@@ -1,0 +1,30 @@
+{
+  "name": "kindfi",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "format-and-lint": "biome check .",
+    "format-and-lint:fix": "biome check . --write",
+    "clean": "git clean -xdf node_modules",
+    "clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +"
+  },
+  "engines": {
+    "bun": "1.x"
+  },
+  "packageManager": "bun@1.1.20",
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "services/*",
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/cbw-sdk",
+      "**/cbw-sdk/**",
+      "**/wagmi",
+      "**/pino-pretty",
+      "**/wagmi/**",
+      "**/pino-pretty/**"
+    ]
+  }
+}

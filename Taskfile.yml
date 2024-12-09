@@ -1,0 +1,57 @@
+version: "3"
+
+tasks:
+  # Task to install dependencies for all packages
+  install:
+    desc: "Install dependencies for all packages"
+    cmds:
+      - bun install
+    silent: true
+
+  # Task to run the development server for the web app
+  dev:web:
+    desc: "Run the development server for the web app"
+    cmds:
+      - cd apps/web && bun run dev
+
+  # Task to build the web app
+  build:web:
+    desc: "Build the web app"
+    cmds:
+      - cd apps/web && bun run build
+
+  # Task to start the production server for the web app
+  start:web:
+    desc: "Start the production server for the web app"
+    cmds:
+      - cd apps/web && bun run start
+
+  # Task to generate types and schemas for the Supabase service
+  gen:supabase:
+    desc: "Generate types and schemas for the Supabase service"
+    cmds:
+      - cd services/supabase && bun run gen
+
+  # Task to generate types and schemas for the Local Supabase service
+  gen:supabase:
+    desc: "Generate types and schemas for the Local Supabase service"
+    cmds:
+      - cd services/supabase && bun run gen:local
+
+  # Task to clean node_modules in all packages
+  clean:
+    desc: "Clean node_modules in all packages"
+    cmds:
+      - bun run clean
+
+  # Task to format and lint the codebase
+  lint:
+    desc: "Format and lint the codebase"
+    cmds:
+      - bun run format-and-lint
+
+  # Task to fix formatting and linting issues
+  lint:fix:
+    desc: "Fix formatting and linting issues"
+    cmds:
+      - bun run format-and-lint:fix
