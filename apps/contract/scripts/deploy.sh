@@ -18,7 +18,7 @@ echo "📦 Installing contract to network..."
 WASM_HASH=$(stellar contract install \
     --network $NETWORK \
     --source $SOURCE \
-    --wasm target/wasm32-unknown-unknown/release/kindfi_nft.wasm)
+    --wasm target/wasm32-unknown-unknown/release/$NETWORK/kindfi_nft.wasm)
 
 echo "✨ Contract installed with hash: $WASM_HASH"
 

@@ -1,0 +1,5 @@
+
+FROM postgres:16-alpine
+
+# Copy in the load-extensions script
+COPY docker/load-extensions.sh /docker-entrypoint-initdb.d/

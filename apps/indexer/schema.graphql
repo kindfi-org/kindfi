@@ -1,0 +1,82 @@
+# To improve query performance, we strongly suggest adding indexes to any field that you plan to filter or sort by
+# Add the `@index` or `@index(unique: true)` annotation after any non-key field
+# https://academy.subquery.network/build/graphql.html#indexing-by-non-primary-key-field
+
+type Account @entity {
+  """
+  id field is always required and must look like this
+  """
+  id: ID!
+  """
+  The first block on which we see a transfer involving this account
+  """
+  firstSeenLedger: Int
+  """
+  The most recent block on which we see a transfer involving this account
+  """
+  lastSeenLedger: Int
+  sentTransfers: [Transfer] @derivedFrom(field: "from") # These are virtual properties to help us navigate to the correct foreign key of Transfer
+  receivedTransfers: [Transfer] @derivedFrom(field: "to") # These are virtual properties to help us navigate to the correct foreign key of Transfer
+  sentPayments: [Payment] @derivedFrom(field: "from") # These are virtual properties to help us navigate to the correct foreign key of Payment
+  receivedPayments: [Payment] @derivedFrom(field: "to") # These are virtual properties to help us navigate to the correct foreign key of Payment
+}
+
+type Transfer @entity {
+  """
+  id field is always required and must look like this
+  """
+  id: ID!
+  """
+  The ledger of the transfer
+  """
+  ledger: Int!
+  """
+  The date of the transfer
+  """
+  date: Date!
+  """
+  The contract that was transferred
+  """
+  contract: String!
+  """
+  The account that transfers are made from
+  """
+  from: Account!
+  """
+  The account that transfers are made to
+  """
+  to: Account!
+  """
+  Value that is transferred
+  """
+  value: BigInt!
+}
+
+type Payment @entity {
+  id: ID!
+  txHash: String!
+  """
+  The account that payments are made from
+  """
+  from: Account!
+  """
+  The account that payments are made to
+  """
+  to: Account!
+  """
+  Amount that is transferred
+  """
+  amount: String!
+}
+
+type Credit @entity {
+  id: ID!
+  account: Account!
+  amount: String!
+}
+
+type Debit @entity {
+  id: ID!
+  account: Account!
+  amount: String!
+}

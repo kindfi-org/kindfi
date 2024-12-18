@@ -1,0 +1,24 @@
+name: PR
+on:
+  pull_request:
+    paths-ignore:
+      - ".github/workflows/**"
+jobs:
+  pr:
+    name: pr
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - run: bun
+      - name: Codegen
+        run: bun codegen
+      - name: Build
+        run: bun run build
+      - name: Install subql-node-stellar
+        run: bun add -g @subql/node-stellar
+      - name: Run tests with Subquery Node
+        run: subql-node-stellar test -f ${{ github.workspace }}
