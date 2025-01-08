@@ -1,0 +1,6 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+node_modules/.bin/commitlint --edit $1
+bun test
+npx --no-install commitlint --edit "$1"
