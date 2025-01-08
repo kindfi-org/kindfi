@@ -3,14 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "init": "bun install && bun husky:init && bun husky:prepare",
-    "husky:init": "husky init",
+    "init": "bun install && bun husky:prepare",
     "husky:prepare": "husky prepare",
     "format-and-lint": "biome check .",
     "format-and-lint:fix": "biome check . --write",
     "clean": "git clean -xdf node_modules",
     "clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-    "prepare": "husky"
   },
   "engines": {
     "bun": "1.x"
