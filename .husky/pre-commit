@@ -1,5 +1,2 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 bun test
 npx --no-install commitlint --edit "$1"
