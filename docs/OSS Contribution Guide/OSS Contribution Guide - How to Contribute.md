@@ -24,7 +24,7 @@ To ensure our codebase remains a shining example of consistency and quality, we 
 - Maintain a clear component hierarchy and organization.
 - Document all design decisions and component usage guidelines within the related issue.
 
-Dive into our **comprehensive code style guide** to uncover a wealth of detailed examples and best practices that will elevate your code to new heights!
+Dive into our [**comprehensive code style guide**](../Code%20and%20Design%20Guide%20Style%20and%20Conventions.md) to uncover a wealth of detailed examples and best practices that will elevate your code to new heights!
 
 # Git Conventions
 
@@ -36,19 +36,19 @@ We adopt a powerful feature branch workflow that will help you organize your con
 
 - Use hyphens to separate words in your branch names (e.g., `feat-user-profile`) for maximum clarity.
 - Prefix your branch names with the type of change you're making:
-    - `feat-`: Adds new features or capabilities.
-    - `fix-`: Resolves bugs or issues.
-    - `docs-`: Updates documentation.
-    - `style-`: Changes code style (formatting, spacing, etc.).
-    - `refactor-`: Improves code structure without changing behavior.
-    - `impr-`: Improves performance and/or code structure.
-    - `test-`: Adds or modifies tests.
-    - `build-`: Changes build system or dependencies.
-    - `ci-`: Updates CI/CD configuration.
-    - `chore-`: Handles routine maintenance tasks.
+  - `feat-`: Adds new features or capabilities.
+  - `fix-`: Resolves bugs or issues.
+  - `docs-`: Updates documentation.
+  - `style-`: Changes code style (formatting, spacing, etc.).
+  - `refactor-`: Improves code structure without changing behavior.
+  - `impr-`: Improves performance and/or code structure.
+  - `test-`: Adds or modifies tests.
+  - `build-`: Changes build system or dependencies.
+  - `ci-`: Updates CI/CD configuration.
+  - `chore-`: Handles routine maintenance tasks.
 - Include the github issue number in your branch name (e.g., `feat-123-user-profile`) to establish a clear link.
 - For complex features, use forward slashes to create a meaningful hierarchy (e.g., `feat/user/profile`).
-    - This will be uncommon unless we need a version of the repository that requires a heavy workload without affecting the main development process.
+  - This will be uncommon unless we need a version of the repository that requires a heavy workload without affecting the main development process.
 - **ALL BRANCHES AND COMMIT MESSAGES MUST BE WRITTEN IN LOWERCASE.**
 - Keep commit messages concise and descriptive (under 72 characters for the title).
 - Use a mono-repo mindset: ensure clarity about which part of the project your changes affect.
@@ -71,8 +71,7 @@ Write your commit messages as clear, action-oriented statements (e.g.: `feat(api
 - `ci:` for updating CI/CD configuration.
 - `wip:` for any work in progress. Additional context is required. e.g.: `wip(feat): add user profile app endpoint`.
 
-> ℹ️ NOTE:  when working with monorepos, best way to provide an even further context, we can include the app name that we are working on for a direct connection with the intended work. e.g.: `[web] wip(feat): add user profile app endpoint` or ``[indexer] wip(impr): auction count upt``. This work the most for final merges to develop/main branches or work in progress commits.
-> 
+> ℹ️ NOTE: when working with monorepos, best way to provide an even further context, we can include the app name that we are working on for a direct connection with the intended work. e.g.: `[web] wip(feat): add user profile app endpoint` or `[indexer] wip(impr): auction count upt`. This work the most for final merges to develop/main branches or work in progress commits.
 
 Feel free to include additional context in the commit body when necessary, referencing any related issues to paint a complete picture of your changes.
 
@@ -114,9 +113,9 @@ While working on an issue, make sure to run local tests to ensure code efficienc
 When working on tests, there are 2 kind of ways (and steps):
 
 1. **Unit Tests:** Ensure the quality of a previous or given contribution:
-    - Create with prompt engineering with an AI chat tool, the unit tests based on the new features.
-    - Run the `bun test` script to check for regressions. Out of the box, `bun` supports unit test, meaning they will hear any `[file_name].test.ts` file where script has been executed.
-2. **Perform thorough manual testing:** as is for the developer to test locally, performing this action will assist to confirm that the issue has been resolved as expected. This is for having a 2nd pair of eyes to verify UI/UX and functionality as user, giving a final test report. 
+   - Create with prompt engineering with an AI chat tool, the unit tests based on the new features.
+   - Run the `bun test` script to check for regressions. Out of the box, `bun` supports unit test, meaning they will hear any `[file_name].test.ts` file where script has been executed.
+2. **Perform thorough manual testing:** as is for the developer to test locally, performing this action will assist to confirm that the issue has been resolved as expected. This is for having a 2nd pair of eyes to verify UI/UX and functionality as user, giving a final test report.
 
 ## Documentation
 
@@ -128,7 +127,7 @@ Our documentation is organized in the `docs` folder:
 - API documentation
 - System architecture overview
 
-Keep documentation current and well-organized as you contribute. If you are contributing in the documentation, **always** provide context about the changes that you are making and why you are making those. Any work with documentation updates and has not been explained in the PR description, it will be rejected. 
+Keep documentation current and well-organized as you contribute. If you are contributing in the documentation, **always** provide context about the changes that you are making and why you are making those. Any work with documentation updates and has not been explained in the PR description, it will be rejected.
 
 # Design Process
 
