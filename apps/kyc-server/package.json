@@ -1,0 +1,33 @@
+{
+  "name": "kyc-server",
+  "version": "0.1.0",
+  "description": "An express application using Apollo for server client queries and PostgreSQL with Drizzle ORM.",
+  "main": "src/app.ts",
+  "scripts": {
+    "start": "ts-node src/app.ts",
+    "test": "bun test",
+    "type-check": "bun eslint",
+    "type-check:fix": "bun eslint --fix",
+    "build": "tsc",
+    "dev": "ts-node-dev src/app.ts",
+    "db:pull": "npx drizzle-kit pull"
+  },
+  "dependencies": {
+    "apollo-server-express": "^3.13.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.3",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "^0.30.1",
+    "ts-node": "^10.4.0",
+    "ts-node-dev": "^1.1.8",
+    "tsx": "^4.19.2",
+    "typescript": "^4.5.4"
+  },
+  "author": "",
+  "license": "ISC"
+}

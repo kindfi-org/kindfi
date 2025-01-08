@@ -10,11 +10,23 @@
     "outDir": "dist",
     "rootDir": "src",
     "target": "es2017",
-    "strict": true
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "strictBuiltinIteratorReturn": true,
+    "alwaysStrict": true,
+    "useUnknownInCatchVariables": true,
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*",
     "node_modules/@subql/types-core/dist/global.d.ts",
     "node_modules/@subql/types-stellar/dist/global.d.ts"
-  ]
+  ],
+  "exclude": ["src/types/**/*"]
 }

@@ -1,8 +1,6 @@
-# SubQuery - Example Project for Stellar Soroban
+# KindFi Indexer w/SubQuery - Stellar Soroban
 
 [SubQuery](https://subquery.network) is a fast, flexible, and reliable open-source data indexer that provides you with custom APIs for your web3 project across all of our supported networks. To learn about how to get started with SubQuery, [visit our docs](https://academy.subquery.network).
-
-**The example project indexes all soroban transfer events on Stellar's Testnet. It also indexes all account payments including credits and debits**
 
 ## Start
 
@@ -12,11 +10,11 @@ You can either clone this GitHub repo, or use the `subql` CLI to bootstrap a cle
 
 Don't forget to install dependencies with `bun install`!
 
-## Editing your SubQuery project
+### First time around?
 
-Although this is a working example SubQuery project, you can edit the SubQuery project by changing the following files:
+If you are the first one to work on the indexer, wohooo! 🚀🎉 You can start by editing the following files or, if you are coming back around the indexer, these are the key files/locations to follow:
 
-- The project manifest in `project.yaml` defines the key project configuration and mapping handler filters
+- The project manifest in `project.ts` defines the key project configuration and mapping handler filters
 - The GraphQL Schema (`schema.graphql`) defines the shape of the resulting data that you are using SubQuery to index
 - The Mapping functions in `src/mappings/` directory are typescript functions that handle transformation logic
 

@@ -23,7 +23,9 @@
   "license": "MIT",
   "dependencies": {
     "@subql/common": "latest",
-    "@subql/types-stellar": "latest"
+    "@subql/types-stellar": "latest",
+    "soroban-client": "latest",
+    "stellar-sdk": "latest"
   },
   "devDependencies": {
     "@subql/cli": "latest",
