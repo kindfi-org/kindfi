@@ -1,12 +1,19 @@
 name: PR
 on:
   pull_request:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   pr:
-    name: pr
+    name: Indexer PR
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -32,7 +39,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
       - name: Install Dependencies
-        run: bun install
+        run: |
+          bun install
+          # Verify installation was successful
+          test -f bun.lockb
       - name: Codegen
         run: bun codegen
         timeout-minutes: 5

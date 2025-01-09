@@ -1,9 +1,6 @@
-name: "CLI deploy"
+name: "Indexer CLI deploy"
 on:
   workflow_dispatch:
-    branches:
-        - main
-        - develop
     inputs:
       projectName:
         description: "kindfi-indexer"
@@ -11,6 +8,7 @@ on:
         type: string
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     name: CLI Deploy
     runs-on: ubuntu-latest
     defaults:
@@ -32,6 +30,11 @@ jobs:
           bun-version: latest
       - name: Verify Bun installation
         run: bun --version
+      - name: Install Dependencies
+        run: |
+          bun install
+          # Verify installation was successful
+          test -f bun.lockb
       - name: Codegen
         run: bun codegen
         timeout-minutes: 5
