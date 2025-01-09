@@ -4,6 +4,9 @@ on:
     branches:
       - main
       - develop
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   pr:
     name: pr
@@ -28,16 +31,17 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
-      - name: Navigating to the indexer directory
-        run: cd apps/indexer
       - name: Codegen
         run: bun codegen
         timeout-minutes: 5
+        working-directory: apps/indexer
       - name: Build
         run: bun run build
         timeout-minutes: 10
+        working-directory: apps/indexer
       - name: Install test dependencies
         run: bun add --dev @subql/node-stellar
       - name: Run tests with Subquery Node
         run: bunx subql-node-stellar test -f ${{ github.workspace }}
         timeout-minutes: 15
+        working-directory: apps/indexer
