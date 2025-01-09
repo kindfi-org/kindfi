@@ -1,7 +1,9 @@
 name: "CLI deploy"
-
 on:
   workflow_dispatch:
+    branches:
+        - main
+        - develop
     inputs:
       projectName:
         description: "kindfi-indexer"
