@@ -43,6 +43,9 @@ jobs:
           bun install
           # Verify installation was successful
           test -f bun.lockb
+        # Untrusted packages can be installed, causing false errors. Continuing on error.
+        # ? If something actually went wrong, the build will fail below.
+        continue-on-error: true
       - name: Codegen
         run: bun codegen
         timeout-minutes: 5
