@@ -127,6 +127,9 @@ Tags: Engineering, Guides, Product
 - **What is JWT:** JWT is a compact URL-safe means of representing claims between two parties.
 - **How KindFi uses it:**
   - Secures user sessions and ensures seamless authentication.
+  - Token expiration and refresh strategies.
+  - Secure storage recommendations.
+  - CSRF protection measures.
 - Documentation: [JWT Docs](https://jwt.io/introduction)
 
 ## **🚨 Authentication**
@@ -140,6 +143,18 @@ Tags: Engineering, Guides, Product
   - Provides an enhanced security to protect user data.
   - Streamlined Web3 wallet integration for non-crypto and crypto users alike.
 - Documentation: [WebAuthn Guide](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API), [WebAuthn Docs](https://webauthn.io/).
+
+#### Passkey (WebAuthN) Browser Support
+
+Passkeys are supported in all major modern browsers. For desktop, Chrome 67+, Firefox 60+, Safari 13+, and Edge 79+ offer full support. On mobile, Android 7+ (Chrome), iOS 13+ (Safari), and Firefox 98+ provide comprehensive support. For detailed compatibility information, visit [Can I use... WebAuthn](https://caniuse.com/webauthn).
+
+| Browser           | Desktop Support | Mobile Support |
+|------------------|-----------------|----------------|
+| Chrome           | 67+            | Android 7+     |
+| Firefox          | 60+            | 98+            |
+| Safari           | 13+            | iOS 13+        |
+| Edge (Chromium)  | 79+            | 79+            |
+| Opera           | 54+            | 73+            |
 
 ## **🪙 Payment and Onboarding**
 
@@ -194,22 +209,6 @@ Tags: Engineering, Guides, Product
 
 By combining cutting-edge technologies with a purpose-driven design, **_KindFi's tech stack creates a platform that's scalable, secure, and inclusive_**. It's not just about what we're building—it's about how we're empowering communities, developers, and innovators to drive meaningful change.
 
-## 🏗️ Folder Structure
-
-Our monorepo, managed with the lightning-fast `bun` package manager, follows an intuitive and declarative folder structure:
-
-1. `apps/`: The home for your groundbreaking server and web applications
-2. `packages/`: A treasure trove of reusable packages that your apps and services can leverage
-3. `services/`: The hub for integrating powerful third-party services like Supabase and DatoCMS
-4. `docs/`: The knowledge base where we store enlightening markdown documents, from product updates to architectural decisions
-
-The beauty of this structure lies in its modularity and flexibility:
-
-- Services can seamlessly integrate packages to supercharge their functionality
-- Apps can tap into the power of both packages and services to create incredible experiences
-- Packages act as the building blocks, independent of specific apps or services
-- Docs serve as the source of truth, generating comprehensive external documentation
-
 ## Folder Structure
 
 Our monorepo, managed with the lightning-fast `bun` package manager, follows an intuitive and declarative folder structure:
@@ -232,20 +231,60 @@ The beauty of this structure lies in its modularity and flexibility:
 
 ```mermaid
 stateDiagram-v2
-    [*] --> UserRegistration
+    [*] --> PasskeyCheck
+
+    state PasskeyCheck {
+        [*] --> CheckBrowserSupport
+        CheckBrowserSupport --> CreatePasskey: Supported
+        CheckBrowserSupport --> UnsupportedBrowser: Not Supported
+        
+        CreatePasskey --> PasskeyCreated: Success
+        CreatePasskey --> PasskeyError: Failed
+        
+        PasskeyError --> RetryPasskey
+        RetryPasskey --> CreatePasskey
+        
+        UnsupportedBrowser --> [*]
+    }
+
+    PasskeyCheck --> UserRegistration: PasskeyCreated
+    
+    state UserRegistration {
+        [*] --> PrepareWeb3Account
+        PrepareWeb3Account --> CollectBasicInfo
+        CollectBasicInfo --> [*]
+    }
 
     UserRegistration --> DocumentUpload: Basic Info Provided
     DocumentUpload --> AIVerification: Documents Uploaded
 
     state AIVerification {
         [*] --> DocumentCheck
-        DocumentCheck --> FaceCheck
-        FaceCheck --> LivenessCheck
-        LivenessCheck --> [*]
+        DocumentCheck --> FaceCheck: Success
+        DocumentCheck --> VerificationError: Failed
+        
+        FaceCheck --> LivenessCheck: Success
+        FaceCheck --> VerificationError: Failed
+        
+        LivenessCheck --> [*]: Success
+        LivenessCheck --> VerificationError: Failed
+        
+        VerificationError --> RetryVerification
+        RetryVerification --> [*]
     }
 
     AIVerification --> ManualReview: AI Verification Complete
     AIVerification --> DocumentUpload: Verification Failed
+
+    state ManualReview {
+        [*] --> ReviewQueue
+        ReviewQueue --> ReviewInProgress: Assigned
+        ReviewInProgress --> ReviewComplete: Processed
+        ReviewComplete --> [*]
+        
+        ReviewInProgress --> TimeoutError: Timeout
+        TimeoutError --> ReviewQueue: Requeue
+    }
 
     ManualReview --> Approved: Passes Review
     ManualReview --> Rejected: Fails Review
@@ -255,9 +294,11 @@ stateDiagram-v2
     Rejected --> [*]
 
     state KYCComplete {
-        [*] --> BasicTier
+        [*] --> GenerateWeb3Account
+        GenerateWeb3Account --> BasicTier: Account Created
         BasicTier --> AdvancedTier: Additional Verification
     }
+
 ```
 
 ### App Data Flow

@@ -1,8 +1,9 @@
 name: PR
 on:
   pull_request:
-    paths-ignore:
-      - ".github/workflows/**"
+    branches:
+      - main
+      - develop
 jobs:
   pr:
     name: pr
@@ -10,21 +11,31 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node.js environment
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install Bun
-        run: |
-          export BUN_INSTALL="$HOME/.bun"
-          curl -fsSL https://bun.sh/install | bash
-          echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> $GITHUB_ENV
-          source /root/.bashrc
-      - run: bun
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Verify Bun installation
+        run: bun --version
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Codegen
         run: bun codegen
+        timeout-minutes: 5
       - name: Build
         run: bun run build
-      - name: Install subql-node-stellar
-        run: bun add -g @subql/node-stellar
+        timeout-minutes: 10
+      - name: Install test dependencies
+        run: bun add --dev @subql/node-stellar
       - name: Run tests with Subquery Node
-        run: subql-node-stellar test -f ${{ github.workspace }}
+        run: bunx subql-node-stellar test -f ${{ github.workspace }}
+        timeout-minutes: 15

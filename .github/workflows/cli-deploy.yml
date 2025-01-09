@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       projectName:
-        description: "KindFi"
+        description: "kindfi-indexer"
         required: true
         type: string
 jobs:
@@ -19,16 +19,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node.js environment
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install Bun
-        run: |
-          export BUN_INSTALL="$HOME/.bun"
-          curl -fsSL https://bun.sh/install | bash
-          echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> $GITHUB_ENV
-          source /root/.bashrc
-      - run: bun
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Verify Bun installation
+        run: bun --version
       - name: Codegen
         run: bun codegen
       - name: Version
@@ -37,4 +35,4 @@ jobs:
         run: echo ${{github.repository}}
       - name: Publish and Deploy
         run: |
-          sh .github/workflows/scripts/publish-deploy.sh -o ${{github.repository}} -p ${{github.event.inputs.projectName}} -e ${{secrets.ENDPOINT}}
+          sh .github/scripts/publish-deploy.sh -o ${{github.repository}} -p ${{github.event.inputs.projectName}} -e ${{secrets.ENDPOINT}}
