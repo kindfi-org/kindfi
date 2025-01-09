@@ -8,6 +8,9 @@ jobs:
   pr:
     name: pr
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/indexer
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node.js environment
@@ -30,19 +33,14 @@ jobs:
             ${{ runner.os }}-bun-
       - name: Install Dependencies
         run: bun install
-        working-directory: apps/indexer
       - name: Codegen
         run: bun codegen
         timeout-minutes: 5
-        working-directory: apps/indexer
       - name: Build
         run: bun run build
         timeout-minutes: 10
-        working-directory: apps/indexer
       - name: Install test dependencies
         run: bun add --dev @subql/node-stellar
-        working-directory: apps/indexer
       - name: Run tests with Subquery Node
         run: bunx subql-node-stellar test -f ${{ github.workspace }}
         timeout-minutes: 15
-        working-directory: apps/indexer

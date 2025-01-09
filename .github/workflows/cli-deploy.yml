@@ -13,6 +13,9 @@ jobs:
   deploy:
     name: CLI Deploy
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/indexer
     environment:
       name: DEPLOYMENT
     env:
@@ -32,13 +35,10 @@ jobs:
       - name: Codegen
         run: bun codegen
         timeout-minutes: 5
-        working-directory: apps/indexer
       - name: Version
         run: npx subql --version
-        working-directory: apps/indexer
       - name: repo
         run: echo ${{github.repository}}
       - name: Publish and Deploy
         run: |
           sh .github/scripts/publish-deploy.sh -o ${{github.repository}} -p ${{github.event.inputs.projectName}} -e ${{secrets.ENDPOINT}}
-        working-directory: apps/indexer
