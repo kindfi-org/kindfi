@@ -17,7 +17,8 @@ jobs:
         run: |
           export BUN_INSTALL="$HOME/.bun"
           curl -fsSL https://bun.sh/install | bash
-          export PATH="$BUN_INSTALL/bin:$PATH"
+          echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> $GITHUB_ENV
+          source /root/.bashrc
       - run: bun
       - name: Codegen
         run: bun codegen
