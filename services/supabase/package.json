@@ -13,7 +13,8 @@
     "types:local": "supabase gen types --lang=typescript > src/database.types.ts --local",
     "schemas": "supabase-to-zod --input src/database.types.ts --output src/database.schemas.ts",
     "db:pull": "supabase pull --project-url=$SUPABASE_URL --project-key=$SUPABASE_API_KEY",
-    "db:push": "supabase push --project-url=$SUPABASE_URL --project-key=$SUPABASE_API_KEY"
+    "db:push": "supabase push --project-url=$SUPABASE_URL --project-key=$SUPABASE_API_KEY",
+    "start": "supabase start  --project-url=$SUPABASE_URL --project-key=$SUPABASE_API_KEY"
 
   },
   "author": "kindfi",

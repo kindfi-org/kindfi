@@ -1,0 +1,17 @@
+{
+  "extends": ["biome:recommended"],
+  "rules": {
+    "no-explicit-any": "error",
+    "import/no-default-export": "error",
+    "camelcase": ["error", { "properties": "always" }],
+    "no-redundant-code": "error"
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "error"
+      }
+    }
+  ]
+}
