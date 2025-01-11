@@ -24,57 +24,63 @@ When writing JavaScript code, we follow these conventions:
 2. **Composition over inheritance:** Favor composing smaller, focused components together over creating deep component hierarchies with inheritance. This keeps your code more flexible and easier to modify.
 3. **Filenames:** Use lowercase with dash separators for directories and file names. For example, `components/auth-wizard`. File extensions should indicate the type of file: `.config.ts`, `.test.ts`, `.context.tsx`, `.type.ts`, `.hook.ts`. For components, the extension can be omitted.
 4. **Avoid default exports:** Prefer named exports over default exports. This makes it clearer what's being imported and helps avoid naming conflicts.
-    
-    ```tsx
-    // Prefer this
-    export const helloMessage = 'hello';
-    export function saySomething() { /* ... */ }
-    
-    // Over this
-    const helloMessage = 'hello';
-    function saySomething() { /* ... */ }
-    export default { helloMessage, saySomething };
-    ```
-    
+
+   ```tsx
+   // Prefer this
+   export const helloMessage = "hello";
+   export function saySomething() {
+     /* ... */
+   }
+
+   // Over this
+   const helloMessage = "hello";
+   function saySomething() {
+     /* ... */
+   }
+   export default { helloMessage, saySomething };
+   ```
+
 5. **Receive an Object, Return an Object (RORO):** When defining functions, especially those interacting with external services, prefer taking an object as input and returning an object as output. This makes the function's interface more explicit and easier to use.
-    
-    ```tsx
-    // types/services.type.ts
-    export interface ServiceParams {
-      limit?: number;
-      offset?: number;
-    }
-    
-    // services/account/account.type.ts
-    export interface GetAccountsParams extends ServiceParams {
-      account?: string;
-    }
-    
-    // services/account/account.service.ts
-    export async function getAccounts({ account, limit = 15, offset = 0 }: GetAccountsParams) {
-      // ...
-    }
-    
-    ```
-    
+
+   ```tsx
+   // types/services.type.ts
+   export interface ServiceParams {
+     limit?: number;
+     offset?: number;
+   }
+
+   // services/account/account.type.ts
+   export interface GetAccountsParams extends ServiceParams {
+     account?: string;
+   }
+
+   // services/account/account.service.ts
+   export async function getAccounts({
+     account,
+     limit = 15,
+     offset = 0,
+   }: GetAccountsParams) {
+     // ...
+   }
+   ```
+
 6. **Use regular function calls on components:** When attaching event handlers or other callbacks to components, use regular function calls instead of arrow functions. This prevents unnecessary re-renders and potential build errors due to hoisting.
-    
-    ```tsx
-    export function MyComponent() {
-      const myMethod = () => console.log('Hello, World!');
-    
-      return (
-        <div>
-          {/* Prefer this */}
-          <button onClick={myMethod}>Click Me</button>
-    
-          {/* Over this */}
-          <button onClick={() => console.log('Hello, World!')}>Click Me</button>
-        </div>
-      );
-    }
-    ```
-    
+
+   ```tsx
+   export function MyComponent() {
+     const myMethod = () => console.log("Hello, World!");
+
+     return (
+       <div>
+         {/* Prefer this */}
+         <button onClick={myMethod}>Click Me</button>
+
+         {/* Over this */}
+         <button onClick={() => console.log("Hello, World!")}>Click Me</button>
+       </div>
+     );
+   }
+   ```
 
 These conventions help keep our JavaScript code consistent, readable, and maintainable. By following them, you'll be contributing to a cleaner, more collaborative codebase.
 
@@ -83,53 +89,52 @@ These conventions help keep our JavaScript code consistent, readable, and mainta
 TypeScript is a powerful tool that helps us catch potential bugs and improve the maintainability of our codebase. Here are some conventions to follow when writing TypeScript:
 
 1. **Type definitions:** Use the appropriate type definition keyword based on the use case:
-    - `interface` for objects and class definitions
-    - `type` for union types, tuples, aliases, and more complex types
-    - `const` for literal types or constants
-    - `enum` for enumerations with a fixed set of values
+   - `interface` for objects and class definitions
+   - `type` for union types, tuples, aliases, and more complex types
+   - `const` for literal types or constants
+   - `enum` for enumerations with a fixed set of values
 2. **Avoid `any`:** The `any` type should be used sparingly, as it essentially opts out of type checking. If you find yourself using `any`, consider if there's a more specific type that could be used instead. A PR with `any` will likely be pushed back for revision.
 3. **Leverage type inference:** TypeScript is often able to infer types based on the context. When the type is clear from the context, you can omit the explicit type annotation to keep your code cleaner and more readable.
-    
-    ```tsx
-    // Instead of this
-    const name: string = 'John';
-    
-    // You can do this
-    const name = 'John';
-    ```
-    
+
+   ```tsx
+   // Instead of this
+   const name: string = "John";
+
+   // You can do this
+   const name = "John";
+   ```
+
 4. **Use type annotations for function parameters and return values:** Even though TypeScript can often infer types, it's a good practice to explicitly annotate function parameters and return values. This makes the function's interface clear and helps catch type-related issues.
-    
-    ```tsx
-    function greet(name: string): string {
-      return `Hello, ${name}!`;
-    }
-    ```
-    
+
+   ```tsx
+   function greet(name: string): string {
+     return `Hello, ${name}!`;
+   }
+   ```
+
 5. **Prefer type assertion with `as`:** When you need to assert a type, use the `as` keyword instead of angle-bracket syntax. This is more readable and consistent with JSX syntax.
-    
-    ```tsx
-    // Prefer this
-    const name = someValue as string;
-    
-    // Over this
-    const name = <string>someValue;
-    ```
-    
+
+   ```tsx
+   // Prefer this
+   const name = someValue as string;
+
+   // Over this
+   const name = <string>someValue;
+   ```
+
 6. **Use type guards:** Type guards are a powerful way to narrow down the type of a variable within a conditional block. This is particularly useful when working with union types.
-    
-    ```tsx
-    function processValue(value: string | number) {
-      if (typeof value === 'string') {
-        // In this block, `value` is of type `string`
-        console.log(value.toUpperCase());
-      } else {
-        // In this block, `value` is of type `number`
-        console.log(value.toFixed(2));
-      }
-    }
-    ```
-    
+
+   ```tsx
+   function processValue(value: string | number) {
+     if (typeof value === "string") {
+       // In this block, `value` is of type `string`
+       console.log(value.toUpperCase());
+     } else {
+       // In this block, `value` is of type `number`
+       console.log(value.toFixed(2));
+     }
+   }
+   ```
 
 By following these TypeScript conventions, you'll be taking full advantage of the language's type system and contributing to a more robust, maintainable codebase.
 
@@ -138,102 +143,100 @@ By following these TypeScript conventions, you'll be taking full advantage of th
 React is at the core of our front-end development. Here are some conventions to keep in mind when writing React components:
 
 1. **Declare components with the function keyword:** Use the `function` keyword to declare your React components. This aligns with the use of React hooks and emphasizes the functional nature of components.
-    
-    ```tsx
-    export function MyComponent({ param1, param2 }: MyComponentProps) {
-      // ...
-    }
-    ```
-    
+
+   ```tsx
+   export function MyComponent({ param1, param2 }: MyComponentProps) {
+     // ...
+   }
+   ```
+
 2. **Order your component file:** Organize your React component files in the following order:
-    1. Imports
-    2. Component declaration
-    3. Styled components (if any)
-    4. TypeScript types and interfaces
-    
-    This makes your component files more readable and easier to navigate.
-    
-    ```tsx
-    // Imports
-    import React from 'react';
-    import { Button, Input } from '@/components/base/button';
-    
-    // Constants declaration
-    const MAX_LENGTH = 20
-    
-    // Component declaration
-    export function MyComponent({ param1, param2 }: MyComponentProps) {
-      const submitAction = async () => {
-    	  'use server'
-    	  return await Promise.resolve(console.log('You clicked!!'))
-      }
-      
-      return (
-    	  <form 
-    			className="w-full max-w-[600px] bg-muted text-muted-foreground m-2 px-4 py-6 rounded-lg"
-    			action={submitAction}
-    		>
-    		  <Input name="username" id="username" maxLength={MAX_LENGTH} />
-    		  <Button type="submit">
-    			  Submit
-    		  </Button>
-    		</form>
-      )
-    }
-    
-    // TypeScript types and interfaces
-    interface MyComponentProps {
-      param1: string;
-      param2: number;
-    }
-    
-    ```
-    
+
+   1. Imports
+   2. Component declaration
+   3. Styled components (if any)
+   4. TypeScript types and interfaces
+
+   This makes your component files more readable and easier to navigate.
+
+   ```tsx
+   // Imports
+   import React from "react";
+   import { Button, Input } from "~/components/base/button";
+
+   // Constants declaration
+   const MAX_LENGTH = 20;
+
+   // Component declaration
+   export function MyComponent({ param1, param2 }: MyComponentProps) {
+     const submitAction = async () => {
+       "use server";
+       return await Promise.resolve(console.log("You clicked!!"));
+     };
+
+     return (
+       <form
+         className='w-full max-w-[600px] bg-muted text-muted-foreground m-2 px-4 py-6 rounded-lg'
+         action={submitAction}
+       >
+         <Input name='username' id='username' maxLength={MAX_LENGTH} />
+         <Button type='submit'>Submit</Button>
+       </form>
+     );
+   }
+
+   // TypeScript types and interfaces
+   interface MyComponentProps {
+     param1: string;
+     param2: number;
+   }
+   ```
+
 3. **Use PascalCase for component names:** Name your components using PascalCase. This makes it clear that the identifier refers to a React component.
-    
-    ```tsx
-    // Prefer this
-    function MyComponent() { /* ... */ }
-    
-    // Over this
-    function myComponent() { /* ... */ }
-    
-    ```
-    
+
+   ```tsx
+   // Prefer this
+   function MyComponent() {
+     /* ... */
+   }
+
+   // Over this
+   function myComponent() {
+     /* ... */
+   }
+   ```
+
 4. **Keep components small and focused:** Each component should have a single, clear responsibility. If a component starts growing too large, consider breaking it down into smaller, reusable components.
 5. **Use functional components and hooks:** With the introduction of hooks, functional components have become the preferred way to write React components. Hooks provide a more concise and flexible way to manage state and side effects in your components.
-    
-    ```tsx
-    'use client'
-    
-    import { useState } from 'react';
-    
-    function Counter() {
-      const [count, setCount] = useState(0);
-    
-      return (
-        <div>
-          <p>Count: {count}</p>
-          <button onClick={() => setCount(count + 1)}>Increment</button>
-        </div>
-      );
-    }
-    
-    ```
-    
+
+   ```tsx
+   "use client";
+
+   import { useState } from "react";
+
+   function Counter() {
+     const [count, setCount] = useState(0);
+
+     return (
+       <div>
+         <p>Count: {count}</p>
+         <button onClick={() => setCount(count + 1)}>Increment</button>
+       </div>
+     );
+   }
+   ```
+
 6. **Use TypeScript for props typing:** Always define the types for your component's props using a TypeScript interface. This makes the component's interface clear and helps catch type-related issues.
-    
-    ```tsx
-    interface GreetingProps {
-      name: string;
-    }
-    
-    function Greeting({ name }: GreetingProps) {
-      return <h1>Hello, {name}!</h1>;
-    }
-    
-    ```
-    
+
+   ```tsx
+   interface GreetingProps {
+     name: string;
+   }
+
+   function Greeting({ name }: GreetingProps) {
+     return <h1>Hello, {name}!</h1>;
+   }
+   ```
 
 By adhering to these React conventions, you'll be writing components that are more readable, maintainable, and consistent with the rest of our codebase.
 
@@ -248,7 +251,7 @@ NextJS latest versions are the backbone of our web applications, providing a pow
 5. **Leverage Streaming and Suspense:** Utilize the Streaming and Suspense features in NextJS 14 to provide a more responsive and interactive user experience. This can be particularly beneficial when dealing with large data sets or complex UI components. [Resource: Streaming and Suspense in Next.js 14](https://www.youtube.com/watch?v=Oa9G4iBcgzs)
 6. **Follow the File Conventions:** Adhere to the file conventions outlined in the [Next.js Documentation](https://nextjs.org/docs/app/api-reference/file-conventions) to ensure your application's structure is consistent and easy to navigate. This includes using the appropriate files for layouts, pages, error handling, and more.
 7. **Optimize Data Fetching:** Implement the recommended data fetching patterns, such as fetching data on the server, fetching data where it's needed, and using the preload pattern to prevent waterfalls. Refer to the [Data Fetching: Data Fetching Patterns and Best Practices](https://nextjs.org/docs/app/building-your-application/data-fetching/patterns) guide for more details.
-8. **Leverage Metadata Files:** Utilize the Metadata File Conventions to manage your application's icons, Open Graph and Twitter images, and SEO-related files. This can help improve the overall presentation and discoverability of your application. Resource: [Metadata File Conventions in Next.js](https://nextjs.org/docs/app/api-reference) 
+8. **Leverage Metadata Files:** Utilize the Metadata File Conventions to manage your application's icons, Open Graph and Twitter images, and SEO-related files. This can help improve the overall presentation and discoverability of your application. Resource: [Metadata File Conventions in Next.js](https://nextjs.org/docs/app/api-reference)
 9. **Maintain a Consistent Coding Style:** Enforce a consistent coding style across your development team by using tools like ESLint and Prettier. This can improve code readability, maintainability, and collaboration.
 10. **Stay Up-to-Date with NextJS Releases:** Regularly review the NextJS documentation and release notes to stay informed about the latest features, improvements, and best practices. This will help you make the most of the NextJS ecosystem and ensure your application remains optimized and secure.
 
@@ -358,10 +361,11 @@ Here are some of the key benefits of using Tailwind CSS:
 Here's an example of how you might style a button using Tailwind:
 
 ```html
-<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+<button
+  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+>
   Click Me!
 </button>
-
 ```
 
 In this example, we're using Tailwind utility classes to style the button:
@@ -388,14 +392,14 @@ When creating design assets, follow a structured approach that enables clear com
 
 1. **Component Architecture:** Build a component-based design structure using Figma's auto-layout functionality. This ensures consistency and supports responsive design principles while aligning with development frameworks.
 2. **Documentation Standards:** Include comprehensive documentation for each significant design element:
-    - Functional specifications
-    - Component behavior parameters
-    - Interactive states
-    - Implementation considerations
+   - Functional specifications
+   - Component behavior parameters
+   - Interactive states
+   - Implementation considerations
 3. **Design Token Management:** Create a systematic approach to design tokens:
-    - Define clear color systems and typography scales
-    - Implement consistent spacing hierarchies
-    - Document component-specific properties
+   - Define clear color systems and typography scales
+   - Implement consistent spacing hierarchies
+   - Document component-specific properties
 
 ## Theme Implementation
 
@@ -431,9 +435,9 @@ We use sequential text sizes to help users distinguish content importance and fo
 
 Text styles are defined as follows:
 
-- *display__n__* (where n = intensity level): Defines webpage headers. Uses 2 scales for Landing Banners, either at page start or site landing, based on design needs.
-- *h__n__* (where n = importance level): Defines text sizes for content titles, sections, and page banners.
-- *body-size* (where size = text size): Defines text sizes for content elements like subtitles, headers, labels, footers, and lists. Uses t-shirt sizing (from xxs to xxl).
+- _display**n**_ (where n = intensity level): Defines webpage headers. Uses 2 scales for Landing Banners, either at page start or site landing, based on design needs.
+- _h**n**_ (where n = importance level): Defines text sizes for content titles, sections, and page banners.
+- _body-size_ (where size = text size): Defines text sizes for content elements like subtitles, headers, labels, footers, and lists. Uses t-shirt sizing (from xxs to xxl).
 
 ## Spacing
 
@@ -451,7 +455,6 @@ Color schemes follow [TailwindCSS color palette](https://tailwindcss.com/docs/cu
 
 Color scales follow this pattern:
 
-- ***main-n*** (main = primary color, n = tint/shade): Primary colors with different tints/shades. Midpoint has no number, with tints ranging from 50-400 and shades from 600-900.
+- **_main-n_** (main = primary color, n = tint/shade): Primary colors with different tints/shades. Midpoint has no number, with tints ranging from 50-400 and shades from 600-900.
 
 > TIP: Keep primary color tints minimal but maintain a complete (contrast) gray scale, including 500 for midpoint.
->
