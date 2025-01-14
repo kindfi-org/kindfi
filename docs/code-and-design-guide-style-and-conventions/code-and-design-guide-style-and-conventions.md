@@ -1,10 +1,13 @@
-# Code and Design Guide: Style and Conventions
+---
+icon: code
+cover: >-
+  https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxOTcwMjR8MHwxfHNlYXJjaHw1fHxjb2RlfGVufDB8fHx8MTczNjgzODk1OXww&ixlib=rb-4.0.3&q=85
+coverY: 0
+---
 
-Created by: Roberto "Andler" Lucas
-Created time: December 17, 2024 4:41 AM
-Tags: Engineering, Guides, Product
+# Code Style and Conventions Guide
 
-# Code Guidelines
+## :computer: Code Guidelines
 
 Our coding philosophy revolves around writing semantic, idiomatic, functional, and declarative code. Here are some key principles to keep in mind:
 
@@ -16,108 +19,102 @@ Our coding philosophy revolves around writing semantic, idiomatic, functional, a
 
 By adhering to these general guidelines, you'll be well on your way to writing clean, maintainable code that aligns with our organization's standards.
 
-## JavaScript Conventions
+### JavaScript Conventions
 
 When writing JavaScript code, we follow these conventions:
 
 1. **Naming variables:** Use meaningful names that describe the purpose of the variable. For booleans, prefix the name with auxiliary verbs such as `does`, `has`, `is`, or `should`. For example, `isDisabled`, `hasPermission`, `shouldRefresh`.
 2. **Composition over inheritance:** Favor composing smaller, focused components together over creating deep component hierarchies with inheritance. This keeps your code more flexible and easier to modify.
 3. **Filenames:** Use lowercase with dash separators for directories and file names. For example, `components/auth-wizard`. File extensions should indicate the type of file: `.config.ts`, `.test.ts`, `.context.tsx`, `.type.ts`, `.hook.ts`. For components, the extension can be omitted.
-4. **Avoid default exports:** Prefer named exports over default exports. This makes it clearer what's being imported and helps avoid naming conflicts.
-    
+4.  **Avoid default exports:** Prefer named exports over default exports. This makes it clearer what's being imported and helps avoid naming conflicts.
+
     ```tsx
     // Prefer this
     export const helloMessage = 'hello';
     export function saySomething() { /* ... */ }
-    
+
     // Over this
     const helloMessage = 'hello';
     function saySomething() { /* ... */ }
     export default { helloMessage, saySomething };
     ```
-    
-5. **Receive an Object, Return an Object (RORO):** When defining functions, especially those interacting with external services, prefer taking an object as input and returning an object as output. This makes the function's interface more explicit and easier to use.
-    
+5.  **Receive an Object, Return an Object (RORO):** When defining functions, especially those interacting with external services, prefer taking an object as input and returning an object as output. This makes the function's interface more explicit and easier to use.
+
     ```tsx
     // types/services.type.ts
     export interface ServiceParams {
       limit?: number;
       offset?: number;
     }
-    
+
     // services/account/account.type.ts
     export interface GetAccountsParams extends ServiceParams {
       account?: string;
     }
-    
+
     // services/account/account.service.ts
     export async function getAccounts({ account, limit = 15, offset = 0 }: GetAccountsParams) {
       // ...
     }
-    
+
     ```
-    
-6. **Use regular function calls on components:** When attaching event handlers or other callbacks to components, use regular function calls instead of arrow functions. This prevents unnecessary re-renders and potential build errors due to hoisting.
-    
+6.  **Use regular function calls on components:** When attaching event handlers or other callbacks to components, use regular function calls instead of arrow functions. This prevents unnecessary re-renders and potential build errors due to hoisting.
+
     ```tsx
     export function MyComponent() {
       const myMethod = () => console.log('Hello, World!');
-    
+
       return (
         <div>
           {/* Prefer this */}
           <button onClick={myMethod}>Click Me</button>
-    
+
           {/* Over this */}
           <button onClick={() => console.log('Hello, World!')}>Click Me</button>
         </div>
       );
     }
     ```
-    
 
 These conventions help keep our JavaScript code consistent, readable, and maintainable. By following them, you'll be contributing to a cleaner, more collaborative codebase.
 
-## TypeScript Conventions
+### TypeScript Conventions
 
 TypeScript is a powerful tool that helps us catch potential bugs and improve the maintainability of our codebase. Here are some conventions to follow when writing TypeScript:
 
 1. **Type definitions:** Use the appropriate type definition keyword based on the use case:
-    - `interface` for objects and class definitions
-    - `type` for union types, tuples, aliases, and more complex types
-    - `const` for literal types or constants
-    - `enum` for enumerations with a fixed set of values
+   * `interface` for objects and class definitions
+   * `type` for union types, tuples, aliases, and more complex types
+   * `const` for literal types or constants
+   * `enum` for enumerations with a fixed set of values
 2. **Avoid `any`:** The `any` type should be used sparingly, as it essentially opts out of type checking. If you find yourself using `any`, consider if there's a more specific type that could be used instead. A PR with `any` will likely be pushed back for revision.
-3. **Leverage type inference:** TypeScript is often able to infer types based on the context. When the type is clear from the context, you can omit the explicit type annotation to keep your code cleaner and more readable.
-    
+3.  **Leverage type inference:** TypeScript is often able to infer types based on the context. When the type is clear from the context, you can omit the explicit type annotation to keep your code cleaner and more readable.
+
     ```tsx
     // Instead of this
     const name: string = 'John';
-    
+
     // You can do this
     const name = 'John';
     ```
-    
-4. **Use type annotations for function parameters and return values:** Even though TypeScript can often infer types, it's a good practice to explicitly annotate function parameters and return values. This makes the function's interface clear and helps catch type-related issues.
-    
+4.  **Use type annotations for function parameters and return values:** Even though TypeScript can often infer types, it's a good practice to explicitly annotate function parameters and return values. This makes the function's interface clear and helps catch type-related issues.
+
     ```tsx
     function greet(name: string): string {
       return `Hello, ${name}!`;
     }
     ```
-    
-5. **Prefer type assertion with `as`:** When you need to assert a type, use the `as` keyword instead of angle-bracket syntax. This is more readable and consistent with JSX syntax.
-    
+5.  **Prefer type assertion with `as`:** When you need to assert a type, use the `as` keyword instead of angle-bracket syntax. This is more readable and consistent with JSX syntax.
+
     ```tsx
     // Prefer this
     const name = someValue as string;
-    
+
     // Over this
     const name = <string>someValue;
     ```
-    
-6. **Use type guards:** Type guards are a powerful way to narrow down the type of a variable within a conditional block. This is particularly useful when working with union types.
-    
+6.  **Use type guards:** Type guards are a powerful way to narrow down the type of a variable within a conditional block. This is particularly useful when working with union types.
+
     ```tsx
     function processValue(value: string | number) {
       if (typeof value === 'string') {
@@ -129,38 +126,37 @@ TypeScript is a powerful tool that helps us catch potential bugs and improve the
       }
     }
     ```
-    
 
 By following these TypeScript conventions, you'll be taking full advantage of the language's type system and contributing to a more robust, maintainable codebase.
 
-## ReactJS Conventions
+### ReactJS Conventions
 
 React is at the core of our front-end development. Here are some conventions to keep in mind when writing React components:
 
-1. **Declare components with the function keyword:** Use the `function` keyword to declare your React components. This aligns with the use of React hooks and emphasizes the functional nature of components.
-    
+1.  **Declare components with the function keyword:** Use the `function` keyword to declare your React components. This aligns with the use of React hooks and emphasizes the functional nature of components.
+
     ```tsx
     export function MyComponent({ param1, param2 }: MyComponentProps) {
       // ...
     }
     ```
-    
-2. **Order your component file:** Organize your React component files in the following order:
+2.  **Order your component file:** Organize your React component files in the following order:
+
     1. Imports
     2. Component declaration
     3. Styled components (if any)
     4. TypeScript types and interfaces
-    
+
     This makes your component files more readable and easier to navigate.
-    
+
     ```tsx
     // Imports
     import React from 'react';
     import { Button, Input } from '@/components/base/button';
-    
+
     // Constants declaration
     const MAX_LENGTH = 20
-    
+
     // Component declaration
     export function MyComponent({ param1, param2 }: MyComponentProps) {
       const submitAction = async () => {
@@ -180,37 +176,35 @@ React is at the core of our front-end development. Here are some conventions to 
     		</form>
       )
     }
-    
+
     // TypeScript types and interfaces
     interface MyComponentProps {
       param1: string;
       param2: number;
     }
-    
+
     ```
-    
-3. **Use PascalCase for component names:** Name your components using PascalCase. This makes it clear that the identifier refers to a React component.
-    
+3.  **Use PascalCase for component names:** Name your components using PascalCase. This makes it clear that the identifier refers to a React component.
+
     ```tsx
     // Prefer this
     function MyComponent() { /* ... */ }
-    
+
     // Over this
     function myComponent() { /* ... */ }
-    
+
     ```
-    
 4. **Keep components small and focused:** Each component should have a single, clear responsibility. If a component starts growing too large, consider breaking it down into smaller, reusable components.
-5. **Use functional components and hooks:** With the introduction of hooks, functional components have become the preferred way to write React components. Hooks provide a more concise and flexible way to manage state and side effects in your components.
-    
+5.  **Use functional components and hooks:** With the introduction of hooks, functional components have become the preferred way to write React components. Hooks provide a more concise and flexible way to manage state and side effects in your components.
+
     ```tsx
     'use client'
-    
+
     import { useState } from 'react';
-    
+
     function Counter() {
       const [count, setCount] = useState(0);
-    
+
       return (
         <div>
           <p>Count: {count}</p>
@@ -218,26 +212,24 @@ React is at the core of our front-end development. Here are some conventions to 
         </div>
       );
     }
-    
+
     ```
-    
-6. **Use TypeScript for props typing:** Always define the types for your component's props using a TypeScript interface. This makes the component's interface clear and helps catch type-related issues.
-    
+6.  **Use TypeScript for props typing:** Always define the types for your component's props using a TypeScript interface. This makes the component's interface clear and helps catch type-related issues.
+
     ```tsx
     interface GreetingProps {
       name: string;
     }
-    
+
     function Greeting({ name }: GreetingProps) {
       return <h1>Hello, {name}!</h1>;
     }
-    
+
     ```
-    
 
 By adhering to these React conventions, you'll be writing components that are more readable, maintainable, and consistent with the rest of our codebase.
 
-## NextJS Conventions
+### NextJS Conventions
 
 NextJS latest versions are the backbone of our web applications, providing a powerful framework for building React applications. Here are some conventions and best practices to follow when working with NextJS 14/15:
 
@@ -248,13 +240,13 @@ NextJS latest versions are the backbone of our web applications, providing a pow
 5. **Leverage Streaming and Suspense:** Utilize the Streaming and Suspense features in NextJS 14 to provide a more responsive and interactive user experience. This can be particularly beneficial when dealing with large data sets or complex UI components. [Resource: Streaming and Suspense in Next.js 14](https://www.youtube.com/watch?v=Oa9G4iBcgzs)
 6. **Follow the File Conventions:** Adhere to the file conventions outlined in the [Next.js Documentation](https://nextjs.org/docs/app/api-reference/file-conventions) to ensure your application's structure is consistent and easy to navigate. This includes using the appropriate files for layouts, pages, error handling, and more.
 7. **Optimize Data Fetching:** Implement the recommended data fetching patterns, such as fetching data on the server, fetching data where it's needed, and using the preload pattern to prevent waterfalls. Refer to the [Data Fetching: Data Fetching Patterns and Best Practices](https://nextjs.org/docs/app/building-your-application/data-fetching/patterns) guide for more details.
-8. **Leverage Metadata Files:** Utilize the Metadata File Conventions to manage your application's icons, Open Graph and Twitter images, and SEO-related files. This can help improve the overall presentation and discoverability of your application. Resource: [Metadata File Conventions in Next.js](https://nextjs.org/docs/app/api-reference) 
+8. **Leverage Metadata Files:** Utilize the Metadata File Conventions to manage your application's icons, Open Graph and Twitter images, and SEO-related files. This can help improve the overall presentation and discoverability of your application. Resource: [Metadata File Conventions in Next.js](https://nextjs.org/docs/app/api-reference)
 9. **Maintain a Consistent Coding Style:** Enforce a consistent coding style across your development team by using tools like ESLint and Prettier. This can improve code readability, maintainability, and collaboration.
 10. **Stay Up-to-Date with NextJS Releases:** Regularly review the NextJS documentation and release notes to stay informed about the latest features, improvements, and best practices. This will help you make the most of the NextJS ecosystem and ensure your application remains optimized and secure.
 
 By following these NextJS 14 conventions and best practices, you'll be building applications that are performant, maintainable, and aligned with the latest industry standards.
 
-### Dive Deeper: OK, Server Components are cool but, what happens for slow or unstable internet connections?
+#### Dive Deeper: OK, Server Components are cool but, what happens for slow or unstable internet connections?
 
 While server components in NextJS 14/15 offer many benefits, they face challenges with slow or unstable internet connections. Let's examine these scenarios and discuss strategies to address potential issues.
 
@@ -291,11 +283,11 @@ To address these challenges, we can employ several strategies:
 
 By being mindful of the potential drawbacks of server components on slow or unstable connections and implementing appropriate mitigation strategies, we can still leverage the benefits of server components while providing a good user experience for all users.
 
-### Honorable Mention: Comparison between NextJS 13 and NextJS 14
+#### Honorable Mention: Comparison between NextJS 13 and NextJS 14
 
 NextJS 14 brought significant changes and improvements compared to NextJS 13. Let's explore some of the key differences between these two versions and understand how NextJS 14 builds upon and enhances the capabilities introduced in NextJS 13.
 
-### App Router
+#### App Router
 
 One of the most significant changes in NextJS 14 is the introduction of the App Router. The App Router provides a more intuitive and powerful routing system compared to the Pages Router used in NextJS 13.
 
@@ -305,11 +297,11 @@ The App Router in NextJS 14 is like having a travel agent. They help you plan yo
 
 Some of the key features of the App Router include:
 
-- **Nested Layouts:** This feature allows you to create a hierarchy of layouts that can be shared across multiple pages. It's like having a consistent design theme throughout your trip - the same color scheme in your hotel room, a similar style of restaurants, etc. This consistency makes your trip (or in this case, your application) feel more cohesive and easier to navigate.
-- **Server Components:** The App Router encourages the use of Server Components, which allow you to render parts of your page on the server. This is like having a concierge at your hotel who can take care of certain tasks for you, like making restaurant reservations or arranging transportation. Server Components can handle data fetching and other server-side tasks, making your application more efficient and secure.
-- **Streaming and Suspense:** These features allow your application to load content incrementally, rather than waiting for the entire page to load before displaying anything. It's like being able to start your vacation while you're still planning parts of it - you can enjoy the beach while you're still deciding on which activities to do later in the trip.
+* **Nested Layouts:** This feature allows you to create a hierarchy of layouts that can be shared across multiple pages. It's like having a consistent design theme throughout your trip - the same color scheme in your hotel room, a similar style of restaurants, etc. This consistency makes your trip (or in this case, your application) feel more cohesive and easier to navigate.
+* **Server Components:** The App Router encourages the use of Server Components, which allow you to render parts of your page on the server. This is like having a concierge at your hotel who can take care of certain tasks for you, like making restaurant reservations or arranging transportation. Server Components can handle data fetching and other server-side tasks, making your application more efficient and secure.
+* **Streaming and Suspense:** These features allow your application to load content incrementally, rather than waiting for the entire page to load before displaying anything. It's like being able to start your vacation while you're still planning parts of it - you can enjoy the beach while you're still deciding on which activities to do later in the trip.
 
-### Server Components
+#### Server Components
 
 NextJS 14 heavily emphasizes the use of Server Components. Server Components allow you to render parts of your page on the server, which can improve performance, security, and developer experience.
 
@@ -319,11 +311,11 @@ In this analogy, the parts of the meal that can be served quickly are like Clien
 
 This approach has several benefits:
 
-- **Improved Performance:** By rendering certain parts of the page on the server, you can reduce the amount of work the client has to do, which can lead to faster load times.
-- **Better Security:** Server Components can handle sensitive tasks like data fetching and authentication on the server, reducing the risk of exposing sensitive information to the client.
-- **Enhanced Developer Experience:** Server Components can make your code more modular and easier to reason about, as you can clearly separate server-side and client-side logic.
+* **Improved Performance:** By rendering certain parts of the page on the server, you can reduce the amount of work the client has to do, which can lead to faster load times.
+* **Better Security:** Server Components can handle sensitive tasks like data fetching and authentication on the server, reducing the risk of exposing sensitive information to the client.
+* **Enhanced Developer Experience:** Server Components can make your code more modular and easier to reason about, as you can clearly separate server-side and client-side logic.
 
-### `use client` Directive
+#### `use client` Directive
 
 In NextJS 14, you can use the `use client` directive to specify that a particular component should be rendered on the client side, even within the App Router.
 
@@ -337,7 +329,7 @@ By using the `use client` directive judiciously, you can strike a balance betwee
 
 In conclusion, NextJS 14 builds upon the foundation laid by NextJS 13 and introduces significant enhancements, particularly in the areas of routing, server-side rendering, and developer experience. By understanding and leveraging features like the App Router, Server Components, and the `use client` directive, you can create powerful, efficient, and maintainable applications that deliver a great user experience.
 
-## Styling
+### Styling
 
 At our organization, we use Tailwind CSS for styling our React components. Tailwind CSS is a utility-first CSS framework that allows us to rapidly build custom user interfaces.
 
@@ -366,92 +358,14 @@ Here's an example of how you might style a button using Tailwind:
 
 In this example, we're using Tailwind utility classes to style the button:
 
-- `bg-blue-500` sets the background color to a specific shade of blue.
-- `hover:bg-blue-700` changes the background color when the button is hovered over.
-- `text-white` makes the button text white.
-- `font-bold` makes the text bold.
-- `py-2` adds padding to the top and bottom of the button.
-- `px-4` adds padding to the left and right of the button.
-- `rounded` makes the button corners rounded.
+* `bg-blue-500` sets the background color to a specific shade of blue.
+* `hover:bg-blue-700` changes the background color when the button is hovered over.
+* `text-white` makes the button text white.
+* `font-bold` makes the text bold.
+* `py-2` adds padding to the top and bottom of the button.
+* `px-4` adds padding to the left and right of the button.
+* `rounded` makes the button corners rounded.
 
 This approach allows us to quickly and easily style our components without writing any custom CSS.
 
 In summary, Tailwind CSS is a powerful tool that allows us to rapidly build consistent, responsive, and maintainable user interfaces. By using Tailwind, we can focus more on our application's functionality and design, and less on writing custom CSS. It's like having a giant, well-organized palette that makes painting your picture faster, easier, and more consistent.
-
-# Design Guidelines
-
-Our design system emphasizes clarity, efficiency, and seamless collaboration between designers and developers. The following guidelines outline our professional approach to design implementation:
-
-## Design System Implementation
-
-When creating design assets, follow a structured approach that enables clear communication and efficient development:
-
-1. **Component Architecture:** Build a component-based design structure using Figma's auto-layout functionality. This ensures consistency and supports responsive design principles while aligning with development frameworks.
-2. **Documentation Standards:** Include comprehensive documentation for each significant design element:
-    - Functional specifications
-    - Component behavior parameters
-    - Interactive states
-    - Implementation considerations
-3. **Design Token Management:** Create a systematic approach to design tokens:
-    - Define clear color systems and typography scales
-    - Implement consistent spacing hierarchies
-    - Document component-specific properties
-
-## Theme Implementation
-
-For multi-theme applications, use this structure:
-
-- **Variable System:** Use Figma's variable functionality to create robust, scalable theming solutions
-- **Theme Documentation:** Keep thorough documentation of theme variations and implementation parameters
-- **Component States:** Document how components behave across different themes and states
-
-A well-implemented design system ensures consistency while maintaining professional standards throughout the design and development process. Keep communication open when sharing new designs until all details are clear.
-
-## Figma Conventions
-
-- Use auto-layout for all components to ensure responsive design.
-- Name all frames, components, and elements using kebab-case convention.
-- Follow component hierarchy and organization as outlined in our design system.
-- Document all design decisions within the related issue.
-- Maintain consistency with established design system guidelines.
-- Ensure proper implementation of constraints and responsive design principles.
-- Always ask to export in SVG when creating/using vectors, always create Vectors to ensure asset high quality.
-- Always ask to export in `webp` format, best way is to use online converters from [PNG to WEBP](https://cloudconvert.com/png-to-webp).
-- Reduce the use of low images resolution or images in vectors.
-
-## Font / Typography
-
-Typography uses a hierarchical pattern to help users navigate content effectively. Here's how it works in practice:
-
-A page begins with a content title, followed by a subtitle and cover image. The first text block follows, leading to a second-level title that introduces the first secondary section.
-
-Further down, third-level titles mark content that's less related to the main topic.
-
-We use sequential text sizes to help users distinguish content importance and follow the site's natural flow.
-
-Text styles are defined as follows:
-
-- *display__n__* (where n = intensity level): Defines webpage headers. Uses 2 scales for Landing Banners, either at page start or site landing, based on design needs.
-- *h__n__* (where n = importance level): Defines text sizes for content titles, sections, and page banners.
-- *body-size* (where size = text size): Defines text sizes for content elements like subtitles, headers, labels, footers, and lists. Uses t-shirt sizing (from xxs to xxl).
-
-## Spacing
-
-Design pattern spacing uses an exponential t-shirt sizing scale. We use [TailwindCSS spacing](https://tailwindcss.com/docs/customizing-spacing#default-spacing-scale) as our reference for pixel scaling in REM.
-
-Consider your design concept when choosing spacing. Decide whether sections need clear separation for focus or should be more condensed, as in blogs or mobile-adaptive designs.
-
-Begin with a middle point pixel size (regular) of 32px. Create a scale using negative and positive exponents (e.g., ...14 x 1.5 = 21 x 1.5 = 32[midpoint] x 1.5 = 48 x 1.5 = 72...).
-
-Scale names MUST use kebab-case with t-shirt sizing and include a zero value: none, x-small, small, regular, large, x-large.
-
-## Colors
-
-Color schemes follow [TailwindCSS color palette](https://tailwindcss.com/docs/customizing-colors#default-color-palette) conventions. Use contrast scales (black/white, based on primary color contrast) to accent or soften colors.
-
-Color scales follow this pattern:
-
-- ***main-n*** (main = primary color, n = tint/shade): Primary colors with different tints/shades. Midpoint has no number, with tints ranging from 50-400 and shades from 600-900.
-
-> TIP: Keep primary color tints minimal but maintain a complete (contrast) gray scale, including 500 for midpoint.
->

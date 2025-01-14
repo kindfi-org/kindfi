@@ -1,8 +1,13 @@
+---
+icon: file-lines
+cover: >-
+  https://images.unsplash.com/photo-1585693991691-d6d7d4b642c4?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxOTcwMjR8MHwxfHNlYXJjaHw4fHxkb2N1bWVudCUyMGd1aWRlfGVufDB8fHx8MTczNjg0MjMzOXww&ixlib=rb-4.0.3&q=85
+coverY: -126
+---
+
 # OSS Contribution Guide
 
-Created by: Roberto "Andler" Lucas
-Created time: December 17, 2024 4:38 AM
-Tags: Engineering, Guides, Product
+Created by: Roberto "Andler" Lucas Created time: December 17, 2024 4:38 AM Tags: Engineering, Guides, Product
 
 Welcome to KindFi! We're thrilled to have you join us on this exciting journey of innovation and collaboration. This guide will be your compass as you navigate the rewarding process of contributing to our cutting-edge projects at the forefront of AI and Web3 technologies.
 
@@ -49,15 +54,15 @@ Our design workflow is built around Figma as our primary design tool. Here's our
 
 Project leads verify these essential elements:
 
-- Alignment with design system guidelines.
-- Implementation of proper layout and constraints.
-- Component reusability and modularity.
-- Accessibility compliance.
-- Responsive design implementation.
+* Alignment with design system guidelines.
+* Implementation of proper layout and constraints.
+* Component reusability and modularity.
+* Accessibility compliance.
+* Responsive design implementation.
 
 ## Issue Application Template
 
-[**Issue Application Template**](OSS%20Contribution%20Guide%2015f8754a4a4b80709015ed37649d6058/Issue%20Application%20Template%201758754a4a4b80b18556d7d2ba79dbc0.md)
+[**Issue Application Template**](https://github.com/kindfi-org/kindfi/blob/main/docs/OSS%20Contribution%20Guide%2015f8754a4a4b80709015ed37649d6058/Issue%20Application%20Template%201758754a4a4b80b18556d7d2ba79dbc0.md)
 
 ## Issue Reporting
 
@@ -83,9 +88,9 @@ At KindFi, we value long-term commitment and sustained contributions to our proj
 
 For contributors who maintain consistent involvement between hackathons and throughout different stages of KindFi's development, we offer enhanced budget allocations. This means:
 
-- Increased funding for your projects at the conclusion of hackathon events.
-- Additional resources allocated based on your sustained contribution history.
-- Special budget considerations during key development stages.
+* Increased funding for your projects at the conclusion of hackathon events.
+* Additional resources allocated based on your sustained contribution history.
+* Special budget considerations during key development stages.
 
 This incentive structure is designed to:
 
@@ -99,14 +104,14 @@ Remember, consistent contribution doesn't just mean code commits - it includes d
 
 We believe that a thriving community is the heart and soul of any successful open-source project. Here's how we cultivate a welcoming and supportive environment:
 
-- Communication channels in Telegram where you can connect with fellow contributors, ask questions, and share ideas.
-- The GitHub issue tracker, a hub for lively discussions, brainstorming sessions, and collaborative problem-solving.
-- Clear contribution guidelines and a code of conduct that ensure everyone feels respected and valued.
-- Recognition and celebration of individual contributions, acknowledging the hard work and dedication of our community members.
+* Communication channels in Telegram where you can connect with fellow contributors, ask questions, and share ideas.
+* The GitHub issue tracker, a hub for lively discussions, brainstorming sessions, and collaborative problem-solving.
+* Clear contribution guidelines and a code of conduct that ensure everyone feels respected and valued.
+* Recognition and celebration of individual contributions, acknowledging the hard work and dedication of our community members.
 
 Building a strong, inclusive community requires consistent effort and commitment from every one of us. By fostering an atmosphere of openness, empathy, and mutual support, we can achieve incredible things together.
 
----
+***
 
 We're thrilled to have you join us on this exciting open-source journey. Your contributions, ideas, and enthusiasm are what make our projects truly exceptional! Together, we'll push the boundaries of what's possible with AI and Web3, and shape a future where innovation knows no limits 💪🏼
 
