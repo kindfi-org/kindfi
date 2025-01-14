@@ -1,5 +1,5 @@
 ---
-icon: pencil
+icon: marker
 ---
 
 # How to Contribute
