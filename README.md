@@ -1,15 +1,42 @@
-# kindfi
+# KindFi Monorepo
 
-To install dependencies:
+The KindFi monorepo apps and services are the following:
+
+- [apps/web](./apps/web): The web app.
+- [apps/kyc-server](./apps/kyc-server): The KYC server.
+- [apps/contract](./apps/contract): The smart contract.
+- [services/supabase](./services/supabase): The Supabase service.
+- [services/ai](./services/ai): The AI service.
+- [services/dictionary](./services/dictionary): The dictionary service.
+
+## 🚀 Quick Start
+
+### BEFORE ANYTHING ELSE
+
+> **Mac/Linux Users:** Follow the [Taskfile.yml](./Taskfile.yml) for the full list of commands to run the project in different areas. Each command has a description of what it does.
+
+> 👀 To make Biome work with auto-formatting, make sure to have `Biome` as the **default code formatter**. You can find the configuration with the command `CTRL + ,` or `CMD + ,` for MacOS users and search for the `vscode://settings/editor.defaultFormatter`. This will read the monorepo Biome configuration. Make sure to have the [Biome extension](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) in your IDE before doing any installation.
+
+1. To install all dependencies, run the following command:
 
 ```bash
-bun install
+bun run init # bun install && bun husky:prepare
 ```
 
-To run:
+> Biome and pre-commit hooks should be installed by now. Ready to run!
+
+1. To run:
 
 ```bash
-bun run index.ts
+# web app
+cd apps/web
+bun dev
+
+# kyc-server
+cd apps/kyc-server
+bun dev
+
+# ...
 ```
 
-This project was created using `bun init` in bun v1.1.34. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+You can see the full list of commands in each of the `package.json` files in the `apps` and `services` directories.
