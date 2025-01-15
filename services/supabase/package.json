@@ -1,27 +1,27 @@
 {
-  "name": "@services/supabase",
-  "version": "0.0.1",
-  "private": true,
-  "type": "module",
-  "description": "supabase module for kindfi",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "scripts": {
-    "gen": "bun run types && bun run schemas",
-    "gen:local": "bun run types:local && bun run schemas",
-    "types": "supabase gen types --lang=typescript > src/database.types.ts --linked",
-    "types:local": "supabase gen types --lang=typescript > src/database.types.ts --local",
-    "schemas": "supabase-to-zod --input src/database.types.ts --output src/database.schemas.ts",
-    "db:pull": "supabase pull --project-url=$SUPABASE_URL --project-key=$SUPABASE_API_KEY",
-    "db:push": "supabase push --project-url=$SUPABASE_URL --project-key=$SUPABASE_API_KEY",
-    "start": "supabase start  --project-url=$SUPABASE_URL --project-key=$SUPABASE_API_KEY"
-
-  },
-  "author": "kindfi",
-  "license": "MIT",
-  "dependencies": {},
-  "devDependencies": {
-    "supabase-to-zod": "^1.0.7",
-    "supabase": "^2.0.0"
-  }
+	"name": "@services/supabase",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"description": "supabase module for kindfi",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"scripts": {
+		"gen": "bun run types && bun run schemas",
+		"gen:local": "bun run types:local && bun run schemas",
+		"types": "supabase gen types --lang=typescript > src/database.types.ts --linked",
+		"types:local": "supabase gen types --lang=typescript > src/database.types.ts --local",
+		"schemas": "supabase-to-zod --input src/database.types.ts --output src/database.schemas.ts",
+		"db:pull": "supabase pull --project-url=$SUPABASE_URL --project-key=$SUPABASE_API_KEY",
+		"db:push": "supabase push --project-url=$SUPABASE_URL --project-key=$SUPABASE_API_KEY",
+		"start": "supabase start",
+		"status": "supabase status"
+	},
+	"author": "kindfi",
+	"license": "MIT",
+	"dependencies": {},
+	"devDependencies": {
+		"supabase-to-zod": "^1.0.7",
+		"supabase": "^2.0.0"
+	}
 }

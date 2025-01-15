@@ -1,4 +1,4 @@
-import { gql } from "apollo-server-express";
+import { gql } from 'apollo-server-express'
 
 // Define the GraphQL schema for KYC applications
 export const apolloTypeDef = gql`
@@ -21,4 +21,4 @@ export const apolloTypeDef = gql`
     createKycApplication(applicantName: String!, applicantEmail: String!): KycApplication!  // Create a new KYC application
     updateKycApplication(id: ID!, status: String!): KycApplication!  // Update the status of an existing KYC application
   }
-`;
+`

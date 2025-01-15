@@ -27,14 +27,16 @@ Our trusty AI sidekick, [CodeRabbitAI](https://www.coderabbit.ai/), will be the 
 
 Once the AI review is complete or under review, a project lead will take a closer look at your changes, evaluating the design, architecture, and overall fit within the project's goals. Making also conversations with CodeRabbitAi to dive deeper into details with the codebase. Project lead may or may not close any open feedback given by the AI.
 
+> ⚠️ If project lead notices that the AI feedback is not accurate, they will start a conversation with CodeRabbitAi to improve the AI feedback and, as contributor, you can do the same. Additionally, if project lead notice that commits are not signed, it will be rejected and ask to re-upload the commits with the proper signature.
+
 ### Addressing Feedback
 
 When you receive feedback on your changes:
 
-1. Take the time to thoroughly understand the suggestions and ask for clarification if needed
-2. Implement the requested changes in your code with care and precision
-3. Commit the revisions and push them to your branch
-4. Notify the reviewers that you've addressed their feedback and your code is ready for another round of review
+1. Take the time to thoroughly understand the suggestions and ask for clarification if needed.
+2. Implement the requested changes in your code with care and precision.
+3. Commit the revisions and push them to your branch. Make sure they are signed.
+4. Notify the reviewers that you've addressed their feedback and your code is ready for another round of review.
 
 If your changes are approved, they'll be merged into the main project. If further iteration is needed, use the provided feedback as a guide to refine your work and resubmit.
 
@@ -54,11 +56,11 @@ Our design workflow is built around Figma as our primary design tool. Here's our
 
 Project leads verify these essential elements:
 
-* Alignment with design system guidelines.
-* Implementation of proper layout and constraints.
-* Component reusability and modularity.
-* Accessibility compliance.
-* Responsive design implementation.
+- Alignment with design system guidelines.
+- Implementation of proper layout and constraints.
+- Component reusability and modularity.
+- Accessibility compliance.
+- Responsive design implementation.
 
 ## Issue Application Template
 
@@ -88,9 +90,9 @@ At KindFi, we value long-term commitment and sustained contributions to our proj
 
 For contributors who maintain consistent involvement between hackathons and throughout different stages of KindFi's development, we offer enhanced budget allocations. This means:
 
-* Increased funding for your projects at the conclusion of hackathon events.
-* Additional resources allocated based on your sustained contribution history.
-* Special budget considerations during key development stages.
+- Increased funding for your projects at the conclusion of hackathon events.
+- Additional resources allocated based on your sustained contribution history.
+- Special budget considerations during key development stages.
 
 This incentive structure is designed to:
 
@@ -104,14 +106,14 @@ Remember, consistent contribution doesn't just mean code commits - it includes d
 
 We believe that a thriving community is the heart and soul of any successful open-source project. Here's how we cultivate a welcoming and supportive environment:
 
-* Communication channels in Telegram where you can connect with fellow contributors, ask questions, and share ideas.
-* The GitHub issue tracker, a hub for lively discussions, brainstorming sessions, and collaborative problem-solving.
-* Clear contribution guidelines and a code of conduct that ensure everyone feels respected and valued.
-* Recognition and celebration of individual contributions, acknowledging the hard work and dedication of our community members.
+- Communication channels in Telegram where you can connect with fellow contributors, ask questions, and share ideas.
+- The GitHub issue tracker, a hub for lively discussions, brainstorming sessions, and collaborative problem-solving.
+- Clear contribution guidelines and a code of conduct that ensure everyone feels respected and valued.
+- Recognition and celebration of individual contributions, acknowledging the hard work and dedication of our community members.
 
 Building a strong, inclusive community requires consistent effort and commitment from every one of us. By fostering an atmosphere of openness, empathy, and mutual support, we can achieve incredible things together.
 
-***
+---
 
 We're thrilled to have you join us on this exciting open-source journey. Your contributions, ideas, and enthusiasm are what make our projects truly exceptional! Together, we'll push the boundaries of what's possible with AI and Web3, and shape a future where innovation knows no limits 💪🏼
 

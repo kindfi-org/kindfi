@@ -28,7 +28,7 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 ## Project Structure
 
-```
+```bash
 kindfi
 ├── apps
 │   ├── web
@@ -42,11 +42,14 @@ kindfi
 │   │   ├── components
 │   │   │   ├── base # Base components
 │   │   │   │   └── dialog.tsx
-│   │   │   └── shared # Shared components
-│   │   │       └── layout.tsx
+│   │   │   ├── shared # Shared components
+│   │   │   │   └── layout.tsx
+│   │   │   ├── page # Page components
+│   │   │   └── sections # Section components for pages
+│   │   ├── context # Context providers
 │   │   ├── hooks # Custom hooks (no context)
 │   │   │   └── use-supabase.ts
-│   │   ├── lib # Utility functions
+│   │   ├── lib # Utility functions library
 │   │   │   └── utils.ts
 │   │   ├── public # Static files
 │   │   ├── tsconfig.json

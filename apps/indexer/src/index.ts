@@ -1,2 +1,2 @@
 //Exports all handler functions
-export * from "./mappings/handlers";
+export * from './mappings/handlers'

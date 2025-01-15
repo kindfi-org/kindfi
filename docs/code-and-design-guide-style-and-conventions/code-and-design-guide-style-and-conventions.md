@@ -26,55 +26,64 @@ When writing JavaScript code, we follow these conventions:
 1. **Naming variables:** Use meaningful names that describe the purpose of the variable. For booleans, prefix the name with auxiliary verbs such as `does`, `has`, `is`, or `should`. For example, `isDisabled`, `hasPermission`, `shouldRefresh`.
 2. **Composition over inheritance:** Favor composing smaller, focused components together over creating deep component hierarchies with inheritance. This keeps your code more flexible and easier to modify.
 3. **Filenames:** Use lowercase with dash separators for directories and file names. For example, `components/auth-wizard`. File extensions should indicate the type of file: `.config.ts`, `.test.ts`, `.context.tsx`, `.type.ts`, `.hook.ts`. For components, the extension can be omitted.
-4.  **Avoid default exports:** Prefer named exports over default exports. This makes it clearer what's being imported and helps avoid naming conflicts.
+4. **Avoid default exports:** Prefer named exports over default exports. This makes it clearer what's being imported and helps avoid naming conflicts.
 
-    ```tsx
-    // Prefer this
-    export const helloMessage = 'hello';
-    export function saySomething() { /* ... */ }
+   ```tsx
+   // Prefer this
+   export const helloMessage = "hello";
+   export function saySomething() {
+     /* ... */
+   }
 
-    // Over this
-    const helloMessage = 'hello';
-    function saySomething() { /* ... */ }
-    export default { helloMessage, saySomething };
-    ```
-5.  **Receive an Object, Return an Object (RORO):** When defining functions, especially those interacting with external services, prefer taking an object as input and returning an object as output. This makes the function's interface more explicit and easier to use.
+   // Over this
+   const helloMessage = "hello";
+   function saySomething() {
+     /* ... */
+   }
+   export default { helloMessage, saySomething };
+   ```
 
-    ```tsx
-    // types/services.type.ts
-    export interface ServiceParams {
-      limit?: number;
-      offset?: number;
-    }
+5. **Receive an Object, Return an Object (RORO):** When defining functions, especially those interacting with external services, prefer taking an object as input and returning an object as output. This makes the function's interface more explicit and easier to use.
 
-    // services/account/account.type.ts
-    export interface GetAccountsParams extends ServiceParams {
-      account?: string;
-    }
+   ```tsx
+   // types/services.type.ts
+   export interface ServiceParams {
+     limit?: number;
+     offset?: number;
+   }
 
-    // services/account/account.service.ts
-    export async function getAccounts({ account, limit = 15, offset = 0 }: GetAccountsParams) {
-      // ...
-    }
+   // services/account/account.type.ts
+   export interface GetAccountsParams extends ServiceParams {
+     account?: string;
+   }
 
-    ```
-6.  **Use regular function calls on components:** When attaching event handlers or other callbacks to components, use regular function calls instead of arrow functions. This prevents unnecessary re-renders and potential build errors due to hoisting.
+   // services/account/account.service.ts
+   export async function getAccounts({
+     account,
+     limit = 15,
+     offset = 0,
+   }: GetAccountsParams) {
+     // ...
+   }
+   ```
 
-    ```tsx
-    export function MyComponent() {
-      const myMethod = () => console.log('Hello, World!');
+6. **Use regular function calls on components:** When attaching event handlers or other callbacks to components, use regular function calls instead of arrow functions. This prevents unnecessary re-renders and potential build errors due to hoisting.
 
-      return (
-        <div>
-          {/* Prefer this */}
-          <button onClick={myMethod}>Click Me</button>
+   ```tsx
+   export function MyComponent() {
+     const myMethod = () => console.log("Hello, World!");
 
-          {/* Over this */}
-          <button onClick={() => console.log('Hello, World!')}>Click Me</button>
-        </div>
-      );
-    }
-    ```
+     return (
+       <div>
+         {/* Prefer this */}
+         <button onClick={myMethod}>Click Me</button>
+
+         {/* Over this */}
+         <button onClick={() => console.log("Hello, World!")}>Click Me</button>
+       </div>
+     );
+   }
+   ```
 
 These conventions help keep our JavaScript code consistent, readable, and maintainable. By following them, you'll be contributing to a cleaner, more collaborative codebase.
 
@@ -83,49 +92,52 @@ These conventions help keep our JavaScript code consistent, readable, and mainta
 TypeScript is a powerful tool that helps us catch potential bugs and improve the maintainability of our codebase. Here are some conventions to follow when writing TypeScript:
 
 1. **Type definitions:** Use the appropriate type definition keyword based on the use case:
-   * `interface` for objects and class definitions
-   * `type` for union types, tuples, aliases, and more complex types
-   * `const` for literal types or constants
-   * `enum` for enumerations with a fixed set of values
+   - `interface` for objects and class definitions
+   - `type` for union types, tuples, aliases, and more complex types
+   - `const` for literal types or constants
+   - `enum` for enumerations with a fixed set of values
 2. **Avoid `any`:** The `any` type should be used sparingly, as it essentially opts out of type checking. If you find yourself using `any`, consider if there's a more specific type that could be used instead. A PR with `any` will likely be pushed back for revision.
-3.  **Leverage type inference:** TypeScript is often able to infer types based on the context. When the type is clear from the context, you can omit the explicit type annotation to keep your code cleaner and more readable.
+3. **Leverage type inference:** TypeScript is often able to infer types based on the context. When the type is clear from the context, you can omit the explicit type annotation to keep your code cleaner and more readable.
 
-    ```tsx
-    // Instead of this
-    const name: string = 'John';
+   ```tsx
+   // Instead of this
+   const name: string = "John";
 
-    // You can do this
-    const name = 'John';
-    ```
-4.  **Use type annotations for function parameters and return values:** Even though TypeScript can often infer types, it's a good practice to explicitly annotate function parameters and return values. This makes the function's interface clear and helps catch type-related issues.
+   // You can do this
+   const name = "John";
+   ```
 
-    ```tsx
-    function greet(name: string): string {
-      return `Hello, ${name}!`;
-    }
-    ```
-5.  **Prefer type assertion with `as`:** When you need to assert a type, use the `as` keyword instead of angle-bracket syntax. This is more readable and consistent with JSX syntax.
+4. **Use type annotations for function parameters and return values:** Even though TypeScript can often infer types, it's a good practice to explicitly annotate function parameters and return values. This makes the function's interface clear and helps catch type-related issues.
 
-    ```tsx
-    // Prefer this
-    const name = someValue as string;
+   ```tsx
+   function greet(name: string): string {
+     return `Hello, ${name}!`;
+   }
+   ```
 
-    // Over this
-    const name = <string>someValue;
-    ```
-6.  **Use type guards:** Type guards are a powerful way to narrow down the type of a variable within a conditional block. This is particularly useful when working with union types.
+5. **Prefer type assertion with `as`:** When you need to assert a type, use the `as` keyword instead of angle-bracket syntax. This is more readable and consistent with JSX syntax.
 
-    ```tsx
-    function processValue(value: string | number) {
-      if (typeof value === 'string') {
-        // In this block, `value` is of type `string`
-        console.log(value.toUpperCase());
-      } else {
-        // In this block, `value` is of type `number`
-        console.log(value.toFixed(2));
-      }
-    }
-    ```
+   ```tsx
+   // Prefer this
+   const name = someValue as string;
+
+   // Over this
+   const name = <string>someValue;
+   ```
+
+6. **Use type guards:** Type guards are a powerful way to narrow down the type of a variable within a conditional block. This is particularly useful when working with union types.
+
+   ```tsx
+   function processValue(value: string | number) {
+     if (typeof value === "string") {
+       // In this block, `value` is of type `string`
+       console.log(value.toUpperCase());
+     } else {
+       // In this block, `value` is of type `number`
+       console.log(value.toFixed(2));
+     }
+   }
+   ```
 
 By following these TypeScript conventions, you'll be taking full advantage of the language's type system and contributing to a more robust, maintainable codebase.
 
@@ -133,99 +145,101 @@ By following these TypeScript conventions, you'll be taking full advantage of th
 
 React is at the core of our front-end development. Here are some conventions to keep in mind when writing React components:
 
-1.  **Declare components with the function keyword:** Use the `function` keyword to declare your React components. This aligns with the use of React hooks and emphasizes the functional nature of components.
+1. **Declare components with the function keyword:** Use the `function` keyword to declare your React components. This aligns with the use of React hooks and emphasizes the functional nature of components.
 
-    ```tsx
-    export function MyComponent({ param1, param2 }: MyComponentProps) {
-      // ...
-    }
-    ```
-2.  **Order your component file:** Organize your React component files in the following order:
+   ```tsx
+   export function MyComponent({ param1, param2 }: MyComponentProps) {
+     // ...
+   }
+   ```
 
-    1. Imports
-    2. Component declaration
-    3. Styled components (if any)
-    4. TypeScript types and interfaces
+2. **Order your component file:** Organize your React component files in the following order:
 
-    This makes your component files more readable and easier to navigate.
+   1. Imports
+   2. Component declaration
+   3. Styled components (if any)
+   4. TypeScript types and interfaces
 
-    ```tsx
-    // Imports
-    import React from 'react';
-    import { Button, Input } from '@/components/base/button';
+   This makes your component files more readable and easier to navigate.
 
-    // Constants declaration
-    const MAX_LENGTH = 20
+   ```tsx
+   // Imports
+   import React from "react";
+   import { Button, Input } from "@/components/base/button";
 
-    // Component declaration
-    export function MyComponent({ param1, param2 }: MyComponentProps) {
-      const submitAction = async () => {
-    	  'use server'
-    	  return await Promise.resolve(console.log('You clicked!!'))
-      }
-      
-      return (
-    	  <form 
-    			className="w-full max-w-[600px] bg-muted text-muted-foreground m-2 px-4 py-6 rounded-lg"
-    			action={submitAction}
-    		>
-    		  <Input name="username" id="username" maxLength={MAX_LENGTH} />
-    		  <Button type="submit">
-    			  Submit
-    		  </Button>
-    		</form>
-      )
-    }
+   // Constants declaration
+   const MAX_LENGTH = 20;
 
-    // TypeScript types and interfaces
-    interface MyComponentProps {
-      param1: string;
-      param2: number;
-    }
+   // Component declaration
+   export function MyComponent({ param1, param2 }: MyComponentProps) {
+     const submitAction = async () => {
+       "use server";
+       return await Promise.resolve(console.log("You clicked!!"));
+     };
 
-    ```
-3.  **Use PascalCase for component names:** Name your components using PascalCase. This makes it clear that the identifier refers to a React component.
+     return (
+       <form
+         className="w-full max-w-[600px] bg-muted text-muted-foreground m-2 px-4 py-6 rounded-lg"
+         action={submitAction}
+       >
+         <Input name="username" id="username" maxLength={MAX_LENGTH} />
+         <Button type="submit">Submit</Button>
+       </form>
+     );
+   }
 
-    ```tsx
-    // Prefer this
-    function MyComponent() { /* ... */ }
+   // TypeScript types and interfaces
+   interface MyComponentProps {
+     param1: string;
+     param2: number;
+   }
+   ```
 
-    // Over this
-    function myComponent() { /* ... */ }
+3. **Use PascalCase for component names:** Name your components using PascalCase. This makes it clear that the identifier refers to a React component.
 
-    ```
+   ```tsx
+   // Prefer this
+   function MyComponent() {
+     /* ... */
+   }
+
+   // Over this
+   function myComponent() {
+     /* ... */
+   }
+   ```
+
 4. **Keep components small and focused:** Each component should have a single, clear responsibility. If a component starts growing too large, consider breaking it down into smaller, reusable components.
-5.  **Use functional components and hooks:** With the introduction of hooks, functional components have become the preferred way to write React components. Hooks provide a more concise and flexible way to manage state and side effects in your components.
+5. **Use functional components and hooks:** With the introduction of hooks, functional components have become the preferred way to write React components. Hooks provide a more concise and flexible way to manage state and side effects in your components.
 
-    ```tsx
-    'use client'
+   ```tsx
+   "use client";
 
-    import { useState } from 'react';
+   import { useState } from "react";
 
-    function Counter() {
-      const [count, setCount] = useState(0);
+   function Counter() {
+     const [count, setCount] = useState(0);
 
-      return (
-        <div>
-          <p>Count: {count}</p>
-          <button onClick={() => setCount(count + 1)}>Increment</button>
-        </div>
-      );
-    }
+     return (
+       <div>
+         <p>Count: {count}</p>
+         <button onClick={() => setCount(count + 1)}>Increment</button>
+       </div>
+     );
+   }
+   ```
 
-    ```
-6.  **Use TypeScript for props typing:** Always define the types for your component's props using a TypeScript interface. This makes the component's interface clear and helps catch type-related issues.
+6. **Use TypeScript for props typing:** Always define the types for your component's props using a TypeScript interface. This makes the component's interface clear and helps catch type-related issues.
 
-    ```tsx
-    interface GreetingProps {
-      name: string;
-    }
+   ```tsx
+   interface GreetingProps {
+     name: string;
+   }
 
-    function Greeting({ name }: GreetingProps) {
-      return <h1>Hello, {name}!</h1>;
-    }
-
-    ```
+   function Greeting({ name }: GreetingProps) {
+     return <h1>Hello, {name}!</h1>;
+   }
+   ```
 
 By adhering to these React conventions, you'll be writing components that are more readable, maintainable, and consistent with the rest of our codebase.
 
@@ -297,9 +311,9 @@ The App Router in NextJS 14 is like having a travel agent. They help you plan yo
 
 Some of the key features of the App Router include:
 
-* **Nested Layouts:** This feature allows you to create a hierarchy of layouts that can be shared across multiple pages. It's like having a consistent design theme throughout your trip - the same color scheme in your hotel room, a similar style of restaurants, etc. This consistency makes your trip (or in this case, your application) feel more cohesive and easier to navigate.
-* **Server Components:** The App Router encourages the use of Server Components, which allow you to render parts of your page on the server. This is like having a concierge at your hotel who can take care of certain tasks for you, like making restaurant reservations or arranging transportation. Server Components can handle data fetching and other server-side tasks, making your application more efficient and secure.
-* **Streaming and Suspense:** These features allow your application to load content incrementally, rather than waiting for the entire page to load before displaying anything. It's like being able to start your vacation while you're still planning parts of it - you can enjoy the beach while you're still deciding on which activities to do later in the trip.
+- **Nested Layouts:** This feature allows you to create a hierarchy of layouts that can be shared across multiple pages. It's like having a consistent design theme throughout your trip - the same color scheme in your hotel room, a similar style of restaurants, etc. This consistency makes your trip (or in this case, your application) feel more cohesive and easier to navigate.
+- **Server Components:** The App Router encourages the use of Server Components, which allow you to render parts of your page on the server. This is like having a concierge at your hotel who can take care of certain tasks for you, like making restaurant reservations or arranging transportation. Server Components can handle data fetching and other server-side tasks, making your application more efficient and secure.
+- **Streaming and Suspense:** These features allow your application to load content incrementally, rather than waiting for the entire page to load before displaying anything. It's like being able to start your vacation while you're still planning parts of it - you can enjoy the beach while you're still deciding on which activities to do later in the trip.
 
 #### Server Components
 
@@ -311,9 +325,9 @@ In this analogy, the parts of the meal that can be served quickly are like Clien
 
 This approach has several benefits:
 
-* **Improved Performance:** By rendering certain parts of the page on the server, you can reduce the amount of work the client has to do, which can lead to faster load times.
-* **Better Security:** Server Components can handle sensitive tasks like data fetching and authentication on the server, reducing the risk of exposing sensitive information to the client.
-* **Enhanced Developer Experience:** Server Components can make your code more modular and easier to reason about, as you can clearly separate server-side and client-side logic.
+- **Improved Performance:** By rendering certain parts of the page on the server, you can reduce the amount of work the client has to do, which can lead to faster load times.
+- **Better Security:** Server Components can handle sensitive tasks like data fetching and authentication on the server, reducing the risk of exposing sensitive information to the client.
+- **Enhanced Developer Experience:** Server Components can make your code more modular and easier to reason about, as you can clearly separate server-side and client-side logic.
 
 #### `use client` Directive
 
@@ -350,21 +364,22 @@ Here are some of the key benefits of using Tailwind CSS:
 Here's an example of how you might style a button using Tailwind:
 
 ```html
-<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+<button
+  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+>
   Click Me!
 </button>
-
 ```
 
 In this example, we're using Tailwind utility classes to style the button:
 
-* `bg-blue-500` sets the background color to a specific shade of blue.
-* `hover:bg-blue-700` changes the background color when the button is hovered over.
-* `text-white` makes the button text white.
-* `font-bold` makes the text bold.
-* `py-2` adds padding to the top and bottom of the button.
-* `px-4` adds padding to the left and right of the button.
-* `rounded` makes the button corners rounded.
+- `bg-blue-500` sets the background color to a specific shade of blue.
+- `hover:bg-blue-700` changes the background color when the button is hovered over.
+- `text-white` makes the button text white.
+- `font-bold` makes the text bold.
+- `py-2` adds padding to the top and bottom of the button.
+- `px-4` adds padding to the left and right of the button.
+- `rounded` makes the button corners rounded.
 
 This approach allows us to quickly and easily style our components without writing any custom CSS.
 
