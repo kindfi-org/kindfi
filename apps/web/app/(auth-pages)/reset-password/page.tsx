@@ -4,8 +4,8 @@ import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { FormMessage, type Message } from '~/components/form-message'
-import { AuthForm } from '~/components/layout/auth/auth-form'
-import { AuthLayout } from '~/components/layout/auth/auth-layout'
+import { AuthForm } from '~/components/shared/layout/auth/auth-form'
+import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 
 export default async function ResetPassword(props: {
 	searchParams: Promise<Message>
