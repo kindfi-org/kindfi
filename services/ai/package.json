@@ -1,31 +1,25 @@
 {
-  "name": "ai-service",
-  "version": "1.0.0",
-  "description": "Service to call a model to predict the sentiment of a text, biometrics, etc.",
-  "main": "src/app.ts",
-  "scripts": {
-    "start": "bun src/app.ts",
-    "test": "bun test",
-    "type-check": "bun eslint",
-    "type-check:fix": "bun eslint --fix"
-  },
-  "dependencies": {
-    "@huggingface/inference": "^2.8.1",
-    "express": "^4.17.1",
-    "dotenv": "^10.0.0"
-  },
-  "devDependencies": {
-    "typescript": "^4.4.4",
-    "@types/node": "^16.0.0",
-    "@types/express": "^4.17.13"
-  },
-  "keywords": [
-    "AI",
-    "HuggingFace",
-    "sentiment-analysis",
-    "biometrics",
-    "KYC"
-  ],
-  "author": "Your Name",
-  "license": "MIT"
+	"name": "ai-service",
+	"version": "1.0.0",
+	"description": "Service to call a model to predict the sentiment of a text, biometrics, etc.",
+	"main": "src/app.ts",
+	"scripts": {
+		"start": "bun src/app.ts",
+		"test": "bun test",
+		"type-check": "bun eslint",
+		"type-check:fix": "bun eslint --fix"
+	},
+	"dependencies": {
+		"@huggingface/inference": "^2.8.1",
+		"express": "^4.17.1",
+		"dotenv": "^10.0.0"
+	},
+	"devDependencies": {
+		"typescript": "^4.4.4",
+		"@types/node": "^16.0.0",
+		"@types/express": "^4.17.13"
+	},
+	"keywords": ["AI", "HuggingFace", "sentiment-analysis", "biometrics", "KYC"],
+	"author": "Your Name",
+	"license": "MIT"
 }

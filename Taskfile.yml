@@ -5,7 +5,7 @@ tasks:
   install:
     desc: "Install dependencies for all packages"
     cmds:
-      - bun install
+      - bun run init
     silent: true
 
   # ? Task to clean node_modules in all packages
@@ -71,7 +71,7 @@ tasks:
     desc: "Generate code for the Subquery Indexer"
     cmds:
       - cd apps/indexer && bun run codegen
-  
+
   indexer:prepack:
     desc: "Prepare the Subquery Indexer for packaging"
     cmds:

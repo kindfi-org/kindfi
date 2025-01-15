@@ -3,41 +3,41 @@
 # https://academy.subquery.network/build/graphql.html#indexing-by-non-primary-key-field
 
 type Account @entity {
-  id: ID!
-  firstSeenLedger: Int
-  lastSeenLedger: Int
-  sentTransfers: [Transfer] @derivedFrom(field: "from") # These are virtual properties to help us navigate to the correct foreign key of Transfer
-  recievedTransfers: [Transfer] @derivedFrom(field: "to") # These are virtual properties to help us navigate to the correct foreign key of Transfer
-  sentPayments: [Payment] @derivedFrom(field: "from") # These are virtual properties to help us navigate to the correct foreign key of Payment
-  receivedPayments: [Payment] @derivedFrom(field: "to") # These are virtual properties to help us navigate to the correct foreign key of Payment
+	id: ID!
+	firstSeenLedger: Int
+	lastSeenLedger: Int
+	sentTransfers: [Transfer] @derivedFrom(field: "from") # These are virtual properties to help us navigate to the correct foreign key of Transfer
+	recievedTransfers: [Transfer] @derivedFrom(field: "to") # These are virtual properties to help us navigate to the correct foreign key of Transfer
+	sentPayments: [Payment] @derivedFrom(field: "from") # These are virtual properties to help us navigate to the correct foreign key of Payment
+	receivedPayments: [Payment] @derivedFrom(field: "to") # These are virtual properties to help us navigate to the correct foreign key of Payment
 }
 
 type Transfer @entity {
-  id: ID!
-  ledger: Int!
-  date: Date!
-  contract: String!
-  from: Account!
-  to: Account!
-  value: BigInt!
+	id: ID!
+	ledger: Int!
+	date: Date!
+	contract: String!
+	from: Account!
+	to: Account!
+	value: BigInt!
 }
 
 type Payment @entity {
-  id: ID!
-  txHash: String!
-  from: Account!
-  to: Account!
-  amount: String!
+	id: ID!
+	txHash: String!
+	from: Account!
+	to: Account!
+	amount: String!
 }
 
 type Credit @entity {
-  id: ID!
-  account: Account!
-  amount: String!
+	id: ID!
+	account: Account!
+	amount: String!
 }
 
 type Debit @entity {
-  id: ID!
-  account: Account!
-  amount: String!
+	id: ID!
+	account: Account!
+	amount: String!
 }

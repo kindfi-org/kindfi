@@ -60,13 +60,13 @@ bun gen # generates what it is in remote
 
 ## Useful Commands
 
-- **Pull Remote Database Schema**
+- **Pull Remote Database Schema to Local**
 
   ```sh
   bun db:pull
   ```
 
-- **Push Local Database Schema**
+- **Push Local Database Schema to Remote**
 
   ```sh
   bun db:push

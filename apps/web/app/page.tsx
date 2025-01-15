@@ -1,7 +1,9 @@
-import { HomeComponent } from "~/components/pages/home";
+import HomeDashboard from '~/app/(routes)/home/page'
 
-export default function Home() {
-  return (
-    <HomeComponent />
-  );
+export default async function Index() {
+	return (
+		<>
+			<HomeDashboard />
+		</>
+	)
 }

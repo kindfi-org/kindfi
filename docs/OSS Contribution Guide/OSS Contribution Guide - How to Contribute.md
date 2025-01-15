@@ -8,27 +8,34 @@ Tags: Engineering, Guides, Product
 
 To ensure our codebase remains a shining example of consistency and quality, we adhere to a set of coding conventions that will guide you on your quest:
 
-- Harness the power of the Shadcn/ui component library and Tailwind CSS to create stunning, responsive UIs
-- Embrace the declarative paradigm and leverage the magic of React hooks for building modular, reusable components
-- Wield the power of TypeScript to write code that's self-documenting, catch errors early, and provide an exceptional developer experience
+- Harness the power of the Shadcn/ui component library and Tailwind CSS to create stunning, responsive UIs.
+- Embrace the declarative paradigm and leverage the magic of React hooks for building modular, reusable components.
+- Wield the power of TypeScript to write code that's self-documenting, catch errors early, and provide an exceptional developer experience.
 - Keep your code DRY (Don't Repeat Yourself) to maintain a lean and efficient codebase
-- Craft meaningful, intention-revealing names for your variables, functions, and components
-- Design small, focused components that excel at a single responsibility
-- Embrace a functional architecture style, reserving classes for server workers or controllers
-- Extract logic into separate functions only when it enhances readability or promotes reusability
+- Craft meaningful, intention-revealing names for your variables, functions, and components.
+- Design small, focused components that excel at a single responsibility (modular design).
+- Embrace a functional architecture style, reserving classes for server workers or controllers.
+- Extract logic into separate functions only when it enhances readability or promotes reusability.
+- Use hooks to manage state and side effects, keeping your components clean and focused.
+- Leverage TypeScript's type system to catch errors early and provide a clear contract for your code.
+- Follow established component naming conventions as our Code Style and Conventions.
 
 ## Design System Standards
 
-- Follow established component naming conventions as our Code Style and Conventions.
+- Follow established component naming conventions as our Code Style and Conventions for frames/components/groups within Figma.
 - Use auto-layout for all components to ensure responsive design.
 - Maintain a clear component hierarchy and organization.
 - Document all design decisions and component usage guidelines within the related issue.
+- Ensure all designs are accessible and comply with WCAG standards.
+- Use the Figma design system library (figma tokens) for consistency and efficiency.
 
 Dive into our [**comprehensive code style guide**](../Code%20and%20Design%20Guide%20Style%20and%20Conventions.md) to uncover a wealth of detailed examples and best practices that will elevate your code to new heights!
 
 # Git Conventions
 
 In this mono-repo, consistency is key to maintaining a clean and organized codebase. These guidelines outline clear conventions for commit messages and branch naming, ensuring a readable and professional commit history that fosters collaboration.
+
+> ⚠️ All commits **must be** signed with your GPG key, otherwise your work won't be recognized. Check this [link](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits) to learn how to sign your commits.
 
 ## Branching Model
 
@@ -53,7 +60,33 @@ We adopt a powerful feature branch workflow that will help you organize your con
 - Keep commit messages concise and descriptive (under 72 characters for the title).
 - Use a mono-repo mindset: ensure clarity about which part of the project your changes affect.
 
-By following these conventions, you'll create a well-structured, easily navigable Git history that tells the story of your project's evolution.
+### Development Flow
+
+```mermaid
+graph TD
+    A["**develop**
+    [Base development branch]"] -- git checkout -b --> B["**feat-123-user-profile**
+    [Working branch]"]
+    B --o E["When work is done"]
+    E --> A
+    A -- when pre-prod test required --o C["**test**
+    [pre-production tests]"]
+    A -- when no pre-prod test required --> D["**main**
+    [Production]"]
+    C --> D
+```
+
+> ⚠️ Always rebase from the `develop` branch. The working flow is:
+>
+> 1. Create a new branch from `develop` with the issue number and a brief description.
+> 2. Work on your feature/fix.
+> 3. Rebase from `develop` to keep your branch up-to-date.
+> 4. Push your branch to the remote repository.
+> 5. Create a pull request to merge your branch into `develop`.
+> 6. Assign reviewers and make sure all checks pass.
+> 7. Merge your branch into `develop` if project lead approves.
+
+By following these conventions, you'll create a well-structured, easily navigable Git history that tells the story of KindFi's evolution.
 
 ## Commit Messages
 
@@ -93,9 +126,12 @@ For instance, a PR titled "[web] Fix login form validation error on Safari" prov
 
 Begin your development journey with these essential steps:
 
-1. Fork and clone the repository: `git clone <repo-url>`.
+1. Clone the repository: `git clone <repo-url>`.
 2. Set up your development environment with `bun install`.
-3. Optionally for MacOS/Linux users, review the root `Taskfile` for available commands and scripts.
+3. Ask for access to the necessary tools and resources (if you haven´t check already).
+4. Optionally for MacOS/Linux users, review the root `Taskfile` for available commands and scripts.
+
+> 👀 For the full list of necessary tools and resources, check our Telegram group and look for your respective area to work on. Her you can visit the [Frontend](https://t.me/c/2422205030/4) and [Backend](https://t.me/c/2422205030/5) topics. You can join to our community [here](https://t.me/c/2422205030) if you haven't!
 
 ## Making Changes
 

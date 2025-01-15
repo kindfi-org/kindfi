@@ -22,14 +22,16 @@ Our trusty AI sidekick, [CodeRabbitAI](https://www.coderabbit.ai/), will be the 
 
 Once the AI review is complete or under review, a project lead will take a closer look at your changes, evaluating the design, architecture, and overall fit within the project's goals. Making also conversations with CodeRabbitAi to dive deeper into details with the codebase. Project lead may or may not close any open feedback given by the AI.
 
+> ⚠️ If project lead notices that the AI feedback is not accurate, they will start a conversation with CodeRabbitAi to improve the AI feedback and, as contributor, you can do the same. Additionally, if project lead notice that commits are not signed, it will be rejected and ask to re-upload the commits with the proper signature.
+
 ### Addressing Feedback
 
 When you receive feedback on your changes:
 
-1. Take the time to thoroughly understand the suggestions and ask for clarification if needed
-2. Implement the requested changes in your code with care and precision
-3. Commit the revisions and push them to your branch
-4. Notify the reviewers that you've addressed their feedback and your code is ready for another round of review
+1. Take the time to thoroughly understand the suggestions and ask for clarification if needed.
+2. Implement the requested changes in your code with care and precision.
+3. Commit the revisions and push them to your branch. Make sure they are signed.
+4. Notify the reviewers that you've addressed their feedback and your code is ready for another round of review.
 
 If your changes are approved, they'll be merged into the main project. If further iteration is needed, use the provided feedback as a guide to refine your work and resubmit.
 
