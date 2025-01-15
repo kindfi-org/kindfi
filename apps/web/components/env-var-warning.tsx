@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Badge } from './ui/badge'
-import { Button } from './ui/button'
+import { Badge } from '~/components/base/badge'
+import { Button } from '~/components/base/button'
 
 export function EnvVarWarning() {
 	return (

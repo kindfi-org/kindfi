@@ -65,8 +65,24 @@ const LatamWeb3Platform = () => {
 		},
 	]
 
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	const FeatureCard = ({ title, description, icon, stats, checkList }: any) => (
+	interface FeatureCardProps {
+		title: string
+		description: string
+		icon: React.ReactNode
+		stats?: {
+			value: string
+			label: string
+		}
+		checkList?: string[]
+	}
+
+	const FeatureCard = ({
+		title,
+		description,
+		icon,
+		stats,
+		checkList,
+	}: FeatureCardProps) => (
 		<motion.div
 			initial={{ opacity: 0, y: 20 }}
 			whileInView={{ opacity: 1, y: 0 }}
