@@ -26,7 +26,7 @@ Our coding philosophy revolves around writing **semantic, idiomatic, functional,
 - **Project Structure:**  
   - Organize components in a well-structured manner.
   - Separate concerns with clear folder structures.
-  - Follow monorepo best practices (`apps/`, `packages/`, `config/`).
+  - Follow monorepo best practices (`apps/`, `packages/`,`services/`, `config/`).
 
 - **Filenames:**  
   - Use lowercase with dash separators (e.g., `auth-wizard.tsx`).
