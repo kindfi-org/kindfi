@@ -167,6 +167,12 @@ Our coding philosophy revolves around writing **semantic, idiomatic, functional,
 - Store sensitive data in environment variables.
 - Validate all incoming API requests for security compliance.
 - Implement Role-Based Access Control (RBAC) using Supabase policies.
+- Set security headers (CSP, HSTS, etc.) using Next.js config
+- Implement rate limiting for API routes
+- Use prepared statements for database queries
+- Enable audit logging for sensitive operations
+- Implement session management best practices
+- Regular security dependency updates
 
 ---
 
