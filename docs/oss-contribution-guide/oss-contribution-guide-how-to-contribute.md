@@ -12,7 +12,7 @@ Welcome to KindFi! We're excited to have you as a part of our community. Here's 
 
 1. **Onboarding:** All new contributors are required to go through our onboarding process, which includes:
    * Reading and acknowledging our contributor guidelines and code of conduct.
-2. **Communication:** takes place on our Telegram server. Make sure to join the relevant channels and introduce yourself to the community. You can connect to all the active contributors by going to our Discord Voice Channels.
+2. **Communication:** takes place on our Telegram server. Make sure to join the relevant channels and introduce yourself to the community.
 
 > ℹ️ Join to our [Telegram community](https://t.me/+CWeVHOZb5no1NmQx) and follow our onboarding process if you haven't already!
 
