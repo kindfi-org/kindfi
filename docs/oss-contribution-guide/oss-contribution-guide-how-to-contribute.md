@@ -8,6 +8,24 @@ icon: marker
 
 Created by: Roberto "Andler" Lucas Created time: January 7, 2025 12:17 AM Tags: Engineering, Guides, Product
 
+Welcome to KindFi! We're excited to have you as a part of our community. Here's what you need to know as a contributor:
+
+1. **Onboarding:** All new contributors are required to go through our onboarding process, which includes:
+   * Reading and acknowledging our contributor guidelines and code of conduct.
+2. **Communication:** takes place on our Telegram server. Make sure to join the relevant channels and introduce yourself to the community. You can connect to all the active contributors by going to our Discord Voice Channels.
+
+> ℹ️ Join to our [Telegram community](https://t.me/+CWeVHOZb5no1NmQx) and follow our onboarding process if you haven't already!
+
+### **Getting Started**
+
+To get started to contribute (after onboarding), you can:
+
+* Fill out your contribution application. You may find a template here: [Issue Application Template](issue-application-template.md)
+* Look for issues labelled "good first issue" on the KindFi portal at the OD platform.
+  * _Make sure it has the OD tags in it_.
+* **YOU MUST HAVE YOUR COMMIT SIGNED FOR EVERY PUSH.** Any commit that is not authenticated (signed) it will be _rejected_ hence, your work _won't count until_ those commits are signed.
+  * You can follow this [GitHub guide here](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) to know how.
+
 ## Code Style and Conventions
 
 To ensure our codebase remains a shining example of consistency and quality, we adhere to a set of coding conventions that will guide you on your quest:
@@ -55,7 +73,7 @@ We adopt a powerful feature branch workflow that will help you organize your con
   * This will be uncommon unless we need a version of the repository that requires a heavy workload without affecting the main development process.
 * **ALL BRANCHES AND COMMIT MESSAGES MUST BE WRITTEN IN LOWERCASE.**
 * Keep commit messages concise and descriptive (under 72 characters for the title).
-* Use a mono-repo mindset: ensure clarity about which part of the project your changes affect.
+* Use a monorepo mindset: ensure clarity about which part of the project your changes affect.
 
 By following these conventions, you'll create a well-structured, easily navigable Git history that tells the story of your project's evolution.
 
