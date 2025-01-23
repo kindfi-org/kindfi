@@ -69,8 +69,7 @@ const CommunitySection = () => {
 					<div className="container space-y-2">
 						{benefits.map((benefit, index) => (
 							<BenefitItem
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								key={index}
+								key={benefit.text}
 								{...benefit}
 								isActive={index === 0}
 							/>

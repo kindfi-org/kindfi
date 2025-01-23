@@ -189,12 +189,9 @@ const Hero = () => {
 						initial="initial"
 						animate="animate"
 					>
-						{categories.map((category, index) => (
+						{categories.map((category) => (
 							<motion.div
-								key={`primary-${
-									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-									index
-								}`}
+								key={`primary-${category.label}`}
 								variants={badgeVariants}
 								whileHover="hover"
 								whileTap="tap"
@@ -228,12 +225,9 @@ const Hero = () => {
 						initial="initial"
 						animate="animate"
 					>
-						{secondaryCategories.map((category, index) => (
+						{secondaryCategories.map((category) => (
 							<motion.div
-								key={`secondary-${
-									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-									index
-								}`}
+								key={`secondary-${category.label}`}
 								variants={badgeVariants}
 								whileHover="hover"
 								whileTap="tap"
@@ -267,12 +261,9 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 1 }}
           >
-            {stats.map((stat, index) => (
+            {stats.map((stat) => (
               <div
-                key={`stat-${
-                  // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                  index
-                }`}
+                key={`stat-${stat.label}`}
                 className="flex flex-col items-center rounded-lg bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md"
               >
                 {stat.icon}

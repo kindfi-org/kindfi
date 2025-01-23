@@ -49,10 +49,9 @@ export const ProjectsShowcase = ({
 						className="w-full"
 					>
 						<CarouselContent className="-ml-2 md:-ml-4">
-							{projects.map((project, index) => (
+							{projects.map((project) => (
 								<CarouselItem
-									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-									key={index}
+									key={project.title}
 									className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
 								>
 									<ProjectCard {...project} />

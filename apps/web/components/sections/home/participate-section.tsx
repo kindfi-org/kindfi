@@ -98,10 +98,7 @@ export const WhyInvestSection = () => {
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 mb-16">
 					{features.map((feature, index) => (
 						<motion.div
-							key={`feature-${
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								index
-							}`}
+							key={`feature-${feature.title}`}
 							initial={{ opacity: 0, y: 20 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true }}

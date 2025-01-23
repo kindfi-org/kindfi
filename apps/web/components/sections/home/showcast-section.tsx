@@ -109,9 +109,11 @@ const LatamWeb3Platform = () => {
 
 			{checkList && (
 				<ul className="space-y-3">
-					{checkList.map((item: string, index: number) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-						<li key={index} className="flex items-center gap-3 text-gray-600">
+					{checkList.map((item: string) => (
+						<li
+							key={`feature-checklist-${item}`}
+							className="flex items-center gap-3 text-gray-600"
+						>
 							<div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
 							{item}
 						</li>
@@ -153,14 +155,8 @@ const LatamWeb3Platform = () => {
 
 				{/* Features Grid */}
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-					{features.map((feature, index) => (
-						<FeatureCard
-							key={`feature-${
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								index
-							}`}
-							{...feature}
-						/>
+					{features.map((feature) => (
+						<FeatureCard key={`feature-${feature.title}`} {...feature} />
 					))}
 				</div>
 
@@ -202,10 +198,7 @@ const LatamWeb3Platform = () => {
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
 					{stats.map((stat, index) => (
 						<motion.div
-							key={`stat-${
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								index
-							}`}
+							key={`stat-${stat.label}`}
 							initial={{ opacity: 0, y: 20 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true }}
