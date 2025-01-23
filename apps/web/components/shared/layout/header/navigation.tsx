@@ -12,44 +12,8 @@ import {
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
 } from '~/components/base/navigation-menu'
+import { projects, resources } from '~/lib/config/navigation'
 import { cn } from '~/lib/utils'
-
-const projects = [
-	{
-		title: 'Explore Projects',
-		href: '/projects',
-		description: 'Discover verified social initiatives powered by blockchain',
-	},
-	{
-		title: 'Create a Project',
-		href: '/create',
-		description: 'Start your social impact campaign with Web3 technology',
-	},
-	{
-		title: 'Featured Projects',
-		href: '/featured',
-		description: 'Explore the most successful initiatives from our community',
-	},
-]
-
-const resources = [
-	{
-		title: 'Learn Web3',
-		href: '/learn',
-		description:
-			'Access guides and resources to understand blockchain and crypto',
-	},
-	{
-		title: 'Community',
-		href: '/community',
-		description: 'Join our decentralized and collaborative community',
-	},
-	{
-		title: 'Social Impact',
-		href: '/impact',
-		description: 'Track metrics and results from impactful social projects',
-	},
-]
 
 export function Navigation() {
 	const pathname = usePathname()
