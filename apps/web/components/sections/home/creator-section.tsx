@@ -178,10 +178,7 @@ const CreatorSection = () => {
 								<div className="space-y-3">
 									{socialButtons.map((button, index) => (
 										<SocialButton
-											key={`social-${
-												// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-												index
-											}`}
+											key={`social-${button.provider}-button`}
 											{...button}
 											className={`w-full ${button.className}`}
 										/>
