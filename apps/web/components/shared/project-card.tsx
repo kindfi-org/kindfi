@@ -83,14 +83,8 @@ export const ProjectCard = ({
 				</CardContent>
 
 				<CardFooter className="flex-shrink-0 flex flex-wrap gap-2 mt-auto">
-					{tags.map((tag, index) => (
-						<Badge
-							key={`tag-${
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								index
-							}`}
-							variant="outline"
-						>
+					{tags.map((tag) => (
+						<Badge key={`tag-${tag}`} variant="outline">
 							{tag}
 						</Badge>
 					))}

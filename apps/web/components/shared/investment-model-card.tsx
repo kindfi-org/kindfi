@@ -37,10 +37,9 @@ export const InvestmentModelCard = ({
 				</div>
 
 				<div className="space-y-3">
-					{benefits?.map((benefit, index) => (
+					{benefits?.map((benefit) => (
 						<div
-							// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-							key={index}
+							key={benefit}
 							className="flex items-center text-sm text-gray-600"
 						>
 							<Check className="w-4 h-4 mr-2 text-green-600" />
