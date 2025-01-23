@@ -12,7 +12,7 @@ import {
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
 } from '~/components/base/navigation-menu'
-import { projects, resources } from '~/lib/config/navigation'
+import { projects, sections } from '~/lib/config/navigation'
 import { cn } from '~/lib/utils'
 
 export function Navigation() {
@@ -21,40 +21,24 @@ export function Navigation() {
 	return (
 		<NavigationMenu>
 			<NavigationMenuList>
-				<NavigationMenuItem>
-					<NavigationMenuTrigger>Projects</NavigationMenuTrigger>
-					<NavigationMenuContent>
-						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-							{projects.map((project) => (
-								<ListItem
-									key={project.title}
-									title={project.title}
-									href={project.href}
-								>
-									{project.description}
-								</ListItem>
-							))}
-						</ul>
-					</NavigationMenuContent>
-				</NavigationMenuItem>
-
-				<NavigationMenuItem>
-					<NavigationMenuTrigger>Resources</NavigationMenuTrigger>
-					<NavigationMenuContent>
-						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-							{resources.map((resource) => (
-								<ListItem
-									key={resource.title}
-									title={resource.title}
-									href={resource.href}
-								>
-									{resource.description}
-								</ListItem>
-							))}
-						</ul>
-					</NavigationMenuContent>
-				</NavigationMenuItem>
-
+				{sections.map(({ section, navigationItems }) => (
+					<NavigationMenuItem key={section}>
+						<NavigationMenuTrigger>{section}</NavigationMenuTrigger>
+						<NavigationMenuContent>
+							<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+								{navigationItems.map((project) => (
+									<ListItem
+										key={project.title}
+										title={project.title}
+										href={project.href}
+									>
+										{project.description}
+									</ListItem>
+								))}
+							</ul>
+						</NavigationMenuContent>
+					</NavigationMenuItem>
+				))}
 				<NavigationMenuItem>
 					<Link href="/about" legacyBehavior passHref>
 						<NavigationMenuLink

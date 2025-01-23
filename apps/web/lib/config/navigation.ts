@@ -1,4 +1,4 @@
-export interface NavigationItem {
+interface NavigationItem {
 	title: string
 	href: string
 	description: string
@@ -39,4 +39,14 @@ export const resources: NavigationItem[] = [
 		href: 'Social Impact',
 		description: 'Description of Resource Y',
 	},
+]
+
+interface NavigationSection {
+	section: string
+	navigationItems: NavigationItem[]
+}
+
+export const sections: NavigationSection[] = [
+	{ section: 'Projects', navigationItems: projects },
+	{ section: 'Resources', navigationItems: resources },
 ]
