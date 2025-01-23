@@ -12,44 +12,8 @@ import {
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
 } from '~/components/base/navigation-menu'
+import { type NavigationSection, sections } from '~/lib/config/navigation'
 import { cn } from '~/lib/utils'
-
-const projects = [
-	{
-		title: 'Explore Projects',
-		href: '/projects',
-		description: 'Discover verified social initiatives powered by blockchain',
-	},
-	{
-		title: 'Create a Project',
-		href: '/create',
-		description: 'Start your social impact campaign with Web3 technology',
-	},
-	{
-		title: 'Featured Projects',
-		href: '/featured',
-		description: 'Explore the most successful initiatives from our community',
-	},
-]
-
-const resources = [
-	{
-		title: 'Learn Web3',
-		href: '/learn',
-		description:
-			'Access guides and resources to understand blockchain and crypto',
-	},
-	{
-		title: 'Community',
-		href: '/community',
-		description: 'Join our decentralized and collaborative community',
-	},
-	{
-		title: 'Social Impact',
-		href: '/impact',
-		description: 'Track metrics and results from impactful social projects',
-	},
-]
 
 export function Navigation() {
 	const pathname = usePathname()
@@ -57,40 +21,24 @@ export function Navigation() {
 	return (
 		<NavigationMenu>
 			<NavigationMenuList>
-				<NavigationMenuItem>
-					<NavigationMenuTrigger>Projects</NavigationMenuTrigger>
-					<NavigationMenuContent>
-						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-							{projects.map((project) => (
-								<ListItem
-									key={project.title}
-									title={project.title}
-									href={project.href}
-								>
-									{project.description}
-								</ListItem>
-							))}
-						</ul>
-					</NavigationMenuContent>
-				</NavigationMenuItem>
-
-				<NavigationMenuItem>
-					<NavigationMenuTrigger>Resources</NavigationMenuTrigger>
-					<NavigationMenuContent>
-						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-							{resources.map((resource) => (
-								<ListItem
-									key={resource.title}
-									title={resource.title}
-									href={resource.href}
-								>
-									{resource.description}
-								</ListItem>
-							))}
-						</ul>
-					</NavigationMenuContent>
-				</NavigationMenuItem>
-
+				{sections.map(({ section, navigationItems }: NavigationSection) => (
+					<NavigationMenuItem key={section}>
+						<NavigationMenuTrigger>{section}</NavigationMenuTrigger>
+						<NavigationMenuContent>
+							<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+								{navigationItems.map((item) => (
+									<ListItem
+										key={item.title}
+										title={item.title}
+										href={item.href}
+									>
+										{item.description}
+									</ListItem>
+								))}
+							</ul>
+						</NavigationMenuContent>
+					</NavigationMenuItem>
+				))}
 				<NavigationMenuItem>
 					<Link href="/about" legacyBehavior passHref>
 						<NavigationMenuLink
