@@ -12,7 +12,7 @@ import {
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
 } from '~/components/base/navigation-menu'
-import { projects, sections } from '~/lib/config/navigation'
+import { sections } from '~/lib/config/navigation'
 import { cn } from '~/lib/utils'
 
 export function Navigation() {

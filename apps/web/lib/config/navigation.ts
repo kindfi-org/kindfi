@@ -4,7 +4,7 @@ interface NavigationItem {
 	description: string
 }
 
-export const projects: NavigationItem[] = [
+const projects: NavigationItem[] = [
 	{
 		title: 'Explore Projects',
 		href: '/projects',
@@ -22,7 +22,7 @@ export const projects: NavigationItem[] = [
 	},
 ]
 
-export const resources: NavigationItem[] = [
+const resources: NavigationItem[] = [
 	{
 		title: 'Learn Web3',
 		href: '/learn',
