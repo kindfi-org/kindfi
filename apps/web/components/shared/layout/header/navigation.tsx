@@ -12,7 +12,7 @@ import {
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
 } from '~/components/base/navigation-menu'
-import { sections } from '~/lib/config/navigation'
+import { type NavigationSection, sections } from '~/lib/config/navigation'
 import { cn } from '~/lib/utils'
 
 export function Navigation() {
@@ -21,18 +21,18 @@ export function Navigation() {
 	return (
 		<NavigationMenu>
 			<NavigationMenuList>
-				{sections.map(({ section, navigationItems }) => (
+				{sections.map(({ section, navigationItems }: NavigationSection) => (
 					<NavigationMenuItem key={section}>
 						<NavigationMenuTrigger>{section}</NavigationMenuTrigger>
 						<NavigationMenuContent>
 							<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-								{navigationItems.map((project) => (
+								{navigationItems.map((item) => (
 									<ListItem
-										key={project.title}
-										title={project.title}
-										href={project.href}
+										key={item.title}
+										title={item.title}
+										href={item.href}
 									>
-										{project.description}
+										{item.description}
 									</ListItem>
 								))}
 							</ul>

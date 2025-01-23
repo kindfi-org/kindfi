@@ -36,12 +36,12 @@ const resources: NavigationItem[] = [
 	},
 	{
 		title: 'Social Impact',
-		href: 'Social Impact',
-		description: 'Description of Resource Y',
+		href: '/social-impact',
+		description: 'Learn about the social impact initiatives and their outcomes',
 	},
 ]
 
-interface NavigationSection {
+export interface NavigationSection {
 	section: string
 	navigationItems: NavigationItem[]
 }
