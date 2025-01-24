@@ -1,6 +1,5 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '~/lib/supabase/server';
 import winston from 'winston';
 
 // Create a logger instance
@@ -15,11 +14,11 @@ const logger = winston.createLogger({
 function isValidRedirectUrl(url: string): boolean {
   const trustedDomains = [
     'kindfi.org',
-	'www.kindfi.org',
+    'www.kindfi.org',
     'kind-fi.com',
-	'www.kind-fi.com',
+    'www.kind-fi.com',
     'kindfi.vercel.app',
-	'localhost',
+    'localhost',
   ];
   // Tighter subdomain pattern: allows only alphanumeric characters after 'kindfi-'
   const subdomainPattern = /^kindfi-[a-zA-Z0-9]+\.vercel\.app$/;
@@ -27,7 +26,7 @@ function isValidRedirectUrl(url: string): boolean {
   try {
     // Ensure the URL is a valid string and sanitize
     if (typeof url !== 'string') {
-      logger.warn('Invalid redirect_url type:', { url });
+      logger.warn('Invalid redirect_url type, expected a string:', { url });
       return false;
     }
 
@@ -36,12 +35,13 @@ function isValidRedirectUrl(url: string): boolean {
 
     // Ensure the URL uses HTTPS for secure redirection
     if (protocol !== 'https:') {
-      logger.warn('Redirect URL must use HTTPS:', { url });
+      logger.warn('Redirect URL must use HTTPS, but received:', { url });
       return false;
     }
 
     // Check if hostname matches trusted domains or subdomain pattern
     if (trustedDomains.includes(hostname) || subdomainPattern.test(hostname)) {
+      logger.info('Valid redirect URL:', { hostname });
       return true;
     }
 
@@ -49,7 +49,7 @@ function isValidRedirectUrl(url: string): boolean {
     return false;
 
   } catch (error) {
-    logger.error('Invalid or malformed URL:', { error });
+    logger.error('Invalid or malformed redirect URL:', { error });
     return false;
   }
 }
@@ -61,10 +61,12 @@ export async function GET(request: NextRequest) {
 
   // Validate if redirectUrl is a valid string before passing it for validation
   if (redirectUrl && typeof redirectUrl === 'string' && isValidRedirectUrl(redirectUrl)) {
+    logger.info('Redirecting to valid URL:', { redirectUrl });
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Default to the homepage if no valid redirect URL is provided
-  logger.warn('Invalid or missing redirect URL, redirecting to homepage');
-  return NextResponse.redirect(requestUrl.origin);
+  // Default to the root of the main domain (kindfi.org) if no valid redirect URL is provided
+  const defaultRedirectUrl = 'https://kindfi.org';
+  logger.warn('Invalid or missing redirect URL, redirecting to root domain:', { defaultRedirectUrl });
+  return NextResponse.redirect(defaultRedirectUrl);
 }
