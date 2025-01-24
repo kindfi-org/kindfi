@@ -24,6 +24,7 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
+import { Paginations } from '~/components/shared/pagination'
 import { ACHIEVEMENT_CARDS, NFTDATA } from '~/lib/constants/section'
 import { AchievementCardProps, type NFTProps } from '~/lib/types/section'
 import { AchievementCard } from './achievement-card'
@@ -40,30 +41,48 @@ const icons = {
 }
 
 const projectOptions = ['All', 'Project X', 'Project Y', 'Project Z']
+
 export function AchievementsGrid() {
 	const [achievements, setAchievements] = useState(ACHIEVEMENT_CARDS)
-	const [activeTab, setActivetab] = useState('achievements')
+	const [activeTab, setActiveTab] = useState('achievements')
 	const [selectedProject, setSelectedProject] = useState('All')
 	const [selectedNFT, setSelectedNFT] = useState<NFTProps | null>(null)
+	const [currentNFTPage, setCurrentNFTPage] = useState(1)
+	const [currentAchievementPage, setCurrentAchievementPage] = useState(1)
+
+	const itemsPerPage = 9
+
+	const updateAchievements = (index: number) => {
+		setAchievements((prev) =>
+			prev.map((achievement, i) => {
+				if (i < index) return { ...achievement, status: 'earned' }
+				if (i === index) return { ...achievement, status: 'in-progress' }
+				return { ...achievement, status: 'locked' }
+			}),
+		)
+	}
 
 	const filteredNFTs =
 		selectedProject === 'All'
 			? NFTDATA
 			: NFTDATA.filter((nft) => nft.project === selectedProject)
 
-	const updateAchievements = (index: number) => {
-		setAchievements((prev) => {
-			return prev.map((achievement, i) => {
-				if (i === index && achievement.status === 'in-progress') {
-					return { ...achievement, status: 'earned' }
-				}
-				if (i === index + 1 && achievement.status === 'locked') {
-					return { ...achievement, status: 'in-progress' }
-				}
-				return achievement
-			})
-		})
-	}
+	const filteredAchievements = achievements
+
+	const paginatedNFTs = filteredNFTs.slice(
+		(currentNFTPage - 1) * itemsPerPage,
+		currentNFTPage * itemsPerPage,
+	)
+
+	const paginatedAchievements = filteredAchievements.slice(
+		(currentAchievementPage - 1) * itemsPerPage,
+		currentAchievementPage * itemsPerPage,
+	)
+
+	const totalNFTPages = Math.ceil(filteredNFTs.length / itemsPerPage)
+	const totalAchievementPages = Math.ceil(
+		filteredAchievements.length / itemsPerPage,
+	)
 
 	const earnedCount = achievements.filter((a) => a.status === 'earned').length
 	const progress = (earnedCount / achievements.length) * 100
@@ -85,7 +104,10 @@ export function AchievementsGrid() {
 								{projectOptions.map((project) => (
 									<DropdownMenuItem
 										key={project}
-										onClick={() => setSelectedProject(project)}
+										onClick={() => {
+											setSelectedProject(project)
+											setCurrentNFTPage(1)
+										}}
 									>
 										{project}
 									</DropdownMenuItem>
@@ -97,14 +119,14 @@ export function AchievementsGrid() {
 						<TabsTrigger
 							value="achievements"
 							className="flex-1 sm:flex-none data-[state=active]:bg-blue-100 data-[state=active]:text-blue-600"
-							onClick={() => setActivetab('achievements')}
+							onClick={() => setActiveTab('achievements')}
 						>
 							Achievements
 						</TabsTrigger>
 						<TabsTrigger
 							value="collection"
 							className="flex-1 sm:flex-none data-[state=active]:bg-blue-100 data-[state=active]:text-blue-600"
-							onClick={() => setActivetab('collection')}
+							onClick={() => setActiveTab('collection')}
 						>
 							Collection
 						</TabsTrigger>
@@ -134,7 +156,7 @@ export function AchievementsGrid() {
 							</Card>
 						)}
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 achievement">
-							{achievements.map((card, index) => (
+							{paginatedAchievements.map((card, index) => (
 								<AchievementCard
 									key={card.title}
 									title={card.title}
@@ -145,12 +167,21 @@ export function AchievementsGrid() {
 								/>
 							))}
 						</div>
+						{totalAchievementPages > 1 && (
+							<div className="flex justify-center mt-6">
+								<Paginations
+									currentPage={currentAchievementPage}
+									totalPages={totalAchievementPages}
+									onPageChange={setCurrentAchievementPage}
+								/>
+							</div>
+						)}
 					</CardContent>
 				</TabsContent>
 				<TabsContent value="collection">
 					<CardContent className="space-y-8">
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 collection">
-							{filteredNFTs.map((nft) => (
+							{paginatedNFTs.map((nft) => (
 								<NFTCard
 									key={nft.id}
 									id={nft.id}
@@ -161,6 +192,15 @@ export function AchievementsGrid() {
 								/>
 							))}
 						</div>
+						{totalNFTPages > 1 && (
+							<div className="flex justify-center mt-6">
+								<Paginations
+									currentPage={currentNFTPage}
+									totalPages={totalNFTPages}
+									onPageChange={setCurrentNFTPage}
+								/>
+							</div>
+						)}
 						<StatsSection
 							totalNFTs={filteredNFTs.length}
 							rareItems={5}
