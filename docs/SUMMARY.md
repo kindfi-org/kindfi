@@ -7,4 +7,3 @@
 - [KindFi Development Philosophy](code-and-design-guide-style-and-conventions/README.md)
   - [Code Style and Conventions Guide](code-and-design-guide-style-and-conventions/code-and-design-guide-style-and-conventions.md)
   - [Design Style and Conventions Guide](code-and-design-guide-style-and-conventions/code-and-design-guide-style-and-conventions-1.md)
-  - [Web App - Key Generation Strategy](web-app-contribution-guide/key-generation-strategy.md)

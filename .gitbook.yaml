@@ -5,4 +5,3 @@ structure:
   folders:
     - path: code-and-design-guide-style-and-conventions
     - path: oss-contribution-guide
-    - path: web-app-contribution-guide
