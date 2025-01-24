@@ -8,6 +8,7 @@ import { SectionCaption } from '~/components/shared/section-caption'
 export const WhyInvestSection = () => {
 	const features = [
 		{
+			id: 'collaborate-and-earn-rewards-id',
 			icon: (
 				<div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center relative overflow-hidden group-hover:bg-teal-100 transition-colors duration-300">
 					<motion.div
@@ -29,6 +30,7 @@ export const WhyInvestSection = () => {
 			highlight: 'Community Rewards',
 		},
 		{
+			id: 'build-a-better-world-id',
 			icon: (
 				<div className="w-16 h-16 rounded-full bg-sky-50 flex items-center justify-center relative overflow-hidden group-hover:bg-sky-100 transition-colors duration-300">
 					<motion.div
@@ -50,6 +52,7 @@ export const WhyInvestSection = () => {
 			highlight: '+50 Social Initiatives',
 		},
 		{
+			id: 'be-the-revolution-id',
 			icon: (
 				<div className="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center relative overflow-hidden group-hover:bg-purple-100 transition-colors duration-300">
 					<motion.div
@@ -98,10 +101,7 @@ export const WhyInvestSection = () => {
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 mb-16">
 					{features.map((feature, index) => (
 						<motion.div
-							key={`feature-${
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								index
-							}`}
+							key={feature.id}
 							initial={{ opacity: 0, y: 20 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true }}

@@ -9,18 +9,22 @@ import { Testimonial } from '~/components/shared/testimonial-card'
 const CommunitySection = () => {
 	const benefits = [
 		{
+			id: 'community-social-impact',
 			icon: <Users className="w-5 h-5" />,
 			text: 'Community for Social Impact',
 		},
 		{
+			id: 'empowering-crypto-supporters',
 			icon: <TrendingUp className="w-5 h-5" />,
 			text: 'Empowering Crypto Supporters',
 		},
 		{
+			id: 'blockchain-verification',
 			icon: <Shield className="w-5 h-5" />,
 			text: 'Blockchain Verification and Security',
 		},
 		{
+			id: 'accelerating-blockchain-adoption',
 			icon: <Rocket className="w-5 h-5" />,
 			text: 'Accelerating Blockchain Adoption',
 		},
@@ -69,8 +73,7 @@ const CommunitySection = () => {
 					<div className="container space-y-2">
 						{benefits.map((benefit, index) => (
 							<BenefitItem
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								key={index}
+								key={benefit.id}
 								{...benefit}
 								isActive={index === 0}
 							/>

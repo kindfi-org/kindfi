@@ -21,6 +21,7 @@ import { Button } from '~/components/base/button'
 const Hero = () => {
 	const categories = [
 		{
+			id: 'empowering-communities-id',
 			icon: <Rocket className="w-4 h-4" />,
 			label: 'Empowering Communities',
 			// Modern & innovative - soft teal
@@ -28,6 +29,7 @@ const Hero = () => {
 				'bg-teal-50/80 text-teal-700 hover:bg-teal-100/80 border-teal-200/50',
 		},
 		{
+			id: 'environmental-projects-id',
 			icon: <Leaf className="w-4 h-4" />,
 			label: 'Environmental Projects',
 			// Environmental - soft sage green
@@ -35,6 +37,7 @@ const Hero = () => {
 				'bg-green-50/80 text-green-700 hover:bg-green-100/80 border-green-200/50',
 		},
 		{
+			id: 'animal-shelters-id',
 			icon: <Heart className="w-4 h-4" />,
 			label: 'Animal Shelters',
 			// Care & compassion - soft rose
@@ -42,6 +45,7 @@ const Hero = () => {
 				'bg-rose-50/80 text-rose-700 hover:bg-rose-100/80 border-rose-200/50',
 		},
 		{
+			id: 'community-news-id',
 			icon: <NewspaperIcon className="w-4 h-4" />,
 			label: 'Community News Initiatives',
 			// Information & trust - soft slate
@@ -52,36 +56,42 @@ const Hero = () => {
 
 	const secondaryCategories = [
 		{
+			id: 'healthcare-support-id',
 			icon: <Stethoscope className="w-4 h-4" />,
 			label: 'Healthcare Support',
 			// Health - soft cyan
 			color: 'border-cyan-200/50 text-cyan-700 hover:bg-cyan-50/80',
 		},
 		{
+			id: 'food-security-id',
 			icon: <UtensilsCrossed className="w-4 h-4" />,
 			label: 'Food Security Campaigns',
 			// Food - soft orange
 			color: 'border-orange-200/50 text-orange-700 hover:bg-orange-50/80',
 		},
 		{
+			id: 'child-welfare-id',
 			icon: <Baby className="w-4 h-4" />,
 			label: 'Child Welfare Programs',
 			// Care & nurture - soft purple
 			color: 'border-purple-200/50 text-purple-700 hover:bg-purple-50/80',
 		},
 		{
+			id: 'sustainable-agriculture-id',
 			icon: <Sprout className="w-4 h-4" />,
 			label: 'Sustainable Agriculture',
 			// Agriculture - soft emerald
 			color: 'border-emerald-200/50 text-emerald-700 hover:bg-emerald-50/80',
 		},
 		{
+			id: 'social-finance-id',
 			icon: <Coins className="w-4 h-4" />,
 			label: 'Social Finance & Innovation',
 			// Finance - soft blue
 			color: 'bg-sky-50/80 text-sky-700 hover:bg-sky-100/80 border-sky-200/50',
 		},
 		{
+			id: 'education-for-all-id',
 			icon: <GraduationCap className="w-4 h-4" />,
 			label: 'Education for All',
 			// Education - soft indigo
@@ -89,6 +99,7 @@ const Hero = () => {
 				'bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100/80 border-indigo-200/50',
 		},
 		{
+			id: 'disaster-relief-id',
 			icon: <HandHelping className="w-4 h-4" />,
 			label: 'Disaster Relief Efforts',
 			// Disaster Relief - soft red
@@ -98,16 +109,19 @@ const Hero = () => {
 
 	const stats = [
 		{
+			id: 'inversiones-exitosas-id',
 			value: '250+',
 			label: 'Inversiones Exitosas',
 			icon: <LineChart className="w-6 h-6 text-teal-600 mb-2" />,
 		},
 		{
+			id: 'proyectos-financiados-id',
 			value: '3,325',
 			label: 'Proyectos Financiados',
 			icon: <Rocket className="w-6 h-6 text-teal-600 mb-2" />,
 		},
 		{
+			id: 'capital-total-invertido-id',
 			value: '$720M',
 			label: 'Capital Total Invertido',
 			icon: <Coins className="w-6 h-6 text-teal-600 mb-2" />,
@@ -189,12 +203,9 @@ const Hero = () => {
 						initial="initial"
 						animate="animate"
 					>
-						{categories.map((category, index) => (
+						{categories.map((category) => (
 							<motion.div
-								key={`primary-${
-									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-									index
-								}`}
+								key={category.id}
 								variants={badgeVariants}
 								whileHover="hover"
 								whileTap="tap"
@@ -228,12 +239,9 @@ const Hero = () => {
 						initial="initial"
 						animate="animate"
 					>
-						{secondaryCategories.map((category, index) => (
+						{secondaryCategories.map((category) => (
 							<motion.div
-								key={`secondary-${
-									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-									index
-								}`}
+								key={category.id}
 								variants={badgeVariants}
 								whileHover="hover"
 								whileTap="tap"
@@ -267,12 +275,9 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 1 }}
           >
-            {stats.map((stat, index) => (
+            {stats.map((stat) => (
               <div
-                key={`stat-${
-                  // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                  index
-                }`}
+                key={stat.id}
                 className="flex flex-col items-center rounded-lg bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md"
               >
                 {stat.icon}
