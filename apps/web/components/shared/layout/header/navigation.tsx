@@ -27,11 +27,7 @@ export function Navigation() {
 						<NavigationMenuContent>
 							<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
 								{navigationItems.map((item) => (
-									<ListItem
-										key={item.title}
-										title={item.title}
-										href={item.href}
-									>
+									<ListItem key={item.id} title={item.title} href={item.href}>
 										{item.description}
 									</ListItem>
 								))}

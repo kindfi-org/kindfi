@@ -48,24 +48,28 @@ const CreatorSection = () => {
 
 	const socialButtons = [
 		{
+			id: 'email-social-button-id',
 			icon: <Mail className="w-5 h-5" />,
 			provider: 'Correo',
 			onClick: () => console.log('Email login'),
 			className: 'bg-teal-600 hover:bg-teal-700 text-white',
 		},
 		{
+			id: 'google-social-button-id',
 			icon: <Globe className="w-5 h-5" />,
 			provider: 'Google',
 			onClick: () => console.log('Google login'),
 			className: 'bg-teal-600 hover:bg-teal-700 text-white',
 		},
 		{
+			id: 'facebook-social-button-id',
 			icon: <Facebook className="w-5 h-5" />,
 			provider: 'Facebook',
 			onClick: () => console.log('Facebook login'),
 			className: 'bg-teal-600 hover:bg-teal-700 text-white',
 		},
 		{
+			id: 'apple-social-button-id',
 			icon: <Apple className="w-5 h-5" />,
 			provider: 'Apple',
 			onClick: () => console.log('Apple login'),
@@ -178,10 +182,7 @@ const CreatorSection = () => {
 								<div className="space-y-3">
 									{socialButtons.map((button, index) => (
 										<SocialButton
-											key={`social-${
-												// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-												index
-											}`}
+											key={button.id}
 											{...button}
 											className={`w-full ${button.className}`}
 										/>
