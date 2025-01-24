@@ -10,6 +10,7 @@ import LatamWeb3Platform from '~/components/sections/home/showcast-section'
 
 const projects = [
 	{
+		id: 'healthy-kids-id',
 		image: '/images/kids.webp',
 		category: 'Child Welfare',
 		title: 'Healthy Kids Workshop',
@@ -20,9 +21,14 @@ const projects = [
 		investors: 18,
 		minInvestment: 5,
 		percentageComplete: 90,
-		tags: ['NGO', 'NUTRITION', 'CHILDREN'],
+		tags: [
+			{ id: 'ngo-tag-id', text: 'NGO' },
+			{ id: 'nutrition-tag-id', text: 'NUTRITION' },
+			{ id: 'children-tag-id', text: 'CHILDREN' },
+		],
 	},
 	{
+		id: 'forest-restoration-id',
 		image: '/images/bosques.webp',
 		category: 'Environmental Protection',
 		title: 'Forest Restoration Initiative',
@@ -33,9 +39,14 @@ const projects = [
 		investors: 35,
 		minInvestment: 10,
 		percentageComplete: 90,
-		tags: ['ENVIRONMENT', 'ECOLOGICAL', 'SUSTAINABLE'],
+		tags: [
+			{ id: 'environment-tag-id', text: 'ENVIRONMENT' },
+			{ id: 'ecological-tag-id', text: 'ECOLOGICAL' },
+			{ id: 'sustainable-tag-id', text: 'SUSTAINABLE' },
+		],
 	},
 	{
+		id: 'rural-animal-shelter-id',
 		image: '/images/dogs.webp',
 		category: 'Animal Welfare',
 		title: 'Rural Animal Shelter',
@@ -46,9 +57,14 @@ const projects = [
 		investors: 22,
 		minInvestment: 8,
 		percentageComplete: 77,
-		tags: ['ANIMALS', 'CARE', 'COMMUNITY'],
+		tags: [
+			{ id: 'animals-tag-id', text: 'ANIMALS' },
+			{ id: 'care-tag-id', text: 'CARE' },
+			{ id: 'community-tag-id', text: 'COMMUNITY' },
+		],
 	},
 	{
+		id: 'disaster-aid-id',
 		image: '/images/disaster-aid.webp',
 		category: 'Disaster Relief',
 		title: 'Natural Disasters Human Aid',
@@ -59,9 +75,14 @@ const projects = [
 		investors: 28,
 		minInvestment: 20,
 		percentageComplete: 60,
-		tags: ['HUMANITARIAN', 'DISASTER RELIEF', 'COMMUNITY SUPPORT'],
+		tags: [
+			{ id: 'humanitarian-tag-id', text: 'HUMANITARIAN' },
+			{ id: 'disaster-tag-id', text: 'DISASTER RELIEF' },
+			{ id: 'community-tag-id', text: 'COMMUNITY SUPPORT' },
+		],
 	},
 	{
+		id: 'indigenous-crafts-id',
 		image: '/images/artesania.webp',
 		category: 'Culture and Arts',
 		title: 'Preserving Indigenous Crafts',
@@ -72,9 +93,14 @@ const projects = [
 		investors: 29,
 		minInvestment: 15,
 		percentageComplete: 68,
-		tags: ['CULTURE', 'INDIGENOUS', 'ART', 'TRADITIONS'],
+		tags: [
+			{ id: 'culture-tag-id', text: 'CULTURE' },
+			{ id: 'indigenous-tag-id', text: 'INDIGENOUS' },
+			{ id: 'art-tag-id', text: 'ART' },
+		],
 	},
 	{
+		id: 'water-for-rural-communities-id',
 		image: '/images/water.webp',
 		category: 'Access to Clean Water',
 		title: 'Water for Rural Communities',
@@ -85,9 +111,14 @@ const projects = [
 		investors: 20,
 		minInvestment: 12,
 		percentageComplete: 74,
-		tags: ['WATER', 'HEALTH', 'COMMUNITY'],
+		tags: [
+			{ id: 'water-tag-id', text: 'WATER' },
+			{ id: 'health-tag-id', text: 'HEALTH' },
+			{ id: 'community-tag-id', text: 'COMMUNITY' },
+		],
 	},
 	{
+		id: 'empowering-education-id',
 		image: '/images/education.webp',
 		category: 'Education',
 		title: 'Empowering Education',
@@ -98,9 +129,14 @@ const projects = [
 		investors: 40,
 		minInvestment: 10,
 		percentageComplete: 73,
-		tags: ['EDUCATION', 'CHILDREN', 'FUTURE'],
+		tags: [
+			{ id: 'education-tag-id', text: 'EDUCATION' },
+			{ id: 'children-tag-id', text: 'CHILDREN' },
+			{ id: 'future-tag-id', text: 'FUTURE' },
+		],
 	},
 	{
+		id: 'mobile-clinics-id',
 		image: '/images/healthcare.webp',
 		category: 'Healthcare',
 		title: 'Mobile Clinics',
@@ -111,7 +147,11 @@ const projects = [
 		investors: 30,
 		minInvestment: 20,
 		percentageComplete: 71,
-		tags: ['HEALTHCARE', 'COMMUNITY', 'IMPACT'],
+		tags: [
+			{ id: 'healthcare-tag-id', text: 'HEALTHCARE' },
+			{ id: 'community-tag-id', text: 'COMMUNITY' },
+			{ id: 'impact-tag-id', text: 'IMPACT' },
+		],
 	},
 ]
 

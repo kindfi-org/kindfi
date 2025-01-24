@@ -11,7 +11,7 @@ export const PlatformFeatureCard = ({
 	title: string
 	description: string
 	content?: React.ReactNode
-	checkList?: string[]
+	checkList?: { id: string; text: string }[]
 }) => {
 	return (
 		<div className="text-center">
@@ -23,9 +23,9 @@ export const PlatformFeatureCard = ({
 					{checkList.length > 0 && (
 						<ul className="text-left">
 							{checkList.map((item) => (
-								<li key={item} className="flex items-center gap-2 mb-2">
+								<li key={item.id} className="flex items-center gap-2 mb-2">
 									<Check className="w-4 h-4 text-green-600" />
-									<span className="text-sm">{item}</span>
+									<span className="text-sm">{item.text}</span>
 								</li>
 							))}
 						</ul>

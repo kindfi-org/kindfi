@@ -7,7 +7,7 @@ interface InvestmentModelCardProps {
 	description: string
 	variant: 'a' | 'b' | 'c'
 	icon: React.ReactNode
-	benefits: string[]
+	benefits: { id: string; text: string }[]
 	onLearnMore?: () => void
 }
 
@@ -39,11 +39,11 @@ export const InvestmentModelCard = ({
 				<div className="space-y-3">
 					{benefits?.map((benefit) => (
 						<div
-							key={benefit}
+							key={benefit.id}
 							className="flex items-center text-sm text-gray-600"
 						>
 							<Check className="w-4 h-4 mr-2 text-green-600" />
-							{benefit}
+							{benefit.text}
 						</div>
 					))}
 				</div>

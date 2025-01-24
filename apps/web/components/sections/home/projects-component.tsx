@@ -51,7 +51,7 @@ export const ProjectsShowcase = ({
 						<CarouselContent className="-ml-2 md:-ml-4">
 							{projects.map((project) => (
 								<CarouselItem
-									key={project.title}
+									key={project.id}
 									className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
 								>
 									<ProjectCard {...project} />

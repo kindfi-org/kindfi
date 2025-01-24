@@ -14,6 +14,7 @@ import { Card, CardContent } from '~/components/base/card'
 const LatamWeb3Platform = () => {
 	const features = [
 		{
+			id: 'transparency-powered-by-web3-id',
 			title: 'Transparency Powered by Web3',
 			description:
 				'Every contribution is recorded on the blockchain, providing real-time reports so you always know how and where the funds are being used.',
@@ -24,6 +25,7 @@ const LatamWeb3Platform = () => {
 			},
 		},
 		{
+			id: 'decentralized-verification-id',
 			title: 'Decentralized Verification',
 			description:
 				'Each project is carefully reviewed and approved by our team to ensure feasibility, security, and alignment with social impact goals. By leveraging the power of decentralization, we provide unmatched transparency and trust.',
@@ -34,31 +36,35 @@ const LatamWeb3Platform = () => {
 			},
 		},
 		{
+			id: 'measurable-social-impact-id',
 			title: 'Measurable Social Impact',
 			description:
 				'Track the tangible impact of every project with full transparency, ensuring your contributions drive meaningful change.',
 			icon: <Target className="w-6 h-6 text-purple-600" />,
 			checkList: [
-				'Real-Time Impact Metrics',
-				'Social Impact Through Smart Escrows',
-				'Transparent Governance',
-				'Blockchain-Powered Assurance',
+				{ id: 'metrics', text: 'Real-Time Impact Metrics' },
+				{ id: 'escrows', text: 'Social Impact Through Smart Escrows' },
+				{ id: 'governance', text: 'Transparent Governance' },
+				{ id: 'blockchain', text: 'Blockchain-Powered Assurance' },
 			],
 		},
 	]
 
 	const stats = [
 		{
+			id: 'verified-projects-id',
 			value: '100%',
 			label: 'Verified Projects',
 			icon: <ShieldCheck className="w-6 h-6 text-blue-600" />,
 		},
 		{
+			id: 'transparency-id',
 			value: '0%',
 			label: 'Hidden Fees',
 			icon: <ChartBar className="w-6 h-6 text-blue-600" />,
 		},
 		{
+			id: 'information-availability-id',
 			value: '24/7',
 			label: 'Information Availability',
 			icon: <Clock className="w-6 h-6 text-blue-600" />,
@@ -73,7 +79,7 @@ const LatamWeb3Platform = () => {
 			value: string
 			label: string
 		}
-		checkList?: string[]
+		checkList?: { id: string; text: string }[]
 	}
 
 	const FeatureCard = ({
@@ -109,13 +115,10 @@ const LatamWeb3Platform = () => {
 
 			{checkList && (
 				<ul className="space-y-3">
-					{checkList.map((item: string) => (
-						<li
-							key={`feature-checklist-${item}`}
-							className="flex items-center gap-3 text-gray-600"
-						>
+					{checkList.map((item) => (
+						<li key={item.id} className="flex items-center gap-3 text-gray-600">
 							<div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-							{item}
+							{item.text}
 						</li>
 					))}
 				</ul>
@@ -156,7 +159,7 @@ const LatamWeb3Platform = () => {
 				{/* Features Grid */}
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
 					{features.map((feature) => (
-						<FeatureCard key={`feature-${feature.title}`} {...feature} />
+						<FeatureCard key={feature.id} {...feature} />
 					))}
 				</div>
 
@@ -198,7 +201,7 @@ const LatamWeb3Platform = () => {
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
 					{stats.map((stat, index) => (
 						<motion.div
-							key={`stat-${stat.label}`}
+							key={stat.id}
 							initial={{ opacity: 0, y: 20 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true }}
