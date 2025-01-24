@@ -15,7 +15,9 @@ const logger = winston.createLogger({
 function isValidRedirectUrl(url: string): boolean {
   const trustedDomains = [
     'kindfi.org',
+	'www.kindfi.org',
     'kind-fi.com',
+	'www.kind-fi.com',
     'kindfi.vercel.app',
 	'localhost',
   ];
@@ -23,7 +25,14 @@ function isValidRedirectUrl(url: string): boolean {
   const subdomainPattern = /^kindfi-[a-zA-Z0-9]+\.vercel\.app$/;
 
   try {
-    const { hostname, protocol } = new URL(url);
+    // Ensure the URL is a valid string and sanitize
+    if (typeof url !== 'string') {
+      logger.warn('Invalid redirect_url type:', { url });
+      return false;
+    }
+
+    const sanitizedUrl = new URL(url); // This will throw an error if the URL is malformed
+    const { hostname, protocol } = sanitizedUrl;
 
     // Ensure the URL uses HTTPS for secure redirection
     if (protocol !== 'https:') {
@@ -40,7 +49,7 @@ function isValidRedirectUrl(url: string): boolean {
     return false;
 
   } catch (error) {
-    logger.error('Invalid URL:', { error });
+    logger.error('Invalid or malformed URL:', { error });
     return false;
   }
 }
@@ -50,13 +59,8 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get('code');
   const redirectUrl = requestUrl.searchParams.get('redirect_url'); // Get redirect URL parameter
 
-  if (code) {
-    const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
-  }
-
-  // Validate the redirect URL
-  if (redirectUrl && isValidRedirectUrl(redirectUrl)) {
+  // Validate if redirectUrl is a valid string before passing it for validation
+  if (redirectUrl && typeof redirectUrl === 'string' && isValidRedirectUrl(redirectUrl)) {
     return NextResponse.redirect(redirectUrl);
   }
 
