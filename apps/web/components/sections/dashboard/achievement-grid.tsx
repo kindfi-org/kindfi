@@ -48,9 +48,8 @@ export function AchievementsGrid() {
 	const [selectedProject, setSelectedProject] = useState('All')
 	const [selectedNFT, setSelectedNFT] = useState<NFTProps | null>(null)
 	const [currentNFTPage, setCurrentNFTPage] = useState(1)
-	const [currentAchievementPage, setCurrentAchievementPage] = useState(1)
 
-	const itemsPerPage = 9
+	const itemsPerPage = 3
 
 	const updateAchievements = (index: number) => {
 		setAchievements((prev) =>
@@ -72,11 +71,6 @@ export function AchievementsGrid() {
 	const paginatedNFTs = filteredNFTs.slice(
 		(currentNFTPage - 1) * itemsPerPage,
 		currentNFTPage * itemsPerPage,
-	)
-
-	const paginatedAchievements = filteredAchievements.slice(
-		(currentAchievementPage - 1) * itemsPerPage,
-		currentAchievementPage * itemsPerPage,
 	)
 
 	const totalNFTPages = Math.ceil(filteredNFTs.length / itemsPerPage)
@@ -156,7 +150,7 @@ export function AchievementsGrid() {
 							</Card>
 						)}
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 achievement">
-							{paginatedAchievements.map((card, index) => (
+							{achievements.map((card, index) => (
 								<AchievementCard
 									key={card.title}
 									title={card.title}
@@ -167,15 +161,6 @@ export function AchievementsGrid() {
 								/>
 							))}
 						</div>
-						{totalAchievementPages > 1 && (
-							<div className="flex justify-center mt-6">
-								<Paginations
-									currentPage={currentAchievementPage}
-									totalPages={totalAchievementPages}
-									onPageChange={setCurrentAchievementPage}
-								/>
-							</div>
-						)}
 					</CardContent>
 				</TabsContent>
 				<TabsContent value="collection">
