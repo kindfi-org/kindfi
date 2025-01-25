@@ -12,9 +12,10 @@ import {
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
 } from '~/components/base/navigation-menu'
+import type { NavigationItem } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
-const projects = [
+const projects: NavigationItem[] = [
 	{
 		title: 'Explore Projects',
 		href: '/projects',
@@ -32,7 +33,7 @@ const projects = [
 	},
 ]
 
-const resources = [
+const resources: NavigationItem[] = [
 	{
 		title: 'Learn Web3',
 		href: '/learn',

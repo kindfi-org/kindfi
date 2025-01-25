@@ -7,15 +7,16 @@ import ProjectJourney from '~/components/sections/home/journey-section'
 import { WhyInvestSection } from '~/components/sections/home/participate-section'
 import { ProjectsShowcase } from '~/components/sections/home/projects-component'
 import LatamWeb3Platform from '~/components/sections/home/showcast-section'
+import type { Project } from '~/lib/types'
 
-const projects = [
+const projects: Project[] = [
 	{
 		id: 'healthy-kids-id',
 		image: '/images/kids.webp',
 		category: 'Child Welfare',
 		title: 'Healthy Kids Workshop',
 		description:
-			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica. Together, we can ensure a brighter future for every child.',
+			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica...',
 		currentAmount: 22800,
 		targetAmount: 25000,
 		investors: 18,

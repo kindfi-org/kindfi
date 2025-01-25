@@ -17,9 +17,10 @@ import {
 } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
+import type { ProjectCategory, StatItem } from '~/lib/types'
 
 const Hero = () => {
-	const categories = [
+	const categories: ProjectCategory[] = [
 		{
 			id: 'empowering-communities-id',
 			icon: <Rocket className="w-4 h-4" />,
@@ -107,7 +108,7 @@ const Hero = () => {
 		},
 	]
 
-	const stats = [
+	const stats: StatItem[] = [
 		{
 			id: 'inversiones-exitosas-id',
 			value: '250+',
