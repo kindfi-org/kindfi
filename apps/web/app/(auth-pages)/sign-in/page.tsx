@@ -26,21 +26,30 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
 					</div>
 				}
 			>
-				<form className="space-y-4">
+				<form className="space-y-4" aria-label="Sign in">
 					<div className="space-y-2">
-						<Label htmlFor="email">Email</Label>
+						<Label htmlFor="email" id="email-lable">
+							Email
+						</Label>
 						<Input
 							id="email"
 							name="email"
 							type="email"
 							placeholder="you@example.com"
 							required
+							aria-labelledby="email-lable"
+							aria-describedby="email-description"
 						/>
+						<span id="email-description" className="sr-only">
+							Please enter your registered email address
+						</span>
 					</div>
 
 					<div className="space-y-2">
 						<div className="flex justify-between items-center">
-							<Label htmlFor="password">Password</Label>
+							<Label htmlFor="password" id="password-label">
+								Password
+							</Label>
 							<Link
 								className="text-sm text-primary hover:underline"
 								href="/forgot-password"
@@ -54,7 +63,12 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
 							name="password"
 							placeholder="Your password"
 							required
+							aria-labelledby="password-label"
+							aria-describedby="password-description"
 						/>
+						<span id="password-description" className="sr-only">
+							Enter your account password
+						</span>
 					</div>
 
 					<Button className="w-full" formAction={signInAction}>

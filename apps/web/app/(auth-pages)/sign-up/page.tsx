@@ -46,12 +46,17 @@ export default async function Signup(props: {
 					</p>
 				</CardHeader>
 				<CardContent>
-					<form className="space-y-4">
+					<form className="space-y-4" aria-label="Sign up">
 						<div className="space-y-4">
 							<div className="space-y-2">
-								<Label htmlFor="email">Email</Label>
+								<Label htmlFor="email" id="email-label">
+									Email
+								</Label>
 								<div className="relative">
-									<Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+									<Mail
+										className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
+										aria-hidden="true"
+									/>
 									<Input
 										id="email"
 										name="email"
@@ -59,14 +64,26 @@ export default async function Signup(props: {
 										placeholder="you@example.com"
 										className="pl-10"
 										required
+										aria-labelledby="email-label"
+										aria-describedby="email-description"
+										aria-required="true"
+										autoComplete="email"
 									/>
 								</div>
+								<span id="email-description" className="sr-only">
+									Enter your email address to create your account
+								</span>
 							</div>
 
 							<div className="space-y-2">
-								<Label htmlFor="password">Password</Label>
+								<Label htmlFor="password" id="password-label">
+									Password
+								</Label>
 								<div className="relative">
-									<Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+									<Lock
+										className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
+										aria-hidden="true"
+									/>
 									<Input
 										id="password"
 										name="password"
@@ -75,9 +92,16 @@ export default async function Signup(props: {
 										className="pl-10"
 										required
 										minLength={6}
+										aria-labelledby="password-label"
+										aria-describedby="password-requirements"
+										aria-required="true"
+										autoComplete="new-password"
 									/>
 								</div>
-								<p className="text-xs text-muted-foreground">
+								<p
+									id="password-requirements"
+									className="text-xs text-muted-foreground"
+								>
 									Must be at least 6 characters long
 								</p>
 							</div>

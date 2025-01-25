@@ -82,13 +82,24 @@ const Footer = () => {
 						</p>
 						{/* Newsletter Subscription */}
 						<div className="mt-4">
-							<h3 className="mb-2 text-sm font-semibold">Keep in touch</h3>
+							<h3 id="newsletter-label" className="mb-2 text-sm font-semibold">
+								Keep in touch
+							</h3>
 							<div className="flex gap-2">
 								<Input
 									type="email"
 									placeholder="tu@email.com"
 									className="max-w-[200px]"
+									aria-required="true"
+									aria-labelledby="newsletter-label"
+									aria-describedby="newsletter-description"
+									required
 								/>
+								<span id="newsletter-description" className="sr-only">
+									Enter your email address to receive our updates and
+									newsletters
+								</span>
+
 								<Button
 									size="sm"
 									className="bg-blue-600 hover:bg-blue-900 text-white"
