@@ -2,7 +2,32 @@ import { type VariantProps, cva } from 'class-variance-authority'
 import type * as React from 'react'
 
 import { cn } from '~/lib/utils'
-
+/**
+ * A Badge component is a small UI element used to display contextual information, often in the form of labels or status indicators.
+ * It supports various variants to reflect different states (e.g., primary, secondary, destructive).
+ *
+ * @component
+ * @example
+ * <Badge variant="default">New</Badge>
+ * <Badge variant="destructive">Deleted</Badge>
+ *
+ * @param {BadgeProps} props - The props for the `Badge` component.
+ * @param {string} [props.className] - Optional class names for custom styling.
+ * @param {string} [props.variant="default"] - Defines the style of the badge. Options include:
+ *   - `default`: Default style, primary color.
+ *   - `secondary`: Secondary style, for less important status.
+ *   - `destructive`: Used for destructive or warning status.
+ *   - `outline`: A minimal outline style, text only.
+ * @returns {JSX.Element} The rendered Badge component.
+ */
+/**
+ * Badge component variants and their respective styles.
+ * @typedef {Object} BadgeVariants
+ * @property {string} default - Default primary badge style.
+ * @property {string} secondary - Secondary badge style.
+ * @property {string} destructive - Destructive badge style (e.g., danger).
+ * @property {string} outline - Outline style for badges.
+ */
 const badgeVariants = cva(
 	'inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
 	{
