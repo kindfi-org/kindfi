@@ -8,7 +8,11 @@ export default function AuthErrorPage() {
 	const router = useRouter()
 
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center p-4">
+		<div
+			aria-live="assertive" // Add aria-live for immediate announcement
+			role="alert" // Add role="alert" for screen readers
+			className="flex min-h-screen flex-col items-center justify-center p-4"
+		>
 			<div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
 				<div className="flex flex-col space-y-2 text-center">
 					<div className="mx-auto rounded-full bg-destructive/15 p-3">
