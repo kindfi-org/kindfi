@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronRight } from 'lucide-react'
+import Image from 'next/image'
 import { Card, CardContent } from '~/components/base/card'
 import type { NFTCardProps } from '~/lib/types/section'
 
@@ -17,9 +18,12 @@ export function NFTCard({
 			onClick={onClick}
 		>
 			<div className="relative h-40 bg-muted overflow-hidden rounded-t-md">
-				<img
+				<Image
 					src={imageUrl || '/images/startup.png'}
-					alt={`NFT ${title}`}
+					alt={`${title} NFT from ${project}`}
+					width={320}
+					height={160}
+					loading="lazy"
 					className="object-cover object-center w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-110"
 				/>
 				<div className="absolute right-3 bottom-3 grid place-content-center rounded-full bg-black/50 px-2 py-1">
