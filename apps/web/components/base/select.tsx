@@ -6,12 +6,32 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 
+/**
+ * Select component for creating a dropdown menu.
+ */
 const Select = SelectPrimitive.Root
 
+/**
+ * SelectGroup component for grouping related select items.
+ */
 const SelectGroup = SelectPrimitive.Group
 
+/**
+ * SelectValue component for displaying the selected value.
+ */
 const SelectValue = SelectPrimitive.Value
 
+/**
+ * SelectTrigger component for opening the select dropdown.
+ */
+/**
+ * SelectTrigger component for opening the select dropdown.
+ * @component
+ * @example
+ * <SelectTrigger>
+ *   Open Menu
+ * </SelectTrigger>
+ */
 const SelectTrigger = React.forwardRef<
 	React.ElementRef<typeof SelectPrimitive.Trigger>,
 	React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>

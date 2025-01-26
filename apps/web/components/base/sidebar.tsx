@@ -35,7 +35,19 @@ type SidebarContext = {
 	isMobile: boolean
 	toggleSidebar: () => void
 }
-
+/**
+ * Sidebar component for managing sidebar state, layout, and behavior.
+ * @component
+ * @param {Object} props - Component props
+ * @param {'left' | 'right'} [props.side='left'] - The side where the sidebar appears
+ * @param {'sidebar' | 'floating' | 'inset'} [props.variant='sidebar'] - The visual style variant of the sidebar
+ * @param {'offcanvas' | 'icon' | 'none'} [props.collapsible='offcanvas'] - The collapse behavior of the sidebar
+ * @param {ReactNode} props.children - Sidebar content
+ * @example
+ * <Sidebar variant="floating" side="right">
+ *   <p>Sidebar Content</p>
+ * </Sidebar>
+ */
 const SidebarContext = React.createContext<SidebarContext | null>(null)
 
 function useSidebar() {
@@ -46,7 +58,21 @@ function useSidebar() {
 
 	return context
 }
-
+/**
+ * SidebarProvider component to manage and provide sidebar state.
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} [props.defaultOpen=true] - Default state of the sidebar (expanded)
+ * @param {boolean} [props.open] - Controlled open state of the sidebar
+ * @param {Function} [props.onOpenChange] - Callback to handle the open state change
+ * @param {ReactNode} props.children - Sidebar content
+ * @example
+ * <SidebarProvider defaultOpen={true}>
+ *   <Sidebar>
+ *     <p>Sidebar Content</p>
+ *   </Sidebar>
+ * </SidebarProvider>
+ */
 const SidebarProvider = React.forwardRef<
 	HTMLDivElement,
 	React.ComponentProps<'div'> & {

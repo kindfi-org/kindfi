@@ -6,7 +6,20 @@ import { X } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
-
+/**
+ * Sheet component for displaying a sliding panel UI
+ * @component
+ * @example
+ * <Sheet>
+ *   <SheetTrigger>Open Sheet</SheetTrigger>
+ *   <SheetContent>
+ *     <SheetHeader>
+ *       <SheetTitle>Sheet Title</SheetTitle>
+ *       <SheetDescription>Description text</SheetDescription>
+ *     </SheetHeader>
+ *   </SheetContent>
+ * </Sheet>
+ */
 const Sheet = SheetPrimitive.Root
 
 const SheetTrigger = SheetPrimitive.Trigger
@@ -74,6 +87,14 @@ const SheetContent = React.forwardRef<
 ))
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
+/**
+ * Header section of the Sheet
+ * @component
+ * @example
+ * <SheetHeader>
+ *   <SheetTitle>Title</SheetTitle>
+ * </SheetHeader>
+ */
 const SheetHeader = ({
 	className,
 	...props
@@ -87,7 +108,14 @@ const SheetHeader = ({
 	/>
 )
 SheetHeader.displayName = 'SheetHeader'
-
+/**
+ * Footer section of the Sheet
+ * @component
+ * @example
+ * <SheetFooter>
+ *   Footer content here
+ * </SheetFooter>
+ */
 const SheetFooter = ({
 	className,
 	...props
@@ -102,6 +130,12 @@ const SheetFooter = ({
 )
 SheetFooter.displayName = 'SheetFooter'
 
+/**
+ * Title component for the Sheet
+ * @component
+ * @example
+ * <SheetTitle>Sheet Title</SheetTitle>
+ */
 const SheetTitle = React.forwardRef<
 	React.ElementRef<typeof SheetPrimitive.Title>,
 	React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
@@ -114,6 +148,12 @@ const SheetTitle = React.forwardRef<
 ))
 SheetTitle.displayName = SheetPrimitive.Title.displayName
 
+/**
+ * Description component for the Sheet
+ * @component
+ * @example
+ * <SheetDescription>Some description text</SheetDescription>
+ */
 const SheetDescription = React.forwardRef<
 	React.ElementRef<typeof SheetPrimitive.Description>,
 	React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>

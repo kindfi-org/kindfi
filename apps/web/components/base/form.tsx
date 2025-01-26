@@ -15,8 +15,16 @@ import {
 import { Label } from '~/components/base/label'
 import { cn } from '~/lib/utils'
 
+/**
+ * Provides form context to child components.
+ */
 const Form = FormProvider
 
+/**
+ * Context for managing form field state.
+ * @template TFieldValues - Form field values
+ * @template TName - Field name
+ */
 type FormFieldContextValue<
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -28,6 +36,13 @@ const FormFieldContext = React.createContext<FormFieldContextValue>(
 	{} as FormFieldContextValue,
 )
 
+/**
+ * Wrapper for form fields with react-hook-form support.
+ * @component
+ * @template TFieldValues - Form field values
+ * @template TName - Field name
+ * @param {ControllerProps<TFieldValues, TName>} props - Form field properties
+ */
 const FormField = <
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -41,6 +56,10 @@ const FormField = <
 	)
 }
 
+/**
+ * Custom hook to access form field state.
+ * @returns {object} Form field context values
+ */
 const useFormField = () => {
 	const fieldContext = React.useContext(FormFieldContext)
 	const itemContext = React.useContext(FormItemContext)
@@ -64,6 +83,9 @@ const useFormField = () => {
 	}
 }
 
+/**
+ * Context for managing form item state.
+ */
 type FormItemContextValue = {
 	id: string
 }
@@ -72,6 +94,11 @@ const FormItemContext = React.createContext<FormItemContextValue>(
 	{} as FormItemContextValue,
 )
 
+/**
+ * Wrapper for form item elements.
+ * @component
+ * @param {React.HTMLAttributes<HTMLDivElement>} props - Component properties
+ */
 const FormItem = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement>
@@ -86,6 +113,11 @@ const FormItem = React.forwardRef<
 })
 FormItem.displayName = 'FormItem'
 
+/**
+ * Label for form fields.
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>} props - Component properties
+ */
 const FormLabel = React.forwardRef<
 	React.ElementRef<typeof LabelPrimitive.Root>,
 	React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
@@ -103,6 +135,11 @@ const FormLabel = React.forwardRef<
 })
 FormLabel.displayName = 'FormLabel'
 
+/**
+ * Control element for form fields.
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof Slot>} props - Component properties
+ */
 const FormControl = React.forwardRef<
 	React.ElementRef<typeof Slot>,
 	React.ComponentPropsWithoutRef<typeof Slot>
@@ -125,6 +162,11 @@ const FormControl = React.forwardRef<
 })
 FormControl.displayName = 'FormControl'
 
+/**
+ * Description text for form fields.
+ * @component
+ * @param {React.HTMLAttributes<HTMLParagraphElement>} props - Component properties
+ */
 const FormDescription = React.forwardRef<
 	HTMLParagraphElement,
 	React.HTMLAttributes<HTMLParagraphElement>
@@ -142,6 +184,11 @@ const FormDescription = React.forwardRef<
 })
 FormDescription.displayName = 'FormDescription'
 
+/**
+ * Message text for form validation errors.
+ * @component
+ * @param {React.HTMLAttributes<HTMLParagraphElement>} props - Component properties
+ */
 const FormMessage = React.forwardRef<
 	HTMLParagraphElement,
 	React.HTMLAttributes<HTMLParagraphElement>

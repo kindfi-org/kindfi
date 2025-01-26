@@ -1,7 +1,17 @@
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
-
+/**
+ * Table component to render tabular data with responsive design.
+ * @component
+ * @param {React.HTMLAttributes<HTMLTableElement>} props - The component props
+ * @param {string} [props.className] - Additional custom CSS classes for styling the table
+ * @example
+ * <Table>
+ *   <TableHeader>...</TableHeader>
+ *   <TableBody>...</TableBody>
+ * </Table>
+ */
 const Table = React.forwardRef<
 	HTMLTableElement,
 	React.HTMLAttributes<HTMLTableElement>
@@ -16,6 +26,16 @@ const Table = React.forwardRef<
 ))
 Table.displayName = 'Table'
 
+/**
+ * TableHeader component for defining the header section of a table.
+ * @component
+ * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - The component props
+ * @param {string} [props.className] - Additional custom CSS classes for styling the header
+ * @example
+ * <TableHeader>
+ *   <TableRow>...</TableRow>
+ * </TableHeader>
+ */
 const TableHeader = React.forwardRef<
 	HTMLTableSectionElement,
 	React.HTMLAttributes<HTMLTableSectionElement>

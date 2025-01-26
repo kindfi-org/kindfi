@@ -5,6 +5,14 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 
+/**
+ * Switch component for creating toggle switches with customizable styles and state.
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>} props - The component props
+ * @param {string} [props.className] - Additional custom CSS classes for styling the switch
+ * @example
+ * <Switch checked={true} onCheckedChange={handleChange} />
+ */
 const Switch = React.forwardRef<
 	React.ElementRef<typeof SwitchPrimitives.Root>,
 	React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>

@@ -4,7 +4,23 @@ import * as SeparatorPrimitive from '@radix-ui/react-separator'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
-
+/**
+ * Separator component for visually dividing content.
+ *
+ * @component
+ * @param {object} props - The component props.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {'horizontal' | 'vertical'} [props.orientation='horizontal'] - Defines the orientation of the separator.
+ * @param {boolean} [props.decorative=true] - Whether the separator is purely decorative.
+ *
+ * @example
+ * // Horizontal separator
+ * <Separator />
+ *
+ * @example
+ * // Vertical separator
+ * <Separator orientation="vertical" />
+ */
 const Separator = React.forwardRef<
 	React.ElementRef<typeof SeparatorPrimitive.Root>,
 	React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>

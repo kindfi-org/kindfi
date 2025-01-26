@@ -4,7 +4,15 @@ import * as ProgressPrimitive from '@radix-ui/react-progress'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
-
+/**
+ * Progress component for displaying loading or completion status.
+ *
+ * @param {Object} props - The properties passed to the component.
+ * @param {string} [props.className] - Additional class names for styling.
+ * @param {number} [props.value] - The current progress value (0-100).
+ * @param {React.Ref} ref - Reference to the progress root element.
+ * @returns {JSX.Element} The rendered Progress component.
+ */
 const Progress = React.forwardRef<
 	React.ElementRef<typeof ProgressPrimitive.Root>,
 	React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>

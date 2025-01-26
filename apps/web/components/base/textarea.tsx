@@ -1,7 +1,16 @@
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
-
+/**
+ * Textarea component for rendering a styled, responsive textarea input field.
+ * Provides support for custom styles, placeholder text, and focus states.
+ *
+ * @component
+ * @param {React.ComponentProps<'textarea'>} props - The component props.
+ * @param {string} [props.className] - Additional custom CSS classes to apply to the textarea.
+ * @example
+ * <Textarea placeholder="Enter your text here" />
+ */
 const Textarea = React.forwardRef<
 	HTMLTextAreaElement,
 	React.ComponentProps<'textarea'>

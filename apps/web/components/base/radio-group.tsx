@@ -5,6 +5,14 @@ import { Circle } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+/**
+ * RadioGroup component for selecting a single option from a group.
+ *
+ * @param {Object} props - The properties passed to the component.
+ * @param {string} [props.className] - Additional class names for styling.
+ * @param {React.Ref} ref - Reference to the radio group root element.
+ * @returns {JSX.Element} The rendered RadioGroup component.
+ */
 
 const RadioGroup = React.forwardRef<
 	React.ElementRef<typeof RadioGroupPrimitive.Root>,
@@ -19,7 +27,14 @@ const RadioGroup = React.forwardRef<
 	)
 })
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
-
+/**
+ * RadioGroupItem component representing an individual radio button.
+ *
+ * @param {Object} props - The properties passed to the component.
+ * @param {string} [props.className] - Additional class names for styling.
+ * @param {React.Ref} ref - Reference to the radio group item element.
+ * @returns {JSX.Element} The rendered RadioGroupItem component.
+ */
 const RadioGroupItem = React.forwardRef<
 	React.ElementRef<typeof RadioGroupPrimitive.Item>,
 	React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
