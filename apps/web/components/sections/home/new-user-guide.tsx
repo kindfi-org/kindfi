@@ -2,45 +2,44 @@
 
 import { motion } from 'framer-motion'
 import {
-	Contibute,
+	Contribute,
 	ExploreDetails,
 	ExploreProject,
 } from '~/components/icons/illustrations'
 import { StepCard } from '~/components/shared/steps-card'
-interface NewInvestorGuideProps {
-	className?: string
-}
 
-const NewInvestorGuide = ({ className = '' }: NewInvestorGuideProps) => {
-	const steps = [
-		{
-			stepNumber: 1,
-			title: 'Explore Available Projects',
-			description:
-				'Browse through a wide range of impactful projects across various categories. Each project provides detailed information to help you make well-informed decisions.',
-			Icon: ExploreProject,
-			imageAlt: 'Illustration of exploring projects',
-		},
-		{
-			stepNumber: 2,
-			title: 'Discover Project Details',
-			description:
-				'Dive into all the key details about each project, including financial goals, progress, and insights about the team behind the idea.',
-			Icon: ExploreDetails,
-			imageAlt: 'Illustration of reviewing project details',
-		},
-		{
-			stepNumber: 3,
-			title: 'Support What Inspires You',
-			description:
-				'Choose the projects that resonate with you the most and decide how much you want to contribute or invest. Support initiatives that align with your values and vision.',
-			Icon: Contibute,
-			imageAlt: 'Illustration of investing or contributing',
-		},
-	]
+// Constants
+const steps = [
+	{
+		stepNumber: 1,
+		title: 'Explore Available Projects',
+		description:
+			'Browse through a wide range of impactful projects across various categories. Each project provides detailed information to help you make well-informed decisions.',
+		Icon: ExploreProject,
+		imageAlt: 'Illustration of exploring projects',
+	},
+	{
+		stepNumber: 2,
+		title: 'Discover Project Details',
+		description:
+			'Dive into all the key details about each project, including financial goals, progress, and insights about the team behind the idea.',
+		Icon: ExploreDetails,
+		imageAlt: 'Illustration of reviewing project details',
+	},
+	{
+		stepNumber: 3,
+		title: 'Support What Inspires You',
+		description:
+			'Choose the projects that resonate with you the most and decide how much you want to contribute or invest. Support initiatives that align with your values and vision.',
+		Icon: Contribute,
+		imageAlt: 'Illustration of investing or contributing',
+	},
+]
 
+// Component
+export function NewUserGuide() {
 	return (
-		<section className={`relative py-24 overflow-hidden ${className}`}>
+		<section className="relative py-24 overflow-hidden">
 			{/* Background */}
 			<div className="absolute inset-0 gradient-bg-blue-purple">
 				<div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
@@ -82,4 +81,11 @@ const NewInvestorGuide = ({ className = '' }: NewInvestorGuideProps) => {
 	)
 }
 
-export default NewInvestorGuide
+// Interfaces
+interface Step {
+  stepNumber: number;
+  title: string;
+  description: string;
+  Icon: React.ElementType;
+  imageAlt: string;
+}
