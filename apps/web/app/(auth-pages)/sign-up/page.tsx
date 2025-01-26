@@ -96,9 +96,9 @@ export default async function Signup(props: {
 								</div>
 								<p
 									id="password-requirements"
-									className="text-xs text-muted-foreground"
+									className="text-xs text-muted-foreground mt-1"
 								>
-									Must be at least 6 characters long
+									Password must be at least 6 characters long
 								</p>
 							</div>
 
