@@ -66,8 +66,6 @@ export default async function Signup(props: {
 										required
 										aria-labelledby="email-label"
 										aria-describedby="email-description"
-										aria-required="true"
-										autoComplete="email"
 									/>
 								</div>
 								<span id="email-description" className="sr-only">
@@ -94,8 +92,6 @@ export default async function Signup(props: {
 										minLength={6}
 										aria-labelledby="password-label"
 										aria-describedby="password-requirements"
-										aria-required="true"
-										autoComplete="new-password"
 									/>
 								</div>
 								<p

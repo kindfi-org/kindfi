@@ -90,7 +90,6 @@ const Footer = () => {
 									type="email"
 									placeholder="tu@email.com"
 									className="max-w-[200px]"
-									aria-required="true"
 									aria-labelledby="newsletter-label"
 									aria-describedby="newsletter-description"
 									required
