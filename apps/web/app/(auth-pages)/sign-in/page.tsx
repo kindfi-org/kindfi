@@ -28,7 +28,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
 			>
 				<form className="space-y-4" aria-label="Sign in">
 					<div className="space-y-2">
-						<Label htmlFor="email" id="email-lable">
+						<Label htmlFor="email" id="email-label">
 							Email
 						</Label>
 						<Input
@@ -37,7 +37,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
 							type="email"
 							placeholder="you@example.com"
 							required
-							aria-labelledby="email-lable"
+							aria-labelledby="email-label"
 							aria-describedby="email-description"
 						/>
 						<span id="email-description" className="sr-only">
