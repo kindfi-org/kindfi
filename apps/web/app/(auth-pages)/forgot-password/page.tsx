@@ -42,7 +42,11 @@ export default async function ForgotPassword(props: {
 						/>
 					</div>
 
-					<Button className="w-full" formAction={forgotPasswordAction}>
+					<Button
+						className="w-full"
+						formAction={forgotPasswordAction}
+						aria-label="Send Password Recovery Link"
+					>
 						Send Recovery Link
 					</Button>
 
@@ -74,6 +78,7 @@ const SuccessMessage = ({ email }: SuccessMessageProps) => (
 				{/* biome-ignore lint/a11y/useButtonType: <explanation> */}
 				<button
 					onClick={() => window.location.reload()}
+					aria-label="Resend Email Recovery Link"
 					className="text-primary hover:underline"
 				>
 					Try again

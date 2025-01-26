@@ -57,6 +57,7 @@ export default function TransactionHistory() {
 						<Button
 							variant="outline"
 							size="icon"
+							aria-label="Filter Transaction History"
 							className="h-8 w-8 border-gray-200"
 						>
 							<Filter className="h-4 w-4" />
@@ -64,6 +65,7 @@ export default function TransactionHistory() {
 						<Button
 							variant="outline"
 							size="icon"
+							aria-label="Refresh Transaction History"
 							className="h-8 w-8 border-gray-200"
 						>
 							<RefreshCw className="h-4 w-4" />

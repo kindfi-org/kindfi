@@ -27,6 +27,7 @@ export default function AuthErrorPage() {
 					variant="default"
 					onClick={() => router.push('/login')}
 					className="w-full"
+					aria-label="Back to Login"
 				>
 					Back to Login
 				</Button>

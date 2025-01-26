@@ -33,6 +33,7 @@ export const CTAButtons = ({
 				size="lg"
 				onClick={onPrimaryClick}
 				className={`gradient-btn text-white px-8 shadow-sm transition-all duration-300 ${primaryClassName}`}
+				aria-label={primaryText}
 			>
 				{primaryText}
 			</Button>
@@ -41,6 +42,7 @@ export const CTAButtons = ({
 				variant="outline"
 				onClick={onSecondaryClick}
 				className={`gradient-border-btn transition-all duration-300 ${secondaryClassName}`}
+				aria-label={secondaryText}
 			>
 				{secondaryText}
 			</Button>

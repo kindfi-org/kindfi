@@ -57,7 +57,11 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
 						/>
 					</div>
 
-					<Button className="w-full" formAction={signInAction}>
+					<Button
+						className="w-full"
+						formAction={signInAction}
+						aria-label="Log Into Account"
+					>
 						Log In
 					</Button>
 				</form>

@@ -52,7 +52,12 @@ export const Header = () => {
 						{/* Mobile menu */}
 						<Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
 							<SheetTrigger asChild>
-								<Button variant="ghost" size="sm" className="md:hidden">
+								<Button
+									variant="ghost"
+									size="sm"
+									aria-label="Open Mobile Navigation Menu"
+									className="md:hidden"
+								>
 									<Menu className="h-5 w-5" />
 								</Button>
 							</SheetTrigger>
@@ -84,6 +89,7 @@ const UserMenu = ({ user }: { user: User }) => {
 				<Button
 					variant="ghost"
 					size="sm"
+					aria-label="Open User Account Menu"
 					className="relative h-8 w-8 rounded-full"
 				>
 					<Avatar className="h-8 w-8">
@@ -116,7 +122,11 @@ const UserMenu = ({ user }: { user: User }) => {
 				<DropdownMenuSeparator />
 				<DropdownMenuItem>
 					<form action={signOutAction} className="w-full">
-						<button type="submit" className="flex w-full items-center">
+						<button
+							type="submit"
+							aria-label="Sign Out of Account"
+							className="flex w-full items-center"
+						>
 							<LogOut className="mr-2 h-4 w-4" />
 							Close session
 						</button>
@@ -131,12 +141,22 @@ const AuthButtons = () => {
 	return (
 		<div className="flex items-center gap-2">
 			<Link href="/sign-in" passHref>
-				<Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+				<Button
+					variant="ghost"
+					size="sm"
+					className="hidden sm:inline-flex"
+					aria-label="Go to Sign In Page"
+				>
 					Sign in
 				</Button>
 			</Link>
 			<Link href="/sign-up" passHref>
-				<Button variant="default" size="sm" className="hidden sm:inline-flex">
+				<Button
+					variant="default"
+					size="sm"
+					className="hidden sm:inline-flex"
+					aria-label="Go to Sign Up Page"
+				>
 					Sign up
 				</Button>
 			</Link>
@@ -180,13 +200,21 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 			</div>
 			<div className="flex flex-col space-y-2">
 				<Link href="/protected">
-					<Button variant="ghost" className="w-full justify-start">
+					<Button
+						variant="ghost"
+						aria-label="Open User Dashboard"
+						className="w-full justify-start"
+					>
 						<UserIcon className="mr-2 h-4 w-4" />
 						Dashboard
 					</Button>
 				</Link>
 				<Link href="/settings">
-					<Button variant="ghost" className="w-full justify-start">
+					<Button
+						variant="ghost"
+						aria-label="Open Account Settings"
+						className="w-full justify-start"
+					>
 						<Settings className="mr-2 h-4 w-4" />
 						Config
 					</Button>
@@ -194,6 +222,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 				<form action={signOutAction}>
 					<Button
 						variant="ghost"
+						aria-label="Sign Out of Account"
 						className="w-full justify-start"
 						type="submit"
 					>
@@ -210,12 +239,20 @@ const MobileAuthButtons = () => {
 	return (
 		<div className="flex flex-col space-y-2">
 			<Link href="/sign-in">
-				<Button variant="ghost" className="w-full justify-start">
+				<Button
+					variant="ghost"
+					aria-label="Go to Sign In Page"
+					className="w-full justify-start"
+				>
 					Sign in
 				</Button>
 			</Link>
 			<Link href="/sign-up">
-				<Button variant="default" className="w-full justify-start">
+				<Button
+					variant="default"
+					aria-label="Go to Sign Up Page"
+					className="w-full justify-start"
+				>
 					Sign up
 				</Button>
 			</Link>

@@ -132,22 +132,16 @@ const ProjectJourney = () => {
 						<div className="inline-flex rounded-full p-1 bg-white shadow-sm border border-gray-100">
 							<Button
 								variant={activeView === 'project' ? 'default' : 'ghost'}
-								className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
-									activeView === 'project'
-										? 'gradient-btn text-white'
-										: 'text-gray-600 hover:text-emerald-600'
-								}`}
+								aria-label="Switch to Social Cause Project Journey"
+								className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${activeView === 'project' ? 'gradient-btn text-white' : 'text-gray-600 hover:text-emerald-600'}`}
 								onClick={() => setActiveView('project')}
 							>
 								Social Cause Path
 							</Button>
 							<Button
 								variant={activeView === 'investor' ? 'default' : 'ghost'}
-								className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
-									activeView === 'investor'
-										? 'gradient-btn text-white'
-										: 'text-gray-600 hover:text-emerald-600'
-								}`}
+								aria-label="Switch to Supporter Investment Journey"
+								className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${activeView === 'investor' ? 'gradient-btn text-white' : 'text-gray-600 hover:text-emerald-600'}`}
 								onClick={() => setActiveView('investor')}
 							>
 								Supporter Path
@@ -200,6 +194,11 @@ const ProjectJourney = () => {
 				>
 					<Button
 						size="lg"
+						aria-label={
+							activeView === 'project'
+								? 'Register Your Social Project'
+								: 'Explore Social Causes'
+						}
 						className="bg-indigo-900 hover:bg-indigo-800 text-white px-8"
 					>
 						{activeView === 'project'

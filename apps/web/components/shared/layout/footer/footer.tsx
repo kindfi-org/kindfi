@@ -91,6 +91,7 @@ const Footer = () => {
 								/>
 								<Button
 									size="sm"
+									aria-label="Subscribe to Newsletter"
 									className="bg-blue-600 hover:bg-blue-900 text-white"
 								>
 									Keep in touch
@@ -142,10 +143,18 @@ const Footer = () => {
 							© {new Date().getFullYear()} KindFi. All rights reserved.
 						</p>
 						<div className="flex items-center gap-2">
-							<Button variant="outline" size="sm">
+							<Button
+								variant="outline"
+								size="sm"
+								aria-label="Open Kindfi Documentation"
+							>
 								Documentation
 							</Button>
-							<Button variant="outline" size="sm">
+							<Button
+								variant="outline"
+								size="sm"
+								aria-label="Open Contact Information"
+							>
 								Contact
 							</Button>
 						</div>
