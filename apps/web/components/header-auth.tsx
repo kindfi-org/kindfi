@@ -52,11 +52,7 @@ export default async function AuthButton() {
 		<div className="flex items-center gap-4">
 			Hey, {user.email}!
 			<form action={signOutAction}>
-				<Button
-					type="submit"
-					variant={'outline'}
-					aria-label="Sign Out of Account"
-				>
+				<Button type="submit" variant={'outline'}>
 					Sign out
 				</Button>
 			</form>
