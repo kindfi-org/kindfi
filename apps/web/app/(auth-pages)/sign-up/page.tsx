@@ -82,11 +82,7 @@ export default async function Signup(props: {
 								</p>
 							</div>
 
-							<Button
-								className="w-full"
-								formAction={signUpAction}
-								aria-label="Create New Account"
-							>
+							<Button className="w-full" formAction={signUpAction}>
 								Create account
 							</Button>
 						</div>

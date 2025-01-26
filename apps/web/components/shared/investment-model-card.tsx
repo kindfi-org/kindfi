@@ -52,7 +52,7 @@ export const InvestmentModelCard = ({
 			<CardFooter className="p-6 pt-0">
 				<Button
 					variant="ghost"
-					aria-label="Learn More"
+					aria-label={`Learn More about ${title} investment model`}
 					className="w-full flex items-center justify-center gap-2 hover:bg-white/50"
 					onClick={onLearnMore}
 				>

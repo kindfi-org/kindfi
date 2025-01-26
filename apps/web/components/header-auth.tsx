@@ -68,13 +68,10 @@ export default async function AuthButton() {
 					Sign in
 				</Link>
 			</Button>
-			<Button
-				asChild
-				size="sm"
-				variant={'default'}
-				aria-label="Navigate to Sign Up Page"
-			>
-				<Link href="/sign-up">Sign up</Link>
+			<Button asChild size="sm" variant={'default'}>
+				<Link href="/sign-up" aria-label="Navigate to Sign Up Page">
+					Sign up
+				</Link>
 			</Button>
 		</div>
 	)
