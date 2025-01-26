@@ -60,12 +60,12 @@ export default async function AuthButton() {
 	) : (
 		<div className="flex gap-2">
 			<Button asChild size="sm" variant={'outline'}>
-				<Link href="/sign-in" aria-label="Navigate to Sign In Page">
+				<Link href="/sign-in" aria-label="Sign In Page">
 					Sign in
 				</Link>
 			</Button>
 			<Button asChild size="sm" variant={'default'}>
-				<Link href="/sign-up" aria-label="Navigate to Sign Up Page">
+				<Link href="/sign-up" aria-label="Sign Up Page">
 					Sign up
 				</Link>
 			</Button>
