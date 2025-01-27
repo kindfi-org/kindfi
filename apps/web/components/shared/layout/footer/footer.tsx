@@ -98,9 +98,13 @@ const Footer = () => {
 									placeholder="tu@email.com"
 									className="max-w-[200px]"
 									aria-labelledby="newsletter-label"
-									aria-describedby="newsletter-description"
-									aria-invalid="true"
+									aria-describedby={`${
+										isEmailInvalid
+											? 'newsletter-error'
+											: 'newsletter-description'
+									}`}
 									required
+									aria-invalid={isEmailInvalid}
 									onChange={validateEmail}
 								/>
 								<Button
