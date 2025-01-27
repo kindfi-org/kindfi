@@ -6,47 +6,23 @@ interface ValidationResult {
 }
 
 const validateMilestone = (milestone: Milestone, index: number): string[] => {
-    const errors: string[] = [];
-    const now = new Date();
-
-    if (!milestone.title?.trim()) {
-        errors.push(`Milestone ${index + 1}: Title is required`);
-    }
-    if (!milestone.description?.trim()) {
-        errors.push(`Milestone ${index + 1}: Description is required`);
-    }
-    if (typeof milestone.amount !== "number" || milestone.amount <= 0) {
-        errors.push(`Milestone ${index + 1}: Amount must be a positive number`);
-    }
-
-    // Enhanced date validation
-    let milestoneDate: Date | null = null;
-    
-    if (milestone.dueDate instanceof Date) {
-        milestoneDate = milestone.dueDate;
-    } else {
-        const parsedDate = Date.parse(String(milestone.dueDate));
-        if (!Number.isNaN(parsedDate)) {
-            milestoneDate = new Date(parsedDate);
-        }
-    }
-
-    if (!milestoneDate) {
-        errors.push(`Milestone ${index + 1}: Invalid due date`);
-    } else {
-        // Check if date is in the past
-        if (milestoneDate < now) {
-            errors.push(`Milestone ${index + 1}: Due date cannot be in the past`);
-        }
-        
-        // Optional: Check if date is too far in the future (e.g., > 2 years)
-        const twoYearsFromNow = new Date(now.getFullYear() + 2, now.getMonth(), now.getDate());
-        if (milestoneDate > twoYearsFromNow) {
-            errors.push(`Milestone ${index + 1}: Due date cannot be more than 2 years in the future`);
-        }
-    }
-
-    return errors;
+  const errors: string[] = [];
+  const now = new Date();
+  
+  if (!milestone.title?.trim()) {
+    errors.push(`Milestone ${index + 1}: Title is required`);
+  }
+  if (!milestone.description?.trim()) {
+    errors.push(`Milestone ${index + 1}: Description is required`);
+  }
+  if (typeof milestone.amount !== 'number' || milestone.amount <= 0) {
+    errors.push(`Milestone ${index + 1}: Amount must be a positive number`);
+  }
+  if (!(milestone.dueDate instanceof Date) && !Date.parse(milestone.dueDate as any)) {
+    errors.push(`Milestone ${index + 1}: Invalid due date`);
+  }
+  
+  return errors;
 };
 
 export function validateEscrowInitialization(
