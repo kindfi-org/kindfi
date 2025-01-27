@@ -19,7 +19,7 @@ const validateMilestone = (milestone: Milestone, index: number): string[] => {
     }
     if (
         !(milestone.dueDate instanceof Date) &&
-        isNan(Date.parse(String(milestone.dueDate)))
+        isNaN(Date.parse(String(milestone.dueDate)))
     ) {
         errors.push(`Milestone ${index + 1}: Invalid due date`);
     }
@@ -39,6 +39,9 @@ export function validateEscrowInitialization(
     }
 
     // Validate parties
+    if (!data.contractParams.parties) {
+     errors.push("Parties object is required");
+} else {
     const { parties } = data.contractParams;
     if (!parties.payer?.trim()) {
         errors.push("Payer address is required");
@@ -48,7 +51,7 @@ export function validateEscrowInitialization(
     }
     if (!Array.isArray(parties.reviewers) || parties.reviewers.length === 0) {
         errors.push("At least one reviewer is required");
-    }
+    }}
 
     // Validate milestones
     if (
@@ -71,19 +74,19 @@ export function validateEscrowInitialization(
         errors.push("Platform fee must be a percentage between 0 and 100");
     }
 
-// Validate metadata exists
-  if (!data.metadata) {
-    errors.push("Metadata is required");
-    return { success: false, errors };
-  }
+    // Validate metadata exists
+    if (!data.metadata) {
+        errors.push("Metadata is required");
+        return { success: false, errors };
+    }
 
-  // Validate metadata fields
-  if (!data.metadata.projectId?.trim()) {
-    errors.push("Project ID is required");
-  }
-  if (!data.metadata.engagementType?.trim()) {
-    errors.push("Engagement type is required");
-  }
+    // Validate metadata fields
+    if (!data.metadata.projectId?.trim()) {
+        errors.push("Project ID is required");
+    }
+    if (!data.metadata.engagementType?.trim()) {
+        errors.push("Engagement type is required");
+    }
 
     return {
         success: errors.length === 0,
