@@ -1,5 +1,8 @@
+'use client'
+
 import { Lock, Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
 import { signUpAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import {
@@ -28,6 +31,22 @@ export default async function Signup(props: {
 	//     </div>
 	//   );
 	// }
+
+	const [isEmailInvalid, setIsEmailInvalid] = useState(false)
+	const [isPasswordInvalid, setIsPasswordInvalid] = useState(false)
+
+	const validateForm = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.target
+
+		if (name === 'email') {
+			const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+			setIsEmailInvalid(!emailRegex.test(value))
+		}
+
+		if (name === 'password') {
+			setIsPasswordInvalid(value.length < 6)
+		}
+	}
 
 	return (
 		<AuthLayout>
@@ -65,12 +84,17 @@ export default async function Signup(props: {
 										className="pl-10"
 										required
 										aria-labelledby="email-label"
-										aria-describedby="email-description"
+										aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
+										aria-invalid={isEmailInvalid}
+										onChange={validateForm}
 									/>
+									<span id="email-description" className="sr-only">
+										Enter your email address to create your account
+									</span>
+									<span id="email-error" className="sr-only">
+										Please enter a valid email address
+									</span>
 								</div>
-								<span id="email-description" className="sr-only">
-									Enter your email address to create your account
-								</span>
 							</div>
 
 							<div className="space-y-2">
@@ -91,15 +115,20 @@ export default async function Signup(props: {
 										required
 										minLength={6}
 										aria-labelledby="password-label"
-										aria-describedby="password-requirements"
+										aria-describedby={`${isPasswordInvalid ? 'password-requirements' : 'password-description'}`}
+										aria-invalid={isPasswordInvalid}
+										onChange={validateForm}
 									/>
+									<span id="password-description" className="sr-only">
+										Create a password for your account
+									</span>
+									<p
+										id="password-requirements"
+										className="text-xs text-muted-foreground mt-1"
+									>
+										Password must be at least 6 characters long
+									</p>
 								</div>
-								<p
-									id="password-requirements"
-									className="text-xs text-muted-foreground mt-1"
-								>
-									Password must be at least 6 characters long
-								</p>
 							</div>
 
 							<Button className="w-full" formAction={signUpAction}>

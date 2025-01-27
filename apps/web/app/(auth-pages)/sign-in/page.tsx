@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
 import { signInAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
@@ -7,8 +10,22 @@ import type { Message } from '~/components/form-message'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 
-export default async function Login(props: { searchParams: Promise<Message> }) {
-	const searchParams = await props.searchParams
+export default function Login(props: { searchParams: Promise<Message> }) {
+	const [isEmailInvalid, setIsEmailInvalid] = useState(false)
+	const [isPasswordInvalid, setIsPasswordInvalid] = useState(false)
+
+	const validateForm = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.target
+
+		if (name === 'email') {
+			const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+			setIsEmailInvalid(!emailRegex.test(value))
+		}
+
+		if (name === 'password') {
+			setIsPasswordInvalid(value.length < 8)
+		}
+	}
 
 	return (
 		<AuthLayout>
@@ -16,7 +33,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
 				title="Welcome Back"
 				subtitle={
 					<div className="text-sm text-muted-foreground">
-						Don’t have an account?{' '}
+						Don't have an account?{' '}
 						<Link
 							className="text-primary font-medium hover:underline"
 							href="/sign-up"
@@ -31,18 +48,25 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
 						<Label htmlFor="email" id="email-label">
 							Email
 						</Label>
-						<Input
-							id="email"
-							name="email"
-							type="email"
-							placeholder="you@example.com"
-							required
-							aria-labelledby="email-label"
-							aria-describedby="email-description"
-						/>
-						<span id="email-description" className="sr-only">
-							Please enter your registered email address
-						</span>
+						<div className="space-y-1">
+							<Input
+								id="email"
+								name="email"
+								type="email"
+								placeholder="you@example.com"
+								required
+								aria-labelledby="email-label"
+								aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
+								aria-invalid={isEmailInvalid}
+								onChange={validateForm}
+							/>
+							<span id="email-description" className="sr-only">
+								Please enter your registered email address
+							</span>
+							<span id="email-error" className="sr-only">
+								Please enter a valid email address
+							</span>
+						</div>
 					</div>
 
 					<div className="space-y-2">
@@ -57,18 +81,25 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
 								Forgot your password?
 							</Link>
 						</div>
-						<Input
-							id="password"
-							type="password"
-							name="password"
-							placeholder="Your password"
-							required
-							aria-labelledby="password-label"
-							aria-describedby="password-description"
-						/>
-						<span id="password-description" className="sr-only">
-							Enter your account password
-						</span>
+						<div className="space-y-1">
+							<Input
+								id="password"
+								type="password"
+								name="password"
+								placeholder="Your password"
+								required
+								aria-labelledby="password-label"
+								aria-describedby={`${isPasswordInvalid ? 'password-error' : 'password-description'}`}
+								aria-invalid={isPasswordInvalid}
+								onChange={validateForm}
+							/>
+							<span id="password-description" className="sr-only">
+								Enter your account password
+							</span>
+							<span id="password-error" className="sr-only">
+								Password must be at least 6 characters long
+							</span>
+						</div>
 					</div>
 
 					<Button className="w-full" formAction={signInAction}>

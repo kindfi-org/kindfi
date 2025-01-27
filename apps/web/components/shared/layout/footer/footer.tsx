@@ -5,10 +5,17 @@ import { GithubIcon, LinkedinIcon, TwitterIcon } from 'lucide-react'
 // https://github.com/simple-icons/simple-icons?tab=readme-ov-file#node-usage-
 // import { siGithub as GithubIcon, siLinkerd as LinkedinIcon, siX as Twitter } from 'simple-icons';
 import Link from 'next/link'
+import { useState } from 'react'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 
 const Footer = () => {
+	const [isEmailInvalid, setIsEmailInvalid] = useState(false)
+
+	const validateEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+		setIsEmailInvalid(!emailRegex.test(e.target.value))
+	}
 	const mainLinks = [
 		{
 			title: 'Projects',
@@ -92,13 +99,10 @@ const Footer = () => {
 									className="max-w-[200px]"
 									aria-labelledby="newsletter-label"
 									aria-describedby="newsletter-description"
+									aria-invalid="true"
 									required
+									onChange={validateEmail}
 								/>
-								<span id="newsletter-description" className="sr-only">
-									Enter your email address to receive our updates and
-									newsletters
-								</span>
-
 								<Button
 									size="sm"
 									className="bg-blue-600 hover:bg-blue-900 text-white"
@@ -106,6 +110,12 @@ const Footer = () => {
 									Keep in touch
 								</Button>
 							</div>
+							<span id="newsletter-description" className="sr-only">
+								Enter your email address to receive our updates and newsletters
+							</span>
+							<span id="newsletter-error" className="sr-only">
+								Please enter a valid email address
+							</span>
 						</div>
 					</div>
 
