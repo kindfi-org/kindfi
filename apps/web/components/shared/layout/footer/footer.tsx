@@ -5,17 +5,14 @@ import { GithubIcon, LinkedinIcon, TwitterIcon } from 'lucide-react'
 // https://github.com/simple-icons/simple-icons?tab=readme-ov-file#node-usage-
 // import { siGithub as GithubIcon, siLinkerd as LinkedinIcon, siX as Twitter } from 'simple-icons';
 import Link from 'next/link'
-import { useState } from 'react'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
+import { useFormValidation } from '~/hooks/use-form-validation'
 
 const Footer = () => {
-	const [isEmailInvalid, setIsEmailInvalid] = useState(false)
-
-	const validateEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-		setIsEmailInvalid(!emailRegex.test(e.target.value))
-	}
+	const { isEmailInvalid, handleValidation } = useFormValidation({
+		email: true,
+	})
 	const mainLinks = [
 		{
 			title: 'Projects',
@@ -95,6 +92,7 @@ const Footer = () => {
 							<div className="flex gap-2">
 								<Input
 									type="email"
+									name="email"
 									placeholder="tu@email.com"
 									className="max-w-[200px]"
 									aria-labelledby="newsletter-label"
@@ -105,7 +103,7 @@ const Footer = () => {
 									}`}
 									required
 									aria-invalid={isEmailInvalid}
-									onChange={validateEmail}
+									onChange={handleValidation}
 								/>
 								<Button
 									size="sm"

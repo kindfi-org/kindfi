@@ -2,7 +2,6 @@
 
 import { Lock, Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
 import { signUpAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import {
@@ -15,8 +14,10 @@ import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import type { Message } from '~/components/form-message'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { useFormValidation } from '~/hooks/use-form-validation'
 
 export default function Signup(props: { searchParams: Promise<Message> }) {
+	const searchParams = props.searchParams
 	// Show success message if registration was successful
 	// if (searchParams.success) {
 	//   return (
@@ -30,21 +31,12 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 	//   );
 	// }
 
-	const [isEmailInvalid, setIsEmailInvalid] = useState(false)
-	const [isPasswordInvalid, setIsPasswordInvalid] = useState(false)
-
-	const validateForm = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = e.target
-
-		if (name === 'email') {
-			const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-			setIsEmailInvalid(!emailRegex.test(value))
-		}
-
-		if (name === 'password') {
-			setIsPasswordInvalid(value.length < 6)
-		}
-	}
+	const { isEmailInvalid, isPasswordInvalid, handleValidation } =
+		useFormValidation({
+			email: true,
+			password: true,
+			minLength: 6,
+		})
 
 	return (
 		<AuthLayout>
@@ -84,7 +76,7 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 										aria-labelledby="email-label"
 										aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
 										aria-invalid={isEmailInvalid}
-										onChange={validateForm}
+										onChange={handleValidation}
 									/>
 									<span id="email-description" className="sr-only">
 										Enter your email address to create your account
@@ -115,7 +107,7 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 										aria-labelledby="password-label"
 										aria-describedby={`${isPasswordInvalid ? 'password-requirements' : 'password-description'}`}
 										aria-invalid={isPasswordInvalid}
-										onChange={validateForm}
+										onChange={handleValidation}
 									/>
 									<span id="password-description" className="sr-only">
 										Create a password for your account

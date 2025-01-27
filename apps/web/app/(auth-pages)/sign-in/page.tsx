@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
 import { signInAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
@@ -9,23 +8,16 @@ import { Label } from '~/components/base/label'
 import type { Message } from '~/components/form-message'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { useFormValidation } from '~/hooks/use-form-validation'
 
 export default function Login(props: { searchParams: Promise<Message> }) {
-	const [isEmailInvalid, setIsEmailInvalid] = useState(false)
-	const [isPasswordInvalid, setIsPasswordInvalid] = useState(false)
-
-	const validateForm = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = e.target
-
-		if (name === 'email') {
-			const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-			setIsEmailInvalid(!emailRegex.test(value))
-		}
-
-		if (name === 'password') {
-			setIsPasswordInvalid(value.length < 8)
-		}
-	}
+	const searchParams = props.searchParams
+	const { isEmailInvalid, isPasswordInvalid, handleValidation } =
+		useFormValidation({
+			email: true,
+			password: true,
+			minLength: 6,
+		})
 
 	return (
 		<AuthLayout>
@@ -58,7 +50,7 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 								aria-labelledby="email-label"
 								aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
 								aria-invalid={isEmailInvalid}
-								onChange={validateForm}
+								onChange={handleValidation}
 							/>
 							<span id="email-description" className="sr-only">
 								Please enter your registered email address
@@ -91,7 +83,7 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 								aria-labelledby="password-label"
 								aria-describedby={`${isPasswordInvalid ? 'password-error' : 'password-description'}`}
 								aria-invalid={isPasswordInvalid}
-								onChange={validateForm}
+								onChange={handleValidation}
 							/>
 							<span id="password-description" className="sr-only">
 								Enter your account password
