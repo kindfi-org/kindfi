@@ -29,10 +29,21 @@ const TooltipTrigger = TooltipPrimitive.Trigger
  * @component
  * @param {React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>} props - The component props
  * @param {number} [props.sideOffset=4] - The distance between the tooltip and the target element.
- * @param {string} [props.className] - Additional CSS classes to apply to the tooltip.
+ * @param {string} [props.className] - Additional CSS classes to apply to the tooltip. Merged with default styles.
+ * @param {React.ReactNode} props.children - The content to display in the tooltip.
+ *
+ * @remarks
+ * - Uses React Portal for rendering outside the DOM hierarchy
+ * - Includes built-in animations for enter/exit transitions
+ * - Supports positioning on all sides (top, right, bottom, left)
  *
  * @example
  * <TooltipContent sideOffset={10}>This is a tooltip message</TooltipContent>
+ *
+ * // With custom className
+ * <TooltipContent className="custom-tooltip">
+ *   Custom styled tooltip
+ * </TooltipContent>
  */
 const TooltipContent = React.forwardRef<
 	React.ElementRef<typeof TooltipPrimitive.Content>,
