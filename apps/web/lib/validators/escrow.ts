@@ -1,4 +1,4 @@
-import { EscrowInitialization, Milestone } from "../types/escrow";
+import type { EscrowInitialization, Milestone } from "../types/escrow";
 
 interface ValidationResult {
     success: boolean;
@@ -19,7 +19,7 @@ const validateMilestone = (milestone: Milestone, index: number): string[] => {
     }
     if (
         !(milestone.dueDate instanceof Date) &&
-        !Date.parse(milestone.dueDate as any)
+        !Date.parse(String(milestone.dueDate))
     ) {
         errors.push(`Milestone ${index + 1}: Invalid due date`);
     }

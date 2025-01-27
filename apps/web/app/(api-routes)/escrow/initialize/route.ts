@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { validateEscrowInitialization } from "~/lib/validators/escrow";
 import { initializeEscrowContract } from "~/lib/stellar/escrow";
-import { EscrowInitialization } from "~/lib/types/escrow";
+import type { EscrowInitialization } from "~/lib/types/escrow";
 
 const supabase = createClient(
     process.env.SUPABASE_URL!,
