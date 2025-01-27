@@ -19,7 +19,7 @@ const validateMilestone = (milestone: Milestone, index: number): string[] => {
     }
     if (
         !(milestone.dueDate instanceof Date) &&
-        !Date.parse(String(milestone.dueDate))
+        isNan(Date.parse(String(milestone.dueDate)))
     ) {
         errors.push(`Milestone ${index + 1}: Invalid due date`);
     }
@@ -71,13 +71,19 @@ export function validateEscrowInitialization(
         errors.push("Platform fee must be a percentage between 0 and 100");
     }
 
-    // Validate metadata
-    if (!data.metadata.projectId?.trim()) {
-        errors.push("Project ID is required");
-    }
-    if (!data.metadata.engagementType?.trim()) {
-        errors.push("Engagement type is required");
-    }
+// Validate metadata exists
+  if (!data.metadata) {
+    errors.push("Metadata is required");
+    return { success: false, errors };
+  }
+
+  // Validate metadata fields
+  if (!data.metadata.projectId?.trim()) {
+    errors.push("Project ID is required");
+  }
+  if (!data.metadata.engagementType?.trim()) {
+    errors.push("Engagement type is required");
+  }
 
     return {
         success: errors.length === 0,
