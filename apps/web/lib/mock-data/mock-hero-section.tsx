@@ -5,12 +5,28 @@ import {
   HandHelping,
   Heart,
   Leaf,
+  LineChart,
   NewspaperIcon,
   Rocket,
   Sprout,
   Stethoscope,
   UtensilsCrossed,
 } from 'lucide-react';
+
+export interface Category {
+  id: string;
+  icon: React.ReactNode;
+  label: string;
+  color: string;
+}
+
+interface Stat {
+  id: string;
+  value: string;
+  label: string;
+  icon: React.ReactNode;
+  highlight?: boolean;
+}
 
 export const categories: Category[] = [
   {
@@ -84,9 +100,24 @@ export const secondaryCategories: Category[] = [
   },
 ];
 
-interface Category {
-  id: string;
-  icon: React.ReactNode;
-  label: string;
-  color: string;
-}
+const stats: Stat[] = [
+  {
+    id: 'inversiones-exitosas-id',
+    value: '250+',
+    label: 'Inversiones Exitosas',
+    icon: <LineChart className="w-6 h-6 text-teal-600 mb-2" />,
+  },
+  {
+    id: 'proyectos-financiados-id',
+    value: '3,325',
+    label: 'Proyectos Financiados',
+    icon: <Rocket className="w-6 h-6 text-teal-600 mb-2" />,
+  },
+  {
+    id: 'capital-total-invertido-id',
+    value: '$720M',
+    label: 'Capital Total Invertido',
+    icon: <Coins className="w-6 h-6 text-teal-600 mb-2" />,
+    highlight: true,
+  },
+];

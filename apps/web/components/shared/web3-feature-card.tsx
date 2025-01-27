@@ -22,9 +22,12 @@ export const Web3FeatureCard = ({
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    transition={{ duration: 0.5 }}
+    transition={{ duration: 0.5, type: "spring" }}
     whileHover={{ y: -5 }}
+    whileFocus={{ y: -5 }}
     className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
+    role="article"
+    aria-label={`Feature: ${title}`}
   >
     <div className="flex items-center gap-4 mb-6">
       <div className="p-3 rounded-xl bg-teal-50">{icon}</div>
@@ -46,7 +49,8 @@ export const Web3FeatureCard = ({
       <ul className="space-y-3">
         {checkList.map((item) => (
           <li key={item.id} className="flex items-center gap-3 text-gray-600">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" aria-hidden="true" />
+            <span className="sr-only">List item:</span>
             {item.text}
           </li>
         ))}

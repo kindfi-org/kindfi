@@ -1,83 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowUpRight, ChevronRight, Megaphone, RefreshCw } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Button } from "~/components/base/button";
 import { SectionCaption } from "~/components/shared/section-caption";
+import { features } from "~/lib/mock-data/mock-join-us-section";
 
-// Constants
-const ANIMATION_DURATION = 20;
-
-const features: Feature[] = [
-  {
-    id: "collaborate-and-earn-rewards-id",
-    icon: (
-      <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center relative overflow-hidden group-hover:bg-teal-100 transition-colors duration-300">
-        <motion.div
-          initial={{ rotate: 0 }}
-          animate={{ rotate: 360 }}
-          transition={{
-            duration: ANIMATION_DURATION,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
-          }}
-          className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(20,184,166,0.1),transparent)]"
-        />
-        <ArrowUpRight className="w-8 h-8 text-teal-600 relative z-10" />
-      </div>
-    ),
-    title: "Collaborate and Earn Rewards",
-    description:
-      "Every contribution brings us closer to real change and meaningful rewards. Receive exclusive benefits like limited-edition NFTs, access to special events, and more. Collaboration has never been this rewarding.",
-    highlight: "Community Rewards",
-  },
-  {
-    id: "build-a-better-world-id",
-    icon: (
-      <div className="w-16 h-16 rounded-full bg-sky-50 flex items-center justify-center relative overflow-hidden group-hover:bg-sky-100 transition-colors duration-300">
-        <motion.div
-          initial={{ rotate: 0 }}
-          animate={{ rotate: -360 }}
-          transition={{
-            duration: ANIMATION_DURATION,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
-          }}
-          className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(14,165,233,0.1),transparent)]"
-        />
-        <RefreshCw className="w-8 h-8 text-sky-600 relative z-10" />
-      </div>
-    ),
-    title: "Build a Better World",
-    description:
-      "Support a diverse range of social initiatives, from animal welfare to cultural preservation. Diversify your contributions and become a driving force for global change.",
-    highlight: "+50 Social Initiatives",
-  },
-  {
-    id: "be-the-revolution-id",
-    icon: (
-      <div className="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center relative overflow-hidden group-hover:bg-purple-100 transition-colors duration-300">
-        <motion.div
-          initial={{ rotate: 0 }}
-          animate={{ rotate: 360 }}
-          transition={{
-            duration: ANIMATION_DURATION,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
-          }}
-          className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(89, 16, 185, 0.1),transparent)]"
-        />
-        <Megaphone className="w-8 h-8 text-purple-600 relative z-10" />
-      </div>
-    ),
-    title: "Be the Revolution",
-    description:
-      "Raise the flag and prove that Web3 is the future of social impact. By empowering causes through decentralized technology, you can create real, lasting change beyond the limits of traditional systems.",
-    highlight: "Web3 Revolution Advocate",
-  },
-];
-
-// Component
 export function JoinUs() {
   return (
     <section className="relative py-24 overflow-hidden">
@@ -111,12 +39,16 @@ export function JoinUs() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <div className="group h-full bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300">
+              <div
+                className="group h-full bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
+                role="article"
+                aria-labelledby={`feature-title-${feature.id}`}
+              >
                 {/* Icon */}
                 {feature.icon}
 
                 {/* Content */}
-                <h3 className="mt-6 text-xl font-semibold text-gray-900">
+                <h3 id={`feature-title-${feature.id}`} className="mt-6 text-xl font-semibold text-gray-900">
                   {feature.title}
                 </h3>
                 <p className="mt-4 text-gray-600 leading-relaxed">
@@ -157,8 +89,8 @@ export function JoinUs() {
               traditional systems.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="gradient-btn text-white px-8"
                 onClick={() => {
                   // TODO: Implement join revolution action
@@ -183,12 +115,3 @@ export function JoinUs() {
     </section>
   );
 };
-
-// Interfaces
-interface Feature {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  highlight: string;
-}

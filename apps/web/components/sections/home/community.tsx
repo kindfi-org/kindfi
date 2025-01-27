@@ -1,52 +1,20 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { Rocket, Shield, TrendingUp, Users } from 'lucide-react';
 import { BenefitItem } from '~/components/shared/benefits-items';
 import { CTAForm } from '~/components/shared/cta-form';
 import { Testimonial } from '~/components/shared/testimonial-card';
 import { useState } from 'react';
+import { benefits, testimonialData } from '~/lib/mock-data/mock-community-section';
 
-// Constants
-const benefits: Benefit[] = [
-  {
-    id: 'community-social-impact',
-    icon: <Users className="w-5 h-5" />,
-    text: 'Community for Social Impact',
-  },
-  {
-    id: 'empowering-crypto-supporters',
-    icon: <TrendingUp className="w-5 h-5" />,
-    text: 'Empowering Crypto Supporters',
-  },
-  {
-    id: 'blockchain-verification',
-    icon: <Shield className="w-5 h-5" />,
-    text: 'Blockchain Verification and Security',
-  },
-  {
-    id: 'accelerating-blockchain-adoption',
-    icon: <Rocket className="w-5 h-5" />,
-    text: 'Accelerating Blockchain Adoption',
-  },
-];
-
-const testimonialData: TestimonialData = {
-  quote:
-    "The KindFi community becomes an ambassador for your social cause, taking your impact far beyond what traditional Web2 methods can achieve. Web3 connects and empowers people worldwide, creating a transparent, global, and secure network of support and verification powered by blockchain technology and Trustless work's Escrows. Supporting meaningful causes isn’t something you can buy—it’s a reward you earn by being part of a movement dedicated to real change.",
-  author: 'KindFi',
-  role: 'Social Impact Platform',
-  imageUrl: '/placeholder-image.jpg', // Replace with actual image
-};
-
-// Component
 export function Community() {
   const prefersReducedMotion = useReducedMotion();
   const [formStatus, setFormStatus] = useState<FormStatus | null>(null);
 
   const handleFormSubmission = async (data: FormData) => {
-    setFormStatus(null); // Reset the status before starting the submission
+    setFormStatus(null);
     try {
+      // Possibly set a "loading" status and disable form to prevent multiple submissions
       await submitForm(data);
       setFormStatus({ type: 'success', message: 'Form submitted successfully!' });
     } catch (error) {
@@ -132,20 +100,6 @@ const submitForm = async (data: FormData): Promise<void> => {
     }, 1000);
   });
 };
-
-// Interfaces
-interface Benefit {
-  id: string;
-  icon: React.ReactNode;
-  text: string;
-}
-
-interface TestimonialData {
-  quote: string;
-  author: string;
-  role: string;
-  imageUrl: string;
-}
 
 interface FormData {
   [key: string]: string | number; // Replace with specific form fields if known

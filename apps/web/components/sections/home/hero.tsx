@@ -1,38 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  Coins,
-  LineChart,
-  Rocket,
-} from 'lucide-react';
+
+import { useCallback } from 'react';
 import { Badge } from '~/components/base/badge';
 import { Button } from '~/components/base/button';
-import { categories, secondaryCategories } from '~/lib/mock-data/mock-categories';
+import { categories, type Category, secondaryCategories } from '~/lib/mock-data/mock-hero-section';
 
 // Constants
-const stats: Stat[] = [
-  {
-    id: 'inversiones-exitosas-id',
-    value: '250+',
-    label: 'Inversiones Exitosas',
-    icon: <LineChart className="w-6 h-6 text-teal-600 mb-2" />,
-  },
-  {
-    id: 'proyectos-financiados-id',
-    value: '3,325',
-    label: 'Proyectos Financiados',
-    icon: <Rocket className="w-6 h-6 text-teal-600 mb-2" />,
-  },
-  {
-    id: 'capital-total-invertido-id',
-    value: '$720M',
-    label: 'Capital Total Invertido',
-    icon: <Coins className="w-6 h-6 text-teal-600 mb-2" />,
-    highlight: true,
-  },
-];
-
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
@@ -52,8 +27,42 @@ const badgeVariants = {
 
 // Component
 export function Hero() {
+  const renderCategory = useCallback((category: Category) => (
+    <motion.div
+      key={category.id}
+      variants={badgeVariants}
+      whileHover="hover"
+      whileTap="tap"
+      className="relative"
+      layout // Add layout prop for smooth reflow
+    >
+      <Badge
+        variant="secondary"
+        className={`px-4 py-2 cursor-pointer transition-all duration-300 ${category.color}`}
+        aria-label={`Filter by ${category.label}`}
+      >
+        <motion.span
+          className="mr-2"
+          animate={{ rotate: [0, 5, -5, 0] }}
+          transition={{
+            duration: 2,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: 'easeInOut',
+          }}
+        >
+          {category.icon}
+        </motion.span>
+        {category.label}
+      </Badge>
+    </motion.div>
+  ), []);
+
   return (
-    <section className="relative z-0 min-h-[80vh] bg-gradient-to-b from-purple-50/50 to-white px-4 py-20">
+    <section 
+      className="relative z-0 min-h-[80vh] bg-gradient-to-b from-purple-50/50 to-white px-4 py-20"
+      aria-labelledby="hero-title"
+      role="banner"
+    >
       <div className="container mx-auto max-w-6xl">
         <div className="text-center">
           <motion.h2
@@ -67,6 +76,7 @@ export function Hero() {
 
           <motion.h1
             className="text-4xl md:text-5xl font-bold gradient-text mb-8 py-4"
+            aria-label="Support Social Causes Using Web3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -110,33 +120,7 @@ export function Hero() {
             initial="initial"
             animate="animate"
           >
-            {categories.map((category) => (
-              <motion.div
-                key={category.id}
-                variants={badgeVariants}
-                whileHover="hover"
-                whileTap="tap"
-                className="relative"
-              >
-                <Badge
-                  variant="secondary"
-                  className={`px-4 py-2 cursor-pointer transition-all duration-300 ${category.color}`}
-                >
-                  <motion.span
-                    className="mr-2"
-                    animate={{ rotate: [0, 5, -5, 0] }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: 'easeInOut',
-                    }}
-                  >
-                    {category.icon}
-                  </motion.span>
-                  {category.label}
-                </Badge>
-              </motion.div>
-            ))}
+            {categories.map(renderCategory)}
           </motion.div>
 
           <motion.div
@@ -178,12 +162,3 @@ export function Hero() {
     </section>
   );
 };
-
-// Interfaces
-interface Stat {
-  id: string;
-  value: string;
-  label: string;
-  icon: React.ReactNode;
-  highlight?: boolean;
-}

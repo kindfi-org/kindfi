@@ -1,49 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  Apple,
-  Facebook,
-  Globe,
-  Mail,
-} from 'lucide-react';
 import { Card, CardContent } from '~/components/base/card';
 import { SocialButton } from '~/components/shared/social-cta';
-import { features } from '~/lib/mock-data/mock-features';
+import { features, socialButtons, statistics } from '~/lib/mock-data/mock-final-cta-section';
 
-// Constants
-const socialButtons: SocialButtonProps[] = [
-  {
-    id: 'email-social-button-id',
-    icon: <Mail className="w-5 h-5" />,
-    provider: 'Correo',
-    onClick: () => console.log('Email login'),
-    className: 'bg-teal-600 hover:bg-teal-700 text-white',
-  },
-  {
-    id: 'google-social-button-id',
-    icon: <Globe className="w-5 h-5" />,
-    provider: 'Google',
-    onClick: () => console.log('Google login'),
-    className: 'bg-teal-600 hover:bg-teal-700 text-white',
-  },
-  {
-    id: 'facebook-social-button-id',
-    icon: <Facebook className="w-5 h-5" />,
-    provider: 'Facebook',
-    onClick: () => console.log('Facebook login'),
-    className: 'bg-teal-600 hover:bg-teal-700 text-white',
-  },
-  {
-    id: 'apple-social-button-id',
-    icon: <Apple className="w-5 h-5" />,
-    provider: 'Apple',
-    onClick: () => console.log('Apple login'),
-    className: 'bg-teal-600 hover:bg-teal-700 text-white',
-  },
-];
-
-// Component
 export const FinalCTA = () => {
   return (
     <section className="relative py-24 overflow-hidden">
@@ -123,15 +84,15 @@ export const FinalCTA = () => {
                 <div className="grid grid-cols-2 gap-6">
                   <div className="text-center">
                     <div className="text-3xl font-bold gradient-text mb-2">
-                      100+
+                      {statistics.projects.value}
                     </div>
-                    <div className="text-gray-600">Verified Project</div>
+                    <div className="text-gray-600">{statistics.projects.label}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold gradient-text mb-2">
-                      $720M
+                      {statistics.capitalRaised.value}
                     </div>
-                    <div className="text-gray-600">Capital Raised</div>
+                    <div className="text-gray-600">{statistics.capitalRaised.label}</div>
                   </div>
                 </div>
               </CardContent>
@@ -164,12 +125,3 @@ export const FinalCTA = () => {
     </section>
   );
 };
-
-// Interfaces
-interface SocialButtonProps {
-  id: string;
-  icon: React.ReactNode;
-  provider: string;
-  onClick: () => void;
-  className: string;
-}

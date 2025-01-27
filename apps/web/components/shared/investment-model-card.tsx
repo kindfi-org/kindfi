@@ -1,12 +1,13 @@
 import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardFooter } from '~/components/base/card'
+import { ModelVariant } from '~/lib/mock-data/mock-how-it-works-section';
 
-enum ModelVariant {
-  SECURE = 'secure',
-  SOCIAL = 'social',
-  BLOCKCHAIN = 'blockchain'
-}
+const variantStyles = {
+	[ModelVariant.SECURE]: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
+	[ModelVariant.SOCIAL]: 'bg-blue-50 hover:bg-blue-100 border-blue-200',
+	[ModelVariant.BLOCKCHAIN]: 'bg-purple-50 hover:bg-purple-100 border-purple-200',
+};
 
 interface InvestmentModelCardProps {
 	title: string
@@ -25,12 +26,6 @@ export const InvestmentModelCard = ({
 	benefits,
 	onLearnMore,
 }: InvestmentModelCardProps) => {
-	const variantStyles = {
-		[ModelVariant.SECURE]: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
-		[ModelVariant.SOCIAL]: 'bg-blue-50 hover:bg-blue-100 border-blue-200',
-		[ModelVariant.BLOCKCHAIN]: 'bg-purple-50 hover:bg-purple-100 border-purple-200',
-	}
-
 	return (
 		<Card
 			className={`transition-all duration-200 ${variantStyles[variant]} border`}

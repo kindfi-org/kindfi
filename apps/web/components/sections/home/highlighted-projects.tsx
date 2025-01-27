@@ -13,7 +13,6 @@ import { ProjectCard } from "~/components/shared/project-card";
 import { SectionCaption } from "~/components/shared/section-caption";
 import { projects } from "~/lib/mock-data/mock-projects";
 
-// Component
 export function HighlightedProjects() {
   return (
     <section className="w-full px-4 py-10 sm:px-6 lg:px-8">

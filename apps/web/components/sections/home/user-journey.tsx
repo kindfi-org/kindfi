@@ -1,98 +1,14 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronRight, Rocket, Users } from "lucide-react";
 import React from "react";
 import { Button } from "~/components/base/button";
+import { investorSteps, projectSteps } from "~/lib/mock-data/mock-user-journey";
 
-// Constants
-const projectSteps: Step[] = [
-  {
-    number: 1,
-    title: "Project Registration",
-    description:
-      "Share the key details of your idea and set clear fundraising goals to kickstart your campaign.",
-    active: true,
-    icon: <Rocket className="w-5 h-5" />,
-  },
-  {
-    number: 2,
-    title: "Review and Approval",
-    description:
-      "Our team evaluates the feasibility of your proposal to ensure transparency and maximize its potential for success.",
-    active: false,
-    icon: <ChevronRight className="w-5 h-5" />,
-  },
-  {
-    number: 3,
-    title: "Campaign Preparation",
-    description:
-      "Refine and optimize your campaign to make it ready for an impactful launch on the platform.",
-    active: false,
-    icon: <ChevronRight className="w-5 h-5" />,
-  },
-  {
-    number: 4,
-    title: "Launch and Promotion",
-    description:
-      "Bring your project to life by launching it for investors and start collecting contributions.",
-    active: false,
-    icon: <ChevronRight className="w-5 h-5" />,
-  },
-  {
-    number: 5,
-    title: "Fund Reception",
-    description:
-      "Once your goal is reached, withdraw your funds and begin building your vision for the future.",
-    active: false,
-    icon: <ChevronRight className="w-5 h-5" />,
-  },
-];
+type ViewType = "project" | "investor";
 
-const investorSteps: Step[] = [
-  {
-    number: 1,
-    title: "Explore Projects",
-    description:
-      "Browse a diverse range of projects aligned with your interests and values, and discover opportunities to make an impact.",
-    active: true,
-    icon: <Users className="w-5 h-5" />,
-  },
-  {
-    number: 2,
-    title: "Analyze Project Details",
-    description:
-      "Access key information about each project, including objectives, progress, and potential impact.",
-    active: false,
-    icon: <ChevronRight className="w-5 h-5" />,
-  },
-  {
-    number: 3,
-    title: "Contribute to Projects",
-    description:
-      "Choose the projects that resonate with you the most and make your contribution with ease.",
-    active: false,
-    icon: <ChevronRight className="w-5 h-5" />,
-  },
-  {
-    number: 4,
-    title: "Real-Time Tracking",
-    description:
-      "Monitor project progress in real-time and receive regular updates on milestones and achievements.",
-    active: false,
-    icon: <ChevronRight className="w-5 h-5" />,
-  },
-  {
-    number: 5,
-    title: "Rewards and Engagement",
-    description:
-      "Receive exclusive rewards like NFTs, tokens, or access to special activities as the projects you supported reach completion.",
-    active: false,
-    icon: <ChevronRight className="w-5 h-5" />,
-  },
-];
+const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Component
 export function UserJourney() {
   const [activeView, setActiveView] = React.useState<ViewType>("project");
 
@@ -109,7 +25,10 @@ export function UserJourney() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{
+              duration: shouldReduceMotion ? 0 : 0.5,
+              y: { duration: shouldReduceMotion ? 0 : 0.5 }
+            }}
           >
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Transform Realities Using the <span className="gradient-text">Power of the Web3</span>
@@ -130,24 +49,36 @@ export function UserJourney() {
               <Button
                 variant={activeView === "project" ? "default" : "ghost"}
                 className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${activeView === "project"
-                    ? "gradient-btn text-white"
-                    : "text-gray-600 hover:text-emerald-600"
+                  ? "gradient-btn text-white"
+                  : "text-gray-600 hover:text-emerald-600"
                   }`}
                 onClick={() => setActiveView("project")}
                 aria-pressed={activeView === "project"}
                 aria-label="Show project creator journey"
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    setActiveView("investor");
+                  }
+                }}
               >
                 Social Cause Path
               </Button>
               <Button
                 variant={activeView === "investor" ? "default" : "ghost"}
                 className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${activeView === "investor"
-                    ? "gradient-btn text-white"
-                    : "text-gray-600 hover:text-emerald-600"
+                  ? "gradient-btn text-white"
+                  : "text-gray-600 hover:text-emerald-600"
                   }`}
                 onClick={() => setActiveView("investor")}
                 aria-pressed={activeView === "investor"}
                 aria-label="Show investor journey"
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    setActiveView("project");
+                  }
+                }}
               >
                 Supporter Path
               </Button>
@@ -208,14 +139,3 @@ export function UserJourney() {
     </section>
   );
 };
-
-// Interfaces
-interface Step {
-  number: number;
-  title: string;
-  description: string;
-  active: boolean;
-  icon: React.ReactNode;
-}
-
-type ViewType = "project" | "investor";
