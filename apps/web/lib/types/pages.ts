@@ -8,7 +8,7 @@ export interface PagePropsBase {
 
 export interface NavigationItem {
 	title: string
-	href: string
+	href: `/${string}` | `https://${string}` | `http://${string}`
 	description?: string
 }
 
