@@ -12,7 +12,7 @@ export interface Milestone {
     description: string;
     amount: number;
     status: "PENDING" | "APPROVED" | "REJECTED";
-    dueDate: Date;
+    dueDate: string;
 }
 
 export interface EscrowParties {
