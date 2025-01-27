@@ -6,8 +6,6 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 
-//e
-
 const Dialog = DialogPrimitive.Root
 
 const DialogTrigger = DialogPrimitive.Trigger
@@ -33,10 +31,20 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 const DialogContent = React.forwardRef<
 	HTMLDialogElement,
-	React.ComponentPropsWithoutRef<'dialog'>
->(({ className, children, ...props }, ref) => {
-	const titleId = React.useId()
-	const descriptionId = React.useId()
+	React.ComponentPropsWithoutRef<'dialog'> & {
+		onOpenChange?: (open: boolean) => void
+	}
+>(({ className, children, onOpenChange, ...props }, ref) => {
+	const fallbackTitleId = React.useId()
+	const fallbackDescriptionId = React.useId()
+	const mergedTitleId = props['aria-labelledby'] || fallbackTitleId
+	const mergedDescriptionId = props['aria-describedby'] || fallbackDescriptionId
+
+	const handleKeyDown = (event: React.KeyboardEvent<HTMLDialogElement>) => {
+		if (event.key === 'Escape') {
+			onOpenChange?.(false)
+		}
+	}
 
 	return (
 		<DialogPortal>
@@ -44,13 +52,14 @@ const DialogContent = React.forwardRef<
 			<dialog
 				ref={ref}
 				open={props.open}
-				aria-labelledby={titleId}
-				aria-describedby={descriptionId}
+				aria-labelledby={mergedTitleId}
+				aria-describedby={mergedDescriptionId}
 				className={cn(
 					'fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg',
 					className,
 				)}
 				{...props}
+				onKeyDown={handleKeyDown}
 			>
 				{children}
 				<DialogPrimitive.Close
@@ -97,36 +106,27 @@ DialogFooter.displayName = 'DialogFooter'
 const DialogTitle = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Title>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => {
-	const titleId = props.id || React.useId()
-	return (
-		<DialogPrimitive.Title ref={ref} asChild id={titleId}>
-			<h2
-				className={cn(
-					'text-lg font-semibold leading-none tracking-tight',
-					className,
-				)}
-				{...props}
-			/>
-		</DialogPrimitive.Title>
-	)
-})
+>(({ className, ...props }, ref) => (
+	<DialogPrimitive.Title ref={ref} asChild>
+		<h2
+			className={cn(
+				'text-lg font-semibold leading-none tracking-tight',
+				className,
+			)}
+			{...props}
+		/>
+	</DialogPrimitive.Title>
+))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
 const DialogDescription = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Description>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => {
-	const descriptionId = props.id || React.useId()
-	return (
-		<DialogPrimitive.Description ref={ref} asChild id={descriptionId}>
-			<p
-				className={cn('text-sm text-muted-foreground', className)}
-				{...props}
-			/>
-		</DialogPrimitive.Description>
-	)
-})
+>(({ className, ...props }, ref) => (
+	<DialogPrimitive.Description ref={ref} asChild>
+		<p className={cn('text-sm text-muted-foreground', className)} {...props} />
+	</DialogPrimitive.Description>
+))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 export {
