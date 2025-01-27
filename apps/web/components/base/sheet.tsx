@@ -8,14 +8,33 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 /**
  * Sheet component for displaying a sliding panel UI
+ * 
+ * The sheet can slide in from different sides of the screen:
+ * - right (default)
+ * - left
+ * - top
+ * - bottom
+ * 
+ * Features smooth enter/exit animations and backdrop overlay.
  * @component
  * @example
  * <Sheet>
  *   <SheetTrigger>Open Sheet</SheetTrigger>
- *   <SheetContent>
+ *   <SheetContent side="right">
  *     <SheetHeader>
  *       <SheetTitle>Sheet Title</SheetTitle>
  *       <SheetDescription>Description text</SheetDescription>
+ *     </SheetHeader>
+ *   </SheetContent>
+ * </Sheet>
+ * 
+ * @example
+ * // Sheet sliding from the left
+ * <Sheet>
+ *   <SheetTrigger>Open Left Sheet</SheetTrigger>
+ *   <SheetContent side="left">
+ *     <SheetHeader>
+ *       <SheetTitle>Left Sheet</SheetTitle>
  *     </SheetHeader>
  *   </SheetContent>
  * </Sheet>

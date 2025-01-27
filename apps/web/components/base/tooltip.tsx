@@ -10,12 +10,30 @@ import { cn } from '~/lib/utils'
  * Can be used to display informative messages when users hover over elements.
  *
  * @component
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/tooltip Radix UI Tooltip}
+ *
+ * @remarks
+ * Must be wrapped in a TooltipProvider component for proper context management.
+ * Follows WAI-ARIA tooltip pattern for accessibility.
  *
  * @example
+ * // Basic usage with provider
  * <Tooltip>
  *   <TooltipTrigger>Hover over me</TooltipTrigger>
  *   <TooltipContent>Here is the tooltip content</TooltipContent>
  * </Tooltip>
+ *
+ * // Complete example with provider
+ * <TooltipProvider>
+ *   <Tooltip>
+ *     <TooltipTrigger asChild>
+ *       <button>Hover me</button>
+ *     </TooltipTrigger>
+ *     <TooltipContent>
+ *       Tooltip message
+ *     </TooltipContent>
+ *   </Tooltip>
+ * </TooltipProvider>
  */
 /**
  * Provider component for Tooltip context.

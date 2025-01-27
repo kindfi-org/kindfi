@@ -8,8 +8,15 @@ import { cn } from '~/lib/utils'
  * @component
  * @param {React.ComponentProps<'textarea'>} props - The component props.
  * @param {string} [props.className] - Additional custom CSS classes to apply to the textarea.
+ * @param {...React.ComponentProps<'textarea'>} props.* - All standard HTML textarea attributes are supported.
  * @example
- * <Textarea placeholder="Enter your text here" />
+ * <Textarea
+ *   placeholder="Enter your message"
+ *   className="min-h-[120px]"
+ *   defaultValue="Default text"
+ *   onChange={(e) => console.log(e.target.value)}
+ * />
+ * @returns {JSX.Element} The rendered Textarea component
  */
 const Textarea = React.forwardRef<
 	HTMLTextAreaElement,

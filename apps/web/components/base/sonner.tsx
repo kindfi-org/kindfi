@@ -7,11 +7,24 @@ import { Toaster as Sonner } from 'sonner'
  * @component
  * @param {ToasterProps} props - The component props
  * @param {import('sonner').ToastOptions} [props.toastOptions] - Custom options for toast notifications
- * @param {string} [props.theme='system'] - The theme for the toaster, which can be 'system', 'dark', or 'light'
+ * @param {'system' | 'dark' | 'light'} [props.theme='system'] - The theme for the toaster
  * @example
+ * // 1. Add Toaster to your app
  * <Toaster>
- *   <p>Toast message</p>
  * </Toaster>
+ * 
+ * // 2. Use toast methods anywhere in your app
+ * import { toast } from 'sonner'
+ * 
+ * // Success notification
+ * toast.success('Payment successful', {
+ *   description: 'Your payment has been processed'
+ * })
+ * 
+ * // Error notification
+ * toast.error('Payment failed', {
+ *   description: 'Please try again'
+ * })
  */
 type ToasterProps = React.ComponentProps<typeof Sonner>
 

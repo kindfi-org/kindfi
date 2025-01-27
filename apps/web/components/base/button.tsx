@@ -7,6 +7,13 @@ import { cn } from '~/lib/utils'
 /**
  * `buttonVariants` defines the styles and variants for the `Button` component.
  * It includes options for different button variants and sizes, along with default configurations.
+ *
+ * @example
+ * // Default variant with large size
+ * buttonVariants({ variant: 'default', size: 'lg' })
+ * 
+ * // Destructive variant with icon size
+ * buttonVariants({ variant: 'destructive', size: 'icon' })
  */
 const buttonVariants = cva(
 	'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',

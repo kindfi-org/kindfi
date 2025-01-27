@@ -6,20 +6,25 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 /**
  * Separator component for visually dividing content.
+ * Built on top of Radix UI Separator primitive for reliable accessibility.
  *
  * @component
  * @param {object} props - The component props.
  * @param {string} [props.className] - Additional CSS classes.
  * @param {'horizontal' | 'vertical'} [props.orientation='horizontal'] - Defines the orientation of the separator.
  * @param {boolean} [props.decorative=true] - Whether the separator is purely decorative.
+ * @aria Implements proper ARIA attributes for accessibility.
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/separator Radix UI Separator}
  *
  * @example
  * // Horizontal separator
- * <Separator />
+ * <Separator className="my-4" />
  *
  * @example
  * // Vertical separator
- * <Separator orientation="vertical" />
+ * <Separator orientation="vertical" className="mx-2 h-6" />
+ * 
+ * @returns {JSX.Element} The rendered Separator component
  */
 const Separator = React.forwardRef<
 	React.ElementRef<typeof SeparatorPrimitive.Root>,

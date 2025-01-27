@@ -6,20 +6,53 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 
-// Dialog component using Radix UI's Dialog component
+/**
+ * Root Dialog component that manages the dialog's open state.
+ * Built on top of Radix UI's Dialog primitive.
+ * 
+ * @component
+ * @example
+ * <Dialog>
+ *   <DialogTrigger>Open</DialogTrigger>
+ *   <DialogContent>Dialog content</DialogContent>
+ * </Dialog>
+ */
 const Dialog = DialogPrimitive.Root
 
-// Trigger for opening the dialog
+/**
+ * Button that opens the dialog when clicked.
+ * 
+ * @component
+ * @example
+ * <DialogTrigger>Open Dialog</DialogTrigger>
+ */
 const DialogTrigger = DialogPrimitive.Trigger
 
-// Portal for rendering the dialog in a separate DOM node
+/**
+ * Portal component that renders the dialog in a separate DOM node.
+ * Ensures proper stacking context and z-index handling.
+ * 
+ * @component
+ */
 const DialogPortal = DialogPrimitive.Portal
 
-// Close button for the dialog
+/**
+ * Button that closes the dialog when clicked.
+ * 
+ * @component
+ * @example
+ * <DialogClose>Close Dialog</DialogClose>
+ */
+const DialogClose = DialogPrimitive.Close
 const DialogClose = DialogPrimitive.Close
 
 /**
  * DialogOverlay component for the background overlay of the dialog.
+ * 
+ * @accessibility
+ * - Provides a semi-transparent backdrop that helps maintain focus within the dialog
+ * - Clicking the overlay closes the dialog by default
+ * - Helps create a focus trap within the dialog
  *
  * @param {React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>} props - The properties for the overlay.
  * @param {React.Ref} ref - The reference to the overlay element.

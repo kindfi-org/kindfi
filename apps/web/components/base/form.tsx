@@ -85,6 +85,7 @@ const useFormField = () => {
 
 /**
  * Context for managing form item state.
+ * @property {string} id - Unique identifier for the form item, used for accessibility
  */
 type FormItemContextValue = {
 	id: string

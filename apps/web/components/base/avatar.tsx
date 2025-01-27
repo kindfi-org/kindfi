@@ -10,6 +10,9 @@ import { cn } from '~/lib/utils'
  * It supports custom styles and handles the layout of the avatar.
  *
  * @component
+ * @accessibility
+ * - Uses ARIA attributes for better screen reader support
+ * - Keyboard navigation support through Radix UI primitives
  * @example
  * <Avatar>
  *   <AvatarImage src="avatar.jpg" alt="User Avatar" />
@@ -45,8 +48,8 @@ Avatar.displayName = AvatarPrimitive.Root.displayName
  * <AvatarImage src="avatar.jpg" alt="User Avatar" />
  *
  * @param {React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>} props - The props for the `AvatarImage` component.
- * @param {string} props.src - The source URL for the avatar image.
- * @param {string} props.alt - The alt text for the avatar image.
+ * @param {string} props.src - Required. The source URL for the avatar image.
+ * @param {string} props.alt - Required. The alt text for the avatar image for accessibility.
  * @param {string} [props.className] - Additional class names to apply custom styles to the image.
  * @param {React.Ref} ref - The ref to forward to the avatar image element.
  * @returns {JSX.Element} The rendered avatar image component.
@@ -66,6 +69,11 @@ AvatarImage.displayName = AvatarPrimitive.Image.displayName
 /**
  * `AvatarFallback` component is displayed when the avatar image is not available.
  * It provides a fallback display, such as initials or a placeholder icon.
+ * 
+ * The fallback is shown in the following scenarios:
+ * - While the image is loading
+ * - If the image fails to load
+ * - When no image source is provided
  *
  * @component
  * @example

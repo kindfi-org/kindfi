@@ -7,9 +7,28 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 /**
  * Checkbox component that wraps Radix UI's `Checkbox` and provides custom styling.
+ * This component is fully accessible, supporting keyboard navigation and screen readers.
  *
  * @param {React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>} props - The properties for the checkbox component.
  * @param {React.Ref} ref - The reference to the root checkbox element.
+ * @param {string} [props.className] - Additional CSS classes for styling
+ * 
+ * @example
+ * // Basic usage
+ * <Checkbox id="terms" />
+ * 
+ * // With label and form integration
+ * <form onSubmit={handleSubmit}>
+ *   <div className="flex items-center space-x-2">
+ *     <Checkbox id="terms" name="terms" required />
+ *     <label
+ *       htmlFor="terms"
+ *       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+ *     >
+ *       Accept terms and conditions
+ *     </label>
+ *   </div>
+ * </form>
  *
  * @returns {JSX.Element} The rendered checkbox component.
  */
