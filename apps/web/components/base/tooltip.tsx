@@ -17,11 +17,32 @@ import { cn } from '~/lib/utils'
  *   <TooltipContent>Here is the tooltip content</TooltipContent>
  * </Tooltip>
  */
-
+/**
+ * Provider component for Tooltip context.
+ * Must wrap any usage of Tooltip components.
+ *
+ * @component
+ */
 const TooltipProvider = TooltipPrimitive.Provider
 
 const Tooltip = TooltipPrimitive.Root
 
+/**
+ * Trigger element that activates the tooltip on hover.
+ *
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger>} props
+ * @param {boolean} [props.asChild] - When true, the trigger will be rendered as its child element
+ *
+ * @example
+ * <TooltipTrigger>Hover me</TooltipTrigger>
+ *
+ * // Using asChild prop
+ * <TooltipTrigger asChild>
+ *   <button>Custom trigger</button>
+ * </TooltipTrigger>
+ */
+const TooltipTrigger = TooltipPrimitive.Trigger
 const TooltipTrigger = TooltipPrimitive.Trigger
 /**
  * TooltipContent component that renders the tooltip message.
