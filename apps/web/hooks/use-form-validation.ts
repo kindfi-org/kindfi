@@ -1,5 +1,12 @@
 import { useState } from 'react'
 
+/**
+ * Configuration options for form validation rules
+ * @interface ValidationRules
+ * @property {boolean} [email] - Enable email format validation
+ * @property {boolean} [password] - Enable password validation
+ * @property {number} [minLength] - Minimum length requirement for password
+ */
 interface ValidationRules {
 	email?: boolean
 	password?: boolean
