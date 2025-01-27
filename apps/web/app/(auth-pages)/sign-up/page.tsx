@@ -31,12 +31,16 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 	//   );
 	// }
 
-	const { isEmailInvalid, isPasswordInvalid, handleValidation } =
-		useFormValidation({
-			email: true,
-			password: true,
-			minLength: 6,
-		})
+	const {
+		isEmailInvalid,
+		isPasswordInvalid,
+		handleValidation,
+		resetValidation,
+	} = useFormValidation({
+		email: true,
+		password: true,
+		minLength: 6,
+	})
 
 	return (
 		<AuthLayout>
@@ -77,6 +81,9 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 										aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
 										aria-invalid={isEmailInvalid}
 										onChange={handleValidation}
+										onSubmit={() => {
+											resetValidation()
+										}}
 									/>
 									<span id="email-description" className="sr-only">
 										Enter your email address to create your account

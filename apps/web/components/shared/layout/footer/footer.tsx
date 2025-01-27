@@ -10,9 +10,10 @@ import { Input } from '~/components/base/input'
 import { useFormValidation } from '~/hooks/use-form-validation'
 
 const Footer = () => {
-	const { isEmailInvalid, handleValidation } = useFormValidation({
-		email: true,
-	})
+	const { isEmailInvalid, handleValidation, resetValidation } =
+		useFormValidation({
+			email: true,
+		})
 	const mainLinks = [
 		{
 			title: 'Projects',
@@ -104,6 +105,9 @@ const Footer = () => {
 									required
 									aria-invalid={isEmailInvalid}
 									onChange={handleValidation}
+									onSubmit={() => {
+										resetValidation()
+									}}
 								/>
 								<Button
 									size="sm"

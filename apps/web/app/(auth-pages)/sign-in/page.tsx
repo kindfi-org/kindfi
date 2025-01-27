@@ -12,12 +12,16 @@ import { useFormValidation } from '~/hooks/use-form-validation'
 
 export default function Login(props: { searchParams: Promise<Message> }) {
 	const searchParams = props.searchParams
-	const { isEmailInvalid, isPasswordInvalid, handleValidation } =
-		useFormValidation({
-			email: true,
-			password: true,
-			minLength: 6,
-		})
+	const {
+		isEmailInvalid,
+		isPasswordInvalid,
+		handleValidation,
+		resetValidation,
+	} = useFormValidation({
+		email: true,
+		password: true,
+		minLength: 6,
+	})
 
 	return (
 		<AuthLayout>
@@ -51,6 +55,9 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 								aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
 								aria-invalid={isEmailInvalid}
 								onChange={handleValidation}
+								onSubmit={() => {
+									resetValidation()
+								}}
 							/>
 							<span id="email-description" className="sr-only">
 								Please enter your registered email address
