@@ -6,6 +6,8 @@ import { Button } from "~/components/base/button";
 import { SectionCaption } from "~/components/shared/section-caption";
 
 // Constants
+const ANIMATION_DURATION = 20;
+
 const features: Feature[] = [
   {
     id: "collaborate-and-earn-rewards-id",
@@ -15,7 +17,7 @@ const features: Feature[] = [
           initial={{ rotate: 0 }}
           animate={{ rotate: 360 }}
           transition={{
-            duration: 20,
+            duration: ANIMATION_DURATION,
             repeat: Number.POSITIVE_INFINITY,
             ease: "linear",
           }}
@@ -37,7 +39,7 @@ const features: Feature[] = [
           initial={{ rotate: 0 }}
           animate={{ rotate: -360 }}
           transition={{
-            duration: 20,
+            duration: ANIMATION_DURATION,
             repeat: Number.POSITIVE_INFINITY,
             ease: "linear",
           }}
@@ -59,7 +61,7 @@ const features: Feature[] = [
           initial={{ rotate: 0 }}
           animate={{ rotate: 360 }}
           transition={{
-            duration: 20,
+            duration: ANIMATION_DURATION,
             repeat: Number.POSITIVE_INFINITY,
             ease: "linear",
           }}
@@ -155,13 +157,22 @@ export function JoinUs() {
               traditional systems.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="gradient-btn text-white px-8">
+            <Button 
+                size="lg" 
+                className="gradient-btn text-white px-8"
+                onClick={() => {
+                  // TODO: Implement join revolution action
+                }}
+              >
                 Join the Revolution
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="gradient-border-btn hover:bg-teal-50"
+                onClick={() => {
+                  // TODO: Implement discovery navigation
+                }}
               >
                 Discover more about KindFi
               </Button>

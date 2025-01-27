@@ -131,7 +131,8 @@ export function PlatformOverview() {
                   href="https://www.trustlesswork.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 underline hover:text-blue-800"
+                  referrerPolicy="no-referrer"
+                  className="text-blue-600 underline hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   Trustless Work
                 </a>

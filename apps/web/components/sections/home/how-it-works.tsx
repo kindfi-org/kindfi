@@ -4,14 +4,20 @@ import { Globe, Shield, Users } from 'lucide-react';
 import { InvestmentModelCard } from '~/components/shared/investment-model-card';
 import { SectionCaption } from '~/components/shared/section-caption';
 
+enum ModelVariant {
+  SECURE = 'secure',
+  SOCIAL = 'social',
+  BLOCKCHAIN = 'blockchain'
+}
+
 // Constants
 const models: Model[] = [
   {
-    id: 'secure-escrow-id',
+    id: `model-${ModelVariant.SECURE}`,
     title: 'Secure Escrow',
     description:
       "Funds are held in a verified escrow account by Trustless work until the project’s goal is met, ensuring the safety and reliability of your contributions.",
-    variant: 'a',
+    variant: ModelVariant.SECURE,
     icon: <Shield className="w-6 h-6 mb-4 text-emerald-600" />,
     benefits: [
       { id: 'smart-contracts-id', text: 'Smart Contracts' },
@@ -20,11 +26,11 @@ const models: Model[] = [
     ],
   },
   {
-    id: 'social-impact-id',
+    id: `model-${ModelVariant.SOCIAL}`,
     title: 'Social Impact',
     description:
       "Once a project achieves its goal, funds are directly released to the social cause, fully backed by smart contracts to ensure transparency and trust.",
-    variant: 'b',
+    variant:  ModelVariant.SOCIAL,
     icon: <Users className="w-6 h-6 mb-4 text-blue-600" />,
     benefits: [
       { id: 'impact-reports-id', text: 'Impact Reports' },
@@ -33,11 +39,11 @@ const models: Model[] = [
     ],
   },
   {
-    id: 'blockchain-web3-id',
+    id: `model-${ModelVariant.BLOCKCHAIN}`,
     title: 'Powered by Blockchain and Web3',
     description:
       "Connect your wallet and participate securely, transparently, and efficiently. Every transaction is recorded on the blockchain.",
-    variant: 'c',
+    variant: ModelVariant.BLOCKCHAIN,
     icon: <Globe className="w-6 h-6 mb-4 text-teal-600" />,
     benefits: [
       { id: 'instant-transactions-id', text: 'Instant Transactions' },
@@ -84,7 +90,7 @@ interface Model {
   id: string;
   title: string;
   description: string;
-  variant: 'a' | 'b' | 'c';
+  variant: ModelVariant;
   icon: React.ReactNode;
   benefits: Benefit[];
 }

@@ -94,9 +94,7 @@ const investorSteps: Step[] = [
 
 // Component
 export function UserJourney() {
-  const [activeView, setActiveView] = React.useState<"project" | "investor">(
-    "project"
-  );
+  const [activeView, setActiveView] = React.useState<ViewType>("project");
 
   const steps = activeView === "project" ? projectSteps : investorSteps;
 
@@ -131,23 +129,25 @@ export function UserJourney() {
             <div className="inline-flex rounded-full p-1 bg-white shadow-sm border border-gray-100">
               <Button
                 variant={activeView === "project" ? "default" : "ghost"}
-                className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
-                  activeView === "project"
+                className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${activeView === "project"
                     ? "gradient-btn text-white"
                     : "text-gray-600 hover:text-emerald-600"
-                }`}
+                  }`}
                 onClick={() => setActiveView("project")}
+                aria-pressed={activeView === "project"}
+                aria-label="Show project creator journey"
               >
                 Social Cause Path
               </Button>
               <Button
                 variant={activeView === "investor" ? "default" : "ghost"}
-                className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
-                  activeView === "investor"
+                className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${activeView === "investor"
                     ? "gradient-btn text-white"
                     : "text-gray-600 hover:text-emerald-600"
-                }`}
+                  }`}
                 onClick={() => setActiveView("investor")}
+                aria-pressed={activeView === "investor"}
+                aria-label="Show investor journey"
               >
                 Supporter Path
               </Button>
@@ -217,3 +217,5 @@ interface Step {
   active: boolean;
   icon: React.ReactNode;
 }
+
+type ViewType = "project" | "investor";

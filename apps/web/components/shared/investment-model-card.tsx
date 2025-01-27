@@ -2,10 +2,16 @@ import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardFooter } from '~/components/base/card'
 
+enum ModelVariant {
+  SECURE = 'secure',
+  SOCIAL = 'social',
+  BLOCKCHAIN = 'blockchain'
+}
+
 interface InvestmentModelCardProps {
 	title: string
 	description: string
-	variant: 'a' | 'b' | 'c'
+	variant: ModelVariant
 	icon: React.ReactNode
 	benefits: { id: string; text: string }[]
 	onLearnMore?: () => void
@@ -20,9 +26,9 @@ export const InvestmentModelCard = ({
 	onLearnMore,
 }: InvestmentModelCardProps) => {
 	const variantStyles = {
-		a: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
-		b: 'bg-blue-50 hover:bg-blue-100 border-blue-200',
-		c: 'bg-purple-50 hover:bg-purple-100 border-purple-200',
+		[ModelVariant.SECURE]: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
+		[ModelVariant.SOCIAL]: 'bg-blue-50 hover:bg-blue-100 border-blue-200',
+		[ModelVariant.BLOCKCHAIN]: 'bg-purple-50 hover:bg-purple-100 border-purple-200',
 	}
 
 	return (
