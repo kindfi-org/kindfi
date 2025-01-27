@@ -16,9 +16,7 @@ import { Label } from '~/components/base/label'
 import type { Message } from '~/components/form-message'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 
-export default async function Signup(props: {
-	searchParams: Promise<Message>
-}) {
+export default function Signup(props: { searchParams: Promise<Message> }) {
 	// Show success message if registration was successful
 	// if (searchParams.success) {
 	//   return (
