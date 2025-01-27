@@ -11,14 +11,33 @@ import { cn } from '~/lib/utils'
  * It uses Radix UI's Label component for accessibility and styling, with support for additional variant-based customization.
  *
  * @component
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/label Radix UI Label Primitive}
  *
  * @example
+ * // Basic usage
+ * <Label htmlFor="email">Email</Label>
+ *
+ * // With custom styling
  * <Label htmlFor="email" className="text-primary">Email</Label>
+ *
+ * // With form control
+ * <div>
+ *   <Label htmlFor="email">Email</Label>
+ *   <Input id="email" type="email" />
+ * </div>
+ *
+ * @accessibility
+ * - Automatically associates with form controls using htmlFor
+ * - Supports keyboard navigation and screen readers
  *
  * @param {React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>} props - The component props.
  * @param {string} [props.className] - Custom CSS classes to apply to the label.
+ * @param {VariantProps<typeof labelVariants>} props.variants - Style variants from class-variance-authority.
  *
  * @returns {JSX.Element} The Label component.
+ *
+ * @remarks
+ * This component uses React.forwardRef to allow ref forwarding to the underlying Radix UI Label component.
  */
 const labelVariants = cva(
 	'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
