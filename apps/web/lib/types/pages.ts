@@ -12,6 +12,11 @@ export interface NavigationItem {
 	description?: string
 }
 
+/**
+ * Represents a section of navigation items with a label.
+ * @property {NavigationItem[]} items - Array of navigation items in this section
+ * @property {string} label - Label for the navigation section
+ */
 export interface NavigationSection {
 	items: NavigationItem[]
 	label: string
