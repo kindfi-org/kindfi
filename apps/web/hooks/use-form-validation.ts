@@ -28,21 +28,23 @@ export function useFormValidation(rules: ValidationRules = {}) {
 		setIsPasswordInvalid(value.length < (rules.minLength || 6))
 	}
 
-	const validateField = (name: string, value: string) => {
-		switch (name) {
-			case 'email':
-				validateEmail(value)
-				break
-			case 'password':
-				validatePassword(value)
-				break
-		}
-	}
+type ValidFieldName = 'email' | 'password';
 
-	const handleValidation = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = e.target
-		validateField(name, value)
-	}
+const validateField = (name: ValidFieldName, value: string) => {
+    switch (name) {
+        case 'email':
+            validateEmail(value)
+            break
+        case 'password':
+            validatePassword(value)
+            break
+    }
+}
+
+const handleValidation = (e: React.ChangeEvent<HTMLInputElement & { name: ValidFieldName }>) => {
+    const { name, value } = e.target
+    validateField(name, value)
+}
 
 	return {
 		isEmailInvalid,
