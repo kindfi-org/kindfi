@@ -19,7 +19,7 @@ export function useFormValidation(rules: ValidationRules = {}) {
 
 	const validateEmail = (value: string) => {
 		if (!rules.email) return
-		const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+		const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 		setIsEmailInvalid(!emailRegex.test(value))
 	}
 
@@ -28,23 +28,25 @@ export function useFormValidation(rules: ValidationRules = {}) {
 		setIsPasswordInvalid(value.length < (rules.minLength || 6))
 	}
 
-type ValidFieldName = 'email' | 'password';
+	type ValidFieldName = 'email' | 'password'
 
-const validateField = (name: ValidFieldName, value: string) => {
-    switch (name) {
-        case 'email':
-            validateEmail(value)
-            break
-        case 'password':
-            validatePassword(value)
-            break
-    }
-}
+	const validateField = (name: ValidFieldName, value: string) => {
+		switch (name) {
+			case 'email':
+				validateEmail(value)
+				break
+			case 'password':
+				validatePassword(value)
+				break
+		}
+	}
 
-const handleValidation = (e: React.ChangeEvent<HTMLInputElement & { name: ValidFieldName }>) => {
-    const { name, value } = e.target
-    validateField(name, value)
-}
+	const handleValidation = (
+		e: React.ChangeEvent<HTMLInputElement & { name: ValidFieldName }>,
+	) => {
+		const { name, value } = e.target
+		validateField(name, value)
+	}
 
 	return {
 		isEmailInvalid,
