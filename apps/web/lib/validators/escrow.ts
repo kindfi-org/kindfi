@@ -19,7 +19,7 @@ const validateMilestone = (milestone: Milestone, index: number): string[] => {
     }
     if (
         !(milestone.dueDate instanceof Date) &&
-        isNaN(Date.parse(String(milestone.dueDate)))
+        Number.isNaN(Date.parse(String(milestone.dueDate)))
     ) {
         errors.push(`Milestone ${index + 1}: Invalid due date`);
     }
