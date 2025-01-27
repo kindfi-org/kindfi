@@ -59,7 +59,11 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 					</p>
 				</CardHeader>
 				<CardContent>
-					<form className="space-y-4" aria-label="Sign up">
+					<form
+						className="space-y-4"
+						aria-label="Sign up"
+						onSubmit={resetValidation}
+					>
 						<div className="space-y-4">
 							<div className="space-y-2">
 								<Label htmlFor="email" id="email-label">
@@ -81,9 +85,6 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 										aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
 										aria-invalid={isEmailInvalid}
 										onChange={handleValidation}
-										onSubmit={() => {
-											resetValidation()
-										}}
 									/>
 									<span id="email-description" className="sr-only">
 										Enter your email address to create your account

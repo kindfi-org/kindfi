@@ -39,7 +39,11 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 					</div>
 				}
 			>
-				<form className="space-y-4" aria-label="Sign in">
+				<form
+					className="space-y-4"
+					aria-label="Sign in"
+					onSubmit={resetValidation}
+				>
 					<div className="space-y-2">
 						<Label htmlFor="email" id="email-label">
 							Email
@@ -55,9 +59,6 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 								aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
 								aria-invalid={isEmailInvalid}
 								onChange={handleValidation}
-								onSubmit={() => {
-									resetValidation()
-								}}
 							/>
 							<span id="email-description" className="sr-only">
 								Please enter your registered email address

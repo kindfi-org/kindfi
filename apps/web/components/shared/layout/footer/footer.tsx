@@ -90,38 +90,34 @@ const Footer = () => {
 							<h3 id="newsletter-label" className="mb-2 text-sm font-semibold">
 								Keep in touch
 							</h3>
-							<div className="flex gap-2">
-								<Input
-									type="email"
-									name="email"
-									placeholder="tu@email.com"
-									className="max-w-[200px]"
-									aria-labelledby="newsletter-label"
-									aria-describedby={`${
-										isEmailInvalid
-											? 'newsletter-error'
-											: 'newsletter-description'
-									}`}
-									required
-									aria-invalid={isEmailInvalid}
-									onChange={handleValidation}
-									onSubmit={() => {
-										resetValidation()
-									}}
-								/>
-								<Button
-									size="sm"
-									className="bg-blue-600 hover:bg-blue-900 text-white"
-								>
-									Keep in touch
-								</Button>
-							</div>
-							<span id="newsletter-description" className="sr-only">
-								Enter your email address to receive our updates and newsletters
-							</span>
-							<span id="newsletter-error" className="sr-only">
-								Please enter a valid email address
-							</span>
+							<form onSubmit={resetValidation}>
+								<div className="flex gap-2">
+									<Input
+										type="email"
+										name="email"
+										placeholder="tu@email.com"
+										className="max-w-[200px]"
+										aria-labelledby="newsletter-label"
+										aria-describedby={`${isEmailInvalid ? 'newsletter-error' : 'newsletter-description'}`}
+										required
+										aria-invalid={isEmailInvalid}
+										onChange={handleValidation}
+									/>
+									<Button
+										size="sm"
+										className="bg-blue-600 hover:bg-blue-900 text-white"
+									>
+										Keep in touch
+									</Button>
+								</div>
+								<span id="newsletter-description" className="sr-only">
+									Enter your email address to receive our updates and
+									newsletters
+								</span>
+								<span id="newsletter-error" className="sr-only">
+									Please enter a valid email address
+								</span>
+							</form>
 						</div>
 					</div>
 
