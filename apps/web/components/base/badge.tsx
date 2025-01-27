@@ -23,10 +23,10 @@ import { cn } from '~/lib/utils'
 /**
  * Badge component variants and their respective styles.
  * @typedef {Object} BadgeVariants
- * @property {string} default - Default primary badge style.
- * @property {string} secondary - Secondary badge style.
- * @property {string} destructive - Destructive badge style (e.g., danger).
- * @property {string} outline - Outline style for badges.
+ * @property {string} default - Default primary badge style with solid background, used for general status indicators.
+ * @property {string} secondary - Secondary badge style with muted colors, suitable for less prominent information.
+ * @property {string} destructive - Destructive badge style with warning colors, used for error states or critical alerts.
+ * @property {string} outline - Minimal outline style without background, ideal for subtle indicators.
  */
 const badgeVariants = cva(
 	'inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
