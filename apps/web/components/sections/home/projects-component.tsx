@@ -14,6 +14,7 @@ import {
 	type ProjectCardProps,
 } from '~/components/shared/project-card'
 import { SectionCaption } from '~/components/shared/section-caption'
+import { projectsContent } from '~/constants/sections/projects'
 
 interface ProjectsShowcaseProps {
 	title: string
@@ -32,7 +33,7 @@ export const ProjectsShowcase = ({
 				<SectionCaption
 					title={title}
 					subtitle={subtitle}
-					highlightWords={['Better World', 'Change Lives']}
+					highlightWords={projectsContent.highlightWords}
 				/>
 
 				<div className="relative">
@@ -65,8 +66,8 @@ export const ProjectsShowcase = ({
 
 				<div className="mt-12 flex justify-center">
 					<CTAButtons
-						primaryText="Register Your Project"
-						secondaryText="Explore Causes"
+						primaryText={projectsContent.cta.primary}
+						secondaryText={projectsContent.cta.secondary}
 					/>
 				</div>
 			</div>
