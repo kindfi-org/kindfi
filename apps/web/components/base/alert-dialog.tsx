@@ -53,11 +53,38 @@ AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
 /**
  * The content section of the alert dialog.
  * This typically contains the message or other elements inside the dialog.
+ * When opened, focus is automatically trapped within the dialog content
+ * and returned to the trigger when closed.
  *
  * @component
+ * @example
+ * <AlertDialog>
+ *   <AlertDialogTrigger>Open</AlertDialogTrigger>
+ *   <AlertDialogContent>
+ *     <AlertDialogHeader>
+ *       <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+ *       <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+ *     </AlertDialogHeader>
+ *     <AlertDialogFooter>
+ *       <AlertDialogCancel>Cancel</AlertDialogCancel>
+ *       <AlertDialogAction>Continue</AlertDialogAction>
+ *     </AlertDialogFooter>
+ *   </AlertDialogContent>
+ * </AlertDialog>
  *
  * @param {Object} props - The component's props.
  * @param {string} [props.className] - Optional additional CSS classes to apply.
+ * @param {React.ReactNode} props.children - The dialog content
+ *
+ * @accessibility
+ * - Manages focus trap when dialog is open
+ * - Supports keyboard navigation
+ * - Implements ARIA dialog pattern
+ *
+ * @keyboard
+ * - Escape: Closes the dialog
+ * - Tab: Cycles through focusable elements
+ * - Shift+Tab: Cycles backwards through focusable elements
  *
  * @returns {JSX.Element} The rendered content of the alert dialog.
  */
