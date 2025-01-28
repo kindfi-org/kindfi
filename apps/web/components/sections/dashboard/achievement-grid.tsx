@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { Gem, Heart, Medal, Star, Trophy, Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardHeader } from '~/components/base/card'
@@ -71,10 +71,17 @@ export function AchievementsGrid() {
 		)
 	}
 
-	const filteredNFTs =
-		selectedProject === 'All'
-			? NFTDATA
-			: NFTDATA.filter((nft) => nft.project === selectedProject)
+	// const filteredNFTs =
+	// 	selectedProject === 'All'
+	// 		? NFTDATA
+	// 		: NFTDATA.filter((nft) => nft.project === selectedProject)
+	const filteredNFTs = useMemo(
+		() =>
+			selectedProject === 'All'
+				? NFTDATA
+				: NFTDATA.filter((nft) => nft.project === selectedProject),
+		[selectedProject],
+	)
 
 	const filteredAchievements = achievements
 

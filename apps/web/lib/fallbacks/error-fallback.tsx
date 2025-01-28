@@ -1,6 +1,6 @@
 'use client'
 import { AlertCircle } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import type { FallbackProps } from 'react-error-boundary'
 import { Button } from '~/components/base/button'
 
@@ -18,6 +18,16 @@ export function ErrorFallback({
 	actionText = 'Try Again',
 }: ErrorFallbackProps) {
 	const [isLoading, setIsLoading] = useState(false)
+
+	const handleReset = useCallback(() => {
+		setIsLoading(true)
+		try {
+			resetErrorBoundary()
+		} finally {
+			setIsLoading(false)
+		}
+	}, [resetErrorBoundary])
+
 	return (
 		<div role="alert" className="p-4 text-center">
 			<div className="mb-4 text-red-600">
@@ -32,10 +42,7 @@ export function ErrorFallback({
 			<p className="mb-4 text-gray-600">{message}</p>
 			<p className="mb-4 text-gray-600">{error.message}</p>
 			<Button
-				onClick={() => {
-					setIsLoading(true)
-					resetErrorBoundary()
-				}}
+				onClick={handleReset}
 				disabled={isLoading}
 				className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors disabled:opacity-50"
 			>
