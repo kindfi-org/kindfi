@@ -53,7 +53,7 @@ const config = {
 					900: 'hsl(140, 80%, 15%)',
 				},
 				secondary: {
-					DEFAULT: 'hsl(220, 40%, 20%)', // Navy Blue
+					DEFAULT: 'hsl(220, 40%, 40%)', // Navy Blue
 					50: 'hsl(220, 20%, 95%)',
 					100: 'hsl(220, 25%, 85%)',
 					200: 'hsl(220, 30%, 75%)',
