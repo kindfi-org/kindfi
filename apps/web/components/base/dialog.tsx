@@ -22,8 +22,8 @@ const DialogOverlay = React.forwardRef<
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 const DialogContent = React.forwardRef<
-	HTMLDialogElement,
-	React.ComponentPropsWithoutRef<'dialog'>
+	React.ElementRef<typeof DialogPrimitive.Content>,
+	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
 	const fallbackTitleId = React.useId()
 	const fallbackDescriptionId = React.useId()
@@ -34,13 +34,12 @@ const DialogContent = React.forwardRef<
 	return (
 		<DialogPrimitive.Portal>
 			<DialogOverlay />
-			<dialog
+			<DialogPrimitive.Content
 				ref={ref}
-				open={props.open}
 				aria-labelledby={mergedTitleId}
 				aria-describedby={mergedDescriptionId}
 				className={cn(
-					'fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg',
+					'fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out sm:rounded-lg',
 					className,
 				)}
 				{...props}
@@ -53,10 +52,10 @@ const DialogContent = React.forwardRef<
 					<X className="h-4 w-4" />
 					<span className="sr-only">Close</span>
 				</DialogPrimitive.Close>
-			</dialog>
+			</DialogPrimitive.Content>
 		</DialogPrimitive.Portal>
 	)
 })
-DialogContent.displayName = 'DialogContent'
+DialogContent.displayName = DialogPrimitive.Content.displayName
 
-export { DialogContent, DialogOverlay }
+export { DialogOverlay, DialogContent }
