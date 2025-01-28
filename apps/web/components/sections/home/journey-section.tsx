@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronRight, Rocket, Users } from 'lucide-react'
 import React from 'react'
 import { Button } from '~/components/base/button'
+import { cn } from '~/lib/utils'
 
 const ProjectJourney = () => {
 	const [activeView, setActiveView] = React.useState<'project' | 'investor'>(
@@ -132,22 +133,30 @@ const ProjectJourney = () => {
 						<div className="inline-flex rounded-full p-1 bg-white shadow-sm border border-gray-100">
 							<Button
 								variant={activeView === 'project' ? 'default' : 'ghost'}
-								className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
-									activeView === 'project'
-										? 'gradient-btn text-white'
-										: 'text-gray-600 hover:text-emerald-600'
-								}`}
+								aria-label="Switch to Social Cause Project Journey"
+								className={cn(
+									'rounded-full px-6 py-2 text-sm font-medium transition-all duration-200',
+									{
+										'gradient-btn text-white': activeView === 'project',
+										'text-gray-600 hover:text-emerald-600':
+											activeView !== 'project',
+									},
+								)}
 								onClick={() => setActiveView('project')}
 							>
 								Social Cause Path
 							</Button>
 							<Button
 								variant={activeView === 'investor' ? 'default' : 'ghost'}
-								className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
-									activeView === 'investor'
-										? 'gradient-btn text-white'
-										: 'text-gray-600 hover:text-emerald-600'
-								}`}
+								aria-label="Switch to Supporter Investment Journey"
+								className={cn(
+									'rounded-full px-6 py-2 text-sm font-medium transition-all duration-200',
+									{
+										'gradient-btn text-white': activeView === 'investor',
+										'text-gray-600 hover:text-emerald-600':
+											activeView !== 'investor',
+									},
+								)}
 								onClick={() => setActiveView('investor')}
 							>
 								Supporter Path
