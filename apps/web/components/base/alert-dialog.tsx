@@ -39,6 +39,7 @@ const AlertDialogContent = React.forwardRef<
 			// - aria-live="assertive": Announces content changes immediately
 			// - aria-atomic="true": Announces the entire content as one atomic unit
 			// Note: This component relies on Radix UI for additional ARIA roles and relationships
+			// See: WCAG 2.1 Success Criterion 4.1.3 Status Messages
 			aria-live="assertive" // Add aria-live for dynamic updates
 			aria-atomic="true" // Ensure the entire content is announced
 			className={cn(
