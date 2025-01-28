@@ -108,11 +108,20 @@ AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
 
 /**
  * Header section of the alert dialog, typically used to display a title or heading.
+ * Should be used within AlertDialogContent to maintain proper structure.
  *
  * @component
+ * @example
+ * <AlertDialogHeader>
+ *   <AlertDialogTitle>Confirm Action</AlertDialogTitle>
+ *   <AlertDialogDescription>
+ *     Are you sure you want to continue?
+ *   </AlertDialogDescription>
+ * </AlertDialogHeader>
  *
  * @param {Object} props - The component's props.
  * @param {string} [props.className] - Optional additional CSS classes to apply.
+ * @param {React.ReactNode} props.children - The header content, typically AlertDialogTitle and AlertDialogDescription
  *
  * @returns {JSX.Element} The rendered header element of the dialog.
  */
