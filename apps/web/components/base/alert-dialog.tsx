@@ -35,6 +35,10 @@ const AlertDialogContent = React.forwardRef<
 		<AlertDialogOverlay />
 		<AlertDialogPrimitive.Content
 			ref={ref}
+			// Accessibility features:
+			// - aria-live="assertive": Announces content changes immediately
+			// - aria-atomic="true": Announces the entire content as one atomic unit
+			// Note: This component relies on Radix UI for additional ARIA roles and relationships
 			aria-live="assertive" // Add aria-live for dynamic updates
 			aria-atomic="true" // Ensure the entire content is announced
 			className={cn(
