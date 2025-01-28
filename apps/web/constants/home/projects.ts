@@ -146,3 +146,9 @@ export const projects: Project[] = [
 		],
 	},
 ]
+
+export const showcaseContent = {
+	title: 'Causes That Change Lives and Shape a Better World',
+	subtitle:
+		'Join hands to support initiatives that create lasting social, environmental, animal, artistic, and cultural impact. From protecting our planet and rescuing animals to uplifting communities and celebrating artistic expression, find a cause that moves you and make a difference today',
+}
