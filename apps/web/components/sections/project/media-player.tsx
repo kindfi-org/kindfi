@@ -7,6 +7,7 @@ type MediaItem = {
 	type: 'image' | 'video'
 	src: `.mp4` | `.jpg` | `.png` | `.webp`
 	alt: string
+	caption?: string
 }
 
 type MediaPlayerProps = {
@@ -17,9 +18,16 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 	const [activeIndex, setActiveIndex] = useState(0)
 
 	const activeItem = items[activeIndex]
+	const videoFileName = activeItem.src
+		.split('/')
+		.pop()
+		?.replace(/\.[^/.]+$/, '')
 
 	return (
-		<div className="media-player flex flex-col items-center space-y-4">
+		<div
+			className="media-player flex flex-col items-center space-y-4"
+			aria-label="Media gallery"
+		>
 			<div className="main-media w-full h-64 bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden">
 				{activeItem.type === 'image' ? (
 					<img
@@ -28,19 +36,44 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 						className="h-full object-contain"
 					/>
 				) : (
-					<video
-						src={activeItem.src}
-						controls
-						className="h-full object-contain"
-					>
-						Your browser does not support the video tag.
-						{/* provide captions src */}
-						<track kind="captions" src="" label="English" />
-					</video>
+					<div className="video-container relative w-full h-full">
+						<video
+							src={activeItem.src}
+							controls
+							className="h-full object-contain"
+							aria-label={activeItem.alt}
+						>
+							<track
+								kind="captions"
+								src={`/captions/${videoFileName}.vtt`}
+								srcLang="en"
+								label="English"
+								default
+							/>
+							{activeItem.caption && (
+								<track
+									kind="descriptions"
+									src={`/descriptions/${videoFileName}.vtt`}
+									srcLang="en"
+									label="English descriptions"
+								/>
+							)}
+							Your browser does not support the video tag.
+						</video>
+						{activeItem.caption && (
+							<div className="caption-text absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center">
+								{activeItem.caption}
+							</div>
+						)}
+					</div>
 				)}
 			</div>
 
-			<div className="thumbnails flex space-x-2">
+			<div
+				className="thumbnails flex space-x-2"
+				role="tablist"
+				aria-label="Media thumbnails"
+			>
 				{items.map((item, index) => (
 					<Button
 						key={item.id}
@@ -51,11 +84,15 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 								? 'border-blue-500'
 								: 'border-gray-300 hover:border-gray-400'
 						}`}
+						aria-selected={activeIndex === index}
+						aria-label={`View ${item.alt}`}
+						role="tab"
 					>
 						{item.type === 'image' ? (
 							<img
 								src={item.src}
-								alt={item.alt || 'Thumbnail'}
+								alt=""
+								aria-hidden="true"
 								className="w-full h-full object-cover"
 							/>
 						) : (
@@ -67,8 +104,9 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 									viewBox="0 0 24 24"
 									stroke="currentColor"
 									role="img"
-									aria-label={item.alt || 'icon'}
+									aria-label="Video thumbnail"
 								>
+									<title>Video thumbnail</title>
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"

@@ -25,12 +25,13 @@ const ProjectUpdatesSection = () => {
 			<div className="mt-6 bg-gray-50 rounded-lg p-6 shadow-lg border border-gray-200">
 				<div className="flex items-center justify-between mb-4">
 					<h2 className="text-xl font-semibold text-black">Success Gallery</h2>
-					<a
-						href="./"
+					<button
+						type="button"
+						onClick={(e) => e.preventDefault()}
 						className="text-sm font-medium text-blue-600 hover:underline"
 					>
 						View All
-					</a>
+					</button>
 				</div>
 				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
 					{successGalleryItems.map((item) => (

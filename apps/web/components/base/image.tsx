@@ -17,7 +17,8 @@ const Image: FC<ImageProps> = ({ src, alt, className, ...props }) => {
 		>
 			<img
 				src={src}
-				alt={alt}
+				alt={alt || ''}
+				aria-hidden={!alt ? 'true' : 'false'}
 				className="w-full h-full object-cover block m-0 p-0"
 				loading="lazy"
 				{...props}
