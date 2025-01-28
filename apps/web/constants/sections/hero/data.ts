@@ -1,4 +1,3 @@
-// apps/web/constants/sections/hero/data.ts
 import type { HeroContent } from './types'
 
 export const heroContent: HeroContent = {
