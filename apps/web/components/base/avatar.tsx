@@ -6,6 +6,7 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 
 /**
+ * ShadCN/UI Reference: https://ui.shadcn.com/docs/components/avatar
  * `Avatar` component is a wrapper that provides a container for an avatar image.
  * It supports custom styles and handles the layout of the avatar.
  *
@@ -69,7 +70,7 @@ AvatarImage.displayName = AvatarPrimitive.Image.displayName
 /**
  * `AvatarFallback` component is displayed when the avatar image is not available.
  * It provides a fallback display, such as initials or a placeholder icon.
- * 
+ *
  * The fallback is shown in the following scenarios:
  * - While the image is loading
  * - If the image fails to load

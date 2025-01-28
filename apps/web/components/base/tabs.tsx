@@ -69,6 +69,8 @@ const TabsTrigger = React.forwardRef<
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
 /**
+ *
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/tabs
  * TabsContent component to display the content for a specific tab.
  * @component
  * @param {React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>} props - The component props

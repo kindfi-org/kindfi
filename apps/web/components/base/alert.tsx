@@ -4,6 +4,7 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 
 /**
+ * ShadCN/UI Reference: https://ui.shadcn.com/docs/components/alert
  * `alertVariants` defines the styles and variants for the `Alert` component.
  * It includes options for different alert styles.
  */

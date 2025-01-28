@@ -6,6 +6,7 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/navigation-menu
  * Root component for the navigation menu.
  */
 const NavigationMenu = React.forwardRef<

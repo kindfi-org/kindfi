@@ -16,6 +16,7 @@ type CarouselPlugin = UseCarouselParameters[1]
 
 type CarouselProps = {
 	/**
+	 *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/carousel
 	 * Optional settings for the carousel.
 	 */
 	opts?: CarouselOptions

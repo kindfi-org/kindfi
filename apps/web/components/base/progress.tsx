@@ -5,6 +5,7 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/progress
  * Progress component for displaying loading or completion status.
  *
  * @param {Object} props - The properties passed to the component.

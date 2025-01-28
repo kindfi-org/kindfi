@@ -5,13 +5,14 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 
 /**
+ * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/button
  * `buttonVariants` defines the styles and variants for the `Button` component.
  * It includes options for different button variants and sizes, along with default configurations.
  *
  * @example
  * // Default variant with large size
  * buttonVariants({ variant: 'default', size: 'lg' })
- * 
+ *
  * // Destructive variant with icon size
  * buttonVariants({ variant: 'destructive', size: 'icon' })
  */

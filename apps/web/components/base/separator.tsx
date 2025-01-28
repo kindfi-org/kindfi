@@ -5,6 +5,7 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/separator
  * Separator component for visually dividing content.
  * Built on top of Radix UI Separator primitive for reliable accessibility.
  *
@@ -23,7 +24,7 @@ import { cn } from '~/lib/utils'
  * @example
  * // Vertical separator
  * <Separator orientation="vertical" className="mx-2 h-6" />
- * 
+ *
  * @returns {JSX.Element} The rendered Separator component
  */
 const Separator = React.forwardRef<

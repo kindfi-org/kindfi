@@ -9,6 +9,7 @@ import { cn } from '~/lib/utils'
 const AlertDialog = AlertDialogPrimitive.Root
 
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/alert-dialog
  * A button that triggers the opening of an alert dialog.
  *
  * @component

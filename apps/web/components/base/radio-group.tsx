@@ -6,6 +6,7 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/radio-group
  * RadioGroup component for selecting a single option from a group.
  * Built on top of Radix UI RadioGroup primitive for reliable accessibility.
  *
@@ -18,7 +19,7 @@ import { cn } from '~/lib/utils'
  * @param {React.Ref} ref - Reference to the radio group root element.
  * @aria Implements proper ARIA attributes and keyboard navigation
  * @see {@link https://www.radix-ui.com/primitives/docs/components/radio-group Radix UI Radio Group}
- * 
+ *
  * @example
  * <RadioGroup
  *   value={selectedFruit}
@@ -28,7 +29,7 @@ import { cn } from '~/lib/utils'
  *   <RadioGroupItem value="apple" id="apple">Apple</RadioGroupItem>
  *   <RadioGroupItem value="orange" id="orange">Orange</RadioGroupItem>
  * </RadioGroup>
- * 
+ *
  * @returns {JSX.Element} The rendered RadioGroup component.
  */
 
@@ -56,7 +57,7 @@ RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
  * @param {string} [props.id] - The id of the radio item
  * @param {React.Ref} ref - Reference to the radio group item element.
  * @aria Implements proper ARIA attributes and keyboard interaction
- * 
+ *
  * @example
  * <RadioGroupItem
  *   value="option1"
@@ -64,7 +65,7 @@ RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
  *   disabled={isDisabled}
  *   className="custom-radio"
  * />
- * 
+ *
  * @returns {JSX.Element} The rendered RadioGroupItem component.
  */
 const RadioGroupItem = React.forwardRef<

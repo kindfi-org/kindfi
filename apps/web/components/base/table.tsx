@@ -27,6 +27,7 @@ const Table = React.forwardRef<
 Table.displayName = 'Table'
 
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/table
  * TableHeader component for defining the header section of a table.
  * @component
  * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - The component props

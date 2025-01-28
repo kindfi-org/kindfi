@@ -8,13 +8,13 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 /**
  * Sheet component for displaying a sliding panel UI
- * 
+ *
  * The sheet can slide in from different sides of the screen:
  * - right (default)
  * - left
  * - top
  * - bottom
- * 
+ *
  * Features smooth enter/exit animations and backdrop overlay.
  * @component
  * @example
@@ -27,7 +27,7 @@ import { cn } from '~/lib/utils'
  *     </SheetHeader>
  *   </SheetContent>
  * </Sheet>
- * 
+ *
  * @example
  * // Sheet sliding from the left
  * <Sheet>
@@ -168,6 +168,7 @@ const SheetTitle = React.forwardRef<
 SheetTitle.displayName = SheetPrimitive.Title.displayName
 
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/sheet
  * Description component for the Sheet
  * @component
  * @example

@@ -22,6 +22,7 @@ const SelectGroup = SelectPrimitive.Group
 const SelectValue = SelectPrimitive.Value
 
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/select
  * SelectTrigger component for opening the select dropdown.
  */
 /**

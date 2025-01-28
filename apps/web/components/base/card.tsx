@@ -3,6 +3,7 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 
 /**
+ * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/card
  * The Card component is a container that provides a flexible and consistent layout for grouping content in a styled box with shadow and rounded corners.
  * It contains different sections (header, content, footer) that can be customized using the various sub-components.
  *

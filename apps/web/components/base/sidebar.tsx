@@ -36,6 +36,7 @@ type SidebarContext = {
 	toggleSidebar: () => void
 }
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/sidebar
  * Sidebar component for managing sidebar state, layout, and behavior.
  * @component
  * @param {Object} props - Component props

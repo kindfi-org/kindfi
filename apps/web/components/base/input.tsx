@@ -5,6 +5,7 @@ import { cn } from '~/lib/utils'
 export interface InputProps
 	extends React.InputHTMLAttributes<HTMLInputElement> {}
 /**
+ * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/input
  * Input component for rendering styled input fields with support for various HTML input attributes.
  * This component provides a flexible and customizable input element, including styles for focus, disabled state, and file inputs.
  *

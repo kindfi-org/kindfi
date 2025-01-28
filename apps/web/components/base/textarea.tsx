@@ -2,6 +2,7 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/textarea
  * Textarea component for rendering a styled, responsive textarea input field.
  * Provides support for custom styles, placeholder text, and focus states.
  *

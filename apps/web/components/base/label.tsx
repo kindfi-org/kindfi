@@ -7,6 +7,7 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/label
  * Label component used for associating a label with a form control (e.g., input, textarea).
  * It uses Radix UI's Label component for accessibility and styling, with support for additional variant-based customization.
  *

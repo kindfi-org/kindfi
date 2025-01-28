@@ -7,9 +7,10 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 
 /**
+ * https://ui.shadcn.com/docs/components/dialog
  * Root Dialog component that manages the dialog's open state.
  * Built on top of Radix UI's Dialog primitive.
- * 
+ *
  * @component
  * @example
  * <Dialog>
@@ -21,7 +22,7 @@ const Dialog = DialogPrimitive.Root
 
 /**
  * Button that opens the dialog when clicked.
- * 
+ *
  * @component
  * @example
  * <DialogTrigger>Open Dialog</DialogTrigger>
@@ -31,24 +32,24 @@ const DialogTrigger = DialogPrimitive.Trigger
 /**
  * Portal component that renders the dialog in a separate DOM node.
  * Ensures proper stacking context and z-index handling.
- * 
+ *
  * @component
  */
 const DialogPortal = DialogPrimitive.Portal
 
 /**
  * Button that closes the dialog when clicked.
- * 
+ *
  * @component
  * @example
  * <DialogClose>Close Dialog</DialogClose>
  */
-const DialogClose = DialogPrimitive.Close
+
 const DialogClose = DialogPrimitive.Close
 
 /**
  * DialogOverlay component for the background overlay of the dialog.
- * 
+ *
  * @accessibility
  * - Provides a semi-transparent backdrop that helps maintain focus within the dialog
  * - Clicking the overlay closes the dialog by default

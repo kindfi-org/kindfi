@@ -6,6 +6,7 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/tooltip
  * Tooltip component using Radix UI for providing hover-based tooltips.
  * Can be used to display informative messages when users hover over elements.
  *
@@ -60,7 +61,6 @@ const Tooltip = TooltipPrimitive.Root
  *   <button>Custom trigger</button>
  * </TooltipTrigger>
  */
-const TooltipTrigger = TooltipPrimitive.Trigger
 const TooltipTrigger = TooltipPrimitive.Trigger
 /**
  * TooltipContent component that renders the tooltip message.

@@ -3,6 +3,7 @@ import type * as React from 'react'
 
 import { cn } from '~/lib/utils'
 /**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/badge
  * A Badge component is a small UI element used to display contextual information, often in the form of labels or status indicators.
  * It supports various variants to reflect different states (e.g., primary, secondary, destructive).
  *
