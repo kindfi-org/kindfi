@@ -31,20 +31,13 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 const DialogContent = React.forwardRef<
 	HTMLDialogElement,
-	React.ComponentPropsWithoutRef<'dialog'> & {
-		onOpenChange?: (open: boolean) => void
-	}
->(({ className, children, onOpenChange, ...props }, ref) => {
+	React.ComponentPropsWithoutRef<'dialog'>
+>(({ className, children, ...props }, ref) => {
 	const fallbackTitleId = React.useId()
 	const fallbackDescriptionId = React.useId()
+
 	const mergedTitleId = props['aria-labelledby'] || fallbackTitleId
 	const mergedDescriptionId = props['aria-describedby'] || fallbackDescriptionId
-
-	const handleKeyDown = (event: React.KeyboardEvent<HTMLDialogElement>) => {
-		if (event.key === 'Escape') {
-			onOpenChange?.(false)
-		}
-	}
 
 	return (
 		<DialogPortal>
@@ -59,7 +52,6 @@ const DialogContent = React.forwardRef<
 					className,
 				)}
 				{...props}
-				onKeyDown={handleKeyDown}
 			>
 				{children}
 				<DialogPrimitive.Close
