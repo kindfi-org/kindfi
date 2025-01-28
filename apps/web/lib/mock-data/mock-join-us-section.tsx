@@ -3,7 +3,7 @@ import { ArrowUpRight, Megaphone, RefreshCw } from "lucide-react";
 
 const ANIMATION_DURATION = 20;
 
-interface Feature {
+export interface Feature {
   id: string;
   icon: React.ReactNode;
   title: string;

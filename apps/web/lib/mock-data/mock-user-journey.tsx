@@ -1,6 +1,6 @@
 import { ChevronRight, Rocket, Users } from "lucide-react";
 
-interface Step {
+export interface Step {
   number: number;
   title: string;
   description: string;

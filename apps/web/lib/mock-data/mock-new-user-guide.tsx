@@ -4,7 +4,7 @@ import {
 	ExploreProject,
 } from '~/components/icons/illustrations'
 
-interface Step {
+export interface Step {
   stepNumber: number;
   title: string;
   description: string;
@@ -12,9 +12,15 @@ interface Step {
   imageAlt: string;
 }
 
+enum StepNumber {
+  EXPLORE = 1,
+  DISCOVER = 2,
+  SUPPORT = 3,
+}
+
 export const steps = [
 	{
-		stepNumber: 1,
+		stepNumber: StepNumber.EXPLORE,
 		title: 'Explore Available Projects',
 		description:
 			'Browse through a wide range of impactful projects across various categories. Each project provides detailed information to help you make well-informed decisions.',
@@ -22,7 +28,7 @@ export const steps = [
 		imageAlt: 'Illustration of exploring projects',
 	},
 	{
-		stepNumber: 2,
+		stepNumber: StepNumber.DISCOVER,
 		title: 'Discover Project Details',
 		description:
 			'Dive into all the key details about each project, including financial goals, progress, and insights about the team behind the idea.',
@@ -30,7 +36,7 @@ export const steps = [
 		imageAlt: 'Illustration of reviewing project details',
 	},
 	{
-		stepNumber: 3,
+		stepNumber: StepNumber.SUPPORT,
 		title: 'Support What Inspires You',
 		description:
 			'Choose the projects that resonate with you the most and decide how much you want to contribute or invest. Support initiatives that align with your values and vision.',

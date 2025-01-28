@@ -20,7 +20,7 @@ export interface Category {
   color: string;
 }
 
-interface Stat {
+export interface Stat {
   id: string;
   value: string;
   label: string;
@@ -100,23 +100,23 @@ export const secondaryCategories: Category[] = [
   },
 ];
 
-const stats: Stat[] = [
+export const stats: Stat[] = [
   {
-    id: 'inversiones-exitosas-id',
+    id: 'successful-investments-id',
     value: '250+',
-    label: 'Inversiones Exitosas',
+    label: 'Successful Investments',
     icon: <LineChart className="w-6 h-6 text-teal-600 mb-2" />,
   },
   {
-    id: 'proyectos-financiados-id',
+    id: 'funded-projects-id',
     value: '3,325',
-    label: 'Proyectos Financiados',
+    label: 'Funded Projects',
     icon: <Rocket className="w-6 h-6 text-teal-600 mb-2" />,
   },
   {
-    id: 'capital-total-invertido-id',
+    id: 'total-invested-capital-id',
     value: '$720M',
-    label: 'Capital Total Invertido',
+    label: 'Total Invested Capital',
     icon: <Coins className="w-6 h-6 text-teal-600 mb-2" />,
     highlight: true,
   },

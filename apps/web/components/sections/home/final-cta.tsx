@@ -1,11 +1,13 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Card, CardContent } from '~/components/base/card';
 import { SocialButton } from '~/components/shared/social-cta';
 import { features, socialButtons, statistics } from '~/lib/mock-data/mock-final-cta-section';
 
 export const FinalCTA = () => {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <section className="relative py-24 overflow-hidden">
       {/* Background */}
@@ -17,9 +19,14 @@ export const FinalCTA = () => {
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          whileInView={{
+            opacity: 1,
+            y: shouldReduceMotion ? 0 : 20
+          }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{
+            duration: shouldReduceMotion ? 0.3 : 0.6
+          }}
           className="text-center mb-16 max-w-3xl mx-auto"
         >
           <h2 className="text-4xl font-bold text-gray-900 mb-6">
@@ -122,6 +129,6 @@ export const FinalCTA = () => {
           </motion.div>
         </div>
       </div>
-    </section>
+    </section >
   );
 };

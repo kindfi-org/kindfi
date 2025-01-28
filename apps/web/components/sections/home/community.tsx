@@ -102,7 +102,8 @@ const submitForm = async (data: FormData): Promise<void> => {
 };
 
 interface FormData {
-  [key: string]: string | number; // Replace with specific form fields if known
+  name: string; 
+  project: string;
 }
 
 interface FormStatus {

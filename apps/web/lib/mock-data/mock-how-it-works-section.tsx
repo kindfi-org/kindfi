@@ -6,12 +6,12 @@ export enum ModelVariant {
   BLOCKCHAIN = 'blockchain'
 }
 
-interface Benefit {
+export interface Benefit {
   id: string;
   text: string;
 }
 
-interface Model {
+export interface Model {
   id: string;
   title: string;
   description: string;

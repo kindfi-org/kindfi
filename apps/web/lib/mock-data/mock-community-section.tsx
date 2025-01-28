@@ -1,12 +1,12 @@
 import { Rocket, Shield, TrendingUp, Users } from 'lucide-react';
 
-interface Benefit {
+export interface Benefit {
   id: string;
   icon: React.ReactNode;
   text: string;
 }
 
-interface TestimonialData {
+export interface TestimonialData {
   quote: string;
   author: string;
   role: string;
@@ -37,8 +37,15 @@ export const benefits: Benefit[] = [
 ];
 
 export const testimonialData: TestimonialData = {
-  quote:
-    "The KindFi community becomes an ambassador for your social cause, taking your impact far beyond what traditional Web2 methods can achieve. Web3 connects and empowers people worldwide, creating a transparent, global, and secure network of support and verification powered by blockchain technology and Trustless work's Escrows. Supporting meaningful causes isn’t something you can buy—it’s a reward you earn by being part of a movement dedicated to real change.",
+  quote: [
+    "The KindFi community becomes an ambassador for your social cause, ",
+    "taking your impact far beyond what traditional Web2 methods can achieve. ",
+    "Web3 connects and empowers people worldwide, creating a transparent, ",
+    "global, and secure network of support and verification powered by ",
+    "blockchain technology and Trustless work's Escrows. Supporting meaningful ",
+    "causes isn't something you can buy—it's a reward you earn by being part ",
+    "of a movement dedicated to real change."
+  ].join(""),
   author: 'KindFi',
   role: 'Social Impact Platform',
   imageUrl: '/placeholder-image.jpg', // Replace with actual image

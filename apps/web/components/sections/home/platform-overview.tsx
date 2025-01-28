@@ -1,12 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Users } from "lucide-react";
 import { Card, CardContent } from "~/components/base/card";
 import { Web3FeatureCard } from "~/components/shared/web3-feature-card";
+import { fadeInUpAnimation } from "~/lib/constants/animations";
 import { features, stats } from "~/lib/mock-data/mock-platform-overview";
 
 export function PlatformOverview() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <section className="relative py-24 overflow-hidden">
       {/* Background */}
@@ -17,10 +20,7 @@ export function PlatformOverview() {
       <div className="relative container mx-auto px-4">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          {...fadeInUpAnimation}
           className="text-center mb-16 max-w-3xl mx-auto"
         >
           <h2 className="text-4xl font-bold text-gray-900 mb-6">
@@ -38,7 +38,7 @@ export function PlatformOverview() {
         </motion.div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16">
           {features.map((feature) => (
             <Web3FeatureCard key={feature.id} {...feature} />
           ))}
@@ -46,10 +46,7 @@ export function PlatformOverview() {
 
         {/* Bottom Info */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          {...fadeInUpAnimation}
         >
           <Card className="bg-gradient-to-r from-purple-50 to-purple-50 max-w-4xl mx-auto border-none shadow-sm">
             <CardContent className="p-8 text-center">
@@ -87,7 +84,10 @@ export function PlatformOverview() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{
+                duration: shouldReduceMotion ? 0.3 : 0.5,
+                delay: shouldReduceMotion ? 0 : index * 0.1
+              }}
               className="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-all duration-300"
             >
               <div className="flex justify-center mb-4">{stat.icon}</div>

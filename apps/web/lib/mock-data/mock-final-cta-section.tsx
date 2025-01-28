@@ -9,14 +9,14 @@ import {
   Zap,
 } from 'lucide-react';
 
-interface Feature {
+export interface Feature {
   id: string;
   icon: React.ReactNode;
   title: string;
   description: string;
 }
 
-interface SocialButtonProps {
+export interface SocialButtonProps {
   id: string;
   icon: React.ReactNode;
   provider: string;
@@ -89,7 +89,7 @@ export const socialButtons: SocialButtonProps[] = [
 export const statistics = {
   projects: {
     value: "100+",
-    label: "Verified Project"
+    label: "Verified Projects"
   },
   capitalRaised: {
     value: "$720M",

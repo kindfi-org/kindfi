@@ -18,7 +18,7 @@ export const Web3FeatureCard = ({
   stats,
   checkList,
 }: Web3FeatureCardProps) => (
-  <motion.div
+  <motion.article
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
@@ -26,7 +26,6 @@ export const Web3FeatureCard = ({
     whileHover={{ y: -5 }}
     whileFocus={{ y: -5 }}
     className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
-    role="article"
     aria-label={`Feature: ${title}`}
   >
     <div className="flex items-center gap-4 mb-6">
@@ -56,5 +55,5 @@ export const Web3FeatureCard = ({
         ))}
       </ul>
     )}
-  </motion.div>
+  </motion.article>
 )

@@ -1,32 +1,16 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 import { useCallback } from 'react';
 import { Badge } from '~/components/base/badge';
 import { Button } from '~/components/base/button';
+import { badgeVariants, staggerChildren } from '~/lib/constants/animations';
 import { categories, type Category, secondaryCategories } from '~/lib/mock-data/mock-hero-section';
 
-// Constants
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 },
-};
-
-const staggerChildren = {
-  animate: { transition: { staggerChildren: 0.1 } },
-};
-
-const badgeVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  hover: { scale: 1.05, transition: { duration: 0.2 } },
-  tap: { scale: 0.95 },
-};
-
-// Component
 export function Hero() {
+  const shouldReduceMotion = useReducedMotion();
+
   const renderCategory = useCallback((category: Category) => (
     <motion.div
       key={category.id}
@@ -143,7 +127,7 @@ export function Hero() {
                 >
                   <motion.span
                     className="mr-2"
-                    animate={{ rotate: [0, 5, -5, 0] }}
+                    animate={shouldReduceMotion ? {} : { rotate: [0, 5, -5, 0] }}
                     transition={{
                       duration: 2,
                       repeat: Number.POSITIVE_INFINITY,

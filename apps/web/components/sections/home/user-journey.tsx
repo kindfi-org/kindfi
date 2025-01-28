@@ -2,17 +2,34 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
+import { cn } from "~/lib/utils";
 import { Button } from "~/components/base/button";
 import { investorSteps, projectSteps } from "~/lib/mock-data/mock-user-journey";
 
 type ViewType = "project" | "investor";
 
-const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 export function UserJourney() {
   const [activeView, setActiveView] = React.useState<ViewType>("project");
 
   const steps = activeView === "project" ? projectSteps : investorSteps;
+
+  const [shouldReduceMotion, setShouldReduceMotion] = React.useState(false);
+
+  const fadeInUpAnimation = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: (delay = 0) => ({
+      duration: shouldReduceMotion ? 0 : 0.5,
+      delay,
+      y: { duration: shouldReduceMotion ? 0 : 0.5 }
+    })
+  };
+
+  React.useEffect(() => {
+    setShouldReduceMotion(
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+  }, []);
 
   return (
     <section className="gradient-bg-blue-purple relative overflow-hidden px-4 py-14">
@@ -23,12 +40,7 @@ export function UserJourney() {
         {/* Header */}
         <div className="text-center mb-16">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : 0.5,
-              y: { duration: shouldReduceMotion ? 0 : 0.5 }
-            }}
+            {...fadeInUpAnimation}
           >
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Transform Realities Using the <span className="gradient-text">Power of the Web3</span>
@@ -41,17 +53,17 @@ export function UserJourney() {
           {/* Toggle Buttons */}
           <motion.div
             className="mt-12 mb-16 flex justify-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            {...fadeInUpAnimation}
           >
             <div className="inline-flex rounded-full p-1 bg-white shadow-sm border border-gray-100">
               <Button
                 variant={activeView === "project" ? "default" : "ghost"}
-                className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${activeView === "project"
-                  ? "gradient-btn text-white"
-                  : "text-gray-600 hover:text-emerald-600"
-                  }`}
+                className={cn(
+                  "rounded-full px-6 py-2 text-sm font-medium transition-all duration-200",
+                  activeView === "project"
+                    ? "gradient-btn text-white"
+                    : "text-gray-600 hover:text-emerald-600"
+                )}
                 onClick={() => setActiveView("project")}
                 aria-pressed={activeView === "project"}
                 aria-label="Show project creator journey"
@@ -94,14 +106,12 @@ export function UserJourney() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
-            className="grid gap-8 md:gap-4 md:grid-cols-5"
+            className="grid gap-8 sm:gap-6 md:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
           >
             {steps.map((step, index) => (
               <motion.div
                 key={`step-${step.number}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                {...fadeInUpAnimation}
               >
                 <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 h-full border border-gray-100">
                   <div className="flex items-center mb-4">

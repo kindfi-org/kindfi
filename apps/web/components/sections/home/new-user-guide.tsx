@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { StepCard } from '~/components/shared/steps-card'
+import { fadeInUpVariants } from '~/lib/constants/animations'
 import { steps } from '~/lib/mock-data/mock-new-user-guide'
 
 export function NewUserGuide() {
@@ -15,8 +16,9 @@ export function NewUserGuide() {
 			<div className="relative container mx-auto px-4">
 				{/* Header */}
 				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
+					variants={fadeInUpVariants}
+					initial="hidden"
+					whileInView="visible"
 					viewport={{ once: true }}
 					transition={{ duration: 0.6 }}
 					className="text-center mb-20"

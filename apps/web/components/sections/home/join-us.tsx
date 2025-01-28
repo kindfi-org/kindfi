@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import { Button } from "~/components/base/button";
 import { SectionCaption } from "~/components/shared/section-caption";
+import { fadeInUpAnimation } from "~/lib/constants/animations";
 import { features } from "~/lib/mock-data/mock-join-us-section";
 
 export function JoinUs() {
@@ -17,10 +18,7 @@ export function JoinUs() {
       <div className="relative container mx-auto px-4">
         {/* Section Caption */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          {...fadeInUpAnimation}
         >
           <SectionCaption
             title="Join the KindFi Revolution: Collaborate and Transform the World with Web3"
@@ -39,7 +37,7 @@ export function JoinUs() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <div
+              <article
                 className="group h-full bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
                 role="article"
                 aria-labelledby={`feature-title-${feature.id}`}
@@ -60,7 +58,7 @@ export function JoinUs() {
                   {feature.highlight}
                   <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
                 </div>
-              </div>
+              </article>
             </motion.div>
           ))}
         </div>

@@ -6,7 +6,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-interface Feature {
+export interface Feature {
   id: string;
   title: string;
   description: string;
@@ -21,7 +21,7 @@ interface Feature {
   }[];
 }
 
-interface Stat {
+export interface Stat {
   id: string;
   value: string;
   label: string;
