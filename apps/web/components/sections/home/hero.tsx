@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import { Badge } from '~/components/base/badge';
 import { Button } from '~/components/base/button';
 import { badgeVariants, staggerChildren } from '~/lib/constants/animations';
-import { categories, secondaryCategories } from '~/lib/mock-data/mock-hero-section';
+import { categories } from '~/lib/mock-data/mock-hero-section';
 import type { Category } from '~/lib/types/home.types';
 
 export function Hero() {
@@ -27,7 +27,7 @@ export function Hero() {
       >
         <motion.span
           className="mr-2"
-          animate={{ rotate: [0, 5, -5, 0] }}
+          animate={shouldReduceMotion ? {} : { rotate: [0, 5, -5, 0] }}
           transition={{
             duration: 2,
             repeat: Number.POSITIVE_INFINITY,
@@ -104,41 +104,6 @@ export function Hero() {
             animate="animate"
           >
             {categories.map(renderCategory)}
-          </motion.div>
-
-          <motion.div
-            className="flex flex-wrap justify-center gap-3 mb-16"
-            variants={staggerChildren}
-            initial="initial"
-            animate="animate"
-          >
-            {secondaryCategories.map((category) => (
-              <motion.div
-                key={category.id}
-                variants={badgeVariants}
-                whileHover="hover"
-                whileTap="tap"
-                className="relative"
-              >
-                <Badge
-                  variant="outline"
-                  className={`px-4 py-2 cursor-pointer transition-all duration-300 ${category.color}`}
-                >
-                  <motion.span
-                    className="mr-2"
-                    animate={shouldReduceMotion ? {} : { rotate: [0, 5, -5, 0] }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: 'easeInOut',
-                    }}
-                  >
-                    {category.icon}
-                  </motion.span>
-                  {category.label}
-                </Badge>
-              </motion.div>
-            ))}
           </motion.div>
         </div>
       </div>

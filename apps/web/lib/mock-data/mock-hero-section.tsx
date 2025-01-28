@@ -39,32 +39,29 @@ export const categories: Category[] = [
     label: 'Community News Initiatives',
     color: 'bg-slate-50/80 text-slate-700 hover:bg-slate-100/80 border-slate-200/50',
   },
-];
-
-export const secondaryCategories: Category[] = [
   {
     id: 'healthcare-support-id',
     icon: <Stethoscope className="w-4 h-4" />,
     label: 'Healthcare Support',
-    color: 'border-cyan-200/50 text-cyan-700 hover:bg-cyan-50/80',
+    color: 'bg-cyan-50/80 border-cyan-200/50 text-cyan-700 hover:bg-cyan-200/80',
   },
   {
     id: 'food-security-id',
     icon: <UtensilsCrossed className="w-4 h-4" />,
     label: 'Food Security Campaigns',
-    color: 'border-orange-200/50 text-orange-700 hover:bg-orange-50/80',
+    color: 'bg-orange-50/80 border-orange-200/50 text-orange-700 hover:bg-orange-200/80',
   },
   {
     id: 'child-welfare-id',
     icon: <Baby className="w-4 h-4" />,
     label: 'Child Welfare Programs',
-    color: 'border-purple-200/50 text-purple-700 hover:bg-purple-50/80',
+    color: 'bg-purple-50/80 border-purple-200/50 text-purple-700 hover:bg-purple-200/80',
   },
   {
     id: 'sustainable-agriculture-id',
     icon: <Sprout className="w-4 h-4" />,
     label: 'Sustainable Agriculture',
-    color: 'border-emerald-200/50 text-emerald-700 hover:bg-emerald-50/80',
+    color: 'bg-sky-50/80 border-emerald-200/50 text-emerald-700 hover:bg-emerald-200/80',
   },
   {
     id: 'social-finance-id',

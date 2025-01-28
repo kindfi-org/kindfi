@@ -65,6 +65,7 @@ export enum ModelVariant {
 export interface Benefit {
   id: string;
   text: string;
+  icon?: React.ReactNode;
 }
 
 export interface Model {
@@ -88,12 +89,6 @@ export interface GuideStep {
   description: string;
   Icon: React.ComponentType;
   imageAlt: string;
-}
-
-export interface Benefit {
-  id: string;
-  icon: React.ReactNode;
-  text: string;
 }
 
 export interface TestimonialData {

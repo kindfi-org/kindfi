@@ -10,8 +10,8 @@ export const staggerChildren = {
 
 export const badgeVariants = {
   initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  hover: { scale: 1.05, transition: { duration: 0.2 } },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.52 } },
+  hover: { scale: 1.05, transition: { duration: 0.24 } },
   tap: { scale: 0.95 },
 };
 
