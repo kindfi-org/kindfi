@@ -102,11 +102,7 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 						</div>
 					</div>
 
-					<Button
-						className="w-full"
-						formAction={signInAction}
-						aria-label="Log Into Account"
-					>
+					<Button className="w-full" formAction={signInAction}>
 						Log In
 					</Button>
 				</form>

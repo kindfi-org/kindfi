@@ -191,7 +191,7 @@ const Hero = () => {
 						<Button
 							size="lg"
 							className="gradient-btn text-white"
-							aria-label="Support Cause via Cryptocurrency"
+							aria-label="Support Causes via Cryptocurrency"
 						>
 							Support with Crypto
 						</Button>
@@ -199,7 +199,7 @@ const Hero = () => {
 							size="lg"
 							variant="outline"
 							className="gradient-border-btn"
-							aria-label="Browse Available Causes"
+							aria-label="Explore Available Causes"
 						>
 							Explore Causes
 						</Button>

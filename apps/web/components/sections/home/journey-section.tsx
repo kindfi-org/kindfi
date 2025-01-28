@@ -209,11 +209,6 @@ const ProjectJourney = () => {
 				>
 					<Button
 						size="lg"
-						aria-label={
-							activeView === 'project'
-								? 'Register Your Social Project'
-								: 'Explore Social Causes'
-						}
 						className="bg-indigo-900 hover:bg-indigo-800 text-white px-8"
 					>
 						{activeView === 'project'

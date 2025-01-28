@@ -124,7 +124,7 @@ const UserMenu = ({ user }: { user: User }) => {
 					<form action={signOutAction} className="w-full">
 						<button
 							type="submit"
-							aria-label="Sign Out of Account"
+							aria-label="Sign out"
 							className="flex w-full items-center"
 						>
 							<LogOut className="mr-2 h-4 w-4" />
@@ -145,7 +145,7 @@ const AuthButtons = () => {
 					variant="ghost"
 					size="sm"
 					className="hidden sm:inline-flex"
-					aria-label="Go to Sign In Page"
+					aria-label="Sign In Page"
 				>
 					Sign in
 				</Button>
@@ -155,7 +155,7 @@ const AuthButtons = () => {
 					variant="default"
 					size="sm"
 					className="hidden sm:inline-flex"
-					aria-label="Go to Sign Up Page"
+					aria-label="Sign Up Page"
 				>
 					Sign up
 				</Button>
@@ -200,11 +200,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 			</div>
 			<div className="flex flex-col space-y-2">
 				<Link href="/protected">
-					<Button
-						variant="ghost"
-						aria-label="Open User Dashboard"
-						className="w-full justify-start"
-					>
+					<Button variant="ghost" className="w-full justify-start">
 						<UserIcon className="mr-2 h-4 w-4" />
 						Dashboard
 					</Button>
@@ -212,7 +208,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 				<Link href="/settings">
 					<Button
 						variant="ghost"
-						aria-label="Open Account Settings"
+						aria-label="Settings"
 						className="w-full justify-start"
 					>
 						<Settings className="mr-2 h-4 w-4" />
@@ -222,7 +218,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 				<form action={signOutAction}>
 					<Button
 						variant="ghost"
-						aria-label="Sign Out of Account"
+						aria-label="Sign out"
 						className="w-full justify-start"
 						type="submit"
 					>
@@ -241,7 +237,7 @@ const MobileAuthButtons = () => {
 			<Link href="/sign-in">
 				<Button
 					variant="ghost"
-					aria-label="Go to Sign In Page"
+					aria-label="Sign In Page"
 					className="w-full justify-start"
 				>
 					Sign in
@@ -250,7 +246,7 @@ const MobileAuthButtons = () => {
 			<Link href="/sign-up">
 				<Button
 					variant="default"
-					aria-label="Go to Sign Up Page"
+					aria-label="Sign Up Page"
 					className="w-full justify-start"
 				>
 					Sign up

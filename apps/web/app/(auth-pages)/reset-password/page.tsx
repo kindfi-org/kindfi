@@ -41,11 +41,7 @@ export default async function ResetPassword(props: {
 						/>
 					</div>
 
-					<Button
-						className="w-full"
-						formAction={resetPasswordAction}
-						aria-label="Update Account Password"
-					>
+					<Button className="w-full" formAction={resetPasswordAction}>
 						Update Password
 					</Button>
 
