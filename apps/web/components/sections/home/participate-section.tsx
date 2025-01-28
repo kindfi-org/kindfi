@@ -153,12 +153,17 @@ export const WhyInvestSection = () => {
 							traditional systems.
 						</p>
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<Button size="lg" className="gradient-btn text-white px-8">
+							<Button
+								size="lg"
+								aria-label="Start Your Social Impact Journey"
+								className="gradient-btn text-white px-8"
+							>
 								Join the Revolution
 							</Button>
 							<Button
 								size="lg"
 								variant="outline"
+								aria-label="Learn More About KindFi Platform"
 								className="gradient-border-btn hover:bg-teal-50"
 							>
 								Discover more about KindFi

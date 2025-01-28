@@ -76,7 +76,7 @@ const SuccessMessage = ({ email }: SuccessMessageProps) => (
 					onClick={() => window.location.reload()}
 					className="text-primary hover:underline"
 				>
-					Try again
+					Resend recovery email
 				</button>
 			</p>
 		</div>
