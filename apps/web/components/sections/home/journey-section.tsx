@@ -1,102 +1,18 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronRight, Rocket, Users } from 'lucide-react'
 import React from 'react'
 import { Button } from '~/components/base/button'
+import { journeyContent } from '~/constants/sections/journey'
 
 const ProjectJourney = () => {
 	const [activeView, setActiveView] = React.useState<'project' | 'investor'>(
 		'project',
 	)
-
-	const projectSteps = [
-		{
-			number: 1,
-			title: 'Project Registration',
-			description:
-				'Share the key details of your idea and set clear fundraising goals to kickstart your campaign.',
-			active: true,
-			icon: <Rocket className="w-5 h-5" />,
-		},
-		{
-			number: 2,
-			title: 'Review and Approval',
-			description:
-				'Our team evaluates the feasibility of your proposal to ensure transparency and maximize its potential for success.',
-			active: false,
-			icon: <ChevronRight className="w-5 h-5" />,
-		},
-		{
-			number: 3,
-			title: 'Campaign Preparation',
-			description:
-				'Refine and optimize your campaign to make it ready for an impactful launch on the platform.',
-			active: false,
-			icon: <ChevronRight className="w-5 h-5" />,
-		},
-		{
-			number: 4,
-			title: 'Launch and Promotion',
-			description:
-				'Bring your project to life by launching it for investors and start collecting contributions.',
-			active: false,
-			icon: <ChevronRight className="w-5 h-5" />,
-		},
-		{
-			number: 5,
-			title: 'Fund Reception',
-			description:
-				'Once your goal is reached, withdraw your funds and begin building your vision for the future.',
-			active: false,
-			icon: <ChevronRight className="w-5 h-5" />,
-		},
-	]
-
-	const investorSteps = [
-		{
-			number: 1,
-			title: 'Explore Projects',
-			description:
-				'Browse a diverse range of projects aligned with your interests and values, and discover opportunities to make an impact.',
-			active: true,
-			icon: <Users className="w-5 h-5" />,
-		},
-		{
-			number: 2,
-			title: 'Analyze Project Details',
-			description:
-				'Access key information about each project, including objectives, progress, and potential impact.',
-			active: false,
-			icon: <ChevronRight className="w-5 h-5" />,
-		},
-		{
-			number: 3,
-			title: 'Contribute to Projects',
-			description:
-				'Choose the projects that resonate with you the most and make your contribution with ease.',
-			active: false,
-			icon: <ChevronRight className="w-5 h-5" />,
-		},
-		{
-			number: 4,
-			title: 'Real-Time Tracking',
-			description:
-				'Monitor project progress in real-time and receive regular updates on milestones and achievements.',
-			active: false,
-			icon: <ChevronRight className="w-5 h-5" />,
-		},
-		{
-			number: 5,
-			title: 'Rewards and Engagement',
-			description:
-				'Receive exclusive rewards like NFTs, tokens, or access to special activities as the projects you supported reach completion.',
-			active: false,
-			icon: <ChevronRight className="w-5 h-5" />,
-		},
-	]
-
-	const steps = activeView === 'project' ? projectSteps : investorSteps
+	const steps =
+		activeView === 'project'
+			? journeyContent.projectSteps
+			: journeyContent.investorSteps
 
 	return (
 		<section className="gradient-bg-blue-purple relative overflow-hidden px-4 py-14">
@@ -112,13 +28,13 @@ const ProjectJourney = () => {
 						transition={{ duration: 0.5 }}
 					>
 						<h2 className="text-4xl font-bold text-gray-900 mb-4">
-							Transform Realities Using the{' '}
-							<span className="gradient-text">Power of the Web3</span>
+							{journeyContent.title.text}{' '}
+							<span className="gradient-text">
+								{journeyContent.title.highlight}
+							</span>
 						</h2>
 						<p className="text-gray-600 max-w-2xl mx-auto text-lg">
-							From creation to launch, follow a transparent and secure process
-							powered by Smart Blockchain Escrows. Every step is verified to
-							ensure the success of your social campaign.
+							{journeyContent.description}
 						</p>
 					</motion.div>
 
@@ -139,7 +55,7 @@ const ProjectJourney = () => {
 								}`}
 								onClick={() => setActiveView('project')}
 							>
-								Social Cause Path
+								{journeyContent.toggleButtons.project}
 							</Button>
 							<Button
 								variant={activeView === 'investor' ? 'default' : 'ghost'}
@@ -150,7 +66,7 @@ const ProjectJourney = () => {
 								}`}
 								onClick={() => setActiveView('investor')}
 							>
-								Supporter Path
+								{journeyContent.toggleButtons.investor}
 							</Button>
 						</div>
 					</motion.div>
@@ -203,8 +119,8 @@ const ProjectJourney = () => {
 						className="bg-indigo-900 hover:bg-indigo-800 text-white px-8"
 					>
 						{activeView === 'project'
-							? 'Register Your Project'
-							: 'Explore Causes'}
+							? journeyContent.actionButtons.project
+							: journeyContent.actionButtons.investor}
 					</Button>
 				</motion.div>
 			</div>
