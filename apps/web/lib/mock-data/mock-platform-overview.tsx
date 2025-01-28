@@ -5,30 +5,9 @@ import {
   Target,
   Wallet,
 } from "lucide-react";
+import { PlatformFeature, Stat } from "~/lib/types/home.types";
 
-export interface Feature {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  stats?: {
-    value: string;
-    label: string;
-  };
-  checkList?: {
-    id: string;
-    text: string;
-  }[];
-}
-
-export interface Stat {
-  id: string;
-  value: string;
-  label: string;
-  icon: React.ReactNode;
-}
-
-export const features: Feature[] = [
+export const features: PlatformFeature[] = [
   {
     id: "transparency-powered-by-web3-id",
     title: "Transparency Powered by Web3",

@@ -64,7 +64,7 @@ export function JoinUs() {
         </div>
 
         {/* Call-to-Action Box */}
-        <motion.div
+        <motion.aside
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -108,7 +108,7 @@ export function JoinUs() {
               </Button>
             </div>
           </div>
-        </motion.div>
+        </motion.aside>
       </div>
     </section>
   );

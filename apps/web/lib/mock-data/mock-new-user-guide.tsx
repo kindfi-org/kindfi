@@ -3,22 +3,9 @@ import {
 	ExploreDetails,
 	ExploreProject,
 } from '~/components/icons/illustrations'
+import { type GuideStep, StepNumber } from '~/lib/types/home.types'
 
-export interface Step {
-  stepNumber: number;
-  title: string;
-  description: string;
-  Icon: React.ElementType;
-  imageAlt: string;
-}
-
-enum StepNumber {
-  EXPLORE = 1,
-  DISCOVER = 2,
-  SUPPORT = 3,
-}
-
-export const steps = [
+export const steps: GuideStep[] = [
 	{
 		stepNumber: StepNumber.EXPLORE,
 		title: 'Explore Available Projects',

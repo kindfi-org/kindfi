@@ -8,21 +8,7 @@ import {
   Target,
   Zap,
 } from 'lucide-react';
-
-export interface Feature {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-export interface SocialButtonProps {
-  id: string;
-  icon: React.ReactNode;
-  provider: string;
-  onClick: () => void;
-  className: string;
-}
+import type { Feature, SocialButtonProps } from '~/lib/types/home.types';
 
 export const features: Feature[] = [
   {

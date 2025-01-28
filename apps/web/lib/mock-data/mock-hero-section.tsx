@@ -12,21 +12,7 @@ import {
   Stethoscope,
   UtensilsCrossed,
 } from 'lucide-react';
-
-export interface Category {
-  id: string;
-  icon: React.ReactNode;
-  label: string;
-  color: string;
-}
-
-export interface Stat {
-  id: string;
-  value: string;
-  label: string;
-  icon: React.ReactNode;
-  highlight?: boolean;
-}
+import type { Category, Stat } from '~/lib/types/home.types';
 
 export const categories: Category[] = [
   {

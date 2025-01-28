@@ -121,6 +121,7 @@ export const FinalCTA = () => {
                       key={button.id}
                       {...button}
                       className={`w-full ${button.className}`}
+                      aria-label={`Sign in with ${button.provider}`}
                     />
                   ))}
                 </div>

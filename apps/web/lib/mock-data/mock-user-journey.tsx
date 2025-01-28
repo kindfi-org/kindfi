@@ -1,14 +1,7 @@
 import { ChevronRight, Rocket, Users } from "lucide-react";
+import { type JourneyStep } from "~/lib/types/home.types";
 
-export interface Step {
-  number: number;
-  title: string;
-  description: string;
-  active: boolean;
-  icon: React.ReactNode;
-}
-
-export const projectSteps: Step[] = [
+export const projectSteps: JourneyStep[] = [
   {
     number: 1,
     title: "Project Registration",
@@ -51,7 +44,7 @@ export const projectSteps: Step[] = [
   },
 ];
 
-export const investorSteps: Step[] = [
+export const investorSteps: JourneyStep[] = [
   {
     number: 1,
     title: "Explore Projects",

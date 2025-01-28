@@ -1,17 +1,5 @@
 import { Rocket, Shield, TrendingUp, Users } from 'lucide-react';
-
-export interface Benefit {
-  id: string;
-  icon: React.ReactNode;
-  text: string;
-}
-
-export interface TestimonialData {
-  quote: string;
-  author: string;
-  role: string;
-  imageUrl: string;
-}
+import type { Benefit, TestimonialData } from '~/lib/types/home.types';
 
 export const benefits: Benefit[] = [
   {

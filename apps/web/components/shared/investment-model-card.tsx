@@ -1,7 +1,7 @@
 import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardFooter } from '~/components/base/card'
-import { ModelVariant } from '~/lib/mock-data/mock-how-it-works-section';
+import { ModelVariant } from '~/lib/types/home.types';
 
 const variantStyles = {
 	[ModelVariant.SECURE]: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',

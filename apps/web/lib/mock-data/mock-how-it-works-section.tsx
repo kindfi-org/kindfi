@@ -1,24 +1,5 @@
 import { Globe, Shield, Users } from 'lucide-react';
-
-export enum ModelVariant {
-  SECURE = 'secure',
-  SOCIAL = 'social',
-  BLOCKCHAIN = 'blockchain'
-}
-
-export interface Benefit {
-  id: string;
-  text: string;
-}
-
-export interface Model {
-  id: string;
-  title: string;
-  description: string;
-  variant: ModelVariant;
-  icon: React.ReactNode;
-  benefits: Benefit[];
-}
+import { type Model, ModelVariant } from '~/lib/types/home.types';
 
 export const models: Model[] = [
   {
@@ -39,7 +20,7 @@ export const models: Model[] = [
     title: 'Social Impact',
     description:
       "Once a project achieves its goal, funds are directly released to the social cause, fully backed by smart contracts to ensure transparency and trust.",
-    variant:  ModelVariant.SOCIAL,
+    variant: ModelVariant.SOCIAL,
     icon: <Users className="w-6 h-6 mb-4 text-blue-600" />,
     benefits: [
       { id: 'impact-reports-id', text: 'Impact Reports' },

@@ -6,7 +6,8 @@ import { useCallback } from 'react';
 import { Badge } from '~/components/base/badge';
 import { Button } from '~/components/base/button';
 import { badgeVariants, staggerChildren } from '~/lib/constants/animations';
-import { categories, type Category, secondaryCategories } from '~/lib/mock-data/mock-hero-section';
+import { categories, secondaryCategories } from '~/lib/mock-data/mock-hero-section';
+import type { Category } from '~/lib/types/home.types';
 
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
@@ -23,7 +24,6 @@ export function Hero() {
       <Badge
         variant="secondary"
         className={`px-4 py-2 cursor-pointer transition-all duration-300 ${category.color}`}
-        aria-label={`Filter by ${category.label}`}
       >
         <motion.span
           className="mr-2"
@@ -60,7 +60,6 @@ export function Hero() {
 
           <motion.h1
             className="text-4xl md:text-5xl font-bold gradient-text mb-8 py-4"
-            aria-label="Support Social Causes Using Web3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
