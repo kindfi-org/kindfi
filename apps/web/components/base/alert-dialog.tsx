@@ -27,8 +27,15 @@ const AlertDialogPortal = AlertDialogPrimitive.Portal
 
 /**
  * The overlay for the alert dialog that appears over the content.
+ * Provides a semi-transparent backdrop that helps maintain focus
+ * on the dialog by visually dimming the rest of the page.
  *
  * @component
+ *
+ * @accessibility
+ * - Helps maintain focus within the dialog
+ * - Provides visual separation from background content
+ * - Animated entrance/exit for better user experience
  *
  * @param {Object} props - The component's props.
  * @param {string} [props.className] - Optional additional CSS classes to apply.
