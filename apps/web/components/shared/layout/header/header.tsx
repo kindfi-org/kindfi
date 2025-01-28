@@ -122,11 +122,7 @@ const UserMenu = ({ user }: { user: User }) => {
 				<DropdownMenuSeparator />
 				<DropdownMenuItem>
 					<form action={signOutAction} className="w-full">
-						<button
-							type="submit"
-							aria-label="Sign out"
-							className="flex w-full items-center"
-						>
+						<button type="submit" className="flex w-full items-center">
 							<LogOut className="mr-2 h-4 w-4" />
 							Close session
 						</button>
@@ -141,22 +137,12 @@ const AuthButtons = () => {
 	return (
 		<div className="flex items-center gap-2">
 			<Link href="/sign-in" passHref>
-				<Button
-					variant="ghost"
-					size="sm"
-					className="hidden sm:inline-flex"
-					aria-label="Sign In Page"
-				>
+				<Button variant="ghost" size="sm" className="hidden sm:inline-flex">
 					Sign in
 				</Button>
 			</Link>
 			<Link href="/sign-up" passHref>
-				<Button
-					variant="default"
-					size="sm"
-					className="hidden sm:inline-flex"
-					aria-label="Sign Up Page"
-				>
+				<Button variant="default" size="sm" className="hidden sm:inline-flex">
 					Sign up
 				</Button>
 			</Link>
@@ -218,7 +204,6 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 				<form action={signOutAction}>
 					<Button
 						variant="ghost"
-						aria-label="Sign out"
 						className="w-full justify-start"
 						type="submit"
 					>
@@ -235,20 +220,12 @@ const MobileAuthButtons = () => {
 	return (
 		<div className="flex flex-col space-y-2">
 			<Link href="/sign-in">
-				<Button
-					variant="ghost"
-					aria-label="Sign In Page"
-					className="w-full justify-start"
-				>
+				<Button variant="ghost" className="w-full justify-start">
 					Sign in
 				</Button>
 			</Link>
 			<Link href="/sign-up">
-				<Button
-					variant="default"
-					aria-label="Sign Up Page"
-					className="w-full justify-start"
-				>
+				<Button variant="default" className="w-full justify-start">
 					Sign up
 				</Button>
 			</Link>

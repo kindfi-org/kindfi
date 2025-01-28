@@ -188,19 +188,10 @@ const Hero = () => {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.6 }}
 					>
-						<Button
-							size="lg"
-							className="gradient-btn text-white"
-							aria-label="Support Causes via Cryptocurrency"
-						>
+						<Button size="lg" className="gradient-btn text-white">
 							Support with Crypto
 						</Button>
-						<Button
-							size="lg"
-							variant="outline"
-							className="gradient-border-btn"
-							aria-label="Explore Available Causes"
-						>
+						<Button size="lg" variant="outline" className="gradient-border-btn">
 							Explore Causes
 						</Button>
 					</motion.div>
