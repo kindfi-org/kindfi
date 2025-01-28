@@ -71,10 +71,6 @@ export function AchievementsGrid() {
 		)
 	}
 
-	// const filteredNFTs =
-	// 	selectedProject === 'All'
-	// 		? NFTDATA
-	// 		: NFTDATA.filter((nft) => nft.project === selectedProject)
 	const filteredNFTs = useMemo(
 		() =>
 			selectedProject === 'All'
