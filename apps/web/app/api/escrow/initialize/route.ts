@@ -86,3 +86,20 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+const initializeEscrow = async (data: EscrowInitialization) => {
+    const response = await fetch("/api/escrow/initialization", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to initialize escrow");
+    }
+
+    return response.json();
+};
