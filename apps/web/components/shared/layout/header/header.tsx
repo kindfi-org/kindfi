@@ -52,7 +52,12 @@ export const Header = () => {
 						{/* Mobile menu */}
 						<Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
 							<SheetTrigger asChild>
-								<Button variant="ghost" size="sm" className="md:hidden">
+								<Button
+									variant="ghost"
+									size="sm"
+									aria-label="Open Mobile Navigation Menu"
+									className="md:hidden"
+								>
 									<Menu className="h-5 w-5" />
 								</Button>
 							</SheetTrigger>
@@ -84,6 +89,7 @@ const UserMenu = ({ user }: { user: User }) => {
 				<Button
 					variant="ghost"
 					size="sm"
+					aria-label="Open User Account Menu"
 					className="relative h-8 w-8 rounded-full"
 				>
 					<Avatar className="h-8 w-8">
@@ -186,7 +192,11 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 					</Button>
 				</Link>
 				<Link href="/settings">
-					<Button variant="ghost" className="w-full justify-start">
+					<Button
+						variant="ghost"
+						aria-label="Settings"
+						className="w-full justify-start"
+					>
 						<Settings className="mr-2 h-4 w-4" />
 						Config
 					</Button>
