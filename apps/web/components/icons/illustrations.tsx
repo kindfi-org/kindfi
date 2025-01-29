@@ -388,7 +388,7 @@ export const ExploreDetails = () => (
 	</svg>
 )
 
-export const Contibute = () => (
+export const Contribute = () => (
 	// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
 	<svg
 		viewBox="0 0 240 240"
