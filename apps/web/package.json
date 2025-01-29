@@ -58,8 +58,7 @@
 		"eslint-config-next": "15.0.4",
 		"@types/bun": "latest"
 	},
-
 		"typescript": "^5"
 	}
-
+}
 }
