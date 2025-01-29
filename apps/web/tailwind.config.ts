@@ -9,7 +9,7 @@ const breakPoints = {
 	'lg-xl': '1260px',
 	xl: '1440px',
 	'2xl': '1600px',
-	'2.5xl': '1880px',
+	'2xl-3xl': '1880px',
 	'3xl': '2160px',
 }
 
