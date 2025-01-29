@@ -58,8 +58,6 @@
 		"eslint-config-next": "15.0.4",
 		"@types/bun": "latest"
 	},
-	"module": "index.ts",
-	"type": "module"
 
 		"typescript": "^5"
 	}
