@@ -4,9 +4,12 @@ const breakPoints = {
 	xs: '320px',
 	sm: '440px',
 	md: '720px',
+	'ml-lg': '900px',
 	lg: '1080px',
+	'lg-xl': '1260px',
 	xl: '1440px',
 	'2xl': '1600px',
+	'2.5xl': '1880px',
 	'3xl': '2160px',
 }
 
@@ -40,13 +43,13 @@ const config = {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(140, 60%, 40%)', // Green
+					DEFAULT: 'hsl(140, 60%, 35%)', // Green
 					50: 'hsl(140, 30%, 95%)', 
 					100: 'hsl(140, 40%, 85%)',
 					200: 'hsl(140, 45%, 75%)',
 					300: 'hsl(140, 50%, 65%)',
 					400: 'hsl(140, 55%, 55%)',
-					500: 'hsl(140, 60%, 40%)',
+					500: 'hsl(140, 60%, 35%)',
 					600: 'hsl(140, 65%, 30%)',
 					700: 'hsl(140, 70%, 25%)',
 					800: 'hsl(140, 75%, 20%)',
