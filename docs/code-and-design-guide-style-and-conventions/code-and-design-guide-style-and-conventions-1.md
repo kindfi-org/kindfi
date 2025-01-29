@@ -7,11 +7,6 @@ coverY: -98
 
 # Design Style and Conventions Guide
 
-## :frame\_photo: Figma Design Links
-
-* [KindFi MVP - Index.](https://www.figma.com/design/N6eCxAkGM19hQUGBK9GBJa/KindFi-MVP?node-id=65-26)
-* [KindFi MVP - Figma Design.](https://www.figma.com/design/N6eCxAkGM19hQUGBK9GBJa/KindFi-MVP?node-id=65-26\&viewport=454%252C490%252C0.04\&t=oBLcVopqbit3ZxxZ-0)
-
 ## :art: Design Guidelines
 
 Our design system emphasizes clarity, efficiency, and seamless collaboration between designers and developers. The following guidelines outline our professional approach to design implementation:
