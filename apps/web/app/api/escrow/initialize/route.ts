@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { validateEscrowInitialization } from "~/lib/validators/escrow";
 import { initializeEscrowContract } from "~/lib/stellar/escrow";
 import type { EscrowInitialization } from "~/lib/types/escrow";
 
 const supabase = createClient(
-    process.env.SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
@@ -58,7 +59,6 @@ export async function POST(req: NextRequest) {
             .single();
 
         if (dbError) {
-            await rollbackEscrowContract(contractResult.contractAddress);
             return NextResponse.json(
                 {
                     error: "Failed to track escrow contract",
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
 }
 
 const initializeEscrow = async (data: EscrowInitialization) => {
-    const response = await fetch("/api/escrow/initialization", {
+    const response = await fetch("/api/escrow/initialize", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -98,7 +98,10 @@ const initializeEscrow = async (data: EscrowInitialization) => {
 
     if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to initialize escrow");
+        throw {
+            error: error.error || "Failed to initialize escrow",
+            details: error.details || null
+        };
     }
 
     return response.json();
