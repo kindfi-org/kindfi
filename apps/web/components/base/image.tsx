@@ -21,6 +21,7 @@ const Image: FC<ImageProps> = ({ src, alt, className, ...props }) => {
 				className="w-full h-full object-cover block m-0 p-0"
 				loading="lazy"
 				{...props}
+				aria-label="image"
 			/>
 		</div>
 	)
