@@ -14,7 +14,7 @@ interface InvestmentModelCardProps {
 	description: string
 	variant: ModelVariant
 	icon: React.ReactNode
-	benefits: { id: string; text: string }[]
+	capabilities: { id: string; text: string }[]
 	onLearnMore?: () => void
 }
 
@@ -23,7 +23,7 @@ export const InvestmentModelCard = ({
 	description,
 	variant,
 	icon,
-	benefits,
+	capabilities,
 	onLearnMore,
 }: InvestmentModelCardProps) => {
 	return (
@@ -38,13 +38,13 @@ export const InvestmentModelCard = ({
 				</div>
 
 				<div className="space-y-3">
-					{benefits?.map((benefit) => (
+					{capabilities?.map((capability) => (
 						<div
-							key={benefit.id}
+							key={capability.id}
 							className="flex items-center text-sm text-gray-600"
 						>
 							<Check className="w-4 h-4 mr-2 text-green-600" />
-							{benefit.text}
+							{capability.text}
 						</div>
 					))}
 				</div>

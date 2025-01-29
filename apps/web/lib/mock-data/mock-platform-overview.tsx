@@ -5,9 +5,9 @@ import {
   Target,
   Wallet,
 } from "lucide-react";
-import { PlatformFeature, Stat } from "~/lib/types/home.types";
+import { Feature, Stat } from "~/lib/types/home.types";
 
-export const features: PlatformFeature[] = [
+export const features: Feature[] = [
   {
     id: "transparency-powered-by-web3-id",
     title: "Transparency Powered by Web3",

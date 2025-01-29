@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight, Megaphone, RefreshCw } from "lucide-react";
-import { type CardFeature } from "~/lib/types/home.types";
+import { type Feature } from "~/lib/types/home.types";
 
 const ANIMATION_DURATION = 20;
 
-export const features: CardFeature[] = [
+export const features: Feature[] = [
   {
     id: "collaborate-and-earn-rewards-id",
     icon: (

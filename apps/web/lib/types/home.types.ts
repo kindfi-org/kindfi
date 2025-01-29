@@ -62,10 +62,9 @@ export enum ModelVariant {
   BLOCKCHAIN = 'blockchain'
 }
 
-export interface Benefit {
+export interface Capability {
   id: string;
   text: string;
-  icon?: React.ReactNode;
 }
 
 export interface Model {
@@ -74,7 +73,7 @@ export interface Model {
   description: string;
   variant: ModelVariant;
   icon: React.ReactNode;
-  benefits: Benefit[];
+  capabilities: Capability[];
 }
 
 export enum StepNumber {
@@ -89,6 +88,12 @@ export interface GuideStep {
   description: string;
   Icon: React.ComponentType;
   imageAlt: string;
+}
+
+export interface Benefit {
+  id: string;
+  text: string;
+  icon: React.ReactNode;
 }
 
 export interface TestimonialData {
