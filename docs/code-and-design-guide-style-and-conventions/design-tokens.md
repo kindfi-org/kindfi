@@ -22,17 +22,9 @@ This document provides a description of the design tokens exported from Figma.
 
 - **H1 (Title)**: Font family `Roboto`, Font size `32px`, Weight `Bold`, Line height `1.25`, Letter spacing `0.5px`. Used for primary page titles.
 - **H2 (Subtitle)**: Font family `Roboto`, Font size `24px`, Weight `Bold`, Line height `1.33`. Used for section headers.
-- **H3 (Section Header)**: Font family `Roboto`, Font size `20px`, Weight `Bold`, Line height `1.4`. Used for subheadings.
+- **H3 (Section Header)**: Font family `Roboto`, Font size `20px`, Weight `SemiBold`, Line height `1.4`. Used for subheadings.
 - **Body Text**: Font family `Roboto`, Font size `16px`, Weight `Regular`, Line height `1.5`. Standard text for paragraphs and content.
 - **Caption**: Font family `Roboto`, Font size `12px`, Weight `Regular`, Line height `1.33`. Used for small labels and captions.
-
-## Spacing
-
-- **Spacing XS**: `4px` (Ideal for compact UI elements and dense layouts).
-- **Spacing SM**: `8px` (Provides subtle separation between related elements).
-- **Spacing MD**: `16px` (Default spacing for content organization).
-- **Spacing LG**: `32px` (Creates clear separation between major sections).
-- **Spacing XL**: `64px` (Ensures generous whitespace for large layouts).
 
 ---
 

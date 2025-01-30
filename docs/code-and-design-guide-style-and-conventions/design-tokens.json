@@ -51,7 +51,7 @@
         "type": "fontFamilies"
       },
       "fontWeight": {
-        "value": "700",
+        "value": "Bold",
         "type": "fontWeights"
       },
       "fontSize": {
@@ -74,7 +74,7 @@
         "type": "fontFamilies"
       },
       "fontWeight": {
-        "value": "700",
+        "value": "Bold",
         "type": "fontWeights"
       },
       "fontSize": {
@@ -97,7 +97,7 @@
         "type": "fontFamilies"
       },
       "fontWeight": {
-        "value": "600",
+        "value": "SemiBold",
         "type": "fontWeights"
       },
       "fontSize": {
@@ -120,7 +120,7 @@
         "type": "fontFamilies"
       },
       "fontWeight": {
-        "value": "400",
+        "value": "Regular",
         "type": "fontWeights"
       },
       "fontSize": {
@@ -143,7 +143,7 @@
         "type": "fontFamilies"
       },
       "fontWeight": {
-        "value": "400",
+        "value": "Regular",
         "type": "fontWeights"
       },
       "fontSize": {
@@ -158,33 +158,6 @@
         "value": "0px",
         "type": "letterSpacing"
       }
-    }
-  },
-  "Spacing": {
-    "spacing-xs": {
-      "value": "4px",
-      "type": "spacing",
-      "description": "Ideal for tight layouts and compact UI elements"
-    },
-    "spacing-sm": {
-      "value": "8px",
-      "type": "spacing",
-      "description": "Adds comfortable separation between related elements"
-    },
-    "spacing-md": {
-      "value": "16px",
-      "type": "spacing",
-      "description": "Used as the default spacing for content organization"
-    },
-    "spacing-lg": {
-      "value": "32px",
-      "type": "spacing",
-      "description": "Provides clear separation between major sections"
-    },
-    "spacing-xl": {
-      "value": "64px",
-      "type": "spacing",
-      "description": "Creates generous whitespace for large layout divisions"
     }
   }
 }
