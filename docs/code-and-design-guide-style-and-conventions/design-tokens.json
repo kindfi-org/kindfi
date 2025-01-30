@@ -160,13 +160,31 @@
       }
     }
   },
-  "$metadata": {
-    "tokenSetOrder": [
-      "Light Mode",
-      "Dark Mode",
-      "Typography",
-      "Spacing",
-      "Shadows"
-    ]
+  "Spacing": {
+    "spacing-xs": {
+      "value": "4px",
+      "type": "spacing",
+      "description": "Ideal for tight layouts and compact UI elements"
+    },
+    "spacing-sm": {
+      "value": "8px",
+      "type": "spacing",
+      "description": "Adds comfortable separation between related elements"
+    },
+    "spacing-md": {
+      "value": "16px",
+      "type": "spacing",
+      "description": "Used as the default spacing for content organization"
+    },
+    "spacing-lg": {
+      "value": "32px",
+      "type": "spacing",
+      "description": "Provides clear separation between major sections"
+    },
+    "spacing-xl": {
+      "value": "64px",
+      "type": "spacing",
+      "description": "Creates generous whitespace for large layout divisions"
+    }
   }
 }
