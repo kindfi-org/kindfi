@@ -3,7 +3,10 @@ import type React from 'react'
 import { FaBullseye, FaCheckCircle, FaGlobe, FaUsers } from 'react-icons/fa'
 import AboutProject from '~/components/sections/project/about-project'
 import SectionContainer from '~/components/sections/project/section-container'
-import { aboutProjectProps,	successGalleryItems,} from '~/lib/constants/mock-data/mock-projects'
+import {
+	aboutProjectProps,
+	successGalleryItems,
+} from '~/lib/constants/mock-data/mock-projects'
 
 type IconKey = 'target' | 'user' | 'language' | 'status'
 

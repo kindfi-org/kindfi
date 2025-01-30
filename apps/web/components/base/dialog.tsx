@@ -5,7 +5,6 @@ import { X } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
-
 /**
  * https://ui.shadcn.com/docs/components/dialog
  * Root Dialog component that manages the dialog's open state.
@@ -60,6 +59,8 @@ const DialogClose = DialogPrimitive.Close
  *
  * @returns {JSX.Element} The rendered overlay component.
  */
+
+
 const DialogOverlay = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Overlay>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -67,7 +68,7 @@ const DialogOverlay = React.forwardRef<
 	<DialogPrimitive.Overlay
 		ref={ref}
 		className={cn(
-			'fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out',
+			'fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
 			className,
 		)}
 		{...props}
@@ -106,7 +107,6 @@ const DialogContent = React.forwardRef<
 	</DialogPortal>
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
-
 /**
  * DialogHeader component for the header section of the dialog.
  *
@@ -114,6 +114,7 @@ DialogContent.displayName = DialogPrimitive.Content.displayName
  *
  * @returns {JSX.Element} The rendered dialog header.
  */
+
 const DialogHeader = ({
 	className,
 	...props
@@ -127,7 +128,6 @@ const DialogHeader = ({
 	/>
 )
 DialogHeader.displayName = 'DialogHeader'
-
 /**
  * DialogFooter component for the footer section of the dialog.
  *
@@ -135,6 +135,7 @@ DialogHeader.displayName = 'DialogHeader'
  *
  * @returns {JSX.Element} The rendered dialog footer.
  */
+
 const DialogFooter = ({
 	className,
 	...props
@@ -148,7 +149,6 @@ const DialogFooter = ({
 	/>
 )
 DialogFooter.displayName = 'DialogFooter'
-
 /**
  * DialogTitle component for the title of the dialog.
  *
@@ -157,6 +157,7 @@ DialogFooter.displayName = 'DialogFooter'
  *
  * @returns {JSX.Element} The rendered title of the dialog.
  */
+
 const DialogTitle = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Title>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -180,6 +181,7 @@ DialogTitle.displayName = DialogPrimitive.Title.displayName
  *
  * @returns {JSX.Element} The rendered description of the dialog.
  */
+
 const DialogDescription = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Description>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
@@ -204,7 +206,6 @@ export {
 	DialogTitle,
 	DialogDescription,
 }
-=======
 	HTMLDialogElement,
 	React.ComponentPropsWithoutRef<'dialog'>
 >(({ className, children, ...props }, ref) => {
@@ -243,3 +244,4 @@ export {
 DialogContent.displayName = 'DialogContent'
 
 export { DialogContent, DialogOverlay }
+
