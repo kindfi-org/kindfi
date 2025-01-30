@@ -5,6 +5,29 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 
+/**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/switch
+ * Switch component for creating toggle switches with customizable styles and state.
+ * Built on top of Radix UI Switch primitive for reliable accessibility.
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>} props - The component props
+ * @param {string} [props.className] - Additional custom CSS classes for styling the switch
+ * @param {boolean} [props.checked] - The controlled checked state of the switch
+ * @param {(checked: boolean) => void} [props.onCheckedChange] - Event handler called when the checked state changes
+ * @param {boolean} [props.disabled] - When true, prevents the user from interacting with the switch
+ * @param {string} [props.id] - The id of the switch
+ * @aria Implements proper ARIA attributes and keyboard interactions
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/switch Radix UI Switch}
+ * @example
+ * <Switch
+ *   checked={isEnabled}
+ *   onCheckedChange={setIsEnabled}
+ *   disabled={isLoading}
+ *   id="notifications"
+ *   aria-label="Enable notifications"
+ * />
+ * @returns {JSX.Element} The rendered Switch component
+ */
 const Switch = React.forwardRef<
 	React.ElementRef<typeof SwitchPrimitives.Root>,
 	React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
