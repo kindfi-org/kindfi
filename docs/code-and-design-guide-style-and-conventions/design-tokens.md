@@ -20,48 +20,19 @@ This document provides a description of the design tokens exported from Figma.
 
 ## Typography
 
-- **H1 (Title)**: Font family `Roboto`, Font size `32px`, Weight `Bold`, Line height `40px`, Letter spacing `0.5px`.
-- **H2 (Subtitle)**: Font family `Roboto`, Font size `24px`, Weight `Bold`, Line height `32px`.
-- **H3 (Section Header)**: Font family `Roboto`, Font size `20px`, Weight `Bold`, Line height `28px`.
-- **Body Text**: Font family `Roboto`, Font size `16px`, Weight `Regular`, Line height `24px`.
-- **Caption**: Font family `Roboto`, Font size `12px`, Weight `Regular`, Line height `16px`.
+- **H1 (Title)**: Font family `Roboto`, Font size `32px`, Weight `Bold`, Line height `1.25`, Letter spacing `0.5px`.
+- **H2 (Subtitle)**: Font family `Roboto`, Font size `24px`, Weight `Bold`, Line height `1.33`.
+- **H3 (Section Header)**: Font family `Roboto`, Font size `20px`, Weight `Bold`, Line height `1.4`.
+- **Body Text**: Font family `Roboto`, Font size `16px`, Weight `Regular`, Line height `1.5`.
+- **Caption**: Font family `Roboto`, Font size `12px`, Weight `Regular`, Line height `1.33`.
 
 ## Spacing
 
-- **Spacing XS**: `4px` (Small spacing for margins and paddings).
-- **Spacing SM**: `8px` (Used for small gaps between elements).
-- **Spacing MD**: `16px` (Standard spacing for content separation).
-- **Spacing LG**: `32px` (Large spacing for sections and layout separation).
-- **Spacing XL**: `64px` (Extra large spacing for major sections and whitespace).
-
-## Shadows
-
-### Small Shadow (SM)
-- **X**: `0px`
-- **Y**: `1px`
-- **Blur**: `2px`
-- **Spread**: `0px`
-- **Color**: `#0000000D`
-- **Type**: `dropShadow`
-- **Description**: Small shadow for subtle depth.
-
-### Medium Shadow (MD)
-- **X**: `0px`
-- **Y**: `4px`
-- **Blur**: `6px`
-- **Spread**: `0px`
-- **Color**: `#0000001A`
-- **Type**: `dropShadow`
-- **Description**: Medium shadow for moderate depth.
-
-### Large Shadow (LG)
-- **X**: `0px`
-- **Y**: `10px`
-- **Blur**: `15px`
-- **Spread**: `-3px`
-- **Color**: `#00000033`
-- **Type**: `innerShadow`
-- **Description**: Large shadow for strong depth.
+- **Spacing XS**: `4px` (Minimal spacing for tight layouts and compact UI elements).
+- **Spacing SM**: `8px` (Comfortable gaps between related elements).
+- **Spacing MD**: `16px` (Default separation for content blocks).
+- **Spacing LG**: `32px` (Generous spacing to define distinct sections).
+- **Spacing XL**: `64px` (Maximum whitespace for major layout divisions).
 
 ---
 
