@@ -6,7 +6,7 @@ import {
 	statsDataUpdates,
 	successGalleryItems,
 	timelineEvents,
-} from '~/lib/constants/mock-data/mock-projects'
+} from '~/lib/mock-data/mock-projects'
 
 const ProjectUpdatesSection = () => {
 	return (
@@ -26,8 +26,10 @@ const ProjectUpdatesSection = () => {
 				<div className="flex items-center justify-between mb-4">
 					<h2 className="text-xl font-semibold text-black">Success Gallery</h2>
 					<button
+						onClick={() => {
+							/* handle view all */
+						}}
 						type="button"
-						onClick={(e) => e.preventDefault()}
 						className="text-sm font-medium text-blue-600 hover:underline"
 					>
 						View All

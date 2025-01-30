@@ -2,12 +2,15 @@ import { useState } from 'react'
 import type React from 'react'
 import { Button } from '~/components/base/button'
 
+type MediaType = 'image' | 'video'
+type MediaFileExtension = '.mp4' | '.jpg' | '.png' | '.webp'
+
 type MediaItem = {
 	id: string
-	type: 'image' | 'video'
-	src: `.mp4` | `.jpg` | `.png` | `.webp`
+	type: MediaType
+	src: MediaFileExtension
 	alt: string
-	caption?: string
+	captionsSrc?: string
 }
 
 type MediaPlayerProps = {
@@ -18,54 +21,38 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 	const [activeIndex, setActiveIndex] = useState(0)
 
 	const activeItem = items[activeIndex]
-	const videoFileName = activeItem.src
-		.split('/')
-		.pop()
-		?.replace(/\.[^/.]+$/, '')
 
 	return (
-		<div
+		<section
 			className="media-player flex flex-col items-center space-y-4"
 			aria-label="Media gallery"
 		>
-			<div className="main-media w-full h-64 bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden">
+			<div
+				className="main-media w-full h-64 bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden"
+				aria-live="polite"
+			>
 				{activeItem.type === 'image' ? (
 					<img
 						src={activeItem.src}
-						alt={activeItem.alt || 'Media item'}
+						alt={activeItem.alt}
 						className="h-full object-contain"
 					/>
 				) : (
-					<div className="video-container relative w-full h-full">
-						<video
-							src={activeItem.src}
-							controls
-							className="h-full object-contain"
-							aria-label={activeItem.alt}
-						>
-							<track
-								kind="captions"
-								src={`/captions/${videoFileName}.vtt`}
-								srcLang="en"
-								label="English"
-								default
-							/>
-							{activeItem.caption && (
-								<track
-									kind="descriptions"
-									src={`/descriptions/${videoFileName}.vtt`}
-									srcLang="en"
-									label="English descriptions"
-								/>
-							)}
-							Your browser does not support the video tag.
-						</video>
-						{activeItem.caption && (
-							<div className="caption-text absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center">
-								{activeItem.caption}
-							</div>
-						)}
-					</div>
+					<video
+						src={activeItem.src}
+						controls
+						className="h-full object-contain"
+						aria-label={activeItem.alt}
+					>
+						<track
+							kind="captions"
+							src={activeItem.captionsSrc}
+							label="English"
+							srcLang="en"
+							default
+						/>
+						Your browser does not support the video tag.
+					</video>
 				)}
 			</div>
 
@@ -79,14 +66,20 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 						key={item.id}
 						type="button"
 						onClick={() => setActiveIndex(index)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								setActiveIndex(index)
+							}
+						}}
+						aria-selected={activeIndex === index}
+						aria-controls="main-media"
+						role="tab"
+						aria-label={`View ${item.alt}`}
 						className={`thumbnail w-16 h-16 border-2 rounded-md overflow-hidden flex items-center justify-center ${
 							activeIndex === index
 								? 'border-blue-500'
 								: 'border-gray-300 hover:border-gray-400'
 						}`}
-						aria-selected={activeIndex === index}
-						aria-label={`View ${item.alt}`}
-						role="tab"
 					>
 						{item.type === 'image' ? (
 							<img
@@ -119,7 +112,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 					</Button>
 				))}
 			</div>
-		</div>
+		</section>
 	)
 }
 

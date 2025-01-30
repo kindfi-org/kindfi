@@ -32,7 +32,14 @@ const ImpactCard: React.FC<ImpactCardProps> = ({
 }
 
 interface ImpactCardsProps {
-	data: ImpactCardProps[]
+	data: {
+		icon: React.ReactNode
+		id: string
+		label: string
+		value: string | number
+		bgColor?: string
+		textColor?: string
+	}[]
 }
 
 const ImpactCards: React.FC<ImpactCardsProps> = ({ data }) => {

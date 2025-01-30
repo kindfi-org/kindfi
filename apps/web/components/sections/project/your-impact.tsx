@@ -2,7 +2,7 @@ import type React from 'react'
 import ImpactCards from '~/components/sections/project/impact-cards'
 import SectionContainer from '~/components/sections/project/section-container'
 import SupporterUpdates from '~/components/sections/project/supporter-updates'
-import { statsData, updatesData } from '~/lib/constants/mock-data/mock-projects'
+import { statsData, updatesData } from '~/lib/mock-data/mock-projects'
 
 const YourImpactSection = () => {
 	return (
