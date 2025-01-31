@@ -27,11 +27,11 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
-import { Paginations } from '~/components/shared/pagination'
-import { ACHIEVEMENT_CARDS, NFTDATA } from '~/lib/constants/mock-data/section'
 import { ErrorFallback } from '~/components/fallbacks/error-fallback'
 import { LoadingFallback } from '~/components/fallbacks/loading-fallback'
-import { type NFTProps } from '~/lib/types/section'
+import { Paginations } from '~/components/shared/pagination'
+import { ACHIEVEMENT_CARDS, NFTDATA } from '~/lib/constants/mock-data/section'
+import type { NFTProps } from '~/lib/types/section'
 import { AchievementCard } from './achievement-card'
 import { NFTCard } from './nft-card'
 import { StatsSection } from './stats-section'
