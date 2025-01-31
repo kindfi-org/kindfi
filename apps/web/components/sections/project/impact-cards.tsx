@@ -41,9 +41,9 @@ interface ImpactCardsProps {
 const ImpactCards: React.FC<ImpactCardsProps> = ({ data }) => {
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-			{data.map((item, index) => (
+			{data.map((item) => (
 				<ImpactCard
-					key={index}
+					key={item.label}
 					icon={item.icon}
 					label={item.label}
 					value={item.value}

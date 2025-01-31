@@ -34,6 +34,8 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 						className="h-full object-contain"
 					>
 						Your browser does not support the video tag.
+						{/* provide captions src */}
+						<track kind="captions" src="" label="English" />
 					</video>
 				)}
 			</div>
@@ -64,6 +66,8 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 									fill="none"
 									viewBox="0 0 24 24"
 									stroke="currentColor"
+									role="img"
+									aria-label={item.alt || 'icon'}
 								>
 									<path
 										strokeLinecap="round"

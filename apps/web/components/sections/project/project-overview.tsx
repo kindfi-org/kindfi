@@ -46,11 +46,14 @@ const ProjectOverview = () => {
 					{mediaList.map((item, index) =>
 						index > 0 ? (
 							<img
-								key={item.src + index}
+								key={item.id}
 								src={item.src}
 								alt={item.alt}
-								onClick={() => handleThumbnailClick(index)}
 								className="w-24 h-24 rounded object-cover cursor-pointer transition-transform transform hover:scale-105 shadow-sm"
+								onClick={() => handleThumbnailClick(index)}
+								onKeyDown={(e) =>
+									e.key === 'Enter' && handleThumbnailClick(index)
+								}
 							/>
 						) : null,
 					)}
