@@ -1,5 +1,20 @@
 import type { Config } from 'tailwindcss'
 
+const breakPoints = {
+	xs: '320px',
+	sm: '440px',
+	md: '720px',
+	'md-lg': '900px',
+	lg: '1080px',
+	'lg-xl': '1260px',
+	xl: '1440px',
+	'xl-2xl': '1520px',
+	'2xl': '1600px',
+	'2xl-3xl': '1880px',
+	'2xl-3xl-mid': '2020px',
+	'3xl': '2160px',
+}
+
 const config = {
 	darkMode: ['class'],
 	content: [
@@ -11,14 +26,7 @@ const config = {
 	],
 	prefix: '',
 	theme: {
-		screens: {
-			xs: '375px',
-			sm: '640px',
-			md: '768px',
-			lg: '1024px',
-			xl: '1280px',
-			'2xl': '1536px',
-		},
+		screens: breakPoints,
 		container: {
 			center: true,
 			padding: {
@@ -28,13 +36,7 @@ const config = {
 				xl: '5rem',
 				'2xl': '6rem',
 			},
-			screens: {
-				sm: '640px',
-				md: '768px',
-				lg: '1024px',
-				xl: '1280px',
-				'2xl': '1536px',
-			},
+			screens: breakPoints,
 		},
 		extend: {
 			colors: {
@@ -46,10 +48,30 @@ const config = {
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
+					50: 'hsl(var(--primary-50))',
+					100: 'hsl(var(--primary-100))',
+					200: 'hsl(var(--primary-200))',
+					300: 'hsl(var(--primary-300))',
+					400: 'hsl(var(--primary-400))',
+					500: 'hsl(var(--primary-500))',
+					600: 'hsl(var(--primary-600))',
+					700: 'hsl(var(--primary-700))',
+					800: 'hsl(var(--primary-800))',
+					900: 'hsl(var(--primary-900))',
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))',
+					50: 'hsl(var(--secondary-50))',
+					100: 'hsl(var(--secondary-100))',
+					200: 'hsl(var(--secondary-200))',
+					300: 'hsl(var(--secondary-300))',
+					400: 'hsl(var(--secondary-400))',
+					500: 'hsl(var(--secondary-500))',
+					600: 'hsl(var(--secondary-600))',
+					700: 'hsl(var(--secondary-700))',
+					800: 'hsl(var(--secondary-800))',
+					900: 'hsl(var(--secondary-900))',
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
