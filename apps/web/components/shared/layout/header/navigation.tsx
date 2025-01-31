@@ -58,7 +58,10 @@ export function Navigation() {
 		<NavigationMenu aria-label="Main navigation">
 			<NavigationMenuList>
 				<NavigationMenuItem>
-					<NavigationMenuTrigger aria-label="Projects menu">
+					<NavigationMenuTrigger
+						aria-label="Projects menu"
+						label="Projects menu"
+					>
 						Projects
 					</NavigationMenuTrigger>
 					<NavigationMenuContent aria-label="Project options list">
@@ -82,9 +85,13 @@ export function Navigation() {
 				</NavigationMenuItem>
 
 				<NavigationMenuItem>
-					<NavigationMenuTrigger aria-label="Resources menu">
+					<NavigationMenuTrigger
+						aria-label="Resources menu"
+						label="Resources menu"
+					>
 						Resources
 					</NavigationMenuTrigger>
+
 					<NavigationMenuContent aria-label="Resource options list">
 						<ul
 							className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]"
