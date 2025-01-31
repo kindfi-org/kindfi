@@ -2,6 +2,7 @@ import type React from 'react'
 import { FaBookmark, FaCheckCircle, FaClock, FaShareAlt } from 'react-icons/fa'
 
 interface TimelineEvent {
+	id: string
 	title: string
 	date: string
 	status: 'completed' | 'pending'
@@ -36,7 +37,7 @@ const Timeline: React.FC<TimelineProps> = ({ events }) => {
 			<ul className="space-y-4">
 				{events.map((event) => (
 					<li
-						key={event.title}
+						key={event.id}
 						className="flex items-center justify-between bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200"
 					>
 						<div className="flex items-center">

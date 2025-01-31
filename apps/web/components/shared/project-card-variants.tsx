@@ -12,9 +12,9 @@ import type React from 'react'
 import { useEffect, useState } from 'react'
 import { comments, nftCollection, nftTiers } from '../mocks/mock-data'
 
-// type ProjectCardProps = {}
+type ProjectCardProps = Record<string, never>
 
-const ProjectCard: React.FC = () => {
+const ProjectCard: React.FC<ProjectCardProps> = () => {
 	const [showImpact, setShowImpact] = useState(false)
 	const [showSuccess, setShowSuccess] = useState(false)
 
@@ -96,7 +96,7 @@ const ProjectCard: React.FC = () => {
 				</div>
 
 				{nftTiers.map((tier) => (
-					<div key={tier.title} className="p-4 bg-gray-50 rounded-lg">
+					<div key={tier.id} className="p-4 bg-gray-50 rounded-lg">
 						<div className="flex justify-between items-center mb-1">
 							<h3 className="font-semibold text-gray-700">{tier.title}</h3>
 							<span className="bg-purple-100 text-purple-600 px-2 py-1 rounded text-sm">
@@ -252,7 +252,8 @@ const ProjectCard: React.FC = () => {
 						.fill(0)
 						.map((_, i) => (
 							<div
-								key={_}
+								// biome-ignore lint/suspicious/noArrayIndexKey: We can use the index for now since the UserAvatar component is just an SVG. Will be updated when actual user images will be used for the avatars. This is a suggestion
+								key={i}
 								className="w-8 h-8 bg-gray-100 rounded-full border-2 border-white"
 								style={{ marginLeft: i > 0 ? '-12px' : '0' }}
 							>
@@ -263,7 +264,7 @@ const ProjectCard: React.FC = () => {
 				</div>
 				<div className="space-y-6">
 					{comments.map((comment) => (
-						<div key={comment.name} className="flex gap-3">
+						<div key={comment.id} className="flex gap-3">
 							<div className="w-10 h-10 bg-gray-100 rounded-full flex-shrink-0">
 								<UserAvatar />
 							</div>
@@ -363,7 +364,8 @@ const ProjectCard: React.FC = () => {
 							.fill(0)
 							.map((_, i) => (
 								<div
-									key={_}
+									// biome-ignore lint/suspicious/noArrayIndexKey: It looks like this is hardcoded in the meantime. I think we can use the index for now.
+									key={i}
 									className="w-8 h-8 bg-gray-100 rounded-full border-2 border-white"
 									style={{ marginLeft: i > 0 ? '-12px' : '0' }}
 								>
