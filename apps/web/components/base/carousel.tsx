@@ -15,23 +15,47 @@ type CarouselOptions = UseCarouselParameters[0]
 type CarouselPlugin = UseCarouselParameters[1]
 
 type CarouselProps = {
+	/**
+	 *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/carousel
+	 * Optional settings for the carousel.
+	 */
 	opts?: CarouselOptions
+	/**
+	 * Optional plugins for the carousel.
+	 */
 	plugins?: CarouselPlugin
+	/**
+	 * Defines the orientation of the carousel ('horizontal' or 'vertical').
+	 * Default is 'horizontal'.
+	 */
 	orientation?: 'horizontal' | 'vertical'
+	/**
+	 * A callback function to set the API for the carousel.
+	 */
 	setApi?: (api: CarouselApi) => void
 }
 
 type CarouselContextProps = {
+	/** The ref of the carousel element. */
 	carouselRef: ReturnType<typeof useEmblaCarousel>[0]
+	/** The API of the carousel. */
 	api: ReturnType<typeof useEmblaCarousel>[1]
+	/** Function to scroll to the previous slide. */
 	scrollPrev: () => void
+	/** Function to scroll to the next slide. */
 	scrollNext: () => void
+	/** Whether the carousel can scroll to the previous slide. */
 	canScrollPrev: boolean
+	/** Whether the carousel can scroll to the next slide. */
 	canScrollNext: boolean
 } & CarouselProps
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 
+/**
+ * Custom hook to access the carousel context.
+ * @throws Will throw an error if used outside of a <Carousel /> component.
+ */
 function useCarousel() {
 	const context = React.useContext(CarouselContext)
 
@@ -42,6 +66,9 @@ function useCarousel() {
 	return context
 }
 
+/**
+ * Carousel component that provides the carousel context and functionality.
+ */
 const Carousel = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement> & CarouselProps
@@ -149,6 +176,9 @@ const Carousel = React.forwardRef<
 )
 Carousel.displayName = 'Carousel'
 
+/**
+ * CarouselContent component that wraps the carousel items and manages overflow.
+ */
 const CarouselContent = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement>
@@ -171,6 +201,9 @@ const CarouselContent = React.forwardRef<
 })
 CarouselContent.displayName = 'CarouselContent'
 
+/**
+ * CarouselItem component that represents an individual item in the carousel.
+ */
 const CarouselItem = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement>
@@ -193,6 +226,9 @@ const CarouselItem = React.forwardRef<
 })
 CarouselItem.displayName = 'CarouselItem'
 
+/**
+ * CarouselPrevious component that renders a button for scrolling to the previous slide.
+ */
 const CarouselPrevious = React.forwardRef<
 	HTMLButtonElement,
 	React.ComponentProps<typeof Button>
@@ -222,6 +258,9 @@ const CarouselPrevious = React.forwardRef<
 })
 CarouselPrevious.displayName = 'CarouselPrevious'
 
+/**
+ * CarouselNext component that renders a button for scrolling to the next slide.
+ */
 const CarouselNext = React.forwardRef<
 	HTMLButtonElement,
 	React.ComponentProps<typeof Button>

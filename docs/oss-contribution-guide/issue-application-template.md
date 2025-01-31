@@ -26,9 +26,9 @@ I'm \[Your Name], and I'm part of the \[mention you community]. I'm excited abou
 
 ### **👀 Links and Profiles**
 
-* GitHub: \[Your GitHub Profile URL]
-* OnlyDust: \[Your OnlyDust Profile URL]
-* Other Relevant Links: \[Portfolio, Blog, LinkedIn.]
+- GitHub: \[Your GitHub Profile URL]
+- OnlyDust: \[Your OnlyDust Profile URL]
+- Other Relevant Links: \[Portfolio, Blog, LinkedIn.]
 
 Thank you for considering my application. I'm excited about the possibility of contributing to this project and making a positive impact. Please let me know if you have any questions or if there's anything else I can provide.
 
@@ -50,8 +50,8 @@ Best regards, \[Your Name]
 >
 > You can find my profiles and links here:
 >
-> * GitHub: [https://github.com/anamartinezdev](https://github.com/anamartinezdev)
-> * OnlyDust: [https://app.onlydust.xyz/anamartinez](https://app.onlydust.xyz/anamartinez)
-> * LinkedIn: [https://linkedin.com/in/anamartinezdev](https://linkedin.com/in/anamartinezdev)
+> - GitHub: [https://github.com/anamartinezdev](https://github.com/anamartinezdev)
+> - OnlyDust: [https://app.onlydust.xyz/anamartinez](https://app.onlydust.xyz/anamartinez)
+> - LinkedIn: [https://linkedin.com/in/anamartinezdev](https://linkedin.com/in/anamartinezdev)
 >
 > Thank you for considering my application. I’m thrilled about the opportunity to contribute to this project and create a positive impact. Please let me know if you have any questions or need any additional information.

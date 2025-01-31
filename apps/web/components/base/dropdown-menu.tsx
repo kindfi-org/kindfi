@@ -5,7 +5,21 @@ import { Check, ChevronRight, Circle } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
-
+/**
+ * Dropdown Menu Component
+ *
+ * A set of components for creating accessible dropdown menus using Radix UI.
+ *
+ * @component
+ * @example
+ * <DropdownMenu>
+ *   <DropdownMenuTrigger>Open Menu</DropdownMenuTrigger>
+ *   <DropdownMenuContent>
+ *     <DropdownMenuItem onSelect={() => alert('Clicked')}>Item 1</DropdownMenuItem>
+ *     <DropdownMenuItem onSelect={() => alert('Clicked')}>Item 2</DropdownMenuItem>
+ *   </DropdownMenuContent>
+ * </DropdownMenu>
+ */
 const DropdownMenu = DropdownMenuPrimitive.Root
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger

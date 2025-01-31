@@ -4,7 +4,10 @@ import { ChevronDown } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
-
+/**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/navigation-menu
+ * Root component for the navigation menu.
+ */
 interface NavigationItem {
 	label: string
 	href: string
@@ -67,7 +70,9 @@ const NavigationMenu = React.forwardRef<
 	)
 })
 NavigationMenu.displayName = NavigationMenuPrimitive.Root.displayName
-
+/**
+ * List wrapper for navigation menu items.
+ */
 const NavigationMenuList = React.forwardRef<
 	React.ElementRef<typeof NavigationMenuPrimitive.List>,
 	React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.List>
@@ -84,14 +89,22 @@ const NavigationMenuList = React.forwardRef<
 ))
 NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName
 
+/**
+ * Individual navigation menu item.
+ */
 const NavigationMenuItem = NavigationMenuPrimitive.Item
 
+/**
+ * Styles for navigation menu trigger button.
+ */
 type TriggerProps = React.ComponentPropsWithoutRef<
 	typeof NavigationMenuPrimitive.Trigger
 > & {
 	'data-state'?: 'open' | 'closed'
 }
-
+/**
+ * Trigger button for dropdown menus.
+ */
 const NavigationMenuTrigger = React.forwardRef<
 	React.ElementRef<typeof NavigationMenuPrimitive.Trigger>,
 	TriggerProps &
@@ -114,7 +127,9 @@ const NavigationMenuTrigger = React.forwardRef<
 	</NavigationMenuPrimitive.Trigger>
 ))
 NavigationMenuTrigger.displayName = NavigationMenuPrimitive.Trigger.displayName
-
+/**
+ * Content section for dropdown menus.
+ */
 const NavigationMenuContent = React.forwardRef<
 	React.ElementRef<typeof NavigationMenuPrimitive.Content>,
 	React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Content>
@@ -130,7 +145,14 @@ const NavigationMenuContent = React.forwardRef<
 ))
 NavigationMenuContent.displayName = NavigationMenuPrimitive.Content.displayName
 
+/**
+ * Link component for navigation menu.
+ */
 const NavigationMenuLink = NavigationMenuPrimitive.Link
+
+/**
+ * Viewport container for the navigation menu dropdown.
+ */
 
 const NavigationMenuViewport = React.forwardRef<
 	React.ElementRef<typeof NavigationMenuPrimitive.Viewport>,
@@ -165,6 +187,9 @@ const NavigationMenuIndicator = React.forwardRef<
 		<div className="relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-border shadow-md" />
 	</NavigationMenuPrimitive.Indicator>
 ))
+/**
+ * Indicator for active navigation menu items.
+ */
 NavigationMenuIndicator.displayName =
 	NavigationMenuPrimitive.Indicator.displayName
 

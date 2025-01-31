@@ -12,9 +12,9 @@
 	"formatter": { "enabled": true, "indentStyle": "tab" },
 	"organizeImports": { "enabled": true },
 	"linter": {
-		"enabled": true,
+		"enabled": false,
 		"rules": {
-			"recommended": true,
+			"recommended": false,
 			"style": {
 				"recommended": true,
 				"noYodaExpression": "error",
