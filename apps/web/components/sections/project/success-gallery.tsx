@@ -63,7 +63,6 @@ const SuccessGallery: React.FC<SuccessGalleryProps> = ({
 								role="img"
 								aria-labelledby="video-icon-title"
 							>
-								{' '}
 								<title id="video-icon-title">Video Thumbnail</title>
 								<path
 									strokeLinecap="round"

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { SectionCaption } from '~/components/shared/section-caption'
-import { fadeInUpAnimation } from '~/lib/constants/animations'
+import { fadeInUpAnimation } from '~/lib/animations'
 import { features } from '~/lib/mock-data/mock-join-us-section'
 
 export function JoinUs() {
@@ -39,10 +39,8 @@ export function JoinUs() {
 								className="group h-full bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
 								aria-labelledby={`feature-title-${feature.id}`}
 							>
-								{/* Icon */}
 								{feature.icon}
 
-								{/* Content */}
 								<h3
 									id={`feature-title-${feature.id}`}
 									className="mt-6 text-xl font-semibold text-gray-900"
@@ -53,7 +51,6 @@ export function JoinUs() {
 									{feature.description}
 								</p>
 
-								{/* Highlight */}
 								<div className="mt-6 flex items-center text-sm font-medium text-blue-600">
 									{feature.highlight}
 									<ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
@@ -63,7 +60,6 @@ export function JoinUs() {
 					))}
 				</div>
 
-				{/* Call-to-Action Box */}
 				<motion.aside
 					initial={{ opacity: 0, y: 20 }}
 					whileInView={{ opacity: 1, y: 0 }}
@@ -71,7 +67,6 @@ export function JoinUs() {
 					transition={{ duration: 0.6, delay: 0.3 }}
 					className="relative bg-white rounded-2xl p-8 lg:p-12 shadow-lg max-w-3xl mx-auto overflow-hidden"
 				>
-					{/* Background Pattern */}
 					<div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-sky-50 opacity-50" />
 
 					<div className="relative">
@@ -90,9 +85,7 @@ export function JoinUs() {
 							<Button
 								size="lg"
 								className="gradient-btn text-white px-8"
-								onClick={() => {
-									// TODO: Implement join revolution action
-								}}
+								onClick={() => {}}
 							>
 								Join the Revolution
 							</Button>
@@ -100,9 +93,7 @@ export function JoinUs() {
 								size="lg"
 								variant="outline"
 								className="gradient-border-btn hover:bg-teal-50"
-								onClick={() => {
-									// TODO: Implement discovery navigation
-								}}
+								onClick={() => {}}
 							>
 								Discover more about KindFi
 							</Button>

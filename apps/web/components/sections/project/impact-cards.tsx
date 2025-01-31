@@ -19,7 +19,6 @@ const ImpactCard: React.FC<ImpactCardProps> = ({
 }) => {
 	return (
 		<div
-			id={id}
 			className={`rounded-lg p-4 shadow-sm ${bgColor} flex flex-col items-start`}
 		>
 			<div className="flex items-center mb-2">

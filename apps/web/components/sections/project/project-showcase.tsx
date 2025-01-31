@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { useState } from 'react'
 import type React from 'react'
 import SectionContainer from '~/components/sections/project/section-container'
@@ -14,8 +15,12 @@ const ProjectShowcaseSection = () => {
 	const [lightboxOpen, setLightboxOpen] = useState(false)
 	const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null)
 
+	// Fix: Accepts MediaItem and index to match expected type
 	const openLightbox = (index: number) => {
-		setSelectedMedia(showcaseData[index])
+		const item = showcaseData[index]
+		if (!item) return
+
+		setSelectedMedia(item)
 		setLightboxOpen(true)
 	}
 
@@ -52,10 +57,12 @@ const ProjectShowcaseSection = () => {
 						</button>
 
 						{selectedMedia.type === 'image' ? (
-							<img
+							<Image
 								src={selectedMedia.src}
 								alt={selectedMedia.alt || 'Showcase image'}
 								className="max-w-full max-h-full rounded-lg"
+								width={800}
+								height={600}
 							/>
 						) : (
 							<video
@@ -66,7 +73,10 @@ const ProjectShowcaseSection = () => {
 							>
 								<track
 									kind="captions"
-									src=""
+									src={`/captions/${selectedMedia.src
+										.split('/')
+										.pop()
+										?.replace(/\.[^/.]+$/, '')}.vtt`}
 									label="English"
 									srcLang="en"
 									default

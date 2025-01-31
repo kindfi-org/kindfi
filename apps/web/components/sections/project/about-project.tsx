@@ -15,7 +15,6 @@ interface Update {
 }
 
 interface AboutProjectProps {
-	id: string
 	description: string
 	highlights: Highlight[]
 	updates: Update[]
@@ -23,7 +22,6 @@ interface AboutProjectProps {
 }
 
 const AboutProject: React.FC<AboutProjectProps> = ({
-	id,
 	description,
 	highlights,
 	updates,

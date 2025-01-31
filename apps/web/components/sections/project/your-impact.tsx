@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type React from 'react'
 import ImpactCards from '~/components/sections/project/impact-cards'
 import SectionContainer from '~/components/sections/project/section-container'
@@ -8,9 +9,10 @@ const YourImpactSection = () => {
 	return (
 		<SectionContainer>
 			<div className="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden shadow-lg">
-				<img
+				<Image
 					src="/images/video.png"
 					alt="Main Video"
+					fill
 					className="w-full h-full object-cover"
 				/>
 			</div>

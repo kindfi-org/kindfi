@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type React from 'react'
 import ImpactCards from '~/components/sections/project/impact-cards'
 import SectionContainer from '~/components/sections/project/section-container'
@@ -26,9 +27,7 @@ const ProjectUpdatesSection = () => {
 				<div className="flex items-center justify-between mb-4">
 					<h2 className="text-xl font-semibold text-black">Success Gallery</h2>
 					<button
-						onClick={() => {
-							/* handle view all */
-						}}
+						onClick={() => {}}
 						type="button"
 						className="text-sm font-medium text-blue-600 hover:underline"
 					>
@@ -41,7 +40,7 @@ const ProjectUpdatesSection = () => {
 							key={item.id}
 							className="bg-gray-100 rounded-lg shadow-inner aspect-w-1 aspect-h-1"
 						>
-							<img
+							<Image
 								src={item.src}
 								alt={item.alt}
 								className="w-full h-full object-cover rounded-lg"

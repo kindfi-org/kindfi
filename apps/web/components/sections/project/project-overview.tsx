@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { useState } from 'react'
 import type React from 'react'
 import { FaBullseye, FaCheckCircle, FaGlobe, FaUsers } from 'react-icons/fa'
@@ -49,13 +50,9 @@ const ProjectOverview = () => {
 	return (
 		<SectionContainer>
 			<div className="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden mb-10">
-				<div
-					className="absolute inset-4 flex items-center justify-center shadow-lg rounded-lg"
-					role="img"
-					aria-label={mediaList[0]?.alt || 'Main project image'}
-				>
+				<div className="absolute inset-4 flex items-center justify-center shadow-lg rounded-lg">
 					{mediaList[0] && (
-						<img
+						<Image
 							src={mediaList[0].src}
 							alt={mediaList[0].alt}
 							className="w-full h-full object-cover rounded-lg"
@@ -69,16 +66,14 @@ const ProjectOverview = () => {
 					{mediaList.map((item, index) =>
 						index > 0 ? (
 							<li key={item.id}>
-								{' '}
 								<button
 									type="button"
-									key={item.id}
 									onClick={() => handleThumbnailClick(item.id)}
 									onKeyDown={handleKeyDown(item.id)}
 									className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
 									aria-label={`View ${item.alt}`}
 								>
-									<img
+									<Image
 										src={item.src}
 										alt={item.alt}
 										aria-hidden="true"

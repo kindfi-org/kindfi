@@ -1,9 +1,18 @@
+import { Image } from '@radix-ui/react-avatar'
 import { useState } from 'react'
 import type React from 'react'
 import { Button } from '~/components/base/button'
 
 type MediaType = 'image' | 'video'
-type MediaFileExtension = '.mp4' | '.jpg' | '.png' | '.webp'
+type MediaFileExtension =
+	| '.mp4'
+	| '.mov'
+	| '.webm'
+	| '.jpg'
+	| '.jpeg'
+	| '.png'
+	| '.webp'
+	| '.avif'
 
 type MediaItem = {
 	id: string
@@ -11,6 +20,7 @@ type MediaItem = {
 	src: MediaFileExtension
 	alt: string
 	captionsSrc?: string
+	descriptionsSrc?: string
 }
 
 type MediaPlayerProps = {
@@ -32,7 +42,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 				aria-live="polite"
 			>
 				{activeItem.type === 'image' ? (
-					<img
+					<Image
 						src={activeItem.src}
 						alt={activeItem.alt}
 						className="h-full object-contain"
@@ -46,11 +56,19 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 					>
 						<track
 							kind="captions"
-							src={activeItem.captionsSrc}
+							src={activeItem.captionsSrc || '/captions/placeholder.vtt'}
 							label="English"
 							srcLang="en"
 							default
 						/>
+						{activeItem.descriptionsSrc && (
+							<track
+								kind="descriptions"
+								src={activeItem.descriptionsSrc}
+								label="English Descriptions"
+								srcLang="en"
+							/>
+						)}
 						Your browser does not support the video tag.
 					</video>
 				)}
@@ -82,7 +100,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 						}`}
 					>
 						{item.type === 'image' ? (
-							<img
+							<Image
 								src={item.src}
 								alt=""
 								aria-hidden="true"

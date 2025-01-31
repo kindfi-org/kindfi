@@ -8,7 +8,13 @@ interface ImageProps extends ImgHTMLAttributes<HTMLImageElement> {
 	isDecorative?: boolean
 }
 
-const Image: FC<ImageProps> = ({ src, alt, className, isDecorative = false, ...props }) => {
+const Image: FC<ImageProps> = ({
+	src,
+	alt,
+	className,
+	isDecorative = false,
+	...props
+}) => {
 	return (
 		<div
 			className={cn(
@@ -16,7 +22,7 @@ const Image: FC<ImageProps> = ({ src, alt, className, isDecorative = false, ...p
 				className,
 			)}
 		>
-			<img
+			<Image
 				src={src}
 				alt={isDecorative ? '' : alt || 'Image'}
 				aria-hidden={isDecorative}

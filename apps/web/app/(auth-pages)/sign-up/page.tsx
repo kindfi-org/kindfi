@@ -12,25 +12,10 @@ import {
 } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
-import type { Message } from '~/components/form-message'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { useFormValidation } from '~/hooks/use-form-validation'
 
-export default function Signup(props: { searchParams: Promise<Message> }) {
-	const searchParams = props.searchParams
-	// Show success message if registration was successful
-	// if (searchParams.success) {
-	//   return (
-	//     <div className="w-full flex items-center justify-center p-4">
-	//       <Card className="w-full max-w-md">
-	//         <CardContent className="pt-6">
-	//           <FormMessage message={searchParams} />
-	//         </CardContent>
-	//       </Card>
-	//     </div>
-	//   );
-	// }
-
+export default function Signup() {
 	const {
 		isEmailInvalid,
 		isPasswordInvalid,
