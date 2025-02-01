@@ -45,13 +45,22 @@ const ProjectOverview = () => {
 				<div className="absolute bottom-8 left-8 flex space-x-2">
 					{mediaList.map((item, index) =>
 						index > 0 ? (
-							<img
-								key={item.src + index}
-								src={item.src}
-								alt={item.alt}
-								onClick={() => handleThumbnailClick(index)}
+							<button
+								type="button"
+								key={item.id}
 								className="w-24 h-24 rounded object-cover cursor-pointer transition-transform transform hover:scale-105 shadow-sm"
-							/>
+								onClick={() => handleThumbnailClick(index)}
+								onKeyDown={(e) =>
+									e.key === 'Enter' && handleThumbnailClick(index)
+								}
+								aria-label={`Click to view ${item.alt}`}
+							>
+								<img
+									src={item.src}
+									alt={item.alt}
+									className="w-full h-full rounded-full"
+								/>
+							</button>
 						) : null,
 					)}
 				</div>
