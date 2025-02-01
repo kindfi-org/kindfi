@@ -1,6 +1,6 @@
-## Usage
+# Usage
 
-### API Endpoints
+## API Endpoints
 
 - **Generate Registration Options:**
 
@@ -30,9 +30,9 @@
   - Request Body: `{ "identifier": "user@example.com", "authenticationResponse": {...} }`
   - Response: Verification result.
 
-### Flow
+## Flow
 
-#### Registration Flow
+### Registration Flow
 
 +---------------------------+
 | User Device |
@@ -63,7 +63,14 @@ v
 | User Device |
 +---------------------------+
 
-#### Authentication Flow
+Summary:
+
+1. **Request Registration Options**: The user device initiates the registration process by requesting options from the API.
+2. **Return WebAuthn Registration Options**: The API responds with the necessary WebAuthn registration options.
+3. **Create Registration Response**: The user device uses these options to create a registration response.
+4. **Verify Registration**: The API verifies the registration response and returns the result to the user device.
+
+### Authentication Flow
 
 +---------------------------+
 | User Device |
@@ -93,3 +100,10 @@ v
 +---------------------------+
 | User Device |
 +---------------------------+
+
+Summary:
+
+1. **Request Authentication Options**: The user device requests authentication options from the API.
+2. **Return WebAuthn Authentication Options**: The API provides the necessary WebAuthn authentication options.
+3. **Create Authentication Response**: The user device creates an authentication response using the provided options.
+4. **Verify Authentication**: The API verifies the authentication response and returns the result to the user device.
