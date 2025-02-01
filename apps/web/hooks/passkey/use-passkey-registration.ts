@@ -23,6 +23,7 @@ export const usePasskeyRegistration = (
 	}
 
 	const handleRegister = async () => {
+		if (!identifier || identifier.trim() === '') return
 		// Initiates the registration process with WebAuthn and Stellar
 		setIsCreatingPasskey(true)
 		setRegSuccess('')

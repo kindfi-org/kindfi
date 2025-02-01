@@ -10,6 +10,10 @@ import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
 import { useStellarContext } from '~/hooks/stellar/stellar-context'
 import { truncateAccount } from '~/lib/passkey/stellar'
 
+// This component is a mock of the passkey dashboard
+// It is used to test the passkey authentication and registration
+// It is pre-used in the production environment
+
 export const PasskeyDashboard = ({
 	identifier = 'test',
 }: {
@@ -32,6 +36,7 @@ export const PasskeyDashboard = ({
 		regError,
 		handleRegister,
 		reset: resetReg,
+		isAlreadyRegistered,
 	} = usePasskeyRegistration(identifier, { onRegister })
 
 	const {
