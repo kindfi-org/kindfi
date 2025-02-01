@@ -21,7 +21,8 @@ interface EscrowContractResult {
 }
 
 export async function initializeEscrowContract(
-    params: EscrowContractParams
+    params: EscrowContractParams,
+    secretKey: string
 ): Promise<EscrowContractResult> {
     try {
         // Calculate total amount including all milestones

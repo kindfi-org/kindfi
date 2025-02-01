@@ -1,17 +1,17 @@
 export class AppError extends Error {
     public statusCode: number;
-    public details?: any;
+    public details?: T;
 
     constructor(message: string, statusCode: number, details?: any) {
         super(message);
         this.statusCode = statusCode;
-        this.details = details;
+        this.details = details as T;
         this.name = "AppError";
     }
 }
 
-export interface AppErrorResponse {
+export interface AppErrorResponse<T = number> {
     error: string; // A brief error message
-    details?: any; // Optional detailed information about the error
+    details?: T; // Optional detailed information about the error
     statusCode?: number; // Optional HTTP status code
 }
