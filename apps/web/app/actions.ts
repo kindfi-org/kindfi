@@ -2,118 +2,192 @@
 
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { createClient } from '~/lib/supabase/server'
-import { encodedRedirect } from '~/lib/utils'
+import { AuthErrorHandler } from '~/lib/auth/error-handler'
+import { Logger } from '~/lib/logger'
+import type { AuthResponse } from '~/lib/auth/type'
 
-export async function signUpAction(formData: FormData) {
-	const supabase = await createClient()
+const logger = new Logger()
+const errorHandler = new AuthErrorHandler(logger)
 
-	const data = {
-		email: formData.get('email') as string,
-		password: formData.get('password') as string,
-	}
+export async function signUpAction(formData: FormData): Promise<AuthResponse> {
+  const supabase = await createClient()
+  const data = {
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  }
 
-	const { error } = await supabase.auth.signUp(data)
-
-	if (error) {
-		return redirect('/error')
-	}
-
-	revalidatePath('/', 'layout')
-	return redirect('/')
+  try {
+    const { error } = await supabase.auth.signUp(data)
+    if (error) {
+      return errorHandler.handleAuthError(error, 'sign_up')
+    }
+    
+    revalidatePath('/', 'layout')
+    return {
+      success: true,
+      message: 'Account created successfully. Please check your email to confirm your account.',
+      redirect: '/sign-in'
+    }
+  } catch (error: any) {
+    return errorHandler.handleAuthError(error, 'sign_up')
+  }
 }
 
-export async function signInAction(formData: FormData) {
-	const email = formData.get('email') as string
-	const password = formData.get('password') as string
-	const supabase = await createClient()
+export async function signInAction(formData: FormData): Promise<AuthResponse> {
+  const supabase = await createClient()
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
 
-	const { error } = await supabase.auth.signInWithPassword({
-		email,
-		password,
-	})
+  if (!email || !password) {
+    return {
+      success: false,
+      message: 'Email and password are required',
+      error: 'Email and password are required'
+    }
+  }
 
-	if (error) {
-		return encodedRedirect('error', '/sign-in', error.message)
-	}
+  try {
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-	return redirect('/')
+    if (error) {
+      return errorHandler.handleAuthError(error, 'sign_in')
+    }
+
+    return {
+      success: true,
+      message: 'Successfully signed in',
+      redirect: 'http://localhost:3000/dashboard'
+    }
+  } catch (error: any) {
+    return errorHandler.handleAuthError(error, 'sign_in')
+  }
 }
 
-export async function signOutAction() {
-	const supabase = await createClient()
-	await supabase.auth.signOut()
-	return redirect('/sign-in')
+export async function signOutAction(): Promise<AuthResponse> {
+  const supabase = await createClient()
+  
+  try {
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      return errorHandler.handleAuthError(error, 'sign_out')
+    }
+    
+    return {
+      success: true,
+      message: 'Successfully signed out',
+      redirect: '/sign-in'
+    }
+  } catch (error: any) {
+    return errorHandler.handleAuthError(error, 'sign_out')
+  }
 }
 
-export async function forgotPasswordAction(formData: FormData) {
-	const email = formData.get('email')?.toString()
-	const supabase = await createClient()
-	const origin = (await headers()).get('origin')
-	const callbackUrl = formData.get('callbackUrl')?.toString()
+export async function forgotPasswordAction(formData: FormData): Promise<AuthResponse> {
+  const email = formData.get('email')?.toString()
+  const supabase = await createClient()
+  const origin = (await headers()).get('origin')
+  const callbackUrl = formData.get('callbackUrl')?.toString()
 
-	if (!email) {
-		return encodedRedirect('error', '/forgot-password', 'Email is required')
-	}
+  if (!email) {
+    return {
+      success: false,
+      message: 'Email is required',
+      error: 'Email is required'
+    }
+  }
 
-	const { error } = await supabase.auth.resetPasswordForEmail(email, {
-		redirectTo: `${origin}/auth/callback?redirect_to=/protected/reset-password`,
-	})
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${origin}/auth/callback?redirect_to=/protected/reset-password`,
+    })
+    
+    if (error) {
+      return errorHandler.handleAuthError(error, 'forgot_password')
+    }
 
-	if (error) {
-		console.error(error.message)
-		return encodedRedirect(
-			'error',
-			'/forgot-password',
-			'Could not reset password',
-		)
-	}
+    const response: AuthResponse = {
+      success: true,
+      message: 'Check your email for a link to reset your password.',
+    }
 
-	if (callbackUrl) {
-		return redirect(callbackUrl)
-	}
+    if (callbackUrl) {
+      response.redirect = callbackUrl
+    }
 
-	return encodedRedirect(
-		'success',
-		'/forgot-password',
-		'Check your email for a link to reset your password.',
-	)
+    return response
+  } catch (error: any) {
+    return errorHandler.handleAuthError(error, 'forgot_password')
+  }
 }
 
-export async function resetPasswordAction(formData: FormData) {
-	const supabase = await createClient()
+export async function resetPasswordAction(formData: FormData): Promise<AuthResponse> {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+  const confirmPassword = formData.get('confirmPassword') as string
 
-	const password = formData.get('password') as string
-	const confirmPassword = formData.get('confirmPassword') as string
+  if (!password || !confirmPassword) {
+    return {
+      success: false,
+      message: 'Password and confirm password are required',
+      error: 'Password and confirm password are required'
+    }
+  }
 
-	if (!password || !confirmPassword) {
-		encodedRedirect(
-			'error',
-			'/protected/reset-password',
-			'Password and confirm password are required',
-		)
-	}
+  if (password !== confirmPassword) {
+    return {
+      success: false,
+      message: 'Passwords do not match',
+      error: 'Passwords do not match'
+    }
+  }
 
-	if (password !== confirmPassword) {
-		encodedRedirect(
-			'error',
-			'/protected/reset-password',
-			'Passwords do not match',
-		)
-	}
+  try {
+    const { error } = await supabase.auth.updateUser({
+      password: password,
+    })
 
-	const { error } = await supabase.auth.updateUser({
-		password: password,
-	})
+    if (error) {
+      return errorHandler.handleAuthError(error, 'reset_password')
+    }
 
-	if (error) {
-		encodedRedirect(
-			'error',
-			'/protected/reset-password',
-			'Password update failed',
-		)
-	}
+    return {
+      success: true,
+      message: 'Password updated successfully',
+      redirect: '/sign-in'
+    }
+  } catch (error: any) {
+    return errorHandler.handleAuthError(error, 'reset_password')
+  }
+}
 
-	encodedRedirect('success', '/protected/reset-password', 'Password updated')
+// Helper function to check auth status
+export async function checkAuthStatus(): Promise<AuthResponse> {
+  const supabase = await createClient()
+  
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession()
+    
+    if (error) {
+      return errorHandler.handleAuthError(error, 'check_auth')
+    }
+
+    if (!session) {
+      return {
+        success: false,
+        message: 'No active session',
+        redirect: '/sign-in'
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Active session found'
+    }
+  } catch (error: any) {
+    return errorHandler.handleAuthError(error, 'check_auth')
+  }
 }
