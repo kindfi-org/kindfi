@@ -18,6 +18,7 @@ export const usePasskeyAuthentication = (
 	const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false)
 	const [authSuccess, setAuthSuccess] = useState<string>('')
 	const [authError, setAuthError] = useState<string>('')
+	const [isNotRegistered, setIsNotRegistered] = useState<boolean>(false)
 
 	const reset = () => {
 		setIsAuthenticating(false)
@@ -30,7 +31,7 @@ export const usePasskeyAuthentication = (
 		setIsAuthenticating(true)
 		setAuthSuccess('')
 		setAuthError('')
-
+		setIsNotRegistered(false)
 		try {
 			const PresignResponse = await prepareSign?.()
 			const resp = await fetch('api/passkey/generate-authentication-options', {
@@ -81,6 +82,7 @@ export const usePasskeyAuthentication = (
 			if (verificationJSON?.verified) {
 				const message = 'User authenticated!'
 				setAuthSuccess(message)
+				setIsNotRegistered(false)
 				toast.success(message)
 				if (onSign && PresignResponse) {
 					onSign({
@@ -103,6 +105,9 @@ export const usePasskeyAuthentication = (
 				)
 			) {
 				message = 'Operation cancelled or not allowed'
+			} else if (error.message.includes('User not found.')) {
+				message = 'User not registered. Please register first.'
+				setIsNotRegistered(true)
 			}
 			setAuthError(message)
 			toast.error(message)
@@ -118,5 +123,6 @@ export const usePasskeyAuthentication = (
 		handleAuth,
 		isAuthenticated: Boolean(authSuccess),
 		reset,
+		isNotRegistered,
 	}
 }

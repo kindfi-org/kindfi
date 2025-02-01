@@ -25,8 +25,13 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 		deployee: stellarUserAddress,
 	} = useStellarContext()
 
-	const { isAuthenticating, authSuccess, authError, handleAuth } =
-		usePasskeyAuthentication(email, { onSign, prepareSign })
+	const {
+		isAuthenticating,
+		authSuccess,
+		authError,
+		handleAuth,
+		isNotRegistered,
+	} = usePasskeyAuthentication(email, { onSign, prepareSign })
 
 	const { isEmailInvalid, handleValidation, resetValidation } =
 		useFormValidation({
@@ -97,13 +102,13 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 						{isAuthenticating ? 'Authenticating...' : 'Log In'}
 					</Button>
 
-					{authSuccess && (
-						<div className="text-green-600">
-							Authentication successful! Redirecting...
+					{isNotRegistered && (
+						<div className="text-yellow-600">
+							User not registered. Please Sign Up first.
 						</div>
 					)}
 
-					{authError && (
+					{authError && !isNotRegistered && (
 						<div className="text-red-600">
 							There was an error during authentication. Please try again.
 						</div>
