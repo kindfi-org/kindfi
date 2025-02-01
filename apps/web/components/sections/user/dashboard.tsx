@@ -1,75 +1,16 @@
 'use client'
 
-import {
-	BarChart2,
-	ChevronRight,
-	Filter,
-	Heart,
-	Users,
-	Wallet,
-} from 'lucide-react'
+import { ChevronRight, Filter, Heart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { ProjectCard } from '~/components/shared/project-card'
-
-const projects = [
-	{
-		id: 'healthy-kids-id',
-		image: '/images/kids.webp',
-		category: 'Child Welfare',
-		title: 'Healthy Kids Workshop',
-		description:
-			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica.',
-		currentAmount: 22800,
-		targetAmount: 25000,
-		investors: 18,
-		minInvestment: 5,
-		percentageComplete: 90,
-		tags: [
-			{ id: 'ngo-tag-id', text: 'NGO' },
-			{ id: 'nutrition-tag-id', text: 'NUTRITION' },
-			{ id: 'children-tag-id', text: 'CHILDREN' },
-		],
-	},
-	{
-		id: 'mobile-clinics-id',
-		image: '/images/healthcare.webp',
-		category: 'Healthcare',
-		title: 'Mobile Clinics',
-		description:
-			'Bring essential healthcare services to remote areas through mobile clinics.',
-		currentAmount: 32000,
-		targetAmount: 45000,
-		investors: 30,
-		minInvestment: 20,
-		percentageComplete: 71,
-		tags: [
-			{ id: 'healthcare-tag-id', text: 'HEALTHCARE' },
-			{ id: 'community-tag-id', text: 'COMMUNITY' },
-			{ id: 'impact-tag-id', text: 'IMPACT' },
-		],
-	},
-]
-
-const impactMetrics = [
-	{
-		label: 'Total Impact',
-		value: '$12,890.50',
-		icon: <BarChart2 className="h-5 w-5 text-teal-500" />,
-	},
-	{
-		label: 'Active Projects',
-		value: '12',
-		icon: <Users className="h-5 w-5 text-blue-500" />,
-	},
-	{
-		label: 'Available Balance',
-		value: '0.5 ETH',
-		icon: <Wallet className="h-5 w-5 text-purple-500" />,
-	},
-]
+import {
+	mockImpactMetrics,
+	mockProjects,
+} from '~/lib/mock-data/mock-user-dashboard'
+import type { ImpactMetric, Project } from '~/lib/types/userdashboard'
 
 export function UserDashboard() {
 	return (
@@ -121,7 +62,7 @@ export function UserDashboard() {
 						</div>
 
 						<ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							{impactMetrics.map((metric) => (
+							{mockImpactMetrics.map((metric: ImpactMetric) => (
 								<li
 									key={metric.label}
 									className="bg-muted rounded-lg p-6 text-center"
@@ -170,7 +111,7 @@ export function UserDashboard() {
 							</div>
 						</div>
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							{projects.map((project) => (
+							{mockProjects.map((project: Project) => (
 								<ProjectCard key={project.id} {...project} />
 							))}
 						</div>
@@ -187,7 +128,7 @@ export function UserDashboard() {
 							</Button>
 						</div>
 						<div className="space-y-4">
-							{projects.map((project) => {
+							{mockProjects.map((project: Project) => {
 								const formattedDate = new Date().toLocaleDateString(undefined, {
 									year: 'numeric',
 									month: 'long',
