@@ -4,28 +4,92 @@
 
 - **Generate Registration Options:**
 
-  `POST /api/generate-registration-options`
+  `POST /api/passkey/generate-registration-options`
 
   - Request Body: `{ "identifier": "user@example.com" }`
   - Response: WebAuthn registration options.
 
 - **Verify Registration:**
 
-  `POST /api/verify-registration`
+  `POST /api/passkey/verify-registration`
 
   - Request Body: `{ "identifier": "user@example.com", "registrationResponse": {...} }`
   - Response: Verification result.
 
 - **Generate Authentication Options:**
 
-  `POST /api/generate-authentication-options`
+  `POST /api/passkey/generate-authentication-options`
 
   - Request Body: `{ "identifier": "user@example.com" }`
   - Response: WebAuthn authentication options.
 
 - **Verify Authentication:**
 
-  `POST /api/verify-authentication`
+  `POST /api/passkey/verify-authentication`
 
   - Request Body: `{ "identifier": "user@example.com", "authenticationResponse": {...} }`
   - Response: Verification result.
+
+### Flow
+
+#### Registration Flow
+
++---------------------------+
+| User Device |
++---------------------------+
+|
+| 1. Request Registration Options
+v
++---------------------------+
+| API: Generate Registration|
+| Options |
++---------------------------+
+|
+| 2. Return WebAuthn Registration Options
+v
++---------------------------+
+| User Device |
++---------------------------+
+|
+| 3. Create Registration Response
+v
++---------------------------+
+| API: Verify Registration |
++---------------------------+
+|
+| 4. Return Verification Result
+v
++---------------------------+
+| User Device |
++---------------------------+
+
+#### Authentication Flow
+
++---------------------------+
+| User Device |
++---------------------------+
+|
+| 5. Request Authentication Options
+v
++---------------------------+
+| API: Generate Authentication |
+| Options |
++---------------------------+
+|
+| 6. Return WebAuthn Authentication Options
+v
++---------------------------+
+| User Device |
++---------------------------+
+|
+| 7. Create Authentication Response
+v
++---------------------------+
+| API: Verify Authentication |
++---------------------------+
+|
+| 8. Return Verification Result
+v
++---------------------------+
+| User Device |
++---------------------------+
