@@ -124,7 +124,7 @@ export const statsDataUpdates: StatItem[] = [
 		icon: '👥',
 	},
 	{
-		id: 'uuid-2',
+		id: 'uuid-3',
 		label: 'NFTs Minted',
 		value: '156',
 		bgColor: 'bg-green-100',
