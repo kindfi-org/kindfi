@@ -99,6 +99,14 @@ const config = {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)',
 			},
+			/**
++			 * Fade animations for overlay components
++			 * Used by: Dialog, Sheet, Dropdown Menu, Alert Dialog
++			 * 
++			 * Usage:
++			 * - fade-in: For showing overlays and content
++			 * - fade-out: For hiding overlays and content
++			 */
 			keyframes: {
 				'accordion-down': {
 					from: { height: '0' },
@@ -108,10 +116,25 @@ const config = {
 					from: { height: 'var(--radix-accordion-content-height)' },
 					to: { height: '0' },
 				},
+				fadeIn: {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' },
+				},
+				fadeOut: {
+					'0%': { opacity: '1' },
+					'100%': { opacity: '0' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fadeIn 0.3s ease-in-out',
+				'fade-out': 'fadeOut 0.3s ease-in-out',
+			},
+			transitionDuration: {
+				default: '200ms',
+				slow: '500ms',
+				fast: '300ms',
 			},
 		},
 	},
