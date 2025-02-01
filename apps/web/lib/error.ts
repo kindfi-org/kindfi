@@ -10,7 +10,7 @@ export class AppError extends Error {
     }
 }
 
-export interface AppErrorResponse<T = number> {
+export interface AppErrorResponse<T = unknown> {
     error: string; // A brief error message
     details?: T; // Optional detailed information about the error
     statusCode?: number; // Optional HTTP status code
