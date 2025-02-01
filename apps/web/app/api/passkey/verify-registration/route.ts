@@ -3,13 +3,13 @@ import { InAppError } from '~/lib/passkey/errors'
 import { verifyRegistration } from '~/lib/passkey/passkey'
 
 export async function POST(req: NextRequest) {
-	const body = await req.json()
-	const input = {
-		identifier: body.identifier,
-		origin: req.headers.get('origin') || body.origin || '',
-		registrationResponse: body.registrationResponse,
-	}
 	try {
+		const body = await req.json()
+		const input = {
+			identifier: body.identifier,
+			origin: req.headers.get('origin') || body.origin || '',
+			registrationResponse: body.registrationResponse,
+		}
 		const options = await verifyRegistration(input)
 		return NextResponse.json(options)
 	} catch (error) {

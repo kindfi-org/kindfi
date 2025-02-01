@@ -3,13 +3,13 @@ import { InAppError } from '~/lib/passkey/errors'
 import { verifyAuthentication } from '~/lib/passkey/passkey'
 
 export async function POST(req: NextRequest) {
-	const body = await req.json()
-	const input = {
-		identifier: body.identifier,
-		origin: req.headers.get('origin') || body.origin || '',
-		authenticationResponse: body.authenticationResponse,
-	}
 	try {
+		const body = await req.json()
+		const input = {
+			identifier: body.identifier,
+			origin: req.headers.get('origin') || body.origin || '',
+			authenticationResponse: body.authenticationResponse,
+		}
 		const options = await verifyAuthentication(input)
 		return NextResponse.json(options)
 	} catch (error) {
