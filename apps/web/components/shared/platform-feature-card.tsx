@@ -11,7 +11,7 @@ export const PlatformFeatureCard = ({
 	title: string
 	description: string
 	content?: React.ReactNode
-	checkList?: string[]
+	checkList?: { id: string; text: string }[]
 }) => {
 	return (
 		<div className="text-center">
@@ -22,11 +22,10 @@ export const PlatformFeatureCard = ({
 					{content && <div className="mb-4">{content}</div>}
 					{checkList.length > 0 && (
 						<ul className="text-left">
-							{checkList.map((item, index) => (
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								<li key={index} className="flex items-center gap-2 mb-2">
+							{checkList.map((item) => (
+								<li key={item.id} className="flex items-center gap-2 mb-2">
 									<Check className="w-4 h-4 text-green-600" />
-									<span className="text-sm">{item}</span>
+									<span className="text-sm">{item.text}</span>
 								</li>
 							))}
 						</ul>

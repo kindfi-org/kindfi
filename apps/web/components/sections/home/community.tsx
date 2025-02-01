@@ -1,49 +1,47 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { Rocket, Shield, TrendingUp, Users } from 'lucide-react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { useState } from 'react'
 import { BenefitItem } from '~/components/shared/benefits-items'
 import { CTAForm } from '~/components/shared/cta-form'
 import { Testimonial } from '~/components/shared/testimonial-card'
+import {
+	benefits,
+	testimonialData,
+} from '~/lib/mock-data/mock-community-section'
 
-const CommunitySection = () => {
-	const benefits = [
-		{
-			icon: <Users className="w-5 h-5" />,
-			text: 'Community for Social Impact',
-		},
-		{
-			icon: <TrendingUp className="w-5 h-5" />,
-			text: 'Empowering Crypto Supporters',
-		},
-		{
-			icon: <Shield className="w-5 h-5" />,
-			text: 'Blockchain Verification and Security',
-		},
-		{
-			icon: <Rocket className="w-5 h-5" />,
-			text: 'Accelerating Blockchain Adoption',
-		},
-	]
+export function Community() {
+	const prefersReducedMotion = useReducedMotion()
+	const [formStatus, setFormStatus] = useState<FormStatus | null>(null)
 
-	const testimonialData = {
-		quote:
-			"The KindFi community becomes an ambassador for your social cause, taking your impact far beyond what traditional Web2 methods can achieve. Web3 connects and empowers people worldwide, creating a transparent, global, and secure network of support and verification powered by blockchain technology and Trustless work's Escrows. Supporting meaningful causes isn’t something you can buy—it’s a reward you earn by being part of a movement dedicated to real change.",
-		author: 'KindFi',
-		role: 'Social Impact Platform',
-		imageUrl: '/placeholder-image.jpg', // Replace with actual image
+	const handleFormSubmission = async (data: FormData) => {
+		setFormStatus(null)
+		try {
+			// Possibly set a "loading" status and disable form to prevent multiple submissions
+			await submitForm(data)
+			setFormStatus({
+				type: 'success',
+				message: 'Form submitted successfully!',
+			})
+		} catch (error) {
+			setFormStatus({
+				type: 'error',
+				message: 'Failed to submit the form. Please try again.',
+			})
+		}
 	}
 
 	return (
 		<section className="py-20">
 			<div className="container mx-auto px-4">
 				{/* Header */}
-				{/* Header */}
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					whileInView={{ opacity: 1, y: 0 }}
 					viewport={{ once: true }}
-					transition={{ duration: 0.6 }}
+					transition={{
+						duration: prefersReducedMotion ? 0 : 0.6, // Respects reduced motion preferences
+					}}
 					className="text-center mb-20 max-w-3xl mx-auto"
 				>
 					<h2 className="text-4xl font-bold text-gray-900 mb-6">
@@ -69,8 +67,7 @@ const CommunitySection = () => {
 					<div className="container space-y-2">
 						{benefits.map((benefit, index) => (
 							<BenefitItem
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								key={index}
+								key={benefit.id}
 								{...benefit}
 								isActive={index === 0}
 							/>
@@ -82,10 +79,45 @@ const CommunitySection = () => {
 				</div>
 
 				{/* CTA Form */}
-				<CTAForm onSubmit={(data) => console.log(data)} />
+				<CTAForm onSubmit={handleFormSubmission} />
+
+				{/* Form Status Message */}
+				{formStatus && (
+					<div
+						className={`mt-4 p-4 rounded-lg ${
+							formStatus.type === 'success'
+								? 'bg-green-100 text-green-800'
+								: 'bg-red-100 text-red-800'
+						}`}
+					>
+						{formStatus.message}
+					</div>
+				)}
 			</div>
 		</section>
 	)
 }
 
-export default CommunitySection
+// Mock form submission function
+const submitForm = async (data: FormData): Promise<void> => {
+	// Simulate a delay
+	return new Promise((resolve, reject) => {
+		setTimeout(() => {
+			if (Math.random() > 0.5) {
+				resolve()
+			} else {
+				reject(new Error('Submission failed'))
+			}
+		}, 1000)
+	})
+}
+
+interface FormData {
+	name: string
+	project: string
+}
+
+interface FormStatus {
+	type: 'success' | 'error'
+	message: string
+}

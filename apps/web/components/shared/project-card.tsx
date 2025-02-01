@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '../base/card'
 import { Progress } from '../base/progress'
 
 export interface ProjectCardProps {
+	id: string
 	image: string
 	category: string
 	title: string
@@ -13,7 +14,7 @@ export interface ProjectCardProps {
 	investors: number
 	minInvestment: number
 	percentageComplete: number
-	tags: string[]
+	tags: { id: string; text: string }[]
 }
 
 export const ProjectCard = ({
@@ -83,15 +84,9 @@ export const ProjectCard = ({
 				</CardContent>
 
 				<CardFooter className="flex-shrink-0 flex flex-wrap gap-2 mt-auto">
-					{tags.map((tag, index) => (
-						<Badge
-							key={`tag-${
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								index
-							}`}
-							variant="outline"
-						>
-							{tag}
+					{tags.map((tag) => (
+						<Badge key={tag.id} variant="outline">
+							{tag.text}
 						</Badge>
 					))}
 				</CardFooter>
