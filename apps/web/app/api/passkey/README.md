@@ -7,28 +7,79 @@
   `POST /api/passkey/generate-registration-options`
 
   - Request Body: `{ "identifier": "user@example.com" }`
-  - Response: WebAuthn registration options.
+  - Success Response (200):
+    ```json
+    {
+      // WebAuthn registration options
+    }
+    ```
+  - Error Response (500):
+    ```json
+    {
+      "error": "No matching RP ID found for the given origin"
+    }
+    ```
 
 - **Verify Registration:**
 
   `POST /api/passkey/verify-registration`
 
   - Request Body: `{ "identifier": "user@example.com", "registrationResponse": {...} }`
-  - Response: Verification result.
+  - Success Response (200):
+    ```json
+    {
+      // Verification result
+    }
+    ```
+  - Error Response (500):
+    ```json
+    {
+      "error": "Challenge not found"
+    }
+    ```
 
 - **Generate Authentication Options:**
 
   `POST /api/passkey/generate-authentication-options`
 
   - Request Body: `{ "identifier": "user@example.com" }`
-  - Response: WebAuthn authentication options.
+  - Success Response (200):
+    ```json
+    {
+      // WebAuthn authentication options
+    }
+    ```
+  - Error Response (500):
+    ```json
+    {
+      "error": "Authenticator not registered"
+    }
+    ```
 
 - **Verify Authentication:**
 
   `POST /api/passkey/verify-authentication`
 
   - Request Body: `{ "identifier": "user@example.com", "authenticationResponse": {...} }`
-  - Response: Verification result.
+  - Success Response (200):
+    ```json
+    {
+      // Verification result
+    }
+    ```
+  - Error Response (500):
+    ```json
+    {
+      "error": "Challenge not found"
+    }
+    ```
+
+### Common Error Messages
+
+- "No matching RP ID found for the given origin"
+- "Challenge not found"
+- "Authenticator not registered"
+- "An unexpected error occurred"
 
 ## Flow
 

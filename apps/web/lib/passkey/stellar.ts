@@ -82,8 +82,6 @@ export const getPublicKeys = async (
 ) => {
 	const contractSalt = hash(base64url.toBuffer(registration.id))
 
-	console.log(JSON.stringify(registration, null, 2))
-
 	if ('attestationObject' in registration.response) {
 		// Handle RegistrationResponseJSON
 		const { publicKeyObject } = getPublicKeyObject(
