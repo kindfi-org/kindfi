@@ -51,6 +51,7 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 
 	useEffect(() => {
 		if (authSuccess) {
+			// If the user is authenticated, we can use the stellarUserAddress later
 			console.log('stellarUserAddress', stellarUserAddress)
 			router.push('/')
 		}
