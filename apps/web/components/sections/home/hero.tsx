@@ -41,7 +41,7 @@ export function Hero() {
 				</Badge>
 			</motion.div>
 		),
-		[],
+		[shouldReduceMotion],
 	)
 
 	return (

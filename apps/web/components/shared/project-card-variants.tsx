@@ -12,7 +12,7 @@ import type React from 'react'
 import { useEffect, useState } from 'react'
 import { comments, nftCollection, nftTiers } from '../mocks/mock-data'
 
-type ProjectCardProps = {}
+type ProjectCardProps = Record<string, never>
 
 const ProjectCard: React.FC<ProjectCardProps> = () => {
 	const [showImpact, setShowImpact] = useState(false)
@@ -33,6 +33,8 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 			viewBox="0 0 24 24"
 			fill="none"
 			className="w-full h-full p-1 text-gray-400"
+			role="img"
+			aria-label="avatar icon"
 		>
 			<path
 				d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
@@ -74,10 +76,11 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 			</div>
 
 			<div className="w-full h-2 bg-gray-200 rounded-full mb-6">
-				<div className="w-5/12 h-2 bg-blue-500 rounded-full"></div>
+				<div className="w-5/12 h-2 bg-blue-500 rounded-full" />
 			</div>
 
 			<button
+				type="button"
 				onClick={() => setShowImpact(true)}
 				className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium mb-6 flex items-center justify-center gap-2"
 			>
@@ -92,8 +95,8 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 					</div>
 				</div>
 
-				{nftTiers.map((tier, index) => (
-					<div key={index} className="p-4 bg-gray-50 rounded-lg">
+				{nftTiers.map((tier) => (
+					<div key={tier.id} className="p-4 bg-gray-50 rounded-lg">
 						<div className="flex justify-between items-center mb-1">
 							<h3 className="font-semibold text-gray-700">{tier.title}</h3>
 							<span className="bg-purple-100 text-purple-600 px-2 py-1 rounded text-sm">
@@ -131,14 +134,17 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 			</div>
 
 			<div className="w-full h-2 bg-gray-200 rounded-full mb-6">
-				<div className="w-5/12 h-2 bg-blue-500 rounded-full"></div>
+				<div className="w-5/12 h-2 bg-blue-500 rounded-full" />
 			</div>
 
 			<div className="flex items-center justify-between mb-6">
-				<button className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium mr-2">
+				<button
+					type="button"
+					className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium mr-2"
+				>
 					Increase Impact
 				</button>
-				<button className="p-3 border border-gray-200 rounded-lg">
+				<button type="button" className="p-3 border border-gray-200 rounded-lg">
 					<Share2 className="w-5 h-5 text-gray-600" />
 				</button>
 			</div>
@@ -223,8 +229,8 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 			<div className="max-w-md p-6 bg-white rounded-lg shadow">
 				<h2 className="text-xl font-semibold mb-4">Your NFT Collection</h2>
 				<div className="space-y-3">
-					{nftCollection.map((nft, index) => (
-						<div key={index} className="p-4 bg-gray-50 rounded-lg">
+					{nftCollection.map((nft) => (
+						<div key={nft.id} className="p-4 bg-gray-50 rounded-lg">
 							<div className="flex justify-between items-center">
 								<div>
 									<h3 className="font-semibold text-gray-700">{nft.title}</h3>
@@ -246,6 +252,7 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 						.fill(0)
 						.map((_, i) => (
 							<div
+								// biome-ignore lint/suspicious/noArrayIndexKey: We can use the index for now since the UserAvatar component is just an SVG. Will be updated when actual user images will be used for the avatars. This is a suggestion
 								key={i}
 								className="w-8 h-8 bg-gray-100 rounded-full border-2 border-white"
 								style={{ marginLeft: i > 0 ? '-12px' : '0' }}
@@ -256,8 +263,8 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 					<span className="text-gray-500 ml-2">+229</span>
 				</div>
 				<div className="space-y-6">
-					{comments.map((comment, index) => (
-						<div key={index} className="flex gap-3">
+					{comments.map((comment) => (
+						<div key={comment.id} className="flex gap-3">
 							<div className="w-10 h-10 bg-gray-100 rounded-full flex-shrink-0">
 								<UserAvatar />
 							</div>
@@ -270,15 +277,23 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 								<div className="flex items-center gap-2 text-gray-500">
 									<Heart className="w-4 h-4" />
 									<span>{comment.likes}</span>
-									<button className="text-blue-600">Reply</button>
+									<button type="button" className="text-blue-600">
+										Reply
+									</button>
 								</div>
 							</div>
 						</div>
 					))}
-					<button className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg">
+					<button
+						type="button"
+						className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg"
+					>
 						Join Success Celebration
 					</button>
-					<button className="w-full py-3 flex items-center justify-center gap-2 text-gray-600">
+					<button
+						type="button"
+						className="w-full py-3 flex items-center justify-center gap-2 text-gray-600"
+					>
 						<Globe className="w-4 h-4" />
 						View All Comments
 					</button>
@@ -307,6 +322,8 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 								viewBox="0 0 24 24"
 								fill="none"
 								className="w-6 h-6 text-gray-400"
+								role="img"
+								aria-label="project creator icon"
 							>
 								<path
 									d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
@@ -329,7 +346,10 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 							<div className="text-gray-500">Joined March 2024</div>
 						</div>
 					</div>
-					<button className="w-full p-3 border border-gray-200 rounded-lg text-gray-700">
+					<button
+						type="button"
+						className="w-full p-3 border border-gray-200 rounded-lg text-gray-700"
+					>
 						Contact Creator
 					</button>
 				</div>
@@ -344,6 +364,7 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 							.fill(0)
 							.map((_, i) => (
 								<div
+									// biome-ignore lint/suspicious/noArrayIndexKey: It looks like this is hardcoded in the meantime. I think we can use the index for now.
 									key={i}
 									className="w-8 h-8 bg-gray-100 rounded-full border-2 border-white"
 									style={{ marginLeft: i > 0 ? '-12px' : '0' }}
@@ -352,6 +373,8 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 										viewBox="0 0 24 24"
 										fill="none"
 										className="w-full h-full p-1 text-gray-400"
+										role="img"
+										aria-label="supporters icon"
 									>
 										<path
 											d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
@@ -372,7 +395,10 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 							))}
 						<span className="text-gray-500 ml-2">+42</span>
 					</div>
-					<button className="w-full p-4 text-gray-600 bg-gray-50 rounded-lg mt-4">
+					<button
+						type="button"
+						className="w-full p-4 text-gray-600 bg-gray-50 rounded-lg mt-4"
+					>
 						Join Community Chat
 					</button>
 				</div>

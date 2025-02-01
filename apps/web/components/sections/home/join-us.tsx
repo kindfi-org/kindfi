@@ -37,7 +37,6 @@ export function JoinUs() {
 						>
 							<article
 								className="group h-full bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
-								role="article"
 								aria-labelledby={`feature-title-${feature.id}`}
 							>
 								{/* Icon */}

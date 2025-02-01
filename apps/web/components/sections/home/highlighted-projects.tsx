@@ -42,7 +42,6 @@ export function HighlightedProjects() {
 								<CarouselItem
 									key={project.id}
 									className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
-									role="group"
 									aria-roledescription="slide"
 								>
 									<ProjectCard {...project} />

@@ -18,7 +18,7 @@ const TAB_COMPONENTS = {
 const ProjectDetailsPage = () => {
 	const tabs = projectTabsData.map((tab) => {
 		const Component = TAB_COMPONENTS[tab.id as keyof typeof TAB_COMPONENTS]
-		const contentComponent = Component ? <Component /> : null
+		const contentComponent = Component ? <Component key={tab.id} /> : null
 
 		return {
 			...tab,
