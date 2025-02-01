@@ -14,6 +14,7 @@ import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import type { Message } from '~/components/form-message'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
 import { useFormValidation } from '~/hooks/use-form-validation'
 
 export default function Signup(props: { searchParams: Promise<Message> }) {
@@ -31,16 +32,12 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 	//   );
 	// }
 
-	const {
-		isEmailInvalid,
-		isPasswordInvalid,
-		handleValidation,
-		resetValidation,
-	} = useFormValidation({
-		email: true,
-		password: true,
-		minLength: 6,
-	})
+	const isWebAuthnSupported = useWebAuthnSupport()
+
+	const { isEmailInvalid, handleValidation, resetValidation } =
+		useFormValidation({
+			email: true,
+		})
 
 	return (
 		<AuthLayout>
@@ -95,43 +92,17 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 								</div>
 							</div>
 
-							<div className="space-y-2">
-								<Label htmlFor="password" id="password-label">
-									Password
-								</Label>
-								<div className="relative">
-									<Lock
-										className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
-										aria-hidden="true"
-									/>
-									<Input
-										id="password"
-										name="password"
-										type="password"
-										placeholder="Create a password"
-										className="pl-10"
-										required
-										minLength={6}
-										aria-labelledby="password-label"
-										aria-describedby={`${isPasswordInvalid ? 'password-requirements' : 'password-description'}`}
-										aria-invalid={isPasswordInvalid}
-										onChange={handleValidation}
-									/>
-									<span id="password-description" className="sr-only">
-										Create a password for your account
+							{isWebAuthnSupported ? (
+								<Button className="w-full" formAction={signUpAction}>
+									Create account
+								</Button>
+							) : (
+								<div className="flex flex-col items-center justify-center">
+									<span>
+										WebAuthn is not supported. Please use a different browser.
 									</span>
-									<p
-										id="password-requirements"
-										className="text-xs text-muted-foreground mt-1"
-									>
-										Password must be at least 6 characters long
-									</p>
 								</div>
-							</div>
-
-							<Button className="w-full" formAction={signUpAction}>
-								Create account
-							</Button>
+							)}
 						</div>
 
 						{/* <FormMessage message={searchParams} /> */}

@@ -6,6 +6,7 @@ import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import type { Message } from '~/components/form-message'
+import { PasskeyDashboard } from '~/components/mocks/passkey-dashboard'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { useFormValidation } from '~/hooks/use-form-validation'
@@ -106,6 +107,7 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 						Log In
 					</Button>
 				</form>
+				<PasskeyDashboard />
 			</AuthForm>
 		</AuthLayout>
 	)
