@@ -2,6 +2,7 @@ import type React from 'react'
 import { HiShieldCheck } from 'react-icons/hi'
 
 interface UpdateCardProps {
+	id: string
 	title: string
 	description: string
 	date: string
@@ -43,8 +44,8 @@ const SupporterUpdates: React.FC<SupporterUpdatesProps> = ({ updates }) => {
 			</div>
 			<h3 className="text-lg font-bold mb-4">Supporter Updates</h3>
 			<div className="space-y-4">
-				{updates.map((update, index) => (
-					<UpdateCard key={index} {...update} />
+				{updates.map((update) => (
+					<UpdateCard key={update.id} {...update} />
 				))}
 			</div>
 		</section>

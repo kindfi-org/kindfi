@@ -26,16 +26,16 @@ const ProjectUpdatesSection = () => {
 				<div className="flex items-center justify-between mb-4">
 					<h2 className="text-xl font-semibold text-black">Success Gallery</h2>
 					<a
-						href="#"
+						href="./"
 						className="text-sm font-medium text-blue-600 hover:underline"
 					>
 						View All
 					</a>
 				</div>
 				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-					{successGalleryItems.map((item, index) => (
+					{successGalleryItems.map((item) => (
 						<div
-							key={index}
+							key={item.id}
 							className="bg-gray-100 rounded-lg shadow-inner aspect-w-1 aspect-h-1"
 						>
 							<img

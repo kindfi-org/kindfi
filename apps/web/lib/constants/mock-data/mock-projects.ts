@@ -11,6 +11,7 @@ interface TabItem {
 }
 
 interface StatItem {
+	id: string
 	label: string
 	value: string
 	bgColor: string
@@ -19,10 +20,12 @@ interface StatItem {
 }
 
 interface UpdateItem extends BaseItem {
+	id: string
 	exclusive?: boolean
 }
 
 interface TimelineEvent extends BaseItem {
+	id: string
 	status: 'completed' | 'pending'
 }
 
@@ -61,6 +64,7 @@ export const projectTabsData: TabItem[] = [
 
 export const statsData: StatItem[] = [
 	{
+		id: 'uuid-1',
 		label: 'Contribution',
 		value: '$100',
 		bgColor: 'bg-blue-100',
@@ -68,6 +72,7 @@ export const statsData: StatItem[] = [
 		icon: '💰',
 	},
 	{
+		id: 'uuid-2',
 		label: 'NFT Earned',
 		value: '1',
 		bgColor: 'bg-purple-100',
@@ -75,6 +80,7 @@ export const statsData: StatItem[] = [
 		icon: '🏆',
 	},
 	{
+		id: 'uuid-3',
 		label: 'Referrals',
 		value: '2',
 		bgColor: 'bg-green-100',
@@ -85,12 +91,14 @@ export const statsData: StatItem[] = [
 
 export const updatesData: UpdateItem[] = [
 	{
+		id: 'uuid-1',
 		title: 'Behind the Scenes Update #1',
 		description: 'Exclusive project insights and progress updates...',
 		date: '2 days ago',
 		exclusive: true,
 	},
 	{
+		id: 'uuid-2',
 		title: 'Behind the Scenes Update #2',
 		description: 'Exclusive project insights and progress updates...',
 		date: '2 days ago',
@@ -100,6 +108,7 @@ export const updatesData: UpdateItem[] = [
 
 export const statsDataUpdates: StatItem[] = [
 	{
+		id: 'uuid-1',
 		label: 'Total Raised',
 		value: '$100,000',
 		bgColor: 'bg-blue-100',
@@ -107,6 +116,7 @@ export const statsDataUpdates: StatItem[] = [
 		icon: '💰',
 	},
 	{
+		id: 'uuid-2',
 		label: 'Supporters',
 		value: '234',
 		bgColor: 'bg-purple-100',
@@ -114,6 +124,7 @@ export const statsDataUpdates: StatItem[] = [
 		icon: '👥',
 	},
 	{
+		id: 'uuid-3',
 		label: 'NFTs Minted',
 		value: '156',
 		bgColor: 'bg-green-100',
@@ -124,24 +135,28 @@ export const statsDataUpdates: StatItem[] = [
 
 export const timelineEvents: TimelineEvent[] = [
 	{
+		id: 'uuid-1',
 		title: 'Project Launch',
 		description: 'Project officially launched',
 		date: 'Mar 15',
 		status: 'completed',
 	},
 	{
+		id: 'uuid-2',
 		title: '50% Milestone',
 		description: 'Reached halfway point',
 		date: 'Apr 1',
 		status: 'completed',
 	},
 	{
+		id: 'uuid-3',
 		title: 'Goal Reached',
 		description: 'Successfully achieved target',
 		date: 'Apr 15',
 		status: 'completed',
 	},
 	{
+		id: 'uuid-4',
 		title: 'Implementation',
 		description: 'Project implementation phase',
 		date: 'May 1',

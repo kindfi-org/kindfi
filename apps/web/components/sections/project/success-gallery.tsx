@@ -60,6 +60,8 @@ const SuccessGallery: React.FC<SuccessGalleryProps> = ({
 								fill="none"
 								viewBox="0 0 24 24"
 								stroke="currentColor"
+								role="img"
+								aria-label={item.alt || 'icon'}
 							>
 								<path
 									strokeLinecap="round"
