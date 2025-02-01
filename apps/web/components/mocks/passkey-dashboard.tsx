@@ -36,7 +36,6 @@ export const PasskeyDashboard = ({
 		regError,
 		handleRegister,
 		reset: resetReg,
-		isAlreadyRegistered,
 	} = usePasskeyRegistration(identifier, { onRegister })
 
 	const {
@@ -47,7 +46,6 @@ export const PasskeyDashboard = ({
 		reset: resetAuth,
 	} = usePasskeyAuthentication(identifier, { onSign, prepareSign })
 
-	// State for action
 	const [action, setAction] = React.useState<string | null>(null)
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

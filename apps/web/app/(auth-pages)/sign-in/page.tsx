@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { type ChangeEvent, useEffect, useState } from 'react'
 import { signInAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
@@ -8,20 +10,46 @@ import { Label } from '~/components/base/label'
 import type { Message } from '~/components/form-message'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { usePasskeyAuthentication } from '~/hooks/passkey/use-passkey-authentication'
+import { useStellarContext } from '~/hooks/stellar/stellar-context'
 import { useFormValidation } from '~/hooks/use-form-validation'
 
 export default function Login(props: { searchParams: Promise<Message> }) {
 	const searchParams = props.searchParams
+	const [email, setEmail] = useState('')
+	const router = useRouter()
+
 	const {
-		isEmailInvalid,
-		isPasswordInvalid,
-		handleValidation,
-		resetValidation,
-	} = useFormValidation({
-		email: true,
-		password: true,
-		minLength: 6,
-	})
+		onSign,
+		prepareSign,
+		deployee: stellarUserAddress,
+	} = useStellarContext()
+
+	const { isAuthenticating, authSuccess, authError, handleAuth } =
+		usePasskeyAuthentication(email, { onSign, prepareSign })
+
+	const { isEmailInvalid, handleValidation, resetValidation } =
+		useFormValidation({
+			email: true,
+		})
+
+	const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+		handleValidation(e as ChangeEvent<HTMLInputElement & { name: 'email' }>)
+		setEmail(e.target.value)
+	}
+
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		if (!isEmailInvalid) handleAuth()
+		resetValidation()
+	}
+
+	useEffect(() => {
+		if (authSuccess) {
+			console.log('stellarUserAddress', stellarUserAddress)
+			router.push('/')
+		}
+	}, [authSuccess, router, stellarUserAddress])
 
 	return (
 		<AuthLayout>
@@ -39,11 +67,7 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 					</div>
 				}
 			>
-				<form
-					className="space-y-4"
-					aria-label="Sign in"
-					onSubmit={resetValidation}
-				>
+				<form className="space-y-4" aria-label="Sign in" onSubmit={onSubmit}>
 					<div className="space-y-2">
 						<Label htmlFor="email" id="email-label">
 							Email
@@ -58,7 +82,7 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 								aria-labelledby="email-label"
 								aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
 								aria-invalid={isEmailInvalid}
-								onChange={handleValidation}
+								onChange={onEmailChange}
 							/>
 							<span id="email-description" className="sr-only">
 								Please enter your registered email address
@@ -69,42 +93,21 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 						</div>
 					</div>
 
-					<div className="space-y-2">
-						<div className="flex justify-between items-center">
-							<Label htmlFor="password" id="password-label">
-								Password
-							</Label>
-							<Link
-								className="text-sm text-primary hover:underline"
-								href="/forgot-password"
-							>
-								Forgot your password?
-							</Link>
-						</div>
-						<div className="space-y-1">
-							<Input
-								id="password"
-								type="password"
-								name="password"
-								placeholder="Your password"
-								required
-								aria-labelledby="password-label"
-								aria-describedby={`${isPasswordInvalid ? 'password-error' : 'password-description'}`}
-								aria-invalid={isPasswordInvalid}
-								onChange={handleValidation}
-							/>
-							<span id="password-description" className="sr-only">
-								Enter your account password
-							</span>
-							<span id="password-error" className="sr-only">
-								Password must be at least 6 characters long
-							</span>
-						</div>
-					</div>
-
 					<Button className="w-full" formAction={signInAction}>
-						Log In
+						{isAuthenticating ? 'Authenticating...' : 'Log In'}
 					</Button>
+
+					{authSuccess && (
+						<div className="text-green-600">
+							Authentication successful! Redirecting...
+						</div>
+					)}
+
+					{authError && (
+						<div className="text-red-600">
+							There was an error during authentication. Please try again.
+						</div>
+					)}
 				</form>
 			</AuthForm>
 		</AuthLayout>

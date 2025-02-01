@@ -60,9 +60,7 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 
 	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		if (!isEmailInvalid) {
-			handleRegister()
-		}
+		if (!isEmailInvalid) handleRegister()
 		resetValidation()
 	}
 
