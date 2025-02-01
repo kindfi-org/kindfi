@@ -32,36 +32,22 @@
 
 ## Flow
 
-### Registration Flow
+### Registration Flow (Sequence Diagram)
 
-+---------------------------+
-| User Device |
-+---------------------------+
-|
-| 1. Request Registration Options
-v
-+---------------------------+
-| API: Generate Registration|
-| Options |
-+---------------------------+
-|
-| 2. Return WebAuthn Registration Options
-v
-+---------------------------+
-| User Device |
-+---------------------------+
-|
-| 3. Create Registration Response
-v
-+---------------------------+
-| API: Verify Registration |
-+---------------------------+
-|
-| 4. Return Verification Result
-v
-+---------------------------+
-| User Device |
-+---------------------------+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant R as Registration API
+    participant P as Passkey Service
+    participant D as Redis
+
+    C->>R: POST /generate-registration-options
+    R->>P: Parse request & extract `identifier` and `origin`
+    P->>D: Save challenge for user
+    D-->>P: Challenge saved with TTL
+    P-->>R: Return registration options (or error)
+    R-->>C: JSON response with registration options
+```
 
 Summary:
 
@@ -70,36 +56,22 @@ Summary:
 3. **Create Registration Response**: The user device uses these options to create a registration response.
 4. **Verify Registration**: The API verifies the registration response and returns the result to the user device.
 
-### Authentication Flow
+### Authentication Flow (Sequence Diagram)
 
-+---------------------------+
-| User Device |
-+---------------------------+
-|
-| 5. Request Authentication Options
-v
-+---------------------------+
-| API: Generate Authentication |
-| Options |
-+---------------------------+
-|
-| 6. Return WebAuthn Authentication Options
-v
-+---------------------------+
-| User Device |
-+---------------------------+
-|
-| 7. Create Authentication Response
-v
-+---------------------------+
-| API: Verify Authentication |
-+---------------------------+
-|
-| 8. Return Verification Result
-v
-+---------------------------+
-| User Device |
-+---------------------------+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant V as Verification API
+    participant P as Passkey Service
+    participant D as Redis
+
+    C->>V: POST /verify-registration or /verify-authentication
+    V->>P: Parse request & construct input
+    P->>D: Retrieve stored challenge
+    D-->>P: Challenge data (or not found)
+    P-->>V: Return verification result (or error)
+    V-->>C: JSON response with verification outcome
+```
 
 Summary:
 
