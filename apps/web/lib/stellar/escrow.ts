@@ -73,6 +73,7 @@ export async function initializeEscrowContract(
 		transaction.sign(Keypair.fromSecret(secretKey))
 
 		// Submit the transaction to the Stellar network
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
 		const server = new Server(process.env.STELLAR_NETWORK_URL!) // Set your Stellar network URL
 		const result = await server.submitTransaction(transaction)
 
