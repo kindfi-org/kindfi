@@ -2,6 +2,7 @@ import type React from 'react'
 
 interface ImpactCardProps {
 	icon: React.ReactNode
+	id: string
 	label: string
 	value: string | number
 	bgColor?: string
@@ -10,6 +11,7 @@ interface ImpactCardProps {
 
 const ImpactCard: React.FC<ImpactCardProps> = ({
 	icon,
+	id,
 	label,
 	value,
 	bgColor = 'bg-blue-100',
@@ -30,8 +32,8 @@ const ImpactCard: React.FC<ImpactCardProps> = ({
 
 interface ImpactCardsProps {
 	data: {
-		id: string
 		icon: React.ReactNode
+		id: string
 		label: string
 		value: string | number
 		bgColor?: string
@@ -46,6 +48,7 @@ const ImpactCards: React.FC<ImpactCardsProps> = ({ data }) => {
 				<ImpactCard
 					key={item.id}
 					icon={item.icon}
+					id={item.id}
 					label={item.label}
 					value={item.value}
 					bgColor={item.bgColor}

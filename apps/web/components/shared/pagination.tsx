@@ -75,7 +75,7 @@ export function Paginations({
 					if (page === -1 || page === -2) {
 						return (
 							<PaginationItem key={`ellipsis-${page}`}>
-								<PaginationEllipsis />
+								<PaginationEllipsis aria-label="More pages" />
 							</PaginationItem>
 						)
 					}
@@ -83,6 +83,9 @@ export function Paginations({
 					return (
 						<PaginationItem key={page}>
 							<PaginationLink
+								type="button"
+								aria-label={`Go to page ${page}`}
+								aria-current={page === currentPage ? 'page' : undefined}
 								href="#"
 								onClick={(e) => {
 									e.preventDefault()
