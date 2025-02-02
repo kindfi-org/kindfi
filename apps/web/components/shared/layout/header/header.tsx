@@ -3,7 +3,6 @@
 import type { User } from '@supabase/supabase-js'
 import { LogOut, Menu, Settings, User as UserIcon } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { signOutAction } from '~/app/actions'
 import { Avatar, AvatarFallback } from '~/components/base/avatar'
@@ -29,8 +28,7 @@ import { Navigation } from './navigation'
 
 export const Header = () => {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-	const { user, isLoading } = useAuth()
-	const router = useRouter()
+	const { user } = useAuth()
 	return (
 		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 			<div className="container mx-auto">

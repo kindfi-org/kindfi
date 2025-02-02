@@ -24,6 +24,7 @@ export function Community() {
 				message: 'Form submitted successfully!',
 			})
 		} catch (error) {
+			console.error(error) // Logs the error for debugging
 			setFormStatus({
 				type: 'error',
 				message: 'Failed to submit the form. Please try again.',
@@ -98,9 +99,7 @@ export function Community() {
 	)
 }
 
-// Mock form submission function
 const submitForm = async (data: FormData): Promise<void> => {
-	// Simulate a delay
 	return new Promise((resolve, reject) => {
 		setTimeout(() => {
 			if (Math.random() > 0.5) {

@@ -3,11 +3,18 @@ import { cn } from '~/lib/utils'
 
 interface ImageProps extends ImgHTMLAttributes<HTMLImageElement> {
 	src: string
-	alt: string
+	alt?: string
 	className?: string
+	isDecorative?: boolean
 }
 
-const Image: FC<ImageProps> = ({ src, alt, className, ...props }) => {
+const Image: FC<ImageProps> = ({
+	src,
+	alt,
+	className,
+	isDecorative = false,
+	...props
+}) => {
 	return (
 		<div
 			className={cn(
@@ -15,9 +22,10 @@ const Image: FC<ImageProps> = ({ src, alt, className, ...props }) => {
 				className,
 			)}
 		>
-			<img
+			<Image
 				src={src}
-				alt={alt}
+				alt={isDecorative ? '' : alt || 'Image'}
+				aria-hidden={isDecorative}
 				className="w-full h-full object-cover block m-0 p-0"
 				loading="lazy"
 				{...props}
