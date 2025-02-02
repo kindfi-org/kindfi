@@ -21,15 +21,14 @@ const Image: FC<BaseImageProps> = ({
 			)}
 		>
 			<NextImage
-				src={src}
+				{...props}
+				className="w-full h-full object-cover block m-0 p-0"
 				alt={isDecorative ? '' : alt || 'Image'}
 				aria-hidden={isDecorative}
-				className="w-full h-full object-cover block m-0 p-0"
-				width={props.width}
 				height={props.height}
+				width={props.width}
 				loading="lazy"
-				{...props}
-				aria-label="image"
+				src={src}
 			/>
 		</picture>
 	)
