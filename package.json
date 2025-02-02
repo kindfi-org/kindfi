@@ -40,5 +40,14 @@
 			"**/wagmi/**",
 			"**/pino-pretty/**"
 		]
+	},
+	"dependencies": {
+		"@simplewebauthn/browser": "^13.1.0",
+		"@simplewebauthn/server": "^13.1.1",
+		"base64url": "^3.0.1",
+		"bigint-conversion": "^2.4.3",
+		"cbor-x": "^1.6.0",
+		"ioredis": "^5.4.2",
+		"ioredis-mock": "^8.9.0"
 	}
 }
