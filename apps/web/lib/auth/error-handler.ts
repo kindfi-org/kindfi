@@ -1,65 +1,69 @@
-import { Logger } from '~/lib/logger'
-import { AuthError } from '@supabase/supabase-js'
-import type { AuthResponse } from './type'
-
-enum AuthErrorType {
-  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
-  EMAIL_NOT_CONFIRMED = 'EMAIL_NOT_CONFIRMED',
-  INVALID_CODE = 'INVALID_CODE',
-  PASSWORD_MISMATCH = 'PASSWORD_MISMATCH',
-  WEAK_PASSWORD = 'WEAK_PASSWORD',
-  EMAIL_TAKEN = 'EMAIL_TAKEN',
-  RATE_LIMITED = 'RATE_LIMITED',
-  SESSION_EXPIRED = 'SESSION_EXPIRED',
-  INVALID_RESET_TOKEN = 'INVALID_RESET_TOKEN'
-}
-
-const ERROR_MESSAGES = {
-  [AuthErrorType.INVALID_CREDENTIALS]: 'Invalid email or password',
-  [AuthErrorType.EMAIL_NOT_CONFIRMED]: 'Please check your email to confirm your account',
-  [AuthErrorType.INVALID_CODE]: 'Invalid or expired authentication code',
-  [AuthErrorType.PASSWORD_MISMATCH]: 'Passwords do not match',
-  [AuthErrorType.WEAK_PASSWORD]: 'Password is too weak. It should be at least 8 characters long',
-  [AuthErrorType.EMAIL_TAKEN]: 'An account with this email already exists',
-  [AuthErrorType.RATE_LIMITED]: 'Too many attempts. Please try again later',
-  [AuthErrorType.SESSION_EXPIRED]: 'Your session has expired. Please sign in again',
-  [AuthErrorType.INVALID_RESET_TOKEN]: 'Password reset link is invalid or has expired'
-}
+import type { AuthError } from '@supabase/supabase-js'
+import type { Logger } from '~/lib/logger'
+import { AuthErrorType, type AuthResponse } from '../types/auth'
+import { ERROR_MESSAGES } from '../constants/error'
 
 export class AuthErrorHandler {
-  private logger: Logger;
-  
+  private logger: Logger
+
   constructor(logger: Logger) {
-    this.logger = logger;
+    this.logger = logger
   }
 
   handleAuthError(error: AuthError, action: string): AuthResponse {
-    const errorType = this.mapSupabaseError(error);
-    const message = ERROR_MESSAGES[errorType] || error.message;
-    
-    this.logError(error, action, errorType);
-    
+    const errorType = this.mapSupabaseError(error)
+    const message = ERROR_MESSAGES[errorType] || error.message
+
+    this.logError(error, action, errorType)
+
     return {
       success: false,
       message,
-      error: message
-    };
+      error: message,
+    }
   }
 
   private mapSupabaseError(error: AuthError): AuthErrorType {
-    switch (error.message) {
-      case 'Invalid login credentials':
-        return AuthErrorType.INVALID_CREDENTIALS;
-      case 'Email not confirmed':
-        return AuthErrorType.EMAIL_NOT_CONFIRMED;
-      case 'Invalid recovery token':
-        return AuthErrorType.INVALID_RESET_TOKEN;
-      case 'Password should be at least 8 characters':
-        return AuthErrorType.WEAK_PASSWORD;
-      case 'User already registered':
-        return AuthErrorType.EMAIL_TAKEN;
+    const errorMessage = error.message.toLowerCase()
+    const statusCode = error.status ?? 0
+
+    // Handle rate limiting
+    if (statusCode === 429) {
+      return AuthErrorType.RATE_LIMIT_EXCEEDED
+    }
+
+    // Handle server errors
+    if (statusCode >= 500) {
+      return AuthErrorType.SERVER_ERROR
+    }
+
+    // Map specific error messages
+    switch (true) {
+      case errorMessage.includes('invalid login credentials'):
+        return AuthErrorType.INVALID_CREDENTIALS
+      case errorMessage.includes('email not confirmed'):
+        return AuthErrorType.EMAIL_NOT_CONFIRMED
+      case errorMessage.includes('invalid recovery token'):
+      case errorMessage.includes('invalid reset token'):
+        return AuthErrorType.INVALID_RESET_TOKEN
+      case errorMessage.includes('password should be'):
+      case errorMessage.includes('weak password'):
+        return AuthErrorType.WEAK_PASSWORD
+      case errorMessage.includes('user already registered'):
+      case errorMessage.includes('email already registered'):
+        return AuthErrorType.EMAIL_TAKEN
+      case errorMessage.includes('expired'):
+        return AuthErrorType.EXPIRED_CODE
+      case errorMessage.includes('invalid code'):
+        return AuthErrorType.INVALID_CODE
+      case errorMessage.includes('no code'):
+        return AuthErrorType.NO_CODE_PROVIDED
+      case errorMessage.includes('session expired'):
+        return AuthErrorType.SESSION_EXPIRED
+      case statusCode === 401:
+        return AuthErrorType.UNAUTHORIZED
       default:
-        return AuthErrorType.INVALID_CREDENTIALS;
+        return AuthErrorType.SERVER_ERROR
     }
   }
 
@@ -68,9 +72,9 @@ export class AuthErrorHandler {
       eventType: 'AUTH_ERROR',
       errorType,
       action,
-      errorCode: error.status,
+      errorCode: error.status ?? 500, 
       message: error.message,
-      timestamp: new Date().toISOString()
-    });
+      timestamp: new Date().toISOString(),
+    })
   }
 }

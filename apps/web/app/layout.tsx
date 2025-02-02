@@ -2,7 +2,7 @@ import { GoogleAnalytics } from '~/components/shared/google-analytics'
 import RootLayoutWrapper from '~/components/shared/layout/layout-helpers/root-layout-wrapper'
 import { Providers } from '~/components/shared/layout/providers'
 import './css/globals.css'
-// import { Toaster } from "~/components/base/toaster"
+import { Toaster } from 'sonner'
 
 const defaultUrl = process.env.VERCEL_URL
 	? `https://${process.env.VERCEL_URL}`
@@ -26,7 +26,7 @@ export default function RootLayout({
 			<body>
 				<Providers>
 					<RootLayoutWrapper>{children}</RootLayoutWrapper>
-					{/* <Toast /> */}
+					<Toaster />
 				</Providers>
 				<GoogleAnalytics GA_MEASUREMENT_ID="G-52DWMZ7R1H" />
 			</body>

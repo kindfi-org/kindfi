@@ -2,6 +2,9 @@
 
 import { Lock, Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { signUpAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import {
@@ -15,21 +18,13 @@ import { Label } from '~/components/base/label'
 import type { Message } from '~/components/form-message'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { useFormValidation } from '~/hooks/use-form-validation'
+import { handleClientAuthError } from '~/lib/auth/clientauth-error-handler'
+import { AuthResponse } from '~/lib/types/auth'
 
 export default function Signup(props: { searchParams: Promise<Message> }) {
-	const searchParams = props.searchParams
-	// Show success message if registration was successful
-	// if (searchParams.success) {
-	//   return (
-	//     <div className="w-full flex items-center justify-center p-4">
-	//       <Card className="w-full max-w-md">
-	//         <CardContent className="pt-6">
-	//           <FormMessage message={searchParams} />
-	//         </CardContent>
-	//       </Card>
-	//     </div>
-	//   );
-	// }
+	const router = useRouter()
+	const searchParams = useSearchParams()
+	const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null)
 
 	const {
 		isEmailInvalid,
@@ -41,6 +36,34 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 		password: true,
 		minLength: 6,
 	})
+
+	useEffect(() => {
+		const error = searchParams.get('error')
+		if (error) {
+			toast.error(decodeURIComponent(error))
+		}
+	}, [searchParams])
+
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		resetValidation()
+
+		const formData = new FormData(event.currentTarget)
+		try {
+			const response = await signUpAction(formData)
+			setAuthResponse(response)
+			if (!response.success) {
+				toast.error(response.message)
+			} else {
+				toast.success('Your account has been created successfully.')
+				router.push(response.redirect || 'sign-in')
+			}
+		} catch (error: any) {
+			const errorResponse = handleClientAuthError(error)
+			setAuthResponse(errorResponse)
+			toast.error(errorResponse.message)
+		}
+	}
 
 	return (
 		<AuthLayout>
@@ -62,7 +85,7 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 					<form
 						className="space-y-4"
 						aria-label="Sign up"
-						onSubmit={resetValidation}
+						onSubmit={handleSubmit}
 					>
 						<div className="space-y-4">
 							<div className="space-y-2">
@@ -129,12 +152,10 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 								</div>
 							</div>
 
-							<Button className="w-full" formAction={signUpAction}>
+							<Button className="w-full" type="submit">
 								Create account
 							</Button>
 						</div>
-
-						{/* <FormMessage message={searchParams} /> */}
 					</form>
 				</CardContent>
 				<CardFooter className="flex flex-col space-y-4 border-t p-6">
