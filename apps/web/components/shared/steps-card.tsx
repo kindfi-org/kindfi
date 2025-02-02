@@ -7,7 +7,6 @@ interface StepCardProps {
 	title: string
 	description: string
 	Icon: React.ComponentType
-	imageAlt: string
 	isReversed?: boolean
 }
 
@@ -16,7 +15,6 @@ export const StepCard = ({
 	title,
 	description,
 	Icon,
-	imageAlt,
 	isReversed = false,
 }: StepCardProps) => {
 	return (
