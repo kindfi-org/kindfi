@@ -32,10 +32,11 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 		<svg
 			viewBox="0 0 24 24"
 			fill="none"
-			className="w-full h-full p-1 text-gray-400"
 			role="img"
-			aria-label="avatar icon"
+			aria-label="User avatar"
+			className="w-full h-full p-1 text-gray-400"
 		>
+			<title>User avatar</title>
 			<path
 				d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
 				stroke="currentColor"
@@ -52,6 +53,24 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 			/>
 		</svg>
 	)
+
+	const renderAvatars = (count: number, prefix: string) => {
+		return Array(count)
+			.fill(0)
+			.map((_, index) => ({
+				id: `${prefix}-${Date.now()}-${index}`,
+				offset: index > 0 ? '-12px' : '0',
+			}))
+			.map(({ id, offset }) => (
+				<div
+					key={id}
+					className="w-8 h-8 bg-gray-100 rounded-full border-2 border-white"
+					style={{ marginLeft: offset }}
+				>
+					<UserAvatar />
+				</div>
+			))
+	}
 
 	const ProjectView = () => (
 		<div className="mb-6">
@@ -248,18 +267,7 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 			<div className="max-w-md p-6 bg-white rounded-lg shadow">
 				<h2 className="text-xl font-semibold mb-4">Community Impact</h2>
 				<div className="flex items-center mb-6">
-					{Array(5)
-						.fill(0)
-						.map((_, i) => (
-							<div
-								// biome-ignore lint/suspicious/noArrayIndexKey: We can use the index for now since the UserAvatar component is just an SVG. Will be updated when actual user images will be used for the avatars. This is a suggestion
-								key={i}
-								className="w-8 h-8 bg-gray-100 rounded-full border-2 border-white"
-								style={{ marginLeft: i > 0 ? '-12px' : '0' }}
-							>
-								<UserAvatar />
-							</div>
-						))}
+					{renderAvatars(5, 'success-avatar')}
 					<span className="text-gray-500 ml-2">+229</span>
 				</div>
 				<div className="space-y-6">
@@ -318,28 +326,7 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 					<h3 className="text-xl font-semibold mb-4">Project Creator</h3>
 					<div className="flex items-center gap-3 mb-4">
 						<div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-							<svg
-								viewBox="0 0 24 24"
-								fill="none"
-								className="w-6 h-6 text-gray-400"
-								role="img"
-								aria-label="project creator icon"
-							>
-								<path
-									d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-								/>
-								<path
-									d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-								/>
-							</svg>
+							<UserAvatar />
 						</div>
 						<div>
 							<div className="font-semibold">Creator Name</div>
@@ -360,39 +347,7 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 						Fellow Supporters
 					</h3>
 					<div className="flex items-center">
-						{Array(5)
-							.fill(0)
-							.map((_, i) => (
-								<div
-									// biome-ignore lint/suspicious/noArrayIndexKey: It looks like this is hardcoded in the meantime. I think we can use the index for now.
-									key={i}
-									className="w-8 h-8 bg-gray-100 rounded-full border-2 border-white"
-									style={{ marginLeft: i > 0 ? '-12px' : '0' }}
-								>
-									<svg
-										viewBox="0 0 24 24"
-										fill="none"
-										className="w-full h-full p-1 text-gray-400"
-										role="img"
-										aria-label="supporters icon"
-									>
-										<path
-											d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
-											stroke="currentColor"
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-										/>
-										<path
-											d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"
-											stroke="currentColor"
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-										/>
-									</svg>
-								</div>
-							))}
+						{renderAvatars(5, 'supporter-avatar')}
 						<span className="text-gray-500 ml-2">+42</span>
 					</div>
 					<button

@@ -1,12 +1,14 @@
 import type React from 'react'
 
 interface Highlight {
+	id: string
 	label: string
 	value: string
 	icon?: React.ReactNode
 }
 
 interface Update {
+	id: string
 	title: string
 	description: string
 	date: string
@@ -42,7 +44,7 @@ const AboutProject: React.FC<AboutProjectProps> = ({
 				</h3>
 				<ul className="grid grid-cols-2 gap-4">
 					{highlights.map((highlight) => (
-						<li key={highlight.label} className="flex items-start pl-4">
+						<li key={highlight.id} className="flex items-start pl-4">
 							{highlight.icon && (
 								<span className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full text-sky-500 mr-3">
 									{highlight.icon}
@@ -77,7 +79,7 @@ const AboutProject: React.FC<AboutProjectProps> = ({
 				<ul>
 					{updates.map((update) => (
 						<li
-							key={update.title}
+							key={update.id}
 							className="bg-gray-100 rounded-lg p-4 mb-4 relative"
 						>
 							<span className="absolute top-2 right-4 text-sm text-gray-400">

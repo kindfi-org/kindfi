@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { StepCard } from '~/components/shared/steps-card'
-import { fadeInUpVariants } from '~/lib/constants/animations'
+import { fadeInUpVariants } from '~/lib/animations'
 import { steps } from '~/lib/mock-data/mock-new-user-guide'
 
 export function NewUserGuide() {
