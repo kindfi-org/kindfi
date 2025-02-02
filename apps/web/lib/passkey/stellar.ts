@@ -171,8 +171,9 @@ export const convertEcdsaSignatureAsnToCompact = (sig: Buffer) => {
 	if (bufToBigint(s) > (bufToBigint(q) - BigInt(1)) / BigInt(2)) {
 		signature64 = Buffer.from([
 			...r,
-			// @ts-expect-error
-			...Buffer.from(bigintToBuf(bufToBigint(q) - bufToBigint(s))),
+			...Buffer.from(
+				new Uint8Array(bigintToBuf(bufToBigint(q) - bufToBigint(s))),
+			),
 		])
 	} else {
 		signature64 = Buffer.from([...r, ...s])
