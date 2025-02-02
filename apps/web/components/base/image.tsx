@@ -1,29 +1,36 @@
-import type { FC, ImgHTMLAttributes } from 'react'
+import NextImage, { type ImageProps } from 'next/image'
+import type { FC } from 'react'
 import { cn } from '~/lib/utils'
 
-interface ImageProps extends ImgHTMLAttributes<HTMLImageElement> {
-	src: string
-	alt: string
-	className?: string
+interface BaseImageProps extends ImageProps {
+	isDecorative?: boolean
 }
 
-const Image: FC<ImageProps> = ({ src, alt, className, ...props }) => {
+const Image: FC<BaseImageProps> = ({
+	src,
+	alt,
+	className,
+	isDecorative = false,
+	...props
+}) => {
 	return (
-		<div
+		<picture
 			className={cn(
 				'w-full h-full flex items-center justify-center overflow-hidden',
 				className,
 			)}
 		>
-			<img
-				src={src}
-				alt={alt}
-				className="w-full h-full object-cover block m-0 p-0"
-				loading="lazy"
+			<NextImage
 				{...props}
-				aria-label="image"
+				className="w-full h-full object-cover block m-0 p-0"
+				alt={isDecorative ? '' : alt || 'Image'}
+				aria-hidden={isDecorative}
+				height={props.height}
+				width={props.width}
+				loading="lazy"
+				src={src}
 			/>
-		</div>
+		</picture>
 	)
 }
 

@@ -2,6 +2,7 @@ import type React from 'react'
 
 interface ImpactCardProps {
 	icon: React.ReactNode
+	id: string
 	label: string
 	value: string | number
 	bgColor?: string
@@ -10,6 +11,7 @@ interface ImpactCardProps {
 
 const ImpactCard: React.FC<ImpactCardProps> = ({
 	icon,
+	id,
 	label,
 	value,
 	bgColor = 'bg-blue-100',
@@ -31,6 +33,7 @@ const ImpactCard: React.FC<ImpactCardProps> = ({
 interface ImpactCardsProps {
 	data: {
 		icon: React.ReactNode
+		id: string
 		label: string
 		value: string | number
 		bgColor?: string
@@ -41,10 +44,11 @@ interface ImpactCardsProps {
 const ImpactCards: React.FC<ImpactCardsProps> = ({ data }) => {
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-			{data.map((item, index) => (
+			{data.map((item) => (
 				<ImpactCard
-					key={index}
+					key={item.id}
 					icon={item.icon}
+					id={item.id}
 					label={item.label}
 					value={item.value}
 					bgColor={item.bgColor}

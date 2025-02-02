@@ -60,7 +60,10 @@ const SuccessGallery: React.FC<SuccessGalleryProps> = ({
 								fill="none"
 								viewBox="0 0 24 24"
 								stroke="currentColor"
+								role="img"
+								aria-labelledby="video-icon-title"
 							>
+								<title id="video-icon-title">Video Thumbnail</title>
 								<path
 									strokeLinecap="round"
 									strokeLinejoin="round"

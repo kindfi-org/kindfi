@@ -6,7 +6,7 @@ import ProjectOverview from '~/components/sections/project/project-overview'
 import ProjectShowcaseSection from '~/components/sections/project/project-showcase'
 import ProjectUpdatesSection from '~/components/sections/project/project-updates'
 import YourImpactSection from '~/components/sections/project/your-impact'
-import { projectTabsData } from '~/lib/constants/mock-data/mock-projects'
+import { projectTabsData } from '~/lib/mock-data/mock-projects'
 
 const TAB_COMPONENTS = {
 	overview: ProjectOverview,
@@ -18,7 +18,7 @@ const TAB_COMPONENTS = {
 const ProjectDetailsPage = () => {
 	const tabs = projectTabsData.map((tab) => {
 		const Component = TAB_COMPONENTS[tab.id as keyof typeof TAB_COMPONENTS]
-		const contentComponent = Component ? <Component /> : null
+		const contentComponent = Component ? <Component key={tab.id} /> : null
 
 		return {
 			...tab,
