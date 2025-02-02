@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
 			logger.error({
 				eventType: 'OTP_VERIFICATION_FAILED',
 				error: errMsg,
-				tokenHash,
 				type,
 				timestamp: new Date().toISOString(),
 			})
