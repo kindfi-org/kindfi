@@ -5,7 +5,7 @@ export interface Tag {
 	text: string
 }
 
-export interface Project {
+export interface ProjectDetails {
 	id: string
 	image: string
 	category: string
