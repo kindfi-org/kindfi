@@ -9,7 +9,7 @@
 		"ignoreUnknown": false,
 		"ignore": ["./apps/web/.next", "./apps/indexer/src/types/models"]
 	},
-	"formatter": { "enabled": true, "indentStyle": "tab" },
+	"formatter": { "enabled": true, "indentStyle": "tab", "indentWidth": 2 },
 	"organizeImports": { "enabled": true },
 	"linter": {
 		"enabled": false,

@@ -6,16 +6,14 @@ interface UpdateCardProps {
 	title: string
 	description: string
 	date: string
-	link?: string
-	isExclusive?: boolean
+	// link?: string
+	// isExclusive?: boolean
 }
 
 const UpdateCard: React.FC<UpdateCardProps> = ({
 	title,
 	description,
 	date,
-	link,
-	isExclusive,
 }) => {
 	return (
 		<div className="bg-white rounded-lg p-4 shadow-md relative border border-gray-200">
