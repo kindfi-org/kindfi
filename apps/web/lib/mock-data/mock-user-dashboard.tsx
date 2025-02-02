@@ -1,5 +1,5 @@
 import { BarChart2, Users, Wallet } from 'lucide-react'
-import type { ImpactMetric, Project } from '~/lib/types/user-dashboard'
+import type { ImpactMetric, ProjectDetails } from '~/lib/types/user-dashboard'
 
 export const mockProjects: ProjectDetails[] = [
 	{
@@ -40,7 +40,7 @@ export const mockProjects: ProjectDetails[] = [
 	},
 ]
 
-export const mockImpactMetrics: ImpactMetricItem[] = [
+export const mockImpactMetrics: ImpactMetric[] = [
 	{
 		label: 'Total Impact',
 		value: '$12,890.50',

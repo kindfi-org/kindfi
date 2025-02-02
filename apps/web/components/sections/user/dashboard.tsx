@@ -10,7 +10,7 @@ import {
 	mockImpactMetrics,
 	mockProjects,
 } from '~/lib/mock-data/mock-user-dashboard'
-import type { ImpactMetric, Project } from '~/lib/types/user-dashboard'
+import type { ImpactMetric, ProjectDetails } from '~/lib/types/user-dashboard'
 
 export function UserDashboard() {
 	return (
@@ -62,7 +62,7 @@ export function UserDashboard() {
 						</div>
 
 						<ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							{mockImpactMetrics.map((metric: ImpactMetricItem) => (
+							{mockImpactMetrics.map((metric: ImpactMetric) => (
 								<li
 									key={metric.label}
 									className="bg-muted rounded-lg p-6 text-center"

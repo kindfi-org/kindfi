@@ -1,13 +1,11 @@
 import type { ReactNode } from 'react'
 
-
 export interface Tag {
 	id: string
 	text: string
 }
 
-
-export interface Project {
+export interface ProjectDetails {
 	id: string
 	image: string
 	category: string
