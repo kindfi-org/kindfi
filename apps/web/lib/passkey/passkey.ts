@@ -178,7 +178,11 @@ export const getAuthenticationOptions = async ({
 		identifier,
 	})
 	if (!userResponse) throw new InAppError(ErrorCode.UNEXPECTED_ERROR)
+
 	const { credentials } = userResponse
+
+	// If no user is found or no credentials are available, throw an error
+	if (credentials.length === 0) throw new InAppError(ErrorCode.USER_NOT_FOUND)
 
 	const opts: GenerateAuthenticationOptionsOpts = {
 		timeout: ENV.CHALLENGE_TTL_MS,

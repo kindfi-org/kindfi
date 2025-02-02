@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '~/lib/supabase/server'
 import { encodedRedirect } from '~/lib/utils'
 
+// TODO: Will be replaced by the passkey registration?
 export async function signUpAction(formData: FormData) {
 	const supabase = await createClient()
 
