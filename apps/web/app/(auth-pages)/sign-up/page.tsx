@@ -19,13 +19,12 @@ import type { Message } from '~/components/form-message'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { useFormValidation } from '~/hooks/use-form-validation'
 import { handleClientAuthError } from '~/lib/auth/clientauth-error-handler'
-import { AuthResponse } from '~/lib/types/auth'
+import type { AuthResponse } from '~/lib/types/auth'
 
 export default function Signup(props: { searchParams: Promise<Message> }) {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null)
-
 	const {
 		isEmailInvalid,
 		isPasswordInvalid,

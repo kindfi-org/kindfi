@@ -1,2 +1,1 @@
-export { AuthErrorType, type AuthResponse } from "./auth.types"
-
+export { AuthErrorType, type AuthResponse } from './auth.types'

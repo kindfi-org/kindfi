@@ -5,7 +5,7 @@ import { headers } from 'next/headers'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
 import { createClient } from '~/lib/supabase/server'
-import { AuthResponse } from '~/lib/types/auth'
+import type { AuthResponse } from '~/lib/types/auth'
 
 const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)

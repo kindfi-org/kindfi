@@ -1,4 +1,5 @@
 interface BaseItem {
+	id: string
 	title: string
 	description: string
 	date: string
@@ -11,6 +12,7 @@ interface TabItem {
 }
 
 interface StatItem {
+	id: string
 	label: string
 	value: string
 	bgColor: string
@@ -19,10 +21,12 @@ interface StatItem {
 }
 
 interface UpdateItem extends BaseItem {
+	id: string
 	exclusive?: boolean
 }
 
 interface TimelineEvent extends BaseItem {
+	id: string
 	status: 'completed' | 'pending'
 }
 
@@ -32,14 +36,17 @@ interface MediaItem {
 	src: string
 	alt: string
 }
+interface Highlight {
+	id: string // Add id to Highlight
+	label: string
+	value: string
+	icon: string
+}
 
 interface AboutProjectProps {
+	id: string
 	description: string
-	highlights: {
-		label: string
-		value: string
-		icon: string
-	}[]
+	highlights: Highlight[]
 	updates: BaseItem[]
 	titleAboveHighlights: boolean
 }
@@ -61,6 +68,8 @@ export const projectTabsData: TabItem[] = [
 
 export const statsData: StatItem[] = [
 	{
+		id: 'stat-1',
+
 		label: 'Contribution',
 		value: '$100',
 		bgColor: 'bg-blue-100',
@@ -68,6 +77,8 @@ export const statsData: StatItem[] = [
 		icon: '💰',
 	},
 	{
+		id: 'stat-2',
+
 		label: 'NFT Earned',
 		value: '1',
 		bgColor: 'bg-purple-100',
@@ -75,6 +86,8 @@ export const statsData: StatItem[] = [
 		icon: '🏆',
 	},
 	{
+		id: 'stat-3',
+
 		label: 'Referrals',
 		value: '2',
 		bgColor: 'bg-green-100',
@@ -85,12 +98,14 @@ export const statsData: StatItem[] = [
 
 export const updatesData: UpdateItem[] = [
 	{
+		id: 'update-1',
 		title: 'Behind the Scenes Update #1',
 		description: 'Exclusive project insights and progress updates...',
 		date: '2 days ago',
 		exclusive: true,
 	},
 	{
+		id: 'update-2',
 		title: 'Behind the Scenes Update #2',
 		description: 'Exclusive project insights and progress updates...',
 		date: '2 days ago',
@@ -100,6 +115,7 @@ export const updatesData: UpdateItem[] = [
 
 export const statsDataUpdates: StatItem[] = [
 	{
+		id: 'stat-1',
 		label: 'Total Raised',
 		value: '$100,000',
 		bgColor: 'bg-blue-100',
@@ -107,6 +123,7 @@ export const statsDataUpdates: StatItem[] = [
 		icon: '💰',
 	},
 	{
+		id: 'stat-2',
 		label: 'Supporters',
 		value: '234',
 		bgColor: 'bg-purple-100',
@@ -114,6 +131,7 @@ export const statsDataUpdates: StatItem[] = [
 		icon: '👥',
 	},
 	{
+		id: 'stat-3',
 		label: 'NFTs Minted',
 		value: '156',
 		bgColor: 'bg-green-100',
@@ -124,24 +142,30 @@ export const statsDataUpdates: StatItem[] = [
 
 export const timelineEvents: TimelineEvent[] = [
 	{
+		id: 'event-1',
 		title: 'Project Launch',
 		description: 'Project officially launched',
 		date: 'Mar 15',
 		status: 'completed',
 	},
 	{
+		id: 'event-2',
 		title: '50% Milestone',
 		description: 'Reached halfway point',
 		date: 'Apr 1',
 		status: 'completed',
 	},
 	{
+		id: 'event-3',
+
 		title: 'Goal Reached',
 		description: 'Successfully achieved target',
 		date: 'Apr 15',
 		status: 'completed',
 	},
 	{
+		id: 'event-4',
+
 		title: 'Implementation',
 		description: 'Project implementation phase',
 		date: 'May 1',
@@ -183,21 +207,44 @@ export const projectOverviewMediaItems: MediaItem[] = [
 ]
 
 export const aboutProjectProps: AboutProjectProps = {
+	id: 'project-1',
 	description:
 		"Our initiative aims to reduce ocean plastic waste by 30% through innovative recycling technologies and community engagement programs. Working with local communities, we've established collection points and education centers.",
 	highlights: [
-		{ label: 'Goal', value: 'Clear environmental impact', icon: 'target' },
-		{ label: 'Community', value: '500+ supporters', icon: 'user' },
-		{ label: 'Location', value: 'Global Initiative', icon: 'language' },
-		{ label: 'Verification', value: 'Verified by KindFi', icon: 'status' },
+		{
+			id: 'highlight-1',
+			label: 'Goal',
+			value: 'Clear environmental impact',
+			icon: 'target',
+		},
+		{
+			id: 'highlight-2',
+			label: 'Community',
+			value: '500+ supporters',
+			icon: 'user',
+		},
+		{
+			id: 'highlight-3',
+			label: 'Location',
+			value: 'Global Initiative',
+			icon: 'language',
+		},
+		{
+			id: 'highlight-4',
+			label: 'Verification',
+			value: 'Verified by KindFi',
+			icon: 'status',
+		},
 	],
 	updates: [
 		{
+			id: 'update-1',
 			title: 'Project Milestone 1',
 			description: 'Brief update about project progress and achievements...',
 			date: '2 days ago',
 		},
 		{
+			id: 'update-2',
 			title: 'Project Milestone 2',
 			description: 'Brief update about project progress and achievements...',
 			date: '2 days ago',

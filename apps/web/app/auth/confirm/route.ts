@@ -10,42 +10,42 @@ const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
 
 export async function GET(request: NextRequest) {
-  const requestUrl = new URL(request.url)
-  const tokenHash = requestUrl.searchParams.get('token_hash')
-  const type = requestUrl.searchParams.get('type')
-  const next = requestUrl.searchParams.get('next') ?? '/dashboard'
+	const requestUrl = new URL(request.url)
+	const tokenHash = requestUrl.searchParams.get('token_hash')
+	const type = requestUrl.searchParams.get('type')
+	const next = requestUrl.searchParams.get('next') ?? '/dashboard'
 
-  const supabase = await createClient()
+	const supabase = await createClient()
 
-  const { success, redirectPath, error } = await useAuthCallback({
-    code: tokenHash,
-    redirectTo: next,
-    logger,
-    errorHandler,
-    supabase,
-    onError: (errMsg) => {
-      logger.error({
-        eventType: 'OTP_VERIFICATION_FAILED',
-        error: errMsg,
-        tokenHash,
-        type,
-        timestamp: new Date().toISOString(),
-      })
-    }
-  })
+	const { success, redirectPath, error } = await useAuthCallback({
+		code: tokenHash,
+		redirectTo: next,
+		logger,
+		errorHandler,
+		supabase,
+		onError: (errMsg) => {
+			logger.error({
+				eventType: 'OTP_VERIFICATION_FAILED',
+				error: errMsg,
+				tokenHash,
+				type,
+				timestamp: new Date().toISOString(),
+			})
+		},
+	})
 
-  if (!success) {
-    return NextResponse.redirect(
-      `${requestUrl.origin}/sign-in?error=${encodeURIComponent(error || 'An unexpected error occurred')}`
-    )
-  }
+	if (!success) {
+		return NextResponse.redirect(
+			`${requestUrl.origin}/sign-in?error=${encodeURIComponent(error || 'An unexpected error occurred')}`,
+		)
+	}
 
-  logger.info({
-    eventType: 'OTP_VERIFICATION_SUCCESS',
-    type,
-    next,
-    timestamp: new Date().toISOString(),
-  })
+	logger.info({
+		eventType: 'OTP_VERIFICATION_SUCCESS',
+		type,
+		next,
+		timestamp: new Date().toISOString(),
+	})
 
-  return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
+	return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
 }

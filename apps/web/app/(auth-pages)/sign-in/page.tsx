@@ -8,17 +8,17 @@ import { signInAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
+import type { Message } from '~/components/form-message'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { useFormValidation } from '~/hooks/use-form-validation'
 import { handleClientAuthError } from '~/lib/auth/clientauth-error-handler'
-import { AuthResponse } from '~/lib/types/auth'
+import type { AuthResponse } from '~/lib/types/auth'
 
-export default function Login() {
+export default function Login(props: { searchParams: Promise<Message> }) {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null)
-
 	const {
 		isEmailInvalid,
 		isPasswordInvalid,
@@ -48,9 +48,7 @@ export default function Login() {
 			if (!response.success) {
 				toast.error(response.message)
 			} else {
-				toast.success(
-					'You have successfully logged in.'
-				)
+				toast.success('You have successfully logged in.')
 				router.push(response.redirect || '/dashboard')
 			}
 		} catch (error: any) {
@@ -66,7 +64,7 @@ export default function Login() {
 				title="Welcome Back"
 				subtitle={
 					<div className="text-sm text-muted-foreground">
-						Don't have an account?{' '}
+						Don&apos;t have an account?
 						<Link
 							className="text-primary font-medium hover:underline"
 							href="/sign-up"

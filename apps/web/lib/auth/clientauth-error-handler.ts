@@ -1,7 +1,5 @@
-import { ERROR_MESSAGES } from "../constants/error"
-import { AuthResponse } from "../types/auth"
-
-
+import { ERROR_MESSAGES } from '../constants/error'
+import type { AuthResponse } from '../types/auth'
 
 export function handleClientAuthError(error: any): AuthResponse {
 	const message =

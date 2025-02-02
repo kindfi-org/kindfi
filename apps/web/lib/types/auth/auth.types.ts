@@ -10,12 +10,12 @@ export enum AuthErrorType {
 	SESSION_EXPIRED = 'SESSION_EXPIRED',
 	RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
 	UNAUTHORIZED = 'UNAUTHORIZED',
-	SERVER_ERROR = 'SERVER_ERROR'
-  }
-  
-  export interface AuthResponse {
+	SERVER_ERROR = 'SERVER_ERROR',
+}
+
+export interface AuthResponse {
 	success: boolean
 	message: string
 	error?: string
 	redirect?: string
-  }
+}
