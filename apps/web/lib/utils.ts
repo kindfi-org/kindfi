@@ -1,7 +1,8 @@
 import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
 import { redirect } from 'next/navigation'
+import Server from 'stellar-sdk'
+import Keypair from 'stellar-sdk'
+import { twMerge } from 'tailwind-merge'
 
 /**
  * Redirects to a specified path with an encoded message as a query parameter.
@@ -20,4 +21,17 @@ export function encodedRedirect(
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
+}
+
+/**
+ * Fetches the sequence number for a given Stellar account.
+ * @param {string} secretKey - The secret key of the Stellar account.
+ * @returns {Promise<number>} The sequence number of the account.
+ */
+export async function getAccountSequence(secretKey: string): Promise<number> {
+	const server = new Server(process.env.STELLAR_NETWORK_URL!)
+	const account = await server.loadAccount(
+		Keypair.fromSecret(secretKey).publicKey(),
+	)
+	return account.sequenceNumber
 }
