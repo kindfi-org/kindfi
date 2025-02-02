@@ -110,7 +110,7 @@ export function UserJourney() {
 						transition={{ duration: 0.5 }}
 						className="grid gap-8 sm:gap-6 md:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
 					>
-						{steps.map((step, index) => (
+						{steps.map((step) => (
 							<motion.div key={`step-${step.number}`} {...fadeInUpAnimation}>
 								<div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 h-full border border-gray-100">
 									<div className="flex items-center mb-4">

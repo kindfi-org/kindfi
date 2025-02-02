@@ -6,8 +6,8 @@ export interface NFTTier {
 }
 
 export interface NFTCollection {
-	id: string
 	title: string
+	id: string
 	rarity: string
 }
 
@@ -20,10 +20,10 @@ export interface Comment {
 }
 
 export const nftTiers: NFTTier[] = [
-	{ id: 'uuid-1', title: 'Early Bird', support: 'Support $50+', left: 100 },
-	{ id: 'uuid-2', title: 'Impact Maker', support: 'Support $100+', left: 50 },
+	{ id: 'nftt-1', title: 'Early Bird', support: 'Support $50+', left: 100 },
+	{ id: 'nftt-2', title: 'Impact Maker', support: 'Support $100+', left: 50 },
 	{
-		id: 'uuid-3',
+		id: 'nftt-3',
 		title: 'Project Champion',
 		support: 'Support $500+',
 		left: 10,
@@ -38,7 +38,7 @@ export const nftCollection: NFTCollection[] = [
 
 export const comments: Comment[] = [
 	{
-		id: 'uuid-1',
+		id: 'comment-1',
 		name: 'Sarah M.',
 		badge: 'Early Supporter',
 		comment:
@@ -46,7 +46,7 @@ export const comments: Comment[] = [
 		likes: 24,
 	},
 	{
-		id: 'uuid-2',
+		id: 'comment-2',
 		name: 'David K.',
 		badge: 'Project Champion',
 		comment:

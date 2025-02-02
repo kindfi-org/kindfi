@@ -12,7 +12,6 @@ import {
 } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
-import type { Message } from '~/components/form-message'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { usePasskeyRegistration } from '~/hooks/passkey/use-passkey-registration'
 import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
