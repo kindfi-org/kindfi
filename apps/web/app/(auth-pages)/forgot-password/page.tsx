@@ -1,4 +1,3 @@
-import { CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import { forgotPasswordAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
@@ -52,33 +51,3 @@ export default async function ForgotPassword(props: {
 		</AuthLayout>
 	)
 }
-
-// Optional: Add success state component
-interface SuccessMessageProps {
-	email: string
-}
-
-const SuccessMessage = ({ email }: SuccessMessageProps) => (
-	<div className="space-y-4">
-		<div className="flex flex-col items-center justify-center space-y-2">
-			<CheckCircle className="w-12 h-12 text-green-500" />
-			<h2 className="text-2xl font-semibold">Check Your Email!</h2>
-		</div>
-		<p className="text-center text-muted-foreground">
-			We’ve sent a recovery link to <strong>{email}</strong>. The link will
-			expire in 24 hours.
-		</p>
-		<div className="text-center">
-			<p className="text-sm text-muted-foreground">
-				Didn’t receive the email?{' '}
-				{/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-				<button
-					onClick={() => window.location.reload()}
-					className="text-primary hover:underline"
-				>
-					Try again
-				</button>
-			</p>
-		</div>
-	</div>
-)

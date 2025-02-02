@@ -14,10 +14,30 @@
 		/* Primary using first theme's color */
 		--primary: 99 57.1% 56.1%;
 		--primary-foreground: 0 0% 100%;
+		--primary-50: 99 30% 95%;
+		--primary-100: 99 40% 85%;
+		--primary-200: 99 45% 75%;
+		--primary-300: 99 50% 65%;
+		--primary-400: 99 55% 55%;
+		--primary-500: 99 57.1% 56.1%; /* Matching your base */
+		--primary-600: 99 65% 30%;
+		--primary-700: 99 70% 25%;
+		--primary-800: 99 75% 20%;
+		--primary-900: 99 80% 15%;
 
 		/* Secondary using dark theme's primary */
 		--secondary: 222 100% 12.2%;
 		--secondary-foreground: 0 0% 100%;
+		--secondary-50: 222 20% 95%;
+		--secondary-100: 222 25% 85%;
+		--secondary-200: 222 30% 75%;
+		--secondary-300: 222 35% 65%;
+		--secondary-400: 222 35% 55%;
+		--secondary-500: 222 100% 12.2%; /* Matching your base */
+		--secondary-600: 222 45% 30%;
+		--secondary-700: 222 50% 25%;
+		--secondary-800: 222 55% 20%;
+		--secondary-900: 222 60% 15%;
 
 		--muted: 222 30% 95%;
 		--muted-foreground: 222 5% 40%;
@@ -57,6 +77,47 @@
 		--input: 222 30% 18%;
 		--ring: 99 57.1% 46.1%;
 		--radius: 0.75rem;
+	}
+}
+
+@layer components {
+	.glow-card {
+		background: radial-gradient(
+			150rem circle at 0 0,
+			rgba(0, 255, 241, 0),
+			transparent 0%
+		);
+		transition: all 0.15s;
+		position: relative;
+	}
+
+	.glow-card:hover::before {
+		opacity: 1;
+	}
+
+	.glow-card::before {
+		content: "";
+		height: 100%;
+		width: 100%;
+		position: absolute;
+		top: 0;
+		left: 0;
+		border-radius: inherit;
+		background: radial-gradient(
+			60rem circle at var(--xPos) var(--yPos),
+			rgba(168, 255, 251, 0.051),
+			transparent 35%
+		);
+		opacity: 0;
+		transition: all 0.15s ease-in-out;
+	}
+
+	.glow-card:hover {
+		background: radial-gradient(
+			90rem circle at var(--xPos) var(--yPos),
+			rgba(197, 253, 250, 0.294),
+			transparent 15%
+		);
 	}
 }
 
