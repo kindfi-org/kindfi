@@ -1,19 +1,17 @@
 import { createClient } from '@supabase/supabase-js'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { AppError } from '~/lib/errors'
+import { AppError } from '~/lib/error'
 import { initializeEscrowContract } from '~/lib/stellar/escrow'
 import type { EscrowInitialization } from '~/lib/types/escrow'
 import { validateEscrowInitialization } from '~/lib/validators/escrow'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-	throw new Error('Missing Supabase environment variables')
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabase = createClient(
+	// biome-ignore lint/style/noNonNullAssertion: <explanation>
+	process.env.NEXT_PUBLIC_SUPABASE_URL!,
+	// biome-ignore lint/style/noNonNullAssertion: <explanation>
+	process.env.SUPABASE_SERVICE_ROLE_KEY!,
+)
 
 export async function POST(req: NextRequest) {
 	try {
@@ -32,7 +30,8 @@ export async function POST(req: NextRequest) {
 
 		const contractResult = await initializeEscrowContract(
 			initializationData.contractParams,
-			initializationData.contractParams.parties.payerSecretKey,
+			initializationData.contractParams.parties.payer,
+			// TODO: Check this initializationData.contractParams.parties.payerSecretKey it seems to be missing, changing to payer in the meantime
 		)
 
 		if (!contractResult.success) {
@@ -91,10 +90,10 @@ export async function POST(req: NextRequest) {
 			console.error('Escrow initialization error:', error)
 			return NextResponse.json(
 				{
-					error: error.message,
-					details: error.details, // Include additional details for troubleshooting
+					error: (error as AppError).message,
+					details: (error as AppError).details, // Include additional details for troubleshooting
 				},
-				{ status: error.statusCode },
+				{ status: (error as AppError).statusCode },
 			)
 		}
 

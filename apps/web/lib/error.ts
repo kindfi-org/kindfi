@@ -5,7 +5,7 @@ export class AppError<T = unknown> extends Error {
 	constructor(message: string, statusCode: number, details?: T) {
 		super(message)
 		this.statusCode = statusCode
-		this.details = details
+		this.details = details as T
 		this.name = 'AppError'
 	}
 }

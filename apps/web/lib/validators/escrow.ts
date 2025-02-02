@@ -18,14 +18,7 @@ const validateMilestone = (milestone: Milestone, index: number): string[] => {
 	if (typeof milestone.amount !== 'number' || milestone.amount <= 0) {
 		errors.push(`Milestone ${index + 1}: Amount must be a positive number`)
 	}
-	const dueDateValue =
-		milestone.dueDate instanceof Date
-			? milestone.dueDate.getTime()
-			: typeof milestone.dueDate === 'string'
-				? Date.parse(milestone.dueDate)
-				: Number.NaN
-
-	if (Number.isNaN(dueDateValue)) {
+	if (!Date.parse(milestone.dueDate.toString())) {
 		errors.push(`Milestone ${index + 1}: Invalid due date`)
 	}
 

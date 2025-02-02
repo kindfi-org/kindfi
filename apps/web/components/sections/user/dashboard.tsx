@@ -10,10 +10,7 @@ import {
 	mockImpactMetrics,
 	mockProjects,
 } from '~/lib/mock-data/mock-user-dashboard'
-import type {
-	ImpactMetricItem,
-	ProjectDetails,
-} from '~/lib/types/user-dashboard'
+import type { ImpactMetric, Project } from '~/lib/types/user-dashboard'
 
 export function UserDashboard() {
 	return (
