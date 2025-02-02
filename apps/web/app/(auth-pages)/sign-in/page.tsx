@@ -13,8 +13,7 @@ import { usePasskeyAuthentication } from '~/hooks/passkey/use-passkey-authentica
 import { useStellarContext } from '~/hooks/stellar/stellar-context'
 import { useFormValidation } from '~/hooks/use-form-validation'
 
-export default function Login(props: { searchParams: Promise<Message> }) {
-	const searchParams = props.searchParams
+export default function Login() {
 	const [email, setEmail] = useState('')
 	const router = useRouter()
 
