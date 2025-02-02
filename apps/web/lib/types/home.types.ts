@@ -110,3 +110,55 @@ export interface SocialButtonProps {
 	onClick: () => void
 	className: string
 }
+
+export interface BaseItem {
+	id: string
+	title: string
+	description: string
+	date: string
+}
+
+export interface TabItem {
+	id: string
+	label: string
+	content: string
+}
+
+export interface StatItem {
+	id: string
+	label: string
+	value: string
+	bgColor: string
+	textColor: string
+	icon: string
+}
+
+export interface UpdateItem extends BaseItem {
+	exclusive?: boolean
+}
+
+export interface TimelineEvent extends BaseItem {
+	status: 'completed' | 'pending'
+}
+
+export interface MediaItem {
+	id: string
+	type: 'image' | 'video'
+	src: string
+	alt: string
+}
+
+export interface Highlight {
+	id: string
+	label: string
+	value: string
+	icon: string
+}
+
+export interface AboutProjectProps {
+	id: string
+	description: string
+	highlights: Highlight[]
+	updates: BaseItem[]
+	titleAboveHighlights: boolean
+}
