@@ -10,7 +10,7 @@ import {
 	mockImpactMetrics,
 	mockProjects,
 } from '~/lib/mock-data/mock-user-dashboard'
-import type { ImpactMetric, Project } from '~/lib/types/user-dashboard'
+import type { ImpactMetric, ProjectDetails } from '~/lib/types/user-dashboard'
 
 export function UserDashboard() {
 	return (
@@ -111,7 +111,7 @@ export function UserDashboard() {
 							</div>
 						</div>
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							{mockProjects.map((project: Project) => (
+							{mockProjects.map((project: ProjectDetails) => (
 								<ProjectCard key={project.id} {...project} />
 							))}
 						</div>
@@ -128,7 +128,7 @@ export function UserDashboard() {
 							</Button>
 						</div>
 						<div className="space-y-4">
-							{mockProjects.map((project: Project) => {
+							{mockProjects.map((project: ProjectDetails) => {
 								const formattedDate = new Date().toLocaleDateString(undefined, {
 									year: 'numeric',
 									month: 'long',
