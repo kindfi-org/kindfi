@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.1.9",
+    "@nanostores/react": "ai/react",
     "ai": "^4.1.16",
     "next": "15.1.6",
     "openai-edge": "^1.2.2",
