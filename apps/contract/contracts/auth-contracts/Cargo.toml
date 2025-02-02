@@ -1,0 +1,8 @@
+[package]
+name = "kindfi_auth"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+auth_controller = { path = "./contracts/auth-controller" }
+account_factory = { path = "./contracts/account-factory" }
