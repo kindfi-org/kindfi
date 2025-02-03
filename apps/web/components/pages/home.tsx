@@ -1,5 +1,11 @@
 import dynamic from 'next/dynamic'
-import type { Money, Percentage, Project } from '~/lib/types'
+import {
+	type Money,
+	type Percentage,
+	type Project,
+	createMoney,
+	createPercentage,
+} from '~/lib/types'
 
 const Hero = dynamic(
 	() => import('~/components/sections/home/hero').then((mod) => mod.Hero),
@@ -103,14 +109,11 @@ const projects: Project[] = [
 		title: 'Forest Restoration Initiative',
 		description:
 			'Restore and reforest areas devastated by uncontrolled deforestation. Your support helps rebuild ecosystems and fight climate change.',
-		currentAmount: { __brand: 'money', value: 54000 } as unknown as Money,
-		targetAmount: { __brand: 'money', value: 60000 } as unknown as Money,
+		currentAmount: createMoney(54000),
+		targetAmount: createMoney(60000),
 		investors: 35,
-		minInvestment: { __brand: 'money', value: 10 } as unknown as Money,
-		percentageComplete: {
-			__brand: 'percentage',
-			value: 90,
-		} as unknown as Percentage,
+		minInvestment: createMoney(10),
+		percentageComplete: createPercentage(90),
 		tags: [
 			{ id: 'environment-tag-id', text: 'ENVIRONMENT' },
 			{ id: 'ecological-tag-id', text: 'ECOLOGICAL' },
@@ -124,14 +127,11 @@ const projects: Project[] = [
 		title: 'Rural Animal Shelter',
 		description:
 			'Provide care and shelter to homeless animals in rural communities. Help us create safe havens for animals in need.',
-		currentAmount: { __brand: 'money', value: 15500 } as unknown as Money,
-		targetAmount: { __brand: 'money', value: 20000 } as unknown as Money,
+		currentAmount: createMoney(15500),
+		targetAmount: createMoney(20000),
 		investors: 22,
-		minInvestment: { __brand: 'money', value: 8 } as unknown as Money,
-		percentageComplete: {
-			__brand: 'percentage',
-			value: 77,
-		} as unknown as Percentage,
+		minInvestment: createMoney(8),
+		percentageComplete: createPercentage(77),
 		tags: [
 			{ id: 'animals-tag-id', text: 'ANIMALS' },
 			{ id: 'care-tag-id', text: 'CARE' },
@@ -145,14 +145,11 @@ const projects: Project[] = [
 		title: 'Natural Disasters Human Aid',
 		description:
 			'Provide critical support to communities affected by natural disasters. From emergency supplies to long-term rebuilding efforts, join us in bringing hope and recovery to those in need.',
-		currentAmount: { __brand: 'money', value: 30000 } as unknown as Money,
-		targetAmount: { __brand: 'money', value: 50000 } as unknown as Money,
+		currentAmount: createMoney(30000),
+		targetAmount: createMoney(50000),
 		investors: 28,
-		minInvestment: { __brand: 'money', value: 20 } as unknown as Money,
-		percentageComplete: {
-			__brand: 'percentage',
-			value: 60,
-		} as unknown as Percentage,
+		minInvestment: createMoney(20),
+		percentageComplete: createPercentage(60),
 		tags: [
 			{ id: 'humanitarian-tag-id', text: 'HUMANITARIAN' },
 			{ id: 'disaster-tag-id', text: 'DISASTER RELIEF' },
@@ -166,14 +163,11 @@ const projects: Project[] = [
 		title: 'Preserving Indigenous Crafts',
 		description:
 			'Support the preservation of indigenous craftsmanship in Costa Rica. Your contributions protect traditional techniques and cultural heritage.',
-		currentAmount: { __brand: 'money', value: 34000 } as unknown as Money,
-		targetAmount: { __brand: 'money', value: 50000 } as unknown as Money,
+		currentAmount: createMoney(34000),
+		targetAmount: createMoney(50000),
 		investors: 29,
-		minInvestment: { __brand: 'money', value: 15 } as unknown as Money,
-		percentageComplete: {
-			__brand: 'percentage',
-			value: 68,
-		} as unknown as Percentage,
+		minInvestment: createMoney(15),
+		percentageComplete: createPercentage(68),
 		tags: [
 			{ id: 'culture-tag-id', text: 'CULTURE' },
 			{ id: 'indigenous-tag-id', text: 'INDIGENOUS' },
@@ -187,14 +181,11 @@ const projects: Project[] = [
 		title: 'Water for Rural Communities',
 		description:
 			'Provide access to safe drinking water in underserved rural areas. Help us install water purification systems to improve health and livelihoods.',
-		currentAmount: { __brand: 'money', value: 18500 } as unknown as Money,
-		targetAmount: { __brand: 'money', value: 25000 } as unknown as Money,
+		currentAmount: createMoney(18500),
+		targetAmount: createMoney(25000),
 		investors: 20,
-		minInvestment: { __brand: 'money', value: 12 } as unknown as Money,
-		percentageComplete: {
-			__brand: 'percentage',
-			value: 74,
-		} as unknown as Percentage,
+		minInvestment: createMoney(20),
+		percentageComplete: createPercentage(74),
 		tags: [
 			{ id: 'water-tag-id', text: 'WATER' },
 			{ id: 'health-tag-id', text: 'HEALTH' },
@@ -208,14 +199,11 @@ const projects: Project[] = [
 		title: 'Empowering Education',
 		description:
 			'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for the next generation.',
-		currentAmount: { __brand: 'money', value: 40000 } as unknown as Money,
-		targetAmount: { __brand: 'money', value: 55000 } as unknown as Money,
+		currentAmount: createMoney(40000),
+		targetAmount: createMoney(55000),
 		investors: 40,
-		minInvestment: { __brand: 'money', value: 10 } as unknown as Money,
-		percentageComplete: {
-			__brand: 'percentage',
-			value: 73,
-		} as unknown as Percentage,
+		minInvestment: createMoney(10),
+		percentageComplete: createPercentage(73),
 		tags: [
 			{ id: 'education-tag-id', text: 'EDUCATION' },
 			{ id: 'children-tag-id', text: 'CHILDREN' },
@@ -229,14 +217,11 @@ const projects: Project[] = [
 		title: 'Mobile Clinics',
 		description:
 			'Bring essential healthcare services to remote areas through mobile clinics. Your support helps save lives and build healthier communities.',
-		currentAmount: { __brand: 'money', value: 32000 } as unknown as Money,
-		targetAmount: { __brand: 'money', value: 45000 } as unknown as Money,
+		currentAmount: createMoney(32000),
+		targetAmount: createMoney(45000),
 		investors: 30,
-		minInvestment: { __brand: 'money', value: 20 } as unknown as Money,
-		percentageComplete: {
-			__brand: 'percentage',
-			value: 71,
-		} as unknown as Percentage,
+		minInvestment: createMoney(20),
+		percentageComplete: createPercentage(71),
 		tags: [
 			{ id: 'healthcare-tag-id', text: 'HEALTHCARE' },
 			{ id: 'community-tag-id', text: 'COMMUNITY' },
