@@ -47,6 +47,9 @@ impl Contract {
             .with_current_contract(salt)
             .deploy_v2(wasm_hash, [pk.to_val()]);
 
+        // track publickeys to generated addresses
+        env.storage.instance().set(&pk, &address);
+
         Ok(address)
     }
 }
