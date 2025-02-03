@@ -1,4 +1,5 @@
 'use client'
+import type { NavigationItem } from '~/lib/types'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -14,7 +15,7 @@ import {
 } from '~/components/base/navigation-menu'
 import { cn } from '~/lib/utils'
 
-const projects = [
+const projects: NavigationItem[] = [
 	{
 		title: 'Explore Projects',
 		href: '/projects',
@@ -32,7 +33,7 @@ const projects = [
 	},
 ]
 
-const resources = [
+const resources: NavigationItem[] = [
 	{
 		title: 'Learn Web3',
 		href: '/learn',
@@ -55,17 +56,27 @@ export function Navigation() {
 	const pathname = usePathname()
 
 	return (
-		<NavigationMenu>
+		<NavigationMenu aria-label="Main navigation">
 			<NavigationMenuList>
 				<NavigationMenuItem>
-					<NavigationMenuTrigger>Projects</NavigationMenuTrigger>
-					<NavigationMenuContent>
-						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+					<NavigationMenuTrigger
+						aria-label="Projects menu"
+						label="Projects menu"
+					>
+						Projects
+					</NavigationMenuTrigger>
+					<NavigationMenuContent aria-label="Project options list">
+						<ul
+							className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]"
+							role="menu"
+						>
 							{projects.map((project) => (
 								<ListItem
 									key={project.title}
 									title={project.title}
 									href={project.href}
+									role="menuitem"
+									aria-label={`${project.title}: ${project.description}`}
 								>
 									{project.description}
 								</ListItem>
@@ -75,14 +86,25 @@ export function Navigation() {
 				</NavigationMenuItem>
 
 				<NavigationMenuItem>
-					<NavigationMenuTrigger>Resources</NavigationMenuTrigger>
-					<NavigationMenuContent>
-						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+					<NavigationMenuTrigger
+						aria-label="Resources menu"
+						label="Resources menu"
+					>
+						Resources
+					</NavigationMenuTrigger>
+
+					<NavigationMenuContent aria-label="Resource options list">
+						<ul
+							className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]"
+							role="menu"
+						>
 							{resources.map((resource) => (
 								<ListItem
 									key={resource.title}
 									title={resource.title}
 									href={resource.href}
+									role="menuitem"
+									aria-label={`${resource.title}: ${resource.description}`}
 								>
 									{resource.description}
 								</ListItem>
@@ -98,6 +120,8 @@ export function Navigation() {
 								navigationMenuTriggerStyle(),
 								pathname === '/about' && 'text-primary',
 							)}
+							aria-label="About KindFi"
+							aria-current={pathname === '/about' ? 'page' : undefined}
 						>
 							About KindFi
 						</NavigationMenuLink>

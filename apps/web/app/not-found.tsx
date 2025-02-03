@@ -79,13 +79,12 @@ export default function Custom404() {
 				{/* Animated icons */}
 				<div className="flex justify-center gap-8 mb-8">
 					{[
-						{ Icon: Heart, color: 'text-red-500' },
-						{ Icon: Globe, color: 'text-green-500' },
-						{ Icon: Users, color: 'text-blue-500' },
-					].map(({ Icon, color }, index) => (
+						{ key: 'heart-icon', Icon: Heart, color: 'text-red-500' },
+						{ key: 'globe-icon', Icon: Globe, color: 'text-green-500' },
+						{ key: 'users-icon', Icon: Users, color: 'text-blue-500' },
+					].map(({ Icon, color, key }, index) => (
 						<motion.div
-							// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-							key={index}
+							key={key}
 							variants={iconVariants}
 							initial="initial"
 							animate="animate"

@@ -1,4 +1,4 @@
-export async function GET(req: Request) {
+export async function GET() {
 	return new Response(
 		JSON.stringify({ message: 'Hello from the foo route!' }),
 		{
@@ -8,7 +8,7 @@ export async function GET(req: Request) {
 	)
 }
 
-export async function POST(_req: Request) {
+export async function POST() {
 	return new Response(JSON.stringify({ message: 'Method Not Allowed' }), {
 		status: 405,
 		headers: { 'Content-Type': 'application/json' },

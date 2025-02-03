@@ -1,3 +1,5 @@
+'use client'
+
 import { Lock, Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { signUpAction } from '~/app/actions'
@@ -10,24 +12,20 @@ import {
 } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
-import type { Message } from '~/components/form-message'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { useFormValidation } from '~/hooks/use-form-validation'
 
-export default async function Signup(props: {
-	searchParams: Promise<Message>
-}) {
-	// Show success message if registration was successful
-	// if (searchParams.success) {
-	//   return (
-	//     <div className="w-full flex items-center justify-center p-4">
-	//       <Card className="w-full max-w-md">
-	//         <CardContent className="pt-6">
-	//           <FormMessage message={searchParams} />
-	//         </CardContent>
-	//       </Card>
-	//     </div>
-	//   );
-	// }
+export default function Signup() {
+	const {
+		isEmailInvalid,
+		isPasswordInvalid,
+		handleValidation,
+		resetValidation,
+	} = useFormValidation({
+		email: true,
+		password: true,
+		minLength: 6,
+	})
 
 	return (
 		<AuthLayout>
@@ -46,12 +44,21 @@ export default async function Signup(props: {
 					</p>
 				</CardHeader>
 				<CardContent>
-					<form className="space-y-4">
+					<form
+						className="space-y-4"
+						aria-label="Sign up"
+						onSubmit={resetValidation}
+					>
 						<div className="space-y-4">
 							<div className="space-y-2">
-								<Label htmlFor="email">Email</Label>
+								<Label htmlFor="email" id="email-label">
+									Email
+								</Label>
 								<div className="relative">
-									<Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+									<Mail
+										className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
+										aria-hidden="true"
+									/>
 									<Input
 										id="email"
 										name="email"
@@ -59,14 +66,29 @@ export default async function Signup(props: {
 										placeholder="you@example.com"
 										className="pl-10"
 										required
+										aria-labelledby="email-label"
+										aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
+										aria-invalid={isEmailInvalid}
+										onChange={handleValidation}
 									/>
+									<span id="email-description" className="sr-only">
+										Enter your email address to create your account
+									</span>
+									<span id="email-error" className="sr-only">
+										Please enter a valid email address
+									</span>
 								</div>
 							</div>
 
 							<div className="space-y-2">
-								<Label htmlFor="password">Password</Label>
+								<Label htmlFor="password" id="password-label">
+									Password
+								</Label>
 								<div className="relative">
-									<Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+									<Lock
+										className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
+										aria-hidden="true"
+									/>
 									<Input
 										id="password"
 										name="password"
@@ -75,11 +97,21 @@ export default async function Signup(props: {
 										className="pl-10"
 										required
 										minLength={6}
+										aria-labelledby="password-label"
+										aria-describedby={`${isPasswordInvalid ? 'password-requirements' : 'password-description'}`}
+										aria-invalid={isPasswordInvalid}
+										onChange={handleValidation}
 									/>
+									<span id="password-description" className="sr-only">
+										Create a password for your account
+									</span>
+									<p
+										id="password-requirements"
+										className="text-xs text-muted-foreground mt-1"
+									>
+										Password must be at least 6 characters long
+									</p>
 								</div>
-								<p className="text-xs text-muted-foreground">
-									Must be at least 6 characters long
-								</p>
 							</div>
 
 							<Button className="w-full" formAction={signUpAction}>
