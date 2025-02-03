@@ -1,7 +1,13 @@
+import type { ReactNode } from 'react'
+/** Interface for category items in hero section */
 export interface Category {
+	/** Unique identifier for the category */
 	id: string
-	icon: React.ReactNode
+	/** Icon component for the category */
+	icon: ReactNode
+	/** Display label for the category */
 	label: string
+	/** Tailwind CSS color classes for styling */
 	color: string
 }
 

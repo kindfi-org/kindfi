@@ -39,7 +39,7 @@ export async function initializeEscrowContract(
 		// Generate unique IDs
 		const engagementId = generateUniqueId()
 		const contributionId = generateUniqueId()
-    
+
 		// Initialize contract on Stellar
 		const payerAccount = new Account(
 			Keypair.fromSecret(params.parties.payer).publicKey(),
