@@ -1,8 +1,8 @@
-export class AppError extends Error {
+export class AppError<T = unknown> extends Error {
 	public statusCode: number
 	public details?: T
 
-	constructor(message: string, statusCode: number, details?: any) {
+	constructor(message: string, statusCode: number, details?: T) {
 		super(message)
 		this.statusCode = statusCode
 		this.details = details as T

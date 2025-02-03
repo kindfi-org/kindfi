@@ -1,14 +1,17 @@
 import {
+	Account,
 	Asset,
 	Keypair,
 	Networks,
 	Operation,
-	Predicate,
-	Server,
 	TransactionBuilder,
+	type xdr,
 } from 'stellar-sdk'
-import { AppError } from '../errors'
+import Predicate from 'stellar-sdk'
+import Server from 'stellar-sdk'
+import { AppError } from '../error'
 import type { EscrowContractParams } from '../types/escrow'
+import { getAccountSequence } from '../utils'
 import { generateUniqueId } from '../utils/id'
 
 interface EscrowContractResult {
@@ -21,7 +24,9 @@ interface EscrowContractResult {
 }
 
 export async function initializeEscrowContract(
-	params: EscrowContractParams,
+	params: EscrowContractParams & {
+		parties: { payer: string; receiver: string }
+	},
 	secretKey: string,
 ): Promise<EscrowContractResult> {
 	try {
@@ -36,7 +41,11 @@ export async function initializeEscrowContract(
 		const contributionId = generateUniqueId()
 
 		// Initialize contract on Stellar
-		const transaction = new TransactionBuilder(params.parties.payer, {
+		const payerAccount = new Account(
+			Keypair.fromSecret(params.parties.payer).publicKey(),
+			await getAccountSequence(params.parties.payer).toString(),
+		)
+		const transaction = new TransactionBuilder(payerAccount, {
 			fee: '100',
 			networkPassphrase: Networks.TESTNET, // or MAINNET for production
 		})
@@ -51,6 +60,9 @@ export async function initializeEscrowContract(
 								Predicate.beforeRelativeTime('12096000'), // 140 days
 								Predicate.not(Predicate.beforeAbsoluteTime('0')),
 							]),
+							toXDRObject: (): xdr.Claimant => {
+								throw new Error('Function not implemented.')
+							},
 						},
 					],
 				}),
@@ -62,6 +74,7 @@ export async function initializeEscrowContract(
 		transaction.sign(Keypair.fromSecret(secretKey))
 
 		// Submit the transaction to the Stellar network
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
 		const server = new Server(process.env.STELLAR_NETWORK_URL!) // Set your Stellar network URL
 		const result = await server.submitTransaction(transaction)
 

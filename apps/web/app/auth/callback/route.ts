@@ -1,27 +1,70 @@
-// app/auth/callback/route.ts
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { useAuthCallback } from '~/hooks/use-auth-callback'
-import { AuthErrorHandler } from '~/lib/auth/error-handler'
-import { Logger } from '~/lib/logger'
 import { createClient } from '~/lib/supabase/server'
+import { isValidRedirectUrl } from '~/lib/config/validate-url'
+import { useAuthErrorHandler } from '~/hooks/use-auth-error-handler'
+
 
 export async function GET(request: NextRequest) {
+	const { logger, errorHandler } = useAuthErrorHandler();
 	const requestUrl = new URL(request.url)
-	const supabase = await createClient()
+	const code = requestUrl.searchParams.get('code')
+	const redirectUrl = requestUrl.searchParams.get('redirect')
 
-	const { success, redirectPath, error } = await useAuthCallback({
-		code: requestUrl.searchParams.get('code'),
-		redirectTo: requestUrl.searchParams.get('redirect_to'),
-		logger: new Logger(),
-		errorHandler: new AuthErrorHandler(new Logger()),
-		supabase,
-		defaultRedirect: '/dashboard',
+	logger.info({
+		eventType: 'AUTH_CALLBACK_REQUEST',
+		url: requestUrl.toString(),
+		redirectUrl,
+		hasCode: !!code,
+		timestamp: new Date().toISOString(),
 	})
 
-	const fullRedirectUrl = error
-		? `${requestUrl.origin}/sign-in?error=${encodeURIComponent(error)}`
-		: `${requestUrl.origin}${redirectPath}`
+	// If redirect URL is missing or invalid, return a JSON error
+	if (!redirectUrl || !isValidRedirectUrl(redirectUrl)) {
+		logger.warn({
+			eventType: 'INVALID_REDIRECT_URL',
+			redirectUrl,
+			timestamp: new Date().toISOString(),
+		})
+		return NextResponse.json({ error: 'Invalid redirect URL' }, { status: 400 })
+	}
 
-	return NextResponse.redirect(fullRedirectUrl)
+	// Exchange the code for a Supabase session if provided
+	if (code) {
+		try {
+			const supabase = await createClient()
+			await supabase.auth.exchangeCodeForSession(code)
+
+			logger.info({
+				eventType: 'CODE_EXCHANGE_SUCCESS',
+				timestamp: new Date().toISOString(),
+			})
+		} catch (error) {
+			const response = errorHandler.handleAuthError(
+				error as any,
+				'exchangeCodeForSession'
+			)
+
+			// Add error parameters to the redirect URL
+			const finalRedirectUrl = new URL(redirectUrl)
+			finalRedirectUrl.searchParams.set('error', response.error ?? 'unknown_error')
+
+			// Redirect with error parameters
+			logger.info({
+				eventType: 'AUTH_ERROR_REDIRECT',
+				redirectUrl: finalRedirectUrl.toString(),
+				errorMessage: response.error,
+				timestamp: new Date().toISOString(),
+			})
+			return NextResponse.redirect(finalRedirectUrl)
+		}
+	}
+
+	// Redirect to the validated URL
+	logger.info({
+		eventType: 'SUCCESSFUL_REDIRECT',
+		redirectUrl,
+		timestamp: new Date().toISOString(),
+	})
+	return NextResponse.redirect(redirectUrl)
 }

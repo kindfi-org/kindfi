@@ -1,50 +1,73 @@
-// app/auth/confirm/route.ts
+import type { EmailOtpType } from '@supabase/supabase-js'
+import { redirect } from 'next/navigation'
 import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
-import { useAuthCallback } from '~/hooks/use-auth-callback'
-import { AuthErrorHandler } from '~/lib/auth/error-handler'
-import { Logger } from '~/lib/logger'
+import { useAuthErrorHandler } from '~/hooks/use-auth-error-handler'
 import { createClient } from '~/lib/supabase/server'
 
-const logger = new Logger()
-const errorHandler = new AuthErrorHandler(logger)
+
 
 export async function GET(request: NextRequest) {
-	const requestUrl = new URL(request.url)
-	const tokenHash = requestUrl.searchParams.get('token_hash')
-	const type = requestUrl.searchParams.get('type')
-	const next = requestUrl.searchParams.get('next') ?? '/dashboard'
+const { logger, errorHandler } = useAuthErrorHandler()	
+  const { searchParams } = new URL(request.url)
+  const tokenHash = searchParams.get('token_hash')
+  const type = searchParams.get('type') as EmailOtpType | null
+  const next = searchParams.get('next') ?? '/'
 
-	const supabase = await createClient()
+  logger.info({
+    eventType: 'EMAIL_VERIFICATION_REQUEST',
+    hasToken: !!tokenHash,
+    type,
+    timestamp: new Date().toISOString(),
+  })
 
-	const { success, redirectPath, error } = await useAuthCallback({
-		code: tokenHash,
-		redirectTo: next,
-		logger,
-		errorHandler,
-		supabase,
-		onError: (errMsg) => {
-			logger.error({
-				eventType: 'OTP_VERIFICATION_FAILED',
-				error: errMsg,
-				type,
-				timestamp: new Date().toISOString(),
-			})
-		},
-	})
+  if (tokenHash && type) {
+    try {
+      const supabase = await createClient()
+      const { error } = await supabase.auth.verifyOtp({
+        type,
+        token_hash: tokenHash,
+      })
 
-	if (!success) {
-		return NextResponse.redirect(
-			`${requestUrl.origin}/sign-in?error=${encodeURIComponent(error || 'An unexpected error occurred')}`,
-		)
-	}
+      if (error) {
+        const response = errorHandler.handleAuthError(error, 'verifyOtp')
+        
+        logger.error({
+          eventType: 'OTP_VERIFICATION_ERROR',
+          errorMessage: response.error,
+          type,
+          timestamp: new Date().toISOString(),
+        })
 
-	logger.info({
-		eventType: 'OTP_VERIFICATION_SUCCESS',
-		type,
-		next,
-		timestamp: new Date().toISOString(),
-	})
+        // Add error to the redirect URL
+        const errorUrl = new URL('/error', request.url)
+        errorUrl.searchParams.set('reason', 'verification_failed')
+        errorUrl.searchParams.set('error', response.error ?? 'unknown_error')
+        redirect(errorUrl.toString())
+      }
 
-	return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
+      logger.info({
+        eventType: 'OTP_VERIFICATION_SUCCESS',
+        type,
+        timestamp: new Date().toISOString(),
+      })
+
+      redirect(next)
+    } catch (error) {
+      logger.error({
+        eventType: 'UNEXPECTED_ERROR',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      })
+      redirect('/error?reason=unexpected_error')
+    }
+  }
+
+  logger.warn({
+    eventType: 'INVALID_VERIFICATION_REQUEST',
+    hasToken: !!tokenHash,
+    hasType: !!type,
+    timestamp: new Date().toISOString(),
+  })
+
+  redirect('/error?reason=missing_parameters')
 }
