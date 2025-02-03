@@ -27,7 +27,12 @@ impl Contract {
         env.storage().instance().set(&AUTH_CONTRACT, &auth_contract);
     }
 
-    pub fn deploy(env: Env, salt: BytesN<32>, pk: BytesN<65>) -> Result<Address, Error> {
+    pub fn deploy(
+        env: Env,
+        salt: BytesN<32>,
+        id: BytesN<65>,
+        pk: BytesN<65>,
+    ) -> Result<Address, Error> {
         let auth_contract = env
             .storage()
             .instance()
@@ -42,13 +47,10 @@ impl Contract {
             .get::<Symbol, BytesN<32>>(&STORAGE_KEY_WASM_HASH)
             .ok_or(Error::StoragKeyError)?;
 
-        let address = env
-            .deployer()
-            .with_current_contract(salt)
-            .deploy_v2(wasm_hash, [pk.to_val()]);
-
-        // track publickeys to generated addresses
-        env.storage.instance().set(&pk, &address);
+        let address = env.deployer().with_current_contract(salt).deploy_v2(
+            wasm_hash,
+            [id.to_val(), pk.to_val(), auth_contract.to_val()],
+        );
 
         Ok(address)
     }

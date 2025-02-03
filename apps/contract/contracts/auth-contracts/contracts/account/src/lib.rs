@@ -1,4 +1,5 @@
 #![no_std]
+use ed25519_dalek::PublicKey;
 use soroban_sdk::{
     auth::{Context, CustomAccountInterface},
     contract, contracterror, contractimpl, contracttype,
@@ -14,13 +15,16 @@ pub struct Contract;
 #[contracterror]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Error {
-    ClientDataJsonChallengeIncorrect = 3,
-    Secp256r1PublicKeyParse = 4,
-    Secp256r1SignatureParse = 5,
-    Secp256r1VerifyFailed = 6,
-    JsonParseError = 7,
-    DeviceNotFound = 8,
-    NotInitiated = 9,
+    ClientDataJsonChallengeIncorrect = 1,
+    Secp256r1PublicKeyParse = 2,
+    Secp256r1SignatureParse = 3,
+    Secp256r1VerifyFailed = 4,
+    JsonParseError = 5,
+    DeviceAlreadySet = 6,
+    DeviceNotFound = 7,
+    NotInitiated = 8,
+    RecoveryAddressSet = 9,
+    AuthContractNotSet = 10,
 }
 
 #[contracttype]
@@ -44,10 +48,30 @@ struct ClientDataJson<'a> {
 }
 
 const STORAGE_KEY_DEVICES: Symbol = symbol_short!("devices");
+const RECOVERY_ADDRESS: Symbol = symbol_short!("recovery");
+const AUTH_CONTRACT: Symbol = symbol_short!("auth");
 
 #[contractimpl]
 impl Contract {
-    pub fn add_device(env: Env, device_id: BytesN<32>, public_key: BytesN<65>) {
+    pub fn constructor(
+        env: Env,
+        device_id: BytesN<32>,
+        public_key: BytesN<65>,
+        auth_contract: Address,
+    ) {
+        let devices = Vec::new(&env).push(DevicePublicKey {
+            device_id,
+            public_key,
+        });
+        env.storage().instance().set(&STORAGE_KEY_DEVICES, &devices);
+        env.storage().instance().set(&AUTH_CONTRACT, &auth_contract);
+    }
+
+    pub fn add_device(
+        env: Env,
+        device_id: BytesN<32>,
+        public_key: BytesN<65>,
+    ) -> Result<(), Error> {
         env.current_contract_address().require_auth();
         let mut devices: Vec<DevicePublicKey> = env
             .storage()
@@ -55,15 +79,22 @@ impl Contract {
             .get(&STORAGE_KEY_DEVICES)
             .unwrap_or(Vec::new(&env));
 
+        if devices.iter().any(|device| device.device_id == device_id) {
+            return Err(Error::DeviceAlreadySet);
+        }
+
         devices.push(DevicePublicKey {
             device_id,
             public_key,
         });
         env.storage().instance().set(&STORAGE_KEY_DEVICES, &devices);
+
+        Ok(())
     }
 
     pub fn remove_device(env: Env, device_id: BytesN<32>) -> Result<(), Error> {
         env.current_contract_address().require_auth();
+
         let mut devices: Vec<DevicePublicKey> = env
             .storage()
             .instance()
@@ -82,6 +113,65 @@ impl Contract {
         env.storage()
             .instance()
             .set(&STORAGE_KEY_DEVICES, &new_devices);
+        Ok(())
+    }
+
+    pub fn add_recovery_address(env: Env, address: Address) -> Result<(), Error> {
+        env.current_contract_address().require_auth();
+
+        if env.storage().instance().has(&RECOVERY_ADDRESS) {
+            return Err(Error::RecoveryAddressSet);
+        }
+
+        env.storage().instance().set(&RECOVERY_ADDRESS, &address);
+
+        Ok(())
+    }
+
+    pub fn update_recovery_address(env: Env, address: Address) -> Result<(), Error> {
+        // add multisig authentication from parent auth contract for recovery update
+        let auth_contract = env
+            .storage()
+            .instance()
+            .get::<Symbol, Address>(&AUTH_CONTRACT)
+            .ok_or(Error::AuthContractNotSet)?;
+
+        auth_contract.require_auth();
+
+        env.storage().instance().set(&RECOVERY_ADDRESS, &address);
+
+        Ok(())
+    }
+
+    pub fn recover_account(
+        env: Env,
+        new_device_id: BytesN<32>,
+        new_public_key: BytesN<65>,
+    ) -> Result<(), Error> {
+        // add multisig authentication from parent auth contract for recovery update
+        let auth_contract = env
+            .storage()
+            .instance()
+            .get::<Symbol, Address>(&AUTH_CONTRACT)
+            .ok_or(Error::AuthContractNotSet)?;
+
+        auth_contract.require_auth();
+
+        let recovery_address = env
+            .storage()
+            .instance()
+            .get::<Symbol, Address>(&RECOVERY_ADDRESS)
+            .unwrap();
+
+        recovery_address.require_auth();
+
+        let devices = Vec::new(&env).push(DevicePublicKey {
+            device_id: new_device_id,
+            public_key: new_public_key,
+        });
+
+        env.storage().instance().set(&STORAGE_KEY_DEVICES, &devices);
+
         Ok(())
     }
 }
