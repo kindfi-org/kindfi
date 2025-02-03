@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-auth_controller = { path = "./contracts/auth-controller" }
-account_factory = { path = "./contracts/account-factory" }
-account_contract = { path = "./contracts/account" }
+auth_controller = { path = "./contracts/auth-controller", version = "0.1.0" }
+account_factory = { path = "./contracts/account-factory", version = "0.1.0" }
+account_contract = { path = "./contracts/account", version = "0.1.0" }

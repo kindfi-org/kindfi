@@ -1,5 +1,4 @@
 #![no_std]
-use ed25519_dalek::PublicKey;
 use soroban_sdk::{
     auth::{Context, CustomAccountInterface},
     contract, contracterror, contractimpl, contracttype,
@@ -16,15 +15,14 @@ pub struct Contract;
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Error {
     ClientDataJsonChallengeIncorrect = 1,
-    Secp256r1PublicKeyParse = 2,
-    Secp256r1SignatureParse = 3,
-    Secp256r1VerifyFailed = 4,
-    JsonParseError = 5,
-    DeviceAlreadySet = 6,
-    DeviceNotFound = 7,
-    NotInitiated = 8,
-    RecoveryAddressSet = 9,
-    AuthContractNotSet = 10,
+    Secp256r1VerifyFailed = 2,
+    JsonParseError = 3,
+    DeviceAlreadySet = 4,
+    DeviceNotFound = 5,
+    NotInitiated = 6,
+    RecoveryAddressSet = 7,
+    RecoveryAddressNotSet = 8,
+    AuthContractNotSet = 9,
 }
 
 #[contracttype]
@@ -161,7 +159,7 @@ impl Contract {
             .storage()
             .instance()
             .get::<Symbol, Address>(&RECOVERY_ADDRESS)
-            .unwrap();
+            .ok_or(Error::RecoveryAddressNotSet);
 
         recovery_address.require_auth();
 

@@ -1,6 +1,4 @@
 #![no_std]
-use core::ops::Add;
-
 use soroban_sdk::{
     auth, contract, contracterror, contractimpl, symbol_short, vec, Address, BytesN, Env, Symbol,
 };
@@ -11,7 +9,7 @@ pub struct Contract;
 #[contracterror]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Error {
-    StoragKeyError = 1,
+    StorageKeyError = 1,
 }
 
 const STORAGE_KEY_WASM_HASH: Symbol = symbol_short!("hash");
@@ -45,7 +43,7 @@ impl Contract {
             .storage()
             .instance()
             .get::<Symbol, BytesN<32>>(&STORAGE_KEY_WASM_HASH)
-            .ok_or(Error::StoragKeyError)?;
+            .ok_or(Error::StorageKeyError)?;
 
         let address = env.deployer().with_current_contract(salt).deploy_v2(
             wasm_hash,

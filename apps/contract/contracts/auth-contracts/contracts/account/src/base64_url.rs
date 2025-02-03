@@ -38,6 +38,11 @@
 const ALPHABET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 pub fn encode(dst: &mut [u8], src: &[u8]) {
+    let required_len = (src.len() + 2) / 3 * 4;
+    if dst.len() < required_len {
+        panic!("destination buffer too small");
+    }
+
     let mut di: usize = 0;
     let mut si: usize = 0;
     let n = (src.len() / 3) * 3;

@@ -1,4 +1,5 @@
 #![no_std]
+use core::cmp::min;
 use soroban_sdk::{contract, contractimpl, panic_with_error, vec, Env, String, Vec};
 
 #[contracterror]
@@ -52,7 +53,7 @@ impl AuthController {
         }
 
         let valid_thresholds = 0..signers.len() + 1;
-        if !valid_thresholds.contains(&DataKey::DefaultThreshold) {
+        if !valid_thresholds.contains(&default_threshold) {
             panic_with_error!(&env, Error::InvalidThreshold);
         }
 
