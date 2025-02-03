@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 auth_controller = { path = "./contracts/auth-controller" }
 account_factory = { path = "./contracts/account-factory" }
+account_contract = { path = "./contracts/account" }
