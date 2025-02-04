@@ -1,7 +1,7 @@
 #![no_std]
 use soroban_sdk::{
     auth::{Context, CustomAccountInterface},
-    contract, contracterror, contractimpl, contracttype,
+    contract, contracterror, contractimpl, contracttype, panic_with_error
     crypto::Hash,
     symbol_short, Bytes, BytesN, Env, Symbol, Vec,
 };
@@ -73,7 +73,7 @@ impl Contract {
         env: Env,
         device_id: BytesN<32>,
         public_key: BytesN<65>,
-    ) -> Result<(), Error> {
+    ) {
         env.current_contract_address().require_auth();
         let mut devices: Vec<DevicePublicKey> = env
             .storage()
@@ -82,7 +82,7 @@ impl Contract {
             .unwrap_or(Vec::new(&env));
 
         if devices.iter().any(|device| device.device_id == device_id) {
-            return Err(Error::DeviceAlreadySet);
+            panic_with_error!(&env, Error::DeviceAlreadySet);
         }
 
         devices.push(DevicePublicKey {
@@ -99,10 +99,9 @@ impl Contract {
                 public_key
             }
         );
-        Ok(())
     }
 
-    pub fn remove_device(env: Env, device_id: BytesN<32>) -> Result<(), Error> {
+    pub fn remove_device(env: Env, device_id: BytesN<32>) {
         env.current_contract_address().require_auth();
 
         let mut devices: Vec<DevicePublicKey> = env
@@ -117,7 +116,7 @@ impl Contract {
             .collect();
 
         if new_devices.len() == devices.len() {
-            return Err(Error::DeviceNotFound);
+            panic_with_error(&env, Error::DeviceNotFound);
         }
 
         env.storage()
@@ -131,15 +130,13 @@ impl Contract {
                 public_key
             }
         );
-
-        Ok(())
     }
 
-    pub fn add_recovery_address(env: Env, address: Address) -> Result<(), Error> {
+    pub fn add_recovery_address(env: Env, address: Address) {
         env.current_contract_address().require_auth();
 
         if env.storage().instance().has(&RECOVERY_ADDRESS) {
-            return Err(Error::RecoveryAddressSet);
+            panic_with_error!(&env, Error::RecoveryAddressSet);
         }
 
         env.storage().instance().set(&RECOVERY_ADDRESS, &address);
@@ -150,11 +147,9 @@ impl Contract {
                 address,
             }
         );
-
-        Ok(())
     }
 
-    pub fn update_recovery_address(env: Env, address: Address) -> Result<(), Error> {
+    pub fn update_recovery_address(env: Env, address: Address) {
         env.current_contract_address().require_auth();
         
         // add multisig authentication from parent auth contract for recovery update
@@ -174,15 +169,13 @@ impl Contract {
                 address,
             }
         );
-
-        Ok(())
     }
 
     pub fn recover_account(
         env: Env,
         new_device_id: BytesN<32>,
         new_public_key: BytesN<65>,
-    ) -> Result<(), Error> {
+    ) {
         // add multisig authentication from parent auth contract for recovery update
         let auth_contract = env
             .storage()
@@ -214,8 +207,6 @@ impl Contract {
                 public_key: new_public_key
             }
         );
-
-        Ok(())
     }
 }
 

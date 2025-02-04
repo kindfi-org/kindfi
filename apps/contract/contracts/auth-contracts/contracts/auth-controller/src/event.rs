@@ -6,6 +6,9 @@ pub const INIT: Symbol = symbol_short!("init");
 // Symbol representing account-related events.
 pub const ACCOUNT: Symbol = symbol_short("ACCOUNT");
 
+// Symbol representing factory-related events.
+pub const FACTORY: Symbol = symbol_short("FACTORY");
+
 // Symbol representing signer-related events.
 pub const SIGNER: Symbol = symbol_short("SIGNER");
 
@@ -40,6 +43,23 @@ pub struct SignerAddedEventData {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SignerRemovedEventData {
     pub signer: BytesN<32>,
+}
+
+// Event data for when a account is added along with its associated context.
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct FactoryAddedEventData {
+    pub factory: Address,
+    pub context: Vec<Address>,
+}
+
+
+// Event data for when a account is added along with its associated context.
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct FactoryRemovedEventData {
+    pub factory: Address,
+    pub context: Vec<Address>,
 }
 
 // Event data for when a account is added along with its associated context.

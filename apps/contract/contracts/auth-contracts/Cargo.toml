@@ -7,3 +7,4 @@ edition = "2021"
 auth_controller = { path = "./contracts/auth-controller", version = "0.1.0" }
 account_factory = { path = "./contracts/account-factory", version = "0.1.0" }
 account_contract = { path = "./contracts/account", version = "0.1.0" }
+commons = {path = "./contracts/commons", version = "0.1.0"}

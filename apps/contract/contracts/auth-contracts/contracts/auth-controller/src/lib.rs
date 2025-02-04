@@ -2,10 +2,9 @@
 use core::cmp::min;
 use soroban_sdk::{contract, contractimpl, panic_with_error, vec, Env, String, Vec};
 
-
 use crate::events::{
- INIT, ACCOUNT, SIGNER, SECURITY, ADDED, REMOVED, UPDATE,
- InitEventData, SignerAddedEventData, SignerRemovedEventData, 
+ INIT, ACCOUNT, SIGNER, SECURITY, ADDED, REMOVED, UPDATE, FACTORY,
+ InitEventData, SignerAddedEventData, SignerRemovedEventData, FactoryAddedEventData, FactoryRemovedEventData,
  AccountAddedEventData, AccountRemovedEventData, DefaultThresholdChangedEventData
 };
 
@@ -24,6 +23,9 @@ pub enum Error {
     DuplicateSignature = 1011,
     AccountExists = 1012,
     AccountDoesNotExist = 1013,
+    FactoryExists = 1014,
+    FactoryDoesNotExist = 1015,
+    NotAllowedContract = 1016
 }
 
 /// Declares the SignedMessage structure, containing the public key and signature.
@@ -41,6 +43,7 @@ enum DataKey {
     DefaultThreshold,
     Signers,
     Account(Address),
+    Factory(Address)
 }
 
 pub const THRESHOLD_LIMIT: u32 = 5;
@@ -154,6 +157,34 @@ impl AuthController {
             .unwrap_or(0)
     }
 
+    fn add_factory(env: Env, factory: Address, context: Vec<Address>) {
+        env.current_contract_address().require_auth();
+        for ctx in context.iter() {
+            if env.storage().instance().has(&DataKey::Factory(ctx.clone())) {
+                panic_with_error!(&env, Error::FactoryExists);
+            }
+            env.storage()
+                .instance()
+                .set(&DataKey::Factory(ctx), &factory);
+        }
+
+        env.events()
+            .publish((FACTORY, ADDED), FactoryAddedEventData { factory, context });
+    }
+
+    fn remove_factory(env: Env, factory: Address, context: Vec<Address>) {
+        env.current_contract_address().require_auth();
+        for ctx in context.iter() {
+            if !env.storage().instance().has(&DataKey::Factory(ctx.clone())) {
+                panic_with_error!(&env, Error::FactoryDoesNotExist);
+            }
+            env.storage().instance().remove(&DataKey::Factory(ctx));
+        }
+
+        env.events()
+            .publish((FACTORY, REMOVED), FactoryRemovedEventData { factory, context });
+    }
+
     fn add_account(env: Env, account: Address, context: Vec<Address>) {
         env.current_contract_address().require_auth();
         for ctx in context.iter() {
@@ -234,31 +265,36 @@ impl AuthController {
 
         let num_signers = signed_messages.len();
 
+
+        let default_threshold = env
+            .storage()
+            .instance()
+            .get(&DataKey::DefaultThreshold)
+            .unwrap_or(0);
+
+        if default_threshold > num_signers {
+            panic_with_error!(&env, Error::DefaultThresholdNotMet);
+        }
+
         for ctx in auth_context.iter() {
             match ctx.clone() {
                 Context::Contract(contract_ctx) => {
-                    match env
-                        .storage()
-                        .instance()
-                        .get(&DataKey::Account(contract_ctx.clone().contract))
-                    {
-                        Some(address) => {
-                            let actThreshold = 4;
-                            if actThreshold > num_signers {
-                                panic_with_error!(&env, Error::AccountThresholdNotMet);
-                            }
-                        }
-                        None => {
-                            let default_threshold = env
-                                .storage()
-                                .instance()
-                                .get(&DataKey::DefaultThreshold)
-                                .unwrap_or(0);
-                            if default_threshold > num_signers {
-                                panic_with_error!(&env, Error::DefaultThresholdNotMet);
-                            }
-                        }
-                    };
+                    let is_account =  env
+                    .storage()
+                    .instance()
+                    .get(&DataKey::Account(contract_ctx.clone().contract)).is_some();
+
+                    let is_factory =  env
+                    .storage()
+                    .instance()
+                    .get(&DataKey::Account(contract_ctx.clone().contract)).is_some();
+
+                    let is_current =  contract_ctx.clone().contract == env.current_contract_address;
+
+                    match (is_account, is_factory, is_current) {
+                        (None(_), None(_), None(_)) => panic_with_error!(&env, Error::NotAllowedContract),
+                        _ => continue
+                    }
                 }
                 Context::CreateContractHostFn(_) => (),
             }
