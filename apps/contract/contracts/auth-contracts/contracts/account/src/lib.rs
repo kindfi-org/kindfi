@@ -6,6 +6,10 @@ use soroban_sdk::{
     symbol_short, Bytes, BytesN, Env, Symbol, Vec,
 };
 
+use crate::events::{
+    DeviceAddedEventData, DeviceRemovedEventData, RecoveryAddressAddedData, RecoveryAddressUpdatedData, AccountRecoveredEventData, ACCOUNT, DEVICEADDED, DEVICEREMOVED, RECOVERY 
+};
+
 mod base64_url;
 
 #[contract]
@@ -85,8 +89,16 @@ impl Contract {
             device_id,
             public_key,
         });
+        
         env.storage().instance().set(&STORAGE_KEY_DEVICES, &devices);
-
+        
+        env.events().publish(
+            (ACCOUNT, DEVICEADDED),
+            DeviceAddedEventData {
+                device_id,
+                public_key
+            }
+        );
         Ok(())
     }
 
@@ -111,6 +123,15 @@ impl Contract {
         env.storage()
             .instance()
             .set(&STORAGE_KEY_DEVICES, &new_devices);
+
+        env.events().publish(
+            (ACCOUNT, DEVICEREMOVED),
+            DeviceRemovedEventData {
+                device_id,
+                public_key
+            }
+        );
+
         Ok(())
     }
 
@@ -123,10 +144,19 @@ impl Contract {
 
         env.storage().instance().set(&RECOVERY_ADDRESS, &address);
 
+        env.events().publish(
+            (ACCOUNT, SECURITY),
+            RecoveryAddressAddedData {
+                address,
+            }
+        );
+
         Ok(())
     }
 
     pub fn update_recovery_address(env: Env, address: Address) -> Result<(), Error> {
+        env.current_contract_address().require_auth();
+        
         // add multisig authentication from parent auth contract for recovery update
         let auth_contract = env
             .storage()
@@ -137,6 +167,13 @@ impl Contract {
         auth_contract.require_auth();
 
         env.storage().instance().set(&RECOVERY_ADDRESS, &address);
+
+        env.events().publish(
+            (ACCOUNT, SECURITY),
+            RecoveryAddressUpdatedData {
+                address,
+            }
+        );
 
         Ok(())
     }
@@ -169,6 +206,14 @@ impl Contract {
         });
 
         env.storage().instance().set(&STORAGE_KEY_DEVICES, &devices);
+
+        env.events().publish(
+            (ACCOUNT, SECURITY),
+            AccountRecoveredEventData {
+                device_id: new_device_id,
+                public_key: new_public_key
+            }
+        );
 
         Ok(())
     }

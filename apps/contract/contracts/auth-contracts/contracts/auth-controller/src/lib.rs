@@ -2,6 +2,13 @@
 use core::cmp::min;
 use soroban_sdk::{contract, contractimpl, panic_with_error, vec, Env, String, Vec};
 
+
+use crate::events::{
+ INIT, ACCOUNT, SIGNER, SECURITY, ADDED, REMOVED, UPDATE,
+ InitEventData, SignerAddedEventData, SignerRemovedEventData, 
+ AccountAddedEventData, AccountRemovedEventData, DefaultThresholdChangedEventData
+};
+
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
@@ -61,6 +68,14 @@ impl AuthController {
         env.storage()
             .instance()
             .set(&DataKey::DefaultThreshold, &default_threshold);
+    
+        env.events().publish(
+            (SECURITY, INIT),
+            InitEventData {
+                threshold: default_threshold,
+                signers,
+            },
+        );
     }
 
     fn add_signer(env: Env, signer: BytesN<32>) {
@@ -77,6 +92,9 @@ impl AuthController {
 
         signers.push_back(signer.clone());
         env.storage().instance().set(&DataKey::Signers, &signers);
+        
+        env.events()
+            .publish((SIGNER, ADDED), SignerAddedEventData { signer });
     }
 
     fn remove_signer(env: Env, signer: BytesN<32>) {
@@ -100,6 +118,9 @@ impl AuthController {
         };
 
         env.storage().instance().set(&DataKey::Signers, &signers);
+    
+        env.events()
+           .publish((SIGNER, ADDED), SignerRemovedEventData { signer });
     }
 
     fn get_signers(env: Env) -> Vec<BytesN<32>> {
@@ -119,6 +140,11 @@ impl AuthController {
         env.storage()
             .instance()
             .set(&DataKey::DefaultThreshold, &threshold);
+    
+        env.events().publish(
+            (SECURITY, UPDATE),
+            DefaultThresholdChangedEventData { threshold },
+        );
     }
 
     fn get_default_threshold(env: Env) -> u32 {
@@ -138,6 +164,9 @@ impl AuthController {
                 .instance()
                 .set(&DataKey::Account(ctx), &account);
         }
+
+        env.events()
+            .publish((ACCOUNT, ADDED), AccountAddedEventData { account, context });
     }
 
     fn remove_account(env: Env, context: Vec<Address>) {
@@ -148,6 +177,9 @@ impl AuthController {
             }
             env.storage().instance().remove(&DataKey::Account(ctx));
         }
+
+        env.events()
+            .publish((ACCOUNT, REMOVED), AccountRemovedEventData { account, context });
     }
 
     fn get_accounts(env: Env, context: Vec<Address>) -> Vec<Address> {
