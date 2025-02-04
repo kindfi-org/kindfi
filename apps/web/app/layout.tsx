@@ -2,6 +2,7 @@ import { ThemeProvider } from 'next-themes'
 import { GoogleAnalytics } from '~/components/shared/google-analytics'
 import { AuthProvider } from '~/hooks/use-auth'
 import './css/globals.css'
+import { Toaster } from 'sonner'
 import Footer from '~/components/shared/layout/footer/footer'
 import { Header } from '~/components/shared/layout/header/header'
 
@@ -36,6 +37,7 @@ export default function RootLayout({
 					<div className="relative min-h-screen flex flex-col">
 						<Header />
 						<main className="flex-1">{children}</main>
+						<Toaster />
 						<Footer />
 					</div>
 				</ProviderWrapper>
