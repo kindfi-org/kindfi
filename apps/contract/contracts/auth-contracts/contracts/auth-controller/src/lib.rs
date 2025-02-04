@@ -8,25 +8,7 @@ use crate::events::{
  AccountAddedEventData, AccountRemovedEventData, DefaultThresholdChangedEventData
 };
 
-#[contracterror]
-#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
-#[repr(u32)]
-pub enum Error {
-    SignerLimitExceeded = 1002,
-    UnknownSigner = 1003,
-    DefaultThresholdNotMet = 1004,
-    SignerDoesNotExist = 1006,
-    AlreadyInitialized = 1007,
-    InvalidThreshold = 1008,
-    SignerAlreadyAdded = 1009,
-    AccountThresholdNotMet = 1010,
-    DuplicateSignature = 1011,
-    AccountExists = 1012,
-    AccountDoesNotExist = 1013,
-    FactoryExists = 1014,
-    FactoryDoesNotExist = 1015,
-    NotAllowedContract = 1016
-}
+use crate::errors::Error;
 
 /// Declares the SignedMessage structure, containing the public key and signature.
 #[contracttype]
