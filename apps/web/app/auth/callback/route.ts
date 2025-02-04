@@ -1,11 +1,10 @@
+import type { AuthError } from '@supabase/supabase-js'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { createClient } from '~/lib/supabase/server'
-import { isValidRedirectUrl } from '~/lib/config/validate-url'
-import { AuthError } from '@supabase/supabase-js'
-import { Logger } from '~/lib/logger'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
-
+import { isValidRedirectUrl } from '~/lib/config/validate-url'
+import { Logger } from '~/lib/logger'
+import { createClient } from '~/lib/supabase/server'
 
 const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
@@ -42,12 +41,15 @@ export async function GET(request: NextRequest) {
 		} catch (error) {
 			const response = errorHandler.handleAuthError(
 				error as AuthError,
-				'exchangeCodeForSession'
+				'exchangeCodeForSession',
 			)
 
 			// Add error parameters to the redirect URL
 			const finalRedirectUrl = new URL(redirectUrl)
-			finalRedirectUrl.searchParams.set('error', response.error ?? 'unknown_error')
+			finalRedirectUrl.searchParams.set(
+				'error',
+				response.error ?? 'unknown_error',
+			)
 
 			// Redirect with error parameters
 			logger.info({

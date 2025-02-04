@@ -1,6 +1,6 @@
 'use client'
 
-import { AuthError } from '@supabase/supabase-js'
+import type { AuthError } from '@supabase/supabase-js'
 import { Lock, Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'

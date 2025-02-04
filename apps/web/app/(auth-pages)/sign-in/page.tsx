@@ -1,6 +1,6 @@
 'use client'
 
-import { AuthError } from '@supabase/supabase-js'
+import type { AuthError } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -31,11 +31,13 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 		minLength: 6,
 	})
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		const error = searchParams.get('error')
 		if (error) {
 			toast.error(decodeURIComponent(error))
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchParams, toast])
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
