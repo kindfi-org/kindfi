@@ -2,11 +2,14 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { createClient } from '~/lib/supabase/server'
 import { isValidRedirectUrl } from '~/lib/config/validate-url'
-import { useAuthErrorHandler } from '~/hooks/use-auth-error-handler'
+import { AuthError } from '@supabase/supabase-js'
+import { Logger } from '~/lib/logger'
+import { AuthErrorHandler } from '~/lib/auth/error-handler'
 
 
+const logger = new Logger()
+const errorHandler = new AuthErrorHandler(logger)
 export async function GET(request: NextRequest) {
-	const { logger, errorHandler } = useAuthErrorHandler();
 	const requestUrl = new URL(request.url)
 	const code = requestUrl.searchParams.get('code')
 	const redirectUrl = requestUrl.searchParams.get('redirect')
@@ -38,7 +41,7 @@ export async function GET(request: NextRequest) {
 			})
 		} catch (error) {
 			const response = errorHandler.handleAuthError(
-				error as any,
+				error as AuthError,
 				'exchangeCodeForSession'
 			)
 

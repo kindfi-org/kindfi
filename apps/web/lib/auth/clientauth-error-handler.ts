@@ -1,21 +1,24 @@
-import { ERROR_MESSAGES } from '../constants/error'
-import type { AuthResponse } from '../types/auth'
+import type { AuthError } from "@supabase/supabase-js"
+import { ERROR_MESSAGES } from "../constants/error"
+import type { AuthResponse } from "../types/auth"
 
-export function handleClientAuthError(error: any): AuthResponse {
-	const message =
-		ERROR_MESSAGES[error.type as keyof typeof ERROR_MESSAGES] || error.message
+export function handleClientAuthError(error: AuthError): AuthResponse {
+  const errorKey = Object.keys(ERROR_MESSAGES).find((key) => error.message.includes(key)) as
+    | keyof typeof ERROR_MESSAGES
+    | undefined
 
-	console.error('[Auth Error]', {
-		eventType: 'AUTH_ERROR',
-		errorType: error.type,
-		action: 'client_side_auth',
-		message: error.message,
-		timestamp: new Date().toISOString(),
-	})
+  const message = errorKey ? ERROR_MESSAGES[errorKey] : error.message || "An unknown error occurred"
 
-	return {
-		success: false,
-		message,
-		error: message,
-	}
+  console.error("[Auth Error]", {
+    eventType: "AUTH_ERROR",
+    errorMessage: error.message,
+    action: "client_side_auth",
+    timestamp: new Date().toISOString(),
+  })
+
+  return {
+    success: false,
+    message,
+    error: message,
+  }
 }

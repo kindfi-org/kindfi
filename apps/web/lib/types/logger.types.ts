@@ -3,7 +3,7 @@ export interface LoggerData {
   
     LogData: {
       eventType: string
-      [key: string]: any
+      [key: string]: unknown
     }
   }
   

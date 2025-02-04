@@ -1,13 +1,14 @@
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import type { NextRequest } from 'next/server'
-import { useAuthErrorHandler } from '~/hooks/use-auth-error-handler'
+import { AuthErrorHandler } from '~/lib/auth/error-handler'
+import { Logger } from '~/lib/logger'
 import { createClient } from '~/lib/supabase/server'
 
 
-
+const logger = new Logger()
+const errorHandler = new AuthErrorHandler(logger)
 export async function GET(request: NextRequest) {
-const { logger, errorHandler } = useAuthErrorHandler()	
   const { searchParams } = new URL(request.url)
   const tokenHash = searchParams.get('token_hash')
   const type = searchParams.get('type') as EmailOtpType | null

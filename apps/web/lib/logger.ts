@@ -19,7 +19,7 @@ export class Logger implements ILogger {
     if (!this.shouldLog(level)) return
 
     const timestamp = new Date().toISOString()
-    const logMethod = console[level] as (message?: any, ...optionalParams: any[]) => void
+    const logMethod = console[level] as (message: string, ...optionalParams: unknown[]) => void
     const prefix = `[${level.toUpperCase()}] ${timestamp}:`
 
     try {

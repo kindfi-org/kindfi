@@ -1,5 +1,6 @@
 'use client'
 
+import { AuthError } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -53,7 +54,7 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 			}
 		} catch (err) {
 			const error = err as Error
-			const errorResponse = handleClientAuthError(error)
+			const errorResponse = handleClientAuthError(error as AuthError)
 			setAuthResponse(errorResponse)
 			toast.error(errorResponse.message)
 		}

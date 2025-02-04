@@ -1,7 +1,9 @@
 'use server'
 
+import { AuthError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
 import { createClient } from '~/lib/supabase/server'
@@ -30,8 +32,8 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 				'Account created successfully. Please check your email to confirm your account.',
 			redirect: '/sign-in',
 		}
-	} catch (error: any) {
-		return errorHandler.handleAuthError(error, 'sign_up')
+	} catch (error) {
+		return errorHandler.handleAuthError(error as AuthError, 'sign_up')
 	}
 }
 
@@ -63,8 +65,8 @@ export async function signInAction(formData: FormData): Promise<AuthResponse> {
 			message: 'Successfully signed in',
 			redirect: '/dashboard',
 		}
-	} catch (error: any) {
-		return errorHandler.handleAuthError(error, 'sign_in')
+	} catch (error) {
+		return errorHandler.handleAuthError(error as AuthError, 'sign_in')
 	}
 }
 
@@ -82,50 +84,36 @@ export async function signOutAction(): Promise<AuthResponse> {
 			message: 'Successfully signed out',
 			redirect: '/sign-in',
 		}
-	} catch (error: any) {
-		return errorHandler.handleAuthError(error, 'sign_out')
+	} catch (error) {
+		return errorHandler.handleAuthError(error as AuthError, 'sign_out')
 	}
 }
 
-export async function forgotPasswordAction(
-	formData: FormData,
-): Promise<AuthResponse> {
-	const email = formData.get('email')?.toString()
+export async function forgotPasswordAction(formData: FormData): Promise<void> {
+	const email = formData.get("email")?.toString()
 	const supabase = await createClient()
-	const origin = (await headers()).get('origin')
-	const callbackUrl = formData.get('callbackUrl')?.toString()
-
+	const origin = (await headers()).get("origin")
+  
 	if (!email) {
-		return {
-			success: false,
-			message: 'Email is required',
-			error: 'Email is required',
-		}
+	  redirect("/forgot-password?error=Email is required")
 	}
-
+  
 	try {
-		const { error } = await supabase.auth.resetPasswordForEmail(email, {
-			redirectTo: `${origin}/auth/callback?redirect_to=/protected/reset-password`,
-		})
-
-		if (error) {
-			return errorHandler.handleAuthError(error, 'forgot_password')
-		}
-
-		const response: AuthResponse = {
-			success: true,
-			message: 'Check your email for a link to reset your password.',
-		}
-
-		if (callbackUrl) {
-			response.redirect = callbackUrl
-		}
-
-		return response
-	} catch (error: any) {
-		return errorHandler.handleAuthError(error, 'forgot_password')
+	  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+		redirectTo: `${origin}/auth/callback?redirect_to=/protected/reset-password`,
+	  })
+  
+	  if (error) {
+		const response = errorHandler.handleAuthError(error, "forgot_password")
+		redirect(`/forgot-password?error=${encodeURIComponent(response.message)}`)
+	  }
+  
+	  redirect("/forgot-password?success=Check your email for a link to reset your password")
+	} catch (error) {
+	  const response = errorHandler.handleAuthError(error as AuthError, "forgot_password")
+	  redirect(`/forgot-password?error=${encodeURIComponent(response.message)}`)
 	}
-}
+  }
 
 export async function resetPasswordAction(
 	formData: FormData,
@@ -164,8 +152,8 @@ export async function resetPasswordAction(
 			message: 'Password updated successfully',
 			redirect: '/sign-in',
 		}
-	} catch (error: any) {
-		return errorHandler.handleAuthError(error, 'reset_password')
+	} catch (error) {
+		return errorHandler.handleAuthError(error as AuthError, 'reset_password')
 	}
 }
 
@@ -195,7 +183,7 @@ export async function checkAuthStatus(): Promise<AuthResponse> {
 			success: true,
 			message: 'Active session found',
 		}
-	} catch (error: any) {
-		return errorHandler.handleAuthError(error, 'check_auth')
+	} catch (error) {
+		return errorHandler.handleAuthError(error as AuthError, 'check_auth')
 	}
 }
