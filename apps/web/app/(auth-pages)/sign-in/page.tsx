@@ -1,15 +1,25 @@
 'use client'
 
+import { AuthError } from '@supabase/supabase-js'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { signInAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
+import type { Message } from '~/components/form-message'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { useFormValidation } from '~/hooks/use-form-validation'
+import { handleClientAuthError } from '~/lib/auth/clientauth-error-handler'
+import type { AuthResponse } from '~/lib/types/auth'
 
-export default function Login() {
+export default function Login(props: { searchParams: Promise<Message> }) {
+	const router = useRouter()
+	const searchParams = useSearchParams()
+	const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null)
 	const {
 		isEmailInvalid,
 		isPasswordInvalid,
@@ -20,6 +30,35 @@ export default function Login() {
 		password: true,
 		minLength: 6,
 	})
+
+	useEffect(() => {
+		const error = searchParams.get('error')
+		if (error) {
+			toast.error(decodeURIComponent(error))
+		}
+	}, [searchParams, toast])
+
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		resetValidation()
+
+		const formData = new FormData(event.currentTarget)
+		try {
+			const response = await signInAction(formData)
+			setAuthResponse(response)
+			if (!response.success) {
+				toast.error(response.message)
+			} else {
+				toast.success('You have successfully logged in.')
+				router.push(response.redirect || '/dashboard')
+			}
+		} catch (err) {
+			const error = err as Error
+			const errorResponse = handleClientAuthError(error as AuthError)
+			setAuthResponse(errorResponse)
+			toast.error(errorResponse.message)
+		}
+	}
 
 	return (
 		<AuthLayout>
@@ -40,7 +79,7 @@ export default function Login() {
 				<form
 					className="space-y-4"
 					aria-label="Sign in"
-					onSubmit={resetValidation}
+					onSubmit={handleSubmit}
 				>
 					<div className="space-y-2">
 						<Label htmlFor="email" id="email-label">
@@ -100,7 +139,7 @@ export default function Login() {
 						</div>
 					</div>
 
-					<Button className="w-full" formAction={signInAction}>
+					<Button className="w-full" type="submit">
 						Log In
 					</Button>
 				</form>

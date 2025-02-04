@@ -4,7 +4,7 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { Check, ChevronRight, Circle } from 'lucide-react'
 import * as React from 'react'
 import useReducedMotion from '~/hooks/use-reduced-motion'
-import { animations } from '~/lib/animation'
+import { animations } from '~/lib/animations'
 
 import { cn } from '~/lib/utils'
 /**
