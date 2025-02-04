@@ -16,7 +16,6 @@ export async function GET(request: NextRequest) {
 		url: requestUrl.toString(),
 		redirectUrl,
 		hasCode: !!code,
-		timestamp: new Date().toISOString(),
 	})
 
 	// If redirect URL is missing or invalid, return a JSON error
@@ -24,7 +23,6 @@ export async function GET(request: NextRequest) {
 		logger.warn({
 			eventType: 'INVALID_REDIRECT_URL',
 			redirectUrl,
-			timestamp: new Date().toISOString(),
 		})
 		return NextResponse.json({ error: 'Invalid redirect URL' }, { status: 400 })
 	}
@@ -37,7 +35,6 @@ export async function GET(request: NextRequest) {
 
 			logger.info({
 				eventType: 'CODE_EXCHANGE_SUCCESS',
-				timestamp: new Date().toISOString(),
 			})
 		} catch (error) {
 			const response = errorHandler.handleAuthError(
@@ -54,7 +51,6 @@ export async function GET(request: NextRequest) {
 				eventType: 'AUTH_ERROR_REDIRECT',
 				redirectUrl: finalRedirectUrl.toString(),
 				errorMessage: response.error,
-				timestamp: new Date().toISOString(),
 			})
 			return NextResponse.redirect(finalRedirectUrl)
 		}
@@ -64,7 +60,6 @@ export async function GET(request: NextRequest) {
 	logger.info({
 		eventType: 'SUCCESSFUL_REDIRECT',
 		redirectUrl,
-		timestamp: new Date().toISOString(),
 	})
 	return NextResponse.redirect(redirectUrl)
 }

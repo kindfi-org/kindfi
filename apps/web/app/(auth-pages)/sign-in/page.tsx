@@ -51,7 +51,8 @@ export default function Login(props: { searchParams: Promise<Message> }) {
 				toast.success('You have successfully logged in.')
 				router.push(response.redirect || '/dashboard')
 			}
-		} catch (error: any) {
+		} catch (err) {
+			const error = err as Error
 			const errorResponse = handleClientAuthError(error)
 			setAuthResponse(errorResponse)
 			toast.error(errorResponse.message)

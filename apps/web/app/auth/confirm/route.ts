@@ -17,7 +17,6 @@ const { logger, errorHandler } = useAuthErrorHandler()
     eventType: 'EMAIL_VERIFICATION_REQUEST',
     hasToken: !!tokenHash,
     type,
-    timestamp: new Date().toISOString(),
   })
 
   if (tokenHash && type) {
@@ -35,7 +34,6 @@ const { logger, errorHandler } = useAuthErrorHandler()
           eventType: 'OTP_VERIFICATION_ERROR',
           errorMessage: response.error,
           type,
-          timestamp: new Date().toISOString(),
         })
 
         // Add error to the redirect URL
@@ -48,7 +46,6 @@ const { logger, errorHandler } = useAuthErrorHandler()
       logger.info({
         eventType: 'OTP_VERIFICATION_SUCCESS',
         type,
-        timestamp: new Date().toISOString(),
       })
 
       redirect(next)
@@ -56,7 +53,6 @@ const { logger, errorHandler } = useAuthErrorHandler()
       logger.error({
         eventType: 'UNEXPECTED_ERROR',
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
       })
       redirect('/error?reason=unexpected_error')
     }
@@ -66,7 +62,6 @@ const { logger, errorHandler } = useAuthErrorHandler()
     eventType: 'INVALID_VERIFICATION_REQUEST',
     hasToken: !!tokenHash,
     hasType: !!type,
-    timestamp: new Date().toISOString(),
   })
 
   redirect('/error?reason=missing_parameters')

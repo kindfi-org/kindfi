@@ -57,7 +57,8 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 				toast.success('Your account has been created successfully.')
 				router.push(response.redirect || 'sign-in')
 			}
-		} catch (error: any) {
+		} catch (err) {
+			const error = err as Error
 			const errorResponse = handleClientAuthError(error)
 			setAuthResponse(errorResponse)
 			toast.error(errorResponse.message)
