@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import { buttonVariants } from '~/components/base/button'
 import useReducedMotion from '~/hooks/use-reduced-motion'
-import { animations } from '~/lib/animation'
+import { animations } from '~/lib/animations'
 import { cn } from '~/lib/utils'
 
 const AlertDialog = AlertDialogPrimitive.Root
