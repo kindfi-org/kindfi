@@ -1,4 +1,4 @@
-use soroban_sdk::{symbol_short, Address, Env, Symbol};
+use soroban_sdk::{Address, Env};
 
 pub struct NFTEvents;
 

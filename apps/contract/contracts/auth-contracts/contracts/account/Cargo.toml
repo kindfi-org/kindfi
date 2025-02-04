@@ -9,7 +9,7 @@ crate-type = ["cdylib"]
 doctest = false
 
 [dependencies]
-soroban-sdk = { version = "22.0.1" }
+soroban-sdk = { workspace = true }
 serde = { version = "1.0.217", default-features = false, features = ["derive"] }
 serde-json-core = { version = "0.6.0", default-features = false }
 

@@ -223,10 +223,10 @@ fn test_remove_signer_fails_if_not_exists() {
 #[test]
 fn test_add_account() {
     let Controller { client, env, .. } = Controller::new(2);
-    let policy = Address::random(&env);
+    let account = Address::random(&env);
     let context = vec![&env, Address::random(&env)];
     assert_eq!(client.get_accounts(&context).len(), 0);
-    client.add_account(&policy, &context);
+    client.add_account(&account, &context);
     assert_eq!(client.get_accounts(&context).len(), 1);
     assert_eq!(env.events().all().len(), 2);
 }
@@ -235,22 +235,22 @@ fn test_add_account() {
 #[should_panic(expected = "#109")]
 fn test_add_account_fails_if_already_exists() {
     let Controller { client, env, .. } = Controller::new(2);
-    let policy = Address::random(&env);
+    let account = Address::random(&env);
     let other = Address::random(&env);
     let context = vec![&env, Address::random(&env)];
-    client.add_account(&policy, &context);
+    client.add_account(&account, &context);
     client.add_account(&other, &context);
 }
 
 #[test]
 fn test_remove_account() {
     let Controller { client, env, .. } = Controller::new(2);
-    let policy = Address::random(&env);
+    let account = Address::random(&env);
     let context = vec![&env, Address::random(&env)];
     assert_eq!(client.get_accounts(&context).len(), 0);
-    client.add_account(&policy, &context);
+    client.add_account(&account, &context);
     assert_eq!(client.get_accounts(&context).len(), 1);
-    client.remove_account(&context);
+    client.remove_account(&account, &context);
     assert_eq!(client.get_accounts(&context).len(), 0);
     assert_eq!(env.events().all().len(), 3);
 }
@@ -259,8 +259,9 @@ fn test_remove_account() {
 #[should_panic(expected = "#1010")]
 fn test_remove_account_fails_if_not_exists() {
     let Controller { client, env, .. } = Controller::new(2);
+    let account = Address::random(&env);
     let context = vec![&env, Address::random(&env)];
-    client.remove_account(&context);
+    client.remove_account(account, &context);
 }
 
 #[test]

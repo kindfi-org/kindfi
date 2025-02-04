@@ -41,7 +41,7 @@ pub struct AuthController;
 
 #[contractimpl]
 impl AuthController {
-    fn init(env: Env, signers: Vec<BytesN<32>>, default_threshold: u32) {
+    pub fn init(env: Env, signers: Vec<BytesN<32>>, default_threshold: u32) {
         if env
             .storage()
             .instance()
@@ -77,7 +77,7 @@ impl AuthController {
         );
     }
 
-    fn add_signer(env: Env, signer: BytesN<32>) {
+    pub fn add_signer(env: Env, signer: BytesN<32>) {
         env.current_contract_address().require_auth();
         let mut signers = env
             .storage()
@@ -102,7 +102,7 @@ impl AuthController {
             .publish((SIGNER, ADDED), SignerAddedEventData { signer });
     }
 
-    fn remove_signer(env: Env, signer: BytesN<32>) {
+    pub fn remove_signer(env: Env, signer: BytesN<32>) {
         env.current_contract_address().require_auth();
 
         let mut signers = env
@@ -134,14 +134,14 @@ impl AuthController {
             .publish((SIGNER, ADDED), SignerRemovedEventData { signer });
     }
 
-    fn get_signers(env: Env) -> Vec<BytesN<32>> {
+    pub fn get_signers(env: Env) -> Vec<BytesN<32>> {
         env.storage()
             .instance()
             .get::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env))
             .unwrap()
     }
 
-    fn set_default_threshold(env: Env, threshold: u32) {
+    pub fn set_default_threshold(env: Env, threshold: u32) {
         env.current_contract_address().require_auth();
 
         let signers = env
@@ -165,14 +165,14 @@ impl AuthController {
         );
     }
 
-    fn get_default_threshold(env: Env) -> u32 {
+    pub fn get_default_threshold(env: Env) -> u32 {
         env.storage()
             .instance()
             .get::<Val, u32>(&DataKey::DefaultThreshold.into_val(&env))
             .unwrap_or(0)
     }
 
-    fn add_factory(env: Env, factory: Address, context: Vec<Address>) {
+    pub fn add_factory(env: Env, factory: Address, context: Vec<Address>) {
         env.current_contract_address().require_auth();
         for ctx in context.iter() {
             if env
@@ -191,7 +191,7 @@ impl AuthController {
             .publish((FACTORY, ADDED), FactoryAddedEventData { factory, context });
     }
 
-    fn remove_factory(env: Env, factory: Address, context: Vec<Address>) {
+    pub fn remove_factory(env: Env, factory: Address, context: Vec<Address>) {
         env.current_contract_address().require_auth();
         for ctx in context.iter() {
             if !env
@@ -212,7 +212,7 @@ impl AuthController {
         );
     }
 
-    fn add_account(env: Env, account: Address, context: Vec<Address>) {
+    pub fn add_account(env: Env, account: Address, context: Vec<Address>) {
         env.current_contract_address().require_auth();
         for ctx in context.iter() {
             if env
@@ -231,7 +231,7 @@ impl AuthController {
             .publish((ACCOUNT, ADDED), AccountAddedEventData { account, context });
     }
 
-    fn remove_account(env: Env, account: Address, context: Vec<Address>) {
+    pub fn remove_account(env: Env, account: Address, context: Vec<Address>) {
         env.current_contract_address().require_auth();
         for ctx in context.iter() {
             if !env
@@ -252,7 +252,7 @@ impl AuthController {
         );
     }
 
-    fn get_accounts(env: Env, context: Vec<Address>) -> Vec<Address> {
+    pub fn get_accounts(env: Env, context: Vec<Address>) -> Vec<Address> {
         let mut accounts = Vec::new(&env);
         for ctx in context.iter() {
             if env

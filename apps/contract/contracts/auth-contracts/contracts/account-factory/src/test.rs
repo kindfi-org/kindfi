@@ -12,10 +12,7 @@ use soroban_sdk::{
 
 // The contract that will be deployed by the deployer contract.
 mod contract {
-    soroban_sdk::contractimport!(
-        file =
-            "../contract/target/wasm32-unknown-unknown/release/soroban_deployer_test_contract.wasm"
-    );
+    soroban_sdk::contractimport!(file = "../../../../target/wasm32-unknown-unknown/");
 }
 
 #[test]
