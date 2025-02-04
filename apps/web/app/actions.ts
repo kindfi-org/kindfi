@@ -70,24 +70,22 @@ export async function signInAction(formData: FormData): Promise<AuthResponse> {
 	}
 }
 
-export async function signOutAction(): Promise<AuthResponse> {
+export async function signOutAction(): Promise<void> {
 	const supabase = await createClient()
-
+  
 	try {
-		const { error } = await supabase.auth.signOut()
-		if (error) {
-			return errorHandler.handleAuthError(error, 'sign_out')
-		}
-
-		return {
-			success: true,
-			message: 'Successfully signed out',
-			redirect: '/sign-in',
-		}
+	  const { error } = await supabase.auth.signOut()
+	  if (error) {
+		const response = errorHandler.handleAuthError(error, 'sign_out')
+		redirect(`/?error=${encodeURIComponent(response.message)}`)
+	  }
+  
+	  redirect('/sign-in?success=Successfully signed out')
 	} catch (error) {
-		return errorHandler.handleAuthError(error as AuthError, 'sign_out')
+	  const response = errorHandler.handleAuthError(error as AuthError, 'sign_out')
+	  redirect(`/?error=${encodeURIComponent(response.message)}`)
 	}
-}
+  }
 
 export async function forgotPasswordAction(formData: FormData): Promise<void> {
 	const email = formData.get("email")?.toString()
@@ -115,47 +113,36 @@ export async function forgotPasswordAction(formData: FormData): Promise<void> {
 	}
   }
 
-export async function resetPasswordAction(
-	formData: FormData,
-): Promise<AuthResponse> {
-	const supabase = await createClient()
+  export async function resetPasswordAction(formData: FormData): Promise<void> {
 	const password = formData.get('password') as string
 	const confirmPassword = formData.get('confirmPassword') as string
-
+  
 	if (!password || !confirmPassword) {
-		return {
-			success: false,
-			message: 'Password and confirm password are required',
-			error: 'Password and confirm password are required',
-		}
+	  redirect('/reset-password?error=Password and confirm password are required')
 	}
-
+  
 	if (password !== confirmPassword) {
-		return {
-			success: false,
-			message: 'Passwords do not match',
-			error: 'Passwords do not match',
-		}
+	  redirect('/reset-password?error=Passwords do not match')
 	}
-
+  
+	const supabase = await createClient()
+  
 	try {
-		const { error } = await supabase.auth.updateUser({
-			password: password,
-		})
-
-		if (error) {
-			return errorHandler.handleAuthError(error, 'reset_password')
-		}
-
-		return {
-			success: true,
-			message: 'Password updated successfully',
-			redirect: '/sign-in',
-		}
+	  const { error } = await supabase.auth.updateUser({
+		password: password,
+	  })
+  
+	  if (error) {
+		const response = errorHandler.handleAuthError(error, 'reset_password')
+		redirect(`/reset-password?error=${encodeURIComponent(response.message)}`)
+	  }
+  
+	  redirect('/sign-in?success=Password updated successfully')
 	} catch (error) {
-		return errorHandler.handleAuthError(error as AuthError, 'reset_password')
+	  const response = errorHandler.handleAuthError(error as AuthError, 'reset_password')
+	  redirect(`/reset-password?error=${encodeURIComponent(response.message)}`)
 	}
-}
+  }
 
 // Helper function to check auth status
 export async function checkAuthStatus(): Promise<AuthResponse> {
