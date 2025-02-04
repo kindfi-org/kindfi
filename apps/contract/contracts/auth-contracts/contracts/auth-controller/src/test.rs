@@ -1,8 +1,8 @@
 #![cfg(test)]
 
 use ed25519_dalek::{Keypair, Signer};
-use rand::rngs::OsRng;
 use hex::decode;
+use rand::rngs::OsRng;
 
 use soroban_sdk::auth::{Context, ContractContext};
 use soroban_sdk::testutils::{Address as _, BytesN as _, Events as _};
@@ -110,7 +110,6 @@ fn test_default_threshold_not_met() {
     );
 }
 
-
 #[test]
 fn test_default_threshold_met_but_wrong_signer() {
     let controller = Controller::new(2);
@@ -141,10 +140,7 @@ fn test_default_threshold_met_but_wrong_signer() {
             }),
         ],
     );
-    assert_eq!(
-        invocation.err().unwrap().unwrap(),
-        Error::UnknownSigner
-    );
+    assert_eq!(invocation.err().unwrap().unwrap(), Error::UnknownSigner);
 }
 
 #[test]
@@ -267,7 +263,6 @@ fn test_remove_account_fails_if_not_exists() {
     client.remove_account(&context);
 }
 
-
 #[test]
 #[should_panic(expected = "#105")]
 fn test_invalid_threshold_on_init_fails() {
@@ -285,7 +280,7 @@ fn test_invalid_threshold_on_update_fails() {
 #[should_panic(expected = "#100")]
 fn test_exceeding_signer_limit_on_update_fails() {
     let Controller { client, env, .. } = Controller::new(2);
-    let mut csprng = OsRng{};
+    let mut csprng = OsRng {};
 
     for _ in 0..15 {
         let keypair: Keypair = Keypair::generate(&mut csprng);

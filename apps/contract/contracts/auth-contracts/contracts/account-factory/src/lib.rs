@@ -1,11 +1,11 @@
 #![no_std]
 use soroban_sdk::{
-    auth, contract, contracterror, contractimpl, symbol_short, vec, Address, BytesN, Env, Symbol,
+    contract, contracterror, contractimpl, symbol_short, vec, Address, BytesN, Env, Symbol,
 };
 
-use crate::events::{
-    ACCOUNT, DEPLOY, AccountDeployEventData
-};
+mod events;
+
+use crate::events::{AccountDeployEventData, ACCOUNT, DEPLOY};
 
 #[contract]
 pub struct Contract;
@@ -51,16 +51,18 @@ impl Contract {
 
         let address = env.deployer().with_current_contract(salt).deploy_v2(
             wasm_hash,
-            [id.to_val(), pk.to_val(), auth_contract.to_val()],
+            vec![&env, id.to_val(), pk.to_val(), auth_contract.to_val()],
         );
 
         env.events().publish(
             (ACCOUNT, DEPLOY),
             AccountDeployEventData {
                 account: address.clone(),
-            }
+            },
         );
 
         Ok(address)
     }
 }
+
+// mod test;

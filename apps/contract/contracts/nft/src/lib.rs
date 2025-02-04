@@ -1,11 +1,11 @@
 #![no_std]
 
-mod contract;
-mod storage;
-mod types;
 mod errors;
 mod events;
+// mod nft;
+mod storage;
+mod types;
 
-pub use contract::NFTContract;
-pub use types::*;
+// pub use contract::NFTContract;
 pub use errors::*;
+pub use types::*;

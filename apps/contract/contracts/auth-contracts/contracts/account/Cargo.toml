@@ -10,11 +10,13 @@ doctest = false
 
 [dependencies]
 soroban-sdk = { version = "22.0.1" }
+serde = { version = "1.0.217", default-features = false, features = ["derive"] }
+serde-json-core = { version = "0.6.0", default-features = false }
 
 [dev-dependencies]
 soroban-sdk = { version = "22.0.1", features = ["testutils"] }
-ed25519-dalek = { version = "1.0.1" }
-rand = { version = "0.7.3" }
+ed25519-dalek = { version = "2.1.1" }
+rand = { version = "0.9.0" }
 
 [profile.release]
 opt-level = "z"

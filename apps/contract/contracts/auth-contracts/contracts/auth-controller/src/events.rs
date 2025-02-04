@@ -4,13 +4,13 @@ use soroban_sdk::{contracttype, symbol_short, Address, BytesN, Symbol, Vec};
 pub const INIT: Symbol = symbol_short!("init");
 
 // Symbol representing account-related events.
-pub const ACCOUNT: Symbol = symbol_short("ACCOUNT");
+pub const ACCOUNT: Symbol = symbol_short!("ACCOUNT");
 
 // Symbol representing factory-related events.
-pub const FACTORY: Symbol = symbol_short("FACTORY");
+pub const FACTORY: Symbol = symbol_short!("FACTORY");
 
 // Symbol representing signer-related events.
-pub const SIGNER: Symbol = symbol_short("SIGNER");
+pub const SIGNER: Symbol = symbol_short!("SIGNER");
 
 // Symbol representing multisig security-related events.
 pub const SECURITY: Symbol = symbol_short!("SECURITY");
@@ -52,7 +52,6 @@ pub struct FactoryAddedEventData {
     pub factory: Address,
     pub context: Vec<Address>,
 }
-
 
 // Event data for when a account is added along with its associated context.
 #[contracttype]

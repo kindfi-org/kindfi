@@ -1,11 +1,17 @@
 #![no_std]
 use core::cmp::min;
-use soroban_sdk::{contract, contractimpl, panic_with_error, vec, Env, String, Vec};
+use soroban_sdk::auth::Context;
+use soroban_sdk::{
+    contract, contractimpl, contracttype, panic_with_error, Address, BytesN, Env, IntoVal, Val, Vec,
+};
+
+mod errors;
+mod events;
 
 use crate::events::{
- INIT, ACCOUNT, SIGNER, SECURITY, ADDED, REMOVED, UPDATE, FACTORY,
- InitEventData, SignerAddedEventData, SignerRemovedEventData, FactoryAddedEventData, FactoryRemovedEventData,
- AccountAddedEventData, AccountRemovedEventData, DefaultThresholdChangedEventData
+    AccountAddedEventData, AccountRemovedEventData, DefaultThresholdChangedEventData,
+    FactoryAddedEventData, FactoryRemovedEventData, InitEventData, SignerAddedEventData,
+    SignerRemovedEventData, ACCOUNT, ADDED, FACTORY, INIT, REMOVED, SECURITY, SIGNER, UPDATE,
 };
 
 use crate::errors::Error;
@@ -25,7 +31,7 @@ enum DataKey {
     DefaultThreshold,
     Signers,
     Account(Address),
-    Factory(Address)
+    Factory(Address),
 }
 
 pub const THRESHOLD_LIMIT: u32 = 5;
@@ -36,7 +42,11 @@ pub struct AuthController;
 #[contractimpl]
 impl AuthController {
     fn init(env: Env, signers: Vec<BytesN<32>>, default_threshold: u32) {
-        if env.storage().instance().has(&DataKey::Signers) {
+        if env
+            .storage()
+            .instance()
+            .has::<Val>(&DataKey::Signers.into_val(&env))
+        {
             panic_with_error!(&env, Error::AlreadyInitialized);
         }
 
@@ -49,11 +59,15 @@ impl AuthController {
             panic_with_error!(&env, Error::InvalidThreshold);
         }
 
-        env.storage().instance().set(&DataKey::Signers, &signers);
         env.storage()
             .instance()
-            .set(&DataKey::DefaultThreshold, &default_threshold);
-    
+            .set::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env), &signers);
+
+        env.storage().instance().set::<Val, u32>(
+            &DataKey::DefaultThreshold.into_val(&env),
+            &default_threshold,
+        );
+
         env.events().publish(
             (SECURITY, INIT),
             InitEventData {
@@ -65,7 +79,11 @@ impl AuthController {
 
     fn add_signer(env: Env, signer: BytesN<32>) {
         env.current_contract_address().require_auth();
-        let mut signers: Vec<BytesN<32>> = env.storage().instance().get(&DataKey::Signers).unwrap();
+        let mut signers = env
+            .storage()
+            .instance()
+            .get::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env))
+            .unwrap();
 
         if signers.contains(&signer) {
             panic_with_error!(&env, Error::SignerAlreadyAdded);
@@ -76,8 +94,10 @@ impl AuthController {
         }
 
         signers.push_back(signer.clone());
-        env.storage().instance().set(&DataKey::Signers, &signers);
-        
+        env.storage()
+            .instance()
+            .set::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env), &signers);
+
         env.events()
             .publish((SIGNER, ADDED), SignerAddedEventData { signer });
     }
@@ -85,12 +105,16 @@ impl AuthController {
     fn remove_signer(env: Env, signer: BytesN<32>) {
         env.current_contract_address().require_auth();
 
-        let mut signers: Vec<BytesN<32>> = env.storage().instance().get(&DataKey::Signers).unwrap();
+        let mut signers = env
+            .storage()
+            .instance()
+            .get::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env))
+            .unwrap();
 
         let threshold = env
             .storage()
             .instance()
-            .get(&DataKey::DefaultThreshold)
+            .get::<Val, u32>(&DataKey::DefaultThreshold.into_val(&env))
             .unwrap_or(0);
 
         if signers.len() == threshold {
@@ -102,20 +126,29 @@ impl AuthController {
             Some(index) => signers.remove(index),
         };
 
-        env.storage().instance().set(&DataKey::Signers, &signers);
-    
+        env.storage()
+            .instance()
+            .set::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env), &signers);
+
         env.events()
-           .publish((SIGNER, ADDED), SignerRemovedEventData { signer });
+            .publish((SIGNER, ADDED), SignerRemovedEventData { signer });
     }
 
     fn get_signers(env: Env) -> Vec<BytesN<32>> {
-        env.storage().instance().get(&DataKey::Signers).unwrap()
+        env.storage()
+            .instance()
+            .get::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env))
+            .unwrap()
     }
 
     fn set_default_threshold(env: Env, threshold: u32) {
         env.current_contract_address().require_auth();
 
-        let signers: Vec<BytesN<32>> = env.storage().instance().get(&DataKey::Signers).unwrap();
+        let signers = env
+            .storage()
+            .instance()
+            .get::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env))
+            .unwrap();
         let valid_thresholds = 0..min(signers.len() + 1, THRESHOLD_LIMIT + 1);
 
         if !valid_thresholds.contains(&threshold) {
@@ -124,8 +157,8 @@ impl AuthController {
 
         env.storage()
             .instance()
-            .set(&DataKey::DefaultThreshold, &threshold);
-    
+            .set::<Val, u32>(&DataKey::DefaultThreshold.into_val(&env), &threshold);
+
         env.events().publish(
             (SECURITY, UPDATE),
             DefaultThresholdChangedEventData { threshold },
@@ -135,19 +168,23 @@ impl AuthController {
     fn get_default_threshold(env: Env) -> u32 {
         env.storage()
             .instance()
-            .get(&DataKey::DefaultThreshold)
+            .get::<Val, u32>(&DataKey::DefaultThreshold.into_val(&env))
             .unwrap_or(0)
     }
 
     fn add_factory(env: Env, factory: Address, context: Vec<Address>) {
         env.current_contract_address().require_auth();
         for ctx in context.iter() {
-            if env.storage().instance().has(&DataKey::Factory(ctx.clone())) {
+            if env
+                .storage()
+                .instance()
+                .has::<Val>(&DataKey::Factory(ctx.clone()).into_val(&env))
+            {
                 panic_with_error!(&env, Error::FactoryExists);
             }
             env.storage()
                 .instance()
-                .set(&DataKey::Factory(ctx), &factory);
+                .set::<Val, Address>(&DataKey::Factory(ctx).into_val(&env), &factory);
         }
 
         env.events()
@@ -157,52 +194,76 @@ impl AuthController {
     fn remove_factory(env: Env, factory: Address, context: Vec<Address>) {
         env.current_contract_address().require_auth();
         for ctx in context.iter() {
-            if !env.storage().instance().has(&DataKey::Factory(ctx.clone())) {
+            if !env
+                .storage()
+                .instance()
+                .has::<Val>(&DataKey::Factory(ctx.clone()).into_val(&env))
+            {
                 panic_with_error!(&env, Error::FactoryDoesNotExist);
             }
-            env.storage().instance().remove(&DataKey::Factory(ctx));
+            env.storage()
+                .instance()
+                .remove::<Val>(&DataKey::Factory(ctx).into_val(&env));
         }
 
-        env.events()
-            .publish((FACTORY, REMOVED), FactoryRemovedEventData { factory, context });
+        env.events().publish(
+            (FACTORY, REMOVED),
+            FactoryRemovedEventData { factory, context },
+        );
     }
 
     fn add_account(env: Env, account: Address, context: Vec<Address>) {
         env.current_contract_address().require_auth();
         for ctx in context.iter() {
-            if env.storage().instance().has(&DataKey::Account(ctx.clone())) {
+            if env
+                .storage()
+                .instance()
+                .has::<Val>(&DataKey::Account(ctx.clone()).into_val(&env))
+            {
                 panic_with_error!(&env, Error::AccountExists);
             }
             env.storage()
                 .instance()
-                .set(&DataKey::Account(ctx), &account);
+                .set::<Val, Address>(&DataKey::Account(ctx).into_val(&env), &account);
         }
 
         env.events()
             .publish((ACCOUNT, ADDED), AccountAddedEventData { account, context });
     }
 
-    fn remove_account(env: Env, context: Vec<Address>) {
+    fn remove_account(env: Env, account: Address, context: Vec<Address>) {
         env.current_contract_address().require_auth();
         for ctx in context.iter() {
-            if !env.storage().instance().has(&DataKey::Account(ctx.clone())) {
+            if !env
+                .storage()
+                .instance()
+                .has::<Val>(&DataKey::Account(ctx.clone()).into_val(&env))
+            {
                 panic_with_error!(&env, Error::AccountDoesNotExist);
             }
-            env.storage().instance().remove(&DataKey::Account(ctx));
+            env.storage()
+                .instance()
+                .remove::<Val>(&DataKey::Account(ctx).into_val(&env));
         }
 
-        env.events()
-            .publish((ACCOUNT, REMOVED), AccountRemovedEventData { account, context });
+        env.events().publish(
+            (ACCOUNT, REMOVED),
+            AccountRemovedEventData { account, context },
+        );
     }
 
     fn get_accounts(env: Env, context: Vec<Address>) -> Vec<Address> {
         let mut accounts = Vec::new(&env);
         for ctx in context.iter() {
-            if env.storage().instance().has(&DataKey::Account(ctx.clone())) {
+            if env
+                .storage()
+                .instance()
+                .has::<Val>(&DataKey::Account(ctx.clone()).into_val(&env))
+            {
                 accounts.push_back(
                     env.storage()
                         .instance()
-                        .get(&DataKey::Account(ctx.clone()))
+                        .get::<Val, Address>(&DataKey::Account(ctx.clone()).into_val(&env))
                         .unwrap(),
                 );
             }
@@ -218,7 +279,11 @@ impl AuthController {
         signed_messages: Vec<SignedMessage>,
         auth_context: Vec<Context>,
     ) -> Result<(), Error> {
-        let signers: Vec<BytesN<32>> = env.storage().instance().get(&DataKey::Signers).unwrap();
+        let signers = env
+            .storage()
+            .instance()
+            .get::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env))
+            .unwrap();
 
         let mut prevSig: Option<BytesN<64>> = None;
 
@@ -247,12 +312,11 @@ impl AuthController {
 
         let num_signers = signed_messages.len();
 
-
         let default_threshold = env
             .storage()
             .instance()
-            .get(&DataKey::DefaultThreshold)
-            .unwrap_or(0);
+            .get::<Val, u32>(&DataKey::DefaultThreshold.into_val(&env))
+            .unwrap();
 
         if default_threshold > num_signers {
             panic_with_error!(&env, Error::DefaultThresholdNotMet);
@@ -261,24 +325,32 @@ impl AuthController {
         for ctx in auth_context.iter() {
             match ctx.clone() {
                 Context::Contract(contract_ctx) => {
-                    let is_account =  env
-                    .storage()
-                    .instance()
-                    .get(&DataKey::Account(contract_ctx.clone().contract)).is_some();
+                    let is_account = env
+                        .storage()
+                        .instance()
+                        .get::<Val, Address>(
+                            &DataKey::Account(contract_ctx.clone().contract).into_val(&env),
+                        )
+                        .is_some();
 
-                    let is_factory =  env
-                    .storage()
-                    .instance()
-                    .get(&DataKey::Account(contract_ctx.clone().contract)).is_some();
+                    let is_factory = env
+                        .storage()
+                        .instance()
+                        .get::<Val, Address>(
+                            &DataKey::Factory(contract_ctx.clone().contract).into_val(&env),
+                        )
+                        .is_some();
 
-                    let is_current =  contract_ctx.clone().contract == env.current_contract_address;
+                    let is_current =
+                        contract_ctx.clone().contract == env.current_contract_address();
 
                     match (is_account, is_factory, is_current) {
-                        (None(_), None(_), None(_)) => panic_with_error!(&env, Error::NotAllowedContract),
-                        _ => continue
+                        (false, false, false) => panic_with_error!(&env, Error::NotAllowedContract),
+                        _ => (),
                     }
                 }
                 Context::CreateContractHostFn(_) => (),
+                Context::CreateContractWithCtorHostFn(_) => (),
             }
         }
         Ok(())
