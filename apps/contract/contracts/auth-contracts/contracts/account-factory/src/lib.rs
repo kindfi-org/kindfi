@@ -8,7 +8,7 @@ mod events;
 use crate::events::{AccountDeployEventData, ACCOUNT, DEPLOY};
 
 #[contract]
-pub struct Contract;
+pub struct AccountFactory;
 
 #[contracterror]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -20,7 +20,7 @@ const STORAGE_KEY_WASM_HASH: Symbol = symbol_short!("hash");
 const AUTH_CONTRACT: Symbol = symbol_short!("auth");
 
 #[contractimpl]
-impl Contract {
+impl AccountFactory {
     pub fn __constructor(env: Env, auth_contract: Address, wasm_hash: BytesN<32>) {
         env.storage()
             .instance()
@@ -65,4 +65,4 @@ impl Contract {
     }
 }
 
-// mod test;
+mod test;

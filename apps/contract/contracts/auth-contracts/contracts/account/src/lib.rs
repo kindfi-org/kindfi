@@ -119,6 +119,10 @@ impl Contract {
             .publish((DEVICE, REMOVED), DeviceRemovedEventData { device_id });
     }
 
+    pub fn get_devices(env: Env) -> Vec<DevicePublicKey> {
+        env.storage().instance().get(&STORAGE_KEY_DEVICES).unwrap()
+    }
+
     pub fn add_recovery_address(env: Env, address: Address) {
         env.current_contract_address().require_auth();
 
