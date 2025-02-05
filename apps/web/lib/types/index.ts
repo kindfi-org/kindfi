@@ -5,5 +5,6 @@ export type ConditionalRequired<
 > = Flag extends true ? Required<Pick<T, K>> : Partial<Pick<T, K>>
 
 export * from './pages'
+export * from './passkey.types'
 export * from './project'
 export * from './stats'
