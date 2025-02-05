@@ -3,9 +3,10 @@ use soroban_sdk::{
     auth::{Context, CustomAccountInterface},
     contract, contracterror, contractimpl, contracttype,
     crypto::Hash,
-    symbol_short, Address, Bytes, BytesN, Env, Symbol, Vec,
+    panic_with_error, symbol_short, Address, Bytes, BytesN, Env, Symbol, Vec,
 };
 mod base64_url;
+mod errors;
 mod events;
 
 use crate::events::{
@@ -14,28 +15,17 @@ use crate::events::{
     SECURITY,
 };
 
-#[contract]
-pub struct Contract;
+use crate::errors::Error;
 
-#[contracterror]
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum Error {
-    ClientDataJsonChallengeIncorrect = 1,
-    Secp256r1VerifyFailed = 2,
-    JsonParseError = 3,
-    DeviceAlreadySet = 4,
-    DeviceNotFound = 5,
-    NotInitiated = 6,
-    RecoveryAddressSet = 7,
-    RecoveryAddressNotSet = 8,
-    AuthContractNotSet = 9,
-}
+#[contract]
+pub struct AccountContract;
 
 #[contracttype]
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct Signature {
     pub authenticator_data: Bytes,
     pub client_data_json: Bytes,
+    pub device_id: BytesN<32>,
     pub signature: BytesN<64>,
 }
 
@@ -56,7 +46,7 @@ const RECOVERY_ADDRESS: Symbol = symbol_short!("recovery");
 const AUTH_CONTRACT: Symbol = symbol_short!("auth");
 
 #[contractimpl]
-impl Contract {
+impl AccountContract {
     pub fn constructor(
         env: Env,
         device_id: BytesN<32>,
@@ -80,7 +70,7 @@ impl Contract {
             .unwrap_or(Vec::new(&env));
 
         if devices.iter().any(|device| device.device_id == device_id) {
-            (&env).panic_with_error(Error::DeviceAlreadySet);
+            panic_with_error!(&env, Error::DeviceAlreadySet);
         }
 
         devices.push_back(DevicePublicKey {
@@ -105,12 +95,16 @@ impl Contract {
         let mut devices: Vec<DevicePublicKey> =
             env.storage().instance().get(&STORAGE_KEY_DEVICES).unwrap();
 
+        if devices.len() == 1 {
+            panic_with_error!(&env, Error::DeviceCannotBeEmpty);
+        }
+
         if let Some(device_) = devices.iter().find(|device| device.device_id == device_id) {
             if let Some(index) = devices.first_index_of(&device_) {
                 devices.remove(index);
             }
         } else {
-            (&env).panic_with_error(Error::DeviceNotFound);
+            panic_with_error!(&env, Error::DeviceNotFound);
         }
 
         env.storage().instance().set(&STORAGE_KEY_DEVICES, &devices);
@@ -127,7 +121,7 @@ impl Contract {
         env.current_contract_address().require_auth();
 
         if env.storage().instance().has(&RECOVERY_ADDRESS) {
-            (&env).panic_with_error(Error::RecoveryAddressSet);
+            panic_with_error!(&env, Error::RecoveryAddressSet);
         }
 
         env.storage().instance().set(&RECOVERY_ADDRESS, &address);
@@ -190,7 +184,7 @@ impl Contract {
 }
 
 #[contractimpl]
-impl CustomAccountInterface for Contract {
+impl CustomAccountInterface for AccountContract {
     type Error = Error;
     type Signature = Signature;
 
@@ -206,14 +200,19 @@ impl CustomAccountInterface for Contract {
             .get(&STORAGE_KEY_DEVICES)
             .ok_or(Error::NotInitiated)?;
 
-        for device in devices.iter() {
+        if let Some(device_) = devices
+            .iter()
+            .find(|device| device.device_id == signature.device_id)
+        {
             let mut payload = Bytes::new(&env);
             payload.append(&signature.authenticator_data);
             payload.extend_from_array(&env.crypto().sha256(&signature.client_data_json).to_array());
             let payload = env.crypto().sha256(&payload);
 
             env.crypto()
-                .secp256r1_verify(&device.public_key, &payload, &signature.signature)
+                .secp256r1_verify(&device_.public_key, &payload, &signature.signature);
+        } else {
+            return Err(Error::DeviceNotFound);
         }
 
         let client_data_json = signature.client_data_json.to_buffer::<1024>();
@@ -231,3 +230,5 @@ impl CustomAccountInterface for Contract {
         Ok(())
     }
 }
+
+mod test;
