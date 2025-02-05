@@ -2,6 +2,28 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 
+/**
+ * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/card
+ * The Card component is a container that provides a flexible and consistent layout for grouping content in a styled box with shadow and rounded corners.
+ * It contains different sections (header, content, footer) that can be customized using the various sub-components.
+ *
+ * @component
+ * @example
+ * <Card>
+ *   <CardHeader>
+ *     <CardTitle>Card Title</CardTitle>
+ *     <CardDescription>Card Description</CardDescription>
+ *   </CardHeader>
+ *   <CardContent>
+ *     Main content of the card.
+ *   </CardContent>
+ *   <CardFooter>Footer content</CardFooter>
+ * </Card>
+ *
+ * @param {React.HTMLAttributes<HTMLDivElement>} props - The props for the `Card` component.
+ * @param {string} [props.className] - Optional class names for custom styling.
+ * @returns {JSX.Element} The rendered Card component.
+ */
 const Card = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement>
@@ -17,6 +39,14 @@ const Card = React.forwardRef<
 ))
 Card.displayName = 'Card'
 
+/**
+ * CardHeader is the section at the top of the card, often used for titles, descriptions, or any introductory content.
+ * It can be customized with additional styling.
+ *
+ * @param {React.HTMLAttributes<HTMLDivElement>} props - The props for the `CardHeader` component.
+ * @param {string} [props.className] - Optional class names for custom styling.
+ * @returns {JSX.Element} The rendered CardHeader component.
+ */
 const CardHeader = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement>
@@ -29,6 +59,13 @@ const CardHeader = React.forwardRef<
 ))
 CardHeader.displayName = 'CardHeader'
 
+/**
+ * CardTitle is the main title of the card, usually in a larger font, typically positioned inside the CardHeader.
+ *
+ * @param {React.HTMLAttributes<HTMLHeadingElement>} props - The props for the `CardTitle` component.
+ * @param {string} [props.className] - Optional class names for custom styling.
+ * @returns {JSX.Element} The rendered CardTitle component.
+ */
 const CardTitle = React.forwardRef<
 	HTMLParagraphElement,
 	React.HTMLAttributes<HTMLHeadingElement>
@@ -44,6 +81,14 @@ const CardTitle = React.forwardRef<
 ))
 CardTitle.displayName = 'CardTitle'
 
+/**
+ * CardDescription provides additional information or context about the content of the card.
+ * It's usually placed below the CardTitle inside the CardHeader.
+ *
+ * @param {React.HTMLAttributes<HTMLParagraphElement>} props - The props for the `CardDescription` component.
+ * @param {string} [props.className] - Optional class names for custom styling.
+ * @returns {JSX.Element} The rendered CardDescription component.
+ */
 const CardDescription = React.forwardRef<
 	HTMLParagraphElement,
 	React.HTMLAttributes<HTMLParagraphElement>
@@ -56,6 +101,14 @@ const CardDescription = React.forwardRef<
 ))
 CardDescription.displayName = 'CardDescription'
 
+/**
+ * CardContent is the main section of the card, typically where the primary content (text, images, etc.) resides.
+ * It provides padding and spacing for the content inside the card.
+ *
+ * @param {React.HTMLAttributes<HTMLDivElement>} props - The props for the `CardContent` component.
+ * @param {string} [props.className] - Optional class names for custom styling.
+ * @returns {JSX.Element} The rendered CardContent component.
+ */
 const CardContent = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement>
@@ -64,6 +117,13 @@ const CardContent = React.forwardRef<
 ))
 CardContent.displayName = 'CardContent'
 
+/**
+ * CardFooter is the bottom section of the card, typically used for actions, links, or other content related to the card.
+ *
+ * @param {React.HTMLAttributes<HTMLDivElement>} props - The props for the `CardFooter` component.
+ * @param {string} [props.className] - Optional class names for custom styling.
+ * @returns {JSX.Element} The rendered CardFooter component.
+ */
 const CardFooter = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement>
