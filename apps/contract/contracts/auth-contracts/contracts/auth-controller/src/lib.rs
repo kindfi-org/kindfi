@@ -131,7 +131,7 @@ impl AuthController {
             .set::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env), &signers);
 
         env.events()
-            .publish((SIGNER, ADDED), SignerRemovedEventData { signer });
+            .publish((SIGNER, REMOVED), SignerRemovedEventData { signer });
     }
 
     pub fn get_signers(env: Env) -> Vec<BytesN<32>> {

@@ -139,7 +139,7 @@ fn test_remove_device() {
 }
 
 #[test]
-#[should_panic(expected = "#2010")]
+#[should_panic(expected = "#209")]
 fn test_remove_device_fails_if_only_one_device() {
     let auth_contract = Address::random(&env);
     let Account { env, client, .. } = Account::new(auth_contract);

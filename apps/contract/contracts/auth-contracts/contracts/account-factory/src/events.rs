@@ -1,12 +1,12 @@
 use soroban_sdk::{contracttype, symbol_short, Address, Symbol};
 
-// Symbol representing account-related events.
+// Symbol for events related to account operations.
 pub const ACCOUNT: Symbol = symbol_short!("ACCOUNT");
 
-// Symbol representing Deploy events.
+// Symbol for account deployment events.
 pub const DEPLOY: Symbol = symbol_short!("DEPLOY");
 
-// Event data for when a device is added.
+// Event data emitted when a new account is deployed.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AccountDeployEventData {

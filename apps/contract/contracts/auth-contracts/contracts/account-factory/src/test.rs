@@ -14,7 +14,7 @@ use soroban_sdk::{
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct DevicePublicKey {
     pub device_id: BytesN<32>,
-    pub public_key: BytesN<65>,
+    pub public_key: BytesN<64>,
 }
 
 // The contract that will be deployed by the deployer contract.
@@ -62,4 +62,27 @@ fn test() {
     let client = contract::Client::new(&env, &contract_id);
     let devices: Vec<DevicePublicKey> = client.get_devices();
     assert_eq!(devices.len(), 1);
+}
+
+#[test]
+#[should_panic]
+fn test_duplicate_deployment() {
+    let env = Env::default();
+    let auth_contract = Address::generate(&env);
+    let wasm_hash = env.deployer().upload_contract_wasm(contract::WASM);
+
+    let factory_client = AccountFactoryClient::new(
+        &env,
+        &env.register(AccountFactory, (&auth_contract, &wasm_hash)),
+    );
+
+    let id = BytesN::random(&env);
+    let pk = BytesN::random(&env);
+    let salt = BytesN::from_array(&env, &[0; 32]);
+
+    env.mock_all_auths();
+    // First deployment
+    factory_client.deploy(&salt, &id, &pk);
+    // Should fail on duplicate deployment
+    factory_client.deploy(&salt, &id, &pk);
 }

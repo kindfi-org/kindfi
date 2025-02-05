@@ -12,6 +12,9 @@ pub const DEVICE: Symbol = symbol_short!("DEVICE");
 // Symbol representing an added event.
 pub const ADDED: Symbol = symbol_short!("ADDED");
 
+// Symbol representing an added event.
+pub const UPDATED: Symbol = symbol_short!("UPDATED");
+
 // Symbol representing a removed event.
 pub const REMOVED: Symbol = symbol_short!("REMOVED");
 
@@ -20,7 +23,7 @@ pub const REMOVED: Symbol = symbol_short!("REMOVED");
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DeviceAddedEventData {
     pub device_id: BytesN<32>,
-    pub public_key: BytesN<65>,
+    pub public_key: BytesN<64>,
 }
 
 // Event data for when a device is removed.
@@ -30,24 +33,17 @@ pub struct DeviceRemovedEventData {
     pub device_id: BytesN<32>,
 }
 
-// Event data for when a recovery addresss is added.
+// Event data for recovery addresss action.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct RecoveryAddressAddedData {
+pub struct RecoveryAddressEventData {
     pub address: Address,
 }
 
-// Event data for when a recovery is updated.
-#[contracttype]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct RecoveryAddressUpdatedData {
-    pub address: Address,
-}
-
-// Event data for when a recovery is updated.
+// Event data for when a recovery is recovered.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AccountRecoveredEventData {
     pub device_id: BytesN<32>,
-    pub public_key: BytesN<65>,
+    pub public_key: BytesN<64>,
 }

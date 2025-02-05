@@ -11,8 +11,7 @@ mod events;
 
 use crate::events::{
     AccountRecoveredEventData, DeviceAddedEventData, DeviceRemovedEventData,
-    RecoveryAddressAddedData, RecoveryAddressUpdatedData, ACCOUNT, ADDED, DEVICE, REMOVED,
-    SECURITY,
+    RecoveryAddressEventData, ACCOUNT, ADDED, DEVICE, REMOVED, SECURITY, UPDATED,
 };
 
 use crate::errors::Error;
@@ -33,7 +32,7 @@ pub struct Signature {
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct DevicePublicKey {
     pub device_id: BytesN<32>,
-    pub public_key: BytesN<65>,
+    pub public_key: BytesN<64>,
 }
 
 #[derive(serde::Deserialize)]
@@ -47,10 +46,10 @@ const AUTH_CONTRACT: Symbol = symbol_short!("auth");
 
 #[contractimpl]
 impl AccountContract {
-    pub fn constructor(
+    pub fn __constructor(
         env: Env,
         device_id: BytesN<32>,
-        public_key: BytesN<65>,
+        public_key: BytesN<64>,
         auth_contract: Address,
     ) {
         let devices = Vec::new(&env).push_back(DevicePublicKey {
@@ -61,7 +60,7 @@ impl AccountContract {
         env.storage().instance().set(&AUTH_CONTRACT, &auth_contract);
     }
 
-    pub fn add_device(env: Env, device_id: BytesN<32>, public_key: BytesN<65>) {
+    pub fn add_device(env: Env, device_id: BytesN<32>, public_key: BytesN<64>) {
         env.current_contract_address().require_auth();
         let mut devices: Vec<DevicePublicKey> = env
             .storage()
@@ -126,8 +125,10 @@ impl AccountContract {
 
         env.storage().instance().set(&RECOVERY_ADDRESS, &address);
 
-        env.events()
-            .publish((ACCOUNT, SECURITY), RecoveryAddressAddedData { address });
+        env.events().publish(
+            (ACCOUNT, SECURITY, ADDED),
+            RecoveryAddressEventData { address },
+        );
     }
 
     pub fn update_recovery_address(env: Env, address: Address) {
@@ -144,11 +145,13 @@ impl AccountContract {
 
         env.storage().instance().set(&RECOVERY_ADDRESS, &address);
 
-        env.events()
-            .publish((ACCOUNT, SECURITY), RecoveryAddressUpdatedData { address });
+        env.events().publish(
+            (ACCOUNT, SECURITY, UPDATED),
+            RecoveryAddressEventData { address },
+        );
     }
 
-    pub fn recover_account(env: Env, new_device_id: BytesN<32>, new_public_key: BytesN<65>) {
+    pub fn recover_account(env: Env, new_device_id: BytesN<32>, new_public_key: BytesN<64>) {
         // add multisig authentication from parent auth contract for recovery update
         let auth_contract = env
             .storage()

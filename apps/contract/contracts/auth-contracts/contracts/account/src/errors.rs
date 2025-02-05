@@ -11,6 +11,5 @@ pub enum Error {
     NotInitiated = 206,
     RecoveryAddressSet = 207,
     RecoveryAddressNotSet = 208,
-    AuthContractNotSet = 209,
-    DeviceCannotBeEmpty = 2010,
+    DeviceCannotBeEmpty = 209,
 }

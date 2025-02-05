@@ -32,8 +32,8 @@ impl AccountFactory {
     pub fn deploy(
         env: Env,
         salt: BytesN<32>,
-        id: BytesN<65>,
-        pk: BytesN<65>,
+        id: BytesN<64>,
+        pk: BytesN<64>,
     ) -> Result<Address, Error> {
         let auth_contract = env
             .storage()

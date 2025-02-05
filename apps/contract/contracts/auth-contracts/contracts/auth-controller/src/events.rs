@@ -45,7 +45,7 @@ pub struct SignerRemovedEventData {
     pub signer: BytesN<32>,
 }
 
-// Event data for when a account is added along with its associated context.
+// Event data for when a factory is added along with its associated context.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FactoryAddedEventData {
@@ -53,7 +53,7 @@ pub struct FactoryAddedEventData {
     pub context: Vec<Address>,
 }
 
-// Event data for when a account is added along with its associated context.
+// Event data for when a factory is added along with its associated context.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FactoryRemovedEventData {
@@ -61,7 +61,7 @@ pub struct FactoryRemovedEventData {
     pub context: Vec<Address>,
 }
 
-// Event data for when a account is added along with its associated context.
+// Event data for when an account is added along with its associated context.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AccountAddedEventData {
@@ -69,7 +69,7 @@ pub struct AccountAddedEventData {
     pub context: Vec<Address>,
 }
 
-// Event data for when a account is removed along with its associated context.
+// Event data for when an account is removed along with its associated context.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AccountRemovedEventData {
