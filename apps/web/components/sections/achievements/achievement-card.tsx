@@ -2,7 +2,7 @@
 
 import { Gem, Heart, Medal, Star, Trophy, Users } from 'lucide-react'
 import { Card, CardContent } from '~/components/base/card'
-import type { AchievementCardProps } from '~/lib/types/section'
+import type { AchievementCardProps } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
 const icons = {

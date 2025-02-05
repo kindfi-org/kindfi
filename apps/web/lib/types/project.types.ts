@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 /** Custom type for percentage values between 0-100 */
-type Percentage = number & { readonly __brand: 'percentage' }
+type Percentage = number & { readonly __brand?: 'percentage' }
 
 /** Helper function to validate and create percentage values */
 function createPercentage(value: number): Percentage {
@@ -12,7 +12,7 @@ function createPercentage(value: number): Percentage {
 }
 
 /** Custom type for non-empty string values */
-type NonEmptyString = string & { readonly __brand: 'non-empty-string' }
+type NonEmptyString = string & { readonly __brand?: 'non-empty-string' }
 
 /** Helper function to validate and create project tag */
 export function createProjectTag(id: string, text: string): ProjectTag {
@@ -37,7 +37,7 @@ type TailwindColor =
 /**add more if needed */
 
 /** Represents a monetary value with precision handling */
-type Money = number & { readonly __brand: 'money' }
+type Money = number & { readonly __brand?: 'money' }
 
 /** Helper function to create monetary values */
 function createMoney(value: number): Money {
@@ -102,11 +102,11 @@ export interface Project {
 }
 
 export {
-	createPercentage,
-	createMoney,
 	createImageUrl,
-	type Percentage,
-	type NonEmptyString,
-	type TailwindColor,
+	createMoney,
+	createPercentage,
 	type Money,
+	type NonEmptyString,
+	type Percentage,
+	type TailwindColor,
 }

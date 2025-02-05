@@ -1,5 +1,5 @@
 import { Rocket, Shield, TrendingUp, Users } from 'lucide-react'
-import type { Benefit, TestimonialData } from '~/lib/types/home.types'
+import type { Benefit, TestimonialData } from '~/lib/types'
 
 export const benefits: Benefit[] = [
 	{

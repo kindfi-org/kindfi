@@ -1,4 +1,4 @@
-import type { EscrowInitialization, Milestone } from '../types/escrow'
+import type { EscrowInitialization, Milestone } from '../types/escrow.types'
 
 interface ValidationResult {
 	success: boolean

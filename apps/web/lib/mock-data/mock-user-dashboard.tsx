@@ -1,5 +1,5 @@
 import { BarChart2, Users, Wallet } from 'lucide-react'
-import type { ImpactMetric, ProjectDetails } from '~/lib/types/user-dashboard'
+import type { ImpactMetric, ProjectDetails } from '~/lib/types'
 
 export const mockProjects: ProjectDetails[] = [
 	{

@@ -8,7 +8,7 @@ import {
 	Target,
 	Zap,
 } from 'lucide-react'
-import type { Feature, SocialButtonProps } from '~/lib/types/home.types'
+import type { Feature, SocialButtonProps } from '~/lib/types'
 
 export const features: Feature[] = [
 	{

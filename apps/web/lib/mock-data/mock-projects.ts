@@ -6,7 +6,7 @@ import type {
 	TabItem,
 	TimelineEvent,
 	UpdateItem,
-} from '~/lib/types/home.types'
+} from '~/lib/types'
 
 export const projects: Project[] = [
 	{

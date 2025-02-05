@@ -1,5 +1,5 @@
 import { Heart, Trophy, Users } from 'lucide-react'
-import type { Activity, Update } from '~/lib/types/right-side-panel'
+import type { Activity, Update } from '~/lib/types'
 
 export const mockUpdates: Update[] = [
 	{

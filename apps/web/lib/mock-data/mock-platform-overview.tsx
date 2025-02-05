@@ -1,5 +1,5 @@
 import { ChartBar, Clock, ShieldCheck, Target, Wallet } from 'lucide-react'
-import type { Feature, Stat } from '~/lib/types/home.types'
+import type { Feature, Stat } from '~/lib/types'
 
 export const features: Feature[] = [
 	{

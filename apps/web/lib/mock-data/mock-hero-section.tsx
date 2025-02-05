@@ -12,7 +12,7 @@ import {
 	Stethoscope,
 	UtensilsCrossed,
 } from 'lucide-react'
-import type { Category, Stat } from '~/lib/types/home.types'
+import type { Category, Stat } from '~/lib/types'
 
 export const categories: Category[] = [
 	{

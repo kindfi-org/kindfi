@@ -14,4 +14,8 @@ export interface StatItem {
 	icon: ReactNode
 	/** Whether this stat should be visually highlighted */
 	highlight?: boolean
+	/** Background color for the stat item */
+	bgColor?: string
+	/** Text color for the stat item */
+	textColor?: string
 }

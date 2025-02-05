@@ -3,7 +3,7 @@
 import { ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 import { Card, CardContent } from '~/components/base/card'
-import type { NFTCardProps } from '~/lib/types/section'
+import type { NFTCardProps } from '~/lib/types'
 
 export function NFTCard({
 	id,
