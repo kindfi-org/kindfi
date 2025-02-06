@@ -1,4 +1,52 @@
-# KindFi NFT Contract Deployment Guide
+# KINDFI CONTRACTS
+
+## 1. Auth Contracts
+
+This repository contains Rust-based smart contracts for a decentralized authentication system. The contracts facilitate account creation, authentication, and account management using smart contract-based logic.
+
+### Overview
+The system consists of three main contracts:
+
+#### 1. **Account Factory**
+
+   - Responsible for deploying new account contracts in a deterministic manner.
+   - Uses a provided WebAssembly (WASM) hash to deploy contract instances.
+   - Ensures only authorized entities can initiate deployments.
+   - Emits events upon successful contract deployments.
+
+#### 2. **Auth Controller**
+
+   - Handles multi-signature authentication and permission management.
+   - Manages a dynamic set of signers, enforcing authentication thresholds.
+   - Supports account and factory management through stored contexts.
+   - Implements flexible authorization rules for external contract calls.
+   - Allows addition and removal of signers, accounts, and factories.
+   - Ensures authentication by verifying **Ed25519** cryptographic signatures.
+   - Emits events for key contract updates such as signer additions and removals.
+
+#### 3. **Account Contract**
+
+   - Represents an individual user account.
+   - Ensures authentication by verifying **Secp256r1** cryptographic signatures, in line with WebAuthn specifications..
+   - Provides methods for account recovery, device management, and security updates.
+   - Uses a multi-device authentication model with public keys tied to registered devices.
+   - Supports recovery mechanisms through a designated recovery address.
+   - Implements a custom authentication interface to validate digital signatures and verify ownership.
+   - Emits events for device additions, removals, and security updates.
+
+### How It Works
+
+1. The **Account Factory** deploys a new **Account Contract** when a user registers.
+2. The **Auth Controller** manages authentication flows, including key validation and session authorization.
+3. The **Account Contract** holds user credentials, allowing secure and decentralized identity management.
+
+### Dependencies
+
+- Rust toolchain
+- Cargo package manager
+- Blockchain runtime (depends on deployment environment)
+
+## 2. KindFi NFT Contract
 
 ## Prerequisites
 

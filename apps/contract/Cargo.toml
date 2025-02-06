@@ -1,11 +1,9 @@
 [workspace]
+members = ["contracts/auth-contracts/*", "contracts/nft"]
 resolver = "2"
-members = [
-  "contracts/*",
-]
 
 [workspace.dependencies]
-soroban-sdk = "20.3.2"
+soroban-sdk = "22.0.6"
 
 [profile.release]
 opt-level = "z"
