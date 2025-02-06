@@ -1,0 +1,20 @@
+[package]
+name = "account_contract"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+serde = { version = "1.0.217", default-features = false, features = ["derive"] }
+serde-json-core = { version = "0.6.0", default-features = false }
+
+[dev-dependencies]
+p256 = { version = "0.13.2" }
+soroban-sdk = { workspace = true, features = ["testutils"] }
+rand = { version = "0.9.0" }
+hex = { version = "0.4.3" }
