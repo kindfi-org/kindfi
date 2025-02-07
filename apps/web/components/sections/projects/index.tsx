@@ -12,9 +12,21 @@ export function ProjectsSection() {
 	)
 	const [sortBy, setSortBy] = React.useState('popular')
 
-	const filteredProjects = mockProjects.filter(
-		(project) => !selectedCategory || project.category === selectedCategory,
-	)
+	const filteredAndSortedProjects = mockProjects
+		.filter(
+			(project) => !selectedCategory || project.category === selectedCategory,
+		)
+		.sort((a, b) => {
+			switch (sortBy) {
+				case 'popular':
+					return b.supporters - a.supporters
+				case 'newest':
+					// TODO: Implement once createdAt is added
+					return 0
+				default:
+					return 0
+			}
+		})
 
 	return (
 		<section className="w-full max-w-7xl mx-auto px-4 py-8">
@@ -30,7 +42,7 @@ export function ProjectsSection() {
 				<SortingControls value={sortBy} onChange={setSortBy} />
 			</div>
 
-			<ProjectGrid projects={filteredProjects} />
+			<ProjectGrid projects={filteredAndSortedProjects} />
 		</section>
 	)
 }
