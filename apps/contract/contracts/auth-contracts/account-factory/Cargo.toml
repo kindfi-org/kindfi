@@ -1,5 +1,5 @@
 [package]
-name = "kindfi-nft"
+name = "account_factory"
 version = "0.1.0"
 edition = "2021"
 
@@ -11,3 +11,4 @@ soroban-sdk = { workspace = true }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
+rand = { version = "0.8.3" }
