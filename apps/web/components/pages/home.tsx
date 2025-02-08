@@ -1,11 +1,6 @@
 import dynamic from 'next/dynamic'
-import {
-	type Money,
-	type Percentage,
-	type Project,
-	createMoney,
-	createPercentage,
-} from '~/lib/types'
+import type { Project, TMoney, TPercentage } from '~/lib/types'
+import { createMoney, createPercentage } from '~/lib/utils/types-helpers'
 
 const Hero = dynamic(
 	() => import('~/components/sections/home/hero').then((mod) => mod.Hero),
@@ -88,14 +83,14 @@ const projects: Project[] = [
 		title: 'Healthy Kids Workshop',
 		description:
 			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica...',
-		currentAmount: { __brand: 'money', value: 22800 } as unknown as Money,
-		targetAmount: { __brand: 'money', value: 25000 } as unknown as Money,
+		currentAmount: { __brand: 'money', value: 22800 } as unknown as TMoney,
+		targetAmount: { __brand: 'money', value: 25000 } as unknown as TMoney,
 		investors: 18,
-		minInvestment: { __brand: 'money', value: 5 } as unknown as Money,
+		minInvestment: { __brand: 'money', value: 5 } as unknown as TMoney,
 		percentageComplete: {
 			__brand: 'percentage',
 			value: 90,
-		} as unknown as Percentage,
+		} as unknown as TPercentage,
 		tags: [
 			{ id: 'ngo-tag-id', text: 'NGO' },
 			{ id: 'nutrition-tag-id', text: 'NUTRITION' },
