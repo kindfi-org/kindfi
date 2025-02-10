@@ -4,7 +4,7 @@ icon: marker
 
 # How to Contribute
 
-## OSS Contribution Guide - How to Contribute
+## :scroll: OSS Contribution Guide - How to Contribute
 
 Created by: Roberto "Andler" Lucas Created time: January 7, 2025 12:17 AM Tags: Engineering, Guides, Product
 
@@ -12,43 +12,44 @@ Welcome to KindFi! We're excited to have you as a part of our community. Here's 
 
 1. **Onboarding:** All new contributors are required to go through our onboarding process, which includes:
    * Reading and acknowledging our contributor guidelines and code of conduct.
-2. **Communication:** takes place on our Telegram server. Make sure to join the relevant channels and introduce yourself to the community.
+   * Acknowledge maintainers/admins that you have read the given documentation and you have applied to your first issue in the Telegram community.
+2. **Communication:** takes place on our Telegram server. Make sure to join the relevant channels and introduce yourself to the community. Additionally, you can communicate any update at the related issue/PR.&#x20;
 
 > ℹ️ Join to our [Telegram community](https://t.me/+CWeVHOZb5no1NmQx) and follow our onboarding process if you haven't already!
 
 ### **Getting Started**
 
-To get started to contribute (after onboarding), you can:
+To get started to contribute (after onboarding), ensure to:
 
 * Fill out your contribution application. You may find a template here: [Issue Application Template](issue-application-template.md)
-* Look for issues labelled "good first issue" on the KindFi portal at the OD platform.
-  * _Make sure it has the OD tags in it_.
-* **YOU MUST HAVE YOUR COMMIT SIGNED FOR EVERY PUSH.** Any commit that is not authenticated (signed) it will be _rejected_ hence, your work _won't count until_ those commits are signed.
+  * If you previously contributed with us, tell us how your skills are related with the issue and a short overview of the approach that you are thinking about with an ETA!
+* Look for issues labelled "good first issue" on the KindFi portal at the OD platform if it is your first time.
+  * _Make sure it has the OD (OnlyDust) tags on it_.
+* **NO** self-assigned issues, wait for maintainers/admins to assign you the issue that you've applied for.
+  * If you self-assigned an issue, you may not be eligible for the requested issue. Be mindful with other applicants.
+* **HAVE YOUR COMMIT SIGNED FOR EVERY PUSH** _(code contributors)_**.** Any commit that is not authenticated (signed) it will be _rejected_ hence, your work _won't count until_ those commits are signed.
   * You can follow this [GitHub guide here](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) to know how.
+* Look our MVP wireframes and designs! You may find it in [this Figma](https://www.figma.com/design/N6eCxAkGM19hQUGBK9GBJa/KindFi-MVP?node-id=65-26\&t=JX2dj1Qb7iPpJ4AX-11).
+  * If you are proposing a design and want to contribute to edit, request access.
+* Keep the conversation when you have an assigned issue, we want to know how you are progressing!
+  * If have been assigned and no response from the contributor, it may result of assignation destitution and be assigned to someone else or moved to the next round. Be mindful with other applicants and your reputation!
 
-## Code Style and Conventions
+## :woman\_technologist: Code Style and Conventions
 
 To ensure our codebase remains a shining example of consistency and quality, we adhere to a set of coding conventions that will guide you on your quest:
 
-* Harness the power of the Shadcn/ui component library and Tailwind CSS to create stunning, responsive UIs
-* Embrace the declarative paradigm and leverage the magic of React hooks for building modular, reusable components
-* Wield the power of TypeScript to write code that's self-documenting, catch errors early, and provide an exceptional developer experience
-* Keep your code DRY (Don't Repeat Yourself) to maintain a lean and efficient codebase
-* Craft meaningful, intention-revealing names for your variables, functions, and components
-* Design small, focused components that excel at a single responsibility
-* Embrace a functional architecture style, reserving classes for server workers or controllers
-* Extract logic into separate functions only when it enhances readability or promotes reusability
-
-### Design System Standards
-
-* Follow established component naming conventions as our Code Style and Conventions.
-* Use auto-layout for all components to ensure responsive design.
-* Maintain a clear component hierarchy and organization.
-* Document all design decisions and component usage guidelines within the related issue.
+* Harness the power of the Shadcn/ui component library and Tailwind CSS to create stunning, responsive UIs.
+* Embrace the declarative paradigm and leverage the magic of React hooks for building modular, reusable components.
+* Wield the power of TypeScript to write code that's self-documenting, catch errors early, and provide an exceptional developer experience.
+* Keep your code DRY (Don't Repeat Yourself) to maintain a lean and efficient codebase.
+* Craft meaningful, intention-revealing names for your variables, functions, and components.
+* Design small, focused components that excel at a single responsibility.
+* Embrace a functional architecture style, reserving classes for server workers or controllers.
+* Extract logic into separate functions only when it enhances readability or promotes reusability.
 
 Dive into our [**comprehensive code style guide**](../code-and-design-guide-style-and-conventions/) to uncover a wealth of detailed examples and best practices that will elevate your code to new heights!
 
-## Git Conventions
+## :computer: Git Conventions
 
 In this mono-repo, consistency is key to maintaining a clean and organized codebase. These guidelines outline clear conventions for commit messages and branch naming, ensuring a readable and professional commit history that fosters collaboration.
 
@@ -109,15 +110,50 @@ When you're ready to share your contributions with the world, it's time to creat
 
 For instance, a PR titled "\[web] Fix login form validation error on Safari" provides a concise summary of the issue being addressed and the app being modified.
 
-## Development Process
+## :motorway: Development Process
 
 ### Getting Started
 
-Begin your development journey with these essential steps:
+Before beginning your development journey, you will have to request access to the repository if you are not able to push changes. Once you have the permissions and everything set, follow these essential steps:
 
-1. Fork and clone the repository: `git clone <repo-url>`.
-2. Set up your development environment with `bun install`.
-3. Optionally for MacOS/Linux users, review the root `Taskfile` for available commands and scripts.
+1. Prepare your git signatures! If you haven't set it up yet, follow [this guide](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
+2. Clone the repository into your local machine with a password-protected SSH key:&#x20;
+
+<pre class="language-bash"><code class="lang-bash"><strong>git clone git@github.com:kindfi-org/kindfi.git
+</strong></code></pre>
+
+3. We use **`bun`** package manager. Set up your development environment with `bun install`. Avoid to include any other package manager i.e.: `pnpm`, `yarn`, `npm`.
+   1. On each project, there is a `README.md`file that mentions how to boot each app/service and how to use the available scripts for each `package.json`.
+   2. Once you have installed all dependencies, make sure that `husky` has been installed for the pre-commits, [commitlintin](https://commitlint.js.org/)[g](https://commitlint.js.org/) and [`biome.js`](https://biomejs.dev/) linting and formatting.
+   3. Ask for environment variable credentials when required. You might need them while working in the web app.
+      1. For supabase, if you have docker in your machine, you can initialize supabase locally and use those credentials instead.
+4. Optionally, for macOS/Linux users, review the root `Taskfile` for available commands and scripts.
+
+### Development Flow
+
+```mermaid fullWidth="false"
+graph TD
+    A["**develop**
+    [Base development branch]"] -- git checkout -b --> B["**feat-123-user-profile**
+    [Working branch]"]
+    B --o E["When work is done"]
+    E --> A
+    A -- when pre-prod test required --o C["**test**
+    [pre-production tests]"]
+    A -- when no pre-prod test required --> D["**main**
+    [Production]"]
+    C --> D
+```
+
+> ⚠️ Always rebase from the `develop` branch. The working flow is:
+>
+> 1. Create a new branch from `develop` with the issue number and a brief description.
+> 2. Work on your feature/fix.
+> 3. Rebase from `develop` to keep your branch up-to-date.
+> 4. Push your branch to the remote repository.
+> 5. Create a pull request to merge your branch into `develop`.
+> 6. Assign reviewers and make sure all checks pass.
+> 7. Merge your branch into `develop` if project lead approves.
 
 ### Making Changes
 
@@ -151,7 +187,7 @@ Our documentation is organized in the `docs` folder:
 
 Keep documentation current and well-organized as you contribute. If you are contributing in the documentation, **always** provide context about the changes that you are making and why you are making those. Any work with documentation updates and has not been explained in the PR description, it will be rejected.
 
-## Design Process
+## :art: Design Process
 
 Our design workflow is centered around Figma and follows a structured process from idealization to implementation:
 
@@ -159,19 +195,28 @@ Our design workflow is centered around Figma and follows a structured process fr
 
 Begin your design journey with these steps:
 
-1. Accept your assigned issue in OnlyDust
-2. Request access to our Figma workspace
-3. Review our design system documentation and component library
-4. Set up your Figma workspace with proper file organization
+1. Accept your assigned issue in OnlyDust.
+2. Request access to our [Figma workspace](https://www.figma.com/files/team/1445297614298403934/project/308829761/KindFi?fuid=1445297612433606627).
+3. Review our design system documentation and component library.
+4. Set up your Figma workspace with proper file organization.
 
 ### Design Workflow
 
 Follow these guidelines while working on your designs:
 
-1. Create designs in the designated Figma project space
-2. Use components from our design system library
-3. Implement auto-layout for responsive designs
-4. Add detailed developer notes in Figma's developer mode
+1. Create designs in the designated Figma project space.
+2. Use components from our design system library.
+3. Implement auto-layout for responsive designs.
+4. Add detailed developer notes in Figma's developer mode.
+
+### Design System Standards
+
+* Follow established component naming conventions as our Code Style and Conventions.
+* Use auto-layout for all components to ensure responsive design.
+* Maintain a clear component hierarchy and organization.
+* Document all design decisions and component usage guidelines within the related issue.
+
+Dive into our [**comprehensive design style guide**](../code-and-design-guide-style-and-conventions/code-and-design-guide-style-and-conventions-1.md) to uncover a wealth of detailed examples and best practices that will elevate your code to new heights!
 
 ### Review Process
 
@@ -187,6 +232,9 @@ Ensure your designs meet our quality standards:
 Prepare your designs for development:
 
 1. Submit your designs following our Figma organization structure.
-2. Project leads review for design system compliance and implementation feasibility.
+   1. You may provide a prototype for an enhanced UX review.
+2. Maintainers/admins review for design system compliance and implementation feasibility.
 3. Address feedback through Figma comments.
+   1. You may receive feedbacks within the issue or PR (if any). Mind to keep the conversation alive.&#x20;
 4. Continue iterations until designs meet all requirements.
+
