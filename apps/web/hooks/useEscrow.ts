@@ -1,11 +1,7 @@
-// apps/web/hooks/useEscrow.ts
 'use client'
-
-import { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import { createClient } from '../lib/supabase/client'
 
-// Database type includes CANCELLED
 type EscrowStatusType =
 	| 'NEW'
 	| 'FUNDED'
@@ -28,7 +24,6 @@ interface DatabaseEscrowRecord {
 	}
 }
 
-// Interface type excludes CANCELLED as per requirements
 interface EscrowStatus {
 	state: 'NEW' | 'FUNDED' | 'ACTIVE' | 'COMPLETED' | 'DISPUTED'
 	milestoneStatus: {
@@ -50,11 +45,9 @@ export function useEscrow(escrowId: string) {
 	const [rawRecord, setRawRecord] = useState<DatabaseEscrowRecord | null>(null)
 	const supabase = createClient()
 
-	// Convert database record to required interface format
 	const transformRecord = (
 		record: DatabaseEscrowRecord,
 	): EscrowStatus | null => {
-		// Skip cancelled records as they're not part of the interface
 		if (record.status === 'CANCELLED') return null
 
 		return {
@@ -101,7 +94,6 @@ export function useEscrow(escrowId: string) {
 	useEffect(() => {
 		fetchEscrowStatus()
 
-		// Set up real-time subscription
 		const channel = supabase.channel(`public:escrow_status:id=eq.${escrowId}`)
 
 		channel
