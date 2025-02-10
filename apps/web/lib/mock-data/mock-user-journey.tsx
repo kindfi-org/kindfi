@@ -1,5 +1,5 @@
 import { ChevronRight, Rocket, Users } from 'lucide-react'
-import type { JourneyStep } from '~/lib/types/home.types'
+import type { JourneyStep } from '~/lib/types'
 
 export const projectSteps: JourneyStep[] = [
 	{

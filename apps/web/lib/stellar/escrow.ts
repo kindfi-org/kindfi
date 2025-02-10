@@ -4,13 +4,13 @@ import {
 	Keypair,
 	Networks,
 	Operation,
+	default as Predicate,
+	default as Server,
 	TransactionBuilder,
 	type xdr,
 } from 'stellar-sdk'
-import Predicate from 'stellar-sdk'
-import Server from 'stellar-sdk'
 import { AppError } from '../error'
-import type { EscrowContractParams } from '../types/escrow'
+import type { EscrowContractParams } from '../types/escrow.types'
 import { getAccountSequence } from '../utils'
 import { generateUniqueId } from '../utils/id'
 

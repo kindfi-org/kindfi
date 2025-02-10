@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
 import { initializeEscrowContract } from '~/lib/stellar/escrow'
-import type { EscrowInitialization } from '~/lib/types/escrow'
+import type { EscrowInitialization } from '~/lib/types'
 import { validateEscrowInitialization } from '~/lib/validators/escrow'
 
 const supabase = createClient(

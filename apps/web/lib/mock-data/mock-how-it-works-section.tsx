@@ -1,5 +1,5 @@
 import { Globe, Shield, Users } from 'lucide-react'
-import { type Model, ModelVariant } from '~/lib/types/home.types'
+import { type Model, ModelVariant } from '~/lib/types'
 
 export const models: Model[] = [
 	{

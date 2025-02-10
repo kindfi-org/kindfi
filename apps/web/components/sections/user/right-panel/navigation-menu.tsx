@@ -2,10 +2,7 @@
 
 import { ChevronRight, Heart, Settings, Wallet } from 'lucide-react'
 import Link from 'next/link'
-import type {
-	DashboardMode,
-	NavigationItem,
-} from '~/lib/types/right-side-panel'
+import type { DashboardMode, NavigationItem } from '~/lib/types'
 
 const userNavigation: NavigationItem[] = [
 	{
@@ -67,10 +64,12 @@ export function NavigationMenu({ mode }: NavigationMenuProps) {
 					aria-label={item.description}
 				>
 					<div className="flex items-center gap-3">
-						<item.icon
-							className="w-5 h-5 text-muted-foreground"
-							aria-hidden="true"
-						/>
+						{item.icon && (
+							<item.icon
+								className="w-5 h-5 text-muted-foreground"
+								aria-hidden="true"
+							/>
+						)}
 						<span className="text-sm font-medium">{item.label}</span>
 					</div>
 					<ChevronRight

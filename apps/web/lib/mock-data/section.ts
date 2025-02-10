@@ -1,4 +1,4 @@
-import type { AchievementCardProps } from '~/lib/types/section'
+import type { AchievementCardProps } from '~/lib/types'
 
 export const ACHIEVEMENT_CARDS: AchievementCardProps[] = [
 	{

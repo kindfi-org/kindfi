@@ -3,7 +3,7 @@ import {
 	ExploreDetails,
 	ExploreProject,
 } from '~/components/icons/illustrations'
-import { type GuideStep, StepNumber } from '~/lib/types/home.types'
+import { type GuideStep, StepNumber } from '~/lib/types'
 
 export const steps: GuideStep[] = [
 	{

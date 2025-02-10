@@ -3,6 +3,7 @@ export enum ErrorCode {
 	CHALLENGE_NOT_FOUND = 'CHALLENGE_NOT_FOUND',
 	AUTHENTICATOR_NOT_REGISTERED = 'AUTHENTICATOR_NOT_REGISTERED',
 	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
+	USER_NOT_FOUND = 'USER_NOT_FOUND',
 }
 
 export const ERROR_MESSAGES: Record<ErrorCode, string> = {
@@ -11,6 +12,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
 	[ErrorCode.AUTHENTICATOR_NOT_REGISTERED]:
 		'Authenticator is not registered with this site.',
 	[ErrorCode.UNEXPECTED_ERROR]: 'An unexpected error occurred.',
+	[ErrorCode.USER_NOT_FOUND]: 'User not found.',
 }
 
 export class InAppError extends Error {
