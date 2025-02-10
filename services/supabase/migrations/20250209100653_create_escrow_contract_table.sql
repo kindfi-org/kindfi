@@ -15,5 +15,15 @@ CREATE TABLE IF NOT EXISTS escrow_contracts (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP WITH TIME ZONE,
     metadata JSONB DEFAULT '{}'::jsonb,
-    CONSTRAINT valid_escrow_amount CHECK (amount > 0)
+    CONSTRAINT valid_escrow_amount CHECK (amount > 0),
+    CONSTRAINT valid_platform_fee CHECK (platform_fee >= 0)
 );
+
+-- Enable Row Level Security (RLS) on the table
+ALTER TABLE escrow_contracts ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policy: allow read access to all
+CREATE POLICY public_select_escrow_contracts
+    ON escrow_contracts
+    FOR SELECT
+    USING (true);
