@@ -7,6 +7,7 @@ import ProjectJourney from '~/components/sections/home/journey-section'
 import { WhyInvestSection } from '~/components/sections/home/participate-section'
 import { ProjectsShowcase } from '~/components/sections/home/projects-component'
 import LatamWeb3Platform from '~/components/sections/home/showcast-section'
+import Escrow from '../../app/projects/escrows/page'
 
 const projects = [
 	{
@@ -171,6 +172,7 @@ export function HomeDashboard() {
 			<LatamWeb3Platform />
 			<CommunitySection />
 			<CreatorSection />
+			<Escrow/>
 		</>
 	)
 }
