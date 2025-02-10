@@ -216,7 +216,7 @@ Follow these guidelines while working on your designs:
 * Maintain a clear component hierarchy and organization.
 * Document all design decisions and component usage guidelines within the related issue.
 
-Dive into our [**comprehensive design style guide**](../code-and-design-guide-style-and-conventions/code-and-design-guide-style-and-conventions-1.md) to uncover a wealth of detailed examples and best practices that will elevate your code to new heights!
+Dive into our [**comprehensive design style guide**](../code-and-design-guide-style-and-conventions/code-and-design-guide-style-and-conventions-1.md) to uncover a wealth of detailed examples and best practices that will elevate your designs into new heights!
 
 ### Review Process
 
