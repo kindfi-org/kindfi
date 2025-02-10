@@ -1,6 +1,7 @@
 'use client'
 
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
 
 interface ProvidersProps {
@@ -15,7 +16,9 @@ export function Providers({ children }: ProvidersProps) {
 			enableSystem
 			disableTransitionOnChange
 		>
-			<AuthProvider>{children}</AuthProvider>
+			<StellarProvider>
+				<AuthProvider>{children}</AuthProvider>
+			</StellarProvider>
 		</NextThemesProvider>
 	)
 }

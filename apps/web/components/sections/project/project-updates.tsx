@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import type React from 'react'
 import ImpactCards from '~/components/sections/project/impact-cards'
 import SectionContainer from '~/components/sections/project/section-container'
 import Timeline from '~/components/sections/project/timeline'

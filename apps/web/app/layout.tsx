@@ -1,10 +1,9 @@
-import { ThemeProvider } from 'next-themes'
-import { GoogleAnalytics } from '~/components/shared/google-analytics'
-import { AuthProvider } from '~/hooks/use-auth'
-import './css/globals.css'
 import { Toaster } from 'sonner'
+import { GoogleAnalytics } from '~/components/shared/google-analytics'
 import Footer from '~/components/shared/layout/footer/footer'
 import { Header } from '~/components/shared/layout/header/header'
+import { Providers } from '~/components/shared/layout/providers'
+import './css/globals.css'
 
 const defaultUrl = process.env.VERCEL_URL
 	? `https://${process.env.VERCEL_URL}`
@@ -16,14 +15,6 @@ export const metadata = {
 		'The first Web3 platform connecting supporters to impactful causes while driving blockchain adoption for social and environmental change',
 }
 
-const ProviderWrapper = ({ children }: { children: React.ReactNode }) => {
-	return (
-		<AuthProvider>
-			<ThemeProvider>{children}</ThemeProvider>
-		</AuthProvider>
-	)
-}
-
 export default function RootLayout({
 	children,
 }: {
@@ -33,14 +24,14 @@ export default function RootLayout({
 		<html lang="en" suppressHydrationWarning>
 			<head />
 			<body suppressHydrationWarning>
-				<ProviderWrapper>
+				<Providers>
 					<div className="relative min-h-screen flex flex-col">
 						<Header />
 						<main className="flex-1">{children}</main>
 						<Toaster />
 						<Footer />
 					</div>
-				</ProviderWrapper>
+				</Providers>
 				<GoogleAnalytics
 					GA_MEASUREMENT_ID={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''}
 				/>

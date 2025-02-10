@@ -37,13 +37,13 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 	}
 }
 
-export async function signInAction(formData: FormData): Promise<AuthResponse> {
+export async function signInAction(formData: FormData): Promise<void> {
 	const supabase = await createClient()
 	const email = formData.get('email') as string
 	const password = formData.get('password') as string
 
 	if (!email || !password) {
-		return {
+		const response = {
 			success: false,
 			message: 'Email and password are required',
 			error: 'Email and password are required',
@@ -57,16 +57,16 @@ export async function signInAction(formData: FormData): Promise<AuthResponse> {
 		})
 
 		if (error) {
-			return errorHandler.handleAuthError(error, 'sign_in')
+			errorHandler.handleAuthError(error, 'sign_in')
 		}
 
-		return {
+		const response = {
 			success: true,
 			message: 'Successfully signed in',
 			redirect: '/dashboard',
 		}
 	} catch (error) {
-		return errorHandler.handleAuthError(error as AuthError, 'sign_in')
+		errorHandler.handleAuthError(error as AuthError, 'sign_in')
 	}
 }
 

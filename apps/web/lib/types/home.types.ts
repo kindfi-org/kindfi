@@ -19,31 +19,12 @@ export interface Stat {
 	highlight?: boolean
 }
 
-export interface Tag {
-	id: string
-	text: string
-}
-
 export interface JourneyStep {
 	number: number
 	title: string
 	description: string
 	active: boolean
 	icon: React.ReactNode
-}
-
-export interface Project {
-	id: string
-	image: string
-	category: string
-	title: string
-	description: string
-	currentAmount: number
-	targetAmount: number
-	investors: number
-	minInvestment: number
-	percentageComplete: number
-	tags: Tag[]
 }
 
 export interface Feature {
@@ -128,15 +109,6 @@ export interface TabItem {
 	id: string
 	label: string
 	content: string
-}
-
-export interface StatItem {
-	id: string
-	label: string
-	value: string
-	bgColor: string
-	textColor: string
-	icon: string
 }
 
 export interface UpdateItem extends BaseItem {

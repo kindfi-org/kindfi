@@ -8,12 +8,15 @@
 
   - Request Body: `{ "identifier": "user@example.com" }`
   - Success Response (200):
+
     ```json
     {
       // WebAuthn registration options
     }
     ```
+
   - Error Response (500):
+
     ```json
     {
       "error": "No matching RP ID found for the given origin"
@@ -26,12 +29,15 @@
 
   - Request Body: `{ "identifier": "user@example.com", "registrationResponse": {...} }`
   - Success Response (200):
+
     ```json
     {
       // Verification result
     }
     ```
+
   - Error Response (500):
+
     ```json
     {
       "error": "Challenge not found"
@@ -44,12 +50,15 @@
 
   - Request Body: `{ "identifier": "user@example.com" }`
   - Success Response (200):
+
     ```json
     {
       // WebAuthn authentication options
     }
     ```
+
   - Error Response (500):
+
     ```json
     {
       "error": "Authenticator not registered"
@@ -62,12 +71,15 @@
 
   - Request Body: `{ "identifier": "user@example.com", "authenticationResponse": {...} }`
   - Success Response (200):
+
     ```json
     {
       // Verification result
     }
     ```
+
   - Error Response (500):
+
     ```json
     {
       "error": "Challenge not found"

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { ArrowUpRight, Megaphone, RefreshCw } from 'lucide-react'
-import type { Feature } from '~/lib/types/home.types'
+import type { Feature } from '~/lib/types'
 
 const ANIMATION_DURATION = 20
 

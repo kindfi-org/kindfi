@@ -4,7 +4,7 @@ import { Suspense, useState } from 'react'
 import { Card } from '~/components/base/card'
 import { ScrollArea } from '~/components/base/scroll-area'
 import { Tabs, TabsList, TabsTrigger } from '~/components/base/tabs'
-import type { DashboardMode } from '~/lib/types/right-side-panel'
+import type { DashboardMode } from '~/lib/types'
 import {
 	ActivitySkeleton,
 	LatestUpdates,
