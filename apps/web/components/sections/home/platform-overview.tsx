@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { Users } from 'lucide-react'
 import { Card, CardContent } from '~/components/base/card'
 import { Web3FeatureCard } from '~/components/shared/web3-feature-card'
-import { fadeInUpAnimation } from '~/lib/animations'
+import { fadeInUpAnimation } from '~/lib/constants/animations'
 import { features, stats } from '~/lib/mock-data/mock-platform-overview'
 
 export function PlatformOverview() {
