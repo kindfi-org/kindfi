@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useCallback } from 'react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import { badgeVariants, staggerChildren } from '~/lib/animations'
+import { badgeVariants, staggerChildren } from '~/lib/constants/animations'
 import { categories } from '~/lib/mock-data/mock-hero-section'
 import type { Category } from '~/lib/types'
 

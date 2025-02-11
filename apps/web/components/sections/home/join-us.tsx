@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { SectionCaption } from '~/components/shared/section-caption'
-import { fadeInUpAnimation } from '~/lib/animations'
+import { fadeInUpAnimation } from '~/lib/constants/animations'
 import { features } from '~/lib/mock-data/mock-join-us-section'
 
 export function JoinUs() {
