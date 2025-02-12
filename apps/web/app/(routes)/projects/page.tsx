@@ -43,7 +43,7 @@ export default function ProjectsPage() {
 	// Reset page when category changes
 	React.useEffect(() => {
 		setCurrentPage(1)
-	}, [selectedCategory])
+	}, []) // Removed selectedCategory from dependencies
 
 	const filteredProjects = React.useMemo(
 		() =>
@@ -61,7 +61,6 @@ export default function ProjectsPage() {
 							)
 						case 'funded':
 							return b.percentageReached - a.percentageReached
-						case 'popular':
 						default:
 							return b.supporters - a.supporters
 					}
@@ -114,8 +113,8 @@ export default function ProjectsPage() {
 
 			{isLoading ? (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-					{Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
-						<div key={index} className="space-y-3">
+					{Array.from({ length: ITEMS_PER_PAGE }).map(() => (
+						<div key={crypto.randomUUID()} className="space-y-3">
 							<Skeleton className="h-48 w-full rounded-lg" />
 							<Skeleton className="h-4 w-3/4" />
 							<Skeleton className="h-4 w-1/2" />
