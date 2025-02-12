@@ -115,7 +115,7 @@ export function useEscrow(escrowId: string) {
     return () => {
       channel.unsubscribe()
     }
-  }, [escrowId])
+  }, [escrowId, fetchEscrowStatus, supabase, transformRecord])
 
   const updateStatus = async (newStatus: EscrowStatusType) => {
     try {
