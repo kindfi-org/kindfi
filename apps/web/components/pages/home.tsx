@@ -87,7 +87,6 @@ const FinalCTA = dynamic(
 export function HomeDashboard() {
 	return (
 		<>
-			<SkeletonHero />
 			<Hero />
 			<UserJourney />
 			<HighlightedProjects />

@@ -34,7 +34,7 @@ const SkeletonGrid: FC<SkeletonGridProps> = ({
 
 	return (
 		<div
-			className={`grid grid-cols-1 ${columnClasses[columns as 2 | 3 | 4 | 5]} ${gapClasses[gap as 3 | 4 | 6 | 8 | 12]} ${className}`}
+			className={`flex flex-wrap gap-2 justify-center ${columnClasses[columns as 2 | 3 | 4 | 5]} ${gapClasses[gap as 3 | 4 | 6 | 8 | 12]} ${className}`}
 		>
 			{Array.from({ length: count }).map(() => {
 				const key = `skeleton-${Math.random().toString(36).substr(2, 9)}`
