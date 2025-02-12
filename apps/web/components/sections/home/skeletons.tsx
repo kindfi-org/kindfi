@@ -36,9 +36,9 @@ const SkeletonGrid: FC<SkeletonGridProps> = ({
 		<div
 			className={`flex flex-wrap gap-2 justify-center ${columnClasses[columns as 2 | 3 | 4 | 5]} ${gapClasses[gap as 3 | 4 | 6 | 8 | 12]} ${className}`}
 		>
-			{Array.from({ length: count }).map(() => {
-				const key = `skeleton-${Math.random().toString(36).substr(2, 9)}`
-				return <div key={key}>{renderItem(Math.random())}</div>
+			{Array.from({ length: count }).map((_, index) => {
+				const key = `skeleton-${index}`
+				return <div key={key}>{renderItem(index)}</div>
 			})}
 		</div>
 	)
