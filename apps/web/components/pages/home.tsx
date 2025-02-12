@@ -1,10 +1,21 @@
 import dynamic from 'next/dynamic'
+import {
+	SkeletonCommunity,
+	SkeletonFinalCTA,
+	SkeletonHero,
+	SkeletonHighlightedProjects,
+	SkeletonHowItWorks,
+	SkeletonJoinUs,
+	SkeletonNewUserGuide,
+	SkeletonPlatformOverview,
+	SkeletonUserJourney,
+} from '~/components/sections/home/skeletons'
 
 const Hero = dynamic(
 	() => import('~/components/sections/home/hero').then((mod) => mod.Hero),
 	{
-		ssr: true, // Rendered on the server to enhance initial load and SEO performance
-		loading: () => <p>Loading Hero Section...</p>,
+		ssr: true,
+		loading: SkeletonHero,
 	},
 )
 const UserJourney = dynamic(
@@ -13,7 +24,7 @@ const UserJourney = dynamic(
 			(mod) => mod.UserJourney,
 		),
 	{
-		loading: () => <p>Loading User Journey...</p>,
+		loading: SkeletonUserJourney,
 	},
 )
 const HighlightedProjects = dynamic(
@@ -22,13 +33,13 @@ const HighlightedProjects = dynamic(
 			(mod) => mod.HighlightedProjects,
 		),
 	{
-		loading: () => <p>Loading Highlighted Projects...</p>,
+		loading: SkeletonHighlightedProjects,
 	},
 )
 const JoinUs = dynamic(
 	() => import('~/components/sections/home/join-us').then((mod) => mod.JoinUs),
 	{
-		loading: () => <p>Loading Join Us...</p>,
+		loading: SkeletonJoinUs,
 	},
 )
 const HowItWorks = dynamic(
@@ -37,7 +48,7 @@ const HowItWorks = dynamic(
 			(mod) => mod.HowItWorks,
 		),
 	{
-		loading: () => <p>Loading How It Works...</p>,
+		loading: SkeletonHowItWorks,
 	},
 )
 const NewUserGuide = dynamic(
@@ -46,7 +57,7 @@ const NewUserGuide = dynamic(
 			(mod) => mod.NewUserGuide,
 		),
 	{
-		loading: () => <p>Loading New User Guide...</p>,
+		loading: SkeletonNewUserGuide,
 	},
 )
 const PlatformOverview = dynamic(
@@ -55,21 +66,21 @@ const PlatformOverview = dynamic(
 			(mod) => mod.PlatformOverview,
 		),
 	{
-		loading: () => <p>Loading Platform Overview...</p>,
+		loading: SkeletonPlatformOverview,
 	},
 )
 const Community = dynamic(
 	() =>
 		import('~/components/sections/home/community').then((mod) => mod.Community),
 	{
-		loading: () => <p>Loading Community...</p>,
+		loading: SkeletonCommunity,
 	},
 )
 const FinalCTA = dynamic(
 	() =>
 		import('~/components/sections/home/final-cta').then((mod) => mod.FinalCTA),
 	{
-		loading: () => <p>Loading Final Call-to-Action...</p>,
+		loading: SkeletonFinalCTA,
 	},
 )
 
