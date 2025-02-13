@@ -6,7 +6,8 @@
 		"@commitlint/cli": "^19.6.1",
 		"@commitlint/config-conventional": "^19.6.0",
 		"@types/bun": "latest",
-		"husky": "^9.1.7"
+		"husky": "^9.1.7",
+		"typescript": "^5.0.0"
 	},
 	"peerDependencies": {
 		"typescript": "^5.0.0"
@@ -22,6 +23,7 @@
 	"packageManager": "bun@1.1.20",
 	"private": true,
 	"scripts": {
+		"dev": "bun run --watch index.ts",
 		"init": "bun install && bun husky:prepare",
 		"husky:prepare": "husky",
 		"format-and-lint": "biome check .",
@@ -29,7 +31,7 @@
 		"clean": "git clean -xdf node_modules",
 		"clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
 		"prepare": "husky",
-		"check": "biome check .",
+		"check": "bun install && biome check .",
 		"format": "biome format . --write"
 	},
 	"workspaces": {
@@ -41,7 +43,8 @@
 			"**/pino-pretty",
 			"**/wagmi/**",
 			"**/pino-pretty/**"
-		]
+		],
+		"version": "independent"
 	},
 	"dependencies": {}
 }
