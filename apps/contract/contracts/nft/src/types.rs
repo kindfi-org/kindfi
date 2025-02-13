@@ -1,17 +1,26 @@
-use soroban_sdk::{contracttype, Address, String};
+use soroban_sdk::{contracttype, symbol_short, Address, String, Symbol, Vec};
 
+pub const ADMIN_KEY: Symbol = symbol_short!("ADMIN");
+pub const COUNTER_KEY: Symbol = symbol_short!("COUNTER");
+
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[contracttype]
-#[derive(Clone)]
-pub struct TokenMetadata {
+pub struct NFTMetadata {
     pub name: String,
-    pub symbol: String,
-    pub uri: String,
+    pub description: String,
+    pub attributes: Vec<String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[contracttype]
+pub struct NFTDetail {
+    pub owner: Address,
+    pub metadata: NFTMetadata,
 }
 
 #[contracttype]
 #[derive(Clone)]
 pub enum DataKey {
-    Admin,
     TokenOwner(u32),
     TokenMetadata(u32),
     TokenUri(u32),
