@@ -28,7 +28,9 @@
 		"format-and-lint:fix": "biome check . --write",
 		"clean": "git clean -xdf node_modules",
 		"clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-		"prepare": "husky"
+		"prepare": "husky",
+		"check": "biome check .",
+		"format": "biome format . --write"
 	},
 	"workspaces": {
 		"packages": ["apps/*", "services/*", "packages/*"],
