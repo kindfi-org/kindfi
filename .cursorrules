@@ -189,3 +189,39 @@ Refer to the official documentation for best practices in:
 - **Vercel AI SDK** (AI Integration)
 - **Supabase** (Database and Authentication)
 - **TailwindCSS** (Styling)
+
+# Soroban Smart Contracts (Stellar)
+*.rs linguist-language=Rust
+Cargo.toml linguist-language=TOML
+soroban-config.json linguist-language=JSON
+
+# Build and Dependencies
+target/ linguist-generated=true
+target/ -diff
+**/target/ linguist-generated=true
+**/target/ -diff
+
+# Soroban Build Artifacts
+**/*.wasm linguist-generated=true
+.soroban/ linguist-generated=true
+.soroban/ -diff
+
+# Documentation
+*.md linguist-documentation
+docs/ linguist-documentation
+
+# Test Files
+*_test.rs linguist-language=Rust
+tests/ linguist-language=Rust
+
+# IDE and Editor Files
+.vscode/ linguist-vendored
+.idea/ linguist-vendored
+*.json linguist-language=JSON
+
+# Package Management
+node_modules/ linguist-vendored
+node_modules/ -diff
+
+# Ignore binary files
+*.wasm binary
