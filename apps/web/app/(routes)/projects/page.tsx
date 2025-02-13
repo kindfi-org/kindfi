@@ -6,7 +6,10 @@ import type { ProjectIconType } from '~/components/icons/index'
 import { CategoryFilters } from '~/components/sections/projects/category-filters'
 import { mockProjects } from '~/components/sections/projects/mock-data'
 import { ProjectGrid } from '~/components/sections/projects/project-grid'
-import { SortingControls } from '~/components/sections/projects/sorting-controls'
+import {
+	type SortOption,
+	SortingControls,
+} from '~/components/sections/projects/sorting-controls'
 import { Paginations } from '~/components/shared/pagination'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Skeleton } from '~/components/ui/skeleton'
@@ -108,7 +111,10 @@ export default function ProjectsPage() {
 						See all ({filteredProjects.length})
 					</button>
 				</div>
-				<SortingControls value={sortBy} onChange={setSortBy} />
+				<SortingControls
+					value={sortBy}
+					onChange={(value: string) => setSortBy(value as SortOption)}
+				/>
 			</div>
 
 			{isLoading ? (
