@@ -32,7 +32,8 @@
 		"format": "biome format . --write",
 		"clean": "git clean -xdf node_modules",
 		"clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-		"check": "bun install && bun run lint"
+		"check": "bun install --no-cache && bun run lint",
+		"ci": "bun install --frozen-lockfile --no-cache && bun run lint"
 	},
 	"workspaces": {
 		"packages": ["apps/*", "services/*", "packages/*"],
