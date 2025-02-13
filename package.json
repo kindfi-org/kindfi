@@ -26,25 +26,22 @@
 		"dev": "bun run --watch index.ts",
 		"init": "bun install && bun husky:prepare",
 		"husky:prepare": "husky",
-		"format-and-lint": "biome check .",
-		"format-and-lint:fix": "biome check . --write",
+		"prepare": "husky",
+		"lint": "biome check .",
+		"lint:fix": "biome check . --write",
+		"format": "biome format . --write",
 		"clean": "git clean -xdf node_modules",
 		"clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-		"prepare": "husky",
-		"check": "bun install && biome check .",
-		"format": "biome format . --write"
+		"check": "bun install && bun run lint"
 	},
 	"workspaces": {
 		"packages": ["apps/*", "services/*", "packages/*"],
+		"version": "independent",
 		"nohoist": [
-			"**/cbw-sdk",
-			"**/cbw-sdk/**",
-			"**/wagmi",
 			"**/pino-pretty",
 			"**/wagmi/**",
 			"**/pino-pretty/**"
-		],
-		"version": "independent"
+		]
 	},
 	"dependencies": {}
 }
