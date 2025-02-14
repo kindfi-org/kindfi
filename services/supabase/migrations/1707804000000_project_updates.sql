@@ -1,14 +1,19 @@
 -- Migration file for project updates
 -- Timestamp: 1707804000000 (2025-02-13 00:00:00 UTC)
 
+-- Create ENUM types
+CREATE TYPE update_type AS ENUM ('milestone', 'progress', 'announcement', 'general');
+CREATE TYPE update_status AS ENUM ('draft', 'published', 'archived');
+
 -- Create project_updates table
 CREATE TABLE project_updates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    parent_update_id UUID REFERENCES project_updates(id),
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    update_type VARCHAR(50) NOT NULL CHECK (update_type IN ('milestone', 'progress', 'announcement', 'general')),
-    status VARCHAR(50) NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'published', 'archived')),
+    update_type update_type NOT NULL,
+    status update_status NOT NULL DEFAULT 'published',
     media_urls JSONB,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -97,7 +102,7 @@ CREATE POLICY "Users can view their own notifications" ON project_update_notific
 
 CREATE POLICY "System can create notifications" ON project_update_notifications
     FOR INSERT
-    WITH CHECK (true);
+    WITH CHECK (pg_trigger_depth() > 0);
 
 CREATE POLICY "Users can mark their notifications as read" ON project_update_notifications
     FOR UPDATE

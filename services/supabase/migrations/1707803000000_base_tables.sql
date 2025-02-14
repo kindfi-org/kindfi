@@ -5,9 +5,9 @@
 CREATE TABLE kindlers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     auth_id UUID UNIQUE NOT NULL,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    display_name VARCHAR(100),
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
+    display_name VARCHAR(255),
     avatar_url TEXT,
     bio TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -19,20 +19,22 @@ CREATE TABLE projects (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    status VARCHAR(50) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'archived')),
+    status VARCHAR(50) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'completed')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by UUID NOT NULL REFERENCES kindlers(id),
-    updated_by UUID NOT NULL REFERENCES kindlers(id)
+    updated_by UUID NOT NULL REFERENCES kindlers(id),
+    deleted_at TIMESTAMPTZ
 );
 
 -- Create project_members table for project membership
 CREATE TABLE project_members (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    kindler_id UUID NOT NULL REFERENCES kindlers(id) ON DELETE CASCADE,
+    kindler_id UUID NOT NULL REFERENCES kindlers(id),
     role VARCHAR(50) NOT NULL CHECK (role IN ('owner', 'admin', 'member')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by UUID NOT NULL REFERENCES kindlers(id),
     UNIQUE(project_id, kindler_id)
 );
 
@@ -50,6 +52,7 @@ CREATE INDEX idx_kindlers_auth_id ON kindlers(auth_id);
 CREATE INDEX idx_kindlers_username ON kindlers(username);
 CREATE INDEX idx_kindlers_email ON kindlers(email);
 CREATE INDEX idx_projects_created_by ON projects(created_by);
+CREATE INDEX idx_projects_status ON projects(status);
 CREATE INDEX idx_project_members_project ON project_members(project_id);
 CREATE INDEX idx_project_members_kindler ON project_members(kindler_id);
 CREATE INDEX idx_project_followers_project ON project_followers(project_id);
@@ -90,9 +93,28 @@ CREATE POLICY "Users can update their own profile" ON kindlers
     USING (auth.uid()::text::uuid = auth_id);
 
 -- Projects RLS Policies
+CREATE POLICY "Authenticated users can create projects" ON projects
+    FOR INSERT
+    WITH CHECK (
+        auth.uid() IS NOT NULL
+        AND created_by = auth.uid()::text::uuid
+        AND updated_by = auth.uid()::text::uuid
+    );
+
+CREATE POLICY "Project owners can delete projects" ON projects
+    FOR DELETE
+    USING (
+        EXISTS (
+            SELECT 1 FROM project_members pm
+            WHERE pm.project_id = projects.id
+            AND pm.kindler_id = auth.uid()::text::uuid
+            AND pm.role = 'owner'
+        )
+    );
+
 CREATE POLICY "Public can view active projects" ON projects
     FOR SELECT
-    USING (status = 'active');
+    USING (status = 'active' AND deleted_at IS NULL);
 
 CREATE POLICY "Project members can view all project states" ON projects
     FOR SELECT

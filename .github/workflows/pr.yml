@@ -1,4 +1,5 @@
-name: PR
+name: Pull Request
+
 on:
   pull_request:
     branches:
@@ -6,21 +7,23 @@ on:
       - develop
     paths-ignore:
       - "**.md"
-      - "docs/**"
-      - ".gitignore"
+      - ".github/**"
+      - "!.github/workflows/**"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   pr:
-    name: Indexer PR
+    name: PR Checks
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/indexer
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Node.js environment
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -41,19 +44,11 @@ jobs:
       - name: Install Dependencies
         run: |
           bun install
-          # Verify installation was successful
           test -f bun.lockb
-        # Untrusted packages can be installed, causing false errors. Continuing on error.
-        # ? If something actually went wrong, the build will fail below.
         continue-on-error: true
-      - name: Codegen
-        run: bun codegen
-        timeout-minutes: 5
-      - name: Build
-        run: bun run build
-        timeout-minutes: 10
-      - name: Install test dependencies
-        run: bun add --dev @subql/node-stellar
-      - name: Run tests with Subquery Node
-        run: bunx subql-node-stellar test -f ${{ github.workspace }}
-        timeout-minutes: 15
+      - name: Type Check
+        run: bun run typecheck
+      - name: Lint
+        run: bun run lint
+      - name: Test
+        run: bun run test
