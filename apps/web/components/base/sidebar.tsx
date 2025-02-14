@@ -18,7 +18,20 @@ import {
 } from '~/components/base/tooltip'
 import { useIsMobile } from '~/hooks/use-mobile'
 import { cn } from '~/lib/utils'
-
+/**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/sidebar
+ * Sidebar component for managing sidebar state, layout, and behavior.
+ * @component
+ * @param {Object} props - Component props
+ * @param {'left' | 'right'} [props.side='left'] - The side where the sidebar appears
+ * @param {'sidebar' | 'floating' | 'inset'} [props.variant='sidebar'] - The visual style variant of the sidebar
+ * @param {'offcanvas' | 'icon' | 'none'} [props.collapsible='offcanvas'] - The collapse behavior of the sidebar
+ * @param {ReactNode} props.children - Sidebar content
+ * @example
+ * <Sidebar variant="floating" side="right">
+ *   <p>Sidebar Content</p>
+ * </Sidebar>
+ */
 const SIDEBAR_COOKIE_NAME = 'sidebar:state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = '16rem'
@@ -46,7 +59,21 @@ function useSidebar() {
 
 	return context
 }
-
+/**
+ * SidebarProvider component to manage and provide sidebar state.
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} [props.defaultOpen=true] - Default state of the sidebar (expanded)
+ * @param {boolean} [props.open] - Controlled open state of the sidebar
+ * @param {Function} [props.onOpenChange] - Callback to handle the open state change
+ * @param {ReactNode} props.children - Sidebar content
+ * @example
+ * <SidebarProvider defaultOpen={true}>
+ *   <Sidebar>
+ *     <p>Sidebar Content</p>
+ *   </Sidebar>
+ * </SidebarProvider>
+ */
 const SidebarProvider = React.forwardRef<
 	HTMLDivElement,
 	React.ComponentProps<'div'> & {

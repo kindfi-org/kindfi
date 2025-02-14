@@ -4,6 +4,12 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 import { type ButtonProps, buttonVariants } from './button'
 
+/**
+ * Pagination navigation container component.
+ * @param {Object} props - React component props.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @returns {JSX.Element} Navigation element for pagination.
+ */
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
 	<nav
 		aria-label="pagination"
@@ -13,6 +19,13 @@ const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
 )
 Pagination.displayName = 'Pagination'
 
+/**
+ * Pagination content wrapper.
+ * @param {Object} props - React component props.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {React.Ref<HTMLUListElement>} ref - Forwarded ref.
+ * @returns {JSX.Element} Unordered list element.
+ */
 const PaginationContent = React.forwardRef<
 	HTMLUListElement,
 	React.ComponentProps<'ul'>
@@ -25,6 +38,13 @@ const PaginationContent = React.forwardRef<
 ))
 PaginationContent.displayName = 'PaginationContent'
 
+/**
+ * Individual pagination item wrapper.
+ * @param {Object} props - React component props.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @param {React.Ref<HTMLLIElement>} ref - Forwarded ref.
+ * @returns {JSX.Element} List item element.
+ */
 const PaginationItem = React.forwardRef<
 	HTMLLIElement,
 	React.ComponentProps<'li'>
@@ -33,11 +53,22 @@ const PaginationItem = React.forwardRef<
 ))
 PaginationItem.displayName = 'PaginationItem'
 
+/**
+ * Props for PaginationLink component.
+ * @typedef {Object} PaginationLinkProps
+ * @property {boolean} [isActive] - Whether the link is active.
+ * @property {ButtonProps['size']} [size] - Size of the button.
+ */
 type PaginationLinkProps = {
 	isActive?: boolean
 } & Pick<ButtonProps, 'size'> &
 	React.ComponentProps<'a'>
 
+/**
+ * Pagination link component.
+ * @param {PaginationLinkProps} props - React component props.
+ * @returns {JSX.Element} Anchor element for pagination links.
+ */
 const PaginationLink = ({
 	className,
 	isActive,
@@ -58,6 +89,11 @@ const PaginationLink = ({
 )
 PaginationLink.displayName = 'PaginationLink'
 
+/**
+ * Previous page button.
+ * @param {React.ComponentProps<typeof PaginationLink>} props - React component props.
+ * @returns {JSX.Element} Button to go to the previous page.
+ */
 const PaginationPrevious = ({
 	className,
 	...props
@@ -74,6 +110,11 @@ const PaginationPrevious = ({
 )
 PaginationPrevious.displayName = 'PaginationPrevious'
 
+/**
+ * Next page button.
+ * @param {React.ComponentProps<typeof PaginationLink>} props - React component props.
+ * @returns {JSX.Element} Button to go to the next page.
+ */
 const PaginationNext = ({
 	className,
 	...props
@@ -90,6 +131,12 @@ const PaginationNext = ({
 )
 PaginationNext.displayName = 'PaginationNext'
 
+/**
+ * Ellipsis for skipped pagination pages.
+ * @param {Object} props - React component props.
+ * @param {string} [props.className] - Additional CSS classes.
+ * @returns {JSX.Element} Span element representing skipped pages.
+ */
 const PaginationEllipsis = ({
 	className,
 	...props
