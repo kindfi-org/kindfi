@@ -18,9 +18,12 @@
 		"packages": ["apps/*", "services/*", "packages/*"],
 		"version": "independent",
 		"nohoist": [
-			"**/pino-pretty",
-			"**/wagmi/**",
-			"**/pino-pretty/**"
+			"**/supabase",
+			"**/supabase/**",
+			"**/react-native",
+			"**/react-native/**",
+			"**/expo",
+			"**/expo/**"
 		]
 	},
 	"devDependencies": {
