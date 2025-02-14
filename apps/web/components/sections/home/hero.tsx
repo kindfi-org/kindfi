@@ -7,7 +7,7 @@ import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { badgeVariants, staggerChildren } from '~/lib/constants/animations'
 import { categories } from '~/lib/mock-data/mock-hero-section'
-import type { Category } from '~/lib/types/home.types'
+import type { Category } from '~/lib/types'
 
 export function Hero() {
 	const shouldReduceMotion = useReducedMotion()
@@ -20,7 +20,7 @@ export function Hero() {
 				whileHover="hover"
 				whileTap="tap"
 				className="relative"
-				layout // Add layout prop for smooth reflow
+				layout
 			>
 				<Badge
 					variant="secondary"

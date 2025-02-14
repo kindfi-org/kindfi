@@ -1,7 +1,7 @@
 import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardFooter } from '~/components/base/card'
-import { ModelVariant } from '~/lib/types/home.types'
+import { ModelVariant } from '~/lib/types'
 
 const variantStyles = {
 	[ModelVariant.SECURE]:

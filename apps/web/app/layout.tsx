@@ -1,12 +1,13 @@
+import { Toaster } from 'sonner'
 import { GoogleAnalytics } from '~/components/shared/google-analytics'
-import RootLayoutWrapper from '~/components/shared/layout/layout-helpers/root-layout-wrapper'
+import Footer from '~/components/shared/layout/footer/footer'
+import { Header } from '~/components/shared/layout/header/header'
 import { Providers } from '~/components/shared/layout/providers'
 import './css/globals.css'
 
 const defaultUrl = process.env.VERCEL_URL
 	? `https://${process.env.VERCEL_URL}`
 	: 'http://localhost:3000'
-
 export const metadata = {
 	metadataBase: new URL(defaultUrl),
 	title: 'KindFi',
@@ -22,11 +23,18 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head />
-			<body>
+			<body suppressHydrationWarning>
 				<Providers>
-					<RootLayoutWrapper>{children}</RootLayoutWrapper>
+					<div className="relative min-h-screen flex flex-col">
+						<Header />
+						<main className="flex-1">{children}</main>
+						<Toaster />
+						<Footer />
+					</div>
 				</Providers>
-				<GoogleAnalytics GA_MEASUREMENT_ID="G-52DWMZ7R1H" />
+				<GoogleAnalytics
+					GA_MEASUREMENT_ID={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''}
+				/>
 			</body>
 		</html>
 	)

@@ -38,6 +38,17 @@ type SidebarContext = {
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
 
+const TRANSITION_DURATION = '200ms'
+const SIDEBAR_STYLES = {
+	transition: `width ${TRANSITION_DURATION} linear`,
+	willChange: 'width',
+}
+const SIDEBAR_STYLES_TWO = {
+	transition: `transform ${TRANSITION_DURATION} linear`,
+
+	willChange: 'transform',
+}
+
 function useSidebar() {
 	const context = React.useContext(SidebarContext)
 	if (!context) {
@@ -83,20 +94,17 @@ const SidebarProvider = React.forwardRef<
 					_setOpen(openState)
 				}
 
-				// This sets the cookie to keep the sidebar state.
 				document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
 			},
-			[setOpenProp, open],
+			[open, setOpenProp],
 		)
 
-		// Helper to toggle the sidebar.
 		const toggleSidebar = React.useCallback(() => {
 			return isMobile
 				? setOpenMobile((open) => !open)
 				: setOpen((open) => !open)
 		}, [isMobile, setOpen])
 
-		// Adds a keyboard shortcut to toggle the sidebar.
 		React.useEffect(() => {
 			const handleKeyDown = (event: KeyboardEvent) => {
 				if (
@@ -112,8 +120,6 @@ const SidebarProvider = React.forwardRef<
 			return () => window.removeEventListener('keydown', handleKeyDown)
 		}, [toggleSidebar])
 
-		// We add a state so that we can do data-state="expanded" or "collapsed".
-		// This makes it easier to style the sidebar with Tailwind classes.
 		const state = open ? 'expanded' : 'collapsed'
 
 		const contextValue = React.useMemo<SidebarContext>(
@@ -221,10 +227,10 @@ const Sidebar = React.forwardRef<
 				data-variant={variant}
 				data-side={side}
 			>
-				{/* This is what handles the sidebar gap on desktop */}
 				<div
+					style={SIDEBAR_STYLES}
 					className={cn(
-						'duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-linear',
+						'relative h-svh w-[--sidebar-width] bg-transparent',
 						'group-data-[collapsible=offcanvas]:w-0',
 						'group-data-[side=right]:rotate-180',
 						variant === 'floating' || variant === 'inset'
@@ -234,16 +240,22 @@ const Sidebar = React.forwardRef<
 				/>
 				<div
 					className={cn(
-						'duration-200 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] ease-linear md:flex',
+						'fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] md:flex',
+						'transform-gpu will-change-transform',
 						side === 'left'
-							? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
-							: 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
+							? '-translate-x-full left-0 group-data-[collapsible=offcanvas]:translate-x-0'
+							: 'translate-x-full right-0 group-data-[collapsible=offcanvas]:translate-x-0',
 						// Adjust the padding for floating and inset variants.
 						variant === 'floating' || variant === 'inset'
 							? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]'
 							: 'group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l',
 						className,
 					)}
+					style={{
+						...SIDEBAR_STYLES_TWO,
+
+						...props.style,
+					}}
 					{...props}
 				>
 					<div
@@ -439,8 +451,9 @@ const SidebarGroupLabel = React.forwardRef<
 			ref={ref}
 			data-sidebar="group-label"
 			className={cn(
-				'duration-200 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opa] ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
-				'group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0',
+				'flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring [&>svg]:size-4 [&>svg]:shrink-0',
+				'transition-opacity duration-200 ease-in-out will-change-[opacity,margin]',
+				'group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:-mt-8 motion-reduce:transition-none',
 				className,
 			)}
 			{...props}
@@ -461,7 +474,6 @@ const SidebarGroupAction = React.forwardRef<
 			data-sidebar="group-action"
 			className={cn(
 				'absolute right-3 top-3.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
-				// Increases the hit area of the button on mobile.
 				'after:absolute after:-inset-2 after:md:hidden',
 				'group-data-[collapsible=icon]:hidden',
 				className,
@@ -607,7 +619,6 @@ const SidebarMenuAction = React.forwardRef<
 			data-sidebar="menu-action"
 			className={cn(
 				'absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 peer-hover/menu-button:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0',
-				// Increases the hit area of the button on mobile.
 				'after:absolute after:-inset-2 after:md:hidden',
 				'peer-data-[size=sm]/menu-button:top-1',
 				'peer-data-[size=default]/menu-button:top-1.5',
@@ -650,7 +661,6 @@ const SidebarMenuSkeleton = React.forwardRef<
 		showIcon?: boolean
 	}
 >(({ className, showIcon = false, ...props }, ref) => {
-	// Random width between 50 to 90%.
 	const width = React.useMemo(() => {
 		return `${Math.floor(Math.random() * 40) + 50}%`
 	}, [])

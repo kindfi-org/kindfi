@@ -1,7 +1,13 @@
+import type { ReactNode } from 'react'
+/** Interface for category items in hero section */
 export interface Category {
+	/** Unique identifier for the category */
 	id: string
-	icon: React.ReactNode
+	/** Icon component for the category */
+	icon: ReactNode
+	/** Display label for the category */
 	label: string
+	/** Tailwind CSS color classes for styling */
 	color: string
 }
 
@@ -13,31 +19,12 @@ export interface Stat {
 	highlight?: boolean
 }
 
-export interface Tag {
-	id: string
-	text: string
-}
-
 export interface JourneyStep {
 	number: number
 	title: string
 	description: string
 	active: boolean
 	icon: React.ReactNode
-}
-
-export interface Project {
-	id: string
-	image: string
-	category: string
-	title: string
-	description: string
-	currentAmount: number
-	targetAmount: number
-	investors: number
-	minInvestment: number
-	percentageComplete: number
-	tags: Tag[]
 }
 
 export interface Feature {
@@ -109,4 +96,47 @@ export interface SocialButtonProps {
 	provider: string
 	onClick: () => void
 	className: string
+}
+
+export interface BaseItem {
+	id: string
+	title: string
+	description: string
+	date: string
+}
+
+export interface TabItem {
+	id: string
+	label: string
+	content: string
+}
+
+export interface UpdateItem extends BaseItem {
+	exclusive?: boolean
+}
+
+export interface TimelineEvent extends BaseItem {
+	status: 'completed' | 'pending'
+}
+
+export interface MediaItem {
+	id: string
+	type: 'image' | 'video'
+	src: string
+	alt: string
+}
+
+export interface Highlight {
+	id: string
+	label: string
+	value: string
+	icon: string
+}
+
+export interface AboutProjectProps {
+	id: string
+	description: string
+	highlights: Highlight[]
+	updates: BaseItem[]
+	titleAboveHighlights: boolean
 }

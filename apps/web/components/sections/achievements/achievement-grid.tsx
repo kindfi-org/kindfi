@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { Gem, Heart, Medal, Star, Trophy, Users } from 'lucide-react'
+import { Trophy } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -30,20 +30,11 @@ import {
 import { ErrorFallback } from '~/components/fallbacks/error-fallback'
 import { LoadingFallback } from '~/components/fallbacks/loading-fallback'
 import { Paginations } from '~/components/shared/pagination'
-import { ACHIEVEMENT_CARDS, NFTDATA } from '~/lib/constants/mock-data/section'
-import type { NFTProps } from '~/lib/types/section'
+import { ACHIEVEMENT_CARDS, NFTDATA } from '~/lib/mock-data/section'
+import type { NFTProps } from '~/lib/types'
 import { AchievementCard } from './achievement-card'
 import { NFTCard } from './nft-card'
 import { StatsSection } from './stats-section'
-
-const icons = {
-	trophy: Trophy,
-	award: Medal,
-	heart: Heart,
-	star: Star,
-	diamond: Gem,
-	users: Users,
-}
 
 const projectOptions = ['All', 'Project X', 'Project Y', 'Project Z']
 
@@ -80,17 +71,12 @@ export function AchievementsGrid() {
 		[selectedProject],
 	)
 
-	const filteredAchievements = achievements
-
 	const paginatedNFTs = filteredNFTs.slice(
 		(currentNFTPage - 1) * itemsPerPage,
 		currentNFTPage * itemsPerPage,
 	)
 
 	const totalNFTPages = Math.ceil(filteredNFTs.length / itemsPerPage)
-	const totalAchievementPages = Math.ceil(
-		filteredAchievements.length / itemsPerPage,
-	)
 
 	const earnedCount = achievements.filter((a) => a.status === 'earned').length
 	const progress = (earnedCount / achievements.length) * 100

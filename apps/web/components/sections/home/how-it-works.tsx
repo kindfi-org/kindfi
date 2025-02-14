@@ -15,7 +15,7 @@ export function HowItWorks() {
 				/>
 
 				<div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-					{models.map((model, index) => (
+					{models.map((model) => (
 						<InvestmentModelCard
 							key={model.id}
 							{...model}

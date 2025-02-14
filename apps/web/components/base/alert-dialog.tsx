@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import { buttonVariants } from '~/components/base/button'
 import useReducedMotion from '~/hooks/use-reduced-motion'
-import { animations } from '~/lib/animation'
+import { animations } from '~/lib/constants/animations'
 import { cn } from '~/lib/utils'
 
 const AlertDialog = AlertDialogPrimitive.Root
@@ -54,7 +54,7 @@ const AlertDialogContent = React.forwardRef<
 				className={cn(
 					'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-default',
 					reducedMotion ? '' : animations.fadeAndZoomAndAnimate.inOut,
-					animations.contentSlide.inOut,
+					reducedMotion ? '' : animations.contentSlide.inOut,
 					'sm:rounded-lg',
 					className,
 				)}
@@ -149,14 +149,14 @@ AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
 
 export {
 	AlertDialog,
-	AlertDialogPortal,
-	AlertDialogOverlay,
-	AlertDialogTrigger,
-	AlertDialogContent,
-	AlertDialogHeader,
-	AlertDialogFooter,
-	AlertDialogTitle,
-	AlertDialogDescription,
 	AlertDialogAction,
 	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogOverlay,
+	AlertDialogPortal,
+	AlertDialogTitle,
+	AlertDialogTrigger,
 }

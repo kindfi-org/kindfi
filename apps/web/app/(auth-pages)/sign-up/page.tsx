@@ -1,8 +1,8 @@
 'use client'
 
-import { Lock, Mail, UserPlus } from 'lucide-react'
+import { Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
-import { signUpAction } from '~/app/actions'
+import { type ChangeEvent, useState } from 'react'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -12,12 +12,13 @@ import {
 } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
-import type { Message } from '~/components/form-message'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { usePasskeyRegistration } from '~/hooks/passkey/use-passkey-registration'
+import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
+import { useStellarContext } from '~/hooks/stellar/stellar-context'
 import { useFormValidation } from '~/hooks/use-form-validation'
 
-export default function Signup(props: { searchParams: Promise<Message> }) {
-	const searchParams = props.searchParams
+export default function Signup() {
 	// Show success message if registration was successful
 	// if (searchParams.success) {
 	//   return (
@@ -31,16 +32,35 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 	//   );
 	// }
 
+	const isWebAuthnSupported = useWebAuthnSupport()
+
+	const { onRegister } = useStellarContext()
+
+	const [email, setEmail] = useState('')
+
 	const {
-		isEmailInvalid,
-		isPasswordInvalid,
-		handleValidation,
-		resetValidation,
-	} = useFormValidation({
-		email: true,
-		password: true,
-		minLength: 6,
-	})
+		isCreatingPasskey,
+		regSuccess,
+		regError,
+		handleRegister,
+		isAlreadyRegistered,
+	} = usePasskeyRegistration(email, { onRegister })
+
+	const { isEmailInvalid, handleValidation, resetValidation } =
+		useFormValidation({
+			email: true,
+		})
+
+	const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+		handleValidation(e as ChangeEvent<HTMLInputElement & { name: 'email' }>)
+		setEmail(e.target.value)
+	}
+
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		if (!isEmailInvalid) handleRegister()
+		resetValidation()
+	}
 
 	return (
 		<AuthLayout>
@@ -59,11 +79,7 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 					</p>
 				</CardHeader>
 				<CardContent>
-					<form
-						className="space-y-4"
-						aria-label="Sign up"
-						onSubmit={resetValidation}
-					>
+					<form className="space-y-4" aria-label="Sign up" onSubmit={onSubmit}>
 						<div className="space-y-4">
 							<div className="space-y-2">
 								<Label htmlFor="email" id="email-label">
@@ -84,7 +100,7 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 										aria-labelledby="email-label"
 										aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
 										aria-invalid={isEmailInvalid}
-										onChange={handleValidation}
+										onChange={onEmailChange}
 									/>
 									<span id="email-description" className="sr-only">
 										Enter your email address to create your account
@@ -95,43 +111,39 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
 								</div>
 							</div>
 
-							<div className="space-y-2">
-								<Label htmlFor="password" id="password-label">
-									Password
-								</Label>
-								<div className="relative">
-									<Lock
-										className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
-										aria-hidden="true"
-									/>
-									<Input
-										id="password"
-										name="password"
-										type="password"
-										placeholder="Create a password"
-										className="pl-10"
-										required
-										minLength={6}
-										aria-labelledby="password-label"
-										aria-describedby={`${isPasswordInvalid ? 'password-requirements' : 'password-description'}`}
-										aria-invalid={isPasswordInvalid}
-										onChange={handleValidation}
-									/>
-									<span id="password-description" className="sr-only">
-										Create a password for your account
+							{isWebAuthnSupported ? (
+								<Button
+									className="w-full"
+									type="submit"
+									disabled={isCreatingPasskey}
+								>
+									{isCreatingPasskey ? 'Creating account...' : 'Create account'}
+								</Button>
+							) : (
+								<div className="flex flex-col items-center justify-center">
+									<span>
+										WebAuthn is not supported. Please use a different browser.
 									</span>
-									<p
-										id="password-requirements"
-										className="text-xs text-muted-foreground mt-1"
-									>
-										Password must be at least 6 characters long
-									</p>
 								</div>
-							</div>
+							)}
 
-							<Button className="w-full" formAction={signUpAction}>
-								Create account
-							</Button>
+							{regSuccess && (
+								<div className="text-green-600">
+									Registration successful! You can now sign in.
+								</div>
+							)}
+
+							{regError && !isAlreadyRegistered && (
+								<div className="text-red-600">
+									There was an error during registration. Please try again.
+								</div>
+							)}
+
+							{isAlreadyRegistered && (
+								<div className="text-yellow-600">
+									This email is already registered. Please sign in.
+								</div>
+							)}
 						</div>
 
 						{/* <FormMessage message={searchParams} /> */}

@@ -1,4 +1,4 @@
-import type { StatsProps } from '~/lib/types/section'
+import type { StatsProps } from '~/lib/types'
 
 export function StatsSection({
 	totalNFTs,

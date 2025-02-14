@@ -7,16 +7,14 @@ interface StepProps {
 	number: number
 	title: string
 	description: string
-	active: boolean
-	isLast: boolean
 }
 
 export const Step = ({
 	number,
 	title,
 	description,
-	active,
-	isLast,
+	// active,
+	// isLast,
 }: StepProps) => (
 	<div className="relative flex flex-1 flex-col items-center">
 		{/* Card */}

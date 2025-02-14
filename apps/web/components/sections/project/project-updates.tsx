@@ -1,4 +1,4 @@
-import type React from 'react'
+import Image from 'next/image'
 import ImpactCards from '~/components/sections/project/impact-cards'
 import SectionContainer from '~/components/sections/project/section-container'
 import Timeline from '~/components/sections/project/timeline'
@@ -6,7 +6,7 @@ import {
 	statsDataUpdates,
 	successGalleryItems,
 	timelineEvents,
-} from '~/lib/constants/mock-data/mock-projects'
+} from '~/lib/mock-data/mock-projects'
 
 const ProjectUpdatesSection = () => {
 	return (
@@ -25,12 +25,13 @@ const ProjectUpdatesSection = () => {
 			<div className="mt-6 bg-gray-50 rounded-lg p-6 shadow-lg border border-gray-200">
 				<div className="flex items-center justify-between mb-4">
 					<h2 className="text-xl font-semibold text-black">Success Gallery</h2>
-					<a
-						href="./"
+					<button
+						onClick={() => {}}
+						type="button"
 						className="text-sm font-medium text-blue-600 hover:underline"
 					>
 						View All
-					</a>
+					</button>
 				</div>
 				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
 					{successGalleryItems.map((item) => (
@@ -38,7 +39,7 @@ const ProjectUpdatesSection = () => {
 							key={item.id}
 							className="bg-gray-100 rounded-lg shadow-inner aspect-w-1 aspect-h-1"
 						>
-							<img
+							<Image
 								src={item.src}
 								alt={item.alt}
 								className="w-full h-full object-cover rounded-lg"

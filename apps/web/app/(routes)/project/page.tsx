@@ -6,7 +6,7 @@ import ProjectOverview from '~/components/sections/project/project-overview'
 import ProjectShowcaseSection from '~/components/sections/project/project-showcase'
 import ProjectUpdatesSection from '~/components/sections/project/project-updates'
 import YourImpactSection from '~/components/sections/project/your-impact'
-import { projectTabsData } from '~/lib/constants/mock-data/mock-projects'
+import { projectTabsData } from '~/lib/mock-data/mock-projects'
 
 const TAB_COMPONENTS = {
 	overview: ProjectOverview,

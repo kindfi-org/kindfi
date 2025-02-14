@@ -1,4 +1,5 @@
 'use client'
+import type { NavigationItem } from '~/lib/types'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -14,7 +15,7 @@ import {
 } from '~/components/base/navigation-menu'
 import { cn } from '~/lib/utils'
 
-const projects = [
+const projects: NavigationItem[] = [
 	{
 		title: 'Explore Projects',
 		href: '/projects',
@@ -32,7 +33,7 @@ const projects = [
 	},
 ]
 
-const resources = [
+const resources: NavigationItem[] = [
 	{
 		title: 'Learn Web3',
 		href: '/learn',
