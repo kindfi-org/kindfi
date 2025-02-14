@@ -13,3 +13,321 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
 		])
 		.nullable(),
 )
+
+export const kindlersRowSchema = z.object({
+	auth_id: z.string(),
+	avatar_url: z.string().nullable(),
+	bio: z.string().nullable(),
+	created_at: z.string(),
+	display_name: z.string().nullable(),
+	email: z.string(),
+	id: z.string(),
+	updated_at: z.string(),
+	username: z.string(),
+})
+
+export const kindlersInsertSchema = z.object({
+	auth_id: z.string(),
+	avatar_url: z.string().optional().nullable(),
+	bio: z.string().optional().nullable(),
+	created_at: z.string().optional(),
+	display_name: z.string().optional().nullable(),
+	email: z.string(),
+	id: z.string().optional(),
+	updated_at: z.string().optional(),
+	username: z.string(),
+})
+
+export const kindlersUpdateSchema = z.object({
+	auth_id: z.string().optional(),
+	avatar_url: z.string().optional().nullable(),
+	bio: z.string().optional().nullable(),
+	created_at: z.string().optional(),
+	display_name: z.string().optional().nullable(),
+	email: z.string().optional(),
+	id: z.string().optional(),
+	updated_at: z.string().optional(),
+	username: z.string().optional(),
+})
+
+export const kindlersRelationshipsSchema = z.tuple([])
+
+export const projectFollowersRowSchema = z.object({
+	created_at: z.string(),
+	id: z.string(),
+	kindler_id: z.string(),
+	project_id: z.string(),
+})
+
+export const projectFollowersInsertSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	kindler_id: z.string(),
+	project_id: z.string(),
+})
+
+export const projectFollowersUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	kindler_id: z.string().optional(),
+	project_id: z.string().optional(),
+})
+
+export const projectFollowersRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_followers_kindler_id_fkey'),
+		columns: z.tuple([z.literal('kindler_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('kindlers'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('project_followers_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectMembersRowSchema = z.object({
+	created_at: z.string(),
+	id: z.string(),
+	kindler_id: z.string(),
+	project_id: z.string(),
+	role: z.string(),
+})
+
+export const projectMembersInsertSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	kindler_id: z.string(),
+	project_id: z.string(),
+	role: z.string(),
+})
+
+export const projectMembersUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	kindler_id: z.string().optional(),
+	project_id: z.string().optional(),
+	role: z.string().optional(),
+})
+
+export const projectMembersRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_members_kindler_id_fkey'),
+		columns: z.tuple([z.literal('kindler_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('kindlers'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('project_members_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectUpdateCommentsRowSchema = z.object({
+	content: z.string(),
+	created_at: z.string(),
+	id: z.string(),
+	kindler_id: z.string(),
+	update_id: z.string(),
+	updated_at: z.string(),
+})
+
+export const projectUpdateCommentsInsertSchema = z.object({
+	content: z.string(),
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	kindler_id: z.string(),
+	update_id: z.string(),
+	updated_at: z.string().optional(),
+})
+
+export const projectUpdateCommentsUpdateSchema = z.object({
+	content: z.string().optional(),
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	kindler_id: z.string().optional(),
+	update_id: z.string().optional(),
+	updated_at: z.string().optional(),
+})
+
+export const projectUpdateCommentsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_update_comments_kindler_id_fkey'),
+		columns: z.tuple([z.literal('kindler_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('kindlers'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('project_update_comments_update_id_fkey'),
+		columns: z.tuple([z.literal('update_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('project_updates'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectUpdateNotificationsRowSchema = z.object({
+	created_at: z.string(),
+	id: z.string(),
+	is_read: z.boolean(),
+	kindler_id: z.string(),
+	update_id: z.string(),
+})
+
+export const projectUpdateNotificationsInsertSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	is_read: z.boolean().optional(),
+	kindler_id: z.string(),
+	update_id: z.string(),
+})
+
+export const projectUpdateNotificationsUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	is_read: z.boolean().optional(),
+	kindler_id: z.string().optional(),
+	update_id: z.string().optional(),
+})
+
+export const projectUpdateNotificationsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_update_notifications_kindler_id_fkey'),
+		columns: z.tuple([z.literal('kindler_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('kindlers'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('project_update_notifications_update_id_fkey'),
+		columns: z.tuple([z.literal('update_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('project_updates'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectUpdatesRowSchema = z.object({
+	content: z.string(),
+	created_at: z.string(),
+	created_by: z.string(),
+	id: z.string(),
+	media_urls: jsonSchema.nullable(),
+	project_id: z.string(),
+	status: z.string(),
+	title: z.string(),
+	update_type: z.string(),
+	updated_at: z.string(),
+	updated_by: z.string(),
+})
+
+export const projectUpdatesInsertSchema = z.object({
+	content: z.string(),
+	created_at: z.string().optional(),
+	created_by: z.string(),
+	id: z.string().optional(),
+	media_urls: jsonSchema.optional().nullable(),
+	project_id: z.string(),
+	status: z.string().optional(),
+	title: z.string(),
+	update_type: z.string(),
+	updated_at: z.string().optional(),
+	updated_by: z.string(),
+})
+
+export const projectUpdatesUpdateSchema = z.object({
+	content: z.string().optional(),
+	created_at: z.string().optional(),
+	created_by: z.string().optional(),
+	id: z.string().optional(),
+	media_urls: jsonSchema.optional().nullable(),
+	project_id: z.string().optional(),
+	status: z.string().optional(),
+	title: z.string().optional(),
+	update_type: z.string().optional(),
+	updated_at: z.string().optional(),
+	updated_by: z.string().optional(),
+})
+
+export const projectUpdatesRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_updates_created_by_fkey'),
+		columns: z.tuple([z.literal('created_by')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('kindlers'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('project_updates_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('project_updates_updated_by_fkey'),
+		columns: z.tuple([z.literal('updated_by')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('kindlers'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectsRowSchema = z.object({
+	created_at: z.string(),
+	created_by: z.string(),
+	description: z.string().nullable(),
+	id: z.string(),
+	name: z.string(),
+	status: z.string(),
+	updated_at: z.string(),
+	updated_by: z.string(),
+})
+
+export const projectsInsertSchema = z.object({
+	created_at: z.string().optional(),
+	created_by: z.string(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	name: z.string(),
+	status: z.string().optional(),
+	updated_at: z.string().optional(),
+	updated_by: z.string(),
+})
+
+export const projectsUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	created_by: z.string().optional(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	name: z.string().optional(),
+	status: z.string().optional(),
+	updated_at: z.string().optional(),
+	updated_by: z.string().optional(),
+})
+
+export const projectsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('projects_created_by_fkey'),
+		columns: z.tuple([z.literal('created_by')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('kindlers'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('projects_updated_by_fkey'),
+		columns: z.tuple([z.literal('updated_by')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('kindlers'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])

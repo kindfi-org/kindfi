@@ -34,7 +34,310 @@ export type Database = {
 	}
 	public: {
 		Tables: {
-			[_ in never]: never
+			kindlers: {
+				Row: {
+					auth_id: string
+					avatar_url: string | null
+					bio: string | null
+					created_at: string
+					display_name: string | null
+					email: string
+					id: string
+					updated_at: string
+					username: string
+				}
+				Insert: {
+					auth_id: string
+					avatar_url?: string | null
+					bio?: string | null
+					created_at?: string
+					display_name?: string | null
+					email: string
+					id?: string
+					updated_at?: string
+					username: string
+				}
+				Update: {
+					auth_id?: string
+					avatar_url?: string | null
+					bio?: string | null
+					created_at?: string
+					display_name?: string | null
+					email?: string
+					id?: string
+					updated_at?: string
+					username?: string
+				}
+				Relationships: []
+			}
+			project_followers: {
+				Row: {
+					created_at: string
+					id: string
+					kindler_id: string
+					project_id: string
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					kindler_id: string
+					project_id: string
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					kindler_id?: string
+					project_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'project_followers_kindler_id_fkey'
+						columns: ['kindler_id']
+						isOneToOne: false
+						referencedRelation: 'kindlers'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'project_followers_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			project_members: {
+				Row: {
+					created_at: string
+					id: string
+					kindler_id: string
+					project_id: string
+					role: string
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					kindler_id: string
+					project_id: string
+					role: string
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					kindler_id?: string
+					project_id?: string
+					role?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'project_members_kindler_id_fkey'
+						columns: ['kindler_id']
+						isOneToOne: false
+						referencedRelation: 'kindlers'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'project_members_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			project_update_comments: {
+				Row: {
+					content: string
+					created_at: string
+					id: string
+					kindler_id: string
+					update_id: string
+					updated_at: string
+				}
+				Insert: {
+					content: string
+					created_at?: string
+					id?: string
+					kindler_id: string
+					update_id: string
+					updated_at?: string
+				}
+				Update: {
+					content?: string
+					created_at?: string
+					id?: string
+					kindler_id?: string
+					update_id?: string
+					updated_at?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'project_update_comments_kindler_id_fkey'
+						columns: ['kindler_id']
+						isOneToOne: false
+						referencedRelation: 'kindlers'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'project_update_comments_update_id_fkey'
+						columns: ['update_id']
+						isOneToOne: false
+						referencedRelation: 'project_updates'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			project_update_notifications: {
+				Row: {
+					created_at: string
+					id: string
+					is_read: boolean
+					kindler_id: string
+					update_id: string
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					is_read?: boolean
+					kindler_id: string
+					update_id: string
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					is_read?: boolean
+					kindler_id?: string
+					update_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'project_update_notifications_kindler_id_fkey'
+						columns: ['kindler_id']
+						isOneToOne: false
+						referencedRelation: 'kindlers'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'project_update_notifications_update_id_fkey'
+						columns: ['update_id']
+						isOneToOne: false
+						referencedRelation: 'project_updates'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			project_updates: {
+				Row: {
+					content: string
+					created_at: string
+					created_by: string
+					id: string
+					media_urls: Json | null
+					project_id: string
+					status: string
+					title: string
+					update_type: string
+					updated_at: string
+					updated_by: string
+				}
+				Insert: {
+					content: string
+					created_at?: string
+					created_by: string
+					id?: string
+					media_urls?: Json | null
+					project_id: string
+					status?: string
+					title: string
+					update_type: string
+					updated_at?: string
+					updated_by: string
+				}
+				Update: {
+					content?: string
+					created_at?: string
+					created_by?: string
+					id?: string
+					media_urls?: Json | null
+					project_id?: string
+					status?: string
+					title?: string
+					update_type?: string
+					updated_at?: string
+					updated_by?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'project_updates_created_by_fkey'
+						columns: ['created_by']
+						isOneToOne: false
+						referencedRelation: 'kindlers'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'project_updates_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'project_updates_updated_by_fkey'
+						columns: ['updated_by']
+						isOneToOne: false
+						referencedRelation: 'kindlers'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			projects: {
+				Row: {
+					created_at: string
+					created_by: string
+					description: string | null
+					id: string
+					name: string
+					status: string
+					updated_at: string
+					updated_by: string
+				}
+				Insert: {
+					created_at?: string
+					created_by: string
+					description?: string | null
+					id?: string
+					name: string
+					status?: string
+					updated_at?: string
+					updated_by: string
+				}
+				Update: {
+					created_at?: string
+					created_by?: string
+					description?: string | null
+					id?: string
+					name?: string
+					status?: string
+					updated_at?: string
+					updated_by?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'projects_created_by_fkey'
+						columns: ['created_by']
+						isOneToOne: false
+						referencedRelation: 'kindlers'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'projects_updated_by_fkey'
+						columns: ['updated_by']
+						isOneToOne: false
+						referencedRelation: 'kindlers'
+						referencedColumns: ['id']
+					},
+				]
+			}
 		}
 		Views: {
 			[_ in never]: never
