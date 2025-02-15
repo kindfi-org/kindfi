@@ -1,6 +1,6 @@
 [workspace]
-members = ["contracts/auth-contracts/*", "contracts/nft"]
 resolver = "2"
+members = ["contracts/auth-contracts/*", "contracts/nft"]
 
 [workspace.dependencies]
 soroban-sdk = "22.0.6"
@@ -15,6 +15,7 @@ panic = "abort"
 codegen-units = 1
 lto = true
 
+# For more information about this profile see https://soroban.stellar.org/docs/basic-tutorials/logging#cargotoml-profile
 [profile.release-with-logs]
 inherits = "release"
 debug-assertions = true
