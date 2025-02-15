@@ -1,10 +1,12 @@
 [package]
-name = "kindfi-nft"
-version = "0.1.0"
+name = "nft"
+version = "0.0.0"
 edition = "2021"
+publish = false
 
 [lib]
 crate-type = ["cdylib"]
+doctest = false
 
 [dependencies]
 soroban-sdk = { workspace = true }
