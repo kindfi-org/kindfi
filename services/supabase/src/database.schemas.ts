@@ -13,3 +13,41 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
 		])
 		.nullable(),
 )
+
+// Add the new schemas for the project-related tables
+
+export const projectSchema = z.object({
+	id: z.string().uuid(),
+	title: z.string(),
+	description: z.string().nullable(),
+	current_amount: z.number(),
+	target_amount: z.number(),
+	min_investment: z.number(),
+	percentage_complete: z.number(),
+	investors_count: z.number(),
+	created_at: z.string().datetime(),
+	updated_at: z.string().datetime(),
+	category_id: z.string().uuid().nullable(),
+	image_url: z.string().nullable(),
+	owner_id: z.string().uuid(),
+})
+
+export const projectTagSchema = z.object({
+	project_id: z.string().uuid(),
+	tag_id: z.string().uuid(),
+})
+
+export const projectUpdateSchema = z.object({
+	id: z.string().uuid(),
+	project_id: z.string().uuid(),
+	content: z.string(),
+	created_at: z.string().datetime(),
+})
+
+export const projectInvestorSchema = z.object({
+	id: z.string().uuid(),
+	project_id: z.string().uuid(),
+	user_id: z.string().uuid(),
+	amount: z.number(),
+	invested_at: z.string().datetime(),
+})
