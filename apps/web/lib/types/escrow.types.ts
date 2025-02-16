@@ -58,6 +58,12 @@ export type StartDisputePayload = Pick<Escrow, "contractId"> & {
   signer: string;
 };
 
+export type ResolveDisputePayload = Pick<Escrow, "contractId"> &
+  Partial<Pick<Escrow, "disputeResolver">> & {
+    approverFunds: string;
+    serviceProviderFunds: string;
+  };
+
 // Escrow's Response
 export type EscrowRequestResponse = {
   status: Status;
