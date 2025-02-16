@@ -33,24 +33,18 @@ export interface Escrow {
   resolvedFlag?: boolean;
 }
 
+// Escrow's Payload
 export type EscrowPayload = Omit<
   Escrow,
   "user" | "createdAt" | "updatedAt" | "id"
 >;
 
-export type TCreateEscrowRequest<T extends EscrowEndpoint> = {
-  action: T;
-  method: HttpMethod;
-  data?: Record<string, any>;
-  params?: Record<string, any>;
-};
-
+// Escrow's Response
 export type EscrowRequestResponse = {
   status: Status;
   unsignedTransaction?: string;
 };
 
-// Response from the escrow's endpoint
 export type InitializeEscrowResponse = {
   contract_id: string;
   escrow: EscrowPayload;
