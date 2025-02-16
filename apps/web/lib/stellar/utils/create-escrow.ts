@@ -1,6 +1,6 @@
-import { getEndpoint } from "./getEndpoint";
-import http from "~/lib/axios/http";
+import { getEndpoint } from "./get-endpoint";
 import { AxiosRequestConfig, Method } from "axios";
+import { http } from "~/lib/axios/http";
 import {
   EscrowEndpoint,
   TCreateEscrowRequest,

@@ -1,10 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { AppError } from "~/lib/error";
 import { validateEscrowInitialization } from "~/lib/validators/escrow";
-import { sendTransaction } from "~/lib/stellar/utils/sendTransaction";
-import { createEscrowRequest } from "~/lib/stellar/utils/createEscrow";
+import { sendTransaction } from "~/lib/stellar/utils/send-transaction";
+import { createEscrowRequest } from "~/lib/stellar/utils/create-escrow";
 import { supabase } from "~/lib/supabase/config";
 import { EscrowPayload } from "~/lib/types/escrow/escrow-payload.types";
 
