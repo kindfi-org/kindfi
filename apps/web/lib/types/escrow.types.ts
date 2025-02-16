@@ -39,6 +39,13 @@ export type EscrowPayload = Omit<
   "user" | "createdAt" | "updatedAt" | "id"
 >;
 
+export type ChangeMilestoneStatusPayload = {
+  contractId?: string;
+  milestoneIndex: string;
+  newStatus: MilestoneStatus;
+  serviceProvider?: string;
+};
+
 // Escrow's Response
 export type EscrowRequestResponse = {
   status: Status;
