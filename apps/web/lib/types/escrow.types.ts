@@ -64,6 +64,12 @@ export type ResolveDisputePayload = Pick<Escrow, "contractId"> &
     serviceProviderFunds: string;
   };
 
+export type EditMilestonesPayload = {
+  contractId: string;
+  escrow: EscrowPayload;
+  signer: string;
+};
+
 // Escrow's Response
 export type EscrowRequestResponse = {
   status: Status;
