@@ -1,5 +1,5 @@
 import http from "~/lib/axios/http";
-import { SendTransactionResponse } from "~/lib/types";
+import { SendTransactionResponse } from "~/lib/types/escrow/escrow-response.types";
 
 export async function sendTransaction(
   signedXdr: string
