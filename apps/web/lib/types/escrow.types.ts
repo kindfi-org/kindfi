@@ -1,58 +1,67 @@
-export type EscrowState =
-	| 'NEW'
-	| 'ACTIVE'
-	| 'IN_DISPUTE'
-	| 'COMPLETED'
-	| 'CANCELLED'
+import { CreatedAt, UpdatedAt } from "./date.types";
+import { EscrowEndpoint, HttpMethod, Status } from "./utils.types";
 
-export interface Milestone {
-	id: string
-	title: string
-	description: string
-	amount: number
-	status: 'PENDING' | 'APPROVED' | 'REJECTED'
-	dueDate: string
+export type MilestoneStatus = "completed" | "approved" | "pending";
+
+export type Milestone = {
+  description: string;
+  status?: MilestoneStatus;
+  flag?: boolean;
+};
+export interface Escrow {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: CreatedAt;
+  updatedAt: UpdatedAt;
+  contractId?: string;
+  balance?: string;
+  token: string;
+  milestones: Milestone[];
+  serviceProvider: string;
+  engagementId: string;
+  disputeResolver: string;
+  amount: string;
+  platformAddress: string;
+  platformFee: string;
+  approver: string;
+  releaseSigner: string;
+  user: string;
+  issuer: string;
+  disputeFlag?: boolean;
+  releaseFlag?: boolean;
+  resolvedFlag?: boolean;
 }
 
-export interface EscrowParties {
-	payer: string // Project supporter address
-	receiver: string // Project creator address
-	reviewers: string[] // Platform reviewers
-}
+export type EscrowPayload = Omit<
+  Escrow,
+  "user" | "createdAt" | "updatedAt" | "id"
+>;
 
-export interface EscrowContractParams {
-	parties: EscrowParties
-	milestones: Milestone[]
-	disputeResolver: string
-	platformFee: number
-}
+export type TCreateEscrowRequest<T extends EscrowEndpoint> = {
+  action: T;
+  method: HttpMethod;
+  data?: Record<string, any>;
+  params?: Record<string, any>;
+};
 
-export interface EscrowMetadata {
-	projectId: string
-	engagementType: string
-	description: string
-	tags: string[]
-}
+export type EscrowRequestResponse = {
+  status: Status;
+  unsignedTransaction?: string;
+};
 
-export interface EscrowInitialization {
-	contractParams: EscrowContractParams
-	metadata: EscrowMetadata
-}
+// Response from the escrow's endpoint
+export type InitializeEscrowResponse = {
+  contract_id: string;
+  escrow: EscrowPayload;
+  message: string;
+  status: Status;
+};
 
-// Database types
-export interface EscrowContract {
-	id: string
-	engagement_id: string
-	contract_id: string
-	project_id: string
-	contribution_id: string
-	payer_address: string
-	receiver_address: string
-	amount: number
-	current_state: EscrowState
-	platform_fee: number
-	created_at: Date
-	updated_at: Date
-	completed_at?: Date
-	metadata: EscrowMetadata
-}
+export type FundEscrowResponse = {
+  message: string;
+  status: Status;
+};
+
+export type SendTransactionResponse = InitializeEscrowResponse &
+  FundEscrowResponse;
