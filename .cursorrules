@@ -1,3 +1,77 @@
+# Next.js and Frontend
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+*.js linguist-language=JavaScript
+*.jsx linguist-language=JavaScript
+*.css linguist-language=CSS
+
+# Soroban Smart Contracts (Stellar)
+*.rs linguist-language=Rust
+Cargo.toml linguist-language=TOML
+soroban-config.json linguist-language=JSON
+
+# Build and Dependencies
+target/ linguist-generated=true
+target/ -diff
+**/target/ linguist-generated=true
+**/target/ -diff
+.next/ linguist-generated=true
+.next/ -diff
+dist/ linguist-generated=true
+dist/ -diff
+
+# Soroban Build Artifacts
+**/*.wasm linguist-generated=true
+.soroban/ linguist-generated=true
+.soroban/ -diff
+
+# Documentation
+*.md linguist-documentation
+docs/ linguist-documentation
+README.md linguist-documentation
+
+# Test Files
+*_test.rs linguist-language=Rust
+*.test.ts linguist-language=TypeScript
+*.test.tsx linguist-language=TypeScript
+tests/ linguist-language=Rust
+__tests__/ linguist-language=TypeScript
+
+# IDE and Editor Files
+.vscode/ linguist-vendored
+.idea/ linguist-vendored
+*.json linguist-language=JSON
+.env.* linguist-language=Text
+
+# Package Management
+node_modules/ linguist-vendored
+node_modules/ -diff
+yarn.lock linguist-generated=true
+package-lock.json linguist-generated=true
+
+# Ignore binary files
+*.wasm binary
+*.jpg binary
+*.png binary
+*.gif binary
+*.ico binary
+*.pdf binary
+
+# Configuration Files
+*.config.js linguist-language=JavaScript
+*.config.ts linguist-language=TypeScript
+tailwind.config.js linguist-language=JavaScript
+next.config.js linguist-language=JavaScript
+postcss.config.js linguist-language=JavaScript
+
+# Database
+*.sql linguist-language=SQL
+prisma/ linguist-language=Prisma
+drizzle/ linguist-language=TypeScript
+
+# Security
+.env.example linguist-language=Text
+
 You are an expert developer in TypeScript, Node.js, Next.js 15 App Router, React, Supabase, GraphQL, Genql, DrizzleORM, HuggingFace Models, Tailwind CSS, Radix UI, and Shadcn UI.
 
 ---
