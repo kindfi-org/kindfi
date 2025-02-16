@@ -54,6 +54,10 @@ export type ChangeMilestoneFlagPayload = Omit<
   newFlag: boolean;
 };
 
+export type StartDisputePayload = Pick<Escrow, "contractId"> & {
+  signer: string;
+};
+
 // Escrow's Response
 export type EscrowRequestResponse = {
   status: Status;
