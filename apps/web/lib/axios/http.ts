@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const http = axios.create({
+export const http = axios.create({
   baseURL: process.env.TRUSTLESS_WORK_API_URL || "",
   timeout: 60000, // 1 minute
   headers: {
@@ -8,5 +8,3 @@ const http = axios.create({
     Authorization: `Bearer ${process.env.TRUSTLESS_WORK_API_KEY}`,
   },
 });
-
-export default http;
