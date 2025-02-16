@@ -24,8 +24,7 @@ export type EscrowEndpoint =
 export type TCreateEscrowRequest<T extends EscrowEndpoint> = {
   action: T;
   method: HttpMethod;
-  data?: Record<
-    string,
+  data?:
     | EscrowPayload
     | StartDisputePayload
     | EditMilestonesPayload
@@ -33,7 +32,7 @@ export type TCreateEscrowRequest<T extends EscrowEndpoint> = {
     | ResolveDisputePayload
     | ChangeMilestoneFlagPayload
     | FundEscrowPayload
-    | DistributeEscrowEarningsEscrowPayload
-  >;
-  params?: Record<string, GetBalanceParams>;
+    | DistributeEscrowEarningsEscrowPayload;
+
+  params?: GetBalanceParams;
 };
