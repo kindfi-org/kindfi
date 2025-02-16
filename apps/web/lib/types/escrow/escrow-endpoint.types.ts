@@ -7,7 +7,8 @@ export type EscrowEndpoint =
   | "resolve"
   | "release"
   | "completeMilestone"
-  | "approveMilestone";
+  | "approveMilestone"
+  | "edit";
 
 export type TCreateEscrowRequest<T extends EscrowEndpoint> = {
   action: T;
