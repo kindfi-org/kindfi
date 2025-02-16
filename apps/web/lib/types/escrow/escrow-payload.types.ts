@@ -31,8 +31,22 @@ export type ResolveDisputePayload = Pick<Escrow, "contractId"> &
     serviceProviderFunds: string;
   };
 
+export type FundEscrowPayload = Pick<Escrow, "amount" | "contractId"> & {
+  signer: string;
+};
+
+export type DistributeEscrowEarningsEscrowPayload = Pick<Escrow, "contractId"> &
+  Partial<Pick<Escrow, "serviceProvider" | "releaseSigner">> & {
+    signer: string;
+  };
+
 export type EditMilestonesPayload = {
   contractId: string;
   escrow: EscrowPayload;
   signer: string;
+};
+
+export type GetBalanceParams = {
+  signer: string;
+  addresses: string[];
 };
