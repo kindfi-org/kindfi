@@ -58,7 +58,6 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@shadcn/ui": "^0.0.4",
 		"@types/node": "^20",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",

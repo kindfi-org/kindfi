@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '../../lib/supabase/client'
 import type { Database } from '../../../../services/supabase/database.types'
 
@@ -39,7 +39,7 @@ export function useEscrow(escrowId: string) {
   const transformRecord = (record: EscrowRecord): EscrowStatusState | null => {
     if (record.status === 'CANCELLED') return null
 
-    // Safely cast metadata with type checking
+
     const metadata = typeof record.metadata === 'object' && record.metadata
       ? record.metadata as { milestoneStatus?: { total: number; completed: number } }
       : { milestoneStatus: { total: 0, completed: 0 } }
@@ -61,7 +61,7 @@ export function useEscrow(escrowId: string) {
     }
   }
 
-  const fetchEscrowStatus = async () => {
+  const fetchEscrowStatus = useCallback(async (): Promise<void> => {
     try {
       setLoading(true)
       setError(null)
@@ -86,7 +86,7 @@ export function useEscrow(escrowId: string) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [escrowId, supabase, transformRecord])
 
   useEffect(() => {
     fetchEscrowStatus()
@@ -115,7 +115,7 @@ export function useEscrow(escrowId: string) {
     return () => {
       channel.unsubscribe()
     }
-  }, [escrowId, fetchEscrowStatus, supabase, transformRecord])
+  }, [escrowId, supabase, transformRecord, fetchEscrowStatus])
 
   const updateStatus = async (newStatus: EscrowStatusType) => {
     try {
@@ -142,7 +142,7 @@ export function useEscrow(escrowId: string) {
     try {
       if (!rawRecord) throw new Error('No record to update')
 
-      // Safely handle existing metadata
+      
       const existingMetadata = typeof rawRecord.metadata === 'object' && rawRecord.metadata
         ? rawRecord.metadata as { milestoneStatus?: { total: number; completed: number } }
         : { milestoneStatus: { total: 0, completed: 0 } }
