@@ -10,3 +10,10 @@ export type EscrowEndpoint =
   | "release"
   | "completeMilestone"
   | "approveMilestone";
+
+export type TCreateEscrowRequest<T extends EscrowEndpoint> = {
+  action: T;
+  method: HttpMethod;
+  data?: Record<string, any>;
+  params?: Record<string, any>;
+};
