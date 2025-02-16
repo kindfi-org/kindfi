@@ -6,13 +6,7 @@ import type { EscrowPayload } from "~/lib/types";
 import { validateEscrowInitialization } from "~/lib/validators/escrow";
 import { sendTransaction } from "~/lib/stellar/utils/sendTransaction";
 import { createEscrowRequest } from "~/lib/stellar/utils/createEscrow";
-
-const supabase = createClient(
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { supabase } from "~/lib/supabase/config";
 
 export async function POST(req: NextRequest) {
   try {
