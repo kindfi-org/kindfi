@@ -1,4 +1,15 @@
 import { HttpMethod } from "../utils.types";
+import {
+  ChangeMilestoneFlagPayload,
+  ChangeMilestoneStatusPayload,
+  DistributeEscrowEarningsEscrowPayload,
+  EditMilestonesPayload,
+  EscrowPayload,
+  FundEscrowPayload,
+  GetBalanceParams,
+  ResolveDisputePayload,
+  StartDisputePayload,
+} from "./escrow-payload.types";
 
 export type EscrowEndpoint =
   | "initiate"
@@ -13,6 +24,16 @@ export type EscrowEndpoint =
 export type TCreateEscrowRequest<T extends EscrowEndpoint> = {
   action: T;
   method: HttpMethod;
-  data?: Record<string, any>;
-  params?: Record<string, any>;
+  data?: Record<
+    string,
+    | EscrowPayload
+    | StartDisputePayload
+    | EditMilestonesPayload
+    | ChangeMilestoneStatusPayload
+    | ResolveDisputePayload
+    | ChangeMilestoneFlagPayload
+    | FundEscrowPayload
+    | DistributeEscrowEarningsEscrowPayload
+  >;
+  params?: Record<string, GetBalanceParams>;
 };
