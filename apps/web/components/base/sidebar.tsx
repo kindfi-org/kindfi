@@ -38,6 +38,17 @@ type SidebarContext = {
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
 
+const TRANSITION_DURATION = '200ms'
+const SIDEBAR_STYLES = {
+	transition: `width ${TRANSITION_DURATION} linear`,
+	willChange: 'width',
+}
+const SIDEBAR_STYLES_TWO = {
+	transition: `transform ${TRANSITION_DURATION} linear`,
+
+	willChange: 'transform',
+}
+
 function useSidebar() {
 	const context = React.useContext(SidebarContext)
 	if (!context) {
@@ -217,8 +228,9 @@ const Sidebar = React.forwardRef<
 				data-side={side}
 			>
 				<div
+					style={SIDEBAR_STYLES}
 					className={cn(
-						'duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-linear',
+						'relative h-svh w-[--sidebar-width] bg-transparent',
 						'group-data-[collapsible=offcanvas]:w-0',
 						'group-data-[side=right]:rotate-180',
 						variant === 'floating' || variant === 'inset'
@@ -228,16 +240,22 @@ const Sidebar = React.forwardRef<
 				/>
 				<div
 					className={cn(
-						'duration-200 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] ease-linear md:flex',
+						'fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] md:flex',
+						'transform-gpu will-change-transform',
 						side === 'left'
-							? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
-							: 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
+							? '-translate-x-full left-0 group-data-[collapsible=offcanvas]:translate-x-0'
+							: 'translate-x-full right-0 group-data-[collapsible=offcanvas]:translate-x-0',
 						// Adjust the padding for floating and inset variants.
 						variant === 'floating' || variant === 'inset'
 							? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]'
 							: 'group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l',
 						className,
 					)}
+					style={{
+						...SIDEBAR_STYLES_TWO,
+
+						...props.style,
+					}}
 					{...props}
 				>
 					<div
@@ -433,8 +451,9 @@ const SidebarGroupLabel = React.forwardRef<
 			ref={ref}
 			data-sidebar="group-label"
 			className={cn(
-				'duration-200 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opa] ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
-				'group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0',
+				'flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring [&>svg]:size-4 [&>svg]:shrink-0',
+				'transition-opacity duration-200 ease-in-out will-change-[opacity,margin]',
+				'group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:-mt-8 motion-reduce:transition-none',
 				className,
 			)}
 			{...props}
