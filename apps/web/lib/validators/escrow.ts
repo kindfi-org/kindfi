@@ -1,4 +1,5 @@
-import type { EscrowPayload, Milestone } from "../types/escrow/escrow.types";
+import { EscrowPayload } from "../types/escrow/escrow-payload.types";
+import type { Milestone } from "../types/escrow/escrow.types";
 
 interface ValidationResult {
   success: boolean;
