@@ -1,8 +1,11 @@
-import { TCreateEscrowRequest, EscrowRequestResponse } from "~/lib/types";
-import { EscrowEndpoint } from "~/lib/types/utils.types";
 import { getEndpoint } from "./getEndpoint";
 import http from "~/lib/axios/http";
 import { AxiosRequestConfig, Method } from "axios";
+import {
+  EscrowEndpoint,
+  TCreateEscrowRequest,
+} from "~/lib/types/escrow/escrow-endpoint.types";
+import { EscrowRequestResponse } from "~/lib/types/escrow/escrow-response.types";
 
 export async function createEscrowRequest<T extends EscrowEndpoint>(
   props: TCreateEscrowRequest<T>
