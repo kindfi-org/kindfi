@@ -46,6 +46,14 @@ export type ChangeMilestoneStatusPayload = {
   serviceProvider?: string;
 };
 
+export type ChangeMilestoneFlagPayload = Omit<
+  ChangeMilestoneStatusPayload,
+  "serviceProvider" | "newStatus"
+> & {
+  approver?: string;
+  newFlag: boolean;
+};
+
 // Escrow's Response
 export type EscrowRequestResponse = {
   status: Status;
