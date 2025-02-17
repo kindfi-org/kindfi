@@ -1,15 +1,16 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '~/components/ui/button'
+import { useSetState } from 'react-use'
+import { Button } from '~/components/base/button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '~/components/ui/select'
+} from '~/components/base/select'
 import {
   Table,
   TableBody,
@@ -17,10 +18,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '~/components/ui/table'
-import { appConfig } from '../../../lib/config/appConfig'
-import { createClient } from '../../../lib/supabase/client'
+} from '~/components/base/table'
+import { appConfig } from '~/lib/config/appConfig'
 import type { Database } from '../../../../../services/supabase/database.types'
+import {
+  getEscrowRecordsAction,
+  updateEscrowStatusAction,
+  insertTestEscrowRecordAction,
+} from '~/app/actions'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']
@@ -32,12 +37,21 @@ type EscrowStatusType =
   | 'DISPUTED'
   | 'CANCELLED'
 
+interface State {
+  dbStatus: string
+  error: string | null
+  records: EscrowRecord[]
+  isLoading: boolean
+}
+
 export function EscrowTable() {
   const router = useRouter()
-  const [dbStatus, setDbStatus] = useState<string>('Checking...')
-  const [error, setError] = useState<string | null>(null)
-  const [records, setRecords] = useState<EscrowRecord[]>([])
-  const supabase = createClient()
+  const [state, setState] = useSetState<State>({
+    dbStatus: 'Checking...',
+    error: null,
+    records: [],
+    isLoading: false
+  })
   
   const isDevelopment = useMemo(() => process.env.NODE_ENV === 'development', [])
   
@@ -53,79 +67,72 @@ export function EscrowTable() {
   const fetchRecords = useCallback(async () => {
     if (!isDevelopment || !appConfig.features.enableEscrowFeature) return
 
+    setState({ isLoading: true })
     try {
-      const { data, error } = await supabase
-        .from('escrow_status')
-        .select('*')
-        .order('last_updated', { ascending: false })
+      const response = await getEscrowRecordsAction()
 
-      if (error) {
-        setError(error.message)
-        setDbStatus('Failed')
+      if (!response.success) {
+        setState({
+          error: response.error || 'Failed to fetch records',
+          dbStatus: 'Failed',
+          isLoading: false
+        })
       } else {
-        setRecords(data || [])
-        setDbStatus('Connected')
+        setState({
+          records: response.data as EscrowRecord[] || [],
+          dbStatus: 'Connected',
+          error: null,
+          isLoading: false
+        })
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-      setDbStatus('Failed')
+      setState({
+        error: err instanceof Error ? err.message : 'Unknown error',
+        dbStatus: 'Failed',
+        isLoading: false
+      })
     }
-  }, [supabase, isDevelopment])
+  }, [isDevelopment, setState])
 
   const updateStatus = async (id: string, newStatus: EscrowStatusType) => {
     if (!isDevelopment || !appConfig.features.enableEscrowFeature) return
 
+    setState({ isLoading: true })
     try {
-      const { error } = await supabase
-        .from('escrow_status')
-        .update({
-          status: newStatus,
-          last_updated: new Date().toISOString(),
-        })
-        .eq('id', id)
+      const response = await updateEscrowStatusAction(id, newStatus)
 
-      if (error) throw error
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to update status')
+      }
 
       await fetchRecords()
-      alert(`Status updated to ${newStatus}`)
     } catch (err) {
       console.error('Error:', err)
-      alert(
-        'Error updating status: ' +
-          (err instanceof Error ? err.message : 'Unknown error'),
-      )
+      setState({
+        error: err instanceof Error ? err.message : 'Unknown error',
+        isLoading: false
+      })
     }
   }
 
   const insertTestData = async () => {
     if (!isDevelopment || !appConfig.features.enableEscrowFeature) return
 
+    setState({ isLoading: true })
     try {
-      const { error } = await supabase.from('escrow_status').insert([
-        {
-          escrow_id: 'test-' + Date.now(),
-          status: 'NEW' as EscrowStatusType,
-          current_milestone: 1,
-          total_funded: 1000,
-          total_released: 0,
-          metadata: {
-            milestoneStatus: {
-              total: 3,
-              completed: 0,
-            },
-          },
-        },
-      ])
+      const response = await insertTestEscrowRecordAction()
 
-      if (error) throw error
-      alert('Test data inserted successfully!')
-      fetchRecords()
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to insert test data')
+      }
+
+      await fetchRecords()
     } catch (err) {
       console.error('Error:', err)
-      alert(
-        'Error inserting test data: ' +
-          (err instanceof Error ? err.message : 'Unknown error'),
-      )
+      setState({
+        error: err instanceof Error ? err.message : 'Unknown error',
+        isLoading: false
+      })
     }
   }
 
@@ -140,10 +147,11 @@ export function EscrowTable() {
     }
   }, [fetchRecords, isDevelopment, router])
 
-  // Early return if not in development
   if (!isDevelopment) {
     return null
   }
+
+  const { dbStatus, error, records, isLoading } = state
 
   return (
     <div className="p-8">
@@ -172,6 +180,7 @@ export function EscrowTable() {
             <Button
               onClick={insertTestData}
               className="bg-blue-500 hover:bg-blue-600"
+              disabled={isLoading}
             >
               Insert Test Data
             </Button>
@@ -179,6 +188,7 @@ export function EscrowTable() {
             <Button
               onClick={fetchRecords}
               className="bg-green-500 hover:bg-green-600"
+              disabled={isLoading}
             >
               Refresh Records
             </Button>
@@ -186,7 +196,9 @@ export function EscrowTable() {
         </div>
 
         <div className="mt-8">
-          <h2 className="text-xl mb-2 text-black">Current Records ({records.length})</h2>
+          <h2 className="text-xl mb-2 text-black">
+            Current Records ({records.length})
+          </h2>
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -202,7 +214,10 @@ export function EscrowTable() {
               </TableHeader>
               <TableBody>
                 {records.map((record) => (
-                  <TableRow key={record.id} className={statusColors[record.status]}>
+                  <TableRow 
+                    key={record.id} 
+                    className={statusColors[record.status]}
+                  >
                     <TableCell className="font-mono text-sm">
                       {record.id}
                     </TableCell>
@@ -219,6 +234,7 @@ export function EscrowTable() {
                         onValueChange={(value) => 
                           updateStatus(record.id, value as EscrowStatusType)
                         }
+                        disabled={isLoading}
                       >
                         <SelectTrigger className="w-[130px]">
                           <SelectValue placeholder={record.status} />
