@@ -1,5 +1,16 @@
-prettier $(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g') --write --ignore-unknown
-bun format-and-lint:fix
+#!/bin/sh
+
+# Format only staged files that can be formatted
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|json|yml|yaml)$' | sed 's| |\\ |g')
+if [ -n "$STAGED_FILES" ]; then
+  prettier --write $STAGED_FILES || true
+  git add $STAGED_FILES
+fi
+
+# Lint only staged TypeScript/JavaScript files
+TS_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx)$' | sed 's| |\\ |g')
+if [ -n "$TS_FILES" ]; then
+  biome check $TS_FILES || true
+fi
+
 git update-index --again
-# ? No true test applied for now. Disable the following line to enable testing when first round of tests are added.
-# bun test

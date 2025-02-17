@@ -1,0 +1,115 @@
+-- Migration file for project updates
+-- Timestamp: 1707804000000 (2025-02-13 00:00:00 UTC)
+
+-- Prerequisites:
+-- 1. Enable auth schema in local environment to access auth.users
+-- 2. Ensure projects table exists with id column
+-- 3. Ensure project_members table exists with project_id and user_id columns
+
+-- Create ENUM types
+CREATE TYPE update_type AS ENUM ('milestone', 'progress', 'announcement', 'general');
+CREATE TYPE update_status AS ENUM ('draft', 'published', 'archived');
+
+-- Create project_updates table
+CREATE TABLE project_updates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    parent_update_id UUID REFERENCES project_updates(id),
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    update_type update_type NOT NULL,
+    status update_status NOT NULL DEFAULT 'published',
+    media_urls JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by UUID NOT NULL REFERENCES auth.users(id),
+    updated_by UUID NOT NULL REFERENCES auth.users(id)
+);
+
+-- Create notification tracking table for many-to-many relationship
+CREATE TABLE project_update_notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    update_id UUID NOT NULL REFERENCES project_updates(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    is_read BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(update_id, user_id)
+);
+
+-- Create comments table for project updates
+CREATE TABLE project_update_comments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    update_id UUID NOT NULL REFERENCES project_updates(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Add indices for better query performance
+CREATE INDEX idx_project_updates_project_id ON project_updates(project_id);
+CREATE INDEX idx_project_updates_created_by ON project_updates(created_by);
+CREATE INDEX idx_project_updates_status ON project_updates(status);
+CREATE INDEX idx_project_update_notifications_user ON project_update_notifications(user_id);
+CREATE INDEX idx_project_update_notifications_update ON project_update_notifications(update_id);
+CREATE INDEX idx_project_update_comments_update ON project_update_comments(update_id);
+CREATE INDEX idx_project_update_comments_user ON project_update_comments(user_id);
+
+-- Add trigger for updating updated_at timestamp
+CREATE TRIGGER set_timestamp
+    BEFORE UPDATE ON project_updates
+    FOR EACH ROW
+    EXECUTE FUNCTION trigger_set_timestamp();
+
+-- Set up Row Level Security (RLS)
+ALTER TABLE project_updates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_update_notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_update_comments ENABLE ROW LEVEL SECURITY;
+
+-- Project Updates RLS Policies
+CREATE POLICY "Public can view published updates" ON project_updates
+    FOR SELECT
+    USING (status = 'published');
+
+CREATE POLICY "Project members can manage updates" ON project_updates
+    FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM project_members pm
+            WHERE pm.project_id = project_updates.project_id
+            AND pm.user_id = auth.uid()
+        )
+    );
+
+-- Notifications RLS Policies
+CREATE POLICY "Users can view their own notifications" ON project_update_notifications
+    FOR SELECT
+    USING (user_id = auth.uid());
+
+CREATE POLICY "System can create notifications" ON project_update_notifications
+    FOR INSERT
+    WITH CHECK (pg_trigger_depth() > 0);
+
+CREATE POLICY "Users can mark their notifications as read" ON project_update_notifications
+    FOR UPDATE
+    USING (user_id = auth.uid())
+    WITH CHECK (user_id = auth.uid());
+
+-- Comments RLS Policies
+CREATE POLICY "Public can view comments on published updates" ON project_update_comments
+    FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM project_updates pu
+            WHERE pu.id = project_update_comments.update_id
+            AND pu.status = 'published'
+        )
+    );
+
+CREATE POLICY "Authenticated users can create comments" ON project_update_comments
+    FOR INSERT
+    WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Users can manage their own comments" ON project_update_comments
+    FOR ALL
+    USING (user_id = auth.uid());
