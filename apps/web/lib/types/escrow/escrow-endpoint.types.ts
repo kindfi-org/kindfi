@@ -1,38 +1,38 @@
-import { HttpMethod } from "../utils.types";
-import {
-  ChangeMilestoneFlagPayload,
-  ChangeMilestoneStatusPayload,
-  DistributeEscrowEarningsEscrowPayload,
-  EditMilestonesPayload,
-  EscrowPayload,
-  FundEscrowPayload,
-  GetBalanceParams,
-  ResolveDisputePayload,
-  StartDisputePayload,
-} from "./escrow-payload.types";
+import type { HttpMethod } from '../utils.types'
+import type {
+	ChangeMilestoneFlagPayload,
+	ChangeMilestoneStatusPayload,
+	DistributeEscrowEarningsEscrowPayload,
+	EditMilestonesPayload,
+	EscrowPayload,
+	FundEscrowPayload,
+	GetBalanceParams,
+	ResolveDisputePayload,
+	StartDisputePayload,
+} from './escrow-payload.types'
 
 export type EscrowEndpoint =
-  | "initiate"
-  | "fund"
-  | "dispute"
-  | "resolve"
-  | "release"
-  | "completeMilestone"
-  | "approveMilestone"
-  | "edit";
+	| 'initiate'
+	| 'fund'
+	| 'dispute'
+	| 'resolve'
+	| 'release'
+	| 'completeMilestone'
+	| 'approveMilestone'
+	| 'edit'
 
 export type TCreateEscrowRequest<T extends EscrowEndpoint> = {
-  action: T;
-  method: HttpMethod;
-  data?:
-    | EscrowPayload
-    | StartDisputePayload
-    | EditMilestonesPayload
-    | ChangeMilestoneStatusPayload
-    | ResolveDisputePayload
-    | ChangeMilestoneFlagPayload
-    | FundEscrowPayload
-    | DistributeEscrowEarningsEscrowPayload;
+	action: T
+	method: HttpMethod
+	data?:
+		| EscrowPayload
+		| StartDisputePayload
+		| EditMilestonesPayload
+		| ChangeMilestoneStatusPayload
+		| ResolveDisputePayload
+		| ChangeMilestoneFlagPayload
+		| FundEscrowPayload
+		| DistributeEscrowEarningsEscrowPayload
 
-  params?: GetBalanceParams;
-};
+	params?: GetBalanceParams
+}

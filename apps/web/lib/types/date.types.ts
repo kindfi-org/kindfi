@@ -1,6 +1,6 @@
 export interface CreatedAt {
-  seconds: number;
-  nanoseconds: number;
+	seconds: number
+	nanoseconds: number
 }
 
-export type UpdatedAt = CreatedAt;
+export type UpdatedAt = CreatedAt

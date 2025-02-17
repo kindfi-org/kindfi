@@ -31,11 +31,7 @@
 		"prepare": "husky"
 	},
 	"workspaces": {
-		"packages": [
-			"apps/*",
-			"services/*",
-			"packages/*"
-		],
+		"packages": ["apps/*", "services/*", "packages/*"],
 		"nohoist": [
 			"**/cbw-sdk",
 			"**/cbw-sdk/**",
