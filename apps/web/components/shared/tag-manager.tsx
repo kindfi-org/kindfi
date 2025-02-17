@@ -25,7 +25,7 @@ export function TagManager() {
 				} else {
 					addTag(newTag)
 					setNewTag('')
-					toast.error(`Tag "${newTag}" created`)
+					toast.success(`Tag "${formattedNewTag}" created`)
 				}
 			} else {
 				toast.error('Tag name cannot be empty')
@@ -42,7 +42,7 @@ export function TagManager() {
 		(tagId: string, newTagName: string) => {
 			updateTag(tagId, newTagName)
 			setEditingTagId(null)
-			toast.success(`Tag updated to "${newTagName}"`)
+			toast.success(`Tag "${formatToPascalCase(newTagName)}" updated`)
 		},
 		[updateTag],
 	)
@@ -78,27 +78,47 @@ export function TagManager() {
 						/>
 					) : (
 						<div
+							// key={tag.id}
+							// className="flex items-center px-2 py-1 rounded-full"
+							// style={{ backgroundColor: tag.color.backgroundColor }}
 							key={tag.id}
-							className="flex items-center px-2 py-1 rounded-full"
-							style={{ backgroundColor: tag.color.backgroundColor }}
+							className={`flex items-center px-2 py-1 rounded-full tag-background-${tag.id}`}
 						>
 							<span style={{ color: tag.color.textColor }}>{tag.text}</span>
-							<Button
+							{/* <Button
 								onClick={() => handleEdit(tag.id)}
 								className="ml-2 p-1 rounded hover:bg-white/20 transition-colors"
 								style={{ color: tag.color.textColor }}
 								title="Edit"
 							>
 								<Edit size={9} />
-							</Button>
+							</Button> */}
 							<Button
+								onClick={() => handleEdit(tag.id)}
+								aria-label="Edit tag"
+								className="ml-2 p-2 rounded hover:bg-white/20 transition-colors min-w-[24px] min-h-[24px]"
+							>
+								<Edit size={12} aria-hidden="true" />
+								<span className="sr-only">Edit tag</span>
+							</Button>
+
+							<Button
+								onClick={() => removeTag(tag.id)}
+								aria-label="Remove tag"
+								className="ml-1 p-2 rounded hover:bg-white/20 transition-colors min-w-[24px] min-h-[24px]"
+								style={{ color: tag.color.textColor }}
+							>
+								<X size={12} aria-hidden="true" />
+								<span className="sr-only">Remove tag</span>
+							</Button>
+							{/* <Button
 								onClick={() => removeTag(tag.id)}
 								className="ml-1 p-1 rounded hover:bg-white/20 transition-colors"
 								style={{ color: tag.color.textColor }}
 								title="Remove"
 							>
 								<X size={9} />
-							</Button>
+							</Button> */}
 						</div>
 					),
 				)}
