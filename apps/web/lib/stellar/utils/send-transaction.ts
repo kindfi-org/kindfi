@@ -1,4 +1,4 @@
-import http from "~/lib/axios/http";
+import { http } from "~/lib/axios/http";
 import { SendTransactionResponse } from "~/lib/types/escrow/escrow-response.types";
 
 export async function sendTransaction(

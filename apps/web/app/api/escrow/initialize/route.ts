@@ -9,12 +9,7 @@ import { EscrowPayload } from "~/lib/types/escrow/escrow-payload.types";
 
 export async function POST(req: NextRequest) {
   try {
-    /* FLOW */
     // 1. Validate the request payload
-    // 2. Create the escrow contract through the initialize escrow - Trustless Work API
-    // 3. Sign the transaction
-    // 4. Send the signed transaction to the Stellar network through the send transaction - Trustless Work API
-
     const initializationData: EscrowPayload = await req.json();
     const validationResult = validateEscrowInitialization(initializationData);
 
@@ -28,6 +23,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 2. Create the escrow contract through the initialize escrow - Trustless Work API
     const responseCreateEscrowRequest = await createEscrowRequest({
       action: "initiate",
       method: "POST",
@@ -36,10 +32,11 @@ export async function POST(req: NextRequest) {
 
     const { unsignedTransaction } = responseCreateEscrowRequest;
 
-    // todo: sign transaction
+    // 3. Sign the transaction
     // const signedTransaction = await signTransaction(unsignedTransaction);
     const signedTxXdr = unsignedTransaction;
 
+    // 4. Send the signed transaction to the Stellar network through the send transaction - Trustless Work API
     const response = await sendTransaction(signedTxXdr || "");
 
     if (response) {
