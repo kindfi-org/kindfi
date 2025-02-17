@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Sign the transaction
     // const signedTransaction = await signTransaction(unsignedTransaction);
+    // change
     const signedTxXdr = unsignedTransaction;
 
     // 4. Send the signed transaction to the Stellar network through the send transaction - Trustless Work API
