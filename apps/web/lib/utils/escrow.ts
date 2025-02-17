@@ -42,14 +42,21 @@ export const updateEscrowMilestone = async (
 ): Promise<EscrowRecord> => {
   const supabase = createClient()
   
+  if (current < 1 || completed < 0) {
+    throw new Error('Milestone numbers must be positive')
+  }
+  
   const total = metadata?.milestoneStatus?.total ?? completed
+  if (completed > total) {
+    throw new Error('Completed milestones cannot exceed total milestones')
+  }
+  
   const updatedMetadata: MilestoneMetadata = {
     milestoneStatus: {
       total,
       completed
     }
   }
-
   const { data, error: updateError } = await supabase
     .from('escrow_status')
     .update({
@@ -60,7 +67,6 @@ export const updateEscrowMilestone = async (
     .eq('id', recordId)
     .select()
     .single()
-
   if (updateError) throw updateError
   if (!data) throw new Error('Failed to update milestone')
   

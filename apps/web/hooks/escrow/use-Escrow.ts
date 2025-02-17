@@ -48,7 +48,7 @@ export const useEscrow = (escrowId: string) => {
     } finally {
       setIsLoading(false)
     }
-  }, [escrowId])
+  },   [escrowId, handleError])
 
   const updateStatus = useCallback(async (newStatus: EscrowStatusType): Promise<EscrowResponse> => {
     setIsLoading(true)
