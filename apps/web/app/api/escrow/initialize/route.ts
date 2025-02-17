@@ -23,18 +23,21 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// 2. Create the escrow contract through the initialize escrow - Trustless Work API
+		/* 2. Create the escrow contract through the initialize escrow - Trustless Work API
+		- The Trustless Work API will return an unsigned transaction XDR	
+		*/
 		const responseCreateEscrowRequest = await createEscrowRequest({
 			action: 'initiate',
 			method: 'POST',
 			data: initializationData,
 		})
 
+		// Get the unsigned transaction XDR
 		const { unsignedTransaction } = responseCreateEscrowRequest
 
 		// 3. Sign the transaction
+		// todo: HERE YOU HAVE TO CREATE A FUNCTION TO SIGN THE TRANSACTION
 		// const signedTransaction = await signTransaction(unsignedTransaction);
-		// change 3
 		const signedTxXdr = unsignedTransaction
 
 		// 4. Send the signed transaction to the Stellar network through the send transaction - Trustless Work API
