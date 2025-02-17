@@ -24,9 +24,9 @@ export const useEscrow = (escrowId: string) => {
   const [error, setError] = useState<string | null>(null)
   const [escrowData, setEscrowData] = useState<EscrowRecord | null>(null)
 
-  const handleError = (err: unknown): string => {
+  const handleError = useCallback((err: unknown): string => {
     return err instanceof Error ? err.message : 'An error occurred'
-  }
+  }, [])
 
   const fetchEscrowStatus = useCallback(async () => {
     setIsLoading(true)
