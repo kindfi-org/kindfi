@@ -1,7 +1,17 @@
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
-
+/**
+ *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/table
+ * TableHeader component for defining the header section of a table.
+ * @component
+ * @param {React.HTMLAttributes<HTMLTableSectionElement>} props - The component props
+ * @param {string} [props.className] - Additional custom CSS classes for styling the header
+ * @example
+ * <TableHeader>
+ *   <TableRow>...</TableRow>
+ * </TableHeader>
+ */
 const Table = React.forwardRef<
 	HTMLTableElement,
 	React.HTMLAttributes<HTMLTableElement>

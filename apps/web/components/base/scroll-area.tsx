@@ -4,6 +4,18 @@ import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
 import * as React from 'react'
 import { cn } from '~/lib/utils'
 
+/**
+ * A scrollable area component using Radix UI's ScrollArea.
+ * It provides a viewport with a custom scrollbar.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <ScrollArea className="h-64 w-48">
+ *   <div className="p-4">Content goes here...</div>
+ * </ScrollArea>
+ * ```
+ */
 const ScrollArea = React.forwardRef<
 	React.ElementRef<typeof ScrollAreaPrimitive.Root>,
 	React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
@@ -22,6 +34,19 @@ const ScrollArea = React.forwardRef<
 ))
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
 
+/**
+ * Custom scrollbar for the ScrollArea component.
+ * Supports both vertical and horizontal orientations.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <ScrollBar orientation="horizontal" />
+ * ```
+ *
+ * @param {Object} props - The component props.
+ * @param {string} [props.orientation="vertical"] - The scrollbar orientation.
+ */
 const ScrollBar = React.forwardRef<
 	React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
 	React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
