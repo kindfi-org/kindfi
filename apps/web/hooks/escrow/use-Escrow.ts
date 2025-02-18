@@ -15,7 +15,7 @@ type EscrowStatusType = 'NEW' | 'FUNDED' | 'ACTIVE' | 'COMPLETED' | 'DISPUTED' |
 interface EscrowResponse {
   success: boolean
   data?: EscrowRecord | null
-  error?: unknown
+  error?: string | null  
 }
 
 export const useEscrow = (escrowId: string) => {
@@ -38,7 +38,7 @@ export const useEscrow = (escrowId: string) => {
     } catch (err) {
       const errorMessage = handleError(err)
       setError(errorMessage)
-      return { success: false, error: err }
+      return { success: false, error: errorMessage }  
     } finally {
       setIsLoading(false)
     }
