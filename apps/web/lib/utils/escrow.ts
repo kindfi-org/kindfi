@@ -1,5 +1,5 @@
 import { createClient } from '~/lib/supabase/client'
-import type { Database } from '../../../../services/supabase/database.types'
+import type { Database } from '@services/supabase/database.types'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']

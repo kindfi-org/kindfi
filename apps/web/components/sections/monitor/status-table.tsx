@@ -19,8 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/base/table'
-import { appConfig } from '~/lib/config/appConfig'
-import type { Database } from '../../../../../services/supabase/database.types'
+import { appConfig } from '~/lib/config/app.config'
+import type { Database } from '@services/supabase/database.types'
 import {
   getEscrowRecordsAction,
   updateEscrowStatusAction,

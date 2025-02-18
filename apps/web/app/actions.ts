@@ -8,7 +8,7 @@ import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
 import { createClient } from '~/lib/supabase/server'
 import type { AuthResponse } from '~/lib/types/auth'
-import type { Database } from '../../../services/supabase/database.types'
+import type { Database } from '@services/supabase/database.types'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useCallback } from 'react'
-import type { Database } from '../../../../services/supabase/database.types'
+import type { Database } from '@services/supabase/database.types'
 import {
  updateEscrowStatusAction,
  updateEscrowMilestoneAction,
