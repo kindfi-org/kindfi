@@ -1,20 +1,31 @@
-export const ExploreProjectsIcon = () => (
-	// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-	<svg
-		viewBox="0 0 200 200"
-		fill="none"
-		xmlns="http://www.w3.org/2000/svg"
-		className="w-48 h-48"
-	>
-		<rect width="200" height="200" fill="#E6EEF9" />
-		<path
-			d="M60 100 L140 100 M100 60 L100 140"
-			stroke="#93C5FD"
-			strokeWidth="20"
-			strokeLinecap="round"
-		/>
-	</svg>
-)
+'use client'
+
+import type { SVGProps } from 'react'
+
+interface IllustrationProps extends SVGProps<SVGSVGElement> {
+	className?: string
+}
+
+export function WaveIllustration({ className, ...props }: IllustrationProps) {
+	return (
+		// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+		<svg
+			viewBox="0 0 200 200"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+			className={`w-48 h-48 ${className || ''}`}
+			{...props}
+		>
+			<rect width="200" height="200" fill="#E6EEF9" />
+			<path
+				d="M60 100 L140 100 M100 60 L100 140"
+				stroke="#93C5FD"
+				strokeWidth="20"
+				strokeLinecap="round"
+			/>
+		</svg>
+	)
+}
 
 export const ProjectDetailsIcon = () => (
 	// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
@@ -252,7 +263,7 @@ export const ExploreDetails = () => (
 				<stop offset="100%" style={{ stopColor: '#2563eb', stopOpacity: 1 }} />
 			</linearGradient>
 			<filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-				<feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.2" />
+				<feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.2" />
 			</filter>
 		</defs>
 
@@ -374,16 +385,16 @@ export const ExploreDetails = () => (
 			d="M160 165 l5 5 l-5 5"
 			fill="none"
 			stroke="#3b82f6"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
 		/>
 		<path
 			d="M155 170 h10"
 			fill="none"
 			stroke="#3b82f6"
-			stroke-width="2"
-			stroke-linecap="round"
+			strokeWidth="2"
+			strokeLinecap="round"
 		/>
 	</svg>
 )
@@ -409,7 +420,7 @@ export const Contribute = () => (
 				<stop offset="100%" style={{ stopColor: '#2563eb', stopOpacity: 1 }} />
 			</linearGradient>
 			<filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-				<feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.2" />
+				<feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.2" />
 			</filter>
 		</defs>
 
@@ -428,16 +439,16 @@ export const Contribute = () => (
 			r="35"
 			fill="none"
 			stroke="white"
-			stroke-width="2"
+			strokeWidth="2"
 			opacity="0.5"
 		/>
 		<text
 			x="80"
 			y="130"
-			font-family="Arial"
-			font-size="24"
+			fontFamily="Arial"
+			fontSize="24"
 			fill="white"
-			text-anchor="middle"
+			textAnchor="middle"
 			opacity="0.9"
 		>
 			$
@@ -458,16 +469,16 @@ export const Contribute = () => (
 			r="35"
 			fill="none"
 			stroke="white"
-			stroke-width="2"
+			strokeWidth="2"
 			opacity="0.5"
 		/>
 		<text
 			x="150"
 			y="130"
-			font-family="Arial"
-			font-size="24"
+			fontFamily="Arial"
+			fontSize="24"
 			fill="white"
-			text-anchor="middle"
+			textAnchor="middle"
 			opacity="0.9"
 		>
 			$
@@ -488,16 +499,16 @@ export const Contribute = () => (
 			r="40"
 			fill="none"
 			stroke="white"
-			stroke-width="2"
+			strokeWidth="2"
 			opacity="0.5"
 		/>
 		<text
 			x="115"
 			y="90"
-			font-family="Arial"
-			font-size="28"
+			fontFamily="Arial"
+			fontSize="28"
 			fill="white"
-			text-anchor="middle"
+			textAnchor="middle"
 			opacity="0.9"
 		>
 			$
@@ -506,14 +517,14 @@ export const Contribute = () => (
 		<path
 			d="M50 160 C80 150, 150 150, 180 160"
 			stroke="white"
-			stroke-width="2"
+			strokeWidth="2"
 			opacity="0.3"
 			fill="none"
 		/>
 		<path
 			d="M60 170 C90 160, 140 160, 170 170"
 			stroke="white"
-			stroke-width="2"
+			strokeWidth="2"
 			opacity="0.3"
 			fill="none"
 		/>
@@ -523,3 +534,28 @@ export const Contribute = () => (
 		<circle cx="115" cy="155" r="3" fill="white" opacity="0.5" />
 	</svg>
 )
+
+export function ExploreProjectsIcon({
+	className,
+	...props
+}: IllustrationProps) {
+	return (
+		// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+		<svg
+			viewBox="0 0 200 200"
+			xmlns="http://www.w3.org/2000/svg"
+			className={className}
+			{...props}
+		>
+			<rect width="200" height="200" fill="#E6EEF9" />
+			<path
+				d="M155 160 h10"
+				fill="none"
+				stroke="#3b82f6"
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	)
+}
