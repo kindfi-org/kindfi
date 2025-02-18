@@ -6,7 +6,9 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "biome check ."
+		"lint": "biome check .",
+		"test": "bun test/**.test.{ts,js,mjs}",
+		"postinstall": "bun test"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^3.9.1",
@@ -56,7 +58,8 @@
 		"sonner": "^1.7.1",
 		"tailwind-merge": "^2.5.5",
 		"tailwindcss-animate": "^1.0.7",
-		"zod": "^3.23.8"
+		"zod": "^3.23.8",
+		"node-fetch": "^2.7.0"
 	},
 	"devDependencies": {
 		"@types/node": "^20",
@@ -65,7 +68,6 @@
 		"@types/react-dom": "^19.0.4",
 		"eslint": "^8",
 		"eslint-config-next": "15.0.4",
-		"node-fetch": "^3.3.2",
 		"postcss": "^8",
 		"tailwindcss": "^3.4.1",
 		"typescript": "^5"

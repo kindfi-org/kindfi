@@ -1,48 +1,97 @@
+import { describe, expect, test } from 'bun:test'
+import { Redis } from '@upstash/redis'
 import fetch from 'node-fetch'
 
-async function testOtpVerification() {
-	const baseUrl = 'http://localhost:3002/auth/confirm'
-	const testParams = {
-		// Using a more realistic token hash format
-		token_hash: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test',
-		type: 'email',
-	}
+const baseUrl = 'http://localhost:3000/auth/confirm'
+const testParams = {
+	// Using a more realistic token hash format
+	token_hash: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test',
+	type: 'email',
+}
 
-	console.log('Starting OTP verification rate limit test...\n')
+// Initialize Redis for cleanup
+const redis = Redis.fromEnv()
 
-	// Function to make a verification request
-	async function makeRequest(attempt) {
-		const url = `${baseUrl}?token_hash=${testParams.token_hash}&type=${testParams.type}`
-
-		try {
-			const response = await fetch(url)
-			const redirectUrl = response.url
-
-			console.log(`Attempt ${attempt}:`)
-			console.log(`Status: ${response.status}`)
-			console.log(`Redirect URL: ${redirectUrl}`)
-
-			if (redirectUrl.includes('rate_limit_exceeded')) {
-				console.log('Rate limit exceeded ✓')
-			} else if (redirectUrl.includes('error')) {
-				console.log('Error:', new URL(redirectUrl).searchParams.get('error'))
-			}
-			console.log('---')
-
-			return response
-		} catch (error) {
-			console.error(`Error in attempt ${attempt}:`, error)
-			return null
+async function makeRequest(clientId = 'unknown') {
+	const url = `${baseUrl}?token_hash=${testParams.token_hash}&type=${testParams.type}`
+	try {
+		const response = await fetch(url, {
+			headers: {
+				'x-forwarded-for': clientId,
+			},
+		})
+		return {
+			status: response.status,
+			redirectUrl: response.url,
 		}
-	}
-
-	// Make multiple requests to trigger rate limiting
-	for (let i = 1; i <= 6; i++) {
-		await makeRequest(i)
-		// Add a small delay between requests
-		await new Promise((resolve) => setTimeout(resolve, 1000))
+	} catch (error) {
+		console.error(`Request failed for client ${clientId}:`, error.message)
+		return null
 	}
 }
 
-// Run the test
-testOtpVerification().catch(console.error)
+async function cleanupRateLimitKeys(clientId) {
+	const keys = [
+		`rate_limit:verifyOtp:${clientId}`,
+		`rate_limit_block:verifyOtp:${clientId}`,
+	]
+	await Promise.all(keys.map((key) => redis.del(key)))
+}
+
+describe('OTP verification rate limiting', () => {
+	test('should allow requests under the limit', async () => {
+		const clientId = '10.0.0.1'
+		await cleanupRateLimitKeys(clientId)
+
+		// All 5 attempts should be allowed
+		for (let i = 1; i <= 5; i++) {
+			const result = await makeRequest(clientId)
+			expect(result).not.toBeNull()
+
+			const url = new URL(result.redirectUrl)
+			expect(url.searchParams.get('reason')).not.toBe('rate_limit_exceeded')
+		}
+	})
+
+	test('should block requests after exceeding limit', async () => {
+		const clientId = '10.0.0.2'
+		await cleanupRateLimitKeys(clientId)
+
+		// Make requests up to the limit
+		for (let i = 0; i < 5; i++) {
+			await makeRequest(clientId)
+		}
+
+		// This request should be blocked
+		const blockedResult = await makeRequest(clientId)
+		const url = new URL(blockedResult.redirectUrl)
+
+		expect(url.searchParams.get('reason')).toBe('rate_limit_exceeded')
+		expect(url.searchParams.get('error')).toContain('Too many attempts')
+	})
+
+	test('should handle rate limits independently per client', async () => {
+		const clientA = '10.0.0.3'
+		const clientB = '10.0.0.4'
+		await Promise.all([
+			cleanupRateLimitKeys(clientA),
+			cleanupRateLimitKeys(clientB),
+		])
+
+		// Block client A
+		for (let i = 0; i < 6; i++) {
+			await makeRequest(clientA)
+		}
+
+		// Wait a bit to ensure rate limit states are properly set
+		await new Promise((resolve) => setTimeout(resolve, 1000))
+
+		// Client B should still be allowed all 5 attempts
+		for (let i = 1; i <= 5; i++) {
+			const result = await makeRequest(clientB)
+			expect(result).not.toBeNull()
+			const url = new URL(result.redirectUrl)
+			expect(url.searchParams.get('reason')).not.toBe('rate_limit_exceeded')
+		}
+	}, 10000) // Increased timeout for this specific test
+})
