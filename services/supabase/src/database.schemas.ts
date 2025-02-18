@@ -14,40 +14,52 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
 		.nullable(),
 )
 
-// Add the new schemas for the project-related tables
-
-export const projectSchema = z.object({
-	id: z.string().uuid(),
-	title: z.string(),
-	description: z.string().nullable(),
+export const projectsRowSchema = z.object({
+	category_id: z.string().nullable(),
+	created_at: z.string().nullable(),
 	current_amount: z.number(),
-	target_amount: z.number(),
-	min_investment: z.number(),
-	percentage_complete: z.number(),
-	investors_count: z.number(),
-	created_at: z.string().datetime(),
-	updated_at: z.string().datetime(),
-	category_id: z.string().uuid().nullable(),
+	description: z.string().nullable(),
+	id: z.string(),
 	image_url: z.string().nullable(),
-	owner_id: z.string().uuid(),
+	investors_count: z.number(),
+	min_investment: z.number(),
+	owner_id: z.string(),
+	percentage_complete: z.number(),
+	target_amount: z.number(),
+	title: z.string(),
+	updated_at: z.string().nullable(),
 })
 
-export const projectTagSchema = z.object({
-	project_id: z.string().uuid(),
-	tag_id: z.string().uuid(),
+export const projectsInsertSchema = z.object({
+	category_id: z.string().optional().nullable(),
+	created_at: z.string().optional().nullable(),
+	current_amount: z.number().optional(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	image_url: z.string().optional().nullable(),
+	investors_count: z.number().optional(),
+	min_investment: z.number(),
+	owner_id: z.string(),
+	percentage_complete: z.number().optional(),
+	target_amount: z.number(),
+	title: z.string(),
+	updated_at: z.string().optional().nullable(),
 })
 
-export const projectUpdateSchema = z.object({
-	id: z.string().uuid(),
-	project_id: z.string().uuid(),
-	content: z.string(),
-	created_at: z.string().datetime(),
+export const projectsUpdateSchema = z.object({
+	category_id: z.string().optional().nullable(),
+	created_at: z.string().optional().nullable(),
+	current_amount: z.number().optional(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	image_url: z.string().optional().nullable(),
+	investors_count: z.number().optional(),
+	min_investment: z.number().optional(),
+	owner_id: z.string().optional(),
+	percentage_complete: z.number().optional(),
+	target_amount: z.number().optional(),
+	title: z.string().optional(),
+	updated_at: z.string().optional().nullable(),
 })
 
-export const projectInvestorSchema = z.object({
-	id: z.string().uuid(),
-	project_id: z.string().uuid(),
-	user_id: z.string().uuid(),
-	amount: z.number(),
-	invested_at: z.string().datetime(),
-})
+export const projectsRelationshipsSchema = z.tuple([])
