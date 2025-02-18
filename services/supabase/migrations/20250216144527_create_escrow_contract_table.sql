@@ -1,4 +1,19 @@
-CREATE TYPE IF NOT EXISTS escrow_state AS ENUM ('NEW','ACTIVE','CANCELLED');
+CREATE TABLE IF NOT EXISTS projects (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS contributions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL REFERENCES projects(id),
+    contributor_id UUID NOT NULL,
+    amount NUMERIC(20,7) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE IF NOT EXISTS escrow_contracts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -9,7 +24,7 @@ CREATE TABLE IF NOT EXISTS escrow_contracts (
     payer_address TEXT NOT NULL,
     receiver_address TEXT NOT NULL,
     amount NUMERIC(20,7) NOT NULL,
-    current_state escrow_state NOT NULL DEFAULT 'NEW',
+    current_state escrow_status_type NOT NULL DEFAULT 'NEW',
     platform_fee NUMERIC(5,2) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
