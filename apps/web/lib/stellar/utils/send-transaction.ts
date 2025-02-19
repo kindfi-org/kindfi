@@ -1,11 +1,11 @@
-import { http } from '~/lib/axios/http'
+import { httpEscrow } from '~/lib/axios/http'
 import type { SendTransactionResponse } from '~/lib/types/escrow/escrow-response.types'
 
 export async function sendTransaction(
 	signedXdr: string,
 ): Promise<SendTransactionResponse> {
 	try {
-		const response = await http.post<SendTransactionResponse>(
+		const response = await httpEscrow.post<SendTransactionResponse>(
 			'/helper/send-transaction',
 			{
 				signedXdr,
