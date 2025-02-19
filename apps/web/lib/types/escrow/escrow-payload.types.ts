@@ -50,3 +50,41 @@ export type GetBalanceParams = {
 	signer: string
 	addresses: string[]
 }
+
+export type TransactionStatus = 'PENDING' | 'SUCCESSFUL' | 'FAILED'
+
+export type TransactionType =
+	| 'DEPOSIT'
+	| 'RELEASE'
+	| 'REFUND'
+	| 'DISPUTE'
+	| 'FEE'
+
+export interface EscrowFundParams {
+	userId: string
+	stellarTransactionHash: string
+	amount: string
+	transactionType: TransactionType
+}
+
+export interface EscrowTransactionMetadata {
+	escrowId: string
+	recipientAddress?: string
+	reason?: string
+	feeAmount?: string
+	payerAddress: string
+	referenceId?: string
+	createdAt: string
+	additionalData?: Record<string, string>
+}
+
+export interface EscrowFundData {
+	fundParams: EscrowFundParams
+	metadata: EscrowTransactionMetadata
+}
+
+export interface EscrowFundUpdateData {
+	escrowId: string
+	transactionHash: string
+	status: TransactionStatus
+}
