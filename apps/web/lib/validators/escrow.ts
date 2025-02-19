@@ -1,4 +1,8 @@
-import type { EscrowPayload } from '../types/escrow/escrow-payload.types'
+import type {
+	EscrowPayload,
+	EscrowFundData,
+	EscrowFundUpdateData,
+} from '../types/escrow/escrow-payload.types'
 import type { Milestone } from '../types/escrow/escrow.types'
 
 interface ValidationResult {
@@ -27,7 +31,7 @@ const validateMilestone = (milestone: Milestone, index: number): string[] => {
 }
 
 export function validateEscrowInitialization(
-	data: EscrowPayload,
+	data: EscrowPayload
 ): ValidationResult {
 	const errors: string[] = []
 
@@ -76,6 +80,107 @@ export function validateEscrowInitialization(
 
 	if (!data.engagementId?.trim()) {
 		errors.push('Engagement type is required')
+	}
+
+	return {
+		success: errors.length === 0,
+		errors,
+	}
+}
+
+export function validateEscrowFunding(data: EscrowFundData): ValidationResult {
+	const errors: string[] = []
+
+	// Validate fundParams object
+	if (!data.fundParams) {
+		errors.push('Funding parameters are required.')
+	} else {
+		if (!data.fundParams.userId?.trim()) {
+			errors.push('User ID is required.')
+		}
+		if (!data.fundParams.stellarTransactionHash?.trim()) {
+			errors.push('Stellar transaction hash is required.')
+		}
+		if (
+			!data.fundParams.amount ||
+			Number.isNaN(Number(data.fundParams.amount)) ||
+			Number(data.fundParams.amount) <= 0
+		) {
+			errors.push('Amount must be a positive number.')
+		}
+		if (!data.fundParams.transactionType) {
+			errors.push('Transaction type is required.')
+		} else if (
+			!['DEPOSIT', 'RELEASE', 'REFUND', 'DISPUTE', 'FEE'].includes(
+				data.fundParams.transactionType
+			)
+		) {
+			errors.push('Invalid transaction type.')
+		}
+	}
+
+	// Validate metadata object
+	if (!data.metadata) {
+		errors.push('Metadata is required.')
+	} else {
+		if (!data.metadata.escrowId?.trim()) {
+			errors.push('Escrow ID is required.')
+		}
+		if (!data.metadata.payerAddress?.trim()) {
+			errors.push('Payer address is required.')
+		}
+
+		// Ensure required fields based on transaction type
+		if (
+			data.fundParams.transactionType === 'RELEASE' &&
+			!data.metadata.recipientAddress?.trim()
+		) {
+			errors.push('Recipient address is required for RELEASE transactions.')
+		}
+		if (
+			['DISPUTE', 'REFUND'].includes(data.fundParams.transactionType) &&
+			!data.metadata.reason?.trim()
+		) {
+			errors.push(
+				`Reason is required for ${data.fundParams.transactionType} transactions.`
+			)
+		}
+		if (
+			data.fundParams.transactionType === 'FEE' &&
+			(!data.metadata.feeAmount ||
+				Number.isNaN(Number(data.metadata.feeAmount)) ||
+				Number(data.metadata.feeAmount) <= 0)
+		) {
+			errors.push('Valid fee amount is required for FEE transactions.')
+		}
+	}
+
+	return {
+		success: errors.length === 0,
+		errors,
+	}
+}
+
+export function validateEscrowFundUpdate(
+	data: EscrowFundUpdateData
+): ValidationResult {
+	const errors: string[] = []
+
+	// Validate escrowId
+	if (!data.escrowId?.trim()) {
+		errors.push('Escrow ID is required.')
+	}
+
+	// Validate transactionHash
+	if (!data.transactionHash?.trim()) {
+		errors.push('Transaction hash is required.')
+	}
+
+	// Validate status
+	if (!data.status) {
+		errors.push('Transaction status is required.')
+	} else if (!['PENDING', 'SUCCESSFUL', 'FAILED'].includes(data.status)) {
+		errors.push('Invalid transaction status.')
 	}
 
 	return {
