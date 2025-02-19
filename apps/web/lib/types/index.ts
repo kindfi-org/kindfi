@@ -4,7 +4,7 @@ export type ConditionalRequired<
 	Flag extends boolean,
 > = Flag extends true ? Required<Pick<T, K>> : Partial<Pick<T, K>>
 
-export * from './escrow.types'
+export * from './escrow/escrow.types'
 export * from './home.types'
 export * from './logger.types'
 export * from './pages.type'
