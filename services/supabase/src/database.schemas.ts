@@ -13,3 +13,178 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
 		])
 		.nullable(),
 )
+
+export const contributionsRowSchema = z.object({
+	amount: z.number(),
+	contributor_id: z.string(),
+	created_at: z.string().nullable(),
+	id: z.string(),
+	project_id: z.string(),
+	updated_at: z.string().nullable(),
+})
+
+export const contributionsInsertSchema = z.object({
+	amount: z.number(),
+	contributor_id: z.string(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	project_id: z.string(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const contributionsUpdateSchema = z.object({
+	amount: z.number().optional(),
+	contributor_id: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	project_id: z.string().optional(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const contributionsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('contributions_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const escrowStatusTypeSchema = z.union([
+	z.literal('NEW'),
+	z.literal('FUNDED'),
+	z.literal('ACTIVE'),
+	z.literal('COMPLETED'),
+	z.literal('DISPUTED'),
+	z.literal('CANCELLED'),
+])
+
+export const escrowContractsInsertSchema = z.object({
+	amount: z.number(),
+	completed_at: z.string().optional().nullable(),
+	contract_id: z.string(),
+	contribution_id: z.string(),
+	created_at: z.string().optional().nullable(),
+	current_state: escrowStatusTypeSchema.optional(),
+	engagement_id: z.string(),
+	id: z.string().optional(),
+	metadata: jsonSchema.optional().nullable(),
+	payer_address: z.string(),
+	platform_fee: z.number(),
+	project_id: z.string(),
+	receiver_address: z.string(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const escrowContractsUpdateSchema = z.object({
+	amount: z.number().optional(),
+	completed_at: z.string().optional().nullable(),
+	contract_id: z.string().optional(),
+	contribution_id: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	current_state: escrowStatusTypeSchema.optional(),
+	engagement_id: z.string().optional(),
+	id: z.string().optional(),
+	metadata: jsonSchema.optional().nullable(),
+	payer_address: z.string().optional(),
+	platform_fee: z.number().optional(),
+	project_id: z.string().optional(),
+	receiver_address: z.string().optional(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const escrowContractsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('escrow_contracts_contribution_id_fkey'),
+		columns: z.tuple([z.literal('contribution_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('contributions'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('escrow_contracts_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const escrowStatusRowSchema = z.object({
+	current_milestone: z.number().nullable(),
+	escrow_id: z.string(),
+	id: z.string(),
+	last_updated: z.string().nullable(),
+	metadata: jsonSchema.nullable(),
+	status: escrowStatusTypeSchema,
+	total_funded: z.number().nullable(),
+	total_released: z.number().nullable(),
+})
+
+export const escrowStatusInsertSchema = z.object({
+	current_milestone: z.number().optional().nullable(),
+	escrow_id: z.string(),
+	id: z.string().optional(),
+	last_updated: z.string().optional().nullable(),
+	metadata: jsonSchema.optional().nullable(),
+	status: escrowStatusTypeSchema,
+	total_funded: z.number().optional().nullable(),
+	total_released: z.number().optional().nullable(),
+})
+
+export const escrowStatusUpdateSchema = z.object({
+	current_milestone: z.number().optional().nullable(),
+	escrow_id: z.string().optional(),
+	id: z.string().optional(),
+	last_updated: z.string().optional().nullable(),
+	metadata: jsonSchema.optional().nullable(),
+	status: escrowStatusTypeSchema.optional(),
+	total_funded: z.number().optional().nullable(),
+	total_released: z.number().optional().nullable(),
+})
+
+export const escrowStatusRelationshipsSchema = z.tuple([])
+
+export const projectsRowSchema = z.object({
+	created_at: z.string().nullable(),
+	description: z.string().nullable(),
+	id: z.string(),
+	name: z.string(),
+	updated_at: z.string().nullable(),
+})
+
+export const projectsInsertSchema = z.object({
+	created_at: z.string().optional().nullable(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	name: z.string(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const projectsUpdateSchema = z.object({
+	created_at: z.string().optional().nullable(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	name: z.string().optional(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const projectsRelationshipsSchema = z.tuple([])
+
+export const escrowContractsRowSchema = z.object({
+	amount: z.number(),
+	completed_at: z.string().nullable(),
+	contract_id: z.string(),
+	contribution_id: z.string(),
+	created_at: z.string().nullable(),
+	current_state: escrowStatusTypeSchema,
+	engagement_id: z.string(),
+	id: z.string(),
+	metadata: jsonSchema.nullable(),
+	payer_address: z.string(),
+	platform_fee: z.number(),
+	project_id: z.string(),
+	receiver_address: z.string(),
+	updated_at: z.string().nullable(),
+})
