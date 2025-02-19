@@ -7,8 +7,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "biome check .",
-		"test": "bun test/**.test.{mjs,ts,js}",
-		"postinstall": "bun test"
+		"test": "bun test/**.test.{mjs,ts,js}"
 	},
 	"dependencies": {
 		"@services/supabase": "workspace:*",
