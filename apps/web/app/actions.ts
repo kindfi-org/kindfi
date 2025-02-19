@@ -372,7 +372,7 @@ export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
 			.from('escrow_status')
 			.insert([
 				{
-					escrow_id: 'test-' + Date.now(),
+					escrow_id: `test-${Date.now()}`,
 					status: 'NEW' as EscrowStatusType,
 					current_milestone: 1,
 					total_funded: 1000,
