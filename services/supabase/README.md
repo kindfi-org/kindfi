@@ -27,15 +27,9 @@ cd monorepo/services/supabase
 bun install
 ```
 
-3. **Environment Variables**
+3. **Get Ready For Migrations**
 
-Copy the sample environment file and update it with your configuration:
-
-```sh
-cp .env.sample .env
-```
-
-Update the `.env` file with your Supabase project URL and API key.
+To create migrations, please follow this [guide](https://supabase.com/docs/guides/local-development/overview#database-migrations), it provides steps to generate migrations, ensure that they work before pushing.
 
 ## Running Supabase Locally
 
@@ -54,22 +48,32 @@ This will start the Supabase local development environment, including the databa
 Generate the necessary types and schemas for the Supabase service:
 
 ```sh
-bun gen:local # generates what it is in local
-bun gen # generates what it is in remote
+bun gen:remote # generates what it is in the linked (remote) database
+bun gen # generates what it is in local database
 ```
+
+3. **Environment Variables**
+
+Copy the sample environment file and update it with your configuration:
+
+```sh
+cp .env.sample .env
+```
+
+Update the `.env` file with the KindFi Supabase project id. This is for remote type generation and to identify the local development host.
 
 ## Useful Commands
 
-- **Pull Remote Database Schema to Local**
+- **Apply (new) migrations to the local database**
 
   ```sh
-  bun db:pull
+  bun migrate # When adding new migrations file, this makes sure to apply them.
   ```
 
-- **Push Local Database Schema to Remote**
+- **Apply migrations by resetting local database completely**
 
   ```sh
-  bun db:push
+  bun reset # When adding new migrations file, this makes sure to apply them by resetting from the migrations.
   ```
 
 ## Documentation

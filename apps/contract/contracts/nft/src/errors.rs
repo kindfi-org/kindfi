@@ -1,11 +1,11 @@
 use soroban_sdk::contracterror;
 
 #[contracterror]
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum NFTError {
-    AlreadyInitialized = 100,
-    NotAuthorized = 101,
-    TokenAlreadyExists = 102,
-    TokenNotFound = 103,
-    NotTokenOwner = 104,
+    AlreadyInitialized = 1,
+    NotAuthorized = 2,
+    TokenNotFound = 3,
+    NotTokenOwner = 4,
+    TokenAlreadyExists = 5,
 }
