@@ -170,24 +170,48 @@ export type Database = {
 			}
 			projects: {
 				Row: {
+					category_id: string | null
 					created_at: string | null
+					current_amount: number
 					description: string | null
 					id: string
-					name: string
+					image_url: string | null
+					investors_count: number
+					min_investment: number
+					owner_id: string
+					percentage_complete: number
+					target_amount: number
+					title: string
 					updated_at: string | null
 				}
 				Insert: {
+					category_id?: string | null
 					created_at?: string | null
+					current_amount?: number
 					description?: string | null
 					id?: string
-					name: string
+					image_url?: string | null
+					investors_count?: number
+					min_investment: number
+					owner_id: string
+					percentage_complete?: number
+					target_amount: number
+					title: string
 					updated_at?: string | null
 				}
 				Update: {
+					category_id?: string | null
 					created_at?: string | null
+					current_amount?: number
 					description?: string | null
 					id?: string
-					name?: string
+					image_url?: string | null
+					investors_count?: number
+					min_investment?: number
+					owner_id?: string
+					percentage_complete?: number
+					target_amount?: number
+					title?: string
 					updated_at?: string | null
 				}
 				Relationships: []

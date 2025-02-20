@@ -147,26 +147,50 @@ export const escrowStatusUpdateSchema = z.object({
 export const escrowStatusRelationshipsSchema = z.tuple([])
 
 export const projectsRowSchema = z.object({
+	category_id: z.string().nullable(),
 	created_at: z.string().nullable(),
+	current_amount: z.number(),
 	description: z.string().nullable(),
 	id: z.string(),
-	name: z.string(),
+	image_url: z.string().nullable(),
+	investors_count: z.number(),
+	min_investment: z.number(),
+	owner_id: z.string(),
+	percentage_complete: z.number(),
+	target_amount: z.number(),
+	title: z.string(),
 	updated_at: z.string().nullable(),
 })
 
 export const projectsInsertSchema = z.object({
+	category_id: z.string().optional().nullable(),
 	created_at: z.string().optional().nullable(),
+	current_amount: z.number().optional(),
 	description: z.string().optional().nullable(),
 	id: z.string().optional(),
-	name: z.string(),
+	image_url: z.string().optional().nullable(),
+	investors_count: z.number().optional(),
+	min_investment: z.number(),
+	owner_id: z.string(),
+	percentage_complete: z.number().optional(),
+	target_amount: z.number(),
+	title: z.string(),
 	updated_at: z.string().optional().nullable(),
 })
 
 export const projectsUpdateSchema = z.object({
+	category_id: z.string().optional().nullable(),
 	created_at: z.string().optional().nullable(),
+	current_amount: z.number().optional(),
 	description: z.string().optional().nullable(),
 	id: z.string().optional(),
-	name: z.string().optional(),
+	image_url: z.string().optional().nullable(),
+	investors_count: z.number().optional(),
+	min_investment: z.number().optional(),
+	owner_id: z.string().optional(),
+	percentage_complete: z.number().optional(),
+	target_amount: z.number().optional(),
+	title: z.string().optional(),
 	updated_at: z.string().optional().nullable(),
 })
 
