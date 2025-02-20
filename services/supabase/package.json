@@ -22,7 +22,6 @@
 	},
 	"author": "kindfi",
 	"license": "MIT",
-	"dependencies": {},
 	"devDependencies": {
 		"supabase-to-zod": "^1.0.7",
 		"supabase": "^2.0.0"
