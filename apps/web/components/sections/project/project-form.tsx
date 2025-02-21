@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
+
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Check, ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react'
 import Image from 'next/image'
@@ -12,9 +14,36 @@ import {
 	step3Fields,
 } from '../../../lib/validators/project'
 
-export default function ProjectForm() {
-	const totalSteps = 3
+// Define constants before component
+const FORM_STEPS = [
+	{ number: 1, label: 'Project Details' },
+	{ number: 2, label: 'Funding Information' },
+	{ number: 3, label: 'Additional Details' },
+] as const
 
+const CATEGORIES = [
+	{ value: 'environment', label: 'Environment' },
+	{ value: 'education', label: 'Education' },
+	{ value: 'healthcare', label: 'Healthcare' },
+	{ value: 'technology', label: 'Technology' },
+	{ value: 'community', label: 'Community' },
+	{ value: 'arts', label: 'Arts' },
+] as const
+
+const CURRENCIES = [
+	{ value: 'USD', label: 'USD' },
+	{ value: 'EUR', label: 'EUR' },
+	{ value: 'GBP', label: 'GBP' },
+	{ value: 'ETH', label: 'ETH' },
+] as const
+
+const FIELDS_TO_VALIDATE = {
+	1: step1Fields,
+	2: step2Fields,
+	3: step3Fields,
+} as const
+
+export default function ProjectForm() {
 	const {
 		register,
 		handleSubmit,
@@ -25,18 +54,6 @@ export default function ProjectForm() {
 		mode: 'onChange',
 	})
 
-	const steps = [
-		{ number: 1, label: 'Project Details' },
-		{ number: 2, label: 'Funding Information' },
-		{ number: 3, label: 'Additional Details' },
-	]
-
-	const fieldsToValidate = {
-		1: step1Fields,
-		2: step2Fields,
-		3: step3Fields,
-	}
-
 	const {
 		step,
 		previewImage,
@@ -44,11 +61,13 @@ export default function ProjectForm() {
 		handleNext,
 		setStep,
 		setPreviewImage,
+		error: imageError,
 	} = useMultiStepForm({
-		totalSteps,
+		totalSteps: FORM_STEPS.length,
 		trigger,
-		steps,
-		fieldsToValidate,
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		steps: FORM_STEPS as any,
+		fieldsToValidate: FIELDS_TO_VALIDATE,
 	})
 
 	const onSubmit = (data: ProjectFormData) => {
@@ -81,7 +100,7 @@ export default function ProjectForm() {
 							className={`w-full px-3 py-2 rounded-md border ${
 								errors.website ? 'border-red-500' : 'border-gray-200'
 							} placeholder:text-gray-500 focus:outline-none focus:ring-2 
-            focus:ring-black focus:ring-offset-1`}
+              focus:ring-black focus:ring-offset-1`}
 						/>
 						{errors.website && (
 							<p className="text-sm text-red-500 mt-1">
@@ -108,7 +127,7 @@ export default function ProjectForm() {
 							className={`w-full px-3 py-2 rounded-md border ${
 								errors.location ? 'border-red-500' : 'border-gray-200'
 							} placeholder:text-gray-500 focus:outline-none focus:ring-2 
-            focus:ring-black focus:ring-offset-1`}
+              focus:ring-black focus:ring-offset-1`}
 						/>
 						{errors.location && (
 							<p className="text-sm text-red-500 mt-1">
@@ -131,15 +150,14 @@ export default function ProjectForm() {
 								className={`w-full px-3 py-2 rounded-md border ${
 									errors.category ? 'border-red-500' : 'border-gray-200'
 								} bg-white appearance-none focus:outline-none focus:ring-2 
-              focus:ring-black focus:ring-offset-1`}
+                focus:ring-black focus:ring-offset-1`}
 							>
 								<option value="">Select a category</option>
-								<option value="environment">Environment</option>
-								<option value="education">Education</option>
-								<option value="healthcare">Healthcare</option>
-								<option value="technology">Technology</option>
-								<option value="community">Community</option>
-								<option value="arts">Arts</option>
+								{CATEGORIES.map((category) => (
+									<option key={category.value} value={category.value}>
+										{category.label}
+									</option>
+								))}
 							</select>
 							<div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
 								<svg
@@ -181,7 +199,7 @@ export default function ProjectForm() {
 							className={`w-full px-3 py-2 rounded-md border ${
 								errors.description ? 'border-red-500' : 'border-gray-200'
 							} placeholder:text-gray-500 focus:outline-none focus:ring-2 
-            focus:ring-black focus:ring-offset-1`}
+              focus:ring-black focus:ring-offset-1`}
 						/>
 						{errors.description && (
 							<p className="text-sm text-red-500 mt-1">
@@ -208,7 +226,7 @@ export default function ProjectForm() {
 							className={`w-full px-3 py-2 rounded-md border ${
 								errors.previousFunding ? 'border-red-500' : 'border-gray-200'
 							} placeholder:text-gray-500 focus:outline-none focus:ring-2 
-            focus:ring-black focus:ring-offset-1`}
+              focus:ring-black focus:ring-offset-1`}
 						/>
 						{errors.previousFunding && (
 							<p className="text-sm text-red-500 mt-1">
@@ -235,7 +253,7 @@ export default function ProjectForm() {
 							className={`w-full px-3 py-2 rounded-md border ${
 								errors.fundingGoal ? 'border-red-500' : 'border-gray-200'
 							} placeholder:text-gray-500 focus:outline-none focus:ring-2 
-            focus:ring-black focus:ring-offset-1`}
+              focus:ring-black focus:ring-offset-1`}
 						/>
 						{errors.fundingGoal && (
 							<p className="text-sm text-red-500 mt-1">
@@ -258,13 +276,14 @@ export default function ProjectForm() {
 								className={`w-full px-3 py-2 rounded-md border ${
 									errors.currency ? 'border-red-500' : 'border-gray-200'
 								} bg-white appearance-none focus:outline-none focus:ring-2 
-              focus:ring-black focus:ring-offset-1`}
+                focus:ring-black focus:ring-offset-1`}
 							>
 								<option value="">Select a currency</option>
-								<option value="USD">USD</option>
-								<option value="EUR">EUR</option>
-								<option value="GBP">GBP</option>
-								<option value="ETH">ETH</option>
+								{CURRENCIES.map((currency) => (
+									<option key={currency.value} value={currency.value}>
+										{currency.label}
+									</option>
+								))}
 							</select>
 							<div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
 								<svg
@@ -297,7 +316,7 @@ export default function ProjectForm() {
 							htmlFor="file-upload"
 							className="block text-sm font-medium text-gray-900 mb-1.5"
 						>
-							Upload a Project Image or Video
+							Upload a Project Image
 						</label>
 						<div className="mt-1 flex justify-center rounded-lg border border-dashed border-gray-300 px-6 py-10">
 							{previewImage ? (
@@ -305,7 +324,7 @@ export default function ProjectForm() {
 									<Image
 										src={previewImage || '/placeholder.svg'}
 										alt="Preview of the project"
-										className="object-contain mb-4"
+										className="mx-auto object-contain mb-4"
 										width={800}
 										height={400}
 									/>
@@ -333,15 +352,22 @@ export default function ProjectForm() {
 												id="file-upload"
 												type="file"
 												className="sr-only"
-												accept="image/*"
-												onChange={handleImageUpload}
+												accept="image/jpeg,image/png,image/gif"
+												onChange={async (e) => {
+													try {
+														await handleImageUpload(e)
+													} catch {}
+												}}
 											/>
 										</label>
 										<p className="pl-1">or drag and drop</p>
 									</div>
 									<p className="text-xs leading-5 text-gray-600">
-										SVG, PNG, JPG or GIF (MAX. 800x400px)
+										PNG, JPG or GIF (max 5MB)
 									</p>
+									{imageError && (
+										<p className="text-sm text-red-500 mt-2">{imageError}</p>
+									)}
 								</div>
 							)}
 						</div>
@@ -365,7 +391,7 @@ export default function ProjectForm() {
 							className={`w-full px-3 py-2 rounded-md border ${
 								errors.projectSupport ? 'border-red-500' : 'border-gray-200'
 							} placeholder:text-gray-500 focus:outline-none focus:ring-2 
-            focus:ring-black focus:ring-offset-1 resize-none`}
+              focus:ring-black focus:ring-offset-1 resize-none`}
 						/>
 						{errors.projectSupport ? (
 							<p className="text-sm text-red-500 mt-1">
@@ -393,7 +419,7 @@ export default function ProjectForm() {
 							className={`w-full px-3 py-2 rounded-md border ${
 								errors.fundUsage ? 'border-red-500' : 'border-gray-200'
 							} placeholder:text-gray-500 focus:outline-none focus:ring-2 
-            focus:ring-black focus:ring-offset-1 resize-none`}
+              focus:ring-black focus:ring-offset-1 resize-none`}
 						/>
 						{errors.fundUsage ? (
 							<p className="text-sm text-red-500 mt-1">
@@ -434,7 +460,7 @@ export default function ProjectForm() {
 			{/* Steps indicator */}
 			<div className="flex justify-between mb-8 relative">
 				<div className="absolute top-4 left-0 w-full h-[2px] bg-gray-200" />
-				{steps.map((s) => (
+				{FORM_STEPS.map((s) => (
 					<div
 						key={s.number}
 						className="relative flex flex-col items-center gap-2 z-10"
