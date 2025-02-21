@@ -3,12 +3,13 @@ import { AppError } from '~/lib/error'
 import type { EscrowFundUpdateData } from '~/lib/types/escrow/escrow-payload.types'
 import { validateEscrowFundUpdate } from '~/lib/validators/escrow'
 import { supabase } from '~/lib/supabase/config'
+
 export async function POST(
 	req: NextRequest,
-	{ params }: { params: { transactionHash: string } }
+	{ params }: { params: Promise<{ transactionHash: string }> }
 ) {
 	try {
-		const { transactionHash } = params
+		const transactionHash = (await params).transactionHash
 		const updateData: EscrowFundUpdateData = await req.json()
 
 		const validationResult = validateEscrowFundUpdate(updateData)
