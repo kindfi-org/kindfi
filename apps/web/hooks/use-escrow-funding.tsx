@@ -1,8 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
 import { Horizon, Networks } from "@stellar/stellar-sdk";
-import { createEscrowRequest } from "~/lib/stellar/utils/create-escrow";
-import { sendTransaction } from "~/lib/stellar/utils/send-transaction";
-import { signTransaction } from "~/lib/stellar/utils/sign-transaction";
 
 interface FundingParams {
   escrowContract: string;
@@ -19,38 +16,6 @@ export const useEscrowFunding = ({ escrowContract, escrowId, amount, payerAddres
 
   const sendPayment = useCallback(async () => {
     try {
-
-      /* 1. Create the escrow contract through the initialize escrow - Trustless Work API
-      - The Trustless Work API will return an unsigned transaction XDR	
-      */
-      const responseFundEscrowRequest = await createEscrowRequest({
-        action: 'fund',
-        method: 'POST',
-        data: {
-          "signer": signer,
-          "contractId": escrowContract
-        },
-      })
-
-      // Get the unsigned transaction XDR
-      const { unsignedTransaction } = responseFundEscrowRequest;
-
-      if (!unsignedTransaction) {
-        throw Error("")
-      }
-
-      // 3. Sign the transaction
-      // todo: HERE YOU HAVE TO CREATE A FUNCTION TO SIGN THE TRANSACTION
-      // const signedTransaction = await signTransaction(unsignedTransaction);
-      // const signedTxXdr = unsignedTransaction
-
-      const signedTxXdr = signTransaction(unsignedTransaction, Networks.TESTNET, signer);
-
-      // 4. Send the signed transaction to the Stellar network through the send transaction - Trustless Work API
-      const txResponse = await sendTransaction(signedTxXdr || '')
-
-      setTransactionHash(txResponse.txHash);
-
       // Call the Next.js API to update the database
       const response = await fetch("/api/escrow/fund", {
         method: "POST",
@@ -58,7 +23,7 @@ export const useEscrowFunding = ({ escrowContract, escrowId, amount, payerAddres
         body: JSON.stringify({
           fundParams: {
             userId: payerAddress,
-            stellarTransactionHash: txResponse.txHash,
+            escrowContract: escrowContract,
             amount: amount.toString(),
             transactionType: "DEPOSIT",
           },
@@ -71,15 +36,15 @@ export const useEscrowFunding = ({ escrowContract, escrowId, amount, payerAddres
       });
 
       const data = await response.json();
-
       if (!response.ok) throw new Error(data.error || "Failed to track funding transaction");
+      setTransactionHash(data.txHash);
       setStatus("pending");
     } catch (error) {
       console.error("Failed to send funding transaction:", error);
       setError(error instanceof Error ? error.message : "Unknown error occurred");
       setStatus("error");
     }
-  }, [signer, escrowId, escrowContract, amount, payerAddress]);
+  }, [escrowId, escrowContract, amount, payerAddress]);
 
 
   const checkStatus = useCallback(async () => {

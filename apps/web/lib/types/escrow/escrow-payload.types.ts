@@ -62,9 +62,9 @@ export type TransactionType =
 
 export interface EscrowFundParams {
 	userId: string
-	stellarTransactionHash: string
 	amount: string
 	transactionType: TransactionType
+	escrowContract: string
 }
 
 export interface EscrowTransactionMetadata {
@@ -81,6 +81,7 @@ export interface EscrowTransactionMetadata {
 export interface EscrowFundData {
 	fundParams: EscrowFundParams
 	metadata: EscrowTransactionMetadata
+	signer: string
 }
 
 export interface EscrowFundUpdateData {

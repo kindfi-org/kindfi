@@ -91,15 +91,16 @@ export function validateEscrowInitialization(
 export function validateEscrowFunding(data: EscrowFundData): ValidationResult {
 	const errors: string[] = []
 
+	if (!data.signer) {
+		errors.push('Signer required')
+	}
+
 	// Validate fundParams object
 	if (!data.fundParams) {
 		errors.push('Funding parameters are required.')
 	} else {
 		if (!data.fundParams.userId?.trim()) {
 			errors.push('User ID is required.')
-		}
-		if (!data.fundParams.stellarTransactionHash?.trim()) {
-			errors.push('Stellar transaction hash is required.')
 		}
 		if (
 			!data.fundParams.amount ||
@@ -116,6 +117,10 @@ export function validateEscrowFunding(data: EscrowFundData): ValidationResult {
 			)
 		) {
 			errors.push('Invalid transaction type.')
+		}
+
+		if (!data.fundParams.escrowContract) {
+			errors.push('Escrow contract is required')
 		}
 	}
 
