@@ -33,9 +33,15 @@ export const FeaturedCreators = ({ creators }: FeatureCreatorsProps) => {
 					change happen.
 				</motion.p>
 				<div className="flex flex-wrap justify-center gap-8 mt-14">
-					{creators.map((creator) => (
-						<FeatureCreatorCard key={creator.name} {...creator} />
-					))}
+					{creators.length === 0 ? (
+						<p>No creators found</p>
+					) : (
+						<>
+							{creators.map((creator) => (
+								<FeatureCreatorCard key={creator.name} {...creator} />
+							))}
+						</>
+					)}
 				</div>
 			</div>
 		</section>

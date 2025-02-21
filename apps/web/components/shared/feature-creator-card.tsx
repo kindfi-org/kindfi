@@ -16,6 +16,8 @@ export interface FeatureCreatorCardProps {
 	followers: number
 	avatarUrl?: string
 	verified?: boolean
+	onViewProjectsClick?: () => void
+	onFollowClick?: () => void
 }
 
 export const FeatureCreatorCard = ({
@@ -27,6 +29,8 @@ export const FeatureCreatorCard = ({
 	followers,
 	avatarUrl,
 	verified = true,
+	onViewProjectsClick = () => {},
+	onFollowClick = () => {},
 }: FeatureCreatorCardProps) => {
 	const creatorData = [
 		{ id: 'total-raised-id', label: 'Total Raised', value: totalRaised },
@@ -83,8 +87,8 @@ export const FeatureCreatorCard = ({
 						className="flex-row-reverse sm:flex-row-reverse w-full"
 						primaryClassName="min-w-[50%]"
 						secondaryClassName="min-w-[50%]"
-						onPrimaryClick={() => {}}
-						onSecondaryClick={() => {}}
+						onPrimaryClick={onViewProjectsClick}
+						onSecondaryClick={onFollowClick}
 					/>
 				</div>
 			</motion.div>

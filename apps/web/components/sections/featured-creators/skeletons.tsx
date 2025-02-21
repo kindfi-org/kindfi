@@ -8,6 +8,7 @@ export const SkeletonFeatureCreators = () => (
 					<div
 						key={number}
 						className="max-w-sm rounded-lg overflow-hidden shadow-lg p-6 bg-white animate-pulse"
+						aria-busy="true"
 					>
 						<div className="flex flex-col items-center">
 							<div className="w-24 h-24 rounded-full bg-gray-300" />
