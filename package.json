@@ -40,6 +40,5 @@
 			"**/wagmi/**",
 			"**/pino-pretty/**"
 		]
-	},
-	"dependencies": {}
+	}
 }

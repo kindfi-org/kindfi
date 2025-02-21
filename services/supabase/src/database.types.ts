@@ -34,7 +34,188 @@ export type Database = {
 	}
 	public: {
 		Tables: {
-			[_ in never]: never
+			contributions: {
+				Row: {
+					amount: number
+					contributor_id: string
+					created_at: string | null
+					id: string
+					project_id: string
+					updated_at: string | null
+				}
+				Insert: {
+					amount: number
+					contributor_id: string
+					created_at?: string | null
+					id?: string
+					project_id: string
+					updated_at?: string | null
+				}
+				Update: {
+					amount?: number
+					contributor_id?: string
+					created_at?: string | null
+					id?: string
+					project_id?: string
+					updated_at?: string | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'contributions_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			escrow_contracts: {
+				Row: {
+					amount: number
+					completed_at: string | null
+					contract_id: string
+					contribution_id: string
+					created_at: string | null
+					current_state: Database['public']['Enums']['escrow_status_type']
+					engagement_id: string
+					id: string
+					metadata: Json | null
+					payer_address: string
+					platform_fee: number
+					project_id: string
+					receiver_address: string
+					updated_at: string | null
+				}
+				Insert: {
+					amount: number
+					completed_at?: string | null
+					contract_id: string
+					contribution_id: string
+					created_at?: string | null
+					current_state?: Database['public']['Enums']['escrow_status_type']
+					engagement_id: string
+					id?: string
+					metadata?: Json | null
+					payer_address: string
+					platform_fee: number
+					project_id: string
+					receiver_address: string
+					updated_at?: string | null
+				}
+				Update: {
+					amount?: number
+					completed_at?: string | null
+					contract_id?: string
+					contribution_id?: string
+					created_at?: string | null
+					current_state?: Database['public']['Enums']['escrow_status_type']
+					engagement_id?: string
+					id?: string
+					metadata?: Json | null
+					payer_address?: string
+					platform_fee?: number
+					project_id?: string
+					receiver_address?: string
+					updated_at?: string | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'escrow_contracts_contribution_id_fkey'
+						columns: ['contribution_id']
+						isOneToOne: false
+						referencedRelation: 'contributions'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'escrow_contracts_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			escrow_status: {
+				Row: {
+					current_milestone: number | null
+					escrow_id: string
+					id: string
+					last_updated: string | null
+					metadata: Json | null
+					status: Database['public']['Enums']['escrow_status_type']
+					total_funded: number | null
+					total_released: number | null
+				}
+				Insert: {
+					current_milestone?: number | null
+					escrow_id: string
+					id?: string
+					last_updated?: string | null
+					metadata?: Json | null
+					status: Database['public']['Enums']['escrow_status_type']
+					total_funded?: number | null
+					total_released?: number | null
+				}
+				Update: {
+					current_milestone?: number | null
+					escrow_id?: string
+					id?: string
+					last_updated?: string | null
+					metadata?: Json | null
+					status?: Database['public']['Enums']['escrow_status_type']
+					total_funded?: number | null
+					total_released?: number | null
+				}
+				Relationships: []
+			}
+			projects: {
+				Row: {
+					category_id: string | null
+					created_at: string | null
+					current_amount: number
+					description: string | null
+					id: string
+					image_url: string | null
+					investors_count: number
+					min_investment: number
+					owner_id: string
+					percentage_complete: number
+					target_amount: number
+					title: string
+					updated_at: string | null
+				}
+				Insert: {
+					category_id?: string | null
+					created_at?: string | null
+					current_amount?: number
+					description?: string | null
+					id?: string
+					image_url?: string | null
+					investors_count?: number
+					min_investment: number
+					owner_id: string
+					percentage_complete?: number
+					target_amount: number
+					title: string
+					updated_at?: string | null
+				}
+				Update: {
+					category_id?: string | null
+					created_at?: string | null
+					current_amount?: number
+					description?: string | null
+					id?: string
+					image_url?: string | null
+					investors_count?: number
+					min_investment?: number
+					owner_id?: string
+					percentage_complete?: number
+					target_amount?: number
+					title?: string
+					updated_at?: string | null
+				}
+				Relationships: []
+			}
 		}
 		Views: {
 			[_ in never]: never
@@ -43,7 +224,13 @@ export type Database = {
 			[_ in never]: never
 		}
 		Enums: {
-			[_ in never]: never
+			escrow_status_type:
+				| 'NEW'
+				| 'FUNDED'
+				| 'ACTIVE'
+				| 'COMPLETED'
+				| 'DISPUTED'
+				| 'CANCELLED'
 		}
 		CompositeTypes: {
 			[_ in never]: never

@@ -23,7 +23,7 @@ const projects: NavigationItem[] = [
 	},
 	{
 		title: 'Create a Project',
-		href: '/create',
+		href: '/create-project',
 		description: 'Start your social impact campaign with Web3 technology',
 	},
 	{

@@ -1,5 +1,9 @@
 prettier $(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g') --write --ignore-unknown
 bun format-and-lint:fix
 git update-index --again
-# ? No true test applied for now. Disable the following line to enable testing when first round of tests are added.
-# bun test
+if git diff --cached --name-only | grep -q '^apps/web/'; then
+  echo "🔵 Running tests for the web application."
+  echo "🔴 Ensure to have no ENV var missing."
+  echo "🟡 Check test errors if any."
+  cd apps/web && bun test
+fi
