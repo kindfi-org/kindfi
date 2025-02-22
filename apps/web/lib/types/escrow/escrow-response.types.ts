@@ -15,9 +15,12 @@ export type InitializeEscrowResponse = {
 }
 
 export type FundEscrowResponse = {
+	txHash: string
 	message: string
 	status: Status
 }
 
 export type SendTransactionResponse = InitializeEscrowResponse &
 	FundEscrowResponse
+
+export type SignTransactionResponse = string
