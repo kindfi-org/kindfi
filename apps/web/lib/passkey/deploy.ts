@@ -3,12 +3,12 @@ import {
 	Address,
 	type Keypair,
 	Operation,
-	rpc as SorobanRpc,
 	StrKey,
 	TransactionBuilder,
 	hash,
 	xdr,
 } from '@stellar/stellar-sdk'
+import { Api, Server, assembleTransaction } from '@stellar/stellar-sdk/rpc'
 import { ENV } from '~/lib/passkey/env'
 
 const { RPC_URL, FACTORY_CONTRACT_ID, HORIZON_URL, NETWORK_PASSPHRASE } = ENV
@@ -18,7 +18,7 @@ export async function handleDeploy(
 	contractSalt: Buffer,
 	publicKey?: Buffer,
 ) {
-	const rpc = new SorobanRpc.Server(RPC_URL)
+	const rpc = new Server(RPC_URL)
 	const deployee = StrKey.encodeContract(
 		hash(
 			xdr.HashIdPreimage.envelopeTypeContractId(
@@ -64,15 +64,9 @@ export async function handleDeploy(
 
 	const sim = await rpc.simulateTransaction(simTxn)
 
-	if (
-		SorobanRpc.Api.isSimulationError(sim) ||
-		SorobanRpc.Api.isSimulationRestore(sim)
-	)
-		throw sim
+	if (Api.isSimulationError(sim) || Api.isSimulationRestore(sim)) throw sim
 
-	const transaction = SorobanRpc.assembleTransaction(simTxn, sim)
-		.setTimeout(0)
-		.build()
+	const transaction = assembleTransaction(simTxn, sim).setTimeout(0).build()
 
 	transaction.sign(bundlerKey)
 
