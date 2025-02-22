@@ -1,5 +1,8 @@
 import * as z from 'zod'
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif']
+
 export const projectFormSchema = z.object({
 	// Step 1
 	website: z
@@ -21,7 +24,17 @@ export const projectFormSchema = z.object({
 		.min(1, 'Funding goal is required')
 		.refine((val) => !Number.isNaN(Number(val)), 'Must be a valid number'),
 	currency: z.string().min(1, 'Please select a currency'),
-	image: z.any().optional(),
+	image: z
+		.any()
+		.optional()
+		.refine(
+			(file) => !file || file?.size <= MAX_FILE_SIZE,
+			'File size must be less than 5MB',
+		)
+		.refine(
+			(file) => !file || ACCEPTED_IMAGE_TYPES.includes(file?.type),
+			'Only .jpg, .jpeg, .png and .gif formats are supported',
+		),
 
 	// Step 3
 	projectSupport: z
@@ -48,6 +61,7 @@ export const step2Fields: (keyof ProjectFormData)[] = [
 	'previousFunding',
 	'fundingGoal',
 	'currency',
+	'image',
 ]
 
 export const step3Fields: (keyof ProjectFormData)[] = [
