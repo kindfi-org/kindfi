@@ -1,10 +1,10 @@
-import { LevelTabs } from '~/components/sections/learning/level-tabs'
-import { SearchBar } from '~/components/sections/learning/search-bar'
+import { LevelTabs } from './level-tabs'
+import { SearchBar } from './search-bar'
 
 interface ResourceFiltersProps {
 	activeLevel: string
 	onLevelChange: (level: string) => void
-	onSearch: (value: string) => void
+	onSearch: (searchTerm: string) => void
 }
 
 export function ResourceFilters({
@@ -13,8 +13,12 @@ export function ResourceFilters({
 	onSearch,
 }: ResourceFiltersProps) {
 	return (
-		<div className="flex flex-col sm:flex-row items-center gap-4">
-			<SearchBar placeholder="Search resources..." onChange={onSearch} />
+		<div className="flex flex-col md:flex-row items-center gap-6">
+			<SearchBar
+				placeholder="Search resources..."
+				onChange={onSearch}
+				className="w-[320px]"
+			/>
 			<LevelTabs value={activeLevel} onValueChange={onLevelChange} />
 		</div>
 	)

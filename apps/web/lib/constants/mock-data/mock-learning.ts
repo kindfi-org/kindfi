@@ -4,28 +4,28 @@ import type { Category, NewsUpdate, Resource } from '~/lib/types/learning.types'
 export const categories: Category[] = [
 	{
 		name: 'Crowdfunding',
-		description: 'Learn about modern crowdfunding techniques and platforms',
+		description: 'Learn the basics of crowdfunding and best practices',
 		icon: LayoutGrid,
 		slug: 'crowdfunding',
 		type: 'crowdfunding',
 	},
 	{
 		name: 'Blockchain',
-		description: 'Understand blockchain technology and its applications',
+		description: 'Understand how blockchain ensures transparency',
 		icon: Shield,
 		slug: 'blockchain',
 		type: 'blockchain',
 	},
 	{
 		name: 'Web3',
-		description: 'Explore the decentralized web and its possibilities',
+		description: 'Explore the future of decentralized funding',
 		icon: Zap,
 		slug: 'web3',
 		type: 'web3',
 	},
 	{
 		name: 'Security',
-		description: 'Learn about crypto security and best practices',
+		description: 'Learn about secure donation practices',
 		icon: ShieldCheck,
 		slug: 'security',
 		type: 'security',
@@ -35,33 +35,49 @@ export const categories: Category[] = [
 export const resources: Resource[] = [
 	{
 		id: 1,
-		title: 'Introduction to Web3 Crowdfunding',
-		description: 'Learn the basics of crowdfunding in the Web3 space',
-		category: 'Crowdfunding',
-		type: 'guide',
-		level: 'beginner',
-		duration: '30 min',
+		title: 'How Blockchain Ensures Donation Transparency',
+		description:
+			'Learn how blockchain technology creates an immutable record of all donations and ensures complete transparency in crowdfunding.',
+		category: 'Blockchain',
+		type: 'article',
+		level: 'Beginner',
+		duration: '10 min',
 		engagement: {
-			likes: 156,
-			comments: 23,
+			likes: 245,
+			comments: 45,
 		},
-		image: '/images/crowdfunding-intro.jpg',
-		featured: true,
+		image: '/images/disaster-aid.webp',
 	},
-	// Add more resources as needed
+	{
+		id: 2,
+		title: 'Getting Started with Stellar Wallets',
+		description:
+			'A step-by-step guide to setting up and using Stellar wallets for secure cryptocurrency donations.',
+		category: 'Stellar',
+		type: 'video',
+		level: 'Beginner',
+		duration: '15 min',
+		engagement: {
+			likes: 189,
+			comments: 32,
+		},
+		image: '/images/bosques.webp',
+	},
+	{
+		id: 3,
+		title: 'Web3 Crowdfunding: A Complete Guide',
+		description:
+			'Understand how Web3 technology is revolutionizing crowdfunding through smart contracts and decentralized finance.',
+		category: 'Web3',
+		type: 'guide',
+		level: 'Intermediate',
+		duration: '20 min',
+		engagement: {
+			likes: 312,
+			comments: 67,
+		},
+		image: '/images/ecommerce.webp',
+	},
 ]
 
-export const newsUpdates: NewsUpdate[] = [
-	{
-		id: 1,
-		title: 'New Security Features Released',
-		description:
-			'Exploring the latest security enhancements in Web3 crowdfunding',
-		date: '2024-02-20',
-		category: 'Security',
-		image: '/images/security-update.jpg',
-		slug: 'new-security-features',
-		tags: ['security', 'update', 'web3'],
-	},
-	// Add more news updates as needed
-]
+export const newsUpdates: NewsUpdate[] = []

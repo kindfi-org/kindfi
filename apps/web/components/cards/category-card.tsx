@@ -22,18 +22,38 @@ export function CategoryCard({
 	type,
 	className = '',
 }: CategoryCardProps) {
-	const Icon = iconMap[type as keyof typeof iconMap] || LayoutGrid
+	const Icon = iconMap[type] || LayoutGrid
 
 	return (
-		<Link href={`/learn/${slug}`}>
+		<Link href={`/learn/${slug}`} className="block w-full">
 			<div
-				className={`p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 ${className}`}
+				className={`
+        h-64 
+        w-full
+        flex 
+        flex-col 
+        items-center 
+        text-center 
+        p-8 
+        bg-white 
+        rounded-xl 
+        shadow-sm 
+        hover:shadow-md 
+        transition-all 
+        duration-300 
+        ${className}
+      `}
 			>
-				<div className="bg-muted rounded-full w-12 h-12 flex items-center justify-center mb-4">
-					<Icon className="w-6 h-6 text-muted-foreground" />
+				{/* Icon Container */}
+				<div className="bg-gray-100 rounded-2xl w-16 h-16 flex items-center justify-center mb-6">
+					<Icon className="w-8 h-8 text-gray-600" />
 				</div>
-				<h3 className="text-xl font-semibold mb-2">{name}</h3>
-				<p className="text-muted-foreground text-base">{description}</p>
+
+				{/* Content Container - Fixed Height */}
+				<div className="flex flex-col flex-grow justify-between">
+					<h3 className="text-xl font-semibold mb-3">{name}</h3>
+					<p className="text-gray-500 text-base line-clamp-3">{description}</p>
+				</div>
 			</div>
 		</Link>
 	)

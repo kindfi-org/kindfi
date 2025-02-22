@@ -1,24 +1,23 @@
 'use client'
 import { useState } from 'react'
 import { CategoryGrid } from '~/components/sections/learning/category-grid'
-import { NewsGrid } from '~/components/sections/learning/news-grid'
+import { Hero } from '~/components/sections/learning/hero'
+import { JoinCommunity } from '~/components/sections/learning/join-community'
+import { LatestUpdates } from '~/components/sections/learning/latest-updates'
 import { ResourceFilters } from '~/components/sections/learning/resource-filters'
 import { ResourceGrid } from '~/components/sections/learning/resource-grid'
-import { SectionHeader } from '~/components/sections/learning/section-header'
-import {
-	categories,
-	newsUpdates,
-	resources,
-} from '~/lib/constants/mock-data/mock-learning'
+import { categories, resources } from '~/lib/constants/mock-data/mock-learning'
 
 export default function LearningPage() {
-	const [activeLevel, setActiveLevel] = useState('all')
+	const [activeLevel, setActiveLevel] = useState('all levels')
 	const [searchQuery, setSearchQuery] = useState('')
 
 	const filteredResources = resources.filter((resource) => {
 		const matchesLevel =
-			activeLevel === 'all' || resource.level.toLowerCase() === activeLevel
+			activeLevel === 'all levels' ||
+			resource.level.toLowerCase() === activeLevel.toLowerCase()
 		const matchesSearch =
+			!searchQuery ||
 			resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
 			resource.description.toLowerCase().includes(searchQuery.toLowerCase())
 		return matchesLevel && matchesSearch
@@ -26,47 +25,47 @@ export default function LearningPage() {
 
 	return (
 		<div className="min-h-screen bg-background">
+			{/* Hero Section */}
+			<Hero />
+
 			{/* Categories Section */}
-			<section className="section-spacing section-padding">
+			<section className="py-24">
 				<div className="container">
-					<SectionHeader
-						title="Learning Categories"
-						description="Explore our comprehensive learning resources across different topics."
-					/>
 					<CategoryGrid categories={categories} />
 				</div>
 			</section>
 
-			{/* Featured Resources */}
-			<section className="section-spacing section-padding gradient-bg-blue-purple">
+			{/* Featured Resources Section */}
+			<section className="py-24 bg-gray-50/40">
 				<div className="container">
-					<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12">
-						<SectionHeader
-							title="Featured Resources"
-							description="Discover our most popular guides, tutorials, and articles."
-							alignment="left"
-							className="mb-0 md:mb-0"
-						/>
-						<ResourceFilters
-							activeLevel={activeLevel}
-							onLevelChange={setActiveLevel}
-							onSearch={setSearchQuery}
-						/>
+					{/* Header and Filters */}
+					<div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-16 gap-8">
+						<div className="max-w-md">
+							<h2 className="text-3xl font-bold mb-2">Featured Resources</h2>
+							<p className="text-gray-600">
+								Discover our most popular guides, tutorials, and articles.
+							</p>
+						</div>
+
+						<div className="flex-1 lg:flex lg:justify-end">
+							<ResourceFilters
+								activeLevel={activeLevel}
+								onLevelChange={setActiveLevel}
+								onSearch={setSearchQuery}
+							/>
+						</div>
 					</div>
+
+					{/* Resources Grid */}
 					<ResourceGrid resources={filteredResources} />
 				</div>
 			</section>
 
 			{/* Latest Updates */}
-			<section className="section-spacing section-padding">
-				<div className="container">
-					<SectionHeader
-						title="Latest Updates"
-						description="Stay informed about the latest developments in Web3 crowdfunding."
-					/>
-					<NewsGrid updates={newsUpdates} />
-				</div>
-			</section>
+			<LatestUpdates />
+
+			{/* Join Community Section */}
+			<JoinCommunity />
 		</div>
 	)
 }

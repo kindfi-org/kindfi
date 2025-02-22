@@ -1,5 +1,4 @@
 import { Search } from 'lucide-react'
-import { Input } from '~/components/base/input'
 
 interface SearchBarProps {
 	placeholder?: string
@@ -8,15 +7,16 @@ interface SearchBarProps {
 }
 
 export function SearchBar({
-	placeholder = 'Search...',
+	placeholder = 'Search resources...',
 	onChange,
 	className = '',
 }: SearchBarProps) {
 	return (
-		<div className={`relative w-full sm:w-[300px] ${className}`}>
-			<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-			<Input
-				className="pl-9"
+		<div className={`relative ${className}`}>
+			<Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+			<input
+				type="text"
+				className="w-full h-12 pl-12 pr-4 rounded-lg border border-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
 				placeholder={placeholder}
 				onChange={(e) => onChange?.(e.target.value)}
 			/>
