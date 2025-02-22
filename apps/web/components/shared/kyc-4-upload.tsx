@@ -104,7 +104,7 @@ const ProofOfAddressUpload = ({
         await handleFileUpload(droppedFile);
       }
     },
-    [documentType, isValidFileType]
+    [documentType, isValidFileType, toast]
   );
 
   const handleFileSelect = useCallback(
@@ -123,7 +123,7 @@ const ProofOfAddressUpload = ({
         await handleFileUpload(selectedFile);
       }
     },
-    [documentType, isValidFileType]
+    [documentType, isValidFileType, toast]
   );
 
   const removeFile = useCallback(() => {
@@ -256,7 +256,7 @@ const ProofOfAddressUpload = ({
       setPreviewUrl(preview);
       await processFile(uploadedFile);
     },
-    [documentType]
+    [documentType, toast]
   );
 
   const processFile = useCallback(
@@ -488,11 +488,7 @@ const ProofOfAddressUpload = ({
                 <p className="font-medium">Validation Errors:</p>
                 <ul className="list-disc pl-6 mt-2 space-y-1">
                   {validationErrors.map((error, index) => (
-{validationErrors.map((error) => (
-  <li key={`error-${error.toLowerCase().replace(/\s+/g, '-')}`} className="text-red-600">
-    {error}
-  </li>
-))}
+                    <li key={index} className="text-red-600">
                       {error}
                     </li>
                   ))}
