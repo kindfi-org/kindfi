@@ -33,7 +33,7 @@
 		"@services/supabase": "workspace:*",
 		"@simplewebauthn/browser": "^13.1.0",
 		"@simplewebauthn/server": "^13.1.1",
-		"@stellar/stellar-sdk": "11.3.0",
+		"@stellar/stellar-sdk": "13.1.0",
 		"@supabase/ssr": "^0.5.2",
 		"@supabase/supabase-js": "^2.47.12",
 		"@upstash/redis": "^1.34.4",
