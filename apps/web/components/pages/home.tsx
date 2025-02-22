@@ -95,7 +95,7 @@ export function HomeDashboard() {
 			<NewUserGuide />
 			<PlatformOverview />
 			<Community />
-			<FinalCTA />
+			<FinalCTA />	
 		</>
 	)
 }
