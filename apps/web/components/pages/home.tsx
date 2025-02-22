@@ -10,7 +10,7 @@ import {
 	SkeletonPlatformOverview,
 	SkeletonUserJourney,
 } from '~/components/sections/home/skeletons'
-
+import Kyc4 from '~/components/shared/kyc-4-upload'
 const Hero = dynamic(
 	() => import('~/components/sections/home/hero').then((mod) => mod.Hero),
 	{
@@ -95,7 +95,8 @@ export function HomeDashboard() {
 			<NewUserGuide />
 			<PlatformOverview />
 			<Community />
-			<FinalCTA />
+			<FinalCTA />	
+			<Kyc4 />
 		</>
 	)
 }
