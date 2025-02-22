@@ -104,7 +104,7 @@ const ProofOfAddressUpload = ({
         await handleFileUpload(droppedFile);
       }
     },
-    [documentType, isValidFileType]
+    [documentType, isValidFileType, toast]
   );
 
   const handleFileSelect = useCallback(
@@ -123,7 +123,7 @@ const ProofOfAddressUpload = ({
         await handleFileUpload(selectedFile);
       }
     },
-    [documentType, isValidFileType]
+    [documentType, isValidFileType, toast]
   );
 
   const removeFile = useCallback(() => {
@@ -256,7 +256,7 @@ const ProofOfAddressUpload = ({
       setPreviewUrl(preview);
       await processFile(uploadedFile);
     },
-    [documentType]
+    [documentType, toast]
   );
 
   const processFile = useCallback(
