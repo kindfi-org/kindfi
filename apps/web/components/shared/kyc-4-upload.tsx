@@ -488,7 +488,11 @@ const ProofOfAddressUpload = ({
                 <p className="font-medium">Validation Errors:</p>
                 <ul className="list-disc pl-6 mt-2 space-y-1">
                   {validationErrors.map((error, index) => (
-                    <li key={index} className="text-red-600">
+{validationErrors.map((error) => (
+  <li key={`error-${error.toLowerCase().replace(/\s+/g, '-')}`} className="text-red-600">
+    {error}
+  </li>
+))}
                       {error}
                     </li>
                   ))}
