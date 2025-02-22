@@ -1,4 +1,3 @@
-import { Toast as ToastPrimitive } from "~/components/types/types"
 
 export interface ToastProps {
   title: string;
