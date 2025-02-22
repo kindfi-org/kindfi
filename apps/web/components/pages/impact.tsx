@@ -1,10 +1,18 @@
 import dynamic from 'next/dynamic'
+import {
+    SkeletonHero,
+    SkeletonSuccessStories,
+    SkeletonCommunityVoices,
+    SkeletonImpactMakers,
+    SkeletonImpactCategories,
+    SkeletonMakeImpact,
+} from '~/components/sections/impact/skeletons'
 
 const Hero = dynamic(
 	() => import('~/components/sections/impact/hero').then((mod) => mod.Hero),
 	{
 		ssr: true,
-		// loading: SkeletonHero,
+		loading: SkeletonHero,
 	},
 )
 
@@ -15,7 +23,7 @@ const SuccessStories = dynamic(
 		),
 	{
 		ssr: true,
-		// loading: SkeletonHero,
+		loading: SkeletonSuccessStories,
 	},
 )
 
@@ -26,7 +34,7 @@ const Testimonials = dynamic(
 		),
 	{
 		ssr: true,
-		// loading: SkeletonHero,
+		loading: SkeletonCommunityVoices,
 	},
 )
 
@@ -37,7 +45,7 @@ const TopImpactMakers = dynamic(
 		),
 	{
 		ssr: true,
-		// loading: SkeletonHero,
+		loading: SkeletonImpactMakers,
 	},
 )
 
@@ -48,7 +56,7 @@ const Categories = dynamic(
 		),
 	{
 		ssr: true,
-		// loading: SkeletonHero,
+		loading: SkeletonImpactCategories,
 	},
 )
 
@@ -59,7 +67,7 @@ const MakeImpact = dynamic(
 		),
 	{
 		ssr: true,
-		// loading: SkeletonHero,
+		loading: SkeletonMakeImpact,
 	},
 )
 export function ImpactDashboard() {
