@@ -5,7 +5,7 @@ import type { SignTransactionResponse } from '~/lib/types/escrow/escrow-response
 export function signTransaction(
 	unsignedXDR: string,
 	networkPassPhrase: string,
-	signer: string
+	signer: string,
 ): SignTransactionResponse {
 	try {
 		const keypair = Keypair.fromSecret(signer)

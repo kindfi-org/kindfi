@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import { supabase } from '~/lib/supabase/config'
 import type { EscrowFundUpdateData } from '~/lib/types/escrow/escrow-payload.types'
 import { validateEscrowFundUpdate } from '~/lib/validators/escrow'
-import { supabase } from '~/lib/supabase/config'
 
 export async function POST(
 	req: NextRequest,
-	{ params }: { params: Promise<{ transactionHash: string }> }
+	{ params }: { params: Promise<{ transactionHash: string }> },
 ) {
 	try {
 		const transactionHash = (await params).transactionHash
@@ -20,7 +20,7 @@ export async function POST(
 					error: 'Invalid escrow fund update data',
 					details: validationResult.errors,
 				},
-				{ status: 400 }
+				{ status: 400 },
 			)
 		}
 
@@ -37,7 +37,7 @@ export async function POST(
 
 		return NextResponse.json(
 			{ message: 'Transaction updated', data },
-			{ status: 200 }
+			{ status: 200 },
 		)
 	} catch (error) {
 		if (error instanceof AppError) {
@@ -47,7 +47,7 @@ export async function POST(
 					error: error.message,
 					details: error.details,
 				},
-				{ status: error.statusCode }
+				{ status: error.statusCode },
 			)
 		}
 
@@ -59,7 +59,7 @@ export async function POST(
 						? error.message
 						: 'Internal server error during escrow fund',
 			},
-			{ status: 500 }
+			{ status: 500 },
 		)
 	}
 }

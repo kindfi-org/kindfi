@@ -1,13 +1,13 @@
+import { Networks } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { Networks } from '@stellar/stellar-sdk'
 import { AppError } from '~/lib/error'
-import type { EscrowFundData } from '~/lib/types/escrow/escrow-payload.types'
-import { validateEscrowFunding } from '~/lib/validators/escrow'
-import { supabase } from '~/lib/supabase/config'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
+import { supabase } from '~/lib/supabase/config'
+import type { EscrowFundData } from '~/lib/types/escrow/escrow-payload.types'
+import { validateEscrowFunding } from '~/lib/validators/escrow'
 
 export async function POST(req: NextRequest) {
 	try {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 		if (!validationResult.success) {
 			return NextResponse.json(
 				{ error: 'Invalid escrow fund data', details: validationResult.errors },
-				{ status: 400 }
+				{ status: 400 },
 			)
 		}
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 		const signedTxXdr = signTransaction(
 			unsignedTransaction,
 			Networks.TESTNET,
-			signer
+			signer,
 		)
 		if (!signedTxXdr) {
 			throw new Error('Transaction signing failed')
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 		if (dbError) {
 			return NextResponse.json(
 				{ error: 'Failed to add fund transaction', details: dbError.message },
-				{ status: 500 }
+				{ status: 500 },
 			)
 		}
 
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 				transactionHash: txResponse.txHash,
 				status: 'INITIALIZED',
 			},
-			{ status: 201 }
+			{ status: 201 },
 		)
 	} catch (error) {
 		console.error('Escrow Fund Error:', error)
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 		if (error instanceof AppError) {
 			return NextResponse.json(
 				{ error: error.message, details: error.details },
-				{ status: error.statusCode }
+				{ status: error.statusCode },
 			)
 		}
 
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
 			{
 				error: error instanceof Error ? error.message : 'Internal server error',
 			},
-			{ status: 500 }
+			{ status: 500 },
 		)
 	}
 }

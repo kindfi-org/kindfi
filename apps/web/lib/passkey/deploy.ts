@@ -16,7 +16,7 @@ const { RPC_URL, FACTORY_CONTRACT_ID, HORIZON_URL, NETWORK_PASSPHRASE } = ENV
 export async function handleDeploy(
 	bundlerKey: Keypair,
 	contractSalt: Buffer,
-	publicKey?: Buffer
+	publicKey?: Buffer,
 ) {
 	const rpc = new SorobanRpc.Server(RPC_URL)
 	const deployee = StrKey.encodeContract(
@@ -29,18 +29,18 @@ export async function handleDeploy(
 							new xdr.ContractIdPreimageFromAddress({
 								address: Address.fromString(FACTORY_CONTRACT_ID).toScAddress(),
 								salt: contractSalt,
-							})
+							}),
 						),
-				})
-			).toXDR()
-		)
+				}),
+			).toXDR(),
+		),
 	)
 
 	// This is a signup deploy vs a signin deploy. Look up if this contract has been already been deployed, otherwise fail
 	if (!publicKey) {
 		await rpc.getContractData(
 			deployee,
-			xdr.ScVal.scvLedgerKeyContractInstance()
+			xdr.ScVal.scvLedgerKeyContractInstance(),
 		)
 		return deployee
 	}
@@ -57,7 +57,7 @@ export async function handleDeploy(
 				contract: FACTORY_CONTRACT_ID,
 				function: 'deploy',
 				args: [xdr.ScVal.scvBytes(contractSalt), xdr.ScVal.scvBytes(publicKey)],
-			})
+			}),
 		)
 		.setTimeout(0)
 		.build()

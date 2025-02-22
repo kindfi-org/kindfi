@@ -1,7 +1,7 @@
 import type {
-	EscrowPayload,
 	EscrowFundData,
 	EscrowFundUpdateData,
+	EscrowPayload,
 } from '../types/escrow/escrow-payload.types'
 import type { Milestone } from '../types/escrow/escrow.types'
 
@@ -31,7 +31,7 @@ const validateMilestone = (milestone: Milestone, index: number): string[] => {
 }
 
 export function validateEscrowInitialization(
-	data: EscrowPayload
+	data: EscrowPayload,
 ): ValidationResult {
 	const errors: string[] = []
 
@@ -113,7 +113,7 @@ export function validateEscrowFunding(data: EscrowFundData): ValidationResult {
 			errors.push('Transaction type is required.')
 		} else if (
 			!['DEPOSIT', 'RELEASE', 'REFUND', 'DISPUTE', 'FEE'].includes(
-				data.fundParams.transactionType
+				data.fundParams.transactionType,
 			)
 		) {
 			errors.push('Invalid transaction type.')
@@ -147,7 +147,7 @@ export function validateEscrowFunding(data: EscrowFundData): ValidationResult {
 			!data.metadata.reason?.trim()
 		) {
 			errors.push(
-				`Reason is required for ${data.fundParams.transactionType} transactions.`
+				`Reason is required for ${data.fundParams.transactionType} transactions.`,
 			)
 		}
 		if (
@@ -167,7 +167,7 @@ export function validateEscrowFunding(data: EscrowFundData): ValidationResult {
 }
 
 export function validateEscrowFundUpdate(
-	data: EscrowFundUpdateData
+	data: EscrowFundUpdateData,
 ): ValidationResult {
 	const errors: string[] = []
 
