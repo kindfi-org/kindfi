@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from "~/components/base/alert";
 import { useToast } from "~/components/base/toast";
 import Tesseract from 'tesseract.js';
 
-
 interface ExtractedData {
   text: string;
   date: string | null;
@@ -24,12 +23,10 @@ type ToastType = {
 
 type DocumentType = 'utility' | 'bank' | 'government' | '';
 
-
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
-
 
 const ProofOfAddressUpload = ({ 
   onBack, 
@@ -41,7 +38,6 @@ const ProofOfAddressUpload = ({
     extractedData: ExtractedData
   }) => void 
 }) => {
-
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -57,7 +53,6 @@ const ProofOfAddressUpload = ({
     }
   }, [previewUrl]);
 
-
   const isValidFileType = useCallback((file: File): boolean => {
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
     return validTypes.includes(file.type);
@@ -66,17 +61,34 @@ const ProofOfAddressUpload = ({
   const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files[0];
+    if (!documentType) {
+      toast({
+        title: "Document Type Required",
+        description: "Please select a document type before uploading.",
+        className: "bg-destructive text-destructive-foreground"
+      } as ToastType);
+      return;
+    }
     if (droppedFile && isValidFileType(droppedFile)) {
       await handleFileUpload(droppedFile);
     }
-  }, [isValidFileType]);
+  }, [documentType, isValidFileType]);
 
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!documentType) {
+      toast({
+        title: "Document Type Required",
+        description: "Please select a document type before uploading.",
+        className: "bg-destructive text-destructive-foreground"
+      } as ToastType);
+      e.target.value = '';
+      return;
+    }
     const selectedFile = e.target.files?.[0];
     if (selectedFile && isValidFileType(selectedFile)) {
       await handleFileUpload(selectedFile);
     }
-  }, [isValidFileType]);
+  }, [documentType, isValidFileType]);
 
   const removeFile = useCallback(() => {
     if (previewUrl) {
@@ -88,9 +100,7 @@ const ProofOfAddressUpload = ({
     setValidationErrors([]);
   }, [previewUrl]);
 
-
   const extractDate = useCallback((text: string): string | null => {
-
     const formattedDatePattern = new RegExp(`(${monthNames.join('|')})\\s+(\\d{1,2}),?\\s+(\\d{4})`, 'i');
     const formattedMatch = text.match(formattedDatePattern);
 
@@ -102,7 +112,6 @@ const ProofOfAddressUpload = ({
         return date.toISOString();
       }
     }
-
 
     const datePattern = /(\d{2})[/-](\d{2})[/-](\d{4})/g;
     const matches = text.match(datePattern);
@@ -123,7 +132,6 @@ const ProofOfAddressUpload = ({
     return null;
   }, []);
 
- 
   const extractAddress = useCallback((text: string): string | null => {
     const lines = text.split('\n');
     const addressLines = lines.filter((line: string) => 
@@ -132,26 +140,17 @@ const ProofOfAddressUpload = ({
     return addressLines.length > 0 ? addressLines.join('\n') : null;
   }, []);
 
- 
   const validateDocument = useCallback((data: ExtractedData): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
-
-    if (!documentType) {
-      errors.push("Please select a document type");
-    }
 
     if (!data.date) {
       errors.push("No date found in the document");
     } else {
-     
       const today = new Date(2025, 1, 22);
- 
       const documentDate = new Date(data.date);
-      
       const threeMonthsAgo = new Date(today);
       threeMonthsAgo.setMonth(today.getMonth() - 3);
 
-  
       const formatDate = (date: Date) => {
         return date.toLocaleDateString('en-US', {
           month: 'long',
@@ -169,11 +168,9 @@ const ProofOfAddressUpload = ({
       }
     }
 
-
     if (!data.address) {
       errors.push("No address found in the document");
     } else {
-
       const addressValidationRegex = /\d+\s+[a-zA-Z0-9\s]+(?:street|st|avenue|ave|road|rd|lane|ln|drive|dr|boulevard|blvd)/i;
       if (!addressValidationRegex.test(data.address)) {
         errors.push("Address appears to be invalid or incomplete");
@@ -184,15 +181,23 @@ const ProofOfAddressUpload = ({
       isValid: errors.length === 0,
       errors
     };
-  }, [documentType]);
-
+  }, []);
 
   const handleFileUpload = useCallback(async (uploadedFile: File) => {
+    if (!documentType) {
+      toast({
+        title: "Document Type Required",
+        description: "Please select a document type first.",
+        className: "bg-destructive text-destructive-foreground"
+      } as ToastType);
+      return;
+    }
+    
     setFile(uploadedFile);
     const preview = URL.createObjectURL(uploadedFile);
     setPreviewUrl(preview);
     await processFile(uploadedFile);
-  }, []);
+  }, [documentType]);
 
   const processFile = useCallback(async (file: File) => {
     setIsProcessing(true);
@@ -266,7 +271,6 @@ const ProofOfAddressUpload = ({
     const { isValid, errors } = validateDocument(extractedData);
 
     if (isValid) {
-
       if (onNext) {
         onNext({
           documentType,
@@ -288,7 +292,6 @@ const ProofOfAddressUpload = ({
       } as ToastType);
     }
   }, [extractedData, documentType, onNext, validateDocument, toast]);
-
 
   return (
     <Card className="w-full max-w-xl mx-auto">
@@ -387,7 +390,7 @@ const ProofOfAddressUpload = ({
                 <div className="mt-2 text-sm space-y-1">
                   {extractedData.date && (
                     <p>
-                      <strong    >Date:</strong>{" "}
+                      <strong>Date:</strong>{" "}
                       {new Date(extractedData.date).toLocaleDateString('en-US', {
                         month: 'long',
                         day: 'numeric',
