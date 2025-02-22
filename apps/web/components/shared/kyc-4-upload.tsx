@@ -60,7 +60,6 @@ const ProofOfAddressUpload = ({
 
   const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const droppedFile = e.dataTransfer.files[0];
     if (!documentType) {
       toast({
         title: "Document Type Required",
@@ -69,6 +68,7 @@ const ProofOfAddressUpload = ({
       } as ToastType);
       return;
     }
+    const droppedFile = e.dataTransfer.files[0];
     if (droppedFile && isValidFileType(droppedFile)) {
       await handleFileUpload(droppedFile);
     }
@@ -146,10 +146,16 @@ const ProofOfAddressUpload = ({
     if (!data.date) {
       errors.push("No date found in the document");
     } else {
-      const today = new Date(2025, 1, 22);
+      const today = new Date();
+
+      today.setHours(0, 0, 0, 0);
+      
       const documentDate = new Date(data.date);
+      documentDate.setHours(0, 0, 0, 0);
+      
       const threeMonthsAgo = new Date(today);
       threeMonthsAgo.setMonth(today.getMonth() - 3);
+      threeMonthsAgo.setHours(0, 0, 0, 0);
 
       const formatDate = (date: Date) => {
         return date.toLocaleDateString('en-US', {
@@ -218,7 +224,6 @@ const ProofOfAddressUpload = ({
       );
 
       const extractedText = result.data.text;
-      console.log('Full extracted text:', extractedText);
 
       const processedData: ExtractedData = {
         text: extractedText,
