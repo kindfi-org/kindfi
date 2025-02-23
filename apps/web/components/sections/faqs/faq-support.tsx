@@ -20,7 +20,7 @@ export function FaqSupport() {
 					<MessageCircle />
 					Join Community
 				</Button>
-				<Button className="border border-[#E6E6E6] text-white bg-[#74BB37]">
+				<Button className="border border-[#E6E6E6] text-white bg-[#466E23]">
 					<Lightbulb />
 					Start a Campaign
 				</Button>
