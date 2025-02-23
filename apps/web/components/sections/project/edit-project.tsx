@@ -624,7 +624,7 @@ export default function EditProjectForm() {
 								htmlFor="youtube"
 								className="block text-sm font-medium text-gray-900 mb-1.5"
 							>
-								TikTok
+								YouTube
 							</label>
 							<InputBase
 								className={`${
