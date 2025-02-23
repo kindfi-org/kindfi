@@ -40,5 +40,7 @@
 			"**/wagmi/**",
 			"**/pino-pretty/**"
 		]
-	}
+	},
+	"module": "index.ts",
+	"type": "module"
 }
