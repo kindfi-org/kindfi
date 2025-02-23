@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { KindFiDB } from '@services/supabase'
 
 async function validateSignatures(
-  signatures: any[],
+  signatures: string[],
   escrowId: string
 ): Promise<boolean> {
   // TODO: Implement passkey attestation and signature verification with the Auth Contract.
@@ -15,10 +15,15 @@ export async function POST(request: NextRequest) {
   try {
     const { escrowId, signatures } = await request.json()
 
+    // Validate required environment variables
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('Missing required environment variables for Supabase')
+    }
+
     // Initialize Supabase client (server-side)
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     )
 
     // Fetch existing contract using the workspace package type
