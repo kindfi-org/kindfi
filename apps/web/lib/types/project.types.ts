@@ -32,6 +32,10 @@ export interface ProjectTag {
 	id: string
 	/** Display text for the tag */
 	text: string
+	color: {
+		backgroundColor: string
+		textColor: string
+	}
 }
 
 /** Interface representing a project category */

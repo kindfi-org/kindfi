@@ -1,10 +1,18 @@
 import type { ProjectTag, TMoney, TPercentage } from '~/lib/types'
 
 /** Helper function to validate and create project tag */
-export function createProjectTag(id: string, text: string): ProjectTag {
+export function createProjectTag(
+	id: string,
+	text: string,
+	color: { backgroundColor: string; textColor: string },
+): ProjectTag {
 	if (!id.trim()) throw new Error('Tag ID cannot be empty')
 	if (!text.trim()) throw new Error('Tag text cannot be empty')
-	return { id, text }
+	if (!color.backgroundColor.trim() || !color.textColor.trim()) {
+		throw new Error('Both backgroundColor and textColor are required')
+	}
+
+	return { id, text, color }
 }
 
 /** Helper function to create monetary values */

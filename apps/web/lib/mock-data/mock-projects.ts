@@ -23,9 +23,30 @@ export const projects: Project[] = [
 		minInvestment: createMoney(5),
 		percentageComplete: createPercentage(90),
 		tags: [
-			{ id: 'ngo-tag-id', text: 'NGO' },
-			{ id: 'nutrition-tag-id', text: 'NUTRITION' },
-			{ id: 'children-tag-id', text: 'CHILDREN' },
+			{
+				id: 'ngo-tag-id',
+				text: 'NGO',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'nutrition-tag-id',
+				text: 'NUTRITION',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'children-tag-id',
+				text: 'CHILDREN',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
 		],
 	},
 	{
@@ -41,9 +62,30 @@ export const projects: Project[] = [
 		minInvestment: createMoney(10),
 		percentageComplete: createPercentage(90),
 		tags: [
-			{ id: 'environment-tag-id', text: 'ENVIRONMENT' },
-			{ id: 'ecological-tag-id', text: 'ECOLOGICAL' },
-			{ id: 'sustainable-tag-id', text: 'SUSTAINABLE' },
+			{
+				id: 'environment-tag-id',
+				text: 'ENVIRONMENT',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'ecological-tag-id',
+				text: 'ECOLOGICAL',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'sustainable-tag-id',
+				text: 'SUSTAINABLE',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
 		],
 	},
 	{
@@ -59,9 +101,30 @@ export const projects: Project[] = [
 		minInvestment: createMoney(8),
 		percentageComplete: createPercentage(77),
 		tags: [
-			{ id: 'animals-tag-id', text: 'ANIMALS' },
-			{ id: 'care-tag-id', text: 'CARE' },
-			{ id: 'community-tag-id', text: 'COMMUNITY' },
+			{
+				id: 'animals-tag-id',
+				text: 'ANIMALS',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'care-tag-id',
+				text: 'CARE',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'community-tag-id',
+				text: 'COMMUNITY',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
 		],
 	},
 	{
@@ -77,9 +140,30 @@ export const projects: Project[] = [
 		minInvestment: createMoney(20),
 		percentageComplete: createPercentage(60),
 		tags: [
-			{ id: 'humanitarian-tag-id', text: 'HUMANITARIAN' },
-			{ id: 'disaster-tag-id', text: 'DISASTER RELIEF' },
-			{ id: 'community-tag-id', text: 'COMMUNITY SUPPORT' },
+			{
+				id: 'humanitarian-tag-id',
+				text: 'HUMANITARIAN',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'disaster-tag-id',
+				text: 'DISASTER RELIEF',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'community-tag-id',
+				text: 'COMMUNITY SUPPORT',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
 		],
 	},
 	{
@@ -95,9 +179,30 @@ export const projects: Project[] = [
 		minInvestment: createMoney(15),
 		percentageComplete: createPercentage(68),
 		tags: [
-			{ id: 'culture-tag-id', text: 'CULTURE' },
-			{ id: 'indigenous-tag-id', text: 'INDIGENOUS' },
-			{ id: 'art-tag-id', text: 'ART' },
+			{
+				id: 'culture-tag-id',
+				text: 'CULTURE',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'indigenous-tag-id',
+				text: 'INDIGENOUS',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'art-tag-id',
+				text: 'ART',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
 		],
 	},
 	{
@@ -113,9 +218,30 @@ export const projects: Project[] = [
 		minInvestment: createMoney(12),
 		percentageComplete: createPercentage(74),
 		tags: [
-			{ id: 'water-tag-id', text: 'WATER' },
-			{ id: 'health-tag-id', text: 'HEALTH' },
-			{ id: 'community-tag-id', text: 'COMMUNITY' },
+			{
+				id: 'water-tag-id',
+				text: 'WATER',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'health-tag-id',
+				text: 'HEALTH',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'community-tag-id',
+				text: 'COMMUNITY',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
 		],
 	},
 	{
@@ -131,9 +257,30 @@ export const projects: Project[] = [
 		minInvestment: createMoney(10),
 		percentageComplete: createPercentage(73),
 		tags: [
-			{ id: 'education-tag-id', text: 'EDUCATION' },
-			{ id: 'children-tag-id', text: 'CHILDREN' },
-			{ id: 'future-tag-id', text: 'FUTURE' },
+			{
+				id: 'education-tag-id',
+				text: 'EDUCATION',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'children-tag-id',
+				text: 'CHILDREN',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'future-tag-id',
+				text: 'FUTURE',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
 		],
 	},
 	{
@@ -149,9 +296,30 @@ export const projects: Project[] = [
 		minInvestment: createMoney(20),
 		percentageComplete: createPercentage(71),
 		tags: [
-			{ id: 'healthcare-tag-id', text: 'HEALTHCARE' },
-			{ id: 'community-tag-id', text: 'COMMUNITY' },
-			{ id: 'impact-tag-id', text: 'IMPACT' },
+			{
+				id: 'healthcare-tag-id',
+				text: 'HEALTHCARE',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'community-tag-id',
+				text: 'COMMUNITY',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
+			{
+				id: 'impact-tag-id',
+				text: 'IMPACT',
+				color: {
+					backgroundColor: '',
+					textColor: '',
+				},
+			},
 		],
 	},
 ]

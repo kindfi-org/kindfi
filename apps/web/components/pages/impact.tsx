@@ -1,11 +1,11 @@
 import dynamic from 'next/dynamic'
 import {
-    SkeletonHero,
-    SkeletonSuccessStories,
-    SkeletonCommunityVoices,
-    SkeletonImpactMakers,
-    SkeletonImpactCategories,
-    SkeletonMakeImpact,
+	SkeletonCommunityVoices,
+	SkeletonHero,
+	SkeletonImpactCategories,
+	SkeletonImpactMakers,
+	SkeletonMakeImpact,
+	SkeletonSuccessStories,
 } from '~/components/sections/impact/skeletons'
 
 const Hero = dynamic(
