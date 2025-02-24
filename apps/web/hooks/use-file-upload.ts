@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { uploadToBucket } from '~/lib/utils/uploadFileToBucket'
+import { uploadToBucket } from '~/lib/utils/upload-file-to-bucket'
 
 interface UploadFileOpts {
 	allowedTypes: { [key: string]: string }

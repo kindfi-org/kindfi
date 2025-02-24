@@ -66,6 +66,10 @@ export const editProjectFormSchema = z.object({
 		.string()
 		.min(1, 'This field is required')
 		.max(MAX_LENGTHS.description),
+	category: z.string().min(1, 'Please select a category'),
+	tags: z
+		.array(z.string().min(1, 'Tag is required'))
+		.min(1, 'At least one tag is required'),
 	image: z.string().url('Image URL is invalid'),
 	video: z.string().url('Video URL is invalid').optional().or(z.literal('')),
 	website: z

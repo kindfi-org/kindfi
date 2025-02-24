@@ -24,13 +24,24 @@ import {
 	InputBaseInput,
 } from '~/components/base/input'
 import { Label } from '~/components/base/label'
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from '~/components/base/select'
 import { Textarea } from '~/components/base/textarea'
-import { useUploadFile } from '~/hooks/useFileUpload'
+import { TagManager } from '~/components/shared/tag-manager'
+import { useUploadFile } from '~/hooks/use-file-upload'
+import { categories } from '~/lib/mock-data/mock-hero-section'
 import {
 	type EditProjectFormData,
 	MAX_LENGTHS,
 	editProjectFormSchema,
-} from '../../../lib/validators/project'
+} from '~/lib/validators/project'
 
 export default function EditProjectForm() {
 	const {
@@ -226,6 +237,60 @@ export default function EditProjectForm() {
 									} text-[13px]`}
 								>
 									{descriptionValue.length}/{MAX_LENGTHS.description} characters
+								</p>
+							</div>
+						</div>
+
+						<div>
+							<label
+								htmlFor="category"
+								className="block text-sm font-medium text-gray-900 mb-1.5"
+							>
+								How would you categorize your project?
+							</label>
+							<div className="relative">
+								<Select onValueChange={(e) => setValue('category', e)}>
+									<SelectTrigger className="w-full border-gray-200 rounded-sm">
+										<SelectValue placeholder="Select a fruit" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectGroup>
+											<SelectLabel>Fruits</SelectLabel>
+											{categories.map((category) => (
+												<SelectItem key={category.id} value={category.label}>
+													{category.label}
+												</SelectItem>
+											))}
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+							</div>
+							{errors.category && (
+								<p className="text-sm text-red-500 mt-1">
+									{errors.category.message}
+								</p>
+							)}
+						</div>
+
+						<div>
+							<Label
+								htmlFor="tags"
+								className="block text-sm font-medium text-gray-900 mb-1.5"
+							>
+								Tags
+							</Label>
+							<TagManager
+								id="tags"
+								onUpdate={(tags) =>
+									setValue(
+										'tags',
+										tags.map((item) => item.text),
+									)
+								}
+							/>
+							<div className="flex items-center justify-between gap-2 mt-1">
+								<p className={`${errors.tags && 'text-red-500'} text-[13px]`}>
+									{errors.tags?.message}
 								</p>
 							</div>
 						</div>
