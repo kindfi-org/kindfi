@@ -1,4 +1,4 @@
-export const mockKycData = {
+export const mockStep5KycData = {
 	personalInfo: {
 		fullName: 'John Doe',
 		dateOfBirth: '1990-01-01',
