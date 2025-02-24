@@ -251,11 +251,11 @@ export default function EditProjectForm() {
 							<div className="relative">
 								<Select onValueChange={(e) => setValue('category', e)}>
 									<SelectTrigger className="w-full border-gray-200 rounded-sm">
-										<SelectValue placeholder="Select a fruit" />
+										<SelectValue placeholder="Select project category" />
 									</SelectTrigger>
 									<SelectContent>
 										<SelectGroup>
-											<SelectLabel>Fruits</SelectLabel>
+											<SelectLabel>Select project category</SelectLabel>
 											{categories.map((category) => (
 												<SelectItem key={category.id} value={category.label}>
 													{category.label}
@@ -447,8 +447,9 @@ export default function EditProjectForm() {
 										allowFullScreen
 										className="w-full h-64 border border-gray-200 rounded-md"
 										frameBorder="0"
-										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+										allow="encrypted-media; picture-in-picture"
 										referrerPolicy="strict-origin-when-cross-origin"
+										sandbox="allow-scripts allow-same-origin allow-presentation"
 									/>
 								) : (
 									<div
