@@ -2,7 +2,7 @@
  * Generates a unique identifier combining timestamp and random elements
  * Format: timestamp-randomString (e.g., 1706547362-a1b2c3d4)
  */
-export function generateUniqueId(): string {
+export function generateUniqueId(prefix = ''): string {
 	// Get current timestamp in seconds
 	const timestamp = Math.floor(Date.now() / 1000)
 
@@ -12,5 +12,5 @@ export function generateUniqueId(): string {
 	).join('')
 
 	// Combine timestamp and random string
-	return `${timestamp}-${randomPart}`
+	return `${prefix}${timestamp}-${randomPart}`
 }

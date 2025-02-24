@@ -1,10 +1,10 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
+import { Badge } from '~/components/base/badge-impact'
 import { levelColors } from '~/lib/constants/impact-data/makers'
 import type { ImpactMaker } from '~/lib/types/impact/impact-makers'
-import { motion } from 'framer-motion'
-import { Badge } from '~/components/base/badge-impact'
 
 interface ImpactMakerCardProps {
 	maker: ImpactMaker
