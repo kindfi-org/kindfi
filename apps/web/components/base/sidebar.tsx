@@ -17,6 +17,7 @@ import {
 	TooltipTrigger,
 } from '~/components/base/tooltip'
 import { useIsMobile } from '~/hooks/use-mobile'
+import useReducedMotion from '~/hooks/use-reduced-motion'
 import { cn } from '~/lib/utils'
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/sidebar
@@ -52,15 +53,19 @@ type SidebarContext = {
 const SidebarContext = React.createContext<SidebarContext | null>(null)
 
 const TRANSITION_DURATION = '200ms'
-const SIDEBAR_STYLES = {
-	transition: `width ${TRANSITION_DURATION} linear`,
-	willChange: 'width',
-}
-const SIDEBAR_STYLES_TWO = {
-	transition: `transform ${TRANSITION_DURATION} linear`,
-
-	willChange: 'transform',
-}
+const getSidebarStyles = (reducedMotion: boolean) => ({
+	transition: reducedMotion
+		? 'none'
+		: `transform ${TRANSITION_DURATION} ease-in-out, opacity ${TRANSITION_DURATION} ease-in-out`,
+	transformOrigin: 'left',
+	willChange: reducedMotion ? 'auto' : 'transform, opacity',
+})
+const getSidebarStylesTwo = (reducedMotion: boolean) => ({
+	transition: reducedMotion
+		? 'none'
+		: `transform ${TRANSITION_DURATION} ease-in-out`,
+	willChange: reducedMotion ? 'auto' : 'transform',
+})
 
 function useSidebar() {
 	const context = React.useContext(SidebarContext)
@@ -209,7 +214,9 @@ const Sidebar = React.forwardRef<
 		ref,
 	) => {
 		const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
-
+		const reducedMotion = useReducedMotion()
+		const SIDEBAR_STYLES = getSidebarStyles(reducedMotion)
+		const SIDEBAR_STYLES_TWO = getSidebarStylesTwo(reducedMotion)
 		if (collapsible === 'none') {
 			return (
 				<div
@@ -255,7 +262,11 @@ const Sidebar = React.forwardRef<
 				data-side={side}
 			>
 				<div
-					style={SIDEBAR_STYLES}
+					style={{
+						...SIDEBAR_STYLES,
+						transform: state === 'expanded' ? 'scaleX(1)' : 'scaleX(0)',
+						opacity: state === 'expanded' ? 1 : 0,
+					}}
 					className={cn(
 						'relative h-svh w-[--sidebar-width] bg-transparent',
 						'group-data-[collapsible=offcanvas]:w-0',
