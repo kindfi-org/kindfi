@@ -34,7 +34,7 @@ export default function Hero() {
 	}
 
 	return (
-		<div className="max-w-lg mx-auto p-6">
+		<div className="max-w-2xl mx-auto">
 			<h2 className="text-2xl font-bold">Complete Your Pitch</h2>
 			<p className="text-gray-600">
 				Before you can start collecting reservations, fill out at least 2
@@ -62,12 +62,13 @@ export default function Hero() {
 								item.completed ? 'bg-muted' : 'hover:bg-muted/50',
 							)}
 						>
-							<Checkbox
-								id={item.id}
-								checked={item.completed}
-								onCheckedChange={() => toggleItem(item.id)}
-								className="mr-3"
-							/>
+							<div className="w-6 h-6 flex items-center justify-center border-2 rounded-full mr-3 border-primary">
+								<Checkbox
+									id={item.id}
+									checked={item.completed}
+									onCheckedChange={() => toggleItem(item.id)}
+								/>
+							</div>
 							<span className="flex-1 text-gray-800">{item.label}</span>
 							<ArrowRight className="text-gray-900 w-5 h-5" />
 						</li>
