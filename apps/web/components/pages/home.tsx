@@ -10,7 +10,7 @@ import {
 	SkeletonPlatformOverview,
 	SkeletonUserJourney,
 } from '~/components/sections/home/skeletons'
-import Kyc from '~/components/shared/kyc/kyc-4/kyc-4-upload'
+import ProofOfAddressUpload from '~/components/shared/kyc/kyc-4/kyc-4-upload'
 
 const Hero = dynamic(
 	() => import('~/components/sections/home/hero').then((mod) => mod.Hero),
@@ -88,7 +88,7 @@ const FinalCTA = dynamic(
 export function HomeDashboard() {
 	return (
 		<>
-			<Kyc />
+			<ProofOfAddressUpload />
 			<Hero />
 			<UserJourney />
 			<HighlightedProjects />
@@ -97,8 +97,8 @@ export function HomeDashboard() {
 			<NewUserGuide />
 			<PlatformOverview />
 			<Community />
-			<FinalCTA />
 			
+			<FinalCTA />
 		</>
 	)
 }

@@ -1,6 +1,6 @@
 import { Loader2, X } from 'lucide-react'
 import type React from 'react'
-import type { ExtractedData } from '~/components/types'
+import type { ExtractedData } from '~/types'
 import Image from 'next/image'
 
 interface DocumentPreviewProps {
@@ -54,8 +54,8 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
 			</button>
 			{previewUrl && (
 				<Image
-				width={400}
-				height={400}
+					width={400}
+					height={400}
 					src={previewUrl}
 					alt="Document preview"
 					className="w-full h-auto max-h-[400px] object-contain"
