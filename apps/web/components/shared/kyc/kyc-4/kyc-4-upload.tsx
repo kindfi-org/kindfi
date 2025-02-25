@@ -4,7 +4,7 @@ import {
 	handleFileSelect,
 	removeFile,
 	useHandleFileUpload,
-} from '@packages/lib/src/doc-utils/uploadHandler'
+} from '@packages/lib/src/doc-utils/upload-handler'
 import {
 	handleContinue,
 	validateDocument,
