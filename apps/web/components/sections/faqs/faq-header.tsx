@@ -42,13 +42,14 @@ export function FaqHeader({
 					{filteredQuestions.length > 0 && (
 						<div className="absolute top-full left-0 w-full bg-white border border-gray-300 shadow-lg rounded-lg z-50 max-h-60 overflow-y-auto">
 							{filteredQuestions.map((faq) => (
-								<p
+								<button
 									key={faq.id}
-									className="text-black text-xs p-3 border-b last:border-none cursor-pointer hover:bg-gray-100 md:text-base"
+									type="button"
+									className="text-black text-xs p-3 border-b last:border-none cursor-pointer hover:bg-gray-100 md:text-base text-left w-full"
 									onClick={() => handleSelectQuestion(faq)}
 								>
 									{faq.question}
-								</p>
+								</button>
 							))}
 						</div>
 					)}
