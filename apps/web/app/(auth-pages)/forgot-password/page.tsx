@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { forgotPasswordAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
