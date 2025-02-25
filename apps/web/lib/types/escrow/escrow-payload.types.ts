@@ -89,3 +89,10 @@ export interface EscrowFundUpdateData {
 	transactionHash: string
 	status: TransactionStatus
 }
+
+export interface MilestoneReviewPayload {
+	milestoneId: string
+	reviewerId: string
+	status: MilestoneStatus
+	comments?: string
+}
