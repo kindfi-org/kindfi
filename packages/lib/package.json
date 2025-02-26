@@ -7,5 +7,6 @@
 	"types": "./src/index.ts",
 	"license": "MIT",
 	"dependencies": {},
-	"devDependencies": {}
+	"devDependencies": {},
+	"tesseract.js": "^6.0.0"
 }
