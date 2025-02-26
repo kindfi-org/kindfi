@@ -1,7 +1,6 @@
 'use client'
 import {
 	createFileUploadHandler,
-	// Prefix unused imports with underscore
 	handleDrop as _baseHandleDrop,
 	handleFileSelect as _baseHandleFileSelect,
 	removeFile,
@@ -71,7 +70,7 @@ const ProofOfAddressUpload = ({
 		toast,
 	)
 
-	// Create wrapper handlers for the FileUploadArea component
+
 	const handleFileSelectWrapper = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedFile = e.target.files?.[0]
 		if (selectedFile) {

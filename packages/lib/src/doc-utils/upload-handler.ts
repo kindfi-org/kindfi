@@ -100,7 +100,7 @@ export function removeFile(
   setExtractedData: (data: any) => void,
   setValidationErrors: (errors: string[]) => void,
 ) {
-  // Only revoke object URLs on the client side
+
   if (typeof window !== 'undefined' && previewUrl) {
     URL.revokeObjectURL(previewUrl)
   }

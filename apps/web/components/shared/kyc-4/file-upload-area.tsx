@@ -4,7 +4,6 @@ import type { useToast } from '~/components/base/toast';
 import { cn } from '~/lib/utils';
 import type { DocumentType } from '~/types';
 
-// Explicitly define the component's props interface
 export interface FileUploadAreaProps {
   isProcessing: boolean;
   documentType: DocumentType;
@@ -18,12 +17,10 @@ export interface FileUploadAreaProps {
   ) => void;
 }
 
-// Use the exported props interface
 const FileUploadArea = ({
   isProcessing,
   handleDrop,
   handleFileSelect,
-  // Rename these props to indicate they're unused
   documentType: _documentType,
   setFile: _setFile,
   toast: _toast,
