@@ -17,7 +17,7 @@ export interface Investor {
 	image: string
 	totalImpact: string
 	projectsSupported: number
-	followers: string
+	followers: number
 	categories: Category[]
 	recentProjects: RecentProject[]
 }
