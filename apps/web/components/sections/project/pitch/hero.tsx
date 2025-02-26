@@ -6,19 +6,9 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Checkbox } from '~/components/base/checkbox'
 import { Progress } from '~/components/base/progress'
+import { requiredItems } from '~/lib/mock-data/project/mock-pitch'
+import type { RequiredItem } from '~/lib/types/project/pitch.types'
 import { cn } from '~/lib/utils'
-
-interface RequiredItem {
-	id: string
-	label: string
-	completed: boolean
-}
-
-const requiredItems: RequiredItem[] = [
-	{ id: 'highlights', label: 'Add at least 2 Highlights', completed: false },
-	{ id: 'pitch', label: 'Complete your Pitch', completed: false },
-	{ id: 'contract', label: 'Review Contract', completed: false },
-]
 
 export default function Hero() {
 	const [items, setItems] = useState<RequiredItem[]>(requiredItems)

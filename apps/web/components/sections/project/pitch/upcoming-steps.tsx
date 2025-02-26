@@ -9,40 +9,7 @@ import {
 	AccordionTrigger,
 } from '~/components/base/accordion'
 import { Button } from '~/components/base/button'
-
-interface Step {
-	id: string
-	title: string
-	description: string
-}
-
-const steps: Step[] = [
-	{
-		id: 'raise',
-		title: 'Raise $50K minimum',
-		description: 'Set your funding goal and create compelling rewards.',
-	},
-	{
-		id: 'legal',
-		title: 'Legal Setup',
-		description: 'Complete necessary legal documentation and agreements.',
-	},
-	{
-		id: 'compliance',
-		title: 'Compliance Review',
-		description: 'Ensure your campaign meets all regulatory requirements.',
-	},
-	{
-		id: 'formC',
-		title: 'File Form C',
-		description: 'Submit required regulatory filings.',
-	},
-	{
-		id: 'publicRaise',
-		title: 'Public Raise',
-		description: 'Launch your campaign to the public.',
-	},
-]
+import { steps } from '~/lib/mock-data/project/mock-pitch'
 
 export default function UpcomingSteps() {
 	return (

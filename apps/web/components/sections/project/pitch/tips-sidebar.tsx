@@ -1,56 +1,10 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import {
-	CircleHelp,
-	type LucideIcon,
-	MessageSquareText,
-	Share2,
-	Star,
-	Users,
-} from 'lucide-react'
+import { CircleHelp } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-
-interface Tip {
-	id: string
-	title: string
-	description: string
-	action: string
-	icon: LucideIcon
-}
-
-const tips: Tip[] = [
-	{
-		id: 'feedback',
-		title: 'Get Pitch Feedback',
-		description:
-			'Share your pitch with our community experts for valuable insights.',
-		action: 'Request Feedback',
-		icon: MessageSquareText,
-	},
-	{
-		id: 'teaser',
-		title: 'Post a Teaser',
-		description: 'Build excitement by sharing previews on social media.',
-		action: 'Create Post',
-		icon: Share2,
-	},
-	{
-		id: 'vip',
-		title: 'Leverage VIP Terms',
-		description: 'Offer special terms to early supporters and key investors.',
-		action: 'Set Terms',
-		icon: Star,
-	},
-	{
-		id: 'testimonials',
-		title: 'Customer Testimonials',
-		description: 'Collect and showcase testimonials from your supporters.',
-		action: 'Add Testimonials',
-		icon: Users,
-	},
-]
+import { tips } from '~/lib/mock-data/project/mock-pitch'
 
 export default function TipsSidebar() {
 	return (
