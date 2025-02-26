@@ -1,10 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Check, ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react'
 import Image from 'next/image'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
+import { CategoryTag } from '~/components/category/CategoryTag/CategoryTag'
+import { PROJECT_CATEGORIES } from '~/components/types/project.types'
 import { useMultiStepForm } from '../../../hooks/use-multi-step-form'
 import {
 	type ProjectFormData,
@@ -19,15 +20,6 @@ const FORM_STEPS = [
 	{ number: 1, label: 'Project Details' },
 	{ number: 2, label: 'Funding Information' },
 	{ number: 3, label: 'Additional Details' },
-] as const
-
-const CATEGORIES = [
-	{ value: 'environment', label: 'Environment' },
-	{ value: 'education', label: 'Education' },
-	{ value: 'healthcare', label: 'Healthcare' },
-	{ value: 'technology', label: 'Technology' },
-	{ value: 'community', label: 'Community' },
-	{ value: 'arts', label: 'Arts' },
 ] as const
 
 const CURRENCIES = [
@@ -49,6 +41,8 @@ export default function ProjectForm() {
 		handleSubmit,
 		formState: { errors },
 		trigger,
+		control,
+		watch,
 	} = useForm<ProjectFormData>({
 		resolver: zodResolver(projectFormSchema),
 		mode: 'onChange',
@@ -74,6 +68,8 @@ export default function ProjectForm() {
 		console.log(data)
 		// Handle form submission
 	}
+
+	const selectedCategory = watch('category')
 
 	const renderFormStep = () => {
 		// Hide all other steps except the current one
@@ -143,45 +139,31 @@ export default function ProjectForm() {
 						>
 							How would you categorize your project?
 						</label>
-						<div className="relative">
-							<select
-								id="category"
-								{...register('category')}
-								className={`w-full px-3 py-2 rounded-md border ${
-									errors.category ? 'border-red-500' : 'border-gray-200'
-								} bg-white appearance-none focus:outline-none focus:ring-2 
-                focus:ring-black focus:ring-offset-1`}
-							>
-								<option value="">Select a category</option>
-								{CATEGORIES.map((category) => (
-									<option key={category.value} value={category.value}>
-										{category.label}
-									</option>
-								))}
-							</select>
-							<div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-								<svg
-									aria-label="Dropdown icon"
-									role="img"
-									className="h-4 w-4 text-gray-400"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-								>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										strokeWidth={2}
-										d="M19 9l-7 7-7-7"
-									/>
-								</svg>
-							</div>
-						</div>
-						{errors.category && (
-							<p className="text-sm text-red-500 mt-1">
-								{errors.category.message}
-							</p>
-						)}
+
+						{/* Replace dropdown with CategoryTag components */}
+						<Controller
+							name="category"
+							control={control}
+							render={({ field }) => (
+								<div className="mt-2">
+									<div className="flex flex-wrap gap-2 ">
+										{PROJECT_CATEGORIES.map((category) => (
+											<CategoryTag
+												key={category.id}
+												category={category}
+												isActive={field.value === category.value}
+												onClick={() => field.onChange(category.value)}
+											/>
+										))}
+									</div>
+									{errors.category && (
+										<p className="text-sm text-red-500 mt-2">
+											{errors.category.message}
+										</p>
+									)}
+								</div>
+							)}
+						/>
 					</div>
 
 					<div>

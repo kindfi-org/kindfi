@@ -11,12 +11,12 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import { useToast } from '~/components/base/toast'
-import { DocumentTypeSelector } from './document-type-selector'
-import { DocumentUploadZone } from './document-upload-zone'
-import { ExtractedDataDisplay } from './extracted-data-display'
 import { useDocumentFiles } from '../../../../hooks/kyc/use-document-files'
 import { useDocumentProcessor } from '../../../../hooks/kyc/use-document-processor'
 import { useDocumentValidation } from '../../../../hooks/kyc/use-document-validation'
+import { DocumentTypeSelector } from './document-type-selector'
+import { DocumentUploadZone } from './document-upload-zone'
+import { ExtractedDataDisplay } from './extracted-data-display'
 import type { DocumentType, IDDocumentUploadProps, ToastType } from './types'
 import { ValidationAlerts } from './validation-alerts'
 
