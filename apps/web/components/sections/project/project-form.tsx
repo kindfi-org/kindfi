@@ -15,7 +15,7 @@ import {
 	step3Fields,
 } from '../../../lib/validators/project'
 
-// Define constants before component
+// Defines constants before component
 const FORM_STEPS = [
 	{ number: 1, label: 'Project Details' },
 	{ number: 2, label: 'Funding Information' },
@@ -72,7 +72,7 @@ export default function ProjectForm() {
 	const selectedCategory = watch('category')
 
 	const renderFormStep = () => {
-		// Hide all other steps except the current one
+		// Hides all other steps except the current one
 		const style = { display: step === 1 ? 'block' : 'none' }
 		const style2 = { display: step === 2 ? 'block' : 'none' }
 		const style3 = { display: step === 3 ? 'block' : 'none' }
