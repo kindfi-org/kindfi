@@ -7,28 +7,30 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
-import Icon from '~/components/base/icon'
-import { mockAboutUs } from '~/lib/constants/mock-data/mock-about-us'
+import { Icon } from '~/components/base/icon'
+import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 const WhyIsDifferent = () => {
 	const { whyIsDifferent } = mockAboutUs
 
 	return (
-		<section className="flex flex-col items-center justify-center gap-8 py-12 w-full">
+		<section className="flex flex-col items-center justify-center gap-8 py-12 w-full px-6">
 			<motion.div
 				initial={{ opacity: 0, y: 30 }}
 				whileInView={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.6 }}
 				className="text-center max-w-2xl"
 			>
-				<h2 className="text-4xl font-bold">Why KindFi Is Different</h2>
+				<h2 className="text-3xl md:text-4xl font-bold">
+					Why KindFi Is Different
+				</h2>
 				<p className="text-lg text-gray-600 mt-2">
 					Discover what makes this platform unique and how it revolutionizes
 					crowdfunding.
 				</p>
 			</motion.div>
 
-			<div className="relative flex justify-center gap-6 w-full px-6">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
 				{whyIsDifferent.map((feature, index) => (
 					<motion.div
 						key={feature.title || `feature-${index}`}
@@ -37,9 +39,8 @@ const WhyIsDifferent = () => {
 						whileHover={{ scale: 1.05 }}
 						transition={{ duration: 0.3 }}
 						viewport={{ once: true }}
-						className="w-80 flex-shrink-0 overflow-visible"
 					>
-						<Card className="h-80 shadow-lg flex flex-col justify-center items-center p-6 border border-gray-200 rounded-lg overflow-hidden">
+						<Card className="h-80 shadow-lg flex flex-col justify-center items-center p-6 border border-gray-200 rounded-lg">
 							<CardHeader className="flex flex-col items-center text-center">
 								<Icon
 									name={feature.icon || 'lock'}
@@ -58,4 +59,4 @@ const WhyIsDifferent = () => {
 	)
 }
 
-export default WhyIsDifferent
+export { WhyIsDifferent }

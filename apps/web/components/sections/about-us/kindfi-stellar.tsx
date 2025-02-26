@@ -1,9 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import type React from 'react'
-import FloatingFeature from '~/components/base/floating-feature'
-import { mockAboutUs } from '~/lib/constants/mock-data/mock-about-us'
+import { FloatingFeature } from '~/components/shared/floating-feature'
+import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 const containerVariants = {
 	hidden: { opacity: 0 },
@@ -15,7 +14,7 @@ const containerVariants = {
 	},
 }
 
-const KindFiStellar: React.FC = () => {
+const KindFiStellar = () => {
 	return (
 		<section className="relative py-16 overflow-hidden">
 			<div className="container mx-auto px-6 text-center">
@@ -60,4 +59,4 @@ const KindFiStellar: React.FC = () => {
 	)
 }
 
-export default KindFiStellar
+export { KindFiStellar }

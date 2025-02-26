@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '~/components/base/card'
-import Icon from '~/components/base/icon'
-import { mockAboutUs } from '~/lib/constants/mock-data/mock-about-us'
+import { Icon } from '~/components/base/icon'
+import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 interface Problem {
 	title: string
@@ -55,4 +55,4 @@ const Problems = () => {
 	)
 }
 
-export default Problems
+export { Problems }

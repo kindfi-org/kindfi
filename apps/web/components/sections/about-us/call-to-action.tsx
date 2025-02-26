@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { Button } from '~/components/base/button'
 
-export default function CallToAction() {
+const CallToAction = () => {
 	return (
 		<section className="flex flex-col items-center text-center py-24 px-8 relative overflow-hidden font-custom">
 			<motion.h2
@@ -55,3 +55,5 @@ export default function CallToAction() {
 		</section>
 	)
 }
+
+export { CallToAction }

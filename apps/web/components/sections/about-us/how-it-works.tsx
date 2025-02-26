@@ -1,5 +1,5 @@
-import Timeline from '~/components/base/timeline'
-import { mockAboutUs } from '~/lib/constants/mock-data/mock-about-us'
+import { Timeline } from '~/components/shared/timeline'
+import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 const HowItWorks = () => {
 	return (
@@ -15,4 +15,4 @@ const HowItWorks = () => {
 	)
 }
 
-export default HowItWorks
+export { HowItWorks }

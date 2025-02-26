@@ -7,7 +7,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
-import { mockAboutUs } from '~/lib/constants/mock-data/mock-about-us'
+import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 const MissionVision = () => {
 	const mission = mockAboutUs?.missionVision?.mission
@@ -68,4 +68,4 @@ const MissionVision = () => {
 	)
 }
 
-export default MissionVision
+export { MissionVision }

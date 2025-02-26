@@ -5,9 +5,9 @@ import { ArrowRight } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import Image from '~/components/base/image'
-import { mockAboutUs } from '~/lib/constants/mock-data/mock-about-us'
+import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
-export default function Hero() {
+const Hero = () => {
 	const { hero } = mockAboutUs
 
 	return (
@@ -80,3 +80,5 @@ export default function Hero() {
 		</motion.section>
 	)
 }
+
+export { Hero }
