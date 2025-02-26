@@ -5,7 +5,7 @@ import { BadgeCheck, Crown, GraduationCap, Leaf } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import { Card, CardContent } from '~/components/base/card'
 import { fadeInUp, staggerChildren } from '~/lib/constants/animations'
-import { investorsData } from '~/lib/constants/community-data/hero-data'
+import { investorsData } from '~/lib/constants/mock-data/community-hero-data'
 import type { HeroInvestor } from '~/lib/types/investors/hero'
 
 const iconMap = {
