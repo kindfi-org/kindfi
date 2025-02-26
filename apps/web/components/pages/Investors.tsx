@@ -2,9 +2,6 @@ import dynamic from 'next/dynamic'
 import {
 	SkeletonCommunityVoices,
 	SkeletonHero,
-	SkeletonImpactCategories,
-	SkeletonImpactMakers,
-	SkeletonMakeImpact,
 	SkeletonSuccessStories,
 } from '~/components/sections/impact/skeletons'
 
