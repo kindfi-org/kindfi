@@ -1,0 +1,80 @@
+/* src/css/categories.css */
+
+:root {
+	/* Category Base Colors - Maintained color scheme with new category names */
+	--category-environment-bg: #e0f2f1;
+	--category-environment-text: #004d40;
+
+	--category-education-bg: #e3f2fd;
+	--category-education-text: #0d47a1;
+
+	--category-healthcare-bg: #ffebee;
+	--category-healthcare-text: #b71c1c;
+
+	--category-technology-bg: #e8f5e9;
+	--category-technology-text: #1b5e20;
+
+	--category-community-bg: #fff3e0;
+	--category-community-text: #e65100;
+
+	--category-arts-bg: #f3e5f5;
+	--category-arts-text: #4a148c;
+}
+
+/* Base Category Styles */
+.category-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 1rem;
+	border-radius: 0.375rem;
+	font-size: 0.875rem;
+	font-weight: 500;
+	transition: all 0.2s ease;
+}
+
+.category-tag:hover {
+	opacity: 0.9;
+}
+
+/* Category Specific Styles */
+.category-tag--environment {
+	background-color: var(--category-environment-bg);
+	color: var(--category-environment-text);
+}
+
+.category-tag--education {
+	background-color: var(--category-education-bg);
+	color: var(--category-education-text);
+}
+
+.category-tag--healthcare {
+	background-color: var(--category-healthcare-bg);
+	color: var(--category-healthcare-text);
+}
+
+.category-tag--technology {
+	background-color: var(--category-technology-bg);
+	color: var(--category-technology-text);
+}
+
+.category-tag--community {
+	background-color: var(--category-community-bg);
+	color: var(--category-community-text);
+}
+
+.category-tag--arts {
+	background-color: var(--category-arts-bg);
+	color: var(--category-arts-text);
+}
+
+/* Active State */
+.category-tag--active {
+	box-shadow: 0 0 0 2px currentColor;
+}
+
+/* Icon Styles */
+.category-icon {
+	width: 1.25rem;
+	height: 1.25rem;
+}
