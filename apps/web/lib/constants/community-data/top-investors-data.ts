@@ -11,7 +11,7 @@ export const investorsData: Investor[] = [
 			'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-B46AKusqD2Kkdwuuqro1ig9ph2nTXH.png',
 		totalImpact: '$250,000',
 		projectsSupported: 45,
-		followers: '800',
+		followers: 800,
 		categories: [
 			{ icon: 'Leaf', name: 'Environment' },
 			{ icon: 'GraduationCap', name: 'Education' },
@@ -31,7 +31,7 @@ export const investorsData: Investor[] = [
 			'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-B46AKusqD2Kkdwuuqro1ig9ph2nTXH.png',
 		totalImpact: '$175,000',
 		projectsSupported: 32,
-		followers: '850',
+		followers: 850,
 		categories: [
 			{ icon: 'Stethoscope', name: 'Healthcare' },
 			{ icon: 'Handshake', name: 'Social Welfare' },
@@ -48,7 +48,7 @@ export const investorsData: Investor[] = [
 			'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-B46AKusqD2Kkdwuuqro1ig9ph2nTXH.png',
 		totalImpact: '$185,000',
 		projectsSupported: 28,
-		followers: '720',
+		followers: 720,
 		categories: [
 			{ icon: 'GraduationCap', name: 'Education' },
 			{ icon: 'Paw', name: 'Animal Protection' },
