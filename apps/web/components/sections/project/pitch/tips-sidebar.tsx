@@ -4,28 +4,19 @@ import { motion } from 'framer-motion'
 import { CircleHelp } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
+import { fadeInWithDelay, fadeSlideUp } from '~/lib/constants/animations'
 import { tips } from '~/lib/mock-data/project/mock-pitch'
 
 export default function TipsSidebar() {
 	return (
-		<motion.aside
-			initial={{ opacity: 0, x: 20 }}
-			animate={{ opacity: 1, x: 0 }}
-			transition={{ duration: 0.5, delay: 0.5 }}
-			className="mx-auto"
-		>
+		<motion.aside className="mx-auto" {...fadeInWithDelay(0.5)}>
 			<div className="flex items-center gap-2">
 				<CircleHelp className="text-gray-500" />
 				<h2 className="text-xl font-bold">Tips to Maximize Your Raise</h2>
 			</div>
 			<div className="mt-4 space-y-4">
 				{tips.map((tip, index) => (
-					<motion.div
-						key={tip.id}
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
-					>
+					<motion.div key={tip.id} {...fadeSlideUp(0.7 + index * 0.1)}>
 						<Card className="p-4 shadow-md border-none">
 							<CardContent className="flex items-center gap-4">
 								<div className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-300">

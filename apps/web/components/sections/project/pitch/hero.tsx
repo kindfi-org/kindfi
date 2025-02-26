@@ -6,6 +6,12 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Checkbox } from '~/components/base/checkbox'
 import { Progress } from '~/components/base/progress'
+import {
+	fadeInUp,
+	fadeInWithDelay,
+	fadeSlideLeft,
+	scaleFadeIn,
+} from '~/lib/constants/animations'
 import { requiredItems } from '~/lib/mock-data/project/mock-pitch'
 import type { RequiredItem } from '~/lib/types/project/pitch.types'
 import { cn } from '~/lib/utils'
@@ -25,35 +31,18 @@ export default function Hero() {
 	}
 
 	return (
-		<motion.div
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.5 }}
-			className="mx-auto"
-		>
-			<motion.h1
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={{ delay: 0.2, duration: 0.5 }}
-				className="text-2xl font-bold"
-			>
+		<motion.div className="mx-auto" {...fadeInUp}>
+			<motion.h1 className="text-2xl font-bold" {...fadeInWithDelay(0.2)}>
 				Complete Your Pitch
 			</motion.h1>
-			<motion.p
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={{ delay: 0.4, duration: 0.5 }}
-				className="text-gray-600"
-			>
+			<motion.p className="text-gray-600" {...fadeInWithDelay(0.4)}>
 				Before you can start collecting reservations, fill out at least 2
 				Highlights, your Pitch, and your Contract.
 			</motion.p>
 
 			<motion.section
-				initial={{ opacity: 0, scale: 0.9 }}
-				animate={{ opacity: 1, scale: 1 }}
-				transition={{ delay: 0.6, duration: 0.5 }}
 				className="rounded-lg shadow-md p-6 mt-5"
+				{...scaleFadeIn}
 			>
 				<div className="mt-4 flex justify-between items-center">
 					<h2 className="text-lg font-semibold">Required Items</h2>
@@ -63,11 +52,7 @@ export default function Hero() {
 				</div>
 
 				{/* Progress Bar */}
-				<motion.div
-					initial={{ opacity: 0, x: -20 }}
-					animate={{ opacity: 1, x: 0 }}
-					transition={{ delay: 0.7, duration: 0.5 }}
-				>
+				<motion.div {...fadeSlideLeft(0.7)}>
 					<Progress value={progress} className="h-2 mt-2" />
 				</motion.div>
 
@@ -76,13 +61,11 @@ export default function Hero() {
 					{items.map((item, index) => (
 						<motion.li
 							key={item.id}
-							initial={{ opacity: 0, x: -20 }}
-							animate={{ opacity: 1, x: 0 }}
-							transition={{ delay: 0.8 + index * 0.2, duration: 0.5 }}
 							className={cn(
 								'flex items-center justify-between p-4 rounded-lg transition-colors',
 								item.completed ? 'bg-muted' : 'hover:bg-muted/50',
 							)}
+							{...fadeSlideLeft(0.8 + index * 0.2)}
 						>
 							<div className="w-6 h-6 flex items-center justify-center border-2 rounded-full mr-3 border-primary">
 								<Checkbox

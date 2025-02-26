@@ -9,16 +9,16 @@ import {
 	AccordionTrigger,
 } from '~/components/base/accordion'
 import { Button } from '~/components/base/button'
+import {
+	fadeInUp,
+	fadeSlideDown,
+	fadeSlideLeft,
+} from '~/lib/constants/animations'
 import { steps } from '~/lib/mock-data/project/mock-pitch'
 
 export default function UpcomingSteps() {
 	return (
-		<motion.section
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.5, delay: 0.5 }}
-			className="mx-auto my-8"
-		>
+		<motion.section className="mx-auto my-8" {...fadeInUp}>
 			<h2 className="text-2xl font-bold">Upcoming Steps</h2>
 
 			{/* Accordion for Steps */}
@@ -28,12 +28,7 @@ export default function UpcomingSteps() {
 				className="mt-8 rounded-lg shadow-md p-6"
 			>
 				{steps.map((step, index) => (
-					<motion.div
-						key={step.id}
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
-					>
+					<motion.div key={step.id} {...fadeSlideLeft(0.7 + index * 0.1)}>
 						<AccordionItem value={step.id} className="border-b">
 							<AccordionTrigger className="flex justify-between w-full py-3 text-left hover:no-underline">
 								<div className="flex items-center gap-3">
@@ -48,11 +43,7 @@ export default function UpcomingSteps() {
 							</AccordionTrigger>
 
 							<AccordionContent className="px-12 pb-4">
-								<motion.div
-									initial={{ opacity: 0, y: -10 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ duration: 0.3 }}
-								>
+								<motion.div {...fadeSlideDown}>
 									<p className="text-gray-600">
 										Additional details and instructions for completing this step
 										will appear here.
