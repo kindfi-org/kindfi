@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { investorsData } from '~/lib/constants/community-data/top-investors-data'
+import { investorsData } from '~/lib/constants/mock-data/community-top-investors-data'
 import { safeParseFloat } from '~/lib/utils/safe-parse-float'
 
 export const useFilteredAndSortedInvestors = (
@@ -24,7 +24,7 @@ export const useFilteredAndSortedInvestors = (
 				case 'projects':
 					return b.projectsSupported - a.projectsSupported
 				case 'followers':
-					return safeParseFloat(b.followers) - safeParseFloat(a.followers)
+					return b.followers - a.followers
 				default:
 					return 0
 			}
