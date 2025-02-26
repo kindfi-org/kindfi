@@ -4,39 +4,30 @@ import type { useToast } from '~/components/base/toast';
 import { cn } from '~/lib/utils';
 import type { DocumentType } from '~/types';
 
-type documentType = DocumentType;
-
-interface FileUploadAreaProps {
+// Explicitly define the component's props interface
+export interface FileUploadAreaProps {
   isProcessing: boolean;
-  documentType: documentType;
+  documentType: DocumentType;
   handleFileSelect: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    documentType: string,
-    handleFileUploadBound: (file: File) => void,
-    setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    toast: ReturnType<typeof useToast>['toast'],
+    _e: React.ChangeEvent<HTMLInputElement>
   ) => void;
-  handleFileUploadBound: (file: File) => void;
   setFile: React.Dispatch<React.SetStateAction<File | null>>;
   toast: ReturnType<typeof useToast>['toast'];
   handleDrop: (
-    e: React.DragEvent<HTMLDivElement>,
-    documentType: documentType,
-    handleFileUploadBound: (file: File) => void,
-    setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    toast: ReturnType<typeof useToast>['toast'],
+    _e: React.DragEvent<HTMLDivElement>
   ) => void;
 }
 
-export const FileUploadArea: React.FC<FileUploadAreaProps> = ({
+// Use the exported props interface
+const FileUploadArea = ({
   isProcessing,
   handleDrop,
   handleFileSelect,
-  documentType,
-  handleFileUploadBound,
-  setFile,
-  toast,
-}) => {
+  // Rename these props to indicate they're unused
+  documentType: _documentType,
+  setFile: _setFile,
+  toast: _toast,
+}: FileUploadAreaProps) => {
   const fileUploadRef = useRef<HTMLInputElement | null>(null);
 
   return (
@@ -48,9 +39,7 @@ export const FileUploadArea: React.FC<FileUploadAreaProps> = ({
         'hover:shadow-lg cursor-pointer relative',
         { 'opacity-50 pointer-events-none': isProcessing },
       )}
-      onDrop={(e) =>
-        handleDrop(e, documentType, handleFileUploadBound, setFile, toast)
-      }
+      onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
       onClick={() => {
         if (isProcessing || !fileUploadRef.current) return;
@@ -72,15 +61,7 @@ export const FileUploadArea: React.FC<FileUploadAreaProps> = ({
         type="file"
         className="hidden"
         accept=".jpg,.jpeg,.png"
-        onChange={(e) =>
-          handleFileSelect(
-            e,
-            documentType,
-            handleFileUploadBound,
-            setFile,
-            toast,
-          )
-        }
+        onChange={handleFileSelect}
         disabled={isProcessing}
       />
       <Upload className="mx-auto mb-4 h-12 w-12 text-gray-400" />
@@ -89,3 +70,5 @@ export const FileUploadArea: React.FC<FileUploadAreaProps> = ({
     </div>
   );
 };
+
+export default FileUploadArea;

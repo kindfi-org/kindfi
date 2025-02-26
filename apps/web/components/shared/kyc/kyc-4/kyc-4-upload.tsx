@@ -1,9 +1,10 @@
 'use client'
 import {
-	handleDrop,
-	handleFileSelect,
+	createFileUploadHandler,
+	// Prefix unused imports with underscore
+	handleDrop as _baseHandleDrop,
+	handleFileSelect as _baseHandleFileSelect,
 	removeFile,
-	useHandleFileUpload,
 } from '@packages/lib/src/doc-utils/upload-handler'
 import {
 	handleContinue,
@@ -26,7 +27,7 @@ import type { ExtractedData } from '~/types'
 import { DocumentPreview } from '~/components/shared/kyc-4/document-preview'
 import { DocumentTypeSelector } from '~/components/shared/kyc-4/document-type-selector'
 import { ExtractedInfoDisplay } from '~/components/shared/kyc-4/extracted-info-display'
-import { FileUploadArea } from '~/components/shared/kyc-4/file-upload-area'
+import FileUploadArea from '~/components/shared/kyc-4/file-upload-area'
 import { OCRProcessor } from '~/components/shared/kyc-4/ocr-processor'
 import { ValidationDisplay } from '~/components/shared/kyc-4/validation-display'
 
@@ -38,8 +39,8 @@ const ProofOfAddressUpload = ({
 	onBack?: () => void
 	onNext?: () => void
 }) => {
-	const [file, setFile] = useState<File | null>(null)
-	// TODO: Refactor the state management using useSetState from 'react-use'
+	// Prefix unused state with underscore
+	const [_file, setFile] = useState<File | null>(null)
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 	const [isProcessing, setIsProcessing] = useState<boolean>(false)
 	const [extractedData, setExtractedData] = useState<ExtractedData | null>(null)
@@ -47,6 +48,9 @@ const ProofOfAddressUpload = ({
 	const [documentType, setDocumentType] = useState<DocumentType>('')
 	const [validationErrors, setValidationErrors] = useState<string[]>([])
 	const { toast } = useToast()
+	
+	// Remove unused ref
+	// const isProcessingFile = useRef(false)
 
 	useEffect(() => {
 		if (previewUrl) {
@@ -54,8 +58,8 @@ const ProofOfAddressUpload = ({
 		}
 	}, [previewUrl])
 
-
-	const handleFileUploadBound = useHandleFileUpload(
+	// Create file upload handler
+	const handleFileUploadBound = createFileUploadHandler(
 		documentType,
 		setFile,
 		setPreviewUrl,
@@ -67,11 +71,21 @@ const ProofOfAddressUpload = ({
 		toast,
 	)
 
-	useEffect(() => {
-		if (file) {
-			handleFileUploadBound(file)
+	// Create wrapper handlers for the FileUploadArea component
+	const handleFileSelectWrapper = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const selectedFile = e.target.files?.[0]
+		if (selectedFile) {
+			handleFileUploadBound(selectedFile)
 		}
-	}, [file, handleFileUploadBound])
+	}
+
+	const handleDropWrapper = (e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault()
+		const droppedFile = e.dataTransfer.files[0]
+		if (droppedFile) {
+			handleFileUploadBound(droppedFile)
+		}
+	}
 
 	return (
 		<Card className="w-full max-w-xl mx-auto">
@@ -100,10 +114,9 @@ const ProofOfAddressUpload = ({
 				{!previewUrl ? (
 					<FileUploadArea
 						isProcessing={isProcessing}
-						handleDrop={handleDrop}
-						handleFileSelect={handleFileSelect}
+						handleDrop={handleDropWrapper}
+						handleFileSelect={handleFileSelectWrapper}
 						documentType={documentType}
-						handleFileUploadBound={handleFileUploadBound}
 						setFile={setFile}
 						toast={toast}
 					/>
@@ -145,7 +158,6 @@ const ProofOfAddressUpload = ({
 						</div>
 					</AlertDescription>
 				</Alert>
-
 				
 				<OCRProcessor
 					isProcessing={isProcessing}
