@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
+import { Tag } from '~/components/shared/project-card'
 
 export interface ProjectCategory {
 	id: string
@@ -12,13 +13,13 @@ export interface Project {
 	id: string
 	title: string
 	description: string
-	imageUrl: string
+	image: string
 	categories: string[]
 	currentAmount: number
-	goalAmount: number
+	targetAmount: number
 	supporters: number
 	minSupport: number
-	tags: string[]
+	tags: Tag[] | string[]
 	createdAt: string
 	location?: string
 }
