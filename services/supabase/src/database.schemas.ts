@@ -146,6 +146,61 @@ export const escrowStatusUpdateSchema = z.object({
 
 export const escrowStatusRelationshipsSchema = z.tuple([])
 
+export const projectTagRelationshipsRowSchema = z.object({
+	project_id: z.string(),
+	tag_id: z.string(),
+})
+
+export const projectTagRelationshipsInsertSchema = z.object({
+	project_id: z.string(),
+	tag_id: z.string(),
+})
+
+export const projectTagRelationshipsUpdateSchema = z.object({
+	project_id: z.string().optional(),
+	tag_id: z.string().optional(),
+})
+
+export const projectTagRelationshipsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_tag_relationships_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('project_tag_relationships_tag_id_fkey'),
+		columns: z.tuple([z.literal('tag_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('project_tags'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectTagsRowSchema = z.object({
+	color: z.string(),
+	created_at: z.string().nullable(),
+	id: z.string(),
+	name: z.string(),
+})
+
+export const projectTagsInsertSchema = z.object({
+	color: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	name: z.string(),
+})
+
+export const projectTagsUpdateSchema = z.object({
+	color: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	name: z.string().optional(),
+})
+
+export const projectTagsRelationshipsSchema = z.tuple([])
+
 export const projectsRowSchema = z.object({
 	category_id: z.string().nullable(),
 	created_at: z.string().nullable(),

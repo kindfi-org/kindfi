@@ -168,6 +168,57 @@ export type Database = {
 				}
 				Relationships: []
 			}
+			project_tag_relationships: {
+				Row: {
+					project_id: string
+					tag_id: string
+				}
+				Insert: {
+					project_id: string
+					tag_id: string
+				}
+				Update: {
+					project_id?: string
+					tag_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'project_tag_relationships_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'project_tag_relationships_tag_id_fkey'
+						columns: ['tag_id']
+						isOneToOne: false
+						referencedRelation: 'project_tags'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			project_tags: {
+				Row: {
+					color: string
+					created_at: string | null
+					id: string
+					name: string
+				}
+				Insert: {
+					color?: string
+					created_at?: string | null
+					id?: string
+					name: string
+				}
+				Update: {
+					color?: string
+					created_at?: string | null
+					id?: string
+					name?: string
+				}
+				Relationships: []
+			}
 			projects: {
 				Row: {
 					category_id: string | null
