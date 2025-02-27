@@ -23,7 +23,7 @@ const iconMap = {
 
 export function InvestorCard({ investor }: { investor: Investor }) {
 	return (
-		<motion.div variants={fadeInUp} className =" h-full">
+		<motion.div variants={fadeInUp} className=" h-full">
 			<Card className="h-full border-none bg-gray-100 shadow-lg shadow-gray-400/50">
 				<CardContent className="p-6">
 					<div className="flex items-start gap-4 mb-6">

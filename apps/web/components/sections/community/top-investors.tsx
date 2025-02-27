@@ -33,7 +33,7 @@ export function TopInvestors() {
 							initial="initial"
 							animate="animate"
 						>
-							<h2 className="text-3xl font-bold">Top Investors</h2>
+							<h2 className="text-3xl font-bold">Top kindlers</h2>
 							<p className="text-muted-foreground">
 								Discover the most impactful contributors driving positive
 								change.

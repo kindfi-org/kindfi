@@ -16,7 +16,7 @@ export function BecomeInvestor() {
 						viewport={{ once: true }}
 						className="mb-6 text-4xl font-bold sm:text-5xl"
 					>
-						Become a Top Investor
+						Become a Top kindlers
 					</motion.h2>
 
 					<motion.p
@@ -26,7 +26,7 @@ export function BecomeInvestor() {
 						viewport={{ once: true }}
 						className="mb-12 text-lg text-gray-600 sm:text-xl"
 					>
-						Join our community of impact-driven investors and help shape the
+						Join our community of impact-driven kindlerss and help shape the
 						future of social change through transparent, blockchain-verified
 						crowdfunding.
 					</motion.p>
