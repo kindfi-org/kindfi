@@ -5,11 +5,12 @@ import Keypair from 'stellar-sdk'
 import { twMerge } from 'tailwind-merge'
 
 /**
- * Redirects to a specified path with an encoded message as a query parameter.
- * @param {('error' | 'success')} type - The type of message, either 'error' or 'success'.
- * @param {string} path - The path to redirect to.
- * @param {string} message - The message to be encoded and added as a query parameter.
- * @returns {never} This function doesn't return as it triggers a redirect.
+ * Generates a redirect URL with an encoded message as a query parameter.
+ *
+ * @param type - The type of message, either 'error' or 'success'.
+ * @param path - The base path for the redirect.
+ * @param message - The message to be encoded and included in the redirect URL.
+ * @returns The redirect URL with the encoded message.
  */
 export function encodedRedirect(
 	type: 'error' | 'success',
@@ -19,14 +20,21 @@ export function encodedRedirect(
 	return redirect(`${path}?${type}=${encodeURIComponent(message)}`)
 }
 
+/**
+ * Combines multiple class names into a single string, merging Tailwind CSS classes intelligently.
+ *
+ * @param {...ClassValue[]} inputs - An array of class values to be combined.
+ * @returns {string} - A single string with the combined class names.
+ */
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
 
 /**
- * Fetches the sequence number for a given Stellar account.
- * @param {string} secretKey - The secret key of the Stellar account.
- * @returns {Promise<number>} The sequence number of the account.
+ * Retrieves the sequence number of an account using the provided secret key.
+ *
+ * @param {string} secretKey - The secret key of the account.
+ * @returns {Promise<number>} A promise that resolves to the sequence number of the account.
  */
 export async function getAccountSequence(secretKey: string): Promise<number> {
 	// biome-ignore lint/style/noNonNullAssertion: <explanation>
