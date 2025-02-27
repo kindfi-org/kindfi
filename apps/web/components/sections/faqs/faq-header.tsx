@@ -47,6 +47,11 @@ export function FaqHeader({
 									key={faq.id}
 									className="text-black text-xs p-3 border-b last:border-none cursor-pointer hover:bg-gray-100 md:text-base"
 									onClick={() => handleSelectQuestion(faq)}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											handleSelectQuestion(faq)
+										}
+									}}
 								>
 									{faq.question}
 								</button>
