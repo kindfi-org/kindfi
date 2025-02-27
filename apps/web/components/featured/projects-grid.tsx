@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-// import type { Project } from '~/lib/types/featured-projects/featured-projects.types'
 import { FilterSort } from './filter-sort'
 import ProjectCard, { Project } from '../shared/project-card'
 
