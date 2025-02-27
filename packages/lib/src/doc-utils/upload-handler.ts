@@ -14,7 +14,6 @@ interface ExtractedData {
   [key: string]: unknown
 }
 
-
 interface TesseractInterface {
   recognize: (file: File, options?: unknown) => Promise<unknown>
   [key: string]: unknown
@@ -48,6 +47,28 @@ export function createFileUploadHandler(
       const preview = URL.createObjectURL(uploadedFile)
       setPreviewUrl(preview)
     }
+    
+
+    const setExtractedDataWrapper = (data: unknown) => {
+
+      if (data && typeof data === 'object') {
+        const convertedData = { ...data as Record<string, unknown> };
+        
+        
+        if ('date' in convertedData && convertedData.date === null) {
+          convertedData.date = undefined;
+        }
+        if ('address' in convertedData && convertedData.address === null) {
+          convertedData.address = undefined;
+        }
+        
+        setExtractedData(convertedData as ExtractedData);
+      } else {
+        
+        setExtractedData(null);
+      }
+    };
+    
     processFile(
       uploadedFile,
       setIsProcessing,
@@ -56,7 +77,7 @@ export function createFileUploadHandler(
       Tesseract,
       extractDate,
       extractAddress,
-      setExtractedData,
+      setExtractedDataWrapper,
       validateDocument,
       toast,
     )

@@ -26,45 +26,87 @@ import FileUploadArea from '~/components/shared/kyc-4/file-upload-area'
 import { OCRProcessor } from '~/components/shared/kyc-4/ocr-processor'
 import { ValidationDisplay } from '~/components/shared/kyc-4/validation-display'
 
-// Define proper types for external libraries and functions
-interface TesseractInterface {
-  recognize: (file: File, options?: unknown) => Promise<unknown>
-  [key: string]: unknown
-}
+type LibraryExtractedData = {
+  date?: string;
+  address?: string;
+  [key: string]: unknown;
+};
 
-type ValidateDocumentFunction = (
-  data: ExtractedData
-) => { isValid: boolean; errors: string[] }
 
-type HandleContinueFunction = (
+type LibraryFunction = (
+  documentType: string | null, 
+  setFile: (file: File | null) => void,
+  setPreviewUrl: (url: string | null) => void,
+  setIsProcessing: (isProcessing: boolean) => void,
+  setProgress: (progress: number) => void,
+  setValidationErrors: (errors: string[]) => void,
+  setExtractedData: (data: LibraryExtractedData | null) => void,
+  Tesseract: unknown,
+  toast: unknown
+) => (file: File) => Promise<void>;
+
+
+type RemoveFileFunction = (
+  previewUrl: string | null,
+  setFile: (file: File | null) => void,
+  setPreviewUrl: (url: string | null) => void,
+  setExtractedData: (data: LibraryExtractedData | null) => void,
+  setValidationErrors: (errors: string[]) => void
+) => void;
+
+
+type OCRHandleContinueFunction = (
   extractedData: ExtractedData | null,
   documentType: DocumentType,
-  onNext: ((data: { documentType: DocumentType; extractedData: ExtractedData }) => void) | undefined,
-  validateDocument: ValidateDocumentFunction,
+  onNext: (data: { documentType: DocumentType; extractedData: ExtractedData }) => void,
+  validateDocument: (data: ExtractedData) => { isValid: boolean; errors: string[] },
   toast: ReturnType<typeof useToast>['toast'],
   setValidationErrors: React.Dispatch<React.SetStateAction<string[]>>
-) => void
+) => void;
 
-// Type adapter functions
-const adaptTesseract = (tesseract: typeof Tesseract): TesseractInterface => tesseract as unknown as TesseractInterface
+const convertSetExtractedData = (
+  setFn: React.Dispatch<React.SetStateAction<ExtractedData | null>>
+): ((data: LibraryExtractedData | null) => void) => {
+  return (data: LibraryExtractedData | null) => {
+    if (data === null) {
+      setFn(null);
+      return;
+    }
 
-const adaptValidateDocument = (
-  validate: typeof validateDocument
-): ValidateDocumentFunction => 
-  (data: ExtractedData) => validate(data as unknown as Parameters<typeof validateDocument>[0])
+    const appData: ExtractedData = {
+      text: data.text as string || '',
+      date: data.date || null,
+      address: data.address, 
+      ...(data as unknown as Record<string, unknown>)
+    };
+    
+    setFn(appData);
+  };
+};
 
-const adaptHandleContinue = (
-  continueHandler: typeof handleContinue
-): HandleContinueFunction =>
-  (extractedData, documentType, onNext, validateDoc, toast, setValidationErrors) => 
-    continueHandler(
-      extractedData as unknown as Parameters<typeof handleContinue>[0],
+
+const createHandleContinueAdapter = (
+  originalFn: typeof handleContinue
+): OCRHandleContinueFunction => {
+  return (extractedData, documentType, onNext, validateDoc, toast, setValidationErrors) => {
+
+    const libExtractedData = extractedData ? {
+      ...extractedData,
+      date: extractedData.date || undefined,
+      address: extractedData.address || undefined
+    } : null;
+    
+   
+    return originalFn(
+      libExtractedData as unknown as Parameters<typeof originalFn>[0],
       documentType,
-      onNext as unknown as Parameters<typeof handleContinue>[2],
-      validateDoc as unknown as Parameters<typeof handleContinue>[3],
-      toast,
+      onNext as unknown as Parameters<typeof originalFn>[2],
+      validateDoc as unknown as Parameters<typeof originalFn>[3],
+      toast as unknown as Parameters<typeof originalFn>[4],
       setValidationErrors
-    )
+    );
+  };
+};
 
 const ProofOfAddressUpload = ({
   onBack,
@@ -73,7 +115,7 @@ const ProofOfAddressUpload = ({
   onBack?: () => void
   onNext?: () => void
 }) => {
-  // Prefix unused state with underscore
+
   const [_file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState<boolean>(false)
@@ -89,13 +131,13 @@ const ProofOfAddressUpload = ({
     }
   }, [previewUrl])
 
-  // Use adapter function to properly type the setter
-  const setExtractedDataAdapter = (data: unknown): void => {
-    setExtractedData(data as ExtractedData | null)
-  }
-
-  // Create file upload handler with proper typing
-  const handleFileUploadBound = createFileUploadHandler(
+  const setExtractedDataAdapter = convertSetExtractedData(setExtractedData);
+  
+  const uploadHandler = createFileUploadHandler as unknown as LibraryFunction;
+  const removeFileHandler = removeFile as unknown as RemoveFileFunction;
+  const adaptedHandleContinue = createHandleContinueAdapter(handleContinue);
+  
+  const handleFileUploadBound = uploadHandler(
     documentType,
     setFile,
     setPreviewUrl,
@@ -103,7 +145,7 @@ const ProofOfAddressUpload = ({
     setProgress,
     setValidationErrors,
     setExtractedDataAdapter,
-    adaptTesseract(Tesseract),
+    Tesseract as unknown,
     toast,
   )
 
@@ -157,7 +199,7 @@ const ProofOfAddressUpload = ({
             progress={progress}
             previewUrl={previewUrl}
             removeFile={() =>
-              removeFile(
+              removeFileHandler(
                 previewUrl,
                 setFile,
                 setPreviewUrl,
@@ -196,9 +238,9 @@ const ProofOfAddressUpload = ({
           onNext={onNext}
           extractedData={extractedData}
           documentType={documentType}
-          validateDocument={adaptValidateDocument(validateDocument)}
+          validateDocument={validateDocument as unknown as (data: ExtractedData) => { isValid: boolean; errors: string[] }}
           toast={toast}
-          handleContinue={adaptHandleContinue(handleContinue)}
+          handleContinue={adaptedHandleContinue}
           setValidationErrors={setValidationErrors}
         />
       </CardContent>
