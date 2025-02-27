@@ -1,7 +1,5 @@
-import type {
-	Creator,
-	Project,
-} from '~/lib/types/featured-projects/featured-projects.types'
+import { Project } from "~/lib/types/projects.types"
+
 
 export const featuredProjects: Project[] = [
 	{
