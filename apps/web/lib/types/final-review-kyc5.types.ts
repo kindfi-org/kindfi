@@ -1,14 +1,14 @@
 interface ExtractedDocumentData {
-    documentNumber: string
-    expiryDate: string
-    issuingCountry: string
-    issuingAuthority: string
-    documentType: "passport" | "national_id" | "driving_license"
-    issuedDate: string
-    fullName: string
-    dateOfBirth: string
-    nationality: string
-  }
+	documentNumber: string
+	expiryDate: string
+	issuingCountry: string
+	issuingAuthority: string
+	documentType: 'passport' | 'national_id' | 'driving_license'
+	issuedDate: string
+	fullName: string
+	dateOfBirth: string
+	nationality: string
+}
 export interface FinalReviewProps {
 	onBack: () => void
 	onSubmit: () => void
