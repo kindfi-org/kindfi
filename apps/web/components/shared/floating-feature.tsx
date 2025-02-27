@@ -28,11 +28,15 @@ const FloatingFeature = ({ icon, title }: FloatingFeatureProps) => {
 			className="flex items-center space-x-4 bg-white px-6 py-3 rounded-full shadow-md border border-gray-200 
 					   md:px-4 md:py-2 sm:space-x-2 sm:px-3 sm:py-2 w-full max-w-sm mx-auto"
 		>
-			<div className="flex items-center justify-center w-12 h-12 bg-green-300 text-white rounded-full 
-							md:w-10 md:h-10 sm:w-8 sm:h-8">
+			<div
+				className="flex items-center justify-center w-12 h-12 bg-green-300 text-white rounded-full 
+							md:w-10 md:h-10 sm:w-8 sm:h-8"
+			>
 				<Icon name={icon} className="w-6 h-6 md:w-5 md:h-5 sm:w-4 sm:h-4" />
 			</div>
-			<span className="text-lg font-medium text-gray-900 md:text-base sm:text-sm">{title}</span>
+			<span className="text-lg font-medium text-gray-900 md:text-base sm:text-sm">
+				{title}
+			</span>
 		</motion.div>
 	)
 }

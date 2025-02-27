@@ -1,4 +1,3 @@
-import * as React from 'react'
 import {
 	BadgeDollarSign,
 	Banknote,
@@ -13,6 +12,7 @@ import {
 	Star,
 	Users,
 } from 'lucide-react'
+import * as React from 'react'
 import { cn } from '~/lib/utils'
 
 const icons: Record<string, LucideIcon> = {
@@ -52,7 +52,7 @@ const Icon = React.forwardRef<SVGSVGElement, IconProps>(
 				className={cn(
 					'w-6 h-6', // Mantiene el tamaño original
 					'md:w-7 md:h-7 lg:w-8 lg:h-8', // Ajustes solo en pantallas más grandes
-					className
+					className,
 				)}
 			/>
 		)
