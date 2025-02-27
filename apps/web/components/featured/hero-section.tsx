@@ -22,11 +22,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 								{badge}
 							</div>
 						)}
-						<h1 className="text-4xl font-bold tracking-tight lg:text-6xl lg:leading-[1.2] text-balance mb-6">
+						<h1 className="text-4xl font-bold tracking-tight gradient-text lg:text-6xl lg:leading-[1.2] text-balance mb-6">
 							{title}
-							{highlight && (
-								<span className="text-primary block mt-2">{highlight}</span>
-							)}
+							{highlight && <span className="block mt-2">{highlight}</span>}
 						</h1>
 						<p className="text-lg text-muted-foreground md:text-xl max-w-2xl mx-auto mb-0">
 							{subtitle}

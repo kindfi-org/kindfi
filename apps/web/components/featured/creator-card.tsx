@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-import type { Creator } from '~/lib/types'
+import type { Creator } from '~/lib/types/featured-projects/featured-projects.types'
 
 interface CreatorCardProps {
 	creator: Creator

@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-import type { Project } from '~/lib/types'
+import type { Project } from '~/lib/types/featured-projects/featured-projects.types'
 
 interface ProjectCardProps {
 	project: Project
@@ -51,13 +51,19 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
 					<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 					<div className="absolute top-4 right-4 flex gap-2">
 						{trending && (
-							<Badge variant="secondary" className="bg-white/90 hover:bg-white">
+							<Badge
+								variant="secondary"
+								className="bg-white/90 hover:bg-white text-black"
+							>
 								<Fire className="h-3 w-3 mr-1 text-orange-500" />
 								Trending
 							</Badge>
 						)}
 						{featured && (
-							<Badge variant="secondary" className="bg-white/90 hover:bg-white">
+							<Badge
+								variant="secondary"
+								className="bg-white/90 hover:bg-white text-black"
+							>
 								<Star className="h-3 w-3 mr-1 text-yellow-500" />
 								Featured
 							</Badge>

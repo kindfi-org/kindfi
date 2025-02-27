@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { Project } from '~/lib/types'
-import { FilterSort } from './FilterSort'
-import { ProjectCard } from './ProjectCard'
+import type { Project } from '~/lib/types/featured-projects/featured-projects.types'
+import { FilterSort } from './filter-sort'
+import { ProjectCard } from './project-card'
 
 interface ProjectsGridProps {
 	projects: Project[]
