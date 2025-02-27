@@ -1,5 +1,4 @@
 import Image from 'next/image'
-// import { Progress } from '@/components/ui/progress'
 import React from 'react'
 import { Progress } from '../base/progress'
 
@@ -75,9 +74,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 					<div className="mb-4">
 						<div className="flex justify-between text-sm mb-1">
 							<span className="font-semibold">${project.currentAmount?.toLocaleString()}</span>
-							<span className="text-gray-500">{project.percentageComplete}% of ${project.targetAmount?.toLocaleString()}</span>
+							<span className="text-gray-500">
+								{(project.percentageComplete ?? percentageCompleteFixed).toFixed(2)}% of $
+								{(project.targetAmount ?? project.goal)?.toLocaleString()}
+							</span>
 						</div>
-						<Progress value={project.percentageComplete ? project.percentageComplete : project.raised} className="h-2 bg-gray-100" />
+						<Progress value={project.percentageComplete ? project.percentageComplete : percentageCompleteFixed} className="h-2 bg-gray-100" />
 					</div>
 
 					<div className="flex justify-between mb-4 text-center">
@@ -86,11 +88,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 							<p className="text-xs text-gray-500">Goal</p>
 						</div>
 						<div>
-							<p className="font-semibold">{project.investors}</p>
+							<p className="font-semibold">{project.investors ?? 0}</p>
 							<p className="text-xs text-gray-500">Investors</p>
 						</div>
 						<div>
-							<p className="font-semibold">${project.minInvestment}</p>
+							<p className="font-semibold">${project.minInvestment ?? 0}</p>
 							<p className="text-xs text-gray-500">Min. Investment</p>
 						</div>
 					</div>
@@ -154,7 +156,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 								{(project.percentageComplete ?? percentageCompleteFixed).toFixed(2)}% of $
 								{(project.targetAmount ?? project.goal)?.toLocaleString()}
 							</span>
-
 						</div>
 						<Progress value={project.percentageComplete ? project.percentageComplete : percentageCompleteFixed} className="h-2 bg-gray-100" />
 					</div>
@@ -169,7 +170,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 							<p className="text-xs text-gray-500">Investors</p>
 						</div>
 						<div>
-							<p className="font-semibold">${project.minInvestment}</p>
+							<p className="font-semibold">${project.minInvestment ?? 0}</p>
 							<p className="text-xs text-gray-500">Min. Investment</p>
 						</div>
 					</div>
