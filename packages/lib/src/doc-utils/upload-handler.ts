@@ -1,6 +1,15 @@
 import { extractAddress, extractDate } from './extraction'
 import { processFile, validateDocument } from './validation'
 
+type DocumentType = 'utility' | 'bank' | 'government' | ''
+
+interface ExtractedData {
+  text: string
+  date: string | null
+  address: string | null
+}
+
+
 type ToastType = {
   title: string
   description?: string
@@ -8,21 +17,27 @@ type ToastType = {
   className?: string
 }
 
-interface ExtractedData {
-  date?: string
-  address?: string
-  [key: string]: unknown
+
+type TesseractLogger = (message: unknown) => void
+
+interface TesseractOptions {
+  logger: TesseractLogger
+}
+
+interface TesseractResult {
+  data: {
+    text: string
+    confidence: number
+    [key: string]: unknown
+  }
 }
 
 interface TesseractInterface {
-  recognize: (file: File, options?: unknown) => Promise<unknown>
-  [key: string]: unknown
+  recognize: (image: File, language: string, options: TesseractOptions) => Promise<TesseractResult>
 }
 
-type ToastOptions = ToastType | Record<string, unknown>
-
 export function createFileUploadHandler(
-  documentType: string | null,
+  documentType: DocumentType | null,
   setFile: (file: File | null) => void,
   setPreviewUrl: (url: string | null) => void,
   setIsProcessing: (isProcessing: boolean) => void,
@@ -30,7 +45,7 @@ export function createFileUploadHandler(
   setValidationErrors: (errors: string[]) => void,
   setExtractedData: (data: ExtractedData | null) => void,
   Tesseract: TesseractInterface,
-  toast: (options: ToastOptions) => void,
+  toast: (options: ToastType) => void,
 ) {
   return async function handleFileUpload(uploadedFile: File) {
     if (!documentType) {
@@ -38,9 +53,10 @@ export function createFileUploadHandler(
         title: 'Document Type Required',
         description: 'Please select a document type first.',
         className: 'bg-destructive text-destructive-foreground',
-      } as ToastType)
+      })
       return
     }
+    
     setFile(uploadedFile)
     // Only create object URLs on the client side
     if (typeof window !== 'undefined') {
@@ -48,36 +64,14 @@ export function createFileUploadHandler(
       setPreviewUrl(preview)
     }
     
-
-    const setExtractedDataWrapper = (data: unknown) => {
-
-      if (data && typeof data === 'object') {
-        const convertedData = { ...data as Record<string, unknown> };
-        
-        
-        if ('date' in convertedData && convertedData.date === null) {
-          convertedData.date = undefined;
-        }
-        if ('address' in convertedData && convertedData.address === null) {
-          convertedData.address = undefined;
-        }
-        
-        setExtractedData(convertedData as ExtractedData);
-      } else {
-        
-        setExtractedData(null);
-      }
-    };
-    
     processFile(
       uploadedFile,
       setIsProcessing,
       setProgress,
       setValidationErrors,
-      Tesseract,
       extractDate,
       extractAddress,
-      setExtractedDataWrapper,
+      setExtractedData,
       validateDocument,
       toast,
     )
@@ -91,9 +85,9 @@ export const isValidFileType = (file: File): boolean => {
 
 export function handleDrop(
   e: React.DragEvent<HTMLDivElement>,
-  documentType: string | null,
+  documentType: DocumentType | null,
   handleFileUpload: (uploadedFile: File) => Promise<void>,
-  toast: (toastProps: ToastOptions) => void,
+  toast: (toastProps: ToastType) => void,
 ) {
   e.preventDefault()
   const droppedFile = e.dataTransfer.files[0]
@@ -104,19 +98,20 @@ export function handleDrop(
 
 export function handleFileSelect(
   e: React.ChangeEvent<HTMLInputElement>,
-  documentType: string | null,
+  documentType: DocumentType | null,
   handleFileUpload: (uploadedFile: File) => Promise<void>,
-  toast: (toastProps: ToastOptions) => void,
+  toast: (toastProps: ToastType) => void,
 ) {
   if (!documentType) {
     toast({
       title: 'Document Type Required',
       description: 'Please select a document type before uploading.',
       className: 'bg-destructive text-destructive-foreground',
-    } as ToastType)
+    })
     e.target.value = ''
     return
   }
+  
   const selectedFile = e.target.files?.[0]
   if (selectedFile && isValidFileType(selectedFile)) {
     handleFileUpload(selectedFile)
@@ -133,6 +128,7 @@ export function removeFile(
   if (typeof window !== 'undefined' && previewUrl) {
     URL.revokeObjectURL(previewUrl)
   }
+  
   setFile(null)
   setPreviewUrl(null)
   setExtractedData(null)
