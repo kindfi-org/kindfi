@@ -1,3 +1,5 @@
+'use client'
+
 import { composeEventHandlers } from '@radix-ui/primitive'
 import { composeRefs } from '@radix-ui/react-compose-refs'
 import { Primitive } from '@radix-ui/react-primitive'
