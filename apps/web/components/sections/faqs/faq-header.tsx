@@ -45,7 +45,6 @@ export function FaqHeader({
 								<button
 									type="button"
 									key={faq.id}
-									type="button"
 									className="text-black text-xs p-3 border-b last:border-none cursor-pointer hover:bg-gray-100 md:text-base text-left w-full"
 									onClick={() => handleSelectQuestion(faq)}
 								>
