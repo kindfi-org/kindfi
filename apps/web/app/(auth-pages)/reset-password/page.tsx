@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { resetPasswordAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
@@ -9,10 +10,24 @@ import { FormMessage, type Message } from '~/components/form-message'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 
-export default async function ResetPassword(props: {
+export default function ResetPassword(props: {
 	searchParams: Promise<Message>
 }) {
-	const searchParams = await props.searchParams
+	const [message, setMessage] = useState<Message | null>(null)
+
+	useEffect(() => {
+		// Resolve the promise when component mounts
+		const fetchMessage = async () => {
+			try {
+				const result = await props.searchParams
+				setMessage(result)
+			} catch (error) {
+				console.error('Error fetching message:', error)
+			}
+		}
+
+		fetchMessage()
+	}, [props.searchParams])
 
 	return (
 		<AuthLayout>
@@ -47,7 +62,7 @@ export default async function ResetPassword(props: {
 						Update Password
 					</Button>
 
-					{searchParams && <FormMessage message={searchParams} />}
+					{message && <FormMessage message={message} />}
 				</form>
 
 				<div className="mt-4 text-center">
