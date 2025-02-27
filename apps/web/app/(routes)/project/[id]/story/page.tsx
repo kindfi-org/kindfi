@@ -1,31 +1,27 @@
 import { Save } from 'lucide-react'
-import { Button } from '../../../components/base/button'
-import { ProjectMedia } from '../../../components/sections/project/project-media'
-import { ProjectStoryForm } from '../../../components/sections/project/project-story'
-import { ProjectTips } from '../../../components/sections/project/project-tips'
-import type { ProjectStory } from '../../../lib/validators/project'
+import { Button } from '../../../../../components/base/button'
+import { ProjectMedia } from '../../../../../components/sections/project/project-media'
+import { ProjectStoryForm } from '../../../../../components/sections/project/project-story'
+import { ProjectTips } from '../../../../../components/sections/project/project-tips'
+import type { ProjectStory } from '../../../../../lib/validators/project'
 
 export default function ProjectPitchPage() {
-	const handleStorySubmit = async (data: ProjectStory) => {
-		'use server'
+	const handleStorySubmit = (data: ProjectStory) => {
 		// TODO: Implement story submission
 		console.log('Story submitted:', data)
 	}
 
-	const handleFileUpload = async (file: File) => {
-		'use server'
+	const handleFileUpload = (file: File) => {
 		// TODO: Implement file upload
 		console.log('File uploaded:', file.name)
 	}
 
-	const handleVideoUrlChange = async (url: string) => {
-		'use server'
+	const handleVideoUrlChange = (url: string) => {
 		// TODO: Implement video URL update
 		console.log('Video URL updated:', url)
 	}
 
-	const handleSaveAll = async () => {
-		'use server'
+	const handleSaveAll = () => {
 		// TODO: Implement saving all changes
 		console.log('Saving all changes')
 	}
