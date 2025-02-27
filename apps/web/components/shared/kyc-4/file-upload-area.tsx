@@ -13,7 +13,7 @@ export interface FileUploadAreaProps {
   setFile: React.Dispatch<React.SetStateAction<File | null>>;
   toast: ReturnType<typeof useToast>['toast'];
   handleDrop: (
-    _e: React.DragEvent<HTMLDivElement>
+    _e: React.DragEvent<HTMLButtonElement>
   ) => void;
 }
 
@@ -21,35 +21,29 @@ const FileUploadArea = ({
   isProcessing,
   handleDrop,
   handleFileSelect,
-  documentType: _documentType,
-  setFile: _setFile,
-  toast: _toast,
 }: FileUploadAreaProps) => {
   const fileUploadRef = useRef<HTMLInputElement | null>(null);
 
   return (
-    <div
+    <button
+      type="button"
       className={cn(
-        'border-2 border-dashed rounded-lg p-8 text-center',
+        'border-2 border-dashed rounded-lg p-8 text-center w-full',
         'transition-all duration-300 ease-in-out transform',
         'hover:scale-[1.02] hover:border-black hover:bg-gray-50',
         'hover:shadow-lg cursor-pointer relative',
         { 'opacity-50 pointer-events-none': isProcessing },
       )}
-      onDrop={handleDrop}
+      onDrop={(e) => {
+        e.preventDefault();
+        if (!isProcessing) handleDrop(e);
+      }}
       onDragOver={(e) => e.preventDefault()}
       onClick={() => {
         if (isProcessing || !fileUploadRef.current) return;
         fileUploadRef.current.click();
       }}
-      onKeyUp={(e) => {
-        if (isProcessing || !fileUploadRef.current) return;
-        if (e.key === 'Enter' || e.key === ' ') {
-          fileUploadRef.current.click();
-        }
-      }}
-      tabIndex={0}
-      role="button"
+      disabled={isProcessing}
     >
       <input
         ref={fileUploadRef}
@@ -64,7 +58,7 @@ const FileUploadArea = ({
       <Upload className="mx-auto mb-4 h-12 w-12 text-gray-400" />
       <h3 className="text-lg font-medium">Click to upload or drag and drop</h3>
       <p className="text-sm text-gray-500">JPG or PNG images only</p>
-    </div>
+    </button>
   );
 };
 

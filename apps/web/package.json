@@ -10,7 +10,7 @@
 		"test": "bun test/**.test.{mjs,ts,js}"
 	},
 	"dependencies": {
-		"@kindfi/shared": "workspace:*",
+		"@packages/lib": "workspace:*",
 		"@hookform/resolvers": "^3.9.1",
 		"@radix-ui/react-alert-dialog": "^1.1.2",
 		"@radix-ui/react-accordion": "^1.2.3",
