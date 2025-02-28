@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
-import type { ExtractedData } from '../../components/shared/kyc/kyc-2/types'
+import type { ExtractedData } from '~/components/shared/kyc/kyc-2/types'
 
 export function useDocumentFiles() {
 	const [frontFile, setFrontFile] = useState<File | null>(null)

@@ -1,7 +1,7 @@
 'use client'
 
-import { TagManager } from '../../../../components/shared/tag-manager'
-import { useTags } from '../../../../lib/utils/tag-context'
+import { TagManager } from '~/components/shared/tag-manager'
+import { useTags } from '~/lib/utils/tag-context'
 
 export default function ProjectTags() {
 	useTags()

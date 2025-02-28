@@ -2,8 +2,8 @@
 
 import { useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Card } from '../../base/card'
-import { Input } from '../../base/input'
+import { Card } from '~/components/base/card'
+import { Input } from '~/components/base/input'
 
 interface ProjectMediaProps {
 	onFileUpload: (file: File) => void

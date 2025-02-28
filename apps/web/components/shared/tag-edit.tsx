@@ -4,9 +4,9 @@ import { Check, X } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import type { ProjectTag } from '../../lib/types/project.types'
-import { formatToPascalCase } from '../../lib/utils/tag-context'
-import { Input } from '../base/input'
+import { Input } from '~/components/base/input'
+import type { ProjectTag } from '~/lib/types/project.types'
+import { formatToPascalCase } from '~/lib/utils/tag-context'
 
 interface TagEditProps {
 	tag: ProjectTag
