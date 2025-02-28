@@ -1,25 +1,22 @@
 import Tesseract from 'tesseract.js';
+import { extractDate, extractAddress } from './extraction';
 
-interface ExtractedData {
+export interface ExtractedData {
   text: string;
   date: string | null;
   address: string | null;
 }
 
-type ToastType = {
+export type DocumentType = 'utility' | 'bank' | 'government' | '';
+
+export type ToastType = {
   title: string;
   description?: string;
   duration?: number;
   className?: string;
-}
-
-type DocumentType = 'utility' | 'bank' | 'government' | '';
-
-type ToastOptions = ToastType & {
-  [key: string]: string | number | undefined;
 };
 
-type ToastFunction = (toastProps: ToastOptions) => void;
+export type ToastFunction = (toastProps: ToastType & { [key: string]: unknown }) => void;
 
 interface TesseractLoggerMessage {
   status: string;
@@ -91,10 +88,7 @@ export const processFile = async (
   setIsProcessing: (value: boolean) => void,
   setProgress: (value: number) => void,
   setValidationErrors: (errors: string[]) => void,
-  extractDate: (text: string) => string | null,
-  extractAddress: (text: string) => string | null,
   setExtractedData: (data: ExtractedData) => void,
-  validateDocument: (data: ExtractedData) => { isValid: boolean; errors: string[] },
   toast: ToastFunction,
 ) => {
   setIsProcessing(true);
@@ -158,7 +152,6 @@ export const handleContinue = (
         extractedData: ExtractedData;
       }) => void)
     | undefined,
-  validateDocument: (data: ExtractedData) => { isValid: boolean; errors: string[] },
   toast: ToastFunction,
   setValidationErrors: (errors: string[]) => void,
 ) => {
