@@ -11,7 +11,7 @@ export interface Tag {
 	}
 }
 
-interface creator {
+interface Creator {
 	id: number | string
 	name: string
 	image: string
@@ -23,16 +23,16 @@ export interface Project {
 	id: string | number
 	title: string
 	description: string
+	currentAmount: number
+	targetAmount: number
+	investors: number
+	minInvestment: number
+	percentageComplete: number
+	tags: Tag[] | string[]
 	image?: string
 	imageUrl?: string
 	location?: string
 	category?: string
-	currentAmount?: number
-	targetAmount?: number
-	investors?: number
-	minInvestment?: number
-	percentageComplete?: number
-	tags: Tag[] | string[]
 	raised?: number
 	goal?: number
 	donors?: number
@@ -40,20 +40,41 @@ export interface Project {
 	completedMilestones?: number
 	trending?: boolean
 	featured?: boolean
-	creator?: creator
+	creator?: Creator 
 }
-
 interface ProjectCardProps {
 	project: Project
 	viewMode?: 'grid' | 'list'
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' }) => {
-	let percentageCompleteFixed = 0;
+// Extracted the shared tag rendering logic
+const RenderTags = ({ tags }: { tags: (Tag | string)[] }) => {
+	if (!Array.isArray(tags)) return null; // Prevents errors if undefined or not an array
+	return (
+		<div className="flex flex-wrap gap-2 mt-4">
+			{tags.map((tag) => (
+				<span
+					key={typeof tag === "string" ? tag : tag.id}
+					className="px-2 py-1 text-xs rounded uppercase"
+					style={
+						typeof tag === "string"
+							? { backgroundColor: "#E5E7EB", color: "#374151" }
+							: { backgroundColor: tag.color?.backgroundColor ?? "", color: tag.color?.textColor ?? "" }
+					}
+				>
+					{typeof tag === "string" ? tag : tag.text}
+				</span>
+			))}
+		</div>
+	);
+};
 
-	if (project.currentAmount && project.targetAmount) {
-		percentageCompleteFixed = (project.currentAmount / project.targetAmount) * 100;
-	}
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' }) => {
+	const targetAmount = project.targetAmount ?? project.goal;
+	const percentageComplete = project.percentageComplete ??
+		(project.currentAmount && project.targetAmount ? (project.currentAmount / project.targetAmount) * 100 : 0);
+
+	// }
 
 	if (viewMode === 'list') {
 		return (
@@ -75,11 +96,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 						<div className="flex justify-between text-sm mb-1">
 							<span className="font-semibold">${project.currentAmount?.toLocaleString()}</span>
 							<span className="text-gray-500">
-								{(project.percentageComplete ?? percentageCompleteFixed).toFixed(2)}% of $
-								{(project.targetAmount ?? project.goal)?.toLocaleString()}
+								{(percentageComplete).toFixed(2)}% of $
+								{targetAmount?.toLocaleString()}
 							</span>
 						</div>
-						<Progress value={project.percentageComplete ? project.percentageComplete : percentageCompleteFixed} className="h-2 bg-gray-100" />
+						<Progress value={percentageComplete} className="h-2 bg-gray-100" />
 					</div>
 
 					<div className="flex justify-between mb-4 text-center">
@@ -97,33 +118,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 						</div>
 					</div>
 
-					<div className="flex flex-wrap gap-2 mt-4">
-						{(project.tags ?? []).map((tag) => {
-							if (typeof tag === 'string') {
-								return (
-									<span
-										key={tag}
-										className="px-2 py-1 text-xs rounded uppercase bg-gray-200 text-gray-700"
-									>
-										{tag}
-									</span>
-								);
-							} else {
-								return (
-									<span
-										key={tag.id}
-										className="px-2 py-1 text-xs rounded uppercase"
-										style={{
-											backgroundColor: tag.color?.backgroundColor ?? "",
-											color: tag.color?.textColor ?? "",
-										}}
-									>
-										{tag.text}
-									</span>
-								);
-							}
-						})}
-					</div>
+					<RenderTags tags={project.tags} />
 				</div>
 			</div>
 		)
@@ -148,16 +143,15 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 				<div className="p-5">
 					<h3 className="text-lg font-semibold mb-2">{project.title}</h3>
 					<p className="text-gray-600 mb-4 line-clamp-2 text-sm">{project.description}</p>
-
 					<div className="mb-4">
 						<div className="flex justify-between text-sm mb-1">
 							<span className="font-semibold">${project.currentAmount?.toLocaleString()}</span>
 							<span className="text-gray-500">
-								{(project.percentageComplete ?? percentageCompleteFixed).toFixed(2)}% of $
-								{(project.targetAmount ?? project.goal)?.toLocaleString()}
+								{(percentageComplete).toFixed(2)}% of $
+								{targetAmount?.toLocaleString()}
 							</span>
 						</div>
-						<Progress value={project.percentageComplete ? project.percentageComplete : percentageCompleteFixed} className="h-2 bg-gray-100" />
+						<Progress value={percentageComplete} className="h-2 bg-gray-100" />
 					</div>
 
 					<div className="flex justify-between mb-4 text-center">
@@ -175,34 +169,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 						</div>
 					</div>
 
-					<div className="flex flex-wrap gap-2 mt-4">
-						{(project.tags ?? []).map((tag) => {
-							if (typeof tag === 'string') {
-								return (
-									<span
-										key={tag}
-										className="px-2 py-1 text-xs rounded uppercase bg-gray-200 text-gray-700"
-									>
-										{tag}
-									</span>
-								);
-							} else {
-								return (
-									<span
-										key={tag.id}
-										className="px-2 py-1 text-xs rounded uppercase"
-										style={{
-											backgroundColor: tag.color?.backgroundColor ?? "",
-											color: tag.color?.textColor ?? "",
-										}}
-									>
-										{tag.text}
-									</span>
-								);
-							}
-						})}
-
-					</div>
+					<RenderTags tags={project.tags} />
 				</div>
 			</div>
 		)
