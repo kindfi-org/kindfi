@@ -11,9 +11,11 @@ export default function ProjectPitchPage() {
 		console.log('Story submitted:', data)
 	}
 
-	const handleFileUpload = (file: File) => {
-		// TODO: Implement file upload
+	const handleFileUpload = async (file: File) => {
+		// Simulating an asynchronous file upload
+		await new Promise((resolve) => setTimeout(resolve, 1000))
 		console.log('File uploaded:', file.name)
+		// TODO: Implement actual file upload logic here
 	}
 
 	const handleVideoUrlChange = (url: string) => {
