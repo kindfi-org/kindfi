@@ -5,7 +5,7 @@ import { Progress } from '../base/progress'
 export interface Tag {
 	id: string | number
 	text: string
-	color: {
+	color?: {
 		backgroundColor: string
 		textColor: string
 	}
