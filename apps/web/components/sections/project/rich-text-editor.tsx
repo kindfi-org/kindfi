@@ -22,7 +22,6 @@ import { cn } from '../../../lib/utils'
 import { Button } from '../../base/button'
 import { LinkDialog } from './LinkDialog'
 
-
 interface RichTextEditorProps {
 	content: string
 	onChange: (content: string) => void
