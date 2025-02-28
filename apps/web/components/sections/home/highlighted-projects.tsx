@@ -9,7 +9,7 @@ import {
 	CarouselPrevious,
 } from '~/components/base/carousel'
 import { CTAButtons } from '~/components/shared/cta-buttons'
-import { ProjectCard } from '~/components/shared/project-card'
+import ProjectCard from '~/components/shared/project-card'
 import { SectionCaption } from '~/components/shared/section-caption'
 import { projects } from '~/lib/mock-data/mock-projects'
 
@@ -44,7 +44,7 @@ export function HighlightedProjects() {
 									className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
 									aria-roledescription="slide"
 								>
-									<ProjectCard {...project} />
+									<ProjectCard project={project} />
 								</CarouselItem>
 							))}
 						</CarouselContent>
