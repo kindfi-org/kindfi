@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight, Shield } from 'lucide-react'
+import { AlertCircle, ArrowRight, Shield } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '~/components/base/button'
@@ -76,6 +76,20 @@ export default function IdentityVerification({
 						<FullNameField control={form.control} />
 						<DateOfBirthField control={form.control} />
 						<NationalityField control={form.control} />
+
+						<div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+							<div className="flex gap-2">
+								<AlertCircle className="h-5 w-5 text-gray-700 flex-shrink-0 mt-0.5" />
+								<div>
+									<p className="font-medium mb-1">Important</p>
+									<p className="text-sm text-gray-600">
+										Please ensure all information matches your official
+										documents. This information cannot be changed later without
+										contacting support.
+									</p>
+								</div>
+							</div>
+						</div>
 
 						<div className="flex justify-end space-x-4 pt-4">
 							<Button type="button" variant="outline" onClick={onCancel}>
