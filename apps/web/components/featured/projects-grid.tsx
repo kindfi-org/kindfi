@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { Project } from '~/lib/types/featured-projects/featured-projects.types'
 import { FilterSort } from './filter-sort'
-import { ProjectCard } from './project-card'
+import ProjectCard, { Project } from '../shared/project-card'
 
 interface ProjectsGridProps {
 	projects: Project[]
@@ -26,7 +25,7 @@ export const ProjectsGrid: React.FC<ProjectsGridProps> = ({
 		// Apply filtering
 		if (filter !== 'all') {
 			result = result.filter(
-				(project) => project.category.toLowerCase() === filter.toLowerCase(),
+				(project) => project.category ? project.category.toLowerCase() === filter.toLowerCase() : "",
 			)
 		}
 
@@ -36,10 +35,10 @@ export const ProjectsGrid: React.FC<ProjectsGridProps> = ({
 				(a, b) => (b.trending ? 1 : 0) - (a.trending ? 1 : 0),
 			)
 		} else if (sort === 'mostFunded') {
-			result = result.sort((a, b) => b.raised - a.raised)
+			result = result.sort((a, b) => (b.raised ?? 0) - (a.raised ?? 0))
 		} else if (sort === 'newest') {
 			// This would typically sort by date, but for mock data we'll just use id
-			result = result.sort((a, b) => b.id - a.id)
+			result = result.sort((a, b) => Number(b.id) - Number(a.id))
 		}
 
 		setFilteredProjects(result)

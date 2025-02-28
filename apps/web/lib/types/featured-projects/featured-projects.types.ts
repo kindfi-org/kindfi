@@ -4,6 +4,7 @@ export interface Creator {
 	image: string
 	verified: boolean
 	completedProjects: number
+	totalcurrentAmount? :number
 	role?: string
 	totalRaised?: number
 	followers?: number
@@ -14,15 +15,21 @@ export interface Project {
 	id: number
 	title: string
 	description: string
-	location: string
+	image?: string
+	location?: string
+	category: string
+	currentAmount?: number
+	targetAmount?: number
+	investors?: number
+	minInvestment?: number
+	percentageComplete?: number
+	tags: string[]
 	raised: number
 	goal: number
-	donors: number
-	image: string
-	category: string
-	milestones: number
-	completedMilestones: number
+	donors?: number
+	milestones?: number
+	completedMilestones?: number
+	trending?: boolean
+	featured?: boolean
 	creator: Creator
-	trending: boolean
-	featured: boolean
 }

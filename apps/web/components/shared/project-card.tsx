@@ -1,96 +1,179 @@
 import Image from 'next/image'
-import { Badge } from '../base/badge'
-import { Card, CardContent, CardFooter, CardHeader } from '../base/card'
+import React from 'react'
 import { Progress } from '../base/progress'
 
-export interface ProjectCardProps {
-	id: string
+export interface Tag {
+	id: string | number
+	text: string
+	color?: {
+		backgroundColor: string
+		textColor: string
+	}
+}
+
+interface Creator {
+	id: number | string
+	name: string
 	image: string
-	category: string
+	verified: boolean,
+	completedProjects: number
+}
+
+export interface Project {
+	id: string | number
 	title: string
 	description: string
 	currentAmount: number
 	targetAmount: number
 	investors: number
-	minInvestment: number
-	percentageComplete: number
-	tags: { id: string; text: string }[]
+	minInvestment?: number
+	percentageComplete?: number
+	tags: Tag[] | string[]
+	image?: string
+	imageUrl?: string
+	location?: string
+	category?: string
+	raised?: number
+	goal?: number
+	donors?: number
+	milestones?: number
+	completedMilestones?: number
+	trending?: boolean
+	featured?: boolean
+	creator?: Creator 
+}
+interface ProjectCardProps {
+	project: Project
+	viewMode?: 'grid' | 'list'
 }
 
-export const ProjectCard = ({
-	image,
-	category,
-	title,
-	description,
-	currentAmount,
-	targetAmount,
-	investors,
-	minInvestment,
-	percentageComplete,
-	tags,
-}: ProjectCardProps) => {
+// Extracted the shared tag rendering logic
+const RenderTags = ({ tags }: { tags: (Tag | string)[] }) => {
+	if (!Array.isArray(tags)) return null; // Prevents errors if undefined or not an array
 	return (
-		<Card className="h-full flex flex-col overflow-hidden transition-shadow hover:shadow-lg">
-			{/* Image Container - Fixed height */}
-			<div className="relative w-full h-48 flex-shrink-0">
-				<Image
-					src={image}
-					alt={title}
-					fill
-					className="object-cover"
-					sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-				/>
-				<Badge className="absolute left-4 top-4 z-10" variant="secondary">
-					{category}
-				</Badge>
-			</div>
+		<div className="flex flex-wrap gap-2 mt-4">
+			{tags.map((tag) => (
+				<span
+					key={typeof tag === "string" ? tag : tag.id}
+					className="px-2 py-1 text-xs rounded uppercase"
+					style={
+						typeof tag === "string"
+							? { backgroundColor: "#E5E7EB", color: "#374151" }
+							: { backgroundColor: tag.color?.backgroundColor ?? "", color: tag.color?.textColor ?? "" }
+					}
+				>
+					{typeof tag === "string" ? tag : tag.text}
+				</span>
+			))}
+		</div>
+	);
+};
 
-			{/* Content Container - Flex grows to fill space */}
-			<div className="flex flex-col flex-1">
-				<CardHeader className="flex-shrink-0">
-					<h3 className="text-xl font-semibold">{title}</h3>
-					<p className="text-sm text-gray-600 line-clamp-2">{description}</p>
-				</CardHeader>
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' }) => {
+	const targetAmount = project.targetAmount ?? project.goal;
+	const percentageComplete = project.percentageComplete ??
+		(project.currentAmount && project.targetAmount ? (project.currentAmount / project.targetAmount) * 100 : 0);
 
-				<CardContent className="flex-1">
-					<div className="space-y-4">
-						<div className="space-y-2">
-							<div className="flex justify-between text-sm">
-								<span>${currentAmount.toLocaleString()}</span>
-								<span className="text-gray-600">
-									{percentageComplete}% of ${targetAmount.toLocaleString()}
-								</span>
-							</div>
-							<Progress value={percentageComplete} />
+	// }
+
+	if (viewMode === 'list') {
+		return (
+			<div className="overflow-hidden transition-shadow duration-300 rounded-lg border border-gray-100 bg-white flex">
+				<div className="relative h-auto w-[200px] min-h-[180px]">
+					<Image
+						src={project.image || '/api/placeholder/400/320'}
+						alt={project.title}
+						fill
+						className="object-cover"
+					/>
+				</div>
+
+				<div className="flex-1 p-5">
+					<h3 className="text-lg font-semibold mb-2">{project.title}</h3>
+					<p className="text-gray-600 mb-4 line-clamp-2 text-sm">{project.description}</p>
+
+					<div className="mb-4">
+						<div className="flex justify-between text-sm mb-1">
+							<span className="font-semibold">${project.currentAmount?.toLocaleString()}</span>
+							<span className="text-gray-500">
+								{(percentageComplete).toFixed(2)}% of $
+								{targetAmount?.toLocaleString()}
+							</span>
 						</div>
+						<Progress value={percentageComplete} className="h-2 bg-gray-100" />
+					</div>
 
-						<div className="grid grid-cols-3 gap-4 text-center">
-							<div>
-								<p className="font-semibold">
-									${currentAmount.toLocaleString()}
-								</p>
-								<p className="text-xs text-gray-600">Goal</p>
-							</div>
-							<div>
-								<p className="font-semibold">{investors}</p>
-								<p className="text-xs text-gray-600">Supporters</p>
-							</div>
-							<div>
-								<p className="font-semibold">${minInvestment}</p>
-								<p className="text-xs text-gray-600">Min. Support</p>
-							</div>
+					<div className="flex justify-between mb-4 text-center">
+						<div>
+							<p className="font-semibold">${project.targetAmount?.toLocaleString()}</p>
+							<p className="text-xs text-gray-500">Goal</p>
+						</div>
+						<div>
+							<p className="font-semibold">{project.investors ?? 0}</p>
+							<p className="text-xs text-gray-500">Investors</p>
+						</div>
+						<div>
+							<p className="font-semibold">${project.minInvestment ?? 0}</p>
+							<p className="text-xs text-gray-500">Min. Investment</p>
 						</div>
 					</div>
-				</CardContent>
 
-				<CardFooter className="flex-shrink-0 flex flex-wrap gap-2 mt-auto">
-					{tags.map((tag) => (
-						<Badge key={tag.id} variant="outline">
-							{tag.text}
-						</Badge>
-					))}
-				</CardFooter>
+					<RenderTags tags={project.tags} />
+				</div>
 			</div>
-		</Card>
-	)
+		)
+	} else if (viewMode === 'grid') {
+		return (
+			<div className="overflow-hidden transition-shadow duration-300 rounded-lg border border-gray-100 bg-white h-full relative">
+				<div className="absolute top-4 left-4 z-10">
+					<span className="bg-white text-gray-800 px-3 py-1 rounded-full text-sm font-medium shadow-sm">
+						{project.category}
+					</span>
+				</div>
+
+				<div className="relative w-full h-48">
+					<Image
+						src={project.image || '/api/placeholder/400/320'}
+						alt={project.title}
+						fill
+						className="object-cover"
+					/>
+				</div>
+
+				<div className="p-5">
+					<h3 className="text-lg font-semibold mb-2">{project.title}</h3>
+					<p className="text-gray-600 mb-4 line-clamp-2 text-sm">{project.description}</p>
+					<div className="mb-4">
+						<div className="flex justify-between text-sm mb-1">
+							<span className="font-semibold">${project.currentAmount?.toLocaleString()}</span>
+							<span className="text-gray-500">
+								{(percentageComplete).toFixed(2)}% of $
+								{targetAmount?.toLocaleString()}
+							</span>
+						</div>
+						<Progress value={percentageComplete} className="h-2 bg-gray-100" />
+					</div>
+
+					<div className="flex justify-between mb-4 text-center">
+						<div>
+							<p className="font-semibold">${project.targetAmount ? project.targetAmount.toLocaleString() : project.goal?.toLocaleString()}</p>
+							<p className="text-xs text-gray-500">Goal</p>
+						</div>
+						<div>
+							<p className="font-semibold">{project.investors ?? 0}</p>
+							<p className="text-xs text-gray-500">Investors</p>
+						</div>
+						<div>
+							<p className="font-semibold">${project.minInvestment ?? 0}</p>
+							<p className="text-xs text-gray-500">Min. Investment</p>
+						</div>
+					</div>
+
+					<RenderTags tags={project.tags} />
+				</div>
+			</div>
+		)
+	}
 }
+
+export default ProjectCard;
