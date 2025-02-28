@@ -14,9 +14,9 @@ export default function ProjectPitchPage() {
 	const handleFileUpload = async (file: File) => {
 		// Simulating an asynchronous file upload
 		await new Promise((resolve) => setTimeout(resolve, 1000))
-		console.log("File uploaded:", file.name)
+		console.log('File uploaded:', file.name)
 		// TODO: Implement actual file upload logic here
-	  }
+	}
 
 	const handleVideoUrlChange = (url: string) => {
 		// TODO: Implement video URL update
