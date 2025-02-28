@@ -62,6 +62,20 @@ cp .env.sample .env
 
 Update the `.env` file with the KindFi Supabase project id. This is for remote type generation and to identify the local development host.
 
+**Supabase Service Role Key**
+
+The SUPABASE_SERVICE_ROLE_KEY is a critical environment variable required for server-side operations with Supabase. It grants admin-level access to your Supabase project and should be handled securely.
+
+Obtaining the Service Role Key
+
+1. Go to your Supabase Dashboard: https://supabase.com/dashboard.
+2. Select the project you're working on.
+3. In the left sidebar, click on Settings.
+4. Select Data API from the settings menu.
+5. Locate the Service Role Key and reveal and copy it:
+
+![alt text](<Screenshot from 2025-02-27 17-59-15.png>)
+
 ## Useful Commands
 
 - **Apply (new) migrations to the local database**
