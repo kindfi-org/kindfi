@@ -1,6 +1,6 @@
 import { Loader2, X } from 'lucide-react'
 import type React from 'react'
-import type { ExtractedData } from '~/types'
+import type { ExtractedData } from './types'
 import Image from 'next/image'
 
 interface DocumentPreviewProps {

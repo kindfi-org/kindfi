@@ -1,6 +1,6 @@
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '~/components/base/alert'
-import type { ExtractedData } from '~/types'
+import type { ExtractedData } from './types'
 
 type ExtractedInfoDisplayProps = {
 	extractedData: ExtractedData | null
