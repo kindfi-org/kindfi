@@ -2,12 +2,12 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import { useCallback, useState } from 'react'
 import Tesseract from 'tesseract.js'
-import type {
-	DocumentType,
-	ExtractedData,
-	ToastFunction,
-} from '../../components/shared/kyc/kyc-2/types'
-import { DocumentPatterns } from '../../components/shared/kyc/kyc-2/types'
+import {
+	DocumentPatterns,
+	type DocumentType,
+	type ExtractedData,
+	type ToastFunction,
+} from '~/components/shared/kyc/kyc-2/types'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
