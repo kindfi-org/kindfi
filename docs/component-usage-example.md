@@ -54,6 +54,9 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -68,6 +71,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
   },
 );
+
 
 Button.displayName = 'Button';
 
@@ -109,8 +113,15 @@ import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Card } from '~/components/base/card';
 import { Input } from '~/components/base/input';
+import { useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { Card } from '~/components/base/card';
+import { Input } from '~/components/base/input';
 
 interface ProjectMediaProps {
+  onFileUpload: (file: File) => void;
+  onVideoUrlChange: (url: string) => void;
+  videoUrl?: string;
   onFileUpload: (file: File) => void;
   onVideoUrlChange: (url: string) => void;
   videoUrl?: string;
@@ -120,7 +131,20 @@ export function ProjectMedia({
   onFileUpload,
   onVideoUrlChange,
   videoUrl = '',
+  onFileUpload,
+  onVideoUrlChange,
+  videoUrl = '',
 }: ProjectMediaProps) {
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (file && file.size <= 10 * 1024 * 1024) {
+        // 10MB limit
+        onFileUpload(file);
+      }
+    },
+    [onFileUpload],
+  );
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
@@ -161,7 +185,6 @@ export function ProjectMedia({
             <p className="text-sm text-gray-500 mt-1">PDF or PowerPoint, max 10MB</p>
           </div>
         </div>
-
         <div>
           <h4 className="font-medium mb-2">Video URL</h4>
           <Input
@@ -190,7 +213,6 @@ export default function ProjectsPage() {
   const handleFileUpload = (file: File) => {
     console.log('File uploaded:', file.name);
   };
-
   const handleVideoUrlChange = (url: string) => {
     console.log('Video URL updated:', url);
   };
@@ -209,6 +231,7 @@ export default function ProjectsPage() {
 ### 3. State Management Example 
 
 For state management, KindFi uses React Context and server actions in Next.js 15. Here's an example:
+
 
 ```tsx
 // File: ~/context/project-context.tsx
@@ -339,7 +362,6 @@ export default function ContributionForm({ onSubmit }) {
 
 // File: ~/app/projects/[id]/page.tsx
 import ContributionForm from '~/components/forms/contribution-form';
-
 export default function ProjectDetails() {
   const handleContribution = async (amount) => {
     'use server';
@@ -411,7 +433,6 @@ export const analyzeCampaign = async (
   if (!response.ok) throw new Error('Campaign analysis failed');
   return response.json();
 };
-
 ```
 
 ### 3. Database Integration (Supabase)
