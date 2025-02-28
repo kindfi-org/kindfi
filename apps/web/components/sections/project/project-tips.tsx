@@ -1,5 +1,5 @@
 import { ChevronRight, Lightbulb, Star } from 'lucide-react'
-import { Card } from '../../base/card'
+import { Card } from '~/components/base/card'
 
 export function ProjectTips() {
 	return (
