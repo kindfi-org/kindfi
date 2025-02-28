@@ -29,4 +29,6 @@ export interface Project {
 	location?: string
 	trending: boolean
 	featured: boolean
+	percentageComplete?: number
+	minInvestment?: number
 }

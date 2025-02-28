@@ -26,8 +26,8 @@ export interface Project {
 	currentAmount: number
 	targetAmount: number
 	investors: number
-	minInvestment: number
-	percentageComplete: number
+	minInvestment?: number
+	percentageComplete?: number
 	tags: Tag[] | string[]
 	image?: string
 	imageUrl?: string
