@@ -74,8 +74,6 @@ Obtaining the Service Role Key
 4. Select Data API from the settings menu.
 5. Locate the Service Role Key and reveal and copy it:
 
-![alt text](<Screenshot from 2025-02-27 17-59-15.png>)
-
 ## Useful Commands
 
 - **Apply (new) migrations to the local database**
