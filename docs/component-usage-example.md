@@ -54,9 +54,6 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -113,15 +110,8 @@ import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Card } from '~/components/base/card';
 import { Input } from '~/components/base/input';
-import { useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Card } from '~/components/base/card';
-import { Input } from '~/components/base/input';
 
 interface ProjectMediaProps {
-  onFileUpload: (file: File) => void;
-  onVideoUrlChange: (url: string) => void;
-  videoUrl?: string;
   onFileUpload: (file: File) => void;
   onVideoUrlChange: (url: string) => void;
   videoUrl?: string;
@@ -145,17 +135,6 @@ export function ProjectMedia({
     },
     [onFileUpload],
   );
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
-      if (file && file.size <= 10 * 1024 * 1024) {
-        // 10MB limit
-        onFileUpload(file);
-      }
-    },
-    [onFileUpload],
-  );
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
