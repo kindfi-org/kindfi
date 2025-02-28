@@ -183,7 +183,7 @@ export type Database = {
 					target_amount: number
 					title: string
 					updated_at: string | null
-					milestones: string
+					milestones: string[]
 				}
 				Insert: {
 					category_id?: string | null
@@ -199,7 +199,7 @@ export type Database = {
 					target_amount: number
 					title: string
 					updated_at?: string | null
-					milestones?: string
+					milestones?: string[]
 				}
 				Update: {
 					category_id?: string | null
@@ -215,7 +215,7 @@ export type Database = {
 					target_amount?: number
 					title?: string
 					updated_at?: string | null
-					milestones?: string
+					milestones?: string[]
 				}
 				Relationships: [
 					{

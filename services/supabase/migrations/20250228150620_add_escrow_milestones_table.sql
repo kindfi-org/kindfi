@@ -1,5 +1,12 @@
 CREATE TYPE milestone_status AS ENUM ('pending', 'in_progress', 'completed', 'failed');
 
+CREATE TABLE project_milestones (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL REFERENCES projects(id),
+    milestone_id UUID NOT NULL REFERENCES escrow_milestones(id),
+    UNIQUE (project_id, milestone_id)
+);
+
 CREATE TABLE escrow_milestones (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     escrow_id UUID NOT NULL REFERENCES escrow_contracts(id),
@@ -15,17 +22,7 @@ CREATE TABLE escrow_milestones (
     CONSTRAINT valid_milestone_amount CHECK (amount > 0)
 );
 
-CREATE TABLE project_milestones (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    project_id UUID NOT NULL REFERENCES projects(id),
-    milestone_id UUID NOT NULL REFERENCES escrow_milestones(id),
-    UNIQUE (project_id, milestone_id)
-);
-
-ALTER TABLE
-    projects
-ADD
-    COLUMN milestones UUIDDEFAULT '{}';
+ALTER TABLE projects ADD COLUMN milestones UUID[] DEFAULT '{}'::uuid[];
 
 ALTER TABLE
     escrow_milestones ENABLE ROW LEVEL SECURITY;
