@@ -246,49 +246,19 @@ export const ProjectProvider = ({ children }) => {
 export const useProject = () => useContext(ProjectContext);
 ```
 
-### Usage with Server Action
+### Using a fetch request
 
-Create a server action to fetch projects from your API.
-```tsx
-"use server";
-
-export const fetchProjects = async () => {
-  const response = await fetch(`${process.env.API_BASE_URL}/api/projects`);
-  if (!response.ok) throw new Error("Failed to fetch projects");
-  return response.json();
-};
-
-```
-Use Server Action in a Client Component
+Making a fetch Request from your API
 ```tsx
 // File: ~/app/projects/page.tsx
-"use client"; 
-
-import { useEffect, useState, useTransition } from "react";
-import { useProject } from "~/context/project-context";
-import { fetchProjects } from "./actions"; // Import the server action
-
-export default function ProjectsPage(){
-  const { state, dispatch } = useProject();
-  const [loading, startTransition] = useTransition();
-
-  useEffect(() => {
-    if (state.projects.length === 0) {
-      startTransition(async () => {
-        try {
-          const initialProjects = await fetchProjects();
-          dispatch({ type: "SET_PROJECTS", payload: initialProjects });
-        } catch (error) {
-          console.error("Failed to fetch projects:", error);
-        }
-      });
-    }
-  }, [state.projects.length, dispatch]);
+export default function async Page(){
+  const response = await fetch(`${process.env.API_BASE_URL}/api/projects`);
+  if (!response.ok) throw new Error("Failed to fetch projects");
+  const projects = await response.json();
 
   return (
     <div>
       <h1>Projects</h1>
-      {loading && <p>Loading projects...</p>}
       <ul>
         {state.projects.map((project) => (
           <li key={project.id}>{project.name}</li>
@@ -354,7 +324,7 @@ export default function ProjectDetails() {
     </div>
   );
 }
- 
+
 ```
 
 ## Service Integration
