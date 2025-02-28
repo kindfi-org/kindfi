@@ -59,7 +59,6 @@ export function DateOfBirthField({ control }: FormFieldProps) {
 									)
 									return date > eighteenYearsAgo
 								}}
-								initialFocus
 							/>
 						</PopoverContent>
 					</Popover>

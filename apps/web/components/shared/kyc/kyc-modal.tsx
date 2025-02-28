@@ -52,7 +52,7 @@ export default function KYCModal({ isOpen, onClose }: KYCModalProps) {
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="sm:max-w-xl p-0" hideClose>
+			<DialogContent className="sm:max-w-xl p-0">
 				{currentStep === 1 && (
 					<IdentityVerification
 						onCancel={handleCancel}
