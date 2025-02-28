@@ -33,10 +33,10 @@ export function useProjectsFilter() {
 				case 'funding':
 					return sortedProjects.sort(
 						(a, b) =>
-							b.currentAmount / b.goalAmount - a.currentAmount / a.goalAmount,
+							b.currentAmount / b.targetAmount - a.currentAmount / a.targetAmount,
 					)
 				case 'supporters':
-					return sortedProjects.sort((a, b) => b.supporters - a.supporters)
+					return sortedProjects.sort((a, b) => b.investors - a.investors)
 				default:
 					return sortedProjects
 			}

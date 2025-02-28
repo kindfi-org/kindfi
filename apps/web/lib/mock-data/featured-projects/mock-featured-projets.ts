@@ -1,17 +1,16 @@
-import type {
-	Creator,
-	Project,
-} from '~/lib/types/featured-projects/featured-projects.types'
+import { Creator } from "~/lib/types/featured-projects/featured-projects.types"
+import { Project } from "~/lib/types/projects.types"
+
 
 export const featuredProjects: Project[] = [
 	{
-		id: 1,
+		id: "1",
 		title: 'Clean Water Initiative',
 		description: 'Providing clean water access to rural communities',
 		location: 'Rural Schools, Kenya',
-		raised: 75000,
-		goal: 50000,
-		donors: 1200,
+		currentAmount: 75000,
+		targetAmount: 50000,
+		investors: 1200,
 		image: '/images/water.webp',
 		category: 'Environment',
 		milestones: 3,
@@ -25,15 +24,19 @@ export const featuredProjects: Project[] = [
 		},
 		trending: true,
 		featured: true,
+		categories: [],
+		minimumSupport: 0,
+		createdAt: "",
+		tags: []
 	},
 	{
-		id: 2,
+		id: "2",
 		title: 'Solar Power for Communities',
 		description: 'Sustainable energy solutions for remote villages',
 		location: 'Remote Villages, India',
-		raised: 120000,
-		goal: 100000,
-		donors: 850,
+		currentAmount: 120000,
+		targetAmount: 100000,
+		investors: 850,
 		image: '/images/renewable-energy.webp',
 		category: 'Energy',
 		milestones: 4,
@@ -47,15 +50,19 @@ export const featuredProjects: Project[] = [
 		},
 		trending: false,
 		featured: true,
+		categories: [],
+		minimumSupport: 0,
+		createdAt: "",
+		tags: []
 	},
 	{
-		id: 3,
+		id: "3",
 		title: 'Education Technology Access',
 		description: 'Bringing modern learning tools to underserved schools',
 		location: 'Urban Schools, Brazil',
-		raised: 45000,
-		goal: 40000,
-		donors: 600,
+		currentAmount: 45000,
+		targetAmount: 40000,
+		investors: 600,
 		image: '/images/education.webp',
 		category: 'Education',
 		milestones: 3,
@@ -69,6 +76,10 @@ export const featuredProjects: Project[] = [
 		},
 		trending: true,
 		featured: false,
+		categories: [],
+		minimumSupport: 0,
+		createdAt: "",
+		tags: []
 	},
 ]
 
@@ -78,7 +89,7 @@ export const featuredCreators: Creator[] = [
 		name: 'Alice Green',
 		role: 'Social Entrepreneur',
 		image: '/images/nft5.png',
-		totalRaised: 250000,
+		totalcurrentAmount: 250000,
 		completedProjects: 8,
 		followers: 1200,
 		recentProject: 'Sustainable Agriculture Initiative',
@@ -89,7 +100,7 @@ export const featuredCreators: Creator[] = [
 		name: 'David Kumar',
 		role: 'Environmental Activist',
 		image: '/images/nft4.png',
-		totalRaised: 180000,
+		totalcurrentAmount: 180000,
 		completedProjects: 6,
 		followers: 950,
 		recentProject: 'Ocean Cleanup Campaign',
@@ -100,7 +111,7 @@ export const featuredCreators: Creator[] = [
 		name: 'Sophie Chen',
 		role: 'Education Advocate',
 		image: '/images/nft3.png',
-		totalRaised: 150000,
+		totalcurrentAmount: 150000,
 		completedProjects: 5,
 		followers: 800,
 		recentProject: 'Digital Learning for All',

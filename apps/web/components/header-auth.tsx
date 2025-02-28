@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { signOutAction } from '~/app/actions'
-import { hasEnvVars } from '~/lib/supabase/check-env-vars'
+import { validateEnvVars } from '~/lib/supabase/check-env-vars'
 import { createClient } from '~/lib/supabase/server'
 import { Badge } from './base/badge'
 import { Button } from './base/button'
@@ -12,7 +12,7 @@ export default async function AuthButton() {
 		data: { user },
 	} = await supabase.auth.getUser()
 
-	if (!hasEnvVars) {
+	if (!validateEnvVars) {
 		return (
 			<>
 				<div className="flex gap-4 items-center">
