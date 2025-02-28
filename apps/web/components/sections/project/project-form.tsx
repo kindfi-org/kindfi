@@ -6,15 +6,15 @@ import { Check, ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 import { Controller, useForm } from 'react-hook-form'
 import { CategoryTag } from '~/components/category/categoryTag/CategoryTag'
+import { useMultiStepForm } from '~/hooks/use-multi-step-form'
 import { PROJECT_CATEGORIES } from '~/lib/constants/project.constants'
-import { useMultiStepForm } from '../../../hooks/use-multi-step-form'
 import {
 	type ProjectFormData,
 	projectFormSchema,
 	step1Fields,
 	step2Fields,
 	step3Fields,
-} from '../../../lib/validators/project'
+} from '~/lib/validators/project'
 
 // Defines constants before component
 const FORM_STEPS = [
