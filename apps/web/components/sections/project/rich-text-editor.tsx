@@ -16,8 +16,11 @@ import {
 	Redo,
 	Undo,
 } from 'lucide-react'
+
+import { useState } from 'react'
 import { cn } from '../../../lib/utils'
 import { Button } from '../../base/button'
+import { LinkDialog } from './LinkDialog'
 
 interface RichTextEditorProps {
 	content: string
@@ -30,6 +33,13 @@ export function RichTextEditor({
 	onChange,
 	placeholder = 'Start writing your story...',
 }: RichTextEditorProps) {
+	// Add these state variables for the dialog
+	const [linkDialogOpen, setLinkDialogOpen] = useState(false)
+	const [linkDialogData, setLinkDialogData] = useState({
+		initialUrl: '',
+		selectedText: '',
+	})
+
 	const editor = useEditor({
 		extensions: [
 			StarterKit.configure({
@@ -159,19 +169,20 @@ export function RichTextEditor({
 				>
 					<ListOrdered className="h-4 w-4" />
 				</Button>
+				{/* Replaced the link button with this new implementation */}
 				<Button
 					variant="outline"
 					size="icon"
 					onClick={() => {
-						const url = window.prompt('Enter URL')
-						if (url) {
-							editor
-								.chain()
-								.focus()
-								.extendMarkRange('link')
-								.setLink({ href: url })
-								.run()
-						}
+						const { state } = editor
+						const { from, to } = state.selection
+						const selectedText = state.doc.textBetween(from, to, ' ')
+
+						const linkMark = editor.isActive('link')
+						const initialUrl = linkMark ? editor.getAttributes('link').href : ''
+
+						setLinkDialogData({ initialUrl, selectedText })
+						setLinkDialogOpen(true)
 					}}
 					className={cn(
 						'transition-colors',
@@ -200,6 +211,15 @@ export function RichTextEditor({
 				</Button>
 			</div>
 			<EditorContent editor={editor} />
+
+			{/* Added the LinkDialog component */}
+			<LinkDialog
+				editor={editor}
+				isOpen={linkDialogOpen}
+				onClose={() => setLinkDialogOpen(false)}
+				initialUrl={linkDialogData.initialUrl}
+				selectedText={linkDialogData.selectedText}
+			/>
 		</div>
 	)
 }

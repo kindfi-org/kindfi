@@ -11,13 +11,17 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import { useToast } from '~/components/base/toast'
-import { useDocumentFiles } from '../../../../hooks/kyc/use-document-files'
-import { useDocumentProcessor } from '../../../../hooks/kyc/use-document-processor'
-import { useDocumentValidation } from '../../../../hooks/kyc/use-document-validation'
-import { DocumentTypeSelector } from './document-type-selector'
-import { DocumentUploadZone } from './document-upload-zone'
-import { ExtractedDataDisplay } from './extracted-data-display'
-import type { DocumentType, IDDocumentUploadProps, ToastType } from './types'
+import { DocumentTypeSelector } from '~/components/shared/kyc/kyc-2/document-type-selector'
+import { DocumentUploadZone } from '~/components/shared/kyc/kyc-2/document-upload-zone'
+import { ExtractedDataDisplay } from '~/components/shared/kyc/kyc-2/extracted-data-display'
+import type {
+	DocumentType,
+	IDDocumentUploadProps,
+	ToastType,
+} from '~/components/shared/kyc/kyc-2/types'
+import { useDocumentFiles } from '~/hooks/kyc/use-document-files'
+import { useDocumentProcessor } from '~/hooks/kyc/use-document-processor'
+import { useDocumentValidation } from '~/hooks/kyc/use-document-validation'
 import { ValidationAlerts } from './validation-alerts'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
