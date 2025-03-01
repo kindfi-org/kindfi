@@ -10,7 +10,7 @@ CREATE TABLE project_milestones (
 CREATE TABLE escrow_milestones (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     escrow_id UUID NOT NULL REFERENCES escrow_contracts(id),
-    project_milestone_id UUID NOT NULL REFERENCES project_milestones(id),
+    project_milestone_id UUID NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
     amount NUMERIC(20, 7) NOT NULL,
@@ -23,7 +23,9 @@ CREATE TABLE escrow_milestones (
 );
 
 ALTER TABLE projects ADD COLUMN milestones UUID[] DEFAULT '{}'::uuid[];
-
+ALTER TABLE escrow_milestones
+ADD CONSTRAINT escrow_milestones_project_milestone_id_fkey
+FOREIGN KEY (project_milestone_id) REFERENCES project_milestones(id);
 ALTER TABLE
     escrow_milestones ENABLE ROW LEVEL SECURITY;
 
