@@ -1,16 +1,12 @@
 import { motion } from 'framer-motion'
-import ProjectCard, { Project } from '~/components/shared/project-card'
-
+import ProjectCard, { type Project } from '~/components/shared/project-card'
 
 interface ProjectsGridProps {
 	projects: Project[]
 	viewMode?: 'grid' | 'list'
 }
 
-export function ProjectsGrid({
-	projects,
-	viewMode,
-}: ProjectsGridProps) {
+export function ProjectsGrid({ projects, viewMode }: ProjectsGridProps) {
 	return (
 		<div
 			className={
