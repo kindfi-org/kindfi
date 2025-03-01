@@ -1,6 +1,6 @@
 # CORS Configuration
 
-This document explains how to configure Cross-Origin Resource Sharing (CORS) for the API.
+This document explains how to configure Cross-Origin Resource Sharing (CORS) for the Passkey Authentication API.
 
 ## Overview
 

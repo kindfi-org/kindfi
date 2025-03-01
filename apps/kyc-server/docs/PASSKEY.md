@@ -6,7 +6,13 @@
 
   `POST /api/passkey/generate-registration-options`
 
-  - Request Body: `{ "identifier": "user@example.com" }`
+  - Request Body:
+    ```json
+    {
+      "identifier": "user@example.com",
+      "origin": "https://app.example.com"
+    }
+    ```
   - Success Response (200):
 
     ```json
@@ -27,7 +33,14 @@
 
   `POST /api/passkey/verify-registration`
 
-  - Request Body: `{ "identifier": "user@example.com", "registrationResponse": {...} }`
+  - Request Body:
+    ```json
+    {
+      "identifier": "user@example.com",
+      "origin": "https://app.example.com",
+      "registrationResponse": {...}
+    }
+    ```
   - Success Response (200):
 
     ```json
@@ -48,7 +61,14 @@
 
   `POST /api/passkey/generate-authentication-options`
 
-  - Request Body: `{ "identifier": "user@example.com" }`
+  - Request Body:
+    ```json
+    {
+      "identifier": "user@example.com",
+      "origin": "https://app.example.com",
+      "challenge": "optional-custom-challenge"
+    }
+    ```
   - Success Response (200):
 
     ```json
@@ -69,7 +89,14 @@
 
   `POST /api/passkey/verify-authentication`
 
-  - Request Body: `{ "identifier": "user@example.com", "authenticationResponse": {...} }`
+  - Request Body:
+    ```json
+    {
+      "identifier": "user@example.com",
+      "origin": "https://app.example.com",
+      "authenticationResponse": {...}
+    }
+    ```
   - Success Response (200):
 
     ```json
@@ -142,3 +169,33 @@ Summary:
 2. **Return WebAuthn Authentication Options**: The API provides the necessary WebAuthn authentication options.
 3. **Create Authentication Response**: The user device creates an authentication response using the provided options.
 4. **Verify Authentication**: The API verifies the authentication response and returns the result to the user device.
+
+## Origin Parameter
+
+The `origin` parameter is required in all passkey API requests and must match one of the origins specified in the `EXPECTED_ORIGIN` environment variable. This parameter helps ensure that passkey operations are only performed from authorized domains.
+
+### Why Origin is Required
+
+1. **Security**: The origin parameter helps prevent cross-site request forgery (CSRF) attacks by ensuring that requests come from trusted domains.
+2. **WebAuthn Requirement**: The WebAuthn specification requires that the origin of the request matches the origin that was used during credential creation.
+3. **Multi-tenant Support**: If your passkey service supports multiple applications, the origin helps identify which application is making the request.
+
+### Example Usage
+
+When making requests from a client application, always include the current origin:
+
+```javascript
+const response = await fetch(
+  "https://api.example.com/api/passkey/generate-registration-options",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      identifier: "user@example.com",
+      origin: window.location.origin, // Automatically use the current origin
+    }),
+  },
+);
+```
