@@ -1,6 +1,6 @@
 import { extractAddress, extractDate } from './extraction'
 import { processFile, validateDocument } from './validation'
-import type { ExtractedData } from '~/apps/web/components/shared/kyc-4/types'
+import type { ExtractedData } from '../../../../apps/web/components/shared/kyc-4/types'
 
 type ToastType = {
   title: string
