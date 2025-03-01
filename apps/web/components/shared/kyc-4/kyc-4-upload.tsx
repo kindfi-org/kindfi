@@ -64,7 +64,7 @@ const ProofOfAddressUpload = ({
 				setProgress,
 				setValidationErrors,
 				setExtractedData,
-				toast,
+				toast
 			)(file)
 		},
 		[documentType, toast], // Dependencies that can change
