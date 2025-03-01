@@ -3,7 +3,7 @@ CREATE TYPE milestone_status AS ENUM ('pending', 'in_progress', 'completed', 'fa
 CREATE TABLE project_milestones (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID NOT NULL REFERENCES projects(id),
-    milestone_id UUID NOT NULL REFERENCES escrow_milestones(id),
+    milestone_id UUID NOT NULL
     UNIQUE (project_id, milestone_id)
 );
 
@@ -23,9 +23,15 @@ CREATE TABLE escrow_milestones (
 );
 
 ALTER TABLE projects ADD COLUMN milestones UUID[] DEFAULT '{}'::uuid[];
+
+ALTER TABLE project_milestones
+ADD CONSTRAINT project_milestones_milestone_id_fkey
+FOREIGN KEY (milestone_id) REFERENCES escrow_milestones(id);
+
 ALTER TABLE escrow_milestones
 ADD CONSTRAINT escrow_milestones_project_milestone_id_fkey
 FOREIGN KEY (project_milestone_id) REFERENCES project_milestones(id);
+
 ALTER TABLE
     escrow_milestones ENABLE ROW LEVEL SECURITY;
 
