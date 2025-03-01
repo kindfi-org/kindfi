@@ -5,13 +5,11 @@ import type { Server, ServerWebSocket } from 'bun'
 import { routes } from './routes'
 import { buildClient } from './utils/buildClient'
 
-// Define the type for client data
 interface ClientData {
 	clientId: string
 	joinedAt: string
 }
 
-// Define the type for parsed message
 interface ParsedMessage {
 	text?: string
 	type?: string
@@ -32,12 +30,12 @@ function getClientFilename(): string {
 	return 'client.js'
 }
 
-// Start the server
 async function startServer() {
 	// Build the client-side JavaScript first
 	await buildClient()
 
 	// Keep track of connected clients
+	// TODO: this is a demonstration of how to use the server, it should be replaced with a real database
 	const clients = new Set<ServerWebSocket<ClientData>>()
 
 	// Define server options with type assertion
