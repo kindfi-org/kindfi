@@ -1,12 +1,11 @@
 'use client'
 import {
-	handleDrop,
-	handleFileSelect,
+	handleDrop as originalHandleDrop,
+	handleFileSelect as originalHandleFileSelect,
 	handleFileUpload,
 	removeFile,
 } from '@packages/lib/src/doc-utils/upload-handler'
 import {
-	handleContinue,
 	validateDocument,
 } from '@packages/lib/src/doc-utils/validation'
 import { AlertCircle } from 'lucide-react'
@@ -77,6 +76,46 @@ const ProofOfAddressUpload = ({
 		}
 	}, [file, handleFileUploadBound]) // Now stable
 
+	// Create a wrapper for onNext to handle the document data
+	const handleNextWithData = useCallback(
+		(data: { documentType: DocumentType; extractedData: ExtractedData }) => {
+			// Process the data if needed
+			console.log('Processing document data:', data);
+			
+			// Then call the original onNext
+			if (onNext) {
+				onNext();
+			}
+		},
+		[onNext]
+	);
+
+	// Create wrapper for handleDrop to fix the type compatibility issue
+	const handleDropWrapper = useCallback(
+		(_e: React.DragEvent<HTMLButtonElement>, 
+		 _documentType: DocumentType,
+		 _handleFileUploadBound: (_file: File) => void,
+		 _setFile: React.Dispatch<React.SetStateAction<File | null>>,
+		 _toast: ReturnType<typeof useToast>['toast']) => {
+			// Cast the event to the expected type
+			const divEvent = _e as unknown as React.DragEvent<HTMLDivElement>;
+			return originalHandleDrop(divEvent, _documentType, _handleFileUploadBound, _setFile, _toast);
+		},
+		[]
+	);
+
+	// Create wrapper for handleFileSelect if needed
+	const handleFileSelectWrapper = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>,
+		 documentType: string,
+		 handleFileUploadBound: (_file: File) => void,
+		 setFile: React.Dispatch<React.SetStateAction<File | null>>,
+		 toast: ReturnType<typeof useToast>['toast']) => {
+			return originalHandleFileSelect(e, documentType, handleFileUploadBound, setFile, toast);
+		},
+		[]
+	);
+
 	return (
 		<Card className="w-full max-w-xl mx-auto">
 			<CardHeader>
@@ -104,8 +143,8 @@ const ProofOfAddressUpload = ({
 				{!previewUrl ? (
 					<FileUploadArea
 						isProcessing={isProcessing}
-						handleDrop={handleDrop}
-						handleFileSelect={handleFileSelect}
+						handleDrop={handleDropWrapper}
+						handleFileSelect={handleFileSelectWrapper}
 						documentType={documentType}
 						handleFileUploadBound={handleFileUploadBound}
 						setFile={setFile}
@@ -153,12 +192,11 @@ const ProofOfAddressUpload = ({
 				<OCRProcessor
 					isProcessing={isProcessing}
 					onBack={onBack}
-					onNext={onNext}
+					onNext={handleNextWithData}
 					extractedData={extractedData}
 					documentType={documentType}
 					validateDocument={validateDocument}
 					toast={toast}
-					handleContinue={handleContinue}
 					setValidationErrors={setValidationErrors}
 				/>
 			</CardContent>

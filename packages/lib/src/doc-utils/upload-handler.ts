@@ -16,7 +16,6 @@ export const handleFileUpload = (
 	setProgress: (progress: number) => void,
 	setValidationErrors: (errors: string[]) => void,
 	setExtractedData: (data: any) => void,
-	// Tesseract: any,
 	toast: (options: ToastType) => void,
 ) => {
 	return async (uploadedFile: File) => {
