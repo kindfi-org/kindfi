@@ -34,6 +34,7 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
+
     if (!body.name) {
       return NextResponse.json(
         { error: 'Tag name is required' },
@@ -41,10 +42,27 @@ export async function PUT(
       );
     }
 
+    // Sanitize input
+    const sanitizedName = body.name.trim();
+
+    if (sanitizedName.length > 50) {
+      return NextResponse.json(
+        { error: 'Tag name must be 50 characters or less' },
+        { status: 400 }
+      );
+    }
+
+	if (!/^[a-zA-Z0-9\s-_]+$/.test(sanitizedName)) {
+      return NextResponse.json(
+        { error: 'Tag name contains invalid characters' },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase
       .from('project_tags')
       .update({
-        name: body.name,
+        name: sanitizedName,
         updated_at: new Date(),
       })
       .eq('id', params.tagId)
