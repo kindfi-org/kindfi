@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import type { PresignResponse, SignParams } from '~/lib/types'
+import { KYC_API_BASE_URL } from './use-passkey.configuration'
 
 export const usePasskeyAuthentication = (
 	identifier: string,
@@ -33,17 +34,20 @@ export const usePasskeyAuthentication = (
 		setIsNotRegistered(false)
 		try {
 			const PresignResponse = await prepareSign?.()
-			const resp = await fetch('api/passkey/generate-authentication-options', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
+			const resp = await fetch(
+				`${KYC_API_BASE_URL}/api/passkey/generate-authentication-options`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						identifier,
+						origin: window.location.origin,
+						challenge: PresignResponse?.base64urlAuthHash,
+					}),
 				},
-				body: JSON.stringify({
-					identifier,
-					origin: window.location.origin,
-					challenge: PresignResponse?.base64urlAuthHash,
-				}),
-			})
+			)
 
 			if (!resp.ok) {
 				const opts = await resp.json()
@@ -57,7 +61,7 @@ export const usePasskeyAuthentication = (
 			})
 
 			const verificationResp = await fetch(
-				'api/passkey/verify-authentication',
+				`${KYC_API_BASE_URL}/api/passkey/verify-authentication`,
 				{
 					method: 'POST',
 					headers: {
