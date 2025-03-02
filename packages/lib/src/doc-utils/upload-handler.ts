@@ -24,7 +24,7 @@ export const handleFileUpload = (
   setExtractedData: (data: ExtractedData | null) => void,
   toast: (options: ToastType) => void,
 ) => {
-  return async (uploadedFile: File) => {
+  return async (uploadedFile: File): Promise<void> => {
     if (!documentType) {
       toast({
         title: 'Document Type Required',
@@ -59,10 +59,10 @@ export const isValidFileType = (file: File): boolean => {
 export const handleDrop = async (
   e: React.DragEvent<HTMLDivElement>,
   documentType: string | null,
-  uploadHandler: ReturnType<typeof handleFileUpload>,
+  uploadHandler: (file: File) => Promise<void>,
   setFile: (file: File | null) => void,
   toast: (toastProps: ToastType) => void,
-) => {
+): Promise<void> => {
   e.preventDefault()
   const droppedFile = e.dataTransfer.files[0]
   if (droppedFile && isValidFileType(droppedFile)) {
@@ -73,10 +73,10 @@ export const handleDrop = async (
 export const handleFileSelect = async (
   e: React.ChangeEvent<HTMLInputElement>,
   documentType: string | null,
-  uploadHandler: ReturnType<typeof handleFileUpload>,
+  uploadHandler: (file: File) => Promise<void>,
   setFile: (file: File | null) => void,
   toast: (toastProps: ToastType) => void,
-) => {
+): Promise<void> => {
   if (!documentType) {
     toast({
       title: 'Document Type Required',
@@ -99,7 +99,7 @@ export const removeFile = (
   setPreviewUrl: (url: string | null) => void,
   setExtractedData: (data: ExtractedData | null) => void,
   setValidationErrors: (errors: string[]) => void,
-) => {
+): void => {
   if (previewUrl) {
     URL.revokeObjectURL(previewUrl)
   }
