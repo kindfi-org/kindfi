@@ -77,8 +77,9 @@ export const useStellar = () => {
 
 	const prepareSign = async (): Promise<PresignResponse> => {
 		// Prepares data for signing a transaction on the Stellar network
-		if (!bundlerKey.current) throw new Error('Bundler key not found')
-		if (!deployee) throw new Error('Deployee not found')
+		// TODO: disable for now, enable the signing logic when the transaction is ready
+		// if (!bundlerKey.current) throw new Error('Bundler key not found')
+		// if (!deployee) throw new Error('Deployee not found')
 		// TODO: Implement the logic to prepare the data for signing a transaction on the Stellar network
 		return {} as PresignResponse
 	}
@@ -87,9 +88,11 @@ export const useStellar = () => {
 		// Handles the signing of a transaction and sends it to the Stellar network
 		try {
 			setLoadingSign(true)
-			if (!bundlerKey.current) throw new Error('Bundler key not found')
-			if (!deployee) throw new Error('Deployee not found')
+			// TODO: disable for now, enable the signing logic when the transaction is ready
+			// if (!bundlerKey.current) throw new Error('Bundler key not found')
+			// if (!deployee) throw new Error('Deployee not found')
 			// TODO: Implement the logic to send the transaction to the Stellar network
+			// TODO: enable the logic to send the transaction to the Stellar network
 			setContractData({})
 		} catch (error) {
 			console.error(error)
