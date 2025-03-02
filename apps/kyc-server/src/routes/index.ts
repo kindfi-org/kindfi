@@ -1,11 +1,7 @@
-import type { drizzle } from 'drizzle-orm/node-postgres'
-import type { Application } from 'express'
-import IndexController from '../controllers'
+import { pingRoutes } from './ping'
+import { reactRoutes } from './react'
 
-function setRoutes(app: Application, db: ReturnType<typeof drizzle>) {
-	const indexController = new IndexController()
-
-	app.get('/', indexController.getIndex.bind(indexController))
+export const routes = {
+	...pingRoutes,
+	...reactRoutes,
 }
-
-export { setRoutes }
