@@ -1,51 +1,54 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '~/lib/supabase/config'
 
-function generateColor(name: string): string {
-	const hash = [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0)
-	return `#${((hash * 2654435761) & 0xffffff).toString(16).padStart(6, '0')}`
-}
+export async function PUT(
+  request: Request,
+  { params }: { params: { tagId: string } }
+) {
+  try {
+    const body = await request.json();
 
-export async function GET() {
-	try {
-		const { data, error } = await supabase.from('project_tags').select('*')
-		if (error) {
-			return NextResponse.json({ error: error.message }, { status: 500 })
-		}
-		return NextResponse.json(data)
-	} catch (err: unknown) {
-		if (err instanceof Error) {
-			return NextResponse.json({ error: err.message }, { status: 500 })
-		}
-		return NextResponse.json({ error: 'Unknown error' }, { status: 500 })
-	}
-}
+    if (!body.name) {
+      return NextResponse.json(
+        { error: 'Tag name is required' },
+        { status: 400 }
+      );
+    }
 
-export async function POST(request: Request) {
-	try {
-		const body = await request.json()
-		if (!body.name) {
-			return NextResponse.json(
-				{ error: 'Tag name is required' },
-				{ status: 400 },
-			)
-		}
+    const sanitizedName = body.name.trim();
 
-		const color = generateColor(body.name)
-		const { data, error } = await supabase
-			.from('project_tags')
-			.insert({ name: body.name, color })
-			.single()
+    if (sanitizedName.length > 50) {
+      return NextResponse.json(
+        { error: 'Tag name must be 50 characters or less' },
+        { status: 400 }
+      );
+    }
 
-		if (error) {
-			return NextResponse.json({ error: error.message }, { status: 409 })
-		}
+	if (!/^[a-zA-Z0-9\s-_]+$/.test(sanitizedName)) {
+      return NextResponse.json(
+        { error: 'Tag name contains invalid characters' },
+        { status: 400 }
+      );
+    }
 
-		return NextResponse.json(data, { status: 201 })
-	} catch (err: unknown) {
-		if (err instanceof Error) {
-			return NextResponse.json({ error: err.message }, { status: 500 })
-		}
-		return NextResponse.json({ error: 'Unknown error' }, { status: 500 })
-	}
+    const { data, error } = await supabase
+      .from('project_tags')
+      .update({
+        name: sanitizedName,
+        updated_at: new Date(),
+      })
+      .eq('id', params.tagId)
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (err: unknown) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }
