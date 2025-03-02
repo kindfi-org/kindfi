@@ -1,26 +1,28 @@
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { supabase } from '~/lib/supabase/config'
 
 export async function GET(
-	_request: Request,
+	request: NextRequest,
+	response: NextResponse,
 	{ params }: { params: { tagId: string } },
 ) {
 	try {
+		if (!params || !params.tagId) {
+			return NextResponse.json({ error: 'Tag ID is required' }, { status: 400 })
+		}
+
 		const { data, error } = await supabase
 			.from('project_tags')
 			.select('*')
 			.eq('id', params.tagId)
 			.single()
 
-		if (error) {
-			if (error.code === 'PGRST116' || error.message.includes('not found')) {
-				return NextResponse.json({ error: 'Tag not found' }, { status: 404 })
-			}
-			return NextResponse.json({ error: error.message }, { status: 500 })
+		if (error || !data) {
+			return NextResponse.json({ error: 'Tag not found' }, { status: 404 })
 		}
 
 		return NextResponse.json(data)
-	} catch (err: unknown) {
+	} catch (err) {
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },
@@ -29,10 +31,16 @@ export async function GET(
 }
 
 export async function PUT(
-	request: Request,
-	{ params }: { params: { tagId: string } },
+	request: NextRequest,
+	Response: NextResponse,
+	context: { params: { tagId: string } },
 ) {
 	try {
+		const { tagId } = context.params
+		if (!tagId) {
+			return NextResponse.json({ error: 'Tag ID is required' }, { status: 400 })
+		}
+
 		const body = await request.json()
 
 		if (!body.name) {
@@ -42,7 +50,6 @@ export async function PUT(
 			)
 		}
 
-		// Sanitize input
 		const sanitizedName = body.name.trim()
 
 		if (sanitizedName.length > 50) {
@@ -65,7 +72,7 @@ export async function PUT(
 				name: sanitizedName,
 				updated_at: new Date(),
 			})
-			.eq('id', params.tagId)
+			.eq('id', tagId)
 			.single()
 
 		if (error) {
@@ -82,14 +89,20 @@ export async function PUT(
 }
 
 export async function DELETE(
-	_request: Request,
-	{ params }: { params: { tagId: string } },
+	request: NextRequest,
+	response: NextResponse,
+	context: { params: { tagId: string } },
 ) {
 	try {
+		const { tagId } = context.params
+		if (!tagId) {
+			return NextResponse.json({ error: 'Tag ID is required' }, { status: 400 })
+		}
+
 		const { data, error } = await supabase
 			.from('project_tags')
 			.delete()
-			.eq('id', params.tagId)
+			.eq('id', tagId)
 			.select()
 
 		if (error) {
