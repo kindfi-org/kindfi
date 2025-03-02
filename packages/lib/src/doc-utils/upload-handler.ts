@@ -1,6 +1,11 @@
 import { extractAddress, extractDate } from './extraction'
 import { processFile, validateDocument } from './validation'
-import type { ExtractedData } from '../../../../apps/web/components/shared/kyc-4/types'
+
+export interface ExtractedData {
+  text: string;
+  date: string | null;
+  address: string | null;
+}
 
 type ToastType = {
   title: string
@@ -54,31 +59,21 @@ export const isValidFileType = (file: File): boolean => {
 export const handleDrop = async (
   e: React.DragEvent<HTMLDivElement>,
   documentType: string | null,
-  handleFileUpload: (
-    uploadedFile: File,
-    documentType: string | null,
-    setFile: (file: File | null) => void,
-    toast: (toastProps: ToastType) => void,
-  ) => void,
+  uploadHandler: ReturnType<typeof handleFileUpload>,
   setFile: (file: File | null) => void,
   toast: (toastProps: ToastType) => void,
 ) => {
   e.preventDefault()
   const droppedFile = e.dataTransfer.files[0]
   if (droppedFile && isValidFileType(droppedFile)) {
-    await handleFileUpload(droppedFile, documentType, setFile, toast)
+    await uploadHandler(droppedFile)
   }
 }
 
 export const handleFileSelect = async (
   e: React.ChangeEvent<HTMLInputElement>,
   documentType: string | null,
-  handleFileUpload: (
-    uploadedFile: File,
-    documentType: string | null,
-    setFile: (file: File | null) => void,
-    toast: (toastProps: ToastType) => void,
-  ) => void,
+  uploadHandler: ReturnType<typeof handleFileUpload>,
   setFile: (file: File | null) => void,
   toast: (toastProps: ToastType) => void,
 ) => {
@@ -94,7 +89,7 @@ export const handleFileSelect = async (
   
   const selectedFile = e.target.files?.[0]
   if (selectedFile && isValidFileType(selectedFile)) {
-    await handleFileUpload(selectedFile, documentType, setFile, toast)
+    await uploadHandler(selectedFile)
   }
 }
 
