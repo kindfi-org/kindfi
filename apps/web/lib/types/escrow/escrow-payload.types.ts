@@ -95,4 +95,6 @@ export interface MilestoneReviewPayload {
 	reviewerId: string
 	status: MilestoneStatus
 	comments?: string
+	signer: string
+	escrowContract: string
 }

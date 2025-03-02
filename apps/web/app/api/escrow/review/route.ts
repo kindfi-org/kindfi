@@ -1,12 +1,15 @@
+import { Networks } from '@stellar/stellar-sdk'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
+import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
+import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
 import { supabase } from '~/lib/supabase/config'
 import type { MilestoneReviewPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { validateMilestoneReview } from '~/lib/validators/escrow'
 
 export async function POST(req: NextRequest) {
 	try {
-		// Parse and validate the request body
 		const reviewData: MilestoneReviewPayload = await req.json()
 		const validationResult = validateMilestoneReview(reviewData)
 
@@ -20,9 +23,16 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		const { milestoneId, reviewerId, status, comments } = reviewData
+		const {
+			milestoneId,
+			reviewerId,
+			status,
+			comments,
+			signer,
+			escrowContract,
+		} = reviewData
 
-		// Check if the milestone exists
+		// Step 1: Validate Milestone Exists
 		const { data: milestone, error: milestoneError } = await supabase
 			.from('escrow_milestones')
 			.select('*')
@@ -36,7 +46,7 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Validate reviewer authorization (Ensure the reviewer has the correct permissions)
+		// Step 2: Validate Reviewer Exists
 		const { data: reviewer, error: reviewerError } = await supabase
 			.from('reviewers')
 			.select('*')
@@ -50,7 +60,38 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Update the milestone status
+		// Step 4: Finalize Milestone On-Chain if Approved
+		if (status === 'approved') {
+			const escrowResponse = await createEscrowRequest({
+				action: 'approveMilestone',
+				method: 'POST',
+				data: { signer, contractId: escrowContract },
+			})
+
+			if (!escrowResponse.unsignedTransaction) {
+				throw new Error('Failed to retrieve unsigned transaction XDR')
+			}
+
+			// Sign transaction
+			const signedTxXdr = signTransaction(
+				escrowResponse.unsignedTransaction,
+				Networks.TESTNET, // Change to MAINNET if in production
+				signer,
+			)
+
+			if (!signedTxXdr) {
+				throw new Error('Transaction signing failed')
+			}
+
+			// Send signed transaction on-chain
+			const txResponse = await sendTransaction(signedTxXdr)
+
+			if (!txResponse || !txResponse.txHash) {
+				throw new Error('Failed to finalize milestone on-chain')
+			}
+		}
+
+		// Step 5: Update Milestone Status in DB
 		const { data: updatedMilestone, error: updateError } = await supabase
 			.from('escrow_milestones')
 			.update({
@@ -65,7 +106,7 @@ export async function POST(req: NextRequest) {
 			throw new Error('Failed to update milestone status')
 		}
 
-		// Add review comments
+		// Step 6: Save Review Comments
 		const { error: commentError } = await supabase
 			.from('review_comments')
 			.insert({
@@ -78,23 +119,17 @@ export async function POST(req: NextRequest) {
 			throw new Error('Failed to add review comments')
 		}
 
-		// Notify the user about the milestone review update
+		// Step 7: Send Notification
 		const { error: notificationError } = await supabase
 			.from('notifications')
 			.insert({
-				user_id: milestone.user_id, // Assuming user_id exists in `escrow_milestones`
+				user_id: milestone.user_id,
 				milestone_id: milestoneId,
 				message: `Your milestone status has been updated to ${status}.`,
 			})
 
 		if (notificationError) {
 			throw new Error('Failed to send notification')
-		}
-
-		// If APPROVED, trigger the blockchain state change (escrow fund release)
-		if (status === 'approved') {
-			// TODO: Call the blockchain smart contract function to release funds
-			// Example: await releaseEscrowFunds(milestone.escrow_id);
 		}
 
 		return NextResponse.json(
