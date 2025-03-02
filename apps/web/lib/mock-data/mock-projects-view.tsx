@@ -16,7 +16,7 @@ export const mockProjectsView: Project[] = [
 		createdAt: '2023-12-01T00:00:00Z',
 		milestones: 0,
 		completedMilestones: (40000 / 55000) * 100,
-		category: "",
+		category: '',
 		creator: {
 			id: 1,
 			name: 'John Doe',
@@ -25,8 +25,7 @@ export const mockProjectsView: Project[] = [
 			completedProjects: 5,
 		},
 		featured: false,
-		trending: false
-
+		trending: false,
 	},
 	{
 		id: '2',
@@ -43,7 +42,7 @@ export const mockProjectsView: Project[] = [
 		createdAt: '2023-11-15T00:00:00Z',
 		milestones: 0,
 		completedMilestones: (40000 / 55000) * 100,
-		category: "",
+		category: '',
 		creator: {
 			id: 1,
 			name: 'John Doe',
@@ -52,7 +51,7 @@ export const mockProjectsView: Project[] = [
 			completedProjects: 5,
 		},
 		featured: false,
-		trending: false
+		trending: false,
 	},
 
 	{
@@ -70,7 +69,7 @@ export const mockProjectsView: Project[] = [
 		createdAt: '2023-10-15T00:00:00Z',
 		milestones: 0,
 		completedMilestones: (40000 / 55000) * 100,
-		category: "",
+		category: '',
 		creator: {
 			id: 1,
 			name: 'John Doe',
@@ -79,7 +78,7 @@ export const mockProjectsView: Project[] = [
 			completedProjects: 5,
 		},
 		featured: false,
-		trending: false
+		trending: false,
 	},
 	{
 		id: '4',
@@ -96,7 +95,7 @@ export const mockProjectsView: Project[] = [
 		createdAt: '2023-11-01T00:00:00Z',
 		milestones: 0,
 		completedMilestones: (40000 / 55000) * 100,
-		category: "",
+		category: '',
 		creator: {
 			id: 1,
 			name: 'John Doe',
@@ -105,7 +104,7 @@ export const mockProjectsView: Project[] = [
 			completedProjects: 5,
 		},
 		featured: false,
-		trending: false
+		trending: false,
 	},
 	{
 		id: '5',
@@ -122,7 +121,7 @@ export const mockProjectsView: Project[] = [
 		createdAt: '2023-09-22T00:00:00Z',
 		milestones: 0,
 		completedMilestones: (40000 / 55000) * 100,
-		category: "",
+		category: '',
 		creator: {
 			id: 1,
 			name: 'John Doe',
@@ -131,7 +130,7 @@ export const mockProjectsView: Project[] = [
 			completedProjects: 5,
 		},
 		featured: false,
-		trending: false
+		trending: false,
 	},
 	{
 		id: '6',
@@ -148,7 +147,7 @@ export const mockProjectsView: Project[] = [
 		createdAt: '2023-12-05T00:00:00Z',
 		milestones: 0,
 		completedMilestones: (40000 / 55000) * 100,
-		category: "",
+		category: '',
 		creator: {
 			id: 1,
 			name: 'John Doe',
@@ -157,7 +156,7 @@ export const mockProjectsView: Project[] = [
 			completedProjects: 5,
 		},
 		featured: false,
-		trending: false
+		trending: false,
 	},
 	{
 		id: '7',
@@ -174,7 +173,7 @@ export const mockProjectsView: Project[] = [
 		createdAt: '2023-10-30T00:00:00Z',
 		milestones: 0,
 		completedMilestones: (40000 / 55000) * 100,
-		category: "",
+		category: '',
 		creator: {
 			id: 1,
 			name: 'John Doe',
@@ -183,7 +182,7 @@ export const mockProjectsView: Project[] = [
 			completedProjects: 5,
 		},
 		featured: false,
-		trending: false
+		trending: false,
 	},
 	{
 		id: '8',
@@ -200,7 +199,7 @@ export const mockProjectsView: Project[] = [
 		createdAt: '2023-11-20T00:00:00Z',
 		milestones: 0,
 		completedMilestones: (40000 / 55000) * 100,
-		category: "",
+		category: '',
 		creator: {
 			id: 1,
 			name: 'John Doe',
@@ -209,6 +208,6 @@ export const mockProjectsView: Project[] = [
 			completedProjects: 5,
 		},
 		featured: false,
-		trending: false
+		trending: false,
 	},
 ]

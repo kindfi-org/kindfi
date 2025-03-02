@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React from 'react'
+import type React from 'react'
 import { Progress } from '../base/progress'
 
 export interface Tag {
@@ -15,7 +15,7 @@ interface Creator {
 	id: number | string
 	name: string
 	image: string
-	verified: boolean,
+	verified: boolean
 	completedProjects: number
 }
 
@@ -40,7 +40,7 @@ export interface Project {
 	completedMilestones?: number
 	trending?: boolean
 	featured?: boolean
-	creator?: Creator 
+	creator?: Creator
 }
 interface ProjectCardProps {
 	project: Project
@@ -49,30 +49,39 @@ interface ProjectCardProps {
 
 // Extracted the shared tag rendering logic
 const RenderTags = ({ tags }: { tags: (Tag | string)[] }) => {
-	if (!Array.isArray(tags)) return null; // Prevents errors if undefined or not an array
+	if (!Array.isArray(tags)) return null // Prevents errors if undefined or not an array
 	return (
 		<div className="flex flex-wrap gap-2 mt-4">
 			{tags.map((tag) => (
 				<span
-					key={typeof tag === "string" ? tag : tag.id}
+					key={typeof tag === 'string' ? tag : tag.id}
 					className="px-2 py-1 text-xs rounded uppercase"
 					style={
-						typeof tag === "string"
-							? { backgroundColor: "#E5E7EB", color: "#374151" }
-							: { backgroundColor: tag.color?.backgroundColor ?? "", color: tag.color?.textColor ?? "" }
+						typeof tag === 'string'
+							? { backgroundColor: '#E5E7EB', color: '#374151' }
+							: {
+									backgroundColor: tag.color?.backgroundColor ?? '',
+									color: tag.color?.textColor ?? '',
+								}
 					}
 				>
-					{typeof tag === "string" ? tag : tag.text}
+					{typeof tag === 'string' ? tag : tag.text}
 				</span>
 			))}
 		</div>
-	);
-};
+	)
+}
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' }) => {
-	const targetAmount = project.targetAmount ?? project.goal;
-	const percentageComplete = project.percentageComplete ??
-		(project.currentAmount && project.targetAmount ? (project.currentAmount / project.targetAmount) * 100 : 0);
+const ProjectCard: React.FC<ProjectCardProps> = ({
+	project,
+	viewMode = 'grid',
+}) => {
+	const targetAmount = project.targetAmount ?? project.goal
+	const percentageComplete =
+		project.percentageComplete ??
+		(project.currentAmount && project.targetAmount
+			? (project.currentAmount / project.targetAmount) * 100
+			: 0)
 
 	// }
 
@@ -90,13 +99,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 
 				<div className="flex-1 p-5">
 					<h3 className="text-lg font-semibold mb-2">{project.title}</h3>
-					<p className="text-gray-600 mb-4 line-clamp-2 text-sm">{project.description}</p>
+					<p className="text-gray-600 mb-4 line-clamp-2 text-sm">
+						{project.description}
+					</p>
 
 					<div className="mb-4">
 						<div className="flex justify-between text-sm mb-1">
-							<span className="font-semibold">${project.currentAmount?.toLocaleString()}</span>
+							<span className="font-semibold">
+								${project.currentAmount?.toLocaleString()}
+							</span>
 							<span className="text-gray-500">
-								{(percentageComplete).toFixed(2)}% of $
+								{percentageComplete.toFixed(2)}% of $
 								{targetAmount?.toLocaleString()}
 							</span>
 						</div>
@@ -105,7 +118,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 
 					<div className="flex justify-between mb-4 text-center">
 						<div>
-							<p className="font-semibold">${project.targetAmount?.toLocaleString()}</p>
+							<p className="font-semibold">
+								${project.targetAmount?.toLocaleString()}
+							</p>
 							<p className="text-xs text-gray-500">Goal</p>
 						</div>
 						<div>
@@ -122,7 +137,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 				</div>
 			</div>
 		)
-	} else if (viewMode === 'grid') {
+	}
+	if (viewMode === 'grid') {
 		return (
 			<div className="overflow-hidden transition-shadow duration-300 rounded-lg border border-gray-100 bg-white h-full relative">
 				<div className="absolute top-4 left-4 z-10">
@@ -142,12 +158,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 
 				<div className="p-5">
 					<h3 className="text-lg font-semibold mb-2">{project.title}</h3>
-					<p className="text-gray-600 mb-4 line-clamp-2 text-sm">{project.description}</p>
+					<p className="text-gray-600 mb-4 line-clamp-2 text-sm">
+						{project.description}
+					</p>
 					<div className="mb-4">
 						<div className="flex justify-between text-sm mb-1">
-							<span className="font-semibold">${project.currentAmount?.toLocaleString()}</span>
+							<span className="font-semibold">
+								${project.currentAmount?.toLocaleString()}
+							</span>
 							<span className="text-gray-500">
-								{(percentageComplete).toFixed(2)}% of $
+								{percentageComplete.toFixed(2)}% of $
 								{targetAmount?.toLocaleString()}
 							</span>
 						</div>
@@ -156,7 +176,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 
 					<div className="flex justify-between mb-4 text-center">
 						<div>
-							<p className="font-semibold">${project.targetAmount ? project.targetAmount.toLocaleString() : project.goal?.toLocaleString()}</p>
+							<p className="font-semibold">
+								$
+								{project.targetAmount
+									? project.targetAmount.toLocaleString()
+									: project.goal?.toLocaleString()}
+							</p>
 							<p className="text-xs text-gray-500">Goal</p>
 						</div>
 						<div>
@@ -176,4 +201,4 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, viewMode = 'grid' })
 	}
 }
 
-export default ProjectCard;
+export default ProjectCard

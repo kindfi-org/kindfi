@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import ProjectCard, { type Project } from '../shared/project-card'
 import { FilterSort } from './filter-sort'
-import ProjectCard, { Project } from '../shared/project-card'
 
 interface ProjectsGridProps {
 	projects: Project[]
@@ -24,8 +24,10 @@ export const ProjectsGrid: React.FC<ProjectsGridProps> = ({
 
 		// Apply filtering
 		if (filter !== 'all') {
-			result = result.filter(
-				(project) => project.category ? project.category.toLowerCase() === filter.toLowerCase() : "",
+			result = result.filter((project) =>
+				project.category
+					? project.category.toLowerCase() === filter.toLowerCase()
+					: '',
 			)
 		}
 
