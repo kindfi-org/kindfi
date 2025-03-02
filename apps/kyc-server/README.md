@@ -8,7 +8,9 @@ A server-side rendered React application built with Bun, with Passkey Authentica
 - **Client-Side Routing**: Smooth navigation between pages without full page reloads
 - **React 19**: Leverages the latest React features for optimal performance
 - **Bun**: Fast JavaScript runtime and bundler
+
 - **WebAuthn/Passkey Authentication**: Secure passwordless authentication using the WebAuthn standard
+
 - **Configurable CORS**: Cross-Origin Resource Sharing with support for specific domains or wildcards
 
 ## Architecture
@@ -88,7 +90,7 @@ The `App` component provides the navigation UI, and the router renders different
 
 ### Prerequisites
 
-- Bun 1.0.0 or higher
+- Bun 1.2.4 or higher
 
 ### Setup
 

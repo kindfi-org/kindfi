@@ -40,6 +40,7 @@ This document provides a summary of the React SSR implementation with client-sid
    - Secure by default
 
 7. **Documentation**
+
    - Comprehensive documentation of all features
    - Setup and usage instructions
    - API reference
