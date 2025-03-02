@@ -2,14 +2,21 @@
 
 import { Edit, X } from 'lucide-react'
 import type React from 'react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { formatToPascalCase, useTags } from '../../lib/utils/tag-context'
-import { Button } from '../base/button'
-import { Input } from '../base/input'
-import { TagEdit } from './tag-edit'
+import { Badge } from '~/components/base/badge'
+import { Button } from '~/components/base/button'
+import { Input } from '~/components/base/input'
+import { TagEdit } from '~/components/shared/tag-edit'
+import type { ProjectTag } from '~/lib/types'
+import { formatToPascalCase, useTags } from '~/lib/utils/tag-context'
 
-export function TagManager() {
+type TagManagerProps = {
+	id?: string
+	onUpdate?: (tags: ProjectTag[]) => void
+}
+
+export function TagManager({ id, onUpdate }: TagManagerProps) {
 	const { tags, addTag, removeTag, updateTag } = useTags()
 	const [newTag, setNewTag] = useState('')
 	// const [error, setError] = useState('')
@@ -51,22 +58,36 @@ export function TagManager() {
 		setEditingTagId(null)
 	}, [])
 
+	useEffect(() => {
+		if (onUpdate) {
+			onUpdate(tags)
+		}
+	}, [tags, onUpdate])
+
 	return (
-		<div className="p-4 rounded-lg">
-			<form onSubmit={handleSubmit} className="mb-4 flex items-center gap-2">
+		<div>
+			<div className="flex items-center gap-2 mb-2">
 				<Input
+					id={id || 'tag-input'}
 					type="text"
 					value={newTag}
 					onChange={(e) => setNewTag(e.target.value)}
 					placeholder="Enter new tag"
-					className="border border-gray-300 rounded-lg px-2 py-1"
+					className="border border-gray-300 rounded-sm px-2 py-1"
+					onKeyDown={(e) =>
+						(e.key === 'Enter' || e.key === ',') && handleSubmit(e)
+					}
 				/>
-				<Button type="submit" variant="secondary" disabled={!newTag.trim()}>
+				<Button
+					type="button"
+					variant="secondary"
+					disabled={!newTag.trim()}
+					onClick={handleSubmit}
+				>
 					Add Tag
 				</Button>
-			</form>
+			</div>
 
-			{/* {error && <p className="text-red-500 mb-2">{error}</p>} */}
 			<div className="flex flex-wrap gap-2">
 				{tags.map((tag) =>
 					editingTagId === tag.id ? (
@@ -77,48 +98,31 @@ export function TagManager() {
 							onCancel={handleCancelEdit}
 						/>
 					) : (
-						<div
-							// key={tag.id}
-							// className="flex items-center px-2 py-1 rounded-full"
-							// style={{ backgroundColor: tag.color.backgroundColor }}
-							key={tag.id}
-							className={`flex items-center px-2 py-1 rounded-full tag-background-${tag.id}`}
-						>
-							<span style={{ color: tag.color.textColor }}>{tag.text}</span>
-							{/* <Button
+						<div key={tag.id} className="flex items-center mr-2 rounded-full">
+							<button
+								type="button"
+								className="grid place-items-center focus-visible:ring-green-500 focus-visible:ring-1 focus-visible:ring-offset-1 rounded-full duration-200 focus:outline-none"
 								onClick={() => handleEdit(tag.id)}
-								className="ml-2 p-1 rounded hover:bg-white/20 transition-colors"
-								style={{ color: tag.color.textColor }}
-								title="Edit"
 							>
-								<Edit size={9} />
-							</Button> */}
-							<Button
-								onClick={() => handleEdit(tag.id)}
-								aria-label="Edit tag"
-								className="ml-2 p-2 rounded hover:bg-white/20 transition-colors min-w-[24px] min-h-[24px]"
-							>
-								<Edit size={12} aria-hidden="true" />
-								<span className="sr-only">Edit tag</span>
-							</Button>
-
+								<Badge
+									style={{
+										color: tag.color.textColor,
+										backgroundColor: tag.color.backgroundColor,
+									}}
+									className="shadow-none px-3 cursor-pointer"
+								>
+									{tag.text}
+								</Badge>
+							</button>
 							<Button
 								onClick={() => removeTag(tag.id)}
 								aria-label="Remove tag"
-								className="ml-1 p-2 rounded hover:bg-white/20 transition-colors min-w-[24px] min-h-[24px]"
+								className="px-1 rounded hover:bg-white/20 transition-colors w-[20px] h-[20px] focus-visible:ring-1"
 								style={{ color: tag.color.textColor }}
 							>
 								<X size={12} aria-hidden="true" />
 								<span className="sr-only">Remove tag</span>
 							</Button>
-							{/* <Button
-								onClick={() => removeTag(tag.id)}
-								className="ml-1 p-1 rounded hover:bg-white/20 transition-colors"
-								style={{ color: tag.color.textColor }}
-								title="Remove"
-							>
-								<X size={9} />
-							</Button> */}
 						</div>
 					),
 				)}

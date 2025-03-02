@@ -4,9 +4,9 @@ import { Check, X } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import type { ProjectTag } from '../../lib/types/project.types'
-import { formatToPascalCase } from '../../lib/utils/tag-context'
-import { Input } from '../base/input'
+import { Input } from '~/components/base/input'
+import type { ProjectTag } from '~/lib/types/project.types'
+import { formatToPascalCase } from '~/lib/utils/tag-context'
 
 interface TagEditProps {
 	tag: ProjectTag
@@ -36,33 +36,35 @@ export function TagEdit({ tag, onUpdate, onCancel }: TagEditProps) {
 	)
 
 	return (
-		<form onSubmit={handleSubmit} className="flex items-center">
+		<div className="flex items-center">
 			<Input
 				type="text"
 				value={editedTag}
 				onChange={(e) => setEditedTag(e.target.value)}
-				className="px-2 py-1 border rounded-2xl mr-2"
+				className="px-2 py-1 border rounded-sm mr-2 text-sm h-8"
 				style={{
 					backgroundColor: tag.color.backgroundColor,
 					color: tag.color.textColor,
 				}}
+				onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
 			/>
 			<button
-				type="submit"
+				type="button"
 				className="p-1 text-green-600 rounded mr-1 transition-colors"
 				title="Save"
+				onClick={handleSubmit}
 			>
 				<Check size={16} />
 			</button>
 			<button
 				type="button"
-				onClick={onCancel}
 				className="p-1 text-red-500 rounded  transition-colors"
 				title="Cancel"
+				onClick={onCancel}
 			>
 				<X size={16} />
 			</button>
 			{/* {error && <p className="text-red-500 ml-2">{error}</p>} */}
-		</form>
+		</div>
 	)
 }

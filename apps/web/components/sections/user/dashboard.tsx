@@ -1,11 +1,11 @@
 'use client'
-
 import { ChevronRight, Filter, Heart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-import { ProjectCard } from '~/components/shared/project-card'
+import ProjectCard from '~/components/shared/project-card'
+// import { ProjectCard } from '~/components/shared/project-card'
 import {
 	mockImpactMetrics,
 	mockProjects,
@@ -112,7 +112,7 @@ export function UserDashboard() {
 						</div>
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							{mockProjects.map((project: ProjectDetails) => (
-								<ProjectCard key={project.id} {...project} />
+								<ProjectCard key={project.id} project={project} />
 							))}
 						</div>
 					</CardContent>
