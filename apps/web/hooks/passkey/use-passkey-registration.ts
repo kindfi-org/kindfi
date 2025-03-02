@@ -5,6 +5,7 @@ import {
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import { KYC_API_BASE_URL } from './use-passkey.configuration'
 
 export const usePasskeyRegistration = (
 	identifier: string,
@@ -33,7 +34,7 @@ export const usePasskeyRegistration = (
 
 		try {
 			const registrationOptionsResp = await fetch(
-				'api/passkey/generate-registration-options',
+				`${KYC_API_BASE_URL}/api/passkey/generate-registration-options`,
 				{
 					method: 'POST',
 					headers: {
@@ -55,17 +56,20 @@ export const usePasskeyRegistration = (
 				optionsJSON: registrationOptions,
 			})
 
-			const verificationResp = await fetch('api/passkey/verify-registration', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
+			const verificationResp = await fetch(
+				`${KYC_API_BASE_URL}/api/passkey/verify-registration`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						registrationResponse,
+						identifier,
+						origin: window.location.origin,
+					}),
 				},
-				body: JSON.stringify({
-					registrationResponse,
-					identifier,
-					origin: window.location.origin,
-				}),
-			})
+			)
 
 			if (!verificationResp.ok) {
 				const verificationJSON = await verificationResp.json()
