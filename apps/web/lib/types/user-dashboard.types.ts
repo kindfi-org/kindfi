@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Tag } from '~/components/shared/project-card'
+import type { Tag } from '~/components/shared/project-card'
 
 export interface ProjectDetails {
 	id: string
