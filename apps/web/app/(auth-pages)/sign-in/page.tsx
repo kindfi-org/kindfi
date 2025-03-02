@@ -61,7 +61,7 @@ export default function Login() {
 				title="Welcome Back"
 				subtitle={
 					<div className="text-sm text-muted-foreground">
-						Don&apos;t have an account?
+						Don&apos;t have an account?{' '}
 						<Link
 							className="text-primary font-medium hover:underline"
 							href="/sign-up"

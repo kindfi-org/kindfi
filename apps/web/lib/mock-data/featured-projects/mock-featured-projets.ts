@@ -1,10 +1,9 @@
-import { Creator } from "~/lib/types/featured-projects/featured-projects.types"
-import { Project } from "~/lib/types/projects.types"
-
+import type { Creator } from '~/lib/types/featured-projects/featured-projects.types'
+import type { Project } from '~/lib/types/projects.types'
 
 export const featuredProjects: Project[] = [
 	{
-		id: "1",
+		id: '1',
 		title: 'Clean Water Initiative',
 		description: 'Providing clean water access to rural communities',
 		location: 'Rural Schools, Kenya',
@@ -26,11 +25,11 @@ export const featuredProjects: Project[] = [
 		featured: true,
 		categories: [],
 		minimumSupport: 0,
-		createdAt: "",
-		tags: []
+		createdAt: '',
+		tags: [],
 	},
 	{
-		id: "2",
+		id: '2',
 		title: 'Solar Power for Communities',
 		description: 'Sustainable energy solutions for remote villages',
 		location: 'Remote Villages, India',
@@ -52,11 +51,11 @@ export const featuredProjects: Project[] = [
 		featured: true,
 		categories: [],
 		minimumSupport: 0,
-		createdAt: "",
-		tags: []
+		createdAt: '',
+		tags: [],
 	},
 	{
-		id: "3",
+		id: '3',
 		title: 'Education Technology Access',
 		description: 'Bringing modern learning tools to underserved schools',
 		location: 'Urban Schools, Brazil',
@@ -78,8 +77,8 @@ export const featuredProjects: Project[] = [
 		featured: false,
 		categories: [],
 		minimumSupport: 0,
-		createdAt: "",
-		tags: []
+		createdAt: '',
+		tags: [],
 	},
 ]
 
