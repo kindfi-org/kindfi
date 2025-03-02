@@ -4,7 +4,7 @@ export interface Creator {
 	image: string
 	verified: boolean
 	completedProjects: number
-	totalcurrentAmount? :number
+	totalcurrentAmount?: number
 	role?: string
 	totalRaised?: number
 	followers?: number
