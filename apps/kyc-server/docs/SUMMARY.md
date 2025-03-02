@@ -27,6 +27,7 @@ This document provides a summary of the React SSR implementation with client-sid
    - Server serves the bundled JavaScript from the `public` directory
    - Proper content types and cache headers are set
 
+<<<<<<< HEAD
 5. **Passkey Authentication**
 
    - WebAuthn/Passkey authentication for secure passwordless login
@@ -34,13 +35,20 @@ This document provides a summary of the React SSR implementation with client-sid
    - Support for multiple authenticators
 
 6. **CORS Configuration**
+=======
+5. **CORS Configuration**
+>>>>>>> c841f2a (feat: Refactor: Express.js to Bun native server with React SSR Integration (#254))
 
    - Configurable Cross-Origin Resource Sharing
    - Support for specific domains or wildcards
    - Secure by default
 
+<<<<<<< HEAD
 7. **Documentation**
 
+=======
+6. **Documentation**
+>>>>>>> c841f2a (feat: Refactor: Express.js to Bun native server with React SSR Integration (#254))
    - Comprehensive documentation of all features
    - Setup and usage instructions
    - API reference

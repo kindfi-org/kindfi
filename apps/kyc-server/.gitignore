@@ -32,8 +32,3 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Finder (MacOS) folder config
 .DS_Store
-
-# Ignore all files in the KYC server public directory
-/public/*
-# But keep the directory itself by not ignoring .gitkeep
-!/public/.gitkeep

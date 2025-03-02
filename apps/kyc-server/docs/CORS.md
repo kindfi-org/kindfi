@@ -1,6 +1,10 @@
 # CORS Configuration
 
+<<<<<<< HEAD
 This document explains how to configure Cross-Origin Resource Sharing (CORS) for the Passkey Authentication API.
+=======
+This document explains how to configure Cross-Origin Resource Sharing (CORS) for the API.
+>>>>>>> c841f2a (feat: Refactor: Express.js to Bun native server with React SSR Integration (#254))
 
 ## Overview
 

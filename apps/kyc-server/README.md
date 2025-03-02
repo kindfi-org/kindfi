@@ -1,6 +1,6 @@
 # Kindfi KYC Server
 
-A server-side rendered React application built with Bun, with Passkey Authentication support.
+A server-side rendered React application built with Bun.
 
 ## Features
 
@@ -8,9 +8,6 @@ A server-side rendered React application built with Bun, with Passkey Authentica
 - **Client-Side Routing**: Smooth navigation between pages without full page reloads
 - **React 19**: Leverages the latest React features for optimal performance
 - **Bun**: Fast JavaScript runtime and bundler
-
-- **WebAuthn/Passkey Authentication**: Secure passwordless authentication using the WebAuthn standard
-
 - **Configurable CORS**: Cross-Origin Resource Sharing with support for specific domains or wildcards
 
 ## Architecture
@@ -31,16 +28,6 @@ After the initial server render, the application hydrates on the client using Re
 2. The client-side JavaScript loads and hydrates the page
 3. React Router takes over navigation, providing a smooth SPA-like experience
 4. When a link is clicked, React Router handles the navigation without a full page reload
-
-### Passkey Authentication
-
-The application implements WebAuthn/Passkey authentication:
-
-- Secure passwordless authentication
-- Support for multiple authenticators
-- Challenge-based authentication flow
-
-For detailed information about the passkey implementation, see [Passkey Documentation](docs/PASSKEY.md).
 
 ### File Structure
 
