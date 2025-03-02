@@ -1,66 +1,159 @@
-# My Express App
+# Kindfi KYC Server
 
-This is an Express application that use TypeScript, PostgreSQL, and Drizzle ORM. It consumes mainly the AI monorepo service to do the KYC verification.
+A server-side rendered React application built with Bun, with Passkey Authentication support.
 
-## Project Structure
+## Features
 
+- **Server-Side Rendering (SSR)**: Initial HTML is rendered on the server for fast page loads and SEO benefits
+- **Client-Side Routing**: Smooth navigation between pages without full page reloads
+- **React 19**: Leverages the latest React features for optimal performance
+- **Bun**: Fast JavaScript runtime and bundler
+
+- **WebAuthn/Passkey Authentication**: Secure passwordless authentication using the WebAuthn standard
+
+- **Configurable CORS**: Cross-Origin Resource Sharing with support for specific domains or wildcards
+
+## Architecture
+
+### Server-Side Rendering
+
+The application uses React's `renderToReadableStream` to render components on the server. This provides:
+
+- Faster initial page loads
+- Better SEO as search engines can crawl the fully rendered HTML
+- Progressive enhancement (the site works even without JavaScript)
+
+### Client-Side Routing
+
+After the initial server render, the application hydrates on the client using React Router:
+
+1. The server renders the initial HTML with regular `<a>` links
+2. The client-side JavaScript loads and hydrates the page
+3. React Router takes over navigation, providing a smooth SPA-like experience
+4. When a link is clicked, React Router handles the navigation without a full page reload
+
+### Passkey Authentication
+
+The application implements WebAuthn/Passkey authentication:
+
+- Secure passwordless authentication
+- Support for multiple authenticators
+- Challenge-based authentication flow
+
+For detailed information about the passkey implementation, see [Passkey Documentation](docs/PASSKEY.md).
+
+### File Structure
+
+- `src/index.tsx` - Main server entry point
+- `src/client.tsx` - Client-side entry point for hydration
+- `src/components/` - React components
+  - `Home.tsx` - Server-side rendered component
+  - `App.tsx` - Client-side router layout component
+- `src/routes/` - Server route handlers
+  - `react.tsx` - React SSR route handlers
+  - `passkey.ts` - Passkey authentication routes
+  - `ping.ts` - Health check routes
+- `build.ts` - Build script for client-side JavaScript
+- `public/` - Static assets and compiled client JavaScript
+- `docs/` - Documentation
+  - `ROUTING.md` - Routing implementation details
+  - `BUILD.md` - Build process documentation
+  - `PASSKEY.md` - Passkey authentication documentation
+  - `CORS.md` - CORS configuration documentation
+
+## How Routing Works
+
+### Server-Side Routes
+
+The server handles these routes:
+
+- `/` - Home page
+- `/react` - React demo page
+- `/client.js` - Serves the client-side JavaScript bundle
+- `/api/passkey/*` - Passkey authentication endpoints
+- `/api/ping` - Health check endpoint
+
+Each React route renders the `Home` component with different content.
+
+For detailed information about the routing implementation, see [Routing Documentation](docs/ROUTING.md).
+
+### Client-Side Routes
+
+After hydration, React Router handles navigation between:
+
+- `/` - Home page
+- `/react` - React demo page
+
+The `App` component provides the navigation UI, and the router renders different content based on the current URL.
+
+## Development
+
+### Prerequisites
+
+- Bun 1.2.4 or higher
+
+### Setup
+
+```bash
+# Install dependencies
+bun install
+
+# Copy the example environment file and modify as needed
+cp .env.example .env
 ```
-kindfi
-├── apps
-│   ├── kyc-server
-│   │   ├── public
-│   │   │   └── styles.css       # Styles for the KYC dashboard
-│   │   ├── src
-│   │   │   ├── controllers      # Contains controllers for handling requests
-│   │   │   │   └── kyc.ts       # KYC controller
-│   │   │   ├── models           # Contains data models
-│   │   │   │   └── kyc-application.ts # KYC application model
-│   │   │   ├── resolvers        # GraphQL resolvers
-│   │   │   │   └── index.ts     # Resolver definitions
-│   │   │   ├── server.ts        # Server setup
-│   │   │   └── app.ts           # Entry point of the application
-│   │   ├── package.json         # NPM dependencies and scripts
-│   │   ├── tsconfig.json        # TypeScript configuration
-│   │   └── README.md            # Project documentation
-├── services
-│   └── supabase
-│       └── .branches
-│           └── _current_branch  # Current branch information
-├── package.json                 # Monorepo configuration
-└── README.md                    # Monorepo documentation
+
+### Development Workflow
+
+```bash
+# Build client-side JavaScript
+bun run build.ts
+
+# Start the server
+bun run src/index.tsx
 ```
 
-## Installation
+The server will start at http://localhost:3001.
 
-1. Clone the repository:
+## Production
 
-   ```
-   git clone <repository-url>
-   cd kindfi/apps/kyc-server
-   ```
+For production, build the client with minification:
 
-2. Install dependencies:
-
-   ```
-   bun install
-   ```
+```bash
+NODE_ENV=production bun run build.ts
+PORT=8080 bun run src/index.tsx
+```
 
 ## Configuration
 
-Make sure to configure your PostgreSQL database connection in `src/app.ts` using Drizzle ORM. Additionally, set up your environment variables by creating a `.env` file based on the `.env.sample` provided.
+### Environment Variables
 
-### Why Drizzle ORM?
+The application uses environment variables for configuration. A `.env.example` file is provided as a template.
 
-Drizzle ORM is a lightweight and easy-to-use ORM for Node.js. It simplifies database interactions with a straightforward API and supports multiple databases. In the KindFi monorepo, Drizzle ORM helps manage shared database access across services, reducing complexity and making the application easier to maintain and extend. Using Drizzle ORM for admin actions avoids overloading Supabase with requests, ensuring efficient database operations.
-
-## Running the Application
-
-To start the application, run:
+Key environment variables include:
 
 ```
-bun start
+# Server configuration
+PORT=3001
+NODE_ENV=development
+
+# WebAuthn configuration
+RP_ID='["localhost", "your-domain.com"]'
+RP_NAME='["App", "Your App Name"]'
+EXPECTED_ORIGIN='["http://localhost:3001", "https://your-domain.com"]'
+CHALLENGE_TTL_SECONDS=60
+
+# CORS Configuration
+ALLOWED_ORIGINS=https://your-domain.com,http://localhost:3001
 ```
 
-## License
+### CORS Configuration
 
-This project is licensed under the MIT License.
+The API supports configurable CORS settings. For detailed CORS configuration options, see [CORS Documentation](docs/CORS.md).
+
+## Documentation
+
+- [Routing Implementation](docs/ROUTING.md) - Details about the routing implementation
+- [Build Process](docs/BUILD.md) - Information about the build process
+- [Passkey Authentication](docs/PASSKEY.md) - Documentation for the passkey authentication
+- [CORS Configuration](docs/CORS.md) - CORS configuration details
+- [Client Example](docs/client-example.js) - Example client implementation

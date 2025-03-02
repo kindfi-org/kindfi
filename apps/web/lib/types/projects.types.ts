@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
-import { Tag } from '~/components/shared/project-card'
-import { Creator } from './featured-projects/featured-projects.types'
+import type { Tag } from '~/components/shared/project-card'
+import type { Creator } from './featured-projects/featured-projects.types'
 
 export interface ProjectCategory {
 	id: string
