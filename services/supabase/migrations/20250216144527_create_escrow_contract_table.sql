@@ -1,5 +1,3 @@
-
-
 CREATE TABLE IF NOT EXISTS contributions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID NOT NULL REFERENCES projects(id),
