@@ -74,7 +74,7 @@ export function TeamMembersPage() {
 						form={form}
 						roles={roles}
 						onSubmit={onSubmit}
-						isSubmitting={false}
+						isSubmitting={isSubmitting}
 					/>
 				</div>
 			</div>
