@@ -4,7 +4,7 @@ CREATE TABLE community (
     update_id uuid NOT NULL,
     comment_id uuid NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT community_pkey PRIMARY KEY ("id")
+    CONSTRAINT community_pkey PRIMARY KEY ("id"),
     CONSTRAINT community_project_id_fkey FOREIGN KEY ("project_id") REFERENCES "public"."projects"("id") ON DELETE CASCADE,
     CONSTRAINT community_update_id_fkey FOREIGN KEY ("update_id") REFERENCES "public"."project_update"("id") ON DELETE CASCADE,
     CONSTRAINT comment_id_fkey FOREIGN KEY ("comment_id") REFERENCES "public"."comments"("id") ON DELETE CASCADE 
