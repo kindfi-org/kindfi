@@ -1,9 +1,5 @@
 import type { ReactNode } from 'react'
-
-export interface Tag {
-	id: string
-	text: string
-}
+import type { Tag } from '~/components/shared/project-card'
 
 export interface ProjectDetails {
 	id: string
@@ -16,7 +12,7 @@ export interface ProjectDetails {
 	investors: number
 	minInvestment: number
 	percentageComplete: number
-	tags: Tag[]
+	tags: Tag[] | string[]
 }
 
 export interface ImpactMetric {

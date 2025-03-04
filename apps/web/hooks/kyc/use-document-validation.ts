@@ -1,10 +1,10 @@
 'use client'
 import { useCallback, useState } from 'react'
-import type {
-	DocumentType,
-	ExtractedData,
-} from '../../components/shared/kyc/kyc-2/types'
-import { DocumentPatterns } from '../../components/shared/kyc/kyc-2/types'
+import {
+	DocumentPatterns,
+	type DocumentType,
+	type ExtractedData,
+} from '~/components/shared/kyc/kyc-2/types'
 
 export function useDocumentValidation(documentType: DocumentType) {
 	const [validationErrors, setValidationErrors] = useState<string[]>([])
