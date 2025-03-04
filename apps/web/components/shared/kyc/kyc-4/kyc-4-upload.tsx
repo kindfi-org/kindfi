@@ -1,15 +1,21 @@
 'use client'
 // import { extractAddress, extractDate } from '@packages/lib/src/doc-utils/extraction'
+// import {
+// 	// handleDrop,
+// 	// handleFileSelect,
+// 	// handleFileUpload,
+// 	// removeFile,
+// } from '@packages/lib/src/doc-utils/uploadHandler'
 import {
-	handleDrop,
-	handleFileSelect,
-	handleFileUpload,
-	removeFile,
-} from '@packages/lib/src/doc-utils/uploadHandler'
-import {
-	handleContinue,
+	// handleContinue,
 	validateDocument,
+	// processFile,
 } from '@packages/lib/src/doc-utils/validation'
+import { processFile } from '@packages/lib/src/doc-utils/fileProcessing'
+// import {
+// 	extractAddress,
+// 	extractDate,
+// } from '@packages/lib/src/doc-utils/extraction'
 import { AlertCircle } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
@@ -24,7 +30,6 @@ import {
 import { useToast } from '~/components/base/toast'
 import type {
 	DocumentType,
-	ExtractedData,
 } from '~/components/shared/kyc/kyc-4/types'
 import { DocumentPreview } from './DocumentPreview'
 import { DocumentTypeSelector } from './DocumentTypeSelector'
@@ -32,6 +37,18 @@ import { ExtractedInfoDisplay } from './ExtractedInfoDisplay'
 import { FileUploadArea } from './FileUploadArea'
 import { OCRProcessor } from './OCRProcessor'
 import { ValidationDisplay } from './ValidationDisplay'
+
+interface ExtractedData {
+	text: string
+	date: string | null
+	address: string | null
+}
+type ToastType = {
+	title: string
+	description?: string
+	duration?: number
+	className?: string
+}
 
 const ProofOfAddressUpload = ({
 	onBack,
@@ -56,6 +73,118 @@ const ProofOfAddressUpload = ({
 		}
 	}, [previewUrl])
 
+	const isValidFileType = (file: File): boolean => {
+		const validTypes = ['image/png', 'image/jpeg', 'image/jpg']
+		return validTypes.includes(file.type)
+	}
+	
+	const handleDrop = async (
+		e: React.DragEvent<HTMLDivElement>,
+		documentType: string | null,
+		handleFileUpload: (
+			uploadedFile: File,
+			documentType: string | null,
+			setFile: (file: File | null) => void,
+			toast: (toastProps: any) => void,
+		) => void,
+		setFile: (file: File | null) => void,
+		toast: (toastProps: any) => void,
+	) => {
+		e.preventDefault()
+		const droppedFile = e.dataTransfer.files[0]
+		if (droppedFile && isValidFileType(droppedFile)) {
+			await handleFileUpload(droppedFile, documentType, setFile, toast)
+		}
+	}
+	
+	const handleFileSelect = async (
+		e: React.ChangeEvent<HTMLInputElement>,
+		documentType: string | null,
+		handleFileUpload: (
+			uploadedFile: File,
+			documentType: string | null,
+			setFile: (file: File | null) => void,
+			toast: (toastProps: any) => void,
+		) => void,
+		setFile: (file: File | null) => void,
+		toast: (toastProps: any) => void,
+	) => {
+		if (!documentType) {
+			e.target.value = ''
+			return
+		}
+		const selectedFile = e.target.files?.[0]
+		if (selectedFile && isValidFileType(selectedFile)) {
+			await handleFileUpload(selectedFile, documentType, setFile, toast)
+		}
+	}
+	
+	const removeFile = (
+		previewUrl: string | null,
+		setFile: (file: File | null) => void,
+		setPreviewUrl: (url: string | null) => void,
+		setExtractedData: (data: any) => void,
+		setValidationErrors: (errors: string[]) => void,
+	) => {
+		if (previewUrl) {
+			URL.revokeObjectURL(previewUrl)
+		}
+		setFile(null)
+		setPreviewUrl(null)
+		setExtractedData(null)
+		setValidationErrors([])
+	}	
+
+	const handleFileUpload = (
+		documentType: string | null,
+		setFile: (file: File | null) => void,
+		setPreviewUrl: (url: string | null) => void,
+		setIsProcessing: (isProcessing: boolean) => void,
+		setProgress: (progress: number) => void,
+		setValidationErrors: (errors: string[]) => void,
+		setExtractedData: (data: any) => void,
+		toast: (options: any) => void
+	) => {
+		return async (uploadedFile: File) => {
+			if (!documentType) {
+				toast({ type: "error", message: "Please select a document type." });
+				return;
+			}
+	
+			setFile(uploadedFile);
+			const preview = URL.createObjectURL(uploadedFile);
+			setPreviewUrl(preview);
+	
+			setIsProcessing(true);
+			setProgress(0);
+			setValidationErrors([]);
+	
+			try {
+				const result = await processFile(uploadedFile);
+	
+				if (result.error) {
+					setValidationErrors([result.error]);
+					toast({ type: "error", message: result.error });
+				} else {
+					setExtractedData(result.extractedData);
+					setValidationErrors(result.validationErrors);
+	
+					if (result.validationErrors.length > 0) {
+						toast({ type: "warning", message: "Document has validation errors." });
+					} else {
+						toast({ type: "success", message: "Document processed successfully!" });
+					}
+				}
+	
+				setProgress(result.progress);
+			} catch (error) {
+				toast({ type: "error", message: "An error occurred while processing the document." });
+				console.error("Error in handleFileUpload:", error);
+			} finally {
+				setIsProcessing(false);
+			}
+		};
+	};
 	const handleFileUploadBound = useCallback(
 		handleFileUpload(
 			documentType,
@@ -75,6 +204,56 @@ const ProofOfAddressUpload = ({
 			handleFileUploadBound(file)
 		}
 	}, [file, handleFileUploadBound]) // Now stable
+
+	const handleContinue = (
+		extractedData: ExtractedData | null,
+		documentType: DocumentType,
+		onNext:
+			| ((data: {
+					documentType: DocumentType
+					extractedData: ExtractedData
+			  }) => void)
+			| undefined,
+		validateDocument: (
+			data: ExtractedData,
+			toast: (toastProps: any) => void,
+		) => { isValid: boolean; errors: string[] },
+		toast: (toastProps: any) => void,
+		setValidationErrors: (errors: string[]) => void,
+	) => {
+		if (!extractedData || !documentType) {
+			toast({
+				title: 'Incomplete Information',
+				description: 'Please upload a document and select a document type.',
+				className: 'bg-destructive text-destructive-foreground',
+			} as ToastType)
+			return
+		}
+	
+		const { isValid, errors } = validateDocument(extractedData, toast)
+	
+		if (isValid) {
+			if (onNext) {
+				onNext({
+					documentType,
+					extractedData,
+				})
+			}
+	
+			toast({
+				title: 'Validation Successful',
+				description: 'Your document has been validated and processed.',
+				className: 'bg-green-500',
+			} as ToastType)
+		} else {
+			setValidationErrors(errors)
+			toast({
+				title: 'Validation Failed',
+				description: 'Please review the document requirements.',
+				className: 'bg-destructive text-destructive-foreground',
+			} as ToastType)
+		}
+	}
 
 	return (
 		<Card className="w-full max-w-xl mx-auto">

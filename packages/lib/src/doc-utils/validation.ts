@@ -1,18 +1,19 @@
 import Tesseract from 'tesseract.js'
+import { extractAddress, extractDate } from './extraction'
 
 interface ExtractedData {
 	text: string
 	date: string | null
 	address: string | null
 }
-type ToastType = {
-	title: string
-	description?: string
-	duration?: number
-	className?: string
-}
+// type ToastType = {
+// 	title: string
+// 	description?: string
+// 	duration?: number
+// 	className?: string
+// }
 
-type DocumentType = 'utility' | 'bank' | 'government' | ''
+// type DocumentType = 'utility' | 'bank' | 'government' | ''
 
 export const validateDocument = (
 	data: ExtractedData,
@@ -67,110 +68,103 @@ export const validateDocument = (
 	}
 }
 
-export const processFile = async (
-	file: File,
-	setIsProcessing: (value: boolean) => void,
-	setProgress: (value: number) => void,
-	setValidationErrors: (errors: string[]) => void,
-	// Tesseract: {
-	// 	recognize: (
-	// 		arg0: File,
-	// 		arg1: string,
-	// 		arg2: { logger: (message: any) => void },
-	// 	) => any
-	// },
-	extractDate: (text: string) => string | null,
-	extractAddress: (text: string) => string | null,
-	setExtractedData: (data: ExtractedData) => void,
-	validateDocument: (
-		data: ExtractedData,
-	) => { isValid: boolean; errors: string[] },
-) => {
-	setIsProcessing(true)
-	setProgress(0)
-	setValidationErrors([])
+// export const processFile = async (
+// 	file: File,
+// 	setIsProcessing: (value: boolean) => void,
+// 	setProgress: (value: number) => void,
+// 	setValidationErrors: (errors: string[]) => void,
+// 	// extractDate: (text: string) => string | null,
+// 	// extractAddress: (text: string) => string | null,
+// 	setExtractedData: (data: ExtractedData) => void,
+// 	validateDocument: (
+// 		data: ExtractedData,
+// 	) => { isValid: boolean; errors: string[] },
+// ) => {
+// 	setIsProcessing(true)
+// 	setProgress(0)
+// 	setValidationErrors([])
 
-	try {
-		const result = await Tesseract.recognize(file, 'eng', {
-			logger: (message: any) => {
-				if (message.status === 'recognizing text') {
-					setProgress(Math.round(message.progress * 100))
-				}
-			},
-		})
+// 	try {
+// 		const result = await Tesseract.recognize(file, 'eng', {
+// 			logger: (message: any) => {
+// 				if (message.status === 'recognizing text') {
+// 					setProgress(Math.round(message.progress * 100))
+// 				}
+// 			},
+// 		})
 
-		const extractedText = result.data.text
+// 		const extractedText = result.data.text
 
-		const processedData: ExtractedData = {
-			text: extractedText,
-			date: extractDate(extractedText),
-			address: extractAddress(extractedText),
-		}
+// 		const processedData: ExtractedData = {
+// 			text: extractedText,
+// 			date: extractDate(extractedText),
+// 			address: extractAddress(extractedText),
+// 		}
 
-		setExtractedData(processedData)
+// 		setExtractedData(processedData)
 
-		const { isValid, errors } = validateDocument(processedData)
+// 		const { isValid, errors } = validateDocument(processedData)
 
-		if (isValid) {
-			// Do something with the extracted data
-		} else {
-			setValidationErrors(errors)
-		}
-	} catch (error) {
-		console.error('Error processing document:', error)
-		// setValidationErrors(['Error processing document'])
-	} finally {
-		setIsProcessing(false)
-		setProgress(0)
-	}
-}
+// 		if (isValid) {
+// 			// Do something with the extracted data
+// 		} else {
+// 			setValidationErrors(errors)
+// 		}
+// 	} catch (error) {
+// 		console.error('Error processing document:', error)
+// 		// setValidationErrors(['Error processing document'])
+// 	} finally {
+// 		setIsProcessing(false)
+// 		setProgress(0)
+// 	}
+// }
 
-export const handleContinue = (
-	extractedData: ExtractedData | null,
-	documentType: DocumentType,
-	onNext:
-		| ((data: {
-				documentType: DocumentType
-				extractedData: ExtractedData
-		  }) => void)
-		| undefined,
-	validateDocument: (
-		data: ExtractedData,
-		toast: (toastProps: any) => void,
-	) => { isValid: boolean; errors: string[] },
-	toast: (toastProps: any) => void,
-	setValidationErrors: (errors: string[]) => void,
-) => {
-	if (!extractedData || !documentType) {
-		toast({
-			title: 'Incomplete Information',
-			description: 'Please upload a document and select a document type.',
-			className: 'bg-destructive text-destructive-foreground',
-		} as ToastType)
-		return
-	}
+// export const handleContinue = (
+// 	extractedData: ExtractedData | null,
+// 	documentType: DocumentType,
+// 	onNext:
+// 		| ((data: {
+// 				documentType: DocumentType
+// 				extractedData: ExtractedData
+// 		  }) => void)
+// 		| undefined,
+// 	validateDocument: (
+// 		data: ExtractedData,
+// 		toast: (toastProps: any) => void,
+// 	) => { isValid: boolean; errors: string[] },
+// 	toast: (toastProps: any) => void,
+// 	setValidationErrors: (errors: string[]) => void,
+// ) => {
+// 	if (!extractedData || !documentType) {
+// 		toast({
+// 			title: 'Incomplete Information',
+// 			description: 'Please upload a document and select a document type.',
+// 			className: 'bg-destructive text-destructive-foreground',
+// 		} as ToastType)
+// 		return
+// 	}
 
-	const { isValid, errors } = validateDocument(extractedData, toast)
+// 	const { isValid, errors } = validateDocument(extractedData, toast)
 
-	if (isValid) {
-		if (onNext) {
-			onNext({
-				documentType,
-				extractedData,
-			})
-		}
+// 	if (isValid) {
+// 		if (onNext) {
+// 			onNext({
+// 				documentType,
+// 				extractedData,
+// 			})
+// 		}
 
-		toast({
-			title: 'Validation Successful',
-			description: 'Your document has been validated and processed.',
-			className: 'bg-green-500',
-		} as ToastType)
-	} else {
-		setValidationErrors(errors)
-		toast({
-			title: 'Validation Failed',
-			description: 'Please review the document requirements.',
-			className: 'bg-destructive text-destructive-foreground',
-		} as ToastType)
-	}
-}
+// 		toast({
+// 			title: 'Validation Successful',
+// 			description: 'Your document has been validated and processed.',
+// 			className: 'bg-green-500',
+// 		} as ToastType)
+// 	} else {
+// 		setValidationErrors(errors)
+// 		toast({
+// 			title: 'Validation Failed',
+// 			description: 'Please review the document requirements.',
+// 			className: 'bg-destructive text-destructive-foreground',
+// 		} as ToastType)
+// 	}
+// }
