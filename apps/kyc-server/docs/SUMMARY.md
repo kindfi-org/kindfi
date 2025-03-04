@@ -27,13 +27,19 @@ This document provides a summary of the React SSR implementation with client-sid
    - Server serves the bundled JavaScript from the `public` directory
    - Proper content types and cache headers are set
 
-5. **CORS Configuration**
+5. **Passkey Authentication**
+
+   - WebAuthn/Passkey authentication for secure passwordless login
+   - Challenge-based authentication flow
+   - Support for multiple authenticators
+
+6. **CORS Configuration**
 
    - Configurable Cross-Origin Resource Sharing
    - Support for specific domains or wildcards
    - Secure by default
 
-6. **Documentation**
+7. **Documentation**
    - Comprehensive documentation of all features
    - Setup and usage instructions
    - API reference
