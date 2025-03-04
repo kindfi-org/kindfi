@@ -3,7 +3,7 @@ CREATE TYPE milestone_status AS ENUM ('pending', 'in_progress', 'completed', 'fa
 CREATE TABLE project_milestones (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID NOT NULL REFERENCES projects(id),
-    milestone_id UUID NOT NULL
+    milestone_id UUID NOT NULL,
     UNIQUE (project_id, milestone_id)
 );
 
