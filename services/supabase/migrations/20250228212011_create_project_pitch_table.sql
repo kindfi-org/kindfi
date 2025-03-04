@@ -25,11 +25,12 @@ USING (
         SELECT id FROM public.projects
         WHERE id = project_pitch.project_id
         AND (
-            created_by = auth.uid() OR
-            id IN (
-                SELECT project_id FROM public.project_members
-                WHERE user_id = auth.uid()
-            )
+            owner_id = auth.uid()
+            -- owner_id = auth.uid() OR
+            -- id IN (
+            --     SELECT project_id FROM public.project_members
+            --     WHERE user_id = auth.uid()
+            -- )
         )
     )
 );
@@ -43,12 +44,13 @@ WITH CHECK (
         SELECT id FROM public.projects
         WHERE id = project_pitch.project_id
         AND (
-            created_by = auth.uid() OR
-            id IN (
-                SELECT project_id FROM public.project_members
-                WHERE user_id = auth.uid()
-                AND role IN ('admin', 'editor')
-            )
+            owner_id = auth.uid()
+            -- owner_id = auth.uid() OR
+            -- id IN (
+            --     SELECT project_id FROM public.project_members
+            --     WHERE user_id = auth.uid()
+            --     AND role IN ('admin', 'editor')
+            -- )
         )
     )
 );
@@ -62,12 +64,13 @@ USING (
         SELECT id FROM public.projects
         WHERE id = project_pitch.project_id
         AND (
-            created_by = auth.uid() OR
-            id IN (
-                SELECT project_id FROM public.project_members
-                WHERE user_id = auth.uid()
-                AND role IN ('admin', 'editor')
-            )
+            owner_id = auth.uid()
+            -- owner_id = auth.uid() OR
+            -- id IN (
+            --     SELECT project_id FROM public.project_members
+            --     WHERE user_id = auth.uid()
+            --     AND role IN ('admin', 'editor')
+            -- )
         )
     )
 );
@@ -81,15 +84,25 @@ USING (
         SELECT id FROM public.projects
         WHERE id = project_pitch.project_id
         AND (
-            created_by = auth.uid() OR
-            id IN (
-                SELECT project_id FROM public.project_members
-                WHERE user_id = auth.uid()
-                AND role = 'admin'
-            )
+            owner_id = auth.uid()
+            -- owner_id = auth.uid() OR
+            -- id IN (
+            --     SELECT project_id FROM public.project_members
+            --     WHERE user_id = auth.uid()
+            --     AND role = 'admin'
+            -- )
         )
     )
 );
+
+-- Create function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
 -- Create trigger to update updated_at timestamp
 CREATE TRIGGER set_updated_at
