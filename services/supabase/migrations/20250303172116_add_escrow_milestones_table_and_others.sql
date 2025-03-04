@@ -32,67 +32,61 @@ ALTER TABLE escrow_milestones
 ADD CONSTRAINT escrow_milestones_project_milestone_id_fkey
 FOREIGN KEY (project_milestone_id) REFERENCES project_milestones(id);
 
-ALTER TABLE
-    escrow_milestones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_milestones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE escrow_milestones ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow authenticated users to create escrow milestones for their projects" ON "public"."escrow_milestones" AS PERMISSIVE FOR
-INSERT
-    TO public WITH CHECK (
-        auth.role() = 'authenticated'
-        AND auth.uid() IN (
-            SELECT
-                owner_id
-            FROM
-                projects
-            WHERE
-                id IN (
-                    SELECT
-                        project_id
-                    FROM
-                        project_milestones
-                    WHERE
-                        milestone_id = escrow_milestones.id
-                )
-        )
-    );
+-- RLS Policies for project_milestones
+-- Project owners can create milestones for their projects
+CREATE POLICY "Project owners can create project milestones" ON project_milestones FOR INSERT WITH CHECK (
+    project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+);
 
-CREATE POLICY "Allow project owners to update escrow milestones" ON "public"."escrow_milestones" AS PERMISSIVE FOR
-UPDATE
-    TO public USING (
-        auth.uid() IN (
-            SELECT
-                owner_id
-            FROM
-                projects
-            WHERE
-                id IN (
-                    SELECT
-                        project_id
-                    FROM
-                        project_milestones
-                    WHERE
-                        milestone_id = escrow_milestones.id
-                )
-        )
-    );
+-- Project owners can view project milestones for their projects
+CREATE POLICY "Project owners can view project milestones" ON project_milestones FOR SELECT USING (
+    project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+);
 
-CREATE POLICY "Allow public read access to escrow milestones for public projects" ON "public"."escrow_milestones" AS PERMISSIVE FOR
-SELECT
-    TO public USING (
-        EXISTS (
-            SELECT
-                1
-            FROM
-                projects
-            WHERE
-                id IN (
-                    SELECT
-                        project_id
-                    FROM
-                        project_milestones
-                    WHERE
-                        milestone_id = escrow_milestones.id
-                )
-                AND public = TRUE
-        )
-    );
+-- Project owners can delete project milestones for their projects
+CREATE POLICY "Project owners can delete project milestones" ON project_milestones FOR DELETE USING (
+    project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+);
+
+-- Project owners can create escrow milestones for their projects
+CREATE POLICY "Project owners can create escrow milestones" ON escrow_milestones FOR INSERT WITH CHECK (
+    EXISTS (
+        SELECT 1
+        FROM project_milestones
+        WHERE id = escrow_milestones.project_milestone_id
+        AND project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+    )
+);
+
+-- Project owners can view escrow milestones for their projects
+CREATE POLICY "Project owners can view escrow milestones" ON escrow_milestones FOR SELECT USING (
+    EXISTS (
+        SELECT 1
+        FROM project_milestones
+        WHERE id = escrow_milestones.project_milestone_id
+        AND project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+    )
+);
+
+-- Project owners can update escrow milestones for their projects
+CREATE POLICY "Project owners can update escrow milestones" ON escrow_milestones FOR UPDATE USING (
+    EXISTS (
+        SELECT 1
+        FROM project_milestones
+        WHERE id = escrow_milestones.project_milestone_id
+        AND project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+    )
+);
+
+-- Project owners can delete escrow milestones for their projects
+CREATE POLICY "Project owners can delete escrow milestones" ON escrow_milestones FOR DELETE USING (
+    EXISTS (
+        SELECT 1
+        FROM project_milestones
+        WHERE id = escrow_milestones.project_milestone_id
+        AND project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+    )
+);
