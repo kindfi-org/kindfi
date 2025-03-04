@@ -84,9 +84,7 @@ export const processFile = async (
 	setExtractedData: (data: ExtractedData) => void,
 	validateDocument: (
 		data: ExtractedData,
-		toast: (toastProps: any) => void,
 	) => { isValid: boolean; errors: string[] },
-	toast: (toastProps: any) => void,
 ) => {
 	setIsProcessing(true)
 	setProgress(0)
@@ -111,30 +109,16 @@ export const processFile = async (
 
 		setExtractedData(processedData)
 
-		const { isValid, errors } = validateDocument(processedData, toast)
+		const { isValid, errors } = validateDocument(processedData)
 
 		if (isValid) {
-			toast({
-				title: 'Document processed successfully',
-				description:
-					"We've extracted the required information from your document.",
-				className: 'bg-green-500',
-			} as ToastType)
+			// Do something with the extracted data
 		} else {
 			setValidationErrors(errors)
-			toast({
-				title: 'Document Validation Failed',
-				description: 'Please review the document requirements.',
-				className: 'bg-destructive text-destructive-foreground',
-			} as ToastType)
 		}
 	} catch (error) {
 		console.error('Error processing document:', error)
-		toast({
-			title: 'Error processing document',
-			description: 'Please ensure your document is clear and try again.',
-			className: 'bg-destructive text-destructive-foreground',
-		} as ToastType)
+		// setValidationErrors(['Error processing document'])
 	} finally {
 		setIsProcessing(false)
 		setProgress(0)

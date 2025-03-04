@@ -1,12 +1,6 @@
 import { extractAddress, extractDate } from './extraction'
 import { processFile, validateDocument } from './validation'
 
-type ToastType = {
-	title: string
-	description?: string
-	duration?: number
-	className?: string
-}
 
 export const handleFileUpload = (
 	documentType: string | null,
@@ -21,11 +15,6 @@ export const handleFileUpload = (
 ) => {
 	return async (uploadedFile: File) => {
 		if (!documentType) {
-			toast({
-				title: 'Document Type Required',
-				description: 'Please select a document type first.',
-				className: 'bg-destructive text-destructive-foreground',
-			} as ToastType)
 			return
 		}
 
@@ -43,7 +32,6 @@ export const handleFileUpload = (
 			extractAddress,
 			setExtractedData,
 			validateDocument,
-			toast,
 		)
 	}
 }
@@ -85,11 +73,6 @@ export const handleFileSelect = async (
 	toast: (toastProps: any) => void,
 ) => {
 	if (!documentType) {
-		toast({
-			title: 'Document Type Required',
-			description: 'Please select a document type before uploading.',
-			className: 'bg-destructive text-destructive-foreground',
-		} as ToastType)
 		e.target.value = ''
 		return
 	}
