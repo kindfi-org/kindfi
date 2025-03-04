@@ -25,7 +25,7 @@ USING (
         SELECT id FROM public.projects
         WHERE id = project_pitch.project_id
         AND (
-            created_by = auth.uid() OR
+            owner_id = auth.uid() OR
             id IN (
                 SELECT project_id FROM public.project_members
                 WHERE user_id = auth.uid()
@@ -43,7 +43,7 @@ WITH CHECK (
         SELECT id FROM public.projects
         WHERE id = project_pitch.project_id
         AND (
-            created_by = auth.uid() OR
+            owner_id = auth.uid() OR
             id IN (
                 SELECT project_id FROM public.project_members
                 WHERE user_id = auth.uid()
