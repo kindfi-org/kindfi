@@ -126,9 +126,6 @@ export function ProjectMedia({
   onFileUpload,
   onVideoUrlChange,
   videoUrl = "",
-  onFileUpload,
-  onVideoUrlChange,
-  videoUrl = "",
 }: ProjectMediaProps) {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
