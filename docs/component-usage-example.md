@@ -103,7 +103,7 @@ In this example, the Button component is a reusable UI element that can be integ
 
 ### 2. Complex Integration Scenerio
 
-For more complex scenarios, such as integrating third-party libraries, the project employs components like react-dropzone for file uploads. The react-dropzone library provides a simple way to create an HTML5-compliant drag-and-drop zone for files. Documentation and examples are available at https://react-dropzone.js.org.
+For more complex scenarios, such as integrating third-party libraries, the project employs components like react-dropzone for file uploads. The react-dropzone library provides a simple way to create an HTML5-compliant drag-and-drop zone for files. Documentation and examples are available at [https://react-dropzone.js.org](https://react-dropzone.js.org).
 
 ### Example
 
