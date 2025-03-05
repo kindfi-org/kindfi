@@ -9,7 +9,7 @@ import type { DocumentType } from './types'
 
 interface DocumentTypeSelectorProps {
 	documentType: DocumentType
-	setDocumentType: (_value: DocumentType) => void
+	setDocumentType: (value: DocumentType) => void
 }
 
 export const DocumentTypeSelector: React.FC<DocumentTypeSelectorProps> = ({

@@ -10,7 +10,6 @@
 		"test": "bun test/**.test.{mjs,ts,js}"
 	},
 	"dependencies": {
-		"@packages/lib": "workspace:*",
 		"@hookform/resolvers": "^3.9.1",
 		"@radix-ui/react-accordion": "^1.2.3",
 		"@radix-ui/react-alert-dialog": "^1.1.2",
