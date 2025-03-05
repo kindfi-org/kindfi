@@ -214,7 +214,7 @@ export function validateMilestoneReview(
 	if (!data.status) {
 		errors.push('Milestone status is required.')
 	} else if (
-		!['pending', 'approved', 'REJECTED', 'completed'].includes(data.status)
+		!['pending', 'approved', 'rejected', 'completed'].includes(data.status)
 	) {
 		errors.push('Invalid milestone status.')
 	}

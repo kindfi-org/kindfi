@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 			status,
 			comments,
 			signer,
-			escrowContract,
+			escrowContractAddress,
 		} = reviewData
 
 		// Step 1: Validate Milestone Exists
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 			const escrowResponse = await createEscrowRequest({
 				action: 'approveMilestone',
 				method: 'POST',
-				data: { signer, contractId: escrowContract },
+				data: { signer, contractId: escrowContractAddress },
 			})
 
 			if (!escrowResponse.unsignedTransaction) {
@@ -134,13 +134,16 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(
 			{
+				success: true,
 				message: 'Milestone reviewed successfully',
-				milestone: updatedMilestone,
+				data: { milestone: updatedMilestone },
 			},
 			{ status: 200 },
 		)
 	} catch (error) {
+
 		console.error('Milestone Review Error:', error)
+
 
 		if (error instanceof AppError) {
 			return NextResponse.json(
@@ -150,8 +153,8 @@ export async function POST(req: NextRequest) {
 		}
 
 		return NextResponse.json(
-			{ error: 'Internal server error during milestone review' },
-			{ status: 500 },
+			{ error: 'Invalid JSON format in request body' },
+			{ status: 400 },
 		)
 	}
 }
