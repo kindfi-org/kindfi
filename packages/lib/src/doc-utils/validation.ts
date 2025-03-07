@@ -1,5 +1,3 @@
-import Tesseract from 'tesseract.js'
-import { extractAddress, extractDate } from './extraction'
 import type { ExtractedData } from './types'
 
 export const validateDocument = (
