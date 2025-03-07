@@ -6,6 +6,15 @@ interface ExtractedData {
 	date: string | null
 	address: string | null
 }
+// type ToastType = {
+// 	title: string
+// 	description?: string
+// 	duration?: number
+// 	className?: string
+// }
+
+// type DocumentType = 'utility' | 'bank' | 'government' | ''
+
 export const validateDocument = (
 	data: ExtractedData,
 ): { isValid: boolean; errors: string[] } => {

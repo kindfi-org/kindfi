@@ -1,12 +1,9 @@
 'use client'
-import {
-	validateDocument,
-} from '@packages/lib/src/doc-utils/validation'
-import { processFile } from '@packages/lib/src/doc-utils/file-processing'
+import { processFile, validateDocument } from '@packages/lib'
+import type { DocumentType } from '@packages/lib'
 import { AlertCircle } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
-
 import { Alert, AlertDescription } from '~/components/base/alert'
 import {
 	Card,
@@ -15,9 +12,6 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import { useToast } from '~/components/base/toast'
-import type {
-	DocumentType,
-} from '~/components/shared/kyc/kyc-4/types'
 import { DocumentPreview } from './document-preview'
 import { DocumentTypeSelector } from './document-type-selector'
 import { ExtractedInfoDisplay } from './extracted-info-display'
@@ -64,26 +58,30 @@ const ProofOfAddressUpload = ({
 		const validTypes = ['image/png', 'image/jpeg', 'image/jpg']
 		return validTypes.includes(file.type)
 	}
-	
+
 	const handleDrop = async (
-		e: React.DragEvent<HTMLDivElement>,
-		documentType: string | null,
-		handleFileUpload: (
-			uploadedFile: File,
-			documentType: string | null,
-			setFile: (file: File | null) => void,
-			toast: (toastProps: any) => void,
-		) => void,
-		setFile: (file: File | null) => void,
-		toast: (toastProps: any) => void,
+		e: React.DragEvent<HTMLLabelElement>,
+		documentType: DocumentType,
+		handleFileUploadBound: (file: File) => void,
+		setFile: React.Dispatch<React.SetStateAction<File | null>>,
+		toast: (props: Omit<ToastType, 'className'>) => () => void,
 	) => {
 		e.preventDefault()
 		const droppedFile = e.dataTransfer.files[0]
 		if (droppedFile && isValidFileType(droppedFile)) {
-			await handleFileUpload(droppedFile, documentType, setFile, toast)
+			await handleFileUpload(
+				documentType,
+				setFile,
+				setPreviewUrl,
+				setIsProcessing,
+				setProgress,
+				setValidationErrors,
+				setExtractedData,
+				toast,
+			)
 		}
 	}
-	
+
 	const handleFileSelect = async (
 		e: React.ChangeEvent<HTMLInputElement>,
 		documentType: string | null,
@@ -91,10 +89,10 @@ const ProofOfAddressUpload = ({
 			uploadedFile: File,
 			documentType: string | null,
 			setFile: (file: File | null) => void,
-			toast: (toastProps: any) => void,
+			toast: (props: Omit<ToastType, 'className'>) => () => void,
 		) => void,
 		setFile: (file: File | null) => void,
-		toast: (toastProps: any) => void,
+		toast: (props: Omit<ToastType, 'className'>) => () => void,
 	) => {
 		if (!documentType) {
 			e.target.value = ''
@@ -105,12 +103,12 @@ const ProofOfAddressUpload = ({
 			await handleFileUpload(selectedFile, documentType, setFile, toast)
 		}
 	}
-	
+
 	const removeFile = (
 		previewUrl: string | null,
 		setFile: (file: File | null) => void,
 		setPreviewUrl: (url: string | null) => void,
-		setExtractedData: (data: any) => void,
+		setExtractedData: (data: ExtractedData | null) => void,
 		setValidationErrors: (errors: string[]) => void,
 	) => {
 		if (previewUrl) {
@@ -120,7 +118,7 @@ const ProofOfAddressUpload = ({
 		setPreviewUrl(null)
 		setExtractedData(null)
 		setValidationErrors([])
-	}	
+	}
 
 	const handleFileUpload = (
 		documentType: string | null,
@@ -129,49 +127,62 @@ const ProofOfAddressUpload = ({
 		setIsProcessing: (isProcessing: boolean) => void,
 		setProgress: (progress: number) => void,
 		setValidationErrors: (errors: string[]) => void,
-		setExtractedData: (data: any) => void,
-		toast: (options: any) => void
+		setExtractedData: (data: ExtractedData | null) => void,
+		toast: (props: Omit<ToastType, 'className'>) => () => void,
 	) => {
 		return async (uploadedFile: File) => {
 			if (!documentType) {
-				toast({ type: "error", message: "Please select a document type." });
-				return;
+				toast({
+					title: 'Error',
+					description: 'Please select a document type.',
+				})
+				return
 			}
-	
-			setFile(uploadedFile);
-			const preview = URL.createObjectURL(uploadedFile);
-			setPreviewUrl(preview);
-	
-			setIsProcessing(true);
-			setProgress(0);
-			setValidationErrors([]);
-	
+
+			setFile(uploadedFile)
+			const preview = URL.createObjectURL(uploadedFile)
+			setPreviewUrl(preview)
+
+			setIsProcessing(true)
+			setProgress(0)
+			setValidationErrors([])
+
 			try {
-				const result = await processFile(uploadedFile);
-	
+				const result = await processFile(uploadedFile)
+
 				if (result.error) {
-					setValidationErrors([result.error]);
-					toast({ type: "error", message: result.error });
+					setValidationErrors([result.error])
+					toast({ title: 'Error', description: result.error })
 				} else {
-					setExtractedData(result.extractedData);
-					setValidationErrors(result.validationErrors);
-	
+					setExtractedData(result.extractedData)
+					setValidationErrors(result.validationErrors)
+
 					if (result.validationErrors.length > 0) {
-						toast({ type: "warning", message: "Document has validation errors." });
+						toast({
+							title: 'Warning',
+							description: 'Document has validation errors.',
+						})
 					} else {
-						toast({ type: "success", message: "Document processed successfully!" });
+						toast({
+							title: 'Success',
+							description: 'Document processed successfully!',
+						})
 					}
 				}
-	
-				setProgress(result.progress);
+
+				setProgress(result.progress)
 			} catch (error) {
-				toast({ type: "error", message: "An error occurred while processing the document." });
-				console.error("Error in handleFileUpload:", error);
+				toast({
+					title: 'Error',
+					description: 'An error occurred while processing the document.',
+				})
+				console.error('Error in handleFileUpload:', error)
 			} finally {
-				setIsProcessing(false);
+				setIsProcessing(false)
 			}
-		};
-	};
+		}
+	}
+	// biome-ignore lint/correctness/useExhaustiveDependencies: these dependencies are needed
 	const handleFileUploadBound = useCallback(
 		handleFileUpload(
 			documentType,
@@ -183,7 +194,7 @@ const ProofOfAddressUpload = ({
 			setExtractedData,
 			toast,
 		),
-		[documentType, toast], // Dependencies that can change
+		[documentType, toast],
 	)
 
 	useEffect(() => {
@@ -203,9 +214,9 @@ const ProofOfAddressUpload = ({
 			| undefined,
 		validateDocument: (
 			data: ExtractedData,
-			toast: (toastProps: any) => void,
+			toast: (props: Omit<ToastType, 'className'>) => () => void,
 		) => { isValid: boolean; errors: string[] },
-		toast: (toastProps: any) => void,
+		toast: (props: Omit<ToastType, 'className'>) => () => void,
 		setValidationErrors: (errors: string[]) => void,
 	) => {
 		if (!extractedData || !documentType) {
@@ -216,9 +227,9 @@ const ProofOfAddressUpload = ({
 			} as ToastType)
 			return
 		}
-	
+
 		const { isValid, errors } = validateDocument(extractedData, toast)
-	
+
 		if (isValid) {
 			if (onNext) {
 				onNext({
@@ -226,7 +237,7 @@ const ProofOfAddressUpload = ({
 					extractedData,
 				})
 			}
-	
+
 			toast({
 				title: 'Validation Successful',
 				description: 'Your document has been validated and processed.',
@@ -269,7 +280,21 @@ const ProofOfAddressUpload = ({
 				{!previewUrl ? (
 					<FileUploadArea
 						isProcessing={isProcessing}
-						handleDrop={handleDrop}
+						handleDrop={(
+							e,
+							documentType,
+							handleFileUploadBound,
+							setFile,
+							toast,
+						) =>
+							handleDrop(
+								e as unknown as React.DragEvent<HTMLLabelElement>,
+								documentType,
+								handleFileUploadBound,
+								setFile,
+								toast,
+							)
+						}
 						handleFileSelect={handleFileSelect}
 						documentType={documentType}
 						handleFileUploadBound={handleFileUploadBound}

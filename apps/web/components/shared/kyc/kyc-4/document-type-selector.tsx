@@ -1,3 +1,4 @@
+import type { DocumentType } from '@packages/lib'
 import {
 	Select,
 	SelectContent,
@@ -5,7 +6,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
-import type { DocumentType } from './types'
 
 interface DocumentTypeSelectorProps {
 	documentType: DocumentType
