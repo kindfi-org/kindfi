@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 'use client'
 import { processFile, validateDocument } from '@packages/lib'
-import type { DocumentType } from '@packages/lib'
+import type { DocumentType, ExtractedData } from '@packages/lib'
 import { AlertCircle } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
@@ -19,11 +20,6 @@ import { FileUploadArea } from './file-upload-area'
 import { OCRProcessor } from './ocr-processor'
 import { ValidationDisplay } from './validation-display'
 
-interface ExtractedData {
-	text: string
-	date: string | null
-	address: string | null
-}
 type ToastType = {
 	title: string
 	description?: string
@@ -36,7 +32,7 @@ const ProofOfAddressUpload = ({
 	onNext,
 }: {
 	onBack?: () => void
-	onNext?: () => void
+	onNext?: (data: { documentType: DocumentType; extractedData: ExtractedData }) => void
 }) => {
 	const [file, setFile] = useState<File | null>(null)
 	// TODO: Refactor the state management using useSetState from 'react-use'
@@ -184,16 +180,18 @@ const ProofOfAddressUpload = ({
 	}
 	// biome-ignore lint/correctness/useExhaustiveDependencies: these dependencies are needed
 	const handleFileUploadBound = useCallback(
-		handleFileUpload(
-			documentType,
-			setFile,
-			setPreviewUrl,
-			setIsProcessing,
-			setProgress,
-			setValidationErrors,
-			setExtractedData,
-			toast,
-		),
+		(uploadedFile: File) => {
+			handleFileUpload(
+				documentType,
+				setFile,
+				setPreviewUrl,
+				setIsProcessing,
+				setProgress,
+				setValidationErrors,
+				setExtractedData,
+				toast,
+			)(uploadedFile)
+		},
 		[documentType, toast],
 	)
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import type { DocumentType } from '@packages/lib'
 import { Upload } from 'lucide-react'
 import { useRef } from 'react'
