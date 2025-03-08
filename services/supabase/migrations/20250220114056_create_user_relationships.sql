@@ -18,7 +18,6 @@ CREATE TABLE kindler_projects (
 );
 
 
-
 -- Add indexes for better query performance
 CREATE INDEX idx_projects_owner_id ON projects(owner_id);
 CREATE INDEX idx_kindler_projects_project_id ON kindler_projects(project_id);
