@@ -67,8 +67,8 @@ USING (
     )
 )
 WITH CHECK (
-    -- Ensure role is within allowed enum values
-    role IN ('admin', 'editor')
+    -- Allow updates via triggers (e.g., automatic timestamp updates) or enforce valid role changes
+    role IN ('admin', 'editor') OR pg_trigger_depth() > 0
 );
 
 -- RLS Policy: Delete project members
