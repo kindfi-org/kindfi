@@ -1,7 +1,7 @@
 import type { ExtractedData } from '@packages/lib'
 import { Loader2, X } from 'lucide-react'
-import type React from 'react'
 import Image from 'next/image'
+import type React from 'react'
 
 interface DocumentPreviewProps {
 	isProcessing: boolean
@@ -53,7 +53,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
 				<X className="h-5 w-5" />
 			</button>
 			{previewUrl && (
-				<Image 
+				<Image
 					width={400}
 					height={400}
 					src={previewUrl}
