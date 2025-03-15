@@ -37,7 +37,7 @@ export function DocumentUploadZone({
 				ref={fileUploadRef}
 				type="file"
 				style={{ display: 'none' }}
-				accept=".jpg,.jpeg,.png,.pdf"
+				accept=".jpg,.jpeg,.png,"
 				onChange={onFileSelect}
 				disabled={isProcessing || isDisabled}
 			/>
