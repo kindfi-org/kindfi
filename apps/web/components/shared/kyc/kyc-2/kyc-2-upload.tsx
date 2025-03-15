@@ -1,6 +1,5 @@
 'use client'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-import * as pdfjsLib from 'pdfjs-dist'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '~/components/base/button'
@@ -23,8 +22,6 @@ import { useDocumentFiles } from '~/hooks/kyc/use-document-files'
 import { useDocumentProcessor } from '~/hooks/kyc/use-document-processor'
 import { useDocumentValidation } from '~/hooks/kyc/use-document-validation'
 import { ValidationAlerts } from './validation-alerts'
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
 export default function IDDocumentUpload({
 	onBack,
@@ -49,8 +46,10 @@ export default function IDDocumentUpload({
 		setBackExtractedData,
 	} = useDocumentFiles()
 
-	const { isProcessing, progress, processFile, convertPDFToImage } =
-		useDocumentProcessor(documentType, toast)
+	const { isProcessing, progress, processFile } = useDocumentProcessor(
+		documentType,
+		toast,
+	)
 
 	const { validationErrors, validateDocument, setValidationErrors } =
 		useDocumentValidation(documentType)
@@ -122,7 +121,7 @@ export default function IDDocumentUpload({
 			}
 
 			try {
-				if (uploadedFile.type !== 'application/pdf') {
+				if (uploadedFile) {
 					const previewUrl = URL.createObjectURL(uploadedFile)
 					if (isFront) {
 						setFrontPreviewUrl(previewUrl)
@@ -133,66 +132,11 @@ export default function IDDocumentUpload({
 					}
 				}
 
-				if (uploadedFile.type === 'application/pdf') {
-					const arrayBuffer = await uploadedFile.arrayBuffer()
-					const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
-					const page = await pdf.getPage(1)
-					const viewport = page.getViewport({ scale: 2.0 })
-
-					const canvas = document.createElement('canvas')
-					canvas.height = viewport.height
-					canvas.width = viewport.width
-
-					const context = canvas.getContext('2d')
-					if (!context) {
-						throw new Error('Could not create canvas context')
-					}
-
-					await page.render({
-						canvasContext: context,
-						viewport: viewport,
-					}).promise
-
-					const blob = await new Promise<Blob>((resolve) => {
-						canvas.toBlob((b) => {
-							if (b) resolve(b)
-						}, 'image/png')
-					})
-
-					canvas.width = 0
-					canvas.height = 0
-					await pdf.destroy()
-
-					if (!blob) {
-						throw new Error('Failed to convert PDF to image')
-					}
-
-					const imageUrl = URL.createObjectURL(blob)
-					const imageFile = new File([blob], 'converted-pdf.png', {
-						type: 'image/png',
-					})
-
-					if (isFront) {
-						setFrontPreviewUrl(imageUrl)
-						setFrontFile(uploadedFile)
-					} else {
-						setBackPreviewUrl(imageUrl)
-						setBackFile(uploadedFile)
-					}
-
-					const processedData = await processFile(imageFile, isFront)
-					if (isFront) {
-						setFrontExtractedData(processedData)
-					} else {
-						setBackExtractedData(processedData)
-					}
+				const processedData = await processFile(uploadedFile, isFront)
+				if (isFront) {
+					setFrontExtractedData(processedData)
 				} else {
-					const processedData = await processFile(uploadedFile, isFront)
-					if (isFront) {
-						setFrontExtractedData(processedData)
-					} else {
-						setBackExtractedData(processedData)
-					}
+					setBackExtractedData(processedData)
 				}
 			} catch (error) {
 				console.error('Error handling file upload:', error)

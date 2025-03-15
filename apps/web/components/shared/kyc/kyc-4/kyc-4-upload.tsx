@@ -32,7 +32,10 @@ const ProofOfAddressUpload = ({
 	onNext,
 }: {
 	onBack?: () => void
-	onNext?: (data: { documentType: DocumentType; extractedData: ExtractedData }) => void
+	onNext?: (data: {
+		documentType: DocumentType
+		extractedData: ExtractedData
+	}) => void
 }) => {
 	const [file, setFile] = useState<File | null>(null)
 	// TODO: Refactor the state management using useSetState from 'react-use'
