@@ -6,6 +6,23 @@ interface ToastProps
 	className?: string
 }
 
+/**
+ * Toast component for displaying brief, non-intrusive notifications. More at: https://ui.shadcn.com/docs/components/toast
+ * @component
+ * @example
+ * // Basic usage
+ * toast({
+ *   title: "Success",
+ *   description: "Your action was completed successfully",
+ * })
+ *
+ * // With action
+ * toast({
+ *   title: "New message",
+ *   description: "You received a new message",
+ *   action: <ToastAction altText="View">View</ToastAction>
+ * })
+ */
 const Toast = React.forwardRef<HTMLLIElement, ToastProps>(
 	({ className, ...props }, ref) => (
 		<ToastPrimitives.Root
