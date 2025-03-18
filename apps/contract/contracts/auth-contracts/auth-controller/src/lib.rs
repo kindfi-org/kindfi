@@ -358,3 +358,4 @@ impl AuthController {
 }
 
 mod test;
+mod test_auth;
