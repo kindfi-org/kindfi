@@ -82,7 +82,7 @@ export function DocumentUploadZone({
 								isDisabled ? 'text-gray-300' : 'text-gray-500',
 							)}
 						>
-							JPG or PDF files only
+							JPG, PNG or PDF files only
 						</p>
 					</button>
 				</div>
