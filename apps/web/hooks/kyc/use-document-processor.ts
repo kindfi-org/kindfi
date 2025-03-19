@@ -1,7 +1,6 @@
 'use client'
-import * as pdfjsLib from 'pdfjs-dist'
+import { processFile } from '@packages/lib'
 import { useCallback, useState } from 'react'
-import Tesseract from 'tesseract.js'
 import {
 	DocumentPatterns,
 	type DocumentType,
@@ -9,41 +8,12 @@ import {
 	type ToastFunction,
 } from '~/components/shared/kyc/kyc-2/types'
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
-
 export function useDocumentProcessor(
 	documentType: DocumentType,
 	toast: ToastFunction,
 ) {
 	const [isProcessing, setIsProcessing] = useState(false)
 	const [progress, setProgress] = useState(0)
-
-	const convertPDFToImage = useCallback(async (file: File): Promise<File> => {
-		const arrayBuffer = await file.arrayBuffer()
-		const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
-		const page = await pdf.getPage(1)
-		const viewport = page.getViewport({ scale: 2.0 })
-
-		const canvas = document.createElement('canvas')
-		canvas.height = viewport.height
-		canvas.width = viewport.width
-
-		const context = canvas.getContext('2d')
-		if (!context) throw new Error('Could not create canvas context')
-
-		await page.render({
-			canvasContext: context,
-			viewport: viewport,
-		}).promise
-
-		return new Promise((resolve, reject) => {
-			canvas.toBlob((blob) => {
-				if (!blob) reject(new Error('Could not convert PDF to image'))
-				else
-					resolve(new File([blob], 'converted-pdf.png', { type: 'image/png' }))
-			}, 'image/png')
-		})
-	}, [])
 
 	const extractText = useCallback(
 		(text: string, pattern: RegExp): string | null => {
@@ -53,32 +23,39 @@ export function useDocumentProcessor(
 		[],
 	)
 
-	const processFile = useCallback(
+	const processFileWithType = useCallback(
 		async (file: File, isFront: boolean) => {
 			setIsProcessing(true)
 			setProgress(0)
 
 			try {
-				const imageToProcess =
-					file.type === 'application/pdf' ? await convertPDFToImage(file) : file
+				// const imageToProcess =
+				// 	file.type === 'application/pdf' ? await convertPDFToImage(file) : file
 
-				const result = await Tesseract.recognize(imageToProcess, 'eng', {
-					logger: (message) => {
-						if (message.status === 'recognizing text') {
-							setProgress(Math.round(message.progress * 100))
-						}
-					},
-				})
+				const { extractedData, progress, success, validationErrors } =
+					await processFile(file)
+				setProgress(progress)
 
-				const extractedText = result.data.text
+				if (!success) {
+					toast({
+						title: 'Validation Error',
+						description: validationErrors.join(', ') || 'Invalid document',
+						className: 'bg-warning text-warning-foreground',
+					})
+					return null
+				}
 
-				const cleanedText = extractedText
+				if (!extractedData) {
+					throw new Error('Failed to extract data')
+				}
+
+				const cleanedText = extractedData.text
 					.replace(/\s+/g, ' ')
 					.trim()
 					.toUpperCase()
 
 				const processedData: ExtractedData = {
-					text: extractedText,
+					...extractedData,
 					idNumber: null,
 					fullName: null,
 					expiryDate: null,
@@ -142,6 +119,7 @@ export function useDocumentProcessor(
 						/ISSUED BY[:\s]+([^\n]+)/i,
 					)
 				}
+
 				return processedData
 			} catch (error) {
 				console.error('Error processing document:', error)
@@ -159,13 +137,12 @@ export function useDocumentProcessor(
 				setProgress(0)
 			}
 		},
-		[documentType, convertPDFToImage, extractText, toast],
+		[documentType, extractText, toast],
 	)
 
 	return {
 		isProcessing,
 		progress,
-		processFile,
-		convertPDFToImage,
+		processFile: processFileWithType,
 	}
 }

@@ -6,25 +6,6 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 
-/**
- * Accordion component library provides a set of accessible, composable accordion components based
- * on Radix UI primitives.
- * More at: https://ui.shadcn.com/docs/components/accordion
- *
- * @components
- * - Accordion: The root container managing accordion state.
- * - AccordionItem: Wraps each individual section.
- * - AccordionTrigger: The clickable header that toggles the visibility of the content. It includes an animated icon that rotates when open.
- * - AccordionContent: The panel that reveals or hides its content based on the state.
- *
- * @example
- * <Accordion type="single" collapsible>
- *   <AccordionItem value="section-1">
- *     <AccordionTrigger>Section 1</AccordionTrigger>
- *     <AccordionContent>Content for section 1.</AccordionContent>
- *   </AccordionItem>
- * </Accordion>
- */
 const Accordion = AccordionPrimitive.Root
 
 const AccordionItem = React.forwardRef<
@@ -74,4 +55,4 @@ const AccordionContent = React.forwardRef<
 
 AccordionContent.displayName = AccordionPrimitive.Content.displayName
 
-export { Accordion, AccordionContent, AccordionItem, AccordionTrigger }
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
