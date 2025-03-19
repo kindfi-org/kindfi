@@ -187,455 +187,455 @@ fn test_signature_verification() {
     assert!(is_valid);
 }
 
-// #[test]
-// fn test_init() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+fn test_init() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     let signers = generate_signers(&env, 3);
-//     let default_threshold = 2;
+    let signers = generate_signers(&env, 3);
+    let default_threshold = 2;
 
-//     client.init(&signers, &default_threshold);
+    client.init(&signers, &default_threshold);
 
-//     // Verify initialization values
-//     assert_eq!(client.get_signers(), signers);
-//     assert_eq!(client.get_default_threshold(), default_threshold);
-// }
+    // Verify initialization values
+    assert_eq!(client.get_signers(), signers);
+    assert_eq!(client.get_default_threshold(), default_threshold);
+}
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #104")]
-// fn test_init_already_initialized() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+#[should_panic(expected = "Error(Contract, #104")]
+fn test_init_already_initialized() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     let signers = generate_signers(&env, 3);
-//     let default_threshold = 2;
+    let signers = generate_signers(&env, 3);
+    let default_threshold = 2;
 
-//     client.init(&signers, &default_threshold);
-//     client.init(&signers, &default_threshold); // Should panic
-// }
+    client.init(&signers, &default_threshold);
+    client.init(&signers, &default_threshold); // Should panic
+}
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #100)")]
-// fn test_init_signer_limit_exceeded() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+#[should_panic(expected = "Error(Contract, #100)")]
+fn test_init_signer_limit_exceeded() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     let signers = generate_signers(&env, 6); // Exceeds THRESHOLD_LIMIT (5)
-//     let default_threshold = 3;
+    let signers = generate_signers(&env, 6); // Exceeds THRESHOLD_LIMIT (5)
+    let default_threshold = 3;
 
-//     client.init(&signers, &default_threshold); // Should panic
-// }
+    client.init(&signers, &default_threshold); // Should panic
+}
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #105)")]
-// fn test_init_invalid_threshold() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+#[should_panic(expected = "Error(Contract, #105)")]
+fn test_init_invalid_threshold() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     let signers = generate_signers(&env, 3);
-//     let default_threshold = 4; // Greater than signers.len()
+    let signers = generate_signers(&env, 3);
+    let default_threshold = 4; // Greater than signers.len()
 
-//     client.init(&signers, &default_threshold); // Should panic
-// }
-
-// // #[test]
-// // fn test_check_auth() {
-// //     let env = Env::default();
-// //     let client = create_auth_client(&env);
-
-// //     // Initialize with a valid configuration
-// //     let signers = generate_signers(&env, 3);
-// //     let default_threshold = 1;
-// //     client.init(&signers, &default_threshold);
-
-// //     // Create secure keys for signing that correspond to the generated signers
-// //     let secure_key1 = get_secure_key_for_signer(0);
-// //     let secure_key2 = get_secure_key_for_signer(1);
-
-// //     // Create a payload
-// //     let payload_bytes: [u8; 32] = [1u8; 32];
-// //     let payload = BytesN::from_array(&env, &payload_bytes);
-
-// //     // Create signed messages
-// //     let signed_message1 = create_signed_message(&env, &secure_key1, &payload);
-// //     let signed_message2 = create_signed_message(&env, &secure_key2, &payload);
-
-// //     let signed_messages = vec![&env, signed_message1, signed_message2];
-
-// //     // Mock the crypto verification
-// //     env.mock_all_auths();
-// //     env.crypto().set_ed25519_verify_result(true);
-
-// //     // Test the check_auth function with valid context
-// //     let valid_context = vec![&env];
-
-// //     // This would normally fail without the mocked crypto and auths
-// //     client.__check_auth(env, &payload, &signed_messages, &valid_context);
-// // }
+    client.init(&signers, &default_threshold); // Should panic
+}
 
 // #[test]
-// fn test_add_signer() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
-
-//     // Generate 3 signers at once
-//     let all_signers = generate_signers(&env, 3);
-
-//     // Use only first two for init
-//     let init_signers = vec![
-//         &env,
-//         all_signers.get_unchecked(0),
-//         all_signers.get_unchecked(1),
-//     ];
-//     let default_threshold = 1;
-//     client.init(&init_signers, &default_threshold);
-
-//     // Mock authorization
-//     env.mock_all_auths();
-
-//     // Add the new third signer
-//     let new_signer = all_signers.get_unchecked(2);
-//     client.add_signer(&new_signer);
-
-//     // Verify signer was added
-//     let updated_signers = client.get_signers();
-//     assert_eq!(updated_signers.len(), 3);
-//     assert!(updated_signers.contains(&new_signer));
-// }
-
-// #[test]
-// #[should_panic(expected = "Error(Contract, #106)")]
-// fn test_add_signer_already_exists() {
+// fn test_check_auth() {
 //     let env = Env::default();
 //     let client = create_auth_client(&env);
 
 //     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 2);
+//     let signers = generate_signers(&env, 3);
 //     let default_threshold = 1;
 //     client.init(&signers, &default_threshold);
 
-//     // Authorize contract to add signer
-//     env.mock_all_auths();
+//     // Create secure keys for signing that correspond to the generated signers
+//     let secure_key1 = get_secure_key_for_signer(0);
+//     let secure_key2 = get_secure_key_for_signer(1);
 
-//     // Try to add an existing signer
-//     client.add_signer(&signers.get_unchecked(0)); // Should panic
+//     // Create a payload
+//     let payload_bytes: [u8; 32] = [1u8; 32];
+//     let payload = BytesN::from_array(&env, &payload_bytes);
+
+//     // Create signed messages
+//     let signed_message1 = create_signed_message(&env, &secure_key1, &payload);
+//     let signed_message2 = create_signed_message(&env, &secure_key2, &payload);
+
+//     let signed_messages = vec![&env, signed_message1, signed_message2];
+
+//     // Mock the crypto verification
+//     env.mock_all_auths();
+//     env.crypto().set_ed25519_verify_result(true);
+
+//     // Test the check_auth function with valid context
+//     let valid_context = vec![&env];
+
+//     // This would normally fail without the mocked crypto and auths
+//     client.__check_auth(env, &payload, &signed_messages, &valid_context);
 // }
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #100)")]
-// fn test_add_signer_limit_exceeded() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+fn test_add_signer() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Generate more than signers limit
-//     let all_signers = generate_signers(&env, 6);
+    // Generate 3 signers at once
+    let all_signers = generate_signers(&env, 3);
+
+    // Use only first two for init
+    let init_signers = vec![
+        &env,
+        all_signers.get_unchecked(0),
+        all_signers.get_unchecked(1),
+    ];
+    let default_threshold = 1;
+    client.init(&init_signers, &default_threshold);
+
+    // Mock authorization
+    env.mock_all_auths();
+
+    // Add the new third signer
+    let new_signer = all_signers.get_unchecked(2);
+    client.add_signer(&new_signer);
+
+    // Verify signer was added
+    let updated_signers = client.get_signers();
+    assert_eq!(updated_signers.len(), 3);
+    assert!(updated_signers.contains(&new_signer));
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #106)")]
+fn test_add_signer_already_exists() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
+
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 2);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
+
+    // Authorize contract to add signer
+    env.mock_all_auths();
+
+    // Try to add an existing signer
+    client.add_signer(&signers.get_unchecked(0)); // Should panic
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #100)")]
+fn test_add_signer_limit_exceeded() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
+
+    // Generate more than signers limit
+    let all_signers = generate_signers(&env, 6);
     
-//     // Initialize with maximum allowed signers
-//     let init_signers = vec![
-//         &env,
-//         all_signers.get_unchecked(0),
-//         all_signers.get_unchecked(1),
-//         all_signers.get_unchecked(2),
-//         all_signers.get_unchecked(3),
-//         all_signers.get_unchecked(4),
-//     ];
+    // Initialize with maximum allowed signers
+    let init_signers = vec![
+        &env,
+        all_signers.get_unchecked(0),
+        all_signers.get_unchecked(1),
+        all_signers.get_unchecked(2),
+        all_signers.get_unchecked(3),
+        all_signers.get_unchecked(4),
+    ];
 
-//     // Initialize client with all signers
-//     let default_threshold = 3;
-//     client.init(&init_signers, &default_threshold);
+    // Initialize client with all signers
+    let default_threshold = 3;
+    client.init(&init_signers, &default_threshold);
 
-//     // Mock authorization
-//     env.mock_all_auths();
+    // Mock authorization
+    env.mock_all_auths();
 
-//     // Add the new signer
-//     let new_signer = all_signers.get_unchecked(5);
-//     client.add_signer(&new_signer); // Should panic
-// }
+    // Add the new signer
+    let new_signer = all_signers.get_unchecked(5);
+    client.add_signer(&new_signer); // Should panic
+}
 
-// #[test]
-// fn test_remove_signer() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+fn test_remove_signer() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 3);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 3);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to remove signer
-//     env.mock_all_auths();
+    // Authorize contract to remove signer
+    env.mock_all_auths();
 
-//     // Remove a signer
-//     let signer_to_remove = signers.get_unchecked(1);
-//     client.remove_signer(&signer_to_remove);
+    // Remove a signer
+    let signer_to_remove = signers.get_unchecked(1);
+    client.remove_signer(&signer_to_remove);
 
-//     // Verify signer was removed
-//     let updated_signers = client.get_signers();
-//     assert_eq!(updated_signers.len(), 2);
-//     assert!(!updated_signers.contains(&signer_to_remove));
-// }
+    // Verify signer was removed
+    let updated_signers = client.get_signers();
+    assert_eq!(updated_signers.len(), 2);
+    assert!(!updated_signers.contains(&signer_to_remove));
+}
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #103)")]
-// fn test_remove_signer_not_found() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+#[should_panic(expected = "Error(Contract, #103)")]
+fn test_remove_signer_not_found() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//      // Generate 3 signers at once
-//     let all_signers = generate_signers(&env, 3);
+     // Generate 3 signers at once
+    let all_signers = generate_signers(&env, 3);
 
-//     // Use only first two for init
-//     let init_signers = vec![
-//         &env,
-//         all_signers.get_unchecked(0),
-//         all_signers.get_unchecked(1),
-//     ];
-//     let default_threshold = 1;
-//     client.init(&init_signers, &default_threshold);
+    // Use only first two for init
+    let init_signers = vec![
+        &env,
+        all_signers.get_unchecked(0),
+        all_signers.get_unchecked(1),
+    ];
+    let default_threshold = 1;
+    client.init(&init_signers, &default_threshold);
 
-//     // Mock authorization
-//     env.mock_all_auths();
+    // Mock authorization
+    env.mock_all_auths();
     
-//     // Try to remove a non-existent signer
-//     let non_existent_signer = all_signers.get_unchecked(2);
-//     client.remove_signer(&non_existent_signer); // Should panic
-// }
+    // Try to remove a non-existent signer
+    let non_existent_signer = all_signers.get_unchecked(2);
+    client.remove_signer(&non_existent_signer); // Should panic
+}
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #105)")]
-// fn test_remove_signer_threshold_violation() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+#[should_panic(expected = "Error(Contract, #105)")]
+fn test_remove_signer_threshold_violation() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with signers equal to threshold
-//     let signers = generate_signers(&env, 2);
-//     let default_threshold = 2;
-//     client.init(&signers, &default_threshold);
+    // Initialize with signers equal to threshold
+    let signers = generate_signers(&env, 2);
+    let default_threshold = 2;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to remove signer
-//     env.mock_all_auths();
+    // Authorize contract to remove signer
+    env.mock_all_auths();
 
-//     // Try to remove a signer (would make signers.len() < threshold)
-//     client.remove_signer(&signers.get_unchecked(0)); // Should panic
-// }
+    // Try to remove a signer (would make signers.len() < threshold)
+    client.remove_signer(&signers.get_unchecked(0)); // Should panic
+}
 
-// #[test]
-// fn test_set_default_threshold() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+fn test_set_default_threshold() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 3);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 3);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to set threshold
-//     env.mock_all_auths();
+    // Authorize contract to set threshold
+    env.mock_all_auths();
 
-//     // Set a new threshold
-//     let new_threshold = 2;
-//     client.set_default_threshold(&new_threshold);
+    // Set a new threshold
+    let new_threshold = 2;
+    client.set_default_threshold(&new_threshold);
 
-//     // Verify threshold was updated
-//     assert_eq!(client.get_default_threshold(), new_threshold);
-// }
+    // Verify threshold was updated
+    assert_eq!(client.get_default_threshold(), new_threshold);
+}
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #105)")]
-// fn test_set_default_threshold_invalid() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+#[should_panic(expected = "Error(Contract, #105)")]
+fn test_set_default_threshold_invalid() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 3);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 3);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to set threshold
-//     env.mock_all_auths();
+    // Authorize contract to set threshold
+    env.mock_all_auths();
 
-//     // Try to set an invalid threshold (> signers.len())
-//     let invalid_threshold = 4;
-//     client.set_default_threshold(&invalid_threshold); // Should panic
-// }
+    // Try to set an invalid threshold (> signers.len())
+    let invalid_threshold = 4;
+    client.set_default_threshold(&invalid_threshold); // Should panic
+}
 
-// #[test]
-// fn test_add_factory() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+fn test_add_factory() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 2);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 2);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to add factory
-//     env.mock_all_auths();
+    // Authorize contract to add factory
+    env.mock_all_auths();
 
-//     // Add a factory
-//     let factory = Address::generate(&env);
-//     let context = vec![&env, Address::generate(&env)];
-//     client.add_factory(&factory, &context);
-// }
+    // Add a factory
+    let factory = Address::generate(&env);
+    let context = vec![&env, Address::generate(&env)];
+    client.add_factory(&factory, &context);
+}
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #1011)")]
-// fn test_add_factory_already_exists() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+#[should_panic(expected = "Error(Contract, #1011)")]
+fn test_add_factory_already_exists() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 2);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 2);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to add factory
-//     env.mock_all_auths();
+    // Authorize contract to add factory
+    env.mock_all_auths();
 
-//     // Add a factory
-//     let factory = Address::generate(&env);
-//     let context = vec![&env, Address::generate(&env)];
-//     client.add_factory(&factory, &context);
+    // Add a factory
+    let factory = Address::generate(&env);
+    let context = vec![&env, Address::generate(&env)];
+    client.add_factory(&factory, &context);
 
-//     // Try to add the same factory context again
-//     client.add_factory(&factory, &context); // Should panic
-// }
+    // Try to add the same factory context again
+    client.add_factory(&factory, &context); // Should panic
+}
 
-// #[test]
-// fn test_remove_factory() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+fn test_remove_factory() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 2);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 2);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to add and remove factory
-//     env.mock_all_auths();
+    // Authorize contract to add and remove factory
+    env.mock_all_auths();
 
-//     // Add a factory
-//     let factory = Address::generate(&env);
-//     let context = vec![&env, Address::generate(&env)];
-//     client.add_factory(&factory, &context);
+    // Add a factory
+    let factory = Address::generate(&env);
+    let context = vec![&env, Address::generate(&env)];
+    client.add_factory(&factory, &context);
 
-//     // Remove the factory
-//     client.remove_factory(&factory, &context);
-// }
+    // Remove the factory
+    client.remove_factory(&factory, &context);
+}
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #1012)")]
-// fn test_remove_factory_not_found() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+#[should_panic(expected = "Error(Contract, #1012)")]
+fn test_remove_factory_not_found() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 2);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 2);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to remove factory
-//     env.mock_all_auths();
+    // Authorize contract to remove factory
+    env.mock_all_auths();
 
-//     // Try to remove a non-existent factory
-//     let factory = Address::generate(&env);
-//     let context = vec![&env, Address::generate(&env)];
-//     client.remove_factory(&factory, &context); // Should panic
-// }
+    // Try to remove a non-existent factory
+    let factory = Address::generate(&env);
+    let context = vec![&env, Address::generate(&env)];
+    client.remove_factory(&factory, &context); // Should panic
+}
 
-// #[test]
-// fn test_add_account() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+fn test_add_account() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 2);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 2);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to add account
-//     env.mock_all_auths();
+    // Authorize contract to add account
+    env.mock_all_auths();
 
-//     // Add an account
-//     let account = Address::generate(&env);
-//     let context = vec![&env, Address::generate(&env)];
-//     client.add_account(&account, &context);
+    // Add an account
+    let account = Address::generate(&env);
+    let context = vec![&env, Address::generate(&env)];
+    client.add_account(&account, &context);
 
-//     // Verify account was added
-//     let accounts = client.get_accounts(&context);
-//     assert_eq!(accounts.len(), 1);
-//     assert_eq!(accounts.get_unchecked(0), account);
-// }
+    // Verify account was added
+    let accounts = client.get_accounts(&context);
+    assert_eq!(accounts.len(), 1);
+    assert_eq!(accounts.get_unchecked(0), account);
+}
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #109)")]
-// fn test_add_account_already_exists() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+#[should_panic(expected = "Error(Contract, #109)")]
+fn test_add_account_already_exists() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 2);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 2);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to add account
-//     env.mock_all_auths();
+    // Authorize contract to add account
+    env.mock_all_auths();
 
-//     // Add an account
-//     let account = Address::generate(&env);
-//     let context = vec![&env, Address::generate(&env)];
-//     client.add_account(&account, &context);
+    // Add an account
+    let account = Address::generate(&env);
+    let context = vec![&env, Address::generate(&env)];
+    client.add_account(&account, &context);
 
-//     // Try to add the same account context again
-//     client.add_account(&account, &context); // Should panic
-// }
+    // Try to add the same account context again
+    client.add_account(&account, &context); // Should panic
+}
 
-// #[test]
-// fn test_remove_account() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+fn test_remove_account() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 2);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 2);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to add and remove account
-//     env.mock_all_auths();
+    // Authorize contract to add and remove account
+    env.mock_all_auths();
 
-//     // Add an account
-//     let account = Address::generate(&env);
-//     let context = vec![&env, Address::generate(&env)];
-//     client.add_account(&account, &context);
+    // Add an account
+    let account = Address::generate(&env);
+    let context = vec![&env, Address::generate(&env)];
+    client.add_account(&account, &context);
 
-//     // Remove the account
-//     client.remove_account(&account, &context);
+    // Remove the account
+    client.remove_account(&account, &context);
 
-//     // Verify account was removed
-//     let accounts = client.get_accounts(&context);
-//     assert_eq!(accounts.len(), 0);
-// }
+    // Verify account was removed
+    let accounts = client.get_accounts(&context);
+    assert_eq!(accounts.len(), 0);
+}
 
-// #[test]
-// #[should_panic(expected = "Error(Contract, #1010)")]
-// fn test_remove_account_not_found() {
-//     let env = Env::default();
-//     let client = create_auth_client(&env);
+#[test]
+#[should_panic(expected = "Error(Contract, #1010)")]
+fn test_remove_account_not_found() {
+    let env = Env::default();
+    let client = create_auth_client(&env);
 
-//     // Initialize with a valid configuration
-//     let signers = generate_signers(&env, 2);
-//     let default_threshold = 1;
-//     client.init(&signers, &default_threshold);
+    // Initialize with a valid configuration
+    let signers = generate_signers(&env, 2);
+    let default_threshold = 1;
+    client.init(&signers, &default_threshold);
 
-//     // Authorize contract to remove account
-//     env.mock_all_auths();
+    // Authorize contract to remove account
+    env.mock_all_auths();
 
-//     // Try to remove a non-existent account
-//     let account = Address::generate(&env);
-//     let context = vec![&env, Address::generate(&env)];
-//     client.remove_account(&account, &context); // Should panic
-// }
+    // Try to remove a non-existent account
+    let account = Address::generate(&env);
+    let context = vec![&env, Address::generate(&env)];
+    client.remove_account(&account, &context); // Should panic
+}
 
 /// Account contract tests
 // fn setup_account_test() -> (Env, AccountContractClient, BytesN<32>, BytesN<65>) {
