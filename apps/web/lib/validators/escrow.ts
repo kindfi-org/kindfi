@@ -2,6 +2,7 @@ import type {
 	EscrowFundData,
 	EscrowFundUpdateData,
 	EscrowPayload,
+	MilestoneReviewPayload,
 } from '../types/escrow/escrow-payload.types'
 import type { Milestone } from '../types/escrow/escrow.types'
 
@@ -186,6 +187,41 @@ export function validateEscrowFundUpdate(
 		errors.push('Transaction status is required.')
 	} else if (!['PENDING', 'SUCCESSFUL', 'FAILED'].includes(data.status)) {
 		errors.push('Invalid transaction status.')
+	}
+
+	return {
+		success: errors.length === 0,
+		errors,
+	}
+}
+
+export function validateMilestoneReview(
+	data: MilestoneReviewPayload,
+): ValidationResult {
+	const errors: string[] = []
+
+	// Validate milestoneId
+	if (!data.milestoneId?.trim()) {
+		errors.push('Milestone ID is required.')
+	}
+
+	// Validate reviewerId
+	if (!data.reviewerId?.trim()) {
+		errors.push('Reviewer ID is required.')
+	}
+
+	// Validate status
+	if (!data.status) {
+		errors.push('Milestone status is required.')
+	} else if (
+		!['pending', 'approved', 'rejected', 'completed'].includes(data.status)
+	) {
+		errors.push('Invalid milestone status.')
+	}
+
+	// Validate comments (optional but should not be empty if provided)
+	if (data.comments && !data.comments.trim()) {
+		errors.push('Comments cannot be empty.')
 	}
 
 	return {
