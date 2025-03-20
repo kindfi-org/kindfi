@@ -12,6 +12,23 @@ interface CalendarProps {
 	mode?: 'single'
 }
 
+/**
+ * A Calendar component that displays a monthly view starting at 18 years ago. Allows the user to select a date.
+ * It initializes the calendar view to a date corresponding to 18 years prior to today and enforces that selected
+ * dates cannot be after that threshold. This date range is a specification for document processing, currently not configurable.
+ *
+ * The component populates the calendar view with days from the previous, current, and next months to ensure a full
+ * grid display. Navigation buttons are provided to traverse months, but navigation to future months beyond the limit
+ * is restricted. Each day cell is interactive, invoking a callback when a valid selection is made, unless the day
+ * is disabled by either being after the allowed date or by a custom disabled function.
+ * @component
+ * @example
+ * <Calendar
+ *  selected={new Date()}
+ *  onSelect={(date) => console.log(date)}
+ *  disabled={(date) => date.getDay() === 0}
+ * />
+ */
 export function Calendar({
 	selected,
 	onSelect,
