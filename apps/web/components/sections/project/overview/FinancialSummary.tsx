@@ -66,6 +66,8 @@ const summaryText =
 const burnRateText =
 	'At the current burn rate of $100,000 per month, the company has approximately 2.5 months of runway remaining. This fundraising round is critical to extend operations and reach key milestones.'
 
+const period = 'Q4 2023'
+
 export function FinancialSummary() {
 	return (
 		<div className="space-y-6 mt-10">
@@ -76,7 +78,7 @@ export function FinancialSummary() {
 					className="bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-200 flex items-center gap-1"
 				>
 					<Calendar className="w-4 h-4" />
-					<span className="font-bold">Q4 2023</span>
+					<span className="font-bold">{period}</span>
 				</Badge>
 			</div>
 
