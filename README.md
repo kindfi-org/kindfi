@@ -40,3 +40,13 @@ bun dev
 ```
 
 You can see the full list of commands in each of the `package.json` files in the `apps` and `services` directories.
+
+
+## Development
+
+```bash
+# Install dependencies
+npm install || pip install -r requirements.txt
+# Run tests
+npm test || pytest
+```
