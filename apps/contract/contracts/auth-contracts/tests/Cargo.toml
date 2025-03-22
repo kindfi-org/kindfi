@@ -1,0 +1,21 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+rand = { version = "0.8.3" }
+auth-controller = { path = "../auth-controller" }
+account = { path = "../account" }
+account-factory = { path = "./account-factory" }
+
+[[test]]
+name = "tests"
+path = "tests/test.rs"
