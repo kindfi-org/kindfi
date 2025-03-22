@@ -1,72 +1,8 @@
-import {
-	Banknote,
-	Calendar,
-	CreditCard,
-	DollarSign,
-	Info,
-	TrendingDown,
-	Wallet,
-} from 'lucide-react'
+import { Calendar, Info } from 'lucide-react'
+
 import { Badge } from '~/components/base/badge'
 import { Card, CardContent } from '~/components/base/card'
-
-interface FinancialMetric {
-	id: string
-	title: string
-	value: string
-	icon: React.ReactNode
-	iconBgColor: string
-	textColor?: string
-	percentage?: number
-}
-
-const financialMetrics: FinancialMetric[] = [
-	{
-		id: 'revenue',
-		title: 'Revenue',
-		value: '$0',
-		icon: <DollarSign className="h-6 w-6 text-blue-600" />,
-		iconBgColor: 'bg-blue-100 group-hover:bg-blue-200',
-	},
-	{
-		id: 'net-loss',
-		title: 'Net Loss',
-		value: '-$818,451',
-		icon: <TrendingDown className="h-6 w-6 text-red-600" />,
-		iconBgColor: 'bg-red-100 group-hover:bg-red-200',
-		textColor: 'text-red-600',
-	},
-	{
-		id: 'short-term-debt',
-		title: 'Short-Term Debt',
-		value: '$128,720',
-		icon: <CreditCard className="h-6 w-6 text-orange-600" />,
-		iconBgColor: 'bg-orange-100 group-hover:bg-orange-200',
-		percentage: 8,
-	},
-	{
-		id: 'raised',
-		title: 'Raised in 2023',
-		value: '$2,075,621',
-		icon: <Banknote className="h-6 w-6 text-green-600" />,
-		iconBgColor: 'bg-green-100 group-hover:bg-green-200',
-	},
-	{
-		id: 'cash',
-		title: 'Cash Available',
-		value: '$250,000',
-		icon: <Wallet className="h-6 w-6 text-purple-600" />,
-		iconBgColor: 'bg-purple-100 group-hover:bg-purple-200',
-	},
-]
-
-const summaryText =
-	'Our financial statements end on December 31, 2023. Our current cash balance is $250,000 as of October 2024. During the previous three months, average monthly revenue was $0, average cost of goods sold was $0, and average operating expenses were $100,000 per month.'
-
-const burnRateText =
-	'At the current burn rate of $100,000 per month, the company has approximately 2.5 months of runway remaining. This fundraising round is critical to extend operations and reach key milestones.'
-
-const period = 'Q4 2023'
+import { financialOverview } from '~/lib/mock-data/project/mock-overview-section'
 
 export function FinancialSummary() {
 	return (
@@ -78,15 +14,17 @@ export function FinancialSummary() {
 					className="bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-200 flex items-center gap-1"
 				>
 					<Calendar className="w-4 h-4" />
-					<span className="font-bold">{period}</span>
+					<span className="font-bold">{financialOverview.period}</span>
 				</Badge>
 			</div>
 
 			<div className="rounded-lg shadow-md p-6 space-y-6">
-				<p className="text-gray-700 leading-relaxed">{summaryText}</p>
+				<p className="text-gray-700 leading-relaxed">
+					{financialOverview.summaryText}
+				</p>
 
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-					{financialMetrics.map((metric) => (
+					{financialOverview.metrics.map((metric) => (
 						<Card
 							key={metric.id}
 							className="group border-gray-200 hover:border-blue-200 hover:shadow-md"
@@ -130,7 +68,9 @@ export function FinancialSummary() {
 								<h3 className="text-xl font-medium text-blue-900">
 									Burn Rate Analysis
 								</h3>
-								<p className="text-blue-800 mt-1">{burnRateText}</p>
+								<p className="text-blue-800 mt-1">
+									{financialOverview.burnRateText}
+								</p>
 							</div>
 						</div>
 					</CardContent>

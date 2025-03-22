@@ -1,28 +1,7 @@
 import { FileText } from 'lucide-react'
 import Link from 'next/link'
 
-interface DocumentLink {
-	id: string
-	title: string
-	href: string
-}
-
-const documentLinks: DocumentLink[] = [
-	{
-		id: 'spv-agreement',
-		title: 'SPV Subscription Agreement',
-		href: '/documents/spv-subscription-agreement.pdf',
-	},
-	{
-		id: 'safe-agreement',
-		title: 'SAFE (Simple Agreement for Future Equity)',
-		href: '/documents/safe-agreement.pdf',
-	},
-]
-
-const companyName = 'Qnetic Corporation'
-
-const infoLink = 'https://example.com/spv-information'
+import { companyInfo } from '~/lib/mock-data/project/mock-overview-section'
 
 export function InvestmentTerms() {
 	return (
@@ -30,11 +9,12 @@ export function InvestmentTerms() {
 			<h2 className="text-3xl font-bold">Investment Terms</h2>
 
 			<p className="text-gray-700 leading-relaxed mb-6">
-				You will be investing in {companyName} through an SPV. This means that
-				when you invest, you will be signing the SPV Subscription Agreement, not
-				the direct investment contract. For more information on SPVs, see{' '}
+				You will be investing in {companyInfo.companyName} through an SPV. This
+				means that when you invest, you will be signing the SPV Subscription
+				Agreement, not the direct investment contract. For more information on
+				SPVs, see{' '}
 				<Link
-					href={infoLink}
+					href={companyInfo.infoLink}
 					className="text-blue-600 hover:underline"
 					target="_blank"
 					rel="noopener noreferrer"
@@ -45,7 +25,7 @@ export function InvestmentTerms() {
 			</p>
 
 			<div className="space-y-2">
-				{documentLinks.map((doc) => (
+				{companyInfo.documents.map((doc) => (
 					<Link
 						key={doc.id}
 						href={doc.href}

@@ -4,62 +4,7 @@ import { useState } from 'react'
 
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-
-interface HighlightItem {
-	id: string
-	title: string
-	description: string
-	indicator?: number
-	backgroundColor?: string
-}
-
-const highlightItems: HighlightItem[] = [
-	{
-		id: 'vc-backed',
-		title: 'VC-Backed',
-		description: 'Raised $250K or more from a venture firm',
-	},
-	{
-		id: 'traction',
-		title: 'Traction',
-		description: '$110M in signed customer LOIs',
-		indicator: 1,
-	},
-	{
-		id: 'team',
-		title: 'Team',
-		description:
-			'Powerhouse of experts in tech, engineering & biz, united to transform energy systems',
-		indicator: 2,
-	},
-	{
-		id: 'technology',
-		title: 'Technology',
-		description:
-			'Fully functional 40%-scale prototype proving our technologies and design architecture',
-		indicator: 3,
-	},
-	{
-		id: 'patents',
-		title: 'Patents',
-		description: '3 applications filed to protect our core innovations',
-		indicator: 4,
-	},
-	{
-		id: 'market-potential',
-		title: 'Market Potential',
-		description:
-			'Projected to address a $500B+ market with increasing global energy demands',
-		indicator: 5,
-	},
-	{
-		id: 'sustainability',
-		title: 'Sustainability',
-		description:
-			'Designed for clean energy with zero emissions and a circular economy approach',
-		indicator: 6,
-	},
-]
+import { highlightItems } from '~/lib/mock-data/project/mock-overview-section'
 
 export function KeyHighlights() {
 	const [showAll, setShowAll] = useState(false)

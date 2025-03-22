@@ -4,46 +4,12 @@ import { ChevronDown, Heart, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-
-interface FeaturedUpdate {
-	title: string
-	imageUrl: string
-	imageAlt: string
-	overlayTitle: string
-	overlaySubtitle: string
-	author: {
-		name: string
-		avatar: string
-		initials: string
-	}
-	date: string
-	likes: number
-	comments: number
-	updatesUrl: string
-	readMoreUrl: string
-}
-
-const featuredUpdate: FeaturedUpdate = {
-	title: 'Professionals Vote Qnetic #1 Investment Opportunity',
-	imageUrl: '/images/image.png',
-	imageAlt: 'Qnetic investment opportunity',
-	overlaySubtitle: 'The',
-	overlayTitle: "Judges' Choice Award Winner",
-	author: {
-		name: 'Joyce Zhou',
-		avatar: '/avatar.svg',
-		initials: 'JZ',
-	},
-	date: 'Mar 19',
-	likes: 7,
-	comments: 2,
-	updatesUrl: '/updates',
-	readMoreUrl: '/updates/professionals-vote-qnetic',
-}
+import { featuredUpdate } from '~/lib/mock-data/project/mock-overview-section'
 
 export function FeaturedUpdate() {
 	const [expanded, setExpanded] = useState(false)
