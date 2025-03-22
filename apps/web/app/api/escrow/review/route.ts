@@ -141,9 +141,7 @@ export async function POST(req: NextRequest) {
 			{ status: 200 },
 		)
 	} catch (error) {
-
 		console.error('Milestone Review Error:', error)
-
 
 		if (error instanceof AppError) {
 			return NextResponse.json(
