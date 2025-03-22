@@ -5,7 +5,6 @@ export interface HighlightItem {
 	title: string
 	description: string
 	indicator?: number
-	backgroundColor?: string
 }
 
 export interface FinancialMetric {
