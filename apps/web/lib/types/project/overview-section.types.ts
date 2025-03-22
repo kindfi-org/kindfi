@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 export interface HighlightItem {
 	id: string
 	title: string
@@ -6,11 +8,11 @@ export interface HighlightItem {
 	backgroundColor?: string
 }
 
-interface FinancialMetric {
+export interface FinancialMetric {
 	id: string
 	title: string
 	value: string
-	icon: React.ReactNode
+	icon: ReactNode
 	iconBgColor: string
 	textColor?: string
 	percentage?: number
@@ -23,29 +25,31 @@ export interface FinancialOverview {
 	metrics: FinancialMetric[]
 }
 
-interface DocumentLink {
+export interface DocumentLink {
 	id: string
 	title: string
 	href: string
 }
 
-export interface CompanyInfo {
+export interface CompanyResources {
 	companyName: string
 	infoLink: string
 	documents: DocumentLink[]
 }
 
-export interface FeaturedUpdate {
+export interface Author {
+	name: string
+	avatar: string
+	initials: string
+}
+
+export interface HighlightedUpdate {
 	title: string
 	imageUrl: string
 	imageAlt: string
 	overlayTitle: string
 	overlaySubtitle: string
-	author: {
-		name: string
-		avatar: string
-		initials: string
-	}
+	author: Author
 	date: string
 	likes: number
 	comments: number
@@ -53,7 +57,7 @@ export interface FeaturedUpdate {
 	readMoreUrl: string
 }
 
-interface InvestorQuote {
+export interface InvestorQuote {
 	text: string
 }
 

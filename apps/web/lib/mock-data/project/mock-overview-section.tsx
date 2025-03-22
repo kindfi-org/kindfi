@@ -7,10 +7,10 @@ import {
 } from 'lucide-react'
 
 import type {
-	CompanyInfo,
-	FeaturedUpdate,
+	CompanyResources,
 	FinancialOverview,
 	HighlightItem,
+	HighlightedUpdate,
 	Investor,
 } from '~/lib/types/project/overview-section.types'
 
@@ -109,7 +109,7 @@ export const financialOverview: FinancialOverview = {
 	],
 }
 
-export const companyInfo: CompanyInfo = {
+export const companyResources: CompanyResources = {
 	companyName: 'Qnetic Corporation',
 	infoLink: 'https://example.com/spv-information',
 	documents: [
@@ -126,7 +126,7 @@ export const companyInfo: CompanyInfo = {
 	],
 }
 
-export const featuredUpdate: FeaturedUpdate = {
+export const highlightedUpdate: HighlightedUpdate = {
 	title: 'Professionals Vote Qnetic #1 Investment Opportunity',
 	imageUrl: '/images/image.png',
 	imageAlt: 'Qnetic investment opportunity',

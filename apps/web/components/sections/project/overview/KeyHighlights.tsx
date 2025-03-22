@@ -4,11 +4,15 @@ import { useState } from 'react'
 
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-import { highlightItems } from '~/lib/mock-data/project/mock-overview-section'
+import type { HighlightItem } from '~/lib/types/project/overview-section.types'
 
-export function KeyHighlights() {
+interface KeyHighlightsProps {
+	items: HighlightItem[]
+}
+
+export function KeyHighlights({ items }: KeyHighlightsProps) {
 	const [showAll, setShowAll] = useState(false)
-	const displayedItems = showAll ? highlightItems : highlightItems.slice(0, 5)
+	const displayedItems = showAll ? items : items.slice(0, 5)
 
 	return (
 		<div className="space-y-6">
@@ -31,12 +35,12 @@ export function KeyHighlights() {
 					</Card>
 				))}
 			</div>
-			{highlightItems.length > 5 && (
+			{items.length > 5 && (
 				<div>
 					<Button
 						variant="outline"
 						onClick={() => setShowAll(!showAll)}
-						className="text-gray-700"
+						className="text-gray-700 transition-all duration-300"
 					>
 						{showAll ? 'Show less' : 'Show more'}
 					</Button>

@@ -5,9 +5,13 @@ import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
 import { Card, CardContent } from '~/components/base/card'
-import { investors } from '~/lib/mock-data/project/mock-overview-section'
+import type { Investor } from '~/lib/types/project/overview-section.types'
 
-export function LeadInvestors() {
+interface LeadInvestorsProps {
+	investors: Investor[]
+}
+
+export function LeadInvestors({ investors }: LeadInvestorsProps) {
 	const principalInvestor = investors.find((investor) => investor.isPrincipal)
 	const otherInvestors = investors.filter((investor) => !investor.isPrincipal)
 

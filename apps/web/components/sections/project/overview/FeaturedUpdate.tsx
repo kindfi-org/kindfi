@@ -1,24 +1,23 @@
-'use client'
-
 import { ChevronDown, Heart, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-import { featuredUpdate } from '~/lib/mock-data/project/mock-overview-section'
+import type { HighlightedUpdate } from '~/lib/types/project/overview-section.types'
 
-export function FeaturedUpdate() {
-	const [expanded, setExpanded] = useState(false)
+interface FeaturedUpdateProps {
+	data: HighlightedUpdate
+}
 
+export function FeaturedUpdate({ data }: FeaturedUpdateProps) {
 	return (
 		<div className="space-y-6 mt-10">
 			<div className="flex justify-between items-center">
 				<h2 className="text-3xl font-bold">Featured Update</h2>
-				<Link href={featuredUpdate.updatesUrl}>
+				<Link href={data.updatesUrl}>
 					<Button>View all updates</Button>
 				</Link>
 			</div>
@@ -39,50 +38,41 @@ export function FeaturedUpdate() {
 									className="flex items-center gap-1 text-gray-600"
 								>
 									<Heart className="h-5 w-5" />
-									<span>{featuredUpdate.likes}</span>
+									<span>{data.likes}</span>
 								</Button>
 								<Button
 									size="icon"
 									className="flex items-center gap-1 text-gray-600"
 								>
 									<MessageSquare className="h-5 w-5" />
-									<span>{featuredUpdate.comments}</span>
+									<span>{data.comments}</span>
 								</Button>
 							</div>
 						</div>
-						<Button
-							size="icon"
-							onClick={() => setExpanded(!expanded)}
-							className="text-gray-500 hover:text-gray-700"
-						>
+						<Button size="icon" className="text-gray-500 hover:text-gray-700">
 							<ChevronDown className="h-5 w-5" />
 						</Button>
 					</div>
 
-					<h3 className="text-2xl font-bold mb-4">{featuredUpdate.title}</h3>
+					<h3 className="text-2xl font-bold mb-4">{data.title}</h3>
 
 					<div className="relative w-full h-[300px] sm:h-[400px] rounded-md overflow-hidden">
 						<Image
-							src={featuredUpdate.imageUrl || '/images/image.png'}
-							alt={featuredUpdate.imageAlt}
+							src={data.imageUrl || '/images/image.png'}
+							alt={data.imageAlt}
 							fill
 							className="object-cover"
 						/>
 
 						<div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900 opacity-75" />
 
-						{(featuredUpdate.overlayTitle ||
-							featuredUpdate.overlaySubtitle) && (
+						{(data.overlayTitle || data.overlaySubtitle) && (
 							<div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-								{featuredUpdate.overlaySubtitle && (
-									<p className="text-white/80 mb-1">
-										{featuredUpdate.overlaySubtitle}
-									</p>
+								{data.overlaySubtitle && (
+									<p className="text-white/80 mb-1">{data.overlaySubtitle}</p>
 								)}
-								{featuredUpdate.overlayTitle && (
-									<h4 className="text-2xl font-bold">
-										{featuredUpdate.overlayTitle}
-									</h4>
+								{data.overlayTitle && (
+									<h4 className="text-2xl font-bold">{data.overlayTitle}</h4>
 								)}
 							</div>
 						)}
@@ -90,19 +80,16 @@ export function FeaturedUpdate() {
 
 					<div className="flex items-center gap-3 my-4">
 						<Avatar>
-							<AvatarImage
-								src={featuredUpdate.author.avatar}
-								alt={featuredUpdate.author.name}
-							/>
-							<AvatarFallback>{featuredUpdate.author.initials}</AvatarFallback>
+							<AvatarImage src={data.author.avatar} alt={data.author.name} />
+							<AvatarFallback>{data.author.initials}</AvatarFallback>
 						</Avatar>
 						<div>
-							<p className="font-medium">{featuredUpdate.author.name}</p>
-							<p className="text-sm text-gray-500">{featuredUpdate.date}</p>
+							<p className="font-medium">{data.author.name}</p>
+							<p className="text-sm text-gray-500">{data.date}</p>
 						</div>
 					</div>
 
-					<Link href={featuredUpdate.readMoreUrl}>
+					<Link href={data.readMoreUrl}>
 						<Button variant="outline" className="w-full">
 							Read more
 						</Button>

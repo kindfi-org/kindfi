@@ -2,9 +2,13 @@ import { Calendar, Info } from 'lucide-react'
 
 import { Badge } from '~/components/base/badge'
 import { Card, CardContent } from '~/components/base/card'
-import { financialOverview } from '~/lib/mock-data/project/mock-overview-section'
+import type { FinancialOverview } from '~/lib/types/project/overview-section.types'
 
-export function FinancialSummary() {
+interface FinancialSummaryProps {
+	data: FinancialOverview
+}
+
+export function FinancialSummary({ data }: FinancialSummaryProps) {
 	return (
 		<div className="space-y-6 mt-10">
 			<div className="flex justify-between items-center">
@@ -14,17 +18,15 @@ export function FinancialSummary() {
 					className="bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-200 flex items-center gap-1"
 				>
 					<Calendar className="w-4 h-4" />
-					<span className="font-bold">{financialOverview.period}</span>
+					<span className="font-bold">{data.period}</span>
 				</Badge>
 			</div>
 
 			<div className="rounded-lg shadow-md p-6 space-y-6">
-				<p className="text-gray-700 leading-relaxed">
-					{financialOverview.summaryText}
-				</p>
+				<p className="text-gray-700 leading-relaxed">{data.summaryText}</p>
 
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-					{financialOverview.metrics.map((metric) => (
+					{data.metrics.map((metric) => (
 						<Card
 							key={metric.id}
 							className="group border-gray-200 hover:border-blue-200 hover:shadow-md"
@@ -63,14 +65,15 @@ export function FinancialSummary() {
 				<Card className="border-gray-200 bg-blue-50">
 					<CardContent className="p-6">
 						<div className="flex gap-3">
-							<Info className="h-5 w-5 text-blue-700 flex-shrink-0 mt-1" />
+							<Info
+								className="h-5 w-5 text-blue-700 flex-shrink-0 mt-1"
+								aria-label="Information"
+							/>
 							<div>
 								<h3 className="text-xl font-medium text-blue-900">
 									Burn Rate Analysis
 								</h3>
-								<p className="text-blue-800 mt-1">
-									{financialOverview.burnRateText}
-								</p>
+								<p className="text-blue-800 mt-1">{data.burnRateText}</p>
 							</div>
 						</div>
 					</CardContent>
