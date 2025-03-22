@@ -27,7 +27,7 @@ const infoLink = 'https://example.com/spv-information'
 export function InvestmentTerms() {
 	return (
 		<div className="space-y-6 mt-10">
-			<h2 className="text-3xl font-bold tracking-tight">Investment Terms</h2>
+			<h2 className="text-3xl font-bold">Investment Terms</h2>
 
 			<p className="text-gray-700 leading-relaxed mb-6">
 				You will be investing in {companyName} through an SPV. This means that

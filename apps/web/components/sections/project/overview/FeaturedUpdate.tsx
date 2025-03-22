@@ -51,7 +51,7 @@ export function FeaturedUpdate() {
 	return (
 		<div className="space-y-6 mt-10">
 			<div className="flex justify-between items-center">
-				<h2 className="text-3xl font-bold tracking-tight">Featured Update</h2>
+				<h2 className="text-3xl font-bold">Featured Update</h2>
 				<Link href={featuredUpdate.updatesUrl}>
 					<Button>View all updates</Button>
 				</Link>

@@ -72,7 +72,7 @@ export function FinancialSummary() {
 	return (
 		<div className="space-y-6 mt-10">
 			<div className="flex justify-between items-center">
-				<h2 className="text-3xl font-bold tracking-tight">Financial Summary</h2>
+				<h2 className="text-3xl font-bold">Financial Summary</h2>
 				<Badge
 					variant="outline"
 					className="bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-200 flex items-center gap-1"

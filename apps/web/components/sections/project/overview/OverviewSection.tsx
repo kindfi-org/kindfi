@@ -2,6 +2,7 @@ import { FeaturedUpdate } from './FeaturedUpdate'
 import { FinancialSummary } from './FinancialSummary'
 import { InvestmentTerms } from './InvestmentTerms'
 import { KeyHighlights } from './KeyHighlights'
+import { LeadInvestors } from './LeadInvestors'
 
 export function OverviewSection() {
 	return (
@@ -10,6 +11,7 @@ export function OverviewSection() {
 			<FinancialSummary />
 			<InvestmentTerms />
 			<FeaturedUpdate />
+			<LeadInvestors />
 		</section>
 	)
 }
