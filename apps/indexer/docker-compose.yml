@@ -1,8 +1,6 @@
 version: "3"
 
 services:
-  env_file:
-    - .env
   postgres:
     build:
       context: .
@@ -12,8 +10,10 @@ services:
     volumes:
       - .data/postgres:/var/lib/postgresql/data
     image: postgres:16-alpine
+    env_file:
+      - .env
     environment:
-      POSTGRES_PASSWORD: POSTGRES_PASSWORD
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -26,12 +26,14 @@ services:
       "postgres":
         condition: service_healthy
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      DB_USER: POSTGRES_USER
-      DB_PASS: POSTGRES_PASSWORD
-      DB_DATABASE: POSTGRES_DATABASE
-      DB_HOST: POSTGRES_HOST
-      DB_PORT: POSTGRES_PORT
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_DATABASE: ${POSTGRES_DATABASE}
+      DB_HOST: ${POSTGRES_HOSTNAME}
+      DB_PORT: ${POSTGRES_PORT}
     volumes:
       - ./:/app
     command:
@@ -56,12 +58,14 @@ services:
       "subquery-node":
         condition: service_healthy
     restart: always
+    env_file:
+      - .env
     environment:
-      DB_USER: POSTGRES_USER
-      DB_PASS: POSTGRES_PASSWORD
-      DB_DATABASE: POSTGRES_DATABASE
-      DB_HOST: POSTGRES_HOST
-      DB_PORT: POSTGRES_PORT
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_DATABASE: ${POSTGRES_DATABASE}
+      DB_HOST: ${POSTGRES_HOSTNAME}
+      DB_PORT: ${POSTGRES_PORT}
     command:
       - --name=app
       - --playground
