@@ -5,11 +5,11 @@ import {
 	highlightedUpdate,
 	investors,
 } from '~/lib/mock-data/project/mock-overview-section'
-import { FeaturedUpdate } from './FeaturedUpdate'
-import { FinancialSummary } from './FinancialSummary'
-import { InvestmentTerms } from './InvestmentTerms'
-import { KeyHighlights } from './KeyHighlights'
-import { LeadInvestors } from './LeadInvestors'
+import { FeaturedUpdate } from './featured-update'
+import { FinancialSummary } from './financial-summary'
+import { InvestmentTerms } from './investment-terms'
+import { KeyHighlights } from './key-highlights'
+import { LeadInvestors } from './lead-investors'
 
 export function OverviewSection() {
 	return (
