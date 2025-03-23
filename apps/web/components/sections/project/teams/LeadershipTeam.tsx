@@ -1,6 +1,4 @@
-import { useState } from "react";
 import type { ITeamMember } from "~/components/types/team";
-import { mockLeadershipTeamData } from "~/lib/mock-data/project/teams";
 import { Card } from "~/components/base/card";
 import { FaExternalLinkAlt, FaLink } from "react-icons/fa";
 import { ITeamData } from "./AdvisoryBoard";
