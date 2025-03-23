@@ -83,6 +83,9 @@
 		"shadcn-ui": "^0.9.4",
 		"tailwindcss": "^3.4.1",
 		"typescript": "^5",
-		"@types/node-fetch": "^2.6.12"
-	}
+		"@types/node-fetch": "^2.6.12",
+		"@types/bun": "latest"
+	},
+	"module": "index.ts",
+	"type": "module"
 }
