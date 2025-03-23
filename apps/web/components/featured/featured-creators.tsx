@@ -1,5 +1,5 @@
-import type { Creator } from '~/lib/types/projects.types';
-import { CreatorCard } from './creator-card';
+import type { Creator } from "~/lib/types/projects.types";
+import { CreatorCard } from "./creator-card";
 
 interface FeaturedCreatorsProps {
   creators: Creator[];

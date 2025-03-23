@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { LayoutGrid, List, SlidersHorizontal } from 'lucide-react';
-import { CategoryFilter } from '~/components/sections/projects';
-import { SortDropdown } from '~/components/sections/projects/sort-dropdown';
-import type { SortOption } from '~/hooks/use-projects-filter';
+import { LayoutGrid, List, SlidersHorizontal } from "lucide-react";
+import { CategoryFilter } from "~/components/sections/projects";
+import { SortDropdown } from "~/components/sections/projects/sort-dropdown";
+import type { SortOption } from "~/hooks/use-projects-filter";
 
 interface ProjectsHeaderProps {
   title: string;
   description?: string;
-  viewMode?: 'grid' | 'list';
-  onViewModeChange?: (mode: 'grid' | 'list') => void;
+  viewMode?: "grid" | "list";
+  onViewModeChange?: (mode: "grid" | "list") => void;
   sortOption?: SortOption;
   onSortChange?: (option: SortOption) => void;
   totalItems?: number;
@@ -25,9 +25,9 @@ interface ProjectsHeaderProps {
 export function ProjectsHeader({
   title,
   description,
-  viewMode = 'grid',
+  viewMode = "grid",
   onViewModeChange,
-  sortOption = 'popular',
+  sortOption = "popular",
   onSortChange,
   totalItems,
   selectedCategories = [],
@@ -48,16 +48,16 @@ export function ProjectsHeader({
             <div className="flex border border-gray-200 rounded-md overflow-hidden">
               <button
                 type="button"
-                className={`p-2 ${viewMode === 'grid' ? 'bg-gray-100' : 'bg-white'}`}
-                onClick={() => onViewModeChange('grid')}
+                className={`p-2 ${viewMode === "grid" ? "bg-gray-100" : "bg-white"}`}
+                onClick={() => onViewModeChange("grid")}
                 aria-label="Grid view"
               >
                 <LayoutGrid className="h-5 w-5 text-gray-700" />
               </button>
               <button
                 type="button"
-                className={`p-2 ${viewMode === 'list' ? 'bg-gray-100' : 'bg-white'}`}
-                onClick={() => onViewModeChange('list')}
+                className={`p-2 ${viewMode === "list" ? "bg-gray-100" : "bg-white"}`}
+                onClick={() => onViewModeChange("list")}
                 aria-label="List view"
               >
                 <List className="h-5 w-5 text-gray-700" />
@@ -83,7 +83,7 @@ export function ProjectsHeader({
           onCategoryToggle={(category: string) => {
             if (selectedCategories.includes(category)) {
               setSelectedCategories?.(
-                selectedCategories.filter((id) => id !== category)
+                selectedCategories.filter((id) => id !== category),
               );
             } else {
               setSelectedCategories?.([...selectedCategories, category]);

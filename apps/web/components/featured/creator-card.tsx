@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { Verified } from 'lucide-react';
-import Image from 'next/image';
-import { Badge } from '~/components/base/badge';
-import { Button } from '~/components/base/button';
-import { Card, CardContent } from '~/components/base/card';
-import type { Creator } from '~/lib/types/projects.types';
+import { Verified } from "lucide-react";
+import Image from "next/image";
+import { Badge } from "~/components/base/badge";
+import { Button } from "~/components/base/button";
+import { Card, CardContent } from "~/components/base/card";
+import type { Creator } from "~/lib/types/projects.types";
 
 interface CreatorCardProps {
   creator: Creator;
@@ -32,7 +32,7 @@ export const CreatorCard: React.FC<CreatorCardProps> = ({ creator }) => {
           <div className="flex items-center gap-4 mb-6">
             <div className="relative h-16 w-16 rounded-full overflow-hidden">
               <Image
-                src={image || '/placeholder.svg'}
+                src={image || "/placeholder.svg"}
                 alt={name}
                 fill
                 className="object-cover"
