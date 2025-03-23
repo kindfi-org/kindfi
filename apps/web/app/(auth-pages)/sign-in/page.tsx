@@ -49,11 +49,9 @@ export default function Login() {
 
 	useEffect(() => {
 		if (authSuccess) {
-			// If the user is authenticated, we can use the stellarUserAddress later
-			console.log('stellarUserAddress', stellarUserAddress)
 			router.push('/')
 		}
-	}, [authSuccess, router, stellarUserAddress])
+	}, [authSuccess, router])
 
 	return (
 		<AuthLayout>
@@ -97,19 +95,30 @@ export default function Login() {
 						</div>
 					</div>
 
-					<Button className="w-full" formAction={signInAction}>
+					<Button
+						className="w-full"
+						formAction={signInAction}
+						aria-live="polite"
+						aria-busy={isAuthenticating}
+					>
 						{isAuthenticating ? 'Authenticating...' : 'Log In'}
 					</Button>
 
 					{isNotRegistered && (
-						<div className="text-yellow-600">
+						<div className="text-yellow-600" role="alert" aria-live="assertive">
 							User not registered. Please Sign Up first.
 						</div>
 					)}
 
 					{authError && !isNotRegistered && (
-						<div className="text-red-600">
+						<div className="text-red-600" role="alert" aria-live="assertive">
 							There was an error during authentication. Please try again.
+						</div>
+					)}
+
+					{authSuccess && (
+						<div className="text-green-600" role="status" aria-live="polite">
+							Authentication successful! Redirecting...
 						</div>
 					)}
 				</form>
