@@ -1,12 +1,22 @@
 "use client";
+import { useState } from "react";
 import { AdvisoryBoard } from "./AdvisoryBoard";
 import { LeadershipTeam } from "./LeadershipTeam";
+import {
+  mockAdvisoryBoardData,
+  mockLeadershipTeamData,
+} from "~/lib/mock-data/project/teams";
 
 const TeamsTab = () => {
+  const [leadershipTeamData] = useState(mockLeadershipTeamData);
+  const [advisoryTeamData] = useState(mockAdvisoryBoardData);
   return (
     <div className="bg-white">
-      <LeadershipTeam />
-      <AdvisoryBoard />
+      <LeadershipTeam
+        data={leadershipTeamData}
+        totalCount={advisoryTeamData.length + leadershipTeamData.length}
+      />
+      <AdvisoryBoard data={advisoryTeamData} />
     </div>
   );
 };
