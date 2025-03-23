@@ -37,21 +37,21 @@ export const mockLeadershipTeamData: ITeamMember[] = [
   },
   {
     name: "Sarah Johnson",
-    role: "Chief Technology Officer",
+    role: "CTO",
     shortBio:
       "Expert in AI and machine learning with a decade of experience in scaling tech startups.",
     links: ["https://linkedin.com/sarahjohnson"],
   },
   {
     name: "David Smith",
-    role: "Chief Financial Officer",
+    role: "CFO",
     shortBio:
       "Seasoned financial strategist with a track record of driving profitability in high-growth companies.",
     links: ["https://linkedin.com/davidsmith"],
   },
   {
     name: "Adam Smith",
-    role: "Chief Information Officer",
+    role: "CIO",
     shortBio:
       "Seasoned information strategist with a track record of driving profitability in high-growth companies.",
     links: ["https://linkedin.com/davidsmith"],
