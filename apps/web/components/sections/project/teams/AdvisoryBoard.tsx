@@ -25,19 +25,26 @@ export interface ITeamData {
   data: ITeamMember[];
 }
 export const AdvisoryBoard: React.FC<ITeamData> = ({ data }) => {
+  const [isViewAllClicked, setIsViewAllClicked] = useState(false);
+  const visibleData = isViewAllClicked ? data : data.slice(0, 4);
   return (
     <div className="mt-[1.5rem]">
       <h2 className="text-2xl font-bold text-black">Advisory Board</h2>
       {/* list */}
-      <div className="flex gap-[1rem] flex-wrap mt-[1.5rem]">
-        {data.map((ele) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-[1.5rem]">
+        {visibleData.map((ele) => (
           <AdvisoryBoardCard key={`${ele.name}${ele.role}`} {...ele} />
         ))}
       </div>
       <div className="w-full flex justify-center items-center mt-[2rem]">
-        <button className="flex items-center gap-2 px-4 py-2 bg-white text-black border border-gray-200 rounded-lg shadow-md hover:bg-gray-100">
+        <button
+          className="flex items-center gap-2 px-4 py-2 bg-white text-black border border-gray-200 rounded-lg shadow-md hover:bg-gray-100"
+          onClick={() => setIsViewAllClicked(!isViewAllClicked)}
+        >
           <Users className="w-5 h-5" />
-          <p className="text-sm">View All Team Members</p>
+          <p className="text-sm">
+            {isViewAllClicked ? "Show Less" : "View All Team Members"}
+          </p>
         </button>
       </div>
     </div>

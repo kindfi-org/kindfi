@@ -9,6 +9,7 @@ export const LeadershipTeamCard: React.FC<ITeamMember> = ({
   name,
   role,
   shortBio,
+  links,
 }) => {
   return (
     <Card className="max-w-sm rounded overflow-hidden shadow-lg bg-white p-6 border border-gray-200">
@@ -17,16 +18,30 @@ export const LeadershipTeamCard: React.FC<ITeamMember> = ({
 
         <div>
           <h2 className="text-lg font-bold text-black">{name}</h2>
-          <a href="#" className="text-blue-600 font-medium">
-            {role}
-          </a>
+          <p className="text-blue-600 font-medium">{role}</p>
           <p className="text-gray-600 text-sm mt-2">{shortBio}</p>
           <div className="mt-3 flex space-x-3 text-gray-500">
             <div className="p-2 rounded-full hover:bg-gray-200 transition">
-              <FaLink className="cursor-pointer" />
+              {links && (
+                <a
+                  href={links[0] ? links[0] : "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaLink className="cursor-pointer" />
+                </a>
+              )}
             </div>
             <div className="p-2 rounded-full hover:bg-gray-200 transition">
-              <FaExternalLinkAlt className="cursor-pointer" />
+              {links && (
+                <a
+                  href={links[1] ? links[1] : "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaExternalLinkAlt className="cursor-pointer" />
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -35,8 +50,8 @@ export const LeadershipTeamCard: React.FC<ITeamMember> = ({
   );
 };
 
-interface ILeaderData extends ITeamData{
-  totalCount : number;
+interface ILeaderData extends ITeamData {
+  totalCount: number;
 }
 export const LeadershipTeam: React.FC<ILeaderData> = ({ data, totalCount }) => {
   return (
@@ -48,8 +63,7 @@ export const LeadershipTeam: React.FC<ILeaderData> = ({ data, totalCount }) => {
         </span>
       </div>
 
-      {/* list */}
-      <div className="flex gap-[1rem] flex-wrap mt-[1.5rem]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-[1.5rem]">
         {data.map((ele) => (
           <LeadershipTeamCard key={`${ele.name}${ele.role}`} {...ele} />
         ))}
