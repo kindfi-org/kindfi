@@ -1,54 +1,15 @@
 import Image from 'next/image'
 import type React from 'react'
+import type { Project, Tag } from '~/lib/types/projects.types'
 import { Progress } from '../base/progress'
 
-export interface Tag {
-	id: string | number
-	text: string
-	color?: {
-		backgroundColor: string
-		textColor: string
-	}
-}
-
-interface Creator {
-	id: number | string
-	name: string
-	image: string
-	verified: boolean
-	completedProjects: number
-}
-
-export interface Project {
-	id: string | number
-	title: string
-	description: string
-	currentAmount: number
-	targetAmount: number
-	investors: number
-	minInvestment?: number
-	percentageComplete?: number
-	tags: Tag[] | string[]
-	image?: string
-	imageUrl?: string
-	location?: string
-	category?: string
-	raised?: number
-	goal?: number
-	donors?: number
-	milestones?: number
-	completedMilestones?: number
-	trending?: boolean
-	featured?: boolean
-	creator?: Creator
-}
 interface ProjectCardProps {
 	project: Project
 	viewMode?: 'grid' | 'list'
 }
 
 // Extracted the shared tag rendering logic
-const RenderTags = ({ tags }: { tags: (Tag | string)[] }) => {
+const RenderTags = ({ tags }: { tags: Tag[] | string[] }) => {
 	if (!Array.isArray(tags)) return null // Prevents errors if undefined or not an array
 	return (
 		<div className="flex flex-wrap gap-2 mt-4">
@@ -59,10 +20,15 @@ const RenderTags = ({ tags }: { tags: (Tag | string)[] }) => {
 					style={
 						typeof tag === 'string'
 							? { backgroundColor: '#E5E7EB', color: '#374151' }
-							: {
-									backgroundColor: tag.color?.backgroundColor ?? '',
-									color: tag.color?.textColor ?? '',
-								}
+							: typeof tag.color !== 'string'
+								? {
+										backgroundColor: tag.color?.backgroundColor ?? '',
+										color: tag.color?.textColor ?? '',
+									}
+								: {
+										backgroundColor: '',
+										color: '',
+									}
 					}
 				>
 					{typeof tag === 'string' ? tag : tag.text}
@@ -72,18 +38,31 @@ const RenderTags = ({ tags }: { tags: (Tag | string)[] }) => {
 	)
 }
 
+const RenderCategories = ({ categories }: { categories: string[] }) =>
+	categories?.length ? (
+		<div className="absolute top-4 left-4 z-10 flex flex-col gap-1">
+			{categories.map((category, index) => (
+				<span
+					key={category}
+					className="bg-white text-gray-800 px-3 py-1 rounded-full text-xs font-medium shadow-sm"
+				>
+					{category}
+				</span>
+			))}
+		</div>
+	) : null
+
 const ProjectCard: React.FC<ProjectCardProps> = ({
 	project,
 	viewMode = 'grid',
 }) => {
+	console.log({ project })
 	const targetAmount = project.targetAmount ?? project.goal
 	const percentageComplete =
 		project.percentageComplete ??
 		(project.currentAmount && project.targetAmount
 			? (project.currentAmount / project.targetAmount) * 100
 			: 0)
-
-	// }
 
 	if (viewMode === 'list') {
 		return (
@@ -95,6 +74,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 						fill
 						className="object-cover"
 					/>
+					<RenderCategories categories={project.categories || []} />
 				</div>
 
 				<div className="flex-1 p-5">
@@ -141,19 +121,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 	if (viewMode === 'grid') {
 		return (
 			<div className="overflow-hidden transition-shadow duration-300 rounded-lg border border-gray-100 bg-white h-full relative">
-				<div className="absolute top-4 left-4 z-10">
-					<span className="bg-white text-gray-800 px-3 py-1 rounded-full text-sm font-medium shadow-sm">
-						{project.category}
-					</span>
-				</div>
-
 				<div className="relative w-full h-48">
 					<Image
 						src={project.image || '/api/placeholder/400/320'}
 						alt={project.title}
 						fill
-						className="object-cover"
+						className="object-cover transition-transform duration-500 hover:scale-105"
 					/>
+					<RenderCategories categories={project.categories || []} />
 				</div>
 
 				<div className="p-5">

@@ -1,7 +1,26 @@
 import type { LucideIcon } from 'lucide-react'
-import type { Tag } from '~/components/shared/project-card'
-import type { Creator } from './featured-projects/featured-projects.types'
 
+export interface Creator {
+	id: number | string
+	name: string
+	image: string
+	verified: boolean
+	completedProjects: number
+	role?: string
+	totalRaised?: number
+	followers?: number
+	recentProject?: string
+}
+export interface Tag {
+	id: string | number
+	text: string
+	color?:
+		| {
+				backgroundColor: string
+				textColor: string
+		  }
+		| string
+}
 export interface ProjectCategory {
 	id: string
 	label: string
@@ -11,24 +30,38 @@ export interface ProjectCategory {
 }
 
 export interface Project {
-	id: string
+	id: number | string
 	title: string
 	description: string
-	image: string
+	image?: string
 	categories: string[]
+	category: string
+	location?: string
+
+	// Financial metrics
 	currentAmount: number
 	targetAmount: number
+	raised?: number
+	goal?: number
+	minInvestment: number
+
+	// Participation metrics
 	investors: number
-	milestones: number
-	completedMilestones: number
-	minimumSupport: number
-	creator: Creator
-	category: string
-	tags: Tag[] | string[]
-	createdAt: string
-	location?: string
-	trending: boolean
-	featured: boolean
+	donors?: number
+
+	// Progress tracking
+	milestones?: number
+	completedMilestones?: number
 	percentageComplete?: number
-	minInvestment?: number
+
+	// Tags and categorization
+	tags: Tag[] | string[]
+	trending?: boolean
+	featured?: boolean
+
+	// Metadata
+	createdAt: string
+
+	// Creator information
+	creator?: Creator
 }

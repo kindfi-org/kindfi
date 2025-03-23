@@ -1,13 +1,37 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import { CTASection } from '~/components/featured/cta-section'
 import { FeaturedCreators } from '~/components/featured/featured-creators'
 import { HeroSection } from '~/components/featured/hero-section'
-import { ProjectsGrid } from '~/components/featured/projects-grid'
+import { ProjectsGrid } from '~/components/shared/projects/projects-grid'
+import ProjectsHeader from '~/components/shared/projects/projects-header'
+import { useProjectsFilter } from '~/hooks/use-projects-filter'
 import {
 	featuredCreators,
 	featuredProjects,
 } from '~/lib/mock-data/featured-projects/mock-featured-projets'
+import type { Project } from '~/lib/types/projects.types'
 
 export default function FeaturedPage() {
+	const [projects, setProjects] = useState<Project[]>([])
+	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+	const {
+		selectedCategories,
+		setSelectedCategories,
+		sortOption,
+		setSortOption,
+		filterProjects,
+		sortProjects,
+	} = useProjectsFilter()
+
+	// Simulate real data loading
+	useEffect(() => {
+		setProjects(featuredProjects)
+	}, [])
+
+	const filteredProjects = filterProjects(sortProjects(projects, sortOption))
+
 	return (
 		<div className="min-h-screen bg-white">
 			{/* Hero Section */}
@@ -18,13 +42,23 @@ export default function FeaturedPage() {
 				badge="Verified Impact"
 			/>
 
-			{/* Featured Projects */}
-			<ProjectsGrid
-				projects={featuredProjects}
-				title="Featured Projects"
-				description="Discover verified projects making real impact worldwide."
-			/>
+			{/* Featured Projects Section*/}
+			<section className="container mx-auto px-6 lg:px-8 py-8">
+				<ProjectsHeader
+					title="Causes That Change Lives"
+					subHeader="Featured Projects"
+					description="Discover verified projects making real impact worldwide."
+					viewMode={viewMode}
+					onViewModeChange={setViewMode}
+					selectedCategories={selectedCategories}
+					setSelectedCategories={setSelectedCategories}
+					sortOption={sortOption}
+					onSortChange={setSortOption}
+					totalItems={projects.length}
+				/>
 
+				<ProjectsGrid projects={filteredProjects} viewMode={viewMode} />
+			</section>
 			{/* Featured Creators */}
 			<FeaturedCreators
 				creators={featuredCreators}
