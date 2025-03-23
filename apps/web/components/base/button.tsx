@@ -127,11 +127,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			iconOnly || (!hasTextContent && (startIcon || endIcon || children))
 
 		// Warning for icon-only buttons without aria-label in development
-		if (isIconOnly && !ariaLabel) {
-			throw new Error(
-				'Accessibility error: Icon-only buttons must have an aria-label to describe their purpose.',
-			)
-		}		
+		if (process.env.NODE_ENV !== 'production' && isIconOnly && !ariaLabel) {
+			console.error('Accessibility error: Icon-only buttons must have an aria-label to describe their purpose.');
+		}
 
 		// Generate props based on component state
 		const buttonProps: React.ButtonHTMLAttributes<HTMLButtonElement> & { role?: string } = {
