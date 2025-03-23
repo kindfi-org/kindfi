@@ -127,24 +127,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			iconOnly || (!hasTextContent && (startIcon || endIcon || children))
 
 		// Warning for icon-only buttons without aria-label in development
-		if (process.env.NODE_ENV !== 'production' && isIconOnly && !ariaLabel) {
-			console.warn(
-				'Accessibility warning: Icon-only buttons must have an aria-label attribute to describe their purpose.',
+		if (isIconOnly && !ariaLabel) {
+			throw new Error(
+				'Accessibility error: Icon-only buttons must have an aria-label to describe their purpose.',
 			)
-		}
+		}		
 
 		// Generate props based on component state
-		const buttonProps: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-			role?: string
-		} = {
-			// Default role is 'button', override for links
+		const buttonProps: React.ButtonHTMLAttributes<HTMLButtonElement> & { role?: string } = {
 			role: isLink ? 'link' : undefined,
-			// If no aria-label is provided but there's text content, use it as fallback
-			'aria-label':
-				ariaLabel ||
-				(isIconOnly && hasTextContent ? String(children) : undefined),
+			'aria-label': ariaLabel || (isIconOnly ? String(children) : undefined),
+			// Automatically set title if aria-label is provided
+			title: ariaLabel || (typeof children === 'string' ? children : undefined),
 			...props,
-		}
+		}		
 
 		return (
 			<Comp
