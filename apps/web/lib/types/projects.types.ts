@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from 'lucide-react';
 
 export interface Creator {
   id: number | string;
@@ -10,7 +10,7 @@ export interface Creator {
   totalRaised?: number;
   followers?: number;
   recentProject?: string;
-  totalcurrentAmount?: number;
+  totalCurrentAmount?: number;
 }
 export interface Tag {
   id: string | number;
@@ -35,7 +35,9 @@ export interface Project {
   title: string;
   description: string;
   image?: string;
+  //for project that has the category field as an array of strings
   categories: string[];
+  //for project that has the category field as a string
   category: string;
   location?: string;
 

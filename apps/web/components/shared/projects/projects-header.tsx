@@ -1,33 +1,50 @@
-"use client";
+'use client';
 
-import { LayoutGrid, List, SlidersHorizontal } from "lucide-react";
-import { CategoryFilter } from "~/components/sections/projects";
-import { SortDropdown } from "~/components/sections/projects/sort-dropdown";
-import type { SortOption } from "~/hooks/use-projects-filter";
+import { LayoutGrid, List, SlidersHorizontal } from 'lucide-react';
+import { CategoryFilter } from '~/components/sections/projects';
+import { SortDropdown } from '~/components/sections/projects/sort-dropdown';
+import type { SortOption } from '~/hooks/use-projects-filter';
 
+/**
+ * Props for the ProjectsHeader component
+ */
 interface ProjectsHeaderProps {
+  /** Main title displayed in the header */
   title: string;
+  /** Optional description text */
   description?: string;
-  viewMode?: "grid" | "list";
-  onViewModeChange?: (mode: "grid" | "list") => void;
+  /** Current view mode - either grid or list */
+  viewMode?: 'grid' | 'list';
+  /** Callback triggered when view mode changes */
+  onViewModeChange?: (mode: 'grid' | 'list') => void;
+  /** Current sort option */
   sortOption?: SortOption;
+  /** Callback triggered when sort option changes */
   onSortChange?: (option: SortOption) => void;
+  /** Total number of items being displayed */
   totalItems?: number;
+  /** Whether to show the sort dropdown menu */
   showSortDropdown?: boolean;
+  /** Whether to show the view mode toggle (grid/list) */
   showViewToggle?: boolean;
+  /** Whether to show the filter button */
   showFilterButton?: boolean;
+  /** Currently selected category filters */
   selectedCategories?: string[];
+  /** Optional secondary header text */
   subHeader?: string;
+  /** Callback triggered when filter button is clicked */
   onFilterClick?: () => void;
+  /** Function to update selected categories */
   setSelectedCategories?: (x: string[]) => void;
 }
 
 export function ProjectsHeader({
   title,
   description,
-  viewMode = "grid",
+  viewMode = 'grid',
   onViewModeChange,
-  sortOption = "popular",
+  sortOption = 'popular',
   onSortChange,
   totalItems,
   selectedCategories = [],
@@ -48,16 +65,16 @@ export function ProjectsHeader({
             <div className="flex border border-gray-200 rounded-md overflow-hidden">
               <button
                 type="button"
-                className={`p-2 ${viewMode === "grid" ? "bg-gray-100" : "bg-white"}`}
-                onClick={() => onViewModeChange("grid")}
+                className={`p-2 ${viewMode === 'grid' ? 'bg-gray-100' : 'bg-white'} transition-colors duration-200`}
+                onClick={() => onViewModeChange('grid')}
                 aria-label="Grid view"
               >
                 <LayoutGrid className="h-5 w-5 text-gray-700" />
               </button>
               <button
                 type="button"
-                className={`p-2 ${viewMode === "list" ? "bg-gray-100" : "bg-white"}`}
-                onClick={() => onViewModeChange("list")}
+                className={`p-2 ${viewMode === 'list' ? 'bg-gray-100' : 'bg-white'} transition-colors duration-200`}
+                onClick={() => onViewModeChange('list')}
                 aria-label="List view"
               >
                 <List className="h-5 w-5 text-gray-700" />
@@ -83,7 +100,7 @@ export function ProjectsHeader({
           onCategoryToggle={(category: string) => {
             if (selectedCategories.includes(category)) {
               setSelectedCategories?.(
-                selectedCategories.filter((id) => id !== category),
+                selectedCategories.filter((id) => id !== category)
               );
             } else {
               setSelectedCategories?.([...selectedCategories, category]);
@@ -105,6 +122,7 @@ export function ProjectsHeader({
                 {totalItems && (
                   <button
                     type="button"
+                    title="See all projects"
                     className="text-primary-500 hover:underline bg-transparent border-none p-0 cursor-pointer"
                   >
                     See all ({totalItems})
