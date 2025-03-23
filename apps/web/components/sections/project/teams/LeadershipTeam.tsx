@@ -1,71 +1,71 @@
-import type { ITeamMember } from "~/components/types/team";
-import { Card } from "~/components/base/card";
-import { FaExternalLinkAlt, FaLink } from "react-icons/fa";
-import { ITeamData } from "./AdvisoryBoard";
+import { FaExternalLinkAlt, FaLink } from 'react-icons/fa'
+import { Card } from '~/components/base/card'
+import type { ITeamMember } from '~/components/types/team'
+import type { ITeamData } from './AdvisoryBoard'
 
 export const LeadershipTeamCard: React.FC<ITeamMember> = ({
-  name,
-  role,
-  shortBio,
-  links,
+	name,
+	role,
+	shortBio,
+	links,
 }) => {
-  return (
-    <Card className="max-w-sm rounded overflow-hidden shadow-lg bg-white p-6 border border-gray-200">
-      <div className="flex items-start space-x-4">
-        <div className="w-32 h-16 bg-gray-200 rounded-lg"></div>
+	return (
+		<Card className="max-w-sm rounded overflow-hidden shadow-lg bg-white p-6 border border-gray-200">
+			<div className="flex items-start space-x-4">
+				<div className="w-32 h-16 bg-gray-200 rounded-lg" />
 
-        <div>
-          <h2 className="text-lg font-bold text-black">{name}</h2>
-          <p className="text-blue-600 font-medium">{role}</p>
-          <p className="text-gray-600 text-sm mt-2">{shortBio}</p>
-          <div className="mt-3 flex space-x-3 text-gray-500">
-            <div className="p-2 rounded-full hover:bg-gray-200 transition">
-              {links && (
-                <a
-                  href={links[0] ? links[0] : "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <FaLink className="cursor-pointer" />
-                </a>
-              )}
-            </div>
-            <div className="p-2 rounded-full hover:bg-gray-200 transition">
-              {links && (
-                <a
-                  href={links[1] ? links[1] : "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <FaExternalLinkAlt className="cursor-pointer" />
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-};
+				<div>
+					<h2 className="text-lg font-bold text-black">{name}</h2>
+					<p className="text-blue-600 font-medium">{role}</p>
+					<p className="text-gray-600 text-sm mt-2">{shortBio}</p>
+					<div className="mt-3 flex space-x-3 text-gray-500">
+						<div className="p-2 rounded-full hover:bg-gray-200 transition">
+							{links && (
+								<a
+									href={links[0] ? links[0] : '#'}
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									<FaLink className="cursor-pointer" />
+								</a>
+							)}
+						</div>
+						<div className="p-2 rounded-full hover:bg-gray-200 transition">
+							{links && (
+								<a
+									href={links[1] ? links[1] : '#'}
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									<FaExternalLinkAlt className="cursor-pointer" />
+								</a>
+							)}
+						</div>
+					</div>
+				</div>
+			</div>
+		</Card>
+	)
+}
 
 interface ILeaderData extends ITeamData {
-  totalCount: number;
+	totalCount: number
 }
 export const LeadershipTeam: React.FC<ILeaderData> = ({ data, totalCount }) => {
-  return (
-    <div>
-      <div className="flex justify-between">
-        <h2 className="text-2xl font-bold text-black">Leadership Team</h2>
-        <span className="px-3 py-1 text-sm font-medium text-black border border-gray-300 rounded-full">
-          {totalCount} members
-        </span>
-      </div>
+	return (
+		<div>
+			<div className="flex justify-between">
+				<h2 className="text-2xl font-bold text-black">Leadership Team</h2>
+				<span className="px-3 py-1 text-sm font-medium text-black border border-gray-300 rounded-full">
+					{totalCount} members
+				</span>
+			</div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-[1.5rem]">
-        {data.map((ele) => (
-          <LeadershipTeamCard key={`${ele.name}${ele.role}`} {...ele} />
-        ))}
-      </div>
-    </div>
-  );
-};
+			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-[1.5rem]">
+				{data.map((ele) => (
+					<LeadershipTeamCard key={`${ele.name}${ele.role}`} {...ele} />
+				))}
+			</div>
+		</div>
+	)
+}
