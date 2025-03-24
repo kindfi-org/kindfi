@@ -2,6 +2,7 @@ import { FaExternalLinkAlt, FaLink } from "react-icons/fa";
 import { Card } from "~/components/base/card";
 import type { ITeamMember } from "~/lib/types/project/team";
 import type { ITeamData } from "./advisory-board";
+import Image from "next/image";
 
 export function LeadershipTeamCard({
   name,
@@ -12,8 +13,13 @@ export function LeadershipTeamCard({
   return (
     <Card className="max-w-sm rounded overflow-hidden shadow-lg bg-white p-6 border border-gray-200">
       <div className="flex items-start space-x-4">
-        <div className="w-32 h-16 bg-gray-200 rounded-lg" />
-
+        <Image
+          src="/images/placeholder.png"
+          alt={name}
+          width={64}
+          height={64}
+          className="rounded-lg bg-gray-200"
+        />
         <div>
           <h2 className="text-lg font-bold text-black">{name}</h2>
           <p className="text-blue-600 font-medium">{role}</p>

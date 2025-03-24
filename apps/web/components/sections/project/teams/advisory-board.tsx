@@ -1,12 +1,19 @@
 import { Users } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { Card } from "~/components/base/card";
 import type { ITeamMember } from "~/lib/types/project/team";
 
-export function AdvisoryBoardCard({ name, role, shortBio }: ITeamMember) { 
+export function AdvisoryBoardCard({ name, role, shortBio }: ITeamMember) {
   return (
     <Card className="max-w-xs rounded overflow-hidden shadow-lg bg-white p-6 border border-gray-200 flex flex-col justify-center items-center">
-      <div className="w-16 h-16 bg-gray-200 rounded-full" />
+      <Image
+        src="/images/placeholder.png"
+        alt={name}
+        width={80}
+        height={80}
+        className="rounded-full bg-gray-200"
+      />
       <div className="font-bold text-black text-lg mb-2 text-center">
         {name}
       </div>
@@ -14,12 +21,12 @@ export function AdvisoryBoardCard({ name, role, shortBio }: ITeamMember) {
       <p className="text-gray-600 text-sm mt-4 text-center">{shortBio}</p>
     </Card>
   );
-};
+}
 
 export interface ITeamData {
   data: ITeamMember[];
 }
-export function AdvisoryBoard ({ data } : ITeamData) {
+export function AdvisoryBoard({ data }: ITeamData) {
   const [isViewAllClicked, setIsViewAllClicked] = useState(false);
   const visibleData = isViewAllClicked ? data : data.slice(0, 4);
   return (
@@ -59,4 +66,4 @@ export function AdvisoryBoard ({ data } : ITeamData) {
       </div>
     </section>
   );
-};
+}
