@@ -1,4 +1,3 @@
-// apps/web/app/(routes)/projects/page.tsx
 'use client'
 
 import { AnimatePresence } from 'framer-motion'
@@ -32,49 +31,52 @@ export default function ProjectsPage() {
 
 	return (
 		<div className="container mx-auto px-4 py-8">
-			<ProjectsHeader
-				title="Causes That Change Lives"
-				viewMode={viewMode}
-				onViewModeChange={setViewMode}
-			/>
-
-			<div className="mt-8 mb-12">
-				<CategoryFilter
-					selectedCategories={selectedCategories}
-					onCategoryToggle={(category: string) => {
-						if (selectedCategories.includes(category)) {
-							setSelectedCategories(
-								selectedCategories.filter((id) => id !== category),
-							)
-						} else {
-							setSelectedCategories([...selectedCategories, category])
-						}
-					}}
+			{/* Projects List Section */}
+			<div>
+				<ProjectsHeader
+					title="Causes That Change Lives"
+					viewMode={viewMode}
+					onViewModeChange={setViewMode}
 				/>
-			</div>
 
-			<div className="flex justify-between items-center mb-8">
-				<h2 className="text-2xl font-semibold">Social Causes To Support</h2>
-				<div className="flex items-center gap-4">
-					<button
-						type="button"
-						className="text-primary-500 hover:underline bg-transparent border-none p-0 cursor-pointer"
-						onClick={() => {
-							/*future logic */
+				<div className="mt-8 mb-12">
+					<CategoryFilter
+						selectedCategories={selectedCategories}
+						onCategoryToggle={(category: string) => {
+							if (selectedCategories.includes(category)) {
+								setSelectedCategories(
+									selectedCategories.filter((id) => id !== category),
+								)
+							} else {
+								setSelectedCategories([...selectedCategories, category])
+							}
 						}}
-					>
-						See all (50)
-					</button>
-					<SortDropdown
-						value={sortOption}
-						onChange={(value: SortOption) => setSortOption(value)}
 					/>
 				</div>
-			</div>
 
-			<AnimatePresence mode="wait">
-				<ProjectsGrid projects={filteredProjects} viewMode={viewMode} />
-			</AnimatePresence>
+				<div className="flex justify-between items-center mb-8">
+					<h2 className="text-2xl font-semibold">Social Causes To Support</h2>
+					<div className="flex items-center gap-4">
+						<button
+							type="button"
+							className="text-primary-500 hover:underline bg-transparent border-none p-0 cursor-pointer"
+							onClick={() => {
+								/*future logic */
+							}}
+						>
+							See all (50)
+						</button>
+						<SortDropdown
+							value={sortOption}
+							onChange={(value: SortOption) => setSortOption(value)}
+						/>
+					</div>
+				</div>
+
+				<AnimatePresence mode="wait">
+					<ProjectsGrid projects={filteredProjects} viewMode={viewMode} />
+				</AnimatePresence>
+			</div>
 		</div>
 	)
 }
