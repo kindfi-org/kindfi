@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion'
 import { BadgeCheck } from 'lucide-react'
-import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Card } from '~/components/base/card'
 import { CTAButtons } from '~/components/shared/cta-buttons'
@@ -10,9 +9,9 @@ import { CTAButtons } from '~/components/shared/cta-buttons'
 export interface FeatureCreatorCardProps {
 	name: string
 	bio: string
-	totalRaised: string
-	completedProjects: number
-	recentProject: string
+	total_raised: string
+	completed_projects: number
+	recent_project: string
 	followers: number
 	avatarUrl?: string
 	verified?: boolean
@@ -23,9 +22,9 @@ export interface FeatureCreatorCardProps {
 export const FeatureCreatorCard = ({
 	name,
 	bio,
-	totalRaised,
-	completedProjects,
-	recentProject,
+	total_raised,
+	completed_projects,
+	recent_project,
 	followers,
 	avatarUrl,
 	verified = true,
@@ -33,11 +32,11 @@ export const FeatureCreatorCard = ({
 	onFollowClick = () => {},
 }: FeatureCreatorCardProps) => {
 	const creatorData = [
-		{ id: 'total-raised-id', label: 'Total Raised', value: totalRaised },
+		{ id: 'total-raised-id', label: 'Total Raised', value: total_raised },
 		{
 			id: 'completed-projects-id',
 			label: 'Completed Projects',
-			value: completedProjects,
+			value: completed_projects,
 		},
 		{ id: 'followers-id', label: 'Followers', value: followers },
 	]
@@ -76,7 +75,7 @@ export const FeatureCreatorCard = ({
 					<div className="my-6">
 						<p className="font-semibold mb-2">Recent Project:</p>
 						<span className="bg-gray-200 rounded-full py-1 px-4 font-semibold text-sm">
-							{recentProject}
+							{recent_project}
 						</span>
 					</div>
 				</div>

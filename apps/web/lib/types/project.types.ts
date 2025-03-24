@@ -63,15 +63,15 @@ export interface Project {
 	/** Project description */
 	description: string
 	/** Current funding amount */
-	currentAmount: TMoney
+	current_amount: TMoney
 	/** Target funding amount */
-	targetAmount: TMoney
+	target_amount: TMoney
 	/** Number of investors */
 	investors_count: number
 	/** Minimum investment amount allowed */
-	minInvestment: TMoney
+	min_investment: TMoney
 	/** Funding progress percentage (0-100) */
-	percentageComplete: TPercentage
+	percentage_complete: TPercentage
 	/** Project tags */
 	tags: ProjectTag[]
 }

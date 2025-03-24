@@ -11,7 +11,7 @@ import type { SortOption } from '~/hooks/use-projects-filter'
 interface ProjectsHeaderProps {
 	/** Main title displayed in the header */
 	title: string
-	/** Optional description text */
+	/** Optional description text, this text goes under the sub header e.g on the featured projects page */
 	description?: string
 	/** Current view mode - either grid or list */
 	viewMode?: 'grid' | 'list'

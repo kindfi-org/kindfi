@@ -22,7 +22,7 @@ export const projects: Project[] = [
 		target_amount: createMoney(25000),
 		investors_count: 18,
 		min_investment: createMoney(5),
-		percentageComplete: createPercentage(90),
+		percentage_complete: createPercentage(90),
 		tags: [
 			{
 				id: 'ngo-tag-id',
@@ -62,7 +62,7 @@ export const projects: Project[] = [
 		target_amount: createMoney(60000),
 		investors_count: 35,
 		min_investment: createMoney(10),
-		percentageComplete: createPercentage(90),
+		percentage_complete: createPercentage(90),
 		tags: [
 			{
 				id: 'environment-tag-id',
@@ -102,7 +102,7 @@ export const projects: Project[] = [
 		target_amount: createMoney(20000),
 		investors_count: 22,
 		min_investment: createMoney(8),
-		percentageComplete: createPercentage(77),
+		percentage_complete: createPercentage(77),
 		tags: [
 			{
 				id: 'animals-tag-id',
@@ -142,7 +142,7 @@ export const projects: Project[] = [
 		target_amount: createMoney(50000),
 		investors_count: 28,
 		min_investment: createMoney(20),
-		percentageComplete: createPercentage(60),
+		percentage_complete: createPercentage(60),
 		tags: [
 			{
 				id: 'humanitarian-tag-id',
@@ -182,7 +182,7 @@ export const projects: Project[] = [
 		target_amount: createMoney(50000),
 		investors_count: 29,
 		min_investment: createMoney(15),
-		percentageComplete: createPercentage(68),
+		percentage_complete: createPercentage(68),
 		tags: [
 			{
 				id: 'culture-tag-id',
@@ -222,7 +222,7 @@ export const projects: Project[] = [
 		target_amount: createMoney(25000),
 		investors_count: 20,
 		min_investment: createMoney(12),
-		percentageComplete: createPercentage(74),
+		percentage_complete: createPercentage(74),
 		tags: [
 			{
 				id: 'water-tag-id',
@@ -262,7 +262,7 @@ export const projects: Project[] = [
 		target_amount: createMoney(55000),
 		investors_count: 40,
 		min_investment: createMoney(10),
-		percentageComplete: createPercentage(73),
+		percentage_complete: createPercentage(73),
 		tags: [
 			{
 				id: 'education-tag-id',
@@ -302,7 +302,7 @@ export const projects: Project[] = [
 		target_amount: createMoney(45000),
 		investors_count: 30,
 		min_investment: createMoney(20),
-		percentageComplete: createPercentage(71),
+		percentage_complete: createPercentage(71),
 		tags: [
 			{
 				id: 'healthcare-tag-id',

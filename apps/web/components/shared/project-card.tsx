@@ -54,9 +54,8 @@ const RenderCategories = ({ categories }: { categories: string[] }) =>
 	) : null
 
 function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
-	const targetAmount = project.target_amount ?? project.goal
-	const percentageComplete =
-		project.percentageComplete ??
+	const percentage_complete =
+		project.percentage_complete ??
 		(project.current_amount && project.target_amount
 			? (project.current_amount / project.target_amount) * 100
 			: 0)
@@ -81,7 +80,7 @@ function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 
 				<ProjectDetails
 					project={project}
-					percentageComplete={percentageComplete}
+					percentage_complete={percentage_complete}
 				/>
 			</div>
 		</div>
@@ -105,7 +104,7 @@ function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 
 				<ProjectDetails
 					project={project}
-					percentageComplete={percentageComplete}
+					percentage_complete={percentage_complete}
 				/>
 			</div>
 		</div>
@@ -115,23 +114,23 @@ function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 export default ProjectCard
 const ProjectDetails = ({
 	project,
-	percentageComplete,
+	percentage_complete,
 }: {
 	project: Project
-	percentageComplete: number
+	percentage_complete: number
 }) => (
 	<>
 		<div className="mb-4">
 			<div className="flex justify-between text-sm mb-1">
 				<span className="font-semibold">
-					${project.current_amount?.toLocaleString()}
+					${project.current_amount?.toLocaleString() ?? '0'}
 				</span>
 				<span className="text-gray-500">
-					{percentageComplete.toFixed(2)}% of $
+					{percentage_complete.toFixed(2)}% of $
 					{project.target_amount?.toLocaleString()}
 				</span>
 			</div>
-			<Progress value={percentageComplete} className="h-2 bg-gray-100" />
+			<Progress value={percentage_complete} className="h-2 bg-gray-100" />
 		</div>
 
 		<div className="flex justify-between mb-4 text-center">

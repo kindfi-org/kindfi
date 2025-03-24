@@ -5,12 +5,12 @@ export interface Creator {
 	name: string
 	image: string
 	verified: boolean
-	completedProjects: number
+	completed_projects: number
 	role?: string
-	totalRaised?: number
+	total_raised?: number
 	followers?: number
-	recentProject?: string
-	totalCurrentAmount?: number
+	recent_project?: string
+	total_current_amount?: number
 }
 export interface Tag {
 	id: string | number
@@ -47,8 +47,8 @@ export interface Project {
 
 	// Progress tracking
 	milestones?: number
-	completedMilestones?: number
-	percentageComplete?: number
+	completed_milestones?: number
+	percentage_complete?: number
 
 	// Tags and categorization
 	tags: Tag[] | string[]

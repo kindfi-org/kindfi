@@ -13,8 +13,8 @@ export const mockProjects: Project[] = [
 		target_amount: 25000,
 		investors_count: 18,
 		min_investment: 5,
-		created_at: '',
-		percentageComplete: 90,
+		created_at: '2023-08-22T09:30:00Z',
+		percentage_complete: 90,
 		tags: [
 			{ id: 'ngo-tag-id', text: 'NGO' },
 			{ id: 'nutrition-tag-id', text: 'NUTRITION' },
@@ -32,8 +32,8 @@ export const mockProjects: Project[] = [
 		target_amount: 45000,
 		investors_count: 30,
 		min_investment: 20,
-		created_at: '',
-		percentageComplete: 71,
+		created_at: '2023-09-22T09:30:00Z',
+		percentage_complete: 71,
 		tags: [
 			{ id: 'healthcare-tag-id', text: 'HEALTHCARE' },
 			{ id: 'community-tag-id', text: 'COMMUNITY' },
