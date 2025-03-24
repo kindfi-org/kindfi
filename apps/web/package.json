@@ -84,7 +84,7 @@
 		"tailwindcss": "^3.4.1",
 		"typescript": "^5",
 		"@types/node-fetch": "^2.6.12",
-		"@types/bun": "latest"
+		"@types/bun": "^1.2.5"
 	},
 	"module": "index.ts",
 	"type": "module"

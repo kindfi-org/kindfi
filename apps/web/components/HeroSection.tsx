@@ -1,16 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { BsStars } from "react-icons/bs";
 import { IoMdArrowForward } from "react-icons/io";
 
-const HeroSection = () => {
+const HeroSection = (): JSX.Element => {
   // active button state
-  const [activeButton, setActiveButton] = useState(1);
+  const [activeButton, setActiveButton] = useState<number>(1)
 
   // handle button click
-  const handleButtonClick = (buttonNumber: number) => {
+  const handleButtonClick = useCallback((buttonNumber: number): void => {
     setActiveButton(buttonNumber);
-  };
+  }, [])
 
   return (
     // hero section
@@ -76,4 +76,4 @@ const HeroSection = () => {
   );
 };
 
-export default HeroSection;
+export { HeroSection };
