@@ -12,7 +12,7 @@ export function AdvisoryBoardCard({ name, role, shortBio }: ITeamMember) {
         alt={name}
         width={80}
         height={80}
-        className="rounded-full bg-gray-200"
+        className="rounded-full bg-gray-200 object-cover"
       />
       <div className="font-bold text-black text-lg mb-2 text-center">
         {name}

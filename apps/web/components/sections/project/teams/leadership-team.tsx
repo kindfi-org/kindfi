@@ -18,7 +18,7 @@ export function LeadershipTeamCard({
           alt={name}
           width={64}
           height={64}
-          className="rounded-lg bg-gray-200"
+          className="rounded-lg bg-gray-200 object-cover"
         />
         <div>
           <h2 className="text-lg font-bold text-black">{name}</h2>
