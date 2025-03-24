@@ -3,9 +3,9 @@
 import { type ResourceType, resourcesData } from '@/lib/knowledge-resources'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { FeaturedResources } from './FeaturedResources'
-import { ResourceCard } from './ResourceCard'
-import { SearchBar } from './SearchBar'
+import { FeaturedResources } from './featured-resources'
+import { ResourceCard } from './resource-card'
+import { SearchBar } from './search-bar'
 
 export const KnowledgeResources = () => {
 	const [searchQuery, setSearchQuery] = useState('')
