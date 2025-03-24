@@ -9,6 +9,9 @@
 		"lint": "biome check"
 	},
 	"dependencies": {
+		"@fortawesome/fontawesome-svg-core": "^6.7.2",
+		"@fortawesome/free-solid-svg-icons": "^6.7.2",
+		"@fortawesome/react-fontawesome": "^0.2.2",
 		"@radix-ui/react-slot": "^1.1.2",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
@@ -17,6 +20,7 @@
 		"next": "15.1.7",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
+		"react-progressbar": "^15.4.1",
 		"tailwind-merge": "^3.0.1",
 		"tailwindcss-animate": "^1.0.7"
 	},
