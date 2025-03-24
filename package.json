@@ -1,48 +1,54 @@
 {
-	"name": "kindfi",
-	"version": "0.0.1",
-	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
-		"@commitlint/cli": "^19.6.1",
-		"@commitlint/config-conventional": "^19.6.0",
-		"@types/bun": "latest",
-		"husky": "^9.1.7"
-	},
-	"peerDependencies": {
-		"typescript": "^5.0.0"
-	},
-	"engines": {
-		"bun": "1.x"
-	},
-	"husky": {
-		"hooks": {
-			"commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-		}
-	},
-	"packageManager": "bun@1.1.20",
-	"private": true,
-	"scripts": {
-		"init": "bun install && bun husky:prepare",
-		"husky:prepare": "husky",
-		"format-and-lint": "biome check .",
-		"format-and-lint:fix": "biome check . --write",
-		"clean": "git clean -xdf node_modules",
-		"clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-		"prepare": "husky"
-	},
-	"workspaces": {
-		"packages": ["apps/*", "services/*", "packages/*"],
-		"nohoist": [
-			"**/cbw-sdk",
-			"**/cbw-sdk/**",
-			"**/wagmi",
-			"**/pino-pretty",
-			"**/wagmi/**",
-			"**/pino-pretty/**"
-		]
-	},
-	"dependencies": {
-		"date-fns": "^4.1.0",
-		"react-webcam": "^7.2.0"
-	}
+  "name": "kindfi",
+  "version": "0.0.1",
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@types/bun": "latest",
+    "husky": "^9.1.7"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "bun": "1.x"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "bun run format-and-lint",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "packageManager": "bun@1.1.20",
+  "private": true,
+  "scripts": {
+    "init": "bun install && bun husky:prepare",
+    "husky:prepare": "husky",
+    "format-and-lint": "biome check .",
+    "format-and-lint:fix": "biome check . --write",
+    "clean": "git clean -xdf node_modules",
+    "clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
+    "prepare": "husky"
+  },
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "services/*",
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/cbw-sdk",
+      "**/cbw-sdk/**",
+      "**/wagmi",
+      "**/pino-pretty",
+      "**/wagmi/**",
+      "**/pino-pretty/**"
+    ]
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.21",
+    "date-fns": "^4.1.0",
+    "react-webcam": "^7.2.0"
+  }
 }

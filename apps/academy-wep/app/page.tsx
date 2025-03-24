@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from "lucide-react";
 import { useState } from "react";
-import { FeaturedLearningPaths } from "@/components/FeaturedLearningPaths";
+
 export default function Home() {
   const [email, setEmail] = useState("");
 
@@ -102,7 +102,6 @@ export default function Home() {
             Be the first to know when we launch.
           </p>
         </motion.div>
-        <FeaturedLearningPaths />
 
         {/* Social Links */}
         <motion.div
