@@ -1,14 +1,14 @@
 import { FaExternalLinkAlt, FaLink } from "react-icons/fa";
 import { Card } from "~/components/base/card";
 import type { ITeamMember } from "~/components/types/team";
-import type { ITeamData } from "./AdvisoryBoard";
+import type { ITeamData } from "./advisory-board";
 
-export const LeadershipTeamCard: React.FC<ITeamMember> = ({
+export function LeadershipTeamCard({
   name,
   role,
   shortBio,
   links,
-}) => {
+}: ITeamMember) {
   return (
     <Card className="max-w-sm rounded overflow-hidden shadow-lg bg-white p-6 border border-gray-200">
       <div className="flex items-start space-x-4">
@@ -46,29 +46,35 @@ export const LeadershipTeamCard: React.FC<ITeamMember> = ({
       </div>
     </Card>
   );
-};
+}
 
 interface ILeaderData extends ITeamData {
   totalCount: number;
 }
-export const LeadershipTeam: React.FC<ILeaderData> = ({ data, totalCount }) => {
+export function LeadershipTeam({ data, totalCount }: ILeaderData) {
   return (
     <section aria-labelledby="leadership-team-heading">
       <div className="flex justify-between">
         <h2 className="text-2xl font-bold text-black">Leadership Team</h2>
         <span className="px-3 py-1 text-sm font-medium text-black border border-gray-300 rounded-full">
-          {totalCount} members
+          {totalCount || (data && data.length) || 0} members
         </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-[1.5rem]">
-        {data.map((ele) => (
-          <LeadershipTeamCard
-            key={`leadership-${ele.name}${ele.role}`}
-            {...ele}
-          />
-        ))}
+        {data && data.length > 0 ? (
+          data.map((ele) => (
+            <LeadershipTeamCard
+              key={`leadership-${ele.name}${ele.role}`}
+              {...ele}
+            />
+          ))
+        ) : (
+          <p className="col-span-full text-gray-500">
+            No leadership team members to display.
+          </p>
+        )}
       </div>
     </section>
   );
-};
+}
