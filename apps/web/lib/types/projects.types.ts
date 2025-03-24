@@ -15,12 +15,7 @@ export interface Creator {
 export interface Tag {
   id: string | number;
   text: string;
-  color?:
-    | {
-        backgroundColor: string;
-        textColor: string;
-      }
-    | string;
+  color?: { backgroundColor: string; textColor: string } | string;
 }
 export interface ProjectCategory {
   id: string;
@@ -37,8 +32,6 @@ export interface Project {
   image?: string;
   //for project that has the category field as an array of strings
   categories: string[];
-  //for project that has the category field as a string
-  category: string;
   location?: string;
 
   // Financial metrics

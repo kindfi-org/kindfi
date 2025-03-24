@@ -10,7 +10,6 @@ export const featuredProjects: Project[] = [
     targetAmount: 100000,
     investors: 850,
     image: '/images/renewable-energy.webp',
-    category: '',
     milestones: 4,
     completedMilestones: 4,
     creator: {
@@ -37,7 +36,6 @@ export const featuredProjects: Project[] = [
     investors: 1200,
     image: '/images/water.webp',
     categories: ['water'],
-    category: '',
     milestones: 3,
     completedMilestones: 3,
     creator: {
@@ -62,7 +60,6 @@ export const featuredProjects: Project[] = [
     targetAmount: 40000,
     investors: 1600,
     image: '/images/education.webp',
-    category: '',
     milestones: 3,
     completedMilestones: 3,
     createdAt: '2023-11-22T00:00:00Z',

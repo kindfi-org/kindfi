@@ -7,29 +7,33 @@ interface ProjectCardProps {
   project: Project;
   viewMode?: 'grid' | 'list';
 }
+const getTagStyles = (tag: Tag | string) => {
+  if (typeof tag === 'string') {
+    return { backgroundColor: '#E5E7EB', color: '#374151' };
+  }
+
+  // Ensure tag.color is an object before accessing its properties
+  if (tag.color && typeof tag.color === 'object') {
+    return {
+      backgroundColor: tag.color.backgroundColor || '',
+      color: tag.color.textColor || '',
+    };
+  }
+
+  return {}; // Default empty style
+};
 
 // Extracted the shared tag rendering logic
 const RenderTags = ({ tags }: { tags: Tag[] | string[] }) => {
   if (!Array.isArray(tags)) return null; // Prevents errors if undefined or not an array
+
   return (
     <div className="flex flex-wrap gap-2 mt-4">
       {tags.map((tag) => (
         <span
           key={typeof tag === 'string' ? tag : tag.id}
           className="px-2 py-1 text-xs rounded uppercase"
-          style={
-            typeof tag === 'string'
-              ? { backgroundColor: '#E5E7EB', color: '#374151' }
-              : typeof tag.color !== 'string'
-                ? {
-                    backgroundColor: tag.color?.backgroundColor ?? '',
-                    color: tag.color?.textColor ?? '',
-                  }
-                : {
-                    backgroundColor: '',
-                    color: '',
-                  }
-          }
+          style={getTagStyles(tag)}
         >
           {typeof tag === 'string' ? tag : tag.text}
         </span>
