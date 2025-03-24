@@ -34,14 +34,15 @@ const CredentialCard = ({
             <p className="text-gray-700 text-sm sm:text-base text-center sm:text-left">
               {description}
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 lg:gap-10 mt-4 sm:mt-5 text-xs">
+            {/* features */}
+            <ul className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 lg:gap-10 mt-4 sm:mt-5 text-xs list-none p-0">
               {features.map((feature, index) => (
-                <p key={index} className={clsx(feature.color, "flex gap-1 justify-center sm:justify-start")}>
+                <li key={index} className={clsx(feature.color, "flex gap-1 justify-center sm:justify-start")}>
                   {feature.icon}
                   {feature.text}
-                </p>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </div>
       </div>

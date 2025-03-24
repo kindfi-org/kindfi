@@ -5,12 +5,12 @@ import { IoMdArrowForward } from "react-icons/io";
 
 const HeroSection = (): JSX.Element => {
   // active button state
-  const [activeButton, setActiveButton] = useState<number>(1)
+  const [activeButton, setActiveButton] = useState<number>(1);
 
   // handle button click
   const handleButtonClick = useCallback((buttonNumber: number): void => {
     setActiveButton(buttonNumber);
-  }, [])
+  }, []);
 
   return (
     // hero section
@@ -31,17 +31,20 @@ const HeroSection = (): JSX.Element => {
             projects. Learn blockchain fundamentals, Stellar blockchain, and
             strategies for managing digital assets to create meaningful change.
           </p>
+          {/* call to action home buttons */}
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <button
-              className="bg-gradient-to-r from-lime-600 to-lime-950 shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2"
+              className="bg-gradient-to-r from-lime-600 to-lime-950 shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2 text-white hover:opacity-90 focus:ring-2 focus:ring-lime-300 focus:outline-none transition-all"
               type="button"
+              aria-label="Start Your Journey"
             >
               Start Your Journey
               <IoMdArrowForward className="inline" />
             </button>
-            <button
-              className="border border-slate-400 shadow px-4 sm:px-5 py-2 rounded-md text-gray-700 mt-3 sm:mt-0"
+            <button 
+              className="border border-slate-400 shadow px-4 sm:px-5 py-2 rounded-md text-gray-700 mt-3 sm:mt-0 hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:outline-none transition-all"
               type="button"
+              aria-label="Try Passkey Login"
             >
               Try Passkey Login
             </button>
