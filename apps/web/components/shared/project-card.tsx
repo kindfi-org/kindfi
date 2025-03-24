@@ -116,7 +116,10 @@ export default ProjectCard
 const ProjectDetails = ({
 	project,
 	percentageComplete,
-}: { project: Project; percentageComplete: number }) => (
+}: {
+	project: Project
+	percentageComplete: number
+}) => (
 	<>
 		<div className="mb-4">
 			<div className="flex justify-between text-sm mb-1">
