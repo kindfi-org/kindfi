@@ -67,7 +67,7 @@ export interface Project {
 	/** Target funding amount */
 	targetAmount: TMoney
 	/** Number of investors */
-	investors: number
+	investors_count: number
 	/** Minimum investment amount allowed */
 	minInvestment: TMoney
 	/** Funding progress percentage (0-100) */

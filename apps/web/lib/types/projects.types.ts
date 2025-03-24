@@ -29,20 +29,20 @@ export interface Project {
 	id: number | string
 	title: string
 	description: string
-	image?: string
+	image_url?: string
 	//for project that has the category field as an array of strings
 	categories: string[]
 	location?: string
 
 	// Financial metrics
-	currentAmount: number
-	targetAmount: number
+	current_amount: number
+	target_amount: number
 	raised?: number
 	goal?: number
-	minInvestment: number
+	min_investment: number
 
 	// Participation metrics
-	investors: number
+	investors_count: number
 	donors?: number
 
 	// Progress tracking
@@ -56,7 +56,7 @@ export interface Project {
 	featured?: boolean
 
 	// Metadata
-	createdAt: string
+	created_at: string
 
 	// Creator information
 	creator?: Creator

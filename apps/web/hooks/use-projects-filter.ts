@@ -1,11 +1,18 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
+import { useSetState } from 'react-use'
 import type { Project } from '~/lib/types/projects.types'
 
 export type SortOption = 'popular' | 'newest' | 'funding' | 'supporters'
 
 export function useProjectsFilter() {
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-	const [sortOption, setSortOption] = useState<SortOption>('popular')
+	const [state, setState] = useSetState<{
+		selectedCategories: string[]
+		sortOption: SortOption
+	}>({
+		selectedCategories: [],
+		sortOption: 'popular',
+	})
+	const { selectedCategories, sortOption } = state
 
 	const filterProjects = useCallback(
 		(projects: Project[]) => {
@@ -28,16 +35,19 @@ export function useProjectsFilter() {
 				case 'newest':
 					return sortedProjects.sort(
 						(a, b) =>
-							new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+							new Date(b.created_at).getTime() -
+							new Date(a.created_at).getTime(),
 					)
 				case 'funding':
 					return sortedProjects.sort(
 						(a, b) =>
-							b.currentAmount / b.targetAmount -
-							a.currentAmount / a.targetAmount,
+							b.current_amount / b.target_amount -
+							a.current_amount / a.target_amount,
 					)
 				case 'supporters':
-					return sortedProjects.sort((a, b) => b.investors - a.investors)
+					return sortedProjects.sort(
+						(a, b) => b.investors_count - a.investors_count,
+					)
 				default:
 					return sortedProjects
 			}
@@ -47,9 +57,11 @@ export function useProjectsFilter() {
 
 	return {
 		selectedCategories,
-		setSelectedCategories,
+		setSelectedCategories: (val: string[]) =>
+			setState((prev) => ({ ...prev, selectedCategories: val })),
 		sortOption,
-		setSortOption,
+		setSortOption: (val: SortOption) =>
+			setState((prev) => ({ ...prev, sortOption: val })),
 		filterProjects,
 		sortProjects,
 	}

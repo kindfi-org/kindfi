@@ -55,7 +55,7 @@ export default function FeaturedPage() {
 					subHeader="Featured Projects"
 					description="Discover verified projects making real impact worldwide."
 					viewMode={viewMode}
-					onViewModeChange={(val: 'grid' | 'list') =>
+					onViewModeChange={(val) =>
 						setState((prev) => ({ ...prev, viewMode: val }))
 					}
 					selectedCategories={selectedCategories}

@@ -21,7 +21,7 @@ interface ProjectsHeaderProps {
 	sortOption?: SortOption
 	/** Callback triggered when sort option changes */
 	onSortChange?: (option: SortOption) => void
-	/** Total number of items being displayed */
+	/** Total number of items being displayed on the ui*/
 	totalItems?: number
 	/** Whether to show the sort dropdown menu */
 	showSortDropdown?: boolean
@@ -31,7 +31,7 @@ interface ProjectsHeaderProps {
 	showFilterButton?: boolean
 	/** Currently selected category filters */
 	selectedCategories?: string[]
-	/** Optional secondary header text */
+	/** Optional secondary header text used in featured projects page */
 	subHeader?: string
 	/** Callback triggered when filter button is clicked */
 	onFilterClick?: () => void

@@ -1,15 +1,21 @@
 // apps/web/app/(routes)/projects/page.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSetState } from 'react-use'
 import { ProjectsGrid } from '~/components/shared/projects/projects-grid'
 import ProjectsHeader from '~/components/shared/projects/projects-header'
 import { useProjectsFilter } from '~/hooks/use-projects-filter'
 import { mockProjectsView } from '~/lib/mock-data/mock-projects-view'
+import type { Project } from '~/lib/types'
 
 export default function ProjectsPage() {
-	const [projects, setProjects] = useState(mockProjectsView)
-	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+	const [state, setState] = useSetState<{
+		projects: Project[]
+		viewMode: 'grid' | 'list'
+	}>({
+		projects: mockProjectsView,
+		viewMode: 'grid',
+	})
 	const {
 		selectedCategories,
 		setSelectedCategories,
@@ -19,10 +25,7 @@ export default function ProjectsPage() {
 		sortProjects,
 	} = useProjectsFilter()
 
-	// Simulate real data loading (for future API integration)
-	useEffect(() => {
-		setProjects(mockProjectsView)
-	}, [])
+	const { projects, viewMode } = state
 
 	const filteredProjects = filterProjects(sortProjects(projects, sortOption))
 
@@ -31,7 +34,9 @@ export default function ProjectsPage() {
 			<ProjectsHeader
 				title="Causes That Change Lives"
 				viewMode={viewMode}
-				onViewModeChange={setViewMode}
+				onViewModeChange={(val) =>
+					setState((prev) => ({ ...prev, viewMode: val }))
+				}
 				selectedCategories={selectedCategories}
 				setSelectedCategories={setSelectedCategories}
 				subHeader="Social Causes To Support"
