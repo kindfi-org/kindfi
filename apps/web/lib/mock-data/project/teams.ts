@@ -1,4 +1,4 @@
-import type { ITeamMember } from '~/components/types/team'
+import type { ITeamMember } from '~/lib/types/project/team'
 
 export const mockAdvisoryBoardData: ITeamMember[] = [
 	{
