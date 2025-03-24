@@ -33,10 +33,9 @@ export function AdvisoryBoard({ data }: ITeamData) {
     <section aria-labelledby="advisory-team-heading" className="mt-[1.5rem]">
       <h2 className="text-2xl font-bold text-black">Advisory Board</h2>
       {/* list */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-[1.5rem]">
-        {visibleData.map((ele) => (
-          <AdvisoryBoardCard key={`advisory-${ele.name}${ele.role}`} {...ele} />
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-[1.5rem]"
+      id="advisory-board-members"
+      >
         {data && data.length > 0 ? (
           visibleData.map((ele) => (
             <AdvisoryBoardCard

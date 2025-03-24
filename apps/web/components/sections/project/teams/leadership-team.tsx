@@ -36,17 +36,25 @@ export function LeadershipTeamCard({
                 </a>
               )}
             </div>
-            <div className="p-2 rounded-full hover:bg-gray-200 transition">
-              {links && (
-                <a
-                  href={links[1] ? links[1] : "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
+            {links &&
+              links.map((link, index) => (
+                <div
+                  key={index}
+                  className="p-2 rounded-full hover:bg-gray-200 transition"
                 >
-                  <FaExternalLinkAlt className="cursor-pointer" />
-                </a>
-              )}
-            </div>
+                  <a
+                    href={link || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {index === 0 ? (
+                      <FaLink className="cursor-pointer" />
+                    ) : (
+                      <FaExternalLinkAlt className="cursor-pointer" />
+                    )}
+                  </a>
+                </div>
+              ))}
           </div>
         </div>
       </div>
@@ -61,9 +69,14 @@ export function LeadershipTeam({ data, totalCount }: ILeaderData) {
   return (
     <section aria-labelledby="leadership-team-heading">
       <div className="flex justify-between">
-        <h2 className="text-2xl font-bold text-black">Leadership Team</h2>
+        <h2
+          className="text-2xl font-bold text-black"
+          id="leadership-team-heading"
+        >
+          Leadership Team
+        </h2>
         <span className="px-3 py-1 text-sm font-medium text-black border border-gray-300 rounded-full">
-          {totalCount || (data && data.length) || 0} members
+          {totalCount ?? (data?.length || 0)} members
         </span>
       </div>
 
