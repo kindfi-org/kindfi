@@ -49,11 +49,9 @@ export default function Login() {
 
 	useEffect(() => {
 		if (authSuccess) {
-			// If the user is authenticated, we can use the stellarUserAddress later
-			console.log('stellarUserAddress', stellarUserAddress)
 			router.push('/')
 		}
-	}, [authSuccess, router, stellarUserAddress])
+	}, [authSuccess, router])
 
 	return (
 		<AuthLayout>
@@ -87,6 +85,7 @@ export default function Login() {
 								aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
 								aria-invalid={isEmailInvalid}
 								onChange={onEmailChange}
+								aria-required="true"
 							/>
 							<span id="email-description" className="sr-only">
 								Please enter your registered email address
@@ -97,20 +96,32 @@ export default function Login() {
 						</div>
 					</div>
 
-					<Button className="w-full" formAction={signInAction}>
+					<Button
+						className="w-full"
+						formAction={signInAction}
+						aria-live="polite"
+						aria-busy={isAuthenticating}
+						tabIndex={0}
+					>
 						{isAuthenticating ? 'Authenticating...' : 'Log In'}
 					</Button>
 
 					{isNotRegistered && (
-						<div className="text-yellow-600">
+						<div className="text-yellow-600" role="alert" aria-live="assertive" tabIndex={0}>
 							User not registered. Please Sign Up first.
 						</div>
 					)}
 
 					{authError && !isNotRegistered && (
-						<div className="text-red-600">
+						<div className="text-red-600" role="alert" aria-live="assertive" tabIndex={0}>
 							There was an error during authentication. Please try again.
 						</div>
+					)}
+
+					{authSuccess && (
+						<output className="text-green-600" aria-live="polite" tabIndex={0}>
+							Authentication successful! Redirecting...
+						</output>
 					)}
 				</form>
 			</AuthForm>

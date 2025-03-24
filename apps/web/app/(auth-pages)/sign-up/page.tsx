@@ -98,9 +98,10 @@ export default function Signup() {
 										className="pl-10"
 										required
 										aria-labelledby="email-label"
-										aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
+										aria-describedby={isEmailInvalid ? 'email-error' : 'email-description'}
 										aria-invalid={isEmailInvalid}
 										onChange={onEmailChange}
+										aria-required="true"
 									/>
 									<span id="email-description" className="sr-only">
 										Enter your email address to create your account
@@ -111,42 +112,17 @@ export default function Signup() {
 								</div>
 							</div>
 
-							{isWebAuthnSupported ? (
-								<Button
-									className="w-full"
-									type="submit"
-									disabled={isCreatingPasskey}
-								>
-									{isCreatingPasskey ? 'Creating account...' : 'Create account'}
-								</Button>
-							) : (
-								<div className="flex flex-col items-center justify-center">
-									<span>
-										WebAuthn is not supported. Please use a different browser.
-									</span>
-								</div>
-							)}
-
-							{regSuccess && (
-								<div className="text-green-600">
-									Registration successful! You can now sign in.
-								</div>
-							)}
-
-							{regError && !isAlreadyRegistered && (
-								<div className="text-red-600">
-									There was an error during registration. Please try again.
-								</div>
-							)}
-
-							{isAlreadyRegistered && (
-								<div className="text-yellow-600">
-									This email is already registered. Please sign in.
-								</div>
-							)}
+							<Button
+								className="w-full"
+								type="submit"
+								disabled={isCreatingPasskey}
+								aria-live="polite"
+								aria-busy={isCreatingPasskey}
+								tabIndex={0}
+							>
+								{isCreatingPasskey ? 'Creating account...' : 'Create account'}
+							</Button>
 						</div>
-
-						{/* <FormMessage message={searchParams} /> */}
 					</form>
 				</CardContent>
 				<CardFooter className="flex flex-col space-y-4 border-t p-6">
@@ -155,6 +131,7 @@ export default function Signup() {
 						<Link
 							href="/sign-in"
 							className="text-primary underline hover:text-primary/80"
+							tabIndex={0}
 						>
 							Sign in
 						</Link>
