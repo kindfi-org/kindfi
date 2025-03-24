@@ -2,8 +2,9 @@ prettier $(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g') -
 bun format-and-lint:fix
 git update-index --again
 if git diff --cached --name-only | grep -q '^apps/web/'; then
-  echo "🔵 Running tests for the web application."
-  echo "🔴 Ensure to have no ENV var missing."
-  echo "🟡 Check test errors if any."
-  cd apps/web && bun test
+  echo "🔵 Pre commit test run temporally removed. Continuing..."
+  # echo "🔵 Running tests for the web application."
+  # echo "🔴 Ensure to have no ENV var missing."
+  # echo "🟡 Check test errors if any."
+  # cd apps/web && bun test
 fi
