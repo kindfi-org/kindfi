@@ -58,7 +58,7 @@ const RenderCategories = ({ categories }: { categories: string[] }) =>
 function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 	const percentageComplete =
 		project.percentage_complete ??
-		(project.current_amount && project.target_amount
+		(project.current_amount && project.target_amount > 0
 			? (project.current_amount / project.target_amount) * 100
 			: 0)
 
