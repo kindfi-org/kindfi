@@ -1,7 +1,4 @@
 'use client'
-
-import CredentialCard from '@/components/credential-card'
-import { HeroSection } from '@/components/hero-section'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
@@ -136,8 +133,6 @@ export default function Home() {
 					))}
 				</motion.div>
 			</div>
-			<HeroSection />
-			<CredentialCard />
 		</main>
 	)
 }

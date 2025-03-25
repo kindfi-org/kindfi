@@ -73,4 +73,4 @@ const CredentialCard = ({
 	)
 }
 
-export default CredentialCard
+export {CredentialCard};
