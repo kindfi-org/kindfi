@@ -1,6 +1,6 @@
 import getContrast from 'get-contrast'
 
-const MAXIMUM_COLOR_RANGE = Number.parseInt('0xFFFFFF')
+const MAXIMUM_COLOR_RANGE = 0xffffff
 function randomHexColor(): string {
 	return `#${`${Math.floor(Math.random() * MAXIMUM_COLOR_RANGE)
 		.toString(16)
