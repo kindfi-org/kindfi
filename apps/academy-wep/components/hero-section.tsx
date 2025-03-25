@@ -92,12 +92,12 @@ const HeroSection = ({
 	const slides = customSlides || DEFAULT_SLIDES
 
 	// Determine the title to display with gradient
-	const displayTitle = applyGradientToLastTwoWords(
-		typeof slides[activeButton - 1].title === 'string'
-			? slides[activeButton - 1].title
-			: (slides[activeButton - 1].title as string),
-	)
-
+  const currentSlide = slides[activeButton - 1];
+	const currentTitle = currentSlide.title;
+	const displayTitle = typeof currentTitle === 'string' 
+		? applyGradientToLastTwoWords(currentTitle)
+		: currentTitle;
+    
 	// Determine the description to display
 	const displayDescription =
 		slides[activeButton - 1]?.description || description
@@ -145,7 +145,7 @@ const HeroSection = ({
 				{/* pagination buttons */}
 				<div className="flex flex-col sm:flex-row gap-3 w-full sm:w-3/4 md:w-1/2 mx-auto mt-8 sm:mt-10 text-xs sm:text-sm justify-center items-center">
 					<div className="flex gap-2 mb-3 sm:mb-0">
-						{[1, 2, 3, 4].map((num) => (
+            {Array.from({ length: slides.length }, (_, i) => i + 1).map((num) => (
 							<button
 								key={num}
 								onClick={() => handleButtonClick(num)}
@@ -170,7 +170,7 @@ const HeroSection = ({
 						))}
 					</div>
 					<p className="text-secondary text-xs">
-						Join <span className="font-semibold">2,500+</span> learners
+            Join<span className="font-semibold">{learnerCount.toLocaleString()}+</span>learners
 						worldwide
 					</p>
 				</div>
