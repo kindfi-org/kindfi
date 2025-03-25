@@ -24,7 +24,7 @@ export function useProjectsFilter() {
 
 				if (
 					project.categories.some((category) =>
-						selectedCategories.includes(category),
+						selectedCategories.includes(category?.toLocaleLowerCase()),
 					)
 				) {
 					return true
@@ -34,7 +34,7 @@ export function useProjectsFilter() {
 					// 2. In the 'tags' array
 					return project.tags.some((tag) => {
 						const tagText = typeof tag === 'string' ? tag : tag.text
-						return selectedCategories.includes(tagText)
+						return selectedCategories.includes(tagText?.toLocaleLowerCase())
 					})
 				}
 
