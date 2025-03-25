@@ -1,43 +1,43 @@
-import { notFound } from "next/navigation";
-import { projects } from "~/lib/mock-data/mock-projects";
-import type { Metadata } from "next";
-import { ProjectDetailView } from "~/components/pages/project/project-information/project-detail-view";
+import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import { ProjectDetailView } from '~/components/pages/project/project-information/project-detail-view'
+import { projects } from '~/lib/mock-data/mock-projects'
 
 interface ProjectPageParams {
-  projectId: string;
+	projectId: string
 }
 
 export async function generateMetadata({
-  params,
+	params,
 }: {
-  params: Promise<ProjectPageParams>;
+	params: Promise<ProjectPageParams>
 }): Promise<Metadata> {
-  const { projectId } = await params;
-  const project = projects.find((p) => p.id.toString() === projectId);
+	const { projectId } = await params
+	const project = projects.find((p) => p.id.toString() === projectId)
 
-  if (!project) {
-    return {
-      title: "Project Not Found",
-    };
-  }
+	if (!project) {
+		return {
+			title: 'Project Not Found',
+		}
+	}
 
-  return {
-    title: `${project.title} | KindFi`,
-    description: project.description,
-  };
+	return {
+		title: `${project.title} | KindFi`,
+		description: project.description,
+	}
 }
 
 export default async function Page({
-  params,
+	params,
 }: {
-  params: Promise<ProjectPageParams>;
+	params: Promise<ProjectPageParams>
 }) {
-  const { projectId } = await params;
-  const project = projects.find((p) => p.id.toString() === projectId);
+	const { projectId } = await params
+	const project = projects.find((p) => p.id.toString() === projectId)
 
-  if (!project) {
-    notFound();
-  }
+	if (!project) {
+		notFound()
+	}
 
-  return <ProjectDetailView project={project} />;
+	return <ProjectDetailView project={project} />
 }
