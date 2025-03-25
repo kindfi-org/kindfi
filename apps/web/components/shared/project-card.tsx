@@ -115,7 +115,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 									{targetAmount?.toLocaleString()}
 								</span>
 							</div>
-							<Progress value={percentageComplete} className="h-2 bg-gray-100" />
+							<Progress
+								value={percentageComplete}
+								className="h-2 bg-gray-100"
+							/>
 						</div>
 
 						<div className="flex justify-between mb-4 text-center">
@@ -170,7 +173,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 									{targetAmount?.toLocaleString()}
 								</span>
 							</div>
-							<Progress value={percentageComplete} className="h-2 bg-gray-100" />
+							<Progress
+								value={percentageComplete}
+								className="h-2 bg-gray-100"
+							/>
 						</div>
 
 						<div className="flex justify-between mb-4 text-center">
