@@ -1,4 +1,3 @@
-// apps/web/app/(routes)/projects/page.tsx
 'use client'
 
 import { AnimatePresence } from 'framer-motion'
@@ -9,10 +8,11 @@ import { ProjectsHeader } from '~/components/sections/projects/projects-header'
 import { SortDropdown } from '~/components/sections/projects/sort-dropdown'
 import { useProjectsFilter } from '~/hooks/use-projects-filter'
 import type { SortOption } from '~/hooks/use-projects-filter'
-import { mockProjectsView } from '~/lib/mock-data/mock-projects-view'
+import { projects } from '~/lib/mock-data/mock-projects'
+import type { Project } from '~/components/shared/project-card'
 
 export default function ProjectsPage() {
-	const [projects, setProjects] = useState(mockProjectsView)
+	const [projectsData, setProjectsData] = useState<Project[]>([])
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 	const {
 		selectedCategories,
@@ -25,10 +25,10 @@ export default function ProjectsPage() {
 
 	// Simulate real data loading (for future API integration)
 	useEffect(() => {
-		setProjects(mockProjectsView)
+		setProjectsData(projects)
 	}, [])
 
-	const filteredProjects = filterProjects(sortProjects(projects, sortOption))
+	const filteredProjects = filterProjects(sortProjects(projectsData, sortOption))
 
 	return (
 		<div className="container mx-auto px-4 py-8">
@@ -63,7 +63,7 @@ export default function ProjectsPage() {
 							/*future logic */
 						}}
 					>
-						See all (50)
+						See all ({projectsData.length})
 					</button>
 					<SortDropdown
 						value={sortOption}
