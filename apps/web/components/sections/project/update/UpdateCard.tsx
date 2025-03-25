@@ -79,16 +79,16 @@ export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
 								>
 									<ChevronDown className="h-5 w-5" />
 								</Button>
-								{isExpanded && (
-									<div className="mt-4 p-3 bg-gray-50 rounded-md">
-										<h4 className="font-semibold mb-2">Additional options</h4>
-										<Button variant="outline" className="mr-2">
-											Share
-										</Button>
-										<Button variant="outline">Save</Button>
-									</div>
-								)}
 							</div>
+							{isExpanded && (
+								<div className="absolute right-6 top-16 z-10 p-3 bg-white shadow-md rounded-md border border-gray-200">
+									<h4 className="font-semibold mb-2">Additional options</h4>
+									<Button variant="outline" className="mr-2">
+										Share
+									</Button>
+									<Button variant="outline">Save</Button>
+								</div>
+							)}
 
 							<h3 className="text-2xl font-bold mb-4">{update.title}</h3>
 
