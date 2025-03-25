@@ -53,6 +53,7 @@
 		"embla-carousel-autoplay": "^8.5.2",
 		"embla-carousel-react": "^8.5.2",
 		"framer-motion": "^11.17.0",
+		"input-otp": "^1.4.2",
 		"ioredis": "^5.4.2",
 		"ioredis-mock": "^8.9.0",
 		"lucide-react": "^0.475.0",
