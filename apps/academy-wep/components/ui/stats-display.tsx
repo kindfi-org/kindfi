@@ -1,6 +1,5 @@
 import React, { forwardRef } from "react"; // Importing React and forwardRef
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Import FontAwesomeIcon
-import { faUserCircle } from "@fortawesome/free-solid-svg-icons"; // Import specific icon
+import { Icon } from "@shadcn/ui"; // Import Shadcn UI Icon component
 
 interface StatsDisplayProps {
   count: number; // Count of learning paths
@@ -14,8 +13,8 @@ const StatsDisplay = forwardRef<HTMLDivElement, StatsDisplayProps>(
         className="bg-white text-green-600 rounded-full p-6 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out w-40 h-40"
       >
         {/* Stats display container */}
-        <FontAwesomeIcon icon={faUserCircle} className="text-5xl" />{" "}
-        {/* Icon for stats display */}
+        <Icon name="user-circle" className="text-5xl" />{" "}
+        {/* Updated to use Shadcn UI Icon */}
         <span className="text-2xl font-semibold mt-2 whitespace-nowrap">
           {count}+
         </span>

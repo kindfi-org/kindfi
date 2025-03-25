@@ -1,9 +1,8 @@
 import React, { useState, useEffect, forwardRef } from "react"; // Importing React, hooks, and forwardRef
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Import FontAwesomeIcon
-import { faBolt, faShieldAlt } from "@fortawesome/free-solid-svg-icons"; // Import specific icons
-import { LearningPathCard } from "./LearningPathCard"; // Use named import
-import { StatsDisplay } from "./StatsDisplay"; // Use named import
-import { CTAButton } from "./CTAButton"; // Use named import
+import { LearningPathCard } from "./learning-path-card"; // Use named import
+import { StatsDisplay } from "./stats-display"; // Use named import
+import { CTAButton } from "./cta-button"; // Use named import
+import { Icon } from "@shadcn/ui"; // Import Shadcn UI Icon component
 
 const FeaturedLearningPaths = forwardRef<
   HTMLDivElement,
@@ -27,8 +26,7 @@ const FeaturedLearningPaths = forwardRef<
       {/* Container for featured learning paths */}
       <div className="flex items-center mb-4">
         <span className="bg-green-100 text-green-600 text-sm font-semibold px-3 py-1 rounded-full flex items-center">
-          <FontAwesomeIcon icon={faBolt} className="mr-2" /> Featured Learning
-          Paths
+          <Icon name="bolt" className="mr-2" /> Featured Learning Paths
         </span>
       </div>
       <h1 className="text-3xl md:text-4xl mb-2">
@@ -44,13 +42,13 @@ const FeaturedLearningPaths = forwardRef<
         {/* Layout for learning path cards and stats */}
         <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-6 md:w-full">
           <LearningPathCard
-            icon={<FontAwesomeIcon icon={faShieldAlt} />}
+            icon="shield" // Pass icon name as string
             title="Blockchain Fundamentals"
             description="6 modules • Beginner friendly"
             progress={50}
           />
           <LearningPathCard
-            icon={<FontAwesomeIcon icon={faBolt} />}
+            icon="bolt" // Pass icon name as string
             title="Stellar Development"
             description="8 modules • Intermediate"
             progress={25}

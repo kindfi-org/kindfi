@@ -1,8 +1,9 @@
 import React, { forwardRef } from "react"; // Importing React and forwardRef
-import ProgressBar from "react-progressbar"; // Importing ProgressBar
+import { Progress } from "@shadcn/ui"; // Importing Shadcn UI Progress component
+import { Icon } from "lucide-react"; // Importing Lucide Icon component
 
 interface LearningPathCardProps {
-  icon: React.ReactNode; // Icon for the learning path
+  icon: string; // Icon name for the learning path
   title: string;
   description: string;
   progress: number;
@@ -17,19 +18,18 @@ const LearningPathCard = forwardRef<HTMLDivElement, LearningPathCardProps>(
       >
         {/* Card container */}
         <div className="bg-green-100 text-green-600 p-3 rounded-full text-xl">
-          {icon}
+          <Icon name={icon} /> {/* Updated to use Lucide Icon */}
         </div>
         <div className="flex-1">
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>{" "}
           {/* Title of the learning path */}
           <p className="text-gray-500 text-base">{description}</p>{" "}
           {/* Description of the learning path */}
-          <ProgressBar
-            completed={progress}
+          <Progress
+            value={progress}
             className="bg-gray-200 rounded-full h-2 mt-2 w-full"
-            bgcolor="green"
           />{" "}
-          {/* Progress bar for the learning path */}
+          {/* Updated to use Shadcn UI Progress component */}
         </div>
       </div>
     );
