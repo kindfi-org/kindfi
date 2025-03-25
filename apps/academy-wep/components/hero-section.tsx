@@ -92,12 +92,13 @@ const HeroSection = ({
 	const slides = customSlides || DEFAULT_SLIDES
 
 	// Determine the title to display with gradient
-  const currentSlide = slides[activeButton - 1];
-	const currentTitle = currentSlide.title;
-	const displayTitle = typeof currentTitle === 'string' 
-		? applyGradientToLastTwoWords(currentTitle)
-		: currentTitle;
-    
+	const currentSlide = slides[activeButton - 1]
+	const currentTitle = currentSlide.title
+	const displayTitle =
+		typeof currentTitle === 'string'
+			? applyGradientToLastTwoWords(currentTitle)
+			: currentTitle
+
 	// Determine the description to display
 	const displayDescription =
 		slides[activeButton - 1]?.description || description
@@ -124,54 +125,80 @@ const HeroSection = ({
 
 					{/* call to action home buttons */}
 					<div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-						<button
-							className="bg-gradient-to-l from-secondary to-primary shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2 text-white hover:opacity-90 focus:ring-2 focus:ring-lime-300 focus:outline-none transition-all"
-							type="button"
-							aria-label="Start Your Journey"
-						>
-							Start Your Journey
-							<IoMdArrowForward className="inline" />
-						</button>
-						<button
-							className="border border-slate-400 shadow px-4 sm:px-5 py-2 rounded-md text-[#4B5563] mt-3 sm:mt-0 hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:outline-none transition-all"
-							type="button"
-							aria-label="Try Passkey Login"
-						>
-							Try Passkey Login
-						</button>
+						{ctaButtons.length > 0 ? (
+							ctaButtons.map((button, index) => (
+								<button
+									key={index}
+									className={
+										button.isPrimary
+											? 'bg-gradient-to-l from-secondary to-primary shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2 text-white hover:opacity-90 focus:ring-2 focus:ring-lime-300 focus:outline-none transition-all'
+											: 'border border-slate-400 shadow px-4 sm:px-5 py-2 rounded-md text-secondary mt-3 sm:mt-0 hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:outline-none transition-all'
+									}
+									type="button"
+									onClick={button.onClick}
+									aria-label={button.text}
+								>
+									{button.text}
+									{button.icon && button.icon}
+								</button>
+							))
+						) : (
+							<div>
+								<button
+									className="bg-gradient-to-l from-secondary to-primary shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2 text-white hover:opacity-90 focus:ring-2 focus:ring-lime-300 focus:outline-none transition-all"
+									type="button"
+									aria-label="Start Your Journey"
+								>
+									Start Your Journey
+									<IoMdArrowForward className="inline" />
+								</button>
+								<button
+									className="border border-slate-400 shadow px-4 sm:px-5 py-2 rounded-md text-secondary mt-3 sm:mt-0 hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:outline-none transition-all"
+									type="button"
+									aria-label="Try Passkey Login"
+								>
+									Try Passkey Login
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 
 				{/* pagination buttons */}
 				<div className="flex flex-col sm:flex-row gap-3 w-full sm:w-3/4 md:w-1/2 mx-auto mt-8 sm:mt-10 text-xs sm:text-sm justify-center items-center">
 					<div className="flex gap-2 mb-3 sm:mb-0">
-            {Array.from({ length: slides.length }, (_, i) => i + 1).map((num) => (
-							<button
-								key={num}
-								onClick={() => handleButtonClick(num)}
-								onKeyDown={(e) => {
-									if (e.key === 'ArrowRight' && num < slides.length) {
-										handleButtonClick(num + 1)
-									} else if (e.key === 'ArrowLeft' && num > 1) {
-										handleButtonClick(num - 1)
-									}
-								}}
-								type="button"
-								className={`h-6 w-6 flex items-center justify-center rounded transition-all duration-300 ${
-									activeButton === num
-										? 'bg-primary text-white'
-										: 'bg-stone-200 text-secondary hover:bg-stone-300'
-								}`}
-								aria-label={`Go to slide ${num}`}
-								aria-current={activeButton === num ? 'true' : 'false'}
-							>
-								{num}
-							</button>
-						))}
+						{Array.from({ length: slides.length }, (_, i) => i + 1).map(
+							(num) => (
+								<button
+									key={num}
+									onClick={() => handleButtonClick(num)}
+									onKeyDown={(e) => {
+										if (e.key === 'ArrowRight' && num < slides.length) {
+											handleButtonClick(num + 1)
+										} else if (e.key === 'ArrowLeft' && num > 1) {
+											handleButtonClick(num - 1)
+										}
+									}}
+									type="button"
+									className={`h-6 w-6 flex items-center justify-center rounded transition-all duration-300 ${
+										activeButton === num
+											? 'bg-primary text-white'
+											: 'bg-stone-200 text-secondary hover:bg-stone-300'
+									}`}
+									aria-label={`Go to slide ${num}`}
+									aria-current={activeButton === num ? 'true' : 'false'}
+								>
+									{num}
+								</button>
+							),
+						)}
 					</div>
 					<p className="text-secondary text-xs">
-            Join <span className="font-semibold">{learnerCount.toLocaleString()}+</span>learners
-						worldwide
+						Join{' '}
+						<span className="font-semibold">
+							{learnerCount.toLocaleString()}+
+						</span>
+						learners worldwide
 					</p>
 				</div>
 			</div>
