@@ -143,7 +143,7 @@ const HeroSection = ({
 								</button>
 							))
 						) : (
-							<div>
+							<div className='flex gap-4'>
 								<button
 									className="bg-gradient-to-l from-secondary to-primary shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2 text-white hover:opacity-90 focus:ring-2 focus:ring-lime-300 focus:outline-none transition-all"
 									type="button"
