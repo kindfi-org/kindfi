@@ -2,7 +2,7 @@
  * @description      : UpdateCard
  * @author           : pheobeayo
  * @group            : ODHack12 contributor
- * @created          : 25/03/2025 - 10:35:38
+ * @created          : 25/03/2025 - 10:36:35
  *
  * MODIFICATION LOG
  * - Version         : 1.0.0
@@ -15,6 +15,7 @@
 import Link from 'next/link'
 
 import { ChevronDown, Heart, MessageSquare } from 'lucide-react'
+import { useState } from 'react'
 import { Avatar, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -27,6 +28,7 @@ interface UpdateCardProps {
 }
 
 export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
+	const [isExpanded, setIsExpanded] = useState(false)
 	return (
 		<div className="space-y-6 mt-10">
 			<div className="flex justify-between items-center">
@@ -35,7 +37,7 @@ export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
 					<Button className="text-xl font-bold">{data.length} updates</Button>
 				</Link>
 			</div>
-			<div className="grid grid-cols-1">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{data.map((update) => (
 					<Card key={update.id} className="overflow-hidden border-gray-200">
 						<CardContent className="p-4 sm:p-6">
@@ -51,6 +53,7 @@ export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
 										<Button
 											size="icon"
 											className="flex items-center gap-1 text-gray-600"
+											aria-label={`Like this update (${update.likes} likes)`}
 										>
 											<Heart className="h-5 w-5" />
 											<span>{update.likes}</span>
@@ -58,6 +61,7 @@ export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
 										<Button
 											size="icon"
 											className="flex items-center gap-1 text-gray-600"
+											aria-label={`View comments (${update.comments} comments)`}
 										>
 											<MessageSquare className="h-5 w-5" />
 											<span>{update.comments}</span>
@@ -67,6 +71,8 @@ export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
 								<Button
 									size="icon"
 									className="text-gray-500 hover:text-gray-700"
+									onClick={() => setIsExpanded(!isExpanded)}
+									aria-label="Toggle additional options"
 								>
 									<ChevronDown className="h-5 w-5" />
 								</Button>
@@ -88,14 +94,11 @@ export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
 							</div>
 
 							<p className="text-gray-700 leading-relaxed mb-6">
-								{update.summary}
+								<p className="text-gray-700 leading-relaxed mb-6">
+									{update.summary || 'No summary available for this update.'}
+								</p>
 							</p>
 
-							<Link href={update.readMoreUrl}>
-								<Button variant="outline" className="w-full">
-									Read more
-								</Button>
-							</Link>
 							<Link href={update.readMoreUrl}>
 								<Button variant="outline" className="w-full">
 									Read more

@@ -31,14 +31,14 @@ export const updateItems: UpdateItem[] = [
 		id: '2',
 		likes: '5',
 		comments: '1',
-		title: 'Milestone Achieved: 40% Scale Protoype Successfully Tested',
+		title: 'Milestone Achieved: 40% Scale Prototype Successfully Tested',
 		author: {
 			name: 'Michael Chen',
 			avatar: '/avatar.svg',
 		},
 		date: 'March 10',
 		description:
-			'Today marks a significant milestone for our team as we ve successfully completed testing of our 40% scale portotype. The results have exceeded our wxpectations...',
+			"Today marks a significant milestone for our team as we've successfully completed testing of our 40% scale prototype. The results have exceeded our expectations...",
 		readMoreUrl: '/updates/milestones-achieved',
 	},
 	{
@@ -52,7 +52,7 @@ export const updateItems: UpdateItem[] = [
 		},
 		date: 'Feb 28',
 		description:
-			'We re thrilled to announce our new strategic partnership with GreemPower inc., onw of the leading renewable energy provider in the North America ...',
+			"We're thrilled to announce our new strategic partnership with GreenPower Inc., one of the leading renewable energy providers in North America...",
 		readMoreUrl: '/updates/new-partnership-announcement',
 	},
 ]
