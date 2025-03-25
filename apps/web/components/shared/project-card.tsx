@@ -55,7 +55,7 @@ const RenderCategories = ({ categories }: { categories: string[] }) =>
 	) : null
 
 function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
-	const percentage_complete =
+	const percentageComplete =
 		project.percentage_complete ??
 		(project.current_amount && project.target_amount
 			? (project.current_amount / project.target_amount) * 100
@@ -82,7 +82,7 @@ function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 
 					<ProjectDetails
 						project={project}
-						percentage_complete={percentage_complete}
+						percentageComplete={percentageComplete}
 					/>
 				</div>
 			</div>
@@ -106,7 +106,7 @@ function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 
 					<ProjectDetails
 						project={project}
-						percentage_complete={percentage_complete}
+						percentageComplete={percentageComplete}
 					/>
 				</div>
 			</div>
@@ -122,10 +122,10 @@ function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 export default ProjectCard
 const ProjectDetails = ({
 	project,
-	percentage_complete,
+	percentageComplete,
 }: {
 	project: Project
-	percentage_complete: number
+	percentageComplete: number
 }) => (
 	<>
 		<div className="mb-4">
@@ -134,11 +134,11 @@ const ProjectDetails = ({
 					${project.current_amount?.toLocaleString() ?? '0'}
 				</span>
 				<span className="text-gray-500">
-					{percentage_complete.toFixed(2)}% of $
+					{percentageComplete.toFixed(2)}% of $
 					{project.target_amount?.toLocaleString()}
 				</span>
 			</div>
-			<Progress value={percentage_complete} className="h-2 bg-gray-100" />
+			<Progress value={percentageComplete} className="h-2 bg-gray-100" />
 		</div>
 
 		<div className="flex justify-between mb-4 text-center">

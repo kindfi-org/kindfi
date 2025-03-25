@@ -9,9 +9,9 @@ import { CTAButtons } from '~/components/shared/cta-buttons'
 export interface FeatureCreatorCardProps {
 	name: string
 	bio: string
-	total_raised: string
-	completed_projects: number
-	recent_project: string
+	totalRaised: string
+	completedProjects: number
+	recentProject: string
 	followers: number
 	avatarUrl?: string
 	verified?: boolean
@@ -22,9 +22,9 @@ export interface FeatureCreatorCardProps {
 export const FeatureCreatorCard = ({
 	name,
 	bio,
-	total_raised,
-	completed_projects,
-	recent_project,
+	totalRaised,
+	completedProjects,
+	recentProject,
 	followers,
 	avatarUrl,
 	verified = true,
@@ -32,11 +32,11 @@ export const FeatureCreatorCard = ({
 	onFollowClick = () => {},
 }: FeatureCreatorCardProps) => {
 	const creatorData = [
-		{ id: 'total-raised-id', label: 'Total Raised', value: total_raised },
+		{ id: 'total-raised-id', label: 'Total Raised', value: totalRaised },
 		{
 			id: 'completed-projects-id',
 			label: 'Completed Projects',
-			value: completed_projects,
+			value: completedProjects,
 		},
 		{ id: 'followers-id', label: 'Followers', value: followers },
 	]
@@ -75,7 +75,7 @@ export const FeatureCreatorCard = ({
 					<div className="my-6">
 						<p className="font-semibold mb-2">Recent Project:</p>
 						<span className="bg-gray-200 rounded-full py-1 px-4 font-semibold text-sm">
-							{recent_project}
+							{recentProject}
 						</span>
 					</div>
 				</div>
