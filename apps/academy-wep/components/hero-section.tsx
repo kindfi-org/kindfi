@@ -177,6 +177,10 @@ const HeroSection = ({
 											handleButtonClick(num + 1)
 										} else if (e.key === 'ArrowLeft' && num > 1) {
 											handleButtonClick(num - 1)
+                    } else if (e.key === 'Home') {
+                      handleButtonClick(1)
+                    } else if (e.key === 'End') {
+                      handleButtonClick(slides.length)
 										}
 									}}
 									type="button"
