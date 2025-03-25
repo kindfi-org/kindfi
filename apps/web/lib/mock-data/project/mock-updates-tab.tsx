@@ -20,10 +20,10 @@ export const updateItems: UpdateItem[] = [
 		title: 'Professional Vote Qnetic #1 Investment Opportunity',
 		author: {
 			name: 'Joyce Zhou',
-			avatar: '/avatar.svg',
+			avatar: '/avatar/joyce.svg',
 		},
 		date: 'March 19',
-		summary:
+		description:
 			'We are excited to announce that Qnetic has been voted the #1 investment opportunity by a panel of industry professionals at the recent CleanTech Innovation Summit ...',
 		readMoreUrl: '/updates/professionals-vote-qnetic',
 	},
@@ -34,7 +34,7 @@ export const updateItems: UpdateItem[] = [
 		title: 'Milestone Achieved: 40% Scale Prototype Successfully Tested',
 		author: {
 			name: 'Michael Chen',
-			avatar: '/avatar.svg',
+			avatar: '/avatars/michael.svg',
 		},
 		date: 'March 10',
 		description:
@@ -48,7 +48,7 @@ export const updateItems: UpdateItem[] = [
 		title: 'New Partnership Announcement with Leading Energy Provider',
 		author: {
 			name: 'Sarah Williams',
-			avatar: '/avatar.svg',
+			avatar: '/avatar/sarah.svg',
 		},
 		date: 'Feb 28',
 		description:

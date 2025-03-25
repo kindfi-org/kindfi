@@ -43,12 +43,14 @@ export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
 						<CardContent className="p-4 sm:p-6">
 							<div className="flex items-center justify-between mb-4">
 								<div className="flex items-center gap-4">
-									<Badge
-										variant="secondary"
-										className="bg-blue-100 text-blue-700 font-bold hover:bg-blue-200"
-									>
-										Featured
-									</Badge>
+									{update.isFeatured && (
+										<Badge
+											variant="secondary"
+											className="bg-blue-100 text-blue-700 font-bold hover:bg-blue-200"
+										>
+											Featured
+										</Badge>
+									)}
 									<div className="flex items-center gap-2">
 										<Button
 											size="icon"
@@ -92,13 +94,9 @@ export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
 									<p className="text-sm text-gray-500">{update.date}</p>
 								</div>
 							</div>
-
 							<p className="text-gray-700 leading-relaxed mb-6">
-								<p className="text-gray-700 leading-relaxed mb-6">
-									{update.summary || 'No summary available for this update.'}
-								</p>
+								{update.description}
 							</p>
-
 							<Link href={update.readMoreUrl}>
 								<Button variant="outline" className="w-full">
 									Read more

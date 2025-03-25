@@ -22,8 +22,6 @@ export function UpdatesTabSection() {
 	const [hasMore, setHasMore] = useState(true)
 
 	const handleLoadMore = async (): Promise<void> => {
-		console.log('Loading more updates...')
-
 		// Simulate API delay
 		await new Promise((resolve) => setTimeout(resolve, 1000))
 		// Get next batch of updates
@@ -38,8 +36,7 @@ export function UpdatesTabSection() {
 		if (currentLength + nextBatch.length >= updateItems.length) {
 			setHasMore(false)
 		}
-
-		console.log('More updates loaded.')
+		// Finished loading process
 	}
 
 	return (

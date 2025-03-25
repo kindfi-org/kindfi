@@ -21,7 +21,7 @@ export interface UpdateItem {
 		avatar: string
 	}
 	date: string
-	summary?: string
 	description?: string
 	readMoreUrl: string
+	isFeatured?: boolean
 }
