@@ -92,7 +92,7 @@ const HeroSection = ({
 	const slides = customSlides || DEFAULT_SLIDES
 
 	// Determine the title to display with gradient
-	const currentSlide = slides[activeButton - 1]
+	const currentSlide = slides[activeButton - 1] ?? { title: '', description: '' }
 	const currentTitle = currentSlide.title
 	const displayTitle =
 		typeof currentTitle === 'string'
