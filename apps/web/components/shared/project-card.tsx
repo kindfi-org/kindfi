@@ -11,7 +11,7 @@ interface ProjectCardProps {
 }
 
 // Extracted the shared tag rendering logic
-const RenderTags = ({ tags }: { tags: Tag[] | string[] }) => {
+function RenderTags({ tags }: { tags: Tag[] | string[] }) {
 	if (!Array.isArray(tags) || tags?.length === 0) return null // Prevents errors if undefined or not an array
 
 	return (
@@ -41,8 +41,8 @@ const RenderTags = ({ tags }: { tags: Tag[] | string[] }) => {
 	)
 }
 
-const RenderCategories = ({ categories }: { categories: string[] }) =>
-	categories?.length ? (
+function RenderCategories({ categories }: { categories: string[] }) {
+	return categories?.length ? (
 		<div className="absolute top-4 left-4 z-10 flex flex-col gap-1">
 			{categories.map((category, index) => (
 				<span
@@ -54,6 +54,7 @@ const RenderCategories = ({ categories }: { categories: string[] }) =>
 			))}
 		</div>
 	) : null
+}
 
 function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 	const percentageComplete =
@@ -74,7 +75,7 @@ function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 }
 
 export default ProjectCard
-const ProjectDetails = ({
+function ProjectDetails({
 	project,
 	percentageComplete,
 	viewMode,
@@ -82,66 +83,68 @@ const ProjectDetails = ({
 	project: Project
 	viewMode: 'list' | 'grid'
 	percentageComplete: number
-}) => (
-	<div
-		className={cn(
-			'overflow-hidden transition-shadow duration-300 rounded-lg border border-gray-100 bg-white',
-			viewMode === 'list' ? 'flex' : 'h-full relative',
-		)}
-	>
+}) {
+	return (
 		<div
 			className={cn(
-				viewMode === 'list'
-					? ' h-auto w-[200px] min-h-[180px]'
-					: ' w-full h-48',
-				'relative',
+				'overflow-hidden transition-shadow duration-300 rounded-lg border border-gray-100 bg-white',
+				viewMode === 'list' ? 'flex' : 'h-full relative',
 			)}
 		>
-			<Image
-				src={project.image_url || '/api/placeholder/400/320'}
-				alt={project.title}
-				fill
-				className="object-cover transition-transform duration-500 hover:scale-105"
-			/>
-			<RenderCategories categories={project.categories || []} />
-		</div>
-
-		<div className={'p-5 flex-1'}>
-			<h3 className="text-lg font-semibold mb-2">{project.title}</h3>
-			<p className="text-gray-600 mb-4 line-clamp-2 text-sm">
-				{project.description}
-			</p>
-			<div className="mb-4">
-				<div className="flex justify-between text-sm mb-1">
-					<span className="font-semibold">
-						${project.current_amount?.toLocaleString() ?? '0'}
-					</span>
-					<span className="text-gray-500">
-						{percentageComplete.toFixed(2)}% of $
-						{project.target_amount?.toLocaleString()}
-					</span>
-				</div>
-				<Progress value={percentageComplete} className="h-2 bg-gray-100" />
+			<div
+				className={cn(
+					viewMode === 'list'
+						? ' h-auto w-[200px] min-h-[180px]'
+						: ' w-full h-48',
+					'relative',
+				)}
+			>
+				<Image
+					src={project.image_url || '/api/placeholder/400/320'}
+					alt={project.title}
+					fill
+					className="object-cover transition-transform duration-500 hover:scale-105"
+				/>
+				<RenderCategories categories={project.categories || []} />
 			</div>
 
-			<div className="flex justify-between mb-4 text-center">
-				<div>
-					<p className="font-semibold">
-						${project.target_amount?.toLocaleString()}
-					</p>
-					<p className="text-xs text-gray-500">Goal</p>
+			<div className={'p-5 flex-1'}>
+				<h3 className="text-lg font-semibold mb-2">{project.title}</h3>
+				<p className="text-gray-600 mb-4 line-clamp-2 text-sm">
+					{project.description}
+				</p>
+				<div className="mb-4">
+					<div className="flex justify-between text-sm mb-1">
+						<span className="font-semibold">
+							${project.current_amount?.toLocaleString() ?? '0'}
+						</span>
+						<span className="text-gray-500">
+							{percentageComplete.toFixed(2)}% of $
+							{project.target_amount?.toLocaleString()}
+						</span>
+					</div>
+					<Progress value={percentageComplete} className="h-2 bg-gray-100" />
 				</div>
-				<div>
-					<p className="font-semibold">{project.investors_count ?? 0}</p>
-					<p className="text-xs text-gray-500">Investors</p>
-				</div>
-				<div>
-					<p className="font-semibold">${project.min_investment ?? 0}</p>
-					<p className="text-xs text-gray-500">Min. Investment</p>
-				</div>
-			</div>
 
-			<RenderTags tags={project.tags} />
+				<div className="flex justify-between mb-4 text-center">
+					<div>
+						<p className="font-semibold">
+							${project.target_amount?.toLocaleString()}
+						</p>
+						<p className="text-xs text-gray-500">Goal</p>
+					</div>
+					<div>
+						<p className="font-semibold">{project.investors_count ?? 0}</p>
+						<p className="text-xs text-gray-500">Investors</p>
+					</div>
+					<div>
+						<p className="font-semibold">${project.min_investment ?? 0}</p>
+						<p className="text-xs text-gray-500">Min. Investment</p>
+					</div>
+				</div>
+
+				<RenderTags tags={project.tags} />
+			</div>
 		</div>
-	</div>
-)
+	)
+}
