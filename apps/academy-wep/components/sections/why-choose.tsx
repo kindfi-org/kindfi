@@ -1,6 +1,10 @@
-import { IoBookOutline, IoShieldOutline, IoPeopleOutline } from 'react-icons/io5'
-import { FeatureCard } from './feature-card'
-import { useEffect, useState } from 'react'
+import {
+  IoBookOutline,
+  IoShieldOutline,
+  IoPeopleOutline,
+} from "react-icons/io5";
+import { FeatureCard } from "./feature-card";
+import { useEffect, useState } from "react";
 
 const FeaturesOverview: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -35,7 +39,7 @@ const FeaturesOverview: React.FC = () => {
             Why Choose KindFi Academy
           </h2>
           <h1 className="text-4xl font-bold mb-4">
-            Learn Skills That Drive{' '}
+            Learn Skills That Drive{" "}
             <span className="text-green-600">Real Impact</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -43,8 +47,14 @@ const FeaturesOverview: React.FC = () => {
             combining technical knowledge with practical applications.
           </p>
         </div>
-        <div id="features-container" className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className={`transform transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`} style={{ transitionDelay: '0ms' }}>
+        <div
+          id="features-container"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+        >
+          <div
+            className={`transform transition-all duration-500 ${isVisible ? "translate-y-0 opacity-100 scale-100" : "translate-y-10 opacity-0 scale-95"}`}
+            style={{ transitionDelay: "0ms" }}
+          >
             <FeatureCard
               icon={<IoBookOutline size={32} className="text-green-500" />}
               title="Interactive"
@@ -55,7 +65,10 @@ const FeaturesOverview: React.FC = () => {
               ctaLink="#"
             />
           </div>
-          <div className={`transform transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`} style={{ transitionDelay: '150ms' }}>
+          <div
+            className={`transform transition-all duration-500 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+            style={{ transitionDelay: "150ms" }}
+          >
             <FeatureCard
               icon={<IoShieldOutline size={32} className="text-blue-500" />}
               title="Stellar NFT"
@@ -66,7 +79,10 @@ const FeaturesOverview: React.FC = () => {
               ctaLink="#"
             />
           </div>
-          <div className={`transform transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`} style={{ transitionDelay: '300ms' }}>
+          <div
+            className={`transform transition-all duration-500 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+            style={{ transitionDelay: "300ms" }}
+          >
             <FeatureCard
               icon={<IoPeopleOutline size={32} className="text-purple-500" />}
               title="Impact"
@@ -80,7 +96,7 @@ const FeaturesOverview: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FeaturesOverview
+export default FeaturesOverview;

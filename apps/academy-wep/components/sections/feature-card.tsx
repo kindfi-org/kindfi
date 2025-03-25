@@ -62,11 +62,12 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
         setPosition(defaultPosition)
       }}
     >
-      <div
+         <div
         className="absolute inset-0 pointer-events-none transition-all duration-300"
         style={{
           opacity: isHovering ? 0.3 : 0.15,
           background: `radial-gradient(220px circle at ${position.x * 100}% ${position.y * 100}%, rgba(${colorMap[titleColor].rgb}, 1), transparent 70%)`,
+          backgroundImage: `-webkit-radial-gradient(circle, rgba(${colorMap[titleColor].rgb}, 1), transparent 70%)`,
         }}
       />
       <CardHeader className="flex items-center justify-center pt-8 pb-2 relative z-10">
