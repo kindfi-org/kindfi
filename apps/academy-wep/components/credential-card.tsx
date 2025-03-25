@@ -53,9 +53,9 @@ const CredentialCard = ({
 
 						{/* features */}
 						<ul className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 lg:gap-10 mt-4 sm:mt-5 text-xs list-none p-0">
-							{features.map((feature, index) => (
+							{features.map((feature) => (
 								<li
-									key={index}
+									key={feature.text}
 									className={clsx(
 										feature.color,
 										'flex gap-1 justify-center sm:justify-start',
