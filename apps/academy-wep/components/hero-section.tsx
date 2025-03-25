@@ -3,57 +3,104 @@ import { useCallback, useState } from 'react'
 import { BsStars } from 'react-icons/bs'
 import { IoMdArrowForward } from 'react-icons/io'
 
+/**
+ * Applies gradient text styling to the last two words of a title
+ */
+const applyGradientToLastTwoWords = (title: string) => {
+	const words = title.split(' ')
+	if (words.length < 2) return title
+
+	const beforeGradient = words.slice(0, -2).join(' ')
+	const gradientWords = words.slice(-2).join(' ')
+
+	return (
+		<>
+			{beforeGradient}{' '}
+			<span className="bg-gradient-to-l from-secondary to-primary bg-clip-text text-transparent">
+				{gradientWords}
+			</span>
+		</>
+	)
+}
+
+/**
+ * Props for the HeroSection component
+ */
 interface HeroSectionProps {
+	/** Optional title content that can include rich JSX */
 	title?: React.ReactNode
+	/** Optional description text */
 	description?: string
+	/** Optional array of CTA buttons to display */
 	ctaButtons?: Array<{
 		text: string
 		isPrimary?: boolean
 		icon?: React.ReactNode
 		onClick?: () => void
 	}>
+	/** Optional count of learners to display */
 	learnerCount?: number
+	/** Optional custom slides to override default slides */
+	slides?: Array<{
+		title: string
+		description: string
+	}>
 }
+
+// Define default slides content outside the component to avoid recreating on each render
+const DEFAULT_SLIDES = [
+	{
+		title: 'Master Blockchain for Social Impact',
+		description:
+			'Learn blockchain fundamentals, Stellar blockchain, and strategies for managing digital assets to create meaningful change.',
+	},
+	{
+		title: 'Revolutionize Digital Asset Management',
+		description:
+			'Gain expertise in managing and leveraging digital assets for sustainable social projects.',
+	},
+	{
+		title: 'Build Transformative Blockchain Solutions',
+		description:
+			'Develop innovative blockchain applications that drive positive social change.',
+	},
+	{
+		title: 'Become a Social Impact Blockchain Leader',
+		description:
+			'Acquire cutting-edge skills to lead blockchain initiatives in the social impact sector.',
+	},
+]
 
 const HeroSection = ({
 	title = (
 		<>
 			Master Blockchain for{' '}
-			<span className="bg-gradient-to-l from-[#000124] to-[#7CC635] bg-clip-text text-transparent">
+			<span className="bg-gradient-to-l from-secondary to-primary bg-clip-text text-transparent">
 				Social Impact
 			</span>
 		</>
 	),
-	description = 'Master the technologies that are revolutionizing social impact projects. Learn blockchain fundamentals, Stellar blockchain, and strategies for managing digital assets to create meaningful change.',
+	description = DEFAULT_SLIDES[0].description,
 	ctaButtons = [],
 	learnerCount = 2500,
+	slides: customSlides,
 }: HeroSectionProps) => {
 	// active button state
 	const [activeButton, setActiveButton] = useState<number>(1)
 
-	// slides content
-	const slides = [
-		{
-			title: 'Master Blockchain for Social Impact',
-			description:
-				'Learn blockchain fundamentals, Stellar blockchain, and strategies for managing digital assets to create meaningful change.',
-		},
-		{
-			title: 'Revolutionize Digital Asset Management',
-			description:
-				'Gain expertise in managing and leveraging digital assets for sustainable social projects.',
-		},
-		{
-			title: 'Build Transformative Blockchain Solutions',
-			description:
-				'Develop innovative blockchain applications that drive positive social change.',
-		},
-		{
-			title: 'Become a Social Impact Blockchain Leader',
-			description:
-				'Acquire cutting-edge skills to lead blockchain initiatives in the social impact sector.',
-		},
-	]
+	// Use custom slides if provided, otherwise use default slides
+	const slides = customSlides || DEFAULT_SLIDES
+
+	// Determine the title to display with gradient
+	const displayTitle = applyGradientToLastTwoWords(
+		typeof slides[activeButton - 1].title === 'string'
+			? slides[activeButton - 1].title
+			: (slides[activeButton - 1].title as string),
+	)
+
+	// Determine the description to display
+	const displayDescription =
+		slides[activeButton - 1]?.description || description
 
 	// handle button click
 	const handleButtonClick = useCallback((buttonNumber: number): void => {
@@ -65,20 +112,20 @@ const HeroSection = ({
 		<div className="bg-stone-100 text-center min-h-screen flex items-center px-4 sm:px-6">
 			<div className="w-full md:w-3/4 lg:w-1/2 mx-auto">
 				<div>
-					<p className="bg-stone-200 text-lime-600 p-2 rounded-lg inline-flex items-center text-xs">
+					<p className="bg-stone-200 text-primary p-2 rounded-lg inline-flex items-center text-xs">
 						<BsStars className="inline mr-1" /> KindFi's Education Platform
 					</p>
 					<h1 className="text-gray-900 text-3xl sm:text-4xl lg:text-5xl font-bold mt-6">
-						{slides[activeButton - 1].title}
+						{displayTitle}
 					</h1>
-					<p className="text-[#4B5563] mt-3 sm:mt-4 text-sm sm:text-base">
-						{slides[activeButton - 1].description}
+					<p className="text-secondary mt-3 sm:mt-4 text-sm sm:text-base">
+						{displayDescription}
 					</p>
 
 					{/* call to action home buttons */}
 					<div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 justify-center">
 						<button
-							className="bg-gradient-to-l from-[#000124] to-[#7CC635] shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2 text-white hover:opacity-90 focus:ring-2 focus:ring-lime-300 focus:outline-none transition-all"
+							className="bg-gradient-to-l from-secondary to-primary shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2 text-white hover:opacity-90 focus:ring-2 focus:ring-lime-300 focus:outline-none transition-all"
 							type="button"
 							aria-label="Start Your Journey"
 						>
@@ -102,19 +149,27 @@ const HeroSection = ({
 							<button
 								key={num}
 								onClick={() => handleButtonClick(num)}
+								onKeyDown={(e) => {
+									if (e.key === 'ArrowRight' && num < 4) {
+										handleButtonClick(num + 1)
+									} else if (e.key === 'ArrowLeft' && num > 1) {
+										handleButtonClick(num - 1)
+									}
+								}}
 								type="button"
 								className={`h-6 w-6 flex items-center justify-center rounded transition-all duration-300 ${
 									activeButton === num
-										? 'bg-[#7CC635] text-white'
-										: 'bg-stone-200 text-[#4B5563] hover:bg-stone-300'
+										? 'bg-primary text-white'
+										: 'bg-stone-200 text-secondary hover:bg-stone-300'
 								}`}
 								aria-label={`Go to slide ${num}`}
+								aria-current={activeButton === num ? 'true' : 'false'}
 							>
 								{num}
 							</button>
 						))}
 					</div>
-					<p className="text-[#4B5563] text-xs">
+					<p className="text-secondary text-xs">
 						Join <span className="font-semibold">2,500+</span> learners
 						worldwide
 					</p>
@@ -124,4 +179,4 @@ const HeroSection = ({
 	)
 }
 
-export { HeroSection };
+export default HeroSection
