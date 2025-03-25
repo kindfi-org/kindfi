@@ -95,7 +95,8 @@ export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
 								</div>
 							</div>
 							<p className="text-gray-700 leading-relaxed mb-6">
-								{update.description}
+								{update.description ||
+									'No description available for this update.'}
 							</p>
 							<Link href={update.readMoreUrl}>
 								<Button variant="outline" className="w-full">

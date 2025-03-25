@@ -20,7 +20,7 @@ export const updateItems: UpdateItem[] = [
 		title: 'Professional Vote Qnetic #1 Investment Opportunity',
 		author: {
 			name: 'Joyce Zhou',
-			avatar: '/avatar/joyce.svg',
+			avatar: '/avatars/joyce.svg',
 		},
 		date: 'March 19',
 		description:
@@ -48,7 +48,7 @@ export const updateItems: UpdateItem[] = [
 		title: 'New Partnership Announcement with Leading Energy Provider',
 		author: {
 			name: 'Sarah Williams',
-			avatar: '/avatar/sarah.svg',
+			avatar: '/avatars/sarah.svg',
 		},
 		date: 'Feb 28',
 		description:
