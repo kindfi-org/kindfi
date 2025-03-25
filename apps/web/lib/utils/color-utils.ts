@@ -9,9 +9,9 @@ function randomHexColor(): string {
 
 export function getA11yColorMatch(color: string): [string, string] {
 	// Validate input color format
-	let new_color = color
-	if (!new_color.startsWith('#')) {
-		new_color = `#${new_color}`
+	let newColor = color
+	if (!newColor.startsWith('#')) {
+		newColor = `#${newColor}`
 	}
 
 	let attempts = 0
@@ -19,12 +19,12 @@ export function getA11yColorMatch(color: string): [string, string] {
 	let contrastColor = randomHexColor()
 
 	while (
-		!getContrast.isAccessible(new_color, contrastColor) &&
+		!getContrast.isAccessible(newColor, contrastColor) &&
 		attempts < MAX_ATTEMPTS
 	) {
 		contrastColor = randomHexColor()
 		attempts++
 	}
 
-	return [new_color, contrastColor] // [background, text]
+	return [newColor, contrastColor] // [background, text]
 }
