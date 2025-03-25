@@ -75,9 +75,19 @@ export function UpdateCard({ data, updatesUrl }: UpdateCardProps) {
 									className="text-gray-500 hover:text-gray-700"
 									onClick={() => setIsExpanded(!isExpanded)}
 									aria-label="Toggle additional options"
+									aria-expanded={isExpanded}
 								>
 									<ChevronDown className="h-5 w-5" />
 								</Button>
+								{isExpanded && (
+									<div className="mt-4 p-3 bg-gray-50 rounded-md">
+										<h4 className="font-semibold mb-2">Additional options</h4>
+										<Button variant="outline" className="mr-2">
+											Share
+										</Button>
+										<Button variant="outline">Save</Button>
+									</div>
+								)}
 							</div>
 
 							<h3 className="text-2xl font-bold mb-4">{update.title}</h3>
