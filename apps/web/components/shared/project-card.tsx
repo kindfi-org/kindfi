@@ -12,7 +12,7 @@ interface ProjectCardProps {
 
 // Extracted the shared tag rendering logic
 const RenderTags = ({ tags }: { tags: Tag[] | string[] }) => {
-	if (!Array.isArray(tags)) return null // Prevents errors if undefined or not an array
+	if (!Array.isArray(tags) || tags?.length === 0) return null // Prevents errors if undefined or not an array
 
 	return (
 		<div className="flex flex-wrap gap-2 mt-4">
@@ -58,7 +58,7 @@ const RenderCategories = ({ categories }: { categories: string[] }) =>
 function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 	const percentageComplete =
 		project.percentage_complete ??
-		(project.current_amount && project.target_amount > 0
+		(project.current_amount >= 0 && project.target_amount > 0
 			? (project.current_amount / project.target_amount) * 100
 			: 0)
 
