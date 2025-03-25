@@ -1,28 +1,23 @@
-import React, { forwardRef } from "react"; // Importing React and forwardRef
-import { Icon } from "@shadcn/ui"; // Import Shadcn UI Icon component
+import { forwardRef } from "react";
+import { LucideIcon, UserCircle } from "lucide-react"; // Using direct Lucide import
+import { Card } from "@/components/ui/card";
 
 interface StatsDisplayProps {
-  count: number; // Count of learning paths
+  count: number;
+  className?: string;
 }
 
 const StatsDisplay = forwardRef<HTMLDivElement, StatsDisplayProps>(
-  ({ count }, ref) => {
+  ({ count, className }, ref) => {
     return (
-      <div
+      <Card
         ref={ref}
-        className="bg-white text-green-600 rounded-full p-6 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out w-40 h-40"
+        className={`rounded-full w-40 h-40 p-6 flex flex-col items-center justify-center hover:shadow-xl transition-shadow ${className}`}
       >
-        {/* Stats display container */}
-        <Icon name="user-circle" className="text-5xl" />{" "}
-        {/* Updated to use Shadcn UI Icon */}
-        <span className="text-2xl font-semibold mt-2 whitespace-nowrap">
-          {count}+
-        </span>
-        <span className="text-gray-500 text-sm whitespace-nowrap">
-          {/* Label for the count */}
-          Learning Paths
-        </span>
-      </div>
+        <UserCircle className="h-12 w-12 text-primary" />
+        <span className="text-3xl font-bold mt-2">{count}+</span>
+        <span className="text-sm text-muted-foreground">Learning Paths</span>
+      </Card>
     );
   }
 );

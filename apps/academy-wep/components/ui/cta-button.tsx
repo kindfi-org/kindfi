@@ -1,4 +1,5 @@
-import React, { forwardRef } from "react"; // Importing React and forwardRef
+import { Button } from "@/components/ui/button";
+import { forwardRef } from "react";
 
 const CTAButton = forwardRef<
   HTMLButtonElement,
@@ -6,14 +7,14 @@ const CTAButton = forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <div className="flex justify-center md:justify-start">
-      <button
+      <Button
         ref={ref}
-        className={`bg-gradient-to-r from-green-600 to-gray-900 text-white font-semibold py-3 px-6 my-4 rounded-xl shadow-lg hover:from-green-500 hover:to-green-700 transition duration-300 ${className}`}
+        className={`bg-gradient-to-r from-green-600 to-gray-900 hover:from-green-500 hover:to-green-700 shadow-lg ${className}`}
+        size="lg"
+        {...props}
       >
-        {" "}
-        {/* Button styling */}
         Explore Learning Paths ➔
-      </button>
+      </Button>
     </div>
   );
 });

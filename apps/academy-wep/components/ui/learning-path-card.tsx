@@ -1,9 +1,10 @@
-import React, { forwardRef } from "react"; // Importing React and forwardRef
-import { Progress } from "@shadcn/ui"; // Importing Shadcn UI Progress component
-import { Icon } from "lucide-react"; // Importing Lucide Icon component
+import { forwardRef } from "react";
+import { Progress } from "./progress"; // Updated to relative path
+import { Card } from "./Card"; // Updated to relative path
+import { Icon } from "~/components/ui/icon"; // Importing the new Icon component
 
 interface LearningPathCardProps {
-  icon: string; // Icon name for the learning path
+  icon: string; // Assuming icon is a string representing the icon name
   title: string;
   description: string;
   progress: number;
@@ -12,26 +13,25 @@ interface LearningPathCardProps {
 const LearningPathCard = forwardRef<HTMLDivElement, LearningPathCardProps>(
   ({ icon, title, description, progress }, ref) => {
     return (
-      <div
+      <Card
         ref={ref}
-        className="bg-white border border-gray-200 rounded-lg p-4 flex items-center space-x-4 shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out transform hover:scale-105 md:w-1/2"
+        className="p-4 flex items-center space-x-4 hover:shadow-lg transition-all duration-300 group"
       >
-        {/* Card container */}
-        <div className="bg-green-100 text-green-600 p-3 rounded-full text-xl">
-          <Icon name={icon} /> {/* Updated to use Lucide Icon */}
+        <div className="bg-green-100/50 text-green-600 p-3 rounded-full group-hover:bg-green-100">
+          <Icon name={icon} className="h-5 w-5" />{" "}
+          {/* Using the new Icon component */}
         </div>
-        <div className="flex-1">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>{" "}
-          {/* Title of the learning path */}
-          <p className="text-gray-500 text-base">{description}</p>{" "}
-          {/* Description of the learning path */}
-          <Progress
-            value={progress}
-            className="bg-gray-200 rounded-full h-2 mt-2 w-full"
-          />{" "}
-          {/* Updated to use Shadcn UI Progress component */}
+        <div className="flex-1 space-y-2">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          <p className="text-muted-foreground text-sm">{description}</p>
+          <div className="space-y-1">
+            <Progress value={progress} className="h-2" />
+            <span className="text-xs text-muted-foreground">
+              {progress}% complete
+            </span>
+          </div>
         </div>
-      </div>
+      </Card>
     );
   }
 );
