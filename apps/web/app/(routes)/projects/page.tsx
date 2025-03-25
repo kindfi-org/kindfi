@@ -6,10 +6,10 @@ import { CategoryFilter } from '~/components/sections/projects/category-filter'
 import { ProjectsGrid } from '~/components/sections/projects/projects-grid'
 import { ProjectsHeader } from '~/components/sections/projects/projects-header'
 import { SortDropdown } from '~/components/sections/projects/sort-dropdown'
+import type { Project } from '~/components/shared/project-card'
 import { useProjectsFilter } from '~/hooks/use-projects-filter'
 import type { SortOption } from '~/hooks/use-projects-filter'
 import { projects } from '~/lib/mock-data/mock-projects'
-import type { Project } from '~/components/shared/project-card'
 
 export default function ProjectsPage() {
 	const [projectsData, setProjectsData] = useState<Project[]>([])
@@ -28,7 +28,9 @@ export default function ProjectsPage() {
 		setProjectsData(projects)
 	}, [])
 
-	const filteredProjects = filterProjects(sortProjects(projectsData, sortOption))
+	const filteredProjects = filterProjects(
+		sortProjects(projectsData, sortOption),
+	)
 
 	return (
 		<div className="container mx-auto px-4 py-8">
