@@ -150,7 +150,7 @@ const HeroSection = ({
 								key={num}
 								onClick={() => handleButtonClick(num)}
 								onKeyDown={(e) => {
-									if (e.key === 'ArrowRight' && num < 4) {
+									if (e.key === 'ArrowRight' && num < slides.length) {
 										handleButtonClick(num + 1)
 									} else if (e.key === 'ArrowLeft' && num > 1) {
 										handleButtonClick(num - 1)
@@ -170,7 +170,7 @@ const HeroSection = ({
 						))}
 					</div>
 					<p className="text-secondary text-xs">
-            Join<span className="font-semibold">{learnerCount.toLocaleString()}+</span>learners
+            Join <span className="font-semibold">{learnerCount.toLocaleString()}+</span>learners
 						worldwide
 					</p>
 				</div>

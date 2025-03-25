@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { IoMdRibbon } from "react-icons/io";
 import { LiaCheckCircleSolid, LiaShieldAltSolid } from "react-icons/lia";
 import { TbUsers } from "react-icons/tb";
+import { THEME_COLORS } from "@/app/constants/colors";
 
 /**
  * Props for the CredentialCard component
@@ -25,20 +26,20 @@ const CredentialCard = ({
   title = "Earn Verifiable Stellar Credentials",
   description = "Complete learning modules to receive NFT badges minted on the Stellar blockchain, showcasing your expertise with immutable proof.",
   features = [
-    {
-      text: "Blockchain Verified",
-      icon: <LiaCheckCircleSolid />,
-      color: "text-[#7CC635]",
+	{ 
+      text: "Blockchain Verified", 
+      icon: <LiaCheckCircleSolid />, 
+      color: THEME_COLORS.blockchain.verified 
     },
-    {
-      text: "Tamper-Proof",
-      icon: <LiaShieldAltSolid />,
-      color: "text-blue-600",
+    { 
+      text: "Tamper-Proof", 
+      icon: <LiaShieldAltSolid />, 
+      color: THEME_COLORS.security.tamperProof 
     },
-    {
-      text: "Industry Recognized",
-      icon: <TbUsers />,
-      color: "text-violet-600",
+    { 
+      text: "Industry Recognized", 
+      icon: <TbUsers />, 
+      color: THEME_COLORS.industry.recognized 
     },
   ],
   className = "",
