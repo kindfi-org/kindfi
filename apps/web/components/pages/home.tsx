@@ -84,13 +84,19 @@ const FinalCTA = dynamic(
 		loading: SkeletonFinalCTA,
 	},
 )
-
+const badges = [
+	{ id: '1', name: 'Beginner', earned: true },
+	{ id: '2', name: 'Intermediate', earned: false },
+	{ id: '3', name: 'Advanced', earned: true },
+	{ id: '4', name: 'Expert', earned: false },
+	{ id: '5', name: 'Master', earned: true },
+]
 export function HomeDashboard() {
 	return (
 		<>
 			<Hero />
 			<UserJourney />
-			<ReadyToEarn />
+			<ReadyToEarn badges={badges} />
 			<HighlightedProjects />
 			<JoinUs />
 			<HowItWorks />

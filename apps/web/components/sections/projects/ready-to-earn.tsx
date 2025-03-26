@@ -4,19 +4,13 @@ import { Award } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '~/components/base/button'
 import { Card } from '~/components/base/card'
-export default function ReadyToEarn() {
+interface ReadyToEarnProps {
+	badges: Array<{ id: string; name: string; earned: boolean }>
+}
+
+export default function ReadyToEarn({ badges }: ReadyToEarnProps) {
 	const router = useRouter()
-	const badges = [
-		{ id: 1, name: 'Beginner', description: 'Completed the beginner module' },
-		{
-			id: 2,
-			name: 'Intermediate',
-			description: 'Completed the intermediate module',
-		},
-		{ id: 3, name: 'Advanced', description: 'Completed the advanced module' },
-		{ id: 4, name: 'Expert', description: 'Completed the expert module' },
-		{ id: 5, name: 'Master', description: 'Completed the master module' },
-	]
+
 	return (
 		<div className="p-10">
 			<section className="w-full min-h-[318px] px-[35px] py-[25px] flex items-center lg:items-start space-y-5 lg:space-y-0 flex-col lg:flex-row  shadow-[0px_4px_5px_rgb(0,0,0,0.1)] bg-gradient-to-r from-[#e7fbfd] via-white to-[#eafde5] rounded-2xl">
