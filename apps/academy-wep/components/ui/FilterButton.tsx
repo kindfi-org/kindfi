@@ -3,7 +3,7 @@ import { Button } from './button'
 
 function FilterButton() {
 	return (
-		<div className="flex flex-row gap-4 justify-between ">
+		<div className="flex flex-row gap-4 justify-between md:w-auto w-full ">
 			<Button className="bg-primary-500 hover:bg-primary-600 transition-all rounded-md shadow-lg hover:shadow-xl">
 				<Filter /> Filter <X />
 			</Button>

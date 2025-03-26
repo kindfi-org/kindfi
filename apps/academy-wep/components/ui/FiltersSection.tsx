@@ -9,7 +9,7 @@ import { Input } from './input'
 function FiltersSection() {
 	return (
 		<div className="flex p-[2%] flex-col z-30 w-full h-auto shadow-lg shadow-gray-300 rounded-md">
-			<div className=" w-full h-auto flex flex-row ">
+			<div className=" w-full h-auto flex md:flex-row flex-col-reverse gap-3 lg:flex-row ">
 				<div className="relative w-full  h-auto">
 					<Input
 						type="Search"
@@ -18,7 +18,7 @@ function FiltersSection() {
 					/>
 					<Search className="w-6 h-6 text-gray-600 absolute top-2 left-2" />
 				</div>
-				<div className="w-full items-end justify-end flex flex-row">
+				<div className="w-full  items-end justify-end flex flex-row">
 					<FilterButton />
 				</div>
 			</div>
