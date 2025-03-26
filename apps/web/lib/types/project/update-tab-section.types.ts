@@ -12,16 +12,16 @@
  **/
 
 export interface UpdateItem {
-	id: string
-	likes: string
-	comments: string
-	title: string
-	author: {
-		name: string
-		avatar: string
-	}
-	date: string
-	description?: string
-	readMoreUrl: string
-	isFeatured?: boolean
+  id: string;
+  likes: string;
+  comments: string;
+  title: string;
+  author: {
+    name: string;
+    avatar: string;
+  };
+  date: string;
+  description?: string;
+  readMoreUrl: string;
+  isFeatured?: boolean;
 }

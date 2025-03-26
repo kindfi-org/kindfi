@@ -10,45 +10,45 @@
  * - Author          : pheobeayo
  * - Modification    : fixed the update tab section in the Project Details
  **/
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { updateItems } from '~/lib/mock-data/project/mock-updates-tab'
-import { LoadMoreButton } from './LoadMoreButton'
-import { UpdateCard } from './UpdateCard'
+import { useState } from "react";
+import { updateItems } from "~/lib/mock-data/project/mock-updates-tab";
+import { LoadMoreButton } from "./LoadMoreButton";
+import { UpdateCard } from "./UpdateCard";
 
 export function UpdatesTabSection() {
-	const [visibleUpdates, setVisibleUpdates] = useState(updateItems.slice(0, 2))
-	const [hasMore, setHasMore] = useState(true)
+  const [visibleUpdates, setVisibleUpdates] = useState(updateItems.slice(0, 2));
+  const [hasMore, setHasMore] = useState(true);
 
-	const handleLoadMore = async (): Promise<void> => {
-		// Simulate API delay
-		await new Promise((resolve) => setTimeout(resolve, 1000))
-		// Get next batch of updates
-		const currentLength = visibleUpdates.length
-		const nextBatch = updateItems.slice(currentLength, currentLength + 2)
+  const handleLoadMore = async (): Promise<void> => {
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Get next batch of updates
+    const currentLength = visibleUpdates.length;
+    const nextBatch = updateItems.slice(currentLength, currentLength + 2);
 
-		if (nextBatch.length > 0) {
-			setVisibleUpdates((prev) => [...prev, ...nextBatch])
-		}
+    if (nextBatch.length > 0) {
+      setVisibleUpdates((prev) => [...prev, ...nextBatch]);
+    }
 
-		// Check if we've loaded all updates
-		if (currentLength + nextBatch.length >= updateItems.length) {
-			setHasMore(false)
-		}
-		// Finished loading process
-	}
+    // Check if we've loaded all updates
+    if (currentLength + nextBatch.length >= updateItems.length) {
+      setHasMore(false);
+    }
+    // Finished loading process
+  };
 
-	return (
-		<section
-			className="w-full max-w-5xl mx-auto py-10 px-4"
-			aria-labelledby="updates-tab-section-title"
-		>
-			<h1 id="updates-tab-section-title" className="sr-only">
-				Updates
-			</h1>
-			<UpdateCard data={visibleUpdates} updatesUrl="/updates" />
-			{hasMore && <LoadMoreButton onLoadMore={handleLoadMore} />}
-		</section>
-	)
+  return (
+    <section
+      className="w-full max-w-5xl mx-auto py-10 px-4"
+      aria-labelledby="updates-tab-section-title"
+    >
+      <h1 id="updates-tab-section-title" className="sr-only">
+        Updates
+      </h1>
+      <UpdateCard data={visibleUpdates} updatesUrl="/updates" />
+      {hasMore && <LoadMoreButton onLoadMore={handleLoadMore} />}
+    </section>
+  );
 }

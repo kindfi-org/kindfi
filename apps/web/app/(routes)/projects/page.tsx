@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useSetState } from 'react-use';
-import { ProjectsGrid } from '~/components/shared/projects/projects-grid';
-import { ProjectsHeader } from '~/components/shared/projects/projects-header';
-import { useProjectsFilter } from '~/hooks/use-projects-filter';
-import { projects as mockProjectsView } from '~/lib/mock-data/mock-projects';
-import type { Project } from '~/lib/types';
+import { useSetState } from "react-use";
+import { ProjectsGrid } from "~/components/shared/projects/projects-grid";
+import { ProjectsHeader } from "~/components/shared/projects/projects-header";
+import { useProjectsFilter } from "~/hooks/use-projects-filter";
+import { projects as mockProjectsView } from "~/lib/mock-data/mock-projects";
+import type { Project } from "~/lib/types";
 
 export default function ProjectsPage() {
   const [state, setState] = useSetState<{
     projects: Project[];
-    viewMode: 'grid' | 'list';
+    viewMode: "grid" | "list";
   }>({
     projects: mockProjectsView,
-    viewMode: 'grid',
+    viewMode: "grid",
   });
   const {
     selectedCategories,
@@ -27,7 +27,7 @@ export default function ProjectsPage() {
   const { projects, viewMode } = state;
 
   const filteredProjects = filterProjects(
-    sortProjects(mockProjectsView, sortOption)
+    sortProjects(mockProjectsView, sortOption),
   );
 
   return (

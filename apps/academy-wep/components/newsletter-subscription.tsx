@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import Link from 'next/link';
-import type React from 'react';
-import { useEffect, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
+import Link from "next/link";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 // Email validation function
 const validateEmail = (email: string) => {
@@ -15,34 +15,34 @@ const validateEmail = (email: string) => {
 
   if (!regex.test(email)) return false;
 
-  const parts = email.split('@');
+  const parts = email.split("@");
   if (parts[0].length > 64 || parts[1].length > 255) return false;
 
   return true;
 };
 
 const NewsletterSubscription = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setShowToast(false);
 
     if (!email) {
-      setError('Please enter your email address');
+      setError("Please enter your email address");
       return;
     }
 
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
       return;
     }
 
@@ -55,14 +55,14 @@ const NewsletterSubscription = () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setToastMessage({
-        title: 'Success!',
+        title: "Success!",
         description: "You've been subscribed to the KindFi Academy newsletter.",
       });
       setShowToast(true);
-      setEmail('');
+      setEmail("");
     } catch (error) {
-      setError('Failed to subscribe. Please try again.');
-      console.error('Subscription error:', error);
+      setError("Failed to subscribe. Please try again.");
+      console.error("Subscription error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -83,9 +83,9 @@ const NewsletterSubscription = () => {
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
       className="rounded-2xl p-8 md:p-12 m-4 md:m-6 xl:m-8 w-full h-fit bg-gradient-to-r from-white via-white to-primary/10"
-      style={{ boxShadow: '0 0 15px 5px rgba(0, 0, 0, 0.1)' }}
+      style={{ boxShadow: "0 0 15px 5px rgba(0, 0, 0, 0.1)" }}
     >
       <AnimatePresence>
         {showToast && (
@@ -93,7 +93,7 @@ const NewsletterSubscription = () => {
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             className="fixed top-4 right-4 bg-white border border-green-200 shadow-lg rounded-lg p-4 max-w-md z-50"
           >
             <div className="flex justify-between items-start">
@@ -180,7 +180,7 @@ const NewsletterSubscription = () => {
                     Subscribing...
                   </>
                 ) : (
-                  'Subscribe Now'
+                  "Subscribe Now"
                 )}
               </Button>
             </motion.div>
@@ -190,7 +190,7 @@ const NewsletterSubscription = () => {
             {error && (
               <motion.p
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
                 className="text-red-500 text-sm mt-1 "
@@ -207,13 +207,13 @@ const NewsletterSubscription = () => {
             transition={{ duration: 0.5, delay: 0.7 }}
             className="text-sm text-slate-500 mt-3"
           >
-            By subscribing, you agree to our{' '}
+            By subscribing, you agree to our{" "}
             <Link
               href="/privacy-policy"
               className="text-green-700 hover:underline"
             >
               Privacy Policy
-            </Link>{' '}
+            </Link>{" "}
             and consent to receive updates from KindFi Academy.
           </motion.p>
         </motion.form>
