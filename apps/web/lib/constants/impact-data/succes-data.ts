@@ -1,4 +1,4 @@
-import type { SuccessStory } from '~/lib/types/impact/succes-story'
+import type { SuccessStory } from '~/lib/types/impact/success-story'
 
 export const successStories: SuccessStory[] = [
 	{
