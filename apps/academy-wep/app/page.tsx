@@ -1,5 +1,6 @@
 'use client'
 
+import FiltersSection from '@/components/ui/FiltersSection'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
@@ -43,6 +44,7 @@ export default function Home() {
 					/>
 				))}
 			</div>
+			<FiltersSection />
 
 			<div className="relative z-10 container mx-auto px-4 py-24 flex flex-col items-center justify-center min-h-screen gap-10">
 				{/* Countdown */}
