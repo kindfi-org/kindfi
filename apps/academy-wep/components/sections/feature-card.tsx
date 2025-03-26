@@ -6,7 +6,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { FiArrowRight } from "react-icons/fi";
 import type { ThemeColor } from "../../../web/lib/constants/theme-color.contants";
 import { colorMap } from "../../../web/lib/constants/theme-color.contants";
@@ -56,14 +56,13 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
     }
   };
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = useCallback(() => {
     setIsHovering(true);
-  };
-
-  const handleMouseLeave = () => {
+  }, []);
+  const handleMouseLeave = useCallback(() => {
     setIsHovering(false);
     setPosition(defaultPosition);
-  };
+  }, []);
 
   return (
     <Card
@@ -83,9 +82,9 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
         style={{
           opacity: isHovering ? 0.3 : 0.15,
           background: prefersReducedMotion
-            ? `radial-gradient(220px circle at 50% 50%, rgba(${colorMap[titleColor].rgb}, 1), transparent 70%)`
-            : `radial-gradient(220px circle at ${position.x * 100}% ${position.y * 100}%, rgba(${colorMap[titleColor].rgb}, 1), transparent 70%)`,
-          backgroundImage: `-webkit-radial-gradient(circle, rgba(${colorMap[titleColor].rgb}, 1), transparent 70%)`,
+            ? `radial-gradient(220px circle at 50% 50%, rgba(${colorMap[titleColor]?.rgb || "0,0,0"}, 1), transparent 70%)`
+            : `radial-gradient(220px circle at ${position.x * 100}% ${position.y * 100}%, rgba(${colorMap[titleColor]?.rgb || "0,0,0"}, 1), transparent 70%)`,
+          backgroundImage: `-webkit-radial-gradient(circle, rgba(${colorMap[titleColor]?.rgb || "0,0,0"}, 1), transparent 70%)`,
         }}
       />
       <CardHeader className="flex items-center justify-center pt-8 pb-2 relative z-10">
