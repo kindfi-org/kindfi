@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from 'lucide-react'
+import AchievementsPage from '@/components/Achivement'
 import { useState } from 'react'
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
 	const now = new Date().getTime()
 	const distance = launchDate - now
 	const days = Math.floor(distance / (1000 * 60 * 60 * 24))
+
 
 	return (
 		<main className="min-h-screen relative overflow-hidden text-foreground">
@@ -137,3 +139,4 @@ export default function Home() {
 		</main>
 	)
 }
+// 9FBD53918710CD5C 
