@@ -8,7 +8,7 @@ import {
 	Shield,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { type SetStateAction, useEffect, useState } from 'react'
 
 import { Button } from '~/components/base/button'
 import {
@@ -49,7 +49,7 @@ export default function VerifyOTPPage() {
 		return `${mins}:${secs < 10 ? '0' : ''}${secs}`
 	}
 
-	const handleOtpChange = (value) => {
+	const handleOtpChange = (value: SetStateAction<string>) => {
 		setOtp(value)
 
 		// Clear any existing errors when user starts typing again
