@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Project, Tag } from '~/lib/types/projects.types'
 import { cn } from '~/lib/utils'
-import { getA11yColorMatch } from '~/lib/utils/color-utils'
+import { getTagColors } from '~/lib/utils/types-helpers'
 import { Progress } from '../base/progress'
 
 interface ProjectCardProps {
@@ -16,27 +16,18 @@ function RenderTags({ tags }: { tags: Tag[] | string[] }) {
 
 	return (
 		<div className="flex flex-wrap gap-2 mt-4">
-			{tags.map((tag) => (
-				<span
-					key={typeof tag === 'string' ? tag : tag.id}
-					className="px-2 py-1 text-xs rounded uppercase"
-					style={
-						typeof tag === 'string'
-							? { backgroundColor: '#E5E7EB', color: '#374151' }
-							: typeof tag.color !== 'string'
-								? {
-										backgroundColor: tag.color?.backgroundColor ?? '',
-										color: tag.color?.textColor ?? '',
-									}
-								: {
-										backgroundColor: tag.color,
-										color: getA11yColorMatch(tag.color)[1], // Use accessible text color
-									}
-					}
-				>
-					{typeof tag === 'string' ? tag : tag.text}
-				</span>
-			))}
+			{tags.map((tag) => {
+				const colors = getTagColors(tag)
+				return (
+					<span
+						key={typeof tag === 'string' ? tag : tag.id}
+						className="px-2 py-1 text-xs rounded uppercase"
+						style={colors}
+					>
+						{typeof tag === 'string' ? tag : tag.text}
+					</span>
+				)
+			})}
 		</div>
 	)
 }
