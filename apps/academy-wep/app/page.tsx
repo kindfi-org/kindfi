@@ -1,6 +1,4 @@
 'use client'
-
-import { WhyChoose } from '@/components/sections/why-choose'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
@@ -135,7 +133,6 @@ export default function Home() {
 					))}
 				</motion.div>
 			</div>
-			<WhyChoose />
 		</main>
 	)
 }
