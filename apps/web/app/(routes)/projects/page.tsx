@@ -2,7 +2,7 @@
 
 import { useSetState } from 'react-use'
 import { ProjectsGrid } from '~/components/shared/projects/projects-grid'
-import ProjectsHeader from '~/components/shared/projects/projects-header'
+import { ProjectsHeader } from '~/components/shared/projects/projects-header'
 import { useProjectsFilter } from '~/hooks/use-projects-filter'
 import { projects as mockProjectsView } from '~/lib/mock-data/mock-projects'
 import type { Project } from '~/lib/types'
@@ -26,7 +26,9 @@ export default function ProjectsPage() {
 
 	const { projects, viewMode } = state
 
-	const filteredProjects = filterProjects(sortProjects(projects, sortOption))
+	const filteredProjects = filterProjects(
+		sortProjects(mockProjectsView, sortOption),
+	)
 
 	return (
 		<div className="container mx-auto px-4 py-8">
