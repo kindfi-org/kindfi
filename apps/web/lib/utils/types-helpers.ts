@@ -1,4 +1,4 @@
-import type { ProjectTag, TMoney, TPercentage } from '~/lib/types'
+import type { ProjectTag, TMoney, TPercentage } from '~/lib/types/project.types'
 
 /** Helper function to validate and create project tag */
 export function createProjectTag(

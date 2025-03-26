@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -8,7 +8,7 @@ import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { TagEdit } from '~/components/shared/tag-edit'
-import type { ProjectTag } from '~/lib/types'
+import type { Tag as ProjectTag } from '~/lib/types'
 import { formatToPascalCase, useTags } from '~/lib/utils/tag-context'
 
 type TagManagerProps = {
