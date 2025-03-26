@@ -70,6 +70,7 @@ export interface ButtonProps
 	startIcon?: React.ReactNode
 	endIcon?: React.ReactNode
 	iconOnly?: boolean
+	'aria-label'?: boolean extends true ? string : string | undefined
 }
 
 /**
@@ -128,17 +129,30 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 		// Warning for icon-only buttons without aria-label in development
 		if (process.env.NODE_ENV !== 'production' && isIconOnly && !ariaLabel) {
-			console.error('Accessibility error: Icon-only buttons must have an aria-label to describe their purpose.');
+			;+console.error(
+				`Accessibility error: Icon-only Button must have an aria-label to describe its purpose. Component: ${Button.displayName}`,
+			)
 		}
 
 		// Generate props based on component state
-		const buttonProps: React.ButtonHTMLAttributes<HTMLButtonElement> & { role?: string } = {
+		const buttonProps: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+			role?: string
+		} = {
 			role: isLink ? 'link' : undefined,
-			'aria-label': ariaLabel || (isIconOnly ? String(children) : undefined),
-			// Automatically set title if aria-label is provided
-			title: ariaLabel || (typeof children === 'string' ? children : undefined),
+			'aria-label': ariaLabel || (isIconOnly ? String(children) : 'Button'),
+			title: ariaLabel || (typeof children === 'string' ? children : 'Button'),
+			...(process.env.NODE_ENV !== 'production' &&
+				isLink &&
+				!('href' in props) && {
+					onClick: (e) => {
+						console.warn(
+							'Accessibility warning: Buttons with role="link" should have an href attribute.',
+						)
+						props.onClick?.(e)
+					},
+				}),
 			...props,
-		}		
+		}
 
 		return (
 			<Comp
@@ -146,9 +160,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 				ref={ref}
 				{...buttonProps}
 			>
-				{startIcon}
+				{startIcon && startIcon}
 				{children}
-				{endIcon}
+				{endIcon && endIcon}
 			</Comp>
 		)
 	},
@@ -211,4 +225,17 @@ export { Button, buttonVariants }
  *   Open Menu
  * </Button>
  * ```
+ * 
+ * // Example of button with dynamic ARIA attributes
+*	const [isOpen, setIsOpen] = useState(false);
+
+	<Button 
+		aria-haspopup="true"
+		aria-expanded={isOpen}
+		aria-controls="dropdown-menu"
+		onClick={() => setIsOpen(!isOpen)}
+		endIcon={<ChevronDownIcon />}
+	>
+		Toggle Menu
+	</Button>
  */
