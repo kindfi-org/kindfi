@@ -1,6 +1,4 @@
 'use client'
-
-import FiltersSection from '@/components/ui/FiltersSection'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
