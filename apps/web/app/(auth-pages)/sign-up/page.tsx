@@ -112,16 +112,42 @@ export default function Signup() {
 								</div>
 							</div>
 
-							<Button
-								className="w-full"
-								type="submit"
-								disabled={isCreatingPasskey}
-								aria-live="polite"
-								aria-busy={isCreatingPasskey}
-								tabIndex={0}
-							>
-								{isCreatingPasskey ? 'Creating account...' : 'Create account'}
-							</Button>
+							{isWebAuthnSupported ? (
+								<Button
+									className="w-full"
+									type="submit"
+									disabled={isCreatingPasskey}
+									aria-live="polite"
+									aria-busy={isCreatingPasskey}
+									tabIndex={0}
+								>
+									{isCreatingPasskey ? 'Creating account...' : 'Create account'}
+								</Button>
+							) : (
+								<div className="flex flex-col items-center justify-center">
+									<span>
+										WebAuthn is not supported. Please use a different browser.
+									</span>
+								</div>
+							)}
+
+							{regSuccess && (
+								<div className="text-green-600">
+									Registration successful! You can now sign in.
+								</div>
+							)}
+
+							{regError && !isAlreadyRegistered && (
+								<div className="text-red-600">
+									There was an error during registration. Please try again.
+								</div>
+							)}
+
+							{isAlreadyRegistered && (
+								<div className="text-yellow-600">
+									This email is already registered. Please sign in.
+								</div>
+							)}
 						</div>
 					</form>
 				</CardContent>

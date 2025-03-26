@@ -49,6 +49,8 @@ export default function Login() {
 
 	useEffect(() => {
 		if (authSuccess) {
+			// If the user is authenticated, we can use the stellarUserAddress later
+			console.log('stellarUserAddress', stellarUserAddress)
 			router.push('/')
 		}
 	}, [authSuccess, router])
@@ -107,7 +109,7 @@ export default function Login() {
 					</Button>
 
 					{isNotRegistered && (
-						<div className="text-yellow-600" role="alert" aria-live="assertive" tabIndex={0}>
+						<div className="text-yellow-600" role="alert" aria-live="assertive">
 							User not registered. Please Sign Up first.
 						</div>
 					)}
