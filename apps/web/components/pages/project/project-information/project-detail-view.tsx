@@ -1,18 +1,18 @@
 'use client'
 
+import { ChevronLeft, Heart, Share2, Users } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { ChevronLeft, Heart, Share2, Users } from 'lucide-react'
-import { Progress } from '~/components/base/progress'
 import { Button } from '~/components/base/button'
+import { Progress } from '~/components/base/progress'
+import { Separator } from '~/components/base/separator'
 import {
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
-import { Separator } from '~/components/base/separator'
 import type { Project } from '~/components/shared/project-card'
 
 //? Import Project Detail Components
