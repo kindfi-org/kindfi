@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import React from 'react'
 import type { ReactNode } from 'react'
-import { Navigation } from './Navigation'
+import { Navigation } from './navigation'
 
 interface HomeProps {
 	message: string | ReactNode

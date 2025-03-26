@@ -6,7 +6,7 @@ import { useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import * as z from 'zod'
 
-import TeamMemberForm from './components/TeamMemberForm'
+import TeamMemberForm from './components/team-member-form'
 
 const teamMemberSchema = z.object({
 	name: z.string().min(2, 'Name must be at least 2 characters'),

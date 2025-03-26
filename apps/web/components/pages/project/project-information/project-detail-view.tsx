@@ -16,14 +16,14 @@ import { Separator } from '~/components/base/separator'
 import type { Project } from '~/components/shared/project-card'
 
 //? Import Project Detail Components
-import BusinessModel from '~/components/sections/projects/BusinessModel'
-import CompetitiveAdvantages from '~/components/sections/projects/CompetitiveAdvantages'
-import InvestmentDetails from '~/components/sections/projects/InvestmentDetails'
-import MarketOpportunity from '~/components/sections/projects/MarketOpportunity'
-import ProjectDocuments from '~/components/sections/projects/ProjectDocuments'
-import ProjectOverview from '~/components/sections/projects/ProjectOverview'
+import BusinessModel from '~/components/sections/projects/business-model'
+import CompetitiveAdvantages from '~/components/sections/projects/competitive-advantages'
+import InvestmentDetails from '~/components/sections/projects/investment-details'
+import MarketOpportunity from '~/components/sections/projects/market-opportunity'
+import ProjectDocuments from '~/components/sections/projects/project-documents'
+import ProjectOverview from '~/components/sections/projects/project-overview'
 import Technology from '~/components/sections/projects/Technology'
-import TractionMilestones from '~/components/sections/projects/TractionMilestones'
+import TractionMilestones from '~/components/sections/projects/traction-milestones'
 
 //? Import Mock Data
 import { businessModelData } from '~/lib/mock-data/mock-business-model'

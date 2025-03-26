@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 import { hydrateRoot } from 'react-dom/client'
-import { Navigation, routes } from './components/Navigation'
-import { getContent } from './utils/contentMap'
+import { Navigation, routes } from './components/navigation'
+import { getContent } from './utils/content-map'
 
 // Get the current path from the window location
 const currentPath = window.location.pathname

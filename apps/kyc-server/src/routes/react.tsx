@@ -1,13 +1,13 @@
 import React from 'react'
 import type { ReactNode } from 'react'
 import { renderToReadableStream } from 'react-dom/server'
-import { About } from '../components/About'
-import { Home } from '../components/Home'
-import { routes } from '../components/Navigation'
-import { WebSocketDemo } from '../components/WebSocketDemo'
+import { About } from '../components/about'
+import { Home } from '../components/home'
+import { routes } from '../components/navigation'
+import { WebSocketDemo } from '../components/web-socket-demo'
 import { corsConfig } from '../config/cors'
 import { withCORS } from '../middleware/cors'
-import { contentMap } from '../utils/contentMap'
+import { contentMap } from '../utils/content-map'
 
 // Create a configured CORS handler
 const withConfiguredCORS = (
