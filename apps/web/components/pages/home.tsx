@@ -10,6 +10,7 @@ import {
 	SkeletonPlatformOverview,
 	SkeletonUserJourney,
 } from '~/components/sections/home/skeletons'
+import ReadyToEarn from '../sections/projects/ready-to-earn'
 
 const Hero = dynamic(
 	() => import('~/components/sections/home/hero').then((mod) => mod.Hero),
@@ -89,6 +90,7 @@ export function HomeDashboard() {
 		<>
 			<Hero />
 			<UserJourney />
+			<ReadyToEarn />
 			<HighlightedProjects />
 			<JoinUs />
 			<HowItWorks />
