@@ -136,6 +136,7 @@ export default function Home() {
 					))}
 				</motion.div>
 			</div>
+			<AchievementsPage/>
 		</main>
 	)
 }
