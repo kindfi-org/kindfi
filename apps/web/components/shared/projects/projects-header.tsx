@@ -142,5 +142,3 @@ export function ProjectsHeader({
 		</div>
 	)
 }
-
-export default ProjectsHeader
