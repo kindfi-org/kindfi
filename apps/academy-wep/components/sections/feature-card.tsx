@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import type React from 'react'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { FiArrowRight } from 'react-icons/fi'
-import type { ThemeColor } from '@/data/data' 
-import { colorMap } from '@/data/data' 
+import type { ThemeColor } from '../../../web/lib/constants/theme-color.contants'
+import { colorMap } from '../../../web/lib/constants/theme-color.contants'
 
 interface FeatureCardProps {
   icon: React.ReactNode
@@ -29,9 +29,20 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
   const [isHovering, setIsHovering] = useState(false)
   const defaultPosition = { x: 0.5, y: 0.25 }
   const [position, setPosition] = useState(defaultPosition)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mediaQuery.matches)
+    
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches)
+    mediaQuery.addEventListener('change', handleChange)
+    
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return
+    if (!cardRef.current || prefersReducedMotion) return
     const rect = cardRef.current.getBoundingClientRect()
     const x = (e.clientX - rect.left) / rect.width
     const y = (e.clientY - rect.top) / rect.height
@@ -62,11 +73,13 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
         setPosition(defaultPosition)
       }}
     >
-         <div
+      <div
         className="absolute inset-0 pointer-events-none transition-all duration-300"
         style={{
           opacity: isHovering ? 0.3 : 0.15,
-          background: `radial-gradient(220px circle at ${position.x * 100}% ${position.y * 100}%, rgba(${colorMap[titleColor].rgb}, 1), transparent 70%)`,
+          background: prefersReducedMotion
+            ? `radial-gradient(220px circle at 50% 50%, rgba(${colorMap[titleColor].rgb}, 1), transparent 70%)`
+            : `radial-gradient(220px circle at ${position.x * 100}% ${position.y * 100}%, rgba(${colorMap[titleColor].rgb}, 1), transparent 70%)`,
           backgroundImage: `-webkit-radial-gradient(circle, rgba(${colorMap[titleColor].rgb}, 1), transparent 70%)`,
         }}
       />
