@@ -8,6 +8,13 @@ import {
 } from 'react-icons/io5'
 import { FeatureCard } from './feature-card'
 
+/**
+ * Creates class and style objects for animation elements
+ * @param isVisible - Whether the element is visible in the viewport
+ * @param prefersReducedMotion - Whether the user prefers reduced motion
+ * @param delay - The animation delay (e.g. '150ms')
+ * @returns An object with className and style properties
+ */
 const getAnimationClasses = (
 	isVisible: boolean,
 	prefersReducedMotion: boolean,
