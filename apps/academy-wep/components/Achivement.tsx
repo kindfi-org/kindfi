@@ -1,4 +1,4 @@
-// pages/achievements.tsx
+
 import React from 'react';
 import AchievementCard ,{AchievementCardProps} from './ui/achivement-card';
 import {
