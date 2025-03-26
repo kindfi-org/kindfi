@@ -26,6 +26,7 @@
       "name": "kindfi-academy-web",
       "version": "0.1.0",
       "dependencies": {
+        "@radix-ui/react-progress": "^1.1.2",
         "@radix-ui/react-slot": "^1.1.2",
         "autoprefixer": "^10.4.21",
         "class-variance-authority": "^0.7.1",
