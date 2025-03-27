@@ -65,7 +65,7 @@ function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 	)
 }
 
-export ProjectCard
+export { ProjectCard }
 function ProjectDetails({
 	project,
 	percentageComplete,
