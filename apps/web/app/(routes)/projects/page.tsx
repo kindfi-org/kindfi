@@ -1,19 +1,20 @@
 'use client'
 
-import { AnimatePresence } from 'framer-motion'
-import { useEffect, useState } from 'react'
-import { CategoryFilter } from '~/components/sections/projects/category-filter'
-import { ProjectsGrid } from '~/components/sections/projects/projects-grid'
-import { ProjectsHeader } from '~/components/sections/projects/projects-header'
-import { SortDropdown } from '~/components/sections/projects/sort-dropdown'
-import type { Project } from '~/components/shared/project-card'
+import { useSetState } from 'react-use'
+import { ProjectsGrid } from '~/components/shared/projects/projects-grid'
+import { ProjectsHeader } from '~/components/shared/projects/projects-header'
 import { useProjectsFilter } from '~/hooks/use-projects-filter'
-import type { SortOption } from '~/hooks/use-projects-filter'
-import { projects } from '~/lib/mock-data/mock-projects'
+import { projects as mockProjectsView } from '~/lib/mock-data/mock-projects'
+import type { Project } from '~/lib/types'
 
 export default function ProjectsPage() {
-	const [projectsData, setProjectsData] = useState<Project[]>([])
-	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+	const [state, setState] = useSetState<{
+		projects: Project[]
+		viewMode: 'grid' | 'list'
+	}>({
+		projects: mockProjectsView,
+		viewMode: 'grid',
+	})
 	const {
 		selectedCategories,
 		setSelectedCategories,
@@ -23,13 +24,10 @@ export default function ProjectsPage() {
 		sortProjects,
 	} = useProjectsFilter()
 
-	// Simulate real data loading (for future API integration)
-	useEffect(() => {
-		setProjectsData(projects)
-	}, [])
+	const { projects, viewMode } = state
 
 	const filteredProjects = filterProjects(
-		sortProjects(projectsData, sortOption),
+		sortProjects(state.projects, sortOption),
 	)
 
 	return (
@@ -37,46 +35,19 @@ export default function ProjectsPage() {
 			<ProjectsHeader
 				title="Causes That Change Lives"
 				viewMode={viewMode}
-				onViewModeChange={setViewMode}
+				onViewModeChange={(val) =>
+					setState((prev) => ({ ...prev, viewMode: val }))
+				}
+				selectedCategories={selectedCategories}
+				setSelectedCategories={setSelectedCategories}
+				subHeader="Social Causes To Support"
+				totalItems={projects.length}
+				showSortDropdown
+				sortOption={sortOption}
+				onSortChange={setSortOption}
 			/>
 
-			<div className="mt-8 mb-12">
-				<CategoryFilter
-					selectedCategories={selectedCategories}
-					onCategoryToggle={(category: string) => {
-						if (selectedCategories.includes(category)) {
-							setSelectedCategories(
-								selectedCategories.filter((id) => id !== category),
-							)
-						} else {
-							setSelectedCategories([...selectedCategories, category])
-						}
-					}}
-				/>
-			</div>
-
-			<div className="flex justify-between items-center mb-8">
-				<h2 className="text-2xl font-semibold">Social Causes To Support</h2>
-				<div className="flex items-center gap-4">
-					<button
-						type="button"
-						className="text-primary-500 hover:underline bg-transparent border-none p-0 cursor-pointer"
-						onClick={() => {
-							/*future logic */
-						}}
-					>
-						See all ({projectsData.length})
-					</button>
-					<SortDropdown
-						value={sortOption}
-						onChange={(value: SortOption) => setSortOption(value)}
-					/>
-				</div>
-			</div>
-
-			<AnimatePresence mode="wait">
-				<ProjectsGrid projects={filteredProjects} viewMode={viewMode} />
-			</AnimatePresence>
+			<ProjectsGrid projects={filteredProjects} viewMode={viewMode} />
 		</div>
 	)
 }

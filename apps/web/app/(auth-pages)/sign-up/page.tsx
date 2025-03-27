@@ -3,6 +3,9 @@
 import { Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { type ChangeEvent, useState } from 'react'
+
+import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
+
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -66,21 +69,21 @@ export default function Signup() {
 		<AuthLayout>
 			<Card className="w-full max-w-md">
 				<CardHeader className="space-y-2 text-center">
-					<div className="flex justify-center mb-4">
-						<div className="rounded-full bg-primary/10 p-4">
+					<div className="flex justify-between mb-4">
+						<div className="flex-col">
+							<h1 className="gradient-text text-2xl mb-2 text-start font-semibold tracking-tight">
+								Create an account
+							</h1>
+							<h3> Enter your email below to create your account</h3>
+						</div>
+						<div className="flex justify-center items-center rounded-full bg-blue-500/10 w-12 h-12">
 							<UserPlus className="h-6 w-6 text-primary" />
 						</div>
 					</div>
-					<h1 className="text-2xl font-semibold tracking-tight">
-						Create an account
-					</h1>
-					<p className="text-sm text-muted-foreground">
-						Enter your email below to create your account
-					</p>
 				</CardHeader>
 				<CardContent>
 					<form className="space-y-4" aria-label="Sign up" onSubmit={onSubmit}>
-						<div className="space-y-4">
+						<div className="space-y-6">
 							<div className="space-y-2">
 								<Label htmlFor="email" id="email-label">
 									Email
@@ -112,13 +115,19 @@ export default function Signup() {
 							</div>
 
 							{isWebAuthnSupported ? (
-								<Button
-									className="w-full"
-									type="submit"
-									disabled={isCreatingPasskey}
-								>
-									{isCreatingPasskey ? 'Creating account...' : 'Create account'}
-								</Button>
+								<>
+									<Button
+										size="lg"
+										className="gradient-btn text-white w-full"
+										type="submit"
+										disabled={isCreatingPasskey}
+									>
+										<>
+											Create account with passkey <UserPlus className="ml-2" />
+										</>
+									</Button>
+									<PasskeyInfoDialog />
+								</>
 							) : (
 								<div className="flex flex-col items-center justify-center">
 									<span>
