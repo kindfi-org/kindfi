@@ -1,6 +1,6 @@
 if git diff --cached --name-only | grep -q '^services/supabase/'; then
   echo "🔵 Running Supabase Typescript generation."
-  if ! cd services/supabase || ! bun gen; then
+  if ! (cd services/supabase && bun gen); then
     echo "🔴 Failed to run Supabase TypeScript generation. Make sure if you are locally running! 👀"
     exit 1
   fi
