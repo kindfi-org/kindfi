@@ -1,11 +1,20 @@
+'use client'
+
+import { LoaderIcon } from 'lucide-react'
+import { useSetState } from 'react-use'
+
 import { CTASection } from '~/components/featured/cta-section'
 import { FeaturedCreators } from '~/components/featured/featured-creators'
 import { HeroSection } from '~/components/featured/hero-section'
-import { ProjectsGrid } from '~/components/featured/projects-grid'
+import { ProjectsGrid } from '~/components/shared/projects/projects-grid'
+import { ProjectsHeader } from '~/components/shared/projects/projects-header'
+
+import { useProjectsFilter } from '~/hooks/use-projects-filter'
 import {
 	featuredCreators,
 	featuredProjects,
-} from '~/lib/mock-data/featured-projects/mock-featured-projets'
+} from '~/lib/mock-data/featured-projects/mock-featured-projects'
+import type { Project } from '~/lib/types/projects.types'
 
 export function FeaturedPage() {
 	return (
@@ -18,13 +27,31 @@ export function FeaturedPage() {
 				badge="Verified Impact"
 			/>
 
-			{/* Featured Projects */}
-			<ProjectsGrid
-				projects={featuredProjects}
-				title="Featured Projects"
-				description="Discover verified projects making real impact worldwide."
-			/>
+			{/* Featured Projects Section*/}
+			<section className="container mx-auto px-6 lg:px-8 py-8">
+				<ProjectsHeader
+					title="Causes That Change Lives"
+					subHeader="Featured Projects"
+					description="Discover verified projects making real impact worldwide."
+					viewMode={viewMode}
+					onViewModeChange={(val) =>
+						setState((prev) => ({ ...prev, viewMode: val }))
+					}
+					selectedCategories={selectedCategories}
+					setSelectedCategories={setSelectedCategories}
+					sortOption={sortOption}
+					onSortChange={setSortOption}
+					totalItems={projects.length}
+				/>
 
+				{loading ? (
+					<div className="flex justify-center py-12">
+						<LoaderIcon className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500" />
+					</div>
+				) : (
+					<ProjectsGrid projects={filteredProjects} viewMode={viewMode} />
+				)}
+			</section>
 			{/* Featured Creators */}
 			<FeaturedCreators
 				creators={featuredCreators}

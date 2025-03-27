@@ -42,7 +42,11 @@
 		]
 	},
 	"dependencies": {
+		"autoprefixer": "^10.4.21",
 		"date-fns": "^4.1.0",
+		"postcss": "^8.5.3",
+		"postcss-flexbugs-fixes": "^5.0.2",
+		"postcss-preset-env": "^10.1.5",
 		"react-webcam": "^7.2.0"
 	}
 }
