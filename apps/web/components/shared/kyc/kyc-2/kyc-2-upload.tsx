@@ -26,7 +26,7 @@ import { ValidationAlerts } from './validation-alerts'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
-export default function IDDocumentUpload({
+export function IDDocumentUpload({
 	onBack,
 	onNext,
 }: IDDocumentUploadProps) {

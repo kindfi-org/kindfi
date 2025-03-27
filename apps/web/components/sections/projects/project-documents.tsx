@@ -14,7 +14,7 @@ export interface ProjectDocumentsProps {
 	documents: Document[]
 }
 
-export default function ProjectDocuments({
+export function ProjectDocuments({
 	title,
 	documents,
 }: ProjectDocumentsProps) {

@@ -8,7 +8,7 @@ import { ResourceFilters } from '~/components/sections/learning/resource-filters
 import { ResourceGrid } from '~/components/sections/learning/resource-grid'
 import { categories, resources } from '~/lib/constants/mock-data/mock-learning'
 
-export default function LearningPage() {
+export function LearningPage() {
 	const [activeLevel, setActiveLevel] = useState('all levels')
 	const [searchQuery, setSearchQuery] = useState('')
 

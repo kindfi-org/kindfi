@@ -1,5 +1,5 @@
 import { InvestorsDashboard } from '~/components/pages/kindlers'
 
-export default function InvestorsPage() {
+export function InvestorsPage() {
 	return <InvestorsDashboard />
 }

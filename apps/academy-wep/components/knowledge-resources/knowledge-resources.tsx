@@ -117,5 +117,3 @@ export const KnowledgeResources = () => {
 		</div>
 	)
 }
-
-export default KnowledgeResources

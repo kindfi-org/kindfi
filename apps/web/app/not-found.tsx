@@ -27,7 +27,7 @@ const iconVariants = {
 	},
 }
 
-export default function Custom404() {
+export function Custom404() {
 	return (
 		<div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-indigo-50 text-center overflow-hidden">
 			{/* Animated background ripples */}

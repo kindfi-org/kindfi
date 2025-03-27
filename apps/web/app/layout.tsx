@@ -1,6 +1,6 @@
 import { Toaster } from 'sonner'
 import { GoogleAnalytics } from '~/components/shared/google-analytics'
-import Footer from '~/components/shared/layout/footer/footer'
+import { Footer } from '~/components/shared/layout/footer/footer'
 import { Header } from '~/components/shared/layout/header/header'
 import { Providers } from '~/components/shared/layout/providers'
 import './css/globals.css'
@@ -15,7 +15,7 @@ export const metadata = {
 		'The first Web3 platform connecting supporters to impactful causes while driving blockchain adoption for social and environmental change',
 }
 
-export default function RootLayout({
+export function RootLayout({
 	children,
 }: {
 	children: React.ReactNode

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import AskQuestionBox from './AskQuestionBox'
-import LoadMoreButton from './LoadMoreButton'
-import QuestionCard from './QuestionCard'
+import { AskQuestionBox } from './ask-question-box'
+import { LoadMoreButton } from './load-more-button'
+import { QuestionCard } from './question-card'
 
 interface Answer {
 	id: number
@@ -73,7 +73,7 @@ const initialQuestions: Question[] = [
 	},
 ]
 
-export default function QAPage() {
+export function QAPage() {
 	const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 
 	const loadMoreQuestions = (): void => {

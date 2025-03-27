@@ -11,7 +11,7 @@ import { useProjectsFilter } from '~/hooks/use-projects-filter'
 import type { SortOption } from '~/hooks/use-projects-filter'
 import { projects } from '~/lib/mock-data/mock-projects'
 
-export default function ProjectsPage() {
+export function ProjectsPage() {
 	const [projectsData, setProjectsData] = useState<Project[]>([])
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 	const {

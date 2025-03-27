@@ -7,7 +7,7 @@ import {
 	featuredProjects,
 } from '~/lib/mock-data/featured-projects/mock-featured-projets'
 
-export default function FeaturedPage() {
+export function FeaturedPage() {
 	return (
 		<div className="min-h-screen bg-white">
 			{/* Hero Section */}

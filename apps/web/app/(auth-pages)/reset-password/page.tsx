@@ -10,7 +10,7 @@ import { FormMessage, type Message } from '~/components/form-message'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 
-export default function ResetPassword(props: {
+export function ResetPassword(props: {
 	searchParams: Promise<Message>
 }) {
 	const [message, setMessage] = useState<Message | null>(null)

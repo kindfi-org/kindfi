@@ -21,7 +21,7 @@ import { useWebAuthnSupport } from "~/hooks/passkey/use-web-authn-support";
 import { useStellarContext } from "~/hooks/stellar/stellar-context";
 import { useFormValidation } from "~/hooks/use-form-validation";
 
-export default function Signup() {
+export function Signup() {
   // Show success message if registration was successful
   // if (searchParams.success) {
   //   return (

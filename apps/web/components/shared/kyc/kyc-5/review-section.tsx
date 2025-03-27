@@ -2,7 +2,7 @@
 import { Button } from '~/components/base/button'
 import type { ReviewSectionProps } from '~/lib/types/final-review-kyc5.types'
 
-export default function ReviewSection({
+export function ReviewSection({
 	title,
 	children,
 	onEdit,

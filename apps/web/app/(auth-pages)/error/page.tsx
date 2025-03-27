@@ -4,7 +4,7 @@ import { AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '~/components/base/button'
 
-export default function AuthErrorPage() {
+export function AuthErrorPage() {
 	const router = useRouter()
 
 	return (

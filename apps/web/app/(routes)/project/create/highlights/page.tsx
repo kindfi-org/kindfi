@@ -15,7 +15,7 @@ interface Highlight {
 	description: string
 }
 
-export default function ProjectHighlights() {
+export function ProjectHighlights() {
 	const [highlights, setHighlights] = useState<Highlight[]>([
 		{ id: generateUniqueId('highlight-'), title: '', description: '' },
 		{ id: generateUniqueId('highlight-'), title: '', description: '' },
