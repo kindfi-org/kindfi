@@ -27,7 +27,7 @@ export default function ProjectsPage() {
 	const { projects, viewMode } = state
 
 	const filteredProjects = filterProjects(
-		sortProjects(mockProjectsView, sortOption),
+		sortProjects(state.projects, sortOption),
 	)
 
 	return (
