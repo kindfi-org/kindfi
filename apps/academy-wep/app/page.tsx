@@ -1,11 +1,11 @@
 'use client'
 
-import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 import { motion } from 'framer-motion'
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from 'lucide-react'
 import { useState } from 'react'
-import { WhyChoose } from '@/components/sections/why-choose'
+import { WhyChoose } from '~/components/sections/why-choose'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
 
 export default function Home() {
 	const [email, setEmail] = useState('')

@@ -64,7 +64,7 @@ const buttonVariants = cva(
  */
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-	VariantProps<typeof buttonVariants> {
+		VariantProps<typeof buttonVariants> {
 	asChild?: boolean
 	isLink?: boolean
 	startIcon?: React.ReactNode
@@ -129,7 +129,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 		// Warning for icon-only buttons without aria-label in development
 		if (process.env.NODE_ENV !== 'production' && isIconOnly && !ariaLabel) {
-			; +console.error(
+			;+console.error(
 				`Accessibility error: Icon-only Button must have an aria-label to describe its purpose. Component: ${Button.displayName}`,
 			)
 		}
@@ -144,22 +144,29 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			...(process.env.NODE_ENV !== 'production' &&
 				isLink &&
 				!('href' in props) && {
-				onClick: (e) => {
-					console.warn(
-						'Accessibility warning: Buttons with role="link" should have an href attribute.',
-					)
-					props.onClick?.(e)
-				},
-			}),
+					onClick: (e) => {
+						console.warn(
+							'Accessibility warning: Buttons with role="link" should have an href attribute.',
+						)
+						props.onClick?.(e)
+					},
+				}),
 			...props,
 		}
 
 		return asChild ? (
-			<Slot className={cn(buttonVariants({ variant, size, className }))} ref={ref}>
+			<Slot
+				className={cn(buttonVariants({ variant, size, className }))}
+				ref={ref}
+			>
 				{React.cloneElement(children as React.ReactElement, buttonProps)}
 			</Slot>
 		) : (
-			<Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...buttonProps}>
+			<Comp
+				className={cn(buttonVariants({ variant, size, className }))}
+				ref={ref}
+				{...buttonProps}
+			>
 				{startIcon}
 				{children}
 				{endIcon}
