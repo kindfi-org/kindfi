@@ -7,7 +7,7 @@ import { useProjectsFilter } from '~/hooks/use-projects-filter'
 import { projects as mockProjectsView } from '~/lib/mock-data/mock-projects'
 import type { Project } from '~/lib/types'
 
-export default function ProjectsPage() {
+export function ProjectsPage() {
 	const [state, setState] = useSetState<{
 		projects: Project[]
 		viewMode: 'grid' | 'list'
