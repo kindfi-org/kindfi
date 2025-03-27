@@ -104,4 +104,4 @@ const project: StellarProject = {
 }
 
 // Must set default to the project instance
-export { project }
+export default project 
