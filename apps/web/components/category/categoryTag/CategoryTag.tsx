@@ -1,30 +1,32 @@
 // src/components/CategoryTag/CategoryTag.tsx
-'use client'
+"use client";
 
-import type React from 'react'
-import type { ProjectCategory } from '~/lib/types/projects.types'
+import type React from "react";
+import type { ProjectCategory } from "~/lib/types/projects.types";
 
 interface CategoryTagProps {
-	category: ProjectCategory
-	isActive?: boolean
-	onClick?: () => void
+  category: ProjectCategory;
+  isActive?: boolean;
+  onClick?: () => void;
 }
 
 export const CategoryTag: React.FC<CategoryTagProps> = ({
-	category,
-	isActive = false,
-	onClick,
+  category,
+  isActive = false,
+  onClick,
 }) => {
-	const Icon = category.icon
+  const Icon = category.icon;
 
-	return (
-		<button
-			className={`category-tag category-tag--${category.id} ${isActive ? 'category-tag--active' : ''}`}
-			onClick={onClick}
-			type="button"
-		>
-			<Icon className="category-icon" />
-			{category.label}
-		</button>
-	)
-}
+  return (
+    <button
+      className={`category-tag category-tag--${category.id} ${
+        isActive ? "category-tag--active" : ""
+      }`}
+      onClick={onClick}
+      type="button"
+    >
+      <Icon className="category-icon" />
+      {category.label}
+    </button>
+  );
+};
