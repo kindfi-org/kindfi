@@ -1,8 +1,8 @@
 import type { UseFormReturn } from 'react-hook-form'
 import { Form } from '~/components/base/form'
 import type { formInputs } from '../team-members'
-import TeamMemberList from './TeamMemberList'
-import VisibilityToggle from './VisibilityToggle'
+import TeamMemberList from './team-member-list'
+import VisibilityToggle from './visibility-toggle'
 
 interface TeamMemberFormProps {
 	form: UseFormReturn<formInputs>

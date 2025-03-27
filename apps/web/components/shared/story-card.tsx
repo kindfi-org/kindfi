@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { MapPin } from 'lucide-react'
 import { IoIosLink } from 'react-icons/io'
 import { Progress } from '~/components/base/progress'
-import type { SuccessStory } from '~/lib/types/impact/succes-story'
+import type { SuccessStory } from '~/lib/types/impact/success-story'
 
 interface StoryCardProps {
 	story: SuccessStory

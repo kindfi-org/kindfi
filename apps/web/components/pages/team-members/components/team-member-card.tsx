@@ -16,7 +16,7 @@ import {
 	SelectValue,
 } from '~/components/base/select'
 import type { formInputs } from '../team-members'
-import ImageUploader from './ImageUploader'
+import ImageUploader from './image-uploader'
 
 interface TeamMemberCardProps {
 	form: UseFormReturn<formInputs>

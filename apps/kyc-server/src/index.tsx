@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { serve } from 'bun'
 import type { Server, ServerWebSocket } from 'bun'
 import { routes } from './routes'
-import { buildClient } from './utils/buildClient'
+import { buildClient } from './utils/build-client'
 
 interface ClientData {
 	clientId: string
