@@ -1,3 +1,5 @@
+'use client'
+
 import { Save } from 'lucide-react'
 import { Button } from '../../../../../components/base/button'
 import { ProjectMedia } from '../../../../../components/sections/project/project-media'
