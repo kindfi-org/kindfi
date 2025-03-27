@@ -84,6 +84,7 @@ const FinalCTA = dynamic(
 	},
 )
 import Kyc from '~/components/shared/kyc/kyc-2/kyc-2-upload'
+import { LearningJourney } from './learning-journey/learning-journey'
 
 export function HomeDashboard() {
 	return (
@@ -96,6 +97,11 @@ export function HomeDashboard() {
 			<NewUserGuide />
 			<PlatformOverview />
 			<Community />
+			<LearningJourney
+				completionPercentage={50}
+				nextLessonTitle="Stellar Wallets"
+				nextLessonDescription="Continue where you left off"
+			/>
 			<FinalCTA />
 		</>
 	)
