@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import type { ProjectTag } from '../types/project.types'
+import type { ProjectTag } from '../types/projects.types'
 
 // Predefined list of accessible color combinations (background and text)
 const ACCESSIBLE_COLORS = [

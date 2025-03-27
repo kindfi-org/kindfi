@@ -5,7 +5,7 @@ import type React from 'react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { Input } from '~/components/base/input'
-import type { ProjectTag } from '~/lib/types/project.types'
+import type { ProjectTag } from '~/lib/types/projects.types'
 import { formatToPascalCase } from '~/lib/utils/tag-context'
 
 interface TagEditProps {
