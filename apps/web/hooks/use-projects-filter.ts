@@ -1,11 +1,18 @@
-import { useCallback, useState } from 'react'
-import type { Project } from '~/components/shared/project-card'
+import { useCallback } from 'react'
+import { useSetState } from 'react-use'
+import type { Project } from '~/lib/types/projects.types'
 
 export type SortOption = 'popular' | 'newest' | 'funding' | 'supporters'
 
 export function useProjectsFilter() {
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-	const [sortOption, setSortOption] = useState<SortOption>('popular')
+	const [state, setState] = useSetState<{
+		selectedCategories: string[]
+		sortOption: SortOption
+	}>({
+		selectedCategories: [],
+		sortOption: 'popular',
+	})
+	const { selectedCategories, sortOption } = state
 
 	const filterProjects = useCallback(
 		(projects: Project[]) => {
@@ -13,16 +20,21 @@ export function useProjectsFilter() {
 
 			return projects.filter((project) => {
 				// Handle different ways categories might be stored
-				// 1. In the 'category' field as a string
-				if (project.category && selectedCategories.includes(project.category)) {
+				// 1. In the 'categories' field as a array of string
+
+				if (
+					project.categories.some((category) =>
+						selectedCategories.includes(category?.toLocaleLowerCase()),
+					)
+				) {
 					return true
 				}
 
-				// 2. In the 'tags' array
 				if (project.tags && project.tags.length > 0) {
+					// 2. In the 'tags' array
 					return project.tags.some((tag) => {
 						const tagText = typeof tag === 'string' ? tag : tag.text
-						return selectedCategories.includes(tagText)
+						return selectedCategories.includes(tagText?.toLocaleLowerCase())
 					})
 				}
 
@@ -40,28 +52,29 @@ export function useProjectsFilter() {
 				case 'newest':
 					// Fallback to current date if createdAt is not available
 					return sortedProjects.sort((a, b) => {
-						const dateA = a.createdAt
-							? new Date(a.createdAt).getTime()
+						const dateA = a.created_at
+							? new Date(a.created_at).getTime()
 							: Date.now()
-						const dateB = b.createdAt
-							? new Date(b.createdAt).getTime()
+						const dateB = b.created_at
+							? new Date(b.created_at).getTime()
 							: Date.now()
 						return dateB - dateA
 					})
 				case 'funding':
 					return sortedProjects.sort((a, b) => {
 						const percentA =
-							a.percentageComplete ||
-							(a.currentAmount / (a.targetAmount || a.goal || 1)) * 100
+							a.percentage_complete ||
+							(a.current_amount / (a.target_amount || a.goal || 1)) * 100
 						const percentB =
-							b.percentageComplete ||
-							(b.currentAmount / (b.targetAmount || b.goal || 1)) * 100
+							b.percentage_complete ||
+							(b.current_amount / (b.target_amount || b.goal || 1)) * 100
 						return percentB - percentA
 					})
 				case 'supporters':
 					return sortedProjects.sort(
 						(a, b) =>
-							(b.investors || b.donors || 0) - (a.investors || a.donors || 0),
+							(b.investors_count || b.donors || 0) -
+							(a.investors_count || a.donors || 0),
 					)
 				default:
 					// 'popular' - could be based on a trending flag or other metrics
@@ -76,7 +89,8 @@ export function useProjectsFilter() {
 
 						// Then by number of supporters
 						return (
-							(b.investors || b.donors || 0) - (a.investors || a.donors || 0)
+							(b.investors_count || b.donors || 0) -
+							(a.investors_count || a.donors || 0)
 						)
 					})
 			}
@@ -86,9 +100,11 @@ export function useProjectsFilter() {
 
 	return {
 		selectedCategories,
-		setSelectedCategories,
+		setSelectedCategories: (val: string[]) =>
+			setState((prev) => ({ ...prev, selectedCategories: val })),
 		sortOption,
-		setSortOption,
+		setSortOption: (val: SortOption) =>
+			setState((prev) => ({ ...prev, sortOption: val })),
 		filterProjects,
 		sortProjects,
 	}
