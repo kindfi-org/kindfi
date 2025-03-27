@@ -1,4 +1,4 @@
-import { buildClient } from './src/utils/buildClient'
+import { buildClient } from './src/utils/build-client'
 
 /**
  * Main build script

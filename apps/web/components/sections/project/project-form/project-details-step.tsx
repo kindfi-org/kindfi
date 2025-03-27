@@ -7,7 +7,7 @@ import {
 	FormMessage,
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
-import { CategoryTag } from '~/components/category/categoryTag/CategoryTag'
+import { CategoryTag } from '~/components/category/category-tag/category-tag'
 import { PROJECT_CATEGORIES } from '~/lib/constants/project.constants'
 import type { ProjectFormData } from '~/lib/validators/project'
 
