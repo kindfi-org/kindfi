@@ -75,9 +75,10 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
 			{!isCompleted && !viewLink && <p>{moduleRequired}</p>}
 
 			{!isCompleted && (
-				<button 
-				 type="button"
-				className="text-sm text-blue-600 bg-blue-50 px-4 py-2 rounded-lg w-full hover:bg-blue-100 hover:text-blue-700 transition-colors duration-300">
+				<button
+					type="button"
+					className="text-sm text-blue-600 bg-blue-50 px-4 py-2 rounded-lg w-full hover:bg-blue-100 hover:text-blue-700 transition-colors duration-300"
+				>
 					Start Learning
 				</button>
 			)}
