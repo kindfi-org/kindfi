@@ -1,6 +1,5 @@
 'use client'
 
-import AchievementsPage from '@/components/page/achivement'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
