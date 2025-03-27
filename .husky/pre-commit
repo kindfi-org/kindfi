@@ -14,4 +14,6 @@ if git diff --cached --name-only | grep -q '^services/supabase/'; then
     echo "🔴 Failed to run Supabase TypeScript generation. Make sure if you are locally running! 👀"
     exit 1
   fi
+  bun format-and-lint:fix
+  git update-index --again
 fi
