@@ -35,7 +35,9 @@ const InputOTPSlot = React.forwardRef<
 	React.ComponentPropsWithoutRef<'div'> & { index: number }
 >(({ index, className, ...props }, ref) => {
 	const inputOTPContext = React.useContext(OTPInputContext)
-	const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index]
+	const { char, hasFakeCaret, isActive } = (
+		inputOTPContext as NonNullable<typeof inputOTPContext>
+	).slots[index]
 
 	return (
 		<div
@@ -62,10 +64,11 @@ const InputOTPSeparator = React.forwardRef<
 	React.ElementRef<'div'>,
 	React.ComponentPropsWithoutRef<'div'>
 >(({ ...props }, ref) => (
-	<div ref={ref} role="separator" {...props}>
+	// biome-ignore lint/a11y/useSemanticElements: role is enough for this component
+	<div ref={ref} role="separator" tabIndex={0} {...props}>
 		<Minus />
 	</div>
 ))
 InputOTPSeparator.displayName = 'InputOTPSeparator'
 
-export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }
+export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot }

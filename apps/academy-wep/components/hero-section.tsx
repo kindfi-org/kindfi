@@ -131,7 +131,7 @@ const HeroSection = ({
 						{ctaButtons.length > 0 ? (
 							ctaButtons.map((button, index) => (
 								<button
-									key={index}
+									key={button.text.replace(/\s/g, '-').toLowerCase()}
 									className={
 										button.isPrimary
 											? 'bg-gradient-to-l from-secondary to-primary shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2 text-white hover:opacity-90 focus:ring-2 focus:ring-lime-300 focus:outline-none transition-all'
