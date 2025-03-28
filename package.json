@@ -24,8 +24,8 @@
   "scripts": {
     "init": "bun install && bun husky:prepare",
     "husky:prepare": "husky",
-    "format-and-lint": "echo biome-format-and-lint",
-    "format-and-lint:fix": "echo biome-format-and-lint",
+    "format-and-lint": "biome check .",
+    "format-and-lint:fix": "biome format --write .",
     "clean": "git clean -xdf node_modules",
     "clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
     "prepare": "husky"
