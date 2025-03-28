@@ -32,7 +32,7 @@ function FiltersSection() {
         <PopularTopics />
       </div>
 
-      <div className="w-full mt-8  flex-col">
+      <div className="w-full mt-8 flex-col">
         <ResetButton onReset={() => {}} />
       </div>
     </div>
