@@ -1,10 +1,8 @@
-import type React from 'react'
-import AchievementCard from '../shared/achivement-card';
 import { achievements } from '@/data/achivement-data'
+import type React from 'react'
+import AchievementCard from '../shared/achivement-card'
 
 const AchievementsPage: React.FC = () => {
-	
-
 	return (
 		<div className="bg-white min-h-screen p-8">
 			<div className=" mx-auto">
@@ -14,7 +12,7 @@ const AchievementsPage: React.FC = () => {
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 					{achievements.map((achievement, index) => (
 						<AchievementCard
-						key={`${achievement.title.toLowerCase().replace(/\s+/g, '-')}`}
+							key={`${achievement.title.toLowerCase().replace(/\s+/g, '-')}`}
 							{...achievement}
 						/>
 					))}
