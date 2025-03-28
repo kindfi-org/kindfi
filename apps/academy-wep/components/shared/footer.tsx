@@ -19,9 +19,9 @@ export function Footer() {
               height={40}
               className="h-8 w-auto"
             />
-            <span className="ml-1 text-sm font-medium text-gray-700">Academy</span>
+            <span className="ml-1 text-sm font-medium text-foreground">Academy</span>
           </div>
-          <p className="text-gray-600 max-w-md">
+          <p className="text-muted-foreground max-w-md">
             The first Web3 platform connecting supporters to impactful causes while driving blockchain adoption for
             social and environmental change.
           </p>
@@ -35,7 +35,7 @@ export function Footer() {
             <ul className="space-y-2">
               {footerRoutes.projects.map((route) => (
                 <li key={route.name}>
-                  <Link href={route.href} className="text-gray-600 hover:text-green-600">
+                  <Link href={route.href} className="text-muted-foreground hover:text-primary">
                     {route.name}
                   </Link>
                 </li>
@@ -49,7 +49,7 @@ export function Footer() {
             <ul className="space-y-2">
               {footerRoutes.resources.map((route) => (
                 <li key={route.name}>
-                  <Link href={route.href} className="text-gray-600 hover:text-green-600">
+                  <Link href={route.href} className="text-muted-foreground hover:text-primary">
                     {route.name}
                   </Link>
                 </li>
@@ -63,7 +63,7 @@ export function Footer() {
             <ul className="space-y-2">
               {footerRoutes.legal.map((route) => (
                 <li key={route.name}>
-                  <Link href={route.href} className="text-gray-600 hover:text-green-600">
+                  <Link href={route.href} className="text-muted-foreground hover:text-primary">
                     {route.name}
                   </Link>
                 </li>
@@ -75,8 +75,8 @@ export function Footer() {
 
       {/* Copyright and Extra Links */}
       <div className="mt-12 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 text-sm text-gray-500">
-        <p>© 2025 KindFi. All rights reserved.</p>
-        <Link href="/documentation" className="hover:text-green-600 md:pr-16 mt-2 md:mt-0">
+        <p>© {new Date().getFullYear()} KindFi. All rights reserved.</p>
+        <Link href="/documentation" className="hover:text-primary md:pr-16 mt-2 md:mt-0">
           Documentation
         </Link>
       </div>
@@ -84,10 +84,12 @@ export function Footer() {
       {/* Floating Help Button */}
       <div className="fixed bottom-6 right-6">
         <Button
-          className="flex items-center justify-center w-14 h-14 bg-green-500 rounded-full text-white shadow-lg hover:bg-green-600 transition-colors"
+          className="flex items-center justify-center w-14 h-14 bg-green-500 rounded-full text-white shadow-lg hover:bg-primary transition-colors"
           aria-label="Get help"
+          title="Get help"
         >
           <Bot className="!w-6 !h-6" />
+          <span className="sr-only">Get assistance</span>
         </Button>
       </div>
     </footer>

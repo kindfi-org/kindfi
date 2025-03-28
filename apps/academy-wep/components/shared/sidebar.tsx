@@ -1,5 +1,6 @@
 "use client"
 
+import { useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -19,24 +20,23 @@ import { Button } from "~/components/base/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/components/base/collapsible"
 import { cn } from "~/lib/utils"
 import { learningPaths, navigationRoutes } from "~/lib/constants/sidebar"
+import type { LearningPath } from "~/lib/types/sidebar"
 
 export function AppSidebar() {
   const pathname = usePathname()
 
   // Check if a route is active
-  const isActive = (href: string, exact = false) => {
+  const isActive = useCallback((href: string, exact = false) => {
     if (exact) {
       return pathname === href
     }
-
     const normalizedHref = href.endsWith("/") ? href.slice(0, -1) : href
     const normalizedPathname = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname
-
     return normalizedPathname === normalizedHref || normalizedPathname.startsWith(`${normalizedHref}/`)
-  }
+  }, [pathname])
 
   // Check if a learning path is active
-  const isLearningPathActive = (path: (typeof learningPaths)[0]) => {
+  const isLearningPathActive = (path: LearningPath) => {
     return isActive(path.href) || path.subItems.some((item) => isActive(item.href))
   }
 
@@ -67,8 +67,8 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     className={cn(
-                      "hover:bg-green-100 hover:text-green-600",
-                      isActive(route.href, true) && "bg-green-100 text-green-600"
+                      "hover:bg-green-100 hover:text-primary",
+                      isActive(route.href, true) && "bg-green-100 text-primary"
                     )}
                   >
                     <Link href={route.href}>
@@ -93,14 +93,14 @@ export function AppSidebar() {
                 <SidebarGroupLabel asChild>
                   <CollapsibleTrigger
                     className={cn(
-                      "flex w-full items-center rounded-md hover:bg-green-100 hover:text-green-600",
-                      isActive(path.href) && "text-green-600",
+                      "flex w-full items-center rounded-md hover:bg-green-100 hover:text-primary",
+                      isActive(path.href) && "text-primary",
                     )}
                   >
                     <div className="flex h-6 w-6 items-center justify-center rounded-sm gradient-btn text-white mr-2">
                       <span className="text-sm font-medium">{path.icon}</span>
                     </div>
-                    <span className="flex-1 text-left text-sm text-gray-700">{path.name}</span>
+                    <span className="flex-1 text-left text-sm text-foreground">{path.name}</span>
                     <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
@@ -111,7 +111,7 @@ export function AppSidebar() {
                       <SidebarMenuItem>
                         <SidebarMenuButton
                           asChild
-                          className={cn("hover:bg-green-100 hover:text-green-600", isActive(path.href, true) && "bg-green-100 text-green-600")}
+                          className={cn("hover:bg-green-100 hover:text-primary", isActive(path.href, true) && "bg-green-100 text-primary")}
                         >
                           <Link href={path.href}>
                             <span>Overview</span>
@@ -123,7 +123,7 @@ export function AppSidebar() {
                         <SidebarMenuItem key={subItem.name}>
                           <SidebarMenuButton
                             asChild
-                            className={cn("hover:bg-green-100 hover:text-green-600", isActive(subItem.href) && "bg-green-100 text-green-600")}
+                            className={cn("hover:bg-green-100 hover:text-primary", isActive(subItem.href) && "bg-green-100 text-primary")}
                           >
                             <Link href={subItem.href}>
                               <span>{subItem.name}</span>
@@ -149,7 +149,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="px-2 space-y-2">
             <Button variant="outline" className="w-full gradient-border-btn">
-              <LockKeyhole className="h-4 w-4 text-green-600" />
+              <LockKeyhole className="h-4 w-4 text-primary" />
               Sign in with Passkey
             </Button>
             <Button className="w-full gradient-btn">
@@ -165,12 +165,12 @@ export function AppSidebar() {
 
         {/* Footer Section */}
         <div className="mt-auto p-4 text-xs font-normal text-gray-500 border-t">
-          <p className="mb-2">© 2025 KindFi Academy</p>
+          <p className="mb-2">© {new Date().getFullYear()} KindFi Academy</p>
           <div className="flex gap-4">
-            <Link href="/terms" className="hover:text-gray-700">
+            <Link href="/terms" className="hover:text-foreground">
               Terms
             </Link>
-            <Link href="/privacy" className="hover:text-gray-700">
+            <Link href="/privacy" className="hover:text-foreground">
               Privacy
             </Link>
           </div>

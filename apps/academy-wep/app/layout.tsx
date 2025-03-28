@@ -34,7 +34,7 @@ export default function RootLayout({
 				<SidebarProvider>
 					<AppSidebar />
 						<main className='flex-1 p-4 pb-0'>
-							<SidebarTrigger className="mr-4" />
+							<SidebarTrigger className="mr-4" aria-label="Toggle sidebar" />
 							{children}
 							<Footer />
 						</main>
