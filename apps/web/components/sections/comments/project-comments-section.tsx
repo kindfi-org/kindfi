@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { AskQuestionBox } from './AskQuestionBox'
-import { CommentsList } from './CommentsList'
-import { LoadMoreButton } from './LoadMoreButton'
+import { AskQuestionBox } from './ask-question-box'
+import { CommentsList } from './comments-list'
+import { LoadMoreButton } from './load-more-button'
+
+// TODO: Move this to the types folder
 
 export interface Comment {
 	id: number
@@ -13,6 +15,8 @@ export interface Comment {
 	replies?: Comment[]
 	likes: number
 }
+
+// TODO: Move this to the constant mock data folder
 
 const initialComments: Comment[] = [
 	{

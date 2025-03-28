@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic'
 
 const CommentsTab = dynamic(
 	() =>
-		import('~/components/sections/comments/ProjectCommentsSection').then(
+		import('~/components/sections/comments/project-comments-section').then(
 			(mod) => mod.ProjectCommentsSection,
 		),
 	{

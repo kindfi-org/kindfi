@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Button } from '~/components/base/button'
 import { Textarea } from '~/components/base/textarea'
 
+// TODO: Move this to the types folder
+
 interface AskQuestionBoxProps {
 	onSubmit: (text: string) => void
 	onAfterSubmit?: () => void

@@ -2,7 +2,9 @@
 
 import { ThumbsUp } from 'lucide-react'
 import { Avatar, AvatarFallback } from '~/components/base/avatar'
-import { AskQuestionBox } from './AskQuestionBox'
+import { AskQuestionBox } from './ask-question-box'
+
+// TODO: Move this to the types folder
 
 export interface Comment {
 	id: number
@@ -12,6 +14,8 @@ export interface Comment {
 	replies?: Comment[]
 	likes: number
 }
+
+// TODO: Move this to the types folder
 
 interface CommentsListProps {
 	comments: Comment[]

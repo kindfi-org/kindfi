@@ -1,4 +1,4 @@
-import { ProjectCommentsSection } from '~/components/sections/comments/ProjectCommentsSection'
+import { ProjectCommentsSection } from '~/components/sections/comments/project-comments-section'
 
 export const CommentsTab = () => {
 	return (
