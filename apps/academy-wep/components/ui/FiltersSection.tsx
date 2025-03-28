@@ -9,7 +9,7 @@ import { Input } from "./input";
 function FiltersSection() {
   return (
     <div className="flex p-[2%] flex-col z-10 w-full h-auto shadow-lg shadow-gray-300 rounded-md">
-      <div className=" w-full h-auto flex md:flex-row flex-col-reverse gap-3 lg:flex-row ">
+      <div className=" w-full h-auto flex md:flex-row flex-col-reverse gap-3 ">
         <div className="relative w-full  h-auto">
           <Input
             type="Search"

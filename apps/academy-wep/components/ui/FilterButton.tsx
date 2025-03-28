@@ -32,8 +32,7 @@ function FilterButton({
         >
           <Menu />
         </button>
-        {/* <LayoutGrid className="text-primary-600" />
-        <Menu /> */}
+      
       </div>
     </div>
   );

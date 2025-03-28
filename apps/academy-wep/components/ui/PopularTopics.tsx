@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Button } from "./button";
 
-function PopularTopics() {
+interface PopularTopicsProps {
+  onTopicSelect?: (topic: string, index: number) => void;
+}
+const topics = ["Blockchain", "Stellar", "Wallets", "Web3"];
+function PopularTopics({ onTopicSelect }: PopularTopicsProps = {}) {
   const [selected, setSelected] = useState(0);
 
   const colors = [
@@ -20,10 +24,13 @@ function PopularTopics() {
           return (
             <Button
               key={list}
-              onClick={() => setSelected(i)}
+              onClick={() => {
+                setSelected(i);
+                if (onTopicSelect) onTopicSelect(list, i);
+              }}
               className={`
                 border transition-all rounded-full px-4 py-2 font-medium
-                ${color.bg} ${selected === i ? `border-2 ` : ""}
+                ${color.bg} ${selected === i ? "border-2" : ""}
 
               `}
             >
@@ -37,5 +44,3 @@ function PopularTopics() {
 }
 
 export default PopularTopics;
-
-const topics = ["Blockchain", "Stellar", "Wallets", "Web3"];
