@@ -41,7 +41,7 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar className="border-r font-semibold p-2">
+    <Sidebar className="border-r font-semibold p-2 bg-card">
       <SidebarContent className="bg-card">
         {/* Logo Section */}
         <SidebarGroup className="pb-4 border-b">
