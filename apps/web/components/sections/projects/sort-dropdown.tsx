@@ -1,6 +1,17 @@
-import { Filter } from 'lucide-react'
+import {
+	FlameIcon as Fire,
+	Heart,
+	Star,
+	TrendingUpIcon as Trending,
+} from 'lucide-react'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '~/components/base/select'
 import type { SortOption } from '~/hooks/use-projects-filter'
-
 interface SortDropdownProps {
 	value: SortOption
 	onChange: (value: SortOption) => void
@@ -10,19 +21,37 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
 	return (
 		<div className="flex items-center">
 			<div className="relative">
-				<select
-					value={value}
-					onChange={(e) => onChange(e.target.value as SortOption)}
-					className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:border-blue-500"
-				>
-					<option value="popular">Popular Searches</option>
-					<option value="newest">Newest</option>
-					<option value="funding">Most Funded</option>
-					<option value="supporters">Most Supporters</option>
-				</select>
-				<div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-					<Filter className="h-4 w-4" />
-				</div>
+				<Select defaultValue={value} onValueChange={onChange}>
+					<SelectTrigger className="w-[180px]">
+						<SelectValue placeholder="Sort by" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="popular">
+							<span className="flex items-center gap-2">
+								<Trending className="h-4 w-4" />
+								Popular Searches
+							</span>
+						</SelectItem>
+						<SelectItem value="funding">
+							<span className="flex items-center gap-2">
+								<Star className="h-4 w-4" />
+								Most Funded
+							</span>
+						</SelectItem>
+						<SelectItem value="newest">
+							<span className="flex items-center gap-2">
+								<Fire className="h-4 w-4" />
+								Newest
+							</span>
+						</SelectItem>
+						<SelectItem value="supporters">
+							<span className="flex items-center gap-2">
+								<Heart className="h-4 w-4" />
+								Most Supporters
+							</span>
+						</SelectItem>
+					</SelectContent>
+				</Select>
 			</div>
 		</div>
 	)

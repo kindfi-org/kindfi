@@ -34,6 +34,7 @@ import { projectDocumentsData } from '~/lib/mock-data/mock-project-documents'
 import { projectData } from '~/lib/mock-data/mock-project-overview'
 import { technologyData } from '~/lib/mock-data/mock-technology'
 import { tractionMilestonesData } from '~/lib/mock-data/mock-traction-milestones'
+import type { Project } from '~/lib/types'
 
 interface ProjectDetailViewProps {
 	project: Project
@@ -41,13 +42,13 @@ interface ProjectDetailViewProps {
 
 export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 	const [donationAmount, setDonationAmount] = useState<number>(
-		project.minInvestment || 10,
+		project.min_investment || 10,
 	)
 
-	const targetAmount = project.targetAmount || project.goal || 0
-	const currentAmount = project.currentAmount || project.raised || 0
+	const targetAmount = project.target_amount || project.goal || 0
+	const currentAmount = project.current_amount || project.raised || 0
 	const percentageComplete =
-		project.percentageComplete ||
+		project.percentage_complete ||
 		(currentAmount && targetAmount ? (currentAmount / targetAmount) * 100 : 0)
 
 	const predefinedAmounts = [10, 25, 50, 100, 250]
@@ -94,7 +95,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 						<div className="w-full md:w-2/5 lg:w-1/3">
 							<div className="rounded-lg overflow-hidden relative aspect-[4/3]">
 								<Image
-									src={project.image || '/api/placeholder/600/450'}
+									src={project.image_url || '/api/placeholder/600/450'}
 									alt={project.title}
 									fill
 									className="object-cover"
@@ -127,7 +128,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 												)}
 											</h3>
 											<p className="text-sm text-gray-500">
-												{project.creator.completedProjects} completed projects
+												{project.creator.completed_projects} completed projects
 											</p>
 										</div>
 									</div>
@@ -138,11 +139,15 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 						{/* Project info */}
 						<div className="w-full md:w-3/5 lg:w-2/3">
 							<div className="flex flex-wrap gap-2 mb-4">
-								{project.category && (
-									<span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-										{project.category}
-									</span>
-								)}
+								{project.categories.length > 0 &&
+									project.categories.map((category) => (
+										<span
+											key={category}
+											className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+										>
+											{category}
+										</span>
+									))}
 
 								{project.location && (
 									<span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
@@ -179,7 +184,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 									<div className="flex items-center">
 										<Users className="h-4 w-4 mr-1" />
 										<span>
-											{project.investors || project.donors || 0} donors
+											{project.investors_count || project.donors || 0} donors
 										</span>
 									</div>
 								</div>
@@ -313,7 +318,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 													// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 													key={index}
 													className={`p-4 rounded-lg border ${
-														index < (project.completedMilestones || 0)
+														index < (project.completed_milestones || 0)
 															? 'bg-green-50 border-green-200'
 															: 'bg-gray-50 border-gray-200'
 													}`}
@@ -321,12 +326,12 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 													<div className="flex items-start">
 														<div
 															className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0 ${
-																index < (project.completedMilestones || 0)
+																index < (project.completed_milestones || 0)
 																	? 'bg-green-500 text-white'
 																	: 'bg-gray-300 text-gray-600'
 															}`}
 														>
-															{index < (project.completedMilestones || 0)
+															{index < (project.completed_milestones || 0)
 																? '✓'
 																: index + 1}
 														</div>
@@ -335,7 +340,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 																Milestone {index + 1}
 															</h4>
 															<p className="text-sm text-gray-600">
-																{index < (project.completedMilestones || 0)
+																{index < (project.completed_milestones || 0)
 																	? 'Completed on January 15, 2025'
 																	: 'Estimated completion: June 30, 2025'}
 															</p>
