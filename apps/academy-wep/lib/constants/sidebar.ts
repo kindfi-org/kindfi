@@ -2,7 +2,6 @@ import { Home, BookOpen, FileText, Trophy, CircleAlert } from "lucide-react"
 
 import type { LearningPath, NavigationRoute } from "../types/sidebar"
 
-// Define navigation routes
 export const navigationRoutes: NavigationRoute[] = [
   { name: "Home", href: "/", icon: Home },
   { name: "Learn", href: "/learn", icon: BookOpen },
@@ -11,7 +10,6 @@ export const navigationRoutes: NavigationRoute[] = [
   { name: "About KindFi", href: "/about", icon: CircleAlert },
 ]
 
-// Define learning paths
 export const learningPaths: LearningPath[] = [
   {
     name: "Blockchain Fundamentals",

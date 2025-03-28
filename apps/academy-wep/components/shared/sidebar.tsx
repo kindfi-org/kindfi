@@ -1,4 +1,5 @@
 "use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -40,8 +41,8 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar className="border-r font-semibold p-2 bg-white">
-      <SidebarContent className="bg-white">
+    <Sidebar className="border-r font-semibold p-2">
+      <SidebarContent className="bg-card">
         {/* Logo Section */}
         <SidebarGroup className="pb-4 border-b">
           <div className="flex items-center">
@@ -71,7 +72,7 @@ export function AppSidebar() {
                     )}
                   >
                     <Link href={route.href}>
-                      <route.icon className="mr-2 h-5 w-5" />
+                      <route.icon className="h-5 w-5" />
                       <span>{route.name}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -158,18 +159,18 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <p className="text-xs text-gray-500 py-4 px-2">
+        <p className="text-xs font-normal text-gray-500 py-4 px-2">
           Passkeys are more secure than passwords and easier to use. No more remembering complex passwords!
         </p>
 
         {/* Footer Section */}
-        <div className="mt-auto p-4 text-xs text-gray-500 border-t">
+        <div className="mt-auto p-4 text-xs font-normal text-gray-500 border-t">
           <p className="mb-2">© 2025 KindFi Academy</p>
           <div className="flex gap-4">
-            <Link href="#" className="hover:text-gray-700">
+            <Link href="/terms" className="hover:text-gray-700">
               Terms
             </Link>
-            <Link href="#" className="hover:text-gray-700">
+            <Link href="/privacy" className="hover:text-gray-700">
               Privacy
             </Link>
           </div>

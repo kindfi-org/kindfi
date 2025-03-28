@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 
 import { AppSidebar } from '~/components/shared/sidebar'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '~/components/base/sidebar'
+import { SidebarProvider, SidebarTrigger } from '~/components/base/sidebar'
+import { Footer } from '~/components/shared/footer'
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',
@@ -32,9 +33,10 @@ export default function RootLayout({
 			>
 				<SidebarProvider>
 					<AppSidebar />
-						<main className='flex-1 p-4'>
+						<main className='flex-1 p-4 pb-0'>
 							<SidebarTrigger className="mr-4" />
 							{children}
+							<Footer />
 						</main>
 				</SidebarProvider>
 			</body>
