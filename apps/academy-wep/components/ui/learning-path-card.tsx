@@ -1,6 +1,6 @@
 import { forwardRef } from 'react'
 import { Icon } from '~/components/ui/icon' // Importing the new Icon component
-import { Card } from './Card' // Updated to relative path
+import { Card } from '../base/card' // Updated to relative path
 import { Progress } from './progress' // Updated to relative path
 
 interface LearningPathCardProps {
