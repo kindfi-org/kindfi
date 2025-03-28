@@ -1,5 +1,5 @@
 'use client'
-
+import ReadyToEarn from '@/components/ready-to-earn'
 import { motion } from 'framer-motion'
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from 'lucide-react'
 import { useState } from 'react'
@@ -79,7 +79,15 @@ export default function Home() {
 					Master blockchain fundamentals and unlock the power of Web3 for social
 					impact.
 				</motion.p>
-
+				{/* Ready to earn more badges */}
+				<motion.div
+					initial={{ x: -100, opacity: 0 }}
+					animate={{ x: 0, opacity: 1 }}
+					exit={{ x: 100, opacity: 0 }}
+					transition={{ duration: 0.6, ease: 'easeInOut' }}
+				>
+					<ReadyToEarn badges={badges} />
+				</motion.div>
 				{/* CTA Section */}
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
