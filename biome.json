@@ -21,11 +21,8 @@
 			"recommended": true,
 			"style": {
 				"recommended": true,
-				"noYodaExpression": "error",
 				"noNonNullAssertion": "warn",
-				"noUselessElse": "error",
-				"useForOf": "error",
-				"useImportType": "error"
+				"noUselessElse": "error"
 			},
 			"correctness": {
 				"recommended": true,
