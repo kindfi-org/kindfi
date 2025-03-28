@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '~/components/base/button'
 import { forwardRef } from 'react'
 
 const CTAButton = forwardRef<

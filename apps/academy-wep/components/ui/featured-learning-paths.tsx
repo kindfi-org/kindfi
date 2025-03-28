@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
+import { Badge } from '~/components/base/badge'
+import { Card } from '~/components/base/card'
 import { Bolt } from 'lucide-react'
 import { forwardRef, useEffect, useState } from 'react'
 import { CTAButton } from './cta-button'
