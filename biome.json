@@ -10,7 +10,8 @@
 		"ignore": [
 			"./apps/web/.next",
 			"./apps/indexer/src/types/models",
-			"./apps/kyc-server/public"
+			"./apps/kyc-server/public",
+			"./docs"
 		]
 	},
 	"formatter": { "enabled": true, "indentStyle": "tab", "indentWidth": 2 },

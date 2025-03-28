@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { FiArrowRight } from 'react-icons/fi'
+import { Button } from '~/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader } from '~/components/ui/card'
 import type { ThemeColor } from '../../../web/lib/constants/theme-color.contants'
 import { colorMap } from '../../../web/lib/constants/theme-color.contants'
 

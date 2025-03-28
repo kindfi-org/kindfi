@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
 import { forwardRef } from 'react'
+import { Button } from '~/components/ui/button'
 
 const CTAButton = forwardRef<
 	HTMLButtonElement,

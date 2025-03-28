@@ -165,7 +165,7 @@ React is at the core of our front-end development. Here are some conventions to 
    ```tsx
    // Imports
    import React from "react";
-   import { Button, Input } from "@/components/base/button";
+   import { Button, Input } from "~/components/base/button";
 
    // Constants declaration
    const MAX_LENGTH = 20;
