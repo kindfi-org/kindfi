@@ -1,4 +1,3 @@
-
 import clsx from 'clsx'
 import { IoMdRibbon } from 'react-icons/io'
 import { LiaCheckCircleSolid, LiaShieldAltSolid } from 'react-icons/lia'

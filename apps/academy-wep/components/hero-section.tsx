@@ -92,7 +92,10 @@ const HeroSection = ({
 	const slides = customSlides || DEFAULT_SLIDES
 
 	// Determine the title to display with gradient
-	const currentSlide = slides[activeButton - 1] ?? { title: '', description: '' }
+	const currentSlide = slides[activeButton - 1] ?? {
+		title: '',
+		description: '',
+	}
 	const currentTitle = currentSlide.title
 	const displayTitle =
 		typeof currentTitle === 'string'
@@ -128,7 +131,7 @@ const HeroSection = ({
 						{ctaButtons.length > 0 ? (
 							ctaButtons.map((button, index) => (
 								<button
-									key={index}
+									key={button.text.replace(/\s/g, '-').toLowerCase()}
 									className={
 										button.isPrimary
 											? 'bg-gradient-to-l from-secondary to-primary shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2 text-white hover:opacity-90 focus:ring-2 focus:ring-lime-300 focus:outline-none transition-all'
@@ -143,7 +146,7 @@ const HeroSection = ({
 								</button>
 							))
 						) : (
-							<div className='flex gap-4'>
+							<div className="flex gap-4">
 								<button
 									className="bg-gradient-to-l from-secondary to-primary shadow px-4 sm:px-5 py-2 rounded-md flex items-center justify-center gap-2 text-white hover:opacity-90 focus:ring-2 focus:ring-lime-300 focus:outline-none transition-all"
 									type="button"
@@ -177,10 +180,10 @@ const HeroSection = ({
 											handleButtonClick(num + 1)
 										} else if (e.key === 'ArrowLeft' && num > 1) {
 											handleButtonClick(num - 1)
-                    } else if (e.key === 'Home') {
-                      handleButtonClick(1)
-                    } else if (e.key === 'End') {
-                      handleButtonClick(slides.length)
+										} else if (e.key === 'Home') {
+											handleButtonClick(1)
+										} else if (e.key === 'End') {
+											handleButtonClick(slides.length)
 										}
 									}}
 									type="button"
