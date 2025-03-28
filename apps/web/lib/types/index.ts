@@ -14,3 +14,4 @@ export * from "./right-side-panel.types";
 export * from "./section.types";
 export * from "./stats.types";
 export * from "./user-dashboard.types";
+export * from "./utils.types";
