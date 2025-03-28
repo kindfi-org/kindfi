@@ -1,4 +1,4 @@
-import { achievements } from '@/data/achivement-data'
+import { achievements } from '~/data/achivement-data'
 import type React from 'react'
 import AchievementCard from '../shared/achivement-card'
 

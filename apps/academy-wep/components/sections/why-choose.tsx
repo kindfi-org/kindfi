@@ -1,6 +1,6 @@
-import { useElementVisibility } from '@/hooks/use-element-visibility'
-import { useReducedMotion } from '@/hooks/use-reduced-motion'
-import { cn } from '@/lib/utils'
+import { useElementVisibility } from '~/hooks/use-element-visibility'
+import { useReducedMotion } from '~/hooks/use-reduced-motion'
+import { cn } from '~/lib/utils'
 import {
 	IoBookOutline,
 	IoPeopleOutline,
