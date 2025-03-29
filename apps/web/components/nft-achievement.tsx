@@ -36,7 +36,7 @@ export function NFTAchievement() {
             </div>
           </div>
 
-          {/* Responsive Badge - Larger size */}
+          {/* Responsive Badge */}
           <div className="bg-white rounded-full h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 flex flex-col items-center justify-center shadow-xl border-4 border-white">
             <div className="flex items-baseline px-1">
               {" "}
