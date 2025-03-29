@@ -61,7 +61,7 @@ export function NFTAchievement() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* Earned Badge Stat */}
-        <div className="bg-green-50 border border-green-100 rounded-xl p-5 flex items-center shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white border border-green-100 rounded-xl p-5 flex items-center shadow-sm hover:shadow-md transition-shadow">
           <div className="bg-green-100 p-3 rounded-full mr-5">
             <Check className="h-6 w-6 text-green-600" />
           </div>
