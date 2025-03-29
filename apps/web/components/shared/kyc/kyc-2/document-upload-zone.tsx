@@ -1,8 +1,8 @@
 'use client'
 import { Upload, X } from 'lucide-react'
+import Image from 'next/image'
 import { useRef } from 'react'
 import { cn } from '~/lib/utils'
-import Image from 'next/image'
 
 interface DocumentUploadZoneProps {
 	side: 'front' | 'back'
@@ -98,7 +98,7 @@ export function DocumentUploadZone({
 						</button>
 					)}
 					<div className="w-full h-52 relative">
-						<Image 
+						<Image
 							width={400}
 							height={400}
 							src={previewUrl}

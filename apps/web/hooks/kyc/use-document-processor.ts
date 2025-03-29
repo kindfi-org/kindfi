@@ -62,17 +62,16 @@ export function useDocumentProcessor(
 				const imageToProcess =
 					file.type === 'application/pdf' ? await convertPDFToImage(file) : file
 
-				const { extractedText, progress,  } =
-					await processFile(imageToProcess)
+				const { extractedText, progress } = await processFile(imageToProcess)
 				setProgress(progress)
 
 				// if (!success) {
-				// 	toast({
-				// 		title: 'Validation Error',
-				// 		description: validationErrors.join(', ') || 'Invalid document',
-				// 		className: 'bg-warning text-warning-foreground',
-				// 	})
-				// 	return null
+				//   toast({
+				//     title: 'Validation Error',
+				//     description: validationErrors.join(', ') || 'Invalid document',
+				//     className: 'bg-warning text-warning-foreground',
+				//   })
+				//   return null
 				// }
 
 				if (!extractedText) {
@@ -167,7 +166,7 @@ export function useDocumentProcessor(
 				setProgress(0)
 			}
 		},
-		[documentType, extractText, toast],
+		[documentType, extractText, convertPDFToImage, toast],
 	)
 
 	return {
