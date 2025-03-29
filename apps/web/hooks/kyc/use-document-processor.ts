@@ -1,7 +1,7 @@
 'use client'
+import { processFile } from '@packages/lib'
 import * as pdfjsLib from 'pdfjs-dist'
 import { useCallback, useState } from 'react'
-import Tesseract from 'tesseract.js'
 import {
 	DocumentPatterns,
 	type DocumentType,
@@ -53,7 +53,7 @@ export function useDocumentProcessor(
 		[],
 	)
 
-	const processFile = useCallback(
+	const processFileWithType = useCallback(
 		async (file: File, isFront: boolean) => {
 			setIsProcessing(true)
 			setProgress(0)
@@ -62,15 +62,22 @@ export function useDocumentProcessor(
 				const imageToProcess =
 					file.type === 'application/pdf' ? await convertPDFToImage(file) : file
 
-				const result = await Tesseract.recognize(imageToProcess, 'eng', {
-					logger: (message) => {
-						if (message.status === 'recognizing text') {
-							setProgress(Math.round(message.progress * 100))
-						}
-					},
-				})
+				const { extractedText, progress,  } =
+					await processFile(imageToProcess)
+				setProgress(progress)
 
-				const extractedText = result.data.text
+				// if (!success) {
+				// 	toast({
+				// 		title: 'Validation Error',
+				// 		description: validationErrors.join(', ') || 'Invalid document',
+				// 		className: 'bg-warning text-warning-foreground',
+				// 	})
+				// 	return null
+				// }
+
+				if (!extractedText) {
+					throw new Error('Failed to extract data')
+				}
 
 				const cleanedText = extractedText
 					.replace(/\s+/g, ' ')
@@ -142,6 +149,7 @@ export function useDocumentProcessor(
 						/ISSUED BY[:\s]+([^\n]+)/i,
 					)
 				}
+
 				return processedData
 			} catch (error) {
 				console.error('Error processing document:', error)
@@ -159,13 +167,12 @@ export function useDocumentProcessor(
 				setProgress(0)
 			}
 		},
-		[documentType, convertPDFToImage, extractText, toast],
+		[documentType, extractText, toast],
 	)
 
 	return {
 		isProcessing,
 		progress,
-		processFile,
-		convertPDFToImage,
+		processFile: processFileWithType,
 	}
 }
