@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import FiltersSection from "~/components/ui/FiltersSection";
+import { FiltersSection } from '~/components/ui/filters-section'
 
 function Page() {
-  return <FiltersSection />;
+	return <FiltersSection />
 }
 
-export default Page;
+export default Page

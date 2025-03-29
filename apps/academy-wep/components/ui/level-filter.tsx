@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Button } from './button'
+import { Button } from '../base/button'
 
-function LevelFilter() {
+const levels = ['All Levels', 'Beginners', 'Intermediate', 'Advanced']
+export function LevelFilter() {
 	const [selected, setSelected] = useState(0)
-
+	const select = (i: number) => setSelected(i)
 	return (
 		<div className="flex flex-col w-auto gap-4">
 			<p className="font-normal text-base">Levels</p>
@@ -11,7 +12,7 @@ function LevelFilter() {
 				{levels.map((list, i) => (
 					<Button
 						key={list}
-						onClick={() => setSelected(i)}
+						onClick={() => select(i)}
 						className={`
               border transition-all rounded-md hover:bg-primary-500 hover:text-white
               ${selected === i ? 'bg-primary-500 text-white' : 'bg-white text-black'}
@@ -25,7 +26,3 @@ function LevelFilter() {
 		</div>
 	)
 }
-
-export default LevelFilter
-
-const levels = ['All Levels', 'Beginners', 'Intermediate', 'Advanced']

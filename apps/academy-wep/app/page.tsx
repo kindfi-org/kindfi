@@ -1,11 +1,12 @@
 'use client'
-import ReadyToEarn from '@/components/ready-to-earn'
+
 import { motion } from 'framer-motion'
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from 'lucide-react'
 import { useState } from 'react'
-import { WhyChoose } from '~/components/sections/why-choose'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
+import ReadyToEarn from '~/components/ready-to-earn'
+import { WhyChoose } from '~/components/sections/why-choose'
 
 export default function Home() {
 	const [email, setEmail] = useState('')
@@ -44,7 +45,6 @@ export default function Home() {
 					/>
 				))}
 			</div>
-			
 
 			<div className="relative z-10 container mx-auto px-4 py-24 flex flex-col items-center justify-center min-h-screen gap-10">
 				{/* Countdown */}
