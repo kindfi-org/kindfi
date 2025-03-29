@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { Button } from '../base/button'
 
-function CategoryFilter({
-	categories,
-	selected,
-	setSelected,
-}: {
+interface CategoryFilterProps {
 	categories: string[]
 	selected: number
 	setSelected: (index: number) => void
-}) {
+}
+
+export function CategoryFilter({
+	categories,
+	selected,
+	setSelected,
+}: CategoryFilterProps) {
 	const [isHovered, setIsHovered] = useState(false)
 
 	const getButtonClassName = (index: number) => {
@@ -45,5 +47,3 @@ function CategoryFilter({
 		</div>
 	)
 }
-
-export default CategoryFilter

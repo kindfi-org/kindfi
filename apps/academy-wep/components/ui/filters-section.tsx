@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react'
 import { useState } from 'react'
 import { Input } from '../base/input'
-import CategoryFilter from './category-filter'
+import { CategoryFilter } from './category-filter'
 import { FilterButton } from './filter-button'
 import { LevelFilter } from './level-filter'
 import { PopularTopics } from './popular-topics'

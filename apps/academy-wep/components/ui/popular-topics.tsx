@@ -4,7 +4,7 @@ import { Button } from '../base/button'
 interface PopularTopicsProps {
 	onTopicSelect?: (topic: string, index: number) => void
 }
-const topics = ['Blockchain', 'Stellar', 'Wallets', 'Web3']
+const TOPICS = ['Blockchain', 'Stellar', 'Wallets', 'Web3']
 export function PopularTopics({ onTopicSelect }: PopularTopicsProps) {
 	const [selected, setSelected] = useState(0)
 
@@ -19,7 +19,7 @@ export function PopularTopics({ onTopicSelect }: PopularTopicsProps) {
 		<div className="flex flex-col w-auto gap-4">
 			<p className="font-normal text-base">Popular Topics</p>
 			<div className="flex flex-wrap items-start gap-4">
-				{topics.map((list, i) => {
+				{TOPICS.map((list, i) => {
 					const color = colors[i % colors.length]
 					return (
 						<Button
