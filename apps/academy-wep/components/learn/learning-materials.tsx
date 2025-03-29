@@ -4,7 +4,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Sparkles } from "lucide-react"
 import { Button } from "~/components/base/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/base/tabs"
+import { Tabs, TabsContent } from "~/components/base/tabs"
 import { LearningModuleCard } from "~/components/learn/learning-module-card"
 import { ResourceCard } from "~/components/learn/resource-card"
 import { TabSelector } from "~/components/learn/tab-selector"
@@ -47,8 +47,6 @@ export function LearningMaterials() {
   const [activeCategory, setActiveCategory] = useState<string>("all")
   const [activeLevel, setActiveLevel] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState<string>("")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [showFilters, setShowFilters] = useState<boolean>(false)
   const [activeTab, setActiveTab] = useState<string>("modules")
 
   // This would come from a database in a real application
@@ -277,29 +275,11 @@ export function LearningMaterials() {
     return true
   })
 
-  // Calculate overall progress
-  const overallProgress = Math.round(
-    (modules.reduce((acc, module) => acc + module.completed, 0) /
-      modules.reduce((acc, module) => acc + module.lessons, 0)) *
-      100,
-  )
-
-  // Get unique categories from modules and resources
-  const categories = [...new Set([...modules, ...resources].map((item) => item.category))]
-
-  // Get unique levels from modules and resources
-  const levels = [...new Set([...modules, ...resources].map((item) => item.level))]
-
   // Reset filters
   const resetFilters = () => {
     setActiveCategory("all")
     setActiveLevel("all")
     setSearchQuery("")
-  }
-
-  // Handle search input
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
   }
 
   return (
@@ -352,7 +332,7 @@ export function LearningMaterials() {
                       </div>
                       <h3 className="text-xl font-medium text-gray-900 mb-2">No modules found</h3>
                       <p className="text-gray-600 mb-6 max-w-md">
-                        We couldn't find any modules matching your current filters. Try adjusting your search criteria.
+                        We couldn&apos;t find any modules matching your current filters. Try adjusting your search criteria.
                       </p>
                       <Button variant="outline" onClick={resetFilters}>
                         Reset Filters
@@ -385,7 +365,7 @@ export function LearningMaterials() {
                       </div>
                       <h3 className="text-xl font-medium text-gray-900 mb-2">No resources found</h3>
                       <p className="text-gray-600 mb-6 max-w-md">
-                        We couldn't find any resources matching your current filters. Try adjusting your search
+                        We couldn&apos;t find any resources matching your current filters. Try adjusting your search
                         criteria.
                       </p>
                       <Button variant="outline" onClick={resetFilters}>

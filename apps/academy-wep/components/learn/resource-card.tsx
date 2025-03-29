@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { Clock, MessageSquare, ThumbsUp } from "lucide-react"
 import { Button } from "~/components/base/button"
@@ -27,10 +28,12 @@ export function ResourceCard({ resource, index }: ResourceCardProps) {
       {/* Card content */}
       <div className="relative z-10 flex flex-col h-full">
         <div className="h-48 bg-gray-100 relative overflow-hidden flex-shrink-0">
-          <img
+          <Image
             src={resource.image || "/placeholder.svg"}
             alt={resource.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            width={400}
+            height={240}
           />
 
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
