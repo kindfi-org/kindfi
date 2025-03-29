@@ -1,7 +1,9 @@
-'use client'
+"use client"
 
-import { LearningMaterials } from '~/components/learn/learning-materials'
+import { LearningMaterials } from "~/components/learn/learning-materials"
 
 export default function LearnPage() {
-	return <LearningMaterials />
+  return <LearningMaterials />
 }
+
+
