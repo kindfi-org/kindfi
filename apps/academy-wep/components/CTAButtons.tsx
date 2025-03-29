@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
-import { Button } from './ui/button'
+import { Button } from '~/components/base/button'
 
 interface CTAButtonsProps {
 	onWorkshopClick?: () => void

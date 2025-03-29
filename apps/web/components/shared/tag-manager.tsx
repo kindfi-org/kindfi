@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -8,8 +8,9 @@ import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { TagEdit } from '~/components/shared/tag-edit'
-import type { ProjectTag } from '~/lib/types'
+import type { Tag as ProjectTag } from '~/lib/types'
 import { formatToPascalCase, useTags } from '~/lib/utils/tag-context'
+import { getTagColors } from '~/lib/utils/types-helpers'
 
 type TagManagerProps = {
 	id?: string
@@ -89,8 +90,9 @@ export function TagManager({ id, onUpdate }: TagManagerProps) {
 			</div>
 
 			<div className="flex flex-wrap gap-2">
-				{tags.map((tag) =>
-					editingTagId === tag.id ? (
+				{tags.map((tag) => {
+					const { color, backgroundColor } = getTagColors(tag)
+					return editingTagId === tag.id ? (
 						<TagEdit
 							key={tag.id}
 							tag={tag}
@@ -102,12 +104,12 @@ export function TagManager({ id, onUpdate }: TagManagerProps) {
 							<button
 								type="button"
 								className="grid place-items-center focus-visible:ring-green-500 focus-visible:ring-1 focus-visible:ring-offset-1 rounded-full duration-200 focus:outline-none"
-								onClick={() => handleEdit(tag.id)}
+								onClick={() => handleEdit(tag.id as string)}
 							>
 								<Badge
 									style={{
-										color: tag.color.textColor,
-										backgroundColor: tag.color.backgroundColor,
+										color,
+										backgroundColor,
 									}}
 									className="shadow-none px-3 cursor-pointer"
 								>
@@ -115,17 +117,17 @@ export function TagManager({ id, onUpdate }: TagManagerProps) {
 								</Badge>
 							</button>
 							<Button
-								onClick={() => removeTag(tag.id)}
+								onClick={() => removeTag(tag.id as string)}
 								aria-label="Remove tag"
 								className="px-1 rounded hover:bg-white/20 transition-colors w-[20px] h-[20px] focus-visible:ring-1"
-								style={{ color: tag.color.textColor }}
+								style={{ color }}
 							>
 								<X size={12} aria-hidden="true" />
 								<span className="sr-only">Remove tag</span>
 							</Button>
 						</div>
-					),
-				)}
+					)
+				})}
 			</div>
 		</div>
 	)

@@ -1,10 +1,14 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from 'lucide-react'
 import { useState } from 'react'
+import { Button } from '~/components/base/button'
+import { Input } from '~/components/base/input'
+import { CommunitySection } from '~/components/CommunitySection'
+import { CommunityStats } from '~/components/CommunityStats'
+import ReadyToEarn from '~/components/ready-to-earn'
+import { WhyChoose } from '~/components/sections/why-choose'
 
 export default function Home() {
 	const [email, setEmail] = useState('')
@@ -78,8 +82,24 @@ export default function Home() {
 					Master blockchain fundamentals and unlock the power of Web3 for social
 					impact.
 				</motion.p>
-
-				{/* CTA Section */}
+				{/* Ready to earn more badges */}
+				<motion.div
+					initial={{ x: -100, opacity: 0 }}
+					animate={{ x: 0, opacity: 1 }}
+					exit={{ x: 100, opacity: 0 }}
+					transition={{ duration: 0.6, ease: 'easeInOut' }}
+				>
+					<ReadyToEarn badges={[
+						{ id: '1', name: 'Blockchain Basics', earned: true },
+						{ id: '2', name: 'Stellar Expert', earned: false },
+						{ id: '3', name: 'Wallet Master', earned: false },
+						{ id: '4', name: 'Asset Manager', earned: false },
+						{ id: '5', name: 'Web3 Pioneer', earned: false },
+							{ id: '6', name: 'KindFi Graduate', earned: false },
+						]}
+					/>
+				</motion.div>
+				<CommunitySection memberCount="500+" />
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -134,6 +154,7 @@ export default function Home() {
 					))}
 				</motion.div>
 			</div>
+			<WhyChoose />
 		</main>
 	)
 }

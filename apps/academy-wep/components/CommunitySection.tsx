@@ -15,10 +15,6 @@ export function CommunitySection({
 }: CommunitySectionProps) {
 	return (
 		<section className="py-24 relative overflow-hidden">
-			<div className="absolute inset-0 bg-gradient-to-b from-white to-gray-50/80"></div>
-			<div className="absolute -top-40 right-20 w-96 h-96 bg-gradient-to-br from-[#7CC635]/10 to-transparent rounded-full blur-3xl"></div>
-			<div className="absolute bottom-0 -left-20 w-80 h-80 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-3xl"></div>
-
 			<div className="container px-4 md:px-6 mx-auto relative z-10">
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
