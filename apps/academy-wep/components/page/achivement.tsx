@@ -1,6 +1,7 @@
-import { achievements } from '@/data/achivement-data'
 import type React from 'react'
-import { AchievementCard } from '../shared/achivement-card'
+import { achievements } from '~/data/achivement-data'
+import AchievementCard from '../shared/achivement-card'
+
 
 const AchievementsPage: React.FC = () => {
 	return (

@@ -3,9 +3,10 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from 'lucide-react'
 import { useState } from 'react'
+import { Button } from '~/components/base/button'
+import { Input } from '~/components/base/input'
+import ReadyToEarn from '~/components/ready-to-earn'
 import { WhyChoose } from '~/components/sections/why-choose'
-import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 
 export function Home() {
 	const [email, setEmail] = useState('')
@@ -79,7 +80,15 @@ export function Home() {
 					Master blockchain fundamentals and unlock the power of Web3 for social
 					impact.
 				</motion.p>
-
+				{/* Ready to earn more badges */}
+				<motion.div
+					initial={{ x: -100, opacity: 0 }}
+					animate={{ x: 0, opacity: 1 }}
+					exit={{ x: 100, opacity: 0 }}
+					transition={{ duration: 0.6, ease: 'easeInOut' }}
+				>
+					<ReadyToEarn badges={badges} />
+				</motion.div>
 				{/* CTA Section */}
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
