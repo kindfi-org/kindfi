@@ -55,7 +55,7 @@ export function Resources() {
         {filteredResources.length > 0 ? (
           <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-4">
-              {filteredResources.slice(0, visibleCount).map(({ id, tags, date, ...resource }) => (
+              {filteredResources.slice(0, visibleCount).map(({ id, ...resource }) => (
                 <ResourceCard key={id} {...resource} />
               ))}
             </div>
@@ -71,7 +71,7 @@ export function Resources() {
         ) : (
           <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-lg font-medium mb-2">No resources found</h3>
-            <p className="text-muted-foreground mb-4">Try adjusting your filters to find what you're looking for.</p>
+            <p className="text-muted-foreground mb-4">Try adjusting your filters to find what you&apos;re looking for.</p>
             <Button
               variant="outline"
               size="sm"

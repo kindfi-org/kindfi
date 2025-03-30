@@ -17,8 +17,10 @@ interface ResourceCardProps {
   description: string
   timeToConsume: number
   level: ExperienceLevel
+  tags: string[]
   likes: number
   comments: number
+  date: string
   slug: string
 }
 
