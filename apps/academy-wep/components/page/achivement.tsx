@@ -2,7 +2,7 @@
 
 import type React from 'react'
 import { achievements } from '~/data/achivement-data'
-import AchievementCard from '../shared/achivement-card'
+import { AchievementCard } from '../shared/achivement-card'
 
 const AchievementsPage: React.FC = () => {
 	return (
@@ -24,4 +24,4 @@ const AchievementsPage: React.FC = () => {
 	)
 }
 
-export default AchievementsPage
+export { AchievementsPage }

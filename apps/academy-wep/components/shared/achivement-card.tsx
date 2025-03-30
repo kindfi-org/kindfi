@@ -86,4 +86,4 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
 	)
 }
 
-export default AchievementCard
+export { AchievementCard }
