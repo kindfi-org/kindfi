@@ -39,6 +39,7 @@ import { technologyData } from '~/lib/mock-data/mock-technology'
 import { tractionMilestonesData } from '~/lib/mock-data/mock-traction-milestones'
 import type { Project, Tag } from '~/lib/types'
 import SimilarProjects from './similar-projects'
+import ProjectMilestone from './project-milestone'
 interface ProjectDetailProp {
 	project: Project
 }
@@ -56,16 +57,16 @@ const formatNumber = (number: number) => {
 const ProjectDetail = ({ project }: ProjectDetailProp) => {
 	const renderedTags = useMemo(() => {
 		return (project.tags as Tag[]).map(({ text, id }: Tag) => (
-				<div
-					key={id}
-					className="w-auto py-1 px-4 rounded-lg bg-slate-200  "
-				>
-					<p className="font-bold text-[9px] capitalize">
-						{text?.toLocaleLowerCase()}
-					</p>
-				</div>
-			));
-		}, [project.tags]);
+			<div
+				key={id}
+				className="w-auto py-1 px-4 rounded-lg bg-slate-200  "
+			>
+				<p className="font-bold text-[9px] capitalize">
+					{text?.toLocaleLowerCase()}
+				</p>
+			</div>
+		));
+	}, [project.tags]);
 	return (
 		<>
 			<div className="w-full min-h-screen py-10 px-6 flex ">
@@ -108,11 +109,13 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 								})}
 							</div>
 						</div>
-
-						<div className="w-full h-auto lg:h-[500px] mt-4 relative ">
+						<div className="w-full h-auto mt-4 relative aspect-video md:aspect-[16/9] lg:aspect-[16/9]">
 							<ProjectVideo
 								url={project?.video_url || "https://res.cloudinary.com/daqjecxhy/video/upload/v1743092835/424799153-62d97d91-9461-4f6f-8760-cc463496a220_qjftva.mov"}
 								fallbackImage={project.image_url}
+								width="100%"
+								height="100%"
+								className="w-full h-full"
 							/>
 
 							<div className=" bg-purple-700 shadow-black rounded-full flex items-center justify-center gap-1 absolute top-6 right-4 w-[50px] py-1 px-2">
@@ -181,50 +184,14 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 														Project Milestones
 													</h3>
 													<div className="space-y-4">
-														{Array.from({ length: project.milestones }).map(
-															(_, index) => (
-																<div
-// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-																	key={`milestone-${index}-${project.id}`}
-																	className={`p-4 rounded-lg border ${
-																		index < (project.completed_milestones || 0)
-																			? 'bg-green-50 border-green-200'
-																			: 'bg-gray-50 border-gray-200'
-																	}`}
-																>
-																	<div className="flex items-start">
-																		<div
-																			className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0 ${
-																				index <
-																				(project.completed_milestones || 0)
-																					? 'bg-green-500 text-white'
-																					: 'bg-gray-300 text-gray-600'
-																			}`}
-																		>
-																			{index <
-																			(project.completed_milestones || 0)
-																				? '✓'
-																				: index + 1}
-																		</div>
-																		<div>
-																			<h4 className="font-medium">
-																				Milestone {index + 1}
-																			</h4>
-																			<p className="text-sm text-gray-600">
-																				{index <
-																				(project.completed_milestones || 0)
-																					? 'Completed on January 15, 2025'
-																					: 'Estimated completion: June 30, 2025'}
-																			</p>
-																			<p className="mt-2">
-																				Lorem ipsum dolor sit amet, consectetur
-																				adipiscing elit.
-																			</p>
-																		</div>
-																	</div>
-																</div>
-															),
-														)}
+													{Array.from({ length: project.milestones }).map((_, index) => (
+									<ProjectMilestone
+										key={`milestone-${index}-${project.id}`}
+										index={index}
+										projectId={project.id}
+										completedMilestones={project.completed_milestones}
+									/>
+								))}
 													</div>
 												</>
 											)}
@@ -436,10 +403,10 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 								<div className="w-full mt-6">
 									<div className="w-full">
 										<Input
-										id="investment-amount"
-										placeholder="Enter investment amount"
-										aria-label="Investment amount"
-										pattern="^\$\d+(\.\d{2})?$"
+											id="investment-amount"
+											placeholder="Enter investment amount"
+											aria-label="Investment amount"
+											pattern="^\$\d+(\.\d{2})?$"
 											value={'$'}
 											className="  border-slate-500 border-1 rounded-md p-4 outline-slate-400 "
 										/>
@@ -498,11 +465,16 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 							<div className="w-full bg-white shadow-gray-200 shadow-md rounded-lg py-6 px-6 my-5">
 								<p className=" font-bold text-lg">Company Tags </p>
 
-								<div className="w-full flex items-center justify-start gap-2 flex-wrap mt-2">					
-											{renderedTags}
+								<div className="w-full flex items-center justify-start gap-2 flex-wrap mt-2">
+									{renderedTags}
 								</div>
 							</div>
-							<SimilarProjects/>
+							<SimilarProjects
+								projects={project?.relatedProjects || []}
+								// biome-ignore lint/style/useTemplate: <explanation>
+								// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+								onViewMoreClick={() => window.location.href = '/projects?category=' + project.categories?.[0]}
+							/>
 						</div>
 					</div>
 				</div>

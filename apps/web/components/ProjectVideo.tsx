@@ -32,7 +32,7 @@ const ProjectVideo: React.FC<ProjectVideoProps> = ({
 	const [videoError, setVideoError] = useState(false)
 	const [playing, setPlaying] = useState(false)
 	const playerRef = useRef<ReactPlayer>(null)
-
+	const [loading, setLoading] = useState(true)
 	const togglePlay = () => {
 		setPlaying((prev) => !prev)
 	}
@@ -56,6 +56,11 @@ const ProjectVideo: React.FC<ProjectVideoProps> = ({
 				</>
 			) : (
 				<div className="relative">
+					{loading && (
+						<div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+							<div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+						</div>
+					)}
 					<ReactPlayer
 						ref={playerRef}
 						url={url}
@@ -65,6 +70,9 @@ const ProjectVideo: React.FC<ProjectVideoProps> = ({
 						muted={muted}
 						width={width}
 						height={height}
+						onReady={() => setLoading(false)}
+						onBuffer={() => setLoading(true)}
+						onBufferEnd={() => setLoading(false)}
 						onError={() => setVideoError(true)}
 						onClick={togglePlay}
 						className={twMerge('rounded-lg overflow-hidden', videoClassName)}
