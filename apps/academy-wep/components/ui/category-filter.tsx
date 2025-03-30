@@ -27,23 +27,23 @@ export function CategoryFilter({
 	}
 
 	return (
-    <div className="flex flex-col w-auto gap-4">
-      <p className="font-normal text-base">Category</p>
-      <div
-        className="flex flex-wrap items-start gap-4"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {categories.map((category, i) => (
-          <Button
-            key={category}
-            onClick={() => setSelected(i)}
-            className={getButtonClassName(i)}
-          >
-            {category}
-          </Button>
-        ))}
-      </div>
-    </div>
-  );
+		<div className="flex flex-col w-auto gap-4">
+			<p className="font-normal text-base">Category</p>
+			<div
+				className="flex flex-wrap items-start gap-4"
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+			>
+				{categories.map((category, i) => (
+					<Button
+						key={category}
+						onClick={() => setSelected(i)}
+						className={getButtonClassName(i)}
+					>
+						{category}
+					</Button>
+				))}
+			</div>
+		</div>
+	)
 }
