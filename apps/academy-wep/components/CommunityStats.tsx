@@ -40,7 +40,7 @@ export function CommunityStats({ memberCount }: CommunityStatsProps) {
 						/>
 					</svg>
 					<div className="text-center">
-                    <div className="font-bold text-gray-900">500+</div>
+                    <div className="font-bold text-gray-900">{memberCount}</div>
                     <div className="text-sm text-gray-500">Community Members</div>
                   </div>
 				</div>
