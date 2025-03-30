@@ -7,7 +7,7 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import type { formInputs } from '../team-members'
-import TeamMemberCard from './TeamMemberCard'
+import { TeamMemberCard } from './team-member-card'
 
 interface TeamMemberListProps {
 	form: UseFormReturn<formInputs>
@@ -65,4 +65,4 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({ form, roles }) => {
 	)
 }
 
-export default TeamMemberList
+export { TeamMemberList }

@@ -47,7 +47,7 @@ const transactions: Transaction[] = [
 	},
 ]
 
-export default function TransactionHistory() {
+export function TransactionHistory() {
 	return (
 		<Card className="p-6 max-w-4xl">
 			<div className="space-y-6">

@@ -17,7 +17,7 @@ export interface BusinessModelProps {
 	markets: MarketCard[]
 }
 
-export default function BusinessModel({
+export function BusinessModel({
 	title,
 	description,
 	markets,

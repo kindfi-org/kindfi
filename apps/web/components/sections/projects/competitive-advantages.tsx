@@ -13,7 +13,7 @@ export interface CompetitiveAdvantagesProps {
 	advantages: Advantage[]
 }
 
-export default function CompetitiveAdvantages({
+export function CompetitiveAdvantages({
 	title,
 	advantages,
 }: CompetitiveAdvantagesProps) {
