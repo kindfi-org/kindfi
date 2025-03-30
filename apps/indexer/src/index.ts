@@ -1,2 +1,7 @@
 //Exports all handler functions
-export * from './mappings/handlers'
+export {
+    handleOperation,
+    handleCredit,
+    handleDebit,
+    handleEvent,
+} from './mappings/handlers';

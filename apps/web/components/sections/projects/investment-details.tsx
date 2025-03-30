@@ -17,7 +17,7 @@ export interface InvestmentDetailsProps {
 	sections: InvestmentSection[]
 }
 
-export default function InvestmentDetails({
+export function InvestmentDetails({
 	title,
 	sections,
 }: InvestmentDetailsProps) {

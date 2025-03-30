@@ -1,5 +1,5 @@
-import AchievementPage from '~/components/pages/achievements'
+import { AchievementPage } from '~/components/pages/achievements'
 
-export default function HomePage() {
+export function HomePage() {
 	return <AchievementPage />
 }

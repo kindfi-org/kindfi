@@ -1,6 +1,6 @@
 import { RightPanel } from '~/components/sections/user/right-panel'
 
-export default function DashboardLayout({
+export function DashboardLayout({
 	children,
 }: {
 	children: React.ReactNode

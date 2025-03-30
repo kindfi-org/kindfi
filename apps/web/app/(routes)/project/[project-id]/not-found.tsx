@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-export default function ProjectNotFound() {
+export function ProjectNotFound() {
 	return (
 		<div className="min-h-[70vh] flex flex-col items-center justify-center px-4 py-16">
 			<div className="text-center max-w-lg">

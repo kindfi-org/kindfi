@@ -27,7 +27,7 @@ export async function generateMetadata({
 	}
 }
 
-export default async function Page({
+export async function Page({
 	params,
 }: {
 	params: Promise<ProjectPageParams>

@@ -7,7 +7,7 @@ import { ProjectStoryForm } from '../../../../../components/sections/project/pro
 import { ProjectTips } from '../../../../../components/sections/project/project-tips'
 import type { ProjectStory } from '../../../../../lib/validators/project'
 
-export default function ProjectPitchPage() {
+export function ProjectPitchPage() {
 	const handleStorySubmit = (data: ProjectStory) => {
 		// TODO: Implement story submission
 		console.log('Story submitted:', data)

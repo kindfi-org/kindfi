@@ -1,5 +1,5 @@
 import { ImpactDashboard } from '~/components/pages/impact'
 
-export default function HomePage() {
+export function HomePage() {
 	return <ImpactDashboard />
 }

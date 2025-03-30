@@ -15,7 +15,7 @@ export interface TractionMilestonesProps {
 	milestones: Milestone[]
 }
 
-export default function TractionMilestones({
+export function TractionMilestones({
 	title,
 	milestones,
 }: TractionMilestonesProps) {

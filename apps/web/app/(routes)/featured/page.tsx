@@ -16,7 +16,7 @@ import {
 } from '~/lib/mock-data/featured-projects/mock-featured-projects'
 import type { Project } from '~/lib/types/projects.types'
 
-export default function FeaturedPage() {
+export function FeaturedPage() {
 	const [state, setState] = useSetState<{
 		projects: Project[]
 		viewMode: 'grid' | 'list'
@@ -37,7 +37,6 @@ export default function FeaturedPage() {
 	const { projects, viewMode, loading } = state
 
 	const filteredProjects = filterProjects(sortProjects(projects, sortOption))
-
 	return (
 		<div className="min-h-screen bg-white">
 			{/* Hero Section */}

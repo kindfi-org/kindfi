@@ -223,3 +223,4 @@ const NewsletterSubscription = () => {
 }
 
 export default NewsletterSubscription
+export { NewsletterSubscription };

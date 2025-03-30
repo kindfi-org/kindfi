@@ -26,7 +26,7 @@ import {
 } from '~/components/base/input-otp'
 import { OTPTips } from '~/components/shared/otp-tips'
 
-export default function VerifyOTPPage() {
+export function VerifyOTPPage() {
 	const router = useRouter()
 	const [otp, setOtp] = useState('')
 	const [timeLeft, setTimeLeft] = useState(120) // 2 minutes

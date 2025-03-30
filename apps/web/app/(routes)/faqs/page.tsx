@@ -2,6 +2,6 @@
 
 import { FaqContainer } from '~/components/sections/faqs/faq-container'
 
-export default function FaqsPage() {
+export function FaqsPage() {
 	return <FaqContainer />
 }

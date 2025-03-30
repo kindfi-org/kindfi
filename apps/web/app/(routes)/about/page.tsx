@@ -7,7 +7,7 @@ import { Problems } from '~/components/sections/about-us/problems'
 import { Roadmap } from '~/components/sections/about-us/roadmap'
 import { WhyIsDifferent } from '~/components/sections/about-us/why-is-different'
 
-export default function AboutPage() {
+export function AboutPage() {
 	return (
 		<div className="w-full flex flex-col items-center text-center">
 			<Hero />

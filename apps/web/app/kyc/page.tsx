@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { Button } from '~/components/base/button'
-import KYCModal from '~/components/shared/kyc/kyc-modal'
+import { KYCModal } from '~/components/shared/kyc/kyc-modal'
 
-export default function KYCVerificationPage() {
+export function KYCVerificationPage() {
 	const [isKYCModalOpen, setIsKYCModalOpen] = useState(false)
 
 	return (

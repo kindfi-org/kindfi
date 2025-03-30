@@ -43,7 +43,7 @@ import {
 	editProjectFormSchema,
 } from '~/lib/validators/project'
 
-export default function EditProjectForm() {
+export function EditProjectForm() {
 	const {
 		register,
 		handleSubmit,

@@ -65,4 +65,4 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({ form, roles }) => {
 	)
 }
 
-export default TeamMemberList
+export { TeamMemberList }

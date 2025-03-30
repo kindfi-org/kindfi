@@ -1,8 +1,8 @@
 import type { UseFormReturn } from 'react-hook-form'
 import { Form } from '~/components/base/form'
 import type { formInputs } from '../team-members'
-import TeamMemberList from './team-member-list'
-import VisibilityToggle from './visibility-toggle'
+import { TeamMemberList } from './team-member-list'
+import { VisibilityToggle } from './visibility-toggle'
 
 interface TeamMemberFormProps {
 	form: UseFormReturn<formInputs>
@@ -63,4 +63,4 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
 	)
 }
 
-export default TeamMemberForm
+export { TeamMemberForm }

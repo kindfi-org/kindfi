@@ -36,7 +36,7 @@ type VisibilityToggleProps = {
 	}[]
 }
 
-export default function VisibilityToggle({
+export function VisibilityToggle({
 	form,
 	roles,
 }: VisibilityToggleProps) {

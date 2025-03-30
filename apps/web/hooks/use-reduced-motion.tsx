@@ -35,4 +35,4 @@ const useReducedMotion = () => {
 	return reducedMotion
 }
 
-export default useReducedMotion
+export { useReducedMotion }

@@ -15,9 +15,9 @@ import { usePasskeyAuthentication } from '~/hooks/passkey/use-passkey-authentica
 import { useStellarContext } from '~/hooks/stellar/stellar-context'
 import { useFormValidation } from '~/hooks/use-form-validation'
 
-export default function Login() {
-	const [email, setEmail] = useState('')
-	const router = useRouter()
+export function Login() {
+  const [email, setEmail] = useState("");
+  const router = useRouter();
 
 	const {
 		onSign,

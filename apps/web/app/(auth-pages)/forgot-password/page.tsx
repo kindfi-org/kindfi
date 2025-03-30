@@ -9,7 +9,7 @@ import { FormMessage, type Message } from '~/components/form-message'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 
-export default async function ForgotPassword(props: {
+export async function ForgotPassword(props: {
 	searchParams: Promise<Message>
 }) {
 	const searchParams = await props.searchParams

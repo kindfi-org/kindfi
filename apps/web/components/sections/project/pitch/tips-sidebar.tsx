@@ -7,7 +7,7 @@ import { Card, CardContent } from '~/components/base/card'
 import { fadeInWithDelay, fadeSlideUp } from '~/lib/constants/animations'
 import { tips } from '~/lib/mock-data/project/mock-pitch'
 
-export default function TipsSidebar() {
+export function TipsSidebar() {
 	return (
 		<motion.aside className="mx-auto" {...fadeInWithDelay(0.5)}>
 			<div className="flex items-center gap-2">

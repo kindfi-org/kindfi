@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 	description: 'A web application for the KindFi Academy',
 }
 
-export default function RootLayout({
+export function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode

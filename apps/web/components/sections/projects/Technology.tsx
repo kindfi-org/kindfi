@@ -8,7 +8,7 @@ export interface TechnologyProps {
 	features: { id: string; text: string }[]
 }
 
-export default function Technology({
+export function Technology({
 	title,
 	description,
 	features,

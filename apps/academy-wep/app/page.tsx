@@ -8,7 +8,7 @@ import { Input } from '~/components/base/input'
 import ReadyToEarn from '~/components/ready-to-earn'
 import { WhyChoose } from '~/components/sections/why-choose'
 
-export default function Home() {
+export function Home() {
 	const [email, setEmail] = useState('')
 
 	// Calculate time until launch
