@@ -6,12 +6,18 @@ interface CommunitySectionProps {
 	memberCount?: string
 	onWorkshopClick?: () => void
 	onSubscribeClick?: () => void
+	title?: string
+	description?: string
+	badgeText?: string
 }
 
 export function CommunitySection({
 	memberCount = '500+',
 	onWorkshopClick,
 	onSubscribeClick,
+	title = 'Learn Together, Build Together',
+	description = 'Stay updated with the latest resources, tutorials, and insights about Web3 crowdfunding. Join our community of builders and changemakers.',
+	badgeText = 'Join Our Community'
 }: CommunitySectionProps) {
 	return (
 		<section className="py-24 relative overflow-hidden">
@@ -26,15 +32,13 @@ export function CommunitySection({
 					<div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
 						<div className="flex-1 text-center md:text-left">
 							<div className="inline-block mb-4 px-3 py-1 bg-[#f0f9e8] text-[#7CC635] rounded-full text-sm font-medium">
-								Join Our Community
+								{badgeText}
 							</div>
 							<h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-gray-800 to-[#7CC635] bg-clip-text text-transparent">
-								Learn Together, Build Together
+								{title}
 							</h2>
 							<p className="text-lg text-gray-600 mb-8">
-								Stay updated with the latest resources, tutorials, and insights
-								about Web3 crowdfunding. Join our community of builders and
-								changemakers.
+								{description}
 							</p>
 
 							<CTAButtons
@@ -43,7 +47,7 @@ export function CommunitySection({
 							/>
 						</div>
 
-						<div className="hidden md:block">
+						<div className="md:block">
 							<CommunityStats memberCount={memberCount} />
 						</div>
 					</div>
