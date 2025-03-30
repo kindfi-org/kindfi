@@ -125,7 +125,6 @@ export default function Signup() {
 										disabled={isCreatingPasskey}
 										aria-live="polite"
 										aria-busy={isCreatingPasskey}
-										tabIndex={0}
 									>
 										<>
 											Create account with passkey <UserPlus className="ml-2" />
@@ -181,7 +180,6 @@ export default function Signup() {
 						<Link
 							href="/sign-in"
 							className="text-primary underline hover:text-primary/80"
-							tabIndex={0}
 						>
 							Sign in
 						</Link>

@@ -109,7 +109,6 @@ export default function Login() {
 							formAction={signInAction}
 							aria-live="polite"
 							aria-busy={isAuthenticating}
-							tabIndex={0}
 						>
 							{isAuthenticating ? (
 								'Authenticating...'
