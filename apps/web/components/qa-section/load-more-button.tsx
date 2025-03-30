@@ -14,4 +14,4 @@ const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({ onLoadMore }) => {
 	)
 }
 
-export default LoadMoreButton
+export { LoadMoreButton }

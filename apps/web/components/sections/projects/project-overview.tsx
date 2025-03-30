@@ -10,7 +10,7 @@ interface ProjectOverviewProps {
 	painPoints: string[]
 }
 
-export default function ProjectOverview({
+export function ProjectOverview({
 	title,
 	overview,
 	descriptionTitle,
