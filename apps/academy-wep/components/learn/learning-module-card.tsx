@@ -5,6 +5,7 @@ import { BookOpen, Clock, MessageSquare, ThumbsUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
+import { ProgressBar } from '~/components/base/progress-bar'
 import type { Module } from './learning-materials'
 
 interface LearningModuleCardProps {
@@ -107,14 +108,13 @@ export function LearningModuleCard({ module, index }: LearningModuleCardProps) {
 
 					{module.unlocked && (
 						<div className="flex items-center gap-4 mb-3">
-<div className="flex items-center gap-4 mb-3">
-  <ProgressBar 
-    value={progress} 
-    showValue={true} 
-    className="flex-grow"
-    variant="success"
-  />
-</div>
+							<div className="flex items-center gap-4 mb-3">
+								<ProgressBar
+									value={progress}
+									className="flex-grow"
+									variant="success"
+								/>
+							</div>
 						</div>
 					)}
 
