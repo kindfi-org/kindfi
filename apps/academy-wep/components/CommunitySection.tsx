@@ -3,15 +3,6 @@ import { CTAButtons } from './CTAButtons'
 import { CommunityStats } from './CommunityStats'
 
 interface CommunitySectionProps {
-	memberCount?: string
-	onWorkshopClick?: () => void
-	onSubscribeClick?: () => void
-	title?: string
-	description?: string
-	badgeText?: string
-}
-
-interface CommunitySectionProps {
   /** Number of community members to display (e.g. "500+") */
   memberCount?: string;
   /** Callback function for workshop button click */
@@ -25,6 +16,15 @@ interface CommunitySectionProps {
   /** Text displayed in the badge above the title */
   badgeText?: string;
 }
+
+export function CommunitySection({
+	memberCount = '500+',
+	onWorkshopClick,
+	onSubscribeClick,
+	title = 'Learn Together, Build Together',
+	description = 'Stay updated with the latest resources, tutorials, and insights about Web3 crowdfunding. Join our community of builders and changemakers.',
+	badgeText = 'Join Our Community',
+}: CommunitySectionProps) {
 	return (
 		<section className="py-24 relative overflow-hidden">
 			<div className="container px-4 md:px-6 mx-auto relative z-10">
@@ -43,9 +43,7 @@ interface CommunitySectionProps {
 							<h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-gray-800 to-[#7CC635] bg-clip-text text-transparent">
 								{title}
 							</h2>
-							<p className="text-lg text-gray-600 mb-8">
-								{description}
-							</p>
+							<p className="text-lg text-gray-600 mb-8">{description}</p>
 
 							<CTAButtons
 								onWorkshopClick={onWorkshopClick}
