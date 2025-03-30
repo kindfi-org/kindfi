@@ -13,7 +13,6 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
-import type { Project } from '~/components/shared/project-card'
 
 //? Import Project Detail Components
 import BusinessModel from '~/components/sections/projects/BusinessModel'
