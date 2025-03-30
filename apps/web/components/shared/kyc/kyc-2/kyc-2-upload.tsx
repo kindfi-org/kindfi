@@ -26,10 +26,7 @@ import { ValidationAlerts } from './validation-alerts'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
-export function IDDocumentUpload({
-	onBack,
-	onNext,
-}: IDDocumentUploadProps) {
+export function IDDocumentUpload({ onBack, onNext }: IDDocumentUploadProps) {
 	const [documentType, setDocumentType] = useState<DocumentType>('')
 	const { toast } = useToast()
 

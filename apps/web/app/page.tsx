@@ -1,9 +1,9 @@
-import { HomeDashboard }  from '~/app/(routes)/home/page'
+import { HomePage } from '~/app/(routes)/home/page'
 
-export async function Index() {
+export default async function Index() {
 	return (
 		<>
-			<HomeDashboard />
+			<HomePage />
 		</>
 	)
 }

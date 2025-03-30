@@ -22,18 +22,18 @@ import { useStellarContext } from '~/hooks/stellar/stellar-context'
 import { useFormValidation } from '~/hooks/use-form-validation'
 
 export function Signup() {
-  // Show success message if registration was successful
-  // if (searchParams.success) {
-  //   return (
-  //     <div className="w-full flex items-center justify-center p-4">
-  //       <Card className="w-full max-w-md">
-  //         <CardContent className="pt-6">
-  //           <FormMessage message={searchParams} />
-  //         </CardContent>
-  //       </Card>
-  //     </div>
-  //   );
-  // }
+	// Show success message if registration was successful
+	// if (searchParams.success) {
+	//   return (
+	//     <div className="w-full flex items-center justify-center p-4">
+	//       <Card className="w-full max-w-md">
+	//         <CardContent className="pt-6">
+	//           <FormMessage message={searchParams} />
+	//         </CardContent>
+	//       </Card>
+	//     </div>
+	//   );
+	// }
 
 	const isWebAuthnSupported = useWebAuthnSupport()
 

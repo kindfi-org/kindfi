@@ -15,14 +15,14 @@ import {
 } from '~/components/base/tabs'
 
 //? Import Project Detail Components
-import BusinessModel from '~/components/sections/projects/business-model'
-import CompetitiveAdvantages from '~/components/sections/projects/competitive-advantages'
-import InvestmentDetails from '~/components/sections/projects/investment-details'
-import MarketOpportunity from '~/components/sections/projects/market-opportunity'
-import ProjectDocuments from '~/components/sections/projects/project-documents'
-import ProjectOverview from '~/components/sections/projects/project-overview'
-import Technology from '~/components/sections/projects/technology'
-import TractionMilestones from '~/components/sections/projects/traction-milestones'
+import { BusinessModel } from '~/components/sections/projects/business-model'
+import { CompetitiveAdvantages } from '~/components/sections/projects/competitive-advantages'
+import { InvestmentDetails } from '~/components/sections/projects/investment-details'
+import { MarketOpportunity } from '~/components/sections/projects/market-opportunity'
+import { ProjectDocuments } from '~/components/sections/projects/project-documents'
+import { ProjectOverview } from '~/components/sections/projects/project-overview'
+import { Technology } from '~/components/sections/projects/technology'
+import { TractionMilestones } from '~/components/sections/projects/traction-milestones'
 
 //? Import Mock Data
 import { businessModelData } from '~/lib/mock-data/mock-business-model'

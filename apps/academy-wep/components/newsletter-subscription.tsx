@@ -222,4 +222,4 @@ const NewsletterSubscription = () => {
 	)
 }
 
-export { NewsletterSubscription };
+export { NewsletterSubscription }

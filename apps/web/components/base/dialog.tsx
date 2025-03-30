@@ -3,7 +3,7 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import * as React from 'react'
-import useReducedMotion from '~/hooks/use-reduced-motion'
+import { useReducedMotion } from '~/hooks/use-reduced-motion'
 import { animations } from '~/lib/constants/animations'
 import { cn } from '~/lib/utils'
 /**
