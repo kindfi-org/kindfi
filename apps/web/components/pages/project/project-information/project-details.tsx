@@ -127,7 +127,10 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 						<div className="w-full mt-6">
 							<div className=" w-full py-8">
 								<Tabs defaultValue="about" className="w-full ">
-									<TabsList aria-label="Project sections" className="mb-8 overflow-x-scroll">
+									<TabsList
+										aria-label="Project sections"
+										className="mb-8 w-full overflow-x-auto overflow-y-hidden whitespace-nowrap scrollbar-hide"
+									>
 										<TabsTrigger value="about">Overview</TabsTrigger>
 										<TabsTrigger value="details">Details</TabsTrigger>
 										<TabsTrigger value="tam">Team</TabsTrigger>
@@ -184,14 +187,14 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 														Project Milestones
 													</h3>
 													<div className="space-y-4">
-													{Array.from({ length: project.milestones }).map((_, index) => (
-									<ProjectMilestone
-										key={`milestone-${index}-${project.id}`}
-										index={index}
-										projectId={project.id}
-										completedMilestones={project.completed_milestones}
-									/>
-								))}
+														{Array.from({ length: project.milestones }).map((_, index) => (
+															<ProjectMilestone
+																key={`milestone-${index}-${project.id}`}
+																index={index}
+																projectId={project.id}
+																completedMilestones={project.completed_milestones}
+															/>
+														))}
 													</div>
 												</>
 											)}
