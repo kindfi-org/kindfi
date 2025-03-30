@@ -8,7 +8,7 @@ export interface MarketOpportunityProps {
 	drivers: { id: string; text: string }[]
 }
 
-export default function MarketOpportunity({
+export function MarketOpportunity({
 	title,
 	description,
 	drivers,

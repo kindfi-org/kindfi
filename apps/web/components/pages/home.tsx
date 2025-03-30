@@ -83,7 +83,7 @@ const FinalCTA = dynamic(
 		loading: SkeletonFinalCTA,
 	},
 )
-import Kyc from '~/components/shared/kyc/kyc-2/kyc-2-upload'
+import { IDDocumentUpload as Kyc } from '~/components/shared/kyc/kyc-2/kyc-2-upload'
 
 export function HomeDashboard() {
 	return (

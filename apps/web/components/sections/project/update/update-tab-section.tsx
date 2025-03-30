@@ -14,8 +14,8 @@
 
 import { useState } from 'react'
 import { updateItems } from '~/lib/mock-data/project/mock-updates-tab'
-import { LoadMoreButton } from './LoadMoreButton'
-import { UpdateCard } from './UpdateCard'
+import { LoadMoreButton } from './load-more-button'
+import { UpdateCard } from './update-card'
 
 export function UpdatesTabSection() {
 	const [visibleUpdates, setVisibleUpdates] = useState(updateItems.slice(0, 2))

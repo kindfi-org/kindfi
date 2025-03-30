@@ -8,11 +8,7 @@ export interface TechnologyProps {
 	features: { id: string; text: string }[]
 }
 
-export default function Technology({
-	title,
-	description,
-	features,
-}: TechnologyProps) {
+export function Technology({ title, description, features }: TechnologyProps) {
 	return (
 		<div className="max-w-4xl mx-auto">
 			<motion.div

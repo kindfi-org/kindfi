@@ -1,6 +1,6 @@
-import Hero from '~/components/sections/project/pitch/hero'
-import TipsSidebar from '~/components/sections/project/pitch/tips-sidebar'
-import UpcomingSteps from '~/components/sections/project/pitch/upcoming-steps'
+import { Hero } from '~/components/sections/project/pitch/hero'
+import { TipsSidebar } from '~/components/sections/project/pitch/tips-sidebar'
+import { UpcomingSteps } from '~/components/sections/project/pitch/upcoming-steps'
 
 export default function PitchPage() {
 	return (

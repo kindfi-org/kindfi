@@ -14,10 +14,7 @@ export interface ProjectDocumentsProps {
 	documents: Document[]
 }
 
-export default function ProjectDocuments({
-	title,
-	documents,
-}: ProjectDocumentsProps) {
+export function ProjectDocuments({ title, documents }: ProjectDocumentsProps) {
 	return (
 		<div className="max-w-4xl mx-auto">
 			<motion.div
