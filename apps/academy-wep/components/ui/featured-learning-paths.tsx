@@ -1,7 +1,9 @@
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
+'use client'
+
 import { Bolt } from 'lucide-react'
-import { forwardRef, useEffect, useState } from 'react'
+import { forwardRef, useState } from 'react'
+import { Badge } from '~/components/base/badge'
+import { Card } from '~/components/base/card'
 import { CTAButton } from './cta-button'
 import { LearningPathCard } from './learning-path-card'
 import { StatsDisplay } from './stats-display'

@@ -1,6 +1,8 @@
-import { Card } from '@/components/ui/card'
-import { LucideIcon, UserCircle } from 'lucide-react' // Using direct Lucide import
+'use client'
+
+import { UserCircle } from 'lucide-react'
 import { forwardRef } from 'react'
+import { Card } from '~/components/base/card'
 
 interface StatsDisplayProps {
 	count: number

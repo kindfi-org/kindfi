@@ -46,32 +46,32 @@ const config = {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
+					'50': 'hsl(var(--primary-50))',
+					'100': 'hsl(var(--primary-100))',
+					'200': 'hsl(var(--primary-200))',
+					'300': 'hsl(var(--primary-300))',
+					'400': 'hsl(var(--primary-400))',
+					'500': 'hsl(var(--primary-500))',
+					'600': 'hsl(var(--primary-600))',
+					'700': 'hsl(var(--primary-700))',
+					'800': 'hsl(var(--primary-800))',
+					'900': 'hsl(var(--primary-900))',
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
-					50: 'hsl(var(--primary-50))',
-					100: 'hsl(var(--primary-100))',
-					200: 'hsl(var(--primary-200))',
-					300: 'hsl(var(--primary-300))',
-					400: 'hsl(var(--primary-400))',
-					500: 'hsl(var(--primary-500))',
-					600: 'hsl(var(--primary-600))',
-					700: 'hsl(var(--primary-700))',
-					800: 'hsl(var(--primary-800))',
-					900: 'hsl(var(--primary-900))',
 				},
 				secondary: {
+					'50': 'hsl(var(--secondary-50))',
+					'100': 'hsl(var(--secondary-100))',
+					'200': 'hsl(var(--secondary-200))',
+					'300': 'hsl(var(--secondary-300))',
+					'400': 'hsl(var(--secondary-400))',
+					'500': 'hsl(var(--secondary-500))',
+					'600': 'hsl(var(--secondary-600))',
+					'700': 'hsl(var(--secondary-700))',
+					'800': 'hsl(var(--secondary-800))',
+					'900': 'hsl(var(--secondary-900))',
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))',
-					50: 'hsl(var(--secondary-50))',
-					100: 'hsl(var(--secondary-100))',
-					200: 'hsl(var(--secondary-200))',
-					300: 'hsl(var(--secondary-300))',
-					400: 'hsl(var(--secondary-400))',
-					500: 'hsl(var(--secondary-500))',
-					600: 'hsl(var(--secondary-600))',
-					700: 'hsl(var(--secondary-700))',
-					800: 'hsl(var(--secondary-800))',
-					900: 'hsl(var(--secondary-900))',
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
@@ -93,36 +93,54 @@ const config = {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))',
 				},
+				sidebar: {
+					DEFAULT: 'hsl(var(--sidebar-background))',
+					foreground: 'hsl(var(--sidebar-foreground))',
+					primary: 'hsl(var(--sidebar-primary))',
+					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+					accent: 'hsl(var(--sidebar-accent))',
+					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+					border: 'hsl(var(--sidebar-border))',
+					ring: 'hsl(var(--sidebar-ring))',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)',
 			},
-			/**
-+			 * Fade animations for overlay components
-+			 * Used by: Dialog, Sheet, Dropdown Menu, Alert Dialog
-+			 * 
-+			 * Usage:
-+			 * - fade-in: For showing overlays and content
-+			 * - fade-out: For hiding overlays and content
-+			 */
 			keyframes: {
 				'accordion-down': {
-					from: { height: '0' },
-					to: { height: 'var(--radix-accordion-content-height)' },
+					from: {
+						height: '0',
+					},
+					to: {
+						height: 'var(--radix-accordion-content-height)',
+					},
 				},
 				'accordion-up': {
-					from: { height: 'var(--radix-accordion-content-height)' },
-					to: { height: '0' },
+					from: {
+						height: 'var(--radix-accordion-content-height)',
+					},
+					to: {
+						height: '0',
+					},
 				},
 				fadeIn: {
-					'0%': { opacity: '0' },
-					'100%': { opacity: '1' },
+					'0%': {
+						opacity: '0',
+					},
+					'100%': {
+						opacity: '1',
+					},
 				},
 				fadeOut: {
-					'0%': { opacity: '1' },
-					'100%': { opacity: '0' },
+					'0%': {
+						opacity: '1',
+					},
+					'100%': {
+						opacity: '0',
+					},
 				},
 			},
 			animation: {
