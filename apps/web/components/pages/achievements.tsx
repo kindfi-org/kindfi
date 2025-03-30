@@ -1,5 +1,5 @@
 import { AchievementsGrid } from '../sections/achievements/achievement-grid'
 
-export default function AchievementPage() {
+export function AchievementPage() {
 	return <AchievementsGrid />
 }

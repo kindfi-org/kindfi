@@ -17,10 +17,7 @@ export interface InvestmentDetailsProps {
 	sections: InvestmentSection[]
 }
 
-export default function InvestmentDetails({
-	title,
-	sections,
-}: InvestmentDetailsProps) {
+export function InvestmentDetails({ title, sections }: InvestmentDetailsProps) {
 	const [openSections, setOpenSections] = useState<string[]>([])
 
 	const toggleSection = (id: string) => {

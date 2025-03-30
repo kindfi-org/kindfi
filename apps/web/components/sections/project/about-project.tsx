@@ -95,4 +95,4 @@ const AboutProject: React.FC<AboutProjectProps> = ({
 	)
 }
 
-export default AboutProject
+export { AboutProject }

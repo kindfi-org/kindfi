@@ -16,29 +16,29 @@ export function PopularTopics({ onTopicSelect }: PopularTopicsProps) {
 	]
 
 	return (
-    <div className="flex flex-col w-auto gap-4">
-      <p className="font-normal text-base">Popular Topics</p>
-      <div className="flex flex-wrap items-start gap-4">
-        {TOPICS.map((topic, i) => {
-          const color = colors[i % colors.length];
-          return (
-            <Button
-              key={topic}
-              onClick={() => {
-                setSelected(i);
-                if (onTopicSelect) onTopicSelect(topic, i);
-              }}
-              className={`
+		<div className="flex flex-col w-auto gap-4">
+			<p className="font-normal text-base">Popular Topics</p>
+			<div className="flex flex-wrap items-start gap-4">
+				{TOPICS.map((topic, i) => {
+					const color = colors[i % colors.length]
+					return (
+						<Button
+							key={topic}
+							onClick={() => {
+								setSelected(i)
+								if (onTopicSelect) onTopicSelect(topic, i)
+							}}
+							className={`
                 border transition-all rounded-full px-4 py-2 font-medium
-                ${color.bg} ${selected === i ? "border-2" : ""}
+                ${color.bg} ${selected === i ? 'border-2' : ''}
 
               `}
-            >
-              {topic}
-            </Button>
-          );
-        })}
-      </div>
-    </div>
-  );
+						>
+							{topic}
+						</Button>
+					)
+				})}
+			</div>
+		</div>
+	)
 }

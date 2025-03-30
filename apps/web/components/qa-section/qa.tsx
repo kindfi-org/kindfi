@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import AskQuestionBox from './ask-question-box'
-import LoadMoreButton from './load-more-button'
-import QuestionCard from './question-card'
+import { AskQuestionBox } from './ask-question-box'
+import { LoadMoreButton } from './load-more-button'
+import { QuestionCard } from './question-card'
 
 // TODO: Change this to the types file
 interface Answer {
@@ -79,7 +79,7 @@ const initialQuestions: Question[] = [
 
 // TODO: Change this to become a page that imports and constructs the section
 
-export default function QAPage() {
+export function QAPage() {
 	const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 
 	const loadMoreQuestions = (): void => {
