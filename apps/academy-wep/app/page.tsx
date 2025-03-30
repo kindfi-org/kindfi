@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { CommunitySection } from '~/components/CommunitySection'
-import { CommunityStats } from '~/components/CommunityStats'
 import ReadyToEarn from '~/components/ready-to-earn'
 import { WhyChoose } from '~/components/sections/why-choose'
 
@@ -18,14 +17,6 @@ export default function Home() {
 	const now = new Date().getTime()
 	const distance = launchDate - now
 	const days = Math.floor(distance / (1000 * 60 * 60 * 24))
-
-	// Sample badges data
-	const badges = [
-		{ id: '1', name: 'Blockchain Basics', earned: true },
-		{ id: '2', name: 'Smart Contracts', earned: false },
-		{ id: '3', name: 'Stellar Development', earned: false },
-		{ id: '4', name: 'Social Impact', earned: false },
-	]
 
 	return (
 		<main className="min-h-screen relative overflow-hidden text-foreground">
