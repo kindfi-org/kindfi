@@ -1,8 +1,8 @@
 'use client'
 
-import { type ResourceType, resourcesData } from '@/lib/knowledge-resources'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { type ResourceType, resourcesData } from '~/lib/knowledge-resources'
 import { FeaturedResources } from './featured-resources'
 import { ResourceCard } from './resource-card'
 import { SearchBar } from './search-bar'

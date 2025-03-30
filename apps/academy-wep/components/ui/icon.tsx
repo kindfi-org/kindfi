@@ -1,3 +1,5 @@
+'use client'
+
 import type { LucideIcon } from 'lucide-react'
 
 import { Bolt, Shield } from 'lucide-react' // Importing Lucide icons

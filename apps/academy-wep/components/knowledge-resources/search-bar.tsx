@@ -1,11 +1,11 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useState } from 'react'
+import { Button } from '~/components/base/button'
+import { Input } from '~/components/base/input'
 
 interface SearchBarProps {
 	onSearch: (query: string) => void
