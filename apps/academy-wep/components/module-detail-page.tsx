@@ -134,7 +134,6 @@ const ModuleDetailPage: React.FC<ModuleDetailPageProps> = ({
                   <div className="flex-shrink-0">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div>
                           <Button
                             variant={
                               lesson.status === "completed"
@@ -153,7 +152,6 @@ const ModuleDetailPage: React.FC<ModuleDetailPageProps> = ({
                                 ? "Start"
                                 : "Locked"}
                           </Button>
-                        </div>
                       </TooltipTrigger>
                       {lesson.status === "locked" && (
                         <TooltipContent>
