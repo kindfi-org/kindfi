@@ -121,7 +121,3 @@ export function FilterPanel({
     </div>
   )
 }
-
-
-
-
