@@ -54,7 +54,7 @@ const ModuleDetailPage: React.FC<ModuleDetailPageProps> = ({
 
 	// ? Here we can sort the lessons by any other parameter, such as "createdAt" or "updatedAt"
 	// ? but for this example, we will sort them by "id"
-	const sortedLessons = lessons.sort((a, b) => a.id - b.id)
+	const sortedLessons = [...lessons].sort((a, b) => a.id - b.id)
 
 	return (
 		<div className="container mx-auto px-4 py-8 max-w-4xl">
