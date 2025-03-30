@@ -18,7 +18,7 @@ interface KYCModalProps {
 	onClose: () => void
 }
 
-export default function KYCModal({ isOpen, onClose }: KYCModalProps) {
+export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 	const [currentStep, setCurrentStep] = useState(1)
 	const [kycData, setKycData] = useState({
 		identityInfo: {} as IdentityFormValues,

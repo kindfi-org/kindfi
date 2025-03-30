@@ -4,7 +4,7 @@ import { BarChart2 } from 'lucide-react'
 import { Card } from '~/components/base/card'
 import { useGlowEffect } from '~/hooks/use-glow-effect'
 
-export default function ImpactCard() {
+export function ImpactCard() {
 	const cardRef = useGlowEffect()
 
 	return (
