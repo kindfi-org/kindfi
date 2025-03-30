@@ -1,11 +1,11 @@
-import { useElementVisibility } from '@/hooks/use-element-visibility'
-import { useReducedMotion } from '@/hooks/use-reduced-motion'
-import { cn } from '@/lib/utils'
 import {
 	IoBookOutline,
 	IoPeopleOutline,
 	IoShieldOutline,
 } from 'react-icons/io5'
+import { useElementVisibility } from '~/hooks/use-element-visibility'
+import { useReducedMotion } from '~/hooks/use-reduced-motion'
+import { cn } from '~/lib/utils'
 import { FeatureCard } from './feature-card'
 
 /**

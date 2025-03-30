@@ -3,9 +3,10 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from 'lucide-react'
 import { useState } from 'react'
+import { Button } from '~/components/base/button'
+import { Input } from '~/components/base/input'
+import ReadyToEarn from '~/components/ready-to-earn'
 import { WhyChoose } from '~/components/sections/why-choose'
-import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 
 export default function Home() {
 	const [email, setEmail] = useState('')
@@ -16,33 +17,47 @@ export default function Home() {
 	const distance = launchDate - now
 	const days = Math.floor(distance / (1000 * 60 * 60 * 24))
 
+	// Sample badges data
+	const badges = [
+		{ id: '1', name: 'Blockchain Basics', earned: true },
+		{ id: '2', name: 'Smart Contracts', earned: false },
+		{ id: '3', name: 'Stellar Development', earned: false },
+		{ id: '4', name: 'Social Impact', earned: false },
+	]
+
 	return (
 		<main className="min-h-screen relative overflow-hidden text-foreground">
 			{/* Background gradient */}
 			{/* Floating elements */}
 			<div className="absolute inset-0 overflow-hidden">
-				{[...Array(3)].map((_, i) => (
-					<motion.div
-						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-						key={i}
-						className="absolute w-[250px] h-[250px] rounded-full bg-primary-400/10 blur-3xl"
-						style={{
-							left: `${Math.random() * 100}%`,
-							top: `${Math.random() * 100}%`,
-						}}
-						animate={{
-							x: [0, 100, 0],
-							y: [0, 50, 0],
-							scale: [1, 1.2, 1],
-						}}
-						transition={{
-							duration: 14,
-							repeat: Number.POSITIVE_INFINITY,
-							ease: 'easeInOut',
-							delay: i * 2,
-						}}
-					/>
-				))}
+				{[...Array(3)].map((_, i) => {
+					// Use fixed positions instead of random values
+					const positions = [
+						{ left: '39.44%', top: '31.45%' },
+						{ left: '43.76%', top: '90.23%' },
+						{ left: '84.08%', top: '40.18%' },
+					]
+
+					return (
+						<motion.div
+							// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+							key={i}
+							className="absolute w-[250px] h-[250px] rounded-full bg-primary-400/10 blur-3xl"
+							style={positions[i]}
+							animate={{
+								x: [0, 100, 0],
+								y: [0, 50, 0],
+								scale: [1, 1.2, 1],
+							}}
+							transition={{
+								duration: 14,
+								repeat: Number.POSITIVE_INFINITY,
+								ease: 'easeInOut',
+								delay: i * 2,
+							}}
+						/>
+					)
+				})}
 			</div>
 
 			<div className="relative z-10 container mx-auto px-4 py-24 flex flex-col items-center justify-center min-h-screen gap-10">
@@ -79,7 +94,15 @@ export default function Home() {
 					Master blockchain fundamentals and unlock the power of Web3 for social
 					impact.
 				</motion.p>
-
+				{/* Ready to earn more badges */}
+				<motion.div
+					initial={{ x: -100, opacity: 0 }}
+					animate={{ x: 0, opacity: 1 }}
+					exit={{ x: 100, opacity: 0 }}
+					transition={{ duration: 0.6, ease: 'easeInOut' }}
+				>
+					<ReadyToEarn badges={badges} />
+				</motion.div>
 				{/* CTA Section */}
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}

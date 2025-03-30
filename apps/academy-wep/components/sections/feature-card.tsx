@@ -1,8 +1,15 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+'use client'
+
 import type React from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FiArrowRight } from 'react-icons/fi'
+import { Button } from '~/components/base/button'
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+} from '~/components/base/card'
 import type { ThemeColor } from '../../../web/lib/constants/theme-color.contants'
 import { colorMap } from '../../../web/lib/constants/theme-color.contants'
 
@@ -27,7 +34,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
 }) => {
 	const cardRef = useRef<HTMLDivElement>(null)
 	const [isHovering, setIsHovering] = useState(false)
-	const defaultPosition = { x: 0.5, y: 0.25 }
+	const defaultPosition = useMemo(() => ({ x: 0.5, y: 0.25 }), [])
 	const [position, setPosition] = useState(defaultPosition)
 	const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
 
@@ -57,7 +64,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
 	const handleMouseLeave = useCallback(() => {
 		setIsHovering(false)
 		setPosition(defaultPosition)
-	}, [])
+	}, [defaultPosition])
 
 	return (
 		<Card
@@ -76,10 +83,9 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
 				className="absolute inset-0 pointer-events-none transition-all duration-300"
 				style={{
 					opacity: isHovering ? 0.3 : 0.15,
-					background: prefersReducedMotion
+					backgroundImage: prefersReducedMotion
 						? `radial-gradient(220px circle at 50% 50%, rgba(${colorMap[titleColor]?.rgb || '0,0,0'}, 1), transparent 70%)`
 						: `radial-gradient(220px circle at ${position.x * 100}% ${position.y * 100}%, rgba(${colorMap[titleColor]?.rgb || '0,0,0'}, 1), transparent 70%)`,
-					backgroundImage: `-webkit-radial-gradient(circle, rgba(${colorMap[titleColor]?.rgb || '0,0,0'}, 1), transparent 70%)`,
 				}}
 			/>
 			<CardHeader className="flex items-center justify-center pt-8 pb-2 relative z-10">
