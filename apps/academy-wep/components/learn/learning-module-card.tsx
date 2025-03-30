@@ -108,13 +108,11 @@ export function LearningModuleCard({ module, index }: LearningModuleCardProps) {
 
 					{module.unlocked && (
 						<div className="flex items-center gap-4 mb-3">
-							<div className="flex items-center gap-4 mb-3">
-								<ProgressBar
-									value={progress}
-									className="flex-grow"
-									variant="success"
-								/>
-							</div>
+							<ProgressBar
+								value={progress}
+								className="flex-grow"
+								variant="success"
+							/>
 						</div>
 					)}
 
