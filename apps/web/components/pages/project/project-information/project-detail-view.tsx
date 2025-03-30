@@ -21,7 +21,7 @@ import { InvestmentDetails } from '~/components/sections/projects/investment-det
 import { MarketOpportunity } from '~/components/sections/projects/market-opportunity'
 import { ProjectDocuments } from '~/components/sections/projects/project-documents'
 import { ProjectOverview } from '~/components/sections/projects/project-overview'
-import { Technology } from '~/components/sections/projects/technology'
+import { Technology } from '~/components/sections/projects/Technology'
 import { TractionMilestones } from '~/components/sections/projects/traction-milestones'
 
 //? Import Mock Data
