@@ -1,6 +1,6 @@
 import { BookOpen, CircleAlert, FileText, Home, Trophy } from 'lucide-react'
 
-import type { LearningPath, NavigationRoute } from '../types/sidebar'
+import type { LearningPath, NavigationRoute } from '../types/sidebar.types'
 
 export const navigationRoutes: NavigationRoute[] = [
 	{ name: 'Home', href: '/', icon: Home },
