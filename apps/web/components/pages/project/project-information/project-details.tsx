@@ -1,7 +1,6 @@
 'use client'
 
 import {
-	ClipboardCopy,
 	Clock,
 	ExternalLink,
 	Heart,
@@ -9,6 +8,7 @@ import {
 	Share,
 	Shield,
 } from 'lucide-react'
+import { useMemo } from 'react'
 import { RiStarFill } from 'react-icons/ri'
 import ProjectVideo from '~/components/ProjectVideo'
 import { Button } from '~/components/base/button'
@@ -29,14 +29,6 @@ import { MarketOpportunity } from '~/components/sections/projects/market-opportu
 import { ProjectDocuments } from '~/components/sections/projects/project-documents'
 import { ProjectOverview } from '~/components/sections/projects/project-overview'
 import { TractionMilestones } from '~/components/sections/projects/traction-milestones'
-// import BusinessModel from '~/components/sections/projects/BusinessModel'
-// import CompetitiveAdvantages from '~/components/sections/projects/CompetitiveAdvantages'
-// import InvestmentDetails from '~/components/sections/projects/InvestmentDetails'
-// import MarketOpportunity from '~/components/sections/projects/MarketOpportunity'
-// import ProjectDocuments from '~/components/sections/projects/ProjectDocuments'
-// import ProjectOverview from '~/components/sections/projects/ProjectOverview'
-// import Technology from '~/components/sections/projects/Technology'
-// import TractionMilestones from '~/components/sections/projects/TractionMilestones'
 import { businessModelData } from '~/lib/mock-data/mock-business-model'
 import { competitiveAdvantagesData } from '~/lib/mock-data/mock-competitive-adventage'
 import { investmentDetailsData } from '~/lib/mock-data/mock-investment-details'
@@ -46,6 +38,7 @@ import { projectData } from '~/lib/mock-data/mock-project-overview'
 import { technologyData } from '~/lib/mock-data/mock-technology'
 import { tractionMilestonesData } from '~/lib/mock-data/mock-traction-milestones'
 import type { Project, Tag } from '~/lib/types'
+import SimilarProjects from './similar-projects'
 interface ProjectDetailProp {
 	project: Project
 }
@@ -61,7 +54,18 @@ const formatNumber = (number: number) => {
 	return number.toLocaleString()
 }
 const ProjectDetail = ({ project }: ProjectDetailProp) => {
-	console.log('project', project)
+	const renderedTags = useMemo(() => {
+		return (project.tags as Tag[]).map(({ text, id }: Tag) => (
+				<div
+					key={id}
+					className="w-auto py-1 px-4 rounded-lg bg-slate-200  "
+				>
+					<p className="font-bold text-[9px] capitalize">
+						{text?.toLocaleLowerCase()}
+					</p>
+				</div>
+			));
+		}, [project.tags]);
 	return (
 		<>
 			<div className="w-full min-h-screen py-10 px-6 flex ">
@@ -84,7 +88,7 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 							</p>
 						</div>
 						<div className="w-full mt-4">
-							<div className=" w-full flex items-centwr gap-3 justify-start">
+							<div className=" w-full flex items-center gap-3 justify-start">
 								{(project.tags as Tag[])?.map(({ id, text }, index) => {
 									const color = tagColors[index % tagColors.length]
 									return (
@@ -107,20 +111,20 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 
 						<div className="w-full h-auto lg:h-[500px] mt-4 relative ">
 							<ProjectVideo
-								url="https://res.cloudinary.com/daqjecxhy/video/upload/v1743092835/424799153-62d97d91-9461-4f6f-8760-cc463496a220_qjftva.mov"
+								url={project?.video_url || "https://res.cloudinary.com/daqjecxhy/video/upload/v1743092835/424799153-62d97d91-9461-4f6f-8760-cc463496a220_qjftva.mov"}
 								fallbackImage={project.image_url}
 							/>
 
 							<div className=" bg-purple-700 shadow-black rounded-full flex items-center justify-center gap-1 absolute top-6 right-4 w-[50px] py-1 px-2">
 								<RiStarFill color="#fff" size={12} />
-								<p className="text-xs text-white font-semibold">4.7</p>
+								<p className="text-xs text-white font-semibold">{project?.rating || '4.7'}</p>
 							</div>
 						</div>
 
 						<div className="w-full mt-6">
 							<div className=" w-full py-8">
 								<Tabs defaultValue="about" className="w-full ">
-									<TabsList className="mb-8 overflow-x-scroll">
+									<TabsList aria-label="Project sections" className="mb-8 overflow-x-scroll">
 										<TabsTrigger value="about">Overview</TabsTrigger>
 										<TabsTrigger value="details">Details</TabsTrigger>
 										<TabsTrigger value="tam">Team</TabsTrigger>
@@ -180,8 +184,8 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 														{Array.from({ length: project.milestones }).map(
 															(_, index) => (
 																<div
-																	// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-																	key={index}
+// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+																	key={`milestone-${index}-${project.id}`}
 																	className={`p-4 rounded-lg border ${
 																		index < (project.completed_milestones || 0)
 																			? 'bg-green-50 border-green-200'
@@ -432,6 +436,10 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 								<div className="w-full mt-6">
 									<div className="w-full">
 										<Input
+										id="investment-amount"
+										placeholder="Enter investment amount"
+										aria-label="Investment amount"
+										pattern="^\$\d+(\.\d{2})?$"
 											value={'$'}
 											className="  border-slate-500 border-1 rounded-md p-4 outline-slate-400 "
 										/>
@@ -490,83 +498,11 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 							<div className="w-full bg-white shadow-gray-200 shadow-md rounded-lg py-6 px-6 my-5">
 								<p className=" font-bold text-lg">Company Tags </p>
 
-								<div className="w-full flex items-center justify-start gap-2 flex-wrap mt-2">
-									{(project.tags as Tag[]).map(({ text, id }: Tag) => (
-										<div
-											key={id}
-											className="w-auto py-1 px-4 rounded-lg bg-slate-200  "
-										>
-											<p className="font-bold text-[9px] capitalize">
-												{text?.toLocaleLowerCase()}
-											</p>
-										</div>
-									))}
+								<div className="w-full flex items-center justify-start gap-2 flex-wrap mt-2">					
+											{renderedTags}
 								</div>
 							</div>
-							<div className="w-full bg-white shadow-gray-200 shadow-md rounded-lg py-6 px-6 my-5">
-								<p className=" font-bold text-lg">Similar Projects </p>
-
-								<div className="w-full  mt-2">
-									<div className="w-full flex items-start justify-between gap-3 my-3">
-										<div className="w-[20%] lg:w-[10%] ">
-											<div className=" bg-gray-300 rounded-sm h-10" />
-										</div>
-
-										<div className="w-[80%] lg:w-[90%]">
-											<p className="text-sm font-semibold truncate ">
-												EcoFlow Energy Solutions
-											</p>
-											<p className=" s text-xs text-gray-400 font-normal truncate">
-												Renewable energy storage for residential
-											</p>
-
-											<div className="w-full flex items-center justify-start gap-3 mt-2">
-												<div className="w-auto py-1 px-4 rounded-lg bg-slate-200">
-													<p className="font-bold text-[9px] capitalize">
-														1.2M raised
-													</p>
-												</div>
-
-												<p className=" text-gray-400 font-semibold text-xs">
-													80%
-												</p>
-											</div>
-										</div>
-									</div>
-									<div className="w-full flex items-start justify-between gap-3 my-3">
-										<div className="w-[20%] lg:w-[10%]">
-											<div className=" bg-gray-300 rounded-sm h-10" />
-										</div>
-
-										<div className="w-[80%] lg:w-[90%]">
-											<p className="text-sm font-semibold truncate ">
-												GreenPower Storage Systems
-											</p>
-											<p className=" s text-xs text-gray-400 font-normal truncate">
-												Grid-scale energy storage technology
-											</p>
-
-											<div className="w-full flex items-center justify-start gap-3 mt-2">
-												<div className="w-auto py-1 px-4 rounded-lg bg-slate-200">
-													<p className="font-bold text-[9px] capitalize">
-														1.2M raised
-													</p>
-												</div>
-
-												<p className=" text-gray-400 font-semibold text-xs">
-													57%
-												</p>
-											</div>
-										</div>
-									</div>
-
-									<div className="w-full mt-5">
-										<p className="text-xs text-center cursor-pointer font-bold">
-											View more
-										</p>
-									</div>
-								</div>
-							</div>
+							<SimilarProjects/>
 						</div>
 					</div>
 				</div>

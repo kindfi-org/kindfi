@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import ProjectDetail from '~/components/pages/project/project-information/project-details'
-// import { ProjectDetailView } from '~/components/pages/project/project-information/project-detail-view'
 import { projects } from '~/lib/mock-data/mock-projects'
 
 interface ProjectPageParams {

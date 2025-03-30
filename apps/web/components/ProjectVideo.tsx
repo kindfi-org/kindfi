@@ -36,6 +36,12 @@ const ProjectVideo: React.FC<ProjectVideoProps> = ({
 	const togglePlay = () => {
 		setPlaying((prev) => !prev)
 	}
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+	if (e.key === ' ' || e.key === 'Enter') {
+		e.preventDefault()
+				togglePlay()
+	}
+		}
 
 	return (
 		<div className={twMerge('rounded-lg overflow-hidden', className)}>
@@ -53,7 +59,7 @@ const ProjectVideo: React.FC<ProjectVideoProps> = ({
 					<ReactPlayer
 						ref={playerRef}
 						url={url}
-						controls={false}
+						controls={controls}
 						playing={playing}
 						loop={loop}
 						muted={muted}
@@ -65,6 +71,9 @@ const ProjectVideo: React.FC<ProjectVideoProps> = ({
 					/>
 					{!playing && (
 						<button
+						aria-label="Play video"
+						onKeyDown={handleKeyDown}
+						tabIndex={0}
 							type="button"
 							className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white p-2"
 							onClick={togglePlay}
