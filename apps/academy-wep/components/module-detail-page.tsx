@@ -60,7 +60,10 @@ const ModuleDetailPage: React.FC<ModuleDetailPageProps> = ({
           </div>
 
           <div className="w-full md:w-64">
-            <ProgressBar value={progress} />
+            <ProgressBar 
+              value={progress} 
+              aria-label={`Module progress: ${progress}% completed`}
+            />
             <p className="text-sm text-gray-500 mt-2 text-right">
               {progress}% completed
             </p>
