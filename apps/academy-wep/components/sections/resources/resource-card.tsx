@@ -1,10 +1,14 @@
+"use client"
+
+import { useRouter } from "next/navigation"
 import { cva } from "class-variance-authority"
-import { ThumbsUp, MessageSquare, FileText, Video, BookMarked, Download } from "lucide-react"
+import { ThumbsUp, MessageSquare } from "lucide-react"
 
 import type { ExperienceLevel, ResourceCategory, ResourceType } from "~/lib/types/resources.types"
 import { Badge } from "~/components/base/badge"
 import { Button } from "~/components/base/button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/base/card"
+import { getTypeIcon } from "~/lib/utils/resources/get-type-icon"
 
 interface ResourceCardProps {
   type: ResourceType
@@ -15,6 +19,7 @@ interface ResourceCardProps {
   level: ExperienceLevel
   likes: number
   comments: number
+  slug: string
 }
 
 // Get the appropriate type badge style
@@ -41,22 +46,9 @@ export function ResourceCard({
   level,
   likes,
   comments,
+  slug,
 }: ResourceCardProps) {
-  // Get the appropriate icon based on resource type
-  const getTypeIcon = () => {
-    switch (type) {
-      case "article":
-        return <FileText className="h-3.5 w-3.5 mr-1" />
-      case "video":
-        return <Video className="h-3.5 w-3.5 mr-1" />
-      case "guide":
-        return <BookMarked className="h-3.5 w-3.5 mr-1" />
-      case "document":
-        return <Download className="h-3.5 w-3.5 mr-1" />
-      default:
-        return <FileText className="h-3.5 w-3.5 mr-1" />
-    }
-  }
+  const router = useRouter()
 
   // Get the appropriate time label based on resource type
   const getTimeLabel = () => {
@@ -93,7 +85,7 @@ export function ResourceCard({
         {/* Reading Time and Level */}
         <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
           <div className="flex items-center font-medium">
-            {getTypeIcon()}
+            {getTypeIcon(type)}
             <span>
               {timeToConsume} {getTimeLabel()}
             </span>
@@ -122,12 +114,12 @@ export function ResourceCard({
             variant="outline"
             size="sm"
             className="text-gray-800 bg-white hover:text-primary hover:bg-white border-gray-200 hover:border-primary"
+            onClick={() => router.push(`/resources/${slug}`)}
           >
             View
           </Button>
         </div>
       </CardFooter>
-
     </Card>
   )
 }
