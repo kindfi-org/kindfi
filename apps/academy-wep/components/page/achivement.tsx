@@ -4,6 +4,7 @@ import type React from 'react'
 import { achievements } from '~/data/achivement-data'
 import { AchievementCard } from '../shared/achivement-card'
 
+
 const AchievementsPage: React.FC = () => {
 	return (
 		<div className="bg-white min-h-screen p-8">

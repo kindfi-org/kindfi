@@ -76,14 +76,6 @@ const initialQuestions: Question[] = [
 		],
 	},
 ]
-
-<<<<<<< HEAD
-// TODO: Change this to become a page that imports and constructs the section
-
-export default function QAPage() {
-=======
-export function QAPage() {
->>>>>>> 18342f6 (refactor: changed all default exports to named exports)
 	const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 
 	const loadMoreQuestions = (): void => {
