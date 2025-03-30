@@ -5,6 +5,7 @@ import { ArrowRight, DiscIcon as Discord, Github, Twitter } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
+import { CommunitySection } from '~/components/CommunitySection'
 import ReadyToEarn from '~/components/ready-to-earn'
 import { WhyChoose } from '~/components/sections/why-choose'
 
@@ -23,14 +24,6 @@ export default function Home() {
 	const now = new Date().getTime()
 	const distance = launchDate - now
 	const days = Math.floor(distance / (1000 * 60 * 60 * 24))
-
-	// Sample badges data
-	const badges = [
-		{ id: '1', name: 'Blockchain Basics', earned: true },
-		{ id: '2', name: 'Smart Contracts', earned: false },
-		{ id: '3', name: 'Stellar Development', earned: false },
-		{ id: '4', name: 'Social Impact', earned: false },
-	]
 
 	return (
 		<main className="min-h-screen relative overflow-hidden text-foreground">
@@ -108,9 +101,17 @@ export default function Home() {
 					exit={{ x: 100, opacity: 0 }}
 					transition={{ duration: 0.6, ease: 'easeInOut' }}
 				>
-					<ReadyToEarn badges={badges} />
+					<ReadyToEarn badges={[
+						{ id: '1', name: 'Blockchain Basics', earned: true },
+						{ id: '2', name: 'Stellar Expert', earned: false },
+						{ id: '3', name: 'Wallet Master', earned: false },
+						{ id: '4', name: 'Asset Manager', earned: false },
+						{ id: '5', name: 'Web3 Pioneer', earned: false },
+							{ id: '6', name: 'KindFi Graduate', earned: false },
+						]}
+					/>
 				</motion.div>
-				{/* CTA Section */}
+				<CommunitySection memberCount="500+" />
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
