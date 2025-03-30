@@ -17,7 +17,7 @@ import {
 	TooltipTrigger,
 } from '~/components/base/tooltip'
 import { useIsMobile } from '~/hooks/use-mobile'
-import useReducedMotion from '~/hooks/use-reduced-motion'
+import { useReducedMotion } from '~/hooks/use-reduced-motion'
 import { cn } from '~/lib/utils'
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/sidebar

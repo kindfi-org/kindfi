@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import ProjectCard from '~/components/shared/project-card'
+import { ProjectCard } from '~/components/shared/project-card'
 import type { Project } from '~/lib/types/projects.types'
 import { cn } from '~/lib/utils'
 

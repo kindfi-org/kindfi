@@ -4,7 +4,7 @@ import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog'
 import * as React from 'react'
 
 import { buttonVariants } from '~/components/base/button'
-import useReducedMotion from '~/hooks/use-reduced-motion'
+import { useReducedMotion } from '~/hooks/use-reduced-motion'
 import { animations } from '~/lib/constants/animations'
 import { cn } from '~/lib/utils'
 

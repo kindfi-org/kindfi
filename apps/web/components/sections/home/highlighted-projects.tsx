@@ -9,7 +9,7 @@ import {
 	CarouselPrevious,
 } from '~/components/base/carousel'
 import { CTAButtons } from '~/components/shared/cta-buttons'
-import ProjectCard from '~/components/shared/project-card'
+import { ProjectCard } from '~/components/shared/project-card'
 import { SectionCaption } from '~/components/shared/section-caption'
 import { projects } from '~/lib/mock-data/mock-projects'
 

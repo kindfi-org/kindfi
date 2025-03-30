@@ -203,4 +203,4 @@ const HeroSection = ({
 	)
 }
 
-export {HeroSection}
+export { HeroSection }

@@ -23,7 +23,7 @@ import {
 } from '~/components/base/dialog'
 import { ScrollArea } from '~/components/base/scroll-area'
 import type { FinalReviewProps } from '~/lib/types/final-review-kyc5.types'
-import {ReviewSection} from './review-section'
+import { ReviewSection } from './review-section'
 
 export function FinalReview({
 	onBack,

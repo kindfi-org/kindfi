@@ -15,7 +15,7 @@ export const metadata = {
 		'The first Web3 platform connecting supporters to impactful causes while driving blockchain adoption for social and environmental change',
 }
 
-export function RootLayout({
+export default function RootLayout({
 	children,
 }: {
 	children: React.ReactNode

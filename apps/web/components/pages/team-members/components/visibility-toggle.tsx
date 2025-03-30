@@ -36,10 +36,7 @@ type VisibilityToggleProps = {
 	}[]
 }
 
-export function VisibilityToggle({
-	form,
-	roles,
-}: VisibilityToggleProps) {
+export function VisibilityToggle({ form, roles }: VisibilityToggleProps) {
 	const [showHiddenMembers, setShowHiddenMembers] = useState(false)
 
 	const {

@@ -16,8 +16,8 @@ import { useStellarContext } from '~/hooks/stellar/stellar-context'
 import { useFormValidation } from '~/hooks/use-form-validation'
 
 export function Login() {
-  const [email, setEmail] = useState("");
-  const router = useRouter();
+	const [email, setEmail] = useState('')
+	const router = useRouter()
 
 	const {
 		onSign,

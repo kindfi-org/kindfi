@@ -222,5 +222,4 @@ const NewsletterSubscription = () => {
 	)
 }
 
-export default NewsletterSubscription
-export { NewsletterSubscription };
+export { NewsletterSubscription }
