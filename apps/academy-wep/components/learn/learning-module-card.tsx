@@ -107,15 +107,14 @@ export function LearningModuleCard({ module, index }: LearningModuleCardProps) {
 
 					{module.unlocked && (
 						<div className="flex items-center gap-4 mb-3">
-							<div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
-								<div
-									className="h-full bg-[#7CC635] rounded-full transition-all duration-700 ease-out group-hover:bg-gradient-to-r group-hover:from-[#7CC635] group-hover:to-[#5ea826]"
-									style={{ width: `${progress}%` }}
-								/>
-							</div>
-							<span className="text-sm font-medium whitespace-nowrap">
-								{progress}%
-							</span>
+<div className="flex items-center gap-4 mb-3">
+  <ProgressBar 
+    value={progress} 
+    showValue={true} 
+    className="flex-grow"
+    variant="success"
+  />
+</div>
 						</div>
 					)}
 
