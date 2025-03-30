@@ -55,8 +55,21 @@ export function Resources() {
         {filteredResources.length > 0 ? (
           <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-4">
-              {filteredResources.slice(0, visibleCount).map(({ id, ...resource }) => (
-                <ResourceCard key={id} {...resource} />
+              {filteredResources.slice(0, visibleCount).map((resource) => (
+                <ResourceCard
+                  key={resource.id}
+                  type={resource.type}
+                  category={resource.category}
+                  title={resource.title}
+                  description={resource.description}
+                  timeToConsume={resource.timeToConsume}
+                  level={resource.level}
+                  tags={resource.tags}
+                  likes={resource.likes}
+                  comments={resource.comments}
+                  date={resource.date}
+                  slug={resource.slug}
+                />
               ))}
             </div>
 

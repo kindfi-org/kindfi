@@ -1,6 +1,7 @@
 export type ResourceType = "article" | "video" | "guide" | "document"
 export type ResourceCategory = "Blockchain" | "Stellar" | "Web3" | "KindFi" | "Impact"
 export type ExperienceLevel = "Beginner" | "Intermediate" | "Advanced"
+export type SortOption = "Most Recent" | "Oldest" | "Most Viewed"
 
 export interface Resource {
   id: string

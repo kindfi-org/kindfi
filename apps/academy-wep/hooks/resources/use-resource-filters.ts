@@ -1,12 +1,12 @@
-// lib/hooks/useResourceFilters.ts
 import { useState, useEffect } from "react"
-import type { ExperienceLevel, Resource, ResourceCategory, ResourceType } from "~/lib/types/resources.types"
+
+import type { ExperienceLevel, Resource, ResourceCategory, ResourceType, SortOption } from "~/lib/types/resources.types"
 
 export function useResourceFilters(resources: Resource[]) {
   const [selectedCategories, setSelectedCategories] = useState<ResourceCategory[]>([])
   const [selectedTypes, setSelectedTypes] = useState<ResourceType[]>([])
   const [selectedLevels, setSelectedLevels] = useState<ExperienceLevel[]>([])
-  const [sortOption, setSortOption] = useState("Most Recent")
+  const [sortOption, setSortOption] = useState<SortOption>("Most Recent")
   const [filteredResources, setFilteredResources] = useState<Resource[]>(resources)
   const [visibleCount, setVisibleCount] = useState(6)
 
@@ -33,6 +33,10 @@ export function useResourceFilters(resources: Resource[]) {
       case "Most Viewed":
         result.sort((a, b) => b.likes - a.likes)
         break
+      default:
+        // Default to Most Recent if an unexpected value is provided
+        result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        break
     }
 
     setFilteredResources(result)
@@ -44,6 +48,18 @@ export function useResourceFilters(resources: Resource[]) {
     setSelectedLevels([])
   }
 
+  const toggleCategory = (c: ResourceCategory) =>
+    setSelectedCategories((prev) => prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c])
+    
+  const toggleType = (t: ResourceType) =>
+    setSelectedTypes((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t])
+    
+  const toggleLevel = (l: ExperienceLevel) =>
+    setSelectedLevels((prev) => prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l])
+    
+  const loadMore = () => 
+    setVisibleCount((prev) => Math.min(prev + 3, filteredResources.length))
+
   return {
     selectedCategories,
     selectedTypes,
@@ -53,12 +69,9 @@ export function useResourceFilters(resources: Resource[]) {
     visibleCount,
     setSortOption,
     resetFilters,
-    toggleCategory: (c: ResourceCategory) =>
-      setSelectedCategories((prev) => prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]),
-    toggleType: (t: ResourceType) =>
-      setSelectedTypes((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]),
-    toggleLevel: (l: ExperienceLevel) =>
-      setSelectedLevels((prev) => prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]),
-    loadMore: () => setVisibleCount((prev) => Math.min(prev + 3, filteredResources.length)),
+    toggleCategory,
+    toggleType,
+    toggleLevel,
+    loadMore,
   }
 }

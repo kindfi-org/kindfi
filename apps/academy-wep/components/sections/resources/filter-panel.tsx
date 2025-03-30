@@ -18,6 +18,10 @@ interface FilterPanelProps {
   onResetFilters: () => void
 }
 
+const categories: ResourceCategory[] = ["Blockchain", "Stellar", "Web3", "KindFi", "Impact"]
+const types: ResourceType[] = ["article", "video", "guide", "document"]
+const levels: ExperienceLevel[] = ["Beginner", "Intermediate", "Advanced"]
+
 export function FilterPanel({
   resources,
   selectedCategories,
@@ -29,10 +33,6 @@ export function FilterPanel({
   onResetFilters,
 }: FilterPanelProps) {
   const { categoryCounts, typeCounts, levelCounts } = useResourceCounts(resources)
-
-  const categories: ResourceCategory[] = ["Blockchain", "Stellar", "Web3", "KindFi", "Impact"]
-  const types: ResourceType[] = ["article", "video", "guide", "document"]
-  const levels: ExperienceLevel[] = ["Beginner", "Intermediate", "Advanced"]
 
   return (
     <div className="space-y-6">

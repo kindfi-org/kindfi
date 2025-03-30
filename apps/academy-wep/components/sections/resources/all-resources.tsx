@@ -4,11 +4,12 @@ import { Filter, ChevronDown } from "lucide-react"
 
 import { Button } from "~/components/base/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/base/dropdown-menu"
+import type { SortOption } from "~/lib/types/resources.types"
 
 interface AllResourcesProps {
   totalResources: number
-  sortOption: string
-  onSortChange: (option: string) => void
+  sortOption: SortOption
+  onSortChange: (option: SortOption) => void
   onToggleFilters: () => void
 }
 
@@ -36,13 +37,13 @@ export function AllResources({
           </Button>
 
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild aria-label="Sort resources">
               <Button variant="ghost" className="flex items-center gap-2">
                 {sortOption}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" aria-label="Sorting options">
               <DropdownMenuItem onClick={() => onSortChange("Most Recent")}>Most Recent</DropdownMenuItem>
               <DropdownMenuItem onClick={() => onSortChange("Oldest")}>Oldest</DropdownMenuItem>
               <DropdownMenuItem onClick={() => onSortChange("Most Viewed")}>Most Viewed</DropdownMenuItem>

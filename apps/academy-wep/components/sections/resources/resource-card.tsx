@@ -39,6 +39,16 @@ const typeVariants = cva('rounded-full', {
   },
 })
 
+// Get the appropriate time label based on resource type
+const getTimeLabel = (type: ResourceType) => {
+  switch (type) {
+    case "video":
+      return "min watch"
+    default:
+      return "min read"
+  }
+}
+
 export function ResourceCard({
   type,
   category,
@@ -51,16 +61,6 @@ export function ResourceCard({
   slug,
 }: ResourceCardProps) {
   const router = useRouter()
-
-  // Get the appropriate time label based on resource type
-  const getTimeLabel = () => {
-    switch (type) {
-      case "video":
-        return "min watch"
-      default:
-        return "min read"
-    }
-  }
 
   return (
     <Card className="group bg-white overflow-hidden h-full flex flex-col hover:shadow-md transition-shadow p-6 pb-0">
@@ -89,7 +89,7 @@ export function ResourceCard({
           <div className="flex items-center font-medium">
             {getTypeIcon(type)}
             <span>
-              {timeToConsume} {getTimeLabel()}
+              {timeToConsume} {getTimeLabel(type)}
             </span>
           </div>
           <Badge variant="outline" className="bg-gray-100 text-muted-foreground border-none">
