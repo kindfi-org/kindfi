@@ -1,12 +1,12 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import Link from 'next/link'
 import type React from 'react'
 import { useEffect, useState } from 'react'
+import { Button } from '~/components/base/button'
+import { Input } from '~/components/base/input'
 
 // Email validation function
 const validateEmail = (email: string) => {

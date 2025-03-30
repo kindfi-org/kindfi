@@ -27,8 +27,6 @@ const applyGradientToLastTwoWords = (title: string) => {
  * Props for the HeroSection component
  */
 interface HeroSectionProps {
-	/** Optional title content that can include rich JSX */
-	title?: React.ReactNode
 	/** Optional description text */
 	description?: string
 	/** Optional array of CTA buttons to display */
@@ -72,14 +70,6 @@ const DEFAULT_SLIDES = [
 ]
 
 const HeroSection = ({
-	title = (
-		<>
-			Master Blockchain for{' '}
-			<span className="bg-gradient-to-l from-secondary to-primary bg-clip-text text-transparent">
-				Social Impact
-			</span>
-		</>
-	),
 	description = DEFAULT_SLIDES[0].description,
 	ctaButtons = [],
 	learnerCount = 2500,
@@ -117,7 +107,7 @@ const HeroSection = ({
 			<div className="w-full md:w-3/4 lg:w-1/2 mx-auto">
 				<div>
 					<p className="bg-stone-200 text-primary p-2 rounded-lg inline-flex items-center text-xs">
-						<BsStars className="inline mr-1" /> KindFi's Education Platform
+						<BsStars className="inline mr-1" /> KindFi&apos;s Education Platform
 					</p>
 					<h1 className="text-gray-900 text-3xl sm:text-4xl lg:text-5xl font-bold mt-6">
 						{displayTitle}
@@ -129,7 +119,7 @@ const HeroSection = ({
 					{/* call to action home buttons */}
 					<div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 justify-center">
 						{ctaButtons.length > 0 ? (
-							ctaButtons.map((button, index) => (
+							ctaButtons.map((button) => (
 								<button
 									key={button.text.replace(/\s/g, '-').toLowerCase()}
 									className={
