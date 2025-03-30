@@ -37,4 +37,7 @@ yarn-error.log*
 next-env.d.ts
 
 # environment variables
+.env*
 .env
+.env.sample
+

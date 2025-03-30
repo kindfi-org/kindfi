@@ -1,3 +1,5 @@
+"use client";
+
 import type React from "react";
 import { achievements } from "~/data/achivement-data";
 import AchievementCard from "./shared/achivement-card";

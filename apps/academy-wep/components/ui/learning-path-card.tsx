@@ -1,7 +1,9 @@
+'use client'
+
 import { forwardRef } from 'react'
-import { Icon } from '~/components/ui/icon' // Importing the new Icon component
-import { Card } from '../base/card' // Updated to relative path
-import { Progress } from './progress' // Updated to relative path
+import { Card } from '~/components/base/card'
+import { Icon } from '~/components/ui/icon'
+import { Progress } from '~/components/ui/progress'
 
 interface LearningPathCardProps {
 	icon: string // Assuming icon is a string representing the icon name
