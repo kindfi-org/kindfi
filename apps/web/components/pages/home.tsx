@@ -85,10 +85,10 @@ const FinalCTA = dynamic(
 	},
 )
 
+
 export function HomeDashboard() {
 	return (
 		<>
-			<KYC />
 			<Hero />
 			<UserJourney />
 			<HighlightedProjects />
