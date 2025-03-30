@@ -33,4 +33,4 @@ const AskQuestionBox: React.FC<AskQuestionBoxProps> = ({ onSubmit }) => {
 	)
 }
 
-export default AskQuestionBox
+export { AskQuestionBox }

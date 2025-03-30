@@ -18,7 +18,7 @@ type ImageUploaderType = {
 	index: number
 }
 
-export default function ImageUploader({ form, index }: ImageUploaderType) {
+export function ImageUploader({ form, index }: ImageUploaderType) {
 	const MAX_FILE_SIZE = 5 * 1024 * 1024
 	const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpg', 'image/webp']
 
