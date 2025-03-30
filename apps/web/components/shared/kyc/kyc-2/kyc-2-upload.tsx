@@ -1,6 +1,5 @@
 'use client'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-// import * as pdfjsLib from 'pdfjs-dist'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '~/components/base/button'
@@ -24,7 +23,6 @@ import { useDocumentProcessor } from '~/hooks/kyc/use-document-processor'
 import { useDocumentValidation } from '~/hooks/kyc/use-document-validation'
 import { ValidationAlerts } from './validation-alerts'
 
-// pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
 export function IDDocumentUpload({ onBack, onNext }: IDDocumentUploadProps) {
 	const [documentType, setDocumentType] = useState<DocumentType>('')

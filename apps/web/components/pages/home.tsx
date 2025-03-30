@@ -10,7 +10,6 @@ import {
 	SkeletonPlatformOverview,
 	SkeletonUserJourney,
 } from '~/components/sections/home/skeletons'
-import KYC from '~/components/shared/kyc/kyc-2/kyc-2-upload'
 
 const Hero = dynamic(
 	() => import('~/components/sections/home/hero').then((mod) => mod.Hero),
