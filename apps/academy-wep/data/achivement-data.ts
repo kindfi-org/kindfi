@@ -1,5 +1,5 @@
-import type { AchievementCardProps } from '@/components/shared/achivement-card'
 import { Globe, Medal, Star, TrendingUp, Trophy, Wallet } from 'lucide-react'
+import type { AchievementCardProps } from '~/components/shared/achivement-card'
 export const achievements: AchievementCardProps[] = [
 	{
 		title: 'Blockchain Basics',

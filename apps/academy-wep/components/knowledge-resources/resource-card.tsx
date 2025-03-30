@@ -1,11 +1,11 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import type { ResourceType } from '@/lib/knowledge-resources'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, MessageSquare, ThumbsUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Button } from '~/components/base/button'
+import type { ResourceType } from '~/lib/knowledge-resources'
 
 interface ResourceCardProps {
 	resource: ResourceType
