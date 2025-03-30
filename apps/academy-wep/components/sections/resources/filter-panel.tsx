@@ -28,40 +28,40 @@ export function FilterPanel({
   onLevelChange,
   onResetFilters,
 }: FilterPanelProps) {
-  const { categoryCounts, typeCounts, levelCounts } = useResourceCounts(resources);
+  const { categoryCounts, typeCounts, levelCounts } = useResourceCounts(resources)
 
   const categories: ResourceCategory[] = ["Blockchain", "Stellar", "Web3", "KindFi", "Impact"]
   const types: ResourceType[] = ["article", "video", "guide", "document"]
   const levels: ExperienceLevel[] = ["Beginner", "Intermediate", "Advanced"]
 
   return (
-    <div>
-      <div className="space-y-5">
-        {/* Categories */}
-        <div className="flex gap-2 items-center mb-4">
-          <h3 className="text-sm font-medium text-gray-700">Categories:</h3>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <Badge
-                key={category}
-                variant={selectedCategories.includes(category) ? "default" : "outline"}
-                className={cn(
-                  "cursor-pointer rounded-full text-xs px-3 py-1",
-                  selectedCategories.includes(category)
-                    ? "bg-green-100 text-primary border-primary hover:bg-green-200"
-                    : "text-gray-700 hover:bg-gray-100"
-                )}
-                onClick={() => onCategoryChange(category)}
-              >
-                {category} ({categoryCounts[category]})
-              </Badge>
-            ))}
-          </div>
+    <div className="space-y-6">
+      {/* Categories */}
+      <div className="flex gap-2 items-center flex-wrap">
+        <h3 className="text-sm font-medium text-gray-700">Categories:</h3>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <Badge
+              key={category}
+              variant={selectedCategories.includes(category) ? "default" : "outline"}
+              className={cn(
+                "cursor-pointer rounded-full text-xs px-3 py-1",
+                selectedCategories.includes(category)
+                  ? "bg-green-100 text-primary border-primary hover:bg-green-200"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+              onClick={() => onCategoryChange(category)}
+            >
+              {category} ({categoryCounts[category]})
+            </Badge>
+          ))}
         </div>
+      </div>
 
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         {/* Resource Types */}
-        <div className="flex gap-2 items-center mb-4">
-          <h3 className="text-sm font-medium text-gray-700">Types:</h3>
+        <div className="flex gap-2 items-center flex-wrap lg:flex-1">
+          <h3 className="text-sm font-medium text-gray-700 whitespace-nowrap">Types:</h3>
           <div className="flex flex-wrap gap-2">
             {types.map((type) => (
               <Badge
@@ -75,16 +75,18 @@ export function FilterPanel({
                 )}
                 onClick={() => onTypeChange(type)}
               >
-                {getTypeIcon(type)}
-                {type.charAt(0).toUpperCase() + type.slice(1)}s ({typeCounts[type]})
+                <div className="flex items-center gap-1">
+                  {getTypeIcon(type)}
+                  {type.charAt(0).toUpperCase() + type.slice(1)}s ({typeCounts[type]})
+                </div>
               </Badge>
             ))}
           </div>
         </div>
 
         {/* Experience Level */}
-        <div className="flex gap-2 items-center mb-4">
-          <h3 className="text-sm font-medium text-gray-700">Level:</h3>
+        <div className="flex gap-2 items-center flex-wrap lg:flex-1">
+          <h3 className="text-sm font-medium text-gray-700 whitespace-nowrap">Level:</h3>
           <div className="flex flex-wrap gap-2">
             {levels.map((level) => (
               <Badge
@@ -105,7 +107,7 @@ export function FilterPanel({
         </div>
 
         {/* Reset Button */}
-        <div className="flex pt-2">
+        <div className="pt-2 lg:pt-0 lg:flex lg:items-start lg:justify-end lg:w-40">
           <Button
             variant="outline"
             size="sm"
@@ -119,3 +121,7 @@ export function FilterPanel({
     </div>
   )
 }
+
+
+
+

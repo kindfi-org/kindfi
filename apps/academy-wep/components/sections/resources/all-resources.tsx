@@ -22,7 +22,7 @@ export function AllResources({
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-4 md:mb-0">All Resources</h1>
 
-      <div className="flex items-center gap-3 w-full md:w-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
         <div className="text-gray-600 text-sm font-medium">Showing {totalResources} resources</div>
 
         <div className="flex items-center gap-2">
