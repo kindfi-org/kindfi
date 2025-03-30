@@ -3,9 +3,9 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from 'lucide-react'
 import { useState } from 'react'
+import { CommunitySection } from '~/components/CommunitySection'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
-import { CommunitySection } from '~/components/CommunitySection'
 import ReadyToEarn from '~/components/ready-to-earn'
 import { WhyChoose } from '~/components/sections/why-choose'
 
@@ -94,12 +94,13 @@ export default function Home() {
 					exit={{ x: 100, opacity: 0 }}
 					transition={{ duration: 0.6, ease: 'easeInOut' }}
 				>
-					<ReadyToEarn badges={[
-						{ id: '1', name: 'Blockchain Basics', earned: true },
-						{ id: '2', name: 'Stellar Expert', earned: false },
-						{ id: '3', name: 'Wallet Master', earned: false },
-						{ id: '4', name: 'Asset Manager', earned: false },
-						{ id: '5', name: 'Web3 Pioneer', earned: false },
+					<ReadyToEarn
+						badges={[
+							{ id: '1', name: 'Blockchain Basics', earned: true },
+							{ id: '2', name: 'Stellar Expert', earned: false },
+							{ id: '3', name: 'Wallet Master', earned: false },
+							{ id: '4', name: 'Asset Manager', earned: false },
+							{ id: '5', name: 'Web3 Pioneer', earned: false },
 							{ id: '6', name: 'KindFi Graduate', earned: false },
 						]}
 					/>
