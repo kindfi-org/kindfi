@@ -68,6 +68,7 @@
 		"react-error-boundary": "^5.0.0",
 		"react-hook-form": "^7.54.0",
 		"react-icons": "^5.4.0",
+		"react-player": "^2.16.0",
 		"react-use": "^17.6.0",
 		"simple-icons": "^14.1.0",
 		"sonner": "^1.7.1",

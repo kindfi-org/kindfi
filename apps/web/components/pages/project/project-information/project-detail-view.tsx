@@ -14,6 +14,7 @@ import {
 	TabsTrigger,
 } from '~/components/base/tabs'
 
+import { Technology } from '~/components/sections/projects/Technology'
 //? Import Project Detail Components
 import { BusinessModel } from '~/components/sections/projects/business-model'
 import { CompetitiveAdvantages } from '~/components/sections/projects/competitive-advantages'
@@ -21,7 +22,6 @@ import { InvestmentDetails } from '~/components/sections/projects/investment-det
 import { MarketOpportunity } from '~/components/sections/projects/market-opportunity'
 import { ProjectDocuments } from '~/components/sections/projects/project-documents'
 import { ProjectOverview } from '~/components/sections/projects/project-overview'
-import { Technology } from '~/components/sections/projects/Technology'
 import { TractionMilestones } from '~/components/sections/projects/traction-milestones'
 
 //? Import Mock Data
