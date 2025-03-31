@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { AskQuestionBox } from './ask-question-box'
-import { LoadMoreButton } from './load-more-button'
-import { QuestionCard } from './question-card'
+import AskQuestionBox from './ask-question-box'
+import LoadMoreButton from './load-more-button'
+import QuestionCard from './question-card'
 
-// TODO: Change this to the types file
 interface Answer {
 	id: number
 	author: string
@@ -14,7 +13,6 @@ interface Answer {
 	content: string
 }
 
-// TODO: Change this to the types file
 interface Question {
 	id: number
 	question: string
@@ -22,8 +20,6 @@ interface Question {
 	timeAgo: string
 	answers: Answer[]
 }
-
-// TODO: Change this to the contanst mock date file
 
 const initialQuestions: Question[] = [
 	{
@@ -77,9 +73,7 @@ const initialQuestions: Question[] = [
 	},
 ]
 
-// TODO: Change this to become a page that imports and constructs the section
-
-export function QAPage() {
+export default function QAPage() {
 	const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 
 	const loadMoreQuestions = (): void => {

@@ -73,4 +73,4 @@ const QuestionCard: React.FC<QuestionProps> = ({
 	)
 }
 
-export { QuestionCard }
+export default QuestionCard
