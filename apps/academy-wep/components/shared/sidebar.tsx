@@ -23,7 +23,7 @@ import {
 	SidebarMenuItem,
 } from '~/components/base/sidebar'
 import { learningPaths, navigationRoutes } from '~/lib/constants/sidebar'
-import type { LearningPath } from '~/lib/types/sidebar'
+import type { LearningPath } from '~/lib/types/sidebar.types'
 import { cn } from '~/lib/utils'
 
 export function AppSidebar() {
