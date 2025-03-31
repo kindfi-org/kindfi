@@ -3,18 +3,18 @@ import { CTAButtons } from './CTAButtons'
 import { CommunityStats } from './CommunityStats'
 
 interface CommunitySectionProps {
-  /** Number of community members to display (e.g. "500+") */
-  memberCount?: string;
-  /** Callback function for workshop button click */
-  onWorkshopClick?: () => void;
-  /** Callback function for subscribe button click */
-  onSubscribeClick?: () => void;
-  /** Main heading text for the community section */
-  title?: string;
-  /** Description paragraph for the community section */
-  description?: string;
-  /** Text displayed in the badge above the title */
-  badgeText?: string;
+	/** Number of community members to display (e.g. "500+") */
+	memberCount?: string
+	/** Callback function for workshop button click */
+	onWorkshopClick?: () => void
+	/** Callback function for subscribe button click */
+	onSubscribeClick?: () => void
+	/** Main heading text for the community section */
+	title?: string
+	/** Description paragraph for the community section */
+	description?: string
+	/** Text displayed in the badge above the title */
+	badgeText?: string
 }
 
 export function CommunitySection({
