@@ -1,6 +1,7 @@
 'use client'
 
 import { Fingerprint } from 'lucide-react'
+import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type ChangeEvent, useEffect, useState } from 'react'
@@ -10,7 +11,6 @@ import { Card, CardContent, CardHeader } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
-import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { usePasskeyAuthentication } from '~/hooks/passkey/use-passkey-authentication'
 import { useStellarContext } from '~/hooks/stellar/stellar-context'
 import { useFormValidation } from '~/hooks/use-form-validation'
@@ -87,9 +87,12 @@ export default function Login() {
 									placeholder="you@example.com"
 									required
 									aria-labelledby="email-label"
-									aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
+									aria-describedby={`${
+										isEmailInvalid ? 'email-error' : 'email-description'
+									}`}
 									aria-invalid={isEmailInvalid}
 									onChange={onEmailChange}
+									aria-required="true"
 								/>
 								<span id="email-description" className="sr-only">
 									Please enter your registered email address
@@ -104,6 +107,8 @@ export default function Login() {
 							size="lg"
 							className="gradient-btn text-white w-full mt-10"
 							formAction={signInAction}
+							aria-live="polite"
+							aria-busy={isAuthenticating}
 						>
 							{isAuthenticating ? (
 								'Authenticating...'
@@ -127,15 +132,25 @@ export default function Login() {
 						<hr />
 
 						{isNotRegistered && (
-							<div className="text-yellow-600">
+							<div
+								className="text-yellow-600"
+								role="alert"
+								aria-live="assertive"
+							>
 								User not registered. Please Sign Up first.
 							</div>
 						)}
 
 						{authError && !isNotRegistered && (
-							<div className="text-red-600">
+							<div className="text-red-600" role="alert" aria-live="assertive">
 								There was an error during authentication. Please try again.
 							</div>
+						)}
+
+						{authSuccess && (
+							<output className="text-green-600" aria-live="polite">
+								Authentication successful! Redirecting...
+							</output>
 						)}
 						<PasskeyInfoDialog />
 					</form>
