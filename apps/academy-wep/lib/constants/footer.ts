@@ -1,4 +1,4 @@
-import type { FooterRoutes } from '../types/footer'
+import type { FooterRoutes } from '../types/footer.types'
 
 export const footerRoutes: FooterRoutes = {
 	projects: [
