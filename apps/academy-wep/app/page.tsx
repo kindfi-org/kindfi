@@ -161,6 +161,7 @@ export default function Home() {
 				</motion.div>
 			</div>
 			<WhyChoose />
+			
 		</main>
 	)
 }

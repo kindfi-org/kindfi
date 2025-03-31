@@ -333,6 +333,7 @@ export function LearningMaterials() {
 						>
 							<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
 								{/* Decorative line elements */}
+                
 								<div className="absolute top-1/4 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#7CC635]/20 to-transparent" />
 								<div className="absolute top-2/3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
@@ -376,8 +377,8 @@ export function LearningMaterials() {
 						>
 							<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
 								{/* Decorative line elements */}
-								<div className="absolute top-1/4 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#7CC635]/20 to-transparent" />
-								<div className="absolute top-2/3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
+								<div className="absolute top-1/4 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#7CC635]/20 to-transparent"/>
+								<div className="absolute top-2/3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"/>
 
 								<AnimatePresence mode="wait">
 									{filteredResources.length > 0 ? (

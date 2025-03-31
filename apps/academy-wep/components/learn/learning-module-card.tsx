@@ -29,10 +29,10 @@ export function LearningModuleCard({ module, index }: LearningModuleCardProps) {
 			aria-label={`Module card: ${module.title}`}
 		>
 			<div className="absolute top-0 right-0 w-12 h-12 bg-gray-50 rounded-bl-2xl z-10 flex items-center justify-center">
-				<div className="w-8 h-8 bg-white rounded-bl-xl shadow-sm" />
+				<div className="w-8 h-8 bg-white rounded-bl-xl shadow-sm"></div>
 			</div>
 			{/* Hover effect background */}
-			<div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+			<div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
 
 			{/* Card content */}
 			<div className="relative z-10 flex flex-col h-full">
