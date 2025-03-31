@@ -101,9 +101,12 @@ export default function Signup() {
 										className="pl-10"
 										required
 										aria-labelledby="email-label"
-										aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
+										aria-describedby={
+											isEmailInvalid ? 'email-error' : 'email-description'
+										}
 										aria-invalid={isEmailInvalid}
 										onChange={onEmailChange}
+										aria-required="true"
 									/>
 									<span id="email-description" className="sr-only">
 										Enter your email address to create your account
@@ -117,10 +120,11 @@ export default function Signup() {
 							{isWebAuthnSupported ? (
 								<>
 									<Button
-										size="lg"
-										className="gradient-btn text-white w-full"
+										className="w-full"
 										type="submit"
 										disabled={isCreatingPasskey}
+										aria-live="polite"
+										aria-busy={isCreatingPasskey}
 									>
 										<>
 											Create account with passkey <UserPlus className="ml-2" />
@@ -137,19 +141,31 @@ export default function Signup() {
 							)}
 
 							{regSuccess && (
-								<div className="text-green-600">
+								<div
+									className="text-green-600"
+									role="status"
+									aria-live="polite"
+								>
 									Registration successful! You can now sign in.
 								</div>
 							)}
 
 							{regError && !isAlreadyRegistered && (
-								<div className="text-red-600">
+								<div
+									className="text-red-600"
+									role="alert"
+									aria-live="assertive"
+								>
 									There was an error during registration. Please try again.
 								</div>
 							)}
 
 							{isAlreadyRegistered && (
-								<div className="text-yellow-600">
+								<div
+									className="text-yellow-600"
+									role="alert"
+									aria-live="assertive"
+								>
 									This email is already registered. Please sign in.
 								</div>
 							)}
