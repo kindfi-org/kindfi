@@ -2,14 +2,14 @@
 
 import { Check, Lock, Trophy } from "lucide-react";
 import type {
-  AchievementStatsProps,
+  AchievementData,
   StatCardProps,
 } from "~/lib/types/learn/nft-achievement.types";
 
 export function NFTAchievementStats({
   totalBadges,
   earnedBadges,
-}: AchievementStatsProps) {
+}: AchievementData) {
   const lockedBadges = totalBadges - earnedBadges;
 
   return (
