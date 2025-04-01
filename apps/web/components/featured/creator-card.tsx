@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-import type { Creator } from '~/lib/types/featured-projects/featured-projects.types'
+import type { Creator } from '~/lib/types/projects.types'
 
 interface CreatorCardProps {
 	creator: Creator
@@ -17,10 +17,10 @@ export const CreatorCard: React.FC<CreatorCardProps> = ({ creator }) => {
 		name,
 		role,
 		image,
-		totalRaised,
-		completedProjects,
+		total_raised,
+		completed_projects,
 		followers,
-		recentProject,
+		recent_project,
 		verified,
 	} = creator
 
@@ -51,12 +51,12 @@ export const CreatorCard: React.FC<CreatorCardProps> = ({ creator }) => {
 						<div className="flex items-center justify-between text-sm">
 							<span className="text-muted-foreground">Total Raised</span>
 							<span className="font-bold">
-								${totalRaised?.toLocaleString()}
+								${total_raised?.toLocaleString()}
 							</span>
 						</div>
 						<div className="flex items-center justify-between text-sm">
 							<span className="text-muted-foreground">Completed Projects</span>
-							<span className="font-bold">{completedProjects}</span>
+							<span className="font-bold">{completed_projects}</span>
 						</div>
 						<div className="flex items-center justify-between text-sm">
 							<span className="text-muted-foreground">Followers</span>
@@ -68,7 +68,7 @@ export const CreatorCard: React.FC<CreatorCardProps> = ({ creator }) => {
 								variant="secondary"
 								className="bg-primary/10 text-primary hover:bg-primary/20"
 							>
-								{recentProject}
+								{recent_project}
 							</Badge>
 						</div>
 					</div>

@@ -20,7 +20,7 @@ import {
 import { useState } from 'react'
 import { cn } from '../../../lib/utils'
 import { Button } from '../../base/button'
-import { LinkDialog } from './LinkDialog'
+import { LinkDialog } from './link-dialog'
 
 interface RichTextEditorProps {
 	content: string

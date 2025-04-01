@@ -34,4 +34,4 @@ const Image: FC<BaseImageProps> = ({
 	)
 }
 
-export default Image
+export { Image }

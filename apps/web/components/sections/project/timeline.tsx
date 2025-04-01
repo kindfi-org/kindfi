@@ -70,4 +70,4 @@ const Timeline: React.FC<TimelineProps> = ({ events }) => {
 	)
 }
 
-export default Timeline
+export { Timeline }

@@ -5,7 +5,7 @@ import { createClient } from '~/lib/supabase/server'
 import { Badge } from './base/badge'
 import { Button } from './base/button'
 
-export default async function AuthButton() {
+export async function AuthButton() {
 	const supabase = await createClient()
 
 	const {

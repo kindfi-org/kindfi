@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import Image from '~/components/base/image'
+import { Image } from '~/components/base/image'
 import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 const Hero = () => {

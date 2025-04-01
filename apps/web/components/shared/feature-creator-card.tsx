@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion'
 import { BadgeCheck } from 'lucide-react'
-import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Card } from '~/components/base/card'
 import { CTAButtons } from '~/components/shared/cta-buttons'

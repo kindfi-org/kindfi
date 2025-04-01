@@ -1,19 +1,20 @@
 import { BarChart2, Users, Wallet } from 'lucide-react'
-import type { ImpactMetric, ProjectDetails } from '~/lib/types'
+import type { ImpactMetric, Project } from '~/lib/types'
 
-export const mockProjects: ProjectDetails[] = [
+export const mockProjects: Project[] = [
 	{
 		id: 'healthy-kids-id',
-		image: '/images/kids.webp',
-		category: 'Child Welfare',
+		image_url: '/images/kids.webp',
+		categories: ['Child Welfare'],
 		title: 'Healthy Kids Workshop',
 		description:
 			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica.',
-		currentAmount: 22800,
-		targetAmount: 25000,
-		investors: 18,
-		minInvestment: 5,
-		percentageComplete: 90,
+		current_amount: 22800,
+		target_amount: 25000,
+		investors_count: 18,
+		min_investment: 5,
+		created_at: '2023-08-22T09:30:00Z',
+		percentage_complete: 90,
 		tags: [
 			{ id: 'ngo-tag-id', text: 'NGO' },
 			{ id: 'nutrition-tag-id', text: 'NUTRITION' },
@@ -22,16 +23,17 @@ export const mockProjects: ProjectDetails[] = [
 	},
 	{
 		id: 'mobile-clinics-id',
-		image: '/images/healthcare.webp',
-		category: 'Healthcare',
+		image_url: '/images/healthcare.webp',
+		categories: ['Healthcare'],
 		title: 'Mobile Clinics',
 		description:
 			'Bring essential healthcare services to remote areas through mobile clinics.',
-		currentAmount: 32000,
-		targetAmount: 45000,
-		investors: 30,
-		minInvestment: 20,
-		percentageComplete: 71,
+		current_amount: 32000,
+		target_amount: 45000,
+		investors_count: 30,
+		min_investment: 20,
+		created_at: '2023-09-22T09:30:00Z',
+		percentage_complete: 71,
 		tags: [
 			{ id: 'healthcare-tag-id', text: 'HEALTHCARE' },
 			{ id: 'community-tag-id', text: 'COMMUNITY' },

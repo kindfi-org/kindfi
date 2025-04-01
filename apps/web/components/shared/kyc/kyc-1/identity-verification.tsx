@@ -22,7 +22,7 @@ import {
 	identitySchema,
 } from './types'
 
-export default function IdentityVerification({
+export function IdentityVerification({
 	onCancel,
 	onNext,
 	defaultValues,

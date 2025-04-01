@@ -2,11 +2,7 @@
 import { Button } from '~/components/base/button'
 import type { ReviewSectionProps } from '~/lib/types/final-review-kyc5.types'
 
-export default function ReviewSection({
-	title,
-	children,
-	onEdit,
-}: ReviewSectionProps) {
+export function ReviewSection({ title, children, onEdit }: ReviewSectionProps) {
 	return (
 		<div className="space-y-4 pb-6 border-b last:border-b-0">
 			<div className="flex justify-between items-center">

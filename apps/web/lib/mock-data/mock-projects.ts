@@ -12,16 +12,17 @@ import { createMoney, createPercentage } from '~/lib/utils/types-helpers'
 export const projects: Project[] = [
 	{
 		id: 'healthy-kids-id',
-		image: '/images/kids.webp',
-		category: 'Child Welfare',
+		created_at: '',
+		image_url: '/images/kids.webp',
+		categories: ['Child Welfare'],
 		title: 'Healthy Kids Workshop',
 		description:
 			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica. Together, we can ensure a brighter future for every child.',
-		currentAmount: createMoney(22800),
-		targetAmount: createMoney(25000),
-		investors: 18,
-		minInvestment: createMoney(5),
-		percentageComplete: createPercentage(90),
+		current_amount: createMoney(22800),
+		target_amount: createMoney(25000),
+		investors_count: 18,
+		min_investment: createMoney(5),
+		percentage_complete: createPercentage(90),
 		tags: [
 			{
 				id: 'ngo-tag-id',
@@ -51,16 +52,17 @@ export const projects: Project[] = [
 	},
 	{
 		id: 'forest-restoration-id',
-		image: '/images/bosques.webp',
-		category: 'Environmental Protection',
+		created_at: '',
+		image_url: '/images/bosques.webp',
+		categories: ['Environmental Protection'],
 		title: 'Forest Restoration Initiative',
 		description:
 			'Restore and reforest areas devastated by uncontrolled deforestation. Your support helps rebuild ecosystems and fight climate change.',
-		currentAmount: createMoney(54000),
-		targetAmount: createMoney(60000),
-		investors: 35,
-		minInvestment: createMoney(10),
-		percentageComplete: createPercentage(90),
+		current_amount: createMoney(54000),
+		target_amount: createMoney(60000),
+		investors_count: 35,
+		min_investment: createMoney(10),
+		percentage_complete: createPercentage(90),
 		tags: [
 			{
 				id: 'environment-tag-id',
@@ -90,16 +92,17 @@ export const projects: Project[] = [
 	},
 	{
 		id: 'rural-animal-shelter-id',
-		image: '/images/dogs.webp',
-		category: 'Animal Welfare',
+		created_at: '',
+		image_url: '/images/dogs.webp',
+		categories: ['Animal Welfare'],
 		title: 'Rural Animal Shelter',
 		description:
 			'Provide care and shelter to homeless animals in rural communities. Help us create safe havens for animals in need.',
-		currentAmount: createMoney(15500),
-		targetAmount: createMoney(20000),
-		investors: 22,
-		minInvestment: createMoney(8),
-		percentageComplete: createPercentage(77),
+		current_amount: createMoney(15500),
+		target_amount: createMoney(20000),
+		investors_count: 22,
+		min_investment: createMoney(8),
+		percentage_complete: createPercentage(77),
 		tags: [
 			{
 				id: 'animals-tag-id',
@@ -129,16 +132,17 @@ export const projects: Project[] = [
 	},
 	{
 		id: 'disaster-aid-id',
-		image: '/images/disaster-aid.webp',
-		category: 'Disaster Relief',
+		created_at: '',
+		image_url: '/images/disaster-aid.webp',
+		categories: ['Disaster Relief'],
 		title: 'Natural Disasters Human Aid',
 		description:
 			'Provide critical support to communities affected by natural disasters. From emergency supplies to long-term rebuilding efforts, join us in bringing hope and recovery to those in need.',
-		currentAmount: createMoney(30000),
-		targetAmount: createMoney(50000),
-		investors: 28,
-		minInvestment: createMoney(20),
-		percentageComplete: createPercentage(60),
+		current_amount: createMoney(30000),
+		target_amount: createMoney(50000),
+		investors_count: 28,
+		min_investment: createMoney(20),
+		percentage_complete: createPercentage(60),
 		tags: [
 			{
 				id: 'humanitarian-tag-id',
@@ -168,16 +172,17 @@ export const projects: Project[] = [
 	},
 	{
 		id: 'indigenous-crafts-id',
-		image: '/images/artesania.webp',
-		category: 'Culture and Arts',
+		created_at: '',
+		image_url: '/images/artesania.webp',
+		categories: ['Culture and Arts'],
 		title: 'Preserving Indigenous Crafts',
 		description:
 			'Support the preservation of indigenous craftsmanship in Costa Rica. Your contributions protect traditional techniques and cultural heritage.',
-		currentAmount: createMoney(34000),
-		targetAmount: createMoney(50000),
-		investors: 29,
-		minInvestment: createMoney(15),
-		percentageComplete: createPercentage(68),
+		current_amount: createMoney(34000),
+		target_amount: createMoney(50000),
+		investors_count: 29,
+		min_investment: createMoney(15),
+		percentage_complete: createPercentage(68),
 		tags: [
 			{
 				id: 'culture-tag-id',
@@ -207,16 +212,17 @@ export const projects: Project[] = [
 	},
 	{
 		id: 'water-for-rural-communities-id',
-		image: '/images/water.webp',
-		category: 'Access to Clean Water',
+		created_at: '',
+		image_url: '/images/water.webp',
+		categories: ['Access to Clean Water'],
 		title: 'Water for Rural Communities',
 		description:
 			'Provide access to safe drinking water in underserved rural areas. Help us install water purification systems to improve health and livelihoods.',
-		currentAmount: createMoney(18500),
-		targetAmount: createMoney(25000),
-		investors: 20,
-		minInvestment: createMoney(12),
-		percentageComplete: createPercentage(74),
+		current_amount: createMoney(18500),
+		target_amount: createMoney(25000),
+		investors_count: 20,
+		min_investment: createMoney(12),
+		percentage_complete: createPercentage(74),
 		tags: [
 			{
 				id: 'water-tag-id',
@@ -246,16 +252,17 @@ export const projects: Project[] = [
 	},
 	{
 		id: 'empowering-education-id',
-		image: '/images/education.webp',
-		category: 'Education',
+		created_at: '',
+		image_url: '/images/education.webp',
+		categories: ['Education'],
 		title: 'Empowering Education',
 		description:
 			'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for the next generation.',
-		currentAmount: createMoney(40000),
-		targetAmount: createMoney(55000),
-		investors: 40,
-		minInvestment: createMoney(10),
-		percentageComplete: createPercentage(73),
+		current_amount: createMoney(40000),
+		target_amount: createMoney(55000),
+		investors_count: 40,
+		min_investment: createMoney(10),
+		percentage_complete: createPercentage(73),
 		tags: [
 			{
 				id: 'education-tag-id',
@@ -285,16 +292,17 @@ export const projects: Project[] = [
 	},
 	{
 		id: 'mobile-clinics-id',
-		image: '/images/healthcare.webp',
-		category: 'Healthcare',
+		created_at: '',
+		image_url: '/images/healthcare.webp',
+		categories: ['Healthcare'],
 		title: 'Mobile Clinics',
 		description:
 			'Bring essential healthcare services to remote areas through mobile clinics. Your support helps save lives and build healthier communities.',
-		currentAmount: createMoney(32000),
-		targetAmount: createMoney(45000),
-		investors: 30,
-		minInvestment: createMoney(20),
-		percentageComplete: createPercentage(71),
+		current_amount: createMoney(32000),
+		target_amount: createMoney(45000),
+		investors_count: 30,
+		min_investment: createMoney(20),
+		percentage_complete: createPercentage(71),
 		tags: [
 			{
 				id: 'healthcare-tag-id',

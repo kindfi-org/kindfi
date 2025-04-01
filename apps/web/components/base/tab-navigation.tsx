@@ -61,4 +61,4 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ tabs, defaultTab }) => {
 	)
 }
 
-export default TabNavigation
+export { TabNavigation }

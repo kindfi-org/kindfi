@@ -16,7 +16,7 @@ import { requiredItems } from '~/lib/mock-data/project/mock-pitch'
 import type { RequiredItem } from '~/lib/types/project/pitch.types'
 import { cn } from '~/lib/utils'
 
-export default function Hero() {
+export function Hero() {
 	const [items, setItems] = useState<RequiredItem[]>(requiredItems)
 
 	const completedCount = items.filter((item) => item.completed).length

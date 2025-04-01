@@ -50,4 +50,4 @@ const SupporterUpdates: React.FC<SupporterUpdatesProps> = ({ updates }) => {
 	)
 }
 
-export default SupporterUpdates
+export { SupporterUpdates }

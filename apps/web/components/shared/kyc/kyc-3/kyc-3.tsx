@@ -169,4 +169,4 @@ const ProofOffaceVerification: React.FC<Props> = ({ onCancel, onContinue }) => {
 	)
 }
 
-export default ProofOffaceVerification
+export { ProofOffaceVerification }

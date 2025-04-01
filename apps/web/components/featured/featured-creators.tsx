@@ -1,4 +1,4 @@
-import type { Creator } from '~/lib/types/featured-projects/featured-projects.types'
+import type { Creator } from '~/lib/types/projects.types'
 import { CreatorCard } from './creator-card'
 
 interface FeaturedCreatorsProps {

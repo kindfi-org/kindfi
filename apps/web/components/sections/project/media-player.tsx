@@ -134,4 +134,4 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 	)
 }
 
-export default MediaPlayer
+export { MediaPlayer }

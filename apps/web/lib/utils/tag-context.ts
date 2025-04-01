@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import type { ProjectTag } from '../types/project.types'
+import type { Tag } from '../types'
 
 // Predefined list of accessible color combinations (background and text)
 const ACCESSIBLE_COLORS = [
@@ -42,7 +42,7 @@ export function getRandomAccessibleColor(): {
 }
 
 export function useTags() {
-	const [tags, setTags] = useState<ProjectTag[]>([])
+	const [tags, setTags] = useState<Tag[]>([])
 
 	const addTag = useCallback(
 		(tagName: string) => {

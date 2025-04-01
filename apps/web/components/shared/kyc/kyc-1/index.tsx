@@ -1,4 +1,4 @@
-export { default as IdentityVerification } from './identity-verification'
+export { IdentityVerification } from './identity-verification'
 export * from './types'
 export * from './full-name-field'
 export * from './date-of-birth-field'

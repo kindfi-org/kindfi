@@ -357,4 +357,4 @@ const ProofOfAddressUpload = ({
 	)
 }
 
-export default ProofOfAddressUpload
+export { ProofOfAddressUpload }

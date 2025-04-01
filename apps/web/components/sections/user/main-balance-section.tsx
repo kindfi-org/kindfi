@@ -5,7 +5,7 @@ import { Button } from '~/components/base/button'
 import { Card } from '~/components/base/card'
 import { useGlowEffect } from '~/hooks/use-glow-effect'
 
-export default function MainBalanceCard() {
+export function MainBalanceCard() {
 	const cardRef = useGlowEffect()
 
 	return (

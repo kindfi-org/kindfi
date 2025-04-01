@@ -10,7 +10,7 @@ import {
 	mockImpactMetrics,
 	mockProjects,
 } from '~/lib/mock-data/mock-user-dashboard'
-import type { ImpactMetric, ProjectDetails } from '~/lib/types'
+import type { ImpactMetric, Project } from '~/lib/types'
 
 export function UserDashboard() {
 	return (
@@ -43,8 +43,8 @@ export function UserDashboard() {
 									sizes="(max-width: 768px) 100vw, 50vw"
 								/>
 								<div
-									className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent 
-                   opacity-0 translate-y-[100.1%] group-hover:translate-y-0 group-hover:opacity-100 
+									className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent
+                   opacity-0 translate-y-[100.1%] group-hover:translate-y-0 group-hover:opacity-100
                    transition-all duration-500 ease-in-out flex flex-col items-center justify-center space-y-4"
 								>
 									<p className="text-white text-center px-6 translate-y-8 group-hover:translate-y-0 transition-transform delay-150 duration-300">
@@ -53,7 +53,7 @@ export function UserDashboard() {
 									</p>
 									<Link
 										href="/all-featured"
-										className="text-white hover:text-white/80 transition-colors font-medium translate-y-8 group-hover:translate-y-0 transition-transform delay-200 duration-300"
+										className="text-white hover:text-white/80 transition-colors font-medium translate-y-8 group-hover:translate-y-0 delay-200 duration-300"
 									>
 										See All
 									</Link>
@@ -111,7 +111,7 @@ export function UserDashboard() {
 							</div>
 						</div>
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							{mockProjects.map((project: ProjectDetails) => (
+							{mockProjects.map((project: Project) => (
 								<ProjectCard key={project.id} project={project} />
 							))}
 						</div>
@@ -128,7 +128,7 @@ export function UserDashboard() {
 							</Button>
 						</div>
 						<div className="space-y-4">
-							{mockProjects.map((project: ProjectDetails) => {
+							{mockProjects.map((project: Project) => {
 								const formattedDate = new Date().toLocaleDateString(undefined, {
 									year: 'numeric',
 									month: 'long',

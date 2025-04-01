@@ -59,4 +59,4 @@ const ImpactCards: React.FC<ImpactCardsProps> = ({ data }) => {
 	)
 }
 
-export default ImpactCards
+export { ImpactCards }
