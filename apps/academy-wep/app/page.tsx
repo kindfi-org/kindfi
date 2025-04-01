@@ -3,9 +3,9 @@
 import { motion } from "framer-motion";
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from "lucide-react";
 import { useState } from "react";
+import { CommunitySection } from "~/components/CommunitySection";
 import { Button } from "~/components/base/button";
 import { Input } from "~/components/base/input";
-import { CommunitySection } from "~/components/CommunitySection";
 import ReadyToEarn from "~/components/ready-to-earn";
 import { WhyChoose } from "~/components/sections/why-choose";
 

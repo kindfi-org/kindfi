@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { ProjectDetailView } from '~/components/pages/project/project-information/project-detail-view'
+import ProjectDetail from '~/components/pages/project/project-information/project-details'
 import { projects } from '~/lib/mock-data/mock-projects'
 
 interface ProjectPageParams {
@@ -39,5 +39,5 @@ export default async function Page({
 		notFound()
 	}
 
-	return <ProjectDetailView project={project} />
+	return <ProjectDetail project={project} />
 }
