@@ -261,7 +261,7 @@ export const verifyAuthentication = async ({
 
 	await deleteChallenge({ identifier, rpId })
 
-	return { verified }
+	return { verified, identifier }
 }
 
 // References
