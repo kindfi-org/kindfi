@@ -54,7 +54,7 @@ export default function LearningPaths() {
         {learningPaths.map((path, index) => {
           const IconComponent = iconMap[path.icon];
           return (
-            <Card key={index} className="p-4 shadow-lg flex items-start">
+            <Card key={`${path.icon}-${path.title}`} className="p-4 shadow-lg flex items-start">
               {IconComponent && (
                 <IconComponent
                   className={`w-10 h-10 ml-4 mr-6 ${
