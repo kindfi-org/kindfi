@@ -1,20 +1,23 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TYPE update_type_enum AS ENUM ('announcement', 'bug_fix', 'feature_update');
+
 CREATE TABLE public.project_updates (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   project_id uuid NOT NULL,
   update_title text NOT NULL,
   update_content text NOT NULL,
-  update_type text NOT NULL,
+  update_type update_type_enum NOT NULL,
   is_notification boolean DEFAULT false,
+  uploaded_by uuid NULL,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
-  metadata jsonb
+  metadata jsonb,
+  CONSTRAINT fk_project FOREIGN KEY (project_id)
+    REFERENCES public.projects (id) ON DELETE CASCADE,
+  CONSTRAINT fk_uploaded_by FOREIGN KEY (uploaded_by)
+    REFERENCES public.members (id) ON DELETE SET NULL
 );
-
-ALTER TABLE public.project_updates
-  ADD CONSTRAINT fk_project
-  FOREIGN KEY (project_id)
-  REFERENCES public.projects (id)
-  ON DELETE CASCADE;
 
 CREATE TABLE public.project_updates_kindlers (
   project_update_id uuid NOT NULL,
@@ -24,11 +27,25 @@ CREATE TABLE public.project_updates_kindlers (
   FOREIGN KEY (kindler_id) REFERENCES public.kindlers (id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_project_updates_project_id ON public.project_updates (project_id);
-CREATE INDEX idx_project_updates_update_type ON public.project_updates (update_type);
+CREATE INDEX idx_project_updates_project_id_update_type 
+ON public.project_updates (project_id, update_type);
+
+CREATE INDEX idx_project_updates_notifications 
+ON public.project_updates (project_id) 
+WHERE is_notification = true;
 
 ALTER TABLE public.project_updates ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY select_project_updates ON public.project_updates
-  FOR SELECT
-  USING (true);
+CREATE POLICY select_own_project_updates ON public.project_updates
+FOR SELECT
+USING (project_id IN (SELECT project_id FROM public.project_members WHERE user_id = current_user_id()));
+
+CREATE POLICY insert_project_updates ON public.project_updates
+FOR INSERT
+WITH CHECK (uploaded_by = current_user_id());
+
+DO $$ BEGIN
+  IF pg_trigger_depth() > 1 THEN
+    RAISE EXCEPTION 'Trigger recursion detected';
+  END IF;
+END $$;
