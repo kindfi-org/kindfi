@@ -2,11 +2,11 @@ import { Gift } from 'lucide-react'
 import { PrimaryCard } from '~/components/cards/primary-card'
 import { NftItem } from '../nft-item'
 import { TitleCardDetail } from '../title-card-detail'
-import type { NftTier, viewModeProps } from '../type'
+import type { NftTier, ViewModeProps } from '../type'
 
 type NftRewardProps = {
 	nftTiers: NftTier[]
-	viewMode: viewModeProps
+	viewMode: ViewModeProps
 }
 
 export function NftReward({ nftTiers, viewMode }: NftRewardProps) {

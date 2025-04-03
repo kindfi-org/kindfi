@@ -16,7 +16,7 @@ export function FellowSupporter() {
 				<div>
 					{dataSupportersMaxToShow.map((item, index) => (
 						<Supporter
-							key={`${item + index}`}
+							key={`${item - index}`}
 							offSet={index > 0 ? '-ml-3' : '0'}
 						/>
 					))}

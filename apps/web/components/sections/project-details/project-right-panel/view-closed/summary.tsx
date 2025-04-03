@@ -19,25 +19,30 @@ export function Summary() {
 
 			<div className="grid grid-cols-3 gap-4">
 				{itemsImpactSummary.map((item) => (
-					<ItemImpact key={item.name} name={item.name} value={item.value} />
+					<ItemImpact
+						key={item.name}
+						name={item.name as ImpactItemName}
+						value={item.value}
+					/>
 				))}
 			</div>
 		</PrimaryCard>
 	)
 }
 
-export function ItemImpact({ name, value }: { name: string; value: number }) {
+type ImpactItemName = 'nft' | 'referrals' | 'points'
+
+export function ItemImpact({
+	name,
+	value,
+}: {
+	name: ImpactItemName
+	value: number
+}) {
 	return (
-		<div
-			className={cn(
-				'p-4 rounded-lg text-center',
-				styleItemImpact[name as keyof typeof styleItemImpact],
-			)}
-		>
+		<div className={cn('p-4 rounded-lg text-center', styleItemImpact[name])}>
 			<span className="text-2xl font-bold">{value}</span>
-			<span className="block">
-				{textItemImpact[name as keyof typeof textItemImpact]}
-			</span>
+			<span className="block">{textItemImpact[name]}</span>
 		</div>
 	)
 }

@@ -87,11 +87,11 @@ export function ViewInitial({
 					</Button>
 				</div>
 
-				<FutureEquity />
+				<FutureEquity {...dataFutureEquity} />
 			</PrimaryCard>
 
 			<NftReward nftTiers={nftTiers} viewMode="initial" />
-			<ProjectCreator />
+			<ProjectCreator {...dataCreator} />
 			<SimilarProject />
 		</div>
 	)
@@ -111,6 +111,16 @@ function InfoDetails({ name, value }: { name: string; value: string }) {
 	)
 }
 
+const dataFutureEquity = {
+	valuationCap: '20 M$',
+	investmentRange: '2 mil $ - 10 mil $',
+}
+
+const dataCreator = {
+	creatorName: 'Qnetic Team',
+	joinDate: 'Joined March 2023',
+}
+
 const dataDetails = [
 	{
 		name: 'Investor',
@@ -118,11 +128,11 @@ const dataDetails = [
 	},
 	{
 		name: 'Min. Investor',
-		value: '300',
+		value: '$300',
 	},
 	{
 		name: 'Closing Date',
-		value: '14',
+		value: '14 days',
 	},
 	{
 		name: 'Type',
@@ -134,16 +144,16 @@ const nftTiers = [
 	{
 		title: 'Early Bird NFT',
 		description: 'Support with $100',
-		rightSite: '42 left',
+		rightSide: '42 left',
 	},
 	{
 		title: 'Impact Maker NFT',
 		description: 'Support with $250',
-		rightSite: '18 left',
+		rightSide: '18 left',
 	},
 	{
 		title: 'Founding Supporter NFT',
 		description: 'Support with $500',
-		rightSite: '5 left',
+		rightSide: '5 left',
 	},
 ]

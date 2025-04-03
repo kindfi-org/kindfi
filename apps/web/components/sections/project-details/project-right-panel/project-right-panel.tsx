@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import type { viewModeProps } from './type'
+import type { ViewModeProps } from './type'
 import { ViewClosed } from './view-closed'
 import { ViewDonated } from './view-donated'
 import { type FormValue, ViewInitial } from './view-initial'
@@ -9,9 +9,9 @@ export function ProjectRightPanel() {
 	const [amountOfSupport, setAmountOfSupport] = useState(
 		projectData.raisedAmount,
 	)
-	const [viewMode, setViewMode] = useState<viewModeProps>('initial')
+	const [viewMode, setViewMode] = useState<ViewModeProps>('initial')
 	const percentage = Math.round(
-		(amountOfSupport / projectData.goalAmount) * 100,
+		Math.min((amountOfSupport / projectData.goalAmount) * 100, 100),
 	)
 
 	const onSubmit = (data: FormValue) => {

@@ -1,7 +1,7 @@
 export type NftTier = {
 	title: string
 	description: string
-	rightSite: string
+	rightSide: string
 }
 
 export type ProjectData = {
@@ -12,4 +12,4 @@ export type ProjectData = {
 	nftTiers: NftTier[]
 }
 
-export type viewModeProps = 'initial' | 'donated' | 'closed'
+export type ViewModeProps = 'initial' | 'donated' | 'closed'

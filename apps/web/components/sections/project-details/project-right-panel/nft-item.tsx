@@ -1,42 +1,43 @@
 import { Star } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import { cn } from '~/lib/utils'
-import type { viewModeProps } from './type'
+import type { ViewModeProps } from './type'
 
 type NftItemProps = {
 	title: string
 	description: string
-	rightSite?: string
+	rightSide?: string
 	isClaimed?: boolean
-	viewMode?: viewModeProps
+	viewMode?: ViewModeProps
+	badgeText?: string
 }
 
 export function NftItem({
 	title,
 	viewMode = 'initial',
 	description,
-	rightSite = '',
+	rightSide = '',
 	isClaimed = false,
+	badgeText = 'Common',
 }: NftItemProps) {
 	const isBgPurple = viewMode === 'closed' || isClaimed
 
 	const renderRightSite = () => {
 		switch (viewMode) {
-			case 'initial':
-				return (
-					<span className="bg-purple-100 text-purple-600 px-2 py-1 rounded text-sm">
-						{rightSite}
-					</span>
-				)
-
 			case 'donated':
 				return isClaimed ? (
 					<Star className="size-5 text-purple-500" />
 				) : (
-					<span className="text-gray-600">{rightSite}</span>
+					<span className="text-gray-600">{rightSide}</span>
 				)
 			case 'closed':
-				return <Badge variant="purple">Common</Badge>
+				return <Badge variant="purple">{badgeText}</Badge>
+			default:
+				return (
+					<span className="bg-purple-100 text-purple-600 px-2 py-1 rounded text-sm">
+						{rightSide}
+					</span>
+				)
 		}
 	}
 

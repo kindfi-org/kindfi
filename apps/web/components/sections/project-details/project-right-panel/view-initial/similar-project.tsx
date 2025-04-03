@@ -48,12 +48,11 @@ function ItemProject({
 				<Image
 					src={image}
 					alt={title}
-					className="rounded-lg"
-					objectFit="cover"
+					className="rounded-lg object-cover"
 					fill
 				/>
 			</div>
-			<div className="">
+			<div>
 				<span className="font-semibold block">{title}</span>
 				<span className="text-gray-600 line-clamp-1">{description}</span>
 				<div>

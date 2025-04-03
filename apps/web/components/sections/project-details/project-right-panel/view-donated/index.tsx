@@ -8,9 +8,7 @@ import { NftItem } from '../nft-item'
 import { FellowSupporter } from './fellow-supporters'
 import { ImpactJourney } from './impact-journey'
 
-type ViewImpactProps = GoalProgressProps & {
-	// Add any additional properties here if needed
-}
+type ViewImpactProps = GoalProgressProps & {}
 
 export function ViewDonated({
 	goal,
@@ -48,7 +46,7 @@ export function ViewDonated({
 				</div>
 
 				<Separator />
-				<ImpactJourney />
+				<ImpactJourney {...dataImpactJourney} />
 			</PrimaryCard>
 
 			<FellowSupporter />
@@ -68,3 +66,10 @@ const dataNft = [
 		rightSite: 'Locked',
 	},
 ]
+
+const dataImpactJourney = {
+	currentImpact: '$100',
+	projectRank: '42',
+	totalProjects: 234,
+	supportingSince: 'Just now',
+}
