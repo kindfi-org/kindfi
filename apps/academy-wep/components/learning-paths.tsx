@@ -2,12 +2,13 @@ import { Layout, Zap } from "lucide-react";
 import { Badge } from "./base/badge";
 import { Button } from "./base/button";
 import { Card,CardContent, CardHeader, CardTitle } from "./base/card";
+ import { cn } from "@/lib/utils"; // adjust path if needed
 
 const iconMap = {
   Layout: Layout,
   Zap: Zap,
 };
-const cardIconStyles = "w-8 h-8 text-primary mr-4 flex-shrink-0";
+
 const learningPaths = [
   {
     icon: "Layout",
@@ -72,18 +73,19 @@ export default function LearningPaths() {
                     <span>{path.modules}</span> | <span>{path.level}</span> |{" "}
                     <span>{path.duration}</span>
                   </div>
-                  <Button
-                    variant={
-                      path.buttonVariant === "outline"
-                        ? "outline"
-                        : "destructive"
-                    }
-                    className={`w-full mt-4 ${
-                      path.buttonVariant === "outline"
-                        ? "bg-gradient-to-l from-secondary to-primary"
-                        : "bg-blue-700"
-                    }`}
-                  >
+                
+<Button
+  variant={path.buttonVariant === "outline" ? "outline" : "destructive"}
+  className={cn(
+    "w-full mt-4",
+    path.buttonVariant === "outline"
+      ? "bg-gradient-to-l from-secondary to-primary"
+      : "bg-blue-700"
+  )}
+>
+  
+</Button>
+
                     Start This Path →
                   </Button>
                 </CardContent>
