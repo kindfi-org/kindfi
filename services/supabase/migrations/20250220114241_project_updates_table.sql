@@ -1,5 +1,5 @@
 -- Create project_updates table
-CREATE TABLE project_updates (
+CREATE TABLE IF NOT EXISTS project_updates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     author_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
