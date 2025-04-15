@@ -1,84 +1,70 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
-import { Badge } from '~/components/base/badge'
+import Link from 'next/link'
 import { Button } from '~/components/base/button'
-import { Image } from '~/components/base/image'
-import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
-const Hero = () => {
-	const { hero } = mockAboutUs
 
+
+export function Hero() {
 	return (
-		<motion.section
-			initial={{ opacity: 0, y: 30 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.6, ease: 'easeOut' }}
-			className="relative flex flex-col-reverse lg:flex-row items-center justify-between gap-10 px-6 lg:px-20 py-16 lg:py-24"
+		<section
+			className="relative z-0 min-h-[60vh] px-4 pt-20"
+			aria-labelledby="hero-title"
+			role="banner"
 		>
-			<motion.div
-				initial={{ opacity: 0, x: -30 }}
-				animate={{ opacity: 1, x: 0 }}
-				transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
-				className="max-w-2xl text-center lg:text-left space-y-6"
-			>
-				<Badge variant="outline" className="text-sm px-4 py-1.5 rounded-full">
-					{hero.badge}
-				</Badge>
-
-				<h1 className="text-5xl lg:text-7xl font-bold text-black leading-[1.3] max-w-[22ch] whitespace-pre-line">
-					{hero.headline}
-				</h1>
-
-				<p className="text-lg lg:text-xl text-gray-600 leading-relaxed">
-					{hero.subheading}
-				</p>
-
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.6, ease: 'easeOut', delay: 0.4 }}
-					className="flex flex-col sm:flex-row gap-4 mt-6"
-				>
-					<Button
-						variant="default"
-						className="bg-black text-white px-6 py-2 text-base flex items-center justify-center gap-2 rounded-md"
+			<div className="container mx-auto max-w-6xl">
+				<div className="text-center">
+					<motion.h2
+						className="text-2xl font-bold mb-6"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5 }}
 					>
-						{hero.ctas[0].label}
-						<ArrowRight
-							size={28}
-							strokeWidth={2.5}
-							className="relative top-[1px] shrink-0"
-						/>
-					</Button>
-					<Button
-						variant="outline"
-						className="px-6 py-3 text-base border rounded-md"
-					>
-						{hero.ctas[1].label}
-					</Button>
-				</motion.div>
-			</motion.div>
+						Reimagining Social Impact
+					</motion.h2>
 
-			<motion.div
-				initial={{ opacity: 0, x: 50 }}
-				animate={{ opacity: 1, x: 0 }}
-				transition={{ duration: 0.6, ease: 'easeOut', delay: 0.3 }}
-				className="w-full flex justify-center"
-			>
-				<div className="w-full max-w-[620px] lg:max-w-[720px] aspect-[7/5]">
-					<Image
-						src={hero.image}
-						alt="Blockchain and Crowdfunding Visual"
-						width={720}
-						height={500}
-						className="rounded-lg shadow-md w-full h-full object-cover"
-					/>
+					<motion.h1
+						className="text-4xl md:text-5xl font-bold gradient-text mb-8 py-4"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5, delay: 0.2 }}
+					>
+						Redefining Crowdfunding with Blockchain Transparency
+					</motion.h1>
+
+					<motion.p
+						className="text-lg text-gray-700 pt-2 my-6"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5, delay: 0.4 }}
+					>
+						KindFi is the first Web3 platform built to fund verified social impact using Stellar blockchain, smart contract escrows, and AI-powered verification. We make it possible to support or launch trusted causes—securely, transparently, and on-chain
+					</motion.p>
+
+					<motion.div
+						className="flex flex-col sm:flex-row gap-4 justify-center"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5, delay: 0.6 }}
+					>
+						<a href="https://www.youtube.com/watch?v=Hlh4R8u-lWU" target="_blank" rel="noopener noreferrer">
+							<Button size="lg" className="gradient-btn text-white">
+							See how it works in minutes
+							</Button>
+						</a>
+						<Link href="/projects">
+							<Button
+								size="lg"
+								variant="outline"
+								className="gradient-border-btn"
+							>
+								Discover causes or launch yours
+							</Button>
+						</Link>
+					</motion.div>
 				</div>
-			</motion.div>
-		</motion.section>
+			</div>
+		</section>
 	)
 }
-
-export { Hero }

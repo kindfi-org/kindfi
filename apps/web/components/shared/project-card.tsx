@@ -1,50 +1,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Project, Tag } from '~/lib/types/projects.types'
+import type { Project } from '~/lib/types/projects.types'
 import { cn } from '~/lib/utils'
-import { getTagColors } from '~/lib/utils/types-helpers'
+import { RenderCategories, RenderTags } from '~/lib/utils/categories-util'
 import { Progress } from '../base/progress'
 
 interface ProjectCardProps {
 	project: Project
 	viewMode?: 'grid' | 'list'
-}
-
-// Extracted the shared tag rendering logic
-function RenderTags({ tags }: { tags: Tag[] | string[] }) {
-	if (!Array.isArray(tags) || tags?.length === 0) return null // Prevents errors if undefined or not an array
-
-	return (
-		<div className="flex flex-wrap gap-2 mt-4">
-			{tags.map((tag) => {
-				const colors = getTagColors(tag)
-				return (
-					<span
-						key={typeof tag === 'string' ? tag : tag.id}
-						className="px-2 py-1 text-xs rounded uppercase"
-						style={colors}
-					>
-						{typeof tag === 'string' ? tag : tag.text}
-					</span>
-				)
-			})}
-		</div>
-	)
-}
-
-function RenderCategories({ categories }: { categories: string[] }) {
-	return categories?.length ? (
-		<div className="absolute top-4 left-4 z-10 flex flex-col gap-1">
-			{categories.map((category, index) => (
-				<span
-					key={category}
-					className="bg-white text-gray-800 px-3 py-1 rounded-full text-xs font-medium shadow-sm"
-				>
-					{category}
-				</span>
-			))}
-		</div>
-	) : null
 }
 
 function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
@@ -66,6 +29,7 @@ function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 }
 
 export default ProjectCard
+
 function ProjectDetails({
 	project,
 	percentageComplete,
@@ -78,7 +42,7 @@ function ProjectDetails({
 	return (
 		<div
 			className={cn(
-				'overflow-hidden transition-shadow duration-300 rounded-lg border border-gray-100 bg-white',
+				'overflow-hidden transition-all duration-300 rounded-lg border border-gray-100 bg-white hover:shadow-md',
 				viewMode === 'list' ? 'flex' : 'h-full relative',
 			)}
 		>
@@ -110,7 +74,7 @@ function ProjectDetails({
 							${project.current_amount?.toLocaleString() ?? '0'}
 						</span>
 						<span className="text-gray-500">
-							{percentageComplete.toFixed(2)}% of $
+							{percentageComplete.toFixed(0)}% of $
 							{project.target_amount?.toLocaleString()}
 						</span>
 					</div>

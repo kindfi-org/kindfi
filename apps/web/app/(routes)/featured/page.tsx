@@ -6,8 +6,8 @@ import { useSetState } from 'react-use'
 import { CTASection } from '~/components/featured/cta-section'
 import { FeaturedCreators } from '~/components/featured/featured-creators'
 import { HeroSection } from '~/components/featured/hero-section'
-import { ProjectsGrid } from '~/components/shared/projects/projects-grid'
-import { ProjectsHeader } from '~/components/shared/projects/projects-header'
+import { ProjectsGrid } from '~/components/sections/projects/projects-grid'
+import { ProjectsHeader } from '~/components/sections/projects/projects-header'
 
 import { useProjectsFilter } from '~/hooks/use-projects-filter'
 import {

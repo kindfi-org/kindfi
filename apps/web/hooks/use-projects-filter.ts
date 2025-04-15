@@ -18,27 +18,35 @@ export function useProjectsFilter() {
 		(projects: Project[]) => {
 			if (selectedCategories.length === 0) return projects
 
+			// Debug selected categories
+			console.log('Filtering with categories:', selectedCategories)
+
 			return projects.filter((project) => {
 				// Handle different ways categories might be stored
 				// 1. In the 'categories' field as a array of string
-
-				if (
-					project.categories.some((category) =>
-						selectedCategories.includes(category?.toLocaleLowerCase()),
-					)
-				) {
-					return true
+				if (project.categories && project.categories.length > 0) {
+					const match = project.categories.some((category) => {
+						if (!category) return false;
+						// Make comparison consistent by lowercasing both sides
+						return selectedCategories.some(
+							selected => selected.toLowerCase() === category.toLowerCase()
+						);
+					});
+					if (match) return true;
 				}
 
+				// 2. In the 'tags' array
 				if (project.tags && project.tags.length > 0) {
-					// 2. In the 'tags' array
 					return project.tags.some((tag) => {
-						const tagText = typeof tag === 'string' ? tag : tag.text
-						return selectedCategories.includes(tagText?.toLocaleLowerCase())
-					})
+						const tagText = typeof tag === 'string' ? tag : tag.text;
+						if (!tagText) return false;
+						return selectedCategories.some(
+							selected => selected.toLowerCase() === tagText.toLowerCase()
+						);
+					});
 				}
 
-				return false
+				return false;
 			})
 		},
 		[selectedCategories],
@@ -100,8 +108,10 @@ export function useProjectsFilter() {
 
 	return {
 		selectedCategories,
-		setSelectedCategories: (val: string[]) =>
-			setState((prev) => ({ ...prev, selectedCategories: val })),
+		setSelectedCategories: (val: string[]) => {
+			console.log('Setting categories to:', val);
+			setState((prev) => ({ ...prev, selectedCategories: val }));
+		},
 		sortOption,
 		setSortOption: (val: SortOption) =>
 			setState((prev) => ({ ...prev, sortOption: val })),

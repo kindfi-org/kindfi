@@ -9,8 +9,8 @@ import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { TagEdit } from '~/components/shared/tag-edit'
 import type { Tag as ProjectTag } from '~/lib/types'
+import { getTagColors } from '~/lib/utils/categories-util'
 import { formatToPascalCase, useTags } from '~/lib/utils/tag-context'
-import { getTagColors } from '~/lib/utils/types-helpers'
 
 type TagManagerProps = {
 	id?: string
