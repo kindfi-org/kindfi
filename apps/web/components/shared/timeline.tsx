@@ -17,13 +17,10 @@ interface TimelineProps {
 /**
  * Timeline - A vertical timeline component with steps down the center.
  */
-const Timeline = ({
-	steps,
-}: TimelineProps) => {
+const Timeline = ({ steps }: TimelineProps) => {
 	return (
 		<section className="py-16">
 			<div className="container mx-auto max-w-3xl px-4">
-		
 				{/* Timeline container */}
 				<div className="relative">
 					{/* Vertical center line */}

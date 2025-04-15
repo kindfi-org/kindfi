@@ -35,7 +35,9 @@ const KindFiStellar = () => {
 					viewport={{ once: true, amount: 0.2 }}
 					className="text-gray-600 max-w-2xl mx-auto mt-4"
 				>
-					With Stellar, KindFi brings trustless, efficient, and borderless collaboration to impact-driven communities from small NGOs in Costa Rica to large donor collectives across LATAM.
+					With Stellar, KindFi brings trustless, efficient, and borderless
+					collaboration to impact-driven communities from small NGOs in Costa
+					Rica to large donor collectives across LATAM.
 				</motion.p>
 
 				<motion.div

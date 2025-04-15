@@ -4,8 +4,6 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
 
-
-
 export function Hero() {
 	return (
 		<section
@@ -39,7 +37,10 @@ export function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.4 }}
 					>
-						KindFi is the first Web3 platform built to fund verified social impact using Stellar blockchain, smart contract escrows, and AI-powered verification. We make it possible to support or launch trusted causes—securely, transparently, and on-chain
+						KindFi is the first Web3 platform built to fund verified social
+						impact using Stellar blockchain, smart contract escrows, and
+						AI-powered verification. We make it possible to support or launch
+						trusted causes—securely, transparently, and on-chain
 					</motion.p>
 
 					<motion.div
@@ -48,9 +49,13 @@ export function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.6 }}
 					>
-						<a href="https://www.youtube.com/watch?v=Hlh4R8u-lWU" target="_blank" rel="noopener noreferrer">
+						<a
+							href="https://www.youtube.com/watch?v=Hlh4R8u-lWU"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
 							<Button size="lg" className="gradient-btn text-white">
-							See how it works in minutes
+								See how it works in minutes
 							</Button>
 						</a>
 						<Link href="/projects">

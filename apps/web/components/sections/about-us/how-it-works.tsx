@@ -8,7 +8,8 @@ const HowItWorks = () => {
 				How KindFi Works
 			</h2>
 			<p className="text-lg text-gray-600 text-center mb-8">
-			A transparent, milestone-based funding system backed by blockchain and AI.
+				A transparent, milestone-based funding system backed by blockchain and
+				AI.
 			</p>
 			<Timeline steps={mockAboutUs.howItWorks} />
 		</section>

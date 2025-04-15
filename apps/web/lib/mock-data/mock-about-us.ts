@@ -15,7 +15,7 @@ export const mockAboutUs = {
 		{
 			title: 'Lack of Transparency',
 			description:
-				"Most platforms keep donors in the dark. KindFi makes every transaction and milestone publicly verifiable through Stellar smart contracts.",
+				'Most platforms keep donors in the dark. KindFi makes every transaction and milestone publicly verifiable through Stellar smart contracts.',
 			icon: 'lock',
 		},
 		{
@@ -41,22 +41,26 @@ export const mockAboutUs = {
 		{
 			icon: 'globe',
 			title: 'Project Submission',
-			description: 'Cause creators submit their campaigns with clear goals and impact milestones. AI helps evaluate legitimacy, optimize storytelling, and flag inconsistencies before review',
+			description:
+				'Cause creators submit their campaigns with clear goals and impact milestones. AI helps evaluate legitimacy, optimize storytelling, and flag inconsistencies before review',
 		},
 		{
 			icon: 'lock',
 			title: 'Secure Donations',
-			description: 'Approved projects go live. Donations are held in Soroban-powered smart escrow contracts on the Stellar blockchain — never directly transferred Contributors use wallets and biometric passkeys for secure, on-chain participation',
+			description:
+				'Approved projects go live. Donations are held in Soroban-powered smart escrow contracts on the Stellar blockchain — never directly transferred Contributors use wallets and biometric passkeys for secure, on-chain participation',
 		},
 		{
 			icon: 'check-circle',
 			title: 'Milestone-Based Releases',
-			description: 'Funds are released in tranches only when verified milestones are met — such as progress photos, reports, or social proof.',
+			description:
+				'Funds are released in tranches only when verified milestones are met — such as progress photos, reports, or social proof.',
 		},
 		{
 			icon: 'star',
 			title: 'Community Growth',
-			description: 'Kinders unlock governance power, exclusive access, and future project prioritization — building a trusted, on-chain identity layer.',
+			description:
+				'Kinders unlock governance power, exclusive access, and future project prioritization — building a trusted, on-chain identity layer.',
 		},
 	],
 	whyIsDifferent: [
@@ -134,22 +138,26 @@ export const mockAboutUs = {
 		{
 			id: 1,
 			title: 'AI-Powered Crowdfunding Optimization',
-			details: "AI agents to vet campaigns, optimize narratives, detect fraud, and surface the most promising projects"
+			details:
+				'AI agents to vet campaigns, optimize narratives, detect fraud, and surface the most promising projects',
 		},
 		{
 			id: 2,
 			title: 'Global NGO & Foundation Partnerships',
-			details: "Collaborations with NGOs and foundations across Latin America to onboard high-impact causes, expand reach and impact"
+			details:
+				'Collaborations with NGOs and foundations across Latin America to onboard high-impact causes, expand reach and impact',
 		},
 		{
 			id: 3,
 			title: 'Soroban-Powered Smart Contracts',
-			details: "Robust governance, referral, streak, and fund management systems using Soroban—enabling decentralized fund releases, NFT-based reputation, and community voting"
+			details:
+				'Robust governance, referral, streak, and fund management systems using Soroban—enabling decentralized fund releases, NFT-based reputation, and community voting',
 		},
 		{
 			id: 4,
 			title: 'Multi-Currency & On-Ramp Integration',
-			details: "Support for USDC, XLM, and fiat onramps to allow seamless contributions from anywhere in the world—crypto-native or not"
+			details:
+				'Support for USDC, XLM, and fiat onramps to allow seamless contributions from anywhere in the world—crypto-native or not',
 		},
 	],
 }

@@ -51,9 +51,9 @@ export default function ProjectsPage() {
 				onSortChange={setSortOption}
 			/>
 
-			<ProjectsGrid 
-				projects={filteredProjects} 
-				viewMode={viewMode} 
+			<ProjectsGrid
+				projects={filteredProjects}
+				viewMode={viewMode}
 				selectedCategories={selectedCategories}
 				onClearFilters={handleClearFilters}
 			/>

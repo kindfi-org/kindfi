@@ -23,9 +23,15 @@ const CallToAction = () => {
 				transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
 				viewport={{ once: true }}
 			>
-				KindFi isn’t just a platform — it’s a new standard for how funding should work: transparent, secure, and accountable from day one.
+				KindFi isn’t just a platform — it’s a new standard for how funding
+				should work: transparent, secure, and accountable from day one.
 			</motion.p>
-		<CTAButtons primaryText={'Explore Projects'} secondaryText={'Make a Change'} primaryHref={'/projects'} secondaryHref={'/sign-up'}/>
+			<CTAButtons
+				primaryText={'Explore Projects'}
+				secondaryText={'Make a Change'}
+				primaryHref={'/projects'}
+				secondaryHref={'/sign-up'}
+			/>
 		</section>
 	)
 }
