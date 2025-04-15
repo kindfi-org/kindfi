@@ -2,6 +2,10 @@ import { Share2, Trophy } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Separator } from '~/components/base/separator'
 import { PrimaryCard } from '~/components/cards/primary-card'
+import {
+	dataImpactJourney,
+	dataNft,
+} from '~/lib/mock-data/project/mock-project-side-panel'
 import { ButtonIconDetail } from '../button-icon-detail'
 import { GoalProgress, type GoalProgressProps } from '../goal-progress'
 import { NftItem } from '../nft-item'
@@ -52,24 +56,4 @@ export function ViewDonated({
 			<FellowSupporter />
 		</div>
 	)
-}
-
-const dataNft = [
-	{
-		title: 'Early Bird NFT',
-		description: 'Claimed • #042',
-		isClaimed: true,
-	},
-	{
-		title: 'Impact Maker NFT',
-		description: 'Support $250 more to unlock',
-		rightSite: 'Locked',
-	},
-]
-
-const dataImpactJourney = {
-	currentImpact: '$100',
-	projectRank: '42',
-	totalProjects: 234,
-	supportingSince: 'Just now',
 }

@@ -1,5 +1,6 @@
 import { Trophy } from 'lucide-react'
 import { PrimaryCard } from '~/components/cards/primary-card'
+import { itemsImpactSummary } from '~/lib/mock-data/project/mock-project-side-panel'
 import { cn } from '~/lib/utils'
 import { TitleCardDetail } from '../title-card-detail'
 
@@ -47,18 +48,11 @@ export function ItemImpact({
 	)
 }
 
-const itemsImpactSummary = [
-	{ name: 'nft', value: 1 },
-	{ name: 'referrals', value: 0 },
-	{ name: 'points', value: 125 },
-]
-
 const styleItemImpact = {
 	nft: 'text-purple-600 bg-purple-50',
 	referrals: 'text-blue-600 bg-blue-50',
 	points: 'text-orange-600 bg-orange-50',
 }
-
 const textItemImpact = {
 	nft: 'NFTs Earned',
 	referrals: 'Referrals',

@@ -2,6 +2,10 @@ import { Globe, Heart } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { PrimaryCard } from '~/components/cards/primary-card'
+import {
+	comments,
+	dataSupporters,
+} from '~/lib/mock-data/project/mock-project-side-panel'
 import { Supporter } from '../supporter'
 import { TitleCardDetail } from '../title-card-detail'
 
@@ -74,23 +78,3 @@ export function Comments({ name, badge, comment, likes }: CommentsProps) {
 		</div>
 	)
 }
-
-const comments = [
-	{
-		id: 'comment-1',
-		name: 'Sarah M.',
-		badge: 'Early Supporter',
-		comment:
-			'Amazing to see the project reach its goal! The community really came together. 🎉',
-		likes: 24,
-	},
-	{
-		id: 'comment-2',
-		name: 'David K.',
-		badge: 'Project Champion',
-		comment:
-			'The transparency and regular updates made this journey special. Looking forward to the impact report! 📊',
-		likes: 18,
-	},
-]
-const dataSupporters = Array(300).fill(0)

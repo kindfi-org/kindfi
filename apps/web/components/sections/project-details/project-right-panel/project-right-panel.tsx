@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { projectData } from '~/lib/mock-data/project/mock-project-side-panel'
 import type { ViewModeProps } from './type'
 import { ViewClosed } from './view-closed'
 import { ViewDonated } from './view-donated'
@@ -52,27 +53,4 @@ export function ProjectRightPanel() {
 	}
 
 	return <div className="max-w-[480px]">{renderView()}</div>
-}
-
-const projectData = {
-	title: 'Energy storage with zero lithium and zero-degradation',
-	raisedAmount: 963419,
-	goalAmount: 1500000,
-	nftTiers: [
-		{
-			title: 'Early Bird NFT',
-			description: 'Support with $100',
-			rightSite: '42 left',
-		},
-		{
-			title: 'Impact Maker NFT',
-			description: 'Support with $250',
-			rightSite: '18 left',
-		},
-		{
-			title: 'Founding Supporter NFT',
-			description: 'Support with $500',
-			rightSite: '5 left',
-		},
-	],
 }

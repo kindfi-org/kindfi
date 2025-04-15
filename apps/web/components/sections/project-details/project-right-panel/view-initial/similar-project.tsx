@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { PrimaryCard } from '~/components/cards/primary-card'
+import { dataProject } from '~/lib/mock-data/project/mock-project-side-panel'
 import { TitleCardDetail } from '../title-card-detail'
 
 export function SimilarProject() {
@@ -65,20 +66,3 @@ function ItemProject({
 		</div>
 	)
 }
-
-const dataProject = [
-	{
-		title: 'EcoFlow Energy Solutions',
-		description: 'Renewable energy storage for residential homes',
-		progress: 80,
-		raised: '1.2M',
-		image: '/images/renewable-energy.webp',
-	},
-	{
-		title: 'GreenPower Storage Systems',
-		description: 'Grid-scale energy storage',
-		progress: 50,
-		raised: '850K',
-		image: '/images/bosques.webp',
-	},
-]

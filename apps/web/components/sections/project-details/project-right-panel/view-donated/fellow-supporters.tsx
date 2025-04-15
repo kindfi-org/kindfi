@@ -1,5 +1,6 @@
 import { Button } from '~/components/base/button'
 import { PrimaryCard } from '~/components/cards/primary-card'
+import { dataSupporters } from '~/lib/mock-data/project/mock-project-side-panel'
 import { Supporter } from '../supporter'
 import { TitleCardDetail } from '../title-card-detail'
 
@@ -32,5 +33,3 @@ export function FellowSupporter() {
 		</PrimaryCard>
 	)
 }
-
-const dataSupporters = Array(300).fill(0)

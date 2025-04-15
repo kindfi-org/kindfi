@@ -12,6 +12,12 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { PrimaryCard } from '~/components/cards/primary-card'
+import {
+	dataCreator,
+	dataDetails,
+	dataFutureEquity,
+	nftTiers,
+} from '~/lib/mock-data/project/mock-project-side-panel'
 import { GoalProgress, type GoalProgressProps } from '../goal-progress'
 import { FutureEquity } from './future-equity'
 import { NftReward } from './nft-reward'
@@ -110,50 +116,3 @@ function InfoDetails({ name, value }: { name: string; value: string }) {
 		</div>
 	)
 }
-
-const dataFutureEquity = {
-	valuationCap: '20 M$',
-	investmentRange: '2 mil $ - 10 mil $',
-}
-
-const dataCreator = {
-	creatorName: 'Qnetic Team',
-	joinDate: 'Joined March 2023',
-}
-
-const dataDetails = [
-	{
-		name: 'Investor',
-		value: '247',
-	},
-	{
-		name: 'Min. Investor',
-		value: '$300',
-	},
-	{
-		name: 'Closing Date',
-		value: '14 days',
-	},
-	{
-		name: 'Type',
-		value: 'SAFE',
-	},
-]
-
-const nftTiers = [
-	{
-		title: 'Early Bird NFT',
-		description: 'Support with $100',
-		rightSide: '42 left',
-	},
-	{
-		title: 'Impact Maker NFT',
-		description: 'Support with $250',
-		rightSide: '18 left',
-	},
-	{
-		title: 'Founding Supporter NFT',
-		description: 'Support with $500',
-		rightSide: '5 left',
-	},
-]
