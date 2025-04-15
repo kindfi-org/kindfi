@@ -55,9 +55,9 @@ export interface Project {
 	title: string
 	description: string
 	image_url?: string
-	video_url?:string;
-	rating?:string;
-	relatedProjects?:[];
+	video_url?: string
+	rating?: string
+	relatedProjects?: []
 	//for project that has the category field as an array of strings
 	categories: string[]
 	location?: string

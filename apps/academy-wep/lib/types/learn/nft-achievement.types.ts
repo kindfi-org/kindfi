@@ -1,18 +1,18 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react'
 
 export interface AchievementData {
-  totalBadges: number;
-  earnedBadges: number;
+	totalBadges: number
+	earnedBadges: number
 }
 
 export interface AchievementProgressProps extends AchievementData {
-  className?: string;
+	className?: string
 }
 
 export interface StatCardProps {
-  icon: ReactNode;
-  iconBgColor: string;
-  borderColor: string;
-  value: number;
-  label: string;
+	icon: ReactNode
+	iconBgColor: string
+	borderColor: string
+	value: number
+	label: string
 }

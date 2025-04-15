@@ -2,8 +2,8 @@
 
 import { forwardRef } from 'react'
 import { Card } from '~/components/base/card'
-import { Icon } from '~/components/ui/icon'
 import { Progress } from '~/components/base/progress'
+import { Icon } from '~/components/ui/icon'
 
 interface LearningPathCardProps {
 	icon: string // Assuming icon is a string representing the icon name
