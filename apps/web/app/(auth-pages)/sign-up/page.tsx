@@ -141,11 +141,7 @@ export default function Signup() {
 							)}
 
 							{regSuccess && (
-								<div
-									className="text-green-600"
-									role="status"
-									aria-live="polite"
-								>
+								<div className="text-green-600" aria-live="polite">
 									Registration successful! You can now sign in.
 								</div>
 							)}

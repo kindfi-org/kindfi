@@ -5,40 +5,19 @@ import { KindFiStellar } from '~/components/sections/about-us/kindfi-stellar'
 import { MissionVision } from '~/components/sections/about-us/mission-vision'
 import { Problems } from '~/components/sections/about-us/problems'
 import { Roadmap } from '~/components/sections/about-us/roadmap'
-import { WhyIsDifferent } from '~/components/sections/about-us/why-is-different'
+import { WhyKindFiIsDifferent } from '~/components/sections/about-us/why-is-different'
 
 export default function AboutPage() {
 	return (
 		<div className="w-full flex flex-col items-center text-center">
 			<Hero />
-
-			<div className="w-full max-w-5xl mx-auto px-6 pt-52 pb-40">
-				<MissionVision />
-			</div>
-
-			<div className="w-full max-w-5xl mx-auto px-6 pt-52 pb-40">
-				<Problems />
-			</div>
-
-			<div className="w-full max-w-5xl mx-auto px-6 pt-52 pb-40">
-				<HowItWorks />
-			</div>
-
-			<div className="w-full max-w-5xl mx-auto px-6 pt-52 pb-40">
-				<WhyIsDifferent />
-			</div>
-
-			<div className="w-full max-w-5xl mx-auto px-6 pt-52 pb-40">
-				<KindFiStellar />
-			</div>
-
-			<div className="w-full max-w-5xl mx-auto px-6 pt-52 pb-40">
-				<Roadmap />
-			</div>
-
-			<div className="w-full max-w-5xl mx-auto px-6 pt-60 pb-60">
-				<CallToAction />
-			</div>
+			<MissionVision />
+			<Problems />
+			<KindFiStellar />
+			<HowItWorks />
+			<WhyKindFiIsDifferent />
+			<Roadmap />
+			<CallToAction />
 		</div>
 	)
 }

@@ -55,11 +55,12 @@ export const CTAForm = ({ onSubmit, className = '' }: CtaFormProps) => {
 					transition={{ duration: 0.6, delay: 0.1 }}
 				>
 					<h2 className="text-3xl font-bold text-gray-900 mb-4">
-						Your Social Project, Amplified by KindFi
+						Launch Your Social Cause with KindFi
 					</h2>
 					<p className="text-lg text-gray-600 mb-8">
-						Join forces with passionate Web3 collaborators to create meaningful
-						social and environmental impact.
+						Whether you’re an NGO, local initiative, or changemaker — start your
+						journey in minutes. Our Web3-powered platform gives your project
+						visibility, trust, and a path to real funding
 					</p>
 				</motion.div>
 
@@ -138,8 +139,8 @@ export const CTAForm = ({ onSubmit, className = '' }: CtaFormProps) => {
 					transition={{ duration: 0.6, delay: 0.2 }}
 					className="text-sm text-gray-500 mt-6"
 				>
-					It takes less than 5 minutes to kick off your journey. Let’s turn your
-					vision into action and impact.
+					It takes less than 5 minutes to kick off your journey. Let is turn
+					your vision into action and impact.
 				</motion.p>
 			</div>
 		</motion.div>

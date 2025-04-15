@@ -23,7 +23,7 @@ export function ResourceCard({ resource, index }: ResourceCardProps) {
 			className="group relative overflow-hidden bg-white rounded-2xl transition-all duration-500 hover:shadow-xl flex flex-col h-full border border-gray-100 shadow-sm"
 		>
 			{/* Hover effect background */}
-			<div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+			<div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
 			{/* Card content */}
 			<div className="relative z-10 flex flex-col h-full">
@@ -36,7 +36,7 @@ export function ResourceCard({ resource, index }: ResourceCardProps) {
 						height={240}
 					/>
 
-					<div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+					<div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
 					<div className="absolute top-3 left-3 z-20">
 						<div className="bg-white/90 backdrop-blur-sm py-1 px-3 rounded-full text-xs font-medium shadow-sm">
@@ -84,6 +84,7 @@ export function ResourceCard({ resource, index }: ResourceCardProps) {
 					<div className="flex flex-wrap items-center gap-2 mb-4 min-h-[28px]">
 						{resource.tags.slice(0, 3).map((tag, index) => (
 							<span
+								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 								key={index}
 								className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
 							>
