@@ -34,6 +34,107 @@ export type Database = {
 	}
 	public: {
 		Tables: {
+			comments: {
+				Row: {
+					author_id: string
+					content: string
+					created_at: string | null
+					id: string
+					parent_comment_id: string | null
+					project_id: string | null
+					project_update_id: string | null
+					updated_at: string | null
+				}
+				Insert: {
+					author_id: string
+					content: string
+					created_at?: string | null
+					id?: string
+					parent_comment_id?: string | null
+					project_id?: string | null
+					project_update_id?: string | null
+					updated_at?: string | null
+				}
+				Update: {
+					author_id?: string
+					content?: string
+					created_at?: string | null
+					id?: string
+					parent_comment_id?: string | null
+					project_id?: string | null
+					project_update_id?: string | null
+					updated_at?: string | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'comments_parent_comment_id_fkey'
+						columns: ['parent_comment_id']
+						isOneToOne: false
+						referencedRelation: 'comments'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'comments_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'comments_project_update_id_fkey'
+						columns: ['project_update_id']
+						isOneToOne: false
+						referencedRelation: 'project_updates'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			community: {
+				Row: {
+					comment_id: string
+					created_at: string | null
+					id: string
+					project_id: string
+					update_id: string
+				}
+				Insert: {
+					comment_id: string
+					created_at?: string | null
+					id?: string
+					project_id: string
+					update_id: string
+				}
+				Update: {
+					comment_id?: string
+					created_at?: string | null
+					id?: string
+					project_id?: string
+					update_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'comment_id_fkey'
+						columns: ['comment_id']
+						isOneToOne: false
+						referencedRelation: 'comments'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'community_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'community_update_id_fkey'
+						columns: ['update_id']
+						isOneToOne: false
+						referencedRelation: 'project_updates'
+						referencedColumns: ['id']
+					},
+				]
+			}
 			contributions: {
 				Row: {
 					amount: number
