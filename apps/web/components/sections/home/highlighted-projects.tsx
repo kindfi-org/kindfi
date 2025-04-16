@@ -9,7 +9,7 @@ import {
 import { CTAButtons } from '~/components/shared/cta-buttons'
 import ProjectCard from '~/components/shared/project-card'
 import { SectionCaption } from '~/components/shared/section-caption'
-import { projects } from '~/constants/hightlighted-projects'
+import { projects } from '~/lib/constants/hightlighted-projects'
 
 export function HighlightedProjects() {
 	return (

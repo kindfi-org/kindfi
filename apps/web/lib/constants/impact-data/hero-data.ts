@@ -1,4 +1,4 @@
-import type { StatCard } from '~/lib/types/impact/hero'
+import type { StatCard } from '~/lib/types/impact/impact-hero.types'
 
 export const statsData: StatCard[] = [
 	{

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import ProjectDetail from '~/components/pages/project/project-information/project-details'
-import { projects } from '~/lib/mock-data/mock-projects'
+import { projects } from '~/lib/mock-data/project/projects.mock'
 
 interface ProjectPageParams {
 	projectId: string

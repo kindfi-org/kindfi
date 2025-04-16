@@ -3,7 +3,7 @@ import { useState } from 'react'
 import {
 	mockAdvisoryBoardData,
 	mockLeadershipTeamData,
-} from '~/lib/mock-data/project/teams'
+} from '~/lib/mock-data/project/project-teams.mock'
 import { AdvisoryBoard } from './advisory-board'
 import { LeadershipTeam } from './leadership-team'
 

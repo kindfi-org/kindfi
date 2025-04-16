@@ -2,7 +2,7 @@ import { Users } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 import { Card } from '~/components/base/card'
-import type { ITeamMember } from '~/lib/types/project/team'
+import type { ITeamMember } from '~/lib/types/project/team.types'
 
 export function AdvisoryBoardCard({ name, role, shortBio }: ITeamMember) {
 	return (

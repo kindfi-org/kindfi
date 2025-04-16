@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { FaExternalLinkAlt, FaLink } from 'react-icons/fa'
 import { Card } from '~/components/base/card'
-import type { ITeamMember } from '~/lib/types/project/team'
+import type { ITeamMember } from '~/lib/types/project/team.types'
 import type { ITeamData } from './advisory-board'
 
 export function LeadershipTeamCard({
