@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
-import type { Testimonial } from '~/lib/types/impact/testimonial'
+import type { Testimonial } from '~/lib/types/impact/impact-testimonial.types'
 
 interface TestimonialCardProps {
 	testimonial: Testimonial

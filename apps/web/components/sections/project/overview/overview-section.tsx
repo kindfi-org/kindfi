@@ -4,7 +4,7 @@ import {
 	highlightItems,
 	highlightedUpdate,
 	investors,
-} from '~/lib/mock-data/project/mock-overview-section'
+} from '~/lib/mock-data/project/project-overview-section.mock'
 import { FeaturedUpdate } from './featured-update'
 import { FinancialSummary } from './financial-summary'
 import { InvestmentTerms } from './investment-terms'

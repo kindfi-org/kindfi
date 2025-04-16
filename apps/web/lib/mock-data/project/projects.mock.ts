@@ -350,6 +350,7 @@ export const projectTabsData: TabItem[] = [
 export const statsData: StatItem[] = [
 	{
 		id: 'stat-1',
+
 		label: 'Contribution',
 		value: '$100',
 		bgColor: 'bg-blue-100',
@@ -358,6 +359,7 @@ export const statsData: StatItem[] = [
 	},
 	{
 		id: 'stat-2',
+
 		label: 'NFT Earned',
 		value: '1',
 		bgColor: 'bg-purple-100',
@@ -366,6 +368,7 @@ export const statsData: StatItem[] = [
 	},
 	{
 		id: 'stat-3',
+
 		label: 'Referrals',
 		value: '2',
 		bgColor: 'bg-green-100',
@@ -420,28 +423,30 @@ export const statsDataUpdates: StatItem[] = [
 
 export const timelineEvents: TimelineEvent[] = [
 	{
-		id: 'timeline-1',
+		id: 'event-1',
 		title: 'Project Launch',
 		description: 'Project officially launched',
 		date: 'Mar 15',
 		status: 'completed',
 	},
 	{
-		id: 'timeline-2',
+		id: 'event-2',
 		title: '50% Milestone',
 		description: 'Reached halfway point',
 		date: 'Apr 1',
 		status: 'completed',
 	},
 	{
-		id: 'timeline-3',
+		id: 'event-3',
+
 		title: 'Goal Reached',
 		description: 'Successfully achieved target',
 		date: 'Apr 15',
 		status: 'completed',
 	},
 	{
-		id: 'timeline-4',
+		id: 'event-4',
+
 		title: 'Implementation',
 		description: 'Project implementation phase',
 		date: 'May 1',

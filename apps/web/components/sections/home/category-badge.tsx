@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
-import { categories as defaultCategories } from '~/constants/hero-data'
 import { staggerChildren } from '~/lib/constants/animations'
+import { categories as defaultCategories } from '~/lib/constants/hero-data'
 import type { Category } from '~/lib/types'
 import { RenderAnimatedCategory } from '~/lib/utils/categories-util'
 

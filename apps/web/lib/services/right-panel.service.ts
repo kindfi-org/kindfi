@@ -1,7 +1,4 @@
-import {
-	mockActivities,
-	mockUpdates,
-} from '~/lib/constants/mock-data/right-panel-mocks'
+import { mockActivities, mockUpdates } from '~/lib/mock-data/right-panel-mocks'
 import type { Activity, Update } from '~/lib/types'
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

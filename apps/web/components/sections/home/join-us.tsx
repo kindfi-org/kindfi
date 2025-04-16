@@ -4,8 +4,8 @@ import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import { KindfiMission } from '~/components/sections/home/mision'
 import { SectionCaption } from '~/components/shared/section-caption'
-import { features } from '~/constants/join-us-data'
 import { fadeInUpAnimation } from '~/lib/constants/animations'
+import { features } from '~/lib/constants/join-us-data'
 
 export function JoinUs() {
 	return (

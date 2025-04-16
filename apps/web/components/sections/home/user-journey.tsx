@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '~/components/base/button'
-import { investorSteps, projectSteps } from '~/constants/user-journey-data'
+import { investorSteps, projectSteps } from '~/lib/constants/user-journey-data'
 import { cn } from '~/lib/utils'
 
 type ViewType = 'project' | 'investor'

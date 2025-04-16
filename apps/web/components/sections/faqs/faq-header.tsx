@@ -9,7 +9,7 @@ import {
 } from '~/components/base/accordion'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
-import type { FAQ } from '~/components/mocks/mock-data'
+import type { FAQ } from '~/lib/mock-data/project/project-card-variants.mock'
 
 interface Props {
 	inputValue: string

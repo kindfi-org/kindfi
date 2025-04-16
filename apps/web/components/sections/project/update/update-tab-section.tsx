@@ -13,7 +13,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateItems } from '~/lib/mock-data/project/mock-updates-tab'
+import { updateItems } from '~/lib/mock-data/project/project-updates-tab.mock'
 import { LoadMoreButton } from './load-more-button'
 import { UpdateCard } from './update-card'
 

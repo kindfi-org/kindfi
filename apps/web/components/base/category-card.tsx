@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { GraduationCap, Leaf, Shield, Users } from 'lucide-react'
 import { FaArrowRight } from 'react-icons/fa'
 import { Card } from '~/components/base/card'
-import type { ImpactCategory } from '~/lib/types/impact/impact-categories'
+import type { ImpactCategory } from '~/lib/types/impact/impact-categories.types'
 
 const icons = {
 	GraduationCap,

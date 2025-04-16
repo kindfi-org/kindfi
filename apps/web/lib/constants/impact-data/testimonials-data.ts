@@ -1,4 +1,4 @@
-import type { Testimonial } from '~/lib/types/impact/testimonial'
+import type { Testimonial } from '~/lib/types/impact/impact-testimonial.types'
 
 export const testimonials: Testimonial[] = [
 	{
