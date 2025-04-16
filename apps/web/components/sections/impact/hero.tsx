@@ -8,7 +8,7 @@ import {
 	staggerChildren,
 } from '~/lib/constants/animations'
 import { statsData } from '~/lib/constants/impact-data/hero-data'
-import type { StatCard } from '~/lib/types/impact/hero'
+import type { StatCard } from '~/lib/types/impact/impact-hero.types'
 
 export function Hero() {
 	const shouldReduceMotion = useReducedMotion()

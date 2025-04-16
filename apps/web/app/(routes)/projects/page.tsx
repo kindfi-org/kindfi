@@ -4,7 +4,7 @@ import { useSetState } from 'react-use'
 import { ProjectsGrid } from '~/components/sections/projects/projects-grid'
 import { ProjectsHeader } from '~/components/sections/projects/projects-header'
 import { useProjectsFilter } from '~/hooks/use-projects-filter'
-import { projects as mockProjectsView } from '~/lib/mock-data/mock-projects'
+import { projects as mockProjectsView } from '~/lib/mock-data/project/projects.mock'
 import type { Project } from '~/lib/types'
 
 export default function ProjectsPage() {

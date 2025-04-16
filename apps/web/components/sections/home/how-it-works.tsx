@@ -2,7 +2,7 @@
 
 import { InvestmentModelCard } from '~/components/shared/investment-model-card'
 import { SectionCaption } from '~/components/shared/section-caption'
-import { models } from '~/constants/how-it-works-data'
+import { models } from '~/lib/constants/how-it-works-data'
 
 export function HowItWorks() {
 	return (

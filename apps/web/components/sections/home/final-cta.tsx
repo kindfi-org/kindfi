@@ -3,7 +3,11 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { Card, CardContent } from '~/components/base/card'
 import { SocialButton } from '~/components/shared/social-cta'
-import { features, socialButtons, statistics } from '~/constants/final-cta-data'
+import {
+	features,
+	socialButtons,
+	statistics,
+} from '~/lib/constants/final-cta-data'
 
 export const FinalCTA = () => {
 	const shouldReduceMotion = useReducedMotion()

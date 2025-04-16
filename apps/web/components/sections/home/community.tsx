@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { BenefitItem } from '~/components/shared/benefits-items'
 import { CTAForm } from '~/components/shared/cta-form'
 import { Testimonial } from '~/components/shared/testimonial-card'
-import { benefits, testimonialData } from '~/constants/community-data'
+import { benefits, testimonialData } from '~/lib/constants/community-data'
 
 export function Community() {
 	const prefersReducedMotion = useReducedMotion()

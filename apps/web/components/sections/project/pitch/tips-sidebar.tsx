@@ -5,7 +5,7 @@ import { CircleHelp } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { fadeInWithDelay, fadeSlideUp } from '~/lib/constants/animations'
-import { tips } from '~/lib/mock-data/project/mock-pitch'
+import { tips } from '~/lib/mock-data/project/project-pitch.mock'
 
 export function TipsSidebar() {
 	return (

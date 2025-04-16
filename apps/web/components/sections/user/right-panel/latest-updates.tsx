@@ -3,7 +3,7 @@
 import { Book } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { ScrollArea } from '~/components/base/scroll-area'
-import { mockUpdates } from '~/lib/constants/mock-data/right-panel-mocks'
+import { mockUpdates } from '~/lib/mock-data/right-panel-mocks'
 
 export function LatestUpdates() {
 	return (

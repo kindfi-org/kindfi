@@ -10,7 +10,11 @@ import {
 } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useState } from 'react'
-import { comments, nftCollection, nftTiers } from '../mocks/mock-data'
+import {
+	comments,
+	nftCollection,
+	nftTiers,
+} from '../../lib/mock-data/project/project-card-variants.mock'
 
 type ProjectCardProps = Record<string, never>
 

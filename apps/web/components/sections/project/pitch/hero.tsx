@@ -12,7 +12,7 @@ import {
 	fadeSlideLeft,
 	scaleFadeIn,
 } from '~/lib/constants/animations'
-import { requiredItems } from '~/lib/mock-data/project/mock-pitch'
+import { requiredItems } from '~/lib/mock-data/project/project-pitch.mock'
 import type { RequiredItem } from '~/lib/types/project/pitch.types'
 import { cn } from '~/lib/utils'
 
