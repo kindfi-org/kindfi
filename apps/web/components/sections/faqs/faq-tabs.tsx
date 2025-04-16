@@ -10,7 +10,10 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
-import { FAQ, categoryTitles, faqData } from '~/components/mocks/mock-data'
+import {
+	categoryTitles,
+	faqData,
+} from '~/lib/mock-data/project/project-card-variants.mock'
 
 interface Props {
 	activeTab: string

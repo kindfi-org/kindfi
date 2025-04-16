@@ -13,3 +13,647 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
 		])
 		.nullable(),
 )
+
+export const commentsRowSchema = z.object({
+	author_id: z.string(),
+	content: z.string(),
+	created_at: z.string().nullable(),
+	id: z.string(),
+	parent_comment_id: z.string().nullable(),
+	project_id: z.string().nullable(),
+	project_update_id: z.string().nullable(),
+	updated_at: z.string().nullable(),
+})
+
+export const commentsInsertSchema = z.object({
+	author_id: z.string(),
+	content: z.string(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	parent_comment_id: z.string().optional().nullable(),
+	project_id: z.string().optional().nullable(),
+	project_update_id: z.string().optional().nullable(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const commentsUpdateSchema = z.object({
+	author_id: z.string().optional(),
+	content: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	parent_comment_id: z.string().optional().nullable(),
+	project_id: z.string().optional().nullable(),
+	project_update_id: z.string().optional().nullable(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const commentsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('comments_parent_comment_id_fkey'),
+		columns: z.tuple([z.literal('parent_comment_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('comments'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('comments_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('comments_project_update_id_fkey'),
+		columns: z.tuple([z.literal('project_update_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('project_updates'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const communityRowSchema = z.object({
+	comment_id: z.string(),
+	created_at: z.string().nullable(),
+	id: z.string(),
+	project_id: z.string(),
+	update_id: z.string(),
+})
+
+export const communityInsertSchema = z.object({
+	comment_id: z.string(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	project_id: z.string(),
+	update_id: z.string(),
+})
+
+export const communityUpdateSchema = z.object({
+	comment_id: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	project_id: z.string().optional(),
+	update_id: z.string().optional(),
+})
+
+export const communityRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('comment_id_fkey'),
+		columns: z.tuple([z.literal('comment_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('comments'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('community_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('community_update_id_fkey'),
+		columns: z.tuple([z.literal('update_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('project_updates'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const contributionsRowSchema = z.object({
+	amount: z.number(),
+	contributor_id: z.string(),
+	created_at: z.string().nullable(),
+	id: z.string(),
+	project_id: z.string(),
+	updated_at: z.string().nullable(),
+})
+
+export const contributionsInsertSchema = z.object({
+	amount: z.number(),
+	contributor_id: z.string(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	project_id: z.string(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const contributionsUpdateSchema = z.object({
+	amount: z.number().optional(),
+	contributor_id: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	project_id: z.string().optional(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const contributionsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('contributions_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const escrowStatusTypeSchema = z.union([
+	z.literal('NEW'),
+	z.literal('FUNDED'),
+	z.literal('ACTIVE'),
+	z.literal('COMPLETED'),
+	z.literal('DISPUTED'),
+	z.literal('CANCELLED'),
+])
+
+export const escrowContractsInsertSchema = z.object({
+	amount: z.number(),
+	completed_at: z.string().optional().nullable(),
+	contract_id: z.string(),
+	contribution_id: z.string(),
+	created_at: z.string().optional().nullable(),
+	current_state: escrowStatusTypeSchema.optional(),
+	engagement_id: z.string(),
+	id: z.string().optional(),
+	metadata: jsonSchema.optional().nullable(),
+	payer_address: z.string(),
+	platform_fee: z.number(),
+	project_id: z.string(),
+	receiver_address: z.string(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const escrowContractsUpdateSchema = z.object({
+	amount: z.number().optional(),
+	completed_at: z.string().optional().nullable(),
+	contract_id: z.string().optional(),
+	contribution_id: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	current_state: escrowStatusTypeSchema.optional(),
+	engagement_id: z.string().optional(),
+	id: z.string().optional(),
+	metadata: jsonSchema.optional().nullable(),
+	payer_address: z.string().optional(),
+	platform_fee: z.number().optional(),
+	project_id: z.string().optional(),
+	receiver_address: z.string().optional(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const escrowContractsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('escrow_contracts_contribution_id_fkey'),
+		columns: z.tuple([z.literal('contribution_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('contributions'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('escrow_contracts_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const milestoneStatusSchema = z.union([
+	z.literal('pending'),
+	z.literal('in_progress'),
+	z.literal('completed'),
+	z.literal('failed'),
+])
+
+export const escrowMilestonesInsertSchema = z.object({
+	amount: z.number(),
+	completed_at: z.string().optional().nullable(),
+	created_at: z.string().optional().nullable(),
+	deadline: z.string(),
+	description: z.string().optional().nullable(),
+	escrow_id: z.string(),
+	id: z.string().optional(),
+	order_index: z.number(),
+	project_milestone_id: z.string(),
+	status: milestoneStatusSchema.optional(),
+	title: z.string(),
+})
+
+export const escrowMilestonesUpdateSchema = z.object({
+	amount: z.number().optional(),
+	completed_at: z.string().optional().nullable(),
+	created_at: z.string().optional().nullable(),
+	deadline: z.string().optional(),
+	description: z.string().optional().nullable(),
+	escrow_id: z.string().optional(),
+	id: z.string().optional(),
+	order_index: z.number().optional(),
+	project_milestone_id: z.string().optional(),
+	status: milestoneStatusSchema.optional(),
+	title: z.string().optional(),
+})
+
+export const escrowMilestonesRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('escrow_milestones_escrow_id_fkey'),
+		columns: z.tuple([z.literal('escrow_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('escrow_contracts'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('escrow_milestones_project_milestone_id_fkey'),
+		columns: z.tuple([z.literal('project_milestone_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('project_milestones'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const escrowStatusRowSchema = z.object({
+	current_milestone: z.number().nullable(),
+	escrow_id: z.string(),
+	id: z.string(),
+	last_updated: z.string().nullable(),
+	metadata: jsonSchema.nullable(),
+	status: escrowStatusTypeSchema,
+	total_funded: z.number().nullable(),
+	total_released: z.number().nullable(),
+})
+
+export const escrowStatusInsertSchema = z.object({
+	current_milestone: z.number().optional().nullable(),
+	escrow_id: z.string(),
+	id: z.string().optional(),
+	last_updated: z.string().optional().nullable(),
+	metadata: jsonSchema.optional().nullable(),
+	status: escrowStatusTypeSchema,
+	total_funded: z.number().optional().nullable(),
+	total_released: z.number().optional().nullable(),
+})
+
+export const escrowStatusUpdateSchema = z.object({
+	current_milestone: z.number().optional().nullable(),
+	escrow_id: z.string().optional(),
+	id: z.string().optional(),
+	last_updated: z.string().optional().nullable(),
+	metadata: jsonSchema.optional().nullable(),
+	status: escrowStatusTypeSchema.optional(),
+	total_funded: z.number().optional().nullable(),
+	total_released: z.number().optional().nullable(),
+})
+
+export const escrowStatusRelationshipsSchema = z.tuple([])
+
+export const kindlerProjectsRowSchema = z.object({
+	joined_at: z.string(),
+	kindler_id: z.string(),
+	project_id: z.string(),
+})
+
+export const kindlerProjectsInsertSchema = z.object({
+	joined_at: z.string().optional(),
+	kindler_id: z.string(),
+	project_id: z.string(),
+})
+
+export const kindlerProjectsUpdateSchema = z.object({
+	joined_at: z.string().optional(),
+	kindler_id: z.string().optional(),
+	project_id: z.string().optional(),
+})
+
+export const kindlerProjectsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('kindler_projects_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const userRoleSchema = z.union([
+	z.literal('kinder'),
+	z.literal('kindler'),
+])
+
+export const profilesInsertSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string(),
+	role: userRoleSchema.optional(),
+	updated_at: z.string().optional(),
+})
+
+export const profilesUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	role: userRoleSchema.optional(),
+	updated_at: z.string().optional(),
+})
+
+export const profilesRelationshipsSchema = z.tuple([])
+
+export const projectMemberRoleSchema = z.union([
+	z.literal('admin'),
+	z.literal('editor'),
+])
+
+export const projectMembersInsertSchema = z.object({
+	id: z.string().optional(),
+	joined_at: z.string().optional(),
+	project_id: z.string(),
+	role: projectMemberRoleSchema.optional(),
+	updated_at: z.string().optional(),
+	user_id: z.string(),
+})
+
+export const projectMembersUpdateSchema = z.object({
+	id: z.string().optional(),
+	joined_at: z.string().optional(),
+	project_id: z.string().optional(),
+	role: projectMemberRoleSchema.optional(),
+	updated_at: z.string().optional(),
+	user_id: z.string().optional(),
+})
+
+export const projectMembersRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_members_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectMilestonesRowSchema = z.object({
+	id: z.string(),
+	milestone_id: z.string(),
+	project_id: z.string(),
+})
+
+export const projectMilestonesInsertSchema = z.object({
+	id: z.string().optional(),
+	milestone_id: z.string(),
+	project_id: z.string(),
+})
+
+export const projectMilestonesUpdateSchema = z.object({
+	id: z.string().optional(),
+	milestone_id: z.string().optional(),
+	project_id: z.string().optional(),
+})
+
+export const projectMilestonesRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_milestones_milestone_id_fkey'),
+		columns: z.tuple([z.literal('milestone_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('escrow_milestones'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('project_milestones_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectPitchRowSchema = z.object({
+	created_at: z.string().nullable(),
+	id: z.string(),
+	pitch_deck: z.string().nullable(),
+	project_id: z.string(),
+	story: z.string().nullable(),
+	title: z.string(),
+	updated_at: z.string().nullable(),
+	video_url: z.string().nullable(),
+})
+
+export const projectPitchInsertSchema = z.object({
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	pitch_deck: z.string().optional().nullable(),
+	project_id: z.string(),
+	story: z.string().optional().nullable(),
+	title: z.string(),
+	updated_at: z.string().optional().nullable(),
+	video_url: z.string().optional().nullable(),
+})
+
+export const projectPitchUpdateSchema = z.object({
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	pitch_deck: z.string().optional().nullable(),
+	project_id: z.string().optional(),
+	story: z.string().optional().nullable(),
+	title: z.string().optional(),
+	updated_at: z.string().optional().nullable(),
+	video_url: z.string().optional().nullable(),
+})
+
+export const projectPitchRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_pitch_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectTagRelationshipsRowSchema = z.object({
+	project_id: z.string(),
+	tag_id: z.string(),
+})
+
+export const projectTagRelationshipsInsertSchema = z.object({
+	project_id: z.string(),
+	tag_id: z.string(),
+})
+
+export const projectTagRelationshipsUpdateSchema = z.object({
+	project_id: z.string().optional(),
+	tag_id: z.string().optional(),
+})
+
+export const projectTagRelationshipsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_tag_relationships_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('project_tag_relationships_tag_id_fkey'),
+		columns: z.tuple([z.literal('tag_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('project_tags'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectTagsRowSchema = z.object({
+	color: z.string(),
+	created_at: z.string().nullable(),
+	id: z.string(),
+	name: z.string(),
+	updated_at: z.string().nullable(),
+})
+
+export const projectTagsInsertSchema = z.object({
+	color: z.string(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	name: z.string(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const projectTagsUpdateSchema = z.object({
+	color: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	name: z.string().optional(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const projectTagsRelationshipsSchema = z.tuple([])
+
+export const projectUpdatesRowSchema = z.object({
+	author_id: z.string(),
+	content: z.string(),
+	created_at: z.string(),
+	id: z.string(),
+	project_id: z.string(),
+	updated_at: z.string(),
+})
+
+export const projectUpdatesInsertSchema = z.object({
+	author_id: z.string(),
+	content: z.string(),
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	project_id: z.string(),
+	updated_at: z.string().optional(),
+})
+
+export const projectUpdatesUpdateSchema = z.object({
+	author_id: z.string().optional(),
+	content: z.string().optional(),
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	project_id: z.string().optional(),
+	updated_at: z.string().optional(),
+})
+
+export const projectUpdatesRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('project_updates_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const projectsRowSchema = z.object({
+	category_id: z.string().nullable(),
+	created_at: z.string().nullable(),
+	current_amount: z.number(),
+	description: z.string().nullable(),
+	id: z.string(),
+	image_url: z.string().nullable(),
+	investors_count: z.number(),
+	milestones: z.array(z.string()).nullable(),
+	min_investment: z.number(),
+	owner_id: z.string(),
+	percentage_complete: z.number(),
+	target_amount: z.number(),
+	title: z.string(),
+	updated_at: z.string().nullable(),
+})
+
+export const projectsInsertSchema = z.object({
+	category_id: z.string().optional().nullable(),
+	created_at: z.string().optional().nullable(),
+	current_amount: z.number().optional(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	image_url: z.string().optional().nullable(),
+	investors_count: z.number().optional(),
+	milestones: z.array(z.string()).optional().nullable(),
+	min_investment: z.number(),
+	owner_id: z.string(),
+	percentage_complete: z.number().optional(),
+	target_amount: z.number(),
+	title: z.string(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const projectsUpdateSchema = z.object({
+	category_id: z.string().optional().nullable(),
+	created_at: z.string().optional().nullable(),
+	current_amount: z.number().optional(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	image_url: z.string().optional().nullable(),
+	investors_count: z.number().optional(),
+	milestones: z.array(z.string()).optional().nullable(),
+	min_investment: z.number().optional(),
+	owner_id: z.string().optional(),
+	percentage_complete: z.number().optional(),
+	target_amount: z.number().optional(),
+	title: z.string().optional(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const projectsRelationshipsSchema = z.tuple([])
+
+export const escrowContractsRowSchema = z.object({
+	amount: z.number(),
+	completed_at: z.string().nullable(),
+	contract_id: z.string(),
+	contribution_id: z.string(),
+	created_at: z.string().nullable(),
+	current_state: escrowStatusTypeSchema,
+	engagement_id: z.string(),
+	id: z.string(),
+	metadata: jsonSchema.nullable(),
+	payer_address: z.string(),
+	platform_fee: z.number(),
+	project_id: z.string(),
+	receiver_address: z.string(),
+	updated_at: z.string().nullable(),
+})
+
+export const escrowMilestonesRowSchema = z.object({
+	amount: z.number(),
+	completed_at: z.string().nullable(),
+	created_at: z.string().nullable(),
+	deadline: z.string(),
+	description: z.string().nullable(),
+	escrow_id: z.string(),
+	id: z.string(),
+	order_index: z.number(),
+	project_milestone_id: z.string(),
+	status: milestoneStatusSchema,
+	title: z.string(),
+})
+
+export const profilesRowSchema = z.object({
+	created_at: z.string(),
+	id: z.string(),
+	role: userRoleSchema,
+	updated_at: z.string(),
+})
+
+export const projectMembersRowSchema = z.object({
+	id: z.string(),
+	joined_at: z.string(),
+	project_id: z.string(),
+	role: projectMemberRoleSchema,
+	updated_at: z.string(),
+	user_id: z.string(),
+})

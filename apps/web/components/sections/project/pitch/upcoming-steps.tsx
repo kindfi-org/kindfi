@@ -14,9 +14,9 @@ import {
 	fadeSlideDown,
 	fadeSlideLeft,
 } from '~/lib/constants/animations'
-import { steps } from '~/lib/mock-data/project/mock-pitch'
+import { steps } from '~/lib/mock-data/project/project-pitch.mock'
 
-export default function UpcomingSteps() {
+export function UpcomingSteps() {
 	return (
 		<motion.section className="mx-auto my-8" {...fadeInUp}>
 			<h2 className="text-2xl font-bold">Upcoming Steps</h2>

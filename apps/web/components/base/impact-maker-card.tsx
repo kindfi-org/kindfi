@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { RiMedalLine } from 'react-icons/ri'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge-impact'
-import type { ImpactMaker } from '~/lib/types/impact/impact-makers'
+import type { ImpactMaker } from '~/lib/types/impact/impact-makers.types'
 
 interface ImpactMakerCardProps {
 	maker: ImpactMaker

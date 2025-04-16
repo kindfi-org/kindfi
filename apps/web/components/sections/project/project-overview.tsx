@@ -1,13 +1,13 @@
 import Image from 'next/image'
-import { useState } from 'react'
 import type React from 'react'
+import { useState } from 'react'
 import { FaBullseye, FaCheckCircle, FaGlobe, FaUsers } from 'react-icons/fa'
-import AboutProject from '~/components/sections/project/about-project'
-import SectionContainer from '~/components/sections/project/section-container'
+import { AboutProject } from '~/components/sections/project/about-project'
+import { SectionContainer } from '~/components/sections/project/section-container'
 import {
 	aboutProjectProps,
 	successGalleryItems,
-} from '~/lib/mock-data/mock-projects'
+} from '~/lib/mock-data/project/projects.mock'
 
 interface MediaItem {
 	id: string
@@ -98,4 +98,4 @@ const ProjectOverview = () => {
 	)
 }
 
-export default ProjectOverview
+export { ProjectOverview }

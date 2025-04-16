@@ -5,7 +5,7 @@ import * as React from 'react'
 import { cn } from '~/lib/utils'
 
 /**
- * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/button
+ * ShadCN/UI Reference: https://ui.shadcn.com/docs/components/button
  * `buttonVariants` defines the styles and variants for the `Button` component.
  * It includes options for different button variants and sizes, along with default configurations.
  *
@@ -59,36 +59,120 @@ const buttonVariants = cva(
  * @property {string} [className] - Additional class names to apply custom styles to the button.
  * @property {VariantProps<typeof buttonVariants>['variant']} [variant] - Defines the style variant of the button.
  * @property {VariantProps<typeof buttonVariants>['size']} [size] - Defines the size of the button.
+ * @property {boolean} [isLink] - If true, the button will have role="link" attribute.
+ * @property {React.ReactNode} [startIcon] - Icon to be displayed before the button text.
+ * @property {React.ReactNode} [endIcon] - Icon to be displayed after the button text.
+ * @property {boolean} [iconOnly] - Indicates if the button only contains an icon.
  */
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
 		VariantProps<typeof buttonVariants> {
 	asChild?: boolean
+	isLink?: boolean
+	startIcon?: React.ReactNode
+	endIcon?: React.ReactNode
+	iconOnly?: boolean
+	'aria-label'?: boolean extends true ? string : string | undefined
 }
 
 /**
  * `Button` component used for triggering actions within the UI. It supports various variants and sizes,
  * and it can optionally render as a child component to integrate with other UI elements.
+ * This component handles proper ARIA attributes and enforces accessibility best practices.
  *
  * @component
  * @example
+ * // Standard button
  * <Button variant="default" size="lg">Click Me</Button>
+ *
  * @example
- * <Button asChild> <Link href="/home">Go to Home</Link> </Button>
+ * // Button as a link
+ * <Button isLink asChild><Link href="/home">Go to Home</Link></Button>
+ *
+ * @example
+ * // Icon-only button
+ * <Button iconOnly aria-label="Close dialog" size="icon"><XIcon /></Button>
+ *
+ * @example
+ * // Button with start icon
+ * <Button startIcon={<UserIcon />}>User Profile</Button>
  *
  * @param {ButtonProps} props - The props for the `Button` component.
  * @param {React.Ref} ref - The ref to forward to the button element.
  * @returns {JSX.Element} The rendered button element.
  */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-	({ className, variant, size, asChild = false, ...props }, ref) => {
+	(
+		{
+			className,
+			variant,
+			size,
+			asChild = false,
+			isLink = false,
+			children,
+			startIcon,
+			endIcon,
+			iconOnly = false,
+			'aria-label': ariaLabel,
+			...props
+		},
+		ref,
+	) => {
 		const Comp = asChild ? Slot : 'button'
-		return (
+
+		// Determine if button content is empty or only contains icons
+		const hasTextContent = React.Children.toArray(children).some(
+			(child) => typeof child === 'string' || typeof child === 'number',
+		)
+
+		// Use the iconOnly prop or determine it based on the presence of text content
+		const isIconOnly =
+			iconOnly || (!hasTextContent && (startIcon || endIcon || children))
+
+		// Warning for icon-only buttons without aria-label in development
+		if (process.env.NODE_ENV !== 'production' && isIconOnly && !ariaLabel) {
+			console.error(
+				`Accessibility error: Icon-only Button must have an aria-label to describe its purpose. Component: ${Button.displayName}`,
+			)
+		}
+
+		// Generate props based on component state
+		const buttonProps: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+			role?: string
+		} = {
+			role: isLink ? 'link' : undefined,
+			'aria-label': ariaLabel || (isIconOnly ? String(children) : 'Button'),
+			title: ariaLabel || (typeof children === 'string' ? children : 'Button'),
+			...(process.env.NODE_ENV !== 'production' &&
+				isLink &&
+				!('href' in props) && {
+					onClick: (e) => {
+						console.warn(
+							'Accessibility warning: Buttons with role="link" should have an href attribute.',
+						)
+						props.onClick?.(e)
+					},
+				}),
+			...props,
+		}
+
+		return asChild ? (
+			<Slot
+				className={cn(buttonVariants({ variant, size, className }))}
+				ref={ref}
+			>
+				{React.cloneElement(children as React.ReactElement, buttonProps)}
+			</Slot>
+		) : (
 			<Comp
 				className={cn(buttonVariants({ variant, size, className }))}
 				ref={ref}
-				{...props}
-			/>
+				{...buttonProps}
+			>
+				{startIcon}
+				{children}
+				{endIcon}
+			</Comp>
 		)
 	},
 )
@@ -96,3 +180,70 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button'
 
 export { Button, buttonVariants }
+
+/**
+ * Button Component Usage Examples
+ *
+ * 1. Standard Button
+ * ```tsx
+ * <Button>Click Me</Button>
+ * ```
+ *
+ * 2. Button with variant and size
+ * ```tsx
+ * <Button variant="destructive" size="lg">Delete Item</Button>
+ * ```
+ *
+ * 3. Button as a link (preserves ARIA attributes)
+ * ```tsx
+ * <Button isLink asChild>
+ *   <Link href="/dashboard">Go to Dashboard</Link>
+ * </Button>
+ * ```
+ *
+ * 4. Icon-only button (requires aria-label)
+ * ```tsx
+ * <Button 
+ *   iconOnly 
+ *   size="icon" 
+ *   aria-label="Close dialog"
+ * >
+ *   <XIcon />
+ * </Button>
+ * ```
+ *
+ * 5. Button with start icon
+ * ```tsx
+ * <Button startIcon={<UserIcon />}>Profile</Button>
+ * <Button endIcon={<ArrowRightIcon />}>Next</Button>
+ * ```
+ *
+ * 6. Disabled button
+ * ```tsx
+ * <Button disabled>Not Available</Button>
+ * ```
+ *
+ * 7. Button with ARIA attributes
+ * ```tsx
+ * <Button
+ *   aria-haspopup="true"
+ *   aria-expanded={menuOpen}
+ *   aria-controls="menu-dropdown"
+ * >
+ *   Open Menu
+ * </Button>
+ * ```
+ * 
+ * // Example of button with dynamic ARIA attributes
+*	const [isOpen, setIsOpen] = useState(false);
+
+	<Button 
+		aria-haspopup="true"
+		aria-expanded={isOpen}
+		aria-controls="dropdown-menu"
+		onClick={() => setIsOpen(!isOpen)}
+		endIcon={<ChevronDownIcon />}
+	>
+		Toggle Menu
+	</Button>
+ */

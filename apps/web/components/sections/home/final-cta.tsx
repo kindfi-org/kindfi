@@ -7,7 +7,7 @@ import {
 	features,
 	socialButtons,
 	statistics,
-} from '~/lib/mock-data/mock-final-cta-section'
+} from '~/lib/constants/final-cta-data'
 
 export const FinalCTA = () => {
 	const shouldReduceMotion = useReducedMotion()
@@ -42,15 +42,19 @@ export const FinalCTA = () => {
 					className="text-center mb-16 max-w-3xl mx-auto"
 				>
 					<h2 className="text-4xl font-bold text-gray-900 mb-6">
-						Built by Web3 Developers to
-						<span className="block gradient-text">Drive Social Change</span>
+						Built by Web3 Developers
+						<span className="block gradient-text">
+							Designed for Real-World Change
+						</span>
 					</h2>
 					<p className="text-lg text-gray-600 leading-relaxed">
-						We are the first blockchain platform dedicated to uniting social
-						causes and collaborators from the crypto world. Designed to maximize
-						social impact across Latin America and beyond, KindFi is building
-						the future of social collaboration. With KindFi, you’re part of a
-						movement to create real and measurable change.
+						KindFi is the first crowdfunding platform built by Web3 developers
+						specifically for verified social impact. Backed by the Stellar
+						blockchain, we bridge crypto transparency with human needs uniting
+						cause creators, collaborators, and communities across Latin America
+						and beyond. When you launch on KindFi, you are not just raising
+						funds. You are joining a movement to make social good unstoppable
+						and accountable.
 					</p>
 				</motion.div>
 

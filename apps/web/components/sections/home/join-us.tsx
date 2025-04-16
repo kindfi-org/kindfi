@@ -2,10 +2,10 @@
 
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
-import { Button } from '~/components/base/button'
+import { KindfiMission } from '~/components/sections/home/mision'
 import { SectionCaption } from '~/components/shared/section-caption'
 import { fadeInUpAnimation } from '~/lib/constants/animations'
-import { features } from '~/lib/mock-data/mock-join-us-section'
+import { features } from '~/lib/constants/join-us-data'
 
 export function JoinUs() {
 	return (
@@ -19,9 +19,12 @@ export function JoinUs() {
 				{/* Section Caption */}
 				<motion.div {...fadeInUpAnimation}>
 					<SectionCaption
-						title="Join the KindFi Revolution: Collaborate and Transform the World with Web3"
-						subtitle="The Web3 community has the power to give back. Support causes that matter, collaborate on impactful projects, and be part of a revolution leveraging Web3 technology to improve lives. Together, we can create lasting and meaningful change."
-						highlightWords={['Transform the World with Web3', 'KindFi']}
+						title="Join the KindFi Movement: Support Change. Earn Trust. Build Impact."
+						subtitle="KindFi is more than a platform — it's a new way to fund real change. Whether you're a cause creator or a supporter, every action you take earns trust, builds your on-chain reputation, and strengthens a transparent, community-led ecosystem."
+						highlightWords={[
+							'Support Change. Earn Trust. Build Impact',
+							'KindFi',
+						]}
 					/>
 				</motion.div>
 
@@ -60,46 +63,7 @@ export function JoinUs() {
 					))}
 				</div>
 
-				<motion.aside
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ duration: 0.6, delay: 0.3 }}
-					className="relative bg-white rounded-2xl p-8 lg:p-12 shadow-lg max-w-3xl mx-auto overflow-hidden"
-				>
-					<div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-sky-50 opacity-50" />
-
-					<div className="relative">
-						<h4 className="text-xl font-semibold text-center text-gray-900 mb-4">
-							KindFi: One Better World
-						</h4>
-						<p className="text-gray-600 mb-8 leading-relaxed">
-							At KindFi, you’re part of a movement demonstrating that Web3 is
-							reshaping the future of social impact. From saving the planet to
-							empowering communities, every contribution makes a difference. Now
-							is the time to use decentralized power to drive true change. Join
-							us in making a real impact, free from the limitations of
-							traditional systems.
-						</p>
-						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<Button
-								size="lg"
-								className="gradient-btn text-white px-8"
-								onClick={() => {}}
-							>
-								Join the Revolution
-							</Button>
-							<Button
-								size="lg"
-								variant="outline"
-								className="gradient-border-btn hover:bg-teal-50"
-								onClick={() => {}}
-							>
-								Discover more about KindFi
-							</Button>
-						</div>
-					</div>
-				</motion.aside>
+				<KindfiMission />
 			</div>
 		</section>
 	)

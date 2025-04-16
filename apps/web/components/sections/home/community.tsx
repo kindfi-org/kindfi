@@ -5,10 +5,7 @@ import { useState } from 'react'
 import { BenefitItem } from '~/components/shared/benefits-items'
 import { CTAForm } from '~/components/shared/cta-form'
 import { Testimonial } from '~/components/shared/testimonial-card'
-import {
-	benefits,
-	testimonialData,
-} from '~/lib/mock-data/mock-community-section'
+import { benefits, testimonialData } from '~/lib/constants/community-data'
 
 export function Community() {
 	const prefersReducedMotion = useReducedMotion()
@@ -46,19 +43,16 @@ export function Community() {
 					className="text-center mb-20 max-w-3xl mx-auto"
 				>
 					<h2 className="text-4xl font-bold text-gray-900 mb-6">
-						<span className="block">More Than Just DeFi</span>
+						<span className="block">More Than Crowdfunding</span>
 						<span className="block gradient-text">
-							Join a Web3 Community of Impact
+							A Blockchain Movement for Good
 						</span>
 					</h2>
 					<p className="text-lg font-medium text-gray-600 leading-relaxed text-justify">
-						KindFi is about building a thriving community that drives real
-						change. Each project fosters a network of passionate ambassadors,
-						contributors, and changemakers working together to ensure success.
-						Through Web3 blockchain technology, you become part of an
-						unstoppable ecosystem dedicated to creating measurable social
-						impact. Collaborate, connect, and help shape a future where crypto
-						and purpose unite for the greater good.
+						KindFi is building a global community where purpose meets
+						technology. Every campaign is not just about funding it is about
+						creating a ripple of verified impact, led by contributors, creators,
+						and change-makers using blockchain for real-world change.
 					</p>
 				</motion.div>
 

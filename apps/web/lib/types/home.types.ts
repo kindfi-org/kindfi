@@ -43,6 +43,16 @@ export interface Feature {
 	}[]
 }
 
+interface Statistic {
+	value: string | number
+	label: string
+}
+
+export interface Statistics {
+	projects: Statistic
+	capitalRaised: Statistic
+}
+
 export enum ModelVariant {
 	SECURE = 'secure',
 	SOCIAL = 'social',

@@ -1,11 +1,12 @@
-import type { ProjectTag, TMoney, TPercentage } from '~/lib/types'
+import type { TMoney, TPercentage, Tag } from '~/lib/types'
+import { getA11yColorMatch } from './color-utils'
 
 /** Helper function to validate and create project tag */
 export function createProjectTag(
 	id: string,
 	text: string,
 	color: { backgroundColor: string; textColor: string },
-): ProjectTag {
+): Tag {
 	if (!id.trim()) throw new Error('Tag ID cannot be empty')
 	if (!text.trim()) throw new Error('Tag text cannot be empty')
 	if (!color.backgroundColor.trim() || !color.textColor.trim()) {
