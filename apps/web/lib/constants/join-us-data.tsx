@@ -22,10 +22,10 @@ export const features: Feature[] = [
 				<ArrowUpRight className="w-8 h-8 text-teal-600 relative z-10" />
 			</div>
 		),
-		title: 'Collaborate and Earn Rewards',
+		title: 'Give With Purpose, Earn With Impact',
 		description:
-			'Every contribution brings us closer to real change and meaningful rewards. Receive exclusive benefits like limited-edition NFTs, access to special events, and more. Collaboration has never been this rewarding.',
-		highlight: 'Community Rewards',
+			'Support verified projects, grow your Kinders NFT, and unlock governance rights, exclusive campaigns, and rewards. Every donation contributes to your on-chain identity and moves the ecosystem forward.',
+		highlight: 'Reputation System',
 	},
 	{
 		id: 'build-a-better-world-id',
@@ -44,10 +44,10 @@ export const features: Feature[] = [
 				<RefreshCw className="w-8 h-8 text-sky-600 relative z-10" />
 			</div>
 		),
-		title: 'Build a Better World',
+		title: 'Fuel the Causes That Matter Most',
 		description:
-			'Support a diverse range of social initiatives, from animal welfare to cultural preservation. Diversify your contributions and become a driving force for global change.',
-		highlight: '+50 Social Initiatives',
+			'Discover social, environmental, and humanitarian projects from across LATAM and beyond. All campaigns are milestone-verified and built on trustless fund release, ensuring your impact is real and trackable.',
+		highlight: 'View Verified Projects',
 	},
 	{
 		id: 'be-the-revolution-id',
@@ -66,9 +66,9 @@ export const features: Feature[] = [
 				<Megaphone className="w-8 h-8 text-purple-600 relative z-10" />
 			</div>
 		),
-		title: 'Be the Revolution',
+		title: 'Become a Steward of Change',
 		description:
-			'Raise the flag and prove that Web3 is the future of social impact. By empowering causes through decentralized technology, you can create real, lasting change beyond the limits of traditional systems.',
-		highlight: 'Web3 Revolution Advocate',
+			"With KindFi, supporters aren't just donors — they're governors. Your on-chain activity earns you the right to help shape how community funds are allocated, and what causes rise next.",
+		highlight: 'Learn About Kinders NFTs',
 	},
 ]

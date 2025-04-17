@@ -1,13 +1,6 @@
 'use client'
 
-import {
-	Clock,
-	ExternalLink,
-	Heart,
-	Link2,
-	Share,
-	Shield,
-} from 'lucide-react'
+import { Clock, ExternalLink, Heart, Link2, Share, Shield } from 'lucide-react'
 import { useMemo } from 'react'
 import { RiStarFill } from 'react-icons/ri'
 import ProjectVideo from '~/components/ProjectVideo'
@@ -33,13 +26,13 @@ import { businessModelData } from '~/lib/mock-data/mock-business-model'
 import { competitiveAdvantagesData } from '~/lib/mock-data/mock-competitive-adventage'
 import { investmentDetailsData } from '~/lib/mock-data/mock-investment-details'
 import { marketOpportunityData } from '~/lib/mock-data/mock-market-opportunity'
-import { projectDocumentsData } from '~/lib/mock-data/mock-project-documents'
-import { projectData } from '~/lib/mock-data/mock-project-overview'
 import { technologyData } from '~/lib/mock-data/mock-technology'
 import { tractionMilestonesData } from '~/lib/mock-data/mock-traction-milestones'
+import { projectDocumentsData } from '~/lib/mock-data/project/project-documents.mock'
+import { projectData } from '~/lib/mock-data/project/project-overview.mock'
 import type { Project, Tag } from '~/lib/types'
-import SimilarProjects from './similar-projects'
 import ProjectMilestone from './project-milestone'
+import SimilarProjects from './similar-projects'
 interface ProjectDetailProp {
 	project: Project
 }
@@ -57,16 +50,13 @@ const formatNumber = (number: number) => {
 const ProjectDetail = ({ project }: ProjectDetailProp) => {
 	const renderedTags = useMemo(() => {
 		return (project.tags as Tag[]).map(({ text, id }: Tag) => (
-			<div
-				key={id}
-				className="w-auto py-1 px-4 rounded-lg bg-slate-200  "
-			>
+			<div key={id} className="w-auto py-1 px-4 rounded-lg bg-slate-200  ">
 				<p className="font-bold text-[9px] capitalize">
 					{text?.toLocaleLowerCase()}
 				</p>
 			</div>
-		));
-	}, [project.tags]);
+		))
+	}, [project.tags])
 	return (
 		<>
 			<div className="w-full min-h-screen py-10 px-6 flex ">
@@ -111,7 +101,10 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 						</div>
 						<div className="w-full h-auto mt-4 relative aspect-video md:aspect-[16/9] lg:aspect-[16/9]">
 							<ProjectVideo
-								url={project?.video_url || "https://res.cloudinary.com/daqjecxhy/video/upload/v1743092835/424799153-62d97d91-9461-4f6f-8760-cc463496a220_qjftva.mov"}
+								url={
+									project?.video_url ||
+									'https://res.cloudinary.com/daqjecxhy/video/upload/v1743092835/424799153-62d97d91-9461-4f6f-8760-cc463496a220_qjftva.mov'
+								}
 								fallbackImage={project.image_url}
 								width="100%"
 								height="100%"
@@ -120,7 +113,9 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 
 							<div className=" bg-purple-700 shadow-black rounded-full flex items-center justify-center gap-1 absolute top-6 right-4 w-[50px] py-1 px-2">
 								<RiStarFill color="#fff" size={12} />
-								<p className="text-xs text-white font-semibold">{project?.rating || '4.7'}</p>
+								<p className="text-xs text-white font-semibold">
+									{project?.rating || '4.7'}
+								</p>
 							</div>
 						</div>
 
@@ -187,14 +182,18 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 														Project Milestones
 													</h3>
 													<div className="space-y-4">
-														{Array.from({ length: project.milestones }).map((_, index) => (
-															<ProjectMilestone
-																key={`milestone-${index}-${project.id}`}
-																index={index}
-																projectId={project.id}
-																completedMilestones={project.completed_milestones}
-															/>
-														))}
+														{Array.from({ length: project.milestones }).map(
+															(_, index) => (
+																<ProjectMilestone
+																	key={`milestone-${index}-${project.id}`}
+																	index={index}
+																	projectId={project.id}
+																	completedMilestones={
+																		project.completed_milestones
+																	}
+																/>
+															),
+														)}
 													</div>
 												</>
 											)}
@@ -474,9 +473,12 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 							</div>
 							<SimilarProjects
 								projects={project?.relatedProjects || []}
-								// biome-ignore lint/style/useTemplate: <explanation>
-								// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-								onViewMoreClick={() => window.location.href = '/projects?category=' + project.categories?.[0]}
+								onViewMoreClick={() =>
+									// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+									(window.location.href =
+										// biome-ignore lint/style/useTemplate: <explanation>
+										'/projects?category=' + project.categories?.[0])
+								}
 							/>
 						</div>
 					</div>

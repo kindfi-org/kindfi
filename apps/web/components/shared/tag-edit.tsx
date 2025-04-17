@@ -6,8 +6,8 @@ import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { Input } from '~/components/base/input'
 import type { Tag as ProjectTag } from '~/lib/types'
+import { getTagColors } from '~/lib/utils/categories-util'
 import { formatToPascalCase } from '~/lib/utils/tag-context'
-import { getTagColors } from '~/lib/utils/types-helpers'
 
 interface TagEditProps {
 	tag: ProjectTag

@@ -201,17 +201,16 @@ export { Button, buttonVariants }
  *
  * 4. Icon-only button (requires aria-label)
  * ```tsx
- * <Button
- *   iconOnly
- *   size="icon"
+ * <Button 
+ *   iconOnly 
+ *   size="icon" 
  *   aria-label="Close dialog"
- *   onClick={closeDialog}
  * >
  *   <XIcon />
  * </Button>
  * ```
  *
- * 5. Button with icon and text
+ * 5. Button with start icon
  * ```tsx
  * <Button startIcon={<UserIcon />}>Profile</Button>
  * <Button endIcon={<ArrowRightIcon />}>Next</Button>

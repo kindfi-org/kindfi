@@ -14,6 +14,111 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
 		.nullable(),
 )
 
+export const commentsRowSchema = z.object({
+	author_id: z.string(),
+	content: z.string(),
+	created_at: z.string().nullable(),
+	id: z.string(),
+	parent_comment_id: z.string().nullable(),
+	project_id: z.string().nullable(),
+	project_update_id: z.string().nullable(),
+	updated_at: z.string().nullable(),
+})
+
+export const commentsInsertSchema = z.object({
+	author_id: z.string(),
+	content: z.string(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	parent_comment_id: z.string().optional().nullable(),
+	project_id: z.string().optional().nullable(),
+	project_update_id: z.string().optional().nullable(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const commentsUpdateSchema = z.object({
+	author_id: z.string().optional(),
+	content: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	parent_comment_id: z.string().optional().nullable(),
+	project_id: z.string().optional().nullable(),
+	project_update_id: z.string().optional().nullable(),
+	updated_at: z.string().optional().nullable(),
+})
+
+export const commentsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('comments_parent_comment_id_fkey'),
+		columns: z.tuple([z.literal('parent_comment_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('comments'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('comments_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('comments_project_update_id_fkey'),
+		columns: z.tuple([z.literal('project_update_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('project_updates'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const communityRowSchema = z.object({
+	comment_id: z.string(),
+	created_at: z.string().nullable(),
+	id: z.string(),
+	project_id: z.string(),
+	update_id: z.string(),
+})
+
+export const communityInsertSchema = z.object({
+	comment_id: z.string(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	project_id: z.string(),
+	update_id: z.string(),
+})
+
+export const communityUpdateSchema = z.object({
+	comment_id: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	project_id: z.string().optional(),
+	update_id: z.string().optional(),
+})
+
+export const communityRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('comment_id_fkey'),
+		columns: z.tuple([z.literal('comment_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('comments'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('community_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('community_update_id_fkey'),
+		columns: z.tuple([z.literal('update_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('project_updates'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
 export const contributionsRowSchema = z.object({
 	amount: z.number(),
 	contributor_id: z.string(),

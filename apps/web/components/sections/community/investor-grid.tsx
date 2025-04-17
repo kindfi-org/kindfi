@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { containerVariants, itemVariants } from '~/lib/constants/animations'
-import type { Investor } from '~/lib/types/investors/top-investors'
+import type { Investor } from '~/lib/types/investors/top-investors.types'
 import { InvestorCard } from './investor-card'
 
 interface InvestorGridProps {

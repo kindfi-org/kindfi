@@ -5,7 +5,7 @@ import { Users } from 'lucide-react'
 import { Card, CardContent } from '~/components/base/card'
 import { Web3FeatureCard } from '~/components/shared/web3-feature-card'
 import { fadeInUpAnimation } from '~/lib/constants/animations'
-import { features, stats } from '~/lib/mock-data/mock-platform-overview'
+import { features, stats } from '~/lib/constants/platform-overview-data'
 
 export function PlatformOverview() {
 	const shouldReduceMotion = useReducedMotion()
@@ -24,16 +24,15 @@ export function PlatformOverview() {
 					className="text-center mb-16 max-w-3xl mx-auto"
 				>
 					<h2 className="text-4xl font-bold text-gray-900 mb-6">
-						<span className="block">The Web3 Platform Transforming</span>
+						<span className="block">Transforming Social Impact in LATAM</span>
 						<span className="block gradient-text">
-							Social Impact in Latin America
+							With Blockchain You Can Trust
 						</span>
 					</h2>
 					<p className="text-lg text-gray-600">
-						Connect your wallet and join verified social projects. We leverage
-						Escrow Blockchain Technology to ensure complete transparency and
-						traceability, guaranteeing that every contribution shapes the future
-						of our society.
+						KindFi connects real-world causes with crypto-powered transparency.
+						Built on Stellar, our escrow system ensures that every contribution
+						is safe, trackable, and only released when impact is proven.
 					</p>
 				</motion.div>
 
@@ -52,23 +51,12 @@ export function PlatformOverview() {
 								<Users className="w-8 h-8 text-purple-700" />
 							</div>
 							<p className="text-gray-600 leading-relaxed font-medium text-center">
-								Using the power of Web3 technology, each project becomes an
-								opportunity to create measurable social change. Smart escrow
-								system powered by:{' '}
-								<a
-									href="https://www.trustlesswork.com/"
-									target="_blank"
-									rel="noopener noreferrer"
-									referrerPolicy="no-referrer"
-									className="text-blue-600 underline hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-								>
-									Trustless Work
-								</a>
-								, ensures that funds are released only when goals are met.
-								Blockchain traceability guarantees full transparency and
-								accountability for every collaboration. Together, we are
-								building a bridge between the blockchain crypto world and
-								meaningful social impact across the world.
+								Every project on KindFi runs on a secure, milestone-based escrow
+								system built with Stellar smart contracts. Funds are only
+								released when real progress is verified — no shortcuts, no empty
+								promises. With on-chain transparency and real-time
+								accountability, we are connecting Web3 with causes that truly
+								matter across Latin America and beyond.
 							</p>
 						</CardContent>
 					</Card>

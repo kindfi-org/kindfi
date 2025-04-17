@@ -1,9 +1,10 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
+import Link from 'next/link'
 import React from 'react'
 import { Button } from '~/components/base/button'
-import { investorSteps, projectSteps } from '~/lib/mock-data/mock-user-journey'
+import { investorSteps, projectSteps } from '~/lib/constants/user-journey-data'
 import { cn } from '~/lib/utils'
 
 type ViewType = 'project' | 'investor'
@@ -41,13 +42,14 @@ export function UserJourney() {
 				<div className="text-center mb-16">
 					<motion.div {...fadeInUpAnimation}>
 						<h2 className="text-4xl font-bold text-gray-900 mb-4">
-							Transform Realities Using the{' '}
-							<span className="gradient-text">Power of the Web3</span>
+							Transform Real-World Impact with the <br />
+							<span className="gradient-text">Power of Stellar Blockchain</span>
 						</h2>
 						<p className="text-gray-600 max-w-2xl mx-auto text-lg">
-							From creation to launch, follow a transparent and secure process
-							powered by Smart Blockchain Escrows. Every step is verified to
-							ensure the success of your social campaign.
+							Whether you're launching a cause or supporting one, KindFi offers
+							a transparent path to creating real change. Every step is designed
+							to build trust, maximize visibility, and ensure funding is tied to
+							real outcomes.
 						</p>
 					</motion.div>
 
@@ -75,7 +77,7 @@ export function UserJourney() {
 									}
 								}}
 							>
-								Social Cause Path
+								For Kindlers
 							</Button>
 							<Button
 								variant={activeView === 'investor' ? 'default' : 'ghost'}
@@ -94,7 +96,7 @@ export function UserJourney() {
 									}
 								}}
 							>
-								Supporter Path
+								For Kinders
 							</Button>
 						</div>
 					</motion.div>
@@ -140,10 +142,15 @@ export function UserJourney() {
 					<Button
 						size="lg"
 						className="bg-indigo-900 hover:bg-indigo-800 text-white px-8"
+						asChild
 					>
-						{activeView === 'project'
-							? 'Register Your Project'
-							: 'Explore Causes'}
+						<Link
+							href={activeView === 'project' ? '/create-project' : '/projects'}
+						>
+							{activeView === 'project'
+								? 'Register Your Project'
+								: 'Explore Causes'}
+						</Link>
 					</Button>
 				</motion.div>
 			</div>

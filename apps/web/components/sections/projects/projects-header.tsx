@@ -1,7 +1,7 @@
 'use client'
 
 import { LayoutGrid, List, SlidersHorizontal } from 'lucide-react'
-import { CategoryFilter } from '~/components/sections/projects'
+import { CategoryFilter } from '~/components/sections/projects/category-filter'
 import { SortDropdown } from '~/components/sections/projects/sort-dropdown'
 import type { SortOption } from '~/hooks/use-projects-filter'
 

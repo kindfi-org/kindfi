@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { investorsData } from '~/lib/constants/mock-data/community-top-investors-data'
+import { investorsData } from '~/lib/mock-data/community-top-investors-data'
 import { safeParseFloat } from '~/lib/utils/safe-parse-float'
 
 export const useFilteredAndSortedInvestors = (

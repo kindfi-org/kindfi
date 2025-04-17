@@ -11,7 +11,7 @@ import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { fadeInUp } from '~/lib/constants/animations'
-import type { Investor } from '~/lib/types/investors/top-investors'
+import type { Investor } from '~/lib/types/investors/top-investors.types'
 
 const iconMap = {
 	Leaf,

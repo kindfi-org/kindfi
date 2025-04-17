@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { type FAQ, faqData } from '~/components/mocks/mock-data'
+import {
+	type FAQ,
+	faqData,
+} from '~/lib/mock-data/project/project-card-variants.mock'
 
 export function useFaqs() {
 	const [inputValue, setInputValue] = useState('')

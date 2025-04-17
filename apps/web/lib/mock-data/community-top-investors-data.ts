@@ -1,4 +1,4 @@
-import type { Investor } from '~/lib/types/investors/top-investors'
+import type { Investor } from '~/lib/types/investors/top-investors.types'
 
 export const investorsData: Investor[] = [
 	{
