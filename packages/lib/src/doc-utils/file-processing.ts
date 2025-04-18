@@ -26,7 +26,8 @@ export const processFile = async (file: File): Promise<ProcessFileResult> => {
 		})
 
 		extractedText = result.data.text
-		// Add logic to populate extractedData and validationErrors if needed
+		// TODO: Add logic to populate extractedData and validationErrors if needed.
+		// This could include document-specific field extraction based on the document type.
 	} catch (error) {
 		console.error('Error processing document:', error)
 		errorMessage = 'Error processing document'
