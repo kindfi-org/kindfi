@@ -13,7 +13,7 @@
 		"types": "supabase gen types typescript --local > src/database.types.ts",
 		"schemas": "supabase-to-zod --input src/database.types.ts --output src/database.schemas.ts",
 		"db:pull": "supabase db pull --local",
-		"db:push": "supabase db push --local",
+		"db:push": "bun run migrate",
 		"start": "supabase start",
 		"stop": "supabase stop",
 		"reset": "supabase db reset",
