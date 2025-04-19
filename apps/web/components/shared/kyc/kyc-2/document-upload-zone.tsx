@@ -1,5 +1,6 @@
 'use client'
 import { Upload, X } from 'lucide-react'
+import Image from 'next/image'
 import { useRef } from 'react'
 import { cn } from '~/lib/utils'
 
@@ -81,7 +82,7 @@ export function DocumentUploadZone({
 								isDisabled ? 'text-gray-300' : 'text-gray-500',
 							)}
 						>
-							JPG, PNG or PDF files only
+							JPG or PDF files only
 						</p>
 					</button>
 				</div>
@@ -97,7 +98,9 @@ export function DocumentUploadZone({
 						</button>
 					)}
 					<div className="w-full h-52 relative">
-						<img
+						<Image
+							width={400}
+							height={400}
 							src={previewUrl}
 							alt={`${side} of ID`}
 							className="absolute w-full h-full object-contain"
