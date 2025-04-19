@@ -1,3 +1,4 @@
+
 insert into categories (name, color) values
 ('Education', '#4A90E2'),
 ('Healthcare', '#27AE60'),
