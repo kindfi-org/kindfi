@@ -10,11 +10,13 @@ alter table public.categories
   add constraint chk_color_format check (color ~ '^#[0-9A-Fa-f]{6}$');
 
 -- Indexes for better performance
-create index idx_categories_name on public.categories (name);
-create index idx_categories_color on public.categories (color);
+-- create index idx_categories_name on public.categories (name);
+-- create index idx_categories_color on public.categories (color);
 
 -- Row Level Security
 alter table public.categories enable row level security;
+
+GRANT SELECT ON public.categories TO public;
 
 -- Public read access
 create policy "Public can read categories"
