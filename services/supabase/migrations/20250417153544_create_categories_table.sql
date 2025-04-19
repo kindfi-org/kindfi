@@ -3,8 +3,11 @@
 create table public.categories (
   id integer primary key generated always as identity,
   name text not null unique,
-  color text not null unique
+  color char(7) not null unique
 );
+
+alter table public.categories
+  add constraint chk_color_format check (color ~ '^#[0-9A-Fa-f]{6}$');
 
 -- Indexes for better performance
 create index idx_categories_name on public.categories (name);
