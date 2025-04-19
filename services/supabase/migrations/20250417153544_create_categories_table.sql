@@ -1,3 +1,4 @@
+
 -- Create categories table
 create table public.categories (
   id integer primary key generated always as identity,
