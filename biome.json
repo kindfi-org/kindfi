@@ -9,6 +9,7 @@
 		"ignoreUnknown": false,
 		"ignore": [
 			"./apps/web/.next",
+			"./apps/academy-wep/.next",
 			"./apps/indexer/src/types/models",
 			"./apps/kyc-server/public"
 		]

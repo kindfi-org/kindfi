@@ -9,7 +9,7 @@
 		"husky": "^9.1.7"
 	},
 	"peerDependencies": {
-		"typescript": "^5.0.0"
+		"typescript": "^5.8.2"
 	},
 	"engines": {
 		"bun": "1.x"
@@ -19,7 +19,7 @@
 			"commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
 		}
 	},
-	"packageManager": "bun@1.1.20",
+	"packageManager": "bun@1.2.0",
 	"private": true,
 	"scripts": {
 		"init": "bun install && bun husky:prepare",
