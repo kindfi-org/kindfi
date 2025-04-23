@@ -1,4 +1,4 @@
-import type { ImpactCategory } from '~/lib/types/impact/impact-categories'
+import type { ImpactCategory } from '~/lib/types/impact/impact-categories.types'
 
 export const impactCategories: ImpactCategory[] = [
 	{

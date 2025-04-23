@@ -82,6 +82,13 @@
 		--radius: 0.75rem;
 		--skeleton-opacity: 0.2;
 	}
+
+	* {
+		@apply border-border outline-ring/50;
+	}
+	body {
+		@apply bg-background text-foreground;
+	}
 }
 
 @layer components {
@@ -122,15 +129,6 @@
 			rgba(197, 253, 250, 0.294),
 			transparent 15%
 		);
-	}
-}
-
-@layer base {
-	* {
-		@apply border-border;
-	}
-	body {
-		@apply bg-background text-foreground;
 	}
 }
 
@@ -235,12 +233,27 @@
 	position: relative;
 	z-index: 50;
 }
+@keyframes progress {
+	0% {
+		transform: translateX(-100%);
+	}
+	50% {
+		transform: translateX(100%);
+	}
+	100% {
+		transform: translateX(-100%);
+	}
+}
 
-@layer base {
-	* {
-		@apply border-border outline-ring/50;
-	}
-	body {
-		@apply bg-background text-foreground;
-	}
+.animate-progress {
+	animation: progress 2s infinite linear;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+	display: none;
+}
+
+.scrollbar-hide {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 }

@@ -1,44 +1,39 @@
 export const mockAboutUs = {
-	hero: {
-		badge: 'Reimagining Social Impact',
-		headline: 'Revolutionizing\nCrowdfunding\nwith Blockchain\nTransparency',
-		subheading:
-			'KindFi is a Web3 crowdfunding platform using Stellar blockchain and AI to ensure transparency, trust, and efficiency in funding social impact projects.',
-		ctas: [
-			{ label: 'Start Exploring', href: '/explore' },
-			{ label: 'Watch Demo', href: '/demo' },
-		],
-		image: '/images/image.png',
-	},
 	missionVision: {
 		mission: {
 			title: 'Our Mission',
 			description:
-				'Empowering communities through transparent, trust-based crowdfunding, ensuring every donation makes a measurable impact.',
+				'To empower communities by transforming how funding reaches social causes — with transparent, traceable, and trust-based crowdfunding powered by blockchain.',
 		},
 		vision: {
 			title: 'Our Vision',
 			description:
-				'A future where blockchain and Web3 technologies serve as the foundation for social good, making donations secure, transparent, and universally accessible.',
+				'A future where anyone, anywhere, can fund or launch a cause with confidence — backed by smart contracts, verified impact, and the accessibility of blockchain technology.',
 		},
 	},
 	problems: [
 		{
 			title: 'Lack of Transparency',
 			description:
-				"Traditional platforms leave donors in the dark about where their money goes and how it's used.",
+				'Most platforms keep donors in the dark. KindFi makes every transaction and milestone publicly verifiable through Stellar smart contracts.',
 			icon: 'lock',
 		},
 		{
 			title: 'High Costs',
 			description:
-				'Excessive fees and operational costs significantly reduce the amount of funds reaching the intended causes.',
+				'Fees around 6 to 8 % or even hidden and intermediaries eat into donations. Our model minimizes costs, ensuring more funds reach the cause.',
 			icon: 'shield',
 		},
 		{
 			title: 'Limited Engagement',
 			description:
-				'Donors lack continuous involvement and visibility into the impact of their contributions.',
+				'Traditional donations are one-off. KindFi introduces dynamic NFTs, quests, and reputation-based governance to keep supporters engaged and rewarded over time.',
+			icon: 'users',
+		},
+		{
+			title: 'No Proof of Progress',
+			description:
+				'On legacy platforms, anyone can launch a project even without follow-through. On KindFi, funds are released only when verified milestones are met.',
 			icon: 'users',
 		},
 	],
@@ -46,66 +41,70 @@ export const mockAboutUs = {
 		{
 			icon: 'globe',
 			title: 'Project Submission',
-			description: 'AI reviews proposals for legitimacy & impact optimization.',
+			description:
+				'Cause creators submit their campaigns with clear goals and impact milestones. AI helps evaluate legitimacy, optimize storytelling, and flag inconsistencies before review',
 		},
 		{
 			icon: 'lock',
 			title: 'Secure Donations',
-			description: 'Funds are held in Stellar-powered smart escrows.',
+			description:
+				'Approved projects go live. Donations are held in Soroban-powered smart escrow contracts on the Stellar blockchain — never directly transferred Contributors use wallets and biometric passkeys for secure, on-chain participation',
 		},
 		{
 			icon: 'check-circle',
 			title: 'Milestone-Based Releases',
-			description: 'Ensuring accountability through verified milestones.',
+			description:
+				'Funds are released in tranches only when verified milestones are met — such as progress photos, reports, or social proof.',
 		},
 		{
 			icon: 'star',
 			title: 'Community Growth',
-			description: 'Donors and contributors earn NFT rewards.',
+			description:
+				'Kinders unlock governance power, exclusive access, and future project prioritization — building a trusted, on-chain identity layer.',
 		},
 	],
 	whyIsDifferent: [
 		{
 			title: 'Total Transparency',
 			description:
-				'Every donation is trackable and verifiable on the Stellar blockchain, ensuring trust and security.',
+				'Every donation is recorded and traceable on-chain through Stellar, ensuring public accountability at every step — no hidden flows, no guesswork.',
 			icon: 'star',
 		},
 		{
-			title: 'Smart Escrow',
+			title: 'Smart Escrow System',
 			description:
-				'Funds are released progressively based on milestones through smart contracts, ensuring proper use.',
+				'Funds aren’t released until progress is proven. With Soroban smart contracts, milestones must be verified to unlock each tranche — protecting contributors and building real trust.',
 			icon: 'check-circle',
 		},
 		{
 			title: 'Global Accessibility',
 			description:
-				'Supports multiple currencies and languages, removing geographical and financial barriers to participation.',
+				'Anyone can contribute — no matter the currency, language, or location. KindFi supports multilingual access, crypto and fiat flows, and onramps for global inclusion.',
 			icon: 'globe',
 		},
 	],
 	kindfiStellarFeatures: [
 		{
 			id: 'financial-inclusion',
-			title: 'Financial Inclusion',
+			title: 'Speed + Affordability',
 			description: 'Making donations accessible to all',
 			icon: 'globe',
 		},
 		{
 			id: 'transparency-security',
-			title: 'Transparency & Security',
+			title: 'Built for Compliance',
 			description: 'All transactions are auditable',
 			icon: 'shield-check',
 		},
 		{
 			id: 'global-transactions',
-			title: 'Global, Low-Cost Transactions',
+			title: 'Fiat-to-Crypto Friendly',
 			description: 'Fast & affordable payments via Stellar',
 			icon: 'banknote',
 		},
 		{
 			id: 'instant-settlement',
-			title: 'Instant Settlement',
+			title: 'Global-First, LATAM-Ready',
 			description: 'Funds transfer in seconds, not days',
 			icon: 'clock',
 		},
@@ -123,7 +122,7 @@ export const mockAboutUs = {
 		},
 		{
 			id: 'decentralization',
-			title: 'Decentralization',
+			title: 'Reputation-Driven',
 			description: 'No middlemen, direct and secure funding',
 			icon: 'network',
 		},
@@ -134,22 +133,31 @@ export const mockAboutUs = {
 			icon: 'globe',
 		},
 	],
+
 	roadmap: [
 		{
 			id: 1,
-			title: 'AI-powered Crowdfunding Optimization',
+			title: 'AI-Powered Crowdfunding Optimization',
+			details:
+				'AI agents to vet campaigns, optimize narratives, detect fraud, and surface the most promising projects',
 		},
 		{
 			id: 2,
-			title: 'Partnerships with Global NGOs',
+			title: 'Global NGO & Foundation Partnerships',
+			details:
+				'Collaborations with NGOs and foundations across Latin America to onboard high-impact causes, expand reach and impact',
 		},
 		{
 			id: 3,
-			title: 'Stellar Soroban Smart Contracts',
+			title: 'Soroban-Powered Smart Contracts',
+			details:
+				'Robust governance, referral, streak, and fund management systems using Soroban—enabling decentralized fund releases, NFT-based reputation, and community voting',
 		},
 		{
 			id: 4,
-			title: 'Multi-currency Support',
+			title: 'Multi-Currency & On-Ramp Integration',
+			details:
+				'Support for USDC, XLM, and fiat onramps to allow seamless contributions from anywhere in the world—crypto-native or not',
 		},
 	],
 }

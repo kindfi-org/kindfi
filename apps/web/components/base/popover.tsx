@@ -5,6 +5,19 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 
+/**
+ * Displays a floating container for additional content, toggled by a trigger element.
+ *
+ * Use this component to wrap a trigger and its corresponding content. The PopoverTrigger
+ * activates the popover, while the PopoverContent renders the floating content with
+ * default animations and styling. More at: https://ui.shadcn.com/docs/components/popover
+ *
+ * @example
+ * <Popover>
+ *   <PopoverTrigger>Open</PopoverTrigger>
+ *   <PopoverContent>Here’s the detailed information...</PopoverContent>
+ * </Popover>
+ */
 const Popover = PopoverPrimitive.Root
 
 const PopoverTrigger = PopoverPrimitive.Trigger
@@ -28,4 +41,4 @@ const PopoverContent = React.forwardRef<
 ))
 PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
-export { Popover, PopoverTrigger, PopoverContent }
+export { Popover, PopoverContent, PopoverTrigger }

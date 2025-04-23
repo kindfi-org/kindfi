@@ -5,7 +5,8 @@ import type React from 'react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { Input } from '~/components/base/input'
-import type { ProjectTag } from '~/lib/types/project.types'
+import type { Tag as ProjectTag } from '~/lib/types'
+import { getTagColors } from '~/lib/utils/categories-util'
 import { formatToPascalCase } from '~/lib/utils/tag-context'
 
 interface TagEditProps {
@@ -24,7 +25,7 @@ export function TagEdit({ tag, onUpdate, onCancel }: TagEditProps) {
 			if (editedTag.trim()) {
 				const formattedNewTag = formatToPascalCase(editedTag)
 				if (formattedNewTag !== tag.text) {
-					onUpdate(tag.id, formattedNewTag)
+					onUpdate(tag.id as string, formattedNewTag)
 				} else {
 					onCancel()
 				}
@@ -34,7 +35,7 @@ export function TagEdit({ tag, onUpdate, onCancel }: TagEditProps) {
 		},
 		[editedTag, tag, onUpdate, onCancel],
 	)
-
+	const colors = getTagColors(tag)
 	return (
 		<div className="flex items-center">
 			<Input
@@ -42,10 +43,7 @@ export function TagEdit({ tag, onUpdate, onCancel }: TagEditProps) {
 				value={editedTag}
 				onChange={(e) => setEditedTag(e.target.value)}
 				className="px-2 py-1 border rounded-sm mr-2 text-sm h-8"
-				style={{
-					backgroundColor: tag.color.backgroundColor,
-					color: tag.color.textColor,
-				}}
+				style={colors}
 				onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
 			/>
 			<button

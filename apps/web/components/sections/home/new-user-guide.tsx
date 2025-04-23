@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { StepCard } from '~/components/shared/steps-card'
 import { fadeInUpVariants } from '~/lib/constants/animations'
-import { steps } from '~/lib/mock-data/mock-new-user-guide'
+import { steps } from '~/lib/constants/new-user-guide-data'
 
 export function NewUserGuide() {
 	return (
@@ -26,12 +26,12 @@ export function NewUserGuide() {
 					<h2 className="text-4xl font-bold text-gray-900 mb-6">
 						<span className="block">New in KindFi?</span>
 						<span className="block gradient-text">
-							Support Verified Projects Today!
+							Start Supporting Real Causes in 3 Easy Steps
 						</span>
 					</h2>
 					<p className="text-lg text-gray-600 max-w-2xl mx-auto">
-						In just 3 simple steps, you can begin contributing to social
-						initiatives securely and transparently.
+						No crypto experience needed. Just choose a cause, learn what it is
+						about, and support it securely using your wallet all in minutes
 					</p>
 				</motion.div>
 

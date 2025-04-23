@@ -6,7 +6,7 @@ import { JoinCommunity } from '~/components/sections/learning/join-community'
 import { LatestUpdates } from '~/components/sections/learning/latest-updates'
 import { ResourceFilters } from '~/components/sections/learning/resource-filters'
 import { ResourceGrid } from '~/components/sections/learning/resource-grid'
-import { categories, resources } from '~/lib/constants/mock-data/mock-learning'
+import { categories, resources } from '~/lib/mock-data/mock-learning'
 
 export default function LearningPage() {
 	const [activeLevel, setActiveLevel] = useState('all levels')

@@ -1,87 +1,61 @@
-import type {
-	Control,
-	Controller,
-	FieldErrors,
-	UseFormRegister,
-} from 'react-hook-form'
-
-import { CategoryTag } from '~/components/category/categoryTag/CategoryTag'
+import type { Control } from 'react-hook-form'
+import {
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '~/components/base/form'
+import { Input } from '~/components/base/input'
+import { CategoryTag } from '~/components/category/categoryTag/category-tag'
 import { PROJECT_CATEGORIES } from '~/lib/constants/project.constants'
 import type { ProjectFormData } from '~/lib/validators/project'
 
 type ProjectDetailsProps = {
-	register: UseFormRegister<ProjectFormData>
 	control: Control<ProjectFormData>
-	errors: FieldErrors<ProjectFormData>
-	Controller: typeof Controller
 }
 
-export function ProjectDetails({
-	register,
-	control,
-	errors,
-	Controller,
-}: ProjectDetailsProps) {
+export function ProjectDetails({ control }: ProjectDetailsProps) {
 	return (
 		<div className="space-y-4">
-			<div>
-				<label
-					htmlFor="website"
-					className="block text-sm font-medium text-gray-900 mb-1.5"
-				>
-					What&apos;s your project&apos;s website?
-				</label>
-				<input
-					type="text"
-					id="website"
-					{...register('website')}
-					placeholder="https://"
-					className={`w-full px-3 py-2 rounded-md border ${
-						errors.website ? 'border-red-500' : 'border-gray-200'
-					} placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1`}
-				/>
-				{errors.website && (
-					<p className="text-sm text-red-500 mt-1">{errors.website.message}</p>
+			<FormField
+				control={control}
+				name="website"
+				render={({ field }) => (
+					<FormItem>
+						<FormLabel>What&apos;s your project&apos;s website?</FormLabel>
+						<FormControl>
+							<Input {...field} placeholder="https://" />
+						</FormControl>
+						<FormMessage className="font-bold gradient-text" />
+						<p className="text-sm text-gray-500 mt-1.5">
+							Optional: Add your project website if you have one
+						</p>
+					</FormItem>
 				)}
-				<p className="text-sm text-gray-500 mt-1.5">
-					Optional: Add your project website if you have one
-				</p>
-			</div>
+			/>
 
-			<div>
-				<label
-					htmlFor="location"
-					className="block text-sm font-medium text-gray-900 mb-1.5"
-				>
-					Where is your project based?
-				</label>
-				<input
-					type="text"
-					id="location"
-					{...register('location')}
-					placeholder="Enter location"
-					className={`w-full px-3 py-2 rounded-md border ${
-						errors.location ? 'border-red-500' : 'border-gray-200'
-					} placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1`}
-				/>
-				{errors.location && (
-					<p className="text-sm text-red-500 mt-1">{errors.location.message}</p>
+			<FormField
+				control={control}
+				name="location"
+				render={({ field }) => (
+					<FormItem>
+						<FormLabel>Where is your project based?</FormLabel>
+						<FormControl>
+							<Input {...field} placeholder="Enter location" />
+						</FormControl>
+						<FormMessage className="font-bold gradient-text" />
+					</FormItem>
 				)}
-			</div>
+			/>
 
-			<div>
-				<label
-					htmlFor="category"
-					className="block text-sm font-medium text-gray-900 mb-1.5"
-				>
-					How would you categorize your project?
-				</label>
-
-				<Controller
-					name="category"
-					control={control}
-					render={({ field }) => (
-						<div className="mt-2">
+			<FormField
+				name="category"
+				control={control}
+				render={({ field }) => (
+					<FormItem>
+						<FormLabel> How would you categorize your project?</FormLabel>
+						<FormControl>
 							<div className="flex flex-wrap gap-2 ">
 								{PROJECT_CATEGORIES.map((category) => (
 									<CategoryTag
@@ -92,38 +66,28 @@ export function ProjectDetails({
 									/>
 								))}
 							</div>
-							{errors.category && (
-								<p className="text-sm text-red-500 mt-2">
-									{errors.category.message}
-								</p>
-							)}
-						</div>
-					)}
-				/>
-			</div>
-
-			<div>
-				<label
-					htmlFor="description"
-					className="block text-sm font-medium text-gray-900 mb-1.5"
-				>
-					Describe your project in simple words
-				</label>
-				<input
-					type="text"
-					id="description"
-					{...register('description')}
-					placeholder="e.g., Providing clean water for rural communities"
-					className={`w-full px-3 py-2 rounded-md border ${
-						errors.description ? 'border-red-500' : 'border-gray-200'
-					} placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1`}
-				/>
-				{errors.description && (
-					<p className="text-sm text-red-500 mt-1">
-						{errors.description.message}
-					</p>
+						</FormControl>
+						<FormMessage className="font-bold gradient-text" />
+					</FormItem>
 				)}
-			</div>
+			/>
+
+			<FormField
+				control={control}
+				name="description"
+				render={({ field }) => (
+					<FormItem>
+						<FormLabel>Describe your project in simple words</FormLabel>
+						<FormControl>
+							<Input
+								{...field}
+								placeholder="e.g., Providing clean water for rural communities"
+							/>
+						</FormControl>
+						<FormMessage className="font-bold gradient-text" />
+					</FormItem>
+				)}
+			/>
 		</div>
 	)
 }

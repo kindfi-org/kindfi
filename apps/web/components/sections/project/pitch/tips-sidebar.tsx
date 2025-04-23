@@ -5,9 +5,9 @@ import { CircleHelp } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { fadeInWithDelay, fadeSlideUp } from '~/lib/constants/animations'
-import { tips } from '~/lib/mock-data/project/mock-pitch'
+import { tips } from '~/lib/mock-data/project/project-pitch.mock'
 
-export default function TipsSidebar() {
+export function TipsSidebar() {
 	return (
 		<motion.aside className="mx-auto" {...fadeInWithDelay(0.5)}>
 			<div className="flex items-center gap-2">
