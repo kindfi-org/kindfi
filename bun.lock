@@ -195,6 +195,9 @@
       "name": "@packages/lib",
       "version": "0.0.1",
       "dependencies": {
+        "@supabase/auth-helpers-nextjs": "^0.10.0",
+        "@supabase/supabase-js": "^2.49.4",
+        "@tanstack/react-query": "^5.74.4",
         "tesseract.js": "^6.0.0",
       },
     },
@@ -825,6 +828,10 @@
     "@substrate/light-client-extension-helpers": ["@substrate/light-client-extension-helpers@1.0.0", "", { "dependencies": { "@polkadot-api/json-rpc-provider": "^0.0.1", "@polkadot-api/json-rpc-provider-proxy": "^0.1.0", "@polkadot-api/observable-client": "^0.3.0", "@polkadot-api/substrate-client": "^0.1.2", "@substrate/connect-extension-protocol": "^2.0.0", "@substrate/connect-known-chains": "^1.1.5", "rxjs": "^7.8.1" }, "peerDependencies": { "smoldot": "2.x" } }, "sha512-TdKlni1mBBZptOaeVrKnusMg/UBpWUORNDv5fdCaJklP4RJiFOzBCrzC+CyVI5kQzsXBisZ+2pXm+rIjS38kHg=="],
 
     "@substrate/ss58-registry": ["@substrate/ss58-registry@1.51.0", "", {}, "sha512-TWDurLiPxndFgKjVavCniytBIw+t4ViOi7TYp9h/D0NMmkEc9klFTo+827eyEJ0lELpqO207Ey7uGxUa+BS1jQ=="],
+
+    "@supabase/auth-helpers-nextjs": ["@supabase/auth-helpers-nextjs@0.10.0", "", { "dependencies": { "@supabase/auth-helpers-shared": "0.7.0", "set-cookie-parser": "^2.6.0" }, "peerDependencies": { "@supabase/supabase-js": "^2.39.8" } }, "sha512-2dfOGsM4yZt0oS4TPiE7bD4vf7EVz7NRz/IJrV6vLg0GP7sMUx8wndv2euLGq4BjN9lUCpu6DG/uCC8j+ylwPg=="],
+
+    "@supabase/auth-helpers-shared": ["@supabase/auth-helpers-shared@0.7.0", "", { "dependencies": { "jose": "^4.14.4" }, "peerDependencies": { "@supabase/supabase-js": "^2.39.8" } }, "sha512-FBFf2ei2R7QC+B/5wWkthMha8Ca2bWHAndN+syfuEUUfufv4mLcAgBCcgNg5nJR8L0gZfyuaxgubtOc9aW3Cpg=="],
 
     "@supabase/auth-js": ["@supabase/auth-js@2.69.1", "", { "dependencies": { "@supabase/node-fetch": "^2.6.14" } }, "sha512-FILtt5WjCNzmReeRLq5wRs3iShwmnWgBvxHfqapC/VoljJl+W8hDAyFmf1NVw3zH+ZjZ05AKxiKxVeb0HNWRMQ=="],
 
@@ -1877,6 +1884,8 @@
     "jest-worker": ["jest-worker@27.5.1", "", { "dependencies": { "@types/node": "*", "merge-stream": "^2.0.0", "supports-color": "^8.0.0" } }, "sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg=="],
 
     "jiti": ["jiti@1.21.7", "", { "bin": { "jiti": "bin/jiti.js" } }, "sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A=="],
+
+    "jose": ["jose@4.15.9", "", {}, "sha512-1vUQX+IdDMVPj4k8kOxgUqlcK518yluMuGZwqlr44FS1ppZB/5GWh4rZG89erpOBOJjU/OBsnCVFfapsRz6nEA=="],
 
     "js-cookie": ["js-cookie@2.2.1", "", {}, "sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ=="],
 

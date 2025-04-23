@@ -7,7 +7,11 @@
 		"moduleDetection": "force",
 		"jsx": "react-jsx",
 		"allowJs": true,
-
+		"baseUrl": ".",
+		"paths": {
+			"@/lib/*": ["packages/lib/src/*"],
+			"~/*": ["./*"]
+		},
 		// Bundler mode
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
@@ -22,9 +26,6 @@
 		// Some stricter flags (disabled by default)
 		"noUnusedLocals": false,
 		"noUnusedParameters": false,
-		"noPropertyAccessFromIndexSignature": false,
-		"paths": {
-			"~/*": ["./*"]
-		}
+		"noPropertyAccessFromIndexSignature": false
 	}
 }

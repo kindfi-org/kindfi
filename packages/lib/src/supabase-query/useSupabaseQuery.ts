@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase-client'
+import { supabase } from '@packages/lib/src/supabase-client'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import {
 	type QueryKey,

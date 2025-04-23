@@ -1,6 +1,6 @@
-import { createServerComponentSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
 
 /**
  * Global utility for performing server-side Supabase queries.
@@ -23,7 +23,7 @@ export async function fetchSupabaseQuery<TData>(
 	key: string,
 	queryFn: (client: SupabaseClient) => Promise<TData>,
 ): Promise<TData> {
-	const supabase = createServerComponentSupabaseClient({ cookies, headers })
+	const supabase = createServerComponentClient({ cookies })
 
 	try {
 		const data = await queryFn(supabase)
