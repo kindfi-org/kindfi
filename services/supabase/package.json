@@ -13,11 +13,11 @@
 		"types": "supabase gen types typescript --local > src/database.types.ts",
 		"schemas": "supabase-to-zod --input src/database.types.ts --output src/database.schemas.ts",
 		"db:pull": "supabase db pull --local",
-		"db:push": "bun run migrate && bun run gen",
+		"db:push": "supabase db push --local",
 		"start": "supabase start",
 		"stop": "supabase stop",
 		"reset": "supabase db reset",
-		"migrate": "supabase db push --local",
+		"migrate": "supabase migrate up",
 		"status": "supabase status"
 	},
 	"author": "kindfi",
