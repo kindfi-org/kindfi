@@ -22,13 +22,18 @@ export function NFTAchievement() {
         proficiency.
       </p>
 
-      <div className="flex justify-center gap-4 pt-2">
-        <Button variant="secondary" className="gradient-btn">
+      <div className="flex flex-col sm:flex-row justify-center gap-4 pt-2 w-full sm:w-auto">
+        <Button
+          variant="secondary"
+          className="gradient-btn"
+          aria-label="View your NFT badge collection"
+        >
           View Your Collection
         </Button>
         <Button
           variant="outline"
           className="hover:text-green-600 border-gray-300"
+          aria-label="Learn more about NFT badges"
         >
           Learn More About NFTs
         </Button>
