@@ -34,6 +34,24 @@ export type Database = {
 	}
 	public: {
 		Tables: {
+			categories: {
+				Row: {
+					color: string
+					id: number
+					name: string
+				}
+				Insert: {
+					color: string
+					id?: never
+					name: string
+				}
+				Update: {
+					color?: string
+					id?: never
+					name?: string
+				}
+				Relationships: []
+			}
 			comments: {
 				Row: {
 					author_id: string
