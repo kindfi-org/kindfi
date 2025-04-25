@@ -3,6 +3,13 @@
 version = 4
 
 [[package]]
+name = "academy-graduation-nft"
+version = "0.1.0"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
 name = "account_contract"
 version = "0.1.0"
 dependencies = [
