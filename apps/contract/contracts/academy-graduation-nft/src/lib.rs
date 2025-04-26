@@ -72,7 +72,7 @@ impl AcademyGraduationNFT {
     /// @param token_id The unique identifier of the NFT
     /// @return Result indicating failure due to soulbound nature
     pub fn attempt_transfer(
-        env: Env,
+        _env: Env,
         from: Address,
         to: Address,
         token_id: u128,

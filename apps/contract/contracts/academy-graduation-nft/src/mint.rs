@@ -1,12 +1,10 @@
-use core::error;
-
 use crate::interface::MetadataOperations;
 use crate::{
     AcademyGraduationNFT,
     datatype::{DataKeys, GraduationNFT, NFTError},
     interface::MintingOperations,
 };
-use soroban_sdk::{Address, Env, String, Symbol, Val, Vec, symbol_short, vec};
+use soroban_sdk::{Address, Env, String, Symbol, Val, Vec, vec};
 
 impl MintingOperations for AcademyGraduationNFT {
     /// Mints a graduation NFT for a recipient
