@@ -1,9 +1,27 @@
-import React from 'react'
+import type React from 'react'
+import type { ViewStyle } from 'react-native'
 import { Defs, Ellipse, G, RadialGradient, Stop, Svg } from 'react-native-svg'
 
-const SvgComponent = () => {
+interface GradientProps {
+	width?: number | string
+	height?: number | string
+	style?: ViewStyle
+}
+
+const Gradient: React.FC<GradientProps> = ({
+	width = '100%',
+	height = '100%',
+	style,
+}) => {
 	return (
-		<Svg width="965" height="1078" viewBox="0 0 965 1078" fill="none">
+		<Svg
+			width={width}
+			height={height}
+			viewBox="0 0 965 1078"
+			fill="none"
+			style={style}
+			preserveAspectRatio="xMidYMid meet"
+		>
 			<G opacity="0.8">
 				<G>
 					<Ellipse
@@ -52,4 +70,4 @@ const SvgComponent = () => {
 	)
 }
 
-export default SvgComponent
+export default Gradient

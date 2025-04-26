@@ -1,47 +1,68 @@
-import React from 'react'
-
 import type { VariantProps } from '@gluestack-ui/nativewind-utils'
-import { Text as RNText } from 'react-native'
+import * as React from 'react'
+import {
+	Platform,
+	Text as RNText,
+	type TextProps as RNTextProps,
+} from 'react-native'
 import { textStyle } from './styles'
 
-type ITextProps = React.ComponentProps<typeof RNText> &
-	VariantProps<typeof textStyle>
+type TextBaseProps = VariantProps<typeof textStyle> & {
+	className?: string
+}
 
-const Text = React.forwardRef<React.ElementRef<typeof RNText>, ITextProps>(
-	(
-		{
-			className,
-			isTruncated,
-			bold,
-			underline,
-			strikeThrough,
-			size = 'md',
-			sub,
-			italic,
-			highlight,
-			...props
-		},
-		ref,
-	) => {
+type ITextProps = (Platform.OS extends 'web'
+	? React.ComponentProps<'span'>
+	: RNTextProps) &
+	TextBaseProps
+
+const Text = React.forwardRef<
+	Platform.OS extends 'web' ? HTMLSpanElement : React.ElementRef<typeof RNText>,
+	ITextProps
+>((props, ref) => {
+	const {
+		className,
+		isTruncated,
+		bold,
+		underline,
+		strikeThrough,
+		size = 'md',
+		sub,
+		italic,
+		highlight,
+		...rest
+	} = props
+
+	const styleClassName = textStyle({
+		isTruncated,
+		bold,
+		underline,
+		strikeThrough,
+		size,
+		sub,
+		italic,
+		highlight,
+		class: className,
+	})
+
+	if (Platform.OS === 'web') {
 		return (
-			<RNText
-				className={textStyle({
-					isTruncated,
-					bold,
-					underline,
-					strikeThrough,
-					size,
-					sub,
-					italic,
-					highlight,
-					class: className,
-				})}
-				{...props}
-				ref={ref}
+			<span
+				className={styleClassName}
+				{...(rest as React.ComponentProps<'span'>)}
+				ref={ref as React.Ref<HTMLSpanElement>}
 			/>
 		)
-	},
-)
+	}
+
+	return (
+		<RNText
+			className={styleClassName}
+			{...(rest as RNTextProps)}
+			ref={ref as React.Ref<RNText>}
+		/>
+	)
+})
 
 Text.displayName = 'Text'
 
