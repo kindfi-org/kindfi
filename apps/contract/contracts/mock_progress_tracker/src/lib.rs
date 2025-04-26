@@ -1,3 +1,4 @@
+#![no_std]
 use soroban_sdk::{Address, Env, contract, contractimpl};
 
 #[contract]

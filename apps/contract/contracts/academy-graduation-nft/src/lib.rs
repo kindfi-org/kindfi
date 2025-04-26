@@ -6,6 +6,16 @@ mod distribution;
 mod interface;
 mod metadata;
 mod mint;
+mod progresstracker {
+    soroban_sdk::contractimport!(
+        file = "../../target/wasm32-unknown-unknown/release/mock_progress_tracker.wasm"
+    );
+}
+mod badgetracker {
+    soroban_sdk::contractimport!(
+        file = "../../target/wasm32-unknown-unknown/release/mock_badge_tracker.wasm"
+    );
+}
 
 use datatype::{DataKeys, GraduationNFT, NFTError};
 use interface::{DistributionOperations, MintingOperations, QueryOperations};

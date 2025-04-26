@@ -4,6 +4,7 @@ use crate::{
     datatype::{DataKeys, GraduationNFT, NFTError},
     interface::MintingOperations,
 };
+use crate::{badgetracker, progresstracker};
 use soroban_sdk::{Address, Env, String, Symbol, Val, Vec, vec};
 
 impl MintingOperations for AcademyGraduationNFT {
@@ -26,23 +27,16 @@ impl MintingOperations for AcademyGraduationNFT {
             .ok_or(NFTError::Uninitialized)?;
 
         // Step 4: Verify module completion
-        let function_name = Symbol::new(&env, "is_completed");
-        let args: Vec<Val> = vec![&env, recipient.clone().to_val()];
-        let is_completed: bool = env
-            .try_invoke_contract::<bool, soroban_sdk::Error>(
-                &progress_tracker,
-                &function_name,
-                args,
-            )
-            .unwrap_or(Ok(false))
-            .unwrap();
 
-        if !is_completed {
+        let client = progresstracker::Client::new(&env, &progress_tracker);
+
+        let progress = client.is_completed(&recipient);
+
+        if !progress {
             return Err(NFTError::NotCompleted);
         }
 
         // Step 5: Retrieve badge tracker address
-        let function_name = Symbol::new(&env, "is_completed");
         let badge_tracker = env
             .storage()
             .persistent()
@@ -50,16 +44,8 @@ impl MintingOperations for AcademyGraduationNFT {
             .ok_or(NFTError::Uninitialized)?;
 
         // Step 6: Fetch badges
-        let badges = {
-            let args = vec![&env, recipient.clone().to_val()];
-            env.try_invoke_contract::<Vec<String>, soroban_sdk::Error>(
-                &badge_tracker,
-                &function_name,
-                args,
-            )
-            .unwrap_or(Ok(Vec::new(&env)))
-            .unwrap()
-        };
+        let badge_client = badgetracker::Client::new(env, &badge_tracker);
+        let badges = badge_client.get_full_badges(&recipient);
 
         // Step 7: Create metadata
         let metadata = Self::create_nft_metadata(
