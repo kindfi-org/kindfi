@@ -28,10 +28,12 @@ pub struct NFTMetadata {
 
 /// NFT-related error codes
 #[contracterror]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[repr(u32)]
 pub enum NFTError {
     AlreadyMinted = 1,
     NotCompleted = 2,
-    Uninitialized = 3,
-    TokenCannotBeTransferred = 4,
+    AlreadyInitialized = 3,
+    Soulbound = 4,
+    Uninitialized = 5,
 }
