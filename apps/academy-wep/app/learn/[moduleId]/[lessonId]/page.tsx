@@ -1,4 +1,5 @@
 import { ChevronRight } from 'lucide-react'
+import { notFound, redirect } from 'next/navigation'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,7 +12,7 @@ import { KnowledgeCheck } from '~/components/sections/learn/knowledge-check'
 import { LessonContent } from '~/components/sections/learn/lesson-content'
 import { LessonHeader } from '~/components/sections/learn/lesson-header'
 import { LessonNavigation } from '~/components/sections/learn/lesson-navigation'
-import { stellarConsensusLesson } from '~/lib/mock-data/learn/mock-lesson'
+import { moduleLessons } from '~/lib/mock-data/learn/mock-lessons'
 
 interface LessonPageParams {
   params: {
@@ -21,9 +22,23 @@ interface LessonPageParams {
 }
 
 export default async function LessonPage({ params }: LessonPageParams) {
-  const { moduleId } = await params
+  const { moduleId, lessonId } = await params
 
-  const lesson = stellarConsensusLesson
+  const lesson = moduleLessons.find(
+    (l) => l.metadata.moduleId === Number(moduleId) && l.metadata.lessonId === Number(lessonId)
+  )
+
+  if (!lesson) {
+    notFound()
+  }
+
+  // If lesson is locked and previous lesson is not completed
+  if (
+    lesson.metadata.lessonNumber > 1 &&
+    moduleLessons[lesson.metadata.lessonNumber - 2].metadata.progress < 100
+  ) {
+    redirect(`/learn/${moduleId}`)
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">
