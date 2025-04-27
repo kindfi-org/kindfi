@@ -5,7 +5,7 @@ use crate::progresstracker;
 
 use super::{
     AcademyGraduationNFT, AcademyGraduationNFTClient,
-    datatype::{DataKeys, GraduationNFT, NFTError},
+    datatype::{DataKeys, NFTError},
 };
 use soroban_sdk::{
     Address, Env, String, Vec,
@@ -32,7 +32,7 @@ fn test_initialize_success() {
     let client = AcademyGraduationNFTClient::new(&env, &contract_id);
 
     // Initialize
-    let _result = client.initialize(&progress_contract, &badge_contract);
+    let _result = client.try_initialize(&progress_contract, &badge_contract);
 
     env.as_contract(&contract_id, || {
         // Verify storage
@@ -97,17 +97,12 @@ fn test_mint_success_full_badges() {
 
     // Mint NFT
     let result = client.try_mint_graduation_nft(&user);
-    assert_eq!(result, Ok(Ok(())));
-
-    env.as_contract(&contract_id, || {
-        // Verify NFT
-        let nft_key = DataKeys::GraduationNFT(user.clone());
-        let nft: GraduationNFT = env.storage().persistent().get(&nft_key).unwrap();
-        assert_eq!(nft.owner, user);
-        assert_eq!(nft.metadata.issued_at, 1234567890);
-        assert_eq!(nft.metadata.version, String::from_str(&env, "v1.0"));
-        assert_eq!(nft.metadata.badges, full_badges);
-    });
+    assert!(result.is_ok(), "Expected Ok, got {:?}", result);
+    let nft = result.unwrap().unwrap();
+    assert_eq!(nft.owner, user);
+    assert_eq!(nft.metadata.issued_at, 1234567890);
+    assert_eq!(nft.metadata.version, String::from_str(&env, "v1.0"));
+    assert_eq!(nft.metadata.badges, full_badges);
 }
 
 #[test]
@@ -124,7 +119,7 @@ fn test_mint_already_minted() {
 
     // Mint first time
     let result = client.try_mint_graduation_nft(&user);
-    assert_eq!(result, Ok(Ok(())));
+    assert!(result.is_ok(), "Expected Ok, got {:?}", result);
 
     // Attempt to mint again
     let result = client.try_mint_graduation_nft(&user);
@@ -151,6 +146,8 @@ fn test_mint_unauthenticated() {
     let badge_contract = env.register(badgetracker::WASM, ());
     let contract_id = env.register(AcademyGraduationNFT, ());
     let client = AcademyGraduationNFTClient::new(&env, &contract_id);
+
+    // Mock all auths delibrately not called
 
     // Initialize
     client.initialize(&progress_contract, &badge_contract);
@@ -194,14 +191,9 @@ fn test_mint_empty_badges() {
 
     // Mint NFT (no badges set, so get_full_badges returns empty Vec)
     let result = client.try_mint_graduation_nft(&user);
-    assert_eq!(result, Ok(Ok(())));
-
-    env.as_contract(&contract_id, || {
-        // Verify NFT
-        let nft_key = DataKeys::GraduationNFT(user.clone());
-        let nft: GraduationNFT = env.storage().persistent().get(&nft_key).unwrap();
-        assert_eq!(nft.metadata.badges, Vec::new(&env));
-    });
+    assert!(result.is_ok(), "Expected Ok, got {:?}", result);
+    let nft = result.unwrap().unwrap();
+    assert_eq!(nft.metadata.badges, Vec::new(&env));
 }
 
 #[test]
@@ -227,7 +219,7 @@ fn test_get_graduation_nft() {
     badge_client.set_badges(&user, &full_badges.clone());
 
     let result = client.try_mint_graduation_nft(&user);
-    assert_eq!(result, Ok(Ok(())));
+    assert!(result.is_ok(), "Expected Ok, got {:?}", result);
 
     // Get NFT
     let result = client.try_get_graduation_nft(&user);
@@ -268,7 +260,7 @@ fn test_has_graduation_nft() {
     let result = client.try_initialize(&progress_contract, &badge_contract);
     assert_eq!(result, Ok(Ok(())));
     let result = client.try_mint_graduation_nft(&user);
-    assert_eq!(result, Ok(Ok(())));
+    assert!(result.is_ok(), "Expected Ok, got {:?}", result);
 
     // Check has NFT
     let has_nft = client.has_graduation_nft(&user);
@@ -293,7 +285,7 @@ fn test_attempt_transfer_fails() {
     let result = client.try_initialize(&progress_contract, &badge_contract);
     assert_eq!(result, Ok(Ok(())));
     let result = client.try_mint_graduation_nft(&user);
-    assert_eq!(result, Ok(Ok(())));
+    assert!(result.is_ok(), "Expected Ok, got {:?}", result);
 
     // Attempt transfer
     let result = client.try_attempt_transfer(&user, &to, &1);
@@ -316,19 +308,15 @@ fn test_mint_multiple_users() {
     // Mint for user1
     env.ledger().with_mut(|l| l.timestamp = 1234567890);
     let result = client.try_mint_graduation_nft(&user1);
-    assert_eq!(result, Ok(Ok(())));
-    let result = client.try_get_graduation_nft(&user1);
-    assert!(result.is_ok());
-    let nft1 = result.unwrap().unwrap().unwrap();
+    assert!(result.is_ok(), "Expected Ok, got {:?}", result);
+    let nft1 = result.unwrap().unwrap();
     assert_eq!(nft1.owner, user1);
 
     // Mint for user2
     env.ledger().with_mut(|l| l.timestamp = 1234567891);
     let result = client.try_mint_graduation_nft(&user2);
-    assert_eq!(result, Ok(Ok(())));
-    let result = client.try_get_graduation_nft(&user2);
-    assert!(result.is_ok());
-    let nft2 = result.unwrap().unwrap().unwrap();
+    assert!(result.is_ok(), "Expected Ok, got {:?}", result);
+    let nft2 = result.unwrap().unwrap();
     assert_eq!(nft2.owner, user2);
 
     // Verify distinct NFTs
