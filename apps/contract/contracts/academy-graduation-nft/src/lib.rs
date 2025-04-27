@@ -1,11 +1,13 @@
 #![no_std]
-use soroban_sdk::{Address, Env, contract, contractimpl};
+use soroban_sdk::{Address, Env, contract, contractimpl, panic_with_error};
 
 mod datatype;
 mod distribution;
 mod interface;
 mod metadata;
 mod mint;
+mod test;
+
 mod progresstracker {
     soroban_sdk::contractimport!(
         file = "../../target/wasm32-unknown-unknown/release/mock_progress_tracker.wasm"
@@ -39,7 +41,7 @@ impl AcademyGraduationNFT {
         badge_tracker: Address,
     ) -> Result<(), NFTError> {
         if env.storage().persistent().has(&DataKeys::ProgressTracker) {
-            return Err(NFTError::Uninitialized);
+            return Err(NFTError::AlreadyInitialized); // This is now a proper error return
         }
 
         env.storage()
@@ -48,7 +50,8 @@ impl AcademyGraduationNFT {
         env.storage()
             .persistent()
             .set(&DataKeys::BadgeTracker, &badge_tracker);
-        Ok(())
+
+        Ok(()) // Return Ok to indicate success
     }
 
     /// @notice Mints a graduation NFT for a user
