@@ -13,31 +13,16 @@ ALTER TABLE comments
 ALTER TABLE comments
   ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
 
--- Add CHECK constraint for valid status values
-ALTER TABLE comments
-  ADD CONSTRAINT valid_question_status 
-  CHECK (
-    type != 'question' OR 
-    metadata->>'status' IN ('new', 'answered', 'resolved')
-  );
-
--- Backfill existing comments with default status
-UPDATE comments 
-SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{status}', '"new"')
-WHERE type = 'question' 
-AND (metadata->>'status' IS NULL);
-
 -- Add indexes for performance optimization
 CREATE INDEX IF NOT EXISTS idx_comments_type ON comments(type);
 CREATE INDEX IF NOT EXISTS idx_comments_metadata_status ON comments((metadata->>'status')) 
   WHERE type = 'question';
 CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments(parent_comment_id);
 
--- Drop existing functions if they exist
+-- Drop existing function if exists
 DROP FUNCTION IF EXISTS update_question_status();
-DROP FUNCTION IF EXISTS handle_official_answer();
 
--- Create improved trigger function for answer updates
+-- Create improved trigger function
 CREATE OR REPLACE FUNCTION update_question_status()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -58,44 +43,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create function to handle official answer updates
-CREATE OR REPLACE FUNCTION handle_official_answer()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF NEW.type = 'answer' 
-  AND NEW.metadata->>'is_official' = 'true' 
-  AND (OLD.metadata->>'is_official' IS NULL OR OLD.metadata->>'is_official' = 'false') THEN
-    -- Mark parent question as resolved when answer becomes official
-    UPDATE comments
-    SET metadata = jsonb_set(
-      metadata,
-      '{status}',
-      to_jsonb('resolved'),
-      true
-    )
-    WHERE id = NEW.parent_comment_id
-    AND type = 'question';
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Drop existing triggers if they exist
+-- Drop existing trigger if exists
 DROP TRIGGER IF EXISTS trigger_update_question_status ON comments;
-DROP TRIGGER IF EXISTS trigger_handle_official_answer ON comments;
 
--- Create triggers for status updates
+-- Create trigger for status updates
 CREATE TRIGGER trigger_update_question_status
   AFTER INSERT ON comments
   FOR EACH ROW
   WHEN (NEW.type = 'answer')
   EXECUTE FUNCTION update_question_status();
-
-CREATE TRIGGER trigger_handle_official_answer
-  AFTER UPDATE ON comments
-  FOR EACH ROW
-  WHEN (NEW.type = 'answer' AND NEW.metadata->>'is_official' = 'true')
-  EXECUTE FUNCTION handle_official_answer();
 
 -- Only project members can mark answers as official (restricted to official flag only)
 CREATE POLICY update_answer_official ON comments
