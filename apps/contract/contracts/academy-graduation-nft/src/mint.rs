@@ -9,7 +9,7 @@ use soroban_sdk::{Address, Env, String};
 
 impl MintingOperations for AcademyGraduationNFT {
     /// Mints a graduation NFT for a recipient
-    fn mint_graduation_nft(env: &Env, recipient: Address) -> Result<(), NFTError> {
+    fn mint_graduation_nft(env: &Env, recipient: Address) -> Result<GraduationNFT, NFTError> {
         // Step 1: Authenticate the recipient
         recipient.require_auth();
 
@@ -62,6 +62,6 @@ impl MintingOperations for AcademyGraduationNFT {
         env.storage().persistent().set(&nft_key, &nft);
 
         // Step 9: Return success
-        Ok(())
+        Ok(nft)
     }
 }

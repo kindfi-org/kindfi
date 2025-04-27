@@ -53,10 +53,6 @@ Before using the contract, ensure you have:
 
 ## 🔧 Setup & Deployment
 
-### Clone Repository
-
-### Install Dependencies
-
 ### Build Contract
 Build the main contract and mock contracts:
 ```sh

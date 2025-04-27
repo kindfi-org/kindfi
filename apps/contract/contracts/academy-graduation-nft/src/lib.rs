@@ -25,6 +25,8 @@ use interface::{DistributionOperations, MintingOperations, QueryOperations};
 /// @title AcademyGraduationNFT
 /// @notice A contract for minting and managing non-transferable NFT badges
 /// awarded to users for completing KindFi Academy modules.
+/// @dev These NFTs are soulbound (non-transferable) by design - any transfer  
+/// attempts will be rejected. Each user can only mint one graduation NFT.
 #[contract]
 pub struct AcademyGraduationNFT;
 
@@ -58,7 +60,7 @@ impl AcademyGraduationNFT {
     /// @param env The contract environment
     /// @param user The address of the user
     /// @return Result indicating success or minting error
-    pub fn mint_graduation_nft(env: Env, user: Address) -> Result<(), NFTError> {
+    pub fn mint_graduation_nft(env: Env, user: Address) -> Result<GraduationNFT, NFTError> {
         <Self as MintingOperations>::mint_graduation_nft(&env, user)
     }
 
