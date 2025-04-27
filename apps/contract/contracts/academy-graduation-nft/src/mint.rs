@@ -5,7 +5,7 @@ use crate::{
     interface::MintingOperations,
 };
 use crate::{badgetracker, progresstracker};
-use soroban_sdk::{Address, Env, String, Symbol, Val, Vec, vec};
+use soroban_sdk::{Address, Env, String};
 
 impl MintingOperations for AcademyGraduationNFT {
     /// Mints a graduation NFT for a recipient

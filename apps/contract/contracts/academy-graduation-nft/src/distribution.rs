@@ -6,6 +6,6 @@ impl DistributionOperations for AcademyGraduationNFT {
 
     fn attempt_transfer(from: Address, _to: Address, _token_id: u128) -> Result<(), NFTError> {
         from.require_auth();
-        Err(NFTError::TokenCannotBeTransferred)
+        Err(NFTError::Soulbound)
     }
 }
