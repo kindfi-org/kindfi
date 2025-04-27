@@ -7,6 +7,7 @@ import {
   BreadcrumbSeparator,
 } from '~/components/base/breadcrumb'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
+import { KnowledgeCheck } from '~/components/sections/learn/knowledge-check'
 import { LessonContent } from '~/components/sections/learn/lesson-content'
 import { LessonHeader } from '~/components/sections/learn/lesson-header'
 import { stellarConsensusLesson } from '~/lib/mock-data/learn/mock-lesson'
@@ -68,7 +69,7 @@ export default async function LessonPage({ params }: LessonPageParams) {
         </TabsContent>
 
         <TabsContent value="quiz">
-
+          <KnowledgeCheck questions={lesson.quiz} />
         </TabsContent>
       </Tabs>
     </div>

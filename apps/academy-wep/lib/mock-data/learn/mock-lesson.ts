@@ -89,10 +89,10 @@ export const stellarConsensusLesson: Lesson = {
 			id: 1,
 			question: 'What type of consensus mechanism does Stellar use?',
 			options: [
-				'Proof of Work',
-				'Proof of Stake',
-				'Federated Byzantine Agreement',
-				'Delegated Proof of Stake',
+				{ id: 'q1-o1', text: 'Proof of Work' },
+				{ id: 'q1-o2', text: 'Proof of Stake' },
+				{ id: 'q1-o3', text: 'Federated Byzantine Agreement' },
+				{ id: 'q1-o4', text: 'Delegated Proof of Stake' },
 			],
 			correctAnswer: 2,
 			explanation:
@@ -102,10 +102,10 @@ export const stellarConsensusLesson: Lesson = {
 			id: 2,
 			question: 'What is a key advantage of the Stellar Consensus Protocol?',
 			options: [
-				'It requires mining',
-				'It confirms transactions in seconds',
-				'It uses more energy than Bitcoin',
-				'It requires all nodes to trust each other',
+				{ id: 'q2-o1', text: 'It requires mining' },
+				{ id: 'q2-o2', text: 'It confirms transactions in seconds' },
+				{ id: 'q2-o3', text: 'It uses more energy than Bitcoin' },
+				{ id: 'q2-o4', text: 'It requires all nodes to trust each other' },
 			],
 			correctAnswer: 1,
 			explanation:
@@ -115,10 +115,10 @@ export const stellarConsensusLesson: Lesson = {
 			id: 3,
 			question: "What is a 'quorum slice' in SCP?",
 			options: [
-				'A piece of the blockchain',
-				'A group of miners',
-				'A subset of trusted nodes',
-				'A transaction fee',
+				{ id: 'q3-o1', text: 'A piece of the blockchain' },
+				{ id: 'q3-o2', text: 'A group of miners' },
+				{ id: 'q3-o3', text: 'A subset of trusted nodes' },
+				{ id: 'q3-o4', text: 'A transaction fee' },
 			],
 			correctAnswer: 2,
 			explanation:

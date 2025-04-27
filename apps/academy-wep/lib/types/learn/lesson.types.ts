@@ -26,6 +26,12 @@ export interface LessonContent {
 	content: LessonSection[]
 }
 
+export interface BulletItem {
+	id: string
+	title: string
+	description: string
+}
+
 export interface LessonSection {
 	id: string
 	type: 'paragraph' | 'heading' | 'subheading' | 'bulletList'
@@ -33,16 +39,15 @@ export interface LessonSection {
 	items?: BulletItem[]
 }
 
-export interface BulletItem {
+export interface QuizOption {
 	id: string
-	title: string
-	description: string
+	text: string
 }
 
 export interface QuizQuestion {
 	id: number
 	question: string
-	options: string[]
+	options: QuizOption[]
 	correctAnswer: number
 	explanation: string
 }
