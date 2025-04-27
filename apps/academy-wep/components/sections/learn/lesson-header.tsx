@@ -14,11 +14,11 @@ export function LessonHeader({ metadata }: LessonHeaderProps) {
 		((metadata.lessonNumber - 1) / metadata.totalLessons) * 100
 
 	return (
-		<div className="bg-gradient-to-br from-white to-green-50 rounded-2xl p-8 shadow-md">
+		<div className="bg-gradient-to-r from-blue-100 to-green-100 rounded-2xl p-8 shadow-md">
 			<div className="space-y-3">
 				<Button
 					variant="outline"
-					className="bg-white border-gray-200 hover:bg-green-100 hover:text-primary hover:border-primary"
+					className="border-gray-200 hover:bg-green-100 hover:text-primary hover:border-primary"
 					asChild
 				>
 					<Link href={`/learn/${metadata.moduleId}`}>
@@ -37,7 +37,7 @@ export function LessonHeader({ metadata }: LessonHeaderProps) {
 						<div className="flex flex-wrap gap-3 mt-4">
 							<Badge
 								variant="outline"
-								className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-normal bg-white text-muted-foreground border-none"
+								className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-normal text-muted-foreground border-none"
 							>
 								<Clock className="h-4 w-4 text-primary" />
 								<span>{metadata.readTime} min read</span>
@@ -45,7 +45,7 @@ export function LessonHeader({ metadata }: LessonHeaderProps) {
 
 							<Badge
 								variant="outline"
-								className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-normal bg-white text-muted-foreground border-none"
+								className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-normal text-muted-foreground border-none"
 							>
 								<BookOpen className="h-4 w-4 text-primary" />
 								<span>{metadata.level}</span>
@@ -53,7 +53,7 @@ export function LessonHeader({ metadata }: LessonHeaderProps) {
 
 							<Badge
 								variant="outline"
-								className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-normal bg-white text-muted-foreground border-none"
+								className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-normal text-muted-foreground border-none"
 							>
 								<Trophy className="h-4 w-4 text-primary" />
 								<span>Earns XP: {metadata.xpEarned}</span>
@@ -64,7 +64,7 @@ export function LessonHeader({ metadata }: LessonHeaderProps) {
 					<div className="flex flex-col items-end gap-1.5">
 						<Badge
 							variant="outline"
-							className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-normal bg-white text-muted-foreground border-none"
+							className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-normal text-muted-foreground border-none"
 						>
 							Lesson {metadata.lessonNumber} of {metadata.totalLessons}
 						</Badge>

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs
 import { KnowledgeCheck } from '~/components/sections/learn/knowledge-check'
 import { LessonContent } from '~/components/sections/learn/lesson-content'
 import { LessonHeader } from '~/components/sections/learn/lesson-header'
+import { LessonNavigation } from '~/components/sections/learn/lesson-navigation'
 import { stellarConsensusLesson } from '~/lib/mock-data/learn/mock-lesson'
 
 interface LessonPageParams {
@@ -72,6 +73,8 @@ export default async function LessonPage({ params }: LessonPageParams) {
           <KnowledgeCheck questions={lesson.quiz} />
         </TabsContent>
       </Tabs>
+
+      <LessonNavigation metadata={lesson.metadata} />
     </div>
   )
 }
