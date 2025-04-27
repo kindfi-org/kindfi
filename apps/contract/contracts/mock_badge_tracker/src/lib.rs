@@ -16,7 +16,7 @@ impl BadgeTracker {
     pub fn get_full_badges(env: Env, user: Address) -> Vec<String> {
         user.require_auth();
         env.storage()
-            .temporary()
+            .persistent()
             .get::<Address, Vec<String>>(&user)
             .unwrap_or_else(|| Vec::new(&env))
     }
