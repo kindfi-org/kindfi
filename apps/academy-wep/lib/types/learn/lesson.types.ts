@@ -27,9 +27,16 @@ export interface LessonContent {
 }
 
 export interface LessonSection {
+	id: string
 	type: 'paragraph' | 'heading' | 'subheading' | 'bulletList'
-	content: string
-	items?: string[]
+	content?: string
+	items?: BulletItem[]
+}
+
+export interface BulletItem {
+	id: string
+	title: string
+	description: string
 }
 
 export interface QuizQuestion {

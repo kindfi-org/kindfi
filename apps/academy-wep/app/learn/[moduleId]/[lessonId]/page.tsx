@@ -6,6 +6,8 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from '~/components/base/breadcrumb'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
+import { LessonContent } from '~/components/sections/learn/lesson-content'
 import { LessonHeader } from '~/components/sections/learn/lesson-header'
 import { stellarConsensusLesson } from '~/lib/mock-data/learn/mock-lesson'
 
@@ -18,6 +20,8 @@ interface LessonPageParams {
 
 export default async function LessonPage({ params }: LessonPageParams) {
   const { moduleId } = await params
+
+  const lesson = stellarConsensusLesson
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -47,7 +51,26 @@ export default async function LessonPage({ params }: LessonPageParams) {
         </Breadcrumb>
       </div>
 
-      <LessonHeader metadata={stellarConsensusLesson.metadata} />
+      <LessonHeader metadata={lesson.metadata} />
+
+      <Tabs defaultValue="content" className="w-full mt-8">
+        <TabsList>
+          <TabsTrigger value="content" className="data-[state=active]:text-primary">
+            Lesson Content
+          </TabsTrigger>
+          <TabsTrigger value="quiz" className="data-[state=active]:text-primary">
+            Knowledge Check
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="content">
+          <LessonContent content={lesson.content} />
+        </TabsContent>
+
+        <TabsContent value="quiz">
+
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

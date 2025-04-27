@@ -27,34 +27,57 @@ export const stellarConsensusLesson: Lesson = {
 		title: 'The Stellar Consensus Protocol (SCP)',
 		content: [
 			{
+				id: 'p1',
 				type: 'paragraph',
 				content:
 					'The Stellar Consensus Protocol (SCP) is the underlying consensus mechanism that powers the Stellar network. Unlike proof-of-work systems like Bitcoin, SCP uses a federated Byzantine agreement system that allows for fast, efficient, and environmentally friendly consensus.',
 			},
 			{
+				id: 's1',
 				type: 'subheading',
 				content: 'Key Features of SCP',
 			},
 			{
+				id: 'b1',
 				type: 'bulletList',
-				content: '',
 				items: [
-					'**Decentralized Control:** No central authority dictates consensus.',
-					'**Low Latency:** Transactions confirm in seconds, not minutes or hours.',
-					'**Flexible Trust:** Users can choose which participants to trust.',
-					'**Asymptotic Security:** Safety is optimal against an adversary below a threshold of the network.',
+					{
+						id: 'b1-i1',
+						title: 'Decentralized Control:',
+						description: 'No central authority dictates consensus.',
+					},
+					{
+						id: 'b1-i2',
+						title: 'Low Latency:',
+						description:
+							'Transactions confirm in seconds, not minutes or hours.',
+					},
+					{
+						id: 'b1-i3',
+						title: 'Flexible Trust:',
+						description: 'Users can choose which participants to trust.',
+					},
+					{
+						id: 'b1-i4',
+						title: 'Asymptotic Security:',
+						description:
+							'Safety is optimal against an adversary with less than a threshold of the network.',
+					},
 				],
 			},
 			{
+				id: 's2',
 				type: 'subheading',
 				content: 'How SCP Works',
 			},
 			{
+				id: 'p2',
 				type: 'paragraph',
 				content:
 					'SCP uses a concept called "quorum slices" where each node selects which other nodes it trusts. When enough trusted nodes agree on a transaction, it becomes part of the ledger.',
 			},
 			{
+				id: 'p3',
 				type: 'paragraph',
 				content:
 					'This approach allows the network to reach consensus without requiring all participants to trust each other, making it more resilient and flexible than traditional consensus mechanisms.',
@@ -73,7 +96,7 @@ export const stellarConsensusLesson: Lesson = {
 			],
 			correctAnswer: 2,
 			explanation:
-				'The Stellar Consensus Protocol uses a Federated Byzantine Agreement system for fast and efficient consensus.',
+				'Stellar uses a Federated Byzantine Agreement system for consensus.',
 		},
 		{
 			id: 2,
@@ -86,7 +109,7 @@ export const stellarConsensusLesson: Lesson = {
 			],
 			correctAnswer: 1,
 			explanation:
-				'The Stellar Consensus Protocol uses a Federated Byzantine Agreement system for fast and efficient consensus.',
+				'SCP achieves low latency and confirms transactions quickly.',
 		},
 		{
 			id: 3,
@@ -94,12 +117,12 @@ export const stellarConsensusLesson: Lesson = {
 			options: [
 				'A piece of the blockchain',
 				'A group of miners',
-				'A subset of nodes that a particular node trusts',
+				'A subset of trusted nodes',
 				'A transaction fee',
 			],
 			correctAnswer: 2,
 			explanation:
-				'The Stellar Consensus Protocol uses a Federated Byzantine Agreement system for fast and efficient consensus.',
+				'A quorum slice is a subset of nodes that a participant trusts.',
 		},
 	],
 }

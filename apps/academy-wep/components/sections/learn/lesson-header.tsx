@@ -25,7 +25,7 @@ export function LessonHeader({ metadata }: LessonHeaderProps) {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-3">
             <h1 className="text-4xl font-extrabold text-foreground">{metadata.title}</h1>
-            <p className="text-lg text-foreground">{metadata.subtitle}</p>
+            <p className="text-lg text-muted-foreground">{metadata.subtitle}</p>
 
             <div className="flex flex-wrap gap-3 mt-4">
               <Badge
