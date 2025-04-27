@@ -6,8 +6,18 @@ pub struct ProgressTracker;
 
 #[contractimpl]
 impl ProgressTracker {
-    /// Always returns true to indicate the user has completed all modules.
-    pub fn is_completed(_env: Env, _user: Address) -> bool {
-        true
+    /// Returns whether the user has completed all modules, based on stored status.
+    pub fn is_completed(env: Env, user: Address) -> bool {
+        user.require_auth();
+        env.storage()
+            .temporary()
+            .get::<Address, bool>(&user)
+            .unwrap_or(true) // Default to true for unconfigured users
+    }
+
+    /// Sets the completion status for a user (for testing purposes).
+    pub fn set_completion(env: Env, user: Address, completed: bool) {
+        user.require_auth();
+        env.storage().temporary().set(&user, &completed);
     }
 }
