@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{Address, Env, contract, contractimpl, panic_with_error};
+use soroban_sdk::{Address, Env, contract, contractimpl};
 
 mod datatype;
 mod distribution;

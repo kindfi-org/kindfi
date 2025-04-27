@@ -5,10 +5,10 @@ use crate::progresstracker;
 
 use super::{
     AcademyGraduationNFT, AcademyGraduationNFTClient,
-    datatype::{DataKeys, GraduationNFT, NFTError, NFTMetadata},
+    datatype::{DataKeys, GraduationNFT, NFTError},
 };
 use soroban_sdk::{
-    Address, Env, Error, String, Vec,
+    Address, Env, String, Vec,
     testutils::{Address as _, Ledger as _},
     vec,
 };
