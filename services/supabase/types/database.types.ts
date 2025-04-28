@@ -1,8 +1,10 @@
 export type CommentType = 'comment' | 'question' | 'answer'
 
+export type CommentStatus = 'new' | 'answered' | 'resolved'
+
 export interface CommentMetadata {
-	status?: 'new' | 'answered' | 'resolved'
-	is_official?: boolean
+	status?: CommentStatus
+	isOfficial?: boolean
 }
 
 export interface Comment {
@@ -10,9 +12,9 @@ export interface Comment {
 	content: string
 	type: CommentType
 	metadata: CommentMetadata
-	parent_comment_id?: string
-	project_id: string
-	author_id: string
-	created_at: string
-	updated_at: string
+	parentCommentId?: string
+	projectId: string
+	authorId: string
+	createdAt: Date
+	updatedAt: Date
 }
