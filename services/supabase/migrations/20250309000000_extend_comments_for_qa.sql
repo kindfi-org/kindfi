@@ -1,4 +1,5 @@
--- Create ENUM type for comment types
+-- Make ENUM creation idempotent
+DROP TYPE IF EXISTS comment_type;
 CREATE TYPE comment_type AS ENUM ('comment', 'question', 'answer');
 
 -- Enable RLS on comments table
@@ -12,6 +13,14 @@ ALTER TABLE comments
 -- Add metadata JSONB field
 ALTER TABLE comments
   ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
+
+-- Backfill legacy Q&A comments
+UPDATE comments
+SET type = CASE
+  WHEN parent_comment_id IS NULL THEN 'question'
+  ELSE 'answer'
+END
+WHERE type = 'comment';
 
 -- Backfill existing question rows with a default status of 'new'
 UPDATE comments
@@ -39,11 +48,12 @@ CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments(parent_comment_id)
 -- Drop existing function if exists
 DROP FUNCTION IF EXISTS update_question_status();
 
--- Create improved trigger function
+-- Create improved trigger function with null guard
 CREATE OR REPLACE FUNCTION update_question_status()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.type = 'answer' THEN
+  -- Enhanced with null guard
+  IF NEW.type = 'answer' AND NEW.parent_comment_id IS NOT NULL THEN
     -- Update the parent question's status to 'answered' if it was 'new'
     UPDATE comments
     SET metadata = jsonb_set(
@@ -71,6 +81,7 @@ CREATE TRIGGER trigger_update_question_status
   EXECUTE FUNCTION update_question_status();
 
 -- Only project members can mark answers as official (restricted to official flag only)
+-- Tightened RLS to prevent unintended changes
 CREATE POLICY update_answer_official ON comments
   FOR UPDATE
   USING (
@@ -89,10 +100,16 @@ CREATE POLICY update_answer_official ON comments
       AND project_members.user_id = auth.uid()
     ) AND
     -- Only allow updates to the is_official flag
-    (OLD.metadata - 'is_official' = NEW.metadata - 'is_official')
+    (OLD.metadata - 'is_official' = NEW.metadata - 'is_official') AND
+    -- Ensure other fields remain unchanged
+    OLD.content = NEW.content AND
+    OLD.type = NEW.type AND
+    OLD.parent_comment_id = NEW.parent_comment_id AND
+    OLD.project_id = NEW.project_id
   );
 
 -- Only question authors can update question status (restricted to status only)
+-- Prevent unintended project transfers
 CREATE POLICY update_question_status ON comments
   FOR UPDATE
   USING (
@@ -107,5 +124,6 @@ CREATE POLICY update_question_status ON comments
     -- Ensure other fields remain unchanged
     OLD.content = NEW.content AND
     OLD.type = NEW.type AND
-    OLD.parent_comment_id = NEW.parent_comment_id
+    OLD.parent_comment_id = NEW.parent_comment_id AND
+    OLD.project_id = NEW.project_id
   );
