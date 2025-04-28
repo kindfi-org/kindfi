@@ -1,6 +1,5 @@
 'use client'
 
-import { LearningMaterials } from '~/components/learn/learning-materials'
 import LearningPaths from '~/components/learningpaths/LearningPaths'
 
 export default function LearnPage() {
