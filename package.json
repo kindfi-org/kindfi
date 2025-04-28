@@ -6,7 +6,8 @@
 		"@commitlint/cli": "^19.6.1",
 		"@commitlint/config-conventional": "^19.6.0",
 		"@types/bun": "latest",
-		"husky": "^9.1.7"
+		"husky": "^9.1.7",
+		"tailwindcss": "^4.1.4"
 	},
 	"peerDependencies": {
 		"typescript": "^5.8.2"
@@ -44,9 +45,12 @@
 	"dependencies": {
 		"autoprefixer": "^10.4.21",
 		"date-fns": "^4.1.0",
+		"moti": "^0.30.0",
+		"nativewind": "^4.1.23",
 		"postcss": "^8.5.3",
 		"postcss-flexbugs-fixes": "^5.0.2",
 		"postcss-preset-env": "^10.1.5",
+		"react-native-reanimated": "^3.17.5",
 		"react-webcam": "^7.2.0"
 	}
 }
