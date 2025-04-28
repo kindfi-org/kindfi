@@ -1,28 +1,12 @@
-/**
- * @description      : update tab section in the project details with Supabase integration
- * @author           : pheobeayo
- * @group            : ODhack 12 contributor
- * @created          : 25/03/2025 - 10:36:35
- *
- * MODIFICATION LOG
- * - Version         : 1.0.0
- * - Date            : 25/03/2025
- * - Author          : pheobeayo
- * - Modification    : fixed the update tab section in the Project Details
- * - Version         : 2.0.0
- * - Date            : [Current Date]
- * - Author          : [Your Name]
- * - Modification    : Implemented Supabase integration for project updates
- **/
 "use client";
 
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { UpdateCard } from "./update-card";
-import { LoadMoreButton } from "./load-more-button";
-import { Button } from "~/components/base/button";
-import { Loader2, Plus } from "lucide-react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Loader2, Plus } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button } from "~/components/base/button";
+import { LoadMoreButton } from "./load-more-button";
+import { UpdateCard } from "./update-card";
 import { UpdateForm } from "./update-form";
 
 export function ProjectUpdatesTabSection() {
