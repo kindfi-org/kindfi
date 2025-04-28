@@ -26,7 +26,7 @@ export const QuestionMetadataSchema = z.object({
 
 /** Metadata specific to answers */
 export const AnswerMetadataSchema = z.object({
-  /** When true, indicates this answer has been marked as official by a project member */
+  //** When true, indicates this answer has been marked as official by a project member */
   isOfficial: z.boolean().optional(),
 }).strict();
 
@@ -43,51 +43,37 @@ export type AnswerMetadata = z.infer<typeof AnswerMetadataSchema>;
 export type CommentMetadata = z.infer<typeof CommentMetadataSchema>;
 
 /** Helper function to ensure chronological integrity of timestamps */
-const isOnOrBefore = (date1: Date, date2: Date) => date1.getTime() <= date2.getTime();
+const isOnOrBefore = (date1: Date, date2: Date): boolean => date1.getTime() <= date2.getTime();
 
-/**
+/** Base fields shared across all comment types */
+const baseFields = {
+  id: z.string().uuid(),
+  content: z.string().min(1).max(10000),
+  parentCommentId: z.string().uuid().optional(),
+  projectId: z.string().uuid(),
+  authorId: z.string().uuid(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+};
+
+/** 
  * Represents a comment entity in the system, supporting standard comments,
  * questions, and answers in a threaded hierarchy
  */
 export const CommentSchema = z.discriminatedUnion('type', [
-  z.object({
-    id: z.string().uuid(),
-    content: z.string().min(1).max(10000),
-    type: z.literal('comment'),
-    metadata: BaseMetadataSchema,
-    parentCommentId: z.string().uuid().optional(),
-    projectId: z.string().uuid(),
-    authorId: z.string().uuid(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  }),
-  z.object({
-    id: z.string().uuid(),
-    content: z.string().min(1).max(10000),
-    type: z.literal('question'),
-    metadata: QuestionMetadataSchema,
-    parentCommentId: z.string().uuid().optional(),
-    projectId: z.string().uuid(),
-    authorId: z.string().uuid(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  }),
-  z.object({
-    id: z.string().uuid(),
-    content: z.string().min(1).max(10000),
-    type: z.literal('answer'),
+  z.object({ ...baseFields, type: z.literal('comment'), metadata: BaseMetadataSchema }),
+  z.object({ ...baseFields, type: z.literal('question'), metadata: QuestionMetadataSchema }),
+  z.object({ 
+    ...baseFields, 
+    type: z.literal('answer'), 
     metadata: AnswerMetadataSchema,
-    parentCommentId: z.string().uuid(),
-    projectId: z.string().uuid(),
-    authorId: z.string().uuid(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
+    parentCommentId: z.string().uuid() // Override to make required for answers
   })
 ]).refine(
   data => isOnOrBefore(data.createdAt, data.updatedAt),
   {
-    message: "Updated date cannot be before created date",
-    path: ["updatedAt"]
+    message: "updatedAt must be on or after createdAt",
+    path: ["createdAt", "updatedAt"]
   }
 );
 
