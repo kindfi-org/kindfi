@@ -90,7 +90,7 @@ export default function Home() {
 					{/* Button to open modal */}
 					<TouchableOpacity
 						onPress={() => setShowOnboarding(true)}
-						className="mt-6 py-3 px-6 bg-green-primary-500 rounded-lg"
+						className="mt-6 py-3 px-6 gradient-btn rounded-lg"
 					>
 						<Text className="text-white font-medium">Show Onboarding</Text>
 					</TouchableOpacity>
