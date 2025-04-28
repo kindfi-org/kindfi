@@ -1,6 +1,5 @@
--- Make ENUM creation idempotent
-DROP TYPE IF EXISTS comment_type;
-CREATE TYPE comment_type AS ENUM ('comment', 'question', 'answer');
+-- Make ENUM creation non-destructive
+CREATE TYPE IF NOT EXISTS comment_type AS ENUM ('comment', 'question', 'answer');
 
 -- Enable RLS on comments table
 ALTER TABLE comments
@@ -80,8 +79,11 @@ CREATE TRIGGER trigger_update_question_status
   WHEN (NEW.type = 'answer')
   EXECUTE FUNCTION update_question_status();
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS update_answer_official ON comments;
+DROP POLICY IF EXISTS update_question_status ON comments;
+
 -- Only project members can mark answers as official (restricted to official flag only)
--- Tightened RLS to prevent unintended changes
 CREATE POLICY update_answer_official ON comments
   FOR UPDATE
   USING (
@@ -109,7 +111,6 @@ CREATE POLICY update_answer_official ON comments
   );
 
 -- Only question authors can update question status (restricted to status only)
--- Prevent unintended project transfers
 CREATE POLICY update_question_status ON comments
   FOR UPDATE
   USING (
@@ -127,3 +128,12 @@ CREATE POLICY update_question_status ON comments
     OLD.parent_comment_id = NEW.parent_comment_id AND
     OLD.project_id = NEW.project_id
   );
+
+-- Add performance index for official answers
+CREATE INDEX IF NOT EXISTS idx_comments_official_answers 
+ON comments((metadata->>'is_official')) 
+WHERE type = 'answer';
+
+-- Add composite index for answer lookups
+CREATE INDEX IF NOT EXISTS idx_comments_type_parent 
+ON comments(type, parent_comment_id);
