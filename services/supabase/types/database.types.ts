@@ -1,20 +1,30 @@
-export type CommentType = 'comment' | 'question' | 'answer'
+import { z } from 'zod';
 
-export type CommentStatus = 'new' | 'answered' | 'resolved'
+// Base enums and their schemas
+export const CommentTypeSchema = z.enum(['comment', 'question', 'answer']);
+export const CommentStatusSchema = z.enum(['new', 'answered', 'resolved']);
 
-export interface CommentMetadata {
-	status?: CommentStatus
-	isOfficial?: boolean
-}
+// Type inference from schemas
+export type CommentType = z.infer<typeof CommentTypeSchema>;
+export type CommentStatus = z.infer<typeof CommentStatusSchema>;
 
-export interface Comment {
-	id: string
-	content: string
-	type: CommentType
-	metadata: CommentMetadata
-	parentCommentId?: string
-	projectId: string
-	authorId: string
-	createdAt: Date
-	updatedAt: Date
-}
+// Metadata schema and type
+export const CommentMetadataSchema = z.object({
+  status: CommentStatusSchema.optional(),
+  isOfficial: z.boolean().optional(),
+});
+export type CommentMetadata = z.infer<typeof CommentMetadataSchema>;
+
+// Comment schema and type
+export const CommentSchema = z.object({
+  id: z.string(),
+  content: z.string(),
+  type: CommentTypeSchema,
+  metadata: CommentMetadataSchema,
+  parentCommentId: z.string().optional(),
+  projectId: z.string(),
+  authorId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+export type Comment = z.infer<typeof CommentSchema>;
