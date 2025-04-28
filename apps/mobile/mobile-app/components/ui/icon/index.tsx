@@ -56,7 +56,8 @@ const Icon = React.forwardRef<React.ElementRef<typeof Svg>, IIConProps>(
 					size={size}
 				/>
 			)
-		} else if (
+		}
+		if (
 			(props.height !== undefined || props.width !== undefined) &&
 			size === undefined
 		) {

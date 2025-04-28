@@ -72,11 +72,10 @@ const Skeleton = forwardRef<
 					ref={ref}
 				/>
 			)
-		} else {
-			Animated.loop(pulse).stop()
-
-			return children
 		}
+		Animated.loop(pulse).stop()
+
+		return children
 	},
 )
 
@@ -107,7 +106,7 @@ const SkeletonText = forwardRef<
 					>
 						{Array.from({ length: _lines }).map((_, index) => (
 							<Skeleton
-								key={index}
+								key={`skeleton-text-${index + 1}`}
 								className={`${startColor} ${skeletonTextStyle({
 									class: className,
 								})}`}
@@ -116,20 +115,18 @@ const SkeletonText = forwardRef<
 						))}
 					</View>
 				)
-			} else {
-				return (
-					<Skeleton
-						className={`${startColor} ${skeletonTextStyle({
-							class: className,
-						})}`}
-						{...props}
-						ref={ref}
-					/>
-				)
 			}
-		} else {
-			return children
+			return (
+				<Skeleton
+					className={`${startColor} ${skeletonTextStyle({
+						class: className,
+					})}`}
+					{...props}
+					ref={ref}
+				/>
+			)
 		}
+		return children
 	},
 )
 

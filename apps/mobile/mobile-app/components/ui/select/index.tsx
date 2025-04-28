@@ -209,7 +209,8 @@ const SelectIcon = React.forwardRef<
 				size={size}
 			/>
 		)
-	} else if (
+	}
+	if (
 		//@ts-expect-error
 		(props?.height !== undefined || props?.width !== undefined) &&
 		size === undefined
