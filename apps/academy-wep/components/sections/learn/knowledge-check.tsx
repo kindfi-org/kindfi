@@ -15,16 +15,36 @@ import { cn } from '~/lib/utils'
 
 interface KnowledgeCheckProps {
 	questions: QuizQuestion[]
+	onQuizComplete: () => void
 }
 
-export function KnowledgeCheck({ questions }: KnowledgeCheckProps) {
+export function KnowledgeCheck({
+	questions,
+	onQuizComplete,
+}: KnowledgeCheckProps) {
 	const [answers, setAnswers] = useState<Record<number, number | null>>({})
 
 	const handleAnswerChange = (questionId: number, answerIndex: number) => {
-		setAnswers((prev) => ({
-			...prev,
-			[questionId]: answerIndex,
-		}))
+		setAnswers((prev) => {
+			const updatedAnswers = {
+				...prev,
+				[questionId]: answerIndex,
+			}
+
+			const allAnswered = questions.every(
+				(q) =>
+					updatedAnswers[q.id] !== undefined && updatedAnswers[q.id] !== null,
+			)
+			const allCorrect = questions.every(
+				(q) => updatedAnswers[q.id] === q.correctAnswer,
+			)
+
+			if (allAnswered && allCorrect) {
+				onQuizComplete()
+			}
+
+			return updatedAnswers
+		})
 	}
 
 	const isAnswerCorrect = (questionId: number, answerIndex: number) => {
