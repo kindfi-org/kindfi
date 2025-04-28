@@ -30,7 +30,7 @@ export const AnswerMetadataSchema = z.object({
   isOfficial: z.boolean().optional(),
 }).strict();
 
-/** Combined metadata schema using discriminated union */
+/** Combined metadata schema as a union of strict variants */
 export const CommentMetadataSchema = z.union([
   BaseMetadataSchema,
   QuestionMetadataSchema,
@@ -70,30 +70,28 @@ const baseFields = {
  * questions, and answers in a threaded hierarchy
  */
 export const CommentSchema = z.discriminatedUnion('type', [
-  z.object({ ...baseFields, type: z.literal('comment'), metadata: BaseMetadataSchema }),
-  z.object({ ...baseFields, type: z.literal('question'), metadata: QuestionMetadataSchema }),
+  z.object({ 
+    ...baseFields, 
+    type: z.literal('comment'), 
+    metadata: BaseMetadataSchema 
+  }).strict(),
+  z.object({ 
+    ...baseFields, 
+    type: z.literal('question'), 
+    metadata: QuestionMetadataSchema 
+  }).strict(),
   z.object({ 
     ...baseFields, 
     type: z.literal('answer'), 
     metadata: AnswerMetadataSchema,
     parentCommentId: z.string().uuid() // Override to make required for answers
-  })
+  }).strict()
 ]).refine(
   data => isOnOrBefore(data.createdAt, data.updatedAt),
   {
     message: "updatedAt must be on or after createdAt",
     path: ["createdAt", "updatedAt"]
   }
-).superRefine((data, ctx) => {
-  if (data.type === 'answer' && data.parentCommentId) {
-    // Note: This validation requires backend implementation
-    // to check parent comment type is 'question'
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Answer must reference a question as parent",
-      path: ["parentCommentId"]
-    });
-  }
-});
+); // relationship validation is enforced by DB trigger / service layer
 
 export type Comment = z.infer<typeof CommentSchema>;
