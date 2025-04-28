@@ -100,13 +100,13 @@ export function KnowledgeCheck({
 										className={cn(
 											'flex items-center gap-3 p-4 rounded-lg border transition-colors hover:bg-green-100 hover:border-primary',
 											answered &&
-											selected &&
-											correct &&
-											'bg-green-100 border-primary',
+												selected &&
+												correct &&
+												'bg-green-100 border-primary',
 											answered &&
-											selected &&
-											!correct &&
-											'bg-red-50 border-red-300',
+												selected &&
+												!correct &&
+												'bg-red-50 border-red-300',
 											!answered && 'hover:bg-muted',
 										)}
 									>
@@ -117,13 +117,13 @@ export function KnowledgeCheck({
 												className={cn(
 													'h-5 w-5 rounded-full border-2',
 													answered &&
-													selected &&
-													correct &&
-													'border-primary bg-green-100',
+														selected &&
+														correct &&
+														'border-primary bg-green-100',
 													answered &&
-													selected &&
-													!correct &&
-													'border-destructive bg-red-100',
+														selected &&
+														!correct &&
+														'border-destructive bg-red-100',
 												)}
 											/>
 
