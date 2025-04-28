@@ -13,6 +13,23 @@ ALTER TABLE comments
 ALTER TABLE comments
   ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
 
+-- Backfill existing question rows with a default status of 'new'
+UPDATE comments
+SET metadata = jsonb_set(coalesce(metadata, '{}'::jsonb), '{status}', to_jsonb('new'), true)
+WHERE type = 'question' AND (metadata->>'status' IS NULL);
+
+-- Enforce non-null metadata
+ALTER TABLE comments
+  ALTER COLUMN metadata SET NOT NULL;
+
+-- Add validation for status values
+ALTER TABLE comments
+  ADD CONSTRAINT chk_comments_metadata_status
+  CHECK (
+    type != 'question' OR 
+    metadata->>'status' IN ('new', 'answered', 'resolved')
+  );
+
 -- Add indexes for performance optimization
 CREATE INDEX IF NOT EXISTS idx_comments_type ON comments(type);
 CREATE INDEX IF NOT EXISTS idx_comments_metadata_status ON comments((metadata->>'status')) 
