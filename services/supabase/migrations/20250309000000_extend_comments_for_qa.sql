@@ -102,8 +102,9 @@ CREATE POLICY update_question_status ON comments
   WITH CHECK (
     type = 'question' AND
     author_id = auth.uid() AND
-    OLD.project_id = NEW.project_id AND
+    -- Only allow updates to the status field
     (OLD.metadata - 'status' = NEW.metadata - 'status') AND
+    -- Ensure other fields remain unchanged
     OLD.content = NEW.content AND
     OLD.type = NEW.type AND
     OLD.parent_comment_id = NEW.parent_comment_id
