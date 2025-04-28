@@ -23,6 +23,7 @@ export function KnowledgeCheck({
 	onQuizComplete,
 }: KnowledgeCheckProps) {
 	const [answers, setAnswers] = useState<Record<number, number | null>>({})
+	const [isFailedAttempt, setIsFailedAttempt] = useState(false)
 
 	const handleAnswerChange = (questionId: number, answerIndex: number) => {
 		setAnswers((prev) => {
@@ -39,8 +40,15 @@ export function KnowledgeCheck({
 				(q) => updatedAnswers[q.id] === q.correctAnswer,
 			)
 
-			if (allAnswered && allCorrect) {
-				onQuizComplete()
+			if (allAnswered) {
+				if (allCorrect) {
+					onQuizComplete()
+					setIsFailedAttempt(false)
+				} else {
+					setIsFailedAttempt(true)
+				}
+			} else {
+				setIsFailedAttempt(false)
 			}
 
 			return updatedAnswers
@@ -91,57 +99,55 @@ export function KnowledgeCheck({
 										key={option.id}
 										className={cn(
 											'flex items-center gap-3 p-4 rounded-lg border transition-colors hover:bg-green-100 hover:border-primary',
-											answered && correct && 'bg-green-100 border-primary',
 											answered &&
-												selected &&
-												!correct &&
-												'bg-red-50 border-red-300',
+											selected &&
+											correct &&
+											'bg-green-100 border-primary',
+											answered &&
+											selected &&
+											!correct &&
+											'bg-red-50 border-red-300',
 											!answered && 'hover:bg-muted',
 										)}
 									>
-										{!answered ? (
-											<>
-												<RadioGroupItem
-													value={optionIndex.toString()}
-													id={option.id}
-												/>
-												<Label
-													htmlFor={option.id}
-													className="text-base font-medium cursor-pointer flex-grow"
-												>
-													{option.text}
-												</Label>
-											</>
-										) : (
-											<>
-												<div
-													className={cn(
-														'relative flex h-5 w-5 items-center justify-center rounded-full border',
-														selected && correct
-															? 'border-green-500'
-															: selected && !correct
-																? 'border-red-500'
-																: 'border-muted-foreground',
-													)}
-												>
-													{selected && correct && (
-														<Check className="h-3 w-3 text-primary" />
-													)}
-													{selected && !correct && (
-														<X className="h-3 w-3 text-destructive" />
+										<div className="relative">
+											<RadioGroupItem
+												value={optionIndex.toString()}
+												id={option.id}
+												className={cn(
+													'h-5 w-5 rounded-full border-2',
+													answered &&
+													selected &&
+													correct &&
+													'border-primary bg-green-100',
+													answered &&
+													selected &&
+													!correct &&
+													'border-destructive bg-red-100',
+												)}
+											/>
+
+											{answered && selected && (
+												<div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+													{correct ? (
+														<Check className="h-3 w-3 text-white" />
+													) : (
+														<X className="h-3 w-3 text-red-500" />
 													)}
 												</div>
-												<span
-													className={cn(
-														'text-base font-medium flex-grow',
-														selected && correct && 'text-foreground',
-														selected && !correct && 'text-foreground',
-													)}
-												>
-													{option.text}
-												</span>
-											</>
-										)}
+											)}
+										</div>
+
+										<Label
+											htmlFor={option.id}
+											className={cn(
+												'text-base font-medium cursor-pointer flex-grow',
+												selected && correct && 'text-foreground',
+												selected && !correct && 'text-destructive',
+											)}
+										>
+											{option.text}
+										</Label>
 									</div>
 								)
 							})}
@@ -171,6 +177,14 @@ export function KnowledgeCheck({
 							})()}
 					</div>
 				))}
+
+				<div className="flex justify-center">
+					{isFailedAttempt && (
+						<div className="text-sm text-destructive mt-2">
+							❌ Some answers are incorrect. Please try again.
+						</div>
+					)}
+				</div>
 			</CardContent>
 		</Card>
 	)
