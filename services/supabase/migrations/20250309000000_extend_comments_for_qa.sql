@@ -1,4 +1,5 @@
--- Make ENUM creation idempotent
+-- Define comment types for Q&A workflow
+-- This enum supports the classification of comments into regular comments, questions, and answers
 DROP TYPE IF EXISTS comment_type;
 CREATE TYPE comment_type AS ENUM ('comment', 'question', 'answer');
 
@@ -6,15 +7,15 @@ CREATE TYPE comment_type AS ENUM ('comment', 'question', 'answer');
 ALTER TABLE comments
   ENABLE ROW LEVEL SECURITY;
 
--- Add type field using ENUM
+-- Add type field using ENUM and metadata JSONB field (combined with NOT NULL for consistency)
 ALTER TABLE comments
   ADD COLUMN IF NOT EXISTS type comment_type NOT NULL DEFAULT 'comment';
 
--- Add metadata JSONB field
 ALTER TABLE comments
-  ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
+  ADD COLUMN IF NOT EXISTS metadata JSONB NOT NULL DEFAULT '{}'::jsonb;
 
 -- Backfill legacy Q&A comments
+-- Note: For large tables, consider batching this update or running during low-traffic periods
 UPDATE comments
 SET type = CASE
   WHEN parent_comment_id IS NULL THEN 'question'
@@ -23,27 +24,31 @@ END
 WHERE type = 'comment';
 
 -- Backfill existing question rows with a default status of 'new'
+-- Note: For large tables, consider batching or monitoring with affected row counts
 UPDATE comments
-SET metadata = jsonb_set(coalesce(metadata, '{}'::jsonb), '{status}', to_jsonb('new'), true)
+SET metadata = jsonb_set(metadata, '{status}', to_jsonb('new'), true)
 WHERE type = 'question' AND (metadata->>'status' IS NULL);
 
--- Enforce non-null metadata
-ALTER TABLE comments
-  ALTER COLUMN metadata SET NOT NULL;
-
 -- Add validation for status values
+-- Using NOT VALID initially to minimize locking on large tables
 ALTER TABLE comments
   ADD CONSTRAINT chk_comments_metadata_status
   CHECK (
     type != 'question' OR 
     metadata->>'status' IN ('new', 'answered', 'resolved')
-  );
+  ) NOT VALID;
+
+-- Validate the constraint in a separate step (can be run later for large tables)
+ALTER TABLE comments
+  VALIDATE CONSTRAINT chk_comments_metadata_status;
 
 -- Add indexes for performance optimization
 CREATE INDEX IF NOT EXISTS idx_comments_type ON comments(type);
 CREATE INDEX IF NOT EXISTS idx_comments_metadata_status ON comments((metadata->>'status')) 
   WHERE type = 'question';
 CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments(parent_comment_id);
+-- Add composite index for frequent question-answer queries
+CREATE INDEX IF NOT EXISTS idx_comments_type_parent_id ON comments(type, parent_comment_id);
 
 -- Drop existing function if exists
 DROP FUNCTION IF EXISTS update_question_status();
@@ -53,6 +58,7 @@ CREATE OR REPLACE FUNCTION update_question_status()
 RETURNS TRIGGER AS $$
 BEGIN
   -- Enhanced with null guard
+  -- Note: This check duplicates the WHEN condition in the trigger for clarity and robustness
   IF NEW.type = 'answer' AND NEW.parent_comment_id IS NOT NULL THEN
     -- Update the parent question's status to 'answered' if it was 'new'
     UPDATE comments
@@ -74,6 +80,7 @@ $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS trigger_update_question_status ON comments;
 
 -- Create trigger for status updates
+-- Note: The WHEN condition pre-filters events before function execution for efficiency
 CREATE TRIGGER trigger_update_question_status
   AFTER INSERT ON comments
   FOR EACH ROW
@@ -81,7 +88,6 @@ CREATE TRIGGER trigger_update_question_status
   EXECUTE FUNCTION update_question_status();
 
 -- Only project members can mark answers as official (restricted to official flag only)
--- Tightened RLS to prevent unintended changes
 CREATE POLICY update_answer_official ON comments
   FOR UPDATE
   USING (
@@ -99,8 +105,9 @@ CREATE POLICY update_answer_official ON comments
       WHERE project_members.project_id = comments.project_id
       AND project_members.user_id = auth.uid()
     ) AND
-    -- Only allow updates to the is_official flag
+    -- Only allow updates to the is_official flag (explicitly referencing the JSONB path)
     (OLD.metadata - 'is_official' = NEW.metadata - 'is_official') AND
+    (OLD.metadata->>'is_official' IS DISTINCT FROM NEW.metadata->>'is_official') AND
     -- Ensure other fields remain unchanged
     OLD.content = NEW.content AND
     OLD.type = NEW.type AND
@@ -109,7 +116,6 @@ CREATE POLICY update_answer_official ON comments
   );
 
 -- Only question authors can update question status (restricted to status only)
--- Prevent unintended project transfers
 CREATE POLICY update_question_status ON comments
   FOR UPDATE
   USING (
@@ -119,8 +125,9 @@ CREATE POLICY update_question_status ON comments
   WITH CHECK (
     type = 'question' AND
     author_id = auth.uid() AND
-    -- Only allow updates to the status field
+    -- Only allow updates to the status field (explicitly referencing the JSONB path)
     (OLD.metadata - 'status' = NEW.metadata - 'status') AND
+    (OLD.metadata->>'status' IS DISTINCT FROM NEW.metadata->>'status') AND
     -- Ensure other fields remain unchanged
     OLD.content = NEW.content AND
     OLD.type = NEW.type AND
