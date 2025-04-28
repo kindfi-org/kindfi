@@ -17,7 +17,7 @@ import { gridItemStyle, gridStyle } from './styles'
 
 const { width: DEVICE_WIDTH } = Dimensions.get('window')
 
-const GridContext = createContext<any>({})
+const GridContext = createContext<Record<string, unknown>>({})
 
 function arrangeChildrenIntoRows({
 	childrenArray,
@@ -65,8 +65,9 @@ function generateResponsiveNumColumns({ gridClass }: { gridClass: string }) {
 	}
 
 	const regex = /^(?:(\w+):)?grid-cols-?(\d+)$/
-	const result: any = {}
+	const result: unknown = {}
 
+	// biome-ignore lint/complexity/noForEach: refactor later
 	numColumns.forEach((classname) => {
 		const match = classname.match(regex)
 		if (match) {
@@ -86,16 +87,17 @@ function generateResponsiveColSpans({
 }) {
 	const gridClassNamePattern = /\b(?:\w+:)?col-span-?\d+\b/g
 
-	const colSpan: any = gridItemClassName?.match(gridClassNamePattern)
+	const colSpan = gridItemClassName?.match(gridClassNamePattern)
 
 	if (!colSpan) {
 		return 1
 	}
 
 	const regex = /^(?:(\w+):)?col-span-?(\d+)$/
-	const result: any = {}
+	const result: Record<string, unknown> = {}
 
-	colSpan.forEach((classname: any) => {
+	// biome-ignore lint/complexity/noForEach: refactor later
+	colSpan.forEach((classname: string) => {
 		const match = classname.match(regex)
 		if (match) {
 			const prefix = match[1] || 'default'
@@ -132,11 +134,11 @@ const Grid = forwardRef<React.ElementRef<typeof View>, IGridProps>(
 
 		const gridClass = _extra?.className
 		const obj = generateResponsiveNumColumns({ gridClass })
-		const responsiveNumColumns: any = useBreakpointValue(obj)
+		const responsiveNumColumns = useBreakpointValue(obj)
 
 		const itemsPerRow = useMemo(() => {
 			// get the colSpan of each child
-			const colSpanArr = React.Children.map(children, (child: any) => {
+			const colSpanArr = React.Children.map(children, (child: unknown) => {
 				const gridItemClassName = child?.props?._extra?.className
 
 				const colSpan2 = getBreakPointValue(
@@ -163,18 +165,22 @@ const Grid = forwardRef<React.ElementRef<typeof View>, IGridProps>(
 			return rowItemsCount
 		}, [responsiveNumColumns, children])
 
-		const childrenWithProps = React.Children.map(children, (child, index) => {
-			if (React.isValidElement(child)) {
-				return React.cloneElement(child, { index } as any)
-			}
+		const childrenWithProps = React.Children.map(
+			children,
+			(child: React.ReactElement, index: number) => {
+				if (React.isValidElement(child)) {
+					return React.cloneElement(child, { index } as IGridItemProps)
+				}
 
-			return child
-		})
+				return child
+			},
+		)
 
 		const gridClassMerged = `${Platform.select({
 			web: gridClass ?? '',
 		})}`
 
+		// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 		const contextValue = useMemo(() => {
 			return {
 				calculatedWidth,
@@ -184,7 +190,7 @@ const Grid = forwardRef<React.ElementRef<typeof View>, IGridProps>(
 				gap: props?.gap || 0,
 				columnGap: props?.columnGap || 0,
 			}
-		}, [calculatedWidth, itemsPerRow, responsiveNumColumns, props])
+		}, [calculatedWidth, itemsPerRow, responsiveNumColumns])
 
 		const borderLeftWidth = props?.borderLeftWidth || props?.borderWidth || 0
 		const borderRightWidth = props?.borderRightWidth || props?.borderWidth || 0
@@ -197,7 +203,7 @@ const Grid = forwardRef<React.ElementRef<typeof View>, IGridProps>(
 					className={gridStyle({
 						class: `${className} ${gridClassMerged}`,
 					})}
-					onLayout={(event: any) => {
+					onLayout={(event) => {
 						const paddingLeftToSubtract =
 							props?.paddingStart || props?.paddingLeft || props?.padding || 0
 
@@ -265,11 +271,13 @@ const GridItem = forwardRef<React.ElementRef<typeof View>, IGridItemProps>(
 		} = useContext(GridContext)
 
 		const gridItemClass = _extra?.className
-		const responsiveColSpan: number =
-			useBreakpointValue(
-				generateResponsiveColSpans({ gridItemClassName: gridItemClass }),
-			) ?? 1
+		const responsiveColSpan = (useBreakpointValue(
+			generateResponsiveColSpans({
+				gridItemClassName: gridItemClass,
+			}) as Partial<Record<string, unknown>>,
+		) ?? 1) as number
 
+		// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 		useEffect(() => {
 			if (
 				!flexDirection?.includes('column') &&
@@ -323,7 +331,7 @@ const GridItem = forwardRef<React.ElementRef<typeof View>, IGridItemProps>(
 				{...props}
 				style={[
 					{
-						flexBasis: flexBasisValue as any,
+						flexBasis: flexBasisValue as number | string,
 					},
 					props.style,
 				]}

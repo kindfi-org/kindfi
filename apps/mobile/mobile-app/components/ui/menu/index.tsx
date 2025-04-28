@@ -102,7 +102,7 @@ const Item = React.forwardRef<
 })
 
 const Separator = React.forwardRef(
-	({ className, ...props }: any, ref?: any) => {
+	({ className, ...props }: unknown, ref?: unknown) => {
 		return (
 			<View
 				ref={ref}

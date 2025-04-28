@@ -64,7 +64,7 @@ export const Icon = React.forwardRef<
 
 type ParameterTypes = Omit<Parameters<typeof createIcon>[0], 'Root'>
 
-const accessClassName = (style: any) => {
+const accessClassName = (style: unknown) => {
 	const styleObject = Array.isArray(style) ? style[0] : style
 	const keys = Object.keys(styleObject)
 	return styleObject[keys[1]]

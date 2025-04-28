@@ -10,7 +10,7 @@ import { ScrollView } from 'react-native'
 
 import { Link } from 'expo-router'
 
-const FeatureCard = ({ iconSvg: IconSvg, name, desc }: any) => {
+const FeatureCard = ({ iconSvg: IconSvg, name, desc }: unknown) => {
 	return (
 		<Box
 			className="flex-column border border-w-1 border-outline-700 md:flex-1 m-2 p-4 rounded"

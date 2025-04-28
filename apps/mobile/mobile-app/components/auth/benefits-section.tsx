@@ -95,7 +95,7 @@ export const BenefitsSection: React.FC = () => {
 				<VStack gap={12}>
 					{benefits.map((benefit, index) => (
 						<Motion.View
-							key={index}
+							key={`${benefit.title.replace(/\s+/g, '-')}-${index + 1}`}
 							initial={{ opacity: 0, translateX: -20 }}
 							animate={{ opacity: 1, translateX: 0 }}
 							transition={{ type: 'spring' }}
@@ -108,7 +108,7 @@ export const BenefitsSection: React.FC = () => {
 				<HStack flexWrap="wrap" gap={12}>
 					{benefits.map((benefit, index) => (
 						<Motion.View
-							key={index}
+							key={`${benefit.title.replace(/\s+/g, '-')}-${index + 1}`}
 							style={{ flex: 1, minWidth: '45%' }}
 							initial={{ opacity: 0, translateY: 20 }}
 							animate={{ opacity: 1, translateY: 0 }}
