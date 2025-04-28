@@ -42,7 +42,7 @@ export type QuestionMetadata = z.infer<typeof QuestionMetadataSchema>;
 export type AnswerMetadata = z.infer<typeof AnswerMetadataSchema>;
 export type CommentMetadata = z.infer<typeof CommentMetadataSchema>;
 
-/** Helper function to ensure chronological integrity of timestamps */
+
 /** 
  * Helper function to ensure chronological integrity of timestamps
  * Compares two dates to verify the first isn't later than the second
@@ -84,7 +84,7 @@ export const CommentSchema = z.discriminatedUnion('type', [
     ...baseFields, 
     type: z.literal('answer'), 
     metadata: AnswerMetadataSchema,
-    parentCommentId: z.string().uuid() // Override to make required for answers
+    parentCommentId: z.string().uuid().optional(false) // Override to make required for answers
   }).strict()
 ]).refine(
   data => isOnOrBefore(data.createdAt, data.updatedAt),
