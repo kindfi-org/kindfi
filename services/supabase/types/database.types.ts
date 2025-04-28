@@ -26,7 +26,7 @@ export const QuestionMetadataSchema = z.object({
 
 /** Metadata specific to answers */
 export const AnswerMetadataSchema = z.object({
-  //** When true, indicates this answer has been marked as official by a project member */
+  /** When true, indicates this answer has been marked as official by a project member */
   isOfficial: z.boolean().optional(),
 }).strict();
 
@@ -43,6 +43,15 @@ export type AnswerMetadata = z.infer<typeof AnswerMetadataSchema>;
 export type CommentMetadata = z.infer<typeof CommentMetadataSchema>;
 
 /** Helper function to ensure chronological integrity of timestamps */
+/** 
+ * Helper function to ensure chronological integrity of timestamps
+ * Compares two dates to verify the first isn't later than the second
+ * Used to validate that createdAt doesn't occur after updatedAt
+ * 
+ * @param date1 - The earlier date (typically createdAt)
+ * @param date2 - The later date (typically updatedAt)
+ * @returns boolean - True if date1 is on or before date2
+ */
 const isOnOrBefore = (date1: Date, date2: Date): boolean => date1.getTime() <= date2.getTime();
 
 /** Base fields shared across all comment types */
@@ -56,7 +65,7 @@ const baseFields = {
   updatedAt: z.date(),
 };
 
-/** 
+/**
  * Represents a comment entity in the system, supporting standard comments,
  * questions, and answers in a threaded hierarchy
  */
@@ -75,6 +84,16 @@ export const CommentSchema = z.discriminatedUnion('type', [
     message: "updatedAt must be on or after createdAt",
     path: ["createdAt", "updatedAt"]
   }
-);
+).superRefine((data, ctx) => {
+  if (data.type === 'answer' && data.parentCommentId) {
+    // Note: This validation requires backend implementation
+    // to check parent comment type is 'question'
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Answer must reference a question as parent",
+      path: ["parentCommentId"]
+    });
+  }
+});
 
 export type Comment = z.infer<typeof CommentSchema>;
