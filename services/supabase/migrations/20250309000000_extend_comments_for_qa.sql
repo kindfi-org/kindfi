@@ -1,7 +1,13 @@
--- Define comment types for Q&A workflow
+-- Define comment types for Q&A workflow using a safer idempotent approach
 -- This enum supports the classification of comments into regular comments, questions, and answers
-DROP TYPE IF EXISTS comment_type;
-CREATE TYPE comment_type AS ENUM ('comment', 'question', 'answer');
+DO $$
+BEGIN
+  -- Check if the type already exists before attempting to create it
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'comment_type') THEN
+    CREATE TYPE comment_type AS ENUM ('comment', 'question', 'answer');
+  END IF;
+END
+$$;
 
 -- Enable RLS on comments table
 ALTER TABLE comments
@@ -49,6 +55,9 @@ CREATE INDEX IF NOT EXISTS idx_comments_metadata_status ON comments((metadata->>
 CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments(parent_comment_id);
 -- Add composite index for frequent question-answer queries
 CREATE INDEX IF NOT EXISTS idx_comments_type_parent_id ON comments(type, parent_comment_id);
+-- Add index for official-flag queries
+CREATE INDEX IF NOT EXISTS idx_comments_is_official ON comments((metadata->>'is_official')) 
+  WHERE type = 'answer';
 
 -- Drop existing function if exists
 DROP FUNCTION IF EXISTS update_question_status();
