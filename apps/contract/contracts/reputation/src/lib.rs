@@ -22,7 +22,23 @@ impl ReputationContract {
         if env.storage().instance().has(&ADMIN_KEY) {
             return Err(ReputationError::AlreadyInitialized);
         }
-        
+
+        if let Address::Account(account_id) = &admin {
+            if account_id.0 == [0u8; 32] {
+                return Err(ReputationError::InvalidAdminAddress);
+            }
+        } else {
+            return Err(ReputationError::InvalidAdminAddress);
+        }
+    
+        if let Address::Contract(contract_id) = &nft_contract_id {
+            if contract_id.0 == [0u8; 32] {
+                return Err(ReputationError::InvalidNftContractId);
+            }
+        } else {
+            return Err(ReputationError::InvalidNftContractId);
+        }
+            
         ReputationStorage::set_admin(&env, &admin);
         ReputationStorage::set_nft_contract_id(&env, &nft_contract_id);
         

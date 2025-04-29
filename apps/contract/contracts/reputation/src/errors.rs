@@ -9,4 +9,6 @@ pub enum ReputationError {
     InvalidTier = 4,
     ContractNotInitialized = 5,
     NFTContractError = 6,
+    InvalidAdminAddress = 7,
+    InvalidNftContractId = 8,
 }
