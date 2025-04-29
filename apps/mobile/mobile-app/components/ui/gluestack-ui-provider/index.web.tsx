@@ -25,15 +25,17 @@ export function GluestackUIProvider({
 	mode?: ModeType
 	children?: React.ReactNode
 }) {
-	let cssVariablesWithMode = ``
+	let cssVariablesWithMode = ''
+	// biome-ignore lint/complexity/noForEach: <explanation>
 	Object.keys(config).forEach((configKey) => {
 		cssVariablesWithMode +=
-			configKey === 'dark' ? `\n .dark {\n ` : `\n:root {\n`
+			configKey === 'dark' ? '\n .dark {\n ' : '\n:root {\n'
 		const cssVariables = Object.keys(
 			config[configKey as keyof typeof config],
 		).reduce((acc: string, curr: string) => {
-			acc += `${curr}:${config[configKey as keyof typeof config][curr]}; `
-			return acc
+			let newAcc = acc
+			newAcc += `${curr}:${config[configKey as keyof typeof config][curr]}; `
+			return newAcc
 		}, '')
 		cssVariablesWithMode += `${cssVariables} \n}`
 	})
@@ -83,6 +85,7 @@ export function GluestackUIProvider({
 		<>
 			<script
 				suppressHydrationWarning
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
 				dangerouslySetInnerHTML={{
 					__html: `(${script.toString()})('${mode}')`,
 				}}

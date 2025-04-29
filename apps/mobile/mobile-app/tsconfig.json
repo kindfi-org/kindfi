@@ -5,15 +5,13 @@
 		"paths": {
 			"@/*": ["./*"],
 			"tailwind.config": ["./tailwind.config.js"]
-		},
-		"typeRoots": ["./node_modules/@types", "./types"]
+		}
 	},
 	"include": [
 		"**/*.ts",
 		"**/*.tsx",
 		".expo/types/**/*.ts",
 		"expo-env.d.ts",
-		"nativewind-env.d.ts",
-		"types/**/*.d.ts"
+		"nativewind-env.d.ts"
 	]
 }
