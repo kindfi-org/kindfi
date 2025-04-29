@@ -54,11 +54,15 @@ impl ReputationContract {
         
         // Check and update tier if necessary
         let current_tier = Self::get_user_tier(env.clone(), user_id.clone())?;
-        let potential_new_tier = Self::calculate_tier_from_score(env.clone(), new_score)?;
         
-        if current_tier != potential_new_tier {
-            ReputationStorage::set_user_tier(&env, &user_id, &potential_new_tier);
-            ReputationEvents::tier_changed(&env, &user_id, &current_tier, &potential_new_tier);
+        // Recalculating tier if score has changed
+        if current_score != new_score {
+            let potential_new_tier = Self::calculate_tier_from_score(env.clone(), new_score)?;
+
+            if current_tier != potential_new_tier {
+                ReputationStorage::set_user_tier(&env, &user_id, &potential_new_tier);
+                ReputationEvents::tier_changed(&env, &user_id, &current_tier, &potential_new_tier);
+            }
         }
         
         // Emit score updated event
