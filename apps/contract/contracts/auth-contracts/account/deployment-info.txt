@@ -1,0 +1,4 @@
+Network: testnet
+WASM Hash: 9fa9694be92c887927f44a8802e4be6b8d382778fb242dc59c7c807b07b481f5
+Contract ID: 
+Deployment Date: Sat Apr 26 09:06:24 WAT 2025
