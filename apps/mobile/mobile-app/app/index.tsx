@@ -25,7 +25,7 @@ import { Item } from '../types';
 //   );
 // };
 const allItems: Item[] = [
-  { id: '1', category: 'animal welfare', image: require('..assets/images/artesania.webp'), text: 'Animal Welfare 1', title: 'Animal Welfare 1', imageUrl: '../assets/images/artesania.webp' },
+  // { id: '1', category: 'animal welfare', image: require('..assets/images/artesania.webp'), text: 'Animal Welfare 1', title: 'Animal Welfare 1', imageUrl: '../assets/images/artesania.webp' },
   { id: '2', category: 'animal welfare', image: require('../assets/images/bosques.webp'), text: 'Animal Welfare 2', title: 'Animal Welfare 2', imageUrl: '../assets/images/bosques.webp' },
   { id: '3', category: 'environment', image: require('../assets/images/education.webp'), text: 'Environment 1', title: 'Environment 1', imageUrl: '../assets/images/education.webp' },
   { id: '4', category: 'environment', image: require('../assets/images/healthcare.webp'), text: 'Environment 2', title: 'Environment 2', imageUrl: '../assets/images/healthcare.webp' },
@@ -43,12 +43,12 @@ export default function Home() {
 
   return (
       <View style={{ flex: 1 }}>
-          <Header logo={require('../assets/images/logo.png')} hamburgerIcon={require('../assets/icons/hamburger.png')} />
-          <Filter items={['animal welfare', 'environment']} onSelect={handleFilterSelect} />
+          <Header logo={require('../assets/images/logo.svg')}  />
+          {/* <Filter items={['animal welfare', 'environment']} onSelect={handleFilterSelect} />
           <ScrollView>
               <Text style={{ fontSize: 24, textAlign: 'center', marginVertical: 20 }}>Change Lives One Block at a Time</Text>
               <ItemList items={filteredItems} />
-          </ScrollView>
+          </ScrollView> */}
       </View>
   );
 }

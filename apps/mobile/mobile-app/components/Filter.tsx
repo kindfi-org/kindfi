@@ -1,18 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-// interface FilterProps {
-//   filterItems: string[];
-//   onFilterSelect: (filter: string) => void;
-// }
+interface FilterProps {
+  filterItems: string[];
+  onFilterSelect: (filter: string) => void;
+}
 
-export interface FilterProps {
 
-    items: string[];
-  
-    onSelect: (filter: string) => void;
-  
-  }
 
 const Filter: React.FC<FilterProps> = ({ filterItems, onFilterSelect }) => {
   return (
