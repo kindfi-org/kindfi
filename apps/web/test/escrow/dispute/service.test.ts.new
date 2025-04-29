@@ -152,7 +152,7 @@ describe('Escrow Dispute Service', () => {
             }) as DisputeEvidence;
             
             expect(spy).toHaveBeenCalledWith('escrow_dispute_evidences');
-            expect(evidence.id).toEqual('test-id'); // Match the ID returned by the mock
+            expect(evidence.id).toEqual('evidence-id');
         });
     });
     

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { addEvidence } from '~/lib/services/escrow-dispute.service'
+import { addEvidence, getEvidenceByDisputeId } from '~/lib/services/escrow-dispute.service'
 import { addEvidenceValidator } from '~/lib/constants/escrow/dispute.validator'
-import { supabase } from '~/lib/supabase/client'
+import { createClient } from '~/lib/supabase/client'
 
 export async function POST(
     req: NextRequest,
@@ -14,7 +14,7 @@ export async function POST(
         // Validate using zod
         const validationResult = addEvidenceValidator.safeParse({
             ...body,
-            escrowId: id
+            disputeId: id
         })
         
         if (!validationResult.success) {
@@ -57,22 +57,13 @@ export async function GET(
     try {
         const { id } = params
         
-        // Get all evidence for the dispute
-        const { data: evidences, error } = await supabase
-            .from('escrow_dispute_evidences')
-            .select('*')
-            .eq('escrow_dispute_id', id)
-            
-        if (error) {
-            return NextResponse.json(
-                { error: 'Failed to fetch evidence' },
-                { status: 500 }
-            )
-        }
+        // Get all evidence for the dispute using the service function
+        const evidence = await getEvidenceByDisputeId(id)
         
+        // Return the evidence with consistent response structure
         return NextResponse.json({
             status: 'success',
-            evidences
+            evidence
         })
     } catch (error) {
         console.error('Error fetching evidence:', error)

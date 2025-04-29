@@ -46,7 +46,7 @@ export async function createDisputeRecord(
 ): Promise<Dispute> {
     // First, create the dispute record
     const supabase = createClient()
-    const { data: dispute, error } = await supabase
+    const { data: row, error } = await supabase
         .from('escrow_disputes')
         .insert({
             escrow_id: data.escrowId,
@@ -61,6 +61,19 @@ export async function createDisputeRecord(
 
     if (error) {
         throw new Error(`Failed to create dispute record: ${error.message}`)
+    }
+
+    const dispute = row && {
+        id: row.id,
+        escrowId: row.escrow_id,
+        status: row.status as DisputeStatus,
+        reason: row.reason,
+        initiator: row.initiator,
+        mediator: row.mediator,
+        resolution: row.resolution,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        resolvedAt: row.resolved_at,
     }
 
     // If there are evidence URLs, add them
@@ -96,7 +109,7 @@ export async function updateDisputeStatus(
     status: DisputeStatus
 ): Promise<Dispute> {
     const supabase = createClient()
-    const { data, error } = await supabase
+    const { data: row, error } = await supabase
         .from('escrow_disputes')
         .update({ 
             status,
@@ -111,7 +124,20 @@ export async function updateDisputeStatus(
         throw new Error(`Failed to update dispute status: ${error.message}`)
     }
 
-    return data
+    const dispute = row && {
+        id: row.id,
+        escrowId: row.escrow_id,
+        status: row.status as DisputeStatus,
+        reason: row.reason,
+        initiator: row.initiator,
+        mediator: row.mediator,
+        resolution: row.resolution,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        resolvedAt: row.resolved_at,
+    }
+
+    return dispute
 }
 
 /**
@@ -150,7 +176,7 @@ export async function addEvidence(
     data: AddEvidencePayload
 ): Promise<DisputeEvidence> {
     const supabase = createClient()
-    const { data: evidence, error } = await supabase
+    const { data: row, error } = await supabase
         .from('escrow_dispute_evidences')
         .insert({
             escrow_dispute_id: data.disputeId,
@@ -164,6 +190,15 @@ export async function addEvidence(
 
     if (error) {
         throw new Error(`Failed to add evidence: ${error.message}`)
+    }
+
+    const evidence = row && {
+        id: row.id,
+        escrowDisputeId: row.escrow_dispute_id,
+        evidenceUrl: row.evidence_url,
+        description: row.description,
+        submittedBy: row.submitted_by,
+        createdAt: row.created_at
     }
 
     return evidence
@@ -208,15 +243,92 @@ export async function getDisputeById(disputeId: string): Promise<Dispute> {
  * @param escrowId The ID of the escrow
  * @returns The dispute records
  */
+/**
+ * Gets disputes by escrow ID with their associated evidence
+ * @param escrowId The ID of the escrow
+ * @returns The dispute records with their evidence data
+ */
 export async function getDisputesByEscrowId(escrowId: string): Promise<Dispute[]> {
     const supabase = createClient()
-    const { data, error } = await supabase
+    
+    // Get all disputes for this escrow
+    const { data: rows, error } = await supabase
         .from('escrow_disputes')
         .select('*')
         .eq('escrow_id', escrowId)
 
     if (error) {
         throw new Error(`Failed to get disputes: ${error.message}`)
+    }
+
+    if (!rows || rows.length === 0) {
+        return []
+    }
+
+    // Get all dispute IDs to fetch evidence in a single query
+    const disputeIds = rows.map(row => row.id)
+    
+    // Fetch all evidence for these disputes in a single query
+    const { data: evidenceRows, error: evidencesError } = await supabase
+        .from('escrow_dispute_evidences')
+        .select('*')
+        .in('escrow_dispute_id', disputeIds)
+
+    if (evidencesError) {
+        console.error('Failed to get evidences:', evidencesError)
+    }
+
+    // Group evidence by dispute ID for efficient lookup
+    const evidenceByDisputeId: Record<string, DisputeEvidence[]> = {}
+    if (evidenceRows) {
+        evidenceRows.forEach(row => {
+            const disputeId = row.escrow_dispute_id
+            if (!evidenceByDisputeId[disputeId]) {
+                evidenceByDisputeId[disputeId] = []
+            }
+            
+            // Map snake_case to camelCase for each evidence item
+            evidenceByDisputeId[disputeId].push({
+                id: row.id,
+                escrowDisputeId: row.escrow_dispute_id,
+                evidenceUrl: row.evidence_url,
+                description: row.description,
+                submittedBy: row.submitted_by,
+                createdAt: row.created_at
+            })
+        })
+    }
+
+    // Map each dispute row to the proper camelCase format and include its evidence
+    return rows.map(row => ({
+        id: row.id,
+        escrowId: row.escrow_id,
+        status: row.status as DisputeStatus,
+        reason: row.reason,
+        initiator: row.initiator,
+        mediator: row.mediator,
+        resolution: row.resolution,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        resolvedAt: row.resolved_at,
+        evidences: evidenceByDisputeId[row.id] || []
+    }))
+}
+
+/**
+ * Gets evidence by dispute ID
+ * @param disputeId The ID of the dispute
+ * @returns The evidence records
+ */
+ export async function getEvidenceByDisputeId(disputeId: string): Promise<DisputeEvidence[]> {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('escrow_dispute_evidences')
+        .select('*')
+        .eq('escrow_dispute_id', disputeId)
+
+    if (error) {
+        throw new Error(`Failed to get evidence: ${error.message}`)
     }
 
     return data || []

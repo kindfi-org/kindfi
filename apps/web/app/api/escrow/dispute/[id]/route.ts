@@ -97,10 +97,18 @@ export async function DELETE(
         }
         
         // Delete dispute evidences first (due to foreign key constraints)
-        await supabase
+        const { error: evidenceError } = await supabase
             .from('escrow_dispute_evidences')
             .delete()
             .eq('escrow_dispute_id', id)
+            
+        if (evidenceError) {
+            console.error('Error deleting dispute evidences:', evidenceError)
+            return NextResponse.json(
+                { error: 'Failed to delete dispute evidences' },
+                { status: 500 }
+            )
+        }
             
         // Delete the dispute
         const { error } = await supabase
@@ -122,10 +130,16 @@ export async function DELETE(
             .eq('escrow_id', dispute.escrow_id)
             
         if (!otherDisputes || otherDisputes.length === 0) {
-            await supabase
+            const { error: updateError } = await supabase
                 .from('escrow_contracts')
                 .update({ dispute_flag: false })
                 .eq('id', dispute.escrow_id)
+            
+            if (updateError) {
+                console.error('Error updating escrow contract dispute flag:', updateError)
+                // We'll log the error but continue with the response since the dispute was deleted successfully
+                // In a production environment, this could be handled by a background job or retry mechanism
+            }
         }
         
         return NextResponse.json({

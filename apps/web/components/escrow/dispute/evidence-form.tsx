@@ -10,10 +10,12 @@ import { AlertCircle, Check, Loader2 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '~/components/base/alert'
 import { addEvidenceValidator } from '~/lib/constants/escrow/dispute.validator'
 
+import type { DisputeEvidence } from '~/lib/types/escrow/dispute.types'
+
 interface EvidenceFormProps {
     disputeId: string
     submittedBy: string
-    onSuccess?: (data: any) => void
+    onSuccess?: (data: { status: string; evidence: DisputeEvidence }) => void
     onError?: (error: Error) => void
     onCancel?: () => void
 }
@@ -62,11 +64,12 @@ export function EvidenceForm({
                 })
             })
 
-            const data = await response.json()
-
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to submit evidence')
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to submit evidence')
             }
+            
+            const data: { status: string; evidence: DisputeEvidence } = await response.json()
 
             setSuccess(true)
             if (onSuccess) {
@@ -92,7 +95,7 @@ export function EvidenceForm({
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form id="evidenceForm" onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
                         <Label htmlFor="evidenceUrl">Evidence URL</Label>
                         <Input
@@ -148,7 +151,8 @@ export function EvidenceForm({
                     Cancel
                 </Button>
                 <Button 
-                    onClick={handleSubmit} 
+                    type="submit"
+                    form="evidenceForm"
                     disabled={isSubmitting || !evidenceUrl || !description || success} 
                     className="w-full sm:w-auto"
                 >

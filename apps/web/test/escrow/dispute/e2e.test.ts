@@ -6,6 +6,7 @@
 
 import { describe, expect, it, mock, beforeAll, afterAll } from 'bun:test';
 import type { DisputeStatus } from '~/lib/types/escrow/dispute.types';
+import type { CreatedAt } from '~/lib/types/date.types';
 
 // Create a constant object with the dispute status values
 const DISPUTE_STATUS = {
@@ -14,12 +15,47 @@ const DISPUTE_STATUS = {
     RESOLVED: 'resolved' as const,
     REJECTED: 'rejected' as const
 };
+
+// Define interfaces for the data structures
+interface DisputeData {
+    escrowId: string;
+    reason: string;
+    initiator: string;
+    status?: string;
+    mediator?: string;
+    resolution?: string;
+    [key: string]: any; // For other properties
+}
+
+interface EvidenceData {
+    escrow_dispute_id: string;
+    evidenceUrl: string;
+    description: string;
+    submitted_by: string;
+    [key: string]: any; // For other properties
+}
+
+interface Dispute extends DisputeData {
+    id: string;
+    status: string;
+    createdAt: CreatedAt;
+    updatedAt: CreatedAt;
+    resolvedAt?: CreatedAt;
+}
+
+interface Evidence extends EvidenceData {
+    id: string;
+    createdAt: CreatedAt;
+}
 import { NextRequest, NextResponse } from 'next/server';
 import { POST as createDispute } from '~/app/api/escrow/dispute/route';
 import { GET as getDisputeById } from '~/app/api/escrow/dispute/[id]/route';
 
 // Mock the Supabase client
-const mockSupabaseData = {
+const mockSupabaseData: {
+    disputes: Dispute[];
+    evidence: Evidence[];
+} = {
     disputes: [
         {
             id: 'test-dispute-id',
@@ -39,14 +75,15 @@ beforeAll(() => {
     mock.module('~/lib/supabase/client', () => ({
         createClient: () => ({
             from: (table: string) => ({
-                insert: (data: any) => ({
+                insert: (data: DisputeData | EvidenceData) => ({
                     select: () => ({
                         single: () => {
                             if (table === 'escrow_disputes') {
-                                const newDispute = {
-                                    ...data,
+                                const disputeData = data as DisputeData;
+                                const newDispute: Dispute = {
+                                    ...disputeData,
                                     id: 'new-dispute-id',
-                                    status: DISPUTE_STATUS.PENDING,
+                                    status: disputeData.status || DISPUTE_STATUS.PENDING,
                                     createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 },
                                     updatedAt: { seconds: Date.now() / 1000, nanoseconds: 0 }
                                 };
@@ -54,8 +91,9 @@ beforeAll(() => {
                                 return Promise.resolve({ data: newDispute });
                             }
                             if (table === 'escrow_dispute_evidences') {
-                                const newEvidence = {
-                                    ...data,
+                                const evidenceData = data as EvidenceData;
+                                const newEvidence: Evidence = {
+                                    ...evidenceData,
                                     id: 'new-evidence-id',
                                     createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 }
                                 };
@@ -70,32 +108,41 @@ beforeAll(() => {
                     eq: (field: string, value: string) => ({
                         order: () => {
                             if (table === 'escrow_disputes') {
-                                const disputes = mockSupabaseData.disputes.filter(d => d[field] === value);
+                                const disputes = mockSupabaseData.disputes.filter(d => {
+                                    return d[field as keyof Dispute] === value;
+                                });
                                 return Promise.resolve({ data: disputes });
                             }
                             if (table === 'escrow_dispute_evidences') {
-                                const evidence = mockSupabaseData.evidence.filter(e => e[field] === value);
+                                const evidence = mockSupabaseData.evidence.filter(e => {
+                                    return e[field as keyof Evidence] === value;
+                                });
                                 return Promise.resolve({ data: evidence });
                             }
                             return Promise.resolve({ data: [] });
                         },
                         single: () => {
                             if (table === 'escrow_disputes') {
-                                const dispute = mockSupabaseData.disputes.find(d => d[field] === value);
+                                const dispute = mockSupabaseData.disputes.find(d => {
+                                    return d[field as keyof Dispute] === value;
+                                });
                                 return Promise.resolve({ data: dispute });
                             }
                             return Promise.resolve({ data: null });
                         }
                     })
                 }),
-                update: (data: any) => ({
+                update: (data: Partial<DisputeData> | Partial<EvidenceData>) => ({
                     eq: (field: string, value: string) => {
                         if (table === 'escrow_disputes') {
-                            const index = mockSupabaseData.disputes.findIndex(d => d[field] === value);
+                            const index = mockSupabaseData.disputes.findIndex(d => {
+                                return d[field as keyof Dispute] === value;
+                            });
                             if (index !== -1) {
+                                const updateData = data as Partial<DisputeData>;
                                 mockSupabaseData.disputes[index] = {
                                     ...mockSupabaseData.disputes[index],
-                                    ...data,
+                                    ...updateData,
                                     updatedAt: { seconds: Date.now() / 1000, nanoseconds: 0 }
                                 };
                                 return Promise.resolve({ data: mockSupabaseData.disputes[index] });

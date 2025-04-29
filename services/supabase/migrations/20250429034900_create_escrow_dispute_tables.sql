@@ -1,3 +1,12 @@
+-- Create trigger function for updating updated_at timestamp
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Create escrow disputes table
 CREATE TABLE IF NOT EXISTS escrow_disputes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -25,7 +34,15 @@ CREATE TABLE IF NOT EXISTS escrow_dispute_evidences (
 -- Add indexes for performance
 CREATE INDEX IF NOT EXISTS idx_escrow_disputes_escrow_id ON escrow_disputes(escrow_id);
 CREATE INDEX IF NOT EXISTS idx_escrow_disputes_status ON escrow_disputes(status);
+CREATE INDEX IF NOT EXISTS idx_escrow_disputes_initiator ON escrow_disputes(initiator);
+CREATE INDEX IF NOT EXISTS idx_escrow_disputes_mediator ON escrow_disputes(mediator);
 CREATE INDEX IF NOT EXISTS idx_escrow_dispute_evidences_dispute_id ON escrow_dispute_evidences(escrow_dispute_id);
+
+-- Create trigger for automatically updating updated_at timestamp
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON escrow_disputes
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
 
 -- Add RLS policies for escrow_disputes table
 ALTER TABLE escrow_disputes ENABLE ROW LEVEL SECURITY;

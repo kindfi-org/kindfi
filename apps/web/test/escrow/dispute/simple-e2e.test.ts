@@ -8,12 +8,12 @@ import { describe, expect, it, mock, beforeAll } from 'bun:test';
 import { NextRequest } from 'next/server';
 import type { DisputeStatus } from '~/lib/types/escrow/dispute.types';
 
-// Create a constant object with the dispute status values
-const DISPUTE_STATUS = {
-    PENDING: 'pending' as const,
-    IN_REVIEW: 'in_review' as const,
-    RESOLVED: 'resolved' as const,
-    REJECTED: 'rejected' as const
+// Create a type-safe object with the dispute status values
+const DISPUTE_STATUS: Record<string, DisputeStatus> = {
+    PENDING: 'pending',
+    IN_REVIEW: 'in_review',
+    RESOLVED: 'resolved',
+    REJECTED: 'rejected'
 };
 
 // Mock database for storing test data
@@ -37,7 +37,7 @@ beforeAll(() => {
     mock.module('~/lib/supabase/client', () => ({
         createClient: () => ({
             from: (table: string) => ({
-                insert: (data: any) => ({
+                insert: (data: Record<string, unknown>) => ({
                     select: () => ({
                         single: () => {
                             if (table === 'escrow_disputes') {
@@ -101,7 +101,7 @@ beforeAll(() => {
                         }
                     })
                 }),
-                update: (data: any) => ({
+                update: (data: Record<string, unknown>) => ({
                     eq: (field: string, value: string) => {
                         if (table === 'escrow_disputes') {
                             // Use a type-safe approach to update a dispute

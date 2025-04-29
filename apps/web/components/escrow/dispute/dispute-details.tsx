@@ -1,15 +1,39 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/base/card'
 import { Badge } from '~/components/base/badge'
 import { Separator } from '~/components/base/separator'
-import { AlertCircle, Check, Clock, FileText, Loader2, User } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '~/components/base/alert'
-import type { Dispute, DisputeEvidence } from '~/lib/types/escrow/dispute.types'
+import type { DisputeEvidence } from '~/lib/types/escrow/dispute.types'
 import { formatDistanceToNow } from 'date-fns'
 import type { CreatedAt } from '~/lib/types/date.types'
+import { useDispute } from '~/hooks/use-dispute'
+import { getDisputeStatusColor } from '~/lib/utils/status-colors'
+
+// Dynamically import Lucide icons to reduce initial bundle size
+const AlertCircle = dynamic(() => import('lucide-react').then(mod => mod.AlertCircle))
+const Check = dynamic(() => import('lucide-react').then(mod => mod.Check))
+const Clock = dynamic(() => import('lucide-react').then(mod => mod.Clock))
+const FileText = dynamic(() => import('lucide-react').then(mod => mod.FileText))
+const Loader2 = dynamic(() => import('lucide-react').then(mod => mod.Loader2))
+const User = dynamic(() => import('lucide-react').then(mod => mod.User))
+
+/**
+ * Format a timestamp consistently, handling different date formats
+ * @param timestamp - CreatedAt object, string date, or undefined
+ * @returns Formatted date string or 'Unknown date' if timestamp is undefined
+ */
+function formatTimestamp(timestamp: CreatedAt | string | undefined): string {
+  if (!timestamp) return 'Unknown date';
+  
+  const date = typeof timestamp === 'string' 
+    ? new Date(timestamp) 
+    : new Date((timestamp as CreatedAt).seconds * 1000);
+    
+  return formatDistanceToNow(date, { addSuffix: true });
+}
 
 interface DisputeDetailsProps {
     disputeId: string
@@ -22,49 +46,10 @@ export function DisputeDetails({
     onResolve,
     onAddEvidence
 }: DisputeDetailsProps) {
-    const [dispute, setDispute] = useState<Dispute | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    // Use the custom hook to fetch dispute data
+    const { dispute, loading, error } = useDispute(disputeId)
 
-    useEffect(() => {
-        const fetchDispute = async () => {
-            try {
-                setLoading(true)
-                setError(null)
-                
-                const response = await fetch(`/api/escrow/dispute/${disputeId}`)
-                const data = await response.json()
-                
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to fetch dispute details')
-                }
-                
-                setDispute(data.dispute)
-            } catch (err) {
-                const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
-                setError(errorMessage)
-            } finally {
-                setLoading(false)
-            }
-        }
-        
-        fetchDispute()
-    }, [disputeId])
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'pending':
-                return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-            case 'in_review':
-                return 'bg-blue-100 text-blue-800 border-blue-200'
-            case 'resolved':
-                return 'bg-green-100 text-green-800 border-green-200'
-            case 'rejected':
-                return 'bg-red-100 text-red-800 border-red-200'
-            default:
-                return 'bg-gray-100 text-gray-800 border-gray-200'
-        }
-    }
+    // Status color mapping is now handled by the imported utility function
 
     if (loading) {
         return (
@@ -99,12 +84,12 @@ export function DisputeDetails({
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle>Dispute #{dispute.id.substring(0, 8)}</CardTitle>
-                    <Badge className={getStatusColor(dispute.status)}>
+                    <Badge className={getDisputeStatusColor(dispute.status)}>
                         {dispute.status.replace('_', ' ').toUpperCase()}
                     </Badge>
                 </div>
                 <CardDescription>
-                    Filed {formatDistanceToNow(new Date((dispute.createdAt as CreatedAt).seconds * 1000), { addSuffix: true })}
+                    Filed {formatTimestamp(dispute.createdAt)}
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -144,7 +129,7 @@ export function DisputeDetails({
                                             Submitted by {evidence.submittedBy.substring(0, 8)}...
                                         </span>
                                         <span className="text-xs text-muted-foreground">
-                                            {formatDistanceToNow(new Date((evidence.createdAt as CreatedAt).seconds * 1000), { addSuffix: true })}
+                                            {formatTimestamp(evidence.createdAt)}
                                         </span>
                                     </div>
                                     <p className="text-sm mb-2">{evidence.description}</p>
@@ -171,7 +156,7 @@ export function DisputeDetails({
                         {dispute.resolvedAt && (
                             <div className="mt-2 flex items-center text-xs text-muted-foreground">
                                 <Clock className="h-3 w-3 mr-1" />
-                                Resolved {formatDistanceToNow(new Date(typeof dispute.resolvedAt === 'string' ? dispute.resolvedAt : (dispute.resolvedAt as CreatedAt).seconds * 1000), { addSuffix: true })}
+                                Resolved {formatTimestamp(dispute.resolvedAt)}
                             </div>
                         )}
                     </div>

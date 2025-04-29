@@ -1,6 +1,7 @@
 import { describe, expect, it, mock, spyOn } from 'bun:test';
 import type { DisputeStatus, Dispute, DisputeEvidence } from '~/lib/types/escrow/dispute.types';
 import type { EscrowRequestResponse } from '~/lib/types/escrow/escrow-response.types';
+import type { CreatedAt } from '~/lib/types/date.types';
 
 // Create a constant object with the dispute status values
 const DISPUTE_STATUS = {
@@ -10,77 +11,136 @@ const DISPUTE_STATUS = {
     REJECTED: 'rejected' as const
 };
 
-// Mock the Supabase client
-const mockSupabase = {
-    from: () => ({
-        insert: () => ({
-            select: () => ({
-                single: () => Promise.resolve({ 
-                    data: { 
-                        id: 'test-id',
-                        escrowId: 'escrow-id',
-                        status: DISPUTE_STATUS.PENDING,
-                        reason: 'Test reason',
-                        initiator: 'user123',
-                        createdAt: { seconds: 1619712000, nanoseconds: 0 },
-                        updatedAt: { seconds: 1619712000, nanoseconds: 0 }
-                    } 
-                })
-            })
-        }),
-        select: () => ({
-            eq: () => ({
-                order: () => Promise.resolve({ 
-                    data: [{ 
-                        id: 'test-id',
-                        escrowId: 'escrow-id',
-                        status: DISPUTE_STATUS.PENDING,
-                        reason: 'Test reason',
-                        initiator: 'user123',
-                        createdAt: { seconds: 1619712000, nanoseconds: 0 },
-                        updatedAt: { seconds: 1619712000, nanoseconds: 0 }
-                    }] 
-                }),
-                single: () => Promise.resolve({ 
-                    data: { 
-                        id: 'test-id',
-                        escrowId: 'escrow-id',
-                        status: DISPUTE_STATUS.PENDING,
-                        reason: 'Test reason',
-                        initiator: 'user123',
-                        createdAt: { seconds: 1619712000, nanoseconds: 0 },
-                        updatedAt: { seconds: 1619712000, nanoseconds: 0 }
-                    } 
-                })
-            })
-        }),
-        update: () => ({
-            eq: () => Promise.resolve({ 
-                data: { 
-                    id: 'test-id',
-                    escrowId: 'escrow-id',
-                    status: DISPUTE_STATUS.IN_REVIEW,
-                    reason: 'Test reason',
-                    initiator: 'user123',
-                    createdAt: { seconds: 1619712000, nanoseconds: 0 },
-                    updatedAt: { seconds: 1619712000, nanoseconds: 0 }
-                } 
-            })
-        })
-    })
+// Helper function to create a timestamp
+const createTimestamp = (time = Date.now()): CreatedAt => ({
+    seconds: time / 1000,
+    nanoseconds: 0
+});
+
+// Mock factory for creating dispute data with different states
+interface DisputeDataOptions {
+    id?: string;
+    escrowId?: string;
+    status?: DisputeStatus;
+    reason?: string;
+    initiator?: string;
+    mediator?: string;
+    resolution?: string;
+    createdAt?: CreatedAt;
+    updatedAt?: CreatedAt;
+    resolvedAt?: CreatedAt;
+}
+
+const createMockDispute = (options: DisputeDataOptions = {}): Dispute => ({
+    id: options.id || 'test-id',
+    escrowId: options.escrowId || 'escrow-id',
+    status: options.status || DISPUTE_STATUS.PENDING,
+    reason: options.reason || 'Test reason',
+    initiator: options.initiator || 'user123',
+    mediator: options.mediator,
+    resolution: options.resolution,
+    createdAt: options.createdAt || createTimestamp(),
+    updatedAt: options.updatedAt || createTimestamp(),
+    resolvedAt: options.resolvedAt ? options.resolvedAt : undefined
+});
+
+// Mock factory for creating evidence data
+interface EvidenceDataOptions {
+    id?: string;
+    disputeId?: string;
+    evidenceUrl?: string;
+    description?: string;
+    submittedBy?: string;
+    createdAt?: CreatedAt;
+}
+
+const createMockEvidence = (options: EvidenceDataOptions = {}): DisputeEvidence => ({
+    id: options.id || 'evidence-id',
+    escrowDisputeId: options.disputeId || 'test-id',
+    evidenceUrl: options.evidenceUrl || 'https://example.com/evidence',
+    description: options.description || 'Test evidence description',
+    submittedBy: options.submittedBy || 'user123',
+    createdAt: options.createdAt || createTimestamp()
+});
+
+// Create different dispute scenarios for testing
+const MOCK_DISPUTES = {
+    PENDING: createMockDispute(),
+    IN_REVIEW: createMockDispute({ status: DISPUTE_STATUS.IN_REVIEW, mediator: 'mediator123' }),
+    RESOLVED: createMockDispute({
+        status: DISPUTE_STATUS.RESOLVED,
+        mediator: 'mediator123',
+        resolution: 'Dispute resolved in favor of the service provider',
+        resolvedAt: createTimestamp()
+    }),
+    REJECTED: createMockDispute({ status: DISPUTE_STATUS.REJECTED })
 };
+
+// Helper function to create Supabase response wrappers
+const wrapResponse = <T>(data: T) => Promise.resolve({ data });
+const wrapSingleResponse = <T>(data: T) => Promise.resolve({ data });
+const wrapArrayResponse = <T>(data: T[]) => Promise.resolve({ data });
+
+// Create a configurable mock Supabase client
+const createMockSupabaseClient = (disputeData = MOCK_DISPUTES.PENDING, evidenceData = createMockEvidence()) => ({
+    from: (table: string) => {
+        // Different behavior based on the table being accessed
+        if (table === 'escrow_disputes') {
+            return {
+                insert: <T>(data: Partial<T>) => ({
+                    select: () => ({
+                        single: () => wrapSingleResponse(disputeData)
+                    })
+                }),
+                select: () => ({
+                    eq: () => ({
+                        order: () => wrapArrayResponse([disputeData]),
+                        single: () => wrapSingleResponse(disputeData)
+                    })
+                }),
+                update: () => ({
+                    eq: () => wrapSingleResponse(MOCK_DISPUTES.IN_REVIEW)
+                })
+            };
+        } else if (table === 'escrow_dispute_evidences') {
+            return {
+                insert: <T>(data: Partial<T>) => ({
+                    select: () => ({
+                        single: () => wrapSingleResponse(evidenceData)
+                    })
+                }),
+                select: () => ({
+                    eq: () => wrapArrayResponse([evidenceData])
+                })
+            };
+        }
+        
+        // Default fallback
+        return {
+            insert: () => ({ select: () => ({ single: () => wrapSingleResponse({}) }) }),
+            select: () => ({ eq: () => ({ order: () => wrapArrayResponse([]), single: () => wrapSingleResponse({}) }) }),
+            update: () => ({ eq: () => wrapSingleResponse({}) })
+        };
+    }
+});
+
+// Create the mock Supabase client instance
+const mockSupabase = createMockSupabaseClient();
 
 // Mock createClient to return our mock Supabase client
 mock.module('~/lib/supabase/client', () => ({
     createClient: () => mockSupabase
 }));
 
-// Mock the Stellar API
+// Mock the Stellar API with configurable responses
+const createMockStellarResponse = (options: Partial<EscrowRequestResponse> = {}): EscrowRequestResponse => ({
+    status: options.status || 'SUCCESS',
+    unsignedTransaction: options.unsignedTransaction || 'mock-transaction'
+});
+
+// Set up the Stellar API mock
 mock.module('~/lib/stellar/utils/create-escrow', () => ({
-    createEscrowRequest: () => Promise.resolve({
-        unsignedTransaction: 'mock-transaction',
-        status: 'success'
-    })
+    createEscrowRequest: () => Promise.resolve(createMockStellarResponse())
 }));
 
 describe('Escrow Dispute Service', () => {
@@ -145,6 +205,9 @@ describe('Escrow Dispute Service', () => {
         
         expect(spy).toHaveBeenCalledWith('escrow_dispute_evidences');
         expect(evidence.id).toBe('test-id');
+        expect(evidence.evidenceUrl).toBe('https://example.com/evidence');
+        expect(evidence.description).toBe('Screenshot of conversation');
+        expect(evidence.submittedBy).toBe('user123');
     });
     
     it('should start a dispute', async () => {

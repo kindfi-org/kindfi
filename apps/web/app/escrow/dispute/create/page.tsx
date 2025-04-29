@@ -18,7 +18,13 @@ export default function CreateDisputePage() {
     // In a real application, this would come from authentication
     const signer = 'user123';
 
-    const handleSuccess = (data: any) => {
+    interface DisputeResponse {
+        dispute?: {
+            id?: string;
+        };
+    }
+    
+    const handleSuccess = (data: DisputeResponse) => {
         // Navigate to the dispute details page after successful creation
         if (data.dispute?.id) {
             router.push(`/escrow/dispute/${data.dispute.id}`);
@@ -28,7 +34,7 @@ export default function CreateDisputePage() {
         }
     };
 
-    const handleError = (error: Error) => {
+    const handleError = (error: Error | { message: string }) => {
         // In a real application, we would show an error notification
         console.error('Error creating dispute:', error);
     };

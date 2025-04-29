@@ -41,7 +41,8 @@ export const assignMediatorValidator = z.object({
  * Validator for adding evidence to a dispute
  */
 export const addEvidenceValidator = z.object({
-    escrowId: z.string().min(1, 'Escrow ID is required'),
+    disputeId: z.string().min(1, 'Dispute ID is required'),
     evidenceUrl: z.string().url('Invalid URL format'),
-    description: z.string().min(1, 'Evidence description is required')
+    description: z.string().min(1, 'Evidence description is required'),
+    submittedBy: z.string().min(1, 'Submitted by is required')
 })

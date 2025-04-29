@@ -29,16 +29,50 @@ describe('Escrow Dispute System', () => {
             expect(result.success).toBe(true);
         });
         
+        it('should reject an invalid dispute creation payload', () => {
+            const invalidPayload = {
+                // Missing required fields
+                contractId: '0x123abc'
+            };
+            
+            const result = startDisputeValidator.safeParse(invalidPayload);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.issues.length).toBeGreaterThan(0); // Should have validation errors
+                expect(result.error.issues.some(issue => issue.path.includes('signer'))).toBe(true);
+                expect(result.error.issues.some(issue => issue.path.includes('reason'))).toBe(true);
+            }
+        });
+        
         it('should validate a valid dispute resolution payload', () => {
             const validPayload = {
                 contractId: '0x123abc',
                 disputeResolver: 'resolver123',
                 approverFunds: '50',
-                serviceProviderFunds: '50'
+                serviceProviderFunds: '50',
+                resolution: 'Funds split evenly between parties'
             };
             
             const result = resolveDisputeValidator.safeParse(validPayload);
             expect(result.success).toBe(true);
+        });
+        
+        it('should reject an invalid dispute resolution payload', () => {
+            const invalidPayload = {
+                contractId: '0x123abc',
+                // Missing required fields (disputeResolver, resolution) and invalid values
+                approverFunds: 'not-a-number',
+                serviceProviderFunds: '-10'
+            };
+            
+            const result = resolveDisputeValidator.safeParse(invalidPayload);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.issues.length).toBeGreaterThan(0);
+                // Should have errors about missing disputeResolver and resolution
+                expect(result.error.issues.some(issue => issue.path.includes('disputeResolver'))).toBe(true);
+                expect(result.error.issues.some(issue => issue.path.includes('resolution'))).toBe(true);
+            }
         });
         
         it('should validate a valid dispute status update payload', () => {
@@ -49,6 +83,21 @@ describe('Escrow Dispute System', () => {
             
             const result = updateDisputeStatusValidator.safeParse(validPayload);
             expect(result.success).toBe(true);
+        });
+        
+        it('should reject an invalid dispute status update payload', () => {
+            const invalidPayload = {
+                escrowId: '123e4567-e89b-12d3-a456-426614174000',
+                status: 'invalid_status' // Invalid status value
+            };
+            
+            const result = updateDisputeStatusValidator.safeParse(invalidPayload);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.issues.length).toBeGreaterThan(0);
+                // Should have an error about invalid status
+                expect(result.error.issues.some(issue => issue.path.includes('status'))).toBe(true);
+            }
         });
         
         it('should validate a valid evidence addition payload', () => {
@@ -62,6 +111,22 @@ describe('Escrow Dispute System', () => {
             expect(result.success).toBe(true);
         });
         
+        it('should reject an invalid evidence addition payload', () => {
+            const invalidPayload = {
+                escrowId: '123e4567-e89b-12d3-a456-426614174000',
+                evidenceUrl: 'not-a-valid-url', // Invalid URL format
+                description: '' // Empty description
+            };
+            
+            const result = addEvidenceValidator.safeParse(invalidPayload);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.issues.length).toBeGreaterThan(0);
+                // Should have errors about invalid URL and empty description
+                expect(result.error.issues.some(issue => issue.path.includes('evidenceUrl'))).toBe(true);
+            }
+        });
+        
         it('should validate a valid mediator assignment payload', () => {
             const validPayload = {
                 escrowId: '123e4567-e89b-12d3-a456-426614174000',
@@ -70,6 +135,21 @@ describe('Escrow Dispute System', () => {
             
             const result = assignMediatorValidator.safeParse(validPayload);
             expect(result.success).toBe(true);
+        });
+        
+        it('should reject an invalid mediator assignment payload', () => {
+            const invalidPayload = {
+                // Missing escrowId
+                mediatorAddress: ''  // Empty mediator address
+            };
+            
+            const result = assignMediatorValidator.safeParse(invalidPayload);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.issues.length).toBeGreaterThan(0);
+                // Should have errors about missing escrowId and invalid mediatorAddress
+                expect(result.error.issues.some(issue => issue.path.includes('escrowId') || issue.path.includes('mediatorAddress'))).toBe(true);
+            }
         });
     });
     

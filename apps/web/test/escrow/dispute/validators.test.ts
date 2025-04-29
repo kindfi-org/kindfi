@@ -84,6 +84,75 @@ describe('Dispute Validators', () => {
             const result = resolveDisputeValidator.safeParse(invalidInput);
             expect(result.success).toBe(false);
         });
+
+        it('should reject invalid input - empty resolution', () => {
+            const invalidInput = {
+                contractId: '0x123abc',
+                disputeResolver: 'resolver123',
+                approverFunds: '50',
+                serviceProviderFunds: '50',
+                resolution: '' // Empty resolution
+            };
+            
+            const result = resolveDisputeValidator.safeParse(invalidInput);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.errors.some(e => 
+                    e.path.includes('resolution') && e.message.includes('required')
+                )).toBe(true);
+            }
+        });
+
+        it('should reject invalid input - missing approverFunds', () => {
+            const invalidInput = {
+                contractId: '0x123abc',
+                disputeResolver: 'resolver123',
+                serviceProviderFunds: '50',
+                resolution: 'Resolution text'
+            };
+            
+            const result = resolveDisputeValidator.safeParse(invalidInput);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.errors.some(e => 
+                    e.path.includes('approverFunds') && e.message.includes('required')
+                )).toBe(true);
+            }
+        });
+
+        it('should reject invalid input - missing serviceProviderFunds', () => {
+            const invalidInput = {
+                contractId: '0x123abc',
+                disputeResolver: 'resolver123',
+                approverFunds: '50',
+                resolution: 'Resolution text'
+            };
+            
+            const result = resolveDisputeValidator.safeParse(invalidInput);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.errors.some(e => 
+                    e.path.includes('serviceProviderFunds') && e.message.includes('required')
+                )).toBe(true);
+            }
+        });
+
+        it('should reject invalid input - missing disputeResolver', () => {
+            const invalidInput = {
+                contractId: '0x123abc',
+                approverFunds: '50',
+                serviceProviderFunds: '50',
+                resolution: 'Resolution text'
+            };
+            
+            const result = resolveDisputeValidator.safeParse(invalidInput);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.errors.some(e => 
+                    e.path.includes('disputeResolver') && e.message.includes('required')
+                )).toBe(true);
+            }
+        });
     });
     
     describe('updateDisputeStatusValidator', () => {
@@ -129,6 +198,39 @@ describe('Dispute Validators', () => {
             
             const result = addEvidenceValidator.safeParse(invalidInput);
             expect(result.success).toBe(false);
+        });
+
+        it('should reject invalid input - missing description', () => {
+            const invalidInput = {
+                escrowId: '123e4567-e89b-12d3-a456-426614174000',
+                evidenceUrl: 'https://example.com/evidence',
+                // description is missing
+            };
+            
+            const result = addEvidenceValidator.safeParse(invalidInput);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.errors.some(e => 
+                    e.path.includes('description') && e.message.includes('required')
+                )).toBe(true);
+            }
+        });
+
+        it('should reject invalid input - missing submittedBy', () => {
+            const invalidInput = {
+                escrowId: '123e4567-e89b-12d3-a456-426614174000',
+                evidenceUrl: 'https://example.com/evidence',
+                description: 'Screenshot of conversation'
+                // submittedBy is missing
+            };
+            
+            const result = addEvidenceValidator.safeParse(invalidInput);
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.errors.some(e => 
+                    e.path.includes('submittedBy') && e.message.includes('required')
+                )).toBe(true);
+            }
         });
     });
     

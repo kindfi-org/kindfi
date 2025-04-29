@@ -2,13 +2,12 @@ import { describe, expect, it, mock } from 'bun:test';
 import { NextRequest } from 'next/server';
 import type { DisputeStatus } from '~/lib/types/escrow/dispute.types';
 
-// Create a constant object with the dispute status values
 const DISPUTE_STATUS = {
-    PENDING: 'pending' as const,
-    IN_REVIEW: 'in_review' as const,
-    RESOLVED: 'resolved' as const,
-    REJECTED: 'rejected' as const
-};
+    PENDING: 'pending',
+    IN_REVIEW: 'in_review',
+    RESOLVED: 'resolved',
+    REJECTED: 'rejected',
+} as const satisfies Record<string, DisputeStatus>;
 
 // Mock the dispute service
 const createDisputeRecordMock = mock(() => Promise.resolve({ 
@@ -96,6 +95,7 @@ describe('Escrow Dispute API Routes', () => {
             
             const req = new NextRequest('http://localhost:3000/api/escrow/dispute', {
                 method: 'POST',
+                headers: { 'content-type': 'application/json' },
                 body: JSON.stringify({
                     contractId: '0x123abc',
                     signer: 'user123',
@@ -154,6 +154,7 @@ describe('Escrow Dispute API Routes', () => {
             
             const req = new NextRequest('http://localhost:3000/api/escrow/dispute/test-id', {
                 method: 'PATCH',
+                headers: { 'content-type': 'application/json' },
                 body: JSON.stringify({
                     escrowId: 'test-id',
                     status: 'in_review'
@@ -193,6 +194,7 @@ describe('Escrow Dispute API Routes', () => {
             
             const req = new NextRequest('http://localhost:3000/api/escrow/dispute/test-id/resolve', {
                 method: 'POST',
+                headers: { 'content-type': 'application/json' },
                 body: JSON.stringify({
                     contractId: '0x123abc',
                     disputeResolver: 'resolver123',
@@ -217,6 +219,7 @@ describe('Escrow Dispute API Routes', () => {
             
             const req = new NextRequest('http://localhost:3000/api/escrow/dispute/test-id/evidence', {
                 method: 'POST',
+                headers: { 'content-type': 'application/json' },
                 body: JSON.stringify({
                     evidenceUrl: 'https://example.com/evidence',
                     description: 'Screenshot of conversation',
