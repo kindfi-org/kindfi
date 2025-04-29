@@ -30,7 +30,6 @@ impl ReputationContract {
         } else {
             return Err(ReputationError::InvalidAdminAddress);
         }
-    
         if let Address::Contract(contract_id) = &nft_contract_id {
             if contract_id.0 == [0u8; 32] {
                 return Err(ReputationError::InvalidNftContractId);
@@ -38,7 +37,6 @@ impl ReputationContract {
         } else {
             return Err(ReputationError::InvalidNftContractId);
         }
-            
         ReputationStorage::set_admin(&env, &admin);
         ReputationStorage::set_nft_contract_id(&env, &nft_contract_id);
         
@@ -145,7 +143,13 @@ impl ReputationContract {
         // Verify admin access
         let admin = ReputationStorage::get_admin(&env);
         admin.require_auth();
-        
+        if let Address::Account(account_id) = &new_admin {
+            if account_id.0 == [0u8; 32] {
+                return Err(ReputationError::InvalidAdminAddress);
+            }
+        } else {
+            return Err(ReputationError::InvalidAdminAddress);
+        }
         // Update admin
         ReputationStorage::set_admin(&env, &new_admin);
         
@@ -160,7 +164,13 @@ impl ReputationContract {
         // Verify admin access
         let admin = ReputationStorage::get_admin(&env);
         admin.require_auth();
-        
+        if let Address::Contract(contract_id) = &new_contract_id {
+            if contract_id.0 == [0u8; 32] {
+                return Err(ReputationError::InvalidNftContractId);
+            }
+        } else {
+            return Err(ReputationError::InvalidNftContractId);
+        }    
         // Get current contract ID
         let current_contract_id = ReputationStorage::get_nft_contract_id(&env)
             .ok_or(ReputationError::ContractNotInitialized)?;
