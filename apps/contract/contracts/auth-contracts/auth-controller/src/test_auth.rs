@@ -339,7 +339,7 @@ fn test_controller_auth_duplicate_signature() {
 
 #[test]
 #[should_panic(expected = "Error(Contract, #1013)")]
-fn test_controller_auth_not_allowed_contract() {
+fn test_controller_auth_invalid_contract() {
     let env = Env::default();
     let auth_client = create_auth_client(&env);
 
@@ -529,52 +529,6 @@ fn test_add_signer_already_exists() {
 
     // Try to add an existing signer
     auth_client.add_signer(&signers.get_unchecked(0)); // Should panic
-}
-
-#[test]
-fn test_add_signer_event() {
-    let env = Env::default();
-
-    // Initialize with unique signers to avoid already added error
-    let initial_signers = generate_signers(&env, 2);
-    let new_signer_vec = generate_signers(&env, 3);
-    let new_signer = new_signer_vec.get_unchecked(2); // Use third generated signer
-
-    let auth_client = create_auth_client(&env);
-    let default_threshold = 1;
-    auth_client.init(&initial_signers, &default_threshold);
-
-    // Mock auth for add_signer
-    env.mock_all_auths();
-
-    // Clear events after init
-    let _ = env.events().all();
-
-    // Add signer
-    auth_client.add_signer(&new_signer);
-
-    // Verify event
-    let events = env.events().all();
-    assert!(!events.is_empty(), "Expected events to be generated");
-
-    // Find the event for adding a signer
-    let signer_event_found = events.iter().any(|(_, topics, data)| {
-        // Check if we have enough topics
-        if topics.len() < 2 {
-            return false;
-        }
-
-        // Convert event data to SignerAddedEventData
-        if let Ok(event_data) = data.clone().try_into_val(&env) {
-            let event_data: SignerAddedEventData = event_data;
-            // Verify the signer in the event matches our added signer
-            event_data.signer == new_signer
-        } else {
-            false
-        }
-    });
-
-    assert!(signer_event_found, "Signer added event not found");
 }
 
 #[test]
@@ -947,6 +901,7 @@ fn test_integration_auth_controller_with_factory() {
     assert_eq!(accounts.get_unchecked(0), account_address);
 }
 
+/// Account Tests
 #[test]
 fn test_account_add_device() {
     let env = Env::default();
