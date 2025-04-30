@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactQueryClientProvider } from '@packages/lib/src/providers/react-query-client-provider'
+import { ReactQueryClientProvider } from '@packages/lib/providers'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'

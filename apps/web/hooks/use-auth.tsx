@@ -1,6 +1,6 @@
 'use client'
 
-import { createSupabaseBrowserClient } from '@packages/lib/src/supabase/browser-client'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
 import type { Session, User } from '@supabase/supabase-js'
 import { createContext, useContext, useEffect, useState } from 'react'
 

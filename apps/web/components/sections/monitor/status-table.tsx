@@ -1,6 +1,6 @@
 'use client'
 
-import type { Database } from '@services/supabase/src/database.types'
+import type { Database } from '@services/supabase'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useSetState } from 'react-use'

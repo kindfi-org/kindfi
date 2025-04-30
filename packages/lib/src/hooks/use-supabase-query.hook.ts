@@ -5,7 +5,7 @@ import {
 	useQueryClient,
 } from '@tanstack/react-query'
 import { useEffect, useMemo } from 'react'
-import { createSupabaseBrowserClient } from '../supabase/browser-client'
+import { createSupabaseBrowserClient } from '../supabase/client/browser-client'
 import type { TypedSupabaseClient } from '../types/supabase-client.type'
 
 type QueryFn<TData> = (client: TypedSupabaseClient) => Promise<TData>

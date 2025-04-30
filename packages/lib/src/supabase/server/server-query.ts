@@ -1,5 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query'
-import type { TypedSupabaseClient } from '../types/supabase-client.type'
+import type { TypedSupabaseClient } from '../../types/supabase-client.type'
 import { createSupabaseServerClient } from './server-client'
 
 type ServerQueryFn<TData> = (client: TypedSupabaseClient) => Promise<TData>

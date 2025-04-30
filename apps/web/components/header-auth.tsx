@@ -1,5 +1,5 @@
-import { validateEnvVars } from '@packages/lib/src/supabase/check-env-vars'
-import { createSupabaseServerClient } from '@packages/lib/src/supabase/server-client'
+import { validateEnvVars } from '@packages/lib/src/supabase'
+import { createSupabaseServerClient } from '@packages/lib/supabase/server'
 import Link from 'next/link'
 import { signOutAction } from '~/app/actions'
 import { Badge } from './base/badge'

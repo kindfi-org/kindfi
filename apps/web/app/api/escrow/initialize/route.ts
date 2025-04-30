@@ -1,4 +1,4 @@
-import { supabase } from '@packages/lib/src/supabase/service-role-client'
+import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'

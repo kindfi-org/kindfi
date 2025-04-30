@@ -1,6 +1,6 @@
-import type { Database } from '@services/supabase/src/database.types'
+import type { Database } from '@services/supabase'
 import { createBrowserClient } from '@supabase/ssr'
-import type { TypedSupabaseClient } from '../types/supabase-client.type'
+import type { TypedSupabaseClient } from '../../types/supabase-client.type'
 
 let client: TypedSupabaseClient | undefined
 

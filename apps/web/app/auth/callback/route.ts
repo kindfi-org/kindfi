@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@packages/lib/src/supabase/server-client'
+import { createSupabaseServerClient } from '@packages/lib/supabase/server'
 import type { AuthError } from '@supabase/supabase-js'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'

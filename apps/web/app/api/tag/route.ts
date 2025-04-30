@@ -1,4 +1,4 @@
-import { supabase } from '@packages/lib/src/supabase/service-role-client'
+import { supabase } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
 
 function generateColor(name: string): string {
