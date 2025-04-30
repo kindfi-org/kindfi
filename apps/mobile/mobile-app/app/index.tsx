@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -46,6 +47,7 @@ const Filter = ({ filters, selectedFilter, onSelect }: { filters: string[]; sele
       <Text style={[styles.filterText, !selectedFilter && styles.activeFilterText]}>All</Text>
     </TouchableOpacity>
 
+
     {/* Dynamic Filters */}
     {filters.map((filter) => (
       <TouchableOpacity
@@ -64,57 +66,7 @@ const Filter = ({ filters, selectedFilter, onSelect }: { filters: string[]; sele
 
 // Main Component
 export default function Home() {
-  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
 
-  const handleFilterSelect = (filter: string | null) => {
-    setSelectedFilter(filter);
-  };
-
-  const filteredItems = selectedFilter
-    ? allItems.filter((item) => item.category.split(', ').includes(selectedFilter))
-    : allItems;
-
-  const filters = Array.from(new Set(allItems.flatMap((item) => item.category.split(', '))));
-
-  return (
-    <View style={{ flex: 1 }}>
-      <Navbar />
-      <Header />
-      <Filter filters={filters} selectedFilter={selectedFilter} onSelect={handleFilterSelect} />
-      <View style={styles.additionalFiltersContainer}>
-
-    <TouchableOpacity
-      onPress={() => handleFilterSelect(null)}
-      style={styles.selectAllButton}
-    >
-      <Text style={styles.selectAllText}>Select All</Text>
-    </TouchableOpacity>
-
-
-    {/* Dropdown Filter */}
-    <RNPickerSelect
-      onValueChange={(value) => handleFilterSelect(value)}
-      items={[
-        { label: 'All', value: null },
-        ...filters.map((filter) => ({ label: filter, value: filter })),
-      ]}
-      style={{
-        inputIOS: styles.dropdown,
-        inputAndroid: styles.dropdown,
-      }}
-      placeholder={{
-        label: 'Select a filter...',
-        value: null,
-      }}
-    />
-
-  
-  </View>
-      <ScrollView>
-        <ItemList items={filteredItems} />
-      </ScrollView>
-    </View>
-  );
 }
 
 // Styles
