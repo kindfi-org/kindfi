@@ -16,26 +16,17 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
+import type { UpdateFormProps, UpdateFormValues } from '~/lib/types/project/update-tab-section.types'
 
 // Define the form schema with Zod
+// TODO: Update this following the DB schema.
 const updateFormSchema = z.object({
 	title: z.string().min(1, { message: 'Title is required' }),
 	description: z.string().min(1, { message: 'Description is required' }),
 })
 
 // Infer the type from the schema
-type UpdateFormValues = z.infer<typeof updateFormSchema>
-
-interface UpdateFormProps {
-	update?: {
-		id: string
-		title: string
-		description: string
-	}
-	onSubmit: (data: { title: string; description: string }) => void
-	onCancel: () => void
-	isSubmitting: boolean
-}
+// type UpdateFormValues = z.infer<typeof updateFormSchema>
 
 export function UpdateForm({
 	update,

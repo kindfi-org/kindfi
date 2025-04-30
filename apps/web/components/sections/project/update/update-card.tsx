@@ -18,15 +18,8 @@ import { Avatar, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
+import type { UpdateCardProps, UpdateFormValues } from '~/lib/types/project/update-tab-section.types'
 import { UpdateForm } from './update-form'
-
-interface UpdateCardProps {
-	data: any[]
-	updatesUrl: string
-	canManageUpdates?: boolean
-	onEdit?: (id: string, data: { title: string; description: string }) => void
-	onDelete?: (id: string) => void
-}
 
 export function UpdateCard({
 	data,
@@ -43,7 +36,7 @@ export function UpdateCard({
 		setExpandedOptions(expandedOptions === updateId ? null : updateId)
 	}
 
-	const handleEdit = (update) => {
+	const handleEdit = (update: UpdateFormValues) => {
 		setEditingUpdateId(update.id)
 		setExpandedOptions(null)
 	}
