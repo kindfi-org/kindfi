@@ -22,7 +22,9 @@ impl ReputationContract {
         if env.storage().instance().has(&ADMIN_KEY) {
             return Err(ReputationError::AlreadyInitialized);
         }
+        // Validates that the address is an Account address with a non-zero identifier.
         Self::validate_admin_address(&admin)?;
+        // Validates that the address is a Contract address with a non-zero identifier.
         Self::validate_nft_contract_address(&nft_contract_id)?;
         ReputationStorage::set_admin(&env, &admin);
         ReputationStorage::set_nft_contract_id(&env, &nft_contract_id);
@@ -134,6 +136,7 @@ impl ReputationContract {
         // Verify admin access
         let admin = ReputationStorage::get_admin(&env);
         admin.require_auth();
+        // Validates that the address is an Account address with a non-zero identifier.
         Self::validate_admin_address(&new_admin)?;
         // Update admin
         ReputationStorage::set_admin(&env, &new_admin);
@@ -149,6 +152,7 @@ impl ReputationContract {
         // Verify admin access
         let admin = ReputationStorage::get_admin(&env);
         admin.require_auth();
+        // Validates that the address is a Contract address with a non-zero identifier.
         Self::validate_nft_contract_address(&new_contract_id)?;  
         // Get current contract ID
         let current_contract_id = ReputationStorage::get_nft_contract_id(&env)
