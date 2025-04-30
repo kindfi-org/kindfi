@@ -1,2 +1,2 @@
-export * from './database.schemas.ts'
-export * as KindFiDB from './database.types'
+export * from "./database.schemas";
+export * from "./database.types";
