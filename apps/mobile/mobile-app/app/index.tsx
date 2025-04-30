@@ -1,86 +1,237 @@
-/* eslint-disable import/no-unresolved */
-import React from "react";
-import Gradient from "@/assets/Icons/Gradient";
-import DocumentData from "@/assets/Icons/DocumentData";
-import LightBulbPerson from "@/assets/Icons/LightbulbPerson";
-import Rocket from "@/assets/Icons/Rocket";
-import Logo from "@/assets/Icons/Logo";
-import { Box } from "@/components/ui/box";
-import { ScrollView } from "react-native";
-import { Text } from "@/components/ui/text";
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import Kindifi from '../assets/Icons/Kindifi';
+import { allItems } from '../components/StyledText';
+import { ItemList } from '../components/StyledText';
+import RNPickerSelect from 'react-native-picker-select';
 
-import { Link } from "expo-router";
+// Header Component
+const Header = () => (
+  <View style={styles.header}>
+    <Text style={styles.headerText} numberOfLines={2} adjustsFontSizeToFit>
+      Change Lives One Block at a Time
+    </Text>
+  </View>
+);
 
-const FeatureCard = ({ iconSvg: IconSvg, name, desc }: any) => {
-  return (
-    <Box
-      className="p-4 m-2 border rounded flex-column border-w-1 border-outline-700 md:flex-1"
-      key={name}
+
+const Navbar = () => (
+  <View style={styles.header}>
+    {/* Hamburger Menu */}
+ 
+    <TouchableOpacity>
+      <Kindifi width={120} height={33} />
+    </TouchableOpacity>
+
+
+    <TouchableOpacity>
+      <MaterialIcons name="menu" size={24} color="#333" />
+    </TouchableOpacity>
+    {/* Separator */}
+    <View style={styles.separator} />
+  </View>
+)
+// Filter Component
+const Filter = ({ filters, selectedFilter, onSelect }: { filters: string[]; selectedFilter: string | null; onSelect: (filter: string | null) => void }) => (
+  <View style={styles.filterContainer}>
+    {/* "All" Filter */}
+    <TouchableOpacity
+      onPress={() => onSelect(null)}
+      style={[
+        styles.filterButton,
+        !selectedFilter && styles.activeFilter,
+      ]}
     >
-      <Box className="flex flex-row items-center">
-        <Text>
-          <IconSvg />
-        </Text>
-        <Text className="ml-2 text-xl font-medium text-typography-white">
-          {name}
-        </Text>
-      </Box>
-      <Text className="mt-2 text-typography-400">{desc}</Text>
-    </Box>
-  );
-};
+      <Text style={[styles.filterText, !selectedFilter && styles.activeFilterText]}>All</Text>
+    </TouchableOpacity>
 
-export default function Home() {
-  return (
-    <Box className="flex-1 bg-black h-[100vh]">
-      <ScrollView
-        style={{ height: "100%" }}
-        contentContainerStyle={{ flexGrow: 1 }}
+    {/* Dynamic Filters */}
+    {filters.map((filter) => (
+      <TouchableOpacity
+        key={filter}
+        onPress={() => onSelect(filter)}
+        style={[
+          styles.filterButton,
+          selectedFilter === filter && styles.activeFilter, 
+        ]}
       >
-        <Box className="absolute h-[500px] w-[500px] lg:w-[700px] lg:h-[700px]">
-          <Gradient />
-        </Box>
-        <Box className="flex items-center flex-1 mx-5 my-16 lg:my-24 lg:mx-32">
-          <Box className="gap-10 base:flex-col sm:flex-row justify-between sm:w-[80%] md:flex-1">
-            <Box className="items-center px-6 py-2 rounded-full bg-background-template flex-column md:flex-row md:self-start">
-              <Text className="font-normal text-typography-white">
-                Get started by editing
-              </Text>
-              <Text className="ml-2 font-medium text-typography-white">
-                ./App.tsx
-              </Text>
-            </Box>
-            <Link href="/tabs/">
-              <Box className="items-center px-6 py-2 rounded-full bg-background-template flex-column sm:flex-row md:self-start">
-                <Text className="font-normal text-typography-white">
-                  Explore Tab Navigation
-                </Text>
-              </Box>
-            </Link>
-          </Box>
-          <Box className="flex-1 justify-center items-center h-[20px] w-[300px] lg:h-[160px] lg:w-[400px]">
-            <Logo />
-          </Box>
+        <Text style={[styles.filterText, selectedFilter === filter && styles.activeFilterText]}>{filter}</Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+);
 
-          <Box className="flex-column md:flex-row">
-            <FeatureCard
-              iconSvg={DocumentData}
-              name="Docs"
-              desc="Find in-depth information about gluestack features and API."
-            />
-            <FeatureCard
-              iconSvg={LightBulbPerson}
-              name="Learn"
-              desc="Learn about gluestack in an interactive course with quizzes!"
-            />
-            <FeatureCard
-              iconSvg={Rocket}
-              name="Deploy"
-              desc="Instantly drop your gluestack site to a shareable URL with vercel."
-            />
-          </Box>
-        </Box>
+// Main Component
+export default function Home() {
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+
+  const handleFilterSelect = (filter: string | null) => {
+    setSelectedFilter(filter);
+  };
+
+  const filteredItems = selectedFilter
+    ? allItems.filter((item) => item.category.split(', ').includes(selectedFilter))
+    : allItems;
+
+  const filters = Array.from(new Set(allItems.flatMap((item) => item.category.split(', '))));
+
+  return (
+    <View style={{ flex: 1 }}>
+      <Navbar />
+      <Header />
+      <Filter filters={filters} selectedFilter={selectedFilter} onSelect={handleFilterSelect} />
+      <View style={styles.additionalFiltersContainer}>
+
+    <TouchableOpacity
+      onPress={() => handleFilterSelect(null)}
+      style={styles.selectAllButton}
+    >
+      <Text style={styles.selectAllText}>Select All</Text>
+    </TouchableOpacity>
+
+
+    {/* Dropdown Filter */}
+    <RNPickerSelect
+      onValueChange={(value) => handleFilterSelect(value)}
+      items={[
+        { label: 'All', value: null },
+        ...filters.map((filter) => ({ label: filter, value: filter })),
+      ]}
+      style={{
+        inputIOS: styles.dropdown,
+        inputAndroid: styles.dropdown,
+      }}
+      placeholder={{
+        label: 'Select a filter...',
+        value: null,
+      }}
+    />
+
+  
+  </View>
+      <ScrollView>
+        <ItemList items={filteredItems} />
       </ScrollView>
-    </Box>
+    </View>
   );
 }
+
+// Styles
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#f8f9fa',
+  },
+  hamburgerIcon: {
+    width: 24,
+    height: 24,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+  },
+  headerText: {
+    flex: 1,
+    textAlign: 'justify',
+    fontSize: 23,
+    fontWeight: 'bold',
+    color: '#333',
+    marginHorizontal: 10,
+  },
+  separator: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: '#ccc',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8, 
+    marginVertical: 10,
+    justifyContent: 'center',
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6, 
+    borderRadius: 9999, 
+    borderWidth: 1, 
+    borderColor: 'rgba(156, 39, 176, 0.5)', 
+    backgroundColor: '#f3f4f6', 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    
+  },
+  activeFilter: {
+    backgroundColor: 'rgba(156, 39, 176, 0.8)', 
+    borderColor: 'rgba(156, 39, 176, 0.8)', 
+  },
+  filterText: {
+    fontSize: 12, 
+    fontWeight: '600', 
+    color: '#6b7280', 
+  },
+  activeFilterText: {
+    color: '#fff', 
+  },
+  itemList: {
+    padding: 16,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#f1f1f1',
+  },
+  itemImage: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
+  },
+  itemText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  additionalFiltersContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+    paddingHorizontal: 16,
+  },
+  dropdown: {
+    fontSize: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    color: '#333',
+    backgroundColor: '#f9f9f9',
+    flex: 1, // Allow dropdown to take up available space
+    marginRight: 10, // Add spacing between dropdown and button
+  },
+  selectAllButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#6200ea',
+  },
+  selectAllText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+});
