@@ -1,15 +1,4 @@
-/**
- * @description      : feature:update tab section
- * @author           : pheobeayo
- * @group            : ODhack 12 contributor
- * @created          : 25/03/2025 - 10:30:54
- *
- * MODIFICATION LOG
- * - Version         : 1.0.0
- * - Date            : 25/03/2025
- * - Author          : pheobeayo
- * - Modification    : fixed the update tab section in the Project Details
- **/
+import type { Tables } from '@services/supabase'
 
 export interface UpdateItem {
 	id: string
@@ -24,4 +13,26 @@ export interface UpdateItem {
 	description?: string
 	readMoreUrl: string
 	isFeatured?: boolean
+}
+
+// Infer at apps/web/components/sections/project/update/update-form.tsx is fine, but it is not align with the database schema
+// so we will use the database schema instead
+export type UpdateFormValues = Pick<
+	Tables<'project_updates'>,
+	'author_id' | 'content' | 'project_id' | 'id'
+>
+
+export interface UpdateFormProps {
+	onSubmit: (data: UpdateFormValues) => void
+	onCancel: () => void
+	isSubmitting: boolean
+	update?: UpdateFormValues
+}
+
+export interface UpdateCardProps {
+	data: Tables<'project_updates'>[]
+	updatesUrl: string
+	canManageUpdates?: boolean
+	onEdit?: (editProps: UpdateFormValues) => void
+	onDelete?: (id: string) => void
 }
