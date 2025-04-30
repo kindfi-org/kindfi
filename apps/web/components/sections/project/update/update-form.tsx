@@ -14,25 +14,31 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/base/form";
+import { Checkbox } from "~/components/base/checkbox";
 import { Input } from "~/components/base/input";
 import { Textarea } from "~/components/base/textarea";
 
-// Define the form schema with Zod
+// Define the form schema with Zod based on actual DB structure
 const updateFormSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
-  description: z.string().min(1, { message: "Description is required" }),
+  content: z.string().min(1, { message: "Content is required" }),
+  is_featured: z.boolean().optional().default(false),
 });
 
 // Infer the type from the schema
 type UpdateFormValues = z.infer<typeof updateFormSchema>;
 
+// Define the update type based on actual DB structure
+interface UpdateData {
+  id?: string;
+  title: string;
+  content: string;
+  is_featured?: boolean;
+}
+
 interface UpdateFormProps {
-  update?: {
-    id: string;
-    title: string;
-    description: string;
-  };
-  onSubmit: (data: { title: string; description: string }) => void;
+  update?: UpdateData;
+  onSubmit: (data: UpdateData) => void;
   onCancel: () => void;
   isSubmitting: boolean;
 }
@@ -48,20 +54,26 @@ export function UpdateForm({
     resolver: zodResolver(updateFormSchema),
     defaultValues: {
       title: update?.title || "",
-      description: update?.description || "",
+      content: update?.content || "",
+      is_featured: update?.is_featured || false,
     },
   });
 
   // Handle form submission
   const handleSubmit = (values: UpdateFormValues) => {
-    onSubmit(values);
+    // If we're editing, preserve the ID
+    if (update?.id) {
+      onSubmit({ ...values, id: update.id });
+    } else {
+      onSubmit(values);
+    }
   };
 
   return (
     <Card className="mb-6 border-blue-100">
       <CardContent className="p-6">
         <h3 className="text-xl font-bold mb-4">
-          {update ? "Edit Update" : "Create New Update"}
+          {update?.id ? "Edit Update" : "Create New Update"}
         </h3>
         <Form {...form}>
           <form
@@ -93,24 +105,45 @@ export function UpdateForm({
 
             <FormField
               control={form.control}
-              name="description"
+              name="content"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel
-                    htmlFor="update-description"
+                    htmlFor="update-content"
                     className="block text-sm font-medium mb-1"
                   >
-                    Description
+                    Content
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      id="update-description"
+                      id="update-content"
                       placeholder="Enter update details"
                       rows={5}
                       {...field}
                     />
                   </FormControl>
                   <FormMessage className="text-red-500 text-sm mt-1" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="is_featured"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Feature this update</FormLabel>
+                    <p className="text-sm text-gray-500">
+                      Featured updates will be highlighted on the project page
+                    </p>
+                  </div>
                 </FormItem>
               )}
             />
@@ -130,7 +163,7 @@ export function UpdateForm({
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
                   </>
-                ) : update ? (
+                ) : update?.id ? (
                   "Save Changes"
                 ) : (
                   "Post Update"

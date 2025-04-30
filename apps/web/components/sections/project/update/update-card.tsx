@@ -20,11 +20,11 @@ import { Button } from "~/components/base/button";
 import { Card, CardContent } from "~/components/base/card";
 import { UpdateForm } from "./update-form";
 
-// Define the Update type
+// Define the Update type based on actual DB structure
 type Update = {
   id: string;
   title: string;
-  description: string;
+  content: string;
   created_at: string;
   is_featured?: boolean;
   likes?: number;
@@ -39,7 +39,10 @@ interface UpdateCardProps {
   data: Update[];
   updatesUrl: string;
   canManageUpdates?: boolean;
-  onEdit?: (id: string, data: { title: string; description: string }) => void;
+  onEdit?: (
+    id: string,
+    data: { title: string; content: string; is_featured?: boolean }
+  ) => void;
   onDelete?: (id: string) => Promise<void>;
 }
 
@@ -189,8 +192,7 @@ export function UpdateCard({
                     <AvatarImage
                       src={
                         update.user?.avatar_url ||
-                        "/placeholder.svg?height=40&width=40" ||
-                        "/placeholder.svg"
+                        "/placeholder.svg?height=40&width=40"
                       }
                       alt={update.user?.name || "User"}
                     />
@@ -205,8 +207,7 @@ export function UpdateCard({
                   </div>
                 </div>
                 <p className="text-gray-700 leading-relaxed mb-6">
-                  {update.description ||
-                    "No description available for this update."}
+                  {update.content || "No content available for this update."}
                 </p>
                 <Link href={`${updatesUrl}/${update.id}`}>
                   <Button variant="outline" className="w-full">

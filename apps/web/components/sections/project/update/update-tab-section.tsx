@@ -1,5 +1,6 @@
 "use client";
 
+import { createBrowserClient } from "@supabase/ssr";
 import { Loader2, Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -7,13 +8,12 @@ import { Button } from "~/components/base/button";
 import { LoadMoreButton } from "./load-more-button";
 import { UpdateCard } from "./update-card";
 import { UpdateForm } from "./update-form";
-import { createClient } from "~/lib/supabase/client";
 
-// Define types for project updates
+// Define types for project updates based on actual DB structure
 type ProjectUpdate = {
   id: string;
   title: string;
-  description: string;
+  content: string;
   created_at: string;
   project_id: string;
   created_by: string;
@@ -26,9 +26,15 @@ type ProjectUpdate = {
   };
 };
 
+// Create Supabase client
+const createClient = () =>
+  createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
+  );
+
 export function ProjectUpdatesTabSection() {
-  // const { projectId } = useParams<{ projectId: string }>();
-  const projectId = "0e88dd52-7087-4418-b4cd-fc2f1e5fb036";
+  const { projectId } = useParams<{ projectId: string }>();
   const [isCreatingUpdate, setIsCreatingUpdate] = useState(false);
   const [page, setPage] = useState(1);
   const [updates, setUpdates] = useState<ProjectUpdate[]>([]);
@@ -71,7 +77,8 @@ export function ProjectUpdatesTabSection() {
   // Create a new update
   const handleCreateUpdate = async (data: {
     title: string;
-    description: string;
+    content: string;
+    is_featured?: boolean;
   }) => {
     try {
       setIsSubmitting(true);
@@ -100,7 +107,7 @@ export function ProjectUpdatesTabSection() {
   // Update an existing update
   const handleEditUpdate = async (
     id: string,
-    data: { title: string; description: string }
+    data: { title: string; content: string; is_featured?: boolean }
   ) => {
     try {
       setIsSubmitting(true);
