@@ -33,9 +33,6 @@ export interface UpdateCardProps {
 	data: Tables<'project_updates'>[]
 	updatesUrl: string
 	canManageUpdates?: boolean
-	onEdit?: (editProps: {
-		id: string
-		data: UpdateFormValues
-	}) => void
+	onEdit?: (editProps: UpdateFormValues) => void
 	onDelete?: (id: string) => void
 }

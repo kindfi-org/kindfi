@@ -18,7 +18,10 @@ import { Avatar, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-import type { UpdateCardProps, UpdateFormValues } from '~/lib/types/project/update-tab-section.types'
+import type {
+	UpdateCardProps,
+	UpdateFormValues,
+} from '~/lib/types/project/update-tab-section.types'
 import { UpdateForm } from './update-form'
 
 export function UpdateCard({
@@ -75,7 +78,10 @@ export function UpdateCard({
 					update={data.find((update) => update.id === editingUpdateId)}
 					onSubmit={(formData) => {
 						if (onEdit) {
-							onEdit(editingUpdateId, formData)
+							// TODO: pas the update id to the form data. This value can be a hidden field in the form
+							// ? or you can use the formData to get the id
+							// ? formData.id = editingUpdateId
+							onEdit(formData)
 							setEditingUpdateId(null)
 						}
 					}}

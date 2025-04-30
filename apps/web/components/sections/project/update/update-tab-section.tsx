@@ -91,11 +91,8 @@ export function ProjectUpdatesTabSection() {
 		createUpdate(data)
 	}
 
-	const handleEditUpdate = ({
-		id,
-		data,
-	}: { id: string; data: UpdateFormValues }) => {
-		updateUpdate({ id, ...data })
+	const handleEditUpdate = (data: UpdateFormValues) => {
+		updateUpdate(data)
 	}
 
 	const handleDeleteUpdate = (id: string) => {
@@ -189,3 +186,61 @@ export function ProjectUpdatesTabSection() {
 		</section>
 	)
 }
+
+// ? Keeping for future reference when the useSupabaseClient is available (query and mutations in the same file... hook is a TanStack Query wrapper)
+// Use TanStack Query to fetch project updates
+// const {
+// 	data: updates,
+// 	isLoading,
+// 	error,
+// 	refetch,
+// } = useSupabaseQuery(['projectUpdates', projectId, page], (supabase) =>
+// 	supabase
+// 		.from('project_updates')
+// 		.select('*, user:created_by(name, avatar_url)')
+// 		.eq('project_id', projectId)
+// 		.order('created_at', { ascending: false })
+// 		.range((page - 1) * pageSize, page * pageSize - 1),
+// )
+
+// // Check if user is a Kindler (project owner)
+// // This would typically come from a user context or auth hook
+// const isKindler = true // Placeholder - replace with actual auth logic
+
+// // Mutation for creating a new update
+// const createUpdateMutation = useSupabaseMutation(
+// 	(supabase, newUpdate) =>
+// 		supabase.from('project_updates').insert([
+// 			{
+// 				...newUpdate,
+// 				project_id: projectId,
+// 			},
+// 		]),
+// 	{
+// 		onSuccess: () => {
+// 			refetch()
+// 			setIsCreatingUpdate(false)
+// 		},
+// 	},
+// )
+
+// // Mutation for updating an existing update
+// const updateUpdateMutation = useSupabaseMutation(
+// 	(supabase, { id, ...updateData }) =>
+// 		supabase.from('project_updates').update(updateData).eq('id', id),
+// 	{
+// 		onSuccess: () => {
+// 			refetch()
+// 		},
+// 	},
+// )
+
+// // Mutation for deleting an update
+// const deleteUpdateMutation = useSupabaseMutation(
+// 	(supabase, id) => supabase.from('project_updates').delete().eq('id', id),
+// 	{
+// 		onSuccess: () => {
+// 			refetch()
+// 		},
+// 	},
+// )
