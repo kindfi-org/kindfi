@@ -22,7 +22,10 @@ impl ReputationContract {
         if env.storage().instance().has(&ADMIN_KEY) {
             return Err(ReputationError::AlreadyInitialized);
         }
-        
+        // Validates that the address is an Account address with a non-zero identifier.
+        Self::validate_admin_address(&admin)?;
+        // Validates that the address is a Contract address with a non-zero identifier.
+        Self::validate_nft_contract_address(&nft_contract_id)?;
         ReputationStorage::set_admin(&env, &admin);
         ReputationStorage::set_nft_contract_id(&env, &nft_contract_id);
         
@@ -133,7 +136,8 @@ impl ReputationContract {
         // Verify admin access
         let admin = ReputationStorage::get_admin(&env);
         admin.require_auth();
-        
+        // Validates that the address is an Account address with a non-zero identifier.
+        Self::validate_admin_address(&new_admin)?;
         // Update admin
         ReputationStorage::set_admin(&env, &new_admin);
         
@@ -148,7 +152,8 @@ impl ReputationContract {
         // Verify admin access
         let admin = ReputationStorage::get_admin(&env);
         admin.require_auth();
-        
+        // Validates that the address is a Contract address with a non-zero identifier.
+        Self::validate_nft_contract_address(&new_contract_id)?;  
         // Get current contract ID
         let current_contract_id = ReputationStorage::get_nft_contract_id(&env)
             .ok_or(ReputationError::ContractNotInitialized)?;
@@ -183,6 +188,28 @@ impl ReputationContract {
         } else {
             Ok(TierLevel::None)
         }
+    }
+    // Validates that the address is an Account address with a non-zero identifier.
+    fn validate_admin_address(admin: &Address) -> Result<(), ReputationError> {
+        if let Address::Account(account_id) = admin {
+            if account_id.0 == [0u8; 32] {
+                return Err(ReputationError::InvalidAdminAddress);
+            }
+        } else {
+            return Err(ReputationError::InvalidAdminAddress);
+        }
+        Ok(())
+    }
+    // Validates that the address is a Contract address with a non-zero identifier.
+    fn validate_nft_contract_address(nft_contract_id: &Address) -> Result<(), ReputationError> {
+        if let Address::Contract(contract_id) = nft_contract_id {
+            if contract_id.0 == [0u8; 32] {
+                return Err(ReputationError::InvalidNftContractId);
+            }
+        } else {
+            return Err(ReputationError::InvalidNftContractId);
+        }
+        Ok(())
     }
 }
 
