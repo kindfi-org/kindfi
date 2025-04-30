@@ -1,13 +1,13 @@
 'use server'
 
-import type { Database } from '@services/supabase/database.types'
+import { createSupabaseServerClient } from '@packages/lib/supabase/server'
+import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
-import { createClient } from '~/lib/supabase/server'
 import type { AuthResponse } from '~/lib/types/auth'
 
 type Tables = Database['public']['Tables']
@@ -31,7 +31,7 @@ const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
 
 export async function signUpAction(formData: FormData): Promise<AuthResponse> {
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 	const data = {
 		email: formData.get('email') as string,
 		password: formData.get('password') as string,
@@ -56,7 +56,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 }
 
 export async function signInAction(formData: FormData): Promise<void> {
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 	const email = formData.get('email') as string
 	const password = formData.get('password') as string
 
@@ -89,7 +89,7 @@ export async function signInAction(formData: FormData): Promise<void> {
 }
 
 export async function signOutAction(): Promise<void> {
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 
 	try {
 		const { error } = await supabase.auth.signOut()
@@ -110,7 +110,7 @@ export async function signOutAction(): Promise<void> {
 
 export async function forgotPasswordAction(formData: FormData): Promise<void> {
 	const email = formData.get('email')?.toString()
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 	const origin = (await headers()).get('origin')
 
 	if (!email) {
@@ -151,7 +151,7 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
 		redirect('/reset-password?error=Passwords do not match')
 	}
 
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 
 	try {
 		const { error } = await supabase.auth.updateUser({
@@ -175,7 +175,7 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
 
 // Helper function to check auth status
 export async function checkAuthStatus(): Promise<AuthResponse> {
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 
 	try {
 		const {
@@ -208,7 +208,7 @@ export async function updateEscrowStatusAction(
 	id: string,
 	newStatus: EscrowStatusType,
 ): Promise<EscrowResponse> {
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 
 	try {
 		const { data, error } = await supabase
@@ -249,7 +249,7 @@ export async function updateEscrowMilestoneAction(
 	current: number,
 	completed: number,
 ): Promise<EscrowResponse> {
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 
 	try {
 		const { data, error } = await supabase
@@ -297,7 +297,7 @@ export async function updateEscrowFinancialsAction(
 	funded: number,
 	released: number,
 ): Promise<EscrowResponse> {
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 
 	try {
 		const { data, error } = await supabase
@@ -336,7 +336,7 @@ export async function updateEscrowFinancialsAction(
 }
 
 export async function getEscrowRecordsAction(): Promise<EscrowResponse> {
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 
 	try {
 		const { data, error } = await supabase
@@ -365,7 +365,7 @@ export async function getEscrowRecordsAction(): Promise<EscrowResponse> {
 }
 
 export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 
 	try {
 		const { data, error } = await supabase
