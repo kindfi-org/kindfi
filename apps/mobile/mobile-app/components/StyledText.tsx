@@ -100,10 +100,10 @@ export const allItems = [
 ];
 
 
-export const ItemList = ({ items, navigation }: { items: typeof allItems; navigation: any }) => (
+export const ItemList = ({ items}: { items: typeof allItems}) => (
   <View style={styles.itemList}>
     {items.map((item) => (
-      <TouchableOpacity key={item.id} style={styles.card} onPress={() => navigation.navigate('ItemDetails', { item })}>
+      <TouchableOpacity key={item.id} style={styles.card} >
         {/* Image Section */}
         <View style={styles.imageContainer}>
           <Image source={item.image} style={styles.image} />
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   progressBarBackground: {
     width: '100%',
     height: 8, 
-    backgroundColor: '#f3f4f6', // Equivalent to bg-gray-100
+    backgroundColor: '#f3f4f6', 
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -239,11 +239,11 @@ const styles = StyleSheet.create({
     marginTop: 16, 
   },
   tag: {
-    paddingHorizontal: 8, // Equivalent to px-2
-    paddingVertical: 4, // Equivalent to py-1
-    fontSize: 10, // Equivalent to text-xs
-    textTransform: 'uppercase', // Equivalent to uppercase
+    paddingHorizontal: 8, 
+    paddingVertical: 4, 
+    fontSize: 10, 
+    textTransform: 'uppercase', 
     borderRadius: 4,
-    backgroundColor: '#f3f4f6', // Light background
+    backgroundColor: '#f3f4f6', 
   },
 });

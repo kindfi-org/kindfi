@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Kindifi from '../assets/Icons/Kindifi';
 import { allItems } from '../components/StyledText';
 import { ItemList } from '../components/StyledText';
-
+import RNPickerSelect from 'react-native-picker-select';
 
 // Header Component
 const Header = () => (
@@ -81,6 +81,35 @@ export default function Home() {
       <Navbar />
       <Header />
       <Filter filters={filters} selectedFilter={selectedFilter} onSelect={handleFilterSelect} />
+      <View style={styles.additionalFiltersContainer}>
+
+    <TouchableOpacity
+      onPress={() => handleFilterSelect(null)}
+      style={styles.selectAllButton}
+    >
+      <Text style={styles.selectAllText}>Select All</Text>
+    </TouchableOpacity>
+
+
+    {/* Dropdown Filter */}
+    <RNPickerSelect
+      onValueChange={(value) => handleFilterSelect(value)}
+      items={[
+        { label: 'All', value: null },
+        ...filters.map((filter) => ({ label: filter, value: filter })),
+      ]}
+      style={{
+        inputIOS: styles.dropdown,
+        inputAndroid: styles.dropdown,
+      }}
+      placeholder={{
+        label: 'Select a filter...',
+        value: null,
+      }}
+    />
+
+  
+  </View>
       <ScrollView>
         <ItemList items={filteredItems} />
       </ScrollView>
@@ -174,5 +203,35 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 16,
     color: '#333',
+  },
+  additionalFiltersContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+    paddingHorizontal: 16,
+  },
+  dropdown: {
+    fontSize: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    color: '#333',
+    backgroundColor: '#f9f9f9',
+    flex: 1, // Allow dropdown to take up available space
+    marginRight: 10, // Add spacing between dropdown and button
+  },
+  selectAllButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#6200ea',
+  },
+  selectAllText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });

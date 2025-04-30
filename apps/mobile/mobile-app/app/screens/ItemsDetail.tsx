@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
 
 const ItemDetails = ({ route }: { route: any }) => {
-  const { item } = route.params; // Retrieve the passed item data
+  const { item } = route.params;
 
   return (
     <ScrollView style={styles.container}>
