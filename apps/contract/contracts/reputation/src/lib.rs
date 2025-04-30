@@ -189,7 +189,7 @@ impl ReputationContract {
             Ok(TierLevel::None)
         }
     }
-
+    // Validates that the address is an Account address with a non-zero identifier.
     fn validate_admin_address(admin: &Address) -> Result<(), ReputationError> {
         if let Address::Account(account_id) = admin {
             if account_id.0 == [0u8; 32] {
@@ -200,7 +200,7 @@ impl ReputationContract {
         }
         Ok(())
     }
-
+    // Validates that the address is a Contract address with a non-zero identifier.
     fn validate_nft_contract_address(nft_contract_id: &Address) -> Result<(), ReputationError> {
         if let Address::Contract(contract_id) = nft_contract_id {
             if contract_id.0 == [0u8; 32] {
