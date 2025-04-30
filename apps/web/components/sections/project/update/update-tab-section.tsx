@@ -8,7 +8,6 @@ import { Button } from "~/components/base/button";
 import { LoadMoreButton } from "./load-more-button";
 import { UpdateCard } from "./update-card";
 import { UpdateForm } from "./update-form";
-import { createClient } from "~/lib/supabase/client";
 
 // Define types for project updates
 type ProjectUpdate = {
@@ -26,6 +25,13 @@ type ProjectUpdate = {
     avatar_url?: string;
   };
 };
+
+// Create Supabase client
+const createClient = () =>
+  createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
+  );
 
 export function ProjectUpdatesTabSection() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -161,7 +167,7 @@ export function ProjectUpdatesTabSection() {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "*", // Listen to all changes (INSERT, UPDATE, DELETE)
           schema: "public",
           table: "project_updates",
           filter: `project_id=eq.${projectId}`,
