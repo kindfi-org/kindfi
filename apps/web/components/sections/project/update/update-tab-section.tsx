@@ -8,6 +8,7 @@ import { Button } from "~/components/base/button";
 import { LoadMoreButton } from "./load-more-button";
 import { UpdateCard } from "./update-card";
 import { UpdateForm } from "./update-form";
+import { createClient } from "~/lib/supabase/client";
 
 // Define types for project updates based on actual DB structure
 type ProjectUpdate = {
@@ -25,13 +26,6 @@ type ProjectUpdate = {
     avatar_url?: string;
   };
 };
-
-// Create Supabase client
-const createClient = () =>
-  createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
-  );
 
 export function ProjectUpdatesTabSection() {
   const { projectId } = useParams<{ projectId: string }>();
