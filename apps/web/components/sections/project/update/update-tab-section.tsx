@@ -1,6 +1,5 @@
 "use client";
 
-import { createBrowserClient } from "@supabase/ssr";
 import { Loader2, Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -28,7 +27,8 @@ type ProjectUpdate = {
 };
 
 export function ProjectUpdatesTabSection() {
-  const { projectId } = useParams<{ projectId: string }>();
+  // const { projectId } = useParams<{ projectId: string }>();
+  const projectId = "0e88dd52-7087-4418-b4cd-fc2f1e5fb036";
   const [isCreatingUpdate, setIsCreatingUpdate] = useState(false);
   const [page, setPage] = useState(1);
   const [updates, setUpdates] = useState<ProjectUpdate[]>([]);
