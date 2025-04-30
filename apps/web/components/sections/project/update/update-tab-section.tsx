@@ -1,14 +1,12 @@
 "use client";
 
-import { createBrowserClient } from "@supabase/ssr";
 import { Loader2, Plus } from "lucide-react";
-import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/base/button";
-import { createClient } from "~/lib/supabase/client";
 import { LoadMoreButton } from "./load-more-button";
 import { UpdateCard } from "./update-card";
 import { UpdateForm } from "./update-form";
+import { createClient } from "~/lib/supabase/client";
 
 // Define types for project updates based on actual DB structure
 type ProjectUpdate = {
@@ -18,14 +16,11 @@ type ProjectUpdate = {
   content: string;
   created_at: string;
   updated_at: string;
-  user?: {
-    name?: string;
-    avatar_url?: string;
-  };
 };
 
 export function ProjectUpdatesTabSection() {
-  const projectId = "0e88dd52-70a7-4418-b4cd-fc2f1e5fb036";
+  const projectId = "58b28e49-ec44-482a-8ac5-aa75b264b6c8";
+
   const [isCreatingUpdate, setIsCreatingUpdate] = useState(false);
   const [page, setPage] = useState(1);
   const [updates, setUpdates] = useState<ProjectUpdate[]>([]);
@@ -44,13 +39,10 @@ export function ProjectUpdatesTabSection() {
       setIsLoading(true);
       const supabase = createClient();
 
-      console.log(
-        `Fetching updates for project: ${projectId}, page: ${page}, pageSize: ${pageSize}`
-      );
-
+      // Modified query to only select project_updates data without joins
       const { data, error } = await supabase
         .from("project_updates")
-        .select("*, user:author_id(name, avatar_url)")
+        .select("*")
         .eq("project_id", projectId)
         .order("created_at", { ascending: false })
         .range((page - 1) * pageSize, page * pageSize - 1);
@@ -59,8 +51,6 @@ export function ProjectUpdatesTabSection() {
         console.error("Error fetching updates:", error);
         throw error;
       }
-
-      console.log("Fetched updates:", data);
 
       setUpdates((prevUpdates) =>
         page === 1 ? data : [...prevUpdates, ...data]
@@ -81,23 +71,24 @@ export function ProjectUpdatesTabSection() {
       setIsSubmitting(true);
       const supabase = createClient();
 
-      console.log("Creating update:", { ...data, project_id: projectId });
+      // Generate a valid UUID for author_id
+      const authorId = crypto.randomUUID();
 
-      const { error } = await supabase.from("project_updates").insert([
-        {
-          ...data,
-          project_id: projectId,
-          // In a real app, you would get the author_id from the authenticated user
-          author_id: "current-user-id", // This should be replaced with the actual user ID
-        },
-      ]);
+      const updateData = {
+        content: data.content,
+        project_id: projectId,
+        author_id: authorId,
+      };
+
+      const { data: insertedData, error } = await supabase
+        .from("project_updates")
+        .insert([updateData])
+        .select();
 
       if (error) {
         console.error("Error creating update:", error);
-        throw error;
+        throw new Error(`Insert error: ${error.message}`);
       }
-
-      console.log("Update created successfully");
 
       // Refetch updates after creating a new one
       setPage(1);
@@ -105,7 +96,9 @@ export function ProjectUpdatesTabSection() {
       setIsCreatingUpdate(false);
     } catch (err) {
       console.error("Error creating update:", err);
-      alert("Failed to create update. Please try again.");
+      alert(
+        `Failed to create update: ${err instanceof Error ? err.message : "Unknown error"}`
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -117,8 +110,6 @@ export function ProjectUpdatesTabSection() {
       setIsSubmitting(true);
       const supabase = createClient();
 
-      console.log("Updating update:", { id, ...data });
-
       const { error } = await supabase
         .from("project_updates")
         .update(data)
@@ -128,8 +119,6 @@ export function ProjectUpdatesTabSection() {
         console.error("Error updating update:", error);
         throw error;
       }
-
-      console.log("Update edited successfully");
 
       // Refetch updates after editing
       await fetchUpdates();
@@ -146,8 +135,6 @@ export function ProjectUpdatesTabSection() {
     try {
       const supabase = createClient();
 
-      console.log("Deleting update:", id);
-
       const { error } = await supabase
         .from("project_updates")
         .delete()
@@ -157,8 +144,6 @@ export function ProjectUpdatesTabSection() {
         console.error("Error deleting update:", error);
         throw error;
       }
-
-      console.log("Update deleted successfully");
 
       // Refetch updates after deleting
       await fetchUpdates();
@@ -177,11 +162,15 @@ export function ProjectUpdatesTabSection() {
 
   // Fetch updates when component mounts or page changes
   useEffect(() => {
-    fetchUpdates();
-  }, [page, projectId]);
+    if (!isCreatingUpdate) {
+      fetchUpdates();
+    }
+  }, [page, projectId, isCreatingUpdate]);
 
   // Setup real-time subscription
   useEffect(() => {
+    if (isCreatingUpdate) return;
+
     const supabase = createClient();
 
     // Subscribe to changes in the project_updates table for this project
@@ -190,13 +179,12 @@ export function ProjectUpdatesTabSection() {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "*", // Listen to all changes (INSERT, UPDATE, DELETE)
           schema: "public",
           table: "project_updates",
           filter: `project_id=eq.${projectId}`,
         },
-        (payload) => {
-          console.log("Real-time update received:", payload);
+        () => {
           // Refetch data when any change occurs
           fetchUpdates();
         }
@@ -206,62 +194,64 @@ export function ProjectUpdatesTabSection() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [projectId]);
+  }, [projectId, isCreatingUpdate]);
 
   return (
     <section
       className="w-full max-w-5xl mx-auto py-10 px-4"
       aria-labelledby="updates-tab-section-title"
     >
-      <div className="flex justify-between items-center mb-6">
-        <h1 id="updates-tab-section-title" className="text-2xl font-bold">
-          Project Updates
-        </h1>
-        {isKindler && (
-          <Button
-            onClick={() => setIsCreatingUpdate(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus size={16} />
-            Add Update
-          </Button>
-        )}
-      </div>
-
-      {isCreatingUpdate && (
+      {isCreatingUpdate ? (
         <UpdateForm
           onSubmit={handleCreateUpdate}
           onCancel={() => setIsCreatingUpdate(false)}
           isSubmitting={isSubmitting}
         />
-      )}
-
-      {isLoading && page === 1 ? (
-        <div className="flex justify-center py-10">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-        </div>
-      ) : error ? (
-        <div className="text-center py-10 text-red-500">
-          Failed to load updates. Please try again.
-          <Button onClick={fetchUpdates} variant="outline" className="mt-4">
-            Retry
-          </Button>
-        </div>
-      ) : updates.length === 0 ? (
-        <div className="text-center py-10 text-gray-500">
-          No updates available yet.
-        </div>
       ) : (
         <>
-          <UpdateCard
-            data={updates}
-            updatesUrl={`/projects/${projectId}/updates`}
-            canManageUpdates={isKindler}
-            onEdit={handleEditUpdate}
-            onDelete={handleDeleteUpdate}
-          />
-          {updates.length >= pageSize && (
-            <LoadMoreButton onLoadMore={handleLoadMore} />
+          <div className="flex justify-between items-center mb-6">
+            <h1 id="updates-tab-section-title" className="text-3xl font-bold">
+              Project Updates
+            </h1>
+            {isKindler && (
+              <Button
+                onClick={() => setIsCreatingUpdate(true)}
+                className="flex items-center gap-2"
+              >
+                <Plus size={16} />
+                Add Update
+              </Button>
+            )}
+          </div>
+
+          {isLoading && page === 1 ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-10 text-red-500">
+              <p className="mb-2">Failed to load updates: {error.message}</p>
+              <Button onClick={fetchUpdates} variant="outline" className="mt-4">
+                Retry
+              </Button>
+            </div>
+          ) : updates.length === 0 ? (
+            <div className="text-center py-10 text-gray-500">
+              No updates available yet.
+            </div>
+          ) : (
+            <>
+              <UpdateCard
+                data={updates}
+                updatesUrl={`/projects/${projectId}/updates`}
+                canManageUpdates={isKindler}
+                onEdit={handleEditUpdate}
+                onDelete={handleDeleteUpdate}
+              />
+              {updates.length >= pageSize && (
+                <LoadMoreButton onLoadMore={handleLoadMore} />
+              )}
+            </>
           )}
         </>
       )}
