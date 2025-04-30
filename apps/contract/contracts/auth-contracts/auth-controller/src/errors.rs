@@ -17,5 +17,5 @@ pub enum Error {
     AccountDoesNotExist = 1010,
     FactoryExists = 1011,
     FactoryDoesNotExist = 1012,
-    NotAllowedContract = 1013
+    NotAllowedContract = 1013,
 }

@@ -16,13 +16,13 @@ pub const SIGNER: Symbol = symbol_short!("SIGNER");
 pub const SECURITY: Symbol = symbol_short!("SECURITY");
 
 // Symbol representing an add event.
-pub const ADDED: Symbol = symbol_short!("Added");
+pub const ADDED: Symbol = symbol_short!("ADDED");
 
 // Symbol representing a removal event.
-pub const REMOVED: Symbol = symbol_short!("Removed");
+pub const REMOVED: Symbol = symbol_short!("REMOVED");
 
 // Symbol representing a changed event.
-pub const UPDATE: Symbol = symbol_short!("Update");
+pub const UPDATED: Symbol = symbol_short!("UPDATED");
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
