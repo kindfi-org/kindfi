@@ -4,6 +4,10 @@ mod errors;
 mod events;
 mod storage;
 mod types;
+mod nft_core;
+mod interface;
+mod metadata;
+
 
 use soroban_sdk::{
     contract, contractimpl, Address, Env, String, Vec,

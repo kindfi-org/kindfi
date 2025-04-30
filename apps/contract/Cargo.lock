@@ -888,9 +888,11 @@ dependencies = [
 
 [[package]]
 name = "nft"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "soroban-sdk",
+ "stellar-default-impl-macro",
+ "stellar-non-fungible",
 ]
 
 [[package]]
@@ -1536,6 +1538,33 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "stellar-constants"
+version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/stellar-contracts?branch=main#4f18e0cd0e1d49b2f27e30e8fa5206e95ea4c178"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
+name = "stellar-default-impl-macro"
+version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/stellar-contracts?branch=main#4f18e0cd0e1d49b2f27e30e8fa5206e95ea4c178"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.98",
+]
+
+[[package]]
+name = "stellar-non-fungible"
+version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/stellar-contracts?branch=main#4f18e0cd0e1d49b2f27e30e8fa5206e95ea4c178"
+dependencies = [
+ "soroban-sdk",
+ "stellar-constants",
+]
 
 [[package]]
 name = "stellar-strkey"
