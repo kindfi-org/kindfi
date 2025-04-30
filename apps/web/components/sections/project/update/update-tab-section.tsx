@@ -5,10 +5,10 @@ import { Loader2, Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/base/button";
+import { createClient } from "~/lib/supabase/client";
 import { LoadMoreButton } from "./load-more-button";
 import { UpdateCard } from "./update-card";
 import { UpdateForm } from "./update-form";
-import { createClient } from "~/lib/supabase/client";
 
 // Define types for project updates based on actual DB structure
 type ProjectUpdate = {
@@ -190,7 +190,7 @@ export function ProjectUpdatesTabSection() {
       .on(
         "postgres_changes",
         {
-          event: "*", // Listen to all changes (INSERT, UPDATE, DELETE)
+          event: "*",
           schema: "public",
           table: "project_updates",
           filter: `project_id=eq.${projectId}`,
