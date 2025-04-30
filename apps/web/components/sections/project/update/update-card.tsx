@@ -133,18 +133,18 @@ export function UpdateCard({
                       <Button
                         size="icon"
                         className="flex items-center gap-1 text-gray-600"
-                        aria-label={`Like this update (${update.likes ?? 0} likes)`}
+                        aria-label={`Like this update (${update.likes} likes)`}
                       >
                         <Heart className="h-5 w-5" />
-                        <span>{update.likes ?? 0}</span>
+                        <span>{update.likes}</span>
                       </Button>
                       <Button
                         size="icon"
                         className="flex items-center gap-1 text-gray-600"
-                        aria-label={`View comments (${update.comments ?? 0} comments)`}
+                        aria-label={`View comments (${update.comments} comments)`}
                       >
                         <MessageSquare className="h-5 w-5" />
-                        <span>{update.comments ?? 0}</span>
+                        <span>{update.comments}</span>
                       </Button>
                     </div>
                   </div>
