@@ -1,6 +1,6 @@
-import { createClient } from '~/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@packages/lib/src/supabase/browser-client'
 
-const supabase = createClient()
+const supabase = createSupabaseBrowserClient()
 
 export async function uploadToBucket(file: File, bucket: string) {
 	if (!bucket) {

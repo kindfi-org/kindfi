@@ -1,3 +1,4 @@
+import { createSupabaseServerClient } from '@packages/lib/src/supabase/server-client'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -5,7 +6,6 @@ import type { NextRequest } from 'next/server'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { Logger } from '~/lib/logger'
-import { createClient } from '~/lib/supabase/server'
 
 const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
 	}
 
 	try {
-		const supabase = await createClient()
+		const supabase = await createSupabaseServerClient()
 		const { error } = await supabase.auth.verifyOtp({
 			type,
 			token_hash: tokenHash,

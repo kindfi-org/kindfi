@@ -1,6 +1,6 @@
+import { supabase } from '@packages/lib/src/supabase/service-role-client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
-import { supabase } from '~/lib/supabase/config'
 import type { EscrowFundUpdateData } from '~/lib/types/escrow/escrow-payload.types'
 import { validateEscrowFundUpdate } from '~/lib/validators/escrow'
 

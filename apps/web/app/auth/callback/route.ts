@@ -1,10 +1,10 @@
+import { createSupabaseServerClient } from '@packages/lib/src/supabase/server-client'
 import type { AuthError } from '@supabase/supabase-js'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { isValidRedirectUrl } from '~/lib/config/validate-url'
 import { Logger } from '~/lib/logger'
-import { createClient } from '~/lib/supabase/server'
 
 const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 	// Exchange the code for a Supabase session if provided
 	if (code) {
 		try {
-			const supabase = await createClient()
+			const supabase = await createSupabaseServerClient()
 			await supabase.auth.exchangeCodeForSession(code)
 
 			logger.info({
