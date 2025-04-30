@@ -16,7 +16,10 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
-import type { UpdateFormProps, UpdateFormValues } from '~/lib/types/project/update-tab-section.types'
+import type {
+	UpdateFormProps,
+	UpdateFormValues,
+} from '~/lib/types/project/update-tab-section.types'
 
 // Define the form schema with Zod
 // TODO: Update this following the DB schema.
