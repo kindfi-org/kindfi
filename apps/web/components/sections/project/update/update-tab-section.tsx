@@ -13,14 +13,11 @@ import { createClient } from "~/lib/supabase/client";
 // Define types for project updates based on actual DB structure
 type ProjectUpdate = {
   id: string;
-  title: string;
+  project_id: string;
+  author_id: string;
   content: string;
   created_at: string;
-  project_id: string;
-  created_by: string;
-  is_featured?: boolean;
-  likes?: number;
-  comments?: number;
+  updated_at: string;
   user?: {
     name?: string;
     avatar_url?: string;
@@ -28,7 +25,7 @@ type ProjectUpdate = {
 };
 
 export function ProjectUpdatesTabSection() {
-  const { projectId } = useParams<{ projectId: string }>();
+  const projectId = "0e88dd52-70a7-4418-b4cd-fc2f1e5fb036";
   const [isCreatingUpdate, setIsCreatingUpdate] = useState(false);
   const [page, setPage] = useState(1);
   const [updates, setUpdates] = useState<ProjectUpdate[]>([]);
@@ -47,19 +44,29 @@ export function ProjectUpdatesTabSection() {
       setIsLoading(true);
       const supabase = createClient();
 
+      console.log(
+        `Fetching updates for project: ${projectId}, page: ${page}, pageSize: ${pageSize}`
+      );
+
       const { data, error } = await supabase
         .from("project_updates")
-        .select("*, user:created_by(name, avatar_url)")
+        .select("*, user:author_id(name, avatar_url)")
         .eq("project_id", projectId)
         .order("created_at", { ascending: false })
         .range((page - 1) * pageSize, page * pageSize - 1);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching updates:", error);
+        throw error;
+      }
+
+      console.log("Fetched updates:", data);
 
       setUpdates((prevUpdates) =>
         page === 1 ? data : [...prevUpdates, ...data]
       );
     } catch (err) {
+      console.error("Failed to fetch updates:", err);
       setError(
         err instanceof Error ? err : new Error("Failed to fetch updates")
       );
@@ -69,23 +76,28 @@ export function ProjectUpdatesTabSection() {
   };
 
   // Create a new update
-  const handleCreateUpdate = async (data: {
-    title: string;
-    content: string;
-    is_featured?: boolean;
-  }) => {
+  const handleCreateUpdate = async (data: { content: string }) => {
     try {
       setIsSubmitting(true);
       const supabase = createClient();
+
+      console.log("Creating update:", { ...data, project_id: projectId });
 
       const { error } = await supabase.from("project_updates").insert([
         {
           ...data,
           project_id: projectId,
+          // In a real app, you would get the author_id from the authenticated user
+          author_id: "current-user-id", // This should be replaced with the actual user ID
         },
       ]);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating update:", error);
+        throw error;
+      }
+
+      console.log("Update created successfully");
 
       // Refetch updates after creating a new one
       setPage(1);
@@ -93,52 +105,68 @@ export function ProjectUpdatesTabSection() {
       setIsCreatingUpdate(false);
     } catch (err) {
       console.error("Error creating update:", err);
+      alert("Failed to create update. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Update an existing update
-  const handleEditUpdate = async (
-    id: string,
-    data: { title: string; content: string; is_featured?: boolean }
-  ) => {
+  const handleEditUpdate = async (id: string, data: { content: string }) => {
     try {
       setIsSubmitting(true);
       const supabase = createClient();
+
+      console.log("Updating update:", { id, ...data });
 
       const { error } = await supabase
         .from("project_updates")
         .update(data)
         .eq("id", id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating update:", error);
+        throw error;
+      }
+
+      console.log("Update edited successfully");
 
       // Refetch updates after editing
       await fetchUpdates();
     } catch (err) {
       console.error("Error updating update:", err);
+      alert("Failed to update. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Delete an update
-  const handleDeleteUpdate = async (id: string) => {
+  const handleDeleteUpdate = async (id: string): Promise<void> => {
     try {
       const supabase = createClient();
+
+      console.log("Deleting update:", id);
 
       const { error } = await supabase
         .from("project_updates")
         .delete()
         .eq("id", id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting update:", error);
+        throw error;
+      }
+
+      console.log("Update deleted successfully");
 
       // Refetch updates after deleting
       await fetchUpdates();
+      return Promise.resolve();
     } catch (err) {
       console.error("Error deleting update:", err);
+      alert("Failed to delete update. Please try again.");
+      return Promise.reject(err);
     }
   };
 
@@ -167,7 +195,8 @@ export function ProjectUpdatesTabSection() {
           table: "project_updates",
           filter: `project_id=eq.${projectId}`,
         },
-        () => {
+        (payload) => {
+          console.log("Real-time update received:", payload);
           // Refetch data when any change occurs
           fetchUpdates();
         }
@@ -185,7 +214,7 @@ export function ProjectUpdatesTabSection() {
       aria-labelledby="updates-tab-section-title"
     >
       <div className="flex justify-between items-center mb-6">
-        <h1 id="updates-tab-section-title" className="text-3xl font-bold">
+        <h1 id="updates-tab-section-title" className="text-2xl font-bold">
           Project Updates
         </h1>
         {isKindler && (
@@ -214,6 +243,9 @@ export function ProjectUpdatesTabSection() {
       ) : error ? (
         <div className="text-center py-10 text-red-500">
           Failed to load updates. Please try again.
+          <Button onClick={fetchUpdates} variant="outline" className="mt-4">
+            Retry
+          </Button>
         </div>
       ) : updates.length === 0 ? (
         <div className="text-center py-10 text-gray-500">

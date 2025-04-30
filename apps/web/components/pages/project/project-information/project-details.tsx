@@ -272,7 +272,6 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
                     value="updates"
                     className="bg-white rounded-lg p-6 border border-gray-100"
                   >
-                    <h2 className="text-2xl font-bold mb-4">Project Updates</h2>
                     <ProjectUpdatesTabSection />
                   </TabsContent>
 

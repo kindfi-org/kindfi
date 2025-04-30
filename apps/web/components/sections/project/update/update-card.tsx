@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { ChevronDown, Edit, Heart, MessageSquare, Trash2 } from "lucide-react";
+import { ChevronDown, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -15,7 +15,6 @@ import {
   AlertDialogTitle,
 } from "~/components/base/alert-dialog";
 import { Avatar, AvatarImage } from "~/components/base/avatar";
-import { Badge } from "~/components/base/badge";
 import { Button } from "~/components/base/button";
 import { Card, CardContent } from "~/components/base/card";
 import { UpdateForm } from "./update-form";
@@ -23,12 +22,10 @@ import { UpdateForm } from "./update-form";
 // Define the Update type based on actual DB structure
 type Update = {
   id: string;
-  title: string;
   content: string;
   created_at: string;
-  is_featured?: boolean;
-  likes?: number;
-  comments?: number;
+  updated_at: string;
+  author_id: string;
   user?: {
     name?: string;
     avatar_url?: string;
@@ -39,10 +36,7 @@ interface UpdateCardProps {
   data: Update[];
   updatesUrl: string;
   canManageUpdates?: boolean;
-  onEdit?: (
-    id: string,
-    data: { title: string; content: string; is_featured?: boolean }
-  ) => void;
+  onEdit?: (id: string, data: { content: string }) => void;
   onDelete?: (id: string) => Promise<void>;
 }
 
@@ -94,6 +88,13 @@ export function UpdateCard({
     }
   };
 
+  // Function to extract the first few words as a "title"
+  const extractTitle = (content: string): string => {
+    const words = content.split(" ");
+    const firstFewWords = words.slice(0, 5).join(" ");
+    return firstFewWords + (words.length > 5 ? "..." : "");
+  };
+
   return (
     <div className="space-y-6 mt-10">
       <div className="flex justify-between items-center">
@@ -123,32 +124,23 @@ export function UpdateCard({
             <Card key={update.id} className="overflow-hidden border-gray-200">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 relative">
-                  <div className="flex items-center gap-4">
-                    {update.is_featured && (
-                      <Badge
-                        variant="secondary"
-                        className="bg-blue-100 text-blue-700 font-bold hover:bg-blue-200"
-                      >
-                        Featured
-                      </Badge>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="icon"
-                        className="flex items-center gap-1 text-gray-600"
-                        aria-label={`Like this update (${update.likes ?? 0} likes)`}
-                      >
-                        <Heart className="h-5 w-5" />
-                        <span>{update.likes ?? 0}</span>
-                      </Button>
-                      <Button
-                        size="icon"
-                        className="flex items-center gap-1 text-gray-600"
-                        aria-label={`View comments (${update.comments ?? 0} comments)`}
-                      >
-                        <MessageSquare className="h-5 w-5" />
-                        <span>{update.comments ?? 0}</span>
-                      </Button>
+                  <div className="flex items-center gap-3 my-4">
+                    <Avatar>
+                      <AvatarImage
+                        src={
+                          update.user?.avatar_url ||
+                          "/placeholder.svg?height=40&width=40"
+                        }
+                        alt={update.user?.name || "User"}
+                      />
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">
+                        {update.user?.name || "Anonymous"}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {formatDate(update.created_at)}
+                      </p>
                     </div>
                   </div>
                   {canManageUpdates && (
@@ -185,29 +177,14 @@ export function UpdateCard({
                   </div>
                 )}
 
-                <h3 className="text-2xl font-bold mb-4">{update.title}</h3>
+                <h3 className="text-xl font-bold mb-4">
+                  {extractTitle(update.content)}
+                </h3>
 
-                <div className="flex items-center gap-3 my-4">
-                  <Avatar>
-                    <AvatarImage
-                      src={
-                        update.user?.avatar_url ||
-                        "/placeholder.svg?height=40&width=40"
-                      }
-                      alt={update.user?.name || "User"}
-                    />
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">
-                      {update.user?.name || "Anonymous"}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {formatDate(update.created_at)}
-                    </p>
-                  </div>
-                </div>
                 <p className="text-gray-700 leading-relaxed mb-6">
-                  {update.content || "No content available for this update."}
+                  {update.content.length > 150
+                    ? `${update.content.substring(0, 150)}...`
+                    : update.content}
                 </p>
                 <Link href={`${updatesUrl}/${update.id}`}>
                   <Button variant="outline" className="w-full">

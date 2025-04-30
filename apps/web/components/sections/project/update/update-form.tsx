@@ -14,15 +14,11 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/base/form";
-import { Checkbox } from "~/components/base/checkbox";
-import { Input } from "~/components/base/input";
 import { Textarea } from "~/components/base/textarea";
 
 // Define the form schema with Zod based on actual DB structure
 const updateFormSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
   content: z.string().min(1, { message: "Content is required" }),
-  is_featured: z.boolean().optional().default(false),
 });
 
 // Infer the type from the schema
@@ -31,9 +27,7 @@ type UpdateFormValues = z.infer<typeof updateFormSchema>;
 // Define the update type based on actual DB structure
 interface UpdateData {
   id?: string;
-  title: string;
   content: string;
-  is_featured?: boolean;
 }
 
 interface UpdateFormProps {
@@ -53,9 +47,7 @@ export function UpdateForm({
   const form = useForm<UpdateFormValues>({
     resolver: zodResolver(updateFormSchema),
     defaultValues: {
-      title: update?.title || "",
       content: update?.content || "",
-      is_featured: update?.is_featured || false,
     },
   });
 
@@ -82,29 +74,6 @@ export function UpdateForm({
           >
             <FormField
               control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel
-                    htmlFor="update-title"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Title
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      id="update-title"
-                      placeholder="Enter update title"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-500 text-sm mt-1" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="content"
               render={({ field }) => (
                 <FormItem>
@@ -117,33 +86,12 @@ export function UpdateForm({
                   <FormControl>
                     <Textarea
                       id="update-content"
-                      placeholder="Enter update details"
-                      rows={5}
+                      placeholder="Share an update about your project..."
+                      rows={8}
                       {...field}
                     />
                   </FormControl>
                   <FormMessage className="text-red-500 text-sm mt-1" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="is_featured"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Feature this update</FormLabel>
-                    <p className="text-sm text-gray-500">
-                      Featured updates will be highlighted on the project page
-                    </p>
-                  </div>
                 </FormItem>
               )}
             />
