@@ -1,12 +1,12 @@
+import { validateEnvVars } from '@packages/lib/src/supabase'
+import { createSupabaseServerClient } from '@packages/lib/supabase/server'
 import Link from 'next/link'
 import { signOutAction } from '~/app/actions'
-import { validateEnvVars } from '~/lib/supabase/check-env-vars'
-import { createClient } from '~/lib/supabase/server'
 import { Badge } from './base/badge'
 import { Button } from './base/button'
 
 export async function AuthButton() {
-	const supabase = await createClient()
+	const supabase = await createSupabaseServerClient()
 
 	const {
 		data: { user },
