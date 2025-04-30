@@ -21,8 +21,27 @@ pub struct NFTDetail {
 #[contracttype]
 #[derive(Clone)]
 pub enum DataKey {
+    Admin,
     TokenOwner(u32),
     TokenMetadata(u32),
     TokenUri(u32),
     UserBalance(Address),
+    LastUpdated(u32),
+    Tier(u32),
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum TierLevel {
+    Wood,
+    Steel,
+    Bronze,
+    Silver,
+    Gold,
+    Diamond
+}
+
+#[contracttype]
+pub struct TokenMetadata {
+    pub uri: String,
 }
