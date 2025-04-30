@@ -1,6 +1,6 @@
 "use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { Loader2, Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -8,89 +8,152 @@ import { Button } from "~/components/base/button";
 import { LoadMoreButton } from "./load-more-button";
 import { UpdateCard } from "./update-card";
 import { UpdateForm } from "./update-form";
+import { createClient } from "~/lib/supabase/client";
+
+// Define types for project updates
+type ProjectUpdate = {
+  id: string;
+  title: string;
+  description: string;
+  created_at: string;
+  project_id: string;
+  created_by: string;
+  is_featured?: boolean;
+  likes?: number;
+  comments?: number;
+  user?: {
+    name?: string;
+    avatar_url?: string;
+  };
+};
 
 export function ProjectUpdatesTabSection() {
-  const { projectId } = useParams();
+  const { projectId } = useParams<{ projectId: string }>();
   const [isCreatingUpdate, setIsCreatingUpdate] = useState(false);
   const [page, setPage] = useState(1);
+  const [updates, setUpdates] = useState<ProjectUpdate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const pageSize = 2;
-
-  // Use TanStack Query to fetch project updates
-  const {
-    data: updates,
-    isLoading,
-    error,
-    refetch,
-  } = useSupabaseQuery(["projectUpdates", projectId, page], (supabase) =>
-    supabase
-      .from("project_updates")
-      .select("*, user:created_by(name, avatar_url)")
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: false })
-      .range((page - 1) * pageSize, page * pageSize - 1)
-  );
 
   // Check if user is a Kindler (project owner)
   // This would typically come from a user context or auth hook
   const isKindler = true; // Placeholder - replace with actual auth logic
 
-  // Mutation for creating a new update
-  const createUpdateMutation = useSupabaseMutation(
-    (supabase, newUpdate) =>
-      supabase.from("project_updates").insert([
+  // Fetch project updates
+  const fetchUpdates = async () => {
+    try {
+      setIsLoading(true);
+      const supabase = createClient();
+
+      const { data, error } = await supabase
+        .from("project_updates")
+        .select("*, user:created_by(name, avatar_url)")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false })
+        .range((page - 1) * pageSize, page * pageSize - 1);
+
+      if (error) throw error;
+
+      setUpdates((prevUpdates) =>
+        page === 1 ? data : [...prevUpdates, ...data]
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error ? err : new Error("Failed to fetch updates")
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Create a new update
+  const handleCreateUpdate = async (data: {
+    title: string;
+    description: string;
+  }) => {
+    try {
+      setIsSubmitting(true);
+      const supabase = createClient();
+
+      const { error } = await supabase.from("project_updates").insert([
         {
-          ...newUpdate,
+          ...data,
           project_id: projectId,
         },
-      ]),
-    {
-      onSuccess: () => {
-        refetch();
-        setIsCreatingUpdate(false);
-      },
-    }
-  );
+      ]);
 
-  // Mutation for updating an existing update
-  const updateUpdateMutation = useSupabaseMutation(
-    (supabase, { id, ...updateData }) =>
-      supabase.from("project_updates").update(updateData).eq("id", id),
-    {
-      onSuccess: () => {
-        refetch();
-      },
-    }
-  );
+      if (error) throw error;
 
-  // Mutation for deleting an update
-  const deleteUpdateMutation = useSupabaseMutation(
-    (supabase, id) => supabase.from("project_updates").delete().eq("id", id),
-    {
-      onSuccess: () => {
-        refetch();
-      },
+      // Refetch updates after creating a new one
+      setPage(1);
+      await fetchUpdates();
+      setIsCreatingUpdate(false);
+    } catch (err) {
+      console.error("Error creating update:", err);
+    } finally {
+      setIsSubmitting(false);
     }
-  );
+  };
 
-  const handleLoadMore = async (): Promise<void> => {
+  // Update an existing update
+  const handleEditUpdate = async (
+    id: string,
+    data: { title: string; description: string }
+  ) => {
+    try {
+      setIsSubmitting(true);
+      const supabase = createClient();
+
+      const { error } = await supabase
+        .from("project_updates")
+        .update(data)
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Refetch updates after editing
+      await fetchUpdates();
+    } catch (err) {
+      console.error("Error updating update:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Delete an update
+  const handleDeleteUpdate = async (id: string) => {
+    try {
+      const supabase = createClient();
+
+      const { error } = await supabase
+        .from("project_updates")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Refetch updates after deleting
+      await fetchUpdates();
+    } catch (err) {
+      console.error("Error deleting update:", err);
+    }
+  };
+
+  // Load more updates
+  const handleLoadMore = async () => {
     setPage((prevPage) => prevPage + 1);
   };
 
-  const handleCreateUpdate = (data) => {
-    createUpdateMutation.mutate(data);
-  };
-
-  const handleEditUpdate = (id, data) => {
-    updateUpdateMutation.mutate({ id, ...data });
-  };
-
-  const handleDeleteUpdate = (id) => {
-    deleteUpdateMutation.mutate(id);
-  };
+  // Fetch updates when component mounts or page changes
+  useEffect(() => {
+    fetchUpdates();
+  }, [page, projectId]);
 
   // Setup real-time subscription
   useEffect(() => {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
 
     // Subscribe to changes in the project_updates table for this project
     const channel = supabase
@@ -98,14 +161,14 @@ export function ProjectUpdatesTabSection() {
       .on(
         "postgres_changes",
         {
-          event: "*", // Listen to all changes (INSERT, UPDATE, DELETE)
+          event: "*",
           schema: "public",
           table: "project_updates",
           filter: `project_id=eq.${projectId}`,
         },
         () => {
           // Refetch data when any change occurs
-          refetch();
+          fetchUpdates();
         }
       )
       .subscribe();
@@ -113,7 +176,7 @@ export function ProjectUpdatesTabSection() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [projectId, refetch]);
+  }, [projectId]);
 
   return (
     <section
@@ -139,11 +202,11 @@ export function ProjectUpdatesTabSection() {
         <UpdateForm
           onSubmit={handleCreateUpdate}
           onCancel={() => setIsCreatingUpdate(false)}
-          isSubmitting={createUpdateMutation.isLoading}
+          isSubmitting={isSubmitting}
         />
       )}
 
-      {isLoading ? (
+      {isLoading && page === 1 ? (
         <div className="flex justify-center py-10">
           <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
         </div>
@@ -151,7 +214,7 @@ export function ProjectUpdatesTabSection() {
         <div className="text-center py-10 text-red-500">
           Failed to load updates. Please try again.
         </div>
-      ) : updates?.length === 0 ? (
+      ) : updates.length === 0 ? (
         <div className="text-center py-10 text-gray-500">
           No updates available yet.
         </div>
