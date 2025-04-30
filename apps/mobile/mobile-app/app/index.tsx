@@ -1,25 +1,44 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
-
+import { MaterialIcons } from '@expo/vector-icons';
+import Kindifi from '../assets/Icons/Kindifi';
+import { allItems } from '../components/StyledText';
+import { ItemList } from '../components/StyledText';
 // Sample data
-const allItems = [
-  { id: '1', category: 'animal welfare', image: require('../assets/images/artesania.webp'), text: 'Animal Welfare 1' },
-  { id: '2', category: 'animal welfare', image: require('../assets/images/bosques.webp'), text: 'Animal Welfare 2' },
-  { id: '3', category: 'environment', image: require('../assets/images/education.webp'), text: 'Environment 1' },
-  { id: '4', category: 'environment', image: require('../assets/images/healthcare.webp'), text: 'Environment 2' },
-  { id: '5', category: 'animal welfare, environment', image: require('../assets/images/healthcare.webp'), text: 'Animal & Environment' },
-];
+// const allItems = [
+//   { id: '1', category: 'animal welfare', image: require('../assets/images/artesania.webp'), text: 'Animal Welfare 1' },
+//   { id: '2', category: 'animal welfare', image: require('../assets/images/bosques.webp'), text: 'Animal Welfare 2' },
+//   { id: '3', category: 'environment', image: require('../assets/images/education.webp'), text: 'Environment 1' },
+//   { id: '4', category: 'environment', image: require('../assets/images/healthcare.webp'), text: 'Environment 2' },
+//   { id: '5', category: 'animal welfare, environment', image: require('../assets/images/healthcare.webp'), text: 'Animal & Environment' },
+// ];
 
 // Header Component
 const Header = () => (
   <View style={styles.header}>
-    {/* <Image source={require('../assets/images/logo.svg')} style={styles.logo} /> */}
     <Text style={styles.headerText} numberOfLines={2} adjustsFontSizeToFit>
       Change Lives One Block at a Time
     </Text>
   </View>
 );
 
+
+const Navbar = () => (
+  <View style={styles.header}>
+    {/* Hamburger Menu */}
+ 
+    <TouchableOpacity>
+      <Kindifi width={120} height={33} />
+    </TouchableOpacity>
+
+
+    <TouchableOpacity>
+      <MaterialIcons name="menu" size={24} color="#333" />
+    </TouchableOpacity>
+    {/* Separator */}
+    <View style={styles.separator} />
+  </View>
+)
 // Filter Component
 const Filter = ({ filters, selectedFilter, onSelect }: { filters: string[]; selectedFilter: string | null; onSelect: (filter: string | null) => void }) => (
   <View style={styles.filterContainer}>
@@ -39,16 +58,16 @@ const Filter = ({ filters, selectedFilter, onSelect }: { filters: string[]; sele
 );
 
 // ItemList Component
-const ItemList = ({ items }: { items: typeof allItems }) => (
-  <View style={styles.itemList}>
-    {items.map((item) => (
-      <View key={item.id} style={styles.item}>
-        <Image source={item.image} style={styles.itemImage} />
-        <Text style={styles.itemText}>{item.text}</Text>
-      </View>
-    ))}
-  </View>
-);
+// const ItemList = ({ items }: { items: typeof allItems }) => (
+//   <View style={styles.itemList}>
+//     {items.map((item) => (
+//       <View key={item.id} style={styles.item}>
+//         <Image source={item.image} style={styles.itemImage} />
+//         <Text style={styles.itemText}>{item.text}</Text>
+//       </View>
+//     ))}
+//   </View>
+// );
 
 // Main Component
 export default function Home() {
@@ -66,6 +85,7 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1 }}>
+      <Navbar />
       <Header />
       <Filter filters={filters} selectedFilter={selectedFilter} onSelect={handleFilterSelect} />
       <ScrollView>
@@ -80,22 +100,33 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
     backgroundColor: '#f8f9fa',
+  },
+  hamburgerIcon: {
+    width: 24,
+    height: 24,
   },
   logo: {
     width: 40,
     height: 40,
-    marginRight: 10,
   },
   headerText: {
+    flex: 1,
+    textAlign: 'justify',
     fontSize: 23,
     fontWeight: 'bold',
     color: '#333',
-    textAlign: 'justify',
-    paddingRight: 10,
-    paddingLeft: 10,
-    flex: 1,
+    marginHorizontal: 10,
+  },
+  separator: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: '#ccc',
   },
   filterContainer: {
     flexDirection: 'row',
