@@ -4,14 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Kindifi from '../assets/Icons/Kindifi';
 import { allItems } from '../components/StyledText';
 import { ItemList } from '../components/StyledText';
-// Sample data
-// const allItems = [
-//   { id: '1', category: 'animal welfare', image: require('../assets/images/artesania.webp'), text: 'Animal Welfare 1' },
-//   { id: '2', category: 'animal welfare', image: require('../assets/images/bosques.webp'), text: 'Animal Welfare 2' },
-//   { id: '3', category: 'environment', image: require('../assets/images/education.webp'), text: 'Environment 1' },
-//   { id: '4', category: 'environment', image: require('../assets/images/healthcare.webp'), text: 'Environment 2' },
-//   { id: '5', category: 'animal welfare, environment', image: require('../assets/images/healthcare.webp'), text: 'Animal & Environment' },
-// ];
+
 
 // Header Component
 const Header = () => (
@@ -42,32 +35,32 @@ const Navbar = () => (
 // Filter Component
 const Filter = ({ filters, selectedFilter, onSelect }: { filters: string[]; selectedFilter: string | null; onSelect: (filter: string | null) => void }) => (
   <View style={styles.filterContainer}>
-    <TouchableOpacity onPress={() => onSelect(null)} style={[styles.filterButton, !selectedFilter && styles.activeFilter]}>
-      <Text style={styles.filterText}>All</Text>
+    {/* "All" Filter */}
+    <TouchableOpacity
+      onPress={() => onSelect(null)}
+      style={[
+        styles.filterButton,
+        !selectedFilter && styles.activeFilter,
+      ]}
+    >
+      <Text style={[styles.filterText, !selectedFilter && styles.activeFilterText]}>All</Text>
     </TouchableOpacity>
+
+    {/* Dynamic Filters */}
     {filters.map((filter) => (
       <TouchableOpacity
         key={filter}
         onPress={() => onSelect(filter)}
-        style={[styles.filterButton, selectedFilter === filter && styles.activeFilter]}
+        style={[
+          styles.filterButton,
+          selectedFilter === filter && styles.activeFilter, 
+        ]}
       >
-        <Text style={styles.filterText}>{filter}</Text>
+        <Text style={[styles.filterText, selectedFilter === filter && styles.activeFilterText]}>{filter}</Text>
       </TouchableOpacity>
     ))}
   </View>
 );
-
-// ItemList Component
-// const ItemList = ({ items }: { items: typeof allItems }) => (
-//   <View style={styles.itemList}>
-//     {items.map((item) => (
-//       <View key={item.id} style={styles.item}>
-//         <Image source={item.image} style={styles.itemImage} />
-//         <Text style={styles.itemText}>{item.text}</Text>
-//       </View>
-//     ))}
-//   </View>
-// );
 
 // Main Component
 export default function Home() {
@@ -130,21 +123,37 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 8, 
     marginVertical: 10,
+    justifyContent: 'center',
   },
   filterButton: {
-    padding: 10,
-    marginHorizontal: 5,
-    borderRadius: 20,
-    backgroundColor: '#e0e0e0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6, 
+    borderRadius: 9999, 
+    borderWidth: 1, 
+    borderColor: 'rgba(156, 39, 176, 0.5)', 
+    backgroundColor: '#f3f4f6', 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    
   },
   activeFilter: {
-    backgroundColor: '#007bff',
+    backgroundColor: 'rgba(156, 39, 176, 0.8)', 
+    borderColor: 'rgba(156, 39, 176, 0.8)', 
   },
   filterText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 12, 
+    fontWeight: '600', 
+    color: '#6b7280', 
+  },
+  activeFilterText: {
+    color: '#fff', 
   },
   itemList: {
     padding: 16,

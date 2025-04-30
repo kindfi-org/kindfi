@@ -1,4 +1,4 @@
-import { View, StyleSheet, Image, Text } from "react-native";
+import { View, StyleSheet, Image, Text, TouchableOpacity } from "react-native";
 
 
 export const allItems = [
@@ -100,10 +100,10 @@ export const allItems = [
 ];
 
 
-export const ItemList = ({ items }: { items: typeof allItems }) => (
+export const ItemList = ({ items, navigation }: { items: typeof allItems; navigation: any }) => (
   <View style={styles.itemList}>
     {items.map((item) => (
-      <View key={item.id} style={styles.card}>
+      <TouchableOpacity key={item.id} style={styles.card} onPress={() => navigation.navigate('ItemDetails', { item })}>
         {/* Image Section */}
         <View style={styles.imageContainer}>
           <Image source={item.image} style={styles.image} />
@@ -148,7 +148,7 @@ export const ItemList = ({ items }: { items: typeof allItems }) => (
             ))}
           </View>
         </View>
-      </View>
+        </TouchableOpacity>
     ))}
   </View>
 );
@@ -165,11 +165,10 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
     backgroundColor: '#fff',
     marginBottom: 16,
-    // transition: 'all 0.3s', // Removed as it is not supported in react-native
   },
   imageContainer: {
     width: '100%',
-    height: 192, // Equivalent to h-48
+    height: 192, 
     position: 'relative',
   },
   image: {
@@ -178,66 +177,66 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   textContainer: {
-    padding: 20, // Equivalent to p-5
+    padding: 20,
     flex: 1,
   },
   title: {
-    fontSize: 18, // Equivalent to text-lg
-    fontWeight: '600', // Equivalent to font-semibold
-    marginBottom: 8, // Equivalent to mb-2
+    fontSize: 18, 
+    fontWeight: '600', 
+    marginBottom: 8, 
   },
   description: {
-    color: '#6b7280', // Equivalent to text-gray-600
-    marginBottom: 16, // Equivalent to mb-4
-    fontSize: 14, // Equivalent to text-sm
+    color: '#6b7280', 
+    marginBottom: 16, 
+    fontSize: 14,
     lineHeight: 20,
   },
   progressContainer: {
-    marginBottom: 16, // Equivalent to mb-4
+    marginBottom: 16, 
   },
   progressTextContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4, // Equivalent to mb-1
+    marginBottom: 4, 
   },
   progressAmount: {
-    fontWeight: '600', // Equivalent to font-semibold
+    fontWeight: '600', 
   },
   progressPercentage: {
-    color: '#9ca3af', // Equivalent to text-gray-500
+    color: '#9ca3af', 
   },
   progressBarBackground: {
     width: '100%',
-    height: 8, // Equivalent to h-2
+    height: 8, 
     backgroundColor: '#f3f4f6', // Equivalent to bg-gray-100
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressBarFill: {
-    width: '90%', // 90% progress
+    width: '90%', 
     height: '100%',
-    backgroundColor: '#3b82f6', // Gradient or solid color
+    backgroundColor: '#7CC635', 
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16, // Equivalent to mb-4
+    marginBottom: 16,
   },
   stat: {
     alignItems: 'center',
   },
   statValue: {
-    fontWeight: '600', // Equivalent to font-semibold
+    fontWeight: '600',
   },
   statLabel: {
-    fontSize: 12, // Equivalent to text-xs
-    color: '#9ca3af', // Equivalent to text-gray-500
+    fontSize: 12,
+    color: '#9ca3af', 
   },
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8, // Equivalent to gap-2
-    marginTop: 16, // Equivalent to mt-4
+    gap: 8, 
+    marginTop: 16, 
   },
   tag: {
     paddingHorizontal: 8, // Equivalent to px-2
