@@ -112,12 +112,22 @@ fn test_unauthorized_update_score() {
 
 #[test]
 #[should_panic(expected = "Error(Contract, #3)")]
-fn test_get_score_streak_nonexistent_user() {
+fn test_get_score_nonexistent_user() {
     let (_, contract, _, user, _) = setup_test();
-
-    // Try to get score for user with no records
     contract.get_score(&user);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #3)")]
+fn test_get_streak_nonexistent_user() {
+    let (_, contract, _, user, _) = setup_test();
     contract.get_streak(&user);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #3)")]
+fn test_get_tier_nonexistent_user() {
+    let (_, contract, _, user, _) = setup_test();
     contract.get_user_tier(&user);
 }
 
