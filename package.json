@@ -47,6 +47,7 @@
 		"postcss": "^8.5.3",
 		"postcss-flexbugs-fixes": "^5.0.2",
 		"postcss-preset-env": "^10.1.5",
+		"react-error-boundary": "^5.0.0",
 		"react-webcam": "^7.2.0"
 	}
 }
