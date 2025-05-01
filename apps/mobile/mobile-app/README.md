@@ -9,7 +9,7 @@ This project is built with [Expo](https://expo.dev), [NativeWind](https://www.na
 ## Getting Started
 
 1. Install dependencies  
-Using your preferred package manager:
+   Using your preferred package manager:
 
 Make sure you are inside mobile-app folder
 
@@ -24,13 +24,14 @@ bun run web or bun run ios or bun run android
 ```
 
 You'll be prompted with options to open:
+
 - Expo Go (iOS/Android)
 - Android emulator
 - iOS simulator
 - Development builds
 
 3. Link your development wallet (optional)  
-Connect your mobile test wallet if simulating live project interaction.
+   Connect your mobile test wallet if simulating live project interaction.
 
 ---
 
@@ -80,7 +81,6 @@ tailwind.config.js      # NativeWind configuration
 We welcome contributors building the future of impact.  
 Join us at:
 
-- [KindFi GitHub](https://github.com/kindfi)  
-- [OnlyDust](https://app.onlydust.com/) for open issues and bounties  
+- [KindFi GitHub](https://github.com/kindfi)
+- [OnlyDust](https://app.onlydust.com/) for open issues and bounties
 - [KindFi Discord](https://discord.gg/kindfi) (Coming soon)
-
