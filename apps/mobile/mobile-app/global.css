@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Gradients */
+.gradient-text {
+	@apply bg-clip-text text-transparent bg-gradient-to-l from-[#000124] to-[#7CC635];
+}
+
+.gradient-btn {
+	@apply bg-gradient-to-r from-green-600 to-indigo-950;
+	@apply transition duration-300;
+}
+
+.gradient-btn:hover {
+	@apply from-green-800 to-indigo-950;
+}
+
+.gradient-btn-purple {
+	@apply bg-gradient-to-r from-green-600 to-blue-900;
+	@apply transition duration-300;
+}
+
+.gradient-btn-purple:hover {
+	@apply from-green-800 to-green-600;
+}
+
+.gradient-border-btn {
+	@apply bg-gradient-to-r border-green-600 to-green-800;
+	@apply text-green-600;
+	@apply transition duration-300;
+}
+
+.gradient-border-btn:hover {
+	@apply border-green-800 to-green-600;
+	@apply text-green-600 !important;
+}
+
+.gradient-bg {
+	@apply bg-gradient-to-r from-blue-50 to-gray-50;
+}
+
+.gradient-bg-blue-purple {
+	@apply bg-gradient-to-b from-purple-50 to-white;
+}
+
+.gradient-progress {
+	@apply bg-gradient-to-r from-[#000124] to-[#7CC635];
+	@apply transition duration-300;
+}
+
+.gradient-progress:hover {
+	@apply from-[#5e5e5e] to-[#7CC635];
+}

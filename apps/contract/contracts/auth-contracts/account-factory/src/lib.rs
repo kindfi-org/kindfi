@@ -3,7 +3,7 @@ use soroban_sdk::{
     contract, contracterror, contractimpl, symbol_short, vec, Address, BytesN, Env, Symbol,
 };
 
-mod events;
+pub mod events;
 
 use crate::events::{AccountDeployEventData, ACCOUNT, DEPLOY};
 

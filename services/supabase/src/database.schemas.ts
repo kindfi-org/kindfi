@@ -14,6 +14,26 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
 		.nullable(),
 )
 
+export const categoriesRowSchema = z.object({
+	color: z.string(),
+	id: z.number(),
+	name: z.string(),
+})
+
+export const categoriesInsertSchema = z.object({
+	color: z.string(),
+	id: z.never().optional(),
+	name: z.string(),
+})
+
+export const categoriesUpdateSchema = z.object({
+	color: z.string().optional(),
+	id: z.never().optional(),
+	name: z.string().optional(),
+})
+
+export const categoriesRelationshipsSchema = z.tuple([])
+
 export const commentsRowSchema = z.object({
 	author_id: z.string(),
 	content: z.string(),

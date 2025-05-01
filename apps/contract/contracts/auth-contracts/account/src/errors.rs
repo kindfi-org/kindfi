@@ -8,8 +8,8 @@ pub enum Error {
     JsonParseError = 203,
     DeviceAlreadySet = 204,
     DeviceNotFound = 205,
-    NotInitiated = 206,
+    DeviceCannotBeEmpty = 206,
     RecoveryAddressSet = 207,
     RecoveryAddressNotSet = 208,
-    DeviceCannotBeEmpty = 209,
+    NotInitiated = 209,
 }

@@ -1,5 +1,5 @@
+import { supabase } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
-import { supabase } from '~/lib/supabase/config'
 
 export async function GET(
 	request: NextRequest,

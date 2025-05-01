@@ -7,7 +7,7 @@ use soroban_sdk::{
 };
 mod base64_url;
 mod errors;
-mod events;
+pub mod events;
 
 use crate::events::{
     AccountRecoveredEventData, DeviceAddedEventData, DeviceRemovedEventData,

@@ -11,7 +11,7 @@ mod events;
 use crate::events::{
     AccountAddedEventData, AccountRemovedEventData, DefaultThresholdChangedEventData,
     FactoryAddedEventData, FactoryRemovedEventData, InitEventData, SignerAddedEventData,
-    SignerRemovedEventData, ACCOUNT, ADDED, FACTORY, INIT, REMOVED, SECURITY, SIGNER, UPDATE,
+    SignerRemovedEventData, ACCOUNT, ADDED, FACTORY, INIT, REMOVED, SECURITY, SIGNER, UPDATED,
 };
 
 use crate::errors::Error;
@@ -160,7 +160,7 @@ impl AuthController {
             .set::<Val, u32>(&DataKey::DefaultThreshold.into_val(&env), &threshold);
 
         env.events().publish(
-            (SECURITY, UPDATE),
+            (SECURITY, UPDATED),
             DefaultThresholdChangedEventData { threshold },
         );
     }
@@ -358,3 +358,4 @@ impl AuthController {
 }
 
 mod test;
+mod test_auth;

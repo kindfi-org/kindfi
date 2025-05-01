@@ -14,6 +14,7 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
+import { ProjectUpdatesTabSection } from '~/components/sections/project/update/update-tab-section'
 import { Technology } from '~/components/sections/projects/Technology'
 import { BusinessModel } from '~/components/sections/projects/business-model'
 import { CompetitiveAdvantages } from '~/components/sections/projects/competitive-advantages'
@@ -271,10 +272,7 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 										value="updates"
 										className="bg-white rounded-lg p-6 border border-gray-100"
 									>
-										<h2 className="text-2xl font-bold mb-4">Project Updates</h2>
-										<p className="text-gray-500">
-											No updates have been posted yet.
-										</p>
+										<ProjectUpdatesTabSection />
 									</TabsContent>
 
 									<TabsContent

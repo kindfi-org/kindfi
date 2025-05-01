@@ -1,5 +1,6 @@
 'use client'
 
+import { ReactQueryClientProvider } from '@packages/lib/providers'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
@@ -10,15 +11,17 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
 	return (
-		<NextThemesProvider
-			attribute="class"
-			defaultTheme="light"
-			forcedTheme="light"
-			disableTransitionOnChange
-		>
-			<StellarProvider>
-				<AuthProvider>{children}</AuthProvider>
-			</StellarProvider>
-		</NextThemesProvider>
+		<ReactQueryClientProvider>
+			<NextThemesProvider
+				attribute="class"
+				defaultTheme="light"
+				forcedTheme="light"
+				disableTransitionOnChange
+			>
+				<StellarProvider>
+					<AuthProvider>{children}</AuthProvider>
+				</StellarProvider>
+			</NextThemesProvider>
+		</ReactQueryClientProvider>
 	)
 }

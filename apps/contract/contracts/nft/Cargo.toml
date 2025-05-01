@@ -10,6 +10,18 @@ doctest = false
 
 [dependencies]
 soroban-sdk = { workspace = true }
+stellar-pausable = { git = "https://github.com/OpenZeppelin/stellar-contracts" }
+stellar-pausable-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts" }
+stellar-fungible = { git = "https://github.com/OpenZeppelin/stellar-contracts" }
+stellar-non-fungible = { git = "https://github.com/OpenZeppelin/stellar-contracts" }
+stellar-upgradeable = { git = "https://github.com/OpenZeppelin/stellar-contracts" }
+stellar-upgradeable-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts" }
+stellar-constants = { git = "https://github.com/OpenZeppelin/stellar-contracts" }
+stellar-default-impl-macro = { git = "https://github.com/OpenZeppelin/stellar-contracts" }
+stellar-event-assertion = { git = "https://github.com/OpenZeppelin/stellar-contracts" }
+openzeppelin-pausable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.1.0" }
+openzeppelin-pausable-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.1.0" }
+openzeppelin-fungible-token = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.1.0" }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }

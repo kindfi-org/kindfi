@@ -1,10 +1,10 @@
+import { supabase } from '@packages/lib/supabase'
 import { Networks } from '@stellar/stellar-sdk'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
-import { supabase } from '~/lib/supabase/config'
 import type { MilestoneReviewPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { validateMilestoneReview } from '~/lib/validators/escrow'
 
