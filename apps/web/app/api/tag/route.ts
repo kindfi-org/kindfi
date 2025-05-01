@@ -1,5 +1,5 @@
+import { supabase } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
-import { supabase } from '~/lib/supabase/config'
 
 function generateColor(name: string): string {
 	const hash = [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0)

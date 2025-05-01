@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 
-members = [ "contracts/academy-graduation-nft","contracts/auth-contracts/*", "contracts/mock_badge_tracker", "contracts/mock_progress_tracker", "contracts/nft"]
+members = [ "contracts/academy-graduation-nft","contracts/auth-contracts/*", "contracts/mock_badge_tracker", "contracts/mock_progress_tracker", "contracts/nft", "contracts/reputation"]
 
 [workspace.dependencies]
 soroban-sdk = "22.0.6"
