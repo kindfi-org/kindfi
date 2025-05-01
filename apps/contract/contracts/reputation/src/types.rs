@@ -7,11 +7,11 @@ pub const NFT_CONTRACT_KEY: Symbol = symbol_short!("NFT");
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]
 pub enum TierLevel {
-    None,     
-    Bronze,   
-    Silver,   
-    Gold,     
-    Platinum, 
+    None,
+    Bronze,
+    Silver,
+    Gold,
+    Platinum,
 }
 
 /// Data keys for storage operations

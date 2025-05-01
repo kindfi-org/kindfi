@@ -1,6 +1,6 @@
-use soroban_sdk::{Address, Env, Symbol, symbol_short, auth};
 use crate::contract::NFTContract;
 use crate::events::NFTEvents;
+use soroban_sdk::{auth, symbol_short, Address, Env, Symbol};
 
 impl NFTContract {
     pub fn transfer(env: Env, from: Address, to: Address, token_id: u32) {
@@ -30,7 +30,7 @@ impl NFTContract {
     pub fn mint(env: Env, to: Address, tier: u32) {
         // Verify authorization
         let sender = auth::get_invoker(&env);
-        
+
         // ... existing code ...
     }
-} 
+}
