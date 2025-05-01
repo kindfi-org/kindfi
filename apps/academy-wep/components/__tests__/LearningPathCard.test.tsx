@@ -1,12 +1,12 @@
-import type React from "react";
+import type { JSX } from "react";
 import { afterEach, expect, mock, test } from "bun:test";
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { LearningPathsCard } from "../learningpaths/LearningPathCard";
 
 import "./setupTests";
 
 // Mock components
-const mockIcon = mock(() => <span data-testid="mock-icon" />);
+const mockIcon = mock((): JSX.Element => <span data-testid="mock-icon" />);
 
 const mockLink = mock(
   ({
@@ -47,7 +47,11 @@ mock.module("~/components/ui/icon", () => ({
 
 mock.module("next/link", () => ({
   __esModule: true,
-  default: mockLink,
+  default: mockLink as React.FC<{
+    href: string;
+    children: React.ReactNode;
+    className?: string;
+  }>,
 }));
 
 mock.module("~/components/base/card", () => ({
@@ -108,9 +112,9 @@ test("applies correct color theme for green CTA", () => {
     ctaColor: "green" as const,
   };
 
-  const { getByText } = render(<LearningPathsCard {...props} />);
+  render(<LearningPathsCard {...props} />);
 
-  const title = getByText(props.title);
+  const title = screen.getByText(props.title);
   expect(title.classList.contains("text-green-600")).toBe(true);
 
   // Check that the Link component was called with the correct class

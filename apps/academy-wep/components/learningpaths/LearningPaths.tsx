@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLayoutEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { LEARNING_PATHS } from "~/lib/utils/learning-paths-utils";
+// Internal imports
 import { LearningPathsCard } from "./LearningPathCard";
 import type { LearningPathCardProps } from "./LearningPathCard";
 import { ErrorFallback } from "./error-fallback";
@@ -31,7 +32,11 @@ const LearningPaths = ({
     <div className="p-8 bg-white lg:p-14">
       <div className="flex flex-col justify-between gap-4 mb-8 md:flex-row md:items-end">
         <div>
-          <div className="px-3 py-1 bg-[#f0f9e8] text-[#7CC635] rounded-full text-sm font-medium mb-4 w-fit">
+          <div
+            className="px-3 py-1 bg-[#f0f9e8] text-[#7CC635] rounded-full text-sm font-medium mb-4 w-fit"
+            role="note"
+            aria-label="Section type"
+          >
             <span>Learning Paths</span>
           </div>
           <h2 className="text-4xl font-bold mb-3 bg-gradient-to-r from-gray-900 via-gray-800 to-[#7CC635] bg-clip-text text-transparent">

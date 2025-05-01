@@ -18,18 +18,27 @@ import { Icon } from "~/components/ui/icon";
  * @param {string} props.duration - The estimated duration of the learning path.
  * @param {string} props.cta - The URL or path for the call-to-action button (e.g., where to start the path).
  * @param {"green" | "blue"} props.ctaColor - The color theme of the call-to-action button (green or blue).
+ * @returns {JSX.Element} A card component displaying the learning path information.
  */
 
 /**
  * Available icon names for learning path cards
  */
 export type LearningPathIconName = "table2" | "zap";
+
+/**
+ * Duration options for learning paths
+ */
 export type LearningPathLevel =
   | "Beginner"
   | "Intermediate"
   | "Advanced"
   | "All Levels";
 export type LearningPathDuration = "2 weeks" | "3 weeks" | "4 weeks";
+
+/**
+ * Color theme options for learning path CTA buttons
+ */
 export type LearningPathCTAColor = "green" | "blue";
 
 export interface LearningPathCardProps {
@@ -106,7 +115,7 @@ const LearningPathsCard = forwardRef<HTMLDivElement, LearningPathCardProps>(
             className={`mt-4 w-full py-3 rounded-md text-center text-white font-medium inline-block ${
               ctaColor === "green"
                 ? "bg-gradient-to-r from-green-400 to-black"
-                : "bg-blue-500"
+                : "bg-blue-500 hover:bg-blue-600"
             }`}
           >
             Start This Path ➔
