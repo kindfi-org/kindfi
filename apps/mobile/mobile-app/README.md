@@ -11,6 +11,8 @@ This project is built with [Expo](https://expo.dev), [NativeWind](https://www.na
 1. Install dependencies  
 Using your preferred package manager:
 
+Make sure you are inside mobile-app folder
+
 ```bash
 bun install
 ```
@@ -18,7 +20,7 @@ bun install
 2. Start the development server
 
 ```bash
-bun run dev
+bun run web or bun run ios or bun run android
 ```
 
 You'll be prompted with options to open:
