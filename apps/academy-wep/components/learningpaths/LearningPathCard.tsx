@@ -20,14 +20,14 @@ import { Icon } from "~/components/ui/icon";
  * @param {"green" | "blue"} props.ctaColor - The color theme of the call-to-action button (green or blue).
  */
 
-type LearningPathIconName = "table2" | "zap";
-type LearningPathLevel =
+export type LearningPathIconName = "table2" | "zap";
+export type LearningPathLevel =
   | "Beginner"
   | "Intermediate"
   | "Advanced"
   | "All Levels";
-type LearningPathDuration = "2 weeks" | "3 weeks" | "4 weeks";
-type LearningPathCTAColor = "green" | "blue";
+export type LearningPathDuration = "2 weeks" | "3 weeks" | "4 weeks";
+export type LearningPathCTAColor = "green" | "blue";
 
 export interface LearningPathCardProps {
   icon: LearningPathIconName;
@@ -66,7 +66,6 @@ const LearningPathsCard = forwardRef<HTMLDivElement, LearningPathCardProps>(
           className={`${ctaColor === "green" ? "bg-green-100/50 text-green-600  group-hover:bg-green-100" : "bg-blue-100/50 text-blue-600  group-hover:bg-blue-100"} p-3 rounded-full transition-all duration-200`}
         >
           <Icon name={icon} className="w-6 h-6" />{" "}
-          {/* Using the new Icon component */}
         </div>
         <div className="flex-1 space-y-6">
           <h2
@@ -77,30 +76,6 @@ const LearningPathsCard = forwardRef<HTMLDivElement, LearningPathCardProps>(
           <p className="text-muted-foreground text-sm !-mt-0.5">
             {description}
           </p>
-          {/* <div
-            aria-label="Learning Path Details"
-            className="flex flex-wrap gap-4 mb-4 text-sm text-gray-500"
-          >
-            <span
-              className="px-2 py-1 bg-gray-100 rounded-full"
-              aria-label={`${modules} modules`}
-            >
-              {modules} Modules
-            </span>
-            <span
-              aria-label={`Level: ${level}`}
-              className="px-2 py-1 bg-gray-100 rounded-full"
-            >
-              {level}
-            </span>
-            <span
-              aria-label={`Duration: ${duration}`}
-              className="px-2 py-1 bg-gray-100 rounded-full"
-            >
-              {duration}
-            </span>
-          </div> */}
-
           <div
             aria-label="Learning Path Details"
             className="flex flex-wrap gap-4 mb-4 text-sm text-gray-500"
@@ -111,25 +86,27 @@ const LearningPathsCard = forwardRef<HTMLDivElement, LearningPathCardProps>(
             >
               {modules} Modules
             </span>
-            <span className={detailBadgeClasses}>{level}</span>
-            <span className={detailBadgeClasses}>{duration}</span>
+            <span className={detailBadgeClasses} aria-label={`Level: ${level}`}>
+              {level}
+            </span>
+            <span
+              className={detailBadgeClasses}
+              aria-label={`Duration: ${duration}`}
+            >
+              {duration}
+            </span>
           </div>
 
           <Link
             href={cta}
             aria-label={`Start learning path: ${title}`}
-            className="flex mt-4"
+            className={`mt-4 w-full py-3 rounded-md text-center text-white font-medium inline-block ${
+              ctaColor === "green"
+                ? "bg-gradient-to-r from-green-400 to-black"
+                : "bg-blue-500"
+            }`}
           >
-            {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-            <button
-              className={`w-full py-3 rounded-md text-white font-medium ${
-                ctaColor === "green"
-                  ? "bg-gradient-to-r from-green-400 to-black"
-                  : "bg-blue-500"
-              }`}
-            >
-              Start This Path ➔
-            </button>
+            Start This Path ➔
           </Link>
         </div>
       </Card>

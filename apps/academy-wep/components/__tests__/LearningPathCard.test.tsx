@@ -8,8 +8,18 @@ import "./setupTests";
 const mockIcon = mock(() => <span data-testid="mock-icon" />);
 
 const mockLink = mock(
-  ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <a href={href}>{children}</a>
+  ({
+    href,
+    children,
+    className,
+  }: {
+    href: string;
+    children: React.ReactNode;
+    className?: string;
+  }) => (
+    <a href={href} className={className}>
+      {children}
+    </a>
   )
 );
 
@@ -102,11 +112,12 @@ test("applies correct color theme for green CTA", () => {
   const title = getByText(props.title);
   expect(title.classList.contains("text-green-600")).toBe(true);
 
-  const buttons = document.querySelectorAll("button");
-  const button = buttons[buttons.length - 1]; // Get the most recent button
-  expect(button?.classList.contains("bg-gradient-to-r")).toBe(true);
-  expect(button?.classList.contains("from-green-400")).toBe(true);
-  expect(button?.classList.contains("to-black")).toBe(true);
+  // Check that the Link component was called with the correct class
+  expect(mockLink).toHaveBeenCalled();
+  const linkCall = mockLink.mock.calls[0][0];
+  expect(linkCall.className).toContain("bg-gradient-to-r");
+  expect(linkCall.className).toContain("from-green-400");
+  expect(linkCall.className).toContain("to-black");
 });
 
 test("applies correct color theme for blue CTA", () => {
@@ -127,10 +138,10 @@ test("applies correct color theme for blue CTA", () => {
   const title = getByText(props.title);
   expect(title.classList.contains("text-blue-500")).toBe(true);
 
-  // The button should be solid blue
-  const buttons = document.querySelectorAll("button");
-  const button = buttons[buttons.length - 1]; // Get the most recent button
-  expect(button?.classList.contains("bg-blue-500")).toBe(true);
+  // Check that the Link component was called with the correct class
+  expect(mockLink).toHaveBeenCalled();
+  const linkCall = mockLink.mock.calls[0][0];
+  expect(linkCall.className).toContain("bg-blue-500");
 });
 
 test("forwards ref correctly", () => {

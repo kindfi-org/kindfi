@@ -1,4 +1,7 @@
-import { LearningPathCardProps } from "~/components/learningpaths/LearningPathCard";
+import {
+  LearningPathCardProps,
+  LearningPathCTAColor,
+} from "~/components/learningpaths/LearningPathCard";
 
 export const LEARNING_PATHS: LearningPathCardProps[] = [
   {
@@ -10,7 +13,7 @@ export const LEARNING_PATHS: LearningPathCardProps[] = [
     level: "Beginner",
     duration: "4 weeks",
     cta: "/learn/blockchain-fundamentals",
-    ctaColor: "green" as const,
+    ctaColor: "green" as LearningPathCTAColor,
   },
   {
     icon: "zap",
@@ -20,7 +23,7 @@ export const LEARNING_PATHS: LearningPathCardProps[] = [
     modules: 5,
     level: "All Levels",
     duration: "3 weeks",
-    ctaColor: "blue" as const,
+    ctaColor: "blue" as LearningPathCTAColor,
     cta: "/learn/impact-crowdfunding",
   },
 ];

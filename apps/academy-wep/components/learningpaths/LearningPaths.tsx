@@ -1,8 +1,9 @@
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { LearningPathCardProps, LearningPathsCard } from "./LearningPathCard";
+import { LearningPathsCard } from "./LearningPathCard";
+import type { LearningPathCardProps } from "./LearningPathCard";
 import LoadingCard from "./loading-card";
 import { LEARNING_PATHS } from "~/lib/utils/learning-paths-utils";
 import { ErrorFallback } from "./error-fallback";
@@ -11,7 +12,9 @@ const LearningPaths = ({ loadingDelay = 1500 }: { loadingDelay?: number }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
+  const handleNavigate = () => router.push("/learn");
+
+  useLayoutEffect(() => {
     const timeout = setTimeout(() => setIsLoading(false), loadingDelay);
     return () => clearTimeout(timeout);
   }, [loadingDelay]);
@@ -31,11 +34,12 @@ const LearningPaths = ({ loadingDelay = 1500 }: { loadingDelay?: number }) => {
           type="button"
           className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-400 rounded-md w-fit"
           aria-label="View All Learning Paths"
-          onClick={() => router.push("/learn")}
+          title="Navigate to all learning paths"
+          onClick={handleNavigate}
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
+            if (["Enter", " "].includes(e.key)) {
               e.preventDefault();
-              router.push("/learn");
+              handleNavigate();
             }
           }}
         >
@@ -51,21 +55,23 @@ const LearningPaths = ({ loadingDelay = 1500 }: { loadingDelay?: number }) => {
         </div>
       ) : (
         <div className="flex flex-col gap-6 lg:flex-row">
-          <ErrorBoundary FallbackComponent={ErrorFallback}>
-            {LEARNING_PATHS.map((path: LearningPathCardProps) => (
+          {LEARNING_PATHS.map((learningPath: LearningPathCardProps) => (
+            <ErrorBoundary
+              key={learningPath.cta}
+              FallbackComponent={ErrorFallback}
+            >
               <LearningPathsCard
-                key={path.cta}
-                icon={path.icon}
-                title={path.title}
-                description={path.description}
-                modules={path.modules}
-                level={path.level}
-                duration={path.duration}
-                cta={path.cta}
-                ctaColor={path.ctaColor}
+                icon={learningPath.icon}
+                title={learningPath.title}
+                description={learningPath.description}
+                modules={learningPath.modules}
+                level={learningPath.level}
+                duration={learningPath.duration}
+                cta={learningPath.cta}
+                ctaColor={learningPath.ctaColor}
               />
-            ))}
-          </ErrorBoundary>
+            </ErrorBoundary>
+          ))}
         </div>
       )}
     </div>
