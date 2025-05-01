@@ -10,6 +10,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "academy_progress_tracker"
+version = "0.1.0"
+dependencies = [
+ "ed25519-dalek 1.0.1",
+ "rand 0.8.5",
+ "soroban-sdk",
+]
+
+[[package]]
 name = "account_contract"
 version = "0.1.0"
 dependencies = [

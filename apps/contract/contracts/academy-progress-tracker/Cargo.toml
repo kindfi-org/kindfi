@@ -19,4 +19,4 @@ soroban-sdk = { workspace = true }
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
 ed25519-dalek = "1.0.1"
-rand = { workspace = true }
+rand = "0.8.5"
