@@ -1,4 +1,4 @@
-import type { Escrow, MilestoneStatus } from './escrow.types'
+import type { Escrow, DisputeStatus, MilestoneStatus } from './escrow.types'
 
 // Escrow's Payload
 export type EscrowPayload = Omit<
@@ -97,4 +97,40 @@ export interface MilestoneReviewPayload {
 	comments?: string
 	signer: string
 	escrowContractAddress: string
+}
+
+// New types for the dispute system
+export interface DisputePayload {
+	escrowId: string
+	milestoneId: string
+	filerAddress: string
+	disputeReason: string
+	evidenceUrls?: string[]
+	signer: string
+	escrowContractAddress: string
+}
+
+export interface DisputeResolutionPayload {
+	disputeId: string
+	mediatorId: string
+	resolution: DisputeStatus
+	resolutionNotes: string
+	approverAmount: string
+	serviceProviderAmount: string
+	signer: string
+	escrowContractAddress: string
+}
+
+export interface MediatorAssignmentPayload {
+	disputeId: string
+	mediatorId: string
+	assignedById: string
+}
+
+export interface EvidenceSubmissionPayload {
+	disputeId: string
+	submitterAddress: string
+	evidenceType: 'DOCUMENT' | 'IMAGE' | 'VIDEO' | 'LINK' | 'TEXT'
+	evidenceUrl: string
+	description: string
 }

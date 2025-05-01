@@ -1,6 +1,8 @@
 import type { CreatedAt, UpdatedAt } from '../date.types'
 
-export type MilestoneStatus = 'completed' | 'approved' | 'pending'
+export type MilestoneStatus = 'completed' | 'approved' | 'pending' | 'disputed'
+
+export type DisputeStatus = 'PENDING' | 'MEDIATION' | 'APPROVED' | 'REJECTED' | 'RESOLVED'
 
 export type Milestone = {
 	description: string

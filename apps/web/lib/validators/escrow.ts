@@ -1,7 +1,11 @@
 import type {
+	DisputePayload,
+	DisputeResolutionPayload,
 	EscrowFundData,
 	EscrowFundUpdateData,
 	EscrowPayload,
+	EvidenceSubmissionPayload,
+	MediatorAssignmentPayload,
 	MilestoneReviewPayload,
 } from '../types/escrow/escrow-payload.types'
 import type { Milestone } from '../types/escrow/escrow.types'
@@ -214,7 +218,7 @@ export function validateMilestoneReview(
 	if (!data.status) {
 		errors.push('Milestone status is required.')
 	} else if (
-		!['pending', 'approved', 'rejected', 'completed'].includes(data.status)
+		!['pending', 'approved', 'rejected', 'completed', 'disputed'].includes(data.status)
 	) {
 		errors.push('Invalid milestone status.')
 	}
@@ -222,6 +226,178 @@ export function validateMilestoneReview(
 	// Validate comments (optional but should not be empty if provided)
 	if (data.comments && !data.comments.trim()) {
 		errors.push('Comments cannot be empty.')
+	}
+
+	return {
+		success: errors.length === 0,
+		errors,
+	}
+}
+
+export function validateDispute(data: DisputePayload): ValidationResult {
+	const errors: string[] = []
+
+	// Validate escrowId
+	if (!data.escrowId?.trim()) {
+		errors.push('Escrow ID is required.')
+	}
+
+	// Validate milestoneId
+	if (!data.milestoneId?.trim()) {
+		errors.push('Milestone ID is required.')
+	}
+
+	// Validate filerAddress
+	if (!data.filerAddress?.trim()) {
+		errors.push('Filer address is required.')
+	}
+
+	// Validate disputeReason
+	if (!data.disputeReason?.trim()) {
+		errors.push('Dispute reason is required.')
+	}
+
+	// Validate signer
+	if (!data.signer?.trim()) {
+		errors.push('Signer is required.')
+	}
+
+	// Validate escrowContractAddress
+	if (!data.escrowContractAddress?.trim()) {
+		errors.push('Escrow contract address is required.')
+	}
+
+	// Validate evidenceUrls (optional but each URL should be valid if provided)
+	if (data.evidenceUrls && Array.isArray(data.evidenceUrls)) {
+		data.evidenceUrls.forEach((url: string, index: number) => {
+			if (!url.trim()) {
+				errors.push(`Evidence URL at index ${index} cannot be empty.`)
+			}
+		})
+	}
+
+	return {
+		success: errors.length === 0,
+		errors,
+	}
+}
+
+export function validateDisputeResolution(
+	data: DisputeResolutionPayload,
+): ValidationResult {
+	const errors: string[] = []
+
+	// Validate disputeId
+	if (!data.disputeId?.trim()) {
+		errors.push('Dispute ID is required.')
+	}
+
+	// Validate mediatorId
+	if (!data.mediatorId?.trim()) {
+		errors.push('Mediator ID is required.')
+	}
+
+	// Validate resolution
+	if (!data.resolution) {
+		errors.push('Resolution is required.')
+	} else if (
+		!['APPROVED', 'REJECTED', 'RESOLVED'].includes(data.resolution)
+	) {
+		errors.push('Invalid resolution status.')
+	}
+
+	// Validate resolutionNotes
+	if (!data.resolutionNotes?.trim()) {
+		errors.push('Resolution notes are required.')
+	}
+
+	// Validate approverAmount
+	if (!data.approverAmount || isNaN(Number(data.approverAmount))) {
+		errors.push('Valid approver amount is required.')
+	}
+
+	// Validate serviceProviderAmount
+	if (
+		!data.serviceProviderAmount ||
+		isNaN(Number(data.serviceProviderAmount))
+	) {
+		errors.push('Valid service provider amount is required.')
+	}
+
+	// Validate signer
+	if (!data.signer?.trim()) {
+		errors.push('Signer is required.')
+	}
+
+	// Validate escrowContractAddress
+	if (!data.escrowContractAddress?.trim()) {
+		errors.push('Escrow contract address is required.')
+	}
+
+	return {
+		success: errors.length === 0,
+		errors,
+	}
+}
+
+export function validateMediatorAssignment(
+	data: MediatorAssignmentPayload,
+): ValidationResult {
+	const errors: string[] = []
+
+	// Validate disputeId
+	if (!data.disputeId?.trim()) {
+		errors.push('Dispute ID is required.')
+	}
+
+	// Validate mediatorId
+	if (!data.mediatorId?.trim()) {
+		errors.push('Mediator ID is required.')
+	}
+
+	// Validate assignedById
+	if (!data.assignedById?.trim()) {
+		errors.push('Assigner ID is required.')
+	}
+
+	return {
+		success: errors.length === 0,
+		errors,
+	}
+}
+
+export function validateEvidenceSubmission(
+	data: EvidenceSubmissionPayload,
+): ValidationResult {
+	const errors: string[] = []
+
+	// Validate disputeId
+	if (!data.disputeId?.trim()) {
+		errors.push('Dispute ID is required.')
+	}
+
+	// Validate submitterAddress
+	if (!data.submitterAddress?.trim()) {
+		errors.push('Submitter address is required.')
+	}
+
+	// Validate evidenceType
+	if (!data.evidenceType) {
+		errors.push('Evidence type is required.')
+	} else if (
+		!['DOCUMENT', 'IMAGE', 'VIDEO', 'LINK', 'TEXT'].includes(data.evidenceType)
+	) {
+		errors.push('Invalid evidence type.')
+	}
+
+	// Validate evidenceUrl
+	if (!data.evidenceUrl?.trim()) {
+		errors.push('Evidence URL is required.')
+	}
+
+	// Validate description
+	if (!data.description?.trim()) {
+		errors.push('Description is required.')
 	}
 
 	return {
