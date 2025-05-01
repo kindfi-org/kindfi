@@ -2,7 +2,7 @@
 use crate::{types::*, ReputationContract, ReputationContractClient};
 use soroban_sdk::{
     testutils::{Address as _, MockAuth, MockAuthInvoke},
-    vec, Address, Env, IntoVal,
+    vec, Address, Env, IntoVal, Val, Vec,
 };
 
 // Test helper function to create a test environment with ReputationContract
@@ -27,6 +27,24 @@ fn setup_test() -> (
     client.initialize(&admin, &nft_contract_id);
 
     (env, client, admin, user, nft_contract_id)
+}
+
+fn mock_unauthorized_action(
+    env: &Env,
+    user: &Address,
+    contract: &ReputationContractClient,
+    fn_name: &str,
+    args: Vec<Val>,
+) {
+    env.mock_auths(&[MockAuth {
+        address: user,
+        invoke: &MockAuthInvoke {
+            contract: &contract.address,
+            fn_name,
+            args,
+            sub_invokes: &[],
+        },
+    }]);
 }
 
 #[test]
@@ -97,15 +115,14 @@ fn test_update_score() {
 fn test_unauthorized_update_score() {
     let (env, contract, _, user, _) = setup_test();
 
-    env.mock_auths(&[MockAuth {
-        address: &user,
-        invoke: &MockAuthInvoke {
-            contract: &contract.address,
-            fn_name: "update_score",
-            args: vec![&env, user.to_val(), 50_i32.into(), 1_i32.into()],
-            sub_invokes: &[],
-        },
-    }]);
+    mock_unauthorized_action(
+        &env,
+        &user,
+        &contract,
+        "update_score",
+        vec![&env, user.to_val(), 50_i32.into(), 1_i32.into()],
+    );
+
     // Try to update score as non-admin user - don't mock auth to trigger error
     contract.update_score(&user, &50, &1);
 }
@@ -217,17 +234,57 @@ fn test_invalid_tier_threshold_setting() {
 #[should_panic(expected = "Error(Auth, InvalidAction)")]
 fn test_non_admin_cannot_set_tier_threshold() {
     let (env, contract, _, _, _) = setup_test();
-
-    // Try as non-admin (should fail) - don't mock auth
     let non_admin = Address::generate(&env);
-    env.mock_auths(&[MockAuth {
-        address: &non_admin,
-        invoke: &MockAuthInvoke {
-            contract: &contract.address,
-            fn_name: "set_tier_threshold",
-            args: vec![&env, TierLevel::Silver.into_val(&env), 600_i32.into()],
-            sub_invokes: &[],
-        },
-    }]);
+
+    // Setup unauthorized action
+    mock_unauthorized_action(
+        &env,
+        &non_admin,
+        &contract,
+        "set_tier_threshold",
+        vec![&env, TierLevel::Silver.into_val(&env), 600_i32.into()],
+    );
+
+    // Try to set tier threshold as non-admin - should fail
     contract.set_tier_threshold(&TierLevel::Silver, &600);
+}
+
+#[test]
+#[should_panic(expected = "Error(Auth, InvalidAction)")]
+fn test_unauthorized_add_admin() {
+    let (env, contract, _, _, _) = setup_test();
+    let non_admin = Address::generate(&env);
+    let new_admin = Address::generate(&env);
+
+    // Setup unauthorized action
+    mock_unauthorized_action(
+        &env,
+        &non_admin,
+        &contract,
+        "add_admin",
+        vec![&env, new_admin.to_val()],
+    );
+
+    // Try to add admin as non-admin user - should fail
+    contract.add_admin(&new_admin);
+}
+
+#[test]
+#[should_panic(expected = "Error(Auth, InvalidAction)")]
+fn test_unauthorized_update_nft_contract() {
+    let (env, contract, _, _, _) = setup_test();
+    let non_admin = Address::generate(&env);
+    let new_nft_contract = Address::generate(&env);
+
+    // Setup unauthorized action
+    mock_unauthorized_action(
+        &env,
+        &non_admin,
+        &contract,
+        "update_nft_contract",
+        vec![&env, new_nft_contract.to_val()],
+    );
+
+    // Try to update NFT contract as non-admin user - should fail
+    contract.update_nft_contract(&new_nft_contract);
 }
