@@ -3,12 +3,24 @@
 import { MotiView } from 'moti'
 import { Pressable, Text, View } from 'react-native'
 
-export default function MissionBlock() {
+interface MissionBlockProps {
+	onJoinPress?: () => void;
+	onDiscoverPress?: () => void;
+	animationDelay?: number;
+	buttonAnimationDelay?: number;
+}
+
+export default function MissionBlock({
+	onJoinPress,
+	onDiscoverPress,
+	animationDelay = 1200,
+	buttonAnimationDelay = 400,
+}: MissionBlockProps) {
 	return (
 		<MotiView
 			from={{ opacity: 0, translateY: 20 }}
 			animate={{ opacity: 1, translateY: 0 }}
-			transition={{ type: 'timing', duration: 800, delay: 1200 }}
+			transition={{ type: 'timing', duration: 800, delay: animationDelay }}
 			className="mx-4 my-8 bg-white rounded-xl p-6 shadow-md"
 			style={{ elevation: 3 }}
 		>
@@ -38,11 +50,11 @@ export default function MissionBlock() {
 				<MotiView
 					from={{ opacity: 0, scale: 0.9 }}
 					animate={{ opacity: 1, scale: 1 }}
-					transition={{ type: 'timing', duration: 600, delay: 1600 }}
+					transition={{ type: 'timing', duration: 600, delay: animationDelay + buttonAnimationDelay }}
 					className="w-full md:w-auto"
 				>
 					<Pressable
-						onPress={() => console.log('Tapped Join the Change')}
+						onPress={onJoinPress || (() => console.log('Tapped Join the Change'))}
 						className="bg-gradient-to-r from-green-600 to-blue-800 py-3 px-6 rounded-full items-center"
 						accessibilityLabel="Join the Change"
 						accessibilityRole="button"
@@ -56,11 +68,11 @@ export default function MissionBlock() {
 				<MotiView
 					from={{ opacity: 0, scale: 0.9 }}
 					animate={{ opacity: 1, scale: 1 }}
-					transition={{ type: 'timing', duration: 600, delay: 1800 }}
+					transition={{ type: 'timing', duration: 600, delay: animationDelay + buttonAnimationDelay + 200 }}
 					className="w-full md:w-auto"
 				>
 					<Pressable
-						onPress={() => console.log('Tapped Discover more about KindFi')}
+						onPress={onDiscoverPress || (() => console.log('Tapped Discover more about KindFi'))}
 						className="border border-green-600 py-3 px-6 rounded-full items-center"
 						accessibilityLabel="Discover more about KindFi"
 						accessibilityRole="button"
