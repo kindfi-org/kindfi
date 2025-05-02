@@ -3,32 +3,35 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
 import type { MediatorAssignmentPayload } from '~/lib/types/escrow/escrow-payload.types'
-import { validateMediatorAssignment } from '~/lib/validators/escrow'
+import { validateMediatorAssignment } from '~/lib/validators/dispute'
 
 export async function POST(req: NextRequest) {
 	try {
 		// 1. Parse and validate the mediator assignment data
-		const assignmentData: MediatorAssignmentPayload = await req.json()
+		const assignmentData = await req.json()
 		const validationResult = validateMediatorAssignment(assignmentData)
 
 		if (!validationResult.success) {
 			return NextResponse.json(
 				{
 					error: 'Invalid mediator assignment data',
-					details: validationResult.errors,
+					details: validationResult.error.format(),
 				},
 				{ status: 400 },
 			)
 		}
+		
+		const validatedData = validationResult.data as MediatorAssignmentPayload
 
-		const { disputeId, mediatorId, assignedById } = assignmentData
+		const { disputeId, mediatorId, assignedById } = validatedData
 
 		// 2. Verify the dispute exists and is in PENDING status
 		const { data: dispute, error: disputeError } = await supabase
-			.from('escrow_disputes')
+			.from('escrow_reviews')
 			.select('*')
 			.eq('id', disputeId)
 			.eq('status', 'PENDING')
+			.eq('type', 'dispute')
 			.single()
 
 		if (disputeError || !dispute) {
@@ -82,7 +85,7 @@ export async function POST(req: NextRequest) {
 		const { data: existingAssignment, error: assignmentError } = await supabase
 			.from('escrow_dispute_assignments')
 			.select('*')
-			.eq('dispute_id', disputeId)
+			.eq('review_id', disputeId)
 			.maybeSingle()
 
 		if (existingAssignment) {
@@ -94,7 +97,7 @@ export async function POST(req: NextRequest) {
 					assigned_by: assignedById,
 					assigned_at: new Date().toISOString(),
 				})
-				.eq('dispute_id', disputeId)
+				.eq('review_id', disputeId)
 
 			if (updateError) {
 				throw new Error(`Failed to update mediator assignment: ${updateError.message}`)
@@ -104,7 +107,7 @@ export async function POST(req: NextRequest) {
 			const { error: insertError } = await supabase
 				.from('escrow_dispute_assignments')
 				.insert({
-					dispute_id: disputeId,
+					review_id: disputeId,
 					mediator_id: mediatorId,
 					assigned_by: assignedById,
 					assigned_at: new Date().toISOString(),
@@ -115,25 +118,17 @@ export async function POST(req: NextRequest) {
 			}
 		}
 
-		// 6. Update the dispute status to indicate a mediator has been assigned
-		const { error: updateError } = await supabase
-			.from('escrow_disputes')
-			.update({
-				status: 'MEDIATION',
-				updated_at: new Date().toISOString(),
-			})
-			.eq('id', disputeId)
-
-		if (updateError) {
-			throw new Error(`Failed to update dispute status: ${updateError.message}`)
-		}
+		// Note: We're skipping updating the dispute status here as per feedback
+		// The status will be updated after the user signs the transaction
+		// This follows the Trustless Work API flow where we prepare the transaction first,
+		// then the user signs it, and only then do we update the off-chain data
 
 		// 7. Send notification to the mediator
 		const { error: notificationError } = await supabase
 			.from('notifications')
 			.insert({
 				user_id: mediator.user_id,
-				dispute_id: disputeId,
+				review_id: disputeId, // Use review_id instead of dispute_id
 				message: 'You have been assigned as a mediator for a dispute',
 				type: 'MEDIATOR_ASSIGNED',
 			})
@@ -174,67 +169,3 @@ export async function POST(req: NextRequest) {
 	}
 }
 
-export async function GET(req: NextRequest) {
-	try {
-		const url = new URL(req.url)
-		const disputeId = url.searchParams.get('disputeId')
-
-		if (!disputeId) {
-			return NextResponse.json(
-				{ error: 'Dispute ID is required' },
-				{ status: 400 },
-			)
-		}
-
-		const { data: assignment, error } = await supabase
-			.from('escrow_dispute_assignments')
-			.select(
-				`
-				*,
-				escrow_mediators!inner(id, mediator_address, name, user_id),
-				users!inner(id, email, display_name)
-			`,
-			)
-			.eq('dispute_id', disputeId)
-			.single()
-
-		if (error) {
-			if (error.code === 'PGRST116') {
-				// No mediator assigned yet
-				return NextResponse.json(
-					{
-						success: true,
-						data: null,
-						message: 'No mediator assigned to this dispute',
-					},
-					{ status: 200 },
-				)
-			}
-			throw new Error(`Failed to fetch mediator assignment: ${error.message}`)
-		}
-
-		return NextResponse.json(
-			{
-				success: true,
-				data: assignment,
-			},
-			{ status: 200 },
-		)
-	} catch (error) {
-		console.error('Fetch Mediator Assignment Error:', error)
-
-		if (error instanceof AppError) {
-			return NextResponse.json(
-				{ error: error.message, details: error.details },
-				{ status: error.statusCode },
-			)
-		}
-
-		return NextResponse.json(
-			{
-				error: error instanceof Error ? error.message : 'Internal server error',
-			},
-			{ status: 500 },
-		)
-	}
-}

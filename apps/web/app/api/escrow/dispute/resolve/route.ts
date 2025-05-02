@@ -7,23 +7,25 @@ import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
 import type { DisputeResolutionPayload } from '~/lib/types/escrow/escrow-payload.types'
-import { validateDisputeResolution } from '~/lib/validators/escrow'
+import { validateDisputeResolution } from '~/lib/validators/dispute'
 
 export async function POST(req: NextRequest) {
 	try {
 		// 1. Parse and validate the dispute resolution data
-		const resolutionData: DisputeResolutionPayload = await req.json()
+		const resolutionData = await req.json()
 		const validationResult = validateDisputeResolution(resolutionData)
 
 		if (!validationResult.success) {
 			return NextResponse.json(
 				{
 					error: 'Invalid dispute resolution data',
-					details: validationResult.errors,
+					details: validationResult.error.format(),
 				},
 				{ status: 400 },
 			)
 		}
+		
+		const validatedData = validationResult.data as DisputeResolutionPayload
 
 		const {
 			disputeId,
@@ -34,14 +36,15 @@ export async function POST(req: NextRequest) {
 			serviceProviderAmount,
 			signer,
 			escrowContractAddress,
-		} = resolutionData
+		} = validatedData
 
-		// 2. Verify the dispute exists and is in PENDING status
+		// 2. Verify the dispute exists and is in PENDING or MEDIATION status
 		const { data: dispute, error: disputeError } = await supabase
-			.from('escrow_disputes')
+			.from('escrow_reviews')
 			.select('*, escrow_milestones!inner(escrow_id)')
 			.eq('id', disputeId)
-			.eq('status', 'PENDING')
+			.in('status', ['PENDING', 'MEDIATION'])
+			.eq('type', 'dispute')
 			.single()
 
 		if (disputeError || !dispute) {
@@ -51,36 +54,11 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// 3. Verify the mediator is authorized to resolve this dispute
-		const { data: mediator, error: mediatorError } = await supabase
-			.from('escrow_mediators')
-			.select('*')
-			.eq('id', mediatorId)
-			.single()
+		// Note: We're skipping mediator verification as per feedback
+		// The frontend will validate the properties to send to our API
+		// We'll directly proceed with the dispute resolution through the Trustless Work API
 
-		if (mediatorError || !mediator) {
-			return NextResponse.json(
-				{ error: 'Mediator not found' },
-				{ status: 404 },
-			)
-		}
-
-		// 4. Verify the mediator is assigned to this dispute
-		const { data: assignment, error: assignmentError } = await supabase
-			.from('escrow_dispute_assignments')
-			.select('*')
-			.eq('dispute_id', disputeId)
-			.eq('mediator_id', mediatorId)
-			.single()
-
-		if (assignmentError || !assignment) {
-			return NextResponse.json(
-				{ error: 'Mediator not assigned to this dispute' },
-				{ status: 403 },
-			)
-		}
-
-		// 5. Resolve the dispute on-chain through the Trustless Work API
+		// 3. Resolve the dispute on-chain through the Trustless Work API
 		const escrowResponse = await createEscrowRequest({
 			action: 'resolveDispute',
 			method: 'POST',
@@ -96,87 +74,31 @@ export async function POST(req: NextRequest) {
 			throw new Error('Failed to retrieve unsigned transaction XDR')
 		}
 
-		// 6. Sign the transaction
-		const signedTxXdr = signTransaction(
-			escrowResponse.unsignedTransaction,
-			Networks.TESTNET, // Change to MAINNET if in production
-			signer,
-		)
-
-		if (!signedTxXdr) {
-			throw new Error('Transaction signing failed')
-		}
-
-		// 7. Send the signed transaction to the blockchain
-		const txResponse = await sendTransaction(signedTxXdr)
-
-		if (!txResponse || !txResponse.txHash) {
-			throw new Error('Failed to resolve dispute on-chain')
-		}
-
-		// 8. Update the dispute status in the database
-		const { error: updateError } = await supabase
-			.from('escrow_disputes')
-			.update({
-				status: resolution,
-				resolution_notes: resolutionNotes,
-				resolved_by: mediatorId,
-				resolved_at: new Date().toISOString(),
-				resolution_tx_hash: txResponse.txHash,
-				approver_amount: approverAmount,
-				service_provider_amount: serviceProviderAmount,
-			})
-			.eq('id', disputeId)
-
-		if (updateError) {
-			throw new Error(`Failed to update dispute status: ${updateError.message}`)
-		}
-
-		// 9. Update the milestone status based on the resolution
-		const milestoneStatus =
-			resolution === 'APPROVED' ? 'completed' : 'rejected'
-
-		await supabase
-			.from('escrow_milestones')
-			.update({ status: milestoneStatus })
-			.eq('id', dispute.escrow_milestones.id)
-
-		// 10. Create notifications for all parties involved
-		const { data: escrow } = await supabase
-			.from('escrow_contracts')
-			.select('service_provider_id, approver_id')
-			.eq('id', dispute.escrow_milestones.escrow_id)
-			.single()
-
-		if (escrow) {
-			await supabase.from('notifications').insert([
-				{
-					user_id: escrow.service_provider_id,
-					dispute_id: disputeId,
-					message: `Dispute resolution: ${resolution}. ${resolutionNotes}`,
-					type: 'DISPUTE_RESOLVED',
-				},
-				{
-					user_id: escrow.approver_id,
-					dispute_id: disputeId,
-					message: `Dispute resolution: ${resolution}. ${resolutionNotes}`,
-					type: 'DISPUTE_RESOLVED',
-				},
-			])
-		}
+		// 4. Return the unsigned transaction to the client for signing
+		// The client will sign the transaction and send it to the /escrow/dispute/sign endpoint
+		// to finalize the signature and update the database
 
 		return NextResponse.json(
 			{
 				success: true,
-				message: 'Dispute resolved successfully',
+				message: 'Unsigned transaction created successfully',
 				data: {
+					unsignedTransaction: escrowResponse.unsignedTransaction,
 					disputeId,
-					transactionHash: txResponse.txHash,
-					status: resolution,
-				},
+					mediatorId,
+					resolution,
+					resolutionNotes,
+					approverAmount,
+					serviceProviderAmount,
+					escrowContractAddress,
+					milestoneId: dispute.milestone_id,
+				}
 			},
 			{ status: 200 },
 		)
+
+		// Note: Notifications will be handled by the /escrow/dispute/sign endpoint
+		// after the transaction is signed and submitted
 	} catch (error) {
 		console.error('Dispute Resolution Error:', error)
 

@@ -7,23 +7,25 @@ import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
 import type { DisputePayload } from '~/lib/types/escrow/escrow-payload.types'
-import { validateDispute } from '~/lib/validators/escrow'
+import { validateDispute } from '~/lib/validators/dispute'
 
 export async function POST(req: NextRequest) {
 	try {
 		// 1. Parse and validate the dispute data
-		const disputeData: DisputePayload = await req.json()
+		const disputeData = await req.json()
 		const validationResult = validateDispute(disputeData)
 
 		if (!validationResult.success) {
 			return NextResponse.json(
 				{
 					error: 'Invalid dispute data',
-					details: validationResult.errors,
+					details: validationResult.error.format(),
 				},
 				{ status: 400 },
 			)
 		}
+		
+		const validatedData = validationResult.data as DisputePayload
 
 		const {
 			escrowId,
@@ -33,7 +35,7 @@ export async function POST(req: NextRequest) {
 			evidenceUrls,
 			signer,
 			escrowContractAddress,
-		} = disputeData
+		} = validatedData
 
 		// 2. Verify the escrow contract and milestone exist
 		const { data: escrow, error: escrowError } = await supabase
@@ -80,10 +82,11 @@ export async function POST(req: NextRequest) {
 
 		// 4. Check if a dispute already exists for this milestone
 		const { data: existingDispute, error: disputeError } = await supabase
-			.from('escrow_disputes')
+			.from('escrow_reviews')
 			.select('*')
 			.eq('milestone_id', milestoneId)
 			.eq('status', 'PENDING')
+			.eq('type', 'dispute')
 			.maybeSingle()
 
 		if (existingDispute) {
@@ -104,78 +107,28 @@ export async function POST(req: NextRequest) {
 			throw new Error('Failed to retrieve unsigned transaction XDR')
 		}
 
-		// 6. Sign the transaction
-		const signedTxXdr = signTransaction(
-			escrowResponse.unsignedTransaction,
-			Networks.TESTNET, // Change to MAINNET if in production
-			signer,
-		)
-
-		if (!signedTxXdr) {
-			throw new Error('Transaction signing failed')
-		}
-
-		// 7. Send the signed transaction to the blockchain
-		const txResponse = await sendTransaction(signedTxXdr)
-
-		if (!txResponse || !txResponse.txHash) {
-			throw new Error('Failed to initiate dispute on-chain')
-		}
-
-		// 8. Record the dispute in the database
-		const { data: dispute, error: insertError } = await supabase
-			.from('escrow_disputes')
-			.insert({
-				escrow_id: escrowId,
-				milestone_id: milestoneId,
-				filer_address: filerAddress,
-				dispute_reason: disputeReason,
-				evidence_urls: evidenceUrls,
-				transaction_hash: txResponse.txHash,
-				status: 'PENDING',
-				created_at: new Date().toISOString(),
-			})
-			.select('id')
-			.single()
-
-		if (insertError) {
-			throw new Error(`Failed to record dispute: ${insertError.message}`)
-		}
-
-		// 9. Update the milestone status to indicate a dispute is in progress
-		await supabase
-			.from('escrow_milestones')
-			.update({ status: 'disputed' })
-			.eq('id', milestoneId)
-
-		// 10. Create a notification for all parties involved
-		await supabase.from('notifications').insert([
-			{
-				user_id: escrow.service_provider_id, // Service provider
-				milestone_id: milestoneId,
-				message: `A dispute has been filed for milestone: ${milestone.title}`,
-				type: 'DISPUTE_FILED',
-			},
-			{
-				user_id: escrow.approver_id, // Approver
-				milestone_id: milestoneId,
-				message: `A dispute has been filed for milestone: ${milestone.title}`,
-				type: 'DISPUTE_FILED',
-			},
-		])
-
+		// 6. Return the unsigned transaction to the client for signing
+		// The client will sign the transaction and send it to the /escrow/dispute/sign endpoint
+		// to finalize the signature and update the database
 		return NextResponse.json(
 			{
 				success: true,
-				message: 'Dispute filed successfully',
+				message: 'Unsigned transaction created successfully',
 				data: {
-					disputeId: dispute.id,
-					transactionHash: txResponse.txHash,
-					status: 'PENDING',
-				},
+					unsignedTransaction: escrowResponse.unsignedTransaction,
+					escrowId,
+					milestoneId,
+					filerAddress,
+					disputeReason,
+					evidenceUrls,
+					escrowContractAddress,
+					escrowParticipantId: escrowParticipant.id,
+				}
 			},
-			{ status: 201 },
+			{ status: 200 },
 		)
+		// Note: The database updates and notifications will be handled by the /escrow/dispute/sign endpoint
+		// after the transaction is signed and submitted
 	} catch (error) {
 		console.error('Dispute Filing Error:', error)
 
@@ -209,7 +162,7 @@ export async function GET(req: NextRequest) {
 		}
 
 		let query = supabase
-			.from('escrow_disputes')
+			.from('escrow_reviews')
 			.select(
 				`
 				*,
@@ -217,6 +170,7 @@ export async function GET(req: NextRequest) {
 				escrow_mediators(id, mediator_address, name)
 			`,
 			)
+			.eq('type', 'dispute')
 			.eq('escrow_id', escrowId)
 
 		if (status) {

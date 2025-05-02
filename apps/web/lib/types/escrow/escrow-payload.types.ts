@@ -1,10 +1,27 @@
-import type { Escrow, DisputeStatus, MilestoneStatus } from './escrow.types'
+import type { Escrow, MilestoneStatus } from './escrow.types';
+import type {
+    DisputePayload,
+    DisputeResolutionPayload,
+    MediatorAssignmentPayload,
+    EvidenceSubmissionPayload,
+    DisputeSignPayload,
+    ReviewStatus as DisputeStatus
+} from '@services/supabase/src/types';
 
 // Escrow's Payload
 export type EscrowPayload = Omit<
-	Escrow,
-	'user' | 'createdAt' | 'updatedAt' | 'id'
+    Escrow,
+    'user' | 'createdAt' | 'updatedAt' | 'id'
 >
+
+// Re-export the types from Supabase service for backward compatibility
+export { 
+    DisputePayload,
+    DisputeResolutionPayload,
+    MediatorAssignmentPayload,
+    EvidenceSubmissionPayload,
+    DisputeSignPayload
+}
 
 export type ChangeMilestoneStatusPayload = {
 	contractId?: string
@@ -99,38 +116,5 @@ export interface MilestoneReviewPayload {
 	escrowContractAddress: string
 }
 
-// New types for the dispute system
-export interface DisputePayload {
-	escrowId: string
-	milestoneId: string
-	filerAddress: string
-	disputeReason: string
-	evidenceUrls?: string[]
-	signer: string
-	escrowContractAddress: string
-}
-
-export interface DisputeResolutionPayload {
-	disputeId: string
-	mediatorId: string
-	resolution: DisputeStatus
-	resolutionNotes: string
-	approverAmount: string
-	serviceProviderAmount: string
-	signer: string
-	escrowContractAddress: string
-}
-
-export interface MediatorAssignmentPayload {
-	disputeId: string
-	mediatorId: string
-	assignedById: string
-}
-
-export interface EvidenceSubmissionPayload {
-	disputeId: string
-	submitterAddress: string
-	evidenceType: 'DOCUMENT' | 'IMAGE' | 'VIDEO' | 'LINK' | 'TEXT'
-	evidenceUrl: string
-	description: string
-}
+// Note: The dispute system types are now imported from @services/supabase/src/types
+// See the imports and re-exports at the top of this file
