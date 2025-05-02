@@ -1,5 +1,5 @@
+use crate::types::{DataKey, TierLevel, ADMIN_KEY, NFT_CONTRACT_KEY};
 use soroban_sdk::{Address, Env};
-use crate::types::{ADMIN_KEY, DataKey, NFT_CONTRACT_KEY, TierLevel};
 
 pub struct ReputationStorage;
 
@@ -59,6 +59,7 @@ impl ReputationStorage {
         let key = DataKey::TierThreshold(tier.clone());
         env.storage().persistent().get(&key)
     }
+
     pub fn validate_tier_eligibility(env: &Env, user: &Address, tier: &TierLevel) -> bool {
         if let (Some(score), Some(threshold)) = (
             Self::get_score(env, user),

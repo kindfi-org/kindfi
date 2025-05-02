@@ -1,5 +1,5 @@
 'use client'
-import type { Database } from '@services/supabase/database.types'
+import type { Database } from '@services/supabase'
 import { useCallback, useState } from 'react'
 import {
 	getEscrowRecordsAction,

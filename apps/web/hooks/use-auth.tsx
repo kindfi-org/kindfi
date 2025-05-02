@@ -1,8 +1,8 @@
 'use client'
 
+import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
 import type { Session, User } from '@supabase/supabase-js'
 import { createContext, useContext, useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 interface AuthContextType {
 	user: any | null
@@ -15,9 +15,12 @@ const AuthContext = createContext<AuthContextType>({
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-	const [user, setUser] = useState<any | null>(null)
-	const [loading, setLoading] = useState(true)
+	// Use undefined as initial state to prevent hydration mismatch
+	const [user, setUser] = useState<User | null | undefined>(undefined)
+	const [isLoading, setIsLoading] = useState(true)
+	const supabase = createSupabaseBrowserClient()
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		try {
 			const supabase = createClient()

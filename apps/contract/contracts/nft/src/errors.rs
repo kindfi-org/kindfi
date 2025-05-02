@@ -8,4 +8,10 @@ pub enum NFTError {
     TokenNotFound = 3,
     NotTokenOwner = 4,
     TokenAlreadyExists = 5,
+    RateLimitExceeded = 6,
+    InvalidSignature = 7,
+    InsufficientSignatures = 8,
+    Paused = 9,
+    UnknownError = 10,
+    InvalidOperation = 9,
 }

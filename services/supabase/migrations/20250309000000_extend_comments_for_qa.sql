@@ -1,5 +1,15 @@
--- Make ENUM creation non-destructive
-CREATE TYPE IF NOT EXISTS comment_type AS ENUM ('comment', 'question', 'answer');
+-- Create ENUM types if they don't exist
+DO $$ BEGIN
+    CREATE TYPE comment_type AS ENUM ('comment', 'question', 'answer');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE comment_status AS ENUM ('active', 'archived', 'deleted');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Enable RLS on comments table
 ALTER TABLE comments
@@ -7,7 +17,11 @@ ALTER TABLE comments
 
 -- Add type field using ENUM
 ALTER TABLE comments
-  ADD COLUMN IF NOT EXISTS type comment_type NOT NULL DEFAULT 'comment';
+  ADD COLUMN IF NOT EXISTS type comment_type DEFAULT 'comment';
+
+-- Add status field using ENUM
+ALTER TABLE comments
+  ADD COLUMN IF NOT EXISTS status comment_status DEFAULT 'active';
 
 -- Add metadata JSONB field
 ALTER TABLE comments
@@ -40,8 +54,7 @@ ALTER TABLE comments
 
 -- Add indexes for performance optimization
 CREATE INDEX IF NOT EXISTS idx_comments_type ON comments(type);
-CREATE INDEX IF NOT EXISTS idx_comments_metadata_status ON comments((metadata->>'status')) 
-  WHERE type = 'question';
+CREATE INDEX IF NOT EXISTS idx_comments_status ON comments(status);
 CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments(parent_comment_id);
 
 -- Drop existing function if exists
@@ -137,3 +150,38 @@ WHERE type = 'answer';
 -- Add composite index for answer lookups
 CREATE INDEX IF NOT EXISTS idx_comments_type_parent 
 ON comments(type, parent_comment_id);
+
+-- Add RLS policies for comments
+CREATE POLICY "Users can view all active comments"
+ON comments FOR SELECT
+USING (status = 'active');
+
+CREATE POLICY "Users can create comments"
+ON comments FOR INSERT
+WITH CHECK (auth.uid() = author_id);
+
+CREATE POLICY "Users can update their own comments"
+ON comments FOR UPDATE
+USING (auth.uid() = author_id);
+
+CREATE POLICY "Users can delete their own comments"
+ON comments FOR DELETE
+USING (auth.uid() = author_id);
+
+-- Add triggers for comment status changes
+CREATE OR REPLACE FUNCTION handle_comment_status_change()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.status IS DISTINCT FROM NEW.status THEN
+        -- You can add additional logic here for status changes
+        -- For example, notifying users or updating related records
+        RAISE NOTICE 'Comment % status changed from % to %', NEW.id, OLD.status, NEW.status;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER on_comment_status_change
+    AFTER UPDATE ON comments
+    FOR EACH ROW
+    EXECUTE FUNCTION handle_comment_status_change();
