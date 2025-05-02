@@ -7,8 +7,7 @@ use soroban_sdk::{
     auth::{Context, ContractContext},
     symbol_short,
     testutils::{Address as _, Events},
-    vec,
-    Address, BytesN, Env, TryIntoVal, Vec,
+    vec, Address, BytesN, Env, TryIntoVal, Vec,
 };
 
 use crate::{
@@ -26,9 +25,7 @@ use account_contract::{
     },
     AccountContract, AccountContractClient,
 };
-use account_factory::{
-    events::AccountDeployEventData, AccountFactory, AccountFactoryClient,
-};
+use account_factory::{events::AccountDeployEventData, AccountFactory, AccountFactoryClient};
 
 // Create mock account contract and import WASM hash
 mod account_contract_mod {
@@ -1529,32 +1526,32 @@ fn test_auth_controller_remove_account_event() {
 fn test_account_add_device_event() {
     let env = Env::default();
     let account_client = create_account_client(&env);
-    
+
     // Mock authorization
     env.mock_all_auths();
-    
+
     // Clear events after init
     let _ = env.events().all();
-    
+
     // Create new device data
     let new_secure_key = SecureKeyStorage::new(99);
     let new_device_id = new_secure_key.get_public_key(&env);
     let new_public_key = new_secure_key.get_secp_public_key(&env);
-    
+
     // Add device
     account_client.add_device(&new_device_id, &new_public_key);
-    
+
     // Verify event
     let events = env.events().all();
     assert!(!events.is_empty(), "Expected events to be generated");
-    
+
     // Find the event for adding a device
     let device_event_found = events.iter().any(|(_, topics, data)| {
         // Check if we have right topics (DEVICE, ADDED)
         if topics.len() < 2 {
             return false;
         }
-        
+
         // Convert event data to DeviceAddedEventData
         if let Ok(event_data) = data.clone().try_into_val(&env) {
             let event_data: DeviceAddedEventData = event_data;
@@ -1564,7 +1561,7 @@ fn test_account_add_device_event() {
             false
         }
     });
-    
+
     assert!(device_event_found, "Device added event not found");
 }
 
@@ -1572,38 +1569,38 @@ fn test_account_add_device_event() {
 fn test_account_remove_device_event() {
     let env = Env::default();
     let account_client = create_account_client(&env);
-    
+
     // Mock authorization
     env.mock_all_auths();
-    
+
     // Add a second device first so we can remove one
     let new_secure_key = SecureKeyStorage::new(99);
     let new_device_id = new_secure_key.get_public_key(&env);
     let new_public_key = new_secure_key.get_secp_public_key(&env);
-    
+
     account_client.add_device(&new_device_id, &new_public_key);
-    
+
     // Clear events after adding device
     let _ = env.events().all();
-    
+
     // Get the first device ID to remove
     let devices = account_client.get_devices();
     let first_device_id = devices.get_unchecked(0).device_id;
-    
+
     // Remove the first device
     account_client.remove_device(&first_device_id);
-    
+
     // Verify event
     let events = env.events().all();
     assert!(!events.is_empty(), "Expected events to be generated");
-    
+
     // Find the event for removing a device
     let device_event_found = events.iter().any(|(_, topics, data)| {
         // Check if we have right topics (DEVICE, REMOVED)
         if topics.len() < 2 {
             return false;
         }
-        
+
         // Convert event data to DeviceRemovedEventData
         if let Ok(event_data) = data.clone().try_into_val(&env) {
             let event_data: DeviceRemovedEventData = event_data;
@@ -1613,7 +1610,7 @@ fn test_account_remove_device_event() {
             false
         }
     });
-    
+
     assert!(device_event_found, "Device removed event not found");
 }
 
@@ -1621,28 +1618,28 @@ fn test_account_remove_device_event() {
 fn test_account_add_recovery_address_event() {
     let env = Env::default();
     let account_client = create_account_client(&env);
-    
+
     // Mock authorization
     env.mock_all_auths();
-    
+
     // Clear events after init
     let _ = env.events().all();
-    
+
     // Add recovery address
     let recovery_address = Address::generate(&env);
     account_client.add_recovery_address(&recovery_address);
-    
+
     // Verify event
     let events = env.events().all();
     assert!(!events.is_empty(), "Expected events to be generated");
-    
+
     // Find the event for adding a recovery address
     let recovery_event_found = events.iter().any(|(_, topics, data)| {
         // Check if we have right topics (ACCOUNT, SECURITY, ADDED)
         if topics.len() < 3 {
             return false;
         }
-        
+
         // Convert event data to RecoveryAddressEventData
         if let Ok(event_data) = data.clone().try_into_val(&env) {
             let event_data: RecoveryAddressEventData = event_data;
@@ -1652,40 +1649,43 @@ fn test_account_add_recovery_address_event() {
             false
         }
     });
-    
-    assert!(recovery_event_found, "Recovery address added event not found");
+
+    assert!(
+        recovery_event_found,
+        "Recovery address added event not found"
+    );
 }
 
 #[test]
 fn test_account_update_recovery_address_event() {
     let env = Env::default();
     let account_client = create_account_client(&env);
-    
+
     // Mock authorization
     env.mock_all_auths();
-    
+
     // Add a recovery address first
     let recovery_address = Address::generate(&env);
     account_client.add_recovery_address(&recovery_address);
-    
+
     // Clear events after adding recovery address
     let _ = env.events().all();
-    
+
     // Update the recovery address
     let new_recovery_address = Address::generate(&env);
     account_client.update_recovery_address(&new_recovery_address);
-    
+
     // Verify event
     let events = env.events().all();
     assert!(!events.is_empty(), "Expected events to be generated");
-    
+
     // Find the event for updating a recovery address
     let recovery_event_found = events.iter().any(|(_, topics, data)| {
         // Check if we have right topics (ACCOUNT, SECURITY, UPDATED)
         if topics.len() < 3 {
             return false;
         }
-        
+
         // Convert event data to RecoveryAddressEventData
         if let Ok(event_data) = data.clone().try_into_val(&env) {
             let event_data: RecoveryAddressEventData = event_data;
@@ -1695,43 +1695,46 @@ fn test_account_update_recovery_address_event() {
             false
         }
     });
-    
-    assert!(recovery_event_found, "Recovery address updated event not found");
+
+    assert!(
+        recovery_event_found,
+        "Recovery address updated event not found"
+    );
 }
 
 #[test]
 fn test_account_recovered_event() {
     let env = Env::default();
     let account_client = create_account_client(&env);
-    
+
     // Mock authorization
     env.mock_all_auths();
-    
+
     // Add a recovery address
     let recovery_address = Address::generate(&env);
     account_client.add_recovery_address(&recovery_address);
-    
+
     // Clear events after adding recovery address
     let _ = env.events().all();
-    
+
     // Recover the account with a new device
     let new_secure_key = SecureKeyStorage::new(100);
     let new_device_id = new_secure_key.get_public_key(&env);
     let new_public_key = new_secure_key.get_secp_public_key(&env);
-    
+
     account_client.recover_account(&new_device_id, &new_public_key);
-    
+
     // Verify event
     let events = env.events().all();
     assert!(!events.is_empty(), "Expected events to be generated");
-    
+
     // Find the event for account recovery
     let recovery_event_found = events.iter().any(|(_, topics, data)| {
         // Check if we have right topics (ACCOUNT, SECURITY)
         if topics.len() < 2 {
             return false;
         }
-        
+
         // Convert event data to AccountRecoveredEventData
         if let Ok(event_data) = data.clone().try_into_val(&env) {
             let event_data: AccountRecoveredEventData = event_data;
@@ -1741,7 +1744,7 @@ fn test_account_recovered_event() {
             false
         }
     });
-    
+
     assert!(recovery_event_found, "Account recovered event not found");
 }
 
@@ -1749,33 +1752,33 @@ fn test_account_recovered_event() {
 fn test_account_factory_deploy_event() {
     let env = Env::default();
     let factory_client = create_factory_client(&env);
-    
+
     // Mock authorization
     env.mock_all_auths();
-    
+
     // Clear events after init
     let _ = env.events().all();
-    
+
     // Set up deployment parameters
     let salt = BytesN::from_array(&env, &[11_u8; 32]);
     let secure_key = SecureKeyStorage::new(42);
     let device_id = secure_key.get_public_key(&env);
     let public_key = secure_key.get_secp_public_key(&env);
-    
+
     // Deploy an account
     let account_address = factory_client.deploy(&salt, &device_id, &public_key);
-    
+
     // Verify event
     let events = env.events().all();
     assert!(!events.is_empty(), "Expected events to be generated");
-    
+
     // Find the event for deploying an account
     let deploy_event_found = events.iter().any(|(_, topics, data)| {
         // Check if we have right topics (ACCOUNT, DEPLOY)
         if topics.len() < 2 {
             return false;
         }
-        
+
         // Convert event data to AccountDeployEventData
         if let Ok(event_data) = data.clone().try_into_val(&env) {
             let event_data: AccountDeployEventData = event_data;
@@ -1785,6 +1788,6 @@ fn test_account_factory_deploy_event() {
             false
         }
     });
-    
+
     assert!(deploy_event_found, "Account deploy event not found");
 }
