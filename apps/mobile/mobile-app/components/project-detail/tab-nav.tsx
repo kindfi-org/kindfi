@@ -15,7 +15,7 @@ export default function TabNav() {
   ];
 
   return (
-    <View className="border-b border-gray-200 mt-6 pb-1">
+    <View className="border-b border-gray-200 pb-1">
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

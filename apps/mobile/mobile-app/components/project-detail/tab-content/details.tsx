@@ -1,7 +1,7 @@
 import { HR } from '@expo/html-elements'
 import { FileText, ChevronDown, ChevronUp, CircleCheck, Download, StretchHorizontal, Building2, Factory, Building } from 'lucide-react-native'
 import { useState } from 'react'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 
 const DropdownSection = ({ title, items }) => {
 	const [isOpen, setIsOpen] = useState(false)
@@ -38,12 +38,6 @@ const DropdownSection = ({ title, items }) => {
 }
 
 export default function Details() {
-	const applicationImages = {
-		dataCenter: require('@/assets/images/icon.png'),
-		utilities: require('@/assets/images/splash.png'),
-		manufacturing: require('@/assets/images/splash.png'),
-		commercial: require('@/assets/images/splash.png'),
-	}
 
 	const items = [
 		'Environmental impact of mining and disposing of battery materials',
@@ -127,18 +121,17 @@ export default function Details() {
 
 			<View className="mb-6 mt-6">
 				<Text className="font-extrabold mb-1">Business Model</Text>
-				<Text className="text-gray-600">
+				<Text className="text-gray-600 mb-4">
 					Our business model is based on manufacturing and selling energy
 					storage systems, with a focus on the following revenue streams:
 				</Text>
-				<View className="flex-row flex-wrap justify-between">
-					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4">
-						<View className="flex-row items-start">
 
+				<View className="flex-col space-y-4">
+					<View className="w-full bg-gray-50 p-4 rounded-lg">
+						<View className="flex-row items-start">
 							<View className="border border-blue-200 rounded-full p-2 mr-3 bg-blue-50">
 								<StretchHorizontal className="text-blue-500" size={20} />
 							</View>
-
 							<View className="flex-1">
 								<Text className="font-bold text-lg mb-1">Data Centers</Text>
 								<Text className="text-gray-600">
@@ -149,12 +142,11 @@ export default function Details() {
 						</View>
 					</View>
 
-					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4">
+					<View className="w-full bg-gray-50 p-4 rounded-lg">
 						<View className="flex-row items-start">
 							<View className="border border-green-200 rounded-full p-2 mr-3 bg-green-50">
 								<Building2 className="text-green-500" size={20} />
 							</View>
-
 							<View className="flex-1">
 								<Text className="font-bold text-lg mb-1">Utilities</Text>
 								<Text className="text-gray-600">
@@ -165,12 +157,11 @@ export default function Details() {
 						</View>
 					</View>
 
-					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4">
+					<View className="w-full bg-gray-50 p-4 rounded-lg">
 						<View className="flex-row items-start">
 							<View className="border border-yellow-200 rounded-full p-2 mr-3 bg-yellow-50">
 								<Factory className="text-yellow-500" size={20} />
 							</View>
-
 							<View className="flex-1">
 								<Text className="font-bold text-lg mb-1">Manufacturing</Text>
 								<Text className="text-gray-600">
@@ -181,12 +172,11 @@ export default function Details() {
 						</View>
 					</View>
 
-					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4">
+					<View className="w-full bg-gray-50 p-4 rounded-lg">
 						<View className="flex-row items-start">
 							<View className="border border-purple-200 rounded-full p-2 mr-3 bg-purple-50">
 								<Building className="text-purple-500" size={20} />
 							</View>
-
 							<View className="flex-1">
 								<Text className="font-bold text-lg mb-1">Commercial Buildings</Text>
 								<Text className="text-gray-600">
@@ -196,7 +186,6 @@ export default function Details() {
 							</View>
 						</View>
 					</View>
-
 				</View>
 			</View>
 
@@ -294,84 +283,90 @@ export default function Details() {
 
 			<HR />
 
-			<View className="mb-6 mt-6">
-				<Text className="font-extrabold mb-3">Traction & Milestones</Text>
+			<View className="mb-6 mt-6 px-4">
+      <Text className="font-extrabold mb-4 text-xl">Traction & Milestones</Text>
 
-				<View className="space-y-6">
-					<View className="flex-row">
-						<View className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center mr-3">
-							<Text className="text-white font-bold">1</Text>
-						</View>
-						<View className="flex-1">
-							<Text className="font-bold text-lg mb-1">
-								Q2 2022: Proof of Concept
-							</Text>
-							<Text className="text-gray-600">
-								Successfully demonstrated 5kWh prototype with energy density of
-								150 Wh/kg.
-							</Text>
-						</View>
-					</View>
+      <View className="relative">
+        {/* Blue vertical line - centered behind the buttons */}
+        <View className="absolute left-6 top-0 bottom-0 w-1 bg-blue-300 z-0" />
 
-					<View className="flex-row">
-						<View className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center mr-3">
-							<Text className="text-white font-bold">2</Text>
-						</View>
-						<View className="flex-1">
-							<Text className="font-bold text-lg mb-1">
-								Q4 2022: Seed Funding
-							</Text>
-							<Text className="text-gray-600">
-								Raised $2.1M from Clean Energy Ventures and angel investors.
-							</Text>
-						</View>
-					</View>
+        {/* STEP 1 */}
+        <View className="flex-row items-start mb-10 relative z-[-1]">
+          <View className="absolute left-1 top-3 w-10 h-10 rounded-full bg-blue-500 items-center justify-center z-20">
+            <Text className="text-white font-bold">1</Text>
+          </View>
+          <View className="flex-1 pl-16">
+            <Text className="font-bold text-lg mb-1">
+              Q2 2022: Proof of Concept
+            </Text>
+            <Text className="text-gray-600">
+              Successfully demonstrated 5kWh prototype with energy density of 150 Wh/kg.
+            </Text>
+          </View>
+        </View>
 
-					<View className="flex-row">
-						<View className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center mr-3">
-							<Text className="text-white font-bold">3</Text>
-						</View>
-						<View className="flex-1">
-							<Text className="font-bold text-lg mb-1">
-								Q2 2023: 40% Scale Prototype
-							</Text>
-							<Text className="text-gray-600">
-								Completed 20kWh system with improved energy density of 200
-								Wh/kg.
-							</Text>
-						</View>
-					</View>
+        {/* STEP 2 */}
+        <View className="flex-row items-start mb-10 relative z-[-1]">
+          <View className="absolute left-1 top-3 w-10 h-10 rounded-full bg-blue-500 items-center justify-center z-20">
+            <Text className="text-white font-bold">2</Text>
+          </View>
+          <View className="flex-1 pl-16">
+            <Text className="font-bold text-lg mb-1">
+              Q4 2022: Seed Funding
+            </Text>
+            <Text className="text-gray-600">
+              Raised $2.1M from Clean Energy Ventures and angel investors.
+            </Text>
+          </View>
+        </View>
 
-					<View className="flex-row">
-						<View className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center mr-3">
-							<Text className="text-white font-bold">4</Text>
-						</View>
-						<View className="flex-1">
-							<Text className="font-bold text-lg mb-1">
-								Q4 2023: First Customer LOIs
-							</Text>
-							<Text className="text-gray-600">
-								Secured $110M in Letters of Intent from data center operators
-								and utilities.
-							</Text>
-						</View>
-					</View>
+        {/* STEP 3 */}
+        <View className="flex-row items-start mb-10 relative z-[-1]">
+          <View className="absolute left-1 top-3 w-10 h-10 rounded-full bg-blue-500 items-center justify-center z-20">
+            <Text className="text-white font-bold">3</Text>
+          </View>
+          <View className="flex-1 pl-16">
+            <Text className="font-bold text-lg mb-1">
+              Q2 2023: 40% Scale Prototype
+            </Text>
+            <Text className="text-gray-600">
+              Completed 20kWh system with improved energy density of 200 Wh/kg.
+            </Text>
+          </View>
+        </View>
 
-					<View className="flex-row">
-						<View className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center mr-3">
-							<Text className="text-white font-bold">5</Text>
-						</View>
-						<View className="flex-1">
-							<Text className="font-bold text-lg mb-1">
-								Q3 2024: Full-Scale Prototype (In Progress)
-							</Text>
-							<Text className="text-gray-600">
-								100kWh commercial-ready system for pilot installations.
-							</Text>
-						</View>
-					</View>
-				</View>
-			</View>
+        {/* STEP 4 */}
+        <View className="flex-row items-start mb-10 relative z-[-1]">
+          <View className="absolute left-1 top-3 w-10 h-10 rounded-full bg-blue-500 items-center justify-center z-20">
+            <Text className="text-white font-bold">4</Text>
+          </View>
+          <View className="flex-1 pl-16">
+            <Text className="font-bold text-lg mb-1">
+              Q4 2023: First Customer LOIs
+            </Text>
+            <Text className="text-gray-600">
+              Secured $110M in Letters of Intent from data center operators and utilities.
+            </Text>
+          </View>
+        </View>
+
+        {/* STEP 5 */}
+        <View className="flex-row items-start relative z-[-1]">
+          <View className="absolute left-1 top-3 w-10 h-10 rounded-full bg-blue-400 items-center justify-center z-20">
+            <Text className="text-white font-bold">5</Text>
+          </View>
+          <View className="flex-1 pl-16">
+            <Text className="font-bold text-lg mb-1">
+              Q3 2024: Full-Scale Prototype <Text className="text-sm italic text-gray-500">(In Progress)</Text>
+            </Text>
+            <Text className="text-gray-600">
+              100kWh commercial-ready system for pilot installations.
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+
 
 			<HR />
 
