@@ -52,17 +52,42 @@ CREATE POLICY "Allow read access to escrow_reviews for authenticated users"
     TO authenticated
     USING (true);
 
-CREATE POLICY "Allow insert access to escrow_reviews for authenticated users"
+CREATE POLICY "Allow insert access to escrow_reviews for contract participants"
     ON escrow_reviews
     FOR INSERT
     TO authenticated
-    WITH CHECK (true);
+    WITH CHECK (
+        -- Only allow inserts if the user is a participant in the escrow contract
+        EXISTS (
+            SELECT 1 FROM escrow_contracts ec
+            WHERE ec.id = escrow_id
+            AND (
+                ec.approver_id = auth.uid() OR
+                ec.service_provider_id = auth.uid()
+            )
+        )
+    );
 
-CREATE POLICY "Allow update access to escrow_reviews for authenticated users"
+CREATE POLICY "Allow update access to escrow_reviews for participants and mediators"
     ON escrow_reviews
     FOR UPDATE
     TO authenticated
-    USING (true);
+    USING (
+        -- Allow updates if the user is a participant in the escrow contract or an assigned mediator
+        EXISTS (
+            SELECT 1 FROM escrow_contracts ec
+            WHERE ec.id = escrow_id
+            AND (
+                ec.approver_id = auth.uid() OR
+                ec.service_provider_id = auth.uid()
+            )
+        ) OR
+        EXISTS (
+            SELECT 1 FROM escrow_dispute_assignments eda
+            WHERE eda.review_id = id
+            AND eda.mediator_id = auth.uid()
+        )
+    );
 
 -- escrow_mediators policies
 ALTER TABLE escrow_mediators ENABLE ROW LEVEL SECURITY;
@@ -77,13 +102,27 @@ CREATE POLICY "Allow insert access to escrow_mediators for administrators"
     ON escrow_mediators
     FOR INSERT
     TO authenticated
-    WITH CHECK (true); -- In a real scenario, this would check for admin role
+    WITH CHECK (
+        -- Only allow administrators to insert mediators
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            WHERE ur.user_id = auth.uid()
+            AND ur.role = 'admin'
+        )
+    );
 
 CREATE POLICY "Allow update access to escrow_mediators for administrators"
     ON escrow_mediators
     FOR UPDATE
     TO authenticated
-    USING (true); -- In a real scenario, this would check for admin role
+    USING (
+        -- Only allow administrators to update mediators
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            WHERE ur.user_id = auth.uid()
+            AND ur.role = 'admin'
+        )
+    );
 
 -- escrow_dispute_assignments policies
 ALTER TABLE escrow_dispute_assignments ENABLE ROW LEVEL SECURITY;
@@ -98,10 +137,24 @@ CREATE POLICY "Allow insert access to escrow_dispute_assignments for administrat
     ON escrow_dispute_assignments
     FOR INSERT
     TO authenticated
-    WITH CHECK (true); -- In a real scenario, this would check for admin role
+    WITH CHECK (
+        -- Only allow administrators to assign mediators to disputes
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            WHERE ur.user_id = auth.uid()
+            AND ur.role = 'admin'
+        )
+    );
 
 CREATE POLICY "Allow update access to escrow_dispute_assignments for administrators"
     ON escrow_dispute_assignments
     FOR UPDATE
     TO authenticated
-    USING (true); -- In a real scenario, this would check for admin role
+    USING (
+        -- Only allow administrators to update mediator assignments
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            WHERE ur.user_id = auth.uid()
+            AND ur.role = 'admin'
+        )
+    );

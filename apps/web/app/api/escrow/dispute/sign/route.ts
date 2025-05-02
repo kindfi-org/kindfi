@@ -27,8 +27,7 @@ export async function POST(req: NextRequest) {
 		const validatedData = validationResult.data as DisputeSignPayload
 
 		const {
-			unsignedTransaction,
-			signer,
+			signedTransaction,
 			type, // 'file' or 'resolve'
 			// For filing a dispute
 			escrowId,
@@ -46,19 +45,14 @@ export async function POST(req: NextRequest) {
 			serviceProviderAmount,
 		} = validatedData
 
-		// 2. Sign the transaction
-		const signedTxXdr = signTransaction(
-			unsignedTransaction,
-			Networks.TESTNET, // Change to MAINNET if in production
-			signer,
-		)
-
-		if (!signedTxXdr) {
-			throw new Error('Transaction signing failed')
+		// 2. Use the signed transaction from the client
+		// This follows the non-custodial design pattern where private keys never touch the server
+		if (!signedTransaction) {
+			throw new Error('No signed transaction provided')
 		}
 
 		// 3. Send the signed transaction to the blockchain
-		const txResponse = await sendTransaction(signedTxXdr)
+		const txResponse = await sendTransaction(signedTransaction)
 
 		if (!txResponse || !txResponse.txHash) {
 			throw new Error('Failed to send transaction to the blockchain')
@@ -89,10 +83,14 @@ export async function POST(req: NextRequest) {
 			}
 
 			// Update the milestone status to indicate a dispute is in progress
-			await supabase
+			const { error: milestoneUpdateError } = await supabase
 				.from('escrow_milestones')
 				.update({ status: 'disputed' })
 				.eq('id', milestoneId)
+
+			if (milestoneUpdateError) {
+				throw new Error(`Failed to mark milestone as disputed: ${milestoneUpdateError.message}`)
+			}
 
 			// Get escrow contract details for notifications
 			const { data: escrow } = await supabase
@@ -110,7 +108,7 @@ export async function POST(req: NextRequest) {
 
 			// Create notifications for all parties involved
 			if (escrow && milestone) {
-				await supabase.from('notifications').insert([
+				const { error: notificationError } = await supabase.from('notifications').insert([
 					{
 						user_id: escrow.service_provider_id,
 						milestone_id: milestoneId,
@@ -124,6 +122,11 @@ export async function POST(req: NextRequest) {
 						type: 'DISPUTE_FILED',
 					},
 				])
+
+				if (notificationError) {
+					console.error('Error creating dispute filed notifications:', notificationError)
+					throw new Error(`Failed to create dispute filed notifications: ${notificationError.message}`)
+				}
 			}
 
 			return NextResponse.json(
@@ -171,21 +174,32 @@ export async function POST(req: NextRequest) {
 				const milestoneStatus =
 					resolution === 'APPROVED' ? 'completed' : 'rejected'
 
-				await supabase
+				// Update milestone status with error handling
+				const { error: milestoneUpdateError } = await supabase
 					.from('escrow_milestones')
 					.update({ status: milestoneStatus })
 					.eq('id', dispute.escrow_milestones.id)
 
+				if (milestoneUpdateError) {
+					console.error('Error updating milestone status:', milestoneUpdateError)
+					throw new Error(`Failed to update milestone status: ${milestoneUpdateError.message}`)
+				}
+
 				// Get escrow contract details for notifications
-				const { data: escrow } = await supabase
+				const { data: escrow, error: escrowError } = await supabase
 					.from('escrow_contracts')
-					.select('service_provider_id, approver_id')
-					.eq('id', dispute.escrow_milestones.escrow_id)
+					.select('*')
+					.eq('id', dispute.escrow_id)
 					.single()
+
+				if (escrowError) {
+					console.error('Error fetching escrow contract:', escrowError)
+					throw new Error(`Failed to fetch escrow contract: ${escrowError.message}`)
+				}
 
 				// Create notifications for all parties involved
 				if (escrow) {
-					await supabase.from('notifications').insert([
+					const { error: notificationError } = await supabase.from('notifications').insert([
 						{
 							user_id: escrow.service_provider_id,
 							review_id: disputeId,
@@ -199,6 +213,11 @@ export async function POST(req: NextRequest) {
 							type: 'DISPUTE_RESOLVED',
 						},
 					])
+
+					if (notificationError) {
+						console.error('Error creating notifications:', notificationError)
+						throw new Error(`Failed to create notifications: ${notificationError.message}`)
+					}
 				}
 			}
 

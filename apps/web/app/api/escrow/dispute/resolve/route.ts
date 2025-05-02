@@ -59,15 +59,18 @@ export async function POST(req: NextRequest) {
 		// We'll directly proceed with the dispute resolution through the Trustless Work API
 
 		// 3. Resolve the dispute on-chain through the Trustless Work API
+		// Create the payload with the correct types
+		const resolvePayload = {
+			signerAddress: mediatorId, // Using mediator ID instead of signer secret
+			contractId: escrowContractAddress,
+			approverFunds: approverAmount,
+			serviceProviderFunds: serviceProviderAmount,
+		};
+
 		const escrowResponse = await createEscrowRequest({
 			action: 'resolveDispute',
 			method: 'POST',
-			data: {
-				signer,
-				contractId: escrowContractAddress,
-				approverFunds: approverAmount,
-				serviceProviderFunds: serviceProviderAmount,
-			},
+			data: resolvePayload,
 		})
 
 		if (!escrowResponse.unsignedTransaction) {

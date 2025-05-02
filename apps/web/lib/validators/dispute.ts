@@ -35,11 +35,13 @@ export const disputeResolutionSchema = z.object({
         .string()
         .min(1, 'Approver amount is required')
         .refine((val) => !Number.isNaN(Number(val)), 'Must be a valid number')
+        .refine((val) => Number(val) >= 0, 'Amount must be a non-negative number')
         .describe('Amount allocated to the approver'),
     serviceProviderAmount: z
         .string()
         .min(1, 'Service provider amount is required')
         .refine((val) => !Number.isNaN(Number(val)), 'Must be a valid number')
+        .refine((val) => Number(val) >= 0, 'Amount must be a non-negative number')
         .describe('Amount allocated to the service provider'),
     signer: signerValidator.describe('Transaction signer'),
     escrowContractAddress: addressValidator.describe('Escrow contract address'),
@@ -76,8 +78,7 @@ export const evidenceSubmissionSchema = z.object({
 
 // Dispute sign schema for the new sign endpoint
 export const disputeSignSchema = z.object({
-    unsignedTransaction: z.string().min(1, 'Unsigned transaction is required'),
-    signer: signerValidator.describe('Transaction signer'),
+    signedTransaction: z.string().min(1, 'Signed transaction is required'),
     type: z.enum(['file', 'resolve']).describe('Transaction type'),
     // For filing a dispute - required if type is 'file'
     escrowId: uuidValidator.optional().describe('Escrow contract ID'),
@@ -93,28 +94,45 @@ export const disputeSignSchema = z.object({
     disputeId: uuidValidator.optional().describe('Dispute ID'),
     mediatorId: uuidValidator.optional().describe('Mediator ID'),
     resolution: z
-        .enum(['APPROVED', 'REJECTED', 'RESOLVED'] as const)
+        .enum(['APPROVED', 'REJECTED', 'RESOLVED'] as const, {
+            required_error: 'Resolution status is required',
+            invalid_type_error: 'Invalid resolution status',
+        })
         .optional()
         .describe('Resolution decision'),
     resolutionNotes: z.string().optional().describe('Notes explaining the resolution'),
     approverAmount: z
         .string()
         .optional()
+        .refine((val) => val === undefined || !Number.isNaN(Number(val)), 'Must be a valid number')
+        .refine((val) => val === undefined || Number(val) >= 0, 'Amount must be a non-negative number')
         .describe('Amount allocated to the approver'),
     serviceProviderAmount: z
         .string()
         .optional()
+        .refine((val) => val === undefined || !Number.isNaN(Number(val)), 'Must be a valid number')
+        .refine((val) => val === undefined || Number(val) >= 0, 'Amount must be a non-negative number')
         .describe('Amount allocated to the service provider'),
     escrowContractAddress: addressValidator.optional().describe('Escrow contract address'),
 }).refine(
     (data) => {
+        const isFileTypeComplete = (data: any) => {
+            return !!data.escrowId && !!data.milestoneId && !!data.filerAddress && 
+                   !!data.disputeReason && !!data.escrowParticipantId;
+        };
+        
+        const isResolveTypeComplete = (data: any) => {
+            return !!data.disputeId && !!data.mediatorId && !!data.resolution && 
+                   !!data.resolutionNotes && !!data.approverAmount && !!data.serviceProviderAmount;
+        };
+
         // If type is 'file', require file-specific fields
         if (data.type === 'file') {
-            return !!data.escrowId && !!data.milestoneId && !!data.filerAddress && !!data.disputeReason && !!data.escrowParticipantId;
+            return isFileTypeComplete(data);
         }
         // If type is 'resolve', require resolve-specific fields
         if (data.type === 'resolve') {
-            return !!data.disputeId && !!data.mediatorId && !!data.resolution && !!data.resolutionNotes && !!data.approverAmount && !!data.serviceProviderAmount;
+            return isResolveTypeComplete(data);
         }
         return false;
     },

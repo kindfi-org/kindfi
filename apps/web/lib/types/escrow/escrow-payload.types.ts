@@ -39,13 +39,16 @@ export type ChangeMilestoneFlagPayload = Omit<
 }
 
 export type StartDisputePayload = Pick<Escrow, 'contractId'> & {
-	signer: string
+	signer?: string; // Keep for backward compatibility
+	signerAddress?: string; // New property for better security
 }
 
 export type ResolveDisputePayload = Pick<Escrow, 'contractId'> &
 	Partial<Pick<Escrow, 'disputeResolver'>> & {
-		approverFunds: string
-		serviceProviderFunds: string
+		approverFunds: string;
+		serviceProviderFunds: string;
+		signer?: string; // Keep for backward compatibility
+		signerAddress?: string; // New property for better security
 	}
 
 export type FundEscrowPayload = Pick<Escrow, 'amount' | 'contractId'> & {

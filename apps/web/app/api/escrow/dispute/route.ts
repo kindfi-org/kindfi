@@ -97,10 +97,16 @@ export async function POST(req: NextRequest) {
 		}
 
 		// 5. Initiate the dispute on-chain through the Trustless Work API
+		// Create the payload with the correct types
+		const disputePayload = {
+			signerAddress: filerAddress,
+			contractId: escrowContractAddress
+		};
+
 		const escrowResponse = await createEscrowRequest({
 			action: 'startDispute',
 			method: 'POST',
-			data: { signer, contractId: escrowContractAddress },
+			data: disputePayload,
 		})
 
 		if (!escrowResponse.unsignedTransaction) {
@@ -174,7 +180,7 @@ export async function GET(req: NextRequest) {
 			.eq('escrow_id', escrowId)
 
 		if (status) {
-			query = query.eq('status', status.toUpperCase())
+			query = query.eq('status', status.toLowerCase())
 		}
 
 		const { data: disputes, error } = await query.order('created_at', {

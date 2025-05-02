@@ -144,8 +144,7 @@ export interface EvidenceSubmissionPayload {
 
 // Payload for signing transactions (both filing and resolving disputes)
 export interface DisputeSignPayload {
-    unsignedTransaction: string;
-    signer: string;
+    signedTransaction: string; // Changed from unsignedTransaction to signedTransaction
     type: 'file' | 'resolve';
     // For filing a dispute
     escrowId?: string;
