@@ -1,4 +1,5 @@
 import { Text, TouchableOpacity, View } from 'react-native'
+import {SquareArrowOutUpRight, Share, Link2 } from 'lucide-react-native'
 
 export default function SharePanel() {
 	return (
@@ -8,16 +9,17 @@ export default function SharePanel() {
 				Help spread the word about this project
 			</Text>
 
-			<View className="flex-row space-x-6">
-				<TouchableOpacity className="bg-gray-100 p-3 rounded-full mr-2">
-					<Text>☞</Text>
+			<View className="flex-row justify-between">
+				<TouchableOpacity className="border p-3 rounded-full mr-2">
+					<Link2 />
 				</TouchableOpacity>
-				<TouchableOpacity className="bg-gray-100 p-3 rounded-full">
-					<Text>☑</Text>
+				<TouchableOpacity className="border p-3 rounded-full">
+				<SquareArrowOutUpRight/>
 				</TouchableOpacity>
-				<TouchableOpacity className="bg-gray-100 p-3 rounded">
-					<Text>Share</Text>
-				</TouchableOpacity>
+				<TouchableOpacity className="border px-12 py-3 rounded flex-row items-center gap-2">
+  <Share size={16} />
+  <Text>Share</Text>
+</TouchableOpacity>
 			</View>
 		</View>
 	)

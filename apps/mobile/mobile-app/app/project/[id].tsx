@@ -38,7 +38,7 @@ export default function ProjectDetailScreen() {
 	}
 
 	return (
-		<View className="flex-1 bg-gray-50">
+		<View className="flex-1 bg-blue-50">
 			<AnimatedScrollView
 				ref={scrollRef}
 				scrollEventThrottle={16}

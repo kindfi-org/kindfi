@@ -1,70 +1,42 @@
-import { Link } from 'expo-router'
-import { useLocalSearchParams } from 'expo-router'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { Link } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { Text, TouchableOpacity, ScrollView, View } from 'react-native';
 
 export default function TabNav() {
-	const { id } = useLocalSearchParams()
-	const { tab = 'overview' } = useLocalSearchParams()
+  const { id } = useLocalSearchParams();
+  const { tab = 'overview' } = useLocalSearchParams();
 
-	const isActive = (tabName: string) => tab === tabName
+  const tabs = [
+    { name: 'Overview', value: 'overview' },
+    { name: 'Details', value: 'details' },
+    { name: 'Team', value: 'team' },
+    { name: 'Updates', value: 'updates' },
+    { name: 'Q&A', value: 'qna' }
+  ];
 
-	return (
-		<View className="flex-row border-b border-gray-200 mt-6">
-			<Link href={`/project/${id}?tab=overview`} asChild>
-				<TouchableOpacity
-					className={`pb-3 px-4 ${isActive('overview') ? 'border-b-2 border-blue-600' : ''}`}
-				>
-					<Text
-						className={`${isActive('overview') ? 'font-bold text-blue-600' : 'text-gray-600'}`}
-					>
-						Overview
-					</Text>
-				</TouchableOpacity>
-			</Link>
-			<Link href={`/project/${id}?tab=details`} asChild>
-				<TouchableOpacity
-					className={`pb-3 px-4 ${isActive('details') ? 'border-b-2 border-blue-600' : ''}`}
-				>
-					<Text
-						className={`${isActive('details') ? 'font-bold text-blue-600' : 'text-gray-600'}`}
-					>
-						Details
-					</Text>
-				</TouchableOpacity>
-			</Link>
-			<Link href={`/project/${id}?tab=team`} asChild>
-				<TouchableOpacity
-					className={`pb-3 px-4 ${isActive('team') ? 'border-b-2 border-blue-600' : ''}`}
-				>
-					<Text
-						className={`${isActive('team') ? 'font-bold text-blue-600' : 'text-gray-600'}`}
-					>
-						Team
-					</Text>
-				</TouchableOpacity>
-			</Link>
-			<Link href={`/project/${id}?tab=updates`} asChild>
-				<TouchableOpacity
-					className={`pb-3 px-4 ${isActive('updates') ? 'border-b-2 border-blue-600' : ''}`}
-				>
-					<Text
-						className={`${isActive('updates') ? 'font-bold text-blue-600' : 'text-gray-600'}`}
-					>
-						Updates
-					</Text>
-				</TouchableOpacity>
-			</Link>
-			<Link href={`/project/${id}?tab=qna`} asChild>
-				<TouchableOpacity
-					className={`pb-3 px-4 ${isActive('qna') ? 'border-b-2 border-blue-600' : ''}`}
-				>
-					<Text
-						className={`${isActive('qna') ? 'font-bold text-blue-600' : 'text-gray-600'}`}
-					>
-						Q&A
-					</Text>
-				</TouchableOpacity>
-			</Link>
-		</View>
-	)
+  return (
+    <View className="border-b border-gray-200 mt-6 pb-1">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+      >
+        <View className="flex-row items-center space-x-2">
+          {tabs.map(({ name, value }) => (
+            <Link key={value} href={`/project/${id}?tab=${value}`} asChild>
+              <TouchableOpacity>
+                <View className={`px-4 py-2 ${tab === value ? 'border border-gray-300 rounded-lg bg-gray-50' : ''}`}>
+                  <Text
+                    className={`text-sm ${tab === value ? 'font-semibold text-black' : 'font-medium text-gray-500'}`}
+                  >
+                    {name}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </Link>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
+  );
 }

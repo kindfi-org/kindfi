@@ -1,4 +1,5 @@
 import { HR } from '@expo/html-elements'
+import { Heart } from 'lucide-react-native'
 import { MotiView } from 'moti'
 import { Text, TextInput, TouchableOpacity, View } from 'react-native'
 
@@ -22,7 +23,7 @@ export default function FundingPanel() {
 				/>
 			</View>
 
-			<View className="flex-row space-x-12 mb-4">
+			<View className="flex-row justify-between mb-4">
 				<View>
 					<Text className="text-gray-600">Investors</Text>
 					<Text className="font-bold">40</Text>
@@ -32,7 +33,7 @@ export default function FundingPanel() {
 					<Text className="font-bold">$10</Text>
 				</View>
 			</View>
-			<View className="flex-row space-x-12 mb-4">
+			<View className="flex-row justify-between mb-4">
 				<View>
 					<Text className="text-gray-600">Closing Date</Text>
 					<Text className="font-bold">14 days</Text>
@@ -65,9 +66,10 @@ export default function FundingPanel() {
 			</TouchableOpacity>
 
 			<TouchableOpacity className="border border-gray-200 py-3 rounded-lg mb-8">
-				<Text className="text-black text-center font-bold">
-					Follow this project
-				</Text>
+				<View className="flex-row items-center justify-center space-x-2">
+					<Heart size={16} />
+					<Text className="text-black font-bold">Follow this project</Text>
+				</View>
 			</TouchableOpacity>
 
 			<HR />

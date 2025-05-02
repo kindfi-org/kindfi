@@ -1,5 +1,5 @@
 import { HR } from '@expo/html-elements'
-import { Check, ChevronDown, ChevronUp } from 'lucide-react-native'
+import { FileText, ChevronDown, ChevronUp, CircleCheck, Download, StretchHorizontal, Building2, Factory, Building } from 'lucide-react-native'
 import { useState } from 'react'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
 
@@ -7,12 +7,12 @@ const DropdownSection = ({ title, items }) => {
 	const [isOpen, setIsOpen] = useState(false)
 
 	return (
-		<View className="border border-gray-200 rounded-lg p-4 mb-4">
+		<View className="border border-gray-200 p-4">
 			<TouchableOpacity
 				className="flex-row justify-between items-center"
 				onPress={() => setIsOpen(!isOpen)}
 			>
-				<Text className="text-xl font-bold">{title}</Text>
+				<Text className="text-lg font-medium">{title}</Text>
 				{isOpen ? (
 					<ChevronUp size={20} color="#6b7280" />
 				) : (
@@ -74,14 +74,14 @@ export default function Details() {
 		{ label: 'Post-money valuation', value: '$13.5M' },
 	]
 
-	const minInvestmentItems = [{ label: 'Amount', value: '$10,000' }]
+	const minInvestmentItems = [{ label: 'Minimum investment amount', value: '$10,000' }]
 
-	const securityTypeItems = [{ label: 'Type', value: 'SAFE' }]
+	const securityTypeItems = [{ label: 'SAFE (Simple Agreement for Future Equity) with a valuation cap of $12M and no discount.' }]
 
 	const investorPerksItems = [
-		{ label: 'Early access', value: 'Product previews' },
-		{ label: 'Updates', value: 'Quarterly reports' },
-		{ label: 'Other benefits', value: 'Founder meetings' },
+		{ label: 'Quarterly investor updates' },
+		{ label: 'Early access to product demos' },
+		{ label: 'Invitation to annual investor summit' },
 	]
 
 	return (
@@ -132,67 +132,77 @@ export default function Details() {
 					storage systems, with a focus on the following revenue streams:
 				</Text>
 				<View className="flex-row flex-wrap justify-between">
-					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4 items-center">
-						<Image
-							source={applicationImages.dataCenter}
-							style={{ width: 64, height: 64, marginBottom: 8 }}
-						/>
-						<Text className="font-bold text-lg mb-1 text-center">
-							Data Centers
-						</Text>
-						<Text className="text-gray-600 text-center">
-							Uninterruptible power supply with lower TCO than traditional
-							battery systems.
-						</Text>
+					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4">
+						<View className="flex-row items-start">
+
+							<View className="border border-blue-200 rounded-full p-2 mr-3 bg-blue-50">
+								<StretchHorizontal className="text-blue-500" size={20} />
+							</View>
+
+							<View className="flex-1">
+								<Text className="font-bold text-lg mb-1">Data Centers</Text>
+								<Text className="text-gray-600">
+									Uninterruptible power supply with lower TCO than traditional
+									battery systems.
+								</Text>
+							</View>
+						</View>
 					</View>
 
-					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4 items-center">
-						<Image
-							source={applicationImages.utilities}
-							style={{ width: 64, height: 64, marginBottom: 8 }}
-						/>
-						<Text className="font-bold text-lg mb-1 text-center">
-							Utilities
-						</Text>
-						<Text className="text-gray-600 text-center">
-							Grid-scale energy storage for renewable energy integration and
-							frequency regulation.
-						</Text>
+					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4">
+						<View className="flex-row items-start">
+							<View className="border border-green-200 rounded-full p-2 mr-3 bg-green-50">
+								<Building2 className="text-green-500" size={20} />
+							</View>
+
+							<View className="flex-1">
+								<Text className="font-bold text-lg mb-1">Utilities</Text>
+								<Text className="text-gray-600">
+									Grid-scale energy storage for renewable energy integration and
+									frequency regulation.
+								</Text>
+							</View>
+						</View>
 					</View>
 
-					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4 items-center">
-						<Image
-							source={applicationImages.manufacturing}
-							style={{ width: 64, height: 64, marginBottom: 8 }}
-						/>
-						<Text className="font-bold text-lg mb-1 text-center">
-							Manufacturing
-						</Text>
-						<Text className="text-gray-600 text-center">
-							Energy storage to reduce peak demand charges and provide backup
-							power.
-						</Text>
+					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4">
+						<View className="flex-row items-start">
+							<View className="border border-yellow-200 rounded-full p-2 mr-3 bg-yellow-50">
+								<Factory className="text-yellow-500" size={20} />
+							</View>
+
+							<View className="flex-1">
+								<Text className="font-bold text-lg mb-1">Manufacturing</Text>
+								<Text className="text-gray-600">
+									Energy storage to reduce peak demand charges and provide backup
+									power.
+								</Text>
+							</View>
+						</View>
 					</View>
 
-					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4 items-center">
-						<Image
-							source={applicationImages.commercial}
-							style={{ width: 64, height: 64, marginBottom: 8 }}
-						/>
-						<Text className="font-bold text-lg mb-1 text-center">
-							Commercial Buildings
-						</Text>
-						<Text className="text-gray-600 text-center">
-							Behind-the-meter storage for demand charge reduction and emergency
-							backup.
-						</Text>
+					<View className="w-[48%] bg-gray-50 p-4 rounded-lg mb-4">
+						<View className="flex-row items-start">
+							<View className="border border-purple-200 rounded-full p-2 mr-3 bg-purple-50">
+								<Building className="text-purple-500" size={20} />
+							</View>
+
+							<View className="flex-1">
+								<Text className="font-bold text-lg mb-1">Commercial Buildings</Text>
+								<Text className="text-gray-600">
+									Behind-the-meter storage for demand charge reduction and emergency
+									backup.
+								</Text>
+							</View>
+						</View>
 					</View>
+
 				</View>
 			</View>
 
 			<HR />
 
-			<View className="mb-6">
+			<View className="mb-6 mt-6">
 				<Text className="font-extrabold mb-1">Market Opportunity</Text>
 				<Text className="text-black">
 					The global energy storage market is projected to grow from $211
@@ -209,7 +219,7 @@ export default function Details() {
 
 			<HR />
 
-			<View className="mb-6">
+			<View className="mb-6 mt-6">
 				<Text className="font-extrabold mb-1">Technology</Text>
 				<Text className="text-gray-600">
 					Our proprietary flywheel technology uses advanced composite materials
@@ -221,14 +231,14 @@ export default function Details() {
 						</View>
 					))}
 				</Text>
-				<View className="mb-8">
-					<Text className="text-2xl font-bold mb-4">
+				<View className="mb-6 mt-6">
+					<Text className="font-extrabold mb-4">
 						Competitive Advantages
 					</Text>
 
 					<View className="flex-row items-start mb-3">
-						<Check
-							className="text-green-500 mr-2 mt-1 border border-green-500 rounded-full"
+						<CircleCheck
+							className="text-green-500 mr-2 mt-1"
 							size={20}
 						/>
 						<View className="flex-1">
@@ -241,8 +251,8 @@ export default function Details() {
 					</View>
 
 					<View className="flex-row items-start mb-3">
-						<Check
-							className="text-green-500 mr-2 mt-1 border border-green-500 rounded-full"
+						<CircleCheck
+							className="text-green-500 mr-2 mt-1"
 							size={20}
 						/>
 						<View className="flex-1">
@@ -254,8 +264,8 @@ export default function Details() {
 					</View>
 
 					<View className="flex-row items-start mb-3">
-						<Check
-							className="text-green-500 mr-2 mt-1 border border-green-500 rounded-full"
+						<CircleCheck
+							className="text-green-500 mr-2 mt-1"
 							size={20}
 						/>
 						<View className="flex-1">
@@ -267,8 +277,8 @@ export default function Details() {
 					</View>
 
 					<View className="flex-row items-start">
-						<Check
-							className="text-green-500 mr-2 mt-1 border border-green-500 rounded-full"
+						<CircleCheck
+							className="text-green-500 mr-2 mt-1"
 							size={20}
 						/>
 						<View className="flex-1">
@@ -284,8 +294,8 @@ export default function Details() {
 
 			<HR />
 
-			<View className="mb-8">
-				<Text className="text-2xl font-bold mb-4">Traction & Milestones</Text>
+			<View className="mb-6 mt-6">
+				<Text className="font-extrabold mb-3">Traction & Milestones</Text>
 
 				<View className="space-y-6">
 					<View className="flex-row">
@@ -382,22 +392,25 @@ export default function Details() {
 
 				<View className="border-b border-gray-100 pb-3 mb-3">
 					<TouchableOpacity className="flex-row justify-between items-center">
+						< FileText className="text-gray-600" />
 						<Text className="text-gray-600">SPV Subscription Agreement</Text>
-						<ChevronDown size={16} color="#6b7280" />
+						<Download size={16} color="#6b7280" />
 					</TouchableOpacity>
 				</View>
 
 				<View className="border-b border-gray-100 pb-3 mb-3">
 					<TouchableOpacity className="flex-row justify-between items-center">
+						< FileText className="text-gray-600" />
 						<Text className="text-gray-600">SAFE Agreement</Text>
-						<ChevronDown size={16} color="#6b7280" />
+						<Download size={16} color="#6b7280" />
 					</TouchableOpacity>
 				</View>
 
 				<View>
 					<TouchableOpacity className="flex-row justify-between items-center">
+						< FileText className="text-gray-600" />
 						<Text className="text-gray-600">Pitch Deck</Text>
-						<ChevronDown size={16} color="#6b7280" />
+						<Download size={16} color="#6b7280" />
 					</TouchableOpacity>
 				</View>
 			</View>
