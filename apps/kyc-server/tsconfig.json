@@ -1,7 +1,8 @@
 {
 	"compilerOptions": {
 		// Enable latest features
-		"lib": ["ESNext", "DOM"],
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"types": ["@testing-library/jest-dom"],
 		"target": "ESNext",
 		"module": "ESNext",
 		"moduleDetection": "force",

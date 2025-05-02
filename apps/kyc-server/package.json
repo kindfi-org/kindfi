@@ -8,7 +8,8 @@
 	"module": "src/index.tsx",
 	"scripts": {
 		"dev": "bun --hot src/index.tsx",
-		"start": "NODE_ENV=production bun src/index.tsx"
+		"start": "NODE_ENV=production bun src/index.tsx",
+		"build": "bun build ./src/index.tsx --outdir ./dist"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^4.1.2",
@@ -16,6 +17,7 @@
 		"@radix-ui/react-select": "^2.1.6",
 		"@radix-ui/react-slot": "^1.1.2",
 		"@simplewebauthn/server": "^13.1.1",
+		"@services/supabase": "workspace:*",
 		"base64url": "^3.0.1",
 		"bun-plugin-tailwind": "^0.0.14",
 		"class-variance-authority": "^0.7.1",
@@ -25,6 +27,8 @@
 		"react-dom": "^19",
 		"react-hook-form": "^7.54.2",
 		"react-router-dom": "^7.2.0",
+		"socket.io": "^4.7.5",
+		"socket.io-client": "^4.7.5",
 		"tailwind-merge": "^3.0.2",
 		"tailwindcss": "^4.0.9",
 		"tailwindcss-animate": "^1.0.7",
@@ -33,6 +37,8 @@
 	"devDependencies": {
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
-		"@types/bun": "latest"
+		"@types/bun": "latest",
+		"@types/socket.io": "^3.0.2",
+		"@types/socket.io-client": "^3.0.0"
 	}
 }

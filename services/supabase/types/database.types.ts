@@ -84,7 +84,7 @@ export const CommentSchema = z.discriminatedUnion('type', [
     ...baseFields, 
     type: z.literal('answer'), 
     metadata: AnswerMetadataSchema,
-    parentCommentId: z.string().uuid().optional(false) // Override to make required for answers
+    parentCommentId: z.string().uuid() // Required for answers
   }).strict()
 ]).refine(
   data => isOnOrBefore(data.createdAt, data.updatedAt),

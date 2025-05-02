@@ -2,67 +2,62 @@
 
 import type { Session, User } from '@supabase/supabase-js'
 import { createContext, useContext, useEffect, useState } from 'react'
-import { createClient } from '~/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 
 interface AuthContextType {
-	user: User | null
-	isLoading: boolean
+	user: any | null
+	loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType>({
 	user: null,
-	isLoading: true,
+	loading: true,
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-	// Use undefined as initial state to prevent hydration mismatch
-	const [user, setUser] = useState<User | null | undefined>(undefined)
-	const [isLoading, setIsLoading] = useState(true)
-	const supabase = createClient()
+	const [user, setUser] = useState<any | null>(null)
+	const [loading, setLoading] = useState(true)
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		// Move session check to useEffect to avoid hydration mismatch
-		const checkSession = async () => {
-			try {
-				const {
-					data: { session },
-				} = await supabase.auth.getSession()
-				setUser(session?.user ?? null)
-			} catch (error) {
-				console.error('Auth check failed:', error)
-				setUser(null)
-			} finally {
-				setIsLoading(false)
+		try {
+			const supabase = createClient()
+
+			// If using mock client, simulate auth state
+			if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+				setUser({ id: 'mock-user', email: 'mock@example.com' })
+				setLoading(false)
+				return
 			}
-		}
 
-		checkSession()
-
-		const {
-			data: { subscription },
-		} = supabase.auth.onAuthStateChange(
-			(_event: string, session: Session | null) => {
+			// Handle auth state changes
+			const {
+				data: { subscription },
+			} = supabase.auth.onAuthStateChange((_event, session) => {
 				setUser(session?.user ?? null)
-				setIsLoading(false)
-			},
-		)
+				setLoading(false)
+			})
 
-		return () => {
-			subscription.unsubscribe()
+			return () => {
+				subscription.unsubscribe()
+			}
+		} catch (error) {
+			console.warn('Auth provider error:', error)
+			setUser(null)
+			setLoading(false)
 		}
 	}, [])
 
-	// Don't render until initial auth check is complete
-	if (user === undefined) {
-		return null
-	}
-
 	return (
-		<AuthContext.Provider value={{ user, isLoading }}>
+		<AuthContext.Provider value={{ user, loading }}>
 			{children}
 		</AuthContext.Provider>
 	)
 }
 
-export const useAuth = () => useContext(AuthContext)
+export const useAuth = () => {
+	const context = useContext(AuthContext)
+	if (!context) {
+		throw new Error('useAuth must be used within an AuthProvider')
+	}
+	return context
+}

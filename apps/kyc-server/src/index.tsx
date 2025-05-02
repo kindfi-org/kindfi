@@ -4,6 +4,8 @@ import { serve } from 'bun'
 import type { Server, ServerWebSocket } from 'bun'
 import { routes } from './routes'
 import { buildClient } from './utils/buildClient'
+import { createServer } from 'http'
+import { WebSocketServer } from './websocket/server'
 
 interface ClientData {
 	clientId: string
@@ -216,6 +218,15 @@ async function startServer() {
 	// Start the server
 	const server = serve(serverOptions)
 	console.log(`🚀 Server running at http://localhost:${server.port}/`)
+
+	const httpServer = createServer()
+	const wsServer = new WebSocketServer(httpServer)
+
+	const port = process.env.PORT || 4000
+
+	httpServer.listen(port, () => {
+		console.log(`KYC Server listening on port ${port}`)
+	})
 }
 
 // Start the server

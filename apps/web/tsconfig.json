@@ -3,6 +3,7 @@
 		"target": "ES2017",
 		"lib": ["dom", "dom.iterable", "esnext"],
 		"allowJs": true,
+		"types": ["@testing-library/jest-dom"],
 		"skipLibCheck": true,
 		"strict": true,
 		"noEmit": true,
@@ -19,8 +20,10 @@
 			}
 		],
 		"paths": {
-			"~/*": ["./*"]
-		}
+			"~/*": ["./src/*"],
+			"@/*": ["./src/*"]
+		},
+		"baseUrl": "."
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
 	"exclude": ["node_modules"]
