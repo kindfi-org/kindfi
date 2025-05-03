@@ -13,14 +13,17 @@ const StatCard = styled(Box)<{ backgroundColor: string }>`
 interface ImpactStatProps {
   label: string;
   backgroundColor: string;
+  onPress?: () => void; // Add optional onPress prop
 }
 
-const ImpactStat = ({ label, backgroundColor }: ImpactStatProps) => {
+const ImpactStat = ({ label, backgroundColor, onPress }: ImpactStatProps) => {
   return (
-    <StatCard backgroundColor={backgroundColor} onTouchEnd={() => console.log('Stat tapped')}>
+    <StatCard backgroundColor={backgroundColor} onTouchEnd={onPress}>
       <Text color="$white" fontSize="$lg" fontWeight="bold" textAlign="center">
         {label}
       </Text>
     </StatCard>
   );
 };
+
+export default ImpactStat;

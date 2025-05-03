@@ -6,8 +6,41 @@ import ImpactFeatureCard from './impact-feature-card';
 import ImpactStat from './impact-stat';
 import styled from 'styled-components/native';
 
+// Define constants for featureCards and impactStats
+const FEATURE_CARDS = [
+  {
+    title: 'Every Contribution, Recorded On-Chain',
+    stat: '$1.7B in regional funding',
+    backgroundColor: '#2563eb',
+    onPress: () => alert('Contributions card tapped'),
+  },
+  {
+    title: 'Every Project, Fully Reviewed',
+    stat: '100% of campaigns',
+    backgroundColor: '#16a34a',
+    onPress: () => alert('Projects card tapped'),
+  },
+  {
+    title: 'From Crypto to Real Change',
+    bullets: [
+      'Real-Time Impact Metrics',
+      'Proof-backed fund releases',
+      'Transparent governance',
+      'Built on Stellar smart contracts',
+    ],
+    backgroundColor: '#d97706',
+    onPress: () => alert('Crypto card tapped'),
+  },
+];
+
+const IMPACT_STATS = [
+  { label: '100% Verified Projects', backgroundColor: '#4b5563', onPress: () => alert('Verified Projects tapped') },
+  { label: '0% Hidden Fees', backgroundColor: '#4b5563', onPress: () => alert('Hidden Fees tapped') },
+  { label: '24/7 Project Transparency', backgroundColor: '#4b5563', onPress: () => alert('Transparency tapped') },
+];
+
 const ExplainerCard = styled(Box)`
-  background-color: #1e3a8a;
+  background-color: ${({ theme }) => theme?.colors?.primary?.dark || '#1e3a8a'};
   padding: 16px;
   border-radius: 12px;
   align-items: center;
@@ -15,34 +48,8 @@ const ExplainerCard = styled(Box)`
 `;
 
 const LatamImpactSection = () => {
-  const featureCards = [
-    {
-      title: 'Every Contribution, Recorded On-Chain',
-      stat: '$1.7B in regional funding',
-      backgroundColor: '#2563eb',
-    },
-    {
-      title: 'Every Project, Fully Reviewed',
-      stat: '100% of campaigns',
-      backgroundColor: '#16a34a',
-    },
-    {
-      title: 'From Crypto to Real Change',
-      bullets: [
-        'Real-Time Impact Metrics',
-        'Proof-backed fund releases',
-        'Transparent governance',
-        'Built on Stellar smart contracts',
-      ],
-      backgroundColor: '#d97706',
-    },
-  ];
-
-  const impactStats = [
-    { label: '100% Verified Projects', backgroundColor: '#4b5563' },
-    { label: '0% Hidden Fees', backgroundColor: '#4b5563' },
-    { label: '24/7 Project Transparency', backgroundColor: '#4b5563' },
-  ];
+  const featureCards = FEATURE_CARDS;
+  const impactStats = IMPACT_STATS;
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
@@ -66,7 +73,7 @@ const LatamImpactSection = () => {
         <HStack space="md" justifyContent="space-between" flexWrap="wrap">
           {featureCards.map((card, index) => (
             <MotiView
-              key={index}
+              key={`feature-${index}-${card.title.replace(/\s+/g, '-').toLowerCase()}`}
               from={{ opacity: 0, translateY: 20 }}
               animate={{ opacity: 1, translateY: 0 }}
               transition={{ type: 'timing', duration: 500, delay: index * 100 }}
@@ -98,7 +105,7 @@ const LatamImpactSection = () => {
         <HStack space="md" justifyContent="space-between" flexWrap="wrap">
           {impactStats.map((stat, index) => (
             <MotiView
-              key={index}
+              key={`stat-${index}-${stat.label.replace(/\s+/g, '-').toLowerCase()}`}
               from={{ opacity: 0, translateY: 20 }}
               animate={{ opacity: 1, translateY: 0 }}
               transition={{ type: 'timing', duration: 500, delay: index * 100 + 400 }}
@@ -112,3 +119,5 @@ const LatamImpactSection = () => {
     </ScrollView>
   );
 };
+
+export default LatamImpactSection;

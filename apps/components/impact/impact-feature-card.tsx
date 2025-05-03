@@ -16,11 +16,12 @@ interface ImpactFeatureCardProps {
   stat?: string;
   bullets?: string[];
   backgroundColor: string;
+  onPress?: () => void;
 }
 
-const ImpactFeatureCard = ({ title, stat, bullets, backgroundColor }: ImpactFeatureCardProps) => {
+const ImpactFeatureCard = ({ title, stat, bullets, backgroundColor, onPress }: ImpactFeatureCardProps) => {
   return (
-    <Card backgroundColor={backgroundColor} onTouchEnd={() => console.log('Card tapped')}>
+    <Card backgroundColor={backgroundColor} onTouchEnd={onPress}>
       <Text color="$white" fontSize="$md" fontWeight="bold">
         {title}
       </Text>
@@ -32,7 +33,12 @@ const ImpactFeatureCard = ({ title, stat, bullets, backgroundColor }: ImpactFeat
       {bullets && (
         <Box mt={8}>
           {bullets.map((bullet, index) => (
-            <Text key={index} color="$white" fontSize="$sm" ml={8}>
+            <Text
+              key={`${index}-${bullet.substring(0, 10)}`} // Use a more unique key
+              color="$white"
+              fontSize="$sm"
+              ml={8}
+            >
               • {bullet}
             </Text>
           ))}
@@ -41,3 +47,6 @@ const ImpactFeatureCard = ({ title, stat, bullets, backgroundColor }: ImpactFeat
     </Card>
   );
 };
+
+export default ImpactFeatureCard;
+
