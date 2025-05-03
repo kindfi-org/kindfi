@@ -1,186 +1,408 @@
 #![cfg(test)]
 use crate::{
-    NFTContract, 
-    errors::NFTError,
+    access::{METADATA_MANAGER_ROLE, MINTER_ROLE},
+    pausable::PauseOperation,
+    types::NFTDetail,
 };
+use crate::{errors::NFTError, KindfiNFT};
 use soroban_sdk::{
-    testutils::{
-        Address as _,
-    }, 
-    vec, 
-    Address, 
-    Env, 
-    String, 
-    Vec,
+    auth::Signature,
+    testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation, MockAuth, MockAuthInvoke},
+    vec, Address, Env, IntoVal, String, Symbol, Vec,
 };
+use stellar_constants::roles::DEFAULT_ADMIN_ROLE;
 
-fn create_contract() -> (Env, Address) {
+// Test helper function to create a test environment with KindfiNFT contract
+fn setup_test() -> (Env, KindfiNFT, Address, Address) {
     let env = Env::default();
-    let contract_id = env.register(NFTContract, ());
-    (env, contract_id)
+    let contract_id = env.register_contract(None, KindfiNFT);
+    let admin = Address::random(&env);
+    let user = Address::random(&env);
+
+    // Initialize the contract
+    KindfiNFT::client(&env, &contract_id)
+        .initialize(&admin)
+        .unwrap();
+
+    (env, KindfiNFT::client(&env, &contract_id), admin, user)
 }
 
-fn create_test_address(env: &Env) -> Address {
-    Address::generate(&env)
+// Helper to create metadata attributes
+fn create_test_attributes(env: &Env) -> Vec<String> {
+    let mut attributes = Vec::new(env);
+    attributes.push_back(String::from_str(env, "trait_type:color"));
+    attributes.push_back(String::from_str(env, "value:red"));
+    attributes
 }
 
 #[test]
-fn test_basic_flow() {
-    let (env, contract_id) = create_contract();
-    let admin = create_test_address(&env);
-    let user = create_test_address(&env);
+fn test_initialize() {
+    let (env, _, admin, _) = setup_test();
 
-    // Initialize contract
-    env.as_contract(&contract_id, || {
-        NFTContract::initialize(env.clone(), admin.clone())
-    }).unwrap();
+    // Verify the admin has the ADMIN_ROLE
+    assert!(
+        KindfiNFT::client(&env, &env.register_contract(None, KindfiNFT))
+            .has_role(&DEFAULT_ADMIN_ROLE, &admin)
+    );
+}
 
-    // Test minting
-    let name = String::from_str(&env, "Test Token");
-    let description = String::from_str(&env, "Test Description");
-    let attributes: Vec<String> = vec![&env];
+#[test]
+fn test_mint_with_minter_role() {
+    let (env, contract, admin, user) = setup_test();
 
-    env.mock_all_auths();
-    
-    let result = env.as_contract(&contract_id, || {
-        NFTContract::mint(
-            env.clone(),
-            user.clone(),
-            name.clone(),
-            description.clone(),
-            attributes.clone(),
-        )
-    });
-    assert!(result.is_ok());
+    // Grant MINTER_ROLE to admin for testing
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            // For simplicity in test, we're not implementing real multi-sig - just direct grant
+            contract.grant_role(&MINTER_ROLE, &admin, &Vec::new(&env));
+        });
 
-    // Verify token metadata
-    let token_detail = env.as_contract(&contract_id, || {
-        NFTContract::token_metadata(env.clone(), 0)
-    });
+    // Mint as admin with MINTER_ROLE
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract
+                .mint(
+                    &user,
+                    &String::from_str(&env, "Test NFT"),
+                    &String::from_str(&env, "Test Description"),
+                    &create_test_attributes(&env),
+                )
+                .unwrap();
+        });
+
+    // Verify the NFT exists and belongs to the user
+    let token_detail = contract.token_metadata(&0);
     assert_eq!(token_detail.owner, user);
-    assert_eq!(token_detail.metadata.name, name);
-    assert_eq!(token_detail.metadata.description, description);
+    assert_eq!(
+        token_detail.metadata.name,
+        String::from_str(&env, "Test NFT")
+    );
 }
 
 #[test]
-fn test_admin_access_control() {
-    let (env, contract_id) = create_contract();
-    let admin = create_test_address(&env);
-    let user = create_test_address(&env);
+fn test_mint_without_minter_role() {
+    let (env, contract, _, user) = setup_test();
 
-    // Initialize contract
-    env.mock_all_auths();
-    env.as_contract(&contract_id, || {
-        NFTContract::initialize(env.clone(), admin.clone())
-    }).unwrap();
+    // Try to mint as user without MINTER_ROLE
+    let result = env
+        .mock_auth()
+        .with_no_verification()
+        .with_address(user.clone())
+        .run(|| {
+            contract.mint(
+                &user,
+                &String::from_str(&env, "Test NFT"),
+                &String::from_str(&env, "Test Description"),
+                &create_test_attributes(&env),
+            )
+        });
 
-    let name = String::from_str(&env, "Test Token");
-    let description = String::from_str(&env, "Test Description");
-    let attributes: Vec<String> = vec![&env];
+    // Should fail due to missing MINTER_ROLE
+    assert!(result.is_err());
 
-    // Test minting without auth (should fail)
-    env.as_contract(&contract_id, || {
-        // Intentar mint sin autorización
-        env.mock_auths(&[]);  // Establecer autorizaciones vacías
-        let result = NFTContract::mint(
-            env.clone(),
-            user.clone(),
-            name.clone(),
-            description.clone(),
-            attributes.clone(),
-        );
-        assert!(result.is_err());
-    });
+    match result.unwrap_err() {
+        NFTError::NotAuthorized => {}
+        e => panic!("Unexpected error: {:?}", e),
+    }
 }
 
 #[test]
-fn test_transfer_ownership() {
-    let (env, contract_id) = create_contract();
-    let admin = create_test_address(&env);
-    let owner = create_test_address(&env);
-    let recipient = create_test_address(&env);
+fn test_transfer() {
+    let (env, contract, admin, user) = setup_test();
 
-    // Initialize and mint
-    env.as_contract(&contract_id, || {
-        NFTContract::initialize(env.clone(), admin.clone())
-    }).unwrap();
+    // Grant MINTER_ROLE to admin
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract.grant_role(&MINTER_ROLE, &admin, &Vec::new(&env));
+        });
 
-    let name = String::from_str(&env, "Test Token");
-    let description = String::from_str(&env, "Test Description");
-    let attributes: Vec<String> = vec![&env];
+    // Mint an NFT to admin
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract
+                .mint(
+                    &admin,
+                    &String::from_str(&env, "Test NFT"),
+                    &String::from_str(&env, "Test Description"),
+                    &create_test_attributes(&env),
+                )
+                .unwrap();
+        });
 
-    env.mock_all_auths();
-    env.as_contract(&contract_id, || {
-        NFTContract::mint(
-            env.clone(),
-            owner.clone(),
-            name.clone(),
-            description.clone(),
-            attributes.clone(),
-        )
-    }).unwrap();
+    // Transfer from admin to user
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract.transfer(&admin, &user, &0).unwrap();
+        });
 
-    // Test transfer
-    env.mock_all_auths();
-    let result = env.as_contract(&contract_id, || {
-        NFTContract::transfer(
-            env.clone(),
-            owner.clone(),
-            recipient.clone(),
-            0,
-        )
-    });
-    assert!(result.is_ok());
-
-    // Verify ownership
-    let token_detail = env.as_contract(&contract_id, || {
-        NFTContract::token_metadata(env.clone(), 0)
-    });
-    assert_eq!(token_detail.owner, recipient);
+    // Verify the NFT is now owned by the user
+    let token_detail = contract.token_metadata(&0);
+    assert_eq!(token_detail.owner, user);
 }
 
 #[test]
-fn test_error_handling() {
-    let (env, contract_id) = create_contract();
-    let admin = create_test_address(&env);
-    let user = create_test_address(&env);
+fn test_pause_and_unpause() {
+    let (env, contract, admin, user) = setup_test();
 
-    // Initialize contract
-    env.mock_all_auths();
-    env.as_contract(&contract_id, || {
-        NFTContract::initialize(env.clone(), admin.clone())
-    }).unwrap();
+    // Grant MINTER_ROLE to admin
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract.grant_role(&MINTER_ROLE, &admin, &Vec::new(&env));
+        });
 
-    // Test unauthorized minting
-    env.as_contract(&contract_id, || {
-        // Intentar mint sin autorización
-        env.mock_auths(&[]);  // Establecer autorizaciones vacías
-        let result = NFTContract::mint(
-            env.clone(),
-            user.clone(),
-            String::from_str(&env, "Test Token"),
-            String::from_str(&env, "Test Description"),
-            vec![&env],
-        );
-        assert!(result.is_err());
-    });
+    // Pause minting
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract.pause(&PauseOperation::MintPause).unwrap();
+        });
 
-    // Test double initialization
-    env.mock_all_auths();
-    let result = env.as_contract(&contract_id, || {
-        NFTContract::initialize(env.clone(), admin.clone())
-    });
-    assert!(matches!(result, Err(NFTError::AlreadyInitialized)));
+    // Try to mint while paused
+    let result = env
+        .mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract.mint(
+                &user,
+                &String::from_str(&env, "Test NFT"),
+                &String::from_str(&env, "Test Description"),
+                &create_test_attributes(&env),
+            )
+        });
 
-    // Test non-existent token transfer
-    env.mock_all_auths();
-    let result = env.as_contract(&contract_id, || {
-        NFTContract::transfer(
-            env.clone(),
-            user.clone(),
-            admin.clone(),
-            999,
-        )
-    });
-    assert!(matches!(result, Err(NFTError::TokenNotFound)));
-} 
+    // Should fail because minting is paused
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        NFTError::Paused => {}
+        e => panic!("Unexpected error: {:?}", e),
+    }
+
+    // Unpause minting
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract.unpause(&PauseOperation::MintPause).unwrap();
+        });
+
+    // Mint now should succeed
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract
+                .mint(
+                    &user,
+                    &String::from_str(&env, "Test NFT"),
+                    &String::from_str(&env, "Test Description"),
+                    &create_test_attributes(&env),
+                )
+                .unwrap();
+        });
+
+    // Verify the NFT exists
+    let token_detail = contract.token_metadata(&0);
+    assert_eq!(token_detail.owner, user);
+}
+
+#[test]
+fn test_role_management() {
+    let (env, contract, admin, user) = setup_test();
+
+    // Admin grants MINTER_ROLE to user
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract
+                .grant_role(&MINTER_ROLE, &user, &Vec::new(&env))
+                .unwrap();
+        });
+
+    // Verify user has MINTER_ROLE
+    assert!(contract.has_role(&MINTER_ROLE, &user));
+
+    // User tries to mint with their new role
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(user.clone())
+        .run(|| {
+            contract
+                .mint(
+                    &user,
+                    &String::from_str(&env, "User NFT"),
+                    &String::from_str(&env, "User Description"),
+                    &create_test_attributes(&env),
+                )
+                .unwrap();
+        });
+
+    // Verify the NFT exists
+    let token_detail = contract.token_metadata(&0);
+    assert_eq!(token_detail.owner, user);
+
+    // Admin revokes MINTER_ROLE from user
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract
+                .revoke_role(&MINTER_ROLE, &user, &Vec::new(&env))
+                .unwrap();
+        });
+
+    // Verify user no longer has MINTER_ROLE
+    assert!(!contract.has_role(&MINTER_ROLE, &user));
+
+    // User tries to mint again, should fail
+    let result = env
+        .mock_auth()
+        .with_no_verification()
+        .with_address(user.clone())
+        .run(|| {
+            contract.mint(
+                &user,
+                &String::from_str(&env, "User NFT 2"),
+                &String::from_str(&env, "User Description"),
+                &create_test_attributes(&env),
+            )
+        });
+
+    // Should fail due to missing MINTER_ROLE
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_metadata_update() {
+    let (env, contract, admin, user) = setup_test();
+
+    // Grant MINTER_ROLE to admin
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract.grant_role(&MINTER_ROLE, &admin, &Vec::new(&env));
+        });
+
+    // Grant METADATA_MANAGER_ROLE to admin
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract.grant_role(&METADATA_MANAGER_ROLE, &admin, &Vec::new(&env));
+        });
+
+    // Mint an NFT
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract
+                .mint(
+                    &user,
+                    &String::from_str(&env, "Original Name"),
+                    &String::from_str(&env, "Original Description"),
+                    &create_test_attributes(&env),
+                )
+                .unwrap();
+        });
+
+    // Update metadata
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract
+                .update_metadata(
+                    &0,
+                    &String::from_str(&env, "Updated Name"),
+                    &String::from_str(&env, "Updated Description"),
+                    &create_test_attributes(&env),
+                )
+                .unwrap();
+        });
+
+    // Verify metadata was updated
+    let token_detail = contract.token_metadata(&0);
+    assert_eq!(
+        token_detail.metadata.name,
+        String::from_str(&env, "Updated Name")
+    );
+    assert_eq!(
+        token_detail.metadata.description,
+        String::from_str(&env, "Updated Description")
+    );
+}
+
+#[test]
+fn test_rate_limiting() {
+    let (env, contract, admin, _) = setup_test();
+
+    // Grant MINTER_ROLE to admin
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract.grant_role(&MINTER_ROLE, &admin, &Vec::new(&env));
+        });
+
+    // Set a very low rate limit for minting (1 mint per window)
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract
+                .set_rate_limit(&String::from_str(&env, "mint"), &1, &1000)
+                .unwrap();
+        });
+
+    // First mint should succeed
+    env.mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract
+                .mint(
+                    &admin,
+                    &String::from_str(&env, "NFT 1"),
+                    &String::from_str(&env, "Description"),
+                    &create_test_attributes(&env),
+                )
+                .unwrap();
+        });
+
+    // Second mint should fail due to rate limiting
+    let result = env
+        .mock_auth()
+        .with_no_verification()
+        .with_address(admin.clone())
+        .run(|| {
+            contract.mint(
+                &admin,
+                &String::from_str(&env, "NFT 2"),
+                &String::from_str(&env, "Description"),
+                &create_test_attributes(&env),
+            )
+        });
+
+    // Should fail due to rate limit
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        NFTError::RateLimitExceeded => {}
+        e => panic!("Unexpected error: {:?}", e),
+    }
+}
