@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  mock-blockchain:
+    build: .
+    ports:
+      - "3800:3800"
+    environment:
+      - PORT=3800
+      - DELAY=500
+      - ERROR_RATE=0.1
+    volumes:
+      - ./src:/app/src
+    command: bun --watch src/index.ts
