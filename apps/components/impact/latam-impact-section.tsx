@@ -73,7 +73,7 @@ const LatamImpactSection = () => {
         <HStack space="md" justifyContent="space-between" flexWrap="wrap">
           {featureCards.map((card, index) => (
             <MotiView
-              key={`feature-${index}-${card.title.replace(/\s+/g, '-').toLowerCase()}`}
+              key={`feature-${index}-${card.title.replace(/\s+/g, '-').toLowerCase()}`} // Updated key
               from={{ opacity: 0, translateY: 20 }}
               animate={{ opacity: 1, translateY: 0 }}
               transition={{ type: 'timing', duration: 500, delay: index * 100 }}
