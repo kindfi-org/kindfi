@@ -177,9 +177,7 @@ export const disputeSignSchema = z.object({
         return false;
     },
     {
-        message: (data) => data.type === 'file'
-            ? 'Filing a dispute requires escrowId, milestoneId, filerAddress, disputeReason, and escrowParticipantId'
-            : 'Resolving a dispute requires disputeId, mediatorId, resolution, resolutionNotes, approverAmount, and serviceProviderAmount',
+        message: 'Required fields missing for the specified transaction type',
         path: ['type'],
     }
 );

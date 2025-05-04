@@ -15,7 +15,7 @@ export type EscrowPayload = Omit<
 >
 
 // Re-export the types from Supabase service for backward compatibility
-export { 
+export type { 
     DisputePayload,
     DisputeResolutionPayload,
     MediatorAssignmentPayload,
