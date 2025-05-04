@@ -112,8 +112,9 @@ export async function POST(req: NextRequest) {
       });
 
     if (commentError) {
-      throw new AppError(`Failed to add review comments: ${commentError.message}`,
-         500,
+      throw new AppError(
+        `Failed to add review comments: ${commentError.message}`,
+        500,
         commentError,
       );
     }
@@ -128,7 +129,11 @@ export async function POST(req: NextRequest) {
       });
 
     if (notificationError) {
-      throw new Error('Failed to send notification');
+      throw new AppError(
+        `Failed to send notification: ${notificationError.message}`,
+        500,
+        notificationError,
+      );
     }
 
     return NextResponse.json(
@@ -149,8 +154,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (error instanceof SyntaxError && error.message.includes('JSON')) {
+      return NextResponse.json(
+        { error: 'Invalid JSON format in request body' },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json(
-		{ error: 'An unexpected error occurred', details: error instanceof Error ? error.message : String(error) },
+      {
+        error: 'An unexpected error occurred',
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 400 },
     );
   }
