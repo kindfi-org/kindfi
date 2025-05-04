@@ -76,6 +76,46 @@ export const evidenceSubmissionSchema = z.object({
     description: nonEmptyString.describe('Description of the evidence'),
 });
 
+// Define the shape of the dispute sign schema first to avoid circular references
+type DisputeSignSchemaShape = {
+    signedTransaction: z.ZodString;
+    type: z.ZodEnum<['file', 'resolve']>;
+    // For filing a dispute - required if type is 'file'
+    escrowId: z.ZodOptional<z.ZodString>;
+    milestoneId: z.ZodOptional<z.ZodString>;
+    filerAddress: z.ZodOptional<z.ZodString>;
+    disputeReason: z.ZodOptional<z.ZodString>;
+    evidenceUrls: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    escrowParticipantId: z.ZodOptional<z.ZodString>;
+    // For resolving a dispute - required if type is 'resolve'
+    disputeId: z.ZodOptional<z.ZodString>;
+    mediatorId: z.ZodOptional<z.ZodString>;
+    resolution: z.ZodOptional<z.ZodEnum<['APPROVED', 'REJECTED', 'RESOLVED']>>;
+    resolutionNotes: z.ZodOptional<z.ZodString>;
+    approverAmount: z.ZodOptional<z.ZodString>;
+    serviceProviderAmount: z.ZodOptional<z.ZodString>;
+    escrowContractAddress: z.ZodOptional<z.ZodString>;
+};
+
+// Type for the data passed to validation functions
+type DisputeSignData = {
+    signedTransaction: string;
+    type: 'file' | 'resolve';
+    escrowId?: string;
+    milestoneId?: string;
+    filerAddress?: string;
+    disputeReason?: string;
+    evidenceUrls?: string[];
+    escrowParticipantId?: string;
+    disputeId?: string;
+    mediatorId?: string;
+    resolution?: 'APPROVED' | 'REJECTED' | 'RESOLVED';
+    resolutionNotes?: string;
+    approverAmount?: string;
+    serviceProviderAmount?: string;
+    escrowContractAddress?: string;
+};
+
 // Dispute sign schema for the new sign endpoint
 export const disputeSignSchema = z.object({
     signedTransaction: z.string().min(1, 'Signed transaction is required'),
@@ -116,12 +156,12 @@ export const disputeSignSchema = z.object({
     escrowContractAddress: addressValidator.optional().describe('Escrow contract address'),
 }).refine(
     (data) => {
-        const isFileTypeComplete = (data: any) => {
+        const isFileTypeComplete = (data: DisputeSignData): boolean => {
             return !!data.escrowId && !!data.milestoneId && !!data.filerAddress && 
                    !!data.disputeReason && !!data.escrowParticipantId;
         };
         
-        const isResolveTypeComplete = (data: any) => {
+        const isResolveTypeComplete = (data: DisputeSignData): boolean => {
             return !!data.disputeId && !!data.mediatorId && !!data.resolution && 
                    !!data.resolutionNotes && !!data.approverAmount && !!data.serviceProviderAmount;
         };
@@ -137,7 +177,9 @@ export const disputeSignSchema = z.object({
         return false;
     },
     {
-        message: 'Required fields missing for the specified transaction type',
+        message: (data) => data.type === 'file'
+            ? 'Filing a dispute requires escrowId, milestoneId, filerAddress, disputeReason, and escrowParticipantId'
+            : 'Resolving a dispute requires disputeId, mediatorId, resolution, resolutionNotes, approverAmount, and serviceProviderAmount',
         path: ['type'],
     }
 );

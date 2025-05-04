@@ -141,7 +141,16 @@ export async function POST(req: NextRequest) {
 				},
 				{ status: 201 },
 			)
-		} else if (type === 'resolve') {
+		}
+
+		if (type === 'resolve') {
+			// Create a properly typed object for resolution details
+			const resolutionDetails = {
+				approverAmount,
+				serviceProviderAmount,
+				mediatorId
+			};
+
 			// Update the dispute status in the database
 			const { error: updateError } = await supabase
 				.from('escrow_reviews')
@@ -150,11 +159,7 @@ export async function POST(req: NextRequest) {
 					resolution_text: resolutionNotes,
 					reviewed_at: new Date().toISOString(),
 					transaction_hash: txResponse.txHash,
-					review_notes: JSON.stringify({
-						approverAmount,
-						serviceProviderAmount,
-						mediatorId
-					})
+					review_notes: JSON.stringify(resolutionDetails)
 				})
 				.eq('id', disputeId)
 
@@ -233,12 +238,12 @@ export async function POST(req: NextRequest) {
 				},
 				{ status: 200 },
 			)
-		} else {
-			return NextResponse.json(
-				{ error: 'Invalid transaction type' },
-				{ status: 400 },
-			)
 		}
+
+		return NextResponse.json(
+			{ error: 'Invalid transaction type' },
+			{ status: 400 },
+		)
 	} catch (error) {
 		console.error('Dispute Sign Error:', error)
 

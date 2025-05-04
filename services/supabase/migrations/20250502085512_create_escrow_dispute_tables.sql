@@ -15,6 +15,11 @@ CREATE TABLE escrow_reviews (
     transaction_hash TEXT
 );
 
+-- Add indexes for frequently queried columns
+CREATE INDEX escrow_reviews_escrow_id_idx ON escrow_reviews(escrow_id);
+CREATE INDEX escrow_reviews_milestone_id_idx ON escrow_reviews(milestone_id);
+CREATE INDEX escrow_reviews_type_idx ON escrow_reviews(type);
+
 -- Add 'disputed' status to escrow_milestones status enum
 ALTER TABLE escrow_milestones
 DROP CONSTRAINT IF EXISTS escrow_milestones_status_check;
@@ -33,6 +38,9 @@ CREATE TABLE escrow_mediators (
     active BOOLEAN DEFAULT TRUE
 );
 
+-- Add unique constraint for mediator_address
+ALTER TABLE escrow_mediators ADD CONSTRAINT escrow_mediators_mediator_address_key UNIQUE (mediator_address);
+
 -- Create escrow_dispute_assignments table for tracking mediator assignments
 CREATE TABLE escrow_dispute_assignments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -46,11 +54,33 @@ CREATE TABLE escrow_dispute_assignments (
 -- escrow_reviews policies
 ALTER TABLE escrow_reviews ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow read access to escrow_reviews for authenticated users"
+CREATE POLICY "Allow read access to escrow_reviews for participants and mediators"
     ON escrow_reviews
     FOR SELECT
     TO authenticated
-    USING (true);
+    USING (
+        -- Only allow reads if the user is a participant in the escrow contract or an assigned mediator
+        EXISTS (
+            SELECT 1 FROM escrow_contracts ec
+            WHERE ec.id = escrow_id
+            AND (
+                ec.approver_id = auth.uid() OR
+                ec.service_provider_id = auth.uid()
+            )
+        ) OR
+        EXISTS (
+            SELECT 1 FROM escrow_dispute_assignments eda
+            JOIN escrow_mediators em ON eda.mediator_id = em.id
+            WHERE eda.review_id = id
+            AND em.user_id = auth.uid()
+        ) OR
+        -- Allow administrators to read all disputes
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            WHERE ur.user_id = auth.uid()
+            AND ur.role = 'admin'
+        )
+    );
 
 CREATE POLICY "Allow insert access to escrow_reviews for contract participants"
     ON escrow_reviews
