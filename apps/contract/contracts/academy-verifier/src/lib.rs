@@ -45,7 +45,6 @@ impl AcademyVerifier {
     ) -> Result<(), Error> {
         // Prevent re-initialization
         if env.storage().instance().has(&DataKey::ProgressTracker) {
-            // panic_with_error!(&env, Error::AlreadyInitialized);
             return Err(Error::AlreadyInitialized);
         }
 
@@ -65,8 +64,8 @@ impl AcademyVerifier {
             (ACADEMY, INIT),
             InitializedEventData {
                 progress_tracker: progress_tracker.clone(),
-                graduation_nft: graduation_nft.clone(),
                 badge_tracker: badge_tracker.clone(),
+                graduation_nft: graduation_nft.clone(),
             },
         );
 

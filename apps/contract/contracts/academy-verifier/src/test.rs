@@ -326,8 +326,8 @@ fn test_contract_initialized_event() {
                 (symbol_short!("ACADEMY"), symbol_short!("INIT")).into_val(&env),
                 InitializedEventData {
                     progress_tracker: progress_tracker_id.clone(),
-                    graduation_nft: graduation_nft_id.clone(),
-                    badge_tracker: badge_tracker_id.clone()
+                    badge_tracker: badge_tracker_id.clone(),
+                    graduation_nft: graduation_nft_id.clone()
                 }
                 .into_val(&env)
             )

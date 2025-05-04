@@ -9,8 +9,8 @@ pub const INIT: Symbol = symbol_short!("INIT");
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InitializedEventData {
     pub progress_tracker: Address,
-    pub graduation_nft: Address,
     pub badge_tracker: Address,
+    pub graduation_nft: Address,
 }
 
 #[contracttype]
