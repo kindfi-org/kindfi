@@ -1,29 +1,29 @@
-import CategorySelector from "@/components/forms/category-select";
-import InputField from "@/components/forms/input-field";
-import StepHeader from "@/components/forms/step-header";
-import StepNavigation from "@/components/forms/step-navigation";
-import { Box } from "@/components/ui/box";
-import { ScrollView, Platform } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
-import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { MotiView } from "moti";
+import CategorySelector from '@/components/forms/category-select'
+import InputField from '@/components/forms/input-field'
+import StepHeader from '@/components/forms/step-header'
+import StepNavigation from '@/components/forms/step-navigation'
+import { Box } from '@/components/ui/box'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
+import { MotiView } from 'moti'
+import { Controller, useForm } from 'react-hook-form'
+import { Platform, ScrollView } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { z } from 'zod'
 const Step1Schema = z.object({
-	website: z.string().url("Please enter a valid URL"),
-	location: z.string().min(1, "Location is required"),
-	category: z.string().min(1, "Category is required"),
-	description: z.string().min(10, "Description must be at least 10 characters"),
-});
-type Step1FormData = z.infer<typeof Step1Schema>;
+	website: z.string().url('Please enter a valid URL'),
+	location: z.string().min(1, 'Location is required'),
+	category: z.string().min(1, 'Category is required'),
+	description: z.string().min(10, 'Description must be at least 10 characters'),
+})
+type Step1FormData = z.infer<typeof Step1Schema>
 const Step1Details = () => {
-	const isiOS = Platform.OS === "ios";
+	const isiOS = Platform.OS === 'ios'
 	const paddingTop = isiOS
 		? useSafeAreaInsets().top * 2
-		: useSafeAreaInsets().top + 20;
-	const router = useRouter();
+		: useSafeAreaInsets().top + 20
+	const router = useRouter()
 	const {
 		control,
 		handleSubmit,
@@ -31,26 +31,26 @@ const Step1Details = () => {
 	} = useForm<Step1FormData>({
 		resolver: zodResolver(Step1Schema),
 		defaultValues: {
-			website: "",
-			location: "",
-			category: "",
-			description: "",
+			website: '',
+			location: '',
+			category: '',
+			description: '',
 		},
-	});
+	})
 
 	const onSubmit = (data: Step1FormData) => {
-		console.log("Form Data:", data);
-		router.push("/submit-project/step-2-funding");
-	};
+		console.log('Form Data:', data)
+		router.push('/submit-project/step-2-funding')
+	}
 	return (
 		<>
 			<ScrollView
 				contentContainerStyle={{
-					alignItems: "center",
-					justifyContent: "flex-start",
+					alignItems: 'center',
+					justifyContent: 'flex-start',
 					flexGrow: 1,
 					paddingTop: paddingTop,
-					backgroundColor: "#F4F6FB",
+					backgroundColor: '#F4F6FB',
 					paddingHorizontal: 24,
 				}}
 			>
@@ -60,7 +60,7 @@ const Step1Details = () => {
 					<MotiView
 						from={{ opacity: 0, translateY: 20 }}
 						animate={{ opacity: 1, translateY: 0 }}
-						transition={{ type: "timing", duration: 400 }}
+						transition={{ type: 'timing', duration: 400 }}
 					>
 						<Controller
 							control={control}
@@ -83,7 +83,7 @@ const Step1Details = () => {
 					<MotiView
 						from={{ opacity: 0, translateY: 20 }}
 						animate={{ opacity: 1, translateY: 0 }}
-						transition={{ type: "timing", duration: 400 }}
+						transition={{ type: 'timing', duration: 400 }}
 					>
 						<Controller
 							control={control}
@@ -104,7 +104,6 @@ const Step1Details = () => {
 						/>
 					</MotiView>
 
-
 					<Controller
 						control={control}
 						name="category"
@@ -113,8 +112,8 @@ const Step1Details = () => {
 								error={!!errors.category}
 								errorMessage={errors.category?.message}
 								onValueChange={(category) => {
-									console.log("category", category);
-									field.onChange(category);
+									console.log('category', category)
+									field.onChange(category)
 								}}
 							/>
 						)}
@@ -123,7 +122,7 @@ const Step1Details = () => {
 					<MotiView
 						from={{ opacity: 0, translateY: 20 }}
 						animate={{ opacity: 1, translateY: 0 }}
-						transition={{ type: "timing", duration: 400 }}
+						transition={{ type: 'timing', duration: 400 }}
 					>
 						<Controller
 							control={control}
@@ -149,7 +148,7 @@ const Step1Details = () => {
 			</ScrollView>
 			<StatusBar backgroundColor="#F4F6FB" style="light" />
 		</>
-	);
-};
+	)
+}
 
-export default Step1Details;
+export default Step1Details
