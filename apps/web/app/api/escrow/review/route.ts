@@ -112,7 +112,10 @@ export async function POST(req: NextRequest) {
       });
 
     if (commentError) {
-      throw new Error(`Failed to add review comments: ${commentError.message}`);
+      throw new AppError(`Failed to add review comments: ${commentError.message}`,
+         500,
+        commentError,
+      );
     }
 
     // Step 7: Send Notification
@@ -147,7 +150,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Invalid JSON format in request body' },
+		{ error: 'An unexpected error occurred', details: error instanceof Error ? error.message : String(error) },
       { status: 400 },
     );
   }

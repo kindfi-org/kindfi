@@ -7,6 +7,9 @@ CREATE TABLE review_comments (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Add indexes for foreign keys to improve query performance
+CREATE INDEX idx_review_comments_milestone_id ON review_comments(milestone_id);
+CREATE INDEX idx_review_comments_reviewer_id ON review_comments(reviewer_id);
 -- Enabling Row Level Security
 ALTER TABLE review_comments ENABLE ROW LEVEL SECURITY;
 
@@ -25,5 +28,11 @@ CREATE POLICY insert_comments ON review_comments
 -- Creating RLS policy for authenticated users to update their own comments
 CREATE POLICY update_own_comments ON review_comments
     FOR UPDATE
+    TO authenticated
+    USING (reviewer_id = (SELECT auth.uid()));
+
+-- Creating RLS policy for authenticated users to delete their own comments
+CREATE POLICY delete_own_comments ON review_comments
+    FOR DELETE
     TO authenticated
     USING (reviewer_id = (SELECT auth.uid()));
