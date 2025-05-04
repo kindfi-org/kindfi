@@ -1,5 +1,5 @@
-use soroban_sdk::{symbol_short, Address, Env, Symbol};
 use crate::types::TierLevel;
+use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
 pub struct ReputationEvents;
 
@@ -29,7 +29,12 @@ impl ReputationEvents {
         env.events().publish(topics, data);
     }
 
-    pub fn tier_threshold_updated(env: &Env, tier: &TierLevel, old_threshold: u32, new_threshold: u32) {
+    pub fn tier_threshold_updated(
+        env: &Env,
+        tier: &TierLevel,
+        old_threshold: u32,
+        new_threshold: u32,
+    ) {
         let topics = (Self::TIER_THRESHOLD_UPDATED, tier.clone());
         let data = (old_threshold, new_threshold);
         env.events().publish(topics, data);

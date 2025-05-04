@@ -1,5 +1,5 @@
-use soroban_sdk::{Address, Env};
 use crate::types::{DataKey, NFTMetadata, ADMIN_KEY};
+use soroban_sdk::{Address, Env};
 
 pub struct NFTStorage;
 
@@ -14,20 +14,28 @@ impl NFTStorage {
     }
 
     pub fn set_token_owner(env: &Env, token_id: &u32, owner: &Address) {
-        env.storage().instance().set(&DataKey::TokenOwner(*token_id), owner);
+        env.storage()
+            .instance()
+            .set(&DataKey::TokenOwner(*token_id), owner);
     }
 
     pub fn get_token_owner(env: &Env, token_id: &u32) -> Option<Address> {
-        env.storage().instance().get(&DataKey::TokenOwner(*token_id))
+        env.storage()
+            .instance()
+            .get(&DataKey::TokenOwner(*token_id))
     }
 
     pub fn set_token_metadata(env: &Env, token_id: &u32, metadata: &NFTMetadata) {
-        env.storage().instance().set(&DataKey::TokenMetadata(*token_id), metadata);
+        env.storage()
+            .instance()
+            .set(&DataKey::TokenMetadata(*token_id), metadata);
     }
 
     #[allow(dead_code)]
     pub fn get_token_metadata(env: &Env, token_id: &u32) -> Option<NFTMetadata> {
-        env.storage().instance().get(&DataKey::TokenMetadata(*token_id))
+        env.storage()
+            .instance()
+            .get(&DataKey::TokenMetadata(*token_id))
     }
 
     pub fn increment_balance(env: &Env, address: &Address) {
