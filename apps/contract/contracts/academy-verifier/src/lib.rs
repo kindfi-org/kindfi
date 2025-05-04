@@ -7,7 +7,9 @@ mod errors;
 mod events;
 
 use crate::errors::Error;
-use crate::events::{EligibilityVerifiedEventData, InitializedEventData, ACADEMY, CERTIFIED, INITIALIZED};
+use crate::events::{
+    CertificationVerifiedEventData, InitializedEventData, ACADEMY, CERTIFIED, INITIALIZED,
+};
 
 /// Storage keys for the contract
 #[contracttype]
@@ -42,10 +44,11 @@ impl AcademyVerifier {
         progress_tracker: Address,
         badge_tracker: Address,
         graduation_nft: Address,
-    ) {
+    ) -> Result<(), Error> {
         // Prevent re-initialization
         if env.storage().instance().has(&DataKey::ProgressTracker) {
-            panic_with_error!(&env, Error::AlreadyInitialized);
+            // panic_with_error!(&env, Error::AlreadyInitialized);
+            return Err(Error::AlreadyInitialized);
         }
 
         // Store the contract addresses
@@ -68,6 +71,8 @@ impl AcademyVerifier {
                 badge_tracker: badge_tracker.clone(),
             },
         );
+
+        Ok(())
     }
 
     /// Retrieves the user's progress as a map of chapter IDs to lesson counts
@@ -213,7 +218,7 @@ impl AcademyVerifier {
         // Publish event for this verification
         env.events().publish(
             (ACADEMY, CERTIFIED),
-            EligibilityVerifiedEventData {
+            CertificationVerifiedEventData {
                 user: user.clone(),
                 is_fully_certified,
                 has_completely_progressed,
@@ -229,30 +234,6 @@ impl AcademyVerifier {
     pub fn is_user_certified(env: Env, user: Address) -> bool {
         let result = Self::is_user_fully_certified(env, user);
         result.is_fully_certified
-    }
-
-    /// Returns the address of the progress tracker contract
-    pub fn get_progress_tracker_address(env: Env) -> Address {
-        env.storage()
-            .instance()
-            .get::<DataKey, Address>(&DataKey::ProgressTracker)
-            .unwrap_or_else(|| panic_with_error!(&env, Error::ContractNotInitialized))
-    }
-
-    /// Returns the address of the badge tracker contract
-    pub fn get_badge_tracker_address(env: Env) -> Address {
-        env.storage()
-            .instance()
-            .get::<DataKey, Address>(&DataKey::BadgeTracker)
-            .unwrap_or_else(|| panic_with_error!(&env, Error::ContractNotInitialized))
-    }
-
-    /// Returns the address of the graduation NFT contract
-    pub fn get_graduation_nft_address(env: Env) -> Address {
-        env.storage()
-            .instance()
-            .get::<DataKey, Address>(&DataKey::GraduationNFT)
-            .unwrap_or_else(|| panic_with_error!(&env, Error::ContractNotInitialized))
     }
 }
 

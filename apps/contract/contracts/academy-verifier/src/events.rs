@@ -15,17 +15,10 @@ pub struct InitializedEventData {
 
 #[contracttype]
 #[derive(Clone)]
-pub struct EligibilityVerifiedEventData {
+pub struct CertificationVerifiedEventData {
     pub user: Address,
     pub is_fully_certified: bool,
     pub has_completely_progressed: bool,
     pub has_all_badges: bool,
     pub has_graduated: bool,
-}
-
-#[contracttype]
-#[derive(Clone)]
-pub struct ContractAddressUpdatedEventData {
-    pub contract_type: Symbol,
-    pub new_address: Address,
 }
