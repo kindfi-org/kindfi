@@ -2,7 +2,8 @@ import { z } from 'zod'
 
 // Common validators
 const uuidValidator = z.string().uuid('Must be a valid UUID')
-const addressValidator = z.string().min(1, 'Address is required')
+const addressValidator = z.string()
+    .regex(/^G[A-Z2-7]{55}$|^0x[a-fA-F0-9]{40}$/, 'Must be a valid Stellar or EVM address')
 const nonEmptyString = z.string().min(1, 'This field is required')
 const signerValidator = z.string().min(1, 'Signer is required')
 
