@@ -3,10 +3,10 @@ use soroban_sdk::{contracttype, symbol_short, Address, Symbol};
 // Event topics
 pub const ACADEMY: Symbol = symbol_short!("ACADEMY");
 pub const CERTIFIED: Symbol = symbol_short!("CERTIFIED");
-pub const INITIALIZED: Symbol = symbol_short!("INIT");
+pub const INIT: Symbol = symbol_short!("INIT");
 
 #[contracttype]
-#[derive(Clone)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InitializedEventData {
     pub progress_tracker: Address,
     pub graduation_nft: Address,
@@ -14,7 +14,7 @@ pub struct InitializedEventData {
 }
 
 #[contracttype]
-#[derive(Clone)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CertificationVerifiedEventData {
     pub user: Address,
     pub is_fully_certified: bool,

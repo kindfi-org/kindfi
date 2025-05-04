@@ -1,15 +1,13 @@
 #![no_std]
 use soroban_sdk::{
-    contract, contractimpl, contracttype, panic_with_error, Address, Env, IntoVal, Map, Symbol, Vec,
+    contract, contractimpl, contracttype, panic_with_error, symbol_short, Address, Env, IntoVal, Map, Symbol, Vec,
 };
 
 mod errors;
 mod events;
 
 use crate::errors::Error;
-use crate::events::{
-    CertificationVerifiedEventData, InitializedEventData, ACADEMY, CERTIFIED, INITIALIZED,
-};
+use crate::events::{CertificationVerifiedEventData, InitializedEventData, ACADEMY, CERTIFIED, INIT};
 
 /// Storage keys for the contract
 #[contracttype]
@@ -21,7 +19,7 @@ enum DataKey {
 }
 
 #[contracttype]
-#[derive(Clone)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct VerificationResult {
     /// Overall verification status (true if all checks passed)
     pub is_fully_certified: bool,
@@ -64,7 +62,7 @@ impl AcademyVerifier {
 
         // Publish event for initialization
         env.events().publish(
-            (ACADEMY, INITIALIZED),
+            (ACADEMY, INIT),
             InitializedEventData {
                 progress_tracker: progress_tracker.clone(),
                 graduation_nft: graduation_nft.clone(),
@@ -138,17 +136,20 @@ impl AcademyVerifier {
             .get::<DataKey, Address>(&DataKey::BadgeTracker)
             .unwrap_or_else(|| panic_with_error!(&env, Error::ContractNotInitialized));
 
+        let chapter_sym = symbol_short!("chapter");
+        let badge_sym = symbol_short!("has_badge");
+
         // Check if the user has a badge for each chapter ID
         chapter_ids.iter().all(|chapter_id| {
             // Call badge tracker to check for each chapter badge
             let has_badge: bool = env.invoke_contract(
                 &badge_tracker,
-                &Symbol::new(&env, "has_badge"),
+                &badge_sym,
                 Vec::from_array(
                     &env,
                     [
                         user.clone().into_val(&env),
-                        Symbol::new(&env, "chapter").into_val(&env),
+                        chapter_sym.into_val(&env),
                         (chapter_id).into_val(&env),
                     ],
                 ),
