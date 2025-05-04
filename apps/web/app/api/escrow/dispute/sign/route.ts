@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 				{ status: 400 },
 			)
 		}
-		
+
 		const validatedData = validationResult.data as DisputeSignPayload
 
 		const {
@@ -89,7 +89,9 @@ export async function POST(req: NextRequest) {
 				.eq('id', milestoneId)
 
 			if (milestoneUpdateError) {
-				throw new Error(`Failed to mark milestone as disputed: ${milestoneUpdateError.message}`)
+				throw new Error(
+					`Failed to mark milestone as disputed: ${milestoneUpdateError.message}`,
+				)
 			}
 
 			// Get escrow contract details for notifications
@@ -108,24 +110,31 @@ export async function POST(req: NextRequest) {
 
 			// Create notifications for all parties involved
 			if (escrow && milestone) {
-				const { error: notificationError } = await supabase.from('notifications').insert([
-					{
-						user_id: escrow.service_provider_id,
-						milestone_id: milestoneId,
-						message: `A dispute has been filed for milestone: ${milestone.title}`,
-						type: 'DISPUTE_FILED',
-					},
-					{
-						user_id: escrow.approver_id,
-						milestone_id: milestoneId,
-						message: `A dispute has been filed for milestone: ${milestone.title}`,
-						type: 'DISPUTE_FILED',
-					},
-				])
+				const { error: notificationError } = await supabase
+					.from('notifications')
+					.insert([
+						{
+							user_id: escrow.service_provider_id,
+							milestone_id: milestoneId,
+							message: `A dispute has been filed for milestone: ${milestone.title}`,
+							type: 'DISPUTE_FILED',
+						},
+						{
+							user_id: escrow.approver_id,
+							milestone_id: milestoneId,
+							message: `A dispute has been filed for milestone: ${milestone.title}`,
+							type: 'DISPUTE_FILED',
+						},
+					])
 
 				if (notificationError) {
-					console.error('Error creating dispute filed notifications:', notificationError)
-					throw new Error(`Failed to create dispute filed notifications: ${notificationError.message}`)
+					console.error(
+						'Error creating dispute filed notifications:',
+						notificationError,
+					)
+					throw new Error(
+						`Failed to create dispute filed notifications: ${notificationError.message}`,
+					)
 				}
 			}
 
@@ -148,8 +157,8 @@ export async function POST(req: NextRequest) {
 			const resolutionDetails = {
 				approverAmount,
 				serviceProviderAmount,
-				mediatorId
-			};
+				mediatorId,
+			}
 
 			// Update the dispute status in the database
 			const { error: updateError } = await supabase
@@ -159,12 +168,14 @@ export async function POST(req: NextRequest) {
 					resolution_text: resolutionNotes,
 					reviewed_at: new Date().toISOString(),
 					transaction_hash: txResponse.txHash,
-					review_notes: JSON.stringify(resolutionDetails)
+					review_notes: JSON.stringify(resolutionDetails),
 				})
 				.eq('id', disputeId)
 
 			if (updateError) {
-				throw new Error(`Failed to update dispute status: ${updateError.message}`)
+				throw new Error(
+					`Failed to update dispute status: ${updateError.message}`,
+				)
 			}
 
 			// Get the dispute details
@@ -186,8 +197,13 @@ export async function POST(req: NextRequest) {
 					.eq('id', dispute.escrow_milestones.id)
 
 				if (milestoneUpdateError) {
-					console.error('Error updating milestone status:', milestoneUpdateError)
-					throw new Error(`Failed to update milestone status: ${milestoneUpdateError.message}`)
+					console.error(
+						'Error updating milestone status:',
+						milestoneUpdateError,
+					)
+					throw new Error(
+						`Failed to update milestone status: ${milestoneUpdateError.message}`,
+					)
 				}
 
 				// Get escrow contract details for notifications
@@ -199,29 +215,35 @@ export async function POST(req: NextRequest) {
 
 				if (escrowError) {
 					console.error('Error fetching escrow contract:', escrowError)
-					throw new Error(`Failed to fetch escrow contract: ${escrowError.message}`)
+					throw new Error(
+						`Failed to fetch escrow contract: ${escrowError.message}`,
+					)
 				}
 
 				// Create notifications for all parties involved
 				if (escrow) {
-					const { error: notificationError } = await supabase.from('notifications').insert([
-						{
-							user_id: escrow.service_provider_id,
-							review_id: disputeId,
-							message: `Dispute resolution: ${resolution}. ${resolutionNotes}`,
-							type: 'DISPUTE_RESOLVED',
-						},
-						{
-							user_id: escrow.approver_id,
-							review_id: disputeId,
-							message: `Dispute resolution: ${resolution}. ${resolutionNotes}`,
-							type: 'DISPUTE_RESOLVED',
-						},
-					])
+					const { error: notificationError } = await supabase
+						.from('notifications')
+						.insert([
+							{
+								user_id: escrow.service_provider_id,
+								review_id: disputeId,
+								message: `Dispute resolution: ${resolution}. ${resolutionNotes}`,
+								type: 'DISPUTE_RESOLVED',
+							},
+							{
+								user_id: escrow.approver_id,
+								review_id: disputeId,
+								message: `Dispute resolution: ${resolution}. ${resolutionNotes}`,
+								type: 'DISPUTE_RESOLVED',
+							},
+						])
 
 					if (notificationError) {
 						console.error('Error creating notifications:', notificationError)
-						throw new Error(`Failed to create notifications: ${notificationError.message}`)
+						throw new Error(
+							`Failed to create notifications: ${notificationError.message}`,
+						)
 					}
 				}
 			}

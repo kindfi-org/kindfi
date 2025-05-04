@@ -218,7 +218,9 @@ export function validateMilestoneReview(
 	if (!data.status) {
 		errors.push('Milestone status is required.')
 	} else if (
-		!['pending', 'approved', 'rejected', 'completed', 'disputed'].includes(data.status)
+		!['pending', 'approved', 'rejected', 'completed', 'disputed'].includes(
+			data.status,
+		)
 	) {
 		errors.push('Invalid milestone status.')
 	}
@@ -300,9 +302,7 @@ export function validateDisputeResolution(
 	// Validate resolution
 	if (!data.resolution) {
 		errors.push('Resolution is required.')
-	} else if (
-		!['APPROVED', 'REJECTED', 'RESOLVED'].includes(data.resolution)
-	) {
+	} else if (!['APPROVED', 'REJECTED', 'RESOLVED'].includes(data.resolution)) {
 		errors.push('Invalid resolution status.')
 	}
 

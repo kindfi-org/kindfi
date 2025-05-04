@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 				{ status: 400 },
 			)
 		}
-		
+
 		const validatedData = validationResult.data as DisputePayload
 
 		const {
@@ -100,8 +100,8 @@ export async function POST(req: NextRequest) {
 		// Create the payload with the correct types
 		const disputePayload = {
 			signerAddress: filerAddress,
-			contractId: escrowContractAddress
-		};
+			contractId: escrowContractAddress,
+		}
 
 		const escrowResponse = await createEscrowRequest({
 			action: 'startDispute',
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
 					evidenceUrls,
 					escrowContractAddress,
 					escrowParticipantId: escrowParticipant.id,
-				}
+				},
 			},
 			{ status: 200 },
 		)

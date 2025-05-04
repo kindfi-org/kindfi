@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 				{ status: 400 },
 			)
 		}
-		
+
 		const validatedData = validationResult.data as MediatorAssignmentPayload
 
 		const { disputeId, mediatorId, assignedById } = validatedData
@@ -49,10 +49,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (mediatorError || !mediator) {
-			return NextResponse.json(
-				{ error: 'Mediator not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Mediator not found' }, { status: 404 })
 		}
 
 		// 4. Verify the assigner is authorized (platform admin or authorized role)
@@ -63,10 +60,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (assignerError || !assigner) {
-			return NextResponse.json(
-				{ error: 'Assigner not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Assigner not found' }, { status: 404 })
 		}
 
 		// Check if the assigner has the required role (admin or dispute_manager)
@@ -100,7 +94,9 @@ export async function POST(req: NextRequest) {
 				.eq('review_id', disputeId)
 
 			if (updateError) {
-				throw new Error(`Failed to update mediator assignment: ${updateError.message}`)
+				throw new Error(
+					`Failed to update mediator assignment: ${updateError.message}`,
+				)
 			}
 		} else {
 			// If there's no existing assignment, create a new one
@@ -114,7 +110,9 @@ export async function POST(req: NextRequest) {
 				})
 
 			if (insertError) {
-				throw new Error(`Failed to create mediator assignment: ${insertError.message}`)
+				throw new Error(
+					`Failed to create mediator assignment: ${insertError.message}`,
+				)
 			}
 		}
 
@@ -168,4 +166,3 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
-

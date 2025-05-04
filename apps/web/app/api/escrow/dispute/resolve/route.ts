@@ -1,11 +1,8 @@
 import { supabase } from '@packages/lib/supabase'
-import { Networks } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
-import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
-import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
 import type { DisputeResolutionPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { validateDisputeResolution } from '~/lib/validators/dispute'
 
@@ -24,7 +21,7 @@ export async function POST(req: NextRequest) {
 				{ status: 400 },
 			)
 		}
-		
+
 		const validatedData = validationResult.data as DisputeResolutionPayload
 
 		const {
@@ -41,7 +38,7 @@ export async function POST(req: NextRequest) {
 		// 2. Verify the dispute exists and is in PENDING or MEDIATION status
 		const { data: dispute, error: disputeError } = await supabase
 			.from('escrow_reviews')
-			.select('*, escrow_milestones!inner(escrow_id)')
+			.select('*, escrow_milestones!inner(id, escrow_id)')
 			.eq('id', disputeId)
 			.in('status', ['PENDING', 'MEDIATION'])
 			.eq('type', 'dispute')
@@ -58,14 +55,28 @@ export async function POST(req: NextRequest) {
 		// The frontend will validate the properties to send to our API
 		// We'll directly proceed with the dispute resolution through the Trustless Work API
 
-		// 3. Resolve the dispute on-chain through the Trustless Work API
+		// 3. Fetch the mediator's wallet address from the database
+		const { data: mediator, error: mediatorError } = await supabase
+			.from('escrow_mediators')
+			.select('mediator_address')
+			.eq('id', mediatorId)
+			.single()
+
+		if (mediatorError || !mediator) {
+			return NextResponse.json(
+				{ error: 'Mediator not found' },
+				{ status: 404 },
+			)
+		}
+
+		// 4. Resolve the dispute on-chain through the Trustless Work API
 		// Create the payload with the correct types
 		const resolvePayload = {
-			signerAddress: mediatorId, // Using mediator ID instead of signer secret
+			signerAddress: mediator.mediator_address, // Using mediator's blockchain address
 			contractId: escrowContractAddress,
 			approverAmount,
 			serviceProviderAmount,
-		};
+		}
 
 		const escrowResponse = await createEscrowRequest({
 			action: 'resolveDispute',
@@ -94,8 +105,9 @@ export async function POST(req: NextRequest) {
 					approverAmount,
 					serviceProviderAmount,
 					escrowContractAddress,
-					milestoneId: dispute.milestone_id,
-				}
+					// Access the milestone_id from the first item in the escrow_milestones array
+					milestoneId: dispute.escrow_milestones?.[0]?.id,
+				},
 			},
 			{ status: 200 },
 		)

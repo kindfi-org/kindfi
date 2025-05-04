@@ -1,26 +1,26 @@
-import type { Escrow, MilestoneStatus } from './escrow.types';
 import type {
-    DisputePayload,
-    DisputeResolutionPayload,
-    MediatorAssignmentPayload,
-    EvidenceSubmissionPayload,
-    DisputeSignPayload,
-    ReviewStatus as DisputeStatus
-} from '@services/supabase/src/types';
+	DisputePayload,
+	DisputeResolutionPayload,
+	DisputeSignPayload,
+	ReviewStatus as DisputeStatus,
+	EvidenceSubmissionPayload,
+	MediatorAssignmentPayload,
+} from '@services/supabase/src/types'
+import type { Escrow, MilestoneStatus } from './escrow.types'
 
 // Escrow's Payload
 export type EscrowPayload = Omit<
-    Escrow,
-    'user' | 'createdAt' | 'updatedAt' | 'id'
+	Escrow,
+	'user' | 'createdAt' | 'updatedAt' | 'id'
 >
 
 // Re-export the types from Supabase service for backward compatibility
-export type { 
-    DisputePayload,
-    DisputeResolutionPayload,
-    MediatorAssignmentPayload,
-    EvidenceSubmissionPayload,
-    DisputeSignPayload
+export type {
+	DisputePayload,
+	DisputeResolutionPayload,
+	MediatorAssignmentPayload,
+	EvidenceSubmissionPayload,
+	DisputeSignPayload,
 }
 
 export type ChangeMilestoneStatusPayload = {
@@ -39,16 +39,16 @@ export type ChangeMilestoneFlagPayload = Omit<
 }
 
 export type StartDisputePayload = Pick<Escrow, 'contractId'> & {
-	signer?: string; // Keep for backward compatibility
-	signerAddress?: string; // New property for better security
+	signer?: string // Keep for backward compatibility
+	signerAddress?: string // New property for better security
 }
 
 export type ResolveDisputePayload = Pick<Escrow, 'contractId'> &
 	Partial<Pick<Escrow, 'disputeResolver'>> & {
-		approverAmount: string;
-		serviceProviderAmount: string;
-		signer?: string; // Keep for backward compatibility
-		signerAddress?: string; // New property for better security
+		approverAmount: string
+		serviceProviderAmount: string
+		signer?: string // Keep for backward compatibility
+		signerAddress?: string // New property for better security
 	}
 
 export type FundEscrowPayload = Pick<Escrow, 'amount' | 'contractId'> & {
