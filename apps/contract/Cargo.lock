@@ -990,7 +990,7 @@ source = "git+https://github.com/OpenZeppelin/stellar-contracts?tag=v0.1.0#f7263
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn 2.0.101",
 ]
 
 [[package]]
@@ -1606,7 +1606,7 @@ source = "git+https://github.com/OpenZeppelin/stellar-contracts#4f18e0cd0e1d49b2
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn 2.0.101",
 ]
 
 [[package]]
@@ -1651,7 +1651,7 @@ source = "git+https://github.com/OpenZeppelin/stellar-contracts#4f18e0cd0e1d49b2
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn 2.0.101",
 ]
 
 [[package]]
@@ -1680,7 +1680,7 @@ source = "git+https://github.com/OpenZeppelin/stellar-contracts#4f18e0cd0e1d49b2
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn 2.0.101",
 ]
 
 [[package]]
