@@ -1,5 +1,5 @@
-import type { Database } from '@services/supabase/database.types'
-import { createClient } from '~/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
+import type { Database, Json } from '@services/supabase'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']
@@ -22,7 +22,7 @@ export const updateEscrowStatus = async (
 	recordId: string,
 	newStatus: EscrowStatusType,
 ): Promise<EscrowRecord> => {
-	const supabase = createClient()
+	const supabase = createSupabaseBrowserClient()
 
 	const { data, error: updateError } = await supabase
 		.from('escrow_status')
@@ -46,7 +46,7 @@ export const updateEscrowMilestone = async (
 	completed: number,
 	metadata?: Partial<MilestoneMetadata>,
 ): Promise<EscrowRecord> => {
-	const supabase = createClient()
+	const supabase = createSupabaseBrowserClient()
 
 	if (current < 1 || completed < 0) {
 		throw new Error('Milestone numbers must be positive')
@@ -67,7 +67,7 @@ export const updateEscrowMilestone = async (
 		.from('escrow_status')
 		.update({
 			current_milestone: current,
-			metadata: updatedMetadata,
+			metadata: updatedMetadata as unknown as Json,
 			last_updated: new Date().toISOString(),
 		})
 		.eq('id', recordId)
@@ -84,7 +84,7 @@ export const updateEscrowFinancials = async (
 	funded: number,
 	released: number,
 ): Promise<EscrowRecord> => {
-	const supabase = createClient()
+	const supabase = createSupabaseBrowserClient()
 
 	if (funded < released) {
 		throw new Error('Total funded cannot be less than total released')

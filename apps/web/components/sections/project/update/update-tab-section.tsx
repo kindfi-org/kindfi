@@ -1,9 +1,9 @@
 'use client'
 
+import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
 import { Loader2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/base/button'
-import { createClient } from '~/lib/supabase/client'
 import { LoadMoreButton } from './load-more-button'
 import { UpdateCard } from './update-card'
 import { UpdateForm } from './update-form'
@@ -37,7 +37,7 @@ export function ProjectUpdatesTabSection() {
 	const fetchUpdates = async () => {
 		try {
 			setIsLoading(true)
-			const supabase = createClient()
+			const supabase = createSupabaseBrowserClient()
 
 			// Modified query to only select project_updates data without joins
 			const { data, error } = await supabase
@@ -69,7 +69,7 @@ export function ProjectUpdatesTabSection() {
 	const handleCreateUpdate = async (data: { content: string }) => {
 		try {
 			setIsSubmitting(true)
-			const supabase = createClient()
+			const supabase = createSupabaseBrowserClient()
 
 			// Generate a valid UUID for author_id
 			const authorId = crypto.randomUUID()
@@ -108,7 +108,7 @@ export function ProjectUpdatesTabSection() {
 	const handleEditUpdate = async (id: string, data: { content: string }) => {
 		try {
 			setIsSubmitting(true)
-			const supabase = createClient()
+			const supabase = createSupabaseBrowserClient()
 
 			const { error } = await supabase
 				.from('project_updates')
@@ -133,7 +133,7 @@ export function ProjectUpdatesTabSection() {
 	// Delete an update
 	const handleDeleteUpdate = async (id: string): Promise<void> => {
 		try {
-			const supabase = createClient()
+			const supabase = createSupabaseBrowserClient()
 
 			const { error } = await supabase
 				.from('project_updates')
@@ -173,7 +173,7 @@ export function ProjectUpdatesTabSection() {
 		useEffect(() => {
 		if (isCreatingUpdate) return
 
-		const supabase = createClient()
+		const supabase = createSupabaseBrowserClient()
 
 		// Subscribe to changes in the project_updates table for this project
 		const channel = supabase
