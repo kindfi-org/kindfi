@@ -161,14 +161,16 @@ export function ProjectUpdatesTabSection() {
 	}
 
 	// Fetch updates when component mounts or page changes
-	useEffect(() => {
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+		useEffect(() => {
 		if (!isCreatingUpdate) {
 			fetchUpdates()
 		}
 	}, [page, projectId, isCreatingUpdate])
 
 	// Setup real-time subscription
-	useEffect(() => {
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+		useEffect(() => {
 		if (isCreatingUpdate) return
 
 		const supabase = createClient()

@@ -73,7 +73,7 @@
         "react-native-web": "~0.19.13",
         "react-native-webview": "13.12.5",
         "tailwindcss": "^3.4.17",
-        "zod": "^3.24.3",
+        "zod": "^3.24.3"
       },
       "devDependencies": {
         "@babel/core": "^7.25.2",
@@ -87,9 +87,9 @@
         "jest-expo": "~52.0.3",
         "jscodeshift": "^0.15.2",
         "react-test-renderer": "18.3.1",
-        "typescript": "^5.3.3",
-      },
-    },
+        "typescript": "^5.3.3"
+      }
+    }
   },
   "packages": {
     "@0no-co/graphql.web": ["@0no-co/graphql.web@1.1.2", "", { "peerDependencies": { "graphql": "^14.0.0 || ^15.0.0 || ^16.0.0" }, "optionalPeers": ["graphql"] }, "sha512-N2NGsU5FLBhT8NZ+3l2YrzZSHITjNXNuDhC4iDiikv0IujaJ0Xc6xIxQZ/Ek3Cb+rgPjnLHYyJm11tInuJn+cw=="],
