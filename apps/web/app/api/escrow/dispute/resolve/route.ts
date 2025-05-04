@@ -63,8 +63,8 @@ export async function POST(req: NextRequest) {
 		const resolvePayload = {
 			signerAddress: mediatorId, // Using mediator ID instead of signer secret
 			contractId: escrowContractAddress,
-			approverFunds: approverAmount,
-			serviceProviderFunds: serviceProviderAmount,
+			approverAmount,
+			serviceProviderAmount,
 		};
 
 		const escrowResponse = await createEscrowRequest({

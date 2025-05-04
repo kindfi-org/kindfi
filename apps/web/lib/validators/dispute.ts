@@ -6,6 +6,20 @@ const addressValidator = z.string().min(1, 'Address is required');
 const nonEmptyString = z.string().min(1, 'This field is required');
 const signerValidator = z.string().min(1, 'Signer is required');
 
+// Monetary amount validator for non-negative numeric strings
+const nonNegativeNumericString = z
+    .string()
+    .min(1, 'Amount is required')
+    .refine((val) => !Number.isNaN(Number(val)), 'Must be a valid number')
+    .refine((val) => Number(val) >= 0, 'Amount must be a non-negative number');
+
+// Optional version of the monetary amount validator
+const optionalNonNegativeNumericString = z
+    .string()
+    .optional()
+    .refine((val) => val === undefined || !Number.isNaN(Number(val)), 'Must be a valid number')
+    .refine((val) => val === undefined || Number(val) >= 0, 'Amount must be a non-negative number');
+
 // Dispute filing schema
 export const disputeSchema = z.object({
     escrowId: uuidValidator.describe('Escrow contract ID'),
@@ -31,18 +45,8 @@ export const disputeResolutionSchema = z.object({
         })
         .describe('Resolution decision'),
     resolutionNotes: nonEmptyString.describe('Notes explaining the resolution'),
-    approverAmount: z
-        .string()
-        .min(1, 'Approver amount is required')
-        .refine((val) => !Number.isNaN(Number(val)), 'Must be a valid number')
-        .refine((val) => Number(val) >= 0, 'Amount must be a non-negative number')
-        .describe('Amount allocated to the approver'),
-    serviceProviderAmount: z
-        .string()
-        .min(1, 'Service provider amount is required')
-        .refine((val) => !Number.isNaN(Number(val)), 'Must be a valid number')
-        .refine((val) => Number(val) >= 0, 'Amount must be a non-negative number')
-        .describe('Amount allocated to the service provider'),
+    approverAmount: nonNegativeNumericString.describe('Amount allocated to the approver'),
+    serviceProviderAmount: nonNegativeNumericString.describe('Amount allocated to the service provider'),
     signer: signerValidator.describe('Transaction signer'),
     escrowContractAddress: addressValidator.describe('Escrow contract address'),
 });
@@ -141,45 +145,62 @@ export const disputeSignSchema = z.object({
         .optional()
         .describe('Resolution decision'),
     resolutionNotes: z.string().optional().describe('Notes explaining the resolution'),
-    approverAmount: z
-        .string()
-        .optional()
-        .refine((val) => val === undefined || !Number.isNaN(Number(val)), 'Must be a valid number')
-        .refine((val) => val === undefined || Number(val) >= 0, 'Amount must be a non-negative number')
-        .describe('Amount allocated to the approver'),
-    serviceProviderAmount: z
-        .string()
-        .optional()
-        .refine((val) => val === undefined || !Number.isNaN(Number(val)), 'Must be a valid number')
-        .refine((val) => val === undefined || Number(val) >= 0, 'Amount must be a non-negative number')
-        .describe('Amount allocated to the service provider'),
+    approverAmount: optionalNonNegativeNumericString.describe('Amount allocated to the approver'),
+    serviceProviderAmount: optionalNonNegativeNumericString.describe('Amount allocated to the service provider'),
     escrowContractAddress: addressValidator.optional().describe('Escrow contract address'),
-}).refine(
-    (data) => {
-        const isFileTypeComplete = (data: DisputeSignData): boolean => {
-            return !!data.escrowId && !!data.milestoneId && !!data.filerAddress && 
-                   !!data.disputeReason && !!data.escrowParticipantId;
-        };
-        
-        const isResolveTypeComplete = (data: DisputeSignData): boolean => {
-            return !!data.disputeId && !!data.mediatorId && !!data.resolution && 
-                   !!data.resolutionNotes && !!data.approverAmount && !!data.serviceProviderAmount;
-        };
+}).superRefine((data, ctx) => {
+    const getMissingFileTypeFields = (data: DisputeSignData): string[] => {
+        const missingFields: string[] = [];
+        if (!data.escrowId) missingFields.push('escrowId');
+        if (!data.milestoneId) missingFields.push('milestoneId');
+        if (!data.filerAddress) missingFields.push('filerAddress');
+        if (!data.disputeReason) missingFields.push('disputeReason');
+        if (!data.escrowParticipantId) missingFields.push('escrowParticipantId');
+        return missingFields;
+    };
+    
+    const getMissingResolveTypeFields = (data: DisputeSignData): string[] => {
+        const missingFields: string[] = [];
+        if (!data.disputeId) missingFields.push('disputeId');
+        if (!data.mediatorId) missingFields.push('mediatorId');
+        if (!data.resolution) missingFields.push('resolution');
+        if (!data.resolutionNotes) missingFields.push('resolutionNotes');
+        if (!data.approverAmount) missingFields.push('approverAmount');
+        if (!data.serviceProviderAmount) missingFields.push('serviceProviderAmount');
+        return missingFields;
+    };
 
-        // If type is 'file', require file-specific fields
-        if (data.type === 'file') {
-            return isFileTypeComplete(data);
+    // If type is 'file', check for missing file-specific fields
+    if (data.type === 'file') {
+        const missingFields = getMissingFileTypeFields(data);
+        if (missingFields.length > 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `Missing required fields for filing a dispute: ${missingFields.join(', ')}`,
+                path: ['type'],
+            });
         }
-        // If type is 'resolve', require resolve-specific fields
-        if (data.type === 'resolve') {
-            return isResolveTypeComplete(data);
-        }
-        return false;
-    },
-    {
-        message: 'Required fields missing for the specified transaction type',
-        path: ['type'],
     }
+    // If type is 'resolve', check for missing resolve-specific fields
+    else if (data.type === 'resolve') {
+        const missingFields = getMissingResolveTypeFields(data);
+        if (missingFields.length > 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `Missing required fields for resolving a dispute: ${missingFields.join(', ')}`,
+                path: ['type'],
+            });
+        }
+    }
+    // If type is neither 'file' nor 'resolve', it's an invalid type
+    else {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Invalid transaction type: ${data.type}`,
+            path: ['type'],
+        });
+    }
+}
 );
 
 // Type definitions for inferred types
