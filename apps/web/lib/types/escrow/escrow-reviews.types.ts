@@ -57,49 +57,6 @@ export interface EscrowMediator {
 	active: boolean
 }
 
-export interface EscrowMediatorInsert {
-	id?: string
-	user_id: string
-	mediator_address: string
-	name: string
-	created_at?: string
-	active?: boolean
-}
-
-export interface EscrowMediatorUpdate {
-	id?: string
-	user_id?: string
-	mediator_address?: string
-	name?: string
-	created_at?: string
-	active?: boolean
-}
-
-// Define the types for the escrow_dispute_assignments table
-export interface EscrowDisputeAssignment {
-	id: string
-	review_id: string
-	mediator_id: string
-	assigned_by: string
-	assigned_at: string
-}
-
-export interface EscrowDisputeAssignmentInsert {
-	id?: string
-	review_id: string
-	mediator_id: string
-	assigned_by: string
-	assigned_at?: string
-}
-
-export interface EscrowDisputeAssignmentUpdate {
-	id?: string
-	review_id?: string
-	mediator_id?: string
-	assigned_by?: string
-	assigned_at?: string
-}
-
 // Export review type enum
 export type ReviewType = 'dispute' | 'milestone'
 
