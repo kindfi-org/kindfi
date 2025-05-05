@@ -312,14 +312,14 @@ export function validateDisputeResolution(
 	}
 
 	// Validate approverAmount
-	if (!data.approverAmount || isNaN(Number(data.approverAmount))) {
+	if (!data.approverAmount || Number.isNaN(Number(data.approverAmount))) {
 		errors.push('Valid approver amount is required.')
 	}
 
 	// Validate serviceProviderAmount
 	if (
 		!data.serviceProviderAmount ||
-		isNaN(Number(data.serviceProviderAmount))
+		Number.isNaN(Number(data.serviceProviderAmount))
 	) {
 		errors.push('Valid service provider amount is required.')
 	}

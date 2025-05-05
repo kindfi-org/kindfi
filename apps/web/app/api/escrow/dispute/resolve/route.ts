@@ -24,8 +24,11 @@ export async function POST(req: NextRequest) {
 
 		const validatedData = validationResult.data as DisputeResolutionPayload
 
+		// TODO: Improve this validation. Some fields are mixed with current logic.
 		const {
+			// Dispute ID is the ID of the AI conversation between the Kindler and the admin where the AI is the mediator
 			disputeId,
+			// Mediator ID is the signer kindler user ID (off-chain)
 			mediatorId,
 			resolution,
 			resolutionNotes,
@@ -51,28 +54,10 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Note: We're skipping mediator verification as per feedback
-		// The frontend will validate the properties to send to our API
-		// We'll directly proceed with the dispute resolution through the Trustless Work API
-
-		// 3. Fetch the mediator's wallet address from the database
-		const { data: mediator, error: mediatorError } = await supabase
-			.from('escrow_mediators')
-			.select('mediator_address')
-			.eq('id', mediatorId)
-			.single()
-
-		if (mediatorError || !mediator) {
-			return NextResponse.json(
-				{ error: 'Mediator not found' },
-				{ status: 404 },
-			)
-		}
-
 		// 4. Resolve the dispute on-chain through the Trustless Work API
 		// Create the payload with the correct types
 		const resolvePayload = {
-			signerAddress: mediator.mediator_address, // Using mediator's blockchain address
+			signerAddress: signer, // Using mediator's blockchain address
 			contractId: escrowContractAddress,
 			approverAmount,
 			serviceProviderAmount,

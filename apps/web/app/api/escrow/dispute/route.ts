@@ -1,11 +1,8 @@
 import { supabase } from '@packages/lib/supabase'
-import { Networks } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
-import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
-import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
 import type { DisputePayload } from '~/lib/types/escrow/escrow-payload.types'
 import { validateDispute } from '~/lib/validators/dispute'
 
@@ -30,7 +27,7 @@ export async function POST(req: NextRequest) {
 		const {
 			escrowId,
 			milestoneId,
-			filerAddress,
+			// filerAddress,
 			disputeReason,
 			evidenceUrls,
 			signer,
@@ -64,27 +61,11 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// 3. Verify the user is allowed to file a dispute
-		// This could be either the service provider or the approver
-		const { data: escrowParticipant, error: participantError } = await supabase
-			.from('escrow_participants')
-			.select('*')
-			.eq('escrow_id', escrowId)
-			.eq('participant_address', filerAddress)
-			.single()
-
-		if (participantError || !escrowParticipant) {
-			return NextResponse.json(
-				{ error: 'Not authorized to file a dispute for this escrow' },
-				{ status: 403 },
-			)
-		}
-
 		// 4. Check if a dispute already exists for this milestone
 		const { data: existingDispute, error: disputeError } = await supabase
 			.from('escrow_reviews')
 			.select('*')
-			.eq('milestone_id', milestoneId)
+			.eq('escrow_id', escrowId)
 			.eq('status', 'PENDING')
 			.eq('type', 'dispute')
 			.maybeSingle()
@@ -99,7 +80,7 @@ export async function POST(req: NextRequest) {
 		// 5. Initiate the dispute on-chain through the Trustless Work API
 		// Create the payload with the correct types
 		const disputePayload = {
-			signerAddress: filerAddress,
+			signerAddress: signer,
 			contractId: escrowContractAddress,
 		}
 
@@ -124,11 +105,9 @@ export async function POST(req: NextRequest) {
 					unsignedTransaction: escrowResponse.unsignedTransaction,
 					escrowId,
 					milestoneId,
-					filerAddress,
 					disputeReason,
 					evidenceUrls,
 					escrowContractAddress,
-					escrowParticipantId: escrowParticipant.id,
 				},
 			},
 			{ status: 200 },
@@ -172,8 +151,7 @@ export async function GET(req: NextRequest) {
 			.select(
 				`
 				*,
-				escrow_milestones!inner(title, description),
-				escrow_mediators(id, mediator_address, name)
+				escrow_milestones!inner(title, description)
 			`,
 			)
 			.eq('type', 'dispute')
