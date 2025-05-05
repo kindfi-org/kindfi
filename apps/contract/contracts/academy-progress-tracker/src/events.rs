@@ -5,7 +5,7 @@ pub const CHAPTER: Symbol = symbol_short!("CHAPTER");
 pub const COMPLETED: Symbol = symbol_short!("COMPLETED");
 
 #[contracttype]
-#[derive(Clone)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LessonCompletedEventData {
     pub user: Address,
     pub chapter_id: u32,
@@ -13,7 +13,7 @@ pub struct LessonCompletedEventData {
 }
 
 #[contracttype]
-#[derive(Clone)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ChapterCompletedEventData {
     pub user: Address,
     pub chapter_id: u32,
