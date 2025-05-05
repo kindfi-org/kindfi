@@ -3,6 +3,7 @@ name = "academy_progress_tracker"
 version = "0.1.0"
 edition = "2021"
 publish = false
+resolver = "2"
 
 [lib]
 crate-type = ["cdylib"]
