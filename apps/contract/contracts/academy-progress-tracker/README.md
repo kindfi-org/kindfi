@@ -36,40 +36,25 @@ cargo test --features testutils
 
 ## Contract Functions
 
-- `mark_lesson_complete(user: Address, chapter_id: u32, lesson_id: u32) -> Result<(), Error>`
-  Mark a lesson as completed for a user. Returns error if lesson is already completed or invalid.
+- `mark_lesson_complete(user: Address, chapter_id: u32, lesson_id: u32) -> ()`
+  Mark a lesson as completed for a user
 
 - `get_completed_lessons(user: Address, chapter_id: u32) -> Vec<u32>`
-  Get list of completed lessons for a user in a chapter. Returns empty vector if no lessons completed.
+  Get a list of completed lessons for a user in a chapter
 
 - `get_chapter_completion_percent(user: Address, chapter_id: u32) -> u32`
-  Get completion percentage for a chapter. Returns 0 if chapter has no lessons.
+  Get completion percentage for a chapter
 
 - `is_chapter_complete(user: Address, chapter_id: u32) -> bool`
-  Check if a chapter is fully completed. Returns true if all lessons are completed.
+  Check if a chapter is fully completed
 
-- `set_chapter_lessons(chapter_id: u32, total_lessons: u32)`
-  Set total number of lessons in a chapter.
+- `set_chapter_lessons(chapter_id: u32, total_lessons: u32) -> ()`
+  Set the total number of lessons in a chapter
 
 ## Events
 
 - `lesson_completed`: Emitted when a lesson is completed
-
-  ```rust
-  pub struct LessonCompletedEventData {
-      pub user: Address,
-      pub chapter_id: u32,
-      pub lesson_id: u32,
-  }
-  ```
-
 - `chapter_completed`: Emitted when all lessons in a chapter are completed
-  ```rust
-  pub struct ChapterCompletedEventData {
-      pub user: Address,
-      pub chapter_id: u32,
-  }
-  ```
 
 ## Error Handling
 

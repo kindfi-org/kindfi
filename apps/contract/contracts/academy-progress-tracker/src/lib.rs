@@ -5,6 +5,10 @@ use soroban_sdk::{
 
 pub mod events;
 pub mod errors;
+#[cfg(feature = "testutils")]
+pub mod testutils;
+#[cfg(test)]
+mod test;
 
 use crate::events::{LessonCompletedEventData, ChapterCompletedEventData, LESSON, CHAPTER, COMPLETED};
 use crate::errors::Error;
@@ -122,5 +126,3 @@ impl ProgressTracker {
             .set(&DataKey::ChapterLessons(chapter_id), &total_lessons);
     }
 }
-
-mod test;

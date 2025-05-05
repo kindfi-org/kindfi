@@ -7,7 +7,7 @@ pub enum Error {
     LessonAlreadyCompleted = 1,
     /// Returned when an invalid chapter ID is provided
     InvalidChapterId = 2,
-    /// Returned when an invalid lesson ID is provided (zero or greater than total lessons)
+    /// Returned when an invalid lesson ID is provided
     InvalidLessonId = 3,
     /// Returned when operations are performed for a user that doesn't exist
     UserNotFound = 4,

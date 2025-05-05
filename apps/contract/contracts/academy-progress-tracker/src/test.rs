@@ -11,7 +11,7 @@ fn test_basic_progress() {
     let client = ProgressTrackerClient::new(&env, &contract_id);
 
     // 2. Create user and configure chapter
-    let user = Address::from_string(&String::from_str(&env, "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"));
+    let user = Address::generate(&env);
     let chapter_id = 1;
     let lesson_id = 1;
 
@@ -29,14 +29,18 @@ fn test_basic_progress() {
     // 6. Verify events
     let events = env.events().all();
     assert_eq!(events.len(), 2);
-    
+
+    // Helper function to verify event topics
+    fn assert_event_with_topic(env: &Env, event_index: usize, expected_topic: &str) {
+        let events = env.events().all();
+        let (_, topics, _) = events.get(event_index).unwrap();
+        let topic = topics.get(0).unwrap();
+        assert!(topic.cmp(&Symbol::new(env, expected_topic).into_val(env)).is_eq());
+    }
+
     // Verify lesson completed event
-    let (_, topics, _) = events.get(0).unwrap();
-    let topic = topics.get(0).unwrap();
-    assert!(topic.cmp(&Symbol::new(&env, "lesson_completed").into_val(&env)).is_eq());
+    assert_event_with_topic(&env, 0, "lesson_completed");
     
     // Verify chapter completed event
-    let (_, topics, _) = events.get(1).unwrap();
-    let topic = topics.get(0).unwrap();
-    assert!(topic.cmp(&Symbol::new(&env, "chapter_completed").into_val(&env)).is_eq());
+    assert_event_with_topic(&env, 1, "chapter_completed");
 } 
