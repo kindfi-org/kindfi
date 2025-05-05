@@ -5,7 +5,6 @@
 // import { ItemList } from '../components/StyledText';
 // import Kindifi from '@/assets/Icons/Kindifi';
 
-
 // // Header Component
 // const Header = () => (
 //   <View style={styles.header}>
@@ -15,15 +14,13 @@
 //   </View>
 // );
 
-
 // const Navbar = () => (
 //   <View style={styles.header}>
 //     {/* Hamburger Menu */}
- 
+
 //     <TouchableOpacity>
 //       <Kindifi width={120} height={33} />
 //     </TouchableOpacity>
-
 
 //     <TouchableOpacity>
 //       <MaterialIcons name="menu" size={24} color="#333" />
@@ -53,7 +50,7 @@
 //         onPress={() => onSelect(filter)}
 //         style={[
 //           styles.filterButton,
-//           selectedFilter === filter && styles.activeFilter, 
+//           selectedFilter === filter && styles.activeFilter,
 //         ]}
 //       >
 //         <Text style={[styles.filterText, selectedFilter === filter && styles.activeFilterText]}>{filter}</Text>
@@ -124,7 +121,7 @@
 //   filterContainer: {
 //     flexDirection: 'row',
 //     flexWrap: 'wrap',
-//     gap: 8, 
+//     gap: 8,
 //     marginVertical: 10,
 //     justifyContent: 'center',
 //   },
@@ -132,28 +129,28 @@
 //     flexDirection: 'row',
 //     alignItems: 'center',
 //     paddingHorizontal: 12,
-//     paddingVertical: 6, 
-//     borderRadius: 9999, 
-//     borderWidth: 1, 
-//     borderColor: 'rgba(156, 39, 176, 0.5)', 
-//     backgroundColor: '#f3f4f6', 
-//     shadowColor: '#000', 
+//     paddingVertical: 6,
+//     borderRadius: 9999,
+//     borderWidth: 1,
+//     borderColor: 'rgba(156, 39, 176, 0.5)',
+//     backgroundColor: '#f3f4f6',
+//     shadowColor: '#000',
 //     shadowOffset: { width: 0, height: 1 },
 //     shadowOpacity: 0.1,
 //     shadowRadius: 2,
-    
+
 //   },
 //   activeFilter: {
-//     backgroundColor: 'rgba(156, 39, 176, 0.8)', 
-//     borderColor: 'rgba(156, 39, 176, 0.8)', 
+//     backgroundColor: 'rgba(156, 39, 176, 0.8)',
+//     borderColor: 'rgba(156, 39, 176, 0.8)',
 //   },
 //   filterText: {
-//     fontSize: 12, 
-//     fontWeight: '600', 
-//     color: '#6b7280', 
+//     fontSize: 12,
+//     fontWeight: '600',
+//     color: '#6b7280',
 //   },
 //   activeFilterText: {
-//     color: '#fff', 
+//     color: '#fff',
 //   },
 //   itemList: {
 //     padding: 16,
