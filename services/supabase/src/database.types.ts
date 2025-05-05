@@ -58,9 +58,11 @@ export type Database = {
 					content: string
 					created_at: string | null
 					id: string
+					metadata: Json
 					parent_comment_id: string | null
 					project_id: string | null
 					project_update_id: string | null
+					type: Database['public']['Enums']['comment_type']
 					updated_at: string | null
 				}
 				Insert: {
@@ -68,9 +70,11 @@ export type Database = {
 					content: string
 					created_at?: string | null
 					id?: string
+					metadata?: Json
 					parent_comment_id?: string | null
 					project_id?: string | null
 					project_update_id?: string | null
+					type?: Database['public']['Enums']['comment_type']
 					updated_at?: string | null
 				}
 				Update: {
@@ -78,9 +82,11 @@ export type Database = {
 					content?: string
 					created_at?: string | null
 					id?: string
+					metadata?: Json
 					parent_comment_id?: string | null
 					project_id?: string | null
 					project_update_id?: string | null
+					type?: Database['public']['Enums']['comment_type']
 					updated_at?: string | null
 				}
 				Relationships: [
@@ -307,6 +313,69 @@ export type Database = {
 						columns: ['project_milestone_id']
 						isOneToOne: false
 						referencedRelation: 'project_milestones'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			escrow_reviews: {
+				Row: {
+					created_at: string | null
+					disputer_id: string | null
+					escrow_id: string
+					evidence_urls: string[] | null
+					id: string
+					milestone_id: string | null
+					resolution_text: string | null
+					review_notes: string | null
+					reviewed_at: string | null
+					reviewer_address: string
+					status: string
+					transaction_hash: string | null
+					type: string
+				}
+				Insert: {
+					created_at?: string | null
+					disputer_id?: string | null
+					escrow_id: string
+					evidence_urls?: string[] | null
+					id?: string
+					milestone_id?: string | null
+					resolution_text?: string | null
+					review_notes?: string | null
+					reviewed_at?: string | null
+					reviewer_address: string
+					status?: string
+					transaction_hash?: string | null
+					type: string
+				}
+				Update: {
+					created_at?: string | null
+					disputer_id?: string | null
+					escrow_id?: string
+					evidence_urls?: string[] | null
+					id?: string
+					milestone_id?: string | null
+					resolution_text?: string | null
+					review_notes?: string | null
+					reviewed_at?: string | null
+					reviewer_address?: string
+					status?: string
+					transaction_hash?: string | null
+					type?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'escrow_reviews_escrow_id_fkey'
+						columns: ['escrow_id']
+						isOneToOne: false
+						referencedRelation: 'escrow_contracts'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'escrow_reviews_milestone_id_fkey'
+						columns: ['milestone_id']
+						isOneToOne: false
+						referencedRelation: 'escrow_milestones'
 						referencedColumns: ['id']
 					},
 				]
@@ -648,6 +717,7 @@ export type Database = {
 			[_ in never]: never
 		}
 		Enums: {
+			comment_type: 'comment' | 'question' | 'answer'
 			escrow_status_type:
 				| 'NEW'
 				| 'FUNDED'
@@ -776,6 +846,7 @@ export const Constants = {
 	},
 	public: {
 		Enums: {
+			comment_type: ['comment', 'question', 'answer'],
 			escrow_status_type: [
 				'NEW',
 				'FUNDED',
