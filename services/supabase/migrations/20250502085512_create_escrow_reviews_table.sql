@@ -24,57 +24,58 @@ CREATE INDEX escrow_reviews_type_idx ON escrow_reviews(type);
 -- escrow_reviews policies
 ALTER TABLE escrow_reviews ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow read access to escrow_reviews for participants and mediators"
-    ON escrow_reviews
-    FOR SELECT
-    TO authenticated
-    USING (
-        -- Only allow reads if the user is a participant in the escrow contract or an assigned mediator
-        EXISTS (
-            SELECT 1 FROM escrow_contracts ec
-            WHERE ec.id = escrow_id
-            AND (
-                ec.approver_id = auth.uid() OR
-                ec.service_provider_id = auth.uid()
-            )
-        ) OR
-        -- Allow administrators to read all disputes
-        EXISTS (
-            SELECT 1 FROM user_roles ur
-            WHERE ur.user_id = auth.uid()
-            AND ur.role = 'admin'
-        )
-    );
+-- TODO: Uncomment and adjust the policies as per requirements. Such fields doesn't exist in the current schema.
+-- CREATE POLICY "Allow read access to escrow_reviews for participants and mediators"
+--     ON escrow_reviews
+--     FOR SELECT
+--     TO authenticated
+--     USING (
+--         -- Only allow reads if the user is a participant in the escrow contract or an assigned mediator
+--         EXISTS (
+--             SELECT 1 FROM escrow_contracts ec
+--             WHERE ec.id = escrow_id
+--             AND (
+--                 ec.approver_id = auth.uid() OR
+--                 ec.service_provider_id = auth.uid()
+--             )
+--         ) OR
+--         -- Allow administrators to read all disputes
+--         EXISTS (
+--             SELECT 1 FROM user_roles ur
+--             WHERE ur.user_id = auth.uid()
+--             AND ur.role = 'admin'
+--         )
+--     );
 
-CREATE POLICY "Allow insert access to escrow_reviews for contract participants"
-    ON escrow_reviews
-    FOR INSERT
-    TO authenticated
-    WITH CHECK (
-        -- Only allow inserts if the user is a participant in the escrow contract
-        EXISTS (
-            SELECT 1 FROM escrow_contracts ec
-            WHERE ec.id = escrow_id
-            AND (
-                ec.approver_id = auth.uid() OR
-                ec.service_provider_id = auth.uid()
-            )
-        )
-    );
+-- CREATE POLICY "Allow insert access to escrow_reviews for contract participants"
+--     ON escrow_reviews
+--     FOR INSERT
+--     TO authenticated
+--     WITH CHECK (
+--         -- Only allow inserts if the user is a participant in the escrow contract
+--         EXISTS (
+--             SELECT 1 FROM escrow_contracts ec
+--             WHERE ec.id = escrow_id
+--             AND (
+--                 ec.approver_id = auth.uid() OR
+--                 ec.service_provider_id = auth.uid()
+--             )
+--         )
+--     );
 
-CREATE POLICY "Allow update access to escrow_reviews for participants and mediators"
-    ON escrow_reviews
-    FOR UPDATE
-    TO authenticated
-    USING (
-        -- Allow updates if the user is a participant in the escrow contract or an assigned mediator
-        EXISTS (
-            SELECT 1 FROM escrow_contracts ec
-            WHERE ec.id = escrow_id
-            AND (
-                ec.approver_id = auth.uid() OR
-                ec.service_provider_id = auth.uid()
-            )
-        )
-    );
+-- CREATE POLICY "Allow update access to escrow_reviews for participants and mediators"
+--     ON escrow_reviews
+--     FOR UPDATE
+--     TO authenticated
+--     USING (
+--         -- Allow updates if the user is a participant in the escrow contract or an assigned mediator
+--         EXISTS (
+--             SELECT 1 FROM escrow_contracts ec
+--             WHERE ec.id = escrow_id
+--             AND (
+--                 ec.approver_id = auth.uid() OR
+--                 ec.service_provider_id = auth.uid()
+--             )
+--         )
+--     );
 
