@@ -9,12 +9,14 @@ The KYC server implements a WebSocket-based real-time communication system for K
 ### Server Components
 
 1. **WebSocket Server**
+
    - Built using Bun's native WebSocket support
    - Handles connection upgrades
    - Manages client connections
    - Processes incoming messages
 
 2. **Supabase Integration**
+
    - Real-time database subscriptions
    - KYC status updates
    - Error handling and reconnection
@@ -39,6 +41,7 @@ The KYC server implements a WebSocket-based real-time communication system for K
 ### Server to Client
 
 1. **KYC Status Update**
+
    ```typescript
    {
      type: 'kyc_status',
@@ -62,17 +65,20 @@ The KYC server implements a WebSocket-based real-time communication system for K
 ## Connection Lifecycle
 
 1. **Connection Establishment**
+
    - Client connects to `ws://localhost:3001/live`
    - Server generates unique client ID
    - Connection is added to client pool
 
 2. **Subscription**
+
    - Client sends subscription message
    - Server validates user ID
    - Server sends initial KYC status
    - Server subscribes to real-time updates
 
 3. **Real-time Updates**
+
    - Supabase emits change event
    - Server processes update
    - Server broadcasts to relevant clients
@@ -87,6 +93,7 @@ The KYC server implements a WebSocket-based real-time communication system for K
 ### Connection Errors
 
 1. **Failed Upgrade**
+
    - Returns 400 status code
    - Logs error details
    - Client should retry connection
@@ -99,6 +106,7 @@ The KYC server implements a WebSocket-based real-time communication system for K
 ### Database Errors
 
 1. **Connection Failure**
+
    - Logs error details
    - Attempts reconnection
    - Notifies affected clients
@@ -111,16 +119,19 @@ The KYC server implements a WebSocket-based real-time communication system for K
 ## Best Practices
 
 1. **Connection Management**
+
    - Use unique client IDs
    - Track connection state
    - Clean up resources on disconnect
 
 2. **Message Handling**
+
    - Validate message format
    - Type-check message content
    - Handle errors gracefully
 
 3. **Real-time Updates**
+
    - Use Supabase real-time subscriptions
    - Filter updates by user ID
    - Handle subscription errors
@@ -133,11 +144,13 @@ The KYC server implements a WebSocket-based real-time communication system for K
 ## Testing
 
 1. **Unit Tests**
+
    - Message validation
    - Error handling
    - Connection management
 
 2. **Integration Tests**
+
    - WebSocket communication
    - Real-time updates
    - Error scenarios
@@ -150,11 +163,13 @@ The KYC server implements a WebSocket-based real-time communication system for K
 ## Security Considerations
 
 1. **Authentication**
+
    - Validate user IDs
    - Implement rate limiting
    - Monitor connection patterns
 
 2. **Data Validation**
+
    - Sanitize user input
    - Validate message format
    - Type-check data
@@ -167,11 +182,13 @@ The KYC server implements a WebSocket-based real-time communication system for K
 ## Performance Optimization
 
 1. **Connection Pooling**
+
    - Reuse connections
    - Limit pool size
    - Monitor usage
 
 2. **Message Batching**
+
    - Batch similar updates
    - Optimize payload size
    - Reduce network traffic
@@ -179,4 +196,4 @@ The KYC server implements a WebSocket-based real-time communication system for K
 3. **Resource Usage**
    - Monitor memory
    - Track CPU usage
-   - Optimize garbage collection 
+   - Optimize garbage collection

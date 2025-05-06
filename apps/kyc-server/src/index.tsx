@@ -2,9 +2,9 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { serve } from 'bun'
 import type { Server, ServerWebSocket } from 'bun'
+import { kycWebSocketService } from './libs/websocket'
 import { routes } from './routes'
 import { buildClient } from './utils/buildClient'
-import { kycWebSocketService } from './libs/websocket'
 
 interface ClientData {
 	clientId: string
@@ -61,7 +61,7 @@ async function startServer() {
 					const requestedFile = url.pathname.substring(1)
 					const publicDir = join(process.cwd(), 'public')
 					const specificFilePath = join(publicDir, requestedFile)
-					
+
 					if (existsSync(specificFilePath)) {
 						const file = Bun.file(specificFilePath)
 						return new Response(file, {
@@ -111,19 +111,27 @@ async function startServer() {
 			message(ws: ServerWebSocket<ClientData>, message: string) {
 				try {
 					const parsedMessage = JSON.parse(message) as ParsedMessage
-					
+
 					if (parsedMessage.type === 'subscribe' && parsedMessage.userId) {
 						ws.data.userId = parsedMessage.userId
 						kycWebSocketService.handleConnection(ws)
 					} else {
-						ws.send(JSON.stringify({ 
-							type: 'error', 
-							message: 'Invalid message format. Expected { type: "subscribe", userId: string }' 
-						}))
+						ws.send(
+							JSON.stringify({
+								type: 'error',
+								message:
+									'Invalid message format. Expected { type: "subscribe", userId: string }',
+							}),
+						)
 					}
 				} catch (error) {
 					console.error('Error parsing message:', error)
-					ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }))
+					ws.send(
+						JSON.stringify({
+							type: 'error',
+							message: 'Invalid message format',
+						}),
+					)
 				}
 			},
 			close(ws: ServerWebSocket<ClientData>) {
