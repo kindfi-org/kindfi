@@ -5,7 +5,7 @@ use soroban_sdk::{
 
 pub mod events;
 pub mod errors;
-#[cfg(feature = "testutils")]
+#[cfg(any(test, feature = "testutils"))]
 pub mod testutils;
 #[cfg(test)]
 mod test;
@@ -125,4 +125,11 @@ impl ProgressTracker {
             .persistent()
             .set(&DataKey::ChapterLessons(chapter_id), &total_lessons);
     }
+}
+
+#[cfg(test)]
+mod test_wasm {
+    soroban_sdk::contractimport!(
+        file = "../../target/wasm32-unknown-unknown/release/academy_progress_tracker.wasm"
+    );
 }

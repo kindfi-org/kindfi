@@ -16,6 +16,7 @@ testutils = ["soroban-sdk/testutils"]
 
 [dependencies]
 soroban-sdk = { workspace = true }
+soroban-env-common = "22.0.7"
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }

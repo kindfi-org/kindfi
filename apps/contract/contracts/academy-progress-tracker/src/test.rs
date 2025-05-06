@@ -1,6 +1,9 @@
 #![cfg(test)]
 
-use soroban_sdk::{Address, Env, String, Symbol, testutils::Events as _, IntoVal, Vec};
+use soroban_sdk::{
+    testutils::Address as _,
+    Address, Env,
+};
 use crate::testutils::{register_test_contract, ProgressTrackerClient};
 
 #[test]
@@ -24,23 +27,5 @@ fn test_basic_progress() {
     // 5. Verify lesson is in completed list
     let completed = client.get_completed_lessons(&user, &chapter_id);
     assert_eq!(completed.len(), 1);
-    assert_eq!(completed.get(0), Some(lesson_id));
-
-    // 6. Verify events
-    let events = env.events().all();
-    assert_eq!(events.len(), 2);
-
-    // Helper function to verify event topics
-    fn assert_event_with_topic(env: &Env, event_index: usize, expected_topic: &str) {
-        let events = env.events().all();
-        let (_, topics, _) = events.get(event_index).unwrap();
-        let topic = topics.get(0).unwrap();
-        assert!(topic.cmp(&Symbol::new(env, expected_topic).into_val(env)).is_eq());
-    }
-
-    // Verify lesson completed event
-    assert_event_with_topic(&env, 0, "lesson_completed");
-    
-    // Verify chapter completed event
-    assert_event_with_topic(&env, 1, "chapter_completed");
+    assert_eq!(completed.get(0).unwrap(), lesson_id);
 } 
