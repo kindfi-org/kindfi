@@ -44,6 +44,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 	if (initialQuestions && initialQuestions.length > 0) {
 		const authorIds = [
+			// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 			...new Set(initialQuestions.map((item: any) => item.author_id)),
 		]
 
@@ -54,6 +55,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 		const authorsMap = authors
 			? authors.reduce(
+					// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 					(acc: Record<string, UserData>, author: any) => {
 						acc[author.id] = author
 						return acc
@@ -62,6 +64,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 				)
 			: {}
 
+		// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 		questionsWithAuthors = initialQuestions.map((question: any) => ({
 			...question,
 			author:
@@ -87,6 +90,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 	if (commentsData && commentsData.length > 0) {
 		const authorIds = [
+			// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 			...new Set(commentsData.map((item: any) => item.author_id)),
 		]
 
@@ -97,6 +101,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 		const authorsMap = authors
 			? authors.reduce(
+					// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 					(acc: Record<string, UserData>, author: any) => {
 						acc[author.id] = author
 						return acc
@@ -105,6 +110,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 				)
 			: {}
 
+		// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 		commentsWithAuthors = commentsData.map((comment: any) => ({
 			...comment,
 			author:

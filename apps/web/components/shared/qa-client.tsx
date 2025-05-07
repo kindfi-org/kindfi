@@ -6,9 +6,10 @@ import type { TypedSupabaseClient } from '@packages/lib/types/supabase-client.ty
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'
-import React, { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
+import type { TablesUpdate } from '@services/supabase'
 import {
 	Bell,
 	BellOff,
@@ -18,7 +19,6 @@ import {
 	Loader2,
 	LogIn,
 	MessageCircle,
-	MessageSquare,
 	RefreshCw,
 	Reply,
 	User as UserIcon,
@@ -200,6 +200,7 @@ export default function QAClient({
 					}
 
 					const authorIds = [
+						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 						...new Set(data.map((item: any) => item.author_id)),
 					]
 
@@ -211,6 +212,7 @@ export default function QAClient({
 
 					if (authorsError) {
 						console.error('Error fetching authors:', authorsError)
+						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 						return data.map((item: any) => ({
 							...item,
 							created_at: item.created_at || new Date().toISOString(),
@@ -229,6 +231,7 @@ export default function QAClient({
 						)
 
 						// Attach author data to each question
+						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 						return data.map((question: any) => ({
 							...question,
 							created_at: question.created_at || new Date().toISOString(),
@@ -245,6 +248,7 @@ export default function QAClient({
 					}
 				}
 
+				// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 				return (data || []).map((item: any) => ({
 					...item,
 					created_at: item.created_at || new Date().toISOString(),
@@ -283,6 +287,7 @@ export default function QAClient({
 				if (data && data.length > 0) {
 					// Get unique author IDs
 					const authorIds = [
+						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 						...new Set(data.map((item: any) => item.author_id)),
 					]
 
@@ -293,6 +298,7 @@ export default function QAClient({
 
 					if (authorsError) {
 						console.error('Error fetching authors:', authorsError)
+						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 						return data.map((item: any) => ({
 							...item,
 							created_at: item.created_at || new Date().toISOString(),
@@ -302,6 +308,7 @@ export default function QAClient({
 
 					if (authors) {
 						const authorsMap = authors.reduce(
+							// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 							(acc: Record<string, UserData>, author: any) => {
 								acc[author.id] = author
 								return acc
@@ -309,6 +316,7 @@ export default function QAClient({
 							{} as Record<string, UserData>,
 						)
 
+						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 						return data.map((comment: any) => ({
 							...comment,
 							created_at: comment.created_at || new Date().toISOString(),
@@ -325,6 +333,7 @@ export default function QAClient({
 					}
 				}
 
+				// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 				return (data || []).map((item: any) => ({
 					...item,
 					created_at: item.created_at || new Date().toISOString(),
@@ -441,6 +450,7 @@ export default function QAClient({
 						})
 
 						const eventType = payload.eventType
+						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
 						const record = payload.new as any
 
 						if (eventType === 'INSERT') {
@@ -471,10 +481,14 @@ export default function QAClient({
 			return () => {
 				supabase.removeChannel(channel)
 			}
-		} else if (subscriptionRef.current) {
-			supabase.removeChannel(subscriptionRef.current)
-			subscriptionRef.current = null
 		}
+
+		if (!subscriptionRef.current) {
+			return
+		}
+
+		supabase.removeChannel(subscriptionRef.current)
+		subscriptionRef.current = null
 	}, [isRealtimeEnabled, projectId, supabase, queryClient, effectiveUser?.id])
 
 	const checkGuestCommentLimit = () => {
@@ -652,7 +666,8 @@ export default function QAClient({
 			const commentId = uuidv4()
 
 			const { data, error } = await supabase
-				.from('comments')
+			.from('comments')
+				// TODO: Fix insert props and types
 				.insert({
 					id: commentId,
 					content: replyContent,
@@ -700,7 +715,7 @@ export default function QAClient({
 
 			const { data, error } = await supabase
 				.from('comments')
-				.update({ is_resolved: true } as any)
+				.update({ is_resolved: true } as TablesUpdate<'comments'>)
 				.eq('id', questionId)
 				.select()
 				.single()
