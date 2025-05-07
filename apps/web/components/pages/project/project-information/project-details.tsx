@@ -23,6 +23,7 @@ import { MarketOpportunity } from '~/components/sections/projects/market-opportu
 import { ProjectDocuments } from '~/components/sections/projects/project-documents'
 import { ProjectOverview } from '~/components/sections/projects/project-overview'
 import { TractionMilestones } from '~/components/sections/projects/traction-milestones'
+import QA from '~/components/shared/qa-client'
 import { businessModelData } from '~/lib/mock-data/mock-business-model'
 import { competitiveAdvantagesData } from '~/lib/mock-data/mock-competitive-adventage'
 import { investmentDetailsData } from '~/lib/mock-data/mock-investment-details'
@@ -44,6 +45,8 @@ const tagColors = [
 	{ textColor: '#4D9A5E', backgroundColor: '#E3F4E7' },
 	{ textColor: '#B56CD2', backgroundColor: '#F3E8FD' },
 ]
+
+const testProjectId = 'test-project-123'
 
 const formatNumber = (number: number) => {
 	return number.toLocaleString()
@@ -324,6 +327,17 @@ const ProjectDetail = ({ project }: ProjectDetailProp) => {
 											/>
 											<Button>Post Comment</Button>
 										</div>
+									</TabsContent>
+									<TabsContent
+										value="q&a"
+										className="bg-white rounded-lg p-6 border border-gray-100"
+									>
+										{/* QA component with no auth required */}
+										<QA
+											projectId={testProjectId}
+											initialQuestions={[]}
+											initialComments={[]}
+										/>
 									</TabsContent>
 								</Tabs>
 							</div>
