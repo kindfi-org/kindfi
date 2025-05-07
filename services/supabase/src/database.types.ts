@@ -37,17 +37,17 @@ export type Database = {
 			categories: {
 				Row: {
 					color: string
-					id: number
+					id: string
 					name: string
 				}
 				Insert: {
 					color: string
-					id?: never
+					id?: string
 					name: string
 				}
 				Update: {
 					color?: string
-					id?: never
+					id?: string
 					name?: string
 				}
 				Relationships: []
@@ -707,7 +707,15 @@ export type Database = {
 					title?: string
 					updated_at?: string | null
 				}
-				Relationships: []
+				Relationships: [
+					{
+						foreignKeyName: 'projects_category_id_fkey'
+						columns: ['category_id']
+						isOneToOne: false
+						referencedRelation: 'categories'
+						referencedColumns: ['id']
+					},
+				]
 			}
 		}
 		Views: {
@@ -725,7 +733,12 @@ export type Database = {
 				| 'COMPLETED'
 				| 'DISPUTED'
 				| 'CANCELLED'
-			milestone_status: 'pending' | 'in_progress' | 'completed' | 'failed'
+			milestone_status:
+				| 'pending'
+				| 'completed'
+				| 'approved'
+				| 'rejected'
+				| 'disputed'
 			project_member_role: 'admin' | 'editor'
 			user_role: 'kinder' | 'kindler'
 		}
@@ -855,7 +868,13 @@ export const Constants = {
 				'DISPUTED',
 				'CANCELLED',
 			],
-			milestone_status: ['pending', 'in_progress', 'completed', 'failed'],
+			milestone_status: [
+				'pending',
+				'completed',
+				'approved',
+				'rejected',
+				'disputed',
+			],
 			project_member_role: ['admin', 'editor'],
 			user_role: ['kinder', 'kindler'],
 		},
