@@ -256,7 +256,7 @@ inspector_port = 8083
 # entrypoint = "./functions/MY_FUNCTION_NAME/index.ts"
 
 [analytics]
-enabled = true
+enabled = false
 port = 54327
 # Configure one of the supported backends: `postgres`, `bigquery`.
 backend = "postgres"

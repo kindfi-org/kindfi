@@ -69,7 +69,9 @@ export async function POST(req: NextRequest) {
 			})
 
 			if (!escrowResponse.unsignedTransaction) {
-				throw new Error('Failed to retrieve unsigned transaction XDR')
+				throw new Error(
+					`Failed to retrieve unsigned transaction XDR${escrowResponse.status === 'ERROR' ? ' due to an error' : ''}`,
+				)
 			}
 
 			// Sign transaction
