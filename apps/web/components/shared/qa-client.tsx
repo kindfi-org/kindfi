@@ -600,7 +600,10 @@ export default function QAClient({
 		mutationFn: async ({
 			questionId,
 			answerContent,
-		}: { questionId: string; answerContent: string }) => {
+		}: {
+			questionId: string
+			answerContent: string
+		}) => {
 			if (!effectiveUser?.id) {
 				throw new Error('User ID is required')
 			}
@@ -658,7 +661,10 @@ export default function QAClient({
 		mutationFn: async ({
 			answerId,
 			replyContent,
-		}: { answerId: string; replyContent: string }) => {
+		}: {
+			answerId: string
+			replyContent: string
+		}) => {
 			if (!effectiveUser?.id) {
 				throw new Error('User ID is required')
 			}
@@ -666,14 +672,13 @@ export default function QAClient({
 			const commentId = uuidv4()
 
 			const { data, error } = await supabase
-			.from('comments')
-				// TODO: Fix insert props and types
+				.from('comments')
 				.insert({
 					id: commentId,
 					content: replyContent,
 					project_id: projectId,
 					author_id: effectiveUser.id,
-					type: 'reply',
+					type: 'comment',
 					parent_comment_id: answerId,
 					is_resolved: false,
 				})
