@@ -1,58 +1,75 @@
+'use client'
+
+import { ChevronDown, Flame, Heart, Star, TrendingUp } from 'lucide-react'
+
+import { Button } from '~/components/base/button'
 import {
-	FlameIcon as Fire,
-	Heart,
-	Star,
-	TrendingUpIcon as Trending,
-} from 'lucide-react'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '~/components/base/select'
-import type { SortOption } from '~/hooks/use-projects-filter'
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '~/components/base/dropdown-menu'
+import type { SortOption, SortOptionItem } from '~/lib/types/project'
+
+const sortOptions: SortOptionItem[] = [
+	{
+		value: 'Most Popular',
+		label: 'Most Popular',
+		icon: <TrendingUp className="h-4 w-4 mr-2" aria-hidden="true" />,
+	},
+	{
+		value: 'Most Funded',
+		label: 'Most Funded',
+		icon: <Star className="h-4 w-4 mr-2" aria-hidden="true" />,
+	},
+	{
+		value: 'Most Recent',
+		label: 'Most Recent',
+		icon: <Flame className="h-4 w-4 mr-2" aria-hidden="true" />,
+	},
+	{
+		value: 'Most Supporters',
+		label: 'Most Supporters',
+		icon: <Heart className="h-4 w-4 mr-2" aria-hidden="true" />,
+	},
+]
+
 interface SortDropdownProps {
 	value: SortOption
 	onChange: (value: SortOption) => void
 }
 
 export function SortDropdown({ value, onChange }: SortDropdownProps) {
+	const selectedOption = sortOptions.find((option) => option.value === value)
+
 	return (
-		<div className="flex items-center">
-			<div className="relative">
-				<Select defaultValue={value} onValueChange={onChange}>
-					<SelectTrigger className="w-[180px]">
-						<SelectValue placeholder="Sort by" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="popular">
-							<span className="flex items-center gap-2">
-								<Trending className="h-4 w-4" />
-								Popular Searches
-							</span>
-						</SelectItem>
-						<SelectItem value="funding">
-							<span className="flex items-center gap-2">
-								<Star className="h-4 w-4" />
-								Most Funded
-							</span>
-						</SelectItem>
-						<SelectItem value="newest">
-							<span className="flex items-center gap-2">
-								<Fire className="h-4 w-4" />
-								Newest
-							</span>
-						</SelectItem>
-						<SelectItem value="supporters">
-							<span className="flex items-center gap-2">
-								<Heart className="h-4 w-4" />
-								Most Supporters
-							</span>
-						</SelectItem>
-					</SelectContent>
-				</Select>
-			</div>
-		</div>
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button
+					variant="outline"
+					className="flex items-center gap-2 gradient-border-btn"
+				>
+					{selectedOption?.icon}
+					{selectedOption?.label}
+					<ChevronDown className="h-4 w-4 ml-2" aria-hidden="true" />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent
+				align="end"
+				className="w-[--radix-dropdown-menu-trigger-width] gradient-border-btn"
+			>
+				{sortOptions.map((option) => (
+					<DropdownMenuItem
+						key={option.value}
+						onClick={() => onChange(option.value)}
+						className="flex items-center cursor-pointer focus:bg-green-100 focus:text-primary"
+						aria-selected={option.value === value}
+					>
+						{option.icon}
+						{option.label}
+					</DropdownMenuItem>
+				))}
+			</DropdownMenuContent>
+		</DropdownMenu>
 	)
 }
