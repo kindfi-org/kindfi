@@ -37,17 +37,17 @@ export type Database = {
 			categories: {
 				Row: {
 					color: string
-					id: number
+					id: string
 					name: string
 				}
 				Insert: {
 					color: string
-					id?: never
+					id?: string
 					name: string
 				}
 				Update: {
 					color?: string
-					id?: never
+					id?: string
 					name?: string
 				}
 				Relationships: []
@@ -778,7 +778,15 @@ export type Database = {
 					title?: string
 					updated_at?: string | null
 				}
-				Relationships: []
+				Relationships: [
+					{
+						foreignKeyName: 'projects_category_id_fkey'
+						columns: ['category_id']
+						isOneToOne: false
+						referencedRelation: 'categories'
+						referencedColumns: ['id']
+					},
+				]
 			}
 		}
 		Views: {

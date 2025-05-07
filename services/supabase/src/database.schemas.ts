@@ -16,19 +16,19 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
 
 export const categoriesRowSchema = z.object({
 	color: z.string(),
-	id: z.number(),
+	id: z.string(),
 	name: z.string(),
 })
 
 export const categoriesInsertSchema = z.object({
 	color: z.string(),
-	id: z.never().optional(),
+	id: z.string().optional(),
 	name: z.string(),
 })
 
 export const categoriesUpdateSchema = z.object({
 	color: z.string().optional(),
-	id: z.never().optional(),
+	id: z.string().optional(),
 	name: z.string().optional(),
 })
 
@@ -760,7 +760,15 @@ export const projectsUpdateSchema = z.object({
 	updated_at: z.string().optional().nullable(),
 })
 
-export const projectsRelationshipsSchema = z.tuple([])
+export const projectsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('projects_category_id_fkey'),
+		columns: z.tuple([z.literal('category_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('categories'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
 
 export const commentsRowSchema = z.object({
 	author_id: z.string(),
