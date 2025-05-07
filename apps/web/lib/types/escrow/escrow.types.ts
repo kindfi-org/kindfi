@@ -1,10 +1,14 @@
+import type { Enums } from '@services/supabase'
+import type { ReviewStatus } from '~/lib/types/escrow/escrow-reviews.types'
 import type { CreatedAt, UpdatedAt } from '../date.types'
 
-export type MilestoneStatus = 'completed' | 'approved' | 'pending'
+// Re-export the types from Supabase service with appropriate names
+export type MilestoneStatusType = Enums<'milestone_status'>
+export type DisputeStatus = ReviewStatus // Using the ReviewStatus from Supabase service
 
 export type Milestone = {
 	description: string
-	status?: MilestoneStatus
+	status?: MilestoneStatusType
 	flag?: boolean
 }
 export interface Escrow {

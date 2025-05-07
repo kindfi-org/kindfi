@@ -17,7 +17,7 @@
 		"start": "supabase start",
 		"stop": "supabase stop",
 		"reset": "supabase db reset",
-		"migrate": "supabase migrate up",
+		"migrate": "supabase migration up",
 		"status": "supabase status"
 	},
 	"author": "kindfi",

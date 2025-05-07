@@ -1,3 +1,11 @@
+import type {
+	DisputePayload,
+	DisputeResolutionPayload,
+	DisputeSignPayload,
+	ReviewStatus as DisputeStatus,
+	EvidenceSubmissionPayload,
+	MediatorAssignmentPayload,
+} from '@services/supabase/src/types'
 import type { Escrow, MilestoneStatus } from './escrow.types'
 
 // Escrow's Payload
@@ -5,6 +13,15 @@ export type EscrowPayload = Omit<
 	Escrow,
 	'user' | 'createdAt' | 'updatedAt' | 'id'
 >
+
+// Re-export the types from Supabase service for backward compatibility
+export type {
+	DisputePayload,
+	DisputeResolutionPayload,
+	MediatorAssignmentPayload,
+	EvidenceSubmissionPayload,
+	DisputeSignPayload,
+}
 
 export type ChangeMilestoneStatusPayload = {
 	contractId?: string
@@ -22,13 +39,16 @@ export type ChangeMilestoneFlagPayload = Omit<
 }
 
 export type StartDisputePayload = Pick<Escrow, 'contractId'> & {
-	signer: string
+	signer?: string // Keep for backward compatibility
+	signerAddress?: string // New property for better security
 }
 
 export type ResolveDisputePayload = Pick<Escrow, 'contractId'> &
 	Partial<Pick<Escrow, 'disputeResolver'>> & {
-		approverFunds: string
-		serviceProviderFunds: string
+		approverAmount: string
+		serviceProviderAmount: string
+		signer?: string // Keep for backward compatibility
+		signerAddress?: string // New property for better security
 	}
 
 export type FundEscrowPayload = Pick<Escrow, 'amount' | 'contractId'> & {
@@ -98,3 +118,6 @@ export interface MilestoneReviewPayload {
 	signer: string
 	escrowContractAddress: string
 }
+
+// Note: The dispute system types are now imported from @services/supabase/src/types
+// See the imports and re-exports at the top of this file
