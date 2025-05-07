@@ -10,6 +10,8 @@ export const getEndpoint = (action: EscrowEndpoint): string => {
 		completeMilestone: '/escrow/change-milestone-status',
 		approveMilestone: '/escrow/change-milestone-flag',
 		edit: '/escrow/update-escrow-by-contract-id',
+		startDispute: '/escrow/start-dispute',
+		resolveDispute: '/escrow/resolve-dispute',
 	}
 	return endpoints[action]
 }
