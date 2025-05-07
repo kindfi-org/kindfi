@@ -71,7 +71,9 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		const isApproved = status === 'approved'
+		// * It shouldn't be "completed"... it should be "approved" however, there is an overlap with the old types with the new migrations.
+		// TODO: Fix this in the DB and prior that, update here.
+		const isApproved = status === 'completed'
 		let escrowResponse = null
 
 		// Step 3: Finalize Milestone On-Chain if Approved

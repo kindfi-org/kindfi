@@ -2,11 +2,10 @@ import type {
 	DisputePayload,
 	DisputeResolutionPayload,
 	DisputeSignPayload,
-	ReviewStatus as DisputeStatus,
 	EvidenceSubmissionPayload,
 	MediatorAssignmentPayload,
-} from '@services/supabase/src/types'
-import type { Escrow, MilestoneStatus } from './escrow.types'
+} from './escrow-reviews.types'
+import type { Escrow, MilestoneStatusType } from './escrow.types'
 
 // Escrow's Payload
 export type EscrowPayload = Omit<
@@ -26,7 +25,7 @@ export type {
 export type ChangeMilestoneStatusPayload = {
 	contractId?: string
 	milestoneIndex: string
-	newStatus: MilestoneStatus
+	newStatus: MilestoneStatusType
 	serviceProvider?: string
 }
 
@@ -113,7 +112,7 @@ export interface EscrowFundUpdateData {
 export interface MilestoneReviewPayload {
 	milestoneId: string
 	reviewerId: string
-	status: MilestoneStatus
+	status: MilestoneStatusType
 	comments?: string
 	signer: string
 	escrowContractAddress: string
