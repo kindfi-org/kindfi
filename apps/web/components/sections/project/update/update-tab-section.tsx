@@ -161,6 +161,7 @@ export function ProjectUpdatesTabSection() {
 	}
 
 	// Fetch updates when component mounts or page changes
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (!isCreatingUpdate) {
 			fetchUpdates()
@@ -168,6 +169,7 @@ export function ProjectUpdatesTabSection() {
 	}, [page, projectId, isCreatingUpdate])
 
 	// Setup real-time subscription
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (isCreatingUpdate) return
 
