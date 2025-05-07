@@ -2,12 +2,12 @@
 // Other components can import it as import QA from '~/components/qa';
 
 // Export the server component as the default export
-export { default } from '~/components/shared/qa-server';
+export { default } from '~/components/shared/qa-server'
 
 // Export other types and components that might be needed elsewhere
 export type {
-  UserData,
-  CommentData,
-  CommentWithReplies,
-  CommentWithAnswers
-} from './types';
+	UserData,
+	CommentData,
+	CommentWithReplies,
+	CommentWithAnswers,
+} from './types'
