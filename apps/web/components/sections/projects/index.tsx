@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { staggerContainer } from '~/lib/constants/animations'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
-import type { Project, SortOption, SortSlug } from '~/lib/types/project'
+import type { Project, SortOption } from '~/lib/types/project'
 
 import { CategoryBadgeSkeleton } from './category-badge-skeleton'
 import { CategoryFilters } from './category-filters'
@@ -22,13 +22,15 @@ export function ProjectsView() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const initialCategoryParams = searchParams.getAll('category')
-	const sortParam = searchParams.get('sort') as SortSlug | null
+	const sortParam = searchParams.get('sort') ?? 'most-popular'
 
 	const {
 		data: initialProjects = [],
 		isLoading: isLoadingProjects,
 		error: projectError,
-	} = useSupabaseQuery('projects', getAllProjects)
+	} = useSupabaseQuery('projects', (client) =>
+		getAllProjects(client, initialCategoryParams, sortParam),
+	)
 
 	const {
 		data: categories = [],
@@ -37,7 +39,6 @@ export function ProjectsView() {
 	} = useSupabaseQuery('categories', getAllCategories, {
 		staleTime: 1000 * 60 * 60, // 1 hour
 		gcTime: 1000 * 60 * 60, // 1 hour
-		additionalKeyValues: ['categories-static'],
 	})
 
 	const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
