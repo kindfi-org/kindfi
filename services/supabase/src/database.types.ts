@@ -39,16 +39,19 @@ export type Database = {
 					color: string
 					id: string
 					name: string
+					slug: string | null
 				}
 				Insert: {
 					color: string
 					id?: string
 					name: string
+					slug?: string | null
 				}
 				Update: {
 					color?: string
 					id?: string
 					name?: string
+					slug?: string | null
 				}
 				Relationships: []
 			}
@@ -793,7 +796,14 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
-			[_ in never]: never
+			unaccent: {
+				Args: { '': string }
+				Returns: string
+			}
+			unaccent_init: {
+				Args: { '': unknown }
+				Returns: unknown
+			}
 		}
 		Enums: {
 			comment_type: 'comment' | 'question' | 'answer'
