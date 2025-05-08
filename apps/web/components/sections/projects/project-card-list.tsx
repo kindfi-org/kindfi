@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion'
 
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
-import { categories } from '~/lib/mock-data/project/categories.mock'
 import type { Project } from '~/lib/types/project'
 import { CategoryBadge } from './category-badge'
 
@@ -12,7 +11,6 @@ interface ProjectCardListProps {
 }
 
 export function ProjectCardList({ project }: ProjectCardListProps) {
-	const category = categories.find((c) => c.id === project.categoryId)
 	const progressPercentage = Math.min(
 		Math.round((project.raised / project.goal) * 100),
 		100,
@@ -37,14 +35,14 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 
 			{/* Content section */}
 			<div className="p-3 sm:p-4 md:p-5 flex flex-col flex-grow">
-				<div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
+				<div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2 mb-2">
 					<h3 className="text-base sm:text-lg md:text-xl font-bold line-clamp-1">
 						{project.title}
 					</h3>
-					{category && (
+					{project.category && (
 						<div className="shrink-0">
 							<CategoryBadge
-								category={category}
+								category={project.category}
 								className="text-xs sm:text-sm"
 							/>
 						</div>
@@ -105,8 +103,9 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 					<div className="flex flex-wrap gap-1" aria-label="Project tags">
 						{project.tags.slice(0, 3).map((tag, index) => (
 							<span
+								// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
 								key={index}
-								className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-gray-100 text-gray-600 rounded text-[10px] sm:text-xs font-medium"
+								className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-gray-100 text-gray-600 rounded text-[10px] sm:text-xs font-medium uppercase"
 							>
 								{tag}
 							</span>

@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion'
 
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
-import { categories } from '~/lib/mock-data/project/categories.mock'
 import type { Project } from '~/lib/types/project'
 import { CategoryBadge } from './category-badge'
 
@@ -12,7 +11,6 @@ interface ProjectCardGridProps {
 }
 
 export function ProjectCardGrid({ project }: ProjectCardGridProps) {
-	const category = categories.find((c) => c.id === project.categoryId)
 	const progressPercentage = Math.min(
 		Math.round((project.raised / project.goal) * 100),
 		100,
@@ -32,9 +30,9 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 					alt={`${project.title} project thumbnail`}
 					className="w-full h-full object-cover"
 				/>
-				{category && (
+				{project.category && (
 					<div className="absolute top-3 left-3">
-						<CategoryBadge category={category} />
+						<CategoryBadge category={project.category} />
 					</div>
 				)}
 			</div>
@@ -86,8 +84,9 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 				<div className="flex flex-wrap gap-1" aria-label="Project tags">
 					{project.tags.slice(0, 3).map((tag, index) => (
 						<span
+							// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
 							key={index}
-							className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium"
+							className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium uppercase"
 						>
 							{tag}
 						</span>

@@ -49,7 +49,17 @@ export function CategoryBadge({
 			tabIndex={isInteractive ? 0 : -1}
 		>
 			{showIcon && Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
-			<span>{category.name}</span>
+			<span
+				className={cn(
+					'whitespace-nowrap overflow-hidden text-ellipsis',
+					isInteractive
+						? 'max-w-[230px] sm:max-w-full'
+						: 'max-w-[100px] sm:max-w-full',
+				)}
+				title={category.name}
+			>
+				{category.name}
+			</span>
 		</motion.button>
 	)
 }

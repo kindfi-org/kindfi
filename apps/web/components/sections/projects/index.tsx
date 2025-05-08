@@ -2,144 +2,113 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
+import { useSupabaseQuery } from '@packages/lib/hooks'
 import { staggerContainer } from '~/lib/constants/animations'
-import type { Category, Project, SortOption } from '~/lib/types/project'
+import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
+import type { Project, SortOption, SortSlug } from '~/lib/types/project'
+
 import { CategoryFilters } from './category-filters'
 import { ProjectCardGrid } from './project-card-grid'
 import { ProjectCardList } from './project-card-list'
-import { SearchInput } from './search-input'
 import { SortDropdown } from './sort-dropdown'
 import { ViewToggle } from './view-toggle'
 
-interface ProjectsViewProps {
-	initialProjects: Project[]
-	categories: Category[]
-}
+export function ProjectsView() {
+	const router = useRouter()
+	const searchParams = useSearchParams()
+	const initialCategoryParams = searchParams.getAll('category')
+	const sortParam = searchParams.get('sort') as SortSlug | null
 
-// Number of projects to load per "page"
-const PROJECTS_PER_PAGE = 8
+	const {
+		data: initialProjects = [],
+		isLoading: isLoadingProjects,
+		error: projectError,
+	} = useSupabaseQuery('projects', getAllProjects)
 
-export function ProjectsView({
-	initialProjects,
-	categories,
-}: ProjectsViewProps) {
-	const [filteredProjects, setFilteredProjects] =
-		useState<Project[]>(initialProjects)
-	const [displayedProjects, setDisplayedProjects] = useState<Project[]>([])
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-	const [searchQuery, setSearchQuery] = useState('')
+	const {
+		data: categories = [],
+		isLoading: isLoadingCategories,
+		error: categoryError,
+	} = useSupabaseQuery('categories', getAllCategories, {
+		staleTime: 1000 * 60 * 60, // 1 hour
+		gcTime: 1000 * 60 * 60, // 1 hour
+		additionalKeyValues: ['categories-static'],
+	})
+
+	const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
+	const [selectedCategories, setSelectedCategories] = useState<string[]>(
+		initialCategoryParams,
+	)
 	const [sortOption, setSortOption] = useState<SortOption>('Most Popular')
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-	const [page, setPage] = useState(1)
-	const [hasMore, setHasMore] = useState(true)
-	const [isLoading, setIsLoading] = useState(false)
 
-	const observer = useRef<IntersectionObserver | null>(null)
-	const lastProjectElementRef = useCallback(
-		(node: HTMLDivElement | null) => {
-			if (isLoading) return
-			if (observer.current) observer.current.disconnect()
-
-			observer.current = new IntersectionObserver((entries) => {
-				if (entries[0].isIntersecting && hasMore) {
-					loadMoreProjects()
-				}
-			})
-
-			if (node) observer.current.observe(node)
-		},
-		[isLoading, hasMore],
-	)
-
-	// Filter projects when dependencies change
 	useEffect(() => {
-		let result = [...initialProjects]
+		if (sortParam === 'most-recent') setSortOption('Most Recent')
+		else if (sortParam === 'most-funded') setSortOption('Most Funded')
+		else if (sortParam === 'most-supporters') setSortOption('Most Supporters')
+		else if (sortParam === 'most-popular') setSortOption('Most Popular')
+	}, [sortParam])
 
-		// Apply category filter
-		if (selectedCategories.length > 0) {
-			result = result.filter((project) =>
-				selectedCategories.includes(project.categoryId),
-			)
+	useEffect(() => {
+		setFilteredProjects(initialProjects)
+	}, [initialProjects])
+
+	const handleCategoryToggle = (categorySlug: string) => {
+		const next = selectedCategories.includes(categorySlug)
+			? selectedCategories.filter((id) => id !== categorySlug)
+			: [...selectedCategories, categorySlug]
+
+		setSelectedCategories(next)
+
+		const params = new URLSearchParams(searchParams.toString())
+		params.delete('category')
+		for (const slug of next) {
+			params.append('category', slug)
 		}
-
-		// Apply search filter
-		if (searchQuery) {
-			const query = searchQuery.toLowerCase()
-			result = result.filter(
-				(project) =>
-					project.title.toLowerCase().includes(query) ||
-					project.description.toLowerCase().includes(query),
-			)
-		}
-
-		// Apply sorting
-		switch (sortOption) {
-			case 'Most Funded':
-				result.sort((a, b) => b.raised - a.raised)
-				break
-			case 'Most Recent':
-				// Since IDs are now strings but we're using them as a proxy for creation date,
-				// we need to handle the comparison differently
-				result.sort((a, b) => {
-					// This assumes IDs are sequential or timestamp-based strings
-					// For UUIDs, you might want to sort by a separate createdAt field instead
-					return b.id.localeCompare(a.id)
-				})
-				break
-			case 'Most Supporters':
-				result.sort((a, b) => b.investors - a.investors)
-				break
-			// Most Popular is default order
-			default:
-				break
-		}
-
-		setFilteredProjects(result)
-		setPage(1)
-		setDisplayedProjects(result.slice(0, PROJECTS_PER_PAGE))
-		setHasMore(result.length > PROJECTS_PER_PAGE)
-	}, [initialProjects, selectedCategories, searchQuery, sortOption])
-
-	const loadMoreProjects = () => {
-		if (!hasMore || isLoading) return
-
-		setIsLoading(true)
-
-		// Simulate loading delay
-		setTimeout(() => {
-			const nextPage = page + 1
-			const startIndex = (nextPage - 1) * PROJECTS_PER_PAGE
-			const endIndex = nextPage * PROJECTS_PER_PAGE
-
-			const newProjects = filteredProjects.slice(startIndex, endIndex)
-			setDisplayedProjects((prev) => [...prev, ...newProjects])
-			setPage(nextPage)
-			setHasMore(endIndex < filteredProjects.length)
-			setIsLoading(false)
-		}, 800)
-	}
-
-	const handleCategoryToggle = (categoryId: string) => {
-		setSelectedCategories((prev) =>
-			prev.includes(categoryId)
-				? prev.filter((id) => id !== categoryId)
-				: [...prev, categoryId],
-		)
+		router.push(`?${params.toString()}`)
 	}
 
 	const handleResetCategories = () => {
 		setSelectedCategories([])
+
+		const params = new URLSearchParams(searchParams.toString())
+		params.delete('category')
+		router.push(`?${params.toString()}`)
 	}
 
-	const handleSearch = (query: string) => {
-		setSearchQuery(query)
+	const handleSortChange = (newSort: SortOption) => {
+		setSortOption(newSort)
+		const params = new URLSearchParams(searchParams.toString())
+		params.set('sort', newSort.toLowerCase().replace(/ /g, '-'))
+		for (const slug of selectedCategories) {
+			params.append('category', slug)
+		}
+		router.push(`?${params.toString()}`)
+	}
+
+	if (isLoadingProjects || isLoadingCategories) {
+		return (
+			<div className="flex justify-center py-12">
+				<Loader2 className="h-6 w-6 animate-spin" />
+				<span className="sr-only">Loading...</span>
+			</div>
+		)
+	}
+
+	if (projectError || categoryError) {
+		return (
+			<div className="text-center text-destructive py-12">
+				Error loading data: {projectError?.message || categoryError?.message}
+			</div>
+		)
 	}
 
 	return (
 		<div>
-			<div className="mb-8">
+			<div className="mb-6">
 				<CategoryFilters
 					categories={categories}
 					selectedCategories={selectedCategories}
@@ -147,21 +116,24 @@ export function ProjectsView({
 					onResetCategories={handleResetCategories}
 				/>
 
-				<div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
-					<div className="w-full md:w-1/3">
-						<SearchInput onSearch={handleSearch} />
+				<div className="flex flex-col md:flex-row gap-4 justify-between">
+					<div className="flex flex-row items-center justify-between gap-2 md:gap-4">
+						<h2 className="text-xl font-semibold">Explore Projects</h2>
+						<p className="text-sm text-gray-500 md:hidden">
+							{selectedCategories.length > 0
+								? `Found ${filteredProjects.length} ${filteredProjects.length === 1 ? 'project' : 'projects'}`
+								: `Showing ${filteredProjects.length} ${filteredProjects.length === 1 ? 'project' : 'projects'}`}
+						</p>
 					</div>
 
-					<div className="flex flex-col md:flex-row items-between md:items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-						<p className="text-sm text-gray-500" aria-live="polite">
-							Showing {displayedProjects.length} of {filteredProjects.length}{' '}
-							projects
+					<div className="flex flex-row items-center gap-0 md:gap-4 justify-between md:justify-end">
+						<p className="hidden md:block text-sm text-gray-500">
+							{selectedCategories.length > 0
+								? `Found ${filteredProjects.length} ${filteredProjects.length === 1 ? 'project' : 'projects'}`
+								: `Showing ${filteredProjects.length} ${filteredProjects.length === 1 ? 'project' : 'projects'}`}
 						</p>
-
-						<div className="flex items-center gap-3 justify-between">
-							<SortDropdown value={sortOption} onChange={setSortOption} />
-							<ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-						</div>
+						<SortDropdown value={sortOption} onChange={handleSortChange} />
+						<ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
 					</div>
 				</div>
 			</div>
@@ -181,20 +153,11 @@ export function ProjectsView({
 							initial="initial"
 							animate="animate"
 							role="feed"
-							aria-busy={isLoading}
 							aria-label="Projects grid view"
 						>
-							{displayedProjects.map((project, index) => {
-								if (displayedProjects.length === index + 1) {
-									return (
-										<div ref={lastProjectElementRef} key={project.id}>
-											<ProjectCardGrid project={project} />
-										</div>
-									)
-								}
-
-								return <ProjectCardGrid key={project.id} project={project} />
-							})}
+							{filteredProjects.map((project) => (
+								<ProjectCardGrid key={project.id} project={project} />
+							))}
 						</motion.div>
 					) : (
 						<motion.div
@@ -203,43 +166,12 @@ export function ProjectsView({
 							initial="initial"
 							animate="animate"
 							role="feed"
-							aria-busy={isLoading}
 							aria-label="Projects list view"
 						>
-							{displayedProjects.map((project, index) => {
-								if (displayedProjects.length === index + 1) {
-									return (
-										<div ref={lastProjectElementRef} key={project.id}>
-											<ProjectCardList project={project} />
-										</div>
-									)
-								}
-
-								return <ProjectCardList key={project.id} project={project} />
-							})}
+							{filteredProjects.map((project) => (
+								<ProjectCardList key={project.id} project={project} />
+							))}
 						</motion.div>
-					)}
-
-					{isLoading && (
-						<div className="flex justify-center mt-8" aria-live="polite">
-							<Loader2 className="h-8 w-8 animate-spin text-primary" />
-							<span className="sr-only">Loading more projects...</span>
-						</div>
-					)}
-
-					{!hasMore && filteredProjects.length > 0 && (
-						<p className="text-center text-gray-500 mt-8" aria-live="polite">
-							No more projects to load
-						</p>
-					)}
-
-					{filteredProjects.length === 0 && (
-						<div className="text-center py-12" aria-live="polite">
-							<h3 className="text-xl font-medium mb-2">No projects found</h3>
-							<p className="text-gray-500">
-								Try adjusting your search or filters
-							</p>
-						</div>
 					)}
 				</motion.div>
 			</AnimatePresence>

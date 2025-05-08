@@ -1,4 +1,5 @@
 import type { Project } from '~/lib/types/project'
+import { categories } from './categories.mock'
 
 export const projects: Project[] = [
 	{
@@ -7,12 +8,13 @@ export const projects: Project[] = [
 		description:
 			'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities.',
 		image: '/images/education.webp',
-		categoryId: '7',
+		category: categories.find((c) => c.id === '7') ?? categories[0],
 		goal: 55000,
 		raised: 40000,
 		investors: 40,
 		minInvestment: 10,
 		tags: ['EDUCATION', 'CHILDREN', 'FUTURE'],
+		createdAt: '2024-01-03T09:15:00Z',
 	},
 	{
 		id: '2',
@@ -20,12 +22,13 @@ export const projects: Project[] = [
 		description:
 			'Restore and reforest areas devastated by uncontrolled deforestation. Your support helps rebuild ecosystems and fight climate change.',
 		image: '/images/bosques.webp',
-		categoryId: '3',
+		category: categories.find((c) => c.id === '3') ?? categories[0],
 		goal: 60000,
 		raised: 54000,
 		investors: 35,
 		minInvestment: 10,
 		tags: ['ENVIRONMENT', 'ECOLOGICAL', 'SUSTAINABLE'],
+		createdAt: '2024-01-17T14:40:00Z',
 	},
 	{
 		id: '3',
@@ -33,12 +36,13 @@ export const projects: Project[] = [
 		description:
 			'Bring essential healthcare services to remote areas through mobile clinics. Your support helps save lives and build healthier communities.',
 		image: '/images/healthcare.webp',
-		categoryId: '8',
+		category: categories.find((c) => c.id === '8') ?? categories[0],
 		goal: 45000,
 		raised: 32000,
 		investors: 30,
 		minInvestment: 20,
 		tags: ['HEALTHCARE', 'COMMUNITY', 'IMPACT'],
+		createdAt: '2024-01-29T11:05:00Z',
 	},
 	{
 		id: '4',
@@ -46,12 +50,13 @@ export const projects: Project[] = [
 		description:
 			'Support the preservation of indigenous craftsmanship in Costa Rica. Your contributions protect traditional techniques and cultural heritage.',
 		image: '/images/artesania.webp',
-		categoryId: '5',
+		category: categories.find((c) => c.id === '5') ?? categories[0],
 		goal: 50000,
 		raised: 34000,
 		investors: 29,
 		minInvestment: 15,
 		tags: ['CULTURE', 'INDIGENOUS', 'ART'],
+		createdAt: '2024-02-06T08:50:00Z',
 	},
 	{
 		id: '5',
@@ -59,12 +64,13 @@ export const projects: Project[] = [
 		description:
 			'Provide access to safe drinking water in underserved rural areas. Help us install water purification systems to improve health and livelihoods.',
 		image: '/images/water.webp',
-		categoryId: '6',
+		category: categories.find((c) => c.id === '6') ?? categories[0],
 		goal: 40000,
 		raised: 28000,
 		investors: 45,
 		minInvestment: 5,
 		tags: ['WATER', 'HEALTH', 'COMMUNITY'],
+		createdAt: '2024-02-14T10:00:00Z',
 	},
 	{
 		id: '6',
@@ -72,12 +78,13 @@ export const projects: Project[] = [
 		description:
 			'Provide care and shelter to homeless animals in rural communities. Help us create safe havens for animals in need.',
 		image: '/images/dogs.webp',
-		categoryId: '1',
+		category: categories.find((c) => c.id === '1') ?? categories[0],
 		goal: 70000,
 		raised: 45000,
 		investors: 60,
 		minInvestment: 10,
 		tags: ['ANIMALS', 'CARE', 'COMMUNITY'],
+		createdAt: '2024-08-21T16:00:00Z',
 	},
 	{
 		id: '7',
@@ -85,12 +92,13 @@ export const projects: Project[] = [
 		description:
 			'Transform vacant urban spaces into thriving community gardens. Help us create green spaces that provide fresh food and bring people together.',
 		image: '/images/placeholder.png',
-		categoryId: '10',
+		category: categories.find((c) => c.id === '10') ?? categories[0],
 		goal: 25000,
 		raised: 18000,
 		investors: 32,
 		minInvestment: 5,
 		tags: ['COMMUNITY', 'FOOD', 'URBAN'],
+		createdAt: '2024-02-27T16:30:00Z',
 	},
 	{
 		id: '8',
@@ -98,12 +106,13 @@ export const projects: Project[] = [
 		description:
 			'Provide critical support to communities affected by natural disasters. From emergency supplies to long-term rebuilding efforts, join us in bringing hope and recovery to those in need.',
 		image: '/images/disaster-aid.webp',
-		categoryId: '4',
+		category: categories.find((c) => c.id === '4') ?? categories[0],
 		goal: 100000,
 		raised: 82000,
 		investors: 120,
 		minInvestment: 10,
 		tags: ['EMERGENCY', 'RELIEF', 'HUMANITARIAN'],
+		createdAt: '2024-03-05T13:20:00Z',
 	},
 	{
 		id: '9',
@@ -111,12 +120,13 @@ export const projects: Project[] = [
 		description:
 			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica. Together, we can ensure a brighter future for every child.',
 		image: '/images/kids.webp',
-		categoryId: '2',
+		category: categories.find((c) => c.id === '2') ?? categories[0],
 		goal: 35000,
 		raised: 22000,
 		investors: 28,
 		minInvestment: 15,
 		tags: ['CHILDREN', 'NUTRITION', 'NGO'],
+		createdAt: '2024-03-18T15:10:00Z',
 	},
 	{
 		id: '10',
@@ -124,12 +134,13 @@ export const projects: Project[] = [
 		description:
 			'Install solar panels in underfunded schools to reduce costs and teach sustainability. Help us bring clean energy to education.',
 		image: '/images/placeholder.png',
-		categoryId: '9',
+		category: categories.find((c) => c.id === '9') ?? categories[0],
 		goal: 80000,
 		raised: 56000,
 		investors: 42,
 		minInvestment: 20,
 		tags: ['ENERGY', 'EDUCATION', 'SUSTAINABILITY'],
+		createdAt: '2024-03-30T17:45:00Z',
 	},
 	{
 		id: '11',
@@ -137,12 +148,13 @@ export const projects: Project[] = [
 		description:
 			'Help us expand our animal shelter to rescue more abandoned pets. Your support provides food, medical care, and loving homes.',
 		image: '/images/placeholder.png',
-		categoryId: '11',
+		category: categories.find((c) => c.id === '11') ?? categories[0],
 		goal: 45000,
 		raised: 31000,
 		investors: 55,
 		minInvestment: 5,
 		tags: ['ANIMALS', 'RESCUE', 'CARE'],
+		createdAt: '2024-04-08T09:25:00Z',
 	},
 	{
 		id: '12',
@@ -150,12 +162,13 @@ export const projects: Project[] = [
 		description:
 			'Support independent journalism in underserved communities. Help us keep citizens informed and hold power accountable.',
 		image: '/images/placeholder.png',
-		categoryId: '12',
+		category: categories.find((c) => c.id === '12') ?? categories[0],
 		goal: 30000,
 		raised: 17000,
 		investors: 25,
 		minInvestment: 10,
 		tags: ['MEDIA', 'DEMOCRACY', 'INFORMATION'],
+		createdAt: '2024-04-19T14:50:00Z',
 	},
 	{
 		id: '13',
@@ -163,12 +176,13 @@ export const projects: Project[] = [
 		description:
 			'Transform unused urban spaces into productive community farms. Help us create sustainable food sources in city environments.',
 		image: '/images/placeholder.png',
-		categoryId: '3',
+		category: categories.find((c) => c.id === '3') ?? categories[0],
 		goal: 35000,
 		raised: 12000,
 		investors: 28,
 		minInvestment: 10,
 		tags: ['AGRICULTURE', 'SUSTAINABILITY', 'COMMUNITY'],
+		createdAt: '2024-04-28T12:10:00Z',
 	},
 	{
 		id: '14',
@@ -176,12 +190,13 @@ export const projects: Project[] = [
 		description:
 			'Build a network of mental health professionals providing free services to underserved communities. Support mental wellbeing for all.',
 		image: '/images/placeholder.png',
-		categoryId: '8',
+		category: categories.find((c) => c.id === '8') ?? categories[0],
 		goal: 60000,
 		raised: 38000,
 		investors: 52,
 		minInvestment: 15,
 		tags: ['HEALTH', 'MENTAL', 'SUPPORT'],
+		createdAt: '2024-05-06T11:35:00Z',
 	},
 	{
 		id: '15',
@@ -189,12 +204,13 @@ export const projects: Project[] = [
 		description:
 			'Remove plastic waste from our oceans and develop sustainable alternatives to single-use plastics. Help us protect marine life.',
 		image: '/images/placeholder.png',
-		categoryId: '3',
+		category: categories.find((c) => c.id === '3') ?? categories[0],
 		goal: 75000,
 		raised: 48000,
 		investors: 67,
 		minInvestment: 20,
 		tags: ['OCEAN', 'ENVIRONMENT', 'PLASTIC'],
+		createdAt: '2024-05-15T10:15:00Z',
 	},
 	{
 		id: '16',
@@ -202,12 +218,13 @@ export const projects: Project[] = [
 		description:
 			'Develop assistive technologies for people with disabilities. Help make the digital world accessible to everyone.',
 		image: '/images/placeholder.png',
-		categoryId: '10',
+		category: categories.find((c) => c.id === '10') ?? categories[0],
 		goal: 50000,
 		raised: 29000,
 		investors: 38,
 		minInvestment: 15,
 		tags: ['TECHNOLOGY', 'ACCESSIBILITY', 'INCLUSION'],
+		createdAt: '2024-06-02T07:40:00Z',
 	},
 	{
 		id: '17',
@@ -215,12 +232,13 @@ export const projects: Project[] = [
 		description:
 			'Provide educational resources and support for refugee children. Help them build a brighter future through learning.',
 		image: '/images/placeholder.png',
-		categoryId: '7',
+		category: categories.find((c) => c.id === '7') ?? categories[0],
 		goal: 40000,
 		raised: 27000,
 		investors: 42,
 		minInvestment: 10,
 		tags: ['EDUCATION', 'REFUGEES', 'CHILDREN'],
+		createdAt: '2024-06-18T13:55:00Z',
 	},
 	{
 		id: '18',
@@ -228,12 +246,13 @@ export const projects: Project[] = [
 		description:
 			'Build eco-friendly, affordable housing for low-income families. Help create sustainable communities for the future.',
 		image: '/images/placeholder.png',
-		categoryId: '3',
+		category: categories.find((c) => c.id === '3') ?? categories[0],
 		goal: 90000,
 		raised: 62000,
 		investors: 75,
 		minInvestment: 25,
 		tags: ['HOUSING', 'SUSTAINABILITY', 'COMMUNITY'],
+		createdAt: '2024-07-01T08:20:00Z',
 	},
 	{
 		id: '19',
@@ -241,12 +260,13 @@ export const projects: Project[] = [
 		description:
 			'Bring arts education to underserved schools. Help nurture creativity and self-expression in young people.',
 		image: '/images/placeholder.png',
-		categoryId: '5',
+		category: categories.find((c) => c.id === '5') ?? categories[0],
 		goal: 30000,
 		raised: 18000,
 		investors: 32,
 		minInvestment: 10,
 		tags: ['ARTS', 'EDUCATION', 'YOUTH'],
+		createdAt: '2024-07-19T14:30:00Z',
 	},
 	{
 		id: '20',
@@ -254,11 +274,12 @@ export const projects: Project[] = [
 		description:
 			'Connect elderly individuals with companions to reduce isolation and improve quality of life. Help combat loneliness in our senior population.',
 		image: '/images/placeholder.png',
-		categoryId: '10',
+		category: categories.find((c) => c.id === '10') ?? categories[0],
 		goal: 25000,
 		raised: 16000,
 		investors: 28,
 		minInvestment: 5,
 		tags: ['SENIORS', 'COMPANIONSHIP', 'COMMUNITY'],
+		createdAt: '2024-08-03T09:45:00Z',
 	},
 ]
