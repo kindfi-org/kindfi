@@ -1,7 +1,6 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -10,9 +9,12 @@ import { staggerContainer } from '~/lib/constants/animations'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
 import type { Project, SortOption, SortSlug } from '~/lib/types/project'
 
+import { CategoryBadgeSkeleton } from './category-badge-skeleton'
 import { CategoryFilters } from './category-filters'
 import { ProjectCardGrid } from './project-card-grid'
+import { ProjectCardGridSkeleton } from './project-card-grid-skeleton'
 import { ProjectCardList } from './project-card-list'
+import { ProjectCardListSkeleton } from './project-card-list-skeleton'
 import { SortDropdown } from './sort-dropdown'
 import { ViewToggle } from './view-toggle'
 
@@ -89,15 +91,6 @@ export function ProjectsView() {
 		router.push(`?${params.toString()}`)
 	}
 
-	if (isLoadingProjects || isLoadingCategories) {
-		return (
-			<div className="flex justify-center py-12">
-				<Loader2 className="h-6 w-6 animate-spin" />
-				<span className="sr-only">Loading...</span>
-			</div>
-		)
-	}
-
 	if (projectError || categoryError) {
 		return (
 			<div className="text-center text-destructive py-12">
@@ -109,12 +102,21 @@ export function ProjectsView() {
 	return (
 		<div>
 			<div className="mb-6">
-				<CategoryFilters
-					categories={categories}
-					selectedCategories={selectedCategories}
-					onCategoryToggle={handleCategoryToggle}
-					onResetCategories={handleResetCategories}
-				/>
+				{isLoadingCategories ? (
+					<div className="flex flex-wrap gap-2">
+						{Array.from({ length: 12 }).map((_, i) => (
+							// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
+							<CategoryBadgeSkeleton key={i} />
+						))}
+					</div>
+				) : (
+					<CategoryFilters
+						categories={categories}
+						selectedCategories={selectedCategories}
+						onCategoryToggle={handleCategoryToggle}
+						onResetCategories={handleResetCategories}
+					/>
+				)}
 
 				<div className="flex flex-col md:flex-row gap-4 justify-between">
 					<div className="flex flex-row items-center justify-between gap-2 md:gap-4">
@@ -146,7 +148,19 @@ export function ProjectsView() {
 					exit={{ opacity: 0 }}
 					transition={{ duration: 0.2 }}
 				>
-					{viewMode === 'grid' ? (
+					{isLoadingProjects ? (
+						<div className="flex gap-4 flex-wrap">
+							{Array.from({ length: 8 }).map((_, i) =>
+								viewMode === 'grid' ? (
+									// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
+									<ProjectCardGridSkeleton key={i} />
+								) : (
+									// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
+									<ProjectCardListSkeleton key={i} />
+								),
+							)}
+						</div>
+					) : viewMode === 'grid' ? (
 						<motion.div
 							className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
 							variants={staggerContainer}
