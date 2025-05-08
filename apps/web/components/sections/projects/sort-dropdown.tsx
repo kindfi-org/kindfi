@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronDown, Flame, Heart, Star, TrendingUp } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 
 import { Button } from '~/components/base/button'
 import {
@@ -9,30 +9,8 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '~/components/base/dropdown-menu'
-import type { SortOption, SortOptionItem } from '~/lib/types/project'
-
-const sortOptions: SortOptionItem[] = [
-	{
-		value: 'Most Popular',
-		label: 'Most Popular',
-		icon: <TrendingUp className="h-4 w-4 mr-2" aria-hidden="true" />,
-	},
-	{
-		value: 'Most Funded',
-		label: 'Most Funded',
-		icon: <Star className="h-4 w-4 mr-2" aria-hidden="true" />,
-	},
-	{
-		value: 'Most Recent',
-		label: 'Most Recent',
-		icon: <Flame className="h-4 w-4 mr-2" aria-hidden="true" />,
-	},
-	{
-		value: 'Most Supporters',
-		label: 'Most Supporters',
-		icon: <Heart className="h-4 w-4 mr-2" aria-hidden="true" />,
-	},
-]
+import { sortOptions } from '~/lib/constants/projects'
+import type { SortOption } from '~/lib/types/project'
 
 interface SortDropdownProps {
 	value: SortOption

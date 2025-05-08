@@ -11,7 +11,7 @@ import { CategoryBadge } from './category-badge'
 interface CategoryFiltersProps {
 	categories: Category[]
 	selectedCategories: string[]
-	onCategoryToggle: (categoryId: string) => void
+	onCategoryToggle: (categorySlug: string) => void
 	onResetCategories: () => void
 }
 
@@ -48,8 +48,8 @@ export function CategoryFilters({
 					<motion.div key={category.id} variants={fadeIn}>
 						<CategoryBadge
 							category={category}
-							selected={selectedCategories.includes(category.id)}
-							onClick={() => onCategoryToggle(category.id)}
+							selected={selectedCategories.includes(category.slug ?? '')}
+							onClick={() => onCategoryToggle(category.slug ?? '')}
 						/>
 					</motion.div>
 				))}
