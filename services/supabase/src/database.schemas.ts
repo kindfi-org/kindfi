@@ -18,18 +18,21 @@ export const categoriesRowSchema = z.object({
 	color: z.string(),
 	id: z.string(),
 	name: z.string(),
+	slug: z.string().nullable(),
 })
 
 export const categoriesInsertSchema = z.object({
 	color: z.string(),
 	id: z.string().optional(),
 	name: z.string(),
+	slug: z.string().optional().nullable(),
 })
 
 export const categoriesUpdateSchema = z.object({
 	color: z.string().optional(),
 	id: z.string().optional(),
 	name: z.string().optional(),
+	slug: z.string().optional().nullable(),
 })
 
 export const categoriesRelationshipsSchema = z.tuple([])
