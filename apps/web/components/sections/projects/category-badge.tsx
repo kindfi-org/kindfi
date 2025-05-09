@@ -1,13 +1,14 @@
 'use client'
 
+import type { Tables } from '@services/supabase'
 import { motion } from 'framer-motion'
 
-import type { Category } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { categoryIcons } from '~/lib/utils/category-icons'
+import { getTextColor } from '~/lib/utils/color-utils'
 
 interface CategoryBadgeProps {
-	category: Category
+	category: Tables<'categories'>
 	selected?: boolean
 	onClick?: () => void
 	className?: string
@@ -24,6 +25,8 @@ export function CategoryBadge({
 	const Icon = categoryIcons[category.name]
 	const isInteractive = !!onClick
 
+	const textColor = getTextColor(category.color)
+
 	return (
 		<motion.button
 			whileHover={{ scale: isInteractive ? 1.05 : 1 }}
@@ -32,7 +35,7 @@ export function CategoryBadge({
 			className={cn(
 				'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
 				selected
-					? 'text-white focus:ring-2 focus:ring-offset-2'
+					? `${textColor === 'white' ? 'text-white' : 'text-black'} focus:ring-2 focus:ring-offset-2`
 					: 'text-gray-700 bg-white border hover:bg-gray-50 focus:ring-2 focus:ring-offset-2',
 				isInteractive ? 'cursor-pointer' : 'cursor-default',
 				className,

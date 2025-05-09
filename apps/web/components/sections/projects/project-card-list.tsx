@@ -2,8 +2,11 @@
 
 import { motion } from 'framer-motion'
 
+import { Badge } from '~/components/base/badge'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import type { Project } from '~/lib/types/project'
+import { cn } from '~/lib/utils'
+import { getTextColor } from '~/lib/utils/color-utils'
 import { CategoryBadge } from './category-badge'
 
 interface ProjectCardListProps {
@@ -101,15 +104,23 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 					</div>
 
 					<div className="flex flex-wrap gap-1" aria-label="Project tags">
-						{project.tags.slice(0, 3).map((tag, index) => (
-							<span
-								// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
-								key={index}
-								className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-gray-100 text-gray-600 rounded text-[10px] sm:text-xs font-medium uppercase"
-							>
-								{tag}
-							</span>
-						))}
+						{project.tags.map((tag) => {
+							const bg = tag.color || '#ccc' // fallback
+							const textColor = getTextColor(bg)
+
+							return (
+								<Badge
+									key={tag.id}
+									className={cn(
+										'uppercase',
+										textColor === 'white' ? 'text-white' : 'text-black',
+									)}
+									style={{ backgroundColor: bg }}
+								>
+									{tag.name}
+								</Badge>
+							)
+						})}
 					</div>
 				</div>
 			</div>

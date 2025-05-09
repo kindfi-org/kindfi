@@ -1,4 +1,11 @@
+import type { Tables } from '@services/supabase'
 import type { ReactNode } from 'react'
+
+export interface Tag {
+	id: string
+	name: string
+	color: string
+}
 
 export interface Project {
 	id: string
@@ -6,19 +13,12 @@ export interface Project {
 	description: string | null
 	image: string | null
 	createdAt: string | null
-	category: Category | null
+	category: Tables<'categories'> | null
 	goal: number
 	raised: number
 	investors: number
 	minInvestment: number
-	tags: string[]
-}
-
-export interface Category {
-	id: string
-	name: string
-	slug: string | null
-	color: string
+	tags: Tag[]
 }
 
 export type SortOption =

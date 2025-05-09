@@ -13,7 +13,11 @@ export const projects: Project[] = [
 		raised: 40000,
 		investors: 40,
 		minInvestment: 10,
-		tags: ['EDUCATION', 'CHILDREN', 'FUTURE'],
+		tags: [
+			{ id: 'tag-education', name: 'EDUCATION', color: '#4A90E2' },
+			{ id: 'tag-children', name: 'CHILDREN', color: '#F39C12' },
+			{ id: 'tag-future', name: 'FUTURE', color: '#2C3E50' },
+		],
 		createdAt: '2024-01-03T09:15:00Z',
 	},
 	{
@@ -27,7 +31,11 @@ export const projects: Project[] = [
 		raised: 54000,
 		investors: 35,
 		minInvestment: 10,
-		tags: ['ENVIRONMENT', 'ECOLOGICAL', 'SUSTAINABLE'],
+		tags: [
+			{ id: 'tag-environment', name: 'ENVIRONMENT', color: '#27AE60' },
+			{ id: 'tag-ecological', name: 'ECOLOGICAL', color: '#16A085' },
+			{ id: 'tag-sustainable', name: 'SUSTAINABLE', color: '#1ABC9C' },
+		],
 		createdAt: '2024-01-17T14:40:00Z',
 	},
 	{
@@ -41,7 +49,11 @@ export const projects: Project[] = [
 		raised: 32000,
 		investors: 30,
 		minInvestment: 20,
-		tags: ['HEALTHCARE', 'COMMUNITY', 'IMPACT'],
+		tags: [
+			{ id: 'tag-healthcare', name: 'HEALTHCARE', color: '#27AE60' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+			{ id: 'tag-impact', name: 'IMPACT', color: '#9B59B6' },
+		],
 		createdAt: '2024-01-29T11:05:00Z',
 	},
 	{
@@ -55,7 +67,11 @@ export const projects: Project[] = [
 		raised: 34000,
 		investors: 29,
 		minInvestment: 15,
-		tags: ['CULTURE', 'INDIGENOUS', 'ART'],
+		tags: [
+			{ id: 'tag-culture', name: 'CULTURE', color: '#9B59B6' },
+			{ id: 'tag-indigenous', name: 'INDIGENOUS', color: '#8E44AD' },
+			{ id: 'tag-art', name: 'ART', color: '#D35400' },
+		],
 		createdAt: '2024-02-06T08:50:00Z',
 	},
 	{
@@ -69,7 +85,11 @@ export const projects: Project[] = [
 		raised: 28000,
 		investors: 45,
 		minInvestment: 5,
-		tags: ['WATER', 'HEALTH', 'COMMUNITY'],
+		tags: [
+			{ id: 'tag-water', name: 'WATER', color: '#3498DB' },
+			{ id: 'tag-health', name: 'HEALTH', color: '#2ECC71' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+		],
 		createdAt: '2024-02-14T10:00:00Z',
 	},
 	{
@@ -83,7 +103,11 @@ export const projects: Project[] = [
 		raised: 45000,
 		investors: 60,
 		minInvestment: 10,
-		tags: ['ANIMALS', 'CARE', 'COMMUNITY'],
+		tags: [
+			{ id: 'tag-animals', name: 'ANIMALS', color: '#E67E22' },
+			{ id: 'tag-care', name: 'CARE', color: '#F39C12' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+		],
 		createdAt: '2024-08-21T16:00:00Z',
 	},
 	{
@@ -97,7 +121,11 @@ export const projects: Project[] = [
 		raised: 18000,
 		investors: 32,
 		minInvestment: 5,
-		tags: ['COMMUNITY', 'FOOD', 'URBAN'],
+		tags: [
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+			{ id: 'tag-food', name: 'FOOD', color: '#F39C12' },
+			{ id: 'tag-urban', name: 'URBAN', color: '#7F8C8D' },
+		],
 		createdAt: '2024-02-27T16:30:00Z',
 	},
 	{
@@ -111,7 +139,11 @@ export const projects: Project[] = [
 		raised: 82000,
 		investors: 120,
 		minInvestment: 10,
-		tags: ['EMERGENCY', 'RELIEF', 'HUMANITARIAN'],
+		tags: [
+			{ id: 'tag-emergency', name: 'EMERGENCY', color: '#E74C3C' },
+			{ id: 'tag-relief', name: 'RELIEF', color: '#C0392B' },
+			{ id: 'tag-humanitarian', name: 'HUMANITARIAN', color: '#FF6F61' },
+		],
 		createdAt: '2024-03-05T13:20:00Z',
 	},
 	{
@@ -125,7 +157,11 @@ export const projects: Project[] = [
 		raised: 22000,
 		investors: 28,
 		minInvestment: 15,
-		tags: ['CHILDREN', 'NUTRITION', 'NGO'],
+		tags: [
+			{ id: 'tag-children', name: 'CHILDREN', color: '#F1C40F' },
+			{ id: 'tag-nutrition', name: 'NUTRITION', color: '#27AE60' },
+			{ id: 'tag-ngo', name: 'NGO', color: '#2980B9' },
+		],
 		createdAt: '2024-03-18T15:10:00Z',
 	},
 	{
@@ -139,7 +175,11 @@ export const projects: Project[] = [
 		raised: 56000,
 		investors: 42,
 		minInvestment: 20,
-		tags: ['ENERGY', 'EDUCATION', 'SUSTAINABILITY'],
+		tags: [
+			{ id: 'tag-energy', name: 'ENERGY', color: '#00BCD4' },
+			{ id: 'tag-education', name: 'EDUCATION', color: '#4A90E2' },
+			{ id: 'tag-sustainability', name: 'SUSTAINABILITY', color: '#2ECC71' },
+		],
 		createdAt: '2024-03-30T17:45:00Z',
 	},
 	{
@@ -153,7 +193,11 @@ export const projects: Project[] = [
 		raised: 31000,
 		investors: 55,
 		minInvestment: 5,
-		tags: ['ANIMALS', 'RESCUE', 'CARE'],
+		tags: [
+			{ id: 'tag-animals', name: 'ANIMALS', color: '#FF7043' },
+			{ id: 'tag-rescue', name: 'RESCUE', color: '#E74C3C' },
+			{ id: 'tag-care', name: 'CARE', color: '#F5B041' },
+		],
 		createdAt: '2024-04-08T09:25:00Z',
 	},
 	{
@@ -167,7 +211,11 @@ export const projects: Project[] = [
 		raised: 17000,
 		investors: 25,
 		minInvestment: 10,
-		tags: ['MEDIA', 'DEMOCRACY', 'INFORMATION'],
+		tags: [
+			{ id: 'tag-media', name: 'MEDIA', color: '#3498DB' },
+			{ id: 'tag-democracy', name: 'DEMOCRACY', color: '#2ECC71' },
+			{ id: 'tag-information', name: 'INFORMATION', color: '#9B59B6' },
+		],
 		createdAt: '2024-04-19T14:50:00Z',
 	},
 	{
@@ -181,7 +229,11 @@ export const projects: Project[] = [
 		raised: 12000,
 		investors: 28,
 		minInvestment: 10,
-		tags: ['AGRICULTURE', 'SUSTAINABILITY', 'COMMUNITY'],
+		tags: [
+			{ id: 'tag-agriculture', name: 'AGRICULTURE', color: '#27AE60' },
+			{ id: 'tag-sustainability', name: 'SUSTAINABILITY', color: '#2ECC71' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+		],
 		createdAt: '2024-04-28T12:10:00Z',
 	},
 	{
@@ -195,7 +247,11 @@ export const projects: Project[] = [
 		raised: 38000,
 		investors: 52,
 		minInvestment: 15,
-		tags: ['HEALTH', 'MENTAL', 'SUPPORT'],
+		tags: [
+			{ id: 'tag-health', name: 'HEALTH', color: '#1ABC9C' },
+			{ id: 'tag-mental', name: 'MENTAL', color: '#8BC34A' },
+			{ id: 'tag-support', name: 'SUPPORT', color: '#D35400' },
+		],
 		createdAt: '2024-05-06T11:35:00Z',
 	},
 	{
@@ -209,7 +265,11 @@ export const projects: Project[] = [
 		raised: 48000,
 		investors: 67,
 		minInvestment: 20,
-		tags: ['OCEAN', 'ENVIRONMENT', 'PLASTIC'],
+		tags: [
+			{ id: 'tag-ocean', name: 'OCEAN', color: '#3498DB' },
+			{ id: 'tag-environment', name: 'ENVIRONMENT', color: '#2ECC71' },
+			{ id: 'tag-plastic', name: 'PLASTIC', color: '#34495E' },
+		],
 		createdAt: '2024-05-15T10:15:00Z',
 	},
 	{
@@ -223,7 +283,11 @@ export const projects: Project[] = [
 		raised: 29000,
 		investors: 38,
 		minInvestment: 15,
-		tags: ['TECHNOLOGY', 'ACCESSIBILITY', 'INCLUSION'],
+		tags: [
+			{ id: 'tag-technology', name: 'TECHNOLOGY', color: '#00BCD4' },
+			{ id: 'tag-accessibility', name: 'ACCESSIBILITY', color: '#9C27B0' },
+			{ id: 'tag-inclusion', name: 'INCLUSION', color: '#FF9800' },
+		],
 		createdAt: '2024-06-02T07:40:00Z',
 	},
 	{
@@ -237,7 +301,11 @@ export const projects: Project[] = [
 		raised: 27000,
 		investors: 42,
 		minInvestment: 10,
-		tags: ['EDUCATION', 'REFUGEES', 'CHILDREN'],
+		tags: [
+			{ id: 'tag-education', name: 'EDUCATION', color: '#4A90E2' },
+			{ id: 'tag-refugees', name: 'REFUGEES', color: '#795548' },
+			{ id: 'tag-children', name: 'CHILDREN', color: '#F39C12' },
+		],
 		createdAt: '2024-06-18T13:55:00Z',
 	},
 	{
@@ -251,7 +319,11 @@ export const projects: Project[] = [
 		raised: 62000,
 		investors: 75,
 		minInvestment: 25,
-		tags: ['HOUSING', 'SUSTAINABILITY', 'COMMUNITY'],
+		tags: [
+			{ id: 'tag-housing', name: 'HOUSING', color: '#9E9E9E' },
+			{ id: 'tag-sustainability', name: 'SUSTAINABILITY', color: '#2ECC71' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+		],
 		createdAt: '2024-07-01T08:20:00Z',
 	},
 	{
@@ -265,7 +337,11 @@ export const projects: Project[] = [
 		raised: 18000,
 		investors: 32,
 		minInvestment: 10,
-		tags: ['ARTS', 'EDUCATION', 'YOUTH'],
+		tags: [
+			{ id: 'tag-arts', name: 'ARTS', color: '#9B59B6' },
+			{ id: 'tag-education', name: 'EDUCATION', color: '#4A90E2' },
+			{ id: 'tag-youth', name: 'YOUTH', color: '#03A9F4' },
+		],
 		createdAt: '2024-07-19T14:30:00Z',
 	},
 	{
@@ -279,7 +355,11 @@ export const projects: Project[] = [
 		raised: 16000,
 		investors: 28,
 		minInvestment: 5,
-		tags: ['SENIORS', 'COMPANIONSHIP', 'COMMUNITY'],
+		tags: [
+			{ id: 'tag-seniors', name: 'SENIORS', color: '#607D8B' },
+			{ id: 'tag-companionship', name: 'COMPANIONSHIP', color: '#FF7043' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+		],
 		createdAt: '2024-08-03T09:45:00Z',
 	},
 ]
