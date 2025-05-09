@@ -1,6 +1,6 @@
-import type { Category } from '~/lib/types/project'
+import type { Tables } from '@services/supabase'
 
-export const categories: Category[] = [
+export const categories: Tables<'categories'>[] = [
 	{ id: '1', name: 'Animal Welfare', slug: 'animal-welfare', color: '#FF7043' },
 	{ id: '2', name: 'Child Welfare', slug: 'child-welfare', color: '#9B59B6' },
 	{

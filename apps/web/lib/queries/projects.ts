@@ -24,8 +24,8 @@ export async function getAllProjects(
       investors_count,
       category:category_id ( * ),
       project_tag_relationships (
-        tag:tag_id ( id, name )
-      )
+				tag:tag_id ( id, name, color )
+			)
     `,
 		)
 		.order(column, { ascending })
@@ -62,7 +62,7 @@ export async function getAllProjects(
 			minInvestment: project.min_investment,
 			createdAt: project.created_at,
 			category: project.category,
-			tags: project.project_tag_relationships.map((r) => r.tag.name),
+			tags: project.project_tag_relationships.map((r) => r.tag),
 		})) ?? []
 	)
 }
