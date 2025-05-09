@@ -29,16 +29,17 @@ export function useKYCWebSocket({
 			setIsConnected(true)
 
 			if (userId) {
-				ws.send(JSON.stringify({ type: 'set_user_id', userId }))
+				ws.send(JSON.stringify({ type: 'subscribe', userId }))
 			}
 		}
 
 		ws.onmessage = (event) => {
 			try {
-				const data = JSON.parse(event.data) as KYCUpdate
-				if (data.type === 'kyc_update') {
-					setLastUpdate(data)
-					onUpdate?.(data)
+				const data = JSON.parse(event.data)
+				if (data && typeof data === 'object' && data.type === 'kyc_update') {
+					const update = data as KYCUpdate
+					setLastUpdate(update)
+					onUpdate?.(update)
 				}
 			} catch (error) {
 				console.error('Error parsing WebSocket message:', error)
@@ -65,7 +66,7 @@ export function useKYCWebSocket({
 	return {
 		isConnected,
 		lastUpdate,
-		sendMessage: (message: unknown) => {
+		sendMessage: <T extends Record<string, any>>(message: T) => {
 			if (wsRef.current?.readyState === WebSocket.OPEN) {
 				wsRef.current.send(JSON.stringify(message))
 			}

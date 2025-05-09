@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useKYCWebSocket } from '../hooks/useKYCWebSocket'
 
 interface KYCStatusProps {
@@ -8,19 +8,14 @@ interface KYCStatusProps {
 }
 
 export function KYCStatus({ userId }: KYCStatusProps) {
-	const [status, setStatus] = useState<string>('pending')
+	type KYCStatusValue = 'pending' | 'approved' | 'rejected' | 'verified'
+	const [status, setStatus] = useState<KYCStatusValue>('pending')
 	const { isConnected, lastUpdate } = useKYCWebSocket({
 		userId,
 		onUpdate: (update) => {
-			setStatus(update.status)
+			setStatus(update.status as KYCStatusValue)
 		},
 	})
-
-	useEffect(() => {
-		if (lastUpdate) {
-			setStatus(lastUpdate.status)
-		}
-	}, [lastUpdate])
 
 	return (
 		<div className="p-4 rounded-lg bg-white shadow-sm">
@@ -31,6 +26,7 @@ export function KYCStatus({ userId }: KYCStatusProps) {
 						className={`w-2 h-2 rounded-full ${
 							isConnected ? 'bg-green-500' : 'bg-red-500'
 						}`}
+						aria-hidden="true"
 					/>
 					<span className="text-sm text-gray-500">
 						{isConnected ? 'Connected' : 'Disconnected'}

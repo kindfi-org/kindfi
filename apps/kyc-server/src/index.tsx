@@ -34,7 +34,12 @@ function getClientFilename(): string {
 
 async function startServer() {
 	if (process.env.NODE_ENV !== 'test') {
-		await buildClient()
+		try {
+			await buildClient()
+		} catch (error) {
+			console.error('❌ Client build failed:', error)
+			process.exit(1)
+		}
 	}
 
 	const serverOptions = {
@@ -58,9 +63,14 @@ async function startServer() {
 
 			if (url.pathname.startsWith('/client') && url.pathname.endsWith('.js')) {
 				try {
-					const requestedFile = url.pathname.substring(1)
+					const requestedFile = url.pathname.replace(/^\/+/, '') // trim leading slashes
 					const publicDir = join(process.cwd(), 'public')
 					const specificFilePath = join(publicDir, requestedFile)
+
+					// 🔒 Reject attempts that escape the public directory
+					if (!specificFilePath.startsWith(publicDir)) {
+						return new Response('Forbidden', { status: 403 })
+					}
 
 					if (existsSync(specificFilePath)) {
 						const file = Bun.file(specificFilePath)
@@ -114,7 +124,7 @@ async function startServer() {
 
 					if (parsedMessage.type === 'subscribe' && parsedMessage.userId) {
 						ws.data.userId = parsedMessage.userId
-						kycWebSocketService.handleConnection(ws)
+						// Optionally call a dedicated `addSubscription` method instead
 					} else {
 						ws.send(
 							JSON.stringify({

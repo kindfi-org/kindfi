@@ -1,10 +1,19 @@
 import { createClient } from '@supabase/supabase-js'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import type { ServerWebSocket } from 'bun'
 
 interface KYCWebSocketData {
 	clientId: string
 	joinedAt: string
 	userId?: string
+}
+
+// Define the structure for KYC status record
+interface KYCStatusRecord {
+	user_id: string
+	status: string
+	verification_level: string
+	[key: string]: any
 }
 
 interface KYCUpdate {
@@ -17,16 +26,36 @@ interface KYCUpdate {
 	}
 }
 
+// Define the payload structure from Supabase
+interface SupabaseKYCPayload {
+	new: {
+		user_id: string
+		status: string
+		verification_level: string
+		[key: string]: any
+	}
+	old: Record<string, any>
+	[key: string]: any
+}
+
 export class KYCWebSocketService {
 	private clients: Set<ServerWebSocket<KYCWebSocketData>> = new Set()
 	private supabase: ReturnType<typeof createClient>
-	private channel: ReturnType<typeof createClient>['channel']
+	private channel?: RealtimeChannel
 
 	constructor() {
+		// Check for required environment variables
+		if (
+			!process.env.NEXT_PUBLIC_SUPABASE_URL ||
+			!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+		) {
+			throw new Error('Missing required Supabase environment variables')
+		}
+
 		// Initialize Supabase client
 		this.supabase = createClient(
-			'https://gcqrhpprpqyfqabrhmla.supabase.co',
-			'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjcXJocHBycHF5ZnFhYnJobWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM3NzAxMDYsImV4cCI6MjA0OTM0NjEwNn0.siqYyF5poKJRz8Wgw-YjhkBzvNY_TUn6rWxalx9HY6g',
+			process.env.NEXT_PUBLIC_SUPABASE_URL,
+			process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 		)
 		this.setupDatabaseSubscription()
 	}
@@ -36,20 +65,24 @@ export class KYCWebSocketService {
 		this.channel = this.supabase
 			.channel('kyc_status_changes')
 			.on(
-				'postgres_changes',
+				'postgres_changes' as any,
 				{
 					event: '*',
 					schema: 'public',
 					table: 'kyc_status',
 				},
-				(payload) => {
+				(payload: any) => {
 					console.log('Received KYC status change:', payload)
+
+					// Type assertion for payload.new
+					const newRecord = payload.new as KYCStatusRecord
+
 					const update: KYCUpdate = {
 						type: 'kyc_status',
 						data: {
-							user_id: payload.new.user_id,
-							status: payload.new.status,
-							verification_level: payload.new.verification_level,
+							user_id: newRecord.user_id,
+							status: newRecord.status,
+							verification_level: newRecord.verification_level,
 							timestamp: new Date().toISOString(),
 						},
 					}
@@ -100,12 +133,13 @@ export class KYCWebSocketService {
 			}
 
 			if (status) {
+				const kycStatus = status as KYCStatusRecord
 				const update: KYCUpdate = {
 					type: 'kyc_status',
 					data: {
-						user_id: status.user_id,
-						status: status.status,
-						verification_level: status.verification_level,
+						user_id: kycStatus.user_id,
+						status: kycStatus.status,
+						verification_level: kycStatus.verification_level,
 						timestamp: new Date().toISOString(),
 					},
 				}

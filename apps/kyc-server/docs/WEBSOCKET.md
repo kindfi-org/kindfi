@@ -31,6 +31,7 @@ The KYC server implements a WebSocket-based real-time communication system for K
 ### Client to Server
 
 1. **Subscribe to KYC Status**
+
    ```typescript
    {
      type: 'subscribe',
@@ -44,7 +45,7 @@ The KYC server implements a WebSocket-based real-time communication system for K
 
    ```typescript
    {
-     type: 'kyc_status',
+     type: 'kyc_update',
      data: {
        user_id: string,
        status: 'pending' | 'verified' | 'rejected',
@@ -55,6 +56,7 @@ The KYC server implements a WebSocket-based real-time communication system for K
    ```
 
 2. **Error Message**
+
    ```typescript
    {
      type: 'error',
@@ -66,9 +68,9 @@ The KYC server implements a WebSocket-based real-time communication system for K
 
 1. **Connection Establishment**
 
-   - Client connects to `ws://localhost:3001/live`
-   - Server generates unique client ID
-   - Connection is added to client pool
+   - Client connects to `ws://${host}/live` where host is typically the current browser location
+   - Server generates a unique client ID
+   - Connection is added to the client pool
 
 2. **Subscription**
 
@@ -165,7 +167,7 @@ The KYC server implements a WebSocket-based real-time communication system for K
 1. **Authentication**
 
    - Validate user IDs
-   - Implement rate limiting
+   - Implement rate-limiting
    - Monitor connection patterns
 
 2. **Data Validation**
