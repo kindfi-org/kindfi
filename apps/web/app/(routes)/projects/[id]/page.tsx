@@ -1,21 +1,32 @@
 import { notFound } from 'next/navigation'
 import { ProjectHero } from '~/components/sections/project-detail/project-hero'
+import { ProjectSidebar } from '~/components/sections/project-detail/project-sidebar'
 import { projectDetail } from '~/lib/mock-data/project/project-detail.mock'
 
-interface ProjectDetailPageProps {
-	params: {
+export default async function ProjectDetailPage({
+	params,
+}: {
+	params: Promise<{
 		id: string
-	}
-}
+	}>
+}) {
+	const { id } = await params
 
-export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-	if (params.id !== projectDetail.id) {
+	if (id !== projectDetail.id) {
 		notFound()
 	}
 
 	return (
 		<main className="container mx-auto px-4 py-8 md:py-12">
-			<ProjectHero project={projectDetail} />
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+				<div className="lg:col-span-2">
+					<ProjectHero project={projectDetail} />
+				</div>
+
+				<div className="lg:col-span-1">
+					<ProjectSidebar project={projectDetail} />
+				</div>
+			</div>
 		</main>
 	)
 }

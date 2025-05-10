@@ -76,11 +76,11 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 					</div>
 					<div className="text-center">
 						<p className="font-bold">{project.investors}</p>
-						<p className="text-xs text-gray-500">Investors</p>
+						<p className="text-xs text-gray-500">Supporters</p>
 					</div>
 					<div className="text-center">
 						<p className="font-bold">${project.minInvestment}</p>
-						<p className="text-xs text-gray-500">Min. Investment</p>
+						<p className="text-xs text-gray-500">Minimum Donation</p>
 					</div>
 				</div>
 
