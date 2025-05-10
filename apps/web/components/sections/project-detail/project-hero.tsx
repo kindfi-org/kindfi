@@ -51,14 +51,14 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 						</p>
 					</div>
 					<div className="bg-gray-50 p-4 rounded-lg text-center">
-						<p className="text-sm text-muted-foreground mb-1">Investors</p>
+						<p className="text-sm text-muted-foreground mb-1">Supporters</p>
 						<p className="text-xl font-bold">
 							<AnimatedCounter value={project.investors} />
 						</p>
 					</div>
 					<div className="bg-gray-50 p-4 rounded-lg text-center">
 						<p className="text-sm text-muted-foreground mb-1">
-							Min. Investment
+							Minimum Donation
 						</p>
 						<p className="text-xl font-bold">
 							$<AnimatedCounter value={project.minInvestment} />

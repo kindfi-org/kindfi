@@ -91,14 +91,14 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 							<p className="font-bold text-xs sm:text-sm">
 								{project.investors}
 							</p>
-							<p className="text-[10px] sm:text-xs text-gray-500">Investors</p>
+							<p className="text-[10px] sm:text-xs text-gray-500">Supporters</p>
 						</div>
 						<div className="text-center">
 							<p className="font-bold text-xs sm:text-sm">
 								${project.minInvestment}
 							</p>
 							<p className="text-[10px] sm:text-xs text-gray-500">
-								Min. Investment
+								Minimum Donation
 							</p>
 						</div>
 					</div>
