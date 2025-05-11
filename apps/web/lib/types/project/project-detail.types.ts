@@ -18,7 +18,6 @@ export interface ProjectOwner {
 	name: string
 	avatar: string
 	bio: string
-	walletAddress: string
 }
 
 export interface TeamMember {
