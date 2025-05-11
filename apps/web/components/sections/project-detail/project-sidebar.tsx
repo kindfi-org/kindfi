@@ -103,7 +103,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 	return (
 		<motion.div
-			className="bg-white rounded-xl shadow-md overflow-hidden sticky top-8"
+			className="bg-white rounded-xl shadow-md overflow-hidden sticky top-16"
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.5, delay: 0.2 }}

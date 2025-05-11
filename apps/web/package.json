@@ -68,6 +68,7 @@
 		"react-error-boundary": "^5.0.0",
 		"react-hook-form": "^7.54.0",
 		"react-icons": "^5.4.0",
+		"react-markdown": "^10.1.0",
 		"react-player": "^2.16.0",
 		"react-use": "^17.6.0",
 		"simple-icons": "^14.1.0",
@@ -78,6 +79,7 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
+		"@tailwindcss/typography": "^0.5.16",
 		"@types/bun": "latest",
 		"@types/node": "^20",
 		"@types/node-fetch": "^2.6.12",

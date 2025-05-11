@@ -43,7 +43,6 @@ Join us in creating a world where every child has access to quality education.`,
 		name: 'Sarah Johnson',
 		avatar: '/images/sarah-johnson.webp',
 		bio: 'Education advocate with 10+ years of experience in developing programs for underserved communities.',
-		walletAddress: '0x1a2b3c4d5e6f7g8h9i0j',
 	},
 	pitchVideo: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
 	pitchFiles: [
