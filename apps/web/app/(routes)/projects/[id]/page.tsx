@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { ProjectHero } from '~/components/sections/project-detail/project-hero'
 import { ProjectSidebar } from '~/components/sections/project-detail/project-sidebar'
+import { ProjectTabs } from '~/components/sections/project-detail/project-tabs'
 import { projectDetail } from '~/lib/mock-data/project/project-detail.mock'
 
 export default async function ProjectDetailPage({
@@ -21,6 +22,7 @@ export default async function ProjectDetailPage({
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<div className="lg:col-span-2">
 					<ProjectHero project={projectDetail} />
+					<ProjectTabs project={projectDetail} />
 				</div>
 
 				<div className="lg:col-span-1">
