@@ -8,6 +8,7 @@ import {
 } from '~/components/base/tabs'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { OverviewTab } from './tabs/overview-tab'
+import { TeamTab } from './tabs/team-tab'
 
 interface ProjectTabsProps {
 	project: ProjectDetail
@@ -27,7 +28,7 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
 				<OverviewTab project={project} />
 			</TabsContent>
 			<TabsContent value="team">
-				<p>TeamTab</p>
+				<TeamTab team={project.team} />
 			</TabsContent>
 			<TabsContent value="milestones">
 				<p>MilestonesTab</p>

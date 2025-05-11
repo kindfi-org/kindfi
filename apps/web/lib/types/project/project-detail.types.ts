@@ -25,6 +25,7 @@ export interface TeamMember {
 	name: string
 	avatar: string
 	role: string
+	bio: string
 	isAdmin: boolean
 	isEditor: boolean
 }
