@@ -7,6 +7,7 @@ import {
 	TabsTrigger,
 } from '~/components/base/tabs'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
+import { MilestonesTab } from './tabs/milestones-tab'
 import { OverviewTab } from './tabs/overview-tab'
 import { TeamTab } from './tabs/team-tab'
 
@@ -31,7 +32,7 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
 				<TeamTab team={project.team} />
 			</TabsContent>
 			<TabsContent value="milestones">
-				<p>MilestonesTab</p>
+				<MilestonesTab milestones={project.milestones} />
 			</TabsContent>
 			<TabsContent value="updates">
 				<p>UpdatesTab</p>

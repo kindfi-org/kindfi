@@ -30,13 +30,20 @@ export interface TeamMember {
 	isEditor: boolean
 }
 
+export type MilestoneStatus =
+	| 'pending'
+	| 'completed'
+	| 'approved'
+	| 'rejected'
+	| 'disputed'
+
 export interface Milestone {
 	id: string
 	title: string
 	description: string
 	amount: number
 	deadline: string
-	status: 'completed' | 'in-progress' | 'upcoming'
+	status: MilestoneStatus
 	index: number
 }
 
