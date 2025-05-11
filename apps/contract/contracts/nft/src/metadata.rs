@@ -1,4 +1,4 @@
-use soroban_sdk::{contract, contracttype, contractimpl,Address, Env, String};
+use soroban_sdk::{contract, contractimpl, Address, Env, String};
 use crate::{
     nft_core::NFTCore,
     types::{DataKey, TokenMetadata, TierLevel},
@@ -70,7 +70,6 @@ impl KindfiNFT {
         let owner = Base::owner_of(&e, token_id);
         owner.require_auth();
 
-        // Verify token exists
         // Verify token exists
         if !e.storage().instance().has(&DataKey::TokenMetadata(token_id)) {
             return Err(Error::TokenNotFound);

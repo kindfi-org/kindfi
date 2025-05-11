@@ -47,6 +47,7 @@ impl NFTCore {
         if !e.storage().persistent().has(&DataKey::TokenMetadata(token_id)) {
             panic_with_error!(&e, Error::TokenNotFound);
         }
+
         // if to address is zero, panic
         // if to.is_zero() {
         //     panic_with_error!(&env, Error::TransferToZeroAddress);
@@ -54,7 +55,11 @@ impl NFTCore {
 
         // verify owner authorization
         from.require_auth();
+
+        // transfer the token using OpenZeppelin's base implementation
         Base::transfer(&e, &from, &to, token_id);
+        
+        // emit transfer event
         emit_transfer(&e, from, to, token_id);
     }
 
@@ -63,9 +68,17 @@ impl NFTCore {
         if !e.storage().persistent().has(&DataKey::TokenMetadata(token_id)) {
             panic_with_error!(&e, Error::TokenNotFound);
         }
+
+        // verify owner authorization
         from.require_auth();
+
+        // burn the token using OpenZeppelin's base implementation
         Base::burn(&e, &from, token_id);
+
+        // remove metadata from storage/ledger
         e.storage().persistent().remove(&DataKey::TokenMetadata(token_id));
+
+        // emit burn event
         emit_burn(&e, from, token_id);
     }
 }

@@ -21,19 +21,21 @@ impl NFTEvents {
 }
 
 
-    /// Emitted when an NFT is burned
+    /// Emitted when an NFT is minted
     pub fn emit_mint(e: &Env, to: Address, token_id: u32, metadata_url: String) {
-        let topics = (symbol_short!("mint"), to);
+        let topics = (Symbol::new(&e, "mint"), to);
         e.events().publish(topics, (token_id, metadata_url));
     }
     
+    /// Emitted when an NFT is transferred
     pub fn emit_transfer(e: &Env, from: Address, to: Address, token_id: u32) {
-        let topics = (symbol_short!("transfer"), from, to);
+        let topics = (Symbol::new(&e, "transfer"), from, to);
         e.events().publish(topics, token_id);
     }
     
+    /// Emitted when an NFT is burned
     pub fn emit_burn(e: &Env, owner: Address, token_id: u32) {
-        let topics = (symbol_short!("burn"), owner);
+        let topics = (Symbol::new(&e, "burn"), owner);
         e.events().publish(topics, token_id);
     }
     
@@ -43,7 +45,7 @@ impl NFTEvents {
         token_id: u32,
         new_url: String
     ) {
-        let topics = (symbol_short!("data_updt"), token_id);
+        let topics = (Symbol::new(&e, "data_updt"), token_id);
         e.events().publish(topics, new_url);
     }
     
@@ -53,7 +55,7 @@ impl NFTEvents {
         token_id: u32,
         new_tier: TierLevel
     ) {
-        let topics = (symbol_short!("tier_updt"), token_id);
+        let topics = (Symbol::new(&e, "tier_updt"), token_id);
         e.events().publish(topics, new_tier);
     }
 

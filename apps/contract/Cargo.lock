@@ -1570,7 +1570,7 @@ source = "git+https://github.com/OpenZeppelin/stellar-contracts?branch=main#4f18
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn 2.0.101",
 ]
 
 [[package]]
