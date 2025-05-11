@@ -1,4 +1,4 @@
-import type { Project } from '.'
+import type { Project } from './'
 
 export interface ProjectDetail extends Project {
 	owner: ProjectOwner
@@ -78,5 +78,3 @@ export interface PitchFile {
 	url: string
 	size: number
 }
-
-export type TabId = 'overview' | 'team' | 'milestones' | 'updates' | 'community'
