@@ -71,11 +71,7 @@ export interface Comment {
 	date: string
 	type?: 'question' | 'answer' | 'general'
 	parentId?: string
-	reactions?: {
-		like: number
-		heart: number
-		celebrate: number
-	}
+	like: number
 }
 
 export interface PitchFile {
