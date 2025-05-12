@@ -7,6 +7,7 @@ import {
 	TabsTrigger,
 } from '~/components/base/tabs'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
+import { CommunityTab } from './tabs/community-tab'
 import { MilestonesTab } from './tabs/milestones-tab'
 import { OverviewTab } from './tabs/overview-tab'
 import { TeamTab } from './tabs/team-tab'
@@ -39,7 +40,7 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
 				<UpdatesTab updates={project.updates} />
 			</TabsContent>
 			<TabsContent value="community">
-				<p>CommunityTab</p>
+				<CommunityTab comments={project.comments} />
 			</TabsContent>
 		</Tabs>
 	)
