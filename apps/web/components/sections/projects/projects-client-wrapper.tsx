@@ -18,7 +18,7 @@ import { ProjectCardListSkeleton } from './project-card-list-skeleton'
 import { SortDropdown } from './sort-dropdown'
 import { ViewToggle } from './view-toggle'
 
-export function ProjectsView() {
+export function ProjectsClientWrapper() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const initialCategoryParams = searchParams.getAll('category')
@@ -28,8 +28,12 @@ export function ProjectsView() {
 		data: initialProjects = [],
 		isLoading: isLoadingProjects,
 		error: projectError,
-	} = useSupabaseQuery('projects', (client) =>
-		getAllProjects(client, initialCategoryParams, sortParam),
+	} = useSupabaseQuery(
+		'projects',
+		(client) => getAllProjects(client, initialCategoryParams, sortParam),
+		{
+			additionalKeyValues: [initialCategoryParams, sortParam],
+		},
 	)
 
 	const {

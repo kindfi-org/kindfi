@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-query'
 
 import { prefetchSupabaseQuery } from '@packages/lib/supabase/server'
-import { ProjectsView } from '~/components/sections/projects'
+import { ProjectsClientWrapper } from '~/components/sections/projects/projects-client-wrapper'
 import { getAllProjects } from '~/lib/queries/projects'
 
 export default async function ProjectsPage({
@@ -24,8 +24,11 @@ export default async function ProjectsPage({
 			: []
 
 	// Prefetch project data from Supabase (includes categories and tags)
-	await prefetchSupabaseQuery(queryClient, 'projects', (client) =>
-		getAllProjects(client, categorySlugs, sortSlug),
+	await prefetchSupabaseQuery(
+		queryClient,
+		'projects',
+		(client) => getAllProjects(client, categorySlugs, sortSlug),
+		[categorySlugs, sortSlug],
 	)
 
 	// Hydrate React Query cache on the client
@@ -45,7 +48,7 @@ export default async function ProjectsPage({
 			</div>
 
 			<HydrationBoundary state={dehydratedState}>
-				<ProjectsView />
+				<ProjectsClientWrapper />
 			</HydrationBoundary>
 		</main>
 	)
