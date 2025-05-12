@@ -79,3 +79,51 @@ export async function getAllCategories(client: TypedSupabaseClient) {
 
 	return data
 }
+
+export async function getProjectById(
+	client: TypedSupabaseClient,
+	projectId: string,
+) {
+	const { data, error } = await client
+		.from('projects')
+		.select(
+			`
+      id,
+      title,
+      description,
+      image_url,
+      created_at,
+      current_amount,
+      target_amount,
+      min_investment,
+      percentage_complete,
+      investors_count,
+      category:category_id ( * ),
+      project_tag_relationships (
+        tag:tag_id ( id, name, color )
+      )
+    `,
+		)
+		.eq('id', projectId)
+		.single()
+
+	if (error) throw error
+
+	if (!data) return null
+
+	console.log(data)
+
+	return {
+		id: data.id,
+		title: data.title,
+		description: data.description,
+		image: data.image_url,
+		goal: data.target_amount,
+		raised: data.current_amount,
+		investors: data.investors_count,
+		minInvestment: data.min_investment,
+		createdAt: data.created_at,
+		category: data.category,
+		tags: data.project_tag_relationships?.map((r) => r.tag) ?? [],
+	}
+}

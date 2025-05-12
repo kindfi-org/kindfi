@@ -2,12 +2,13 @@
 
 import { motion } from 'framer-motion'
 import { CategoryBadge } from '~/components/sections/projects/category-badge'
+import type { Project } from '~/lib/types/project'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { AnimatedCounter } from './animated-counter'
 import { ProjectOwner } from './project-owner'
 
 interface ProjectHeroProps {
-	project: ProjectDetail
+	project: Project
 }
 
 export function ProjectHero({ project }: ProjectHeroProps) {
@@ -66,7 +67,7 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 					</div>
 				</div>
 
-				<ProjectOwner owner={project.owner} />
+				{/* <ProjectOwner owner={project.owner} /> */}
 			</div>
 		</motion.section>
 	)

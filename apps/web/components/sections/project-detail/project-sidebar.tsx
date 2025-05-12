@@ -19,12 +19,13 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { progressBarAnimation } from '~/lib/constants/animations'
+import type { Project } from '~/lib/types/project'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
 import { getTextColor } from '~/lib/utils/color-utils'
 
 interface ProjectSidebarProps {
-	project: ProjectDetail
+	project: Project
 }
 
 export function ProjectSidebar({ project }: ProjectSidebarProps) {
@@ -89,7 +90,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			navigator
 				.share({
 					title: project.title,
-					text: project.description,
+					text: project.description ?? '',
 					url: window.location.href,
 				})
 				.catch((error) => console.log('Error sharing', error))
