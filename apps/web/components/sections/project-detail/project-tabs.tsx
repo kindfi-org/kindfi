@@ -10,6 +10,7 @@ import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { MilestonesTab } from './tabs/milestones-tab'
 import { OverviewTab } from './tabs/overview-tab'
 import { TeamTab } from './tabs/team-tab'
+import { UpdatesTab } from './tabs/updates-tab'
 
 interface ProjectTabsProps {
 	project: ProjectDetail
@@ -35,7 +36,7 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
 				<MilestonesTab milestones={project.milestones} />
 			</TabsContent>
 			<TabsContent value="updates">
-				<p>UpdatesTab</p>
+				<UpdatesTab updates={project.updates} />
 			</TabsContent>
 			<TabsContent value="community">
 				<p>CommunityTab</p>

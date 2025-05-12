@@ -147,13 +147,13 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 									<FormLabel>Donation Amount (USD)</FormLabel>
 									<div className="relative">
 										<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-											<span className="text-gray-500 sm:text-sm">$</span>
+											<span className="text-muted-foreground">$</span>
 										</div>
 										<FormControl>
 											<Input
 												type="number"
 												placeholder={`Min. $${project.minInvestment}`}
-												className="pl-7 gradient-border-btn"
+												className="pl-6 border-green-600 bg-white"
 												{...field}
 												onChange={(e) => {
 													const value =
@@ -185,7 +185,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				<div className="flex gap-4">
 					<Button
 						variant="outline"
-						className="w-full flex items-center justify-center gap-2 gradient-border-btn"
+						className="w-full flex items-center justify-center gap-2 gradient-border-btn bg-white"
 						onClick={handleToggleFollow}
 					>
 						<Heart
@@ -196,7 +196,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 					<Button
 						variant="outline"
-						className="w-full flex items-center justify-center gap-2 gradient-border-btn"
+						className="w-full flex items-center justify-center gap-2 gradient-border-btn bg-white"
 						onClick={handleShare}
 					>
 						<Share className="h-4 w-4" />
