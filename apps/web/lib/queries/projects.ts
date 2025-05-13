@@ -123,6 +123,44 @@ export async function getProjectById(
 
 	console.log(pitch)
 
+	// Fetch project members and match with profiles
+	const { data: members, error: membersError } = await client
+		.from('project_members')
+		.select('id, role, title, user_id')
+		.eq('project_id', projectId)
+
+	if (membersError) throw membersError
+
+	console.log(members)
+
+	const userIds = members.map((m) => m.user_id)
+	console.log(userIds)
+	const { data: profiles, error: profilesError } = await client
+		.from('profiles')
+		.select('id, display_name, bio, image_url')
+		.in('id', userIds)
+
+	if (profilesError) throw profilesError
+
+	console.log(profiles)
+
+	const team = members.flatMap((m) => {
+		const profile = profiles.find((p) => p.id === m.user_id)
+		if (!profile) return []
+		return [
+			{
+				id: m.id,
+				displayName: profile.display_name,
+				avatar: profile.image_url,
+				bio: profile.bio,
+				role: m.role,
+				title: m.title,
+			},
+		]
+	})
+
+	console.log(team)
+
 	// Return the normalized project object
 	return {
 		id: project.id,
@@ -136,17 +174,13 @@ export async function getProjectById(
 		createdAt: project.created_at,
 		category: project.category,
 		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
-		pitch: pitch
-			? {
-					id: pitch.id,
-					title: pitch.title,
-					story: pitch.story,
-					pitchDeck: pitch.pitch_deck,
-					videoUrl: pitch.video_url,
-				}
-			: {
-					id: '',
-					title: '',
-				},
+		pitch: {
+			id: pitch?.id ?? '',
+			title: pitch?.title ?? '',
+			story: pitch?.story ?? null,
+			pitchDeck: pitch?.pitch_deck ?? null,
+			videoUrl: pitch?.video_url ?? null,
+		},
+		team,
 	}
 }

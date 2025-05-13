@@ -32,31 +32,37 @@ export function TeamTab({ team }: TeamTabProps) {
 					>
 						<Avatar className="h-20 w-20 mb-4">
 							<AvatarImage
-								src={member.avatar || '/placeholder.svg'}
-								alt={member.name}
+								src={member.avatar || '/images/placeholder.png'}
+								alt={member.displayName ?? 'User Avatar'}
 							/>
-							<AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+							<AvatarFallback>
+								{member.displayName?.charAt(0).toUpperCase() ?? 'U'}
+							</AvatarFallback>
 						</Avatar>
 						<div className="flex items-center gap-2 mb-1">
-							<h3 className="font-bold text-lg">{member.name}</h3>
-							{member.isAdmin && (
+							<h3 className="font-bold text-lg">
+								{member.displayName ?? 'Unknown'}
+							</h3>
+							{member.role === 'admin' && (
 								<Crown className="h-4 w-4 text-amber-500" aria-label="Admin" />
 							)}
-							{member.isEditor && (
+							{member.role === 'editor' && (
 								<Edit className="h-4 w-4 text-blue-500" aria-label="Editor" />
 							)}
 						</div>
 						<p className="text-primary font-semibold uppercase">
-							{member.role}
+							{member.title ?? 'Member'}
 						</p>
-						<p className="text-sm text-muted-foreground mb-4">{member.bio}</p>
+						<p className="text-sm text-muted-foreground mb-4">
+							{member.bio || 'No bio available.'}
+						</p>
 						<div className="flex gap-2">
-							{member.isAdmin && (
+							{member.role === 'admin' && (
 								<span className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">
 									Admin
 								</span>
 							)}
-							{member.isEditor && (
+							{member.role === 'editor' && (
 								<span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
 									Editor
 								</span>

@@ -6,9 +6,10 @@ export const projectDetail: ProjectDetail = {
 	title: 'Empowering Education',
 	description:
 		'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for all children regardless of their background.',
-	story: `# Empowering Education: A Vision for Equal Opportunity
-
-Our mission is to bridge the education gap in low-income communities by providing quality educational resources, technology, and mentorship programs.
+	pitch: {
+		id: '1',
+		title: 'Empowering Education: A Vision for Equal Opportunity',
+		story: `Our mission is to bridge the education gap in low-income communities by providing quality educational resources, technology, and mentorship programs.
 
 ## The Problem
 
@@ -27,6 +28,10 @@ We're implementing a three-pronged approach:
 With your support, we aim to reach 50 schools and impact over 10,000 students in the first year. Each investment directly contributes to a child's future.
 
 Join us in creating a world where every child has access to quality education.`,
+		videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+		pitchDeck: '',
+	},
+
 	image: '/images/education.webp',
 	category: categories.find((c) => c.id === '7') ?? categories[0],
 	goal: 55000,
@@ -38,72 +43,38 @@ Join us in creating a world where every child has access to quality education.`,
 		{ id: 'tag-children', name: 'CHILDREN', color: '#9B59B6' },
 		{ id: 'tag-future', name: 'FUTURE', color: '#03A9F4' },
 	],
-	owner: {
-		id: 'owner1',
-		name: 'Sarah Johnson',
-		avatar: '/images/sarah-johnson.webp',
-		bio: 'Education advocate with 10+ years of experience in developing programs for underserved communities.',
-	},
-	pitchVideo: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-	pitchFiles: [
-		{
-			id: 'file1',
-			name: 'Empowering Education Presentation',
-			type: 'pdf',
-			url: '#',
-			size: 2500000,
-		},
-		{
-			id: 'file2',
-			name: 'Budget Breakdown',
-			type: 'pptx',
-			url: '#',
-			size: 1800000,
-		},
-		{
-			id: 'file3',
-			name: 'Implementation Timeline',
-			type: 'pdf',
-			url: '#',
-			size: 1200000,
-		},
-	],
 	team: [
 		{
 			id: 'team1',
-			name: 'Sarah Johnson',
+			displayName: 'Sarah Johnson',
 			avatar: '/images/sarah-johnson.webp',
-			role: 'Project Lead',
+			title: 'Project Lead',
+			role: 'admin',
 			bio: 'Education advocate with 10+ years of experience developing programs for underserved communities. Sarah oversees all aspects of the project and maintains relationships with school administrators and community leaders.',
-			isAdmin: true,
-			isEditor: true,
 		},
 		{
 			id: 'team2',
-			name: 'Michael Chen',
+			displayName: 'Michael Chen',
 			avatar: '/images/michael-chen.webp',
-			role: 'Education Specialist',
+			title: 'Education Specialist',
+			role: 'editor',
 			bio: 'Former teacher with a PhD in Education Policy. Michael designs curriculum materials and training programs for teachers, ensuring our educational resources meet the highest standards.',
-			isAdmin: false,
-			isEditor: true,
 		},
 		{
 			id: 'team3',
-			name: 'Aisha Patel',
+			displayName: 'Aisha Patel',
 			avatar: '/images/aisha-patel.webp',
-			role: 'Community Outreach',
+			title: 'Community Outreach',
+			role: 'editor',
 			bio: 'Community organizer with deep connections in underserved neighborhoods. Aisha builds relationships with families and community organizations to ensure our programs address real needs.',
-			isAdmin: false,
-			isEditor: true,
 		},
 		{
 			id: 'team4',
-			name: 'David Rodriguez',
+			displayName: 'David Rodriguez',
 			avatar: '/images/david-rodriguez.webp',
-			role: 'Technology Coordinator',
+			title: 'Technology Coordinator',
+			role: 'editor',
 			bio: 'IT specialist with expertise in educational technology. David manages the implementation of computer labs, internet connectivity, and digital learning tools in partner schools.',
-			isAdmin: false,
-			isEditor: false,
 		},
 	],
 	milestones: [

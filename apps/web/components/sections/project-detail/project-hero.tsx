@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import { CategoryBadge } from '~/components/sections/projects/category-badge'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { AnimatedCounter } from './animated-counter'
-import { ProjectOwner } from './project-owner'
 
 interface ProjectHeroProps {
 	project: ProjectDetail
@@ -65,8 +64,6 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 						</p>
 					</div>
 				</div>
-
-				{/* <ProjectOwner owner={project.owner} /> */}
 			</div>
 		</motion.section>
 	)
