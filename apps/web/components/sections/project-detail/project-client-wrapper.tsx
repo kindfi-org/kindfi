@@ -42,7 +42,7 @@ export function ProjectClientWrapper({ projectId }: ProjectClientWrapperProps) {
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<div className="lg:col-span-2">
 					<ProjectHero project={project} />
-					<ProjectTabs project={projectDetail} />
+					<ProjectTabs project={project} />
 				</div>
 
 				<div className="lg:col-span-1">

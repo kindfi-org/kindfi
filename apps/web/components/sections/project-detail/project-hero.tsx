@@ -2,13 +2,12 @@
 
 import { motion } from 'framer-motion'
 import { CategoryBadge } from '~/components/sections/projects/category-badge'
-import type { Project } from '~/lib/types/project'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { AnimatedCounter } from './animated-counter'
 import { ProjectOwner } from './project-owner'
 
 interface ProjectHeroProps {
-	project: Project
+	project: ProjectDetail
 }
 
 export function ProjectHero({ project }: ProjectHeroProps) {

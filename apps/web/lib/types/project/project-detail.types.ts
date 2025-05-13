@@ -1,16 +1,12 @@
 import type { Project } from './'
 
 export interface ProjectDetail extends Project {
-	owner: ProjectOwner
-	description: string
-	story: string
-	pitchVideo?: string
-	pitchFiles?: PitchFile[]
-	team: TeamMember[]
-	milestones: Milestone[]
-	updates: Update[]
-	comments: Comment[]
-	createdAt: string
+	// owner: ProjectOwner
+	pitch: ProjectPitch
+	// team: TeamMember[]
+	// milestones: Milestone[]
+	// updates: Update[]
+	// comments: Comment[]
 }
 
 export interface ProjectOwner {
@@ -18,6 +14,14 @@ export interface ProjectOwner {
 	name: string
 	avatar: string
 	bio: string
+}
+
+export interface ProjectPitch {
+	id: string
+	title: string
+	story?: string | null
+	pitchDeck?: string | null
+	videoUrl?: string | null
 }
 
 export interface TeamMember {

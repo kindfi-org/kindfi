@@ -28,19 +28,19 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
 				<TabsTrigger value="community">Community</TabsTrigger>
 			</TabsList>
 			<TabsContent value="overview">
-				<OverviewTab project={project} />
+				<OverviewTab pitch={project.pitch} />
 			</TabsContent>
 			<TabsContent value="team">
-				<TeamTab team={project.team} />
+				{/* <TeamTab team={project.team} /> */}
 			</TabsContent>
 			<TabsContent value="milestones">
-				<MilestonesTab milestones={project.milestones} />
+				{/* <MilestonesTab milestones={project.milestones} /> */}
 			</TabsContent>
 			<TabsContent value="updates">
-				<UpdatesTab updates={project.updates} />
+				{/* <UpdatesTab updates={project.updates} /> */}
 			</TabsContent>
 			<TabsContent value="community">
-				<CommunityTab comments={project.comments} />
+				{/* <CommunityTab comments={project.comments} /> */}
 			</TabsContent>
 		</Tabs>
 	)
