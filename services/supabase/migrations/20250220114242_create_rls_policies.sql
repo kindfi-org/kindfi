@@ -5,11 +5,19 @@ ALTER TABLE kindler_projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE project_updates ENABLE ROW LEVEL SECURITY;
 
 -- Profiles table policies
-CREATE POLICY "Profiles are viewable by everyone"
-    ON profiles
-    FOR SELECT
-    TO authenticated
-    USING (true);
+
+-- TEMPORARY POLICY: Allows public read access while there's no authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Public read access to profiles"
+ON public.profiles
+FOR SELECT 
+USING (true);
+
+-- CREATE POLICY "Profiles are viewable by everyone"
+--     ON profiles
+--     FOR SELECT
+--     TO authenticated
+--     USING (true);
 
 CREATE POLICY "Users can insert their own profile"
     ON profiles

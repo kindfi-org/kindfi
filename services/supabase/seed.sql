@@ -427,3 +427,110 @@ Join us in creating a world where every child has access to quality education.$$
   'http://127.0.0.1:54321/storage/v1/object/public/project_pitch_decks/civic-leadership.pdf',
   'https://www.youtube.com/embed/w38Saswmfdc'
   );
+
+-- Insert users
+insert into auth.users (id, email, encrypted_password) values
+  ('fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', 'nina.martinez@example.com', ''),
+  ('c124b016-bab9-4904-8e1a-c38b8623001b', 'ximena.thompson@example.com', ''),
+  ('44e69d1d-2659-4a51-82ce-487e8c9ef320', 'diego.gonzalez@example.com', ''),
+  ('08bf1aed-8822-4d99-84ae-f89fcf46624a', 'diego.jackson@example.com', ''),
+  ('bcc18c37-3a33-4585-9af0-0e163cbb3850', 'isabel.wright@example.com', ''),
+  ('5af02f63-3be5-44e4-bd3a-0964b1dc8e39', 'diana.white@example.com', ''),
+  ('2c8a13a2-0a76-4758-84bd-12a633cf598c', 'grace.taylor@example.com', ''),
+  ('0876de6c-f9ad-4ba2-b4a3-725ddbb8d498', 'maria.martin@example.com', ''),
+  ('ba754a4b-c267-4d70-8c1a-00154f9b1cf1', 'karen.allen@example.com', ''),
+  ('eee0c1ac-86c6-4024-a5e3-c5f350626b6a', 'frank.thomas@example.com', ''),
+  ('8f665ffb-d1bf-43da-90b6-1f2bb88d91ca', 'tina.king@example.com', ''),
+  ('31738359-04ef-418d-a6e5-59e9de312dab', 'bob.thompson@example.com', ''),
+  ('fec8063f-59a9-4e66-a6c8-c9f5c4a57353', 'john.gonzalez@example.com', ''),
+  ('8fdf59c8-98ab-4fdd-bbf3-4578b59d959d', 'zoe.martinez@example.com', ''),
+  ('1616f605-613d-49d8-b933-efad3fbc688c', 'samuel.scott@example.com', ''),
+  ('e3cb1263-0e79-4fd5-be41-d1aa76f03bdc', 'wendy.davis@example.com', ''),
+  ('8e05ed73-6be8-4e23-bd02-3a8344cef8d4', 'oscar.thompson@example.com', ''),
+  ('e52ed5c4-722d-4380-853e-7530db295722', 'maria.moore@example.com', ''),
+  ('51fdcab5-7789-429d-bb3b-844139921e84', 'oscar.wright@example.com', ''),
+  ('55499a3c-f7d8-492b-a790-4223f29467b1', 'bob.martin@example.com', ''),
+  ('b5780351-aba6-459e-8d41-3fbd3a5018bf', 'tina.lopez@example.com', ''),
+  ('ff517450-e235-477e-a058-a2a73608dd69', 'nina.thompson@example.com', ''),
+  ('f51272df-fd8f-4826-adf8-58aa6378cb32', 'paula.clark@example.com', ''),
+  ('bc6176d7-72c0-4b4c-b2b5-44cde3438517', 'carlos.perez@example.com', ''),
+  ('1609aba1-bcbb-426b-ae57-456f02e16de7', 'yuri.lopez@example.com', ''),
+  ('8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'diego.taylor@example.com', ''),
+  ('ad549c42-5906-41a8-a08f-5d810e01d2eb', 'alice.lopez@example.com', ''),
+  ('2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'zoe.perez@example.com', ''),
+  ('81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'frank.hall@example.com', '');
+
+-- Insert profiles for all users
+insert into public.profiles (id, role, display_name, bio, image_url) values
+  ('fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', 'kinder', 'Nina Martinez', 'Empowering youth with mindfulness tools and support.', 'https://randomuser.me/api/portraits/women/1.jpg'),
+  ('c124b016-bab9-4904-8e1a-c38b8623001b', 'kinder', 'Ximena Thompson', 'Mobilizing rapid aid to disaster-affected communities worldwide.', 'https://randomuser.me/api/portraits/women/2.jpg'),
+  ('44e69d1d-2659-4a51-82ce-487e8c9ef320', 'kinder', 'Diego Gonzalez', 'Focused on bringing clean water to every corner of the world.', 'https://randomuser.me/api/portraits/men/1.jpg'),
+  ('08bf1aed-8822-4d99-84ae-f89fcf46624a', 'kinder', 'Diego Jackson', 'Mobilizing rapid aid to disaster-affected communities worldwide.', 'https://randomuser.me/api/portraits/men/2.jpg'),
+  ('bcc18c37-3a33-4585-9af0-0e163cbb3850', 'kinder', 'Isabel Wright', 'Teaching coding and digital skills to the next generation of innovators.', 'https://randomuser.me/api/portraits/women/3.jpg'),
+  ('5af02f63-3be5-44e4-bd3a-0964b1dc8e39', 'kinder', 'Diana White', 'Rescuing and rehabilitating animals in need with love and care.', 'https://randomuser.me/api/portraits/women/4.jpg'),
+  ('2c8a13a2-0a76-4758-84bd-12a633cf598c', 'kinder', 'Grace Taylor', 'Creating art that reflects social change and community empowerment.', 'https://randomuser.me/api/portraits/women/5.jpg'),
+  ('0876de6c-f9ad-4ba2-b4a3-725ddbb8d498', 'kinder', 'Maria Martin', 'Rescuing and rehabilitating animals in need with love and care.', 'https://randomuser.me/api/portraits/women/6.jpg'),
+  ('ba754a4b-c267-4d70-8c1a-00154f9b1cf1', 'kinder', 'Karen Allen', 'Training young leaders to advocate for change and justice.', 'https://randomuser.me/api/portraits/women/7.jpg'),
+  ('eee0c1ac-86c6-4024-a5e3-c5f350626b6a', 'kinder', 'Frank Thomas', 'Rescuing and rehabilitating animals in need with love and care.', 'https://randomuser.me/api/portraits/men/3.jpg'),
+  ('8f665ffb-d1bf-43da-90b6-1f2bb88d91ca', 'kinder', 'Tina King', 'Dedicated to restoring ecosystems and combating climate change.', 'https://randomuser.me/api/portraits/women/8.jpg'),
+  ('31738359-04ef-418d-a6e5-59e9de312dab', 'kinder', 'Bob Thompson', 'Empowering youth with mindfulness tools and support.', 'https://randomuser.me/api/portraits/men/4.jpg'),
+  ('fec8063f-59a9-4e66-a6c8-c9f5c4a57353', 'kinder', 'John Gonzalez', 'Working to ensure accessible healthcare in underserved regions.', 'https://randomuser.me/api/portraits/men/5.jpg'),
+  ('8fdf59c8-98ab-4fdd-bbf3-4578b59d959d', 'kinder', 'Zoe Martinez', 'Mobilizing rapid aid to disaster-affected communities worldwide.', 'https://randomuser.me/api/portraits/women/9.jpg'),
+  ('1616f605-613d-49d8-b933-efad3fbc688c', 'kinder', 'Samuel Scott', 'Mobilizing rapid aid to disaster-affected communities worldwide.', 'https://randomuser.me/api/portraits/men/6.jpg'),
+  ('e3cb1263-0e79-4fd5-be41-d1aa76f03bdc', 'kinder', 'Wendy Davis', 'Rescuing and rehabilitating animals in need with love and care.', 'https://randomuser.me/api/portraits/women/10.jpg'),
+  ('8e05ed73-6be8-4e23-bd02-3a8344cef8d4', 'kinder', 'Oscar Thompson', 'Working to ensure accessible healthcare in underserved regions.', 'https://randomuser.me/api/portraits/men/7.jpg'),
+  ('e52ed5c4-722d-4380-853e-7530db295722', 'kinder', 'Maria Moore', 'Focused on bringing clean water to every corner of the world.', 'https://randomuser.me/api/portraits/women/11.jpg'),
+  ('51fdcab5-7789-429d-bb3b-844139921e84', 'kinder', 'Oscar Wright', 'Focused on bringing clean water to every corner of the world.', 'https://randomuser.me/api/portraits/men/8.jpg'),
+  ('55499a3c-f7d8-492b-a790-4223f29467b1', 'kinder', 'Bob Martin', 'Teaching coding and digital skills to the next generation of innovators.', 'https://randomuser.me/api/portraits/men/9.jpg'),
+  ('b5780351-aba6-459e-8d41-3fbd3a5018bf', 'kinder', 'Tina Lopez', 'Teaching coding and digital skills to the next generation of innovators.', 'https://randomuser.me/api/portraits/women/12.jpg'),
+  ('ff517450-e235-477e-a058-a2a73608dd69', 'kinder', 'Nina Thompson', 'Training young leaders to advocate for change and justice.', 'https://randomuser.me/api/portraits/women/13.jpg'),
+  ('f51272df-fd8f-4826-adf8-58aa6378cb32', 'kinder', 'Paula Clark', 'Empowering youth with mindfulness tools and support.', 'https://randomuser.me/api/portraits/women/14.jpg'),
+  ('bc6176d7-72c0-4b4c-b2b5-44cde3438517', 'kinder', 'Carlos Perez', 'Teaching coding and digital skills to the next generation of innovators.', 'https://randomuser.me/api/portraits/men/10.jpg'),
+  ('1609aba1-bcbb-426b-ae57-456f02e16de7', 'kinder', 'Yuri Lopez', 'Empowering youth with mindfulness tools and support.', 'https://randomuser.me/api/portraits/women/15.jpg'),
+  ('8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'kinder', 'Diego Taylor', 'Creating art that reflects social change and community empowerment.', 'https://randomuser.me/api/portraits/men/11.jpg'),
+  ('ad549c42-5906-41a8-a08f-5d810e01d2eb', 'kinder', 'Alice Lopez', 'Mobilizing rapid aid to disaster-affected communities worldwide.', 'https://randomuser.me/api/portraits/women/16.jpg'),
+  ('2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'kinder', 'Zoe Perez', 'Training young leaders to advocate for change and justice.', 'https://randomuser.me/api/portraits/women/17.jpg'),
+  ('81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'kinder', 'Frank Hall', 'Empowering youth with mindfulness tools and support.', 'https://randomuser.me/api/portraits/men/12.jpg');
+
+-- Insert project members for each project
+insert into public.project_members (project_id, user_id, role, title) values
+  ((select id from public.projects where title = 'Empowering Education'), 'fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', 'admin', 'Founder'),
+  ((select id from public.projects where title = 'Empowering Education'), 'c124b016-bab9-4904-8e1a-c38b8623001b', 'editor', 'Education Specialist'),
+  ((select id from public.projects where title = 'Empowering Education'), '44e69d1d-2659-4a51-82ce-487e8c9ef320', 'editor', 'Community Liaison'),
+
+  ((select id from public.projects where title = 'Forest Restoration Initiative'), 'bcc18c37-3a33-4585-9af0-0e163cbb3850', 'admin', 'Founder'),
+  ((select id from public.projects where title = 'Forest Restoration Initiative'), '5af02f63-3be5-44e4-bd3a-0964b1dc8e39', 'editor', 'Field Officer'),
+  ((select id from public.projects where title = 'Forest Restoration Initiative'), '2c8a13a2-0a76-4758-84bd-12a633cf598c', 'editor', 'Research Analyst'),
+
+  ((select id from public.projects where title = 'Universal Health Access'), '0876de6c-f9ad-4ba2-b4a3-725ddbb8d498', 'admin', 'Founder'),
+  ((select id from public.projects where title = 'Universal Health Access'), 'ba754a4b-c267-4d70-8c1a-00154f9b1cf1', 'editor', 'Medical Advisor'),
+  ((select id from public.projects where title = 'Universal Health Access'), 'eee0c1ac-86c6-4024-a5e3-c5f350626b6a', 'editor', 'Outreach Manager'),
+
+  ((select id from public.projects where title = 'Clean Water for Life'), '31738359-04ef-418d-a6e5-59e9de312dab', 'admin', 'Founder'),
+  ((select id from public.projects where title = 'Clean Water for Life'), 'fec8063f-59a9-4e66-a6c8-c9f5c4a57353', 'editor', 'Sanitation Officer'),
+  ((select id from public.projects where title = 'Clean Water for Life'), '8fdf59c8-98ab-4fdd-bbf3-4578b59d959d', 'editor', 'Trainer'),
+
+  ((select id from public.projects where title = 'Animal Rescue Network'), 'e3cb1263-0e79-4fd5-be41-d1aa76f03bdc', 'admin', 'Founder'),
+  ((select id from public.projects where title = 'Animal Rescue Network'), '8e05ed73-6be8-4e23-bd02-3a8344cef8d4', 'editor', 'Veterinarian'),
+  ((select id from public.projects where title = 'Animal Rescue Network'), 'e52ed5c4-722d-4380-853e-7530db295722', 'editor', 'Adoption Lead'),
+
+  ((select id from public.projects where title = 'Mindful Support'), '51fdcab5-7789-429d-bb3b-844139921e84', 'admin', 'Founder'),
+  ((select id from public.projects where title = 'Mindful Support'), '55499a3c-f7d8-492b-a790-4223f29467b1', 'editor', 'UX Designer'),
+  ((select id from public.projects where title = 'Mindful Support'), 'b5780351-aba6-459e-8d41-3fbd3a5018bf', 'editor', 'Counselor'),
+
+  ((select id from public.projects where title = 'Artists for Social Impact'), 'ff517450-e235-477e-a058-a2a73608dd69', 'admin', 'Founder'),
+  ((select id from public.projects where title = 'Artists for Social Impact'), 'f51272df-fd8f-4826-adf8-58aa6378cb32', 'editor', 'Creative Director'),
+  ((select id from public.projects where title = 'Artists for Social Impact'), 'bc6176d7-72c0-4b4c-b2b5-44cde3438517', 'editor', 'Storyteller'),
+
+  ((select id from public.projects where title = 'Code the Future'), '8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'admin', 'Founder'),
+  ((select id from public.projects where title = 'Code the Future'), 'ad549c42-5906-41a8-a08f-5d810e01d2eb', 'editor', 'Software Engineer'),
+  ((select id from public.projects where title = 'Code the Future'), '2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'editor', 'Program Manager'),
+
+  ((select id from public.projects where title = 'Emergency Response Fund'), '1609aba1-bcbb-426b-ae57-456f02e16de7', 'admin', 'Founder'),
+  ((select id from public.projects where title = 'Emergency Response Fund'), '8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'editor', 'Logistics Specialist'),
+  ((select id from public.projects where title = 'Emergency Response Fund'), 'ad549c42-5906-41a8-a08f-5d810e01d2eb', 'editor', 'Field Manager'),
+
+  ((select id from public.projects where title = 'Civic Leadership Lab'), '2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'admin', 'Founder'),
+  ((select id from public.projects where title = 'Civic Leadership Lab'), '81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'editor', 'Policy Mentor'),
+  ((select id from public.projects where title = 'Civic Leadership Lab'), '55499a3c-f7d8-492b-a790-4223f29467b1', 'editor', 'Advocacy Lead');
+  
