@@ -515,20 +515,29 @@ export type Database = {
 			}
 			profiles: {
 				Row: {
+					bio: string | null
 					created_at: string
+					display_name: string
 					id: string
+					image_url: string | null
 					role: Database['public']['Enums']['user_role']
 					updated_at: string
 				}
 				Insert: {
+					bio?: string | null
 					created_at?: string
+					display_name: string
 					id: string
+					image_url?: string | null
 					role?: Database['public']['Enums']['user_role']
 					updated_at?: string
 				}
 				Update: {
+					bio?: string | null
 					created_at?: string
+					display_name?: string
 					id?: string
+					image_url?: string | null
 					role?: Database['public']['Enums']['user_role']
 					updated_at?: string
 				}
@@ -540,6 +549,7 @@ export type Database = {
 					joined_at: string
 					project_id: string
 					role: Database['public']['Enums']['project_member_role']
+					title: string
 					updated_at: string
 					user_id: string
 				}
@@ -548,6 +558,7 @@ export type Database = {
 					joined_at?: string
 					project_id: string
 					role?: Database['public']['Enums']['project_member_role']
+					title: string
 					updated_at?: string
 					user_id: string
 				}
@@ -556,6 +567,7 @@ export type Database = {
 					joined_at?: string
 					project_id?: string
 					role?: Database['public']['Enums']['project_member_role']
+					title?: string
 					updated_at?: string
 					user_id?: string
 				}

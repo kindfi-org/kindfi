@@ -491,15 +491,21 @@ export const userRoleSchema = z.union([
 ])
 
 export const profilesInsertSchema = z.object({
+	bio: z.string().optional().nullable(),
 	created_at: z.string().optional(),
+	display_name: z.string(),
 	id: z.string(),
+	image_url: z.string().optional().nullable(),
 	role: userRoleSchema.optional(),
 	updated_at: z.string().optional(),
 })
 
 export const profilesUpdateSchema = z.object({
+	bio: z.string().optional().nullable(),
 	created_at: z.string().optional(),
+	display_name: z.string().optional(),
 	id: z.string().optional(),
+	image_url: z.string().optional().nullable(),
 	role: userRoleSchema.optional(),
 	updated_at: z.string().optional(),
 })
@@ -516,6 +522,7 @@ export const projectMembersInsertSchema = z.object({
 	joined_at: z.string().optional(),
 	project_id: z.string(),
 	role: projectMemberRoleSchema.optional(),
+	title: z.string(),
 	updated_at: z.string().optional(),
 	user_id: z.string(),
 })
@@ -525,6 +532,7 @@ export const projectMembersUpdateSchema = z.object({
 	joined_at: z.string().optional(),
 	project_id: z.string().optional(),
 	role: projectMemberRoleSchema.optional(),
+	title: z.string().optional(),
 	updated_at: z.string().optional(),
 	user_id: z.string().optional(),
 })
@@ -839,8 +847,11 @@ export const kycStatusRowSchema = z.object({
 })
 
 export const profilesRowSchema = z.object({
+	bio: z.string().nullable(),
 	created_at: z.string(),
+	display_name: z.string(),
 	id: z.string(),
+	image_url: z.string().nullable(),
 	role: userRoleSchema,
 	updated_at: z.string(),
 })
@@ -850,6 +861,7 @@ export const projectMembersRowSchema = z.object({
 	joined_at: z.string(),
 	project_id: z.string(),
 	role: projectMemberRoleSchema,
+	title: z.string(),
 	updated_at: z.string(),
 	user_id: z.string(),
 })
