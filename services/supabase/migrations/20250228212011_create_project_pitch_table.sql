@@ -16,24 +16,31 @@ COMMENT ON TABLE public.project_pitch IS 'Stores project pitch information inclu
 -- Add RLS policies
 ALTER TABLE public.project_pitch ENABLE ROW LEVEL SECURITY;
 
--- Create policy for users to view project pitches they have access to
-CREATE POLICY "Users can view project pitches they have access to" 
+-- TEMPORARY POLICY: Allows public read access while there's no authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Public read access to project pitches"
 ON public.project_pitch
 FOR SELECT 
-USING (
-    project_id IN (
-        SELECT id FROM public.projects
-        WHERE id = project_pitch.project_id
-        AND (
-            owner_id = auth.uid()
-            -- owner_id = auth.uid() OR
-            -- id IN (
-            --     SELECT project_id FROM public.project_members
-            --     WHERE user_id = auth.uid()
-            -- )
-        )
-    )
-);
+USING (true);
+
+-- Create policy for users to view project pitches they have access to
+-- CREATE POLICY "Users can view project pitches they have access to" 
+-- ON public.project_pitch
+-- FOR SELECT 
+-- USING (
+--     project_id IN (
+--         SELECT id FROM public.projects
+--         WHERE id = project_pitch.project_id
+--         AND (
+--             owner_id = auth.uid()
+--             -- owner_id = auth.uid() OR
+--             -- id IN (
+--             --     SELECT project_id FROM public.project_members
+--             --     WHERE user_id = auth.uid()
+--             -- )
+--         )
+--     )
+-- );
 
 -- Create policy for users to insert their own project pitches
 CREATE POLICY "Users can insert their own project pitches" 

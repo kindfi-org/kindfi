@@ -19,13 +19,12 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { progressBarAnimation } from '~/lib/constants/animations'
-import type { Project } from '~/lib/types/project'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
 import { getTextColor } from '~/lib/utils/color-utils'
 
 interface ProjectSidebarProps {
-	project: Project
+	project: ProjectDetail
 }
 
 export function ProjectSidebar({ project }: ProjectSidebarProps) {

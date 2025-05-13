@@ -84,7 +84,8 @@ export async function getProjectById(
 	client: TypedSupabaseClient,
 	projectId: string,
 ) {
-	const { data, error } = await client
+	// Fetch the project by ID, including its category and tags
+	const { data: project, error: projectError } = await client
 		.from('projects')
 		.select(
 			`
@@ -107,23 +108,45 @@ export async function getProjectById(
 		.eq('id', projectId)
 		.single()
 
-	if (error) throw error
+	if (projectError) throw projectError
+	if (!project) return null
 
-	if (!data) return null
+	// Fetch the related pitch (if it exists)
+	const { data: pitch, error: pitchError } = await client
+		.from('project_pitch')
+		.select('id, title, story, pitch_deck, video_url')
+		.eq('project_id', projectId)
+		.single()
 
-	console.log(data)
+	// Ignore "no rows found" error (code PGRST116)
+	if (pitchError && pitchError.code !== 'PGRST116') throw pitchError
 
+	console.log(pitch)
+
+	// Return the normalized project object
 	return {
-		id: data.id,
-		title: data.title,
-		description: data.description,
-		image: data.image_url,
-		goal: data.target_amount,
-		raised: data.current_amount,
-		investors: data.investors_count,
-		minInvestment: data.min_investment,
-		createdAt: data.created_at,
-		category: data.category,
-		tags: data.project_tag_relationships?.map((r) => r.tag) ?? [],
+		id: project.id,
+		title: project.title,
+		description: project.description,
+		image: project.image_url,
+		goal: project.target_amount,
+		raised: project.current_amount,
+		investors: project.investors_count,
+		minInvestment: project.min_investment,
+		createdAt: project.created_at,
+		category: project.category,
+		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
+		pitch: pitch
+			? {
+					id: pitch.id,
+					title: pitch.title,
+					story: pitch.story,
+					pitchDeck: pitch.pitch_deck,
+					videoUrl: pitch.video_url,
+				}
+			: {
+					id: '',
+					title: '',
+				},
 	}
 }
