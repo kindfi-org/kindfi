@@ -4,7 +4,7 @@ import type { Project } from './'
 export interface ProjectDetail extends Project {
 	pitch: ProjectPitch
 	team: TeamMember[]
-	// milestones: Milestone[]
+	milestones: Milestone[]
 	// updates: Update[]
 	// comments: Comment[]
 }
@@ -40,7 +40,7 @@ export interface Milestone {
 	amount: number
 	deadline: string
 	status: MilestoneStatus
-	index: number
+	orderIndex: number
 }
 
 export interface Update {

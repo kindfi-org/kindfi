@@ -534,3 +534,46 @@ insert into public.project_members (project_id, user_id, role, title) values
   ((select id from public.projects where title = 'Civic Leadership Lab'), '81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'editor', 'Policy Mentor'),
   ((select id from public.projects where title = 'Civic Leadership Lab'), '55499a3c-f7d8-492b-a790-4223f29467b1', 'editor', 'Advocacy Lead');
   
+-- Insert milestones for each project
+insert into public.milestones (project_id, title, description, amount, deadline, status, order_index)
+values
+
+((select id from public.projects where title = 'Empowering Education'), 'Needs Assessment', 'Conduct educational needs survey across target region.', 10000, '2025-07-01', 'approved', 0),
+((select id from public.projects where title = 'Empowering Education'), 'Resource Development', 'Develop and print learning materials.', 20000, '2025-08-01', 'disputed', 1),
+((select id from public.projects where title = 'Empowering Education'), 'Program Launch', 'Start the educational sessions with selected schools.', 20000, '2025-09-01', 'pending', 2),
+
+((select id from public.projects where title = 'Forest Restoration Initiative'), 'Site Preparation', 'Clear and prepare the land for planting.', 10000, '2025-07-01', 'approved', 0),
+((select id from public.projects where title = 'Forest Restoration Initiative'), 'Tree Planting', 'Plant native species with community volunteers.', 15000, '2025-08-01', 'completed', 1),
+((select id from public.projects where title = 'Forest Restoration Initiative'), 'Monitoring and Maintenance', 'Install monitoring sensors and maintain growth.', 10000, '2025-09-01', 'pending', 2),
+
+((select id from public.projects where title = 'Universal Health Access'), 'Medical Supplies Acquisition', 'Purchase essential medicine and kits.', 15000, '2025-07-01', 'approved', 0),
+((select id from public.projects where title = 'Universal Health Access'), 'Health Camp Setup', 'Establish temporary health checkup camps.', 15000, '2025-08-01', 'pending', 1),
+((select id from public.projects where title = 'Universal Health Access'), 'Community Health Outreach', 'Launch mobile units and health awareness drives.', 10000, '2025-09-01', 'pending', 2),
+
+((select id from public.projects where title = 'Clean Water for Life'), 'Survey and Planning', 'Evaluate locations and draft blueprints.', 10000, '2025-07-01', 'approved', 0),
+((select id from public.projects where title = 'Clean Water for Life'), 'Infrastructure Setup', 'Install filtration systems and pipelines.', 30000, '2025-08-01', 'pending', 1),
+((select id from public.projects where title = 'Clean Water for Life'), 'Training & Sustainability', 'Train locals on maintenance and water hygiene.', 10000, '2025-09-01', 'pending', 2),
+
+((select id from public.projects where title = 'Animal Rescue Network'), 'Shelter Renovation', 'Upgrade facilities to improve animal care.', 10000, '2025-07-01', 'approved', 0),
+((select id from public.projects where title = 'Animal Rescue Network'), 'Medical Treatment', 'Provide necessary veterinary care and vaccinations.', 10000, '2025-08-01', 'pending', 1),
+((select id from public.projects where title = 'Animal Rescue Network'), 'Adoption Campaign', 'Run outreach campaigns to boost adoptions.', 10000, '2025-09-01', 'pending', 2),
+
+((select id from public.projects where title = 'Mindful Support'), 'Curriculum Design', 'Create mental wellness content tailored to youth.', 7500, '2025-07-01', 'approved', 0),
+((select id from public.projects where title = 'Mindful Support'), 'Training Facilitators', 'Train volunteers and psychologists for sessions.', 10000, '2025-08-01', 'pending', 1),
+((select id from public.projects where title = 'Mindful Support'), 'Pilot Workshops', 'Conduct pilot workshops in local schools.', 7500, '2025-09-01', 'pending', 2),
+
+((select id from public.projects where title = 'Artists for Social Impact'), 'Artist Selection', 'Curate artists with a passion for social change.', 5000, '2025-07-01', 'approved', 0),
+((select id from public.projects where title = 'Artists for Social Impact'), 'Community Murals', 'Paint murals reflecting community values.', 5000, '2025-08-01', 'pending', 1),
+((select id from public.projects where title = 'Artists for Social Impact'), 'Public Showcase', 'Host events to share and discuss art impact.', 5000, '2025-09-01', 'pending', 2),
+
+((select id from public.projects where title = 'Code the Future'), 'Curriculum Development', 'Design a coding curriculum for schools.', 10000, '2025-07-01', 'approved', 0),
+((select id from public.projects where title = 'Code the Future'), 'Infrastructure Setup', 'Provide laptops and internet connectivity.', 15000, '2025-08-01', 'completed', 1),
+((select id from public.projects where title = 'Code the Future'), 'Bootcamp Launch', 'Start hands-on bootcamps for students.', 15000, '2025-09-01', 'pending', 2),
+
+((select id from public.projects where title = 'Emergency Response Fund'), 'Supplies Procurement', 'Purchase essential emergency kits.', 15000, '2025-07-01', 'approved', 0),
+((select id from public.projects where title = 'Emergency Response Fund'), 'Training First Responders', 'Train local emergency response teams.', 40000, '2025-08-01', 'rejected', 1),
+((select id from public.projects where title = 'Emergency Response Fund'), 'Community Drills', 'Run emergency preparedness drills.', 15000, '2025-09-01', 'pending', 2),
+
+((select id from public.projects where title = 'Civic Leadership Lab'), 'Program Launch', 'Introduce leadership and civics curriculum.', 10000, '2025-07-01', 'approved', 0),
+((select id from public.projects where title = 'Civic Leadership Lab'), 'Mentorship Network', 'Pair youth with experienced civic leaders.', 10000, '2025-08-01', 'pending', 1),
+((select id from public.projects where title = 'Civic Leadership Lab'), 'Community Projects', 'Support student-led civic improvement projects.', 10000, '2025-09-01', 'pending', 2);
