@@ -10,7 +10,9 @@ interface MilestonesTabProps {
 }
 
 export function MilestonesTab({ milestones }: MilestonesTabProps) {
-	const sortedMilestones = [...milestones].sort((a, b) => a.index - b.index)
+	const sortedMilestones = [...milestones].sort(
+		(a, b) => a.orderIndex - b.orderIndex,
+	)
 
 	if (sortedMilestones.length === 0) {
 		return (

@@ -131,18 +131,13 @@ export async function getProjectById(
 
 	if (membersError) throw membersError
 
-	console.log(members)
-
 	const userIds = members.map((m) => m.user_id)
-	console.log(userIds)
 	const { data: profiles, error: profilesError } = await client
 		.from('profiles')
 		.select('id, display_name, bio, image_url')
 		.in('id', userIds)
 
 	if (profilesError) throw profilesError
-
-	console.log(profiles)
 
 	const team = members.flatMap((m) => {
 		const profile = profiles.find((p) => p.id === m.user_id)
@@ -160,6 +155,17 @@ export async function getProjectById(
 	})
 
 	console.log(team)
+
+	// Fetch project milestones
+	const { data: milestones, error: milestonesError } = await client
+		.from('milestones')
+		.select('id, title, description, amount, deadline, status, order_index')
+		.eq('project_id', projectId)
+		.order('order_index', { ascending: true })
+
+	if (milestonesError) throw milestonesError
+
+	console.log(milestones)
 
 	// Return the normalized project object
 	return {
@@ -182,5 +188,14 @@ export async function getProjectById(
 			videoUrl: pitch?.video_url ?? null,
 		},
 		team,
+		milestones: (milestones ?? []).map((m) => ({
+			id: m.id,
+			title: m.title,
+			description: m.description,
+			amount: m.amount,
+			deadline: m.deadline,
+			status: m.status,
+			orderIndex: m.order_index,
+		})),
 	}
 }
