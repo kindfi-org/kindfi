@@ -265,43 +265,16 @@ export type Database = {
 			}
 			escrow_milestones: {
 				Row: {
-					amount: number
-					completed_at: string | null
-					created_at: string | null
-					deadline: string
-					description: string | null
 					escrow_id: string
-					id: string
-					order_index: number
-					project_milestone_id: string
-					status: Database['public']['Enums']['milestone_status']
-					title: string
+					milestone_id: string
 				}
 				Insert: {
-					amount: number
-					completed_at?: string | null
-					created_at?: string | null
-					deadline: string
-					description?: string | null
 					escrow_id: string
-					id?: string
-					order_index: number
-					project_milestone_id: string
-					status?: Database['public']['Enums']['milestone_status']
-					title: string
+					milestone_id: string
 				}
 				Update: {
-					amount?: number
-					completed_at?: string | null
-					created_at?: string | null
-					deadline?: string
-					description?: string | null
 					escrow_id?: string
-					id?: string
-					order_index?: number
-					project_milestone_id?: string
-					status?: Database['public']['Enums']['milestone_status']
-					title?: string
+					milestone_id?: string
 				}
 				Relationships: [
 					{
@@ -312,10 +285,10 @@ export type Database = {
 						referencedColumns: ['id']
 					},
 					{
-						foreignKeyName: 'escrow_milestones_project_milestone_id_fkey'
-						columns: ['project_milestone_id']
+						foreignKeyName: 'escrow_milestones_milestone_id_fkey'
+						columns: ['milestone_id']
 						isOneToOne: false
-						referencedRelation: 'project_milestones'
+						referencedRelation: 'milestones'
 						referencedColumns: ['id']
 					},
 				]
@@ -378,7 +351,7 @@ export type Database = {
 						foreignKeyName: 'escrow_reviews_milestone_id_fkey'
 						columns: ['milestone_id']
 						isOneToOne: false
-						referencedRelation: 'escrow_milestones'
+						referencedRelation: 'milestones'
 						referencedColumns: ['id']
 					},
 				]
@@ -435,6 +408,53 @@ export type Database = {
 				Relationships: [
 					{
 						foreignKeyName: 'kindler_projects_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			milestones: {
+				Row: {
+					amount: number
+					completed_at: string | null
+					created_at: string | null
+					deadline: string
+					description: string | null
+					id: string
+					order_index: number
+					project_id: string
+					status: Database['public']['Enums']['milestone_status']
+					title: string
+				}
+				Insert: {
+					amount: number
+					completed_at?: string | null
+					created_at?: string | null
+					deadline: string
+					description?: string | null
+					id?: string
+					order_index: number
+					project_id: string
+					status?: Database['public']['Enums']['milestone_status']
+					title: string
+				}
+				Update: {
+					amount?: number
+					completed_at?: string | null
+					created_at?: string | null
+					deadline?: string
+					description?: string | null
+					id?: string
+					order_index?: number
+					project_id?: string
+					status?: Database['public']['Enums']['milestone_status']
+					title?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'milestones_project_id_fkey'
 						columns: ['project_id']
 						isOneToOne: false
 						referencedRelation: 'projects'
@@ -503,39 +523,6 @@ export type Database = {
 				Relationships: [
 					{
 						foreignKeyName: 'project_members_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			project_milestones: {
-				Row: {
-					id: string
-					milestone_id: string
-					project_id: string
-				}
-				Insert: {
-					id?: string
-					milestone_id: string
-					project_id: string
-				}
-				Update: {
-					id?: string
-					milestone_id?: string
-					project_id?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'project_milestones_milestone_id_fkey'
-						columns: ['milestone_id']
-						isOneToOne: false
-						referencedRelation: 'escrow_milestones'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'project_milestones_project_id_fkey'
 						columns: ['project_id']
 						isOneToOne: false
 						referencedRelation: 'projects'
@@ -682,7 +669,6 @@ export type Database = {
 					id: string
 					image_url: string | null
 					investors_count: number
-					milestones: string[] | null
 					min_investment: number
 					owner_id: string
 					percentage_complete: number
@@ -698,7 +684,6 @@ export type Database = {
 					id?: string
 					image_url?: string | null
 					investors_count?: number
-					milestones?: string[] | null
 					min_investment: number
 					owner_id: string
 					percentage_complete?: number
@@ -714,7 +699,6 @@ export type Database = {
 					id?: string
 					image_url?: string | null
 					investors_count?: number
-					milestones?: string[] | null
 					min_investment?: number
 					owner_id?: string
 					percentage_complete?: number
