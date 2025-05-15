@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import clsx from 'clsx'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -64,7 +65,11 @@ export function CommentForm({
 	}
 
 	return (
-		<div className={`${isReply ? 'pl-6 border-l-2 border-gray-200 mt-3' : ''}`}>
+		<div
+			className={clsx({
+				'pl-6 border-l-2 border-gray-200 mt-3': isReply,
+			})}
+		>
 			<div className="flex gap-3">
 				<Avatar className="h-8 w-8 flex-shrink-0">
 					<AvatarImage
@@ -85,7 +90,13 @@ export function CommentForm({
 											<Textarea
 												{...field}
 												placeholder={placeholder}
-												className={`resize-none min-h-[80px] border-green-600 ${isOverLimit ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+												className={clsx(
+													'resize-none min-h-[80px] border-green-600',
+													{
+														'border-red-500 focus-visible:ring-red-500':
+															isOverLimit,
+													},
+												)}
 												onFocus={() => setIsFocused(true)}
 												aria-label={placeholder}
 												aria-invalid={isOverLimit}
@@ -100,7 +111,10 @@ export function CommentForm({
 							<div className="flex justify-between items-center mt-2">
 								<div
 									id="character-count"
-									className={`text-xs ${isOverLimit ? 'text-red-500' : 'text-gray-500'}`}
+									className={clsx('text-xs', {
+										'text-red-500': isOverLimit,
+										'text-gray-500': !isOverLimit,
+									})}
 									aria-live="polite"
 								>
 									{characterCount}/{maxLength} characters

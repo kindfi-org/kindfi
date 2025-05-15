@@ -71,7 +71,7 @@ BEGIN
     SET metadata = jsonb_set(
       metadata,
       '{status}',
-      to_jsonb('answered'),
+      to_jsonb('answered'::text),
       true
     )
     WHERE id = NEW.parent_comment_id

@@ -13,13 +13,6 @@ interface CommunityTabProps {
 }
 
 export function CommunityTab({ comments }: CommunityTabProps) {
-	// Filter out comments that are replies (have a parentId)
-	const topLevelComments = comments.filter((comment) => !comment.parentId)
-	// Sort by date (newest first)
-	const sortedComments = [...topLevelComments].sort(
-		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-	)
-
 	const [showQuestionForm, setShowQuestionForm] = useState(false)
 	const [commentsState, setCommentsState] = useState<Comment[]>(comments)
 
@@ -41,6 +34,26 @@ export function CommunityTab({ comments }: CommunityTabProps) {
 
 		setCommentsState((prev) => [newQuestion, ...prev])
 		setShowQuestionForm(false)
+	}
+
+	const handleAddReply = (parentId: string, content: string) => {
+		const reply: Comment = {
+			id: `temp-${Date.now()}`,
+			content,
+			author: {
+				id: 'current-user',
+				name: 'You',
+				avatar: '/abstract-geometric-shapes.png',
+			},
+			type: 'answer',
+			date: new Date().toISOString(),
+			parentId,
+			like: 0,
+		}
+
+		// TODO: Persist answer to backend
+
+		setCommentsState((prev) => [...prev, reply])
 	}
 
 	// Get all top-level comments from the current state
@@ -92,7 +105,11 @@ export function CommunityTab({ comments }: CommunityTabProps) {
 					No comments yet. Be the first to ask a question!
 				</div>
 			) : (
-				<CommentThread comments={commentsState} allowReplies={true} />
+				<CommentThread
+					comments={commentsState}
+					allowReplies={true}
+					onAddReply={handleAddReply}
+				/>
 			)}
 		</motion.div>
 	)
