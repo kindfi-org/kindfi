@@ -85,11 +85,19 @@ CREATE POLICY "Users can leave projects"
     USING (auth.uid() = kindler_id);
 
 -- Project updates policies
-CREATE POLICY "Project updates are viewable by everyone"
-    ON project_updates
-    FOR SELECT
-    TO authenticated
-    USING (true);
+
+-- TEMPORARY POLICY: Allows public read access while there's no authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Public read access to project updates"
+ON public.project_updates
+FOR SELECT 
+USING (true);
+
+-- CREATE POLICY "Project updates are viewable by everyone"
+--     ON project_updates
+--     FOR SELECT
+--     TO authenticated
+--     USING (true);
 
 CREATE POLICY "Project updates can be created by project members"
     ON project_updates

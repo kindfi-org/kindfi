@@ -5,7 +5,7 @@ export interface ProjectDetail extends Project {
 	pitch: ProjectPitch
 	team: TeamMember[]
 	milestones: Milestone[]
-	// updates: Update[]
+	updates: Update[]
 	// comments: Comment[]
 }
 
@@ -36,7 +36,7 @@ export type MilestoneStatus =
 export interface Milestone {
 	id: string
 	title: string
-	description: string
+	description: string | null
 	amount: number
 	deadline: string
 	status: MilestoneStatus
@@ -65,7 +65,7 @@ export interface Comment {
 		avatar: string
 	}
 	date: string
-	type?: 'question' | 'answer' | 'general'
+	type: Enums<'comment_type'>
 	parentId?: string
 	like: number
 }

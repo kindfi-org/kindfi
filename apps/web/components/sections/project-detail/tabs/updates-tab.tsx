@@ -48,6 +48,7 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 				name: 'You',
 				avatar: '/abstract-geometric-shapes.png',
 			},
+			type: 'comment',
 			date: new Date().toISOString(),
 			like: 0,
 		}
@@ -77,6 +78,20 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 			...prev,
 			[updateId]: false,
 		}))
+	}
+
+	const addReply = (updateId: string, reply: Comment) => {
+		setUpdatesState((prevUpdates) =>
+			prevUpdates.map((update) => {
+				if (update.id === updateId) {
+					return {
+						...update,
+						comments: [reply, ...update.comments],
+					}
+				}
+				return update
+			}),
+		)
 	}
 
 	return (
@@ -211,7 +226,10 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 										<h4 className="font-medium mb-4">
 											Comments ({update.comments.length})
 										</h4>
-										<CommentThread comments={update.comments} />
+										<CommentThread
+											comments={update.comments}
+											onAddReply={(reply) => addReply(update.id, reply)}
+										/>
 									</motion.div>
 								)}
 							</AnimatePresence>
