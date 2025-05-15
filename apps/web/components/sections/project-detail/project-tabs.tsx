@@ -37,7 +37,7 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
 				<MilestonesTab milestones={project.milestones} />
 			</TabsContent>
 			<TabsContent value="updates">
-				{/* <UpdatesTab updates={project.updates} /> */}
+				<UpdatesTab updates={project.updates} />
 			</TabsContent>
 			<TabsContent value="community">
 				{/* <CommunityTab comments={project.comments} /> */}

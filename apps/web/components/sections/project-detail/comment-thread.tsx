@@ -14,6 +14,7 @@ interface CommentThreadProps {
 	parentId?: string
 	level?: number
 	allowReplies?: boolean
+	onAddReply: (newComment: Comment) => void
 }
 
 export function CommentThread({
@@ -21,6 +22,7 @@ export function CommentThread({
 	parentId = undefined,
 	level = 0,
 	allowReplies = true,
+	onAddReply,
 }: CommentThreadProps) {
 	// Filter comments to only include those that are direct replies to the parentId
 	// If parentId is undefined, get top-level comments (those without a parentId)
@@ -46,6 +48,7 @@ export function CommentThread({
 					allComments={comments}
 					level={level}
 					allowReplies={allowReplies}
+					onAddReply={onAddReply}
 				/>
 			))}
 		</div>
@@ -57,6 +60,7 @@ interface CommentItemProps {
 	allComments: Comment[]
 	level: number
 	allowReplies: boolean
+	onAddReply: (newComment: Comment) => void
 }
 
 function CommentItem({
@@ -64,14 +68,11 @@ function CommentItem({
 	allComments,
 	level,
 	allowReplies,
+	onAddReply,
 }: CommentItemProps) {
 	const [isExpanded, setIsExpanded] = useState(false)
 	const [showReplyForm, setShowReplyForm] = useState(false)
-	const [replies, setReplies] = useState<Comment[]>(
-		allComments.filter((c) => c.parentId === comment.id),
-	)
 
-	// Count all replies, including nested ones
 	const replyCount = useMemo(() => {
 		const countAllReplies = (commentId: string): number => {
 			const directReplies = allComments.filter((c) => c.parentId === commentId)
@@ -86,28 +87,6 @@ function CommentItem({
 
 	const hasReplies = replyCount > 0
 
-	const getCommentTypeClass = (type?: string) => {
-		switch (type) {
-			case 'question':
-				return 'bg-blue-100 text-blue-800'
-			case 'answer':
-				return 'bg-green-100 text-green-800'
-			default:
-				return 'bg-gray-100 text-gray-800'
-		}
-	}
-
-	const getCommentTypeText = (type?: string) => {
-		switch (type) {
-			case 'question':
-				return 'Question'
-			case 'answer':
-				return 'Answer'
-			default:
-				return 'Comment'
-		}
-	}
-
 	const handleAddReply = (content: string) => {
 		const newReply: Comment = {
 			id: `temp-${Date.now()}`,
@@ -117,12 +96,12 @@ function CommentItem({
 				name: 'You',
 				avatar: '/abstract-geometric-shapes.png',
 			},
+			type: 'comment',
 			date: new Date().toISOString(),
 			parentId: comment.id,
 			like: 0,
 		}
-
-		setReplies((prev) => [newReply, ...prev])
+		onAddReply(newReply)
 		setShowReplyForm(false)
 		setIsExpanded(true)
 	}
@@ -148,14 +127,6 @@ function CommentItem({
 					<div className="flex-1">
 						<div className="flex flex-wrap items-center gap-2">
 							<h4 className="font-medium">{comment.author.name}</h4>
-							{comment.type && (
-								<span
-									className={`text-xs px-2 py-0.5 rounded-full ${getCommentTypeClass(comment.type)}`}
-									aria-label={getCommentTypeText(comment.type)}
-								>
-									{getCommentTypeText(comment.type)}
-								</span>
-							)}
 						</div>
 						<p className="text-xs text-gray-500">
 							{new Date(comment.date).toLocaleDateString('en-US', {
@@ -248,15 +219,11 @@ function CommentItem({
 						className="mt-3"
 					>
 						<CommentThread
-							comments={[
-								...allComments,
-								...replies.filter(
-									(reply) => !allComments.some((c) => c.id === reply.id),
-								),
-							]}
+							comments={allComments}
 							parentId={comment.id}
 							level={level + 1}
-							allowReplies={allowReplies && level < 2} // Limit nesting to 3 levels
+							allowReplies={allowReplies && level < 2}
+							onAddReply={onAddReply}
 						/>
 					</motion.div>
 				)}

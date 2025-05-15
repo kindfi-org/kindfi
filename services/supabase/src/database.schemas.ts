@@ -633,6 +633,7 @@ export const projectUpdatesRowSchema = z.object({
 	created_at: z.string(),
 	id: z.string(),
 	project_id: z.string(),
+	title: z.string(),
 	updated_at: z.string(),
 })
 
@@ -642,6 +643,7 @@ export const projectUpdatesInsertSchema = z.object({
 	created_at: z.string().optional(),
 	id: z.string().optional(),
 	project_id: z.string(),
+	title: z.string(),
 	updated_at: z.string().optional(),
 })
 
@@ -651,6 +653,7 @@ export const projectUpdatesUpdateSchema = z.object({
 	created_at: z.string().optional(),
 	id: z.string().optional(),
 	project_id: z.string().optional(),
+	title: z.string().optional(),
 	updated_at: z.string().optional(),
 })
 
