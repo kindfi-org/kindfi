@@ -9,7 +9,8 @@
 	"scripts": {
 		"dev": "bun --hot src/index.tsx",
 		"start": "NODE_ENV=production bun src/index.tsx",
-		"migrate": "bun src/scripts/migrate.ts",
+		"db:generate": "drizzle-kit generate:pg",
+		"db:push": "drizzle-kit push:pg",
 		"test": "bun test src/__tests__/*.test.ts",
 		"test:watch": "bun test --watch src/__tests__/*.test.ts"
 	},
