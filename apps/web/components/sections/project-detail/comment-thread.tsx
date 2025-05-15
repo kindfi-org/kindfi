@@ -1,5 +1,6 @@
 'use client'
 
+import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -14,7 +15,7 @@ interface CommentThreadProps {
 	parentId?: string
 	level?: number
 	allowReplies?: boolean
-	onAddReply: (newComment: Comment) => void
+	onAddReply?: (parentId: string, content: string) => void
 }
 
 export function CommentThread({
@@ -39,6 +40,8 @@ export function CommentThread({
 		return null
 	}
 
+	const canReply = allowReplies && level < 1
+
 	return (
 		<div className="space-y-4">
 			{sortedComments.map((comment) => (
@@ -47,7 +50,7 @@ export function CommentThread({
 					comment={comment}
 					allComments={comments}
 					level={level}
-					allowReplies={allowReplies}
+					canReply={canReply}
 					onAddReply={onAddReply}
 				/>
 			))}
@@ -59,15 +62,15 @@ interface CommentItemProps {
 	comment: Comment
 	allComments: Comment[]
 	level: number
-	allowReplies: boolean
-	onAddReply: (newComment: Comment) => void
+	canReply: boolean
+	onAddReply?: (parentId: string, content: string) => void
 }
 
 function CommentItem({
 	comment,
 	allComments,
 	level,
-	allowReplies,
+	canReply,
 	onAddReply,
 }: CommentItemProps) {
 	const [isExpanded, setIsExpanded] = useState(false)
@@ -85,32 +88,19 @@ function CommentItem({
 		return countAllReplies(comment.id)
 	}, [allComments, comment.id])
 
-	const hasReplies = replyCount > 0
-
 	const handleAddReply = (content: string) => {
-		const newReply: Comment = {
-			id: `temp-${Date.now()}`,
-			content,
-			author: {
-				id: 'current-user',
-				name: 'You',
-				avatar: '/abstract-geometric-shapes.png',
-			},
-			type: 'comment',
-			date: new Date().toISOString(),
-			parentId: comment.id,
-			like: 0,
-		}
-		onAddReply(newReply)
+		onAddReply?.(comment.id, content)
 		setShowReplyForm(false)
 		setIsExpanded(true)
 	}
 
-	const canReply = allowReplies && level < 1
+	const hasReplies = replyCount > 0
 
 	return (
 		<motion.div
-			className={`${level > 0 ? 'pl-6 border-l-2 border-gray-200' : ''}`}
+			className={clsx({
+				'pl-6 border-l-2 border-gray-200': level > 0,
+			})}
 			initial={{ opacity: 0, y: 10 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.2 }}
@@ -222,7 +212,7 @@ function CommentItem({
 							comments={allComments}
 							parentId={comment.id}
 							level={level + 1}
-							allowReplies={allowReplies && level < 2}
+							allowReplies={level + 1 < 2}
 							onAddReply={onAddReply}
 						/>
 					</motion.div>

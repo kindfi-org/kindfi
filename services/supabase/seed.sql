@@ -578,6 +578,7 @@ values
 ((select id from public.projects where title = 'Civic Leadership Lab'), 'Mentorship Network', 'Pair youth with experienced civic leaders.', 10000, '2025-08-01', 'pending', 1),
 ((select id from public.projects where title = 'Civic Leadership Lab'), 'Community Projects', 'Support student-led civic improvement projects.', 10000, '2025-09-01', 'pending', 2);
 
+-- Insert updates for each project
 INSERT INTO project_updates (id, title, content, author_id, project_id, created_at) VALUES
 ('d2538d90-cce7-4efa-98a2-468e5398f302', 'Progress on Empowering', 'Empowering Education is making significant strides. In this phase, we''re focusing on team building.', 'fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', (SELECT id FROM projects WHERE title = 'Empowering Education'), '2025-04-27T21:08:17.417996'),
 ('97e41c02-3657-425d-8f76-0c3ef99c78dd', 'Update on Empowering', 'Empowering Education is making significant strides. In this phase, we''re focusing on community engagement.', 'c124b016-bab9-4904-8e1a-c38b8623001b', (SELECT id FROM projects WHERE title = 'Empowering Education'), '2025-05-05T21:08:17.417996'),
@@ -610,6 +611,7 @@ INSERT INTO project_updates (id, title, content, author_id, project_id, created_
 ('f158cd89-3caa-4cf2-809a-8ffc58ee41ae', 'Update on Civic', 'Civic Leadership Lab is making significant strides. In this phase, we''re focusing on community engagement.', '81d3ff4d-b5de-42e7-a53d-26f275fe7668', (SELECT id FROM projects WHERE title = 'Civic Leadership Lab'), '2025-04-16T21:08:17.417996'),
 ('9452ce24-a4ff-420c-afda-9430e5393673', 'Insight on Civic', 'Civic Leadership Lab is making significant strides. In this phase, we''re focusing on technical implementation.', '81d3ff4d-b5de-42e7-a53d-26f275fe7668', (SELECT id FROM projects WHERE title = 'Civic Leadership Lab'), '2025-04-22T21:08:17.417996');
 
+-- Insert comments on updates
 INSERT INTO comments (id, content, author_id, project_update_id, created_at, type) VALUES
 ('429f7c7d-98c4-4388-af6f-f39a94466517', 'Looking forward to seeing this evolve.', '08bf1aed-8822-4d99-84ae-f89fcf46624a', 'd2538d90-cce7-4efa-98a2-468e5398f302', '2025-04-28T02:08:17.417996', 'comment'),
 ('164e5e76-a079-4c0b-b4e5-8a8d3b52c2b5', 'This sounds promising!', '81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'd2538d90-cce7-4efa-98a2-468e5398f302', '2025-04-28T06:08:17.417996', 'comment'),
@@ -671,3 +673,41 @@ INSERT INTO comments (id, content, author_id, project_update_id, created_at, typ
 ('0ecb45e9-f82f-4e22-8e4a-c196a3d43653', 'This sounds promising!', 'fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', 'f158cd89-3caa-4cf2-809a-8ffc58ee41ae', '2025-04-18T16:08:17.417996', 'comment'),
 ('f61542a7-3285-470a-90cb-0ed0523f5db0', 'This sounds promising!', 'c124b016-bab9-4904-8e1a-c38b8623001b', '9452ce24-a4ff-420c-afda-9430e5393673', '2025-04-24T10:08:17.417996', 'comment'),
 ('09d562b0-f35d-4dd5-9168-091cada3abf1', 'How can we help with this?', '08bf1aed-8822-4d99-84ae-f89fcf46624a', '9452ce24-a4ff-420c-afda-9430e5393673', '2025-04-23T12:08:17.417996', 'comment');
+
+-- Insert project-related questions
+INSERT INTO comments (id, content, author_id, type, project_id, created_at)
+VALUES
+('bbc150c3-3524-492f-89fd-bae7ed410518', 'What is the long-term impact of this project?', '81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'question', (SELECT id FROM projects WHERE title = 'Empowering Education'), '2025-05-14T15:00:00'),
+('6982263d-f403-4a7a-a70c-27daf1c91f47', 'How can contributors help in this initiative?', 'bcc18c37-3a33-4585-9af0-0e163cbb3850', 'question', (SELECT id FROM projects WHERE title = 'Empowering Education'), '2025-05-14T15:02:00'),
+('18960f4d-efb5-47f7-947f-ee00c5b7b2a8', 'What is the long-term impact of this project?', 'fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', 'question', (SELECT id FROM projects WHERE title = 'Forest Restoration Initiative'), '2025-05-14T15:05:00'),
+('d75e6f99-162c-4b63-9466-0f2cdf2316cd', 'How can contributors help in this initiative?', 'ad549c42-5906-41a8-a08f-5d810e01d2eb', 'question', (SELECT id FROM projects WHERE title = 'Forest Restoration Initiative'), '2025-05-14T15:07:00'),
+('82da46ab-68e7-45d6-8bea-4e3e8a938906', 'What is the long-term impact of this project?', '08bf1aed-8822-4d99-84ae-f89fcf46624a', 'question', (SELECT id FROM projects WHERE title = 'Universal Health Access'), '2025-05-14T15:10:00'),
+('eaf62672-7531-4517-b2f0-9b68f700be20', 'How can contributors help in this initiative?', '55499a3c-f7d8-492b-a790-4223f29467b1', 'question', (SELECT id FROM projects WHERE title = 'Universal Health Access'), '2025-05-14T15:12:00'),
+('30d91aab-6793-4fa4-ad94-b9864b39d30d', 'What is the long-term impact of this project?', 'fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', 'question', (SELECT id FROM projects WHERE title = 'Clean Water for Life'), '2025-05-14T15:15:00'),
+('4a7d1c26-2e59-4fcb-93df-dbc7a3c2064f', 'How can contributors help in this initiative?', 'bcc18c37-3a33-4585-9af0-0e163cbb3850', 'question', (SELECT id FROM projects WHERE title = 'Clean Water for Life'), '2025-05-14T15:17:00'),
+('2a18b402-90dc-4e79-a278-4a13b8a06b42', 'What is the long-term impact of this project?', 'c124b016-bab9-4904-8e1a-c38b8623001b', 'question', (SELECT id FROM projects WHERE title = 'Animal Rescue Network'), '2025-05-14T15:20:00'),
+('4b16231a-3c0d-4c53-9a64-8542b0bad3c0', 'How can contributors help in this initiative?', 'fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', 'question', (SELECT id FROM projects WHERE title = 'Animal Rescue Network'), '2025-05-14T15:22:00'),
+('8d3fee7e-91c5-4c7f-a7bf-6d8ebe5ce951', 'What is the long-term impact of this project?', 'c124b016-bab9-4904-8e1a-c38b8623001b', 'question', (SELECT id FROM projects WHERE title = 'Mindful Support'), '2025-05-14T15:25:00'),
+('3aa44b69-6296-48bc-9fef-7e930e7c1170', 'How can contributors help in this initiative?', 'bcc18c37-3a33-4585-9af0-0e163cbb3850', 'question', (SELECT id FROM projects WHERE title = 'Mindful Support'), '2025-05-14T15:27:00'),
+('a3eade33-d373-48c8-b481-2bf6971e9dea', 'What is the long-term impact of this project?', 'c124b016-bab9-4904-8e1a-c38b8623001b', 'question', (SELECT id FROM projects WHERE title = 'Artists for Social Impact'), '2025-05-14T15:30:00'),
+('dd5f6941-b27f-4963-bf41-698209f0354a', 'How can contributors help in this initiative?', '55499a3c-f7d8-492b-a790-4223f29467b1', 'question', (SELECT id FROM projects WHERE title = 'Artists for Social Impact'), '2025-05-14T15:32:00'),
+('647eac37-6041-4beb-a2ae-f10784998829', 'What is the long-term impact of this project?', 'bcc18c37-3a33-4585-9af0-0e163cbb3850', 'question', (SELECT id FROM projects WHERE title = 'Code the Future'), '2025-05-14T15:35:00'),
+('800d6013-ca3d-4b9c-bac1-d918b0ddbb4a', 'How can contributors help in this initiative?', '08bf1aed-8822-4d99-84ae-f89fcf46624a', 'question', (SELECT id FROM projects WHERE title = 'Code the Future'), '2025-05-14T15:37:00'),
+('0fc92eca-2523-4ffb-b819-75b3252140ec', 'What is the long-term impact of this project?', '55499a3c-f7d8-492b-a790-4223f29467b1', 'question', (SELECT id FROM projects WHERE title = 'Emergency Response Fund'), '2025-05-14T15:40:00'),
+('ff265a02-4395-424c-9063-7cd79b62cd46', 'How can contributors help in this initiative?', '55499a3c-f7d8-492b-a790-4223f29467b1', 'question', (SELECT id FROM projects WHERE title = 'Emergency Response Fund'), '2025-05-14T15:42:00'),
+('f95363bf-d9b8-499a-999f-ea9da4bf3465', 'What is the long-term impact of this project?', '08bf1aed-8822-4d99-84ae-f89fcf46624a', 'question', (SELECT id FROM projects WHERE title = 'Civic Leadership Lab'), '2025-05-14T15:45:00'),
+('6b7812af-e424-4082-9d06-6cf7b5305bce', 'How can contributors help in this initiative?', 'c124b016-bab9-4904-8e1a-c38b8623001b', 'question', (SELECT id FROM projects WHERE title = 'Civic Leadership Lab'), '2025-05-14T15:47:00');
+
+-- Insert answers to previously inserted questions
+INSERT INTO comments (id, content, author_id, type, project_id, parent_comment_id, created_at)
+VALUES
+('bbf28695-28c1-4077-adc3-68fb5a2fdfcd', 'This project aims to increase literacy and educational opportunities in underserved regions, leading to generational empowerment.', 'fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', 'answer', (SELECT id FROM projects WHERE title = 'Empowering Education'), 'bbc150c3-3524-492f-89fd-bae7ed410518', '2025-05-14T15:04:00'),
+('af29e005-7172-4003-b841-9af45c76d655', 'In the long run, we hope to regenerate native forests, improve biodiversity, and mitigate climate change in local ecosystems.', 'bcc18c37-3a33-4585-9af0-0e163cbb3850', 'answer', (SELECT id FROM projects WHERE title = 'Forest Restoration Initiative'), '18960f4d-efb5-47f7-947f-ee00c5b7b2a8', '2025-05-14T15:09:00'),
+('515e92c9-4312-43ec-aefb-8fc88ae8c4b6', 'The long-term goal is to establish a sustainable healthcare network that reduces preventable deaths and ensures medical equity.', '0876de6c-f9ad-4ba2-b4a3-725ddbb8d498', 'answer', (SELECT id FROM projects WHERE title = 'Universal Health Access'), '82da46ab-68e7-45d6-8bea-4e3e8a938906', '2025-05-14T15:14:00'),
+('b042715a-c28e-4a1e-a5fd-3702271c8b6c', 'This initiative will provide continuous access to clean drinking water, which will improve health and reduce disease in remote areas.', '31738359-04ef-418d-a6e5-59e9de312dab', 'answer', (SELECT id FROM projects WHERE title = 'Clean Water for Life'), '30d91aab-6793-4fa4-ad94-b9864b39d30d', '2025-05-14T15:19:00'),
+('8842b7dd-b4a8-4e97-8f55-da82c56880d1', 'We envision a future with a strong animal welfare system that reduces neglect and increases community responsibility for animals.', 'e3cb1263-0e79-4fd5-be41-d1aa76f03bdc', 'answer', (SELECT id FROM projects WHERE title = 'Animal Rescue Network'), '2a18b402-90dc-4e79-a278-4a13b8a06b42', '2025-05-14T15:24:00'),
+('e1009ea4-930a-43ed-a817-dd4f42d203de', 'Our long-term goal is to destigmatize mental health and make therapy and emotional support accessible to vulnerable populations.', '51fdcab5-7789-429d-bb3b-844139921e84', 'answer', (SELECT id FROM projects WHERE title = 'Mindful Support'), '8d3fee7e-91c5-4c7f-a7bf-6d8ebe5ce951', '2025-05-14T15:29:00'),
+('628da6d1-2fbe-440a-99c2-1434b15bff28', 'Over time, this project will create a platform where marginalized voices are amplified through art, driving social and political change.', 'ff517450-e235-477e-a058-a2a73608dd69', 'answer', (SELECT id FROM projects WHERE title = 'Artists for Social Impact'), 'a3eade33-d373-48c8-b481-2bf6971e9dea', '2025-05-14T15:34:00'),
+('9603ddc3-5778-4299-8158-c2190f641b24', 'We''re building the foundation for a generation of tech-savvy youth who will drive innovation in their communities.', '8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'answer', (SELECT id FROM projects WHERE title = 'Code the Future'), '647eac37-6041-4beb-a2ae-f10784998829', '2025-05-14T15:39:00'),
+('75121793-98e8-49d7-a03e-c193b488494d', 'Our impact will be a faster, more coordinated response to disasters, minimizing harm and improving community resilience.', '1609aba1-bcbb-426b-ae57-456f02e16de7', 'answer', (SELECT id FROM projects WHERE title = 'Emergency Response Fund'), '0fc92eca-2523-4ffb-b819-75b3252140ec', '2025-05-14T15:44:00'),
+('e0daece7-bd72-47c6-9a0e-fa4f3e24910c', 'In the long term, this initiative will cultivate future civic leaders and strengthen democratic engagement in local governments.', '2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'answer', (SELECT id FROM projects WHERE title = 'Civic Leadership Lab'), 'f95363bf-d9b8-499a-999f-ea9da4bf3465', '2025-05-14T15:49:00');

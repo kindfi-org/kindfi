@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
+import { useSetState } from 'react-use'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import { CommentForm } from '~/components/sections/project-detail/comment-form'
@@ -17,26 +18,20 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 	const sortedUpdates = [...updates].sort(
 		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
 	)
-	const [expandedUpdates, setExpandedUpdates] = useState<
+	const [expandedUpdates, setExpandedUpdates] = useSetState<
 		Record<string, boolean>
 	>({})
-	const [showCommentForms, setShowCommentForms] = useState<
+	const [showCommentForms, setShowCommentForms] = useSetState<
 		Record<string, boolean>
 	>({})
 	const [updatesState, setUpdatesState] = useState(sortedUpdates)
 
 	const toggleComments = (updateId: string) => {
-		setExpandedUpdates((prev) => ({
-			...prev,
-			[updateId]: !prev[updateId],
-		}))
+		setExpandedUpdates({ [updateId]: !expandedUpdates[updateId] })
 	}
 
 	const toggleCommentForm = (updateId: string) => {
-		setShowCommentForms((prev) => ({
-			...prev,
-			[updateId]: !prev[updateId],
-		}))
+		setShowCommentForms({ [updateId]: !showCommentForms[updateId] })
 	}
 
 	const addComment = (updateId: string, content: string) => {
@@ -53,6 +48,8 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 			like: 0,
 		}
 
+		// TODO: Persist comment to backend
+
 		setUpdatesState((prevUpdates) =>
 			prevUpdates.map((update) => {
 				if (update.id === updateId) {
@@ -65,32 +62,34 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 			}),
 		)
 
-		// TODO: Persist comment to backend
-
 		// Show comments after adding a new one
-		setExpandedUpdates((prev) => ({
-			...prev,
-			[updateId]: true,
-		}))
+		setExpandedUpdates({ [updateId]: true })
 
 		// Hide the comment form
-		setShowCommentForms((prev) => ({
-			...prev,
-			[updateId]: false,
-		}))
+		setShowCommentForms({ [updateId]: false })
 	}
 
-	const addReply = (updateId: string, reply: Comment) => {
-		setUpdatesState((prevUpdates) =>
-			prevUpdates.map((update) => {
-				if (update.id === updateId) {
-					return {
-						...update,
-						comments: [reply, ...update.comments],
-					}
-				}
-				return update
-			}),
+	const addReply = (updateId: string, parentId: string, content: string) => {
+		const reply: Comment = {
+			id: `temp-${Date.now()}`,
+			content,
+			author: {
+				id: 'current-user',
+				name: 'You',
+				avatar: '/abstract-geometric-shapes.png',
+			},
+			type: 'comment',
+			date: new Date().toISOString(),
+			parentId,
+			like: 0,
+		}
+
+		// TODO: Persist comment to backend
+
+		setUpdatesState((prev) =>
+			prev.map((u) =>
+				u.id === updateId ? { ...u, comments: [...u.comments, reply] } : u,
+			),
 		)
 	}
 
@@ -228,7 +227,10 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 										</h4>
 										<CommentThread
 											comments={update.comments}
-											onAddReply={(reply) => addReply(update.id, reply)}
+											allowReplies={true}
+											onAddReply={(parentId, content) =>
+												addReply(update.id, parentId, content)
+											}
 										/>
 									</motion.div>
 								)}

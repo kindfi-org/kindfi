@@ -6,7 +6,7 @@ export interface ProjectDetail extends Project {
 	team: TeamMember[]
 	milestones: Milestone[]
 	updates: Update[]
-	// comments: Comment[]
+	comments: Comment[]
 }
 
 export interface ProjectPitch {
