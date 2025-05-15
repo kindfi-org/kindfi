@@ -7,11 +7,13 @@ import {
 	TabsTrigger,
 } from '~/components/base/tabs'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
-import { CommunityTab } from './tabs/community-tab'
-import { MilestonesTab } from './tabs/milestones-tab'
-import { OverviewTab } from './tabs/overview-tab'
-import { TeamTab } from './tabs/team-tab'
-import { UpdatesTab } from './tabs/updates-tab'
+import {
+	CommunityTab,
+	MilestonesTab,
+	OverviewTab,
+	TeamTab,
+	UpdatesTab,
+} from './tabs'
 
 interface ProjectTabsProps {
 	project: ProjectDetail
