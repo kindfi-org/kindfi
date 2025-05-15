@@ -1,12 +1,26 @@
 'use client'
 
+import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion } from 'framer-motion'
-
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '~/components/base/button'
-import { Categories } from './category-badge'
+import { CategoryBadge } from '~/components/sections/projects/category-badge'
+import { getAllCategories } from '~/lib/queries/projects'
+import { CategoryBadgeSkeleton } from '../projects/category-badge-skeleton'
 
 export function Hero() {
+	const router = useRouter()
+
+	const {
+		data: categories = [],
+		isLoading,
+		error,
+	} = useSupabaseQuery('categories', getAllCategories, {
+		staleTime: 1000 * 60 * 60, // 1 hour
+		gcTime: 1000 * 60 * 60, // 1 hour
+	})
+
 	return (
 		<section
 			className="relative z-0 min-h-[80vh] bg-gradient-to-b from-purple-50/50 to-white px-4 pt-20"
@@ -66,7 +80,33 @@ export function Hero() {
 							</Button>
 						</Link>
 					</motion.div>
-					<Categories className="mt-6" />
+					<div className="mt-6 flex flex-wrap justify-center gap-2">
+						{isLoading ? (
+							<div className="flex flex-wrap gap-2">
+								{Array.from({ length: 12 }).map((_, i) => (
+									// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
+									<CategoryBadgeSkeleton key={i} />
+								))}
+							</div>
+						) : error ? (
+							<p className="text-sm text-destructive text-center w-full">
+								Failed to load categories. Please try again later.
+							</p>
+						) : (
+							categories.map((category) => (
+								<CategoryBadge
+									key={category.id}
+									category={category}
+									onClick={() => {
+										if (!category.slug) return
+										router.push(
+											`/projects?category=${encodeURIComponent(category.slug)}`,
+										)
+									}}
+								/>
+							))
+						)}
+					</div>
 				</div>
 			</div>
 		</section>
