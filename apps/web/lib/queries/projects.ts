@@ -5,6 +5,7 @@ export async function getAllProjects(
 	client: TypedSupabaseClient,
 	categorySlugs: string[] = [],
 	sortSlug = 'most-popular',
+	limit?: number,
 ) {
 	const { column, ascending } = sortMap[sortSlug] ?? sortMap['most-popular']
 
@@ -42,6 +43,10 @@ export async function getAllProjects(
 		if (categoryIds.length > 0) {
 			query = query.in('category_id', categoryIds)
 		}
+	}
+
+	if (limit) {
+		query = query.limit(limit)
 	}
 
 	const { data, error } = await query
