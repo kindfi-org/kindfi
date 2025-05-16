@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '~/components/base/button'
 import { CategoryBadge } from '~/components/sections/projects/category-badge'
+import { CategoryBadgeSkeleton } from '~/components/sections/projects/skeletons'
 import { getAllCategories } from '~/lib/queries/projects'
-import { CategoryBadgeSkeleton } from '../projects/category-badge-skeleton'
 
 export function Hero() {
 	const router = useRouter()
