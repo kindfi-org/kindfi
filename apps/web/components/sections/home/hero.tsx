@@ -23,7 +23,7 @@ export function Hero() {
 
 	return (
 		<section
-			className="relative z-0 min-h-[80vh] bg-gradient-to-b from-purple-50/50 to-white px-4 pt-20"
+			className="relative z-0 min-h-[80vh] bg-gradient-to-b from-purple-50/50 to-white px-4 pt-20 pb-8"
 			aria-labelledby="hero-title"
 			role="banner"
 		>
@@ -80,7 +80,7 @@ export function Hero() {
 							</Button>
 						</Link>
 					</motion.div>
-					<div className="mt-6 flex flex-wrap justify-center gap-2">
+					<div className="mt-8 flex flex-wrap justify-center gap-2">
 						{isLoading ? (
 							<div className="flex flex-wrap gap-2">
 								{Array.from({ length: 12 }).map((_, i) => (
