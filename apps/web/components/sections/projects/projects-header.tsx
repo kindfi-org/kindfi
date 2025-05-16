@@ -2,7 +2,7 @@
 
 import { LayoutGrid, List, SlidersHorizontal } from 'lucide-react'
 import { CategoryFilter } from '~/components/sections/projects/category-filter'
-import { SortDropdown } from '~/components/sections/projects/sort-dropdown'
+import { SortDropdown } from '~/components/sections/projects/filters'
 import type { SortOption } from '~/lib/types/project'
 
 /**

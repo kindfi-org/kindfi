@@ -6,8 +6,8 @@ import { useState } from 'react'
 import { useSetState } from 'react-use'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
-import { CommentForm } from '~/components/sections/project-detail/comment-form'
-import { CommentThread } from '~/components/sections/project-detail/comment-thread'
+import { CommentForm } from '~/components/sections/projects/detail/comment-form'
+import { CommentThread } from '~/components/sections/projects/detail/comment-thread'
 import type { Comment, Update } from '~/lib/types/project/project-detail.types'
 
 interface UpdatesTabProps {

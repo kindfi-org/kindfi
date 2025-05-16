@@ -4,8 +4,8 @@ import { motion } from 'framer-motion'
 import { HelpCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '~/components/base/button'
-import { CommentForm } from '~/components/sections/project-detail/comment-form'
-import { CommentThread } from '~/components/sections/project-detail/comment-thread'
+import { CommentForm } from '~/components/sections/projects/detail/comment-form'
+import { CommentThread } from '~/components/sections/projects/detail/comment-thread'
 import type { Comment } from '~/lib/types/project/project-detail.types'
 
 interface CommunityTabProps {

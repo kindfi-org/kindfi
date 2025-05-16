@@ -7,7 +7,7 @@ import {
 	CarouselContent,
 	CarouselItem,
 } from '~/components/base/carousel'
-import { ProjectCardGrid } from '~/components/sections/projects/project-card-grid'
+import { ProjectCardGrid } from '~/components/sections/projects/cards'
 import { ProjectCardGridSkeleton } from '~/components/sections/projects/skeletons'
 import { CTAButtons } from '~/components/shared/cta-buttons'
 import { SectionCaption } from '~/components/shared/section-caption'
