@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { Badge } from '~/components/base/badge'
@@ -31,10 +32,12 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 			>
 				{/* Image section - responsive width */}
 				<div className="relative w-1/4 min-w-[100px] max-w-[180px] overflow-hidden">
-					<img
+					<Image
 						src={project.image || '/images/placeholder.png'}
 						alt={`${project.title} project thumbnail`}
-						className="w-full h-full object-cover"
+						fill
+						className="object-cover"
+						priority
 					/>
 				</div>
 

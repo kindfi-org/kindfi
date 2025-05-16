@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { CategoryBadge } from '~/components/sections/projects/category-badge'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { AnimatedCounter } from './animated-counter'
@@ -18,11 +19,12 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 			transition={{ duration: 0.5 }}
 		>
 			<div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
-				<img
+				<Image
 					src={project.image || '/placeholder.svg'}
 					alt={`${project.title} banner`}
-					className="w-full h-full object-cover"
-					loading="eager"
+					fill
+					className="object-cover"
+					priority
 				/>
 				{project.category && (
 					<div className="absolute top-4 left-4">
