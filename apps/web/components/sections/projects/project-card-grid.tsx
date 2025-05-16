@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { Badge } from '~/components/base/badge'
@@ -30,10 +31,12 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 				transition={{ duration: 0.3 }}
 			>
 				<div className="relative h-48 overflow-hidden">
-					<img
+					<Image
 						src={project.image || '/images/placeholder.png'}
 						alt={`${project.title} project thumbnail`}
-						className="w-full h-full object-cover"
+						fill
+						className="object-cover"
+						priority
 					/>
 					{project.category && (
 						<div className="absolute top-3 left-3">
