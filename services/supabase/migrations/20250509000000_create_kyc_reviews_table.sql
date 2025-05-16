@@ -1,6 +1,5 @@
-
 DO $$ BEGIN
-    CREATE TYPE kyc_status_enum AS ENUM ('pending', 'approved', 'rejected');
+    CREATE TYPE kyc_status_enum AS ENUM ('pending', 'approved', 'rejected', 'verified');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
@@ -13,22 +12,25 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS kyc_status (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id TEXT NOT NULL,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     status kyc_status_enum NOT NULL DEFAULT 'pending',
     verification_level kyc_verification_enum NOT NULL DEFAULT 'basic',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(user_id)
 );
 
 CREATE TABLE IF NOT EXISTS kyc_reviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     kyc_status_id UUID NOT NULL REFERENCES kyc_status(id) ON DELETE CASCADE,
-    reviewer_id TEXT NOT NULL,
+    reviewer_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     decision kyc_status_enum NOT NULL,
     reason TEXT,
     additional_notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    review_notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(kyc_status_id, reviewer_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_kyc_status_user_id ON kyc_status(user_id);
@@ -40,10 +42,14 @@ ALTER TABLE kyc_reviews ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view their own KYC status"
     ON kyc_status FOR SELECT
-    USING (auth.uid()::text = user_id);
+    USING (auth.uid() = user_id);
 
 CREATE POLICY "Admins can view all KYC statuses"
     ON kyc_status FOR SELECT
+    USING (auth.jwt() ->> 'role' = 'admin');
+
+CREATE POLICY "Admins can update KYC statuses"
+    ON kyc_status FOR UPDATE
     USING (auth.jwt() ->> 'role' = 'admin');
 
 CREATE POLICY "Users can view their own KYC reviews"
@@ -52,7 +58,7 @@ CREATE POLICY "Users can view their own KYC reviews"
         EXISTS (
             SELECT 1 FROM kyc_status
             WHERE kyc_status.id = kyc_reviews.kyc_status_id
-            AND kyc_status.user_id = auth.uid()::text
+            AND kyc_status.user_id = auth.uid()
         )
     );
 
@@ -71,7 +77,7 @@ CREATE POLICY "Admins can update KYC reviews"
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at = NOW();
     RETURN NEW;
 END;
 $$ language 'plpgsql';

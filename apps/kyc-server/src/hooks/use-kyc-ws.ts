@@ -52,7 +52,6 @@ export function useKYCWebSocket({
 	const connectionTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 	const onUpdateRef = useRef(onUpdate)
 
-	// Update the callback ref when onUpdate changes
 	useEffect(() => {
 		onUpdateRef.current = onUpdate
 	}, [onUpdate])
@@ -62,7 +61,6 @@ export function useKYCWebSocket({
 		const ws = new WebSocket(`${protocol}://${window.location.host}/live`)
 		wsRef.current = ws
 
-		// Set connection timeout
 		connectionTimeoutRef.current = setTimeout(() => {
 			if (ws.readyState !== WebSocket.OPEN) {
 				console.log('WebSocket connection timed out')
@@ -103,7 +101,6 @@ export function useKYCWebSocket({
 			setIsConnected(false)
 			clearTimeout(connectionTimeoutRef.current)
 
-			// Attempt to reconnect with exponential backoff
 			if (retryCountRef.current < maxRetries) {
 				const delay = initialRetryDelay * Math.pow(2, retryCountRef.current)
 				retryTimeoutRef.current = setTimeout(() => {

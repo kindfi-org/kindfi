@@ -6,7 +6,6 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
 	throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be defined')
 }
 
-// Initialize Supabase client with service role key for privileged operations
 const supabase = createClient(
 	process.env.SUPABASE_URL,
 	process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -31,10 +30,9 @@ const initDatabase = async () => {
 	return drizzle(client)
 }
 
-// Export a promise instead of awaited result to avoid top-level await
 export const dbPromise = initDatabase()
 
-// Helper function to get the database instance
+
 export const getDb = async () => {
 	return await dbPromise
 }

@@ -8,7 +8,6 @@ interface KYCWebSocketData {
 	userId?: string
 }
 
-// Define the structure for KYC status record
 interface KYCStatusRecord {
 	user_id: string
 	status: string
@@ -26,7 +25,6 @@ interface KYCUpdate {
 	}
 }
 
-// Define the payload structure from Supabase
 interface SupabaseKYCPayload {
 	new: {
 		user_id: string
@@ -44,7 +42,6 @@ export class KYCWebSocketService {
 	private channel?: RealtimeChannel
 
 	constructor() {
-		// Check for required environment variables
 		if (
 			!process.env.NEXT_PUBLIC_SUPABASE_URL ||
 			!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -61,7 +58,6 @@ export class KYCWebSocketService {
 	}
 
 	private setupDatabaseSubscription() {
-		// Subscribe to KYC status changes using Supabase real-time
 		this.channel = this.supabase
 			.channel('kyc_status_changes')
 			.on(
@@ -74,7 +70,6 @@ export class KYCWebSocketService {
 				(payload: any) => {
 					console.log('Received KYC status change:', payload)
 
-					// Type assertion for payload.new
 					const newRecord = payload.new as KYCStatusRecord
 
 					const update: KYCUpdate = {
