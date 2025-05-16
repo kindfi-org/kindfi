@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Download } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { Button } from '~/components/base/button'
-import { FileIcon } from '~/components/sections/project-detail/file-icon'
+import { FileIcon } from '~/components/sections/projects/detail/file-icon'
 import type { ProjectPitch } from '~/lib/types/project/project-detail.types'
 
 interface OverviewTabProps {

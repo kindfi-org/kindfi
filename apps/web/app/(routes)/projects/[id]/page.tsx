@@ -4,7 +4,7 @@ import {
 	QueryClient,
 	dehydrate,
 } from '@tanstack/react-query'
-import { ProjectClientWrapper } from '~/components/sections/project-detail/project-client-wrapper'
+import { ProjectClientWrapper } from '~/components/sections/projects/detail/project-client-wrapper'
 import { getProjectById } from '~/lib/queries/projects'
 
 export default async function ProjectDetailPage({

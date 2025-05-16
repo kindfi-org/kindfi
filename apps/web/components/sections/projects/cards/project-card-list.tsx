@@ -9,7 +9,7 @@ import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { getTextColor } from '~/lib/utils/color-utils'
-import { CategoryBadge } from './category-badge'
+import { CategoryBadge } from '../filters'
 
 interface ProjectCardListProps {
 	project: Project

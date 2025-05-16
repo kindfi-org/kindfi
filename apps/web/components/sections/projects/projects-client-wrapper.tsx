@@ -8,17 +8,13 @@ import { useSupabaseQuery } from '@packages/lib/hooks'
 import { staggerContainer } from '~/lib/constants/animations'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
 import type { Project, SortOption } from '~/lib/types/project'
-
-import { CategoryFilters } from './category-filters'
-import { ProjectCardGrid } from './project-card-grid'
-import { ProjectCardList } from './project-card-list'
+import { ProjectCardGrid, ProjectCardList } from './cards'
+import { CategoryFilters, SortDropdown, ViewToggle } from './filters'
 import {
 	CategoryBadgeSkeleton,
 	ProjectCardGridSkeleton,
 	ProjectCardListSkeleton,
 } from './skeletons'
-import { SortDropdown } from './sort-dropdown'
-import { ViewToggle } from './view-toggle'
 
 export function ProjectsClientWrapper() {
 	const router = useRouter()

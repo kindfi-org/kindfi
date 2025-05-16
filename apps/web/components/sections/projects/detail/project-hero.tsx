@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { CategoryBadge } from '~/components/sections/projects/category-badge'
+import { CategoryBadge } from '~/components/sections/projects/filters'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { AnimatedCounter } from './animated-counter'
 
