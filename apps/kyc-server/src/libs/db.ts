@@ -1,54 +1,40 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import { createClient } from "@supabase/supabase-js";
-import postgres from "postgres";
-import { kycStatus } from "../schema/kyc";
+import { createClient } from '@supabase/supabase-js'
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
 
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
-	throw new Error("SUPABASE_URL and SUPABASE_ANON_KEY must be defined");
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+	throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be defined')
 }
 
-// Initialize Supabase client
+// Initialize Supabase client with service role key for privileged operations
 const supabase = createClient(
 	process.env.SUPABASE_URL,
-	process.env.SUPABASE_ANON_KEY,
+	process.env.SUPABASE_SERVICE_ROLE_KEY,
 	{
 		auth: {
-			persistSession: false
-		}
+			autoRefreshToken: false,
+			persistSession: false,
+		},
 	}
-);
+)
 
-const getDatabaseUrl = async () => {
-	try {
-		const { data, error } = await supabase.rpc("get_database_url");
-		if (error) throw error;
-		if (!data) throw new Error("Database URL not found");
-		return data;
-	} catch (error) {
-		console.error("Error getting database URL:", error);
-		throw error;
-	}
-};
+const getDatabaseUrl = async (): Promise<string> => {
+	const { data, error } = await supabase.rpc('get_database_url')
+	if (error) throw error
+	if (!data) throw new Error('Database URL not found')
+	return data
+}
 
 const initDatabase = async () => {
-	try {
-		const databaseUrl = await getDatabaseUrl();
-		const client = postgres(databaseUrl, {
-			max: 10,
-			idle_timeout: 20,
-			connect_timeout: 10, 
-		});
-		
-		return drizzle(client, {
-			schema: {
-				kycStatus,
-			},
-		});
-	} catch (error) {
-		console.error("Error initializing database:", error);
-		throw error;
-	}
-};
+	const databaseUrl = await getDatabaseUrl()
+	const client = postgres(databaseUrl)
+	return drizzle(client)
+}
 
-export const db = await initDatabase();
-export type Database = typeof db;
+// Export a promise instead of awaited result to avoid top-level await
+export const dbPromise = initDatabase()
+
+// Helper function to get the database instance
+export const getDb = async () => {
+	return await dbPromise
+}

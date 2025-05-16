@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
 interface KYCUpdate {
 	type: 'kyc_update'
@@ -7,11 +7,34 @@ interface KYCUpdate {
 	timestamp: string
 }
 
+interface WebSocketError {
+	type: 'error'
+	message: string
+}
+
+type WebSocketMessage = KYCUpdate | WebSocketError
+
 interface UseKYCWebSocketOptions {
 	userId?: string
 	onUpdate?: (update: KYCUpdate) => void
 	maxRetries?: number
 	initialRetryDelay?: number
+	connectionTimeout?: number
+}
+
+const isValidKYCUpdate = (data: unknown): data is KYCUpdate => {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		'type' in data &&
+		data.type === 'kyc_update' &&
+		'userId' in data &&
+		typeof data.userId === 'string' &&
+		'status' in data &&
+		typeof data.status === 'string' &&
+		'timestamp' in data &&
+		typeof data.timestamp === 'string'
+	)
 }
 
 export function useKYCWebSocket({
@@ -19,22 +42,39 @@ export function useKYCWebSocket({
 	onUpdate,
 	maxRetries = 5,
 	initialRetryDelay = 1000,
+	connectionTimeout = 10000,
 }: UseKYCWebSocketOptions = {}) {
 	const [isConnected, setIsConnected] = useState(false)
 	const lastUpdateRef = useRef<KYCUpdate | null>(null)
 	const wsRef = useRef<WebSocket | null>(null)
 	const retryCountRef = useRef(0)
 	const retryTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+	const connectionTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+	const onUpdateRef = useRef(onUpdate)
 
-	const connect = () => {
+	// Update the callback ref when onUpdate changes
+	useEffect(() => {
+		onUpdateRef.current = onUpdate
+	}, [onUpdate])
+
+	const connect = useCallback(() => {
 		const protocol = process.env.NODE_ENV === 'production' ? 'wss' : 'ws'
 		const ws = new WebSocket(`${protocol}://${window.location.host}/live`)
 		wsRef.current = ws
+
+		// Set connection timeout
+		connectionTimeoutRef.current = setTimeout(() => {
+			if (ws.readyState !== WebSocket.OPEN) {
+				console.log('WebSocket connection timed out')
+				ws.close()
+			}
+		}, connectionTimeout)
 
 		ws.onopen = () => {
 			console.log('WebSocket connected')
 			setIsConnected(true)
 			retryCountRef.current = 0
+			clearTimeout(connectionTimeoutRef.current)
 
 			if (userId) {
 				ws.send(JSON.stringify({ type: 'subscribe', userId }))
@@ -43,11 +83,15 @@ export function useKYCWebSocket({
 
 		ws.onmessage = (event) => {
 			try {
-				const data = JSON.parse(event.data)
-				if (data && typeof data === 'object' && data.type === 'kyc_update') {
-					const update = data as KYCUpdate
-					lastUpdateRef.current = update
-					onUpdate?.(update)
+				const data = JSON.parse(event.data) as WebSocketMessage
+				
+				if (isValidKYCUpdate(data)) {
+					lastUpdateRef.current = data
+					onUpdateRef.current?.(data)
+				} else if (data && typeof data === 'object' && 'type' in data && data.type === 'error') {
+					console.error('Server error:', (data as WebSocketError).message)
+				} else {
+					console.warn('Received unknown message format:', data)
 				}
 			} catch (error) {
 				console.error('Error parsing WebSocket message:', error)
@@ -57,6 +101,7 @@ export function useKYCWebSocket({
 		ws.onclose = () => {
 			console.log('WebSocket disconnected')
 			setIsConnected(false)
+			clearTimeout(connectionTimeoutRef.current)
 
 			// Attempt to reconnect with exponential backoff
 			if (retryCountRef.current < maxRetries) {
@@ -72,7 +117,7 @@ export function useKYCWebSocket({
 			console.error('WebSocket error:', error)
 			setIsConnected(false)
 		}
-	}
+	}, [userId, maxRetries, initialRetryDelay, connectionTimeout])
 
 	useEffect(() => {
 		connect()
@@ -81,11 +126,14 @@ export function useKYCWebSocket({
 			if (retryTimeoutRef.current) {
 				clearTimeout(retryTimeoutRef.current)
 			}
+			if (connectionTimeoutRef.current) {
+				clearTimeout(connectionTimeoutRef.current)
+			}
 			if (wsRef.current?.readyState === WebSocket.OPEN) {
 				wsRef.current.close()
 			}
 		}
-	}, [userId, onUpdate, maxRetries, initialRetryDelay])
+	}, [connect])
 
 	return {
 		isConnected,
