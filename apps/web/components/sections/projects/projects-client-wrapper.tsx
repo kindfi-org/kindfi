@@ -9,12 +9,14 @@ import { staggerContainer } from '~/lib/constants/animations'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
 import type { Project, SortOption } from '~/lib/types/project'
 
-import { CategoryBadgeSkeleton } from './category-badge-skeleton'
 import { CategoryFilters } from './category-filters'
 import { ProjectCardGrid } from './project-card-grid'
-import { ProjectCardGridSkeleton } from './project-card-grid-skeleton'
 import { ProjectCardList } from './project-card-list'
-import { ProjectCardListSkeleton } from './project-card-list-skeleton'
+import {
+	CategoryBadgeSkeleton,
+	ProjectCardGridSkeleton,
+	ProjectCardListSkeleton,
+} from './skeletons'
 import { SortDropdown } from './sort-dropdown'
 import { ViewToggle } from './view-toggle'
 

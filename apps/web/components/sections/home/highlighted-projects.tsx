@@ -8,7 +8,7 @@ import {
 	CarouselItem,
 } from '~/components/base/carousel'
 import { ProjectCardGrid } from '~/components/sections/projects/project-card-grid'
-import { ProjectCardGridSkeleton } from '~/components/sections/projects/project-card-grid-skeleton'
+import { ProjectCardGridSkeleton } from '~/components/sections/projects/skeletons'
 import { CTAButtons } from '~/components/shared/cta-buttons'
 import { SectionCaption } from '~/components/shared/section-caption'
 import { getAllProjects } from '~/lib/queries/projects'
