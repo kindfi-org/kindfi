@@ -11,6 +11,13 @@ $$;
 ALTER TABLE comments
   ENABLE ROW LEVEL SECURITY;
 
+-- TEMPORARY POLICY: Allows public read access while there's no authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Public read access to comments"
+ON public.comments
+FOR SELECT 
+USING (true);
+
 -- Add type field using ENUM
 ALTER TABLE comments
   ADD COLUMN IF NOT EXISTS type comment_type NOT NULL DEFAULT 'comment';
@@ -64,7 +71,7 @@ BEGIN
     SET metadata = jsonb_set(
       metadata,
       '{status}',
-      to_jsonb('answered'),
+      to_jsonb('answered'::text),
       true
     )
     WHERE id = NEW.parent_comment_id

@@ -16,6 +16,7 @@ export const SocialButton = ({
 		variant="outline"
 		className="w-full flex items-center gap-2 mb-3"
 		onClick={onClick}
+		aria-label={`Continue with ${provider}`}
 	>
 		{icon}
 		<span>Continuar con {provider}</span>

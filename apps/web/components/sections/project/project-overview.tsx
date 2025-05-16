@@ -7,7 +7,7 @@ import { SectionContainer } from '~/components/sections/project/section-containe
 import {
 	aboutProjectProps,
 	successGalleryItems,
-} from '~/lib/mock-data/project/projects.mock'
+} from '~/lib/mock-data/project/mock-projects'
 
 interface MediaItem {
 	id: string

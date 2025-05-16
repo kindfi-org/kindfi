@@ -143,6 +143,11 @@ export function UserJourney() {
 						size="lg"
 						className="bg-indigo-900 hover:bg-indigo-800 text-white px-8"
 						asChild
+						aria-label={
+							activeView === 'project'
+								? 'Register your project'
+								: 'Explore causes'
+						}
 					>
 						<Link
 							href={activeView === 'project' ? '/create-project' : '/projects'}

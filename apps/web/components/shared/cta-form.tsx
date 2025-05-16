@@ -119,6 +119,7 @@ export const CTAForm = ({ onSubmit, className = '' }: CtaFormProps) => {
 							className={`gradient-btn text-white px-8 transition-all duration-300 ${
 								isLoading ? 'opacity-80' : ''
 							}`}
+							aria-label="Start project submission"
 						>
 							{isLoading ? (
 								<Loader2 className="w-5 h-5 animate-spin mr-2" />

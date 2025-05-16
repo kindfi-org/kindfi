@@ -2,8 +2,8 @@
 
 import { LayoutGrid, List, SlidersHorizontal } from 'lucide-react'
 import { CategoryFilter } from '~/components/sections/projects/category-filter'
-import { SortDropdown } from '~/components/sections/projects/sort-dropdown'
-import type { SortOption } from '~/hooks/use-projects-filter'
+import { SortDropdown } from '~/components/sections/projects/filters'
+import type { SortOption } from '~/lib/types/project'
 
 /**
  * Props for the ProjectsHeader component
@@ -44,7 +44,7 @@ export function ProjectsHeader({
 	description,
 	viewMode = 'grid',
 	onViewModeChange,
-	sortOption = 'popular',
+	sortOption = 'Most Popular',
 	onSortChange,
 	totalItems,
 	selectedCategories = [],

@@ -28,3 +28,15 @@ export function getA11yColorMatch(color: string): [string, string] {
 
 	return [newColor, contrastColor] // [background, text]
 }
+
+export function getTextColor(bgColor: string): 'white' | 'black' {
+	const color = bgColor.trim().startsWith('#')
+		? bgColor.trim()
+		: `#${bgColor.trim()}`
+	const whiteRatio = getContrast.ratio(color, '#FFFFFF')
+	const blackRatio = getContrast.ratio(color, '#000000')
+
+	if (whiteRatio >= 4) return 'white'
+	if (blackRatio >= 4.5) return 'black'
+	return whiteRatio > blackRatio ? 'white' : 'black'
+}

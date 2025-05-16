@@ -75,6 +75,7 @@ export function ProjectUpdatesTabSection() {
 			const authorId = crypto.randomUUID()
 
 			const updateData = {
+				title: '',
 				content: data.content,
 				project_id: projectId,
 				author_id: authorId,
