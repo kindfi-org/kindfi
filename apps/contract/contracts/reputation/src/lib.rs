@@ -49,8 +49,10 @@ impl ReputationContract {
         streak: u32,
     ) -> Result<(), ReputationError> {
         // Verify admin access
-        let admin = ReputationStorage::get_admin(&env);
-        admin.require_auth();
+        let admin = ReputationStorage::get_admin(&env).unwrap_or_else(|| {
+    panic!("Admin not initialized");
+   });
+   admin.require_auth();
 
         // Get current score and update
         let current_score = ReputationStorage::get_score(&env, &user_id).unwrap_or(0);
@@ -114,8 +116,11 @@ impl ReputationContract {
         threshold: u32,
     ) -> Result<(), ReputationError> {
         // Verify admin access
-        let admin = ReputationStorage::get_admin(&env);
-        admin.require_auth();
+       let admin = ReputationStorage::get_admin(&env).unwrap_or_else(|| {
+    panic!("Admin not initialized");
+});
+admin.require_auth();
+
 
         if tier == TierLevel::None {
             return Err(ReputationError::InvalidTier);
@@ -135,8 +140,11 @@ impl ReputationContract {
 
     pub fn add_admin(env: Env, new_admin: Address) -> Result<(), ReputationError> {
         // Verify admin access
-        let admin = ReputationStorage::get_admin(&env);
-        admin.require_auth();
+       let admin = ReputationStorage::get_admin(&env).unwrap_or_else(|| {
+    panic!("Admin not initialized");
+});
+admin.require_auth();
+
         // Validates that the address is an Account address with a non-zero identifier.
         Self::validate_admin_address(&new_admin)?;
         // Update admin
@@ -150,8 +158,11 @@ impl ReputationContract {
 
     pub fn update_nft_contract(env: Env, new_contract_id: Address) -> Result<(), ReputationError> {
         // Verify admin access
-        let admin = ReputationStorage::get_admin(&env);
-        admin.require_auth();
+       let admin = ReputationStorage::get_admin(&env).unwrap_or_else(|| {
+    panic!("Admin not initialized");
+});
+admin.require_auth();
+
         // Validates that the address is a Contract address with a non-zero identifier.
         Self::validate_nft_contract_address(&new_contract_id)?;
         // Get current contract ID
