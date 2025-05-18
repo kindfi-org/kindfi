@@ -10,9 +10,9 @@ import { ScrollView } from 'react-native'
 import { Link } from 'expo-router'
 
 interface FeatureCardProps {
-	iconSvg: React.ComponentType;
-	name: string;
-	desc: string;
+	iconSvg: React.ComponentType
+	name: string
+	desc: string
 }
 
 const FeatureCard = ({ iconSvg: IconSvg, name, desc }: FeatureCardProps) => {

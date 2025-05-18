@@ -9,12 +9,13 @@ export const identitySchema = z.object({
 			required_error: 'Date of birth is required',
 		})
 		.refine((date) => {
+			if (!date) return false
 			const today = new Date()
-			today.setHours(0, 0, 0, 0)
-			const eighteenYearsAgo = new Date()
+			today.setHours(0, 0, 0, 0) // Normaliza la hora
+			const eighteenYearsAgo = new Date(today)
 			eighteenYearsAgo.setFullYear(today.getFullYear() - 18)
-			eighteenYearsAgo.setHours(0, 0, 0, 0)
-			return date <= eighteenYearsAgo
+			eighteenYearsAgo.setHours(0, 0, 0, 0) // Normaliza la hora
+			return date <= eighteenYearsAgo && !Number.isNaN(date.getTime()) // Solo fechas hasta 18 años atrás
 		}, 'You must be at least 18 years old'),
 	nationality: z.string().min(1, 'Nationality is required'),
 })

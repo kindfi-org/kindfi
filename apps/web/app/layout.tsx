@@ -3,6 +3,7 @@ import { GoogleAnalytics } from '~/components/shared/google-analytics'
 import { Footer } from '~/components/shared/layout/footer/footer'
 import { Header } from '~/components/shared/layout/header/header'
 import { Providers } from '~/components/shared/layout/providers'
+import { KycProvider } from '../../web/hooks/kyc/useKycContext'
 import './css/globals.css'
 
 const defaultUrl = process.env.VERCEL_URL
@@ -25,12 +26,14 @@ export default function RootLayout({
 			<head />
 			<body suppressHydrationWarning>
 				<Providers>
-					<div className="relative min-h-screen flex flex-col">
-						<Header />
-						<main className="flex-1">{children}</main>
-						<Toaster />
-						<Footer />
-					</div>
+					<KycProvider>
+						<div className="relative min-h-screen flex flex-col">
+							<Header />
+							<main className="flex-1">{children}</main>
+							<Toaster />
+							<Footer />
+						</div>
+					</KycProvider>
 				</Providers>
 				<GoogleAnalytics
 					GA_MEASUREMENT_ID={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''}

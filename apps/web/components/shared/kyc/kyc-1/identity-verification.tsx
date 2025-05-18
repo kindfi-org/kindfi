@@ -28,11 +28,15 @@ export function IdentityVerification({
 	defaultValues,
 }: IdentityVerificationProps) {
 	const [isOpen, setIsOpen] = useState(true)
+	const [submissionError, setSubmissionError] = useState<string | null>(null)
+
 	const form = useForm<IdentityFormValues>({
 		resolver: zodResolver(identitySchema),
 		defaultValues: {
 			fullName: defaultValues?.fullName || '',
-			dateOfBirth: defaultValues?.dateOfBirth || undefined,
+			dateOfBirth: defaultValues?.dateOfBirth
+				? new Date(defaultValues.dateOfBirth)
+				: undefined,
 			nationality: defaultValues?.nationality || '',
 		},
 	})
@@ -47,9 +51,16 @@ export function IdentityVerification({
 
 	if (!isOpen) return null
 
-	const handleSubmit = (data: IdentityFormValues) => {
-		console.log(data)
-		onNext(data)
+	const handleSubmit = async (data: IdentityFormValues) => {
+		try {
+			console.log('Submitting data:', data)
+			setSubmissionError(null)
+			await onNext(data)
+			console.log('Submission successful')
+		} catch (error) {
+			console.error('Error submitting data:', error)
+			setSubmissionError('Error submitting data. Please try again.')
+		}
 	}
 
 	return (
@@ -61,7 +72,7 @@ export function IdentityVerification({
 						Verify Your Identity
 					</CardTitle>
 					<p className="text-gray-500 mt-1">
-						Let&apos;s start by confirming some basic information about you.
+						Let's start by confirming some basic information about you.
 					</p>
 				</div>
 			</CardHeader>
@@ -76,6 +87,17 @@ export function IdentityVerification({
 						<FullNameField control={form.control} />
 						<DateOfBirthField control={form.control} />
 						<NationalityField control={form.control} />
+
+						{submissionError && (
+							<div className="bg-red-50 p-4 rounded-lg border border-red-200">
+								<div className="flex gap-2">
+									<AlertCircle className="h-5 w-5 text-red-700 flex-shrink-0 mt-0.5" />
+									<div>
+										<p className="text-sm text-red-600">{submissionError}</p>
+									</div>
+								</div>
+							</div>
+						)}
 
 						<div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
 							<div className="flex gap-2">
