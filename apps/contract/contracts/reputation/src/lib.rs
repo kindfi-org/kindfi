@@ -16,6 +16,13 @@ pub struct ReputationContract;
 
 #[contractimpl]
 impl ReputationContract {
+    // Helper function to get admin or panic with a clear message
+    fn get_admin_or_panic(env: &Env) -> Address {
+        ReputationStorage::get_admin(env).unwrap_or_else(|| {
+            panic!("Admin not initialized");
+        })
+    }
+
     pub fn initialize(
         env: Env,
         admin: Address,
@@ -49,10 +56,8 @@ impl ReputationContract {
         streak: u32,
     ) -> Result<(), ReputationError> {
         // Verify admin access
-        let admin = ReputationStorage::get_admin(&env).unwrap_or_else(|| {
-    panic!("Admin not initialized");
-   });
-   admin.require_auth();
+        let admin = Self::get_admin_or_panic(&env);
+        admin.require_auth();
 
         // Get current score and update
         let current_score = ReputationStorage::get_score(&env, &user_id).unwrap_or(0);
