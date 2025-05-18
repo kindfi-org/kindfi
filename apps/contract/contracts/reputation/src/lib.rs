@@ -121,11 +121,8 @@ impl ReputationContract {
         threshold: u32,
     ) -> Result<(), ReputationError> {
         // Verify admin access
-       let admin = ReputationStorage::get_admin(&env).unwrap_or_else(|| {
-    panic!("Admin not initialized");
-});
-admin.require_auth();
-
+        let admin = Self::get_admin_or_panic(&env);
+        admin.require_auth();
 
         if tier == TierLevel::None {
             return Err(ReputationError::InvalidTier);
