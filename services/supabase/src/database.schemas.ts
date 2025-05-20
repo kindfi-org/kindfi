@@ -237,9 +237,10 @@ export const escrowContractsRelationshipsSchema = z.tuple([
 
 export const milestoneStatusSchema = z.union([
 	z.literal('pending'),
-	z.literal('in_progress'),
 	z.literal('completed'),
-	z.literal('failed'),
+	z.literal('approved'),
+	z.literal('rejected'),
+	z.literal('disputed'),
 ])
 
 export const escrowMilestonesInsertSchema = z.object({
@@ -414,6 +415,72 @@ export const kindlerProjectsRelationshipsSchema = z.tuple([
 		referencedColumns: z.tuple([z.literal('id')]),
 	}),
 ])
+
+export const kycStatusEnumSchema = z.union([
+	z.literal('pending'),
+	z.literal('approved'),
+	z.literal('rejected'),
+	z.literal('verified'),
+])
+
+export const kycReviewsInsertSchema = z.object({
+	additional_notes: z.string().optional().nullable(),
+	created_at: z.string().optional(),
+	decision: kycStatusEnumSchema,
+	id: z.string().optional(),
+	kyc_status_id: z.string(),
+	reason: z.string().optional().nullable(),
+	review_notes: z.string().optional().nullable(),
+	reviewer_id: z.string(),
+	updated_at: z.string().optional(),
+})
+
+export const kycReviewsUpdateSchema = z.object({
+	additional_notes: z.string().optional().nullable(),
+	created_at: z.string().optional(),
+	decision: kycStatusEnumSchema.optional(),
+	id: z.string().optional(),
+	kyc_status_id: z.string().optional(),
+	reason: z.string().optional().nullable(),
+	review_notes: z.string().optional().nullable(),
+	reviewer_id: z.string().optional(),
+	updated_at: z.string().optional(),
+})
+
+export const kycReviewsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('kyc_reviews_kyc_status_id_fkey'),
+		columns: z.tuple([z.literal('kyc_status_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('kyc_status'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const kycVerificationEnumSchema = z.union([
+	z.literal('basic'),
+	z.literal('enhanced'),
+])
+
+export const kycStatusInsertSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	status: kycStatusEnumSchema.optional(),
+	updated_at: z.string().optional(),
+	user_id: z.string(),
+	verification_level: kycVerificationEnumSchema.optional(),
+})
+
+export const kycStatusUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	status: kycStatusEnumSchema.optional(),
+	updated_at: z.string().optional(),
+	user_id: z.string().optional(),
+	verification_level: kycVerificationEnumSchema.optional(),
+})
+
+export const kycStatusRelationshipsSchema = z.tuple([])
 
 export const userRoleSchema = z.union([
 	z.literal('kinder'),
@@ -737,6 +804,27 @@ export const escrowMilestonesRowSchema = z.object({
 	project_milestone_id: z.string(),
 	status: milestoneStatusSchema,
 	title: z.string(),
+})
+
+export const kycReviewsRowSchema = z.object({
+	additional_notes: z.string().nullable(),
+	created_at: z.string(),
+	decision: kycStatusEnumSchema,
+	id: z.string(),
+	kyc_status_id: z.string(),
+	reason: z.string().nullable(),
+	review_notes: z.string().nullable(),
+	reviewer_id: z.string(),
+	updated_at: z.string(),
+})
+
+export const kycStatusRowSchema = z.object({
+	created_at: z.string(),
+	id: z.string(),
+	status: kycStatusEnumSchema,
+	updated_at: z.string(),
+	user_id: z.string(),
+	verification_level: kycVerificationEnumSchema,
 })
 
 export const profilesRowSchema = z.object({

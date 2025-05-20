@@ -439,6 +439,77 @@ export type Database = {
 					},
 				]
 			}
+			kyc_reviews: {
+				Row: {
+					additional_notes: string | null
+					created_at: string
+					decision: Database['public']['Enums']['kyc_status_enum']
+					id: string
+					kyc_status_id: string
+					reason: string | null
+					review_notes: string | null
+					reviewer_id: string
+					updated_at: string
+				}
+				Insert: {
+					additional_notes?: string | null
+					created_at?: string
+					decision: Database['public']['Enums']['kyc_status_enum']
+					id?: string
+					kyc_status_id: string
+					reason?: string | null
+					review_notes?: string | null
+					reviewer_id: string
+					updated_at?: string
+				}
+				Update: {
+					additional_notes?: string | null
+					created_at?: string
+					decision?: Database['public']['Enums']['kyc_status_enum']
+					id?: string
+					kyc_status_id?: string
+					reason?: string | null
+					review_notes?: string | null
+					reviewer_id?: string
+					updated_at?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'kyc_reviews_kyc_status_id_fkey'
+						columns: ['kyc_status_id']
+						isOneToOne: false
+						referencedRelation: 'kyc_status'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			kyc_status: {
+				Row: {
+					created_at: string
+					id: string
+					status: Database['public']['Enums']['kyc_status_enum']
+					updated_at: string
+					user_id: string
+					verification_level: Database['public']['Enums']['kyc_verification_enum']
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					status?: Database['public']['Enums']['kyc_status_enum']
+					updated_at?: string
+					user_id: string
+					verification_level?: Database['public']['Enums']['kyc_verification_enum']
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					status?: Database['public']['Enums']['kyc_status_enum']
+					updated_at?: string
+					user_id?: string
+					verification_level?: Database['public']['Enums']['kyc_verification_enum']
+				}
+				Relationships: []
+			}
 			profiles: {
 				Row: {
 					created_at: string
@@ -725,7 +796,14 @@ export type Database = {
 				| 'COMPLETED'
 				| 'DISPUTED'
 				| 'CANCELLED'
-			milestone_status: 'pending' | 'in_progress' | 'completed' | 'failed'
+			kyc_status_enum: 'pending' | 'approved' | 'rejected' | 'verified'
+			kyc_verification_enum: 'basic' | 'enhanced'
+			milestone_status:
+				| 'pending'
+				| 'completed'
+				| 'approved'
+				| 'rejected'
+				| 'disputed'
 			project_member_role: 'admin' | 'editor'
 			user_role: 'kinder' | 'kindler'
 		}
@@ -855,7 +933,15 @@ export const Constants = {
 				'DISPUTED',
 				'CANCELLED',
 			],
-			milestone_status: ['pending', 'in_progress', 'completed', 'failed'],
+			kyc_status_enum: ['pending', 'approved', 'rejected', 'verified'],
+			kyc_verification_enum: ['basic', 'enhanced'],
+			milestone_status: [
+				'pending',
+				'completed',
+				'approved',
+				'rejected',
+				'disputed',
+			],
 			project_member_role: ['admin', 'editor'],
 			user_role: ['kinder', 'kindler'],
 		},
