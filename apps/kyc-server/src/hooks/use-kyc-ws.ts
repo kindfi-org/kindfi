@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface KYCUpdate {
 	type: 'kyc_update'
@@ -82,11 +82,16 @@ export function useKYCWebSocket({
 		ws.onmessage = (event) => {
 			try {
 				const data = JSON.parse(event.data) as WebSocketMessage
-				
+
 				if (isValidKYCUpdate(data)) {
 					lastUpdateRef.current = data
 					onUpdateRef.current?.(data)
-				} else if (data && typeof data === 'object' && 'type' in data && data.type === 'error') {
+				} else if (
+					data &&
+					typeof data === 'object' &&
+					'type' in data &&
+					data.type === 'error'
+				) {
 					console.error('Server error:', (data as WebSocketError).message)
 				} else {
 					console.warn('Received unknown message format:', data)
@@ -149,4 +154,4 @@ export function useKYCWebSocket({
 			}
 		},
 	}
-} 
+}

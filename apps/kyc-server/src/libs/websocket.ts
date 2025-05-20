@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 import type { ServerWebSocket } from 'bun'
 
 interface KYCWebSocketData {

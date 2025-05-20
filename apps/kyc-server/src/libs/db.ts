@@ -14,7 +14,7 @@ const supabase = createClient(
 			autoRefreshToken: false,
 			persistSession: false,
 		},
-	}
+	},
 )
 
 const getDatabaseUrl = async (): Promise<string> => {
@@ -31,7 +31,6 @@ const initDatabase = async () => {
 }
 
 export const dbPromise = initDatabase()
-
 
 export const getDb = async () => {
 	return await dbPromise

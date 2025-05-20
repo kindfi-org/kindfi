@@ -9,7 +9,10 @@ interface KYCStatusProps {
 	initialStatus?: 'pending' | 'approved' | 'rejected' | 'verified'
 }
 
-export function KYCStatus({ userId, initialStatus = 'pending' }: KYCStatusProps) {
+export function KYCStatus({
+	userId,
+	initialStatus = 'pending',
+}: KYCStatusProps) {
 	type KYCStatusValue = 'pending' | 'approved' | 'rejected' | 'verified'
 	const [status, setStatus] = useState<KYCStatusValue>(initialStatus)
 	const [isLoading, setIsLoading] = useState(true)
@@ -29,7 +32,7 @@ export function KYCStatus({ userId, initialStatus = 'pending' }: KYCStatusProps)
 					<div
 						className={cn(
 							'w-2 h-2 rounded-full',
-							isConnected ? 'bg-green-500' : 'bg-red-500'
+							isConnected ? 'bg-green-500' : 'bg-red-500',
 						)}
 						aria-hidden="true"
 					/>
@@ -57,7 +60,7 @@ export function KYCStatus({ userId, initialStatus = 'pending' }: KYCStatusProps)
 								'px-2 py-1 text-xs font-medium rounded-full',
 								status === 'approved' && 'bg-green-100 text-green-800',
 								status === 'rejected' && 'bg-red-100 text-red-800',
-								status === 'pending' && 'bg-yellow-100 text-yellow-800'
+								status === 'pending' && 'bg-yellow-100 text-yellow-800',
 							)}
 						>
 							{status.charAt(0).toUpperCase() + status.slice(1)}
