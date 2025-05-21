@@ -464,6 +464,50 @@ export const kycStatusUpdateSchema = z.object({
 
 export const kycStatusRelationshipsSchema = z.tuple([])
 
+export const milestoneStatusSchema = z.union([
+	z.literal('pending'),
+	z.literal('completed'),
+	z.literal('approved'),
+	z.literal('rejected'),
+	z.literal('disputed'),
+])
+
+export const milestonesInsertSchema = z.object({
+	amount: z.number(),
+	completed_at: z.string().optional().nullable(),
+	created_at: z.string().optional().nullable(),
+	deadline: z.string(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	order_index: z.number(),
+	project_id: z.string(),
+	status: milestoneStatusSchema.optional(),
+	title: z.string(),
+})
+
+export const milestonesUpdateSchema = z.object({
+	amount: z.number().optional(),
+	completed_at: z.string().optional().nullable(),
+	created_at: z.string().optional().nullable(),
+	deadline: z.string().optional(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	order_index: z.number().optional(),
+	project_id: z.string().optional(),
+	status: milestoneStatusSchema.optional(),
+	title: z.string().optional(),
+})
+
+export const milestonesRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('milestones_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
 export const userRoleSchema = z.union([
 	z.literal('kinder'),
 	z.literal('kindler'),
@@ -755,19 +799,6 @@ export const escrowContractsRowSchema = z.object({
 	updated_at: z.string().nullable(),
 })
 
-export const milestonesRowSchema = z.object({
-	amount: z.number(),
-	completed_at: z.string().nullable(),
-	created_at: z.string().nullable(),
-	deadline: z.string(),
-	description: z.string().nullable(),
-	id: z.string(),
-	order_index: z.number(),
-	project_id: z.string(),
-	status: milestoneStatusSchema,
-	title: z.string(),
-})
-
 export const kycReviewsRowSchema = z.object({
 	additional_notes: z.string().nullable(),
 	created_at: z.string(),
@@ -787,6 +818,19 @@ export const kycStatusRowSchema = z.object({
 	updated_at: z.string(),
 	user_id: z.string(),
 	verification_level: kycVerificationEnumSchema,
+})
+
+export const milestonesRowSchema = z.object({
+	amount: z.number(),
+	completed_at: z.string().nullable(),
+	created_at: z.string().nullable(),
+	deadline: z.string(),
+	description: z.string().nullable(),
+	id: z.string(),
+	order_index: z.number(),
+	project_id: z.string(),
+	status: milestoneStatusSchema,
+	title: z.string(),
 })
 
 export const profilesRowSchema = z.object({

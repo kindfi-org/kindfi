@@ -486,6 +486,53 @@ export type Database = {
 				}
 				Relationships: []
 			}
+			milestones: {
+				Row: {
+					amount: number
+					completed_at: string | null
+					created_at: string | null
+					deadline: string
+					description: string | null
+					id: string
+					order_index: number
+					project_id: string
+					status: Database['public']['Enums']['milestone_status']
+					title: string
+				}
+				Insert: {
+					amount: number
+					completed_at?: string | null
+					created_at?: string | null
+					deadline: string
+					description?: string | null
+					id?: string
+					order_index: number
+					project_id: string
+					status?: Database['public']['Enums']['milestone_status']
+					title: string
+				}
+				Update: {
+					amount?: number
+					completed_at?: string | null
+					created_at?: string | null
+					deadline?: string
+					description?: string | null
+					id?: string
+					order_index?: number
+					project_id?: string
+					status?: Database['public']['Enums']['milestone_status']
+					title?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'milestones_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+				]
+			}
 			profiles: {
 				Row: {
 					bio: string | null
