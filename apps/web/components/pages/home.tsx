@@ -1,4 +1,4 @@
-import { DynamicComponents } from '~/constants/home-page-data'
+import { DynamicComponents } from '~/lib/constants/home-page-data'
 
 export function HomeDashboard() {
 	return (

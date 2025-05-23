@@ -19,25 +19,32 @@ ALTER TABLE public.project_members ENABLE ROW LEVEL SECURITY;
 CREATE INDEX idx_project_members_project_id ON public.project_members(project_id);
 CREATE INDEX idx_project_members_user_id ON public.project_members(user_id);
 
--- RLS Policy: View project members
-CREATE POLICY "Project members are viewable by authenticated users"
+-- TEMPORARY POLICY: Allows public read access while there's no authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Public read access to project members"
 ON public.project_members
-FOR SELECT
-TO authenticated
-USING (
-    -- User can see members of their own projects
-    project_id IN (
-        SELECT id FROM public.projects 
-        WHERE owner_id = auth.uid()
-    )
-    OR 
-    -- User can see members of projects they are part of
-    EXISTS (
-        SELECT 1 FROM public.project_members 
-        WHERE project_id = project_members.project_id 
-        AND user_id = auth.uid()
-    )
-);
+FOR SELECT 
+USING (true);
+
+-- RLS Policy: View project members
+-- CREATE POLICY "Project members are viewable by authenticated users"
+-- ON public.project_members
+-- FOR SELECT
+-- TO authenticated
+-- USING (
+--     -- User can see members of their own projects
+--     project_id IN (
+--         SELECT id FROM public.projects 
+--         WHERE owner_id = auth.uid()
+--     )
+--     OR 
+--     -- User can see members of projects they are part of
+--     EXISTS (
+--         SELECT 1 FROM public.project_members 
+--         WHERE project_id = project_members.project_id 
+--         AND user_id = auth.uid()
+--     )
+-- );
 
 -- RLS Policy: Insert project members
 CREATE POLICY "Project owners can add members"

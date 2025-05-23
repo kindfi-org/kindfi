@@ -43,6 +43,9 @@ export const CTAButtons = ({
 			)}
 			disabled={disabled}
 			asChild={!!primaryHref && !disabled}
+			aria-label={
+				typeof primaryText === 'string' ? primaryText : 'Primary action'
+			}
 		>
 			{primaryHref && !disabled ? (
 				<Link href={primaryHref}>{primaryText}</Link>
@@ -64,6 +67,9 @@ export const CTAButtons = ({
 			)}
 			disabled={disabled}
 			asChild={!!secondaryHref && !disabled}
+			aria-label={
+				typeof secondaryText === 'string' ? secondaryText : 'Secondary action'
+			}
 		>
 			{secondaryHref && !disabled ? (
 				<Link href={secondaryHref}>{secondaryText}</Link>

@@ -7,7 +7,7 @@ import { AllResources } from '~/components/sections/resources/all-resources'
 import { FilterPanel } from '~/components/sections/resources/filter-panel'
 import { ResourceCard } from '~/components/sections/resources/resource-card'
 import { useResourceFilters } from '~/hooks/resources/use-resource-filters'
-import { resources } from '~/lib/mock-data/resources.mock'
+import { resources } from '~/lib/mock-data/mock-resources'
 
 export function Resources() {
 	const {
@@ -28,7 +28,7 @@ export function Resources() {
 	const [isFilterPanelVisible, setIsFilterPanelVisible] = useState(false)
 
 	return (
-		<main className="flex-1 p-4 pt-0">
+		<div className="flex-1 p-4 pt-0">
 			<div className="max-w-7xl mx-auto">
 				<AllResources
 					totalResources={filteredResources.length}
@@ -102,6 +102,6 @@ export function Resources() {
 					</div>
 				)}
 			</div>
-		</main>
+		</div>
 	)
 }

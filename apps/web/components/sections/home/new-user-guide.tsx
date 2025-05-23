@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion'
 import { StepCard } from '~/components/shared/steps-card'
-import { steps } from '~/constants/new-user-guide-data'
 import { fadeInUpVariants } from '~/lib/constants/animations'
+import { steps } from '~/lib/constants/new-user-guide-data'
 
 export function NewUserGuide() {
 	return (

@@ -4,8 +4,8 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { Users } from 'lucide-react'
 import { Card, CardContent } from '~/components/base/card'
 import { Web3FeatureCard } from '~/components/shared/web3-feature-card'
-import { features, stats } from '~/constants/platform-overview-data'
 import { fadeInUpAnimation } from '~/lib/constants/animations'
+import { features, stats } from '~/lib/constants/platform-overview-data'
 
 export function PlatformOverview() {
 	const shouldReduceMotion = useReducedMotion()

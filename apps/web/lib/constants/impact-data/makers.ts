@@ -1,4 +1,4 @@
-import type { ImpactMaker } from '~/lib/types/impact/impact-makers'
+import type { ImpactMaker } from '~/lib/types/impact/impact-makers.types'
 
 export const impactMakers: ImpactMaker[] = [
 	{

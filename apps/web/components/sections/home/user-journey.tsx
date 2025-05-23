@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '~/components/base/button'
-import { investorSteps, projectSteps } from '~/constants/user-journey-data'
+import { investorSteps, projectSteps } from '~/lib/constants/user-journey-data'
 import { cn } from '~/lib/utils'
 
 type ViewType = 'project' | 'investor'
@@ -143,6 +143,11 @@ export function UserJourney() {
 						size="lg"
 						className="bg-indigo-900 hover:bg-indigo-800 text-white px-8"
 						asChild
+						aria-label={
+							activeView === 'project'
+								? 'Register your project'
+								: 'Explore causes'
+						}
 					>
 						<Link
 							href={activeView === 'project' ? '/create-project' : '/projects'}

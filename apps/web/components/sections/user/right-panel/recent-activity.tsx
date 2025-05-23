@@ -4,7 +4,7 @@ import { ScrollArea } from '@radix-ui/react-scroll-area'
 import { ChevronRight, Clock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '~/components/base/button'
-import { mockActivities } from '~/lib/constants/mock-data/right-panel-mocks'
+import { mockActivities } from '~/lib/mock-data/right-panel-mocks'
 
 export function RecentActivity() {
 	const router = useRouter()
