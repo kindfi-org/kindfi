@@ -8,9 +8,9 @@ impl ReputationStorage {
         env.storage().instance().set(&ADMIN_KEY, admin);
     }
 
-    pub fn get_admin(env: &Env) -> Address {
-        env.storage().instance().get(&ADMIN_KEY).unwrap()
-    }
+    pub fn get_admin(env: &Env) -> Option<Address> {
+    env.storage().instance().get(&ADMIN_KEY)
+}
 
     pub fn set_nft_contract_id(env: &Env, contract_id: &Address) {
         env.storage().instance().set(&NFT_CONTRACT_KEY, contract_id);
