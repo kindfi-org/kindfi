@@ -1,0 +1,30 @@
+import {
+	Banknote,
+	Brain,
+	Bus,
+	Cpu,
+	Gavel,
+	GraduationCap,
+	HeartPulse,
+	Leaf,
+	type LucideIcon,
+	Palette,
+	PawPrint,
+	ShieldAlert,
+	Users,
+} from 'lucide-react'
+
+export const categoryIcons: Record<string, LucideIcon> = {
+	'Animal Welfare': PawPrint,
+	'Arts & Culture': Palette,
+	'Community & Civic Engagement': Users,
+	'Disaster Relief & Humanitarian Aid': ShieldAlert,
+	Education: GraduationCap,
+	'Environment & Sustainability': Leaf,
+	Healthcare: HeartPulse,
+	'Mental Health & Well-being': Brain,
+	'Poverty Alleviation & Economic Development': Banknote,
+	'Public Infrastructure & Transportation': Bus,
+	'Social Justice & Human Rights': Gavel,
+	'Technology & Innovation': Cpu,
+}
