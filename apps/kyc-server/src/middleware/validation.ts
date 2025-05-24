@@ -19,24 +19,24 @@ const updateKycReviewSchema = Joi.object({
   notes: Joi.string().optional(),
 });
 
-export const validateCreateKycReview = (req: Request, res: Response, next: NextFunction) => {
-  const { error } = createKycReviewSchema.validate(req.body);
-  if (error) {
-    return res.status(400).json({
-      success: false,
-      error: error.details[0].message,
-    });
-  }
-  next();
-};
+/**
+ * Factory function to create a validation middleware for a given Joi schema.
+ * @param schema Joi schema to validate against
+ * @returns Express middleware function
+ */
+export function createValidationMiddleware(schema: Joi.ObjectSchema) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const { error } = schema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details[0].message,
+      });
+    }
+    next();
+  };
+}
 
-export const validateUpdateKycReview = (req: Request, res: Response, next: NextFunction) => {
-  const { error } = updateKycReviewSchema.validate(req.body);
-  if (error) {
-    return res.status(400).json({
-      success: false,
-      error: error.details[0].message,
-    });
-  }
-  next();
-};
+export const validateCreateKycReview = createValidationMiddleware(createKycReviewSchema);
+
+export const validateUpdateKycReview = createValidationMiddleware(updateKycReviewSchema);

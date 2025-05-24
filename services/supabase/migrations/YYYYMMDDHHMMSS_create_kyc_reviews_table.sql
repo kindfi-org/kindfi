@@ -11,7 +11,16 @@ CREATE TABLE kyc_reviews (
     reviewer_id TEXT,
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    -- Add foreign key constraints for user_id and reviewer_id
+    CONSTRAINT fk_kyc_reviews_user
+        FOREIGN KEY (user_id)
+        REFERENCES auth.users(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_kyc_reviews_reviewer
+        FOREIGN KEY (reviewer_id)
+        REFERENCES auth.users(id)
+        ON DELETE SET NULL
 );
 
 -- Create indexes for better query performance

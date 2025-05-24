@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { kycReviewsService } from '../services/kycReviewsService';
 import { validateCreateKycReview, validateUpdateKycReview } from '../middleware/validation';
 import { authenticate } from '../middleware/auth';
+import { KycStatus } from '../types/kyc-status.type'; // Add this import (adjust path if needed)
 
 const router = Router();
 
@@ -14,9 +15,15 @@ router.post('/', authenticate, validateCreateKycReview, async (req, res) => {
       data: review,
     });
   } catch (error) {
-    res.status(400).json({
+    const statusCode =
+      error?.name === 'ValidationError'
+        ? 400
+        : error?.name === 'NotFoundError'
+        ? 404
+        : 500;
+    res.status(statusCode).json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Internal server error',
     });
   }
 });
@@ -26,14 +33,28 @@ router.get('/user/:userId', authenticate, async (req, res) => {
   try {
     const { userId } = req.params;
     const reviews = await kycReviewsService.getReviewsByUserId(userId);
+
+    if (!reviews || (Array.isArray(reviews) && reviews.length === 0)) {
+      return res.status(404).json({
+        success: false,
+        error: 'No KYC reviews found for this user',
+      });
+    }
+
     res.json({
       success: true,
       data: reviews,
     });
   } catch (error) {
-    res.status(400).json({
+    const statusCode =
+      error?.name === 'ValidationError'
+        ? 400
+        : error?.name === 'NotFoundError'
+        ? 404
+        : 500;
+    res.status(statusCode).json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Internal server error',
     });
   }
 });
@@ -43,14 +64,28 @@ router.get('/user/:userId/latest', authenticate, async (req, res) => {
   try {
     const { userId } = req.params;
     const review = await kycReviewsService.getLatestReviewByUserId(userId);
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        error: 'No latest KYC review found for this user',
+      });
+    }
+
     res.json({
       success: true,
       data: review,
     });
   } catch (error) {
-    res.status(400).json({
+    const statusCode =
+      error?.name === 'ValidationError'
+        ? 400
+        : error?.name === 'NotFoundError'
+        ? 404
+        : 500;
+    res.status(statusCode).json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Internal server error',
     });
   }
 });
@@ -60,7 +95,7 @@ router.get('/:reviewId', authenticate, async (req, res) => {
   try {
     const { reviewId } = req.params;
     const review = await kycReviewsService.getReviewById(reviewId);
-    
+
     if (!review) {
       return res.status(404).json({
         success: false,
@@ -73,9 +108,15 @@ router.get('/:reviewId', authenticate, async (req, res) => {
       data: review,
     });
   } catch (error) {
-    res.status(400).json({
+    const statusCode =
+      error?.name === 'ValidationError'
+        ? 400
+        : error?.name === 'NotFoundError'
+        ? 404
+        : 500;
+    res.status(statusCode).json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Internal server error',
     });
   }
 });
@@ -90,9 +131,15 @@ router.put('/:reviewId', authenticate, validateUpdateKycReview, async (req, res)
       data: review,
     });
   } catch (error) {
-    res.status(400).json({
+    const statusCode =
+      error?.name === 'ValidationError'
+        ? 400
+        : error?.name === 'NotFoundError'
+        ? 404
+        : 500;
+    res.status(statusCode).json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Internal server error',
     });
   }
 });
@@ -101,15 +148,33 @@ router.put('/:reviewId', authenticate, validateUpdateKycReview, async (req, res)
 router.get('/status/:status', authenticate, async (req, res) => {
   try {
     const { status } = req.params;
+
+    // Define allowed KycStatus values (update as needed)
+    const allowedStatuses = ['pending', 'approved', 'rejected', 'under_review'] as const;
+    type KycStatus = typeof allowedStatuses[number];
+
+    if (!allowedStatuses.includes(status as KycStatus)) {
+      return res.status(400).json({
+        success: false,
+        error: `Invalid status value: '${status}'. Allowed values are: ${allowedStatuses.join(', ')}`,
+      });
+    }
+
     const reviews = await kycReviewsService.getReviewsByStatus(status as KycStatus);
     res.json({
       success: true,
       data: reviews,
     });
   } catch (error) {
-    res.status(400).json({
+    const statusCode =
+      error?.name === 'ValidationError'
+        ? 400
+        : error?.name === 'NotFoundError'
+        ? 404
+        : 500;
+    res.status(statusCode).json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Internal server error',
     });
   }
 });

@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import { kycReviewsService } from '../services/kycReviewsService';
-import type { CreateKycReview } from '../types/database';
+import type { CreateKycReview, KycReview } from '../types/database';
 
 describe('KYC Reviews Service', () => {
   const testUserId = 'test-user-123';
@@ -16,9 +16,15 @@ describe('KYC Reviews Service', () => {
 
   test('should create a KYC review', async () => {
     const review = await kycReviewsService.createReview(testReviewData);
+
+    // Explicitly check for null or undefined before accessing properties
+    expect(review).toBeDefined();
+    if (review === null || review === undefined) {
+      throw new Error('Expected review to be defined');
+    }
+
     createdReviewId = review.id;
 
-    expect(review).toBeDefined();
     expect(review.user_id).toBe(testUserId);
     expect(review.status).toBe('pending');
     expect(review.verification_level).toBe('basic');
@@ -48,13 +54,31 @@ describe('KYC Reviews Service', () => {
 
   test('should get latest review by user ID', async () => {
     const latestReview = await kycReviewsService.getLatestReviewByUserId(testUserId);
+
+    // Explicitly assert the type and check for null
     expect(latestReview).toBeDefined();
-    expect(latestReview!.user_id).toBe(testUserId);
+
+    if (latestReview === null || latestReview === undefined) {
+      throw new Error('Expected latestReview to be defined');
+    }
+
+    // Optionally, use a type assertion if your service returns KycReview | null
+    const typedReview = latestReview as KycReview;
+
+    expect(typedReview.user_id).toBe(testUserId);
   });
 
   // Cleanup
   afterAll(async () => {
-    // Clean up test data if needed
-    // This would depend on your test database setup
+    // Remove the created test review to ensure test isolation
+    if (createdReviewId) {
+      try {
+        await kycReviewsService.deleteReview(createdReviewId);
+      } catch (error) {
+        // Log error but do not fail the test suite cleanup
+        // eslint-disable-next-line no-console
+        console.error('Failed to clean up test KYC review:', error);
+      }
+    }
   });
 });
