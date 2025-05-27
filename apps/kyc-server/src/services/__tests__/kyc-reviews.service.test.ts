@@ -8,7 +8,20 @@ describe('KycReviewsService', () => {
 
   beforeEach(() => {
     service = new KycReviewsService();
-    testUserId = 'test-user-' + Date.now();
+    testUserId = `test-user-${Date.now()}`;
+  });
+
+  afterEach(async () => {
+    // Cleanup: remove all reviews for the test user to ensure test isolation
+    const reviews = await service.getKycReviewsByUserId(testUserId);
+    if (reviews && reviews.length > 0) {
+      await Promise.all(
+        reviews.map((review) =>
+          // Assuming a deleteKycReview method exists; implement if missing
+          service.deleteKycReview?.(review.id)
+        )
+      );
+    }
   });
 
   it('should create a KYC review', async () => {
@@ -63,5 +76,15 @@ describe('KycReviewsService', () => {
       expect(updatedReview?.status).toBe('approved');
       expect(updatedReview?.notes).toBe('Approved after document verification');
     }
+  });
+
+  it('should handle update for non-existent KYC review ID gracefully', async () => {
+    const nonExistentId = 'non-existent-id-' + Date.now();
+    const result = await service.updateKycReview(nonExistentId, {
+      status: 'rejected',
+      notes: 'No such review'
+    });
+
+    expect(result).toBeNull();
   });
 });

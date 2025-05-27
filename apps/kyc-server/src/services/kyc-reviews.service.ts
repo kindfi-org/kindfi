@@ -44,8 +44,7 @@ export class KycReviewsService {
       .single();
 
     if (error) {
-      console.error('Error fetching KYC review:', error);
-      return null;
+      throw new Error('Failed to fetch KYC review');
     }
 
     return data;
