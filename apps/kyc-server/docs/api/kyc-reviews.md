@@ -202,7 +202,7 @@ All error responses follow this format:
 ```bash
 curl -X POST http://localhost:3001/api/kyc-reviews \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-token" \
+  -H "Authorization: Bearer <YOUR_JWT_TOKEN>" \
   -d '{
     "user_id": "user-123",
     "status": "pending",
@@ -215,7 +215,7 @@ curl -X POST http://localhost:3001/api/kyc-reviews \
 ```bash
 curl -X PATCH http://localhost:3001/api/kyc-reviews/review-uuid \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-token" \
+  -H "Authorization: Bearer <YOUR_JWT_TOKEN>" \
   -d '{
     "status": "approved",
     "notes": "Documents verified successfully"
@@ -225,5 +225,17 @@ curl -X PATCH http://localhost:3001/api/kyc-reviews/review-uuid \
 ### Get User's KYC History
 ```bash
 curl -X GET http://localhost:3001/api/kyc-reviews/user/user-123 \
-  -H "Authorization: Bearer your-token"
+  -H "Authorization: Bearer <YOUR_JWT_TOKEN>"
+```
+
+### Get KYC Review by ID
+```bash
+curl -X GET http://localhost:3001/api/kyc-reviews/review-uuid \
+  -H "Authorization: Bearer <YOUR_JWT_TOKEN>"
+```
+
+### Get Latest KYC Review for a User
+```bash
+curl -X GET http://localhost:3001/api/kyc-reviews/user/user-123/latest \
+  -H "Authorization: Bearer <YOUR_JWT_TOKEN>"
 ```
