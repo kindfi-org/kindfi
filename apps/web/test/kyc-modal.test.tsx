@@ -3,7 +3,6 @@ import { KYCModal } from '~/components/shared/kyc/kyc-modal'
 import { KycProvider } from '../hooks/kyc/useKycContext'
 import '@testing-library/jest-dom'
 
-// Definimos el tipo de las props de IdentityVerification
 interface IdentityVerificationProps {
 	onCancel: () => void
 	onNext: (data: {
@@ -13,7 +12,6 @@ interface IdentityVerificationProps {
 	}) => void
 }
 
-// Mock de los componentes KYC
 jest.mock('~/components/shared/kyc/kyc-1', () => ({
 	IdentityVerification: ({ onCancel, onNext }: IdentityVerificationProps) => (
 		<div>
@@ -36,7 +34,6 @@ jest.mock('~/components/shared/kyc/kyc-1', () => ({
 	),
 }))
 
-// Mock de los otros componentes
 jest.mock('~/components/shared/kyc/kyc-2/kyc-2-upload', () => () => (
 	<div>Paso 2</div>
 ))

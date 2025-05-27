@@ -9,10 +9,8 @@ const kycApiClient = axios.create({
 	headers: { 'Content-Type': 'application/json' },
 })
 
-// Define un tipo genérico para datos, puede ser objeto con valores arbitrarios o primitivos
 type KycData = Record<string, unknown> | unknown
 
-// Transforma datos para asegurar que los objetos Date se conviertan a cadenas ISO (YYYY-MM-DD)
 const transformData = (data: KycData): KycData => {
 	if (data && typeof data === 'object' && !Array.isArray(data)) {
 		const transformed: Record<string, unknown> = {}
@@ -30,7 +28,7 @@ const transformData = (data: KycData): KycData => {
 		}
 		return transformed
 	}
-	// Para arrays o primitivos, retornar tal cual
+
 	return data
 }
 
@@ -62,7 +60,7 @@ export const submitKycStep = async <T = unknown>(
 			await new Promise((resolve) => setTimeout(resolve, 2000 * attempt))
 		}
 	}
-	throw new Error(`Failed to send step ${step} data`) // por seguridad
+	throw new Error(`Failed to send step ${step} data`) 
 }
 
 export const submitFinalKyc = async <T = unknown>(

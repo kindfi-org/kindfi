@@ -1,7 +1,6 @@
 import type { Control } from 'react-hook-form'
 import * as z from 'zod'
 
-// Define validation schema
 export const identitySchema = z.object({
 	fullName: z.string().min(3, 'Full name must be at least 3 characters'),
 	dateOfBirth: z
@@ -32,7 +31,6 @@ export interface FormFieldProps {
 	control: Control<IdentityFormValues>
 }
 
-// List of countries for the nationality dropdown
 export const countries = [
 	'United States',
 	'United Kingdom',
