@@ -199,14 +199,17 @@ impl ReputationContract {
     }
     // Validates that the address is an Account address with a non-zero identifier.
     fn validate_admin_address(_admin: &Address) -> Result<(), ReputationError> {
-        // Stub: always valid
-        Ok(())
-    }
-    
-    fn validate_nft_contract_address(_nft_contract_id: &Address) -> Result<(), ReputationError> {
-        // Stub: always valid
-        Ok(())
-    }
+    // TODO: Reimplement proper validation once soroban_sdk supports address type checks
+    // Temporary stub: always valid
+    Ok(())
+}
+
+fn validate_nft_contract_address(_nft_contract_id: &Address) -> Result<(), ReputationError> {
+    // TODO: Reimplement proper validation once soroban_sdk supports contract address checks
+    // Temporary stub: always valid
+    Ok(())
+}
+
     
 }
     
