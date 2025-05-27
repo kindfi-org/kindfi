@@ -82,4 +82,29 @@ describe('KycReviewsService', () => {
 
     expect(result).toBeNull();
   });
+
+  it('should retrieve a KYC review by its ID', async () => {
+    // Arrange: create a review first
+    const input: CreateKycReviewInput = {
+      user_id: testUserId,
+      status: 'pending',
+      verification_level: 'basic',
+      notes: 'Review for get by ID'
+    };
+
+    const createdReview = await service.createKycReview(input);
+
+    // Act: retrieve the review by its ID
+    const fetchedReview = createdReview
+      ? await service.getKycReviewById(createdReview.id)
+      : null;
+
+    // Assert: the fetched review matches the created one
+    expect(fetchedReview).toBeTruthy();
+    expect(fetchedReview?.id).toBe(createdReview?.id);
+    expect(fetchedReview?.user_id).toBe(testUserId);
+    expect(fetchedReview?.status).toBe('pending');
+    expect(fetchedReview?.verification_level).toBe('basic');
+    expect(fetchedReview?.notes).toBe('Review for get by ID');
+  });
 });

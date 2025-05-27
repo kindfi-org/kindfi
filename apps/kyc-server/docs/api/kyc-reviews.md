@@ -196,3 +196,45 @@ Get the latest KYC review for a user.
 - Ensure requests include the `Authorization: Bearer <token>` header.
 - Error responses follow a consistent `{ "error": "message" }` schema.
 - Only authorized reviewers can create or update reviews.
+
+---
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
+  const { id } = params;
+  const {
+    status,
+    verification_level,
+    reviewer_id,
+    notes,
+  }: {
+    status?: 'pending' | 'approved' | 'rejected' | 'verified';
+    verification_level?: 'basic' | 'enhanced';
+    reviewer_id?: string;
+    notes?: string;
+  } = await req.json();
+
+  // Build update object dynamically
+  const updateFields: Record<string, unknown> = {};
+  if (status) updateFields.status = status;
+  if (verification_level) updateFields.verification_level = verification_level;
+  if (typeof reviewer_id !== 'undefined') updateFields.reviewer_id = reviewer_id;
+  if (typeof notes !== 'undefined') updateFields.notes = notes;
+
+  if (Object.keys(updateFields).length === 0) {
+    return NextResponse.json(
+      { error: 'No valid fields provided for update' },
+      { status: 400 }
+    );
+  }
+
+  // ...perform update using DrizzleORM or your DB client...
+  // Example:
+  // const updatedReview = await db.update(kycReviews).set(updateFields).where(eq(kycReviews.id, id)).returning();
+
+  // ...handle not found, unauthorized, etc...
+
+  // return NextResponse.json(updatedReview);
+}
