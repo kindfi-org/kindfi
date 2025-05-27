@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { KycReviewsService } from '../kyc-reviews.service';
 import type { CreateKycReviewInput } from '@kindfi/shared/types/kyc-reviews';
+import { prisma } from '../../../lib/prisma'; // Adjust path if needed
 
 describe('KycReviewsService', () => {
   let service: KycReviewsService;
@@ -13,15 +14,9 @@ describe('KycReviewsService', () => {
 
   afterEach(async () => {
     // Cleanup: remove all reviews for the test user to ensure test isolation
-    const reviews = await service.getKycReviewsByUserId(testUserId);
-    if (reviews && reviews.length > 0) {
-      await Promise.all(
-        reviews.map((review) =>
-          // Assuming a deleteKycReview method exists; implement if missing
-          service.deleteKycReview?.(review.id)
-        )
-      );
-    }
+    await prisma.kycReview.deleteMany({
+      where: { user_id: testUserId }
+    });
   });
 
   it('should create a KYC review', async () => {
@@ -79,7 +74,7 @@ describe('KycReviewsService', () => {
   });
 
   it('should handle update for non-existent KYC review ID gracefully', async () => {
-    const nonExistentId = 'non-existent-id-' + Date.now();
+    const nonExistentId = `non-existent-id-${Date.now()}`;
     const result = await service.updateKycReview(nonExistentId, {
       status: 'rejected',
       notes: 'No such review'

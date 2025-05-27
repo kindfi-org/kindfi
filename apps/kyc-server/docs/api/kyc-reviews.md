@@ -17,6 +17,7 @@ Create a new KYC review.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "user_id": "string",
@@ -28,6 +29,7 @@ Create a new KYC review.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "string",
@@ -42,6 +44,7 @@ Create a new KYC review.
 ```
 
 **Error Response:**
+
 ```json
 {
   "error": "Invalid request body or unauthorized"
@@ -57,6 +60,7 @@ Get all KYC reviews for a specific user.
 **Authentication:** Required
 
 **Response:**
+
 ```json
 [
   {
@@ -73,6 +77,7 @@ Get all KYC reviews for a specific user.
 ```
 
 **Error Response:**
+
 ```json
 {
   "error": "User not found or unauthorized"
@@ -88,6 +93,7 @@ Get a specific KYC review by ID.
 **Authentication:** Required
 
 **Response:**
+
 ```json
 {
   "id": "string",
@@ -102,6 +108,7 @@ Get a specific KYC review by ID.
 ```
 
 **Error Response:**
+
 ```json
 {
   "error": "Review not found or unauthorized"
@@ -117,6 +124,7 @@ Update a KYC review by ID.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "status": "pending | approved | rejected | verified (optional)",
@@ -127,6 +135,7 @@ Update a KYC review by ID.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "string",
@@ -141,6 +150,7 @@ Update a KYC review by ID.
 ```
 
 **Error Response:**
+
 ```json
 {
   "error": "Review not found, invalid update, or unauthorized"
@@ -156,6 +166,7 @@ Get the latest KYC review for a user.
 **Authentication:** Required
 
 **Response:**
+
 ```json
 {
   "id": "string",
@@ -170,6 +181,7 @@ Get the latest KYC review for a user.
 ```
 
 **Error Response:**
+
 ```json
 {
   "error": "No reviews found for user or unauthorized"

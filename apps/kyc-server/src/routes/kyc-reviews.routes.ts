@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { KycReviewsService } from '../services/kyc-reviews.service';
 import { authMiddleware } from '../middleware/auth.middleware';
 // Import shared KYC review types for type safety
-import type { KycReview, CreateKycReviewInput, UpdateKycReviewInput } from '../../../shared/types/kyc-review.type';
+import type { KycReview, CreateKycReviewInput, UpdateKycReviewInput } from '../../../../packages/shared/types/kyc-reviews';
 
 const router = Router();
 const kycReviewsService = new KycReviewsService();
@@ -13,20 +13,20 @@ router.post(
   authMiddleware,
   async (req, res) => {
     try {
-      const { userId, status, comments }: CreateKycReviewInput = req.body;
+      const { user_id, status, notes }: CreateKycReviewInput = req.body;
 
       // Input validation: ensure required fields are present and valid
-      if (typeof userId !== 'string' || userId.trim() === '') {
-        return res.status(400).json({ error: 'Invalid or missing userId' });
+      if (typeof user_id !== 'string' || user_id.trim() === '') {
+        return res.status(400).json({ error: 'Invalid or missing user_id' });
       }
       if (typeof status !== 'string' || status.trim() === '') {
         return res.status(400).json({ error: 'Invalid or missing status' });
       }
-      if (comments !== undefined && typeof comments !== 'string') {
-        return res.status(400).json({ error: 'Invalid comments' });
+      if (notes !== undefined && typeof notes !== 'string') {
+        return res.status(400).json({ error: 'Invalid notes' });
       }
 
-      const review: KycReview = await kycReviewsService.createKycReview({ userId, status, comments });
+      const review: KycReview = await kycReviewsService.createKycReview({ user_id, status, notes });
       res.status(201).json(review);
     } catch (error) {
       res.status(500).json({ error: 'Failed to create KYC review' });
@@ -76,17 +76,17 @@ router.patch(
   async (req, res) => {
     try {
       const { id } = req.params;
-      const { status, comments }: UpdateKycReviewInput = req.body;
+      const { status, notes }: UpdateKycReviewInput = req.body;
 
       // Input validation: ensure required fields are present and valid
       if (typeof status !== 'string' || status.trim() === '') {
         return res.status(400).json({ error: 'Invalid or missing status' });
       }
-      if (comments !== undefined && typeof comments !== 'string') {
-        return res.status(400).json({ error: 'Invalid comments' });
+      if (notes !== undefined && typeof notes !== 'string') {
+        return res.status(400).json({ error: 'Invalid notes' });
       }
 
-      const review: KycReview | null = await kycReviewsService.updateKycReview(id, { status, comments });
+      const review: KycReview | null = await kycReviewsService.updateKycReview(id, { status, notes });
 
       if (!review) {
         return res.status(404).json({ error: 'KYC review not found' });
