@@ -22,5 +22,18 @@ export const kycStatus = pgTable('kyc_status', {
 	updated_at: timestamp('updated_at').defaultNow(),
 })
 
+export const kycReviews = pgTable('kyc_reviews', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	user_id: text('user_id').notNull(),
+	status: statusEnum('status').notNull().default('pending'),
+	verification_level: verificationEnum('verification_level').notNull(),
+	reviewer_id: text('reviewer_id'),
+	notes: text('notes'),
+	created_at: timestamp('created_at').defaultNow(),
+	updated_at: timestamp('updated_at').defaultNow(),
+})
+
 export type KYCStatus = typeof kycStatus.$inferSelect
 export type NewKYCStatus = typeof kycStatus.$inferInsert
+export type KYCReview = typeof kycReviews.$inferSelect
+export type NewKYCReview = typeof kycReviews.$inferInsert
