@@ -25,6 +25,7 @@ import {
 } from '~/components/base/sheet'
 import { useAuth } from '~/hooks/use-auth'
 import { Navigation } from './navigation'
+import { NotificationDropdown } from '~/components/notifications/notification-dropdown'
 
 export const Header = () => {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -45,6 +46,7 @@ export const Header = () => {
 
 					{/* Action Buttons */}
 					<div className="flex items-center space-x-4">
+						{user && <NotificationDropdown />}
 						{user ? <UserMenu user={user} /> : <AuthButtons />}
 
 						{/* Mobile menu */}

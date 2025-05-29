@@ -852,3 +852,63 @@ export const projectMembersRowSchema = z.object({
 	updated_at: z.string(),
 	user_id: z.string(),
 })
+
+export const notificationTypeSchema = z.union([
+	z.literal('project_update'),
+	z.literal('milestone_completed'),
+	z.literal('escrow_released'),
+	z.literal('kyc_status_change'),
+	z.literal('comment_added'),
+	z.literal('member_joined'),
+	z.literal('system_alert')
+]);
+
+export const notificationsRowSchema = z.object({
+	id: z.string(),
+	type: notificationTypeSchema,
+	message: z.string(),
+	from: z.string().nullable(),
+	to: z.string(),
+	metadata: jsonSchema,
+	created_at: z.string(),
+	read_at: z.string().nullable()
+});
+
+export const notificationsInsertSchema = z.object({
+	id: z.string().optional(),
+	type: notificationTypeSchema,
+	message: z.string(),
+	from: z.string().optional().nullable(),
+	to: z.string(),
+	metadata: jsonSchema.optional(),
+	created_at: z.string().optional(),
+	read_at: z.string().optional().nullable()
+});
+
+export const notificationsUpdateSchema = z.object({
+	id: z.string().optional(),
+	type: notificationTypeSchema.optional(),
+	message: z.string().optional(),
+	from: z.string().optional().nullable(),
+	to: z.string().optional(),
+	metadata: jsonSchema.optional(),
+	created_at: z.string().optional(),
+	read_at: z.string().optional().nullable()
+});
+
+export const notificationsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('notifications_from_fkey'),
+		columns: z.tuple([z.literal('from')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('users'),
+		referencedColumns: z.tuple([z.literal('id')])
+	}),
+	z.object({
+		foreignKeyName: z.literal('notifications_to_fkey'),
+		columns: z.tuple([z.literal('to')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('users'),
+		referencedColumns: z.tuple([z.literal('id')])
+	})
+]);
