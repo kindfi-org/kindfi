@@ -140,7 +140,14 @@ END;
 $$;
 
 -- Schedule cleanup job to run daily at 3 AM
--- First, unschedule any existing job with the same name
-SELECT cron.unschedule('cleanup_old_notifications');
+DO $$
+BEGIN
+  -- Attempt to unschedule, ignore if it doesn't exist
+  PERFORM cron.unschedule('cleanup_old_notifications');
+EXCEPTION WHEN OTHERS THEN
+  -- Job might not exist on first run
+  NULL;
+END $$;
+
 -- Then schedule the new job
 SELECT cron.schedule('cleanup_old_notifications', '0 3 * * *', 'SELECT public.cleanup_old_notifications();'); 

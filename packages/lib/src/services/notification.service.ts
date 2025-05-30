@@ -1,12 +1,11 @@
 import { createHash } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+import { NotificationStatus, NotificationType } from '../types/notification'
 import type { Database } from '../types/supabase'
 import { logger } from '../utils/logger'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
-type NotificationType = Database['public']['Enums']['notification_type']
-type NotificationStatus = Database['public']['Enums']['notification_status']
 
 const NotificationSchema = z.object({
 	type: z.nativeEnum(NotificationType),
@@ -25,6 +24,7 @@ export class NotificationService {
 	private supabase
 	private readonly MAX_QUEUE_SIZE = 1000
 	private isProcessing = false
+	private processingLock: Promise<void> | null = null
 	private queue: Array<{ notification: CreateNotification; retries: number }> =
 		[]
 
@@ -52,10 +52,25 @@ export class NotificationService {
 		}
 	}
 
+	private async acquireLock(): Promise<void> {
+		if (this.processingLock) {
+			await this.processingLock
+		}
+		this.processingLock = new Promise((resolve) => {
+			this.isProcessing = true
+			resolve()
+		})
+	}
+
+	private releaseLock(): void {
+		this.isProcessing = false
+		this.processingLock = null
+	}
+
 	private async processQueue(): Promise<void> {
 		if (this.isProcessing || this.queue.length === 0) return
 
-		this.isProcessing = true
+		await this.acquireLock()
 		const item = this.queue[0]
 
 		try {
@@ -73,20 +88,28 @@ export class NotificationService {
 			if (error) throw error
 
 			this.queue.shift()
+			logger.info('Notification processed successfully', {
+				queueSize: this.queue.length,
+				retries: item.retries,
+			})
 		} catch (error) {
 			logger.error('Error processing notification', error)
 			if (item.retries < MAX_RETRIES) {
 				item.retries++
 				setTimeout(() => {
-					this.isProcessing = false
+					this.releaseLock()
 					this.processQueue()
 				}, RETRY_DELAY * item.retries)
 				return
 			}
 			this.queue.shift()
+			logger.warn('Notification processing failed after max retries', {
+				queueSize: this.queue.length,
+				retries: item.retries,
+			})
 		}
 
-		this.isProcessing = false
+		this.releaseLock()
 		await this.processQueue()
 	}
 
