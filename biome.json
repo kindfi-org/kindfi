@@ -7,11 +7,15 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
+		"maxSize": 5000000,
 		"ignore": [
 			"./apps/web/.next",
 			"./apps/academy-wep/.next",
 			"./apps/indexer/src/types/models",
-			"./apps/kyc-server/public"
+			"./apps/kyc-server/public",
+			"**/dist/**",
+			"**/build/**",
+			"**/node_modules/**"
 		]
 	},
 	"formatter": { "enabled": true, "indentStyle": "tab", "indentWidth": 2 },

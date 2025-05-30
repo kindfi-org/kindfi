@@ -4,13 +4,13 @@ CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 -- Create notification type enum
 CREATE TYPE public.notification_type AS ENUM (
-  'system',
-  'transaction',
-  'security',
-  'account',
-  'market',
-  'kyc',
-  'support'
+  'PROJECT_UPDATE',
+  'MILESTONE_COMPLETED',
+  'ESCROW_RELEASED',
+  'KYC_STATUS_CHANGE',
+  'COMMENT_ADDED',
+  'MEMBER_JOINED',
+  'SYSTEM_ALERT'
 );
 
 -- Create notification status enum

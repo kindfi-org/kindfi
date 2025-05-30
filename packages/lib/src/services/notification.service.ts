@@ -62,7 +62,7 @@ export class NotificationService {
 			const { error } = await this.supabase.from('notifications').insert({
 				...item.notification,
 				metadata_hash: metadataHash,
-				delivery_status: 'pending' as NotificationStatus,
+				delivery_status: NotificationStatus.Pending,
 			})
 
 			if (error) throw error

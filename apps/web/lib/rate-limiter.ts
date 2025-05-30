@@ -25,10 +25,17 @@ export class RateLimiter {
 			)
 		}
 
-		this.redis = new Redis({
-			url,
-			token,
-		})
+		try {
+			this.redis = new Redis({
+				url,
+				token,
+			})
+		} catch (error) {
+			throw new Error(
+				`Failed to initialize Redis client: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
+		}
+
 		this.windowMs = options.windowMs
 		this.max = options.max
 	}
