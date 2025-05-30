@@ -1,11 +1,13 @@
 'use client'
 
-import type { Notification } from '@packages/lib'
-import { formatDistanceToNow } from 'date-fns'
+import { cn } from '@/lib/utils'
+import { formatNotificationDate } from '@/lib/utils'
+import type { Database } from '@kindfi/lib/types/supabase'
 import { Check } from 'lucide-react'
 import { Button } from '../../components/ui/button'
-import { cn } from '../../lib/utils'
 import { useNotificationContext } from '../../providers/notification-provider'
+
+type Notification = Database['public']['Tables']['notifications']['Row']
 
 interface NotificationItemProps {
 	notification: Notification
@@ -24,9 +26,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
 			<div className="flex-1 space-y-1">
 				<p className="text-sm font-medium">{notification.message}</p>
 				<p className="text-xs text-muted-foreground">
-					{formatDistanceToNow(new Date(notification.created_at), {
-						addSuffix: true,
-					})}
+					{formatNotificationDate(notification.created_at)}
 				</p>
 			</div>
 			{!notification.read_at && (

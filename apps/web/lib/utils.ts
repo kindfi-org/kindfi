@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from 'clsx'
+import { formatDistanceToNow } from 'date-fns'
 import { redirect } from 'next/navigation'
 import Server from 'stellar-sdk'
 import Keypair from 'stellar-sdk'
@@ -43,4 +44,14 @@ export async function getAccountSequence(secretKey: string): Promise<number> {
 		Keypair.fromSecret(secretKey).publicKey(),
 	)
 	return account.sequenceNumber
+}
+
+export function formatNotificationDate(dateString: string): string {
+	try {
+		return formatDistanceToNow(new Date(dateString), {
+			addSuffix: true,
+		})
+	} catch {
+		return 'Recently'
+	}
 }

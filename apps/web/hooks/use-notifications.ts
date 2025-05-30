@@ -1,41 +1,39 @@
-import type { Notification } from '@packages/lib'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import { formatNotificationDate } from '@/lib/utils'
+import { useSupabase } from '@kindfi/lib'
+import type { Database } from '@kindfi/lib/types/supabase'
 import { useCallback, useEffect, useState } from 'react'
 
-export function useNotifications() {
+type Notification = Database['public']['Tables']['notifications']['Row']
+
+export function useNotifications(userId: string) {
+	const { supabase } = useSupabase()
 	const [notifications, setNotifications] = useState<Notification[]>([])
-	const [unreadCount, setUnreadCount] = useState(0)
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<Error | null>(null)
-	const [page, setPage] = useState(1)
 	const [hasMore, setHasMore] = useState(true)
-	const supabase = createClientComponentClient()
+	const [page, setPage] = useState(0)
+	const PAGE_SIZE = 20
 
 	const fetchNotifications = useCallback(
 		async (pageNum: number) => {
 			try {
-				setIsLoading(true)
-				setError(null)
-
-				const { data, error, count } = await supabase
+				const { data, error: fetchError } = await supabase
 					.from('notifications')
-					.select('*', { count: 'exact' })
+					.select('*')
+					.eq('to', userId)
 					.order('created_at', { ascending: false })
-					.range((pageNum - 1) * 20, pageNum * 20 - 1)
+					.range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1)
 
-				if (error) throw error
+				if (fetchError) throw fetchError
 
-				const typedData = (data || []) as Notification[]
-				const total = count || 0
-				setHasMore(total > pageNum * 20)
-
-				if (pageNum === 1) {
-					setNotifications(typedData)
+				if (pageNum === 0) {
+					setNotifications(data)
 				} else {
-					setNotifications((prev) => [...prev, ...typedData])
+					setNotifications((prev) => [...prev, ...data])
 				}
-				setUnreadCount(typedData.filter((n) => !n.read_at).length)
+
+				setHasMore(data.length === PAGE_SIZE)
+				setError(null)
 			} catch (err) {
 				setError(
 					err instanceof Error
@@ -46,7 +44,7 @@ export function useNotifications() {
 				setIsLoading(false)
 			}
 		},
-		[supabase],
+		[supabase, userId],
 	)
 
 	const loadMore = useCallback(() => {
@@ -58,21 +56,20 @@ export function useNotifications() {
 	const markAsRead = useCallback(
 		async (notificationIds: string[]) => {
 			try {
-				const { error } = await supabase.rpc('mark_notifications_as_read', {
-					p_notification_ids: notificationIds,
-				})
-
-				if (error) throw error
-
-				setNotifications((prev) =>
-					prev.map((n) =>
-						notificationIds.includes(n.id)
-							? { ...n, read_at: new Date().toISOString() }
-							: n,
-					),
+				const { error: updateError } = await supabase.rpc(
+					'mark_notifications_as_read',
+					{ p_notification_ids: notificationIds },
 				)
 
-				setUnreadCount((prev) => Math.max(0, prev - notificationIds.length))
+				if (updateError) throw updateError
+
+				setNotifications((prev) =>
+					prev.map((notification) =>
+						notificationIds.includes(notification.id)
+							? { ...notification, read_at: new Date().toISOString() }
+							: notification,
+					),
+				)
 			} catch (err) {
 				setError(
 					err instanceof Error
@@ -84,28 +81,11 @@ export function useNotifications() {
 		[supabase],
 	)
 
-	const markAllAsRead = useCallback(async () => {
-		try {
-			const unreadIds = notifications.filter((n) => !n.read_at).map((n) => n.id)
-
-			if (unreadIds.length === 0) return
-
-			await markAsRead(unreadIds)
-		} catch (err) {
-			setError(
-				err instanceof Error
-					? err
-					: new Error('Failed to mark all notifications as read'),
-			)
-		}
-	}, [notifications, markAsRead])
-
 	useEffect(() => {
 		fetchNotifications(page)
 	}, [fetchNotifications, page])
 
 	useEffect(() => {
-		// Subscribe to real-time updates
 		const channel = supabase
 			.channel('notifications')
 			.on(
@@ -114,29 +94,10 @@ export function useNotifications() {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'notifications',
+					filter: `to=eq.${userId}`,
 				},
-				(payload: RealtimePostgresChangesPayload<Notification>) => {
-					const newNotification = payload.new as Notification
-					setNotifications((prev) => [newNotification, ...prev])
-					setUnreadCount((prev) => prev + 1)
-				},
-			)
-			.on(
-				'postgres_changes',
-				{
-					event: 'UPDATE',
-					schema: 'public',
-					table: 'notifications',
-				},
-				(payload: RealtimePostgresChangesPayload<Notification>) => {
-					const updatedNotification = payload.new as Notification
-					setNotifications((prev) =>
-						prev.map((n) =>
-							n.id === updatedNotification.id
-								? { ...n, ...updatedNotification }
-								: n,
-						),
-					)
+				(payload) => {
+					setNotifications((prev) => [payload.new as Notification, ...prev])
 				},
 			)
 			.subscribe()
@@ -144,20 +105,15 @@ export function useNotifications() {
 		return () => {
 			supabase.removeChannel(channel)
 		}
-	}, [supabase])
+	}, [supabase, userId])
 
 	return {
 		notifications,
-		unreadCount,
 		isLoading,
 		error,
 		hasMore,
 		loadMore,
 		markAsRead,
-		markAllAsRead,
-		refresh: () => {
-			setPage(1)
-			fetchNotifications(1)
-		},
+		formatDate: formatNotificationDate,
 	}
 }
