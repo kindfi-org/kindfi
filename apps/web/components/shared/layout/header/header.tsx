@@ -23,9 +23,9 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from '~/components/base/sheet'
+import { NotificationDropdown } from '~/components/notifications/notification-dropdown'
 import { useAuth } from '~/hooks/use-auth'
 import { Navigation } from './navigation'
-import { NotificationDropdown } from '~/components/notifications/notification-dropdown'
 
 export const Header = () => {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

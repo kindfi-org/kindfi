@@ -1,7 +1,19 @@
+import type { RouteProp } from '@react-navigation/native'
 import React from 'react'
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
 
-const ItemDetails = ({ route }: { route: any }) => {
+type ItemDetailsRouteParams = {
+	item: {
+		tags: string[]
+		// Add other item properties as needed
+	}
+}
+
+const ItemDetails = ({
+	route,
+}: {
+	route: RouteProp<{ params: ItemDetailsRouteParams }, 'params'>
+}) => {
 	const { item } = route.params
 
 	return (
@@ -33,8 +45,8 @@ const ItemDetails = ({ route }: { route: any }) => {
 
 				{/* Tags Section */}
 				<View style={styles.tagsContainer}>
-					{item.tags.map((tag: string, index: number) => (
-						<Text key={index} style={styles.tag}>
+					{item.tags.map((tag: string) => (
+						<Text key={`tag-${tag}`} style={styles.tag}>
 							{tag}
 						</Text>
 					))}

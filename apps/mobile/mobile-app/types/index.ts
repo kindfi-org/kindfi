@@ -1,9 +1,12 @@
-export interface Item {
+import type { ImageSourcePropType } from 'react-native'
+
+export interface Project {
 	id: string
 	title: string
+	description: string
 	imageUrl: string
 	category: string
-	image: any
+	image: ImageSourcePropType
 	text: string
 }
 

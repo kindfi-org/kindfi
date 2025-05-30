@@ -65,9 +65,9 @@ export default function MobileNavbar() {
 					className="bg-white rounded-lg p-2 shadow-md"
 					style={{ elevation: 4 }}
 				>
-					{navItems.map((item, index) => (
+					{navItems.map((item) => (
 						<MotiView
-							key={index}
+							key={`nav-${item.label}`}
 							from={{ opacity: 0, translateX: -20 }}
 							animate={{ opacity: 1, translateX: 0 }}
 							transition={{ delay: index * 100, type: 'timing', duration: 300 }}

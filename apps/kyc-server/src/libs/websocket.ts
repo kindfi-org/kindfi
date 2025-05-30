@@ -1,4 +1,7 @@
-import type { RealtimeChannel } from '@supabase/supabase-js'
+import type {
+	RealtimeChannel,
+	RealtimePostgresChangesPayload,
+} from '@supabase/supabase-js'
 import { createClient } from '@supabase/supabase-js'
 import type { ServerWebSocket } from 'bun'
 
@@ -8,11 +11,22 @@ interface KYCWebSocketData {
 	userId?: string
 }
 
-interface KYCStatusRecord {
+interface KYCStatusData {
 	user_id: string
 	status: string
 	verification_level: string
-	[key: string]: any
+	[key: string]: string | number | boolean
+}
+
+interface KYCStatusChange {
+	new: {
+		user_id: string
+		status: string
+		verification_level: string
+		[key: string]: string | number | boolean
+	}
+	old: Record<string, string | number | boolean>
+	[key: string]: unknown
 }
 
 interface KYCUpdate {
@@ -30,10 +44,10 @@ interface SupabaseKYCPayload {
 		user_id: string
 		status: string
 		verification_level: string
-		[key: string]: any
+		[key: string]: string | number | boolean
 	}
-	old: Record<string, any>
-	[key: string]: any
+	old: Record<string, string | number | boolean>
+	[key: string]: unknown
 }
 
 export class KYCWebSocketService {
@@ -61,23 +75,23 @@ export class KYCWebSocketService {
 		this.channel = this.supabase
 			.channel('kyc_status_changes')
 			.on(
-				'postgres_changes' as any,
+				'postgres_changes' as const,
 				{
 					event: '*',
 					schema: 'public',
 					table: 'kyc_status',
 				},
-				(payload: any) => {
+				(payload: RealtimePostgresChangesPayload<KYCStatusChange>) => {
 					console.log('Received KYC status change:', payload)
 
-					const newRecord = payload.new as KYCStatusRecord
+					const newRecord = payload.new as KYCStatusData
 
 					const update: KYCUpdate = {
 						type: 'kyc_status',
 						data: {
-							user_id: newRecord.user_id,
-							status: newRecord.status,
-							verification_level: newRecord.verification_level,
+							user_id: String(newRecord.user_id),
+							status: String(newRecord.status),
+							verification_level: String(newRecord.verification_level),
 							timestamp: new Date().toISOString(),
 						},
 					}
@@ -110,10 +124,14 @@ export class KYCWebSocketService {
 
 	private async sendInitialStatus(ws: ServerWebSocket<KYCWebSocketData>) {
 		try {
+			if (!ws.data.userId) {
+				return
+			}
+
 			const { data: status, error } = await this.supabase
 				.from('kyc_status')
 				.select('*')
-				.eq('user_id', ws.data.userId!)
+				.eq('user_id', ws.data.userId)
 				.single()
 
 			if (error) {
@@ -128,13 +146,13 @@ export class KYCWebSocketService {
 			}
 
 			if (status) {
-				const kycStatus = status as KYCStatusRecord
+				const kycStatus = status as KYCStatusData
 				const update: KYCUpdate = {
 					type: 'kyc_status',
 					data: {
-						user_id: kycStatus.user_id,
-						status: kycStatus.status,
-						verification_level: kycStatus.verification_level,
+						user_id: String(kycStatus.user_id),
+						status: String(kycStatus.status),
+						verification_level: String(kycStatus.verification_level),
 						timestamp: new Date().toISOString(),
 					},
 				}

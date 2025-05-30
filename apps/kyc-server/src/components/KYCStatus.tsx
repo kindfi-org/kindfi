@@ -41,6 +41,7 @@ export function KYCStatus({
 					</span>
 					{!isConnected && (
 						<button
+							type="button"
 							onClick={reconnect}
 							className="text-sm text-blue-500 hover:text-blue-600"
 						>

@@ -3,10 +3,11 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { MotiView } from 'moti'
 import type React from 'react'
 import { Text, View } from 'react-native'
+import type { StyleProp, TextStyle } from 'react-native'
 
 interface AnimatedTextProps {
 	text: string
-	textStyle?: any
+	textStyle?: StyleProp<TextStyle>
 	delay?: number
 	duration?: number
 	className?: string
@@ -70,7 +71,7 @@ export const AnimatedCharacters: React.FC<AnimatedTextProps> = ({
 		<View className={`flex-row flex-wrap justify-center ${className}`}>
 			{characters.map((char, index) => (
 				<MotiView
-					key={index}
+					key={`char-${char}`}
 					from={{ opacity: 0, translateY: 10 }}
 					animate={{ opacity: 1, translateY: 0 }}
 					transition={{
@@ -79,7 +80,7 @@ export const AnimatedCharacters: React.FC<AnimatedTextProps> = ({
 						delay: delay + index * duration,
 					}}
 				>
-					<Text className={textStyle}>{char === ' ' ? '\u00A0' : char}</Text>
+					<Text style={textStyle}>{char === ' ' ? '\u00A0' : char}</Text>
 				</MotiView>
 			))}
 		</View>

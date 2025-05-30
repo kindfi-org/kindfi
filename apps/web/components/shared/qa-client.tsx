@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
+import type { Database } from '@/types/supabase'
 import type { TablesUpdate } from '@services/supabase'
 import {
 	Bell,
@@ -88,6 +89,9 @@ interface QAClientProps {
 	initialQuestions: CommentData[]
 	initialComments: CommentData[]
 }
+
+type Question = Database['public']['Tables']['questions']['Row']
+type User = Database['public']['Tables']['users']['Row']
 
 // Helper functions for guest users
 const getGuestUserId = () => {
@@ -195,13 +199,8 @@ export default function QAClient({
 
 				if (data && data.length > 0) {
 					// Get unique author IDs
-					if (!Array.isArray(data)) {
-						throw new Error('Failed to fetch comments: data is not an array')
-					}
-
 					const authorIds = [
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						...new Set(data.map((item: any) => item.author_id)),
+						...new Set(data.map((item: Question) => item.author_id)),
 					]
 
 					// Fetch authors
@@ -212,18 +211,17 @@ export default function QAClient({
 
 					if (authorsError) {
 						console.error('Error fetching authors:', authorsError)
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((item: any) => ({
+						return data.map((item: Question) => ({
 							...item,
 							created_at: item.created_at || new Date().toISOString(),
-							author: null,
+							author: undefined,
 						})) as CommentData[]
 					}
 
 					if (authors) {
 						// Create a lookup map for authors
 						const authorsMap = authors.reduce(
-							(acc: Record<string, UserData>, author: any) => {
+							(acc: Record<string, UserData>, author: User) => {
 								acc[author.id] = author
 								return acc
 							},
@@ -231,27 +229,19 @@ export default function QAClient({
 						)
 
 						// Attach author data to each question
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((question: any) => ({
+						return data.map((question: Question) => ({
 							...question,
 							created_at: question.created_at || new Date().toISOString(),
-							author:
-								authorsMap[question.author_id] ||
-								(question.author_id?.includes('-')
-									? {
-											id: question.author_id,
-											full_name: 'Guest User',
-											is_team_member: false,
-										}
-									: null),
+							author: authorsMap[question.author_id],
 						})) as CommentData[]
 					}
 				}
 
 				// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-				return (data || []).map((item: any) => ({
+				return (data || []).map((item: Question) => ({
 					...item,
 					created_at: item.created_at || new Date().toISOString(),
+					author: undefined,
 				})) as CommentData[]
 			} catch (err) {
 				console.error('Error fetching questions:', err)
@@ -287,8 +277,7 @@ export default function QAClient({
 				if (data && data.length > 0) {
 					// Get unique author IDs
 					const authorIds = [
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						...new Set(data.map((item: any) => item.author_id)),
+						...new Set(data.map((item: Question) => item.author_id)),
 					]
 
 					const { data: authors, error: authorsError } = await supabase
@@ -298,18 +287,16 @@ export default function QAClient({
 
 					if (authorsError) {
 						console.error('Error fetching authors:', authorsError)
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((item: any) => ({
+						return data.map((item: Question) => ({
 							...item,
 							created_at: item.created_at || new Date().toISOString(),
-							author: null,
+							author: undefined,
 						})) as CommentData[]
 					}
 
 					if (authors) {
 						const authorsMap = authors.reduce(
-							// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-							(acc: Record<string, UserData>, author: any) => {
+							(acc: Record<string, UserData>, author: User) => {
 								acc[author.id] = author
 								return acc
 							},
@@ -317,26 +304,19 @@ export default function QAClient({
 						)
 
 						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((comment: any) => ({
+						return data.map((comment: Question) => ({
 							...comment,
 							created_at: comment.created_at || new Date().toISOString(),
-							author:
-								authorsMap[comment.author_id] ||
-								(comment.author_id?.includes('-')
-									? {
-											id: comment.author_id,
-											full_name: 'Guest User',
-											is_team_member: false,
-										}
-									: null),
+							author: authorsMap[comment.author_id],
 						})) as CommentData[]
 					}
 				}
 
 				// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-				return (data || []).map((item: any) => ({
+				return (data || []).map((item: Question) => ({
 					...item,
 					created_at: item.created_at || new Date().toISOString(),
+					author: undefined,
 				})) as CommentData[]
 			} catch (err) {
 				console.error('Error fetching comments:', err)
@@ -450,8 +430,7 @@ export default function QAClient({
 						})
 
 						const eventType = payload.eventType
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						const record = payload.new as any
+						const record = payload.new as Question
 
 						if (eventType === 'INSERT') {
 							const commentType = record?.type || 'comment'
