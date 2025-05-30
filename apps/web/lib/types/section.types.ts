@@ -3,6 +3,7 @@ export interface AchievementCardProps {
 	subtitle?: string
 	status: 'earned' | 'in-progress' | 'locked'
 	icon: 'trophy' | 'award' | 'heart' | 'star' | 'diamond' | 'users'
+	progressPercentage?: number
 }
 export interface NFTProps {
 	id: string

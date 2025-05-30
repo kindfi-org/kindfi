@@ -57,7 +57,12 @@ export function AchievementsGrid() {
 		setAchievements((prev) =>
 			prev.map((achievement, i) => {
 				if (i < index) return { ...achievement, status: 'earned' }
-				if (i === index) return { ...achievement, status: 'in-progress' }
+				if (i === index)
+					return {
+						...achievement,
+						status: 'in-progress',
+						progressPercentage: 65,
+					}
 				return { ...achievement, status: 'locked' }
 			}),
 		)
@@ -173,6 +178,7 @@ export function AchievementsGrid() {
 											subtitle={card.subtitle}
 											status={card.status}
 											icon={card.icon}
+											progressPercentage={card.progressPercentage}
 											onClick={() => updateAchievements(index)}
 										/>
 									))}
