@@ -23,9 +23,10 @@ const RETRY_DELAY = 1000
 
 export class NotificationService {
 	private supabase
+	private readonly MAX_QUEUE_SIZE = 1000
+	private isProcessing = false
 	private queue: Array<{ notification: CreateNotification; retries: number }> =
 		[]
-	private isProcessing = false
 
 	constructor(supabaseUrl: string, supabaseKey: string) {
 		this.supabase = createClient<Database>(supabaseUrl, supabaseKey)
@@ -60,7 +61,11 @@ export class NotificationService {
 		try {
 			const metadataHash = await this.hashMetadata(item.notification.metadata)
 			const { error } = await this.supabase.from('notifications').insert({
-				...item.notification,
+				type: item.notification.type,
+				message: item.notification.message,
+				from: item.notification.from,
+				to: item.notification.to,
+				metadata: item.notification.metadata,
 				metadata_hash: metadataHash,
 				delivery_status: NotificationStatus.Pending,
 			})
@@ -82,15 +87,24 @@ export class NotificationService {
 		}
 
 		this.isProcessing = false
-		this.processQueue()
+		await this.processQueue()
 	}
 
 	public async createNotification(
 		notification: CreateNotification,
-	): Promise<void> {
+	): Promise<{ queued: boolean; queueSize: number }> {
 		await this.validateNotification(notification)
+
+		if (this.queue.length >= this.MAX_QUEUE_SIZE) {
+			logger.warn('Notification queue is full', {
+				queueSize: this.queue.length,
+			})
+			return { queued: false, queueSize: this.queue.length }
+		}
+
 		this.queue.push({ notification, retries: 0 })
-		this.processQueue()
+		await this.processQueue()
+		return { queued: true, queueSize: this.queue.length }
 	}
 
 	public subscribeToNotifications(

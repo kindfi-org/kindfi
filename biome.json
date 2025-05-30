@@ -9,13 +9,14 @@
 		"ignoreUnknown": false,
 		"maxSize": 5000000,
 		"ignore": [
-			"./apps/web/.next",
-			"./apps/academy-wep/.next",
-			"./apps/indexer/src/types/models",
-			"./apps/kyc-server/public",
+			"**/.next/**",
 			"**/dist/**",
 			"**/build/**",
-			"**/node_modules/**"
+			"**/node_modules/**",
+			"**/coverage/**",
+			"**/.cache/**",
+			"**/apps/indexer/src/types/models/**",
+			"**/apps/kyc-server/public/**"
 		]
 	},
 	"formatter": { "enabled": true, "indentStyle": "tab", "indentWidth": 2 },

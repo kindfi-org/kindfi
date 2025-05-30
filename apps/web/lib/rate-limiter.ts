@@ -41,23 +41,32 @@ export class RateLimiter {
 	}
 
 	async check(key: string): Promise<RateLimitResult> {
-		const now = Date.now()
-		const windowKey = `ratelimit:${key}:${Math.floor(now / this.windowMs)}`
+		try {
+			const now = Date.now()
+			const windowKey = `ratelimit:${key}:${Math.floor(now / this.windowMs)}`
 
-		// Get current count
-		const count = await this.redis.incr(windowKey)
+			// Get current count
+			const count = await this.redis.incr(windowKey)
 
-		// Set expiry if this is the first request in the window
-		if (count === 1) {
-			await this.redis.expire(windowKey, Math.ceil(this.windowMs / 1000))
-		}
+			// Set expiry if this is the first request in the window
+			if (count === 1) {
+				await this.redis.expire(windowKey, Math.ceil(this.windowMs / 1000))
+			}
 
-		// Calculate retry after time
-		const retryAfter = Math.ceil((this.windowMs - (now % this.windowMs)) / 1000)
+			const success = count <= this.max
+			// Calculate retry after time - if at limit, wait for next window
+			const retryAfter = success
+				? 0
+				: Math.ceil((this.windowMs - (now % this.windowMs)) / 1000)
 
-		return {
-			success: count <= this.max,
-			retryAfter,
+			return {
+				success,
+				retryAfter,
+			}
+		} catch (error) {
+			throw new Error(
+				`Rate limiter check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 }
