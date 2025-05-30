@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import type { Database } from '../types/supabase'
+import { logger } from '../utils/logger'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
 type NotificationType = Database['public']['Enums']['notification_type']
@@ -18,8 +19,8 @@ const NotificationSchema = z.object({
 		'support',
 	] as const),
 	message: z.string().min(1),
-	from: z.string().min(1),
-	to: z.string().min(1),
+	from: z.string().uuid().nullable(),
+	to: z.string().uuid(),
 	metadata: z.record(z.unknown()).default({}),
 })
 
@@ -51,6 +52,7 @@ export class NotificationService {
 		try {
 			await NotificationSchema.parseAsync(notification)
 		} catch (error) {
+			logger.error('Invalid notification', error)
 			throw new Error(
 				`Invalid notification: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			)
@@ -75,7 +77,7 @@ export class NotificationService {
 
 			this.queue.shift()
 		} catch (error) {
-			console.error('Error processing notification:', error)
+			logger.error('Error processing notification', error)
 			if (item.retries < MAX_RETRIES) {
 				item.retries++
 				setTimeout(() => {
@@ -114,7 +116,16 @@ export class NotificationService {
 					filter: `to=eq.${userId}`,
 				},
 				(payload) => {
-					callback(payload.new as Notification)
+					const newNotification = payload.new
+					if (
+						!newNotification ||
+						typeof newNotification !== 'object' ||
+						!('id' in newNotification)
+					) {
+						logger.warn('Invalid notification payload', payload)
+						return
+					}
+					callback(newNotification as Notification)
 				},
 			)
 			.subscribe()

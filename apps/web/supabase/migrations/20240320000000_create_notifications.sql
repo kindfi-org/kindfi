@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   type notification_type NOT NULL,
   message TEXT NOT NULL,
-  "from" TEXT NOT NULL,
-  "to" TEXT NOT NULL,
+  "from" UUID,
+  "to" UUID NOT NULL,
   metadata JSONB NOT NULL DEFAULT '{}',
   metadata_hash TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -36,6 +36,22 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 CREATE INDEX IF NOT EXISTS idx_notifications_to ON public.notifications("to");
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at);
 CREATE INDEX IF NOT EXISTS idx_notifications_delivery_status ON public.notifications(delivery_status);
+CREATE INDEX IF NOT EXISTS idx_notifications_to_unread ON public.notifications("to", read_at) WHERE read_at IS NULL;
+
+-- Create metadata hash trigger function
+CREATE OR REPLACE FUNCTION public.generate_metadata_hash()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.metadata_hash = encode(digest(NEW.metadata::text, 'sha256'), 'hex');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create metadata hash trigger
+CREATE TRIGGER generate_metadata_hash_trigger
+  BEFORE INSERT OR UPDATE OF metadata ON public.notifications
+  FOR EACH ROW
+  EXECUTE FUNCTION public.generate_metadata_hash();
 
 -- Enable Row Level Security
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
