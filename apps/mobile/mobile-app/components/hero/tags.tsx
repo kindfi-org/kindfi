@@ -35,17 +35,17 @@ export const AnimatedTag: React.FC<AnimatedTagProps> = ({
 				delay,
 				easing: Easing.bezier(0.25, 0.1, 0.25, 1),
 			}}
-			style={{ marginRight: 8, marginBottom: 8 }}
 		>
 			<Pressable
 				onPressIn={() => setIsPressed(true)}
 				onPressOut={() => setIsPressed(false)}
 				onPress={onPress}
+				hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
 			>
 				<MotiView
 					animate={{
-						scale: isPressed ? 1.1 : 1,
-						translateY: isPressed ? -5 : 0,
+						scale: isPressed ? 1.05 : 1,
+						translateY: isPressed ? -2 : 0,
 					}}
 					transition={{
 						type: 'timing',
@@ -54,37 +54,41 @@ export const AnimatedTag: React.FC<AnimatedTagProps> = ({
 				>
 					<View
 						className={`rounded-full px-4 py-2 border border-gray-100 shadow-sm ${isPressed ? 'shadow-md' : ''}`}
-						style={{ backgroundColor: bgColor }}
+						style={{
+							backgroundColor: bgColor,
+							minHeight: 36,
+							alignSelf: 'flex-start',
+						}}
 					>
 						<View className="flex-row items-center">
 							<MotiView
 								animate={{
-									rotate: isPressed ? '10deg' : '0deg',
-									scale: isPressed ? 1.2 : 1,
+									rotate: isPressed ? '5deg' : '0deg',
+									scale: isPressed ? 1.1 : 1,
 								}}
 								transition={{
 									type: 'timing',
 									duration: 200,
+								}}
+								style={{
+									width: 16,
+									height: 16,
+									alignItems: 'center',
+									justifyContent: 'center',
 								}}
 							>
 								{icon}
 							</MotiView>
-							<MotiView
-								animate={{
-									translateX: isPressed ? 3 : 0,
+							<Text
+								className="ml-2 text-sm font-medium"
+								style={{
+									color: textColor,
+									lineHeight: 20,
 								}}
-								transition={{
-									type: 'timing',
-									duration: 200,
-								}}
+								numberOfLines={1}
 							>
-								<Text
-									className="ml-2 text-sm font-medium"
-									style={{ color: textColor }}
-								>
-									{label}
-								</Text>
-							</MotiView>
+								{label}
+							</Text>
 						</View>
 					</View>
 				</MotiView>

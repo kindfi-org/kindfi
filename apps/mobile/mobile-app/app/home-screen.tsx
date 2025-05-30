@@ -1,6 +1,7 @@
 import { MotiView } from 'moti'
 import { SafeAreaView, ScrollView, StatusBar, View } from 'react-native'
 import HeroSection from '../components/hero/hero-section'
+import LatamImpactSection from '../components/impact/latam-impact-section'
 import MissionBlock from '../components/mission/mission-block'
 import MobileNavbar from '../components/navbar/navbar-placeholder'
 
@@ -18,7 +19,7 @@ export default function HomeScreen() {
 					<ScrollView className="flex-1">
 						<View className="pt-16">
 							<HeroSection />
-							{/* Other sections would go here */}
+							<LatamImpactSection />
 							<MissionBlock />
 						</View>
 					</ScrollView>
