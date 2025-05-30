@@ -23,6 +23,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from '~/components/base/sheet'
+import { NotificationDropdown } from '~/components/notifications/notification-dropdown'
 import { useAuth } from '~/hooks/use-auth'
 import { Navigation } from './navigation'
 
@@ -45,6 +46,7 @@ export const Header = () => {
 
 					{/* Action Buttons */}
 					<div className="flex items-center space-x-4">
+						{user && <NotificationDropdown />}
 						{user ? <UserMenu user={user} /> : <AuthButtons />}
 
 						{/* Mobile menu */}

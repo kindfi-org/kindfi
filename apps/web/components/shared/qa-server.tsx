@@ -1,7 +1,11 @@
+import type { Database } from '@/types/supabase'
 import { createSupabaseServerClient } from '@packages/lib/supabase/server/server-client'
 import { Loader2 } from 'lucide-react'
 import { Suspense } from 'react'
 import QAClient from './qa-client'
+
+type Question = Database['public']['Tables']['questions']['Row']
+type User = Database['public']['Tables']['users']['Row']
 
 interface UserData {
 	id: string
@@ -44,8 +48,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 	if (initialQuestions && initialQuestions.length > 0) {
 		const authorIds = [
-			// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-			...new Set(initialQuestions.map((item: any) => item.author_id)),
+			...new Set(initialQuestions.map((item: Question) => item.author_id)),
 		]
 
 		const { data: authors } = await supabase
@@ -55,8 +58,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 		const authorsMap = authors
 			? authors.reduce(
-					// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-					(acc: Record<string, UserData>, author: any) => {
+					(acc: Record<string, UserData>, author: User) => {
 						acc[author.id] = author
 						return acc
 					},
@@ -64,18 +66,9 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 				)
 			: {}
 
-		// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-		questionsWithAuthors = initialQuestions.map((question: any) => ({
+		questionsWithAuthors = initialQuestions.map((question: Question) => ({
 			...question,
-			author:
-				authorsMap[question.author_id] ||
-				(question.author_id?.includes('-')
-					? {
-							id: question.author_id,
-							full_name: 'Guest User',
-							is_team_member: false,
-						}
-					: undefined),
+			author: authorsMap[question.author_id],
 		}))
 	}
 
@@ -90,8 +83,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 	if (commentsData && commentsData.length > 0) {
 		const authorIds = [
-			// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-			...new Set(commentsData.map((item: any) => item.author_id)),
+			...new Set(commentsData.map((item: Question) => item.author_id)),
 		]
 
 		const { data: authors } = await supabase
@@ -101,8 +93,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 		const authorsMap = authors
 			? authors.reduce(
-					// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-					(acc: Record<string, UserData>, author: any) => {
+					(acc: Record<string, UserData>, author: User) => {
 						acc[author.id] = author
 						return acc
 					},
@@ -110,18 +101,9 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 				)
 			: {}
 
-		// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-		commentsWithAuthors = commentsData.map((comment: any) => ({
+		commentsWithAuthors = commentsData.map((comment: Question) => ({
 			...comment,
-			author:
-				authorsMap[comment.author_id] ||
-				(comment.author_id?.includes('-')
-					? {
-							id: comment.author_id,
-							full_name: 'Guest User',
-							is_team_member: false,
-						}
-					: undefined),
+			author: authorsMap[comment.author_id],
 		}))
 	}
 

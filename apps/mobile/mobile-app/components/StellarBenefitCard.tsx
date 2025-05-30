@@ -50,8 +50,11 @@ export default function StellarBenefitCard({
 					</Text>
 				)}
 				<Box className="mb-4 space-y-2">
-					{bullets.map((item, index) => (
-						<Box key={index} className="flex-row items-start space-x-2">
+					{bullets.map((item) => (
+						<Box
+							key={`bullet-${item}`}
+							className="flex-row items-start space-x-2"
+						>
 							<Text
 								className={`${bulletColor} text-base`}
 								accessibilityLabel="Checkmark"

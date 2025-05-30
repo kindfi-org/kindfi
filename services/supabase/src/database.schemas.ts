@@ -508,6 +508,41 @@ export const milestonesRelationshipsSchema = z.tuple([
 	}),
 ])
 
+export const notificationsRowSchema = z.object({
+	created_at: z.string(),
+	from: z.string().nullable(),
+	id: z.string(),
+	message: z.string(),
+	metadata: jsonSchema,
+	read_at: z.string().nullable(),
+	to: z.string(),
+	type: z.string(),
+})
+
+export const notificationsInsertSchema = z.object({
+	created_at: z.string().optional(),
+	from: z.string().optional().nullable(),
+	id: z.string().optional(),
+	message: z.string(),
+	metadata: jsonSchema.optional(),
+	read_at: z.string().optional().nullable(),
+	to: z.string(),
+	type: z.string(),
+})
+
+export const notificationsUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	from: z.string().optional().nullable(),
+	id: z.string().optional(),
+	message: z.string().optional(),
+	metadata: jsonSchema.optional(),
+	read_at: z.string().optional().nullable(),
+	to: z.string().optional(),
+	type: z.string().optional(),
+})
+
+export const notificationsRelationshipsSchema = z.tuple([])
+
 export const userRoleSchema = z.union([
 	z.literal('kinder'),
 	z.literal('kindler'),

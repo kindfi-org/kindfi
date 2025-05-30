@@ -107,7 +107,7 @@ export function useKYCWebSocket({
 			clearTimeout(connectionTimeoutRef.current)
 
 			if (retryCountRef.current < maxRetries) {
-				const delay = initialRetryDelay * Math.pow(2, retryCountRef.current)
+				const delay = initialRetryDelay * 2 ** retryCountRef.current
 				retryTimeoutRef.current = setTimeout(() => {
 					retryCountRef.current++
 					connect()
@@ -140,7 +140,7 @@ export function useKYCWebSocket({
 	return {
 		isConnected,
 		lastUpdate: lastUpdateRef.current,
-		sendMessage: <T extends Record<string, any>>(message: T) => {
+		sendMessage: <T extends Record<string, unknown>>(message: T) => {
 			if (wsRef.current?.readyState === WebSocket.OPEN) {
 				wsRef.current.send(JSON.stringify(message))
 			}

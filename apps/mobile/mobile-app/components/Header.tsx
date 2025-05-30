@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons'
 import type React from 'react'
 import { Image, StyleSheet, Text, View } from 'react-native'
+import type { ImageSourcePropType } from 'react-native'
+
 interface HeaderProps {
-	logo: any
+	logo: ImageSourcePropType
 }
 
 const Header: React.FC<HeaderProps> = ({ logo }) => {

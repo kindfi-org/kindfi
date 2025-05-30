@@ -1,11 +1,12 @@
 import React from 'react'
+import type { ComponentType } from 'react'
 import { Text } from '../Themed'
 import { Box } from '../ui/box'
 import { Icon } from '../ui/icon'
 import { Link } from '../ui/link'
 
 type ImpactCardProps = {
-	icon: any // Icon component (like RefreshCcw)
+	icon: ComponentType<{ size?: number; color?: string }>
 	title: string
 	description: string
 	linkText: string

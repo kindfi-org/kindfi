@@ -35,19 +35,17 @@ function ImpactSection() {
 				transprarent, community-led ecosystem
 			</Text>
 
-			{impact_data.map((items, i) => {
-				return (
-					<ImpactCard
-						key={i}
-						icon={items.icon}
-						title={items.title}
-						description={items.description}
-						linkText={items.linkText}
-						linkHref={items.linkHref}
-						iconColor={items.iconColor}
-					/>
-				)
-			})}
+			{impact_data.map((items) => (
+				<ImpactCard
+					key={`impact-${items.title}`}
+					icon={items.icon}
+					title={items.title}
+					description={items.description}
+					linkText={items.linkText}
+					linkHref={items.linkHref}
+					iconColor={items.iconColor}
+				/>
+			))}
 		</View>
 	)
 }

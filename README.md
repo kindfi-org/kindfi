@@ -34,7 +34,7 @@ bun run init # bun install && bun husky:prepare
 
 1. To run:
 
-```bash
+```bash    
 # web app
 cd apps/web
 bun dev

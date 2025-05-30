@@ -533,6 +533,39 @@ export type Database = {
 					},
 				]
 			}
+			notifications: {
+				Row: {
+					created_at: string
+					from: string | null
+					id: string
+					message: string
+					metadata: Json
+					read_at: string | null
+					to: string
+					type: string
+				}
+				Insert: {
+					created_at?: string
+					from?: string | null
+					id?: string
+					message: string
+					metadata?: Json
+					read_at?: string | null
+					to: string
+					type: string
+				}
+				Update: {
+					created_at?: string
+					from?: string | null
+					id?: string
+					message?: string
+					metadata?: Json
+					read_at?: string | null
+					to?: string
+					type?: string
+				}
+				Relationships: []
+			}
 			profiles: {
 				Row: {
 					bio: string | null
@@ -795,6 +828,20 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
+			create_notification: {
+				Args: {
+					p_type: string
+					p_message: string
+					p_from: string
+					p_to: string
+					p_metadata?: Json
+				}
+				Returns: string
+			}
+			mark_notifications_as_read: {
+				Args: { p_notification_ids: string[] }
+				Returns: undefined
+			}
 			unaccent: {
 				Args: { '': string }
 				Returns: string

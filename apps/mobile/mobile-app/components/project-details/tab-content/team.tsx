@@ -23,16 +23,15 @@ export default function Team() {
 		<View className="mt-4">
 			<Text className="text-lg font-bold mb-6">Our Team</Text>
 
-			{teamMembers.map((member, index) => (
-				<View key={index} className="flex-row mb-6">
+			{teamMembers.map((member) => (
+				<View key={`member-${member.name}`} className="flex-row mb-6">
 					<Image
 						source={{ uri: 'https://placehold.co/100x100' }}
 						className="w-16 h-16 rounded-full mr-4"
 					/>
-					<View className="flex-1">
-						<Text className="font-bold text-lg">{member.name}</Text>
-						<Text className="text-blue-600 mb-1">{member.role}</Text>
-						<Text className="text-gray-600">{member.bio}</Text>
+					<View>
+						<Text className="font-bold">{member.name}</Text>
+						<Text className="text-gray-600">{member.role}</Text>
 					</View>
 				</View>
 			))}
