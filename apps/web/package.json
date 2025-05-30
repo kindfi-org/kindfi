@@ -46,7 +46,7 @@
 		"@tiptap/pm": "^2.11.5",
 		"@tiptap/react": "^2.11.5",
 		"@tiptap/starter-kit": "^2.11.5",
-		"@upstash/redis": "^1.34.4",
+		"@upstash/redis": "^1.28.4",
 		"base64url": "^3.0.1",
 		"bigint-conversion": "^2.4.3",
 		"cbor-x": "^1.6.0",

@@ -1,3 +1,7 @@
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
 -- Create notification type enum
 CREATE TYPE public.notification_type AS ENUM (
   'system',
@@ -22,8 +26,8 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   type notification_type NOT NULL,
   message TEXT NOT NULL,
-  "from" UUID,
-  "to" UUID NOT NULL,
+  sender_id UUID REFERENCES auth.users(id),
+  recipient_id UUID NOT NULL REFERENCES auth.users(id),
   metadata JSONB NOT NULL DEFAULT '{}',
   metadata_hash TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -33,12 +37,15 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 );
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTS idx_notifications_to ON public.notifications("to");
+CREATE INDEX IF NOT EXISTS idx_notifications_recipient_id ON public.notifications(recipient_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at);
 CREATE INDEX IF NOT EXISTS idx_notifications_delivery_status ON public.notifications(delivery_status);
-CREATE INDEX IF NOT EXISTS idx_notifications_to_unread ON public.notifications("to", read_at) WHERE read_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_notifications_recipient_unread ON public.notifications(recipient_id, read_at) WHERE read_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_notifications_recipient_status_created ON public.notifications(recipient_id, delivery_status, created_at DESC);
 
 -- Create metadata hash trigger function
+-- This function automatically generates a SHA-256 hash of the metadata field
+-- for data integrity verification. The hash is immutable once generated.
 CREATE OR REPLACE FUNCTION public.generate_metadata_hash()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -60,12 +67,12 @@ ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own notifications"
   ON public.notifications
   FOR SELECT
-  USING ("to" = auth.uid());
+  USING (recipient_id = auth.uid());
 
 CREATE POLICY "Users can update their own notifications"
   ON public.notifications
   FOR UPDATE
-  USING ("to" = auth.uid());
+  USING (recipient_id = auth.uid());
 
 -- Create cleanup function
 CREATE OR REPLACE FUNCTION public.cleanup_old_notifications()
@@ -80,16 +87,33 @@ BEGIN
 END;
 $$;
 
+-- Schedule cleanup job to run daily at 3 AM
+SELECT cron.schedule('0 3 * * *', 'SELECT public.cleanup_old_notifications();');
+
 -- Create function to mark notifications as read
 CREATE OR REPLACE FUNCTION public.mark_notifications_as_read(p_notification_ids UUID[])
-RETURNS void
+RETURNS integer
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
+DECLARE
+  updated_count integer;
 BEGIN
-  UPDATE public.notifications
-  SET read_at = now()
-  WHERE id = ANY(p_notification_ids)
-  AND "to" = auth.uid();
+  -- Validate array size
+  IF array_length(p_notification_ids, 1) > 100 THEN
+    RAISE EXCEPTION 'Too many notification IDs provided. Maximum is 100.';
+  END IF;
+
+  -- Update notifications and get count
+  WITH updated AS (
+    UPDATE public.notifications
+    SET read_at = now()
+    WHERE id = ANY(p_notification_ids)
+    AND recipient_id = auth.uid()
+    RETURNING 1
+  )
+  SELECT count(*) INTO updated_count FROM updated;
+
+  RETURN updated_count;
 END;
 $$; 

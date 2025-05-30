@@ -1,3 +1,4 @@
+import { RateLimiter } from '@/lib/rate-limiter'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -5,6 +6,11 @@ import { z } from 'zod'
 
 const syncSchema = z.object({
 	notificationIds: z.array(z.string().uuid()),
+})
+
+const rateLimiter = new RateLimiter({
+	windowMs: 60 * 1000, // 1 minute
+	max: 10, // 10 requests per minute
 })
 
 export async function POST(request: Request) {
@@ -18,6 +24,19 @@ export async function POST(request: Request) {
 		} = await supabase.auth.getSession()
 		if (authError || !session) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		// Check rate limit
+		const ip = request.headers.get('x-forwarded-for') || 'unknown'
+		const rateLimitResult = await rateLimiter.check(ip)
+		if (!rateLimitResult.success) {
+			return NextResponse.json(
+				{ error: 'Too many requests' },
+				{
+					status: 429,
+					headers: { 'Retry-After': rateLimitResult.retryAfter.toString() },
+				},
+			)
 		}
 
 		// Validate request body

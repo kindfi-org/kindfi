@@ -9,15 +9,7 @@ type NotificationType = Database['public']['Enums']['notification_type']
 type NotificationStatus = Database['public']['Enums']['notification_status']
 
 const NotificationSchema = z.object({
-	type: z.enum([
-		'system',
-		'transaction',
-		'security',
-		'account',
-		'market',
-		'kyc',
-		'support',
-	] as const),
+	type: z.nativeEnum(NotificationType),
 	message: z.string().min(1),
 	from: z.string().uuid().nullable(),
 	to: z.string().uuid(),
