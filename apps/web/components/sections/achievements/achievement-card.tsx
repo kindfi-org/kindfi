@@ -2,6 +2,7 @@
 
 import { Gem, Heart, Medal, Star, Trophy, Users } from 'lucide-react'
 import { Card, CardContent } from '~/components/base/card'
+import { Progress } from '~/components/base/progress'
 import type { AchievementCardProps } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
@@ -19,6 +20,7 @@ export function AchievementCard({
 	subtitle,
 	status,
 	icon,
+	progressPercentage,
 	onClick,
 }: AchievementCardProps & { onClick: () => void }) {
 	const Icon = icons[icon]
@@ -56,6 +58,19 @@ export function AchievementCard({
 					>
 						{subtitle}
 					</p>
+				)}
+				{status === 'in-progress' && progressPercentage !== undefined && (
+					<div className="w-full mt-3 space-y-1">
+						<div className="relative h-2 w-full overflow-hidden rounded-full bg-blue-100">
+							<div
+								className="absolute h-full w-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-in-out"
+								style={{ width: `${progressPercentage}%` }}
+							/>
+						</div>
+						<p className="text-xs font-medium text-blue-600 text-center">
+							{progressPercentage}% Complete
+						</p>
+					</div>
 				)}
 			</CardContent>
 		</Card>
