@@ -19,15 +19,11 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 
+import type { KycStatusRow } from '~/lib/types/kyc/kyc-table-types'
+
 // ———————————————————————————————————————————————————————————————————————————
 // 1. KYC data shape
 // ———————————————————————————————————————————————————————————————————————————
-export type KycStatusRow = {
-	id: string
-	user: string
-	status: 'approved' | 'pending' | 'rejected'
-	requestedAt: string
-}
 
 const kycData: KycStatusRow[] = [
 	{ id: '1', user: 'alice', status: 'approved', requestedAt: '2025-05-20' },

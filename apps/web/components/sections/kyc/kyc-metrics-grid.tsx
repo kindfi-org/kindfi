@@ -1,6 +1,5 @@
-import React from 'react'
-
 import dynamic from 'next/dynamic'
+import { SummaryCard } from '~/components/cards/summary-card'
 
 const SignUpTrendsBarChart = dynamic(
 	() =>
@@ -16,15 +15,6 @@ const KycStatusPieChart = dynamic(
 	{
 		ssr: true,
 		loading: () => <div>Loading KYC pie chart…</div>,
-	},
-)
-
-const SummaryCard = dynamic(
-	() =>
-		import('~/components/cards/summary-card').then((mod) => mod.SummaryCard),
-	{
-		ssr: true,
-		loading: () => <div>Loading summary…</div>,
 	},
 )
 

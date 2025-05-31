@@ -37,12 +37,7 @@ import {
 	TableRow,
 } from '~/components/base/table'
 
-export type KycStatusRow = {
-	id: string
-	user: string
-	status: 'approved' | 'pending' | 'rejected'
-	requestedAt: string
-}
+import type { KycStatusRow } from '~/lib/types/kyc/kyc-table-types'
 
 const kycData: KycStatusRow[] = [
 	{ id: '1', user: 'alice', status: 'approved', requestedAt: '2025-05-20' },
