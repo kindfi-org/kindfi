@@ -177,3 +177,15 @@ fn test_mint_without_progress_should_fail() {
     let metadata = String::from_str(&env, "metadata");
     badge_client.mint_badge(&user, &BadgeType::Chapter, &22u32, &metadata);
 }
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #4)")]
+fn test_mint_chapter_badge_partial_progress() {
+    let (env, user, _, badge_client, progress_client) = setup();
+    
+    progress_client.set_chapter_lessons(&1, &3); // Chapter has 3 lessons
+    progress_client.mark_lesson_complete(&user, &1, &1); // Only 1 completed
+    
+    let metadata = String::from_str(&env, "metadata");
+    badge_client.mint_badge(&user, &BadgeType::Chapter, &1u32, &metadata);
+}

@@ -13,18 +13,23 @@ use events::{BADGE, BadgeMintedEventData};
 
 mod test;
 
-/// Define the storage keys for persistent storage
+/// Storage keys for persistent data
 #[contracttype]
 #[derive(Clone)]
 enum DataKey {
-    Badge(Address, BadgeType, u32), // Key for individual badge
-    UserIndex(Address),             // Key for tracking user's badge index
-    ProgressTrackerAddress,         // Stored progress tracker contract address
+    /// Individual badge storage: (user_address, badge_type, reference_id)
+    Badge(Address, BadgeType, u32),
+    /// User's badge index mapping badge types to reference IDs
+    UserIndex(Address),
+    /// Address of the external progress tracker contract
+    ProgressTrackerAddress,
 }
 
 // Client for the external academy-progress-tracker contract
 #[contractclient(name = "ProgressTrackerClient")]
 pub trait ProgressTracker {
+    /// Check if a chapter is complete for a user
+    /// Returns false if unable to verify (fail-safe approach)
     fn is_chapter_complete(env: Env, user: Address, chapter_id: u32) -> bool;
 }
 
@@ -67,7 +72,7 @@ impl AcademyBadgeTracker {
                 .storage()
                 .instance()
                 .get::<_, Address>(&DataKey::ProgressTrackerAddress)
-                .expect("ProgressTracker address not set");
+                .ok_or(BadgeError::ProgressTrackerAddressNotSet)?;
             let client = ProgressTrackerClient::new(&env, &progress_tracker_address);
             let completed = client.is_chapter_complete(&user, &reference_id);
             if !completed {
