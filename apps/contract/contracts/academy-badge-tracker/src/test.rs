@@ -178,6 +178,7 @@ fn test_mint_without_progress_should_fail() {
     badge_client.mint_badge(&user, &BadgeType::Chapter, &22u32, &metadata);
 }
 
+/// Test minting a Chapter badge when progress is incomplete (should panic)
 #[test]
 #[should_panic(expected = "HostError: Error(Contract, #4)")]
 fn test_mint_chapter_badge_partial_progress() {
