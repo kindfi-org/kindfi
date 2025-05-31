@@ -1,5 +1,9 @@
-import { AchievementPage } from '~/components/pages/achievements'
+import KycMetricsPage from '~/components/pages/kyc-metrics'
 
 export default function HomePage() {
-	return <AchievementPage />
+	return (
+		<div>
+			<KycMetricsPage />
+		</div>
+	)
 }
