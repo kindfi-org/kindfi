@@ -3,6 +3,14 @@
 version = 4
 
 [[package]]
+name = "academy-badge-tracker"
+version = "0.1.0"
+dependencies = [
+ "academy_progress_tracker",
+ "soroban-sdk",
+]
+
+[[package]]
 name = "academy-graduation-nft"
 version = "0.1.0"
 dependencies = [
