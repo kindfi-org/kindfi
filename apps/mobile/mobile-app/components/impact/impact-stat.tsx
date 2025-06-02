@@ -1,11 +1,13 @@
+import type { LucideIcon } from 'lucide-react-native'
 import React from 'react'
 import { Pressable, View } from 'react-native'
+import { getThemeColor } from '../../constants/theme-colors'
 import { Text } from '../Themed'
 import { Box } from '../ui/box'
 import { Icon } from '../ui/icon'
 
 type ImpactStatProps = {
-	icon: any // Icon component from lucide-react-native
+	icon: LucideIcon
 	value: string
 	label: string
 	iconColor?: string
@@ -23,17 +25,6 @@ function ImpactStat({
 }: ImpactStatProps) {
 	const CardWrapper = onPress ? Pressable : View
 
-	// Color mapping for reliable colors
-	const getIconColor = (colorName: string) => {
-		const colorMap: { [key: string]: string } = {
-			'success-600': '#16a34a',
-			'blue-600': '#2563eb',
-			'yellow-600': '#ca8a04',
-			'orange-600': '#ea580c',
-		}
-		return colorMap[colorName] || colorName
-	}
-
 	return (
 		<CardWrapper onPress={onPress} className="flex-1">
 			<Box
@@ -47,7 +38,7 @@ function ImpactStat({
 						as={icon}
 						height={18}
 						width={18}
-						color={getIconColor(iconColor)}
+						color={getThemeColor(iconColor)}
 					/>
 				</Box>
 

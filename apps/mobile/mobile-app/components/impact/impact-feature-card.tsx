@@ -1,15 +1,17 @@
+import type { LucideIcon } from 'lucide-react-native'
 import React from 'react'
 import { Pressable, View } from 'react-native'
+import { getThemeColor } from '../../constants/theme-colors'
 import { Text } from '../Themed'
 import { Box } from '../ui/box'
 import { Icon } from '../ui/icon'
 
 type ImpactFeatureCardProps = {
-	icon: any // Icon component from lucide-react-native
+	icon: LucideIcon
 	title: string
 	description: string
-	stat?: string // Optional stat text
-	bulletPoints?: string[] // Optional bullet points instead of stat
+	stat?: string
+	bulletPoints?: string[]
 	iconColor?: string
 	backgroundColor?: string
 	onPress?: () => void
@@ -21,22 +23,11 @@ function ImpactFeatureCard({
 	description,
 	stat,
 	bulletPoints,
-	iconColor = '#10b981', // Default green color
+	iconColor = '#10b981',
 	backgroundColor = 'bg-white',
 	onPress,
 }: ImpactFeatureCardProps) {
 	const CardWrapper = onPress ? Pressable : View
-
-	// Color mapping for reliable colors
-	const getIconColor = (colorName: string) => {
-		const colorMap: { [key: string]: string } = {
-			'success-600': '#16a34a',
-			'blue-600': '#2563eb',
-			'yellow-600': '#ca8a04',
-			'orange-600': '#ea580c',
-		}
-		return colorMap[colorName] || colorName
-	}
 
 	return (
 		<CardWrapper onPress={onPress} className="w-full">
@@ -45,14 +36,12 @@ function ImpactFeatureCard({
 			>
 				{/* Icon */}
 				<View className="items-center mb-4">
-					<Box
-						className={`rounded-full bg-white w-12 h-12 items-center justify-center shadow-sm`}
-					>
+					<Box className="rounded-full bg-white w-12 h-12 items-center justify-center shadow-sm">
 						<Icon
 							as={icon}
 							height={24}
 							width={24}
-							color={getIconColor(iconColor)}
+							color={getThemeColor(iconColor)}
 						/>
 					</Box>
 				</View>
@@ -83,7 +72,7 @@ function ImpactFeatureCard({
 					<View className="bg-white/70 rounded-lg p-3 w-full">
 						{bulletPoints.map((point, index) => (
 							<View
-								key={index}
+								key={`bullet-${point.substring(0, 10)}-${index}`}
 								className="flex-row items-center justify-center mb-1.5 last:mb-0"
 							>
 								<View className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2" />
