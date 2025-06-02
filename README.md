@@ -17,7 +17,7 @@ Join our open-source contributor community on Telegram:
 We collaborate, debug, and build together — whether you're a beginner or advanced dev, you're welcome here.
 
 ## 🚀 Quick Start
-       
+
 ### BEFORE ANYTHING ELSE
 
 > **Mac/Linux Users:** Follow the [Taskfile.yml](./Taskfile.yml) for the full list of commands to run the project in different areas. Each command has a description of what it does.

@@ -41,6 +41,7 @@ CREATE INDEX IF NOT EXISTS idx_notifications_to ON public.notifications("to");
 CREATE INDEX IF NOT EXISTS idx_notifications_type ON public.notifications(type);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_read_status ON public.notifications("to", read_at) WHERE read_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_notifications_to_created_at ON public.notifications("to", created_at DESC);
 
 -- Enable Row Level Security
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
@@ -72,6 +73,11 @@ CREATE POLICY "Users can update their own notifications"
     FOR UPDATE
     USING (auth.uid() = "to")
     WITH CHECK (auth.uid() = "to");
+
+CREATE POLICY "Users can delete their own notifications"
+    ON public.notifications
+    FOR DELETE
+    USING (auth.uid() = "to");
 
 -- Create function to hash metadata
 CREATE FUNCTION public.hash_notification_metadata()
@@ -141,13 +147,24 @@ BEGIN
             
             -- If successful, return the notification ID
             RETURN v_notification_id;
-        EXCEPTION WHEN OTHERS THEN
-            v_retry_count := v_retry_count + 1;
-            IF v_retry_count = v_max_retries THEN
-                RAISE EXCEPTION 'Failed to create notification after % retries: %', v_max_retries, SQLERRM;
-            END IF;
-            -- Wait for a short time before retrying
-            PERFORM pg_sleep(0.1 * v_retry_count);
+        EXCEPTION 
+            -- Handle deadlock detection (40P01)
+            WHEN deadlock_detected THEN
+                v_retry_count := v_retry_count + 1;
+                IF v_retry_count = v_max_retries THEN
+                    RAISE EXCEPTION 'Failed to create notification after % retries due to deadlock: %', v_max_retries, SQLERRM;
+                END IF;
+                PERFORM pg_sleep(0.1 * v_retry_count);
+            -- Handle serialization failures (40001)
+            WHEN serialization_failure THEN
+                v_retry_count := v_retry_count + 1;
+                IF v_retry_count = v_max_retries THEN
+                    RAISE EXCEPTION 'Failed to create notification after % retries due to serialization failure: %', v_max_retries, SQLERRM;
+                END IF;
+                PERFORM pg_sleep(0.1 * v_retry_count);
+            -- Immediately raise other errors without retry
+            WHEN OTHERS THEN
+                RAISE EXCEPTION 'Failed to create notification: %', SQLERRM;
         END;
     END LOOP;
     
