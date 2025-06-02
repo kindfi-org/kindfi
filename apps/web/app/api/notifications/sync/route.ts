@@ -1,22 +1,23 @@
 import { notificationService } from '@packages/lib/services'
 import { NextResponse } from 'next/server'
+import { createSupabaseServerClient } from '@packages/lib/supabase/server/server-client'
 
 export async function POST(request: Request) {
 	try {
-		const { userId } = await request.json()
-		if (!userId) {
+		const { notificationId } = await request.json()
+		if (!notificationId) {
 			return NextResponse.json(
-				{ error: 'User ID is required' },
+				{ error: 'Notification ID is required' },
 				{ status: 400 },
 			)
 		}
 
-		await notificationService.syncNotifications(userId)
+		await notificationService.markAsRead(notificationId)
 		return NextResponse.json({ success: true })
 	} catch (error) {
-		console.error('Error syncing notifications:', error)
+		console.error('Error marking notification as read:', error)
 		return NextResponse.json(
-			{ error: 'Failed to sync notifications' },
+			{ error: 'Failed to mark notification as read' },
 			{ status: 500 },
 		)
 	}

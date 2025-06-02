@@ -1,16 +1,17 @@
 import { createHash } from 'node:crypto'
 import type { Database } from '@services/supabase'
 import { createClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { Mutex } from 'async-mutex'
 import { z } from 'zod'
 import { logger } from '../utils/logger'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
 type NotificationType = Database['public']['Enums']['notification_type']
-type NotificationStatus = Database['public']['Enums']['notification_status']
+type NotificationMetadata = Database['public']['Tables']['notifications']['Row']['metadata']
 
 const NotificationSchema = z.object({
-	type: z.nativeEnum(NotificationType),
+	type: z.enum(['project_update', 'milestone_completed', 'escrow_released', 'kyc_status_change', 'comment_added', 'member_joined', 'system_alert']),
 	message: z.string().min(1),
 	from: z.string().uuid().nullable(),
 	to: z.string().uuid(),
@@ -31,7 +32,7 @@ interface QueueMetrics {
 }
 
 export class NotificationService {
-	private supabase
+	private supabase: SupabaseClient<Database>
 	private readonly MAX_QUEUE_SIZE = 1000
 	private readonly mutex = new Mutex()
 	private queue: Array<{ notification: CreateNotification; retries: number }> =
@@ -77,15 +78,12 @@ export class NotificationService {
 
 		try {
 			const item = this.queue[0]
-			const metadataHash = await this.hashMetadata(item.notification.metadata)
 			const { error } = await this.supabase.from('notifications').insert({
 				type: item.notification.type,
 				message: item.notification.message,
 				from: item.notification.from,
 				to: item.notification.to,
-				metadata: item.notification.metadata,
-				metadata_hash: metadataHash,
-				delivery_status: 'pending' as NotificationStatus,
+				metadata: item.notification.metadata as NotificationMetadata,
 			})
 
 			if (error) throw error
@@ -185,20 +183,19 @@ export class NotificationService {
 		}
 	}
 
-	public async syncNotifications(userId: string): Promise<void> {
+	public async markAsRead(notificationId: string): Promise<void> {
 		try {
 			const { error } = await this.supabase
 				.from('notifications')
-				.update({ delivery_status: 'delivered' as NotificationStatus })
-				.eq('to', userId)
-				.eq('delivery_status', 'pending' as NotificationStatus)
+				.update({ read_at: new Date().toISOString() })
+				.eq('id', notificationId)
 
 			if (error) {
-				logger.error('Error syncing notifications', error)
+				logger.error('Error marking notification as read', error)
 				throw error
 			}
 		} catch (error) {
-			logger.error('Error syncing notifications', error)
+			logger.error('Error marking notification as read', error)
 			throw error
 		}
 	}

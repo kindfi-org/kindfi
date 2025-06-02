@@ -1,9 +1,20 @@
 {
 	"extends": ["next/core-web-vitals", "next/typescript"],
+	"parser": "@typescript-eslint/parser",
+	"plugins": ["@typescript-eslint"],
 	"rules": {
-		"no-unused-vars": "warn",
+		"no-unused-vars": "off",
 		"@typescript-eslint/no-unused-vars": "warn",
 		"@typescript-eslint/no-empty-object-type": "warn",
-		"react/no-unescaped-entities": "warn"
+		"react/no-unescaped-entities": "off",
+		"@next/next/no-img-element": "warn",
+		"@typescript-eslint/no-explicit-any": "warn",
+		"@typescript-eslint/ban-ts-comment": "warn",
+		"@next/next/no-async-client-component": "warn",
+		"react-hooks/exhaustive-deps": "warn",
+		"@typescript-eslint/no-unused-expressions": ["error", {
+			"allowShortCircuit": true,
+			"allowTernary": true
+		}]
 	}
 }

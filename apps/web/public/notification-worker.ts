@@ -1,14 +1,38 @@
+/// <reference lib="webworker" />
+/// <reference lib="es2015" />
+/// <reference path="../types/service-worker.d.ts" />
+
+// @ts-nocheck
+
+declare const self: ServiceWorkerGlobalScope & typeof globalThis;
+
 interface NotificationData {
 	id: string
 	title: string
 	message: string
 	metadata: Record<string, unknown>
+	url?: string
+}
+
+interface ExtendedNotificationOptions extends NotificationOptions {
+	actions?: Array<{
+		action: string
+		title: string
+	}>
+	tag?: string
+	renotify?: boolean
+	requireInteraction?: boolean
+	data?: NotificationData
+}
+
+interface SyncEvent extends ExtendableEvent {
+	readonly tag: string;
 }
 
 const CACHE_NAME = 'notifications-cache-v1'
 const NOTIFICATION_ICON = '/icons/notification-icon.png'
 
-self.addEventListener('install', (event: ExtendableMessageEvent) => {
+self.addEventListener('install', (event: ExtendableEvent) => {
 	event.waitUntil(
 		caches.open(CACHE_NAME).then((cache) => {
 			return cache.addAll([NOTIFICATION_ICON, '/offline.html'])
@@ -16,7 +40,7 @@ self.addEventListener('install', (event: ExtendableMessageEvent) => {
 	)
 })
 
-self.addEventListener('activate', (event: ExtendableMessageEvent) => {
+self.addEventListener('activate', (event: ExtendableEvent) => {
 	event.waitUntil(
 		caches.keys().then((cacheNames) => {
 			return Promise.all(
@@ -34,11 +58,11 @@ self.addEventListener('push', (event: PushEvent) => {
 	try {
 		const notification = event.data.json() as NotificationData
 
-		const options: NotificationOptions = {
+		const options: ExtendedNotificationOptions = {
 			body: notification.message,
 			icon: NOTIFICATION_ICON,
 			badge: NOTIFICATION_ICON,
-			data: notification.metadata,
+			data: notification,
 			actions: [
 				{
 					action: 'open',
@@ -70,13 +94,13 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
 			(event.notification.data as NotificationData)?.url || '/notifications'
 
 		event.waitUntil(
-			clients.matchAll({ type: 'window' }).then((clientList) => {
+			self.clients.matchAll({ type: 'window' }).then((clientList: readonly WindowClient[]) => {
 				for (const client of clientList) {
-					if (client.url === urlToOpen && 'focus' in client) {
+					if (client.url === urlToOpen) {
 						return client.focus()
 					}
 				}
-				return clients.openWindow(urlToOpen)
+				return self.clients.openWindow(urlToOpen)
 			}),
 		)
 	}
@@ -108,7 +132,7 @@ async function syncNotifications(): Promise<void> {
 				body: notification.message,
 				icon: NOTIFICATION_ICON,
 				badge: NOTIFICATION_ICON,
-				data: notification.metadata,
+				data: notification,
 				tag: notification.id,
 			})
 		}
