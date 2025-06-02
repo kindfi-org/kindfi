@@ -9,8 +9,7 @@ BEGIN
             'pending',
             'sent',
             'failed',
-            'delivered',
-            'read'
+            'delivered'
         );
     END IF;
 END $$;
@@ -31,12 +30,20 @@ BEGIN
     END IF;
 END $$;
 
+-- Drop existing triggers first
+DO $$
+BEGIN
+    DROP TRIGGER IF EXISTS hash_notification_metadata_trigger ON public.notifications;
+EXCEPTION WHEN OTHERS THEN
+    NULL;
+END $$;
+
 -- Drop existing functions if they exist
 DO $$
 BEGIN
-    DROP FUNCTION IF EXISTS public.hash_notification_metadata() CASCADE;
-    DROP FUNCTION IF EXISTS public.create_notification(TEXT, TEXT, UUID, UUID, JSONB) CASCADE;
-    DROP FUNCTION IF EXISTS public.mark_notifications_as_read(UUID[]) CASCADE;
+    DROP FUNCTION IF EXISTS public.hash_notification_metadata() RESTRICT;
+    DROP FUNCTION IF EXISTS public.create_notification(TEXT, TEXT, UUID, UUID, JSONB) RESTRICT;
+    DROP FUNCTION IF EXISTS public.mark_notifications_as_read(UUID[]) RESTRICT;
 EXCEPTION WHEN OTHERS THEN
     NULL;
 END $$;
@@ -46,16 +53,16 @@ CREATE TABLE IF NOT EXISTS public.notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     type notification_type NOT NULL,
     message TEXT NOT NULL,
-    "from" UUID REFERENCES auth.users(id),
-    "to" UUID NOT NULL REFERENCES auth.users(id),
+    "from" UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    "to" UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    metadata_hash TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     read_at TIMESTAMPTZ,
     delivery_status delivery_status NOT NULL DEFAULT 'pending'
 );
 
 -- Create indexes for better query performance
-CREATE INDEX IF NOT EXISTS idx_notifications_to ON public.notifications("to");
 CREATE INDEX IF NOT EXISTS idx_notifications_type ON public.notifications(type);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_read_status ON public.notifications("to", read_at) WHERE read_at IS NULL;
@@ -102,14 +109,11 @@ CREATE FUNCTION public.hash_notification_metadata()
 RETURNS TRIGGER AS $$
 BEGIN
     -- Hash the metadata using HMAC-SHA256
-    NEW.metadata = jsonb_build_object(
-        'hashed_data',
-        encode(hmac(
-            NEW.metadata::text,
-            current_setting('app.settings.jwt_secret', true),
-            'sha256'
-        ), 'hex')
-    );
+    NEW.metadata_hash = encode(hmac(
+        NEW.metadata::text,
+        current_setting('app.settings.jwt_secret', true),
+        'sha256'
+    ), 'hex');
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -185,8 +189,6 @@ BEGIN
                 RAISE EXCEPTION 'Failed to create notification: %', SQLERRM;
         END;
     END LOOP;
-    
-    RETURN NULL;
 END;
 $$;
 
@@ -194,22 +196,30 @@ $$;
 CREATE FUNCTION public.mark_notifications_as_read(
     p_notification_ids UUID[]
 )
-RETURNS VOID
+RETURNS INTEGER
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
+DECLARE
+    v_count INTEGER;
 BEGIN
-    UPDATE public.notifications
-    SET read_at = now()
-    WHERE id = ANY(p_notification_ids)
-    AND "to" = auth.uid();
+    WITH updated AS (
+        UPDATE public.notifications
+        SET read_at = now()
+        WHERE id = ANY(p_notification_ids)
+        AND "to" = auth.uid()
+        RETURNING 1
+    )
+    SELECT count(*) INTO v_count FROM updated;
+    
+    RETURN v_count;
 END;
 $$;
 
 -- Grant necessary permissions
 DO $$
 BEGIN
-    EXECUTE 'GRANT SELECT, UPDATE ON public.notifications TO authenticated';
+    EXECUTE 'GRANT SELECT, UPDATE, DELETE ON public.notifications TO authenticated';
     EXECUTE 'GRANT EXECUTE ON FUNCTION public.create_notification(notification_type, TEXT, UUID, UUID, JSONB) TO authenticated';
     EXECUTE 'GRANT EXECUTE ON FUNCTION public.mark_notifications_as_read(UUID[]) TO authenticated';
 EXCEPTION WHEN OTHERS THEN
