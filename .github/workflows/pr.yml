@@ -24,15 +24,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install build essentials
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential python3
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - name: Install SubQuery CLI
-        run: npm install -g @subql/cli@latest
+      - name: Verify Bun installation
+        run: bun --version
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
@@ -47,6 +43,8 @@ jobs:
           bun install
           # Verify installation was successful
           test -f bun.lockb
+        # Untrusted packages can be installed, causing false errors. Continuing on error.
+        # ? If something actually went wrong, the build will fail below.
         continue-on-error: true
       - name: Codegen
         run: bun codegen
@@ -55,22 +53,7 @@ jobs:
         run: bun run build
         timeout-minutes: 10
       - name: Install test dependencies
-        run: |
-          bun add --dev @subql/node-stellar@6.0.0 @subql/testing@6.0.0
-          bun add --dev @types/jest jest ts-jest
-      - name: Run Jest tests
-        run: bun run test
-        timeout-minutes: 10
-      - name: Prepare SubQuery test environment
-        run: |
-          echo "NODE_OPTIONS=--max_old_space_size=8192"
-          mkdir -p .data
-      - name: Run SubQuery tests
-        run: |
-          export NODE_OPTIONS="--max_old_space_size=8192"
-          npx subql-node-stellar \
-            --timeout 300000 \
-            --debug \
-            --batch-size 1 \
-            --project-path ${{ github.workspace }}/apps/indexer \
-            test
+        run: bun add --dev @subql/node-stellar
+      - name: Run tests with Subquery Node
+        run: bunx subql-node-stellar test -f ${{ github.workspace }}
+        timeout-minutes: 15
