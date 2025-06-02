@@ -1,19 +1,8 @@
 import { subqlTest } from '@subql/testing'
-import { Account, Transfer } from '../types'
-import { handleEvent } from '../mappings/handlers'
+import { Account, Transfer } from '../src/types'
+import { handleEvent } from '../src/mappings/handlers'
 import type { SorobanEvent, StellarBlock } from '@subql/types-stellar'
 import { xdr } from 'soroban-client'
-
-/*
-// https://academy.subquery.network/build/testing.html
-subqlTest(
-  "testName", // test name
-  1000003, // block height to process
-  [], // dependent entities
-  [], // expected entities
-  "handleEvent" //handler name
-);
-*/
 
 // Mock data for testing
 const mockEvent = {
@@ -86,4 +75,4 @@ test('handleEvent processes transfer correctly', async () => {
     ],
     'handleEvent'
   )
-})
+}) 

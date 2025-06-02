@@ -53,7 +53,13 @@ jobs:
         run: bun run build
         timeout-minutes: 10
       - name: Install test dependencies
-        run: bun add --dev @subql/node-stellar
-      - name: Run tests with Subquery Node
-        run: bunx subql-node-stellar test -f ${{ github.workspace }}
+        run: |
+          bun add --dev @subql/node-stellar @types/jest jest ts-jest
+          bun add --dev @subql/testing
+      - name: Run tests
+        run: |
+          # First try with Jest
+          bun run test
+          # Then try with SubQuery test runner
+          bunx subql-node-stellar test -f ${{ github.workspace }}/apps/indexer
         timeout-minutes: 15
