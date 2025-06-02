@@ -104,6 +104,11 @@ CREATE POLICY "Users can delete their own notifications"
     FOR DELETE
     USING (auth.uid() = "to");
 
+CREATE POLICY "Users can insert notifications"
+    ON public.notifications
+    FOR INSERT
+    WITH CHECK (auth.uid() = "from" OR "from" IS NULL);
+
 -- Create function to hash metadata
 CREATE FUNCTION public.hash_notification_metadata()
 RETURNS TRIGGER AS $$
@@ -219,7 +224,7 @@ $$;
 -- Grant necessary permissions
 DO $$
 BEGIN
-    EXECUTE 'GRANT SELECT, UPDATE, DELETE ON public.notifications TO authenticated';
+    EXECUTE 'GRANT SELECT, INSERT, UPDATE, DELETE ON public.notifications TO authenticated';
     EXECUTE 'GRANT EXECUTE ON FUNCTION public.create_notification(notification_type, TEXT, UUID, UUID, JSONB) TO authenticated';
     EXECUTE 'GRANT EXECUTE ON FUNCTION public.mark_notifications_as_read(UUID[]) TO authenticated';
 EXCEPTION WHEN OTHERS THEN
