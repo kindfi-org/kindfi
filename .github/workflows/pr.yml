@@ -56,10 +56,22 @@ jobs:
         run: |
           bun add --dev @subql/node-stellar @types/jest jest ts-jest
           bun add --dev @subql/testing
-      - name: Run tests
+      - name: Debug project structure
         run: |
-          # First try with Jest
-          bun run test
-          # Then try with SubQuery test runner
-          bunx subql-node-stellar test -f ${{ github.workspace }}/apps/indexer
-        timeout-minutes: 15
+          pwd
+          ls -la
+          cat project.yaml || echo "project.yaml not found"
+      - name: Run Jest tests
+        run: bun run test
+        timeout-minutes: 10
+      - name: Run SubQuery tests
+        run: |
+          # Ensure we're in the correct directory
+          cd ${{ github.workspace }}/apps/indexer
+          # Debug SubQuery configuration
+          echo "Current directory: $(pwd)"
+          echo "Project manifest:"
+          cat project.yaml
+          # Run SubQuery tests with absolute path
+          bunx subql-node-stellar test
+        timeout-minutes: 5
