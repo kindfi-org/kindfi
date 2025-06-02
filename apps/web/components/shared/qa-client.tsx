@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-import type { Database } from '@/types/supabase'
+import type { Database } from '@services/supabase'
 import type { TablesUpdate } from '@services/supabase'
 import {
 	Bell,

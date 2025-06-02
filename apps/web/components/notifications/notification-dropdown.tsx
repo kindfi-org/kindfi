@@ -1,42 +1,44 @@
 'use client'
 
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from '@radix-ui/react-dropdown-menu'
-import { Bell } from 'lucide-react'
-import { useNotifications } from '~/hooks/use-notifications'
-import { cn } from '~/lib/utils'
-import { Button } from '../base/button'
-import { NotificationList } from './notification-list'
+import { Button } from '~/components/base/button'
+import { ScrollArea } from '~/components/base/scroll-area'
+import { useNotificationContext } from '~/providers/notification-provider'
+import { NotificationItem } from './notification-item'
 
-interface NotificationDropdownProps {
-	className?: string
-}
-
-export function NotificationDropdown({ className }: NotificationDropdownProps) {
-	const { unreadCount } = useNotifications()
+export function NotificationDropdown() {
+	const { notifications, isLoading, error, hasMore, loadMore } =
+		useNotificationContext()
 
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button
-					variant="ghost"
-					size="icon"
-					className={cn('relative', className)}
-				>
-					<Bell className="h-5 w-5" />
-					{unreadCount > 0 && (
-						<span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-							{unreadCount > 99 ? '99+' : unreadCount}
-						</span>
-					)}
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-80">
-				<NotificationList />
-			</DropdownMenuContent>
-		</DropdownMenu>
+		<div className="w-96 rounded-lg border bg-background shadow-lg">
+			<ScrollArea className="h-[32rem]">
+				{notifications.length === 0 ? (
+					<div className="p-4 text-center text-muted-foreground">
+						No notifications
+					</div>
+				) : (
+					<div className="divide-y">
+						{notifications.map((notification) => (
+							<NotificationItem
+								key={notification.id}
+								notification={notification}
+							/>
+						))}
+						{hasMore && (
+							<div className="flex justify-center p-4">
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={loadMore}
+									disabled={isLoading}
+								>
+									{isLoading ? 'Loading...' : 'Load more'}
+								</Button>
+							</div>
+						)}
+					</div>
+				)}
+			</ScrollArea>
+		</div>
 	)
 }

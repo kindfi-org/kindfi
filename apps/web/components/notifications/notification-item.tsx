@@ -1,11 +1,11 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { formatNotificationDate } from '@/lib/utils'
-import { useNotificationContext } from '@/providers/notification-provider'
-import type { Database } from '@kindfi/lib/types/supabase'
+import type { Database } from '@services/supabase'
 import { Check } from 'lucide-react'
+import { Button } from '~/components/base/button'
+import { cn } from '~/lib/utils'
+import { formatNotificationDate } from '~/lib/utils'
+import { useNotificationContext } from '~/providers/notification-provider'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
 

@@ -7,9 +7,20 @@
 	"types": "./src/index.ts",
 	"license": "MIT",
 	"dependencies": {
+		"@services/supabase": "workspace:*",
+		"@supabase/auth-helpers-nextjs": "^0.10.0",
 		"@supabase/supabase-js": "^2.49.4",
 		"@tanstack/react-query": "^5.74.7",
-		"tesseract.js": "^6.0.0"
+		"async-mutex": "^0.4.1",
+		"tesseract.js": "^6.0.0",
+		"zod": "^3.23.8"
 	},
-	"devDependencies": {}
+	"devDependencies": {
+		"@types/react": "^19",
+		"@types/react-dom": "^19"
+	},
+	"peerDependencies": {
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0"
+	}
 }

@@ -1,11 +1,10 @@
-import { formatNotificationDate } from '@/lib/utils'
-import { useSupabase } from '@kindfi/lib'
-import type { Database } from '@kindfi/lib/types/supabase'
 import { useCallback, useEffect, useState } from 'react'
+import type { Database } from '../types/supabase'
+import { useSupabase } from './use-supabase'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
 
-export function useNotifications(userId: string) {
+export function useNotifications() {
 	const { supabase } = useSupabase()
 	const [notifications, setNotifications] = useState<Notification[]>([])
 	const [isLoading, setIsLoading] = useState(true)
@@ -20,20 +19,14 @@ export function useNotifications(userId: string) {
 				const { data, error: fetchError } = await supabase
 					.from('notifications')
 					.select('*')
-					.eq('to', userId)
 					.order('created_at', { ascending: false })
 					.range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1)
 
 				if (fetchError) throw fetchError
 
-				if (pageNum === 0) {
-					setNotifications(data)
-				} else {
-					setNotifications((prev) => [...prev, ...data])
-				}
-
+				setNotifications((prev) => (pageNum === 0 ? data : [...prev, ...data]))
 				setHasMore(data.length === PAGE_SIZE)
-				setError(null)
+				setPage(pageNum)
 			} catch (err) {
 				setError(
 					err instanceof Error
@@ -44,22 +37,22 @@ export function useNotifications(userId: string) {
 				setIsLoading(false)
 			}
 		},
-		[supabase, userId],
+		[supabase],
 	)
 
 	const loadMore = useCallback(() => {
 		if (!isLoading && hasMore) {
-			setPage((prev) => prev + 1)
+			fetchNotifications(page + 1)
 		}
-	}, [isLoading, hasMore])
+	}, [fetchNotifications, hasMore, isLoading, page])
 
 	const markAsRead = useCallback(
 		async (notificationIds: string[]) => {
 			try {
-				const { error: updateError } = await supabase.rpc(
-					'mark_notifications_as_read',
-					{ p_notification_ids: notificationIds },
-				)
+				const { error: updateError } = await supabase
+					.from('notifications')
+					.update({ read_at: new Date().toISOString() })
+					.in('id', notificationIds)
 
 				if (updateError) throw updateError
 
@@ -81,31 +74,38 @@ export function useNotifications(userId: string) {
 		[supabase],
 	)
 
-	useEffect(() => {
-		fetchNotifications(page)
-	}, [fetchNotifications, page])
+	const markAllAsRead = useCallback(async () => {
+		try {
+			const { error: updateError } = await supabase
+				.from('notifications')
+				.update({ read_at: new Date().toISOString() })
+				.is('read_at', null)
 
-	useEffect(() => {
-		const channel = supabase
-			.channel('notifications')
-			.on(
-				'postgres_changes',
-				{
-					event: 'INSERT',
-					schema: 'public',
-					table: 'notifications',
-					filter: `to=eq.${userId}`,
-				},
-				(payload) => {
-					setNotifications((prev) => [payload.new as Notification, ...prev])
-				},
+			if (updateError) throw updateError
+
+			setNotifications((prev) =>
+				prev.map((notification) => ({
+					...notification,
+					read_at: notification.read_at || new Date().toISOString(),
+				})),
 			)
-			.subscribe()
-
-		return () => {
-			supabase.removeChannel(channel)
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err
+					: new Error('Failed to mark all notifications as read'),
+			)
 		}
-	}, [supabase, userId])
+	}, [supabase])
+
+	const refresh = useCallback(() => {
+		setIsLoading(true)
+		fetchNotifications(0)
+	}, [fetchNotifications])
+
+	useEffect(() => {
+		fetchNotifications(0)
+	}, [fetchNotifications])
 
 	return {
 		notifications,
@@ -114,6 +114,7 @@ export function useNotifications(userId: string) {
 		hasMore,
 		loadMore,
 		markAsRead,
-		formatDate: formatNotificationDate,
+		markAllAsRead,
+		refresh,
 	}
 }

@@ -183,4 +183,22 @@ export class NotificationService {
 			this.supabase.removeChannel(channel)
 		}
 	}
+
+	public async syncNotifications(userId: string): Promise<void> {
+		try {
+			const { error } = await this.supabase
+				.from('notifications')
+				.update({ delivery_status: NotificationStatus.Delivered })
+				.eq('to', userId)
+				.eq('delivery_status', NotificationStatus.Pending)
+
+			if (error) {
+				logger.error('Error syncing notifications', error)
+				throw error
+			}
+		} catch (error) {
+			logger.error('Error syncing notifications', error)
+			throw error
+		}
+	}
 }

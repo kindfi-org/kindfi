@@ -1,12 +1,12 @@
 'use client'
 
-import type { Notification } from '@packages/lib'
+import type { NotificationService } from '@packages/lib/services'
 import { Loader2 } from 'lucide-react'
 import { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'
-import { Button } from '../../components/ui/button'
-import { ScrollArea } from '../../components/ui/scroll-area'
-import { useNotificationContext } from '../../providers/notification-provider'
+import { Button } from '~/components/base/button'
+import { ScrollArea } from '~/components/base/scroll-area'
+import { useNotificationContext } from '~/providers/notification-provider'
 import { NotificationItem } from './notification-item'
 
 export function NotificationList() {

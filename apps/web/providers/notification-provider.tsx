@@ -1,73 +1,21 @@
 'use client'
 
-import type { Notification } from '@packages/lib'
-import { createContext, useContext, useEffect, useState } from 'react'
-import { useNotifications } from '../hooks/use-notifications'
+import { useNotifications } from '@packages/lib/hooks'
+import { createContext, useContext } from 'react'
 
-interface NotificationContextType {
-	notifications: Notification[]
-	unreadCount: number
-	isLoading: boolean
-	error: Error | null
-	hasMore: boolean
-	loadMore: () => void
-	markAsRead: (notificationIds: string[]) => Promise<void>
-	markAllAsRead: () => Promise<void>
-	refresh: () => void
-}
-
-const NotificationContext = createContext<NotificationContextType | undefined>(
-	undefined,
-)
+const NotificationContext = createContext<ReturnType<
+	typeof useNotifications
+> | null>(null)
 
 export function NotificationProvider({
 	children,
 }: {
 	children: React.ReactNode
 }) {
-	const {
-		notifications,
-		unreadCount,
-		isLoading,
-		error,
-		hasMore,
-		loadMore,
-		markAsRead,
-		markAllAsRead,
-		refresh,
-	} = useNotifications()
-
-	const [isServiceWorkerRegistered, setIsServiceWorkerRegistered] =
-		useState(false)
-
-	useEffect(() => {
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker
-				.register('/notification-worker.js')
-				.then((registration) => {
-					console.log('Service Worker registered:', registration)
-					setIsServiceWorkerRegistered(true)
-				})
-				.catch((error) => {
-					console.error('Service Worker registration failed:', error)
-				})
-		}
-	}, [])
+	const notificationState = useNotifications()
 
 	return (
-		<NotificationContext.Provider
-			value={{
-				notifications,
-				unreadCount,
-				isLoading,
-				error,
-				hasMore,
-				loadMore,
-				markAsRead,
-				markAllAsRead,
-				refresh,
-			}}
-		>
+		<NotificationContext.Provider value={notificationState}>
 			{children}
 		</NotificationContext.Provider>
 	)
@@ -75,7 +23,7 @@ export function NotificationProvider({
 
 export function useNotificationContext() {
 	const context = useContext(NotificationContext)
-	if (context === undefined) {
+	if (!context) {
 		throw new Error(
 			'useNotificationContext must be used within a NotificationProvider',
 		)
