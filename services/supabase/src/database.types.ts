@@ -542,7 +542,7 @@ export type Database = {
 					metadata: Json
 					read_at: string | null
 					to: string
-					type: string
+					type: Database['public']['Enums']['notification_type']
 				}
 				Insert: {
 					created_at?: string
@@ -552,7 +552,7 @@ export type Database = {
 					metadata?: Json
 					read_at?: string | null
 					to: string
-					type: string
+					type: Database['public']['Enums']['notification_type']
 				}
 				Update: {
 					created_at?: string
@@ -562,7 +562,7 @@ export type Database = {
 					metadata?: Json
 					read_at?: string | null
 					to?: string
-					type?: string
+					type?: Database['public']['Enums']['notification_type']
 				}
 				Relationships: []
 			}
@@ -868,6 +868,14 @@ export type Database = {
 				| 'approved'
 				| 'rejected'
 				| 'disputed'
+			notification_type:
+				| 'project_update'
+				| 'milestone_completed'
+				| 'escrow_released'
+				| 'kyc_status_change'
+				| 'comment_added'
+				| 'member_joined'
+				| 'system_alert'
 			project_member_role: 'admin' | 'editor'
 			user_role: 'kinder' | 'kindler'
 		}
@@ -1005,6 +1013,15 @@ export const Constants = {
 				'approved',
 				'rejected',
 				'disputed',
+			],
+			notification_type: [
+				'project_update',
+				'milestone_completed',
+				'escrow_released',
+				'kyc_status_change',
+				'comment_added',
+				'member_joined',
+				'system_alert',
 			],
 			project_member_role: ['admin', 'editor'],
 			user_role: ['kinder', 'kindler'],

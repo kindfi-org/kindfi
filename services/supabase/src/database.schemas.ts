@@ -508,16 +508,15 @@ export const milestonesRelationshipsSchema = z.tuple([
 	}),
 ])
 
-export const notificationsRowSchema = z.object({
-	created_at: z.string(),
-	from: z.string().nullable(),
-	id: z.string(),
-	message: z.string(),
-	metadata: jsonSchema,
-	read_at: z.string().nullable(),
-	to: z.string(),
-	type: z.string(),
-})
+export const notificationTypeSchema = z.union([
+	z.literal('project_update'),
+	z.literal('milestone_completed'),
+	z.literal('escrow_released'),
+	z.literal('kyc_status_change'),
+	z.literal('comment_added'),
+	z.literal('member_joined'),
+	z.literal('system_alert'),
+])
 
 export const notificationsInsertSchema = z.object({
 	created_at: z.string().optional(),
@@ -527,7 +526,7 @@ export const notificationsInsertSchema = z.object({
 	metadata: jsonSchema.optional(),
 	read_at: z.string().optional().nullable(),
 	to: z.string(),
-	type: z.string(),
+	type: notificationTypeSchema,
 })
 
 export const notificationsUpdateSchema = z.object({
@@ -538,7 +537,7 @@ export const notificationsUpdateSchema = z.object({
 	metadata: jsonSchema.optional(),
 	read_at: z.string().optional().nullable(),
 	to: z.string().optional(),
-	type: z.string().optional(),
+	type: notificationTypeSchema.optional(),
 })
 
 export const notificationsRelationshipsSchema = z.tuple([])
@@ -866,6 +865,17 @@ export const milestonesRowSchema = z.object({
 	project_id: z.string(),
 	status: milestoneStatusSchema,
 	title: z.string(),
+})
+
+export const notificationsRowSchema = z.object({
+	created_at: z.string(),
+	from: z.string().nullable(),
+	id: z.string(),
+	message: z.string(),
+	metadata: jsonSchema,
+	read_at: z.string().nullable(),
+	to: z.string(),
+	type: notificationTypeSchema,
 })
 
 export const profilesRowSchema = z.object({
