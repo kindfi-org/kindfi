@@ -1,12 +1,13 @@
 import { createHash } from 'node:crypto'
+import type { Database } from '@services/supabase'
 import { createClient } from '@supabase/supabase-js'
 import { Mutex } from 'async-mutex'
 import { z } from 'zod'
-import { NotificationStatus, NotificationType } from '../types/notification'
-import type { Database } from '../types/supabase'
 import { logger } from '../utils/logger'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
+type NotificationType = Database['public']['Enums']['notification_type']
+type NotificationStatus = Database['public']['Enums']['notification_status']
 
 const NotificationSchema = z.object({
 	type: z.nativeEnum(NotificationType),
@@ -84,7 +85,7 @@ export class NotificationService {
 				to: item.notification.to,
 				metadata: item.notification.metadata,
 				metadata_hash: metadataHash,
-				delivery_status: NotificationStatus.Pending,
+				delivery_status: 'pending' as NotificationStatus,
 			})
 
 			if (error) throw error
@@ -188,9 +189,9 @@ export class NotificationService {
 		try {
 			const { error } = await this.supabase
 				.from('notifications')
-				.update({ delivery_status: NotificationStatus.Delivered })
+				.update({ delivery_status: 'delivered' as NotificationStatus })
 				.eq('to', userId)
-				.eq('delivery_status', NotificationStatus.Pending)
+				.eq('delivery_status', 'pending' as NotificationStatus)
 
 			if (error) {
 				logger.error('Error syncing notifications', error)
