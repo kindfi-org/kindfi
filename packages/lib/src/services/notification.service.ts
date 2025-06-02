@@ -8,10 +8,19 @@ import { logger } from '../utils/logger'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
 type NotificationType = Database['public']['Enums']['notification_type']
-type NotificationMetadata = Database['public']['Tables']['notifications']['Row']['metadata']
+type NotificationMetadata =
+	Database['public']['Tables']['notifications']['Row']['metadata']
 
 const NotificationSchema = z.object({
-	type: z.enum(['project_update', 'milestone_completed', 'escrow_released', 'kyc_status_change', 'comment_added', 'member_joined', 'system_alert']),
+	type: z.enum([
+		'project_update',
+		'milestone_completed',
+		'escrow_released',
+		'kyc_status_change',
+		'comment_added',
+		'member_joined',
+		'system_alert',
+	]),
 	message: z.string().min(1),
 	from: z.string().uuid().nullable(),
 	to: z.string().uuid(),

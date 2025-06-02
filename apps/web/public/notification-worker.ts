@@ -4,7 +4,7 @@
 
 // @ts-nocheck
 
-declare const self: ServiceWorkerGlobalScope & typeof globalThis;
+declare const self: ServiceWorkerGlobalScope & typeof globalThis
 
 interface NotificationData {
 	id: string
@@ -26,7 +26,7 @@ interface ExtendedNotificationOptions extends NotificationOptions {
 }
 
 interface SyncEvent extends ExtendableEvent {
-	readonly tag: string;
+	readonly tag: string
 }
 
 const CACHE_NAME = 'notifications-cache-v1'
@@ -94,14 +94,16 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
 			(event.notification.data as NotificationData)?.url || '/notifications'
 
 		event.waitUntil(
-			self.clients.matchAll({ type: 'window' }).then((clientList: readonly WindowClient[]) => {
-				for (const client of clientList) {
-					if (client.url === urlToOpen) {
-						return client.focus()
+			self.clients
+				.matchAll({ type: 'window' })
+				.then((clientList: readonly WindowClient[]) => {
+					for (const client of clientList) {
+						if (client.url === urlToOpen) {
+							return client.focus()
+						}
 					}
-				}
-				return self.clients.openWindow(urlToOpen)
-			}),
+					return self.clients.openWindow(urlToOpen)
+				}),
 		)
 	}
 })
