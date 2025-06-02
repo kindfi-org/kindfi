@@ -14,6 +14,16 @@ BEGIN
     END IF;
 END $$;
 
+-- Drop existing functions if they exist
+DO $$
+BEGIN
+    DROP FUNCTION IF EXISTS public.hash_notification_metadata() CASCADE;
+    DROP FUNCTION IF EXISTS public.create_notification(TEXT, TEXT, UUID, UUID, JSONB) CASCADE;
+    DROP FUNCTION IF EXISTS public.mark_notifications_as_read(UUID[]) CASCADE;
+EXCEPTION WHEN OTHERS THEN
+    NULL;
+END $$;
+
 -- Create notifications table
 CREATE TABLE IF NOT EXISTS public.notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -35,6 +45,22 @@ CREATE INDEX IF NOT EXISTS idx_notifications_read_status ON public.notifications
 -- Enable Row Level Security
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies
+DO $$ 
+DECLARE
+    policy_name text;
+BEGIN
+    FOR policy_name IN (
+        SELECT policyname 
+        FROM pg_policies 
+        WHERE schemaname = 'public' 
+        AND tablename = 'notifications'
+    )
+    LOOP
+        EXECUTE format('DROP POLICY IF EXISTS %I ON public.notifications', policy_name);
+    END LOOP;
+END $$;
+
 -- Create policies
 CREATE POLICY "Users can view their own notifications"
     ON public.notifications
@@ -48,7 +74,7 @@ CREATE POLICY "Users can update their own notifications"
     WITH CHECK (auth.uid() = "to");
 
 -- Create function to hash metadata
-CREATE OR REPLACE FUNCTION public.hash_notification_metadata()
+CREATE FUNCTION public.hash_notification_metadata()
 RETURNS TRIGGER AS $$
 BEGIN
     -- Hash the metadata using HMAC-SHA256
@@ -65,13 +91,22 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create trigger for metadata hashing
-CREATE TRIGGER hash_notification_metadata_trigger
-    BEFORE INSERT ON public.notifications
-    FOR EACH ROW
-    EXECUTE FUNCTION public.hash_notification_metadata();
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_trigger 
+        WHERE tgname = 'hash_notification_metadata_trigger'
+        AND tgrelid = 'public.notifications'::regclass
+    ) THEN
+        CREATE TRIGGER hash_notification_metadata_trigger
+            BEFORE INSERT ON public.notifications
+            FOR EACH ROW
+            EXECUTE FUNCTION public.hash_notification_metadata();
+    END IF;
+END $$;
 
 -- Create function to handle notification creation with retry logic
-CREATE OR REPLACE FUNCTION public.create_notification(
+CREATE FUNCTION public.create_notification(
     p_type notification_type,
     p_message TEXT,
     p_from UUID,
@@ -121,7 +156,7 @@ END;
 $$;
 
 -- Create function to mark notifications as read
-CREATE OR REPLACE FUNCTION public.mark_notifications_as_read(
+CREATE FUNCTION public.mark_notifications_as_read(
     p_notification_ids UUID[]
 )
 RETURNS VOID
@@ -137,8 +172,13 @@ END;
 $$;
 
 -- Grant necessary permissions
-GRANT SELECT, UPDATE ON public.notifications TO authenticated;
-GRANT EXECUTE ON FUNCTION public.create_notification TO authenticated;
-GRANT EXECUTE ON FUNCTION public.mark_notifications_as_read TO authenticated;
+DO $$
+BEGIN
+    EXECUTE 'GRANT SELECT, UPDATE ON public.notifications TO authenticated';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.create_notification(notification_type, TEXT, UUID, UUID, JSONB) TO authenticated';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.mark_notifications_as_read(UUID[]) TO authenticated';
+EXCEPTION WHEN OTHERS THEN
+    NULL;
+END $$;
 
 COMMENT ON TABLE public.notifications IS 'Stores user notifications with secure metadata handling and delivery guarantees'; 
