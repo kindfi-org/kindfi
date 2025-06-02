@@ -28,7 +28,7 @@ jobs:
         with:
           bun-version: latest
       - name: Verify Bun installation
-        run: bun --version
+        run: bun install -g @subql/cli@latest
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
@@ -54,8 +54,9 @@ jobs:
         timeout-minutes: 10
       - name: Install test dependencies
         run: |
-          bun add --dev @subql/node-stellar @types/jest jest ts-jest
-          bun add --dev @subql/testing
+          bun add --dev @subql/node-stellar@3.3.1
+          bun add --dev @subql/testing@3.3.1
+          bun add --dev @types/jest jest ts-jest
       - name: Debug project structure
         run: |
           pwd
@@ -64,14 +65,16 @@ jobs:
       - name: Run Jest tests
         run: bun run test
         timeout-minutes: 10
+      - name: Prepare SubQuery test environment
+        run: |
+          echo "NODE_OPTIONS=--max_old_space_size=8192"
+          mkdir -p .data
       - name: Run SubQuery tests
         run: |
-          # Ensure we're in the correct directory
-          cd ${{ github.workspace }}/apps/indexer
-          # Debug SubQuery configuration
-          echo "Current directory: $(pwd)"
-          echo "Project manifest:"
-          cat project.yaml
-          # Run SubQuery tests with absolute path
-          bunx subql-node-stellar test
-        timeout-minutes: 5
+          # Run tests with specific configuration
+          SUBQL_TEST_PROJECT_PATH=${{ github.workspace }}/apps/indexer \
+          bunx subql-node-stellar \
+            --timeout 300000 \
+            --debug \
+            --batch-size 1 \
+            test
