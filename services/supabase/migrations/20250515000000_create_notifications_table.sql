@@ -29,10 +29,17 @@ CREATE INDEX IF NOT EXISTS idx_notifications_read_status ON public.notifications
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
 -- Create policies
-CREATE POLICY "Users can view their own notifications"
-    ON public.notifications
-    FOR SELECT
-    USING (auth.uid() = "to");
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE schemaname = 'public' 
+        AND tablename = 'notifications' 
+        AND policyname = 'Users can view their own notifications'
+    ) THEN
+        EXECUTE 'CREATE POLICY "Users can view their own notifications" ON public.notifications FOR SELECT USING (auth.uid() = "to")';
+    END IF;
+END $$;
 
 CREATE POLICY "Users can update their own notifications"
     ON public.notifications
