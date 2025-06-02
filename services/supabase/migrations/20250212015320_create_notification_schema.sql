@@ -1,3 +1,20 @@
+-- Enable pgcrypto extension for UUID generation
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Create delivery status enum
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'delivery_status') THEN
+        CREATE TYPE delivery_status AS ENUM (
+            'pending',
+            'sent',
+            'failed',
+            'delivered',
+            'read'
+        );
+    END IF;
+END $$;
+
 -- Create notification type enum
 DO $$ 
 BEGIN
@@ -33,7 +50,8 @@ CREATE TABLE IF NOT EXISTS public.notifications (
     "to" UUID NOT NULL REFERENCES auth.users(id),
     metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    read_at TIMESTAMPTZ
+    read_at TIMESTAMPTZ,
+    delivery_status delivery_status NOT NULL DEFAULT 'pending'
 );
 
 -- Create indexes for better query performance
