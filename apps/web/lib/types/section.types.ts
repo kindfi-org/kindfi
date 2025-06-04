@@ -4,7 +4,7 @@ export interface AchievementCardProps {
 	status: 'earned' | 'in-progress' | 'locked'
 	icon: 'trophy' | 'award' | 'heart' | 'star' | 'diamond' | 'users'
 	/** Progress percentage for in-progress achievements (0-100) */
-	progressPercentage?: number & { __brand: 'percentage' } | number
+	progressPercentage?: number
 }
 export interface NFTProps {
 	id: string
