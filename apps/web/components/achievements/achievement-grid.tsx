@@ -1,4 +1,4 @@
-import { achievements } from '@/lib/mock-data/section'
+import { achievements } from '~/lib/mock-data/section'
 import { useState } from 'react'
 import { AchievementCard } from './achievement-card'
 
