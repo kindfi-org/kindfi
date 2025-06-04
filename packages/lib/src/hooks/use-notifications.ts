@@ -52,9 +52,10 @@ export function useNotifications() {
 	const markAsRead = useCallback(
 		async (notificationIds: string[]) => {
 			try {
+				const now = new Date().toISOString()
 				const { error: updateError } = await supabase
 					.from('notifications')
-					.update({ read_at: null })
+					.update({ read_at: now })
 					.in('id', notificationIds)
 
 				if (updateError) throw updateError
@@ -62,7 +63,7 @@ export function useNotifications() {
 				setNotifications((prev) =>
 					prev.map((notification) =>
 						notificationIds.includes(notification.id)
-							? { ...notification, read_at: 'now()' }
+							? { ...notification, read_at: now }
 							: notification,
 					),
 				)

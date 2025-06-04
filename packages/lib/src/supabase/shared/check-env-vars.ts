@@ -11,9 +11,11 @@ export function validateEnvVars(requiredEnvVars: string[]) {
 
 export function validateSupabaseEnvVars() {
 	const requiredEnvVars = [
-		'SUPABASE_URL',
-		'SUPABASE_ANON_KEY',
+		// 'SUPABASE_URL', // removed for web app
+		// 'SUPABASE_ANON_KEY', // removed for web app
 		'SUPABASE_SERVICE_ROLE_KEY',
+		'NEXT_PUBLIC_SUPABASE_URL',
+		'NEXT_PUBLIC_SUPABASE_ANON_KEY',
 	]
 
 	validateEnvVars(requiredEnvVars)

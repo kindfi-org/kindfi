@@ -31,7 +31,12 @@ export function NotificationItem({
 				<div className="flex-1 space-y-1">
 					<p className="text-sm font-medium">{message}</p>
 					<p className="text-xs text-muted-foreground">
-						{formatDistanceToNow(new Date(created_at), { addSuffix: true })}
+						{(() => {
+							const date = new Date(created_at)
+							return Number.isNaN(date.getTime())
+								? ''
+								: formatDistanceToNow(date, { addSuffix: true })
+						})()}
 					</p>
 				</div>
 				{!read_at && (

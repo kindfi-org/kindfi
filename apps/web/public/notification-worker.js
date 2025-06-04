@@ -1,11 +1,18 @@
 /// <reference lib="webworker" />
 /// <reference lib="es2015" />
 
-const CACHE_NAME = 'notifications-cache-v1'
-const NOTIFICATION_ICON = '/icons/notification-icon.png'
+function getConfig() {
+	const options = self.registration?.options || {}
+	return {
+		CACHE_NAME: options.CACHE_NAME || 'notifications-cache-v1',
+		NOTIFICATION_ICON:
+			options.NOTIFICATION_ICON || '/icons/notification-icon.png',
+	}
+}
 
 // Install event
 self.addEventListener('install', (event) => {
+	const { CACHE_NAME, NOTIFICATION_ICON } = getConfig()
 	event.waitUntil(
 		caches.open(CACHE_NAME).then((cache) => {
 			return cache.addAll([NOTIFICATION_ICON, '/offline.html'])
@@ -15,6 +22,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event
 self.addEventListener('activate', (event) => {
+	const { CACHE_NAME } = getConfig()
 	event.waitUntil(
 		caches.keys().then((cacheNames) => {
 			return Promise.all(
@@ -36,6 +44,7 @@ function isString(obj) {
 
 // Push event
 self.addEventListener('push', (event) => {
+	const { NOTIFICATION_ICON } = getConfig()
 	try {
 		event.waitUntil(
 			(async () => {
@@ -84,21 +93,17 @@ self.addEventListener('push', (event) => {
 // Notification click event
 self.addEventListener('notificationclick', (event) => {
 	event.notification.close()
-
-	if (event.action === 'open') {
-		const urlToOpen = event.notification.data?.url || '/notifications'
-
-		event.waitUntil(
-			self.clients.matchAll({ type: 'window' }).then((clientList) => {
-				for (const client of clientList) {
-					if (client.url === urlToOpen) {
-						return client.focus()
-					}
+	const urlToOpen = event.notification.data?.url || '/notifications'
+	event.waitUntil(
+		self.clients.matchAll({ type: 'window' }).then((clientList) => {
+			for (const client of clientList) {
+				if (client.url === urlToOpen) {
+					return client.focus()
 				}
-				return self.clients.openWindow(urlToOpen)
-			}),
-		)
-	}
+			}
+			return self.clients.openWindow(urlToOpen)
+		}),
+	)
 })
 
 // Sync event

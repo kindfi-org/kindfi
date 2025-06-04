@@ -15,3 +15,33 @@ export type NotificationType = Database['public']['Enums']['notification_type']
  */
 export type NotificationMetadata =
 	Database['public']['Tables']['notifications']['Row']['metadata']
+
+/**
+ * Type guard to check if a value is a valid NotificationType.
+ */
+export function isNotificationType(value: unknown): value is NotificationType {
+	const validTypes = [
+		'info',
+		'success',
+		'warning',
+		'error',
+		// Add other enum values as defined in your DB
+	]
+	return typeof value === 'string' && validTypes.includes(value)
+}
+
+/**
+ * Type guard to check if an object conforms to the Notification type structure.
+ */
+export function isNotification(obj: unknown): obj is Notification {
+	if (typeof obj !== 'object' || obj === null) return false
+	const n = obj as Record<string, unknown>
+	return (
+		typeof n.id === 'string' &&
+		typeof n.message === 'string' &&
+		'created_at' in n &&
+		typeof n.created_at === 'string' &&
+		'type' in n &&
+		isNotificationType(n.type)
+	)
+}

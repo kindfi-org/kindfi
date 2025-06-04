@@ -9,7 +9,7 @@
 	"dependencies": {
 		"@services/supabase": "workspace:*",
 		"@supabase/supabase-js": "^2.49.4",
-		"@supabase/ssr": "^0.2.0",
+		"@supabase/ssr": "^0.6.1",
 		"@tanstack/react-query": "^5.74.7",
 		"async-mutex": "^0.4.1",
 		"tesseract.js": "^6.0.0",

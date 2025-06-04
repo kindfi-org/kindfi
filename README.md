@@ -34,7 +34,7 @@ bun run init # bun install && bun husky:prepare
 
 1. To run:
 
-```bash    
+```bash
 # web app
 cd apps/web
 bun dev
@@ -47,3 +47,20 @@ bun dev
 ```
 
 You can see the full list of commands in each of the `package.json` files in the `apps` and `services` directories.
+
+## Environment Variables
+
+The following Supabase-related environment variables are required for the application to function correctly:
+
+```
+# Server-side Supabase credentials
+SUPABASE_URL=your-supabase-url
+SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+
+# Client-side (public) Supabase credentials
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+Ensure these are set in your environment or .env files as appropriate for your deployment.

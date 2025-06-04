@@ -1,6 +1,28 @@
 import type { SorobanEvent, StellarBlock } from '@subql/types-stellar'
 import { xdr } from 'soroban-client'
 
+/**
+ * Comprehensive mock SorobanEvent for testing blockchain event handling logic.
+ *
+ * This mock event simulates a realistic event emitted from the Stellar blockchain,
+ * including detailed ledger and contract data. It is strongly typed as SorobanEvent
+ * and includes fields such as ledger sequence, contractId, topic, and value, all
+ * populated with plausible test values. The ledger property is typed as StellarBlock
+ * to ensure type safety and accurate structure.
+ *
+ * Usage:
+ * - Use this mock in unit and integration tests to validate event processing logic.
+ * - Ensures that event handlers and indexers can correctly parse and handle real-world
+ *   blockchain event data structures.
+ * - Facilitates regression testing by providing a stable, comprehensive event fixture.
+ *
+ * TypeScript Types:
+ * - SorobanEvent (from @subql/types-stellar)
+ * - StellarBlock (for the ledger property)
+ *
+ * This mock is intended to improve test reliability and maintainability by providing
+ * a single source of realistic event data for all test scenarios.
+ */
 export const mockEvent = {
 	id: 'test-event-1',
 	ledger: {

@@ -80,7 +80,9 @@ export class NotificationService {
 			while (this.queue.length > 0) {
 				const batch = this.queue.splice(0, 10)
 				const notificationsToInsert = batch.map((item) => ({
-					type: item.notification.type.toLowerCase() as NotificationType,
+					type: (typeof item.notification.type === 'string'
+						? item.notification.type.toUpperCase()
+						: item.notification.type) as NotificationType,
 					message: item.notification.message,
 					to: item.notification.to,
 					metadata: item.notification.metadata as NotificationMetadata,
@@ -123,7 +125,11 @@ export class NotificationService {
 
 		this.queue.push({ notification, retries: 0 })
 		this.metrics.queueSize = this.queue.length
-		await this.processQueue()
+		try {
+			await this.processQueue()
+		} catch (error) {
+			logger.error('Error in processQueue during createNotification', error)
+		}
 		return { queued: true, queueSize: this.metrics.queueSize }
 	}
 
@@ -165,13 +171,25 @@ export class NotificationService {
 		}
 	}
 
-	public async markAsRead(notificationId: string): Promise<void> {
+	public async markAsRead(
+		notificationId: string,
+		userId: string,
+	): Promise<void> {
 		try {
+			// Check that the notification belongs to the user
+			const { data, error: fetchError } = await this.supabase
+				.from('notifications')
+				.select('id, to')
+				.eq('id', notificationId)
+				.single()
+			if (fetchError) throw fetchError
+			if (!data || data.to !== userId) {
+				throw new Error('Unauthorized: Notification does not belong to user')
+			}
 			const { error } = await this.supabase
 				.from('notifications')
 				.update({ read_at: new Date().toISOString() })
 				.eq('id', notificationId)
-
 			if (error) throw error
 		} catch (error) {
 			logger.error('Error marking notification as read', error)
