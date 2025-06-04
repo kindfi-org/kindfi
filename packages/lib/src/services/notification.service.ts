@@ -41,6 +41,16 @@ export class NotificationService {
 	private readonly mutex = new Mutex()
 	private queue: Array<{ notification: CreateNotification; retries: number }> =
 		[]
+	private retryQueue: Array<{
+		notification: CreateNotification
+		retries: number
+	}> = []
+	private deadLetterQueue: Array<{
+		notification: CreateNotification
+		reason: string
+	}> = []
+	private retryTimer: NodeJS.Timeout | null = null
+	private readonly RETRY_INTERVAL = 2000 // ms
 	private metrics: QueueMetrics = {
 		queueSize: 0,
 		processingTime: 0,
@@ -53,18 +63,68 @@ export class NotificationService {
 
 	constructor(supabaseUrl: string, supabaseKey: string) {
 		this.supabase = createClient<Database>(supabaseUrl, supabaseKey)
+		this.startRetryTimer()
 	}
 
-	private async validateNotification(
-		notification: CreateNotification,
-	): Promise<void> {
+	private startRetryTimer() {
+		if (this.retryTimer) return
+		this.retryTimer = setInterval(() => {
+			this.processRetryQueue()
+		}, this.RETRY_INTERVAL)
+	}
+
+	private stopRetryTimer() {
+		if (this.retryTimer) {
+			clearInterval(this.retryTimer)
+			this.retryTimer = null
+		}
+	}
+
+	private async processRetryQueue() {
+		if (this.retryQueue.length === 0) return
+		const release = await this.mutex.acquire()
 		try {
-			await NotificationSchema.parseAsync(notification)
-		} catch (error) {
-			logger.error('Invalid notification', error)
-			throw new Error(
-				`Invalid notification: ${error instanceof Error ? error.message : 'Unknown error'}`,
-			)
+			const batch = this.retryQueue.splice(0, 10)
+			const notificationsToInsert = batch.map((item) => ({
+				type: item.notification.type as NotificationType,
+				message: item.notification.message,
+				to: item.notification.to,
+				metadata: item.notification.metadata as NotificationMetadata,
+				created_at: new Date().toISOString(),
+				read_at: null,
+			}))
+			const { error } = await this.supabase
+				.from('notifications')
+				.insert(notificationsToInsert)
+			if (error) {
+				for (const item of batch) {
+					if (item.retries < this.MAX_RETRIES) {
+						item.retries++
+						this.retryQueue.push(item)
+					} else {
+						this.deadLetterQueue.push({
+							notification: item.notification,
+							reason: 'Max retries exceeded',
+						})
+						logger.error(
+							'Notification moved to dead letter queue after max retries',
+							{ notification: item.notification },
+						)
+					}
+				}
+				this.metrics.errorCount += batch.length
+				return
+			}
+			this.metrics.successCount += batch.length
+			this.metrics.lastProcessedAt = new Date()
+			this.metrics.processingTime = 0 // Not tracking for retry queue
+			this.metrics.queueSize = this.queue.length + this.retryQueue.length
+			logger.info('Batch retry notification processed successfully', {
+				queueSize: this.metrics.queueSize,
+				batchSize: batch.length,
+			})
+		} finally {
+			release()
 		}
 	}
 
@@ -91,19 +151,18 @@ export class NotificationService {
 				if (error) {
 					logger.error('Error processing notification batch', error)
 					this.metrics.errorCount++
-					// Retry logic for each item in the batch
+					// Move to retry queue for centralized retry
 					for (const item of batch) {
-						if (item.retries < this.MAX_RETRIES) {
-							item.retries++
-							const delay = this.BASE_RETRY_DELAY * 2 ** (item.retries - 1)
-							setTimeout(() => {
-								this.queue.push(item)
-								this.metrics.queueSize = this.queue.length
-								this.processQueue()
-							}, delay)
+						item.retries++
+						if (item.retries <= this.MAX_RETRIES) {
+							this.retryQueue.push(item)
 						} else {
+							this.deadLetterQueue.push({
+								notification: item.notification,
+								reason: 'Max retries exceeded',
+							})
 							logger.error(
-								'Notification batch permanently failed after max retries',
+								'Notification moved to dead letter queue after max retries',
 								{ notification: item.notification },
 							)
 						}
@@ -113,7 +172,7 @@ export class NotificationService {
 				this.metrics.successCount += batch.length
 				this.metrics.lastProcessedAt = new Date()
 				this.metrics.processingTime = Date.now() - startTime
-				this.metrics.queueSize = this.queue.length
+				this.metrics.queueSize = this.queue.length + this.retryQueue.length
 				logger.info('Batch notification processed successfully', {
 					queueSize: this.metrics.queueSize,
 					processingTime: this.metrics.processingTime,
@@ -122,6 +181,19 @@ export class NotificationService {
 			}
 		} finally {
 			release()
+		}
+	}
+
+	private async validateNotification(
+		notification: CreateNotification,
+	): Promise<void> {
+		try {
+			await NotificationSchema.parseAsync(notification)
+		} catch (error) {
+			logger.error('Invalid notification', error)
+			throw new Error(
+				`Invalid notification: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 
