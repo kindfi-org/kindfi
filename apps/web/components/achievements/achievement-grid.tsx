@@ -36,10 +36,13 @@ export function AchievementGrid() {
 				<AchievementCard
 					key={achievement.id}
 					title={achievement.title}
-					description={achievement.description}
+					subtitle={achievement.description}
 					icon={achievement.icon}
 					status={achievement.status}
 					progressPercentage={achievement.progressPercentage}
+					onClick={() => {
+						// TODO: handle achievement click (e.g., open details)
+					}}
 				/>
 			))}
 		</div>
