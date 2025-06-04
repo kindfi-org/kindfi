@@ -126,6 +126,8 @@ impl AcademyBadgeTracker {
         refs.push_back(reference_id);
         index.set(badge_type.clone(), refs);
         env.storage().persistent().set(&user_index_key, &index);
+        // Extend TTL to keep user index alive longer in storage
+        env.storage().persistent().extend_ttl(&user_index_key, 100, 200);
 
         // Emit an event for external tracking
         env.events().publish(
