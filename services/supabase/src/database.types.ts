@@ -536,30 +536,36 @@ export type Database = {
 			notifications: {
 				Row: {
 					created_at: string
+					delivery_status: Database['public']['Enums']['delivery_status']
 					from: string | null
 					id: string
 					message: string
 					metadata: Json
+					metadata_hash: string | null
 					read_at: string | null
 					to: string
 					type: Database['public']['Enums']['notification_type']
 				}
 				Insert: {
 					created_at?: string
+					delivery_status?: Database['public']['Enums']['delivery_status']
 					from?: string | null
 					id?: string
 					message: string
 					metadata?: Json
+					metadata_hash?: string | null
 					read_at?: string | null
 					to: string
 					type: Database['public']['Enums']['notification_type']
 				}
 				Update: {
 					created_at?: string
+					delivery_status?: Database['public']['Enums']['delivery_status']
 					from?: string | null
 					id?: string
 					message?: string
 					metadata?: Json
+					metadata_hash?: string | null
 					read_at?: string | null
 					to?: string
 					type?: Database['public']['Enums']['notification_type']
@@ -830,7 +836,7 @@ export type Database = {
 		Functions: {
 			create_notification: {
 				Args: {
-					p_type: string
+					p_type: Database['public']['Enums']['notification_type']
 					p_message: string
 					p_from: string
 					p_to: string
@@ -840,7 +846,7 @@ export type Database = {
 			}
 			mark_notifications_as_read: {
 				Args: { p_notification_ids: string[] }
-				Returns: undefined
+				Returns: number
 			}
 			unaccent: {
 				Args: { '': string }
@@ -853,6 +859,7 @@ export type Database = {
 		}
 		Enums: {
 			comment_type: 'comment' | 'question' | 'answer'
+			delivery_status: 'pending' | 'sent' | 'failed' | 'delivered'
 			escrow_status_type:
 				| 'NEW'
 				| 'FUNDED'
@@ -997,6 +1004,7 @@ export const Constants = {
 	public: {
 		Enums: {
 			comment_type: ['comment', 'question', 'answer'],
+			delivery_status: ['pending', 'sent', 'failed', 'delivered'],
 			escrow_status_type: [
 				'NEW',
 				'FUNDED',

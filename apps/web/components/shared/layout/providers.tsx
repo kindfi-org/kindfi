@@ -19,9 +19,7 @@ export function Providers({ children }: ProvidersProps) {
 				disableTransitionOnChange
 			>
 				<StellarProvider>
-					<AuthProvider>
-						{children}
-					</AuthProvider>
+					<AuthProvider>{children}</AuthProvider>
 				</StellarProvider>
 			</NextThemesProvider>
 		</ReactQueryClientProvider>
