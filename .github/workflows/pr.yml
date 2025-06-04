@@ -43,8 +43,6 @@ jobs:
           bun install
           # Verify installation was successful
           test -f bun.lockb
-        # Untrusted packages can be installed, causing false errors. Continuing on error.
-        # ? If something actually went wrong, the build will fail below.
         continue-on-error: true
       - name: Codegen
         run: bun codegen
@@ -52,8 +50,8 @@ jobs:
       - name: Build
         run: bun run build
         timeout-minutes: 10
-      - name: Install test dependencies
-        run: bun add --dev @subql/node-stellar
-      - name: Run tests with Subquery Node
-        run: bunx subql-node-stellar test -f ${{ github.workspace }}
+      - name: Run tests
+        run: |
+          bun test
+          bun run test:subql
         timeout-minutes: 15

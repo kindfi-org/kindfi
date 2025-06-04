@@ -142,8 +142,8 @@ export async function handleEvent(event: SorobanEvent): Promise<void> {
 		value: BigInt(event.value.u64()?.toBigInt() ?? 0),
 	})
 
-	fromAccount.lastSeenLedger = event.ledger.sequence
-	toAccount.lastSeenLedger = event.ledger.sequence
+		fromAccount.lastSeenLedger = event.ledger.sequence
+		toAccount.lastSeenLedger = event.ledger.sequence
 
 	await Promise.all([fromAccount.save(), toAccount.save(), transfer.save()])
 }
@@ -174,7 +174,7 @@ function decodeAddress(scVal: xdr.ScVal): string {
 		return Address.account(scVal.address().accountId().ed25519()).toString()
 	} catch (e) {
 		try {
-			return Address.contract(scVal.address().contractId()).toString()
+		return Address.contract(scVal.address().contractId()).toString()
 		} catch (error) {
 			if (error instanceof Error) {
 				throw new Error(`Failed to decode address: ${error.message}`)

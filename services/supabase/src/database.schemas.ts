@@ -509,38 +509,44 @@ export const milestonesRelationshipsSchema = z.tuple([
 ])
 
 export const notificationTypeSchema = z.union([
-	z.literal('project_update'),
-	z.literal('milestone_completed'),
-	z.literal('escrow_released'),
-	z.literal('kyc_status_change'),
-	z.literal('comment_added'),
-	z.literal('member_joined'),
-	z.literal('system_alert'),
+	z.literal('TRANSFER'),
+	z.literal('PAYMENT'),
+	z.literal('CREDIT'),
+	z.literal('DEBIT'),
+	z.literal('SYSTEM')
 ])
 
 export const notificationsInsertSchema = z.object({
-	created_at: z.string().optional(),
-	from: z.string().optional().nullable(),
 	id: z.string().optional(),
-	message: z.string(),
-	metadata: jsonSchema.optional(),
-	read_at: z.string().optional().nullable(),
-	to: z.string(),
+	account_id: z.string(),
 	type: notificationTypeSchema,
+	message: z.string(),
+	is_read: z.boolean().default(false),
+	created_at: z.string().optional().nullable(),
+	updated_at: z.string().optional().nullable(),
+	metadata: jsonSchema.optional().nullable()
 })
 
 export const notificationsUpdateSchema = z.object({
-	created_at: z.string().optional(),
-	from: z.string().optional().nullable(),
 	id: z.string().optional(),
-	message: z.string().optional(),
-	metadata: jsonSchema.optional(),
-	read_at: z.string().optional().nullable(),
-	to: z.string().optional(),
+	account_id: z.string().optional(),
 	type: notificationTypeSchema.optional(),
+	message: z.string().optional(),
+	is_read: z.boolean().optional(),
+	created_at: z.string().optional().nullable(),
+	updated_at: z.string().optional().nullable(),
+	metadata: jsonSchema.optional().nullable()
 })
 
-export const notificationsRelationshipsSchema = z.tuple([])
+export const notificationsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('notifications_account_id_fkey'),
+		columns: z.tuple([z.literal('account_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('profiles'),
+		referencedColumns: z.tuple([z.literal('id')])
+	})
+])
 
 export const userRoleSchema = z.union([
 	z.literal('kinder'),

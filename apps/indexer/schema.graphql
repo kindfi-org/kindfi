@@ -10,6 +10,7 @@ type Account @entity {
 	recievedTransfers: [Transfer] @derivedFrom(field: "to") # These are virtual properties to help us navigate to the correct foreign key of Transfer
 	sentPayments: [Payment] @derivedFrom(field: "from") # These are virtual properties to help us navigate to the correct foreign key of Payment
 	receivedPayments: [Payment] @derivedFrom(field: "to") # These are virtual properties to help us navigate to the correct foreign key of Payment
+	notifications: [Notification] @derivedFrom(field: "account")
 }
 
 type Transfer @entity {
@@ -40,4 +41,23 @@ type Debit @entity {
 	id: ID!
 	account: Account!
 	amount: String!
+}
+
+enum NotificationType {
+	TRANSFER
+	PAYMENT
+	CREDIT
+	DEBIT
+	SYSTEM
+}
+
+type Notification @entity {
+	id: ID!
+	account: Account!
+	type: NotificationType! @index
+	message: String!
+	isRead: Boolean! @index
+	createdAt: Date! @index
+	updatedAt: Date! @index
+	metadata: JSON
 }

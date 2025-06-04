@@ -115,9 +115,9 @@ RETURNS TRIGGER AS $$
 BEGIN
     -- Hash the metadata using HMAC-SHA256
     NEW.metadata_hash = encode(hmac(
-        NEW.metadata::text,
-        current_setting('app.settings.jwt_secret', true),
-        'sha256'
+            NEW.metadata::text,
+            current_setting('app.settings.jwt_secret', true),
+            'sha256'
     ), 'hex');
     RETURN NEW;
 END;
@@ -184,11 +184,11 @@ BEGIN
                 PERFORM pg_sleep(0.1 * v_retry_count);
             -- Handle serialization failures (40001)
             WHEN serialization_failure THEN
-                v_retry_count := v_retry_count + 1;
-                IF v_retry_count = v_max_retries THEN
+            v_retry_count := v_retry_count + 1;
+            IF v_retry_count = v_max_retries THEN
                     RAISE EXCEPTION 'Failed to create notification after % retries due to serialization failure: %', v_max_retries, SQLERRM;
-                END IF;
-                PERFORM pg_sleep(0.1 * v_retry_count);
+            END IF;
+            PERFORM pg_sleep(0.1 * v_retry_count);
             -- Immediately raise other errors without retry
             WHEN OTHERS THEN
                 RAISE EXCEPTION 'Failed to create notification: %', SQLERRM;
@@ -209,9 +209,9 @@ DECLARE
     v_count INTEGER;
 BEGIN
     WITH updated AS (
-        UPDATE public.notifications
-        SET read_at = now()
-        WHERE id = ANY(p_notification_ids)
+    UPDATE public.notifications
+    SET read_at = now()
+    WHERE id = ANY(p_notification_ids)
         AND "to" = auth.uid()
         RETURNING 1
     )

@@ -8,21 +8,11 @@ import { logger } from '../utils/logger'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
 type NotificationType = Database['public']['Enums']['notification_type']
-type NotificationMetadata =
-	Database['public']['Tables']['notifications']['Row']['metadata']
+type NotificationMetadata = Database['public']['Tables']['notifications']['Row']['metadata']
 
 const NotificationSchema = z.object({
-	type: z.enum([
-		'project_update',
-		'milestone_completed',
-		'escrow_released',
-		'kyc_status_change',
-		'comment_added',
-		'member_joined',
-		'system_alert',
-	]),
+	type: z.enum(['project_update', 'milestone_completed', 'escrow_released', 'kyc_status_change', 'comment_added', 'member_joined', 'system_alert']),
 	message: z.string().min(1),
-	from: z.string().uuid().nullable(),
 	to: z.string().uuid(),
 	metadata: z.record(z.unknown()).default({}),
 })
@@ -44,8 +34,7 @@ export class NotificationService {
 	private supabase: SupabaseClient<Database>
 	private readonly MAX_QUEUE_SIZE = 1000
 	private readonly mutex = new Mutex()
-	private queue: Array<{ notification: CreateNotification; retries: number }> =
-		[]
+	private queue: Array<{ notification: CreateNotification; retries: number }> = []
 	private metrics: QueueMetrics = {
 		queueSize: 0,
 		processingTime: 0,
@@ -58,16 +47,12 @@ export class NotificationService {
 		this.supabase = createClient<Database>(supabaseUrl, supabaseKey)
 	}
 
-	private async hashMetadata(
-		metadata: Record<string, unknown>,
-	): Promise<string> {
+	private async hashMetadata(metadata: Record<string, unknown>): Promise<string> {
 		const metadataString = JSON.stringify(metadata)
 		return createHash('sha256').update(metadataString).digest('hex')
 	}
 
-	private async validateNotification(
-		notification: CreateNotification,
-	): Promise<void> {
+	private async validateNotification(notification: CreateNotification): Promise<void> {
 		try {
 			await NotificationSchema.parseAsync(notification)
 		} catch (error) {
@@ -90,9 +75,10 @@ export class NotificationService {
 			const { error } = await this.supabase.from('notifications').insert({
 				type: item.notification.type,
 				message: item.notification.message,
-				from: item.notification.from,
 				to: item.notification.to,
 				metadata: item.notification.metadata as NotificationMetadata,
+				created_at: new Date().toISOString(),
+				read_at: null
 			})
 
 			if (error) throw error
@@ -196,7 +182,9 @@ export class NotificationService {
 		try {
 			const { error } = await this.supabase
 				.from('notifications')
-				.update({ read_at: new Date().toISOString() })
+				.update({ 
+					read_at: new Date().toISOString()
+				})
 				.eq('id', notificationId)
 
 			if (error) {

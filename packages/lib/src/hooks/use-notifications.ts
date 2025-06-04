@@ -51,7 +51,9 @@ export function useNotifications() {
 			try {
 				const { error: updateError } = await supabase
 					.from('notifications')
-					.update({ read_at: new Date().toISOString() })
+					.update({ 
+						read_at: new Date().toISOString()
+					})
 					.in('id', notificationIds)
 
 				if (updateError) throw updateError
@@ -78,7 +80,9 @@ export function useNotifications() {
 		try {
 			const { error: updateError } = await supabase
 				.from('notifications')
-				.update({ read_at: new Date().toISOString() })
+				.update({ 
+					read_at: new Date().toISOString()
+				})
 				.is('read_at', null)
 
 			if (updateError) throw updateError
@@ -86,7 +90,7 @@ export function useNotifications() {
 			setNotifications((prev) =>
 				prev.map((notification) => ({
 					...notification,
-					read_at: notification.read_at || new Date().toISOString(),
+					read_at: new Date().toISOString()
 				})),
 			)
 		} catch (err) {

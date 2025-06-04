@@ -1,13 +1,20 @@
 'use client'
 
-import { Button } from '~/components/base/button'
 import { ScrollArea } from '~/components/base/scroll-area'
-import { useNotificationContext } from '~/providers/notification-provider'
 import { NotificationItem } from './notification-item'
+import { useNotifications } from '@packages/lib'
+import { useInView } from 'react-intersection-observer'
+import type { Database } from '@services/supabase'
+
+type Notification = Database['public']['Tables']['notifications']['Row']
 
 export function NotificationDropdown() {
-	const { notifications, isLoading, error, hasMore, loadMore } =
-		useNotificationContext()
+	const { notifications, isLoading, hasMore, loadMore } = useNotifications()
+	const { ref, inView } = useInView()
+
+	if (inView && hasMore && !isLoading) {
+		loadMore()
+	}
 
 	return (
 		<div className="w-96 rounded-lg border bg-background shadow-lg">
@@ -18,22 +25,20 @@ export function NotificationDropdown() {
 					</div>
 				) : (
 					<div className="divide-y">
-						{notifications.map((notification) => (
+						{notifications.map((notification: Notification) => (
 							<NotificationItem
 								key={notification.id}
-								notification={notification}
+								id={notification.id}
+								message={notification.message}
+								readAt={notification.read_at}
+								createdAt={notification.created_at}
 							/>
 						))}
 						{hasMore && (
-							<div className="flex justify-center p-4">
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={loadMore}
-									disabled={isLoading}
-								>
-									{isLoading ? 'Loading...' : 'Load more'}
-								</Button>
+							<div ref={ref} className="flex justify-center p-4">
+								{isLoading && (
+									<p className="text-sm text-muted-foreground">Loading...</p>
+								)}
 							</div>
 						)}
 					</div>

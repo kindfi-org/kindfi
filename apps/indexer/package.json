@@ -9,8 +9,8 @@
 		"start:docker": "docker-compose pull && docker-compose up --remove-orphans",
 		"dev": "subql codegen && subql build && docker-compose pull && docker-compose up --remove-orphans",
 		"prepack": "rm -rf dist && npm run build",
-		"test": "jest",
-		"test:subql": "subql build && subql-node-stellar test -f C:/Users/ojoseph/Desktop/kindfi/apps/indexer",
+		"test": "bun test",
+		"test:subql": "subql build && subql-node-stellar test -f ./apps/indexer",
 		"build:develop": "NODE_ENV=develop subql codegen && NODE_ENV=develop subql build",
 		"test:watch": "jest --watch"
 	},

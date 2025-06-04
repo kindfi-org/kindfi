@@ -7,3 +7,4 @@ export type NotificationMetadata =
 export type Notification = Database['public']['Tables']['notifications']['Row']
 
 export * from './doc-utils'
+export * from './hooks'

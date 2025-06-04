@@ -1,45 +1,51 @@
 'use client'
 
-import type { Database } from '@services/supabase'
-import { Check } from 'lucide-react'
 import { Button } from '~/components/base/button'
-import { cn } from '~/lib/utils'
-import { formatNotificationDate } from '~/lib/utils'
-import { useNotificationContext } from '~/providers/notification-provider'
-
-type Notification = Database['public']['Tables']['notifications']['Row']
+import { Card } from '~/components/base/card'
+import { useNotifications } from '@packages/lib'
+import { formatDistanceToNow } from 'date-fns'
+import { Check } from 'lucide-react'
+import { useCallback } from 'react'
 
 interface NotificationItemProps {
-	notification: Notification
+	id: string
+	message: string
+	readAt: string | null
+	createdAt: string
 }
 
-export function NotificationItem({ notification }: NotificationItemProps) {
-	const { markAsRead } = useNotificationContext()
+export function NotificationItem({
+	id,
+	message,
+	readAt,
+	createdAt,
+}: NotificationItemProps) {
+	const { markAsRead } = useNotifications()
+
+	const handleMarkAsRead = useCallback(() => {
+		markAsRead([id])
+	}, [id, markAsRead])
 
 	return (
-		<div
-			className={cn(
-				'flex items-start gap-4 p-4 transition-colors hover:bg-muted/50',
-				!notification.read_at && 'bg-muted/25',
-			)}
-		>
-			<div className="flex-1 space-y-1">
-				<p className="text-sm font-medium">{notification.message}</p>
-				<p className="text-xs text-muted-foreground">
-					{formatNotificationDate(notification.created_at)}
-				</p>
+		<Card className="p-4">
+			<div className="flex items-start gap-4">
+				<div className="flex-1 space-y-1">
+					<p className="text-sm font-medium">{message}</p>
+					<p className="text-xs text-muted-foreground">
+						{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+					</p>
+				</div>
+				{!readAt && (
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8"
+						onClick={handleMarkAsRead}
+					>
+						<Check className="h-4 w-4" />
+					</Button>
+				)}
 			</div>
-			{!notification.read_at && (
-				<Button
-					variant="ghost"
-					size="icon"
-					className="h-8 w-8"
-					onClick={() => markAsRead([notification.id])}
-				>
-					<Check className="h-4 w-4" />
-					<span className="sr-only">Mark as read</span>
-				</Button>
-			)}
-		</div>
+		</Card>
 	)
 }
