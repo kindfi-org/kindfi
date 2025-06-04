@@ -83,8 +83,10 @@ export type ProjectPitchUpdate = Tables['project_pitch']['Update']
 
 // Project Tag Relationship types
 export type ProjectTagRelationship = Tables['project_tag_relationships']['Row']
-export type ProjectTagRelationshipInsert = Tables['project_tag_relationships']['Insert']
-export type ProjectTagRelationshipUpdate = Tables['project_tag_relationships']['Update']
+export type ProjectTagRelationshipInsert =
+	Tables['project_tag_relationships']['Insert']
+export type ProjectTagRelationshipUpdate =
+	Tables['project_tag_relationships']['Update']
 
 // Project Tag types
 export type ProjectTag = Tables['project_tags']['Row']
@@ -112,34 +114,34 @@ export type CampaignUpdate = ProjectUpdateType
 
 // Combined types for complex operations
 export type ProjectWithMembers = Project & {
-  project_members: ProjectMember[]
+	project_members: ProjectMember[]
 }
 
 export type ProjectWithMilestones = Project & {
-  milestones: Milestone[]
+	milestones: Milestone[]
 }
 
 export type ProjectWithUpdates = Project & {
-  project_updates: ProjectUpdate[]
+	project_updates: ProjectUpdate[]
 }
 
 export type ProjectWithPitch = Project & {
-  project_pitch: ProjectPitch | null
+	project_pitch: ProjectPitch | null
 }
 
 export type FullProject = Project & {
-  category: Category | null
-  project_members: ProjectMember[]
-  milestones: Milestone[]
-  project_updates: ProjectUpdate[]
-  project_pitch: ProjectPitch | null
-  contributions: Contribution[]
+	category: Category | null
+	project_members: ProjectMember[]
+	milestones: Milestone[]
+	project_updates: ProjectUpdate[]
+	project_pitch: ProjectPitch | null
+	contributions: Contribution[]
 }
 
 export type CommentWithReplies = Comment & {
-  replies: Comment[]
+	replies: Comment[]
 }
 
 export type EscrowContractWithReviews = EscrowContract & {
-  escrow_reviews: EscrowReview[]
+	escrow_reviews: EscrowReview[]
 }

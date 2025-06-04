@@ -6,6 +6,17 @@
 	"description": "supabase module for kindfi",
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
+	"files": [
+		"src/",
+		"src/api.ts",
+		"src/client/",
+		"src/custom.ts",
+		"src/enum.ts",
+		"src/tables.ts",
+		"src/utils/",
+		"src/database.types.ts",
+		"src/database.schemas.ts"
+	],
 	"scripts": {
 		"gen:remote": "bun run types:remote && bun run schemas",
 		"gen": "bun run types && bun run schemas",
@@ -23,8 +34,8 @@
 	"author": "kindfi",
 	"license": "MIT",
 	"dependencies": {
-    "@supabase/supabase-js": "^2.49.0"
-  },
+		"@supabase/supabase-js": "^2.49.0"
+	},
 	"devDependencies": {
 		"supabase-to-zod": "^1.0.7",
 		"supabase": "^2.0.0"
