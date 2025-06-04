@@ -60,14 +60,21 @@ export function AchievementCard({
 				)}
 				{status === 'in-progress' && progressPercentage !== undefined && (
 					<div className="w-full mt-3 space-y-1">
-						<div className="relative h-2 w-full overflow-hidden rounded-full bg-blue-100">
+						<div
+							className="relative h-2 w-full overflow-hidden rounded-full bg-blue-100"
+							role="progressbar"
+							aria-valuenow={Math.max(0, Math.min(100, progressPercentage))}
+							aria-valuemin={0}
+							aria-valuemax={100}
+							aria-label={`Achievement progress: ${Math.max(0, Math.min(100, progressPercentage))}% complete`}
+						>
 							<div
 								className="absolute h-full w-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-in-out"
-								style={{ width: `${progressPercentage}%` }}
+								style={{ width: `${Math.max(0, Math.min(100, progressPercentage))}%` }}
 							/>
 						</div>
 						<p className="text-xs font-medium text-blue-600 text-center">
-							{progressPercentage}% Complete
+							{Math.max(0, Math.min(100, progressPercentage))}% Complete
 						</p>
 					</div>
 				)}
