@@ -10,6 +10,7 @@ import { useFonts } from 'expo-font'
 import { Slot } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, useState } from 'react'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import '../global.css'
 
@@ -59,10 +60,12 @@ function RootLayoutNav() {
 	const colorScheme = useColorScheme()
 
 	return (
-		<GluestackUIProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
-			<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-				<Slot />
-			</ThemeProvider>
-		</GluestackUIProvider>
+		<SafeAreaProvider>
+			<GluestackUIProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
+				<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+					<Slot />
+				</ThemeProvider>
+			</GluestackUIProvider>
+		</SafeAreaProvider>
 	)
 }
