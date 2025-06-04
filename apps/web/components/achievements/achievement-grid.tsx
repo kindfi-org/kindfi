@@ -2,13 +2,13 @@ import { achievements } from '~/lib/mock-data/section'
 import { useState } from 'react'
 import { AchievementCard } from './achievement-card'
 
-interface Achievement {
+import type { AchievementCardProps } from '~/lib/types'
+
+interface Achievement extends Omit<AchievementCardProps, 'status'> {
 	id: string
-	title: string
 	description: string
 	icon: React.ReactNode
 	status: 'locked' | 'in-progress' | 'completed'
-	progressPercentage?: number
 }
 
 export function AchievementGrid() {
