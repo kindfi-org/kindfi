@@ -22,6 +22,9 @@
 	},
 	"author": "kindfi",
 	"license": "MIT",
+	"dependencies": {
+    "@supabase/supabase-js": "^2.49.0"
+  },
 	"devDependencies": {
 		"supabase-to-zod": "^1.0.7",
 		"supabase": "^2.0.0"
