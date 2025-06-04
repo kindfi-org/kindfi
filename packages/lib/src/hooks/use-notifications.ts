@@ -12,6 +12,7 @@ export function useNotifications() {
 	const [hasMore, setHasMore] = useState(true)
 	const [page, setPage] = useState(0)
 	const PAGE_SIZE = 20
+	const [paginationLoading, setPaginationLoading] = useState(false)
 
 	const fetchNotifications = useCallback(
 		async (pageNum: number) => {
@@ -35,25 +36,25 @@ export function useNotifications() {
 				)
 			} finally {
 				setIsLoading(false)
+				setPaginationLoading(false)
 			}
 		},
 		[supabase],
 	)
 
 	const loadMore = useCallback(() => {
-		if (!isLoading && hasMore) {
+		if (!paginationLoading && hasMore) {
+			setPaginationLoading(true)
 			fetchNotifications(page + 1)
 		}
-	}, [fetchNotifications, hasMore, isLoading, page])
+	}, [fetchNotifications, hasMore, paginationLoading, page])
 
 	const markAsRead = useCallback(
 		async (notificationIds: string[]) => {
 			try {
 				const { error: updateError } = await supabase
 					.from('notifications')
-					.update({ 
-						read_at: new Date().toISOString()
-					})
+					.update({ read_at: null })
 					.in('id', notificationIds)
 
 				if (updateError) throw updateError
@@ -61,7 +62,7 @@ export function useNotifications() {
 				setNotifications((prev) =>
 					prev.map((notification) =>
 						notificationIds.includes(notification.id)
-							? { ...notification, read_at: new Date().toISOString() }
+							? { ...notification, read_at: 'now()' }
 							: notification,
 					),
 				)
@@ -80,9 +81,7 @@ export function useNotifications() {
 		try {
 			const { error: updateError } = await supabase
 				.from('notifications')
-				.update({ 
-					read_at: new Date().toISOString()
-				})
+				.update({ read_at: 'now()' })
 				.is('read_at', null)
 
 			if (updateError) throw updateError
@@ -90,7 +89,7 @@ export function useNotifications() {
 			setNotifications((prev) =>
 				prev.map((notification) => ({
 					...notification,
-					read_at: new Date().toISOString()
+					read_at: 'now()',
 				})),
 			)
 		} catch (err) {

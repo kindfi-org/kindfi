@@ -1,10 +1,11 @@
 'use client'
 
+import { useNotifications } from '@packages/lib'
+import type { Database } from '@services/supabase'
+import { useEffect } from 'react'
+import { useInView } from 'react-intersection-observer'
 import { ScrollArea } from '~/components/base/scroll-area'
 import { NotificationItem } from './notification-item'
-import { useNotifications } from '@packages/lib'
-import { useInView } from 'react-intersection-observer'
-import type { Database } from '@services/supabase'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
 
@@ -12,9 +13,11 @@ export function NotificationDropdown() {
 	const { notifications, isLoading, hasMore, loadMore } = useNotifications()
 	const { ref, inView } = useInView()
 
-	if (inView && hasMore && !isLoading) {
-		loadMore()
-	}
+	useEffect(() => {
+		if (inView && hasMore && !isLoading) {
+			loadMore()
+		}
+	}, [inView, hasMore, isLoading, loadMore])
 
 	return (
 		<div className="w-96 rounded-lg border bg-background shadow-lg">
@@ -26,13 +29,7 @@ export function NotificationDropdown() {
 				) : (
 					<div className="divide-y">
 						{notifications.map((notification: Notification) => (
-							<NotificationItem
-								key={notification.id}
-								id={notification.id}
-								message={notification.message}
-								readAt={notification.read_at}
-								createdAt={notification.created_at}
-							/>
+							<NotificationItem key={notification.id} {...notification} />
 						))}
 						{hasMore && (
 							<div ref={ref} className="flex justify-center p-4">

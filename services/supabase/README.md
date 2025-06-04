@@ -37,7 +37,7 @@ To create migrations, please follow this [guide](https://supabase.com/docs/guide
 
 Use the following command to start the Supabase services:
 
-```sh
+```bash
 bun start # supabase start
 ```
 

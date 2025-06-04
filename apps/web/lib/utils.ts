@@ -46,12 +46,15 @@ export async function getAccountSequence(secretKey: string): Promise<number> {
 	return account.sequenceNumber
 }
 
-export function formatNotificationDate(dateString: string): string {
+export function formatNotificationDate(
+	dateString: string,
+	fallback = 'Recently',
+): string {
 	try {
 		return formatDistanceToNow(new Date(dateString), {
 			addSuffix: true,
 		})
 	} catch {
-		return 'Recently'
+		return fallback
 	}
 }

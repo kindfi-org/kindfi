@@ -8,10 +8,19 @@ import { logger } from '../utils/logger'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
 type NotificationType = Database['public']['Enums']['notification_type']
-type NotificationMetadata = Database['public']['Tables']['notifications']['Row']['metadata']
+type NotificationMetadata =
+	Database['public']['Tables']['notifications']['Row']['metadata']
 
 const NotificationSchema = z.object({
-	type: z.enum(['project_update', 'milestone_completed', 'escrow_released', 'kyc_status_change', 'comment_added', 'member_joined', 'system_alert']),
+	type: z.enum([
+		'PROJECT_UPDATE',
+		'MILESTONE_COMPLETED',
+		'ESCROW_RELEASED',
+		'KYC_STATUS_CHANGE',
+		'COMMENT_ADDED',
+		'MEMBER_JOINED',
+		'SYSTEM_ALERT',
+	]),
 	message: z.string().min(1),
 	to: z.string().uuid(),
 	metadata: z.record(z.unknown()).default({}),
@@ -34,7 +43,8 @@ export class NotificationService {
 	private supabase: SupabaseClient<Database>
 	private readonly MAX_QUEUE_SIZE = 1000
 	private readonly mutex = new Mutex()
-	private queue: Array<{ notification: CreateNotification; retries: number }> = []
+	private queue: Array<{ notification: CreateNotification; retries: number }> =
+		[]
 	private metrics: QueueMetrics = {
 		queueSize: 0,
 		processingTime: 0,
@@ -47,12 +57,9 @@ export class NotificationService {
 		this.supabase = createClient<Database>(supabaseUrl, supabaseKey)
 	}
 
-	private async hashMetadata(metadata: Record<string, unknown>): Promise<string> {
-		const metadataString = JSON.stringify(metadata)
-		return createHash('sha256').update(metadataString).digest('hex')
-	}
-
-	private async validateNotification(notification: CreateNotification): Promise<void> {
+	private async validateNotification(
+		notification: CreateNotification,
+	): Promise<void> {
 		try {
 			await NotificationSchema.parseAsync(notification)
 		} catch (error) {
@@ -66,59 +73,39 @@ export class NotificationService {
 	private async processQueue(): Promise<void> {
 		if (this.queue.length === 0) return
 
-		// Use mutex to ensure only one processQueue runs at a time
 		const release = await this.mutex.acquire()
 		const startTime = Date.now()
 
 		try {
-			const item = this.queue[0]
-			const { error } = await this.supabase.from('notifications').insert({
-				type: item.notification.type,
-				message: item.notification.message,
-				to: item.notification.to,
-				metadata: item.notification.metadata as NotificationMetadata,
-				created_at: new Date().toISOString(),
-				read_at: null
-			})
-
-			if (error) throw error
-
-			this.queue.shift()
-			this.metrics.successCount++
-			this.metrics.lastProcessedAt = new Date()
-			this.metrics.processingTime = Date.now() - startTime
-			this.metrics.queueSize = this.queue.length
-
-			logger.info('Notification processed successfully', {
-				queueSize: this.metrics.queueSize,
-				processingTime: this.metrics.processingTime,
-				retries: item.retries,
-			})
-		} catch (error) {
-			logger.error('Error processing notification', error)
-			this.metrics.errorCount++
-
-			const item = this.queue[0]
-			if (item && item.retries < MAX_RETRIES) {
-				item.retries++
-				release()
-				setTimeout(() => this.processQueue(), RETRY_DELAY * item.retries)
-				return
-			}
-
-			if (item) {
-				this.queue.shift()
-				logger.warn('Notification processing failed after max retries', {
+			while (this.queue.length > 0) {
+				const batch = this.queue.splice(0, 10)
+				const notificationsToInsert = batch.map((item) => ({
+					type: item.notification.type.toLowerCase() as NotificationType,
+					message: item.notification.message,
+					to: item.notification.to,
+					metadata: item.notification.metadata as NotificationMetadata,
+					created_at: new Date().toISOString(),
+					read_at: null,
+				}))
+				const { error } = await this.supabase
+					.from('notifications')
+					.insert(notificationsToInsert)
+				if (error) throw error
+				this.metrics.successCount += batch.length
+				this.metrics.lastProcessedAt = new Date()
+				this.metrics.processingTime = Date.now() - startTime
+				this.metrics.queueSize = this.queue.length
+				logger.info('Batch notification processed successfully', {
 					queueSize: this.metrics.queueSize,
-					retries: item.retries,
+					processingTime: this.metrics.processingTime,
+					batchSize: batch.length,
 				})
 			}
+		} catch (error) {
+			logger.error('Error processing notification batch', error)
+			this.metrics.errorCount++
 		} finally {
 			release()
-			// Continue processing if there are more items
-			if (this.queue.length > 0) {
-				await this.processQueue()
-			}
 		}
 	}
 
@@ -182,15 +169,10 @@ export class NotificationService {
 		try {
 			const { error } = await this.supabase
 				.from('notifications')
-				.update({ 
-					read_at: new Date().toISOString()
-				})
+				.update({ read_at: new Date().toISOString() })
 				.eq('id', notificationId)
 
-			if (error) {
-				logger.error('Error marking notification as read', error)
-				throw error
-			}
+			if (error) throw error
 		} catch (error) {
 			logger.error('Error marking notification as read', error)
 			throw error

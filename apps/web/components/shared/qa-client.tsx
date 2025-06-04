@@ -56,10 +56,9 @@ import {
 	TooltipTrigger,
 } from '~/components/base/tooltip'
 
-// Types reused from your current component
 interface UserData {
 	id: string
-	full_name?: string
+	display_name?: string
 	avatar_url?: string
 	is_team_member?: boolean
 }
@@ -72,7 +71,6 @@ interface CommentData {
 	author_id: string
 	type?: string
 	parent_comment_id?: string | null
-	is_resolved?: boolean
 	author?: UserData
 }
 
@@ -84,7 +82,6 @@ interface CommentWithAnswers extends CommentData {
 	answers?: CommentWithReplies[]
 }
 
-// Modified interface to accept initialData from server
 interface QAClientProps {
 	projectId: string
 	currentUser?: UserData | null
@@ -92,7 +89,6 @@ interface QAClientProps {
 	initialComments: CommentData[]
 }
 
-// Helper functions for guest users
 const getGuestUserId = () => {
 	if (typeof window === 'undefined') return null
 
@@ -127,7 +123,6 @@ const incrementGuestCommentCount = () => {
 	return newCount
 }
 
-// Client component that uses the initial data from the server
 export default function QAClient({
 	projectId,
 	currentUser,
@@ -170,7 +165,7 @@ export default function QAClient({
 		(guestUserId
 			? {
 					id: guestUserId,
-					full_name: 'Guest User',
+					display_name: 'Guest User',
 					is_team_member: false,
 				}
 			: null)
@@ -187,7 +182,7 @@ export default function QAClient({
 				const { data, error } = await supabase
 					.from('comments')
 					.select(
-						'id, content, created_at, project_id, author_id, type, parent_comment_id, is_resolved',
+						'id, content, created_at, project_id, author_id, type, parent_comment_id',
 					)
 					.eq('project_id', projectId)
 					.eq('type', 'question')
@@ -198,13 +193,10 @@ export default function QAClient({
 
 				if (data && data.length > 0) {
 					// Get unique author IDs
-					if (!Array.isArray(data)) {
-						throw new Error('Failed to fetch comments: data is not an array')
-					}
-
 					const authorIds = [
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						...new Set(data.map((item: any) => item.author_id)),
+						...new Set(
+							data.map((item: { author_id: string }) => item.author_id),
+						),
 					]
 
 					// Fetch authors
@@ -215,46 +207,41 @@ export default function QAClient({
 
 					if (authorsError) {
 						console.error('Error fetching authors:', authorsError)
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((item: any) => ({
+						return data.map((item) => ({
 							...item,
-							created_at: item.created_at || new Date().toISOString(),
-							author: null,
+							created_at: item.created_at ?? '',
+							author: undefined,
 						})) as CommentData[]
 					}
 
 					if (authors) {
-						// Create a lookup map for authors
 						const authorsMap = authors.reduce(
-							(acc: Record<string, UserData>, author: any) => {
+							(acc: Record<string, UserData>, author: UserData) => {
 								acc[author.id] = author
 								return acc
 							},
 							{} as Record<string, UserData>,
 						)
 
-						// Attach author data to each question
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((question: any) => ({
+						return data.map((question) => ({
 							...question,
-							created_at: question.created_at || new Date().toISOString(),
+							created_at: question.created_at ?? '',
 							author:
 								authorsMap[question.author_id] ||
 								(question.author_id?.includes('-')
 									? {
 											id: question.author_id,
-											full_name: 'Guest User',
+											display_name: 'Guest User',
 											is_team_member: false,
 										}
-									: null),
+									: undefined),
 						})) as CommentData[]
 					}
 				}
 
-				// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-				return (data || []).map((item: any) => ({
+				return (data || []).map((item) => ({
 					...item,
-					created_at: item.created_at || new Date().toISOString(),
+					created_at: item.created_at ?? '',
 				})) as CommentData[]
 			} catch (err) {
 				console.error('Error fetching questions:', err)
@@ -290,8 +277,9 @@ export default function QAClient({
 				if (data && data.length > 0) {
 					// Get unique author IDs
 					const authorIds = [
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						...new Set(data.map((item: any) => item.author_id)),
+						...new Set(
+							data.map((item: { author_id: string }) => item.author_id),
+						),
 					]
 
 					const { data: authors, error: authorsError } = await supabase
@@ -301,45 +289,41 @@ export default function QAClient({
 
 					if (authorsError) {
 						console.error('Error fetching authors:', authorsError)
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((item: any) => ({
+						return data.map((item) => ({
 							...item,
-							created_at: item.created_at || new Date().toISOString(),
-							author: null,
+							created_at: item.created_at ?? '',
+							author: undefined,
 						})) as CommentData[]
 					}
 
 					if (authors) {
 						const authorsMap = authors.reduce(
-							// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-							(acc: Record<string, UserData>, author: any) => {
+							(acc: Record<string, UserData>, author: UserData) => {
 								acc[author.id] = author
 								return acc
 							},
 							{} as Record<string, UserData>,
 						)
 
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((comment: any) => ({
+						return data.map((comment) => ({
 							...comment,
-							created_at: comment.created_at || new Date().toISOString(),
+							created_at: comment.created_at ?? '',
 							author:
 								authorsMap[comment.author_id] ||
 								(comment.author_id?.includes('-')
 									? {
 											id: comment.author_id,
-											full_name: 'Guest User',
+											display_name: 'Guest User',
 											is_team_member: false,
 										}
-									: null),
+									: undefined),
 						})) as CommentData[]
 					}
 				}
 
-				// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-				return (data || []).map((item: any) => ({
+				return (data || []).map((item) => ({
 					...item,
-					created_at: item.created_at || new Date().toISOString(),
+					created_at: item.created_at ?? '',
 				})) as CommentData[]
 			} catch (err) {
 				console.error('Error fetching comments:', err)
@@ -453,8 +437,7 @@ export default function QAClient({
 						})
 
 						const eventType = payload.eventType
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						const record = payload.new as any
+						const record = payload.new as CommentData
 
 						if (eventType === 'INSERT') {
 							const commentType = record?.type || 'comment'
@@ -464,10 +447,6 @@ export default function QAClient({
 
 								setTimeout(() => setRealtimeStatus(null), 5000)
 							}
-						} else if (eventType === 'UPDATE' && record?.is_resolved) {
-							setRealtimeStatus('A question has been marked as resolved')
-
-							setTimeout(() => setRealtimeStatus(null), 5000)
 						}
 					},
 				)
@@ -561,7 +540,6 @@ export default function QAClient({
 					project_id: projectId,
 					author_id: effectiveUser.id,
 					type: 'question',
-					is_resolved: false,
 					parent_comment_id: null,
 				})
 				.select()
@@ -622,7 +600,6 @@ export default function QAClient({
 					author_id: effectiveUser.id,
 					type: 'answer',
 					parent_comment_id: questionId,
-					is_resolved: false,
 				})
 				.select()
 				.single()
@@ -683,7 +660,6 @@ export default function QAClient({
 					author_id: effectiveUser.id,
 					type: 'comment',
 					parent_comment_id: answerId,
-					is_resolved: false,
 				})
 				.select()
 				.single()
@@ -708,51 +684,6 @@ export default function QAClient({
 		},
 		onError: (error) => {
 			console.error('Error submitting reply:', error)
-			setRealtimeStatus(
-				`Error: ${error instanceof Error ? error.message : String(error)}`,
-			)
-			setTimeout(() => setRealtimeStatus(null), 5000)
-		},
-	})
-
-	const markResolvedMutation = useMutation({
-		mutationFn: async (questionId: string) => {
-			if (!effectiveUser?.id) {
-				throw new Error('User ID is required')
-			}
-
-			const { data, error } = await supabase
-				.from('comments')
-				.update({ is_resolved: true } as TablesUpdate<'comments'>)
-				.eq('id', questionId)
-				.select()
-				.single()
-
-			if (error) throw error
-			return data
-		},
-		onSuccess: (updatedQuestion) => {
-			queryClient.setQueryData(
-				['supabase', 'projectQuestions', projectId],
-				(oldData: CommentData[] | undefined) => {
-					if (!oldData) return []
-					return oldData.map((q) =>
-						q.id === updatedQuestion.id ? { ...q, is_resolved: true } : q,
-					)
-				},
-			)
-
-			setProcessedQuestions((prev) =>
-				prev.map((q) =>
-					q.id === updatedQuestion.id ? { ...q, is_resolved: true } : q,
-				),
-			)
-
-			setRealtimeStatus('Question marked as resolved')
-			setTimeout(() => setRealtimeStatus(null), 3000)
-		},
-		onError: (error) => {
-			console.error('Error marking as resolved:', error)
 			setRealtimeStatus(
 				`Error: ${error instanceof Error ? error.message : String(error)}`,
 			)
@@ -788,11 +719,6 @@ export default function QAClient({
 			answerId,
 			replyContent: replyContent[answerId],
 		})
-	}
-
-	const handleMarkResolved = (questionId: string) => {
-		if (!effectiveUser) return
-		markResolvedMutation.mutate(questionId)
 	}
 
 	const toggleQuestion = (id: string) => {
@@ -849,7 +775,7 @@ export default function QAClient({
 				<div>
 					<div className="flex items-center">
 						<p className={`font-medium ${nameSize}`}>
-							{user?.full_name || `User ${user?.id?.substring(0, 6)}`}
+							{user?.display_name || `User ${user?.id?.substring(0, 6)}`}
 						</p>
 						{user?.is_team_member && (
 							<Badge
@@ -1065,20 +991,6 @@ export default function QAClient({
 												question.author || null,
 												question.created_at,
 											)}
-											<div className="flex items-center gap-2">
-												{question.is_resolved && (
-													<Badge
-														variant="secondary"
-														className="bg-green-50 text-green-700"
-													>
-														<CheckCircle
-															className="mr-1 h-3 w-3"
-															aria-hidden="true"
-														/>
-														Resolved
-													</Badge>
-												)}
-											</div>
 										</div>
 									</CardHeader>
 									<CardContent className="pb-3">
@@ -1112,35 +1024,6 @@ export default function QAClient({
 													/>
 												)}
 											</Button>
-
-											{!question.is_resolved && effectiveUser && (
-												<Button
-													variant="outline"
-													size="sm"
-													className="rounded-full"
-													onClick={() => handleMarkResolved(question.id)}
-													disabled={markResolvedMutation.isPending}
-													aria-label="Mark question as resolved"
-												>
-													{markResolvedMutation.isPending ? (
-														<>
-															<Loader2
-																className="h-3 w-3 animate-spin mr-1"
-																aria-hidden="true"
-															/>
-															Mark Resolved
-														</>
-													) : (
-														<>
-															<CheckCircle
-																className="mr-1 h-3 w-3"
-																aria-hidden="true"
-															/>
-															Mark Resolved
-														</>
-													)}
-												</Button>
-											)}
 										</div>
 
 										{expandedQuestionIds[question.id] && (

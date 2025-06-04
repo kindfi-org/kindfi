@@ -112,11 +112,17 @@ CREATE POLICY "Users can insert notifications"
 -- Create function to hash metadata
 CREATE FUNCTION public.hash_notification_metadata()
 RETURNS TRIGGER AS $$
+DECLARE
+    jwt_secret TEXT;
 BEGIN
+    jwt_secret := current_setting('app.settings.jwt_secret', true);
+    IF jwt_secret IS NULL OR length(trim(jwt_secret)) = 0 THEN
+        RAISE EXCEPTION 'JWT secret is missing or empty in app.settings.jwt_secret';
+    END IF;
     -- Hash the metadata using HMAC-SHA256
     NEW.metadata_hash = encode(hmac(
             NEW.metadata::text,
-            current_setting('app.settings.jwt_secret', true),
+            jwt_secret,
             'sha256'
     ), 'hex');
     RETURN NEW;

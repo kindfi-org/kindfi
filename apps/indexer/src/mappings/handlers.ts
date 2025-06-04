@@ -1,8 +1,8 @@
 import type {
 	SorobanEvent,
+	StellarBlock,
 	StellarEffect,
 	StellarOperation,
-	StellarBlock,
 } from '@subql/types-stellar'
 import { Address, type xdr } from 'soroban-client'
 import type { Horizon } from 'stellar-sdk'
@@ -18,7 +18,7 @@ export async function handleOperation(
 	if (!op.ledger?.sequence) {
 		throw new Error('Missing ledger sequence')
 	}
-	
+
 	const ledgerSequence = op.ledger.sequence
 	console.info(`Indexing operation ${op.id}, type: ${op.type}`)
 
@@ -123,10 +123,7 @@ export async function handleEvent(event: SorobanEvent): Promise<void> {
 		fromAddress,
 		event.ledger.sequence,
 	)
-	const toAccount = await checkAndGetAccount(
-		toAddress,
-		event.ledger.sequence,
-	)
+	const toAccount = await checkAndGetAccount(toAddress, event.ledger.sequence)
 
 	if (!event.contractId) {
 		throw new Error('Missing contract ID')
@@ -142,8 +139,8 @@ export async function handleEvent(event: SorobanEvent): Promise<void> {
 		value: BigInt(event.value.u64()?.toBigInt() ?? 0),
 	})
 
-		fromAccount.lastSeenLedger = event.ledger.sequence
-		toAccount.lastSeenLedger = event.ledger.sequence
+	fromAccount.lastSeenLedger = event.ledger.sequence
+	toAccount.lastSeenLedger = event.ledger.sequence
 
 	await Promise.all([fromAccount.save(), toAccount.save(), transfer.save()])
 }
@@ -155,10 +152,12 @@ async function checkAndGetAccount(
 	if (!id) {
 		throw new Error('Invalid account ID')
 	}
-
+	if (typeof ledgerSequence !== 'number' || ledgerSequence <= 0) {
+		throw new Error('Invalid ledgerSequence')
+	}
 	const normalizedId = id.toLowerCase()
 	let account = await Account.get(normalizedId)
-	
+
 	if (!account) {
 		account = Account.create({
 			id: normalizedId,
@@ -174,7 +173,7 @@ function decodeAddress(scVal: xdr.ScVal): string {
 		return Address.account(scVal.address().accountId().ed25519()).toString()
 	} catch (e) {
 		try {
-		return Address.contract(scVal.address().contractId()).toString()
+			return Address.contract(scVal.address().contractId()).toString()
 		} catch (error) {
 			if (error instanceof Error) {
 				throw new Error(`Failed to decode address: ${error.message}`)

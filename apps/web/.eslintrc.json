@@ -18,6 +18,7 @@
 				"allowShortCircuit": true,
 				"allowTernary": true
 			}
-		]
+		],
+		"@typescript-eslint/prefer-nullish-coalescing": "warn"
 	}
 }

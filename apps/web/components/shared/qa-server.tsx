@@ -7,15 +7,19 @@ import { Loader2 } from 'lucide-react'
 import { Suspense } from 'react'
 import QAClient from './qa-client'
 
-// @ts-nocheck
-
+/**
+ * User data for Q&A system.
+ */
 interface UserData {
 	id: string
-	full_name?: string
+	display_name?: string
 	avatar_url?: string
 	is_team_member?: boolean
 }
 
+/**
+ * Comment or question data for Q&A system.
+ */
 interface CommentData {
 	id: string
 	content: string
@@ -24,7 +28,6 @@ interface CommentData {
 	author_id: string
 	type?: string
 	parent_comment_id?: string | null
-	is_resolved?: boolean
 	author?: UserData
 }
 
@@ -33,13 +36,38 @@ interface QAProps {
 	currentUser?: UserData | null
 }
 
+function ensureString(val: string | null | undefined): string {
+	return val ?? ''
+}
+
+function fillGuestUser(id: string): UserData {
+	return {
+		id,
+		display_name: 'Guest User',
+		is_team_member: false,
+	}
+}
+
+/**
+ * Profile row returned from Supabase.
+ */
+type ProfileRow = {
+	id: string
+	display_name?: string
+	image_url?: string | null
+	is_team_member?: boolean
+}
+
+/**
+ * Server component for Q&A, fetches initial data and renders QAClient.
+ */
 export default async function QA({ projectId, currentUser }: QAProps) {
 	const supabase = await createSupabaseServerClient()
 
 	const { data: initialQuestions, error: questionsError } = await supabase
 		.from('comments')
 		.select(
-			'id, content, created_at, project_id, author_id, type, parent_comment_id, is_resolved',
+			'id, content, created_at, project_id, author_id, type, parent_comment_id',
 		)
 		.eq('project_id', projectId)
 		.eq('type', 'question')
@@ -50,44 +78,52 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 	if (initialQuestions && initialQuestions.length > 0) {
 		const authorIds = [
-			// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-			...new Set(initialQuestions.map((item: any) => item.author_id)),
+			...new Set(initialQuestions.map((item) => item.author_id)),
 		]
 
 		const { data: authors } = await supabase
 			.from('profiles')
-			.select('*')
+			.select('id, display_name, image_url')
 			.in('id', authorIds)
 
-		const authorsMap = authors
+		const authorsMap: { [key: string]: UserData } = authors
 			? authors.reduce(
-					// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-					(acc: Record<string, UserData>, author: any) => {
-						acc[author.id] = author
+					(acc: { [key: string]: UserData }, author: ProfileRow) => {
+						acc[author.id] = {
+							id: author.id,
+							display_name: author.display_name,
+							avatar_url: author.image_url ?? undefined,
+							is_team_member: author.is_team_member ?? false,
+						}
 						return acc
 					},
-					{} as Record<string, UserData>,
+					{} as { [key: string]: UserData },
 				)
 			: {}
 
-		// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-		questionsWithAuthors = initialQuestions.map((question: any) => ({
-			...question,
-			author:
-				authorsMap[question.author_id] ||
-				(question.author_id?.includes('-')
-					? {
-							id: question.author_id,
-							full_name: 'Guest User',
-							is_team_member: false,
-						}
-					: undefined),
-		}))
+		questionsWithAuthors = initialQuestions
+			.filter((q) => q.created_at)
+			.map((question) => ({
+				id: question.id,
+				content: question.content,
+				created_at: ensureString(question.created_at),
+				project_id: question.project_id ?? '',
+				author_id: question.author_id,
+				type: question.type,
+				parent_comment_id: question.parent_comment_id,
+				author:
+					authorsMap[question.author_id] ||
+					(question.author_id?.includes('-')
+						? fillGuestUser(question.author_id)
+						: undefined),
+			}))
 	}
 
 	const { data: commentsData } = await supabase
 		.from('comments')
-		.select('*')
+		.select(
+			'id, content, created_at, project_id, author_id, type, parent_comment_id',
+		)
 		.eq('project_id', projectId)
 		.not('parent_comment_id', 'is', null)
 		.order('created_at', { ascending: true })
@@ -95,40 +131,44 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 	let commentsWithAuthors: CommentData[] = []
 
 	if (commentsData && commentsData.length > 0) {
-		const authorIds = [
-			// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-			...new Set(commentsData.map((item: any) => item.author_id)),
-		]
+		const authorIds = [...new Set(commentsData.map((item) => item.author_id))]
 
 		const { data: authors } = await supabase
 			.from('profiles')
-			.select('*')
+			.select('id, display_name, image_url')
 			.in('id', authorIds)
 
-		const authorsMap = authors
+		const authorsMap: { [key: string]: UserData } = authors
 			? authors.reduce(
-					// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-					(acc: Record<string, UserData>, author: any) => {
-						acc[author.id] = author
+					(acc: { [key: string]: UserData }, author: ProfileRow) => {
+						acc[author.id] = {
+							id: author.id,
+							display_name: author.display_name,
+							avatar_url: author.image_url ?? undefined,
+							is_team_member: author.is_team_member ?? false,
+						}
 						return acc
 					},
-					{} as Record<string, UserData>,
+					{} as { [key: string]: UserData },
 				)
 			: {}
 
-		// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-		commentsWithAuthors = commentsData.map((comment: any) => ({
-			...comment,
-			author:
-				authorsMap[comment.author_id] ||
-				(comment.author_id?.includes('-')
-					? {
-							id: comment.author_id,
-							full_name: 'Guest User',
-							is_team_member: false,
-						}
-					: undefined),
-		}))
+		commentsWithAuthors = commentsData
+			.filter((c) => c.created_at)
+			.map((comment) => ({
+				id: comment.id,
+				content: comment.content,
+				created_at: ensureString(comment.created_at),
+				project_id: comment.project_id ?? '',
+				author_id: comment.author_id,
+				type: comment.type,
+				parent_comment_id: comment.parent_comment_id,
+				author:
+					authorsMap[comment.author_id] ||
+					(comment.author_id?.includes('-')
+						? fillGuestUser(comment.author_id)
+						: undefined),
+			}))
 	}
 
 	if (questionsError) {
@@ -162,8 +202,8 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 			<QAClient
 				projectId={projectId}
 				currentUser={currentUser}
-				initialQuestions={questionsWithAuthors || []}
-				initialComments={commentsWithAuthors || []}
+				initialQuestions={questionsWithAuthors}
+				initialComments={commentsWithAuthors}
 			/>
 		</Suspense>
 	)

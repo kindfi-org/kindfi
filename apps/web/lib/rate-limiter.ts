@@ -16,6 +16,14 @@ export class RateLimiter {
 	private max: number
 
 	constructor(options: RateLimiterOptions) {
+		// Validate windowMs and max are positive integers
+		if (!Number.isInteger(options.windowMs) || options.windowMs <= 0) {
+			throw new Error('windowMs must be a positive integer')
+		}
+		if (!Number.isInteger(options.max) || options.max <= 0) {
+			throw new Error('max must be a positive integer')
+		}
+
 		const url = process.env.UPSTASH_REDIS_REST_URL
 		const token = process.env.UPSTASH_REDIS_REST_TOKEN
 
@@ -44,6 +52,9 @@ export class RateLimiter {
 		try {
 			const now = Date.now()
 			const windowKey = `ratelimit:${key}:${Math.floor(now / this.windowMs)}`
+
+			// The windowKey pattern is: ratelimit:<userKey>:<timeWindowBucket>
+			// Combines prefix, user key, and current time window for rate limiting.
 
 			// Get current count
 			const count = await this.redis.incr(windowKey)
