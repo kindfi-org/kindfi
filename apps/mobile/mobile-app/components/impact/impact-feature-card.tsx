@@ -27,7 +27,6 @@ const getBackgroundColor = (bgClass: string): string => {
 			return '#dbeafe'
 		case 'bg-orange-100':
 			return '#fed7aa'
-		case 'bg-white':
 		default:
 			return '#ffffff'
 	}

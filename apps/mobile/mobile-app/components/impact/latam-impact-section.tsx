@@ -3,6 +3,7 @@ import {
 	CheckCircle,
 	DollarSign,
 	Eye,
+	LucideIcon,
 	Shield,
 	TrendingUp,
 	Users,
@@ -15,6 +16,8 @@ import {
 	FlatList, 
 	Dimensions, 
 	Pressable,
+} from 'react-native'
+import type { 
 	NativeScrollEvent,
 	NativeSyntheticEvent
 } from 'react-native'
@@ -45,7 +48,7 @@ const getResponsiveLayout = () => {
 
 type FeatureCardData = {
 	id: string
-	icon: any
+	icon: LucideIcon
 	title: string
 	description: string
 	stat?: string
