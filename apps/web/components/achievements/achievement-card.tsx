@@ -58,21 +58,26 @@ export function AchievementCard({
 				<div className="flex-1 space-y-1">
 					<h3 className={cn('font-semibold', config.textColor)}>{title}</h3>
 					<p className="text-sm text-muted-foreground">{description}</p>
-					{status === 'in-progress' && progressPercentage !== undefined && (
-						<div className="mt-2 space-y-1">
-							<div className="flex justify-between text-xs">
-								<span className="text-muted-foreground">Progress</span>
-								<span className="font-medium text-yellow-500">
-									{progressPercentage}%
-								</span>
-							</div>
-							<Progress
-								value={progressPercentage}
-								className="h-1.5 bg-yellow-500/20"
-								indicatorClassName="bg-gradient-to-r from-yellow-500 to-yellow-400"
-							/>
-						</div>
-					)}
+{status === 'in-progress' && progressPercentage !== undefined && (
+  <div className="mt-2 space-y-1">
+    <div className="flex justify-between text-xs">
+      <span className="text-muted-foreground">Progress</span>
+      <span className="font-medium text-yellow-500">
+        {progressPercentage}%
+      </span>
+    </div>
+    <Progress
+      value={progressPercentage}
+      className="h-1.5 bg-yellow-500/20"
+      indicatorClassName="bg-gradient-to-r from-yellow-500 to-yellow-400"
+      aria-label={`Achievement progress: ${progressPercentage}%`}
+      role="progressbar"
+      aria-valuenow={progressPercentage}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    />
+  </div>
+)}
 				</div>
 			</div>
 		</div>
