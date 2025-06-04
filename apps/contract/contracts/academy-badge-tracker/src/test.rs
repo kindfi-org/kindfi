@@ -2,7 +2,7 @@
 
 use crate::datatypes::BadgeType;
 use crate::events::{BADGE, BadgeMintedEventData};
-use crate::{AcademyBadgeTracker, AcademyBadgeTrackerArgs, AcademyBadgeTrackerClient};
+use crate::{AcademyBadgeTracker, AcademyBadgeTrackerClient};
 use soroban_sdk::{
     testutils::{Address as _, Events},
     vec, Address, Env, IntoVal, String,
@@ -11,6 +11,12 @@ use soroban_sdk::{
 mod progress {
     soroban_sdk::contractimport!(
         file = "../../target/wasm32-unknown-unknown/release/academy_progress_tracker.wasm"
+    );
+}
+
+mod auth_controller {
+    soroban_sdk::contractimport!(
+        file = "../../target/wasm32-unknown-unknown/release/auth_controller.wasm"
     );
 }
 
@@ -33,22 +39,32 @@ macro_rules! assert_event {
 
 /// Helper function to set up environment, user and contract client for tests
 // Generalized setup function for both contracts and user
-fn setup<'a>() -> (Env, Address, Address, AcademyBadgeTrackerClient<'a>, progress::Client<'a>) {
+fn setup<'a>() -> (
+    Env,
+    Address, // user
+    Address, // contract_id
+    AcademyBadgeTrackerClient<'a>,
+    progress::Client<'a>,
+) {
     let env = Env::default();
+
+    let admin = Address::generate(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths();
 
     // Register progress tracker contract
     let progress_id = env.register(progress::WASM, ());
     let progress_client = progress::Client::new(&env, &progress_id);
 
-    // Register badge tracker contract
-    let badge_id = env.register(
-        AcademyBadgeTracker,
-        AcademyBadgeTrackerArgs::__constructor(&progress_id),
-    );
-    let badge_client = AcademyBadgeTrackerClient::new(&env, &badge_id);
+    // Register and initialize auth controller with a known admin account
+    let auth_id = env.register(auth_controller::WASM, ());
+    let auth_client = auth_controller::Client::new(&env, &auth_id);
+    auth_client.add_account(&admin, &vec![&env, admin.clone()]);
 
-    let user = Address::generate(&env);
-    env.mock_all_auths();
+    // Register badge tracker contract
+    let badge_id = env.register(AcademyBadgeTracker, ());
+    let badge_client = AcademyBadgeTrackerClient::new(&env, &badge_id);
+    badge_client.init(&progress_id, &auth_id, &admin);
 
     (env, user, badge_id, badge_client, progress_client)
 }
@@ -189,4 +205,21 @@ fn test_mint_chapter_badge_partial_progress() {
     
     let metadata = String::from_str(&env, "metadata");
     badge_client.mint_badge(&user, &BadgeType::Chapter, &1u32, &metadata);
+}
+
+/// Test init fails if the provided admin is not recognized by the auth contract
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #6)")]
+fn test_constructor_with_unauthenticated_admin_should_fail() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let progress_id = env.register(progress::WASM, ());
+    let auth_id = env.register(auth_controller::WASM, ());
+
+    let badge_id = env.register(AcademyBadgeTracker, ());
+    let badge_client = AcademyBadgeTrackerClient::new(&env, &badge_id);
+
+    badge_client.init(&progress_id, &auth_id, &admin);
 }

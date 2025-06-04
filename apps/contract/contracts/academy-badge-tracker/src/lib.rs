@@ -33,16 +33,32 @@ pub trait ProgressTracker {
     fn is_chapter_complete(env: Env, user: Address, chapter_id: u32) -> bool;
 }
 
+// Client for the external auth-controller contract used to validate known users
+#[contractclient(name = "AuthControllerClient")]
+pub trait AuthController {
+    /// Returns true if the address belongs to a known authenticated KindFi user
+    fn is_authenticated_user(env: Env, address: Address) -> bool;
+}
+
 #[contract]
 pub struct AcademyBadgeTracker;
 
 #[contractimpl]
 impl AcademyBadgeTracker {
-    /// Constructor to set the address of the ProgressTracker contract
-    pub fn __constructor(env: Env, progress_tracker_address: Address) {
+    /// Initializes contract with tracker and auth controller addresses, validating the admin
+    pub fn init(env: Env, progress_tracker_address: Address, auth_controller_address: Address, admin: Address) -> Result<(), BadgeError> {
+        // Call auth contract to check if the admin is a valid KindFi user
+        let auth_client = AuthControllerClient::new(&env, &auth_controller_address);
+        if !auth_client.is_authenticated_user(&admin) {
+            return Err(BadgeError::InvalidKindfiUserAddress);
+        }
+
+        // Save progress tracker address to instance storage
         env.storage()
             .instance()
             .set(&DataKey::ProgressTrackerAddress, &progress_tracker_address);
+
+        Ok(())
     }
 
     /// Mint a badge for a user, validating input and preventing duplicates
