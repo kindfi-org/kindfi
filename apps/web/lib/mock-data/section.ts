@@ -12,7 +12,7 @@ export const ACHIEVEMENT_CARDS: AchievementCardProps[] = [
 		subtitle: 'In Progress',
 		status: 'in-progress',
 		icon: 'heart',
-		progressPercentage: 23,
+		progressPercentage: 23, // Progress percentage (0-100)
 	},
 	{
 		title: 'Serial Supporter',
