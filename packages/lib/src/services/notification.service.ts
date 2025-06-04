@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto'
 import type { Database } from '@services/supabase'
 import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -49,6 +48,8 @@ export class NotificationService {
 		errorCount: 0,
 		successCount: 0,
 	}
+	private readonly MAX_RETRIES = 3
+	private readonly BASE_RETRY_DELAY = 1000 // ms
 
 	constructor(supabaseUrl: string, supabaseKey: string) {
 		this.supabase = createClient<Database>(supabaseUrl, supabaseKey)
@@ -77,9 +78,7 @@ export class NotificationService {
 			while (this.queue.length > 0) {
 				const batch = this.queue.splice(0, 10)
 				const notificationsToInsert = batch.map((item) => ({
-					type: (typeof item.notification.type === 'string'
-						? item.notification.type.toUpperCase()
-						: item.notification.type) as NotificationType,
+					type: item.notification.type as NotificationType,
 					message: item.notification.message,
 					to: item.notification.to,
 					metadata: item.notification.metadata as NotificationMetadata,
@@ -89,7 +88,28 @@ export class NotificationService {
 				const { error } = await this.supabase
 					.from('notifications')
 					.insert(notificationsToInsert)
-				if (error) throw error
+				if (error) {
+					logger.error('Error processing notification batch', error)
+					this.metrics.errorCount++
+					// Retry logic for each item in the batch
+					for (const item of batch) {
+						if (item.retries < this.MAX_RETRIES) {
+							item.retries++
+							const delay = this.BASE_RETRY_DELAY * 2 ** (item.retries - 1)
+							setTimeout(() => {
+								this.queue.push(item)
+								this.metrics.queueSize = this.queue.length
+								this.processQueue()
+							}, delay)
+						} else {
+							logger.error(
+								'Notification batch permanently failed after max retries',
+								{ notification: item.notification },
+							)
+						}
+					}
+					continue // Skip success metrics for this batch
+				}
 				this.metrics.successCount += batch.length
 				this.metrics.lastProcessedAt = new Date()
 				this.metrics.processingTime = Date.now() - startTime
@@ -100,9 +120,6 @@ export class NotificationService {
 					batchSize: batch.length,
 				})
 			}
-		} catch (error) {
-			logger.error('Error processing notification batch', error)
-			this.metrics.errorCount++
 		} finally {
 			release()
 		}

@@ -4,14 +4,14 @@ import { useSupabase } from './use-supabase'
 
 type Notification = Database['public']['Tables']['notifications']['Row']
 
-export function useNotifications() {
+export function useNotifications(pageSize = 20) {
 	const { supabase } = useSupabase()
 	const [notifications, setNotifications] = useState<Notification[]>([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<Error | null>(null)
 	const [hasMore, setHasMore] = useState(true)
 	const [page, setPage] = useState(0)
-	const PAGE_SIZE = 20
+	const PAGE_SIZE = pageSize
 	const [paginationLoading, setPaginationLoading] = useState(false)
 
 	const fetchNotifications = useCallback(
@@ -39,7 +39,7 @@ export function useNotifications() {
 				setPaginationLoading(false)
 			}
 		},
-		[supabase],
+		[supabase, PAGE_SIZE],
 	)
 
 	const loadMore = useCallback(() => {
