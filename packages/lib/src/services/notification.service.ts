@@ -28,9 +28,6 @@ const NotificationSchema = z.object({
 
 type CreateNotification = z.infer<typeof NotificationSchema>
 
-const MAX_RETRIES = 3
-const RETRY_DELAY = 1000
-
 interface QueueMetrics {
 	queueSize: number
 	processingTime: number

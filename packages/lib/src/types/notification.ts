@@ -21,11 +21,13 @@ export type NotificationMetadata =
  */
 export function isNotificationType(value: unknown): value is NotificationType {
 	const validTypes = [
-		'info',
-		'success',
-		'warning',
-		'error',
-		// Add other enum values as defined in your DB
+		'PROJECT_UPDATE',
+		'MILESTONE_COMPLETED',
+		'ESCROW_RELEASED',
+		'KYC_STATUS_CHANGE',
+		'COMMENT_ADDED',
+		'MEMBER_JOINED',
+		'SYSTEM_ALERT',
 	]
 	return typeof value === 'string' && validTypes.includes(value)
 }

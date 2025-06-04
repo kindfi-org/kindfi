@@ -26,7 +26,7 @@ import { xdr } from 'soroban-client'
 export const mockEvent = {
 	id: 'test-event-1',
 	ledger: {
-		sequence: 1000003,
+		sequence: 1000003, // Chosen to simulate a high, realistic ledger sequence for regression testing
 		id: 'test-ledger-1',
 		paging_token: 'token-1',
 		hash: 'hash-1',
@@ -38,10 +38,10 @@ export const mockEvent = {
 		closed_at: '2025-06-02T22:29:29.585Z',
 		total_coins: '100000000',
 		fee_pool: '1000',
-		base_fee_in_stroops: 100,
-		base_reserve_in_stroops: 5000000,
-		max_tx_set_size: 1000,
-		protocol_version: 20,
+		base_fee_in_stroops: 100, // Typical base fee for testnet/mainnet
+		base_reserve_in_stroops: 5000000, // Standard base reserve for realistic block
+		max_tx_set_size: 1000, // Reflects a common max transaction set size
+		protocol_version: 20, // Matches a recent Stellar protocol version for compatibility
 		header_xdr: 'header-xdr-1',
 	} as StellarBlock,
 	ledgerClosedAt: '2025-06-02T22:29:29.585Z',

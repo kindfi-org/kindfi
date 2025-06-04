@@ -52,7 +52,7 @@ You can see the full list of commands in each of the `package.json` files in the
 
 The following Supabase-related environment variables are required for the application to function correctly:
 
-```
+```bash
 # Server-side Supabase credentials
 SUPABASE_URL=your-supabase-url
 SUPABASE_ANON_KEY=your-supabase-anon-key
