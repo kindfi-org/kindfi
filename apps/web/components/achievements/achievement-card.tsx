@@ -2,12 +2,9 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, Lock, Trophy } from 'lucide-react'
 
-export interface AchievementCardProps {
-	title: string
-	description: string
-	icon: React.ReactNode
-	status: 'locked' | 'in-progress' | 'completed'
-	progressPercentage?: number
+import type { AchievementCardProps as BaseProps } from '~/lib/types/section.types'
+
+export interface AchievementCardProps extends BaseProps {
 	className?: string
 }
 
