@@ -23,6 +23,7 @@ export function AchievementCard({
 	onClick,
 }: AchievementCardProps & { onClick: () => void }) {
 	const Icon = icons[icon]
+	const clampedProgress = Math.max(0, Math.min(100, progressPercentage ?? 0))
 
 	return (
 		<Card
@@ -56,9 +57,6 @@ export function AchievementCard({
 				>
 					{description}
 				</p>
-				// Extract clamping logic for readability and reuse
-				const clampedProgress = Math.max(0, Math.min(100, progressPercentage));
-
 				{status === 'in-progress' && progressPercentage !== undefined && (
 					<div className="w-full mt-3 space-y-1">
 						<div

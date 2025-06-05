@@ -27,6 +27,7 @@ export function AchievementGrid() {
 			{userAchievements.map((achievement) => (
 				<AchievementCard
 					key={achievement.id}
+					id={achievement.id}
 					title={achievement.title}
 					description={achievement.description}
 					icon={achievement.icon}
