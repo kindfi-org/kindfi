@@ -56,24 +56,27 @@ export function AchievementCard({
 				>
 					{description}
 				</p>
+				// Extract clamping logic for readability and reuse
+				const clampedProgress = Math.max(0, Math.min(100, progressPercentage));
+
 				{status === 'in-progress' && progressPercentage !== undefined && (
 					<div className="w-full mt-3 space-y-1">
 						<div
 							className="relative h-2 w-full overflow-hidden rounded-full bg-blue-100"
 							role="progressbar"
 							tabIndex={0}
-							aria-valuenow={Math.max(0, Math.min(100, progressPercentage))}
+							aria-valuenow={clampedProgress}
 							aria-valuemin={0}
 							aria-valuemax={100}
-							aria-label={`Achievement progress: ${Math.max(0, Math.min(100, progressPercentage))}% complete`}
+							aria-label={`Achievement progress: ${clampedProgress}% complete`}
 						>
 							<div
 								className="absolute h-full w-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-in-out"
-								style={{ width: `${Math.max(0, Math.min(100, progressPercentage))}%` }}
+								style={{ width: `${clampedProgress}%` }}
 							/>
 						</div>
 						<p className="text-xs font-medium text-blue-600 text-center">
-							{Math.max(0, Math.min(100, progressPercentage))}% Complete
+							{clampedProgress}% Complete
 						</p>
 					</div>
 				)}
