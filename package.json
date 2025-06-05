@@ -29,7 +29,10 @@
 		"format-and-lint:fix": "biome check . --write",
 		"clean": "git clean -xdf node_modules",
 		"clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-		"prepare": "husky"
+		"prepare": "husky",
+		"build": "bun run build:web && bun run build:indexer",
+		"build:web": "cd apps/web && bun run build",
+		"build:indexer": "cd apps/indexer && subql codegen && subql build"
 	},
 	"workspaces": {
 		"packages": ["apps/*", "services/*", "packages/*"],

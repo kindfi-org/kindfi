@@ -1,21 +1,13 @@
-import { achievements } from '~/lib/mock-data/section'
+import { ACHIEVEMENT_CARDS } from '~/lib/mock-data/section'
 import { useState } from 'react'
 import { AchievementCard } from './achievement-card'
-
 import type { AchievementCardProps } from '~/lib/types'
-
-interface Achievement extends Omit<AchievementCardProps, 'status'> {
-	id: string
-	description: string
-	icon: React.ReactNode
-	status: 'locked' | 'in-progress' | 'completed'
-}
 
 export function AchievementGrid() {
 	const [userAchievements, setUserAchievements] =
-		useState<Achievement[]>(achievements)
+		useState<AchievementCardProps[]>(ACHIEVEMENT_CARDS)
 
-	const updateAchievements = (id: string, newStatus: Achievement['status']) => {
+	const updateAchievements = (id: string, newStatus: AchievementCardProps['status']) => {
 		setUserAchievements((prev) =>
 			prev.map((achievement) => {
 				if (achievement.id === id) {
@@ -36,13 +28,10 @@ export function AchievementGrid() {
 				<AchievementCard
 					key={achievement.id}
 					title={achievement.title}
-					subtitle={achievement.description}
+					description={achievement.description}
 					icon={achievement.icon}
 					status={achievement.status}
 					progressPercentage={achievement.progressPercentage}
-					onClick={() => {
-						// TODO: handle achievement click (e.g., open details)
-					}}
 				/>
 			))}
 		</div>

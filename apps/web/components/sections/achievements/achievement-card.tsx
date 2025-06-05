@@ -16,7 +16,7 @@ const icons = {
 
 export function AchievementCard({
 	title,
-	subtitle,
+	description,
 	status,
 	icon,
 	progressPercentage,
@@ -29,7 +29,7 @@ export function AchievementCard({
 			onClick={onClick}
 			className={cn(
 				'transition-all h-full cursor-pointer',
-				status === 'earned' && 'bg-primary/5 hover:bg-primary/10',
+				status === 'completed' && 'bg-primary/5 hover:bg-primary/10',
 				status === 'in-progress' && 'bg-blue-50 hover:bg-blue-100',
 				status === 'locked' && 'bg-muted/50 opacity-60 cursor-not-allowed',
 			)}
@@ -38,7 +38,7 @@ export function AchievementCard({
 				<div
 					className={cn(
 						'p-2 rounded-full mb-2',
-						status === 'earned' && 'bg-primary/20 text-primary',
+						status === 'completed' && 'bg-primary/20 text-primary',
 						status === 'in-progress' && 'bg-blue-100 text-blue-600',
 						status === 'locked' && 'bg-muted text-muted-foreground',
 					)}
@@ -46,23 +46,22 @@ export function AchievementCard({
 					<Icon className="w-6 h-6 font-extrabold" />
 				</div>
 				<h3 className="text-md font-normal text-center">{title}</h3>
-				{subtitle && (
-					<p
-						className={cn(
-							'text-sm mt-1',
-							status === 'earned' && 'text-primary',
-							status === 'in-progress' && 'text-blue-600',
-							status === 'locked' && 'text-muted-foreground',
-						)}
-					>
-						{subtitle}
-					</p>
-				)}
+				<p
+					className={cn(
+						'text-sm mt-1',
+						status === 'completed' && 'text-primary',
+						status === 'in-progress' && 'text-blue-600',
+						status === 'locked' && 'text-muted-foreground',
+					)}
+				>
+					{description}
+				</p>
 				{status === 'in-progress' && progressPercentage !== undefined && (
 					<div className="w-full mt-3 space-y-1">
 						<div
 							className="relative h-2 w-full overflow-hidden rounded-full bg-blue-100"
 							role="progressbar"
+							tabIndex={0}
 							aria-valuenow={Math.max(0, Math.min(100, progressPercentage))}
 							aria-valuemin={0}
 							aria-valuemax={100}

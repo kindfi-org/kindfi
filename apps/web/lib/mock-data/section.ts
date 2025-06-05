@@ -2,39 +2,45 @@ import type { AchievementCardProps } from '~/lib/types'
 
 export const ACHIEVEMENT_CARDS: AchievementCardProps[] = [
 	{
+		id: '1',
 		title: 'First Support',
-		subtitle: 'Earned',
-		status: 'earned',
+		description: 'Make your first contribution to a project',
+		status: 'completed',
 		icon: 'trophy',
 	},
 	{
+		id: '2',
 		title: 'Community Builder',
-		subtitle: 'In Progress',
+		description: 'Help build our community',
 		status: 'in-progress',
 		icon: 'heart',
 		progressPercentage: 23, // Progress percentage (0-100)
 	},
 	{
+		id: '3',
 		title: 'Serial Supporter',
-		subtitle: 'Locked',
+		description: 'Support multiple projects',
 		status: 'locked',
 		icon: 'star',
 	},
 	{
+		id: '4',
 		title: 'Impact Leader',
-		subtitle: 'Locked',
+		description: 'Lead by example',
 		status: 'locked',
 		icon: 'award',
 	},
 	{
+		id: '5',
 		title: 'Diamond Impact',
-		subtitle: 'Locked',
+		description: 'Make a significant impact',
 		status: 'locked',
 		icon: 'diamond',
 	},
 	{
+		id: '6',
 		title: 'Network Effect',
-		subtitle: 'Locked',
+		description: 'Help grow our network',
 		status: 'locked',
 		icon: 'users',
 	},

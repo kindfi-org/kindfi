@@ -56,7 +56,7 @@ export function AchievementsGrid() {
 	const updateAchievements = (index: number) => {
 		setAchievements((prev) =>
 			prev.map((achievement, i) => {
-				if (i < index) return { ...achievement, status: 'earned' }
+				if (i < index) return { ...achievement, status: 'completed' }
 				if (i === index)
 					return {
 						...achievement,
@@ -83,8 +83,8 @@ export function AchievementsGrid() {
 
 	const totalNFTPages = Math.ceil(filteredNFTs.length / itemsPerPage)
 
-	const earnedCount = achievements.filter((a) => a.status === 'earned').length
-	const progress = (earnedCount / achievements.length) * 100
+	const completedCount = achievements.filter((a) => a.status === 'completed').length
+	const progress = (completedCount / achievements.length) * 100
 
 	return (
 		<ErrorBoundary
@@ -173,12 +173,13 @@ export function AchievementsGrid() {
 								<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 achievement">
 									{achievements.map((card, index) => (
 										<AchievementCard
-											key={card.title}
+											key={card.id}
+											id={card.id}
 											title={card.title}
-											subtitle={card.subtitle}
 											status={card.status}
 											icon={card.icon}
 											progressPercentage={card.progressPercentage}
+											description={card.description}
 											onClick={() => updateAchievements(index)}
 										/>
 									))}
