@@ -272,6 +272,13 @@ impl AuthController {
         return accounts;
     }
 
+    /// Checks if the given address is registered as an authenticated KindFi user.
+    pub fn is_authenticated_user(env: Env, address: Address) -> bool {
+        env.storage()
+            .instance()
+            .has::<Val>(&DataKey::Account(address).into_val(&env))
+    }
+
     #[allow(non_snake_case)]
     fn __check_auth(
         env: Env,
