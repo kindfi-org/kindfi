@@ -91,3 +91,57 @@ Obtaining the Service Role Key
 ## Documentation
 
 For more detailed instructions and advanced configurations, refer to the [Supabase Local Development Guide](https://supabase.com/docs/guides/local-development).
+
+# @kindfi/supabase - Centralized Type System
+
+This package provides centralized TypeScript types and Zod schemas for all Supabase database entities used across the KindFi platform.
+
+## Overview
+
+This centralized type system eliminates duplicate type definitions and ensures consistency across all applications in the monorepo.
+
+## Architecture
+
+### Core Files
+
+- **`database.types.ts`** - Generated TypeScript types from Supabase CLI
+- **`database.schemas.ts`** - Zod schemas for runtime validation
+- **`enums.ts`** - Centralized enum definitions
+- **`tables.ts`** - Table-specific type utilities
+- **`api.ts`** - API response types
+- **`custom.ts`** - Custom utility types
+- **`utils/type.guards.ts`** - Type guard functions
+
+### Type Categories
+
+#### Database Tables
+All table types are generated from the database schema and include:
+- Insert types (for creating records)
+- Update types (for modifying records)
+- Row types (for complete records)
+
+#### Enums
+Centralized enum definitions ensure consistency:
+- `ProjectStatus`
+- `UserRole`
+- `TransactionType`
+- `KYCStatus`
+
+#### Validation Schemas
+Zod schemas provide runtime validation:
+- Input validation for API endpoints
+- Form validation in frontend applications
+- Data transformation and parsing
+
+## Usage
+
+### Basic Import
+```typescript
+import { Database, Tables, Enums } from '@kindfi/supabase';
+
+// Use table types
+type Project = Tables<'projects'>;
+type User = Tables<'users'>;
+
+// Use enums
+type Status = Enums<'project_status'>;
