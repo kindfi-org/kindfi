@@ -4,14 +4,10 @@ CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 -- Create notification type enum
 CREATE TYPE notification_type AS ENUM (
-    'project_update',
-    'project_comment',
-    'project_investment',
-    'project_milestone',
-    'escrow_update',
-    'escrow_dispute',
-    'kyc_status',
-    'system'
+    'info',
+    'success',
+    'warning',
+    'error'
 );
 
 -- Create notification priority enum
@@ -175,7 +171,7 @@ $$ LANGUAGE plpgsql;
 
 -- Create trigger for retry handling
 CREATE TRIGGER handle_notification_retry
-    AFTER UPDATE OF delivery_status ON notifications
+    BEFORE UPDATE OF delivery_status ON notifications
     FOR EACH ROW
     WHEN (NEW.delivery_status = 'failed' AND OLD.delivery_status != 'failed')
     EXECUTE FUNCTION handle_notification_retry();
@@ -183,4 +179,4 @@ CREATE TRIGGER handle_notification_retry
 -- Grant appropriate permissions
 GRANT SELECT, INSERT, UPDATE, DELETE ON notifications TO authenticated;
 GRANT SELECT ON notifications TO anon;
-GRANT INSERT ON notification_logs TO authenticated;
+GRANT SELECT, INSERT ON notification_logs TO authenticated;

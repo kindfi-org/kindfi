@@ -161,15 +161,22 @@ export class NotificationLogger {
 	 * @param {LogErrorParams} params - Parameters for the error log
 	 */
 	async logError({ message, error, context }: LogErrorParams): Promise<void> {
-		await this.supabase.from('notification_logs').insert({
-			action: 'error',
-			message,
-			metadata: {
-				...context,
-				error: error instanceof Error ? error.message : String(error),
-				stack: error instanceof Error ? error.stack : undefined,
-			},
-		})
+		try {
+			const { error: dbError } = await this.supabase.from('notification_logs').insert({
+				action: 'error',
+				message,
+				metadata: {
+					...context,
+					error: error instanceof Error ? error.message : String(error),
+					stack: error instanceof Error ? error.stack : undefined,
+				},
+			})
+			
+			if (dbError) throw dbError
+		} catch (logError) {
+			console.error('Failed to log error:', logError)
+			// Don't throw to avoid disrupting the main flow
+		}
 	}
 
 	/**
@@ -181,12 +188,19 @@ export class NotificationLogger {
 		message,
 		context,
 	}: LogInfoParams): Promise<void> {
-		await this.supabase.from('notification_logs').insert({
-			notification_id: notificationId,
-			action: 'info',
-			message,
-			metadata: context,
-		})
+		try {
+			const { error: dbError } = await this.supabase.from('notification_logs').insert({
+				notification_id: notificationId,
+				action: 'info',
+				message,
+				metadata: context,
+			})
+			
+			if (dbError) throw dbError
+		} catch (logError) {
+			console.error('Failed to log info:', logError)
+			// Don't throw to avoid disrupting the main flow
+		}
 	}
 
 	/**
@@ -198,12 +212,19 @@ export class NotificationLogger {
 		message,
 		context,
 	}: LogWarningParams): Promise<void> {
-		await this.supabase.from('notification_logs').insert({
-			notification_id: notificationId,
-			action: 'warning',
-			message,
-			metadata: context,
-		})
+		try {
+			const { error: dbError } = await this.supabase.from('notification_logs').insert({
+				notification_id: notificationId,
+				action: 'warning',
+				message,
+				metadata: context,
+			})
+			
+			if (dbError) throw dbError
+		} catch (logError) {
+			console.error('Failed to log warning:', logError)
+			// Don't throw to avoid disrupting the main flow
+		}
 	}
 
 	/**
