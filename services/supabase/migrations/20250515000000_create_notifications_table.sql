@@ -3,32 +3,19 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 -- Create notification type enum
-DO $$ BEGIN
-    CREATE TYPE notification_type AS ENUM (
-        'project_update',
-        'project_comment',
-        'project_investment',
-        'project_milestone',
-        'escrow_update',
-        'escrow_dispute',
-        'kyc_status',
-        'system'
-    );
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+CREATE TYPE notification_type AS ENUM (
+    'info',
+    'success',
+    'warning',
+    'error'
+);
 
 -- Create notification priority enum
-DO $$ BEGIN
-    CREATE TYPE notification_priority AS ENUM (
-        'low',
-        'medium',
-        'high',
-        'urgent'
-    );
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+CREATE TYPE notification_priority AS ENUM (
+    'low',
+    'medium',
+    'high'
+);
 
 -- Create notification delivery status enum
 DO $$ BEGIN
@@ -45,13 +32,13 @@ END $$;
 
 -- Create notifications table with all features
 CREATE TABLE IF NOT EXISTS notifications (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     type notification_type NOT NULL,
-    priority notification_priority NOT NULL DEFAULT 'medium',
+    priority notification_priority DEFAULT 'medium' NOT NULL,
     title TEXT NOT NULL,
     message TEXT NOT NULL,
-    is_read BOOLEAN NOT NULL DEFAULT false,
+    is_read BOOLEAN DEFAULT false NOT NULL,
     read_at TIMESTAMPTZ,
     action_url TEXT,
     metadata JSONB DEFAULT '{}'::jsonb,
@@ -61,83 +48,75 @@ CREATE TABLE IF NOT EXISTS notifications (
     last_delivery_attempt TIMESTAMPTZ,
     next_retry_at TIMESTAMPTZ,
     push_subscription_id TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
     expires_at TIMESTAMPTZ,
     CONSTRAINT valid_expiry CHECK (expires_at IS NULL OR expires_at > created_at)
 );
 
 -- Create notification logs table
 CREATE TABLE IF NOT EXISTS notification_logs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    notification_id UUID NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
-    level TEXT NOT NULL CHECK (level IN ('error', 'info')),
-    message TEXT NOT NULL,
-    stack TEXT,
-    context JSONB DEFAULT '{}'::jsonb,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    notification_id UUID REFERENCES notifications(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    action TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+    metadata JSONB
 );
 
 -- Create indexes for better query performance
-CREATE INDEX idx_notifications_user_id ON notifications(user_id);
-CREATE INDEX idx_notifications_type ON notifications(type);
-CREATE INDEX idx_notifications_priority ON notifications(priority);
-CREATE INDEX idx_notifications_is_read ON notifications(is_read);
-CREATE INDEX idx_notifications_created_at ON notifications(created_at);
-CREATE INDEX idx_notifications_expires_at ON notifications(expires_at);
-CREATE INDEX idx_notifications_metadata ON notifications USING gin(metadata);
-CREATE INDEX idx_notifications_delivery_status ON notifications(delivery_status);
-CREATE INDEX idx_notifications_next_retry_at ON notifications(next_retry_at);
-CREATE INDEX idx_notifications_user_unread_recent ON notifications(user_id, is_read, created_at DESC);
+CREATE INDEX notifications_user_id_idx ON notifications(user_id);
+CREATE INDEX notifications_type_idx ON notifications(type);
+CREATE INDEX notifications_created_at_idx ON notifications(created_at);
+CREATE INDEX notifications_is_read_idx ON notifications(is_read);
+CREATE INDEX notification_logs_notification_id_idx ON notification_logs(notification_id);
+CREATE INDEX notification_logs_user_id_idx ON notification_logs(user_id);
+CREATE INDEX notifications_priority ON notifications(priority);
+CREATE INDEX notifications_read_at ON notifications(read_at);
+CREATE INDEX notifications_action_url ON notifications(action_url);
+CREATE INDEX notifications_metadata ON notifications USING gin(metadata);
+CREATE INDEX notifications_delivery_status ON notifications(delivery_status);
+CREATE INDEX notifications_next_retry_at ON notifications(next_retry_at);
+CREATE INDEX notifications_user_unread_recent ON notifications(user_id, is_read, created_at DESC);
 
--- Create indexes for notification logs
-CREATE INDEX idx_notification_logs_notification_id ON notification_logs(notification_id);
-CREATE INDEX idx_notification_logs_level ON notification_logs(level);
-CREATE INDEX idx_notification_logs_created_at ON notification_logs(created_at);
+-- Create updated_at trigger
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_notifications_updated_at
+    BEFORE UPDATE ON notifications
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- Enable Row Level Security
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notification_logs ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies for notifications
+-- Create policies
 CREATE POLICY "Users can view their own notifications"
     ON notifications FOR SELECT
     USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can update their own notifications"
     ON notifications FOR UPDATE
-    USING (auth.uid() = user_id)
-    WITH CHECK (auth.uid() = user_id);
+    USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete their own notifications"
     ON notifications FOR DELETE
     USING (auth.uid() = user_id);
 
--- Create RLS policies for notification logs
-CREATE POLICY "Users can view logs for their notifications"
+CREATE POLICY "Users can view their own notification logs"
     ON notification_logs FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM notifications
-            WHERE notifications.id = notification_logs.notification_id
-            AND notifications.user_id = auth.uid()
-        )
-    );
+    USING (auth.uid() = user_id);
 
--- Create function to update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_notification_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Create trigger for updated_at
-CREATE TRIGGER update_notification_updated_at
-    BEFORE UPDATE ON notifications
-    FOR EACH ROW
-    EXECUTE FUNCTION update_notification_updated_at();
+CREATE POLICY "Users can create their own notification logs"
+    ON notification_logs FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
 
 -- Create function to calculate HMAC hash
 CREATE OR REPLACE FUNCTION calculate_metadata_hash()
@@ -192,25 +171,7 @@ CREATE TRIGGER handle_notification_retry
     WHEN (NEW.delivery_status = 'failed' AND OLD.delivery_status != 'failed')
     EXECUTE FUNCTION handle_notification_retry();
 
-CREATE OR REPLACE FUNCTION cleanup_old_notifications()
-RETURNS void AS $$
-BEGIN
-    -- Delete notifications older than 30 days
-    DELETE FROM notifications
-    WHERE created_at < NOW() - INTERVAL '30 days'
-    AND (
-        delivery_status IN ('delivered', 'failed', 'expired')
-        OR (delivery_status = 'pending' AND next_retry_at < NOW() - INTERVAL '7 days')
-    );
-END;
-$$ LANGUAGE plpgsql;
-
-SELECT cron.schedule(
-    'cleanup-old-notifications',
-    '0 0 * * *', -- Run at midnight every day
-    $$SELECT cleanup_old_notifications()$$
-);
-
 -- Grant appropriate permissions
-GRANT SELECT, UPDATE, DELETE ON notifications TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON notifications TO authenticated;
 GRANT SELECT ON notifications TO anon;
+GRANT INSERT ON notification_logs TO authenticated;

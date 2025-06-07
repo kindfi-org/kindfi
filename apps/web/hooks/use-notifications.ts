@@ -1,17 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import { NotificationService } from '../lib/services/notification-service'
 import type {
 	CreateNotificationDTO,
-	Notification,
 	NotificationFilters,
 	NotificationSort,
 	UpdateNotificationDTO,
 } from '../lib/types/notification'
-import { supabase } from '../lib/supabase/client'
+import { createClient } from '@supabase/supabase-js'
 import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
+import type { RealtimeChannel } from '@supabase/realtime-js'
+import { env } from '../lib/config/env'
 
-const notificationService = new NotificationService()
+const supabase = createClient(env().NEXT_PUBLIC_SUPABASE_URL, env().NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 export function useNotifications(
 	filters: NotificationFilters = {},
@@ -21,6 +22,8 @@ export function useNotifications(
 ) {
 	const queryClient = useQueryClient()
 	const [unreadCount, setUnreadCount] = useState(0)
+	const [connectionState, setConnectionState] = useState<'connected' | 'disconnected'>('disconnected')
+	const notificationService = useMemo(() => new NotificationService(), [])
 
 	// Query for notifications
 	const {
@@ -107,7 +110,6 @@ export function useNotifications(
 	// Set up real-time subscription for notifications
 	useEffect(() => {
 		let isMounted = true;
-		let connectionState: 'connected' | 'disconnected' = 'connected';
 		const channel = supabase
 			.channel('notifications')
 			.on(
@@ -120,17 +122,22 @@ export function useNotifications(
 				() => {
 					if (isMounted) {
 						refetch()
-						notificationService.getUnreadCount().then(setUnreadCount)
+						notificationService.getUnreadCount()
+							.then(setUnreadCount)
+							.catch((error) => {
+								console.error('Failed to update unread count:', error)
+							})
 					}
 				},
 			)
 			.subscribe(
-				(status) => {
+				(status: 'SUBSCRIBED' | 'CLOSED' | 'CHANNEL_ERROR' | 'TIMED_OUT') => {
 					if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
 						console.error('Notification subscription error');
-						connectionState = 'disconnected';
+						setConnectionState('disconnected');
 					} else if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
-						connectionState = 'connected';
+						console.log('Notification subscription connected');
+						setConnectionState('connected');
 					}
 				}
 			);
@@ -139,7 +146,7 @@ export function useNotifications(
 			isMounted = false;
 			channel.unsubscribe();
 		};
-	}, [refetch]);
+	}, [refetch, notificationService]);
 
 	return {
 		notifications: notificationsData?.data || [],
@@ -147,6 +154,7 @@ export function useNotifications(
 		unreadCount,
 		isLoading,
 		error,
+		connectionState,
 		createNotification: createNotification.mutate,
 		updateNotification: updateNotification.mutate,
 		markAsRead: markAsRead.mutate,

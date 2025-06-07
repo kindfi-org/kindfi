@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { supabase } from '@packages/lib/supabase'
-const logger = { info: console.info, error: console.error };
+import { NotificationLogger } from '~/lib/services/notification-logger';
+const logger = new NotificationLogger();
 
 const syncPayloadSchema = z.object({
   notificationId: z.string().uuid(),
@@ -16,9 +17,19 @@ export async function POST(request: Request) {
     const payload = syncPayloadSchema.parse(body);
 
     // Log the sync attempt
-    logger.info('Notification sync attempt:', payload);
+    await logger.logInfo({
+      notificationId: payload.notificationId,
+      message: 'Notification sync attempt',
+      context: payload,
+    });
 
-    await supabase
+    // Add authentication check
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { error: updateError } = await supabase
       .from('notifications')
       .update({ 
         status: payload.status,
@@ -27,9 +38,27 @@ export async function POST(request: Request) {
       })
       .eq('id', payload.notificationId);
 
+    if (updateError) {
+      await logger.logError({
+        notificationId: payload.notificationId,
+        message: 'Database update failed',
+        error: updateError,
+        context: payload,
+      });
+      return NextResponse.json({ error: 'Failed to update notification status' }, { status: 500 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error('Sync error:', error);
+    let notificationId: string | undefined = undefined;
+    if (typeof error === 'object' && error && 'notificationId' in error && typeof (error as Record<string, unknown>).notificationId === 'string') {
+      notificationId = (error as Record<string, unknown>).notificationId as string;
+    }
+    await logger.logError({
+      notificationId,
+      message: 'Sync error',
+      error,
+    });
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(

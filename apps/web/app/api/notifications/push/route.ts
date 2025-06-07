@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { env } from '~/lib/config/env'
 import { z } from 'zod'
+import { NotificationLogger } from '~/lib/services/notification-logger';
+import { RateLimiter } from '~/lib/auth/rate-limiter';
 
 webpush.setVapidDetails(
-	`mailto:${env.VAPID_EMAIL}`,
-	env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-	env.VAPID_PRIVATE_KEY,
+	`mailto:${env().VAPID_EMAIL}`,
+	env().NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+	env().VAPID_PRIVATE_KEY,
 )
 
 const subscriptionSchema = z.object({
@@ -30,29 +32,18 @@ const requestSchema = z.object({
 	notification: notificationSchema
 })
 
-// Stub rateLimit and logger for now if not implemented
-const rateLimit = async () => ({ success: true });
-const logger = { error: console.error };
+// Remove the redundant interface and use z.infer<typeof requestSchema>
+type PushRequestBody = z.infer<typeof requestSchema>;
 
-interface PushRequestBody {
-	subscription: {
-		endpoint: string;
-		keys: { p256dh: string; auth: string };
-	};
-	notification: {
-		title: string;
-		body: string;
-		icon?: string;
-		badge?: string;
-		data?: Record<string, unknown>;
-	};
-}
+const rateLimiter = new RateLimiter();
+const logger = new NotificationLogger();
 
 export async function POST(request: Request) {
 	try {
 		// Rate limiting
-		const limiter = await rateLimit();
-		if (!limiter.success) {
+		const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+		const rateLimitResult = await rateLimiter.increment(clientIp, 'pushNotification');
+		if (rateLimitResult.isBlocked) {
 			return new Response('Too Many Requests', { status: 429 });
 		}
 
@@ -120,7 +111,10 @@ export async function POST(request: Request) {
 			throw error // Re-throw other errors
 		}
 	} catch (error) {
-		logger.error('Push notification error:', error)
+		await logger.logError({
+			message: 'Push notification error',
+			error,
+		});
 		
 		if (error instanceof z.ZodError) {
 			return new Response('Invalid request data', { status: 400 })

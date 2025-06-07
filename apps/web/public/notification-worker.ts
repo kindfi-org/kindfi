@@ -1,6 +1,5 @@
 /// <reference lib="webworker" />
 
-import type { Notification } from '../lib/types/notification';
 
 const sw = self as unknown as ServiceWorkerGlobalScope;
 
@@ -16,6 +15,82 @@ interface NotificationData {
 	notificationId?: string;
 }
 
+interface PushNotificationData {
+	title: string;
+	message: string;
+	metadata: object;
+	icon?: string;
+	badge?: string;
+	actions?: Array<{ action: string; title: string; icon?: string }>;
+}
+
+interface SyncManager {
+	register(tag: string): Promise<void>;
+}
+
+interface ServiceWorkerRegistrationWithSync extends ServiceWorkerRegistration {
+	sync?: SyncManager;
+}
+
+function validatePushData(data: unknown): PushNotificationData {
+	if (!data || typeof data !== 'object') {
+		throw new Error('Invalid notification data');
+	}
+	
+	const notification = data as Record<string, unknown>;
+	
+	// Validate required fields
+	if (!notification.title || typeof notification.title !== 'string') {
+		throw new Error('Invalid notification title');
+	}
+	if (!notification.message || typeof notification.message !== 'string') {
+		throw new Error('Invalid notification message');
+	}
+	if (!notification.metadata || typeof notification.metadata !== 'object') {
+		throw new Error('Invalid notification metadata');
+	}
+	
+	// Validate optional fields
+	if (notification.icon !== undefined && typeof notification.icon !== 'string') {
+		throw new Error('Invalid notification icon');
+	}
+	if (notification.badge !== undefined && typeof notification.badge !== 'string') {
+		throw new Error('Invalid notification badge');
+	}
+	if (notification.actions !== undefined) {
+		if (!Array.isArray(notification.actions)) {
+			throw new Error('Invalid notification actions');
+		}
+		// Validate each action
+		notification.actions.forEach((action, index) => {
+			if (!action || typeof action !== 'object') {
+				throw new Error(`Invalid action at index ${index}`);
+			}
+			if (!action.action || typeof action.action !== 'string') {
+				throw new Error(`Invalid action name at index ${index}`);
+			}
+			if (!action.title || typeof action.title !== 'string') {
+				throw new Error(`Invalid action title at index ${index}`);
+			}
+			if (action.icon !== undefined && typeof action.icon !== 'string') {
+				throw new Error(`Invalid action icon at index ${index}`);
+			}
+		});
+	}
+	
+	// Create a properly typed object
+	const validatedData: PushNotificationData = {
+		title: notification.title as string,
+		message: notification.message as string,
+		metadata: notification.metadata as object,
+		icon: notification.icon as string | undefined,
+		badge: notification.badge as string | undefined,
+		actions: notification.actions as Array<{ action: string; title: string; icon?: string }> | undefined
+	};
+	
+	return validatedData;
+}
+
 sw.addEventListener('push', (event: PushEvent) => {
 	if (!event.data) {
 		console.warn('Push event received without data');
@@ -23,49 +98,25 @@ sw.addEventListener('push', (event: PushEvent) => {
 	}
 
 	try {
-		const data = event.data.json();
+		const rawData = event.data.json();
+		const data = validatePushData(rawData);
 		
-		// Validate required fields
-		if (!data.title || typeof data.title !== 'string') {
-			throw new Error('Invalid notification title');
-		}
-		if (!data.message || typeof data.message !== 'string') {
-			throw new Error('Invalid notification message');
-		}
-		if (!data.metadata || typeof data.metadata !== 'object') {
-			throw new Error('Invalid notification metadata');
-		}
-
-		// Validate optional fields if present
-		if (data.icon && typeof data.icon !== 'string') {
-			throw new Error('Invalid notification icon');
-		}
-		if (data.badge && typeof data.badge !== 'string') {
-			throw new Error('Invalid notification badge');
-		}
-		if (data.actions && !Array.isArray(data.actions)) {
-			throw new Error('Invalid notification actions');
-		}
-
-		const options = {
+		const options: NotificationOptions = {
 			body: data.message,
-			icon: data.icon || '/icons/notification-icon.png',
-			badge: data.badge || '/icons/notification-badge.png',
+			icon: data.icon,
+			badge: data.badge,
 			data: data.metadata,
 			requireInteraction: true,
-			actions: data.actions || []
+			tag: 'notification',
+			// Add actions if they exist
+			...(data.actions && { actions: data.actions })
 		};
 
 		event.waitUntil(
 			sw.registration.showNotification(data.title, options)
-				.catch(error => {
-					console.error('Failed to show notification:', error);
-					// Optionally report the error to your logging service
-				})
 		);
 	} catch (error) {
-		console.error('Failed to process push notification:', error);
-		// Optionally report the error to your logging service
+		console.error('Error handling push notification:', error);
 	}
 });
 
@@ -98,39 +149,41 @@ sw.addEventListener('notificationclick', (event: NotificationEvent) => {
 	}
 });
 
+async function handleSync(syncEvent: SyncEvent): Promise<void> {
+	try {
+		const response = await fetch('/api/notifications/sync', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				notificationId: syncEvent.notificationId,
+				status: syncEvent.status,
+				error: syncEvent.error,
+				timestamp: Date.now()
+			})
+		});
+
+		if (!response.ok) {
+			throw new Error(`Sync failed: ${response.statusText}`);
+		}
+	} catch (error) {
+		console.error('Background sync failed:', error);
+		// Retry the sync later if supported
+		const reg = sw.registration as ServiceWorkerRegistrationWithSync;
+		if (reg.sync) {
+			try {
+				await reg.sync.register('notification-sync');
+			} catch (retryError) {
+				console.error('Failed to register sync retry:', retryError);
+			}
+		}
+	}
+}
+
 sw.addEventListener('sync', ((event: ExtendableEvent) => {
 	const syncEvent = event as unknown as SyncEvent;
 	if (syncEvent.tag === 'notification-sync') {
-		syncEvent.waitUntil(
-			(async () => {
-				try {
-					const response = await fetch('/api/notifications/sync', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							notificationId: syncEvent.notificationId,
-							status: syncEvent.status,
-							error: syncEvent.error,
-							timestamp: Date.now()
-						})
-					});
-
-					if (!response.ok) {
-						throw new Error(`Sync failed: ${response.statusText}`);
-					}
-				} catch (error) {
-					console.error('Background sync failed:', error);
-					// You might want to retry the sync later
-					if ('sync' in sw.registration) {
-						syncEvent.waitUntil(
-							(sw.registration as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } })
-								.sync.register('notification-sync')
-						);
-					}
-				}
-			})()
-		);
+		event.waitUntil(handleSync(syncEvent));
 	}
 }) as EventListener);
