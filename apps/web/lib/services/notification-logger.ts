@@ -11,11 +11,13 @@ const supabase = createClient(
  * @property {string} message - Error message to be logged
  * @property {unknown} error - The error object or message
  * @property {Record<string, unknown>} [context] - Optional additional context data
+ * @property {string} [notificationId] - Optional ID of the related notification
  */
 interface LogErrorParams {
 	message: string
 	error: unknown
 	context?: Record<string, unknown>
+	notificationId?: string
 }
 
 /**
@@ -73,6 +75,7 @@ export interface LogResult<T> {
 export async function logError(params: LogErrorParams): Promise<void> {
 	try {
 		await supabase.from('notification_logs').insert({
+			notification_id: params.notificationId,
 			action: 'error',
 			message: params.message,
 			metadata: {
@@ -160,9 +163,10 @@ export class NotificationLogger {
 	 * Logs an error event to the notification logs
 	 * @param {LogErrorParams} params - Parameters for the error log
 	 */
-	async logError({ message, error, context }: LogErrorParams): Promise<void> {
+	async logError({ message, error, context, notificationId }: LogErrorParams): Promise<void> {
 		try {
 			const { error: dbError } = await this.supabase.from('notification_logs').insert({
+				notification_id: notificationId,
 				action: 'error',
 				message,
 				metadata: {
