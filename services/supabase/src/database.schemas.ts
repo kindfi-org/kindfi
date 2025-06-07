@@ -508,6 +508,51 @@ export const milestonesRelationshipsSchema = z.tuple([
 	}),
 ])
 
+export const deliveryStatusSchema = z.union([
+	z.literal('pending'),
+	z.literal('sent'),
+	z.literal('failed'),
+	z.literal('delivered'),
+])
+
+export const notificationTypeSchema = z.union([
+	z.literal('project_update'),
+	z.literal('milestone_completed'),
+	z.literal('escrow_released'),
+	z.literal('kyc_status_change'),
+	z.literal('comment_added'),
+	z.literal('member_joined'),
+	z.literal('system_alert'),
+])
+
+export const notificationsInsertSchema = z.object({
+	created_at: z.string().optional(),
+	delivery_status: deliveryStatusSchema.optional(),
+	from: z.string().optional().nullable(),
+	id: z.string().optional(),
+	message: z.string(),
+	metadata: jsonSchema.optional(),
+	metadata_hash: z.string().optional().nullable(),
+	read_at: z.string().optional().nullable(),
+	to: z.string(),
+	type: notificationTypeSchema,
+})
+
+export const notificationsUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	delivery_status: deliveryStatusSchema.optional(),
+	from: z.string().optional().nullable(),
+	id: z.string().optional(),
+	message: z.string().optional(),
+	metadata: jsonSchema.optional(),
+	metadata_hash: z.string().optional().nullable(),
+	read_at: z.string().optional().nullable(),
+	to: z.string().optional(),
+	type: notificationTypeSchema.optional(),
+})
+
+export const notificationsRelationshipsSchema = z.tuple([])
+
 export const userRoleSchema = z.union([
 	z.literal('kinder'),
 	z.literal('kindler'),
@@ -831,6 +876,19 @@ export const milestonesRowSchema = z.object({
 	project_id: z.string(),
 	status: milestoneStatusSchema,
 	title: z.string(),
+})
+
+export const notificationsRowSchema = z.object({
+	created_at: z.string(),
+	delivery_status: deliveryStatusSchema,
+	from: z.string().nullable(),
+	id: z.string(),
+	message: z.string(),
+	metadata: jsonSchema,
+	metadata_hash: z.string().nullable(),
+	read_at: z.string().nullable(),
+	to: z.string(),
+	type: notificationTypeSchema,
 })
 
 export const profilesRowSchema = z.object({

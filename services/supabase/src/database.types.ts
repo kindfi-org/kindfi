@@ -533,6 +533,45 @@ export type Database = {
 					},
 				]
 			}
+			notifications: {
+				Row: {
+					created_at: string
+					delivery_status: Database['public']['Enums']['delivery_status']
+					from: string | null
+					id: string
+					message: string
+					metadata: Json
+					metadata_hash: string | null
+					read_at: string | null
+					to: string
+					type: Database['public']['Enums']['notification_type']
+				}
+				Insert: {
+					created_at?: string
+					delivery_status?: Database['public']['Enums']['delivery_status']
+					from?: string | null
+					id?: string
+					message: string
+					metadata?: Json
+					metadata_hash?: string | null
+					read_at?: string | null
+					to: string
+					type: Database['public']['Enums']['notification_type']
+				}
+				Update: {
+					created_at?: string
+					delivery_status?: Database['public']['Enums']['delivery_status']
+					from?: string | null
+					id?: string
+					message?: string
+					metadata?: Json
+					metadata_hash?: string | null
+					read_at?: string | null
+					to?: string
+					type?: Database['public']['Enums']['notification_type']
+				}
+				Relationships: []
+			}
 			profiles: {
 				Row: {
 					bio: string | null
@@ -795,6 +834,20 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
+			create_notification: {
+				Args: {
+					p_type: Database['public']['Enums']['notification_type']
+					p_message: string
+					p_from: string
+					p_to: string
+					p_metadata?: Json
+				}
+				Returns: string
+			}
+			mark_notifications_as_read: {
+				Args: { p_notification_ids: string[] }
+				Returns: number
+			}
 			unaccent: {
 				Args: { '': string }
 				Returns: string
@@ -806,6 +859,7 @@ export type Database = {
 		}
 		Enums: {
 			comment_type: 'comment' | 'question' | 'answer'
+			delivery_status: 'pending' | 'sent' | 'failed' | 'delivered'
 			escrow_status_type:
 				| 'NEW'
 				| 'FUNDED'
@@ -821,6 +875,14 @@ export type Database = {
 				| 'approved'
 				| 'rejected'
 				| 'disputed'
+			notification_type:
+				| 'project_update'
+				| 'milestone_completed'
+				| 'escrow_released'
+				| 'kyc_status_change'
+				| 'comment_added'
+				| 'member_joined'
+				| 'system_alert'
 			project_member_role: 'admin' | 'editor'
 			user_role: 'kinder' | 'kindler'
 		}
@@ -942,6 +1004,7 @@ export const Constants = {
 	public: {
 		Enums: {
 			comment_type: ['comment', 'question', 'answer'],
+			delivery_status: ['pending', 'sent', 'failed', 'delivered'],
 			escrow_status_type: [
 				'NEW',
 				'FUNDED',
@@ -958,6 +1021,15 @@ export const Constants = {
 				'approved',
 				'rejected',
 				'disputed',
+			],
+			notification_type: [
+				'project_update',
+				'milestone_completed',
+				'escrow_released',
+				'kyc_status_change',
+				'comment_added',
+				'member_joined',
+				'system_alert',
 			],
 			project_member_role: ['admin', 'editor'],
 			user_role: ['kinder', 'kindler'],
