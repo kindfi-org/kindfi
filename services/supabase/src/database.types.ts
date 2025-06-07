@@ -533,6 +533,107 @@ export type Database = {
 					},
 				]
 			}
+			notification_logs: {
+				Row: {
+					action: string
+					created_at: string
+					id: string
+					metadata: Json | null
+					notification_id: string | null
+					user_id: string
+				}
+				Insert: {
+					action: string
+					created_at?: string
+					id?: string
+					metadata?: Json | null
+					notification_id?: string | null
+					user_id: string
+				}
+				Update: {
+					action?: string
+					created_at?: string
+					id?: string
+					metadata?: Json | null
+					notification_id?: string | null
+					user_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'notification_logs_notification_id_fkey'
+						columns: ['notification_id']
+						isOneToOne: false
+						referencedRelation: 'notifications'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			notifications: {
+				Row: {
+					action_url: string | null
+					created_at: string
+					delivery_attempts: number
+					delivery_status: Database['public']['Enums']['notification_delivery_status']
+					expires_at: string | null
+					id: string
+					is_read: boolean
+					last_delivery_attempt: string | null
+					message: string
+					metadata: Json | null
+					metadata_hash: string | null
+					next_retry_at: string | null
+					priority: Database['public']['Enums']['notification_priority']
+					push_subscription_id: string | null
+					read_at: string | null
+					title: string
+					type: Database['public']['Enums']['notification_type']
+					updated_at: string
+					user_id: string
+				}
+				Insert: {
+					action_url?: string | null
+					created_at?: string
+					delivery_attempts?: number
+					delivery_status?: Database['public']['Enums']['notification_delivery_status']
+					expires_at?: string | null
+					id?: string
+					is_read?: boolean
+					last_delivery_attempt?: string | null
+					message: string
+					metadata?: Json | null
+					metadata_hash?: string | null
+					next_retry_at?: string | null
+					priority?: Database['public']['Enums']['notification_priority']
+					push_subscription_id?: string | null
+					read_at?: string | null
+					title: string
+					type: Database['public']['Enums']['notification_type']
+					updated_at?: string
+					user_id: string
+				}
+				Update: {
+					action_url?: string | null
+					created_at?: string
+					delivery_attempts?: number
+					delivery_status?: Database['public']['Enums']['notification_delivery_status']
+					expires_at?: string | null
+					id?: string
+					is_read?: boolean
+					last_delivery_attempt?: string | null
+					message?: string
+					metadata?: Json | null
+					metadata_hash?: string | null
+					next_retry_at?: string | null
+					priority?: Database['public']['Enums']['notification_priority']
+					push_subscription_id?: string | null
+					read_at?: string | null
+					title?: string
+					type?: Database['public']['Enums']['notification_type']
+					updated_at?: string
+					user_id?: string
+				}
+				Relationships: []
+			}
 			profiles: {
 				Row: {
 					bio: string | null
@@ -821,6 +922,22 @@ export type Database = {
 				| 'approved'
 				| 'rejected'
 				| 'disputed'
+			notification_delivery_status:
+				| 'pending'
+				| 'sent'
+				| 'delivered'
+				| 'failed'
+				| 'expired'
+			notification_priority: 'low' | 'medium' | 'high'
+			notification_type:
+				| 'project_update'
+				| 'project_comment'
+				| 'project_investment'
+				| 'project_milestone'
+				| 'escrow_update'
+				| 'escrow_dispute'
+				| 'kyc_status'
+				| 'system'
 			project_member_role: 'admin' | 'editor'
 			user_role: 'kinder' | 'kindler'
 		}
@@ -958,6 +1075,24 @@ export const Constants = {
 				'approved',
 				'rejected',
 				'disputed',
+			],
+			notification_delivery_status: [
+				'pending',
+				'sent',
+				'delivered',
+				'failed',
+				'expired',
+			],
+			notification_priority: ['low', 'medium', 'high'],
+			notification_type: [
+				'project_update',
+				'project_comment',
+				'project_investment',
+				'project_milestone',
+				'escrow_update',
+				'escrow_dispute',
+				'kyc_status',
+				'system',
 			],
 			project_member_role: ['admin', 'editor'],
 			user_role: ['kinder', 'kindler'],

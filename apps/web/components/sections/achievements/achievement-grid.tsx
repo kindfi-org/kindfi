@@ -83,7 +83,9 @@ export function AchievementsGrid() {
 
 	const totalNFTPages = Math.ceil(filteredNFTs.length / itemsPerPage)
 
-	const completedCount = achievements.filter((a) => a.status === 'completed').length
+	const completedCount = achievements.filter(
+		(a) => a.status === 'completed',
+	).length
 	const progress = (completedCount / achievements.length) * 100
 
 	return (

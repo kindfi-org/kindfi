@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react-native'
 import React, { useEffect, useRef } from 'react'
-import { View, Animated } from 'react-native'
+import { Animated, View } from 'react-native'
 import { getThemeColor } from '../../constants/theme-colors'
 import { Text } from '../Themed'
 import { Box } from '../ui/box'
@@ -54,10 +54,7 @@ function ImpactFeatureCard({
 	}, [isActive, opacityAnim])
 
 	return (
-		<Animated.View 
-			className="w-full"
-			style={{ opacity: opacityAnim }}
-		>
+		<Animated.View className="w-full" style={{ opacity: opacityAnim }}>
 			<View
 				style={{
 					backgroundColor: getBackgroundColor(backgroundColor),
@@ -101,12 +98,12 @@ function ImpactFeatureCard({
 
 				<View style={{ width: '100%' }}>
 					{stat && (
-						<View 
+						<View
 							style={{
 								backgroundColor: 'rgba(255, 255, 255, 0.7)',
 								borderRadius: 8,
 								padding: 12,
-								width: '100%'
+								width: '100%',
 							}}
 						>
 							<Text className="text-sm font-semibold text-gray-700 text-center">
@@ -116,21 +113,23 @@ function ImpactFeatureCard({
 					)}
 
 					{bulletPoints && (
-						<View 
+						<View
 							style={{
 								backgroundColor: 'rgba(255, 255, 255, 0.7)',
 								borderRadius: 8,
 								padding: 12,
-								width: '100%'
+								width: '100%',
 							}}
 						>
 							{bulletPoints.map((point, index) => (
 								<View
 									key={`bullet-${point.substring(0, 10)}-${index}`}
 									className="flex-row items-center"
-									style={{ marginBottom: index === bulletPoints.length - 1 ? 0 : 8 }}
+									style={{
+										marginBottom: index === bulletPoints.length - 1 ? 0 : 8,
+									}}
 								>
-									<View 
+									<View
 										style={{
 											width: 6,
 											height: 6,
