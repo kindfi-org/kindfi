@@ -4,10 +4,14 @@ CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 -- Create notification type enum
 CREATE TYPE notification_type AS ENUM (
-    'info',
-    'success',
-    'warning',
-    'error'
+    'project_update',
+    'project_comment',
+    'project_investment',
+    'project_milestone',
+    'escrow_update',
+    'escrow_dispute',
+    'kyc_status',
+    'system'
 );
 
 -- Create notification priority enum
@@ -110,6 +114,10 @@ CREATE POLICY "Users can delete their own notifications"
     ON notifications FOR DELETE
     USING (auth.uid() = user_id);
 
+CREATE POLICY "Users can create their own notifications"
+    ON notifications FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
 CREATE POLICY "Users can view their own notification logs"
     ON notification_logs FOR SELECT
     USING (auth.uid() = user_id);
@@ -119,6 +127,7 @@ CREATE POLICY "Users can create their own notification logs"
     WITH CHECK (auth.uid() = user_id);
 
 -- Create function to calculate HMAC hash
+-- See docs/notification-security.md for HMAC key configuration
 CREATE OR REPLACE FUNCTION calculate_metadata_hash()
 RETURNS TRIGGER AS $$
 BEGIN

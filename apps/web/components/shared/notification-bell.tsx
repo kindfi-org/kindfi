@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from 'date-fns'
 import { Bell } from 'lucide-react'
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useNotifications } from '../../hooks/use-notifications'
 import type { BaseNotification } from '../../lib/types/notification'
 import { cn } from '../../lib/utils'
@@ -22,9 +22,9 @@ export function NotificationBell() {
 		useNotifications()
 
 	const truncateMessage = useCallback((message: string, maxLength = 100) => {
-		if (message.length <= maxLength) return message;
-		return `${message.slice(0, maxLength)}...`;
-	}, []);
+		if (message.length <= maxLength) return message
+		return `${message.slice(0, maxLength)}...`
+	}, [])
 
 	const handleNotificationClick = (id: string) => {
 		markAsRead(id)
@@ -50,10 +50,9 @@ export function NotificationBell() {
 
 			{/* ARIA live region for unread count changes */}
 			<div aria-live="polite" className="sr-only">
-				{unreadCount === 0 
-					? 'No unread notifications' 
-					: `${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}`
-				}
+				{unreadCount === 0
+					? 'No unread notifications'
+					: `${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}`}
 			</div>
 
 			<DropdownMenuContent className="w-80" align="end">

@@ -1,5 +1,9 @@
+import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
+import type { RealtimeChannel } from '@supabase/realtime-js'
+import { createClient } from '@supabase/supabase-js'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useState, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { env } from '../lib/config/env'
 import { NotificationService } from '../lib/services/notification-service'
 import type {
 	CreateNotificationDTO,
@@ -7,12 +11,6 @@ import type {
 	NotificationSort,
 	UpdateNotificationDTO,
 } from '../lib/types/notification'
-import { createClient } from '@supabase/supabase-js'
-import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
-import type { RealtimeChannel } from '@supabase/realtime-js'
-import { env } from '../lib/config/env'
-
-const supabase = createClient(env().NEXT_PUBLIC_SUPABASE_URL, env().NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 export function useNotifications(
 	filters: NotificationFilters = {},
@@ -20,9 +18,19 @@ export function useNotifications(
 	page = 1,
 	pageSize = 20,
 ) {
+	const supabase = useMemo(
+		() =>
+			createClient(
+				env().NEXT_PUBLIC_SUPABASE_URL,
+				env().NEXT_PUBLIC_SUPABASE_ANON_KEY,
+			),
+		[],
+	)
 	const queryClient = useQueryClient()
 	const [unreadCount, setUnreadCount] = useState(0)
-	const [connectionState, setConnectionState] = useState<'connected' | 'disconnected'>('disconnected')
+	const [connectionState, setConnectionState] = useState<
+		'connected' | 'disconnected'
+	>('disconnected')
 	const notificationService = useMemo(() => new NotificationService(), [])
 
 	// Query for notifications
@@ -40,7 +48,12 @@ export function useNotifications(
 	// Query for unread count
 	const { data: count } = useQuery({
 		queryKey: ['notifications', 'unread-count'],
-		queryFn: () => notificationService.getUnreadCount(),
+		queryFn: async () => {
+			const {
+				data: { session },
+			} = await supabase.auth.getSession()
+			return notificationService.getUnreadCount(session?.user?.id || '')
+		},
 	})
 
 	// Update unread count when count changes
@@ -109,7 +122,7 @@ export function useNotifications(
 
 	// Set up real-time subscription for notifications
 	useEffect(() => {
-		let isMounted = true;
+		let isMounted = true
 		const channel = supabase
 			.channel('notifications')
 			.on(
@@ -122,7 +135,11 @@ export function useNotifications(
 				() => {
 					if (isMounted) {
 						refetch()
-						notificationService.getUnreadCount()
+						supabase.auth
+							.getSession()
+							.then(({ data: { session } }) =>
+								notificationService.getUnreadCount(session?.user?.id || ''),
+							)
 							.then(setUnreadCount)
 							.catch((error) => {
 								console.error('Failed to update unread count:', error)
@@ -130,23 +147,21 @@ export function useNotifications(
 					}
 				},
 			)
-			.subscribe(
-				(status: 'SUBSCRIBED' | 'CLOSED' | 'CHANNEL_ERROR' | 'TIMED_OUT') => {
-					if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
-						console.error('Notification subscription error');
-						setConnectionState('disconnected');
-					} else if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
-						console.log('Notification subscription connected');
-						setConnectionState('connected');
-					}
+			.subscribe((status) => {
+				if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
+					console.error('Notification subscription error')
+					setConnectionState('disconnected')
+				} else if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+					console.log('Notification subscription connected')
+					setConnectionState('connected')
 				}
-			);
+			})
 
 		return () => {
-			isMounted = false;
-			channel.unsubscribe();
-		};
-	}, [refetch, notificationService]);
+			isMounted = false
+			channel.unsubscribe()
+		}
+	}, [refetch, notificationService, supabase])
 
 	return {
 		notifications: notificationsData?.data || [],

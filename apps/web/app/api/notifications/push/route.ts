@@ -1,129 +1,94 @@
 import { NextResponse } from 'next/server'
-import webpush from 'web-push'
-import { env } from '~/lib/config/env'
 import { z } from 'zod'
-import { NotificationLogger } from '~/lib/services/notification-logger';
-import { RateLimiter } from '~/lib/auth/rate-limiter';
+import { env } from '~/lib/config/env'
+import { NotificationLogger } from '~/lib/services/notification-logger'
+import { NotificationService } from '~/lib/services/notification-service'
 
-webpush.setVapidDetails(
-	`mailto:${env().VAPID_EMAIL}`,
-	env().NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-	env().VAPID_PRIVATE_KEY,
-)
-
-const subscriptionSchema = z.object({
+// Define Zod schemas for request validation
+const pushSubscriptionSchema = z.object({
 	endpoint: z.string().url(),
 	keys: z.object({
 		p256dh: z.string(),
-		auth: z.string()
-	})
+		auth: z.string(),
+	}),
 })
 
 const notificationSchema = z.object({
-	title: z.string().min(1).max(100),
-	body: z.string().min(1).max(500),
+	title: z.string().min(1),
+	body: z.string().min(1),
 	icon: z.string().url().optional(),
 	badge: z.string().url().optional(),
-	data: z.record(z.unknown()).optional()
+	data: z.record(z.unknown()).optional(),
 })
 
 const requestSchema = z.object({
-	subscription: subscriptionSchema,
-	notification: notificationSchema
+	subscription: pushSubscriptionSchema,
+	notification: notificationSchema,
 })
 
-// Remove the redundant interface and use z.infer<typeof requestSchema>
-type PushRequestBody = z.infer<typeof requestSchema>;
-
-const rateLimiter = new RateLimiter();
-const logger = new NotificationLogger();
+type PushRequestBody = z.infer<typeof requestSchema>
 
 export async function POST(request: Request) {
+	const logger = new NotificationLogger()
+	const notificationService = new NotificationService()
+
 	try {
-		// Rate limiting
-		const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
-		const rateLimitResult = await rateLimiter.increment(clientIp, 'pushNotification');
-		if (rateLimitResult.isBlocked) {
-			return new Response('Too Many Requests', { status: 429 });
-		}
-
-		// Request size validation
-		const contentLength = request.headers.get('content-length')
-		if (contentLength && Number.parseInt(contentLength) > 1024 * 10) { // 10KB limit
-			return new Response('Request too large', { status: 413 })
-		}
-
-		const body: PushRequestBody = await request.json()
+		// Validate request body using Zod schema
+		const body = requestSchema.parse(await request.json())
 		const { subscription, notification } = body
 
-		// Enhanced subscription validation
-		if (
-			!subscription ||
-			typeof subscription.endpoint !== 'string' ||
-			!subscription.keys ||
-			typeof subscription.keys.p256dh !== 'string' ||
-			typeof subscription.keys.auth !== 'string'
-		) {
-			return NextResponse.json(
-				{ error: 'Invalid push subscription' },
-				{ status: 400 },
-			)
-		}
-
-		// Validate notification
-		if (!notification || !notification.title || !notification.body) {
-			return NextResponse.json(
-				{ error: 'Invalid notification data' },
-				{ status: 400 },
-			)
-		}
-
 		// Send push notification
-		try {
-			await webpush.sendNotification(
-				subscription,
-				JSON.stringify({
+		const response = await fetch(subscription.endpoint, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${env().NEXT_PUBLIC_VAPID_PUBLIC_KEY}`,
+			},
+			body: JSON.stringify({
+				title: notification.title,
+				body: notification.body,
+				icon: notification.icon,
+				badge: notification.badge,
+				data: notification.data,
+			}),
+		})
+
+		if (!response.ok) {
+			throw new Error(
+				`Failed to send push notification: ${response.statusText}`,
+			)
+		}
+
+		// Log successful push notification
+		await logger.logInfo({
+			message: 'Push notification sent successfully',
+			context: {
+				endpoint: subscription.endpoint,
+				notification: {
 					title: notification.title,
 					body: notification.body,
-					icon: notification.icon,
-					badge: notification.badge,
-					data: notification.data,
-				}),
-			)
+				},
+			},
+		})
 
-			return NextResponse.json({ success: true })
-		} catch (error) {
-			// Handle specific web-push errors
-			if (error instanceof Error) {
-				if (error.message.includes('VAPID')) {
-					return NextResponse.json(
-						{ error: 'Invalid VAPID configuration' },
-						{ status: 500 },
-					)
-				}
-				if (error.message.includes('subscription')) {
-					return NextResponse.json(
-						{ error: 'Invalid push subscription' },
-						{ status: 400 },
-					)
-				}
-			}
-			throw error // Re-throw other errors
-		}
+		return NextResponse.json({ success: true })
 	} catch (error) {
+		// Log error and return appropriate response
 		await logger.logError({
-			message: 'Push notification error',
-			error,
-		});
-		
+			message: 'Failed to send push notification',
+			error: error instanceof Error ? error : new Error(String(error)),
+		})
+
 		if (error instanceof z.ZodError) {
-			return new Response('Invalid request data', { status: 400 })
+			return NextResponse.json(
+				{ error: 'Invalid request data', details: error.errors },
+				{ status: 400 },
+			)
 		}
-		
-		if (error instanceof Error && error.message.includes('VAPID')) {
-			return new Response('VAPID configuration error', { status: 500 })
-		}
-		
-		return new Response('Internal server error', { status: 500 })
+
+		return NextResponse.json(
+			{ error: 'Failed to send push notification' },
+			{ status: 500 },
+		)
 	}
 }

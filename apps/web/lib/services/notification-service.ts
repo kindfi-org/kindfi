@@ -1,14 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
+import { env } from '../config/env'
 import type {
-	CreateNotificationDTO,
 	BaseNotification,
+	CreateNotificationDTO,
 	NotificationFilters,
 	NotificationResponse,
 	NotificationSort,
 	UpdateNotificationDTO,
 } from '../types/notification'
 import { NotificationLogger } from './notification-logger'
-import { env } from '../config/env'
 
 function isNotification(data: unknown): data is BaseNotification {
 	return (
@@ -28,21 +28,18 @@ function isNotificationArray(data: unknown): data is BaseNotification[] {
 	return Array.isArray(data) && data.every(isNotification)
 }
 
-const supabase = createClient(
-	env().NEXT_PUBLIC_SUPABASE_URL,
-	env().NEXT_PUBLIC_SUPABASE_ANON_KEY,
-)
-
 export class NotificationService {
 	private logger: NotificationLogger
 	private supabase: ReturnType<typeof createClient>
 
 	constructor(supabaseClient?: ReturnType<typeof createClient>) {
 		this.logger = new NotificationLogger()
-		this.supabase = supabaseClient || createClient(
-			env().NEXT_PUBLIC_SUPABASE_URL,
-			env().NEXT_PUBLIC_SUPABASE_ANON_KEY,
-		)
+		this.supabase =
+			supabaseClient ||
+			createClient(
+				env().NEXT_PUBLIC_SUPABASE_URL,
+				env().NEXT_PUBLIC_SUPABASE_ANON_KEY,
+			)
 	}
 
 	async getNotifications(
@@ -51,7 +48,9 @@ export class NotificationService {
 		page = 1,
 		pageSize = 20,
 	): Promise<NotificationResponse> {
-		let query = this.supabase.from('notifications').select('*', { count: 'exact' })
+		let query = this.supabase
+			.from('notifications')
+			.select('*', { count: 'exact' })
 
 		// Apply filters
 		if (filters.is_read !== undefined) {
@@ -113,32 +112,31 @@ export class NotificationService {
 		}
 	}
 
-	async getUnreadCount(): Promise<number> {
-		const { count, error } = await supabase
+	async getUnreadCount(userId: string): Promise<number> {
+		const { count, error } = await this.supabase
 			.from('notifications')
 			.select('*', { count: 'exact', head: true })
 			.eq('is_read', false)
+			.eq('user_id', userId)
 
 		if (error) {
 			await this.logger.logError({
 				message: 'Failed to get unread count',
 				error,
+				context: { userId },
 			})
 			throw new Error(`Failed to get unread count: ${error.message}`)
 		}
 
-		await this.logger.logInfo({
-			message: 'Unread count fetched successfully',
-			context: { count: count || 0 },
-		})
-
 		return count || 0
 	}
 
-	async createNotification(data: CreateNotificationDTO): Promise<BaseNotification> {
-		const { data: notification, error } = await supabase
+	async createNotification(
+		data: CreateNotificationDTO,
+	): Promise<BaseNotification> {
+		const { data: notification, error } = await this.supabase
 			.from('notifications')
-			.insert(data)
+			.insert(data as unknown as Record<string, unknown>)
 			.select()
 			.single()
 
@@ -151,8 +149,8 @@ export class NotificationService {
 			throw new Error(`Failed to create notification: ${error.message}`)
 		}
 
-		if (!notification) {
-			throw new Error('Failed to create notification: No data returned')
+		if (!notification || !isNotification(notification)) {
+			throw new Error('Failed to create notification: Invalid data returned')
 		}
 
 		await this.logger.logInfo({
@@ -161,7 +159,7 @@ export class NotificationService {
 			context: { ...data },
 		})
 
-		return notification as BaseNotification
+		return notification
 	}
 
 	async getNotification(id: string): Promise<BaseNotification> {
@@ -169,37 +167,39 @@ export class NotificationService {
 			.from('notifications')
 			.select('*')
 			.eq('id', id)
-			.single();
+			.single()
 
 		if (error) {
 			await this.logger.logError({
 				message: 'Failed to get notification',
 				error,
 				context: { id },
-			});
-			throw new Error(`Failed to get notification: ${error.message}`);
+			})
+			throw new Error(`Failed to get notification: ${error.message}`)
 		}
 
 		if (!data || !isNotification(data)) {
-			const notFoundError = new Error(`Notification ${id} not found or invalid data structure`);
+			const notFoundError = new Error(
+				`Notification ${id} not found or invalid data structure`,
+			)
 			await this.logger.logError({
 				message: 'Notification not found or invalid',
 				error: notFoundError,
 				context: { id },
-			});
-			throw notFoundError;
+			})
+			throw notFoundError
 		}
 
-		return data;
+		return data
 	}
 
 	async updateNotification(
 		id: string,
 		data: UpdateNotificationDTO,
 	): Promise<BaseNotification> {
-		const { data: notification, error } = await supabase
+		const { data: notification, error } = await this.supabase
 			.from('notifications')
-			.update(data)
+			.update(data as unknown as Record<string, unknown>)
 			.eq('id', id)
 			.select()
 			.single()
@@ -213,8 +213,8 @@ export class NotificationService {
 			throw new Error(`Failed to update notification: ${error.message}`)
 		}
 
-		if (!notification) {
-			throw new Error('Failed to update notification: No data returned')
+		if (!notification || !isNotification(notification)) {
+			throw new Error('Failed to update notification: Invalid data returned')
 		}
 
 		await this.logger.logInfo({
@@ -223,11 +223,14 @@ export class NotificationService {
 			context: { id, ...data },
 		})
 
-		return notification as BaseNotification
+		return notification
 	}
 
 	async deleteNotification(id: string): Promise<void> {
-		const { error } = await supabase.from('notifications').delete().eq('id', id)
+		const { error } = await this.supabase
+			.from('notifications')
+			.delete()
+			.eq('id', id)
 
 		if (error) {
 			await this.logger.logError({
@@ -237,6 +240,11 @@ export class NotificationService {
 			})
 			throw new Error(`Failed to delete notification: ${error.message}`)
 		}
+
+		await this.logger.logInfo({
+			notificationId: id,
+			message: 'Notification deleted successfully',
+		})
 	}
 
 	async markAsRead(id: string): Promise<BaseNotification> {
@@ -246,7 +254,7 @@ export class NotificationService {
 	}
 
 	async markAllAsRead(): Promise<void> {
-		const { error } = await supabase
+		const { error } = await this.supabase
 			.from('notifications')
 			.update({
 				is_read: true,
@@ -262,6 +270,10 @@ export class NotificationService {
 				`Failed to mark all notifications as read: ${error.message}`,
 			)
 		}
+
+		await this.logger.logInfo({
+			message: 'All notifications marked as read successfully',
+		})
 	}
 
 	async deleteExpiredNotifications(): Promise<number> {
@@ -270,56 +282,54 @@ export class NotificationService {
 				.from('notifications')
 				.delete()
 				.lt('expires_at', new Date().toISOString())
-				.select('id');
+				.select('id')
 
-			if (error) throw error;
+			if (error) throw error
 
-			const deletedCount = data?.length || 0;
+			const deletedCount = data?.length || 0
 			await this.logger.logInfo({
 				message: 'Expired notifications deleted successfully',
 				context: { deletedCount },
-			});
-			return deletedCount;
+			})
+			return deletedCount
 		} catch (error) {
 			await this.logger.logError({
 				message: 'Failed to delete expired notifications',
 				error,
-			});
-			throw new Error(`Failed to delete expired notifications: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			})
+			throw new Error(
+				`Failed to delete expired notifications: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 
-	async cleanupOldNotifications(): Promise<number> {
-		try {
-			const { data, error } = await this.supabase
-				.from('notifications')
-				.delete()
-				.lt('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
-				.in('delivery_status', ['delivered', 'failed', 'expired'])
-				.or(`and(delivery_status.eq.pending,next_retry_at.lt.${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()})`)
-				.select('id');
+	async cleanupOldNotifications(): Promise<void> {
+		const thirtyDaysAgo = new Date(
+			Date.now() - 30 * 24 * 60 * 60 * 1000,
+		).toISOString()
+		const sevenDaysAgo = new Date(
+			Date.now() - 7 * 24 * 60 * 60 * 1000,
+		).toISOString()
 
-			if (error) {
-				await this.logger.logError({
-					message: 'Failed to cleanup old notifications',
-					error,
-				});
-				throw new Error(`Failed to cleanup old notifications: ${error.message}`);
-			}
+		const { data, error } = await this.supabase
+			.from('notifications')
+			.delete()
+			.lt('created_at', thirtyDaysAgo)
+			.in('delivery_status', ['delivered', 'failed', 'expired'])
+			.or(`and(delivery_status.eq.pending,next_retry_at.lt.${sevenDaysAgo})`)
+			.select('id')
 
-			const deletedCount = data?.length || 0;
-			await this.logger.logInfo({
-				message: 'Old notifications cleaned up successfully',
-				context: { deletedCount },
-			});
-
-			return deletedCount;
-		} catch (error) {
+		if (error) {
 			await this.logger.logError({
-				message: 'Error cleaning up old notifications',
+				message: 'Failed to cleanup old notifications',
 				error,
-			});
-			throw error;
+			})
+			throw new Error(`Failed to cleanup old notifications: ${error.message}`)
 		}
+
+		await this.logger.logInfo({
+			message: 'Old notifications cleaned up successfully',
+			context: { deletedCount: data?.length || 0 },
+		})
 	}
 }
