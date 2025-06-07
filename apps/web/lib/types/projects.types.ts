@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
-import type { Database, Tables, Enums } from './database.types'
+import type { Tables, Enums } from './database.types'
+
 
 /** Custom type for percentage values between 0-100 */
 export type TPercentage = number & { readonly __brand: 'percentage' }
