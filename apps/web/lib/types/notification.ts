@@ -2,7 +2,7 @@ export type NotificationType = 'info' | 'success' | 'warning' | 'error'
 export type NotificationPriority = 'low' | 'medium' | 'high'
 export type NotificationDeliveryStatus = 'pending' | 'sent' | 'failed'
 
-export type Notification = {
+export interface Notification {
 	id: string
 	title: string
 	message: string
@@ -12,15 +12,19 @@ export type Notification = {
 	is_read: boolean
 	read_at: string | null
 	action_url: string | null
-	metadata: Record<string, unknown> | null
+	metadata: Record<string, unknown>
+	metadata_hash: string | null
 	delivery_status: NotificationDeliveryStatus
 	delivery_attempts: number
 	last_delivery_attempt: string | null
+	next_retry_at: string | null
+	push_subscription_id: string | null
 	created_at: string
 	updated_at: string
+	expires_at: string | null
 }
 
-export type CreateNotificationDTO = {
+export interface CreateNotificationDTO {
 	title: string
 	message: string
 	type: NotificationType
@@ -28,6 +32,8 @@ export type CreateNotificationDTO = {
 	user_id: string
 	action_url?: string
 	metadata?: Record<string, unknown>
+	push_subscription_id?: string
+	expires_at?: string | Date
 }
 
 export type UpdateNotificationDTO = Partial<CreateNotificationDTO> & {

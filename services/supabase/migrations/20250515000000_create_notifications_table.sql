@@ -1,3 +1,7 @@
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
 -- Create notification type enum
 DO $$ BEGIN
     CREATE TYPE notification_type AS ENUM (
@@ -39,17 +43,6 @@ EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
--- Create notification logs table
-CREATE TABLE IF NOT EXISTS notification_logs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    notification_id UUID NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
-    level TEXT NOT NULL CHECK (level IN ('error', 'info')),
-    message TEXT NOT NULL,
-    stack TEXT,
-    context JSONB DEFAULT '{}'::jsonb,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
 -- Create notifications table with all features
 CREATE TABLE IF NOT EXISTS notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -74,6 +67,17 @@ CREATE TABLE IF NOT EXISTS notifications (
     CONSTRAINT valid_expiry CHECK (expires_at IS NULL OR expires_at > created_at)
 );
 
+-- Create notification logs table
+CREATE TABLE IF NOT EXISTS notification_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    notification_id UUID NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
+    level TEXT NOT NULL CHECK (level IN ('error', 'info')),
+    message TEXT NOT NULL,
+    stack TEXT,
+    context JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Create indexes for better query performance
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX idx_notifications_type ON notifications(type);
@@ -84,6 +88,7 @@ CREATE INDEX idx_notifications_expires_at ON notifications(expires_at);
 CREATE INDEX idx_notifications_metadata ON notifications USING gin(metadata);
 CREATE INDEX idx_notifications_delivery_status ON notifications(delivery_status);
 CREATE INDEX idx_notifications_next_retry_at ON notifications(next_retry_at);
+CREATE INDEX idx_notifications_user_unread_recent ON notifications(user_id, is_read, created_at DESC);
 
 -- Create indexes for notification logs
 CREATE INDEX idx_notification_logs_notification_id ON notification_logs(notification_id);
@@ -164,7 +169,7 @@ DECLARE
     backoff_seconds INTEGER;
 BEGIN
     -- Calculate exponential backoff (2^attempts * 60 seconds, max 24 hours)
-    backoff_seconds := LEAST(POWER(2, NEW.delivery_attempts) * 60, 86400);
+    backoff_seconds := LEAST((POWER(2, NEW.delivery_attempts) * 60)::INTEGER, 86400);
     
     -- Set next retry time
     NEW.next_retry_at := NOW() + (backoff_seconds || ' seconds')::interval;
@@ -187,7 +192,6 @@ CREATE TRIGGER handle_notification_retry
     WHEN (NEW.delivery_status = 'failed' AND OLD.delivery_status != 'failed')
     EXECUTE FUNCTION handle_notification_retry();
 
--- Create function to clean up old notifications
 CREATE OR REPLACE FUNCTION cleanup_old_notifications()
 RETURNS void AS $$
 BEGIN
@@ -201,7 +205,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create a scheduled job to run cleanup daily
 SELECT cron.schedule(
     'cleanup-old-notifications',
     '0 0 * * *', -- Run at midnight every day
@@ -210,4 +213,4 @@ SELECT cron.schedule(
 
 -- Grant appropriate permissions
 GRANT SELECT, UPDATE, DELETE ON notifications TO authenticated;
-GRANT SELECT ON notifications TO anon; 
+GRANT SELECT ON notifications TO anon;

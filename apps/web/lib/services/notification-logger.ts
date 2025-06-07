@@ -1,9 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
+import { env } from '../config/env'
 
-const supabase = createClient(
-	process.env.NEXT_PUBLIC_SUPABASE_URL!,
-	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-)
+const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 interface LogErrorParams {
 	notificationId?: string
@@ -26,6 +24,62 @@ interface NotificationLog {
 	stack: string | null
 	context: Record<string, unknown>
 	created_at: string
+}
+
+export interface LogResult<T> {
+	data: T | null
+	error: Error | null
+}
+
+export async function logError(notificationId: string, error: Error, context?: Record<string, unknown>): Promise<void> {
+	try {
+		await supabase.from('notification_logs').insert({
+			notification_id: notificationId,
+			level: 'error',
+			message: error.message,
+			stack: error.stack,
+			context: context || {}
+		})
+	} catch (logError) {
+		console.error('Failed to log error:', logError)
+		throw error // Rethrow the original error after logging attempt
+	}
+}
+
+export async function getNotificationLogs(notificationId: string): Promise<LogResult<NotificationLog[]>> {
+	try {
+		const { data, error } = await supabase
+			.from('notification_logs')
+			.select('*')
+			.eq('notification_id', notificationId)
+			.order('created_at', { ascending: false })
+
+		if (error) throw error
+		return { data, error: null }
+	} catch (error) {
+		return { 
+			data: null, 
+			error: error instanceof Error ? error : new Error('Unknown error occurred') 
+		}
+	}
+}
+
+export async function getRecentLogs(limit = 100): Promise<LogResult<NotificationLog[]>> {
+	try {
+		const { data, error } = await supabase
+			.from('notification_logs')
+			.select('*')
+			.order('created_at', { ascending: false })
+			.limit(limit)
+
+		if (error) throw error
+		return { data, error: null }
+	} catch (error) {
+		return { 
+			data: null, 
+			error: error instanceof Error ? error : new Error('Unknown error occurred') 
+		}
+	}
 }
 
 export class NotificationLogger {

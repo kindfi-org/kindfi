@@ -8,10 +8,11 @@ import type {
 	UpdateNotificationDTO,
 } from '../types/notification'
 import { NotificationLogger } from './notification-logger'
+import { env } from '../config/env'
 
 const supabase = createClient(
-	process.env.NEXT_PUBLIC_SUPABASE_URL!,
-	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+	env.NEXT_PUBLIC_SUPABASE_URL,
+	env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 )
 
 export class NotificationService {
@@ -131,14 +132,25 @@ export class NotificationService {
 	}
 
 	async getNotification(id: string): Promise<Notification> {
-		const { data: notification, error } = await supabase
-			.from('notifications')
-			.select()
-			.eq('id', id)
-			.single()
+		try {
+			const { data, error } = await supabase
+				.from('notifications')
+				.select('*')
+				.eq('id', id)
+				.single();
 
-		if (error) throw error
-		return notification
+			if (error) throw error;
+			if (!data) throw new Error(`Notification ${id} not found`);
+
+			return data;
+		} catch (error) {
+			await this.logger.logError({
+				message: 'Failed to get notification',
+				error,
+				context: { id },
+			});
+			throw error;
+		}
 	}
 
 	async updateNotification(
@@ -212,12 +224,27 @@ export class NotificationService {
 		}
 	}
 
-	async deleteExpiredNotifications(): Promise<void> {
-		const { error } = await supabase
-			.from('notifications')
-			.delete()
-			.lt('expires_at', new Date().toISOString())
+	async deleteExpiredNotifications(): Promise<{ deleted: number; error: Error | null }> {
+		try {
+			const { data, error } = await supabase
+				.from('notifications')
+				.delete()
+				.lt('expires_at', new Date().toISOString())
+				.select('id');
 
-		if (error) throw error
+			if (error) throw error;
+
+			return { 
+				deleted: data?.length || 0,
+				error: null
+			};
+		} catch (error) {
+			const err = error instanceof Error ? error : new Error('Unknown error occurred');
+			console.error('Failed to delete expired notifications:', err);
+			return {
+				deleted: 0,
+				error: err
+			};
+		}
 	}
 }

@@ -11,7 +11,22 @@ const envSchema = z.object({
 	NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
 })
 
-export const env = envSchema.parse(process.env)
+export const getEnv = () => {
+	try {
+		const env = envSchema.parse(process.env)
+		return env
+	} catch (error) {
+		if (error instanceof z.ZodError) {
+			const missingVars = error.errors
+				.map(err => `${err.path.join('.')}: ${err.message}`)
+				.join('\n')
+			throw new Error(`Environment validation failed:\n${missingVars}`)
+		}
+		throw error
+	}
+}
+
+export const env = getEnv()
 
 // Type for the validated environment variables
 export type Env = z.infer<typeof envSchema>

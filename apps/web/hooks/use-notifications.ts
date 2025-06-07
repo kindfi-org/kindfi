@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { NotificationService } from '../lib/services/notification-service'
@@ -9,12 +8,10 @@ import type {
 	NotificationSort,
 	UpdateNotificationDTO,
 } from '../lib/types/notification'
+import { supabase } from '../lib/supabase/client'
+import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
 
 const notificationService = new NotificationService()
-const supabase = createClient(
-	process.env.NEXT_PUBLIC_SUPABASE_URL!,
-	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-)
 
 export function useNotifications(
 	filters: NotificationFilters = {},
@@ -109,6 +106,8 @@ export function useNotifications(
 
 	// Set up real-time subscription for notifications
 	useEffect(() => {
+		let isMounted = true;
+		let connectionState: 'connected' | 'disconnected' = 'connected';
 		const channel = supabase
 			.channel('notifications')
 			.on(
@@ -119,16 +118,28 @@ export function useNotifications(
 					table: 'notifications',
 				},
 				() => {
-					refetch()
-					notificationService.getUnreadCount().then(setUnreadCount)
+					if (isMounted) {
+						refetch()
+						notificationService.getUnreadCount().then(setUnreadCount)
+					}
 				},
 			)
-			.subscribe()
+			.subscribe(
+				(status) => {
+					if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
+						console.error('Notification subscription error');
+						connectionState = 'disconnected';
+					} else if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+						connectionState = 'connected';
+					}
+				}
+			);
 
 		return () => {
-			channel.unsubscribe()
-		}
-	}, [refetch])
+			isMounted = false;
+			channel.unsubscribe();
+		};
+	}, [refetch]);
 
 	return {
 		notifications: notificationsData?.data || [],
