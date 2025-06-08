@@ -31,8 +31,15 @@ CREATE TABLE IF NOT EXISTS notifications (
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     body TEXT NOT NULL,
+    type notification_type NOT NULL DEFAULT 'info',
+    priority notification_priority NOT NULL DEFAULT 'medium',
+    is_read BOOLEAN DEFAULT false,
+    delivery_status notification_delivery_status DEFAULT 'pending',
+    delivery_attempts INTEGER DEFAULT 0,
+    next_retry_at TIMESTAMPTZ,
+    expires_at TIMESTAMPTZ,
+    metadata JSONB DEFAULT '{}'::jsonb,
     data JSONB DEFAULT '{}'::jsonb,
-    read BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -69,6 +76,10 @@ CREATE POLICY "Users can delete their own notifications"
     ON notifications FOR DELETE
     USING (auth.uid() = user_id);
 
+CREATE POLICY "Users can create their own notifications"
+    ON notifications FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
 -- Notification preferences policies
 CREATE POLICY "Users can view their own notification preferences"
     ON notification_preferences FOR SELECT
@@ -97,30 +108,6 @@ CREATE TRIGGER update_notification_preferences_updated_at
     BEFORE UPDATE ON notification_preferences
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
-
--- Create function to calculate HMAC hash
--- See docs/notification-security.md for HMAC key configuration
-CREATE OR REPLACE FUNCTION calculate_metadata_hash()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Use a secure key from environment variables
-    NEW.metadata_hash := encode(
-        hmac(
-            NEW.metadata::text::bytea,
-            current_setting('app.settings.metadata_hmac_key')::bytea,
-            'sha256'
-        ),
-        'hex'
-    );
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Create trigger for metadata hash
-CREATE TRIGGER set_metadata_hash
-    BEFORE INSERT OR UPDATE OF metadata ON notifications
-    FOR EACH ROW
-    EXECUTE FUNCTION calculate_metadata_hash();
 
 -- Create function to handle retry logic
 CREATE OR REPLACE FUNCTION handle_notification_retry()
@@ -155,3 +142,7 @@ CREATE TRIGGER handle_notification_retry
 -- Grant appropriate permissions
 GRANT SELECT, INSERT, UPDATE, DELETE ON notifications TO authenticated;
 GRANT SELECT ON notifications TO anon;
+
+-- Remove metadata hash function and trigger since they're not being used
+DROP TRIGGER IF EXISTS set_metadata_hash ON notifications;
+DROP FUNCTION IF EXISTS calculate_metadata_hash();

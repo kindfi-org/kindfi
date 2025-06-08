@@ -44,6 +44,8 @@ export interface NotificationPreferences {
 	in_app: boolean
 }
 
+type NotificationUpdate = Partial<Omit<BaseNotification, 'id' | 'created_at' | 'updated_at'>>
+
 export class NotificationService {
 	private logger: NotificationLogger
 
@@ -228,7 +230,7 @@ export class NotificationService {
 	): Promise<BaseNotification> {
 		const { data: notification, error } = await supabase
 			.from('notifications')
-			.update(data as unknown as Record<string, unknown>)
+			.update(data satisfies NotificationUpdate)
 			.eq('id', id)
 			.select()
 			.single()

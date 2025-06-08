@@ -2,7 +2,7 @@ import { REALTIME_SUBSCRIBE_STATES } from "@supabase/realtime-js";
 import type { RealtimeChannel } from "@supabase/realtime-js";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { supabase } from "@packages/lib/supabase";
+import { createSupabaseBrowserClient } from "@packages/lib/supabase/client";
 import { NotificationService } from "../lib/services/notification-service";
 import type {
   CreateNotificationDTO,
@@ -17,6 +17,7 @@ export function useNotifications(
   page = 1,
   pageSize = 20,
 ) {
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const queryClient = useQueryClient();
   const [unreadCount, setUnreadCount] = useState(0);
   const [connectionState, setConnectionState] = useState<

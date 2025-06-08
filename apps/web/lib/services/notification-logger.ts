@@ -38,6 +38,8 @@ interface LogWarningParams {
 	context?: Record<string, unknown>
 }
 
+export type LogLevel = 'error' | 'info' | 'warning'
+
 /**
  * Represents a notification log entry from the database
  * @property {string} id - Unique identifier for the log entry
@@ -50,7 +52,7 @@ interface LogWarningParams {
 interface NotificationLog {
 	id: string
 	notification_id: string | null
-	action: 'error' | 'info' | 'warning'
+	level: LogLevel
 	message: string
 	metadata?: Record<string, unknown>
 	created_at: string
@@ -70,7 +72,7 @@ export async function logError(params: LogErrorParams): Promise<void> {
 	try {
 		await supabase.from('notification_logs').insert({
 			notification_id: params.notificationId,
-			action: 'error',
+			level: 'error',
 			message: params.message,
 			metadata: {
 				...params.context,
@@ -150,7 +152,7 @@ export class NotificationLogger {
 		try {
 			const { error: dbError } = await supabase.from('notification_logs').insert({
 				notification_id: notificationId,
-				action: 'error',
+				level: 'error',
 				message,
 				metadata: {
 					...context,
