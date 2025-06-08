@@ -1,9 +1,8 @@
 import { REALTIME_SUBSCRIBE_STATES } from "@supabase/realtime-js";
 import type { RealtimeChannel } from "@supabase/realtime-js";
-import { createClient } from "@supabase/supabase-js";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { env } from "../lib/config/env";
+import { supabase } from "@packages/lib/supabase";
 import { NotificationService } from "../lib/services/notification-service";
 import type {
   CreateNotificationDTO,
@@ -18,14 +17,6 @@ export function useNotifications(
   page = 1,
   pageSize = 20,
 ) {
-  const supabase = useMemo(
-    () =>
-      createClient(
-        env().NEXT_PUBLIC_SUPABASE_URL,
-        env().NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      ),
-    [],
-  );
   const queryClient = useQueryClient();
   const [unreadCount, setUnreadCount] = useState(0);
   const [connectionState, setConnectionState] = useState<
@@ -100,7 +91,13 @@ export function useNotifications(
 
   // Mutation for marking all notifications as read
   const markAllAsRead = useMutation({
-    mutationFn: () => notificationService.markAllAsRead(),
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) {
+        throw new Error('User not authenticated');
+      }
+      return notificationService.markAllAsRead(session.user.id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
       queryClient.invalidateQueries({
@@ -161,7 +158,7 @@ export function useNotifications(
       isMounted = false;
       channel.unsubscribe();
     };
-  }, [refetch, notificationService, supabase]);
+  }, [refetch, notificationService]);
 
   return {
     notifications: notificationsData?.data || [],

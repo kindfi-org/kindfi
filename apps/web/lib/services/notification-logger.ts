@@ -1,10 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
-import { env } from '../config/env'
-
-const supabase = createClient(
-	env().NEXT_PUBLIC_SUPABASE_URL,
-	env().NEXT_PUBLIC_SUPABASE_ANON_KEY,
-)
+import { supabase } from '@packages/lib/supabase'
 
 /**
  * Parameters for logging error events
@@ -148,24 +142,13 @@ export async function getRecentLogs(
 }
 
 export class NotificationLogger {
-	private supabase: ReturnType<typeof createClient>
-
-	constructor(supabaseClient?: ReturnType<typeof createClient>) {
-		this.supabase =
-			supabaseClient ||
-			createClient(
-				env().NEXT_PUBLIC_SUPABASE_URL,
-				env().NEXT_PUBLIC_SUPABASE_ANON_KEY,
-			)
-	}
-
 	/**
 	 * Logs an error event to the notification logs
 	 * @param {LogErrorParams} params - Parameters for the error log
 	 */
 	async logError({ message, error, context, notificationId }: LogErrorParams): Promise<void> {
 		try {
-			const { error: dbError } = await this.supabase.from('notification_logs').insert({
+			const { error: dbError } = await supabase.from('notification_logs').insert({
 				notification_id: notificationId,
 				action: 'error',
 				message,
@@ -193,14 +176,14 @@ export class NotificationLogger {
 		context,
 	}: LogInfoParams): Promise<void> {
 		try {
-			const { error: dbError } = await this.supabase.from('notification_logs').insert({
+			const { error } = await supabase.from('notification_logs').insert({
+				level: 'info',
+				message: message,
 				notification_id: notificationId,
-				action: 'info',
-				message,
 				metadata: context,
 			})
 			
-			if (dbError) throw dbError
+			if (error) throw error
 		} catch (logError) {
 			console.error('Failed to log info:', logError)
 			// Don't throw to avoid disrupting the main flow
@@ -217,14 +200,14 @@ export class NotificationLogger {
 		context,
 	}: LogWarningParams): Promise<void> {
 		try {
-			const { error: dbError } = await this.supabase.from('notification_logs').insert({
+			const { error } = await supabase.from('notification_logs').insert({
+				level: 'warning',
+				message: message,
 				notification_id: notificationId,
-				action: 'warning',
-				message,
 				metadata: context,
 			})
 			
-			if (dbError) throw dbError
+			if (error) throw error
 		} catch (logError) {
 			console.error('Failed to log warning:', logError)
 			// Don't throw to avoid disrupting the main flow
@@ -239,24 +222,19 @@ export class NotificationLogger {
 	async getNotificationLogs(
 		notificationId: string,
 	): Promise<NotificationLog[]> {
-		const { data, error } = await this.supabase
-			.from('notification_logs')
-			.select('*')
-			.eq('notification_id', notificationId)
-			.order('created_at', { ascending: false })
+		try {
+			const { data, error } = await supabase
+				.from('notification_logs')
+				.select('*')
+				.eq('notification_id', notificationId)
+				.order('created_at', { ascending: false })
 
-		if (error) {
-			throw new Error(`Failed to get notification logs: ${error.message}`)
+			if (error) throw error
+			return data || []
+		} catch (error) {
+			console.error('Failed to get notification logs:', error)
+			return []
 		}
-
-		return (data ?? []).map((log) => ({
-			id: log.id,
-			notification_id: log.notification_id,
-			action: log.action,
-			message: log.message,
-			metadata: log.metadata,
-			created_at: log.created_at,
-		})) as NotificationLog[]
 	}
 
 	/**
@@ -266,24 +244,19 @@ export class NotificationLogger {
 	 * @returns {Promise<NotificationLog[]>} Array of error logs
 	 */
 	async getErrorLogs(limit = 100, offset = 0): Promise<NotificationLog[]> {
-		const { data, error } = await this.supabase
-			.from('notification_logs')
-			.select('*')
-			.eq('action', 'error')
-			.order('created_at', { ascending: false })
-			.range(offset, offset + limit - 1)
+		try {
+			const { data, error } = await supabase
+				.from('notification_logs')
+				.select('*')
+				.eq('level', 'error')
+				.order('created_at', { ascending: false })
+				.range(offset, offset + limit - 1)
 
-		if (error) {
-			throw new Error(`Failed to get error logs: ${error.message}`)
+			if (error) throw error
+			return data || []
+		} catch (error) {
+			console.error('Failed to get error logs:', error)
+			return []
 		}
-
-		return (data ?? []).map((log) => ({
-			id: log.id,
-			notification_id: log.notification_id,
-			action: log.action,
-			message: log.message,
-			metadata: log.metadata,
-			created_at: log.created_at,
-		})) as NotificationLog[]
 	}
 }

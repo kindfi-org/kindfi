@@ -14,90 +14,49 @@ CREATE TYPE notification_type AS ENUM (
 CREATE TYPE notification_priority AS ENUM (
     'low',
     'medium',
-    'high'
+    'high',
+    'urgent'
 );
 
 -- Create notification delivery status enum
-DO $$ BEGIN
-    CREATE TYPE notification_delivery_status AS ENUM (
-        'pending',
-        'sent',
-        'delivered',
-        'failed',
-        'expired'
-    );
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+CREATE TYPE notification_delivery_status AS ENUM (
+    'pending',
+    'delivered',
+    'failed'
+);
 
--- Create notifications table with all features
+-- Create notifications table
 CREATE TABLE IF NOT EXISTS notifications (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    type notification_type NOT NULL,
-    priority notification_priority DEFAULT 'medium' NOT NULL,
     title TEXT NOT NULL,
-    message TEXT NOT NULL,
-    is_read BOOLEAN DEFAULT false NOT NULL,
-    read_at TIMESTAMPTZ,
-    action_url TEXT,
-    metadata JSONB DEFAULT '{}'::jsonb,
-    metadata_hash TEXT,
-    delivery_status notification_delivery_status NOT NULL DEFAULT 'pending',
-    delivery_attempts INTEGER NOT NULL DEFAULT 0,
-    last_delivery_attempt TIMESTAMPTZ,
-    next_retry_at TIMESTAMPTZ,
-    push_subscription_id TEXT,
-    created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
-    expires_at TIMESTAMPTZ,
-    CONSTRAINT valid_expiry CHECK (expires_at IS NULL OR expires_at > created_at)
+    body TEXT NOT NULL,
+    data JSONB DEFAULT '{}'::jsonb,
+    read BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Create notification logs table
-CREATE TABLE IF NOT EXISTS notification_logs (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    notification_id UUID REFERENCES notifications(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    action TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
-    metadata JSONB
+-- Create notification preferences table
+CREATE TABLE IF NOT EXISTS notification_preferences (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email BOOLEAN DEFAULT true,
+    push BOOLEAN DEFAULT true,
+    in_app BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Create indexes for better query performance
-CREATE INDEX notifications_user_id_idx ON notifications(user_id);
-CREATE INDEX notifications_type_idx ON notifications(type);
-CREATE INDEX notifications_created_at_idx ON notifications(created_at);
-CREATE INDEX notifications_is_read_idx ON notifications(is_read);
-CREATE INDEX notification_logs_notification_id_idx ON notification_logs(notification_id);
-CREATE INDEX notification_logs_user_id_idx ON notification_logs(user_id);
-CREATE INDEX notifications_priority ON notifications(priority);
-CREATE INDEX notifications_read_at ON notifications(read_at);
-CREATE INDEX notifications_action_url ON notifications(action_url);
-CREATE INDEX notifications_metadata ON notifications USING gin(metadata);
-CREATE INDEX notifications_delivery_status ON notifications(delivery_status);
-CREATE INDEX notifications_next_retry_at ON notifications(next_retry_at);
-CREATE INDEX notifications_user_unread_recent ON notifications(user_id, is_read, created_at DESC);
+-- Create indexes
+CREATE INDEX IF NOT EXISTS notifications_user_id_idx ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS notifications_created_at_idx ON notifications(created_at);
+CREATE INDEX IF NOT EXISTS notifications_read_idx ON notifications(read);
 
--- Create updated_at trigger
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = now();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
-CREATE TRIGGER update_notifications_updated_at
-    BEFORE UPDATE ON notifications
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Enable Row Level Security
+-- Create RLS policies
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notification_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_preferences ENABLE ROW LEVEL SECURITY;
 
--- Create policies
+-- Notifications policies
 CREATE POLICY "Users can view their own notifications"
     ON notifications FOR SELECT
     USING (auth.uid() = user_id);
@@ -110,17 +69,34 @@ CREATE POLICY "Users can delete their own notifications"
     ON notifications FOR DELETE
     USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can create their own notifications"
-    ON notifications FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can view their own notification logs"
-    ON notification_logs FOR SELECT
+-- Notification preferences policies
+CREATE POLICY "Users can view their own notification preferences"
+    ON notification_preferences FOR SELECT
     USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can create their own notification logs"
-    ON notification_logs FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update their own notification preferences"
+    ON notification_preferences FOR UPDATE
+    USING (auth.uid() = user_id);
+
+-- Create functions
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create triggers
+CREATE TRIGGER update_notifications_updated_at
+    BEFORE UPDATE ON notifications
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_notification_preferences_updated_at
+    BEFORE UPDATE ON notification_preferences
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- Create function to calculate HMAC hash
 -- See docs/notification-security.md for HMAC key configuration
@@ -179,4 +155,3 @@ CREATE TRIGGER handle_notification_retry
 -- Grant appropriate permissions
 GRANT SELECT, INSERT, UPDATE, DELETE ON notifications TO authenticated;
 GRANT SELECT ON notifications TO anon;
-GRANT SELECT, INSERT ON notification_logs TO authenticated;
