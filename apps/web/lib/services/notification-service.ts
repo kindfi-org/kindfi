@@ -277,23 +277,13 @@ export class NotificationService {
 		try {
 			const { error } = await supabase
 				.from('notifications')
-				.update({ read: true })
+				.update({ is_read: true })
 				.eq('id', notificationId)
 
 			if (error) throw error
-
-			await this.logger.logInfo({
-				notificationId,
-				message: 'Notification marked as read',
-			})
-
 			return true
 		} catch (error) {
-			await this.logger.logError({
-				message: 'Failed to mark notification as read',
-				error,
-				context: { notificationId },
-			})
+			console.error('Failed to mark notification as read:', error)
 			return false
 		}
 	}
@@ -307,24 +297,14 @@ export class NotificationService {
 		try {
 			const { error } = await supabase
 				.from('notifications')
-				.update({ read: true })
+				.update({ is_read: true })
 				.eq('user_id', userId)
-				.eq('read', false)
+				.eq('is_read', false)
 
 			if (error) throw error
-
-			await this.logger.logInfo({
-				message: 'All notifications marked as read',
-				context: { userId },
-			})
-
 			return true
 		} catch (error) {
-			await this.logger.logError({
-				message: 'Failed to mark all notifications as read',
-				error,
-				context: { userId },
-			})
+			console.error('Failed to mark all notifications as read:', error)
 			return false
 		}
 	}
@@ -340,18 +320,13 @@ export class NotificationService {
 				.from('notifications')
 				.select('*')
 				.eq('user_id', userId)
-				.eq('read', false)
+				.eq('is_read', false)
 				.order('created_at', { ascending: false })
 
 			if (error) throw error
-
 			return data || []
 		} catch (error) {
-			await this.logger.logError({
-				message: 'Failed to get unread notifications',
-				error,
-				context: { userId },
-			})
+			console.error('Failed to get unread notifications:', error)
 			return []
 		}
 	}

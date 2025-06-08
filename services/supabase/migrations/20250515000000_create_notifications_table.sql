@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 -- Create notification type enum
-CREATE TYPE notification_type AS ENUM (
+CREATE TYPE IF NOT EXISTS notification_type AS ENUM (
     'info',
     'success',
     'warning',
@@ -11,7 +11,7 @@ CREATE TYPE notification_type AS ENUM (
 );
 
 -- Create notification priority enum
-CREATE TYPE notification_priority AS ENUM (
+CREATE TYPE IF NOT EXISTS notification_priority AS ENUM (
     'low',
     'medium',
     'high',
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS notification_preferences (
 -- Create indexes
 CREATE INDEX IF NOT EXISTS notifications_user_id_idx ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS notifications_created_at_idx ON notifications(created_at);
-CREATE INDEX IF NOT EXISTS notifications_read_idx ON notifications(read);
+CREATE INDEX IF NOT EXISTS notifications_is_read_idx ON notifications(is_read);
 
 -- Create RLS policies
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;

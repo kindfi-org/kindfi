@@ -43,7 +43,10 @@ export function useNotifications(
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      return notificationService.getUnreadCount(session?.user?.id || "");
+      if (!session?.user?.id) {
+        return 0; // No unread notifications for unauthenticated users
+      }
+      return notificationService.getUnreadCount(session.user.id);
     },
   });
 
