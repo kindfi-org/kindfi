@@ -19,7 +19,6 @@ export function useNotifications(
 ) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const queryClient = useQueryClient();
-  const [unreadCount, setUnreadCount] = useState(0);
   const [connectionState, setConnectionState] = useState<
     "connected" | "disconnected"
   >("disconnected");
@@ -47,13 +46,6 @@ export function useNotifications(
       return notificationService.getUnreadCount(session?.user?.id || "");
     },
   });
-
-  // Update unread count when count changes
-  useEffect(() => {
-    if (count !== undefined) {
-      setUnreadCount(count);
-    }
-  }, [count]);
 
   // Mutation for creating a notification
   const createNotification = useMutation({
@@ -133,15 +125,9 @@ export function useNotifications(
         () => {
           if (isMounted) {
             refetch();
-            supabase.auth
-              .getSession()
-              .then(({ data: { session } }) =>
-                notificationService.getUnreadCount(session?.user?.id || ""),
-              )
-              .then(setUnreadCount)
-              .catch((error) => {
-                console.error("Failed to update unread count:", error);
-              });
+            queryClient.invalidateQueries({
+              queryKey: ["notifications", "unread-count"],
+            });
           }
         },
       )
@@ -159,12 +145,12 @@ export function useNotifications(
       isMounted = false;
       channel.unsubscribe();
     };
-  }, [refetch, notificationService]);
+  }, [supabase, refetch, queryClient]);
 
   return {
     notifications: notificationsData?.data || [],
     totalCount: notificationsData?.count || 0,
-    unreadCount,
+    unreadCount: count ?? 0,
     isLoading,
     error,
     connectionState,

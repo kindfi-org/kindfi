@@ -28,16 +28,6 @@ function isNotificationArray(data: unknown): data is BaseNotification[] {
 	return Array.isArray(data) && data.every(isNotification)
 }
 
-export interface Notification {
-	id: string
-	user_id: string
-	title: string
-	body: string
-	data?: Record<string, unknown>
-	read: boolean
-	created_at: string
-}
-
 export interface NotificationPreferences {
 	email: boolean
 	push: boolean
@@ -66,7 +56,7 @@ export class NotificationService {
 		sort: NotificationSort = { field: 'created_at', direction: 'desc' },
 		page = 1,
 		pageSize = 20,
-	): Promise<NotificationResponse> {
+	): Promise<{ data: BaseNotification[]; count: number }> {
 		let query = supabase
 			.from('notifications')
 			.select('*', { count: 'exact' })
@@ -135,8 +125,8 @@ export class NotificationService {
 		const { count, error } = await supabase
 			.from('notifications')
 			.select('*', { count: 'exact', head: true })
-			.eq('is_read', false)
 			.eq('user_id', userId)
+			.eq('is_read', false)
 
 		if (error) {
 			await this.logger.logError({
@@ -157,7 +147,7 @@ export class NotificationService {
 	 */
 	async createNotification(
 		notification: CreateNotificationDTO,
-	): Promise<Notification | null> {
+	): Promise<BaseNotification | null> {
 		try {
 			const { data, error } = await supabase
 				.from('notifications')
@@ -344,7 +334,7 @@ export class NotificationService {
 	 * @param {string} userId - The ID of the user
 	 * @returns {Promise<Notification[]>} Array of unread notifications
 	 */
-	async getUnreadNotifications(userId: string): Promise<Notification[]> {
+	async getUnreadNotifications(userId: string): Promise<BaseNotification[]> {
 		try {
 			const { data, error } = await supabase
 				.from('notifications')
