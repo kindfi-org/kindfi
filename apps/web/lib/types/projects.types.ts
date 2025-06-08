@@ -1,6 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import type { Tables, Enums } from './database.types'
-
+import type { Enums, Tables } from './database.types'
 
 /** Custom type for percentage values between 0-100 */
 export type TPercentage = number & { readonly __brand: 'percentage' }
@@ -61,12 +60,13 @@ export interface Creator {
 
 /** Tag interface using Supabase project_tags table */
 export interface Tag extends Pick<ProjectTagRow, 'id' | 'name'> {
-	text?: string // Keep for backward compatibility
+	text?: string // Legacy field, consider migrating to 'name'
 	color?: { backgroundColor: string; textColor: string } | string
 }
 
 /** Project Category interface using Supabase categories table */
-export interface ProjectCategory extends Pick<CategoryRow, 'id' | 'name' | 'slug'> {
+export interface ProjectCategory
+	extends Pick<CategoryRow, 'id' | 'name' | 'slug'> {
 	label: string
 	value: string
 	icon: LucideIcon
@@ -85,14 +85,14 @@ export interface Project {
 	min_investment: number
 	investors_count: number
 	created_at: string
-	
+
 	// Optional Supabase fields
 	owner_id?: string
 	category_id?: string | null
 	image_url?: string | null
 	updated_at?: string | null
 	percentage_complete?: number
-	
+
 	// Additional computed/derived fields
 	raised?: number
 	goal?: number
@@ -100,7 +100,7 @@ export interface Project {
 	rating?: string
 	video_url?: string
 	location?: string
-	
+
 	// Related data
 	categories: string[]
 	tags: Tag[] | string[]
@@ -108,10 +108,10 @@ export interface Project {
 	milestones?: number
 	members?: ProjectMemberRow[]
 	relatedProjects?: Project[]
-	
+
 	// Progress tracking
 	completed_milestones?: number
-	
+
 	// Feature flags
 	trending?: boolean
 	featured?: boolean

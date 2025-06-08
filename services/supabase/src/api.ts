@@ -159,7 +159,7 @@ export interface SearchResult<T> {
 	results: T[]
 	total_count: number
 	query: string
-	filters_applied: Record<string, any>
+	filters_applied: Record<string,  unknown>
 	search_time_ms: number
 	suggestions?: string[]
 }
@@ -182,7 +182,7 @@ export interface NotificationData {
 }
 
 // Webhook types
-export interface WebhookPayload<T = any> {
+export interface WebhookPayload<T = unknown> {
 	event: string
 	data: T
 	timestamp: string
@@ -202,7 +202,7 @@ export interface EscrowWebhookData {
 // Export types for different operations
 export interface ExportRequest {
 	format: 'csv' | 'json' | 'xlsx'
-	filters?: Record<string, any>
+	filters?: Record<string,  unknown>
 	columns?: string[]
 	date_range?: {
 		start: string
@@ -249,7 +249,7 @@ export const isApiSuccessResponse = <T>(
 }
 
 export const isApiErrorResponse = (
-	response: ApiResponse<any>,
+	response: ApiResponse<unknown>,
 ): response is ApiErrorResponse => {
 	return (
 		response.success === false &&
