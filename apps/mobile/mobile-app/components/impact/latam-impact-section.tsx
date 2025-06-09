@@ -3,24 +3,21 @@ import {
 	CheckCircle,
 	DollarSign,
 	Eye,
-	LucideIcon,
+	type LucideIcon,
 	Shield,
 	TrendingUp,
 	Users,
 } from 'lucide-react-native'
 import { MotiView } from 'moti'
 import React, { useRef, useState, useEffect } from 'react'
-import { 
-	Text as RNText, 
-	View, 
-	FlatList, 
-	Dimensions, 
+import {
+	Dimensions,
+	FlatList,
 	Pressable,
+	Text as RNText,
+	View,
 } from 'react-native'
-import type { 
-	NativeScrollEvent,
-	NativeSyntheticEvent
-} from 'react-native'
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { Text } from '../Themed'
 import { Box } from '../ui/box'
 import { GradientText } from '../ui/gradientText'
@@ -32,17 +29,17 @@ const getResponsiveLayout = () => {
 	const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 	const isTablet = screenWidth >= 768
 	const isLandscape = screenWidth > screenHeight
-	
+
 	// Dynamic padding based on screen size
-	const CARD_PADDING = isTablet ? 32 : (screenWidth < 375 ? 12 : 16)
-	const CARD_WIDTH = screenWidth - (CARD_PADDING * 2)
-	
+	const CARD_PADDING = isTablet ? 32 : screenWidth < 375 ? 12 : 16
+	const CARD_WIDTH = screenWidth - CARD_PADDING * 2
+
 	return {
 		screenWidth,
 		CARD_PADDING,
 		CARD_WIDTH,
 		isTablet,
-		isLandscape
+		isLandscape,
 	}
 }
 
@@ -61,41 +58,41 @@ const featureCardsData: FeatureCardData[] = [
 	{
 		id: '1',
 		icon: CheckCircle,
-		title: "Every Contribution, Recorded On-Chain",
-		description: "Complete transparency with immutable transaction records",
-		stat: "$1.7B in regional funding tracked annually",
-		iconColor: "success-600",
-		backgroundColor: "bg-green-100"
+		title: 'Every Contribution, Recorded On-Chain',
+		description: 'Complete transparency with immutable transaction records',
+		stat: '$1.7B in regional funding tracked annually',
+		iconColor: 'success-600',
+		backgroundColor: 'bg-green-100',
 	},
 	{
 		id: '2',
 		icon: Shield,
-		title: "Every Project, Fully Reviewed",
-		description: "Rigorous vetting process ensures legitimate impact projects",
-		stat: "100% of campaigns undergo milestone verification",
-		iconColor: "blue-600",
-		backgroundColor: "bg-blue-100"
+		title: 'Every Project, Fully Reviewed',
+		description: 'Rigorous vetting process ensures legitimate impact projects',
+		stat: '100% of campaigns undergo milestone verification',
+		iconColor: 'blue-600',
+		backgroundColor: 'bg-blue-100',
 	},
 	{
 		id: '3',
 		icon: TrendingUp,
-		title: "From Crypto to Real Change",
-		description: "Transforming digital contributions into measurable impact",
+		title: 'From Crypto to Real Change',
+		description: 'Transforming digital contributions into measurable impact',
 		bulletPoints: [
 			'Real-Time Impact Metrics',
 			'Proof-backed fund releases',
 			'Transparent governance',
 			'Built on Stellar smart contracts',
 		],
-		iconColor: "orange-600",
-		backgroundColor: "bg-orange-100"
-	}
+		iconColor: 'orange-600',
+		backgroundColor: 'bg-orange-100',
+	},
 ]
 
 export function LatamImpactSection() {
 	const [currentIndex, setCurrentIndex] = useState(0)
 	const flatListRef = useRef<FlatList>(null)
-	
+
 	// Get responsive layout values
 	const { screenWidth, CARD_PADDING, isTablet } = getResponsiveLayout()
 
@@ -104,7 +101,10 @@ export function LatamImpactSection() {
 		const handleKeyPress = (event: KeyboardEvent) => {
 			if (event.key === 'ArrowLeft' && currentIndex > 0) {
 				scrollToIndex(currentIndex - 1)
-			} else if (event.key === 'ArrowRight' && currentIndex < featureCardsData.length - 1) {
+			} else if (
+				event.key === 'ArrowRight' &&
+				currentIndex < featureCardsData.length - 1
+			) {
 				scrollToIndex(currentIndex + 1)
 			}
 		}
@@ -119,13 +119,21 @@ export function LatamImpactSection() {
 	const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
 		const contentOffset = event.nativeEvent.contentOffset.x
 		const index = Math.round(contentOffset / screenWidth)
-		if (index !== currentIndex && index >= 0 && index < featureCardsData.length) {
+		if (
+			index !== currentIndex &&
+			index >= 0 &&
+			index < featureCardsData.length
+		) {
 			setCurrentIndex(index)
 		}
 	}
 
 	const scrollToIndex = (index: number) => {
-		if (index >= 0 && index < featureCardsData.length && index !== currentIndex) {
+		if (
+			index >= 0 &&
+			index < featureCardsData.length &&
+			index !== currentIndex
+		) {
 			// Use scrollToOffset instead of scrollToIndex for better compatibility with pagingEnabled
 			const offsetX = index * screenWidth
 			flatListRef.current?.scrollToOffset({ offset: offsetX, animated: true })
@@ -133,12 +141,18 @@ export function LatamImpactSection() {
 		}
 	}
 
-	const renderFeatureCard = ({ item, index }: { item: FeatureCardData; index: number }) => (
+	const renderFeatureCard = ({
+		item,
+		index,
+	}: {
+		item: FeatureCardData
+		index: number
+	}) => (
 		<View style={{ width: screenWidth, paddingHorizontal: CARD_PADDING }}>
 			<MotiView
 				from={{ opacity: 0, translateY: 50 }}
 				animate={{ opacity: 1, translateY: 0 }}
-				transition={{ type: 'timing', duration: 600, delay: 200 + (index * 200) }}
+				transition={{ type: 'timing', duration: 600, delay: 200 + index * 200 }}
 			>
 				<ImpactFeatureCard
 					icon={item.icon}
@@ -165,7 +179,7 @@ export function LatamImpactSection() {
 						height: isTablet ? 12 : 10,
 						borderRadius: isTablet ? 6 : 5,
 						backgroundColor: index === currentIndex ? '#16a34a' : '#d1d5db',
-						transform: [{ scale: index === currentIndex ? 1.25 : 1 }]
+						transform: [{ scale: index === currentIndex ? 1.25 : 1 }],
 					}}
 				/>
 			))}
@@ -182,13 +196,17 @@ export function LatamImpactSection() {
 			<View className="mb-8" style={{ paddingHorizontal: CARD_PADDING }}>
 				<Text className="text-3xl font-bold text-center text-gray-800 mb-4">
 					Transforming Social Impact in{' '}
-					<GradientText style={{ fontSize: isTablet ? 32 : 28, fontWeight: 'bold' }}>
+					<GradientText
+						style={{ fontSize: isTablet ? 32 : 28, fontWeight: 'bold' }}
+					>
 						LATAM
 					</GradientText>
 				</Text>
 				<Text className="text-3xl font-bold text-center text-gray-800 mb-4">
 					With Blockchain You Can{' '}
-					<GradientText style={{ fontSize: isTablet ? 32 : 28, fontWeight: 'bold' }}>
+					<GradientText
+						style={{ fontSize: isTablet ? 32 : 28, fontWeight: 'bold' }}
+					>
 						Trust
 					</GradientText>
 				</Text>
@@ -224,7 +242,7 @@ export function LatamImpactSection() {
 				from={{ opacity: 0, scale: 0.9 }}
 				animate={{ opacity: 1, scale: 1 }}
 				transition={{ type: 'timing', duration: 700, delay: 800 }}
-				className="mb-8" 
+				className="mb-8"
 				style={{ paddingHorizontal: CARD_PADDING }}
 			>
 				<View className="bg-green-100 rounded-xl p-6 border border-green-200 shadow-sm">
@@ -274,7 +292,10 @@ export function LatamImpactSection() {
 				</View>
 			</MotiView>
 
-			<View className="flex-row gap-3" style={{ paddingHorizontal: CARD_PADDING }}>
+			<View
+				className="flex-row gap-3"
+				style={{ paddingHorizontal: CARD_PADDING }}
+			>
 				<MotiView
 					from={{ opacity: 0, translateY: 30 }}
 					animate={{ opacity: 1, translateY: 0 }}
