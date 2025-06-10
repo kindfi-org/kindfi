@@ -56,45 +56,33 @@ export function useNotifications(
 		},
 	)
 
+	const onSuccessUpdate = () => {
+		queryClient.invalidateQueries({
+			queryKey: ['supabase', 'notifications'],
+		})
+		queryClient.invalidateQueries({
+			queryKey: ['supabase', 'unread-count'],
+		})
+	}
+
 	// Mutation for creating a notification
 	const createNotification = useMutation({
 		mutationFn: (data: CreateNotificationDTO) =>
 			notificationService.createNotification(data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['supabase', 'notifications'],
-			})
-			queryClient.invalidateQueries({
-				queryKey: ['supabase', 'unread-count'],
-			})
-		},
+		onSuccess: onSuccessUpdate,
 	})
 
 	// Mutation for updating a notification
 	const updateNotification = useMutation({
 		mutationFn: ({ id, data }: { id: string; data: UpdateNotificationDTO }) =>
 			notificationService.updateNotification(id, data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['supabase', 'notifications'],
-			})
-			queryClient.invalidateQueries({
-				queryKey: ['supabase', 'unread-count'],
-			})
-		},
+		onSuccess: onSuccessUpdate,
 	})
 
 	// Mutation for marking a notification as read
 	const markAsRead = useMutation({
 		mutationFn: (id: string) => notificationService.markAsRead(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['supabase', 'notifications'],
-			})
-			queryClient.invalidateQueries({
-				queryKey: ['supabase', 'unread-count'],
-			})
-		},
+		onSuccess: onSuccessUpdate,
 	})
 
 	// Mutation for marking all notifications as read
@@ -108,27 +96,13 @@ export function useNotifications(
 			}
 			return notificationService.markAllAsRead(session.user.id)
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['supabase', 'notifications'],
-			})
-			queryClient.invalidateQueries({
-				queryKey: ['supabase', 'unread-count'],
-			})
-		},
+		onSuccess: onSuccessUpdate,
 	})
 
 	// Mutation for deleting a notification
 	const deleteNotification = useMutation({
 		mutationFn: (id: string) => notificationService.deleteNotification(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['supabase', 'notifications'],
-			})
-			queryClient.invalidateQueries({
-				queryKey: ['supabase', 'unread-count'],
-			})
-		},
+		onSuccess: onSuccessUpdate,
 	})
 
 	// Set up real-time subscription for notifications
