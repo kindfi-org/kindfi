@@ -1,4 +1,4 @@
-#![cfg(feature = "testutils")]
+#![cfg(any(test, feature = "testutils"))]
 
 use soroban_sdk::{
     Address, Env, IntoVal, Symbol, Vec,
@@ -31,8 +31,8 @@ impl<'a> ProgressTrackerClient<'a> {
         self.env.invoke_contract::<Vec<u32>>(self.contract_id, &Symbol::new(self.env, "get_completed_lessons"), args)
     }
 
-    pub fn set_chapter_lessons(&self, chapter_id: &u32, total_lessons: &u32) {
-        let args = (chapter_id, total_lessons).into_val(self.env);
+    pub fn set_chapter_lessons(&self, admin: &Address, chapter_id: &u32, total_lessons: &u32) {
+        let args = (admin, chapter_id, total_lessons).into_val(self.env);
         self.env.invoke_contract::<()>(self.contract_id, &Symbol::new(self.env, "set_chapter_lessons"), args);
     }
 } 
