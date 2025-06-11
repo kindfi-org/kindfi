@@ -144,7 +144,7 @@ export function LatamImpactSection() {
 	const renderFeatureCard = ({
 		item,
 		index,
-
+	}: { item: FeatureCardData; index: number }) => (
 		<View style={{ width: screenWidth, paddingHorizontal: CARD_PADDING }}>
 			<MotiView
 				from={{ opacity: 0, translateY: 50 }}
