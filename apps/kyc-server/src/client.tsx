@@ -2,6 +2,7 @@
 import { hydrateRoot } from 'react-dom/client'
 import { Navigation, routes } from './components/Navigation'
 import { getContent } from './utils/contentMap'
+
 import './index.css'
 
 // Get the current path from the window location

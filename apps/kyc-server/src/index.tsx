@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { serve } from 'bun'
 import type { Server, ServerWebSocket } from 'bun'
-import { kycWebSocketService } from './libs/websocket'
+import { kycWebSocketService } from './lib/websocket'
 import { routes } from './routes'
 import { buildClient } from './utils/buildClient'
 
