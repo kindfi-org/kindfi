@@ -61,6 +61,13 @@ async function startServer() {
 				return new Response()
 			}
 
+			// Serve any static file from /public
+			const publicPath = join(process.cwd(), 'public', url.pathname)
+			if (existsSync(publicPath)) {
+				const file = Bun.file(publicPath)
+				return new Response(file)
+			}
+
 			if (url.pathname.startsWith('/client') && url.pathname.endsWith('.js')) {
 				try {
 					const requestedFile = url.pathname.replace(/^\/+/, '') // trim leading slashes

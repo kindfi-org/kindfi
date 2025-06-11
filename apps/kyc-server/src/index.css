@@ -1,0 +1,19 @@
+@import "../styles/globals.css";
+
+@layer base {
+	body {
+		@apply font-sans container mx-auto p-8 leading-relaxed bg-background text-foreground;
+	}
+
+	h1 {
+		@apply text-3xl font-bold tracking-tight mb-4 text-foreground;
+	}
+
+	p {
+		@apply text-base text-muted-foreground mb-6;
+	}
+
+	.card {
+		@apply bg-card rounded-lg p-6 shadow-sm border mb-6;
+	}
+}
