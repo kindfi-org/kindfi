@@ -159,7 +159,7 @@ export interface SearchResult<T> {
 	results: T[]
 	total_count: number
 	query: string
-	filters_applied: Record<string,  unknown>
+	filters_applied: Record<string, unknown>
 	search_time_ms: number
 	suggestions?: string[]
 }
@@ -178,7 +178,7 @@ export interface NotificationData {
 	read: boolean
 	created_at: string
 	action_url?: string
-	metadata?: Record<string, any>
+	metadata?: Record<string, unknown>
 }
 
 // Webhook types
@@ -202,7 +202,7 @@ export interface EscrowWebhookData {
 // Export types for different operations
 export interface ExportRequest {
 	format: 'csv' | 'json' | 'xlsx'
-	filters?: Record<string,  unknown>
+	filters?: Record<string, unknown>
 	columns?: string[]
 	date_range?: {
 		start: string
