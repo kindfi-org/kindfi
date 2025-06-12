@@ -148,19 +148,26 @@ export class NotificationLogger {
 	 * Logs an error event to the notification logs
 	 * @param {LogErrorParams} params - Parameters for the error log
 	 */
-	async logError({ message, error, context, notificationId }: LogErrorParams): Promise<void> {
+	async logError({
+		message,
+		error,
+		context,
+		notificationId,
+	}: LogErrorParams): Promise<void> {
 		try {
-			const { error: dbError } = await supabase.from('notification_logs').insert({
-				notification_id: notificationId,
-				level: 'error',
-				message,
-				metadata: {
-					...context,
-					error: error instanceof Error ? error.message : String(error),
-					stack: error instanceof Error ? error.stack : undefined,
-				},
-			})
-			
+			const { error: dbError } = await supabase
+				.from('notification_logs')
+				.insert({
+					notification_id: notificationId,
+					level: 'error',
+					message,
+					metadata: {
+						...context,
+						error: error instanceof Error ? error.message : String(error),
+						stack: error instanceof Error ? error.stack : undefined,
+					},
+				})
+
 			if (dbError) throw dbError
 		} catch (logError) {
 			console.error('Failed to log error:', logError)
@@ -184,7 +191,7 @@ export class NotificationLogger {
 				notification_id: notificationId,
 				metadata: context,
 			})
-			
+
 			if (error) throw error
 		} catch (logError) {
 			console.error('Failed to log info:', logError)
@@ -208,7 +215,7 @@ export class NotificationLogger {
 				notification_id: notificationId,
 				metadata: context,
 			})
-			
+
 			if (error) throw error
 		} catch (logError) {
 			console.error('Failed to log warning:', logError)
