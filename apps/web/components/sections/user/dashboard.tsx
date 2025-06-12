@@ -5,12 +5,27 @@ import Link from 'next/link'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import ProjectCard from '~/components/shared/project-card'
-// import { ProjectCard } from '~/components/shared/project-card'
 import {
 	mockImpactMetrics,
 	mockProjects,
 } from '~/lib/mock-data/mock-user-dashboard'
-import type { ImpactMetric, Project } from '~/lib/types'
+import type { Project } from '~/lib/types/projects.types'
+import type { ImpactMetric } from '~/lib/types/user-dashboard.types'
+
+type MockProject = {
+	id: string
+	image_url: string
+	categories: string[]
+	title: string
+	description: string
+	current_amount: number
+	target_amount: number
+	investors_count: number
+	min_investment: number
+	created_at: string
+	percentage_complete: number
+	tags: { id: string; text: string }[]
+}
 
 export function UserDashboard() {
 	return (
@@ -111,9 +126,14 @@ export function UserDashboard() {
 							</div>
 						</div>
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							{mockProjects.map((project: Project) => (
-								<ProjectCard key={project.id} project={project} />
-							))}
+							{(mockProjects as MockProject[]).map((mockProject) => {
+								// Transform mock project to match expected Project type
+								const project: Project = {
+									...mockProject,
+									tags: mockProject.tags.map((tag) => tag.text),
+								}
+								return <ProjectCard key={project.id} project={project} />
+							})}
 						</div>
 					</CardContent>
 				</Card>
@@ -128,7 +148,7 @@ export function UserDashboard() {
 							</Button>
 						</div>
 						<div className="space-y-4">
-							{mockProjects.map((project: Project) => {
+							{(mockProjects as MockProject[]).map((mockProject) => {
 								const formattedDate = new Date().toLocaleDateString(undefined, {
 									year: 'numeric',
 									month: 'long',
@@ -137,14 +157,14 @@ export function UserDashboard() {
 
 								return (
 									<div
-										key={project.id}
+										key={mockProject.id}
 										className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
 									>
 										<h3 className="font-medium text-sm mb-1">
-											{project.title}
+											{mockProject.title}
 										</h3>
 										<p className="text-sm text-gray-600">
-											{project.description}
+											{mockProject.description}
 										</p>
 										<time
 											dateTime={new Date().toISOString()}

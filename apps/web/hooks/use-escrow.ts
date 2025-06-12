@@ -1,5 +1,4 @@
 'use client'
-import type { Database } from '@services/supabase'
 import { useCallback, useState } from 'react'
 import {
 	getEscrowRecordsAction,
@@ -7,6 +6,7 @@ import {
 	updateEscrowMilestoneAction,
 	updateEscrowStatusAction,
 } from '~/app/actions'
+import type { Database } from '~/lib/types/database.types'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']

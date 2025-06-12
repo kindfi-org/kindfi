@@ -1,7 +1,7 @@
-import type { Database } from '@services/supabase'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { TypedSupabaseClient } from '../../types/supabase-client.type'
+import type { Database } from '../client/database.types'
 
 /**
  * Creates a new Supabase server-side client using cookies for authentication.

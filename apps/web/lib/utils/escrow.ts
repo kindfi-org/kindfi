@@ -1,5 +1,5 @@
 import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
-import type { Database, Json } from '@services/supabase'
+import type { Database, Json } from '../types/database.types'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']

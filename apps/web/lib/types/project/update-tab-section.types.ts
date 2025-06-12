@@ -1,4 +1,4 @@
-import type { Tables } from '@services/supabase'
+import type { Tables } from '~/lib/types/database.types'
 
 export interface UpdateItem {
 	id: string

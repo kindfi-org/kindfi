@@ -1,7 +1,7 @@
 'use client'
 
-import type { Tables } from '@services/supabase'
 import { motion } from 'framer-motion'
+import type { Tables } from '~/lib/types/database.types'
 
 import { cn } from '~/lib/utils'
 import { categoryIcons } from '~/lib/utils/category-icons'

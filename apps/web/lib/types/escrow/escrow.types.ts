@@ -1,5 +1,5 @@
-import type { Enums } from '@services/supabase'
 import type { ReviewStatus } from '~/lib/types/escrow/escrow-reviews.types'
+import type { Enums } from '../database.types'
 import type { CreatedAt, UpdatedAt } from '../date.types'
 
 // Re-export the types from Supabase service with appropriate names

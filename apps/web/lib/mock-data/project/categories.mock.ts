@@ -1,4 +1,4 @@
-import type { Tables } from '@services/supabase'
+import type { Tables } from '~/lib/types/database.types'
 
 export const categories: Tables<'categories'>[] = [
 	{ id: '1', name: 'Animal Welfare', slug: 'animal-welfare', color: '#FF7043' },

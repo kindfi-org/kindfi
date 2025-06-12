@@ -1,6 +1,5 @@
 'use client'
 
-import type { Database } from '@services/supabase'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useSetState } from 'react-use'
@@ -26,6 +25,7 @@ import {
 	TableRow,
 } from '~/components/base/table'
 import { appConfig } from '~/lib/config/app.config'
+import type { Database } from '~/lib/types/database.types'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']

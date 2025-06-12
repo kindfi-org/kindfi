@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import type { Tag } from '../types'
+import type { Tag } from '../types/projects.types'
 
 // Predefined list of accessible color combinations (background and text)
 const ACCESSIBLE_COLORS = [
@@ -47,13 +47,14 @@ export function useTags() {
 	const addTag = useCallback(
 		(tagName: string) => {
 			const formattedTag = formatToPascalCase(tagName)
-			if (!tags.some((tag) => tag.text === formattedTag)) {
+			// Changed from tag.text to tag.name
+			if (!tags.some((tag) => tag.name === formattedTag)) {
 				const { backgroundColor, textColor } = getRandomAccessibleColor()
 				setTags((prevTags) => [
 					...prevTags,
 					{
 						id: crypto.randomUUID(),
-						text: formattedTag,
+						name: formattedTag, // Changed from text to name
 						color: { backgroundColor, textColor },
 					},
 				])
@@ -70,12 +71,14 @@ export function useTags() {
 	const updateTag = useCallback(
 		(tagId: string, newTagName: string) => {
 			const formattedNewTag = formatToPascalCase(newTagName)
+			// Changed from tag.text to tag.name in both conditions
 			if (
-				!tags.some((tag) => tag.id !== tagId && tag.text === formattedNewTag)
+				!tags.some((tag) => tag.id !== tagId && tag.name === formattedNewTag)
 			) {
 				setTags((prevTags) =>
-					prevTags.map((tag) =>
-						tag.id === tagId ? { ...tag, text: formattedNewTag } : tag,
+					prevTags.map(
+						(tag) =>
+							tag.id === tagId ? { ...tag, name: formattedNewTag } : tag, // Changed from text to name
 					),
 				)
 			}

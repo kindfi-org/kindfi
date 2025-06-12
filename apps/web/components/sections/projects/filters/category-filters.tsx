@@ -3,9 +3,9 @@
 import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
 
-import type { Tables } from '@services/supabase'
 import { Button } from '~/components/base/button'
 import { fadeIn, staggerContainer } from '~/lib/constants/animations'
+import type { Tables } from '~/lib/types/database.types'
 import { CategoryBadge } from './'
 
 interface CategoryFiltersProps {

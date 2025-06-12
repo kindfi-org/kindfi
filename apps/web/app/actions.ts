@@ -1,7 +1,6 @@
 'use server'
 
 import { createSupabaseServerClient } from '@packages/lib/supabase/server'
-import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
@@ -9,6 +8,7 @@ import { redirect } from 'next/navigation'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
 import type { AuthResponse } from '~/lib/types/auth'
+import type { Database } from '~/lib/types/database.types'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']

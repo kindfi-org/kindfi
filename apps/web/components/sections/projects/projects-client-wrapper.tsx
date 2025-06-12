@@ -23,7 +23,7 @@ export function ProjectsClientWrapper() {
 	const sortParam = searchParams.get('sort') ?? 'most-popular'
 
 	const {
-		data: initialProjects = [],
+		data: rawInitialProjects = [],
 		isLoading: isLoadingProjects,
 		error: projectError,
 	} = useSupabaseQuery(
@@ -42,6 +42,15 @@ export function ProjectsClientWrapper() {
 		staleTime: 1000 * 60 * 60, // 1 hour
 		gcTime: 1000 * 60 * 60, // 1 hour
 	})
+
+	// Transform the raw projects to ensure tags have required color property
+	const initialProjects = rawInitialProjects.map((project) => ({
+		...project,
+		tags: project.tags.map((tag) => ({
+			...tag,
+			color: tag.color || '#6B7280', // Provide default color if undefined
+		})),
+	}))
 
 	const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
 	const [selectedCategories, setSelectedCategories] = useState<string[]>(

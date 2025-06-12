@@ -1,5 +1,5 @@
-import type { Tables } from '@services/supabase'
 import type { ReactNode } from 'react'
+import type { Tables } from '../database.types'
 
 export interface Tag {
 	id: string

@@ -1,8 +1,8 @@
 import { supabase } from '@packages/lib/supabase'
-import type { Enums } from '@services/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import type { Enums } from '~/lib/types/database.types'
 import type { MediatorAssignmentPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { validateMediatorAssignment } from '~/lib/validators/dispute'
 
