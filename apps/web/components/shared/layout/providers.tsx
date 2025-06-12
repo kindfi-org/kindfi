@@ -24,8 +24,11 @@ export function Providers({ children }: ProvidersProps) {
 					scope: '/',
 				})
 				.then((registration) => {
-					console.log('Service Worker registered with scope:', registration.scope)
-					
+					console.log(
+						'Service Worker registered with scope:',
+						registration.scope,
+					)
+
 					// Request notification permission
 					if ('Notification' in window) {
 						Notification.requestPermission().then((permission) => {

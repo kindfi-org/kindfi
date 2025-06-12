@@ -1,22 +1,11 @@
+import { featureCardsData } from '@/constants/impact/latam-section'
+import { getResponsiveLayout } from '@/lib/utils'
+import type { FeatureCardData } from '@/types/impact.types'
 import { LinearGradient } from 'expo-linear-gradient'
-import {
-	CheckCircle,
-	DollarSign,
-	Eye,
-	type LucideIcon,
-	Shield,
-	TrendingUp,
-	Users,
-} from 'lucide-react-native'
+import { CheckCircle, DollarSign, Eye, Users } from 'lucide-react-native'
 import { MotiView } from 'moti'
 import React, { useRef, useState, useEffect } from 'react'
-import {
-	Dimensions,
-	FlatList,
-	Pressable,
-	Text as RNText,
-	View,
-} from 'react-native'
+import { FlatList, Pressable, Text as RNText, View } from 'react-native'
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { Text } from '../Themed'
 import { Box } from '../ui/box'
@@ -25,69 +14,6 @@ import ImpactFeatureCard from './impact-feature-card'
 import ImpactStat from './impact-stat'
 
 // Responsive design constants
-const getResponsiveLayout = () => {
-	const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
-	const isTablet = screenWidth >= 768
-	const isLandscape = screenWidth > screenHeight
-
-	// Dynamic padding based on screen size
-	const CARD_PADDING = isTablet ? 32 : screenWidth < 375 ? 12 : 16
-	const CARD_WIDTH = screenWidth - CARD_PADDING * 2
-
-	return {
-		screenWidth,
-		CARD_PADDING,
-		CARD_WIDTH,
-		isTablet,
-		isLandscape,
-	}
-}
-
-type FeatureCardData = {
-	id: string
-	icon: LucideIcon
-	title: string
-	description: string
-	stat?: string
-	bulletPoints?: string[]
-	iconColor: string
-	backgroundColor: string
-}
-
-const featureCardsData: FeatureCardData[] = [
-	{
-		id: '1',
-		icon: CheckCircle,
-		title: 'Every Contribution, Recorded On-Chain',
-		description: 'Complete transparency with immutable transaction records',
-		stat: '$1.7B in regional funding tracked annually',
-		iconColor: 'success-600',
-		backgroundColor: 'bg-green-100',
-	},
-	{
-		id: '2',
-		icon: Shield,
-		title: 'Every Project, Fully Reviewed',
-		description: 'Rigorous vetting process ensures legitimate impact projects',
-		stat: '100% of campaigns undergo milestone verification',
-		iconColor: 'blue-600',
-		backgroundColor: 'bg-blue-100',
-	},
-	{
-		id: '3',
-		icon: TrendingUp,
-		title: 'From Crypto to Real Change',
-		description: 'Transforming digital contributions into measurable impact',
-		bulletPoints: [
-			'Real-Time Impact Metrics',
-			'Proof-backed fund releases',
-			'Transparent governance',
-			'Built on Stellar smart contracts',
-		],
-		iconColor: 'orange-600',
-		backgroundColor: 'bg-orange-100',
-	},
-]
 
 export function LatamImpactSection() {
 	const [currentIndex, setCurrentIndex] = useState(0)
