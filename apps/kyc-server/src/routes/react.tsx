@@ -1,6 +1,6 @@
 import React from 'react'
 import type { ReactNode } from 'react'
-import { renderToReadableStream } from 'react-dom/server'
+import { renderToString } from 'react-dom/server'
 import { About } from '../components/About'
 import { Home } from '../components/Home'
 import { routes } from '../components/Navigation'
@@ -18,19 +18,18 @@ const withConfiguredCORS = (
 const createRoute = (message: string | ReactNode, path: string) => ({
 	async GET(req: Request) {
 		return withConfiguredCORS(async () => {
-			const stream = await renderToReadableStream(
+			const html = renderToString(
 				<Home message={message} currentPath={path} />,
 			)
 
-			return new Response(stream, {
-				headers: { 'Content-Type': 'text/html' },
+			return new Response(`<!DOCTYPE html>${html}`, {
+				headers: { 'Content-Type': 'text/html; charset=utf-8' },
 			})
 		})(req)
 	},
 	OPTIONS: withConfiguredCORS(() => new Response(null)),
 })
 
-// Create routes object from the routes array
 const routesObject = routes.reduce(
 	(acc, route) => {
 		acc[route.path] = createRoute(

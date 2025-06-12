@@ -1,8 +1,15 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import React from 'react'
 import type { ReactNode } from 'react'
 import { Navigation } from './Navigation'
+import {
+	DashboardAnalytics,
+	DashboardCustomers,
+	DashboardOverview,
+	DashboardProducts,
+	DashboardSettings,
+} from './dashboard-page'
+import { DashboardLayout } from './dashboard-skeleton'
 
 interface HomeProps {
 	message: string | ReactNode
@@ -23,9 +30,88 @@ function getClientFilename(): string {
 	return 'client.js'
 }
 
+function getMockUser() {
+	return {
+		name: 'Alicia Koch',
+		email: 'alicia@kindfi.com',
+	}
+}
+
+function getDashboardComponent(currentPath: string): ReactNode {
+	switch (currentPath) {
+		case '/dashboard':
+			return <DashboardOverview />
+		case '/dashboard/customers':
+			return <DashboardCustomers />
+		case '/dashboard/products':
+			return <DashboardProducts />
+		case '/dashboard/analytics':
+			return <DashboardAnalytics />
+		case '/dashboard/settings':
+			return <DashboardSettings />
+		default:
+			return <DashboardOverview />
+	}
+}
+
 export function Home({ message, currentPath = '/' }: HomeProps) {
 	// Get the client filename
 	const clientJs = getClientFilename()
+	const isDashboardRoute = currentPath.startsWith('/dashboard')
+	const user = getMockUser()
+
+	if (isDashboardRoute) {
+		const dashboardComponent = getDashboardComponent(currentPath)
+
+		return (
+			<html lang="en">
+				<head>
+					<title>Kindfi KYC Dashboard</title>
+					<meta charSet="utf-8" />
+					<meta name="viewport" content="width=device-width, initial-scale=1" />
+					<meta
+						name="description"
+						content="Kindfi KYC Dashboard - Manage customer verification and compliance"
+					/>
+
+					<style>{`
+						* {
+							margin: 0;
+							padding: 0;
+							box-sizing: border-box;
+						}
+						
+						html, body {
+							height: 100%;
+							font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+							background-color: #0f0f23;
+							color: #e2e8f0;
+						}
+						
+						#root {
+							min-height: 100vh;
+						}
+						
+						/* Focus styles for accessibility */
+						button:focus-visible, 
+						input:focus-visible, 
+						a:focus-visible {
+							outline: 2px solid #8b5cf6;
+							outline-offset: 2px;
+						}
+					`}</style>
+					<script type="module" src={`/${clientJs}`} defer />
+				</head>
+				<body>
+					<div id="root">
+						<DashboardLayout currentPath={currentPath} user={user}>
+							{dashboardComponent}
+						</DashboardLayout>
+					</div>
+				</body>
+			</html>
+		)
+	}
 
 	return (
 		<html lang="en">
@@ -34,52 +120,52 @@ export function Home({ message, currentPath = '/' }: HomeProps) {
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<style>{`
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            line-height: 1.6;
-          }
-          h1 {
-            color: #333;
-            margin-bottom: 1rem;
-          }
-          p {
-            color: #666;
-            margin-bottom: 1.5rem;
-          }
-          .card {
-            background: #f9f9f9;
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 1.5rem;
-          }
-          nav {
-            margin-bottom: 2rem;
-          }
-          nav ul {
-            display: flex;
-            list-style: none;
-            padding: 0;
-            gap: 1rem;
-          }
-          nav a {
-            color: #0066cc;
-            text-decoration: none;
-            padding: 0.5rem 0;
-            border-bottom: 2px solid transparent;
-            transition: border-color 0.2s;
-          }
-          nav a:hover {
-            border-color: #0066cc;
-          }
-          nav a.active {
-            border-color: #0066cc;
-            font-weight: 500;
-          }
-        `}</style>
+					body {
+						font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+						max-width: 800px;
+						margin: 0 auto;
+						padding: 2rem;
+						line-height: 1.6;
+					}
+					h1 {
+						color: #333;
+						margin-bottom: 1rem;
+					}
+					p {
+						color: #666;
+						margin-bottom: 1.5rem;
+					}
+					.card {
+						background: #f9f9f9;
+						border-radius: 8px;
+						padding: 1.5rem;
+						box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+						margin-bottom: 1.5rem;
+					}
+					nav {
+						margin-bottom: 2rem;
+					}
+					nav ul {
+						display: flex;
+						list-style: none;
+						padding: 0;
+						gap: 1rem;
+					}
+					nav a {
+						color: #0066cc;
+						text-decoration: none;
+						padding: 0.5rem 0;
+						border-bottom: 2px solid transparent;
+						transition: border-color 0.2s;
+					}
+					nav a:hover {
+						border-color: #0066cc;
+					}
+					nav a.active {
+						border-color: #0066cc;
+						font-weight: 500;
+					}
+				`}</style>
 				<script type="module" src={`/${clientJs}`} defer />
 			</head>
 			<body>

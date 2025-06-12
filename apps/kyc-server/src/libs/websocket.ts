@@ -12,7 +12,7 @@ interface KYCStatusRecord {
 	user_id: string
 	status: string
 	verification_level: string
-	[key: string]: any
+	[key: string]: unknown
 }
 
 interface KYCUpdate {
@@ -30,10 +30,10 @@ interface SupabaseKYCPayload {
 		user_id: string
 		status: string
 		verification_level: string
-		[key: string]: any
+		[key: string]: unknown
 	}
-	old: Record<string, any>
-	[key: string]: any
+	old: Record<string, unknown>
+	[key: string]: unknown
 }
 
 export class KYCWebSocketService {
@@ -61,13 +61,13 @@ export class KYCWebSocketService {
 		this.channel = this.supabase
 			.channel('kyc_status_changes')
 			.on(
-				'postgres_changes' as any,
+				'postgres_changes',
 				{
 					event: '*',
 					schema: 'public',
 					table: 'kyc_status',
 				},
-				(payload: any) => {
+				(payload: SupabaseKYCPayload) => {
 					console.log('Received KYC status change:', payload)
 
 					const newRecord = payload.new as KYCStatusRecord
@@ -110,10 +110,20 @@ export class KYCWebSocketService {
 
 	private async sendInitialStatus(ws: ServerWebSocket<KYCWebSocketData>) {
 		try {
+			if (!ws.data.userId) {
+				ws.send(
+					JSON.stringify({
+						type: 'error',
+						message: 'User ID is required',
+					}),
+				)
+				return
+			}
+
 			const { data: status, error } = await this.supabase
 				.from('kyc_status')
 				.select('*')
-				.eq('user_id', ws.data.userId!)
+				.eq('user_id', ws.data.userId)
 				.single()
 
 			if (error) {
