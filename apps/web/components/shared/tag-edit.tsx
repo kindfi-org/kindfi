@@ -5,18 +5,18 @@ import type React from 'react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { Input } from '~/components/base/input'
-import type { Tag as ProjectTag } from '~/lib/types'
+import type { Tag } from '~/lib/types/projects.types'
 import { getTagColors } from '~/lib/utils/categories-util'
 import { formatToPascalCase } from '~/lib/utils/tag-context'
 
-interface TagEditProps {
-	tag: ProjectTag
+type TagEditProps = {
+	tag: Tag
 	onUpdate: (tagId: string, newTagName: string) => void
 	onCancel: () => void
 }
 
 export function TagEdit({ tag, onUpdate, onCancel }: TagEditProps) {
-	const [editedTag, setEditedTag] = useState(tag.text)
+	const [editedTag, setEditedTag] = useState(tag.name) // Changed from tag.text to tag.name
 	// const [error, setError] = useState('')
 
 	const handleSubmit = useCallback(
@@ -24,7 +24,8 @@ export function TagEdit({ tag, onUpdate, onCancel }: TagEditProps) {
 			e.preventDefault()
 			if (editedTag.trim()) {
 				const formattedNewTag = formatToPascalCase(editedTag)
-				if (formattedNewTag !== tag.text) {
+				if (formattedNewTag !== tag.name) {
+					// Changed from tag.text to tag.name
 					onUpdate(tag.id as string, formattedNewTag)
 				} else {
 					onCancel()
@@ -35,7 +36,9 @@ export function TagEdit({ tag, onUpdate, onCancel }: TagEditProps) {
 		},
 		[editedTag, tag, onUpdate, onCancel],
 	)
+
 	const colors = getTagColors(tag)
+
 	return (
 		<div className="flex items-center">
 			<Input
@@ -56,7 +59,7 @@ export function TagEdit({ tag, onUpdate, onCancel }: TagEditProps) {
 			</button>
 			<button
 				type="button"
-				className="p-1 text-red-500 rounded  transition-colors"
+				className="p-1 text-red-500 rounded transition-colors"
 				title="Cancel"
 				onClick={onCancel}
 			>

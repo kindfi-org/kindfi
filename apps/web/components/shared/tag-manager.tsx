@@ -8,13 +8,13 @@ import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { TagEdit } from '~/components/shared/tag-edit'
-import type { Tag as ProjectTag } from '~/lib/types'
+import type { Tag } from '~/lib/types/projects.types'
 import { getTagColors } from '~/lib/utils/categories-util'
 import { formatToPascalCase, useTags } from '~/lib/utils/tag-context'
 
 type TagManagerProps = {
 	id?: string
-	onUpdate?: (tags: ProjectTag[]) => void
+	onUpdate?: (tags: Tag[]) => void
 }
 
 export function TagManager({ id, onUpdate }: TagManagerProps) {
@@ -28,7 +28,7 @@ export function TagManager({ id, onUpdate }: TagManagerProps) {
 			e.preventDefault()
 			if (newTag.trim()) {
 				const formattedNewTag = formatToPascalCase(newTag)
-				if (tags.some((tag) => tag.text === formattedNewTag)) {
+				if (tags.some((tag) => tag.name === formattedNewTag)) {
 					toast.error('Tag already exists')
 				} else {
 					addTag(newTag)
@@ -88,7 +88,6 @@ export function TagManager({ id, onUpdate }: TagManagerProps) {
 					Add Tag
 				</Button>
 			</div>
-
 			<div className="flex flex-wrap gap-2">
 				{tags.map((tag) => {
 					const { color, backgroundColor } = getTagColors(tag)
@@ -113,7 +112,7 @@ export function TagManager({ id, onUpdate }: TagManagerProps) {
 									}}
 									className="shadow-none px-3 cursor-pointer"
 								>
-									{tag.text}
+									{tag.name}
 								</Badge>
 							</button>
 							<Button

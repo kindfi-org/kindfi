@@ -15,13 +15,20 @@ import { getAllProjects } from '~/lib/queries/projects'
 
 export function HighlightedProjects() {
 	const {
-		data: projects = [],
+		data: rawProjects = [],
 		isLoading,
 		error,
 	} = useSupabaseQuery('highlighted-projects', (client) =>
 		getAllProjects(client, [], 'most-recent', 6),
 	)
 
+	const projects = rawProjects.map((project) => ({
+		...project,
+		tags: project.tags.map((tag) => ({
+			...tag,
+			color: tag.color || '#6B7280',
+		})),
+	}))
 	return (
 		<section className="w-full px-4 py-10 sm:px-6 lg:px-8">
 			<div className="mx-auto max-w-[1400px]">

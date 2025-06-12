@@ -9,7 +9,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-import type { TablesUpdate } from '@services/supabase'
 import {
 	Bell,
 	BellOff,
@@ -52,6 +51,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '~/components/base/tooltip'
+import type { TablesUpdate } from '~/lib/types/database.types'
 
 // Types reused from your current component
 interface UserData {

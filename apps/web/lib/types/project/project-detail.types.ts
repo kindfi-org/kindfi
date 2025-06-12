@@ -1,4 +1,4 @@
-import type { Enums } from '@services/supabase'
+import type { Enums } from '../database.types'
 import type { Project } from './'
 
 export interface ProjectDetail extends Project {

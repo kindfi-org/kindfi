@@ -1,5 +1,4 @@
 'use client'
-
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { notFound } from 'next/navigation'
 import { getProjectById } from '~/lib/queries/projects'
@@ -20,7 +19,7 @@ interface ProjectClientWrapperProps {
 
 export function ProjectClientWrapper({ projectId }: ProjectClientWrapperProps) {
 	const {
-		data: project,
+		data: rawProject,
 		isLoading,
 		error,
 	} = useSupabaseQuery(
@@ -31,9 +30,19 @@ export function ProjectClientWrapper({ projectId }: ProjectClientWrapperProps) {
 		},
 	)
 
-	if (error || !project) notFound()
+	if (error || !rawProject) notFound()
 
-	const category = project.category?.slug
+	const project = rawProject
+		? {
+				...rawProject,
+				tags: rawProject.tags.map((tag) => ({
+					...tag,
+					color: tag.color || '#6B7280',
+				})),
+			}
+		: undefined
+
+	const category = project?.category?.slug
 		? { name: project.category.name, slug: project.category.slug }
 		: undefined
 
@@ -43,10 +52,12 @@ export function ProjectClientWrapper({ projectId }: ProjectClientWrapperProps) {
 				{isLoading ? (
 					<BreadcrumbSkeleton />
 				) : (
-					<BreadcrumbContainer title={project.title} category={category} />
+					<BreadcrumbContainer
+						title={project?.title || ''}
+						category={category}
+					/>
 				)}
 			</div>
-
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<div className="lg:col-span-2">
 					{isLoading ? (
@@ -54,20 +65,19 @@ export function ProjectClientWrapper({ projectId }: ProjectClientWrapperProps) {
 							<ProjectHeroSkeleton />
 							<ProjectTabsSkeleton />
 						</>
-					) : (
+					) : project ? (
 						<>
 							<ProjectHero project={project} />
 							<ProjectTabs project={project} />
 						</>
-					)}
+					) : null}
 				</div>
-
 				<div className="lg:col-span-1">
 					{isLoading ? (
 						<ProjectSidebarSkeleton />
-					) : (
+					) : project ? (
 						<ProjectSidebar project={project} />
-					)}
+					) : null}
 				</div>
 			</div>
 		</>

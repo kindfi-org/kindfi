@@ -27,26 +27,14 @@ export const projects: Project[] = [
 			{
 				id: 'ngo-tag-id',
 				text: 'NGO',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'nutrition-tag-id',
 				text: 'NUTRITION',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'children-tag-id',
 				text: 'CHILDREN',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 		],
 	},
@@ -67,26 +55,14 @@ export const projects: Project[] = [
 			{
 				id: 'environment-tag-id',
 				text: 'ENVIRONMENT',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'ecological-tag-id',
 				text: 'ECOLOGICAL',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'sustainable-tag-id',
 				text: 'SUSTAINABLE',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 		],
 	},
@@ -107,26 +83,14 @@ export const projects: Project[] = [
 			{
 				id: 'animals-tag-id',
 				text: 'ANIMALS',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'care-tag-id',
 				text: 'CARE',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'community-tag-id',
 				text: 'COMMUNITY',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 		],
 	},
@@ -147,26 +111,14 @@ export const projects: Project[] = [
 			{
 				id: 'humanitarian-tag-id',
 				text: 'HUMANITARIAN',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'disaster-tag-id',
 				text: 'DISASTER RELIEF',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'community-tag-id',
 				text: 'COMMUNITY SUPPORT',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 		],
 	},
@@ -187,26 +139,14 @@ export const projects: Project[] = [
 			{
 				id: 'culture-tag-id',
 				text: 'CULTURE',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'indigenous-tag-id',
 				text: 'INDIGENOUS',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'art-tag-id',
 				text: 'ART',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 		],
 	},
@@ -227,26 +167,14 @@ export const projects: Project[] = [
 			{
 				id: 'water-tag-id',
 				text: 'WATER',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'health-tag-id',
 				text: 'HEALTH',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'community-tag-id',
 				text: 'COMMUNITY',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 		],
 	},
@@ -267,26 +195,14 @@ export const projects: Project[] = [
 			{
 				id: 'education-tag-id',
 				text: 'EDUCATION',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'children-tag-id',
 				text: 'CHILDREN',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'future-tag-id',
 				text: 'FUTURE',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 		],
 	},
@@ -307,26 +223,14 @@ export const projects: Project[] = [
 			{
 				id: 'healthcare-tag-id',
 				text: 'HEALTHCARE',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'community-tag-id',
 				text: 'COMMUNITY',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 			{
 				id: 'impact-tag-id',
 				text: 'IMPACT',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
 			},
 		],
 	},

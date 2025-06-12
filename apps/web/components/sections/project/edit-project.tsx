@@ -284,7 +284,9 @@ export function EditProjectForm() {
 								onUpdate={(tags) =>
 									setValue(
 										'tags',
-										tags.map((item) => item.text),
+										tags
+											.map((item) => item.text)
+											.filter((text): text is string => text !== undefined),
 									)
 								}
 							/>

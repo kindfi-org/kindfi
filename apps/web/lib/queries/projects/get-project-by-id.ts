@@ -55,7 +55,10 @@ export async function getProjectById(
 		minInvestment: project.min_investment,
 		createdAt: project.created_at,
 		category: project.category,
-		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
+		tags:
+			project.project_tag_relationships?.map(
+				(r: { tag: { id: string; name: string; color?: string } }) => r.tag,
+			) ?? [],
 		pitch,
 		team,
 		milestones,
