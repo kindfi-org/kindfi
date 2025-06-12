@@ -3,27 +3,42 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 -- Create notification type enum
-CREATE TYPE IF NOT EXISTS notification_type AS ENUM (
-    'info',
-    'success',
-    'warning',
-    'error'
-);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_type') THEN
+        CREATE TYPE notification_type AS ENUM (
+            'info',
+            'success',
+            'warning',
+            'error'
+        );
+    END IF;
+END$$;
 
 -- Create notification priority enum
-CREATE TYPE IF NOT EXISTS notification_priority AS ENUM (
-    'low',
-    'medium',
-    'high',
-    'urgent'
-);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_priority') THEN
+        CREATE TYPE notification_priority AS ENUM (
+            'low',
+            'medium',
+            'high',
+            'urgent'
+        );
+    END IF;
+END$$;
 
 -- Create notification delivery status enum
-CREATE TYPE notification_delivery_status AS ENUM (
-    'pending',
-    'delivered',
-    'failed'
-);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_delivery_status') THEN
+        CREATE TYPE notification_delivery_status AS ENUM (
+            'pending',
+            'delivered',
+            'failed'
+        );
+    END IF;
+END$$;
 
 -- Create notifications table
 CREATE TABLE IF NOT EXISTS notifications (

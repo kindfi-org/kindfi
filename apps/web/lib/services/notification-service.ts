@@ -1,5 +1,4 @@
 import { supabase } from '@packages/lib/supabase'
-import { NotificationLogger } from './notification-logger'
 import type {
 	BaseNotification,
 	CreateNotificationDTO,
@@ -8,6 +7,7 @@ import type {
 	NotificationSort,
 	UpdateNotificationDTO,
 } from '../types/notification'
+import { NotificationLogger } from './notification-logger'
 
 function isNotification(data: unknown): data is BaseNotification {
 	return (
@@ -34,7 +34,9 @@ export interface NotificationPreferences {
 	in_app: boolean
 }
 
-type NotificationUpdate = Partial<Omit<BaseNotification, 'id' | 'created_at' | 'updated_at'>>
+type NotificationUpdate = Partial<
+	Omit<BaseNotification, 'id' | 'created_at' | 'updated_at'>
+>
 
 export class NotificationService {
 	private logger: NotificationLogger
@@ -57,9 +59,7 @@ export class NotificationService {
 		page = 1,
 		pageSize = 20,
 	): Promise<{ data: BaseNotification[]; count: number }> {
-		let query = supabase
-			.from('notifications')
-			.select('*', { count: 'exact' })
+		let query = supabase.from('notifications').select('*', { count: 'exact' })
 
 		// Apply filters
 		if (filters.is_read !== undefined) {
@@ -248,10 +248,7 @@ export class NotificationService {
 	}
 
 	async deleteNotification(id: string): Promise<void> {
-		const { error } = await supabase
-			.from('notifications')
-			.delete()
-			.eq('id', id)
+		const { error } = await supabase.from('notifications').delete().eq('id', id)
 
 		if (error) {
 			await this.logger.logError({
@@ -370,12 +367,10 @@ export class NotificationService {
 		preferences: Partial<NotificationPreferences>,
 	): Promise<boolean> {
 		try {
-			const { error } = await supabase
-				.from('notification_preferences')
-				.upsert({
-					user_id: userId,
-					...preferences,
-				})
+			const { error } = await supabase.from('notification_preferences').upsert({
+				user_id: userId,
+				...preferences,
+			})
 
 			if (error) throw error
 
