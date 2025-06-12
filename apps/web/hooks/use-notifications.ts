@@ -1,8 +1,8 @@
+import { useSupabaseQuery } from '@packages/lib/hooks'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
 import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
-import type { RealtimeChannel } from '@supabase/realtime-js'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo, useState } from 'react'
 import { NotificationService } from '../lib/services/notification-service'
 import type {
 	CreateNotificationDTO,
@@ -24,65 +24,65 @@ export function useNotifications(
 	>('disconnected')
 	const notificationService = useMemo(() => new NotificationService(), [])
 
-	// Query for notifications
+	// Query for notifications using the shared hook
 	const {
 		data: notificationsData,
 		isLoading,
 		error,
-		refetch,
-	} = useQuery({
-		queryKey: ['notifications', filters, sort, page, pageSize],
-		queryFn: () =>
-			notificationService.getNotifications(filters, sort, page, pageSize),
-	})
+		refresh: refetch,
+	} = useSupabaseQuery(
+		'notifications',
+		() => notificationService.getNotifications(filters, sort, page, pageSize),
+		{
+			additionalKeyValues: [filters, sort, page, pageSize],
+			staleTime: 1000 * 60 * 5, // 5 minutes
+		},
+	)
 
-	// Query for unread count
-	const { data: count } = useQuery({
-		queryKey: ['notifications', 'unread-count'],
-		queryFn: async () => {
+	// Query for unread count using the shared hook
+	const { data: count } = useSupabaseQuery(
+		'unread-count',
+		async (client) => {
 			const {
 				data: { session },
-			} = await supabase.auth.getSession()
+			} = await client.auth.getSession()
 			if (!session?.user?.id) {
 				return 0 // No unread notifications for unauthenticated users
 			}
 			return notificationService.getUnreadCount(session.user.id)
 		},
-	})
+		{
+			staleTime: 1000 * 60 * 2, // 2 minutes
+		},
+	)
+
+	const onSuccessUpdate = () => {
+		queryClient.invalidateQueries({
+			queryKey: ['supabase', 'notifications'],
+		})
+		queryClient.invalidateQueries({
+			queryKey: ['supabase', 'unread-count'],
+		})
+	}
 
 	// Mutation for creating a notification
 	const createNotification = useMutation({
 		mutationFn: (data: CreateNotificationDTO) =>
 			notificationService.createNotification(data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['notifications'] })
-			queryClient.invalidateQueries({
-				queryKey: ['notifications', 'unread-count'],
-			})
-		},
+		onSuccess: onSuccessUpdate,
 	})
 
 	// Mutation for updating a notification
 	const updateNotification = useMutation({
 		mutationFn: ({ id, data }: { id: string; data: UpdateNotificationDTO }) =>
 			notificationService.updateNotification(id, data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['notifications'] })
-			queryClient.invalidateQueries({
-				queryKey: ['notifications', 'unread-count'],
-			})
-		},
+		onSuccess: onSuccessUpdate,
 	})
 
 	// Mutation for marking a notification as read
 	const markAsRead = useMutation({
 		mutationFn: (id: string) => notificationService.markAsRead(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['notifications'] })
-			queryClient.invalidateQueries({
-				queryKey: ['notifications', 'unread-count'],
-			})
-		},
+		onSuccess: onSuccessUpdate,
 	})
 
 	// Mutation for marking all notifications as read
@@ -96,23 +96,13 @@ export function useNotifications(
 			}
 			return notificationService.markAllAsRead(session.user.id)
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['notifications'] })
-			queryClient.invalidateQueries({
-				queryKey: ['notifications', 'unread-count'],
-			})
-		},
+		onSuccess: onSuccessUpdate,
 	})
 
 	// Mutation for deleting a notification
 	const deleteNotification = useMutation({
 		mutationFn: (id: string) => notificationService.deleteNotification(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['notifications'] })
-			queryClient.invalidateQueries({
-				queryKey: ['notifications', 'unread-count'],
-			})
-		},
+		onSuccess: onSuccessUpdate,
 	})
 
 	// Set up real-time subscription for notifications
@@ -131,7 +121,7 @@ export function useNotifications(
 					if (isMounted) {
 						refetch()
 						queryClient.invalidateQueries({
-							queryKey: ['notifications', 'unread-count'],
+							queryKey: ['supabase', 'unread-count'],
 						})
 					}
 				},
