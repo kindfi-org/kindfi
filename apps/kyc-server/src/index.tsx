@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { serve } from 'bun'
 import type { Server, ServerWebSocket } from 'bun'
-import { kycWebSocketService } from './libs/websocket'
+import { kycWebSocketService } from './lib/websocket'
 import { routes } from './routes'
 import { buildClient } from './utils/buildClient'
 
@@ -59,6 +59,13 @@ async function startServer() {
 				}
 
 				return new Response()
+			}
+
+			// Serve any static file from /public
+			const publicPath = join(process.cwd(), 'public', url.pathname)
+			if (existsSync(publicPath)) {
+				const file = Bun.file(publicPath)
+				return new Response(file)
 			}
 
 			if (url.pathname.startsWith('/client') && url.pathname.endsWith('.js')) {
