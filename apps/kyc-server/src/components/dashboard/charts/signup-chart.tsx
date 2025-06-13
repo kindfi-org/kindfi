@@ -19,15 +19,9 @@ import { TimeRangeSelector } from './time-range-selector'
 
 interface SignupChartProps {
 	data: ChartDataPoint[]
-	title?: string
-	description?: string
 }
 
-export function SignupChart({
-	data,
-	title = 'New User Signups',
-	description,
-}: SignupChartProps) {
+export function SignupChart({ data }: SignupChartProps) {
 	const { chartConfig, timeRange, setTimeRange, filteredData, isMobile } =
 		useSignupChartConfig(data)
 
@@ -35,12 +29,14 @@ export function SignupChart({
 		<Card className="@container/card">
 			<CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
 				<div className="flex flex-col gap-1">
-					<CardTitle className="text-lg sm:text-xl">{title}</CardTitle>
+					<CardTitle className="text-lg sm:text-xl">New User Signups</CardTitle>
 					<CardDescription className="text-sm">
-						<span className="hidden sm:inline">
-							KYC registrations for the last 3 months
-						</span>
-						<span className="inline sm:hidden">Last 3 months</span>
+						KYC registrations in the last{' '}
+						{timeRange === '7d'
+							? '7 days'
+							: timeRange === '30d'
+								? '30 days'
+								: '3 months'}
 					</CardDescription>
 				</div>
 
