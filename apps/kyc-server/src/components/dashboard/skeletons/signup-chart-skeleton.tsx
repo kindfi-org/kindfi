@@ -9,7 +9,7 @@ import { Skeleton } from '~/components/base/skeleton'
 
 export function SignupChartSkeleton() {
 	return (
-		<div className="px-4 lg:px-6">
+		<div className="px-4 lg:px-6" aria-hidden="true" data-loading="true">
 			<Card className="@container/card">
 				<CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
 					<div className="flex flex-col gap-1">

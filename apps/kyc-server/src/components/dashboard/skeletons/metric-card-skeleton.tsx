@@ -9,7 +9,7 @@ import { Skeleton } from '~/components/base/skeleton'
 
 export function MetricCardSkeleton() {
 	return (
-		<Card className="@container/card">
+		<Card className="@container/card" aria-hidden="true" data-loading="true">
 			<CardHeader className="relative">
 				<CardDescription>
 					<Skeleton className="h-4 w-20" />

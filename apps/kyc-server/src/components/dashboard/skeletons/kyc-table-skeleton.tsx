@@ -10,7 +10,11 @@ import {
 
 export function KycTableSkeleton() {
 	return (
-		<div className="flex w-full flex-col justify-start gap-6">
+		<div
+			className="flex w-full flex-col justify-start gap-6"
+			aria-hidden="true"
+			data-loading="true"
+		>
 			{/* Filters Skeleton */}
 			<div className="flex flex-col gap-4 px-4 sm:flex-row sm:items-center lg:px-6">
 				<div className="flex items-center gap-2">
