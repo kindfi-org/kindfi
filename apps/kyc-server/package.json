@@ -7,7 +7,7 @@
 	"main": "src/index.tsx",
 	"module": "src/index.tsx",
 	"scripts": {
-		"dev": "cross-env NODE_ENV=development bun --hot src/index.tsx",
+		"dev": "cross-env NODE_ENV=development bun src/index.tsx",
 		"build": "bun build src/index.tsx --outdir dist",
 		"start": "cross-env NODE_ENV=production bun src/index.tsx",
 		"lint": "eslint . --ext .ts,.tsx",

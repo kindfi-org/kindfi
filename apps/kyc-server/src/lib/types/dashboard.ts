@@ -4,7 +4,19 @@ import type {
 	kycStatusRowSchema,
 	kycStatusUpdateSchema,
 } from '@services/supabase'
+import type { LucideIcon } from 'lucide-react'
 import type { z } from 'zod'
+
+export type MetricKey = keyof Omit<KycStats, 'trends'>
+
+export interface MetricConfig {
+	key: MetricKey
+	title: string
+	iconColor: string
+	icon: LucideIcon
+	text: string
+	description: string
+}
 
 export type KycRecord = z.infer<typeof kycStatusRowSchema>
 export type KycReview = z.infer<typeof kycReviewsRowSchema>

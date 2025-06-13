@@ -1,58 +1,37 @@
-import {
-	CheckCircle2Icon,
-	ClockIcon,
-	TrendingUpIcon,
-	UserCheckIcon,
-	UserIcon,
-	UserXIcon,
-} from 'lucide-react'
+import { ClockIcon, UserCheckIcon, UserIcon, UserXIcon } from 'lucide-react'
+import type { MetricConfig } from '../types/dashboard'
 
-export const metricsConfig = [
+export const metricsConfig: MetricConfig[] = [
 	{
-		key: 'totalUsers' as const,
+		key: 'totalUsers',
 		title: 'Total Users',
+		icon: UserIcon,
+		iconColor: 'text-primary',
+		text: 'Growing user base',
 		description: 'Total registered users',
-		icon: TrendingUpIcon,
-		footer: {
-			icon: UserIcon,
-			text: 'Growing user base',
-			description: 'Total registered users',
-		},
 	},
 	{
-		key: 'pending' as const,
+		key: 'pending',
 		title: 'KYC Pending',
-		description: 'Users pending verification',
 		icon: ClockIcon,
 		iconColor: 'text-orange-500',
-		footer: {
-			icon: ClockIcon,
-			text: 'Awaiting review',
-			description: 'Users pending verification',
-		},
+		text: 'Awaiting review',
+		description: 'Users pending verification',
 	},
 	{
-		key: 'approved' as const,
+		key: 'approved',
 		title: 'KYC Approved',
-		description: 'Successfully verified users',
-		icon: CheckCircle2Icon,
+		icon: UserCheckIcon,
 		iconColor: 'text-green-500',
-		footer: {
-			icon: UserCheckIcon,
-			text: 'Verification complete',
-			description: 'Successfully verified users',
-		},
+		text: 'Verification complete',
+		description: 'Successfully verified users',
 	},
 	{
-		key: 'rejected' as const,
+		key: 'rejected',
 		title: 'KYC Rejected',
-		description: 'Users requiring resubmission',
 		icon: UserXIcon,
 		iconColor: 'text-red-500',
-		footer: {
-			icon: UserXIcon,
-			text: 'Verification failed',
-			description: 'Users requiring resubmission',
-		},
+		text: 'Verification failed',
+		description: 'Users requiring resubmission',
 	},
 ]

@@ -16,22 +16,21 @@ export function MetricsGrid({ stats, className }: MetricsGridProps) {
 				className,
 			)}
 		>
-			{metricsConfig.map((config) => (
-				<MetricCard
-					key={config.key}
-					title={config.title}
-					value={stats[config.key]}
-					description={config.description}
-					icon={config.icon}
-					iconColor={config.iconColor ?? 'text-primary'}
-					trend={{
-						value: stats.trends[config.key].value,
-						isPositive: stats.trends[config.key].isPositive,
-						label: config.key,
-					}}
-					footer={config.footer}
-				/>
-			))}
+			{metricsConfig.map((metric) => {
+				return (
+					<MetricCard
+						key={metric.key}
+						title={metric.title}
+						value={stats[metric.key]}
+						trendValue={stats.trends[metric.key].value}
+						isPositive={stats.trends[metric.key].isPositive}
+						icon={metric.icon}
+						iconColor={metric.iconColor}
+						text={metric.text}
+						description={metric.description}
+					/>
+				)
+			})}
 		</div>
 	)
 }
