@@ -1,6 +1,9 @@
 'use client'
 
-import { LearningMaterials } from '~/components/learn/learning-materials'
+
+import ModuleHeader from '~/components/Module-Detail/ModuleHeader'
+import ModuleLessons from '~/components/Module-Detail/ModuleLessons'
+import ModuleFooter from '~/components/Module-Detail/ModuleFooter'
 
 export default function LearnPage() {
 	return (
@@ -10,7 +13,10 @@ export default function LearnPage() {
 				name="description"
 				content="Explore educational modules and resources to enhance your financial literacy"
 			/>
-			<LearningMaterials />
+			
+			<ModuleHeader/>
+			<ModuleLessons/>
+			<ModuleFooter/>
 		</>
 	)
 }
