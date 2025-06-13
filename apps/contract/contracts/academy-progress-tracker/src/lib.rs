@@ -10,8 +10,8 @@ pub mod testutils;
 #[cfg(test)]
 mod test;
 
-use crate::events::{LessonCompletedEventData, ChapterCompletedEventData, LESSON, CHAPTER, COMPLETED};
-use crate::errors::Error;
+use crate::events::{LessonCompletedEventData, ChapterCompletedEventData, ChapterUpdatedEventData, LESSON, CHAPTER, COMPLETED, UPDATED};
+use crate::errors::{Error, panic_with_error};
 
 #[contracttype]
 #[derive(Clone)]
@@ -120,14 +120,35 @@ impl ProgressTracker {
         completed_lessons.len() as u32 == total_lessons
     }
 
-    pub fn set_chapter_lessons(env: Env, chapter_id: u32, total_lessons: u32) {
+    pub fn set_chapter_lessons(env: Env, admin: Address, chapter_id: u32, total_lessons: u32) {
+        // Require admin authorization
+        admin.require_auth();
+
+        // Validate inputs
+        if chapter_id == 0 {
+            panic_with_error(&env, Error::InvalidChapterId);
+        }
+        if total_lessons == 0 {
+            panic_with_error(&env, Error::InvalidProgress);
+        }
+
+        // Persist the total lessons for the chapter
         env.storage()
             .persistent()
             .set(&DataKey::ChapterLessons(chapter_id), &total_lessons);
+
+        // Emit event for transparency
+        env.events().publish(
+            (CHAPTER, UPDATED),
+            ChapterUpdatedEventData {
+                chapter_id,
+                total_lessons,
+            },
+        );
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "wasm-tests"))]
 mod test_wasm {
     soroban_sdk::contractimport!(
         file = "../../target/wasm32-unknown-unknown/release/academy_progress_tracker.wasm"
