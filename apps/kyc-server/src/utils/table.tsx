@@ -1,21 +1,16 @@
-import {
-	CheckCircle2Icon,
-	ClockIcon,
-	LoaderIcon,
-	XCircleIcon,
-} from 'lucide-react'
+import { CheckCircle2, Clock, Loader, XCircle } from 'lucide-react'
 
 export const getStatusIcon = (status: string) => {
 	switch (status) {
 		case 'approved':
 		case 'verified':
-			return <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
+			return <CheckCircle2 className="text-green-500 dark:text-green-400" />
 		case 'pending':
-			return <ClockIcon className="text-orange-500 dark:text-orange-400" />
+			return <Clock className="text-orange-500 dark:text-orange-400" />
 		case 'rejected':
-			return <XCircleIcon className="text-red-500 dark:text-red-400" />
+			return <XCircle className="text-red-500 dark:text-red-400" />
 		default:
-			return <LoaderIcon />
+			return <Loader />
 	}
 }
 

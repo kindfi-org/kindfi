@@ -1,5 +1,5 @@
 import type { Table } from '@tanstack/react-table'
-import { ChevronDownIcon, ColumnsIcon, FilterIcon } from 'lucide-react'
+import { ChevronDown, Columns, Filter } from 'lucide-react'
 
 import { Button } from '~/components/base/button'
 import {
@@ -37,10 +37,7 @@ export function KycTableFilters({
 		<div className="flex flex-col gap-4 px-4 sm:flex-row sm:items-center lg:px-6">
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center">
 				<div className="flex items-center gap-2">
-					<FilterIcon
-						className="size-4 text-muted-foreground"
-						aria-hidden="true"
-					/>
+					<Filter className="size-4 text-muted-foreground" aria-hidden="true" />
 					<Label htmlFor="status-filter" className="text-sm font-medium">
 						Status:
 					</Label>
@@ -94,10 +91,10 @@ export function KycTableFilters({
 							size="sm"
 							aria-label="Customize table columns"
 						>
-							<ColumnsIcon className="size-4" aria-hidden="true" />
+							<Columns className="size-4" aria-hidden="true" />
 							<span className="hidden lg:inline">Customize Columns</span>
 							<span className="lg:hidden">Columns</span>
-							<ChevronDownIcon className="size-4" aria-hidden="true" />
+							<ChevronDown className="size-4" aria-hidden="true" />
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end" className="w-56">

@@ -1,9 +1,10 @@
 'use client'
 
-import * as React from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
 import type { ChartConfig } from '~/components/base/chart'
 import { useIsMobile } from '~/hooks/use-mobile'
-import type { ChartDataPoint } from '~/lib/types/dashboard'
+import type { ChartDataPoint, TimeRange } from '~/lib/types/dashboard'
 import { filterDataByTimeRange } from '~/utils/chart'
 
 export const chartConfig = {
@@ -22,15 +23,15 @@ export const chartConfig = {
 
 export function useSignupChartConfig(data: ChartDataPoint[]) {
 	const isMobile = useIsMobile()
-	const [timeRange, setTimeRange] = React.useState('30d')
+	const [timeRange, setTimeRange] = useState<TimeRange>('30d')
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (isMobile) {
 			setTimeRange('7d')
 		}
 	}, [isMobile])
 
-	const filteredData = React.useMemo(() => {
+	const filteredData = useMemo(() => {
 		if (!data) return []
 		return filterDataByTimeRange(data, timeRange)
 	}, [data, timeRange])

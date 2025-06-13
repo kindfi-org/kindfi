@@ -21,14 +21,14 @@ import {
 	SelectValue,
 } from '~/components/base/select'
 import { Textarea } from '~/components/base/textarea'
-import type { kycReviewsInsertValues } from '~/lib/types/dashboard'
+import type { KycReviewsInsertValues } from '~/lib/types/dashboard'
 
 interface AddReviewFormProps {
 	userId: string
 }
 
 export function AddReviewForm({ userId }: AddReviewFormProps) {
-	const form = useForm<kycReviewsInsertValues>({
+	const form = useForm<KycReviewsInsertValues>({
 		resolver: zodResolver(kycReviewsInsertSchema),
 		defaultValues: {
 			decision: undefined,
@@ -37,7 +37,7 @@ export function AddReviewForm({ userId }: AddReviewFormProps) {
 		},
 	})
 
-	function onSubmit(data: kycReviewsInsertValues) {
+	function onSubmit(data: KycReviewsInsertValues) {
 		toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
 			loading: `Adding review for ${userId}`,
 			success: 'Review added successfully',
@@ -64,7 +64,7 @@ export function AddReviewForm({ userId }: AddReviewFormProps) {
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Decision</FormLabel>
-								<Select onValueChange={field.onChange} value={field.value}>
+								<Select {...field} onValueChange={field.onChange}>
 									<FormControl>
 										<SelectTrigger aria-label="Select review decision">
 											<SelectValue placeholder="Select decision" />

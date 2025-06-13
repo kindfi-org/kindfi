@@ -1,4 +1,4 @@
-import type { ChartDataPoint } from '~/lib/types/dashboard'
+import type { ChartDataPoint, TimeRange } from '~/lib/types/dashboard'
 
 export function formatDateTick(value: string): string {
 	const date = new Date(value)
@@ -10,7 +10,7 @@ export function formatDateTick(value: string): string {
 
 export function filterDataByTimeRange(
 	data: ChartDataPoint[],
-	timeRange: string,
+	timeRange: TimeRange,
 ): ChartDataPoint[] {
 	const referenceDate = new Date('2024-06-30')
 	let daysToSubtract = 90

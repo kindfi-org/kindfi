@@ -1,9 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { GripVerticalIcon } from 'lucide-react'
 import { Button } from '~/components/base/button'
+import { cn } from '~/lib/utils'
 
 interface DragHandleProps {
-	id: number
+	id: string
 	className?: string
 }
 
@@ -18,7 +19,10 @@ export function DragHandle({ id, className }: DragHandleProps) {
 			{...listeners}
 			variant="ghost"
 			size="icon"
-			className={`size-7 text-muted-foreground hover:bg-transparent ${className || ''}`}
+			className={cn(
+				'size-7 text-muted-foreground hover:bg-transparent',
+				className,
+			)}
 			aria-label={`Drag to reorder item ${id}`}
 		>
 			<GripVerticalIcon className="size-3 text-muted-foreground" />

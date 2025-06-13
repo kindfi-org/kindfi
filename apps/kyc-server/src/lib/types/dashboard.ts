@@ -18,10 +18,12 @@ export interface MetricConfig {
 	description: string
 }
 
+export type TimeRange = '7d' | '30d' | '90d'
+
 export type KycRecord = z.infer<typeof kycStatusRowSchema>
 export type KycReview = z.infer<typeof kycReviewsRowSchema>
-export type kycStatusUpdateValues = z.infer<typeof kycStatusUpdateSchema>
-export type kycReviewsInsertValues = z.infer<typeof kycReviewsInsertSchema>
+export type KycStatusUpdateValues = z.infer<typeof kycStatusUpdateSchema>
+export type KycReviewsInsertValues = z.infer<typeof kycReviewsInsertSchema>
 
 export interface KycStats {
 	totalUsers: number

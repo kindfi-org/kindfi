@@ -20,14 +20,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
-import type { KycRecord, kycStatusUpdateValues } from '~/lib/types/dashboard'
+import type { KycRecord, KycStatusUpdateValues } from '~/lib/types/dashboard'
 
 interface KycDetailsFormProps {
 	item: KycRecord
 }
 
 export function KycDetailsForm({ item }: KycDetailsFormProps) {
-	const form = useForm<kycStatusUpdateValues>({
+	const form = useForm<KycStatusUpdateValues>({
 		resolver: zodResolver(kycStatusUpdateSchema),
 		defaultValues: {
 			user_id: item.user_id,
@@ -38,7 +38,7 @@ export function KycDetailsForm({ item }: KycDetailsFormProps) {
 		},
 	})
 
-	function onSubmit(data: kycStatusUpdateValues) {
+	function onSubmit(data: KycStatusUpdateValues) {
 		toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
 			loading: `Updating KYC details for ${data.user_id}`,
 			success: 'KYC details updated successfully',
@@ -59,11 +59,7 @@ export function KycDetailsForm({ item }: KycDetailsFormProps) {
 						<FormItem>
 							<FormLabel>User ID</FormLabel>
 							<FormControl>
-								<Input
-									{...field}
-									readOnly
-									aria-describedby="user-id-description"
-								/>
+								<Input {...field} readOnly />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -77,10 +73,7 @@ export function KycDetailsForm({ item }: KycDetailsFormProps) {
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Status</FormLabel>
-								<Select
-									onValueChange={field.onChange}
-									defaultValue={field.value}
-								>
+								<Select value={field.value} onValueChange={field.onChange}>
 									<FormControl>
 										<SelectTrigger aria-label="Select KYC status">
 											<SelectValue placeholder="Select a status" />
@@ -134,7 +127,11 @@ export function KycDetailsForm({ item }: KycDetailsFormProps) {
 								<FormControl>
 									<Input
 										{...field}
-										value={new Date(field.value ?? '').toLocaleDateString()}
+										value={
+											field.value
+												? new Date(field.value).toLocaleDateString()
+												: ''
+										}
 										readOnly
 									/>
 								</FormControl>
@@ -152,7 +149,11 @@ export function KycDetailsForm({ item }: KycDetailsFormProps) {
 								<FormControl>
 									<Input
 										{...field}
-										value={new Date(field.value ?? '').toLocaleDateString()}
+										value={
+											field.value
+												? new Date(field.value).toLocaleDateString()
+												: ''
+										}
 										readOnly
 									/>
 								</FormControl>
