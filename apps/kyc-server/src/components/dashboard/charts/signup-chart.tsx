@@ -22,7 +22,7 @@ interface SignupChartProps {
 }
 
 export function SignupChart({ data }: SignupChartProps) {
-	const { chartConfig, timeRange, setTimeRange, filteredData, isMobile } =
+	const { chartConfig, timeRange, setTimeRange, filteredData } =
 		useSignupChartConfig(data)
 
 	return (
@@ -44,7 +44,6 @@ export function SignupChart({ data }: SignupChartProps) {
 					<TimeRangeSelector
 						timeRange={timeRange}
 						onTimeRangeChange={setTimeRange}
-						isMobile={isMobile}
 					/>
 				</div>
 			</CardHeader>

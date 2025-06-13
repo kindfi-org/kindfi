@@ -41,6 +41,5 @@ export function useSignupChartConfig(data: ChartDataPoint[]) {
 		timeRange,
 		setTimeRange,
 		filteredData,
-		isMobile,
 	}
 }

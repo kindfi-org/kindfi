@@ -6,10 +6,11 @@ import {
 	SelectValue,
 } from '~/components/base/select'
 import { ToggleGroup, ToggleGroupItem } from '~/components/base/toggle-group'
+import type { TimeRange } from '~/lib/types/dashboard'
 
 interface TimeRangeSelectorProps {
-	timeRange: string
-	onTimeRangeChange: (value: string) => void
+	timeRange: TimeRange
+	onTimeRangeChange: (value: TimeRange) => void
 }
 
 export function TimeRangeSelector({

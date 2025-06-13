@@ -1,6 +1,7 @@
+import type { Enums } from '@services/supabase'
 import { CheckCircle2, Clock, Loader, XCircle } from 'lucide-react'
 
-export const getStatusIcon = (status: string) => {
+export const getStatusIcon = (status: Enums<'kyc_status_enum'>) => {
 	switch (status) {
 		case 'approved':
 		case 'verified':
@@ -14,7 +15,7 @@ export const getStatusIcon = (status: string) => {
 	}
 }
 
-export const getStatusColor = (status: string) => {
+export const getStatusColor = (status: Enums<'kyc_status_enum'>) => {
 	switch (status) {
 		case 'approved':
 		case 'verified':
