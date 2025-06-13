@@ -10,13 +10,11 @@ import { ToggleGroup, ToggleGroupItem } from '~/components/base/toggle-group'
 interface TimeRangeSelectorProps {
 	timeRange: string
 	onTimeRangeChange: (value: string) => void
-	isMobile: boolean
 }
 
 export function TimeRangeSelector({
 	timeRange,
 	onTimeRangeChange,
-	isMobile,
 }: TimeRangeSelectorProps) {
 	return (
 		<>
