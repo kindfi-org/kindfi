@@ -1,7 +1,6 @@
 import { ClockIcon, LoaderIcon } from 'lucide-react'
 
 import { Badge } from '~/components/base/badge'
-import { Label } from '~/components/base/label'
 import type { KycReview } from '~/lib/types/dashboard'
 
 interface ReviewHistoryProps {
@@ -15,9 +14,9 @@ export function ReviewHistory({ isLoading, reviews }: ReviewHistoryProps) {
 			className="flex flex-col gap-3"
 			aria-labelledby="review-history-heading"
 		>
-			<Label id="review-history-heading" className="text-base font-medium">
+			<h2 id="review-history-heading" className="text-base font-medium">
 				Review History
-			</Label>
+			</h2>
 			{isLoading ? (
 				<div
 					className="flex items-center justify-center py-8"
@@ -68,22 +67,22 @@ export function ReviewHistory({ isLoading, reviews }: ReviewHistoryProps) {
 							</div>
 							<div className="space-y-2">
 								<div>
-									<Label className="text-xs font-medium text-muted-foreground">
+									<p className="text-xs font-medium text-muted-foreground m-0">
 										Reviewer
-									</Label>
+									</p>
 									<p className="text-sm">{review.reviewer_id}</p>
 								</div>
 								<div>
-									<Label className="text-xs font-medium text-muted-foreground">
+									<p className="text-xs font-medium text-muted-foreground m-0">
 										Review Notes
-									</Label>
+									</p>
 									<p className="text-sm">{review.review_notes}</p>
 								</div>
 								{review.additional_notes && (
 									<div>
-										<Label className="text-xs font-medium text-muted-foreground">
+										<p className="text-xs font-medium text-muted-foreground m-0">
 											Additional Notes
-										</Label>
+										</p>
 										<p className="text-sm">{review.additional_notes}</p>
 									</div>
 								)}

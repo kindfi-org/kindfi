@@ -1,5 +1,5 @@
 import { ClockIcon, UserCheckIcon, UserIcon, UserXIcon } from 'lucide-react'
-import type { MetricConfig } from '../types/dashboard'
+import type { MetricConfig, TimeRangeOption } from '../types/dashboard'
 
 export const metricsConfig: MetricConfig[] = [
 	{
@@ -36,7 +36,7 @@ export const metricsConfig: MetricConfig[] = [
 	},
 ]
 
-export const timeRanges = [
+export const timeRanges: TimeRangeOption[] = [
 	{ label: 'Last 3 months', value: '90d' },
 	{ label: 'Last 30 days', value: '30d' },
 	{ label: 'Last 7 days', value: '7d' },

@@ -20,6 +20,11 @@ export interface MetricConfig {
 
 export type TimeRange = '7d' | '30d' | '90d'
 
+export type TimeRangeOption = {
+	label: string
+	value: TimeRange
+}
+
 export type KycRecord = z.infer<typeof kycStatusRowSchema>
 export type KycReview = z.infer<typeof kycReviewsRowSchema>
 export type KycStatusUpdateValues = z.infer<typeof kycStatusUpdateSchema>

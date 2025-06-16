@@ -50,7 +50,7 @@ export function MetricCard({
 						aria-label={`Trend: ${isPositive ? 'positive' : 'negative'} ${trendValue}%`}
 					>
 						{isPositive ? '+' : '-'}
-						{trendValue}%
+						{Math.abs(trendValue)}%
 					</Badge>
 				</div>
 			</CardHeader>

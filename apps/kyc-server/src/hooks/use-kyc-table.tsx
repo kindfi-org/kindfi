@@ -1,6 +1,7 @@
 import {
 	type ColumnFiltersState,
 	type OnChangeFn,
+	type RowSelectionState,
 	type SortingState,
 	type VisibilityState,
 	getCoreRowModel,
@@ -21,17 +22,13 @@ type PaginationState = {
 	pageSize: number
 }
 
-type SetPaginationDispatch = React.Dispatch<
-	React.SetStateAction<Partial<PaginationState>>
->
-
 export function useKycTable(initialData: KycRecord[] = []) {
 	const [kycData, setKycData] = useState<KycRecord[]>(initialData)
 
 	const [statusFilter, setStatusFilter] = useState('all')
 	const [verificationLevelFilter, setVerificationLevelFilter] = useState('all')
 
-	const [rowSelection, setRowSelection] = useSetState({})
+	const [rowSelection, setRowSelection] = useSetState<RowSelectionState>({})
 	const [columnVisibility, setColumnVisibility] = useSetState<VisibilityState>(
 		{},
 	)
@@ -42,27 +39,6 @@ export function useKycTable(initialData: KycRecord[] = []) {
 		pageIndex: 0,
 		pageSize: 10,
 	})
-
-	const updatePagination = (({
-		pageIndex,
-		pageSize,
-	}: Partial<PaginationState>) => {
-		setPagination((prev) => ({
-			pageIndex: pageIndex ?? prev.pageIndex,
-			pageSize: pageSize ?? prev.pageSize,
-		}))
-	}) as SetPaginationDispatch
-
-	const handlePaginationChange: OnChangeFn<PaginationState> = (
-		updaterOrValue,
-	) => {
-		if (typeof updaterOrValue === 'function') {
-			const result = updaterOrValue(pagination)
-			updatePagination(result)
-		} else {
-			updatePagination(updaterOrValue)
-		}
-	}
 
 	const filteredData = useMemo(() => {
 		return kycData.filter((item) => {
@@ -90,7 +66,7 @@ export function useKycTable(initialData: KycRecord[] = []) {
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onColumnVisibilityChange: setColumnVisibility,
-		onPaginationChange: handlePaginationChange,
+		onPaginationChange: setPagination,
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),

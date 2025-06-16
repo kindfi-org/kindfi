@@ -28,7 +28,6 @@ export function DragHandle({ id, className }: DragHandleProps) {
 			aria-label={`Drag to reorder item ${id}`}
 		>
 			<GripVerticalIcon className="size-3 text-muted-foreground" />
-			<span className="sr-only">Drag to reorder</span>
 		</Button>
 	)
 }
