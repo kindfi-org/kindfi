@@ -1,6 +1,5 @@
 import {
 	type ColumnFiltersState,
-	type OnChangeFn,
 	type RowSelectionState,
 	type SortingState,
 	type VisibilityState,
