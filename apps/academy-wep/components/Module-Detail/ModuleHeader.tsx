@@ -1,21 +1,22 @@
 'use client'
 
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react'
 
+import { CourseStats } from './CourseStats'
 import { NextLessonCard } from './NextLessonCard'
 import { ProgressBar } from './ProgressBar'
-import { CourseStats } from './CourseStats';
+import Link from 'next/link'
 
 interface ModuleHeaderProps {
-	completionPercentage: number
-	nextLessonTitle: string
-	nextLessonDescription: string
+  completionPercentage?: number
+  nextLessonTitle?: string
+  nextLessonDescription?: string
 }
 
 export default function ModuleHeader({
 	completionPercentage = 50,
-	nextLessonTitle = 'Stellar Wallets',
-	nextLessonDescription = 'Continue where you left off',
+	nextLessonTitle = 'Stellar Blockchain Basics',
+	nextLessonDescription = 'Understand the Stellar network, consensus mechanism, and ecosystem',
 }: ModuleHeaderProps) {
 	return (
 		<main className="p-10">
@@ -29,35 +30,31 @@ export default function ModuleHeader({
 				<div className="grid gap-8 lg:grid-cols-[1fr_400px]">
 					<div className="space-y-6">
 						{/* Tag */}
-						<div className="inline-flex items-center gap-1.5 cursor-pointer rounded-full bg-[#7CC635]  border-gray-300 hover:border-[#7CC635]  border bg-opacity-10  px-3 py-1 text-sm font-medium text-black hover:text-[#7CC635] transition-all">
+						<Link href="/modules" className="inline-flex items-center gap-1.5 cursor-pointer rounded-full bg-[#7CC635]  border-gray-300 hover:border-[#7CC635]  border bg-opacity-10  px-3 py-1 text-sm font-medium text-black hover:text-[#7CC635] transition-all">
 							<span>
 								<ArrowLeft size={18} />
 							</span>
 							<span>Back to Modules</span>
-						</div>
+						</Link>
 
 						{/* Title */}
-						<h2 className="text-4xl font-bold">
-							Stellar Blockchain Basics
-						</h2>
+						<h2 className="text-4xl font-bold">{nextLessonTitle}</h2>
 
 						{/* Description */}
 						<p className="text-gray-600 text-lg font-semibold">
-						Understand the Stellar network, consensus mechanism, and ecosystem
+							{nextLessonDescription}
 						</p>
 
 						{/* Progress Bar */}
 						<ProgressBar percentage={completionPercentage} />
 
 						{/* CTA Buttons */}
-						<CourseStats/>
+						<CourseStats />
 					</div>
 
 					{/* Next Lesson Card */}
 					<div className="flex items-center justify-center">
-						<NextLessonCard
-							
-						/>
+						<NextLessonCard />
 					</div>
 				</div>
 			</section>

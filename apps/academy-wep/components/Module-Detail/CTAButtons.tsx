@@ -17,6 +17,7 @@ export function CTAButtons({
 			<Button
 				onClick={onContinueLearning}
 				size="lg"
+				type="button"
 				variant="gradient-green"
 				className=" w-52 px-6 py-6  text-base rounded-sm shadow-md hover:shadow-lg transition-all duration-300 "
 			>
@@ -26,6 +27,7 @@ export function CTAButtons({
 
 			<Button
 				onClick={onViewBadges}
+				type="button"
 				variant="outline"
 				className="border-[#7CC635] text-[#7CC635] w-40 px-2 py-[23px] text-base rounded-sm hover:bg-green-50 "
 			>

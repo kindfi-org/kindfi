@@ -4,14 +4,11 @@ import { Play } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 
-
 interface NextLessonCardProps {
-	
 	onStartLesson?: () => void
 }
 
 export function NextLessonCard({
-	
 	onStartLesson = () => {},
 }: NextLessonCardProps) {
 	return (
@@ -25,12 +22,11 @@ export function NextLessonCard({
 
 						<div className="space-y-1">
 							<h3 className="text-2xl font-semibold">Continue Learning</h3>
-							<p className="text-xl font-semibold text-slate-500">
-								 Start Next Lesson
+							<p className="text-xl font-semibold text-slate-500" aria-label="Start next lesson">
+								Start Next Lesson
 							</p>
 						</div>
 					</div>
-
 
 					<Button
 						onClick={onStartLesson}

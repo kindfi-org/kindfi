@@ -18,6 +18,10 @@ export function ProgressBar({
 		<div className="space-y-2">
 			<div className="flex items-center gap-4">
 				<div
+				role="progressbar"
+					aria-valuenow={validPercentage}
+					aria-valuemin={0}
+					aria-valuemax={100}
 					className={cn(
 						'relative h-3 w-full overflow-hidden rounded-full bg-slate-200',
 						size === 'sm' && 'h-2',
