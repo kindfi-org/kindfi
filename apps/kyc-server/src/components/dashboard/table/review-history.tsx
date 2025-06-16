@@ -59,7 +59,10 @@ export function ReviewHistory({ isLoading, reviews }: ReviewHistoryProps) {
 									{review.decision.charAt(0).toUpperCase() +
 										review.decision.slice(1)}
 								</Badge>
-								<time className="text-xs text-muted-foreground">
+								<time
+									className="text-xs text-muted-foreground"
+									dateTime={review.created_at}
+								>
 									{new Date(review.created_at).toLocaleDateString()}
 								</time>
 							</div>

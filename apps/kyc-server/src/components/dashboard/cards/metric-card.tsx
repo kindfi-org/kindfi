@@ -15,7 +15,7 @@ interface MetricCardProps {
 	value: number
 	trendValue: number
 	isPositive: boolean
-	icon: LucideIcon
+	icon?: LucideIcon
 	text: string
 	description: string
 	iconColor?: string
@@ -49,14 +49,16 @@ export function MetricCard({
 						)}
 						aria-label={`Trend: ${isPositive ? 'positive' : 'negative'} ${trendValue}%`}
 					>
-						{isPositive ? '+' : ''}
+						{isPositive ? '+' : '-'}
 						{trendValue}%
 					</Badge>
 				</div>
 			</CardHeader>
 			<CardFooter className="flex-col items-start gap-1 text-sm">
 				<div className="line-clamp-1 flex gap-2 font-medium">
-					<Icon className={cn('size-4', iconColor)} aria-hidden="true" />
+					{Icon && (
+						<Icon className={cn('size-4', iconColor)} aria-hidden="true" />
+					)}
 					{text}
 				</div>
 				<div className="text-muted-foreground">{description}</div>

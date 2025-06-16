@@ -6,6 +6,7 @@ import {
 	SelectValue,
 } from '~/components/base/select'
 import { ToggleGroup, ToggleGroupItem } from '~/components/base/toggle-group'
+import { timeRanges } from '~/lib/constants/dashboard'
 import type { TimeRange } from '~/lib/types/dashboard'
 
 interface TimeRangeSelectorProps {
@@ -27,27 +28,16 @@ export function TimeRangeSelector({
 				className="@[767px]/card:flex hidden"
 				aria-label="Select time range"
 			>
-				<ToggleGroupItem
-					value="90d"
-					className="h-8 px-2.5"
-					aria-label="Last 3 months"
-				>
-					Last 3 months
-				</ToggleGroupItem>
-				<ToggleGroupItem
-					value="30d"
-					className="h-8 px-2.5"
-					aria-label="Last 30 days"
-				>
-					Last 30 days
-				</ToggleGroupItem>
-				<ToggleGroupItem
-					value="7d"
-					className="h-8 px-2.5"
-					aria-label="Last 7 days"
-				>
-					Last 7 days
-				</ToggleGroupItem>
+				{timeRanges.map((r) => (
+					<ToggleGroupItem
+						key={r.value}
+						value={r.value}
+						className="h-8 px-2.5"
+						aria-label={r.label}
+					>
+						{r.label}
+					</ToggleGroupItem>
+				))}
 			</ToggleGroup>
 
 			<Select value={timeRange} onValueChange={onTimeRangeChange}>
@@ -58,15 +48,11 @@ export function TimeRangeSelector({
 					<SelectValue placeholder="Last 3 months" />
 				</SelectTrigger>
 				<SelectContent className="rounded-xl">
-					<SelectItem value="90d" className="rounded-lg">
-						Last 3 months
-					</SelectItem>
-					<SelectItem value="30d" className="rounded-lg">
-						Last 30 days
-					</SelectItem>
-					<SelectItem value="7d" className="rounded-lg">
-						Last 7 days
-					</SelectItem>
+					{timeRanges.map((r) => (
+						<SelectItem key={r.value} value={r.value} className="rounded-lg">
+							{r.label}
+						</SelectItem>
+					))}
 				</SelectContent>
 			</Select>
 		</>

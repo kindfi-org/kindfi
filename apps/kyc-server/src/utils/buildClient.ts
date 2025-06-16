@@ -2,7 +2,7 @@ import { existsSync, mkdirSync } from 'node:fs'
 import { readdir, rename, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { build } from 'bun'
-import plugin from 'bun-plugin-tailwind'
+import tailwindPlugin from 'bun-plugin-tailwind'
 
 /**
  * Builds the client-side JavaScript with a dynamic filename
@@ -26,7 +26,7 @@ export async function buildClient() {
 	const result = await build({
 		entrypoints: ['./src/client.tsx'],
 		outdir: './public',
-		plugins: [plugin],
+		plugins: [tailwindPlugin],
 		minify: process.env.NODE_ENV === 'production',
 		target: 'browser',
 		format: 'esm',

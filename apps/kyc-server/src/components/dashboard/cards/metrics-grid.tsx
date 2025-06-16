@@ -1,5 +1,5 @@
 import { MetricCard } from '~/components/dashboard/cards/metric-card'
-import { metricsConfig } from '~/lib/constants/metrics'
+import { metricsConfig } from '~/lib/constants/dashboard'
 import type { KycStats } from '~/lib/types/dashboard'
 import { cn } from '~/lib/utils'
 

@@ -1,20 +1,22 @@
+import type { UniqueIdentifier } from '@dnd-kit/core'
 import { useSortable } from '@dnd-kit/sortable'
 import { GripVerticalIcon } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { cn } from '~/lib/utils'
 
 interface DragHandleProps {
-	id: string
+	id: UniqueIdentifier
 	className?: string
 }
 
 export function DragHandle({ id, className }: DragHandleProps) {
-	const { attributes, listeners } = useSortable({
+	const { attributes, listeners, setNodeRef } = useSortable({
 		id,
 	})
 
 	return (
 		<Button
+			ref={setNodeRef}
 			{...attributes}
 			{...listeners}
 			variant="ghost"

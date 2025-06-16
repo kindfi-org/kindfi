@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import {
 	Card,
 	CardDescription,
@@ -7,7 +8,7 @@ import {
 } from '~/components/base/card'
 import { Skeleton } from '~/components/base/skeleton'
 
-export function MetricCardSkeleton() {
+function MetricCardSkeletonImpl() {
 	return (
 		<Card className="@container/card" aria-hidden="true" data-loading="true">
 			<CardHeader className="relative">
@@ -33,3 +34,6 @@ export function MetricCardSkeleton() {
 		</Card>
 	)
 }
+
+export const MetricCardSkeleton = memo(MetricCardSkeletonImpl)
+MetricCardSkeleton.displayName = 'MetricCardSkeleton'

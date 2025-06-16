@@ -59,7 +59,7 @@ export function KycTablePagination({ table }: KycTablePaginationProps) {
 
 				<div className="flex w-fit items-center justify-center text-sm font-medium">
 					Page {table.getState().pagination.pageIndex + 1} of{' '}
-					{table.getPageCount()}
+					{table.getPageCount()} {table.getPageCount() === 1 ? 'page' : 'pages'}
 				</div>
 
 				<div className="flex items-center gap-2 justify-center sm:justify-start">

@@ -13,19 +13,7 @@ import {
 } from '@dnd-kit/core'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { arrayMove } from '@dnd-kit/sortable'
-import {
-	type ColumnFiltersState,
-	type SortingState,
-	type VisibilityState,
-	getCoreRowModel,
-	getFacetedRowModel,
-	getFacetedUniqueValues,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useReactTable,
-} from '@tanstack/react-table'
-import { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo } from 'react'
 
 import { Table } from '~/components/base/table'
 import { KycTableSkeleton } from '~/components/dashboard/skeletons/kyc-table-skeleton'
@@ -34,6 +22,7 @@ import { kycColumns } from '~/components/dashboard/table/kyc-table-columns'
 import { KycTableFilters } from '~/components/dashboard/table/kyc-table-filters'
 import { KycTableHeader } from '~/components/dashboard/table/kyc-table-header'
 import { KycTablePagination } from '~/components/dashboard/table/kyc-table-pagination'
+import { useKycTable } from '~/hooks/use-kyc-table'
 import type { KycRecord } from '~/lib/types/dashboard'
 
 interface KycTableProps {
@@ -45,18 +34,13 @@ export function KycTable({
 	data: initialData,
 	isLoading = false,
 }: KycTableProps) {
-	const [data, setData] = useState(() => initialData || [])
-	const [rowSelection, setRowSelection] = useState({})
-	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-	const [sorting, setSorting] = useState<SortingState>([])
-	const [pagination, setPagination] = useState({
-		pageIndex: 0,
-		pageSize: 10,
-	})
-	const [statusFilter, setStatusFilter] = useState<string>('all')
-	const [verificationLevelFilter, setVerificationLevelFilter] =
-		useState<string>('all')
+	const {
+		table,
+		kycData,
+		setKycData,
+		filters: { statusFilter, verificationLevelFilter },
+		setFilters: { setStatusFilter, setVerificationLevelFilter },
+	} = useKycTable(initialData)
 
 	const sortableId = useId()
 	const sensors = useSensors(
@@ -66,65 +50,28 @@ export function KycTable({
 	)
 
 	const dataIds = useMemo<UniqueIdentifier[]>(
-		() => data?.map(({ id }) => id) || [],
-		[data],
+		() => kycData?.map(({ id }) => id) || [],
+		[kycData],
 	)
 
-	// Update data when initialData changes
 	useEffect(() => {
 		if (initialData) {
-			setData(initialData)
+			setKycData(initialData)
 		}
-	}, [initialData])
-
-	// Filter data based on status and verification level
-	const filteredData = useMemo(() => {
-		return data.filter((item) => {
-			const statusMatch = statusFilter === 'all' || item.status === statusFilter
-			const levelMatch =
-				verificationLevelFilter === 'all' ||
-				item.verification_level === verificationLevelFilter
-			return statusMatch && levelMatch
-		})
-	}, [data, statusFilter, verificationLevelFilter])
-
-	const table = useReactTable({
-		data: filteredData,
-		columns: kycColumns,
-		state: {
-			sorting,
-			columnVisibility,
-			rowSelection,
-			columnFilters,
-			pagination,
-		},
-		getRowId: (row) => row.id.toString(),
-		enableRowSelection: true,
-		onRowSelectionChange: setRowSelection,
-		onSortingChange: setSorting,
-		onColumnFiltersChange: setColumnFilters,
-		onColumnVisibilityChange: setColumnVisibility,
-		onPaginationChange: setPagination,
-		getCoreRowModel: getCoreRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getFacetedRowModel: getFacetedRowModel(),
-		getFacetedUniqueValues: getFacetedUniqueValues(),
-	})
+	}, [initialData, setKycData])
 
 	const handleDragEnd = useCallback(
 		(event: DragEndEvent) => {
 			const { active, over } = event
 			if (active && over && active.id !== over.id) {
-				setData((data) => {
+				setKycData((data) => {
 					const oldIndex = dataIds.indexOf(active.id)
 					const newIndex = dataIds.indexOf(over.id)
 					return arrayMove(data, oldIndex, newIndex)
 				})
 			}
 		},
-		[dataIds],
+		[dataIds, setKycData],
 	)
 
 	if (isLoading || !initialData) {
