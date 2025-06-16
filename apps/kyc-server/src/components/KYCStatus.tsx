@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { cn } from '~/lib/utils'
 import { useKYCWebSocket } from '../hooks/use-kyc-ws'
-import { cn } from '../utils/cn'
 
 interface KYCStatusProps {
 	userId: string
@@ -41,6 +41,7 @@ export function KYCStatus({
 					</span>
 					{!isConnected && (
 						<button
+							type="button"
 							onClick={reconnect}
 							className="text-sm text-blue-500 hover:text-blue-600"
 						>

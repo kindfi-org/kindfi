@@ -1,11 +1,12 @@
-import React from 'react'
 import type { ReactNode } from 'react'
+import { Dashboard } from '~/components/dashboard'
 import { About } from '../components/About'
 import { WebSocketDemo } from '../components/WebSocketDemo'
 
 // Centralized content map for both client and server
 export const contentMap: Record<string, ReactNode> = {
 	'/': 'Welcome to Kindfi KYC Server!',
+	'/dashboard': <Dashboard />,
 	'/react': 'This page is server-side rendered with React and Bun!',
 	'/websocket': <WebSocketDemo />,
 	'/about': <About />,
