@@ -108,7 +108,9 @@ impl ReputationContract {
         ReputationStorage::get_tier_threshold(&env, &tier).ok_or(ReputationError::InvalidTier)
     }
 
-    fn get_tier_neighbors(tier: &TierLevel) -> Result<(Option<TierLevel>, Option<TierLevel>), ReputationError> {
+    const fn get_tier_neighbors(
+        tier: &TierLevel,
+    ) -> Result<(Option<TierLevel>, Option<TierLevel>), ReputationError> {
         use TierLevel::*;
 
         match tier {
