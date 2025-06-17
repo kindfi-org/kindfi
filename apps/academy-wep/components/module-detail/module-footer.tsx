@@ -1,7 +1,7 @@
 'use client'
 
 import { Award } from 'lucide-react'
-import { CTAButtons } from './CTAButtons'
+import { CTAButtons } from './cta-buttons'
 
 export default function ModuleFooter() {
 	return (

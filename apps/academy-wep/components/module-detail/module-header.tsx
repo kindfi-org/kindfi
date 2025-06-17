@@ -2,9 +2,9 @@
 
 import { ArrowLeft } from 'lucide-react'
 
-import { CourseStats } from './CourseStats'
-import { NextLessonCard } from './NextLessonCard'
-import { ProgressBar } from './ProgressBar'
+import { CourseStats } from './course-stats'
+import { NextLessonCard } from './next-lesson-card'
+import { ProgressBar } from './progress-bar'
 import Link from 'next/link'
 
 interface ModuleHeaderProps {
