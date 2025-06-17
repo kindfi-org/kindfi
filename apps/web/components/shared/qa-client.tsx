@@ -1,3 +1,4 @@
+// ! SPLIT THIS COMPONENT... ⚠️
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks/use-supabase-query.hook'
@@ -25,6 +26,7 @@ import {
 	Reply,
 	User as UserIcon,
 } from 'lucide-react'
+import { useAsync, useAsyncFn } from 'react-use'
 import { Alert, AlertDescription, AlertTitle } from '~/components/base/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
@@ -105,7 +107,6 @@ export default function QAClient({
 }: QAClientProps) {
 	const router = useRouter()
 	const queryClient = useQueryClient()
-	const supabase = createSupabaseBrowserClient()
 
 	const [newQuestion, setNewQuestion] = useState<string>('')
 	const [expandedQuestionIds, setExpandedQuestionIds] = useState<
@@ -455,7 +456,7 @@ export default function QAClient({
 
 		supabase.removeChannel(subscriptionRef.current)
 		subscriptionRef.current = null
-	}, [isRealtimeEnabled, projectId, supabase, queryClient, effectiveUser?.id])
+	}, [isRealtimeEnabled, projectId, queryClient, effectiveUser?.id])
 
 	const checkGuestCommentLimit = () => {
 		if (currentUser) return true // Logged in users don't have limits
@@ -788,58 +789,6 @@ export default function QAClient({
 		setReplyingTo(null)
 	}
 
-	const renderUserInfo = async (
-		userId: string,
-		createdAt: string,
-		size: 'sm' | 'md' = 'md',
-	) => {
-		const { data: userData, error: errorData } = await supabase
-			.from('profiles')
-			.select('*')
-			.eq('id', userId)
-			.single()
-		const avatarSize = size === 'sm' ? 'h-6 w-6' : 'h-8 w-8'
-		const iconSize = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'
-		const nameSize = size === 'sm' ? 'text-sm' : 'text-base'
-		const timeSize = size === 'sm' ? 'text-xs' : 'text-sm'
-
-		return (
-			<div className="flex items-center gap-2">
-				<Avatar className={avatarSize}>
-					{userData?.image_url ? (
-						<AvatarImage src={userData?.image_url} alt="User avatar" />
-					) : (
-						<AvatarFallback>
-							<UserIcon className={iconSize} aria-hidden="true" />
-						</AvatarFallback>
-					)}
-				</Avatar>
-				<div>
-					<div className="flex items-center">
-						<p className={`font-medium ${nameSize}`}>
-							{userData?.display_name ||
-								`User ${userData?.id?.substring(0, 6)}`}
-						</p>
-						{/* TODO: Add user role relationship to project. For now using role */}
-						{userData?.role && (
-							<Badge
-								variant="outline"
-								className="ml-2 text-xs py-0 h-5 bg-blue-50 text-blue-700 border-blue-200"
-							>
-								Team
-							</Badge>
-						)}
-					</div>
-					<p className={`text-muted-foreground ${timeSize}`}>
-						{formatDistanceToNow(new Date(createdAt), {
-							addSuffix: true,
-						})}
-					</p>
-				</div>
-			</div>
-		)
-	}
-
 	return (
 		<>
 			<h2 className="text-2xl font-bold mb-4 flex items-center justify-between">
@@ -1031,10 +980,11 @@ export default function QAClient({
 								>
 									<CardHeader className="pb-3">
 										<div className="flex justify-between items-start">
-											{renderUserInfo(
-												question.author_id,
-												question.created_at as string,
-											)}
+											<RenderUserInfo
+												authorData={question.author}
+												createdAt={question.created_at as string}
+												size="sm"
+											/>
 											<div className="flex items-center gap-2">
 												{(question.metadata?.is_resolved as boolean) && (
 													<Badge
@@ -1125,11 +1075,13 @@ export default function QAClient({
 																>
 																	<div className="flex items-start gap-2">
 																		<div className="flex-1">
-																			{renderUserInfo(
-																				answer.author_id,
-																				answer.created_at as string,
-																				'sm',
-																			)}
+																			<RenderUserInfo
+																				authorData={question.author}
+																				createdAt={
+																					question.created_at as string
+																				}
+																				size="sm"
+																			/>
 																			<p className="mt-2 whitespace-pre-line">
 																				{answer.content}
 																			</p>
@@ -1168,11 +1120,13 @@ export default function QAClient({
 																					className="pl-4 border-l-2 border-gray-100 py-2 mb-2 rounded-r-sm"
 																				>
 																					<div className="flex-1">
-																						{renderUserInfo(
-																							reply.author_id,
-																							reply.created_at as string,
-																							'sm',
-																						)}
+																						<RenderUserInfo
+																							authorData={question.author}
+																							createdAt={
+																								question.created_at as string
+																							}
+																							size="sm"
+																						/>
 																						<p className="mt-2 whitespace-pre-line text-sm">
 																							{reply.content}
 																						</p>
@@ -1343,5 +1297,60 @@ export default function QAClient({
 				</DialogContent>
 			</Dialog>
 		</>
+	)
+}
+
+function RenderUserInfo({
+	authorData,
+	createdAt,
+	size = 'md',
+}: {
+	size: 'sm' | 'md'
+	createdAt: string
+	authorData?: UserData
+}) {
+	if (!authorData) {
+		return null
+	}
+
+	const avatarSize = size === 'sm' ? 'h-6 w-6' : 'h-8 w-8'
+	const iconSize = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'
+	const nameSize = size === 'sm' ? 'text-sm' : 'text-base'
+	const timeSize = size === 'sm' ? 'text-xs' : 'text-sm'
+
+	return (
+		<div className="flex items-center gap-2">
+			<Avatar className={avatarSize}>
+				{authorData?.image_url ? (
+					<AvatarImage src={authorData?.image_url} alt="User avatar" />
+				) : (
+					<AvatarFallback>
+						<UserIcon className={iconSize} aria-hidden="true" />
+					</AvatarFallback>
+				)}
+			</Avatar>
+			<div>
+				<div className="flex items-center">
+					<p className={`font-medium ${nameSize}`}>
+						{authorData?.display_name ||
+							`User ${authorData?.id?.substring(0, 6)}`}
+					</p>
+					{/* TODO: Add user role relationship to project. For now using role */}
+					{authorData?.role && (
+						<Badge
+							variant="outline"
+							className="ml-2 text-xs py-0 h-5 bg-blue-50 text-blue-700 border-blue-200"
+						>
+							Team
+						</Badge>
+					)}
+				</div>
+				<p className={`text-muted-foreground ${timeSize}`}>
+					{formatDistanceToNow(new Date(createdAt), {
+						addSuffix: true,
+					})}
+				</p>
+			</div>
+		</div>
 	)
 }

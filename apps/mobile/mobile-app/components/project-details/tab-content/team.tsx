@@ -25,7 +25,7 @@ export default function Team() {
 
 			{teamMembers.map((member) => (
 				<View
-					key={member.name.replace(/>\s+/g, '-').toLowerCase()}
+					key={member.name.replace(/\s+/g, '-').toLowerCase()}
 					className="flex-row mb-6"
 				>
 					<Image

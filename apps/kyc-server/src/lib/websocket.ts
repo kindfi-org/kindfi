@@ -107,7 +107,7 @@ export class KYCWebSocketService {
 				.from('kyc_status')
 				.select('*')
 				.eq('user_id', ws.data.userId || 'no-user-id')
-				.single()
+				.maybeSingle()
 
 			if (error) {
 				console.error('Error fetching KYC status:', error)
