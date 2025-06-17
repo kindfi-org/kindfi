@@ -125,7 +125,7 @@ impl ReputationContract {
         tier: &TierLevel,
         new_threshold: u32,
     ) -> Result<(), ReputationError> {
-        let (lower_neighbor, upper_neighbor) = get_tier_neighbors(tier)?;
+        let (lower_neighbor, upper_neighbor) = Self::get_tier_neighbors(tier)?;
 
         if let Some(lower) = lower_neighbor {
             if let Some(lower_threshold) = ReputationStorage::get_tier_threshold(env, &lower) {
@@ -158,7 +158,7 @@ impl ReputationContract {
           return Err(ReputationError::InvalidTier);
         }
 
-        validate_threshold_ordering(&env, &tier, threshold)?;
+        Self::validate_threshold_ordering(&env, &tier, threshold)?;
 
         let old_threshold = ReputationStorage::get_tier_threshold(&env, &tier)
         .ok_or(ReputationError::InvalidTier)?;

@@ -211,11 +211,11 @@ fn test_calculate_tier_from_score() {
 #[test]
 fn test_tier_neighbors() {
     use TierLevel::*;
-    assert_eq!(get_tier_neighbors(&Bronze).unwrap(), (None, Some(Silver)));
-    assert_eq!(get_tier_neighbors(&Silver).unwrap(), (Some(Bronze), Some(Gold)));
-    assert_eq!(get_tier_neighbors(&Gold).unwrap(), (Some(Silver), Some(Platinum)));
-    assert_eq!(get_tier_neighbors(&Platinum).unwrap(), (Some(Gold), None));
-    assert!(get_tier_neighbors(&None).is_err());
+    assert_eq!(ReputationContract::get_tier_neighbors(&Bronze).unwrap(), (None, Some(Silver)));
+    assert_eq!(ReputationContract::get_tier_neighbors(&Silver).unwrap(), (Some(Bronze), Some(Gold)));
+    assert_eq!(ReputationContract::get_tier_neighbors(&Gold).unwrap(), (Some(Silver), Some(Platinum)));
+    assert_eq!(ReputationContract::get_tier_neighbors(&Platinum).unwrap(), (Some(Gold), None));
+    assert!(ReputationContract::get_tier_neighbors(&None).is_err());
 }
 
 
