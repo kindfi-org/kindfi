@@ -32,7 +32,9 @@ function ImpactStat({
 			>
 				{/* Icon */}
 				<Box
-					className={`rounded-full bg-white w-8 h-8 items-center justify-center shadow-sm`}
+					className={
+						'rounded-full bg-white w-8 h-8 items-center justify-center shadow-sm'
+					}
 				>
 					<Icon
 						as={icon}

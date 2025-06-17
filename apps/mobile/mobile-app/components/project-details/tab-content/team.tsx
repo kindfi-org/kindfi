@@ -23,8 +23,11 @@ export default function Team() {
 		<View className="mt-4">
 			<Text className="text-lg font-bold mb-6">Our Team</Text>
 
-			{teamMembers.map((member, index) => (
-				<View key={index} className="flex-row mb-6">
+			{teamMembers.map((member) => (
+				<View
+					key={member.name.replace(/>\s+/g, '-').toLowerCase()}
+					className="flex-row mb-6"
+				>
 					<Image
 						source={{ uri: 'https://placehold.co/100x100' }}
 						className="w-16 h-16 rounded-full mr-4"

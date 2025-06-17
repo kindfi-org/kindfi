@@ -32,8 +32,11 @@ export default function Overview() {
 			<Text className="text-lg font-bold mb-2 mt-3">
 				How Funds Will Be Used
 			</Text>
-			{items.map((item, index) => (
-				<View key={index} style={{ flexDirection: 'row', marginBottom: 8 }}>
+			{items.map((item) => (
+				<View
+					key={`${item.split(' ')[0]}-key`}
+					style={{ flexDirection: 'row', marginBottom: 8 }}
+				>
 					<Text style={{ marginRight: 8 }}>•</Text>
 					<Text style={{ fontSize: 16 }}>{item}</Text>
 				</View>

@@ -1,4 +1,8 @@
-import type { RealtimeChannel } from '@supabase/supabase-js'
+import type {
+	RealtimeChannel,
+	RealtimePostgresChangesPayload,
+	Subscription,
+} from '@supabase/supabase-js'
 import { createClient } from '@supabase/supabase-js'
 import type { ServerWebSocket } from 'bun'
 
@@ -12,7 +16,7 @@ interface KYCStatusRecord {
 	user_id: string
 	status: string
 	verification_level: string
-	[key: string]: any
+	[key: string]: unknown
 }
 
 interface KYCUpdate {
@@ -23,17 +27,6 @@ interface KYCUpdate {
 		verification_level: string
 		timestamp: string
 	}
-}
-
-interface SupabaseKYCPayload {
-	new: {
-		user_id: string
-		status: string
-		verification_level: string
-		[key: string]: any
-	}
-	old: Record<string, any>
-	[key: string]: any
 }
 
 export class KYCWebSocketService {
@@ -61,13 +54,13 @@ export class KYCWebSocketService {
 		this.channel = this.supabase
 			.channel('kyc_status_changes')
 			.on(
-				'postgres_changes' as any,
+				'postgres_changes',
 				{
 					event: '*',
 					schema: 'public',
 					table: 'kyc_status',
 				},
-				(payload: any) => {
+				(payload: RealtimePostgresChangesPayload<KYCStatusRecord>) => {
 					console.log('Received KYC status change:', payload)
 
 					const newRecord = payload.new as KYCStatusRecord
@@ -113,7 +106,7 @@ export class KYCWebSocketService {
 			const { data: status, error } = await this.supabase
 				.from('kyc_status')
 				.select('*')
-				.eq('user_id', ws.data.userId!)
+				.eq('user_id', ws.data.userId || 'no-user-id')
 				.single()
 
 			if (error) {

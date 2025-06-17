@@ -98,7 +98,7 @@ export function LatamImpactSection() {
 		<View className="flex-row justify-center items-center mt-6 gap-2">
 			{featureCardsData.map((_, index) => (
 				<Pressable
-					key={index}
+					key={_.id}
 					onPress={() => scrollToIndex(index)}
 					style={{
 						width: isTablet ? 12 : 10,

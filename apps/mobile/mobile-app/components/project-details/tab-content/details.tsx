@@ -13,7 +13,13 @@ import {
 import { useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 
-const DropdownSection = ({ title, items }) => {
+const DropdownSection = ({
+	title,
+	items,
+}: {
+	title: string
+	items: { label: string; value?: string }[]
+}) => {
 	const [isOpen, setIsOpen] = useState(false)
 
 	return (
@@ -32,10 +38,10 @@ const DropdownSection = ({ title, items }) => {
 
 			{isOpen && (
 				<View className="mt-3">
-					{items.map((item, index) => (
+					{items.map((item) => (
 						<View
-							key={index}
-							className={`py-2 ${index !== items.length - 1 ? 'border-b border-gray-100' : ''}`}
+							key={item.label.replace(/\s+/g, '-').toLowerCase()}
+							className={`py-2 ${item !== items[items.length - 1] ? 'border-b border-gray-100' : ''}`}
 						>
 							<Text className="text-gray-600">{item.label}</Text>
 							<Text className="font-bold mt-1">{item.value}</Text>
@@ -124,8 +130,11 @@ export default function Details() {
 					environmental drawbacks or performance degradation. Our solution
 					addresses several critical pain points in the current energy storage
 					market:
-					{items.map((item, index) => (
-						<View key={index} style={{ flexDirection: 'row', marginTop: 8 }}>
+					{items.map((item) => (
+						<View
+							key={item.split(' ')[0].toLowerCase()}
+							style={{ flexDirection: 'row', marginTop: 8 }}
+						>
 							<Text style={{ marginRight: 8 }}>•</Text>
 							<Text style={{ fontSize: 16 }}>{item}</Text>
 						</View>
@@ -215,8 +224,11 @@ export default function Details() {
 					The global energy storage market is projected to grow from $211
 					billion in 2022 to $413 billion by 2030, with a CAGR of 8.7%. Key
 					drivers include:
-					{items2.map((item, index) => (
-						<View key={index} style={{ flexDirection: 'row', marginTop: 8 }}>
+					{items2.map((item) => (
+						<View
+							key={item.split(' ')[0].toLowerCase()}
+							style={{ flexDirection: 'row', marginTop: 8 }}
+						>
 							<Text style={{ marginRight: 8 }}>•</Text>
 							<Text style={{ fontSize: 16 }}>{item}</Text>
 						</View>
@@ -231,8 +243,11 @@ export default function Details() {
 				<Text className="text-gray-600">
 					Our proprietary flywheel technology uses advanced composite materials
 					and magnetic bearings to achieve:
-					{items3.map((item, index) => (
-						<View key={index} style={{ flexDirection: 'row', marginTop: 8 }}>
+					{items3.map((item) => (
+						<View
+							key={item.split(' ')[0].toLowerCase()}
+							style={{ flexDirection: 'row', marginTop: 8 }}
+						>
 							<Text style={{ marginRight: 8 }}>•</Text>
 							<Text style={{ fontSize: 16 }}>{item}</Text>
 						</View>

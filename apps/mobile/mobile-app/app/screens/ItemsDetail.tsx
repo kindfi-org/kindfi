@@ -1,13 +1,42 @@
 import React from 'react'
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
+import {
+	Image,
+	type ImageSourcePropType,
+	ScrollView,
+	StyleSheet,
+	Text,
+	View,
+} from 'react-native'
 
-const ItemDetails = ({ route }: { route: any }) => {
+type ItemProps = {
+	image: string | ImageSourcePropType
+	title: string
+	description: string
+	progress: { amountRaised: number; percentage: number; goal: number }
+	stats: { goal: number; investors: number; minInvestment: number }
+	tags: string[]
+}
+
+const ItemDetails = ({
+	route,
+}: {
+	route: { params: { item?: ItemProps } }
+}) => {
 	const { item } = route.params
+
+	if (!item) {
+		return null
+	}
 
 	return (
 		<ScrollView style={styles.container}>
 			{/* Image Section */}
-			<Image source={item.image} style={styles.image} />
+			<Image
+				source={
+					typeof item.image === 'string' ? { uri: item.image } : item.image
+				}
+				style={styles.image}
+			/>
 
 			{/* Text Section */}
 			<View style={styles.textContainer}>
@@ -33,8 +62,11 @@ const ItemDetails = ({ route }: { route: any }) => {
 
 				{/* Tags Section */}
 				<View style={styles.tagsContainer}>
-					{item.tags.map((tag: string, index: number) => (
-						<Text key={index} style={styles.tag}>
+					{item.tags.map((tag: string) => (
+						<Text
+							key={tag.replace(/\s+/g, '-').toLowerCase()}
+							style={styles.tag}
+						>
 							{tag}
 						</Text>
 					))}

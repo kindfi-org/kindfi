@@ -9,7 +9,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-import type { TablesUpdate } from '@services/supabase'
+import { supabase } from '@packages/lib/supabase'
+import type { Tables, TablesUpdate } from '@services/supabase'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import {
 	Bell,
 	BellOff,
@@ -52,42 +54,12 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '~/components/base/tooltip'
-
-// Types reused from your current component
-interface UserData {
-	id: string
-	full_name?: string
-	avatar_url?: string
-	is_team_member?: boolean
-}
-
-interface CommentData {
-	id: string
-	content: string
-	created_at: string
-	project_id: string
-	author_id: string
-	type?: string
-	parent_comment_id?: string | null
-	is_resolved?: boolean
-	author?: UserData
-}
-
-interface CommentWithReplies extends CommentData {
-	replies?: CommentData[]
-}
-
-interface CommentWithAnswers extends CommentData {
-	answers?: CommentWithReplies[]
-}
-
-// Modified interface to accept initialData from server
-interface QAClientProps {
-	projectId: string
-	currentUser?: UserData | null
-	initialQuestions: CommentData[]
-	initialComments: CommentData[]
-}
+import type {
+	CommentData,
+	CommentWithAnswers,
+	QAClientProps,
+	UserData,
+} from '~/lib/types/qa/types'
 
 // Helper functions for guest users
 const getGuestUserId = () => {
@@ -183,79 +155,68 @@ export default function QAClient({
 			try {
 				const { data, error } = await supabase
 					.from('comments')
-					.select(
-						'id, content, created_at, project_id, author_id, type, parent_comment_id, is_resolved',
-					)
+					.select('*')
 					.eq('project_id', projectId)
 					.eq('type', 'question')
 					.is('parent_comment_id', null)
 					.order('created_at', { ascending: false })
 
 				if (error) throw error
-
-				if (data && data.length > 0) {
-					// Get unique author IDs
-					if (!Array.isArray(data)) {
-						throw new Error('Failed to fetch comments: data is not an array')
-					}
-
-					const authorIds = [
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						...new Set(data.map((item: any) => item.author_id)),
-					]
-
-					// Fetch authors
-					const { data: authors, error: authorsError } = await supabase
-						.from('profiles')
-						.select('*')
-						.in('id', authorIds)
-
-					if (authorsError) {
-						console.error('Error fetching authors:', authorsError)
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((item: any) => ({
-							...item,
-							created_at: item.created_at || new Date().toISOString(),
-							author: null,
-						})) as CommentData[]
-					}
-
-					if (authors) {
-						// Create a lookup map for authors
-						const authorsMap = authors.reduce(
-							(acc: Record<string, UserData>, author: any) => {
-								acc[author.id] = author
-								return acc
-							},
-							{} as Record<string, UserData>,
-						)
-
-						// Attach author data to each question
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((question: any) => ({
-							...question,
-							created_at: question.created_at || new Date().toISOString(),
-							author:
-								authorsMap[question.author_id] ||
-								(question.author_id?.includes('-')
-									? {
-											id: question.author_id,
-											full_name: 'Guest User',
-											is_team_member: false,
-										}
-									: null),
-						})) as CommentData[]
-					}
+				if (!data || !data.length) {
+					console.warn('No questions found for this project')
+					return []
 				}
 
-				// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-				return (data || []).map((item: any) => ({
+				const authorIds = [...new Set(data.map((item) => item.author_id))]
+
+				// Fetch authors
+				const { data: authors, error: authorsError } = await supabase
+					.from('profiles')
+					.select('*')
+					.in('id', authorIds)
+
+				if (authorsError) {
+					console.error('Error fetching authors:', authorsError)
+					return data.map((item) => ({
+						...item,
+						created_at: item.created_at || new Date().toISOString(),
+						author: null,
+					})) as unknown as CommentData[]
+				}
+
+				if (authors) {
+					// Create a lookup map for authors
+					const authorsMap = authors.reduce(
+						(acc: Record<string, UserData>, author: UserData) => {
+							acc[author.id] = author
+							return acc
+						},
+						{} as Record<string, UserData>,
+					)
+
+					// Attach author data to each question
+					return data.map((question) => ({
+						...question,
+						created_at: question.created_at || new Date().toISOString(),
+						author:
+							authorsMap[question.author_id] ||
+							(question.author_id?.includes('-')
+								? {
+										id: question.author_id,
+										full_name: 'Guest User',
+										is_team_member: false,
+									}
+								: null),
+					})) as CommentData[]
+				}
+
+				return data.map((item) => ({
 					...item,
 					created_at: item.created_at || new Date().toISOString(),
 				})) as CommentData[]
 			} catch (err) {
 				console.error('Error fetching questions:', err)
-				return [] as CommentData[]
+				return []
 			}
 		},
 		{
@@ -282,65 +243,59 @@ export default function QAClient({
 					.order('created_at', { ascending: true })
 
 				if (error) throw error
-
-				// If we have comments, fetch author data separately
-				if (data && data.length > 0) {
-					// Get unique author IDs
-					const authorIds = [
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						...new Set(data.map((item: any) => item.author_id)),
-					]
-
-					const { data: authors, error: authorsError } = await supabase
-						.from('profiles')
-						.select('*')
-						.in('id', authorIds)
-
-					if (authorsError) {
-						console.error('Error fetching authors:', authorsError)
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((item: any) => ({
-							...item,
-							created_at: item.created_at || new Date().toISOString(),
-							author: null,
-						})) as CommentData[]
-					}
-
-					if (authors) {
-						const authorsMap = authors.reduce(
-							// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-							(acc: Record<string, UserData>, author: any) => {
-								acc[author.id] = author
-								return acc
-							},
-							{} as Record<string, UserData>,
-						)
-
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						return data.map((comment: any) => ({
-							...comment,
-							created_at: comment.created_at || new Date().toISOString(),
-							author:
-								authorsMap[comment.author_id] ||
-								(comment.author_id?.includes('-')
-									? {
-											id: comment.author_id,
-											full_name: 'Guest User',
-											is_team_member: false,
-										}
-									: null),
-						})) as CommentData[]
-					}
+				if (!data || data.length === 0) {
+					console.warn('No comments found for this project')
+					return []
 				}
 
-				// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-				return (data || []).map((item: any) => ({
+				// Get unique author IDs
+				const authorIds = [...new Set(data.map((item) => item.author_id))]
+
+				const { data: authors, error: authorsError } = await supabase
+					.from('profiles')
+					.select('*')
+					.in('id', authorIds)
+
+				if (authorsError) {
+					console.error('Error fetching authors:', authorsError)
+					return data.map((item) => ({
+						...item,
+						created_at: item.created_at || new Date().toISOString(),
+						author: null,
+					})) as unknown as CommentData[]
+				}
+
+				if (authors) {
+					const authorsMap = authors.reduce(
+						(acc: Record<string, UserData>, author: UserData) => {
+							acc[author.id] = author
+							return acc
+						},
+						{} as Record<string, UserData>,
+					)
+
+					return data.map((comment) => ({
+						...comment,
+						created_at: comment.created_at || new Date().toISOString(),
+						author:
+							authorsMap[comment.author_id] ||
+							(comment.author_id?.includes('-')
+								? {
+										id: comment.author_id,
+										full_name: 'Guest User',
+										is_team_member: false,
+									}
+								: null),
+					})) as CommentData[]
+				}
+
+				return data.map((item) => ({
 					...item,
 					created_at: item.created_at || new Date().toISOString(),
 				})) as CommentData[]
 			} catch (err) {
 				console.error('Error fetching comments:', err)
-				return [] as CommentData[]
+				return []
 			}
 		},
 		{
@@ -357,7 +312,9 @@ export default function QAClient({
 			const answers = commentsData.filter(
 				(comment) => comment.type === 'answer',
 			)
-			const replies = commentsData.filter((comment) => comment.type === 'reply')
+			const replies = commentsData.filter(
+				(comment) => comment.type === 'comment',
+			)
 
 			// Build the threaded structure
 			const questionsWithAnswers = questions.map((question) => {
@@ -367,16 +324,23 @@ export default function QAClient({
 						const answerReplies = replies.filter(
 							(reply) => reply.parent_comment_id === answer.id,
 						)
+						const metadata = (question?.metadata || {}) as Record<
+							string,
+							unknown
+						>
 
 						return {
 							...answer,
 							replies: answerReplies,
+							metadata,
 						}
 					})
 
+				const metadata = (question?.metadata || {}) as Record<string, unknown>
 				return {
 					...question,
 					answers: questionAnswers,
+					metadata,
 				}
 			})
 
@@ -400,7 +364,7 @@ export default function QAClient({
 				!expandedQuestionIds[question.id]
 			) {
 				const hasRecentActivity = question.answers.some((answer) => {
-					const answerDate = new Date(answer.created_at)
+					const answerDate = new Date(answer.created_at || '1970-01-01')
 					const now = new Date()
 					const hoursDiff =
 						(now.getTime() - answerDate.getTime()) / (1000 * 60 * 60)
@@ -436,7 +400,9 @@ export default function QAClient({
 						table: 'comments',
 						filter: `project_id=eq.${projectId}`,
 					},
-					(payload) => {
+					(
+						payload: RealtimePostgresChangesPayload<TablesUpdate<'comments'>>,
+					) => {
 						console.log('Real-time update received:', payload)
 
 						setRealtimeActivity(true)
@@ -450,8 +416,8 @@ export default function QAClient({
 						})
 
 						const eventType = payload.eventType
-						// TODO: Use proper type for item (USE THE SUPABASE TYPES... THEY HAVE EXPLICIT TYPES FOR THIS SCENARIO)
-						const record = payload.new as any
+						const record = payload.new as Tables<'comments'> | null
+						const metadata = (record?.metadata || {}) as Record<string, unknown>
 
 						if (eventType === 'INSERT') {
 							const commentType = record?.type || 'comment'
@@ -461,7 +427,7 @@ export default function QAClient({
 
 								setTimeout(() => setRealtimeStatus(null), 5000)
 							}
-						} else if (eventType === 'UPDATE' && record?.is_resolved) {
+						} else if (eventType === 'UPDATE' && metadata.is_resolved) {
 							setRealtimeStatus('A question has been marked as resolved')
 
 							setTimeout(() => setRealtimeStatus(null), 5000)
@@ -822,11 +788,16 @@ export default function QAClient({
 		setReplyingTo(null)
 	}
 
-	const renderUserInfo = (
-		user: UserData | null,
+	const renderUserInfo = async (
+		userId: string,
 		createdAt: string,
 		size: 'sm' | 'md' = 'md',
 	) => {
+		const { data: userData, error: errorData } = await supabase
+			.from('profiles')
+			.select('*')
+			.eq('id', userId)
+			.single()
 		const avatarSize = size === 'sm' ? 'h-6 w-6' : 'h-8 w-8'
 		const iconSize = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'
 		const nameSize = size === 'sm' ? 'text-sm' : 'text-base'
@@ -835,8 +806,8 @@ export default function QAClient({
 		return (
 			<div className="flex items-center gap-2">
 				<Avatar className={avatarSize}>
-					{user?.avatar_url ? (
-						<AvatarImage src={user.avatar_url} alt="User avatar" />
+					{userData?.image_url ? (
+						<AvatarImage src={userData?.image_url} alt="User avatar" />
 					) : (
 						<AvatarFallback>
 							<UserIcon className={iconSize} aria-hidden="true" />
@@ -846,9 +817,11 @@ export default function QAClient({
 				<div>
 					<div className="flex items-center">
 						<p className={`font-medium ${nameSize}`}>
-							{user?.full_name || `User ${user?.id?.substring(0, 6)}`}
+							{userData?.display_name ||
+								`User ${userData?.id?.substring(0, 6)}`}
 						</p>
-						{user?.is_team_member && (
+						{/* TODO: Add user role relationship to project. For now using role */}
+						{userData?.role && (
 							<Badge
 								variant="outline"
 								className="ml-2 text-xs py-0 h-5 bg-blue-50 text-blue-700 border-blue-200"
@@ -1059,11 +1032,11 @@ export default function QAClient({
 									<CardHeader className="pb-3">
 										<div className="flex justify-between items-start">
 											{renderUserInfo(
-												question.author || null,
-												question.created_at,
+												question.author_id,
+												question.created_at as string,
 											)}
 											<div className="flex items-center gap-2">
-												{question.is_resolved && (
+												{(question.metadata?.is_resolved as boolean) && (
 													<Badge
 														variant="secondary"
 														className="bg-green-50 text-green-700"
@@ -1110,7 +1083,7 @@ export default function QAClient({
 												)}
 											</Button>
 
-											{!question.is_resolved && effectiveUser && (
+											{!question.metadata?.is_resolved && effectiveUser && (
 												<Button
 													variant="outline"
 													size="sm"
@@ -1147,13 +1120,14 @@ export default function QAClient({
 														{question.answers.map((answer) => (
 															<div key={answer.id} className="mb-6">
 																<div
-																	className={`answer-item pl-4 border-l-2 ${answer.author?.is_team_member ? 'border-blue-300 bg-blue-50/30' : 'border-blue-100'} py-2 rounded-r-sm`}
+																	// TODO: condition won't work. Create relationship of user role within project. Using author_id for now.
+																	className={`answer-item pl-4 border-l-2 ${answer.author_id ? 'border-blue-300 bg-blue-50/30' : 'border-blue-100'} py-2 rounded-r-sm`}
 																>
 																	<div className="flex items-start gap-2">
 																		<div className="flex-1">
 																			{renderUserInfo(
-																				answer.author || null,
-																				answer.created_at,
+																				answer.author_id,
+																				answer.created_at as string,
 																				'sm',
 																			)}
 																			<p className="mt-2 whitespace-pre-line">
@@ -1195,8 +1169,8 @@ export default function QAClient({
 																				>
 																					<div className="flex-1">
 																						{renderUserInfo(
-																							reply.author || null,
-																							reply.created_at,
+																							reply.author_id,
+																							reply.created_at as string,
 																							'sm',
 																						)}
 																						<p className="mt-2 whitespace-pre-line text-sm">

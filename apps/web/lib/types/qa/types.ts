@@ -1,21 +1,11 @@
 // Common types used in the QA component
 
-export interface UserData {
-	id: string
-	full_name?: string
-	avatar_url?: string
-	is_team_member?: boolean
-}
+import type { Tables } from '@services/supabase'
 
-export interface CommentData {
-	id: string
-	content: string
-	created_at: string
-	project_id: string
-	author_id: string
-	type?: string
-	parent_comment_id?: string | null
-	is_resolved?: boolean
+export interface UserData extends Tables<'profiles'> {}
+
+export interface CommentData extends Omit<Tables<'comments'>, 'metadata'> {
+	metadata?: Record<string, unknown>
 	author?: UserData
 }
 
@@ -30,4 +20,11 @@ export interface CommentWithAnswers extends CommentData {
 export interface QAProps {
 	projectId: string
 	currentUser?: UserData | null
+}
+
+export interface QAClientProps {
+	projectId: string
+	currentUser?: UserData | null
+	initialQuestions: CommentData[]
+	initialComments: CommentData[]
 }
