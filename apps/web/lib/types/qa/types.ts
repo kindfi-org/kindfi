@@ -22,9 +22,7 @@ export interface QAProps {
 	currentUser?: UserData | null
 }
 
-export interface QAClientProps {
-	projectId: string
-	currentUser?: UserData | null
+export interface QAClientProps extends QAProps {
 	initialQuestions: CommentData[]
 	initialComments: CommentData[]
 }
