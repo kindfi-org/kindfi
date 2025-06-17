@@ -9,7 +9,7 @@ import {
 	View,
 } from 'react-native'
 import RNPickerSelect from 'react-native-picker-select'
-import Kindifi from '../assets/Icons/Kindifi'
+import KindFi from '../assets/icons/kindfi'
 import { allItems } from '../components/StyledText'
 import { ItemList } from '../components/StyledText'
 
@@ -27,7 +27,7 @@ const Navbar = () => (
 		{/* Hamburger Menu */}
 
 		<TouchableOpacity>
-			<Kindifi width={120} height={33} />
+			<KindFi width={120} height={33} />
 		</TouchableOpacity>
 
 		<TouchableOpacity>
@@ -84,7 +84,63 @@ const Filter = ({
 )
 
 // Main Component
-export default function Home() {}
+export default function Home() {
+	const [selectedFilter, setSelectedFilter] = useState<string | null>(null)
+
+	const handleFilterSelect = (filter: string | null) => {
+		setSelectedFilter(filter)
+	}
+
+	const filteredItems = selectedFilter
+		? allItems.filter((item) =>
+				item.category.split(', ').includes(selectedFilter),
+			)
+		: allItems
+
+	const filters = Array.from(
+		new Set(allItems.flatMap((item) => item.category.split(', '))),
+	)
+
+	return (
+		<View style={{ flex: 1 }}>
+			<Navbar />
+			<Header />
+			<Filter
+				filters={filters}
+				selectedFilter={selectedFilter}
+				onSelect={handleFilterSelect}
+			/>
+			<View style={styles.additionalFiltersContainer}>
+				<TouchableOpacity
+					onPress={() => handleFilterSelect(null)}
+					style={styles.selectAllButton}
+				>
+					<Text style={styles.selectAllText}>Select All</Text>
+				</TouchableOpacity>
+
+				{/* Dropdown Filter */}
+				<RNPickerSelect
+					onValueChange={(value) => handleFilterSelect(value)}
+					items={[
+						{ label: 'All', value: null },
+						...filters.map((filter) => ({ label: filter, value: filter })),
+					]}
+					style={{
+						inputIOS: styles.dropdown,
+						inputAndroid: styles.dropdown,
+					}}
+					placeholder={{
+						label: 'Select a filter...',
+						value: null,
+					}}
+				/>
+			</View>
+			<ScrollView>
+				<ItemList items={filteredItems} />
+			</ScrollView>
+		</View>
+	)
+}
 
 // Styles
 const styles = StyleSheet.create({

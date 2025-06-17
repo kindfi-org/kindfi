@@ -8,7 +8,6 @@ import Svg, {
 } from 'react-native-svg'
 const SvgComponent = (props: SvgProps) => (
 	<Svg
-		xmlns="http://www.w3.org/2000/svg"
 		width={120}
 		height={33}
 		fill="none"
