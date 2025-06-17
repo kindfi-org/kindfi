@@ -67,7 +67,7 @@ export default function MobileNavbar() {
 				>
 					{navItems.map((item, index) => (
 						<MotiView
-							key={index}
+							key={item.label.replace(/\s+/g, '-').toLowerCase()}
 							from={{ opacity: 0, translateX: -20 }}
 							animate={{ opacity: 1, translateX: 0 }}
 							transition={{ delay: index * 100, type: 'timing', duration: 300 }}
