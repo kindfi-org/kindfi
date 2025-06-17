@@ -1076,10 +1076,8 @@ export default function QAClient({
 																	<div className="flex items-start gap-2">
 																		<div className="flex-1">
 																			<RenderUserInfo
-																				authorData={question.author}
-																				createdAt={
-																					question.created_at as string
-																				}
+																				authorData={answer.author}
+																				createdAt={answer.created_at as string}
 																				size="sm"
 																			/>
 																			<p className="mt-2 whitespace-pre-line">
@@ -1121,9 +1119,9 @@ export default function QAClient({
 																				>
 																					<div className="flex-1">
 																						<RenderUserInfo
-																							authorData={question.author}
+																							authorData={reply.author}
 																							createdAt={
-																								question.created_at as string
+																								reply.created_at as string
 																							}
 																							size="sm"
 																						/>
