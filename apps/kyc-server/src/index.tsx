@@ -2,21 +2,23 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { serve } from 'bun'
 import type { Server, ServerWebSocket } from 'bun'
+import { kycWebSocketService } from './lib/websocket'
 import { routes } from './routes'
 import { buildClient } from './utils/buildClient'
 
 interface ClientData {
 	clientId: string
 	joinedAt: string
+	userId?: string
 }
 
 interface ParsedMessage {
-	text?: string
 	type?: string
+	userId?: string
+	text?: string
 	[key: string]: unknown
 }
 
-// Function to get the current client filename from manifest
 function getClientFilename(): string {
 	try {
 		const manifestPath = join(process.cwd(), 'public', 'manifest.json')
@@ -31,22 +33,21 @@ function getClientFilename(): string {
 }
 
 async function startServer() {
-	// Build the client-side JavaScript first
-	await buildClient()
+	if (process.env.NODE_ENV !== 'test') {
+		try {
+			await buildClient()
+		} catch (error) {
+			console.error('❌ Client build failed:', error)
+			process.exit(1)
+		}
+	}
 
-	// Keep track of connected clients
-	// TODO: this is a demonstration of how to use the server, it should be replaced with a real database
-	const clients = new Set<ServerWebSocket<ClientData>>()
-
-	// Define server options with type assertion
 	const serverOptions = {
 		fetch(req: Request, server: Server): Response | Promise<Response> {
 			const url = new URL(req.url)
 
-			// Handle WebSocket connections
 			if (url.pathname === '/live') {
 				const upgraded = server.upgrade<ClientData>(req, {
-					// Data passed to the WebSocket object
 					data: {
 						clientId: crypto.randomUUID(),
 						joinedAt: new Date().toISOString(),
@@ -60,17 +61,24 @@ async function startServer() {
 				return new Response()
 			}
 
-			// Serve static files from the public directory
+			// Serve any static file from /public
+			const publicPath = join(process.cwd(), 'public', url.pathname)
+			if (existsSync(publicPath)) {
+				const file = Bun.file(publicPath)
+				return new Response(file)
+			}
+
 			if (url.pathname.startsWith('/client') && url.pathname.endsWith('.js')) {
 				try {
-					// Get the requested filename from the URL
-					const requestedFile = url.pathname.substring(1) // Remove leading slash
-
-					// Get the path to the public directory
+					const requestedFile = url.pathname.replace(/^\/+/, '') // trim leading slashes
 					const publicDir = join(process.cwd(), 'public')
-
-					// Check if the specific file exists
 					const specificFilePath = join(publicDir, requestedFile)
+
+					// 🔒 Reject attempts that escape the public directory
+					if (!specificFilePath.startsWith(publicDir)) {
+						return new Response('Forbidden', { status: 403 })
+					}
+
 					if (existsSync(specificFilePath)) {
 						const file = Bun.file(specificFilePath)
 						return new Response(file, {
@@ -81,7 +89,6 @@ async function startServer() {
 						})
 					}
 
-					// If specific file not found, try to serve the current client file from manifest
 					const currentClientJs = getClientFilename()
 					const filePath = join(publicDir, currentClientJs)
 					if (existsSync(filePath)) {
@@ -100,8 +107,6 @@ async function startServer() {
 					return new Response('File not found', { status: 404 })
 				}
 			}
-
-			// Check if the route exists in our routes object
 			const pathname = url.pathname
 			const route = routes[pathname as keyof typeof routes]
 
@@ -111,101 +116,43 @@ async function startServer() {
 					// @ts-expect-error method is dynamically accessed
 					return route[method](req)
 				}
-
-				// Method not allowed
 				return new Response('Method not allowed', { status: 405 })
 			}
 
-			// Default response for unknown routes
 			return new Response('Kindfi KYC Server API', { status: 404 })
 		},
 		websocket: {
 			open(ws: ServerWebSocket<ClientData>) {
-				// Add the client to the set of connected clients
-				clients.add(ws)
+				kycWebSocketService.handleConnection(ws)
+			},
+			message(ws: ServerWebSocket<ClientData>, message: string) {
+				try {
+					const parsedMessage = JSON.parse(message) as ParsedMessage
 
-				// Log the connection
-				console.log(`Client connected: ${ws.data.clientId}`)
-
-				// Send a welcome message to the client
-				ws.send(
-					JSON.stringify({
-						type: 'welcome',
-						message: `Welcome to the Kindfi KYC Server! Your client ID is ${ws.data.clientId}`,
-						clientId: ws.data.clientId,
-					}),
-				)
-
-				// Broadcast to all clients that a new user has joined
-				for (const client of clients) {
-					if (client !== ws) {
-						client.send(
+					if (parsedMessage.type === 'subscribe' && parsedMessage.userId) {
+						ws.data.userId = parsedMessage.userId
+						// Optionally call a dedicated `addSubscription` method instead
+					} else {
+						ws.send(
 							JSON.stringify({
-								type: 'userJoined',
-								message: `A new user has joined! Total users: ${clients.size}`,
-								totalUsers: clients.size,
+								type: 'error',
+								message:
+									'Invalid message format. Expected { type: "subscribe", userId: string }',
 							}),
 						)
 					}
-				}
-			},
-			message(ws: ServerWebSocket<ClientData>, message: string) {
-				// Log the message
-				console.log(`Message from ${ws.data.clientId}: ${message}`)
-
-				try {
-					// Parse the message
-					const parsedMessage = JSON.parse(message) as ParsedMessage
-
-					// Prepare response message
-					const responseMessage = {
-						type: 'message',
-						clientId: ws.data.clientId,
-						message: parsedMessage.text || message,
-						text: parsedMessage.text || message,
-						timestamp: new Date().toISOString(),
-					}
-
-					// Broadcast the message to all clients
-					for (const client of clients) {
-						client.send(JSON.stringify(responseMessage))
-					}
 				} catch (error) {
-					// If the message is not valid JSON, just broadcast it as is
 					console.error('Error parsing message:', error)
-
-					// Prepare response for plain text message
-					const responseMessage = {
-						type: 'message',
-						clientId: ws.data.clientId,
-						message: message,
-						text: message,
-						timestamp: new Date().toISOString(),
-					}
-
-					// Broadcast to all clients
-					for (const client of clients) {
-						client.send(JSON.stringify(responseMessage))
-					}
-				}
-			},
-			close(ws: ServerWebSocket<ClientData>) {
-				// Remove the client from the set of connected clients
-				clients.delete(ws)
-
-				// Log the disconnection
-				console.log(`Client disconnected: ${ws.data.clientId}`)
-
-				// Broadcast to all clients that a user has left
-				for (const client of clients) {
-					client.send(
+					ws.send(
 						JSON.stringify({
-							type: 'userLeft',
-							message: `A user has left. Total users: ${clients.size}`,
-							totalUsers: clients.size,
+							type: 'error',
+							message: 'Invalid message format',
 						}),
 					)
 				}
+			},
+			close(ws: ServerWebSocket<ClientData>) {
+				kycWebSocketService.handleDisconnection(ws)
 			},
 		},
 		port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3001,
@@ -213,13 +160,16 @@ async function startServer() {
 		development: process.env.NODE_ENV !== 'production',
 	} as const
 
-	// Start the server
 	const server = serve(serverOptions)
 	console.log(`🚀 Server running at http://localhost:${server.port}/`)
+	return server
 }
 
-// Start the server
-startServer().catch((error) => {
-	console.error('Failed to start server:', error)
-	process.exit(1)
-})
+if (process.env.NODE_ENV !== 'test') {
+	startServer().catch((error) => {
+		console.error('Failed to start server:', error)
+		process.exit(1)
+	})
+}
+
+export { startServer }

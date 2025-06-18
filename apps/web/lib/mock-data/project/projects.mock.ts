@@ -1,535 +1,365 @@
-import type {
-	AboutProjectProps,
-	MediaItem,
-	Project,
-	StatItem,
-	TabItem,
-	TimelineEvent,
-	UpdateItem,
-} from '~/lib/types'
-import { createMoney, createPercentage } from '~/lib/utils/types-helpers'
+import type { Project } from '~/lib/types/project'
+import { categories } from './categories.mock'
 
 export const projects: Project[] = [
 	{
-		id: 'healthy-kids-id',
-		created_at: '',
-		image_url: '/images/kids.webp',
-		categories: ['Child Welfare'],
-		title: 'Healthy Kids Workshop',
+		id: '1',
+		title: 'Empowering Education',
 		description:
-			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica. Together, we can ensure a brighter future for every child.',
-		current_amount: createMoney(22800),
-		target_amount: createMoney(25000),
-		investors_count: 18,
-		min_investment: createMoney(5),
-		percentage_complete: createPercentage(90),
+			'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities.',
+		image: '/images/education.webp',
+		category: categories.find((c) => c.id === '7') ?? categories[0],
+		goal: 55000,
+		raised: 40000,
+		investors: 40,
+		minInvestment: 10,
 		tags: [
-			{
-				id: 'ngo-tag-id',
-				text: 'NGO',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'nutrition-tag-id',
-				text: 'NUTRITION',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'children-tag-id',
-				text: 'CHILDREN',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
+			{ id: 'tag-education', name: 'EDUCATION', color: '#4A90E2' },
+			{ id: 'tag-children', name: 'CHILDREN', color: '#F39C12' },
+			{ id: 'tag-future', name: 'FUTURE', color: '#2C3E50' },
 		],
+		createdAt: '2024-01-03T09:15:00Z',
 	},
 	{
-		id: 'forest-restoration-id',
-		created_at: '',
-		image_url: '/images/bosques.webp',
-		categories: ['Environmental Protection'],
+		id: '2',
 		title: 'Forest Restoration Initiative',
 		description:
 			'Restore and reforest areas devastated by uncontrolled deforestation. Your support helps rebuild ecosystems and fight climate change.',
-		current_amount: createMoney(54000),
-		target_amount: createMoney(60000),
-		investors_count: 35,
-		min_investment: createMoney(10),
-		percentage_complete: createPercentage(90),
+		image: '/images/bosques.webp',
+		category: categories.find((c) => c.id === '3') ?? categories[0],
+		goal: 60000,
+		raised: 54000,
+		investors: 35,
+		minInvestment: 10,
 		tags: [
-			{
-				id: 'environment-tag-id',
-				text: 'ENVIRONMENT',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'ecological-tag-id',
-				text: 'ECOLOGICAL',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'sustainable-tag-id',
-				text: 'SUSTAINABLE',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
+			{ id: 'tag-environment', name: 'ENVIRONMENT', color: '#27AE60' },
+			{ id: 'tag-ecological', name: 'ECOLOGICAL', color: '#16A085' },
+			{ id: 'tag-sustainable', name: 'SUSTAINABLE', color: '#1ABC9C' },
 		],
+		createdAt: '2024-01-17T14:40:00Z',
 	},
 	{
-		id: 'rural-animal-shelter-id',
-		created_at: '',
-		image_url: '/images/dogs.webp',
-		categories: ['Animal Welfare'],
-		title: 'Rural Animal Shelter',
-		description:
-			'Provide care and shelter to homeless animals in rural communities. Help us create safe havens for animals in need.',
-		current_amount: createMoney(15500),
-		target_amount: createMoney(20000),
-		investors_count: 22,
-		min_investment: createMoney(8),
-		percentage_complete: createPercentage(77),
-		tags: [
-			{
-				id: 'animals-tag-id',
-				text: 'ANIMALS',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'care-tag-id',
-				text: 'CARE',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'community-tag-id',
-				text: 'COMMUNITY',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-		],
-	},
-	{
-		id: 'disaster-aid-id',
-		created_at: '',
-		image_url: '/images/disaster-aid.webp',
-		categories: ['Disaster Relief'],
-		title: 'Natural Disasters Human Aid',
-		description:
-			'Provide critical support to communities affected by natural disasters. From emergency supplies to long-term rebuilding efforts, join us in bringing hope and recovery to those in need.',
-		current_amount: createMoney(30000),
-		target_amount: createMoney(50000),
-		investors_count: 28,
-		min_investment: createMoney(20),
-		percentage_complete: createPercentage(60),
-		tags: [
-			{
-				id: 'humanitarian-tag-id',
-				text: 'HUMANITARIAN',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'disaster-tag-id',
-				text: 'DISASTER RELIEF',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'community-tag-id',
-				text: 'COMMUNITY SUPPORT',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-		],
-	},
-	{
-		id: 'indigenous-crafts-id',
-		created_at: '',
-		image_url: '/images/artesania.webp',
-		categories: ['Culture and Arts'],
-		title: 'Preserving Indigenous Crafts',
-		description:
-			'Support the preservation of indigenous craftsmanship in Costa Rica. Your contributions protect traditional techniques and cultural heritage.',
-		current_amount: createMoney(34000),
-		target_amount: createMoney(50000),
-		investors_count: 29,
-		min_investment: createMoney(15),
-		percentage_complete: createPercentage(68),
-		tags: [
-			{
-				id: 'culture-tag-id',
-				text: 'CULTURE',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'indigenous-tag-id',
-				text: 'INDIGENOUS',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'art-tag-id',
-				text: 'ART',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-		],
-	},
-	{
-		id: 'water-for-rural-communities-id',
-		created_at: '',
-		image_url: '/images/water.webp',
-		categories: ['Access to Clean Water'],
-		title: 'Water for Rural Communities',
-		description:
-			'Provide access to safe drinking water in underserved rural areas. Help us install water purification systems to improve health and livelihoods.',
-		current_amount: createMoney(18500),
-		target_amount: createMoney(25000),
-		investors_count: 20,
-		min_investment: createMoney(12),
-		percentage_complete: createPercentage(74),
-		tags: [
-			{
-				id: 'water-tag-id',
-				text: 'WATER',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'health-tag-id',
-				text: 'HEALTH',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'community-tag-id',
-				text: 'COMMUNITY',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-		],
-	},
-	{
-		id: 'empowering-education-id',
-		created_at: '',
-		image_url: '/images/education.webp',
-		categories: ['Education'],
-		title: 'Empowering Education',
-		description:
-			'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for the next generation.',
-		current_amount: createMoney(40000),
-		target_amount: createMoney(55000),
-		investors_count: 40,
-		min_investment: createMoney(10),
-		percentage_complete: createPercentage(73),
-		tags: [
-			{
-				id: 'education-tag-id',
-				text: 'EDUCATION',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'children-tag-id',
-				text: 'CHILDREN',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'future-tag-id',
-				text: 'FUTURE',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-		],
-	},
-	{
-		id: 'mobile-clinics-id',
-		created_at: '',
-		image_url: '/images/healthcare.webp',
-		categories: ['Healthcare'],
+		id: '3',
 		title: 'Mobile Clinics',
 		description:
 			'Bring essential healthcare services to remote areas through mobile clinics. Your support helps save lives and build healthier communities.',
-		current_amount: createMoney(32000),
-		target_amount: createMoney(45000),
-		investors_count: 30,
-		min_investment: createMoney(20),
-		percentage_complete: createPercentage(71),
+		image: '/images/healthcare.webp',
+		category: categories.find((c) => c.id === '8') ?? categories[0],
+		goal: 45000,
+		raised: 32000,
+		investors: 30,
+		minInvestment: 20,
 		tags: [
-			{
-				id: 'healthcare-tag-id',
-				text: 'HEALTHCARE',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'community-tag-id',
-				text: 'COMMUNITY',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
-			{
-				id: 'impact-tag-id',
-				text: 'IMPACT',
-				color: {
-					backgroundColor: '',
-					textColor: '',
-				},
-			},
+			{ id: 'tag-healthcare', name: 'HEALTHCARE', color: '#27AE60' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+			{ id: 'tag-impact', name: 'IMPACT', color: '#9B59B6' },
 		],
+		createdAt: '2024-01-29T11:05:00Z',
+	},
+	{
+		id: '4',
+		title: 'Preserving Indigenous Crafts',
+		description:
+			'Support the preservation of indigenous craftsmanship in Costa Rica. Your contributions protect traditional techniques and cultural heritage.',
+		image: '/images/artesania.webp',
+		category: categories.find((c) => c.id === '5') ?? categories[0],
+		goal: 50000,
+		raised: 34000,
+		investors: 29,
+		minInvestment: 15,
+		tags: [
+			{ id: 'tag-culture', name: 'CULTURE', color: '#9B59B6' },
+			{ id: 'tag-indigenous', name: 'INDIGENOUS', color: '#8E44AD' },
+			{ id: 'tag-art', name: 'ART', color: '#D35400' },
+		],
+		createdAt: '2024-02-06T08:50:00Z',
+	},
+	{
+		id: '5',
+		title: 'Water for Rural Communities',
+		description:
+			'Provide access to safe drinking water in underserved rural areas. Help us install water purification systems to improve health and livelihoods.',
+		image: '/images/water.webp',
+		category: categories.find((c) => c.id === '6') ?? categories[0],
+		goal: 40000,
+		raised: 28000,
+		investors: 45,
+		minInvestment: 5,
+		tags: [
+			{ id: 'tag-water', name: 'WATER', color: '#3498DB' },
+			{ id: 'tag-health', name: 'HEALTH', color: '#2ECC71' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+		],
+		createdAt: '2024-02-14T10:00:00Z',
+	},
+	{
+		id: '6',
+		title: 'Rural Animal Shelter',
+		description:
+			'Provide care and shelter to homeless animals in rural communities. Help us create safe havens for animals in need.',
+		image: '/images/dogs.webp',
+		category: categories.find((c) => c.id === '1') ?? categories[0],
+		goal: 70000,
+		raised: 45000,
+		investors: 60,
+		minInvestment: 10,
+		tags: [
+			{ id: 'tag-animals', name: 'ANIMALS', color: '#E67E22' },
+			{ id: 'tag-care', name: 'CARE', color: '#F39C12' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+		],
+		createdAt: '2024-08-21T16:00:00Z',
+	},
+	{
+		id: '7',
+		title: 'Community Garden Project',
+		description:
+			'Transform vacant urban spaces into thriving community gardens. Help us create green spaces that provide fresh food and bring people together.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '10') ?? categories[0],
+		goal: 25000,
+		raised: 18000,
+		investors: 32,
+		minInvestment: 5,
+		tags: [
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+			{ id: 'tag-food', name: 'FOOD', color: '#F39C12' },
+			{ id: 'tag-urban', name: 'URBAN', color: '#7F8C8D' },
+		],
+		createdAt: '2024-02-27T16:30:00Z',
+	},
+	{
+		id: '8',
+		title: 'Natural Disasters Human Aid',
+		description:
+			'Provide critical support to communities affected by natural disasters. From emergency supplies to long-term rebuilding efforts, join us in bringing hope and recovery to those in need.',
+		image: '/images/disaster-aid.webp',
+		category: categories.find((c) => c.id === '4') ?? categories[0],
+		goal: 100000,
+		raised: 82000,
+		investors: 120,
+		minInvestment: 10,
+		tags: [
+			{ id: 'tag-emergency', name: 'EMERGENCY', color: '#E74C3C' },
+			{ id: 'tag-relief', name: 'RELIEF', color: '#C0392B' },
+			{ id: 'tag-humanitarian', name: 'HUMANITARIAN', color: '#FF6F61' },
+		],
+		createdAt: '2024-03-05T13:20:00Z',
+	},
+	{
+		id: '9',
+		title: 'Healthy Kids Workshop',
+		description:
+			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica. Together, we can ensure a brighter future for every child.',
+		image: '/images/kids.webp',
+		category: categories.find((c) => c.id === '2') ?? categories[0],
+		goal: 35000,
+		raised: 22000,
+		investors: 28,
+		minInvestment: 15,
+		tags: [
+			{ id: 'tag-children', name: 'CHILDREN', color: '#F1C40F' },
+			{ id: 'tag-nutrition', name: 'NUTRITION', color: '#27AE60' },
+			{ id: 'tag-ngo', name: 'NGO', color: '#2980B9' },
+		],
+		createdAt: '2024-03-18T15:10:00Z',
+	},
+	{
+		id: '10',
+		title: 'Renewable Energy for Schools',
+		description:
+			'Install solar panels in underfunded schools to reduce costs and teach sustainability. Help us bring clean energy to education.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '9') ?? categories[0],
+		goal: 80000,
+		raised: 56000,
+		investors: 42,
+		minInvestment: 20,
+		tags: [
+			{ id: 'tag-energy', name: 'ENERGY', color: '#00BCD4' },
+			{ id: 'tag-education', name: 'EDUCATION', color: '#4A90E2' },
+			{ id: 'tag-sustainability', name: 'SUSTAINABILITY', color: '#2ECC71' },
+		],
+		createdAt: '2024-03-30T17:45:00Z',
+	},
+	{
+		id: '11',
+		title: 'Animal Shelter Expansion',
+		description:
+			'Help us expand our animal shelter to rescue more abandoned pets. Your support provides food, medical care, and loving homes.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '11') ?? categories[0],
+		goal: 45000,
+		raised: 31000,
+		investors: 55,
+		minInvestment: 5,
+		tags: [
+			{ id: 'tag-animals', name: 'ANIMALS', color: '#FF7043' },
+			{ id: 'tag-rescue', name: 'RESCUE', color: '#E74C3C' },
+			{ id: 'tag-care', name: 'CARE', color: '#F5B041' },
+		],
+		createdAt: '2024-04-08T09:25:00Z',
+	},
+	{
+		id: '12',
+		title: 'Local Journalism Fund',
+		description:
+			'Support independent journalism in underserved communities. Help us keep citizens informed and hold power accountable.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '12') ?? categories[0],
+		goal: 30000,
+		raised: 17000,
+		investors: 25,
+		minInvestment: 10,
+		tags: [
+			{ id: 'tag-media', name: 'MEDIA', color: '#3498DB' },
+			{ id: 'tag-democracy', name: 'DEMOCRACY', color: '#2ECC71' },
+			{ id: 'tag-information', name: 'INFORMATION', color: '#9B59B6' },
+		],
+		createdAt: '2024-04-19T14:50:00Z',
+	},
+	{
+		id: '13',
+		title: 'Urban Farming Initiative',
+		description:
+			'Transform unused urban spaces into productive community farms. Help us create sustainable food sources in city environments.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '3') ?? categories[0],
+		goal: 35000,
+		raised: 12000,
+		investors: 28,
+		minInvestment: 10,
+		tags: [
+			{ id: 'tag-agriculture', name: 'AGRICULTURE', color: '#27AE60' },
+			{ id: 'tag-sustainability', name: 'SUSTAINABILITY', color: '#2ECC71' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+		],
+		createdAt: '2024-04-28T12:10:00Z',
+	},
+	{
+		id: '14',
+		title: 'Mental Health Support Network',
+		description:
+			'Build a network of mental health professionals providing free services to underserved communities. Support mental wellbeing for all.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '8') ?? categories[0],
+		goal: 60000,
+		raised: 38000,
+		investors: 52,
+		minInvestment: 15,
+		tags: [
+			{ id: 'tag-health', name: 'HEALTH', color: '#1ABC9C' },
+			{ id: 'tag-mental', name: 'MENTAL', color: '#8BC34A' },
+			{ id: 'tag-support', name: 'SUPPORT', color: '#D35400' },
+		],
+		createdAt: '2024-05-06T11:35:00Z',
+	},
+	{
+		id: '15',
+		title: 'Clean Ocean Initiative',
+		description:
+			'Remove plastic waste from our oceans and develop sustainable alternatives to single-use plastics. Help us protect marine life.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '3') ?? categories[0],
+		goal: 75000,
+		raised: 48000,
+		investors: 67,
+		minInvestment: 20,
+		tags: [
+			{ id: 'tag-ocean', name: 'OCEAN', color: '#3498DB' },
+			{ id: 'tag-environment', name: 'ENVIRONMENT', color: '#2ECC71' },
+			{ id: 'tag-plastic', name: 'PLASTIC', color: '#34495E' },
+		],
+		createdAt: '2024-05-15T10:15:00Z',
+	},
+	{
+		id: '16',
+		title: 'Accessible Technology for All',
+		description:
+			'Develop assistive technologies for people with disabilities. Help make the digital world accessible to everyone.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '10') ?? categories[0],
+		goal: 50000,
+		raised: 29000,
+		investors: 38,
+		minInvestment: 15,
+		tags: [
+			{ id: 'tag-technology', name: 'TECHNOLOGY', color: '#00BCD4' },
+			{ id: 'tag-accessibility', name: 'ACCESSIBILITY', color: '#9C27B0' },
+			{ id: 'tag-inclusion', name: 'INCLUSION', color: '#FF9800' },
+		],
+		createdAt: '2024-06-02T07:40:00Z',
+	},
+	{
+		id: '17',
+		title: 'Refugee Education Program',
+		description:
+			'Provide educational resources and support for refugee children. Help them build a brighter future through learning.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '7') ?? categories[0],
+		goal: 40000,
+		raised: 27000,
+		investors: 42,
+		minInvestment: 10,
+		tags: [
+			{ id: 'tag-education', name: 'EDUCATION', color: '#4A90E2' },
+			{ id: 'tag-refugees', name: 'REFUGEES', color: '#795548' },
+			{ id: 'tag-children', name: 'CHILDREN', color: '#F39C12' },
+		],
+		createdAt: '2024-06-18T13:55:00Z',
+	},
+	{
+		id: '18',
+		title: 'Sustainable Housing Solutions',
+		description:
+			'Build eco-friendly, affordable housing for low-income families. Help create sustainable communities for the future.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '3') ?? categories[0],
+		goal: 90000,
+		raised: 62000,
+		investors: 75,
+		minInvestment: 25,
+		tags: [
+			{ id: 'tag-housing', name: 'HOUSING', color: '#9E9E9E' },
+			{ id: 'tag-sustainability', name: 'SUSTAINABILITY', color: '#2ECC71' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+		],
+		createdAt: '2024-07-01T08:20:00Z',
+	},
+	{
+		id: '19',
+		title: 'Arts Education for Youth',
+		description:
+			'Bring arts education to underserved schools. Help nurture creativity and self-expression in young people.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '5') ?? categories[0],
+		goal: 30000,
+		raised: 18000,
+		investors: 32,
+		minInvestment: 10,
+		tags: [
+			{ id: 'tag-arts', name: 'ARTS', color: '#9B59B6' },
+			{ id: 'tag-education', name: 'EDUCATION', color: '#4A90E2' },
+			{ id: 'tag-youth', name: 'YOUTH', color: '#03A9F4' },
+		],
+		createdAt: '2024-07-19T14:30:00Z',
+	},
+	{
+		id: '20',
+		title: 'Senior Companion Program',
+		description:
+			'Connect elderly individuals with companions to reduce isolation and improve quality of life. Help combat loneliness in our senior population.',
+		image: '/images/placeholder.png',
+		category: categories.find((c) => c.id === '10') ?? categories[0],
+		goal: 25000,
+		raised: 16000,
+		investors: 28,
+		minInvestment: 5,
+		tags: [
+			{ id: 'tag-seniors', name: 'SENIORS', color: '#607D8B' },
+			{ id: 'tag-companionship', name: 'COMPANIONSHIP', color: '#FF7043' },
+			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
+		],
+		createdAt: '2024-08-03T09:45:00Z',
 	},
 ]
-
-export const projectTabsData: TabItem[] = [
-	{ id: 'overview', label: 'Project Overview', content: '<ProjectOverview />' },
-	{ id: 'impact', label: 'Your Impact', content: '<YourImpactSection />' },
-	{
-		id: 'updates',
-		label: 'Projects Updates',
-		content: '<ProjectUpdatesSection />',
-	},
-	{
-		id: 'showcase',
-		label: 'Success Gallery',
-		content: '<ProjectShowcaseSection />',
-	},
-]
-
-export const statsData: StatItem[] = [
-	{
-		id: 'stat-1',
-
-		label: 'Contribution',
-		value: '$100',
-		bgColor: 'bg-blue-100',
-		textColor: 'text-blue-700',
-		icon: '💰',
-	},
-	{
-		id: 'stat-2',
-
-		label: 'NFT Earned',
-		value: '1',
-		bgColor: 'bg-purple-100',
-		textColor: 'text-purple-700',
-		icon: '🏆',
-	},
-	{
-		id: 'stat-3',
-
-		label: 'Referrals',
-		value: '2',
-		bgColor: 'bg-green-100',
-		textColor: 'text-green-700',
-		icon: '👥',
-	},
-]
-
-export const updatesData: UpdateItem[] = [
-	{
-		id: 'update-1',
-		title: 'Behind the Scenes Update #1',
-		description: 'Exclusive project insights and progress updates...',
-		date: '2 days ago',
-		exclusive: true,
-	},
-	{
-		id: 'update-2',
-		title: 'Behind the Scenes Update #2',
-		description: 'Exclusive project insights and progress updates...',
-		date: '2 days ago',
-		exclusive: true,
-	},
-]
-
-export const statsDataUpdates: StatItem[] = [
-	{
-		id: 'stat-1',
-		label: 'Total Raised',
-		value: '$100,000',
-		bgColor: 'bg-blue-100',
-		textColor: 'text-blue-700',
-		icon: '💰',
-	},
-	{
-		id: 'stat-2',
-		label: 'Supporters',
-		value: '234',
-		bgColor: 'bg-purple-100',
-		textColor: 'text-purple-700',
-		icon: '👥',
-	},
-	{
-		id: 'stat-3',
-		label: 'NFTs Minted',
-		value: '156',
-		bgColor: 'bg-green-100',
-		textColor: 'text-green-700',
-		icon: '🏆',
-	},
-]
-
-export const timelineEvents: TimelineEvent[] = [
-	{
-		id: 'event-1',
-		title: 'Project Launch',
-		description: 'Project officially launched',
-		date: 'Mar 15',
-		status: 'completed',
-	},
-	{
-		id: 'event-2',
-		title: '50% Milestone',
-		description: 'Reached halfway point',
-		date: 'Apr 1',
-		status: 'completed',
-	},
-	{
-		id: 'event-3',
-
-		title: 'Goal Reached',
-		description: 'Successfully achieved target',
-		date: 'Apr 15',
-		status: 'completed',
-	},
-	{
-		id: 'event-4',
-
-		title: 'Implementation',
-		description: 'Project implementation phase',
-		date: 'May 1',
-		status: 'pending',
-	},
-]
-
-const createMediaItems = (
-	count: number,
-	prefix: string,
-	type: 'image' | 'video' = 'image',
-) =>
-	Array.from({ length: count }, (_, i) => ({
-		id: `${prefix.toLowerCase()}-${i + 1}`,
-		src: `/images/${type}.png`,
-		alt: `${prefix} ${i + 1}`,
-		type,
-	}))
-
-export const successGalleryItems: MediaItem[] = createMediaItems(4, 'Success')
-export const showcaseData: MediaItem[] = createMediaItems(12, 'Showcase')
-export const mediaItems: MediaItem[] = [
-	{
-		id: 'main-video',
-		src: '/images/video.png',
-		alt: 'Main Video',
-		type: 'video',
-	},
-	...createMediaItems(4, 'Thumbnail'),
-]
-
-export const projectOverviewMediaItems: MediaItem[] = [
-	{
-		id: 'main-video',
-		type: 'video',
-		src: '/images/video.png',
-		alt: 'Main Video',
-	},
-]
-
-export const aboutProjectProps: AboutProjectProps = {
-	id: 'project-1',
-	description:
-		"Our initiative aims to reduce ocean plastic waste by 30% through innovative recycling technologies and community engagement programs. Working with local communities, we've established collection points and education centers.",
-	highlights: [
-		{
-			id: 'highlight-1',
-			label: 'Goal',
-			value: 'Clear environmental impact',
-			icon: 'target',
-		},
-		{
-			id: 'highlight-2',
-			label: 'Community',
-			value: '500+ supporters',
-			icon: 'user',
-		},
-		{
-			id: 'highlight-3',
-			label: 'Location',
-			value: 'Global Initiative',
-			icon: 'language',
-		},
-		{
-			id: 'highlight-4',
-			label: 'Verification',
-			value: 'Verified by KindFi',
-			icon: 'status',
-		},
-	],
-	updates: [
-		{
-			id: 'update-1',
-			title: 'Project Milestone 1',
-			description: 'Brief update about project progress and achievements...',
-			date: '2 days ago',
-		},
-		{
-			id: 'update-2',
-			title: 'Project Milestone 2',
-			description: 'Brief update about project progress and achievements...',
-			date: '2 days ago',
-		},
-	],
-	titleAboveHighlights: true,
-}

@@ -11,7 +11,7 @@ mod events;
 use crate::events::{
     AccountAddedEventData, AccountRemovedEventData, DefaultThresholdChangedEventData,
     FactoryAddedEventData, FactoryRemovedEventData, InitEventData, SignerAddedEventData,
-    SignerRemovedEventData, ACCOUNT, ADDED, FACTORY, INIT, REMOVED, SECURITY, SIGNER, UPDATE,
+    SignerRemovedEventData, ACCOUNT, ADDED, FACTORY, INIT, REMOVED, SECURITY, SIGNER, UPDATED,
 };
 
 use crate::errors::Error;
@@ -160,7 +160,7 @@ impl AuthController {
             .set::<Val, u32>(&DataKey::DefaultThreshold.into_val(&env), &threshold);
 
         env.events().publish(
-            (SECURITY, UPDATE),
+            (SECURITY, UPDATED),
             DefaultThresholdChangedEventData { threshold },
         );
     }
@@ -272,6 +272,13 @@ impl AuthController {
         return accounts;
     }
 
+    /// Checks if the given address is registered as an authenticated KindFi user.
+    pub fn is_authenticated_user(env: Env, address: Address) -> bool {
+        env.storage()
+            .instance()
+            .has::<Val>(&DataKey::Account(address).into_val(&env))
+    }
+
     #[allow(non_snake_case)]
     fn __check_auth(
         env: Env,
@@ -358,3 +365,4 @@ impl AuthController {
 }
 
 mod test;
+mod test_auth;

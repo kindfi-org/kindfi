@@ -1,10 +1,7 @@
-import { Networks } from '@stellar/stellar-sdk'
+import { supabase } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
-import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
-import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
-import { supabase } from '~/lib/supabase/config'
 import type { MilestoneReviewPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { validateMilestoneReview } from '~/lib/validators/escrow'
 
@@ -31,6 +28,20 @@ export async function POST(req: NextRequest) {
 			signer,
 			escrowContractAddress,
 		} = reviewData
+
+		// Verify authenticated user matches reviewerId
+		const {
+			data: { user },
+			error: authError,
+		} = await supabase.auth.getUser()
+		if (authError || !user || user.id !== reviewerId) {
+			return NextResponse.json(
+				{
+					error: 'Unauthorized: Reviewer ID does not match authenticated user',
+				},
+				{ status: 403 },
+			)
+		}
 
 		// Step 1: Validate Milestone Exists
 		const { data: milestone, error: milestoneError } = await supabase
@@ -60,9 +71,14 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Step 4: Finalize Milestone On-Chain if Approved
-		if (status === 'approved') {
-			const escrowResponse = await createEscrowRequest({
+		// * It shouldn't be "completed"... it should be "approved" however, there is an overlap with the old types with the new migrations.
+		// TODO: Fix this in the DB and prior that, update here.
+		const isApproved = status === 'completed'
+		let escrowResponse = null
+
+		// Step 3: Finalize Milestone On-Chain if Approved
+		if (isApproved) {
+			escrowResponse = await createEscrowRequest({
 				action: 'approveMilestone',
 				method: 'POST',
 				data: { signer, contractId: escrowContractAddress },
@@ -71,40 +87,41 @@ export async function POST(req: NextRequest) {
 			if (!escrowResponse.unsignedTransaction) {
 				throw new Error('Failed to retrieve unsigned transaction XDR')
 			}
-
-			// Sign transaction
-			const signedTxXdr = signTransaction(
-				escrowResponse.unsignedTransaction,
-				Networks.TESTNET, // Change to MAINNET if in production
-				signer,
-			)
-
-			if (!signedTxXdr) {
-				throw new Error('Transaction signing failed')
-			}
-
-			// Send signed transaction on-chain
-			const txResponse = await sendTransaction(signedTxXdr)
-
-			if (!txResponse || !txResponse.txHash) {
-				throw new Error('Failed to finalize milestone on-chain')
-			}
 		}
 
-		// Step 5: Update Milestone Status in DB
-		const { data: updatedMilestone, error: updateError } = await supabase
-			.from('escrow_milestones')
-			.update({
-				status,
-				completed_at: status === 'approved' ? new Date().toISOString() : null,
-			})
-			.eq('id', milestoneId)
-			.select('*')
-			.single()
+		// TODO: Move this to FE for signatures
+		// // Sign transaction
+		// const signedTxXdr = signTransaction(
+		//   escrowResponse.unsignedTransaction,
+		//   Networks.TESTNET, // Change to MAINNET if in production
+		//   signer,
+		// );
+		// if (!signedTxXdr) {
+		//   throw new Error('Transaction signing failed');
+		// }
 
-		if (updateError) {
-			throw new Error('Failed to update milestone status')
-		}
+		// TODO: Move this to BE for sending transaction
+		// Send signed transaction on-chain
+		// const txResponse = await sendTransaction(signedTxXdr);
+
+		// if (!txResponse || !txResponse.txHash) {
+		//   throw new Error('Failed to finalize milestone on-chain');
+		// }
+
+		// TODO: Move this to the BE to update the milestone status
+		// // Step 5: Update Milestone Status in DB
+		// const { data: updatedMilestone, error: updateError } = await supabase
+		//   .from('escrow_milestones')
+		//   .update({
+		//     status,
+		//     completed_at: isApproved ? new Date().toISOString() : null,
+		//   })
+		//   .eq('id', milestoneId)
+		//   .select('*')
+		//   .single();
+		// if (updateError) {
+		//   throw new Error('Failed to update milestone status');
+		// }
 
 		// Step 6: Save Review Comments
 		const { error: commentError } = await supabase
@@ -116,7 +133,11 @@ export async function POST(req: NextRequest) {
 			})
 
 		if (commentError) {
-			throw new Error('Failed to add review comments')
+			throw new AppError(
+				`Failed to add review comments: ${commentError.message}`,
+				500,
+				commentError,
+			)
 		}
 
 		// Step 7: Send Notification
@@ -125,18 +146,26 @@ export async function POST(req: NextRequest) {
 			.insert({
 				user_id: milestone.user_id,
 				milestone_id: milestoneId,
-				message: `Your milestone status has been updated to ${status}.`,
+				message: `Your milestone status has been updated to ${status}.${isApproved ? ' Admins are finalizing the transaction for approval.' : ''}`,
 			})
 
 		if (notificationError) {
-			throw new Error('Failed to send notification')
+			throw new AppError(
+				`Failed to send notification: ${notificationError.message}`,
+				500,
+				notificationError,
+			)
 		}
 
 		return NextResponse.json(
 			{
 				success: true,
 				message: 'Milestone reviewed successfully',
-				data: { milestone: updatedMilestone },
+				data: {
+					// TODO: Return the updated milestone after signing and sending the transaction, not before
+					// milestone: updatedMilestone,
+					escrowResponse,
+				},
 			},
 			{ status: 200 },
 		)
@@ -150,8 +179,18 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
+		if (error instanceof SyntaxError && error.message.includes('JSON')) {
+			return NextResponse.json(
+				{ error: 'Invalid JSON format in request body' },
+				{ status: 400 },
+			)
+		}
+
 		return NextResponse.json(
-			{ error: 'Invalid JSON format in request body' },
+			{
+				error: 'An unexpected error occurred',
+				details: error instanceof Error ? error.message : String(error),
+			},
 			{ status: 400 },
 		)
 	}

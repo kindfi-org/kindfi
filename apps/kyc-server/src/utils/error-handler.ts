@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES, InAppError } from '../libs/passkey/errors'
+import { ERROR_MESSAGES, InAppError } from '../lib/passkey/errors'
 
 /**
  * Helper function to handle errors consistently

@@ -14,25 +14,45 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
 		.nullable(),
 )
 
-export const commentsRowSchema = z.object({
-	author_id: z.string(),
-	content: z.string(),
-	created_at: z.string().nullable(),
+export const categoriesRowSchema = z.object({
+	color: z.string(),
 	id: z.string(),
-	parent_comment_id: z.string().nullable(),
-	project_id: z.string().nullable(),
-	project_update_id: z.string().nullable(),
-	updated_at: z.string().nullable(),
+	name: z.string(),
+	slug: z.string().nullable(),
 })
+
+export const categoriesInsertSchema = z.object({
+	color: z.string(),
+	id: z.string().optional(),
+	name: z.string(),
+	slug: z.string().optional().nullable(),
+})
+
+export const categoriesUpdateSchema = z.object({
+	color: z.string().optional(),
+	id: z.string().optional(),
+	name: z.string().optional(),
+	slug: z.string().optional().nullable(),
+})
+
+export const categoriesRelationshipsSchema = z.tuple([])
+
+export const commentTypeSchema = z.union([
+	z.literal('comment'),
+	z.literal('question'),
+	z.literal('answer'),
+])
 
 export const commentsInsertSchema = z.object({
 	author_id: z.string(),
 	content: z.string(),
 	created_at: z.string().optional().nullable(),
 	id: z.string().optional(),
+	metadata: jsonSchema.optional(),
 	parent_comment_id: z.string().optional().nullable(),
 	project_id: z.string().optional().nullable(),
 	project_update_id: z.string().optional().nullable(),
+	type: commentTypeSchema.optional(),
 	updated_at: z.string().optional().nullable(),
 })
 
@@ -41,9 +61,11 @@ export const commentsUpdateSchema = z.object({
 	content: z.string().optional(),
 	created_at: z.string().optional().nullable(),
 	id: z.string().optional(),
+	metadata: jsonSchema.optional(),
 	parent_comment_id: z.string().optional().nullable(),
 	project_id: z.string().optional().nullable(),
 	project_update_id: z.string().optional().nullable(),
+	type: commentTypeSchema.optional(),
 	updated_at: z.string().optional().nullable(),
 })
 
@@ -216,39 +238,19 @@ export const escrowContractsRelationshipsSchema = z.tuple([
 	}),
 ])
 
-export const milestoneStatusSchema = z.union([
-	z.literal('pending'),
-	z.literal('in_progress'),
-	z.literal('completed'),
-	z.literal('failed'),
-])
+export const escrowMilestonesRowSchema = z.object({
+	escrow_id: z.string(),
+	milestone_id: z.string(),
+})
 
 export const escrowMilestonesInsertSchema = z.object({
-	amount: z.number(),
-	completed_at: z.string().optional().nullable(),
-	created_at: z.string().optional().nullable(),
-	deadline: z.string(),
-	description: z.string().optional().nullable(),
 	escrow_id: z.string(),
-	id: z.string().optional(),
-	order_index: z.number(),
-	project_milestone_id: z.string(),
-	status: milestoneStatusSchema.optional(),
-	title: z.string(),
+	milestone_id: z.string(),
 })
 
 export const escrowMilestonesUpdateSchema = z.object({
-	amount: z.number().optional(),
-	completed_at: z.string().optional().nullable(),
-	created_at: z.string().optional().nullable(),
-	deadline: z.string().optional(),
-	description: z.string().optional().nullable(),
 	escrow_id: z.string().optional(),
-	id: z.string().optional(),
-	order_index: z.number().optional(),
-	project_milestone_id: z.string().optional(),
-	status: milestoneStatusSchema.optional(),
-	title: z.string().optional(),
+	milestone_id: z.string().optional(),
 })
 
 export const escrowMilestonesRelationshipsSchema = z.tuple([
@@ -260,10 +262,75 @@ export const escrowMilestonesRelationshipsSchema = z.tuple([
 		referencedColumns: z.tuple([z.literal('id')]),
 	}),
 	z.object({
-		foreignKeyName: z.literal('escrow_milestones_project_milestone_id_fkey'),
-		columns: z.tuple([z.literal('project_milestone_id')]),
+		foreignKeyName: z.literal('escrow_milestones_milestone_id_fkey'),
+		columns: z.tuple([z.literal('milestone_id')]),
 		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('project_milestones'),
+		referencedRelation: z.literal('milestones'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const escrowReviewsRowSchema = z.object({
+	created_at: z.string().nullable(),
+	disputer_id: z.string().nullable(),
+	escrow_id: z.string(),
+	evidence_urls: z.array(z.string()).nullable(),
+	id: z.string(),
+	milestone_id: z.string().nullable(),
+	resolution_text: z.string().nullable(),
+	review_notes: z.string().nullable(),
+	reviewed_at: z.string().nullable(),
+	reviewer_address: z.string(),
+	status: z.string(),
+	transaction_hash: z.string().nullable(),
+	type: z.string(),
+})
+
+export const escrowReviewsInsertSchema = z.object({
+	created_at: z.string().optional().nullable(),
+	disputer_id: z.string().optional().nullable(),
+	escrow_id: z.string(),
+	evidence_urls: z.array(z.string()).optional().nullable(),
+	id: z.string().optional(),
+	milestone_id: z.string().optional().nullable(),
+	resolution_text: z.string().optional().nullable(),
+	review_notes: z.string().optional().nullable(),
+	reviewed_at: z.string().optional().nullable(),
+	reviewer_address: z.string(),
+	status: z.string().optional(),
+	transaction_hash: z.string().optional().nullable(),
+	type: z.string(),
+})
+
+export const escrowReviewsUpdateSchema = z.object({
+	created_at: z.string().optional().nullable(),
+	disputer_id: z.string().optional().nullable(),
+	escrow_id: z.string().optional(),
+	evidence_urls: z.array(z.string()).optional().nullable(),
+	id: z.string().optional(),
+	milestone_id: z.string().optional().nullable(),
+	resolution_text: z.string().optional().nullable(),
+	review_notes: z.string().optional().nullable(),
+	reviewed_at: z.string().optional().nullable(),
+	reviewer_address: z.string().optional(),
+	status: z.string().optional(),
+	transaction_hash: z.string().optional().nullable(),
+	type: z.string().optional(),
+})
+
+export const escrowReviewsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('escrow_reviews_escrow_id_fkey'),
+		columns: z.tuple([z.literal('escrow_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('escrow_contracts'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+	z.object({
+		foreignKeyName: z.literal('escrow_reviews_milestone_id_fkey'),
+		columns: z.tuple([z.literal('milestone_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('milestones'),
 		referencedColumns: z.tuple([z.literal('id')]),
 	}),
 ])
@@ -331,21 +398,245 @@ export const kindlerProjectsRelationshipsSchema = z.tuple([
 	}),
 ])
 
+export const kycStatusEnumSchema = z.union([
+	z.literal('pending'),
+	z.literal('approved'),
+	z.literal('rejected'),
+	z.literal('verified'),
+])
+
+export const kycReviewsInsertSchema = z.object({
+	additional_notes: z.string().optional().nullable(),
+	created_at: z.string().optional(),
+	decision: kycStatusEnumSchema,
+	id: z.string().optional(),
+	kyc_status_id: z.string(),
+	reason: z.string().optional().nullable(),
+	review_notes: z.string().optional().nullable(),
+	reviewer_id: z.string(),
+	updated_at: z.string().optional(),
+})
+
+export const kycReviewsUpdateSchema = z.object({
+	additional_notes: z.string().optional().nullable(),
+	created_at: z.string().optional(),
+	decision: kycStatusEnumSchema.optional(),
+	id: z.string().optional(),
+	kyc_status_id: z.string().optional(),
+	reason: z.string().optional().nullable(),
+	review_notes: z.string().optional().nullable(),
+	reviewer_id: z.string().optional(),
+	updated_at: z.string().optional(),
+})
+
+export const kycReviewsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('kyc_reviews_kyc_status_id_fkey'),
+		columns: z.tuple([z.literal('kyc_status_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('kyc_status'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const kycVerificationEnumSchema = z.union([
+	z.literal('basic'),
+	z.literal('enhanced'),
+])
+
+export const kycStatusInsertSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	status: kycStatusEnumSchema.optional(),
+	updated_at: z.string().optional(),
+	user_id: z.string(),
+	verification_level: kycVerificationEnumSchema.optional(),
+})
+
+export const kycStatusUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	status: kycStatusEnumSchema.optional(),
+	updated_at: z.string().optional(),
+	user_id: z.string().optional(),
+	verification_level: kycVerificationEnumSchema.optional(),
+})
+
+export const kycStatusRelationshipsSchema = z.tuple([])
+
+export const milestoneStatusSchema = z.union([
+	z.literal('pending'),
+	z.literal('completed'),
+	z.literal('approved'),
+	z.literal('rejected'),
+	z.literal('disputed'),
+])
+
+export const milestonesInsertSchema = z.object({
+	amount: z.number(),
+	completed_at: z.string().optional().nullable(),
+	created_at: z.string().optional().nullable(),
+	deadline: z.string(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	order_index: z.number(),
+	project_id: z.string(),
+	status: milestoneStatusSchema.optional(),
+	title: z.string(),
+})
+
+export const milestonesUpdateSchema = z.object({
+	amount: z.number().optional(),
+	completed_at: z.string().optional().nullable(),
+	created_at: z.string().optional().nullable(),
+	deadline: z.string().optional(),
+	description: z.string().optional().nullable(),
+	id: z.string().optional(),
+	order_index: z.number().optional(),
+	project_id: z.string().optional(),
+	status: milestoneStatusSchema.optional(),
+	title: z.string().optional(),
+})
+
+export const milestonesRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('milestones_project_id_fkey'),
+		columns: z.tuple([z.literal('project_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('projects'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const notificationLogsRowSchema = z.object({
+	action: z.string(),
+	created_at: z.string(),
+	id: z.string(),
+	metadata: jsonSchema.nullable(),
+	notification_id: z.string().nullable(),
+	user_id: z.string(),
+})
+
+export const notificationLogsInsertSchema = z.object({
+	action: z.string(),
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	metadata: jsonSchema.optional().nullable(),
+	notification_id: z.string().optional().nullable(),
+	user_id: z.string(),
+})
+
+export const notificationLogsUpdateSchema = z.object({
+	action: z.string().optional(),
+	created_at: z.string().optional(),
+	id: z.string().optional(),
+	metadata: jsonSchema.optional().nullable(),
+	notification_id: z.string().optional().nullable(),
+	user_id: z.string().optional(),
+})
+
+export const notificationLogsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('notification_logs_notification_id_fkey'),
+		columns: z.tuple([z.literal('notification_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('notifications'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const notificationDeliveryStatusSchema = z.union([
+	z.literal('pending'),
+	z.literal('sent'),
+	z.literal('delivered'),
+	z.literal('failed'),
+	z.literal('expired'),
+])
+
+export const notificationPrioritySchema = z.union([
+	z.literal('low'),
+	z.literal('medium'),
+	z.literal('high'),
+])
+
+export const notificationTypeSchema = z.union([
+	z.literal('project_update'),
+	z.literal('project_comment'),
+	z.literal('project_investment'),
+	z.literal('project_milestone'),
+	z.literal('escrow_update'),
+	z.literal('escrow_dispute'),
+	z.literal('kyc_status'),
+	z.literal('system'),
+])
+
+export const notificationsInsertSchema = z.object({
+	action_url: z.string().optional().nullable(),
+	created_at: z.string().optional(),
+	delivery_attempts: z.number().optional(),
+	delivery_status: notificationDeliveryStatusSchema.optional(),
+	expires_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	is_read: z.boolean().optional(),
+	last_delivery_attempt: z.string().optional().nullable(),
+	message: z.string(),
+	metadata: jsonSchema.optional().nullable(),
+	metadata_hash: z.string().optional().nullable(),
+	next_retry_at: z.string().optional().nullable(),
+	priority: notificationPrioritySchema.optional(),
+	push_subscription_id: z.string().optional().nullable(),
+	read_at: z.string().optional().nullable(),
+	title: z.string(),
+	type: notificationTypeSchema,
+	updated_at: z.string().optional(),
+	user_id: z.string(),
+})
+
+export const notificationsUpdateSchema = z.object({
+	action_url: z.string().optional().nullable(),
+	created_at: z.string().optional(),
+	delivery_attempts: z.number().optional(),
+	delivery_status: notificationDeliveryStatusSchema.optional(),
+	expires_at: z.string().optional().nullable(),
+	id: z.string().optional(),
+	is_read: z.boolean().optional(),
+	last_delivery_attempt: z.string().optional().nullable(),
+	message: z.string().optional(),
+	metadata: jsonSchema.optional().nullable(),
+	metadata_hash: z.string().optional().nullable(),
+	next_retry_at: z.string().optional().nullable(),
+	priority: notificationPrioritySchema.optional(),
+	push_subscription_id: z.string().optional().nullable(),
+	read_at: z.string().optional().nullable(),
+	title: z.string().optional(),
+	type: notificationTypeSchema.optional(),
+	updated_at: z.string().optional(),
+	user_id: z.string().optional(),
+})
+
+export const notificationsRelationshipsSchema = z.tuple([])
+
 export const userRoleSchema = z.union([
 	z.literal('kinder'),
 	z.literal('kindler'),
 ])
 
 export const profilesInsertSchema = z.object({
+	bio: z.string().optional().nullable(),
 	created_at: z.string().optional(),
+	display_name: z.string(),
 	id: z.string(),
+	image_url: z.string().optional().nullable(),
 	role: userRoleSchema.optional(),
 	updated_at: z.string().optional(),
 })
 
 export const profilesUpdateSchema = z.object({
+	bio: z.string().optional().nullable(),
 	created_at: z.string().optional(),
+	display_name: z.string().optional(),
 	id: z.string().optional(),
+	image_url: z.string().optional().nullable(),
 	role: userRoleSchema.optional(),
 	updated_at: z.string().optional(),
 })
@@ -362,6 +653,7 @@ export const projectMembersInsertSchema = z.object({
 	joined_at: z.string().optional(),
 	project_id: z.string(),
 	role: projectMemberRoleSchema.optional(),
+	title: z.string(),
 	updated_at: z.string().optional(),
 	user_id: z.string(),
 })
@@ -371,6 +663,7 @@ export const projectMembersUpdateSchema = z.object({
 	joined_at: z.string().optional(),
 	project_id: z.string().optional(),
 	role: projectMemberRoleSchema.optional(),
+	title: z.string().optional(),
 	updated_at: z.string().optional(),
 	user_id: z.string().optional(),
 })
@@ -378,41 +671,6 @@ export const projectMembersUpdateSchema = z.object({
 export const projectMembersRelationshipsSchema = z.tuple([
 	z.object({
 		foreignKeyName: z.literal('project_members_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
-
-export const projectMilestonesRowSchema = z.object({
-	id: z.string(),
-	milestone_id: z.string(),
-	project_id: z.string(),
-})
-
-export const projectMilestonesInsertSchema = z.object({
-	id: z.string().optional(),
-	milestone_id: z.string(),
-	project_id: z.string(),
-})
-
-export const projectMilestonesUpdateSchema = z.object({
-	id: z.string().optional(),
-	milestone_id: z.string().optional(),
-	project_id: z.string().optional(),
-})
-
-export const projectMilestonesRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('project_milestones_milestone_id_fkey'),
-		columns: z.tuple([z.literal('milestone_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('escrow_milestones'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-	z.object({
-		foreignKeyName: z.literal('project_milestones_project_id_fkey'),
 		columns: z.tuple([z.literal('project_id')]),
 		isOneToOne: z.literal(false),
 		referencedRelation: z.literal('projects'),
@@ -527,6 +785,7 @@ export const projectUpdatesRowSchema = z.object({
 	created_at: z.string(),
 	id: z.string(),
 	project_id: z.string(),
+	title: z.string(),
 	updated_at: z.string(),
 })
 
@@ -536,6 +795,7 @@ export const projectUpdatesInsertSchema = z.object({
 	created_at: z.string().optional(),
 	id: z.string().optional(),
 	project_id: z.string(),
+	title: z.string(),
 	updated_at: z.string().optional(),
 })
 
@@ -545,6 +805,7 @@ export const projectUpdatesUpdateSchema = z.object({
 	created_at: z.string().optional(),
 	id: z.string().optional(),
 	project_id: z.string().optional(),
+	title: z.string().optional(),
 	updated_at: z.string().optional(),
 })
 
@@ -566,7 +827,6 @@ export const projectsRowSchema = z.object({
 	id: z.string(),
 	image_url: z.string().nullable(),
 	investors_count: z.number(),
-	milestones: z.array(z.string()).nullable(),
 	min_investment: z.number(),
 	owner_id: z.string(),
 	percentage_complete: z.number(),
@@ -583,7 +843,6 @@ export const projectsInsertSchema = z.object({
 	id: z.string().optional(),
 	image_url: z.string().optional().nullable(),
 	investors_count: z.number().optional(),
-	milestones: z.array(z.string()).optional().nullable(),
 	min_investment: z.number(),
 	owner_id: z.string(),
 	percentage_complete: z.number().optional(),
@@ -600,7 +859,6 @@ export const projectsUpdateSchema = z.object({
 	id: z.string().optional(),
 	image_url: z.string().optional().nullable(),
 	investors_count: z.number().optional(),
-	milestones: z.array(z.string()).optional().nullable(),
 	min_investment: z.number().optional(),
 	owner_id: z.string().optional(),
 	percentage_complete: z.number().optional(),
@@ -609,7 +867,28 @@ export const projectsUpdateSchema = z.object({
 	updated_at: z.string().optional().nullable(),
 })
 
-export const projectsRelationshipsSchema = z.tuple([])
+export const projectsRelationshipsSchema = z.tuple([
+	z.object({
+		foreignKeyName: z.literal('projects_category_id_fkey'),
+		columns: z.tuple([z.literal('category_id')]),
+		isOneToOne: z.literal(false),
+		referencedRelation: z.literal('categories'),
+		referencedColumns: z.tuple([z.literal('id')]),
+	}),
+])
+
+export const commentsRowSchema = z.object({
+	author_id: z.string(),
+	content: z.string(),
+	created_at: z.string().nullable(),
+	id: z.string(),
+	metadata: jsonSchema,
+	parent_comment_id: z.string().nullable(),
+	project_id: z.string().nullable(),
+	project_update_id: z.string().nullable(),
+	type: commentTypeSchema,
+	updated_at: z.string().nullable(),
+})
 
 export const escrowContractsRowSchema = z.object({
 	amount: z.number(),
@@ -628,23 +907,68 @@ export const escrowContractsRowSchema = z.object({
 	updated_at: z.string().nullable(),
 })
 
-export const escrowMilestonesRowSchema = z.object({
+export const kycReviewsRowSchema = z.object({
+	additional_notes: z.string().nullable(),
+	created_at: z.string(),
+	decision: kycStatusEnumSchema,
+	id: z.string(),
+	kyc_status_id: z.string(),
+	reason: z.string().nullable(),
+	review_notes: z.string().nullable(),
+	reviewer_id: z.string(),
+	updated_at: z.string(),
+})
+
+export const kycStatusRowSchema = z.object({
+	created_at: z.string(),
+	id: z.string(),
+	status: kycStatusEnumSchema,
+	updated_at: z.string(),
+	user_id: z.string(),
+	verification_level: kycVerificationEnumSchema,
+})
+
+export const milestonesRowSchema = z.object({
 	amount: z.number(),
 	completed_at: z.string().nullable(),
 	created_at: z.string().nullable(),
 	deadline: z.string(),
 	description: z.string().nullable(),
-	escrow_id: z.string(),
 	id: z.string(),
 	order_index: z.number(),
-	project_milestone_id: z.string(),
+	project_id: z.string(),
 	status: milestoneStatusSchema,
 	title: z.string(),
 })
 
-export const profilesRowSchema = z.object({
+export const notificationsRowSchema = z.object({
+	action_url: z.string().nullable(),
 	created_at: z.string(),
+	delivery_attempts: z.number(),
+	delivery_status: notificationDeliveryStatusSchema,
+	expires_at: z.string().nullable(),
 	id: z.string(),
+	is_read: z.boolean(),
+	last_delivery_attempt: z.string().nullable(),
+	message: z.string(),
+	metadata: jsonSchema.nullable(),
+	metadata_hash: z.string().nullable(),
+	next_retry_at: z.string().nullable(),
+	priority: notificationPrioritySchema,
+	push_subscription_id: z.string().nullable(),
+	read_at: z.string().nullable(),
+	title: z.string(),
+	type: notificationTypeSchema,
+	updated_at: z.string(),
+	user_id: z.string(),
+})
+
+export const profilesRowSchema = z.object({
+	bio: z.string().nullable(),
+	created_at: z.string(),
+	display_name: z.string(),
+	id: z.string(),
+	image_url: z.string().nullable(),
 	role: userRoleSchema,
 	updated_at: z.string(),
 })
@@ -654,6 +978,7 @@ export const projectMembersRowSchema = z.object({
 	joined_at: z.string(),
 	project_id: z.string(),
 	role: projectMemberRoleSchema,
+	title: z.string(),
 	updated_at: z.string(),
 	user_id: z.string(),
 })

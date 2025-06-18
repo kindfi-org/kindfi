@@ -34,15 +34,38 @@ export type Database = {
 	}
 	public: {
 		Tables: {
+			categories: {
+				Row: {
+					color: string
+					id: string
+					name: string
+					slug: string | null
+				}
+				Insert: {
+					color: string
+					id?: string
+					name: string
+					slug?: string | null
+				}
+				Update: {
+					color?: string
+					id?: string
+					name?: string
+					slug?: string | null
+				}
+				Relationships: []
+			}
 			comments: {
 				Row: {
 					author_id: string
 					content: string
 					created_at: string | null
 					id: string
+					metadata: Json
 					parent_comment_id: string | null
 					project_id: string | null
 					project_update_id: string | null
+					type: Database['public']['Enums']['comment_type']
 					updated_at: string | null
 				}
 				Insert: {
@@ -50,9 +73,11 @@ export type Database = {
 					content: string
 					created_at?: string | null
 					id?: string
+					metadata?: Json
 					parent_comment_id?: string | null
 					project_id?: string | null
 					project_update_id?: string | null
+					type?: Database['public']['Enums']['comment_type']
 					updated_at?: string | null
 				}
 				Update: {
@@ -60,9 +85,11 @@ export type Database = {
 					content?: string
 					created_at?: string | null
 					id?: string
+					metadata?: Json
 					parent_comment_id?: string | null
 					project_id?: string | null
 					project_update_id?: string | null
+					type?: Database['public']['Enums']['comment_type']
 					updated_at?: string | null
 				}
 				Relationships: [
@@ -238,43 +265,16 @@ export type Database = {
 			}
 			escrow_milestones: {
 				Row: {
-					amount: number
-					completed_at: string | null
-					created_at: string | null
-					deadline: string
-					description: string | null
 					escrow_id: string
-					id: string
-					order_index: number
-					project_milestone_id: string
-					status: Database['public']['Enums']['milestone_status']
-					title: string
+					milestone_id: string
 				}
 				Insert: {
-					amount: number
-					completed_at?: string | null
-					created_at?: string | null
-					deadline: string
-					description?: string | null
 					escrow_id: string
-					id?: string
-					order_index: number
-					project_milestone_id: string
-					status?: Database['public']['Enums']['milestone_status']
-					title: string
+					milestone_id: string
 				}
 				Update: {
-					amount?: number
-					completed_at?: string | null
-					created_at?: string | null
-					deadline?: string
-					description?: string | null
 					escrow_id?: string
-					id?: string
-					order_index?: number
-					project_milestone_id?: string
-					status?: Database['public']['Enums']['milestone_status']
-					title?: string
+					milestone_id?: string
 				}
 				Relationships: [
 					{
@@ -285,10 +285,73 @@ export type Database = {
 						referencedColumns: ['id']
 					},
 					{
-						foreignKeyName: 'escrow_milestones_project_milestone_id_fkey'
-						columns: ['project_milestone_id']
+						foreignKeyName: 'escrow_milestones_milestone_id_fkey'
+						columns: ['milestone_id']
 						isOneToOne: false
-						referencedRelation: 'project_milestones'
+						referencedRelation: 'milestones'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			escrow_reviews: {
+				Row: {
+					created_at: string | null
+					disputer_id: string | null
+					escrow_id: string
+					evidence_urls: string[] | null
+					id: string
+					milestone_id: string | null
+					resolution_text: string | null
+					review_notes: string | null
+					reviewed_at: string | null
+					reviewer_address: string
+					status: string
+					transaction_hash: string | null
+					type: string
+				}
+				Insert: {
+					created_at?: string | null
+					disputer_id?: string | null
+					escrow_id: string
+					evidence_urls?: string[] | null
+					id?: string
+					milestone_id?: string | null
+					resolution_text?: string | null
+					review_notes?: string | null
+					reviewed_at?: string | null
+					reviewer_address: string
+					status?: string
+					transaction_hash?: string | null
+					type: string
+				}
+				Update: {
+					created_at?: string | null
+					disputer_id?: string | null
+					escrow_id?: string
+					evidence_urls?: string[] | null
+					id?: string
+					milestone_id?: string | null
+					resolution_text?: string | null
+					review_notes?: string | null
+					reviewed_at?: string | null
+					reviewer_address?: string
+					status?: string
+					transaction_hash?: string | null
+					type?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'escrow_reviews_escrow_id_fkey'
+						columns: ['escrow_id']
+						isOneToOne: false
+						referencedRelation: 'escrow_contracts'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'escrow_reviews_milestone_id_fkey'
+						columns: ['milestone_id']
+						isOneToOne: false
+						referencedRelation: 'milestones'
 						referencedColumns: ['id']
 					},
 				]
@@ -352,22 +415,250 @@ export type Database = {
 					},
 				]
 			}
-			profiles: {
+			kyc_reviews: {
 				Row: {
+					additional_notes: string | null
 					created_at: string
+					decision: Database['public']['Enums']['kyc_status_enum']
 					id: string
-					role: Database['public']['Enums']['user_role']
+					kyc_status_id: string
+					reason: string | null
+					review_notes: string | null
+					reviewer_id: string
 					updated_at: string
 				}
 				Insert: {
+					additional_notes?: string | null
 					created_at?: string
-					id: string
-					role?: Database['public']['Enums']['user_role']
+					decision: Database['public']['Enums']['kyc_status_enum']
+					id?: string
+					kyc_status_id: string
+					reason?: string | null
+					review_notes?: string | null
+					reviewer_id: string
 					updated_at?: string
+				}
+				Update: {
+					additional_notes?: string | null
+					created_at?: string
+					decision?: Database['public']['Enums']['kyc_status_enum']
+					id?: string
+					kyc_status_id?: string
+					reason?: string | null
+					review_notes?: string | null
+					reviewer_id?: string
+					updated_at?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'kyc_reviews_kyc_status_id_fkey'
+						columns: ['kyc_status_id']
+						isOneToOne: false
+						referencedRelation: 'kyc_status'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			kyc_status: {
+				Row: {
+					created_at: string
+					id: string
+					status: Database['public']['Enums']['kyc_status_enum']
+					updated_at: string
+					user_id: string
+					verification_level: Database['public']['Enums']['kyc_verification_enum']
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					status?: Database['public']['Enums']['kyc_status_enum']
+					updated_at?: string
+					user_id: string
+					verification_level?: Database['public']['Enums']['kyc_verification_enum']
 				}
 				Update: {
 					created_at?: string
 					id?: string
+					status?: Database['public']['Enums']['kyc_status_enum']
+					updated_at?: string
+					user_id?: string
+					verification_level?: Database['public']['Enums']['kyc_verification_enum']
+				}
+				Relationships: []
+			}
+			milestones: {
+				Row: {
+					amount: number
+					completed_at: string | null
+					created_at: string | null
+					deadline: string
+					description: string | null
+					id: string
+					order_index: number
+					project_id: string
+					status: Database['public']['Enums']['milestone_status']
+					title: string
+				}
+				Insert: {
+					amount: number
+					completed_at?: string | null
+					created_at?: string | null
+					deadline: string
+					description?: string | null
+					id?: string
+					order_index: number
+					project_id: string
+					status?: Database['public']['Enums']['milestone_status']
+					title: string
+				}
+				Update: {
+					amount?: number
+					completed_at?: string | null
+					created_at?: string | null
+					deadline?: string
+					description?: string | null
+					id?: string
+					order_index?: number
+					project_id?: string
+					status?: Database['public']['Enums']['milestone_status']
+					title?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'milestones_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			notification_logs: {
+				Row: {
+					action: string
+					created_at: string
+					id: string
+					metadata: Json | null
+					notification_id: string | null
+					user_id: string
+				}
+				Insert: {
+					action: string
+					created_at?: string
+					id?: string
+					metadata?: Json | null
+					notification_id?: string | null
+					user_id: string
+				}
+				Update: {
+					action?: string
+					created_at?: string
+					id?: string
+					metadata?: Json | null
+					notification_id?: string | null
+					user_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'notification_logs_notification_id_fkey'
+						columns: ['notification_id']
+						isOneToOne: false
+						referencedRelation: 'notifications'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			notifications: {
+				Row: {
+					action_url: string | null
+					created_at: string
+					delivery_attempts: number
+					delivery_status: Database['public']['Enums']['notification_delivery_status']
+					expires_at: string | null
+					id: string
+					is_read: boolean
+					last_delivery_attempt: string | null
+					message: string
+					metadata: Json | null
+					metadata_hash: string | null
+					next_retry_at: string | null
+					priority: Database['public']['Enums']['notification_priority']
+					push_subscription_id: string | null
+					read_at: string | null
+					title: string
+					type: Database['public']['Enums']['notification_type']
+					updated_at: string
+					user_id: string
+				}
+				Insert: {
+					action_url?: string | null
+					created_at?: string
+					delivery_attempts?: number
+					delivery_status?: Database['public']['Enums']['notification_delivery_status']
+					expires_at?: string | null
+					id?: string
+					is_read?: boolean
+					last_delivery_attempt?: string | null
+					message: string
+					metadata?: Json | null
+					metadata_hash?: string | null
+					next_retry_at?: string | null
+					priority?: Database['public']['Enums']['notification_priority']
+					push_subscription_id?: string | null
+					read_at?: string | null
+					title: string
+					type: Database['public']['Enums']['notification_type']
+					updated_at?: string
+					user_id: string
+				}
+				Update: {
+					action_url?: string | null
+					created_at?: string
+					delivery_attempts?: number
+					delivery_status?: Database['public']['Enums']['notification_delivery_status']
+					expires_at?: string | null
+					id?: string
+					is_read?: boolean
+					last_delivery_attempt?: string | null
+					message?: string
+					metadata?: Json | null
+					metadata_hash?: string | null
+					next_retry_at?: string | null
+					priority?: Database['public']['Enums']['notification_priority']
+					push_subscription_id?: string | null
+					read_at?: string | null
+					title?: string
+					type?: Database['public']['Enums']['notification_type']
+					updated_at?: string
+					user_id?: string
+				}
+				Relationships: []
+			}
+			profiles: {
+				Row: {
+					bio: string | null
+					created_at: string
+					display_name: string
+					id: string
+					image_url: string | null
+					role: Database['public']['Enums']['user_role']
+					updated_at: string
+				}
+				Insert: {
+					bio?: string | null
+					created_at?: string
+					display_name: string
+					id: string
+					image_url?: string | null
+					role?: Database['public']['Enums']['user_role']
+					updated_at?: string
+				}
+				Update: {
+					bio?: string | null
+					created_at?: string
+					display_name?: string
+					id?: string
+					image_url?: string | null
 					role?: Database['public']['Enums']['user_role']
 					updated_at?: string
 				}
@@ -379,6 +670,7 @@ export type Database = {
 					joined_at: string
 					project_id: string
 					role: Database['public']['Enums']['project_member_role']
+					title: string
 					updated_at: string
 					user_id: string
 				}
@@ -387,6 +679,7 @@ export type Database = {
 					joined_at?: string
 					project_id: string
 					role?: Database['public']['Enums']['project_member_role']
+					title: string
 					updated_at?: string
 					user_id: string
 				}
@@ -395,45 +688,13 @@ export type Database = {
 					joined_at?: string
 					project_id?: string
 					role?: Database['public']['Enums']['project_member_role']
+					title?: string
 					updated_at?: string
 					user_id?: string
 				}
 				Relationships: [
 					{
 						foreignKeyName: 'project_members_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			project_milestones: {
-				Row: {
-					id: string
-					milestone_id: string
-					project_id: string
-				}
-				Insert: {
-					id?: string
-					milestone_id: string
-					project_id: string
-				}
-				Update: {
-					id?: string
-					milestone_id?: string
-					project_id?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'project_milestones_milestone_id_fkey'
-						columns: ['milestone_id']
-						isOneToOne: false
-						referencedRelation: 'escrow_milestones'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'project_milestones_project_id_fkey'
 						columns: ['project_id']
 						isOneToOne: false
 						referencedRelation: 'projects'
@@ -543,6 +804,7 @@ export type Database = {
 					created_at: string
 					id: string
 					project_id: string
+					title: string
 					updated_at: string
 				}
 				Insert: {
@@ -551,6 +813,7 @@ export type Database = {
 					created_at?: string
 					id?: string
 					project_id: string
+					title: string
 					updated_at?: string
 				}
 				Update: {
@@ -559,6 +822,7 @@ export type Database = {
 					created_at?: string
 					id?: string
 					project_id?: string
+					title?: string
 					updated_at?: string
 				}
 				Relationships: [
@@ -580,7 +844,6 @@ export type Database = {
 					id: string
 					image_url: string | null
 					investors_count: number
-					milestones: string[] | null
 					min_investment: number
 					owner_id: string
 					percentage_complete: number
@@ -596,7 +859,6 @@ export type Database = {
 					id?: string
 					image_url?: string | null
 					investors_count?: number
-					milestones?: string[] | null
 					min_investment: number
 					owner_id: string
 					percentage_complete?: number
@@ -612,7 +874,6 @@ export type Database = {
 					id?: string
 					image_url?: string | null
 					investors_count?: number
-					milestones?: string[] | null
 					min_investment?: number
 					owner_id?: string
 					percentage_complete?: number
@@ -620,16 +881,32 @@ export type Database = {
 					title?: string
 					updated_at?: string | null
 				}
-				Relationships: []
+				Relationships: [
+					{
+						foreignKeyName: 'projects_category_id_fkey'
+						columns: ['category_id']
+						isOneToOne: false
+						referencedRelation: 'categories'
+						referencedColumns: ['id']
+					},
+				]
 			}
 		}
 		Views: {
 			[_ in never]: never
 		}
 		Functions: {
-			[_ in never]: never
+			unaccent: {
+				Args: { '': string }
+				Returns: string
+			}
+			unaccent_init: {
+				Args: { '': unknown }
+				Returns: unknown
+			}
 		}
 		Enums: {
+			comment_type: 'comment' | 'question' | 'answer'
 			escrow_status_type:
 				| 'NEW'
 				| 'FUNDED'
@@ -637,7 +914,30 @@ export type Database = {
 				| 'COMPLETED'
 				| 'DISPUTED'
 				| 'CANCELLED'
-			milestone_status: 'pending' | 'in_progress' | 'completed' | 'failed'
+			kyc_status_enum: 'pending' | 'approved' | 'rejected' | 'verified'
+			kyc_verification_enum: 'basic' | 'enhanced'
+			milestone_status:
+				| 'pending'
+				| 'completed'
+				| 'approved'
+				| 'rejected'
+				| 'disputed'
+			notification_delivery_status:
+				| 'pending'
+				| 'sent'
+				| 'delivered'
+				| 'failed'
+				| 'expired'
+			notification_priority: 'low' | 'medium' | 'high'
+			notification_type:
+				| 'project_update'
+				| 'project_comment'
+				| 'project_investment'
+				| 'project_milestone'
+				| 'escrow_update'
+				| 'escrow_dispute'
+				| 'kyc_status'
+				| 'system'
 			project_member_role: 'admin' | 'editor'
 			user_role: 'kinder' | 'kindler'
 		}
@@ -758,6 +1058,7 @@ export const Constants = {
 	},
 	public: {
 		Enums: {
+			comment_type: ['comment', 'question', 'answer'],
 			escrow_status_type: [
 				'NEW',
 				'FUNDED',
@@ -766,7 +1067,33 @@ export const Constants = {
 				'DISPUTED',
 				'CANCELLED',
 			],
-			milestone_status: ['pending', 'in_progress', 'completed', 'failed'],
+			kyc_status_enum: ['pending', 'approved', 'rejected', 'verified'],
+			kyc_verification_enum: ['basic', 'enhanced'],
+			milestone_status: [
+				'pending',
+				'completed',
+				'approved',
+				'rejected',
+				'disputed',
+			],
+			notification_delivery_status: [
+				'pending',
+				'sent',
+				'delivered',
+				'failed',
+				'expired',
+			],
+			notification_priority: ['low', 'medium', 'high'],
+			notification_type: [
+				'project_update',
+				'project_comment',
+				'project_investment',
+				'project_milestone',
+				'escrow_update',
+				'escrow_dispute',
+				'kyc_status',
+				'system',
+			],
 			project_member_role: ['admin', 'editor'],
 			user_role: ['kinder', 'kindler'],
 		},

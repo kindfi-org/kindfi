@@ -1,8 +1,7 @@
 import { useCallback } from 'react'
 import { useSetState } from 'react-use'
+import type { SortOption } from '~/lib/types/project'
 import type { Project } from '~/lib/types/projects.types'
-
-export type SortOption = 'popular' | 'newest' | 'funding' | 'supporters'
 
 export function useProjectsFilter() {
 	const [state, setState] = useSetState<{
@@ -10,7 +9,7 @@ export function useProjectsFilter() {
 		sortOption: SortOption
 	}>({
 		selectedCategories: [],
-		sortOption: 'popular',
+		sortOption: 'Most Popular',
 	})
 	const { selectedCategories, sortOption } = state
 
@@ -57,7 +56,7 @@ export function useProjectsFilter() {
 			const sortedProjects = [...projects]
 
 			switch (option) {
-				case 'newest':
+				case 'Most Recent':
 					// Fallback to current date if createdAt is not available
 					return sortedProjects.sort((a, b) => {
 						const dateA = a.created_at
@@ -68,7 +67,7 @@ export function useProjectsFilter() {
 							: Date.now()
 						return dateB - dateA
 					})
-				case 'funding':
+				case 'Most Funded':
 					return sortedProjects.sort((a, b) => {
 						const percentA =
 							a.percentage_complete ||
@@ -78,7 +77,7 @@ export function useProjectsFilter() {
 							(b.current_amount / (b.target_amount || b.goal || 1)) * 100
 						return percentB - percentA
 					})
-				case 'supporters':
+				case 'Most Supporters':
 					return sortedProjects.sort(
 						(a, b) =>
 							(b.investors_count || b.donors || 0) -

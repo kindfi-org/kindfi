@@ -225,3 +225,33 @@ export const noResultsVariants = {
 		},
 	},
 }
+
+export const fadeIn = {
+	initial: { opacity: 0 },
+	animate: { opacity: 1 },
+	exit: { opacity: 0 },
+	transition: { duration: 0.3 },
+}
+
+export const staggerContainer = {
+	initial: {},
+	animate: {
+		transition: {
+			staggerChildren: 0.05,
+		},
+	},
+}
+
+export const cardHover = {
+	scale: 1.02,
+	boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+	transition: { duration: 0.3 },
+}
+
+export const progressBarAnimation = {
+	initial: { width: 0 },
+	animate: (width: number) => ({
+		width: `${width}%`,
+		transition: { duration: 1, ease: 'easeOut' },
+	}),
+}

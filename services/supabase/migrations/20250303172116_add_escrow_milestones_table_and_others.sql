@@ -1,4 +1,8 @@
-CREATE TYPE milestone_status AS ENUM ('pending', 'in_progress', 'completed', 'failed');
+CREATE TYPE milestone_status AS ENUM ('pending',
+'completed',
+'approved',
+'rejected',
+'disputed');
 
 CREATE TABLE project_milestones (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
