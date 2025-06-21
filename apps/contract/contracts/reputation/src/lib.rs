@@ -108,6 +108,7 @@ impl ReputationContract {
         ReputationStorage::get_tier_threshold(&env, &tier).ok_or(ReputationError::InvalidTier)
     }
 
+    #[inline(always)]
     fn get_tier_neighbors(tier: &TierLevel) -> Result<(Option<TierLevel>, Option<TierLevel>), ReputationError> {
         use TierLevel::*;
 
@@ -120,6 +121,22 @@ impl ReputationContract {
         }
     }
 
+    fn validate_bound(
+        env: &Env,
+        neighbor: Option<TierLevel>,
+        new_threshold: u32,
+        comparison: fn(u32, u32) -> bool,
+    ) -> Result<(), ReputationError> {
+        if let (Some(tier), Some(threshold)) =
+            (neighbor, ReputationStorage::get_tier_threshold(env, &tier))
+        {
+            if comparison(new_threshold, threshold) {
+                return Err(ReputationError::InvalidThresholdOrdering);
+            }
+        }
+        Ok(())
+    }
+
     fn validate_threshold_ordering(
         env: &Env,
         tier: &TierLevel,
@@ -127,21 +144,8 @@ impl ReputationContract {
     ) -> Result<(), ReputationError> {
         let (lower_neighbor, upper_neighbor) = Self::get_tier_neighbors(tier)?;
 
-        if let Some(lower) = lower_neighbor {
-            if let Some(lower_threshold) = ReputationStorage::get_tier_threshold(env, &lower) {
-                if new_threshold <= lower_threshold {
-                    return Err(ReputationError::InvalidThresholdOrdering);
-                }
-            }
-        }
-
-        if let Some(upper) = upper_neighbor {
-            if let Some(upper_threshold) = ReputationStorage::get_tier_threshold(env, &upper) {
-                if new_threshold >= upper_threshold {
-                    return Err(ReputationError::InvalidThresholdOrdering);
-                }
-            }
-        }
+        Self::validate_bound(env, lower_neighbor, new_threshold, |a, b| a <= b)?;
+        Self::validate_bound(env, upper_neighbor, new_threshold, |a, b| a >= b)?;
 
         Ok(())
     }
@@ -156,6 +160,10 @@ impl ReputationContract {
 
         if tier == TierLevel::None {
           return Err(ReputationError::InvalidTier);
+        }
+
+        if threshold == 0 {
+            return Err(ReputationError::InvalidThresholdOrdering);
         }
 
         Self::validate_threshold_ordering(&env, &tier, threshold)?;
