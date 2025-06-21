@@ -26,7 +26,7 @@ export default function HeroSection() {
 					<MotiView className="mb-2">
 						<AnimatedCharacters
 							text="Support What Matters"
-							textStyle="text-3xl font-bold text-center text-gray-800"
+							textClassName="text-3xl font-bold text-center text-gray-800"
 							delay={300}
 							duration={40}
 						/>
@@ -36,7 +36,7 @@ export default function HeroSection() {
 					<MotiView className="mb-4">
 						<GradientText
 							text="Where Blockchain Meets Real-World Impact"
-							textStyle="text-2xl font-bold text-center text-[#41692d]"
+							textClassName="text-2xl font-bold text-center text-[#41692d]"
 							delay={1200}
 						/>
 					</MotiView>
