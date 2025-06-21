@@ -108,31 +108,76 @@ impl ReputationContract {
         ReputationStorage::get_tier_threshold(&env, &tier).ok_or(ReputationError::InvalidTier)
     }
 
+    #[inline(always)]
+    fn get_tier_neighbors(tier: &TierLevel) -> Result<(Option<TierLevel>, Option<TierLevel>), ReputationError> {
+        use TierLevel::*;
+
+        match tier {
+            Bronze => Ok((None, Some(Silver))),
+            Silver => Ok((Some(Bronze), Some(Gold))),
+            Gold => Ok((Some(Silver), Some(Platinum))),
+            Platinum => Ok((Some(Gold), None)),
+            None => Err(ReputationError::InvalidTier),
+        }
+    }
+
+    fn validate_bound(
+        env: &Env,
+        neighbor: Option<TierLevel>,
+        new_threshold: u32,
+        comparison: fn(u32, u32) -> bool,
+    ) -> Result<(), ReputationError> {
+        if let (Some(tier), Some(threshold)) =
+            (neighbor, ReputationStorage::get_tier_threshold(env, &tier))
+        {
+            if comparison(new_threshold, threshold) {
+                return Err(ReputationError::InvalidThresholdOrdering);
+            }
+        }
+        Ok(())
+    }
+
+    fn validate_threshold_ordering(
+        env: &Env,
+        tier: &TierLevel,
+        new_threshold: u32,
+    ) -> Result<(), ReputationError> {
+        let (lower_neighbor, upper_neighbor) = Self::get_tier_neighbors(tier)?;
+
+        Self::validate_bound(env, lower_neighbor, new_threshold, |a, b| a <= b)?;
+        Self::validate_bound(env, upper_neighbor, new_threshold, |a, b| a >= b)?;
+
+        Ok(())
+    }
+
     pub fn set_tier_threshold(
         env: Env,
         tier: TierLevel,
         threshold: u32,
     ) -> Result<(), ReputationError> {
-        // Verify admin access
         let admin = ReputationStorage::get_admin(&env);
         admin.require_auth();
 
         if tier == TierLevel::None {
-            return Err(ReputationError::InvalidTier);
+          return Err(ReputationError::InvalidTier);
         }
 
-        // Update threshold
+        if threshold == 0 {
+            return Err(ReputationError::InvalidThresholdOrdering);
+        }
+
+        Self::validate_threshold_ordering(&env, &tier, threshold)?;
+
         let old_threshold = ReputationStorage::get_tier_threshold(&env, &tier)
-            .ok_or(ReputationError::InvalidTier)?;
+        .ok_or(ReputationError::InvalidTier)?;
 
         ReputationStorage::set_tier_threshold(&env, &tier, &threshold);
 
-        // Emit event
         ReputationEvents::tier_threshold_updated(&env, &tier, old_threshold, threshold);
 
         Ok(())
     }
-
+    
     pub fn add_admin(env: Env, new_admin: Address) -> Result<(), ReputationError> {
         // Verify admin access
         let admin = ReputationStorage::get_admin(&env);
