@@ -1,5 +1,3 @@
-
-
 import ModuleFooter from '~/components/module-detail/module-footer'
 import ModuleHeader from '~/components/module-detail/module-header'
 import ModuleLessons from '~/components/module-detail/module-lessons'
