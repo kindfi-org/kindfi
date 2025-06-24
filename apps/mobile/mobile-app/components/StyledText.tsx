@@ -155,8 +155,11 @@ export const ItemList = ({ items }: { items: typeof allItems }) => (
 
 					{/* Tags Section */}
 					<View style={styles.tagsContainer}>
-						{item.tags.map((tag, index) => (
-							<Text key={index} style={styles.tag}>
+						{item.tags.map((tag) => (
+							<Text
+								key={tag.replace(/\s+/g, '-').toLowerCase()}
+								style={styles.tag}
+							>
 								{tag}
 							</Text>
 						))}

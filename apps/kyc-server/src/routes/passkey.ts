@@ -4,7 +4,7 @@ import {
 	getRegistrationOptions,
 	verifyAuthentication,
 	verifyRegistration,
-} from '../libs/passkey/passkey'
+} from '../lib/passkey/passkey'
 import { withCORS } from '../middleware/cors'
 import { handleError } from '../utils/error-handler'
 

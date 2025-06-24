@@ -1,13 +1,13 @@
 import MaskedView from '@react-native-masked-view/masked-view'
 import { LinearGradient } from 'expo-linear-gradient'
-import { Text as DefaultText } from 'react-native'
+import { Text as DefaultText, type TextProps } from 'react-native'
 
 export function GradientText({
 	children,
 	style,
 }: {
 	children: React.ReactNode
-	style?: any
+	style?: TextProps['style']
 }) {
 	return (
 		<MaskedView
