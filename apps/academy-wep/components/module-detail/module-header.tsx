@@ -2,15 +2,15 @@
 
 import { ArrowLeft } from 'lucide-react'
 
+import Link from 'next/link'
 import { CourseStats } from './course-stats'
 import { NextLessonCard } from './next-lesson-card'
 import { ProgressBar } from './progress-bar'
-import Link from 'next/link'
 
 interface ModuleHeaderProps {
-  completionPercentage?: number
-  nextLessonTitle?: string
-  nextLessonDescription?: string
+	completionPercentage?: number
+	nextLessonTitle?: string
+	nextLessonDescription?: string
 }
 
 export default function ModuleHeader({
@@ -30,7 +30,10 @@ export default function ModuleHeader({
 				<div className="grid gap-8 lg:grid-cols-[1fr_400px]">
 					<div className="space-y-6">
 						{/* Tag */}
-						<Link href="/modules" className="inline-flex items-center gap-1.5 cursor-pointer rounded-full bg-[#7CC635]  border-gray-300 hover:border-[#7CC635]  border bg-opacity-10  px-3 py-1 text-sm font-medium text-black hover:text-[#7CC635] transition-all">
+						<Link
+							href="/modules"
+							className="inline-flex items-center gap-1.5 cursor-pointer rounded-full bg-[#7CC635]  border-gray-300 hover:border-[#7CC635]  border bg-opacity-10  px-3 py-1 text-sm font-medium text-black hover:text-[#7CC635] transition-all"
+						>
 							<span>
 								<ArrowLeft size={18} />
 							</span>

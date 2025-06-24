@@ -32,7 +32,6 @@ export default function ModuleFooter() {
 
 					{/* Next Lesson Card */}
 					<div className="flex items-center justify-center">
-				
 						<div className="p-[15px] bg-gradient-to-r from-blue-100 via-blue-200 to-gray-200 rounded-full">
 							<div className="bg-white rounded-full w-24 h-24 flex items-center justify-center relative">
 								<Award className="h-16 w-16 text-green-500" />
