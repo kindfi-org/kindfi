@@ -26,7 +26,7 @@ export default function HeroSection() {
 					<MotiView className="mb-2">
 						<AnimatedCharacters
 							text="Support What Matters"
-							textStyle="text-3xl font-bold text-center text-gray-800"
+							textClassName="text-3xl font-bold text-center text-gray-800"
 							delay={300}
 							duration={40}
 						/>
@@ -36,7 +36,7 @@ export default function HeroSection() {
 					<MotiView className="mb-4">
 						<GradientText
 							text="Where Blockchain Meets Real-World Impact"
-							textStyle="text-2xl font-bold text-center text-[#41692d]"
+							textClassName="text-2xl font-bold text-center text-[#41692d]"
 							delay={1200}
 						/>
 					</MotiView>
@@ -113,130 +113,99 @@ export default function HeroSection() {
 						from={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						transition={{ type: 'timing', duration: 600, delay: 2600 }}
+						className="px-3"
 					>
-						{/* First Row */}
-						<ScrollView
-							horizontal
-							showsHorizontalScrollIndicator={false}
-							className="mb-2"
-						>
-							<View className="flex-row">
-								<AnimatedTag
-									icon={<FontAwesome5 name="users" size={16} color="#2E7D32" />}
-									label="Empowering Communities"
-									bgColor="#E8F5E9"
-									textColor="#2E7D32"
-									delay={2700}
-								/>
-								<AnimatedTag
-									icon={<FontAwesome5 name="tree" size={16} color="#2E7D32" />}
-									label="Environmental Projects"
-									bgColor="#E8F5E9"
-									textColor="#2E7D32"
-									delay={2800}
-								/>
-								<AnimatedTag
-									icon={<FontAwesome5 name="paw" size={16} color="#D32F2F" />}
-									label="Animal Shelters"
-									bgColor="#FFEBEE"
-									textColor="#D32F2F"
-									delay={2900}
-								/>
-								<AnimatedTag
-									icon={
-										<Ionicons
-											name="newspaper-outline"
-											size={16}
-											color="#1976D2"
-										/>
-									}
-									label="Community News Initiatives"
-									bgColor="#E3F2FD"
-									textColor="#1976D2"
-									delay={3000}
-								/>
-							</View>
-						</ScrollView>
-
-						{/* Second Row */}
-						<ScrollView
-							horizontal
-							showsHorizontalScrollIndicator={false}
-							className="mb-2"
-						>
-							<View className="flex-row">
-								<AnimatedTag
-									icon={
-										<FontAwesome5
-											name="stethoscope"
-											size={16}
-											color="#0097A7"
-										/>
-									}
-									label="Healthcare Support"
-									bgColor="#E0F7FA"
-									textColor="#0097A7"
-									delay={3100}
-								/>
-								<AnimatedTag
-									icon={
-										<MaterialIcons
-											name="restaurant"
-											size={16}
-											color="#455A64"
-										/>
-									}
-									label="Food Security Campaigns"
-									bgColor="#ECEFF1"
-									textColor="#455A64"
-									delay={3200}
-								/>
-								<AnimatedTag
-									icon={<FontAwesome5 name="baby" size={16} color="#7B1FA2" />}
-									label="Child Welfare Programs"
-									bgColor="#F3E5F5"
-									textColor="#7B1FA2"
-									delay={3300}
-								/>
-								<AnimatedTag
-									icon={
-										<MaterialCommunityIcons
-											name="sprout"
-											size={16}
-											color="#388E3C"
-										/>
-									}
-									label="Sustainable Agriculture"
-									bgColor="#E8F5E9"
-									textColor="#388E3C"
-									delay={3400}
-								/>
-							</View>
-						</ScrollView>
-
-						{/* Third Row */}
-						<ScrollView horizontal showsHorizontalScrollIndicator={false}>
-							<View className="flex-row">
-								<AnimatedTag
-									icon={
-										<Feather name="dollar-sign" size={16} color="#1565C0" />
-									}
-									label="Social Finance & Innovation"
-									bgColor="#E3F2FD"
-									textColor="#1565C0"
-									delay={3500}
-								/>
-								<AnimatedTag
-									icon={
-										<Ionicons name="school-outline" size={16} color="#673AB7" />
-									}
-									label="Education for All"
-									bgColor="#EDE7F6"
-									textColor="#673AB7"
-									delay={3600}
-								/>
-							</View>
-						</ScrollView>
+						{/* All Tags in a wrapping container */}
+						<View className="flex-row flex-wrap justify-center gap-2.5">
+							<AnimatedTag
+								icon={<FontAwesome5 name="users" size={16} color="#2E7D32" />}
+								label="Empowering Communities"
+								bgColor="#E8F5E9"
+								textColor="#2E7D32"
+								delay={2700}
+							/>
+							<AnimatedTag
+								icon={<FontAwesome5 name="tree" size={16} color="#2E7D32" />}
+								label="Environmental Projects"
+								bgColor="#E8F5E9"
+								textColor="#2E7D32"
+								delay={2800}
+							/>
+							<AnimatedTag
+								icon={<FontAwesome5 name="paw" size={16} color="#D32F2F" />}
+								label="Animal Shelters"
+								bgColor="#FFEBEE"
+								textColor="#D32F2F"
+								delay={2900}
+							/>
+							<AnimatedTag
+								icon={
+									<Ionicons
+										name="newspaper-outline"
+										size={16}
+										color="#1976D2"
+									/>
+								}
+								label="Community News"
+								bgColor="#E3F2FD"
+								textColor="#1976D2"
+								delay={3000}
+							/>
+							<AnimatedTag
+								icon={
+									<FontAwesome5 name="stethoscope" size={16} color="#0097A7" />
+								}
+								label="Healthcare Support"
+								bgColor="#E0F7FA"
+								textColor="#0097A7"
+								delay={3100}
+							/>
+							<AnimatedTag
+								icon={
+									<MaterialIcons name="restaurant" size={16} color="#455A64" />
+								}
+								label="Food Security"
+								bgColor="#ECEFF1"
+								textColor="#455A64"
+								delay={3200}
+							/>
+							<AnimatedTag
+								icon={<FontAwesome5 name="baby" size={16} color="#7B1FA2" />}
+								label="Child Welfare"
+								bgColor="#F3E5F5"
+								textColor="#7B1FA2"
+								delay={3300}
+							/>
+							<AnimatedTag
+								icon={
+									<MaterialCommunityIcons
+										name="sprout"
+										size={16}
+										color="#388E3C"
+									/>
+								}
+								label="Sustainable Agriculture"
+								bgColor="#E8F5E9"
+								textColor="#388E3C"
+								delay={3400}
+							/>
+							<AnimatedTag
+								icon={<Feather name="dollar-sign" size={16} color="#1565C0" />}
+								label="Social Finance"
+								bgColor="#E3F2FD"
+								textColor="#1565C0"
+								delay={3500}
+							/>
+							<AnimatedTag
+								icon={
+									<Ionicons name="school-outline" size={16} color="#673AB7" />
+								}
+								label="Education for All"
+								bgColor="#EDE7F6"
+								textColor="#673AB7"
+								delay={3600}
+							/>
+						</View>
 					</MotiView>
 				</View>
 			</View>

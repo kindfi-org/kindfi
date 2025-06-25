@@ -37,12 +37,15 @@ export default function Root({ children }: { children: React.ReactNode }) {
 	)
 }
 
+// ! No dark/light mode support in web yet.
+// ! This is a workaround to ensure the background color does not flicker in dark mode,
+// ? but leaving the setup as is for now to keep it in mind for future updates.
 const responsiveBackground = `
 body {
   background-color: #fff;
 }
 @media (prefers-color-scheme: dark) {
   body {
-    background-color: #000;
+    background-color: #fff;
   }
 }`

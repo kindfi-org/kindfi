@@ -35,10 +35,10 @@ function ImpactSection() {
 				transprarent, community-led ecosystem
 			</Text>
 
-			{impact_data.map((items, i) => {
+			{impact_data.map((items) => {
 				return (
 					<ImpactCard
-						key={i}
+						key={items.title.replace(/\s+/g, '-').toLowerCase()}
 						icon={items.icon}
 						title={items.title}
 						description={items.description}
