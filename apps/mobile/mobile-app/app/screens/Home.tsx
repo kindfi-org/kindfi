@@ -1,4 +1,4 @@
-import KindFi from '@/assets/icons/kindfi'
+import KindFi from '@/assets/Icons/kindfi'
 import ItemList from '@/components/ItemList'
 import { allItems } from '@/components/StyledText'
 import { MaterialIcons } from '@expo/vector-icons'
