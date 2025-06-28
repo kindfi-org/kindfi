@@ -1,10 +1,14 @@
+import { appEnvConfig } from '@packages/lib/config'
+
+const appConfig = appEnvConfig()
+
 /**
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
 	async headers() {
 		// Only apply strict headers in production
-		if (process.env.NODE_ENV === 'production') {
+		if (appConfig.env.nodeEnv === 'production') {
 			return [
 				{
 					source: '/:path*',
@@ -29,7 +33,7 @@ const nextConfig = {
                 style-src 'self' 'unsafe-inline';
                 img-src 'self' data: blob:;
                 font-src 'self' data:;
-                connect-src 'self' https://kyc.example.com https://api.example.com ${process.env.NEXT_PUBLIC_SUPABASE_URL} https://*.vercel.app;
+                connect-src 'self' https://kyc.example.com https://api.example.com ${appConfig.database.url} https://*.vercel.app;
                 frame-ancestors 'self';
                 upgrade-insecure-requests;
               `.replace(/\s{2,}/g, ' '),

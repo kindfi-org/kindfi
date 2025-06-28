@@ -55,7 +55,8 @@
 		"tw-animate-css": "^1.3.4",
 		"vaul": "^1.1.2",
 		"ws": "^8.16.0",
-		"zod": "^3.25.62"
+		"zod": "^3.25.62",
+		"@packages/lib": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/react": "^19",

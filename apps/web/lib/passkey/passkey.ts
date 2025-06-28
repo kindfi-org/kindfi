@@ -37,15 +37,18 @@ const getRpInfo = (
 	origin: string,
 ): { rpName: string; rpId: string; expectedOrigin: string } => {
 	const index = ENV.EXPECTED_ORIGIN.findIndex(
-		(expectedOrigin) => origin === expectedOrigin,
+		(expectedOrigin: string) => origin === expectedOrigin,
 	)
-	if (index !== -1)
-		return {
-			rpName: ENV.RP_NAME[index],
-			rpId: ENV.RP_ID[index],
-			expectedOrigin: ENV.EXPECTED_ORIGIN[index],
-		}
-	throw new InAppError(ErrorCode.NO_MATCHING_RP_ID)
+
+	if (index === -1) {
+		throw new Error(`Origin ${origin} not found in expected origins`)
+	}
+
+	return {
+		rpName: ENV.RP_NAME[index] || ENV.RP_NAME[0],
+		rpId: ENV.RP_ID[index] || ENV.RP_ID[0],
+		expectedOrigin: ENV.EXPECTED_ORIGIN[index],
+	}
 }
 
 export const getRegistrationOptions = async ({

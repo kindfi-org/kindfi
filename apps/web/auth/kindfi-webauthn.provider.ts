@@ -101,7 +101,7 @@ export function nanoid(type: 'string' | 'number' | 'uuid' = 'uuid'): string {
 
 	return id.replace(/[xy]/g, (char) => {
 		const random = (Math.random() * 16) | 0
-		const idValue = char === 'x' ? random : (random && 0x3) | 0x8
+		const idValue = char === 'x' ? random : (random & 0x3) | 0x8
 
 		if (type === 'string') {
 			return String.fromCharCode(97 + idValue) // Convert to a letter

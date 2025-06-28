@@ -1,10 +1,9 @@
+import { appEnvConfig } from '@packages/lib/config'
 import type { Enums } from '@services/supabase'
 import NextAuth from 'next-auth'
-import { getToken } from 'next-auth/jwt' // This import might become unused or used differently if custom JWT generation for Hasura is re-implemented correctly. For now, let's keep it if other parts of the file might use it, though the problematic block is removed.
-import { cookies } from 'next/headers' // This import will become unused after the change.
 import { kindfiWebAuthnProvider } from '~/auth/kindfi-webauthn.provider'
-import { appConfig } from '~/lib/config/app.config'
-// Removed unused import: import { UpdatedAt } from '../../../../lib/types/date.types';
+
+const appConfig = appEnvConfig()
 
 const handler = NextAuth({
 	providers: [kindfiWebAuthnProvider],
@@ -69,7 +68,7 @@ const handler = NextAuth({
 		maxAge: appConfig.auth.token.expiration, // 30 days
 		updateAge: appConfig.auth.token.update, // 24 hours
 	},
-	debug: process.env.NODE_ENV === 'development',
+	debug: appConfig.env.nodeEnv === 'development',
 	theme: {
 		colorScheme: 'light',
 		brandColor: '#fafafa',
