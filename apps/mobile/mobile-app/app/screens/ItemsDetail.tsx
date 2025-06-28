@@ -1,3 +1,4 @@
+import { getImageSource } from '@/lib/utils'
 import React from 'react'
 import {
 	Image,
@@ -31,12 +32,7 @@ const ItemDetails = ({
 	return (
 		<ScrollView style={styles.container}>
 			{/* Image Section */}
-			<Image
-				source={
-					typeof item.image === 'string' ? { uri: item.image } : item.image
-				}
-				style={styles.image}
-			/>
+			<Image source={getImageSource(item.image)} style={styles.image} />
 
 			{/* Text Section */}
 			<View style={styles.textContainer}>

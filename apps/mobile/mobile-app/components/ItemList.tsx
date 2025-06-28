@@ -1,11 +1,14 @@
 import type React from 'react'
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native'
-
-interface Item {
-	id: string
-	title: string
-	image: string
-}
+import {
+	FlatList,
+	Image,
+	ImageSourcePropType,
+	StyleSheet,
+	Text,
+	View,
+} from 'react-native'
+import { getImageSource } from '../lib/utils'
+import type { Item } from '../types'
 
 interface ItemListProps {
 	items: Item[]
@@ -14,7 +17,7 @@ interface ItemListProps {
 const ItemList: React.FC<ItemListProps> = ({ items }) => {
 	const renderItem = ({ item }: { item: Item }) => (
 		<View style={styles.itemContainer}>
-			<Image source={{ uri: item.image }} style={styles.itemImage} />
+			<Image source={getImageSource(item.image)} style={styles.itemImage} />
 			<Text style={styles.itemText}>{item.title}</Text>
 		</View>
 	)

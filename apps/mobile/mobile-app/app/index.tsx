@@ -1,3 +1,4 @@
+import { KindFi } from '@/assets/icons/kindfi'
 import { MaterialIcons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import {
@@ -9,7 +10,6 @@ import {
 	View,
 } from 'react-native'
 import RNPickerSelect from 'react-native-picker-select'
-import KindFi from '../assets/icons/kindfi'
 import { allItems } from '../components/StyledText'
 import { ItemList } from '../components/StyledText'
 
