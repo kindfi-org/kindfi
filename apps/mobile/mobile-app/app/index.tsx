@@ -1,4 +1,4 @@
-import KindFi from '@/assets/Icons/kindfi'
+import KindFi from '@/assets/icons/kindfi'
 import { MaterialIcons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import {
