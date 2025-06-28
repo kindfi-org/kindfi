@@ -1,14 +1,17 @@
 import { Ionicons } from '@expo/vector-icons'
 import type React from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { Image, type ImageSourcePropType, StyleSheet, View } from 'react-native'
 interface HeaderProps {
-	logo: any
+	logo: string | ImageSourcePropType
 }
 
 const Header: React.FC<HeaderProps> = ({ logo }) => {
 	return (
 		<View style={styles.container}>
-			<Image source={logo} style={styles.logo} />
+			<Image
+				source={typeof logo === 'string' ? { uri: logo } : logo}
+				style={styles.logo}
+			/>
 			<Ionicons name="menu" size={30} color="black" />
 		</View>
 	)

@@ -495,43 +495,43 @@ insert into public.profiles (id, role, display_name, bio, image_url) values
 -- Insert project members for each project
 insert into public.project_members (project_id, user_id, role, title) values
   ((select id from public.projects where title = 'Empowering Education'), 'fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Empowering Education'), 'c124b016-bab9-4904-8e1a-c38b8623001b', 'editor', 'Education Specialist'),
-  ((select id from public.projects where title = 'Empowering Education'), '44e69d1d-2659-4a51-82ce-487e8c9ef320', 'editor', 'Community Liaison'),
+  ((select id from public.projects where title = 'Empowering Education'), 'c124b016-bab9-4904-8e1a-c38b8623001b', 'core', 'Education Specialist'),
+  ((select id from public.projects where title = 'Empowering Education'), '44e69d1d-2659-4a51-82ce-487e8c9ef320', 'advisor', 'Community Liaison'),
 
   ((select id from public.projects where title = 'Forest Restoration Initiative'), 'bcc18c37-3a33-4585-9af0-0e163cbb3850', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Forest Restoration Initiative'), '5af02f63-3be5-44e4-bd3a-0964b1dc8e39', 'editor', 'Field Officer'),
+  ((select id from public.projects where title = 'Forest Restoration Initiative'), '5af02f63-3be5-44e4-bd3a-0964b1dc8e39', 'core', 'Field Officer'),
   ((select id from public.projects where title = 'Forest Restoration Initiative'), '2c8a13a2-0a76-4758-84bd-12a633cf598c', 'editor', 'Research Analyst'),
 
   ((select id from public.projects where title = 'Universal Health Access'), '0876de6c-f9ad-4ba2-b4a3-725ddbb8d498', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Universal Health Access'), 'ba754a4b-c267-4d70-8c1a-00154f9b1cf1', 'editor', 'Medical Advisor'),
+  ((select id from public.projects where title = 'Universal Health Access'), 'ba754a4b-c267-4d70-8c1a-00154f9b1cf1', 'advisor', 'Medical Advisor'),
   ((select id from public.projects where title = 'Universal Health Access'), 'eee0c1ac-86c6-4024-a5e3-c5f350626b6a', 'editor', 'Outreach Manager'),
 
   ((select id from public.projects where title = 'Clean Water for Life'), '31738359-04ef-418d-a6e5-59e9de312dab', 'admin', 'Founder'),
   ((select id from public.projects where title = 'Clean Water for Life'), 'fec8063f-59a9-4e66-a6c8-c9f5c4a57353', 'editor', 'Sanitation Officer'),
-  ((select id from public.projects where title = 'Clean Water for Life'), '8fdf59c8-98ab-4fdd-bbf3-4578b59d959d', 'editor', 'Trainer'),
+  ((select id from public.projects where title = 'Clean Water for Life'), '8fdf59c8-98ab-4fdd-bbf3-4578b59d959d', 'community', 'Trainer'),
 
   ((select id from public.projects where title = 'Animal Rescue Network'), 'e3cb1263-0e79-4fd5-be41-d1aa76f03bdc', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Animal Rescue Network'), '8e05ed73-6be8-4e23-bd02-3a8344cef8d4', 'editor', 'Veterinarian'),
-  ((select id from public.projects where title = 'Animal Rescue Network'), 'e52ed5c4-722d-4380-853e-7530db295722', 'editor', 'Adoption Lead'),
+  ((select id from public.projects where title = 'Animal Rescue Network'), '8e05ed73-6be8-4e23-bd02-3a8344cef8d4', 'core', 'Veterinarian'),
+  ((select id from public.projects where title = 'Animal Rescue Network'), 'e52ed5c4-722d-4380-853e-7530db295722', 'community', 'Adoption Lead'),
 
   ((select id from public.projects where title = 'Mindful Support'), '51fdcab5-7789-429d-bb3b-844139921e84', 'admin', 'Founder'),
   ((select id from public.projects where title = 'Mindful Support'), '55499a3c-f7d8-492b-a790-4223f29467b1', 'editor', 'UX Designer'),
-  ((select id from public.projects where title = 'Mindful Support'), 'b5780351-aba6-459e-8d41-3fbd3a5018bf', 'editor', 'Counselor'),
+  ((select id from public.projects where title = 'Mindful Support'), 'b5780351-aba6-459e-8d41-3fbd3a5018bf', 'advisor', 'Counselor'),
 
   ((select id from public.projects where title = 'Artists for Social Impact'), 'ff517450-e235-477e-a058-a2a73608dd69', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Artists for Social Impact'), 'f51272df-fd8f-4826-adf8-58aa6378cb32', 'editor', 'Creative Director'),
+  ((select id from public.projects where title = 'Artists for Social Impact'), 'f51272df-fd8f-4826-adf8-58aa6378cb32', 'core', 'Creative Director'),
   ((select id from public.projects where title = 'Artists for Social Impact'), 'bc6176d7-72c0-4b4c-b2b5-44cde3438517', 'editor', 'Storyteller'),
 
   ((select id from public.projects where title = 'Code the Future'), '8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Code the Future'), 'ad549c42-5906-41a8-a08f-5d810e01d2eb', 'editor', 'Software Engineer'),
-  ((select id from public.projects where title = 'Code the Future'), '2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'editor', 'Program Manager'),
+  ((select id from public.projects where title = 'Code the Future'), 'ad549c42-5906-41a8-a08f-5d810e01d2eb', 'core', 'Software Engineer'),
+  ((select id from public.projects where title = 'Code the Future'), '2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'others', 'Program Manager'),
 
   ((select id from public.projects where title = 'Emergency Response Fund'), '1609aba1-bcbb-426b-ae57-456f02e16de7', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Emergency Response Fund'), '8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'editor', 'Logistics Specialist'),
+  ((select id from public.projects where title = 'Emergency Response Fund'), '8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'core', 'Logistics Specialist'),
   ((select id from public.projects where title = 'Emergency Response Fund'), 'ad549c42-5906-41a8-a08f-5d810e01d2eb', 'editor', 'Field Manager'),
 
   ((select id from public.projects where title = 'Civic Leadership Lab'), '2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Civic Leadership Lab'), '81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'editor', 'Policy Mentor'),
+  ((select id from public.projects where title = 'Civic Leadership Lab'), '81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'advisor', 'Policy Mentor'),
   ((select id from public.projects where title = 'Civic Leadership Lab'), '55499a3c-f7d8-492b-a790-4223f29467b1', 'editor', 'Advocacy Lead');
   
 -- Insert milestones for each project
