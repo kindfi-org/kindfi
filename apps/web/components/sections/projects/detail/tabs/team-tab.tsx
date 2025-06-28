@@ -1,7 +1,14 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Crown, Edit } from 'lucide-react'
+import {
+	Crown,
+	Edit,
+	Puzzle,
+	ShieldCheck,
+	UserCheck,
+	Users,
+} from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import type { TeamMember } from '~/lib/types/project/project-detail.types'
 
@@ -49,6 +56,27 @@ export function TeamTab({ team }: TeamTabProps) {
 							{member.role === 'editor' && (
 								<Edit className="h-4 w-4 text-blue-500" aria-label="Editor" />
 							)}
+							{member.role === 'advisor' && (
+								<UserCheck
+									className="h-4 w-4 text-teal-500"
+									aria-label="Advisor"
+								/>
+							)}
+							{member.role === 'community' && (
+								<Users
+									className="h-4 w-4 text-green-500"
+									aria-label="Community"
+								/>
+							)}
+							{member.role === 'core' && (
+								<ShieldCheck
+									className="h-4 w-4 text-purple-500"
+									aria-label="Core"
+								/>
+							)}
+							{member.role === 'others' && (
+								<Puzzle className="h-4 w-4 text-gray-500" aria-label="Other" />
+							)}
 						</div>
 						<p className="text-primary font-semibold uppercase">
 							{member.title ?? 'Member'}
@@ -65,6 +93,26 @@ export function TeamTab({ team }: TeamTabProps) {
 							{member.role === 'editor' && (
 								<span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
 									Editor
+								</span>
+							)}
+							{member.role === 'advisor' && (
+								<span className="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">
+									Advisor
+								</span>
+							)}
+							{member.role === 'community' && (
+								<span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+									Community
+								</span>
+							)}
+							{member.role === 'core' && (
+								<span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
+									Core
+								</span>
+							)}
+							{member.role === 'others' && (
+								<span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+									Other
 								</span>
 							)}
 						</div>
