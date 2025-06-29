@@ -1,5 +1,4 @@
-use crate::datatype::GraduationNFT;
-use crate::datatype::{NFTError, NFTMetadata};
+use crate::datatype::{GraduationNFT, NFTError, NFTMetadata};
 // Note: String and Vec are soroban_sdk generic types (see datatype.rs for detailed explanation)
 use soroban_sdk::{Address, Env, String, Vec};
 
