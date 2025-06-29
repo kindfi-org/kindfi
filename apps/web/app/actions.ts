@@ -48,7 +48,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 			success: true,
 			message:
 				'Account created successfully. Please check your email to confirm your account.',
-			redirect: '/sign-in',
+			redirect: '/otp-validation',
 		}
 	} catch (error) {
 		return errorHandler.handleAuthError(error as AuthError, 'sign_up')
@@ -81,7 +81,7 @@ export async function signInAction(formData: FormData): Promise<void> {
 		const response = {
 			success: true,
 			message: 'Successfully signed in',
-			redirect: '/dashboard',
+			redirect: '/projects',
 		}
 	} catch (error) {
 		errorHandler.handleAuthError(error as AuthError, 'sign_in')

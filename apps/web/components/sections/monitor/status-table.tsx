@@ -1,5 +1,6 @@
 'use client'
 
+import { appEnvConfig } from '@packages/lib/config'
 import type { Database } from '@services/supabase'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -25,7 +26,8 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/base/table'
-import { appConfig } from '~/lib/config/app.config'
+
+const appConfig = appEnvConfig()
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']
@@ -54,7 +56,7 @@ export function EscrowTable() {
 	})
 
 	const isDevelopment = useMemo(
-		() => process.env.NODE_ENV === 'development',
+		() => appConfig.env.nodeEnv === 'development',
 		[],
 	)
 

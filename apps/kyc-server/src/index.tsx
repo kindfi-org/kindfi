@@ -1,10 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { appEnvConfig } from '@packages/lib'
 import { serve } from 'bun'
 import type { Server, ServerWebSocket } from 'bun'
 import { kycWebSocketService } from './lib/websocket'
 import { routes } from './routes'
 import { buildClient } from './utils/buildClient'
+
+const appConfig = appEnvConfig()
 
 interface ClientData {
 	clientId: string
@@ -33,7 +36,7 @@ function getClientFilename(): string {
 }
 
 async function startServer() {
-	if (process.env.NODE_ENV !== 'test') {
+	if (appConfig.env.nodeEnv !== 'test') {
 		try {
 			await buildClient()
 		} catch (error) {
@@ -155,9 +158,9 @@ async function startServer() {
 				kycWebSocketService.handleDisconnection(ws)
 			},
 		},
-		port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3001,
+		port: appConfig.deployment.port,
 		routes,
-		development: process.env.NODE_ENV !== 'production',
+		development: appConfig.env.nodeEnv !== 'production',
 	} as const
 
 	const server = serve(serverOptions)
@@ -165,7 +168,7 @@ async function startServer() {
 	return server
 }
 
-if (process.env.NODE_ENV !== 'test') {
+if (appConfig.env.nodeEnv !== 'test') {
 	startServer().catch((error) => {
 		console.error('Failed to start server:', error)
 		process.exit(1)

@@ -35,7 +35,35 @@ export const categoriesUpdateSchema = z.object({
 	slug: z.string().optional().nullable(),
 })
 
-export const categoriesRelationshipsSchema = z.tuple([])
+export const challengesRowSchema = z.object({
+	challenge: z.string(),
+	created_at: z.string(),
+	expires_at: z.string(),
+	id: z.string(),
+	identifier: z.string(),
+	rp_id: z.string(),
+	user_id: z.string().nullable(),
+})
+
+export const challengesInsertSchema = z.object({
+	challenge: z.string(),
+	created_at: z.string().optional(),
+	expires_at: z.string().optional(),
+	id: z.string().optional(),
+	identifier: z.string(),
+	rp_id: z.string(),
+	user_id: z.string().optional().nullable(),
+})
+
+export const challengesUpdateSchema = z.object({
+	challenge: z.string().optional(),
+	created_at: z.string().optional(),
+	expires_at: z.string().optional(),
+	id: z.string().optional(),
+	identifier: z.string().optional(),
+	rp_id: z.string().optional(),
+	user_id: z.string().optional().nullable(),
+})
 
 export const commentTypeSchema = z.union([
 	z.literal('comment'),
@@ -69,30 +97,6 @@ export const commentsUpdateSchema = z.object({
 	updated_at: z.string().optional().nullable(),
 })
 
-export const commentsRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('comments_parent_comment_id_fkey'),
-		columns: z.tuple([z.literal('parent_comment_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('comments'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-	z.object({
-		foreignKeyName: z.literal('comments_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-	z.object({
-		foreignKeyName: z.literal('comments_project_update_id_fkey'),
-		columns: z.tuple([z.literal('project_update_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('project_updates'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
-
 export const communityRowSchema = z.object({
 	comment_id: z.string(),
 	created_at: z.string().nullable(),
@@ -116,30 +120,6 @@ export const communityUpdateSchema = z.object({
 	project_id: z.string().optional(),
 	update_id: z.string().optional(),
 })
-
-export const communityRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('comment_id_fkey'),
-		columns: z.tuple([z.literal('comment_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('comments'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-	z.object({
-		foreignKeyName: z.literal('community_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-	z.object({
-		foreignKeyName: z.literal('community_update_id_fkey'),
-		columns: z.tuple([z.literal('update_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('project_updates'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
 
 export const contributionsRowSchema = z.object({
 	amount: z.number(),
@@ -168,14 +148,19 @@ export const contributionsUpdateSchema = z.object({
 	updated_at: z.string().optional().nullable(),
 })
 
-export const contributionsRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('contributions_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
+export const backupStateSchema = z.union([
+	z.literal('not_backed_up'),
+	z.literal('backed_up'),
+])
+
+export const deviceTypeSchema = z.union([
+	z.literal('single_device'),
+	z.literal('multi_device'),
+])
+
+export const profileVerificationStatusSchema = z.union([
+	z.literal('unverified'),
+	z.literal('verified'),
 ])
 
 export const escrowStatusTypeSchema = z.union([
@@ -221,23 +206,6 @@ export const escrowContractsUpdateSchema = z.object({
 	updated_at: z.string().optional().nullable(),
 })
 
-export const escrowContractsRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('escrow_contracts_contribution_id_fkey'),
-		columns: z.tuple([z.literal('contribution_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('contributions'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-	z.object({
-		foreignKeyName: z.literal('escrow_contracts_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
-
 export const escrowMilestonesRowSchema = z.object({
 	escrow_id: z.string(),
 	milestone_id: z.string(),
@@ -252,23 +220,6 @@ export const escrowMilestonesUpdateSchema = z.object({
 	escrow_id: z.string().optional(),
 	milestone_id: z.string().optional(),
 })
-
-export const escrowMilestonesRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('escrow_milestones_escrow_id_fkey'),
-		columns: z.tuple([z.literal('escrow_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('escrow_contracts'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-	z.object({
-		foreignKeyName: z.literal('escrow_milestones_milestone_id_fkey'),
-		columns: z.tuple([z.literal('milestone_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('milestones'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
 
 export const escrowReviewsRowSchema = z.object({
 	created_at: z.string().nullable(),
@@ -318,23 +269,6 @@ export const escrowReviewsUpdateSchema = z.object({
 	type: z.string().optional(),
 })
 
-export const escrowReviewsRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('escrow_reviews_escrow_id_fkey'),
-		columns: z.tuple([z.literal('escrow_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('escrow_contracts'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-	z.object({
-		foreignKeyName: z.literal('escrow_reviews_milestone_id_fkey'),
-		columns: z.tuple([z.literal('milestone_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('milestones'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
-
 export const escrowStatusRowSchema = z.object({
 	current_milestone: z.number().nullable(),
 	escrow_id: z.string(),
@@ -368,8 +302,6 @@ export const escrowStatusUpdateSchema = z.object({
 	total_released: z.number().optional().nullable(),
 })
 
-export const escrowStatusRelationshipsSchema = z.tuple([])
-
 export const kindlerProjectsRowSchema = z.object({
 	joined_at: z.string(),
 	kindler_id: z.string(),
@@ -387,16 +319,6 @@ export const kindlerProjectsUpdateSchema = z.object({
 	kindler_id: z.string().optional(),
 	project_id: z.string().optional(),
 })
-
-export const kindlerProjectsRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('kindler_projects_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
 
 export const kycStatusEnumSchema = z.union([
 	z.literal('pending'),
@@ -429,16 +351,6 @@ export const kycReviewsUpdateSchema = z.object({
 	updated_at: z.string().optional(),
 })
 
-export const kycReviewsRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('kyc_reviews_kyc_status_id_fkey'),
-		columns: z.tuple([z.literal('kyc_status_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('kyc_status'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
-
 export const kycVerificationEnumSchema = z.union([
 	z.literal('basic'),
 	z.literal('enhanced'),
@@ -461,8 +373,6 @@ export const kycStatusUpdateSchema = z.object({
 	user_id: z.string().optional(),
 	verification_level: kycVerificationEnumSchema.optional(),
 })
-
-export const kycStatusRelationshipsSchema = z.tuple([])
 
 export const milestoneStatusSchema = z.union([
 	z.literal('pending'),
@@ -498,16 +408,6 @@ export const milestonesUpdateSchema = z.object({
 	title: z.string().optional(),
 })
 
-export const milestonesRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('milestones_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
-
 export const notificationPreferencesRowSchema = z.object({
 	created_at: z.string().nullable(),
 	email: z.boolean().nullable(),
@@ -534,8 +434,6 @@ export const notificationPreferencesUpdateSchema = z.object({
 	updated_at: z.string().optional().nullable(),
 	user_id: z.string().optional(),
 })
-
-export const notificationPreferencesRelationshipsSchema = z.tuple([])
 
 export const notificationDeliveryStatusSchema = z.union([
 	z.literal('pending'),
@@ -593,8 +491,6 @@ export const notificationsUpdateSchema = z.object({
 	user_id: z.string().optional(),
 })
 
-export const notificationsRelationshipsSchema = z.tuple([])
-
 export const userRoleSchema = z.union([
 	z.literal('kinder'),
 	z.literal('kindler'),
@@ -603,7 +499,8 @@ export const userRoleSchema = z.union([
 export const profilesInsertSchema = z.object({
 	bio: z.string().optional().nullable(),
 	created_at: z.string().optional(),
-	display_name: z.string(),
+	display_name: z.string().optional(),
+	email: z.string().optional().nullable(),
 	id: z.string(),
 	image_url: z.string().optional().nullable(),
 	role: userRoleSchema.optional(),
@@ -614,13 +511,12 @@ export const profilesUpdateSchema = z.object({
 	bio: z.string().optional().nullable(),
 	created_at: z.string().optional(),
 	display_name: z.string().optional(),
+	email: z.string().optional().nullable(),
 	id: z.string().optional(),
 	image_url: z.string().optional().nullable(),
 	role: userRoleSchema.optional(),
 	updated_at: z.string().optional(),
 })
-
-export const profilesRelationshipsSchema = z.tuple([])
 
 export const projectMemberRoleSchema = z.union([
 	z.literal('admin'),
@@ -636,7 +532,7 @@ export const projectMembersInsertSchema = z.object({
 	joined_at: z.string().optional(),
 	project_id: z.string(),
 	role: projectMemberRoleSchema.optional(),
-	title: z.string(),
+	title: z.string().optional(),
 	updated_at: z.string().optional(),
 	user_id: z.string(),
 })
@@ -650,16 +546,6 @@ export const projectMembersUpdateSchema = z.object({
 	updated_at: z.string().optional(),
 	user_id: z.string().optional(),
 })
-
-export const projectMembersRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('project_members_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
 
 export const projectPitchRowSchema = z.object({
 	created_at: z.string().nullable(),
@@ -694,16 +580,6 @@ export const projectPitchUpdateSchema = z.object({
 	video_url: z.string().optional().nullable(),
 })
 
-export const projectPitchRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('project_pitch_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
-
 export const projectTagRelationshipsRowSchema = z.object({
 	project_id: z.string(),
 	tag_id: z.string(),
@@ -718,23 +594,6 @@ export const projectTagRelationshipsUpdateSchema = z.object({
 	project_id: z.string().optional(),
 	tag_id: z.string().optional(),
 })
-
-export const projectTagRelationshipsRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('project_tag_relationships_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-	z.object({
-		foreignKeyName: z.literal('project_tag_relationships_tag_id_fkey'),
-		columns: z.tuple([z.literal('tag_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('project_tags'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
 
 export const projectTagsRowSchema = z.object({
 	color: z.string(),
@@ -759,8 +618,6 @@ export const projectTagsUpdateSchema = z.object({
 	name: z.string().optional(),
 	updated_at: z.string().optional().nullable(),
 })
-
-export const projectTagsRelationshipsSchema = z.tuple([])
 
 export const projectUpdatesRowSchema = z.object({
 	author_id: z.string(),
@@ -791,16 +648,6 @@ export const projectUpdatesUpdateSchema = z.object({
 	title: z.string().optional(),
 	updated_at: z.string().optional(),
 })
-
-export const projectUpdatesRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('project_updates_project_id_fkey'),
-		columns: z.tuple([z.literal('project_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('projects'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
 
 export const projectsRowSchema = z.object({
 	category_id: z.string().nullable(),
@@ -849,16 +696,6 @@ export const projectsUpdateSchema = z.object({
 	title: z.string().optional(),
 	updated_at: z.string().optional().nullable(),
 })
-
-export const projectsRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('projects_category_id_fkey'),
-		columns: z.tuple([z.literal('category_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('categories'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
 
 export const commentsRowSchema = z.object({
 	author_id: z.string(),
@@ -946,6 +783,7 @@ export const profilesRowSchema = z.object({
 	bio: z.string().nullable(),
 	created_at: z.string(),
 	display_name: z.string(),
+	email: z.string().nullable(),
 	id: z.string(),
 	image_url: z.string().nullable(),
 	role: userRoleSchema,

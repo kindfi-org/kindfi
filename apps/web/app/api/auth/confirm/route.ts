@@ -87,7 +87,9 @@ export async function GET(request: NextRequest) {
 			clientIp,
 		})
 
-		redirect(next)
+		// After successful email verification, redirect to passkey registration
+		const redirectUrl = type === 'signup' ? '/passkey-registration' : next
+		redirect(redirectUrl)
 	} catch (error) {
 		logger.error({
 			eventType: 'UNEXPECTED_ERROR',

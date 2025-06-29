@@ -1,7 +1,10 @@
 import type { Database } from '@services/supabase'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { appEnvConfig } from '~/packages/lib/src/config'
 import type { TypedSupabaseClient } from '../../types/supabase-client.type'
+
+const appConfig = appEnvConfig()
 
 /**
  * Creates a new Supabase server-side client using cookies for authentication.
@@ -18,8 +21,8 @@ export async function createSupabaseServerClient(): Promise<TypedSupabaseClient>
 	const cookieStore = await cookies()
 
 	return createServerClient<Database>(
-		process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+		appConfig.database.url,
+		appConfig.database.anonKey,
 		{
 			cookies: {
 				getAll() {

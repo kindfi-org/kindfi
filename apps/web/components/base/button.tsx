@@ -1,8 +1,11 @@
+import { appEnvConfig } from '@packages/lib'
 import { Slot } from '@radix-ui/react-slot'
 import { type VariantProps, cva } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+
+const appConfig = appEnvConfig()
 
 /**
  * ShadCN/UI Reference: https://ui.shadcn.com/docs/components/button
@@ -130,7 +133,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			iconOnly || (!hasTextContent && (startIcon || endIcon || children))
 
 		// Warning for icon-only buttons without aria-label in development
-		if (process.env.NODE_ENV !== 'production' && isIconOnly && !ariaLabel) {
+		if (appConfig.env.nodeEnv !== 'production' && isIconOnly && !ariaLabel) {
 			console.error(
 				`Accessibility error: Icon-only Button must have an aria-label to describe its purpose. Component: ${Button.displayName}`,
 			)
@@ -143,7 +146,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			role: isLink ? 'link' : undefined,
 			'aria-label': ariaLabel || (isIconOnly ? String(children) : 'Button'),
 			title: ariaLabel || (typeof children === 'string' ? children : 'Button'),
-			...(process.env.NODE_ENV !== 'production' &&
+			...(appConfig.env.nodeEnv !== 'production' &&
 				isLink &&
 				!('href' in props) && {
 					onClick: (e) => {
