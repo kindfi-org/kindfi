@@ -15,58 +15,67 @@ import {
 	verifyRegistrationResponse,
 } from '@simplewebauthn/server'
 
+import { appEnvConfig } from '@packages/lib/config'
 import base64url from 'base64url'
-import { ENV_PASSKEY } from './env'
-import { ErrorCode, InAppError } from './errors'
+import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import {
 	deleteChallenge,
 	getChallenge,
 	getUser,
 	saveChallenge,
 	saveUser,
-} from './redis'
+} from './database'
+
+const appConfig = appEnvConfig()
 
 /**
  * Retrieves the RP ID corresponding to the provided host.
- *
- * @param origin - The host for which to retrieve the RP ID.
- * @returns The matching RP ID and name.
- * @throws Error if no matching RP ID is found.
  */
 const getRpInfo = (
 	origin: string,
 ): { rpName: string; rpId: string; expectedOrigin: string } => {
-	const index = ENV_PASSKEY.EXPECTED_ORIGIN.findIndex(
+	const expectedOrigins = appConfig.passkey.expectedOrigin
+	const rpIds = appConfig.passkey.rpId
+	const rpNames = appConfig.passkey.rpName
+
+	const index = expectedOrigins.findIndex(
 		(expectedOrigin: string) => origin === expectedOrigin,
 	)
-	if (index !== -1)
-		return {
-			rpName: ENV_PASSKEY.RP_NAME[index],
-			rpId: ENV_PASSKEY.RP_ID[index],
-			expectedOrigin: ENV_PASSKEY.EXPECTED_ORIGIN[index],
-		}
-	throw new InAppError(ErrorCode.NO_MATCHING_RP_ID)
+
+	if (index === -1) {
+		throw new Error(`Origin ${origin} not found in expected origins`)
+	}
+
+	return {
+		rpName: rpNames[index] || rpNames[0],
+		rpId: rpIds[index] || rpIds[0],
+		expectedOrigin: expectedOrigins[index],
+	}
 }
 
 export const getRegistrationOptions = async ({
 	identifier,
 	origin,
+	userId,
 }: {
 	identifier: string
 	origin: string
+	userId?: string
 }) => {
 	const { rpId, rpName } = getRpInfo(origin)
 	const userResponse = await getUser({
 		rpId,
 		identifier,
+		userId,
 	})
 	if (!userResponse) throw new InAppError(ErrorCode.UNEXPECTED_ERROR)
 	const { credentials } = userResponse
+
 	const opts: GenerateRegistrationOptionsOpts = {
 		rpName,
 		rpID: rpId,
 		userName: identifier,
-		timeout: ENV_PASSKEY.CHALLENGE_TTL_MS,
+		timeout: appConfig.passkey.challengeTtlMs,
 		attestationType: 'none',
 		/**
 		 * Passing in a user's list of already-registered credential IDs here prevents users from
@@ -91,12 +100,15 @@ export const getRegistrationOptions = async ({
 		 */
 		supportedAlgorithmIDs: [-7],
 	}
+
 	const options = await generateRegistrationOptions(opts)
 	await saveChallenge({
 		identifier,
 		rpId,
 		challenge: options.challenge,
+		userId,
 	})
+
 	return options
 }
 
@@ -104,21 +116,25 @@ export const verifyRegistration = async ({
 	identifier,
 	registrationResponse,
 	origin,
+	userId,
 }: {
 	identifier: string
 	registrationResponse: RegistrationResponseJSON
 	origin: string
+	userId?: string
 }) => {
 	const { rpId, expectedOrigin } = getRpInfo(origin)
 	const expectedChallenge = await getChallenge({
 		identifier,
 		rpId,
+		userId,
 	})
 	if (!expectedChallenge) throw new InAppError(ErrorCode.CHALLENGE_NOT_FOUND)
 
 	const userResponse = await getUser({
 		rpId,
 		identifier,
+		userId,
 	})
 	if (!userResponse) throw new InAppError(ErrorCode.UNEXPECTED_ERROR)
 	const { credentials } = userResponse
@@ -155,11 +171,12 @@ export const verifyRegistration = async ({
 				user: {
 					credentials: [...credentials, newCredential],
 				},
+				userId,
 			})
 		}
 	}
 
-	await deleteChallenge({ identifier, rpId })
+	await deleteChallenge({ identifier, rpId, userId })
 	return { verified }
 }
 
@@ -167,15 +184,18 @@ export const getAuthenticationOptions = async ({
 	identifier,
 	origin,
 	challenge,
+	userId,
 }: {
 	identifier: string
 	origin: string
 	challenge?: string
+	userId?: string
 }) => {
 	const { rpId } = getRpInfo(origin)
 	const userResponse = await getUser({
 		rpId,
 		identifier,
+		userId,
 	})
 	if (!userResponse) throw new InAppError(ErrorCode.UNEXPECTED_ERROR)
 
@@ -185,7 +205,7 @@ export const getAuthenticationOptions = async ({
 	if (credentials.length === 0) throw new InAppError(ErrorCode.USER_NOT_FOUND)
 
 	const opts: GenerateAuthenticationOptionsOpts = {
-		timeout: ENV_PASSKEY.CHALLENGE_TTL_MS,
+		timeout: appConfig.passkey.challengeTtlMs,
 		allowCredentials: credentials.map((cred) => ({
 			id: cred.id,
 			type: 'public-key',
@@ -201,7 +221,9 @@ export const getAuthenticationOptions = async ({
 		identifier,
 		rpId,
 		challenge: options.challenge,
+		userId,
 	})
+
 	return options
 }
 
@@ -209,21 +231,25 @@ export const verifyAuthentication = async ({
 	identifier,
 	authenticationResponse,
 	origin,
+	userId,
 }: {
 	identifier: string
 	authenticationResponse: AuthenticationResponseJSON
 	origin: string
+	userId?: string
 }) => {
 	const { rpId, expectedOrigin } = getRpInfo(origin)
 	const expectedChallenge = await getChallenge({
 		identifier,
 		rpId,
+		userId,
 	})
 	if (!expectedChallenge) throw new InAppError(ErrorCode.CHALLENGE_NOT_FOUND)
 
 	const userResponse = await getUser({
 		rpId,
 		identifier,
+		userId,
 	})
 	if (!userResponse) throw new InAppError(ErrorCode.UNEXPECTED_ERROR)
 	const { credentials } = userResponse
@@ -256,17 +282,11 @@ export const verifyAuthentication = async ({
 			user: {
 				credentials,
 			},
+			userId,
 		})
 	}
 
-	await deleteChallenge({ identifier, rpId })
+	await deleteChallenge({ identifier, rpId, userId })
 
 	return { verified }
 }
-
-// References
-
-// https://passkeys.dev/docs/use-cases/bootstrapping/#a-note-about-user-verification
-// https://simplewebauthn.dev/docs/advanced/example-project
-// https://www.passkeys.com/guide#backend-setup
-// https://github.com/kalepail/soroban-passkey?tab=readme-ov-file#soropass

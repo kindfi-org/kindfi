@@ -1,5 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
+import { appEnvConfig } from '~/packages/lib/src/config'
+
+const appConfig = appEnvConfig()
 
 export const updateSession = async (request: NextRequest) => {
 	// This `try/catch` block is only here for the interactive tutorial.
@@ -13,10 +16,8 @@ export const updateSession = async (request: NextRequest) => {
 		})
 
 		const supabase = createServerClient(
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			process.env.NEXT_PUBLIC_SUPABASE_URL!,
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+			appConfig.database.url,
+			appConfig.database.anonKey,
 			{
 				cookies: {
 					getAll() {
@@ -42,6 +43,17 @@ export const updateSession = async (request: NextRequest) => {
 		// This will refresh session if expired - required for Server Components
 		// https://supabase.com/docs/guides/auth/server-side/nextjs
 		const user = await supabase.auth.getUser()
+
+		if (
+			!user &&
+			!request.nextUrl.pathname.startsWith('/auth/sign-in') &&
+			!request.nextUrl.pathname.startsWith('/auth')
+		) {
+			// no user, potentially respond by redirecting the user to the login page
+			const url = request.nextUrl.clone()
+			url.pathname = '/auth/sign-in'
+			return NextResponse.redirect(url)
+		}
 
 		return response
 	} catch (e) {

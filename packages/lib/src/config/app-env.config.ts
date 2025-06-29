@@ -46,6 +46,25 @@ function detectApp(): AppName | undefined {
 	return undefined
 }
 
+// Generic getEnv function
+export function getEnv<T extends AppName>(appName?: T): AppEnvInterface {
+	try {
+		const schema = appName ? createAppSchema(appName) : baseEnvSchema
+		const parsed = schema.parse(process.env)
+		return transformEnv(parsed)
+	} catch (error) {
+		if (error instanceof z.ZodError) {
+			const missingVars = error.errors
+				.map((err) => `  • ${err.path.join('.')}: ${err.message}`)
+				.join('\n')
+			throw new Error(
+				`❌ Environment validation failed for ${appName || 'generic'}:\n${missingVars}\n\nPlease check your .env file and ensure all required variables are set.`,
+			)
+		}
+		throw error
+	}
+}
+
 // Transform function with explicit type annotation
 export function transformEnv(data: ValidatedEnvInput): AppEnvInterface {
 	return {
@@ -62,6 +81,7 @@ export function transformEnv(data: ValidatedEnvInput): AppEnvInterface {
 			anonKey:
 				data.NEXT_PUBLIC_SUPABASE_ANON_KEY || data.SUPABASE_ANON_KEY || '',
 			serviceRoleKey: data.SUPABASE_SERVICE_ROLE_KEY || '',
+			connectionString: data.SUPABASE_DB_URL || '',
 		},
 		features: {
 			enableEscrowFeature:
@@ -125,25 +145,6 @@ export function transformEnv(data: ValidatedEnvInput): AppEnvInterface {
 			challengeTtlMs: (data.CHALLENGE_TTL_SECONDS || 60) * 1000,
 		},
 	} as const
-}
-
-// Generic getEnv function
-export function getEnv<T extends AppName>(appName?: T): AppEnvInterface {
-	try {
-		const schema = appName ? createAppSchema(appName) : baseEnvSchema
-		const parsed = schema.parse(process.env)
-		return transformEnv(parsed)
-	} catch (error) {
-		if (error instanceof z.ZodError) {
-			const missingVars = error.errors
-				.map((err) => `  • ${err.path.join('.')}: ${err.message}`)
-				.join('\n')
-			throw new Error(
-				`❌ Environment validation failed for ${appName || 'generic'}:\n${missingVars}\n\nPlease check your .env file and ensure all required variables are set.`,
-			)
-		}
-		throw error
-	}
 }
 
 // ? Main export function with app detection
@@ -220,6 +221,7 @@ export const baseEnvSchema = z.object({
 		.url('Invalid Supabase URL format')
 		.optional(),
 	SUPABASE_URL: z.string().url('Invalid Supabase URL format').optional(),
+	SUPABASE_DB_URL: z.string().url('Invalid Supabase DB URL format').optional(),
 	NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
 	SUPABASE_ANON_KEY: z.string().optional(),
 	SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
@@ -329,10 +331,11 @@ export const appRequirements = {
 			'RP_NAME',
 			'EXPECTED_ORIGIN',
 			'CHALLENGE_TTL_SECONDS',
+			'SUPABASE_DB_URL',
 		] as const,
 	},
 	'kyc-server': {
-		required: ['SUPABASE_URL', 'SUPABASE_ANON_KEY'] as const,
+		required: ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_DB_URL'] as const,
 		optional: [
 			'RP_ID',
 			'RP_NAME',

@@ -24,6 +24,7 @@ export interface AppEnvInterface {
 	}
 	readonly database: {
 		readonly url: string
+		readonly connectionString: string
 		readonly anonKey: string
 		readonly serviceRoleKey: string
 	}

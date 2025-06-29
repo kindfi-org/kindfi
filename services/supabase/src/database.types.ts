@@ -55,6 +55,36 @@ export type Database = {
 				}
 				Relationships: []
 			}
+			challenges: {
+				Row: {
+					challenge: string
+					created_at: string
+					expires_at: string
+					id: string
+					identifier: string
+					rp_id: string
+					user_id: string | null
+				}
+				Insert: {
+					challenge: string
+					created_at?: string
+					expires_at?: string
+					id?: string
+					identifier: string
+					rp_id: string
+					user_id?: string | null
+				}
+				Update: {
+					challenge?: string
+					created_at?: string
+					expires_at?: string
+					id?: string
+					identifier?: string
+					rp_id?: string
+					user_id?: string | null
+				}
+				Relationships: []
+			}
 			comments: {
 				Row: {
 					author_id: string
@@ -196,6 +226,66 @@ export type Database = {
 						referencedColumns: ['id']
 					},
 				]
+			}
+			devices: {
+				Row: {
+					aaguid: string
+					backup_state: Database['public']['Enums']['backup_state']
+					created_at: string
+					credential_id: string
+					credential_type: Database['public']['Enums']['credential_type']
+					device_name: string | null
+					device_type: Database['public']['Enums']['device_type']
+					id: string
+					identifier: string
+					last_used_at: string | null
+					profile_verification_status: Database['public']['Enums']['profile_verification_status']
+					public_key: string
+					rp_id: string
+					sign_count: number
+					transports: string[]
+					updated_at: string
+					user_id: string | null
+				}
+				Insert: {
+					aaguid?: string
+					backup_state?: Database['public']['Enums']['backup_state']
+					created_at?: string
+					credential_id: string
+					credential_type?: Database['public']['Enums']['credential_type']
+					device_name?: string | null
+					device_type?: Database['public']['Enums']['device_type']
+					id?: string
+					identifier: string
+					last_used_at?: string | null
+					profile_verification_status?: Database['public']['Enums']['profile_verification_status']
+					public_key: string
+					rp_id: string
+					sign_count?: number
+					transports?: string[]
+					updated_at?: string
+					user_id?: string | null
+				}
+				Update: {
+					aaguid?: string
+					backup_state?: Database['public']['Enums']['backup_state']
+					created_at?: string
+					credential_id?: string
+					credential_type?: Database['public']['Enums']['credential_type']
+					device_name?: string | null
+					device_type?: Database['public']['Enums']['device_type']
+					id?: string
+					identifier?: string
+					last_used_at?: string | null
+					profile_verification_status?: Database['public']['Enums']['profile_verification_status']
+					public_key?: string
+					rp_id?: string
+					sign_count?: number
+					transports?: string[]
+					updated_at?: string
+					user_id?: string | null
+				}
+				Relationships: []
 			}
 			escrow_contracts: {
 				Row: {
@@ -625,6 +715,7 @@ export type Database = {
 					bio: string | null
 					created_at: string
 					display_name: string
+					email: string | null
 					id: string
 					image_url: string | null
 					role: Database['public']['Enums']['user_role']
@@ -633,7 +724,8 @@ export type Database = {
 				Insert: {
 					bio?: string | null
 					created_at?: string
-					display_name: string
+					display_name?: string
+					email?: string | null
 					id: string
 					image_url?: string | null
 					role?: Database['public']['Enums']['user_role']
@@ -643,6 +735,7 @@ export type Database = {
 					bio?: string | null
 					created_at?: string
 					display_name?: string
+					email?: string | null
 					id?: string
 					image_url?: string | null
 					role?: Database['public']['Enums']['user_role']
@@ -665,7 +758,7 @@ export type Database = {
 					joined_at?: string
 					project_id: string
 					role?: Database['public']['Enums']['project_member_role']
-					title: string
+					title?: string
 					updated_at?: string
 					user_id: string
 				}
@@ -882,6 +975,10 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
+			cleanup_expired_challenges: {
+				Args: Record<PropertyKey, never>
+				Returns: undefined
+			}
 			unaccent: {
 				Args: { '': string }
 				Returns: string
@@ -892,7 +989,10 @@ export type Database = {
 			}
 		}
 		Enums: {
+			backup_state: 'not_backed_up' | 'backed_up'
 			comment_type: 'comment' | 'question' | 'answer'
+			credential_type: 'public-key'
+			device_type: 'single_device' | 'multi_device'
 			escrow_status_type:
 				| 'NEW'
 				| 'FUNDED'
@@ -911,6 +1011,7 @@ export type Database = {
 			notification_delivery_status: 'pending' | 'delivered' | 'failed'
 			notification_priority: 'low' | 'medium' | 'high' | 'urgent'
 			notification_type: 'info' | 'success' | 'warning' | 'error'
+			profile_verification_status: 'unverified' | 'verified'
 			project_member_role:
 				| 'admin'
 				| 'editor'
@@ -1037,7 +1138,10 @@ export const Constants = {
 	},
 	public: {
 		Enums: {
+			backup_state: ['not_backed_up', 'backed_up'],
 			comment_type: ['comment', 'question', 'answer'],
+			credential_type: ['public-key'],
+			device_type: ['single_device', 'multi_device'],
 			escrow_status_type: [
 				'NEW',
 				'FUNDED',
@@ -1058,6 +1162,7 @@ export const Constants = {
 			notification_delivery_status: ['pending', 'delivered', 'failed'],
 			notification_priority: ['low', 'medium', 'high', 'urgent'],
 			notification_type: ['info', 'success', 'warning', 'error'],
+			profile_verification_status: ['unverified', 'verified'],
 			project_member_role: [
 				'admin',
 				'editor',
