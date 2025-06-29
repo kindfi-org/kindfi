@@ -5,6 +5,7 @@ use crate::{
     interface::MintingOperations,
 };
 use crate::{badgetracker, progresstracker};
+// Note: String is a soroban_sdk generic type (see datatype.rs for detailed explanation)
 use soroban_sdk::{Address, Env, String};
 
 impl MintingOperations for AcademyGraduationNFT {
