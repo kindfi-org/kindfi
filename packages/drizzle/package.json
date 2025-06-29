@@ -12,7 +12,9 @@
 		"migrate": "bun ./src/migrate.ts"
 	},
 	"dependencies": {
-		"pg": "^8.16.3"
+		"drizzle-orm": "^0.44.2",
+		"pg": "^8.16.3",
+		"@packages/lib": "workspace:*"
 	},
 	"devDependencies": {
 		"drizzle-kit": "^0.31.4",

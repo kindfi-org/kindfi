@@ -35,16 +35,16 @@ export const saveChallenge = async ({
 	await db
 		.delete(challenges)
 		.where(
-			and(eq(challenges.identifier, identifier), eq(challenges.rp_id, rpId)),
+			and(eq(challenges.identifier, identifier), eq(challenges.rpId, rpId)),
 		)
 
 	// Insert the new challenge with 5-minute expiration
 	await db.insert(challenges).values({
-		user_id: userId || null,
+		userId: userId || null,
 		identifier,
-		rp_id: rpId,
+		rpId,
 		challenge,
-		expires_at: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes from now
+		expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 minutes from now as ISO string
 	})
 }
 
@@ -68,9 +68,9 @@ export const getChallenge = async ({
 		.where(
 			and(
 				eq(challenges.identifier, identifier),
-				eq(challenges.rp_id, rpId),
+				eq(challenges.rpId, rpId),
 				// Only return non-expired challenges
-				gt(challenges.expires_at, new Date()),
+				gt(challenges.expiresAt, new Date().toISOString()),
 			),
 		)
 		.limit(1)
@@ -95,7 +95,7 @@ export const deleteChallenge = async ({
 	await db
 		.delete(challenges)
 		.where(
-			and(eq(challenges.identifier, identifier), eq(challenges.rp_id, rpId)),
+			and(eq(challenges.identifier, identifier), eq(challenges.rpId, rpId)),
 		)
 }
 
@@ -123,15 +123,15 @@ export const getUser = async ({
 			.where(
 				and(
 					eq(devices.identifier, identifier),
-					eq(devices.rp_id, rpId),
-					...(userId ? [eq(devices.user_id, userId)] : []),
+					eq(devices.rpId, rpId),
+					...(userId ? [eq(devices.userId, userId)] : []),
 				),
 			)
 
 		const credentials: WebAuthnCredential[] = deviceRecords.map((device) => ({
-			id: device.credential_id,
-			publicKey: base64ToUint8Array(device.public_key),
-			counter: device.sign_count,
+			id: device.credentialId,
+			publicKey: base64ToUint8Array(device.publicKey),
+			counter: device.signCount,
 			transports: device.transports as AuthenticatorTransportFuture[],
 		}))
 
@@ -170,8 +170,8 @@ export const saveUser = async ({
 			.where(
 				and(
 					eq(devices.identifier, identifier),
-					eq(devices.rp_id, rpId),
-					eq(devices.credential_id, credential.id),
+					eq(devices.rpId, rpId),
+					eq(devices.credentialId, credential.id),
 				),
 			)
 			.limit(1)
@@ -181,28 +181,28 @@ export const saveUser = async ({
 			await db
 				.update(devices)
 				.set({
-					sign_count: credential.counter,
+					signCount: credential.counter,
 					transports: credential.transports || [],
-					last_used_at: new Date(),
-					updated_at: new Date(),
+					lastUsedAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
 				})
 				.where(eq(devices.id, existingDevice[0].id))
 		} else {
 			// Insert new device
 			await db.insert(devices).values({
-				user_id: userId || null,
+				userId: userId || null,
 				identifier,
-				rp_id: rpId,
-				credential_id: credential.id,
-				public_key: uint8ArrayToBase64(credential.publicKey),
-				sign_count: credential.counter,
+				rpId,
+				credentialId: credential.id,
+				publicKey: uint8ArrayToBase64(credential.publicKey),
+				signCount: credential.counter,
 				transports: credential.transports || [],
-				credential_type: 'public-key',
+				credentialType: 'public-key',
 				aaguid: '00000000-0000-0000-0000-000000000000',
-				profile_verification_status: 'unverified',
-				device_type: 'single_device',
-				backup_state: 'not_backed_up',
-				last_used_at: new Date(),
+				profileVerificationStatus: 'unverified',
+				deviceType: 'single_device',
+				backupState: 'not_backed_up',
+				lastUsedAt: new Date().toISOString(),
 			})
 		}
 	}
@@ -214,7 +214,9 @@ export const saveUser = async ({
 export const cleanupExpiredChallenges = async (): Promise<void> => {
 	const db = await getDb()
 
-	await db.delete(challenges).where(lt(challenges.expires_at, new Date()))
+	await db
+		.delete(challenges)
+		.where(lt(challenges.expiresAt, new Date().toISOString()))
 }
 
 /**
@@ -226,8 +228,8 @@ export const getUserDevices = async (userId: string): Promise<Device[]> => {
 	return await db
 		.select()
 		.from(devices)
-		.where(eq(devices.user_id, userId))
-		.orderBy(desc(devices.last_used_at))
+		.where(eq(devices.userId, userId))
+		.orderBy(desc(devices.lastUsedAt))
 }
 
 /**
@@ -241,10 +243,10 @@ export const updateDeviceLastUsed = async (
 	await db
 		.update(devices)
 		.set({
-			last_used_at: new Date(),
-			updated_at: new Date(),
+			lastUsedAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
 		})
-		.where(eq(devices.credential_id, credentialId))
+		.where(eq(devices.credentialId, credentialId))
 }
 
 /**
@@ -259,6 +261,6 @@ export const removeDevice = async (
 	await db
 		.delete(devices)
 		.where(
-			and(eq(devices.user_id, userId), eq(devices.credential_id, credentialId)),
+			and(eq(devices.userId, userId), eq(devices.credentialId, credentialId)),
 		)
 }

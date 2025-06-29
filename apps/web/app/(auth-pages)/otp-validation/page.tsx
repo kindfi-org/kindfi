@@ -60,34 +60,46 @@ export default function VerifyOTPPage() {
 		if (otp.length !== 6) return
 
 		setIsVerifying(true)
+		setError('')
 
-		// Simulate verification
-		await new Promise((resolve) => setTimeout(resolve, 1500))
+		try {
+			// Since Supabase uses email link verification, this is primarily for demonstration
+			// In a real implementation, you might use email OTP instead of email links
+			await new Promise((resolve) => setTimeout(resolve, 1500))
 
-		const timeoutId = setTimeout(() => {
-			setIsVerifying(false)
-
-			// For demo: validate if OTP is "123456"
+			// For demo purposes - in real app, the verification happens via email link
 			if (otp === '123456') {
 				setIsVerified(true)
-				setSuccess('Verification successful! You will be redirected shortly.')
-				router.push('/dashboard')
+				setSuccess('Verification successful! Redirecting to passkey setup...')
+				setTimeout(() => {
+					router.push('/passkey-registration')
+				}, 2000)
 			} else {
-				setError('Invalid verification code. Please try again.')
+				setError(
+					'Invalid verification code. Please check your email and click the verification link.',
+				)
 			}
-		}, 1500)
-
-		return () => clearTimeout(timeoutId)
+		} catch (err) {
+			setError('Verification failed. Please try again.')
+		} finally {
+			setIsVerifying(false)
+		}
 	}
 
 	const handleResend = async () => {
 		setIsResending(true)
+		setError('')
 
-		// Simulate resending OTP
-		await new Promise((resolve) => setTimeout(resolve, 1000))
-
-		setTimeLeft(120)
-		setIsResending(false)
+		try {
+			// Simulate resending verification email
+			await new Promise((resolve) => setTimeout(resolve, 1000))
+			setTimeLeft(120)
+			setSuccess('Verification email resent! Please check your inbox.')
+		} catch (err) {
+			setError('Failed to resend verification email. Please try again.')
+		} finally {
+			setIsResending(false)
+		}
 	}
 
 	return (
@@ -103,12 +115,13 @@ export default function VerifyOTPPage() {
 								className="text-center text-2xl font-bold"
 								id="otp-label"
 							>
-								Verify Your Account
+								Check Your Email
 							</CardTitle>
 							<CardDescription className="text-center">
-								We've sent a 6-digit verification code to your email
-								<div className="mt-1 font-medium text-primary">
-									j***@example.com
+								We've sent a verification link to your email address. Click the
+								link to complete your account setup.
+								<div className="mt-2 font-medium text-primary">
+									Please check your inbox and spam folder
 								</div>
 							</CardDescription>
 						</CardHeader>
