@@ -1,5 +1,6 @@
-use crate::GraduationNFT;
+use crate::datatype::GraduationNFT;
 use crate::datatype::{NFTError, NFTMetadata};
+// Note: String and Vec are soroban_sdk generic types (see datatype.rs for detailed explanation)
 use soroban_sdk::{Address, Env, String, Vec};
 
 /// Trait for creating and managing NFT metadata  

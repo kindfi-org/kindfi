@@ -3,6 +3,7 @@ use crate::{
     datatype::{NFTError, NFTMetadata},
     interface::MetadataOperations,
 };
+// Note: String and Vec are soroban_sdk generic types (see datatype.rs for detailed explanation)
 use soroban_sdk::{String, Vec};
 
 impl MetadataOperations for AcademyGraduationNFT {
