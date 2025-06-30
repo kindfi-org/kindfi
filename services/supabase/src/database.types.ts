@@ -829,10 +829,13 @@ export type Database = {
 					description: string | null
 					id: string
 					image_url: string | null
-					investors_count: number
+					kinder_count: number
 					min_investment: number
 					owner_id: string
 					percentage_complete: number
+					project_location: string | null
+					slug: string
+					social_links: Json
 					target_amount: number
 					title: string
 					updated_at: string | null
@@ -844,10 +847,13 @@ export type Database = {
 					description?: string | null
 					id?: string
 					image_url?: string | null
-					investors_count?: number
+					kinder_count?: number
 					min_investment: number
 					owner_id: string
 					percentage_complete?: number
+					project_location?: string | null
+					slug: string
+					social_links?: Json
 					target_amount: number
 					title: string
 					updated_at?: string | null
@@ -859,10 +865,13 @@ export type Database = {
 					description?: string | null
 					id?: string
 					image_url?: string | null
-					investors_count?: number
+					kinder_count?: number
 					min_investment?: number
 					owner_id?: string
 					percentage_complete?: number
+					project_location?: string | null
+					slug?: string
+					social_links?: Json
 					target_amount?: number
 					title?: string
 					updated_at?: string | null
