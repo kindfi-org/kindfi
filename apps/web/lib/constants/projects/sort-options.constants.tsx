@@ -28,6 +28,6 @@ export const sortOptions: SortOptionItem[] = [
 export const sortMap: Record<string, { column: string; ascending: boolean }> = {
 	'most-funded': { column: 'current_amount', ascending: false },
 	'most-recent': { column: 'created_at', ascending: false },
-	'most-supporters': { column: 'investors_count', ascending: false },
+	'most-supporters': { column: 'kinder_count', ascending: false },
 	'most-popular': { column: 'title', ascending: true }, // Adjustable at discretion
 }
