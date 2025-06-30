@@ -89,7 +89,7 @@ function ProjectDetails({
 						<p className="text-xs text-gray-500">Goal</p>
 					</div>
 					<div>
-						<p className="font-semibold">{project.investors_count ?? 0}</p>
+						<p className="font-semibold">{project.kinder_count ?? 0}</p>
 						<p className="text-xs text-gray-500">Investors</p>
 					</div>
 					<div>

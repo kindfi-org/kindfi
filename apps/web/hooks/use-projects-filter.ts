@@ -80,8 +80,8 @@ export function useProjectsFilter() {
 				case 'Most Supporters':
 					return sortedProjects.sort(
 						(a, b) =>
-							(b.investors_count || b.donors || 0) -
-							(a.investors_count || a.donors || 0),
+							(b.kinder_count || b.donors || 0) -
+							(a.kinder_count || a.donors || 0),
 					)
 				default:
 					// 'popular' - could be based on a trending flag or other metrics
@@ -96,8 +96,8 @@ export function useProjectsFilter() {
 
 						// Then by number of supporters
 						return (
-							(b.investors_count || b.donors || 0) -
-							(a.investors_count || a.donors || 0)
+							(b.kinder_count || b.donors || 0) -
+							(a.kinder_count || a.donors || 0)
 						)
 					})
 			}
