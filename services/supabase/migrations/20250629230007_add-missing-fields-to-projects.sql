@@ -1,7 +1,11 @@
+-- Enable extension
+CREATE EXTENSION IF NOT EXISTS unaccent;
+
 -- Add slug, social_links, project_location fields to projects
-ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS slug TEXT NOT NULL;
-ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS social_links JSONB NOT NULL DEFAULT '{}'::jsonb;
-ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS project_location CHAR(3);
+ALTER TABLE public.projects
+  ADD COLUMN slug TEXT NOT NULL,
+  ADD COLUMN social_links JSONB NOT NULL DEFAULT '{}'::jsonb,
+  ADD COLUMN project_location CHAR(3);
 
 -- Rename investors_count to kinder_count
 ALTER TABLE public.projects RENAME COLUMN investors_count TO kinder_count;
@@ -18,7 +22,10 @@ BEGIN
     UPDATE public.projects
     SET
         current_amount = current_amount + NEW.amount,
-        percentage_complete = LEAST((current_amount + NEW.amount) / target_amount * 100, 100),
+        percentage_complete = CASE
+          WHEN target_amount > 0 THEN LEAST((current_amount + NEW.amount) / target_amount * 100, 100)
+          ELSE 0
+        END,
         kinder_count = kinder_count + 1
     WHERE id = NEW.project_id;
     RETURN NEW;
@@ -26,8 +33,6 @@ END;
 $$;
 
 -- Create slug generation function and trigger
-CREATE EXTENSION IF NOT EXISTS unaccent;
-
 CREATE OR REPLACE FUNCTION public.generate_project_slug()
 RETURNS trigger
 LANGUAGE plpgsql
