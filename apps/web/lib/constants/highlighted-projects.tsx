@@ -20,7 +20,7 @@ export const projects: Project[] = [
 			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica. Together, we can ensure a brighter future for every child.',
 		current_amount: createMoney(22800),
 		target_amount: createMoney(25000),
-		investors_count: 18,
+		kinder_count: 18,
 		min_investment: createMoney(5),
 		percentage_complete: createPercentage(90),
 		tags: [
@@ -60,7 +60,7 @@ export const projects: Project[] = [
 			'Restore and reforest areas devastated by uncontrolled deforestation. Your support helps rebuild ecosystems and fight climate change.',
 		current_amount: createMoney(54000),
 		target_amount: createMoney(60000),
-		investors_count: 35,
+		kinder_count: 35,
 		min_investment: createMoney(10),
 		percentage_complete: createPercentage(90),
 		tags: [
@@ -100,7 +100,7 @@ export const projects: Project[] = [
 			'Provide care and shelter to homeless animals in rural communities. Help us create safe havens for animals in need.',
 		current_amount: createMoney(15500),
 		target_amount: createMoney(20000),
-		investors_count: 22,
+		kinder_count: 22,
 		min_investment: createMoney(8),
 		percentage_complete: createPercentage(77),
 		tags: [
@@ -140,7 +140,7 @@ export const projects: Project[] = [
 			'Provide critical support to communities affected by natural disasters. From emergency supplies to long-term rebuilding efforts, join us in bringing hope and recovery to those in need.',
 		current_amount: createMoney(30000),
 		target_amount: createMoney(50000),
-		investors_count: 28,
+		kinder_count: 28,
 		min_investment: createMoney(20),
 		percentage_complete: createPercentage(60),
 		tags: [
@@ -180,7 +180,7 @@ export const projects: Project[] = [
 			'Support the preservation of indigenous craftsmanship in Costa Rica. Your contributions protect traditional techniques and cultural heritage.',
 		current_amount: createMoney(34000),
 		target_amount: createMoney(50000),
-		investors_count: 29,
+		kinder_count: 29,
 		min_investment: createMoney(15),
 		percentage_complete: createPercentage(68),
 		tags: [
@@ -220,7 +220,7 @@ export const projects: Project[] = [
 			'Provide access to safe drinking water in underserved rural areas. Help us install water purification systems to improve health and livelihoods.',
 		current_amount: createMoney(18500),
 		target_amount: createMoney(25000),
-		investors_count: 20,
+		kinder_count: 20,
 		min_investment: createMoney(12),
 		percentage_complete: createPercentage(74),
 		tags: [
@@ -260,7 +260,7 @@ export const projects: Project[] = [
 			'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for the next generation.',
 		current_amount: createMoney(40000),
 		target_amount: createMoney(55000),
-		investors_count: 40,
+		kinder_count: 40,
 		min_investment: createMoney(10),
 		percentage_complete: createPercentage(73),
 		tags: [
@@ -300,7 +300,7 @@ export const projects: Project[] = [
 			'Bring essential healthcare services to remote areas through mobile clinics. Your support helps save lives and build healthier communities.',
 		current_amount: createMoney(32000),
 		target_amount: createMoney(45000),
-		investors_count: 30,
+		kinder_count: 30,
 		min_investment: createMoney(20),
 		percentage_complete: createPercentage(71),
 		tags: [

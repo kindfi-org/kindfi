@@ -19,7 +19,7 @@ The central table storing all project information.
 | target_amount       | NUMERIC(12,2)            | NOT NULL, CHECK > 0                      | Total funding goal                  |
 | min_investment      | NUMERIC(12,2)            | NOT NULL, CHECK <= target_amount         | Minimum allowed investment amount   |
 | percentage_complete | NUMERIC(5,2)             | NOT NULL, DEFAULT 0                      | Percentage of funding goal achieved |
-| investors_count     | INTEGER                  | NOT NULL, DEFAULT 0                      | Number of unique investors          |
+| kinder_count        | INTEGER                  | NOT NULL, DEFAULT 0                      | Number of unique investors          |
 | created_at          | TIMESTAMP WITH TIME ZONE | DEFAULT CURRENT_TIMESTAMP                | When project was created            |
 | updated_at          | TIMESTAMP WITH TIME ZONE | DEFAULT CURRENT_TIMESTAMP                | When project was last updated       |
 | category_id         | TEXT                     |                                          | References future categories table  |
@@ -105,5 +105,5 @@ The table is designed to integrate with several other tables that will be create
 ## Implementation Notes
 
 - The `category_id` is defined as TEXT to accommodate future integration with a categories table.
-- Automated calculations for `percentage_complete` and `investors_count` will be handled by triggers when the investor table is implemented.
+- Automated calculations for `percentage_complete` and `kinder_count` will be handled by triggers when the investor table is implemented.
 - The schema uses appropriate numeric precision (12,2) for monetary values to handle amounts up to 10 billion with 2 decimal places.
