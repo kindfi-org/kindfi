@@ -42,17 +42,17 @@ ALTER TABLE escrow_milestones ENABLE ROW LEVEL SECURITY;
 -- RLS Policies for project_milestones
 -- Project owners can create milestones for their projects
 CREATE POLICY "Project owners can create project milestones" ON project_milestones FOR INSERT WITH CHECK (
-    project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+    project_id IN (SELECT id FROM projects WHERE kinder_id = auth.uid())
 );
 
 -- Project owners can view project milestones for their projects
 CREATE POLICY "Project owners can view project milestones" ON project_milestones FOR SELECT USING (
-    project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+    project_id IN (SELECT id FROM projects WHERE kinder_id = auth.uid())
 );
 
 -- Project owners can delete project milestones for their projects
 CREATE POLICY "Project owners can delete project milestones" ON project_milestones FOR DELETE USING (
-    project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+    project_id IN (SELECT id FROM projects WHERE kinder_id = auth.uid())
 );
 
 -- Project owners can create escrow milestones for their projects
@@ -61,7 +61,7 @@ CREATE POLICY "Project owners can create escrow milestones" ON escrow_milestones
         SELECT 1
         FROM project_milestones
         WHERE id = escrow_milestones.project_milestone_id
-        AND project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+        AND project_id IN (SELECT id FROM projects WHERE kinder_id = auth.uid())
     )
 );
 
@@ -71,7 +71,7 @@ CREATE POLICY "Project owners can view escrow milestones" ON escrow_milestones F
         SELECT 1
         FROM project_milestones
         WHERE id = escrow_milestones.project_milestone_id
-        AND project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+        AND project_id IN (SELECT id FROM projects WHERE kinder_id = auth.uid())
     )
 );
 
@@ -81,7 +81,7 @@ CREATE POLICY "Project owners can update escrow milestones" ON escrow_milestones
         SELECT 1
         FROM project_milestones
         WHERE id = escrow_milestones.project_milestone_id
-        AND project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+        AND project_id IN (SELECT id FROM projects WHERE kinder_id = auth.uid())
     )
 );
 
@@ -91,6 +91,6 @@ CREATE POLICY "Project owners can delete escrow milestones" ON escrow_milestones
         SELECT 1
         FROM project_milestones
         WHERE id = escrow_milestones.project_milestone_id
-        AND project_id IN (SELECT id FROM projects WHERE owner_id = auth.uid())
+        AND project_id IN (SELECT id FROM projects WHERE kinder_id = auth.uid())
     )
 );

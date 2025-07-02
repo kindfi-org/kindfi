@@ -23,7 +23,7 @@ CREATE INDEX idx_project_members_user_id ON public.project_members(user_id);
 -- ⚠️ Remove or replace this policy when auth is active
 CREATE POLICY "Public read access to project members"
 ON public.project_members
-FOR SELECT 
+FOR SELECT
 USING (true);
 
 -- RLS Policy: View project members
@@ -34,14 +34,14 @@ USING (true);
 -- USING (
 --     -- User can see members of their own projects
 --     project_id IN (
---         SELECT id FROM public.projects 
---         WHERE owner_id = auth.uid()
+--         SELECT id FROM public.projects
+--         WHERE kinder_id = auth.uid()
 --     )
---     OR 
+--     OR
 --     -- User can see members of projects they are part of
 --     EXISTS (
---         SELECT 1 FROM public.project_members 
---         WHERE project_id = project_members.project_id 
+--         SELECT 1 FROM public.project_members
+--         WHERE project_id = project_members.project_id
 --         AND user_id = auth.uid()
 --     )
 -- );
@@ -55,8 +55,8 @@ WITH CHECK (
     -- Only project owners can add members
     EXISTS (
         SELECT 1 FROM public.projects
-        WHERE id = project_id 
-        AND owner_id = auth.uid()
+        WHERE id = project_id
+        AND kinder_id = auth.uid()
     )
 );
 
@@ -69,8 +69,8 @@ USING (
     -- Only project owners can modify member details
     EXISTS (
         SELECT 1 FROM public.projects
-        WHERE id = project_id 
-        AND owner_id = auth.uid()
+        WHERE id = project_id
+        AND kinder_id = auth.uid()
     )
 )
 WITH CHECK (
@@ -87,10 +87,10 @@ USING (
     -- Project owners can remove any member
     EXISTS (
         SELECT 1 FROM public.projects
-        WHERE id = project_id 
-        AND owner_id = auth.uid()
+        WHERE id = project_id
+        AND kinder_id = auth.uid()
     )
-    OR 
+    OR
     -- Users can remove themselves
     user_id = auth.uid()
 );

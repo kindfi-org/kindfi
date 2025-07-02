@@ -18,6 +18,6 @@ USING (
         SELECT 1
         FROM public.projects
         WHERE id = project_id
-          AND owner_id = auth.uid()
+          AND kinder_id = auth.uid()
     )
 );

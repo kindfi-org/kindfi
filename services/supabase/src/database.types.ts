@@ -830,8 +830,8 @@ export type Database = {
 					id: string
 					image_url: string | null
 					kinder_count: number
+					kinder_id: string
 					min_investment: number
-					owner_id: string
 					percentage_complete: number
 					project_location: string | null
 					slug: string
@@ -848,8 +848,8 @@ export type Database = {
 					id?: string
 					image_url?: string | null
 					kinder_count?: number
+					kinder_id: string
 					min_investment: number
-					owner_id: string
 					percentage_complete?: number
 					project_location?: string | null
 					slug: string
@@ -866,8 +866,8 @@ export type Database = {
 					id?: string
 					image_url?: string | null
 					kinder_count?: number
+					kinder_id?: string
 					min_investment?: number
-					owner_id?: string
 					percentage_complete?: number
 					project_location?: string | null
 					slug?: string

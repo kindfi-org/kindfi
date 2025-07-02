@@ -14,7 +14,7 @@ create policy "Project owners can upload" on storage.objects
 for insert to authenticated with check (
   bucket_id = 'project_pitch_decks'
   and auth.uid() = (
-    select owner_id from projects 
+    select kinder_id from projects
     where id = (storage.foldername(name))[1]::uuid
   )
 );
@@ -24,7 +24,7 @@ create policy "Project team can view" on storage.objects
 for select using (
   bucket_id = 'project_pitch_decks'
   and (
-    auth.uid() = (select owner_id from projects where id = (storage.foldername(name))[1]::uuid)
+    auth.uid() = (select kinder_id from projects where id = (storage.foldername(name))[1]::uuid)
     or exists (
       select 1 from project_members
       where project_id = (storage.foldername(name))[1]::uuid
@@ -38,7 +38,7 @@ create policy "Only owners can delete" on storage.objects
 for delete using (
   bucket_id = 'project_pitch_decks'
   and auth.uid() = (
-    select owner_id from projects 
+    select kinder_id from projects
     where id = (storage.foldername(name))[1]::uuid
   )
 );
