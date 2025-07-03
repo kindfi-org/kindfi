@@ -6,7 +6,7 @@ import { Header } from '~/components/shared/layout/header/header'
 import { Providers } from '~/components/shared/layout/providers'
 import './css/globals.css'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('web')
 
 const defaultUrl = appConfig.deployment.vercelUrl
 	? `https://${appConfig.deployment.vercelUrl}`

@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('web')
 
 /**
  * ShadCN/UI Reference: https://ui.shadcn.com/docs/components/button

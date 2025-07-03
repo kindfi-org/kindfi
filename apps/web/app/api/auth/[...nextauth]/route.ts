@@ -3,7 +3,7 @@ import type { Enums } from '@services/supabase'
 import NextAuth from 'next-auth'
 import { kindfiWebAuthnProvider } from '~/auth/kindfi-webauthn.provider'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('web')
 
 const handler = NextAuth({
 	providers: [kindfiWebAuthnProvider],

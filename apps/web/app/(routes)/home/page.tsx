@@ -1,4 +1,4 @@
-import { prefetchSupabaseQuery } from '@packages/lib/supabase/server'
+import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 import {
 	HydrationBoundary,
 	QueryClient,

@@ -1,6 +1,6 @@
 'use server'
 
-import { createSupabaseServerClient } from '@packages/lib/supabase/server'
+import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'

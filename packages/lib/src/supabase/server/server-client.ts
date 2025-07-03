@@ -1,7 +1,7 @@
 import type { Database } from '@services/supabase'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { appEnvConfig } from '~/packages/lib/src/config'
+import { appEnvConfig } from '../../config'
 import type { TypedSupabaseClient } from '../../types/supabase-client.type'
 
 const appConfig = appEnvConfig()

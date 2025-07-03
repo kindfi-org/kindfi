@@ -1,7 +1,7 @@
 import { appEnvConfig } from '@packages/lib'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('kyc-server')
 
 interface KYCUpdate {
 	type: 'kyc_update'

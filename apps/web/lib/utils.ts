@@ -5,8 +5,6 @@ import Server from 'stellar-sdk'
 import Keypair from 'stellar-sdk'
 import { twMerge } from 'tailwind-merge'
 
-const appConfig = appEnvConfig()
-
 /**
  * Generates a redirect URL with an encoded message as a query parameter.
  *
@@ -40,6 +38,7 @@ export function cn(...inputs: ClassValue[]) {
  * @returns {Promise<number>} A promise that resolves to the sequence number of the account.
  */
 export async function getAccountSequence(secretKey: string): Promise<number> {
+	const appConfig = appEnvConfig('web')
 	const server = new Server(appConfig.stellar.networkUrl)
 	const account = await server.loadAccount(
 		Keypair.fromSecret(secretKey).publicKey(),

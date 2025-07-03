@@ -26,7 +26,7 @@ import {
 	saveUser,
 } from './database'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('kyc-server')
 
 /**
  * Retrieves the RP ID corresponding to the provided host.

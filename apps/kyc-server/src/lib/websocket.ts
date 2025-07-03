@@ -1,5 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config'
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import type {
 	RealtimeChannel,
@@ -8,7 +8,7 @@ import type {
 } from '@supabase/supabase-js'
 import type { ServerWebSocket } from 'bun'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('kyc-server')
 
 interface KYCWebSocketData {
 	clientId: string
@@ -40,16 +40,16 @@ export class KYCWebSocketService {
 	private isInitialized = false
 
 	constructor() {
-		if (!appConfig.database.url || !appConfig.database.anonKey) {
+		if (!appConfig.database.url || !appConfig.database.serviceRoleKey) {
 			throw new Error('Missing required Supabase environment variables')
 		}
 
 		this.initializeSupabase()
 	}
 
-	private async initializeSupabase() {
+	private initializeSupabase() {
 		try {
-			this.supabase = await createSupabaseServerClient()
+			this.supabase = supabaseServiceRole as TypedSupabaseClient
 			if (!this.supabase) {
 				throw new Error('Failed to create Supabase client')
 			}

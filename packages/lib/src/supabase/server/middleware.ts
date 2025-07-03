@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
-import { appEnvConfig } from '~/packages/lib/src/config'
+import { appEnvConfig } from '../../config'
 
 const appConfig = appEnvConfig()
 

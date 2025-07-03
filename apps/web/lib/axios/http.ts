@@ -1,7 +1,7 @@
 import { appEnvConfig } from '@packages/lib'
 import axios, { type CreateAxiosDefaults } from 'axios'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('web')
 
 export const createHttpRequest = (
 	baseURL: string,

@@ -5,7 +5,7 @@ import { appEnvConfig } from '@packages/lib'
 import { build } from 'bun'
 import tailwindPlugin from 'bun-plugin-tailwind'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('kyc-server')
 
 /**
  * Builds the client-side JavaScript with a dynamic filename

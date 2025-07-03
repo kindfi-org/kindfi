@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { NotificationLogger } from '~/lib/services/notification-logger'
 import { NotificationService } from '~/lib/services/notification-service'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('web')
 
 // Define Zod schemas for request validation
 const pushSubscriptionSchema = z.object({

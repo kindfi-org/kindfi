@@ -7,7 +7,7 @@ import { kycWebSocketService } from './lib/websocket'
 import { routes } from './routes'
 import { buildClient } from './utils/buildClient'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('kyc-server')
 
 interface ClientData {
 	clientId: string

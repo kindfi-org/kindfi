@@ -1,7 +1,7 @@
 import { appEnvConfig } from '@packages/lib/config'
-import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('web')
 const supabase = createSupabaseBrowserClient()
 
 export async function uploadToBucket(file: File, bucket: string) {

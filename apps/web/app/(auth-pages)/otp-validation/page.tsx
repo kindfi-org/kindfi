@@ -7,9 +7,10 @@ import {
 	CheckCircle2,
 	Shield,
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { type SetStateAction, useEffect, useState } from 'react'
 
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -28,6 +29,7 @@ import { OTPTips } from '~/components/shared/otp-tips'
 
 export default function VerifyOTPPage() {
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const [otp, setOtp] = useState('')
 	const [timeLeft, setTimeLeft] = useState(120) // 2 minutes
 	const [isVerifying, setIsVerifying] = useState(false)
@@ -35,6 +37,9 @@ export default function VerifyOTPPage() {
 	const [isResending, setIsResending] = useState(false)
 	const [error, setError] = useState('')
 	const [success, setSuccess] = useState('')
+
+	const supabase = createSupabaseBrowserClient()
+	const email = searchParams.get('email') || ''
 
 	useEffect(() => {
 		if (timeLeft > 0 && !isVerified) {
@@ -63,40 +68,63 @@ export default function VerifyOTPPage() {
 		setError('')
 
 		try {
-			// Since Supabase uses email link verification, this is primarily for demonstration
-			// In a real implementation, you might use email OTP instead of email links
-			await new Promise((resolve) => setTimeout(resolve, 1500))
+			const { data, error: verifyError } = await supabase.auth.verifyOtp({
+				email,
+				token: otp,
+				type: 'signup',
+			})
 
-			// For demo purposes - in real app, the verification happens via email link
-			if (otp === '123456') {
+			if (verifyError) {
+				throw verifyError
+			}
+
+			if (data.user) {
 				setIsVerified(true)
 				setSuccess('Verification successful! Redirecting to passkey setup...')
 				setTimeout(() => {
 					router.push('/passkey-registration')
 				}, 2000)
-			} else {
-				setError(
-					'Invalid verification code. Please check your email and click the verification link.',
-				)
 			}
 		} catch (err) {
-			setError('Verification failed. Please try again.')
+			console.error('OTP verification error:', err)
+			if (err instanceof Error) {
+				setError(err.message)
+			} else {
+				setError('Verification failed. Please try again.')
+			}
 		} finally {
 			setIsVerifying(false)
 		}
 	}
 
 	const handleResend = async () => {
+		if (!email) {
+			setError('Email address not found. Please go back to sign up.')
+			return
+		}
+
 		setIsResending(true)
 		setError('')
 
 		try {
-			// Simulate resending verification email
-			await new Promise((resolve) => setTimeout(resolve, 1000))
+			const { error: resendError } = await supabase.auth.resend({
+				type: 'signup',
+				email,
+			})
+
+			if (resendError) {
+				throw resendError
+			}
+
 			setTimeLeft(120)
-			setSuccess('Verification email resent! Please check your inbox.')
+			setSuccess('Verification code resent! Please check your inbox.')
 		} catch (err) {
-			setError('Failed to resend verification email. Please try again.')
+			console.error('Resend OTP error:', err)
+			if (err instanceof Error) {
+				setError(err.message)
+			} else {
+				setError('Failed to resend verification code. Please try again.')
+			}
 		} finally {
 			setIsResending(false)
 		}
@@ -105,7 +133,10 @@ export default function VerifyOTPPage() {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
 			<div className="w-full max-w-5xl">
-				<div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+				<form
+					className="grid gap-6 lg:grid-cols-[1fr_320px]"
+					onSubmit={handleVerify}
+				>
 					<Card className="w-full border-none">
 						<CardHeader className="space-y-1">
 							<div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
@@ -118,8 +149,9 @@ export default function VerifyOTPPage() {
 								Check Your Email
 							</CardTitle>
 							<CardDescription className="text-center">
-								We've sent a verification link to your email address. Click the
-								link to complete your account setup.
+								We've sent a verification code to{' '}
+								{email && <span className="font-medium">{email}</span>}. Enter
+								the 6-digit code below to complete your account setup.
 								<div className="mt-2 font-medium text-primary">
 									Please check your inbox and spam folder
 								</div>
@@ -258,7 +290,7 @@ export default function VerifyOTPPage() {
 								<>
 									<Button
 										className="w-full gap-2"
-										onClick={handleVerify}
+										type="submit"
 										disabled={otp.length !== 6 || isVerifying || timeLeft <= 0}
 									>
 										{isVerifying ? 'Verifying...' : 'Verify Code'}
@@ -271,9 +303,10 @@ export default function VerifyOTPPage() {
 										</span>
 										<Button
 											variant="link"
+											type="button"
 											className="h-auto p-0 text-sm"
 											onClick={handleResend}
-											disabled={isResending || timeLeft > 0}
+											disabled={isResending || timeLeft > 0 || !email}
 										>
 											{isResending ? 'Sending...' : 'Resend'}
 										</Button>
@@ -287,7 +320,7 @@ export default function VerifyOTPPage() {
 					<div className="self-start lg:self-center">
 						<OTPTips />
 					</div>
-				</div>
+				</form>
 			</div>
 		</div>
 	)

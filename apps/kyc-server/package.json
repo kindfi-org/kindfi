@@ -12,8 +12,6 @@
 		"start": "cross-env NODE_ENV=production bun src/index.tsx",
 		"lint": "eslint . --ext .ts,.tsx",
 		"format": "prettier --write \"**/*.{ts,tsx}\"",
-		"db:generate": "drizzle-kit generate:pg",
-		"db:push": "drizzle-kit push:pg",
 		"test": "bun test src/__tests__/*.test.ts",
 		"test:watch": "bun test --watch src/__tests__/*.test.ts"
 	},

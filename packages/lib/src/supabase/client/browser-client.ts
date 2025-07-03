@@ -1,8 +1,11 @@
 import type { Database } from '@services/supabase'
 import { createBrowserClient } from '@supabase/ssr'
+import { appEnvConfig } from '../../config'
 import type { TypedSupabaseClient } from '../../types/supabase-client.type'
 
 let client: TypedSupabaseClient | undefined
+
+const appConfig = appEnvConfig()
 
 /**
  * Creates (or reuses) a singleton Supabase browser client.

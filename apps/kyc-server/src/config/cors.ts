@@ -1,7 +1,7 @@
 import { appEnvConfig } from '@packages/lib'
 import type { CorsOptions } from '../middleware/cors'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('kyc-server')
 
 /**
  * CORS configuration for the application

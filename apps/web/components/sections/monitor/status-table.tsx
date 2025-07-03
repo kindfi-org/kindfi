@@ -27,7 +27,7 @@ import {
 	TableRow,
 } from '~/components/base/table'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('web')
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']

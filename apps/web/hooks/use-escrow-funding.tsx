@@ -2,7 +2,7 @@ import { appEnvConfig } from '@packages/lib'
 import { Horizon, Networks } from '@stellar/stellar-sdk'
 import { useCallback, useEffect, useState } from 'react'
 
-const appConfig = appEnvConfig()
+const appConfig = appEnvConfig('web')
 
 interface FundingParams {
 	escrowContract: string
