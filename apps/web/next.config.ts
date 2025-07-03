@@ -1,10 +1,23 @@
-/**
- * @type {import('next').NextConfig}
- */
-const nextConfig = {
+import { appEnvConfig } from '@packages/lib/config'
+import type { NextConfig } from 'next'
+
+const appConfig = appEnvConfig('web')
+
+const nextConfig: NextConfig = {
+	// Add runtime configuration for environment variables
+	env: {
+		// Only expose specific variables to the client
+		NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+		NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+		NEXT_PUBLIC_SUPABASE_SERVICE_KEY:
+			process.env.NEXT_PUBLIC_SUPABASE_SERVICE_KEY,
+		NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+		NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+	},
+
 	async headers() {
 		// Only apply strict headers in production
-		if (process.env.NODE_ENV === 'production') {
+		if (appConfig.env.nodeEnv === 'production') {
 			return [
 				{
 					source: '/:path*',
@@ -29,7 +42,7 @@ const nextConfig = {
                 style-src 'self' 'unsafe-inline';
                 img-src 'self' data: blob:;
                 font-src 'self' data:;
-                connect-src 'self' https://kyc.example.com https://api.example.com https://*.vercel.app;
+                connect-src 'self' https://kyc.example.com https://api.example.com ${appConfig.database.url} https://*.vercel.app;
                 frame-ancestors 'self';
                 upgrade-insecure-requests;
               `.replace(/\s{2,}/g, ' '),

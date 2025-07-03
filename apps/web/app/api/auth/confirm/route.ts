@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@packages/lib/supabase/server'
+import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -87,7 +87,9 @@ export async function GET(request: NextRequest) {
 			clientIp,
 		})
 
-		redirect(next)
+		// After successful email verification, redirect to passkey registration
+		const redirectUrl = type === 'signup' ? '/passkey-registration' : next
+		redirect(redirectUrl)
 	} catch (error) {
 		logger.error({
 			eventType: 'UNEXPECTED_ERROR',

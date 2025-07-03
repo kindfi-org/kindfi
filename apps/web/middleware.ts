@@ -1,4 +1,4 @@
-import { updateSession } from '@packages/lib/supabase/server'
+import { updateSession } from '@packages/lib/supabase-server'
 import type { NextRequest } from 'next/server'
 
 // * Infer the type of the first parameter of updateSession

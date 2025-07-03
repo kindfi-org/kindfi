@@ -4,7 +4,7 @@ import {
 	getRegistrationOptions,
 	verifyAuthentication,
 	verifyRegistration,
-} from '../lib/passkey/passkey'
+} from '../lib/passkey/passkey-service'
 import { withCORS } from '../middleware/cors'
 import { handleError } from '../utils/error-handler'
 
@@ -18,10 +18,11 @@ export const passkeyRoutes = {
 		async POST(req: Request) {
 			return withConfiguredCORS(async () => {
 				try {
-					const { identifier, origin } = await req.json()
+					const { identifier, origin, userId } = await req.json()
 					const options = await getRegistrationOptions({
 						identifier,
 						origin,
+						userId,
 					})
 					return Response.json(options)
 				} catch (error) {
@@ -36,11 +37,13 @@ export const passkeyRoutes = {
 		async POST(req: Request) {
 			return withConfiguredCORS(async () => {
 				try {
-					const { identifier, origin, registrationResponse } = await req.json()
+					const { identifier, origin, registrationResponse, userId } =
+						await req.json()
 					const result = await verifyRegistration({
 						identifier,
 						registrationResponse,
 						origin,
+						userId,
 					})
 					return Response.json(result)
 				} catch (error) {
@@ -55,11 +58,12 @@ export const passkeyRoutes = {
 		async POST(req: Request) {
 			return withConfiguredCORS(async () => {
 				try {
-					const { identifier, challenge, origin } = await req.json()
+					const { identifier, challenge, origin, userId } = await req.json()
 					const options = await getAuthenticationOptions({
 						identifier,
 						origin,
 						challenge,
+						userId,
 					})
 
 					return Response.json(options)
@@ -75,12 +79,13 @@ export const passkeyRoutes = {
 		async POST(req: Request) {
 			return withConfiguredCORS(async () => {
 				try {
-					const { identifier, origin, authenticationResponse } =
+					const { identifier, origin, authenticationResponse, userId } =
 						await req.json()
 					const result = await verifyAuthentication({
 						identifier,
 						authenticationResponse,
 						origin,
+						userId,
 					})
 
 					return Response.json(result)

@@ -12,8 +12,6 @@
 		"start": "cross-env NODE_ENV=production bun src/index.tsx",
 		"lint": "eslint . --ext .ts,.tsx",
 		"format": "prettier --write \"**/*.{ts,tsx}\"",
-		"db:generate": "drizzle-kit generate:pg",
-		"db:push": "drizzle-kit push:pg",
 		"test": "bun test src/__tests__/*.test.ts",
 		"test:watch": "bun test --watch src/__tests__/*.test.ts"
 	},
@@ -40,7 +38,6 @@
 		"bun-plugin-tailwind": "^0.0.14",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
-		"drizzle-orm": "^0.29.0",
 		"lucide-react": "^0.513.0",
 		"postgres": "^3.4.0",
 		"react": "^19.0.0",
@@ -55,7 +52,9 @@
 		"tw-animate-css": "^1.3.4",
 		"vaul": "^1.1.2",
 		"ws": "^8.16.0",
-		"zod": "^3.25.62"
+		"zod": "^3.25.62",
+		"@packages/lib": "workspace:*",
+		"@packages/drizzle": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/react": "^19",

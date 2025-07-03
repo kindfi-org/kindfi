@@ -1,5 +1,5 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
-import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'

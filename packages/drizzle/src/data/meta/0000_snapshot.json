@@ -1,0 +1,2655 @@
+{
+	"id": "00000000-0000-0000-0000-000000000000",
+	"prevId": "",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"public.escrow_contracts": {
+			"name": "escrow_contracts",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "uuid_generate_v4()"
+				},
+				"engagement_id": {
+					"name": "engagement_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"contract_id": {
+					"name": "contract_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"contribution_id": {
+					"name": "contribution_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"payer_address": {
+					"name": "payer_address",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"receiver_address": {
+					"name": "receiver_address",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"amount": {
+					"name": "amount",
+					"type": "numeric(20, 7)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"current_state": {
+					"name": "current_state",
+					"type": "escrow_status_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'NEW'"
+				},
+				"platform_fee": {
+					"name": "platform_fee",
+					"type": "numeric(5, 2)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				},
+				"completed_at": {
+					"name": "completed_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"metadata": {
+					"name": "metadata",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'{}'::jsonb"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"escrow_contracts_project_id_fkey": {
+					"name": "escrow_contracts_project_id_fkey",
+					"tableFrom": "escrow_contracts",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"escrow_contracts_contribution_id_fkey": {
+					"name": "escrow_contracts_contribution_id_fkey",
+					"tableFrom": "escrow_contracts",
+					"tableTo": "contributions",
+					"schemaTo": "public",
+					"columnsFrom": ["contribution_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"escrow_contracts_engagement_id_key": {
+					"columns": ["engagement_id"],
+					"nullsNotDistinct": false,
+					"name": "escrow_contracts_engagement_id_key"
+				},
+				"escrow_contracts_contract_id_key": {
+					"columns": ["contract_id"],
+					"nullsNotDistinct": false,
+					"name": "escrow_contracts_contract_id_key"
+				}
+			},
+			"checkConstraints": {
+				"valid_escrow_amount": {
+					"name": "valid_escrow_amount",
+					"value": "amount > (0)::numeric"
+				},
+				"valid_platform_fee": {
+					"name": "valid_platform_fee",
+					"value": "platform_fee >= (0)::numeric"
+				}
+			},
+			"policies": {
+				"public_select_escrow_contracts": {
+					"name": "public_select_escrow_contracts",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"],
+					"using": "true"
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.projects": {
+			"name": "projects",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "uuid_generate_v4()"
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"current_amount": {
+					"name": "current_amount",
+					"type": "numeric(12, 2)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'0'"
+				},
+				"target_amount": {
+					"name": "target_amount",
+					"type": "numeric(12, 2)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"min_investment": {
+					"name": "min_investment",
+					"type": "numeric(12, 2)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"percentage_complete": {
+					"name": "percentage_complete",
+					"type": "numeric(5, 2)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'0'"
+				},
+				"investors_count": {
+					"name": "investors_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				},
+				"category_id": {
+					"name": "category_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"image_url": {
+					"name": "image_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"owner_id": {
+					"name": "owner_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {
+				"idx_projects_owner_id": {
+					"name": "idx_projects_owner_id",
+					"columns": [
+						{
+							"expression": "owner_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"projects_owner_id_fkey": {
+					"name": "projects_owner_id_fkey",
+					"tableFrom": "projects",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["owner_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"projects_category_id_fkey": {
+					"name": "projects_category_id_fkey",
+					"tableFrom": "projects",
+					"tableTo": "categories",
+					"schemaTo": "public",
+					"columnsFrom": ["category_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {
+				"check_min_investment_less_than_target": {
+					"name": "check_min_investment_less_than_target",
+					"value": "min_investment <= target_amount"
+				},
+				"check_positive_target_amount": {
+					"name": "check_positive_target_amount",
+					"value": "target_amount > (0)::numeric"
+				}
+			},
+			"policies": {
+				"Projects can be deleted by owner": {
+					"name": "Projects can be deleted by owner",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["authenticated"],
+					"using": "(auth.uid() = owner_id)"
+				},
+				"Projects can be updated by owner": {
+					"name": "Projects can be updated by owner",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["authenticated"]
+				},
+				"Projects can be created by authenticated users": {
+					"name": "Projects can be created by authenticated users",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["authenticated"]
+				},
+				"Projects are viewable by everyone": {
+					"name": "Projects are viewable by everyone",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["authenticated"]
+				},
+				"Allow public read access to projects": {
+					"name": "Allow public read access to projects",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				},
+				"Allow project owners to update their projects": {
+					"name": "Allow project owners to update their projects",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				},
+				"Allow authenticated users to create projects": {
+					"name": "Allow authenticated users to create projects",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.escrow_status": {
+			"name": "escrow_status",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "uuid_generate_v4()"
+				},
+				"escrow_id": {
+					"name": "escrow_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "escrow_status_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"current_milestone": {
+					"name": "current_milestone",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"total_funded": {
+					"name": "total_funded",
+					"type": "numeric(20, 7)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"total_released": {
+					"name": "total_released",
+					"type": "numeric(20, 7)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"last_updated": {
+					"name": "last_updated",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				},
+				"metadata": {
+					"name": "metadata",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'{}'::jsonb"
+				}
+			},
+			"indexes": {
+				"idx_escrow_status_escrow_id": {
+					"name": "idx_escrow_status_escrow_id",
+					"columns": [
+						{
+							"expression": "escrow_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "text_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"idx_escrow_status_last_updated": {
+					"name": "idx_escrow_status_last_updated",
+					"columns": [
+						{
+							"expression": "last_updated",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "timestamptz_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"idx_escrow_status_metadata": {
+					"name": "idx_escrow_status_metadata",
+					"columns": [
+						{
+							"expression": "metadata",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "jsonb_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "gin",
+					"with": {}
+				},
+				"idx_escrow_status_status": {
+					"name": "idx_escrow_status_status",
+					"columns": [
+						{
+							"expression": "status",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "enum_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {
+				"valid_amounts": {
+					"name": "valid_amounts",
+					"value": "total_funded >= total_released"
+				}
+			},
+			"policies": {},
+			"isRLSEnabled": false
+		},
+		"public.contributions": {
+			"name": "contributions",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "uuid_generate_v4()"
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"contributor_id": {
+					"name": "contributor_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"amount": {
+					"name": "amount",
+					"type": "numeric(20, 7)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"contributions_project_id_fkey": {
+					"name": "contributions_project_id_fkey",
+					"tableFrom": "contributions",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {},
+			"isRLSEnabled": false
+		},
+		"public.profiles": {
+			"name": "profiles",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"role": {
+					"name": "role",
+					"type": "user_role",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'kindler'"
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"display_name": {
+					"name": "display_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"bio": {
+					"name": "bio",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"image_url": {
+					"name": "image_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"profiles_id_fkey": {
+					"name": "profiles_id_fkey",
+					"tableFrom": "profiles",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {
+				"Users can update their own profile": {
+					"name": "Users can update their own profile",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["authenticated"],
+					"withCheck": "(auth.uid() = id)",
+					"using": "(auth.uid() = id)"
+				},
+				"Users can insert their own profile": {
+					"name": "Users can insert their own profile",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["authenticated"]
+				},
+				"Public read access to profiles": {
+					"name": "Public read access to profiles",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.project_updates": {
+			"name": "project_updates",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"author_id": {
+					"name": "author_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"content": {
+					"name": "content",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"idx_project_updates_author_id": {
+					"name": "idx_project_updates_author_id",
+					"columns": [
+						{
+							"expression": "author_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"idx_project_updates_project_id": {
+					"name": "idx_project_updates_project_id",
+					"columns": [
+						{
+							"expression": "project_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"project_updates_project_id_fkey": {
+					"name": "project_updates_project_id_fkey",
+					"tableFrom": "project_updates",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"project_updates_author_id_fkey": {
+					"name": "project_updates_author_id_fkey",
+					"tableFrom": "project_updates",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["author_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {
+				"Project updates can be deleted by authors or project owners": {
+					"name": "Project updates can be deleted by authors or project owners",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["authenticated"],
+					"using": "((auth.uid() = author_id) OR (EXISTS ( SELECT 1\n   FROM projects\n  WHERE ((projects.id = project_updates.project_id) AND (projects.owner_id = auth.uid())))))"
+				},
+				"Project updates can be modified by authors": {
+					"name": "Project updates can be modified by authors",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["authenticated"]
+				},
+				"Project updates can be created by project members": {
+					"name": "Project updates can be created by project members",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["authenticated"]
+				},
+				"Public read access to project updates": {
+					"name": "Public read access to project updates",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.project_pitch": {
+			"name": "project_pitch",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"story": {
+					"name": "story",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"pitch_deck": {
+					"name": "pitch_deck",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"video_url": {
+					"name": "video_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"project_pitch_project_id_fkey": {
+					"name": "project_pitch_project_id_fkey",
+					"tableFrom": "project_pitch",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {
+				"Users can delete their own project pitches": {
+					"name": "Users can delete their own project pitches",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["public"],
+					"using": "(project_id IN ( SELECT projects.id\n   FROM projects\n  WHERE ((projects.id = project_pitch.project_id) AND (projects.owner_id = auth.uid()))))"
+				},
+				"Users can update their own project pitches": {
+					"name": "Users can update their own project pitches",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				},
+				"Users can insert their own project pitches": {
+					"name": "Users can insert their own project pitches",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"]
+				},
+				"Public read access to project pitches": {
+					"name": "Public read access to project pitches",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.community": {
+			"name": "community",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "uuid_generate_v4()"
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"update_id": {
+					"name": "update_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"comment_id": {
+					"name": "comment_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				}
+			},
+			"indexes": {
+				"community_project_id_idx": {
+					"name": "community_project_id_idx",
+					"columns": [
+						{
+							"expression": "project_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"community_update_id_idx": {
+					"name": "community_update_id_idx",
+					"columns": [
+						{
+							"expression": "update_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"community_project_id_fkey": {
+					"name": "community_project_id_fkey",
+					"tableFrom": "community",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"community_update_id_fkey": {
+					"name": "community_update_id_fkey",
+					"tableFrom": "community",
+					"tableTo": "project_updates",
+					"schemaTo": "public",
+					"columnsFrom": ["update_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"comment_id_fkey": {
+					"name": "comment_id_fkey",
+					"tableFrom": "community",
+					"tableTo": "comments",
+					"schemaTo": "public",
+					"columnsFrom": ["comment_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {},
+			"isRLSEnabled": false
+		},
+		"public.milestones": {
+			"name": "milestones",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "uuid_generate_v4()"
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"amount": {
+					"name": "amount",
+					"type": "numeric(20, 7)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"deadline": {
+					"name": "deadline",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "milestone_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'pending'"
+				},
+				"order_index": {
+					"name": "order_index",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				},
+				"completed_at": {
+					"name": "completed_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"milestones_project_id_fkey": {
+					"name": "milestones_project_id_fkey",
+					"tableFrom": "milestones",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {
+				"valid_milestone_amount": {
+					"name": "valid_milestone_amount",
+					"value": "amount > (0)::numeric"
+				}
+			},
+			"policies": {
+				"Project owners can delete milestones": {
+					"name": "Project owners can delete milestones",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["public"],
+					"using": "(project_id IN ( SELECT projects.id\n   FROM projects\n  WHERE (projects.owner_id = auth.uid())))"
+				},
+				"Project owners can update milestones": {
+					"name": "Project owners can update milestones",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				},
+				"Public read access to milestones": {
+					"name": "Public read access to milestones",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				},
+				"Project owners can create milestones": {
+					"name": "Project owners can create milestones",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.project_members": {
+			"name": "project_members",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"role": {
+					"name": "role",
+					"type": "project_member_role",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'editor'"
+				},
+				"joined_at": {
+					"name": "joined_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {
+				"idx_project_members_project_id": {
+					"name": "idx_project_members_project_id",
+					"columns": [
+						{
+							"expression": "project_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"idx_project_members_user_id": {
+					"name": "idx_project_members_user_id",
+					"columns": [
+						{
+							"expression": "user_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"project_members_project_id_fkey": {
+					"name": "project_members_project_id_fkey",
+					"tableFrom": "project_members",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"project_members_user_id_fkey": {
+					"name": "project_members_user_id_fkey",
+					"tableFrom": "project_members",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"project_members_project_id_user_id_key": {
+					"columns": ["project_id", "user_id"],
+					"nullsNotDistinct": false,
+					"name": "project_members_project_id_user_id_key"
+				}
+			},
+			"checkConstraints": {},
+			"policies": {
+				"Project owners can remove members": {
+					"name": "Project owners can remove members",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["authenticated"],
+					"using": "((EXISTS ( SELECT 1\n   FROM projects\n  WHERE ((projects.id = project_members.project_id) AND (projects.owner_id = auth.uid())))) OR (user_id = auth.uid()))"
+				},
+				"Project owners can update member roles": {
+					"name": "Project owners can update member roles",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["authenticated"]
+				},
+				"Project owners can add members": {
+					"name": "Project owners can add members",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["authenticated"]
+				},
+				"Public read access to project members": {
+					"name": "Public read access to project members",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.project_tags": {
+			"name": "project_tags",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"color": {
+					"name": "color",
+					"type": "char(7)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"project_tags_name_key": {
+					"columns": ["name"],
+					"nullsNotDistinct": false,
+					"name": "project_tags_name_key"
+				}
+			},
+			"checkConstraints": {
+				"project_tags_color_check": {
+					"name": "project_tags_color_check",
+					"value": "(color)::text ~ '^#[0-9A-Fa-f]{6}$'::text"
+				}
+			},
+			"policies": {},
+			"isRLSEnabled": false
+		},
+		"public.comments": {
+			"name": "comments",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "uuid_generate_v4()"
+				},
+				"content": {
+					"name": "content",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"author_id": {
+					"name": "author_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"parent_comment_id": {
+					"name": "parent_comment_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"project_update_id": {
+					"name": "project_update_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				},
+				"type": {
+					"name": "type",
+					"type": "comment_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'comment'"
+				},
+				"metadata": {
+					"name": "metadata",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'{}'::jsonb"
+				}
+			},
+			"indexes": {
+				"idx_comments_metadata_status": {
+					"name": "idx_comments_metadata_status",
+					"columns": [
+						{
+							"expression": "((metadata ->> 'status'::text))",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "text_ops",
+							"isExpression": true
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"where": "(type = 'question'::comment_type)",
+					"with": {}
+				},
+				"idx_comments_official_answers": {
+					"name": "idx_comments_official_answers",
+					"columns": [
+						{
+							"expression": "((metadata ->> 'is_official'::text))",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "text_ops",
+							"isExpression": true
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"where": "(type = 'answer'::comment_type)",
+					"with": {}
+				},
+				"idx_comments_parent_id": {
+					"name": "idx_comments_parent_id",
+					"columns": [
+						{
+							"expression": "parent_comment_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"idx_comments_type": {
+					"name": "idx_comments_type",
+					"columns": [
+						{
+							"expression": "type",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "enum_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"idx_comments_type_parent": {
+					"name": "idx_comments_type_parent",
+					"columns": [
+						{
+							"expression": "type",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						},
+						{
+							"expression": "parent_comment_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"comments_author_id_fkey": {
+					"name": "comments_author_id_fkey",
+					"tableFrom": "comments",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["author_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"comments_parent_comment_id_fkey": {
+					"name": "comments_parent_comment_id_fkey",
+					"tableFrom": "comments",
+					"tableTo": "comments",
+					"schemaTo": "public",
+					"columnsFrom": ["parent_comment_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"comments_project_id_fkey": {
+					"name": "comments_project_id_fkey",
+					"tableFrom": "comments",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"comments_project_update_id_fkey": {
+					"name": "comments_project_update_id_fkey",
+					"tableFrom": "comments",
+					"tableTo": "project_updates",
+					"schemaTo": "public",
+					"columnsFrom": ["project_update_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {
+				"check_project_or_update": {
+					"name": "check_project_or_update",
+					"value": "((project_id IS NOT NULL) AND (project_update_id IS NULL)) OR ((project_id IS NULL) AND (project_update_id IS NOT NULL))"
+				},
+				"chk_comments_metadata_status": {
+					"name": "chk_comments_metadata_status",
+					"value": "(type <> 'question'::comment_type) OR ((metadata ->> 'status'::text) = ANY (ARRAY['new'::text, 'answered'::text, 'resolved'::text]))"
+				}
+			},
+			"policies": {
+				"update_question_status": {
+					"name": "update_question_status",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"],
+					"withCheck": "((type = 'question'::comment_type) AND (author_id = auth.uid()) AND (content = content) AND (NOT (parent_comment_id IS DISTINCT FROM parent_comment_id)) AND (project_id = project_id) AND true)",
+					"using": "((type = 'question'::comment_type) AND (author_id = auth.uid()))"
+				},
+				"update_answer_official": {
+					"name": "update_answer_official",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				},
+				"Public read access to comments": {
+					"name": "Public read access to comments",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.escrow_reviews": {
+			"name": "escrow_reviews",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "uuid_generate_v4()"
+				},
+				"escrow_id": {
+					"name": "escrow_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"milestone_id": {
+					"name": "milestone_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"reviewer_address": {
+					"name": "reviewer_address",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'PENDING'"
+				},
+				"review_notes": {
+					"name": "review_notes",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				},
+				"reviewed_at": {
+					"name": "reviewed_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"disputer_id": {
+					"name": "disputer_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"type": {
+					"name": "type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"resolution_text": {
+					"name": "resolution_text",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"evidence_urls": {
+					"name": "evidence_urls",
+					"type": "text[]",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"transaction_hash": {
+					"name": "transaction_hash",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {
+				"escrow_reviews_escrow_id_idx": {
+					"name": "escrow_reviews_escrow_id_idx",
+					"columns": [
+						{
+							"expression": "escrow_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"escrow_reviews_milestone_id_idx": {
+					"name": "escrow_reviews_milestone_id_idx",
+					"columns": [
+						{
+							"expression": "milestone_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"escrow_reviews_type_idx": {
+					"name": "escrow_reviews_type_idx",
+					"columns": [
+						{
+							"expression": "type",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "text_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"escrow_reviews_escrow_id_fkey": {
+					"name": "escrow_reviews_escrow_id_fkey",
+					"tableFrom": "escrow_reviews",
+					"tableTo": "escrow_contracts",
+					"schemaTo": "public",
+					"columnsFrom": ["escrow_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"escrow_reviews_milestone_id_fkey": {
+					"name": "escrow_reviews_milestone_id_fkey",
+					"tableFrom": "escrow_reviews",
+					"tableTo": "milestones",
+					"schemaTo": "public",
+					"columnsFrom": ["milestone_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {
+				"escrow_reviews_type_check": {
+					"name": "escrow_reviews_type_check",
+					"value": "type = ANY (ARRAY['dispute'::text, 'milestone'::text])"
+				}
+			},
+			"policies": {},
+			"isRLSEnabled": true
+		},
+		"public.categories": {
+			"name": "categories",
+			"schema": "",
+			"columns": {
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"color": {
+					"name": "color",
+					"type": "char(7)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"slug": {
+					"name": "slug",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {
+				"categories_slug_idx": {
+					"name": "categories_slug_idx",
+					"columns": [
+						{
+							"expression": "slug",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "text_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"categories_name_key": {
+					"columns": ["name"],
+					"nullsNotDistinct": false,
+					"name": "categories_name_key"
+				},
+				"categories_color_key": {
+					"columns": ["color"],
+					"nullsNotDistinct": false,
+					"name": "categories_color_key"
+				}
+			},
+			"checkConstraints": {
+				"chk_color_format": {
+					"name": "chk_color_format",
+					"value": "color ~ '^#[0-9A-Fa-f]{6}$'::text"
+				}
+			},
+			"policies": {
+				"Admins can write categories": {
+					"name": "Admins can write categories",
+					"as": "PERMISSIVE",
+					"for": "ALL",
+					"to": ["public"],
+					"withCheck": "(current_setting('jwt.claims.role'::text, true) = 'admin'::text)",
+					"using": "(current_setting('jwt.claims.role'::text, true) = 'admin'::text)"
+				},
+				"Public can read categories": {
+					"name": "Public can read categories",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.kyc_status": {
+			"name": "kyc_status",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "kyc_status_enum",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'pending'"
+				},
+				"verification_level": {
+					"name": "verification_level",
+					"type": "kyc_verification_enum",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'basic'"
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"idx_kyc_status_user_id": {
+					"name": "idx_kyc_status_user_id",
+					"columns": [
+						{
+							"expression": "user_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"kyc_status_user_id_fkey": {
+					"name": "kyc_status_user_id_fkey",
+					"tableFrom": "kyc_status",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"kyc_status_user_id_key": {
+					"columns": ["user_id"],
+					"nullsNotDistinct": false,
+					"name": "kyc_status_user_id_key"
+				}
+			},
+			"checkConstraints": {},
+			"policies": {
+				"Admins can update KYC statuses": {
+					"name": "Admins can update KYC statuses",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"],
+					"using": "((auth.jwt() ->> 'role'::text) = 'admin'::text)"
+				},
+				"Admins can view all KYC statuses": {
+					"name": "Admins can view all KYC statuses",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				},
+				"Users can view their own KYC status": {
+					"name": "Users can view their own KYC status",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.kyc_reviews": {
+			"name": "kyc_reviews",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"kyc_status_id": {
+					"name": "kyc_status_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"reviewer_id": {
+					"name": "reviewer_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"decision": {
+					"name": "decision",
+					"type": "kyc_status_enum",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"reason": {
+					"name": "reason",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"additional_notes": {
+					"name": "additional_notes",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"review_notes": {
+					"name": "review_notes",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"idx_kyc_reviews_kyc_status_id": {
+					"name": "idx_kyc_reviews_kyc_status_id",
+					"columns": [
+						{
+							"expression": "kyc_status_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"idx_kyc_reviews_reviewer_id": {
+					"name": "idx_kyc_reviews_reviewer_id",
+					"columns": [
+						{
+							"expression": "reviewer_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"kyc_reviews_kyc_status_id_fkey": {
+					"name": "kyc_reviews_kyc_status_id_fkey",
+					"tableFrom": "kyc_reviews",
+					"tableTo": "kyc_status",
+					"schemaTo": "public",
+					"columnsFrom": ["kyc_status_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"kyc_reviews_reviewer_id_fkey": {
+					"name": "kyc_reviews_reviewer_id_fkey",
+					"tableFrom": "kyc_reviews",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["reviewer_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"kyc_reviews_kyc_status_id_reviewer_id_key": {
+					"columns": ["kyc_status_id", "reviewer_id"],
+					"nullsNotDistinct": false,
+					"name": "kyc_reviews_kyc_status_id_reviewer_id_key"
+				}
+			},
+			"checkConstraints": {},
+			"policies": {
+				"Users can view their own KYC reviews": {
+					"name": "Users can view their own KYC reviews",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"],
+					"using": "(EXISTS ( SELECT 1\n   FROM kyc_status\n  WHERE ((kyc_status.id = kyc_reviews.kyc_status_id) AND (kyc_status.user_id = auth.uid()))))"
+				},
+				"Admins can update KYC reviews": {
+					"name": "Admins can update KYC reviews",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				},
+				"Admins can create KYC reviews": {
+					"name": "Admins can create KYC reviews",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"]
+				},
+				"Admins can view all KYC reviews": {
+					"name": "Admins can view all KYC reviews",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.notification_preferences": {
+			"name": "notification_preferences",
+			"schema": "",
+			"columns": {
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"email": {
+					"name": "email",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": false,
+					"default": true
+				},
+				"push": {
+					"name": "push",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": false,
+					"default": true
+				},
+				"in_app": {
+					"name": "in_app",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": false,
+					"default": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"notification_preferences_user_id_fkey": {
+					"name": "notification_preferences_user_id_fkey",
+					"tableFrom": "notification_preferences",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {
+				"Users can update their own notification preferences": {
+					"name": "Users can update their own notification preferences",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"],
+					"using": "(auth.uid() = user_id)"
+				},
+				"Users can view their own notification preferences": {
+					"name": "Users can view their own notification preferences",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.notifications": {
+			"name": "notifications",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"body": {
+					"name": "body",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"type": {
+					"name": "type",
+					"type": "notification_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'info'"
+				},
+				"priority": {
+					"name": "priority",
+					"type": "notification_priority",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'medium'"
+				},
+				"is_read": {
+					"name": "is_read",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": false,
+					"default": false
+				},
+				"delivery_status": {
+					"name": "delivery_status",
+					"type": "notification_delivery_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'pending'"
+				},
+				"delivery_attempts": {
+					"name": "delivery_attempts",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false,
+					"default": 0
+				},
+				"next_retry_at": {
+					"name": "next_retry_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"expires_at": {
+					"name": "expires_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"metadata": {
+					"name": "metadata",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'{}'::jsonb"
+				},
+				"data": {
+					"name": "data",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'{}'::jsonb"
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"notifications_created_at_idx": {
+					"name": "notifications_created_at_idx",
+					"columns": [
+						{
+							"expression": "created_at",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "timestamptz_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"notifications_is_read_idx": {
+					"name": "notifications_is_read_idx",
+					"columns": [
+						{
+							"expression": "is_read",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "bool_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"notifications_user_id_idx": {
+					"name": "notifications_user_id_idx",
+					"columns": [
+						{
+							"expression": "user_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"notifications_user_id_fkey": {
+					"name": "notifications_user_id_fkey",
+					"tableFrom": "notifications",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {
+				"Users can create their own notifications": {
+					"name": "Users can create their own notifications",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"],
+					"withCheck": "(auth.uid() = user_id)"
+				},
+				"Users can delete their own notifications": {
+					"name": "Users can delete their own notifications",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["public"]
+				},
+				"Users can update their own notifications": {
+					"name": "Users can update their own notifications",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				},
+				"Users can view their own notifications": {
+					"name": "Users can view their own notifications",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.project_tag_relationships": {
+			"name": "project_tag_relationships",
+			"schema": "",
+			"columns": {
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"tag_id": {
+					"name": "tag_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"project_tag_relationships_project_id_fkey": {
+					"name": "project_tag_relationships_project_id_fkey",
+					"tableFrom": "project_tag_relationships",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"project_tag_relationships_tag_id_fkey": {
+					"name": "project_tag_relationships_tag_id_fkey",
+					"tableFrom": "project_tag_relationships",
+					"tableTo": "project_tags",
+					"schemaTo": "public",
+					"columnsFrom": ["tag_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"project_tag_relationships_pkey": {
+					"name": "project_tag_relationships_pkey",
+					"columns": ["project_id", "tag_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {},
+			"isRLSEnabled": false
+		},
+		"public.escrow_milestones": {
+			"name": "escrow_milestones",
+			"schema": "",
+			"columns": {
+				"escrow_id": {
+					"name": "escrow_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"milestone_id": {
+					"name": "milestone_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"escrow_milestones_escrow_id_fkey": {
+					"name": "escrow_milestones_escrow_id_fkey",
+					"tableFrom": "escrow_milestones",
+					"tableTo": "escrow_contracts",
+					"schemaTo": "public",
+					"columnsFrom": ["escrow_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"escrow_milestones_milestone_id_fkey": {
+					"name": "escrow_milestones_milestone_id_fkey",
+					"tableFrom": "escrow_milestones",
+					"tableTo": "milestones",
+					"schemaTo": "public",
+					"columnsFrom": ["milestone_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"escrow_milestones_pkey1": {
+					"name": "escrow_milestones_pkey1",
+					"columns": ["escrow_id", "milestone_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {
+				"Project owners can delete escrow milestones": {
+					"name": "Project owners can delete escrow milestones",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["public"],
+					"using": "(milestone_id IN ( SELECT milestones.id\n   FROM milestones\n  WHERE (milestones.project_id IN ( SELECT projects.id\n           FROM projects\n          WHERE (projects.owner_id = auth.uid())))))"
+				},
+				"Project owners can update escrow milestones": {
+					"name": "Project owners can update escrow milestones",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				},
+				"Project owners can view escrow milestones": {
+					"name": "Project owners can view escrow milestones",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				},
+				"Project owners can create escrow milestones": {
+					"name": "Project owners can create escrow milestones",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.kindler_projects": {
+			"name": "kindler_projects",
+			"schema": "",
+			"columns": {
+				"kindler_id": {
+					"name": "kindler_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"joined_at": {
+					"name": "joined_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"idx_kindler_projects_project_id": {
+					"name": "idx_kindler_projects_project_id",
+					"columns": [
+						{
+							"expression": "project_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"kindler_projects_kindler_id_fkey": {
+					"name": "kindler_projects_kindler_id_fkey",
+					"tableFrom": "kindler_projects",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["kindler_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"kindler_projects_project_id_fkey": {
+					"name": "kindler_projects_project_id_fkey",
+					"tableFrom": "kindler_projects",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"kindler_projects_pkey": {
+					"name": "kindler_projects_pkey",
+					"columns": ["kindler_id", "project_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {
+				"Users can leave projects": {
+					"name": "Users can leave projects",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["authenticated"],
+					"using": "(auth.uid() = kindler_id)"
+				},
+				"Users can join projects as kindlers": {
+					"name": "Users can join projects as kindlers",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["authenticated"]
+				},
+				"Kindler-project relationships viewable by everyone": {
+					"name": "Kindler-project relationships viewable by everyone",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["authenticated"]
+				}
+			},
+			"isRLSEnabled": true
+		}
+	},
+	"enums": {
+		"public.comment_type": {
+			"name": "comment_type",
+			"values": ["comment", "question", "answer"],
+			"schema": "public"
+		},
+		"public.escrow_status_type": {
+			"name": "escrow_status_type",
+			"values": [
+				"NEW",
+				"FUNDED",
+				"ACTIVE",
+				"COMPLETED",
+				"DISPUTED",
+				"CANCELLED"
+			],
+			"schema": "public"
+		},
+		"public.kyc_status_enum": {
+			"name": "kyc_status_enum",
+			"values": ["pending", "approved", "rejected", "verified"],
+			"schema": "public"
+		},
+		"public.kyc_verification_enum": {
+			"name": "kyc_verification_enum",
+			"values": ["basic", "enhanced"],
+			"schema": "public"
+		},
+		"public.milestone_status": {
+			"name": "milestone_status",
+			"values": ["pending", "completed", "approved", "rejected", "disputed"],
+			"schema": "public"
+		},
+		"public.notification_delivery_status": {
+			"name": "notification_delivery_status",
+			"values": ["pending", "delivered", "failed"],
+			"schema": "public"
+		},
+		"public.notification_priority": {
+			"name": "notification_priority",
+			"values": ["low", "medium", "high", "urgent"],
+			"schema": "public"
+		},
+		"public.notification_type": {
+			"name": "notification_type",
+			"values": ["info", "success", "warning", "error"],
+			"schema": "public"
+		},
+		"public.project_member_role": {
+			"name": "project_member_role",
+			"values": ["admin", "editor"],
+			"schema": "public"
+		},
+		"public.user_role": {
+			"name": "user_role",
+			"values": ["kinder", "kindler"],
+			"schema": "public"
+		}
+	},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"schemas": {},
+		"tables": {},
+		"columns": {}
+	},
+	"internal": {
+		"tables": {
+			"escrow_reviews": {
+				"columns": {
+					"evidence_urls": {
+						"isArray": true,
+						"dimensions": 1,
+						"rawType": "text"
+					}
+				}
+			}
+		}
+	}
+}

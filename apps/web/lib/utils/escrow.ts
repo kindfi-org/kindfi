@@ -1,4 +1,4 @@
-import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Database, Json } from '@services/supabase'
 
 type Tables = Database['public']['Tables']

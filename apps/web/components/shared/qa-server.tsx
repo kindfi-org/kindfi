@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@packages/lib/supabase/server/server-client'
+import { createSupabaseServerClient } from '@packages/lib/supabase-server/server-client'
 import type { Tables } from '@services/supabase'
 import { Loader2 } from 'lucide-react'
 import { Suspense } from 'react'
