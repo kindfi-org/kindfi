@@ -70,7 +70,7 @@ export interface Project {
 	min_investment: number
 
 	// Participation metrics
-	investors_count: number
+	kinder_count: number
 	donors?: number
 
 	// Progress tracking
