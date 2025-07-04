@@ -49,7 +49,8 @@ impl ReputationContract {
         streak: u32,
     ) -> Result<(), ReputationError> {
         // Verify admin access
-        let admin = ReputationStorage::get_admin(&env);
+        let admin = ReputationStorage::get_admin(&env)
+            .ok_or(ReputationError::ContractNotInitialized)?;
         admin.require_auth();
 
         // Get current score and update
@@ -156,7 +157,8 @@ impl ReputationContract {
         tier: TierLevel,
         threshold: u32,
     ) -> Result<(), ReputationError> {
-        let admin = ReputationStorage::get_admin(&env);
+        let admin = ReputationStorage::get_admin(&env)
+            .ok_or(ReputationError::ContractNotInitialized)?;
         admin.require_auth();
 
         if tier == TierLevel::None {
@@ -181,7 +183,8 @@ impl ReputationContract {
     
     pub fn add_admin(env: Env, new_admin: Address) -> Result<(), ReputationError> {
         // Verify admin access
-        let admin = ReputationStorage::get_admin(&env);
+        let admin = ReputationStorage::get_admin(&env)
+            .ok_or(ReputationError::ContractNotInitialized)?;
         admin.require_auth();
         // Validates that the address is an Account address with a non-zero identifier.
         Self::validate_admin_address(&env, &new_admin)?;
@@ -196,7 +199,9 @@ impl ReputationContract {
 
     pub fn update_nft_contract(env: Env, new_contract_id: Address) -> Result<(), ReputationError> {
         // Verify admin access
-        let admin = ReputationStorage::get_admin(&env);
+        let admin = ReputationStorage::get_admin(&env)
+            .ok_or(ReputationError::ContractNotInitialized)?;
+            
         admin.require_auth();
         // Validates that the address is a Contract address with a non-zero identifier.
         Self::validate_nft_contract_address(&env, &new_contract_id)?;
