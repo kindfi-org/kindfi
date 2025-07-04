@@ -59,15 +59,5 @@ impl ReputationStorage {
         let key = DataKey::TierThreshold(tier.clone());
         env.storage().persistent().get(&key)
     }
-
-    pub fn validate_tier_eligibility(env: &Env, user: &Address, tier: &TierLevel) -> bool {
-        if let (Some(score), Some(threshold)) = (
-            Self::get_score(env, user),
-            Self::get_tier_threshold(env, tier),
-        ) {
-            score >= threshold
-        } else {
-            false
-        }
-    }
+    
 }

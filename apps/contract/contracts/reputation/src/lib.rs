@@ -5,7 +5,7 @@ mod events;
 mod storage;
 mod types;
 
-use soroban_sdk::{contract, contractimpl, Address, Env};
+use soroban_sdk::{contract, contractimpl, Address, Env, String};
 
 use crate::{
     errors::ReputationError, events::ReputationEvents, storage::ReputationStorage, types::*,
@@ -25,9 +25,9 @@ impl ReputationContract {
             return Err(ReputationError::AlreadyInitialized);
         }
         // Validates that the address is an Account address with a non-zero identifier.
-        Self::validate_admin_address(&admin)?;
+        Self::validate_admin_address(&env, &admin)?;
         // Validates that the address is a Contract address with a non-zero identifier.
-        Self::validate_nft_contract_address(&nft_contract_id)?;
+        Self::validate_nft_contract_address(&env, &nft_contract_id)?;
         ReputationStorage::set_admin(&env, &admin);
         ReputationStorage::set_nft_contract_id(&env, &nft_contract_id);
 
@@ -113,10 +113,10 @@ impl ReputationContract {
         use TierLevel::*;
 
         match tier {
-            Bronze => Ok((None, Some(Silver))),
+            Bronze => Ok((Some(None), Some(Silver))),
             Silver => Ok((Some(Bronze), Some(Gold))),
             Gold => Ok((Some(Silver), Some(Platinum))),
-            Platinum => Ok((Some(Gold), None)),
+            Platinum => Ok((Some(Gold), Some(None))),
             None => Err(ReputationError::InvalidTier),
         }
     }
@@ -124,10 +124,11 @@ impl ReputationContract {
     fn validate_bound(
         env: &Env,
         neighbor: Option<TierLevel>,
+        tier: &TierLevel,
         new_threshold: u32,
         comparison: fn(u32, u32) -> bool,
     ) -> Result<(), ReputationError> {
-        if let (Some(tier), Some(threshold)) =
+        if let (Some(_tier), Some(threshold)) =
             (neighbor, ReputationStorage::get_tier_threshold(env, &tier))
         {
             if comparison(new_threshold, threshold) {
@@ -144,8 +145,8 @@ impl ReputationContract {
     ) -> Result<(), ReputationError> {
         let (lower_neighbor, upper_neighbor) = Self::get_tier_neighbors(tier)?;
 
-        Self::validate_bound(env, lower_neighbor, new_threshold, |a, b| a <= b)?;
-        Self::validate_bound(env, upper_neighbor, new_threshold, |a, b| a >= b)?;
+        Self::validate_bound(env, lower_neighbor, tier, new_threshold, |a, b| a <= b)?;
+        Self::validate_bound(env, upper_neighbor, tier, new_threshold, |a, b| a >= b)?;
 
         Ok(())
     }
@@ -183,7 +184,7 @@ impl ReputationContract {
         let admin = ReputationStorage::get_admin(&env);
         admin.require_auth();
         // Validates that the address is an Account address with a non-zero identifier.
-        Self::validate_admin_address(&new_admin)?;
+        Self::validate_admin_address(&env, &new_admin)?;
         // Update admin
         ReputationStorage::set_admin(&env, &new_admin);
 
@@ -198,7 +199,7 @@ impl ReputationContract {
         let admin = ReputationStorage::get_admin(&env);
         admin.require_auth();
         // Validates that the address is a Contract address with a non-zero identifier.
-        Self::validate_nft_contract_address(&new_contract_id)?;
+        Self::validate_nft_contract_address(&env, &new_contract_id)?;
         // Get current contract ID
         let current_contract_id = ReputationStorage::get_nft_contract_id(&env)
             .ok_or(ReputationError::ContractNotInitialized)?;
@@ -238,24 +239,18 @@ impl ReputationContract {
             Ok(TierLevel::None)
         }
     }
+
     // Validates that the address is an Account address with a non-zero identifier.
-    fn validate_admin_address(admin: &Address) -> Result<(), ReputationError> {
-        if let Address::Account(account_id) = admin {
-            if account_id.0 == [0u8; 32] {
-                return Err(ReputationError::InvalidAdminAddress);
-            }
-        } else {
+    fn validate_admin_address(env: &Env, admin: &Address) -> Result<(), ReputationError> {
+        if admin.to_string() == String::from_str(&env, ZERO_ADDRESS)  {
             return Err(ReputationError::InvalidAdminAddress);
         }
         Ok(())
     }
+    
     // Validates that the address is a Contract address with a non-zero identifier.
-    fn validate_nft_contract_address(nft_contract_id: &Address) -> Result<(), ReputationError> {
-        if let Address::Contract(contract_id) = nft_contract_id {
-            if contract_id.0 == [0u8; 32] {
-                return Err(ReputationError::InvalidNftContractId);
-            }
-        } else {
+    fn validate_nft_contract_address(env: &Env, nft_contract_id: &Address) -> Result<(), ReputationError> {
+        if nft_contract_id.to_string() == String::from_str(&env, ZERO_ADDRESS) {
             return Err(ReputationError::InvalidNftContractId);
         }
         Ok(())
