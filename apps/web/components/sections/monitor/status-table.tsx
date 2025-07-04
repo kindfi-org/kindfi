@@ -27,8 +27,6 @@ import {
 	TableRow,
 } from '~/components/base/table'
 
-const appConfig = appEnvConfig('web')
-
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']
 type EscrowStatusType =
@@ -47,6 +45,7 @@ interface State {
 }
 
 export function EscrowTable() {
+	const appConfig = appEnvConfig('web')
 	const router = useRouter()
 	const [state, setState] = useSetState<State>({
 		dbStatus: 'Checking...',
@@ -55,10 +54,7 @@ export function EscrowTable() {
 		isLoading: false,
 	})
 
-	const isDevelopment = useMemo(
-		() => appConfig.env.nodeEnv === 'development',
-		[],
-	)
+	const isDevelopment = appConfig.env.nodeEnv === 'development'
 
 	const statusColors = useMemo(
 		() => ({
@@ -72,7 +68,7 @@ export function EscrowTable() {
 		[],
 	)
 
-	const fetchRecords = useCallback(async () => {
+	const fetchRecords = async () => {
 		if (!isDevelopment || !appConfig.features.enableEscrowFeature) return
 
 		setState({ isLoading: true })
@@ -100,7 +96,7 @@ export function EscrowTable() {
 				isLoading: false,
 			})
 		}
-	}, [isDevelopment, setState])
+	}
 
 	const updateStatus = async (id: string, newStatus: EscrowStatusType) => {
 		if (!isDevelopment || !appConfig.features.enableEscrowFeature) return
@@ -144,6 +140,7 @@ export function EscrowTable() {
 		}
 	}
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (!isDevelopment) {
 			router.push('/')
@@ -153,7 +150,7 @@ export function EscrowTable() {
 		if (appConfig.features.enableEscrowFeature) {
 			fetchRecords()
 		}
-	}, [fetchRecords, isDevelopment, router])
+	}, [isDevelopment, router])
 
 	if (!isDevelopment) {
 		return null

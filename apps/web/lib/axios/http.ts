@@ -1,8 +1,6 @@
 import { appEnvConfig } from '@packages/lib'
 import axios, { type CreateAxiosDefaults } from 'axios'
 
-const appConfig = appEnvConfig('web')
-
 export const createHttpRequest = (
 	baseURL: string,
 	config?: Omit<CreateAxiosDefaults, 'baseURL'>,
@@ -14,11 +12,11 @@ export const createHttpRequest = (
 	})
 
 export const httpEscrow = createHttpRequest(
-	appConfig.externalApis.trustlessWork.url,
+	appEnvConfig('web').externalApis.trustlessWork.url,
 	{
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${appConfig.externalApis.trustlessWork.apiKey}`,
+			Authorization: `Bearer ${appEnvConfig('web').externalApis.trustlessWork.apiKey}`,
 		},
 	},
 )

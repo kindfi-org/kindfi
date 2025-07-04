@@ -5,8 +5,6 @@ import * as React from 'react'
 
 import { cn } from '~/lib/utils'
 
-const appConfig = appEnvConfig('web')
-
 /**
  * ShadCN/UI Reference: https://ui.shadcn.com/docs/components/button
  * `buttonVariants` defines the styles and variants for the `Button` component.
@@ -121,6 +119,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 		},
 		ref,
 	) => {
+		const appConfig = appEnvConfig('web')
 		const Comp = asChild ? Slot : 'button'
 
 		// Determine if button content is empty or only contains icons
@@ -133,6 +132,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			iconOnly || (!hasTextContent && (startIcon || endIcon || children))
 
 		// Warning for icon-only buttons without aria-label in development
+		console.log('process.env from appConfig', appConfig)
 		if (appConfig.env.nodeEnv !== 'production' && isIconOnly && !ariaLabel) {
 			console.error(
 				`Accessibility error: Icon-only Button must have an aria-label to describe its purpose. Component: ${Button.displayName}`,

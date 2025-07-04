@@ -10,41 +10,6 @@ let _webEnv: AppEnvInterface | null = null
 let _kycServerEnv: AppEnvInterface | null = null
 let _genericEnv: AppEnvInterface | null = null
 
-// Next.js runtime environment injection
-function getNextjsRuntimeEnv(): Record<string, string | undefined> {
-	// Check if we're in a Next.js environment
-	if (typeof window !== 'undefined') {
-		// Client-side: only NEXT_PUBLIC_ prefixed variables are available
-		const clientEnv: Record<string, string | undefined> = {}
-
-		// Filter only NEXT_PUBLIC_ variables from process.env
-		if (typeof process !== 'undefined' && process.env) {
-			for (const [key, value] of Object.entries(process.env)) {
-				if (key.startsWith('NEXT_PUBLIC_')) {
-					clientEnv[key] = value
-				}
-			}
-		}
-
-		return clientEnv
-	}
-
-	// Server-side: all variables are available
-	return process.env
-}
-
-// Enhanced environment reading with Next.js support
-function readEnvironmentVariables(): Record<string, string | undefined> {
-	const env = getNextjsRuntimeEnv()
-
-	// Merge with process.env as fallback (server-side or Node.js context)
-	if (typeof process !== 'undefined' && process.env) {
-		return { ...process.env, ...env }
-	}
-
-	return env
-}
-
 // Function to create app-specific schema
 function createAppSchema<T extends AppName>(appName: T) {
 	const requirements = appRequirements[appName]
@@ -85,7 +50,7 @@ function detectApp(): AppName | undefined {
 export function getEnv<T extends AppName>(appName?: T): AppEnvInterface {
 	try {
 		const schema = appName ? createAppSchema(appName) : baseEnvSchema
-		const envVars = readEnvironmentVariables()
+		const envVars = process.env as Record<string, string | undefined>
 
 		console.log('🔍 Environment Variables Read:', {
 			appName,
@@ -208,7 +173,7 @@ export function transformEnv(data: ValidatedEnvInput): AppEnvInterface {
 				apiKey: data.TRUSTLESS_WORK_API_KEY || '',
 			},
 			kyc: {
-				baseUrl: data.NEXT_PUBLIC_KYC_API_BASE_URL || '',
+				baseUrl: data.NEXT_PUBLIC_KYC_API_BASE_URL || 'http://localhost:3001',
 			},
 		},
 		analytics: {
@@ -422,6 +387,7 @@ export const appRequirements = {
 			'RP_NAME',
 			'EXPECTED_ORIGIN',
 			'CHALLENGE_TTL_SECONDS',
+			'REDIS_URL',
 			'SUPABASE_DB_URL',
 		] as const,
 	},

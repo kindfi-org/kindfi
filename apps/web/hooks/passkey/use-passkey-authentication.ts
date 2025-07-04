@@ -1,9 +1,9 @@
+import { appEnvConfig } from '@packages/lib/config/app-env.config'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import type { PresignResponse, SignParams } from '~/lib/types'
-import { KYC_API_BASE_URL } from './use-passkey.configuration'
 
 export const usePasskeyAuthentication = (
 	identifier: string,
@@ -15,6 +15,8 @@ export const usePasskeyAuthentication = (
 		prepareSign?: () => Promise<PresignResponse>
 	},
 ) => {
+	const appConfig = appEnvConfig('web')
+	const baseUrl = appConfig.externalApis.kyc.baseUrl
 	const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false)
 	const [authSuccess, setAuthSuccess] = useState<string>('')
 	const [authError, setAuthError] = useState<string>('')
@@ -35,7 +37,7 @@ export const usePasskeyAuthentication = (
 		try {
 			const PresignResponse = await prepareSign?.()
 			const resp = await fetch(
-				`${KYC_API_BASE_URL}/api/passkey/generate-authentication-options`,
+				`${baseUrl}/api/passkey/generate-authentication-options`,
 				{
 					method: 'POST',
 					headers: {
@@ -61,7 +63,7 @@ export const usePasskeyAuthentication = (
 			})
 
 			const verificationResp = await fetch(
-				`${KYC_API_BASE_URL}/api/passkey/verify-authentication`,
+				`${baseUrl}/api/passkey/verify-authentication`,
 				{
 					method: 'POST',
 					headers: {

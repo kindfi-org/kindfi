@@ -1,12 +1,10 @@
+import { appEnvConfig } from '@packages/lib/config'
 import type { RegistrationResponseJSON } from '@simplewebauthn/browser'
 import { Horizon, Keypair } from '@stellar/stellar-sdk'
 import { useEffect, useRef, useState } from 'react'
 import { handleDeploy } from '~/lib/passkey/deploy'
-import { ENV } from '~/lib/passkey/env'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
-
-const { HORIZON_URL } = ENV
 
 const getStoredDeployee = () => {
 	return localStorage.getItem('sp:deployee')
@@ -110,6 +108,7 @@ export const useStellar = () => {
 
 	useEffect(() => {
 		const init = async () => {
+			const appConfig = appEnvConfig('web')
 			try {
 				const storedBundler = getStoredBundler()
 				if (storedBundler) {
@@ -117,7 +116,7 @@ export const useStellar = () => {
 				} else {
 					bundlerKey.current = Keypair.random()
 					setStoredBundler(bundlerKey.current.secret())
-					const horizon = new Horizon.Server(HORIZON_URL)
+					const horizon = new Horizon.Server(appConfig.stellar.networkUrl)
 					await horizon.friendbot(bundlerKey.current.publicKey()).call()
 				}
 				const storedDeployee = getStoredDeployee()

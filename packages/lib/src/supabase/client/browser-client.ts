@@ -5,8 +5,6 @@ import type { TypedSupabaseClient } from '../../types/supabase-client.type'
 
 let client: TypedSupabaseClient | undefined
 
-const appConfig = appEnvConfig()
-
 /**
  * Creates (or reuses) a singleton Supabase browser client.
  *
@@ -19,13 +17,14 @@ const appConfig = appEnvConfig()
  * const { data } = await supabase.from('categories').select('*');
  */
 export function createSupabaseBrowserClient() {
+	const appConfig = appEnvConfig()
 	if (client) {
 		return client
 	}
 
 	client = createBrowserClient<Database>(
-		appConfig.database.url ?? '',
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+		appConfig.database.url,
+		appConfig.database.anonKey,
 	)
 
 	return client
