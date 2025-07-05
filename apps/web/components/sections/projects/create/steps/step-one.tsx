@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import * as z from 'zod'
 
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
@@ -19,24 +18,8 @@ import {
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
 import { useCreateProject } from '~/lib/contexts/create-project-context'
-
-const stepOneSchema = z
-	.object({
-		title: z.string().min(3, 'Title must be at least 3 characters'),
-		description: z
-			.string()
-			.min(10, 'Description must be at least 10 characters'),
-		targetAmount: z.number().min(1, 'Target amount must be at least $1'),
-		minimumInvestment: z
-			.number()
-			.min(1, 'Minimum investment must be at least $1'),
-	})
-	.refine((data) => data.minimumInvestment <= data.targetAmount, {
-		message: 'Minimum investment cannot exceed target amount',
-		path: ['minimumInvestment'],
-	})
-
-type StepOneData = z.infer<typeof stepOneSchema>
+import { stepOneSchema } from '~/lib/schemas/create-project.schemas'
+import type { StepOneData } from '~/lib/types/project/create-project.types'
 
 interface StepOneProps {
 	onNext: () => void

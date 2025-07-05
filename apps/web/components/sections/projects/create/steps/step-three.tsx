@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import { Check, ChevronDown, ChevronLeft } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import * as z from 'zod'
 
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
@@ -32,27 +31,18 @@ import {
 } from '~/components/base/popover'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/filters'
-import { countries } from '~/lib/constants/projects/country.constant'
 import { useCreateProject } from '~/lib/contexts/create-project-context'
 import { categories } from '~/lib/mock-data/project/categories.mock'
+import { stepThreeSchema } from '~/lib/schemas/create-project.schemas'
+import type { StepThreeData } from '~/lib/types/project/create-project.types'
 import { cn } from '~/lib/utils'
+import {
+	findCountryByAlpha3,
+	getCountryOptions,
+} from '~/lib/utils/create-project-helpers'
 import { CountryFlag } from '../country-flag'
 
-// Transform countries object to display format
-const countryOptions = Object.entries(countries).map(([key, country]) => ({
-	alpha3: country.alpha3,
-	alpha2: country.alpha2,
-	// "costaRica" → "Costa Rica"
-	name: key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()),
-}))
-
-const stepThreeSchema = z.object({
-	location: z.string().length(3, 'Select a valid country'), // e.g. "CRI"
-	category: z.string().min(1, 'Please select a category'),
-	tags: z.array(z.string()).optional(),
-})
-
-type StepThreeData = z.infer<typeof stepThreeSchema>
+const countryOptions = getCountryOptions()
 
 interface StepThreeProps {
 	onBack: () => void
@@ -73,7 +63,7 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 	})
 
 	const selectedCode = form.watch('location')
-	const selected = countryOptions.find((c) => c.alpha3 === selectedCode)
+	const selected = findCountryByAlpha3(selectedCode)
 
 	const handleSelect = (alpha3: string) => {
 		form.setValue('location', alpha3, { shouldValidate: true })

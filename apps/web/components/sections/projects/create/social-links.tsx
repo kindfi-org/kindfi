@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { cn } from '~/lib/utils'
+import { isValidUrl } from '~/lib/utils/create-project-helpers'
 
 interface SocialLinksProps {
 	value: string[]
@@ -17,15 +18,6 @@ interface SocialLinksProps {
 export function SocialLinks({ value, onChange, error }: SocialLinksProps) {
 	const [newLink, setNewLink] = useState('')
 	const [linkError, setLinkError] = useState('')
-
-	const isValidUrl = (url: string): boolean => {
-		try {
-			new URL(url)
-			return true
-		} catch {
-			return false
-		}
-	}
 
 	const addLink = () => {
 		const trimmed = newLink.trim()

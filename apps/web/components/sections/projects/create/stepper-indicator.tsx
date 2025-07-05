@@ -5,6 +5,7 @@ import { Check } from 'lucide-react'
 
 import { useCreateProject } from '~/lib/contexts/create-project-context'
 import { cn } from '~/lib/utils'
+import { isValidUrl } from '~/lib/utils/create-project-helpers'
 
 interface StepperIndicatorProps {
 	currentStep: number
@@ -16,15 +17,6 @@ const stepLabels = [
 	'Media and Links',
 	'Location and Classification',
 ]
-
-const isValidUrl = (url: string): boolean => {
-	try {
-		new URL(url)
-		return true
-	} catch {
-		return false
-	}
-}
 
 export function StepperIndicator({
 	currentStep,
@@ -52,11 +44,7 @@ export function StepperIndicator({
 			}
 
 			case 3:
-				return Boolean(
-					formData.location.country &&
-						formData.location.code &&
-						formData.category,
-				)
+				return Boolean(formData.location && formData.category)
 
 			default:
 				return false

@@ -2,7 +2,7 @@
 
 import { Flag } from 'lucide-react'
 
-import { countries } from '~/lib/constants/projects/country.constant'
+import { getAlpha2FromAlpha3 } from '~/lib/utils/create-project-helpers'
 
 interface CountryFlagProps {
 	countryCode: string
@@ -13,9 +13,7 @@ export function CountryFlag({
 	countryCode,
 	className = 'w-6 h-4',
 }: CountryFlagProps) {
-	// Find the country by alpha3 code
-	const country = Object.values(countries).find((c) => c.alpha3 === countryCode)
-	const alpha2Code = country?.alpha2
+	const alpha2Code = getAlpha2FromAlpha3(countryCode)
 
 	if (!alpha2Code) {
 		return (

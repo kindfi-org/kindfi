@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import * as z from 'zod'
 
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
@@ -20,18 +19,8 @@ import { Input } from '~/components/base/input'
 import { ImageUpload } from '~/components/sections/projects/create/image-upload'
 import { SocialLinks } from '~/components/sections/projects/create/social-links'
 import { useCreateProject } from '~/lib/contexts/create-project-context'
-
-const stepTwoSchema = z.object({
-	image: z.any().nullable(),
-	website: z
-		.string()
-		.url('Please enter a valid URL')
-		.optional()
-		.or(z.literal('')),
-	socialLinks: z.array(z.string().url('Please enter a valid URL')),
-})
-
-type StepTwoData = z.infer<typeof stepTwoSchema>
+import { stepTwoSchema } from '~/lib/schemas/create-project.schemas'
+import type { StepTwoData } from '~/lib/types/project/create-project.types'
 
 interface StepTwoProps {
 	onNext: () => void
