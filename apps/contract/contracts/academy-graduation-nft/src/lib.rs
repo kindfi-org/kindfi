@@ -8,6 +8,9 @@ mod metadata;
 mod mint;
 mod test;
 
+// Re-export main types for easier access
+pub use datatype::{GraduationNFT, NFTMetadata, NFTError, DataKeys};
+
 mod progresstracker {
     soroban_sdk::contractimport!(
         file = "../../target/wasm32-unknown-unknown/release/mock_progress_tracker.wasm"
@@ -19,7 +22,6 @@ mod badgetracker {
     );
 }
 
-use datatype::{DataKeys, GraduationNFT, NFTError};
 use interface::{DistributionOperations, MintingOperations, QueryOperations};
 
 /// @title AcademyGraduationNFT
