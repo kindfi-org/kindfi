@@ -26,10 +26,10 @@ const stepOneSchema = z
 		description: z
 			.string()
 			.min(10, 'Description must be at least 10 characters'),
-		targetAmount: z.number().positive('Target amount must be positive'),
+		targetAmount: z.number().min(1, 'Target amount must be at least $1'),
 		minimumInvestment: z
 			.number()
-			.positive('Minimum investment must be positive'),
+			.min(1, 'Minimum investment must be at least $1'),
 	})
 	.refine((data) => data.minimumInvestment <= data.targetAmount, {
 		message: 'Minimum investment cannot exceed target amount',

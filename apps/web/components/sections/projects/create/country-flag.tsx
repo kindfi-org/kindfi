@@ -11,7 +11,7 @@ interface CountryFlagProps {
 
 export function CountryFlag({
 	countryCode,
-	className = 'w-5 h-4',
+	className = 'w-6 h-4',
 }: CountryFlagProps) {
 	// Find the country by alpha3 code
 	const country = Object.values(countries).find((c) => c.alpha3 === countryCode)
