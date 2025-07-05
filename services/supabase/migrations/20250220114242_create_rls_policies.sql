@@ -10,7 +10,7 @@ ALTER TABLE project_updates ENABLE ROW LEVEL SECURITY;
 -- ⚠️ Remove or replace this policy when auth is active
 CREATE POLICY "Public read access to profiles"
 ON public.profiles
-FOR SELECT 
+FOR SELECT
 USING (true);
 
 -- CREATE POLICY "Profiles are viewable by everyone"
@@ -34,29 +34,29 @@ CREATE POLICY "Users can update their own profile"
 
 -- Projects policies
 CREATE POLICY "Projects are viewable by everyone"
-    ON projects 
+    ON projects
     FOR SELECT
     TO authenticated
     USING (true);
 
 CREATE POLICY "Projects can be created by authenticated users"
-    ON projects 
+    ON projects
     FOR INSERT
     TO authenticated
-    WITH CHECK (auth.uid() = owner_id);
+    WITH CHECK (auth.uid() = kindler_id);
 
 CREATE POLICY "Projects can be updated by owner"
-    ON projects 
+    ON projects
     FOR UPDATE
     TO authenticated
-    USING (auth.uid() = owner_id)
-    WITH CHECK (auth.uid() = owner_id);
+    USING (auth.uid() = kindler_id)
+    WITH CHECK (auth.uid() = kindler_id);
 
 CREATE POLICY "Projects can be deleted by owner"
-    ON projects 
+    ON projects
     FOR DELETE
     TO authenticated
-    USING (auth.uid() = owner_id);
+    USING (auth.uid() = kindler_id);
 
 -- Kindler_projects policies
 CREATE POLICY "Kindler-project relationships viewable by everyone"
@@ -70,10 +70,10 @@ CREATE POLICY "Users can join projects as kindlers"
     FOR INSERT
     TO authenticated
     WITH CHECK (
-        auth.uid() = kindler_id 
+        auth.uid() = kindler_id
         AND EXISTS (
-            SELECT 1 FROM projects 
-            WHERE id = project_id 
+            SELECT 1 FROM projects
+            WHERE id = project_id
             AND target_amount > current_amount
         )
     );
@@ -90,7 +90,7 @@ CREATE POLICY "Users can leave projects"
 -- ⚠️ Remove or replace this policy when auth is active
 CREATE POLICY "Public read access to project updates"
 ON public.project_updates
-FOR SELECT 
+FOR SELECT
 USING (true);
 
 -- CREATE POLICY "Project updates are viewable by everyone"
@@ -104,21 +104,21 @@ CREATE POLICY "Project updates can be created by project members"
     FOR INSERT
     TO authenticated
     WITH CHECK (
-        auth.uid() = author_id 
+        auth.uid() = author_id
         AND (
             -- Allow if user is project owner
             EXISTS (
-                SELECT 1 
-                FROM projects 
-                WHERE id = project_id 
-                AND owner_id = auth.uid()
+                SELECT 1
+                FROM projects
+                WHERE id = project_id
+                AND kindler_id = auth.uid()
             )
-            OR 
+            OR
             -- Allow if user is a kindler (contributor) to the project
             EXISTS (
-                SELECT 1 
-                FROM kindler_projects 
-                WHERE project_id = project_updates.project_id 
+                SELECT 1
+                FROM kindler_projects
+                WHERE project_id = project_updates.project_id
                 AND kindler_id = auth.uid()
             )
         )
@@ -134,9 +134,9 @@ CREATE POLICY "Project updates can be modified by authors"
         AND (
             -- Only allow updates if the project is still active
             EXISTS (
-                SELECT 1 
-                FROM projects 
-                WHERE id = project_id 
+                SELECT 1
+                FROM projects
+                WHERE id = project_id
                 AND current_amount < target_amount
             )
         )
@@ -148,12 +148,12 @@ CREATE POLICY "Project updates can be deleted by authors or project owners"
     TO authenticated
     USING (
         auth.uid() = author_id
-        OR 
+        OR
         EXISTS (
-            SELECT 1 
-            FROM projects 
-            WHERE id = project_id 
-            AND owner_id = auth.uid()
+            SELECT 1
+            FROM projects
+            WHERE id = project_id
+            AND kindler_id = auth.uid()
         )
     );
 
