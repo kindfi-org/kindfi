@@ -24,10 +24,7 @@ const initialFormData: CreateProjectFormData = {
 	image: null,
 	website: '',
 	socialLinks: [],
-	location: {
-		country: '',
-		code: '',
-	},
+	location: '',
 	category: '',
 	tags: [],
 }

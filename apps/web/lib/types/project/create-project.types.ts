@@ -11,15 +11,7 @@ export interface CreateProjectFormData {
 	socialLinks: string[]
 
 	// Step 3: Location and Classification
-	location: {
-		country: string
-		code: string
-	}
+	location: string
 	category: string
 	tags: string[]
-}
-
-export interface Country {
-	name: string
-	code: string // ISO 3166-1 alpha-3
 }

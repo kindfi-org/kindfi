@@ -32,30 +32,20 @@ import {
 } from '~/components/base/popover'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/filters'
+import { countries } from '~/lib/constants/projects/country.constant'
 import { useCreateProject } from '~/lib/contexts/create-project-context'
 import { categories } from '~/lib/mock-data/project/categories.mock'
-import type { Country } from '~/lib/types/project/create-project.types'
 import { cn } from '~/lib/utils'
 
-// Mock countries data
-const countries: Country[] = [
-	{ name: 'United States', code: 'USA' },
-	{ name: 'Canada', code: 'CAN' },
-	{ name: 'United Kingdom', code: 'GBR' },
-	{ name: 'Germany', code: 'DEU' },
-	{ name: 'France', code: 'FRA' },
-	{ name: 'Japan', code: 'JPN' },
-	{ name: 'Australia', code: 'AUS' },
-	{ name: 'Brazil', code: 'BRA' },
-	{ name: 'India', code: 'IND' },
-	{ name: 'China', code: 'CHN' },
-]
+// Transform countries object to display format
+const countryOptions = Object.entries(countries).map(([key, code]) => ({
+	code,
+	// "costaRica" → "Costa Rica"
+	name: key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()),
+}))
 
 const stepThreeSchema = z.object({
-	location: z.object({
-		country: z.string().min(1, 'Please select a country'),
-		code: z.string().length(3, 'Invalid country code'),
-	}),
+	location: z.string().length(3, 'Select a valid country'), // e.g. "CRI"
 	category: z.string().min(1, 'Please select a category'),
 	tags: z.array(z.string()).optional(),
 })
@@ -80,12 +70,11 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 		},
 	})
 
-	const handleCountrySelect = (country: Country) => {
-		form.setValue(
-			'location',
-			{ country: country.name, code: country.code },
-			{ shouldValidate: true },
-		)
+	const selectedCode = form.watch('location')
+	const selected = countryOptions.find((c) => c.code === selectedCode)
+
+	const handleSelect = (code: string) => {
+		form.setValue('location', code, { shouldValidate: true })
 		setOpen(false)
 	}
 
@@ -96,10 +85,6 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 		})
 		onSubmit()
 	}
-
-	const selectedCountry = countries.find(
-		(country) => country.code === form.watch('location.code'),
-	)
 
 	return (
 		<motion.div
@@ -129,12 +114,10 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 														aria-expanded={open}
 														className={cn(
 															'w-full justify-between border-green-600 bg-white text-sm font-medium text-gray-700 hover:text-gray-700',
-															!selectedCountry && 'text-muted-foreground',
+															!selected && 'text-muted-foreground',
 														)}
 													>
-														{selectedCountry
-															? selectedCountry.name
-															: 'Select a country'}
+														{selected ? selected.name : 'Select a country'}
 														<ChevronDown className="ml-2 h-4 w-4 shrink-0" />
 													</Button>
 												</FormControl>
@@ -148,17 +131,17 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 													<CommandList>
 														<CommandEmpty>No country found.</CommandEmpty>
 														<CommandGroup className="max-h-64 overflow-auto">
-															{countries.map((country) => (
+															{countryOptions.map((country) => (
 																<CommandItem
 																	key={country.code}
 																	value={country.name}
-																	onSelect={() => handleCountrySelect(country)}
+																	onSelect={() => handleSelect(country.code)}
 																	className="cursor-pointer"
 																>
 																	<Check
 																		className={cn(
 																			'mr-2 h-4 w-4',
-																			selectedCountry?.code === country.code
+																			selected?.code === country.code
 																				? 'opacity-100'
 																				: 'opacity-0',
 																		)}
