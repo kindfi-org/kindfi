@@ -36,10 +36,12 @@ import { countries } from '~/lib/constants/projects/country.constant'
 import { useCreateProject } from '~/lib/contexts/create-project-context'
 import { categories } from '~/lib/mock-data/project/categories.mock'
 import { cn } from '~/lib/utils'
+import { CountryFlag } from '../country-flag'
 
 // Transform countries object to display format
-const countryOptions = Object.entries(countries).map(([key, code]) => ({
-	code,
+const countryOptions = Object.entries(countries).map(([key, country]) => ({
+	alpha3: country.alpha3,
+	alpha2: country.alpha2,
 	// "costaRica" → "Costa Rica"
 	name: key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()),
 }))
@@ -71,10 +73,10 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 	})
 
 	const selectedCode = form.watch('location')
-	const selected = countryOptions.find((c) => c.code === selectedCode)
+	const selected = countryOptions.find((c) => c.alpha3 === selectedCode)
 
-	const handleSelect = (code: string) => {
-		form.setValue('location', code, { shouldValidate: true })
+	const handleSelect = (alpha3: string) => {
+		form.setValue('location', alpha3, { shouldValidate: true })
 		setOpen(false)
 	}
 
@@ -112,12 +114,18 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 													<Button
 														variant="outline"
 														aria-expanded={open}
+														aria-label="Select a country"
 														className={cn(
 															'w-full justify-between border-green-600 bg-white text-sm font-medium text-gray-700 hover:text-gray-700',
 															!selected && 'text-muted-foreground',
 														)}
 													>
-														{selected ? selected.name : 'Select a country'}
+														<div className="flex items-center">
+															{selected && (
+																<CountryFlag countryCode={selected.alpha3} />
+															)}
+															{selected ? selected.name : 'Select a country'}
+														</div>
 														<ChevronDown className="ml-2 h-4 w-4 shrink-0" />
 													</Button>
 												</FormControl>
@@ -133,19 +141,20 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 														<CommandGroup className="max-h-64 overflow-auto">
 															{countryOptions.map((country) => (
 																<CommandItem
-																	key={country.code}
+																	key={country.alpha3}
 																	value={country.name}
-																	onSelect={() => handleSelect(country.code)}
+																	onSelect={() => handleSelect(country.alpha3)}
 																	className="cursor-pointer"
 																>
 																	<Check
 																		className={cn(
 																			'mr-2 h-4 w-4',
-																			selected?.code === country.code
+																			selected?.alpha3 === country.alpha3
 																				? 'opacity-100'
 																				: 'opacity-0',
 																		)}
 																	/>
+																	<CountryFlag countryCode={country.alpha3} />
 																	{country.name}
 																</CommandItem>
 															))}
