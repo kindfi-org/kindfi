@@ -1,0 +1,107 @@
+'use client'
+
+import { ImageIcon, Upload, X } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { useDropzone } from 'react-dropzone'
+
+import { Button } from '~/components/base/button'
+import { cn } from '~/lib/utils'
+
+interface ImageUploadProps {
+	value: File | null
+	onChange: (file: File | null) => void
+	error?: string
+}
+
+export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
+	const [preview, setPreview] = useState<string | null>(null)
+
+	const onDrop = useCallback(
+		(acceptedFiles: File[]) => {
+			const file = acceptedFiles[0]
+			if (file) {
+				onChange(file)
+				const reader = new FileReader()
+				reader.onload = () => setPreview(reader.result as string)
+				reader.readAsDataURL(file)
+			}
+		},
+		[onChange],
+	)
+
+	const { getRootProps, getInputProps, isDragActive } = useDropzone({
+		onDrop,
+		accept: {
+			'image/jpeg': ['.jpg', '.jpeg'],
+			'image/png': ['.png'],
+			'image/webp': ['.webp'],
+		},
+		maxSize: 5 * 1024 * 1024, // 5MB
+		multiple: false,
+	})
+
+	const removeImage = () => {
+		onChange(null)
+		setPreview(null)
+	}
+
+	return (
+		<div className="space-y-4">
+			{!value ? (
+				<div
+					{...getRootProps()}
+					className={cn(
+						'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
+						{
+							'border-blue-400 bg-blue-50': isDragActive,
+							'border-gray-300 hover:border-gray-400': !isDragActive && !error,
+							'border-red-300 bg-red-50': error,
+						},
+					)}
+				>
+					<input {...getInputProps()} aria-label="Upload project image" />
+					<Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+					<p className="text-lg font-medium text-gray-900 mb-2">
+						{isDragActive ? 'Drop your image here' : 'Upload project image'}
+					</p>
+					<p className="text-sm text-gray-500">
+						Drag and drop or click to select
+					</p>
+					<p className="text-xs text-gray-400 mt-2">
+						JPEG, PNG, WebP up to 5MB
+					</p>
+				</div>
+			) : (
+				<div className="relative">
+					<div className="relative rounded-lg overflow-hidden border border-gray-200">
+						{preview ? (
+							<img
+								src={preview || '/images/placeholder.png'}
+								alt="Project preview"
+								className="w-full h-48 object-contain bg-gray-50 rounded-md"
+							/>
+						) : (
+							<div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+								<ImageIcon className="h-12 w-12 text-gray-400" />
+							</div>
+						)}
+						<Button
+							type="button"
+							variant="destructive"
+							size="sm"
+							className="absolute top-2 right-2"
+							onClick={removeImage}
+							aria-label="Remove image"
+						>
+							<X className="h-4 w-4" />
+						</Button>
+					</div>
+					<p className="text-sm text-muted-foreground mt-2">
+						{value.name} ({(value.size / 1024 / 1024).toFixed(2)} MB)
+					</p>
+				</div>
+			)}
+			{error && <p className="text-sm text-destructive">{error}</p>}
+		</div>
+	)
+}
