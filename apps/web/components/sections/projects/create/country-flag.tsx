@@ -1,6 +1,8 @@
 'use client'
 
 import { Flag } from 'lucide-react'
+import Image from 'next/image'
+import { useState } from 'react'
 
 import { getAlpha2FromAlpha3 } from '~/lib/utils/create-project-helpers'
 
@@ -11,14 +13,15 @@ interface CountryFlagProps {
 
 export function CountryFlag({
 	countryCode,
-	className = 'w-6 h-4',
+	className = 'w-6',
 }: CountryFlagProps) {
-	const alpha2Code = getAlpha2FromAlpha3(countryCode)
+	const alpha2 = getAlpha2FromAlpha3(countryCode)
+	const [error, setError] = useState(false)
 
-	if (!alpha2Code) {
+	if (!alpha2 || error) {
 		return (
 			<div
-				className={`${className} bg-gray-200 rounded-sm flex items-center justify-center mr-2 flex-shrink-0`}
+				className={`${className} aspect-[3/2] flex items-center justify-center mr-2 flex-shrink-0`}
 			>
 				<Flag className="h-3 w-3 text-muted-foreground" />
 			</div>
@@ -26,24 +29,17 @@ export function CountryFlag({
 	}
 
 	return (
-		<div className={`${className} mr-2 flex-shrink-0 overflow-hidden`}>
-			<img
-				src={`https://flagcdn.com/${alpha2Code.toLowerCase()}.svg`}
+		<div
+			className={`${className} aspect-[3/2] mr-2 flex-shrink-0 overflow-hidden relative`}
+		>
+			<Image
+				src={`https://flagcdn.com/${alpha2.toLowerCase()}.svg`}
 				alt={`${countryCode} flag`}
-				className="w-full h-full object-cover"
-				onError={(e) => {
-					// Fallback to generic flag icon if image fails to load
-					const target = e.target as HTMLImageElement
-					target.style.display = 'none'
-					const fallback = target.nextElementSibling as HTMLElement
-					if (fallback) {
-						fallback.style.display = 'flex'
-					}
-				}}
+				fill
+				className="object-cover"
+				onError={() => setError(true)}
+				unoptimized
 			/>
-			<div className="w-full h-full hidden items-center justify-center">
-				<Flag className="h-3 w-3 text-muted-foreground" />
-			</div>
 		</div>
 	)
 }
