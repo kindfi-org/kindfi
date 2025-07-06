@@ -204,20 +204,21 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 								)}
 							/>
 
-							<div className="flex justify-between">
+							<div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3">
 								<Button
 									type="button"
 									variant="outline"
 									onClick={onBack}
-									className="flex items-center gap-2 gradient-border-btn bg-white"
+									className="flex items-center justify-center gap-2 gradient-border-btn bg-white w-full sm:w-auto"
 								>
 									<ChevronLeft className="h-4 w-4" />
 									Previous
 								</Button>
+
 								<Button
 									type="submit"
 									disabled={!form.formState.isValid}
-									className="flex items-center gap-2 gradient-btn text-white"
+									className="flex items-center justify-center gap-2 gradient-btn text-white w-full sm:w-auto"
 								>
 									Submit for Review
 									<Check className="h-4 w-4" />
