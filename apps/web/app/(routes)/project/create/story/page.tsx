@@ -1,11 +1,11 @@
 'use client'
 
 import { Save } from 'lucide-react'
-import { Button } from '../../../../../components/base/button'
-import { ProjectMedia } from '../../../../../components/sections/project/project-media'
-import { ProjectStoryForm } from '../../../../../components/sections/project/project-story'
-import { ProjectTips } from '../../../../../components/sections/project/project-tips'
-import type { ProjectStory } from '../../../../../lib/validators/project'
+import { Button } from '~/components/base/button'
+import { ProjectMedia } from '~/components/sections/project/project-media'
+import { ProjectStoryForm } from '~/components/sections/project/project-story'
+import { ProjectTips } from '~/components/sections/project/project-tips'
+import type { ProjectStory } from '~/lib/types/project/create-project.types'
 
 export default function ProjectPitchPage() {
 	const handleStorySubmit = (data: ProjectStory) => {
