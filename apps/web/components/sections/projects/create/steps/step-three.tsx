@@ -2,20 +2,12 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
-import { Check, ChevronDown, ChevronLeft } from 'lucide-react'
+import { Check, ChevronLeft } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-import {
-	Command,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-} from '~/components/base/command'
 import {
 	Form,
 	FormControl,
@@ -24,25 +16,13 @@ import {
 	FormLabel,
 	FormMessage,
 } from '~/components/base/form'
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '~/components/base/popover'
+import { LocationSelect } from '~/components/sections/projects/create/location-select'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/filters'
 import { useCreateProject } from '~/lib/contexts/create-project-context'
 import { categories } from '~/lib/mock-data/project/categories.mock'
 import { stepThreeSchema } from '~/lib/schemas/create-project.schemas'
 import type { StepThreeData } from '~/lib/types/project/create-project.types'
-import { cn } from '~/lib/utils'
-import {
-	findCountryByAlpha3,
-	getCountryOptions,
-} from '~/lib/utils/create-project-helpers'
-import { CountryFlag } from '../country-flag'
-
-const countryOptions = getCountryOptions()
 
 interface StepThreeProps {
 	onBack: () => void
@@ -51,7 +31,6 @@ interface StepThreeProps {
 
 export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 	const { formData, updateFormData } = useCreateProject()
-	const [open, setOpen] = useState(false)
 
 	const form = useForm<StepThreeData>({
 		resolver: zodResolver(stepThreeSchema),
@@ -61,14 +40,6 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 			tags: formData.tags,
 		},
 	})
-
-	const selectedCode = form.watch('location')
-	const selected = findCountryByAlpha3(selectedCode)
-
-	const handleSelect = (alpha3: string) => {
-		form.setValue('location', alpha3, { shouldValidate: true })
-		setOpen(false)
-	}
 
 	const handleSubmit = (data: StepThreeData) => {
 		updateFormData({
@@ -95,64 +66,15 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 							<FormField
 								control={form.control}
 								name="location"
-								render={({ field: _field }) => (
+								render={({ field }) => (
 									<FormItem className="flex flex-col">
 										<FormLabel>Where is your project based? *</FormLabel>
-										<Popover open={open} onOpenChange={setOpen}>
-											<PopoverTrigger asChild>
-												<FormControl>
-													<Button
-														variant="outline"
-														aria-expanded={open}
-														aria-label="Select a country"
-														className={cn(
-															'w-full justify-between border-green-600 bg-white text-sm font-medium text-gray-700 hover:text-gray-700',
-															!selected && 'text-muted-foreground',
-														)}
-													>
-														<div className="flex items-center">
-															{selected && (
-																<CountryFlag countryCode={selected.alpha3} />
-															)}
-															{selected ? selected.name : 'Select a country'}
-														</div>
-														<ChevronDown className="ml-2 h-4 w-4 shrink-0" />
-													</Button>
-												</FormControl>
-											</PopoverTrigger>
-											<PopoverContent
-												className="w-[--radix-popover-trigger-width] p-0"
-												align="start"
-											>
-												<Command className="bg-white">
-													<CommandInput placeholder="Search countries..." />
-													<CommandList>
-														<CommandEmpty>No country found.</CommandEmpty>
-														<CommandGroup className="max-h-64 overflow-auto">
-															{countryOptions.map((country) => (
-																<CommandItem
-																	key={country.alpha3}
-																	value={country.name}
-																	onSelect={() => handleSelect(country.alpha3)}
-																	className="cursor-pointer"
-																>
-																	<Check
-																		className={cn(
-																			'mr-2 h-4 w-4',
-																			selected?.alpha3 === country.alpha3
-																				? 'opacity-100'
-																				: 'opacity-0',
-																		)}
-																	/>
-																	<CountryFlag countryCode={country.alpha3} />
-																	{country.name}
-																</CommandItem>
-															))}
-														</CommandGroup>
-													</CommandList>
-												</Command>
-											</PopoverContent>
-										</Popover>
+										<FormControl>
+											<LocationSelect
+												value={field.value}
+												onChange={field.onChange}
+											/>
+										</FormControl>
 										<FormMessage />
 									</FormItem>
 								)}
