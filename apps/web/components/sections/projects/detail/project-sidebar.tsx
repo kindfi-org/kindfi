@@ -21,7 +21,7 @@ import { Input } from '~/components/base/input'
 import { progressBarAnimation } from '~/lib/constants/animations'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
-import { getTextColor } from '~/lib/utils/color-utils'
+import { getContrastTextColor } from '~/lib/utils/color-utils'
 
 interface ProjectSidebarProps {
 	project: ProjectDetail
@@ -210,7 +210,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				<div className="flex flex-wrap gap-2">
 					{project.tags.map((tag) => {
 						const bg = tag.color || '#ccc' // fallback
-						const textColor = getTextColor(bg)
+						const textColor = getContrastTextColor(bg)
 
 						return (
 							<Badge

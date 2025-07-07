@@ -1,10 +1,16 @@
 import type { z } from 'zod'
 
 import type {
+	projectStorySchema,
 	stepOneSchema,
 	stepThreeSchema,
 	stepTwoSchema,
 } from '~/lib/schemas/create-project.schemas'
+
+export interface Tag {
+	label: string
+	color: string
+}
 
 export interface CreateProjectFormData {
 	id?: string
@@ -22,7 +28,7 @@ export interface CreateProjectFormData {
 	// Step 3: Location and Classification
 	location: string
 	category: string
-	tags: string[]
+	tags: Tag[]
 }
 
 export interface CountryOption {
@@ -35,3 +41,4 @@ export interface CountryOption {
 export type StepOneData = z.infer<typeof stepOneSchema>
 export type StepTwoData = z.infer<typeof stepTwoSchema>
 export type StepThreeData = z.infer<typeof stepThreeSchema>
+export type ProjectStory = z.infer<typeof projectStorySchema>

@@ -29,5 +29,37 @@ export const stepTwoSchema = z.object({
 export const stepThreeSchema = z.object({
 	location: z.string().length(3, 'Select a valid country'), // e.g. "CRI"
 	category: z.string().min(1, 'Please select a category'),
-	tags: z.array(z.string()).optional(),
+	tags: z
+		.array(
+			z.object({
+				label: z.string(),
+				color: z.string(),
+			}),
+		)
+		.optional(),
+})
+
+export const projectStorySchema = z.object({
+	title: z
+		.string()
+		.min(1, 'Title is required')
+		.max(100, 'Title must be less than 100 characters'),
+	story: z.string().min(1, 'Story is required'),
+	pitchDeck: z
+		.object({
+			url: z.string().optional(),
+			size: z.number().max(10 * 1024 * 1024, 'File must be less than 10MB'),
+		})
+		.optional(),
+	videoUrl: z
+		.string()
+		.url('Must be a valid URL')
+		.refine(
+			(url) =>
+				url.includes('youtube.com') ||
+				url.includes('youtu.be') ||
+				url.includes('vimeo.com'),
+			'Must be a YouTube or Vimeo URL',
+		)
+		.optional(),
 })

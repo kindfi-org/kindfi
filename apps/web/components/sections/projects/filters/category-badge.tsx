@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 
 import { cn } from '~/lib/utils'
 import { categoryIcons } from '~/lib/utils/category-icons'
-import { getTextColor } from '~/lib/utils/color-utils'
+import { getContrastTextColor } from '~/lib/utils/color-utils'
 
 interface CategoryBadgeProps {
 	category: Tables<'categories'>
@@ -25,7 +25,7 @@ export function CategoryBadge({
 	const Icon = categoryIcons[category.name]
 	const isInteractive = !!onClick
 
-	const textColor = getTextColor(category.color)
+	const textColor = getContrastTextColor(category.color)
 
 	return (
 		<motion.button
