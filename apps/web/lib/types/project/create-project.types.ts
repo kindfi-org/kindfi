@@ -7,6 +7,7 @@ import type {
 } from '~/lib/schemas/create-project.schemas'
 
 export interface CreateProjectFormData {
+	id?: string
 	// Step 1: Basic Information
 	title: string
 	description: string
