@@ -37,19 +37,19 @@ const updateProjectSchema = stepOneSchema
 	.and(stepThreeSchema)
 
 interface UpdateProjectFormProps {
-	projectData: CreateProjectFormData
+	project: CreateProjectFormData
 }
 
-export function UpdateProjectForm({ projectData }: UpdateProjectFormProps) {
+export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 	const { toast } = useToast()
 
 	const form = useForm<CreateProjectFormData>({
 		resolver: zodResolver(updateProjectSchema),
-		defaultValues: projectData,
+		defaultValues: project,
 	})
 
 	const onSubmit = (data: CreateProjectFormData) => {
-		console.log('Updating project:', projectData.id, data)
+		console.log('Updating project:', project.id, data)
 
 		toast({
 			title: 'Project updated successfully!',
