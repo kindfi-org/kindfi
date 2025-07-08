@@ -8,10 +8,12 @@ import {
 	Text,
 	TouchableOpacity,
 	View,
+	Platform
 } from 'react-native'
 import RNPickerSelect from 'react-native-picker-select'
 import { allItems } from '../components/StyledText'
 import { ItemList } from '../components/StyledText'
+
 
 // Header Component
 const Header = () => (
@@ -83,7 +85,7 @@ export default function Home() {
 	)
 
 	return (
-		<View style={{ flex: 1, marginTop: 50 }}>
+		<View style={{ flex: 1, marginTop:  Platform.OS === 'web' ? 0 : 50, }}>
 			<Navbar />
 			<Header />
 			<Filter
