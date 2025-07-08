@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { cn } from '~/lib/utils'
-import { isValidUrl } from '~/lib/utils/create-project-helpers'
+import { isAllowedSocialUrl } from '~/lib/utils/create-project-helpers'
 
 interface SocialLinksProps {
 	value: string[]
@@ -23,7 +23,9 @@ export function SocialLinks({ value, onChange, error }: SocialLinksProps) {
 		const trimmed = newLink.trim()
 
 		if (!trimmed) return setLinkError('Please enter a URL')
-		if (!isValidUrl(trimmed)) return setLinkError('Please enter a valid URL')
+		if (!isAllowedSocialUrl(trimmed)) {
+			return setLinkError('URL must be from a valid social network')
+		}
 		if (value.includes(trimmed))
 			return setLinkError('This URL has already been added')
 
@@ -59,7 +61,7 @@ export function SocialLinks({ value, onChange, error }: SocialLinksProps) {
 						className={cn(
 							'bg-white',
 							linkError
-								? 'border-red-500 focus-visible:ring-red-500'
+								? 'border-red-500 focus-visible:ring-red-500 focus-visible:ring-offset-2'
 								: 'border-green-600',
 						)}
 						aria-label="Add social link"

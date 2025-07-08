@@ -4,6 +4,7 @@ import { Flag } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 
+import { cn } from '~/lib/utils'
 import { getAlpha2FromAlpha3 } from '~/lib/utils/create-project-helpers'
 
 interface CountryFlagProps {
@@ -21,7 +22,10 @@ export function CountryFlag({
 	if (!alpha2 || error) {
 		return (
 			<div
-				className={`${className} aspect-[3/2] flex items-center justify-center mr-2 flex-shrink-0`}
+				className={cn(
+					className,
+					'aspect-[3/2] flex items-center justify-center mr-2 flex-shrink-0',
+				)}
 			>
 				<Flag className="h-3 w-3 text-muted-foreground" />
 			</div>
@@ -30,7 +34,10 @@ export function CountryFlag({
 
 	return (
 		<div
-			className={`${className} aspect-[3/2] mr-2 flex-shrink-0 overflow-hidden relative`}
+			className={cn(
+				className,
+				'aspect-[3/2] mr-2 flex-shrink-0 overflow-hidden relative',
+			)}
 		>
 			<Image
 				src={`https://flagcdn.com/${alpha2.toLowerCase()}.svg`}

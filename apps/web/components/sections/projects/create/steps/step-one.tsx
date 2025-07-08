@@ -72,7 +72,6 @@ export function StepOne({ onNext }: StepOneProps) {
 								)}
 							/>
 
-							{/* Keep all the form fields as they are */}
 							<FormField
 								control={form.control}
 								name="description"
@@ -165,6 +164,7 @@ export function StepOne({ onNext }: StepOneProps) {
 									variant="outline"
 									disabled
 									className="flex items-center gap-2 gradient-border-btn bg-white"
+									aria-label="Previous step (disabled on first step)"
 								>
 									<ChevronLeft className="h-4 w-4" />
 									Previous

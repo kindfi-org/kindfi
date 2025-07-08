@@ -1,6 +1,7 @@
 'use client'
 
 import { ImageIcon, Upload, X } from 'lucide-react'
+import Image from 'next/image'
 import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 
@@ -23,6 +24,10 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 				onChange(file)
 				const reader = new FileReader()
 				reader.onload = () => setPreview(reader.result as string)
+				reader.onerror = () => {
+					console.error('Error reading file')
+					setPreview(null)
+				}
 				reader.readAsDataURL(file)
 			}
 		},
@@ -59,7 +64,11 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 						},
 					)}
 				>
-					<input {...getInputProps()} aria-label="Upload project image" />
+					<input
+						{...getInputProps()}
+						aria-label="Upload project image. Accepts JPEG, PNG, WebP files up to 5MB"
+						aria-describedby="upload-instructions"
+					/>
 					<Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
 					<p className="text-lg font-medium text-gray-900 mb-2">
 						{isDragActive ? 'Drop your image here' : 'Upload project image'}
@@ -67,7 +76,7 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 					<p className="text-sm text-gray-500">
 						Drag and drop or click to select
 					</p>
-					<p className="text-xs text-gray-400 mt-2">
+					<p id="upload-instructions" className="text-xs text-gray-400 mt-2">
 						JPEG, PNG, WebP up to 5MB
 					</p>
 				</div>
@@ -75,10 +84,13 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 				<div className="relative">
 					<div className="relative rounded-lg overflow-hidden border border-gray-200">
 						{preview ? (
-							<img
+							<Image
 								src={preview || '/images/placeholder.png'}
 								alt="Project preview"
+								width={400}
+								height={192}
 								className="w-full h-48 object-contain bg-gray-50 rounded-md"
+								unoptimized={!!preview} // Disable Next.js optimization for data-URL previews
 							/>
 						) : (
 							<div className="w-full h-48 bg-gray-100 flex items-center justify-center">

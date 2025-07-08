@@ -10,11 +10,15 @@ export function CreateProjectForm() {
 	const { currentStep, setCurrentStep, formData } = useCreateProject()
 
 	const handleNext = () => {
-		setCurrentStep(currentStep + 1)
+		if (currentStep < 3) {
+			setCurrentStep(currentStep + 1)
+		}
 	}
 
 	const handleBack = () => {
-		setCurrentStep(currentStep - 1)
+		if (currentStep > 1) {
+			setCurrentStep(currentStep - 1)
+		}
 	}
 
 	const handleSubmit = () => {

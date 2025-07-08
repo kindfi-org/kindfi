@@ -158,7 +158,7 @@ export function TagInput({
 				<div className="flex flex-wrap gap-2">
 					{value.map((tag, index) => (
 						<TagBadge
-							key={`${tag.label}-${index}`}
+							key={`${tag.label}`}
 							tag={tag}
 							onRemove={() => removeTag(index)}
 							showRemoveButton={true}

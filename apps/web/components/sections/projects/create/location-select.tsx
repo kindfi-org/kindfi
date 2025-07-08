@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { Button } from '~/components/base/button'
 import {
@@ -24,14 +24,13 @@ import {
 	getCountryOptions,
 } from '~/lib/utils/create-project-helpers'
 
-const countryOptions = getCountryOptions()
-
 interface LocationSelectProps {
 	value: string
 	onChange: (value: string) => void
 }
 
 export function LocationSelect({ value, onChange }: LocationSelectProps) {
+	const countryOptions = useMemo(() => getCountryOptions(), [])
 	const [open, setOpen] = useState(false)
 	const selected = findCountryByAlpha3(value)
 
@@ -68,6 +67,11 @@ export function LocationSelect({ value, onChange }: LocationSelectProps) {
 					<CommandList>
 						<CommandEmpty>No country found.</CommandEmpty>
 						<CommandGroup className="max-h-64 overflow-auto">
+							{countryOptions.length === 0 && (
+								<div className="p-2 text-sm text-muted-foreground">
+									Loading countries...
+								</div>
+							)}
 							{countryOptions.map((country) => (
 								<CommandItem
 									key={country.alpha3}

@@ -1,5 +1,7 @@
 import * as z from 'zod'
 
+import { isAllowedSocialUrl } from '../utils/create-project-helpers'
+
 export const stepOneSchema = z
 	.object({
 		title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -20,10 +22,22 @@ export const stepTwoSchema = z.object({
 	image: z.any().nullable(),
 	website: z
 		.string()
-		.url('Please enter a valid URL')
+		.url('Please enter a valid URL (e.g., https://example.com)')
+		.refine((url) => url.startsWith('https://'), {
+			message: 'Website URL must use HTTPS for security',
+		})
 		.optional()
 		.or(z.literal('')),
-	socialLinks: z.array(z.string().url('Please enter a valid URL')),
+	socialLinks: z
+		.array(
+			z
+				.string()
+				.url('Please enter a valid social media URL')
+				.refine(isAllowedSocialUrl, {
+					message: 'Please enter a valid social media URL',
+				}),
+		)
+		.optional(),
 })
 
 export const stepThreeSchema = z.object({

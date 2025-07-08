@@ -40,3 +40,27 @@ export function getAlpha2FromAlpha3(alpha3: string): string | undefined {
 	const country = Object.values(countries).find((c) => c.alpha3 === alpha3)
 	return country?.alpha2
 }
+
+/**
+ * Checks whether a given URL is from an allowed social media domain.
+ */
+export function isAllowedSocialUrl(url: string): boolean {
+	const allowed = [
+		'twitter.com',
+		'linkedin.com',
+		'github.com',
+		'facebook.com',
+		'instagram.com',
+		'youtube.com',
+		't.me',
+		'discord.gg',
+		'medium.com',
+		'tiktok.com',
+	]
+	try {
+		const { hostname } = new URL(url)
+		return allowed.some((d) => hostname === d || hostname.endsWith(`.${d}`))
+	} catch {
+		return false
+	}
+}

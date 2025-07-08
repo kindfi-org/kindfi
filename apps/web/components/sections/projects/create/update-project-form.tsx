@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
-import { Save } from 'lucide-react'
+import { Loader2, Save } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '~/components/base/button'
@@ -58,6 +58,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 	}
 
 	const isDirty = form.formState.isDirty
+	const isSubmitting = form.formState.isSubmitting
 
 	return (
 		<motion.div
@@ -310,12 +311,22 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 
 							<Button
 								type="submit"
-								disabled={!isDirty}
+								disabled={!isDirty || isSubmitting}
 								className="flex items-center gap-2 px-8 gradient-btn text-white w-full"
 								size="lg"
+								aria-describedby={isDirty ? 'unsaved-changes' : 'all-saved'}
 							>
-								<Save className="h-4 w-4" />
-								Save Changes
+								{isSubmitting ? (
+									<>
+										<Loader2 className="h-4 w-4 animate-spin" />
+										Saving...
+									</>
+								) : (
+									<>
+										<Save className="h-4 w-4" />
+										Save Changes
+									</>
+								)}
 							</Button>
 						</div>
 					</div>
