@@ -26,4 +26,11 @@ finalConfig.transformer = {
 	unstable_allowRequireContext: true,
 }
 
+config.resolver.sourceExts = config.resolver.sourceExts.filter(ext => ext !== 'mjs');
+
+// Alias tslib to the proper module
+config.resolver.extraNodeModules = {
+	tslib: require.resolve('tslib/tslib.es6.js'),
+  };
+
 module.exports = finalConfig

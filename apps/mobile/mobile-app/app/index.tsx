@@ -60,26 +60,7 @@ const Filter = ({
 			</Text>
 		</TouchableOpacity>
 
-		{/* Dynamic Filters */}
-		{filters.map((filter) => (
-			<TouchableOpacity
-				key={filter}
-				onPress={() => onSelect(filter)}
-				style={[
-					styles.filterButton,
-					selectedFilter === filter && styles.activeFilter,
-				]}
-			>
-				<Text
-					style={[
-						styles.filterText,
-						selectedFilter === filter && styles.activeFilterText,
-					]}
-				>
-					{filter}
-				</Text>
-			</TouchableOpacity>
-		))}
+		
 	</View>
 )
 
@@ -102,7 +83,7 @@ export default function Home() {
 	)
 
 	return (
-		<View style={{ flex: 1 }}>
+		<View style={{ flex: 1, marginTop: 50 }}>
 			<Navbar />
 			<Header />
 			<Filter
