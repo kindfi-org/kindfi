@@ -35,10 +35,10 @@ export function StepCard({ step, index }: StepCardProps) {
 					</View>
 
 					<VStack space="xs" className="flex-1">
-						<Text className="font-semibold text-lg text-gray-900 dark:text-white">
+						<Text className="text-2xl font-bold text-gray-900 dark:text-white">
 							{step.title}
 						</Text>
-						<Text className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+						<Text className="text-base text-gray-600 dark:text-gray-300">
 							{step.description}
 						</Text>
 					</VStack>

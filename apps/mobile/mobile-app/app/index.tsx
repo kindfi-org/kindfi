@@ -12,6 +12,7 @@ import {
 import RNPickerSelect from 'react-native-picker-select'
 import { allItems } from '../components/StyledText'
 import { ItemList } from '../components/StyledText'
+import OnboardingScreen from './onboarding-screen'
 
 // Header Component
 const Header = () => (
@@ -103,7 +104,8 @@ export default function Home() {
 
 	return (
 		<View style={{ flex: 1 }}>
-			<Navbar />
+			<OnboardingScreen />
+			{/* <Navbar />
 			<Header />
 			<Filter
 				filters={filters}
@@ -118,7 +120,6 @@ export default function Home() {
 					<Text style={styles.selectAllText}>Select All</Text>
 				</TouchableOpacity>
 
-				{/* Dropdown Filter */}
 				<RNPickerSelect
 					onValueChange={(value) => handleFilterSelect(value)}
 					items={[
@@ -137,7 +138,7 @@ export default function Home() {
 			</View>
 			<ScrollView>
 				<ItemList items={filteredItems} />
-			</ScrollView>
+			</ScrollView> */}
 		</View>
 	)
 }
