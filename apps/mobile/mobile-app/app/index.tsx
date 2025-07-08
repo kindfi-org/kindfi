@@ -7,12 +7,13 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
-	View,
-	Platform
+	View
 } from 'react-native'
 import RNPickerSelect from 'react-native-picker-select'
 import { allItems } from '../components/StyledText'
 import { ItemList } from '../components/StyledText'
+import { SafeAreaView } from 'react-native-safe-area-context'
+
 
 
 // Header Component
@@ -85,7 +86,7 @@ export default function Home() {
 	)
 
 	return (
-		<View style={{ flex: 1, marginTop:  Platform.OS === 'web' ? 0 : 50, }}>
+		<SafeAreaView style={{ flex: 1}}>
 			<Navbar />
 			<Header />
 			<Filter
@@ -121,7 +122,7 @@ export default function Home() {
 			<ScrollView>
 				<ItemList items={filteredItems} />
 			</ScrollView>
-		</View>
+		</SafeAreaView>
 	)
 }
 

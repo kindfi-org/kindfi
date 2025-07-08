@@ -69,7 +69,7 @@
 		"expo-symbols": "~0.4.5",
 		"expo-system-ui": "~5.0.10",
 		"expo-web-browser": "~14.2.0",
-		"framer-motion": "11.0.2",
+		"framer-motion": "10.12.16",
 		"lucide-react-native": "^0.503.0",
 		"moti": "0.22.0",
 		"nativewind": "^4.1.23",
