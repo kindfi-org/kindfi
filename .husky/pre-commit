@@ -1,10 +1,10 @@
-# if git diff --cached --name-only | grep -q '^services/supabase/'; then
-#   echo "🔵 Running Supabase Typescript generation."
-#   if ! (cd services/supabase && bun gen); then
-#     echo "🔴 Failed to run Supabase TypeScript generation. Make sure if you are locally running! 👀"
-#     exit 1
-#   fi
-# fi
+if git diff --cached --name-only | grep -q '^services/supabase/'; then
+  echo "🔵 Running Supabase Typescript generation."
+  if ! (cd services/supabase && bun gen); then
+    echo "🔴 Failed to run Supabase TypeScript generation. Make sure if you are locally running! 👀"
+    exit 1
+  fi
+fi
 prettier $(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g') --write --ignore-unknown
 bun format-and-lint:fix
 git update-index --again
