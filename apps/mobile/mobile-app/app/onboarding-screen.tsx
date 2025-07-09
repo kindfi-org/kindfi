@@ -7,7 +7,7 @@ export default function OnboardingScreen() {
 	return (
 		<SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
 			<StatusBar style="auto" />
-			<OnboardingSection />
+			<OnboardingSection /> 
 		</SafeAreaView>
 	)
 }
