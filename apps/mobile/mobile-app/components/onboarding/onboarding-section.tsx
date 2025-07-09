@@ -1,12 +1,17 @@
 import { MotiView } from 'moti'
 import React, { useState, useRef } from 'react'
+import {
+	Animated,
+	Dimensions,
+	type NativeScrollEvent,
+	type NativeSyntheticEvent,
+	type ScrollView,
+} from 'react-native'
 import { Button, ButtonText } from '../ui/button'
 import { Text } from '../ui/text'
 import { VStack } from '../ui/vstack'
 import { OnboardingToggle } from './onboarding-toggle'
 import { StepCard } from './step-card'
-import { Animated, Dimensions, NativeScrollEvent, NativeSyntheticEvent, ScrollView } from 'react-native'
-
 
 interface Step {
 	number: number
@@ -85,7 +90,7 @@ export function OnboardingSection() {
 	const [currentStepIndex, setCurrentStepIndex] = useState(0)
 
 	const scrollViewRef = useRef<ScrollView>(null)
-	const screenHeight = Dimensions.get('window').height;
+	const screenHeight = Dimensions.get('window').height
 
 	const scrollY = useRef(new Animated.Value(0)).current
 
@@ -133,13 +138,19 @@ export function OnboardingSection() {
 			showsVerticalScrollIndicator={false}
 			onScroll={Animated.event(
 				[{ nativeEvent: { contentOffset: { y: scrollY } } }],
-				{ useNativeDriver: false, listener: handleScroll }
+				{ useNativeDriver: false, listener: handleScroll },
 			)}
 			scrollEventThrottle={16}
-			className="flex-1 bg-gray-50 dark:bg-gray-900"
+			className="flex-1 bg-gray-50 dark:bg-gray-900 relative"
 		>
 			{/* Hero Section */}
-			<Animated.View style={{ height: screenHeight, justifyContent: 'center', paddingHorizontal: 24 }}>
+			<Animated.View
+				style={{
+					height: screenHeight,
+					justifyContent: 'center',
+					paddingHorizontal: 24,
+				}}
+			>
 				<VStack space="lg" className="items-center my-[5rem]">
 					<Animated.Text
 						style={{ transform: [{ scale: titleScale }] }}
@@ -157,6 +168,16 @@ export function OnboardingSection() {
 				</VStack>
 
 				<OnboardingToggle activeTab={activeTab} onTabChange={handleTabChange} />
+
+				<VStack
+					space="md"
+					className="items-center absolute bottom-20 left-0 right-0"
+				>
+					<Text className="text-gray-500 dark:text-gray-400 text-sm">
+						Swipe up to explore{' '}
+						{activeTab === 'kindlers' ? 'project creators' : 'supporters'}
+					</Text>
+				</VStack>
 			</Animated.View>
 
 			{/* Steps */}
