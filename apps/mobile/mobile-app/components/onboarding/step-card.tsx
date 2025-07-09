@@ -48,8 +48,18 @@ export function StepCard({ step, index, total, currentIndex }: StepCardProps) {
 						</Text>
 					</VStack>
 				</HStack>
+			</View>
 
-				
+			<View className="flex-row justify-center mt-[5rem]">
+				{Array.from({ length: total }).map((_, i) => (
+					<View
+						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+						key={i}
+						className={`h-3 w-3 mx-1 rounded-full ${
+							i === currentIndex ? 'bg-blue-600' : 'bg-gray-300'
+						}`}
+					/>
+				))}
 			</View>
 		</MotiView>
 	)
