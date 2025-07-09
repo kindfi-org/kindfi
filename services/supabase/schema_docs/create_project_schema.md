@@ -24,7 +24,7 @@ The central table storing all project information.
 | updated_at          | TIMESTAMP WITH TIME ZONE | DEFAULT CURRENT_TIMESTAMP                | When project was last updated       |
 | category_id         | TEXT                     |                                          | References future categories table  |
 | image_url           | TEXT                     |                                          | URL to project cover image          |
-| owner_id            | UUID                     | NOT NULL, FK to auth.users(id)           | Project creator reference           |
+| kindler_id            | UUID                     | NOT NULL, FK to auth.users(id)           | Project creator reference           |
 
 ## Constraints and Indices
 
@@ -34,7 +34,7 @@ The central table storing all project information.
 
 ### Foreign Keys
 
-- `projects_owner_id_fkey`: Links `owner_id` to `auth.users(id)`
+- `projects_kindler_id_fkey`: Links `kindler_id` to `auth.users(id)`
 
 ### Check Constraints
 
@@ -44,7 +44,7 @@ The central table storing all project information.
 ### Indices
 
 - `idx_projects_category_id`: Optimizes queries filtering by category
-- `idx_projects_owner_id`: Optimizes queries filtering by owner
+- `idx_projects_kindler_id`: Optimizes queries filtering by owner
 
 ## Triggers
 
@@ -62,7 +62,7 @@ policy "Allow authenticated users to create projects"
   as permissive
   for insert
   to public
-  with check ((auth.role() = 'authenticated'::text) AND (auth.uid() = owner_id));
+  with check ((auth.role() = 'authenticated'::text) AND (auth.uid() = kindler_id));
 ```
 
 _Only authenticated users can create projects, and they must be set as the owner._
@@ -75,7 +75,7 @@ policy "Allow project owners to update their projects"
   as permissive
   for update
   to public
-  using ((auth.uid() = owner_id));
+  using ((auth.uid() = kindler_id));
 ```
 
 _Only project owners can update their own projects._

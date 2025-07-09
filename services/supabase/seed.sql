@@ -26,7 +26,7 @@ on conflict (id) do nothing;
 insert into public.projects (
   title, description, current_amount, target_amount,
   min_investment, percentage_complete, kinder_count,
-  category_id, image_url, owner_id,
+  category_id, image_url, kindler_id,
   social_links, project_location
 )
 values
@@ -371,7 +371,7 @@ Join us in creating a world where every child has access to quality education.$$
   $$,
   'http://127.0.0.1:54321/storage/v1/object/public/project_pitch_decks/mindful-support.pdf',
   'https://www.youtube.com/embed/vzKryaN44ss'),
-  
+
   ((select id from public.projects where title = 'Artists for Social Impact'),
   'Art That Inspires Change: Artists for Social Impact',
   $$Art has always had the power to move hearts, shift perspectives, and ignite revolutions. Through this initiative, we aim to support artists who are using their creative gifts to advocate for justice and drive positive social transformation.
@@ -454,26 +454,26 @@ Join us in creating a world where every child has access to quality education.$$
 
   In the aftermath of hurricanes, earthquakes, floods, and wildfires, survivors face:
 
-  - Lack of food and clean water  
-  - Displacement from homes and shelters  
-  - Inadequate medical attention and hygiene supplies  
-  - Disruption of communication and infrastructure  
+  - Lack of food and clean water
+  - Displacement from homes and shelters
+  - Inadequate medical attention and hygiene supplies
+  - Disruption of communication and infrastructure
 
   ## Our Relief Strategy
 
   We act quickly, with impact-driven priorities:
 
-  1. **Rapid Deployment Teams**: On-the-ground volunteers and logistics specialists ready to mobilize.  
-  2. **Essential Supplies**: Distribution of food, water, blankets, and emergency kits within 24 hours.  
-  3. **Shelter & Safety**: Temporary housing solutions with sanitation and security protocols.  
-  4. **Coordination with Local Leaders**: Ensuring culturally appropriate, community-driven interventions.  
+  1. **Rapid Deployment Teams**: On-the-ground volunteers and logistics specialists ready to mobilize.
+  2. **Essential Supplies**: Distribution of food, water, blankets, and emergency kits within 24 hours.
+  3. **Shelter & Safety**: Temporary housing solutions with sanitation and security protocols.
+  4. **Coordination with Local Leaders**: Ensuring culturally appropriate, community-driven interventions.
 
   ## What We Aim to Achieve
 
-  - Aid delivery to **over 50,000** affected individuals per disaster event  
-  - Reduce emergency response time to **under 12 hours**  
-  - Establish a pre-stocked network of **10 regional warehouses**  
-  - Train **1,000 volunteers** in crisis logistics and trauma support  
+  - Aid delivery to **over 50,000** affected individuals per disaster event
+  - Reduce emergency response time to **under 12 hours**
+  - Establish a pre-stocked network of **10 regional warehouses**
+  - Train **1,000 volunteers** in crisis logistics and trauma support
 
   ## Why You Matter
 
@@ -625,7 +625,7 @@ insert into public.project_members (project_id, user_id, role, title) values
   ((select id from public.projects where title = 'Civic Leadership Lab'), '2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'admin', 'Founder'),
   ((select id from public.projects where title = 'Civic Leadership Lab'), '81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'advisor', 'Policy Mentor'),
   ((select id from public.projects where title = 'Civic Leadership Lab'), '55499a3c-f7d8-492b-a790-4223f29467b1', 'editor', 'Advocacy Lead');
-  
+
 -- Insert milestones for each project
 insert into public.milestones (project_id, title, description, amount, deadline, status, order_index)
 values
