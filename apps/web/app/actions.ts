@@ -32,23 +32,29 @@ const errorHandler = new AuthErrorHandler(logger)
 
 export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 	const supabase = await createSupabaseServerClient()
-	const data = {
-		email: formData.get('email') as string,
-		password: formData.get('password') as string,
+	const email = formData.get('email') as string
+	const signInWithOptOpt = {
+		email,
+		options: {
+			emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?redirect_to=/otp-validation?email=${email}`,
+			shouldCreateUser: true,
+		},
 	}
 
 	try {
-		const { error } = await supabase.auth.signUp(data)
+		const { data, error } = await supabase.auth.signInWithOtp(signInWithOptOpt)
 		if (error) {
 			return errorHandler.handleAuthError(error, 'sign_up')
 		}
 
 		revalidatePath('/', 'layout')
+		console.log('Sign up data: ', data)
 		return {
 			success: true,
 			message:
-				'Account created successfully. Please check your email to confirm your account.',
-			redirect: '/otp-validation',
+				'Verification code sent! Please check your email to confirm your account.',
+			redirect: `/otp-validation?email=${encodeURIComponent(signInWithOptOpt.email)}`,
+			data,
 		}
 	} catch (error) {
 		return errorHandler.handleAuthError(error as AuthError, 'sign_up')

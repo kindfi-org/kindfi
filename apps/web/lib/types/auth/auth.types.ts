@@ -16,6 +16,7 @@ export enum AuthErrorType {
 export interface AuthResponse {
 	success: boolean
 	message: string
+	data?: Record<string, unknown>
 	error?: string
 	redirect?: string
 }

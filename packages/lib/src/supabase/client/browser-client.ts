@@ -22,9 +22,18 @@ export function createSupabaseBrowserClient() {
 		return client
 	}
 
+	// ? There is a moment in the react render that process.env doesn't exist in the browser hence,
+	// ? a fallback is required to add on this render step cycle...
+	// ? - @andlerrl
 	client = createBrowserClient<Database>(
-		appConfig.database.url,
-		appConfig.database.anonKey,
+		appConfig.database.url ||
+			process.env.NEXT_PUBLIC_SUPABASE_URL ||
+			process.env.SUPABASE_URL ||
+			'',
+		appConfig.database.anonKey ||
+			process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+			process.env.SUPABASE_ANON_KEY ||
+			'',
 	)
 
 	return client

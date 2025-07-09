@@ -45,8 +45,10 @@
 	"license": "MIT",
 	"dependencies": {
 		"@supabase/supabase-js": "^2.49.4",
+		"@supabase/ssr": "^0.6.1",
 		"@tanstack/react-query": "^5.74.7",
-		"tesseract.js": "^6.0.0"
+		"tesseract.js": "^6.0.0",
+		"@services/supabase": "workspace:*"
 	},
 	"devDependencies": {}
 }

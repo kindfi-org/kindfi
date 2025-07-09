@@ -1,14 +1,13 @@
 import { appEnvConfig } from '@packages/lib/config'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 
-const appConfig = appEnvConfig('web')
-const supabase = createSupabaseBrowserClient()
-
 export async function uploadToBucket(file: File, bucket: string) {
+	const supabase = createSupabaseBrowserClient()
 	if (!bucket) {
 		return { error: 'No storage bucket specified' }
 	}
 
+	const appConfig = appEnvConfig('web')
 	const filePath = `${Date.now()}-${file.name}`
 	const { error } = await supabase.storage
 		.from(bucket)

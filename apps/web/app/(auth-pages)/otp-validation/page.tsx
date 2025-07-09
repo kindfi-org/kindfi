@@ -7,7 +7,7 @@ import {
 	CheckCircle2,
 	Shield,
 } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { redirect, useRouter, useSearchParams } from 'next/navigation'
 import { type SetStateAction, useEffect, useState } from 'react'
 
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
@@ -42,6 +42,12 @@ export default function VerifyOTPPage() {
 	const email = searchParams.get('email') || ''
 
 	useEffect(() => {
+		if (!email) {
+			redirect('/sign-up')
+		}
+	}, [email])
+
+	useEffect(() => {
 		if (timeLeft > 0 && !isVerified) {
 			const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
 			return () => clearTimeout(timer)
@@ -61,7 +67,8 @@ export default function VerifyOTPPage() {
 		if (error) setError('')
 	}
 
-	const handleVerify = async () => {
+	const handleVerify = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
 		if (otp.length !== 6) return
 
 		setIsVerifying(true)
@@ -71,7 +78,7 @@ export default function VerifyOTPPage() {
 			const { data, error: verifyError } = await supabase.auth.verifyOtp({
 				email,
 				token: otp,
-				type: 'signup',
+				type: 'email',
 			})
 
 			if (verifyError) {

@@ -20,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [isLoading, setIsLoading] = useState(true)
 	const supabase = createSupabaseBrowserClient()
 
+	// TODO: Check provider, it does not have a env variable context here hence, the check session might not be working properly...
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		// Move session check to useEffect to avoid hydration mismatch
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				const {
 					data: { session },
 				} = await supabase.auth.getSession()
+				console.log('Session check result:', session)
 				setUser(session?.user ?? null)
 			} catch (error) {
 				console.error('Auth check failed:', error)

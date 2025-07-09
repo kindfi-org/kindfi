@@ -76,6 +76,8 @@ export interface ButtonProps
 	'aria-label'?: boolean extends true ? string : string | undefined
 }
 
+const appConfig = appEnvConfig('web')
+
 /**
  * `Button` component used for triggering actions within the UI. It supports various variants and sizes,
  * and it can optionally render as a child component to integrate with other UI elements.
@@ -119,7 +121,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 		},
 		ref,
 	) => {
-		const appConfig = appEnvConfig('web')
 		const Comp = asChild ? Slot : 'button'
 
 		// Determine if button content is empty or only contains icons
@@ -132,7 +133,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			iconOnly || (!hasTextContent && (startIcon || endIcon || children))
 
 		// Warning for icon-only buttons without aria-label in development
-		console.log('process.env from appConfig', appConfig)
 		if (appConfig.env.nodeEnv !== 'production' && isIconOnly && !ariaLabel) {
 			console.error(
 				`Accessibility error: Icon-only Button must have an aria-label to describe its purpose. Component: ${Button.displayName}`,

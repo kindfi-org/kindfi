@@ -23,7 +23,6 @@ import { useFormValidation } from '~/hooks/use-form-validation'
 export default function Signup() {
 	const router = useRouter()
 	const [email, setEmail] = useState('')
-	const [password, setPassword] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [error, setError] = useState('')
 	const [success, setSuccess] = useState('')
@@ -39,14 +38,9 @@ export default function Signup() {
 		if (error) setError('')
 	}
 
-	const onPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-		setPassword(e.target.value)
-		if (error) setError('')
-	}
-
 	const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		if (isEmailInvalid || !email || !password) return
+		if (isEmailInvalid || !email) return
 
 		setIsSubmitting(true)
 		setError('')
@@ -55,7 +49,6 @@ export default function Signup() {
 		try {
 			const formData = new FormData()
 			formData.append('email', email)
-			formData.append('password', password)
 
 			const result = await signUpAction(formData)
 
@@ -63,7 +56,7 @@ export default function Signup() {
 				setSuccess(result.message)
 				// Redirect to OTP validation after a brief delay
 				setTimeout(() => {
-					router.push('/otp-validation')
+					router.push(result?.redirect || '/sign-up')
 				}, 1500)
 			} else {
 				setError(result.message)
@@ -131,32 +124,10 @@ export default function Signup() {
 								</div>
 							</div>
 
-							<div className="space-y-2">
-								<Label htmlFor="password" id="password-label">
-									Password
-								</Label>
-								<Input
-									id="password"
-									name="password"
-									type="password"
-									placeholder="Create a secure password"
-									required
-									aria-labelledby="password-label"
-									aria-describedby="password-description"
-									onChange={onPasswordChange}
-									aria-required="true"
-									value={password}
-									minLength={6}
-								/>
-								<span id="password-description" className="sr-only">
-									Create a password with at least 6 characters
-								</span>
-							</div>
-
 							<Button
 								className="w-full gradient-btn text-white"
 								type="submit"
-								disabled={isSubmitting || isEmailInvalid || !email || !password}
+								disabled={isSubmitting || isEmailInvalid || !email}
 								aria-live="polite"
 								aria-busy={isSubmitting}
 							>

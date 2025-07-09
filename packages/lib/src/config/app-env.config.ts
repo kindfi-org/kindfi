@@ -52,24 +52,24 @@ export function getEnv<T extends AppName>(appName?: T): AppEnvInterface {
 		const schema = appName ? createAppSchema(appName) : baseEnvSchema
 		const envVars = process.env as Record<string, string | undefined>
 
-		console.log('🔍 Environment Variables Read:', {
-			appName,
-			envVarsKeys: Object.keys(envVars),
-			hasRequiredVars: appName
-				? appRequirements[appName].required.map((key) => ({
-						key,
-						exists: !!envVars[key],
-						value: envVars[key]
-							? `${envVars[key]?.substring(0, 10)}...`
-							: 'undefined',
-					}))
-				: 'generic',
-		})
+		// console.log('🔍 Environment Variables Read:', {
+		// 	appName,
+		// 	envVarsKeys: Object.keys(envVars),
+		// 	hasRequiredVars: appName
+		// 		? appRequirements[appName].required.map((key) => ({
+		// 				key,
+		// 				exists: !!envVars[key],
+		// 				value: envVars[key]
+		// 					? `${envVars[key]?.substring(0, 10)}...`
+		// 					: 'undefined',
+		// 			}))
+		// 		: 'generic',
+		// })
 
-		console.log('🏗️ Schema Info:', {
-			schemaKeys: Object.keys(schema.shape),
-			requiredFields: appName ? appRequirements[appName].required : 'none',
-		})
+		// console.log('🏗️ Schema Info:', {
+		// 	schemaKeys: Object.keys(schema.shape),
+		// 	requiredFields: appName ? appRequirements[appName].required : 'none',
+		// })
 
 		// Perform a safe parse first to get detailed error information
 		const result = schema.safeParse(envVars)
@@ -88,7 +88,7 @@ export function getEnv<T extends AppName>(appName?: T): AppEnvInterface {
 			throw result.error
 		}
 
-		console.log('✅ Schema validation successful, transforming environment...')
+		// console.log('✅ Schema validation successful, transforming environment...')
 		const parsed = result.data
 
 		return transformEnv(parsed)
@@ -113,15 +113,15 @@ export function getEnv<T extends AppName>(appName?: T): AppEnvInterface {
 
 // Transform function with explicit type annotation
 export function transformEnv(data: ValidatedEnvInput): AppEnvInterface {
-	console.log('🔄 Transforming environment variables:', {
-		dataKeys: Object.keys(data),
-		sampleData: {
-			nodeEnv: data.NODE_ENV,
-			hasSupabaseUrl: !!data.NEXT_PUBLIC_SUPABASE_URL || !!data.SUPABASE_URL,
-			hasSupabaseKey:
-				!!data.NEXT_PUBLIC_SUPABASE_ANON_KEY || !!data.SUPABASE_ANON_KEY,
-		},
-	})
+	// console.log('🔄 Transforming environment variables:', {
+	// 	dataKeys: Object.keys(data),
+	// 	sampleData: {
+	// 		nodeEnv: data.NODE_ENV,
+	// 		hasSupabaseUrl: !!data.NEXT_PUBLIC_SUPABASE_URL || !!data.SUPABASE_URL,
+	// 		hasSupabaseKey:
+	// 			!!data.NEXT_PUBLIC_SUPABASE_ANON_KEY || !!data.SUPABASE_ANON_KEY,
+	// 	},
+	// })
 
 	return {
 		auth: {
@@ -227,22 +227,34 @@ export function appEnvConfig(appName?: AppName): AppEnvInterface {
 	// Auto-detect app if not provided
 	const detectedApp = appName || detectApp()
 
-	switch (detectedApp) {
-		case 'web':
-			if (!_webEnv) {
-				_webEnv = getEnv('web')
-			}
-			return _webEnv
-		case 'kyc-server':
-			if (!_kycServerEnv) {
-				_kycServerEnv = getEnv('kyc-server')
-			}
-			return _kycServerEnv
-		default:
-			if (!_genericEnv) {
-				_genericEnv = getEnv()
-			}
-			return _genericEnv
+	try {
+		switch (detectedApp) {
+			case 'web':
+				if (!_webEnv || Object.keys(_webEnv).length === 0) {
+					_webEnv = getEnv('web')
+				}
+				return _webEnv
+			case 'kyc-server':
+				if (!_kycServerEnv || Object.keys(_kycServerEnv).length === 0) {
+					_kycServerEnv = getEnv('kyc-server')
+				}
+				return _kycServerEnv
+			default:
+				if (!_genericEnv || Object.keys(_genericEnv).length === 0) {
+					_genericEnv = getEnv()
+				}
+				return _genericEnv
+		}
+	} catch (error) {
+		console.error(
+			`Failed to get environment configuration for ${detectedApp}. Please check your environment variables.`,
+			{
+				errorType: error?.constructor?.name,
+				message: error instanceof Error ? error.message : 'Unknown error',
+				appName: detectedApp,
+			},
+		)
+		return transformEnv(process.env as ValidatedEnvInput)
 	}
 }
 
