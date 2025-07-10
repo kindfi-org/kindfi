@@ -7,14 +7,12 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
-	View
+	View,
 } from 'react-native'
 import RNPickerSelect from 'react-native-picker-select'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { allItems } from '../components/StyledText'
 import { ItemList } from '../components/StyledText'
-import { SafeAreaView } from 'react-native-safe-area-context'
-
-
 
 // Header Component
 const Header = () => (
@@ -63,7 +61,26 @@ const Filter = ({
 			</Text>
 		</TouchableOpacity>
 
-		
+		{/* Dynamic Filters */}
+		{filters.map((filter) => (
+			<TouchableOpacity
+				key={filter}
+				onPress={() => onSelect(filter)}
+				style={[
+					styles.filterButton,
+					selectedFilter === filter && styles.activeFilter,
+				]}
+			>
+				<Text
+					style={[
+						styles.filterText,
+						selectedFilter === filter && styles.activeFilterText,
+					]}
+				>
+					{filter}
+				</Text>
+			</TouchableOpacity>
+		))}
 	</View>
 )
 
@@ -86,7 +103,7 @@ export default function Home() {
 	)
 
 	return (
-		<SafeAreaView style={{ flex: 1}}>
+		<SafeAreaView style={{ flex: 1 }}>
 			<Navbar />
 			<Header />
 			<Filter
@@ -94,31 +111,6 @@ export default function Home() {
 				selectedFilter={selectedFilter}
 				onSelect={handleFilterSelect}
 			/>
-			<View style={styles.additionalFiltersContainer}>
-				<TouchableOpacity
-					onPress={() => handleFilterSelect(null)}
-					style={styles.selectAllButton}
-				>
-					<Text style={styles.selectAllText}>Select All</Text>
-				</TouchableOpacity>
-
-				{/* Dropdown Filter */}
-				<RNPickerSelect
-					onValueChange={(value) => handleFilterSelect(value)}
-					items={[
-						{ label: 'All', value: null },
-						...filters.map((filter) => ({ label: filter, value: filter })),
-					]}
-					style={{
-						inputIOS: styles.dropdown,
-						inputAndroid: styles.dropdown,
-					}}
-					placeholder={{
-						label: 'Select a filter...',
-						value: null,
-					}}
-				/>
-			</View>
 			<ScrollView>
 				<ItemList items={filteredItems} />
 			</ScrollView>
