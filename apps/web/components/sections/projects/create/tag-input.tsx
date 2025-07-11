@@ -1,13 +1,15 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus } from 'lucide-react'
+import { Plus, Shuffle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { TagBadge } from '~/components/sections/projects/create/tag-badge'
 import type { Tag } from '~/lib/types/project/create-project.types'
+import { cn } from '~/lib/utils'
+import { generateDistinctRandomColor } from '~/lib/utils/color-utils'
 
 interface TagInputProps {
 	value: Tag[]
@@ -25,15 +27,42 @@ export function TagInput({
 	maxTags = 10,
 }: TagInputProps) {
 	const [newTag, setNewTag] = useState('')
-	const [selectedColor, setSelectedColor] = useState('#3B82F6') // Default blue
+	const [selectedColor, setSelectedColor] = useState('')
 	const [showPreview, setShowPreview] = useState(false)
+	const [colorError, setColorError] = useState('')
 	const inputRef = useRef<HTMLInputElement>(null)
 	const colorInputRef = useRef<HTMLInputElement>(null)
+
+	// Generate initial random color when component mounts or when tags change
+	useEffect(() => {
+		if (!selectedColor) {
+			const existingColors = value.map((tag) => tag.color)
+			const randomColor = generateDistinctRandomColor(existingColors)
+			setSelectedColor(randomColor)
+		}
+	}, [selectedColor, value])
 
 	// Show preview when user starts typing
 	useEffect(() => {
 		setShowPreview(newTag.trim().length > 0)
 	}, [newTag])
+
+	// Check if the selected color is already used by another tag
+	const isColorDuplicate = (color: string): boolean => {
+		return value.some((tag) => tag.color.toLowerCase() === color.toLowerCase())
+	}
+
+	// Find which tag is using the duplicate color
+	const findTagWithColor = (color: string): Tag | undefined => {
+		return value.find((tag) => tag.color.toLowerCase() === color.toLowerCase())
+	}
+
+	const generateNewRandomColor = () => {
+		const existingColors = value.map((tag) => tag.color)
+		const newRandomColor = generateDistinctRandomColor(existingColors)
+		setSelectedColor(newRandomColor)
+		setColorError('')
+	}
 
 	const addTag = () => {
 		const tagLabel = newTag.trim().toUpperCase()
@@ -45,6 +74,15 @@ export function TagInput({
 		// Check max tags limit
 		if (value.length >= maxTags) return
 
+		// Check for duplicate color
+		if (isColorDuplicate(selectedColor)) {
+			const duplicateTag = findTagWithColor(selectedColor)
+			setColorError(
+				`This color is already used by "${duplicateTag?.label}" tag`,
+			)
+			return
+		}
+
 		const newTagObj: Tag = {
 			label: tagLabel,
 			color: selectedColor,
@@ -53,13 +91,31 @@ export function TagInput({
 		onChange([...value, newTagObj])
 		setNewTag('')
 		setShowPreview(false)
+		setColorError('')
+
+		// Generate a new random color for the next tag
+		const updatedExistingColors = [
+			...value.map((tag) => tag.color),
+			selectedColor,
+		]
+		const nextRandomColor = generateDistinctRandomColor(updatedExistingColors)
+		setSelectedColor(nextRandomColor)
 
 		// Focus back to input for better UX
 		inputRef.current?.focus()
 	}
 
 	const removeTag = (indexToRemove: number) => {
+		const removedTag = value[indexToRemove]
 		onChange(value.filter((_, index) => index !== indexToRemove))
+
+		// Clear color error if the removed tag was causing the duplicate color error
+		if (
+			colorError &&
+			removedTag.color.toLowerCase() === selectedColor.toLowerCase()
+		) {
+			setColorError('')
+		}
 	}
 
 	const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -77,17 +133,29 @@ export function TagInput({
 	}
 
 	const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setSelectedColor(e.target.value)
+		const newColor = e.target.value
+		setSelectedColor(newColor)
+
+		// Check for duplicate color and show error immediately
+		if (isColorDuplicate(newColor)) {
+			const duplicateTag = findTagWithColor(newColor)
+			setColorError(
+				`This color is already used by "${duplicateTag?.label}" tag`,
+			)
+		} else {
+			setColorError('') // Clear error if color is unique
+		}
 	}
 
 	const canAddTag =
 		newTag.trim().length > 0 &&
 		!value.find((tag) => tag.label === newTag.trim().toUpperCase()) &&
-		value.length < maxTags
+		value.length < maxTags &&
+		!colorError
 
 	return (
 		<div className="space-y-4">
-			{/* Input and Color Picker */}
+			{/* Input and Color Controls */}
 			<div className="flex gap-2">
 				<div className="flex-1 relative">
 					<Input
@@ -102,12 +170,29 @@ export function TagInput({
 						maxLength={20}
 					/>
 
-					{/* Color picker circle */}
-					<div className="absolute inset-y-0 right-2 flex items-center">
+					{/* Color controls container */}
+					<div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+						{/* Random color generator button */}
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							onClick={generateNewRandomColor}
+							className="h-6 w-6 p-0 hover:bg-gray-100 rounded-full"
+							aria-label="Generate random color"
+							title="Generate random color"
+						>
+							<Shuffle className="h-3 w-3 text-gray-500" />
+						</Button>
 						<button
 							type="button"
 							onClick={handleColorClick}
-							className="w-6 h-6 rounded-full border-2 border-gray-300 hover:border-gray-400 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+							className={cn(
+								'w-6 h-6 rounded-full border-2 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
+								colorError
+									? 'border-red-400 hover:border-red-500'
+									: 'border-gray-300 hover:border-gray-400',
+							)}
 							style={{ backgroundColor: selectedColor }}
 							aria-label="Choose tag color"
 							title="Click to choose color"
@@ -132,6 +217,13 @@ export function TagInput({
 					<Plus className="h-4 w-4" />
 				</Button>
 			</div>
+
+			{/* Color Error Message */}
+			{colorError && (
+				<p className="text-[0.8rem] font-medium text-destructive">
+					{colorError}
+				</p>
+			)}
 
 			{/* Tag Preview */}
 			<AnimatePresence>
@@ -175,12 +267,20 @@ export function TagInput({
 			)}
 
 			{/* Error message */}
-			{error && <p className="text-sm text-red-600">{error}</p>}
+			{error && (
+				<p className="text-[0.8rem] font-medium text-destructive">{error}</p>
+			)}
 
-			{/* Tags count */}
-			<p className="text-xs text-gray-500">
-				{value.length}/{maxTags} tags
-			</p>
+			{/* Tags count and color info */}
+			<div className="flex justify-between items-center">
+				<p className="text-xs text-gray-500">
+					{value.length}/{maxTags} tags
+				</p>
+				<p className="text-xs text-gray-400">
+					<Shuffle className="h-3 w-3 inline mr-1" />
+					Click shuffle for random color
+				</p>
+			</div>
 		</div>
 	)
 }
