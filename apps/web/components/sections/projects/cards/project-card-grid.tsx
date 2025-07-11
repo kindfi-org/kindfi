@@ -99,10 +99,7 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 							return (
 								<Badge
 									key={tag.id}
-									className={cn(
-										'uppercase',
-										textColor === 'white' ? 'text-white' : 'text-black',
-									)}
+									className={cn('uppercase', textColor)}
 									style={{ backgroundColor: bg }}
 								>
 									{tag.name}

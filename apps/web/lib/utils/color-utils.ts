@@ -70,15 +70,61 @@ export function getContrastRatio(color1: string, color2: string): number {
 }
 
 /**
- * Get the appropriate text color (black or white) for a given background color
- * Uses WCAG AA standard (4.5:1 contrast ratio)
+ * Get the appropriate text color (black, white, or gray) for a given background color.
+ * Returns the one with the highest contrast ratio.
  */
 export function getContrastTextColor(
 	backgroundColor: string,
-): 'black' | 'white' {
-	const whiteContrast = getContrastRatio(backgroundColor, '#FFFFFF')
-	const blackContrast = getContrastRatio(backgroundColor, '#000000')
+): 'text-black' | 'text-white' | 'text-muted-foreground' {
+	const contrastWithWhite = getContrastRatio(backgroundColor, '#FFFFFF')
+	const contrastWithBlack = getContrastRatio(backgroundColor, '#000000')
+	const contrastWithGray = getContrastRatio(backgroundColor, '#61646B') // text-muted-foreground
 
-	// Return the color that provides better contrast
-	return whiteContrast > blackContrast ? 'white' : 'black'
+	const maxContrast = Math.max(
+		contrastWithWhite,
+		contrastWithBlack,
+		contrastWithGray,
+	)
+
+	if (maxContrast === contrastWithWhite) return 'text-white'
+	if (maxContrast === contrastWithBlack) return 'text-black'
+	return 'text-muted-foreground'
+}
+
+/**
+ * Generate a visually distinct random color using HSL for better distribution
+ */
+export function generateDistinctRandomColor(
+	existingColors: string[] = [],
+): string {
+	// Use HSL for better color distribution
+	const hue = Math.floor(Math.random() * 360)
+	const saturation = 60 + Math.floor(Math.random() * 30) // 60-90% for vibrant colors
+	const lightness = 45 + Math.floor(Math.random() * 20) // 45-65% for good contrast
+
+	// Convert HSL to hex
+	const hslToHex = (h: number, s: number, l: number): string => {
+		const light = l / 100
+		const a = (s * Math.min(light, 1 - light)) / 100
+		const f = (n: number) => {
+			const k = (n + h / 30) % 12
+			const color = light - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
+			return Math.round(255 * color)
+				.toString(16)
+				.padStart(2, '0')
+		}
+		return `#${f(0)}${f(8)}${f(4)}`
+	}
+
+	let newColor = hslToHex(hue, saturation, lightness)
+
+	// If color already exists, try a few more times with different hues
+	let attempts = 0
+	while (existingColors.includes(newColor) && attempts < 10) {
+		const newHue = (hue + (attempts + 1) * 36) % 360 // Spread colors around the color wheel
+		newColor = hslToHex(newHue, saturation, lightness)
+		attempts++
+	}
+
+	return newColor
 }

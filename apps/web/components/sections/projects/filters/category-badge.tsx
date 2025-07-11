@@ -35,7 +35,7 @@ export function CategoryBadge({
 			className={cn(
 				'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
 				selected
-					? `${textColor === 'white' ? 'text-white' : 'text-black'} focus:ring-2 focus:ring-offset-2`
+					? `${textColor} focus:ring-2 focus:ring-offset-2`
 					: 'text-gray-700 bg-white border hover:bg-gray-50 focus:ring-2 focus:ring-offset-2',
 				isInteractive ? 'cursor-pointer' : 'cursor-default',
 				className,

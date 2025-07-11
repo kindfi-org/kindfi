@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import type { Tag } from '~/lib/types/project/create-project.types'
+import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
 
 interface TagBadgeProps {
@@ -26,10 +27,12 @@ export function TagBadge({ tag, onRemove, showRemoveButton }: TagBadgeProps) {
 		>
 			<Badge
 				variant="secondary"
-				className="flex items-center gap-1 px-3 py-1 text-sm font-medium border-0"
+				className={cn(
+					'flex items-center gap-1 px-3 py-1 text-sm font-medium border-0',
+					textColor,
+				)}
 				style={{
 					backgroundColor: tag.color,
-					color: textColor === 'white' ? '#ffffff' : '#000000',
 				}}
 			>
 				<span>{tag.label}</span>
@@ -41,7 +44,7 @@ export function TagBadge({ tag, onRemove, showRemoveButton }: TagBadgeProps) {
 						className="h-4 w-4 p-0 hover:bg-black/20 rounded-full ml-1"
 						onClick={onRemove}
 						aria-label={`Remove tag ${tag.label}`}
-						style={{ color: textColor === 'white' ? '#ffffff' : '#000000' }}
+						style={{ color: textColor }}
 					>
 						<X className="h-3 w-3" />
 					</Button>

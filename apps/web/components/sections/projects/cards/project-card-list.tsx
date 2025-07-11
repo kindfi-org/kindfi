@@ -118,10 +118,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 								return (
 									<Badge
 										key={tag.id}
-										className={cn(
-											'uppercase',
-											textColor === 'white' ? 'text-white' : 'text-black',
-										)}
+										className={cn('uppercase', textColor)}
 										style={{ backgroundColor: bg }}
 									>
 										{tag.name}
