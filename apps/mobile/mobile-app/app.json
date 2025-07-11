@@ -38,7 +38,9 @@
 				{
 					"photosPermission": "The app needs access to your photos to let you upload images."
 				}
-			]
+			],
+			"expo-font",
+			"expo-web-browser"
 		],
 		"experiments": {
 			"typedRoutes": true

@@ -42,6 +42,7 @@
 			"**/pino-pretty/**"
 		]
 	},
+
 	"dependencies": {
 		"@types/web-push": "^3.6.4",
 		"autoprefixer": "^10.4.21",

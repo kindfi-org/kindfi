@@ -10,6 +10,7 @@ import {
 	View,
 } from 'react-native'
 import RNPickerSelect from 'react-native-picker-select'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { allItems } from '../components/StyledText'
 import { ItemList } from '../components/StyledText'
 import OnboardingScreen from './onboarding-screen'
