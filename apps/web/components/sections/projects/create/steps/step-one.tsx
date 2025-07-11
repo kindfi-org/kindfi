@@ -17,7 +17,7 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
-import { useCreateProject } from '~/lib/contexts/create-project-context'
+import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { stepOneSchema } from '~/lib/schemas/create-project.schemas'
 import type { StepOneData } from '~/lib/types/project/create-project.types'
 

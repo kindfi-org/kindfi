@@ -19,7 +19,7 @@ import {
 import { LocationSelect } from '~/components/sections/projects/create/location-select'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/filters'
-import { useCreateProject } from '~/lib/contexts/create-project-context'
+import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { categories } from '~/lib/mock-data/project/categories.mock'
 import { stepThreeSchema } from '~/lib/schemas/create-project.schemas'
 import type { StepThreeData } from '~/lib/types/project/create-project.types'

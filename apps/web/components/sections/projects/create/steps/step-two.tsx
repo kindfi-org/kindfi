@@ -18,7 +18,7 @@ import {
 import { Input } from '~/components/base/input'
 import { ImageUpload } from '~/components/sections/projects/create/image-upload'
 import { SocialLinks } from '~/components/sections/projects/create/social-links'
-import { useCreateProject } from '~/lib/contexts/create-project-context'
+import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { stepTwoSchema } from '~/lib/schemas/create-project.schemas'
 import type { StepTwoData } from '~/lib/types/project/create-project.types'
 

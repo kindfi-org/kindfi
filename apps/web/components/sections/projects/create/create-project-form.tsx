@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from 'framer-motion'
 
-import { useCreateProject } from '~/lib/contexts/create-project-context'
+import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { StepperIndicator } from './stepper-indicator'
 import { StepOne, StepThree, StepTwo } from './steps'
 

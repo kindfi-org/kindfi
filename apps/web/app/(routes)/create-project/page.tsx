@@ -1,5 +1,5 @@
 import { CreateProjectForm } from '~/components/sections/projects/create/create-project-form'
-import { CreateProjectProvider } from '~/lib/contexts/create-project-context'
+import { CreateProjectProvider } from '~/hooks/contexts/use-create-project.context'
 
 export default function CreateProjectPage() {
 	return (

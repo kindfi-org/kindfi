@@ -3,7 +3,7 @@
 import { type ReactNode, createContext, useContext, useState } from 'react'
 import { useSetState } from 'react-use'
 
-import type { CreateProjectFormData } from '../types/project/create-project.types'
+import type { CreateProjectFormData } from '../../lib/types/project/create-project.types'
 
 interface CreateProjectContextType {
 	formData: CreateProjectFormData

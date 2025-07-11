@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { Check } from 'lucide-react'
 
-import { useCreateProject } from '~/lib/contexts/create-project-context'
+import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { cn } from '~/lib/utils'
 import { isValidUrl } from '~/lib/utils/create-project-helpers'
 
