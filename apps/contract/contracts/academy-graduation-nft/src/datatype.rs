@@ -1,4 +1,3 @@
-// NOTE: Soroban SDK generic types without explicit environment parameter
 // String and Vec in soroban_sdk are actually String<Env> and Vec<T, Env>, but within
 // smart contracts they work as type aliases that automatically bind to the contract's
 // environment. This can be confusing for newcomers who might expect explicit generics.

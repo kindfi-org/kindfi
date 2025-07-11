@@ -38,6 +38,11 @@ pub struct AcademyGraduationNFT;
 
 #[contractimpl]
 impl AcademyGraduationNFT {
+    /// @notice Initializes the contract with tracker addresses
+    /// @param env The contract environment
+    /// @param progress_tracker The address of the progress tracker contract
+    /// @param badge_tracker The address of the badge tracker contract
+    /// @return Result indicating success or initialization error
     /// @notice Initializes the contract with tracker addresses and admin
     pub fn initialize(
         env: Env,
@@ -68,15 +73,27 @@ impl AcademyGraduationNFT {
     }
 
     /// @notice Updates the contract admin
+    /// @param env The contract environment
+    /// @param new_admin The new admin address
+    /// @return Result indicating success or error
+    /// @notice Updates the contract admin
     pub fn update_admin(env: Env, new_admin: Address) -> Result<(), NFTError> {
         set_admin(&env, new_admin)
     }
 
     /// @notice Pauses or unpauses the contract
+    /// @param env The contract environment
+    /// @param paused The new pause status
+    /// @return Result indicating success or error
+    /// @notice Pauses or unpauses the contract
     pub fn set_contract_pause(env: Env, paused: bool) -> Result<(), NFTError> {
         set_paused(&env, paused)
     }
 
+    /// @notice Mints a graduation NFT for a user
+    /// @param env The contract environment
+    /// @param user The address of the user to mint the NFT for
+    /// @return Result containing the minted NFT or error
     /// @notice Mints a graduation NFT for a user
     pub fn mint_graduation_nft(env: Env, user: Address) -> Result<GraduationNFT, NFTError> {
         if is_paused(&env) {
@@ -88,15 +105,29 @@ impl AcademyGraduationNFT {
     }
 
     /// @notice Retrieves a user's graduation NFT
+    /// @param env The contract environment
+    /// @param user The address of the user to retrieve the NFT for
+    /// @return Option containing the NFT or None if not found
+    /// @notice Retrieves a user's graduation NFT
     pub fn get_graduation_nft(env: Env, user: Address) -> Option<GraduationNFT> {
         <Self as QueryOperations>::get_graduation_nft(&env, user)
     }
 
     /// @notice Checks if a user has a graduation NFT
+    /// @param env The contract environment
+    /// @param user The address of the user to check
+    /// @return Boolean indicating if the user has an NFT
+    /// @notice Checks if a user has a graduation NFT
     pub fn has_graduation_nft(env: Env, user: Address) -> bool {
         <Self as QueryOperations>::has_graduation_nft(&env, user)
     }
 
+    /// @notice Attempts to transfer an NFT (always fails)
+    /// @param _env The contract environment
+    /// @param from The address of the sender
+    /// @param to The address of the recipient
+    /// @param token_id The ID of the NFT to transfer
+    /// @return Result indicating success or error
     /// @notice Attempts to transfer an NFT (always fails)
     pub fn attempt_transfer(
         _env: Env,
@@ -107,6 +138,10 @@ impl AcademyGraduationNFT {
         <Self as DistributionOperations>::attempt_transfer(from, to, token_id)
     }
 
+    /// @notice Updates the maximum allowed badges
+    /// @param env The contract environment
+    /// @param new_max The new maximum number of badges
+    /// @return Result indicating success or error
     /// @notice Updates the maximum allowed badges
     pub fn update_max_badges(env: Env, new_max: u32) -> Result<(), NFTError> {
         check_admin(&env)?;
