@@ -1,6 +1,7 @@
 #![no_std]
 use soroban_sdk::{Address, Env, contract, contractimpl};
 
+mod admin;
 mod datatype;
 mod distribution;
 mod interface;
@@ -10,6 +11,7 @@ mod test;
 
 // Re-export main types for easier access
 pub use datatype::{GraduationNFT, NFTMetadata, NFTError, DataKeys};
+use admin::{check_admin, initialize_admin, set_admin, set_paused, is_paused};
 
 mod progresstracker {
     soroban_sdk::contractimport!(
@@ -24,6 +26,8 @@ mod badgetracker {
 
 use interface::{DistributionOperations, MintingOperations, QueryOperations};
 
+const MAX_BADGES: u32 = 100; // Maximum number of badges allowed
+
 /// @title AcademyGraduationNFT
 /// @notice A contract for minting and managing non-transferable NFT badges
 /// awarded to users for completing KindFi Academy modules.
@@ -34,60 +38,66 @@ pub struct AcademyGraduationNFT;
 
 #[contractimpl]
 impl AcademyGraduationNFT {
-    /// @notice Initializes the contract with tracker addresses
-    /// @param env The contract environment
-    /// @param progress_tracker The address of the progress tracker contract
-    /// @param badge_tracker The address of the badge tracker contract
-    /// @return Result indicating success or initialization error
+    /// @notice Initializes the contract with tracker addresses and admin
     pub fn initialize(
         env: Env,
+        admin: Address,
         progress_tracker: Address,
         badge_tracker: Address,
     ) -> Result<(), NFTError> {
-        if env.storage().persistent().has(&DataKeys::ProgressTracker) {
-            return Err(NFTError::AlreadyInitialized); // This is now a proper error return
+        // Validate addresses
+        let this_contract = env.current_contract_address();
+        if progress_tracker == this_contract ||
+           badge_tracker == this_contract {
+            return Err(NFTError::InvalidInput);
         }
 
-        env.storage()
-            .persistent()
-            .set(&DataKeys::ProgressTracker, &progress_tracker);
-        env.storage()
-            .persistent()
-            .set(&DataKeys::BadgeTracker, &badge_tracker);
+        // Initialize admin first
+        initialize_admin(&env, admin)?;
 
-        Ok(()) // Return Ok to indicate success
+        // Set contract dependencies
+        env.storage().persistent().set(&DataKeys::ProgressTracker, &progress_tracker);
+        env.storage().persistent().set(&DataKeys::BadgeTracker, &badge_tracker);
+        env.storage().persistent().set(&DataKeys::MaxBadges, &MAX_BADGES);
+
+        // Emit initialization event
+        env.events().publish(("init", "contract"), 
+            (progress_tracker, badge_tracker));
+
+        Ok(())
+    }
+
+    /// @notice Updates the contract admin
+    pub fn update_admin(env: Env, new_admin: Address) -> Result<(), NFTError> {
+        set_admin(&env, new_admin)
+    }
+
+    /// @notice Pauses or unpauses the contract
+    pub fn set_contract_pause(env: Env, paused: bool) -> Result<(), NFTError> {
+        set_paused(&env, paused)
     }
 
     /// @notice Mints a graduation NFT for a user
-    /// @param env The contract environment
-    /// @param user The address of the user
-    /// @return Result indicating success or minting error
     pub fn mint_graduation_nft(env: Env, user: Address) -> Result<GraduationNFT, NFTError> {
+        if is_paused(&env) {
+            return Err(NFTError::Paused);
+        }
+        
+        user.require_auth();
         <Self as MintingOperations>::mint_graduation_nft(&env, user)
     }
 
     /// @notice Retrieves a user's graduation NFT
-    /// @param env The contract environment
-    /// @param user The address of the user
-    /// @return The NFT details or None if not found
     pub fn get_graduation_nft(env: Env, user: Address) -> Option<GraduationNFT> {
         <Self as QueryOperations>::get_graduation_nft(&env, user)
     }
 
     /// @notice Checks if a user has a graduation NFT
-    /// @param env The contract environment
-    /// @param user The address of the user
-    /// @return True if the user has an NFT, false otherwise
     pub fn has_graduation_nft(env: Env, user: Address) -> bool {
         <Self as QueryOperations>::has_graduation_nft(&env, user)
     }
 
     /// @notice Attempts to transfer an NFT (always fails)
-    /// @param env The contract environment
-    /// @param from The address of the sender
-    /// @param to The address of the recipient
-    /// @param token_id The unique identifier of the NFT
-    /// @return Result indicating failure due to soulbound nature
     pub fn attempt_transfer(
         _env: Env,
         from: Address,
@@ -95,6 +105,17 @@ impl AcademyGraduationNFT {
         token_id: u128,
     ) -> Result<(), NFTError> {
         <Self as DistributionOperations>::attempt_transfer(from, to, token_id)
+    }
+
+    /// @notice Updates the maximum allowed badges
+    pub fn update_max_badges(env: Env, new_max: u32) -> Result<(), NFTError> {
+        check_admin(&env)?;
+        if new_max == 0 {
+            return Err(NFTError::InvalidInput);
+        }
+        env.storage().persistent().set(&DataKeys::MaxBadges, &new_max);
+        env.events().publish(("max_badges", "update"), new_max);
+        Ok(())
     }
 }
 

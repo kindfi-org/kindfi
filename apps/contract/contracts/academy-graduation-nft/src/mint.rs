@@ -1,68 +1,72 @@
-use crate::interface::MetadataOperations;
+use soroban_sdk::{Address, Env, String, Vec};
 use crate::{
-    AcademyGraduationNFT,
-    datatype::{DataKeys, GraduationNFT, NFTError},
+    datatype::{DataKeys, GraduationNFT, NFTMetadata, NFTError},
     interface::MintingOperations,
+    progresstracker, badgetracker,
 };
-use crate::{badgetracker, progresstracker};
-// Note: String is a soroban_sdk generic type (see datatype.rs for detailed explanation)
-use soroban_sdk::{Address, Env, String};
 
-impl MintingOperations for AcademyGraduationNFT {
-    /// Mints a graduation NFT for a recipient
-    fn mint_graduation_nft(env: &Env, recipient: Address) -> Result<GraduationNFT, NFTError> {
-        // Step 1: Authenticate the recipient
-        recipient.require_auth();
+impl MintingOperations for super::AcademyGraduationNFT {
+    fn mint_graduation_nft(env: &Env, user: Address) -> Result<GraduationNFT, NFTError> {
+        // Check if contract is initialized
+        if !env.storage().persistent().has(&DataKeys::ProgressTracker) {
+            return Err(NFTError::Uninitialized);
+        }
 
-        // Step 2: Check for existing NFT
-        let nft_key = DataKeys::GraduationNFT(recipient.clone());
-        if env.storage().persistent().has(&nft_key) {
+        // Check if NFT already minted
+        if env.storage().persistent().has(&DataKeys::GraduationNFT(user.clone())) {
             return Err(NFTError::AlreadyMinted);
         }
 
-        // Step 3: Retrieve progress tracker address
-        let progress_tracker = env
-            .storage()
-            .persistent()
-            .get(&DataKeys::ProgressTracker)
-            .ok_or(NFTError::Uninitialized)?;
+        // Get contract addresses
+        let progress_tracker: Address = env.storage().persistent().get(&DataKeys::ProgressTracker).unwrap();
+        let badge_tracker: Address = env.storage().persistent().get(&DataKeys::BadgeTracker).unwrap();
 
-        // Step 4: Verify module completion
+        // Create client instances
+        let progress_client = progresstracker::Client::new(env, &progress_tracker);
+        let badge_client = badgetracker::Client::new(env, &badge_tracker);
 
-        let client = progresstracker::Client::new(&env, &progress_tracker);
-
-        let progress = client.is_completed(&recipient);
-
-        if !progress {
+        // Check completion status
+        if !progress_client.is_completed(&user) {
             return Err(NFTError::NotCompleted);
         }
 
-        // Step 5: Retrieve badge tracker address
-        let badge_tracker = env
-            .storage()
-            .persistent()
-            .get(&DataKeys::BadgeTracker)
-            .ok_or(NFTError::Uninitialized)?;
+        // Get user's badges
+        let badges = badge_client.get_full_badges(&user);
+        
+        // Validate badge count
+        let max_badges: u32 = env.storage().persistent().get(&DataKeys::MaxBadges).unwrap();
+        if badges.len() as u32 > max_badges {
+            return Err(NFTError::TooManyBadges);
+        }
 
-        // Step 6: Fetch badges
-        let badge_client = badgetracker::Client::new(env, &badge_tracker);
-        let badges = badge_client.get_full_badges(&recipient);
-
-        // Step 7: Create metadata
-        let metadata = Self::create_nft_metadata(
-            env.ledger().timestamp(),
-            String::from_str(env, "v1.0"),
-            badges,
-        )?;
-
-        // Step 8: Create and store NFT
+        // Create NFT metadata
         let nft = GraduationNFT {
-            owner: recipient.clone(),
-            metadata,
+            owner: user.clone(),
+            metadata: NFTMetadata {
+                issued_at: env.ledger().timestamp(),
+                version: String::from_str(env, "v1.0"),
+                badges: badges.clone(),
+                achievement_score: calculate_achievement_score(&badges),
+                completion_date: env.ledger().timestamp(),
+            },
         };
-        env.storage().persistent().set(&nft_key, &nft);
 
-        // Step 9: Return success
+        // Store NFT
+        env.storage().persistent().set(&DataKeys::GraduationNFT(user.clone()), &nft);
+
+        // Emit mint event
+        env.events().publish(
+            ("mint", "graduation_nft"),
+            (user, badges.len(), env.ledger().timestamp())
+        );
+
         Ok(nft)
     }
+}
+
+// Helper function to calculate achievement score based on badges
+fn calculate_achievement_score(badges: &Vec<String>) -> u32 {
+    // Simple scoring: 100 points per badge
+    // This could be enhanced with different weights for different badges
+    (badges.len() as u32) * 100
 }

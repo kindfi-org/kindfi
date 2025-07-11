@@ -10,9 +10,12 @@ use soroban_sdk::{Address, String, Vec, contracterror, contracttype};
 #[contracttype]
 #[derive(Clone)]
 pub enum DataKeys {
-    ProgressTracker,        // Address of the progress tracker contract
-    BadgeTracker,           // Address of the badge tracker contract
+    Admin,                  // Address of the contract admin
+    Paused,                // Contract pause status
+    ProgressTracker,       // Address of the progress tracker contract
+    BadgeTracker,          // Address of the badge tracker contract
     GraduationNFT(Address), // Graduation NFT for a specific user
+    MaxBadges,             // Maximum number of badges allowed
 }
 
 /// Structure representing a soulbound graduation NFT
@@ -29,7 +32,9 @@ pub struct GraduationNFT {
 pub struct NFTMetadata {
     pub issued_at: u64,      // Timestamp of NFT issuance
     pub version: String,     // Academy version (e.g., "v1.0")
-    pub badges: Vec<String>, // String of badges
+    pub badges: Vec<String>, // List of earned badges
+    pub achievement_score: u32, // Overall achievement score
+    pub completion_date: u64,  // Date of course completion
 }
 
 /// NFT-related error codes
@@ -42,4 +47,10 @@ pub enum NFTError {
     AlreadyInitialized = 3,
     Soulbound = 4,
     Uninitialized = 5,
+    NoAdmin = 6,
+    InvalidAdmin = 7,
+    Paused = 8,
+    TooManyBadges = 9,
+    InvalidInput = 10,
+    Unauthorized = 11,
 }

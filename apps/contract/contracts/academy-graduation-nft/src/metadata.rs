@@ -15,7 +15,9 @@ impl MetadataOperations for AcademyGraduationNFT {
         let metadata = NFTMetadata {
             issued_at,
             version,
-            badges,
+            badges: badges.clone(),
+            achievement_score: (badges.len() as u32) * 100, // 100 points per badge
+            completion_date: issued_at, // Using same timestamp as issued_at
         };
         Ok(metadata)
     }
