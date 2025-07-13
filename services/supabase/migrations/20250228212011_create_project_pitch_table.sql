@@ -20,20 +20,20 @@ ALTER TABLE public.project_pitch ENABLE ROW LEVEL SECURITY;
 -- ⚠️ Remove or replace this policy when auth is active
 CREATE POLICY "Public read access to project pitches"
 ON public.project_pitch
-FOR SELECT 
+FOR SELECT
 USING (true);
 
 -- Create policy for users to view project pitches they have access to
--- CREATE POLICY "Users can view project pitches they have access to" 
+-- CREATE POLICY "Users can view project pitches they have access to"
 -- ON public.project_pitch
--- FOR SELECT 
+-- FOR SELECT
 -- USING (
 --     project_id IN (
 --         SELECT id FROM public.projects
 --         WHERE id = project_pitch.project_id
 --         AND (
---             owner_id = auth.uid()
---             -- owner_id = auth.uid() OR
+--             kindler_id = auth.uid()
+--             -- kindler_id = auth.uid() OR
 --             -- id IN (
 --             --     SELECT project_id FROM public.project_members
 --             --     WHERE user_id = auth.uid()
@@ -43,16 +43,16 @@ USING (true);
 -- );
 
 -- Create policy for users to insert their own project pitches
-CREATE POLICY "Users can insert their own project pitches" 
+CREATE POLICY "Users can insert their own project pitches"
 ON public.project_pitch
-FOR INSERT 
+FOR INSERT
 WITH CHECK (
     project_id IN (
         SELECT id FROM public.projects
         WHERE id = project_pitch.project_id
         AND (
-            owner_id = auth.uid()
-            -- owner_id = auth.uid() OR
+            kindler_id = auth.uid()
+            -- kindler_id = auth.uid() OR
             -- id IN (
             --     SELECT project_id FROM public.project_members
             --     WHERE user_id = auth.uid()
@@ -63,16 +63,16 @@ WITH CHECK (
 );
 
 -- Create policy for users to update their own project pitches
-CREATE POLICY "Users can update their own project pitches" 
+CREATE POLICY "Users can update their own project pitches"
 ON public.project_pitch
-FOR UPDATE 
+FOR UPDATE
 USING (
     project_id IN (
         SELECT id FROM public.projects
         WHERE id = project_pitch.project_id
         AND (
-            owner_id = auth.uid()
-            -- owner_id = auth.uid() OR
+            kindler_id = auth.uid()
+            -- kindler_id = auth.uid() OR
             -- id IN (
             --     SELECT project_id FROM public.project_members
             --     WHERE user_id = auth.uid()
@@ -83,16 +83,16 @@ USING (
 );
 
 -- Create policy for users to delete their own project pitches
-CREATE POLICY "Users can delete their own project pitches" 
+CREATE POLICY "Users can delete their own project pitches"
 ON public.project_pitch
-FOR DELETE 
+FOR DELETE
 USING (
     project_id IN (
         SELECT id FROM public.projects
         WHERE id = project_pitch.project_id
         AND (
-            owner_id = auth.uid()
-            -- owner_id = auth.uid() OR
+            kindler_id = auth.uid()
+            -- kindler_id = auth.uid() OR
             -- id IN (
             --     SELECT project_id FROM public.project_members
             --     WHERE user_id = auth.uid()

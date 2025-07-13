@@ -23,7 +23,7 @@ export async function getProjectById(
       target_amount,
       min_investment,
       percentage_complete,
-      investors_count,
+      kinder_count,
       category:category_id ( * ),
       project_tag_relationships (
         tag:tag_id ( id, name, color )
@@ -51,7 +51,7 @@ export async function getProjectById(
 		image: project.image_url,
 		goal: project.target_amount,
 		raised: project.current_amount,
-		investors: project.investors_count,
+		investors: project.kinder_count,
 		minInvestment: project.min_investment,
 		createdAt: project.created_at,
 		category: project.category,

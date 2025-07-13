@@ -1,3 +1,4 @@
+import { KindFi } from '@/assets/icons/kindfi'
 import { MaterialIcons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import {
@@ -9,7 +10,7 @@ import {
 	View,
 } from 'react-native'
 import RNPickerSelect from 'react-native-picker-select'
-import KindFi from '../assets/icons/kindfi'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { allItems } from '../components/StyledText'
 import { ItemList } from '../components/StyledText'
 
@@ -102,7 +103,7 @@ export default function Home() {
 	)
 
 	return (
-		<View style={{ flex: 1 }}>
+		<SafeAreaView style={{ flex: 1 }}>
 			<Navbar />
 			<Header />
 			<Filter
@@ -110,35 +111,10 @@ export default function Home() {
 				selectedFilter={selectedFilter}
 				onSelect={handleFilterSelect}
 			/>
-			<View style={styles.additionalFiltersContainer}>
-				<TouchableOpacity
-					onPress={() => handleFilterSelect(null)}
-					style={styles.selectAllButton}
-				>
-					<Text style={styles.selectAllText}>Select All</Text>
-				</TouchableOpacity>
-
-				{/* Dropdown Filter */}
-				<RNPickerSelect
-					onValueChange={(value) => handleFilterSelect(value)}
-					items={[
-						{ label: 'All', value: null },
-						...filters.map((filter) => ({ label: filter, value: filter })),
-					]}
-					style={{
-						inputIOS: styles.dropdown,
-						inputAndroid: styles.dropdown,
-					}}
-					placeholder={{
-						label: 'Select a filter...',
-						value: null,
-					}}
-				/>
-			</View>
 			<ScrollView>
 				<ItemList items={filteredItems} />
 			</ScrollView>
-		</View>
+		</SafeAreaView>
 	)
 }
 
