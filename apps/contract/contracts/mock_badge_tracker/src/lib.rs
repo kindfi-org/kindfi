@@ -7,23 +7,20 @@ pub struct BadgeTracker;
 #[contractimpl]
 impl BadgeTracker {
     /// Returns an empty list of badges for a user.
-    pub fn get_empty_badges(env: Env, user: Address) -> Vec<String> {
-        user.require_auth();
-        Vec::new(&env)
+    pub fn get_empty_badges(_env: Env, _user: Address) -> Vec<String> {
+        Vec::new(&_env)
     }
 
     /// Returns the user's badges from storage, or an empty list if unset.
     pub fn get_full_badges(env: Env, user: Address) -> Vec<String> {
-        user.require_auth();
         env.storage()
-            .persistent()
+            .temporary()
             .get::<Address, Vec<String>>(&user)
             .unwrap_or_else(|| Vec::new(&env))
     }
 
     /// Sets the user's badges (for testing or badge assignment).
     pub fn set_badges(env: Env, user: Address, badges: Vec<String>) {
-        user.require_auth();
         env.storage().temporary().set(&user, &badges);
     }
 }
