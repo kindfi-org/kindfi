@@ -5,6 +5,19 @@ members = [ "contracts/academy-graduation-nft", "contracts/academy-verifier", "c
 
 [workspace.dependencies]
 soroban-sdk = "22.0.6"
+stellar-constants = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-default-impl-macro = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-fungible = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-non-fungible = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-pausable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-pausable-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-upgradeable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-upgradeable-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-ownable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-ownable-macro = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-access-control = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-access-control-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+
 
 [profile.release]
 opt-level = "z"
