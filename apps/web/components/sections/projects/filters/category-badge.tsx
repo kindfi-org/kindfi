@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 
 import { cn } from '~/lib/utils'
 import { categoryIcons } from '~/lib/utils/category-icons'
-import { getTextColor } from '~/lib/utils/color-utils'
+import { getContrastTextColor } from '~/lib/utils/color-utils'
 
 interface CategoryBadgeProps {
 	category: Tables<'categories'>
@@ -25,7 +25,7 @@ export function CategoryBadge({
 	const Icon = categoryIcons[category.name]
 	const isInteractive = !!onClick
 
-	const textColor = getTextColor(category.color)
+	const textColor = getContrastTextColor(category.color)
 
 	return (
 		<motion.button
@@ -35,7 +35,7 @@ export function CategoryBadge({
 			className={cn(
 				'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
 				selected
-					? `${textColor === 'white' ? 'text-white' : 'text-black'} focus:ring-2 focus:ring-offset-2`
+					? `${textColor} focus:ring-2 focus:ring-offset-2`
 					: 'text-gray-700 bg-white border hover:bg-gray-50 focus:ring-2 focus:ring-offset-2',
 				isInteractive ? 'cursor-pointer' : 'cursor-default',
 				className,
@@ -50,6 +50,9 @@ export function CategoryBadge({
 			aria-pressed={isInteractive ? selected : undefined}
 			role={isInteractive ? 'button' : 'badge'}
 			tabIndex={isInteractive ? 0 : -1}
+			aria-label={
+				isInteractive ? `Select category ${category.name}` : undefined
+			}
 		>
 			{showIcon && Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
 			<span

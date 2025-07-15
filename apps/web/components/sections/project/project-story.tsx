@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form'
 import { Card } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { RichTextEditor } from '~/components/sections/project/rich-text-editor'
-import { type ProjectStory, projectStorySchema } from '~/lib/validators/project'
+import { projectStorySchema } from '~/lib/schemas/create-project.schemas'
+import type { ProjectStory } from '~/lib/types/project/create-project.types'
 
 interface ProjectStoryFormProps {
 	onSubmit: (data: ProjectStory) => void
