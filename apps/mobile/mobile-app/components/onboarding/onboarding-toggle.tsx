@@ -37,7 +37,7 @@ export function OnboardingToggle({
 				>
 					{containerWidth > 0 && (
 						<MotiView
-							className="absolute bg-white dark:bg-gray-700 rounded-xl shadow-lg"
+							className="absolute bg-white dark:bg-gray-700 rounded-xl "
 							animate={{
 								left: slidePosition,
 							}}

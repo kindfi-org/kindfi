@@ -1,6 +1,12 @@
 import { MotiView } from 'moti'
 import React, { useState, useRef } from 'react'
-import { ScrollView } from 'react-native'
+import {
+	Animated,
+	Dimensions,
+	type NativeScrollEvent,
+	type NativeSyntheticEvent,
+	type ScrollView,
+} from 'react-native'
 import { Button, ButtonText } from '../ui/button'
 import { Text } from '../ui/text'
 import { VStack } from '../ui/vstack'
@@ -81,7 +87,12 @@ const kindersSteps: Step[] = [
 
 export function OnboardingSection() {
 	const [activeTab, setActiveTab] = useState<'kindlers' | 'kinders'>('kindlers')
+	const [currentStepIndex, setCurrentStepIndex] = useState(0)
+
 	const scrollViewRef = useRef<ScrollView>(null)
+	const screenHeight = Dimensions.get('window').height
+
+	const scrollY = useRef(new Animated.Value(0)).current
 
 	const currentSteps = activeTab === 'kindlers' ? kindlersSteps : kindersSteps
 	const ctaText =
@@ -99,58 +110,98 @@ export function OnboardingSection() {
 		)
 	}
 
+	const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+		const offsetY = event.nativeEvent.contentOffset.y
+		const index = Math.round(offsetY / screenHeight)
+		setCurrentStepIndex(index - 1) // -1 because hero is first
+	}
+
+	const titleScale = scrollY.interpolate({
+		inputRange: [0, 200],
+		outputRange: [1, 0.8],
+		extrapolate: 'clamp',
+	})
+
+	const descOpacity = scrollY.interpolate({
+		inputRange: [0, 150],
+		outputRange: [1, 0],
+		extrapolate: 'clamp',
+	})
+
 	return (
-		<ScrollView
+		<Animated.ScrollView
 			ref={scrollViewRef}
-			className="flex-1 bg-gray-50 dark:bg-gray-900"
+			pagingEnabled
+			snapToInterval={screenHeight}
+			decelerationRate="fast"
+			snapToAlignment="start"
 			showsVerticalScrollIndicator={false}
+			onScroll={Animated.event(
+				[{ nativeEvent: { contentOffset: { y: scrollY } } }],
+				{ useNativeDriver: false, listener: handleScroll },
+			)}
+			scrollEventThrottle={16}
+			className="flex-1 bg-gray-50 dark:bg-gray-900 relative"
 		>
-			<VStack space="lg" className="px-6 py-8">
-				<VStack space="sm" className="items-center">
-					<MotiView
-						from={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						transition={{ type: 'timing', duration: 800, delay: 300 }}
+			{/* Hero Section */}
+			<Animated.View
+				style={{
+					height: screenHeight,
+					justifyContent: 'center',
+					paddingHorizontal: 24,
+				}}
+			>
+				<VStack space="lg" className="items-center my-[5rem]">
+					<Animated.Text
+						style={{ transform: [{ scale: titleScale }] }}
+						className="text-4xl font-bold text-center text-gray-900 dark:text-white"
 					>
-						<Text className="text-3xl font-bold text-gray-900 dark:text-white text-center">
-							How KindFi Works
-						</Text>
-					</MotiView>
-					<MotiView
-						from={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						transition={{ type: 'timing', duration: 800, delay: 600 }}
+						How KindFi Works
+					</Animated.Text>
+					<Animated.Text
+						style={{ opacity: descOpacity }}
+						className="text-lg text-center text-gray-600 dark:text-gray-300 max-w-xl"
 					>
-						<Text className="text-lg text-gray-600 dark:text-gray-300 text-center max-w-2xl">
-							Whether you're creating positive change or supporting meaningful
-							causes, KindFi makes it simple to make a difference.
-						</Text>
-					</MotiView>
+						Whether you're creating positive change or supporting meaningful
+						causes, KindFi makes it simple to make a difference.
+					</Animated.Text>
 				</VStack>
 
 				<OnboardingToggle activeTab={activeTab} onTabChange={handleTabChange} />
 
-				<VStack space="md" className="w-full">
-					{currentSteps.map((step, index) => (
-						<StepCard
-							key={`${activeTab}-${step.number}`}
-							step={step}
-							index={index}
-						/>
-					))}
+				<VStack
+					space="md"
+					className="items-center absolute bottom-20 left-0 right-0"
+				>
+					<Text className="text-gray-500 dark:text-gray-400 text-sm">
+						Swipe up to explore{' '}
+						{activeTab === 'kindlers' ? 'project creators' : 'supporters'}
+					</Text>
 				</VStack>
+			</Animated.View>
 
-				<VStack space="md" className="items-center mt-8">
-					<Button
-						onPress={handleCtaPress}
-						size="lg"
-						action="primary"
-						className="px-8 py-4 rounded-xl min-w-64"
-					>
-						<ButtonText className="font-semibold text-lg">{ctaText}</ButtonText>
-					</Button>
-				</VStack>
+			{/* Steps */}
+			{currentSteps.map((step, index) => (
+				<StepCard
+					key={`${activeTab}-${step.number}`}
+					step={step}
+					index={index}
+					total={currentSteps.length}
+					currentIndex={currentStepIndex}
+				/>
+			))}
+
+			{/* CTA */}
+			<VStack space="md" className="items-center my-8">
+				<Button
+					onPress={() => console.log(ctaText)}
+					size="lg"
+					action="primary"
+					className="px-8 py-4 rounded-xl min-w-64 h-18"
+				>
+					<ButtonText className="font-semibold text-lg ">{ctaText}</ButtonText>
+				</Button>
 			</VStack>
-		</ScrollView>
+		</Animated.ScrollView>
 	)
 }

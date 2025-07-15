@@ -13,6 +13,7 @@ import RNPickerSelect from 'react-native-picker-select'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { allItems } from '../components/StyledText'
 import { ItemList } from '../components/StyledText'
+import OnboardingScreen from './onboarding-screen'
 
 // Header Component
 const Header = () => (
@@ -103,18 +104,43 @@ export default function Home() {
 	)
 
 	return (
-		<SafeAreaView style={{ flex: 1 }}>
-			<Navbar />
+		<View style={{ flex: 1 }}>
+			<OnboardingScreen />
+			{/* <Navbar />
 			<Header />
 			<Filter
 				filters={filters}
 				selectedFilter={selectedFilter}
 				onSelect={handleFilterSelect}
 			/>
+			<View style={styles.additionalFiltersContainer}>
+				<TouchableOpacity
+					onPress={() => handleFilterSelect(null)}
+					style={styles.selectAllButton}
+				>
+					<Text style={styles.selectAllText}>Select All</Text>
+				</TouchableOpacity>
+
+				<RNPickerSelect
+					onValueChange={(value) => handleFilterSelect(value)}
+					items={[
+						{ label: 'All', value: null },
+						...filters.map((filter) => ({ label: filter, value: filter })),
+					]}
+					style={{
+						inputIOS: styles.dropdown,
+						inputAndroid: styles.dropdown,
+					}}
+					placeholder={{
+						label: 'Select a filter...',
+						value: null,
+					}}
+				/>
+			</View>
 			<ScrollView>
 				<ItemList items={filteredItems} />
-			</ScrollView>
-		</SafeAreaView>
+			</ScrollView> */}
+		</View>
 	)
 }
 
