@@ -29,7 +29,7 @@ const nextConfig = {
                 style-src 'self' 'unsafe-inline';
                 img-src 'self' data: blob:;
                 font-src 'self' data:;
-                connect-src 'self' https://kyc.example.com https://api.example.com https://*.vercel.app;
+                connect-src 'self' https://flagcdn.com https://*.kindfi.org https://*.supabase.co https://*.vercel.app;
                 frame-ancestors 'self';
                 upgrade-insecure-requests;
               `.replace(/\s{2,}/g, ' '),
