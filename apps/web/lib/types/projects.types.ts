@@ -37,11 +37,13 @@ export interface Creator {
 	recent_project?: string
 	total_current_amount?: number
 }
+
 export interface Tag {
 	id: string | number
 	text: string
 	color?: { backgroundColor: string; textColor: string } | string
 }
+
 export interface ProjectCategory {
 	id: string
 	label: string
