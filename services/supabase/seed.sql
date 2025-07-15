@@ -22,22 +22,114 @@ values ('00000000-0000-0000-0000-000000000001', 'demo@example.com', '')
 on conflict (id) do nothing;
 
 -- Insert projects
+-- Insert projects
 insert into public.projects (
   title, description, current_amount, target_amount,
-  min_investment, percentage_complete, investors_count,
-  category_id, image_url, owner_id
+  min_investment, percentage_complete, kinder_count,
+  category_id, image_url, kindler_id,
+  social_links, project_location
 )
 values
-  ('Empowering Education', 'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for a brighter future.', 40000, 55000, 10, 73, 40, (select id from categories where name = 'Education'), '/images/education.webp', '00000000-0000-0000-0000-000000000001'),
-  ('Forest Restoration Initiative', 'Restore and reforest areas devastated by uncontrolled deforestation. Your support helps rebuild ecosystems and fight climate change.', 54000, 60000, 10, 90, 35, (select id from categories where name = 'Environment & Sustainability'), '/images/bosques.webp', '00000000-0000-0000-0000-000000000001'),
-  ('Universal Health Access', 'Provide basic health services, vaccinations, and medical support to underserved rural populations.', 20000, 40000, 15, 50, 25, (select id from categories where name = 'Healthcare'), '/images/healthcare.webp', '00000000-0000-0000-0000-000000000001'),
-  ('Clean Water for Life', 'Install clean water systems and filtration technologies in remote villages lacking access to potable water.', 25000, 50000, 20, 50, 30, (select id from categories where name = 'Poverty Alleviation & Economic Development'), '/images/water.webp', '00000000-0000-0000-0000-000000000001'),
-  ('Animal Rescue Network', 'Establish a rescue network for stray and injured animals, providing medical care and adoption support.', 15000, 30000, 5, 50, 15, (select id from categories where name = 'Animal Welfare'), '/images/dogs.webp', '00000000-0000-0000-0000-000000000001'),
-  ('Mindful Support', 'Develop and distribute an easy-to-use mobile app that provides resources, exercises, and mental health support to young adults.', 10000, 25000, 2, 40, 20, (select id from categories where name = 'Mental Health & Well-being'), '/images/mental-health.webp', '00000000-0000-0000-0000-000000000001'),
-  ('Artists for Social Impact', 'Fund artistic initiatives that highlight social justice, encourage civic engagement, and spark policy changes.', 8000, 15000, 1, 53, 12, (select id from categories where name = 'Arts & Culture'), '/images/artesania.webp', '00000000-0000-0000-0000-000000000001'),
-  ('Code the Future', 'Deliver coding and digital literacy training for high school students in low-resource communities.', 30000, 40000, 12, 75, 28, (select id from categories where name = 'Technology & Innovation'), '/images/technology.webp', '00000000-0000-0000-0000-000000000001'),
-  ('Emergency Response Fund', 'Deliver essential supplies, shelter, and food to communities affected by floods, earthquakes, and other disasters.', 45000, 70000, 25, 64, 33, (select id from categories where name = 'Disaster Relief & Humanitarian Aid'), '/images/disaster-aid.webp', '00000000-0000-0000-0000-000000000001'),
-  ('Civic Leadership Lab', 'Train young leaders in community organizing, policy advocacy, and civic education to promote democratic values.', 12000, 30000, 7, 40, 19, (select id from categories where name = 'Community & Civic Engagement'), '/images/ecommerce.webp', '00000000-0000-0000-0000-000000000001');
+  (
+    'Empowering Education',
+    'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for a brighter future.',
+    40000, 55000, 10, 73, 40,
+    (select id from categories where name = 'Education'),
+    '/images/education.webp',
+    '00000000-0000-0000-0000-000000000001',
+    '{"website": "https://empoweringeducation.org", "twitter": "https://x.com/empoweringedu", "facebook": "https://www.facebook.com/EmpoweringEducation", "instagram": "https://www.instagram.com/empowering.education"}',
+    'USA'
+  ),
+  (
+    'Forest Restoration Initiative',
+    'Restore and reforest areas devastated by uncontrolled deforestation. Your support helps rebuild ecosystems and fight climate change.',
+    54000, 60000, 10, 90, 35,
+    (select id from categories where name = 'Environment & Sustainability'),
+    '/images/bosques.webp',
+    '00000000-0000-0000-0000-000000000001',
+    '{"website": "https://www.therestorationinitiative.org", "facebook": "https://www.facebook.com/IUCNForest", "twitter": "https://x.com/iucn_forests", "youtube": "https://www.youtube.com/@IucnOrg"}',
+    'CMR'
+  ),
+  (
+    'Universal Health Access',
+    'Provide basic health services, vaccinations, and medical support to underserved rural populations.',
+    20000, 40000, 15, 50, 25,
+    (select id from categories where name = 'Healthcare'),
+    '/images/healthcare.webp',
+    '00000000-0000-0000-0000-000000000001',
+    '{"website": "https://www.who.int/health-topics/universal-health-coverage"}',
+    'USA'
+  ),
+  (
+    'Clean Water for Life',
+    'Install clean water systems and filtration technologies in remote villages lacking access to potable water.',
+    25000, 50000, 20, 50, 30,
+    (select id from categories where name = 'Poverty Alleviation & Economic Development'),
+    '/images/water.webp',
+    '00000000-0000-0000-0000-000000000001',
+    '{"website": "https://cleanwater.org", "facebook": "https://www.facebook.com/CleanWaterAction", "twitter": "https://twitter.com/cleanh2oaction", "instagram": "https://www.instagram.com/cleanh2oaction"}',
+    'USA'
+  ),
+  (
+    'Animal Rescue Network',
+    'Establish a rescue network for stray and injured animals, providing medical care and adoption support.',
+    15000, 30000, 5, 50, 15,
+    (select id from categories where name = 'Animal Welfare'),
+    '/images/dogs.webp',
+    '00000000-0000-0000-0000-000000000001',
+    '{"website": "https://rescuenetworkmn.org", "facebook": "https://www.facebook.com/rescuenetworkmn", "instagram": "https://www.instagram.com/rescuenetworkmn"}',
+    'USA'
+  ),
+  (
+    'Mindful Support',
+    'Develop and distribute an easy-to-use mobile app that provides resources, exercises, and mental health support to young adults.',
+    10000, 25000, 2, 40, 20,
+    (select id from categories where name = 'Mental Health & Well-being'),
+    '/images/mental-health.webp',
+    '00000000-0000-0000-0000-000000000001',
+    '{"website": "https://www.mindful-support.com"}',
+    'CAN'
+  ),
+  (
+    'Artists for Social Impact',
+    'Fund artistic initiatives that highlight social justice, encourage civic engagement, and spark policy changes.',
+    8000, 15000, 1, 53, 12,
+    (select id from categories where name = 'Arts & Culture'),
+    '/images/artesania.webp',
+    '00000000-0000-0000-0000-000000000001',
+    '{"website": "https://artisticfreedominitiative.org/our-programs/artists-for-social-change", "facebook": "https://www.facebook.com/Artistic-Freedom-Initiative-1631480230423882", "youtube": "https://www.youtube.com/channel/UCWdqdu8eOGV8cfDLpMtYjXg", "twitter": "https://twitter.com/artistic_AFI", "linkedin": "https://www.linkedin.com/company/artistic-freedom-initiative", "instagram": "https://www.instagram.com/artistic_freedom_initiative"}',
+    'USA'
+  ),
+  (
+    'Code the Future',
+    'Deliver coding and digital literacy training for high school students in low-resource communities.',
+    30000, 40000, 12, 75, 28,
+    (select id from categories where name = 'Technology & Innovation'),
+    '/images/technology.webp',
+    '00000000-0000-0000-0000-000000000001',
+    '{"website": "https://codeforfuture.eu"}',
+    'GBR'
+  ),
+  (
+    'Emergency Response Fund',
+    'Deliver essential supplies, shelter, and food to communities affected by floods, earthquakes, and other disasters.',
+    45000, 70000, 25, 64, 33,
+    (select id from categories where name = 'Disaster Relief & Humanitarian Aid'),
+    '/images/disaster-aid.webp',
+    '00000000-0000-0000-0000-000000000001',
+    '{"website": "https://cerf.un.org"}',
+    'DEU'
+  ),
+  (
+    'Civic Leadership Lab',
+    'Train young leaders in community organizing, policy advocacy, and civic education to promote democratic values.',
+    12000, 30000, 7, 40, 19,
+    (select id from categories where name = 'Community & Civic Engagement'),
+    '/images/ecommerce.webp',
+    '00000000-0000-0000-0000-000000000001',
+    '{"website": "https://kravislab.cmc.edu", "facebook": "https://www.facebook.com/KravisLabCMC", "instagram": "https://www.instagram.com/KravisLabCMC", "twitter": "https://twitter.com/KravisLabCMC", "youtube": "https://www.youtube.com/channel/UCygX0UgZVwqC_szfUn_3NRw", "linkedin": "https://www.linkedin.com/company/kravis-lab-for-social-impact"}',
+    'USA'
+  );
 
 -- Insert tags
 insert into public.project_tags (name, color)
@@ -279,7 +371,7 @@ Join us in creating a world where every child has access to quality education.$$
   $$,
   'http://127.0.0.1:54321/storage/v1/object/public/project_pitch_decks/mindful-support.pdf',
   'https://www.youtube.com/embed/vzKryaN44ss'),
-  
+
   ((select id from public.projects where title = 'Artists for Social Impact'),
   'Art That Inspires Change: Artists for Social Impact',
   $$Art has always had the power to move hearts, shift perspectives, and ignite revolutions. Through this initiative, we aim to support artists who are using their creative gifts to advocate for justice and drive positive social transformation.
@@ -362,26 +454,26 @@ Join us in creating a world where every child has access to quality education.$$
 
   In the aftermath of hurricanes, earthquakes, floods, and wildfires, survivors face:
 
-  - Lack of food and clean water  
-  - Displacement from homes and shelters  
-  - Inadequate medical attention and hygiene supplies  
-  - Disruption of communication and infrastructure  
+  - Lack of food and clean water
+  - Displacement from homes and shelters
+  - Inadequate medical attention and hygiene supplies
+  - Disruption of communication and infrastructure
 
   ## Our Relief Strategy
 
   We act quickly, with impact-driven priorities:
 
-  1. **Rapid Deployment Teams**: On-the-ground volunteers and logistics specialists ready to mobilize.  
-  2. **Essential Supplies**: Distribution of food, water, blankets, and emergency kits within 24 hours.  
-  3. **Shelter & Safety**: Temporary housing solutions with sanitation and security protocols.  
-  4. **Coordination with Local Leaders**: Ensuring culturally appropriate, community-driven interventions.  
+  1. **Rapid Deployment Teams**: On-the-ground volunteers and logistics specialists ready to mobilize.
+  2. **Essential Supplies**: Distribution of food, water, blankets, and emergency kits within 24 hours.
+  3. **Shelter & Safety**: Temporary housing solutions with sanitation and security protocols.
+  4. **Coordination with Local Leaders**: Ensuring culturally appropriate, community-driven interventions.
 
   ## What We Aim to Achieve
 
-  - Aid delivery to **over 50,000** affected individuals per disaster event  
-  - Reduce emergency response time to **under 12 hours**  
-  - Establish a pre-stocked network of **10 regional warehouses**  
-  - Train **1,000 volunteers** in crisis logistics and trauma support  
+  - Aid delivery to **over 50,000** affected individuals per disaster event
+  - Reduce emergency response time to **under 12 hours**
+  - Establish a pre-stocked network of **10 regional warehouses**
+  - Train **1,000 volunteers** in crisis logistics and trauma support
 
   ## Why You Matter
 
@@ -495,45 +587,45 @@ insert into public.profiles (id, role, display_name, bio, image_url) values
 -- Insert project members for each project
 insert into public.project_members (project_id, user_id, role, title) values
   ((select id from public.projects where title = 'Empowering Education'), 'fba413a5-05f1-4c79-9fd2-b0b67e3e1fb0', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Empowering Education'), 'c124b016-bab9-4904-8e1a-c38b8623001b', 'editor', 'Education Specialist'),
-  ((select id from public.projects where title = 'Empowering Education'), '44e69d1d-2659-4a51-82ce-487e8c9ef320', 'editor', 'Community Liaison'),
+  ((select id from public.projects where title = 'Empowering Education'), 'c124b016-bab9-4904-8e1a-c38b8623001b', 'core', 'Education Specialist'),
+  ((select id from public.projects where title = 'Empowering Education'), '44e69d1d-2659-4a51-82ce-487e8c9ef320', 'advisor', 'Community Liaison'),
 
   ((select id from public.projects where title = 'Forest Restoration Initiative'), 'bcc18c37-3a33-4585-9af0-0e163cbb3850', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Forest Restoration Initiative'), '5af02f63-3be5-44e4-bd3a-0964b1dc8e39', 'editor', 'Field Officer'),
+  ((select id from public.projects where title = 'Forest Restoration Initiative'), '5af02f63-3be5-44e4-bd3a-0964b1dc8e39', 'core', 'Field Officer'),
   ((select id from public.projects where title = 'Forest Restoration Initiative'), '2c8a13a2-0a76-4758-84bd-12a633cf598c', 'editor', 'Research Analyst'),
 
   ((select id from public.projects where title = 'Universal Health Access'), '0876de6c-f9ad-4ba2-b4a3-725ddbb8d498', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Universal Health Access'), 'ba754a4b-c267-4d70-8c1a-00154f9b1cf1', 'editor', 'Medical Advisor'),
+  ((select id from public.projects where title = 'Universal Health Access'), 'ba754a4b-c267-4d70-8c1a-00154f9b1cf1', 'advisor', 'Medical Advisor'),
   ((select id from public.projects where title = 'Universal Health Access'), 'eee0c1ac-86c6-4024-a5e3-c5f350626b6a', 'editor', 'Outreach Manager'),
 
   ((select id from public.projects where title = 'Clean Water for Life'), '31738359-04ef-418d-a6e5-59e9de312dab', 'admin', 'Founder'),
   ((select id from public.projects where title = 'Clean Water for Life'), 'fec8063f-59a9-4e66-a6c8-c9f5c4a57353', 'editor', 'Sanitation Officer'),
-  ((select id from public.projects where title = 'Clean Water for Life'), '8fdf59c8-98ab-4fdd-bbf3-4578b59d959d', 'editor', 'Trainer'),
+  ((select id from public.projects where title = 'Clean Water for Life'), '8fdf59c8-98ab-4fdd-bbf3-4578b59d959d', 'community', 'Trainer'),
 
   ((select id from public.projects where title = 'Animal Rescue Network'), 'e3cb1263-0e79-4fd5-be41-d1aa76f03bdc', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Animal Rescue Network'), '8e05ed73-6be8-4e23-bd02-3a8344cef8d4', 'editor', 'Veterinarian'),
-  ((select id from public.projects where title = 'Animal Rescue Network'), 'e52ed5c4-722d-4380-853e-7530db295722', 'editor', 'Adoption Lead'),
+  ((select id from public.projects where title = 'Animal Rescue Network'), '8e05ed73-6be8-4e23-bd02-3a8344cef8d4', 'core', 'Veterinarian'),
+  ((select id from public.projects where title = 'Animal Rescue Network'), 'e52ed5c4-722d-4380-853e-7530db295722', 'community', 'Adoption Lead'),
 
   ((select id from public.projects where title = 'Mindful Support'), '51fdcab5-7789-429d-bb3b-844139921e84', 'admin', 'Founder'),
   ((select id from public.projects where title = 'Mindful Support'), '55499a3c-f7d8-492b-a790-4223f29467b1', 'editor', 'UX Designer'),
-  ((select id from public.projects where title = 'Mindful Support'), 'b5780351-aba6-459e-8d41-3fbd3a5018bf', 'editor', 'Counselor'),
+  ((select id from public.projects where title = 'Mindful Support'), 'b5780351-aba6-459e-8d41-3fbd3a5018bf', 'advisor', 'Counselor'),
 
   ((select id from public.projects where title = 'Artists for Social Impact'), 'ff517450-e235-477e-a058-a2a73608dd69', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Artists for Social Impact'), 'f51272df-fd8f-4826-adf8-58aa6378cb32', 'editor', 'Creative Director'),
+  ((select id from public.projects where title = 'Artists for Social Impact'), 'f51272df-fd8f-4826-adf8-58aa6378cb32', 'core', 'Creative Director'),
   ((select id from public.projects where title = 'Artists for Social Impact'), 'bc6176d7-72c0-4b4c-b2b5-44cde3438517', 'editor', 'Storyteller'),
 
   ((select id from public.projects where title = 'Code the Future'), '8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Code the Future'), 'ad549c42-5906-41a8-a08f-5d810e01d2eb', 'editor', 'Software Engineer'),
-  ((select id from public.projects where title = 'Code the Future'), '2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'editor', 'Program Manager'),
+  ((select id from public.projects where title = 'Code the Future'), 'ad549c42-5906-41a8-a08f-5d810e01d2eb', 'core', 'Software Engineer'),
+  ((select id from public.projects where title = 'Code the Future'), '2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'others', 'Program Manager'),
 
   ((select id from public.projects where title = 'Emergency Response Fund'), '1609aba1-bcbb-426b-ae57-456f02e16de7', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Emergency Response Fund'), '8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'editor', 'Logistics Specialist'),
+  ((select id from public.projects where title = 'Emergency Response Fund'), '8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'core', 'Logistics Specialist'),
   ((select id from public.projects where title = 'Emergency Response Fund'), 'ad549c42-5906-41a8-a08f-5d810e01d2eb', 'editor', 'Field Manager'),
 
   ((select id from public.projects where title = 'Civic Leadership Lab'), '2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'admin', 'Founder'),
-  ((select id from public.projects where title = 'Civic Leadership Lab'), '81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'editor', 'Policy Mentor'),
+  ((select id from public.projects where title = 'Civic Leadership Lab'), '81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'advisor', 'Policy Mentor'),
   ((select id from public.projects where title = 'Civic Leadership Lab'), '55499a3c-f7d8-492b-a790-4223f29467b1', 'editor', 'Advocacy Lead');
-  
+
 -- Insert milestones for each project
 insert into public.milestones (project_id, title, description, amount, deadline, status, order_index)
 values

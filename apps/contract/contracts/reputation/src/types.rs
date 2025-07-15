@@ -2,6 +2,7 @@ use soroban_sdk::{contracttype, symbol_short, Address, Symbol};
 
 pub const ADMIN_KEY: Symbol = symbol_short!("ADMIN");
 pub const NFT_CONTRACT_KEY: Symbol = symbol_short!("NFT");
+pub const ZERO_ADDRESS: &str = "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 /// Tier levels for reputation system
 #[derive(Clone, Debug, Eq, PartialEq)]

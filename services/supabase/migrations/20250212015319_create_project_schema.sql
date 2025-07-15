@@ -11,7 +11,7 @@ create table "public"."projects" (
     "updated_at" timestamp with time zone default CURRENT_TIMESTAMP,
     "category_id" text,
     "image_url" text,
-    "owner_id" uuid not null
+    "kindler_id" uuid not null
 );
 
 
@@ -27,9 +27,9 @@ alter table "public"."projects" add constraint "check_positive_target_amount" CH
 
 alter table "public"."projects" validate constraint "check_positive_target_amount";
 
-alter table "public"."projects" add constraint "projects_owner_id_fkey" FOREIGN KEY (owner_id) REFERENCES auth.users(id) not valid;
+alter table "public"."projects" add constraint "projects_kindler_id_fkey" FOREIGN KEY (kindler_id) REFERENCES auth.users(id) not valid;
 
-alter table "public"."projects" validate constraint "projects_owner_id_fkey";
+alter table "public"."projects" validate constraint "projects_kindler_id_fkey";
 
 set check_function_bodies = off;
 
@@ -51,7 +51,7 @@ CREATE OR REPLACE FUNCTION public.update_project_on_investment()
 AS $function$
 BEGIN
     UPDATE public.projects
-    SET 
+    SET
         current_amount = current_amount + NEW.amount,
         percentage_complete = LEAST((current_amount + NEW.amount) / target_amount * 100, 100),
         investors_count = investors_count + 1
@@ -130,7 +130,7 @@ on "public"."projects"
 as permissive
 for insert
 to public
-with check (((auth.role() = 'authenticated'::text) AND (auth.uid() = owner_id)));
+with check (((auth.role() = 'authenticated'::text) AND (auth.uid() = kindler_id)));
 
 
 create policy "Allow project owners to update their projects"
@@ -138,7 +138,7 @@ on "public"."projects"
 as permissive
 for update
 to public
-using ((auth.uid() = owner_id));
+using ((auth.uid() = kindler_id));
 
 
 create policy "Allow public read access to projects"
@@ -150,6 +150,3 @@ using (true);
 
 
 CREATE TRIGGER update_projects_modtime BEFORE UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION update_modified_column();
-
-
-

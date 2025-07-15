@@ -2,7 +2,6 @@ use crate::access::{AccessControl, DEFAULT_ADMIN_ROLE};
 use crate::errors::NFTError;
 use soroban_sdk::{contracttype, symbol_short, Address, Env, Symbol};
 use stellar_pausable::{Pausable, PausableError};
-use stellar_pausable_macros::pausable_contract;
 
 pub const PAUSE_KEY: Symbol = symbol_short!("PAUSE");
 

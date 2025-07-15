@@ -11,4 +11,5 @@ pub enum ReputationError {
     NFTContractError = 6,
     InvalidAdminAddress = 7,
     InvalidNftContractId = 8,
+    InvalidThresholdOrdering = 9,
 }

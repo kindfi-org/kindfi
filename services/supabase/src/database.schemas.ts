@@ -508,109 +508,88 @@ export const milestonesRelationshipsSchema = z.tuple([
 	}),
 ])
 
-export const notificationLogsRowSchema = z.object({
-	action: z.string(),
-	created_at: z.string(),
-	id: z.string(),
-	metadata: jsonSchema.nullable(),
-	notification_id: z.string().nullable(),
+export const notificationPreferencesRowSchema = z.object({
+	created_at: z.string().nullable(),
+	email: z.boolean().nullable(),
+	in_app: z.boolean().nullable(),
+	push: z.boolean().nullable(),
+	updated_at: z.string().nullable(),
 	user_id: z.string(),
 })
 
-export const notificationLogsInsertSchema = z.object({
-	action: z.string(),
-	created_at: z.string().optional(),
-	id: z.string().optional(),
-	metadata: jsonSchema.optional().nullable(),
-	notification_id: z.string().optional().nullable(),
+export const notificationPreferencesInsertSchema = z.object({
+	created_at: z.string().optional().nullable(),
+	email: z.boolean().optional().nullable(),
+	in_app: z.boolean().optional().nullable(),
+	push: z.boolean().optional().nullable(),
+	updated_at: z.string().optional().nullable(),
 	user_id: z.string(),
 })
 
-export const notificationLogsUpdateSchema = z.object({
-	action: z.string().optional(),
-	created_at: z.string().optional(),
-	id: z.string().optional(),
-	metadata: jsonSchema.optional().nullable(),
-	notification_id: z.string().optional().nullable(),
+export const notificationPreferencesUpdateSchema = z.object({
+	created_at: z.string().optional().nullable(),
+	email: z.boolean().optional().nullable(),
+	in_app: z.boolean().optional().nullable(),
+	push: z.boolean().optional().nullable(),
+	updated_at: z.string().optional().nullable(),
 	user_id: z.string().optional(),
 })
 
-export const notificationLogsRelationshipsSchema = z.tuple([
-	z.object({
-		foreignKeyName: z.literal('notification_logs_notification_id_fkey'),
-		columns: z.tuple([z.literal('notification_id')]),
-		isOneToOne: z.literal(false),
-		referencedRelation: z.literal('notifications'),
-		referencedColumns: z.tuple([z.literal('id')]),
-	}),
-])
+export const notificationPreferencesRelationshipsSchema = z.tuple([])
 
 export const notificationDeliveryStatusSchema = z.union([
 	z.literal('pending'),
-	z.literal('sent'),
 	z.literal('delivered'),
 	z.literal('failed'),
-	z.literal('expired'),
 ])
 
 export const notificationPrioritySchema = z.union([
 	z.literal('low'),
 	z.literal('medium'),
 	z.literal('high'),
+	z.literal('urgent'),
 ])
 
 export const notificationTypeSchema = z.union([
-	z.literal('project_update'),
-	z.literal('project_comment'),
-	z.literal('project_investment'),
-	z.literal('project_milestone'),
-	z.literal('escrow_update'),
-	z.literal('escrow_dispute'),
-	z.literal('kyc_status'),
-	z.literal('system'),
+	z.literal('info'),
+	z.literal('success'),
+	z.literal('warning'),
+	z.literal('error'),
 ])
 
 export const notificationsInsertSchema = z.object({
-	action_url: z.string().optional().nullable(),
-	created_at: z.string().optional(),
-	delivery_attempts: z.number().optional(),
-	delivery_status: notificationDeliveryStatusSchema.optional(),
+	body: z.string(),
+	created_at: z.string().optional().nullable(),
+	data: jsonSchema.optional().nullable(),
+	delivery_attempts: z.number().optional().nullable(),
+	delivery_status: notificationDeliveryStatusSchema.optional().nullable(),
 	expires_at: z.string().optional().nullable(),
 	id: z.string().optional(),
-	is_read: z.boolean().optional(),
-	last_delivery_attempt: z.string().optional().nullable(),
-	message: z.string(),
+	is_read: z.boolean().optional().nullable(),
 	metadata: jsonSchema.optional().nullable(),
-	metadata_hash: z.string().optional().nullable(),
 	next_retry_at: z.string().optional().nullable(),
 	priority: notificationPrioritySchema.optional(),
-	push_subscription_id: z.string().optional().nullable(),
-	read_at: z.string().optional().nullable(),
 	title: z.string(),
-	type: notificationTypeSchema,
-	updated_at: z.string().optional(),
+	type: notificationTypeSchema.optional(),
+	updated_at: z.string().optional().nullable(),
 	user_id: z.string(),
 })
 
 export const notificationsUpdateSchema = z.object({
-	action_url: z.string().optional().nullable(),
-	created_at: z.string().optional(),
-	delivery_attempts: z.number().optional(),
-	delivery_status: notificationDeliveryStatusSchema.optional(),
+	body: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	data: jsonSchema.optional().nullable(),
+	delivery_attempts: z.number().optional().nullable(),
+	delivery_status: notificationDeliveryStatusSchema.optional().nullable(),
 	expires_at: z.string().optional().nullable(),
 	id: z.string().optional(),
-	is_read: z.boolean().optional(),
-	last_delivery_attempt: z.string().optional().nullable(),
-	message: z.string().optional(),
+	is_read: z.boolean().optional().nullable(),
 	metadata: jsonSchema.optional().nullable(),
-	metadata_hash: z.string().optional().nullable(),
 	next_retry_at: z.string().optional().nullable(),
 	priority: notificationPrioritySchema.optional(),
-	push_subscription_id: z.string().optional().nullable(),
-	read_at: z.string().optional().nullable(),
 	title: z.string().optional(),
 	type: notificationTypeSchema.optional(),
-	updated_at: z.string().optional(),
+	updated_at: z.string().optional().nullable(),
 	user_id: z.string().optional(),
 })
 
@@ -646,6 +625,10 @@ export const profilesRelationshipsSchema = z.tuple([])
 export const projectMemberRoleSchema = z.union([
 	z.literal('admin'),
 	z.literal('editor'),
+	z.literal('advisor'),
+	z.literal('community'),
+	z.literal('core'),
+	z.literal('others'),
 ])
 
 export const projectMembersInsertSchema = z.object({
@@ -826,10 +809,13 @@ export const projectsRowSchema = z.object({
 	description: z.string().nullable(),
 	id: z.string(),
 	image_url: z.string().nullable(),
-	investors_count: z.number(),
+	kinder_count: z.number(),
+	kindler_id: z.string(),
 	min_investment: z.number(),
-	owner_id: z.string(),
 	percentage_complete: z.number(),
+	project_location: z.string().nullable(),
+	slug: z.string(),
+	social_links: jsonSchema,
 	target_amount: z.number(),
 	title: z.string(),
 	updated_at: z.string().nullable(),
@@ -842,10 +828,13 @@ export const projectsInsertSchema = z.object({
 	description: z.string().optional().nullable(),
 	id: z.string().optional(),
 	image_url: z.string().optional().nullable(),
-	investors_count: z.number().optional(),
+	kinder_count: z.number().optional(),
+	kindler_id: z.string(),
 	min_investment: z.number(),
-	owner_id: z.string(),
 	percentage_complete: z.number().optional(),
+	project_location: z.string().optional().nullable(),
+	slug: z.string(),
+	social_links: jsonSchema.optional(),
 	target_amount: z.number(),
 	title: z.string(),
 	updated_at: z.string().optional().nullable(),
@@ -858,10 +847,13 @@ export const projectsUpdateSchema = z.object({
 	description: z.string().optional().nullable(),
 	id: z.string().optional(),
 	image_url: z.string().optional().nullable(),
-	investors_count: z.number().optional(),
+	kinder_count: z.number().optional(),
+	kindler_id: z.string().optional(),
 	min_investment: z.number().optional(),
-	owner_id: z.string().optional(),
 	percentage_complete: z.number().optional(),
+	project_location: z.string().optional().nullable(),
+	slug: z.string().optional(),
+	social_links: jsonSchema.optional(),
 	target_amount: z.number().optional(),
 	title: z.string().optional(),
 	updated_at: z.string().optional().nullable(),
@@ -942,24 +934,20 @@ export const milestonesRowSchema = z.object({
 })
 
 export const notificationsRowSchema = z.object({
-	action_url: z.string().nullable(),
-	created_at: z.string(),
-	delivery_attempts: z.number(),
-	delivery_status: notificationDeliveryStatusSchema,
+	body: z.string(),
+	created_at: z.string().nullable(),
+	data: jsonSchema.nullable(),
+	delivery_attempts: z.number().nullable(),
+	delivery_status: notificationDeliveryStatusSchema.nullable(),
 	expires_at: z.string().nullable(),
 	id: z.string(),
-	is_read: z.boolean(),
-	last_delivery_attempt: z.string().nullable(),
-	message: z.string(),
+	is_read: z.boolean().nullable(),
 	metadata: jsonSchema.nullable(),
-	metadata_hash: z.string().nullable(),
 	next_retry_at: z.string().nullable(),
 	priority: notificationPrioritySchema,
-	push_subscription_id: z.string().nullable(),
-	read_at: z.string().nullable(),
 	title: z.string(),
 	type: notificationTypeSchema,
-	updated_at: z.string(),
+	updated_at: z.string().nullable(),
 	user_id: z.string(),
 })
 

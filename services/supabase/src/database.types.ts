@@ -533,103 +533,89 @@ export type Database = {
 					},
 				]
 			}
-			notification_logs: {
+			notification_preferences: {
 				Row: {
-					action: string
-					created_at: string
-					id: string
-					metadata: Json | null
-					notification_id: string | null
+					created_at: string | null
+					email: boolean | null
+					in_app: boolean | null
+					push: boolean | null
+					updated_at: string | null
 					user_id: string
 				}
 				Insert: {
-					action: string
-					created_at?: string
-					id?: string
-					metadata?: Json | null
-					notification_id?: string | null
+					created_at?: string | null
+					email?: boolean | null
+					in_app?: boolean | null
+					push?: boolean | null
+					updated_at?: string | null
 					user_id: string
 				}
 				Update: {
-					action?: string
-					created_at?: string
-					id?: string
-					metadata?: Json | null
-					notification_id?: string | null
+					created_at?: string | null
+					email?: boolean | null
+					in_app?: boolean | null
+					push?: boolean | null
+					updated_at?: string | null
 					user_id?: string
 				}
-				Relationships: [
-					{
-						foreignKeyName: 'notification_logs_notification_id_fkey'
-						columns: ['notification_id']
-						isOneToOne: false
-						referencedRelation: 'notifications'
-						referencedColumns: ['id']
-					},
-				]
+				Relationships: []
 			}
 			notifications: {
 				Row: {
-					action_url: string | null
-					created_at: string
-					delivery_attempts: number
-					delivery_status: Database['public']['Enums']['notification_delivery_status']
+					body: string
+					created_at: string | null
+					data: Json | null
+					delivery_attempts: number | null
+					delivery_status:
+						| Database['public']['Enums']['notification_delivery_status']
+						| null
 					expires_at: string | null
 					id: string
-					is_read: boolean
-					last_delivery_attempt: string | null
-					message: string
+					is_read: boolean | null
 					metadata: Json | null
-					metadata_hash: string | null
 					next_retry_at: string | null
 					priority: Database['public']['Enums']['notification_priority']
-					push_subscription_id: string | null
-					read_at: string | null
 					title: string
 					type: Database['public']['Enums']['notification_type']
-					updated_at: string
+					updated_at: string | null
 					user_id: string
 				}
 				Insert: {
-					action_url?: string | null
-					created_at?: string
-					delivery_attempts?: number
-					delivery_status?: Database['public']['Enums']['notification_delivery_status']
+					body: string
+					created_at?: string | null
+					data?: Json | null
+					delivery_attempts?: number | null
+					delivery_status?:
+						| Database['public']['Enums']['notification_delivery_status']
+						| null
 					expires_at?: string | null
 					id?: string
-					is_read?: boolean
-					last_delivery_attempt?: string | null
-					message: string
+					is_read?: boolean | null
 					metadata?: Json | null
-					metadata_hash?: string | null
 					next_retry_at?: string | null
 					priority?: Database['public']['Enums']['notification_priority']
-					push_subscription_id?: string | null
-					read_at?: string | null
 					title: string
-					type: Database['public']['Enums']['notification_type']
-					updated_at?: string
+					type?: Database['public']['Enums']['notification_type']
+					updated_at?: string | null
 					user_id: string
 				}
 				Update: {
-					action_url?: string | null
-					created_at?: string
-					delivery_attempts?: number
-					delivery_status?: Database['public']['Enums']['notification_delivery_status']
+					body?: string
+					created_at?: string | null
+					data?: Json | null
+					delivery_attempts?: number | null
+					delivery_status?:
+						| Database['public']['Enums']['notification_delivery_status']
+						| null
 					expires_at?: string | null
 					id?: string
-					is_read?: boolean
-					last_delivery_attempt?: string | null
-					message?: string
+					is_read?: boolean | null
 					metadata?: Json | null
-					metadata_hash?: string | null
 					next_retry_at?: string | null
 					priority?: Database['public']['Enums']['notification_priority']
-					push_subscription_id?: string | null
-					read_at?: string | null
 					title?: string
 					type?: Database['public']['Enums']['notification_type']
-					updated_at?: string
+					updated_at?: string | null
 					user_id?: string
 				}
 				Relationships: []
@@ -843,10 +829,13 @@ export type Database = {
 					description: string | null
 					id: string
 					image_url: string | null
-					investors_count: number
+					kinder_count: number
+					kindler_id: string
 					min_investment: number
-					owner_id: string
 					percentage_complete: number
+					project_location: string | null
+					slug: string
+					social_links: Json
 					target_amount: number
 					title: string
 					updated_at: string | null
@@ -858,10 +847,13 @@ export type Database = {
 					description?: string | null
 					id?: string
 					image_url?: string | null
-					investors_count?: number
+					kinder_count?: number
+					kindler_id: string
 					min_investment: number
-					owner_id: string
 					percentage_complete?: number
+					project_location?: string | null
+					slug: string
+					social_links?: Json
 					target_amount: number
 					title: string
 					updated_at?: string | null
@@ -873,10 +865,13 @@ export type Database = {
 					description?: string | null
 					id?: string
 					image_url?: string | null
-					investors_count?: number
+					kinder_count?: number
+					kindler_id?: string
 					min_investment?: number
-					owner_id?: string
 					percentage_complete?: number
+					project_location?: string | null
+					slug?: string
+					social_links?: Json
 					target_amount?: number
 					title?: string
 					updated_at?: string | null
@@ -922,23 +917,16 @@ export type Database = {
 				| 'approved'
 				| 'rejected'
 				| 'disputed'
-			notification_delivery_status:
-				| 'pending'
-				| 'sent'
-				| 'delivered'
-				| 'failed'
-				| 'expired'
-			notification_priority: 'low' | 'medium' | 'high'
-			notification_type:
-				| 'project_update'
-				| 'project_comment'
-				| 'project_investment'
-				| 'project_milestone'
-				| 'escrow_update'
-				| 'escrow_dispute'
-				| 'kyc_status'
-				| 'system'
-			project_member_role: 'admin' | 'editor'
+			notification_delivery_status: 'pending' | 'delivered' | 'failed'
+			notification_priority: 'low' | 'medium' | 'high' | 'urgent'
+			notification_type: 'info' | 'success' | 'warning' | 'error'
+			project_member_role:
+				| 'admin'
+				| 'editor'
+				| 'advisor'
+				| 'community'
+				| 'core'
+				| 'others'
 			user_role: 'kinder' | 'kindler'
 		}
 		CompositeTypes: {
@@ -1076,25 +1064,17 @@ export const Constants = {
 				'rejected',
 				'disputed',
 			],
-			notification_delivery_status: [
-				'pending',
-				'sent',
-				'delivered',
-				'failed',
-				'expired',
+			notification_delivery_status: ['pending', 'delivered', 'failed'],
+			notification_priority: ['low', 'medium', 'high', 'urgent'],
+			notification_type: ['info', 'success', 'warning', 'error'],
+			project_member_role: [
+				'admin',
+				'editor',
+				'advisor',
+				'community',
+				'core',
+				'others',
 			],
-			notification_priority: ['low', 'medium', 'high'],
-			notification_type: [
-				'project_update',
-				'project_comment',
-				'project_investment',
-				'project_milestone',
-				'escrow_update',
-				'escrow_dispute',
-				'kyc_status',
-				'system',
-			],
-			project_member_role: ['admin', 'editor'],
 			user_role: ['kinder', 'kindler'],
 		},
 	},
