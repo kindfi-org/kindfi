@@ -27,7 +27,7 @@ insert into public.projects (
   title, description, current_amount, target_amount,
   min_investment, percentage_complete, kinder_count,
   category_id, image_url, kindler_id,
-  social_links, project_location
+  social_links, project_location, slug
 )
 values
   (
@@ -38,7 +38,8 @@ values
     '/images/education.webp',
     '00000000-0000-0000-0000-000000000001',
     '{"website": "https://empoweringeducation.org", "twitter": "https://x.com/empoweringedu", "facebook": "https://www.facebook.com/EmpoweringEducation", "instagram": "https://www.instagram.com/empowering.education"}',
-    'USA'
+    'USA',
+    'empowering-education'
   ),
   (
     'Forest Restoration Initiative',
@@ -48,7 +49,8 @@ values
     '/images/bosques.webp',
     '00000000-0000-0000-0000-000000000001',
     '{"website": "https://www.therestorationinitiative.org", "facebook": "https://www.facebook.com/IUCNForest", "twitter": "https://x.com/iucn_forests", "youtube": "https://www.youtube.com/@IucnOrg"}',
-    'CMR'
+    'CMR',
+    'forest-restoration-initiative'
   ),
   (
     'Universal Health Access',
@@ -58,7 +60,8 @@ values
     '/images/healthcare.webp',
     '00000000-0000-0000-0000-000000000001',
     '{"website": "https://www.who.int/health-topics/universal-health-coverage"}',
-    'USA'
+    'USA',
+    'universal-health-access'
   ),
   (
     'Clean Water for Life',
@@ -68,7 +71,8 @@ values
     '/images/water.webp',
     '00000000-0000-0000-0000-000000000001',
     '{"website": "https://cleanwater.org", "facebook": "https://www.facebook.com/CleanWaterAction", "twitter": "https://twitter.com/cleanh2oaction", "instagram": "https://www.instagram.com/cleanh2oaction"}',
-    'USA'
+    'USA',
+    'clean-water-life'
   ),
   (
     'Animal Rescue Network',
@@ -78,7 +82,8 @@ values
     '/images/dogs.webp',
     '00000000-0000-0000-0000-000000000001',
     '{"website": "https://rescuenetworkmn.org", "facebook": "https://www.facebook.com/rescuenetworkmn", "instagram": "https://www.instagram.com/rescuenetworkmn"}',
-    'USA'
+    'USA',
+    'animal-rescue-network'
   ),
   (
     'Mindful Support',
@@ -88,7 +93,8 @@ values
     '/images/mental-health.webp',
     '00000000-0000-0000-0000-000000000001',
     '{"website": "https://www.mindful-support.com"}',
-    'CAN'
+    'CAN',
+    'mindful-support'
   ),
   (
     'Artists for Social Impact',
@@ -98,7 +104,8 @@ values
     '/images/artesania.webp',
     '00000000-0000-0000-0000-000000000001',
     '{"website": "https://artisticfreedominitiative.org/our-programs/artists-for-social-change", "facebook": "https://www.facebook.com/Artistic-Freedom-Initiative-1631480230423882", "youtube": "https://www.youtube.com/channel/UCWdqdu8eOGV8cfDLpMtYjXg", "twitter": "https://twitter.com/artistic_AFI", "linkedin": "https://www.linkedin.com/company/artistic-freedom-initiative", "instagram": "https://www.instagram.com/artistic_freedom_initiative"}',
-    'USA'
+    'USA',
+    'artists-social-impact'
   ),
   (
     'Code the Future',
@@ -108,7 +115,8 @@ values
     '/images/technology.webp',
     '00000000-0000-0000-0000-000000000001',
     '{"website": "https://codeforfuture.eu"}',
-    'GBR'
+    'GBR',
+    'code-future'
   ),
   (
     'Emergency Response Fund',
@@ -118,7 +126,8 @@ values
     '/images/disaster-aid.webp',
     '00000000-0000-0000-0000-000000000001',
     '{"website": "https://cerf.un.org"}',
-    'DEU'
+    'DEU',
+    'emergency-response-fund'
   ),
   (
     'Civic Leadership Lab',
@@ -128,7 +137,8 @@ values
     '/images/ecommerce.webp',
     '00000000-0000-0000-0000-000000000001',
     '{"website": "https://kravislab.cmc.edu", "facebook": "https://www.facebook.com/KravisLabCMC", "instagram": "https://www.instagram.com/KravisLabCMC", "twitter": "https://twitter.com/KravisLabCMC", "youtube": "https://www.youtube.com/channel/UCygX0UgZVwqC_szfUn_3NRw", "linkedin": "https://www.linkedin.com/company/kravis-lab-for-social-impact"}',
-    'USA'
+    'USA',
+    'civic-leadership-lab'
   );
 
 -- Insert tags
