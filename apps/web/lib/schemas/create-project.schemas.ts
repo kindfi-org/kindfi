@@ -1,6 +1,6 @@
 import * as z from 'zod'
 
-import { isAllowedSocialUrl } from '../utils/create-project-helpers'
+import { isAllowedSocialUrl } from '../utils/project-utils'
 
 export const stepOneSchema = z
 	.object({

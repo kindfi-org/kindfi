@@ -5,7 +5,7 @@ import { Check } from 'lucide-react'
 
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { cn } from '~/lib/utils'
-import { isValidUrl } from '~/lib/utils/create-project-helpers'
+import { isValidUrl } from '~/lib/utils/project-utils'
 
 interface StepperIndicatorProps {
 	currentStep: number

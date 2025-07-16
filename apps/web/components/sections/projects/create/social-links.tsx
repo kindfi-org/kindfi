@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { cn } from '~/lib/utils'
-import { isAllowedSocialUrl } from '~/lib/utils/create-project-helpers'
+import { isAllowedSocialUrl } from '~/lib/utils/project-utils'
 
 interface SocialLinksProps {
 	value: string[]
