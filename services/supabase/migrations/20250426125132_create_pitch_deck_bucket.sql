@@ -1,6 +1,7 @@
 -- 1. Create the bucket
 insert into storage.buckets (id, name, public)
-values ('project_pitch_decks', 'project_pitch_decks', false);
+values ('project_pitch_decks', 'project_pitch_decks', false)
+on conflict (id) do nothing;
 
 -- 2. Restrict file types
 create policy "Restrict file types" on storage.objects
@@ -14,7 +15,7 @@ create policy "Project owners can upload" on storage.objects
 for insert to authenticated with check (
   bucket_id = 'project_pitch_decks'
   and auth.uid() = (
-    select owner_id from projects 
+    select kindler_id from projects
     where id = (storage.foldername(name))[1]::uuid
   )
 );
@@ -24,7 +25,7 @@ create policy "Project team can view" on storage.objects
 for select using (
   bucket_id = 'project_pitch_decks'
   and (
-    auth.uid() = (select owner_id from projects where id = (storage.foldername(name))[1]::uuid)
+    auth.uid() = (select kindler_id from projects where id = (storage.foldername(name))[1]::uuid)
     or exists (
       select 1 from project_members
       where project_id = (storage.foldername(name))[1]::uuid
@@ -38,7 +39,7 @@ create policy "Only owners can delete" on storage.objects
 for delete using (
   bucket_id = 'project_pitch_decks'
   and auth.uid() = (
-    select owner_id from projects 
+    select kindler_id from projects
     where id = (storage.foldername(name))[1]::uuid
   )
 );

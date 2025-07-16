@@ -13,5 +13,5 @@ pub enum NFTError {
     InsufficientSignatures = 8,
     Paused = 9,
     UnknownError = 10,
-    InvalidOperation = 9,
+    InvalidOperation = 11,
 }

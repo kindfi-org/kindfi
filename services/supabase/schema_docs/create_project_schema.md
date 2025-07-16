@@ -19,12 +19,12 @@ The central table storing all project information.
 | target_amount       | NUMERIC(12,2)            | NOT NULL, CHECK > 0                      | Total funding goal                  |
 | min_investment      | NUMERIC(12,2)            | NOT NULL, CHECK <= target_amount         | Minimum allowed investment amount   |
 | percentage_complete | NUMERIC(5,2)             | NOT NULL, DEFAULT 0                      | Percentage of funding goal achieved |
-| investors_count     | INTEGER                  | NOT NULL, DEFAULT 0                      | Number of unique investors          |
+| kinder_count        | INTEGER                  | NOT NULL, DEFAULT 0                      | Number of unique investors          |
 | created_at          | TIMESTAMP WITH TIME ZONE | DEFAULT CURRENT_TIMESTAMP                | When project was created            |
 | updated_at          | TIMESTAMP WITH TIME ZONE | DEFAULT CURRENT_TIMESTAMP                | When project was last updated       |
 | category_id         | TEXT                     |                                          | References future categories table  |
 | image_url           | TEXT                     |                                          | URL to project cover image          |
-| owner_id            | UUID                     | NOT NULL, FK to auth.users(id)           | Project creator reference           |
+| kindler_id          | UUID                     | NOT NULL, FK to auth.users(id)           | Project creator reference           |
 
 ## Constraints and Indices
 
@@ -34,7 +34,7 @@ The central table storing all project information.
 
 ### Foreign Keys
 
-- `projects_owner_id_fkey`: Links `owner_id` to `auth.users(id)`
+- `projects_kindler_id_fkey`: Links `kindler_id` to `auth.users(id)`
 
 ### Check Constraints
 
@@ -44,7 +44,7 @@ The central table storing all project information.
 ### Indices
 
 - `idx_projects_category_id`: Optimizes queries filtering by category
-- `idx_projects_owner_id`: Optimizes queries filtering by owner
+- `idx_projects_kindler_id`: Optimizes queries filtering by owner
 
 ## Triggers
 
@@ -62,7 +62,7 @@ policy "Allow authenticated users to create projects"
   as permissive
   for insert
   to public
-  with check ((auth.role() = 'authenticated'::text) AND (auth.uid() = owner_id));
+  with check ((auth.role() = 'authenticated'::text) AND (auth.uid() = kindler_id));
 ```
 
 _Only authenticated users can create projects, and they must be set as the owner._
@@ -75,7 +75,7 @@ policy "Allow project owners to update their projects"
   as permissive
   for update
   to public
-  using ((auth.uid() = owner_id));
+  using ((auth.uid() = kindler_id));
 ```
 
 _Only project owners can update their own projects._
@@ -105,5 +105,5 @@ The table is designed to integrate with several other tables that will be create
 ## Implementation Notes
 
 - The `category_id` is defined as TEXT to accommodate future integration with a categories table.
-- Automated calculations for `percentage_complete` and `investors_count` will be handled by triggers when the investor table is implemented.
+- Automated calculations for `percentage_complete` and `kinder_count` will be handled by triggers when the investor table is implemented.
 - The schema uses appropriate numeric precision (12,2) for monetary values to handle amounts up to 10 billion with 2 decimal places.

@@ -1,7 +1,6 @@
 #![no_std]
 
 mod access;
-mod distribution;
 mod errors;
 mod events;
 mod pausable;
@@ -11,9 +10,8 @@ mod test;
 mod types;
 
 use soroban_sdk::{
-    auth, contract, contractimpl, symbol_short, xdr::Signature, Address, Env, String, Vec,
+    contract, contractimpl, symbol_short, Address, Bytes, BytesN, Env, String, Vec,
 };
-use stellar_pausable_macros::pausable_contract;
 
 use crate::{
     access::{AccessControl, DEFAULT_ADMIN_ROLE, METADATA_MANAGER_ROLE, MINTER_ROLE},
@@ -30,7 +28,6 @@ const MINT_OP: soroban_sdk::Symbol = symbol_short!("mint");
 const TRANSFER_OP: soroban_sdk::Symbol = symbol_short!("transfer");
 const METADATA_UPDATE_OP: soroban_sdk::Symbol = symbol_short!("updmeta");
 
-#[pausable_contract]
 #[contract]
 pub struct KindfiNFT;
 
@@ -66,40 +63,41 @@ impl KindfiNFT {
         name: String,
         description: String,
         attributes: Vec<String>,
+        admin: Address,
     ) -> Result<(), NFTError> {
-        // Check if minting is paused
+        // Check if the contract is paused
         NFTPausable::require_not_paused(&env, &PauseOperation::MintPause)?;
 
         // Verify minter role access
-        let invoker = auth::get_invoker(&env);
-        AccessControl::require_role(&env, MINTER_ROLE, &invoker)?;
+        admin.require_auth();
+        AccessControl::require_role(&env, MINTER_ROLE, &admin)?;
 
         // Check rate limit
-        RateLimiter::check_rate_limit(&env, &invoker, MINT_OP)?;
+        RateLimiter::check_rate_limit(&env, &admin, MINT_OP)?;
 
         // Get and increment token counter
         let token_id: u32 = env.storage().instance().get(&COUNTER_KEY).unwrap();
         env.storage().instance().set(&COUNTER_KEY, &(token_id + 1));
 
-        // Create metadata
+        // Create the NFT metadata
         let metadata = NFTMetadata {
             name,
             description,
             attributes,
         };
 
-        // Store token data
+        // Store the NFT
         NFTStorage::set_token_owner(&env, &token_id, &to);
         NFTStorage::set_token_metadata(&env, &token_id, &metadata);
 
-        // Increment balance
+        // Update balance
         NFTStorage::increment_balance(&env, &to);
 
-        // Emit mint event
-        NFTEvents::mint(&env, &to, token_id);
+        // Record the operation for rate limiting
+        RateLimiter::record_operation(&env, &admin, MINT_OP);
 
-        // Record operation for rate limiting
-        RateLimiter::record_operation(&env, &invoker, MINT_OP);
+        // Emit event
+        NFTEvents::mint(&env, &to, token_id, &metadata);
 
         Ok(())
     }
@@ -146,33 +144,38 @@ impl KindfiNFT {
         name: String,
         description: String,
         attributes: Vec<String>,
+        admin: Address,
     ) -> Result<(), NFTError> {
         // Check if metadata updates are paused
         NFTPausable::require_not_paused(&env, &PauseOperation::MetadataPause)?;
 
         // Verify metadata manager role
-        let invoker = auth::get_invoker(&env);
-        AccessControl::require_role(&env, METADATA_MANAGER_ROLE, &invoker)?;
+        admin.require_auth();
+        AccessControl::require_role(&env, METADATA_MANAGER_ROLE, &admin)?;
 
         // Check rate limit
-        RateLimiter::check_rate_limit(&env, &invoker, METADATA_UPDATE_OP)?;
+        RateLimiter::check_rate_limit(&env, &admin, METADATA_UPDATE_OP)?;
 
         // Verify token exists
         if NFTStorage::get_token_owner(&env, &token_id).is_none() {
             return Err(NFTError::TokenNotFound);
         }
 
-        // Create and update metadata
+        // Create new metadata
         let metadata = NFTMetadata {
             name,
             description,
             attributes,
         };
 
+        // Update metadata
         NFTStorage::set_token_metadata(&env, &token_id, &metadata);
 
-        // Record operation for rate limiting
-        RateLimiter::record_operation(&env, &invoker, METADATA_UPDATE_OP);
+        // Record the operation for rate limiting
+        RateLimiter::record_operation(&env, &admin, METADATA_UPDATE_OP);
+
+        // Emit event
+        NFTEvents::metadata_update(&env, token_id, &metadata);
 
         Ok(())
     }
@@ -193,103 +196,98 @@ impl KindfiNFT {
         env: Env,
         role: u32,
         account: Address,
-        signatures: Vec<(Address, Signature)>,
+        signatures: Vec<(Address, BytesN<64>)>,
     ) -> Result<(), NFTError> {
-        // Para granting roles, necesitamos aprobación de los administradores
-        // Serializar manualmente role y account para el hash
-        let mut payload_data = Vec::new(&env);
-        payload_data.push_back(role);
+        // For granting roles, we need approval from the admins
+        // Serialize role and account for the hash
+        let mut payload_data = Bytes::new(&env);
+        payload_data.append(&Bytes::from_slice(&env, &role.to_le_bytes()));
+        // Simple approach - just use the account directly without conversion
+        payload_data.append(&Bytes::from_slice(&env, &[0u8])); // placeholder
 
-        // Crear un payload para firmar
-        let payload = env.crypto().sha256(&payload_data);
-
-        // Multi-sig verificación para operaciones críticas
+        // Multi-sig verification for critical operations
         AccessControl::require_role_with_multiple_signatures(
             &env,
             DEFAULT_ADMIN_ROLE,
             symbol_short!("grantrol"),
             &signatures,
-            &payload,
+            &payload_data,
         )?;
 
-        // Otorgar el rol
+
         AccessControl::grant_role(&env, role, &account)?;
 
         Ok(())
     }
 
-    // Revoke role con el mismo patrón
+    // Revoke role with the same pattern
     pub fn revoke_role(
         env: Env,
         role: u32,
         account: Address,
-        signatures: Vec<(Address, Signature)>,
+        signatures: Vec<(Address, BytesN<64>)>,
     ) -> Result<(), NFTError> {
-        // Serializar manualmente role y account para el hash
-        let mut payload_data = Vec::new(&env);
-        payload_data.push_back(role);
+        // Serialize role and account for the hash
+        let mut payload_data = Bytes::new(&env);
+        payload_data.append(&Bytes::from_slice(&env, &role.to_le_bytes()));
+        // Simple approach - just use the account directly without conversion
+        payload_data.append(&Bytes::from_slice(&env, &[0u8])); // placeholder
 
-        // Crear un payload para firmar
-        let payload = env.crypto().sha256(&payload_data);
-
-        // Multi-sig verificación para operaciones críticas
+        // Multi-sig verification for critical operations
         AccessControl::require_role_with_multiple_signatures(
             &env,
             DEFAULT_ADMIN_ROLE,
             symbol_short!("revkrol"),
             &signatures,
-            &payload,
+            &payload_data,
         )?;
 
-        // Revocar el rol
+        // Revoke the role
         AccessControl::revoke_role(&env, role, &account)?;
 
         Ok(())
     }
 
     // Pause contract functions
-    pub fn pause(env: Env, operation: PauseOperation) -> Result<(), NFTError> {
+    pub fn pause(env: Env, operation: PauseOperation, admin: Address) -> Result<(), NFTError> {
         // Verify admin authorization
-        let invoker = auth::get_invoker(&env);
-        AccessControl::require_role(&env, DEFAULT_ADMIN_ROLE, &invoker)?;
+        admin.require_auth();
+        AccessControl::require_role(&env, DEFAULT_ADMIN_ROLE, &admin)?;
 
-        NFTPausable::pause(&env, &operation, &invoker)
+        NFTPausable::pause(&env, &operation, &admin)
     }
 
     // Unpause contract functions
-    pub fn unpause(env: Env, operation: PauseOperation) -> Result<(), NFTError> {
+    pub fn unpause(env: Env, operation: PauseOperation, admin: Address) -> Result<(), NFTError> {
         // Verify admin authorization
-        let invoker = auth::get_invoker(&env);
-        AccessControl::require_role(&env, DEFAULT_ADMIN_ROLE, &invoker)?;
+        admin.require_auth();
+        AccessControl::require_role(&env, DEFAULT_ADMIN_ROLE, &admin)?;
 
-        NFTPausable::unpause(&env, &operation, &invoker)
+        NFTPausable::unpause(&env, &operation, &admin)
     }
 
-    // Set multisig threshold con el mismo patrón
+    // Set multisig threshold with the same pattern
     pub fn set_multisig_threshold(
         env: Env,
         role: u32,
         threshold: u32,
-        signatures: Vec<(Address, Signature)>,
+        signatures: Vec<(Address, BytesN<64>)>,
     ) -> Result<(), NFTError> {
-        // Serializar manualmente role y account para el hash
-        let mut payload_data = Vec::new(&env);
-        payload_data.push_back(role);
-        payload_data.push_back(threshold);
+        // Serialize role and threshold for the hash
+        let mut payload_data = Bytes::new(&env);
+        payload_data.append(&Bytes::from_slice(&env, &role.to_le_bytes()));
+        payload_data.append(&Bytes::from_slice(&env, &threshold.to_le_bytes()));
 
-        // Crear un payload para firmar
-        let payload = env.crypto().sha256(&payload_data);
-
-        // Multi-sig verificación para operaciones críticas
+        // Multi-sig verification for critical operations
         AccessControl::require_role_with_multiple_signatures(
             &env,
             DEFAULT_ADMIN_ROLE,
             symbol_short!("setthres"),
             &signatures,
-            &payload,
+            &payload_data,
         )?;
 
-        // Establecer el threshold
+        // Set the threshold
         AccessControl::set_multisig_threshold(&env, role, threshold)?;
 
         Ok(())
@@ -301,18 +299,17 @@ impl KindfiNFT {
         operation_name: String,
         limit: u32,
         window_ledgers: u32,
+        admin: Address,
     ) -> Result<(), NFTError> {
         // Verify admin access
-        let invoker = auth::get_invoker(&env);
-        AccessControl::require_role(&env, DEFAULT_ADMIN_ROLE, &invoker)?;
+        admin.require_auth();
+        AccessControl::require_role(&env, DEFAULT_ADMIN_ROLE, &admin)?;
 
-        // Convert string to symbol
-        // NOTA: En lugar de usar symbol_short con string dinámico, necesitamos manejar operaciones conocidas
-        if operation_name == "mint" {
+        if operation_name == String::from_str(&env, "mint") {
             RateLimiter::set_limit(&env, MINT_OP, limit, window_ledgers);
-        } else if operation_name == "transfer" {
+        } else if operation_name == String::from_str(&env, "transfer") {
             RateLimiter::set_limit(&env, TRANSFER_OP, limit, window_ledgers);
-        } else if operation_name == "updmeta" {
+        } else if operation_name == String::from_str(&env, "updmeta") {
             RateLimiter::set_limit(&env, METADATA_UPDATE_OP, limit, window_ledgers);
         } else {
             return Err(NFTError::InvalidOperation);

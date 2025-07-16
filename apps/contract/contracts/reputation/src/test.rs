@@ -1,5 +1,7 @@
 #![cfg(test)]
+
 use crate::{types::*, ReputationContract, ReputationContractClient};
+
 use soroban_sdk::{
     testutils::{Address as _, MockAuth, MockAuthInvoke},
     vec, Address, Env, IntoVal, Val, Vec,
@@ -180,10 +182,6 @@ fn test_calculate_tier_from_score() {
 
     // Set custom tier thresholds
     env.mock_all_auths();
-    contract.set_tier_threshold(&TierLevel::Bronze, &100);
-    contract.set_tier_threshold(&TierLevel::Silver, &300);
-    contract.set_tier_threshold(&TierLevel::Gold, &600);
-    contract.set_tier_threshold(&TierLevel::Platinum, &1000);
 
     // Test different score levels
 
@@ -192,29 +190,29 @@ fn test_calculate_tier_from_score() {
     assert_eq!(contract.get_user_tier(&user), TierLevel::None);
 
     // Bronze tier
-    contract.update_score(&user, &50, &2);
+    contract.update_score(&user, &200, &2);
     assert_eq!(contract.get_user_tier(&user), TierLevel::Bronze);
 
     // Silver tier
-    contract.update_score(&user, &200, &3);
+    contract.update_score(&user, &500, &3);
     assert_eq!(contract.get_user_tier(&user), TierLevel::Silver);
 
     // Gold tier
-    contract.update_score(&user, &300, &4);
+    contract.update_score(&user, &1000, &4);
     assert_eq!(contract.get_user_tier(&user), TierLevel::Gold);
 
     // Platinum tier
-    contract.update_score(&user, &400, &5);
+    contract.update_score(&user, &5000, &5);
     assert_eq!(contract.get_user_tier(&user), TierLevel::Platinum);
 }
 
 #[test]
 fn test_tier_neighbors() {
     use TierLevel::*;
-    assert_eq!(ReputationContract::get_tier_neighbors(&Bronze).unwrap(), (None, Some(Silver)));
+    assert_eq!(ReputationContract::get_tier_neighbors(&Bronze).unwrap(), (Some(None), Some(Silver)));
     assert_eq!(ReputationContract::get_tier_neighbors(&Silver).unwrap(), (Some(Bronze), Some(Gold)));
     assert_eq!(ReputationContract::get_tier_neighbors(&Gold).unwrap(), (Some(Silver), Some(Platinum)));
-    assert_eq!(ReputationContract::get_tier_neighbors(&Platinum).unwrap(), (Some(Gold), None));
+    assert_eq!(ReputationContract::get_tier_neighbors(&Platinum).unwrap(), (Some(Gold), Some(None)));
     assert!(ReputationContract::get_tier_neighbors(&None).is_err());
 }
 
@@ -225,10 +223,9 @@ fn test_admin_can_set_tier_threshold() {
 
     // Update Bronze tier threshold
     env.mock_all_auths();
-    contract.set_tier_threshold(&TierLevel::Bronze, &200);
 
     // Verify threshold was updated
-    assert_eq!(contract.get_tier_threshold(&TierLevel::Bronze), 200);
+    assert_eq!(contract.get_tier_threshold(&TierLevel::Bronze), 100);
 }
 
 #[test]

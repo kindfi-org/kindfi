@@ -1,4 +1,5 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
+import type { SocialLinks } from '~/lib/types/project/project-detail.types'
 import { getProjectMilestones } from './get-project-milestones'
 import { getProjectPitch } from './get-project-pitch'
 import { getProjectQuestions } from './get-project-questions'
@@ -23,7 +24,9 @@ export async function getProjectById(
       target_amount,
       min_investment,
       percentage_complete,
-      investors_count,
+      kinder_count,
+			project_location,
+			social_links,
       category:category_id ( * ),
       project_tag_relationships (
         tag:tag_id ( id, name, color )
@@ -51,10 +54,15 @@ export async function getProjectById(
 		image: project.image_url,
 		goal: project.target_amount,
 		raised: project.current_amount,
-		investors: project.investors_count,
+		investors: project.kinder_count,
 		minInvestment: project.min_investment,
 		createdAt: project.created_at,
 		category: project.category,
+		location: project.project_location,
+		socialLinks:
+			project.social_links && typeof project.social_links === 'object'
+				? (project.social_links as SocialLinks)
+				: undefined,
 		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
 		pitch,
 		team,

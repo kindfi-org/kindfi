@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS projects (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     description TEXT,
-    owner_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    kindler_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     target_amount DECIMAL NOT NULL DEFAULT 0,
     current_amount DECIMAL NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -30,5 +30,5 @@ CREATE TABLE kindler_projects (
 );
 
 -- Add indexes for better query performance
-CREATE INDEX idx_projects_owner_id ON projects(owner_id);
+CREATE INDEX idx_projects_kindler_id ON projects(kindler_id);
 CREATE INDEX idx_kindler_projects_project_id ON kindler_projects(project_id);

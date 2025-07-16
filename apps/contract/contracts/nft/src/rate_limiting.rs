@@ -117,7 +117,7 @@ impl RateLimiter {
                         .instance()
                         .get(&RateLimitDataKey::UserOperationCount(
                             user.clone(),
-                            operation,
+                            operation.clone(),
                         ))
                         .unwrap_or(0);
 
@@ -137,7 +137,7 @@ impl RateLimiter {
         );
 
         env.storage().instance().set(
-            &RateLimitDataKey::UserLastOperation(user.clone(), operation),
+            &RateLimitDataKey::UserLastOperation(user.clone(), operation.clone()),
             &current_ledger,
         );
     }

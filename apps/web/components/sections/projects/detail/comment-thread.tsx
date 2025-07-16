@@ -6,9 +6,9 @@ import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
+import { CommentForm } from '~/components/sections/projects/detail/comment-form'
+import { LikeButton } from '~/components/sections/projects/detail/like-button'
 import type { Comment } from '~/lib/types/project/project-detail.types'
-import { CommentForm } from './comment-form'
-import { LikeButton } from './like-button'
 
 interface CommentThreadProps {
 	comments: Comment[]

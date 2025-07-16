@@ -60,4 +60,4 @@ const SvgComponent = (props: SvgProps) => (
 		</Defs>
 	</Svg>
 )
-export default SvgComponent
+export const KindFi = SvgComponent

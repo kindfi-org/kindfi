@@ -1,4 +1,4 @@
-import { Dimensions } from 'react-native'
+import { Dimensions, type ImageSourcePropType } from 'react-native'
 
 export const getResponsiveLayout = () => {
 	const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
@@ -16,4 +16,13 @@ export const getResponsiveLayout = () => {
 		isTablet,
 		isLandscape,
 	}
+}
+
+export const getImageSource = (
+	image: string | ImageSourcePropType,
+): ImageSourcePropType => {
+	if (typeof image === 'string') {
+		return { uri: image } // Remote image
+	}
+	return image // Local image (e.g. require())
 }

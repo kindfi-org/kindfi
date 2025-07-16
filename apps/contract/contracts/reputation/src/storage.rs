@@ -8,8 +8,8 @@ impl ReputationStorage {
         env.storage().instance().set(&ADMIN_KEY, admin);
     }
 
-    pub fn get_admin(env: &Env) -> Address {
-        env.storage().instance().get(&ADMIN_KEY).unwrap()
+    pub fn get_admin(env: &Env) -> Option<Address> {
+        env.storage().instance().get(&ADMIN_KEY)
     }
 
     pub fn set_nft_contract_id(env: &Env, contract_id: &Address) {
@@ -59,15 +59,5 @@ impl ReputationStorage {
         let key = DataKey::TierThreshold(tier.clone());
         env.storage().persistent().get(&key)
     }
-
-    pub fn validate_tier_eligibility(env: &Env, user: &Address, tier: &TierLevel) -> bool {
-        if let (Some(score), Some(threshold)) = (
-            Self::get_score(env, user),
-            Self::get_tier_threshold(env, tier),
-        ) {
-            score >= threshold
-        } else {
-            false
-        }
-    }
+    
 }

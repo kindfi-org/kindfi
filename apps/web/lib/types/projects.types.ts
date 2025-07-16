@@ -37,11 +37,13 @@ export interface Creator {
 	recent_project?: string
 	total_current_amount?: number
 }
+
 export interface Tag {
 	id: string | number
 	text: string
 	color?: { backgroundColor: string; textColor: string } | string
 }
+
 export interface ProjectCategory {
 	id: string
 	label: string
@@ -70,7 +72,7 @@ export interface Project {
 	min_investment: number
 
 	// Participation metrics
-	investors_count: number
+	kinder_count: number
 	donors?: number
 
 	// Progress tracking
