@@ -5,16 +5,23 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
-import { staggerContainer } from '~/lib/constants/animations'
-import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
-import type { Project, SortOption } from '~/lib/types/project'
-import { ProjectCardGrid, ProjectCardList } from './cards'
-import { CategoryFilters, SortDropdown, ViewToggle } from './filters'
+import {
+	ProjectCardGrid,
+	ProjectCardList,
+} from '~/components/sections/projects/cards'
+import {
+	CategoryFilters,
+	SortDropdown,
+	ViewToggle,
+} from '~/components/sections/projects/filters'
 import {
 	CategoryBadgeSkeleton,
 	ProjectCardGridSkeleton,
 	ProjectCardListSkeleton,
-} from './skeletons'
+} from '~/components/sections/projects/skeletons'
+import { staggerContainer } from '~/lib/constants/animations'
+import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
+import type { Project, SortOption } from '~/lib/types/project'
 
 export function ProjectsClientWrapper() {
 	const router = useRouter()

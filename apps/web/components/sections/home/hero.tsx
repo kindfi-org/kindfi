@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '~/components/base/button'
-import { CategoryBadge } from '~/components/sections/projects/filters'
+import { CategoryBadge } from '~/components/sections/projects/shared'
 import { CategoryBadgeSkeleton } from '~/components/sections/projects/skeletons'
 import { getAllCategories } from '~/lib/queries/projects'
 

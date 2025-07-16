@@ -17,12 +17,12 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '~/components/base/popover'
-import { CountryFlag } from '~/components/sections/projects/create/country-flag'
+import { CountryFlag } from '~/components/sections/projects/shared'
 import { cn } from '~/lib/utils'
 import {
 	findCountryByAlpha3,
 	getCountryOptions,
-} from '~/lib/utils/create-project-helpers'
+} from '~/lib/utils/project-utils'
 
 interface LocationSelectProps {
 	value: string
@@ -52,7 +52,9 @@ export function LocationSelect({ value, onChange }: LocationSelectProps) {
 					)}
 				>
 					<div className="flex items-center">
-						{selected && <CountryFlag countryCode={selected.alpha3} />}
+						{selected && (
+							<CountryFlag countryCode={selected.alpha3} className="w-6 mr-2" />
+						)}
 						{selected ? selected.name : 'Select a country'}
 					</div>
 					<ChevronDown className="ml-2 h-4 w-4 shrink-0" />

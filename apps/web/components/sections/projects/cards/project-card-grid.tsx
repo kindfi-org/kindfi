@@ -5,11 +5,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { Badge } from '~/components/base/badge'
+import { CategoryBadge } from '~/components/sections/projects/shared'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
-import { CategoryBadge } from '../filters'
 
 interface ProjectCardGridProps {
 	project: Project

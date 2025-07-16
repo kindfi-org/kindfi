@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 
 import { cn } from '~/lib/utils'
-import { getAlpha2FromAlpha3 } from '~/lib/utils/create-project-helpers'
+import { getAlpha2FromAlpha3 } from '~/lib/utils/project-utils'
 
 interface CountryFlagProps {
 	countryCode: string
@@ -36,7 +36,7 @@ export function CountryFlag({
 		<div
 			className={cn(
 				className,
-				'aspect-[3/2] mr-2 flex-shrink-0 overflow-hidden relative',
+				'aspect-[3/2] flex-shrink-0 overflow-hidden relative',
 			)}
 		>
 			<Image

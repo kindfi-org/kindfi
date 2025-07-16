@@ -22,7 +22,7 @@ import { ImageUpload } from '~/components/sections/projects/create/image-upload'
 import { LocationSelect } from '~/components/sections/projects/create/location-select'
 import { SocialLinks } from '~/components/sections/projects/create/social-links'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
-import { CategoryBadge } from '~/components/sections/projects/filters'
+import { CategoryBadge } from '~/components/sections/projects/shared'
 import { categories } from '~/lib/mock-data/project/categories.mock'
 import {
 	stepOneSchema,

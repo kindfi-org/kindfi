@@ -18,7 +18,7 @@ import {
 } from '~/components/base/form'
 import { LocationSelect } from '~/components/sections/projects/create/location-select'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
-import { CategoryBadge } from '~/components/sections/projects/filters'
+import { CategoryBadge } from '~/components/sections/projects/shared'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { categories } from '~/lib/mock-data/project/categories.mock'
 import { stepThreeSchema } from '~/lib/schemas/create-project.schemas'

@@ -2,9 +2,13 @@
 
 import { AnimatePresence } from 'framer-motion'
 
+import { StepperIndicator } from '~/components/sections/projects/create/stepper-indicator'
+import {
+	StepOne,
+	StepThree,
+	StepTwo,
+} from '~/components/sections/projects/create/steps'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
-import { StepperIndicator } from './stepper-indicator'
-import { StepOne, StepThree, StepTwo } from './steps'
 
 export function CreateProjectForm() {
 	const { currentStep, setCurrentStep, formData } = useCreateProject()
