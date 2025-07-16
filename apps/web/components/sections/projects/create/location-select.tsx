@@ -17,7 +17,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '~/components/base/popover'
-import { CountryFlag } from '~/components/sections/projects/create/country-flag'
+import { CountryFlag } from '~/components/sections/projects/shared/country-flag'
 import { cn } from '~/lib/utils'
 import {
 	findCountryByAlpha3,

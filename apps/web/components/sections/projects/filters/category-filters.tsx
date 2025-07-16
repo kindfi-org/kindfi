@@ -6,7 +6,7 @@ import { X } from 'lucide-react'
 import type { Tables } from '@services/supabase'
 import { Button } from '~/components/base/button'
 import { fadeIn, staggerContainer } from '~/lib/constants/animations'
-import { CategoryBadge } from './'
+import { CategoryBadge } from '../shared'
 
 interface CategoryFiltersProps {
 	categories: Tables<'categories'>[]

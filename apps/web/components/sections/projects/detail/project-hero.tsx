@@ -2,10 +2,10 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { CategoryBadge } from '~/components/sections/projects/filters'
+import { CategoryBadge } from '~/components/sections/projects/shared'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
-import { CountryFlag } from '../create/country-flag'
+import { CountryFlag } from '../shared/country-flag'
 import { AnimatedCounter } from './animated-counter'
 import { SocialLinksDisplay } from './social-links-display'
 

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import { UpdateProjectForm } from '~/components/sections/projects/create/update-project-form'
-import { BreadcrumbContainer } from '~/components/sections/projects/detail/breadcrumb-container'
+import { BreadcrumbContainer } from '~/components/sections/projects/shared/breadcrumb-container'
 import { project } from '~/lib/mock-data/project/create-project.mock'
 
 export default async function UpdateProjectPage({

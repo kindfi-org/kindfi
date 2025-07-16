@@ -3,7 +3,7 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { notFound } from 'next/navigation'
 import { getProjectById } from '~/lib/queries/projects'
-import { BreadcrumbContainer } from './breadcrumb-container'
+import { BreadcrumbContainer } from '../shared/breadcrumb-container'
 import { ProjectHero } from './project-hero'
 import { ProjectSidebar } from './project-sidebar'
 import { ProjectTabs } from './project-tabs'
