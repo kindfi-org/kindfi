@@ -10,6 +10,7 @@ export interface Tag {
 export interface Project {
 	id: string
 	title: string
+	slug: string | null
 	description: string | null
 	image: string | null
 	createdAt: string | null

@@ -15,6 +15,7 @@ export async function getAllProjects(
 			`
       id,
       title,
+			slug,
       description,
       image_url,
       created_at,
@@ -57,6 +58,7 @@ export async function getAllProjects(
 		data?.map((project) => ({
 			id: project.id,
 			title: project.title,
+			slug: project.slug,
 			description: project.description,
 			image: project.image_url,
 			goal: project.target_amount,

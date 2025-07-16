@@ -8,12 +8,12 @@ export default async function UpdateProjectPage({
 	params,
 }: {
 	params: Promise<{
-		id: string
+		slug: string
 	}>
 }) {
-	const { id } = await params
+	const { slug } = await params
 
-	if (id !== project.id) {
+	if (slug !== project.slug) {
 		notFound()
 	}
 
