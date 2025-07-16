@@ -88,6 +88,9 @@ export function SocialLinksDisplay({
 												width={16}
 												height={16}
 												className="h-4 w-4"
+												onError={(e) => {
+													e.currentTarget.src = '/icons/social/link.svg'
+												}}
 											/>
 										)}
 									</a>
