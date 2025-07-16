@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { X } from 'lucide-react' // Import X icon for clear button
+import { X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Badge } from '~/components/base/badge'
 import { getCategoryStyles } from '~/lib/utils/categories-util'
