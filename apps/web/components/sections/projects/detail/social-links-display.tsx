@@ -10,6 +10,7 @@ import {
 	TooltipTrigger,
 } from '~/components/base/tooltip'
 import type { SocialLinks } from '~/lib/types/project/project-detail.types'
+import { cn } from '~/lib/utils'
 import { getSocialTypeFromUrl, isValidUrl } from '~/lib/utils/project-utils'
 
 interface SocialLinksDisplayProps {
@@ -56,7 +57,10 @@ export function SocialLinksDisplay({
 
 	return (
 		<div
-			className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full ${className}`}
+			className={cn(
+				'flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full',
+				className,
+			)}
 		>
 			<span className="text-sm text-muted-foreground font-medium shrink-0">
 				Connect with us:
