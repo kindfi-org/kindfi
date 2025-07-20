@@ -54,7 +54,8 @@ export const useStellar = () => {
 		try {
 			setLoadingRegister(true)
 			setStoredCredentialId(registerRes.id)
-			const { contractSalt, publicKey } = await getPublicKeys(registerRes)
+			const { contractSalt, publicKey, aaguid } =
+				await getPublicKeys(registerRes)
 			if (!bundlerKey.current) throw new Error('Bundler key not found')
 			if (!contractSalt || !publicKey) throw new Error('Invalid public keys')
 			setCreatingDeployee(true)
@@ -72,6 +73,8 @@ export const useStellar = () => {
 			setCreatingDeployee(false)
 		}
 	}
+
+	console.log('deployee', deployee)
 
 	const prepareSign = async (): Promise<PresignResponse> => {
 		// Prepares data for signing a transaction on the Stellar network

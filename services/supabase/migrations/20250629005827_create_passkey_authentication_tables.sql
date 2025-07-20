@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS "public"."devices" (
     "credential_type" "public"."credential_type" NOT NULL DEFAULT 'public-key',
     "credential_id" "text" NOT NULL, -- Base64url encoded credential ID
     "aaguid" "text" DEFAULT '00000000-0000-0000-0000-000000000000' NOT NULL,
+    "address" "text" DEFAULT '0x' NOT NULL, -- Stellar address associated with the device
     "sign_count" integer NOT NULL DEFAULT 0,
     "transports" "text"[] NOT NULL DEFAULT '{}',
     "profile_verification_status" "public"."profile_verification_status" NOT NULL DEFAULT 'unverified',

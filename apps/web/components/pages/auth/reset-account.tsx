@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { forgotPasswordAction } from '~/app/actions'
+import { requestResetAccountAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
@@ -9,11 +9,11 @@ import { FormMessage, type Message } from '~/components/form-message'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 
-export default async function ForgotPassword(props: {
-	searchParams: Promise<Message>
+export async function ResetAccountComponent({
+	searchParams,
+}: {
+	searchParams: Message
 }) {
-	const searchParams = await props.searchParams
-
 	return (
 		<AuthLayout>
 			<AuthForm
@@ -43,7 +43,7 @@ export default async function ForgotPassword(props: {
 						/>
 					</div>
 
-					<Button className="w-full" formAction={forgotPasswordAction}>
+					<Button className="w-full" formAction={requestResetAccountAction}>
 						Send Recovery Link
 					</Button>
 

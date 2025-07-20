@@ -61,6 +61,7 @@ export interface AppEnvInterface {
 		readonly gaId: string
 	}
 	readonly deployment: {
+		readonly appUrl: string
 		readonly vercelUrl: string
 		readonly port: number
 	}

@@ -181,6 +181,8 @@ export function transformEnv(data: ValidatedEnvInput): AppEnvInterface {
 		},
 		deployment: {
 			vercelUrl: data.VERCEL_URL || '',
+			appUrl:
+				data.NEXT_PUBLIC_APP_URL || data.APP_URL || 'http://localhost:3000',
 			port: data.PORT || 3000,
 		},
 		kycServer: {
@@ -326,6 +328,8 @@ export const baseEnvSchema = z.object({
 
 	// Deployment
 	VERCEL_URL: z.string().optional(),
+	NEXT_PUBLIC_APP_URL: z.string().optional(),
+	APP_URL: z.string().optional(),
 	PORT: z
 		.string()
 		.regex(/^\d+$/, 'Port must be a valid number')
@@ -385,6 +389,8 @@ export const appRequirements = {
 		required: [
 			'NEXT_PUBLIC_SUPABASE_URL',
 			'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+			'NEXT_PUBLIC_KYC_API_BASE_URL',
+			'NEXT_PUBLIC_APP_URL',
 			'NEXTAUTH_SECRET',
 		] as const,
 		optional: [
@@ -404,7 +410,12 @@ export const appRequirements = {
 		] as const,
 	},
 	'kyc-server': {
-		required: ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_DB_URL'] as const,
+		required: [
+			'SUPABASE_URL',
+			'SUPABASE_ANON_KEY',
+			'SUPABASE_DB_URL',
+			'APP_URL',
+		] as const,
 		optional: [
 			'RP_ID',
 			'RP_NAME',

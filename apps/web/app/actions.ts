@@ -1,5 +1,6 @@
 'use server'
 
+import { appEnvConfig } from '@packages/lib/config'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
@@ -31,12 +32,13 @@ const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
 
 export async function signUpAction(formData: FormData): Promise<AuthResponse> {
+	const appConfig = appEnvConfig('web')
 	const supabase = await createSupabaseServerClient()
 	const email = formData.get('email') as string
 	const signInWithOptOpt = {
 		email,
 		options: {
-			emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?redirect_to=/otp-validation?email=${email}`,
+			emailRedirectTo: `${appConfig.deployment.appUrl}/auth/callback?redirect_to=/otp-validation?email=${email}`,
 			shouldCreateUser: true,
 		},
 	}
@@ -114,7 +116,9 @@ export async function signOutAction(): Promise<void> {
 	}
 }
 
-export async function forgotPasswordAction(formData: FormData): Promise<void> {
+export async function requestResetAccountAction(
+	formData: FormData,
+): Promise<void> {
 	const email = formData.get('email')?.toString()
 	const supabase = await createSupabaseServerClient()
 	const origin = (await headers()).get('origin')

@@ -230,6 +230,7 @@ export type Database = {
 			devices: {
 				Row: {
 					aaguid: string
+					address: string
 					backup_state: Database['public']['Enums']['backup_state']
 					created_at: string
 					credential_id: string
@@ -249,6 +250,7 @@ export type Database = {
 				}
 				Insert: {
 					aaguid?: string
+					address?: string
 					backup_state?: Database['public']['Enums']['backup_state']
 					created_at?: string
 					credential_id: string
@@ -268,6 +270,7 @@ export type Database = {
 				}
 				Update: {
 					aaguid?: string
+					address?: string
 					backup_state?: Database['public']['Enums']['backup_state']
 					created_at?: string
 					credential_id?: string
@@ -923,11 +926,11 @@ export type Database = {
 					id: string
 					image_url: string | null
 					kinder_count: number
+					kindler_id: string
 					min_investment: number
-					owner_id: string
 					percentage_complete: number
 					project_location: string | null
-					slug: string | null
+					slug: string
 					social_links: Json
 					target_amount: number
 					title: string
@@ -941,11 +944,11 @@ export type Database = {
 					id?: string
 					image_url?: string | null
 					kinder_count?: number
+					kindler_id: string
 					min_investment: number
-					owner_id: string
 					percentage_complete?: number
 					project_location?: string | null
-					slug?: string | null
+					slug: string
 					social_links?: Json
 					target_amount: number
 					title: string
@@ -959,11 +962,11 @@ export type Database = {
 					id?: string
 					image_url?: string | null
 					kinder_count?: number
+					kindler_id?: string
 					min_investment?: number
-					owner_id?: string
 					percentage_complete?: number
 					project_location?: string | null
-					slug?: string | null
+					slug?: string
 					social_links?: Json
 					target_amount?: number
 					title?: string

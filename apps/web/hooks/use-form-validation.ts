@@ -24,7 +24,7 @@ export function useFormValidation(rules: ValidationRules = {}) {
 
 	const validateEmail = (value: string) => {
 		if (!rules.email) return
-		const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+		const emailRegex = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 		setIsEmailInvalid(!emailRegex.test(value))
 	}
 
