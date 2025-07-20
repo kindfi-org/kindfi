@@ -582,7 +582,13 @@ insert into public.profiles (id, role, display_name, bio, image_url, email) valu
   ('8a3c9070-d0ea-44d4-94c6-1e12b6787b6c', 'kinder', 'Diego Taylor', 'Creating art that reflects social change and community empowerment.', 'https://randomuser.me/api/portraits/men/11.jpg', 'diego.taylor@example.com'),
   ('ad549c42-5906-41a8-a08f-5d810e01d2eb', 'kinder', 'Alice Lopez', 'Mobilizing rapid aid to disaster-affected communities worldwide.', 'https://randomuser.me/api/portraits/women/16.jpg', 'alice.lopez@example.com'),
   ('2b0a69d6-f304-47d3-ab4c-1b0dd816adf3', 'kinder', 'Zoe Perez', 'Training young leaders to advocate for change and justice.', 'https://randomuser.me/api/portraits/women/17.jpg', 'zoe.perez@example.com'),
-  ('81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'kinder', 'Frank Hall', 'Empowering youth with mindfulness tools and support.', 'https://randomuser.me/api/portraits/men/12.jpg', 'frank.hall@example.com');
+  ('81d3ff4d-b5de-42e7-a53d-26f275fe7668', 'kinder', 'Frank Hall', 'Empowering youth with mindfulness tools and support.', 'https://randomuser.me/api/portraits/men/12.jpg', 'frank.hall@example.com')
+  on conflict (id) do update set
+  display_name = excluded.display_name,
+  bio = excluded.bio,
+  image_url = excluded.image_url,
+  email = excluded.email  
+  where public.profiles.id = excluded.id;
 
 -- Insert project members for each project
 insert into public.project_members (project_id, user_id, role, title) values
