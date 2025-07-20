@@ -24,6 +24,7 @@ import { useStellarContext } from '~/hooks/stellar/stellar-context'
 export function PasskeyRegistrationComponent() {
 	const router = useRouter()
 	const [userEmail, setUserEmail] = useState('')
+	const [userId, setUserId] = useState('')
 	const isWebAuthnSupported = useWebAuthnSupport()
 	const { onRegister } = useStellarContext()
 
@@ -34,7 +35,7 @@ export function PasskeyRegistrationComponent() {
 		handleRegister,
 		isAlreadyRegistered,
 		reset,
-	} = usePasskeyRegistration(userEmail, { onRegister })
+	} = usePasskeyRegistration(userEmail, { onRegister, userId })
 
 	// Get user email from current session
 	useEffect(() => {
@@ -45,6 +46,7 @@ export function PasskeyRegistrationComponent() {
 					const { user } = await response.json()
 					if (user?.email) {
 						setUserEmail(user.email)
+						setUserId(user.id || '') // Set userId if available
 					} else {
 						// If no user session, redirect to sign-up
 						router.push('/sign-up')

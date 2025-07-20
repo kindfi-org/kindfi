@@ -47,17 +47,16 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 
 		const { data: user, error: userError } = await supabase
 			.from('profiles')
-			.select()
+			.select('role, display_name, bio, image_url')
 			.eq('id', credentials.userId)
 			.single()
 		const { data: device, error: deviceError } = await supabase
 			.from('devices')
-			.select()
+			.select('*')
 			.eq('credential_id', deviceCredentials.credentialId)
 			.eq('pub_key', deviceCredentials.pubKey)
 			.eq('user_id', credentials.userId)
 			.single()
-		// TODO: Create device table in supabase
 		const deviceData = device as Tables<'devices'> | null
 		const userData = user as Tables<'profiles'> | null
 

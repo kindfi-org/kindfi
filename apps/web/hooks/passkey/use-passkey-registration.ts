@@ -9,7 +9,10 @@ import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 
 export const usePasskeyRegistration = (
 	identifier: string,
-	{ onRegister }: { onRegister?: (res: RegistrationResponseJSON) => void },
+	{
+		onRegister,
+		userId,
+	}: { onRegister?: (res: RegistrationResponseJSON) => void; userId?: string },
 ) => {
 	const appConfig = appEnvConfig('web')
 	const baseUrl = appConfig.externalApis.kyc.baseUrl
@@ -45,6 +48,7 @@ export const usePasskeyRegistration = (
 					body: JSON.stringify({
 						identifier,
 						origin: window.location.origin,
+						userId,
 					}),
 				},
 			)
@@ -69,6 +73,7 @@ export const usePasskeyRegistration = (
 						registrationResponse,
 						identifier,
 						origin: window.location.origin,
+						userId,
 					}),
 				},
 			)

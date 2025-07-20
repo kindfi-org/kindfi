@@ -4,6 +4,7 @@ import type { NextConfig } from 'next'
 const appConfig = appEnvConfig('web')
 
 const nextConfig: NextConfig = {
+	serverExternalPackages: ['@packages/lib'],
 	async headers() {
 		// Only apply strict headers in production
 		if (appConfig.env.nodeEnv === 'production') {

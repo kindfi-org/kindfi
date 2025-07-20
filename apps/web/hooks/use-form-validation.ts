@@ -1,3 +1,6 @@
+import { useSupabaseQuery } from '@packages/lib/hooks'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
+import { throttle } from 'lodash'
 import { useState } from 'react'
 
 /**
@@ -12,36 +15,41 @@ interface ValidationRules {
 	password?: boolean
 	minLength?: number
 }
+type ValidFieldName = 'email'
 
 export function useFormValidation(rules: ValidationRules = {}) {
 	const [isEmailInvalid, setIsEmailInvalid] = useState(false)
-	const [isPasswordInvalid, setIsPasswordInvalid] = useState(false)
+	const [doesEmailExist, setDoesEmailExist] = useState('')
+	const supabase = createSupabaseBrowserClient()
 
 	const resetValidation = () => {
 		setIsEmailInvalid(false)
-		setIsPasswordInvalid(false)
+		setDoesEmailExist('')
 	}
 
 	const validateEmail = (value: string) => {
 		if (!rules.email) return
 		const emailRegex = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-		setIsEmailInvalid(!emailRegex.test(value))
-	}
+		const newEmailValidation = emailRegex.test(value)
+		setIsEmailInvalid(!newEmailValidation)
 
-	const validatePassword = (value: string) => {
-		if (!rules.password) return
-		setIsPasswordInvalid(value.length < (rules.minLength || 6))
+		throttle(async () => {
+			if (!newEmailValidation) return
+			const { data } = await supabase
+				.from('profiles')
+				.select('id')
+				.eq('email', value)
+				.single()
+			setDoesEmailExist(data?.id || '')
+		}, 750)()
 	}
-
-	type ValidFieldName = 'email' | 'password'
 
 	const validateField = (name: ValidFieldName, value: string) => {
 		switch (name) {
 			case 'email':
 				validateEmail(value)
 				break
-			case 'password':
-				validatePassword(value)
+			default:
 				break
 		}
 	}
@@ -55,10 +63,9 @@ export function useFormValidation(rules: ValidationRules = {}) {
 
 	return {
 		isEmailInvalid,
-		isPasswordInvalid,
+		doesEmailExist,
 		handleValidation,
 		validateEmail,
-		validatePassword,
 		resetValidation,
 	}
 }

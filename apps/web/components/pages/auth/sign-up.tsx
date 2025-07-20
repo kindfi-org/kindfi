@@ -20,6 +20,7 @@ import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { useFormValidation } from '~/hooks/use-form-validation'
+import { cn } from '~/lib/utils'
 
 export function SignupComponent() {
 	const router = useRouter()
@@ -32,7 +33,7 @@ export function SignupComponent() {
 		},
 	)
 
-	const { isEmailInvalid, handleValidation, resetValidation } =
+	const { isEmailInvalid, doesEmailExist, handleValidation, resetValidation } =
 		useFormValidation({
 			email: true,
 		})
@@ -94,83 +95,104 @@ export function SignupComponent() {
 
 				<CardContent>
 					<form className="space-y-4" aria-label="Sign up" onSubmit={onSubmit}>
-						<div className="space-y-6">
-							<div className="space-y-2">
-								<Label htmlFor="email" id="email-label">
-									Email
-								</Label>
-								<div className="relative">
-									<Mail
-										className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
-										aria-hidden="true"
-									/>
-									<Input
-										id="email"
-										name="email"
-										type="email"
-										placeholder="you@example.com"
-										className="pl-10"
-										required
-										aria-labelledby="email-label"
-										aria-describedby={
-											isEmailInvalid ? 'email-error' : 'email-description'
-										}
-										aria-invalid={isEmailInvalid}
-										onChange={onEmailChange}
-										aria-required="true"
-										value={email}
-									/>
-									<span id="email-description" className="sr-only">
-										Enter your email address to create your account
-									</span>
-									<span id="email-error" className="sr-only">
-										Please enter a valid email address
-									</span>
-								</div>
-							</div>
-
-							<Button
-								className="w-full gradient-btn text-white"
-								type="submit"
-								disabled={isSubmitting || isEmailInvalid || !email}
+						{success && (
+							<output
+								className="text-green-600 text-sm text-center"
+								role="alert"
 								aria-live="polite"
-								aria-busy={isSubmitting}
 							>
-								{isSubmitting ? (
-									'Creating account...'
-								) : (
-									<>
-										Create account <UserPlus className="ml-2 h-4 w-4" />
-									</>
-								)}
-							</Button>
+								{success}
+							</output>
+						)}
 
-							<PasskeyInfoDialog />
+						{error && (
+							<output
+								className="text-red-600 text-sm text-center"
+								role="alert"
+								aria-live="assertive"
+							>
+								{error}
+							</output>
+						)}
 
-							{success && (
-								<div
-									className="text-green-600 text-sm text-center"
-									role="alert"
-									aria-live="polite"
-								>
-									{success}
-								</div>
-							)}
-
-							{error && (
-								<div
-									className="text-red-600 text-sm text-center"
-									role="alert"
-									aria-live="assertive"
-								>
-									{error}
-								</div>
-							)}
+						<div className="space-y-2">
+							<Label htmlFor="email" id="email-label">
+								Email
+							</Label>
+							<div className="space-y-1 pb-6 relative">
+								<Mail
+									className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
+									aria-hidden="true"
+								/>
+								<Input
+									id="email"
+									name="email"
+									type="email"
+									placeholder="you@example.com"
+									required
+									aria-labelledby="email-label"
+									aria-describedby={
+										isEmailInvalid ? 'email-error' : 'email-description'
+									}
+									aria-invalid={isEmailInvalid}
+									onChange={onEmailChange}
+									aria-required="true"
+									value={email}
+									className={cn('pl-10', {
+										'border-red-500 outline-none ring-2 ring-red-500':
+											email &&
+											(isEmailInvalid || (!isEmailInvalid && doesEmailExist)),
+										'border-green-500 outline-none ring-2 ring-green-500':
+											!isEmailInvalid && !doesEmailExist && email,
+									})}
+								/>
+								{email &&
+									(isEmailInvalid || (!isEmailInvalid && doesEmailExist)) && (
+										<span
+											className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
+											role="alert"
+											aria-live="polite"
+										>
+											{isEmailInvalid ? (
+												'Please enter a valid email address.'
+											) : (
+												<>
+													Account is already registered. Please{' '}
+													<Link
+														className="text-primary font-medium hover:underline"
+														href="/sign-in"
+													>
+														sign in
+													</Link>{' '}
+													instead.
+												</>
+											)}
+										</span>
+									)}
+							</div>
 						</div>
+
+						<Button
+							className="w-full gradient-btn text-white"
+							type="submit"
+							disabled={isSubmitting || isEmailInvalid || !email}
+							aria-live="polite"
+							aria-busy={isSubmitting}
+						>
+							{isSubmitting ? (
+								'Creating account...'
+							) : (
+								<>
+									Create account <UserPlus className="ml-2 h-4 w-4" />
+								</>
+							)}
+						</Button>
+
+						<PasskeyInfoDialog />
 					</form>
 				</CardContent>
 				<CardFooter className="flex flex-col space-y-4 border-t p-6">
-					<div className="text-center text-sm text-muted-foreground">
+					<div className="text-center text-muted-foreground">
 						Already have an account?{' '}
 						<Link
 							href="/sign-in"

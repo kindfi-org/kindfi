@@ -27,7 +27,7 @@ import {
 } from '~/components/base/input-otp'
 import { OTPTips } from '~/components/shared/otp-tips'
 
-export default function VerifyOTPPage() {
+export function VerifyOTPComponent() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const [otp, setOtp] = useState('')

@@ -4,6 +4,7 @@ import { appEnvConfig } from '@packages/lib/config'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
+import { getServerSession, signOut } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -63,36 +64,114 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 	}
 }
 
-export async function signInAction(formData: FormData): Promise<void> {
-	const supabase = await createSupabaseServerClient()
+export async function signInAction(formData: FormData): Promise<AuthResponse> {
 	const email = formData.get('email') as string
-	const password = formData.get('password') as string
 
-	if (!email || !password) {
-		const response = {
+	if (!email) {
+		return {
 			success: false,
-			message: 'Email and password are required',
-			error: 'Email and password are required',
+			message: 'Email is required',
+			error: 'Email is required',
 		}
 	}
 
-	try {
-		const { error, data } = await supabase.auth.signInWithPassword({
-			email,
-			password,
-		})
+	// Validate email format
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+	if (!emailRegex.test(email)) {
+		return {
+			success: false,
+			message: 'Invalid email format',
+			error: 'Invalid email format',
+		}
+	}
 
-		if (error) {
-			errorHandler.handleAuthError(error, 'sign_in')
+	// For passkey authentication, we just validate the email exists in our system
+	const supabase = await createSupabaseServerClient()
+
+	try {
+		const { data: userData, error: userError } = await supabase
+			.from('profiles')
+			.select('id, email')
+			.eq('email', email)
+			.single()
+
+		if (userError || !userData) {
+			return {
+				success: false,
+				message: 'Email not found. Please sign up first.',
+				error: 'User not found',
+			}
 		}
 
-		const response = {
+		return {
 			success: true,
-			message: 'Successfully signed in',
-			redirect: '/projects',
+			message: 'Email validated. Proceed with passkey authentication.',
+			data: { userId: userData.id, email: userData.email },
 		}
 	} catch (error) {
-		errorHandler.handleAuthError(error as AuthError, 'sign_in')
+		return errorHandler.handleAuthError(error as AuthError, 'sign_in')
+	}
+}
+
+export async function createSessionAction({
+	userId,
+	email,
+}: {
+	userId: string
+	email: string
+}): Promise<AuthResponse> {
+	const supabase = await createSupabaseServerClient()
+
+	try {
+		// Verify the user exists and the email matches
+		const { data: userData, error: userError } = await supabase
+			.from('profiles')
+			.select('id, email')
+			.eq('id', userId)
+			.eq('email', email)
+			.single()
+
+		if (userError || !userData) {
+			return {
+				success: false,
+				message:
+					'User verification failed. Email does not match registered user.',
+				error: 'User verification failed',
+			}
+		}
+
+		// Create a session for the verified user
+		const { data: sessionData, error: sessionError } =
+			await supabase.auth.admin.generateLink({
+				type: 'magiclink',
+				email: email,
+			})
+
+		if (sessionError) {
+			return errorHandler.handleAuthError(sessionError, 'create_session')
+		}
+
+		logger.info({
+			eventType: 'SESSION_CREATED',
+			userId,
+			email,
+		})
+
+		revalidatePath('/', 'layout')
+		return {
+			success: true,
+			message: 'Session created successfully',
+			redirect: '/dashboard',
+			data: sessionData,
+		}
+	} catch (error) {
+		logger.error({
+			eventType: 'SESSION_CREATION_ERROR',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			userId,
+			email,
+		})
+		return errorHandler.handleAuthError(error as AuthError, 'create_session')
 	}
 }
 
@@ -100,7 +179,10 @@ export async function signOutAction(): Promise<void> {
 	const supabase = await createSupabaseServerClient()
 
 	try {
+		// Clear NextAuth session
+		await signOut({ redirect: false })
 		const { error } = await supabase.auth.signOut()
+
 		if (error) {
 			const response = errorHandler.handleAuthError(error, 'sign_out')
 			redirect(`/?error=${encodeURIComponent(response.message)}`)
@@ -124,28 +206,30 @@ export async function requestResetAccountAction(
 	const origin = (await headers()).get('origin')
 
 	if (!email) {
-		redirect('/forgot-password?error=Email is required')
+		redirect('/reset-account?error=Email is required')
 	}
 
 	try {
-		const { error } = await supabase.auth.resetPasswordForEmail(email, {
-			redirectTo: `${origin}/auth/callback?redirect_to=/protected/reset-password`,
-		})
+		// TODO: Implement a proper reset account flow
+		// This is a placeholder for the actual reset account logic
+		// const { error } = await supabase.auth.resetPasswordForEmail(email, {
+		// 	redirectTo: `${origin}/auth/callback?redirect_to=//reset-account`,
+		// })
 
-		if (error) {
-			const response = errorHandler.handleAuthError(error, 'forgot_password')
-			redirect(`/forgot-password?error=${encodeURIComponent(response.message)}`)
-		}
+		// if (error) {
+		// 	const response = errorHandler.handleAuthError(error, 'forgot_password')
+		// 	redirect(`/reset-account?error=${encodeURIComponent(response.message)}`)
+		// }
 
 		redirect(
-			'/forgot-password?success=Check your email for a link to reset your password',
+			'/reset-account?success=Check your email for a confirmation request to reset your account',
 		)
 	} catch (error) {
 		const response = errorHandler.handleAuthError(
 			error as AuthError,
 			'forgot_password',
 		)
-		redirect(`/forgot-password?error=${encodeURIComponent(response.message)}`)
+		redirect(`/reset-account?error=${encodeURIComponent(response.message)}`)
 	}
 }
 

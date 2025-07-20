@@ -5,124 +5,9 @@ import type {
 	ValidatedEnvInput,
 } from '~/packages/lib/src/types/config.types'
 
-// App-specific cached instances
-let _webEnv: AppEnvInterface | null = null
-let _kycServerEnv: AppEnvInterface | null = null
-let _genericEnv: AppEnvInterface | null = null
-
-// Function to create app-specific schema
-function createAppSchema<T extends AppName>(appName: T) {
-	const requirements = appRequirements[appName]
-	const schemaShape: z.ZodRawShape = { ...baseEnvSchema.shape }
-
-	// Make required fields non-optional
-	for (const field of requirements.required) {
-		const fieldSchema = baseEnvSchema.shape[field]
-		if (fieldSchema) {
-			// Create a new required version of the schema
-			const unwrapped = fieldSchema.isOptional()
-				? fieldSchema.unwrap()
-				: fieldSchema
-			schemaShape[field] = unwrapped
-		}
-	}
-
-	return z.object(schemaShape)
-}
-
-// App detection helper
-function detectApp(): AppName | undefined {
-	// Check package.json name or process.cwd() to determine app
-	if (typeof process !== 'undefined') {
-		try {
-			const packagePath = process.cwd() || process.env.PWD || ''
-			if (packagePath.includes('/apps/web')) return 'web'
-			if (packagePath.includes('/apps/kyc-server')) return 'kyc-server'
-		} catch {
-			// Fallback to process.env.APP_NAME if available
-			return process.env.APP_NAME as AppName
-		}
-	}
-	return (process.env.APP_NAME as 'web' | 'kyc-server') || undefined
-}
-
-// Generic getEnv function
-export function getEnv<T extends AppName>(appName?: T): AppEnvInterface {
-	try {
-		const schema = appName ? createAppSchema(appName) : baseEnvSchema
-		const envVars = process.env as Record<string, string | undefined>
-
-		// console.log('🔍 Environment Variables Read:', {
-		// 	appName,
-		// 	envVarsKeys: Object.keys(envVars),
-		// 	hasRequiredVars: appName
-		// 		? appRequirements[appName].required.map((key) => ({
-		// 				key,
-		// 				exists: !!envVars[key],
-		// 				value: envVars[key]
-		// 					? `${envVars[key]?.substring(0, 10)}...`
-		// 					: 'undefined',
-		// 			}))
-		// 		: 'generic',
-		// })
-
-		// console.log('🏗️ Schema Info:', {
-		// 	schemaKeys: Object.keys(schema.shape),
-		// 	requiredFields: appName ? appRequirements[appName].required : 'none',
-		// })
-
-		// Perform a safe parse first to get detailed error information
-		const result = schema.safeParse(envVars)
-
-		if (!result.success) {
-			console.error('❌ Schema validation failed:', {
-				errorCount: result.error.errors.length,
-				errors: result.error.errors.map((err) => ({
-					path: err.path.join('.'),
-					message: err.message,
-					code: err.code,
-					received: err.code === 'invalid_type' ? err.received : undefined,
-					expected: err.code === 'invalid_type' ? err.expected : undefined,
-				})),
-			})
-			throw result.error
-		}
-
-		// console.log('✅ Schema validation successful, transforming environment...')
-		const parsed = result.data
-
-		return transformEnv(parsed)
-	} catch (error) {
-		console.error('💥 Error in getEnv function:', {
-			errorType: error?.constructor?.name,
-			message: error instanceof Error ? error.message : 'Unknown error',
-			appName,
-		})
-
-		if (error instanceof z.ZodError) {
-			const missingVars = error.errors
-				.map((err) => `  • ${err.path.join('.')}: ${err.message}`)
-				.join('\n')
-			throw new Error(
-				`❌ Environment validation failed for ${appName || 'generic'}:\n${missingVars}\n\nPlease check your .env file and ensure all required variables are set.`,
-			)
-		}
-		throw error
-	}
-}
-
 // Transform function with explicit type annotation
-export function transformEnv(data: ValidatedEnvInput): AppEnvInterface {
-	// console.log('🔄 Transforming environment variables:', {
-	// 	dataKeys: Object.keys(data),
-	// 	sampleData: {
-	// 		nodeEnv: data.NODE_ENV,
-	// 		hasSupabaseUrl: !!data.NEXT_PUBLIC_SUPABASE_URL || !!data.SUPABASE_URL,
-	// 		hasSupabaseKey:
-	// 			!!data.NEXT_PUBLIC_SUPABASE_ANON_KEY || !!data.SUPABASE_ANON_KEY,
-	// 	},
-	// })
-
+export function transformEnv(): AppEnvInterface {
+	const data = process.env as ValidatedEnvInput
 	return {
 		auth: {
 			secret: data.NEXTAUTH_SECRET || 'super-secret',
@@ -183,7 +68,7 @@ export function transformEnv(data: ValidatedEnvInput): AppEnvInterface {
 			vercelUrl: data.VERCEL_URL || '',
 			appUrl:
 				data.NEXT_PUBLIC_APP_URL || data.APP_URL || 'http://localhost:3000',
-			port: data.PORT || 3000,
+			port: Number(data.PORT) || 3000,
 		},
 		kycServer: {
 			allowedOrigins: data.ALLOWED_ORIGINS || '',
@@ -205,58 +90,214 @@ export function transformEnv(data: ValidatedEnvInput): AppEnvInterface {
 	} as const
 }
 
-// ? Main export function with app detection
-/**
- * Get the environment configuration for a specific app.
- * This function auto-detects the app based on the current working directory or uses the provided app name.
- * It returns the environment configuration for the detected app, ensuring that all required environment variables
- * are validated and transformed into a consistent format.
- *
- * @param appName Optional app name to override auto-detection.
- * If not provided, the function will attempt to detect the app based on the current working directory
- * @returns The environment configuration for the detected app.
- * @throws {Error} If the environment validation fails or if required variables are missing.
- * @example
- *
- * import { appEnvConfig } from '@packages/lib/config'
- * const config = appEnvConfig('web') // Explicitly specify 'web' app
- * // or
- * const config = appEnvConfig() // Auto-detects the app based on current working directory
- * // Use the config object to access environment variables
- * console.log(config.auth.secret) // Access the auth secret
- */
-export function appEnvConfig(appName?: AppName): AppEnvInterface {
-	// Auto-detect app if not provided
-	const detectedApp = appName || detectApp()
+// Create app-specific schema that validates the transformed config
+function createAppConfigSchema<T extends AppName>(appName: T) {
+	const requirements = appRequirements[appName]
 
-	try {
-		switch (detectedApp) {
-			case 'web':
-				if (!_webEnv || Object.keys(_webEnv).length === 0) {
-					_webEnv = getEnv('web')
-				}
-				return _webEnv
-			case 'kyc-server':
-				if (!_kycServerEnv || Object.keys(_kycServerEnv).length === 0) {
-					_kycServerEnv = getEnv('kyc-server')
-				}
-				return _kycServerEnv
-			default:
-				if (!_genericEnv || Object.keys(_genericEnv).length === 0) {
-					_genericEnv = getEnv()
-				}
-				return _genericEnv
+	const baseSchema = z.object({
+		auth: z.object({
+			secret: z.string(),
+			url: z.string(),
+			token: z.object({
+				expiration: z.number(),
+				update: z.number(),
+			}),
+		}),
+		database: z.object({
+			url: z.string(),
+			anonKey: z.string(),
+			serviceRoleKey: z.string(),
+			connectionString: z.string(),
+		}),
+		features: z.object({
+			enableEscrowFeature: z.boolean(),
+		}),
+		vapid: z.object({
+			email: z.string(),
+			privateKey: z.string(),
+			publicKey: z.string(),
+		}),
+		env: z.object({
+			nodeEnv: z.enum(['development', 'production', 'test']),
+			appEnv: z.enum(['development', 'production', 'test']),
+		}),
+		stellar: z.object({
+			networkUrl: z.string(),
+			networkPassphrase: z.string(),
+			factoryContractId: z.string(),
+			accountSecp256r1ContractWasm: z.string(),
+			rpcUrl: z.string(),
+			horizonUrl: z.string(),
+		}),
+		externalApis: z.object({
+			trustlessWork: z.object({
+				url: z.string(),
+				apiKey: z.string(),
+			}),
+			kyc: z.object({
+				baseUrl: z.string(),
+			}),
+		}),
+		analytics: z.object({
+			gaId: z.string(),
+		}),
+		deployment: z.object({
+			vercelUrl: z.string(),
+			appUrl: z.string(),
+			port: z.number(),
+		}),
+		kycServer: z.object({
+			allowedOrigins: z.string(),
+		}),
+		indexer: z.object({
+			chainId: z.string(),
+			endpoint: z.string(),
+		}),
+		passkey: z.object({
+			redis: z.object({
+				url: z.string(),
+			}),
+			rpId: z.array(z.string()),
+			rpName: z.array(z.string()),
+			expectedOrigin: z.array(z.string()),
+			challengeTtlSeconds: z.number(),
+			challengeTtlMs: z.number(),
+		}),
+	})
+
+	// Create validation rules based on app requirements
+	const validationRules = createValidationRules(requirements)
+
+	return baseSchema.superRefine((config, ctx) => {
+		validateRequiredFields(config, validationRules, ctx)
+	})
+}
+
+// Helper to create validation rules based on app requirements
+function createValidationRules<T extends AppName>(
+	requirements: (typeof appRequirements)[T],
+) {
+	const rules: Record<string, { path: string[]; isRequired: boolean }> = {}
+
+	// Map environment variables to config paths
+	const envToConfigMap: Record<string, string[]> = {
+		NEXT_PUBLIC_SUPABASE_URL: ['database', 'url'],
+		SUPABASE_URL: ['database', 'url'],
+		NEXT_PUBLIC_SUPABASE_ANON_KEY: ['database', 'anonKey'],
+		SUPABASE_ANON_KEY: ['database', 'anonKey'],
+		SUPABASE_SERVICE_ROLE_KEY: ['database', 'serviceRoleKey'],
+		SUPABASE_DB_URL: ['database', 'connectionString'],
+		NEXT_PUBLIC_KYC_API_BASE_URL: ['externalApis', 'kyc', 'baseUrl'],
+		NEXT_PUBLIC_APP_URL: ['deployment', 'appUrl'],
+		APP_URL: ['deployment', 'appUrl'],
+		NEXTAUTH_SECRET: ['auth', 'secret'],
+		ALLOWED_ORIGINS: ['kycServer', 'allowedOrigins'],
+		PORT: ['deployment', 'port'],
+	}
+
+	// Mark required fields
+	for (const envVar of requirements.required) {
+		const configPath = envToConfigMap[envVar]
+		if (configPath) {
+			rules[envVar] = { path: configPath, isRequired: true }
 		}
+	}
+
+	return rules
+}
+
+// Validate required fields in the transformed config
+function validateRequiredFields(
+	config: AppEnvInterface,
+	rules: Record<string, { path: string[]; isRequired: boolean }>,
+	ctx: z.RefinementCtx,
+) {
+	for (const [envVar, rule] of Object.entries(rules)) {
+		if (rule.isRequired) {
+			const value = getNestedValue(config, rule.path)
+			if (!value || value === '') {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: rule.path,
+					message: `Required environment variable ${envVar} is missing or empty`,
+				})
+			}
+		}
+	}
+}
+
+// Helper to get nested value from object
+function getNestedValue<T = unknown>(
+	obj: AppEnvInterface,
+	path: string[],
+): T | undefined {
+	return path.reduce((current: unknown, key: string) => {
+		if (current && typeof current === 'object' && key in current) {
+			return (current as Record<string, unknown>)[key]
+		}
+		return undefined
+	}, obj) as T | undefined
+}
+
+// App detection helper
+function detectApp(): AppName | undefined {
+	// Check package.json name or process.cwd() to determine app
+	if (typeof process !== 'undefined') {
+		try {
+			const packagePath = process.cwd() || process.env.PWD || ''
+			if (packagePath.includes('/apps/web')) return 'web'
+			if (packagePath.includes('/apps/kyc-server')) return 'kyc-server'
+		} catch {
+			// Fallback to process.env.APP_NAME if available
+			return process.env.APP_NAME as AppName
+		}
+	}
+	return (process.env.APP_NAME as 'web' | 'kyc-server') || undefined
+}
+
+// Generic appEnvConfig function that validates transformed config
+export function appEnvConfig<T extends AppName>(appName?: T): AppEnvInterface {
+	try {
+		const app = appName || detectApp()
+		// Transform the environment first
+		const transformedConfig = transformEnv()
+
+		// Validate the transformed config if app name is provided
+		if (appName) {
+			const schema = createAppConfigSchema(appName)
+			const result = schema.safeParse(transformedConfig)
+
+			if (!result.success) {
+				console.error('❌ Config validation failed:', {
+					errorCount: result.error.errors.length,
+					errors: result.error.errors.map((err) => ({
+						path: err.path.join('.'),
+						message: err.message,
+						code: err.code,
+					})),
+				})
+
+				const missingVars = result.error.errors
+					.map((err) => `  • ${err.path.join('.')}: ${err.message}`)
+					.join('\n')
+				throw new Error(
+					`❌ Environment validation failed for ${appName}:\n${missingVars}\n\nPlease check your .env file and ensure all required variables are set.`,
+				)
+			}
+
+			console.log(
+				`✅ Environment variables for ${appName} validated successfully.`,
+			)
+		}
+
+		return transformedConfig
 	} catch (error) {
-		console.error(
-			`Failed to get environment configuration for ${detectedApp}. Please check your environment variables.`,
-			{
-				errorType: error?.constructor?.name,
-				message: error instanceof Error ? error.message : 'Unknown error',
-				appName: detectedApp,
-			},
-		)
-		return transformEnv(process.env as ValidatedEnvInput)
+		console.error('💥 Error in getEnv function:', {
+			errorType: error?.constructor?.name,
+			message: error instanceof Error ? error.message : 'Unknown error',
+			appName,
+		})
+		throw error
 	}
 }
 

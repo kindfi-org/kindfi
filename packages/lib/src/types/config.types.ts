@@ -14,72 +14,72 @@ export type ValidatedEnvInput = z.infer<typeof baseEnvSchema>
 export type AppEnv = ReturnType<typeof transformEnv>
 
 export interface AppEnvInterface {
-	readonly auth: {
-		readonly secret: string
-		readonly url: string
-		readonly token: {
-			readonly expiration: number
-			readonly update: number
+	auth: {
+		secret: string
+		url: string
+		token: {
+			expiration: number
+			update: number
 		}
 	}
-	readonly database: {
-		readonly url: string
-		readonly connectionString: string
-		readonly anonKey: string
-		readonly serviceRoleKey: string
+	database: {
+		url: string
+		connectionString: string
+		anonKey: string
+		serviceRoleKey: string
 	}
-	readonly features: {
-		readonly enableEscrowFeature: boolean
+	features: {
+		enableEscrowFeature: boolean
 	}
-	readonly vapid: {
-		readonly email: string
-		readonly privateKey: string
-		readonly publicKey: string
+	vapid: {
+		email: string
+		privateKey: string
+		publicKey: string
 	}
-	readonly env: {
-		readonly nodeEnv: string
-		readonly appEnv: string
+	env: {
+		nodeEnv: string
+		appEnv: string
 	}
-	readonly stellar: {
-		readonly networkUrl: string
-		readonly networkPassphrase: string
-		readonly factoryContractId: string
-		readonly accountSecp256r1ContractWasm: string
-		readonly rpcUrl: string
-		readonly horizonUrl: string
+	stellar: {
+		networkUrl: string
+		networkPassphrase: string
+		factoryContractId: string
+		accountSecp256r1ContractWasm: string
+		rpcUrl: string
+		horizonUrl: string
 	}
-	readonly externalApis: {
-		readonly trustlessWork: {
-			readonly url: string
-			readonly apiKey: string
+	externalApis: {
+		trustlessWork: {
+			url: string
+			apiKey: string
 		}
-		readonly kyc: {
-			readonly baseUrl: string
+		kyc: {
+			baseUrl: string
 		}
 	}
-	readonly analytics: {
-		readonly gaId: string
+	analytics: {
+		gaId: string
 	}
-	readonly deployment: {
-		readonly appUrl: string
-		readonly vercelUrl: string
-		readonly port: number
+	deployment: {
+		appUrl: string
+		vercelUrl: string
+		port: number
 	}
-	readonly kycServer: {
-		readonly allowedOrigins: string
+	kycServer: {
+		allowedOrigins: string
 	}
-	readonly indexer: {
-		readonly chainId: string
-		readonly endpoint: string
+	indexer: {
+		chainId: string
+		endpoint: string
 	}
-	readonly passkey: {
-		readonly redis: {
-			readonly url: string
+	passkey: {
+		redis: {
+			url: string
 		}
-		readonly rpId: string[]
-		readonly rpName: string[]
-		readonly expectedOrigin: string[]
-		readonly challengeTtlSeconds: number
-		readonly challengeTtlMs: number
+		rpId: string[]
+		rpName: string[]
+		expectedOrigin: string[]
+		challengeTtlSeconds: number
+		challengeTtlMs: number
 	}
 }

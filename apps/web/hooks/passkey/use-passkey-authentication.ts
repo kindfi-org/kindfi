@@ -1,7 +1,8 @@
-import { appEnvConfig } from '@packages/lib/config/app-env.config'
+import { appEnvConfig, transformEnv } from '@packages/lib/config/app-env.config'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { createSessionAction, signInAction } from '~/app/actions'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import type { PresignResponse, SignParams } from '~/lib/types'
 
@@ -10,13 +11,13 @@ export const usePasskeyAuthentication = (
 	{
 		onSign,
 		prepareSign,
+		userId,
 	}: {
 		onSign?: (params: SignParams) => void
 		prepareSign?: () => Promise<PresignResponse>
+		userId?: string
 	},
 ) => {
-	const appConfig = appEnvConfig('web')
-	const baseUrl = appConfig.externalApis.kyc.baseUrl
 	const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false)
 	const [authSuccess, setAuthSuccess] = useState<string>('')
 	const [authError, setAuthError] = useState<string>('')
@@ -29,6 +30,8 @@ export const usePasskeyAuthentication = (
 	}
 
 	const handleAuth = async () => {
+		const appConfig = appEnvConfig('web')
+		const baseUrl = appConfig.externalApis.kyc.baseUrl
 		// Initiates the authentication process with WebAuthn and prepares for Stellar signing
 		setIsAuthenticating(true)
 		setAuthSuccess('')
@@ -73,6 +76,7 @@ export const usePasskeyAuthentication = (
 						identifier,
 						authenticationResponse,
 						origin: window.location.origin,
+						userId,
 					}),
 				},
 			)
@@ -85,16 +89,32 @@ export const usePasskeyAuthentication = (
 			const verificationJSON = await verificationResp.json()
 
 			if (verificationJSON?.verified) {
-				const message = 'User authenticated!'
+				// Create session after successful passkey verification
+				const sessionResult = await createSessionAction({
+					userId: userId || verificationJSON.userId,
+					email: identifier, // identifier should be the email
+				})
+
+				if (!sessionResult.success) {
+					throw new Error(sessionResult.message)
+				}
+
+				const message = 'User authenticated and session created!'
 				setAuthSuccess(message)
 				setIsNotRegistered(false)
 				toast.success(message)
+
 				if (onSign && PresignResponse) {
 					onSign({
 						signRes: authenticationResponse,
 						authTxn: PresignResponse.authTxn,
 						lastLedger: PresignResponse.lastLedger,
 					})
+				}
+
+				// Redirect to dashboard if specified
+				if (sessionResult.redirect) {
+					window.location.href = sessionResult.redirect
 				}
 			} else {
 				const message = `Oh no, something went wrong! Response: ${JSON.stringify(verificationJSON)}`

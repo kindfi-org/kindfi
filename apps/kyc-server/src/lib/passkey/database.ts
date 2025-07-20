@@ -198,7 +198,7 @@ export const saveUser = async ({
 				signCount: credential.counter,
 				transports: credential.transports || [],
 				credentialType: 'public-key',
-				aaguid: '00000000-0000-0000-0000-000000000000',
+				aaguid: credential.aaguid,
 				profileVerificationStatus: 'unverified',
 				deviceType: 'single_device',
 				backupState: 'not_backed_up',
