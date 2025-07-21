@@ -1,8 +1,11 @@
 import { appEnvConfig, transformEnv } from '@packages/lib/config/app-env.config'
+import { supabase } from '@packages/lib/supabase'
 import { startAuthentication } from '@simplewebauthn/browser'
+import { signIn } from 'next-auth/react'
+import { redirect } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { createSessionAction, signInAction } from '~/app/actions'
+import { createSessionAction } from '~/app/actions'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import type { PresignResponse, SignParams } from '~/lib/types'
 
@@ -112,10 +115,27 @@ export const usePasskeyAuthentication = (
 					})
 				}
 
-				// Redirect to dashboard if specified
-				if (sessionResult.redirect) {
-					window.location.href = sessionResult.redirect
-				}
+				// signIn(
+				// 	'credentials',
+				// 	{
+				// 		redirect: true,
+				// 		callbackUrl: sessionResult.redirect || '/',
+				// 	},
+				// 	{
+				// 		userId: userId || verificationJSON.userId,
+				// 		email: identifier,
+				// 		pubKey: sessionResult.data?.properties.public_key || '',
+				// 		credentialId: sessionResult.data?.credential_id || '',
+				// 		address: sessionResult.data?.address || '',
+				// 		sessionToken: supabase.auth
+				// 			.setSession(sessionResult.data?.sessionToken || '')
+				// 			.then((res) => res.data.session.access_token),
+				// 	},
+				// ).catch((error) => {
+				// 	const message = `Failed to sign in: ${error.message}`
+				// 	setAuthError(message)
+				// 	toast.error(message)
+				// })
 			} else {
 				const message = `Oh no, something went wrong! Response: ${JSON.stringify(verificationJSON)}`
 				setAuthError(message)

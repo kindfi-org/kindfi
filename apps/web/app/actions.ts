@@ -142,10 +142,10 @@ export async function createSessionAction({
 
 		// Create a session for the verified user
 		const { data: sessionData, error: sessionError } =
-			await supabase.auth.admin.generateLink({
-				type: 'magiclink',
-				email: email,
-			})
+			await supabase.auth.setSession({
+				access_token: userData.id, // Using user ID as access token for session creation
+				refresh_token: userData.id, // Using user ID as refresh token for session creation
+			}) // Type assertion to match expected structure
 
 		if (sessionError) {
 			return errorHandler.handleAuthError(sessionError, 'create_session')
@@ -158,12 +158,13 @@ export async function createSessionAction({
 		})
 
 		revalidatePath('/', 'layout')
+		console.log('Session created: ', sessionData)
 		return {
 			success: true,
 			message: 'Session created successfully',
 			redirect: '/dashboard',
 			data: sessionData,
-		}
+		} as AuthResponse
 	} catch (error) {
 		logger.error({
 			eventType: 'SESSION_CREATION_ERROR',

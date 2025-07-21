@@ -288,5 +288,12 @@ export const verifyAuthentication = async ({
 
 	await deleteChallenge({ identifier, rpId, userId })
 
-	return { verified }
+	const device = {
+		id: dbCredential.id,
+		pubKey: dbCredential.publicKey,
+		address: dbCredential.address,
+		transports: dbCredential.transports,
+	}
+
+	return { verified, device }
 }

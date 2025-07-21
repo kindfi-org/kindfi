@@ -1,3 +1,6 @@
+import type { supabase } from '@packages/lib/supabase'
+import type { GenerateLinkResponse } from '@supabase/supabase-js'
+
 export enum AuthErrorType {
 	INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
 	EMAIL_NOT_CONFIRMED = 'EMAIL_NOT_CONFIRMED',
@@ -16,7 +19,7 @@ export enum AuthErrorType {
 export interface AuthResponse {
 	success: boolean
 	message: string
-	data?: Record<string, unknown>
+	data?: GenerateLinkResponse['data']
 	error?: string
 	redirect?: string
 }
