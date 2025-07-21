@@ -89,6 +89,11 @@ export const useStellar = () => {
 		// Handles the signing of a transaction and sends it to the Stellar network
 		try {
 			setLoadingSign(true)
+			console.log('{ signRes, authTxn, lastLedger }::onSign from use-stellar', {
+				signRes,
+				authTxn,
+				lastLedger,
+			})
 			// TODO: disable for now, enable the signing logic when the transaction is ready
 			// if (!bundlerKey.current) throw new Error('Bundler key not found')
 			// if (!deployee) throw new Error('Deployee not found')

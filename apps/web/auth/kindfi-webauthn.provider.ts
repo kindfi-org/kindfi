@@ -6,13 +6,14 @@ import CredentialsProvider, {
 } from 'next-auth/providers/credentials'
 
 export const kindfiWebAuthnProvider = CredentialsProvider({
-	name: 'Kindfi WebAuthn',
-	id: 'kindfi-webauthn',
+	name: 'Credentials',
 	credentials: {
-		label: 'KF-WA',
-		type: '1',
-		value: 'webauthn',
-	} as Record<string, CredentialInput>,
+		userId: { label: 'User ID', type: 'text' },
+		email: { label: 'Email', type: 'email' },
+		pubKey: { label: 'Public Key', type: 'text' },
+		credentialId: { label: 'Credential ID', type: 'text' },
+		address: { label: 'Address', type: 'text' },
+	} as Record<keyof KindfiWebAuthnCredentials, CredentialInput>,
 	async authorize(credentialsArg, _req) {
 		const credentials = credentialsArg as KindfiWebAuthnCredentials | undefined
 		console.log('🗝️ login with credentials -> ', credentials)
@@ -52,9 +53,9 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			.single()
 		const { data: device, error: deviceError } = await supabase
 			.from('devices')
-			.select('*')
+			.select()
 			.eq('credential_id', deviceCredentials.credentialId)
-			.eq('pub_key', deviceCredentials.pubKey)
+			.eq('public_key', deviceCredentials.pubKey)
 			.eq('user_id', credentials.userId)
 			.single()
 		const deviceData = device as Tables<'devices'> | null

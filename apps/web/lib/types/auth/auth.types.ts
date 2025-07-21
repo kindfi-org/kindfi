@@ -1,4 +1,5 @@
 import type { supabase } from '@packages/lib/supabase'
+import type { Tables } from '@services/supabase'
 import type { GenerateLinkResponse } from '@supabase/supabase-js'
 
 export enum AuthErrorType {
@@ -19,7 +20,7 @@ export enum AuthErrorType {
 export interface AuthResponse {
 	success: boolean
 	message: string
-	data?: GenerateLinkResponse['data']
+	data?: GenerateLinkResponse['data'] | (Tables<'profiles'> & Tables<'devices'>)
 	error?: string
 	redirect?: string
 }

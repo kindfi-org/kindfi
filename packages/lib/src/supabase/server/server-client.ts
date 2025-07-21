@@ -17,13 +17,26 @@ const appConfig = appEnvConfig()
  * const supabase = await createSupabaseServerClient();
  * const { data } = await supabase.from('projects').select('*');
  */
-export async function createSupabaseServerClient(): Promise<TypedSupabaseClient> {
+export async function createSupabaseServerClient(supabaseServerClientProps?: {
+	jwt?: string
+	accessToken?: () => Promise<string>
+}): Promise<TypedSupabaseClient> {
+	const { jwt, accessToken } = supabaseServerClientProps || {}
 	const cookieStore = await cookies()
 
 	return createServerClient<Database>(
 		appConfig.database.url,
 		appConfig.database.anonKey,
 		{
+			...(jwt || accessToken
+				? {
+						accessToken: jwt
+							? async () => {
+									return jwt
+								}
+							: accessToken,
+					}
+				: {}),
 			cookies: {
 				getAll() {
 					return cookieStore.getAll()

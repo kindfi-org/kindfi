@@ -50,7 +50,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 			return errorHandler.handleAuthError(error, 'sign_up')
 		}
 
-		revalidatePath('/', 'layout')
+		revalidatePath('/sign-up', 'layout')
 		console.log('Sign up data: ', data)
 		return {
 			success: true,
@@ -61,55 +61,6 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 		}
 	} catch (error) {
 		return errorHandler.handleAuthError(error as AuthError, 'sign_up')
-	}
-}
-
-export async function signInAction(formData: FormData): Promise<AuthResponse> {
-	const email = formData.get('email') as string
-
-	if (!email) {
-		return {
-			success: false,
-			message: 'Email is required',
-			error: 'Email is required',
-		}
-	}
-
-	// Validate email format
-	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-	if (!emailRegex.test(email)) {
-		return {
-			success: false,
-			message: 'Invalid email format',
-			error: 'Invalid email format',
-		}
-	}
-
-	// For passkey authentication, we just validate the email exists in our system
-	const supabase = await createSupabaseServerClient()
-
-	try {
-		const { data: userData, error: userError } = await supabase
-			.from('profiles')
-			.select('id, email')
-			.eq('email', email)
-			.single()
-
-		if (userError || !userData) {
-			return {
-				success: false,
-				message: 'Email not found. Please sign up first.',
-				error: 'User not found',
-			}
-		}
-
-		return {
-			success: true,
-			message: 'Email validated. Proceed with passkey authentication.',
-			data: { userId: userData.id, email: userData.email },
-		}
-	} catch (error) {
-		return errorHandler.handleAuthError(error as AuthError, 'sign_in')
 	}
 }
 
@@ -126,7 +77,7 @@ export async function createSessionAction({
 		// Verify the user exists and the email matches
 		const { data: userData, error: userError } = await supabase
 			.from('profiles')
-			.select('id, email')
+			.select()
 			.eq('id', userId)
 			.eq('email', email)
 			.single()
@@ -140,30 +91,20 @@ export async function createSessionAction({
 			}
 		}
 
-		// Create a session for the verified user
-		const { data: sessionData, error: sessionError } =
-			await supabase.auth.setSession({
-				access_token: userData.id, // Using user ID as access token for session creation
-				refresh_token: userData.id, // Using user ID as refresh token for session creation
-			}) // Type assertion to match expected structure
-
-		if (sessionError) {
-			return errorHandler.handleAuthError(sessionError, 'create_session')
-		}
-
 		logger.info({
 			eventType: 'SESSION_CREATED',
 			userId,
 			email,
 		})
 
-		revalidatePath('/', 'layout')
-		console.log('Session created: ', sessionData)
+		// revalidatePath('/sign-in', 'layout')
+		// console.log('Session created: ', sessionData)
 		return {
 			success: true,
 			message: 'Session created successfully',
 			redirect: '/dashboard',
-			data: sessionData,
+			// data: sessionData,
+			data: userData,
 		} as AuthResponse
 	} catch (error) {
 		logger.error({

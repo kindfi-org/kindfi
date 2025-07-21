@@ -58,6 +58,7 @@ export function LoginComponent() {
 
 	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
+		e.stopPropagation()
 		if (!isEmailInvalid) handleAuth()
 		resetValidation()
 	}
@@ -66,9 +67,9 @@ export function LoginComponent() {
 		if (authSuccess) {
 			// If the user is authenticated, we can use the stellarUserAddress later
 			console.log('stellarUserAddress', stellarUserAddress)
-			router.push('/dashboard')
+			// router.push('/dashboard')
 		}
-	}, [authSuccess, router, stellarUserAddress])
+	}, [authSuccess, stellarUserAddress])
 
 	return (
 		<AuthLayout>
@@ -175,6 +176,7 @@ export function LoginComponent() {
 						<Button
 							size="lg"
 							className="gradient-btn text-white w-full mt-10"
+							type="submit"
 							// formAction={signInAction}
 							aria-live="polite"
 							aria-busy={isAuthenticating}

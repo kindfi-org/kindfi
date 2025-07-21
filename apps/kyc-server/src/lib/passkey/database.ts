@@ -130,6 +130,7 @@ export const getUser = async ({
 
 		const credentials: WebAuthnCredential[] = deviceRecords.map((device) => ({
 			id: device.credentialId,
+			address: device.address,
 			publicKey: base64ToUint8Array(device.publicKey),
 			counter: device.signCount,
 			transports: device.transports as AuthenticatorTransportFuture[],
@@ -199,6 +200,7 @@ export const saveUser = async ({
 				transports: credential.transports || [],
 				credentialType: 'public-key',
 				aaguid: credential.aaguid,
+				address: credential.address,
 				profileVerificationStatus: 'unverified',
 				deviceType: 'single_device',
 				backupState: 'not_backed_up',

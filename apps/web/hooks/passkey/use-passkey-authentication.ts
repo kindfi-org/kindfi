@@ -2,7 +2,7 @@ import { appEnvConfig, transformEnv } from '@packages/lib/config/app-env.config'
 import { supabase } from '@packages/lib/supabase'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { signIn } from 'next-auth/react'
-import { redirect } from 'next/navigation'
+import { RedirectType, redirect } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { createSessionAction } from '~/app/actions'
@@ -40,6 +40,9 @@ export const usePasskeyAuthentication = (
 		setAuthSuccess('')
 		setAuthError('')
 		setIsNotRegistered(false)
+
+		let success = false
+
 		try {
 			const PresignResponse = await prepareSign?.()
 			const resp = await fetch(
@@ -91,57 +94,67 @@ export const usePasskeyAuthentication = (
 
 			const verificationJSON = await verificationResp.json()
 
-			if (verificationJSON?.verified) {
-				// Create session after successful passkey verification
-				const sessionResult = await createSessionAction({
-					userId: userId || verificationJSON.userId,
-					email: identifier, // identifier should be the email
-				})
-
-				if (!sessionResult.success) {
-					throw new Error(sessionResult.message)
-				}
-
-				const message = 'User authenticated and session created!'
-				setAuthSuccess(message)
-				setIsNotRegistered(false)
-				toast.success(message)
-
-				if (onSign && PresignResponse) {
-					onSign({
-						signRes: authenticationResponse,
-						authTxn: PresignResponse.authTxn,
-						lastLedger: PresignResponse.lastLedger,
-					})
-				}
-
-				// signIn(
-				// 	'credentials',
-				// 	{
-				// 		redirect: true,
-				// 		callbackUrl: sessionResult.redirect || '/',
-				// 	},
-				// 	{
-				// 		userId: userId || verificationJSON.userId,
-				// 		email: identifier,
-				// 		pubKey: sessionResult.data?.properties.public_key || '',
-				// 		credentialId: sessionResult.data?.credential_id || '',
-				// 		address: sessionResult.data?.address || '',
-				// 		sessionToken: supabase.auth
-				// 			.setSession(sessionResult.data?.sessionToken || '')
-				// 			.then((res) => res.data.session.access_token),
-				// 	},
-				// ).catch((error) => {
-				// 	const message = `Failed to sign in: ${error.message}`
-				// 	setAuthError(message)
-				// 	toast.error(message)
-				// })
-			} else {
-				const message = `Oh no, something went wrong! Response: ${JSON.stringify(verificationJSON)}`
-				setAuthError(message)
-				toast.error(message)
+			if (!verificationJSON?.verified) {
+				throw new InAppError(
+					ErrorCode.AUTHENTICATOR_NOT_REGISTERED,
+					'Authentication verification failed',
+				)
 			}
+
+			// Create session after successful passkey verification
+			const sessionResult = await createSessionAction({
+				userId: userId || verificationJSON.userId,
+				email: identifier, // identifier should be the email
+			})
+
+			if (!sessionResult.success) {
+				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, sessionResult.message)
+			}
+
+			const message = 'User authenticated and session created!'
+
+			if (onSign && PresignResponse) {
+				await onSign({
+					signRes: authenticationResponse,
+					authTxn: PresignResponse.authTxn,
+					lastLedger: PresignResponse.lastLedger,
+				})
+			}
+
+			console.log('verificationJSON:', verificationJSON)
+
+			// Convert pubKey object to Uint8Array, then to base64 string
+			const pubKeyArray =
+				verificationJSON.device.pubKey instanceof Uint8Array
+					? verificationJSON.device.pubKey
+					: new Uint8Array(
+							Object.values(
+								verificationJSON.device.pubKey as Record<string, number>,
+							),
+						)
+			const pubKeyString = Buffer.from(pubKeyArray).toString('base64')
+
+			console.log('base64PubKey:', pubKeyString)
+			const loginResult = await signIn('credentials', {
+				redirect: false,
+				userId: userId || verificationJSON.userId,
+				email: identifier,
+				pubKey: pubKeyString,
+				credentialId: verificationJSON.device.id,
+				address: verificationJSON.device.address,
+			}).catch((error) => {
+				console.error('Error during signIn:', error)
+				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, error.message)
+			})
+
+			console.log('Login result:', loginResult)
+
+			setAuthSuccess(message)
+			setIsNotRegistered(false)
+			toast.success(message)
+			success = loginResult?.ok
 		} catch (_error) {
+			console.error('🔴 Error during passkey authentication:', _error)
 			const error = _error as Error
 			let message = error.toString()
 			if (
@@ -153,11 +166,17 @@ export const usePasskeyAuthentication = (
 			} else if (error.message.includes('User not found.')) {
 				message = 'User not registered. Please register first.'
 				setIsNotRegistered(true)
+			} else {
+				message = `Oh no, something went wrong! Response: ${JSON.stringify(error)}`
 			}
 			setAuthError(message)
 			toast.error(message)
 		} finally {
 			setIsAuthenticating(false)
+			if (success) {
+				// Redirect to the dashboard or any other page after successful authentication
+				redirect('/dashboard', RedirectType.replace)
+			}
 		}
 	}
 

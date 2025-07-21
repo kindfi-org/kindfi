@@ -59,24 +59,45 @@ export const sessionsInAuthRelations = relations(
 	}),
 )
 
+export const mfaFactorsInAuthRelations = relations(
+	mfaFactorsInAuth,
+	({ one, many }) => ({
+		usersInAuth: one(usersInAuth, {
+			fields: [mfaFactorsInAuth.userId],
+			references: [usersInAuth.id],
+		}),
+		mfaChallengesInAuths: many(mfaChallengesInAuth),
+	}),
+)
+
 export const usersInAuthRelations = relations(usersInAuth, ({ many }) => ({
+	mfaFactorsInAuths: many(mfaFactorsInAuth),
 	sessionsInAuths: many(sessionsInAuth),
 	identitiesInAuths: many(identitiesInAuth),
 	oneTimeTokensInAuths: many(oneTimeTokensInAuth),
-	mfaFactorsInAuths: many(mfaFactorsInAuth),
-	projectUpdates: many(projectUpdates),
-	projects: many(projects),
-	comments: many(comments),
 	profiles: many(profiles),
-	kycStatuses: many(kycStatus),
-	kycReviews: many(kycReviews),
+	projects: many(projects),
+	projectUpdates: many(projectUpdates),
 	projectMembers: many(projectMembers),
+	comments: many(comments),
+	kycReviews: many(kycReviews),
+	kycStatuses: many(kycStatus),
 	notificationPreferences: many(notificationPreferences),
 	notifications: many(notifications),
 	challenges: many(challenges),
 	devices: many(devices),
 	kindlerProjects: many(kindlerProjects),
 }))
+
+export const mfaChallengesInAuthRelations = relations(
+	mfaChallengesInAuth,
+	({ one }) => ({
+		mfaFactorsInAuth: one(mfaFactorsInAuth, {
+			fields: [mfaChallengesInAuth.factorId],
+			references: [mfaFactorsInAuth.id],
+		}),
+	}),
+)
 
 export const ssoDomainsInAuthRelations = relations(
 	ssoDomainsInAuth,
@@ -92,8 +113,8 @@ export const ssoProvidersInAuthRelations = relations(
 	ssoProvidersInAuth,
 	({ many }) => ({
 		ssoDomainsInAuths: many(ssoDomainsInAuth),
-		samlRelayStatesInAuths: many(samlRelayStatesInAuth),
 		samlProvidersInAuths: many(samlProvidersInAuth),
+		samlRelayStatesInAuths: many(samlRelayStatesInAuth),
 	}),
 )
 
@@ -103,6 +124,16 @@ export const mfaAmrClaimsInAuthRelations = relations(
 		sessionsInAuth: one(sessionsInAuth, {
 			fields: [mfaAmrClaimsInAuth.sessionId],
 			references: [sessionsInAuth.id],
+		}),
+	}),
+)
+
+export const samlProvidersInAuthRelations = relations(
+	samlProvidersInAuth,
+	({ one }) => ({
+		ssoProvidersInAuth: one(ssoProvidersInAuth, {
+			fields: [samlProvidersInAuth.ssoProviderId],
+			references: [ssoProvidersInAuth.id],
 		}),
 	}),
 )
@@ -128,16 +159,6 @@ export const flowStateInAuthRelations = relations(
 	}),
 )
 
-export const samlProvidersInAuthRelations = relations(
-	samlProvidersInAuth,
-	({ one }) => ({
-		ssoProvidersInAuth: one(ssoProvidersInAuth, {
-			fields: [samlProvidersInAuth.ssoProviderId],
-			references: [ssoProvidersInAuth.id],
-		}),
-	}),
-)
-
 export const identitiesInAuthRelations = relations(
 	identitiesInAuth,
 	({ one }) => ({
@@ -158,27 +179,6 @@ export const oneTimeTokensInAuthRelations = relations(
 	}),
 )
 
-export const mfaFactorsInAuthRelations = relations(
-	mfaFactorsInAuth,
-	({ one, many }) => ({
-		usersInAuth: one(usersInAuth, {
-			fields: [mfaFactorsInAuth.userId],
-			references: [usersInAuth.id],
-		}),
-		mfaChallengesInAuths: many(mfaChallengesInAuth),
-	}),
-)
-
-export const mfaChallengesInAuthRelations = relations(
-	mfaChallengesInAuth,
-	({ one }) => ({
-		mfaFactorsInAuth: one(mfaFactorsInAuth, {
-			fields: [mfaChallengesInAuth.factorId],
-			references: [mfaFactorsInAuth.id],
-		}),
-	}),
-)
-
 export const contributionsRelations = relations(
 	contributions,
 	({ one, many }) => ({
@@ -193,20 +193,20 @@ export const contributionsRelations = relations(
 export const projectsRelations = relations(projects, ({ one, many }) => ({
 	contributions: many(contributions),
 	escrowContracts: many(escrowContracts),
-	projectUpdates: many(projectUpdates),
-	projectPitches: many(projectPitch),
 	usersInAuth: one(usersInAuth, {
-		fields: [projects.ownerId],
+		fields: [projects.kindlerId],
 		references: [usersInAuth.id],
 	}),
 	category: one(categories, {
 		fields: [projects.categoryId],
 		references: [categories.id],
 	}),
+	projectUpdates: many(projectUpdates),
+	projectPitches: many(projectPitch),
+	projectMembers: many(projectMembers),
 	milestones: many(milestones),
 	communities: many(community),
 	comments: many(comments),
-	projectMembers: many(projectMembers),
 	projectTagRelationships: many(projectTagRelationships),
 	kindlerProjects: many(kindlerProjects),
 }))
@@ -226,6 +226,17 @@ export const escrowContractsRelations = relations(
 		escrowMilestones: many(escrowMilestones),
 	}),
 )
+
+export const profilesRelations = relations(profiles, ({ one }) => ({
+	usersInAuth: one(usersInAuth, {
+		fields: [profiles.id],
+		references: [usersInAuth.id],
+	}),
+}))
+
+export const categoriesRelations = relations(categories, ({ many }) => ({
+	projects: many(projects),
+}))
 
 export const projectUpdatesRelations = relations(
 	projectUpdates,
@@ -250,8 +261,15 @@ export const projectPitchRelations = relations(projectPitch, ({ one }) => ({
 	}),
 }))
 
-export const categoriesRelations = relations(categories, ({ many }) => ({
-	projects: many(projects),
+export const projectMembersRelations = relations(projectMembers, ({ one }) => ({
+	project: one(projects, {
+		fields: [projectMembers.projectId],
+		references: [projects.id],
+	}),
+	usersInAuth: one(usersInAuth, {
+		fields: [projectMembers.userId],
+		references: [usersInAuth.id],
+	}),
 }))
 
 export const milestonesRelations = relations(milestones, ({ one, many }) => ({
@@ -302,13 +320,6 @@ export const commentsRelations = relations(comments, ({ one, many }) => ({
 	}),
 }))
 
-export const profilesRelations = relations(profiles, ({ one }) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [profiles.id],
-		references: [usersInAuth.id],
-	}),
-}))
-
 export const escrowReviewsRelations = relations(escrowReviews, ({ one }) => ({
 	escrowContract: one(escrowContracts, {
 		fields: [escrowReviews.escrowId],
@@ -318,14 +329,6 @@ export const escrowReviewsRelations = relations(escrowReviews, ({ one }) => ({
 		fields: [escrowReviews.milestoneId],
 		references: [milestones.id],
 	}),
-}))
-
-export const kycStatusRelations = relations(kycStatus, ({ one, many }) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [kycStatus.userId],
-		references: [usersInAuth.id],
-	}),
-	kycReviews: many(kycReviews),
 }))
 
 export const kycReviewsRelations = relations(kycReviews, ({ one }) => ({
@@ -339,13 +342,10 @@ export const kycReviewsRelations = relations(kycReviews, ({ one }) => ({
 	}),
 }))
 
-export const projectMembersRelations = relations(projectMembers, ({ one }) => ({
-	project: one(projects, {
-		fields: [projectMembers.projectId],
-		references: [projects.id],
-	}),
+export const kycStatusRelations = relations(kycStatus, ({ one, many }) => ({
+	kycReviews: many(kycReviews),
 	usersInAuth: one(usersInAuth, {
-		fields: [projectMembers.userId],
+		fields: [kycStatus.userId],
 		references: [usersInAuth.id],
 	}),
 }))

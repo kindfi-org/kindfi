@@ -8,9 +8,9 @@ const appConfig = appEnvConfig('web')
 const handler = NextAuth({
 	providers: [kindfiWebAuthnProvider],
 	pages: {
-		signIn: '/auth/signin',
+		signIn: '/sign-in',
 		// TODO: to be implemented
-		signOut: '/auth/signout',
+		// signOut: '/sign-out',
 	},
 	callbacks: {
 		async jwt({ token, user, account }) {
@@ -59,6 +59,7 @@ const handler = NextAuth({
 		},
 		async signIn({ user, account }) {
 			// TODO: Add custom sign-in logic if needed?
+			console.log('🗝️ SignIn callback triggered with user:', { user, account })
 			return true
 		},
 	},
