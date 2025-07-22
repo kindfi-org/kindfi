@@ -1310,7 +1310,7 @@ function RenderUserInfo({
 							variant="outline"
 							className="ml-2 text-xs py-0 h-5 bg-blue-50 text-blue-700 border-blue-200"
 						>
-							Team
+							{authorData?.role}
 						</Badge>
 					)}
 				</div>
