@@ -2,7 +2,6 @@
 	"name": "kindfi",
 	"version": "0.0.1",
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
 		"@commitlint/cli": "^19.6.1",
 		"@commitlint/config-conventional": "^19.6.0",
 		"@types/bun": "latest",
@@ -43,6 +42,7 @@
 		]
 	},
 	"dependencies": {
+		"@biomejs/cli-darwin-x64": "^2.1.2",
 		"@types/web-push": "^3.6.4",
 		"autoprefixer": "^10.4.21",
 		"date-fns": "^4.1.0",
