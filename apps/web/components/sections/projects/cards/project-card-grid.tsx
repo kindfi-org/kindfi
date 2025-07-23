@@ -5,11 +5,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { Badge } from '~/components/base/badge'
+import { CategoryBadge } from '~/components/sections/projects/shared'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
-import { getTextColor } from '~/lib/utils/color-utils'
-import { CategoryBadge } from '../filters'
+import { getContrastTextColor } from '~/lib/utils/color-utils'
 
 interface ProjectCardGridProps {
 	project: Project
@@ -94,15 +94,12 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 					<div className="flex flex-wrap gap-1" aria-label="Project tags">
 						{project.tags.map((tag) => {
 							const bg = tag.color || '#ccc' // fallback
-							const textColor = getTextColor(bg)
+							const textColor = getContrastTextColor(bg)
 
 							return (
 								<Badge
 									key={tag.id}
-									className={cn(
-										'uppercase',
-										textColor === 'white' ? 'text-white' : 'text-black',
-									)}
+									className={cn('uppercase', textColor)}
 									style={{ backgroundColor: bg }}
 								>
 									{tag.name}

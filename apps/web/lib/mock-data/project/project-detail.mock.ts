@@ -38,6 +38,13 @@ Join us in creating a world where every child has access to quality education.`,
 	raised: 40000,
 	investors: 40,
 	minInvestment: 10,
+	location: 'USA',
+	socialLinks: {
+		website: 'https://empoweringeducation.org',
+		twitter: 'https://x.com/empoweringedu',
+		facebook: 'https://www.facebook.com/EmpoweringEducation',
+		instagram: 'https://www.instagram.com/empowering.education',
+	},
 	tags: [
 		{ id: 'tag-education', name: 'EDUCATION', color: '#4A90E2' },
 		{ id: 'tag-children', name: 'CHILDREN', color: '#9B59B6' },

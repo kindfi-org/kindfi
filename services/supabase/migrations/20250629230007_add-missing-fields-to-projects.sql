@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS unaccent;
 
 -- Add slug, social_links, project_location fields to projects
 ALTER TABLE public.projects
-  ADD COLUMN slug TEXT NOT NULL,
+  ADD COLUMN slug TEXT,
   ADD COLUMN social_links JSONB NOT NULL DEFAULT '{}'::jsonb,
   ADD COLUMN project_location CHAR(3);
 
@@ -66,11 +66,24 @@ CREATE TRIGGER projects_generate_slug
 BEFORE INSERT OR UPDATE OF title ON public.projects
 FOR EACH ROW EXECUTE FUNCTION public.generate_project_slug();
 
+-- * Backfill slugs for existing projects.
+-- ? This is done by triggering the `generate_project_slug` function for all rows
+-- ? where the slug is currently NULL. The trigger is fired by updating the `title`
+-- ? column to its own value, which is a standard way to invoke an update trigger.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.projects WHERE slug IS NULL) THEN
+    UPDATE public.projects SET title = title WHERE slug IS NULL;
+  END IF;
+END;
+$$;
+
 -- Add indexes
 CREATE UNIQUE INDEX IF NOT EXISTS projects_slug_key ON public.projects(slug);
 CREATE INDEX IF NOT EXISTS projects_project_location_idx ON public.projects(project_location);
 
--- Add country code format constraint
+-- Add country code format constraint and set slug as NOT NULL after table update
 ALTER TABLE public.projects
-ADD CONSTRAINT chk_project_location_alpha3
-CHECK (project_location IS NULL OR project_location ~ '^[A-Z]{3}$');
+    ALTER COLUMN slug SET NOT NULL,
+    ADD CONSTRAINT chk_project_location_alpha3
+    CHECK (project_location IS NULL OR project_location ~ '^[A-Z]{3}$');
