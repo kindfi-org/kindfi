@@ -31,7 +31,7 @@ export function BreadcrumbContainer({
 }: BreadcrumbContainerProps) {
 	const pathname = usePathname()
 	const params = useParams()
-	const projectId = params?.id as string | undefined
+	const projectSlug = params?.slug as string | undefined
 
 	// Only show breadcrumbs on /projects pages
 	if (!pathname.includes('/projects')) {
@@ -88,12 +88,12 @@ export function BreadcrumbContainer({
 						</>
 					)}
 
-					{title && projectId && (
+					{title && projectSlug && (
 						<>
 							<BreadcrumbSeparator />
 							<BreadcrumbItem>
 								<BreadcrumbLink asChild>
-									<Link href={`/projects/${projectId}`}>{title}</Link>
+									<Link href={`/projects/${projectSlug}`}>{title}</Link>
 								</BreadcrumbLink>
 							</BreadcrumbItem>
 						</>
@@ -103,9 +103,9 @@ export function BreadcrumbContainer({
 						<>
 							<BreadcrumbSeparator />
 							<BreadcrumbItem>
-								{subSection && projectId ? (
+								{subSection && projectSlug ? (
 									<BreadcrumbLink asChild>
-										<Link href={`/projects/${projectId}/manage`}>
+										<Link href={`/projects/${projectSlug}/manage`}>
 											{manageSection}
 										</Link>
 									</BreadcrumbLink>

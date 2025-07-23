@@ -12,22 +12,24 @@ import {
 	ProjectTabsSkeleton,
 } from '~/components/sections/projects/detail/skeletons'
 import { BreadcrumbContainer } from '~/components/sections/projects/shared'
-import { getProjectById } from '~/lib/queries/projects'
+import { getProjectBySlug } from '~/lib/queries/projects'
 
 interface ProjectClientWrapperProps {
-	projectId: string
+	projectSlug: string
 }
 
-export function ProjectClientWrapper({ projectId }: ProjectClientWrapperProps) {
+export function ProjectClientWrapper({
+	projectSlug,
+}: ProjectClientWrapperProps) {
 	const {
 		data: project,
 		isLoading,
 		error,
 	} = useSupabaseQuery(
 		'project',
-		(client) => getProjectById(client, projectId),
+		(client) => getProjectBySlug(client, projectSlug),
 		{
-			additionalKeyValues: [projectId],
+			additionalKeyValues: [projectSlug],
 		},
 	)
 

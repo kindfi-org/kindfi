@@ -49,7 +49,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 	})
 
 	const onSubmit = (data: CreateProjectFormData) => {
-		console.log('Updating project:', project.id, data)
+		console.log('Updating project:', project.slug, data)
 
 		toast({
 			title: 'Project updated successfully!',

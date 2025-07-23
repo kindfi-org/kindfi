@@ -22,7 +22,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 	)
 
 	return (
-		<Link href={`/projects/${project.id}`} className="h-full">
+		<Link href={`/projects/${project.slug}`} className="h-full">
 			<motion.article
 				className="bg-white rounded-lg overflow-hidden shadow-md flex flex-row h-full"
 				whileHover={cardHover}
