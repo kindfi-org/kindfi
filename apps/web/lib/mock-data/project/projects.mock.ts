@@ -5,6 +5,7 @@ export const projects: Project[] = [
 	{
 		id: '1',
 		title: 'Empowering Education',
+		slug: 'empowering-education',
 		description:
 			'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities.',
 		image: '/images/education.webp',
@@ -23,6 +24,7 @@ export const projects: Project[] = [
 	{
 		id: '2',
 		title: 'Forest Restoration Initiative',
+		slug: 'forest-restoration-initiative',
 		description:
 			'Restore and reforest areas devastated by uncontrolled deforestation. Your support helps rebuild ecosystems and fight climate change.',
 		image: '/images/bosques.webp',
@@ -41,6 +43,7 @@ export const projects: Project[] = [
 	{
 		id: '3',
 		title: 'Mobile Clinics',
+		slug: 'mobile-clinics',
 		description:
 			'Bring essential healthcare services to remote areas through mobile clinics. Your support helps save lives and build healthier communities.',
 		image: '/images/healthcare.webp',
@@ -59,6 +62,7 @@ export const projects: Project[] = [
 	{
 		id: '4',
 		title: 'Preserving Indigenous Crafts',
+		slug: 'preserving-indigenous-crafts',
 		description:
 			'Support the preservation of indigenous craftsmanship in Costa Rica. Your contributions protect traditional techniques and cultural heritage.',
 		image: '/images/artesania.webp',
@@ -77,6 +81,7 @@ export const projects: Project[] = [
 	{
 		id: '5',
 		title: 'Water for Rural Communities',
+		slug: 'water-for-rural-communities',
 		description:
 			'Provide access to safe drinking water in underserved rural areas. Help us install water purification systems to improve health and livelihoods.',
 		image: '/images/water.webp',
@@ -95,6 +100,7 @@ export const projects: Project[] = [
 	{
 		id: '6',
 		title: 'Rural Animal Shelter',
+		slug: 'rural-animal-shelter',
 		description:
 			'Provide care and shelter to homeless animals in rural communities. Help us create safe havens for animals in need.',
 		image: '/images/dogs.webp',
@@ -113,6 +119,7 @@ export const projects: Project[] = [
 	{
 		id: '7',
 		title: 'Community Garden Project',
+		slug: 'community-garden-project',
 		description:
 			'Transform vacant urban spaces into thriving community gardens. Help us create green spaces that provide fresh food and bring people together.',
 		image: '/images/placeholder.png',
@@ -131,6 +138,7 @@ export const projects: Project[] = [
 	{
 		id: '8',
 		title: 'Natural Disasters Human Aid',
+		slug: 'natural-disasters-human-aid',
 		description:
 			'Provide critical support to communities affected by natural disasters. From emergency supplies to long-term rebuilding efforts, join us in bringing hope and recovery to those in need.',
 		image: '/images/disaster-aid.webp',
@@ -149,6 +157,7 @@ export const projects: Project[] = [
 	{
 		id: '9',
 		title: 'Healthy Kids Workshop',
+		slug: 'healthy-kids-workshop',
 		description:
 			'Provide nourishing meals and support to children at risk of malnutrition in Costa Rica. Together, we can ensure a brighter future for every child.',
 		image: '/images/kids.webp',
@@ -167,6 +176,7 @@ export const projects: Project[] = [
 	{
 		id: '10',
 		title: 'Renewable Energy for Schools',
+		slug: 'renewable-energy-for-schools',
 		description:
 			'Install solar panels in underfunded schools to reduce costs and teach sustainability. Help us bring clean energy to education.',
 		image: '/images/placeholder.png',
@@ -185,6 +195,7 @@ export const projects: Project[] = [
 	{
 		id: '11',
 		title: 'Animal Shelter Expansion',
+		slug: 'animal-shelter-expansion',
 		description:
 			'Help us expand our animal shelter to rescue more abandoned pets. Your support provides food, medical care, and loving homes.',
 		image: '/images/placeholder.png',
@@ -203,6 +214,7 @@ export const projects: Project[] = [
 	{
 		id: '12',
 		title: 'Local Journalism Fund',
+		slug: 'local-journalism-fund',
 		description:
 			'Support independent journalism in underserved communities. Help us keep citizens informed and hold power accountable.',
 		image: '/images/placeholder.png',
@@ -221,6 +233,7 @@ export const projects: Project[] = [
 	{
 		id: '13',
 		title: 'Urban Farming Initiative',
+		slug: 'urban-farming-initiative',
 		description:
 			'Transform unused urban spaces into productive community farms. Help us create sustainable food sources in city environments.',
 		image: '/images/placeholder.png',
@@ -239,6 +252,7 @@ export const projects: Project[] = [
 	{
 		id: '14',
 		title: 'Mental Health Support Network',
+		slug: 'mental-health-support-network',
 		description:
 			'Build a network of mental health professionals providing free services to underserved communities. Support mental wellbeing for all.',
 		image: '/images/placeholder.png',
@@ -257,6 +271,7 @@ export const projects: Project[] = [
 	{
 		id: '15',
 		title: 'Clean Ocean Initiative',
+		slug: 'clean-ocean-initiative',
 		description:
 			'Remove plastic waste from our oceans and develop sustainable alternatives to single-use plastics. Help us protect marine life.',
 		image: '/images/placeholder.png',
@@ -275,6 +290,7 @@ export const projects: Project[] = [
 	{
 		id: '16',
 		title: 'Accessible Technology for All',
+		slug: 'accessible-technology-for-all',
 		description:
 			'Develop assistive technologies for people with disabilities. Help make the digital world accessible to everyone.',
 		image: '/images/placeholder.png',
@@ -293,6 +309,7 @@ export const projects: Project[] = [
 	{
 		id: '17',
 		title: 'Refugee Education Program',
+		slug: 'refugee-education-program',
 		description:
 			'Provide educational resources and support for refugee children. Help them build a brighter future through learning.',
 		image: '/images/placeholder.png',
@@ -311,6 +328,7 @@ export const projects: Project[] = [
 	{
 		id: '18',
 		title: 'Sustainable Housing Solutions',
+		slug: 'sustainable-housing-solutions',
 		description:
 			'Build eco-friendly, affordable housing for low-income families. Help create sustainable communities for the future.',
 		image: '/images/placeholder.png',
@@ -329,6 +347,7 @@ export const projects: Project[] = [
 	{
 		id: '19',
 		title: 'Arts Education for Youth',
+		slug: 'arts-education-for-youth',
 		description:
 			'Bring arts education to underserved schools. Help nurture creativity and self-expression in young people.',
 		image: '/images/placeholder.png',
@@ -347,6 +366,7 @@ export const projects: Project[] = [
 	{
 		id: '20',
 		title: 'Senior Companion Program',
+		slug: 'senior-companion-program',
 		description:
 			'Connect elderly individuals with companions to reduce isolation and improve quality of life. Help combat loneliness in our senior population.',
 		image: '/images/placeholder.png',

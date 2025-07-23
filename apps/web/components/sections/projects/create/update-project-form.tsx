@@ -49,9 +49,8 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
     defaultValues: project,
   });
 
-  const onSubmit = (data: CreateProjectFormData) => {
-    console.log("Updating project:", project.id, data);
 
+	const onSubmit = (data: CreateProjectFormData) => {
     toast({
       title: "Project updated successfully!",
       description: "Your project information has been saved.",

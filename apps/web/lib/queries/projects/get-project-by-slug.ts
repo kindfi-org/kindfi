@@ -6,17 +6,18 @@ import { getProjectQuestions } from './get-project-questions'
 import { getProjectTeam } from './get-project-team'
 import { getProjectUpdates } from './get-project-updates'
 
-export async function getProjectById(
+export async function getProjectBySlug(
 	client: TypedSupabaseClient,
-	projectId: string,
+	projectSlug: string,
 ) {
-	// Fetch the project by ID, including its category and tags
+	// Fetch the project by slug, including its category and tags
 	const { data: project, error: projectError } = await client
 		.from('projects')
 		.select(
 			`
       id,
       title,
+			slug,
       description,
       image_url,
       created_at,
@@ -33,11 +34,13 @@ export async function getProjectById(
       )
     `,
 		)
-		.eq('id', projectId)
+		.eq('slug', projectSlug)
 		.single()
 
 	if (projectError) throw projectError
 	if (!project) return null
+
+	const projectId = project.id
 
 	const [pitch, team, milestones, updates, comments] = await Promise.all([
 		getProjectPitch(client, projectId),
@@ -50,6 +53,7 @@ export async function getProjectById(
 	return {
 		id: project.id,
 		title: project.title,
+		slug: project.slug,
 		description: project.description,
 		image: project.image_url,
 		goal: project.target_amount,
