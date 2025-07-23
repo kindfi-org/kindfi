@@ -1,8 +1,8 @@
 import type { CreateProjectFormData } from '~/lib/types/project/create-project.types'
 
 export const project: CreateProjectFormData = {
-	id: '1',
 	title: 'Empowering Education',
+	slug: 'empowering-education',
 	description:
 		'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for all children regardless of their background.',
 	targetAmount: 55000,

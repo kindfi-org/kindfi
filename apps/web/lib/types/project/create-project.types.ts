@@ -13,7 +13,7 @@ export interface Tag {
 }
 
 export interface CreateProjectFormData {
-	id?: string
+	slug?: string
 	// Step 1: Basic Information
 	title: string
 	description: string
