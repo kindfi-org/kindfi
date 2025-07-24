@@ -14,6 +14,7 @@ import {
 
 import { Label } from '~/components/base/label'
 import { cn } from '~/lib/utils'
+import { getCsrfTokenFromCookie } from '~/lib/utils/csrf'
 
 /**
  * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/form
@@ -215,6 +216,15 @@ const FormMessage = React.forwardRef<
 })
 FormMessage.displayName = 'FormMessage'
 
+/**
+ * Hidden CSRF token field for forms.
+ * This should be used in server components or SSR context only.
+ */
+export function CSRFTokenField(): JSX.Element {
+	const token = getCsrfTokenFromCookie()
+	return <input type="hidden" name="csrfToken" value={token || ''} />
+}
+
 export {
 	useFormField,
 	Form,
@@ -224,4 +234,5 @@ export {
 	FormDescription,
 	FormMessage,
 	FormField,
+	CSRFTokenField,
 }

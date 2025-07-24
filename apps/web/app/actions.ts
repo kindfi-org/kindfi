@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
 import type { AuthResponse } from '~/lib/types/auth'
+import { validateCsrfToken } from '~/lib/utils/csrf'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']
@@ -31,6 +32,13 @@ const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
 
 export async function signUpAction(formData: FormData): Promise<AuthResponse> {
+	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
+		return {
+			success: false,
+			message: 'Invalid CSRF token',
+			error: 'Invalid CSRF token',
+		}
+	}
 	const supabase = await createSupabaseServerClient()
 	const data = {
 		email: formData.get('email') as string,
@@ -56,6 +64,9 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 }
 
 export async function signInAction(formData: FormData): Promise<void> {
+	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
+		throw new Error('Invalid CSRF token')
+	}
 	const supabase = await createSupabaseServerClient()
 	const email = formData.get('email') as string
 	const password = formData.get('password') as string
@@ -109,6 +120,9 @@ export async function signOutAction(): Promise<void> {
 }
 
 export async function forgotPasswordAction(formData: FormData): Promise<void> {
+	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
+		redirect('/forgot-password?error=Invalid CSRF token')
+	}
 	const email = formData.get('email')?.toString()
 	const supabase = await createSupabaseServerClient()
 	const origin = (await headers()).get('origin')
@@ -140,6 +154,9 @@ export async function forgotPasswordAction(formData: FormData): Promise<void> {
 }
 
 export async function resetPasswordAction(formData: FormData): Promise<void> {
+	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
+		redirect('/reset-password?error=Invalid CSRF token')
+	}
 	const password = formData.get('password') as string
 	const confirmPassword = formData.get('confirmPassword') as string
 
