@@ -2,7 +2,7 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks/use-supabase-query.hook'
-import type { TypedSupabaseClient } from '@packages/lib/types/supabase-client.type'
+import type { TypedSupabaseClient } from '@packages/lib/types/supabase-client.types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'

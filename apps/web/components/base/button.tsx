@@ -1,4 +1,5 @@
 import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { Slot } from '@radix-ui/react-slot'
 import { type VariantProps, cva } from 'class-variance-authority'
 import * as React from 'react'
@@ -76,7 +77,7 @@ export interface ButtonProps
 	'aria-label'?: boolean extends true ? string : string | undefined
 }
 
-const appConfig = appEnvConfig('web')
+const appConfig: AppEnvInterface = appEnvConfig('web')
 
 /**
  * `Button` component used for triggering actions within the UI. It supports various variants and sizes,

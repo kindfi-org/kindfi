@@ -19,7 +19,7 @@ export const ValidationDisplay: React.FC<ValidationDisplayProps> = ({
 					<ul className="list-disc pl-6 mt-2 space-y-1">
 						{validationErrors.map((error) => (
 							<li
-								key={error.replace(/\s/g, '-').toLowerCase().substring(0, 16)}
+								key={error.replace(/\s/g, '-').toLowerCase()?.substring(0, 16)}
 								className="text-destructive"
 							>
 								{error}

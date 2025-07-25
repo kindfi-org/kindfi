@@ -1,10 +1,11 @@
 import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { NotificationLogger } from '~/lib/services/notification-logger'
 import { NotificationService } from '~/lib/services/notification-service'
 
-const appConfig = appEnvConfig('web')
+const appConfig: AppEnvInterface = appEnvConfig('web')
 
 // Define Zod schemas for request validation
 const pushSubscriptionSchema = z.object({

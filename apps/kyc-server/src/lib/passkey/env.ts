@@ -1,7 +1,8 @@
 import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 
 // Use the centralized configuration
-const appConfig = appEnvConfig('kyc-server')
+const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
 // Export passkey configuration for backward compatibility
 export const ENV_PASSKEY = {

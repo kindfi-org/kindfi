@@ -1,7 +1,8 @@
 import type { Database } from '@services/supabase'
 import { createBrowserClient } from '@supabase/ssr'
+import type { AppEnvInterface } from '~/packages/lib/src/types'
 import { appEnvConfig } from '../../config'
-import type { TypedSupabaseClient } from '../../types/supabase-client.type'
+import type { TypedSupabaseClient } from '../../types/supabase-client.types'
 
 let client: TypedSupabaseClient | undefined
 
@@ -17,7 +18,7 @@ let client: TypedSupabaseClient | undefined
  * const { data } = await supabase.from('categories').select('*');
  */
 export function createSupabaseBrowserClient() {
-	const appConfig = appEnvConfig()
+	const appConfig: AppEnvInterface = appEnvConfig()
 	if (client) {
 		return client
 	}

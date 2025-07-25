@@ -1,5 +1,6 @@
 import { appEnvConfig, transformEnv } from '@packages/lib/config/app-env.config'
 import { supabase } from '@packages/lib/supabase'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { signIn } from 'next-auth/react'
 import { RedirectType, redirect } from 'next/navigation'
@@ -33,7 +34,7 @@ export const usePasskeyAuthentication = (
 	}
 
 	const handleAuth = async () => {
-		const appConfig = appEnvConfig('web')
+		const appConfig: AppEnvInterface = appEnvConfig('web')
 		const baseUrl = appConfig.externalApis.kyc.baseUrl
 		// Initiates the authentication process with WebAuthn and prepares for Stellar signing
 		setIsAuthenticating(true)
@@ -152,7 +153,7 @@ export const usePasskeyAuthentication = (
 			setAuthSuccess(message)
 			setIsNotRegistered(false)
 			toast.success(message)
-			success = loginResult?.ok
+			success = Boolean(loginResult?.ok)
 		} catch (_error) {
 			console.error('🔴 Error during passkey authentication:', _error)
 			const error = _error as Error

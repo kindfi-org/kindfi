@@ -2,6 +2,7 @@
 
 import { appEnvConfig } from '@packages/lib/config'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
 import { getServerSession, signOut } from 'next-auth'
@@ -33,7 +34,7 @@ const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
 
 export async function signUpAction(formData: FormData): Promise<AuthResponse> {
-	const appConfig = appEnvConfig('web')
+	const appConfig: AppEnvInterface = appEnvConfig('web')
 	const supabase = await createSupabaseServerClient()
 	const email = formData.get('email') as string
 	const signInWithOptOpt = {

@@ -1,6 +1,7 @@
 'use client'
 
 import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -45,7 +46,7 @@ interface State {
 }
 
 export function EscrowTable() {
-	const appConfig = appEnvConfig('web')
+	const appConfig: AppEnvInterface = appEnvConfig('web')
 	const router = useRouter()
 	const [state, setState] = useSetState<State>({
 		dbStatus: 'Checking...',

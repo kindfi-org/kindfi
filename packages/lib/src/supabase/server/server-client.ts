@@ -1,10 +1,11 @@
 import type { Database } from '@services/supabase'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import type { AppEnvInterface } from '~/packages/lib/src/types'
 import { appEnvConfig } from '../../config'
-import type { TypedSupabaseClient } from '../../types/supabase-client.type'
+import type { TypedSupabaseClient } from '../../types/supabase-client.types'
 
-const appConfig = appEnvConfig()
+const appConfig: AppEnvInterface = appEnvConfig()
 
 /**
  * Creates a new Supabase server-side client using cookies for authentication.

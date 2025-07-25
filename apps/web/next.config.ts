@@ -1,7 +1,8 @@
 import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import type { NextConfig } from 'next'
 
-const appConfig = appEnvConfig('web')
+const appConfig: AppEnvInterface = appEnvConfig('web')
 
 const nextConfig: NextConfig = {
 	serverExternalPackages: ['@packages/lib'],

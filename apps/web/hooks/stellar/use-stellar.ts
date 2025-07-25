@@ -1,4 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import type { RegistrationResponseJSON } from '@simplewebauthn/browser'
 import { Horizon, Keypair } from '@stellar/stellar-sdk'
 import { useEffect, useRef, useState } from 'react'
@@ -116,7 +117,7 @@ export const useStellar = () => {
 
 	useEffect(() => {
 		const init = async () => {
-			const appConfig = appEnvConfig('web')
+			const appConfig: AppEnvInterface = appEnvConfig('web')
 			try {
 				const storedBundler = getStoredBundler()
 				if (storedBundler) {

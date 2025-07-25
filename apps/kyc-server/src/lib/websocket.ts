@@ -1,6 +1,6 @@
 import { appEnvConfig } from '@packages/lib/config'
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
-import type { TypedSupabaseClient } from '@packages/lib/types'
+import type { AppEnvInterface, TypedSupabaseClient } from '@packages/lib/types'
 import type {
 	RealtimeChannel,
 	RealtimePostgresChangesPayload,
@@ -8,7 +8,7 @@ import type {
 } from '@supabase/supabase-js'
 import type { ServerWebSocket } from 'bun'
 
-const appConfig = appEnvConfig('kyc-server')
+const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
 interface KYCWebSocketData {
 	clientId: string

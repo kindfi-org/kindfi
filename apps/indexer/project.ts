@@ -8,8 +8,9 @@ import { Horizon } from 'stellar-sdk'
 
 import path from 'node:path'
 import * as dotenv from 'dotenv'
+import type { AppEnvInterface } from '~/packages/lib/src/types'
 
-const appConfig = appEnvConfig()
+const appConfig: AppEnvInterface = appEnvConfig()
 const mode = appConfig.env.nodeEnv
 
 // Load the appropriate .env file

@@ -1,4 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config/app-env.config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	type RegistrationResponseJSON,
 	startRegistration,
@@ -14,7 +15,7 @@ export const usePasskeyRegistration = (
 		userId,
 	}: { onRegister?: (res: RegistrationResponseJSON) => void; userId?: string },
 ) => {
-	const appConfig = appEnvConfig('web')
+	const appConfig: AppEnvInterface = appEnvConfig('web')
 	const baseUrl = appConfig.externalApis.kyc.baseUrl
 	const [isCreatingPasskey, setIsCreatingPasskey] = useState<boolean>(false)
 	const [regSuccess, setRegSuccess] = useState<string>('')

@@ -129,7 +129,7 @@ export function UpdateCard({
 										</Avatar>
 										<div>
 											<p className="font-medium">
-												Author ID: {update.author_id.substring(0, 8)}...
+												Author ID: {update.author_id?.substring(0, 8)}...
 											</p>
 											<p className="text-sm text-gray-500">
 												{formatDate(update.created_at)}
@@ -176,7 +176,7 @@ export function UpdateCard({
 
 								<p className="text-gray-700 leading-relaxed mb-6">
 									{update.content.length > 150
-										? `${update.content.substring(0, 150)}...`
+										? `${update.content?.substring(0, 150)}...`
 										: update.content}
 								</p>
 								<Link href={`${updatesUrl}/${update.id}`}>

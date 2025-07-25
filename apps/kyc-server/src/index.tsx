@@ -1,13 +1,14 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { serve } from 'bun'
 import type { Server, ServerWebSocket } from 'bun'
 import { kycWebSocketService } from './lib/websocket'
 import { routes } from './routes'
 import { buildClient } from './utils/buildClient'
 
-const appConfig = appEnvConfig('kyc-server')
+const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
 interface ClientData {
 	clientId: string

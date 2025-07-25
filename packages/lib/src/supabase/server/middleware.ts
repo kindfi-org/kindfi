@@ -1,13 +1,19 @@
 import { createServerClient } from '@supabase/ssr'
+import type { Session } from 'next-auth'
 import { type NextRequest, NextResponse } from 'next/server'
+import type { AppEnvInterface } from '~/packages/lib/src/types'
 import { appEnvConfig } from '../../config'
 
-const appConfig = appEnvConfig()
+const appConfig: AppEnvInterface = appEnvConfig()
 
-export const updateSession = async (request: NextRequest) => {
+export const updateSession = async (
+	request: NextRequest,
+	userSession: Session | null,
+) => {
 	// This `try/catch` block is only here for the interactive tutorial.
 	// Feel free to remove once you have Supabase connected.
 	try {
+		const cookies = request.cookies
 		// Create an unmodified response
 		let response = NextResponse.next({
 			request: {
@@ -15,19 +21,26 @@ export const updateSession = async (request: NextRequest) => {
 			},
 		})
 
+		const cookieSessionToken = cookies
+			.getAll()
+			.find((cookie) => cookie.name === 'next-auth.session-token')?.value
+		console.log('🗝️ Middleware triggered', { cookies: cookieSessionToken })
+
 		const supabase = createServerClient(
 			appConfig.database.url,
 			appConfig.database.anonKey,
 			{
+				accessToken: async (...args) => {
+					console.log('🗝️ Access token requested', { args })
+					return cookieSessionToken || null
+				},
 				cookies: {
 					getAll() {
-						return request.cookies.getAll()
+						return cookies.getAll()
 					},
 					setAll(cookiesToSet) {
 						// biome-ignore lint/complexity/noForEach: <explanation>
-						cookiesToSet.forEach(({ name, value }) =>
-							request.cookies.set(name, value),
-						)
+						cookiesToSet.forEach(({ name, value }) => cookies.set(name, value))
 						response = NextResponse.next({
 							request,
 						})
@@ -42,8 +55,9 @@ export const updateSession = async (request: NextRequest) => {
 
 		// This will refresh session if expired - required for Server Components
 		// https://supabase.com/docs/guides/auth/server-side/nextjs
-		const user = await supabase.auth.getUser()
-
+		const user = await supabase.auth.getUser(cookieSessionToken) // it wont work 😏
+		console.log('🗝️ User fetched from Supabase:', user)
+		// TODO: Validate the user session
 		if (
 			!user &&
 			!request.nextUrl.pathname.startsWith('/sign-in') &&

@@ -5,8 +5,9 @@ import { Footer } from '~/components/shared/layout/footer/footer'
 import { Header } from '~/components/shared/layout/header/header'
 import { Providers } from '~/components/shared/layout/providers'
 import './css/globals.css'
+import type { AppEnvInterface } from '@packages/lib/types'
 
-const appConfig = appEnvConfig('web')
+const appConfig: AppEnvInterface = appEnvConfig('web')
 
 const defaultUrl = appConfig.deployment.vercelUrl
 	? `https://${appConfig.deployment.vercelUrl}`

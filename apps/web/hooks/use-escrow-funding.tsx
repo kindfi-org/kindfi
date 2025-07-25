@@ -1,4 +1,5 @@
 import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { Horizon, Networks } from '@stellar/stellar-sdk'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -103,7 +104,7 @@ export const useEscrowFunding = ({
 }
 
 export async function fetchTransactionStatus(hash: string) {
-	const appConfig = appEnvConfig('web')
+	const appConfig: AppEnvInterface = appEnvConfig('web')
 	const server = new Horizon.Server(appConfig.stellar.networkUrl)
 	const response = await server.transactions().transaction(hash).call()
 	return response

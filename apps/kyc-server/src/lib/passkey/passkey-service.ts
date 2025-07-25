@@ -16,6 +16,7 @@ import {
 } from '@simplewebauthn/server'
 
 import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import base64url from 'base64url'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import {
@@ -26,7 +27,7 @@ import {
 	saveUser,
 } from './database'
 
-const appConfig = appEnvConfig('kyc-server')
+const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
 /**
  * Retrieves the RP ID corresponding to the provided host.

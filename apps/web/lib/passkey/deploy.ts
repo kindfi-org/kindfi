@@ -1,4 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,
 	Address,
@@ -16,7 +17,7 @@ export async function handleDeploy(
 	contractSalt: Buffer,
 	publicKey?: Buffer,
 ): Promise<string> {
-	const config = appEnvConfig('web')
+	const config: AppEnvInterface = appEnvConfig('web')
 	const rpc = new Server(config.stellar.rpcUrl)
 	const deployee = StrKey.encodeContract(
 		hash(
