@@ -1,6 +1,6 @@
 'use client'
 import { AlertCircle } from 'lucide-react'
-import React, { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import type { FallbackProps } from 'react-error-boundary'
 import { Button } from '~/components/base/button'
 

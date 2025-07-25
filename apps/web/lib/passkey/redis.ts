@@ -1,11 +1,10 @@
-import Redis from 'ioredis'
-import RedisMock from 'ioredis-mock'
-import { ENV } from '~/lib/passkey/env'
-
 import type {
 	AuthenticatorTransportFuture,
 	WebAuthnCredential,
 } from '@simplewebauthn/server'
+import Redis from 'ioredis'
+import RedisMock from 'ioredis-mock'
+import { ENV } from '~/lib/passkey/env'
 
 const getRedis = () => {
 	if (!ENV.REDIS_URL) {

@@ -6,8 +6,8 @@ import type { VariantProps } from '@gluestack-ui/nativewind-utils'
 import { tva } from '@gluestack-ui/nativewind-utils/tva'
 import {
 	AnimatePresence,
-	Motion,
 	createMotionAnimatedComponent,
+	Motion,
 } from '@legendapp/motion'
 import { cssInterop } from 'nativewind'
 import React from 'react'

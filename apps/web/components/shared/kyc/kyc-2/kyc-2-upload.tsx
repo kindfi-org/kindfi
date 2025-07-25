@@ -90,7 +90,7 @@ export default function IDDocumentUpload({
 				await handleFileUpload(droppedFile, isFront)
 			}
 		},
-		[documentType, isValidFileType, toast],
+		[documentType, isValidFileType, toast, handleFileUpload],
 	)
 
 	const handleFileSelect = useCallback(
@@ -109,7 +109,7 @@ export default function IDDocumentUpload({
 				await handleFileUpload(selectedFile, isFront)
 			}
 		},
-		[documentType, isValidFileType, toast],
+		[documentType, isValidFileType, toast, handleFileUpload],
 	)
 
 	const handleFileUpload = useCallback(

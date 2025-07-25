@@ -1,3 +1,4 @@
+import type { Milestone } from '../types/escrow/escrow.types'
 import type {
 	DisputePayload,
 	DisputeResolutionPayload,
@@ -8,7 +9,6 @@ import type {
 	MediatorAssignmentPayload,
 	MilestoneReviewPayload,
 } from '../types/escrow/escrow-payload.types'
-import type { Milestone } from '../types/escrow/escrow.types'
 
 interface ValidationResult {
 	success: boolean

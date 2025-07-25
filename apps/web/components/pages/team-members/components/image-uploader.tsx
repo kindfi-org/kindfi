@@ -1,6 +1,5 @@
 import { ImageIcon, Trash2 } from 'lucide-react'
 import Image from 'next/image'
-import React from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 import { toast } from 'sonner'
 import {

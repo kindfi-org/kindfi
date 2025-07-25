@@ -3,6 +3,7 @@
 import { Award } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from './base/button'
+
 interface ReadyToEarnProps {
 	badges: Array<{ id: string; name: string; earned: boolean }>
 }

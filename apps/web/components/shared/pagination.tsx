@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import {
 	Pagination,
 	PaginationContent,
@@ -71,7 +70,7 @@ export function Paginations({
 					/>
 				</PaginationItem>
 
-				{pageNumbers.map((page, index) => {
+				{pageNumbers.map((page, _index) => {
 					if (page === -1 || page === -2) {
 						return (
 							<PaginationItem key={`ellipsis-${page}`}>

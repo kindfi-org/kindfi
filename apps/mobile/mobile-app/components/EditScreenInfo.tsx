@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
 import { ExternalLink } from './ExternalLink'

@@ -54,10 +54,7 @@ export const getBreakPointValue = (values: BreakPointValue, width: number) => {
 
 	mediaQueriesBreakpoints.forEach(
 		(breakpoint: Record<string, unknown>, index: number) => {
-			breakpoint.value = Object.prototype.hasOwnProperty.call(
-				values,
-				breakpoint.key as string,
-			)
+			breakpoint.value = Object.hasOwn(values, breakpoint.key as string)
 				? // @ts-ignore
 					values[breakpoint.key]
 				: mediaQueriesBreakpoints[index - 1]?.value ||

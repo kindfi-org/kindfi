@@ -72,7 +72,7 @@ export async function signInAction(formData: FormData): Promise<void> {
 	const password = formData.get('password') as string
 
 	if (!email || !password) {
-		const response = {
+		const _response = {
 			success: false,
 			message: 'Email and password are required',
 			error: 'Email and password are required',
@@ -89,7 +89,7 @@ export async function signInAction(formData: FormData): Promise<void> {
 			errorHandler.handleAuthError(error, 'sign_in')
 		}
 
-		const response = {
+		const _response = {
 			success: true,
 			message: 'Successfully signed in',
 			redirect: '/dashboard',

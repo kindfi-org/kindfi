@@ -5,7 +5,7 @@ export * from 'expo-router'
 
 declare module 'expo-router' {
 	export namespace ExpoRouter {
-		export interface __routes<T extends string | object = string> {
+		export interface __routes<_T extends string | object = string> {
 			hrefInputParams:
 				| {
 						pathname: Router.RelativePathString

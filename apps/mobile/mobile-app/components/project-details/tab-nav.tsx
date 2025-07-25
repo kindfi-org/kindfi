@@ -1,5 +1,4 @@
-import { Link } from 'expo-router'
-import { useLocalSearchParams } from 'expo-router'
+import { Link, useLocalSearchParams } from 'expo-router'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 export default function TabNav() {

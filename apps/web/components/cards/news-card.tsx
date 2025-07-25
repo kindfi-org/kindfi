@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { NewsUpdate } from '~/lib/types/learning.types'
 import { formatDate } from '~/lib/utils/date-utils'
+
 interface NewsCardProps {
 	update: NewsUpdate
 	className?: string

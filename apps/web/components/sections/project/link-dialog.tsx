@@ -30,7 +30,7 @@ export function LinkDialog({
 	selectedText = '',
 }: LinkDialogProps) {
 	const [url, setUrl] = useState(initialUrl)
-	const [text, setText] = useState(selectedText)
+	const [_text, _setText] = useState(selectedText)
 	const [validationError, setValidationError] = useState('')
 
 	const validateUrl = (input: string) => {

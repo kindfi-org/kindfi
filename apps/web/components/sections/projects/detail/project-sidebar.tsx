@@ -117,7 +117,6 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				<div
 					className="w-full bg-gray-100 rounded-full h-1.5 sm:h-2"
 					role="progressbar"
-					tabIndex={0}
 					aria-valuenow={progressPercentage}
 					aria-valuemin={0}
 					aria-valuemax={100}

@@ -2,17 +2,12 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks/use-supabase-query.hook'
-import { createSupabaseBrowserClient } from '@packages/lib/supabase/client/browser-client'
-import type { TypedSupabaseClient } from '@packages/lib/types/supabase-client.type'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { formatDistanceToNow } from 'date-fns'
-import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
-
 import { supabase } from '@packages/lib/supabase'
+import type { TypedSupabaseClient } from '@packages/lib/types/supabase-client.type'
 import type { Tables, TablesUpdate } from '@services/supabase'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { formatDistanceToNow } from 'date-fns'
 import {
 	Bell,
 	BellOff,
@@ -26,7 +21,9 @@ import {
 	Reply,
 	User as UserIcon,
 } from 'lucide-react'
-import { useAsync, useAsyncFn } from 'react-use'
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import { Alert, AlertDescription, AlertTitle } from '~/components/base/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'

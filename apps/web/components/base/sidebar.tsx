@@ -1,7 +1,7 @@
 'use client'
 
 import { Slot } from '@radix-ui/react-slot'
-import { type VariantProps, cva } from 'class-variance-authority'
+import { cva, type VariantProps } from 'class-variance-authority'
 import { PanelLeft } from 'lucide-react'
 import * as React from 'react'
 
@@ -19,6 +19,7 @@ import {
 import { useIsMobile } from '~/hooks/use-mobile'
 import useReducedMotion from '~/hooks/use-reduced-motion'
 import { cn } from '~/lib/utils'
+
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/sidebar
  * Sidebar component for managing sidebar state, layout, and behavior.

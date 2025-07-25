@@ -1,9 +1,8 @@
-import { Box } from '@/components/ui/box'
-import { Text } from '@/components/ui/text'
 import { MotiView } from 'moti'
 import { useColorScheme } from 'nativewind'
-import React from 'react'
 import { ScrollView } from 'react-native'
+import { Box } from '@/components/ui/box'
+import { Text } from '@/components/ui/text'
 import StellarBenefitCard from './StellarBenefitCard'
 
 export default function StellarSection() {

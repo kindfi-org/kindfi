@@ -1,3 +1,7 @@
+import { useLocalSearchParams } from 'expo-router'
+import { useRef } from 'react'
+import { ScrollView, View } from 'react-native'
+import Animated from 'react-native-reanimated'
 import FundingPanel from '@/components/project-details/funding-panel'
 import Gallery from '@/components/project-details/gallery'
 import ProjectHeader from '@/components/project-details/header'
@@ -11,10 +15,6 @@ import Team from '@/components/project-details/tab-content/team'
 import Updates from '@/components/project-details/tab-content/updates'
 import TabNav from '@/components/project-details/tab-nav'
 import Tags from '@/components/project-details/tags'
-import { useLocalSearchParams } from 'expo-router'
-import { useRef } from 'react'
-import { ScrollView, View } from 'react-native'
-import Animated from 'react-native-reanimated'
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 

@@ -101,7 +101,7 @@ export function FiltersSection() {
 	}, [])
 
 	const handleTopicSelect = useCallback(
-		(topic: string, index: number) => {
+		(_topic: string, index: number) => {
 			setSelectedTopic(selectedTopic === index ? -1 : index)
 		},
 		[selectedTopic],

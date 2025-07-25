@@ -37,7 +37,7 @@ export function AddReviewForm({ userId }: AddReviewFormProps) {
 		},
 	})
 
-	function onSubmit(data: KycReviewsInsertValues) {
+	function onSubmit(_data: KycReviewsInsertValues) {
 		toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
 			loading: `Adding review for ${userId}`,
 			success: 'Review added successfully',

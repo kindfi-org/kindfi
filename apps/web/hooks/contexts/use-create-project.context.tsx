@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, createContext, useContext, useState } from 'react'
+import { createContext, type ReactNode, useContext, useState } from 'react'
 import { useSetState } from 'react-use'
 
 import type { CreateProjectFormData } from '../../lib/types/project/create-project.types'

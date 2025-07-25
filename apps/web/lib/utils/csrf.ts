@@ -1,5 +1,6 @@
-import { randomBytes } from 'crypto'
 // Import process for type support in some environments
+
+import { randomBytes } from 'node:crypto'
 import process from 'node:process'
 // If you see type errors for 'process' or 'crypto', ensure you have @types/node installed
 // npm i --save-dev @types/node

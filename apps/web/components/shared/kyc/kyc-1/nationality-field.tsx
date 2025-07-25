@@ -12,7 +12,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
-import { type FormFieldProps, countries } from './types'
+import { countries, type FormFieldProps } from './types'
 
 export function NationalityField({ control }: FormFieldProps) {
 	return (

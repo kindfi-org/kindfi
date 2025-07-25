@@ -8,8 +8,7 @@ import {
 import { createSlider } from '@gluestack-ui/slider'
 import { cssInterop } from 'nativewind'
 import React from 'react'
-import { Pressable } from 'react-native'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 const SCOPE = 'SLIDER'
 const Root = withStyleContext(View, SCOPE)

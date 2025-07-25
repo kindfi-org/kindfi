@@ -39,7 +39,7 @@ export function LatestUpdates({ className = '' }: LatestUpdatesProps) {
 
 				{/* Updates Grid */}
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-					{updates.map((update, index) => (
+					{updates.map((update, _index) => (
 						<UpdateCard
 							key={update.href}
 							category={update.category}

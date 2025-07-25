@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 interface Message {
 	id: string
@@ -34,7 +34,7 @@ export function WebSocketDemo() {
 			try {
 				const data = JSON.parse(event.data)
 				addMessage(`${data.message || data.text || event.data}`, 'server')
-			} catch (e) {
+			} catch (_e) {
 				addMessage(`${event.data}`, 'server')
 			}
 		}
@@ -55,7 +55,7 @@ export function WebSocketDemo() {
 		return () => {
 			ws.close()
 		}
-	}, [])
+	}, [addMessage])
 
 	// Auto-scroll to bottom when messages change
 	// Using useLayoutEffect to ensure scrolling happens before browser paint

@@ -1,12 +1,11 @@
+import { CheckCircle, DollarSign, Eye, Users } from 'lucide-react-native'
+import { MotiView } from 'moti'
+import { useEffect, useRef, useState } from 'react'
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
+import { FlatList, Pressable, View } from 'react-native'
 import { featureCardsData } from '@/constants/impact/latam-section'
 import { getResponsiveLayout } from '@/lib/utils'
 import type { FeatureCardData } from '@/types/impact.types'
-import { LinearGradient } from 'expo-linear-gradient'
-import { CheckCircle, DollarSign, Eye, Users } from 'lucide-react-native'
-import { MotiView } from 'moti'
-import React, { useRef, useState, useEffect } from 'react'
-import { FlatList, Pressable, Text as RNText, View } from 'react-native'
-import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { Text } from '../Themed'
 import { Box } from '../ui/box'
 import { GradientText } from '../ui/gradientText'
@@ -40,7 +39,7 @@ export function LatamImpactSection() {
 			window.addEventListener('keydown', handleKeyPress)
 			return () => window.removeEventListener('keydown', handleKeyPress)
 		}
-	}, [currentIndex])
+	}, [currentIndex, scrollToIndex])
 
 	const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
 		const contentOffset = event.nativeEvent.contentOffset.x
