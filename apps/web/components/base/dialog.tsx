@@ -6,6 +6,7 @@ import * as React from 'react'
 import useReducedMotion from '~/hooks/use-reduced-motion'
 import { animations } from '~/lib/constants/animations'
 import { cn } from '~/lib/utils'
+
 /**
  * https://ui.shadcn.com/docs/components/dialog
  * Root Dialog component that manages the dialog's open state.

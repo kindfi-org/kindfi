@@ -1,9 +1,8 @@
+import { appEnvConfig } from '@packages/lib/config'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-import * as schema from './data/schema'
-
-import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '~/packages/lib/src/types'
+import * as schema from './data/schema'
 
 const appConfig: AppEnvInterface = appEnvConfig()
 
@@ -13,5 +12,5 @@ const pool = new Pool({
 
 export const db = drizzle(pool, { schema })
 
-export * from './data/schema'
 export * from './data/relations'
+export * from './data/schema'

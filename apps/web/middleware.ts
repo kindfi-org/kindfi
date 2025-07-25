@@ -1,8 +1,7 @@
 import { updateSession } from '@packages/lib/supabase-server'
-import { getServerSession } from 'next-auth'
-import { withAuth } from 'next-auth/middleware'
 import type { NextRequest } from 'next/server'
-import { nextAuthOption } from '~/lib/auth/auth-options'
+import { withAuth } from 'next-auth/middleware'
+import { ensureCsrfTokenCookie } from './app/actions/csrf'
 
 // * Infer the type of the first parameter of updateSession
 type ExpectedRequestType = Parameters<typeof updateSession>[0]
@@ -14,6 +13,8 @@ export default withAuth({
 })
 
 export async function middleware(request: NextRequest) {
+	// Ensure CSRF token cookie is set
+	ensureCsrfTokenCookie()
 	// * Cast the request object through 'unknown' to the expected type.
 	// ? This handles cases where TypeScript sees two NextRequest types as "incompatible"
 	// ? due to different declaration origins in a monorepo setup.

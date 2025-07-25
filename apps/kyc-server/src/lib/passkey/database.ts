@@ -4,7 +4,7 @@ import type {
 } from '@simplewebauthn/server'
 import { and, desc, eq, gt, lt } from 'drizzle-orm'
 import { getDb } from '../db'
-import { type Challenge, type Device, challenges, devices } from './schema'
+import { type Challenge, challenges, type Device, devices } from './schema'
 
 // Utility functions for data conversion
 const uint8ArrayToBase64 = (array: Uint8Array): string => {

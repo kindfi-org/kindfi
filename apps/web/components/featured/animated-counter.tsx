@@ -12,7 +12,7 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 	duration = 2000,
 }) => {
 	const [count, setCount] = useState(0)
-	const countRef = useRef<number | null>(null)
+	const _countRef = useRef<number | null>(null)
 
 	useEffect(() => {
 		let startTime: number

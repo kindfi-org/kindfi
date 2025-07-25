@@ -7,7 +7,7 @@ import {
 } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { MotiView } from 'moti'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 import { AnimatedCharacters, GradientText } from './animated-text'
 import { AnimatedTag } from './tags'
 

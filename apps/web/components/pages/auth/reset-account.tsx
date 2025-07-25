@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { requestResetAccountAction } from '~/app/actions'
+import { requestResetAccountAction } from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'

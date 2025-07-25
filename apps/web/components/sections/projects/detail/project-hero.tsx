@@ -4,8 +4,10 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { AnimatedCounter } from '~/components/sections/projects/detail/animated-counter'
 import { SocialLinksDisplay } from '~/components/sections/projects/detail/social-links-display'
-import { CategoryBadge } from '~/components/sections/projects/shared'
-import { CountryFlag } from '~/components/sections/projects/shared'
+import {
+	CategoryBadge,
+	CountryFlag,
+} from '~/components/sections/projects/shared'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
 

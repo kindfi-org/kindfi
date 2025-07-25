@@ -1,5 +1,3 @@
-import { subqlTest } from '@subql/testing'
-
 /*
 // https://academy.subquery.network/build/testing.html
 subqlTest(

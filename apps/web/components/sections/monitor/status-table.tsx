@@ -10,7 +10,7 @@ import {
 	getEscrowRecordsAction,
 	insertTestEscrowRecordAction,
 	updateEscrowStatusAction,
-} from '~/app/actions'
+} from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import {
 	Select,

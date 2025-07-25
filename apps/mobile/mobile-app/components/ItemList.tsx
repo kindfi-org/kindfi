@@ -1,12 +1,5 @@
 import type React from 'react'
-import {
-	FlatList,
-	Image,
-	ImageSourcePropType,
-	StyleSheet,
-	Text,
-	View,
-} from 'react-native'
+import { FlatList, Image, StyleSheet, Text, View } from 'react-native'
 import { getImageSource } from '../lib/utils'
 import type { Item } from '../types'
 

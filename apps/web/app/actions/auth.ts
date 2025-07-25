@@ -4,11 +4,12 @@ import { appEnvConfig } from '@packages/lib/config'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
-import type { AuthError } from '@supabase/supabase-js'
-import { getServerSession, signOut } from 'next-auth'
+import type { AuthError, AuthOtpResponse } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { signOut } from 'next-auth'
+import { validateCsrfToken } from '~/app/actions/csrf'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
 import type { AuthResponse } from '~/lib/types/auth'
@@ -35,6 +36,13 @@ const errorHandler = new AuthErrorHandler(logger)
 
 export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 	const appConfig: AppEnvInterface = appEnvConfig('web')
+	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
+		return {
+			success: false,
+			message: 'Invalid CSRF token',
+			error: 'Invalid CSRF token',
+		}
+	}
 	const supabase = await createSupabaseServerClient()
 	const email = formData.get('email') as string
 	const signInWithOptOpt = {
@@ -98,8 +106,10 @@ export async function createSessionAction({
 			email,
 		})
 
-		// revalidatePath('/sign-in', 'layout')
-		// console.log('Session created: ', sessionData)
+		if (userError) {
+			errorHandler.handleAuthError(userError, 'sign_in')
+		}
+
 		return {
 			success: true,
 			message: 'Session created successfully',
@@ -144,6 +154,9 @@ export async function signOutAction(): Promise<void> {
 export async function requestResetAccountAction(
 	formData: FormData,
 ): Promise<void> {
+	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
+		redirect('/forgot-password?error=Invalid CSRF token')
+	}
 	const email = formData.get('email')?.toString()
 	const supabase = await createSupabaseServerClient()
 	const origin = (await headers()).get('origin')
@@ -177,6 +190,9 @@ export async function requestResetAccountAction(
 }
 
 export async function resetPasswordAction(formData: FormData): Promise<void> {
+	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
+		redirect('/reset-password?error=Invalid CSRF token')
+	}
 	const password = formData.get('password') as string
 	const confirmPassword = formData.get('confirmPassword') as string
 

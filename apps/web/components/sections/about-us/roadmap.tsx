@@ -35,7 +35,7 @@ const Roadmap = () => {
 	}
 
 	// Get the total roadmap items length for progress indicator
-	const totalSteps = mockAboutUs.roadmap.length
+	const _totalSteps = mockAboutUs.roadmap.length
 
 	return (
 		<div className="container mx-auto py-6 relative z-10">
@@ -65,7 +65,7 @@ const Roadmap = () => {
 				whileInView="visible"
 				viewport={{ once: true, amount: 0.1 }}
 			>
-				{mockAboutUs.roadmap.map((item, index) => (
+				{mockAboutUs.roadmap.map((item, _index) => (
 					<motion.div
 						key={item.id}
 						variants={cardVariants}

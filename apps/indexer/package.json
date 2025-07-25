@@ -14,7 +14,11 @@
 	},
 	"homepage": "https://github.com/subquery/stellar-subql-starter",
 	"repository": "github:subquery/stellar-subql-starter",
-	"files": ["dist", "schema.graphql", "project.yaml"],
+	"files": [
+		"dist",
+		"schema.graphql",
+		"project.yaml"
+	],
 	"author": "kindfi-org",
 	"license": "MIT",
 	"dependencies": {

@@ -1,22 +1,12 @@
-import { KindFi } from '@/assets/icons/kindfi'
 import { MaterialIcons } from '@expo/vector-icons'
-import React, { useState } from 'react'
-import {
-	Image,
-	ScrollView,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
-} from 'react-native'
-import RNPickerSelect from 'react-native-picker-select'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useState } from 'react'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { KindFi } from '@/assets/icons/kindfi'
 import { allItems } from '../components/StyledText'
-import { ItemList } from '../components/StyledText'
 import OnboardingScreen from './onboarding-screen'
 
 // Header Component
-const Header = () => (
+const _Header = () => (
 	<View style={styles.header}>
 		<Text style={styles.headerText} numberOfLines={2} adjustsFontSizeToFit>
 			Change Lives One Block at a Time
@@ -24,7 +14,7 @@ const Header = () => (
 	</View>
 )
 
-const Navbar = () => (
+const _Navbar = () => (
 	<View style={styles.header}>
 		{/* Hamburger Menu */}
 
@@ -40,7 +30,7 @@ const Navbar = () => (
 	</View>
 )
 // Filter Component
-const Filter = ({
+const _Filter = ({
 	filters,
 	selectedFilter,
 	onSelect,
@@ -89,17 +79,17 @@ const Filter = ({
 export default function Home() {
 	const [selectedFilter, setSelectedFilter] = useState<string | null>(null)
 
-	const handleFilterSelect = (filter: string | null) => {
+	const _handleFilterSelect = (filter: string | null) => {
 		setSelectedFilter(filter)
 	}
 
-	const filteredItems = selectedFilter
+	const _filteredItems = selectedFilter
 		? allItems.filter((item) =>
 				item.category.split(', ').includes(selectedFilter),
 			)
 		: allItems
 
-	const filters = Array.from(
+	const _filters = Array.from(
 		new Set(allItems.flatMap((item) => item.category.split(', '))),
 	)
 

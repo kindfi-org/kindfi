@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form'
 
 import { Button } from '~/components/base/button'
 import {
+	CSRFTokenField,
 	Form,
 	FormControl,
 	FormField,
@@ -49,7 +50,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 	})
 
 	const onSubmit = (data: CreateProjectFormData) => {
-		console.log('Updating project:', project.id, data)
+		console.log('Updating project:', project.slug, data)
 
 		toast({
 			title: 'Project updated successfully!',
@@ -69,8 +70,9 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
-					className="space-y-6 max-w-2xl mx-auto"
+					className="max-w-2xl mx-auto space-y-6"
 				>
+					<CSRFTokenField />
 					{/* Title */}
 					<FormField
 						control={form.control}
@@ -81,7 +83,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 								<FormControl>
 									<Input
 										placeholder="Enter your project title"
-										className="border-green-600 bg-white"
+										className="bg-white border-green-600"
 										{...field}
 									/>
 								</FormControl>
@@ -110,7 +112,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 					/>
 
 					{/* Target Amount */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 						<FormField
 							control={form.control}
 							name="targetAmount"
@@ -119,13 +121,13 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									<FormLabel>Target Amount</FormLabel>
 									<FormControl>
 										<div className="relative">
-											<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+											<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
 												<span className="text-gray-500 sm:text-sm">$</span>
 											</div>
 											<Input
 												type="number"
 												placeholder="50000"
-												className="pl-7 border-green-600 bg-white"
+												className="bg-white border-green-600 pl-7"
 												value={field.value ?? ''}
 												onChange={(e) =>
 													field.onChange(
@@ -151,13 +153,13 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									<FormLabel>Minimum Investment</FormLabel>
 									<FormControl>
 										<div className="relative">
-											<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+											<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
 												<span className="text-gray-500 sm:text-sm">$</span>
 											</div>
 											<Input
 												type="number"
 												placeholder="100"
-												className="pl-7 border-green-600 bg-white"
+												className="bg-white border-green-600 pl-7"
 												value={field.value ?? ''}
 												onChange={(e) =>
 													field.onChange(
@@ -186,7 +188,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									<Input
 										type="url"
 										placeholder="https://yourproject.com"
-										className="border-green-600 bg-white"
+										className="bg-white border-green-600"
 										value={field.value ?? ''}
 										onChange={(e) => field.onChange(e.target.value)}
 									/>
@@ -260,7 +262,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 							<FormItem>
 								<FormLabel>Category</FormLabel>
 								<FormControl>
-									<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+									<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 										{categories.map((category) => (
 											<CategoryBadge
 												key={category.id}
@@ -298,10 +300,10 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 
 					{/* Save Button Section */}
 					<div className="pt-6 border-t border-gray-200">
-						<div className="text-center space-y-4">
+						<div className="space-y-4 text-center">
 							<div className="text-sm text-muted-foreground">
 								{isDirty ? (
-									<span className="text-amber-600 font-medium">
+									<span className="font-medium text-amber-600">
 										You have unsaved changes
 									</span>
 								) : (
@@ -312,18 +314,18 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 							<Button
 								type="submit"
 								disabled={!isDirty || isSubmitting}
-								className="flex items-center gap-2 px-8 gradient-btn text-white w-full"
+								className="flex items-center w-full gap-2 px-8 text-white gradient-btn"
 								size="lg"
 								aria-describedby={isDirty ? 'unsaved-changes' : 'all-saved'}
 							>
 								{isSubmitting ? (
 									<>
-										<Loader2 className="h-4 w-4 animate-spin" />
+										<Loader2 className="w-4 h-4 animate-spin" />
 										Saving...
 									</>
 								) : (
 									<>
-										<Save className="h-4 w-4" />
+										<Save className="w-4 h-4" />
 										Save Changes
 									</>
 								)}

@@ -4,11 +4,8 @@ import { Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { ChangeEvent } from 'react'
-
-import { signUpAction } from '~/app/actions'
-import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
-
 import { useSetState } from 'react-use'
+import { signUpAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -19,6 +16,7 @@ import {
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { useFormValidation } from '~/hooks/use-form-validation'
 import { cn } from '~/lib/utils'
 

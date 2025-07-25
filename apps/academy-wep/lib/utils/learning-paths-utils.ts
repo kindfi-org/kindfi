@@ -1,6 +1,6 @@
 import type {
-	LearningPathCTAColor,
 	LearningPathCardProps,
+	LearningPathCTAColor,
 } from '~/components/learningpaths/LearningPathCard'
 
 export const LEARNING_PATHS: LearningPathCardProps[] = [

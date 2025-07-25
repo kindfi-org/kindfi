@@ -1,8 +1,9 @@
 // biome-ignore lint/style/useNodejsImportProtocol: <explanation>
-import { dirname } from 'path'
+
+import { dirname } from 'node:path'
+import { FlatCompat } from '@eslint/eslintrc'
 // biome-ignore lint/style/useNodejsImportProtocol: <explanation>
 import { fileURLToPath } from 'url'
-import { FlatCompat } from '@eslint/eslintrc'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)

@@ -1,6 +1,6 @@
 import { appEnvConfig } from '@packages/lib'
 import type { AppEnvInterface } from '@packages/lib/types'
-import { Horizon, Networks } from '@stellar/stellar-sdk'
+import { Horizon } from '@stellar/stellar-sdk'
 import { useCallback, useEffect, useState } from 'react'
 
 interface FundingParams {

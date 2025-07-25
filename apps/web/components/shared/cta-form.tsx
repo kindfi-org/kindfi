@@ -23,7 +23,7 @@ export const CTAForm = ({ onSubmit, className = '' }: CtaFormProps) => {
 		try {
 			await onSubmit(formData)
 			// Optional: Add success feedback
-		} catch (error) {
+		} catch (_error) {
 			// Optional: Add error handling
 		} finally {
 			setIsLoading(false)

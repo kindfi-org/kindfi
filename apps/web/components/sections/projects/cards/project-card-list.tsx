@@ -22,7 +22,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 	)
 
 	return (
-		<Link href={`/projects/${project.id}`} className="h-full">
+		<Link href={`/projects/${project.slug}`} className="h-full">
 			<motion.article
 				className="bg-white rounded-lg overflow-hidden shadow-md flex flex-row h-full"
 				whileHover={cardHover}
@@ -65,7 +65,6 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 						<div
 							className="w-full bg-gray-100 rounded-full h-1.5 sm:h-2"
 							role="progressbar"
-							tabIndex={0}
 							aria-valuenow={progressPercentage}
 							aria-valuemin={0}
 							aria-valuemax={100}

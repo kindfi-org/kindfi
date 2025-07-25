@@ -33,7 +33,7 @@ type PushRequestBody = z.infer<typeof requestSchema>
 
 export async function POST(request: Request) {
 	const logger = new NotificationLogger()
-	const notificationService = new NotificationService()
+	const _notificationService = new NotificationService()
 
 	try {
 		// Validate request body using Zod schema

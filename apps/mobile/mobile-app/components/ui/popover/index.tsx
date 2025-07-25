@@ -8,8 +8,8 @@ import {
 import { createPopover } from '@gluestack-ui/popover'
 import {
 	AnimatePresence,
-	Motion,
 	createMotionAnimatedComponent,
+	Motion,
 } from '@legendapp/motion'
 import { cssInterop } from 'nativewind'
 import React from 'react'

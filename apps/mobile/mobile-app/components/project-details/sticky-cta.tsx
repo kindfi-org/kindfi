@@ -1,10 +1,10 @@
 import { Text, TouchableOpacity, View } from 'react-native'
 import Animated, {
-	useAnimatedStyle,
-	interpolate,
 	Extrapolate,
+	interpolate,
+	useAnimatedStyle,
+	useScrollViewOffset,
 } from 'react-native-reanimated'
-import { useScrollViewOffset } from 'react-native-reanimated'
 
 export default function StickyCTA({ scrollRef }) {
 	const scrollOffset = useScrollViewOffset(scrollRef)

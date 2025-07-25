@@ -20,7 +20,7 @@ export function DateOfBirthField({ control }: FormFieldProps) {
 	const formatDate = (date: Date) => {
 		try {
 			return format(date, 'PPP')
-		} catch (error) {
+		} catch (_error) {
 			return 'Invalid date'
 		}
 	}

@@ -1,3 +1,5 @@
+import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import type {
 	AuthenticationResponseJSON,
 	GenerateAuthenticationOptionsOpts,
@@ -7,16 +9,12 @@ import type {
 	VerifyRegistrationResponseOpts,
 	WebAuthnCredential,
 } from '@simplewebauthn/server'
-
 import {
 	generateAuthenticationOptions,
 	generateRegistrationOptions,
 	verifyAuthenticationResponse,
 	verifyRegistrationResponse,
 } from '@simplewebauthn/server'
-
-import { appEnvConfig } from '@packages/lib/config'
-import type { AppEnvInterface } from '@packages/lib/types'
 import base64url from 'base64url'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import {

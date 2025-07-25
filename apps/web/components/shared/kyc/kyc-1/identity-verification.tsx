@@ -11,7 +11,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
-import { Form } from '~/components/base/form'
+import { CSRFTokenField, Form } from '~/components/base/form'
 import { DateOfBirthField } from './date-of-birth-field'
 import { FullNameField } from './full-name-field'
 import { NationalityField } from './nationality-field'
@@ -37,11 +37,11 @@ export function IdentityVerification({
 		},
 	})
 
-	const handleClose = () => {
+	const _handleClose = () => {
 		setIsOpen(false)
 	}
 
-	const handleContinue = () => {
+	const _handleContinue = () => {
 		setIsOpen(false)
 	}
 
@@ -73,6 +73,7 @@ export function IdentityVerification({
 						onSubmit={form.handleSubmit(handleSubmit)}
 						className="space-y-6"
 					>
+						<CSRFTokenField />
 						<FullNameField control={form.control} />
 						<DateOfBirthField control={form.control} />
 						<NationalityField control={form.control} />

@@ -3,14 +3,14 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,
 	Address,
+	hash,
 	type Keypair,
 	Operation,
 	StrKey,
 	TransactionBuilder,
-	hash,
 	xdr,
 } from '@stellar/stellar-sdk'
-import { Api, Server, assembleTransaction } from '@stellar/stellar-sdk/rpc'
+import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 
 export async function handleDeploy(
 	bundlerKey: Keypair,

@@ -1,4 +1,3 @@
-import { useMobile } from '@/hooks/use-mobile'
 import { Box, HStack, Text, VStack } from '@gluestack-ui/themed'
 import { Motion } from '@legendapp/motion'
 import {
@@ -9,7 +8,7 @@ import {
 	Users2,
 } from 'lucide-react-native'
 import type React from 'react'
-import { View } from 'react-native'
+import { useMobile } from '@/hooks/use-mobile'
 
 interface BenefitCardProps {
 	title: string

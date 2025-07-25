@@ -4,7 +4,6 @@ import type { AppEnvInterface, TypedSupabaseClient } from '@packages/lib/types'
 import type {
 	RealtimeChannel,
 	RealtimePostgresChangesPayload,
-	Subscription,
 } from '@supabase/supabase-js'
 import type { ServerWebSocket } from 'bun'
 

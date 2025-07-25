@@ -27,10 +27,7 @@ export function EmptyProject({
 						{selectedCategories.length > 1 ? 'categories' : 'category'}.
 					</>
 				) : (
-					<>
-						There are no projects available at the moment. Please check back
-						later.
-					</>
+					'There are no projects available at the moment. Please check back later.'
 				)}
 			</p>
 

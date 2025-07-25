@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic'
 import {
 	SkeletonCommunity,
 	SkeletonFinalCTA,
@@ -9,8 +10,6 @@ import {
 	SkeletonPlatformOverview,
 	SkeletonUserJourney,
 } from '~/components/sections/home/skeletons'
-
-import dynamic from 'next/dynamic'
 
 export const DynamicComponents = {
 	Hero: dynamic(

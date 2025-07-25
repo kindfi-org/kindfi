@@ -1,5 +1,6 @@
 'use client'
 
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import {
 	AlertCircle,
 	ArrowRight,
@@ -9,8 +10,6 @@ import {
 } from 'lucide-react'
 import { redirect, useRouter, useSearchParams } from 'next/navigation'
 import { type SetStateAction, useEffect, useState } from 'react'
-
-import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { Button } from '~/components/base/button'
 import {
 	Card,
