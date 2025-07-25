@@ -1,10 +1,9 @@
 'use client'
 
+import { useSupabaseQuery } from '@packages/lib/hooks'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import {
 	ProjectCardGrid,
 	ProjectCardList,

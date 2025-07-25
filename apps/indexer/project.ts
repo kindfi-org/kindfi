@@ -1,12 +1,11 @@
+import path from 'node:path'
 import {
 	StellarDatasourceKind,
 	StellarHandlerKind,
 	type StellarProject,
 } from '@subql/types-stellar'
-import { Horizon } from 'stellar-sdk'
-
-import path from 'node:path'
 import * as dotenv from 'dotenv'
+import { Horizon } from 'stellar-sdk'
 
 const mode = process.env.NODE_ENV || 'production'
 

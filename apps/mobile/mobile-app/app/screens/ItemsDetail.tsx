@@ -1,5 +1,3 @@
-import { getImageSource } from '@/lib/utils'
-import React from 'react'
 import {
 	Image,
 	type ImageSourcePropType,
@@ -8,6 +6,7 @@ import {
 	Text,
 	View,
 } from 'react-native'
+import { getImageSource } from '@/lib/utils'
 
 type ItemProps = {
 	image: string | ImageSourcePropType

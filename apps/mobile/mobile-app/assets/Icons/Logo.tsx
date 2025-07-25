@@ -1,4 +1,3 @@
-import React from 'react'
 import { Defs, LinearGradient, Path, Rect, Stop, Svg } from 'react-native-svg'
 
 const YourSvgComponent = () => {

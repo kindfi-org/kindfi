@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { resetPasswordAction } from '~/app/actions'
+import { resetPasswordAction } from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'

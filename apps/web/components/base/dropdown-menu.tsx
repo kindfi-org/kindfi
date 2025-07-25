@@ -7,6 +7,7 @@ import useReducedMotion from '~/hooks/use-reduced-motion'
 import { animations } from '~/lib/constants/animations'
 
 import { cn } from '~/lib/utils'
+
 /**
  * Dropdown Menu Component
  *

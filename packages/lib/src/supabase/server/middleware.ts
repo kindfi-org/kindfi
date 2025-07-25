@@ -41,10 +41,10 @@ export const updateSession = async (request: NextRequest) => {
 
 		// This will refresh session if expired - required for Server Components
 		// https://supabase.com/docs/guides/auth/server-side/nextjs
-		const user = await supabase.auth.getUser()
+		const _user = await supabase.auth.getUser()
 
 		return response
-	} catch (e) {
+	} catch (_e) {
 		// If you are here, a Supabase client could not be created!
 		// This is likely because you have not set up environment variables.
 		// Check out http://localhost:3000 for Next Steps.

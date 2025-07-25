@@ -19,7 +19,13 @@
 		"@types/node": "^16.0.0",
 		"@types/express": "^4.17.13"
 	},
-	"keywords": ["AI", "HuggingFace", "sentiment-analysis", "biometrics", "KYC"],
+	"keywords": [
+		"AI",
+		"HuggingFace",
+		"sentiment-analysis",
+		"biometrics",
+		"KYC"
+	],
 	"author": "Your Name",
 	"license": "MIT"
 }

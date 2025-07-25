@@ -1,7 +1,5 @@
 'use client'
 
-import type React from 'react'
-
 import { ArrowLeft, Check, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -48,7 +46,7 @@ export function FinalReview({
 				setIsSuccess(false)
 				setIsSubmitting(false)
 			}, 3000)
-		} catch (error) {
+		} catch (_error) {
 			toast.error('Submission Failed')
 			setIsSubmitting(false)
 		}

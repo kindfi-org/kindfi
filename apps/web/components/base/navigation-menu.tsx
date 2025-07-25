@@ -1,9 +1,10 @@
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu'
-import { type VariantProps, cva } from 'class-variance-authority'
+import { cva, type VariantProps } from 'class-variance-authority'
 import { ChevronDown } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/navigation-menu
  * Root component for the navigation menu.

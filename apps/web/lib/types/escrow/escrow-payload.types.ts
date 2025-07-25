@@ -1,3 +1,4 @@
+import type { Escrow, MilestoneStatusType } from './escrow.types'
 import type {
 	DisputePayload,
 	DisputeResolutionPayload,
@@ -5,7 +6,6 @@ import type {
 	EvidenceSubmissionPayload,
 	MediatorAssignmentPayload,
 } from './escrow-reviews.types'
-import type { Escrow, MilestoneStatusType } from './escrow.types'
 
 // Escrow's Payload
 export type EscrowPayload = Omit<

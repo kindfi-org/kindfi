@@ -82,13 +82,13 @@ export async function handleEvent(event: SorobanEvent): Promise<void> {
 	// The transfer event has the following payload \[env, from, to\]
 	// console.info(JSON.stringify(event));
 	const {
-		topic: [env, from, to],
+		topic: [_env, from, to],
 	} = event
 
 	try {
 		decodeAddress(from)
 		decodeAddress(to)
-	} catch (e) {
+	} catch (_e) {
 		console.info('decode address failed')
 	}
 
@@ -139,7 +139,7 @@ async function checkAndGetAccount(
 function decodeAddress(scVal: xdr.ScVal): string {
 	try {
 		return Address.account(scVal.address().accountId().ed25519()).toString()
-	} catch (e) {
+	} catch (_e) {
 		return Address.contract(scVal.address().contractId()).toString()
 	}
 }

@@ -1,8 +1,8 @@
 import { prefetchSupabaseQuery } from '@packages/lib/supabase/server'
 import {
+	dehydrate,
 	HydrationBoundary,
 	QueryClient,
-	dehydrate,
 } from '@tanstack/react-query'
 import { HomeDashboard } from '~/components/pages/home'
 import { getAllProjects } from '~/lib/queries/projects'

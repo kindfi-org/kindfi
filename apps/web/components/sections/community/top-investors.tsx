@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { CategorySelect } from '~/components/sections/community/category-select'
 import type { CategoryOption } from '~/components/sections/community/category-select'
+import { CategorySelect } from '~/components/sections/community/category-select'
 import { InvestorGrid } from '~/components/sections/community/investor-grid'
 import { NoResultsMessage } from '~/components/sections/community/no-results-message'
 import type { OptionSort } from '~/components/sections/community/sort-select'

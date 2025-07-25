@@ -3,9 +3,6 @@
 import { Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { type ChangeEvent, useState } from 'react'
-
-import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
-
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -16,6 +13,7 @@ import {
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { usePasskeyRegistration } from '~/hooks/passkey/use-passkey-registration'
 import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
 import { useStellarContext } from '~/hooks/stellar/stellar-context'
@@ -126,9 +124,7 @@ export default function Signup() {
 										aria-live="polite"
 										aria-busy={isCreatingPasskey}
 									>
-										<>
-											Create account with passkey <UserPlus className="ml-2" />
-										</>
+										Create account with passkey <UserPlus className="ml-2" />
 									</Button>
 									<PasskeyInfoDialog />
 								</>

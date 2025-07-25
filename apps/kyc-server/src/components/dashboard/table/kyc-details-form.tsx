@@ -1,8 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { kycStatusUpdateSchema } from '@services/supabase'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-
-import { kycStatusUpdateSchema } from '@services/supabase'
 import { Button } from '~/components/base/button'
 import {
 	Form,

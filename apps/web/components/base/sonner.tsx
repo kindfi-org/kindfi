@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes'
 import { Toaster as Sonner } from 'sonner'
+
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/sonner
  * Toaster component for displaying toast notifications with custom styles and theme support.

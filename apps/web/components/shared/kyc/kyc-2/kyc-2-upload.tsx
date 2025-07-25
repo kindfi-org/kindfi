@@ -74,44 +74,6 @@ export default function IDDocumentUpload({
 		return validTypes.includes(file.type)
 	}, [])
 
-	const handleDrop = useCallback(
-		async (e: React.DragEvent<HTMLDivElement>, isFront: boolean) => {
-			e.preventDefault()
-			if (!documentType) {
-				toast({
-					title: 'Document Type Required',
-					description: 'Please select an ID document type before uploading.',
-					className: 'bg-destructive text-destructive-foreground',
-				} as ToastType)
-				return
-			}
-			const droppedFile = e.dataTransfer.files[0]
-			if (droppedFile && isValidFileType(droppedFile)) {
-				await handleFileUpload(droppedFile, isFront)
-			}
-		},
-		[documentType, isValidFileType, toast],
-	)
-
-	const handleFileSelect = useCallback(
-		async (e: React.ChangeEvent<HTMLInputElement>, isFront: boolean) => {
-			if (!documentType) {
-				toast({
-					title: 'Document Type Required',
-					description: 'Please select an ID document type before uploading.',
-					className: 'bg-destructive text-destructive-foreground',
-				} as ToastType)
-				e.target.value = ''
-				return
-			}
-			const selectedFile = e.target.files?.[0]
-			if (selectedFile && isValidFileType(selectedFile)) {
-				await handleFileUpload(selectedFile, isFront)
-			}
-		},
-		[documentType, isValidFileType, toast],
-	)
-
 	const handleFileUpload = useCallback(
 		async (uploadedFile: File, isFront: boolean) => {
 			if (!documentType) {
@@ -174,6 +136,44 @@ export default function IDDocumentUpload({
 			setFrontExtractedData,
 			setBackExtractedData,
 		],
+	)
+
+	const handleDrop = useCallback(
+		async (e: React.DragEvent<HTMLDivElement>, isFront: boolean) => {
+			e.preventDefault()
+			if (!documentType) {
+				toast({
+					title: 'Document Type Required',
+					description: 'Please select an ID document type before uploading.',
+					className: 'bg-destructive text-destructive-foreground',
+				} as ToastType)
+				return
+			}
+			const droppedFile = e.dataTransfer.files[0]
+			if (droppedFile && isValidFileType(droppedFile)) {
+				await handleFileUpload(droppedFile, isFront)
+			}
+		},
+		[documentType, isValidFileType, toast, handleFileUpload],
+	)
+
+	const handleFileSelect = useCallback(
+		async (e: React.ChangeEvent<HTMLInputElement>, isFront: boolean) => {
+			if (!documentType) {
+				toast({
+					title: 'Document Type Required',
+					description: 'Please select an ID document type before uploading.',
+					className: 'bg-destructive text-destructive-foreground',
+				} as ToastType)
+				e.target.value = ''
+				return
+			}
+			const selectedFile = e.target.files?.[0]
+			if (selectedFile && isValidFileType(selectedFile)) {
+				await handleFileUpload(selectedFile, isFront)
+			}
+		},
+		[documentType, isValidFileType, toast, handleFileUpload],
 	)
 
 	const handleContinue = useCallback(() => {

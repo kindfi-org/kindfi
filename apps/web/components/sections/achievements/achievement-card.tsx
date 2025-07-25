@@ -63,7 +63,6 @@ export function AchievementCard({
 						<div
 							className="relative h-2 w-full overflow-hidden rounded-full bg-blue-100"
 							role="progressbar"
-							tabIndex={0}
 							aria-valuenow={clampedProgress}
 							aria-valuemin={0}
 							aria-valuemax={100}

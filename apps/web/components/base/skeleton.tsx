@@ -1,4 +1,5 @@
 import { cn } from '~/lib/utils'
+
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/skeleton
  * Skeleton loader component used as a placeholder for loading content.

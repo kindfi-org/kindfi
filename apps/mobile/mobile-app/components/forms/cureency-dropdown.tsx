@@ -9,7 +9,6 @@ import {
 	SelectDragIndicator,
 	SelectDragIndicatorWrapper,
 	SelectIcon,
-	SelectInput,
 	SelectItem,
 	SelectPortal,
 	SelectTrigger,

@@ -1,12 +1,12 @@
 import {
+	Table as ExpoTable,
 	TBody as ExpoTBody,
 	Caption as ExpoTCaption,
 	TFoot as ExpoTFoot,
 	THead as ExpoTHead,
 	TR as ExpoTR,
-	Table as ExpoTable,
 } from '@expo/html-elements'
-import React, { createContext, useMemo, useContext } from 'react'
+import React, { createContext, useContext, useMemo } from 'react'
 
 import { Text, View } from 'react-native'
 import {
@@ -14,8 +14,8 @@ import {
 	tableCaptionStyle,
 	tableDataStyle,
 	tableFooterStyle,
-	tableHeadStyle,
 	tableHeaderStyle,
+	tableHeadStyle,
 	tableRowStyleStyle,
 	tableStyle,
 } from './styles'

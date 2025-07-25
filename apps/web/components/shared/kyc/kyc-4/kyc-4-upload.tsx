@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 'use client'
-import { processFile, validateDocument } from '@packages/lib'
 import type { DocumentType, ExtractedData } from '@packages/lib'
+import { processFile, validateDocument } from '@packages/lib'
 import { AlertCircle } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
@@ -61,7 +61,7 @@ const ProofOfAddressUpload = ({
 	const handleDrop = async (
 		e: React.DragEvent<HTMLLabelElement>,
 		documentType: DocumentType,
-		handleFileUploadBound: (file: File) => void,
+		_handleFileUploadBound: (file: File) => void,
 		setFile: React.Dispatch<React.SetStateAction<File | null>>,
 		toast: (props: Omit<ToastType, 'className'>) => () => void,
 	) => {

@@ -1,9 +1,3 @@
-import CurrencyDropdown from '@/components/forms/cureency-dropdown'
-import InputField from '@/components/forms/input-field'
-import StepHeader from '@/components/forms/step-header'
-import StepNavigation from '@/components/forms/step-navigation'
-import UploadImage from '@/components/forms/upload-image'
-import { Box } from '@/components/ui/box'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
@@ -12,6 +6,13 @@ import { Controller, useForm } from 'react-hook-form'
 import { Platform, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { z } from 'zod'
+import CurrencyDropdown from '@/components/forms/cureency-dropdown'
+import InputField from '@/components/forms/input-field'
+import StepHeader from '@/components/forms/step-header'
+import StepNavigation from '@/components/forms/step-navigation'
+import UploadImage from '@/components/forms/upload-image'
+import { Box } from '@/components/ui/box'
+
 const Step2Schema = z.object({
 	amountRaised: z
 		.string()

@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/table
  * TableHeader component for defining the header section of a table.

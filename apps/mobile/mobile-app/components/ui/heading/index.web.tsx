@@ -2,6 +2,7 @@ import type { VariantProps } from '@gluestack-ui/nativewind-utils'
 import type React from 'react'
 import { forwardRef, memo } from 'react'
 import { headingStyle } from './styles'
+
 type IHeadingProps = VariantProps<typeof headingStyle> &
 	React.ComponentPropsWithoutRef<'h1'> & {
 		as?: React.ElementType
