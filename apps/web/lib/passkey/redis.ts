@@ -70,6 +70,7 @@ export type WebAuthnCredentialJSON = {
 	publicKey: string
 	counter: number
 	transports: string[]
+	address: string
 }
 
 // TODO: we should persist the user in the database, aka postgres
@@ -89,6 +90,7 @@ export const getUser = async ({
 		const credentials: WebAuthnCredential[] = user.credentials.map(
 			(credential) => ({
 				id: credential.id,
+				address: credential.address,
 				publicKey: base64ToUint8Array(credential.publicKey),
 				counter: credential.counter,
 				transports: credential.transports

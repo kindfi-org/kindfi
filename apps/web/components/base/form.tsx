@@ -11,10 +11,9 @@ import {
 	FormProvider,
 	useFormContext,
 } from 'react-hook-form'
-
+import { getCsrfTokenFromCookie } from '~/app/actions/csrf'
 import { Label } from '~/components/base/label'
 import { cn } from '~/lib/utils'
-import { getCsrfTokenFromCookie } from '~/lib/utils/csrf'
 
 /**
  * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/form
@@ -220,9 +219,18 @@ FormMessage.displayName = 'FormMessage'
  * Hidden CSRF token field for forms.
  * This should be used in server components or SSR context only.
  */
-export function CSRFTokenField(): JSX.Element {
-	const token = getCsrfTokenFromCookie()
-	return <input type="hidden" name="csrfToken" value={token || ''} />
+export function CSRFTokenField(): React.ReactElement {
+	let token = ''
+	getCsrfTokenFromCookie().then((fetchedToken) => {
+		if (!fetchedToken) {
+			console.warn(
+				'CSRF token not found in cookies. Ensure you have set it correctly.',
+			)
+			return
+		}
+		token = fetchedToken
+	})
+	return <input type="hidden" name="csrfToken" value={token} />
 }
 
 export {
@@ -234,5 +242,4 @@ export {
 	FormDescription,
 	FormMessage,
 	FormField,
-	CSRFTokenField,
 }

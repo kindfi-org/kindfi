@@ -1,7 +1,6 @@
-// Import process for type support in some environments
+'use server'
 
-import { randomBytes } from 'node:crypto'
-import process from 'node:process'
+// Import process for type support in some environments
 // If you see type errors for 'process' or 'crypto', ensure you have @types/node installed
 // npm i --save-dev @types/node
 import { cookies } from 'next/headers'
@@ -10,8 +9,10 @@ const CSRF_COOKIE_NAME = 'csrf_token'
 const CSRF_TOKEN_LENGTH = 32
 
 // Generate a cryptographically secure CSRF token
-export function generateCsrfToken(): string {
-	return randomBytes(CSRF_TOKEN_LENGTH).toString('hex')
+export async function generateCsrfToken(): Promise<string> {
+	return new Crypto()
+		.getRandomValues(new Uint8Array(CSRF_TOKEN_LENGTH))
+		.toString()
 }
 
 // Set CSRF token in a secure, HTTP-only cookie if not already set
@@ -19,7 +20,7 @@ export async function ensureCsrfTokenCookie(): Promise<string> {
 	const cookieStore = await cookies()
 	let token = cookieStore.get(CSRF_COOKIE_NAME)?.value
 	if (!token) {
-		token = generateCsrfToken()
+		token = await generateCsrfToken()
 		cookieStore.set(CSRF_COOKIE_NAME, token, {
 			httpOnly: true,
 			sameSite: 'lax',

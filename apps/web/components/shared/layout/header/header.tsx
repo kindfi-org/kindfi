@@ -4,7 +4,7 @@ import type { User } from '@supabase/supabase-js'
 import { LogOut, Menu, Settings, User as UserIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { signOutAction } from '~/app/actions'
+import { signOutAction } from '~/app/actions/auth'
 import { Avatar, AvatarFallback } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import {

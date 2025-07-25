@@ -6,10 +6,10 @@ import type { AuthError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { validateCsrfToken } from '~/app/actions/csrf'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
 import type { AuthResponse } from '~/lib/types/auth'
-import { validateCsrfToken } from '~/lib/utils/csrf'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']

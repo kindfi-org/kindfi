@@ -6,7 +6,7 @@ import {
 	updateEscrowFinancialsAction,
 	updateEscrowMilestoneAction,
 	updateEscrowStatusAction,
-} from '~/app/actions'
+} from '~/app/actions/auth'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']
