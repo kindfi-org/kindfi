@@ -145,7 +145,6 @@ export const verifyRegistration = async ({
 			 */
 			const newCredential: WebAuthnCredential = {
 				id: credential.id,
-				address: credential.address,
 				publicKey: credential.publicKey,
 				counter: credential.counter,
 				transports: registrationResponse.response.transports,
