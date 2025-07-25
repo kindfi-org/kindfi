@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react-native'
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Animated, View } from 'react-native'
 import { getThemeColor } from '../../constants/theme-colors'
 import { Text } from '../Themed'

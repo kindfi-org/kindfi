@@ -4,6 +4,7 @@ import * as TabsPrimitive from '@radix-ui/react-tabs'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+
 /**
  * Tabs component to manage tabbed navigation and content switching.
  * @component

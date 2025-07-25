@@ -1,11 +1,11 @@
-import React, { createContext, useMemo, useContext } from 'react'
+import React, { createContext, useContext, useMemo } from 'react'
 import {
 	tableBodyStyle,
 	tableCaptionStyle,
 	tableDataStyle,
 	tableFooterStyle,
-	tableHeadStyle,
 	tableHeaderStyle,
+	tableHeadStyle,
 	tableRowStyleStyle,
 	tableStyle,
 } from './styles'

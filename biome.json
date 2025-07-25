@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -7,15 +7,16 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": [
-			"./apps/web/.next",
-			"./apps/academy-wep/.next",
-			"./apps/indexer/src/types/models",
-			"./apps/kyc-server/public"
+		"includes": [
+			"**",
+			"!apps/web/.next",
+			"!apps/academy-wep/.next",
+			"!apps/indexer/src/types/models",
+			"!apps/kyc-server/public"
 		]
 	},
 	"formatter": { "enabled": true, "indentStyle": "tab", "indentWidth": 2 },
-	"organizeImports": { "enabled": true },
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
 		"rules": {

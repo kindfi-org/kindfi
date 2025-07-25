@@ -4,6 +4,7 @@ import { type FC, useState } from 'react'
 import { Image, StyleSheet, TouchableOpacity } from 'react-native'
 import { Box } from '../ui/box'
 import { Text } from '../ui/text'
+
 interface UploadImageProps {
 	value?: string
 	onChange?: (value: string) => void

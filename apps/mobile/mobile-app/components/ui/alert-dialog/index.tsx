@@ -1,19 +1,18 @@
 'use client'
 import { createAlertDialog } from '@gluestack-ui/alert-dialog'
+import type { VariantProps } from '@gluestack-ui/nativewind-utils'
 import { tva } from '@gluestack-ui/nativewind-utils/tva'
 import {
 	useStyleContext,
 	withStyleContext,
 } from '@gluestack-ui/nativewind-utils/withStyleContext'
-import React from 'react'
-
-import type { VariantProps } from '@gluestack-ui/nativewind-utils'
 import {
 	AnimatePresence,
-	Motion,
 	createMotionAnimatedComponent,
+	Motion,
 } from '@legendapp/motion'
 import { cssInterop } from 'nativewind'
+import React from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 
 const AnimatedPressable = createMotionAnimatedComponent(Pressable)

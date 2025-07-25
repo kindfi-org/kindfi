@@ -1,6 +1,6 @@
 import type React from 'react'
-import { Button } from '~/components/base/button'
 import type { ButtonProps } from '~/components/base/button'
+import { Button } from '~/components/base/button'
 
 type ButtonIconDetailProps = {
 	children: React.ReactNode

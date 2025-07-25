@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import React from 'react'
 import {
 	FeatureCreatorCard,
 	type FeatureCreatorCardProps,
@@ -36,11 +35,9 @@ export const FeaturedCreators = ({ creators }: FeatureCreatorsProps) => {
 					{creators.length === 0 ? (
 						<p>No creators found</p>
 					) : (
-						<>
-							{creators.map((creator) => (
-								<FeatureCreatorCard key={creator.name} {...creator} />
-							))}
-						</>
+						creators.map((creator) => (
+							<FeatureCreatorCard key={creator.name} {...creator} />
+						))
 					)}
 				</div>
 			</div>

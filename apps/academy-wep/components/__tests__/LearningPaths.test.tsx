@@ -1,8 +1,13 @@
 import './setupTests'
 
 import { afterEach, expect, mock, test } from 'bun:test'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { cleanup } from '@testing-library/react'
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import type { LearningPathCardProps } from '../learningpaths/LearningPathCard'
 import LearningPaths from '../learningpaths/LearningPaths'

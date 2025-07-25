@@ -2,17 +2,12 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks/use-supabase-query.hook'
-import { createSupabaseBrowserClient } from '@packages/lib/supabase/client/browser-client'
-import type { TypedSupabaseClient } from '@packages/lib/types/supabase-client.type'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { formatDistanceToNow } from 'date-fns'
-import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
-
 import { supabase } from '@packages/lib/supabase'
+import type { TypedSupabaseClient } from '@packages/lib/types/supabase-client.type'
 import type { Tables, TablesUpdate } from '@services/supabase'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { formatDistanceToNow } from 'date-fns'
 import {
 	Bell,
 	BellOff,
@@ -26,7 +21,9 @@ import {
 	Reply,
 	User as UserIcon,
 } from 'lucide-react'
-import { useAsync, useAsyncFn } from 'react-use'
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import { Alert, AlertDescription, AlertTitle } from '~/components/base/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
@@ -156,64 +153,35 @@ export default function QAClient({
 			try {
 				const { data, error } = await supabase
 					.from('comments')
-					.select('*')
+					.select(
+						`
+					*,
+					author:profiles (id, full_name, image_url, email),
+					project_members (role, project_id, profile_id)
+				`,
+					)
 					.eq('project_id', projectId)
 					.eq('type', 'question')
 					.is('parent_comment_id', null)
 					.order('created_at', { ascending: false })
 
 				if (error) throw error
+
 				if (!data || !data.length) {
 					console.warn('No questions found for this project')
 					return []
 				}
 
-				const authorIds = [...new Set(data.map((item) => item.author_id))]
-
-				// Fetch authors
-				const { data: authors, error: authorsError } = await supabase
-					.from('profiles')
-					.select('*')
-					.in('id', authorIds)
-
-				if (authorsError) {
-					console.error('Error fetching authors:', authorsError)
-					return data.map((item) => ({
-						...item,
-						created_at: item.created_at || new Date().toISOString(),
-						author: null,
-					})) as unknown as CommentData[]
-				}
-
-				if (authors) {
-					// Create a lookup map for authors
-					const authorsMap = authors.reduce(
-						(acc: Record<string, UserData>, author: UserData) => {
-							acc[author.id] = author
-							return acc
-						},
-						{} as Record<string, UserData>,
-					)
-
-					// Attach author data to each question
-					return data.map((question) => ({
-						...question,
-						created_at: question.created_at || new Date().toISOString(),
-						author:
-							authorsMap[question.author_id] ||
-							(question.author_id?.includes('-')
-								? {
-										id: question.author_id,
-										full_name: 'Guest User',
-										is_team_member: false,
-									}
-								: null),
-					})) as CommentData[]
-				}
-
 				return data.map((item) => ({
 					...item,
 					created_at: item.created_at || new Date().toISOString(),
+					author: item.author_id?.includes('-')
+						? {
+								id: item.author_id,
+								full_name: 'Guest User',
+								is_team_member: false,
+							}
+						: undefined,
 				})) as CommentData[]
 			} catch (err) {
 				console.error('Error fetching questions:', err)
@@ -1339,7 +1307,7 @@ function RenderUserInfo({
 							variant="outline"
 							className="ml-2 text-xs py-0 h-5 bg-blue-50 text-blue-700 border-blue-200"
 						>
-							Team
+							{authorData?.role}
 						</Badge>
 					)}
 				</div>

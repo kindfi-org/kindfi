@@ -4,6 +4,7 @@ import * as SeparatorPrimitive from '@radix-ui/react-separator'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/separator
  * Separator component for visually dividing content.

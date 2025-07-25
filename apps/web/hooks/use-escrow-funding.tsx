@@ -1,4 +1,4 @@
-import { Horizon, Networks } from '@stellar/stellar-sdk'
+import { Horizon } from '@stellar/stellar-sdk'
 import { useCallback, useEffect, useState } from 'react'
 
 interface FundingParams {

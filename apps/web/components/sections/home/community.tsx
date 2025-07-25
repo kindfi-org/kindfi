@@ -93,7 +93,7 @@ export function Community() {
 	)
 }
 
-const submitForm = async (data: FormData): Promise<void> => {
+const submitForm = async (_data: FormData): Promise<void> => {
 	return new Promise((resolve, reject) => {
 		setTimeout(() => {
 			if (Math.random() > 0.5) {

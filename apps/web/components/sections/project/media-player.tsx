@@ -1,6 +1,6 @@
 import { Image } from '@radix-ui/react-avatar'
-import { useState } from 'react'
 import type React from 'react'
+import { useState } from 'react'
 import { Button } from '~/components/base/button'
 
 type MediaType = 'image' | 'video'

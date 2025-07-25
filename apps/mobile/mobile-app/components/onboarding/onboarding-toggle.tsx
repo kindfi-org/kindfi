@@ -1,5 +1,5 @@
 import { MotiView } from 'moti'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { type LayoutChangeEvent, Pressable, View } from 'react-native'
 import { HStack } from '../ui/hstack'
 import { Text } from '../ui/text'

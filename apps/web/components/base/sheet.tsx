@@ -1,12 +1,13 @@
 'use client'
 
 import * as SheetPrimitive from '@radix-ui/react-dialog'
-import { type VariantProps, cva } from 'class-variance-authority'
+import { cva, type VariantProps } from 'class-variance-authority'
 import { X } from 'lucide-react'
 import * as React from 'react'
 import useReducedMotion from '~/hooks/use-reduced-motion'
 import { animations } from '~/lib/constants/animations'
 import { cn } from '~/lib/utils'
+
 /**
  * Sheet component for displaying a sliding panel UI
  *

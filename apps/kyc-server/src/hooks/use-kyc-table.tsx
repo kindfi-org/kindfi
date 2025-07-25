@@ -1,15 +1,15 @@
 import {
 	type ColumnFiltersState,
-	type RowSelectionState,
-	type SortingState,
-	type VisibilityState,
 	getCoreRowModel,
 	getFacetedRowModel,
 	getFacetedUniqueValues,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
+	type RowSelectionState,
+	type SortingState,
 	useReactTable,
+	type VisibilityState,
 } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
 import { useSetState } from 'react-use'

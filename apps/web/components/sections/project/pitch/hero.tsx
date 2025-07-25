@@ -1,9 +1,8 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { useState } from 'react'
-
-import { motion } from 'framer-motion'
 import { Checkbox } from '~/components/base/checkbox'
 import { Progress } from '~/components/base/progress'
 import {

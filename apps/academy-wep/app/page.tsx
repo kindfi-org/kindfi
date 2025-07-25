@@ -3,9 +3,9 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, DiscIcon as Discord, Github, Twitter } from 'lucide-react'
 import { useState } from 'react'
-import { CommunitySection } from '~/components/CommunitySection'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
+import { CommunitySection } from '~/components/CommunitySection'
 import ReadyToEarn from '~/components/ready-to-earn'
 import { WhyChoose } from '~/components/sections/why-choose'
 
@@ -14,7 +14,7 @@ export default function Home() {
 
 	// Calculate time until launch
 	const launchDate = new Date('2025-06-01').getTime()
-	const now = new Date().getTime()
+	const now = Date.now()
 	const distance = launchDate - now
 	const days = Math.floor(distance / (1000 * 60 * 60 * 24))
 

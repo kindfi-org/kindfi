@@ -3,7 +3,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
 import { Check, ChevronLeft } from 'lucide-react'
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '~/components/base/button'

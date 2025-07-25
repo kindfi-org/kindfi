@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
-import { CTAButtons } from './CTAButtons'
 import { CommunityStats } from './CommunityStats'
+import { CTAButtons } from './CTAButtons'
 
 interface CommunitySectionProps {
 	/** Number of community members to display (e.g. "500+") */

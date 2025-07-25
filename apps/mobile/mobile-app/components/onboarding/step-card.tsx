@@ -1,5 +1,4 @@
 import { MotiView } from 'moti'
-import React from 'react'
 import { Dimensions, View } from 'react-native'
 import { HStack } from '../ui/hstack'
 import { Text } from '../ui/text'

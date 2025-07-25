@@ -1,7 +1,6 @@
 import { usePathname } from 'expo-router'
 import { Box } from '../ui/box'
 import { Center } from '../ui/center'
-import { Divider } from '../ui/divider'
 import { Heading } from '../ui/heading'
 import { HStack } from '../ui/hstack'
 import { Text } from '../ui/text'

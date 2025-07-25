@@ -4,6 +4,7 @@ import * as SwitchPrimitives from '@radix-ui/react-switch'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/switch
  * Switch component for creating toggle switches with customizable styles and state.

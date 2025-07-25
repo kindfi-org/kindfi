@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import {
+	CSRFTokenField,
 	Form,
 	FormControl,
 	FormField,
@@ -69,6 +70,7 @@ export function UpdateForm({
 						onSubmit={form.handleSubmit(handleSubmit)}
 						className="space-y-4"
 					>
+						<CSRFTokenField />
 						<FormField
 							control={form.control}
 							name="content"

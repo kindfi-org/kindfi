@@ -2,7 +2,7 @@ import type { DocumentType, ExtractedData } from '@packages/lib'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import type React from 'react'
 import { Button } from '~/components/base/button'
-import { Toast, type useToast } from '~/components/base/toast'
+import type { useToast } from '~/components/base/toast'
 
 interface OCRProcessorProps {
 	isProcessing: boolean

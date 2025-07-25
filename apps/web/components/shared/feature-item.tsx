@@ -1,5 +1,3 @@
-import React from 'react'
-
 // Feature Item Component
 interface FeatureItemProps {
 	title: string

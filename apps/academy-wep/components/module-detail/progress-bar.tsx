@@ -19,7 +19,6 @@ export function ProgressBar({
 			<div className="flex items-center gap-4">
 				<div
 					role="progressbar"
-					tabIndex={0}
 					aria-valuenow={validPercentage}
 					aria-valuemin={0}
 					aria-valuemax={100}

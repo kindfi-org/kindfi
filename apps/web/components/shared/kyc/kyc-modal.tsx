@@ -46,7 +46,7 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 	}
 
 	// Function to go back to previous step
-	const handleBack = () => {
+	const _handleBack = () => {
 		setCurrentStep((prev) => Math.max(prev - 1, 1))
 	}
 

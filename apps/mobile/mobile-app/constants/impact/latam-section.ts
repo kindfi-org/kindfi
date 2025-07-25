@@ -1,5 +1,5 @@
-import type { FeatureCardData } from '@/types/impact.types'
 import { CheckCircle, Shield, TrendingUp } from 'lucide-react-native'
+import type { FeatureCardData } from '@/types/impact.types'
 
 export const featureCardsData: FeatureCardData[] = [
 	{

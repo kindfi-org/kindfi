@@ -1,7 +1,6 @@
 import type {
 	RealtimeChannel,
 	RealtimePostgresChangesPayload,
-	Subscription,
 } from '@supabase/supabase-js'
 import { createClient } from '@supabase/supabase-js'
 import type { ServerWebSocket } from 'bun'

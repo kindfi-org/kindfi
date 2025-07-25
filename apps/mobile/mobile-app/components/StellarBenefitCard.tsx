@@ -1,8 +1,7 @@
+import { MotiView } from 'moti'
+import { Pressable, useColorScheme } from 'react-native'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
-import { MotiView } from 'moti'
-import React from 'react'
-import { Pressable, useColorScheme } from 'react-native'
 
 type StellarBenefitCardProps = {
 	icon: string

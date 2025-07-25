@@ -240,7 +240,7 @@ export function Calendar({
 					</div>
 					{weeks.map((week) => (
 						<div key={week.id} className="flex mt-2">
-							{week.days.map((dayObj, dayIndex) => {
+							{week.days.map((dayObj, _dayIndex) => {
 								const day = dayObj.value
 								const isCurrentMonth =
 									!dayObj.isPrevMonth && !dayObj.isNextMonth

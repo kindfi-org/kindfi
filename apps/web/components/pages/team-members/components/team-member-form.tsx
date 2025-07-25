@@ -1,5 +1,5 @@
 import type { UseFormReturn } from 'react-hook-form'
-import { Form } from '~/components/base/form'
+import { CSRFTokenField, Form } from '~/components/base/form'
 import type { formInputs } from '../team-members'
 import { TeamMemberList } from './team-member-list'
 import { VisibilityToggle } from './visibility-toggle'
@@ -20,6 +20,7 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+				<CSRFTokenField />
 				<TeamMemberList form={form} roles={roles} />
 				<VisibilityToggle form={form} roles={roles} />
 

@@ -1,5 +1,3 @@
-import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
-import { useColorScheme } from '@/components/useColorScheme'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import {
 	DarkTheme,
@@ -10,6 +8,8 @@ import { useFonts } from 'expo-font'
 import { Slot } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, useState } from 'react'
+import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
+import { useColorScheme } from '@/components/useColorScheme'
 
 import '../global.css'
 
@@ -32,7 +32,7 @@ export default function RootLayout() {
 		...FontAwesome.font,
 	})
 
-	const [styleLoaded, setStyleLoaded] = useState(false)
+	const [_styleLoaded, _setStyleLoaded] = useState(false)
 	// Expo Router uses Error Boundaries to catch errors in the navigation tree.
 	useEffect(() => {
 		if (error) throw error

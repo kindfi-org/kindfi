@@ -1,5 +1,5 @@
 'use client'
-import { type ReactNode, createContext, useContext } from 'react'
+import { createContext, type ReactNode, useContext } from 'react'
 import { useStellar } from '~/hooks/stellar/use-stellar'
 
 type StellarContextProps = ReturnType<typeof useStellar>

@@ -5,6 +5,7 @@ import { Check } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/checkbox
  * Checkbox component that wraps Radix UI's `Checkbox` and provides custom styling.

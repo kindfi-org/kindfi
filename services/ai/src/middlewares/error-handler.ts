@@ -8,7 +8,7 @@
  *
  * @returns {void}
  */
-export function errorHandler(err, req, res, next?) {
+export function errorHandler(err, _req, res, _next?) {
 	console.error(err.stack)
 	res.status(500).json({
 		message: 'An error occurred',

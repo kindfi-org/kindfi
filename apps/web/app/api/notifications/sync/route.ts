@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({ success: true })
 	} catch (error) {
-		let notificationId: string | undefined = undefined
+		let notificationId: string | undefined
 		if (hasNotificationId(error)) {
 			notificationId = error.notificationId
 		}

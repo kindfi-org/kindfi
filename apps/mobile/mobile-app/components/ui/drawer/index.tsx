@@ -8,8 +8,8 @@ import {
 } from '@gluestack-ui/nativewind-utils/withStyleContext'
 import {
 	AnimatePresence,
-	Motion,
 	createMotionAnimatedComponent,
+	Motion,
 } from '@legendapp/motion'
 import { cssInterop } from 'nativewind'
 import React from 'react'

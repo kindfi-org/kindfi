@@ -65,7 +65,7 @@ export function ProjectMedia({
 					setUploadProgress(100)
 					setUploadedFile(file)
 					setError(null)
-				} catch (err) {
+				} catch (_err) {
 					setError('Failed to upload file. Please try again.')
 					setUploadProgress(0)
 				} finally {
