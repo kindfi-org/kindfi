@@ -4,7 +4,7 @@ import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useSetState } from 'react-use'
 import {
 	getEscrowRecordsAction,

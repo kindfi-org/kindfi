@@ -258,7 +258,7 @@ function detectApp(): AppName | undefined {
 // Generic appEnvConfig function that validates transformed config
 export function appEnvConfig<T extends AppName>(appName?: T): AppEnvInterface {
 	try {
-		const app = appName || detectApp()
+		const _app = appName || detectApp()
 		// Transform the environment first
 		const transformedConfig = transformEnv()
 

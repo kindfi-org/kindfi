@@ -1,12 +1,9 @@
 'use client'
 
-import { appEnvConfig } from '@packages/lib/config'
-import { throttle } from 'lodash'
 import { Fingerprint } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type ChangeEvent, useEffect, useState } from 'react'
-import { signInAction } from '~/app/actions'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -25,7 +22,7 @@ import { cn } from '~/lib/utils'
 
 export function LoginComponent() {
 	const [email, setEmail] = useState('')
-	const router = useRouter()
+	const _router = useRouter()
 
 	const {
 		onSign,

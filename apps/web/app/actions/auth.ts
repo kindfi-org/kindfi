@@ -4,7 +4,7 @@ import { appEnvConfig } from '@packages/lib/config'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
-import type { AuthError, AuthOtpResponse } from '@supabase/supabase-js'
+import type { AuthError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -158,8 +158,8 @@ export async function requestResetAccountAction(
 		redirect('/forgot-password?error=Invalid CSRF token')
 	}
 	const email = formData.get('email')?.toString()
-	const supabase = await createSupabaseServerClient()
-	const origin = (await headers()).get('origin')
+	const _supabase = await createSupabaseServerClient()
+	const _origin = (await headers()).get('origin')
 
 	if (!email) {
 		redirect('/reset-account?error=Email is required')

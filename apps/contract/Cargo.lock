@@ -925,7 +925,6 @@ dependencies = [
  "stellar-access-control-macros",
  "stellar-constants",
  "stellar-default-impl-macro",
- "stellar-fungible",
  "stellar-non-fungible",
  "stellar-ownable",
  "stellar-ownable-macro",
@@ -1627,15 +1626,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.101",
-]
-
-[[package]]
-name = "stellar-fungible"
-version = "0.3.0"
-source = "git+https://github.com/OpenZeppelin/stellar-contracts?tag=v0.3.0#659fcabdc0e4712254dfebe4f45efd54f49826e9"
-dependencies = [
- "soroban-sdk",
- "stellar-constants",
 ]
 
 [[package]]

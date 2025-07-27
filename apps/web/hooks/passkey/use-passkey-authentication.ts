@@ -1,5 +1,4 @@
-import { appEnvConfig, transformEnv } from '@packages/lib/config/app-env.config'
-import { supabase } from '@packages/lib/supabase'
+import { appEnvConfig } from '@packages/lib/config/app-env.config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { RedirectType, redirect } from 'next/navigation'

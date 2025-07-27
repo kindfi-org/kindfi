@@ -8,7 +8,7 @@ const appConfig: AppEnvInterface = appEnvConfig()
 
 export const updateSession = async (
 	request: NextRequest,
-	userSession: Session | null,
+	_userSession: Session | null,
 ) => {
 	// This `try/catch` block is only here for the interactive tutorial.
 	// Feel free to remove once you have Supabase connected.

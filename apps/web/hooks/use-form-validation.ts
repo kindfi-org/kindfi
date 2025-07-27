@@ -1,4 +1,3 @@
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
 import { throttle } from 'lodash'
 import { useState } from 'react'

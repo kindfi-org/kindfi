@@ -63,7 +63,7 @@ export function SignupComponent() {
 			} else {
 				setSignUpState({ error: result.message })
 			}
-		} catch (err) {
+		} catch (_err) {
 			setSignUpState({
 				error: 'An unexpected error occurred. Please try again.',
 			})

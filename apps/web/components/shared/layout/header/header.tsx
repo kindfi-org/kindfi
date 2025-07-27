@@ -84,7 +84,7 @@ export const Header = () => {
 const UserMenu = ({ user }: { user: User }) => {
 	const router = useRouter()
 
-	const handleSignOutAction = async () => {
+	const _handleSignOutAction = async () => {
 		try {
 			await signOutAction()
 			router.push('/')

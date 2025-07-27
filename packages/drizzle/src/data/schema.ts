@@ -445,7 +445,7 @@ export const ssoProvidersInAuth = auth.table(
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
 	},
-	(table) => [
+	(_table) => [
 		uniqueIndex('sso_providers_resource_id_idx').using(
 			'btree',
 			sql`lower(resource_id)`,
