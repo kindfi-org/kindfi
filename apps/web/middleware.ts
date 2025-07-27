@@ -8,13 +8,15 @@ type ExpectedRequestType = Parameters<typeof updateSession>[0]
 
 export default withAuth({
 	pages: {
-		signIn: '/auth/signin',
+		signIn: '/sign-in',
+		signOut: '/sign-out',
+		error: '/error',
 	},
 })
 
 export async function middleware(request: NextRequest) {
 	// Ensure CSRF token cookie is set
-	ensureCsrfTokenCookie()
+	// await ensureCsrfTokenCookie()
 	// * Cast the request object through 'unknown' to the expected type.
 	// ? This handles cases where TypeScript sees two NextRequest types as "incompatible"
 	// ? due to different declaration origins in a monorepo setup.

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { ChangeEvent } from 'react'
 import { useSetState } from 'react-use'
-import { signUpAction } from '~/app/actions'
+import { signUpAction } from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import {
 	Card,

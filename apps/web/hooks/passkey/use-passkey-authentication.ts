@@ -5,7 +5,7 @@ import { RedirectType, redirect } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { createSessionAction } from '~/app/actions'
+import { createSessionAction } from '~/app/actions/auth'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import type { PresignResponse, SignParams } from '~/lib/types'
 
