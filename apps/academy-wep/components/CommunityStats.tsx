@@ -8,7 +8,6 @@ export function CommunityStats({ memberCount }: CommunityStatsProps) {
 			<div className="absolute inset-0 bg-gradient-to-br from-[#7CC635]/20 to-blue-500/20 rounded-full blur-xl transform rotate-6 scale-95" />
 			<div className="relative bg-white p-4 sm:p-6 rounded-full shadow-lg border border-gray-100 w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 lg:w-48 lg:h-48 xl:w-52 xl:h-52 flex items-center justify-center">
 				<div className="relative z-10 flex flex-col items-center">
-					{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
 					<svg
 						width="64"
 						height="64"
@@ -17,6 +16,7 @@ export function CommunityStats({ memberCount }: CommunityStatsProps) {
 						xmlns="http://www.w3.org/2000/svg"
 						className="mb-2 sm:mb-3 md:mb-4"
 					>
+						<title>Community Icon</title>
 						<path
 							d="M16 28C22.6274 28 28 22.6274 28 16C28 9.37258 22.6274 4 16 4C9.37258 4 4 9.37258 4 16C4 22.6274 9.37258 28 16 28Z"
 							stroke="#7CC635"

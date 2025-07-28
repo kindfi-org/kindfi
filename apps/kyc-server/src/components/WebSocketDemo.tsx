@@ -16,6 +16,18 @@ export function WebSocketDemo() {
 	const messagesEndRef = useRef<HTMLDivElement>(null)
 	const lastMessageCountRef = useRef(0)
 
+	// Add a message to the chat
+	const addMessage = (text: string, sender: 'user' | 'server') => {
+		const newMessage: Message = {
+			id: Date.now().toString(),
+			text,
+			sender,
+			timestamp: Date.now(),
+		}
+
+		setMessages((prevMessages) => [...prevMessages, newMessage])
+	}
+
 	// Connect to WebSocket
 	useEffect(() => {
 		// Get the current host
@@ -55,6 +67,7 @@ export function WebSocketDemo() {
 		return () => {
 			ws.close()
 		}
+		// biome-ignore lint/correctness/useExhaustiveDependencies: dep
 	}, [addMessage])
 
 	// Auto-scroll to bottom when messages change
@@ -67,18 +80,6 @@ export function WebSocketDemo() {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [messages])
-
-	// Add a message to the chat
-	const addMessage = (text: string, sender: 'user' | 'server') => {
-		const newMessage: Message = {
-			id: Date.now().toString(),
-			text,
-			sender,
-			timestamp: Date.now(),
-		}
-
-		setMessages((prevMessages) => [...prevMessages, newMessage])
-	}
 
 	// Send a message
 	const sendMessage = () => {

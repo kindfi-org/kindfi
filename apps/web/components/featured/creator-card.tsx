@@ -13,7 +13,6 @@ interface CreatorCardProps {
 
 export const CreatorCard: React.FC<CreatorCardProps> = ({ creator }) => {
 	const {
-		id,
 		name,
 		role,
 		image,

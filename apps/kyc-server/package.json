@@ -1,22 +1,4 @@
 {
-	"name": "kyc-server",
-	"version": "0.1.0",
-	"description": "Kyc server using Bun, React, and TailwindCSS",
-	"private": true,
-	"type": "module",
-	"main": "src/index.tsx",
-	"module": "src/index.tsx",
-	"scripts": {
-		"dev": "cross-env NODE_ENV=development bun src/index.tsx",
-		"build": "bun build src/index.tsx --outdir dist",
-		"start": "cross-env NODE_ENV=production bun src/index.tsx",
-		"lint": "eslint . --ext .ts,.tsx",
-		"format": "prettier --write \"**/*.{ts,tsx}\"",
-		"db:generate": "drizzle-kit generate:pg",
-		"db:push": "drizzle-kit push:pg",
-		"test": "bun test src/__tests__/*.test.ts",
-		"test:watch": "bun test --watch src/__tests__/*.test.ts"
-	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.3.1",
 		"@dnd-kit/modifiers": "^9.0.0",
@@ -42,6 +24,7 @@
 		"clsx": "^2.1.1",
 		"drizzle-orm": "^0.29.0",
 		"lucide-react": "^0.513.0",
+		"next-theme": "^0.1.5",
 		"postgres": "^3.4.0",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
@@ -57,15 +40,33 @@
 		"ws": "^8.16.0",
 		"zod": "^3.25.62"
 	},
+	"description": "Kyc server using Bun, React, and TailwindCSS",
 	"devDependencies": {
+		"@types/bun": "latest",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
-		"@types/bun": "latest",
 		"@types/ws": "^8.5.10",
 		"cross-env": "^7.0.3",
 		"drizzle-kit": "^0.20.14",
 		"eslint": "^8.56.0",
 		"prettier": "^3.1.0",
 		"typescript": "^5.3.0"
-	}
+	},
+	"main": "src/index.tsx",
+	"module": "src/index.tsx",
+	"name": "kyc-server",
+	"private": true,
+	"scripts": {
+		"build": "bun build src/index.tsx --outdir dist",
+		"db:generate": "drizzle-kit generate:pg",
+		"db:push": "drizzle-kit push:pg",
+		"dev": "cross-env NODE_ENV=development bun --watch src/index.tsx",
+		"format": "prettier --write \"**/*.{ts,tsx}\"",
+		"lint": "eslint . --ext .ts,.tsx",
+		"start": "cross-env NODE_ENV=production bun src/index.tsx",
+		"test": "bun test src/__tests__/*.test.ts",
+		"test:watch": "bun test --watch src/__tests__/*.test.ts"
+	},
+	"type": "module",
+	"version": "0.1.0"
 }

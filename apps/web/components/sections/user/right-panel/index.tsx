@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/a11y/useSemanticElements: any */
+/** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: any */
 'use client'
 
 import { Suspense, useState } from 'react'

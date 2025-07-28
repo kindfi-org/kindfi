@@ -21,6 +21,19 @@ export function LatamImpactSection() {
 	// Get responsive layout values
 	const { screenWidth, CARD_PADDING, isTablet } = getResponsiveLayout()
 
+	const scrollToIndex = (index: number) => {
+		if (
+			index >= 0 &&
+			index < featureCardsData.length &&
+			index !== currentIndex
+		) {
+			// Use scrollToOffset instead of scrollToIndex for better compatibility with pagingEnabled
+			const offsetX = index * screenWidth
+			flatListRef.current?.scrollToOffset({ offset: offsetX, animated: true })
+			setCurrentIndex(index)
+		}
+	}
+
 	// Keyboard navigation (for external keyboard support on mobile)
 	useEffect(() => {
 		const handleKeyPress = (event: KeyboardEvent) => {
@@ -39,6 +52,7 @@ export function LatamImpactSection() {
 			window.addEventListener('keydown', handleKeyPress)
 			return () => window.removeEventListener('keydown', handleKeyPress)
 		}
+		// biome-ignore lint/correctness/useExhaustiveDependencies: change
 	}, [currentIndex, scrollToIndex])
 
 	const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -49,19 +63,6 @@ export function LatamImpactSection() {
 			index >= 0 &&
 			index < featureCardsData.length
 		) {
-			setCurrentIndex(index)
-		}
-	}
-
-	const scrollToIndex = (index: number) => {
-		if (
-			index >= 0 &&
-			index < featureCardsData.length &&
-			index !== currentIndex
-		) {
-			// Use scrollToOffset instead of scrollToIndex for better compatibility with pagingEnabled
-			const offsetX = index * screenWidth
-			flatListRef.current?.scrollToOffset({ offset: offsetX, animated: true })
 			setCurrentIndex(index)
 		}
 	}

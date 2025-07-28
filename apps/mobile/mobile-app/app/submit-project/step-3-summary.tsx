@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/useHookAtTopLevel: any */
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'

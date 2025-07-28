@@ -12,7 +12,6 @@ interface UploadImageProps {
 	errorMessage?: string
 }
 const UploadImage: FC<UploadImageProps> = ({
-	value,
 	onChange,
 	error,
 	errorMessage,

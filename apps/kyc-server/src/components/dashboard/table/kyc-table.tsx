@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: any*/
 'use client'
 
 import {

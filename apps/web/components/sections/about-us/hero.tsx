@@ -6,6 +6,7 @@ import { Button } from '~/components/base/button'
 
 export function Hero() {
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: can't use role with section
 		<section
 			className="relative z-0 min-h-[60vh] px-4 pt-20"
 			aria-labelledby="hero-title"

@@ -1,7 +1,8 @@
+// biome-ignore assist/source/organizeImports: false
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { ReactNode } from 'react'
-import { Navigation } from './Navigation'
+// import { Navigation } from './Navigation'
 
 interface HomeProps {
 	message: string | ReactNode
@@ -22,7 +23,7 @@ function getClientFilename(): string {
 	return 'client.js'
 }
 
-export function Home({ message, currentPath = '/' }: HomeProps) {
+export function Home({ message }: HomeProps) {
 	// Get the client filename
 	const clientJs = getClientFilename()
 
@@ -36,9 +37,9 @@ export function Home({ message, currentPath = '/' }: HomeProps) {
 				<script type="module" src={`/${clientJs}`} defer />
 			</head>
 			<body>
-				<h1>Kindfi KYC Server</h1>
+				{/* <h1>Kindfi KYC Server HOM</h1> */}
 				<div id="root">
-					<Navigation currentPath={currentPath} />
+					{/* <Navigation currentPath={currentPath} /> */}
 					<div className="card">
 						{typeof message === 'string' ? <p>{message}</p> : message}
 					</div>

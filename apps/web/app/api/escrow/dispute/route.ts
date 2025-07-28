@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// 4. Check if a dispute already exists for this milestone
-		const { data: existingDispute, error: disputeError } = await supabase
+		const { data: existingDispute } = await supabase
 			.from('escrow_reviews')
 			.select('*')
 			.eq('escrow_id', escrowId)

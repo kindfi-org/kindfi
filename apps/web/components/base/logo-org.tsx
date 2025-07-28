@@ -8,7 +8,7 @@ export function LogoOrg({
 	height?: number
 }) {
 	return (
-		// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+		// biome-ignore lint/a11y/noSvgWithoutTitle: title
 		<svg
 			width={width}
 			height={height}

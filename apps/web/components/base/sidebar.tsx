@@ -127,6 +127,7 @@ const SidebarProvider = React.forwardRef<
 					_setOpen(openState)
 				}
 
+				// biome-ignore lint/suspicious/noDocumentCookie: no doc
 				document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
 			},
 			[open, setOpenProp],

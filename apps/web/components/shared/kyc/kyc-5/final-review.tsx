@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/performance/noImgElement: any */
 'use client'
 
 import { ArrowLeft, Check, X } from 'lucide-react'

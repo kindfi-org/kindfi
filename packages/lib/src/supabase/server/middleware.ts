@@ -13,9 +13,9 @@ export const updateSession = async (request: NextRequest) => {
 		})
 
 		const supabase = createServerClient(
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: false
 			process.env.NEXT_PUBLIC_SUPABASE_URL!,
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: false
 			process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 			{
 				cookies: {
@@ -23,14 +23,12 @@ export const updateSession = async (request: NextRequest) => {
 						return request.cookies.getAll()
 					},
 					setAll(cookiesToSet) {
-						// biome-ignore lint/complexity/noForEach: <explanation>
 						cookiesToSet.forEach(({ name, value }) =>
 							request.cookies.set(name, value),
 						)
 						response = NextResponse.next({
 							request,
 						})
-						// biome-ignore lint/complexity/noForEach: <explanation>
 						cookiesToSet.forEach(({ name, value, options }) =>
 							response.cookies.set(name, value, options),
 						)

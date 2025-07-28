@@ -1,36 +1,30 @@
 {
 	"expo": {
-		"name": "test-expo",
-		"slug": "test-expo",
-		"version": "1.0.0",
-		"orientation": "portrait",
+		"android": {
+			"adaptiveIcon": {
+				"backgroundColor": "#ffffff",
+				"foregroundImage": "./assets/images/adaptive-icon.png"
+			}
+		},
+		"experiments": {
+			"typedRoutes": true
+		},
 		"icon": "./assets/images/icon.png",
-		"scheme": "myapp",
-		"userInterfaceStyle": "automatic",
-		"newArchEnabled": true,
 		"ios": {
 			"supportsTablet": true
 		},
-		"android": {
-			"adaptiveIcon": {
-				"foregroundImage": "./assets/images/adaptive-icon.png",
-				"backgroundColor": "#ffffff"
-			}
-		},
-		"web": {
-			"bundler": "metro",
-			"output": "static",
-			"favicon": "./assets/images/favicon.png"
-		},
+		"name": "test-expo",
+		"newArchEnabled": true,
+		"orientation": "portrait",
 		"plugins": [
 			"expo-router",
 			[
 				"expo-splash-screen",
 				{
+					"backgroundColor": "#ffffff",
 					"image": "./assets/images/splash-icon.png",
 					"imageWidth": 200,
-					"resizeMode": "contain",
-					"backgroundColor": "#ffffff"
+					"resizeMode": "contain"
 				}
 			],
 			[
@@ -42,8 +36,14 @@
 			"expo-font",
 			"expo-web-browser"
 		],
-		"experiments": {
-			"typedRoutes": true
+		"scheme": "myapp",
+		"slug": "test-expo",
+		"userInterfaceStyle": "automatic",
+		"version": "1.0.0",
+		"web": {
+			"bundler": "metro",
+			"favicon": "./assets/images/favicon.png",
+			"output": "static"
 		}
 	}
 }

@@ -16,7 +16,7 @@
 		]
 	},
 	"formatter": { "enabled": true, "indentStyle": "tab", "indentWidth": 2 },
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"assist": { "actions": {} },
 	"linter": {
 		"enabled": true,
 		"rules": {

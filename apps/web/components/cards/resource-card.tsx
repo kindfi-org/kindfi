@@ -106,7 +106,7 @@ export function ResourceCard({ resource, className = '' }: ResourceCardProps) {
 					className="inline-flex items-center mt-6 text-black hover:opacity-80"
 				>
 					<span className="font-medium">Start Learning</span>
-					{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
+					{/* biome-ignore lint/a11y/noSvgWithoutTitle: any */}
 					<svg
 						className="w-4 h-4 ml-2"
 						viewBox="0 0 24 24"

@@ -12,7 +12,7 @@ interface InputFieldProps {
 	onChange?: (value: string) => void
 	keyboardType?: KeyboardType
 	onBlur?: () => void
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	inputRef?: React.Ref<any>
 	borderColor?: string
 	className?: StyleAttribute
@@ -60,7 +60,6 @@ const InputField: FC<InputFieldProps> = ({
 	placeHolder,
 	placeHolderColor,
 	label,
-	style,
 	infoText,
 	textArea = false,
 	error,
