@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import { Dashboard } from '~/components/dashboard'
-import { About } from '../components/About'
-import { WebSocketDemo } from '../components/WebSocketDemo'
+import About from '~/pages/About'
+import Dashboard from '~/pages/Dashboard'
+import WebSocketDemo from '../pages/WebSocketDemo'
 
 // Centralized content map for both client and server
 export const contentMap: Record<string, ReactNode> = {

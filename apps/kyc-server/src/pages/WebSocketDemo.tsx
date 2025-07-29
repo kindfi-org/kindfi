@@ -8,7 +8,7 @@ interface Message {
 	timestamp: number
 }
 
-export function WebSocketDemo() {
+export default function WebSocketDemo() {
 	const [connected, setConnected] = useState(false)
 	const [messages, setMessages] = useState<Message[]>([])
 	const [inputValue, setInputValue] = useState('')

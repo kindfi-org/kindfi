@@ -15,7 +15,7 @@ hydrateRoot(
 	<React.StrictMode>
 		<BrowserRouter>
 			<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-				<Layout currentPath={''} navigate={() => console.log('')}>
+				<Layout>
 					<Routes>
 						<Route path="/dashboard" element={<DashboardPage />} />
 						<Route path="/about" element={<About />} />

@@ -23,7 +23,7 @@ function getClientFilename(): string {
 	return 'client.js'
 }
 
-export function Home({ message }: HomeProps) {
+export default function Home({ message }: HomeProps) {
 	// Get the client filename
 	const clientJs = getClientFilename()
 
