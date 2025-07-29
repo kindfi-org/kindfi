@@ -1,7 +1,17 @@
-import { ChevronDown, LogOut, Moon, Settings, Sun, User } from 'lucide-react'
+/** biome-ignore-all assist/source/organizeImports: any */
+import {
+	DropdownMenu,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
+	DropdownMenuLabel,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+} from '@radix-ui/react-dropdown-menu'
+import { LogOut, Moon, Sun, User } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '~/lib/utils'
+import { Button } from './base/button'
 
 // Mock useTheme hook since you mentioned you have it
 const useTheme = () => {
@@ -16,17 +26,18 @@ const Header = () => {
 	const currentPath = window.location.pathname
 
 	const mainNavItems = [
-		{ id: 'dashboard', label: 'Dashboard', active: true },
-		{ id: 'react-demo', label: 'React Demo' },
-		{ id: 'websocket-demo', label: 'WebSocket Demo' },
-		{ id: 'about', label: 'About' },
+		{ path: '/dashboard', label: 'Dashboard', active: true },
+		{ path: '/react-demo', label: 'React Demo' },
+		{ path: '/websocket-demo', label: 'WebSocket Demo' },
+		{ path: '/about', label: 'About' },
 	]
 
 	const innerNavItems = [
-		{ id: 'customers', label: 'Customers' },
-		{ id: 'projects', label: 'Projects' },
-		{ id: 'analytics', label: 'Analytics' },
-		{ id: 'settings', label: 'Settings' },
+		{ path: '/dashboard', label: 'Dashboard' },
+		{ path: '/dashboard/customers', label: 'Customers' },
+		{ path: '/dashboard/projects', label: 'Projects' },
+		{ path: '/dashboard/analytics', label: 'Analytics' },
+		{ path: '/dashboard/settings', label: 'Settings' },
 	]
 
 	return (
@@ -45,85 +56,74 @@ const Header = () => {
 					{/* Main Navigation Items */}
 					{mainNavItems.map((item) => (
 						<Link
-							key={item.id}
-							to={`/${item.id}`}
+							key={item.path}
+							to={item.path}
 							className={cn(
-								'px-4 py-3 text-base font-medium rounded-md transition-colors',
-								`/${item.id}` === currentPath
-									? 'bg-gray-900 text-white'
+								'py-3 px-3 text-base font-medium rounded-md transition-colors',
+								currentPath.startsWith(item.path)
+									? '!bg-black text-white'
 									: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
 							)}
+							style={{
+								backgroundColor: currentPath.startsWith(item.path)
+									? 'black'
+									: 'transparent',
+								color: currentPath.startsWith(item.path) ? 'white' : 'gray',
+							}}
 						>
 							{item.label}
 						</Link>
 					))}
 
 					{/* User Dropdown */}
-					<div className="relative">
-						<button
-							type="button"
-							onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-							className="flex items-center space-x-2 px-4 py-3 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="ghost"
+								className="relative p-0 w-8 h-8 rounded-full"
+							>
+								<User className="w-5 h-5" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent
+							className="!w-[10rem] !z-50 bg-white  dark:bg-zinc-900 rounded-md shadow-xl p-2 space-y-1 z-50"
+							align="end"
+							style={{ width: '10rem', zIndex: 90, backgroundColor: 'white' }}
 						>
-							<User className="w-5 h-5" />
-							{/* <span>Sign In</span> */}
-							<ChevronDown className="w-5 h-5" />
-						</button>
+							<DropdownMenuLabel className="px-2 text-xs text-muted-foreground">
+								My Account
+							</DropdownMenuLabel>
 
-						{/* Dropdown Menu */}
-						{isUserDropdownOpen && (
-							<div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50">
-								<div className="px-5 py-3 text-base text-gray-700 border-b border-gray-100">
-									<div className="font-medium">John Doe</div>
-									<div className="text-gray-500 text-sm">john@example.com</div>
+							<DropdownMenuItem className="px-3 py-2 rounded-md hover:bg-muted">
+								Preferences
+							</DropdownMenuItem>
+
+							<DropdownMenuItem
+								onClick={toggleTheme}
+								className="px-3 py-2 rounded-md hover:bg-muted"
+							>
+								{theme === 'dark' ? (
+									<div className="flex justify-left items-center ">
+										<Sun className="mr-2 h-4 w-4" />
+										<span>Light Mode</span>
+									</div>
+								) : (
+									<div className="flex  justify-left items-center">
+										<Moon className="mr-2 h-4 w-4" /> Dark Mode
+									</div>
+								)}
+							</DropdownMenuItem>
+
+							<DropdownMenuSeparator />
+
+							<DropdownMenuItem className="px-3 py-2 rounded-md hover:bg-muted text-red-500">
+								<div className="flex justify-left items-center">
+									<LogOut className="h-4 w-4" />
+									<span>Logout</span>
 								</div>
-
-								<Link
-									to="/account"
-									className="flex items-center w-full px-5 py-3 text-base text-gray-700 hover:bg-gray-100"
-								>
-									<Settings className="w-5 h-5 mr-3" />
-									Account Settings
-								</Link>
-
-								<Link
-									to="/preferences"
-									className="flex items-center w-full px-5 py-3 text-base text-gray-700 hover:bg-gray-100"
-								>
-									<Settings className="w-5 h-5 mr-3" />
-									Preferences
-								</Link>
-
-								<button
-									type="button"
-									onClick={toggleTheme}
-									className="flex items-center w-full px-5 py-3 text-base text-gray-700 hover:bg-gray-100"
-								>
-									{theme === 'light' ? (
-										<>
-											<Moon className="w-5 h-5 mr-3" />
-											Dark Mode
-										</>
-									) : (
-										<>
-											<Sun className="w-5 h-5 mr-3" />
-											Light Mode
-										</>
-									)}
-								</button>
-
-								<div className="border-t border-gray-100 mt-2">
-									<button
-										type="button"
-										className="flex items-center w-full px-5 py-3 text-base text-gray-700 hover:bg-gray-100"
-									>
-										<LogOut className="w-5 h-5 mr-3" />
-										Sign Out
-									</button>
-								</div>
-							</div>
-						)}
-					</div>
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</div>
 
@@ -132,14 +132,20 @@ const Header = () => {
 				<div className="flex space-x-12">
 					{innerNavItems.map((item) => (
 						<Link
-							key={item.id}
-							to={`/dashboard/${item.id}`}
+							key={item.path}
+							to={item.path}
 							className={cn(
-								'py-5 px-2 border-b-2 font-medium text-base transition-colors',
-								`/${item.id}` === currentPath
-									? 'border-gray-900 text-gray-900'
+								'py-3 px-3 border-b-2 font-medium  rounded-md text-base transition-colors',
+								currentPath.startsWith(item.path)
+									? 'bg-gray-900 text-red-400 border-red-400'
 									: 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
 							)}
+							style={{
+								backgroundColor: currentPath.startsWith(item.path)
+									? 'black'
+									: 'transparent',
+								color: currentPath.startsWith(item.path) ? 'white' : 'gray',
+							}}
 						>
 							{item.label}
 						</Link>
