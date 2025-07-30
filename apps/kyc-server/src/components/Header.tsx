@@ -7,12 +7,31 @@ import {
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 } from '@radix-ui/react-dropdown-menu'
-import { LogOut, Menu, Moon, Sun, User, X } from 'lucide-react'
+import {
+	Activity,
+	CreditCard,
+	DollarSign,
+	LogOut,
+	Menu,
+	Moon,
+	Sun,
+	User,
+	Users,
+	X,
+} from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '~/lib/utils'
 import { Button } from './base/button'
 import { useTheme } from '~/hooks/use-theme'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './base/tabs'
+import {
+	Card,
+	CardHeader,
+	CardTitle,
+	CardContent,
+	CardDescription,
+} from './base/card'
 
 const Header = () => {
 	const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
@@ -152,26 +171,28 @@ const Header = () => {
 			</div>
 
 			{/* Inner Navigation Tabs */}
-			<div className="px-8 border-b  pb-3 mt-2">
-				<div className="flex space-x-12">
-					{innerNavItems.map((item) => (
-						<Link
-							key={item.path}
-							to={item.path}
-							className={cn(
-								'py-2 px-3 text-base font-medium rounded-md transition-colors',
-								currentPath === item.path
-									? 'bg-black text-white  dark:bg-gray-800 dark:text-white'
-									: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
-							)}
-						>
-							{item.label}
-						</Link>
-					))}
+			{currentPath.startsWith('/dashboard') && (
+				<div className="px-4 py-2 rounded-xl bg-gray-200 dark:bg-gray-900 inline-flex space-x-2">
+					{innerNavItems.map((item) => {
+						const isActive = currentPath === item.path
+						return (
+							<Link
+								key={item.path}
+								to={item.path}
+								className={cn(
+									'px-4 py-2 text-sm font-medium rounded-md transition-all cursor-pointer',
+									isActive
+										? 'bg-white text-black shadow-sm dark:bg-gray-800 dark:text-white'
+										: 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
+								)}
+							>
+								{item.label}
+							</Link>
+						)
+					})}
 				</div>
-			</div>
+			)}
 
-			{/* Click outside to close dropdown */}
 			{isUserDropdownOpen && (
 				<button
 					type="button"
