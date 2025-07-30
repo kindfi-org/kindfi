@@ -7,31 +7,12 @@ import {
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 } from '@radix-ui/react-dropdown-menu'
-import {
-	Activity,
-	CreditCard,
-	DollarSign,
-	LogOut,
-	Menu,
-	Moon,
-	Sun,
-	User,
-	Users,
-	X,
-} from 'lucide-react'
+import { LogOut, Menu, Moon, Sun, User, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '~/lib/utils'
 import { Button } from './base/button'
 import { useTheme } from '~/hooks/use-theme'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './base/tabs'
-import {
-	Card,
-	CardHeader,
-	CardTitle,
-	CardContent,
-	CardDescription,
-} from './base/card'
 
 const Header = () => {
 	const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
