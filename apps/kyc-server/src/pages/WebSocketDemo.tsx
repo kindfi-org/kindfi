@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/useExhaustiveDependencies: dependency overload [to be worked on later]*/
 import type { KeyboardEvent } from 'react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
@@ -67,8 +68,7 @@ export default function WebSocketDemo() {
 		return () => {
 			ws.close()
 		}
-		// biome-ignore lint/correctness/useExhaustiveDependencies: dep
-	}, [addMessage])
+	}, [window.location.host])
 
 	// Auto-scroll to bottom when messages change
 	// Using useLayoutEffect to ensure scrolling happens before browser paint
@@ -145,6 +145,7 @@ export default function WebSocketDemo() {
 					/>
 					<button
 						type="button"
+						className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
 						onClick={sendMessage}
 						disabled={!connected || !inputValue.trim()}
 					>
@@ -228,19 +229,6 @@ export default function WebSocketDemo() {
           margin-right: 0.5rem;
         }
         
-        button {
-          padding: 0.75rem 1.5rem;
-          background-color: #0066cc;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: 500;
-        }
-        
-        button:hover {
-          background-color: #0055b3;
-        }
         
         button:disabled {
           background-color: #cccccc;

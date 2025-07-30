@@ -24,8 +24,8 @@ const Header = () => {
 	const mainNavItems = [
 		{ path: '/signin', label: 'Sign In' },
 		{ path: '/dashboard', label: 'Dashboard', active: true },
-		{ path: '/react-demo', label: 'React Demo' },
-		{ path: '/websocket-demo', label: 'WebSocket Demo' },
+		{ path: '/react', label: 'React Demo' },
+		{ path: '/websocket', label: 'WebSocket Demo' },
 		{ path: '/about', label: 'About' },
 	]
 
