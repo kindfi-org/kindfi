@@ -2,7 +2,7 @@ import type { Enums } from '@services/supabase'
 import type { Project } from './'
 
 export interface ProjectDetail extends Project {
-	location: string | null
+	location: string
 	socialLinks?: SocialLinks
 	pitch: ProjectPitch
 	team: TeamMember[]

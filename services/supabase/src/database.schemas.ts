@@ -803,17 +803,17 @@ export const projectUpdatesRelationshipsSchema = z.tuple([
 ])
 
 export const projectsRowSchema = z.object({
-	category_id: z.string().nullable(),
+	category_id: z.string(),
 	created_at: z.string().nullable(),
 	current_amount: z.number(),
-	description: z.string().nullable(),
+	description: z.string(),
 	id: z.string(),
 	image_url: z.string().nullable(),
 	kinder_count: z.number(),
 	kindler_id: z.string(),
 	min_investment: z.number(),
 	percentage_complete: z.number(),
-	project_location: z.string().nullable(),
+	project_location: z.string(),
 	slug: z.string().nullable(),
 	social_links: jsonSchema,
 	target_amount: z.number(),
@@ -822,17 +822,17 @@ export const projectsRowSchema = z.object({
 })
 
 export const projectsInsertSchema = z.object({
-	category_id: z.string().optional().nullable(),
+	category_id: z.string(),
 	created_at: z.string().optional().nullable(),
 	current_amount: z.number().optional(),
-	description: z.string().optional().nullable(),
+	description: z.string(),
 	id: z.string().optional(),
 	image_url: z.string().optional().nullable(),
 	kinder_count: z.number().optional(),
 	kindler_id: z.string(),
 	min_investment: z.number(),
 	percentage_complete: z.number().optional(),
-	project_location: z.string().optional().nullable(),
+	project_location: z.string(),
 	slug: z.string().optional().nullable(),
 	social_links: jsonSchema.optional(),
 	target_amount: z.number(),
@@ -841,17 +841,17 @@ export const projectsInsertSchema = z.object({
 })
 
 export const projectsUpdateSchema = z.object({
-	category_id: z.string().optional().nullable(),
+	category_id: z.string().optional(),
 	created_at: z.string().optional().nullable(),
 	current_amount: z.number().optional(),
-	description: z.string().optional().nullable(),
+	description: z.string().optional(),
 	id: z.string().optional(),
 	image_url: z.string().optional().nullable(),
 	kinder_count: z.number().optional(),
 	kindler_id: z.string().optional(),
 	min_investment: z.number().optional(),
 	percentage_complete: z.number().optional(),
-	project_location: z.string().optional().nullable(),
+	project_location: z.string().optional(),
 	slug: z.string().optional().nullable(),
 	social_links: jsonSchema.optional(),
 	target_amount: z.number().optional(),

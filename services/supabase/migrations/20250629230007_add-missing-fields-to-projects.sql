@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS unaccent;
 ALTER TABLE public.projects
   ADD COLUMN slug TEXT,
   ADD COLUMN social_links JSONB NOT NULL DEFAULT '{}'::jsonb,
-  ADD COLUMN project_location CHAR(3);
+  ADD COLUMN project_location CHAR(3) NOT NULL;
 
 -- Rename investors_count to kinder_count
 ALTER TABLE public.projects RENAME COLUMN investors_count TO kinder_count;

@@ -823,17 +823,17 @@ export type Database = {
 			}
 			projects: {
 				Row: {
-					category_id: string | null
+					category_id: string
 					created_at: string | null
 					current_amount: number
-					description: string | null
+					description: string
 					id: string
 					image_url: string | null
 					kinder_count: number
 					kindler_id: string
 					min_investment: number
 					percentage_complete: number
-					project_location: string | null
+					project_location: string
 					slug: string | null
 					social_links: Json
 					target_amount: number
@@ -841,17 +841,17 @@ export type Database = {
 					updated_at: string | null
 				}
 				Insert: {
-					category_id?: string | null
+					category_id: string
 					created_at?: string | null
 					current_amount?: number
-					description?: string | null
+					description: string
 					id?: string
 					image_url?: string | null
 					kinder_count?: number
 					kindler_id: string
 					min_investment: number
 					percentage_complete?: number
-					project_location?: string | null
+					project_location: string
 					slug?: string | null
 					social_links?: Json
 					target_amount: number
@@ -859,17 +859,17 @@ export type Database = {
 					updated_at?: string | null
 				}
 				Update: {
-					category_id?: string | null
+					category_id?: string
 					created_at?: string | null
 					current_amount?: number
-					description?: string | null
+					description?: string
 					id?: string
 					image_url?: string | null
 					kinder_count?: number
 					kindler_id?: string
 					min_investment?: number
 					percentage_complete?: number
-					project_location?: string | null
+					project_location?: string
 					slug?: string | null
 					social_links?: Json
 					target_amount?: number

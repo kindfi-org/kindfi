@@ -1,7 +1,7 @@
 create table "public"."projects" (
     "id" uuid not null default uuid_generate_v4(),
     "title" text not null,
-    "description" text,
+    "description" text not null,
     "current_amount" numeric(12,2) not null default 0,
     "target_amount" numeric(12,2) not null,
     "min_investment" numeric(12,2) not null,
@@ -9,7 +9,7 @@ create table "public"."projects" (
     "investors_count" integer not null default 0,
     "created_at" timestamp with time zone default CURRENT_TIMESTAMP,
     "updated_at" timestamp with time zone default CURRENT_TIMESTAMP,
-    "category_id" text,
+    "category_id" text not null,
     "image_url" text,
     "kindler_id" uuid not null
 );
