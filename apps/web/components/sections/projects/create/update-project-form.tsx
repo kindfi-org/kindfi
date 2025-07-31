@@ -1,8 +1,10 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion } from 'framer-motion'
 import { Loader2, Save } from 'lucide-react'
+import { notFound } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '~/components/base/button'
@@ -24,13 +26,16 @@ import { LocationSelect } from '~/components/sections/projects/create/location-s
 import { SocialLinks } from '~/components/sections/projects/create/social-links'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/shared'
-import { categories } from '~/lib/mock-data/project/categories.mock'
+import { getAllCategories } from '~/lib/queries/projects'
+import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import {
 	stepOneSchema,
 	stepThreeSchema,
 	stepTwoSchema,
 } from '~/lib/schemas/create-project.schemas'
 import type { CreateProjectFormData } from '~/lib/types/project/create-project.types'
+import { normalizeProjectToFormDefaults } from '~/lib/utils/project-utils'
+import { CategoryBadgeSkeleton } from '../skeletons'
 
 // Combine all schemas for the complete form
 const updateProjectSchema = stepOneSchema
@@ -38,15 +43,37 @@ const updateProjectSchema = stepOneSchema
 	.and(stepThreeSchema)
 
 interface UpdateProjectFormProps {
-	project: CreateProjectFormData
+	projectSlug: string
 }
 
-export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
+export function UpdateProjectForm({ projectSlug }: UpdateProjectFormProps) {
+	const {
+		data: project,
+		// isLoading,
+		error: projectError,
+	} = useSupabaseQuery(
+		'basic-project-info',
+		(client) => getBasicProjectInfoBySlug(client, projectSlug),
+		{
+			additionalKeyValues: [projectSlug],
+		},
+	)
+
+	const {
+		data: categories = [],
+		isLoading,
+		error: categoryError,
+	} = useSupabaseQuery('categories', getAllCategories, {
+		staleTime: 1000 * 60 * 60, // 1 hour
+		gcTime: 1000 * 60 * 60, // 1 hour
+	})
+
+	if (projectError || !project) notFound()
 	const { toast } = useToast()
 
 	const form = useForm<CreateProjectFormData>({
 		resolver: zodResolver(updateProjectSchema),
-		defaultValues: project,
+		defaultValues: normalizeProjectToFormDefaults(project),
 	})
 
 	const onSubmit = (data: CreateProjectFormData) => {
@@ -262,16 +289,28 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 							<FormItem>
 								<FormLabel>Category</FormLabel>
 								<FormControl>
-									<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-										{categories.map((category) => (
-											<CategoryBadge
-												key={category.id}
-												category={category}
-												selected={field.value === category.id}
-												onClick={() => field.onChange(category.id)}
-												className="justify-center"
-											/>
-										))}
+									<div className="mt-8 flex flex-wrap gap-2">
+										{isLoading ? (
+											<div className="flex flex-wrap gap-2">
+												{Array.from({ length: 12 }).map((_, i) => (
+													// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
+													<CategoryBadgeSkeleton key={i} />
+												))}
+											</div>
+										) : categoryError ? (
+											<p className="text-sm text-destructive text-center w-full">
+												Failed to load categories. Please try again later.
+											</p>
+										) : (
+											categories.map((category) => (
+												<CategoryBadge
+													key={category.id}
+													category={category}
+													selected={field.value === category.id}
+													onClick={() => field.onChange(category.id)}
+												/>
+											))
+										)}
 									</div>
 								</FormControl>
 								<FormMessage />

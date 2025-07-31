@@ -1,5 +1,9 @@
 import { countries } from '../constants/projects/countries.constant'
-import type { CountryOption } from '../types/project/create-project.types'
+import type {
+	CountryOption,
+	CreateProjectFormData,
+	ProjectSummary,
+} from '../types/project/create-project.types'
 
 /**
  * Validates if a string is a valid URL
@@ -107,5 +111,29 @@ export function getSocialTypeFromUrl(url: string): string | null {
 		return 'website' // Default for other domains
 	} catch {
 		return null
+	}
+}
+
+/**
+ * Normalizes a project object into default form values expected by CreateProjectFormData.
+ * Useful for pre-filling forms when editing an existing project.
+ * Ensures proper fallback values and formats social links correctly.
+ */
+export function normalizeProjectToFormDefaults(
+	project: ProjectSummary,
+): CreateProjectFormData {
+	return {
+		title: project.title ?? '',
+		description: project.description ?? '',
+		targetAmount: project.goal ?? 0,
+		minimumInvestment: project.minInvestment ?? 0,
+		image: null,
+		website: project.socialLinks?.website ?? '',
+		socialLinks: Object.entries(project.socialLinks || {})
+			.filter(([key]) => key !== 'website')
+			.map(([, url]) => String(url)),
+		location: project.location ?? '',
+		category: project.category?.id ?? '',
+		tags: project.tags ?? [],
 	}
 }

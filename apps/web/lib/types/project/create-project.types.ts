@@ -1,3 +1,4 @@
+import type { Tables } from '@services/supabase'
 import type { z } from 'zod'
 import type {
 	projectStorySchema,
@@ -5,6 +6,7 @@ import type {
 	stepThreeSchema,
 	stepTwoSchema,
 } from '~/lib/schemas/create-project.schemas'
+import type { SocialLinks } from './project-detail.types'
 
 export interface Tag {
 	name: string
@@ -52,4 +54,17 @@ export interface InsertProjectPayload {
 	kindler_id: string
 	image_url?: string
 	social_links?: Record<string, string>
+}
+
+export interface ProjectSummary {
+	id: string
+	title: string
+	description: string | null
+	goal: number
+	minInvestment: number
+	image: string | null
+	socialLinks: SocialLinks
+	location: string | null
+	category: Tables<'categories'> | null
+	tags: Tag[]
 }
