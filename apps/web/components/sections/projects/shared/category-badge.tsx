@@ -29,6 +29,7 @@ export function CategoryBadge({
 
 	return (
 		<motion.button
+			type="button"
 			whileHover={{ scale: isInteractive ? 1.05 : 1 }}
 			whileTap={{ scale: isInteractive ? 0.95 : 1 }}
 			onClick={onClick}

@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion } from 'framer-motion'
 import { Check, ChevronLeft } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -19,17 +20,32 @@ import { LocationSelect } from '~/components/sections/projects/create/location-s
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/shared'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
-import { categories } from '~/lib/mock-data/project/categories.mock'
+import { getAllCategories } from '~/lib/queries/projects'
 import { stepThreeSchema } from '~/lib/schemas/create-project.schemas'
 import type { StepThreeData } from '~/lib/types/project/create-project.types'
+import { CategoryBadgeSkeleton } from '../../skeletons'
 
 interface StepThreeProps {
 	onBack: () => void
-	onSubmit: () => void
+	onSubmit: (data: StepThreeData) => void
+	isPending?: boolean
 }
 
-export function StepThree({ onBack, onSubmit }: StepThreeProps) {
-	const { formData, updateFormData } = useCreateProject()
+export function StepThree({
+	onBack,
+	onSubmit,
+	isPending = false,
+}: StepThreeProps) {
+	const { formData } = useCreateProject()
+
+	const {
+		data: categories = [],
+		isLoading,
+		error,
+	} = useSupabaseQuery('categories', getAllCategories, {
+		staleTime: 1000 * 60 * 60, // 1 hour
+		gcTime: 1000 * 60 * 60, // 1 hour
+	})
 
 	const form = useForm<StepThreeData>({
 		resolver: zodResolver(stepThreeSchema),
@@ -41,11 +57,7 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 	})
 
 	const handleSubmit = (data: StepThreeData) => {
-		updateFormData({
-			...data,
-			tags: data.tags || [],
-		})
-		onSubmit()
+		onSubmit(data)
 	}
 
 	return (
@@ -88,16 +100,28 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 											How would you categorize your project? *
 										</FormLabel>
 										<FormControl>
-											<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-												{categories.map((category) => (
-													<CategoryBadge
-														key={category.id}
-														category={category}
-														selected={field.value === category.id}
-														onClick={() => field.onChange(category.id)}
-														className="justify-center"
-													/>
-												))}
+											<div className="mt-8 flex flex-wrap gap-2">
+												{isLoading ? (
+													<div className="flex flex-wrap gap-2">
+														{Array.from({ length: 12 }).map((_, i) => (
+															// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
+															<CategoryBadgeSkeleton key={i} />
+														))}
+													</div>
+												) : error ? (
+													<p className="text-sm text-destructive text-center w-full">
+														Failed to load categories. Please try again later.
+													</p>
+												) : (
+													categories.map((category) => (
+														<CategoryBadge
+															key={category.id}
+															category={category}
+															selected={field.value === category.id}
+															onClick={() => field.onChange(category.id)}
+														/>
+													))
+												)}
 											</div>
 										</FormControl>
 										<FormMessage />
@@ -138,11 +162,11 @@ export function StepThree({ onBack, onSubmit }: StepThreeProps) {
 
 								<Button
 									type="submit"
-									disabled={!form.formState.isValid}
+									disabled={!form.formState.isValid || isPending}
 									className="flex items-center justify-center gap-2 gradient-btn text-white w-full sm:w-auto"
 								>
-									Submit for Review
-									<Check className="h-4 w-4" />
+									{isPending ? 'Submitting...' : 'Submit for Review'}
+									{!isPending && <Check className="h-4 w-4" />}
 								</Button>
 							</div>
 						</form>

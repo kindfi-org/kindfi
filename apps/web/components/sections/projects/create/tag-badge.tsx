@@ -35,7 +35,7 @@ export function TagBadge({ tag, onRemove, showRemoveButton }: TagBadgeProps) {
 					backgroundColor: tag.color,
 				}}
 			>
-				<span>{tag.label}</span>
+				<span>{tag.name}</span>
 				{showRemoveButton && (
 					<Button
 						type="button"
@@ -43,7 +43,7 @@ export function TagBadge({ tag, onRemove, showRemoveButton }: TagBadgeProps) {
 						size="sm"
 						className="h-4 w-4 p-0 hover:bg-black/20 rounded-full ml-1"
 						onClick={onRemove}
-						aria-label={`Remove tag ${tag.label}`}
+						aria-label={`Remove tag ${tag.name}`}
 						style={{ color: textColor }}
 					>
 						<X className="h-3 w-3" />

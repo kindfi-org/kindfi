@@ -13,6 +13,7 @@ ON public.profiles
 FOR SELECT
 USING (true);
 
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Profiles are viewable by everyone"
 --     ON profiles
 --     FOR SELECT
@@ -39,11 +40,20 @@ CREATE POLICY "Projects are viewable by everyone"
     TO authenticated
     USING (true);
 
-CREATE POLICY "Projects can be created by authenticated users"
+-- TEMPORARY POLICY: Allows project creation without authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Temporary public insert access to projects"
     ON projects
     FOR INSERT
-    TO authenticated
-    WITH CHECK (auth.uid() = kindler_id);
+    TO public
+    WITH CHECK (true);
+
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
+-- CREATE POLICY "Projects can be created by authenticated users"
+--     ON projects
+--     FOR INSERT
+--     TO authenticated
+--     WITH CHECK (auth.uid() = kindler_id);
 
 CREATE POLICY "Projects can be updated by owner"
     ON projects
@@ -93,6 +103,7 @@ ON public.project_updates
 FOR SELECT
 USING (true);
 
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Project updates are viewable by everyone"
 --     ON project_updates
 --     FOR SELECT

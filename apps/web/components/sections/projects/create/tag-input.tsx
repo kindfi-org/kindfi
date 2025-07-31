@@ -65,11 +65,11 @@ export function TagInput({
 	}
 
 	const addTag = () => {
-		const tagLabel = newTag.trim().toUpperCase()
-		if (!tagLabel) return
+		const tagName = newTag.trim().toUpperCase()
+		if (!tagName) return
 
 		// Check if tag already exists
-		if (value.find((tag) => tag.label === tagLabel)) return
+		if (value.find((tag) => tag.name === tagName)) return
 
 		// Check max tags limit
 		if (value.length >= maxTags) return
@@ -78,13 +78,13 @@ export function TagInput({
 		if (isColorDuplicate(selectedColor)) {
 			const duplicateTag = findTagWithColor(selectedColor)
 			setColorError(
-				`This color is already used by "${duplicateTag?.label}" tag`,
+				`This color is already used by "${duplicateTag?.name}" tag`,
 			)
 			return
 		}
 
 		const newTagObj: Tag = {
-			label: tagLabel,
+			name: tagName,
 			color: selectedColor,
 		}
 
@@ -140,7 +140,7 @@ export function TagInput({
 		if (isColorDuplicate(newColor)) {
 			const duplicateTag = findTagWithColor(newColor)
 			setColorError(
-				`This color is already used by "${duplicateTag?.label}" tag`,
+				`This color is already used by "${duplicateTag?.name}" tag`,
 			)
 		} else {
 			setColorError('') // Clear error if color is unique
@@ -149,7 +149,7 @@ export function TagInput({
 
 	const canAddTag =
 		newTag.trim().length > 0 &&
-		!value.find((tag) => tag.label === newTag.trim().toUpperCase()) &&
+		!value.find((tag) => tag.name === newTag.trim().toUpperCase()) &&
 		value.length < maxTags &&
 		!colorError
 
@@ -237,8 +237,8 @@ export function TagInput({
 					>
 						<span className="text-sm text-muted-foreground">Preview:</span>
 						<TagBadge
-							tag={{ label: newTag.trim().toUpperCase(), color: selectedColor }}
-							onRemove={() => {}}
+							tag={{ name: newTag.trim().toUpperCase(), color: selectedColor }}
+							onRemove={() => { }}
 							showRemoveButton={false}
 						/>
 					</motion.div>
@@ -250,7 +250,7 @@ export function TagInput({
 				<div className="flex flex-wrap gap-2">
 					{value.map((tag, index) => (
 						<TagBadge
-							key={`${tag.label}`}
+							key={`${tag.name}`}
 							tag={tag}
 							onRemove={() => removeTag(index)}
 							showRemoveButton={true}

@@ -834,7 +834,7 @@ export type Database = {
 					min_investment: number
 					percentage_complete: number
 					project_location: string | null
-					slug: string
+					slug: string | null
 					social_links: Json
 					target_amount: number
 					title: string
@@ -852,7 +852,7 @@ export type Database = {
 					min_investment: number
 					percentage_complete?: number
 					project_location?: string | null
-					slug: string
+					slug?: string | null
 					social_links?: Json
 					target_amount: number
 					title: string
@@ -870,7 +870,7 @@ export type Database = {
 					min_investment?: number
 					percentage_complete?: number
 					project_location?: string | null
-					slug?: string
+					slug?: string | null
 					social_links?: Json
 					target_amount?: number
 					title?: string
