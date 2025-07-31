@@ -1,5 +1,4 @@
 import type { z } from 'zod'
-
 import type {
 	projectStorySchema,
 	stepOneSchema,
@@ -8,7 +7,7 @@ import type {
 } from '~/lib/schemas/create-project.schemas'
 
 export interface Tag {
-	label: string
+	name: string
 	color: string
 }
 
@@ -42,3 +41,15 @@ export type StepOneData = z.infer<typeof stepOneSchema>
 export type StepTwoData = z.infer<typeof stepTwoSchema>
 export type StepThreeData = z.infer<typeof stepThreeSchema>
 export type ProjectStory = z.infer<typeof projectStorySchema>
+
+export interface InsertProjectPayload {
+	title: string
+	description: string
+	target_amount: number
+	min_investment: number
+	project_location: string
+	category_id: string
+	kindler_id: string
+	image_url?: string
+	social_links?: Record<string, string>
+}
