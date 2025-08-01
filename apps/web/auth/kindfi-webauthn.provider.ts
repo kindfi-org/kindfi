@@ -1,6 +1,6 @@
 import { supabase } from '@packages/lib/supabase'
 import type { Tables } from '@services/supabase'
-import { omit } from 'lodash'
+import type { User } from 'next-auth'
 import CredentialsProvider, {
 	type CredentialInput,
 } from 'next-auth/providers/credentials'
@@ -14,13 +14,13 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 		credentialId: { label: 'Credential ID', type: 'text' },
 		address: { label: 'Address', type: 'text' },
 	} as Record<keyof KindfiWebAuthnCredentials, CredentialInput>,
-	async authorize(credentialsArg, _req) {
+	async authorize(credentialsArg, _req): Promise<User | null> {
 		const credentials = credentialsArg as KindfiWebAuthnCredentials | undefined
 		console.log('🗝️ login with credentials -> ', credentials)
 
 		if (!credentials) {
 			console.error('No credentials provided')
-			throw new Error('No credentials provided')
+			return null
 		}
 
 		const deviceCredentials = {
@@ -30,34 +30,34 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 
 		// TODO: Add on-chain verification of the user device
 
-		// ? When on-chain verification completes, we can fetch the user data from Supabase
-		const supabaseAuth = await supabase.auth.admin.getUserById(
-			credentials.userId,
-		)
+		// First, check if user exists in NextAuth users table
+		const { data: nextAuthUser, error: nextAuthError } = await supabase
+			.from('next_auth.users')
+			.select('*')
+			.eq('id', credentials.userId)
+			.single()
 
-		if (supabaseAuth.error) {
-			console.error('Error fetching user by ID:', {
-				error: supabaseAuth.error,
-			})
-			throw new Error('Error fetching user by ID')
-		}
-		if (!supabaseAuth.data.user) {
-			console.error('User not found for ID:', credentials.userId)
-			throw new Error('User not found')
+		if (nextAuthError || !nextAuthUser) {
+			console.error('NextAuth user not found:', { error: nextAuthError })
+			throw new Error('NextAuth user not found')
 		}
 
+		// Get user profile data
 		const { data: user, error: userError } = await supabase
 			.from('profiles')
 			.select('role, display_name, bio, image_url')
-			.eq('id', credentials.userId)
+			.eq('next_auth_user_id', credentials.userId)
 			.single()
+
+		// Get device data
 		const { data: device, error: deviceError } = await supabase
 			.from('devices')
 			.select()
 			.eq('credential_id', deviceCredentials.credentialId)
 			.eq('public_key', deviceCredentials.pubKey)
-			.eq('user_id', credentials.userId)
+			.eq('next_auth_user_id', credentials.userId)
 			.single()
+
 		const deviceData = device as Tables<'devices'> | null
 		const userData = user as Tables<'profiles'> | null
 
@@ -76,8 +76,23 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 		return {
 			id: credentials.userId,
 			email: credentials.email,
-			device: omit(deviceData, ['user_id']),
-			userData,
+			name: userData?.display_name || credentials.email,
+			image: userData?.image_url || null,
+			device: deviceData
+				? {
+						credential_id: deviceData.credential_id,
+						public_key: deviceData.public_key,
+						address: deviceData.address,
+					}
+				: undefined,
+			userData: userData
+				? {
+						role: userData.role,
+						display_name: userData.display_name,
+						bio: userData.bio || undefined,
+						image_url: userData.image_url || undefined,
+					}
+				: undefined,
 		}
 	},
 })

@@ -1,7 +1,6 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
-import { error } from 'console'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
 import { StellarProvider } from '~/hooks/stellar/stellar-context'

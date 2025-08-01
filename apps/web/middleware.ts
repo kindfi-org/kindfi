@@ -1,7 +1,6 @@
 import { updateSession } from '@packages/lib/supabase-server'
 import type { NextRequest } from 'next/server'
 import { withAuth } from 'next-auth/middleware'
-import { ensureCsrfTokenCookie } from './app/actions/csrf'
 
 // * Infer the type of the first parameter of updateSession
 type ExpectedRequestType = Parameters<typeof updateSession>[0]
