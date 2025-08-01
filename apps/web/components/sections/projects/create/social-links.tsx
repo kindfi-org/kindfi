@@ -1,6 +1,6 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import type React from 'react'
 import { useState } from 'react'
 
@@ -75,9 +75,11 @@ export function SocialLinks({ value, onChange, error }: SocialLinksProps) {
 					type="button"
 					onClick={addLink}
 					disabled={!newLink.trim()}
+					aria-label="Add link"
 					className="bg-indigo-900 hover:bg-indigo-800 text-white"
 				>
-					Add link
+					<Plus className="h-4 w-4 sm:hidden" />
+					<span className="hidden sm:inline">Add link</span>
 				</Button>
 			</div>
 

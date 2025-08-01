@@ -34,7 +34,7 @@ export function CategoryBadge({
 			whileTap={{ scale: isInteractive ? 0.95 : 1 }}
 			onClick={onClick}
 			className={cn(
-				'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
+				'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors max-w-full',
 				selected
 					? `${textColor} focus:ring-2 focus:ring-offset-2`
 					: 'text-gray-700 bg-white border hover:bg-gray-50 focus:ring-2 focus:ring-offset-2',
@@ -58,10 +58,11 @@ export function CategoryBadge({
 			{showIcon && Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
 			<span
 				className={cn(
-					'whitespace-nowrap overflow-hidden text-ellipsis',
+					'overflow-hidden text-ellipsis',
 					isInteractive
-						? 'max-w-[230px] sm:max-w-full'
-						: 'max-w-[100px] sm:max-w-full',
+						? 'max-w-[160px] sm:max-w-full'
+						: 'max-w-[90px] sm:max-w-full',
+					'whitespace-nowrap',
 				)}
 				title={category.name}
 			>
