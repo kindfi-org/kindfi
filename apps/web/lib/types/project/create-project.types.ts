@@ -56,7 +56,7 @@ export interface InsertProjectPayload {
 	social_links?: Record<string, string>
 }
 
-export interface ProjectSummary {
+export interface BasicProjectInfo {
 	id: string
 	title: string
 	description: string | null

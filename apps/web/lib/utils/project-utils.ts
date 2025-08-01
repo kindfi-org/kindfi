@@ -2,7 +2,7 @@ import { countries } from '../constants/projects/countries.constant'
 import type {
 	CountryOption,
 	CreateProjectFormData,
-	ProjectSummary,
+	BasicProjectInfo,
 } from '../types/project/create-project.types'
 
 /**
@@ -120,7 +120,7 @@ export function getSocialTypeFromUrl(url: string): string | null {
  * Ensures proper fallback values and formats social links correctly.
  */
 export function normalizeProjectToFormDefaults(
-	project: ProjectSummary,
+	project: BasicProjectInfo,
 ): CreateProjectFormData {
 	return {
 		title: project.title ?? '',

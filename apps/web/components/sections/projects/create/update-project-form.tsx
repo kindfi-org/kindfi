@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion } from 'framer-motion'
 import { Loader2, Save } from 'lucide-react'
-import { notFound } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '~/components/base/button'
@@ -27,13 +26,15 @@ import { SocialLinks } from '~/components/sections/projects/create/social-links'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/shared'
 import { getAllCategories } from '~/lib/queries/projects'
-import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import {
 	stepOneSchema,
 	stepThreeSchema,
 	stepTwoSchema,
 } from '~/lib/schemas/create-project.schemas'
-import type { CreateProjectFormData } from '~/lib/types/project/create-project.types'
+import type {
+	BasicProjectInfo,
+	CreateProjectFormData,
+} from '~/lib/types/project/create-project.types'
 import { normalizeProjectToFormDefaults } from '~/lib/utils/project-utils'
 import { CategoryBadgeSkeleton } from '../skeletons'
 
@@ -43,21 +44,11 @@ const updateProjectSchema = stepOneSchema
 	.and(stepThreeSchema)
 
 interface UpdateProjectFormProps {
-	projectSlug: string
+	project: BasicProjectInfo
 }
 
-export function UpdateProjectForm({ projectSlug }: UpdateProjectFormProps) {
-	const {
-		data: project,
-		// isLoading,
-		error: projectError,
-	} = useSupabaseQuery(
-		'basic-project-info',
-		(client) => getBasicProjectInfoBySlug(client, projectSlug),
-		{
-			additionalKeyValues: [projectSlug],
-		},
-	)
+export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
+	const { toast } = useToast()
 
 	const {
 		data: categories = [],
@@ -68,16 +59,13 @@ export function UpdateProjectForm({ projectSlug }: UpdateProjectFormProps) {
 		gcTime: 1000 * 60 * 60, // 1 hour
 	})
 
-	if (projectError || !project) notFound()
-	const { toast } = useToast()
-
 	const form = useForm<CreateProjectFormData>({
 		resolver: zodResolver(updateProjectSchema),
 		defaultValues: normalizeProjectToFormDefaults(project),
 	})
 
 	const onSubmit = (data: CreateProjectFormData) => {
-		console.log('Updating project:', project.slug, data)
+		console.log('Updating project:', data)
 
 		toast({
 			title: 'Project updated successfully!',
