@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus, Shuffle } from 'lucide-react'
+import { Shuffle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '~/components/base/button'
@@ -212,9 +212,9 @@ export function TagInput({
 					type="button"
 					onClick={addTag}
 					disabled={!canAddTag}
-					aria-label="Add tag"
+					className="bg-indigo-900 hover:bg-indigo-800 text-white"
 				>
-					<Plus className="h-4 w-4" />
+					Add tag
 				</Button>
 			</div>
 
