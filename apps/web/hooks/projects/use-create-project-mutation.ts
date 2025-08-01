@@ -7,12 +7,29 @@ import type { CreateProjectFormData } from '~/lib/types/project/create-project.t
 export function useCreateProjectMutation() {
 	return useMutation({
 		mutationFn: async (formData: CreateProjectFormData) => {
+			const fd = new FormData()
+
+			fd.append('title', formData.title)
+			fd.append('description', formData.description)
+			fd.append('targetAmount', String(formData.targetAmount))
+			fd.append('minimumInvestment', String(formData.minimumInvestment))
+
+			if (formData.image) {
+				fd.append('image', formData.image)
+			}
+
+			if (formData.website) {
+				fd.append('website', formData.website)
+			}
+
+			fd.append('location', formData.location)
+			fd.append('category', formData.category)
+			fd.append('tags', JSON.stringify(formData.tags))
+			fd.append('socialLinks', JSON.stringify(formData.socialLinks))
+
 			const res = await fetch('/api/projects/create', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(formData),
+				body: fd,
 			})
 
 			if (!res.ok) {

@@ -1,8 +1,8 @@
 import { countries } from '../constants/projects/countries.constant'
 import type {
+	BasicProjectInfo,
 	CountryOption,
 	CreateProjectFormData,
-	BasicProjectInfo,
 } from '../types/project/create-project.types'
 
 /**
@@ -127,7 +127,7 @@ export function normalizeProjectToFormDefaults(
 		description: project.description ?? '',
 		targetAmount: project.goal ?? 0,
 		minimumInvestment: project.minInvestment ?? 0,
-		image: null,
+		image: project.image ?? null,
 		website: project.socialLinks?.website ?? '',
 		socialLinks: Object.entries(project.socialLinks || {})
 			.filter(([key]) => key !== 'website')

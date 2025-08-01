@@ -77,9 +77,7 @@ export function TagInput({
 		// Check for duplicate color
 		if (isColorDuplicate(selectedColor)) {
 			const duplicateTag = findTagWithColor(selectedColor)
-			setColorError(
-				`This color is already used by "${duplicateTag?.name}" tag`,
-			)
+			setColorError(`This color is already used by "${duplicateTag?.name}" tag`)
 			return
 		}
 
@@ -139,9 +137,7 @@ export function TagInput({
 		// Check for duplicate color and show error immediately
 		if (isColorDuplicate(newColor)) {
 			const duplicateTag = findTagWithColor(newColor)
-			setColorError(
-				`This color is already used by "${duplicateTag?.name}" tag`,
-			)
+			setColorError(`This color is already used by "${duplicateTag?.name}" tag`)
 		} else {
 			setColorError('') // Clear error if color is unique
 		}
@@ -240,7 +236,7 @@ export function TagInput({
 						<span className="text-sm text-muted-foreground">Preview:</span>
 						<TagBadge
 							tag={{ name: newTag.trim().toUpperCase(), color: selectedColor }}
-							onRemove={() => { }}
+							onRemove={() => {}}
 							showRemoveButton={false}
 						/>
 					</motion.div>

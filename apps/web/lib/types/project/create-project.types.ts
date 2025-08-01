@@ -22,7 +22,7 @@ export interface CreateProjectFormData {
 	minimumInvestment: number
 
 	// Step 2: Media and Links
-	image: File | null
+	image: string | File | null
 	website?: string
 	socialLinks: string[]
 
