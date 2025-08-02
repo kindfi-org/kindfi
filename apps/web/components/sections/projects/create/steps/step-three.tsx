@@ -139,7 +139,7 @@ export function StepThree({
 										</FormLabel>
 										<FormControl>
 											<TagInput
-												value={field.value || []}
+												tags={field.value || []}
 												onChange={field.onChange}
 												error={form.formState.errors.tags?.message}
 											/>

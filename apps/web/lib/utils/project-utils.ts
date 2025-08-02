@@ -307,7 +307,7 @@ export async function upsertTags(
 				name,
 				color: tagColors[name] ?? '#888888',
 			})),
-			{ onConflict: 'name' },
+			{ onConflict: 'name,color' },
 		)
 		.select('id, name')
 

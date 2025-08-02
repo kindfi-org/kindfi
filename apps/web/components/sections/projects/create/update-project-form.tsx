@@ -326,7 +326,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 											<FormLabel>Tags</FormLabel>
 											<FormControl>
 												<TagInput
-													value={field.value || []}
+													tags={field.value || []}
 													onChange={field.onChange}
 													error={form.formState.errors.tags?.message}
 												/>
