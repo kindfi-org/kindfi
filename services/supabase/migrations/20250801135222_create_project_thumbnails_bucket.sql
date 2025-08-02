@@ -64,14 +64,15 @@ USING (
 --       EXISTS (
 --         SELECT 1
 --         FROM projects
---         WHERE projects.id::TEXT = SPLIT_PART(storage.objects.name, '/', 1)
+--         WHERE projects.slug = SPLIT_PART(storage.objects.name, '/', 1)
 --         AND projects.kindler_id = auth.uid()
 --       )
 --       OR
 --       EXISTS (
 --         SELECT 1
---         FROM project_members
---         WHERE project_members.project_id::TEXT = SPLIT_PART(storage.objects.name, '/', 1)
+--         FROM projects
+--         JOIN project_members ON project_members.project_id = projects.id
+--         WHERE projects.slug = SPLIT_PART(storage.objects.name, '/', 1)
 --         AND project_members.user_id = auth.uid()
 --       )
 --     )

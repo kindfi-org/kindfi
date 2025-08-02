@@ -85,4 +85,4 @@ CREATE INDEX IF NOT EXISTS projects_project_location_idx ON public.projects(proj
 -- Add country code format constraint
 ALTER TABLE public.projects
   ADD CONSTRAINT chk_project_location_alpha3
-  CHECK (project_location IS NULL OR project_location ~ '^[A-Z]{3}$');
+  CHECK (project_location ~ '^[A-Z]{3}$');
