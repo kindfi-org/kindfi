@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { BreadcrumbContainer } from '~/components/sections/projects/shared'
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import { BreadcrumbSkeleton } from '../detail/skeletons'
+import { UpdateProjectFormSkeleton } from './skeletons'
 import { UpdateProjectForm } from './update-project-form'
 
 interface UpdateProjectWrapperProps {
@@ -50,7 +51,11 @@ export function UpdateProjectWrapper({
 					Update your project's core information and social media presence.
 				</p>
 			</div>
-			<UpdateProjectForm project={project} />
+			{isLoading ? (
+				<UpdateProjectFormSkeleton />
+			) : (
+				<UpdateProjectForm project={project} />
+			)}
 		</>
 	)
 }
