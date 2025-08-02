@@ -2,6 +2,16 @@
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
+	images: {
+		remotePatterns: [
+			{
+				protocol: 'http',
+				hostname: '127.0.0.1',
+				port: '54321',
+				pathname: '/storage/v1/object/public/project_thumbnails/**',
+			},
+		],
+	},
 	async headers() {
 		// Only apply strict headers in production
 		if (process.env.NODE_ENV === 'production') {

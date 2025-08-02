@@ -4,10 +4,22 @@ import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { CreateProjectFormData } from '~/lib/types/project/create-project.types'
 
-export function useCreateProjectMutation() {
+type UseProjectMutationOptions = {
+	projectId?: string // If present, triggers update; otherwise, create
+}
+
+export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 	return useMutation({
 		mutationFn: async (formData: CreateProjectFormData) => {
 			const fd = new FormData()
+
+			if (projectId) {
+				fd.append('projectId', projectId)
+			}
+
+			if (formData.slug) {
+				fd.append('slug', formData.slug)
+			}
 
 			fd.append('title', formData.title)
 			fd.append('description', formData.description)
@@ -27,27 +39,40 @@ export function useCreateProjectMutation() {
 			fd.append('tags', JSON.stringify(formData.tags))
 			fd.append('socialLinks', JSON.stringify(formData.socialLinks))
 
-			const res = await fetch('/api/projects/create', {
-				method: 'POST',
-				body: fd,
-			})
+			const res = await fetch(
+				projectId ? '/api/projects/update' : '/api/projects/create',
+				{
+					method: projectId ? 'PATCH' : 'POST',
+					body: fd,
+				},
+			)
 
 			if (!res.ok) {
 				const error = await res.json()
-				throw new Error(error.error || 'Failed to create project')
+				throw new Error(error.error || 'Failed to submit project')
 			}
 
 			return res.json()
 		},
 		onSuccess: (data) => {
-			toast.success('Project Created Successfully! 🎉', {
-				description: `Your project "${data.title}" has been created.\nYou have 7 days to complete your project setup.`,
-			})
+			toast.success(
+				projectId
+					? 'Project Updated Successfully 🎉'
+					: 'Project Created Successfully! 🎉',
+				{
+					description: projectId
+						? 'Your changes have been saved.'
+						: `Your project "${data.title}" has been created.\nYou have 7 days to complete your project setup.`,
+				},
+			)
 		},
 		onError: (error: Error) => {
-			toast.error('Failed to create project', {
-				description: error.message,
-			})
+			toast.error(
+				projectId ? 'Failed to update project' : 'Failed to create project',
+				{
+					description: error.message,
+				},
+			)
 		},
 	})
 }

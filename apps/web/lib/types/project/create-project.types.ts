@@ -44,20 +44,9 @@ export type StepTwoData = z.infer<typeof stepTwoSchema>
 export type StepThreeData = z.infer<typeof stepThreeSchema>
 export type ProjectStory = z.infer<typeof projectStorySchema>
 
-export interface InsertProjectPayload {
-	title: string
-	description: string
-	target_amount: number
-	min_investment: number
-	project_location: string
-	category_id: string
-	kindler_id: string
-	image_url?: string
-	social_links?: Record<string, string>
-}
-
 export interface BasicProjectInfo {
 	id: string
+	slug: string | null
 	title: string
 	description: string | null
 	goal: number

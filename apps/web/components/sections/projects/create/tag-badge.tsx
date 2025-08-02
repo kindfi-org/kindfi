@@ -35,7 +35,7 @@ export function TagBadge({ tag, onRemove, showRemoveButton }: TagBadgeProps) {
 					backgroundColor: tag.color,
 				}}
 			>
-				<span>{tag.name}</span>
+				<span>{tag.name.toUpperCase()}</span>
 				{showRemoveButton && (
 					<Button
 						type="button"

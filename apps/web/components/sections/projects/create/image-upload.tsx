@@ -106,13 +106,13 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 								alt="Project preview"
 								width={400}
 								height={192}
-								className="w-full h-48 object-contain bg-gray-50 rounded-md"
+								className="w-full h-64 object-cover bg-gray-50 rounded-md"
 								unoptimized={
 									preview.startsWith('data:') || preview.startsWith('http')
 								}
 							/>
 						) : (
-							<div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+							<div className="w-full h-64 bg-gray-100 flex items-center justify-center">
 								<ImageIcon className="h-12 w-12 text-gray-400" />
 							</div>
 						)}

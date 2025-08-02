@@ -19,12 +19,12 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
-import { useToast } from '~/components/base/toast'
 import { ImageUpload } from '~/components/sections/projects/create/image-upload'
 import { LocationSelect } from '~/components/sections/projects/create/location-select'
 import { SocialLinks } from '~/components/sections/projects/create/social-links'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/shared'
+import { useProjectMutation } from '~/hooks/projects/use-project-mutation'
 import { getAllCategories } from '~/lib/queries/projects'
 import {
 	stepOneSchema,
@@ -48,7 +48,9 @@ interface UpdateProjectFormProps {
 }
 
 export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
-	const { toast } = useToast()
+	const { mutateAsync: updateProject, isPending } = useProjectMutation({
+		projectId: project.id,
+	})
 
 	const {
 		data: categories = [],
@@ -64,17 +66,19 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 		defaultValues: normalizeProjectToFormDefaults(project),
 	})
 
-	const onSubmit = (data: CreateProjectFormData) => {
+	const onSubmit = async (data: CreateProjectFormData) => {
+		if (project.slug) {
+			data.slug = project.slug
+		}
 		console.log('Updating project:', data)
-
-		toast({
-			title: 'Project updated successfully!',
-			description: 'Your project information has been saved.',
+		await updateProject(data, {
+			onSuccess: () => {
+				form.reset(data)
+			},
 		})
 	}
 
 	const isDirty = form.formState.isDirty
-	const isSubmitting = form.formState.isSubmitting
 
 	return (
 		<motion.div
@@ -347,14 +351,15 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 
 										<Button
 											type="submit"
-											disabled={!isDirty || isSubmitting}
+											disabled={!isDirty || isPending}
 											className="flex items-center w-full gap-2 px-8 text-white gradient-btn"
 											size="lg"
 											aria-describedby={
 												isDirty ? 'unsaved-changes' : 'all-saved'
 											}
+											aria-label="Save changes"
 										>
-											{isSubmitting ? (
+											{isPending ? (
 												<>
 													<Loader2 className="w-4 h-4 animate-spin" />
 													Saving...

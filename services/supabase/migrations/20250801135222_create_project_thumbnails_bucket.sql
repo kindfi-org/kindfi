@@ -32,6 +32,27 @@ WITH CHECK (
   bucket_id = 'project_thumbnails'
 );
 
+-- TEMPORARY POLICY: Allows project creation without authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Allow public update to project thumbnails"
+ON storage.objects
+FOR UPDATE
+TO public
+USING (true)
+WITH CHECK (
+  bucket_id = 'project_thumbnails'
+);
+
+-- TEMPORARY POLICY: Allows project creation without authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Allow public delete to project thumbnails"
+ON storage.objects
+FOR DELETE
+TO public
+USING (
+  bucket_id = 'project_thumbnails'
+);
+
 -- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Allow update/delete to project thumbnails for project members or kindler"
 -- ON storage.objects

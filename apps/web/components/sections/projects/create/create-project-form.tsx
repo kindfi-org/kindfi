@@ -10,13 +10,13 @@ import {
 	StepTwo,
 } from '~/components/sections/projects/create/steps'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
-import { useCreateProjectMutation } from '~/hooks/projects/use-create-project-mutation'
+import { useProjectMutation } from '~/hooks/projects/use-project-mutation'
 import type { StepThreeData } from '~/lib/types/project/create-project.types'
 
 export function CreateProjectForm() {
 	const { currentStep, setCurrentStep, formData, updateFormData } =
 		useCreateProject()
-	const { mutateAsync: createProject, isPending } = useCreateProjectMutation()
+	const { mutateAsync: createProject, isPending } = useProjectMutation({})
 	const router = useRouter()
 
 	const handleNext = () => {
