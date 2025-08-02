@@ -244,13 +244,10 @@ export async function uploadProjectImage(
 		.from('project_thumbnails')
 		.list(slug, { limit: 100 })
 
-	console.log(existingFiles)
-
 	if (listError) throw new Error(`Failed to list images: ${listError.message}`)
 
 	if (existingFiles && existingFiles.length > 0) {
 		const filesToDelete = existingFiles.map((file) => `${slug}/${file.name}`)
-		console.log(filesToDelete)
 		const { error: deleteError } = await supabase.storage
 			.from('project_thumbnails')
 			.remove(filesToDelete)

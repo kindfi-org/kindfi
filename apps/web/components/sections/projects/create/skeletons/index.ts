@@ -1,1 +1,1 @@
-export * from './UpdateProjectFormSkeleton'
+export * from './update-project-form-skeleton'
