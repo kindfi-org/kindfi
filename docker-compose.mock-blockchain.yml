@@ -1,0 +1,126 @@
+# Docker Compose configuration for KindFi Mock Blockchain Services
+# This provides a local development environment for testing blockchain interactions
+
+version: '3.8'
+
+services:
+  # Mock Blockchain API Server
+  mock-blockchain-api:
+    build:
+      context: .
+      dockerfile: docker/mock-blockchain.Dockerfile
+    container_name: kindfi-mock-blockchain
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MOCK_ENVIRONMENT=development
+      - NETWORK_DELAY=100
+      - ERROR_RATE=0.05
+      - ENABLE_LOGGING=true
+      - GENERATE_TEST_DATA=true
+      - TEST_USER_COUNT=10
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+    networks:
+      - kindfi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Redis for caching and session management (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: kindfi-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - kindfi-network
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+  # PostgreSQL for persistent data (optional)
+  postgres:
+    image: postgres:15-alpine
+    container_name: kindfi-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=kindfi_mock
+      - POSTGRES_USER=kindfi
+      - POSTGRES_PASSWORD=kindfi_dev_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - kindfi-network
+    restart: unless-stopped
+
+  # Mock Blockchain Explorer (optional web interface)
+  mock-explorer:
+    build:
+      context: .
+      dockerfile: docker/mock-explorer.Dockerfile
+    container_name: kindfi-mock-explorer
+    ports:
+      - "3002:3002"
+    environment:
+      - MOCK_API_URL=http://mock-blockchain-api:3001
+      - NODE_ENV=development
+    depends_on:
+      - mock-blockchain-api
+    networks:
+      - kindfi-network
+    restart: unless-stopped
+
+networks:
+  kindfi-network:
+    driver: bridge
+    name: kindfi-network
+
+volumes:
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+
+# Development overrides
+# Use: docker-compose -f docker-compose.mock-blockchain.yml -f docker-compose.override.yml up
+---
+# docker-compose.override.yml (for development)
+version: '3.8'
+
+services:
+  mock-blockchain-api:
+    environment:
+      - NODE_ENV=development
+      - ENABLE_LOGGING=true
+      - NETWORK_DELAY=50  # Faster for development
+      - ERROR_RATE=0.02   # Lower error rate for development
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - ./apps/web/lib/services/blockchain:/app/lib/services/blockchain
+    command: ["bun", "run", "dev:mock-blockchain"]
+
+  # Development database with exposed ports
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=kindfi_dev
+      - POSTGRES_USER=dev_user
+      - POSTGRES_PASSWORD=dev_password
+
+  # Development Redis
+  redis:
+    ports:
+      - "6379:6379"
