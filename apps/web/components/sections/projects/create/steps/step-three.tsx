@@ -36,7 +36,7 @@ export function StepThree({
 	onSubmit,
 	isPending = false,
 }: StepThreeProps) {
-	const { formData } = useCreateProject()
+	const { formData, updateFormData } = useCreateProject()
 
 	const {
 		data: categories = [],
@@ -55,6 +55,15 @@ export function StepThree({
 			tags: formData.tags,
 		},
 	})
+
+	const handlePrevious = () => {
+		const data = form.getValues()
+		updateFormData({
+			...data,
+			tags: data.tags || [],
+		})
+		onBack()
+	}
 
 	const handleSubmit = (data: StepThreeData) => {
 		onSubmit(data)
@@ -153,7 +162,7 @@ export function StepThree({
 								<Button
 									type="button"
 									variant="outline"
-									onClick={onBack}
+									onClick={handlePrevious}
 									className="flex items-center justify-center gap-2 gradient-border-btn bg-white w-full sm:w-auto"
 								>
 									<ChevronLeft className="h-4 w-4" />
