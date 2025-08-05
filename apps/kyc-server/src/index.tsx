@@ -128,10 +128,13 @@ async function startServer() {
 			message(ws: ServerWebSocket<ClientData>, message: string) {
 				try {
 					const parsedMessage = JSON.parse(message) as ParsedMessage
-
-					if (parsedMessage.type === 'subscribe' && parsedMessage.userId) {
+					if (
+						parsedMessage.type?.match(/(subscribe|reply)/) &&
+						parsedMessage.userId
+					) {
 						ws.data.userId = parsedMessage.userId
 						// Optionally call a dedicated `addSubscription` method instead
+						console.log('parsedMessage', parsedMessage)
 					} else {
 						ws.send(
 							JSON.stringify({

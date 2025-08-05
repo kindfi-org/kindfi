@@ -1,6 +1,22 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: dependency overload [to be worked on later]*/
+
+import { Send, Server, User, Wifi, WifiOff } from 'lucide-react'
 import type { KeyboardEvent } from 'react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useLocation, useNavigation } from 'react-router-dom'
+import { Avatar, AvatarFallback } from '~/components/base/avatar'
+import { Badge } from '~/components/base/badge'
+import { Button } from '~/components/base/button'
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from '~/components/base/card'
+import { Input } from '~/components/base/input'
+import { ScrollArea } from '~/components/base/scroll-area'
+import { Separator } from '~/components/base/separator'
+import { cn } from '~/lib/utils'
 
 interface Message {
 	id: string
@@ -13,9 +29,16 @@ export default function WebSocketDemo() {
 	const [connected, setConnected] = useState(false)
 	const [messages, setMessages] = useState<Message[]>([])
 	const [inputValue, setInputValue] = useState('')
+	const windowRef = useRef<Window | null>(null)
 	const wsRef = useRef<WebSocket | null>(null)
 	const messagesEndRef = useRef<HTMLDivElement>(null)
 	const lastMessageCountRef = useRef(0)
+	const { current: userData } = useRef({
+		id: `admin_${Math.random().toString(36).substring(2, 9)}`,
+		name: 'Admin User',
+		email: 'admin@kindfi.com',
+		role: 'admin',
+	})
 
 	// Add a message to the chat
 	const addMessage = (text: string, sender: 'user' | 'server') => {
@@ -31,16 +54,18 @@ export default function WebSocketDemo() {
 
 	// Connect to WebSocket
 	useEffect(() => {
+		windowRef.current = window
+		const windowLocation = windowRef.current.location
 		// Get the current host
-		const host = window.location.host
-		const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+		const host = windowLocation.host
+		const protocol = windowLocation.protocol === 'https:' ? 'wss:' : 'ws:'
 		const wsUrl = `${protocol}//${host}/live`
 
 		const ws = new WebSocket(wsUrl)
 
 		ws.onopen = () => {
 			setConnected(true)
-			addMessage('Connected to server', 'server')
+			addMessage('Admin connection established', 'server')
 		}
 
 		ws.onmessage = (event) => {
@@ -54,12 +79,12 @@ export default function WebSocketDemo() {
 
 		ws.onclose = () => {
 			setConnected(false)
-			addMessage('Disconnected from server', 'server')
+			addMessage('Admin connection terminated', 'server')
 		}
 
 		ws.onerror = (error) => {
 			console.error('WebSocket error:', error)
-			addMessage('Error connecting to server', 'server')
+			addMessage('Connection error occurred', 'server')
 		}
 
 		wsRef.current = ws
@@ -68,25 +93,28 @@ export default function WebSocketDemo() {
 		return () => {
 			ws.close()
 		}
-	}, [window.location.host])
+	}, [windowRef.current])
 
 	// Auto-scroll to bottom when messages change
-	// Using useLayoutEffect to ensure scrolling happens before browser paint
 	useLayoutEffect(() => {
-		// Only scroll if messages have been added
 		if (messages.length > lastMessageCountRef.current) {
 			messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
 			lastMessageCountRef.current = messages.length
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [messages])
 
 	// Send a message
 	const sendMessage = () => {
 		if (!inputValue.trim() || !connected) return
 
-		// Send message as JSON with proper format
-		wsRef.current?.send(JSON.stringify({ text: inputValue }))
+		const userMessages = messages.filter((msg) => msg.sender === 'user')
+		wsRef.current?.send(
+			JSON.stringify({
+				type: userMessages.length > 0 ? 'reply' : 'subscribe',
+				userId: userData.id,
+				text: inputValue,
+			}),
+		)
 		addMessage(inputValue, 'user')
 		setInputValue('')
 	}
@@ -108,134 +136,104 @@ export default function WebSocketDemo() {
 	}
 
 	return (
-		<div className="websocket-demo">
-			<h2>WebSocket Demo</h2>
-
-			<div className="connection-status">
-				Status:{' '}
-				<span className={connected ? 'connected' : 'disconnected'}>
-					{connected ? 'Connected' : 'Disconnected'}
-				</span>
-			</div>
-
-			<div className="chat-container">
-				<div className="messages">
-					{messages.map((message) => (
-						<div
-							key={message.id}
-							className={`message ${message.sender === 'user' ? 'user-message' : 'server-message'}`}
+		<div className="flex flex-col h-full w-full max-w-4xl mx-auto p-4 space-y-4">
+			<Card>
+				<CardHeader className="pb-3">
+					<div className="flex items-center justify-between">
+						<CardTitle className="text-xl font-semibold">
+							Admin WebSocket Console
+						</CardTitle>
+						<Badge
+							variant={connected ? 'default' : 'destructive'}
+							className="flex items-center gap-1"
 						>
-							<div className="message-content">{message.text}</div>
-							<div className="message-time">
-								{formatTime(message.timestamp)}
-							</div>
+							{connected ? (
+								<>
+									<Wifi className="w-3 h-3" />
+									Connected
+								</>
+							) : (
+								<>
+									<WifiOff className="w-3 h-3" />
+									Disconnected
+								</>
+							)}
+						</Badge>
+					</div>
+				</CardHeader>
+				<Separator />
+				<CardContent className="p-0">
+					<ScrollArea className="h-96 p-4">
+						<div className="space-y-4">
+							{messages.map((message) => (
+								<div
+									key={message.id}
+									className={cn(
+										'flex gap-1.5',
+										message.sender === 'user' ? 'justify-end' : 'justify-start',
+									)}
+								>
+									{message.sender === 'server' && (
+										<Avatar className="w-8 h-8">
+											<AvatarFallback className="bg-primary text-primary-foreground">
+												<Server className="w-4 h-4" />
+											</AvatarFallback>
+										</Avatar>
+									)}
+									<div
+										className={cn(
+											'flex flex-col gap-1 max-w-xs lg:max-w-md',
+											message.sender === 'user' ? 'items-end' : 'items-start',
+										)}
+									>
+										<div
+											className={cn(
+												'rounded-lg px-3 py-2 text-sm',
+												message.sender === 'user'
+													? 'bg-primary text-primary-foreground'
+													: 'bg-muted text-muted-foreground',
+											)}
+										>
+											{message.text}
+										</div>
+										<span className="text-xs text-muted-foreground">
+											{formatTime(message.timestamp)}
+										</span>
+									</div>
+									{message.sender === 'user' && (
+										<Avatar className="w-8 h-8">
+											<AvatarFallback className="bg-secondary text-secondary-foreground">
+												<User className="w-4 h-4" />
+											</AvatarFallback>
+										</Avatar>
+									)}
+								</div>
+							))}
+							<div ref={messagesEndRef} />
 						</div>
-					))}
-					<div ref={messagesEndRef} />
-				</div>
-
-				<div className="input-container">
-					<input
-						type="text"
-						value={inputValue}
-						onChange={(e) => setInputValue(e.target.value)}
-						onKeyPress={handleKeyPress}
-						placeholder="Type a message..."
-						disabled={!connected}
-					/>
-					<button
-						type="button"
-						className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-						onClick={sendMessage}
-						disabled={!connected || !inputValue.trim()}
-					>
-						Send
-					</button>
-				</div>
-			</div>
-
-			<style>
-				{`
-        .websocket-demo {
-          max-width: 600px;
-          margin: 0 auto;
-        }
-        
-        .connection-status {
-          margin-bottom: 1rem;
-          font-weight: 500;
-        }
-        
-        .connected {
-          color: #4caf50;
-        }
-        
-        .disconnected {
-          color: #f44336;
-        }
-        
-        .chat-container {
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          overflow: hidden;
-        }
-        
-        .messages {
-          height: 300px;
-          overflow-y: auto;
-          padding: 1rem;
-          background-color: #f9f9f9;
-        }
-        
-        .message {
-          margin-bottom: 0.75rem;
-          padding: 0.75rem;
-          border-radius: 8px;
-          max-width: 80%;
-          position: relative;
-        }
-        
-        .user-message {
-          background-color: #e3f2fd;
-          margin-left: auto;
-          border-bottom-right-radius: 0;
-        }
-        
-        .server-message {
-          background-color: #f1f1f1;
-          margin-right: auto;
-          border-bottom-left-radius: 0;
-        }
-        
-        .message-time {
-          font-size: 0.7rem;
-          color: #666;
-          margin-top: 0.25rem;
-          text-align: right;
-        }
-        
-        .input-container {
-          display: flex;
-          padding: 0.75rem;
-          background-color: #fff;
-          border-top: 1px solid #ddd;
-        }
-        
-        input {
-          flex: 1;
-          padding: 0.75rem;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          margin-right: 0.5rem;
-        }
-        
-        
-        button:disabled {
-          background-color: #cccccc;
-          cursor: not-allowed;
-        }
-        `}
-			</style>
+					</ScrollArea>
+				</CardContent>
+				<Separator />
+				<CardContent className="p-4">
+					<div className="flex gap-2">
+						<Input
+							value={inputValue}
+							onChange={(e) => setInputValue(e.target.value)}
+							onKeyPress={handleKeyPress}
+							placeholder="Type an admin message..."
+							disabled={!connected}
+							className="flex-1"
+						/>
+						<Button
+							onClick={sendMessage}
+							disabled={!connected || !inputValue.trim()}
+							size="sm"
+						>
+							<Send className="w-4 h-4" />
+						</Button>
+					</div>
+				</CardContent>
+			</Card>
 		</div>
 	)
 }
