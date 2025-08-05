@@ -15,7 +15,6 @@ const resolveScreenWidth: Record<string, unknown> = {
 	default: 0,
 }
 
-// biome-ignore lint/complexity/noForEach: refactor later
 Object.entries(screenSize).forEach(([key, value]) => {
 	if (typeof value === 'string') {
 		resolveScreenWidth[key] = Number.parseInt(value.replace('px', ''), 10)
@@ -33,7 +32,6 @@ export const getBreakPointValue = (values: BreakPointValue, width: number) => {
 			isValid: true,
 		},
 	]
-	// biome-ignore lint/complexity/noForEach: refactor later
 	Object.keys(resolveScreenWidth).forEach((key) => {
 		const isValid = isValidBreakpoint(
 			resolveScreenWidth[key as keyof typeof resolveScreenWidth] as number,

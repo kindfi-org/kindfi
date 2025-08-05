@@ -8,7 +8,7 @@ interface IllustrationProps extends SVGProps<SVGSVGElement> {
 
 export function WaveIllustration({ className, ...props }: IllustrationProps) {
 	return (
-		// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+		// biome-ignore lint/a11y/noSvgWithoutTitle: any
 		<svg
 			viewBox="0 0 200 200"
 			fill="none"
@@ -28,7 +28,7 @@ export function WaveIllustration({ className, ...props }: IllustrationProps) {
 }
 
 export const ProjectDetailsIcon = () => (
-	// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+	// biome-ignore lint/a11y/noSvgWithoutTitle: any
 	<svg
 		viewBox="0 0 200 200"
 		fill="none"
@@ -41,7 +41,7 @@ export const ProjectDetailsIcon = () => (
 )
 
 export const InvestDonateIcon = () => (
-	// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+	// biome-ignore lint/a11y/noSvgWithoutTitle: any
 	<svg
 		viewBox="0 0 200 200"
 		fill="none"
@@ -60,7 +60,7 @@ export const InvestDonateIcon = () => (
 )
 
 export const ExploreProject = () => (
-	// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+	// biome-ignore lint/a11y/noSvgWithoutTitle: any
 	<svg
 		viewBox="0 0 240 240"
 		xmlns="http://www.w3.org/2000/svg"
@@ -251,7 +251,7 @@ export const ExploreProject = () => (
 )
 
 export const ExploreDetails = () => (
-	// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+	// biome-ignore lint/a11y/noSvgWithoutTitle: no title
 	<svg
 		viewBox="0 0 240 240"
 		xmlns="http://www.w3.org/2000/svg"
@@ -400,7 +400,7 @@ export const ExploreDetails = () => (
 )
 
 export const Contribute = () => (
-	// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+	// biome-ignore lint/a11y/noSvgWithoutTitle: no title
 	<svg
 		viewBox="0 0 240 240"
 		xmlns="http://www.w3.org/2000/svg"
@@ -540,7 +540,7 @@ export function ExploreProjectsIcon({
 	...props
 }: IllustrationProps) {
 	return (
-		// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+		// biome-ignore lint/a11y/noSvgWithoutTitle: no title
 		<svg
 			viewBox="0 0 200 200"
 			xmlns="http://www.w3.org/2000/svg"

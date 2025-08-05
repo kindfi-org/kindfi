@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: false positive */
 'use client'
 
 import Link from 'next/link'

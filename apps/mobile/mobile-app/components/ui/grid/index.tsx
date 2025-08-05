@@ -67,7 +67,7 @@ function generateResponsiveNumColumns({ gridClass }: { gridClass: string }) {
 	const regex = /^(?:(\w+):)?grid-cols-?(\d+)$/
 	const result: unknown = {}
 
-	// biome-ignore lint/complexity/noForEach: refactor later
+	// refactor later
 	numColumns.forEach((classname) => {
 		const match = classname.match(regex)
 		if (match) {
@@ -96,7 +96,7 @@ function generateResponsiveColSpans({
 	const regex = /^(?:(\w+):)?col-span-?(\d+)$/
 	const result: Record<string, unknown> = {}
 
-	// biome-ignore lint/complexity/noForEach: refactor later
+	//  refactor later
 	colSpan.forEach((classname: string) => {
 		const match = classname.match(regex)
 		if (match) {
@@ -180,7 +180,7 @@ const Grid = forwardRef<React.ElementRef<typeof View>, IGridProps>(
 			web: gridClass ?? '',
 		})}`
 
-		// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+		// biome-ignore lint/correctness/useExhaustiveDependencies:any
 		const contextValue = useMemo(() => {
 			return {
 				calculatedWidth,
@@ -277,7 +277,7 @@ const GridItem = forwardRef<React.ElementRef<typeof View>, IGridItemProps>(
 			}) as Partial<Record<string, unknown>>,
 		) ?? 1) as number
 
-		// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+		// biome-ignore lint/correctness/useExhaustiveDependencies: any
 		useEffect(() => {
 			if (
 				!flexDirection?.includes('column') &&

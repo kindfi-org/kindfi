@@ -16,7 +16,6 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
 	text,
 	textClassName,
 	delay = 0,
-	duration = 50,
 	className = '',
 }) => {
 	return (

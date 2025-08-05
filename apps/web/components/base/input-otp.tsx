@@ -65,6 +65,7 @@ const InputOTPSeparator = React.forwardRef<
 	React.ComponentPropsWithoutRef<'div'>
 >(({ ...props }, ref) => (
 	// biome-ignore lint/a11y/useSemanticElements: role is enough for this component
+	// biome-ignore lint/a11y/useAriaPropsForRole: can't use role="separator" with div
 	<div ref={ref} role="separator" tabIndex={0} {...props}>
 		<Minus />
 	</div>

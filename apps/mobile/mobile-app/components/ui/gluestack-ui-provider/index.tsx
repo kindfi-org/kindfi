@@ -17,7 +17,7 @@ export function GluestackUIProvider({
 }) {
 	const { colorScheme, setColorScheme } = useColorScheme()
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {
 		setColorScheme(mode)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -26,7 +26,7 @@ export function GluestackUIProvider({
 	return (
 		<View
 			style={[
-				// biome-ignore lint/style/noNonNullAssertion: <explanation>
+				// biome-ignore lint/style/noNonNullAssertion: any
 				config[colorScheme!],
 				// eslint-disable-next-line react-native/no-inline-styles
 				{ flex: 1, height: '100%', width: '100%' },

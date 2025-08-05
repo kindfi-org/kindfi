@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [isLoading, setIsLoading] = useState(true)
 	const supabase = createSupabaseBrowserClient()
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {
 		// Move session check to useEffect to avoid hydration mismatch
 		const checkSession = async () => {

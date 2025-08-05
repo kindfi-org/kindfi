@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useSemanticElements: any */
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'

@@ -13,14 +13,13 @@ export const SectionCaption = ({
 }: SectionCaptionProps) => {
 	const highlightText = (text: string) => {
 		let result = text
-		// biome-ignore lint/complexity/noForEach: <explanation>
 		highlightWords.forEach((word) => {
 			result = result.replace(
 				word,
 				`<span class="font-bold gradient-text">${word}</span>`,
 			)
 		})
-		// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+		// biome-ignore lint/security/noDangerouslySetInnerHtml: any
 		return <div dangerouslySetInnerHTML={{ __html: result }} />
 	}
 

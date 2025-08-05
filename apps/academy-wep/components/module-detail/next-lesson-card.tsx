@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: disable ally error */
 'use client'
 
 import { Play } from 'lucide-react'

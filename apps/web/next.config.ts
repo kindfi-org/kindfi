@@ -45,7 +45,7 @@ const nextConfig = {
 					],
 				},
 			]
-			// biome-ignore lint/style/noUselessElse: <explanation>
+			// biome-ignore lint/style/noUselessElse:  no useless else[refactor]
 		} else {
 			// Return minimal headers for development
 			return [

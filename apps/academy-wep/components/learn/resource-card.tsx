@@ -82,10 +82,9 @@ export function ResourceCard({ resource, index }: ResourceCardProps) {
 					</div>
 
 					<div className="flex flex-wrap items-center gap-2 mb-4 min-h-[28px]">
-						{resource.tags.slice(0, 3).map((tag, index) => (
+						{resource.tags.slice(0, 3).map((tag) => (
 							<span
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								key={index}
+								key={tag}
 								className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
 							>
 								{tag}

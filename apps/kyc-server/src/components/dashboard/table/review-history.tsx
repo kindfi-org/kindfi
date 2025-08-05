@@ -18,10 +18,7 @@ export function ReviewHistory({ isLoading, reviews }: ReviewHistoryProps) {
 				Review History
 			</h2>
 			{isLoading ? (
-				<div
-					className="flex items-center justify-center py-8"
-					aria-label="Loading reviews"
-				>
+				<div className="flex items-center justify-center py-8">
 					<LoaderIcon
 						className="size-6 animate-spin text-muted-foreground"
 						aria-hidden="true"

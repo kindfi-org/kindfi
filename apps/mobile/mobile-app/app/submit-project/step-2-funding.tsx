@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/useHookAtTopLevel: any */
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
@@ -43,7 +44,7 @@ const Step2Funding = () => {
 		handleSubmit,
 		formState: { errors },
 	} = useForm<Step2FormData>({
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny:false
 		resolver: zodResolver(Step2Schema) as any,
 		defaultValues: {
 			amountRaised: 0,

@@ -1,5 +1,4 @@
 export function validateEnvVars(requiredEnvVars: string[]) {
-	// biome-ignore lint/complexity/noForEach: <explanation>
 	requiredEnvVars.forEach((envVar) => {
 		if (!process.env[envVar]) {
 			throw new Error(`Missing required environment variable: ${envVar}`)

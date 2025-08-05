@@ -34,7 +34,6 @@ export function Calendar({
 	onSelect,
 	className,
 	disabled,
-	mode = 'single',
 }: CalendarProps) {
 	// Calculate 18 years ago from today
 	const today = new Date()

@@ -15,7 +15,6 @@ const icons = {
 }
 
 export function AchievementCard({
-	id,
 	title,
 	description,
 	status,
