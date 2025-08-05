@@ -62,6 +62,10 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 				setPreview(null)
 			}
 			reader.readAsDataURL(value)
+			// Cleanup function to abort reading if component unmounts or value changes
+			return () => {
+				reader.abort()
+			}
 		} else {
 			setPreview(null)
 		}
