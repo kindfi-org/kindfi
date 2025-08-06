@@ -9,7 +9,7 @@ members = [
   "contracts/auth-contracts/auth-controller",
   "contracts/mock_badge_tracker",
   "contracts/mock_progress_tracker",
-  "contracts/nft",
+  "contracts/nft-kindfi",
   "contracts/reputation",
   "contracts/academy-progress-tracker",
   "contracts/academy-badge-tracker"

@@ -8,7 +8,7 @@ import type { AuthError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { signOut } from 'next-auth'
+import { signOut } from 'next-auth/react'
 import { validateCsrfToken } from '~/app/actions/csrf'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
@@ -155,7 +155,7 @@ export async function requestResetAccountAction(
 	formData: FormData,
 ): Promise<void> {
 	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
-		redirect('/forgot-password?error=Invalid CSRF token')
+		redirect('/reset-account?error=Invalid CSRF token')
 	}
 	const email = formData.get('email')?.toString()
 	const _supabase = await createSupabaseServerClient()
@@ -183,7 +183,7 @@ export async function requestResetAccountAction(
 	} catch (error) {
 		const response = errorHandler.handleAuthError(
 			error as AuthError,
-			'forgot_password',
+			'reset_account',
 		)
 		redirect(`/reset-account?error=${encodeURIComponent(response.message)}`)
 	}

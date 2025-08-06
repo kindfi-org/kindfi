@@ -7,13 +7,14 @@ import type {
 
 export type AppName = keyof typeof appRequirements
 
-// Type for the validated environment input (before transformation)
+/** Type for the validated environment input (before transformation) */
 export type ValidatedEnvInput = z.infer<typeof baseEnvSchema>
 
-// Type for the validated environment variables
+/** Type for the validated environment variables */
 export type AppEnv = ReturnType<typeof transformEnv>
 
 export interface AppEnvInterface {
+	/** Authentication configuration including secrets and token settings */
 	auth: {
 		secret: string
 		url: string
@@ -22,6 +23,7 @@ export interface AppEnvInterface {
 			update: number
 		}
 	}
+	/** Database connection and authentication settings */
 	database: {
 		url: string
 		connectionString: string
@@ -41,6 +43,7 @@ export interface AppEnvInterface {
 		nodeEnv: string
 		appEnv: string
 	}
+	/** Stellar blockchain network configuration */
 	stellar: {
 		networkUrl: string
 		networkPassphrase: string
@@ -73,6 +76,7 @@ export interface AppEnvInterface {
 		chainId: string
 		endpoint: string
 	}
+	/** Passkey authentication configuration */
 	passkey: {
 		redis: {
 			url: string

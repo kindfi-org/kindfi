@@ -15,43 +15,45 @@ echo "🛠️  Building auth contracts with Stellar CLI..."
 
 # Build each contract individually using stellar contract build
 echo "Building Account Contract..."
-cargo build --target wasm32-unknown-unknown --release --manifest-path ./contracts/auth-contracts/account/Cargo.toml
+cargo build --target wasm32-unknown-unknown --release --manifest-path ./contracts/auth-contracts/account/Cargo.toml || { echo "🔴 Failed to build Account Contract"; exit 1; }
 
 echo "Building Auth Controller Contract..."
-cargo build --target wasm32-unknown-unknown --release --manifest-path ./contracts/auth-contracts/auth-controller/Cargo.toml
+cargo build --target wasm32-unknown-unknown --release --manifest-path ./contracts/auth-contracts/auth-controller/Cargo.toml || { echo "🔴 Failed to build Auth Controller Contract"; exit 1; }
 
 echo "Building Account Factory Contract..."
-cargo build --target wasm32-unknown-unknown --release --manifest-path ./contracts/auth-contracts/account-factory/Cargo.toml
+cargo build --target wasm32-unknown-unknown --release --manifest-path ./contracts/auth-contracts/account-factory/Cargo.toml || { echo "🔴 Failed to build Account Factory Contract"; exit 1; }
 
 echo "✅ All contracts built successfully!"
 
 # Deploy Auth Controller Contract first (since Account needs it)
 echo "📦 Deploying Auth Controller Contract..."
 AUTH_CONTROLLER_WASM_HASH=$(stellar contract upload \
-    --network $NETWORK \
-    --source $SOURCE \
+    --network "$NETWORK" \
+    --source "$SOURCE" \
     --wasm target/wasm32-unknown-unknown/release/auth_controller.wasm)
 
 AUTH_CONTROLLER_CONTRACT_ID=$(stellar contract deploy \
-    --network $NETWORK \
-    --source $SOURCE \
-    --wasm-hash $AUTH_CONTROLLER_WASM_HASH)
+    --network "$NETWORK" \
+    --source "$SOURCE" \
+    --wasm-hash "$AUTH_CONTROLLER_WASM_HASH")
 
 echo "✅ Auth Controller Contract deployed: $AUTH_CONTROLLER_CONTRACT_ID"
 
 # Generate sample device_id and public_key for Account Contract
 echo "📦 Deploying Account Contract..."
 ACCOUNT_WASM_HASH=$(stellar contract upload \
-    --network $NETWORK \
-    --source $SOURCE \
+    --network "$NETWORK" \
+    --source "$SOURCE" \
     --wasm target/wasm32-unknown-unknown/release/account_contract.wasm)
 
 # Convert credential ID to 32-byte hex hash (SHA-256 of the credential ID)
+# TODO: Set a testnet credential_id (supabase db superuser)
 CREDENTIAL_ID="S_Kj5QeUSkyguckpT-2kXA"
 DEVICE_ID_HASH=$(echo -n "$CREDENTIAL_ID" | shasum -a 256 | cut -d' ' -f1)
 
 # Convert base64 public key to hex format
 # Your WebAuthn public key in base64
+# TODO: Set a testnet public_key_base64 (supabase db superuser)
 PUBLIC_KEY_BASE64="pQECAyYgASFYINYWHQkaQvnILp78oIB5xmAkx9sy20FMy0r4fOyJe2ogIlgga6SFzW37nuqRRVxFR7c8+5JfQhWrQwjcs8N3huPrIg4="
 
 # Decode base64 to hex
@@ -83,30 +85,30 @@ echo "Public key length: ${#PUBLIC_KEY_HEX} characters (should be 130)"
 # ? credential_id (device_id) from devices off-chain table: must be the admin who can update the contract config
 # ? public_key from devices off-chain table: must be the admin who can update the contract config
 ACCOUNT_CONTRACT_ID=$(stellar contract deploy \
-    --network $NETWORK \
-    --source $SOURCE \
-    --wasm-hash $ACCOUNT_WASM_HASH \
+    --network "$NETWORK" \
+    --source "$SOURCE" \
+    --wasm-hash "$ACCOUNT_WASM_HASH" \
     -- \
     --device_id "$DEVICE_ID_HASH" \
     --public_key "$PUBLIC_KEY_HEX" \
-    --auth_contract $AUTH_CONTROLLER_CONTRACT_ID)
+    --auth_contract "$AUTH_CONTROLLER_CONTRACT_ID")
 
 echo "✅ Account Contract deployed: $ACCOUNT_CONTRACT_ID"
 
 # Deploy Account Factory Contract  
 echo "📦 Deploying Account Factory Contract..."
 ACCOUNT_FACTORY_WASM_HASH=$(stellar contract upload \
-    --network $NETWORK \
-    --source $SOURCE \
+    --network "$NETWORK" \
+    --source "$SOURCE" \
     --wasm target/wasm32-unknown-unknown/release/account_factory.wasm)
 
 ACCOUNT_FACTORY_CONTRACT_ID=$(stellar contract deploy \
-    --network $NETWORK \
-    --source $SOURCE \
-    --wasm-hash $ACCOUNT_FACTORY_WASM_HASH \
+    --network "$NETWORK" \
+    --source "$SOURCE" \
+    --wasm-hash "$ACCOUNT_FACTORY_WASM_HASH" \
     -- \
-    --auth_contract $AUTH_CONTROLLER_CONTRACT_ID \
-    --wasm_hash $ACCOUNT_WASM_HASH)
+    --auth_contract "$AUTH_CONTROLLER_CONTRACT_ID" \
+    --wasm_hash "$ACCOUNT_WASM_HASH")
 
 echo "✅ Account Factory Contract deployed: $ACCOUNT_FACTORY_CONTRACT_ID"
 

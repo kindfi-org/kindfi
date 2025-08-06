@@ -214,7 +214,9 @@ CREATE OR REPLACE FUNCTION "public"."create_profile_for_new_user"() RETURNS "tri
     VALUES (
       NEW.id,
       NEW.email
-    );
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      email = COALESCE(public.profiles.email, EXCLUDED.email);
     RETURN NEW;
   END;
   $$;
