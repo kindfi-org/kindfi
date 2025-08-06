@@ -26,6 +26,7 @@ ON public.project_members
 FOR SELECT
 USING (true);
 
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- RLS Policy: View project members
 -- CREATE POLICY "Project members are viewable by authenticated users"
 -- ON public.project_members

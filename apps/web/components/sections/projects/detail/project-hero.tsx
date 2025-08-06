@@ -25,7 +25,7 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 		>
 			<div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
 				<Image
-					src={project.image || '/placeholder.svg'}
+					src={project.image || '/images/placeholder.png'}
 					alt={`${project.title} banner`}
 					fill
 					className="object-cover"

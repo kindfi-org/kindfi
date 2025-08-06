@@ -76,8 +76,10 @@ export function SocialLinks({ value, onChange, error }: SocialLinksProps) {
 					onClick={addLink}
 					disabled={!newLink.trim()}
 					aria-label="Add link"
+					className="bg-indigo-900 hover:bg-indigo-800 text-white"
 				>
-					<Plus className="h-4 w-4" />
+					<Plus className="h-4 w-4 sm:hidden" />
+					<span className="hidden sm:inline">Add link</span>
 				</Button>
 			</div>
 
@@ -95,6 +97,7 @@ export function SocialLinks({ value, onChange, error }: SocialLinksProps) {
 								size="sm"
 								onClick={() => removeLink(link)}
 								aria-label={`Remove link ${link}`}
+								className="h-4 w-4 p-0 hover:bg-black/20 rounded-full ml-1"
 							>
 								<X className="h-4 w-4" />
 							</Button>

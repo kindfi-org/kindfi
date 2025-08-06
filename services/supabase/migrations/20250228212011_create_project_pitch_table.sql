@@ -23,6 +23,7 @@ ON public.project_pitch
 FOR SELECT
 USING (true);
 
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- Create policy for users to view project pitches they have access to
 -- CREATE POLICY "Users can view project pitches they have access to"
 -- ON public.project_pitch

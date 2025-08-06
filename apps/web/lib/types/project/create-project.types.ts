@@ -1,14 +1,15 @@
+import type { Tables } from '@services/supabase'
 import type { z } from 'zod'
-
 import type {
 	projectStorySchema,
 	stepOneSchema,
 	stepThreeSchema,
 	stepTwoSchema,
 } from '~/lib/schemas/create-project.schemas'
+import type { SocialLinks } from './project-detail.types'
 
 export interface Tag {
-	label: string
+	name: string
 	color: string
 }
 
@@ -21,7 +22,7 @@ export interface CreateProjectFormData {
 	minimumInvestment: number
 
 	// Step 2: Media and Links
-	image: File | null
+	image: string | File | null
 	website?: string
 	socialLinks: string[]
 
@@ -42,3 +43,17 @@ export type StepOneData = z.infer<typeof stepOneSchema>
 export type StepTwoData = z.infer<typeof stepTwoSchema>
 export type StepThreeData = z.infer<typeof stepThreeSchema>
 export type ProjectStory = z.infer<typeof projectStorySchema>
+
+export interface BasicProjectInfo {
+	id: string
+	slug: string | null
+	title: string
+	description: string | null
+	goal: number
+	minInvestment: number
+	image: string | null
+	socialLinks: SocialLinks
+	location: string | null
+	category: Tables<'categories'> | null
+	tags: Tag[]
+}

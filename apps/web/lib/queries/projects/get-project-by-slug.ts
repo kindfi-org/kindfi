@@ -1,5 +1,5 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
-import type { SocialLinks } from '~/lib/types/project/project-detail.types'
+import { getBasicProjectInfoBySlug } from './get-basic-project-info-by-slug'
 import { getProjectMilestones } from './get-project-milestones'
 import { getProjectPitch } from './get-project-pitch'
 import { getProjectQuestions } from './get-project-questions'
@@ -10,37 +10,10 @@ export async function getProjectBySlug(
 	client: TypedSupabaseClient,
 	projectSlug: string,
 ) {
-	// Fetch the project by slug, including its category and tags
-	const { data: project, error: projectError } = await client
-		.from('projects')
-		.select(
-			`
-      id,
-      title,
-			slug,
-      description,
-      image_url,
-      created_at,
-      current_amount,
-      target_amount,
-      min_investment,
-      percentage_complete,
-      kinder_count,
-			project_location,
-			social_links,
-      category:category_id ( * ),
-      project_tag_relationships (
-        tag:tag_id ( id, name, color )
-      )
-    `,
-		)
-		.eq('slug', projectSlug)
-		.single()
+	const basicInfo = await getBasicProjectInfoBySlug(client, projectSlug)
+	if (!basicInfo) return null
 
-	if (projectError) throw projectError
-	if (!project) return null
-
-	const projectId = project.id
+	const projectId = basicInfo.id
 
 	const [pitch, team, milestones, updates, comments] = await Promise.all([
 		getProjectPitch(client, projectId),
@@ -51,23 +24,7 @@ export async function getProjectBySlug(
 	])
 
 	return {
-		id: project.id,
-		title: project.title,
-		slug: project.slug,
-		description: project.description,
-		image: project.image_url,
-		goal: project.target_amount,
-		raised: project.current_amount,
-		investors: project.kinder_count,
-		minInvestment: project.min_investment,
-		createdAt: project.created_at,
-		category: project.category,
-		location: project.project_location,
-		socialLinks:
-			project.social_links && typeof project.social_links === 'object'
-				? (project.social_links as SocialLinks)
-				: undefined,
-		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
+		...basicInfo,
 		pitch,
 		team,
 		milestones,
