@@ -1,4 +1,4 @@
-import { appEnvConfig } from '@packages/lib/config/app-env.config'
+import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	type RegistrationResponseJSON,

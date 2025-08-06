@@ -1,5 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config'
-import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { RegistrationResponseJSON } from '@simplewebauthn/browser'
 import { Horizon, Keypair } from '@stellar/stellar-sdk'

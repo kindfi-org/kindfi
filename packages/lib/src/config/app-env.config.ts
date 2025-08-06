@@ -109,6 +109,7 @@ function createAppConfigSchema<T extends AppName>(appName: T) {
 			anonKey: z.string(),
 			serviceRoleKey: z.string(),
 			connectionString: z.string(),
+			port: z.string(),
 		}),
 		features: z.object({
 			enableEscrowFeature: z.boolean(),
