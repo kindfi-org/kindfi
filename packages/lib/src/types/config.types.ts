@@ -27,6 +27,7 @@ export interface AppEnvInterface {
 		connectionString: string
 		anonKey: string
 		serviceRoleKey: string
+		port: string
 	}
 	features: {
 		enableEscrowFeature: boolean

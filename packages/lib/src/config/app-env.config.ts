@@ -23,6 +23,7 @@ export function transformEnv(): AppEnvInterface {
 				data.NEXT_PUBLIC_SUPABASE_ANON_KEY || data.SUPABASE_ANON_KEY || '',
 			serviceRoleKey: data.SUPABASE_SERVICE_ROLE_KEY || '',
 			connectionString: data.SUPABASE_DB_URL || '',
+			port: data.SUPABASE_PORT || '54321',
 		},
 		features: {
 			enableEscrowFeature:
@@ -332,6 +333,7 @@ export const baseEnvSchema = z.object({
 		.url('Invalid Supabase URL format')
 		.optional(),
 	SUPABASE_URL: z.string().url('Invalid Supabase URL format').optional(),
+	SUPABASE_PORT: z.string().optional(),
 	SUPABASE_DB_URL: z.string().url('Invalid Supabase DB URL format').optional(),
 	NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
 	SUPABASE_ANON_KEY: z.string().optional(),

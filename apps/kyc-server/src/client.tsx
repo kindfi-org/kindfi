@@ -1,42 +1,37 @@
-/** @jsxImportSource react */
+import React from 'react'
 import { hydrateRoot } from 'react-dom/client'
-import { Navigation, routes } from './components/Navigation'
-import { getContent } from './utils/contentMap'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import Layout from './components/Layout'
+import { ThemeProvider } from './components/provider/theme-provider'
+import About from './pages/About'
+import DashboardPage from './pages/dashboard'
+import Customers from './pages/dashboard/customers'
+import WebSocketDemo from './pages/WebSocketDemo'
 
 import './index.css'
 
-// Get the current path from the window location
-const currentPath = window.location.pathname
-
-// Debug log to check if client-side JavaScript is being updated
-console.log(
-	'Client-side JavaScript loaded. Available routes:',
-	routes.map((r) => r.path).join(', '),
+const rootElement = document.getElementById('root')
+if (!rootElement) {
+	throw new Error('Root element not found')
+}
+hydrateRoot(
+	rootElement,
+	<React.StrictMode>
+		<BrowserRouter>
+			<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+				<Layout>
+					<Routes>
+						<Route path="/dashboard" element={<DashboardPage />} />
+						<Route path="/about" element={<About />} />
+						<Route
+							path="/react"
+							element={<div>This is a React demo page.</div>}
+						/>
+						<Route path="/websocket" element={<WebSocketDemo />} />
+						<Route path="/dashboard/customers" element={<Customers />} />
+					</Routes>
+				</Layout>
+			</ThemeProvider>
+		</BrowserRouter>
+	</React.StrictMode>,
 )
-console.log('Current path:', currentPath)
-
-// Get content for the current path
-const content = getContent(currentPath)
-
-// Hydrate the application
-document.addEventListener('DOMContentLoaded', () => {
-	const root = document.getElementById('root')
-	if (root) {
-		// Create the navigation element with the same routes as the server
-		const navigationElement = <Navigation currentPath={currentPath} />
-
-		// Log the navigation element for debugging
-		console.log('Navigation element:', navigationElement)
-
-		hydrateRoot(
-			root,
-			<>
-				{navigationElement}
-				<div className="card">
-					{typeof content === 'string' ? <p>{content}</p> : content}
-				</div>
-				<p>Server-side rendered with React and Bun</p>
-			</>,
-		)
-	}
-})

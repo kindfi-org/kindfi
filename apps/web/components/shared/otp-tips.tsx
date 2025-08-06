@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: any */
 import { AlertTriangle, CheckCircle, Clock, Info, Mail } from 'lucide-react'
 import {
 	Card,

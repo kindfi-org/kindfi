@@ -13,10 +13,11 @@ SET row_security = off;
 CREATE SCHEMA IF NOT EXISTS next_auth;
 GRANT USAGE ON SCHEMA next_auth TO service_role;
 GRANT ALL ON SCHEMA next_auth TO postgres;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
 
 -- Create users table for NextAuth
 CREATE TABLE IF NOT EXISTS next_auth.users (
-    id UUID NOT NULL DEFAULT uuid_generate_v4(),
+    id UUID NOT NULL DEFAULT extensions.uuid_generate_v4(),
     name text,
     email text,
     "emailVerified" timestamp with time zone,
@@ -41,13 +42,13 @@ $$;
 
 -- Create sessions table for NextAuth
 CREATE TABLE IF NOT EXISTS next_auth.sessions (
-    id UUID NOT NULL DEFAULT uuid_generate_v4(),
+    id UUID NOT NULL DEFAULT extensions.uuid_generate_v4(),
     expires timestamp with time zone NOT NULL,
-    "sessionToken" text NOT NULL,
-    "userId" UUID,
+    session_token text NOT NULL,
+    user_id UUID,
     CONSTRAINT sessions_pkey PRIMARY KEY (id),
-    CONSTRAINT sessionToken_unique UNIQUE ("sessionToken"),
-    CONSTRAINT "sessions_userId_fkey" FOREIGN KEY ("userId")
+    CONSTRAINT sessionToken_unique UNIQUE (session_token),
+    CONSTRAINT sessions_user_id_fkey FOREIGN KEY (user_id)
         REFERENCES next_auth.users (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
@@ -58,10 +59,10 @@ GRANT ALL ON TABLE next_auth.sessions TO service_role;
 
 -- Create accounts table for NextAuth
 CREATE TABLE IF NOT EXISTS next_auth.accounts (
-    id UUID NOT NULL DEFAULT uuid_generate_v4(),
+    id UUID NOT NULL DEFAULT extensions.uuid_generate_v4(),
     type text NOT NULL,
     provider text NOT NULL,
-    "providerAccountId" text NOT NULL,
+    provider_account_id text NOT NULL,
     refresh_token text,
     access_token text,
     expires_at bigint,
@@ -71,10 +72,10 @@ CREATE TABLE IF NOT EXISTS next_auth.accounts (
     session_state text,
     oauth_token_secret text,
     oauth_token text,
-    "userId" UUID,
+    user_id UUID,
     CONSTRAINT accounts_pkey PRIMARY KEY (id),
-    CONSTRAINT provider_unique UNIQUE (provider, "providerAccountId"),
-    CONSTRAINT "accounts_userId_fkey" FOREIGN KEY ("userId")
+    CONSTRAINT provider_unique UNIQUE (provider, provider_account_id),
+    CONSTRAINT accounts_user_id_fkey FOREIGN KEY (user_id)
         REFERENCES next_auth.users (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
@@ -107,10 +108,10 @@ CREATE POLICY "Users can view own user data" ON next_auth.users
     FOR SELECT USING (next_auth.uid() = id);
 
 CREATE POLICY "Users can view own sessions" ON next_auth.sessions
-    FOR SELECT USING (next_auth.uid() = "userId");
+    FOR SELECT USING (next_auth.uid() = user_id);
 
 CREATE POLICY "Users can view own accounts" ON next_auth.accounts
-    FOR SELECT USING (next_auth.uid() = "userId");
+    FOR SELECT USING (next_auth.uid() = user_id);
 
 -- Service role can manage all NextAuth data
 CREATE POLICY "Service role can manage all users" ON next_auth.users
@@ -194,10 +195,10 @@ GRANT EXECUTE ON FUNCTION next_auth.uid() TO postgres, service_role, authenticat
 GRANT EXECUTE ON FUNCTION public.handle_new_next_auth_user() TO postgres, service_role;
 
 -- Create indexes for performance
-CREATE INDEX IF NOT EXISTS idx_next_auth_sessions_user_id ON next_auth.sessions("userId");
-CREATE INDEX IF NOT EXISTS idx_next_auth_sessions_session_token ON next_auth.sessions("sessionToken");
-CREATE INDEX IF NOT EXISTS idx_next_auth_accounts_user_id ON next_auth.accounts("userId");
-CREATE INDEX IF NOT EXISTS idx_next_auth_accounts_provider ON next_auth.accounts(provider, "providerAccountId");
+CREATE INDEX IF NOT EXISTS idx_next_auth_sessions_user_id ON next_auth.sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_next_auth_sessions_session_token ON next_auth.sessions(session_token);
+CREATE INDEX IF NOT EXISTS idx_next_auth_accounts_user_id ON next_auth.accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_next_auth_accounts_provider ON next_auth.accounts(provider, provider_account_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_next_auth_user_id ON public.profiles(next_auth_user_id);
 CREATE INDEX IF NOT EXISTS idx_devices_next_auth_user_id ON public.devices(next_auth_user_id);
 CREATE INDEX IF NOT EXISTS idx_challenges_next_auth_user_id ON public.challenges(next_auth_user_id);

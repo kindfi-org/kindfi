@@ -33,8 +33,7 @@ export default function Home() {
 
 					return (
 						<motion.div
-							// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-							key={i}
+							key={`floating-${positions[i].left}-${positions[i].top}`}
 							className="absolute w-[250px] h-[250px] rounded-full bg-primary-400/10 blur-3xl"
 							style={positions[i]}
 							animate={{
@@ -140,10 +139,9 @@ export default function Home() {
 						{ icon: Discord, label: 'Discord', link: '#' },
 						{ icon: Twitter, label: 'Twitter', link: '#' },
 						{ icon: Github, label: 'Github', link: '#' },
-					].map((social, i) => (
+					].map((social) => (
 						<a
-							// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-							key={i}
+							key={social.label}
 							href={social.link}
 							target="_blank"
 							rel="noopener noreferrer"

@@ -2,7 +2,7 @@
 
 @layer base {
 	body {
-		@apply font-sans max-w-screen mx-auto p-8 leading-relaxed bg-background text-foreground;
+		@apply font-sans w-full max-w-screen mx-auto p-8 leading-relaxed bg-background text-foreground;
 	}
 
 	body[data-scroll-locked] {

@@ -16,7 +16,6 @@ export const useEscrowFunding = ({
 	escrowId,
 	amount,
 	payerAddress,
-	signer,
 }: FundingParams) => {
 	const [status, setStatus] = useState<
 		'idle' | 'pending' | 'success' | 'failed' | 'error'

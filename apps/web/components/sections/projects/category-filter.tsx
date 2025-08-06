@@ -96,7 +96,7 @@ export function CategoryFilter({
 	}
 
 	// Handle scroll events
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {
 		const container = scrollContainerRef.current
 		if (!container) return

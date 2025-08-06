@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { BadgeCheck, Crown, GraduationCap, Leaf } from 'lucide-react'
+import Image from 'next/image'
 import { Badge } from '~/components/base/badge'
 import { Card, CardContent } from '~/components/base/card'
 import { fadeInUp, staggerChildren } from '~/lib/constants/animations'
@@ -68,7 +69,7 @@ function InvestorCard({ investor }: { investor: HeroInvestor }) {
 							transition={{ duration: 0.2 }}
 						>
 							<div className="w-24 h-24 rounded-lg bg-gray-200 overflow-hidden">
-								<img
+								<Image
 									src={investor.profileImg || '/placeholder.svg'}
 									alt={investor.name}
 									className="w-full h-full object-cover"

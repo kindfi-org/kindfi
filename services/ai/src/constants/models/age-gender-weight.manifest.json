@@ -1,32 +1,32 @@
 {
-	"model": "age-gender",
-	"version": "1.0",
-	"description": "Model for predicting age and gender from images.",
-	"input": {
-		"type": "image",
-		"format": "RGB",
-		"size": "224x224"
-	},
-	"output": {
-		"type": "json",
-		"fields": [
-			{
-				"name": "age",
-				"type": "integer",
-				"description": "Predicted age of the individual."
-			},
-			{
-				"name": "gender",
-				"type": "string",
-				"description": "Predicted gender of the individual (male/female)."
-			}
-		]
-	},
-	"license": "MIT",
 	"authors": [
 		{
-			"name": "Your Name",
-			"email": "your.email@example.com"
+			"email": "your.email@example.com",
+			"name": "Your Name"
 		}
-	]
+	],
+	"description": "Model for predicting age and gender from images.",
+	"input": {
+		"format": "RGB",
+		"size": "224x224",
+		"type": "image"
+	},
+	"license": "MIT",
+	"model": "age-gender",
+	"output": {
+		"fields": [
+			{
+				"description": "Predicted age of the individual.",
+				"name": "age",
+				"type": "integer"
+			},
+			{
+				"description": "Predicted gender of the individual (male/female).",
+				"name": "gender",
+				"type": "string"
+			}
+		],
+		"type": "json"
+	},
+	"version": "1.0"
 }

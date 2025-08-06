@@ -7,6 +7,7 @@ import {
 	PawPrintIcon as Paw,
 	Stethoscope,
 } from 'lucide-react'
+import Image from 'next/image'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
@@ -28,7 +29,7 @@ export function InvestorCard({ investor }: { investor: Investor }) {
 				<CardContent className="p-6">
 					<div className="flex items-start gap-4 mb-6">
 						<div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-400">
-							<img
+							<Image
 								src={investor.image || '/placeholder.svg'}
 								alt=""
 								className="w-full h-full object-cover"

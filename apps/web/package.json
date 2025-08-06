@@ -1,14 +1,4 @@
 {
-	"name": "web",
-	"version": "0.1.0",
-	"private": true,
-	"scripts": {
-		"dev": "next dev",
-		"build": "next build",
-		"start": "next start",
-		"lint": "biome check .",
-		"test": "bun test/**.test.{mjs,ts,js}"
-	},
 	"dependencies": {
 		"@auth/supabase-adapter": "^1.10.0",
 		"@hookform/resolvers": "^3.9.1",
@@ -101,5 +91,15 @@
 		"shadcn-ui": "^0.9.4",
 		"tailwindcss": "^3.4.1",
 		"typescript": "^5"
-	}
+	},
+	"name": "web",
+	"private": true,
+	"scripts": {
+		"build": "next build",
+		"dev": "next dev",
+		"lint": "biome check .",
+		"start": "next start",
+		"test": "bun test/**.test.{mjs,ts,js}"
+	},
+	"version": "0.1.0"
 }

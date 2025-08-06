@@ -40,7 +40,6 @@ function ImpactFeatureCard({
 	bulletPoints,
 	iconColor = '#10b981',
 	backgroundColor = 'bg-white',
-	onPress,
 	isActive = true,
 }: ImpactFeatureCardProps) {
 	const opacityAnim = useRef(new Animated.Value(isActive ? 1 : 0.4)).current

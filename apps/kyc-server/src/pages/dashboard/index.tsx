@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react'
-
+import { MetricsGrid } from '~/components/dashboard/cards/metrics-grid'
+import { SignupChart } from '~/components/dashboard/charts/signup-chart'
+import { DashboardSkeleton } from '~/components/dashboard/skeletons/dashboard-skeleton'
+import { KycTable } from '~/components/dashboard/table/kyc-table'
 import {
 	mockKycRecords,
 	mockKycStats,
 	mockSignupChartData,
 } from '~/lib/mock-data/dashboard'
-import { MetricsGrid } from './cards/metrics-grid'
-import { SignupChart } from './charts/signup-chart'
-import { DashboardSkeleton } from './skeletons/dashboard-skeleton'
-import { KycTable } from './table/kyc-table'
 
-export function Dashboard() {
+export default function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
 
 	// Simulate loading state

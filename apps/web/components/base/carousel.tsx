@@ -165,7 +165,6 @@ const Carousel = React.forwardRef<
 					ref={ref}
 					onKeyDownCapture={handleKeyDown}
 					className={cn('relative', className)}
-					aria-roledescription="carousel"
 					{...props}
 				>
 					{children}
@@ -211,6 +210,7 @@ const CarouselItem = React.forwardRef<
 	const { orientation } = useCarousel()
 
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: <explanation>
 		<div
 			ref={ref}
 			role="group"

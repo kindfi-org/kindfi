@@ -50,5 +50,6 @@
 		"tesseract.js": "^6.0.0",
 		"@services/supabase": "workspace:*"
 	},
-	"devDependencies": {}
+	"devDependencies": {},
+	"type": "module"
 }

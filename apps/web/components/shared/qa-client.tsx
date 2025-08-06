@@ -142,12 +142,9 @@ export default function QAClient({
 				}
 			: null)
 
-	const {
-		data: questions,
-		isLoading: questionsLoading,
-		error: questionsError,
-		refresh: refetchQuestions,
-	} = useSupabaseQuery<CommentData[]>(
+	const { data: questions, refresh: refetchQuestions } = useSupabaseQuery<
+		CommentData[]
+	>(
 		'projectQuestions',
 		async (supabase: TypedSupabaseClient) => {
 			try {
@@ -195,11 +192,7 @@ export default function QAClient({
 		},
 	)
 
-	const {
-		data: commentsData,
-		isLoading: commentsLoading,
-		error: commentsError,
-	} = useSupabaseQuery<CommentData[]>(
+	const { data: commentsData } = useSupabaseQuery<CommentData[]>(
 		'projectComments',
 		async (supabase: TypedSupabaseClient) => {
 			try {
@@ -562,7 +555,7 @@ export default function QAClient({
 			if (error) throw error
 			return { data, questionId }
 		},
-		onSuccess: ({ data: newAnswer, questionId }) => {
+		onSuccess: ({ questionId }) => {
 			handleGuestCommentSuccess()
 
 			setReplyContent((prev) => {

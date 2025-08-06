@@ -13,6 +13,7 @@ ON public.profiles
 FOR SELECT
 USING (true);
 
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Profiles are viewable by everyone"
 --     ON profiles
 --     FOR SELECT
@@ -33,24 +34,51 @@ CREATE POLICY "Users can update their own profile"
     WITH CHECK (auth.uid() = id);
 
 -- Projects policies
-CREATE POLICY "Projects are viewable by everyone"
-    ON projects
-    FOR SELECT
-    TO authenticated
-    USING (true);
+-- TEMPORARY POLICY: Allows public read access while there's no authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Public read access to projects"
+ON projects
+FOR SELECT
+USING (true);
 
-CREATE POLICY "Projects can be created by authenticated users"
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
+-- CREATE POLICY "Projects are viewable by everyone"
+--     ON projects
+--     FOR SELECT
+--     TO authenticated
+--     USING (true);
+
+-- TEMPORARY POLICY: Allows project creation without authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Temporary public insert access to projects"
     ON projects
     FOR INSERT
-    TO authenticated
-    WITH CHECK (auth.uid() = kindler_id);
+    TO public
+    WITH CHECK (true);
 
-CREATE POLICY "Projects can be updated by owner"
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
+-- CREATE POLICY "Projects can be created by authenticated users"
+--     ON projects
+--     FOR INSERT
+--     TO authenticated
+--     WITH CHECK (auth.uid() = kindler_id);
+
+-- TEMPORARY POLICY: Allows project creation without authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Temporary public update access to projects"
     ON projects
     FOR UPDATE
-    TO authenticated
-    USING (auth.uid() = kindler_id)
-    WITH CHECK (auth.uid() = kindler_id);
+    TO public
+    USING (true)
+    WITH CHECK (true);
+
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
+-- CREATE POLICY "Projects can be updated by owner"
+--     ON projects
+--     FOR UPDATE
+--     TO authenticated
+--     USING (auth.uid() = kindler_id)
+--     WITH CHECK (auth.uid() = kindler_id);
 
 CREATE POLICY "Projects can be deleted by owner"
     ON projects
@@ -93,6 +121,7 @@ ON public.project_updates
 FOR SELECT
 USING (true);
 
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Project updates are viewable by everyone"
 --     ON project_updates
 --     FOR SELECT

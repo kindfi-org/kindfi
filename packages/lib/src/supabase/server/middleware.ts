@@ -39,12 +39,10 @@ export const updateSession = async (
 						return cookies.getAll()
 					},
 					setAll(cookiesToSet) {
-						// biome-ignore lint/complexity/noForEach: <explanation>
 						cookiesToSet.forEach(({ name, value }) => cookies.set(name, value))
 						response = NextResponse.next({
 							request,
 						})
-						// biome-ignore lint/complexity/noForEach: <explanation>
 						cookiesToSet.forEach(({ name, value, options }) =>
 							response.cookies.set(name, value, options),
 						)

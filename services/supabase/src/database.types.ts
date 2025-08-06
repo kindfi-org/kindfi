@@ -17,12 +17,161 @@ export type Database = {
 		Functions: {
 			graphql: {
 				Args: {
+					extensions?: Json
 					operationName?: string
 					query?: string
 					variables?: Json
-					extensions?: Json
 				}
 				Returns: Json
+			}
+		}
+		Enums: {
+			[_ in never]: never
+		}
+		CompositeTypes: {
+			[_ in never]: never
+		}
+	}
+	next_auth: {
+		Tables: {
+			accounts: {
+				Row: {
+					access_token: string | null
+					expires_at: number | null
+					id: string
+					id_token: string | null
+					oauth_token: string | null
+					oauth_token_secret: string | null
+					provider: string
+					provider_account_id: string
+					refresh_token: string | null
+					scope: string | null
+					session_state: string | null
+					token_type: string | null
+					type: string
+					user_id: string | null
+				}
+				Insert: {
+					access_token?: string | null
+					expires_at?: number | null
+					id?: string
+					id_token?: string | null
+					oauth_token?: string | null
+					oauth_token_secret?: string | null
+					provider: string
+					provider_account_id: string
+					refresh_token?: string | null
+					scope?: string | null
+					session_state?: string | null
+					token_type?: string | null
+					type: string
+					user_id?: string | null
+				}
+				Update: {
+					access_token?: string | null
+					expires_at?: number | null
+					id?: string
+					id_token?: string | null
+					oauth_token?: string | null
+					oauth_token_secret?: string | null
+					provider?: string
+					provider_account_id?: string
+					refresh_token?: string | null
+					scope?: string | null
+					session_state?: string | null
+					token_type?: string | null
+					type?: string
+					user_id?: string | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'accounts_user_id_fkey'
+						columns: ['user_id']
+						isOneToOne: false
+						referencedRelation: 'users'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			sessions: {
+				Row: {
+					expires: string
+					id: string
+					session_token: string
+					user_id: string | null
+				}
+				Insert: {
+					expires: string
+					id?: string
+					session_token: string
+					user_id?: string | null
+				}
+				Update: {
+					expires?: string
+					id?: string
+					session_token?: string
+					user_id?: string | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'sessions_user_id_fkey'
+						columns: ['user_id']
+						isOneToOne: false
+						referencedRelation: 'users'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			users: {
+				Row: {
+					email: string | null
+					emailVerified: string | null
+					id: string
+					image: string | null
+					name: string | null
+				}
+				Insert: {
+					email?: string | null
+					emailVerified?: string | null
+					id?: string
+					image?: string | null
+					name?: string | null
+				}
+				Update: {
+					email?: string | null
+					emailVerified?: string | null
+					id?: string
+					image?: string | null
+					name?: string | null
+				}
+				Relationships: []
+			}
+			verification_tokens: {
+				Row: {
+					expires: string
+					identifier: string | null
+					token: string
+				}
+				Insert: {
+					expires: string
+					identifier?: string | null
+					token: string
+				}
+				Update: {
+					expires?: string
+					identifier?: string | null
+					token?: string
+				}
+				Relationships: []
+			}
+		}
+		Views: {
+			[_ in never]: never
+		}
+		Functions: {
+			uid: {
+				Args: Record<PropertyKey, never>
+				Returns: string
 			}
 		}
 		Enums: {
@@ -62,6 +211,7 @@ export type Database = {
 					expires_at: string
 					id: string
 					identifier: string
+					next_auth_user_id: string | null
 					rp_id: string
 					user_id: string | null
 				}
@@ -71,6 +221,7 @@ export type Database = {
 					expires_at?: string
 					id?: string
 					identifier: string
+					next_auth_user_id?: string | null
 					rp_id: string
 					user_id?: string | null
 				}
@@ -80,6 +231,7 @@ export type Database = {
 					expires_at?: string
 					id?: string
 					identifier?: string
+					next_auth_user_id?: string | null
 					rp_id?: string
 					user_id?: string | null
 				}
@@ -240,6 +392,7 @@ export type Database = {
 					id: string
 					identifier: string
 					last_used_at: string | null
+					next_auth_user_id: string | null
 					profile_verification_status: Database['public']['Enums']['profile_verification_status']
 					public_key: string
 					rp_id: string
@@ -260,6 +413,7 @@ export type Database = {
 					id?: string
 					identifier: string
 					last_used_at?: string | null
+					next_auth_user_id?: string | null
 					profile_verification_status?: Database['public']['Enums']['profile_verification_status']
 					public_key: string
 					rp_id: string
@@ -280,6 +434,7 @@ export type Database = {
 					id?: string
 					identifier?: string
 					last_used_at?: string | null
+					next_auth_user_id?: string | null
 					profile_verification_status?: Database['public']['Enums']['profile_verification_status']
 					public_key?: string
 					rp_id?: string
@@ -721,6 +876,7 @@ export type Database = {
 					email: string | null
 					id: string
 					image_url: string | null
+					next_auth_user_id: string | null
 					role: Database['public']['Enums']['user_role']
 					updated_at: string
 				}
@@ -731,6 +887,7 @@ export type Database = {
 					email?: string | null
 					id: string
 					image_url?: string | null
+					next_auth_user_id?: string | null
 					role?: Database['public']['Enums']['user_role']
 					updated_at?: string
 				}
@@ -741,6 +898,7 @@ export type Database = {
 					email?: string | null
 					id?: string
 					image_url?: string | null
+					next_auth_user_id?: string | null
 					role?: Database['public']['Enums']['user_role']
 					updated_at?: string
 				}
@@ -919,54 +1077,54 @@ export type Database = {
 			}
 			projects: {
 				Row: {
-					category_id: string | null
+					category_id: string
 					created_at: string | null
 					current_amount: number
-					description: string | null
+					description: string
 					id: string
 					image_url: string | null
 					kinder_count: number
 					kindler_id: string
 					min_investment: number
 					percentage_complete: number
-					project_location: string | null
-					slug: string
+					project_location: string
+					slug: string | null
 					social_links: Json
 					target_amount: number
 					title: string
 					updated_at: string | null
 				}
 				Insert: {
-					category_id?: string | null
+					category_id: string
 					created_at?: string | null
 					current_amount?: number
-					description?: string | null
+					description: string
 					id?: string
 					image_url?: string | null
 					kinder_count?: number
 					kindler_id: string
 					min_investment: number
 					percentage_complete?: number
-					project_location?: string | null
-					slug: string
+					project_location: string
+					slug?: string | null
 					social_links?: Json
 					target_amount: number
 					title: string
 					updated_at?: string | null
 				}
 				Update: {
-					category_id?: string | null
+					category_id?: string
 					created_at?: string | null
 					current_amount?: number
-					description?: string | null
+					description?: string
 					id?: string
 					image_url?: string | null
 					kinder_count?: number
 					kindler_id?: string
 					min_investment?: number
 					percentage_complete?: number
-					project_location?: string | null
-					slug?: string
+					project_location?: string
+					slug?: string | null
 					social_links?: Json
 					target_amount?: number
 					title?: string
@@ -1158,6 +1316,9 @@ export type CompositeTypes<
 
 export const Constants = {
 	graphql_public: {
+		Enums: {},
+	},
+	next_auth: {
 		Enums: {},
 	},
 	public: {

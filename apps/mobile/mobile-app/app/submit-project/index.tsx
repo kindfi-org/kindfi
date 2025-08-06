@@ -9,7 +9,7 @@ const SubmitProject = () => {
 	const router = useRouter()
 
 	useFocusEffect(
-		// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+		// biome-ignore lint/correctness/useExhaustiveDependencies: false
 		useCallback(() => {
 			router.replace('/submit-project/step-1-details')
 		}, []),

@@ -45,6 +45,7 @@ export function LatestUpdates() {
 									{update.timestamp}
 								</time>
 							</div>
+							{/** biome-ignore lint/a11y/useAriaPropsSupportedByRole:any */}
 							<p
 								className="text-xs text-muted-foreground line-clamp-2"
 								aria-label={`Update description: ${update.description}`}

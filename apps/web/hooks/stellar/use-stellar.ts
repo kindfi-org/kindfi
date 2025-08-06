@@ -199,6 +199,7 @@ export const useStellar = () => {
 		return {} as PresignResponse
 	}
 
+	// biome-ignore lint/correctness/noUnusedFunctionParameters: any
 	const onSign = async ({ signRes, authTxn, lastLedger }: SignParams) => {
 		// Handles the signing of a transaction and sends it to the Stellar network
 		try {

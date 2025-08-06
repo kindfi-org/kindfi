@@ -22,7 +22,6 @@ values ('00000000-0000-0000-0000-000000000001', 'demo@example.com', '')
 on conflict (id) do nothing;
 
 -- Insert projects
--- Insert projects
 insert into public.projects (
   title, description, current_amount, target_amount,
   min_investment, percentage_complete, kinder_count,
