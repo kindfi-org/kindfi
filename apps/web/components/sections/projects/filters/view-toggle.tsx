@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useSemanticElements: any */
 'use client'
 
 import { motion } from 'framer-motion'
@@ -25,7 +26,6 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
 				className={`relative ${viewMode === 'grid' ? 'text-primary' : 'text-gray-500'}`}
 				aria-label="Grid view"
 				aria-checked={viewMode === 'grid'}
-				// biome-ignore lint/a11y/useSemanticElements: needed for custom radio styling
 				role="radio"
 			>
 				{viewMode === 'grid' && (
@@ -45,7 +45,6 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
 				className={`relative ${viewMode === 'list' ? 'text-primary' : 'text-gray-500'}`}
 				aria-label="List view"
 				aria-checked={viewMode === 'list'}
-				// biome-ignore lint/a11y/useSemanticElements: needed for custom radio styling
 				role="radio"
 			>
 				{viewMode === 'list' && (

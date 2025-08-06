@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertCircle } from 'lucide-react'
+import Image from 'next/image'
 import type React from 'react'
 import { useCallback, useRef, useState } from 'react'
 import Webcam from 'react-webcam'
@@ -116,7 +117,7 @@ const ProofOffaceVerification: React.FC<Props> = ({ onCancel, onContinue }) => {
 								className="w-full h-full object-cover"
 							/>
 						) : (
-							<img
+							<Image
 								src={image}
 								alt="Captured"
 								className="w-full h-full object-cover"

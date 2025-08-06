@@ -46,7 +46,7 @@ export const stepThreeSchema = z.object({
 	tags: z
 		.array(
 			z.object({
-				label: z.string(),
+				name: z.string(),
 				color: z.string(),
 			}),
 		)

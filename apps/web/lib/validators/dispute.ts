@@ -94,6 +94,7 @@ export const evidenceSubmissionSchema = z.object({
 })
 
 // Define the shape of the dispute sign schema first to avoid circular references
+// biome-ignore lint/correctness/noUnusedVariables: not in use
 type DisputeSignSchemaShape = {
 	signedTransaction: z.ZodString
 	type: z.ZodEnum<['file', 'resolve']>

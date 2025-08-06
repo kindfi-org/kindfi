@@ -1,7 +1,7 @@
 create table "public"."projects" (
     "id" uuid not null default uuid_generate_v4(),
     "title" text not null,
-    "description" text,
+    "description" text not null,
     "current_amount" numeric(12,2) not null default 0,
     "target_amount" numeric(12,2) not null,
     "min_investment" numeric(12,2) not null,
@@ -9,7 +9,7 @@ create table "public"."projects" (
     "investors_count" integer not null default 0,
     "created_at" timestamp with time zone default CURRENT_TIMESTAMP,
     "updated_at" timestamp with time zone default CURRENT_TIMESTAMP,
-    "category_id" text,
+    "category_id" text not null,
     "image_url" text,
     "kindler_id" uuid not null
 );
@@ -125,28 +125,29 @@ grant truncate on table "public"."projects" to "service_role";
 
 grant update on table "public"."projects" to "service_role";
 
-create policy "Allow authenticated users to create projects"
-on "public"."projects"
-as permissive
-for insert
-to public
-with check (((auth.role() = 'authenticated'::text) AND (auth.uid() = kindler_id)));
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
+-- create policy "Allow authenticated users to create projects"
+-- on "public"."projects"
+-- as permissive
+-- for insert
+-- to public
+-- with check (((auth.role() = 'authenticated'::text) AND (auth.uid() = kindler_id)));
 
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
+-- create policy "Allow project owners to update their projects"
+-- on "public"."projects"
+-- as permissive
+-- for update
+-- to public
+-- using ((auth.uid() = kindler_id));
 
-create policy "Allow project owners to update their projects"
-on "public"."projects"
-as permissive
-for update
-to public
-using ((auth.uid() = kindler_id));
-
-
-create policy "Allow public read access to projects"
-on "public"."projects"
-as permissive
-for select
-to public
-using (true);
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
+-- create policy "Allow public read access to projects"
+-- on "public"."projects"
+-- as permissive
+-- for select
+-- to public
+-- using (true);
 
 
 CREATE TRIGGER update_projects_modtime BEFORE UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION update_modified_column();

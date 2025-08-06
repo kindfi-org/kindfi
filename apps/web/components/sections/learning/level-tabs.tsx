@@ -17,7 +17,7 @@ export function LevelTabs({
 				{levels.map((level) => {
 					const isActive = value === level.toLowerCase()
 					return (
-						// biome-ignore lint/a11y/useButtonType: <explanation>
+						// biome-ignore lint/a11y/useButtonType: no need for type here
 						<button
 							key={level}
 							onClick={() => onValueChange(level.toLowerCase())}

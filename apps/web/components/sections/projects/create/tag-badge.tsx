@@ -11,11 +11,11 @@ import { getContrastTextColor } from '~/lib/utils/color-utils'
 
 interface TagBadgeProps {
 	tag: Tag
-	onRemove: () => void
-	showRemoveButton: boolean
+	onRemove?: () => void
+	onSelect?: () => void
 }
 
-export function TagBadge({ tag, onRemove, showRemoveButton }: TagBadgeProps) {
+export function TagBadge({ tag, onRemove, onSelect }: TagBadgeProps) {
 	const textColor = getContrastTextColor(tag.color)
 
 	return (
@@ -27,23 +27,27 @@ export function TagBadge({ tag, onRemove, showRemoveButton }: TagBadgeProps) {
 		>
 			<Badge
 				variant="secondary"
+				onClick={onSelect}
+				aria-label={onSelect ? `Select tag ${tag.name}` : undefined}
 				className={cn(
 					'flex items-center gap-1 px-3 py-1 text-sm font-medium border-0',
 					textColor,
+					onSelect && 'cursor-pointer hover:opacity-90',
 				)}
-				style={{
-					backgroundColor: tag.color,
-				}}
+				style={{ backgroundColor: tag.color }}
 			>
-				<span>{tag.label}</span>
-				{showRemoveButton && (
+				<span>{tag.name.toUpperCase()}</span>
+				{onRemove && (
 					<Button
 						type="button"
 						variant="ghost"
 						size="sm"
 						className="h-4 w-4 p-0 hover:bg-black/20 rounded-full ml-1"
-						onClick={onRemove}
-						aria-label={`Remove tag ${tag.label}`}
+						onClick={(e) => {
+							e.stopPropagation()
+							onRemove()
+						}}
+						aria-label={`Remove tag ${tag.name}`}
 						style={{ color: textColor }}
 					>
 						<X className="h-3 w-3" />

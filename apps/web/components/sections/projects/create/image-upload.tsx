@@ -2,14 +2,14 @@
 
 import { ImageIcon, Upload, X } from 'lucide-react'
 import Image from 'next/image'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 
 import { Button } from '~/components/base/button'
 import { cn } from '~/lib/utils'
 
 interface ImageUploadProps {
-	value: File | null
+	value: File | string | null
 	onChange: (file: File | null) => void
 	error?: string
 }
@@ -50,6 +50,27 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 		setPreview(null)
 	}
 
+	// Mostrar preview si value es una URL o si ya hay un File
+	useEffect(() => {
+		if (typeof value === 'string') {
+			setPreview(value)
+		} else if (value instanceof File) {
+			const reader = new FileReader()
+			reader.onload = () => setPreview(reader.result as string)
+			reader.onerror = () => {
+				console.error('Error reading file')
+				setPreview(null)
+			}
+			reader.readAsDataURL(value)
+			// Cleanup function to abort reading if component unmounts or value changes
+			return () => {
+				reader.abort()
+			}
+		} else {
+			setPreview(null)
+		}
+	}, [value])
+
 	return (
 		<div className="space-y-4">
 			{!value ? (
@@ -85,15 +106,17 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 					<div className="relative rounded-lg overflow-hidden border border-gray-200">
 						{preview ? (
 							<Image
-								src={preview || '/images/placeholder.png'}
+								src={preview}
 								alt="Project preview"
 								width={400}
 								height={192}
-								className="w-full h-48 object-contain bg-gray-50 rounded-md"
-								unoptimized={!!preview} // Disable Next.js optimization for data-URL previews
+								className="w-full h-64 object-cover bg-gray-50 rounded-md"
+								unoptimized={
+									preview.startsWith('data:') || preview.startsWith('http')
+								}
 							/>
 						) : (
-							<div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+							<div className="w-full h-64 bg-gray-100 flex items-center justify-center">
 								<ImageIcon className="h-12 w-12 text-gray-400" />
 							</div>
 						)}
@@ -108,9 +131,11 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 							<X className="h-4 w-4" />
 						</Button>
 					</div>
-					<p className="text-sm text-muted-foreground mt-2">
-						{value.name} ({(value.size / 1024 / 1024).toFixed(2)} MB)
-					</p>
+					{value instanceof File && (
+						<p className="text-sm text-muted-foreground mt-2">
+							{value.name} ({(value.size / 1024 / 1024).toFixed(2)} MB)
+						</p>
+					)}
 				</div>
 			)}
 			{error && <p className="text-sm text-destructive">{error}</p>}

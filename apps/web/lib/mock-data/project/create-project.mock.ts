@@ -17,8 +17,8 @@ export const project: CreateProjectFormData = {
 	location: 'CRI', // Costa Rica
 	category: '7', // Education
 	tags: [
-		{ label: 'EDUCATION', color: '#3B82F6' },
-		{ label: 'CHILDREN', color: '#10B981' },
-		{ label: 'FUTURE', color: '#F59E0B' },
+		{ name: 'EDUCATION', color: '#3B82F6' },
+		{ name: 'CHILDREN', color: '#10B981' },
+		{ name: 'FUTURE', color: '#F59E0B' },
 	],
 }

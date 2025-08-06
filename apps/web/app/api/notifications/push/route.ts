@@ -26,6 +26,7 @@ const requestSchema = z.object({
 	notification: notificationSchema,
 })
 
+// biome-ignore lint/correctness/noUnusedVariables: not in use
 type PushRequestBody = z.infer<typeof requestSchema>
 
 export async function POST(request: Request) {

@@ -14,7 +14,6 @@ export const useEscrowFunding = ({
 	escrowId,
 	amount,
 	payerAddress,
-	signer,
 }: FundingParams) => {
 	const [status, setStatus] = useState<
 		'idle' | 'pending' | 'success' | 'failed' | 'error'
@@ -102,7 +101,7 @@ export const useEscrowFunding = ({
 }
 
 export async function fetchTransactionStatus(hash: string) {
-	// biome-ignore lint/style/noNonNullAssertion: <explanation>
+	// biome-ignore lint/style/noNonNullAssertion: any
 	const server = new Horizon.Server(process.env.STELLAR_NETWORK_URL!)
 	const response = await server.transactions().transaction(hash).call()
 	return response

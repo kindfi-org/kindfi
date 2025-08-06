@@ -37,7 +37,7 @@ export function cn(...inputs: ClassValue[]) {
  * @returns {Promise<number>} A promise that resolves to the sequence number of the account.
  */
 export async function getAccountSequence(secretKey: string): Promise<number> {
-	// biome-ignore lint/style/noNonNullAssertion: <explanation>
+	// biome-ignore lint/style/noNonNullAssertion: maybe null
 	const server = new Server(process.env.STELLAR_NETWORK_URL!)
 	const account = await server.loadAccount(
 		Keypair.fromSecret(secretKey).publicKey(),

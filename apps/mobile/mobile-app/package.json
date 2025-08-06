@@ -1,22 +1,4 @@
 {
-	"name": "expo-app",
-	"main": "expo-router/entry",
-	"version": "1.0.0",
-	"scripts": {
-		"start": "expo start",
-		"android": "DARK_MODE=media expo start --android",
-		"ios": "DARK_MODE=media expo start --ios",
-		"web": "DARK_MODE=media expo start --web",
-		"test": "jest --watchAll",
-		"lint": "expo lint"
-	},
-	"jest": {
-		"preset": "jest-expo"
-	},
-	"overrides": {
-		"tslib": "2.6.2",
-		"framer-motion": "10.12.16"
-	},
 	"dependencies": {
 		"@expo/html-elements": "^0.4.2",
 		"@expo/vector-icons": "^14.0.2",
@@ -106,5 +88,23 @@
 		"react-test-renderer": "19.0.0",
 		"typescript": "^5.3.3"
 	},
-	"private": true
+	"jest": {
+		"preset": "jest-expo"
+	},
+	"main": "expo-router/entry",
+	"name": "expo-app",
+	"overrides": {
+		"framer-motion": "10.12.16",
+		"tslib": "2.6.2"
+	},
+	"private": true,
+	"scripts": {
+		"android": "DARK_MODE=media expo start --android",
+		"ios": "DARK_MODE=media expo start --ios",
+		"lint": "expo lint",
+		"start": "expo start",
+		"test": "jest --watchAll",
+		"web": "DARK_MODE=media expo start --web"
+	},
+	"version": "1.0.0"
 }

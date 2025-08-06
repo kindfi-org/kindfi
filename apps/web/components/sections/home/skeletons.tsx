@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useSemanticElements: any*/
 import type { FC } from 'react'
 import { Skeleton } from '~/components/base/skeleton'
 import { SkeletonText } from '~/components/base/skeleton-text'

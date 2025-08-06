@@ -89,6 +89,10 @@ export function StepOne({ onNext }: StepOneProps) {
 												{...field}
 											/>
 										</FormControl>
+										<p className="text-sm text-muted-foreground mt-2">
+											Just a quick summary is fine for now. You will be able to
+											edit it later.
+										</p>
 										<FormMessage />
 									</FormItem>
 								)}
