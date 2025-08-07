@@ -1,7 +1,7 @@
 import type { Tables } from '@services/supabase'
 import type { z } from 'zod'
 import type {
-	projectStorySchema,
+	projectPitchSchema,
 	stepOneSchema,
 	stepThreeSchema,
 	stepTwoSchema,
@@ -42,7 +42,7 @@ export interface CountryOption {
 export type StepOneData = z.infer<typeof stepOneSchema>
 export type StepTwoData = z.infer<typeof stepTwoSchema>
 export type StepThreeData = z.infer<typeof stepThreeSchema>
-export type ProjectStory = z.infer<typeof projectStorySchema>
+export type ProjectPitch = z.infer<typeof projectPitchSchema>
 
 export interface BasicProjectInfo {
 	id: string

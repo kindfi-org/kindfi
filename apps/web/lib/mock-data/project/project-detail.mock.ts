@@ -8,7 +8,6 @@ export const projectDetail: ProjectDetail = {
 	description:
 		'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for all children regardless of their background.',
 	pitch: {
-		id: '1',
 		title: 'Empowering Education: A Vision for Equal Opportunity',
 		story: `Our mission is to bridge the education gap in low-income communities by providing quality educational resources, technology, and mentorship programs.
 

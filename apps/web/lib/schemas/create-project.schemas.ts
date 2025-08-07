@@ -53,27 +53,33 @@ export const stepThreeSchema = z.object({
 		.optional(),
 })
 
-export const projectStorySchema = z.object({
+// YouTube URL regex pattern
+const youtubeRegex =
+	/^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)[a-zA-Z0-9_-]{11}(&.*)?$/
+
+// Vimeo URL regex pattern
+const vimeoRegex = /^(https?:\/\/)?(www\.)?(vimeo\.com\/)[0-9]+(\?.*)?$/
+
+export const projectPitchSchema = z.object({
 	title: z
 		.string()
 		.min(1, 'Title is required')
 		.max(100, 'Title must be less than 100 characters'),
-	story: z.string().min(1, 'Story is required'),
-	pitchDeck: z
-		.object({
-			url: z.string().optional(),
-			size: z.number().max(10 * 1024 * 1024, 'File must be less than 10MB'),
-		})
-		.optional(),
+	story: z
+		.string()
+		.min(1, 'Story is required')
+		.min(50, 'Story must be at least 50 characters long'),
+	pitchDeck: z.any().nullable(),
 	videoUrl: z
 		.string()
-		.url('Must be a valid URL')
+		.optional()
 		.refine(
-			(url) =>
-				url.includes('youtube.com') ||
-				url.includes('youtu.be') ||
-				url.includes('vimeo.com'),
-			'Must be a YouTube or Vimeo URL',
-		)
-		.optional(),
+			(url) => {
+				if (!url || url.trim() === '') return true
+				return youtubeRegex.test(url) || vimeoRegex.test(url)
+			},
+			{
+				message: 'Please enter a valid YouTube or Vimeo URL',
+			},
+		),
 })

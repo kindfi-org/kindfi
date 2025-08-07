@@ -1,66 +1,70 @@
-'use client'
+import { notFound } from 'next/navigation'
+import { ProjectPitchForm } from '~/components/sections/projects/pitch/project-pitch-form'
+import { TipsSidebar } from '~/components/sections/projects/pitch/tips-sidebar'
+import { BreadcrumbContainer } from '~/components/sections/projects/shared'
+import { projectDetail } from '~/lib/mock-data/project/project-detail.mock'
 
-import { Save } from 'lucide-react'
-import { Button } from '~/components/base/button'
-import { ProjectMedia } from '~/components/sections/project/project-media'
-import { ProjectStoryForm } from '~/components/sections/project/project-story'
-import { ProjectTips } from '~/components/sections/project/project-tips'
-import type { ProjectStory } from '~/lib/types/project/create-project.types'
+// Simulate async data fetching for pitch data
+async function getPitchData(slug: string) {
+	// Simulate loading delay
+	await new Promise((resolve) => setTimeout(resolve, 800))
 
-export default function ProjectPitchPage() {
-	const handleStorySubmit = (data: ProjectStory) => {
-		// TODO: Implement story submission
-		console.log('Story submitted:', data)
+	if (slug !== projectDetail.slug) {
+		return null
 	}
 
-	const handleFileUpload = async (file: File) => {
-		// Simulating an asynchronous file upload
-		await new Promise((resolve) => setTimeout(resolve, 1000))
-		console.log('File uploaded:', file.name)
-		// TODO: Implement actual file upload logic here
+	// Return existing pitch data
+	return {
+		title: projectDetail.pitch.title,
+		story: projectDetail.pitch.story,
+		pitchDeck: null, // In real app, this would be the existing file
+		videoUrl: projectDetail.pitch.videoUrl || '',
 	}
+}
 
-	const handleVideoUrlChange = (url: string) => {
-		// TODO: Implement video URL update
-		console.log('Video URL updated:', url)
-	}
+export default async function ProjectPitchPage({
+	params,
+}: {
+	params: Promise<{
+		slug: string
+	}>
+}) {
+	const { slug } = await params
 
-	const handleSaveAll = () => {
-		// TODO: Implement saving all changes
-		console.log('Saving all changes')
+	const pitch = await getPitchData(slug)
+
+	if (!pitch) {
+		notFound()
 	}
 
 	return (
-		<div className="container mx-auto py-8">
-			<h1 className="text-3xl font-bold mb-8">Project Pitch & Story</h1>
-			<p className="text-gray-600 mb-8">
-				Tell your story and explain why donors should support your project
-			</p>
-
-			<div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-				<div className="lg:col-span-3">
-					<div className="space-y-8">
-						<ProjectStoryForm onSubmit={handleStorySubmit} />
-						<ProjectMedia
-							onFileUpload={handleFileUpload}
-							onVideoUrlChange={handleVideoUrlChange}
-						/>
-					</div>
-					<div className="mt-8 flex justify-end">
-						<Button
-							onClick={handleSaveAll}
-							className="bg-black hover:bg-black/90 text-white"
-						>
-							<Save className="w-4 h-4 mr-1" />
-							Save Changes
-						</Button>
-					</div>
+		<main className="container mx-auto px-4 py-8 md:py-12">
+			<div className="flex flex-col items-center justify-center mb-8">
+				<BreadcrumbContainer
+					category={{ name: 'Education', slug: 'education' }}
+					title="Empowering Education"
+					manageSection="Project Management"
+					subSection="Pitch"
+				/>
+				<div className="inline-flex items-center px-4 py-2 rounded-full font-medium text-purple-600 bg-purple-100 border-transparent mb-4">
+					Project Management
 				</div>
-
-				<aside className="lg:col-span-1 relative">
-					<ProjectTips />
-				</aside>
+				<h1 className="text-3xl md:text-4xl font-bold mb-4 py-2 sm:text-center gradient-text">
+					Project Pitch
+				</h1>
+				<p className="text-xl text-muted-foreground max-w-5xl mx-auto">
+					Create a compelling pitch that showcases your project's impact and
+					inspires supporters to join your mission.
+				</p>
 			</div>
-		</div>
+			<section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start max-w-5xl mx-auto">
+				<div className="lg:col-span-2">
+					<ProjectPitchForm pitch={pitch} />
+				</div>
+				<aside className="lg:col-span-1">
+					<TipsSidebar />
+				</aside>
+			</section>
+		</main>
 	)
 }
