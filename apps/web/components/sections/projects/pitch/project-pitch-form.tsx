@@ -104,7 +104,7 @@ export function ProjectPitchForm({ pitch }: ProjectPitchFormProps) {
 											<MarkdownEditor
 												value={field.value}
 												onChange={field.onChange}
-												placeholder="# Your Project Story
+												placeholder={`# Your Project Story
 
 ## The Problem
 Describe the problem you're solving...
@@ -116,7 +116,7 @@ Explain how your project addresses this problem...
 Share the positive change you'll create...
 
 ## Why Support Us
-Tell supporters why they should believe in your mission..."
+Tell supporters why they should believe in your mission...`}
 												error={form.formState.errors.story?.message}
 											/>
 										</FormControl>
