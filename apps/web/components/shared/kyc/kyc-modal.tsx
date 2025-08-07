@@ -10,7 +10,10 @@ import {
 } from '~/components/shared'
 import type { IdentityFormValues } from '~/components/shared/kyc/kyc-1'
 import { useKYC } from '~/hooks/use-kyc'
-import type { FinalReviewProps } from '~/lib/types/final-review-kyc5.types'
+import type {
+	ExtractedDocumentData,
+	FinalReviewProps,
+} from '~/lib/types/final-review-kyc5.types'
 
 // Define a comprehensive type for all collected KYC data
 export type KYCData = FinalReviewProps['kycData'] & {
@@ -21,6 +24,28 @@ interface KYCModalProps {
 	isOpen: boolean
 	onClose: () => void
 }
+
+interface DocumentSubmitData {
+	documentType: string
+	extractedData: ExtractedDocumentData
+	frontImage: File | null
+	backImage: File | null
+}
+
+interface AddressSubmitData {
+  extractedData?: {
+   address?: {
+      street?: string
+      city?: string
+      country?: string
+    }
+  }
+  file: File | null
+}
+
+
+
+
 
 export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 	const {
@@ -47,13 +72,7 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 	}
 
 	// Handles data from Step 2, with the corrected inline type
-	const handleDocumentSubmit = (data: {
-		documentType: string
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		extractedData: any
-		frontImage: File | null
-		backImage: File | null
-	}) => {
+	const handleDocumentSubmit = (data: DocumentSubmitData) => {
 		updateKycData({
 			documents: {
 				documentType: data.documentType || '',
@@ -74,8 +93,8 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 	}
 
 	// Handles data from Step 4
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	const handleAddressSubmit = (data: any) => {
+	
+	const handleAddressSubmit = (data: AddressSubmitData) => {
 		updateKycData({
 			address: {
 				street: data.extractedData?.address?.street || '',
@@ -101,7 +120,14 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="p-0 sm:max-w-xl">
+			<DialogContent
+				className="p-0 sm:max-w-xl"
+				aria-label="KYC Verification Process"
+				aria-describedby="kyc-step-description"
+			>
+				<div className="sr-only" id="kyc-step-description">
+					Step {currentStep} of 5 in the KYC verification process
+				</div>
 				{isLoading && <div className="p-4">Submitting...</div>}
 				{error && <div className="p-4 text-red-500">{error}</div>}
 
