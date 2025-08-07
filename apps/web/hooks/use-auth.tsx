@@ -16,8 +16,8 @@ const AuthContext = createContext<AuthContextType>({
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-	// Use undefined as initial state to prevent hydration mismatch
-	const [user, setUser] = useState<User | undefined>(undefined)
+	// Use null as initial state to prevent hydration mismatch
+	const [user, setUser] = useState<User | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const supabase = createSupabaseBrowserClient()
 
@@ -30,10 +30,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					data: { session },
 				} = await supabase.auth.getSession()
 				console.log('Session check result:', session)
-				setUser(session?.user ?? undefined)
+				setUser(session?.user ?? null)
 			} catch (error) {
 				console.error('Auth check failed:', error)
-				setUser(undefined)
+				setUser(null)
 			} finally {
 				setIsLoading(false)
 			}
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange(
 			(_event: string, session: Session | null) => {
-				setUser(session?.user ?? undefined)
+				setUser(session?.user ?? null)
 				setIsLoading(false)
 			},
 		)
@@ -55,11 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, [])
 
-	// Don't render until initial auth check is complete
-	if (user === undefined) {
-		return null
-	}
-
+	// Always render children, but show loading state
 	return (
 		<SessionProvider>
 			<AuthContext.Provider value={{ user, isLoading }}>

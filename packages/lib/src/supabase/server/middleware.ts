@@ -53,19 +53,19 @@ export const updateSession = async (
 
 		// This will refresh session if expired - required for Server Components
 		// https://supabase.com/docs/guides/auth/server-side/nextjs
-		const user = await supabase.auth.getUser(cookieSessionToken) // it wont work 😏
-		console.log('🗝️ User fetched from Supabase:', user)
-		// TODO: Validate the user session
-		if (
-			!user &&
-			!request.nextUrl.pathname.startsWith('/sign-in') &&
-			!request.nextUrl.pathname.startsWith('/auth')
-		) {
-			// no user, potentially respond by redirecting the user to the login page
-			const url = request.nextUrl.clone()
-			url.pathname = '/sign-in'
-			return NextResponse.redirect(url)
-		}
+		// const user = await supabase.auth.getUser(cookieSessionToken) // it wont work 😏
+		// console.log('🗝️ User fetched from Supabase:', user)
+		// // TODO: Validate the user session
+		// if (
+		// 	!user &&
+		// 	!request.nextUrl.pathname.startsWith('/sign-in') &&
+		// 	!request.nextUrl.pathname.startsWith('/auth')
+		// ) {
+		// 	// no user, potentially respond by redirecting the user to the login page
+		// 	const url = request.nextUrl.clone()
+		// 	url.pathname = '/sign-in'
+		// 	return NextResponse.redirect(url)
+		// }
 
 		return response
 	} catch (_e) {

@@ -1,26 +1,42 @@
 import { updateSession } from '@packages/lib/supabase-server'
 import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import { withAuth } from 'next-auth/middleware'
+import { ensureCsrfTokenCookie } from '~/app/actions/csrf'
 
 // * Infer the type of the first parameter of updateSession
 type ExpectedRequestType = Parameters<typeof updateSession>[0]
 
-export default withAuth({
-	pages: {
-		signIn: '/sign-in',
-		signOut: '/sign-out',
-		error: '/error',
+export default withAuth(
+	async function middleware(request: NextRequest) {
+		try {
+			// Ensure CSRF token cookie is set
+			await ensureCsrfTokenCookie()
+			// * Cast the request object through 'unknown' to the expected type.
+			// ? This handles cases where TypeScript sees two NextRequest types as "incompatible"
+			// ? due to different declaration origins in a monorepo setup.
+			return await updateSession(
+				request as unknown as ExpectedRequestType,
+				null,
+			)
+		} catch (error) {
+			console.error('Middleware error:', error)
+			// Return NextResponse.next() to allow the request to continue
+			return NextResponse.next({
+				request: {
+					headers: request.headers,
+				},
+			})
+		}
 	},
-})
-
-export async function middleware(request: NextRequest) {
-	// Ensure CSRF token cookie is set
-	// await ensureCsrfTokenCookie()
-	// * Cast the request object through 'unknown' to the expected type.
-	// ? This handles cases where TypeScript sees two NextRequest types as "incompatible"
-	// ? due to different declaration origins in a monorepo setup.
-	return await updateSession(request as unknown as ExpectedRequestType, null)
-}
+	{
+		pages: {
+			signIn: '/sign-in',
+			signOut: '/sign-out',
+			error: '/error',
+		},
+	},
+)
 
 export const config = {
 	matcher: [
