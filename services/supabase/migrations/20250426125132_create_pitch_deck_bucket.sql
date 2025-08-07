@@ -1,16 +1,26 @@
--- 1. Create the bucket
-insert into storage.buckets (id, name, public)
-values ('project_pitch_decks', 'project_pitch_decks', false)
-on conflict (id) do nothing;
-
--- 2. Restrict file types
-create policy "Restrict file types" on storage.objects
-for insert to authenticated with check (
-  bucket_id = 'project_pitch_decks'
-  and (storage.extension(name) in ('pdf', 'ppt', 'pptx', 'key', 'odp'))
+-- Create a public bucket for project pitch decks with size and MIME type restrictions
+INSERT INTO storage.buckets (
+  id,
+  name,
+  public,
+  file_size_limit,
+  allowed_mime_types
+)
+VALUES (
+  'project_pitch_decks',
+  'project_pitch_decks',
+  TRUE,
+  10485760, -- 10MB
+  ARRAY[
+    'application/pdf',
+    'application/vnd.ms-powerpoint', -- .ppt
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', -- .pptx
+    'application/vnd.apple.keynote', -- .key
+    'application/vnd.oasis.opendocument.presentation' -- .odp
+  ]
 );
 
--- 3. Upload policy (project owners only)
+-- Upload policy (project owners only)
 create policy "Project owners can upload" on storage.objects
 for insert to authenticated with check (
   bucket_id = 'project_pitch_decks'
@@ -20,7 +30,7 @@ for insert to authenticated with check (
   )
 );
 
--- 4. View policy (owners + project members)
+-- View policy (owners + project members)
 create policy "Project team can view" on storage.objects
 for select using (
   bucket_id = 'project_pitch_decks'
@@ -34,7 +44,7 @@ for select using (
   )
 );
 
--- 5. Delete policy (owners only)
+-- Delete policy (owners only)
 create policy "Only owners can delete" on storage.objects
 for delete using (
   bucket_id = 'project_pitch_decks'
