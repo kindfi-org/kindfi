@@ -948,7 +948,7 @@ export type Database = {
 					id: string
 					pitch_deck: string | null
 					project_id: string
-					story: string | null
+					story: string
 					title: string
 					updated_at: string | null
 					video_url: string | null
@@ -958,7 +958,7 @@ export type Database = {
 					id?: string
 					pitch_deck?: string | null
 					project_id: string
-					story?: string | null
+					story: string
 					title: string
 					updated_at?: string | null
 					video_url?: string | null
@@ -968,7 +968,7 @@ export type Database = {
 					id?: string
 					pitch_deck?: string | null
 					project_id?: string
-					story?: string | null
+					story?: string
 					title?: string
 					updated_at?: string | null
 					video_url?: string | null
