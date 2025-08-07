@@ -42,13 +42,14 @@ export function Providers({ children }: ProvidersProps) {
 					try {
 						const reg = registration as ServiceWorkerRegistrationWithSync
 						if (reg.periodicSync) {
-							reg.periodicSync
-								.register('notification-sync', {
-									minInterval: 24 * 60 * 60 * 1000, // 24 hours
-								})
-								.catch((error) => {
-									console.error('Periodic sync registration failed:', error)
-								})
+							// TODO: Fix registration, crashing on some MacOs due lack of permissions on browsers by default...
+							// reg.periodicSync
+							// 	.register('notification-sync', {
+							// 		minInterval: 24 * 60 * 60 * 1000, // 24 hours
+							// 	})
+							// 	.catch((error) => {
+							// 		console.error('Periodic sync registration failed:', error)
+							// 	})
 						}
 					} catch (error) {
 						console.error('Periodic sync not supported:', error)
