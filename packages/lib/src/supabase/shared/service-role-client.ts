@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import type { AppEnvInterface } from '~/packages/lib/src/types'
 import { appEnvConfig } from '../../config'
+import type { AppEnvInterface } from '../../types'
 
 const appConfig: AppEnvInterface = appEnvConfig()
 

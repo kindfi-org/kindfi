@@ -1,8 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
 import type { Session } from 'next-auth'
-import type { AppEnvInterface } from '~/packages/lib/src/types'
 import { appEnvConfig } from '../../config'
+import type { AppEnvInterface } from '../../types'
 
 const appConfig: AppEnvInterface = appEnvConfig()
 

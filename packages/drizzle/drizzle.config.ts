@@ -1,6 +1,6 @@
 import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import type { Config } from 'drizzle-kit'
-import type { AppEnvInterface } from '~/packages/lib/src/types'
 
 const appConfig: AppEnvInterface = appEnvConfig()
 

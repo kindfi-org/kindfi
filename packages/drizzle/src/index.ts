@@ -1,7 +1,7 @@
 import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-import type { AppEnvInterface } from '~/packages/lib/src/types'
 import * as schema from './data/schema'
 
 const appConfig: AppEnvInterface = appEnvConfig()

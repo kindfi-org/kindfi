@@ -1,9 +1,5 @@
 import { z } from 'zod'
-import type {
-	AppEnvInterface,
-	AppName,
-	ValidatedEnvInput,
-} from '~/packages/lib/src/types/config.types'
+import type { AppEnvInterface, AppName, ValidatedEnvInput } from '../types'
 
 // Transform function with explicit type annotation
 export function transformEnv(): AppEnvInterface {
@@ -92,7 +88,9 @@ export function transformEnv(): AppEnvInterface {
 }
 
 // Create app-specific schema that validates the transformed config
-function createAppConfigSchema<T extends AppName>(appName: T) {
+function createAppConfigSchema<T extends keyof typeof appRequirements>(
+	appName: T,
+) {
 	const requirements = appRequirements[appName]
 
 	const baseSchema = z.object({
@@ -176,7 +174,7 @@ function createAppConfigSchema<T extends AppName>(appName: T) {
 }
 
 // Helper to create validation rules based on app requirements
-function createValidationRules<T extends AppName>(
+function createValidationRules<T extends keyof typeof appRequirements>(
 	requirements: (typeof appRequirements)[T],
 ) {
 	const rules: Record<string, { path: string[]; isRequired: boolean }> = {}
@@ -258,7 +256,9 @@ function detectApp(): AppName | undefined {
 }
 
 // Generic appEnvConfig function that validates transformed config
-export function appEnvConfig<T extends AppName>(appName?: T): AppEnvInterface {
+export function appEnvConfig<T extends keyof typeof appRequirements>(
+	appName?: T,
+): AppEnvInterface {
 	try {
 		const _app = appName || detectApp()
 		// Transform the environment first
@@ -283,12 +283,12 @@ export function appEnvConfig<T extends AppName>(appName?: T): AppEnvInterface {
 					.map((err) => `  • ${err.path.join('.')}: ${err.message}`)
 					.join('\n')
 				throw new Error(
-					`❌ Environment validation failed for ${appName}:\n${missingVars}\n\nPlease check your .env file and ensure all required variables are set.`,
+					`❌ Environment validation failed for ${String(appName)}:\n${missingVars}\n\nPlease check your .env file and ensure all required variables are set.`,
 				)
 			}
 
 			console.log(
-				`✅ Environment variables for ${appName} validated successfully.`,
+				`✅ Environment variables for ${String(appName)} validated successfully.`,
 			)
 		}
 

@@ -1,9 +1,5 @@
 import type * as z from 'zod'
-import type {
-	appRequirements,
-	baseEnvSchema,
-	transformEnv,
-} from '~/packages/lib/src/config'
+import type { appRequirements, baseEnvSchema, transformEnv } from '../config'
 
 export type AppName = keyof typeof appRequirements
 

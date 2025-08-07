@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	StellarDatasourceKind,
 	StellarHandlerKind,
@@ -7,7 +8,6 @@ import {
 } from '@subql/types-stellar'
 import * as dotenv from 'dotenv'
 import { Horizon } from 'stellar-sdk'
-import type { AppEnvInterface } from '~/packages/lib/src/types'
 
 const appConfig: AppEnvInterface = appEnvConfig()
 const mode = appConfig.env.nodeEnv
