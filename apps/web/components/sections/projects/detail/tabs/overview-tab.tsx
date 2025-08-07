@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Download } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { Button } from '~/components/base/button'
-import { FileIcon } from '~/components/sections/projects/detail/file-icon'
+import { FileIcon } from '~/components/sections/projects/shared'
 import type { ProjectPitch } from '~/lib/types/project/project-detail.types'
 
 interface OverviewTabProps {
@@ -59,13 +59,7 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 						)
 						const extension = fileName.split('.').pop()?.toLowerCase()
 						const fileType =
-							extension === 'ppt' || extension === 'pptx'
-								? 'ppt'
-								: extension === 'key'
-									? 'key'
-									: extension === 'odp'
-										? 'odp'
-										: 'pdf' // fallback
+							extension === 'ppt' || extension === 'pptx' ? 'ppt' : 'pdf' // fallback
 
 						return (
 							<div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
