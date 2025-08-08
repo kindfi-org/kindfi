@@ -4,19 +4,19 @@ import { transformToEmbedUrl, uploadPitchDeck } from '~/lib/utils/project-utils'
 
 export async function POST(
 	req: Request,
-	{ params }: { params: { slug: string } },
+	{ params }: { params: Promise<{ slug: string }> },
 ) {
 	try {
 		const supabase = await createSupabaseServerClient()
 		const formData = await req.formData()
 
-		const projectSlug = params.slug
+		const { slug: projectSlug } = await params
 		const projectId = formData.get('projectId') as string
 		const title = formData.get('title') as string
 		const story = formData.get('story') as string
 		const rawVideoUrl = formData.get('videoUrl') as string | null
 		const videoUrl = rawVideoUrl ? transformToEmbedUrl(rawVideoUrl) : null
-		const pitchDeck = formData.get('pitchDeck') as File | null
+		const pitchDeck = formData.get('pitchDeck') as File | string | null
 
 		if (!projectId || !projectSlug || !title || !story) {
 			return NextResponse.json(
@@ -32,6 +32,8 @@ export async function POST(
 		let pitchDeckUrl: string | null = null
 		if (pitchDeck instanceof File) {
 			pitchDeckUrl = await uploadPitchDeck(projectSlug, pitchDeck, supabase)
+		} else if (typeof pitchDeck === 'string') {
+			pitchDeckUrl = pitchDeck.trim()
 		}
 
 		// Check if there's already a pitch for this project

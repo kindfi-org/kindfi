@@ -25,7 +25,7 @@ export function useProjectPitchMutation() {
 				fd.append('videoUrl', formData.videoUrl)
 			}
 
-			if (formData.pitchDeck instanceof File) {
+			if (formData.pitchDeck) {
 				fd.append('pitchDeck', formData.pitchDeck)
 			}
 
