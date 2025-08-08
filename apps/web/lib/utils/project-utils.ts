@@ -321,3 +321,94 @@ export async function upsertTags(
 
 	if (relError) throw new Error(relError.message)
 }
+
+/**
+ * Uploads a project's pitch deck using the project slug as folder path.
+ *
+ * @param slug - The slug of the project (used as folder in Supabase Storage)
+ * @param file - The pitch deck file to upload
+ * @param supabase - Supabase client instance
+ * @returns public URL or null
+ * @throws on failure
+ */
+export async function uploadPitchDeck(
+	slug: string,
+	file: File,
+	supabase: TypedSupabaseClient,
+): Promise<string | null> {
+	const { data: existingFiles, error: listError } = await supabase.storage
+		.from('project_pitch_decks')
+		.list(slug, { limit: 100 })
+
+	if (listError)
+		throw new Error(`Failed to list pitch decks: ${listError.message}`)
+
+	if (existingFiles && existingFiles.length > 0) {
+		const filesToDelete = existingFiles.map((f) => `${slug}/${f.name}`)
+		const { error: deleteError } = await supabase.storage
+			.from('project_pitch_decks')
+			.remove(filesToDelete)
+
+		if (deleteError)
+			throw new Error(
+				`Failed to delete old pitch decks: ${deleteError.message}`,
+			)
+	}
+
+	const arrayBuffer = await file.arrayBuffer()
+	const buffer = new Uint8Array(arrayBuffer)
+	const filename = `${slug}/${file.name}`
+
+	const { error: uploadError } = await supabase.storage
+		.from('project_pitch_decks')
+		.upload(filename, buffer, {
+			contentType: file.type,
+			upsert: false,
+		})
+
+	if (uploadError) throw new Error(`Upload error: ${uploadError.message}`)
+
+	const { data: publicUrlData } = supabase.storage
+		.from('project_pitch_decks')
+		.getPublicUrl(filename)
+
+	return publicUrlData?.publicUrl || null
+}
+
+/**
+ * Converts a YouTube or Vimeo URL into an embeddable format.
+ * Supports typical watch/share links and transforms them to iframe-compatible embed URLs.
+ *
+ * Examples:
+ * - https://www.youtube.com/watch?v=abc123 → https://www.youtube.com/embed/abc123
+ * - https://vimeo.com/123456 → https://player.vimeo.com/video/123456
+ *
+ * @param url - The original video URL provided by the user
+ * @returns The embed-compatible URL if matched, or the original URL if no transformation applies
+ */
+export function transformToEmbedUrl(url: string): string {
+	try {
+		const parsedUrl = new URL(url)
+		const hostname = parsedUrl.hostname
+		const pathname = parsedUrl.pathname
+
+		if (hostname.includes('youtube.com')) {
+			const videoId = parsedUrl.searchParams.get('v')
+			if (videoId) return `https://www.youtube.com/embed/${videoId}`
+		}
+
+		if (hostname === 'youtu.be') {
+			const videoId = pathname.split('/')[1]
+			if (videoId) return `https://www.youtube.com/embed/${videoId}`
+		}
+
+		if (hostname.includes('vimeo.com')) {
+			const videoId = pathname.split('/')[1]
+			if (videoId) return `https://player.vimeo.com/video/${videoId}`
+		}
+
+		return url // fallback (leave unchanged)
+	} catch {
+		return url // invalid URL, return as is
+	}
+}
