@@ -11,11 +11,7 @@ interface NewsCardProps {
 
 export function NewsCard({ update, className = '' }: NewsCardProps) {
 	return (
-		<Link
-			href={`/news/${update.slug}`}
-			className={`block group ${className}`}
-			legacyBehavior
-		>
+		<Link href={`/news/${update.slug}`} className={`block group ${className}`}>
 			<article className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
 				{/* Image Container */}
 				{update.image && (

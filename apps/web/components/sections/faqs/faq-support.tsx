@@ -13,19 +13,19 @@ export function FaqSupport() {
 				support and discussions
 			</p>
 			<div className="flex flex-col gap-4 justify-center items-center md:flex-row">
-				<Link href="/" legacyBehavior>
+				<Link href="/">
 					<Button className="bg-black text-white">
 						<ArrowRight />
 						See How It Works
 					</Button>
 				</Link>
-				<Link href="/community" legacyBehavior>
+				<Link href="/community">
 					<Button className="border border-[#E6E6E6] text-black">
 						<MessageCircle />
 						See The Community
 					</Button>
 				</Link>
-				<Link href="/create-project" legacyBehavior>
+				<Link href="/create-project">
 					<Button className="border border-[#E6E6E6] text-white bg-[#466E23]">
 						<Lightbulb />
 						Start a Campaign

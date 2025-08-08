@@ -48,9 +48,7 @@ export const CTAButtons = ({
 			}
 		>
 			{primaryHref && !disabled ? (
-				<Link href={primaryHref} legacyBehavior>
-					{primaryText}
-				</Link>
+				<Link href={primaryHref}>{primaryText}</Link>
 			) : (
 				primaryText
 			)}
@@ -74,9 +72,7 @@ export const CTAButtons = ({
 			}
 		>
 			{secondaryHref && !disabled ? (
-				<Link href={secondaryHref} legacyBehavior>
-					{secondaryText}
-				</Link>
+				<Link href={secondaryHref}>{secondaryText}</Link>
 			) : (
 				secondaryText
 			)}

@@ -59,7 +59,7 @@ export function Hero() {
 								See how it works in minutes
 							</Button>
 						</a>
-						<Link href="/projects" legacyBehavior>
+						<Link href="/projects">
 							<Button
 								size="lg"
 								variant="outline"

@@ -62,7 +62,6 @@ export function NavigationMenu({ mode }: NavigationMenuProps) {
 					href={item.href}
 					className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
 					aria-label={item.description}
-					legacyBehavior
 				>
 					<div className="flex items-center gap-3">
 						{item.icon && (

@@ -35,7 +35,7 @@ export const Header = () => {
 			<div className="container max-w-screen-xl mx-auto">
 				<div className="flex h-16 items-center justify-between px-4">
 					{/* Logo */}
-					<Link href="/" className="flex items-center space-x-2" legacyBehavior>
+					<Link href="/" className="flex items-center space-x-2">
 						<LogoOrg width={120} height={33} className="h-auto w-auto" />
 					</Link>
 
@@ -123,7 +123,7 @@ const UserMenu = ({ user }: { user: User }) => {
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
-					<Link href="/protected" className="cursor-pointer" legacyBehavior>
+					<Link href="/protected" className="cursor-pointer">
 						<UserIcon className="mr-2 h-4 w-4" />
 						Dashboard
 					</Link>
@@ -145,12 +145,12 @@ const UserMenu = ({ user }: { user: User }) => {
 const AuthButtons = () => {
 	return (
 		<div className="flex items-center gap-2">
-			<Link href="/sign-in" passHref legacyBehavior>
+			<Link href="/sign-in" passHref>
 				<Button variant="ghost" size="sm" className="hidden sm:inline-flex">
 					Sign in
 				</Button>
 			</Link>
-			<Link href="/sign-up" passHref legacyBehavior>
+			<Link href="/sign-up" passHref>
 				<Button variant="default" size="sm" className="hidden sm:inline-flex">
 					Sign up
 				</Button>
@@ -194,13 +194,13 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 				</div>
 			</div>
 			<div className="flex flex-col space-y-2">
-				<Link href="/protected" legacyBehavior>
+				<Link href="/protected">
 					<Button variant="ghost" className="w-full justify-start">
 						<UserIcon className="mr-2 h-4 w-4" />
 						Dashboard
 					</Button>
 				</Link>
-				<Link href="/settings" legacyBehavior>
+				<Link href="/settings">
 					<Button
 						variant="ghost"
 						aria-label="Settings"
@@ -228,12 +228,12 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 const MobileAuthButtons = () => {
 	return (
 		<div className="flex flex-col space-y-2">
-			<Link href="/sign-in" legacyBehavior>
+			<Link href="/sign-in">
 				<Button variant="ghost" className="w-full justify-start">
 					Sign in
 				</Button>
 			</Link>
-			<Link href="/sign-up" legacyBehavior>
+			<Link href="/sign-up">
 				<Button variant="default" className="w-full justify-start">
 					Sign up
 				</Button>

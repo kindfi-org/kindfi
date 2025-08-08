@@ -77,11 +77,7 @@ const Footer = () => {
 				<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
 					{/* Brand Column */}
 					<div className="flex flex-col gap-4">
-						<Link
-							href="/"
-							className="flex items-center space-x-2"
-							legacyBehavior
-						>
+						<Link href="/" className="flex items-center space-x-2">
 							<span className="text-xl font-bold text-black">KindFi</span>
 						</Link>
 						<p className="text-sm text-gray-600">
@@ -137,7 +133,6 @@ const Footer = () => {
 										<Link
 											href={link.href}
 											className="text-sm text-gray-600 hover:text-blue-700 transition-colors"
-											legacyBehavior
 										>
 											{link.label}
 										</Link>

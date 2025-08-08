@@ -5,7 +5,7 @@ import { Button } from '~/components/base/button'
 export function HeroButtons() {
 	return (
 		<div className="flex flex-col sm:flex-row gap-4 justify-center">
-			<Link href="/learn" legacyBehavior>
+			<Link href="/learn">
 				<Button
 					variant="default"
 					className="h-12 px-8 bg-black text-white hover:bg-black/90"
@@ -15,7 +15,7 @@ export function HeroButtons() {
 					<ArrowRight className="ml-2 h-5 w-5" />
 				</Button>
 			</Link>
-			<Link href="/courses" legacyBehavior>
+			<Link href="/courses">
 				<Button
 					variant="outline"
 					size="lg"

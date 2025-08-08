@@ -19,7 +19,6 @@ export function UpdateCard({
 		<Link
 			href={href}
 			className={`block p-8 bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 ${className}`}
-			legacyBehavior
 		>
 			{/* Category */}
 			<div className="inline-block px-3 py-1 bg-gray-100 rounded-md text-sm font-medium mb-6">

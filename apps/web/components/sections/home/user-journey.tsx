@@ -150,7 +150,6 @@ export function UserJourney() {
 					>
 						<Link
 							href={activeView === 'project' ? '/create-project' : '/projects'}
-							legacyBehavior
 						>
 							{activeView === 'project'
 								? 'Register Your Project'

@@ -95,7 +95,7 @@ export function UpdateCard({
 		<div className="space-y-6 mt-10">
 			<div className="flex justify-between items-center">
 				<h2 className="text-3xl font-bold">Updates</h2>
-				<Link href={updatesUrl} legacyBehavior>
+				<Link href={updatesUrl}>
 					<Button className="text-xl font-bold">{data.length} updates</Button>
 				</Link>
 			</div>
@@ -177,7 +177,7 @@ export function UpdateCard({
 										? `${update.content?.substring(0, 150)}...`
 										: update.content}
 								</p>
-								<Link href={`${updatesUrl}/${update.id}`} legacyBehavior>
+								<Link href={`${updatesUrl}/${update.id}`}>
 									<Button variant="outline" className="w-full">
 										Read more
 									</Button>

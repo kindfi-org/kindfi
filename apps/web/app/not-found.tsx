@@ -98,13 +98,13 @@ export default function Custom404() {
 					transition={{ delay: 1.2, duration: 0.8 }}
 					className="flex flex-col sm:flex-row justify-center gap-4"
 				>
-					<Link href="/" legacyBehavior>
+					<Link href="/">
 						<Button className="w-full sm:w-auto bg-green-600 text-white hover:bg-emerald-700 group">
 							Return Home
 							<ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
 						</Button>
 					</Link>
-					<Link href="/projects" legacyBehavior>
+					<Link href="/projects">
 						<Button className="w-full sm:w-auto bg-white text-green-600 border-2 border-emerald-600 hover:bg-blue-50">
 							Discover Projects
 						</Button>

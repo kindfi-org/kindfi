@@ -29,7 +29,6 @@ export function Hero() {
 						<Link
 							href="/learn"
 							className="inline-flex h-12 items-center justify-center rounded-lg bg-black px-8 text-white transition-colors hover:bg-black/90"
-							legacyBehavior
 						>
 							Start Learning
 							<ArrowRight className="ml-2 h-5 w-5" />
@@ -38,7 +37,6 @@ export function Hero() {
 						<Link
 							href="/courses"
 							className="inline-flex h-12 items-center justify-center rounded-lg border-2 border-gray-200 px-8 transition-colors hover:bg-gray-50"
-							legacyBehavior
 						>
 							<GraduationCap className="mr-2 h-5 w-5" />
 							Browse Courses
