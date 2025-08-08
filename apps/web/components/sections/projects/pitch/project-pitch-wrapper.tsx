@@ -6,6 +6,7 @@ import { BreadcrumbContainer } from '~/components/sections/projects/shared'
 import { getProjectPitchDataBySlug } from '~/lib/queries/projects/get-project-pitch-data-by-slug'
 import { BreadcrumbSkeleton } from '../detail/skeletons'
 import { ProjectPitchForm } from './project-pitch-form'
+import { ProjectPitchFormSkeleton } from './skeleton'
 import { TipsSidebar } from './tips-sidebar'
 
 interface ProjectPitchWrapperProps {
@@ -55,11 +56,15 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 			</div>
 			<section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start max-w-5xl mx-auto">
 				<div className="lg:col-span-2">
-					<ProjectPitchForm
-						projectId={project.id}
-						projectSlug={project.slug}
-						pitch={project.pitch}
-					/>
+					{isLoading ? (
+						<ProjectPitchFormSkeleton />
+					) : (
+						<ProjectPitchForm
+							projectId={project.id}
+							projectSlug={project.slug}
+							pitch={project.pitch}
+						/>
+					)}
 				</div>
 				<aside className="lg:col-span-1">
 					<TipsSidebar />

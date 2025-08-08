@@ -14,9 +14,7 @@ VALUES (
   ARRAY[
     'application/pdf',
     'application/vnd.ms-powerpoint', -- .ppt
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation', -- .pptx
-    'application/vnd.apple.keynote', -- .key
-    'application/vnd.oasis.opendocument.presentation' -- .odp
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation' -- .pptx
   ]
 );
 
