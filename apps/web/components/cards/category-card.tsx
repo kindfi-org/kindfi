@@ -25,7 +25,7 @@ export function CategoryCard({
 	const Icon = iconMap[type] || LayoutGrid
 
 	return (
-		<Link href={`/learn/${slug}`} className="block w-full">
+		<Link href={`/learn/${slug}`} className="block w-full" legacyBehavior>
 			<div
 				className={`
         h-64 

@@ -18,7 +18,11 @@ function ProjectCard({ project, viewMode = 'grid' }: ProjectCardProps) {
 			: 0)
 
 	return (
-		<Link href={`/project/${project.id}`} className="block h-full">
+		<Link
+			href={`/project/${project.id}`}
+			className="block h-full"
+			legacyBehavior
+		>
 			<ProjectDetails
 				project={project}
 				percentageComplete={percentageComplete}

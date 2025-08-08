@@ -49,7 +49,7 @@ export function BreadcrumbContainer({
 				<BreadcrumbList>
 					<BreadcrumbItem>
 						<BreadcrumbLink asChild>
-							<Link href="/" className="flex items-center">
+							<Link href="/" className="flex items-center" legacyBehavior>
 								<Home className="h-4 w-4" />
 								<span className="sr-only">Home</span>
 							</Link>
@@ -66,7 +66,11 @@ export function BreadcrumbContainer({
 							</BreadcrumbPage>
 						) : (
 							<BreadcrumbLink asChild>
-								<Link href="/projects" className="flex items-center">
+								<Link
+									href="/projects"
+									className="flex items-center"
+									legacyBehavior
+								>
 									<span>Projects</span>
 								</Link>
 							</BreadcrumbLink>
@@ -80,6 +84,7 @@ export function BreadcrumbContainer({
 								<BreadcrumbLink asChild>
 									<Link
 										href={`/projects?category=${encodeURIComponent(category.slug)}`}
+										legacyBehavior
 									>
 										{category.name}
 									</Link>
@@ -93,7 +98,9 @@ export function BreadcrumbContainer({
 							<BreadcrumbSeparator />
 							<BreadcrumbItem>
 								<BreadcrumbLink asChild>
-									<Link href={`/projects/${projectSlug}`}>{title}</Link>
+									<Link href={`/projects/${projectSlug}`} legacyBehavior>
+										{title}
+									</Link>
 								</BreadcrumbLink>
 							</BreadcrumbItem>
 						</>
@@ -105,7 +112,10 @@ export function BreadcrumbContainer({
 							<BreadcrumbItem>
 								{subSection && projectSlug ? (
 									<BreadcrumbLink asChild>
-										<Link href={`/projects/${projectSlug}/manage`}>
+										<Link
+											href={`/projects/${projectSlug}/manage`}
+											legacyBehavior
+										>
 											{manageSection}
 										</Link>
 									</BreadcrumbLink>

@@ -66,12 +66,12 @@ export function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.6 }}
 					>
-						<Link href="/projects">
+						<Link href="/projects" legacyBehavior>
 							<Button size="lg" className="gradient-btn text-white">
 								Support with Crypto
 							</Button>
 						</Link>
-						<Link href="/projects">
+						<Link href="/projects" legacyBehavior>
 							<Button
 								size="lg"
 								variant="outline"

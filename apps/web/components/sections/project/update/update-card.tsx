@@ -95,11 +95,10 @@ export function UpdateCard({
 		<div className="space-y-6 mt-10">
 			<div className="flex justify-between items-center">
 				<h2 className="text-3xl font-bold">Updates</h2>
-				<Link href={updatesUrl}>
+				<Link href={updatesUrl} legacyBehavior>
 					<Button className="text-xl font-bold">{data.length} updates</Button>
 				</Link>
 			</div>
-
 			{editingUpdateId && (
 				<UpdateForm
 					update={data.find((update) => update.id === editingUpdateId)}
@@ -113,7 +112,6 @@ export function UpdateCard({
 					isSubmitting={false}
 				/>
 			)}
-
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{data.length > 0 ? (
 					data.map((update) => (
@@ -179,7 +177,7 @@ export function UpdateCard({
 										? `${update.content?.substring(0, 150)}...`
 										: update.content}
 								</p>
-								<Link href={`${updatesUrl}/${update.id}`}>
+								<Link href={`${updatesUrl}/${update.id}`} legacyBehavior>
 									<Button variant="outline" className="w-full">
 										Read more
 									</Button>
@@ -193,7 +191,6 @@ export function UpdateCard({
 					</div>
 				)}
 			</div>
-
 			<AlertDialog
 				open={!!deletingUpdateId}
 				onOpenChange={(open) => !open && setDeletingUpdateId(null)}

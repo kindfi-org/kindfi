@@ -80,7 +80,6 @@ export const ExploreProject = () => (
 				<stop offset="100%" style={{ stopColor: '#60a5fa', stopOpacity: 1 }} />
 			</linearGradient>
 		</defs>
-
 		<rect
 			x="45"
 			y="65"
@@ -127,7 +126,6 @@ export const ExploreProject = () => (
 			opacity="0.7"
 		/>
 		<circle cx="65" cy="130" r="20" fill="white" opacity="0.2" />
-
 		<rect
 			x="115"
 			y="45"
@@ -174,7 +172,6 @@ export const ExploreProject = () => (
 			opacity="0.7"
 		/>
 		<circle cx="135" cy="110" r="20" fill="white" opacity="0.2" />
-
 		<rect
 			x="85"
 			y="95"
@@ -221,7 +218,6 @@ export const ExploreProject = () => (
 			opacity="0.7"
 		/>
 		<circle cx="105" cy="160" r="20" fill="white" opacity="0.2" />
-
 		<defs>
 			<filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
 				<feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.2" />
@@ -234,7 +230,6 @@ export const ExploreProject = () => (
 				</feMerge>
 			</filter>
 		</defs>
-
 		<g transform="translate(140, 140)" filter="url(#glow)">
 			<circle cx="0" cy="0" r="18" fill="none" stroke="white" strokeWidth="4" />
 			<line
@@ -266,7 +261,6 @@ export const ExploreDetails = () => (
 				<feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.2" />
 			</filter>
 		</defs>
-
 		<rect
 			x="50"
 			y="40"
@@ -285,7 +279,6 @@ export const ExploreDetails = () => (
 			rx="10"
 			fill="url(#docGradient)"
 		/>
-
 		<rect
 			x="65"
 			y="55"
@@ -304,7 +297,6 @@ export const ExploreDetails = () => (
 			fill="white"
 			opacity="0.6"
 		/>
-
 		<rect
 			x="65"
 			y="90"
@@ -332,7 +324,6 @@ export const ExploreDetails = () => (
 			fill="white"
 			opacity="0.2"
 		/>
-
 		<rect
 			x="65"
 			y="135"
@@ -351,7 +342,6 @@ export const ExploreDetails = () => (
 			fill="white"
 			opacity="0.9"
 		/>
-
 		<rect
 			x="65"
 			y="155"
@@ -379,7 +369,6 @@ export const ExploreDetails = () => (
 			fill="white"
 			opacity="0.6"
 		/>
-
 		<circle cx="160" cy="170" r="15" fill="white" opacity="0.9" />
 		<path
 			d="M160 165 l5 5 l-5 5"
@@ -423,7 +412,6 @@ export const Contribute = () => (
 				<feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.2" />
 			</filter>
 		</defs>
-
 		<circle
 			cx="85"
 			cy="125"
@@ -453,7 +441,6 @@ export const Contribute = () => (
 		>
 			$
 		</text>
-
 		<circle
 			cx="155"
 			cy="125"
@@ -483,7 +470,6 @@ export const Contribute = () => (
 		>
 			$
 		</text>
-
 		<circle
 			cx="120"
 			cy="85"
@@ -513,7 +499,6 @@ export const Contribute = () => (
 		>
 			$
 		</text>
-
 		<path
 			d="M50 160 C80 150, 150 150, 180 160"
 			stroke="white"
@@ -528,7 +513,6 @@ export const Contribute = () => (
 			opacity="0.3"
 			fill="none"
 		/>
-
 		<circle cx="65" cy="95" r="3" fill="white" opacity="0.5" />
 		<circle cx="165" cy="95" r="3" fill="white" opacity="0.5" />
 		<circle cx="115" cy="155" r="3" fill="white" opacity="0.5" />

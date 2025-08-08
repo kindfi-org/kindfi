@@ -55,7 +55,6 @@ export function ResourceCard({ resource, className = '' }: ResourceCardProps) {
 					<ResourceTypeBadge type={resource.type} />
 				</div>
 			</div>
-
 			{/* Content Section */}
 			<div className="p-6">
 				{/* Category */}
@@ -104,6 +103,7 @@ export function ResourceCard({ resource, className = '' }: ResourceCardProps) {
 				<Link
 					href={`/resources/${resource.id}`}
 					className="inline-flex items-center mt-6 text-black hover:opacity-80"
+					legacyBehavior
 				>
 					<span className="font-medium">Start Learning</span>
 					{/* biome-ignore lint/a11y/noSvgWithoutTitle: any */}

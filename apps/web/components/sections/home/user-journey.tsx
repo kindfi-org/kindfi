@@ -36,7 +36,6 @@ export function UserJourney() {
 		<section className="gradient-bg-blue-purple relative overflow-hidden px-4 py-14">
 			{/* Background Pattern */}
 			<div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
-
 			<div className="relative mx-auto max-w-7xl">
 				{/* Header */}
 				<div className="text-center mb-16">
@@ -151,6 +150,7 @@ export function UserJourney() {
 					>
 						<Link
 							href={activeView === 'project' ? '/create-project' : '/projects'}
+							legacyBehavior
 						>
 							{activeView === 'project'
 								? 'Register Your Project'

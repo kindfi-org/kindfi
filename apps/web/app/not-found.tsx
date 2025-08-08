@@ -44,7 +44,6 @@ export default function Custom404() {
 					className="absolute w-72 h-72 rounded-full border-2 border-blue-200"
 				/>
 			</div>
-
 			<div className="relative z-10 max-w-xl px-4">
 				<motion.div
 					initial={{ y: -50, opacity: 0 }}
@@ -99,13 +98,13 @@ export default function Custom404() {
 					transition={{ delay: 1.2, duration: 0.8 }}
 					className="flex flex-col sm:flex-row justify-center gap-4"
 				>
-					<Link href="/">
+					<Link href="/" legacyBehavior>
 						<Button className="w-full sm:w-auto bg-green-600 text-white hover:bg-emerald-700 group">
 							Return Home
 							<ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
 						</Button>
 					</Link>
-					<Link href="/projects">
+					<Link href="/projects" legacyBehavior>
 						<Button className="w-full sm:w-auto bg-white text-green-600 border-2 border-emerald-600 hover:bg-blue-50">
 							Discover Projects
 						</Button>
