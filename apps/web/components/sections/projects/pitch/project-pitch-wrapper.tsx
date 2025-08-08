@@ -39,7 +39,7 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 						category={category}
 						title={project.title}
 						manageSection="Project Management"
-						subSection="Basics"
+						subSection="Pitch"
 					/>
 				)}
 				<div className="inline-flex items-center px-4 py-2 rounded-full font-medium text-purple-600 bg-purple-100 border-transparent mb-4">
@@ -55,7 +55,11 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 			</div>
 			<section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start max-w-5xl mx-auto">
 				<div className="lg:col-span-2">
-					<ProjectPitchForm pitch={project.pitch} />
+					<ProjectPitchForm
+						projectId={project.id}
+						projectSlug={project.slug}
+						pitch={project.pitch}
+					/>
 				</div>
 				<aside className="lg:col-span-1">
 					<TipsSidebar />

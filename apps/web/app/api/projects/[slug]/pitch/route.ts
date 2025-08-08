@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@packages/lib/supabase/server'
+import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
 import { transformToEmbedUrl, uploadPitchDeck } from '~/lib/utils/project-utils'
 

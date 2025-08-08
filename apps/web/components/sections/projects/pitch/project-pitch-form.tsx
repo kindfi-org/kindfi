@@ -2,9 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
-import { Save, Video } from 'lucide-react'
+import { Loader2, Save, Video } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import {
@@ -18,16 +17,25 @@ import {
 	FormMessage,
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
+import { useProjectPitchMutation } from '~/hooks/projects/use-pitch-mutation'
 import { projectPitchSchema } from '~/lib/schemas/create-project.schemas'
 import type { ProjectPitch } from '~/lib/types/project/project-detail.types'
 import { FileUpload } from './file-upload'
-import { MarkdownEditor } from './markdown-editor'
+import { RichTextEditor } from './rich-text-editor'
 
 interface ProjectPitchFormProps {
+	projectId: string
+	projectSlug: string
 	pitch: ProjectPitch
 }
 
-export function ProjectPitchForm({ pitch }: ProjectPitchFormProps) {
+export function ProjectPitchForm({
+	projectId,
+	projectSlug,
+	pitch,
+}: ProjectPitchFormProps) {
+	const { mutateAsync: savePitch, isPending } = useProjectPitchMutation()
+
 	const form = useForm<ProjectPitch>({
 		resolver: zodResolver(projectPitchSchema),
 		defaultValues: {
@@ -36,18 +44,24 @@ export function ProjectPitchForm({ pitch }: ProjectPitchFormProps) {
 			pitchDeck: pitch?.pitchDeck || null,
 			videoUrl: pitch?.videoUrl || '',
 		},
-		mode: 'onChange',
 	})
 
-	const handleSubmit = (data: ProjectPitch) => {
+	const handleSubmit = async (data: ProjectPitch) => {
+		const payload = {
+			...data,
+			projectId,
+			projectSlug: projectSlug,
+		}
+
 		console.log('Pitch data:', data)
 
-		toast.success('Pitch saved successfully!', {
-			description: 'Your project pitch has been updated.',
+		await savePitch(payload, {
+			onSuccess: () => {
+				form.reset(data)
+			},
 		})
 	}
 
-	const isFormValid = form.formState.isValid
 	const isDirty = form.formState.isDirty
 
 	return (
@@ -76,7 +90,7 @@ export function ProjectPitchForm({ pitch }: ProjectPitchFormProps) {
 												<Input
 													placeholder="Enter your pitch title"
 													maxLength={100}
-													className="bg-white border-green-600"
+													className="bg-white border-green-600 pr-16"
 													{...field}
 												/>
 												<div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
@@ -101,28 +115,16 @@ export function ProjectPitchForm({ pitch }: ProjectPitchFormProps) {
 									<FormItem>
 										<FormLabel>Story *</FormLabel>
 										<FormControl>
-											<MarkdownEditor
+											<RichTextEditor
 												value={field.value}
 												onChange={field.onChange}
-												placeholder={`# Your Project Story
-
-## The Problem
-Describe the problem you're solving...
-
-## Our Solution
-Explain how your project addresses this problem...
-
-## Expected Impact
-Share the positive change you'll create...
-
-## Why Support Us
-Tell supporters why they should believe in your mission...`}
 												error={form.formState.errors.story?.message}
 											/>
 										</FormControl>
 										<FormDescription>
-											Tell your story using Markdown. Explain the problem, your
-											solution, and the impact you'll create.
+											Write your project story using the editor. Describe the
+											problem, your proposed solution, and the positive impact
+											you aim to achieve.
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -202,12 +204,22 @@ Tell supporters why they should believe in your mission...`}
 
 									<Button
 										type="submit"
-										disabled={!isFormValid || !isDirty}
+										disabled={!isDirty || isPending}
 										className="flex items-center gap-2 px-8 text-white gradient-btn"
 										size="lg"
+										aria-label="Save changes"
 									>
-										<Save className="h-4 w-4" />
-										Save Changes
+										{isPending ? (
+											<>
+												<Loader2 className="w-4 h-4 animate-spin" />
+												Saving...
+											</>
+										) : (
+											<>
+												<Save className="h-4 w-4" />
+												Save Changes
+											</>
+										)}
 									</Button>
 								</div>
 							</div>

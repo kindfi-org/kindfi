@@ -1,4 +1,4 @@
-import { prefetchSupabaseQuery } from '@packages/lib/supabase/server'
+import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 import {
 	dehydrate,
 	HydrationBoundary,
@@ -28,10 +28,10 @@ export default async function ProjectPitchPage({
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<main className="container mx-auto px-4 py-8 md:py-12">
+		<div className="container mx-auto px-4 py-8 md:py-12">
 			<HydrationBoundary state={dehydratedState}>
 				<ProjectPitchWrapper projectSlug={slug} />
 			</HydrationBoundary>
-		</main>
+		</div>
 	)
 }
