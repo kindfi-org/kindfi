@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import parse from 'html-react-parser'
 import { Download } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
 import { Button } from '~/components/base/button'
 import { FileIcon } from '~/components/sections/projects/shared'
 import type { ProjectPitch } from '~/lib/types/project/project-detail.types'
@@ -24,11 +24,7 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 
 			{/* Project story section */}
 			{pitch.story && (
-				<div className="mb-8">
-					<div className="prose max-w-none">
-						<ReactMarkdown>{pitch.story}</ReactMarkdown>
-					</div>
-				</div>
+				<div className="mb-8 prose max-w-none">{parse(pitch.story)}</div>
 			)}
 
 			{/* Video section */}
