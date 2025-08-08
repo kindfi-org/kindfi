@@ -286,10 +286,9 @@ export function appEnvConfig<T extends keyof typeof appRequirements>(
 					`❌ Environment validation failed for ${String(appName)}:\n${missingVars}\n\nPlease check your .env file and ensure all required variables are set.`,
 				)
 			}
-
-			console.log(
-				`✅ Environment variables for ${String(appName)} validated successfully.`,
-			)
+			// console.log(
+			// 	`✅ Environment variables for ${String(appName)} validated successfully.`,
+			// )
 		}
 
 		return transformedConfig

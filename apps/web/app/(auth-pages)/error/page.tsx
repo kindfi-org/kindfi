@@ -18,7 +18,7 @@ export default function AuthErrorPage() {
 					</p>
 				</div>
 
-				<Link href="/login" className="w-full">
+				<Link href="/sign-in" className="w-full">
 					Back to Login
 				</Link>
 			</div>

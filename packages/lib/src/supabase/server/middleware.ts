@@ -12,28 +12,18 @@ export const updateSession = async (
 ) => {
 	// This `try/catch` block is only here for the interactive tutorial.
 	// Feel free to remove once you have Supabase connected.
+	// Create an unmodified response
+	let response = NextResponse.next({
+		request: {
+			headers: request.headers,
+		},
+	})
 	try {
 		const cookies = request.cookies
-		// Create an unmodified response
-		let response = NextResponse.next({
-			request: {
-				headers: request.headers,
-			},
-		})
-
-		const cookieSessionToken = cookies
-			.getAll()
-			.find((cookie) => cookie.name === 'next-auth.session-token')?.value
-		console.log('🗝️ Middleware triggered', { cookies: cookieSessionToken })
-
 		const supabase = createServerClient(
 			appConfig.database.url,
 			appConfig.database.anonKey,
 			{
-				accessToken: async (...args) => {
-					console.log('🗝️ Access token requested', { args })
-					return cookieSessionToken || null
-				},
 				cookies: {
 					getAll() {
 						return cookies.getAll()
@@ -72,10 +62,6 @@ export const updateSession = async (
 		// If you are here, a Supabase client could not be created!
 		// This is likely because you have not set up environment variables.
 		// Check out http://localhost:3000 for Next Steps.
-		return NextResponse.next({
-			request: {
-				headers: request.headers,
-			},
-		})
+		return response
 	}
 }

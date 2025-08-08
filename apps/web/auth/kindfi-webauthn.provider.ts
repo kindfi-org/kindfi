@@ -30,24 +30,22 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 
 		// TODO: Add on-chain verification of the user device
 
-		// First, check if user exists in NextAuth users table
-		const { data: nextAuthUser, error: nextAuthError } = await supabase
-			.from('next_auth.users')
-			.select('*')
-			.eq('id', credentials.userId)
+		// First, check if user exists in NextAuth users table (via profiles mapping instead of querying cross-schema directly)
+		const { data: profileUser, error: profileLookupError } = await supabase
+			.from('profiles')
+			.select('next_auth_user_id, display_name, bio, image_url, role')
+			.eq('next_auth_user_id', credentials.userId)
 			.single()
 
-		if (nextAuthError || !nextAuthUser) {
-			console.error('NextAuth user not found:', { error: nextAuthError })
+		if (profileLookupError || !profileUser) {
+			console.error('NextAuth mapped profile not found:', {
+				error: profileLookupError,
+			})
 			throw new Error('NextAuth user not found')
 		}
 
-		// Get user profile data
-		const { data: user, error: userError } = await supabase
-			.from('profiles')
-			.select('role, display_name, bio, image_url')
-			.eq('next_auth_user_id', credentials.userId)
-			.single()
+		// Get user profile data (already retrieved above, but keep existing logic for clarity)
+		const userData = profileUser as Tables<'profiles'> | null
 
 		// Get device data
 		const { data: device, error: deviceError } = await supabase
@@ -59,12 +57,7 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			.single()
 
 		const deviceData = device as Tables<'devices'> | null
-		const userData = user as Tables<'profiles'> | null
 
-		if (userError) {
-			console.error('Error fetching user data:', { error: userError })
-			throw new Error('Error fetching user data')
-		}
 		if (deviceError) {
 			console.error('Error fetching device data:', { error: deviceError })
 			throw new Error('Error fetching device data')

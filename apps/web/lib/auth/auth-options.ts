@@ -9,10 +9,7 @@ import { kindfiWebAuthnProvider } from '~/auth/kindfi-webauthn.provider'
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
 export const nextAuthOption: NextAuthOptions = {
-	adapter: KindfiSupabaseAdapter({
-		url: appConfig.database.url,
-		secret: appConfig.database.serviceRoleKey,
-	}),
+	adapter: KindfiSupabaseAdapter(),
 	providers: [kindfiWebAuthnProvider],
 	pages: {
 		signIn: '/sign-in',
@@ -94,7 +91,7 @@ export const nextAuthOption: NextAuthOptions = {
 			)
 			return session
 		},
-		// @ts-ignore
+		// @ts-expect-error auth param is OK on this scenario as we only return it.
 		async authorized({ auth }) {
 			return !!auth?.user
 		},

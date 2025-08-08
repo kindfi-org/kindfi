@@ -1,12 +1,8 @@
 import type { AdapterAccount } from '@auth/core/adapters'
 import { SupabaseAdapter } from '@auth/supabase-adapter'
-import { createClient } from '@supabase/supabase-js'
+import { appEnvConfig } from '@packages/lib'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Adapter, AdapterSession, AdapterUser } from 'next-auth/adapters'
-
-interface KindfiAdapterOptions {
-	url: string
-	secret: string
-}
 
 interface DeviceData {
 	credential_id: string
@@ -31,19 +27,15 @@ interface KindfiUser extends AdapterUser {
  * Extends the standard Supabase adapter to handle WebAuthn credentials
  * and maintain device/user data synchronization
  */
-export function KindfiSupabaseAdapter({
-	url,
-	secret,
-}: KindfiAdapterOptions): Adapter {
-	const supabase = createClient(url, secret, {
-		auth: {
-			persistSession: false,
-			autoRefreshToken: false,
-		},
-	})
+export function KindfiSupabaseAdapter(): Adapter {
+	const appConfig = appEnvConfig('web')
+	const supabase = createSupabaseBrowserClient()
 
 	// Get the base Supabase adapter
-	const baseAdapter = SupabaseAdapter({ url, secret })
+	const baseAdapter = SupabaseAdapter({
+		url: appConfig.database.url,
+		secret: appConfig.database.serviceRoleKey,
+	})
 
 	return {
 		...baseAdapter,
@@ -82,7 +74,7 @@ export function KindfiSupabaseAdapter({
 					.single()
 
 				if (profileData) {
-					;(user as KindfiUser).userData = profileData
+					;(user as KindfiUser).userData = profileData as UserData
 				}
 			}
 
@@ -108,7 +100,7 @@ export function KindfiSupabaseAdapter({
 					.single()
 
 				if (profileData) {
-					;(user as KindfiUser).userData = profileData
+					;(user as KindfiUser).userData = profileData as UserData
 				}
 			}
 
@@ -133,12 +125,14 @@ export function KindfiSupabaseAdapter({
 				// Look up user by credential ID in devices table
 				const { data: deviceData, error: deviceError } = await supabase
 					.from('devices')
-					.select(`
+					.select(
+						`
             next_auth_user_id,
             credential_id,
             public_key,
             address
-          `)
+          `,
+					)
 					.eq('credential_id', providerAccountId)
 					.single()
 
@@ -150,14 +144,15 @@ export function KindfiSupabaseAdapter({
 					return null
 				}
 
-				// Get the NextAuth user
-				const { data: userData, error: userError } = await supabase
-					.from('next_auth.users')
-					.select('*')
-					.eq('id', deviceData.next_auth_user_id)
-					.single()
+				// Get the NextAuth user via base adapter (already scoped to next_auth schema)
+				let nextAuthUser: AdapterUser | null = null
+				if (baseAdapter.getUser) {
+					nextAuthUser = await baseAdapter.getUser(
+						deviceData.next_auth_user_id || '',
+					)
+				}
 
-				if (userError || !userData) {
+				if (!nextAuthUser) {
 					console.log(
 						'🔧 KindfiSupabaseAdapter: No NextAuth user found',
 						deviceData.next_auth_user_id,
@@ -169,9 +164,9 @@ export function KindfiSupabaseAdapter({
 				const { data: profileData } = await supabase
 					.from('profiles')
 					.select('role, display_name, bio, image_url')
-					.eq('next_auth_user_id', deviceData.next_auth_user_id)
+					.eq('next_auth_user_id', deviceData.next_auth_user_id || '')
 					.single()
-
+				const userData = nextAuthUser as unknown as KindfiUser
 				const kindfiUser: KindfiUser = {
 					id: userData.id,
 					email: userData.email,
@@ -183,7 +178,7 @@ export function KindfiSupabaseAdapter({
 						public_key: deviceData.public_key,
 						address: deviceData.address,
 					},
-					userData: profileData || undefined,
+					userData: (profileData as UserData) || undefined,
 				}
 
 				console.log(
@@ -197,7 +192,10 @@ export function KindfiSupabaseAdapter({
 			if (!baseAdapter.getUserByAccount) {
 				return null
 			}
-			return await baseAdapter.getUserByAccount({ providerAccountId, provider })
+			return await baseAdapter.getUserByAccount({
+				providerAccountId,
+				provider,
+			})
 		},
 
 		async linkAccount(
@@ -270,7 +268,7 @@ export function KindfiSupabaseAdapter({
 					.single()
 
 				if (profileData) {
-					;(result.user as KindfiUser).userData = profileData
+					;(result.user as KindfiUser).userData = profileData as UserData
 				}
 			}
 

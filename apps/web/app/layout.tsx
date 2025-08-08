@@ -26,7 +26,6 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<head />
 			<body suppressHydrationWarning>
 				<Providers>
 					<div className="relative min-h-screen flex flex-col">

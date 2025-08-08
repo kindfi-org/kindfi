@@ -1,31 +1,41 @@
 import { updateSession } from '@packages/lib/supabase-server'
-import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { withAuth } from 'next-auth/middleware'
+import { type NextRequestWithAuth, withAuth } from 'next-auth/middleware'
 import { ensureCsrfTokenCookie } from '~/app/actions/csrf'
 
 // * Infer the type of the first parameter of updateSession
 type ExpectedRequestType = Parameters<typeof updateSession>[0]
 
+// Auth protected path prefixes / exact matches
+const AUTH_PROTECTED_PATHS = ['/create-project', '/dashboard']
+
+function isProtectedPath(pathname: string) {
+	return (
+		AUTH_PROTECTED_PATHS.includes(pathname) ||
+		// /projects/[slug]/manage pattern
+		(pathname.startsWith('/projects/') && pathname.endsWith('/manage'))
+	)
+}
+
 export default withAuth(
-	async function middleware(request: NextRequest) {
+	async function middleware(req: NextRequestWithAuth) {
 		try {
-			// Ensure CSRF token cookie is set
 			await ensureCsrfTokenCookie()
-			// * Cast the request object through 'unknown' to the expected type.
-			// ? This handles cases where TypeScript sees two NextRequest types as "incompatible"
-			// ? due to different declaration origins in a monorepo setup.
-			return await updateSession(
-				request as unknown as ExpectedRequestType,
-				null,
-			)
+
+			// Redirect unauthenticated access to protected paths
+			if (isProtectedPath(req.nextUrl.pathname) && !req.nextauth?.token) {
+				const url = req.nextUrl.clone()
+				url.pathname = '/sign-in'
+				url.searchParams.set('callbackUrl', req.nextUrl.pathname)
+				return NextResponse.redirect(url)
+			}
+
+			// Pass through Supabase session refresh logic
+			return await updateSession(req as unknown as ExpectedRequestType, null)
 		} catch (error) {
 			console.error('Middleware error:', error)
-			// Return NextResponse.next() to allow the request to continue
 			return NextResponse.next({
-				request: {
-					headers: request.headers,
-				},
+				request: { headers: req.headers },
 			})
 		}
 	},
