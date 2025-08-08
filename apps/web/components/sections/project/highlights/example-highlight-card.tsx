@@ -1,3 +1,5 @@
+import type React from 'react'
+
 interface ExampleHighlightProps {
 	icon: React.ReactNode
 	title: string

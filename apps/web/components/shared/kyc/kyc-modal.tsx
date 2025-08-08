@@ -5,11 +5,15 @@ import {
 	FinalReview,
 	IDDocumentUpload,
 	IdentityVerification,
-	ProofOfAddressUpload,
+	// ProofOfAddressUpload,
 	ProofOffaceVerification,
 } from '~/components/shared'
 import type { IdentityFormValues } from '~/components/shared/kyc/kyc-1'
 import { useKYC } from '~/hooks/use-kyc'
+import type {
+	DocumentType,
+	ExtractedData,
+} from '~/components/shared/kyc/kyc-2/types'
 import type {
 	ExtractedDocumentData,
 	FinalReviewProps,
@@ -25,23 +29,23 @@ interface KYCModalProps {
 	onClose: () => void
 }
 
-interface DocumentSubmitData {
-	documentType: string
-	extractedData: ExtractedDocumentData
+interface SubmitData {
+	documentType: DocumentType
+	extractedData: ExtractedData
 	frontImage: File | null
 	backImage: File | null
 }
 
-interface AddressSubmitData {
-  extractedData?: {
-   address?: {
-      street?: string
-      city?: string
-      country?: string
-    }
-  }
-  file: File | null
-}
+// interface AddressSubmitData {
+// 	extractedData?: {
+// 		address?: {
+// 			street?: string
+// 			city?: string
+// 			country?: string
+// 		}
+// 	}
+// 	file: File | null
+//}
 
 
 
@@ -71,14 +75,25 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 		nextStep()
 	}
 
-	// Handles data from Step 2, with the corrected inline type
-	const handleDocumentSubmit = (data: DocumentSubmitData) => {
+	const handleDocumentSubmit = (data: SubmitData) => {
+		const transformedData: ExtractedDocumentData = {
+			documentNumber: data.extractedData.idNumber || '',
+			expiryDate: data.extractedData.expiryDate || '',
+			issuingCountry: '',
+			issuingAuthority: data.extractedData.issuingAuthority || '',
+			documentType: 'national_id',
+			issuedDate: data.extractedData.issueDate || '',
+			fullName: data.extractedData.fullName || '',
+			dateOfBirth: '',
+			nationality: data.extractedData.nationality || '',
+		}
+
 		updateKycData({
 			documents: {
 				documentType: data.documentType || '',
 				frontImage: data.frontImage,
 				backImage: data.backImage,
-				extractedData: data.extractedData,
+				extractedData: transformedData,
 			},
 		})
 		nextStep()
@@ -94,17 +109,17 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 
 	// Handles data from Step 4
 	
-	const handleAddressSubmit = (data: AddressSubmitData) => {
-		updateKycData({
-			address: {
-				street: data.extractedData?.address?.street || '',
-				city: data.extractedData?.address?.city || '',
-				country: data.extractedData?.address?.country || '',
-				proofDocument: data.file,
-			},
-		})
-		nextStep()
-	}
+	// const handleAddressSubmit = (data: AddressSubmitData) => {
+	// 	updateKycData({
+	// 		address: {
+	// 			street: data.extractedData?.address?.street || '',
+	// 			city: data.extractedData?.address?.city || '',
+	// 			country: data.extractedData?.address?.country || '',
+	// 			proofDocument: null,
+	// 		},
+	// 	})
+	// 	nextStep()
+	// }
 
 	const handleCancel = () => {
 		onClose()
@@ -150,12 +165,12 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 					/>
 				)}
 
-				{currentStep === 4 && (
+				{/* {currentStep === 4 && (
 					<ProofOfAddressUpload
 						onBack={prevStep}
 						onNext={handleAddressSubmit}
 					/>
-				)}
+				)} */}
 
 				{currentStep === 5 && (
 					<FinalReview
