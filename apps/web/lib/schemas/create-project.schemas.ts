@@ -67,8 +67,14 @@ export const projectPitchSchema = z.object({
 		.max(100, 'Title must be less than 100 characters'),
 	story: z
 		.string()
-		.min(1, 'Story is required')
-		.min(50, 'Story must be at least 50 characters long'),
+		.trim()
+		.refine(
+			(val) => {
+				const plainText = val.replace(/<[^>]*>/g, '').trim() // remove HTML tags
+				return plainText.length >= 50
+			},
+			{ message: 'Story must be at least 50 characters long' },
+		),
 	pitchDeck: z.any().nullable(),
 	videoUrl: z
 		.string()

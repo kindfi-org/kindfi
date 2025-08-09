@@ -27,6 +27,10 @@ import {
 import { cn } from '~/lib/utils'
 import { LinkDialog } from './link-dialog'
 
+// Returns the count of visible characters by collapsing whitespace and trimming the text
+const visibleCharCount = (text: string) =>
+	Array.from(text.replace(/\s+/g, ' ').trim()).length
+
 interface RichTextEditorProps {
 	value: string
 	onChange: (value: string) => void
@@ -207,7 +211,10 @@ export function RichTextEditor({
 				</div>
 
 				<div className="px-4 py-2 bg-gray-50 border-t text-xs text-gray-500 text-end">
-					{editor?.getText().length || value.length} characters
+					{editor
+						? visibleCharCount(editor.getText())
+						: visibleCharCount(value)}{' '}
+					characters
 				</div>
 			</div>
 
