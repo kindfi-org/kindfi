@@ -18,15 +18,21 @@ export async function POST(
 		const videoUrl = rawVideoUrl ? transformToEmbedUrl(rawVideoUrl) : null
 		const pitchDeck = formData.get('pitchDeck') as File | string | null
 
-		if (!projectId || !projectSlug || !title || !story) {
+		// Single guard clause that also reports which required fields are missing
+		const missingFields = Object.entries({
+			projectId,
+			projectSlug,
+			title,
+			story,
+		})
+			.filter(([, v]) => !v)
+			.map(([k]) => k)
+			.join(', ')
+		if (missingFields) {
 			return NextResponse.json(
-				{ error: 'Missing required fields' },
+				{ error: `Missing required fields: ${missingFields}` },
 				{ status: 400 },
 			)
-		}
-
-		if (!projectId) {
-			return NextResponse.json({ error: 'Missing projectId' }, { status: 400 })
 		}
 
 		let pitchDeckUrl: string | null = null
