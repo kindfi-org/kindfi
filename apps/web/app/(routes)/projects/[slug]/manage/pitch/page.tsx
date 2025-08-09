@@ -28,10 +28,10 @@ export default async function ProjectPitchPage({
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<div className="container mx-auto px-4 py-8 md:py-12">
+		<section className="container mx-auto px-4 py-8 md:py-12">
 			<HydrationBoundary state={dehydratedState}>
 				<ProjectPitchWrapper projectSlug={slug} />
 			</HydrationBoundary>
-		</div>
+		</section>
 	)
 }
