@@ -89,6 +89,7 @@ export function LinkDialog({
 							attrs: {
 								href: values.url,
 								target: '_blank',
+								rel: 'noopener noreferrer nofollow',
 							},
 						},
 					],
@@ -99,7 +100,11 @@ export function LinkDialog({
 				.chain()
 				.focus()
 				.extendMarkRange('link')
-				.setLink({ href: values.url, target: '_blank' })
+				.setLink({
+					href: values.url,
+					target: '_blank',
+					rel: 'noopener noreferrer nofollow',
+				})
 				.run()
 		}
 
