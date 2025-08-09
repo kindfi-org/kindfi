@@ -26,7 +26,11 @@ import { Input } from '~/components/base/input'
 import { cn } from '~/lib/utils'
 
 const linkSchema = z.object({
-	url: z.string().url('Please enter a valid URL (e.g., https://example.com)'),
+	url: z
+		.string()
+		.trim()
+		.url('Please enter a valid URL (e.g., https://example.com)')
+		.refine((u) => u.startsWith('https://'), { message: 'URL must use HTTPS' }),
 	text: z.string().optional(),
 })
 
