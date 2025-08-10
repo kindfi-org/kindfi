@@ -1,14 +1,15 @@
 'use client'
 
+// biome-ignore assist/source/organizeImports: <explanation>
 import { Dialog, DialogContent } from '~/components/base/dialog'
 import {
 	FinalReview,
 	IDDocumentUpload,
 	IdentityVerification,
-	// ProofOfAddressUpload,
 	ProofOffaceVerification,
 } from '~/components/shared'
 import type { IdentityFormValues } from '~/components/shared/kyc/kyc-1'
+import { ProofOfAddressUpload } from '~/components/shared/kyc/kyc-4/kyc-4-upload'
 import { useKYC } from '~/hooks/use-kyc'
 import type {
 	DocumentType,
@@ -18,10 +19,17 @@ import type {
 	ExtractedDocumentData,
 	FinalReviewProps,
 } from '~/lib/types/final-review-kyc5.types'
+import type {
+	DocumentType as ProofOfAddressDocumentType,
+	ExtractedData as ProofOfAddressExtractedData,
+} from '@packages/lib'
 
 // Define a comprehensive type for all collected KYC data
 export type KYCData = FinalReviewProps['kycData'] & {
 	faceVerification: { selfieImage: string | null }
+	proofOfAddress?: {
+		documentType: ProofOfAddressDocumentType
+	} & ProofOfAddressExtractedData
 }
 
 interface KYCModalProps {
@@ -35,21 +43,6 @@ interface SubmitData {
 	frontImage: File | null
 	backImage: File | null
 }
-
-// interface AddressSubmitData {
-// 	extractedData?: {
-// 		address?: {
-// 			street?: string
-// 			city?: string
-// 			country?: string
-// 		}
-// 	}
-// 	file: File | null
-//}
-
-
-
-
 
 export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 	const {
@@ -108,18 +101,18 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 	}
 
 	// Handles data from Step 4
-	
-	// const handleAddressSubmit = (data: AddressSubmitData) => {
-	// 	updateKycData({
-	// 		address: {
-	// 			street: data.extractedData?.address?.street || '',
-	// 			city: data.extractedData?.address?.city || '',
-	// 			country: data.extractedData?.address?.country || '',
-	// 			proofDocument: null,
-	// 		},
-	// 	})
-	// 	nextStep()
-	// }
+	const handleProofOfAddressSubmit = (data: {
+		documentType: ProofOfAddressDocumentType
+		extractedData: ProofOfAddressExtractedData
+	}) => {
+		updateKycData({
+			proofOfAddress: {
+				documentType: data.documentType,
+				...data.extractedData,
+			},
+		})
+		nextStep()
+	}
 
 	const handleCancel = () => {
 		onClose()
@@ -165,12 +158,12 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 					/>
 				)}
 
-				{/* {currentStep === 4 && (
+				{currentStep === 4 && (
 					<ProofOfAddressUpload
 						onBack={prevStep}
-						onNext={handleAddressSubmit}
+						onNext={handleProofOfAddressSubmit}
 					/>
-				)} */}
+				)}
 
 				{currentStep === 5 && (
 					<FinalReview
