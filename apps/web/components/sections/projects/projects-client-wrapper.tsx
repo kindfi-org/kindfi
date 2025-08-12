@@ -148,7 +148,6 @@ export function ProjectsClientWrapper() {
 					</div>
 				</div>
 			</div>
-
 			<AnimatePresence mode="wait">
 				<motion.div
 					key={viewMode}

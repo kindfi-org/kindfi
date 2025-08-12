@@ -1,1 +1,2 @@
-export * from './supabase-client.type'
+export * from './config.types'
+export * from './supabase-client.types'

@@ -55,7 +55,6 @@ export function ResourceCard({ resource, className = '' }: ResourceCardProps) {
 					<ResourceTypeBadge type={resource.type} />
 				</div>
 			</div>
-
 			{/* Content Section */}
 			<div className="p-6">
 				{/* Category */}

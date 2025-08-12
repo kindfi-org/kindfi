@@ -1,0 +1,4 @@
+Network: testnet
+WASM Hash: 
+Contract ID: 
+Deployment Date: Sun Jul 20 21:02:26 CST 2025

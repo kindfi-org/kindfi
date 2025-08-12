@@ -1,7 +1,11 @@
 import type { Database } from '@services/supabase'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import type { TypedSupabaseClient } from '../../types/supabase-client.type'
+import { appEnvConfig } from '../../config'
+import type { AppEnvInterface } from '../../types'
+import type { TypedSupabaseClient } from '../../types/supabase-client.types'
+
+const appConfig: AppEnvInterface = appEnvConfig()
 
 /**
  * Creates a new Supabase server-side client using cookies for authentication.
@@ -14,13 +18,26 @@ import type { TypedSupabaseClient } from '../../types/supabase-client.type'
  * const supabase = await createSupabaseServerClient();
  * const { data } = await supabase.from('projects').select('*');
  */
-export async function createSupabaseServerClient(): Promise<TypedSupabaseClient> {
+export async function createSupabaseServerClient(supabaseServerClientProps?: {
+	jwt?: string
+	accessToken?: () => Promise<string>
+}): Promise<TypedSupabaseClient> {
+	const { jwt, accessToken } = supabaseServerClientProps || {}
 	const cookieStore = await cookies()
 
 	return createServerClient<Database>(
-		process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+		appConfig.database.url,
+		appConfig.database.anonKey,
 		{
+			...(jwt || accessToken
+				? {
+						accessToken: jwt
+							? async () => {
+									return jwt
+								}
+							: accessToken,
+					}
+				: {}),
 			cookies: {
 				getAll() {
 					return cookieStore.getAll()

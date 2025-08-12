@@ -1,11 +1,14 @@
 'use server'
 
-import { createSupabaseServerClient } from '@packages/lib/supabase/server'
+import { appEnvConfig } from '@packages/lib/config'
+import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { signOut } from 'next-auth/react'
 import { validateCsrfToken } from '~/app/actions/csrf'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
@@ -32,6 +35,7 @@ const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
 
 export async function signUpAction(formData: FormData): Promise<AuthResponse> {
+	const appConfig: AppEnvInterface = appEnvConfig('web')
 	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
 		return {
 			success: false,
@@ -40,62 +44,87 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 		}
 	}
 	const supabase = await createSupabaseServerClient()
-	const data = {
-		email: formData.get('email') as string,
-		password: formData.get('password') as string,
+	const email = formData.get('email') as string
+	const signInWithOptOpt = {
+		email,
+		options: {
+			emailRedirectTo: `${appConfig.deployment.appUrl}/auth/callback?redirect_to=/otp-validation?email=${email}`,
+			shouldCreateUser: true,
+		},
 	}
 
 	try {
-		const { error } = await supabase.auth.signUp(data)
+		const { data, error } = await supabase.auth.signInWithOtp(signInWithOptOpt)
 		if (error) {
 			return errorHandler.handleAuthError(error, 'sign_up')
 		}
 
-		revalidatePath('/', 'layout')
+		revalidatePath('/sign-up', 'layout')
+		console.log('Sign up data: ', data)
 		return {
 			success: true,
 			message:
-				'Account created successfully. Please check your email to confirm your account.',
-			redirect: '/sign-in',
+				'Verification code sent! Please check your email to confirm your account.',
+			redirect: `/otp-validation?email=${encodeURIComponent(signInWithOptOpt.email)}`,
+			data,
 		}
 	} catch (error) {
 		return errorHandler.handleAuthError(error as AuthError, 'sign_up')
 	}
 }
 
-export async function signInAction(formData: FormData): Promise<void> {
-	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
-		throw new Error('Invalid CSRF token')
-	}
+export async function createSessionAction({
+	userId,
+	email,
+}: {
+	userId: string
+	email: string
+}): Promise<AuthResponse> {
 	const supabase = await createSupabaseServerClient()
-	const email = formData.get('email') as string
-	const password = formData.get('password') as string
-
-	if (!email || !password) {
-		const _response = {
-			success: false,
-			message: 'Email and password are required',
-			error: 'Email and password are required',
-		}
-	}
 
 	try {
-		const { error } = await supabase.auth.signInWithPassword({
+		// Verify the user exists and the email matches
+		const { data: userData, error: userError } = await supabase
+			.from('profiles')
+			.select()
+			.eq('id', userId)
+			.eq('email', email)
+			.single()
+
+		if (userError || !userData) {
+			return {
+				success: false,
+				message:
+					'User verification failed. Email does not match registered user.',
+				error: 'User verification failed',
+			}
+		}
+
+		logger.info({
+			eventType: 'SESSION_CREATED',
+			userId,
 			email,
-			password,
 		})
 
-		if (error) {
-			errorHandler.handleAuthError(error, 'sign_in')
+		if (userError) {
+			errorHandler.handleAuthError(userError, 'sign_in')
 		}
 
-		const _response = {
+		return {
 			success: true,
-			message: 'Successfully signed in',
+			message: 'Session created successfully',
 			redirect: '/dashboard',
-		}
+			// data: sessionData,
+			data: userData,
+		} as AuthResponse
 	} catch (error) {
-		errorHandler.handleAuthError(error as AuthError, 'sign_in')
+		logger.error({
+			eventType: 'SESSION_CREATION_ERROR',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			userId,
+			email,
+		})
+		return errorHandler.handleAuthError(error as AuthError, 'create_session')
 	}
 }
 
@@ -103,7 +132,10 @@ export async function signOutAction(): Promise<void> {
 	const supabase = await createSupabaseServerClient()
 
 	try {
+		// Clear NextAuth session
+		await signOut({ redirect: false })
 		const { error } = await supabase.auth.signOut()
+
 		if (error) {
 			const response = errorHandler.handleAuthError(error, 'sign_out')
 			redirect(`/?error=${encodeURIComponent(response.message)}`)
@@ -119,37 +151,41 @@ export async function signOutAction(): Promise<void> {
 	}
 }
 
-export async function forgotPasswordAction(formData: FormData): Promise<void> {
+export async function requestResetAccountAction(
+	formData: FormData,
+): Promise<void> {
 	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
-		redirect('/forgot-password?error=Invalid CSRF token')
+		redirect('/reset-account?error=Invalid CSRF token')
 	}
 	const email = formData.get('email')?.toString()
-	const supabase = await createSupabaseServerClient()
-	const origin = (await headers()).get('origin')
+	const _supabase = await createSupabaseServerClient()
+	const _origin = (await headers()).get('origin')
 
 	if (!email) {
-		redirect('/forgot-password?error=Email is required')
+		redirect('/reset-account?error=Email is required')
 	}
 
 	try {
-		const { error } = await supabase.auth.resetPasswordForEmail(email, {
-			redirectTo: `${origin}/auth/callback?redirect_to=/protected/reset-password`,
-		})
+		// TODO: Implement a proper reset account flow
+		// This is a placeholder for the actual reset account logic
+		// const { error } = await supabase.auth.resetPasswordForEmail(email, {
+		// 	redirectTo: `${origin}/auth/callback?redirect_to=//reset-account`,
+		// })
 
-		if (error) {
-			const response = errorHandler.handleAuthError(error, 'forgot_password')
-			redirect(`/forgot-password?error=${encodeURIComponent(response.message)}`)
-		}
+		// if (error) {
+		// 	const response = errorHandler.handleAuthError(error, 'forgot_password')
+		// 	redirect(`/reset-account?error=${encodeURIComponent(response.message)}`)
+		// }
 
 		redirect(
-			'/forgot-password?success=Check your email for a link to reset your password',
+			'/reset-account?success=Check your email for a confirmation request to reset your account',
 		)
 	} catch (error) {
 		const response = errorHandler.handleAuthError(
 			error as AuthError,
-			'forgot_password',
+			'reset_account',
 		)
-		redirect(`/forgot-password?error=${encodeURIComponent(response.message)}`)
+		redirect(`/reset-account?error=${encodeURIComponent(response.message)}`)
 	}
 }
 

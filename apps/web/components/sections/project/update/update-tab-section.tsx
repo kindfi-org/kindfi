@@ -1,6 +1,6 @@
 'use client'
 
-import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { Loader2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/base/button'

@@ -1,0 +1,28 @@
+{
+	"version": 2,
+	"builds": [
+		{
+			"src": "src/index.tsx",
+			"use": "@vercel/node",
+			"config": {
+				"includeFiles": "**"
+			}
+		}
+	],
+	"routes": [
+		{
+			"src": "/api/(.*)",
+			"dest": "/src/index.tsx"
+		},
+		{
+			"src": "/(.*)",
+			"dest": "/src/index.tsx"
+		}
+	],
+	"functions": {
+		"src/index.tsx": {
+			"runtime": "nodejs18.x"
+		}
+	},
+	"outputDirectory": "dist"
+}

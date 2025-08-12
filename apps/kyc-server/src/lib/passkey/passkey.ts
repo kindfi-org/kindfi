@@ -1,3 +1,4 @@
+// ! TODO: CLEAN THIS UP...
 import type {
 	AuthenticationResponseJSON,
 	GenerateAuthenticationOptionsOpts,
@@ -37,7 +38,7 @@ const getRpInfo = (
 	origin: string,
 ): { rpName: string; rpId: string; expectedOrigin: string } => {
 	const index = ENV_PASSKEY.EXPECTED_ORIGIN.findIndex(
-		(expectedOrigin) => origin === expectedOrigin,
+		(expectedOrigin: string) => origin === expectedOrigin,
 	)
 	if (index !== -1)
 		return {

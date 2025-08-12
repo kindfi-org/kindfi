@@ -99,7 +99,6 @@ export function UpdateCard({
 					<Button className="text-xl font-bold">{data.length} updates</Button>
 				</Link>
 			</div>
-
 			{editingUpdateId && (
 				<UpdateForm
 					update={data.find((update) => update.id === editingUpdateId)}
@@ -113,7 +112,6 @@ export function UpdateCard({
 					isSubmitting={false}
 				/>
 			)}
-
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{data.length > 0 ? (
 					data.map((update) => (
@@ -129,7 +127,7 @@ export function UpdateCard({
 										</Avatar>
 										<div>
 											<p className="font-medium">
-												Author ID: {update.author_id.substring(0, 8)}...
+												Author ID: {update.author_id?.substring(0, 8)}...
 											</p>
 											<p className="text-sm text-gray-500">
 												{formatDate(update.created_at)}
@@ -176,7 +174,7 @@ export function UpdateCard({
 
 								<p className="text-gray-700 leading-relaxed mb-6">
 									{update.content.length > 150
-										? `${update.content.substring(0, 150)}...`
+										? `${update.content?.substring(0, 150)}...`
 										: update.content}
 								</p>
 								<Link href={`${updatesUrl}/${update.id}`}>
@@ -193,7 +191,6 @@ export function UpdateCard({
 					</div>
 				)}
 			</div>
-
 			<AlertDialog
 				open={!!deletingUpdateId}
 				onOpenChange={(open) => !open && setDeletingUpdateId(null)}

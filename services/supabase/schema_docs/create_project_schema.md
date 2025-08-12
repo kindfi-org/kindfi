@@ -24,7 +24,7 @@ The central table storing all project information.
 | updated_at          | TIMESTAMP WITH TIME ZONE | DEFAULT CURRENT_TIMESTAMP                | When project was last updated       |
 | category_id         | TEXT                     |                                          | References future categories table  |
 | image_url           | TEXT                     |                                          | URL to project cover image          |
-| kindler_id            | UUID                     | NOT NULL, FK to auth.users(id)           | Project creator reference           |
+| kindler_id          | UUID                     | NOT NULL, FK to auth.users(id)           | Project creator reference           |
 
 ## Constraints and Indices
 

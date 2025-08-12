@@ -1,4 +1,8 @@
+import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
+
+const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
 interface KYCUpdate {
 	type: 'kyc_update'
@@ -57,7 +61,7 @@ export function useKYCWebSocket({
 	}, [onUpdate])
 
 	const connect = useCallback(() => {
-		const protocol = process.env.NODE_ENV === 'production' ? 'wss' : 'ws'
+		const protocol = appConfig.env.nodeEnv === 'production' ? 'wss' : 'ws'
 		const ws = new WebSocket(`${protocol}://${window.location.host}/live`)
 		wsRef.current = ws
 

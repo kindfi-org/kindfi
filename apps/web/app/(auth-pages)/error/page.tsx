@@ -1,12 +1,7 @@
-'use client'
-
 import { AlertCircle } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { Button } from '~/components/base/button'
+import Link from 'next/link'
 
 export default function AuthErrorPage() {
-	const router = useRouter()
-
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center p-4">
 			<div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
@@ -23,13 +18,9 @@ export default function AuthErrorPage() {
 					</p>
 				</div>
 
-				<Button
-					variant="default"
-					onClick={() => router.push('/login')}
-					className="w-full"
-				>
+				<Link href="/sign-in" className="w-full">
 					Back to Login
-				</Button>
+				</Link>
 			</div>
 		</div>
 	)

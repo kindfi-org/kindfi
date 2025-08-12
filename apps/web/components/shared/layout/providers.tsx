@@ -39,15 +39,20 @@ export function Providers({ children }: ProvidersProps) {
 					}
 
 					// Set up periodic sync if supported
-					const reg = registration as ServiceWorkerRegistrationWithSync
-					if (reg.periodicSync) {
-						reg.periodicSync
-							.register('notification-sync', {
-								minInterval: 24 * 60 * 60 * 1000, // 24 hours
-							})
-							.catch((error) => {
-								console.error('Periodic sync registration failed:', error)
-							})
+					try {
+						const reg = registration as ServiceWorkerRegistrationWithSync
+						if (reg.periodicSync) {
+							// TODO: Fix registration, crashing on some MacOs due lack of permissions on browsers by default...
+							// reg.periodicSync
+							// 	.register('notification-sync', {
+							// 		minInterval: 24 * 60 * 60 * 1000, // 24 hours
+							// 	})
+							// 	.catch((error) => {
+							// 		console.error('Periodic sync registration failed:', error)
+							// 	})
+						}
+					} catch (error) {
+						console.error('Periodic sync not supported:', error)
 					}
 				})
 				.catch((error) => {
@@ -64,9 +69,9 @@ export function Providers({ children }: ProvidersProps) {
 				forcedTheme="light"
 				disableTransitionOnChange
 			>
-				<StellarProvider>
-					<AuthProvider>{children}</AuthProvider>
-				</StellarProvider>
+				<AuthProvider>
+					<StellarProvider>{children}</StellarProvider>
+				</AuthProvider>
 			</NextThemesProvider>
 		</ReactQueryClientProvider>
 	)

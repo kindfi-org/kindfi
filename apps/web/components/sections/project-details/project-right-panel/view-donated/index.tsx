@@ -12,7 +12,7 @@ import { NftItem } from '../nft-item'
 import { FellowSupporter } from './fellow-supporters'
 import { ImpactJourney } from './impact-journey'
 
-type ViewImpactProps = GoalProgressProps & {}
+type ViewImpactProps = GoalProgressProps
 
 export function ViewDonated({
 	goal,
