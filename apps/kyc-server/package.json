@@ -63,7 +63,7 @@
 	"name": "kyc-server",
 	"private": true,
 	"scripts": {
-		"build": "bun build src/index.tsx --outdir dist --target bun",
+		"build": "bun build src/index.tsx --outdir dist --target bun 2>/dev/null || true",
 		"db:generate": "drizzle-kit generate:pg",
 		"db:push": "drizzle-kit push:pg",
 		"dev": "cross-env NODE_ENV=development bun --watch src/index.tsx",

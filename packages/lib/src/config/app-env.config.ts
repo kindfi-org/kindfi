@@ -6,19 +6,17 @@ export function transformEnv(): AppEnvInterface {
 	const data = process.env as ValidatedEnvInput
 	return {
 		auth: {
-auth: {
-    secret: data.NEXTAUTH_SECRET || (() => {
-        if (data.NODE_ENV === 'production') {
-            throw new Error('NEXTAUTH_SECRET is required in production')
-        }
-        // Generate a random secret for development only
-        console.warn('⚠️ Using auto-generated NEXTAUTH_SECRET for development')
-        return require('crypto').randomBytes(32).toString('hex')
-    })(),
-    url: data.NEXTAUTH_URL || '',
-    // ...other properties
-}
-			url: data.NEXTAUTH_URL || '',
+			secret:
+				data.NEXTAUTH_SECRET ||
+				(() => {
+					if (data.NODE_ENV === 'production') {
+						throw new Error('NEXTAUTH_SECRET is required in production')
+					}
+					// Generate a random secret for development only
+					console.warn('⚠️ Using auto-generated NEXTAUTH_SECRET for development')
+					return require('crypto').randomBytes(32).toString('hex')
+				})(),
+			url: data.NEXTAUTH_URL || 'http://localhost:3000',
 			token: {
 				expiration: data.JWT_TOKEN_EXPIRATION || 60 * 60 * 24 * 30, // Default to 30 days
 				update: data.NEXT_PUBLIC_JWT_TOKEN_UPDATE || 60 * 60 * 24, // Default to 24 hours
