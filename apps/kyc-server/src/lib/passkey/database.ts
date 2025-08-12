@@ -95,10 +95,13 @@ export const deleteChallenge = async ({
 	await db
 		.delete(challenges)
 		.where(
-			and(eq(challenges.identifier, identifier), eq(challenges.rpId, rpId)),
+			and(
+				eq(challenges.identifier, identifier),
+				eq(challenges.rpId, rpId),
+				...(userId ? [eq(challenges.userId, userId)] : []),
+			),
 		)
 }
-
 /**
  * Get user credentials from the database
  */
