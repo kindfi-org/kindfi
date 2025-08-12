@@ -1,3 +1,4 @@
+import { appEnvConfig } from '@packages/lib'
 import axios, { type CreateAxiosDefaults } from 'axios'
 
 export const createHttpRequest = (
@@ -11,11 +12,11 @@ export const createHttpRequest = (
 	})
 
 export const httpEscrow = createHttpRequest(
-	process.env.TRUSTLESS_WORK_API_URL || '',
+	appEnvConfig('web').externalApis.trustlessWork.url,
 	{
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${process.env.TRUSTLESS_WORK_API_KEY}`,
+			Authorization: `Bearer ${appEnvConfig('web').externalApis.trustlessWork.apiKey}`,
 		},
 	},
 )

@@ -1,9 +1,9 @@
 // ! SPLIT THIS COMPONENT... ⚠️
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks/use-supabase-query.hook'
+import { useSupabaseQuery } from '@packages/lib/hooks'
 import { supabase } from '@packages/lib/supabase'
-import type { TypedSupabaseClient } from '@packages/lib/types/supabase-client.type'
+import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { Tables, TablesUpdate } from '@services/supabase'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'

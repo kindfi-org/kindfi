@@ -1,12 +1,16 @@
+import { appEnvConfig } from '@packages/lib'
 import { Toaster } from 'sonner'
 import { GoogleAnalytics } from '~/components/shared/google-analytics'
 import { Footer } from '~/components/shared/layout/footer/footer'
 import { Header } from '~/components/shared/layout/header/header'
 import { Providers } from '~/components/shared/layout/providers'
 import './css/globals.css'
+import type { AppEnvInterface } from '@packages/lib/types'
 
-const defaultUrl = process.env.VERCEL_URL
-	? `https://${process.env.VERCEL_URL}`
+const appConfig: AppEnvInterface = appEnvConfig('web')
+
+const defaultUrl = appConfig.deployment.vercelUrl
+	? `https://${appConfig.deployment.vercelUrl}`
 	: 'http://localhost:3000'
 export const metadata = {
 	metadataBase: new URL(defaultUrl),
@@ -22,7 +26,6 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<head />
 			<body suppressHydrationWarning>
 				<Providers>
 					<div className="relative min-h-screen flex flex-col">
@@ -32,9 +35,7 @@ export default function RootLayout({
 						<Footer />
 					</div>
 				</Providers>
-				<GoogleAnalytics
-					GA_MEASUREMENT_ID={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''}
-				/>
+				<GoogleAnalytics GA_MEASUREMENT_ID={appConfig.analytics.gaId} />
 			</body>
 		</html>
 	)

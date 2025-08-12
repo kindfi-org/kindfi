@@ -9,7 +9,6 @@ export function ProjectTabsSkeleton() {
 					<Skeleton key={i} className="h-10 flex-shrink-0" />
 				))}
 			</div>
-
 			<div className="bg-white rounded-xl shadow-sm p-6">
 				<Skeleton className="h-8 w-1/3 mb-6" />
 				<Skeleton className="h-4 w-full mb-2" />

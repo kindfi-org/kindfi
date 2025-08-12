@@ -93,8 +93,8 @@ self.addEventListener('install', (event) => {
 				.open('notification-assets-v1')
 				.then((cache) => {
 					return cache.addAll([
-						'/icons/notification-icon.png',
-						'/icons/notification-badge.png',
+						// '/icons/notification-icon.png',
+						// '/icons/notification-badge.png',
 					])
 				}),
 			// Skip waiting to activate immediately

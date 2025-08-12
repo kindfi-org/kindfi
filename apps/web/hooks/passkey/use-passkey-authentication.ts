@@ -1,18 +1,24 @@
+import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { startAuthentication } from '@simplewebauthn/browser'
+import { RedirectType, redirect } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { createSessionAction } from '~/app/actions/auth'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import type { PresignResponse, SignParams } from '~/lib/types'
-import { KYC_API_BASE_URL } from './use-passkey.configuration'
 
 export const usePasskeyAuthentication = (
 	identifier: string,
 	{
 		onSign,
 		prepareSign,
+		userId,
 	}: {
 		onSign?: (params: SignParams) => void
 		prepareSign?: () => Promise<PresignResponse>
+		userId?: string
 	},
 ) => {
 	const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false)
@@ -27,15 +33,20 @@ export const usePasskeyAuthentication = (
 	}
 
 	const handleAuth = async () => {
+		const appConfig: AppEnvInterface = appEnvConfig('web')
+		const baseUrl = appConfig.externalApis.kyc.baseUrl
 		// Initiates the authentication process with WebAuthn and prepares for Stellar signing
 		setIsAuthenticating(true)
 		setAuthSuccess('')
 		setAuthError('')
 		setIsNotRegistered(false)
+
+		let success = false
+
 		try {
 			const PresignResponse = await prepareSign?.()
 			const resp = await fetch(
-				`${KYC_API_BASE_URL}/api/passkey/generate-authentication-options`,
+				`${baseUrl}/api/passkey/generate-authentication-options`,
 				{
 					method: 'POST',
 					headers: {
@@ -61,7 +72,7 @@ export const usePasskeyAuthentication = (
 			})
 
 			const verificationResp = await fetch(
-				`${KYC_API_BASE_URL}/api/passkey/verify-authentication`,
+				`${baseUrl}/api/passkey/verify-authentication`,
 				{
 					method: 'POST',
 					headers: {
@@ -71,6 +82,7 @@ export const usePasskeyAuthentication = (
 						identifier,
 						authenticationResponse,
 						origin: window.location.origin,
+						userId,
 					}),
 				},
 			)
@@ -82,24 +94,67 @@ export const usePasskeyAuthentication = (
 
 			const verificationJSON = await verificationResp.json()
 
-			if (verificationJSON?.verified) {
-				const message = 'User authenticated!'
-				setAuthSuccess(message)
-				setIsNotRegistered(false)
-				toast.success(message)
-				if (onSign && PresignResponse) {
-					onSign({
-						signRes: authenticationResponse,
-						authTxn: PresignResponse.authTxn,
-						lastLedger: PresignResponse.lastLedger,
-					})
-				}
-			} else {
-				const message = `Oh no, something went wrong! Response: ${JSON.stringify(verificationJSON)}`
-				setAuthError(message)
-				toast.error(message)
+			if (!verificationJSON?.verified) {
+				throw new InAppError(
+					ErrorCode.AUTHENTICATOR_NOT_REGISTERED,
+					'Authentication verification failed',
+				)
 			}
+
+			// Create session after successful passkey verification
+			const sessionResult = await createSessionAction({
+				userId: userId || verificationJSON.userId,
+				email: identifier, // identifier should be the email
+			})
+
+			if (!sessionResult.success) {
+				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, sessionResult.message)
+			}
+
+			const message = 'User authenticated and session created!'
+
+			if (onSign && PresignResponse) {
+				await onSign({
+					signRes: authenticationResponse,
+					authTxn: PresignResponse.authTxn,
+					lastLedger: PresignResponse.lastLedger,
+				})
+			}
+
+			console.log('verificationJSON:', verificationJSON)
+
+			// Convert pubKey object to Uint8Array, then to base64 string
+			const pubKeyArray =
+				verificationJSON.device.pubKey instanceof Uint8Array
+					? verificationJSON.device.pubKey
+					: new Uint8Array(
+							Object.values(
+								verificationJSON.device.pubKey as Record<string, number>,
+							),
+						)
+			const pubKeyString = Buffer.from(pubKeyArray).toString('base64')
+
+			console.log('base64PubKey:', pubKeyString)
+			const loginResult = await signIn('credentials', {
+				redirect: false,
+				userId: userId || verificationJSON.userId,
+				email: identifier,
+				pubKey: pubKeyString,
+				credentialId: verificationJSON.device.id,
+				address: verificationJSON.device.address,
+			}).catch((error) => {
+				console.error('Error during signIn:', error)
+				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, error.message)
+			})
+
+			console.log('Login result:', loginResult)
+
+			setAuthSuccess(message)
+			setIsNotRegistered(false)
+			toast.success(message)
+			success = Boolean(loginResult?.ok)
 		} catch (_error) {
+			console.error('🔴 Error during passkey authentication:', _error)
 			const error = _error as Error
 			let message = error.toString()
 			if (
@@ -111,11 +166,17 @@ export const usePasskeyAuthentication = (
 			} else if (error.message.includes('User not found.')) {
 				message = 'User not registered. Please register first.'
 				setIsNotRegistered(true)
+			} else {
+				message = `Oh no, something went wrong! Response: ${JSON.stringify(error)}`
 			}
 			setAuthError(message)
 			toast.error(message)
 		} finally {
 			setIsAuthenticating(false)
+			if (success) {
+				// Redirect to the dashboard or any other page after successful authentication
+				redirect('/dashboard', RedirectType.replace)
+			}
 		}
 	}
 

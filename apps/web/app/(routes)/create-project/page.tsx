@@ -4,7 +4,7 @@ import { CreateProjectProvider } from '~/hooks/contexts/use-create-project.conte
 export default function CreateProjectPage() {
 	return (
 		<CreateProjectProvider>
-			<main className="container mx-auto px-4 py-8 md:py-12">
+			<section className="container mx-auto px-4 py-8 md:py-12">
 				<div className="text-center mb-8">
 					<div className="inline-flex items-center px-4 py-2 rounded-full font-medium text-purple-600 bg-purple-100 border-transparent mb-4">
 						Create Project
@@ -19,7 +19,7 @@ export default function CreateProjectPage() {
 				</div>
 
 				<CreateProjectForm />
-			</main>
+			</section>
 		</CreateProjectProvider>
 	)
 }

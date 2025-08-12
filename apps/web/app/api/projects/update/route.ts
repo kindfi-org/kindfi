@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@packages/lib/supabase/server'
+import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import {

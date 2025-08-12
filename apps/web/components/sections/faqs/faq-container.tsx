@@ -1,9 +1,11 @@
+'use client'
+
 import { useFaqs } from '~/hooks/use-faqs'
 import { FaqHeader } from './faq-header'
 import { FaqSupport } from './faq-support'
 import { FaqTabs } from './faq-tabs'
 
-export const FaqContainer = () => {
+export function FaqContainer() {
 	const {
 		inputValue,
 		filteredQuestions,

@@ -34,76 +34,73 @@ export function PasskeyInfoDialog() {
 								The modern, passwordless way to sign in
 							</DialogDescription>
 						</div>
-						<div className="flex justify-center items-center rounded-full bg-primary/10 my-2 px-4">
+						<div className="flex justify-center items-center rounded-full border border-zinc-300/50 bg-primary/10 my-2 p-3">
 							<Key className="text-primary text-3xl" />
 						</div>
 					</div>
 				</DialogHeader>
-				<div className="space-y-4 py-4">
+				<DialogDescription className="space-y-4 py-4">
 					<section>
 						<Card className="w-full max-w-md text-lg p-4">
-							<p className="">
+							<p>
 								Passkeys are replacements for passwords that provide strong
 								security and better user experience.
 							</p>
 						</Card>
 					</section>
 					<section className="flex items-start">
-						<div className="flex justify-center items-center rounded-full bg-primary/10 p-4">
+						<div className="flex justify-center items-center rounded-full border border-zinc-300/50 bg-primary/10 p-4">
 							<Shield className="text-primary text-3xl" />
 						</div>
 						<div className="ml-4">
-							<h2 className="font-semibold mb-2">More Secure</h2>
-							<h3>
+							<h2 className="font-semibold text-black mb-2">More Secure</h2>
+							<p className="text-zinc-800">
 								Passkeys uses strong cryptography and biometric(like your finger
-								print or face) to protect your acoount from phishing and data
+								print or face) to protect your account from phishing and data
 								breaches.
-							</h3>
+							</p>
 						</div>
 					</section>
 					<section className="flex items-start">
-						<div className="flex justify-center items-center rounded-full bg-blue-500/10 p-4">
+						<div className="flex justify-center items-center rounded-full border border-zinc-300/50 bg-blue-500/10 p-4">
 							<Fingerprint className="text-blue-500 text-3xl" />
 						</div>
 						<div className="ml-4">
-							<h2 className="font-semibold mb-2">Easier to Use</h2>
-							<h3>
+							<h2 className="font-semibold text-black mb-2">Easier to Use</h2>
+							<p className="text-zinc-800">
 								No more remembering complex passwords. Just use your device's
 								biometric authentication or pin to sign in instantly.
-							</h3>
+							</p>
 						</div>
 					</section>
 					<section className="flex items-start">
-						<div className="flex justify-center items-center rounded-full bg-purple-500/10 p-4">
+						<div className="flex justify-center items-center rounded-full border border-zinc-300/50 bg-purple-500/10 p-4">
 							<Lock className="text-purple-500 text-3xl" />
 						</div>
 						<div className="ml-4">
-							<h2 className="font-semibold mb-2">Works Across Devices</h2>
-							<h3>
+							<h2 className="font-semibold text-black mb-2">
+								Works Across Devices
+							</h2>
+							<p className="text-zinc-800">
 								Your passkey sync securely across your devices, so you can sign
 								in from anywhere.
-							</h3>
+							</p>
 						</div>
 					</section>
 					<section>
 						<Card className="w-full max-w-md text-lg p-4">
-							<h3 className="font-medium mb-2">How it works</h3>
-							<p className="text-sm text-muted-foreground">
-								<ul>
-									<li>1. Enter your username</li>
-									<li className="flex items-start gap-1">
-										<span>2.</span>
-										<span className="inline">
-											Your device will prompt you to authenticate with your
-											fingerprint, face, or pin
-										</span>
-									</li>
-									<li>3. Your are secure signed in - no password needed</li>
-								</ul>
-							</p>
+							<h3 className="font-medium mb-2 px-0">How it works</h3>
+							<ol className="list-decimal space-y-1 list-inside text-sm text-muted-foreground">
+								<li>Enter your email.</li>
+								<li>
+									Your device will prompt you to authenticate with your
+									fingerprint, face, or pin.
+								</li>
+								<li>You are securely signed in! No password needed.</li>
+							</ol>
 						</Card>
 					</section>
-				</div>
+				</DialogDescription>
 			</DialogContent>
 		</Dialog>
 	)

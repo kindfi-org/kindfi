@@ -1,20 +1,24 @@
-/**
- * @type {import('next').NextConfig}
- */
-const nextConfig = {
+import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
+import type { NextConfig } from 'next'
+
+const appConfig: AppEnvInterface = appEnvConfig('web')
+const isProduction = appConfig.env.nodeEnv === 'production'
+const nextConfig: NextConfig = {
+	serverExternalPackages: ['@packages/lib'],
 	images: {
 		remotePatterns: [
 			{
-				protocol: process.env.NODE_ENV === 'production' ? 'https' : 'http',
-				hostname: process.env.SUPABASE_HOSTNAME || '127.0.0.1',
-				port: process.env.SUPABASE_PORT || '54321',
+				protocol: isProduction ? 'https' : 'http',
+				hostname: appConfig.database.url || '127.0.0.1',
+				port: appConfig.database.port || '54321',
 				pathname: '/storage/v1/object/public/project_thumbnails/**',
 			},
 		],
 	},
 	async headers() {
 		// Only apply strict headers in production
-		if (process.env.NODE_ENV === 'production') {
+		if (isProduction) {
 			return [
 				{
 					source: '/:path*',

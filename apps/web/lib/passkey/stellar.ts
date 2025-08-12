@@ -84,7 +84,7 @@ export const getPublicKeys = async (
 
 	if ('attestationObject' in registration.response) {
 		// Handle RegistrationResponseJSON
-		const { publicKeyObject } = getPublicKeyObject(
+		const { publicKeyObject, aaguid } = getPublicKeyObject(
 			registration.response.attestationObject,
 		)
 		const publicKey = Buffer.from([
@@ -96,6 +96,7 @@ export const getPublicKeys = async (
 		return {
 			contractSalt,
 			publicKey,
+			aaguid: base64url.encode(aaguid),
 		}
 	}
 	return {

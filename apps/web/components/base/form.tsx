@@ -198,15 +198,15 @@ const FormMessage = React.forwardRef<
 	const { error, formMessageId } = useFormField()
 	const body = error ? String(error?.message) : children
 
-	if (!body) {
-		return null
-	}
-
 	return (
 		<p
 			ref={ref}
 			id={formMessageId}
-			className={cn('text-[0.8rem] font-medium text-destructive', className)}
+			className={cn(
+				'text-[0.8rem] font-medium text-destructive',
+				!body && 'hidden',
+				className,
+			)}
 			{...props}
 		>
 			{body}
@@ -220,16 +220,24 @@ FormMessage.displayName = 'FormMessage'
  * This should be used in server components or SSR context only.
  */
 export function CSRFTokenField(): React.ReactElement {
-	let token = ''
-	getCsrfTokenFromCookie().then((fetchedToken) => {
-		if (!fetchedToken) {
-			console.warn(
-				'CSRF token not found in cookies. Ensure you have set it correctly.',
-			)
-			return
+	// Client-safe retrieval of CSRF token
+	const [token, setToken] = React.useState('')
+	React.useEffect(() => {
+		let active = true
+		getCsrfTokenFromCookie().then((fetchedToken) => {
+			if (!active) return
+			if (!fetchedToken) {
+				console.warn(
+					'CSRF token not found in cookies. Ensure you have set it correctly.',
+				)
+				return
+			}
+			setToken(fetchedToken)
+		})
+		return () => {
+			active = false
 		}
-		token = fetchedToken
-	})
+	}, [])
 	return <input type="hidden" name="csrfToken" value={token} />
 }
 

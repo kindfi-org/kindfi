@@ -1,3 +1,5 @@
+import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	type RegistrationResponseJSON,
 	startRegistration,
@@ -5,12 +7,16 @@ import {
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
-import { KYC_API_BASE_URL } from './use-passkey.configuration'
 
 export const usePasskeyRegistration = (
 	identifier: string,
-	{ onRegister }: { onRegister?: (res: RegistrationResponseJSON) => void },
+	{
+		onRegister,
+		userId,
+	}: { onRegister?: (res: RegistrationResponseJSON) => void; userId?: string },
 ) => {
+	const appConfig: AppEnvInterface = appEnvConfig('web')
+	const baseUrl = appConfig.externalApis.kyc.baseUrl
 	const [isCreatingPasskey, setIsCreatingPasskey] = useState<boolean>(false)
 	const [regSuccess, setRegSuccess] = useState<string>('')
 	const [regError, setRegError] = useState<string>('')
@@ -34,7 +40,7 @@ export const usePasskeyRegistration = (
 
 		try {
 			const registrationOptionsResp = await fetch(
-				`${KYC_API_BASE_URL}/api/passkey/generate-registration-options`,
+				`${baseUrl}/api/passkey/generate-registration-options`,
 				{
 					method: 'POST',
 					headers: {
@@ -43,6 +49,7 @@ export const usePasskeyRegistration = (
 					body: JSON.stringify({
 						identifier,
 						origin: window.location.origin,
+						userId,
 					}),
 				},
 			)
@@ -57,7 +64,7 @@ export const usePasskeyRegistration = (
 			})
 
 			const verificationResp = await fetch(
-				`${KYC_API_BASE_URL}/api/passkey/verify-registration`,
+				`${baseUrl}/api/passkey/verify-registration`,
 				{
 					method: 'POST',
 					headers: {
@@ -67,6 +74,7 @@ export const usePasskeyRegistration = (
 						registrationResponse,
 						identifier,
 						origin: window.location.origin,
+						userId,
 					}),
 				},
 			)

@@ -1,4 +1,8 @@
+import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
 import type { CorsOptions } from '../middleware/cors'
+
+const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
 /**
  * CORS configuration for the application
@@ -12,9 +16,9 @@ import type { CorsOptions } from '../middleware/cors'
 export const corsConfig: CorsOptions = {
 	// Set allowed origins based on environment
 	allowedOrigins:
-		process.env.NODE_ENV === 'production'
-			? process.env.ALLOWED_ORIGINS
-				? process.env.ALLOWED_ORIGINS.split(',')
+		appConfig.env.nodeEnv === 'production'
+			? appConfig.kycServer.allowedOrigins
+				? appConfig.kycServer.allowedOrigins.split(',')
 				: ['https://app.kindfi.com']
 			: '*',
 

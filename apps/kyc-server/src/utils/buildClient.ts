@@ -1,8 +1,12 @@
 import { existsSync, mkdirSync } from 'node:fs'
 import { readdir, rename, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { build } from 'bun'
 import tailwindPlugin from 'bun-plugin-tailwind'
+
+const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
 /**
  * Builds the client-side JavaScript with a dynamic filename
@@ -27,7 +31,7 @@ export async function buildClient() {
 		entrypoints: ['./src/client.tsx'],
 		outdir: './public',
 		plugins: [tailwindPlugin],
-		minify: process.env.NODE_ENV === 'production',
+		minify: appConfig.env.nodeEnv === 'production',
 		target: 'browser',
 		format: 'esm',
 	})

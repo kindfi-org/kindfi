@@ -24,12 +24,10 @@ export function UpdateCard({
 			<div className="inline-block px-3 py-1 bg-gray-100 rounded-md text-sm font-medium mb-6">
 				{category}
 			</div>
-
 			{/* Title */}
 			<h3 className="text-[22px] leading-tight font-semibold mb-6 line-clamp-3">
 				{title}
 			</h3>
-
 			{/* Date */}
 			<time className="text-base text-gray-500">{date}</time>
 		</Link>
