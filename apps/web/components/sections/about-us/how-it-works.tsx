@@ -1,4 +1,3 @@
-
 import { Timeline } from '~/components/shared/timeline'
 import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
