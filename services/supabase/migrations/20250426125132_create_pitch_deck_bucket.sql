@@ -1,21 +1,13 @@
--- Create a public bucket for project pitch decks with size and MIME type restrictions
-INSERT INTO storage.buckets (
-  id,
-  name,
-  public,
-  file_size_limit,
-  allowed_mime_types
-)
-VALUES (
-  'project_pitch_decks',
-  'project_pitch_decks',
-  TRUE,
-  10485760, -- 10MB
-  ARRAY[
-    'application/pdf',
-    'application/vnd.ms-powerpoint', -- .ppt
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation' -- .pptx
-  ]
+-- Create the bucket
+insert into storage.buckets (id, name, public)
+values ('project_pitch_decks', 'project_pitch_decks', false)
+on conflict (id) do nothing;
+
+-- Restrict file types
+create policy "Restrict file types" on storage.objects
+for insert to authenticated with check (
+  bucket_id = 'project_pitch_decks'
+  and (storage.extension(name) in ('pdf', 'ppt', 'pptx', 'key', 'odp'))
 );
 
 -- Allow public read access to objects in the project_pitch_decks bucket

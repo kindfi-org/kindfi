@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS public.project_pitch (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
-    story TEXT NOT NULL,
+    story TEXT,
     pitch_deck VARCHAR(255),
     video_url VARCHAR(255),
     project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
