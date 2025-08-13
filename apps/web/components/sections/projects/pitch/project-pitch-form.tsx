@@ -50,7 +50,7 @@ export function ProjectPitchForm({
 		const payload = {
 			...data,
 			projectId,
-			projectSlug: projectSlug,
+			projectSlug,
 		}
 
 		console.log('Pitch data:', data)

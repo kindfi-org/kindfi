@@ -9,6 +9,8 @@ import {
 	Bold,
 	Heading1,
 	Heading2,
+	Heading3,
+	Heading4,
 	Italic,
 	Link as LinkIcon,
 	List,
@@ -56,7 +58,7 @@ export function RichTextEditor({
 		extensions: [
 			StarterKit.configure({
 				heading: {
-					levels: [1, 2],
+					levels: [1, 2, 3, 4],
 				},
 				bulletList: {
 					keepMarks: true,
@@ -94,7 +96,7 @@ export function RichTextEditor({
 		editorProps: {
 			attributes: {
 				class:
-					'prose prose-sm max-w-none min-h-[200px] p-4 outline-none [&_h1]:text-3xl [&_h2]:text-2xl',
+					'prose prose-sm max-w-none min-h-[200px] p-4 outline-none [&_h1]:text-3xl [&_h2]:text-2xl [&_h3]:text-xl [&_h4]:text-lg',
 			},
 		},
 		immediatelyRender: false,
@@ -124,6 +126,18 @@ export function RichTextEditor({
 			action: () => editor?.chain().focus().toggleHeading({ level: 2 }).run(),
 			label: 'H2',
 			active: editor?.isActive('heading', { level: 2 }),
+		},
+		{
+			icon: Heading3,
+			action: () => editor?.chain().focus().toggleHeading({ level: 3 }).run(),
+			label: 'H3',
+			active: editor?.isActive('heading', { level: 3 }),
+		},
+		{
+			icon: Heading4,
+			action: () => editor?.chain().focus().toggleHeading({ level: 4 }).run(),
+			label: 'H4',
+			active: editor?.isActive('heading', { level: 4 }),
 		},
 		{
 			icon: List,
