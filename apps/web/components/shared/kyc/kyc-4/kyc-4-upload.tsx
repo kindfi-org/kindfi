@@ -267,7 +267,7 @@ const ProofOfAddressUpload = ({
 
 			<CardContent className="space-y-6">
 				<div>
-					<h3 className="text-lg font-medium mb-2">Step 4 of 4</h3>
+					<h3 className="mb-2 text-lg font-medium">Step 4 of 4</h3>
 					<div className="w-full h-2 bg-gray-200 rounded-full">
 						<div className="w-full h-2 bg-black rounded-full" />
 					</div>
@@ -328,11 +328,11 @@ const ProofOfAddressUpload = ({
 				<ValidationDisplay validationErrors={validationErrors} />
 
 				<Alert variant="default">
-					<AlertCircle className="h-4 w-4" />
+					<AlertCircle className="w-4 h-4" />
 					<AlertDescription>
 						<div className="mt-2">
 							<p className="font-medium">Your document must:</p>
-							<ul className="list-disc pl-6 mt-2 space-y-1">
+							<ul className="pl-6 mt-2 space-y-1 list-disc">
 								<li>Be dated within the last 3 months</li>
 								<li>Show your full name and current address</li>
 								<li>Be a clear, complete copy of the original</li>

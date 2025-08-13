@@ -52,3 +52,14 @@ export interface IDDocumentUploadProps {
 }
 
 export type ToastFunction = (props: ToastType) => void
+
+export interface AddressSubmitData {
+	extractedData?: {
+		address?: {
+			street?: string
+			city?: string
+			country?: string
+		}
+	}
+	file: File | null
+}
