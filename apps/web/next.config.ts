@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
 		remotePatterns: [
 			{
 				protocol: isProduction ? 'https' : 'http',
-				hostname: appConfig.database.url || '127.0.0.1',
+				hostname: new URL(appConfig.database.url).hostname || '127.0.0.1',
 				port: appConfig.database.port || '54321',
 				pathname: '/storage/v1/object/public/project_thumbnails/**',
 			},
