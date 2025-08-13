@@ -1,7 +1,11 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
-import { transformToEmbedUrl, uploadPitchDeck } from '~/lib/utils/project-utils'
+import {
+	deleteFolderFromBucket,
+	transformToEmbedUrl,
+	uploadPitchDeck,
+} from '~/lib/utils/project-utils'
 
 export async function POST(
 	req: Request,
@@ -18,6 +22,7 @@ export async function POST(
 		const rawVideoUrl = formData.get('videoUrl') as string | null
 		const videoUrl = rawVideoUrl ? transformToEmbedUrl(rawVideoUrl) : null
 		const pitchDeck = formData.get('pitchDeck') as File | null
+		const removePitchDeck = formData.get('removePitchDeck') === 'true'
 
 		// Single guard clause that also reports which required fields are missing
 		const missingFields = Object.entries({
@@ -36,26 +41,35 @@ export async function POST(
 			)
 		}
 
-		let pitchDeckUrl: string | undefined
-		if (pitchDeck instanceof File) {
-			pitchDeckUrl =
-				(await uploadPitchDeck(projectSlug, pitchDeck, supabase)) ?? undefined
-		}
-
-		const payload: TablesInsert<'project_pitch'> = {
+		const projectPitchData: TablesInsert<'project_pitch'> = {
 			project_id: projectId,
 			title,
 			story,
 			video_url: videoUrl,
 		}
 
-		if (pitchDeckUrl !== undefined) {
-			payload.pitch_deck = pitchDeckUrl // set or replace only when provided
+		if (pitchDeck instanceof File) {
+			projectPitchData.pitch_deck =
+				(await uploadPitchDeck(projectSlug, pitchDeck, supabase)) ?? undefined
+		} else if (removePitchDeck) {
+			// Remove pitch deck from the database
+			projectPitchData.pitch_deck = null
+
+			try {
+				// Delete all files in the project's pitch deck folder
+				await deleteFolderFromBucket(
+					supabase,
+					'project_pitch_decks',
+					projectSlug,
+				)
+			} catch (e) {
+				console.warn('Failed to cleanup thumbnails:', (e as Error).message)
+			}
 		}
 
 		const { error } = await supabase
 			.from('project_pitch')
-			.upsert(payload, { onConflict: 'project_id' })
+			.upsert(projectPitchData, { onConflict: 'project_id' })
 
 		if (error) {
 			console.error(error)

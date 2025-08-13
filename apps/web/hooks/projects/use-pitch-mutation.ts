@@ -24,6 +24,8 @@ export function useProjectPitchMutation() {
 
 			if (formData.pitchDeck instanceof File) {
 				fd.append('pitchDeck', formData.pitchDeck)
+			} else if (formData.pitchDeck === null) {
+				fd.append('removePitchDeck', 'true')
 			}
 
 			const res = await fetch(`/api/projects/${formData.projectSlug}/pitch`, {

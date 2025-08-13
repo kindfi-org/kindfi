@@ -7,7 +7,7 @@ import type {
 	CreateProjectFormData,
 	Tag,
 } from '../types/project/create-project.types'
-import { makeSupabaseAdapter, uploadFile } from './storage'
+import { deleteFolder, makeSupabaseAdapter, uploadFile } from './storage'
 
 /**
  * Checks if a string is a syntactically valid URL.
@@ -24,6 +24,16 @@ export function isValidUrl(url: string): boolean {
 		return false
 	}
 }
+
+/**
+ * Type guard that checks if a given value is a `File` object.
+ * Safe to call in non-browser environments by verifying `File` exists.
+ *
+ * @param value - The value to check
+ * @returns True if the value is a File instance, otherwise false
+ */
+export const isFile = (value: unknown): value is File =>
+	typeof File !== 'undefined' && value instanceof File
 
 /**
  * Transforms the internal `countries` constant into an array of options
@@ -360,4 +370,22 @@ export function transformToEmbedUrl(url: string): string {
 	} catch {
 		return url // invalid URL, return as is
 	}
+}
+
+/**
+ * Convenience helper to delete all files from a bucket/folder with Supabase.
+ *
+ * @param supabase - Supabase client
+ * @param bucket - Bucket name
+ * @param folder - Folder/prefix to clean
+ * @returns The number of files removed
+ * @throws If listing or deleting files fails
+ */
+export async function deleteFolderFromBucket(
+	supabase: TypedSupabaseClient,
+	bucket: string,
+	folder: string,
+): Promise<number> {
+	const client = makeSupabaseAdapter(supabase, bucket)
+	return deleteFolder(client, folder)
 }

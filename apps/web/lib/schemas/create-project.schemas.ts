@@ -1,10 +1,6 @@
 import * as z from 'zod'
 
-import { isAllowedSocialUrl } from '~/lib/utils/project-utils'
-
-// Guards against ReferenceError when running outside the browser
-const isFile = (v: unknown): v is File =>
-	typeof File !== 'undefined' && v instanceof File
+import { isAllowedSocialUrl, isFile } from '~/lib/utils/project-utils'
 
 export const stepOneSchema = z
 	.object({

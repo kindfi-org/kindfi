@@ -42,11 +42,8 @@ export async function uploadFile({
 	deleteExisting?: boolean
 	cacheControl?: string
 }): Promise<string | null> {
-	const { files } = await client.list(folder, { limit: 100 })
-
-	if (deleteExisting && files.length > 0) {
-		const toDelete = files.map((f) => `${folder}/${f.name}`)
-		await client.remove(toDelete)
+	if (deleteExisting) {
+		await deleteFolder(client, folder)
 	}
 
 	const buffer = new Uint8Array(await file.arrayBuffer())
@@ -60,6 +57,26 @@ export async function uploadFile({
 
 	const url = await client.getUrl(filename)
 	return url ?? null
+}
+
+/**
+ * Deletes all files under a given folder (prefix) using the provided storage client.
+ *
+ * @param client - Storage adapter (e.g., Supabase) with list/remove capabilities
+ * @param folder - Folder/prefix to clean (e.g., "project-slug")
+ * @returns The number of files removed
+ * @throws If listing or deleting files fails
+ */
+export async function deleteFolder(
+	client: StorageAdapter,
+	folder: string,
+): Promise<number> {
+	const { files } = await client.list(folder, { limit: 100 })
+	if (!files?.length) return 0
+
+	const paths = files.map((f) => `${folder}/${f.name}`)
+	await client.remove(paths)
+	return paths.length
 }
 
 /**

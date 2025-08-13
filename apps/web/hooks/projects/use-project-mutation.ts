@@ -28,6 +28,8 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 
 			if (formData.image instanceof File) {
 				fd.append('image', formData.image)
+			} else if (formData.image === null) {
+				fd.append('removeImage', 'true')
 			}
 
 			if (formData.website) {
