@@ -7,6 +7,7 @@ import type {
 	CreateProjectFormData,
 	Tag,
 } from '../types/project/create-project.types'
+import { makeSupabaseAdapter, uploadFile } from './storage'
 
 /**
  * Checks if a string is a syntactically valid URL.
@@ -224,10 +225,9 @@ export function buildSocialLinks(
 }
 
 /**
- * Uploads a project's thumbnail image to the Supabase Storage bucket.
+ * Uploads a project's thumbnail image into the "project_thumbnails" bucket.
  *
- * Deletes all existing images under the slug folder and uploads a new one
- * with a unique UUID-based filename. Returns the public URL of the uploaded image.
+ * Removes all existing files in the same folder before upload.
  *
  * @param slug - The slug of the project (used as folder path in the bucket)
  * @param image - The image File to upload
@@ -240,42 +240,18 @@ export async function uploadProjectImage(
 	image: File,
 	supabase: TypedSupabaseClient,
 ): Promise<string | null> {
-	const { data: existingFiles, error: listError } = await supabase.storage
-		.from('project_thumbnails')
-		.list(slug, { limit: 100 })
-
-	if (listError) throw new Error(`Failed to list images: ${listError.message}`)
-
-	if (existingFiles && existingFiles.length > 0) {
-		const filesToDelete = existingFiles.map((file) => `${slug}/${file.name}`)
-		const { error: deleteError } = await supabase.storage
-			.from('project_thumbnails')
-			.remove(filesToDelete)
-
-		if (deleteError)
-			throw new Error(`Failed to delete old images: ${deleteError.message}`)
-	}
-
-	const arrayBuffer = await image.arrayBuffer()
-	const buffer = new Uint8Array(arrayBuffer)
-
-	const extension = image.name.split('.').pop()
-	const filename = `${slug}/${uuidv4()}.${extension}`
-
-	const { error: uploadError } = await supabase.storage
-		.from('project_thumbnails')
-		.upload(filename, buffer, {
-			contentType: image.type,
-			upsert: false,
-		})
-
-	if (uploadError) throw new Error(uploadError.message)
-
-	const { data: publicUrlData } = supabase.storage
-		.from('project_thumbnails')
-		.getPublicUrl(filename)
-
-	return publicUrlData?.publicUrl || null
+	const adapter = makeSupabaseAdapter(supabase, 'project_thumbnails')
+	return uploadFile({
+		client: adapter,
+		folder: slug,
+		file: image,
+		generateFilename: (slug, file) => {
+			const ext = file.name.split('.').pop() || 'png'
+			return `${slug}/${uuidv4()}.${ext}`
+		},
+		deleteExisting: true,
+		cacheControl: '3600', // 1 hour
+	})
 }
 
 /**
@@ -323,56 +299,29 @@ export async function upsertTags(
 }
 
 /**
- * Uploads a project's pitch deck using the project slug as folder path.
+ * Uploads a project's pitch deck into the "project_pitch_decks" bucket.
+ *
+ * Removes all existing files in the same folder before upload.
  *
  * @param slug - The slug of the project (used as folder in Supabase Storage)
  * @param file - The pitch deck file to upload
- * @param supabase - Supabase client instance
- * @returns public URL or null
- * @throws on failure
+ * @param supabase - The Supabase client instance
+ * @returns The public URL of the uploaded file, or null if upload failed
+ * @throws If listing, deleting, or uploading the file fails
  */
 export async function uploadPitchDeck(
 	slug: string,
 	file: File,
 	supabase: TypedSupabaseClient,
 ): Promise<string | null> {
-	const { data: existingFiles, error: listError } = await supabase.storage
-		.from('project_pitch_decks')
-		.list(slug, { limit: 100 })
-
-	if (listError)
-		throw new Error(`Failed to list pitch decks: ${listError.message}`)
-
-	if (existingFiles && existingFiles.length > 0) {
-		const filesToDelete = existingFiles.map((f) => `${slug}/${f.name}`)
-		const { error: deleteError } = await supabase.storage
-			.from('project_pitch_decks')
-			.remove(filesToDelete)
-
-		if (deleteError)
-			throw new Error(
-				`Failed to delete old pitch decks: ${deleteError.message}`,
-			)
-	}
-
-	const arrayBuffer = await file.arrayBuffer()
-	const buffer = new Uint8Array(arrayBuffer)
-	const filename = `${slug}/${file.name}`
-
-	const { error: uploadError } = await supabase.storage
-		.from('project_pitch_decks')
-		.upload(filename, buffer, {
-			contentType: file.type,
-			upsert: false,
-		})
-
-	if (uploadError) throw new Error(`Upload error: ${uploadError.message}`)
-
-	const { data: publicUrlData } = supabase.storage
-		.from('project_pitch_decks')
-		.getPublicUrl(filename)
-
-	return publicUrlData?.publicUrl || null
+	const adapter = makeSupabaseAdapter(supabase, 'project_pitch_decks')
+	return uploadFile({
+		client: adapter,
+		folder: slug,
+		file,
+		deleteExisting: true,
+		cacheControl: '3600', // 1 hour
+	})
 }
 
 /**

@@ -26,7 +26,7 @@ import { RichTextEditor } from './rich-text-editor'
 interface ProjectPitchFormProps {
 	projectId: string
 	projectSlug: string
-	pitch: ProjectPitch
+	pitch?: ProjectPitch | null
 }
 
 export function ProjectPitchForm({
