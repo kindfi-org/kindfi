@@ -2,19 +2,16 @@
 
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import type { ProjectPitchData } from '~/lib/types/project/create-project.types'
 
-type ProjectPitchFormData = {
+type ProjectPitchRequestData = ProjectPitchData & {
 	projectId: string
 	projectSlug: string
-	title: string
-	story: string
-	videoUrl: string | null
-	pitchDeck: File | string | null
 }
 
 export function useProjectPitchMutation() {
 	return useMutation({
-		mutationFn: async (formData: ProjectPitchFormData) => {
+		mutationFn: async (formData: ProjectPitchRequestData) => {
 			const fd = new FormData()
 
 			fd.append('projectId', formData.projectId)
@@ -25,7 +22,7 @@ export function useProjectPitchMutation() {
 				fd.append('videoUrl', formData.videoUrl)
 			}
 
-			if (formData.pitchDeck) {
+			if (formData.pitchDeck instanceof File) {
 				fd.append('pitchDeck', formData.pitchDeck)
 			}
 

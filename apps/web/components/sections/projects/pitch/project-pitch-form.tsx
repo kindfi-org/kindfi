@@ -19,14 +19,14 @@ import {
 import { Input } from '~/components/base/input'
 import { useProjectPitchMutation } from '~/hooks/projects/use-pitch-mutation'
 import { projectPitchSchema } from '~/lib/schemas/create-project.schemas'
-import type { ProjectPitch } from '~/lib/types/project/project-detail.types'
+import type { ProjectPitchData } from '~/lib/types/project/create-project.types'
 import { FileUpload } from './file-upload'
 import { RichTextEditor } from './rich-text-editor'
 
 interface ProjectPitchFormProps {
 	projectId: string
 	projectSlug: string
-	pitch?: ProjectPitch | null
+	pitch?: ProjectPitchData | null
 }
 
 export function ProjectPitchForm({
@@ -36,17 +36,17 @@ export function ProjectPitchForm({
 }: ProjectPitchFormProps) {
 	const { mutateAsync: savePitch, isPending } = useProjectPitchMutation()
 
-	const form = useForm<ProjectPitch>({
+	const form = useForm<ProjectPitchData>({
 		resolver: zodResolver(projectPitchSchema),
 		defaultValues: {
 			title: pitch?.title || '',
 			story: pitch?.story || '',
 			pitchDeck: pitch?.pitchDeck || null,
-			videoUrl: pitch?.videoUrl || '',
+			videoUrl: pitch?.videoUrl || null,
 		},
 	})
 
-	const handleSubmit = async (data: ProjectPitch) => {
+	const handleSubmit = async (data: ProjectPitchData) => {
 		const payload = {
 			...data,
 			projectId,

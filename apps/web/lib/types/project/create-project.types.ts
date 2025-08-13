@@ -42,7 +42,7 @@ export interface CountryOption {
 export type StepOneData = z.infer<typeof stepOneSchema>
 export type StepTwoData = z.infer<typeof stepTwoSchema>
 export type StepThreeData = z.infer<typeof stepThreeSchema>
-export type ProjectPitch = z.infer<typeof projectPitchSchema>
+export type ProjectPitchData = z.infer<typeof projectPitchSchema>
 
 export interface BasicProjectInfo {
 	id: string

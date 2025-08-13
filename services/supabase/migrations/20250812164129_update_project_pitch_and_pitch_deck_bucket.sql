@@ -7,6 +7,10 @@ WHERE story IS NULL;
 ALTER TABLE public.project_pitch
 ALTER COLUMN story SET NOT NULL;
 
+-- Ensure 'project_id' is unique to support upsert on conflict
+ALTER TABLE public.project_pitch
+ADD CONSTRAINT project_pitch_project_id_key UNIQUE (project_id);
+
 -- Create the 'project_pitch_decks' bucket if it does not exist
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('project_pitch_decks', 'project_pitch_decks', TRUE)

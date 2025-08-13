@@ -2,6 +2,10 @@ import * as z from 'zod'
 
 import { isAllowedSocialUrl } from '~/lib/utils/project-utils'
 
+// Guards against ReferenceError when running outside the browser
+const isFile = (v: unknown): v is File =>
+	typeof File !== 'undefined' && v instanceof File
+
 export const stepOneSchema = z
 	.object({
 		title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -19,7 +23,15 @@ export const stepOneSchema = z
 	})
 
 export const stepTwoSchema = z.object({
-	image: z.any().nullable(),
+	image: z
+		.union([
+			z.string().url('Project Image must be a valid URL'),
+			z.custom<File>(
+				(v) => isFile(v),
+				'Project Image must be a File upload or URL',
+			),
+		])
+		.nullable(),
 	website: z
 		.string()
 		.url('Please enter a valid URL (e.g., https://example.com)')
@@ -75,10 +87,18 @@ export const projectPitchSchema = z.object({
 			},
 			{ message: 'Story must be at least 50 characters long' },
 		),
-	pitchDeck: z.any().nullable(),
+	pitchDeck: z
+		.union([
+			z.string().url('Pitch deck must be a valid URL'),
+			z.custom<File>(
+				(v) => isFile(v),
+				'Pitch deck must be a File upload or URL',
+			),
+		])
+		.nullable(),
 	videoUrl: z
 		.string()
-		.optional()
+		.nullable()
 		.refine(
 			(url) => {
 				if (!url || url.trim() === '') return true

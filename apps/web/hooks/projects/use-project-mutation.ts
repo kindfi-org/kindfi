@@ -26,7 +26,7 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 			fd.append('targetAmount', String(formData.targetAmount))
 			fd.append('minimumInvestment', String(formData.minimumInvestment))
 
-			if (formData.image) {
+			if (formData.image instanceof File) {
 				fd.append('image', formData.image)
 			}
 

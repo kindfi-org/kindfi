@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { transformToEmbedUrl, uploadPitchDeck } from '~/lib/utils/project-utils'
 
@@ -16,7 +17,7 @@ export async function POST(
 		const story = formData.get('story') as string
 		const rawVideoUrl = formData.get('videoUrl') as string | null
 		const videoUrl = rawVideoUrl ? transformToEmbedUrl(rawVideoUrl) : null
-		const pitchDeck = formData.get('pitchDeck') as File | string | null
+		const pitchDeck = formData.get('pitchDeck') as File | null
 
 		// Single guard clause that also reports which required fields are missing
 		const missingFields = Object.entries({
@@ -35,38 +36,30 @@ export async function POST(
 			)
 		}
 
-		let pitchDeckUrl: string | null = null
+		let pitchDeckUrl: string | undefined
 		if (pitchDeck instanceof File) {
-			pitchDeckUrl = await uploadPitchDeck(projectSlug, pitchDeck, supabase)
-		} else if (typeof pitchDeck === 'string') {
-			pitchDeckUrl = pitchDeck.trim()
+			pitchDeckUrl =
+				(await uploadPitchDeck(projectSlug, pitchDeck, supabase)) ?? undefined
 		}
 
-		// Check if there's already a pitch for this project
-		const { data: existingPitch } = await supabase
-			.from('project_pitch')
-			.select('id')
-			.eq('project_id', projectId)
-			.single()
-
-		const payload = {
+		const payload: TablesInsert<'project_pitch'> = {
+			project_id: projectId,
 			title,
 			story,
 			video_url: videoUrl,
-			pitch_deck: pitchDeckUrl,
-			project_id: projectId,
 		}
 
-		const result = existingPitch
-			? await supabase
-					.from('project_pitch')
-					.update(payload)
-					.eq('project_id', projectId)
-			: await supabase.from('project_pitch').insert(payload)
+		if (pitchDeckUrl !== undefined) {
+			payload.pitch_deck = pitchDeckUrl // set or replace only when provided
+		}
 
-		if (result.error) {
-			console.error(result.error)
-			return NextResponse.json({ error: result.error.message }, { status: 500 })
+		const { error } = await supabase
+			.from('project_pitch')
+			.upsert(payload, { onConflict: 'project_id' })
+
+		if (error) {
+			console.error(error)
+			return NextResponse.json({ error: error.message }, { status: 500 })
 		}
 
 		return NextResponse.json({
