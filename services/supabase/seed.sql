@@ -190,7 +190,7 @@ values
 <p class="mb-2">With your support, we aim to reach 50 schools and impact over 10,000 students in the first year. Each investment directly contributes to a child's future.</p>
 <p class="mb-2">Join us in creating a world where every child has access to quality education.</p>
 $$,
-   'http://127.0.0.1:54321/storage/v1/object/sign/project_pitch_decks/empowering-education.pdf',
+   'http://127.0.0.1:54321/storage/v1/object/public/project_pitch_decks/empowering-education.pdf',
    'https://www.youtube.com/embed/dwPxCzH0RrU'
   ),
 
@@ -217,7 +217,7 @@ $$,
 <p class="mb-2">This is more than planting trees — it’s a fight for climate stability, food security, and clean water. Supporting this project helps restore the lungs of our planet and ensures a livable future for all.</p>
 <p class="mb-2">Let’s reforest together, one tree at a time.</p>
 $$,
-  'http://127.0.0.1:54321/storage/v1/object/sign/project_pitch_decks/forest-restoration.pdf',
+  'http://127.0.0.1:54321/storage/v1/object/public/project_pitch_decks/forest-restoration.pdf',
   'https://www.youtube.com/embed/vzJmYDw4i54'
   ),
 

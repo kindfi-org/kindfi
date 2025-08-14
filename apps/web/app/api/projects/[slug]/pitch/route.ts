@@ -63,7 +63,10 @@ export async function POST(
 					projectSlug,
 				)
 			} catch (e) {
-				console.warn('Failed to cleanup thumbnails:', (e as Error).message)
+				console.warn(
+					'Failed to cleanup pitch deck folder:',
+					(e as Error).message,
+				)
 			}
 		}
 

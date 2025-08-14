@@ -43,7 +43,14 @@ export async function uploadFile({
 	cacheControl?: string
 }): Promise<string | null> {
 	if (deleteExisting) {
-		await deleteFolder(client, folder)
+		try {
+			await deleteFolder(client, folder)
+		} catch (e) {
+			console.warn(
+				`Failed to delete existing files in ${folder}:`,
+				(e as Error).message,
+			)
+		}
 	}
 
 	const buffer = new Uint8Array(await file.arrayBuffer())

@@ -41,7 +41,11 @@ export function CreateProjectForm() {
 		updateFormData(fullData)
 		console.log('Submitting project:', fullData)
 		const result = await createProject(fullData)
-		router.push(`/projects/${result.slug}/manage`)
+		if ('slug' in result && result.slug) {
+			router.push(`/projects/${result.slug}/manage`)
+		} else {
+			router.push('/projects')
+		}
 	}
 
 	const renderStep = () => {

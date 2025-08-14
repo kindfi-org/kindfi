@@ -2,7 +2,7 @@ import { Skeleton } from '~/components/base/skeleton'
 
 export function UpdateProjectFormSkeleton() {
 	return (
-		<div className="max-w-2xl mx-auto" aria-busy="true" aria-live="polite">
+		<div className="max-w-2xl mx-auto" aria-busy="true">
 			<div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
 				{/* Title */}
 				<div className="space-y-2">

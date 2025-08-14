@@ -20,7 +20,7 @@ export function TipsSidebar() {
 		>
 			<Card className="p-6 shadow-md hover:shadow-lg transition-shadow bg-white">
 				<div className="flex items-center gap-2 mb-4">
-					<Star className="w-5 h-5 text-yellow-500" />
+					<Star className="w-5 h-5 text-yellow-500" aria-hidden="true" />
 					<h3 className="text-xl font-semibold">Writing Tips</h3>
 				</div>
 				<ul className="space-y-3">
@@ -33,7 +33,10 @@ export function TipsSidebar() {
 						'End with a clear call to action',
 					].map((tip) => (
 						<li key={tip} className="flex items-start gap-2">
-							<ChevronRight className="w-4 h-4 mt-1 text-blue-500 shrink-0" />
+							<ChevronRight
+								className="w-4 h-4 mt-1 text-blue-500 shrink-0"
+								aria-hidden="true"
+							/>
 							<span>{tip}</span>
 						</li>
 					))}
@@ -42,7 +45,7 @@ export function TipsSidebar() {
 
 			<Card className="p-6 shadow-md hover:shadow-lg transition-shadow bg-white">
 				<div className="flex items-center gap-2 mb-2">
-					<Lightbulb className="w-5 h-5 text-yellow-500" />
+					<Lightbulb className="w-5 h-5 text-yellow-500" aria-hidden="true" />
 					<h3 className="text-lg font-semibold">Pro Tip</h3>
 				</div>
 				<p className="text-gray-600">

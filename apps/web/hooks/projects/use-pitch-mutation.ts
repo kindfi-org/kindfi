@@ -9,10 +9,12 @@ type ProjectPitchRequestData = ProjectPitchData & {
 	projectSlug: string
 }
 
+type PitchSaveResponse = { message: string }
+
 export function useProjectPitchMutation() {
 	const queryClient = useQueryClient()
 
-	return useMutation({
+	return useMutation<PitchSaveResponse, Error, ProjectPitchRequestData>({
 		mutationFn: async (formData: ProjectPitchRequestData) => {
 			const fd = new FormData()
 
@@ -52,7 +54,6 @@ export function useProjectPitchMutation() {
 			toast.success('Pitch saved successfully! 🎉', {
 				description: 'All your changes have been recorded successfully.',
 			})
-			console.log(_data, variables)
 			queryClient.invalidateQueries({
 				queryKey: ['project-pitch', variables.projectSlug],
 			})

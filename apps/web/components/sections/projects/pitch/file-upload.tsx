@@ -106,7 +106,10 @@ export function FileUpload({
 							)}
 						>
 							<input {...getInputProps()} aria-label={label} />
-							<Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+							<Upload
+								className="mx-auto h-12 w-12 text-gray-400 mb-4"
+								aria-hidden="true"
+							/>
 							<p className="text-lg font-medium text-gray-900 mb-2">
 								{isDragActive ? 'Drop your file here' : label}
 							</p>
@@ -180,7 +183,6 @@ export function FileUpload({
 						transition={{ duration: 0.2 }}
 						className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3"
 						role="alert"
-						aria-live="polite"
 					>
 						<AlertCircle className="h-4 w-4 flex-shrink-0" />
 						<span>{displayError}</span>

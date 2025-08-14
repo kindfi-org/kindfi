@@ -4,6 +4,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { CreateProjectFormData } from '~/lib/types/project/create-project.types'
 
+type CreateProjectResponse = {
+	slug: string
+}
+
+type UpdateProjectResponse = {
+	message: string
+}
+
 type UseProjectMutationOptions = {
 	projectId?: string // If present, triggers update; otherwise, create
 }
@@ -12,7 +20,11 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 	const queryClient = useQueryClient()
 	const isUpdate = Boolean(projectId)
 
-	return useMutation({
+	return useMutation<
+		CreateProjectResponse | UpdateProjectResponse,
+		Error,
+		CreateProjectFormData
+	>({
 		mutationFn: async (formData: CreateProjectFormData) => {
 			const fd = new FormData()
 
@@ -65,7 +77,7 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 
 			return res.json()
 		},
-		onSuccess: (data, variables) => {
+		onSuccess: (_data, variables) => {
 			toast.success(
 				isUpdate
 					? 'Project Updated Successfully! 🎉'
@@ -73,13 +85,12 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 				{
 					description: isUpdate
 						? 'Your changes have been saved.'
-						: `Your project "${data.title}" has been created.\nYou have 7 days to complete your project setup.`,
+						: `Your project "${variables.title}" has been created.\nYou have 7 days to complete your project setup.`,
 				},
 			)
-			console.log(data, variables)
 			if (isUpdate) {
 				queryClient.invalidateQueries({
-					queryKey: ['project-pitch', variables.slug],
+					queryKey: ['basic-project-info', variables.slug],
 				})
 				queryClient.invalidateQueries({
 					queryKey: ['project', variables.slug],
