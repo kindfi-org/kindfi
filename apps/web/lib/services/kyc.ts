@@ -6,8 +6,6 @@ import type { KYCData } from '~/components/shared/kyc/kyc-modal'
 export async function submitKYC(
 	kycData: KYCData,
 ): Promise<{ success: boolean; message?: string }> {
-	
-
 	// Simulate network delay
 	await new Promise((resolve) => setTimeout(resolve, 2000))
 
