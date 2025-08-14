@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { CreateProjectFormData } from '~/lib/types/project/create-project.types'
 
@@ -9,6 +9,9 @@ type UseProjectMutationOptions = {
 }
 
 export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
+	const queryClient = useQueryClient()
+	const isUpdate = Boolean(projectId)
+
 	return useMutation({
 		mutationFn: async (formData: CreateProjectFormData) => {
 			const fd = new FormData()
@@ -42,35 +45,51 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 			fd.append('socialLinks', JSON.stringify(formData.socialLinks))
 
 			const res = await fetch(
-				projectId ? '/api/projects/update' : '/api/projects/create',
+				isUpdate ? '/api/projects/update' : '/api/projects/create',
 				{
-					method: projectId ? 'PATCH' : 'POST',
+					method: isUpdate ? 'PATCH' : 'POST',
 					body: fd,
 				},
 			)
 
 			if (!res.ok) {
-				const error = await res.json()
-				throw new Error(error.error || 'Failed to submit project')
+				try {
+					const error = await res.json()
+					throw new Error(error?.error || 'Failed to submit project')
+				} catch {
+					// Fallback for non-JSON responses
+					const text = await res.text()
+					throw new Error(text || 'Failed to submit project')
+				}
 			}
 
 			return res.json()
 		},
-		onSuccess: (data) => {
+		onSuccess: (data, variables) => {
 			toast.success(
-				projectId
-					? 'Project Updated Successfully 🎉'
+				isUpdate
+					? 'Project Updated Successfully! 🎉'
 					: 'Project Created Successfully! 🎉',
 				{
-					description: projectId
+					description: isUpdate
 						? 'Your changes have been saved.'
 						: `Your project "${data.title}" has been created.\nYou have 7 days to complete your project setup.`,
 				},
 			)
+			console.log(data, variables)
+			if (isUpdate) {
+				queryClient.invalidateQueries({
+					queryKey: ['project-pitch', variables.slug],
+				})
+				queryClient.invalidateQueries({
+					queryKey: ['project', variables.slug],
+				})
+			}
+			queryClient.invalidateQueries({ queryKey: ['projects'] })
 		},
 		onError: (error: Error) => {
 			toast.error(
-				projectId ? 'Failed to update project' : 'Failed to create project',
+				isUpdate ? 'Failed to update project' : 'Failed to create project',
 				{
 					description: error.message,
 				},

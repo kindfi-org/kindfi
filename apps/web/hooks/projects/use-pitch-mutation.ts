@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { ProjectPitchData } from '~/lib/types/project/create-project.types'
 
@@ -10,6 +10,8 @@ type ProjectPitchRequestData = ProjectPitchData & {
 }
 
 export function useProjectPitchMutation() {
+	const queryClient = useQueryClient()
+
 	return useMutation({
 		mutationFn: async (formData: ProjectPitchRequestData) => {
 			const fd = new FormData()
@@ -34,15 +36,28 @@ export function useProjectPitchMutation() {
 			})
 
 			if (!res.ok) {
-				const error = await res.json()
-				throw new Error(error.error || 'Failed to submit pitch')
+				try {
+					const error = await res.json()
+					throw new Error(error?.error || 'Failed to submit pitch')
+				} catch {
+					// Fallback for non-JSON responses
+					const text = await res.text()
+					throw new Error(text || 'Failed to submit pitch')
+				}
 			}
 
 			return res.json()
 		},
-		onSuccess: () => {
-			toast.success('Pitch saved successfully 🎉', {
+		onSuccess: (_data, variables) => {
+			toast.success('Pitch saved successfully! 🎉', {
 				description: 'All your changes have been recorded successfully.',
+			})
+			console.log(_data, variables)
+			queryClient.invalidateQueries({
+				queryKey: ['project-pitch', variables.projectSlug],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['project', variables.projectSlug],
 			})
 		},
 		onError: (error: Error) => {

@@ -10,7 +10,8 @@ export async function getProjectIdTitleAndCategoryBySlug(
 		.eq('slug', slug)
 		.single()
 
-	if (error || !data) throw error || new Error('Project not found')
+	if (error) throw error
+	if (!data) throw new Error(`Project with slug '${slug}' not found`)
 
 	return {
 		id: data.id,

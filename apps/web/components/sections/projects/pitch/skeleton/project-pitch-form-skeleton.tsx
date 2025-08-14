@@ -3,7 +3,7 @@ import { Skeleton } from '~/components/base/skeleton'
 
 export function ProjectPitchFormSkeleton() {
 	return (
-		<div className="max-w-5xl w-full">
+		<div className="max-w-5xl w-full" aria-busy="true" aria-live="polite">
 			<Card className="bg-white">
 				<CardContent>
 					<div className="w-full space-y-6">

@@ -2,7 +2,9 @@
 
 import { motion } from 'framer-motion'
 import parse from 'html-react-parser'
+import DOMPurify from 'isomorphic-dompurify'
 import { Download } from 'lucide-react'
+import { useMemo } from 'react'
 import { Button } from '~/components/base/button'
 import { FileIcon } from '~/components/sections/projects/shared'
 import type { ProjectPitch } from '~/lib/types/project/project-detail.types'
@@ -12,6 +14,12 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ pitch }: OverviewTabProps) {
+	// Sanitize user-provided HTML to prevent XSS before parsing/rendering
+	const safeStory = useMemo(
+		() => (pitch.story ? DOMPurify.sanitize(pitch.story) : ''),
+		[pitch.story],
+	)
+
 	return (
 		<motion.div
 			className="bg-white rounded-xl shadow-sm p-6"
@@ -24,7 +32,7 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 
 			{/* Project story section */}
 			{pitch.story && (
-				<div className="mb-8 prose max-w-none">{parse(pitch.story)}</div>
+				<div className="mb-8 prose max-w-none">{parse(safeStory)}</div>
 			)}
 
 			{/* Video section */}
@@ -38,6 +46,7 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 							className="w-full h-full"
 							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 							allowFullScreen
+							// Keep sandbox to further reduce risk when embedding
 							sandbox="allow-same-origin allow-scripts allow-presentation"
 						/>
 					</div>

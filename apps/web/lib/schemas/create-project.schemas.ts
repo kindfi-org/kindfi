@@ -63,10 +63,10 @@ export const stepThreeSchema = z.object({
 
 // YouTube URL regex pattern
 const youtubeRegex =
-	/^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)[a-zA-Z0-9_-]{11}(&.*)?$/
+	/^(https:\/\/)(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)[a-zA-Z0-9_-]{11}(&.*)?$/
 
 // Vimeo URL regex pattern
-const vimeoRegex = /^(https?:\/\/)?(www\.)?(vimeo\.com\/)[0-9]+(\?.*)?$/
+const vimeoRegex = /^(https:\/\/)(www\.)?(vimeo\.com\/)[0-9]+(\?.*)?$/
 
 export const projectPitchSchema = z.object({
 	title: z
@@ -94,14 +94,15 @@ export const projectPitchSchema = z.object({
 		.nullable(),
 	videoUrl: z
 		.string()
-		.nullable()
+		.transform((v) => v.trim())
+		.transform((v) => (v === '' ? null : v))
 		.refine(
 			(url) => {
-				if (!url || url.trim() === '') return true
+				if (url === null) return true
 				return youtubeRegex.test(url) || vimeoRegex.test(url)
 			},
 			{
-				message: 'Please enter a valid YouTube or Vimeo URL',
+				message: 'Please enter a valid HTTPS YouTube or Vimeo URL',
 			},
 		),
 })

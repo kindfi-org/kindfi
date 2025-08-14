@@ -1,16 +1,22 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { ChevronRight, Lightbulb, Star } from 'lucide-react'
 import { Card } from '~/components/base/card'
 
 export function TipsSidebar() {
+	const shouldReduceMotion = useReducedMotion()
+
 	return (
 		<motion.div
-			className="sticky top-16 space-y-6"
-			initial={{ opacity: 0, y: 20 }}
+			className="sticky top-16 space-y-6 transform-gpu will-change-transform"
+			initial={
+				shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
+			}
 			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.5, delay: 0.2 }}
+			transition={
+				shouldReduceMotion ? undefined : { duration: 0.5, delay: 0.2 }
+			}
 		>
 			<Card className="p-6 shadow-md hover:shadow-lg transition-shadow bg-white">
 				<div className="flex items-center gap-2 mb-4">

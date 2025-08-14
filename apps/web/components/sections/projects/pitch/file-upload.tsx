@@ -179,6 +179,8 @@ export function FileUpload({
 						exit={{ opacity: 0, y: -10 }}
 						transition={{ duration: 0.2 }}
 						className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3"
+						role="alert"
+						aria-live="polite"
 					>
 						<AlertCircle className="h-4 w-4 flex-shrink-0" />
 						<span>{displayError}</span>

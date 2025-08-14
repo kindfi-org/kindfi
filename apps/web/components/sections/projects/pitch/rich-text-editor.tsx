@@ -171,13 +171,13 @@ export function RichTextEditor({
 			icon: Undo,
 			action: () => editor?.chain().focus().undo().run(),
 			label: 'Undo',
-			disabled: !editor?.can().undo(),
+			disabled: !(editor && editor.can().undo()),
 		},
 		{
 			icon: Redo,
 			action: () => editor?.chain().focus().redo().run(),
 			label: 'Redo',
-			disabled: !editor?.can().redo(),
+			disabled: !(editor && editor.can().redo()),
 		},
 	]
 
@@ -220,7 +220,7 @@ export function RichTextEditor({
 					{!editor ? (
 						<div className="p-4 text-gray-400 italic">Loading editor...</div>
 					) : (
-						<EditorContent editor={editor} />
+						<EditorContent editor={editor} aria-invalid={!!error} />
 					)}
 				</div>
 
