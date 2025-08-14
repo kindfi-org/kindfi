@@ -69,12 +69,11 @@ export function useKYC() {
 		try {
 			const result = await submitKYC(kycData)
 			if (result.success) {
-			
 				localStorage.removeItem(KYC_STORAGE_KEY)
 			} else {
 				setError(result.message || 'An unknown error occurred.')
 			}
-		} catch  {
+		} catch {
 			setError('Failed to submit KYC data.')
 		} finally {
 			setIsLoading(false)

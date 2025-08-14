@@ -30,10 +30,10 @@ export default async function UpdateProjectPage({
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<main className="container mx-auto px-4 py-8 md:py-12">
+		<section className="container mx-auto px-4 py-8 md:py-12">
 			<HydrationBoundary state={dehydratedState}>
 				<UpdateProjectWrapper projectSlug={slug} />
 			</HydrationBoundary>
-		</main>
+		</section>
 	)
 }

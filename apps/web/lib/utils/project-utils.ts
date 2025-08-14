@@ -7,6 +7,7 @@ import type {
 	CreateProjectFormData,
 	Tag,
 } from '../types/project/create-project.types'
+import { deleteFolder, makeSupabaseAdapter, uploadFile } from './storage'
 
 /**
  * Checks if a string is a syntactically valid URL.
@@ -23,6 +24,16 @@ export function isValidUrl(url: string): boolean {
 		return false
 	}
 }
+
+/**
+ * Type guard that checks if a given value is a `File` object.
+ * Safe to call in non-browser environments by verifying `File` exists.
+ *
+ * @param value - The value to check
+ * @returns True if the value is a File instance, otherwise false
+ */
+export const isFile = (value: unknown): value is File =>
+	typeof File !== 'undefined' && value instanceof File
 
 /**
  * Transforms the internal `countries` constant into an array of options
@@ -224,10 +235,9 @@ export function buildSocialLinks(
 }
 
 /**
- * Uploads a project's thumbnail image to the Supabase Storage bucket.
+ * Uploads a project's thumbnail image into the "project_thumbnails" bucket.
  *
- * Deletes all existing images under the slug folder and uploads a new one
- * with a unique UUID-based filename. Returns the public URL of the uploaded image.
+ * Removes all existing files in the same folder before upload.
  *
  * @param slug - The slug of the project (used as folder path in the bucket)
  * @param image - The image File to upload
@@ -240,42 +250,18 @@ export async function uploadProjectImage(
 	image: File,
 	supabase: TypedSupabaseClient,
 ): Promise<string | null> {
-	const { data: existingFiles, error: listError } = await supabase.storage
-		.from('project_thumbnails')
-		.list(slug, { limit: 100 })
-
-	if (listError) throw new Error(`Failed to list images: ${listError.message}`)
-
-	if (existingFiles && existingFiles.length > 0) {
-		const filesToDelete = existingFiles.map((file) => `${slug}/${file.name}`)
-		const { error: deleteError } = await supabase.storage
-			.from('project_thumbnails')
-			.remove(filesToDelete)
-
-		if (deleteError)
-			throw new Error(`Failed to delete old images: ${deleteError.message}`)
-	}
-
-	const arrayBuffer = await image.arrayBuffer()
-	const buffer = new Uint8Array(arrayBuffer)
-
-	const extension = image.name.split('.').pop()
-	const filename = `${slug}/${uuidv4()}.${extension}`
-
-	const { error: uploadError } = await supabase.storage
-		.from('project_thumbnails')
-		.upload(filename, buffer, {
-			contentType: image.type,
-			upsert: false,
-		})
-
-	if (uploadError) throw new Error(uploadError.message)
-
-	const { data: publicUrlData } = supabase.storage
-		.from('project_thumbnails')
-		.getPublicUrl(filename)
-
-	return publicUrlData?.publicUrl || null
+	const adapter = makeSupabaseAdapter(supabase, 'project_thumbnails')
+	return uploadFile({
+		client: adapter,
+		folder: slug,
+		file: image,
+		generateFilename: (slug, file) => {
+			const ext = file.name.split('.').pop() || 'png'
+			return `${slug}/${uuidv4()}.${ext}`
+		},
+		deleteExisting: true,
+		cacheControl: '3600', // 1 hour
+	})
 }
 
 /**
@@ -320,4 +306,86 @@ export async function upsertTags(
 		)
 
 	if (relError) throw new Error(relError.message)
+}
+
+/**
+ * Uploads a project's pitch deck into the "project_pitch_decks" bucket.
+ *
+ * Removes all existing files in the same folder before upload.
+ *
+ * @param slug - The slug of the project (used as folder in Supabase Storage)
+ * @param file - The pitch deck file to upload
+ * @param supabase - The Supabase client instance
+ * @returns The public URL of the uploaded file, or null if upload failed
+ * @throws If listing, deleting, or uploading the file fails
+ */
+export async function uploadPitchDeck(
+	slug: string,
+	file: File,
+	supabase: TypedSupabaseClient,
+): Promise<string | null> {
+	const adapter = makeSupabaseAdapter(supabase, 'project_pitch_decks')
+	return uploadFile({
+		client: adapter,
+		folder: slug,
+		file,
+		deleteExisting: true,
+		cacheControl: '3600', // 1 hour
+	})
+}
+
+/**
+ * Converts a YouTube or Vimeo URL into an embeddable format.
+ * Supports typical watch/share links and transforms them to iframe-compatible embed URLs.
+ *
+ * Examples:
+ * - https://www.youtube.com/watch?v=abc123 → https://www.youtube.com/embed/abc123
+ * - https://vimeo.com/123456 → https://player.vimeo.com/video/123456
+ *
+ * @param url - The original video URL provided by the user
+ * @returns The embed-compatible URL if matched, or the original URL if no transformation applies
+ */
+export function transformToEmbedUrl(url: string): string {
+	try {
+		const parsedUrl = new URL(url)
+		const hostname = parsedUrl.hostname
+		const pathname = parsedUrl.pathname
+
+		if (hostname.includes('youtube.com')) {
+			const videoId = parsedUrl.searchParams.get('v')
+			if (videoId) return `https://www.youtube.com/embed/${videoId}`
+		}
+
+		if (hostname === 'youtu.be') {
+			const videoId = pathname.split('/')[1]
+			if (videoId) return `https://www.youtube.com/embed/${videoId}`
+		}
+
+		if (hostname.includes('vimeo.com')) {
+			const videoId = pathname.split('/')[1]
+			if (videoId) return `https://player.vimeo.com/video/${videoId}`
+		}
+
+		return url // fallback (leave unchanged)
+	} catch {
+		return url // invalid URL, return as is
+	}
+}
+
+/**
+ * Convenience helper to delete all files from a bucket/folder with Supabase.
+ *
+ * @param supabase - Supabase client
+ * @param bucket - Bucket name
+ * @param folder - Folder/prefix to clean
+ * @returns The number of files removed
+ * @throws If listing or deleting files fails
+ */
+export async function deleteFolderFromBucket(
+	supabase: TypedSupabaseClient,
+	bucket: string,
+	folder: string,
+): Promise<number> {
+	const client = makeSupabaseAdapter(supabase, bucket)
+	return deleteFolder(client, folder)
 }

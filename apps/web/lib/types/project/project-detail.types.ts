@@ -26,9 +26,8 @@ export interface SocialLinks {
 }
 
 export interface ProjectPitch {
-	id: string
 	title: string
-	story: string | null
+	story: string
 	pitchDeck: string | null
 	videoUrl: string | null
 }

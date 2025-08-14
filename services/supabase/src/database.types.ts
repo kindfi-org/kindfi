@@ -948,7 +948,7 @@ export type Database = {
 					id: string
 					pitch_deck: string | null
 					project_id: string
-					story: string | null
+					story: string
 					title: string
 					updated_at: string | null
 					video_url: string | null
@@ -958,7 +958,7 @@ export type Database = {
 					id?: string
 					pitch_deck?: string | null
 					project_id: string
-					story?: string | null
+					story: string
 					title: string
 					updated_at?: string | null
 					video_url?: string | null
@@ -968,7 +968,7 @@ export type Database = {
 					id?: string
 					pitch_deck?: string | null
 					project_id?: string
-					story?: string | null
+					story?: string
 					title?: string
 					updated_at?: string | null
 					video_url?: string | null
@@ -977,7 +977,7 @@ export type Database = {
 					{
 						foreignKeyName: 'project_pitch_project_id_fkey'
 						columns: ['project_id']
-						isOneToOne: false
+						isOneToOne: true
 						referencedRelation: 'projects'
 						referencedColumns: ['id']
 					},

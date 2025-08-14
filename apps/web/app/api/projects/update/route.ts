@@ -3,6 +3,7 @@ import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import {
 	buildSocialLinks,
+	deleteFolderFromBucket,
 	parseFormData,
 	uploadProjectImage,
 	upsertTags,
@@ -29,6 +30,8 @@ export async function PATCH(req: Request) {
 			image,
 		} = parseFormData(formData)
 
+		const removeImage = formData.get('removeImage') === 'true'
+
 		if (!projectId) {
 			return NextResponse.json(
 				{ error: 'Project id is missing' },
@@ -53,6 +56,18 @@ export async function PATCH(req: Request) {
 
 			const imageUrl = await uploadProjectImage(slug, image, supabase)
 			updateData.image_url = imageUrl
+		} else if (removeImage) {
+			// Remove image from the database
+			updateData.image_url = null
+
+			if (slug) {
+				try {
+					// Delete all files in the project's thumbnail folder
+					await deleteFolderFromBucket(supabase, 'project_thumbnails', slug)
+				} catch (e) {
+					console.warn('Failed to cleanup thumbnails:', (e as Error).message)
+				}
+			}
 		}
 
 		// Update the project record in the database

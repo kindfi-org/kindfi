@@ -90,7 +90,10 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 						aria-label="Upload project image. Accepts JPEG, PNG, WebP files up to 5MB"
 						aria-describedby="upload-instructions"
 					/>
-					<Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+					<Upload
+						className="mx-auto h-12 w-12 text-gray-400 mb-4"
+						aria-hidden="true"
+					/>
 					<p className="text-lg font-medium text-gray-900 mb-2">
 						{isDragActive ? 'Drop your image here' : 'Upload project image'}
 					</p>

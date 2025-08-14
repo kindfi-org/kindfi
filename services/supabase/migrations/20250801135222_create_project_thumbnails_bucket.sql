@@ -12,7 +12,8 @@ VALUES (
   TRUE,
   5242880, -- 5MB
   ARRAY['image/jpeg', 'image/png', 'image/webp']
-);
+)
+ON CONFLICT (id) DO NOTHING;
 
 -- Allow public read access to objects in the project_thumbnails bucket
 CREATE POLICY "Allow public read access to project thumbnails"

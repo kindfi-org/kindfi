@@ -77,7 +77,7 @@ export async function POST(req: Request) {
 		// Create tag relationships for the new project
 		await upsertTags(project.id, tags, supabase)
 
-		return NextResponse.json({ title, slug: project.slug }, { status: 200 })
+		return NextResponse.json({ slug: project.slug }, { status: 201 })
 	} catch (err) {
 		console.error(err)
 		return NextResponse.json(
