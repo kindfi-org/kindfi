@@ -1,8 +1,15 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/base/card'
 import { Button } from '~/components/base/button'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '~/components/base/card'
 import { Textarea } from '~/components/base/textarea'
 
 export interface AskQuestionFormProps {
@@ -13,13 +20,20 @@ export interface AskQuestionFormProps {
 	isDisabled?: boolean
 }
 
-export function AskQuestionForm({ newQuestion, onChange, onSubmit, isSubmitting, isDisabled }: AskQuestionFormProps) {
+export function AskQuestionForm({
+	newQuestion,
+	onChange,
+	onSubmit,
+	isSubmitting,
+	isDisabled,
+}: AskQuestionFormProps) {
 	return (
 		<Card className="border-0 shadow-sm">
 			<CardHeader className="pb-3">
 				<CardTitle className="text-lg">Ask a Question</CardTitle>
 				<CardDescription>
-					Your question will be visible to the project team and community members.
+					Your question will be visible to the project team and community
+					members.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -39,7 +53,10 @@ export function AskQuestionForm({ newQuestion, onChange, onSubmit, isSubmitting,
 				>
 					{isSubmitting ? (
 						<>
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+							<Loader2
+								className="mr-2 h-4 w-4 animate-spin"
+								aria-hidden="true"
+							/>
 							Submitting...
 						</>
 					) : (
@@ -52,5 +69,3 @@ export function AskQuestionForm({ newQuestion, onChange, onSubmit, isSubmitting,
 }
 
 export default AskQuestionForm
-
-

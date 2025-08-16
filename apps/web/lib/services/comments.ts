@@ -9,7 +9,9 @@ export async function fetchQuestions(
 ): Promise<CommentData[]> {
 	const { data, error } = await client
 		.from('comments')
-		.select(`*, author:profiles (id, full_name, image_url, email), project_members (role, project_id, profile_id)`) // eslint-disable-line max-len
+		.select(
+			`*, author:profiles (id, full_name, image_url, email), project_members (role, project_id, profile_id)`,
+		) // eslint-disable-line max-len
 		.eq('project_id', projectId)
 		.eq('type', 'question')
 		.is('parent_comment_id', null)
@@ -56,12 +58,15 @@ export async function fetchChildComments(
 		})) as unknown as CommentData[]
 	}
 
-	const authorsMap = authors.reduce((acc: Record<string, UserData>, author) => {
-		if (author) {
-			acc[author.id] = author
-		}
-		return acc
-	}, {} as Record<string, UserData>)
+	const authorsMap = authors.reduce(
+		(acc: Record<string, UserData>, author) => {
+			if (author) {
+				acc[author.id] = author
+			}
+			return acc
+		},
+		{} as Record<string, UserData>,
+	)
 
 	return data.map((comment) => ({
 		...comment,
@@ -69,21 +74,37 @@ export async function fetchChildComments(
 		author:
 			authorsMap[comment.author_id] ||
 			(comment.author_id?.includes('-')
-				? { id: comment.author_id, full_name: 'Guest User', is_team_member: false }
+				? {
+						id: comment.author_id,
+						full_name: 'Guest User',
+						is_team_member: false,
+					}
 				: null),
 	})) as CommentData[]
 }
 
-export async function insertComment(payload: Partial<Tables<'comments'>>): Promise<Tables<'comments'>> {
-	const { data, error } = await supabase.from('comments').insert(payload).select().single()
+export async function insertComment(
+	payload: Partial<Tables<'comments'>>,
+): Promise<Tables<'comments'>> {
+	const { data, error } = await supabase
+		.from('comments')
+		.insert(payload)
+		.select()
+		.single()
 	if (error) throw error
 	return data
 }
 
-export async function updateComment(id: string, updates: TablesUpdate<'comments'>): Promise<Tables<'comments'>> {
-	const { data, error } = await supabase.from('comments').update(updates).eq('id', id).select().single()
+export async function updateComment(
+	id: string,
+	updates: TablesUpdate<'comments'>,
+): Promise<Tables<'comments'>> {
+	const { data, error } = await supabase
+		.from('comments')
+		.update(updates)
+		.eq('id', id)
+		.select()
+		.single()
 	if (error) throw error
 	return data
 }
-
-

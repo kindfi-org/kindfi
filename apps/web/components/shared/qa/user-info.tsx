@@ -1,11 +1,10 @@
 'use client'
 
-
-import type { UserData, ProfileRow } from '~/lib/types/qa/types'
-import { User as UserIcon } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { User as UserIcon } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
+import type { ProfileRow, UserData } from '~/lib/types/qa/types'
 
 export interface UserInfoProps {
 	authorData?: UserData

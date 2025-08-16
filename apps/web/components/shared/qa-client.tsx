@@ -20,13 +20,19 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '~/components/base/tooltip'
+import { AskQuestionForm } from '~/components/shared/qa/ask-question-form'
+import { QuestionCard } from '~/components/shared/qa/question-card'
+import {
+	fetchChildComments,
+	fetchQuestions,
+	insertComment,
+	updateComment,
+} from '~/lib/services/comments'
 import type {
 	CommentData,
 	CommentWithAnswers,
 	QAClientProps,
 } from '~/lib/types/qa/types'
-import { AskQuestionForm } from '~/components/shared/qa/ask-question-form'
-import { QuestionCard } from '~/components/shared/qa/question-card'
 import {
 	buildQuestionThreads,
 	getGuestRemainingComments as utilGetGuestRemainingComments,
@@ -34,12 +40,6 @@ import {
 	incrementGuestCommentCount as utilIncrementGuestCommentCount,
 	resetGuestCommentCount as utilResetGuestCommentCount,
 } from '~/lib/utils/qa'
-import {
-	fetchChildComments,
-	fetchQuestions,
-	insertComment,
-	updateComment,
-} from '~/lib/services/comments'
 
 // Helper functions moved to utils/qa
 const getGuestUserId = utilGetGuestUserId

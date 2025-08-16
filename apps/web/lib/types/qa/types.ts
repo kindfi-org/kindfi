@@ -3,7 +3,10 @@
 import type { Tables } from '@services/supabase'
 
 export type ProfileRow = Tables<'profiles'>
-export type UserData = ProfileRow | { id: string; full_name: string; is_team_member: boolean } | null
+export type UserData =
+	| ProfileRow
+	| { id: string; full_name: string; is_team_member: boolean }
+	| null
 
 export interface CommentData extends Omit<Tables<'comments'>, 'metadata'> {
 	metadata?: Record<string, unknown>
