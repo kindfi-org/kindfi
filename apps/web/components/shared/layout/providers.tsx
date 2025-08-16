@@ -3,9 +3,9 @@
 import { ReactQueryClientProvider } from '@packages/lib/providers'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
+import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
-import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 
 interface ProvidersProps {
 	children: React.ReactNode

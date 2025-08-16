@@ -2,23 +2,23 @@
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import Autoplay from 'embla-carousel-autoplay'
+import router from 'next/router'
 import { useState } from 'react'
 import {
 	Carousel,
 	CarouselContent,
 	CarouselItem,
 } from '~/components/base/carousel'
+import { CategoryPills } from '~/components/sections/home/category-pills'
 import { ProjectCardGrid } from '~/components/sections/projects/cards'
 import { ProjectCardGridSkeleton } from '~/components/sections/projects/skeletons'
-import { CategoryPills } from '~/components/sections/home/category-pills'
+import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 import { CTAButtons } from '~/components/shared/cta-buttons'
 import { SectionCaption } from '~/components/shared/section-caption'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
-import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
-import router from 'next/router'
 
 export function HighlightedProjects() {
-    const [waitlistOpen, setWaitlistOpen] = useState(false)
+	const [waitlistOpen, setWaitlistOpen] = useState(false)
 	const {
 		data: projects = [],
 		isLoading,
@@ -93,15 +93,15 @@ export function HighlightedProjects() {
 				)}
 
 				<div className="mt-12 flex justify-center">
-                    <CTAButtons
-                        primaryText="Waitlist Your Project"
-                        secondaryText="Explore Causes"
-                        primaryHref={''}
-                        secondaryHref={'/projects'}
-                        onPrimaryClick={() => setWaitlistOpen(true)}
-                        onSecondaryClick={() => router.push('/projects')}
-                    />
-                    <WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
+					<CTAButtons
+						primaryText="Waitlist Your Project"
+						secondaryText="Explore Causes"
+						primaryHref={''}
+						secondaryHref={'/projects'}
+						onPrimaryClick={() => setWaitlistOpen(true)}
+						onSecondaryClick={() => router.push('/projects')}
+					/>
+					<WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
 				</div>
 			</div>
 		</section>

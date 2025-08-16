@@ -3,9 +3,9 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, Loader2, Rocket } from 'lucide-react'
 import { useState } from 'react'
+import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 import { Button } from '../base/button'
 import { Input } from '../base/input'
-import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 
 interface CtaFormProps {
 	onSubmit: (data: { name: string; project: string }) => void

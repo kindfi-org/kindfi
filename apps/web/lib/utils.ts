@@ -36,7 +36,7 @@ export function cn(...inputs: ClassValue[]) {
  * Builds the URL to the projects page filtered by category slug.
  */
 export function buildProjectsCategoryUrl(categorySlug: string): string {
-  return `/projects?category=${encodeURIComponent(categorySlug)}`
+	return `/projects?category=${encodeURIComponent(categorySlug)}`
 }
 
 /**

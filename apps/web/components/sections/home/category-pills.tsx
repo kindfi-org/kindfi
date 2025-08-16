@@ -2,11 +2,9 @@
 
 import type { Tables } from '@services/supabase'
 import { useRouter } from 'next/navigation'
-
-import { cn } from '~/lib/utils'
 import { CategoryBadge } from '~/components/sections/projects/shared'
 import { CategoryBadgeSkeleton } from '~/components/sections/projects/skeletons'
-import { buildProjectsCategoryUrl } from '~/lib/utils'
+import { buildProjectsCategoryUrl, cn } from '~/lib/utils'
 
 interface CategoryPillsProps {
 	categories: Tables<'categories'>[]
@@ -35,12 +33,12 @@ export function CategoryPills({
 		onCategoryClick ||
 		(enableDefaultNavigation
 			? (category: Tables<'categories'>) => {
-				if (!category.slug) return
-				const href = buildUrl
-					? buildUrl(category)
-					: buildProjectsCategoryUrl(category.slug as string)
-				router.push(href)
-			}
+					if (!category.slug) return
+					const href = buildUrl
+						? buildUrl(category)
+						: buildProjectsCategoryUrl(category.slug as string)
+					router.push(href)
+				}
 			: undefined)
 
 	return (
@@ -61,12 +59,14 @@ export function CategoryPills({
 					<CategoryBadge
 						key={category.id}
 						category={category}
-						onClick={handleCategoryClick ? () => handleCategoryClick(category) : undefined}
+						onClick={
+							handleCategoryClick
+								? () => handleCategoryClick(category)
+								: undefined
+						}
 					/>
 				))
 			)}
 		</div>
 	)
 }
-
-

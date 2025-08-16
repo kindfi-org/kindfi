@@ -2,13 +2,21 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState } from 'react'
 import Image from 'next/image'
+import { useState } from 'react'
 import { Button } from '~/components/base/button'
-import { useTypewriter } from '~/hooks/use-typewriter'
 import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
+import { useTypewriter } from '~/hooks/use-typewriter'
 
-const HERO_WORDS = ['Impact', 'Causes', 'World', 'Support', 'Trust', 'Adoption', 'Needs']
+const HERO_WORDS = [
+	'Impact',
+	'Causes',
+	'World',
+	'Support',
+	'Trust',
+	'Adoption',
+	'Needs',
+]
 
 export function Hero() {
 	const { displayText, longestWordCh } = useTypewriter(HERO_WORDS, {
@@ -43,7 +51,7 @@ export function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.2 }}
 					>
-						Where Blockchain Meets{" "}
+						Where Blockchain Meets{' '}
 						<span
 							className="inline-flex items-center"
 							style={{ minWidth: `${longestWordCh}ch` }}
@@ -63,9 +71,11 @@ export function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.4 }}
 					>
-						KindFi is a Latin American platform that connects donors and social projects for real change. Built on secure blockchain technology,
-						we make giving transparent, safe, and easy. With live progress updates so you know your support is making a difference.
-						Start your campaign or find a cause to support today.
+						KindFi is a Latin American platform that connects donors and social
+						projects for real change. Built on secure blockchain technology, we
+						make giving transparent, safe, and easy. With live progress updates
+						so you know your support is making a difference. Start your campaign
+						or find a cause to support today.
 					</motion.p>
 
 					<motion.div
@@ -83,8 +93,15 @@ export function Hero() {
 						transition={{ duration: 0.5, delay: 0.6 }}
 					>
 						<div className="mt-8 flex flex-col items-center gap-3">
-							<span className="text-xl text-muted-foreground">Supported by</span>
-							<a href="https://stellar.org/" target="_blank" rel="noopener noreferrer" aria-label="Visit Stellar.org">
+							<span className="text-xl text-muted-foreground">
+								Supported by
+							</span>
+							<a
+								href="https://stellar.org/"
+								target="_blank"
+								rel="noopener noreferrer"
+								aria-label="Visit Stellar.org"
+							>
 								<Image
 									src="/images/SDF.webp"
 									alt="Stellar Development Foundation"
@@ -106,7 +123,12 @@ function WaitlistCTA() {
 	const [open, setOpen] = useState(false)
 	return (
 		<>
-			<Button size="lg" variant="outline" className="gradient-border-btn" onClick={() => setOpen(true)}>
+			<Button
+				size="lg"
+				variant="outline"
+				className="gradient-border-btn"
+				onClick={() => setOpen(true)}
+			>
 				Waitlist your project
 			</Button>
 			<WaitlistModal open={open} onOpenChange={setOpen} />

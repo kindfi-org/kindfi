@@ -711,6 +711,48 @@ export const projectsUpdateSchema = z.object({
 	updated_at: z.string().optional().nullable(),
 })
 
+export const waitlistInterestsRowSchema = z.object({
+	category_id: z.string().nullable(),
+	consent: z.boolean(),
+	created_at: z.string(),
+	email: z.string().nullable(),
+	id: z.string(),
+	location: z.string().nullable(),
+	name: z.string(),
+	project_description: z.string().nullable(),
+	project_name: z.string().nullable(),
+	role: z.string(),
+	source: z.string().nullable(),
+})
+
+export const waitlistInterestsInsertSchema = z.object({
+	category_id: z.string().optional().nullable(),
+	consent: z.boolean().optional(),
+	created_at: z.string().optional(),
+	email: z.string().optional().nullable(),
+	id: z.string().optional(),
+	location: z.string().optional().nullable(),
+	name: z.string(),
+	project_description: z.string().optional().nullable(),
+	project_name: z.string().optional().nullable(),
+	role: z.string(),
+	source: z.string().optional().nullable(),
+})
+
+export const waitlistInterestsUpdateSchema = z.object({
+	category_id: z.string().optional().nullable(),
+	consent: z.boolean().optional(),
+	created_at: z.string().optional(),
+	email: z.string().optional().nullable(),
+	id: z.string().optional(),
+	location: z.string().optional().nullable(),
+	name: z.string().optional(),
+	project_description: z.string().optional().nullable(),
+	project_name: z.string().optional().nullable(),
+	role: z.string().optional(),
+	source: z.string().optional().nullable(),
+})
+
 export const commentsRowSchema = z.object({
 	author_id: z.string(),
 	content: z.string(),

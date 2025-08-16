@@ -7,7 +7,7 @@ create table if not exists public.waitlist_interests (
   role text not null check (role in ('project_creator','supporter','partner')),
   project_name text null,
   project_description text null,
-  category_id uuid null references public.categories(id) on delete set null,
+  category_id uuid null,
   location text null,
   source text null,
   consent boolean not null default false

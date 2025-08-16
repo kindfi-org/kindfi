@@ -39,7 +39,9 @@ export const KindfiMission = () => {
 						transition={{ duration: 0.6, delay: 0.4 }}
 					>
 						<p className="text-gray-700 mb-6 leading-relaxed text-center sm:text-left">
-						Born in Latin America and powered by secure blockchain technology, KindFi connects donors and social projects to create measurable impact worldwide.
+							Born in Latin America and powered by secure blockchain technology,
+							KindFi connects donors and social projects to create measurable
+							impact worldwide.
 						</p>
 
 						<p className="text-gray-700 mb-8 leading-relaxed text-center sm:text-left">

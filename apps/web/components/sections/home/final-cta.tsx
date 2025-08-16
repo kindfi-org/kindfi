@@ -1,9 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import {
-	features,
-} from '~/lib/constants/final-cta-data'
+import { features } from '~/lib/constants/final-cta-data'
 
 export const FinalCTA = () => {
 	const shouldReduceMotion = useReducedMotion()
@@ -66,9 +64,7 @@ export const FinalCTA = () => {
 							className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full"
 						>
 							<div className="flex items-center gap-4 mb-4">
-								<div className="p-2 rounded-xl bg-teal-50">
-									{feature.icon}
-								</div>
+								<div className="p-2 rounded-xl bg-teal-50">{feature.icon}</div>
 								<h3 className="text-xl font-semibold text-gray-900">
 									{feature.title}
 								</h3>

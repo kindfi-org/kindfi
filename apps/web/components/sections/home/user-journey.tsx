@@ -4,9 +4,9 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '~/components/base/button'
+import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 import { investorSteps, projectSteps } from '~/lib/constants/user-journey-data'
 import { cn } from '~/lib/utils'
-import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 
 type ViewType = 'project' | 'investor'
 
@@ -151,7 +151,10 @@ export function UserJourney() {
 							>
 								Waitlist Your Project
 							</Button>
-							<WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
+							<WaitlistModal
+								open={waitlistOpen}
+								onOpenChange={setWaitlistOpen}
+							/>
 						</>
 					) : (
 						<Button
