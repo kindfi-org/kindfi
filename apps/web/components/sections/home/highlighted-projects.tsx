@@ -2,6 +2,7 @@
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import Autoplay from 'embla-carousel-autoplay'
+import { useState } from 'react'
 import {
 	Carousel,
 	CarouselContent,
@@ -9,11 +10,15 @@ import {
 } from '~/components/base/carousel'
 import { ProjectCardGrid } from '~/components/sections/projects/cards'
 import { ProjectCardGridSkeleton } from '~/components/sections/projects/skeletons'
+import { CategoryPills } from '~/components/sections/home/category-pills'
 import { CTAButtons } from '~/components/shared/cta-buttons'
 import { SectionCaption } from '~/components/shared/section-caption'
-import { getAllProjects } from '~/lib/queries/projects'
+import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
+import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
+import router from 'next/router'
 
 export function HighlightedProjects() {
+    const [waitlistOpen, setWaitlistOpen] = useState(false)
 	const {
 		data: projects = [],
 		isLoading,
@@ -22,6 +27,15 @@ export function HighlightedProjects() {
 		getAllProjects(client, [], 'most-recent', 6),
 	)
 
+	const {
+		data: categories = [],
+		isLoading: isLoadingCategories,
+		error: errorCategories,
+	} = useSupabaseQuery('categories', getAllCategories, {
+		staleTime: 1000 * 60 * 60,
+		gcTime: 1000 * 60 * 60,
+	})
+
 	return (
 		<section className="w-full px-4 py-10 sm:px-6 lg:px-8">
 			<div className="mx-auto max-w-[1400px]">
@@ -29,6 +43,12 @@ export function HighlightedProjects() {
 					title="Change Lives One Block at a Time"
 					subtitle="From clean water and education to healthcare and child welfare, each project on KindFi represents a real-world AID opportunity to make a difference. Explore verified community-backed campaigns, track progress transparently, and support what moves you all through the power of blockchain"
 					highlightWords={['Change Lives One Block at a Time']}
+				/>
+
+				<CategoryPills
+					categories={categories}
+					isLoading={isLoadingCategories}
+					error={errorCategories}
 				/>
 
 				{isLoading ? (
@@ -73,10 +93,15 @@ export function HighlightedProjects() {
 				)}
 
 				<div className="mt-12 flex justify-center">
-					<CTAButtons
-						primaryText="Register Your Project"
-						secondaryText="Explore Causes"
-					/>
+                    <CTAButtons
+                        primaryText="Waitlist Your Project"
+                        secondaryText="Explore Causes"
+                        primaryHref={''}
+                        secondaryHref={'/projects'}
+                        onPrimaryClick={() => setWaitlistOpen(true)}
+                        onSecondaryClick={() => router.push('/projects')}
+                    />
+                    <WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
 				</div>
 			</div>
 		</section>

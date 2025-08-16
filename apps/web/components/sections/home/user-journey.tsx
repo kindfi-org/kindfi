@@ -6,11 +6,13 @@ import React from 'react'
 import { Button } from '~/components/base/button'
 import { investorSteps, projectSteps } from '~/lib/constants/user-journey-data'
 import { cn } from '~/lib/utils'
+import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 
 type ViewType = 'project' | 'investor'
 
 export function UserJourney() {
 	const [activeView, setActiveView] = React.useState<ViewType>('project')
+	const [waitlistOpen, setWaitlistOpen] = React.useState(false)
 
 	const steps = activeView === 'project' ? projectSteps : investorSteps
 
@@ -138,24 +140,30 @@ export function UserJourney() {
 					animate={{ opacity: 1 }}
 					transition={{ duration: 0.5, delay: 0.8 }}
 				>
-					<Button
-						size="lg"
-						className="bg-indigo-900 hover:bg-indigo-800 text-white px-8"
-						asChild
-						aria-label={
-							activeView === 'project'
-								? 'Register your project'
-								: 'Explore causes'
-						}
-					>
-						<Link
-							href={activeView === 'project' ? '/create-project' : '/projects'}
+					{activeView === 'project' ? (
+						<>
+							<Button
+								size="lg"
+								className="gradient-border-btn text-white px-8"
+								onClick={() => setWaitlistOpen(true)}
+								aria-label="Waitlist your project"
+								variant="outline"
+							>
+								Waitlist Your Project
+							</Button>
+							<WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
+						</>
+					) : (
+						<Button
+							size="lg"
+							className="gradient-border-btn text-white px-8"
+							asChild
+							aria-label="Explore causes"
+							variant="outline"
 						>
-							{activeView === 'project'
-								? 'Register Your Project'
-								: 'Explore Causes'}
-						</Link>
-					</Button>
+							<Link href="/projects">Explore Causes</Link>
+						</Button>
+					)}
 				</motion.div>
 			</div>
 		</section>

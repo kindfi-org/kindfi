@@ -33,6 +33,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Builds the URL to the projects page filtered by category slug.
+ */
+export function buildProjectsCategoryUrl(categorySlug: string): string {
+  return `/projects?category=${encodeURIComponent(categorySlug)}`
+}
+
+/**
  * Retrieves the sequence number of an account using the provided secret key.
  *
  * @param {string} secretKey - The secret key of the account.

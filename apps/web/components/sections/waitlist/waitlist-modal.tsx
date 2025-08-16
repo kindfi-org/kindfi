@@ -1,0 +1,381 @@
+'use client'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+
+import { Dialog, DialogContent } from '~/components/base/dialog'
+import { Button } from '~/components/base/button'
+import { Card, CardContent } from '~/components/base/card'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '~/components/base/form'
+import { Input } from '~/components/base/input'
+import { Textarea } from '~/components/base/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/base/select'
+import { useWaitlist } from '~/hooks/contexts/use-waitlist.context'
+import {
+  waitlistSchema,
+  waitlistStepOneSchema,
+  waitlistStepThreeSchema,
+  waitlistStepTwoSchema,
+} from '~/lib/schemas/waitlist.schemas'
+import type {
+  WaitlistFormData,
+  WaitlistStepOneData,
+  WaitlistStepThreeData,
+  WaitlistStepTwoData,
+} from '~/lib/types/waitlist.types'
+import { useSupabaseQuery } from '@packages/lib/hooks'
+import { getAllCategories } from '~/lib/queries/projects/get-all-categories'
+
+interface WaitlistModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
+  const { currentStep, setCurrentStep, formData, updateFormData } = useWaitlist()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleNext = () => {
+    if (currentStep < 3) setCurrentStep(currentStep + 1)
+  }
+  const handleBack = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1)
+  }
+
+  const StepperIndicator = () => {
+    const steps = ['Your interest', 'Project (optional)', 'Consent']
+    return (
+      <div className="flex items-center justify-center mb-6">
+        {steps.map((label, index) => {
+          const stepNumber = index + 1
+          const isActive = currentStep === stepNumber
+          const isCompleted = currentStep > stepNumber
+          return (
+            <div key={label} className="flex items-center">
+              <div
+                className={`h-2 w-8 rounded-full mx-1 ${
+                  isActive ? 'bg-blue-600' : isCompleted ? 'bg-green-600' : 'bg-gray-200'
+                }`}
+                aria-label={`Step ${stepNumber}: ${label}`}
+              />
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <StepOne onNext={handleNext} />
+      case 2:
+        return <StepTwo onNext={handleNext} onBack={handleBack} />
+      case 3:
+        return (
+          <StepThree onBack={handleBack} onSubmit={async (data) => {
+            setIsSubmitting(true)
+            try {
+              const body: WaitlistFormData = { ...formData, ...data }
+              const res = await fetch('/api/waitlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+              })
+              if (!res.ok) {
+                const err = await res.json().catch(() => ({}))
+                throw new Error(err?.error || 'Failed to submit interest')
+              }
+              onOpenChange(false)
+            } catch (_e) {
+              // could add a toast here if desired
+            } finally {
+              setIsSubmitting(false)
+            }
+          }} isPending={isSubmitting} />
+        )
+      default:
+        return <StepOne onNext={handleNext} />
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <StepperIndicator />
+        <AnimatePresence mode="wait">{renderStep()}</AnimatePresence>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function StepOne({ onNext }: { onNext: () => void }) {
+  const { formData, updateFormData } = useWaitlist()
+  const form = useForm<WaitlistStepOneData>({
+    resolver: zodResolver(waitlistStepOneSchema),
+    defaultValues: {
+      name: formData.name,
+      email: formData.email || '',
+      role: formData.role,
+    },
+  })
+
+  const onSubmit = (data: WaitlistStepOneData) => {
+    updateFormData({ ...data, email: data.email || undefined })
+    onNext()
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.3 }}>
+      <Card className="bg-white">
+        <CardContent className="pt-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Your name *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Maria Lopez" className="bg-white" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email (optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="you@example.com" className="bg-white" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>I am a *</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="project_creator">Project creator</SelectItem>
+                          <SelectItem value="supporter">Supporter</SelectItem>
+                          <SelectItem value="partner">Partner</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end">
+                <Button type="submit" className="min-w-28">
+                  Next <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+function StepTwo({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
+  const { formData, updateFormData } = useWaitlist()
+  const { data: categories = [] } = useSupabaseQuery('categories', getAllCategories)
+  const form = useForm<WaitlistStepTwoData>({
+    resolver: zodResolver(waitlistStepTwoSchema),
+    defaultValues: {
+      projectName: formData.projectName || '',
+      projectDescription: formData.projectDescription || '',
+      categoryId: formData.categoryId || '',
+      location: formData.location || '',
+    },
+  })
+
+  const onSubmit = (data: WaitlistStepTwoData) => {
+    updateFormData({ ...data, categoryId: data.categoryId || undefined })
+    onNext()
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.3 }}>
+      <Card className="bg-white">
+        <CardContent className="pt-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="projectName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project name (optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Agua Limpia en Lima" className="bg-white" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="projectDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Brief description (optional)</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="What is the impact you want to create?" className="bg-white" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category (optional)</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location (optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="City, Country" className="bg-white" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-between">
+                <Button type="button" variant="outline" onClick={onBack}>
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Back
+                </Button>
+                <Button type="submit" className="min-w-28">
+                  Next <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+function StepThree({ onBack, onSubmit, isPending = false }: { onBack: () => void; onSubmit: (d: WaitlistStepThreeData) => void; isPending?: boolean }) {
+  const { formData, updateFormData } = useWaitlist()
+  const form = useForm<WaitlistStepThreeData>({
+    resolver: zodResolver(waitlistStepThreeSchema),
+    defaultValues: {
+      source: formData.source || '',
+      consent: formData.consent,
+    },
+  })
+
+  const handleSubmit = (data: WaitlistStepThreeData) => {
+    updateFormData(data)
+    onSubmit(data)
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.3 }}>
+      <Card className="bg-white">
+        <CardContent className="pt-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="source"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Where did you hear about KindFi? (optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Twitter, Stellar, friend, etc." className="bg-white" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="consent"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center gap-3">
+                      <input id="consent" type="checkbox" className="h-4 w-4" checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />
+                      <FormLabel htmlFor="consent">I agree to be contacted about KindFi updates</FormLabel>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-between">
+                <Button type="button" variant="outline" onClick={onBack}>
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Back
+                </Button>
+                <Button type="submit" className="min-w-28" disabled={isPending}>
+                  {isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting
+                    </>
+                  ) : (
+                    'Submit'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+
