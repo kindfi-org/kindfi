@@ -1,5 +1,4 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { waitlistSchema } from '~/lib/schemas/waitlist.schemas'
 
@@ -30,8 +29,7 @@ export async function POST(req: Request) {
 			consent,
 		} = parsed.data
 
-		const anyClient = supabase as unknown as SupabaseClient<any>
-		const { data, error } = await anyClient
+		const { data, error } = await supabase
 			.from('waitlist_interests')
 			.insert({
 				name,

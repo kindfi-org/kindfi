@@ -4,7 +4,7 @@ import type { KYCData } from '~/components/shared/kyc/kyc-modal'
 
 // Simulate an API call to submit KYC data
 export async function submitKYC(
-	kycData: KYCData,
+	_kycData: KYCData,
 ): Promise<{ success: boolean; message?: string }> {
 	// Simulate network delay
 	await new Promise((resolve) => setTimeout(resolve, 2000))

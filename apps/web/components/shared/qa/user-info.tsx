@@ -1,0 +1,76 @@
+'use client'
+
+
+import type { UserData, ProfileRow } from '~/lib/types/qa/types'
+import { User as UserIcon } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
+import { Badge } from '~/components/base/badge'
+
+export interface UserInfoProps {
+	authorData?: UserData
+	createdAt: string
+	size?: 'sm' | 'md'
+}
+
+export function UserInfo({
+	authorData,
+	createdAt,
+	size = 'md',
+}: UserInfoProps) {
+	if (!authorData) {
+		return null
+	}
+
+	const avatarSize = size === 'sm' ? 'h-6 w-6' : 'h-8 w-8'
+	const iconSize = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'
+	const nameSize = size === 'sm' ? 'text-sm' : 'text-base'
+	const timeSize = size === 'sm' ? 'text-xs' : 'text-sm'
+
+	// Narrow union: profile row vs guest shape
+	let avatarUrl: string | null = null
+	let displayName: string = ''
+	let role: string | undefined
+	if ('display_name' in authorData) {
+		const profile = authorData as ProfileRow
+		avatarUrl = profile.image_url
+		displayName = profile.display_name || `User ${profile.id.substring(0, 6)}`
+		role = profile.role
+	} else {
+		// guest shape
+		displayName =
+			authorData.full_name || `User ${authorData.id.substring(0, 6)}`
+	}
+
+	return (
+		<div className="flex gap-2 items-center">
+			<Avatar className={avatarSize}>
+				{avatarUrl ? (
+					<AvatarImage src={avatarUrl} alt="User avatar" />
+				) : (
+					<AvatarFallback>
+						<UserIcon className={iconSize} aria-hidden="true" />
+					</AvatarFallback>
+				)}
+			</Avatar>
+			<div>
+				<div className="flex items-center">
+					<p className={`font-medium ${nameSize}`}>{displayName}</p>
+					{role && (
+						<Badge
+							variant="outline"
+							className="py-0 ml-2 h-5 text-xs text-blue-700 bg-blue-50 border-blue-200"
+						>
+							{role}
+						</Badge>
+					)}
+				</div>
+				<p className={`text-muted-foreground ${timeSize}`}>
+					{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+				</p>
+			</div>
+		</div>
+	)
+}
+
+export default UserInfo

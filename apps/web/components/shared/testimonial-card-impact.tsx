@@ -16,9 +16,9 @@ export function TestimonialCard({ testimonial, index }: TestimonialCardProps) {
 			whileInView={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.5, delay: index * 0.1 }}
 			viewport={{ once: true }}
-			className="flex flex-col items-center rounded-2xl bg-white p-8 shadow-lg"
+			className="flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg"
 		>
-			<Avatar className="h-20 w-20 mb-4">
+			<Avatar className="mb-4 w-20 h-20">
 				<AvatarImage src={testimonial.image} alt={testimonial.name} />
 				<AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
 			</Avatar>
@@ -31,7 +31,7 @@ export function TestimonialCard({ testimonial, index }: TestimonialCardProps) {
 			</div>
 
 			<blockquote className="mt-6 text-center">
-				<p className="text-gray-700 italic">"{testimonial.quote}"</p>
+				<p className="italic text-gray-700">&quot;{testimonial.quote}&quot;</p>
 			</blockquote>
 		</motion.div>
 	)
