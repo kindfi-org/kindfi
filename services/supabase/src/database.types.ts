@@ -17,161 +17,12 @@ export type Database = {
 		Functions: {
 			graphql: {
 				Args: {
-					extensions?: Json
 					operationName?: string
 					query?: string
 					variables?: Json
+					extensions?: Json
 				}
 				Returns: Json
-			}
-		}
-		Enums: {
-			[_ in never]: never
-		}
-		CompositeTypes: {
-			[_ in never]: never
-		}
-	}
-	next_auth: {
-		Tables: {
-			accounts: {
-				Row: {
-					access_token: string | null
-					expires_at: number | null
-					id: string
-					id_token: string | null
-					oauth_token: string | null
-					oauth_token_secret: string | null
-					provider: string
-					provider_account_id: string
-					refresh_token: string | null
-					scope: string | null
-					session_state: string | null
-					token_type: string | null
-					type: string
-					user_id: string | null
-				}
-				Insert: {
-					access_token?: string | null
-					expires_at?: number | null
-					id?: string
-					id_token?: string | null
-					oauth_token?: string | null
-					oauth_token_secret?: string | null
-					provider: string
-					provider_account_id: string
-					refresh_token?: string | null
-					scope?: string | null
-					session_state?: string | null
-					token_type?: string | null
-					type: string
-					user_id?: string | null
-				}
-				Update: {
-					access_token?: string | null
-					expires_at?: number | null
-					id?: string
-					id_token?: string | null
-					oauth_token?: string | null
-					oauth_token_secret?: string | null
-					provider?: string
-					provider_account_id?: string
-					refresh_token?: string | null
-					scope?: string | null
-					session_state?: string | null
-					token_type?: string | null
-					type?: string
-					user_id?: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'accounts_user_id_fkey'
-						columns: ['user_id']
-						isOneToOne: false
-						referencedRelation: 'users'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			sessions: {
-				Row: {
-					expires: string
-					id: string
-					session_token: string
-					user_id: string | null
-				}
-				Insert: {
-					expires: string
-					id?: string
-					session_token: string
-					user_id?: string | null
-				}
-				Update: {
-					expires?: string
-					id?: string
-					session_token?: string
-					user_id?: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'sessions_user_id_fkey'
-						columns: ['user_id']
-						isOneToOne: false
-						referencedRelation: 'users'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			users: {
-				Row: {
-					email: string | null
-					emailVerified: string | null
-					id: string
-					image: string | null
-					name: string | null
-				}
-				Insert: {
-					email?: string | null
-					emailVerified?: string | null
-					id?: string
-					image?: string | null
-					name?: string | null
-				}
-				Update: {
-					email?: string | null
-					emailVerified?: string | null
-					id?: string
-					image?: string | null
-					name?: string | null
-				}
-				Relationships: []
-			}
-			verification_tokens: {
-				Row: {
-					expires: string
-					identifier: string | null
-					token: string
-				}
-				Insert: {
-					expires: string
-					identifier?: string | null
-					token: string
-				}
-				Update: {
-					expires?: string
-					identifier?: string | null
-					token?: string
-				}
-				Relationships: []
-			}
-		}
-		Views: {
-			[_ in never]: never
-		}
-		Functions: {
-			uid: {
-				Args: Record<PropertyKey, never>
-				Returns: string
 			}
 		}
 		Enums: {
@@ -201,39 +52,6 @@ export type Database = {
 					id?: string
 					name?: string
 					slug?: string | null
-				}
-				Relationships: []
-			}
-			challenges: {
-				Row: {
-					challenge: string
-					created_at: string
-					expires_at: string
-					id: string
-					identifier: string
-					next_auth_user_id: string | null
-					rp_id: string
-					user_id: string | null
-				}
-				Insert: {
-					challenge: string
-					created_at?: string
-					expires_at?: string
-					id?: string
-					identifier: string
-					next_auth_user_id?: string | null
-					rp_id: string
-					user_id?: string | null
-				}
-				Update: {
-					challenge?: string
-					created_at?: string
-					expires_at?: string
-					id?: string
-					identifier?: string
-					next_auth_user_id?: string | null
-					rp_id?: string
-					user_id?: string | null
 				}
 				Relationships: []
 			}
@@ -378,72 +196,6 @@ export type Database = {
 						referencedColumns: ['id']
 					},
 				]
-			}
-			devices: {
-				Row: {
-					aaguid: string
-					address: string
-					backup_state: Database['public']['Enums']['backup_state']
-					created_at: string
-					credential_id: string
-					credential_type: Database['public']['Enums']['credential_type']
-					device_name: string | null
-					device_type: Database['public']['Enums']['device_type']
-					id: string
-					identifier: string
-					last_used_at: string | null
-					next_auth_user_id: string | null
-					profile_verification_status: Database['public']['Enums']['profile_verification_status']
-					public_key: string
-					rp_id: string
-					sign_count: number
-					transports: string[]
-					updated_at: string
-					user_id: string | null
-				}
-				Insert: {
-					aaguid?: string
-					address?: string
-					backup_state?: Database['public']['Enums']['backup_state']
-					created_at?: string
-					credential_id: string
-					credential_type?: Database['public']['Enums']['credential_type']
-					device_name?: string | null
-					device_type?: Database['public']['Enums']['device_type']
-					id?: string
-					identifier: string
-					last_used_at?: string | null
-					next_auth_user_id?: string | null
-					profile_verification_status?: Database['public']['Enums']['profile_verification_status']
-					public_key: string
-					rp_id: string
-					sign_count?: number
-					transports?: string[]
-					updated_at?: string
-					user_id?: string | null
-				}
-				Update: {
-					aaguid?: string
-					address?: string
-					backup_state?: Database['public']['Enums']['backup_state']
-					created_at?: string
-					credential_id?: string
-					credential_type?: Database['public']['Enums']['credential_type']
-					device_name?: string | null
-					device_type?: Database['public']['Enums']['device_type']
-					id?: string
-					identifier?: string
-					last_used_at?: string | null
-					next_auth_user_id?: string | null
-					profile_verification_status?: Database['public']['Enums']['profile_verification_status']
-					public_key?: string
-					rp_id?: string
-					sign_count?: number
-					transports?: string[]
-					updated_at?: string
-					user_id?: string | null
-				}
-				Relationships: []
 			}
 			escrow_contracts: {
 				Row: {
@@ -674,6 +426,8 @@ export type Database = {
 					review_notes: string | null
 					reviewer_id: string
 					updated_at: string
+					user_id: string
+					verification_level: Database['public']['Enums']['kyc_verification_enum']
 				}
 				Insert: {
 					additional_notes?: string | null
@@ -685,6 +439,8 @@ export type Database = {
 					review_notes?: string | null
 					reviewer_id: string
 					updated_at?: string
+					user_id: string
+					verification_level: Database['public']['Enums']['kyc_verification_enum']
 				}
 				Update: {
 					additional_notes?: string | null
@@ -696,6 +452,8 @@ export type Database = {
 					review_notes?: string | null
 					reviewer_id?: string
 					updated_at?: string
+					user_id?: string
+					verification_level?: Database['public']['Enums']['kyc_verification_enum']
 				}
 				Relationships: [
 					{
@@ -731,6 +489,36 @@ export type Database = {
 					updated_at?: string
 					user_id?: string
 					verification_level?: Database['public']['Enums']['kyc_verification_enum']
+				}
+				Relationships: []
+			}
+			kyc_verification_reviews: {
+				Row: {
+					created_at: string
+					id: string
+					notes: string | null
+					reviewer_id: string
+					status: Database['public']['Enums']['kyc_status_enum']
+					updated_at: string
+					user_id: string
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					notes?: string | null
+					reviewer_id: string
+					status: Database['public']['Enums']['kyc_status_enum']
+					updated_at?: string
+					user_id: string
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					notes?: string | null
+					reviewer_id?: string
+					status?: Database['public']['Enums']['kyc_status_enum']
+					updated_at?: string
+					user_id?: string
 				}
 				Relationships: []
 			}
@@ -873,21 +661,17 @@ export type Database = {
 					bio: string | null
 					created_at: string
 					display_name: string
-					email: string | null
 					id: string
 					image_url: string | null
-					next_auth_user_id: string | null
 					role: Database['public']['Enums']['user_role']
 					updated_at: string
 				}
 				Insert: {
 					bio?: string | null
 					created_at?: string
-					display_name?: string
-					email?: string | null
+					display_name: string
 					id: string
 					image_url?: string | null
-					next_auth_user_id?: string | null
 					role?: Database['public']['Enums']['user_role']
 					updated_at?: string
 				}
@@ -895,10 +679,8 @@ export type Database = {
 					bio?: string | null
 					created_at?: string
 					display_name?: string
-					email?: string | null
 					id?: string
 					image_url?: string | null
-					next_auth_user_id?: string | null
 					role?: Database['public']['Enums']['user_role']
 					updated_at?: string
 				}
@@ -919,7 +701,7 @@ export type Database = {
 					joined_at?: string
 					project_id: string
 					role?: Database['public']['Enums']['project_member_role']
-					title?: string
+					title: string
 					updated_at?: string
 					user_id: string
 				}
@@ -948,7 +730,7 @@ export type Database = {
 					id: string
 					pitch_deck: string | null
 					project_id: string
-					story: string
+					story: string | null
 					title: string
 					updated_at: string | null
 					video_url: string | null
@@ -958,7 +740,7 @@ export type Database = {
 					id?: string
 					pitch_deck?: string | null
 					project_id: string
-					story: string
+					story?: string | null
 					title: string
 					updated_at?: string | null
 					video_url?: string | null
@@ -968,7 +750,7 @@ export type Database = {
 					id?: string
 					pitch_deck?: string | null
 					project_id?: string
-					story?: string
+					story?: string | null
 					title?: string
 					updated_at?: string | null
 					video_url?: string | null
@@ -977,7 +759,7 @@ export type Database = {
 					{
 						foreignKeyName: 'project_pitch_project_id_fkey'
 						columns: ['project_id']
-						isOneToOne: true
+						isOneToOne: false
 						referencedRelation: 'projects'
 						referencedColumns: ['id']
 					},
@@ -1077,54 +859,54 @@ export type Database = {
 			}
 			projects: {
 				Row: {
-					category_id: string
+					category_id: string | null
 					created_at: string | null
 					current_amount: number
-					description: string
+					description: string | null
 					id: string
 					image_url: string | null
 					kinder_count: number
 					kindler_id: string
 					min_investment: number
 					percentage_complete: number
-					project_location: string
-					slug: string | null
+					project_location: string | null
+					slug: string
 					social_links: Json
 					target_amount: number
 					title: string
 					updated_at: string | null
 				}
 				Insert: {
-					category_id: string
+					category_id?: string | null
 					created_at?: string | null
 					current_amount?: number
-					description: string
+					description?: string | null
 					id?: string
 					image_url?: string | null
 					kinder_count?: number
 					kindler_id: string
 					min_investment: number
 					percentage_complete?: number
-					project_location: string
-					slug?: string | null
+					project_location?: string | null
+					slug: string
 					social_links?: Json
 					target_amount: number
 					title: string
 					updated_at?: string | null
 				}
 				Update: {
-					category_id?: string
+					category_id?: string | null
 					created_at?: string | null
 					current_amount?: number
-					description?: string
+					description?: string | null
 					id?: string
 					image_url?: string | null
 					kinder_count?: number
 					kindler_id?: string
 					min_investment?: number
 					percentage_complete?: number
-					project_location?: string
-					slug?: string | null
+					project_location?: string | null
+					slug?: string
 					social_links?: Json
 					target_amount?: number
 					title?: string
@@ -1145,10 +927,6 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
-			cleanup_expired_challenges: {
-				Args: Record<PropertyKey, never>
-				Returns: undefined
-			}
 			unaccent: {
 				Args: { '': string }
 				Returns: string
@@ -1159,10 +937,7 @@ export type Database = {
 			}
 		}
 		Enums: {
-			backup_state: 'not_backed_up' | 'backed_up'
 			comment_type: 'comment' | 'question' | 'answer'
-			credential_type: 'public-key'
-			device_type: 'single_device' | 'multi_device'
 			escrow_status_type:
 				| 'NEW'
 				| 'FUNDED'
@@ -1181,7 +956,6 @@ export type Database = {
 			notification_delivery_status: 'pending' | 'delivered' | 'failed'
 			notification_priority: 'low' | 'medium' | 'high' | 'urgent'
 			notification_type: 'info' | 'success' | 'warning' | 'error'
-			profile_verification_status: 'unverified' | 'verified'
 			project_member_role:
 				| 'admin'
 				| 'editor'
@@ -1197,25 +971,21 @@ export type Database = {
 	}
 }
 
-type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
+type DefaultSchema = Database[Extract<keyof Database, 'public'>]
 
 export type Tables<
 	DefaultSchemaTableNameOrOptions extends
 		| keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
-		| { schema: keyof DatabaseWithoutInternals },
+		| { schema: keyof Database },
 	TableName extends DefaultSchemaTableNameOrOptions extends {
-		schema: keyof DatabaseWithoutInternals
+		schema: keyof Database
 	}
-		? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-				DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+		? keyof (Database[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+				Database[DefaultSchemaTableNameOrOptions['schema']]['Views'])
 		: never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals
-}
-	? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-			DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+	? (Database[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+			Database[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
 			Row: infer R
 		}
 		? R
@@ -1233,16 +1003,14 @@ export type Tables<
 export type TablesInsert<
 	DefaultSchemaTableNameOrOptions extends
 		| keyof DefaultSchema['Tables']
-		| { schema: keyof DatabaseWithoutInternals },
+		| { schema: keyof Database },
 	TableName extends DefaultSchemaTableNameOrOptions extends {
-		schema: keyof DatabaseWithoutInternals
+		schema: keyof Database
 	}
-		? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+		? keyof Database[DefaultSchemaTableNameOrOptions['schema']]['Tables']
 		: never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals
-}
-	? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+	? Database[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
 			Insert: infer I
 		}
 		? I
@@ -1258,16 +1026,14 @@ export type TablesInsert<
 export type TablesUpdate<
 	DefaultSchemaTableNameOrOptions extends
 		| keyof DefaultSchema['Tables']
-		| { schema: keyof DatabaseWithoutInternals },
+		| { schema: keyof Database },
 	TableName extends DefaultSchemaTableNameOrOptions extends {
-		schema: keyof DatabaseWithoutInternals
+		schema: keyof Database
 	}
-		? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+		? keyof Database[DefaultSchemaTableNameOrOptions['schema']]['Tables']
 		: never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals
-}
-	? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+	? Database[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
 			Update: infer U
 		}
 		? U
@@ -1283,16 +1049,14 @@ export type TablesUpdate<
 export type Enums<
 	DefaultSchemaEnumNameOrOptions extends
 		| keyof DefaultSchema['Enums']
-		| { schema: keyof DatabaseWithoutInternals },
+		| { schema: keyof Database },
 	EnumName extends DefaultSchemaEnumNameOrOptions extends {
-		schema: keyof DatabaseWithoutInternals
+		schema: keyof Database
 	}
-		? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+		? keyof Database[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
 		: never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals
-}
-	? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+	? Database[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
 	: DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
 		? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
 		: never
@@ -1300,16 +1064,14 @@ export type Enums<
 export type CompositeTypes<
 	PublicCompositeTypeNameOrOptions extends
 		| keyof DefaultSchema['CompositeTypes']
-		| { schema: keyof DatabaseWithoutInternals },
+		| { schema: keyof Database },
 	CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-		schema: keyof DatabaseWithoutInternals
+		schema: keyof Database
 	}
-		? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+		? keyof Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
 		: never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals
-}
-	? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+	? Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
 	: PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
 		? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
 		: never
@@ -1318,15 +1080,9 @@ export const Constants = {
 	graphql_public: {
 		Enums: {},
 	},
-	next_auth: {
-		Enums: {},
-	},
 	public: {
 		Enums: {
-			backup_state: ['not_backed_up', 'backed_up'],
 			comment_type: ['comment', 'question', 'answer'],
-			credential_type: ['public-key'],
-			device_type: ['single_device', 'multi_device'],
 			escrow_status_type: [
 				'NEW',
 				'FUNDED',
@@ -1347,7 +1103,6 @@ export const Constants = {
 			notification_delivery_status: ['pending', 'delivered', 'failed'],
 			notification_priority: ['low', 'medium', 'high', 'urgent'],
 			notification_type: ['info', 'success', 'warning', 'error'],
-			profile_verification_status: ['unverified', 'verified'],
 			project_member_role: [
 				'admin',
 				'editor',
