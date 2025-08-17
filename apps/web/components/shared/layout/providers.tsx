@@ -3,6 +3,7 @@
 import { ReactQueryClientProvider } from '@packages/lib/providers'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
+import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
 
@@ -70,7 +71,9 @@ export function Providers({ children }: ProvidersProps) {
 				disableTransitionOnChange
 			>
 				<AuthProvider>
-					<StellarProvider>{children}</StellarProvider>
+					<WaitlistProvider>
+						<StellarProvider>{children}</StellarProvider>
+					</WaitlistProvider>
 				</AuthProvider>
 			</NextThemesProvider>
 		</ReactQueryClientProvider>

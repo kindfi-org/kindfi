@@ -1,25 +1,31 @@
 /** biome-ignore-all lint/a11y/useSemanticElements: any */
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { useState } from 'react'
 import { Button } from '~/components/base/button'
-import { CategoryBadge } from '~/components/sections/projects/shared'
-import { CategoryBadgeSkeleton } from '~/components/sections/projects/skeletons'
-import { getAllCategories } from '~/lib/queries/projects'
+import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
+import { useTypewriter } from '~/hooks/use-typewriter'
+
+const HERO_WORDS = [
+	'Impact',
+	'Causes',
+	'World',
+	'Support',
+	'Trust',
+	'Adoption',
+	'Needs',
+]
 
 export function Hero() {
-	const router = useRouter()
-
-	const {
-		data: categories = [],
-		isLoading,
-		error,
-	} = useSupabaseQuery('categories', getAllCategories, {
-		staleTime: 1000 * 60 * 60, // 1 hour
-		gcTime: 1000 * 60 * 60, // 1 hour
+	const { displayText, longestWordCh } = useTypewriter(HERO_WORDS, {
+		typingSpeedMs: 120,
+		deletingSpeedMs: 70,
+		fullWordPauseMs: 1200,
+		emptyPauseMs: 400,
+		order: 'sequential',
+		loop: true,
 	})
 
 	return (
@@ -31,33 +37,45 @@ export function Hero() {
 			<div className="container mx-auto max-w-6xl">
 				<div className="text-center">
 					<motion.h2
-						className="text-2xl font-bold text-gray-800 mb-6"
+						className="text-xl font-semibold text-gray-800 mb-2"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5 }}
 					>
-						Support What Matters
+						Connect. Support. See the Change.
 					</motion.h2>
 
 					<motion.h1
-						className="text-4xl md:text-5xl font-bold gradient-text mb-8 py-4"
+						className="text-8xl font-bold gradient-text mb-2 py-4"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.2 }}
 					>
-						Where Blockchain Meets Real-World Impact
+						Where Blockchain Meets{' '}
+						<span
+							className="inline-flex items-center"
+							style={{ minWidth: `${longestWordCh}ch` }}
+							aria-live="polite"
+						>
+							Real-{displayText}
+							<span
+								className="ml-1 inline-block h-[1em] w-[2px] bg-current animate-pulse align-middle"
+								aria-hidden
+							/>
+						</span>
 					</motion.h1>
 
 					<motion.p
-						className="text-lg text-gray-700 pt-2 my-6"
+						className="text-lg text-gray-700 my-4"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.4 }}
 					>
-						KindFi empowers people to support trusted causes around the world
-						using the power of stellar blockchain. Every contribution goes
-						further with built-in transparency, verified impact, and a community
-						that believes giving should be easy, smart, secure, and meaningful
+						KindFi is a Latin American platform that connects donors and social
+						projects for real change. Built on secure blockchain technology, we
+						make giving transparent, safe, and easy. With live progress updates
+						so you know your support is making a difference. Start your campaign
+						or find a cause to support today.
 					</motion.p>
 
 					<motion.div
@@ -66,50 +84,54 @@ export function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.6 }}
 					>
-						<Link href="/projects">
-							<Button size="lg" className="gradient-btn text-white">
-								Support with Crypto
-							</Button>
-						</Link>
-						<Link href="/projects">
-							<Button
-								size="lg"
-								variant="outline"
-								className="gradient-border-btn"
-							>
-								Explore Causes
-							</Button>
-						</Link>
+						<WaitlistCTA />
 					</motion.div>
-					<div className="mt-8 flex flex-wrap justify-center gap-2">
-						{isLoading ? (
-							<div className="flex flex-wrap gap-2">
-								{Array.from({ length: 12 }).map((_, i) => (
-									// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
-									<CategoryBadgeSkeleton key={i} />
-								))}
-							</div>
-						) : error ? (
-							<p className="text-sm text-destructive text-center w-full">
-								Failed to load categories. Please try again later.
-							</p>
-						) : (
-							categories.map((category) => (
-								<CategoryBadge
-									key={category.id}
-									category={category}
-									onClick={() => {
-										if (!category.slug) return
-										router.push(
-											`/projects?category=${encodeURIComponent(category.slug)}`,
-										)
-									}}
+					<motion.div
+						className="flex flex-col sm:flex-row gap-4 justify-center"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5, delay: 0.6 }}
+					>
+						<div className="mt-8 flex flex-col items-center gap-3">
+							<span className="text-xl text-muted-foreground">
+								Supported by
+							</span>
+							<a
+								href="https://stellar.org/"
+								target="_blank"
+								rel="noopener noreferrer"
+								aria-label="Visit Stellar.org"
+							>
+								<Image
+									src="/images/SDF.webp"
+									alt="Stellar Development Foundation"
+									width={420}
+									height={110}
+									className="h-[72px] w-auto"
+									priority
 								/>
-							))
-						)}
-					</div>
+							</a>
+						</div>
+					</motion.div>
 				</div>
 			</div>
 		</section>
+	)
+}
+
+function WaitlistCTA() {
+	const [open, setOpen] = useState(false)
+	return (
+		<>
+			<Button
+				size="lg"
+				variant="outline"
+				className="gradient-border-btn"
+				onClick={() => setOpen(true)}
+			>
+				Waitlist your project
+			</Button>
+			<WaitlistModal open={open} onOpenChange={setOpen} />
+		</>
 	)
 }

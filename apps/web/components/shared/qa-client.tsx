@@ -1,4 +1,3 @@
-// ! SPLIT THIS COMPONENT... ⚠️
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
@@ -7,93 +6,45 @@ import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { Tables, TablesUpdate } from '@services/supabase'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { formatDistanceToNow } from 'date-fns'
-import {
-	Bell,
-	BellOff,
-	CheckCircle,
-	ChevronDown,
-	ChevronUp,
-	Loader2,
-	LogIn,
-	MessageCircle,
-	RefreshCw,
-	Reply,
-	User as UserIcon,
-} from 'lucide-react'
+import { Bell, BellOff, LogIn, RefreshCw, User as UserIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { Alert, AlertDescription, AlertTitle } from '~/components/base/alert'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
-import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-// Import shadcn UI components
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from '~/components/base/dialog'
+import { Card } from '~/components/base/card'
 import { Separator } from '~/components/base/separator'
-import { Textarea } from '~/components/base/textarea'
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from '~/components/base/tooltip'
+import { AskQuestionForm } from '~/components/shared/qa/ask-question-form'
+import { QuestionCard } from '~/components/shared/qa/question-card'
+import {
+	fetchChildComments,
+	fetchQuestions,
+	insertComment,
+	updateComment,
+} from '~/lib/services/comments'
 import type {
 	CommentData,
 	CommentWithAnswers,
 	QAClientProps,
-	UserData,
 } from '~/lib/types/qa/types'
+import {
+	buildQuestionThreads,
+	getGuestRemainingComments as utilGetGuestRemainingComments,
+	getGuestUserId as utilGetGuestUserId,
+	incrementGuestCommentCount as utilIncrementGuestCommentCount,
+	resetGuestCommentCount as utilResetGuestCommentCount,
+} from '~/lib/utils/qa'
 
-// Helper functions for guest users
-const getGuestUserId = () => {
-	if (typeof window === 'undefined') return null
-
-	let guestUserId = localStorage.getItem('guestUserId')
-	if (!guestUserId) {
-		guestUserId = uuidv4()
-		localStorage.setItem('guestUserId', guestUserId)
-		localStorage.setItem('guestCommentCount', '0')
-	}
-	return guestUserId
-}
-
-const getGuestRemainingComments = () => {
-	if (typeof window === 'undefined') return 3
-
-	const count = Number.parseInt(
-		localStorage.getItem('guestCommentCount') || '0',
-		10,
-	)
-	return Math.max(0, 3 - count)
-}
-
-const incrementGuestCommentCount = () => {
-	if (typeof window === 'undefined') return 0
-
-	const currentCount = Number.parseInt(
-		localStorage.getItem('guestCommentCount') || '0',
-		10,
-	)
-	const newCount = currentCount + 1
-	localStorage.setItem('guestCommentCount', newCount.toString())
-	return newCount
-}
+// Helper functions moved to utils/qa
+const getGuestUserId = utilGetGuestUserId
+const getGuestRemainingComments = () => utilGetGuestRemainingComments()
+const incrementGuestCommentCount = utilIncrementGuestCommentCount
 
 // Client component that uses the initial data from the server
 export default function QAClient({
@@ -169,17 +120,8 @@ export default function QAClient({
 					return []
 				}
 
-				return data.map((item) => ({
-					...item,
-					created_at: item.created_at || new Date().toISOString(),
-					author: item.author_id?.includes('-')
-						? {
-								id: item.author_id,
-								full_name: 'Guest User',
-								is_team_member: false,
-							}
-						: undefined,
-				})) as CommentData[]
+				const mapped = await fetchQuestions(supabase, projectId)
+				return mapped
 			} catch (err) {
 				console.error('Error fetching questions:', err)
 				return []
@@ -196,65 +138,12 @@ export default function QAClient({
 		'projectComments',
 		async (supabase: TypedSupabaseClient) => {
 			try {
-				// Get comments without the join
-				const { data, error } = await supabase
-					.from('comments')
-					.select('*')
-					.eq('project_id', projectId)
-					.not('parent_comment_id', 'is', null) // Only get comments with a parent
-					.order('created_at', { ascending: true })
-
-				if (error) throw error
+				const data = await fetchChildComments(supabase, projectId)
 				if (!data || data.length === 0) {
 					console.warn('No comments found for this project')
 					return []
 				}
-
-				// Get unique author IDs
-				const authorIds = [...new Set(data.map((item) => item.author_id))]
-
-				const { data: authors, error: authorsError } = await supabase
-					.from('profiles')
-					.select('*')
-					.in('id', authorIds)
-
-				if (authorsError) {
-					console.error('Error fetching authors:', authorsError)
-					return data.map((item) => ({
-						...item,
-						created_at: item.created_at || new Date().toISOString(),
-						author: null,
-					})) as unknown as CommentData[]
-				}
-
-				if (authors) {
-					const authorsMap = authors.reduce(
-						(acc: Record<string, UserData>, author: UserData) => {
-							acc[author.id] = author
-							return acc
-						},
-						{} as Record<string, UserData>,
-					)
-
-					return data.map((comment) => ({
-						...comment,
-						created_at: comment.created_at || new Date().toISOString(),
-						author:
-							authorsMap[comment.author_id] ||
-							(comment.author_id?.includes('-')
-								? {
-										id: comment.author_id,
-										full_name: 'Guest User',
-										is_team_member: false,
-									}
-								: null),
-					})) as CommentData[]
-				}
-
-				return data.map((item) => ({
-					...item,
-					created_at: item.created_at || new Date().toISOString(),
-				})) as CommentData[]
+				return data
 			} catch (err) {
 				console.error('Error fetching comments:', err)
 				return []
@@ -269,44 +158,9 @@ export default function QAClient({
 
 	useEffect(() => {
 		if (!questions || !commentsData) return
-
 		try {
-			const answers = commentsData.filter(
-				(comment) => comment.type === 'answer',
-			)
-			const replies = commentsData.filter(
-				(comment) => comment.type === 'comment',
-			)
-
-			// Build the threaded structure
-			const questionsWithAnswers = questions.map((question) => {
-				const questionAnswers = answers
-					.filter((answer) => answer.parent_comment_id === question.id)
-					.map((answer) => {
-						const answerReplies = replies.filter(
-							(reply) => reply.parent_comment_id === answer.id,
-						)
-						const metadata = (question?.metadata || {}) as Record<
-							string,
-							unknown
-						>
-
-						return {
-							...answer,
-							replies: answerReplies,
-							metadata,
-						}
-					})
-
-				const metadata = (question?.metadata || {}) as Record<string, unknown>
-				return {
-					...question,
-					answers: questionAnswers,
-					metadata,
-				}
-			})
-
-			setProcessedQuestions(questionsWithAnswers)
+			const threads = buildQuestionThreads(questions, commentsData)
+			setProcessedQuestions(threads)
 		} catch (err) {
 			console.error('Error processing comments:', err)
 		}
@@ -445,10 +299,8 @@ export default function QAClient({
 		setIsLoginDialogOpen(false)
 
 		// Reset the guest comment count to allow 3 more comments
-		if (typeof window !== 'undefined') {
-			localStorage.setItem('guestCommentCount', '0')
-			setGuestRemainingComments(3)
-		}
+		utilResetGuestCommentCount()
+		setGuestRemainingComments(3)
 	}
 
 	const handleManualRefresh = () => {
@@ -478,21 +330,15 @@ export default function QAClient({
 
 			const commentId = uuidv4()
 
-			const { data, error } = await supabase
-				.from('comments')
-				.insert({
-					id: commentId,
-					content: questionContent,
-					project_id: projectId,
-					author_id: effectiveUser.id,
-					type: 'question',
-					is_resolved: false,
-					parent_comment_id: null,
-				})
-				.select()
-				.single()
-
-			if (error) throw error
+			const data = await insertComment({
+				id: commentId,
+				content: questionContent,
+				project_id: projectId,
+				author_id: effectiveUser.id,
+				type: 'question',
+				is_resolved: false,
+				parent_comment_id: null,
+			} as Partial<Tables<'comments'>>)
 			return data
 		},
 		onSuccess: (newQuestion) => {
@@ -538,21 +384,15 @@ export default function QAClient({
 
 			const commentId = uuidv4()
 
-			const { data, error } = await supabase
-				.from('comments')
-				.insert({
-					id: commentId,
-					content: answerContent,
-					project_id: projectId,
-					author_id: effectiveUser.id,
-					type: 'answer',
-					parent_comment_id: questionId,
-					is_resolved: false,
-				})
-				.select()
-				.single()
-
-			if (error) throw error
+			const data = await insertComment({
+				id: commentId,
+				content: answerContent,
+				project_id: projectId,
+				author_id: effectiveUser.id,
+				type: 'answer',
+				parent_comment_id: questionId,
+				is_resolved: false,
+			} as Partial<Tables<'comments'>>)
 			return { data, questionId }
 		},
 		onSuccess: ({ questionId }) => {
@@ -599,21 +439,15 @@ export default function QAClient({
 
 			const commentId = uuidv4()
 
-			const { data, error } = await supabase
-				.from('comments')
-				.insert({
-					id: commentId,
-					content: replyContent,
-					project_id: projectId,
-					author_id: effectiveUser.id,
-					type: 'comment',
-					parent_comment_id: answerId,
-					is_resolved: false,
-				})
-				.select()
-				.single()
-
-			if (error) throw error
+			const data = await insertComment({
+				id: commentId,
+				content: replyContent,
+				project_id: projectId,
+				author_id: effectiveUser.id,
+				type: 'comment',
+				parent_comment_id: answerId,
+				is_resolved: false,
+			} as Partial<Tables<'comments'>>)
 			return data
 		},
 		onSuccess: () => {
@@ -646,14 +480,9 @@ export default function QAClient({
 				throw new Error('User ID is required')
 			}
 
-			const { data, error } = await supabase
-				.from('comments')
-				.update({ is_resolved: true } as TablesUpdate<'comments'>)
-				.eq('id', questionId)
-				.select()
-				.single()
-
-			if (error) throw error
+			const data = await updateComment(questionId, {
+				is_resolved: true,
+			} as TablesUpdate<'comments'>)
 			return data
 		},
 		onSuccess: (updatedQuestion) => {
@@ -752,9 +581,9 @@ export default function QAClient({
 
 	return (
 		<>
-			<h2 className="text-2xl font-bold mb-4 flex items-center justify-between">
+			<h2 className="flex justify-between items-center mb-4 text-2xl font-bold">
 				<span>Community Q&A</span>
-				<div className="flex items-center gap-2 ">
+				<div className="flex gap-2 items-center">
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -766,7 +595,7 @@ export default function QAClient({
 									aria-label="Refresh Q&A"
 								>
 									<RefreshCw
-										className={`h-4 w-4 ${realtimeActivity ? 'animate-spin text-blue-600' : ''}`}
+										className={`h-4 w-4 ${realtimeActivity ? 'text-blue-600 animate-spin' : ''}`}
 										aria-hidden="true"
 									/>
 								</Button>
@@ -793,11 +622,11 @@ export default function QAClient({
 								>
 									{isRealtimeEnabled ? (
 										<Bell
-											className="h-4 w-4 text-blue-600"
+											className="w-4 h-4 text-blue-600"
 											aria-hidden="true"
 										/>
 									) : (
-										<BellOff className="h-4 w-4" aria-hidden="true" />
+										<BellOff className="w-4 h-4" aria-hidden="true" />
 									)}
 								</Button>
 							</TooltipTrigger>
@@ -813,11 +642,11 @@ export default function QAClient({
 				</div>
 			</h2>
 
-			<p className="text-gray-500 mb-1">
+			<p className="mb-1 text-gray-500">
 				Ask questions about this project and get answers from the community and
 				project team members.
 				{isRealtimeEnabled && (
-					<span className="text-blue-600 ml-1">
+					<span className="ml-1 text-blue-600">
 						Real-time updates are enabled.
 					</span>
 				)}
@@ -825,9 +654,9 @@ export default function QAClient({
 
 			{realtimeStatus && (
 				<div
-					className={`mb-4 py-2 px-3 text-sm rounded-md ${realtimeActivity ? 'bg-blue-50 text-blue-700' : 'bg-gray-50 text-gray-700'}`}
+					className={`mb-4 py-2 px-3 text-sm rounded-md ${realtimeActivity ? 'text-blue-700 bg-blue-50' : 'text-gray-700 bg-gray-50'}`}
 				>
-					<div className="flex items-center gap-2">
+					<div className="flex gap-2 items-center">
 						{realtimeActivity && (
 							<div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
 						)}
@@ -839,20 +668,20 @@ export default function QAClient({
 			{!currentUser && guestRemainingComments > 0 && (
 				<Alert
 					variant="default"
-					className="mb-6 bg-blue-50 text-blue-700 border-blue-200"
+					className="mb-6 text-blue-700 bg-blue-50 border-blue-200"
 				>
-					<AlertTitle className="flex items-center gap-2">
-						<UserIcon className="h-4 w-4" />
+					<AlertTitle className="flex gap-2 items-center">
+						<UserIcon className="w-4 h-4" />
 						Guest Mode
 					</AlertTitle>
 					<AlertDescription>
-						You're currently browsing as a guest. You have{' '}
+						You&apos;re currently browsing as a guest. You have{' '}
 						{guestRemainingComments} comment
 						{guestRemainingComments !== 1 ? 's' : ''} remaining.
 						<Button
 							variant="link"
 							onClick={handleGoToLogin}
-							className="p-0 h-auto text-blue-700 font-medium underline ml-1"
+							className="p-0 ml-1 h-auto font-medium text-blue-700 underline"
 						>
 							Log in
 						</Button>{' '}
@@ -864,18 +693,18 @@ export default function QAClient({
 			{!currentUser && guestRemainingComments === 0 && (
 				<Alert
 					variant="default"
-					className="mb-6 bg-yellow-50 text-yellow-700 border-yellow-200"
+					className="mb-6 text-yellow-700 bg-yellow-50 border-yellow-200"
 				>
-					<AlertTitle className="flex items-center gap-2">
-						<LogIn className="h-4 w-4" />
+					<AlertTitle className="flex gap-2 items-center">
+						<LogIn className="w-4 h-4" />
 						Comment Limit Reached
 					</AlertTitle>
 					<AlertDescription>
-						You've reached the guest comment limit.
+						You&apos;ve reached the guest comment limit.
 						<Button
 							variant="link"
 							onClick={handleGoToLogin}
-							className="p-0 h-auto text-yellow-700 font-medium underline ml-1"
+							className="p-0 ml-1 h-auto font-medium text-yellow-700 underline"
 						>
 							Log in
 						</Button>{' '}
@@ -884,48 +713,14 @@ export default function QAClient({
 				</Alert>
 			)}
 
-			<div className="community-qa-container space-y-6">
-				<Card className="border-0 shadow-sm">
-					<CardHeader className="pb-3">
-						<CardTitle className="text-lg">Ask a Question</CardTitle>
-						<CardDescription>
-							Your question will be visible to the project team and community
-							members.
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<Textarea
-							value={newQuestion}
-							onChange={(e) => setNewQuestion(e.target.value)}
-							placeholder="What would you like to know about this project?"
-							className="min-h-24 focus:border-primary"
-						/>
-					</CardContent>
-					<CardFooter className="flex justify-end gap-2">
-						<Button
-							onClick={handleSubmitQuestion}
-							disabled={
-								!newQuestion.trim() ||
-								submitQuestionMutation.isPending ||
-								(!currentUser && guestRemainingComments === 0)
-							}
-							className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
-							aria-label="Submit your question"
-						>
-							{submitQuestionMutation.isPending ? (
-								<>
-									<Loader2
-										className="mr-2 h-4 w-4 animate-spin"
-										aria-hidden="true"
-									/>
-									Submitting...
-								</>
-							) : (
-								'Submit Question'
-							)}
-						</Button>
-					</CardFooter>
-				</Card>
+			<div className="space-y-6 community-qa-container">
+				<AskQuestionForm
+					newQuestion={newQuestion}
+					onChange={setNewQuestion}
+					onSubmit={handleSubmitQuestion}
+					isSubmitting={submitQuestionMutation.isPending}
+					isDisabled={!currentUser && guestRemainingComments === 0}
+				/>
 
 				<Separator className="my-6" />
 
@@ -935,271 +730,27 @@ export default function QAClient({
 					{processedQuestions && processedQuestions.length > 0 ? (
 						<div className="space-y-4">
 							{processedQuestions.map((question) => (
-								<Card
+								<QuestionCard
 									key={question.id}
-									className="question-card overflow-hidden"
-								>
-									<CardHeader className="pb-3">
-										<div className="flex justify-between items-start">
-											<RenderUserInfo
-												authorData={question.author}
-												createdAt={question.created_at as string}
-												size="sm"
-											/>
-											<div className="flex items-center gap-2">
-												{(question.metadata?.is_resolved as boolean) && (
-													<Badge
-														variant="secondary"
-														className="bg-green-50 text-green-700"
-													>
-														<CheckCircle
-															className="mr-1 h-3 w-3"
-															aria-hidden="true"
-														/>
-														Resolved
-													</Badge>
-												)}
-											</div>
-										</div>
-									</CardHeader>
-									<CardContent className="pb-3">
-										<p className="whitespace-pre-line">{question.content}</p>
-									</CardContent>
-									<CardFooter className="flex flex-col items-start pt-0">
-										<div className="w-full flex justify-between items-center mb-3">
-											<Button
-												variant="outline"
-												size="sm"
-												className="flex items-center gap-1 text-sm rounded-full"
-												onClick={() => toggleQuestion(question.id)}
-												aria-label={
-													expandedQuestionIds[question.id]
-														? 'Collapse answers'
-														: 'Expand answers'
-												}
-											>
-												<MessageCircle className="h-4 w-4" aria-hidden="true" />
-												{question.answers?.length || 0}{' '}
-												{question.answers?.length === 1 ? 'Answer' : 'Answers'}
-												{expandedQuestionIds[question.id] ? (
-													<ChevronUp
-														className="h-4 w-4 ml-1"
-														aria-hidden="true"
-													/>
-												) : (
-													<ChevronDown
-														className="h-4 w-4 ml-1"
-														aria-hidden="true"
-													/>
-												)}
-											</Button>
-
-											{!question.metadata?.is_resolved && effectiveUser && (
-												<Button
-													variant="outline"
-													size="sm"
-													className="rounded-full"
-													onClick={() => handleMarkResolved(question.id)}
-													disabled={markResolvedMutation.isPending}
-													aria-label="Mark question as resolved"
-												>
-													{markResolvedMutation.isPending ? (
-														<>
-															<Loader2
-																className="h-3 w-3 animate-spin mr-1"
-																aria-hidden="true"
-															/>
-															Mark Resolved
-														</>
-													) : (
-														<>
-															<CheckCircle
-																className="mr-1 h-3 w-3"
-																aria-hidden="true"
-															/>
-															Mark Resolved
-														</>
-													)}
-												</Button>
-											)}
-										</div>
-
-										{expandedQuestionIds[question.id] && (
-											<div className="w-full border-t pt-3 mt-2">
-												{question.answers && question.answers.length > 0 ? (
-													<div className="answer-list space-y-4 mb-6">
-														{question.answers.map((answer) => (
-															<div key={answer.id} className="mb-6">
-																<div
-																	// TODO: condition won't work. Create relationship of user role within project. Using author_id for now.
-																	className={`answer-item pl-4 border-l-2 ${answer.author_id ? 'border-blue-300 bg-blue-50/30' : 'border-blue-100'} py-2 rounded-r-sm`}
-																>
-																	<div className="flex items-start gap-2">
-																		<div className="flex-1">
-																			<RenderUserInfo
-																				authorData={answer.author}
-																				createdAt={answer.created_at as string}
-																				size="sm"
-																			/>
-																			<p className="mt-2 whitespace-pre-line">
-																				{answer.content}
-																			</p>
-																			{replyingTo !== answer.id &&
-																				effectiveUser && (
-																					<Button
-																						variant="outline"
-																						size="sm"
-																						className="mt-2 flex items-center gap-1"
-																						onClick={() =>
-																							startReplyingTo(answer.id)
-																						}
-																						aria-label="Reply to this answer"
-																						disabled={
-																							!currentUser &&
-																							guestRemainingComments === 0
-																						}
-																					>
-																						<Reply
-																							className="h-3 w-3"
-																							aria-hidden="true"
-																						/>
-																						Reply
-																					</Button>
-																				)}
-																		</div>
-																	</div>
-																</div>
-
-																{answer.replies &&
-																	answer.replies.length > 0 && (
-																		<div className="ml-8 mt-2">
-																			{answer.replies.map((reply) => (
-																				<div
-																					key={reply.id}
-																					className="pl-4 border-l-2 border-gray-100 py-2 mb-2 rounded-r-sm"
-																				>
-																					<div className="flex-1">
-																						<RenderUserInfo
-																							authorData={reply.author}
-																							createdAt={
-																								reply.created_at as string
-																							}
-																							size="sm"
-																						/>
-																						<p className="mt-2 whitespace-pre-line text-sm">
-																							{reply.content}
-																						</p>
-																					</div>
-																				</div>
-																			))}
-																		</div>
-																	)}
-
-																{replyingTo === answer.id && effectiveUser && (
-																	<div className="reply-form ml-8 mt-2 mb-4">
-																		<div className="pl-4 border-l-2 border-gray-100 py-2">
-																			<Textarea
-																				value={replyContent[answer.id] || ''}
-																				onChange={(e) =>
-																					handleReplyChange(
-																						answer.id,
-																						e.target.value,
-																					)
-																				}
-																				placeholder="Write a reply..."
-																				className="min-h-16 text-sm w-full bg-gray-50"
-																			/>
-																			<div className="flex justify-end gap-2 mt-2">
-																				<Button
-																					size="sm"
-																					variant="outline"
-																					className="text-xs"
-																					onClick={cancelReply}
-																					aria-label="Cancel reply"
-																				>
-																					Cancel
-																				</Button>
-																				<Button
-																					size="sm"
-																					className="bg-blue-500 hover:bg-blue-600 text-white text-xs"
-																					onClick={() =>
-																						handleSubmitReply(answer.id)
-																					}
-																					disabled={
-																						!replyContent[answer.id]?.trim() ||
-																						submitReplyMutation.isPending
-																					}
-																					aria-label="Post your reply"
-																				>
-																					{submitReplyMutation.isPending ? (
-																						<>
-																							<Loader2
-																								className="mr-1 h-3 w-3 animate-spin"
-																								aria-hidden="true"
-																							/>
-																							Submitting...
-																						</>
-																					) : (
-																						'Post Reply'
-																					)}
-																				</Button>
-																			</div>
-																		</div>
-																	</div>
-																)}
-															</div>
-														))}
-													</div>
-												) : (
-													<p className="text-muted-foreground text-sm mb-4">
-														No answers yet. Be the first to answer!
-													</p>
-												)}
-
-												{effectiveUser && (
-													<div className="answer-form w-full border p-4 rounded-md bg-gray-50">
-														<h4 className="text-base font-medium mb-2">
-															Add Your Answer
-														</h4>
-														<Textarea
-															value={replyContent[question.id] || ''}
-															onChange={(e) =>
-																handleReplyChange(question.id, e.target.value)
-															}
-															placeholder="Write your answer here..."
-															className="min-h-20 text-sm w-full bg-white mb-2"
-														/>
-														<div className="flex justify-end mt-2">
-															<Button
-																size="sm"
-																className="bg-blue-500 hover:bg-blue-600 text-white"
-																onClick={() => handleSubmitAnswer(question.id)}
-																disabled={
-																	!replyContent[question.id]?.trim() ||
-																	submitAnswerMutation.isPending ||
-																	(!currentUser && guestRemainingComments === 0)
-																}
-																aria-label="Submit your answer"
-															>
-																{submitAnswerMutation.isPending ? (
-																	<>
-																		<Loader2
-																			className="mr-1 h-3 w-3 animate-spin"
-																			aria-hidden="true"
-																		/>
-																		Submitting...
-																	</>
-																) : (
-																	'Submit Answer'
-																)}
-															</Button>
-														</div>
-													</div>
-												)}
-											</div>
-										)}
-									</CardFooter>
-								</Card>
+									question={question}
+									effectiveUser={effectiveUser}
+									expanded={!!expandedQuestionIds[question.id]}
+									onToggle={toggleQuestion}
+									onMarkResolved={handleMarkResolved}
+									markResolvedPending={markResolvedMutation.isPending}
+									replyingTo={replyingTo}
+									replyContent={replyContent}
+									onStartReplying={startReplyingTo}
+									onCancelReply={cancelReply}
+									onReplyChange={handleReplyChange}
+									onSubmitReply={handleSubmitReply}
+									onSubmitAnswer={handleSubmitAnswer}
+									submitAnswerPending={submitAnswerMutation.isPending}
+									submitReplyPending={submitReplyMutation.isPending}
+									isGuestLimitReached={
+										!currentUser && guestRemainingComments === 0
+									}
+								/>
 							))}
 						</div>
 					) : (
@@ -1211,105 +762,6 @@ export default function QAClient({
 					)}
 				</div>
 			</div>
-
-			<Dialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
-				<DialogContent className="sm:max-w-md">
-					<DialogHeader>
-						<DialogTitle>Comment Limit Reached</DialogTitle>
-						<DialogDescription>
-							You've used all 3 comments available in guest mode. Would you like
-							to log in or continue as a guest with a fresh session?
-						</DialogDescription>
-					</DialogHeader>
-					<div className="flex justify-center my-4">
-						<div className="bg-blue-50 p-4 rounded-lg text-center w-full">
-							<p className="text-blue-700 font-medium mb-2">
-								Create an account to:
-							</p>
-							<ul className="text-blue-600 text-sm text-left list-disc pl-4 mb-2">
-								<li>Participate without limits</li>
-								<li>Track your contributions</li>
-								<li>Get notifications on replies</li>
-								<li>Build your community profile</li>
-							</ul>
-						</div>
-					</div>
-					<DialogFooter className="flex sm:justify-between">
-						<Button
-							type="button"
-							variant="outline"
-							onClick={handleContinueAsGuest}
-							className="flex items-center gap-1 sm:mt-0 mt-2 w-full sm:w-auto"
-						>
-							<UserIcon className="h-4 w-4" />
-							Continue as Guest
-						</Button>
-						<Button
-							type="button"
-							onClick={handleGoToLogin}
-							className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1 w-full sm:w-auto"
-						>
-							<LogIn className="h-4 w-4" />
-							Log In / Sign Up
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
 		</>
-	)
-}
-
-function RenderUserInfo({
-	authorData,
-	createdAt,
-	size = 'md',
-}: {
-	size: 'sm' | 'md'
-	createdAt: string
-	authorData?: UserData
-}) {
-	if (!authorData) {
-		return null
-	}
-
-	const avatarSize = size === 'sm' ? 'h-6 w-6' : 'h-8 w-8'
-	const iconSize = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'
-	const nameSize = size === 'sm' ? 'text-sm' : 'text-base'
-	const timeSize = size === 'sm' ? 'text-xs' : 'text-sm'
-
-	return (
-		<div className="flex items-center gap-2">
-			<Avatar className={avatarSize}>
-				{authorData?.image_url ? (
-					<AvatarImage src={authorData?.image_url} alt="User avatar" />
-				) : (
-					<AvatarFallback>
-						<UserIcon className={iconSize} aria-hidden="true" />
-					</AvatarFallback>
-				)}
-			</Avatar>
-			<div>
-				<div className="flex items-center">
-					<p className={`font-medium ${nameSize}`}>
-						{authorData?.display_name ||
-							`User ${authorData?.id?.substring(0, 6)}`}
-					</p>
-					{/* TODO: Add user role relationship to project. For now using role */}
-					{authorData?.role && (
-						<Badge
-							variant="outline"
-							className="ml-2 text-xs py-0 h-5 bg-blue-50 text-blue-700 border-blue-200"
-						>
-							{authorData?.role}
-						</Badge>
-					)}
-				</div>
-				<p className={`text-muted-foreground ${timeSize}`}>
-					{formatDistanceToNow(new Date(createdAt), {
-						addSuffix: true,
-					})}
-				</p>
-			</div>
-		</div>
 	)
 }
