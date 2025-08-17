@@ -19,7 +19,6 @@ export const waitlistStepTwoSchema = z.object({
 		.string()
 		.min(10, 'Please share at least 10 characters')
 		.optional(),
-	categoryId: z.string().optional(),
 	location: z.string().optional(),
 })
 

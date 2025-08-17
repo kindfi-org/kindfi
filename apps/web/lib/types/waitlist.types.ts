@@ -6,7 +6,6 @@ export interface WaitlistFormData {
 	role: WaitlistRole
 	projectName?: string
 	projectDescription?: string
-	categoryId?: string
 	location?: string
 	source?: string
 	consent: boolean
@@ -21,7 +20,6 @@ export interface WaitlistStepOneData {
 export interface WaitlistStepTwoData {
 	projectName?: string
 	projectDescription?: string
-	categoryId?: string
 	location?: string
 }
 

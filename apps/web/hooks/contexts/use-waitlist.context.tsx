@@ -24,7 +24,6 @@ const initialFormData: WaitlistFormData = {
 	role: 'project_creator',
 	projectName: '',
 	projectDescription: '',
-	categoryId: '',
 	location: '',
 	source: '',
 	consent: false,

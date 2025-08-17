@@ -1,7 +1,6 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { useState } from 'react'
@@ -27,9 +26,7 @@ import {
 } from '~/components/base/select'
 import { Textarea } from '~/components/base/textarea'
 import { useWaitlist } from '~/hooks/contexts/use-waitlist.context'
-import { getAllCategories } from '~/lib/queries/projects/get-all-categories'
 import {
-	waitlistSchema,
 	waitlistStepOneSchema,
 	waitlistStepThreeSchema,
 	waitlistStepTwoSchema,
@@ -47,8 +44,7 @@ interface WaitlistModalProps {
 }
 
 export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
-	const { currentStep, setCurrentStep, formData, updateFormData } =
-		useWaitlist()
+	const { currentStep, setCurrentStep, formData } = useWaitlist()
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const handleNext = () => {
@@ -61,7 +57,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 	const StepperIndicator = () => {
 		const steps = ['Your interest', 'Project (optional)', 'Consent']
 		return (
-			<div className="flex items-center justify-center mb-6">
+			<div className="flex justify-center items-center mb-6">
 				{steps.map((label, index) => {
 					const stepNumber = index + 1
 					const isActive = currentStep === stepNumber
@@ -76,7 +72,6 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 											? 'bg-green-600'
 											: 'bg-gray-200'
 								}`}
-								aria-label={`Step ${stepNumber}: ${label}`}
 							/>
 						</div>
 					)
@@ -105,12 +100,14 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 									body: JSON.stringify(body),
 								})
 								if (!res.ok) {
-									const err = await res.json().catch(() => ({}))
-									throw new Error(err?.error || 'Failed to submit interest')
+									const err = await res.json().catch(() => ({}) as unknown)
+									const message = err?.error || 'Failed to submit interest'
+									console.error('Waitlist submission failed:', err)
+									throw new Error(message)
 								}
 								onOpenChange(false)
 							} catch (_e) {
-								// could add a toast here if desired
+								console.error('Waitlist submit error:', _e)
 							} finally {
 								setIsSubmitting(false)
 							}
@@ -223,7 +220,7 @@ function StepOne({ onNext }: { onNext: () => void }) {
 							/>
 							<div className="flex justify-end">
 								<Button type="submit" className="min-w-28">
-									Next <ChevronRight className="ml-2 h-4 w-4" />
+									Next <ChevronRight className="ml-2 w-4 h-4" />
 								</Button>
 							</div>
 						</form>
@@ -242,22 +239,17 @@ function StepTwo({
 	onBack: () => void
 }) {
 	const { formData, updateFormData } = useWaitlist()
-	const { data: categories = [] } = useSupabaseQuery(
-		'categories',
-		getAllCategories,
-	)
 	const form = useForm<WaitlistStepTwoData>({
 		resolver: zodResolver(waitlistStepTwoSchema),
 		defaultValues: {
 			projectName: formData.projectName || '',
 			projectDescription: formData.projectDescription || '',
-			categoryId: formData.categoryId || '',
 			location: formData.location || '',
 		},
 	})
 
 	const onSubmit = (data: WaitlistStepTwoData) => {
-		updateFormData({ ...data, categoryId: data.categoryId || undefined })
+		updateFormData({ ...data })
 		onNext()
 	}
 
@@ -308,33 +300,6 @@ function StepTwo({
 							/>
 							<FormField
 								control={form.control}
-								name="categoryId"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Category (optional)</FormLabel>
-										<FormControl>
-											<Select
-												value={field.value}
-												onValueChange={field.onChange}
-											>
-												<SelectTrigger>
-													<SelectValue placeholder="Choose a category" />
-												</SelectTrigger>
-												<SelectContent>
-													{categories.map((c) => (
-														<SelectItem key={c.id} value={c.id}>
-															{c.name}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
 								name="location"
 								render={({ field }) => (
 									<FormItem>
@@ -352,10 +317,10 @@ function StepTwo({
 							/>
 							<div className="flex justify-between">
 								<Button type="button" variant="outline" onClick={onBack}>
-									<ChevronLeft className="mr-2 h-4 w-4" /> Back
+									<ChevronLeft className="mr-2 w-4 h-4" /> Back
 								</Button>
 								<Button type="submit" className="min-w-28">
-									Next <ChevronRight className="ml-2 h-4 w-4" />
+									Next <ChevronRight className="ml-2 w-4 h-4" />
 								</Button>
 							</div>
 						</form>
@@ -427,11 +392,11 @@ function StepThree({
 								name="consent"
 								render={({ field }) => (
 									<FormItem>
-										<div className="flex items-center gap-3">
+										<div className="flex gap-3 items-center">
 											<input
 												id="consent"
 												type="checkbox"
-												className="h-4 w-4"
+												className="w-4 h-4"
 												checked={field.value}
 												onChange={(e) => field.onChange(e.target.checked)}
 											/>
@@ -445,12 +410,12 @@ function StepThree({
 							/>
 							<div className="flex justify-between">
 								<Button type="button" variant="outline" onClick={onBack}>
-									<ChevronLeft className="mr-2 h-4 w-4" /> Back
+									<ChevronLeft className="mr-2 w-4 h-4" /> Back
 								</Button>
 								<Button type="submit" className="min-w-28" disabled={isPending}>
 									{isPending ? (
 										<>
-											<Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
+											<Loader2 className="mr-2 w-4 h-4 animate-spin" />{' '}
 											Submitting
 										</>
 									) : (
