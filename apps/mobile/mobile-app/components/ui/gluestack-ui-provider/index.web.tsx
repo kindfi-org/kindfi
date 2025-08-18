@@ -26,7 +26,6 @@ export function GluestackUIProvider({
 	children?: React.ReactNode
 }) {
 	let cssVariablesWithMode = ''
-	// biome-ignore lint/complexity/noForEach: <explanation>
 	Object.keys(config).forEach((configKey) => {
 		cssVariablesWithMode +=
 			configKey === 'dark' ? '\n .dark {\n ' : '\n:root {\n'
@@ -85,7 +84,7 @@ export function GluestackUIProvider({
 		<>
 			<script
 				suppressHydrationWarning
-				// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: any
 				dangerouslySetInnerHTML={{
 					__html: `(${script.toString()})('${mode}')`,
 				}}

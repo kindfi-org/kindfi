@@ -39,6 +39,15 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 		},
 	})
 
+	const handlePrevious = () => {
+		const data = form.getValues()
+		updateFormData({
+			...data,
+			socialLinks: data.socialLinks || [],
+		})
+		onBack()
+	}
+
 	const onSubmit = (data: StepTwoData) => {
 		updateFormData({
 			...data,
@@ -85,7 +94,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 								name="website"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>What's your project's website? *</FormLabel>
+										<FormLabel>What's your project's website?</FormLabel>
 										<FormControl>
 											<Input
 												type="url"
@@ -122,7 +131,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 								<Button
 									type="button"
 									variant="outline"
-									onClick={onBack}
+									onClick={handlePrevious}
 									className="flex items-center gap-2 gradient-border-btn bg-white"
 								>
 									<ChevronLeft className="h-4 w-4" />

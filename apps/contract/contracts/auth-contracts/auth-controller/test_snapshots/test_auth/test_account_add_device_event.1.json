@@ -1,8 +1,4 @@
 {
-	"generators": {
-		"address": 2,
-		"nonce": 0
-	},
 	"auth": [
 		[],
 		[
@@ -11,8 +7,6 @@
 				{
 					"function": {
 						"contract_fn": {
-							"contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-							"function_name": "add_device",
 							"args": [
 								{
 									"bytes": "35ccaf567ce385fe73a3d0ef44c04c8e4f13cf02ec853ac430a8bfd40cefe008"
@@ -20,7 +14,9 @@
 								{
 									"bytes": "04ce4a8df256558162747d72543ab253f6d5277908e7f1208f853e4750e8d62c2349f5673f4ff4997cc0b25f32750dc11b466800b0526e2891d184664da3a1527a"
 								}
-							]
+							],
+							"contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+							"function_name": "add_device"
 						}
 					},
 					"sub_invocations": []
@@ -28,33 +24,71 @@
 			]
 		]
 	],
+	"events": [
+		{
+			"event": {
+				"body": {
+					"v0": {
+						"data": {
+							"map": [
+								{
+									"key": {
+										"symbol": "device_id"
+									},
+									"val": {
+										"bytes": "35ccaf567ce385fe73a3d0ef44c04c8e4f13cf02ec853ac430a8bfd40cefe008"
+									}
+								},
+								{
+									"key": {
+										"symbol": "public_key"
+									},
+									"val": {
+										"bytes": "04ce4a8df256558162747d72543ab253f6d5277908e7f1208f853e4750e8d62c2349f5673f4ff4997cc0b25f32750dc11b466800b0526e2891d184664da3a1527a"
+									}
+								}
+							]
+						},
+						"topics": [
+							{
+								"symbol": "DEVICE"
+							},
+							{
+								"symbol": "ADDED"
+							}
+						]
+					}
+				},
+				"contract_id": "0000000000000000000000000000000000000000000000000000000000000002",
+				"ext": "v0",
+				"type_": "contract"
+			},
+			"failed_call": false
+		}
+	],
+	"generators": {
+		"address": 2,
+		"nonce": 0
+	},
 	"ledger": {
-		"protocol_version": 22,
-		"sequence_number": 0,
-		"timestamp": 0,
-		"network_id": "0000000000000000000000000000000000000000000000000000000000000000",
 		"base_reserve": 0,
-		"min_persistent_entry_ttl": 4096,
-		"min_temp_entry_ttl": 16,
-		"max_entry_ttl": 6312000,
 		"ledger_entries": [
 			[
 				{
 					"contract_data": {
 						"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-						"key": "ledger_key_contract_instance",
-						"durability": "persistent"
+						"durability": "persistent",
+						"key": "ledger_key_contract_instance"
 					}
 				},
 				[
 					{
-						"last_modified_ledger_seq": 0,
 						"data": {
 							"contract_data": {
-								"ext": "v0",
 								"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-								"key": "ledger_key_contract_instance",
 								"durability": "persistent",
+								"ext": "v0",
+								"key": "ledger_key_contract_instance",
 								"val": {
 									"contract_instance": {
 										"executable": {
@@ -123,7 +157,8 @@
 								}
 							}
 						},
-						"ext": "v0"
+						"ext": "v0",
+						"last_modified_ledger_seq": 0
 					},
 					4095
 				]
@@ -132,31 +167,31 @@
 				{
 					"contract_data": {
 						"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+						"durability": "temporary",
 						"key": {
 							"ledger_key_nonce": {
 								"nonce": 801925984706572462
 							}
-						},
-						"durability": "temporary"
+						}
 					}
 				},
 				[
 					{
-						"last_modified_ledger_seq": 0,
 						"data": {
 							"contract_data": {
-								"ext": "v0",
 								"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+								"durability": "temporary",
+								"ext": "v0",
 								"key": {
 									"ledger_key_nonce": {
 										"nonce": 801925984706572462
 									}
 								},
-								"durability": "temporary",
 								"val": "void"
 							}
 						},
-						"ext": "v0"
+						"ext": "v0",
+						"last_modified_ledger_seq": 0
 					},
 					6311999
 				]
@@ -169,61 +204,26 @@
 				},
 				[
 					{
-						"last_modified_ledger_seq": 0,
 						"data": {
 							"contract_code": {
+								"code": "",
 								"ext": "v0",
-								"hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-								"code": ""
+								"hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 							}
 						},
-						"ext": "v0"
+						"ext": "v0",
+						"last_modified_ledger_seq": 0
 					},
 					4095
 				]
 			]
-		]
-	},
-	"events": [
-		{
-			"event": {
-				"ext": "v0",
-				"contract_id": "0000000000000000000000000000000000000000000000000000000000000002",
-				"type_": "contract",
-				"body": {
-					"v0": {
-						"topics": [
-							{
-								"symbol": "DEVICE"
-							},
-							{
-								"symbol": "ADDED"
-							}
-						],
-						"data": {
-							"map": [
-								{
-									"key": {
-										"symbol": "device_id"
-									},
-									"val": {
-										"bytes": "35ccaf567ce385fe73a3d0ef44c04c8e4f13cf02ec853ac430a8bfd40cefe008"
-									}
-								},
-								{
-									"key": {
-										"symbol": "public_key"
-									},
-									"val": {
-										"bytes": "04ce4a8df256558162747d72543ab253f6d5277908e7f1208f853e4750e8d62c2349f5673f4ff4997cc0b25f32750dc11b466800b0526e2891d184664da3a1527a"
-									}
-								}
-							]
-						}
-					}
-				}
-			},
-			"failed_call": false
-		}
-	]
+		],
+		"max_entry_ttl": 6312000,
+		"min_persistent_entry_ttl": 4096,
+		"min_temp_entry_ttl": 16,
+		"network_id": "0000000000000000000000000000000000000000000000000000000000000000",
+		"protocol_version": 22,
+		"sequence_number": 0,
+		"timestamp": 0
+	}
 }

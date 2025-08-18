@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS unaccent;
 ALTER TABLE public.projects
   ADD COLUMN slug TEXT,
   ADD COLUMN social_links JSONB NOT NULL DEFAULT '{}'::jsonb,
-  ADD COLUMN project_location CHAR(3);
+  ADD COLUMN project_location CHAR(3) NOT NULL;
 
 -- Rename investors_count to kinder_count
 ALTER TABLE public.projects RENAME COLUMN investors_count TO kinder_count;
@@ -82,8 +82,7 @@ $$;
 CREATE UNIQUE INDEX IF NOT EXISTS projects_slug_key ON public.projects(slug);
 CREATE INDEX IF NOT EXISTS projects_project_location_idx ON public.projects(project_location);
 
--- Add country code format constraint and set slug as NOT NULL after table update
+-- Add country code format constraint
 ALTER TABLE public.projects
-    ALTER COLUMN slug SET NOT NULL,
-    ADD CONSTRAINT chk_project_location_alpha3
-    CHECK (project_location IS NULL OR project_location ~ '^[A-Z]{3}$');
+  ADD CONSTRAINT chk_project_location_alpha3
+  CHECK (project_location ~ '^[A-Z]{3}$');

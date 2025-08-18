@@ -3,8 +3,9 @@
 import type { User } from '@supabase/supabase-js'
 import { LogOut, Menu, Settings, User as UserIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { signOutAction } from '~/app/actions'
+import { signOutAction } from '~/app/actions/auth'
 import { Avatar, AvatarFallback } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import {
@@ -31,8 +32,8 @@ export const Header = () => {
 	const { user } = useAuth()
 	return (
 		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-			<div className="container mx-auto">
-				<div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+			<div className="container max-w-screen-xl mx-auto">
+				<div className="flex h-16 items-center justify-between px-4">
 					{/* Logo */}
 					<Link href="/" className="flex items-center space-x-2">
 						<LogoOrg width={120} height={33} className="h-auto w-auto" />
@@ -81,6 +82,17 @@ export const Header = () => {
 }
 
 const UserMenu = ({ user }: { user: User }) => {
+	const router = useRouter()
+
+	const _handleSignOutAction = async () => {
+		try {
+			await signOutAction()
+			router.push('/')
+		} catch (error) {
+			console.error('Error signing out:', error)
+		}
+	}
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -90,11 +102,16 @@ const UserMenu = ({ user }: { user: User }) => {
 					aria-label="Open User Account Menu"
 					className="relative h-8 w-8 rounded-full"
 				>
-					<Avatar className="h-8 w-8">
+					<Avatar className="h-8 w-8 border border-zinc-500/50">
 						<AvatarFallback suppressHydrationWarning>
 							{user.email?.[0].toUpperCase()}
 						</AvatarFallback>
 					</Avatar>
+					{user.email?.split('@')[0] && (
+						<span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white">
+							<span className="sr-only">Online</span>
+						</span>
+					)}
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-56">
@@ -109,12 +126,6 @@ const UserMenu = ({ user }: { user: User }) => {
 					<Link href="/protected" className="cursor-pointer">
 						<UserIcon className="mr-2 h-4 w-4" />
 						Dashboard
-					</Link>
-				</DropdownMenuItem>
-				<DropdownMenuItem asChild>
-					<Link href="/settings" className="cursor-pointer">
-						<Settings className="mr-2 h-4 w-4" />
-						Config
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
@@ -206,7 +217,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 						type="submit"
 					>
 						<LogOut className="mr-2 h-4 w-4" />
-						Close session
+						Sign Out
 					</Button>
 				</form>
 			</div>

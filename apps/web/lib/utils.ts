@@ -1,3 +1,5 @@
+import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { type ClassValue, clsx } from 'clsx'
 import { redirect } from 'next/navigation'
 import Server from 'stellar-sdk'
@@ -31,14 +33,21 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Builds the URL to the projects page filtered by category slug.
+ */
+export function buildProjectsCategoryUrl(categorySlug: string): string {
+	return `/projects?category=${encodeURIComponent(categorySlug)}`
+}
+
+/**
  * Retrieves the sequence number of an account using the provided secret key.
  *
  * @param {string} secretKey - The secret key of the account.
  * @returns {Promise<number>} A promise that resolves to the sequence number of the account.
  */
 export async function getAccountSequence(secretKey: string): Promise<number> {
-	// biome-ignore lint/style/noNonNullAssertion: <explanation>
-	const server = new Server(process.env.STELLAR_NETWORK_URL!)
+	const appConfig: AppEnvInterface = appEnvConfig('web')
+	const server = new Server(appConfig.stellar.networkUrl)
 	const account = await server.loadAccount(
 		Keypair.fromSecret(secretKey).publicKey(),
 	)

@@ -1,5 +1,7 @@
+import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { Slot } from '@radix-ui/react-slot'
-import { type VariantProps, cva } from 'class-variance-authority'
+import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
@@ -75,6 +77,8 @@ export interface ButtonProps
 	'aria-label'?: boolean extends true ? string : string | undefined
 }
 
+const appConfig: AppEnvInterface = appEnvConfig('web')
+
 /**
  * `Button` component used for triggering actions within the UI. It supports various variants and sizes,
  * and it can optionally render as a child component to integrate with other UI elements.
@@ -130,7 +134,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			iconOnly || (!hasTextContent && (startIcon || endIcon || children))
 
 		// Warning for icon-only buttons without aria-label in development
-		if (process.env.NODE_ENV !== 'production' && isIconOnly && !ariaLabel) {
+		if (appConfig.env.nodeEnv !== 'production' && isIconOnly && !ariaLabel) {
 			console.error(
 				`Accessibility error: Icon-only Button must have an aria-label to describe its purpose. Component: ${Button.displayName}`,
 			)
@@ -143,7 +147,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			role: isLink ? 'link' : undefined,
 			'aria-label': ariaLabel || (isIconOnly ? String(children) : 'Button'),
 			title: ariaLabel || (typeof children === 'string' ? children : 'Button'),
-			...(process.env.NODE_ENV !== 'production' &&
+			...(appConfig.env.nodeEnv !== 'production' &&
 				isLink &&
 				!('href' in props) && {
 					onClick: (e) => {

@@ -1,7 +1,4 @@
-import InputField from '@/components/forms/input-field'
-import StepHeader from '@/components/forms/step-header'
-import StepNavigation from '@/components/forms/step-navigation'
-import { Box } from '@/components/ui/box'
+/** biome-ignore-all lint/correctness/useHookAtTopLevel: any */
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
@@ -10,6 +7,11 @@ import { Controller, useForm } from 'react-hook-form'
 import { Platform, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { z } from 'zod'
+import InputField from '@/components/forms/input-field'
+import StepHeader from '@/components/forms/step-header'
+import StepNavigation from '@/components/forms/step-navigation'
+import { Box } from '@/components/ui/box'
+
 const Step3Schema = z.object({
 	projectSupportReason: z
 		.string()
@@ -24,7 +26,7 @@ const Step3Summary = () => {
 		? useSafeAreaInsets().top * 2
 		: useSafeAreaInsets().top + 20
 
-	const router = useRouter()
+	const _router = useRouter()
 	const {
 		control,
 		handleSubmit,

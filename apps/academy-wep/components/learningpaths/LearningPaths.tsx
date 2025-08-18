@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation'
 import { useLayoutEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { LEARNING_PATHS } from '~/lib/utils/learning-paths-utils'
+import { ErrorFallback } from './error-fallback'
+import type { LearningPathCardProps } from './LearningPathCard'
 // Internal imports
 import { LearningPathsCard } from './LearningPathCard'
-import type { LearningPathCardProps } from './LearningPathCard'
-import { ErrorFallback } from './error-fallback'
 import { LoadingCard } from './loading-card'
 
 const DEFAULT_LOADING_DELAY = 1500

@@ -1,8 +1,11 @@
+import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { env } from '~/lib/config/env'
 import { NotificationLogger } from '~/lib/services/notification-logger'
 import { NotificationService } from '~/lib/services/notification-service'
+
+const appConfig: AppEnvInterface = appEnvConfig('web')
 
 // Define Zod schemas for request validation
 const pushSubscriptionSchema = z.object({
@@ -26,11 +29,12 @@ const requestSchema = z.object({
 	notification: notificationSchema,
 })
 
+// biome-ignore lint/correctness/noUnusedVariables: not in use
 type PushRequestBody = z.infer<typeof requestSchema>
 
 export async function POST(request: Request) {
 	const logger = new NotificationLogger()
-	const notificationService = new NotificationService()
+	const _notificationService = new NotificationService()
 
 	try {
 		// Validate request body using Zod schema
@@ -42,7 +46,7 @@ export async function POST(request: Request) {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${env().NEXT_PUBLIC_VAPID_PUBLIC_KEY}`,
+				Authorization: `Bearer ${appConfig.vapid.publicKey}`,
 			},
 			body: JSON.stringify({
 				title: notification.title,

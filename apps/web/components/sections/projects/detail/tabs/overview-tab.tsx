@@ -1,10 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import parse from 'html-react-parser'
+import DOMPurify from 'isomorphic-dompurify'
 import { Download } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
+import { useMemo } from 'react'
 import { Button } from '~/components/base/button'
-import { FileIcon } from '~/components/sections/projects/detail/file-icon'
+import { FileIcon } from '~/components/sections/projects/shared'
 import type { ProjectPitch } from '~/lib/types/project/project-detail.types'
 
 interface OverviewTabProps {
@@ -12,6 +14,12 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ pitch }: OverviewTabProps) {
+	// Sanitize user-provided HTML to prevent XSS before parsing/rendering
+	const safeStory = useMemo(
+		() => (pitch.story ? DOMPurify.sanitize(pitch.story) : ''),
+		[pitch.story],
+	)
+
 	return (
 		<motion.div
 			className="bg-white rounded-xl shadow-sm p-6"
@@ -24,11 +32,7 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 
 			{/* Project story section */}
 			{pitch.story && (
-				<div className="mb-8">
-					<div className="prose max-w-none">
-						<ReactMarkdown>{pitch.story}</ReactMarkdown>
-					</div>
-				</div>
+				<div className="mb-8 prose max-w-none">{parse(safeStory)}</div>
 			)}
 
 			{/* Video section */}
@@ -42,6 +46,7 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 							className="w-full h-full"
 							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 							allowFullScreen
+							// Keep sandbox to further reduce risk when embedding
 							sandbox="allow-same-origin allow-scripts allow-presentation"
 						/>
 					</div>
@@ -59,13 +64,7 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 						)
 						const extension = fileName.split('.').pop()?.toLowerCase()
 						const fileType =
-							extension === 'ppt' || extension === 'pptx'
-								? 'ppt'
-								: extension === 'key'
-									? 'key'
-									: extension === 'odp'
-										? 'odp'
-										: 'pdf' // fallback
+							extension === 'ppt' || extension === 'pptx' ? 'ppt' : 'pdf' // fallback
 
 						return (
 							<div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">

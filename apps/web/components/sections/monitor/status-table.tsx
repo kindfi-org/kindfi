@@ -1,14 +1,16 @@
 'use client'
 
+import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useSetState } from 'react-use'
 import {
 	getEscrowRecordsAction,
 	insertTestEscrowRecordAction,
 	updateEscrowStatusAction,
-} from '~/app/actions'
+} from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import {
 	Select,
@@ -25,7 +27,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/base/table'
-import { appConfig } from '~/lib/config/app.config'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']
@@ -45,6 +46,7 @@ interface State {
 }
 
 export function EscrowTable() {
+	const appConfig: AppEnvInterface = appEnvConfig('web')
 	const router = useRouter()
 	const [state, setState] = useSetState<State>({
 		dbStatus: 'Checking...',
@@ -53,10 +55,7 @@ export function EscrowTable() {
 		isLoading: false,
 	})
 
-	const isDevelopment = useMemo(
-		() => process.env.NODE_ENV === 'development',
-		[],
-	)
+	const isDevelopment = appConfig.env.nodeEnv === 'development'
 
 	const statusColors = useMemo(
 		() => ({
@@ -70,7 +69,7 @@ export function EscrowTable() {
 		[],
 	)
 
-	const fetchRecords = useCallback(async () => {
+	const fetchRecords = async () => {
 		if (!isDevelopment || !appConfig.features.enableEscrowFeature) return
 
 		setState({ isLoading: true })
@@ -98,7 +97,7 @@ export function EscrowTable() {
 				isLoading: false,
 			})
 		}
-	}, [isDevelopment, setState])
+	}
 
 	const updateStatus = async (id: string, newStatus: EscrowStatusType) => {
 		if (!isDevelopment || !appConfig.features.enableEscrowFeature) return
@@ -142,6 +141,7 @@ export function EscrowTable() {
 		}
 	}
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (!isDevelopment) {
 			router.push('/')
@@ -151,7 +151,7 @@ export function EscrowTable() {
 		if (appConfig.features.enableEscrowFeature) {
 			fetchRecords()
 		}
-	}, [fetchRecords, isDevelopment, router])
+	}, [isDevelopment, router])
 
 	if (!isDevelopment) {
 		return null

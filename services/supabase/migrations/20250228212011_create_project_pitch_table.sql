@@ -23,6 +23,7 @@ ON public.project_pitch
 FOR SELECT
 USING (true);
 
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- Create policy for users to view project pitches they have access to
 -- CREATE POLICY "Users can view project pitches they have access to"
 -- ON public.project_pitch
@@ -42,45 +43,64 @@ USING (true);
 --     )
 -- );
 
--- Create policy for users to insert their own project pitches
-CREATE POLICY "Users can insert their own project pitches"
-ON public.project_pitch
-FOR INSERT
-WITH CHECK (
-    project_id IN (
-        SELECT id FROM public.projects
-        WHERE id = project_pitch.project_id
-        AND (
-            kindler_id = auth.uid()
-            -- kindler_id = auth.uid() OR
-            -- id IN (
-            --     SELECT project_id FROM public.project_members
-            --     WHERE user_id = auth.uid()
-            --     AND role IN ('admin', 'editor')
-            -- )
-        )
-    )
-);
+-- TEMPORARY POLICY: Allows project creation without authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Temporary public insert access to project pitches"
+    ON project_pitch
+    FOR INSERT
+    TO public
+    WITH CHECK (true);
 
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
+-- Create policy for users to insert their own project pitches
+-- CREATE POLICY "Users can insert their own project pitches"
+-- ON public.project_pitch
+-- FOR INSERT
+-- WITH CHECK (
+--     project_id IN (
+--         SELECT id FROM public.projects
+--         WHERE id = project_pitch.project_id
+--         AND (
+--             kindler_id = auth.uid()
+--             -- kindler_id = auth.uid() OR
+--             -- id IN (
+--             --     SELECT project_id FROM public.project_members
+--             --     WHERE user_id = auth.uid()
+--             --     AND role IN ('admin', 'editor')
+--             -- )
+--         )
+--     )
+-- );
+
+-- TEMPORARY POLICY: Allows project creation without authentication
+-- ⚠️ Remove or replace this policy when auth is active
+CREATE POLICY "Temporary public update access to project pitches"
+    ON project_pitch
+    FOR UPDATE
+    TO public
+    USING (true)
+    WITH CHECK (true);
+
+-- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- Create policy for users to update their own project pitches
-CREATE POLICY "Users can update their own project pitches"
-ON public.project_pitch
-FOR UPDATE
-USING (
-    project_id IN (
-        SELECT id FROM public.projects
-        WHERE id = project_pitch.project_id
-        AND (
-            kindler_id = auth.uid()
-            -- kindler_id = auth.uid() OR
-            -- id IN (
-            --     SELECT project_id FROM public.project_members
-            --     WHERE user_id = auth.uid()
-            --     AND role IN ('admin', 'editor')
-            -- )
-        )
-    )
-);
+-- CREATE POLICY "Users can update their own project pitches"
+-- ON public.project_pitch
+-- FOR UPDATE
+-- USING (
+--     project_id IN (
+--         SELECT id FROM public.projects
+--         WHERE id = project_pitch.project_id
+--         AND (
+--             kindler_id = auth.uid()
+--             -- kindler_id = auth.uid() OR
+--             -- id IN (
+--             --     SELECT project_id FROM public.project_members
+--             --     WHERE user_id = auth.uid()
+--             --     AND role IN ('admin', 'editor')
+--             -- )
+--         )
+--     )
+-- );
 
 -- Create policy for users to delete their own project pitches
 CREATE POLICY "Users can delete their own project pitches"

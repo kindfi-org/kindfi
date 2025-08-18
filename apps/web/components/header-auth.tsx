@@ -1,7 +1,7 @@
-import { validateEnvVars } from '@packages/lib/src/supabase'
-import { createSupabaseServerClient } from '@packages/lib/supabase/server'
+import { validateEnvVars } from '@packages/lib/supabase'
+import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import Link from 'next/link'
-import { signOutAction } from '~/app/actions'
+import { signOutAction } from '~/app/actions/auth'
 import { Badge } from './base/badge'
 import { Button } from './base/button'
 
@@ -14,38 +14,36 @@ export async function AuthButton() {
 
 	if (!validateEnvVars) {
 		return (
-			<>
-				<div className="flex gap-4 items-center">
-					<div>
-						<Badge
-							variant={'default'}
-							className="font-normal pointer-events-none"
-						>
-							Please update .env.local file with anon key and url
-						</Badge>
-					</div>
-					<div className="flex gap-2">
-						<Button
-							asChild
-							size="sm"
-							variant={'outline'}
-							disabled
-							className="opacity-75 cursor-none pointer-events-none"
-						>
-							<Link href="/sign-in">Sign in</Link>
-						</Button>
-						<Button
-							asChild
-							size="sm"
-							variant={'default'}
-							disabled
-							className="opacity-75 cursor-none pointer-events-none"
-						>
-							<Link href="/sign-up">Sign up</Link>
-						</Button>
-					</div>
+			<div className="flex gap-4 items-center">
+				<div>
+					<Badge
+						variant={'default'}
+						className="font-normal pointer-events-none"
+					>
+						Please update .env.local file with anon key and url
+					</Badge>
 				</div>
-			</>
+				<div className="flex gap-2">
+					<Button
+						asChild
+						size="sm"
+						variant={'outline'}
+						disabled
+						className="opacity-75 cursor-none pointer-events-none"
+					>
+						<Link href="/sign-in">Sign in</Link>
+					</Button>
+					<Button
+						asChild
+						size="sm"
+						variant={'default'}
+						disabled
+						className="opacity-75 cursor-none pointer-events-none"
+					>
+						<Link href="/sign-up">Sign up</Link>
+					</Button>
+				</div>
+			</div>
 		)
 	}
 	return user ? (

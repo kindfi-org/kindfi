@@ -1,10 +1,24 @@
-/**
- * @type {import('next').NextConfig}
- */
-const nextConfig = {
+import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
+import type { NextConfig } from 'next'
+
+const appConfig: AppEnvInterface = appEnvConfig('web')
+const isProduction = appConfig.env.nodeEnv === 'production'
+const nextConfig: NextConfig = {
+	serverExternalPackages: ['@packages/lib'],
+	images: {
+		remotePatterns: [
+			{
+				protocol: isProduction ? 'https' : 'http',
+				hostname: new URL(appConfig.database.url).hostname || '127.0.0.1',
+				port: appConfig.database.port || '54321',
+				pathname: '/storage/v1/object/public/project_thumbnails/**',
+			},
+		],
+	},
 	async headers() {
 		// Only apply strict headers in production
-		if (process.env.NODE_ENV === 'production') {
+		if (isProduction) {
 			return [
 				{
 					source: '/:path*',
@@ -45,7 +59,7 @@ const nextConfig = {
 					],
 				},
 			]
-			// biome-ignore lint/style/noUselessElse: <explanation>
+			// biome-ignore lint/style/noUselessElse:  no useless else[refactor]
 		} else {
 			// Return minimal headers for development
 			return [

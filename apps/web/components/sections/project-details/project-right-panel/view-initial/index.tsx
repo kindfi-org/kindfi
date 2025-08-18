@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '~/components/base/button'
 import {
+	CSRFTokenField,
 	Form,
 	FormControl,
 	FormField,
@@ -68,6 +69,7 @@ export function ViewInitial({
 				<div>
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)}>
+							<CSRFTokenField />
 							<FormField
 								control={form.control}
 								name="amountOfSupport"

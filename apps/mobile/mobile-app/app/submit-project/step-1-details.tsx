@@ -1,8 +1,4 @@
-import CategorySelector from '@/components/forms/category-select'
-import InputField from '@/components/forms/input-field'
-import StepHeader from '@/components/forms/step-header'
-import StepNavigation from '@/components/forms/step-navigation'
-import { Box } from '@/components/ui/box'
+/** biome-ignore-all lint/correctness/useHookAtTopLevel: any*/
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
@@ -11,6 +7,12 @@ import { Controller, useForm } from 'react-hook-form'
 import { Platform, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { z } from 'zod'
+import CategorySelector from '@/components/forms/category-select'
+import InputField from '@/components/forms/input-field'
+import StepHeader from '@/components/forms/step-header'
+import StepNavigation from '@/components/forms/step-navigation'
+import { Box } from '@/components/ui/box'
+
 const Step1Schema = z.object({
 	website: z.string().url('Please enter a valid URL'),
 	location: z.string().min(1, 'Location is required'),

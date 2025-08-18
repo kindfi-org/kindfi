@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import {
+	CSRFTokenField,
 	Form,
 	FormControl,
 	FormField,
@@ -54,6 +55,7 @@ export function StepOne({ onNext }: StepOneProps) {
 				<CardContent className="pt-6">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+							<CSRFTokenField />
 							<FormField
 								control={form.control}
 								name="title"
@@ -87,6 +89,10 @@ export function StepOne({ onNext }: StepOneProps) {
 												{...field}
 											/>
 										</FormControl>
+										<p className="text-sm text-muted-foreground mt-2">
+											Just a quick summary is fine for now. You will be able to
+											edit it later.
+										</p>
 										<FormMessage />
 									</FormItem>
 								)}

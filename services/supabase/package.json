@@ -1,29 +1,29 @@
 {
-	"name": "@services/supabase",
-	"version": "0.0.1",
-	"private": true,
-	"type": "module",
+	"author": "kindfi",
 	"description": "supabase module for kindfi",
+	"devDependencies": {
+		"supabase": "^2.0.0",
+		"supabase-to-zod": "1.0.5"
+	},
+	"license": "MIT",
 	"main": "./src/index.ts",
-	"types": "./src/index.ts",
+	"name": "@services/supabase",
+	"private": true,
 	"scripts": {
-		"gen:remote": "bun run types:remote && bun run schemas",
-		"gen": "bun run types && bun run schemas",
-		"types:remote": "supabase gen types typescript --project-id ${PROJECT_ID} > src/database.types.ts",
-		"types": "supabase gen types typescript --local > src/database.types.ts",
-		"schemas": "supabase-to-zod --input src/database.types.ts --output src/database.schemas.ts",
 		"db:pull": "supabase db pull --local",
 		"db:push": "supabase db push --local",
-		"start": "supabase start",
-		"stop": "supabase stop",
-		"reset": "supabase db reset",
+		"gen": "bun run types && bun run schemas",
+		"gen:remote": "bun run types:remote && bun run schemas",
 		"migrate": "supabase migration up",
-		"status": "supabase status"
+		"reset": "supabase db reset",
+		"schemas": "supabase-to-zod --input src/database.types.ts --output src/database.schemas.ts",
+		"start": "supabase start",
+		"status": "supabase status",
+		"stop": "supabase stop",
+		"types": "supabase gen types typescript --local > src/database.types.ts",
+		"types:remote": "supabase gen types typescript --project-id ${PROJECT_ID} > src/database.types.ts"
 	},
-	"author": "kindfi",
-	"license": "MIT",
-	"devDependencies": {
-		"supabase-to-zod": "^1.0.7",
-		"supabase": "^2.0.0"
-	}
+	"type": "module",
+	"types": "./src/index.ts",
+	"version": "0.0.1"
 }

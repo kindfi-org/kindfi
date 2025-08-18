@@ -1,9 +1,10 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
-import { Plus, Shuffle } from 'lucide-react'
+import { useSupabaseQuery } from '@packages/lib/hooks'
+import { motion } from 'framer-motion'
+import { MousePointer, Plus, Shuffle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-
+import { useDebounce } from 'react-use'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { TagBadge } from '~/components/sections/projects/create/tag-badge'
@@ -12,7 +13,7 @@ import { cn } from '~/lib/utils'
 import { generateDistinctRandomColor } from '~/lib/utils/color-utils'
 
 interface TagInputProps {
-	value: Tag[]
+	tags: Tag[]
 	onChange: (tags: Tag[]) => void
 	error?: string
 	placeholder?: string
@@ -20,7 +21,7 @@ interface TagInputProps {
 }
 
 export function TagInput({
-	value,
+	tags,
 	onChange,
 	error,
 	placeholder = 'Enter a tag',
@@ -28,91 +29,96 @@ export function TagInput({
 }: TagInputProps) {
 	const [newTag, setNewTag] = useState('')
 	const [selectedColor, setSelectedColor] = useState('')
-	const [showPreview, setShowPreview] = useState(false)
+	const [tagError, setTagError] = useState('')
 	const [colorError, setColorError] = useState('')
+	const [showPreview, setShowPreview] = useState(false)
+	const [searchTerm, setSearchTerm] = useState('')
+	const [debouncedSearch, setDebouncedSearch] = useState('')
 	const inputRef = useRef<HTMLInputElement>(null)
 	const colorInputRef = useRef<HTMLInputElement>(null)
 
-	// Generate initial random color when component mounts or when tags change
-	useEffect(() => {
-		if (!selectedColor) {
-			const existingColors = value.map((tag) => tag.color)
-			const randomColor = generateDistinctRandomColor(existingColors)
-			setSelectedColor(randomColor)
-		}
-	}, [selectedColor, value])
+	// Debounce user input to limit queries
+	useDebounce(() => setDebouncedSearch(searchTerm), 700, [searchTerm])
 
-	// Show preview when user starts typing
+	// Fetch matching tags from Supabas
+	const { data: matchingTags } = useSupabaseQuery<Tag[]>(
+		'search-tags',
+		async (supabase) => {
+			if (!debouncedSearch) return []
+			const { data, error } = await supabase
+				.from('project_tags')
+				.select('name, color')
+				.ilike('name', `${debouncedSearch}%`)
+				.limit(5)
+			if (error) throw error
+			return data ?? []
+		},
+		{
+			enabled: debouncedSearch.length > 0,
+			additionalKeyValues: [debouncedSearch],
+			staleTime: 5_000,
+		},
+	)
+
+	useEffect(() => {
+		setTagError('')
+		setSearchTerm(newTag)
+	}, [newTag])
+
 	useEffect(() => {
 		setShowPreview(newTag.trim().length > 0)
 	}, [newTag])
 
-	// Check if the selected color is already used by another tag
-	const isColorDuplicate = (color: string): boolean => {
-		return value.some((tag) => tag.color.toLowerCase() === color.toLowerCase())
-	}
+	// Generate a new color when none is selected
+	useEffect(() => {
+		if (!selectedColor) {
+			const existingColors = tags.map((tag) => tag.color)
+			setSelectedColor(generateDistinctRandomColor(existingColors))
+		}
+	}, [selectedColor, tags])
 
-	// Find which tag is using the duplicate color
-	const findTagWithColor = (color: string): Tag | undefined => {
-		return value.find((tag) => tag.color.toLowerCase() === color.toLowerCase())
-	}
+	const isColorDuplicate = (color: string) =>
+		tags.some((tag) => tag.color.toLowerCase() === color.toLowerCase())
+
+	const findTagWithColor = (color: string) =>
+		tags.find((tag) => tag.color.toLowerCase() === color.toLowerCase())
 
 	const generateNewRandomColor = () => {
-		const existingColors = value.map((tag) => tag.color)
-		const newRandomColor = generateDistinctRandomColor(existingColors)
-		setSelectedColor(newRandomColor)
+		const existingColors = tags.map((tag) => tag.color)
+		setSelectedColor(generateDistinctRandomColor(existingColors))
 		setColorError('')
 	}
 
 	const addTag = () => {
-		const tagLabel = newTag.trim().toUpperCase()
-		if (!tagLabel) return
-
-		// Check if tag already exists
-		if (value.find((tag) => tag.label === tagLabel)) return
-
-		// Check max tags limit
-		if (value.length >= maxTags) return
-
-		// Check for duplicate color
+		const tagName = newTag.trim().toUpperCase()
+		if (!tagName) return
+		if (tags.find((tag) => tag.name === tagName)) return
+		if (tags.length >= maxTags) return
 		if (isColorDuplicate(selectedColor)) {
 			const duplicateTag = findTagWithColor(selectedColor)
-			setColorError(
-				`This color is already used by "${duplicateTag?.label}" tag`,
-			)
+			setColorError(`This color is already used by "${duplicateTag?.name}" tag`)
 			return
 		}
 
-		const newTagObj: Tag = {
-			label: tagLabel,
-			color: selectedColor,
-		}
-
-		onChange([...value, newTagObj])
+		const newTagObj: Tag = { name: tagName, color: selectedColor }
+		onChange([...tags, newTagObj])
 		setNewTag('')
 		setShowPreview(false)
 		setColorError('')
 
-		// Generate a new random color for the next tag
-		const updatedExistingColors = [
-			...value.map((tag) => tag.color),
-			selectedColor,
-		]
-		const nextRandomColor = generateDistinctRandomColor(updatedExistingColors)
-		setSelectedColor(nextRandomColor)
-
-		// Focus back to input for better UX
+		const updatedColors = [...tags.map((tag) => tag.color), selectedColor]
+		setSelectedColor(generateDistinctRandomColor(updatedColors))
 		inputRef.current?.focus()
 	}
 
 	const removeTag = (indexToRemove: number) => {
-		const removedTag = value[indexToRemove]
-		onChange(value.filter((_, index) => index !== indexToRemove))
+		const removed = tags[indexToRemove]
+		onChange(tags.filter((_, i) => i !== indexToRemove))
 
-		// Clear color error if the removed tag was causing the duplicate color error
+		// Reset color error if removed tag had the conflicting color
 		if (
 			colorError &&
-			removedTag.color.toLowerCase() === selectedColor.toLowerCase()
+			removed.color.toLowerCase() === selectedColor.toLowerCase()
 		) {
 			setColorError('')
 		}
@@ -128,34 +134,44 @@ export function TagInput({
 		}
 	}
 
-	const handleColorClick = () => {
-		colorInputRef.current?.click()
-	}
+	const handleColorClick = () => colorInputRef.current?.click()
 
 	const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const newColor = e.target.value
-		setSelectedColor(newColor)
-
-		// Check for duplicate color and show error immediately
-		if (isColorDuplicate(newColor)) {
-			const duplicateTag = findTagWithColor(newColor)
-			setColorError(
-				`This color is already used by "${duplicateTag?.label}" tag`,
-			)
+		const color = e.target.value
+		setSelectedColor(color)
+		if (isColorDuplicate(color)) {
+			const duplicate = findTagWithColor(color)
+			setColorError(`This color is already used by "${duplicate?.name}" tag`)
 		} else {
-			setColorError('') // Clear error if color is unique
+			setColorError('')
 		}
+	}
+
+	const handleSelectTag = (tag: Tag) => {
+		const normalizedName = tag.name.trim().toUpperCase()
+		const isDuplicate = tags.some(
+			(t) => t.name.trim().toUpperCase() === normalizedName,
+		)
+
+		if (isDuplicate) {
+			setTagError(`The tag "${normalizedName}" is already selected`)
+			return
+		}
+
+		setTagError('')
+		onChange([...tags, { ...tag, name: normalizedName }])
+		setNewTag('')
+		setDebouncedSearch('')
 	}
 
 	const canAddTag =
 		newTag.trim().length > 0 &&
-		!value.find((tag) => tag.label === newTag.trim().toUpperCase()) &&
-		value.length < maxTags &&
+		!tags.find((tag) => tag.name === newTag.trim().toUpperCase()) &&
+		tags.length < maxTags &&
 		!colorError
 
 	return (
 		<div className="space-y-4">
-			{/* Input and Color Controls */}
 			<div className="flex gap-2">
 				<div className="flex-1 relative">
 					<Input
@@ -169,10 +185,7 @@ export function TagInput({
 						aria-label="Add tag"
 						maxLength={20}
 					/>
-
-					{/* Color controls container */}
 					<div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-						{/* Random color generator button */}
 						<Button
 							type="button"
 							variant="ghost"
@@ -207,74 +220,92 @@ export function TagInput({
 						/>
 					</div>
 				</div>
-
 				<Button
 					type="button"
 					onClick={addTag}
 					disabled={!canAddTag}
 					aria-label="Add tag"
+					className="bg-indigo-900 hover:bg-indigo-800 text-white flex items-center gap-2"
 				>
-					<Plus className="h-4 w-4" />
+					<Plus className="h-4 w-4 sm:hidden" />
+					<span className="hidden sm:inline">Add tag</span>
 				</Button>
 			</div>
 
-			{/* Color Error Message */}
 			{colorError && (
 				<p className="text-[0.8rem] font-medium text-destructive">
 					{colorError}
 				</p>
 			)}
 
-			{/* Tag Preview */}
-			<AnimatePresence>
-				{showPreview && newTag.trim() && (
-					<motion.div
-						initial={{ opacity: 0, y: -10 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: -10 }}
-						transition={{ duration: 0.2 }}
-						className="flex items-center gap-2"
-					>
-						<span className="text-sm text-muted-foreground">Preview:</span>
-						<TagBadge
-							tag={{ label: newTag.trim().toUpperCase(), color: selectedColor }}
-							onRemove={() => {}}
-							showRemoveButton={false}
-						/>
-					</motion.div>
-				)}
-			</AnimatePresence>
+			{showPreview && newTag.trim() && (
+				<motion.div
+					initial={{ opacity: 0, y: -10 }}
+					animate={{ opacity: 1, y: 0 }}
+					exit={{ opacity: 0, y: -10 }}
+					transition={{ duration: 0.2 }}
+					className="flex items-center gap-2"
+				>
+					<span className="text-sm text-muted-foreground">Preview:</span>
+					<TagBadge
+						tag={{ name: newTag.trim().toUpperCase(), color: selectedColor }}
+					/>
+				</motion.div>
+			)}
 
-			{/* Existing Tags */}
-			{value.length > 0 && (
-				<div className="flex flex-wrap gap-2">
-					{value.map((tag, index) => (
-						<TagBadge
-							key={`${tag.label}`}
-							tag={tag}
-							onRemove={() => removeTag(index)}
-							showRemoveButton={true}
-						/>
-					))}
+			{/* Suggestions */}
+			{debouncedSearch && matchingTags && matchingTags.length > 0 && (
+				<div className="space-y-2">
+					<p className="text-sm text-gray-500">Suggestions:</p>
+					<div className="flex flex-wrap gap-2">
+						{matchingTags.map((tag) => (
+							<TagBadge
+								key={`${tag.name}-${tag.color}`}
+								tag={tag}
+								onSelect={() => handleSelectTag(tag)}
+							/>
+						))}
+					</div>
+
+					<p className="flex items-center text-xs text-gray-400 mt-1 pl-1">
+						<MousePointer className="h-3 w-3 inline mr-1" />
+						Click a suggestion to add it
+					</p>
 				</div>
 			)}
 
-			{/* Max tags warning */}
-			{value.length >= maxTags && (
+			{tagError && (
+				<p className="text-[0.8rem] font-medium text-destructive">{tagError}</p>
+			)}
+
+			{tags.length > 0 && (
+				<div className="flex flex-col gap-2">
+					<p className="text-sm text-gray-500">My tags:</p>
+					<div className="flex flex-wrap gap-2">
+						{tags.map((tag, index) => (
+							<TagBadge
+								key={`${tag.name}-${tag.color}`}
+								tag={tag}
+								onRemove={() => removeTag(index)}
+							/>
+						))}
+					</div>
+				</div>
+			)}
+
+			{tags.length >= maxTags && (
 				<p className="text-sm text-amber-600">
 					Maximum of {maxTags} tags reached
 				</p>
 			)}
 
-			{/* Error message */}
 			{error && (
 				<p className="text-[0.8rem] font-medium text-destructive">{error}</p>
 			)}
 
-			{/* Tags count and color info */}
 			<div className="flex justify-between items-center">
 				<p className="text-xs text-gray-500">
-					{value.length}/{maxTags} tags
+					{tags.length}/{maxTags} tags
 				</p>
 				<p className="text-xs text-gray-400">
 					<Shuffle className="h-3 w-3 inline mr-1" />

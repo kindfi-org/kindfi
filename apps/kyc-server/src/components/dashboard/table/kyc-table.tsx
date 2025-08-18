@@ -1,13 +1,14 @@
+/** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: any*/
 'use client'
 
 import {
+	closestCenter,
 	DndContext,
 	type DragEndEvent,
 	KeyboardSensor,
 	MouseSensor,
 	TouchSensor,
 	type UniqueIdentifier,
-	closestCenter,
 	useSensor,
 	useSensors,
 } from '@dnd-kit/core'

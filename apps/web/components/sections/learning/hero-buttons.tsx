@@ -15,7 +15,6 @@ export function HeroButtons() {
 					<ArrowRight className="ml-2 h-5 w-5" />
 				</Button>
 			</Link>
-
 			<Link href="/courses">
 				<Button
 					variant="outline"

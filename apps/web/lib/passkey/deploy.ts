@@ -1,33 +1,37 @@
+import { appEnvConfig } from '@packages/lib/config'
+import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,
 	Address,
+	hash,
 	type Keypair,
 	Operation,
 	StrKey,
 	TransactionBuilder,
-	hash,
 	xdr,
 } from '@stellar/stellar-sdk'
-import { Api, Server, assembleTransaction } from '@stellar/stellar-sdk/rpc'
-import { ENV } from '~/lib/passkey/env'
-
-const { RPC_URL, FACTORY_CONTRACT_ID, HORIZON_URL, NETWORK_PASSPHRASE } = ENV
+import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 
 export async function handleDeploy(
 	bundlerKey: Keypair,
 	contractSalt: Buffer,
 	publicKey?: Buffer,
-) {
-	const rpc = new Server(RPC_URL)
+): Promise<string> {
+	const config: AppEnvInterface = appEnvConfig('web')
+	const rpc = new Server(config.stellar.rpcUrl)
 	const deployee = StrKey.encodeContract(
 		hash(
 			xdr.HashIdPreimage.envelopeTypeContractId(
 				new xdr.HashIdPreimageContractId({
-					networkId: hash(Buffer.from(NETWORK_PASSPHRASE, 'utf-8')),
+					networkId: hash(
+						Buffer.from(config.stellar.networkPassphrase, 'utf-8'),
+					),
 					contractIdPreimage:
 						xdr.ContractIdPreimage.contractIdPreimageFromAddress(
 							new xdr.ContractIdPreimageFromAddress({
-								address: Address.fromString(FACTORY_CONTRACT_ID).toScAddress(),
+								address: Address.fromString(
+									config.stellar.factoryContractId,
+								).toScAddress(),
 								salt: contractSalt,
 							}),
 						),
@@ -50,11 +54,11 @@ export async function handleDeploy(
 		.then((res) => new Account(res.accountId(), res.sequenceNumber()))
 	const simTxn = new TransactionBuilder(bundlerKeyAccount, {
 		fee: '100',
-		networkPassphrase: NETWORK_PASSPHRASE,
+		networkPassphrase: config.stellar.networkPassphrase,
 	})
 		.addOperation(
 			Operation.invokeContractFunction({
-				contract: FACTORY_CONTRACT_ID,
+				contract: config.stellar.factoryContractId,
 				function: 'deploy',
 				args: [xdr.ScVal.scvBytes(contractSalt), xdr.ScVal.scvBytes(publicKey)],
 			}),
@@ -74,7 +78,7 @@ export async function handleDeploy(
 	// TODO handle archived entries
 
 	const txResp = await (
-		await fetch(`${HORIZON_URL}/transactions`, {
+		await fetch(`${config.stellar.horizonUrl}/transactions`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 			body: new URLSearchParams({ tx: transaction.toXDR() }),

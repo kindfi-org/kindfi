@@ -2,9 +2,14 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { CategoryBadge } from '~/components/sections/projects/filters'
+import { AnimatedCounter } from '~/components/sections/projects/detail/animated-counter'
+import { SocialLinksDisplay } from '~/components/sections/projects/detail/social-links-display'
+import {
+	CategoryBadge,
+	CountryFlag,
+} from '~/components/sections/projects/shared'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
-import { AnimatedCounter } from './animated-counter'
+import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
 
 interface ProjectHeroProps {
 	project: ProjectDetail
@@ -20,7 +25,7 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 		>
 			<div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
 				<Image
-					src={project.image || '/placeholder.svg'}
+					src={project.image || '/images/placeholder.png'}
 					alt={`${project.title} banner`}
 					fill
 					className="object-cover"
@@ -37,6 +42,27 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 				<h1 className="text-3xl md:text-4xl font-bold mb-3">{project.title}</h1>
 
 				<p className="text-muted-foreground mb-6">{project.description}</p>
+
+				{/* Location + Social Links */}
+				{(project.location || project.socialLinks) && (
+					<div className="flex flex-wrap items-center justify-between mb-6 gap-2">
+						{project.location && (
+							<div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+								<span>Location:</span>
+								<CountryFlag countryCode={project.location} />
+								<span className="text-gray-700">
+									{getCountryNameFromAlpha3(project.location)}
+								</span>
+							</div>
+						)}
+
+						{project.socialLinks && (
+							<div className="flex items-center gap-3">
+								<SocialLinksDisplay socialLinks={project.socialLinks} />
+							</div>
+						)}
+					</div>
+				)}
 
 				<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
 					<div className="bg-gray-50 p-4 rounded-lg text-center">

@@ -1,4 +1,6 @@
-import { Horizon, Networks } from '@stellar/stellar-sdk'
+import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
+import { Horizon } from '@stellar/stellar-sdk'
 import { useCallback, useEffect, useState } from 'react'
 
 interface FundingParams {
@@ -14,7 +16,6 @@ export const useEscrowFunding = ({
 	escrowId,
 	amount,
 	payerAddress,
-	signer,
 }: FundingParams) => {
 	const [status, setStatus] = useState<
 		'idle' | 'pending' | 'success' | 'failed' | 'error'
@@ -102,8 +103,8 @@ export const useEscrowFunding = ({
 }
 
 export async function fetchTransactionStatus(hash: string) {
-	// biome-ignore lint/style/noNonNullAssertion: <explanation>
-	const server = new Horizon.Server(process.env.STELLAR_NETWORK_URL!)
+	const appConfig: AppEnvInterface = appEnvConfig('web')
+	const server = new Horizon.Server(appConfig.stellar.networkUrl)
 	const response = await server.transactions().transaction(hash).call()
 	return response
 }

@@ -1,22 +1,33 @@
 [workspace]
 resolver = "2"
 
-members = [ "contracts/academy-graduation-nft", "contracts/academy-verifier", "contracts/auth-contracts/*", "contracts/mock_badge_tracker", "contracts/mock_progress_tracker", "contracts/nft", "contracts/reputation", "contracts/academy-progress-tracker", "contracts/academy-badge-tracker"]
+members = [ 
+  "contracts/academy-graduation-nft",
+  "contracts/academy-verifier",
+  "contracts/auth-contracts/account",
+  "contracts/auth-contracts/account-factory",
+  "contracts/auth-contracts/auth-controller",
+  "contracts/mock_badge_tracker",
+  "contracts/mock_progress_tracker",
+  "contracts/nft-kindfi",
+  "contracts/reputation",
+  "contracts/academy-progress-tracker",
+  "contracts/academy-badge-tracker"
+]
 
 [workspace.dependencies]
 soroban-sdk = "22.0.6"
+stellar-access-control = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-access-control-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
 stellar-constants = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
 stellar-default-impl-macro = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-fungible = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
 stellar-non-fungible = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-ownable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+stellar-ownable-macro = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
 stellar-pausable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
 stellar-pausable-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
 stellar-upgradeable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
 stellar-upgradeable-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-ownable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-ownable-macro = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-access-control = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-access-control-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
 
 
 [profile.release]

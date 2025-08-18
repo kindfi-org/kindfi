@@ -6,8 +6,8 @@ export { default } from '~/components/shared/qa-server'
 
 // Export other types and components that might be needed elsewhere
 export type {
-	UserData,
 	CommentData,
-	CommentWithReplies,
 	CommentWithAnswers,
+	CommentWithReplies,
+	UserData,
 } from './types'

@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import type React from 'react'
 import { Badge } from '~/components/base/badge'
-import type { TMoney, TPercentage, Tag } from '~/lib/types'
+import type { Tag, TMoney, TPercentage } from '~/lib/types'
 import { getA11yColorMatch } from './color-utils'
 
 /** Helper function to create monetary values */

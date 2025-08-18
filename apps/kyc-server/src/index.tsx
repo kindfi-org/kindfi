@@ -1,10 +1,14 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { serve } from 'bun'
+import { appEnvConfig } from '@packages/lib'
+import type { AppEnvInterface } from '@packages/lib/types'
 import type { Server, ServerWebSocket } from 'bun'
+import { serve } from 'bun'
 import { kycWebSocketService } from './lib/websocket'
 import { routes } from './routes'
 import { buildClient } from './utils/buildClient'
+
+const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
 interface ClientData {
 	clientId: string
@@ -33,7 +37,7 @@ function getClientFilename(): string {
 }
 
 async function startServer() {
-	if (process.env.NODE_ENV !== 'test') {
+	if (appConfig.env.nodeEnv !== 'test') {
 		try {
 			await buildClient()
 		} catch (error) {
@@ -128,10 +132,13 @@ async function startServer() {
 			message(ws: ServerWebSocket<ClientData>, message: string) {
 				try {
 					const parsedMessage = JSON.parse(message) as ParsedMessage
-
-					if (parsedMessage.type === 'subscribe' && parsedMessage.userId) {
+					if (
+						parsedMessage.type?.match(/(subscribe|reply)/) &&
+						parsedMessage.userId
+					) {
 						ws.data.userId = parsedMessage.userId
 						// Optionally call a dedicated `addSubscription` method instead
+						console.log('parsedMessage', parsedMessage)
 					} else {
 						ws.send(
 							JSON.stringify({
@@ -155,9 +162,9 @@ async function startServer() {
 				kycWebSocketService.handleDisconnection(ws)
 			},
 		},
-		port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3001,
+		port: appConfig.deployment.port,
 		routes,
-		development: process.env.NODE_ENV !== 'production',
+		development: appConfig.env.nodeEnv !== 'production',
 	} as const
 
 	const server = serve(serverOptions)
@@ -165,7 +172,7 @@ async function startServer() {
 	return server
 }
 
-if (process.env.NODE_ENV !== 'test') {
+if (appConfig.env.nodeEnv !== 'test') {
 	startServer().catch((error) => {
 		console.error('Failed to start server:', error)
 		process.exit(1)

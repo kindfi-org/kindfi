@@ -1,5 +1,4 @@
 export function validateEnvVars(requiredEnvVars: string[]) {
-	// biome-ignore lint/complexity/noForEach: <explanation>
 	requiredEnvVars.forEach((envVar) => {
 		if (!process.env[envVar]) {
 			throw new Error(`Missing required environment variable: ${envVar}`)
@@ -17,4 +16,22 @@ export function validateSupabaseEnvVars() {
 	]
 
 	validateEnvVars(requiredEnvVars)
+}
+
+export function validatePasskeyEnvVars() {
+	const requiredEnvVars = ['RP_ID', 'RP_NAME', 'EXPECTED_ORIGIN']
+
+	const optionalEnvVars = [
+		'REDIS_URL',
+		'CHALLENGE_TTL_SECONDS',
+		'NETWORK_PASSPHRASE',
+		'FACTORY_CONTRACT_ID',
+		'ACCOUNT_SECP256R1_CONTRACT_WASM',
+		'RPC_URL',
+		'HORIZON_URL',
+	]
+
+	validateEnvVars(requiredEnvVars)
+	console.log('Core passkey environment variables validated.')
+	console.log(`Optional passkey variables: ${optionalEnvVars.join(', ')}`)
 }

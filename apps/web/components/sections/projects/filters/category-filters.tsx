@@ -1,12 +1,11 @@
 'use client'
 
+import type { Tables } from '@services/supabase'
 import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
-
-import type { Tables } from '@services/supabase'
 import { Button } from '~/components/base/button'
+import { CategoryBadge } from '~/components/sections/projects/shared'
 import { fadeIn, staggerContainer } from '~/lib/constants/animations'
-import { CategoryBadge } from './'
 
 interface CategoryFiltersProps {
 	categories: Tables<'categories'>[]

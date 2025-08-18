@@ -1,10 +1,13 @@
+import { appEnvConfig } from '@packages/lib/config'
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import type { AppEnvInterface, TypedSupabaseClient } from '@packages/lib/types'
 import type {
 	RealtimeChannel,
 	RealtimePostgresChangesPayload,
-	Subscription,
 } from '@supabase/supabase-js'
-import { createClient } from '@supabase/supabase-js'
 import type { ServerWebSocket } from 'bun'
+
+const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
 interface KYCWebSocketData {
 	clientId: string
@@ -31,26 +34,38 @@ interface KYCUpdate {
 
 export class KYCWebSocketService {
 	private clients: Set<ServerWebSocket<KYCWebSocketData>> = new Set()
-	private supabase: ReturnType<typeof createClient>
+	private supabase: TypedSupabaseClient | null = null
 	private channel?: RealtimeChannel
+	private isInitialized = false
 
 	constructor() {
-		if (
-			!process.env.NEXT_PUBLIC_SUPABASE_URL ||
-			!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-		) {
+		if (!appConfig.database.url || !appConfig.database.serviceRoleKey) {
 			throw new Error('Missing required Supabase environment variables')
 		}
 
-		// Initialize Supabase client
-		this.supabase = createClient(
-			process.env.NEXT_PUBLIC_SUPABASE_URL,
-			process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-		)
-		this.setupDatabaseSubscription()
+		this.initializeSupabase()
+	}
+
+	private initializeSupabase() {
+		try {
+			this.supabase = supabaseServiceRole as TypedSupabaseClient
+			if (!this.supabase) {
+				throw new Error('Failed to create Supabase client')
+			}
+			this.isInitialized = true
+			this.setupDatabaseSubscription()
+		} catch (error) {
+			console.error('Failed to initialize Supabase client:', error)
+			throw error
+		}
 	}
 
 	private setupDatabaseSubscription() {
+		if (!this.supabase) {
+			console.error('Supabase client not initialized')
+			return
+		}
+
 		this.channel = this.supabase
 			.channel('kyc_status_changes')
 			.on(
@@ -90,8 +105,8 @@ export class KYCWebSocketService {
 		this.clients.add(ws)
 		console.log(`KYC WebSocket client connected: ${ws.data.clientId}`)
 
-		// Send initial KYC status if userId is provided
-		if (ws.data.userId) {
+		// Send initial KYC status if userId is provided and client is initialized
+		if (ws.data.userId && this.isInitialized) {
 			this.sendInitialStatus(ws)
 		}
 	}
@@ -102,6 +117,16 @@ export class KYCWebSocketService {
 	}
 
 	private async sendInitialStatus(ws: ServerWebSocket<KYCWebSocketData>) {
+		if (!this.supabase) {
+			ws.send(
+				JSON.stringify({
+					type: 'error',
+					message: 'Service not ready',
+				}),
+			)
+			return
+		}
+
 		try {
 			const { data: status, error } = await this.supabase
 				.from('kyc_status')

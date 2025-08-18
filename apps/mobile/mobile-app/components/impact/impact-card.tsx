@@ -1,5 +1,4 @@
 import type { LucideIcon } from 'lucide-react-native'
-import React from 'react'
 import { Text } from '../Themed'
 import { Box } from '../ui/box'
 import { Icon } from '../ui/icon'

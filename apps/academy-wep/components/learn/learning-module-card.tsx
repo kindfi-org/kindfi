@@ -38,7 +38,7 @@ export function LearningModuleCard({ module, index }: LearningModuleCardProps) {
 				<div className="h-48 bg-gray-100 relative overflow-hidden flex-shrink-0">
 					<Image
 						src={module.image || '/placeholder.svg'}
-						alt={module.title}
+						alt={module.title || 'Learning module image'}
 						className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
 						width={400}
 						height={240}
@@ -76,7 +76,6 @@ export function LearningModuleCard({ module, index }: LearningModuleCardProps) {
 					{!module.unlocked && (
 						<div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-30">
 							<div className="bg-white rounded-full p-4 shadow-lg transform transition-transform duration-500 hover:scale-110">
-								{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									width="28"
@@ -89,7 +88,7 @@ export function LearningModuleCard({ module, index }: LearningModuleCardProps) {
 									strokeLinejoin="round"
 									className="text-gray-500"
 								>
-									{/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
+									<title>Locked Module</title>
 									<rect
 										width="18"
 										height="11"
@@ -98,7 +97,6 @@ export function LearningModuleCard({ module, index }: LearningModuleCardProps) {
 										rx="2"
 										ry="2"
 									></rect>
-									{/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
 									<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
 								</svg>
 							</div>
@@ -139,10 +137,9 @@ export function LearningModuleCard({ module, index }: LearningModuleCardProps) {
 					</div>
 
 					<div className="flex flex-wrap items-center gap-2 mb-4 min-h-[28px]">
-						{module.tags.map((tag, index) => (
+						{module.tags.map((tag) => (
 							<span
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-								key={index}
+								key={tag}
 								className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
 							>
 								{tag}

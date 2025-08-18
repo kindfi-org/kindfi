@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '~/components/base/button'
+import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 import { investorSteps, projectSteps } from '~/lib/constants/user-journey-data'
 import { cn } from '~/lib/utils'
 
@@ -11,6 +12,7 @@ type ViewType = 'project' | 'investor'
 
 export function UserJourney() {
 	const [activeView, setActiveView] = React.useState<ViewType>('project')
+	const [waitlistOpen, setWaitlistOpen] = React.useState(false)
 
 	const steps = activeView === 'project' ? projectSteps : investorSteps
 
@@ -36,7 +38,6 @@ export function UserJourney() {
 		<section className="gradient-bg-blue-purple relative overflow-hidden px-4 py-14">
 			{/* Background Pattern */}
 			<div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
-
 			<div className="relative mx-auto max-w-7xl">
 				{/* Header */}
 				<div className="text-center mb-16">
@@ -139,24 +140,33 @@ export function UserJourney() {
 					animate={{ opacity: 1 }}
 					transition={{ duration: 0.5, delay: 0.8 }}
 				>
-					<Button
-						size="lg"
-						className="bg-indigo-900 hover:bg-indigo-800 text-white px-8"
-						asChild
-						aria-label={
-							activeView === 'project'
-								? 'Register your project'
-								: 'Explore causes'
-						}
-					>
-						<Link
-							href={activeView === 'project' ? '/create-project' : '/projects'}
+					{activeView === 'project' ? (
+						<>
+							<Button
+								size="lg"
+								className="gradient-border-btn text-white px-8"
+								onClick={() => setWaitlistOpen(true)}
+								aria-label="Waitlist your project"
+								variant="outline"
+							>
+								Waitlist Your Project
+							</Button>
+							<WaitlistModal
+								open={waitlistOpen}
+								onOpenChange={setWaitlistOpen}
+							/>
+						</>
+					) : (
+						<Button
+							size="lg"
+							className="gradient-border-btn text-white px-8"
+							asChild
+							aria-label="Explore causes"
+							variant="outline"
 						>
-							{activeView === 'project'
-								? 'Register Your Project'
-								: 'Explore Causes'}
-						</Link>
-					</Button>
+							<Link href="/projects">Explore Causes</Link>
+						</Button>
+					)}
 				</motion.div>
 			</div>
 		</section>

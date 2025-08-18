@@ -1,7 +1,8 @@
 'use client'
 
-import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Session, User } from '@supabase/supabase-js'
+import { SessionProvider } from 'next-auth/react'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 interface AuthContextType {
@@ -15,12 +16,12 @@ const AuthContext = createContext<AuthContextType>({
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-	// Use undefined as initial state to prevent hydration mismatch
-	const [user, setUser] = useState<User | null | undefined>(undefined)
+	// Use null as initial state to prevent hydration mismatch
+	const [user, setUser] = useState<User | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const supabase = createSupabaseBrowserClient()
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {
 		// Move session check to useEffect to avoid hydration mismatch
 		const checkSession = async () => {
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				const {
 					data: { session },
 				} = await supabase.auth.getSession()
+				console.log('Session check result:', session)
 				setUser(session?.user ?? null)
 			} catch (error) {
 				console.error('Auth check failed:', error)
@@ -53,15 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, [])
 
-	// Don't render until initial auth check is complete
-	if (user === undefined) {
-		return null
-	}
-
+	// Always render children, but show loading state
 	return (
-		<AuthContext.Provider value={{ user, isLoading }}>
-			{children}
-		</AuthContext.Provider>
+		<SessionProvider>
+			<AuthContext.Provider value={{ user, isLoading }}>
+				{children}
+			</AuthContext.Provider>
+		</SessionProvider>
 	)
 }
 

@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: any */
 'use client'
 
 import { motion, useInView } from 'framer-motion'
@@ -136,7 +137,6 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 			<div className="absolute -left-3 sm:left-0 top-0 z-10 flex items-center justify-center w-6 h-6 sm:w-12 sm:h-12 rounded-full bg-white border-2 shadow-md">
 				{getStatusIcon(milestone.status)}
 			</div>
-
 			{/* Card content */}
 			<motion.div
 				className="ml-6 sm:ml-20 relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm"

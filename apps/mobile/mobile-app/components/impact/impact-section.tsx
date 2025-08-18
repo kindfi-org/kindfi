@@ -1,8 +1,8 @@
 import { ArrowUpRight, Megaphone, RefreshCcw } from 'lucide-react-native'
-import React from 'react'
 import { Text, View } from '../Themed'
 import { GradientText } from '../ui/gradientText'
 import ImpactCard from './impact-card'
+
 function ImpactSection() {
 	return (
 		<View className="flex-1 p-5 h-full gap-5   items-center justify-center  w-full bg-background-light">

@@ -1,8 +1,4 @@
 {
-	"generators": {
-		"address": 3,
-		"nonce": 0
-	},
 	"auth": [
 		[],
 		[
@@ -11,13 +7,13 @@
 				{
 					"function": {
 						"contract_fn": {
-							"contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-							"function_name": "add_recovery_address",
 							"args": [
 								{
 									"address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
 								}
-							]
+							],
+							"contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+							"function_name": "add_recovery_address"
 						}
 					},
 					"sub_invocations": []
@@ -30,8 +26,6 @@
 				{
 					"function": {
 						"contract_fn": {
-							"contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-							"function_name": "recover_account",
 							"args": [
 								{
 									"bytes": "ae3a9bc6eb721b7b8a34d23aa0d5b1623e89bc6f092815ea13b92f79a39c7d38"
@@ -39,7 +33,9 @@
 								{
 									"bytes": "047da9456ae7632794bcd3292ed3ec8d370ad63f76e6daf97da1896ed6249f9af81515092900477cf4d1fc97070aa8fa54aaf38c352f63d41292443042de437049"
 								}
-							]
+							],
+							"contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+							"function_name": "recover_account"
 						}
 					},
 					"sub_invocations": []
@@ -50,8 +46,6 @@
 				{
 					"function": {
 						"contract_fn": {
-							"contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-							"function_name": "recover_account",
 							"args": [
 								{
 									"bytes": "ae3a9bc6eb721b7b8a34d23aa0d5b1623e89bc6f092815ea13b92f79a39c7d38"
@@ -59,7 +53,9 @@
 								{
 									"bytes": "047da9456ae7632794bcd3292ed3ec8d370ad63f76e6daf97da1896ed6249f9af81515092900477cf4d1fc97070aa8fa54aaf38c352f63d41292443042de437049"
 								}
-							]
+							],
+							"contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+							"function_name": "recover_account"
 						}
 					},
 					"sub_invocations": []
@@ -67,45 +63,84 @@
 			]
 		]
 	],
+	"events": [
+		{
+			"event": {
+				"body": {
+					"v0": {
+						"data": {
+							"map": [
+								{
+									"key": {
+										"symbol": "device_id"
+									},
+									"val": {
+										"bytes": "ae3a9bc6eb721b7b8a34d23aa0d5b1623e89bc6f092815ea13b92f79a39c7d38"
+									}
+								},
+								{
+									"key": {
+										"symbol": "public_key"
+									},
+									"val": {
+										"bytes": "047da9456ae7632794bcd3292ed3ec8d370ad63f76e6daf97da1896ed6249f9af81515092900477cf4d1fc97070aa8fa54aaf38c352f63d41292443042de437049"
+									}
+								}
+							]
+						},
+						"topics": [
+							{
+								"symbol": "ACCOUNT"
+							},
+							{
+								"symbol": "SECURITY"
+							}
+						]
+					}
+				},
+				"contract_id": "0000000000000000000000000000000000000000000000000000000000000002",
+				"ext": "v0",
+				"type_": "contract"
+			},
+			"failed_call": false
+		}
+	],
+	"generators": {
+		"address": 3,
+		"nonce": 0
+	},
 	"ledger": {
-		"protocol_version": 22,
-		"sequence_number": 0,
-		"timestamp": 0,
-		"network_id": "0000000000000000000000000000000000000000000000000000000000000000",
 		"base_reserve": 0,
-		"min_persistent_entry_ttl": 4096,
-		"min_temp_entry_ttl": 16,
-		"max_entry_ttl": 6312000,
 		"ledger_entries": [
 			[
 				{
 					"contract_data": {
 						"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+						"durability": "temporary",
 						"key": {
 							"ledger_key_nonce": {
 								"nonce": 5541220902715666415
 							}
-						},
-						"durability": "temporary"
+						}
 					}
 				},
 				[
 					{
-						"last_modified_ledger_seq": 0,
 						"data": {
 							"contract_data": {
-								"ext": "v0",
 								"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+								"durability": "temporary",
+								"ext": "v0",
 								"key": {
 									"ledger_key_nonce": {
 										"nonce": 5541220902715666415
 									}
 								},
-								"durability": "temporary",
 								"val": "void"
 							}
 						},
-						"ext": "v0"
+						"ext": "v0",
+						"last_modified_ledger_seq": 0
 					},
 					6311999
 				]
@@ -114,19 +149,18 @@
 				{
 					"contract_data": {
 						"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-						"key": "ledger_key_contract_instance",
-						"durability": "persistent"
+						"durability": "persistent",
+						"key": "ledger_key_contract_instance"
 					}
 				},
 				[
 					{
-						"last_modified_ledger_seq": 0,
 						"data": {
 							"contract_data": {
-								"ext": "v0",
 								"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-								"key": "ledger_key_contract_instance",
 								"durability": "persistent",
+								"ext": "v0",
+								"key": "ledger_key_contract_instance",
 								"val": {
 									"contract_instance": {
 										"executable": {
@@ -183,7 +217,8 @@
 								}
 							}
 						},
-						"ext": "v0"
+						"ext": "v0",
+						"last_modified_ledger_seq": 0
 					},
 					4095
 				]
@@ -192,31 +227,31 @@
 				{
 					"contract_data": {
 						"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+						"durability": "temporary",
 						"key": {
 							"ledger_key_nonce": {
 								"nonce": 801925984706572462
 							}
-						},
-						"durability": "temporary"
+						}
 					}
 				},
 				[
 					{
-						"last_modified_ledger_seq": 0,
 						"data": {
 							"contract_data": {
-								"ext": "v0",
 								"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+								"durability": "temporary",
+								"ext": "v0",
 								"key": {
 									"ledger_key_nonce": {
 										"nonce": 801925984706572462
 									}
 								},
-								"durability": "temporary",
 								"val": "void"
 							}
 						},
-						"ext": "v0"
+						"ext": "v0",
+						"last_modified_ledger_seq": 0
 					},
 					6311999
 				]
@@ -225,31 +260,31 @@
 				{
 					"contract_data": {
 						"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+						"durability": "temporary",
 						"key": {
 							"ledger_key_nonce": {
 								"nonce": 1033654523790656264
 							}
-						},
-						"durability": "temporary"
+						}
 					}
 				},
 				[
 					{
-						"last_modified_ledger_seq": 0,
 						"data": {
 							"contract_data": {
-								"ext": "v0",
 								"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+								"durability": "temporary",
+								"ext": "v0",
 								"key": {
 									"ledger_key_nonce": {
 										"nonce": 1033654523790656264
 									}
 								},
-								"durability": "temporary",
 								"val": "void"
 							}
 						},
-						"ext": "v0"
+						"ext": "v0",
+						"last_modified_ledger_seq": 0
 					},
 					6311999
 				]
@@ -262,61 +297,26 @@
 				},
 				[
 					{
-						"last_modified_ledger_seq": 0,
 						"data": {
 							"contract_code": {
+								"code": "",
 								"ext": "v0",
-								"hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-								"code": ""
+								"hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 							}
 						},
-						"ext": "v0"
+						"ext": "v0",
+						"last_modified_ledger_seq": 0
 					},
 					4095
 				]
 			]
-		]
-	},
-	"events": [
-		{
-			"event": {
-				"ext": "v0",
-				"contract_id": "0000000000000000000000000000000000000000000000000000000000000002",
-				"type_": "contract",
-				"body": {
-					"v0": {
-						"topics": [
-							{
-								"symbol": "ACCOUNT"
-							},
-							{
-								"symbol": "SECURITY"
-							}
-						],
-						"data": {
-							"map": [
-								{
-									"key": {
-										"symbol": "device_id"
-									},
-									"val": {
-										"bytes": "ae3a9bc6eb721b7b8a34d23aa0d5b1623e89bc6f092815ea13b92f79a39c7d38"
-									}
-								},
-								{
-									"key": {
-										"symbol": "public_key"
-									},
-									"val": {
-										"bytes": "047da9456ae7632794bcd3292ed3ec8d370ad63f76e6daf97da1896ed6249f9af81515092900477cf4d1fc97070aa8fa54aaf38c352f63d41292443042de437049"
-									}
-								}
-							]
-						}
-					}
-				}
-			},
-			"failed_call": false
-		}
-	]
+		],
+		"max_entry_ttl": 6312000,
+		"min_persistent_entry_ttl": 4096,
+		"min_temp_entry_ttl": 16,
+		"network_id": "0000000000000000000000000000000000000000000000000000000000000000",
+		"protocol_version": 22,
+		"sequence_number": 0,
+		"timestamp": 0
+	}
 }

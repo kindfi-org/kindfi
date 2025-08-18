@@ -10,10 +10,11 @@ export interface Tag {
 export interface Project {
 	id: string
 	title: string
-	description: string | null
+	slug: string | null
+	description: string
 	image: string | null
 	createdAt: string | null
-	category: Tables<'categories'> | null
+	category: Tables<'categories'>
 	goal: number
 	raised: number
 	investors: number

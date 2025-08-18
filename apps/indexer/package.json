@@ -1,33 +1,37 @@
 {
-	"name": "@kindfi/indexer",
-	"version": "0.0.1",
-	"description": "SubQL Indexer to process all userbase in the kindfi platform blockchain activity and contributions, to push it to the off-chain data for his cosumption.",
-	"main": "dist/index.js",
-	"scripts": {
-		"build": "subql codegen && subql build",
-		"codegen": "subql codegen",
-		"start:docker": "docker-compose pull && docker-compose up --remove-orphans",
-		"dev": "subql codegen && subql build && docker-compose pull && docker-compose up --remove-orphans",
-		"prepack": "rm -rf dist && npm run build",
-		"test": "subql build && subql-node-stellar test",
-		"build:develop": "NODE_ENV=develop subql codegen && NODE_ENV=develop subql build"
-	},
-	"homepage": "https://github.com/subquery/stellar-subql-starter",
-	"repository": "github:subquery/stellar-subql-starter",
-	"files": ["dist", "schema.graphql", "project.yaml"],
 	"author": "kindfi-org",
-	"license": "MIT",
 	"dependencies": {
 		"@subql/common": "latest",
 		"@subql/types-stellar": "latest",
 		"soroban-client": "latest",
 		"stellar-sdk": "latest"
 	},
+	"description": "SubQL Indexer to process all userbase in the kindfi platform blockchain activity and contributions, to push it to the off-chain data for his cosumption.",
 	"devDependencies": {
 		"@subql/cli": "latest",
-		"@subql/types": "latest",
 		"@subql/testing": "latest",
-		"typescript": "^5.2.2",
-		"dotenv": "latest"
-	}
+		"@subql/types": "latest",
+		"dotenv": "latest",
+		"typescript": "^5.2.2"
+	},
+	"files": [
+		"dist",
+		"schema.graphql",
+		"project.yaml"
+	],
+	"homepage": "https://github.com/subquery/stellar-subql-starter",
+	"license": "MIT",
+	"main": "dist/index.js",
+	"name": "@kindfi/indexer",
+	"repository": "github:subquery/stellar-subql-starter",
+	"scripts": {
+		"build": "subql codegen && subql build",
+		"build:develop": "NODE_ENV=develop subql codegen && NODE_ENV=develop subql build",
+		"codegen": "subql codegen",
+		"dev": "subql codegen && subql build && docker-compose pull && docker-compose up --remove-orphans",
+		"prepack": "rm -rf dist && npm run build",
+		"start:docker": "docker-compose pull && docker-compose up --remove-orphans",
+		"test": "subql build && subql-node-stellar test"
+	},
+	"version": "0.0.1"
 }

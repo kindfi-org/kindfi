@@ -1,8 +1,8 @@
 import type { CreateProjectFormData } from '~/lib/types/project/create-project.types'
 
 export const project: CreateProjectFormData = {
-	id: '1',
 	title: 'Empowering Education',
+	slug: 'empowering-education',
 	description:
 		'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for all children regardless of their background.',
 	targetAmount: 55000,
@@ -17,8 +17,8 @@ export const project: CreateProjectFormData = {
 	location: 'CRI', // Costa Rica
 	category: '7', // Education
 	tags: [
-		{ label: 'EDUCATION', color: '#3B82F6' },
-		{ label: 'CHILDREN', color: '#10B981' },
-		{ label: 'FUTURE', color: '#F59E0B' },
+		{ name: 'EDUCATION', color: '#3B82F6' },
+		{ name: 'CHILDREN', color: '#10B981' },
+		{ name: 'FUTURE', color: '#F59E0B' },
 	],
 }

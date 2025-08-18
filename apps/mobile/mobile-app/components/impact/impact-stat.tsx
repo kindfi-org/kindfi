@@ -1,5 +1,4 @@
 import type { LucideIcon } from 'lucide-react-native'
-import React from 'react'
 import { Pressable, View } from 'react-native'
 import { getThemeColor } from '../../constants/theme-colors'
 import { Text } from '../Themed'

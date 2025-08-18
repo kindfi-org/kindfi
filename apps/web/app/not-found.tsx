@@ -46,7 +46,6 @@ export default function Custom404() {
 					className="absolute w-72 h-72 rounded-full border-2 border-blue-200"
 				/>
 			</div>
-
 			<div className="relative z-10 max-w-xl px-4">
 				<motion.div
 					initial={{ y: -50, opacity: 0 }}

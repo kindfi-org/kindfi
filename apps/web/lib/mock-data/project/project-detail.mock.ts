@@ -4,10 +4,10 @@ import { categories } from './categories.mock'
 export const projectDetail: ProjectDetail = {
 	id: '1',
 	title: 'Empowering Education',
+	slug: 'empowering-education',
 	description:
 		'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for all children regardless of their background.',
 	pitch: {
-		id: '1',
 		title: 'Empowering Education: A Vision for Equal Opportunity',
 		story: `Our mission is to bridge the education gap in low-income communities by providing quality educational resources, technology, and mentorship programs.
 
@@ -38,6 +38,13 @@ Join us in creating a world where every child has access to quality education.`,
 	raised: 40000,
 	investors: 40,
 	minInvestment: 10,
+	location: 'USA',
+	socialLinks: {
+		website: 'https://empoweringeducation.org',
+		twitter: 'https://x.com/empoweringedu',
+		facebook: 'https://www.facebook.com/EmpoweringEducation',
+		instagram: 'https://www.instagram.com/empowering.education',
+	},
 	tags: [
 		{ id: 'tag-education', name: 'EDUCATION', color: '#4A90E2' },
 		{ id: 'tag-children', name: 'CHILDREN', color: '#9B59B6' },

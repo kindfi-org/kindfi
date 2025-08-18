@@ -2,32 +2,34 @@
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { notFound } from 'next/navigation'
-import { getProjectById } from '~/lib/queries/projects'
-import { BreadcrumbContainer } from './breadcrumb-container'
-import { ProjectHero } from './project-hero'
-import { ProjectSidebar } from './project-sidebar'
-import { ProjectTabs } from './project-tabs'
+import { ProjectHero } from '~/components/sections/projects/detail/project-hero'
+import { ProjectSidebar } from '~/components/sections/projects/detail/project-sidebar'
+import { ProjectTabs } from '~/components/sections/projects/detail/project-tabs'
 import {
 	BreadcrumbSkeleton,
 	ProjectHeroSkeleton,
 	ProjectSidebarSkeleton,
 	ProjectTabsSkeleton,
-} from './skeletons'
+} from '~/components/sections/projects/detail/skeletons'
+import { BreadcrumbContainer } from '~/components/sections/projects/shared'
+import { getProjectBySlug } from '~/lib/queries/projects'
 
 interface ProjectClientWrapperProps {
-	projectId: string
+	projectSlug: string
 }
 
-export function ProjectClientWrapper({ projectId }: ProjectClientWrapperProps) {
+export function ProjectClientWrapper({
+	projectSlug,
+}: ProjectClientWrapperProps) {
 	const {
 		data: project,
 		isLoading,
 		error,
 	} = useSupabaseQuery(
 		'project',
-		(client) => getProjectById(client, projectId),
+		(client) => getProjectBySlug(client, projectSlug),
 		{
-			additionalKeyValues: [projectId],
+			additionalKeyValues: [projectSlug],
 		},
 	)
 

@@ -1,13 +1,23 @@
 'use client'
 
 import { AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 
+import { StepperIndicator } from '~/components/sections/projects/create/stepper-indicator'
+import {
+	StepOne,
+	StepThree,
+	StepTwo,
+} from '~/components/sections/projects/create/steps'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
-import { StepperIndicator } from './stepper-indicator'
-import { StepOne, StepThree, StepTwo } from './steps'
+import { useProjectMutation } from '~/hooks/projects/use-project-mutation'
+import type { StepThreeData } from '~/lib/types/project/create-project.types'
 
 export function CreateProjectForm() {
-	const { currentStep, setCurrentStep, formData } = useCreateProject()
+	const { currentStep, setCurrentStep, formData, updateFormData } =
+		useCreateProject()
+	const { mutateAsync: createProject, isPending } = useProjectMutation({})
+	const router = useRouter()
 
 	const handleNext = () => {
 		if (currentStep < 3) {
@@ -21,8 +31,21 @@ export function CreateProjectForm() {
 		}
 	}
 
-	const handleSubmit = () => {
-		console.log('Submitting project:', formData)
+	const handleSubmit = async (stepThreeData: StepThreeData) => {
+		const fullData = {
+			...formData,
+			...stepThreeData,
+			tags: stepThreeData.tags || [],
+		}
+
+		updateFormData(fullData)
+		console.log('Submitting project:', fullData)
+		const result = await createProject(fullData)
+		if ('slug' in result && result.slug) {
+			router.push(`/projects/${result.slug}/manage`)
+		} else {
+			router.push('/projects')
+		}
 	}
 
 	const renderStep = () => {
@@ -32,7 +55,13 @@ export function CreateProjectForm() {
 			case 2:
 				return <StepTwo onNext={handleNext} onBack={handleBack} />
 			case 3:
-				return <StepThree onBack={handleBack} onSubmit={handleSubmit} />
+				return (
+					<StepThree
+						onBack={handleBack}
+						onSubmit={handleSubmit}
+						isPending={isPending}
+					/>
+				)
 			default:
 				return <StepOne onNext={handleNext} />
 		}

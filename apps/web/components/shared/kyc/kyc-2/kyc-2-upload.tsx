@@ -74,44 +74,6 @@ export default function IDDocumentUpload({
 		return validTypes.includes(file.type)
 	}, [])
 
-	const handleDrop = useCallback(
-		async (e: React.DragEvent<HTMLDivElement>, isFront: boolean) => {
-			e.preventDefault()
-			if (!documentType) {
-				toast({
-					title: 'Document Type Required',
-					description: 'Please select an ID document type before uploading.',
-					className: 'bg-destructive text-destructive-foreground',
-				} as ToastType)
-				return
-			}
-			const droppedFile = e.dataTransfer.files[0]
-			if (droppedFile && isValidFileType(droppedFile)) {
-				await handleFileUpload(droppedFile, isFront)
-			}
-		},
-		[documentType, isValidFileType, toast],
-	)
-
-	const handleFileSelect = useCallback(
-		async (e: React.ChangeEvent<HTMLInputElement>, isFront: boolean) => {
-			if (!documentType) {
-				toast({
-					title: 'Document Type Required',
-					description: 'Please select an ID document type before uploading.',
-					className: 'bg-destructive text-destructive-foreground',
-				} as ToastType)
-				e.target.value = ''
-				return
-			}
-			const selectedFile = e.target.files?.[0]
-			if (selectedFile && isValidFileType(selectedFile)) {
-				await handleFileUpload(selectedFile, isFront)
-			}
-		},
-		[documentType, isValidFileType, toast],
-	)
-
 	const handleFileUpload = useCallback(
 		async (uploadedFile: File, isFront: boolean) => {
 			if (!documentType) {
@@ -176,6 +138,44 @@ export default function IDDocumentUpload({
 		],
 	)
 
+	const handleDrop = useCallback(
+		async (e: React.DragEvent<HTMLDivElement>, isFront: boolean) => {
+			e.preventDefault()
+			if (!documentType) {
+				toast({
+					title: 'Document Type Required',
+					description: 'Please select an ID document type before uploading.',
+					className: 'bg-destructive text-destructive-foreground',
+				} as ToastType)
+				return
+			}
+			const droppedFile = e.dataTransfer.files[0]
+			if (droppedFile && isValidFileType(droppedFile)) {
+				await handleFileUpload(droppedFile, isFront)
+			}
+		},
+		[documentType, isValidFileType, toast, handleFileUpload],
+	)
+
+	const handleFileSelect = useCallback(
+		async (e: React.ChangeEvent<HTMLInputElement>, isFront: boolean) => {
+			if (!documentType) {
+				toast({
+					title: 'Document Type Required',
+					description: 'Please select an ID document type before uploading.',
+					className: 'bg-destructive text-destructive-foreground',
+				} as ToastType)
+				e.target.value = ''
+				return
+			}
+			const selectedFile = e.target.files?.[0]
+			if (selectedFile && isValidFileType(selectedFile)) {
+				await handleFileUpload(selectedFile, isFront)
+			}
+		},
+		[documentType, isValidFileType, toast, handleFileUpload],
+	)
+
 	const handleContinue = useCallback(() => {
 		if (!frontExtractedData || !documentType || !frontFile) {
 			toast({
@@ -227,9 +227,9 @@ export default function IDDocumentUpload({
 				</p>
 			</CardHeader>
 
-			<CardContent className="space-y-6 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+			<CardContent className="flex-grow space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
 				<div className="flex-shrink-0">
-					<h3 className="text-lg font-medium mb-2">Step 2 of 4</h3>
+					<h3 className="mb-2 text-lg font-medium">Step 2 of 4</h3>
 					<div className="w-full h-2 bg-gray-200 rounded-full">
 						<div className="w-1/2 h-2 bg-black rounded-full" />
 					</div>
@@ -292,15 +292,15 @@ export default function IDDocumentUpload({
 				/>
 			</CardContent>
 
-			<div className="flex justify-between space-x-4 p-6 border-t flex-shrink-0">
+			<div className="flex justify-between flex-shrink-0 p-6 space-x-4 border-t">
 				<Button variant="outline" onClick={onBack} disabled={isProcessing}>
-					<ArrowLeft className="mr-2 h-4 w-4" /> Back
+					<ArrowLeft className="w-4 h-4 mr-2" /> Back
 				</Button>
 				<Button
 					onClick={handleContinue}
 					disabled={isProcessing || !frontFile || !backFile || !documentType}
 				>
-					Continue <ArrowRight className="ml-2 h-4 w-4" />
+					Continue <ArrowRight className="w-4 h-4 ml-2" />
 				</Button>
 			</div>
 		</Card>

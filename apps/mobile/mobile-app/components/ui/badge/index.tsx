@@ -9,6 +9,7 @@ import {
 import { cssInterop } from 'nativewind'
 import React from 'react'
 import { Text, View } from 'react-native'
+
 const SCOPE = 'BADGE'
 
 const badgeStyle = tva({

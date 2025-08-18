@@ -1,4 +1,4 @@
-interface ExtractedDocumentData {
+export interface ExtractedDocumentData {
 	documentNumber: string
 	expiryDate: string
 	issuingCountry: string

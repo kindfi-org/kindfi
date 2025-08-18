@@ -6,7 +6,7 @@ export async function getProjectPitch(
 ) {
 	const { data, error } = await client
 		.from('project_pitch')
-		.select('id, title, story, pitch_deck, video_url')
+		.select('title, story, pitch_deck, video_url')
 		.eq('project_id', projectId)
 		.single()
 
@@ -14,16 +14,14 @@ export async function getProjectPitch(
 
 	return data
 		? {
-				id: data.id,
 				title: data.title,
 				story: data.story,
 				pitchDeck: data.pitch_deck,
 				videoUrl: data.video_url,
 			}
 		: {
-				id: '',
 				title: '',
-				story: null,
+				story: '',
 				pitchDeck: null,
 				videoUrl: null,
 			}

@@ -1,5 +1,4 @@
 'use client'
-import type { NavigationItem } from '~/lib/types'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -13,6 +12,7 @@ import {
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
 } from '~/components/base/navigation-menu'
+import type { NavigationItem } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
 const projects: NavigationItem[] = [
@@ -66,10 +66,7 @@ export function Navigation() {
 						Projects
 					</NavigationMenuTrigger>
 					<NavigationMenuContent aria-label="Project options list">
-						<ul
-							className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]"
-							role="menu"
-						>
+						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
 							{projects.map((project) => (
 								<ListItem
 									key={project.title}
@@ -94,10 +91,7 @@ export function Navigation() {
 					</NavigationMenuTrigger>
 
 					<NavigationMenuContent aria-label="Resource options list">
-						<ul
-							className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]"
-							role="menu"
-						>
+						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
 							{resources.map((resource) => (
 								<ListItem
 									key={resource.title}
@@ -114,7 +108,7 @@ export function Navigation() {
 				</NavigationMenuItem>
 
 				<NavigationMenuItem>
-					<Link href="/about" legacyBehavior passHref>
+					<Link href="/about" passHref>
 						<NavigationMenuLink
 							className={cn(
 								navigationMenuTriggerStyle(),

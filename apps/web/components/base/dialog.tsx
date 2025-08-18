@@ -6,6 +6,7 @@ import * as React from 'react'
 import useReducedMotion from '~/hooks/use-reduced-motion'
 import { animations } from '~/lib/constants/animations'
 import { cn } from '~/lib/utils'
+
 /**
  * https://ui.shadcn.com/docs/components/dialog
  * Root Dialog component that manages the dialog's open state.
@@ -70,7 +71,7 @@ const DialogOverlay = React.forwardRef<
 		<DialogPrimitive.Overlay
 			ref={ref}
 			className={cn(
-				'fixed inset-0 z-50',
+				'fixed inset-0 z-50 backdrop-blur-[1px]',
 				reducedMotion
 					? 'bg-black/80'
 					: animations.fadeAndAnimateAndOverlay.inOut,

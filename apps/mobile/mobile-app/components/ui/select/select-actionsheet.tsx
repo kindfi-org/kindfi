@@ -8,10 +8,11 @@ import { tva } from '@gluestack-ui/nativewind-utils/tva'
 import { withStyleContext } from '@gluestack-ui/nativewind-utils/withStyleContext'
 import {
 	AnimatePresence,
-	Motion,
 	createMotionAnimatedComponent,
+	Motion,
 } from '@legendapp/motion'
 import { cssInterop } from 'nativewind'
+import React from 'react'
 import {
 	FlatList,
 	Pressable,
@@ -21,8 +22,6 @@ import {
 	View,
 	VirtualizedList,
 } from 'react-native'
-
-import React from 'react'
 
 const AnimatedPressable = createMotionAnimatedComponent(Pressable)
 

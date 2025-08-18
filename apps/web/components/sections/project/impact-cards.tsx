@@ -11,7 +11,6 @@ interface ImpactCardProps {
 
 const ImpactCard: React.FC<ImpactCardProps> = ({
 	icon,
-	id,
 	label,
 	value,
 	bgColor = 'bg-blue-100',

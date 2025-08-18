@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: any */
 'use client'
 
 import { motion } from 'framer-motion'
@@ -5,11 +6,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { Badge } from '~/components/base/badge'
+import { CategoryBadge } from '~/components/sections/projects/shared'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
-import { CategoryBadge } from '../filters'
 
 interface ProjectCardGridProps {
 	project: Project
@@ -22,7 +23,7 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 	)
 
 	return (
-		<Link href={`/projects/${project.id}`} className="h-full">
+		<Link href={`/projects/${project.slug}`} className="h-full">
 			<motion.article
 				className="bg-white rounded-lg overflow-hidden shadow-md flex flex-col h-full"
 				whileHover={cardHover}
@@ -56,7 +57,6 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 					<div
 						className="w-full bg-gray-100 rounded-full h-1.5 sm:h-2"
 						role="progressbar"
-						tabIndex={0}
 						aria-valuenow={progressPercentage}
 						aria-valuemin={0}
 						aria-valuemax={100}

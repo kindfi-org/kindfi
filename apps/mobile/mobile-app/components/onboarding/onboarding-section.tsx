@@ -1,5 +1,4 @@
-import { MotiView } from 'moti'
-import React, { useState, useRef } from 'react'
+import { useRef, useState } from 'react'
 import {
 	Animated,
 	Dimensions,
@@ -103,7 +102,7 @@ export function OnboardingSection() {
 		scrollViewRef.current?.scrollTo({ y: 0, animated: true })
 	}
 
-	const handleCtaPress = () => {
+	const _handleCtaPress = () => {
 		// Navigation logic will be implemented when routing is set up
 		console.log(
 			`Navigate to ${activeTab === 'kindlers' ? 'project registration' : 'causes browser'}`,

@@ -2,6 +2,8 @@ import type { Enums } from '@services/supabase'
 import type { Project } from './'
 
 export interface ProjectDetail extends Project {
+	location: string
+	socialLinks?: SocialLinks
 	pitch: ProjectPitch
 	team: TeamMember[]
 	milestones: Milestone[]
@@ -9,10 +11,23 @@ export interface ProjectDetail extends Project {
 	comments: Comment[]
 }
 
+export interface SocialLinks {
+	website?: string
+	twitter?: string
+	facebook?: string
+	instagram?: string
+	linkedin?: string
+	github?: string
+	youtube?: string
+	telegram?: string
+	discord?: string
+	medium?: string
+	tiktok?: string
+}
+
 export interface ProjectPitch {
-	id: string
 	title: string
-	story: string | null
+	story: string
 	pitchDeck: string | null
 	videoUrl: string | null
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { createSupabaseBrowserClient } from '@packages/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { Loader2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/base/button'
@@ -81,7 +81,7 @@ export function ProjectUpdatesTabSection() {
 				author_id: authorId,
 			}
 
-			const { data: insertedData, error } = await supabase
+			const { error } = await supabase
 				.from('project_updates')
 				.insert([updateData])
 				.select()
@@ -162,7 +162,7 @@ export function ProjectUpdatesTabSection() {
 	}
 
 	// Fetch updates when component mounts or page changes
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {
 		if (!isCreatingUpdate) {
 			fetchUpdates()
@@ -170,7 +170,7 @@ export function ProjectUpdatesTabSection() {
 	}, [page, projectId, isCreatingUpdate])
 
 	// Setup real-time subscription
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {
 		if (isCreatingUpdate) return
 

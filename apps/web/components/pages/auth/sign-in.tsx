@@ -1,0 +1,209 @@
+'use client'
+
+import { Fingerprint } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { type ChangeEvent, useEffect, useState } from 'react'
+import { Button } from '~/components/base/button'
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+} from '~/components/base/card'
+import { Input } from '~/components/base/input'
+import { Label } from '~/components/base/label'
+import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
+import { usePasskeyAuthentication } from '~/hooks/passkey/use-passkey-authentication'
+import { useStellarContext } from '~/hooks/stellar/stellar-context'
+import { useFormValidation } from '~/hooks/use-form-validation'
+import { cn } from '~/lib/utils'
+
+export function LoginComponent() {
+	const [email, setEmail] = useState('')
+	const _router = useRouter()
+
+	const {
+		onSign,
+		prepareSign,
+		deployee: stellarUserAddress,
+	} = useStellarContext()
+
+	const { isEmailInvalid, doesEmailExist, handleValidation, resetValidation } =
+		useFormValidation({
+			email: true,
+		})
+
+	const {
+		isAuthenticating,
+		authSuccess,
+		authError,
+		handleAuth,
+		isNotRegistered,
+	} = usePasskeyAuthentication(email, {
+		onSign,
+		prepareSign,
+		userId: doesEmailExist,
+	})
+
+	const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+		handleValidation(e as ChangeEvent<HTMLInputElement & { name: 'email' }>)
+		const emailValue = e.target.value.trim()
+		setEmail(emailValue)
+	}
+
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		e.stopPropagation()
+		if (!isEmailInvalid) handleAuth()
+		resetValidation()
+	}
+
+	useEffect(() => {
+		if (authSuccess) {
+			// If the user is authenticated, we can use the stellarUserAddress later
+			console.log('stellarUserAddress', stellarUserAddress)
+			// router.push('/dashboard')
+		}
+	}, [authSuccess, stellarUserAddress])
+
+	return (
+		<AuthLayout>
+			<Card className="w-full max-w-md">
+				<CardHeader className="space-y-2">
+					<div className="flex justify-between mb-4">
+						<div className="flex-col">
+							<h1 className="gradient-text text-2xl mb-2 text-start font-semibold tracking-tight">
+								Welcome Back
+							</h1>
+							<h2>Sign in with your passkey to continue</h2>
+						</div>
+						<div className="flex justify-center items-center rounded-full bg-blue-500/10 w-12 h-12">
+							<Fingerprint className="h-6 w-6 text-primary text-2xl" />
+						</div>
+					</div>
+				</CardHeader>
+				<CardContent>
+					<form className="space-y-4" aria-label="Sign in" onSubmit={onSubmit}>
+						{isNotRegistered && (
+							<legend
+								className="border border-zinc-600/50 rounded-lg p-4 space-y-4 text-yellow-600"
+								role="alert"
+								aria-live="assertive"
+							>
+								Device account not found. Please{' '}
+								<Link
+									className="text-primary font-medium hover:underline"
+									href="/sign-up"
+								>
+									sign up
+								</Link>{' '}
+								first.
+							</legend>
+						)}
+
+						{authError && !isNotRegistered && (
+							<legend
+								className="border border-zinc-600/50 rounded-lg p-4 space-y-4 text-red-600"
+								role="alert"
+								aria-live="assertive"
+							>
+								There was an error during authentication. Please try again.
+							</legend>
+						)}
+
+						{authSuccess && (
+							<output className="text-green-600" aria-live="polite">
+								Authentication successful! Redirecting...
+							</output>
+						)}
+						<div className="space-y-2">
+							<Label htmlFor="email" id="email-label">
+								Email
+							</Label>
+							<div className="space-y-1 pb-6 relative">
+								<Input
+									id="email"
+									name="email"
+									type="email"
+									placeholder="you@example.com"
+									required
+									aria-labelledby="email-label"
+									aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
+									aria-invalid={isEmailInvalid}
+									onChange={onEmailChange}
+									aria-required="true"
+									className={cn({
+										'border-red-500 outline-none ring-2 ring-red-500':
+											isEmailInvalid ||
+											(!isEmailInvalid && !doesEmailExist && email),
+										'border-green-500 outline-none ring-2 ring-green-500':
+											!isEmailInvalid && doesEmailExist,
+									})}
+								/>
+								{isEmailInvalid && (
+									<span
+										className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
+										role="alert"
+										aria-live="assertive"
+									>
+										Please enter a valid email address.
+									</span>
+								)}
+								{!isEmailInvalid && !doesEmailExist && email && (
+									<span
+										className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
+										role="alert"
+										aria-live="polite"
+									>
+										Account is not registered. Please{' '}
+										<Link
+											className="text-primary font-medium hover:underline"
+											href="/sign-up"
+										>
+											sign up
+										</Link>{' '}
+										first.
+									</span>
+								)}
+							</div>
+						</div>
+
+						<Button
+							size="lg"
+							className="gradient-btn text-white w-full mt-10"
+							type="submit"
+							// formAction={signInAction}
+							aria-live="polite"
+							aria-busy={isAuthenticating}
+							disabled={
+								!email || !doesEmailExist || isAuthenticating || isEmailInvalid
+							}
+						>
+							{isAuthenticating ? (
+								'Authenticating...'
+							) : (
+								<>
+									Sign in with passkey <Fingerprint />
+								</>
+							)}
+						</Button>
+						<PasskeyInfoDialog />
+					</form>
+				</CardContent>
+				<CardFooter className="flex flex-col space-y-4 border-t p-6">
+					<div className="text-sm text-center text-muted-foreground">
+						Don&apos;t have an account yet?{' '}
+						<Link
+							className="text-primary font-medium hover:underline"
+							href="/sign-up"
+						>
+							Create new one
+						</Link>
+					</div>
+				</CardFooter>
+			</Card>
+		</AuthLayout>
+	)
+}

@@ -2,8 +2,8 @@ import { supabase } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
-	request: NextRequest,
-	response: NextResponse,
+	_request: NextRequest,
+	_response: NextResponse,
 	{ params }: { params: { tagId: string } },
 ) {
 	try {
@@ -32,7 +32,7 @@ export async function GET(
 
 export async function PUT(
 	request: NextRequest,
-	Response: NextResponse,
+	_Response: NextResponse,
 	context: { params: { tagId: string } },
 ) {
 	try {
@@ -89,8 +89,8 @@ export async function PUT(
 }
 
 export async function DELETE(
-	request: NextRequest,
-	response: NextResponse,
+	_request: NextRequest,
+	_response: NextResponse,
 	context: { params: { tagId: string } },
 ) {
 	try {

@@ -1,17 +1,17 @@
 {
-	"model": "face-expression",
-	"version": "1.0",
+	"author": "Your Name",
+	"date": "2023-10-01",
 	"description": "This model predicts facial expressions from images.",
 	"input": {
-		"type": "image",
 		"format": "JPEG/PNG",
-		"size": "224x224"
-	},
-	"output": {
-		"type": "classification",
-		"labels": ["happy", "sad", "angry", "surprised", "neutral"]
+		"size": "224x224",
+		"type": "image"
 	},
 	"license": "MIT",
-	"author": "Your Name",
-	"date": "2023-10-01"
+	"model": "face-expression",
+	"output": {
+		"labels": ["happy", "sad", "angry", "surprised", "neutral"],
+		"type": "classification"
+	},
+	"version": "1.0"
 }
