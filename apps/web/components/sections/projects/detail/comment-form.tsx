@@ -15,6 +15,7 @@ import {
 	FormMessage,
 } from '~/components/base/form'
 import { Textarea } from '~/components/base/textarea'
+import { getAvatarFallback } from '~/lib/utils'
 
 interface CommentFormProps {
 	userAvatar?: string
@@ -76,7 +77,7 @@ export function CommentForm({
 						src={userAvatar || '/images/placeholder.png'}
 						alt={userName}
 					/>
-					<AvatarFallback>{userName.charAt(0)}</AvatarFallback>
+					<AvatarFallback>{getAvatarFallback(userName)}</AvatarFallback>
 				</Avatar>
 				<div className="flex-1">
 					<Form {...form}>

@@ -9,6 +9,7 @@ import { Button } from '~/components/base/button'
 import { CommentForm } from '~/components/sections/projects/detail/comment-form'
 import { LikeButton } from '~/components/sections/projects/detail/like-button'
 import type { Comment } from '~/lib/types/project/project-detail.types'
+import { getAvatarFallback } from '~/lib/utils'
 
 interface CommentThreadProps {
 	comments: Comment[]
@@ -112,7 +113,9 @@ function CommentItem({
 							src={comment.author.avatar || '/placeholder.svg'}
 							alt={comment.author.name}
 						/>
-						<AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
+						<AvatarFallback>
+							{getAvatarFallback(comment.author.name)}
+						</AvatarFallback>
 					</Avatar>
 					<div className="flex-1">
 						<div className="flex flex-wrap items-center gap-2">

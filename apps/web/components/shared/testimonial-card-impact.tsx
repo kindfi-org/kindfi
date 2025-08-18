@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import type { Testimonial } from '~/lib/types/impact/impact-testimonial.types'
+import { getAvatarFallback } from '~/lib/utils'
 
 interface TestimonialCardProps {
 	testimonial: Testimonial
@@ -20,7 +21,7 @@ export function TestimonialCard({ testimonial, index }: TestimonialCardProps) {
 		>
 			<Avatar className="mb-4 w-20 h-20">
 				<AvatarImage src={testimonial.image} alt={testimonial.name} />
-				<AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+				<AvatarFallback>{getAvatarFallback(testimonial.name)}</AvatarFallback>
 			</Avatar>
 
 			<div className="text-center">

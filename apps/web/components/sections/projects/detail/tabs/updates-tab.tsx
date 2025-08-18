@@ -9,6 +9,7 @@ import { Button } from '~/components/base/button'
 import { CommentForm } from '~/components/sections/projects/detail/comment-form'
 import { CommentThread } from '~/components/sections/projects/detail/comment-thread'
 import type { Comment, Update } from '~/lib/types/project/project-detail.types'
+import { getAvatarFallback } from '~/lib/utils'
 
 interface UpdatesTabProps {
 	updates: Update[]
@@ -126,7 +127,7 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 											alt={update.author.name}
 										/>
 										<AvatarFallback>
-											{update.author.name.charAt(0)}
+											{getAvatarFallback(update.author.name)}
 										</AvatarFallback>
 									</Avatar>
 									<div>

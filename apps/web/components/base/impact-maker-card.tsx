@@ -5,6 +5,7 @@ import { RiMedalLine } from 'react-icons/ri'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge-impact'
 import type { ImpactMaker } from '~/lib/types/impact/impact-makers.types'
+import { getAvatarFallback } from '~/lib/utils'
 
 interface ImpactMakerCardProps {
 	maker: ImpactMaker
@@ -23,7 +24,7 @@ export function ImpactMakerCard({ maker, index }: ImpactMakerCardProps) {
 			<div className="flex items-center gap-4">
 				<Avatar className="h-16 w-16">
 					<AvatarImage src={maker.image} alt={maker.name} />
-					<AvatarFallback>{maker.name.charAt(0)}</AvatarFallback>
+					<AvatarFallback>{getAvatarFallback(maker.name)}</AvatarFallback>
 				</Avatar>
 
 				<div>

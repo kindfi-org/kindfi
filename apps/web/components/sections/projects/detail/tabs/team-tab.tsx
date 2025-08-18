@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import type { TeamMember } from '~/lib/types/project/project-detail.types'
+import { getAvatarFallback } from '~/lib/utils'
 import { memberRole } from '~/lib/utils/member-role'
 
 interface TeamTabProps {
@@ -41,7 +42,7 @@ export function TeamTab({ team }: TeamTabProps) {
 									alt={member.displayName ?? 'User Avatar'}
 								/>
 								<AvatarFallback>
-									{member.displayName?.charAt(0).toUpperCase() ?? 'U'}
+									{getAvatarFallback(member.displayName)}
 								</AvatarFallback>
 							</Avatar>
 

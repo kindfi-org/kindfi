@@ -25,6 +25,7 @@ import {
 	SheetTrigger,
 } from '~/components/base/sheet'
 import { useAuth } from '~/hooks/use-auth'
+import { getAvatarFallback } from '~/lib/utils'
 import { Navigation } from './navigation'
 
 export const Header = () => {
@@ -185,7 +186,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 			<div className="flex items-center space-x-4">
 				<Avatar className="h-8 w-8">
 					<AvatarFallback suppressHydrationWarning>
-						{user.email?.[0].toUpperCase()}
+						{getAvatarFallback(user.email)}
 					</AvatarFallback>
 				</Avatar>
 				<div className="space-y-1">
