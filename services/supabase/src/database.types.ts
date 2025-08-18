@@ -922,6 +922,56 @@ export type Database = {
 					},
 				]
 			}
+			waitlist_interests: {
+				Row: {
+					category_id: string | null
+					consent: boolean
+					created_at: string
+					email: string | null
+					id: string
+					location: string | null
+					name: string
+					project_description: string | null
+					project_name: string | null
+					role: string
+					source: string | null
+				}
+				Insert: {
+					category_id?: string | null
+					consent?: boolean
+					created_at?: string
+					email?: string | null
+					id?: string
+					location?: string | null
+					name: string
+					project_description?: string | null
+					project_name?: string | null
+					role: string
+					source?: string | null
+				}
+				Update: {
+					category_id?: string | null
+					consent?: boolean
+					created_at?: string
+					email?: string | null
+					id?: string
+					location?: string | null
+					name?: string
+					project_description?: string | null
+					project_name?: string | null
+					role?: string
+					source?: string | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'waitlist_interests_category_id_fkey'
+						columns: ['category_id']
+						isOneToOne: false
+						referencedRelation: 'categories'
+						referencedColumns: ['id']
+					},
+				]
+			}
 		}
 		Views: {
 			[_ in never]: never

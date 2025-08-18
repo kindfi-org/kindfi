@@ -9,9 +9,6 @@ export function transformEnv(): AppEnvInterface {
 			secret:
 				data.NEXTAUTH_SECRET ||
 				(() => {
-					if (data.NODE_ENV === 'production') {
-						throw new Error('NEXTAUTH_SECRET is required in production')
-					}
 					// Generate a random secret for development only
 					console.warn('⚠️ Using auto-generated NEXTAUTH_SECRET for development')
 					return require('crypto').randomBytes(32).toString('hex')

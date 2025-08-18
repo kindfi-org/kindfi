@@ -53,11 +53,6 @@ export function JoinUs() {
 								<p className="mt-4 text-gray-600 leading-relaxed">
 									{feature.description}
 								</p>
-
-								<div className="mt-6 flex items-center text-sm font-medium text-blue-600">
-									{feature.highlight}
-									<ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
-								</div>
 							</article>
 						</motion.div>
 					))}

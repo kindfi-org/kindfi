@@ -2,7 +2,11 @@
 
 import type { Tables } from '@services/supabase'
 
-export interface UserData extends Tables<'profiles'> {}
+export type ProfileRow = Tables<'profiles'>
+export type UserData =
+	| ProfileRow
+	| { id: string; full_name: string; is_team_member: boolean }
+	| null
 
 export interface CommentData extends Omit<Tables<'comments'>, 'metadata'> {
 	metadata?: Record<string, unknown>
