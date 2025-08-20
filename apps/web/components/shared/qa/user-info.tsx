@@ -41,8 +41,13 @@ export function UserInfo({
 			authorData.full_name || `User ${authorData.id.substring(0, 6)}`
 	}
 
-	// Create accessible alt text with proper fallback handling
-	const avatarAltText = displayName ? `${displayName}'s avatar` : 'User avatar'
+	// Accessible alt text: prefer real names; fall back to a generic label if none provided
+	const directName =
+		'display_name' in authorData
+			? (authorData as ProfileRow).display_name
+			: authorData.full_name
+	const nameForAlt = directName?.trim()
+	const avatarAltText = nameForAlt ? `Avatar of ${nameForAlt}` : 'User avatar'
 
 	return (
 		<div className="flex gap-2 items-center">
