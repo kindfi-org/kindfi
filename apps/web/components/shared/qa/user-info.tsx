@@ -1,5 +1,4 @@
 'use client'
-
 import { formatDistanceToNow } from 'date-fns'
 import { User as UserIcon } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
@@ -30,6 +29,7 @@ export function UserInfo({
 	let avatarUrl: string | null = null
 	let displayName: string = ''
 	let role: string | undefined
+
 	if ('display_name' in authorData) {
 		const profile = authorData as ProfileRow
 		avatarUrl = profile.image_url
@@ -41,11 +41,14 @@ export function UserInfo({
 			authorData.full_name || `User ${authorData.id.substring(0, 6)}`
 	}
 
+	// Create accessible alt text with proper fallback handling
+	const avatarAltText = displayName ? `${displayName}'s avatar` : 'User avatar'
+
 	return (
 		<div className="flex gap-2 items-center">
 			<Avatar className={avatarSize}>
 				{avatarUrl ? (
-					<AvatarImage src={avatarUrl} alt="User avatar" />
+					<AvatarImage src={avatarUrl} alt={avatarAltText} />
 				) : (
 					<AvatarFallback>
 						<UserIcon className={iconSize} aria-hidden="true" />
