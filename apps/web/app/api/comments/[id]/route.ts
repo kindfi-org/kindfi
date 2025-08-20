@@ -65,7 +65,11 @@ export async function PATCH(
 				{ status: 400 },
 			)
 		}
-		updates.is_resolved = body.is_resolved as boolean
+		const currentMetadata = (existing.metadata as Record<string, unknown>) || {}
+		updates.metadata = {
+			...currentMetadata,
+			status: body.is_resolved ? 'resolved' : 'new',
+		}
 	}
 
 	if (Object.keys(updates).length === 0) {

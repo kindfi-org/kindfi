@@ -237,7 +237,10 @@ export default function QAClient({
 
 								setTimeout(() => setRealtimeStatus(null), 5000)
 							}
-						} else if (eventType === 'UPDATE' && metadata.is_resolved) {
+						} else if (
+							eventType === 'UPDATE' &&
+							metadata.status === 'resolved'
+						) {
 							setRealtimeStatus('A question has been marked as resolved')
 
 							setTimeout(() => setRealtimeStatus(null), 5000)
@@ -480,14 +483,24 @@ export default function QAClient({
 				(oldData: CommentData[] | undefined) => {
 					if (!oldData) return []
 					return oldData.map((q) =>
-						q.id === updatedQuestion.id ? { ...q, is_resolved: true } : q,
+						q.id === updatedQuestion.id
+							? {
+									...q,
+									metadata: { ...q.metadata, status: 'resolved' },
+								}
+							: q,
 					)
 				},
 			)
 
 			setProcessedQuestions((prev) =>
 				prev.map((q) =>
-					q.id === updatedQuestion.id ? { ...q, is_resolved: true } : q,
+					q.id === updatedQuestion.id
+						? {
+								...q,
+								metadata: { ...q.metadata, status: 'resolved' },
+							}
+						: q,
 				),
 			)
 

@@ -58,8 +58,7 @@ export async function POST(req: NextRequest) {
 			type,
 			parent_comment_id,
 			author_id: authorId,
-			is_resolved: false,
-			metadata: type === 'question' ? { is_resolved: false } : null,
+			metadata: type === 'question' ? { status: 'new' } : {},
 		}
 
 		const { data, error } = await supabase
