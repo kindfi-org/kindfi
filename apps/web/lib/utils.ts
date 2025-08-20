@@ -53,3 +53,10 @@ export async function getAccountSequence(secretKey: string): Promise<number> {
 	)
 	return account.sequenceNumber
 }
+
+export function getAvatarFallback(name: string | undefined): string {
+	if (!name || name.trim() === '') {
+		return 'U' // Default AvatarFallback for a user with undefined or empty name
+	}
+	return name.trim().charAt(0).toUpperCase()
+}

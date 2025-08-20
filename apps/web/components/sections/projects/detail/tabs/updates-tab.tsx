@@ -4,8 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { useSetState } from 'react-use'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
+import { UserAvatar } from '~/components/base/user-avatar'
 import { CommentForm } from '~/components/sections/projects/detail/comment-form'
 import { CommentThread } from '~/components/sections/projects/detail/comment-thread'
 import type { Comment, Update } from '~/lib/types/project/project-detail.types'
@@ -120,15 +120,11 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 								</h3>
 
 								<div className="flex items-center gap-3 mb-4 min-w-0">
-									<Avatar className="h-8 w-8">
-										<AvatarImage
-											src={update.author.avatar || '/placeholder.svg'}
-											alt={update.author.name}
-										/>
-										<AvatarFallback>
-											{update.author.name.charAt(0)}
-										</AvatarFallback>
-									</Avatar>
+									<UserAvatar
+										src={update.author.avatar || '/placeholder.svg'}
+										alt={update.author.name}
+										name={update.author.name}
+									/>
 									<div>
 										<p className="font-medium text-sm break-words">
 											{update.author.name}
