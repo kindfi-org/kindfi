@@ -5,7 +5,6 @@ import clsx from 'clsx'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import {
 	Form,
@@ -15,7 +14,7 @@ import {
 	FormMessage,
 } from '~/components/base/form'
 import { Textarea } from '~/components/base/textarea'
-import { getAvatarFallback } from '~/lib/utils'
+import { UserAvatar } from '~/components/base/user-avatar'
 
 interface CommentFormProps {
 	userAvatar?: string
@@ -72,13 +71,11 @@ export function CommentForm({
 			})}
 		>
 			<div className="flex gap-3">
-				<Avatar className="h-8 w-8 flex-shrink-0">
-					<AvatarImage
-						src={userAvatar || '/images/placeholder.png'}
-						alt={userName}
-					/>
-					<AvatarFallback>{getAvatarFallback(userName)}</AvatarFallback>
-				</Avatar>
+				<UserAvatar
+					src={userAvatar || '/images/placeholder.png'}
+					alt={userName}
+					name={userName}
+				/>
 				<div className="flex-1">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(handleFormSubmit)}>

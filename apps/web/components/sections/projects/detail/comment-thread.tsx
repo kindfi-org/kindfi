@@ -4,12 +4,11 @@ import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
+import { UserAvatar } from '~/components/base/user-avatar'
 import { CommentForm } from '~/components/sections/projects/detail/comment-form'
 import { LikeButton } from '~/components/sections/projects/detail/like-button'
 import type { Comment } from '~/lib/types/project/project-detail.types'
-import { getAvatarFallback } from '~/lib/utils'
 
 interface CommentThreadProps {
 	comments: Comment[]
@@ -108,15 +107,11 @@ function CommentItem({
 		>
 			<div className="bg-white rounded-lg p-4">
 				<div className="flex items-start gap-3 mb-3 flex-wrap min-w-0">
-					<Avatar className="h-8 w-8">
-						<AvatarImage
-							src={comment.author.avatar || '/placeholder.svg'}
-							alt={comment.author.name}
-						/>
-						<AvatarFallback>
-							{getAvatarFallback(comment.author.name)}
-						</AvatarFallback>
-					</Avatar>
+					<UserAvatar
+						src={comment.author.avatar || '/images/placeholder.png'}
+						alt={comment.author.name}
+						name={comment.author.name}
+					/>
 					<div className="flex-1">
 						<div className="flex flex-wrap items-center gap-2">
 							<h4 className="font-medium">{comment.author.name}</h4>

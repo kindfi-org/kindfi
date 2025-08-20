@@ -1,9 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
+import { UserAvatar } from '~/components/base/user-avatar'
 import type { TeamMember } from '~/lib/types/project/project-detail.types'
-import { getAvatarFallback } from '~/lib/utils'
 import { memberRole } from '~/lib/utils/member-role'
 
 interface TeamTabProps {
@@ -36,15 +35,12 @@ export function TeamTab({ team }: TeamTabProps) {
 							transition={{ duration: 0.2 }}
 						>
 							{/* Avatar */}
-							<Avatar className="h-20 w-20 mb-4">
-								<AvatarImage
-									src={member.avatar || '/images/placeholder.png'}
-									alt={member.displayName ?? 'User Avatar'}
-								/>
-								<AvatarFallback>
-									{getAvatarFallback(member.displayName)}
-								</AvatarFallback>
-							</Avatar>
+							<UserAvatar
+								src={member.avatar || '/images/placeholder.png'}
+								alt={member.displayName}
+								name={member.displayName}
+								className="h-20 w-20 mb-4"
+							/>
 
 							{/* Name + role icon */}
 							<div className="flex items-center gap-2 mb-1">
