@@ -1,10 +1,10 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge-impact'
 import { levelColors } from '~/lib/constants/impact-data/makers'
 import type { ImpactMaker } from '~/lib/types/impact/impact-makers.types'
+import { UserAvatar } from '../base/user-avatar'
 
 interface ImpactMakerCardProps {
 	maker: ImpactMaker
@@ -21,10 +21,12 @@ export function ImpactMakerCard({ maker, index }: ImpactMakerCardProps) {
 			className="rounded-2xl bg-white p-6 shadow-lg"
 		>
 			<div className="flex items-start gap-4">
-				<Avatar className="h-16 w-16">
-					<AvatarImage src={maker.image} alt={maker.name} />
-					<AvatarFallback>{maker.name.charAt(0)}</AvatarFallback>
-				</Avatar>
+				<UserAvatar
+					src={maker.image}
+					alt={maker.name}
+					name={maker.name}
+					className="h-16 w-16"
+				/>
 
 				<div className="flex-1">
 					<h3 className="text-xl font-semibold">{maker.name}</h3>
