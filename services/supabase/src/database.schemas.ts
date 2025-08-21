@@ -535,6 +535,7 @@ export const projectMemberRoleSchema = z.union([
 export const projectMembersInsertSchema = z.object({
 	id: z.string().optional(),
 	joined_at: z.string().optional(),
+	next_auth_user_id: z.string().optional().nullable(),
 	project_id: z.string(),
 	role: projectMemberRoleSchema.optional(),
 	title: z.string().optional(),
@@ -545,6 +546,7 @@ export const projectMembersInsertSchema = z.object({
 export const projectMembersUpdateSchema = z.object({
 	id: z.string().optional(),
 	joined_at: z.string().optional(),
+	next_auth_user_id: z.string().optional().nullable(),
 	project_id: z.string().optional(),
 	role: projectMemberRoleSchema.optional(),
 	title: z.string().optional(),
@@ -850,6 +852,7 @@ export const profilesRowSchema = z.object({
 export const projectMembersRowSchema = z.object({
 	id: z.string(),
 	joined_at: z.string(),
+	next_auth_user_id: z.string().nullable(),
 	project_id: z.string(),
 	role: projectMemberRoleSchema,
 	title: z.string(),

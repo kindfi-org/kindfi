@@ -908,6 +908,7 @@ export type Database = {
 				Row: {
 					id: string
 					joined_at: string
+					next_auth_user_id: string | null
 					project_id: string
 					role: Database['public']['Enums']['project_member_role']
 					title: string
@@ -917,6 +918,7 @@ export type Database = {
 				Insert: {
 					id?: string
 					joined_at?: string
+					next_auth_user_id?: string | null
 					project_id: string
 					role?: Database['public']['Enums']['project_member_role']
 					title?: string
@@ -926,6 +928,7 @@ export type Database = {
 				Update: {
 					id?: string
 					joined_at?: string
+					next_auth_user_id?: string | null
 					project_id?: string
 					role?: Database['public']['Enums']['project_member_role']
 					title?: string
@@ -1198,6 +1201,23 @@ export type Database = {
 			cleanup_expired_challenges: {
 				Args: Record<PropertyKey, never>
 				Returns: undefined
+			}
+			get_current_user_profile: {
+				Args: Record<PropertyKey, never>
+				Returns: {
+					user_id: string
+					profile_id: string
+					role: Database['public']['Enums']['user_role']
+					next_auth_user_id: string
+				}[]
+			}
+			is_project_owner: {
+				Args: { project_uuid: string; user_uuid: string }
+				Returns: boolean
+			}
+			is_project_team_member: {
+				Args: { project_uuid: string; user_uuid: string }
+				Returns: boolean
 			}
 			unaccent: {
 				Args: { '': string }
