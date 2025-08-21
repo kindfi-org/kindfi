@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirm your email change</title>
+    <style>
+      /* Email client resets */
+      html,
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+      }
+      table,
+      td {
+        border-collapse: collapse !important;
+      }
+      a[x-apple-data-detectors],
+      u + #body a {
+        color: inherit !important;
+        text-decoration: none !important;
+        font-size: inherit !important;
+      }
+
+      /* Brand-aligned base */
+      body {
+        background: #f4f6fb;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .preheader {
+        display: none !important;
+        visibility: hidden;
+        opacity: 0;
+        height: 0;
+        width: 0;
+        overflow: hidden;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        background: #ffffff;
+        border-radius: 12px;
+      }
+      .card {
+        padding: 24px;
+      }
+      .brand {
+        font-size: 14px;
+        color: #6b7280;
+      }
+      .title {
+        margin: 8px 0 12px;
+        font-size: 22px;
+        color: #18191b;
+      }
+      .text {
+        margin: 0 0 12px;
+        color: #374151;
+        line-height: 1.5;
+      }
+      .muted {
+        color: #6b7280;
+        font-size: 12px;
+      }
+      .btn {
+        background: #7cc635;
+        color: #ffffff !important;
+        text-decoration: none;
+        padding: 12px 18px;
+        border-radius: 12px;
+        display: inline-block;
+      }
+      .code {
+        text-align: center;
+        margin: 8px 0 20px;
+      }
+      .code-box {
+        display: inline-block;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: #eef1f6;
+        color: #18191b;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 3px;
+      }
+      .hr {
+        border: none;
+        border-top: 1px solid #c3ccdf;
+        margin: 16px 0;
+      }
+
+      /* Responsive */
+      @media screen and (max-width: 600px) {
+        .card {
+          padding: 16px !important;
+        }
+        .title {
+          font-size: 20px !important;
+        }
+        .text {
+          font-size: 15px !important;
+        }
+        .code-box {
+          font-size: 20px !important;
+          letter-spacing: 2px !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body id="body">
+    <div class="preheader">
+      Confirm your email change from {{ .Email }} to {{ .NewEmail }}.
+    </div>
+
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="padding: 24px 0"
+    >
+      <tr>
+        <td align="center">
+          <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0"><tr><td><![endif]-->
+          <table
+            role="presentation"
+            class="container"
+            cellpadding="0"
+            cellspacing="0"
+          >
+            <tr>
+              <td class="card">
+                <div class="brand">KindFi</div>
+
+                <h2 class="title">Confirm your email change</h2>
+                <p class="text">
+                  You requested to update your email from
+                  <strong>{{ .Email }}</strong> to
+                  <strong>{{ .NewEmail }}</strong>.
+                </p>
+
+                <p class="text">Click the button to confirm:</p>
+                <p style="margin: 16px 0">
+                  <a class="btn" href="{{ .ConfirmationURL }}"
+                    >Confirm email change</a
+                  >
+                </p>
+
+                <p class="text">Or enter this verification code:</p>
+                <p class="code"><span class="code-box">{{ .Token }}</span></p>
+
+                <p class="muted" style="margin: 24px 0 0">
+                  If you didn’t request this change, you can safely ignore this
+                  email.
+                </p>
+
+                <hr class="hr" />
+                <p class="muted">
+                  Help:
+                  <a href="{{ .SiteURL }}" style="color: inherit"
+                    >{{ .SiteURL }}</a
+                  >
+                </p>
+              </td>
+            </tr>
+          </table>
+          <!--[if mso]></td></tr></table><![endif]-->
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
