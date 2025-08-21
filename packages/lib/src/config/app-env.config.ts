@@ -37,6 +37,9 @@ export function transformEnv(): AppEnvInterface {
 			privateKey: data.VAPID_PRIVATE_KEY || '',
 			publicKey: data.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
 		},
+		resend: {
+			apiKey: data.RESEND_SMTP_API_KEY || '',
+		},
 		env: {
 			nodeEnv: data.NODE_ENV || 'development',
 			appEnv: data.NEXT_PUBLIC_APP_ENV || 'development',
@@ -123,6 +126,9 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(
 			privateKey: z.string(),
 			publicKey: z.string(),
 		}),
+		resend: z.object({
+			apiKey: z.string(),
+		}),
 		env: z.object({
 			nodeEnv: z.enum(['development', 'production', 'test']),
 			appEnv: z.enum(['development', 'production', 'test']),
@@ -199,6 +205,7 @@ function createValidationRules<T extends keyof typeof appRequirements>(
 		NEXTAUTH_SECRET: ['auth', 'secret'],
 		ALLOWED_ORIGINS: ['kycServer', 'allowedOrigins'],
 		PORT: ['deployment', 'port'],
+		RESEND_SMTP_API_KEY: ['resend', 'apiKey'],
 	}
 
 	// Mark required fields
@@ -314,6 +321,9 @@ export const baseEnvSchema = z.object({
 	VAPID_EMAIL: z.string().email('Invalid VAPID email format').optional(),
 	VAPID_PRIVATE_KEY: z.string().optional(),
 	NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().optional(),
+
+	// RESEND Configuration
+	RESEND_SMTP_API_KEY: z.string().optional(),
 
 	// Auth Configuration
 	NEXTAUTH_SECRET: z.string().optional(),
@@ -446,6 +456,7 @@ export const appRequirements = {
 			'VAPID_EMAIL',
 			'VAPID_PRIVATE_KEY',
 			'NEXT_PUBLIC_VAPID_PUBLIC_KEY',
+			'RESEND_SMTP_API_KEY',
 			'SUPABASE_SERVICE_ROLE_KEY',
 			'TRUSTLESS_WORK_API_URL',
 			'TRUSTLESS_WORK_API_KEY',
