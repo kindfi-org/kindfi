@@ -78,6 +78,9 @@
         font-size: 26px;
         font-weight: 800;
         letter-spacing: 4px;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
       }
       .hr {
         border: none;
@@ -131,7 +134,11 @@
                 <p class="text">Enter this 6-digit code to continue:</p>
 
                 <p class="code">
-                  <span class="code-box">{{ .Token }}</span>
+                  <span
+                    class="code-box"
+                    aria-label="Your verification code is {{ .Token }}"
+                    >{{ .Token }}</span
+                  >
                 </p>
 
                 <p class="text">
@@ -147,7 +154,11 @@
                 <hr class="hr" />
                 <p class="muted">
                   Need help? Visit
-                  <a href="{{ .SiteURL }}" style="color: inherit"
+                  <a
+                    href="{{ .SiteURL }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style="color: inherit"
                     >{{ .SiteURL }}</a
                   >
                 </p>

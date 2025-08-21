@@ -8,6 +8,7 @@ import {
 	Text,
 } from '@react-email/components'
 import { Tailwind } from '@react-email/tailwind'
+import { cn } from '~/lib/utils'
 
 interface WelcomeNewUserEmailProps {
 	displayName: string
@@ -18,16 +19,12 @@ export function WelcomeNewUserEmail({
 	displayName,
 	hasKyc,
 }: WelcomeNewUserEmailProps) {
-	const badgeStyle = hasKyc
-		? { backgroundColor: '#E6F4EA', color: '#166534' } // green-ish
-		: { backgroundColor: '#FEF3C7', color: '#92400E' } // amber-ish
-
 	const badgeLabel = hasKyc ? 'KYC completed' : 'KYC pending'
 
 	return (
 		<Html>
 			<Head />
-			<Preview>Welcome, ${displayName}!</Preview>
+			<Preview>{`Welcome, ${displayName}!`}</Preview>
 			<Tailwind>
 				<Body className="bg-gray-50 text-gray-900">
 					<Container className="mx-auto my-8 w-full max-w-[560px]">
@@ -40,15 +37,12 @@ export function WelcomeNewUserEmail({
 
 							{/* Status badge */}
 							<div
-								style={{
-									display: 'inline-block',
-									padding: '6px 10px',
-									borderRadius: 999,
-									fontSize: 12,
-									fontWeight: 600,
-									lineHeight: 1,
-									...badgeStyle,
-								}}
+								className={cn(
+									'inline-block rounded-full py-1.5 px-2.5 text-xs font-semibold leading-none',
+									hasKyc
+										? 'bg-emerald-50 text-green-700'
+										: 'bg-amber-100 text-amber-800',
+								)}
 							>
 								{badgeLabel}
 							</div>

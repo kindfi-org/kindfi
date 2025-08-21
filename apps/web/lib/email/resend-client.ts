@@ -1,7 +1,7 @@
 import { appEnvConfig } from '@packages/lib'
 import { Resend } from 'resend'
 
-let resend: Resend | null = null
+let resendClient: Resend | null = null
 
 /**
  * Returns a Resend client (singleton created on first use).
@@ -10,7 +10,7 @@ let resend: Resend | null = null
  * - Reuses a single instance across calls.
  */
 export function getResendClient(): Resend {
-	if (resend) return resend
+	if (resendClient) return resendClient
 
 	// Read env without app-level strict validation to avoid startup failures.
 	const env = appEnvConfig()
@@ -22,6 +22,6 @@ export function getResendClient(): Resend {
 	}
 
 	// Initialize once and reuse.
-	resend = new Resend(apiKey)
-	return resend
+	resendClient = new Resend(apiKey)
+	return resendClient
 }

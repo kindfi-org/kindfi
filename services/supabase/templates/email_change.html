@@ -85,6 +85,9 @@
         font-size: 22px;
         font-weight: 800;
         letter-spacing: 3px;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
       }
       .hr {
         border: none;
@@ -145,13 +148,24 @@
 
                 <p class="text">Click the button to confirm:</p>
                 <p style="margin: 16px 0">
-                  <a class="btn" href="{{ .ConfirmationURL }}"
+                  <a
+                    class="btn"
+                    href="{{ .ConfirmationURL }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Confirm email change for {{ .NewEmail }}"
                     >Confirm email change</a
                   >
                 </p>
 
                 <p class="text">Or enter this verification code:</p>
-                <p class="code"><span class="code-box">{{ .Token }}</span></p>
+                <p class="code">
+                  <span
+                    class="code-box"
+                    aria-label="Your verification code is {{ .Token }}"
+                    >{{ .Token }}</span
+                  >
+                </p>
 
                 <p class="muted" style="margin: 24px 0 0">
                   If you didn’t request this change, you can safely ignore this
@@ -161,7 +175,11 @@
                 <hr class="hr" />
                 <p class="muted">
                   Help:
-                  <a href="{{ .SiteURL }}" style="color: inherit"
+                  <a
+                    href="{{ .SiteURL }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style="color: inherit"
                     >{{ .SiteURL }}</a
                   >
                 </p>
