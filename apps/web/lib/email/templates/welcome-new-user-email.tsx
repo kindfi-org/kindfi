@@ -22,7 +22,7 @@ export function WelcomeNewUserEmail({
 	const badgeLabel = hasKyc ? 'KYC completed' : 'KYC pending'
 
 	return (
-		<Html>
+		<Html lang="en">
 			<Head />
 			<Preview>{`Welcome, ${displayName}!`}</Preview>
 			<Tailwind>
