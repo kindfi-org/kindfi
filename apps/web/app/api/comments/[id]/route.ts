@@ -12,9 +12,9 @@ interface UpdateCommentBody {
 
 export async function PATCH(
 	req: NextRequest,
-	{ params }: { params: { id: string } },
+	{ params }: { params: Promise<{ id: string }> },
 ) {
-	const { id } = params
+	const { id } = await params
 	if (!id) {
 		return NextResponse.json({ error: 'Missing id' }, { status: 400 })
 	}
@@ -37,7 +37,7 @@ export async function PATCH(
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 	}
 
-	// Fetch existing comment to ensure ownership, if user is not the owner, then they wont be able to update comment
+	// fetch existing comment to ensure ownership, if user is not the owner, then they wont be able to update comment
 	const { data: existing, error: fetchError } = await supabase
 		.from('comments')
 		.select('*')
@@ -45,6 +45,16 @@ export async function PATCH(
 		.single()
 	if (fetchError || !existing) {
 		return NextResponse.json({ error: 'Comment not found' }, { status: 404 })
+	}
+
+	if (existing.author_id !== user.id) {
+		return NextResponse.json(
+			{
+				error:
+					'Forbidden: You are not able to update comments that are not yours',
+			},
+			{ status: 403 },
+		)
 	}
 
 	// Allow marking resolved only on questions
