@@ -60,11 +60,7 @@ export function getAvatarFallback(name: string | undefined): string {
 	}
 
 	const trimmedName = name.trim()
-	const nameParts = trimmedName.split(' ').filter((part) => part.length > 0)
-
-	if (nameParts.length === 0) {
-		return 'U'
-	}
+	const nameParts = trimmedName.split(/\s+/)
 
 	if (nameParts.length === 1) {
 		// Single name: return first two characters if available, otherwise first character

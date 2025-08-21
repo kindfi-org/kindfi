@@ -50,7 +50,7 @@ export const FeatureCreatorCard = ({
 			>
 				<div className="flex flex-row items-center">
 					<UserAvatar
-						src={avatarUrl}
+						src={avatarUrl || undefined}
 						alt={`${name}'s avatar`}
 						name={name}
 						className="h-20 w-20"
