@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import type { Testimonial } from '~/lib/types/impact/impact-testimonial.types'
+import { UserAvatar } from '../base/user-avatar'
 
 interface TestimonialCardProps {
 	testimonial: Testimonial
@@ -18,10 +18,12 @@ export function TestimonialCard({ testimonial, index }: TestimonialCardProps) {
 			viewport={{ once: true }}
 			className="flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg"
 		>
-			<Avatar className="mb-4 w-20 h-20">
-				<AvatarImage src={testimonial.image} alt={testimonial.name} />
-				<AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
-			</Avatar>
+			<UserAvatar
+				src={testimonial.image}
+				alt={testimonial.name}
+				name={testimonial.name}
+				className="mb-4 w-20 h-20"
+			/>
 
 			<div className="text-center">
 				<h3 className="text-xl font-semibold">{testimonial.name}</h3>
