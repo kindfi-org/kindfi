@@ -17,15 +17,24 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 			)
 		}
 
-		const { searchParams } = new URL(req.url)
+		const { searchParams } = req.nextUrl
 		const projectId = searchParams.get('project_id')
 		const typeParam = searchParams.get('type')
 		const type =
 			typeParam && ['comment', 'question', 'answer'].includes(typeParam)
 				? (typeParam as 'comment' | 'question' | 'answer')
 				: null
-		const limit = Math.max(1, Math.min(Number(searchParams.get('limit') ?? 50), 100))
-		const offset = Math.max(0, Number(searchParams.get('offset') ?? 0))
+		
+		// Guard against NaN and negative values for pagination
+		const limitParam = searchParams.get('limit')
+		const rawLimit = limitParam ? Number(limitParam) : NaN
+		const limit = Number.isFinite(rawLimit) && rawLimit > 0
+			? Math.max(1, Math.min(rawLimit, 100))
+			: 50
+			
+		const offsetParam = searchParams.get('offset')
+		const rawOffset = offsetParam ? Number(offsetParam) : NaN
+		const offset = Number.isFinite(rawOffset) ? Math.max(0, rawOffset) : 0
 
 		let query = supabase
 			.from('comments')

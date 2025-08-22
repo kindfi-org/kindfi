@@ -12,10 +12,10 @@ const mockSupabase = {
 	select: mock(() => mockSupabase),
 	insert: mock(() => mockSupabase),
 	eq: mock(() => mockSupabase),
+	returns: mock(() => mockSupabase),
 	single: mock(),
 	order: mock(() => mockSupabase),
 	range: mock(() => mockSupabase),
-	update: mock(() => mockSupabase),
 	auth: {
 		getUser: mock(async () => ({
 			data: { user: { id: '123e4567-e89b-12d3-a456-426614174000' } },
@@ -37,6 +37,13 @@ describe('/api/comments', () => {
 		if (typeof mockSupabase.auth?.getUser?.mock?.clear === 'function') {
 			mockSupabase.auth.getUser.mock.clear()
 		}
+		
+		// Reset specific mocks to default values
+		mockSupabase.range.mockResolvedValue({
+			data: [],
+			error: null,
+			count: 0,
+		})
 	})
 
 	describe('POST /api/comments', () => {
@@ -329,6 +336,8 @@ describe('/api/comments', () => {
 				{ id: 'comment-2', content: 'Test comment 2' },
 			]
 
+			// Clear any previous mocks and set up fresh
+			mockSupabase.range.mockClear()
 			mockSupabase.range.mockResolvedValue({
 				data: mockComments,
 				error: null,
@@ -435,6 +444,50 @@ describe('/api/comments', () => {
 			expect(res.status).toBe(401)
 			expect(json.success).toBe(false)
 			expect(json.error.message).toBe('Unauthorized')
+		})
+
+		test('GET should handle invalid limit parameter gracefully', async () => {
+			const mockComments = [{ id: 'comment-1', content: 'Test comment' }]
+
+			mockSupabase.range.mockResolvedValue({
+				data: mockComments,
+				error: null,
+				count: 1,
+			})
+
+			const req = new NextRequest('http://localhost/api/comments?limit=abc')
+			const response = await GET(req)
+			const result = await response.json()
+
+			expect(response.status).toBe(200)
+			expect(result.pagination).toEqual({
+				limit: 50, // Should default to 50 for invalid input
+				offset: 0,
+				total: 1,
+			})
+		})
+
+		test('GET should handle negative offset parameter gracefully', async () => {
+			const mockComments = [{ id: 'comment-1', content: 'Test comment' }]
+
+			// Clear any previous mocks and set up fresh
+			mockSupabase.range.mockClear()
+			mockSupabase.range.mockResolvedValue({
+				data: mockComments,
+				error: null,
+				count: 1,
+			})
+
+			const req = new NextRequest('http://localhost/api/comments?offset=-10')
+			const response = await GET(req)
+			const result = await response.json()
+
+			expect(response.status).toBe(200)
+			expect(result.pagination).toEqual({
+				limit: 50,
+				offset: 0, // Should clamp to 0 for negative input
+				total: 1,
+			})
 		})
 	})
 })

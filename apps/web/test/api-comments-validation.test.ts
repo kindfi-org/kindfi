@@ -1,96 +1,42 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import { createCommentSchema } from '../app/api/comments/validation'
+import { createCommentSchema, validateParentComment } from '../app/api/comments/validation'
 
 // Mock Supabase client for validation testing
 const mockSupabase: {
 	from: (table: string) => MockQuery
 	select: (cols: string) => MockQuery
 	eq: (col: string, val: string) => MockQuery
+	returns: <T>() => MockQuery
 	single: () => Promise<MockSingleResult>
 } = {
 	from: mock(() => mockSupabase),
 	select: mock(() => mockSupabase),
 	eq: mock(() => mockSupabase),
+	returns: mock(() => mockSupabase),
 	single: mock(() => Promise.resolve({ data: null, error: null })),
 }
 
-/**
- * Validates parent comment relationships and type hierarchy
- * This is the same validation logic from the route
- */
-interface MockSingleResult { data: unknown; error: { message: string } | null }
+type ParentCommentRow = {
+	id: string
+	type: 'comment' | 'question' | 'answer'
+	project_id: string | null
+	project_update_id: string | null
+}
+
+interface MockSingleResult {
+	data: ParentCommentRow | null
+	error: { message: string } | null
+}
+
 interface MockQuery {
 	select: (cols: string) => MockQuery
 	eq: (col: string, val: string) => MockQuery
+	returns: <T>() => MockQuery
 	single: () => Promise<MockSingleResult>
 }
-interface MockClient {
-	from: (_table: string) => MockQuery
-}
 
-async function validateParentComment(
-	supabase: MockClient,
-	parentCommentId: string,
-	commentType: 'comment' | 'question' | 'answer',
-	projectId?: string,
-	projectUpdateId?: string,
-): Promise<{ valid: boolean; error?: string }> {
-	// Check if parent comment exists
-	const { data: parentComment, error: fetchError } = await supabase
-		.from('comments')
-		.select('id, type, project_id, project_update_id')
-		.eq('id', parentCommentId)
-		.single()
-
-	if (fetchError || !parentComment) {
-		return { valid: false, error: 'Parent comment not found' }
-	}
-
-	// Validate parent belongs to same project/update
-	const parentProjectId = parentComment.project_id
-	const parentProjectUpdateId = parentComment.project_update_id
-
-	if (projectId && parentProjectId !== projectId) {
-		return {
-			valid: false,
-			error: 'Parent comment belongs to a different project',
-		}
-	}
-
-	if (projectUpdateId && parentProjectUpdateId !== projectUpdateId) {
-		return {
-			valid: false,
-			error: 'Parent comment belongs to a different project update',
-		}
-	}
-
-	// Validate type hierarchy rules
-	if (commentType === 'answer') {
-		// Answers should only be added to questions
-		if (parentComment.type !== 'question') {
-			return {
-				valid: false,
-				error: 'Answers can only be added to questions',
-			}
-		}
-	} else if (commentType === 'question') {
-		// Questions cannot have parents (they are top-level)
-		return {
-			valid: false,
-			error: 'Questions cannot have parent comments',
-		}
-	} else if (commentType === 'comment') {
-		// Comments can be added to any type, but let's be explicit about allowed parents
-		if (!['question', 'comment'].includes(parentComment.type)) {
-			return {
-				valid: false,
-				error: 'Invalid parent comment type for this comment',
-			}
-		}
-	}
-
-	return { valid: true }
-}
+// Helper to cast mock to proper Supabase type for testing
+const typedMockSupabase = mockSupabase as unknown as Awaited<ReturnType<typeof import('@packages/lib/supabase-server').createSupabaseServerClient>>
 
 describe('Comments API Validation Logic', () => {
 	beforeEach(() => {
@@ -248,12 +194,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'answer',
-				'123e4567-e89b-12d3-a456-426614174001',
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'answer',
+				projectId: '123e4567-e89b-12d3-a456-426614174001',
+			})
 
 			expect(result.valid).toBe(false)
 			expect(result.error).toBe('Parent comment not found')
@@ -273,12 +219,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'answer',
-				'123e4567-e89b-12d3-a456-426614174001', // Different from parent
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'answer',
+				projectId: '123e4567-e89b-12d3-a456-426614174001', // Different from parent
+			})
 
 			expect(result.valid).toBe(false)
 			expect(result.error).toBe('Parent comment belongs to a different project')
@@ -298,13 +244,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'answer',
-				undefined,
-				'123e4567-e89b-12d3-a456-426614174001', // Different from parent
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'answer',
+				projectUpdateId: '123e4567-e89b-12d3-a456-426614174001', // Different from parent
+			})
 
 			expect(result.valid).toBe(false)
 			expect(result.error).toBe(
@@ -326,12 +271,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'answer',
-				'123e4567-e89b-12d3-a456-426614174001',
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'answer',
+				projectId: '123e4567-e89b-12d3-a456-426614174001',
+			})
 
 			expect(result.valid).toBe(true)
 			expect(result.error).toBeUndefined()
@@ -351,13 +296,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'answer',
-				undefined,
-				'123e4567-e89b-12d3-a456-426614174001',
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'answer',
+				projectUpdateId: '123e4567-e89b-12d3-a456-426614174001',
+			})
 
 			expect(result.valid).toBe(true)
 			expect(result.error).toBeUndefined()
@@ -379,12 +323,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'answer',
-				'123e4567-e89b-12d3-a456-426614174001',
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'answer',
+				projectId: '123e4567-e89b-12d3-a456-426614174001',
+			})
 
 			expect(result.valid).toBe(true)
 			expect(result.error).toBeUndefined()
@@ -404,12 +348,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'answer',
-				'123e4567-e89b-12d3-a456-426614174001',
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'answer',
+				projectId: '123e4567-e89b-12d3-a456-426614174001',
+			})
 
 			expect(result.valid).toBe(false)
 			expect(result.error).toBe('Answers can only be added to questions')
@@ -429,12 +373,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'question',
-				'123e4567-e89b-12d3-a456-426614174001',
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'question',
+				projectId: '123e4567-e89b-12d3-a456-426614174001',
+			})
 
 			expect(result.valid).toBe(false)
 			expect(result.error).toBe('Questions cannot have parent comments')
@@ -454,12 +398,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'comment',
-				'123e4567-e89b-12d3-a456-426614174001',
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'comment',
+				projectId: '123e4567-e89b-12d3-a456-426614174001',
+			})
 
 			expect(result.valid).toBe(true)
 			expect(result.error).toBeUndefined()
@@ -479,12 +423,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'comment',
-				'123e4567-e89b-12d3-a456-426614174001',
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'comment',
+				projectId: '123e4567-e89b-12d3-a456-426614174001',
+			})
 
 			expect(result.valid).toBe(true)
 			expect(result.error).toBeUndefined()
@@ -504,12 +448,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'comment',
-				'123e4567-e89b-12d3-a456-426614174001',
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'comment',
+				projectId: '123e4567-e89b-12d3-a456-426614174001',
+			})
 
 			expect(result.valid).toBe(false)
 			expect(result.error).toBe('Invalid parent comment type for this comment')
@@ -526,12 +470,12 @@ describe('Comments API Validation Logic', () => {
 				}),
 			)
 
-			const result = await validateParentComment(
-				mockSupabase,
-				'123e4567-e89b-12d3-a456-426614174999',
-				'answer',
-				'123e4567-e89b-12d3-a456-426614174001',
-			)
+			const result = await validateParentComment({
+				supabase: typedMockSupabase,
+				parentCommentId: '123e4567-e89b-12d3-a456-426614174999',
+				commentType: 'answer',
+				projectId: '123e4567-e89b-12d3-a456-426614174001',
+			})
 
 			expect(result.valid).toBe(false)
 			expect(result.error).toBe('Parent comment not found')

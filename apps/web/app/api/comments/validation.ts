@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import type { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { Tables } from '@services/supabase'
 
 // Schema for validating comment creation requests
@@ -16,14 +16,22 @@ export const createCommentSchema = z
 		type: z.enum(['comment', 'question', 'answer']).default('comment'),
 		metadata: z.record(z.unknown()).default({}),
 	})
-	.refine(
-		(data) => data.project_id || data.project_update_id,
-		'Either project_id or project_update_id must be provided',
-	)
-	.refine(
-		(data) => !(data.project_id && data.project_update_id),
-		'Only one of project_id or project_update_id can be provided',
-	)
+	.superRefine((data, ctx) => {
+		if (!data.project_id && !data.project_update_id) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Either project_id or project_update_id must be provided',
+				path: ['project_id'],
+			})
+		}
+		if (data.project_id && data.project_update_id) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Only one of project_id or project_update_id can be provided',
+				path: ['project_id'],
+			})
+		}
+	})
 
 export interface ParentValidationInput {
 	supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
@@ -52,6 +60,7 @@ export async function validateParentComment({
 	const { data: parentComment, error: fetchError } = await supabase
 		.from('comments')
 		.select('id, type, project_id, project_update_id')
+		.returns<ParentCommentRow>()
 		.eq('id', parentCommentId)
 		.single()
 
