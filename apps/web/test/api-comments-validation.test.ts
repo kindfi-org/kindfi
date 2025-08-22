@@ -1,22 +1,28 @@
-import { describe, expect, test, beforeEach, mock } from 'bun:test'
+import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import { z } from 'zod'
 
 // Create the same validation schema that's used in the route
-const createCommentSchema = z.object({
-	content: z.string().min(1, 'Content is required').max(5000, 'Content too long'),
-	author_id: z.string().uuid('Invalid author ID'),
-	parent_comment_id: z.string().uuid('Invalid parent comment ID').optional(),
-	project_id: z.string().uuid('Invalid project ID').optional(),
-	project_update_id: z.string().uuid('Invalid project update ID').optional(),
-	type: z.enum(['comment', 'question', 'answer']).default('comment'),
-	metadata: z.record(z.any()).default({}),
-}).refine(
-	(data) => data.project_id || data.project_update_id,
-	'Either project_id or project_update_id must be provided'
-).refine(
-	(data) => !(data.project_id && data.project_update_id),
-	'Only one of project_id or project_update_id can be provided'
-)
+const createCommentSchema = z
+	.object({
+		content: z
+			.string()
+			.trim()
+			.min(1, 'Content is required')
+			.max(5000, 'Content too long'),
+		parent_comment_id: z.string().uuid('Invalid parent comment ID').optional(),
+		project_id: z.string().uuid('Invalid project ID').optional(),
+		project_update_id: z.string().uuid('Invalid project update ID').optional(),
+		type: z.enum(['comment', 'question', 'answer']).default('comment'),
+		metadata: z.record(z.unknown()).default({}),
+	})
+	.refine(
+		(data) => data.project_id || data.project_update_id,
+		'Either project_id or project_update_id must be provided',
+	)
+	.refine(
+		(data) => !(data.project_id && data.project_update_id),
+		'Only one of project_id or project_update_id can be provided',
+	)
 
 // Mock Supabase client for validation testing
 const mockSupabase = {
@@ -30,12 +36,22 @@ const mockSupabase = {
  * Validates parent comment relationships and type hierarchy
  * This is the same validation logic from the route
  */
+interface MockSingleResult { data: unknown; error: { message: string } | null }
+interface MockQuery {
+	select: (cols: string) => MockQuery
+	eq: (col: string, val: string) => MockQuery
+	single: () => Promise<MockSingleResult>
+}
+interface MockClient {
+	from: (_table: string) => MockQuery
+}
+
 async function validateParentComment(
-	supabase: any,
+	supabase: MockClient,
 	parentCommentId: string,
-	commentType: string,
+	commentType: 'comment' | 'question' | 'answer',
 	projectId?: string,
-	projectUpdateId?: string
+	projectUpdateId?: string,
 ): Promise<{ valid: boolean; error?: string }> {
 	// Check if parent comment exists
 	const { data: parentComment, error: fetchError } = await supabase
@@ -55,14 +71,14 @@ async function validateParentComment(
 	if (projectId && parentProjectId !== projectId) {
 		return {
 			valid: false,
-			error: 'Parent comment belongs to a different project'
+			error: 'Parent comment belongs to a different project',
 		}
 	}
 
 	if (projectUpdateId && parentProjectUpdateId !== projectUpdateId) {
 		return {
 			valid: false,
-			error: 'Parent comment belongs to a different project update'
+			error: 'Parent comment belongs to a different project update',
 		}
 	}
 
@@ -72,21 +88,21 @@ async function validateParentComment(
 		if (parentComment.type !== 'question') {
 			return {
 				valid: false,
-				error: 'Answers can only be added to questions'
+				error: 'Answers can only be added to questions',
 			}
 		}
 	} else if (commentType === 'question') {
 		// Questions cannot have parents (they are top-level)
 		return {
 			valid: false,
-			error: 'Questions cannot have parent comments'
+			error: 'Questions cannot have parent comments',
 		}
 	} else if (commentType === 'comment') {
 		// Comments can be added to any type, but let's be explicit about allowed parents
 		if (!['question', 'comment'].includes(parentComment.type)) {
 			return {
 				valid: false,
-				error: 'Invalid parent comment type for this comment'
+				error: 'Invalid parent comment type for this comment',
 			}
 		}
 	}
@@ -97,18 +113,18 @@ async function validateParentComment(
 describe('Comments API Validation Logic', () => {
 	beforeEach(() => {
 		// Reset all mocks
-		Object.values(mockSupabase).forEach((fn: any) => {
-			if (fn.mock && fn.mock.clear) {
-				fn.mock.clear()
+		Object.values(mockSupabase).forEach((fn) => {
+			// bun:test mock has a `mock` property with `clear`
+			if (typeof (fn as any)?.mock?.clear === 'function') {
+				;(fn as any).mock.clear()
 			}
 		})
 	})
 
 	const validCommentData = {
 		content: 'This is a test comment',
-		author_id: '123e4567-e89b-12d3-a456-426614174000',
 		project_id: '123e4567-e89b-12d3-a456-426614174001',
-		type: 'comment' as const
+		type: 'comment' as const,
 	}
 
 	describe('Schema Validation', () => {
@@ -117,7 +133,6 @@ describe('Comments API Validation Logic', () => {
 			expect(result.success).toBe(true)
 			if (result.success) {
 				expect(result.data.content).toBe(validCommentData.content)
-				expect(result.data.author_id).toBe(validCommentData.author_id)
 				expect(result.data.project_id).toBe(validCommentData.project_id)
 				expect(result.data.type).toBe(validCommentData.type)
 			}
@@ -128,63 +143,76 @@ describe('Comments API Validation Logic', () => {
 			const result = createCommentSchema.safeParse(invalidData)
 			expect(result.success).toBe(false)
 			if (!result.success) {
-				expect(result.error.issues.some(issue => 
-					issue.message === 'Content is required'
-				)).toBe(true)
+				expect(
+					result.error.issues.some(
+						(issue) => issue.message === 'Content is required',
+					),
+				).toBe(true)
 			}
 		})
 
 		test('should reject content that is too long', () => {
-			const invalidData = { 
-				...validCommentData, 
-				content: 'a'.repeat(5001) 
+			const invalidData = {
+				...validCommentData,
+				content: 'a'.repeat(5001),
 			}
 			const result = createCommentSchema.safeParse(invalidData)
 			expect(result.success).toBe(false)
 			if (!result.success) {
-				expect(result.error.issues.some(issue => 
-					issue.message === 'Content too long'
-				)).toBe(true)
+				expect(
+					result.error.issues.some(
+						(issue) => issue.message === 'Content too long',
+					),
+				).toBe(true)
 			}
 		})
 
-		test('should reject invalid UUID format for author_id', () => {
-			const invalidData = { ...validCommentData, author_id: 'invalid-uuid' }
+		test('should reject content with only whitespace', () => {
+			const invalidData = { ...validCommentData, content: '   ' }
 			const result = createCommentSchema.safeParse(invalidData)
 			expect(result.success).toBe(false)
 			if (!result.success) {
-				expect(result.error.issues.some(issue => 
-					issue.message === 'Invalid author ID'
-				)).toBe(true)
+				expect(
+					result.error.issues.some(
+						(issue) => issue.message === 'Content is required',
+					),
+				).toBe(true)
 			}
 		})
 
 		test('should reject when both project_id and project_update_id are provided', () => {
-			const invalidData = { 
-				...validCommentData, 
-				project_update_id: '123e4567-e89b-12d3-a456-426614174002'
+			const invalidData = {
+				...validCommentData,
+				project_update_id: '123e4567-e89b-12d3-a456-426614174002',
 			}
 			const result = createCommentSchema.safeParse(invalidData)
 			expect(result.success).toBe(false)
 			if (!result.success) {
-				expect(result.error.issues.some(issue => 
-					issue.message === 'Only one of project_id or project_update_id can be provided'
-				)).toBe(true)
+				expect(
+					result.error.issues.some(
+						(issue) =>
+							issue.message ===
+							'Only one of project_id or project_update_id can be provided',
+					),
+				).toBe(true)
 			}
 		})
 
 		test('should reject when neither project_id nor project_update_id are provided', () => {
-			const invalidData = { 
+			const invalidData = {
 				content: validCommentData.content,
-				author_id: validCommentData.author_id,
-				type: validCommentData.type
+				type: validCommentData.type,
 			}
 			const result = createCommentSchema.safeParse(invalidData)
 			expect(result.success).toBe(false)
 			if (!result.success) {
-				expect(result.error.issues.some(issue => 
-					issue.message === 'Either project_id or project_update_id must be provided'
-				)).toBe(true)
+				expect(
+					result.error.issues.some(
+						(issue) =>
+							issue.message ===
+							'Either project_id or project_update_id must be provided',
+					),
+				).toBe(true)
 			}
 		})
 
@@ -209,8 +237,7 @@ describe('Comments API Validation Logic', () => {
 		test('should set default comment type when not provided', () => {
 			const dataWithoutType = {
 				content: validCommentData.content,
-				author_id: validCommentData.author_id,
-				project_id: validCommentData.project_id
+				project_id: validCommentData.project_id,
 			}
 			const result = createCommentSchema.safeParse(dataWithoutType)
 			expect(result.success).toBe(true)
@@ -234,15 +261,15 @@ describe('Comments API Validation Logic', () => {
 			mockSupabase.single.mockReturnValue(
 				Promise.resolve({
 					data: null,
-					error: { message: 'Not found' }
-				})
+					error: { message: 'Not found' },
+				}),
 			)
 
 			const result = await validateParentComment(
 				mockSupabase,
 				'123e4567-e89b-12d3-a456-426614174999',
 				'answer',
-				'123e4567-e89b-12d3-a456-426614174001'
+				'123e4567-e89b-12d3-a456-426614174001',
 			)
 
 			expect(result.valid).toBe(false)
@@ -257,17 +284,17 @@ describe('Comments API Validation Logic', () => {
 						id: '123e4567-e89b-12d3-a456-426614174999',
 						type: 'question',
 						project_id: '123e4567-e89b-12d3-a456-426614174002', // Different project
-						project_update_id: null
+						project_update_id: null,
 					},
-					error: null
-				})
+					error: null,
+				}),
 			)
 
 			const result = await validateParentComment(
 				mockSupabase,
 				'123e4567-e89b-12d3-a456-426614174999',
 				'answer',
-				'123e4567-e89b-12d3-a456-426614174001' // Different from parent
+				'123e4567-e89b-12d3-a456-426614174001', // Different from parent
 			)
 
 			expect(result.valid).toBe(false)
@@ -282,10 +309,10 @@ describe('Comments API Validation Logic', () => {
 						id: '123e4567-e89b-12d3-a456-426614174999',
 						type: 'question',
 						project_id: null,
-						project_update_id: '123e4567-e89b-12d3-a456-426614174002' // Different update
+						project_update_id: '123e4567-e89b-12d3-a456-426614174002', // Different update
 					},
-					error: null
-				})
+					error: null,
+				}),
 			)
 
 			const result = await validateParentComment(
@@ -293,11 +320,13 @@ describe('Comments API Validation Logic', () => {
 				'123e4567-e89b-12d3-a456-426614174999',
 				'answer',
 				undefined,
-				'123e4567-e89b-12d3-a456-426614174001' // Different from parent
+				'123e4567-e89b-12d3-a456-426614174001', // Different from parent
 			)
 
 			expect(result.valid).toBe(false)
-			expect(result.error).toBe('Parent comment belongs to a different project update')
+			expect(result.error).toBe(
+				'Parent comment belongs to a different project update',
+			)
 		})
 
 		test('should accept when parent comment belongs to same project', async () => {
@@ -308,17 +337,17 @@ describe('Comments API Validation Logic', () => {
 						id: '123e4567-e89b-12d3-a456-426614174999',
 						type: 'question',
 						project_id: '123e4567-e89b-12d3-a456-426614174001',
-						project_update_id: null
+						project_update_id: null,
 					},
-					error: null
-				})
+					error: null,
+				}),
 			)
 
 			const result = await validateParentComment(
 				mockSupabase,
 				'123e4567-e89b-12d3-a456-426614174999',
 				'answer',
-				'123e4567-e89b-12d3-a456-426614174001'
+				'123e4567-e89b-12d3-a456-426614174001',
 			)
 
 			expect(result.valid).toBe(true)
@@ -333,10 +362,10 @@ describe('Comments API Validation Logic', () => {
 						id: '123e4567-e89b-12d3-a456-426614174999',
 						type: 'question',
 						project_id: null,
-						project_update_id: '123e4567-e89b-12d3-a456-426614174001'
+						project_update_id: '123e4567-e89b-12d3-a456-426614174001',
 					},
-					error: null
-				})
+					error: null,
+				}),
 			)
 
 			const result = await validateParentComment(
@@ -344,7 +373,7 @@ describe('Comments API Validation Logic', () => {
 				'123e4567-e89b-12d3-a456-426614174999',
 				'answer',
 				undefined,
-				'123e4567-e89b-12d3-a456-426614174001'
+				'123e4567-e89b-12d3-a456-426614174001',
 			)
 
 			expect(result.valid).toBe(true)
@@ -361,17 +390,17 @@ describe('Comments API Validation Logic', () => {
 						id: '123e4567-e89b-12d3-a456-426614174999',
 						type: 'question',
 						project_id: '123e4567-e89b-12d3-a456-426614174001',
-						project_update_id: null
+						project_update_id: null,
 					},
-					error: null
-				})
+					error: null,
+				}),
 			)
 
 			const result = await validateParentComment(
 				mockSupabase,
 				'123e4567-e89b-12d3-a456-426614174999',
 				'answer',
-				'123e4567-e89b-12d3-a456-426614174001'
+				'123e4567-e89b-12d3-a456-426614174001',
 			)
 
 			expect(result.valid).toBe(true)
@@ -386,17 +415,17 @@ describe('Comments API Validation Logic', () => {
 						id: '123e4567-e89b-12d3-a456-426614174999',
 						type: 'comment', // Not a question
 						project_id: '123e4567-e89b-12d3-a456-426614174001',
-						project_update_id: null
+						project_update_id: null,
 					},
-					error: null
-				})
+					error: null,
+				}),
 			)
 
 			const result = await validateParentComment(
 				mockSupabase,
 				'123e4567-e89b-12d3-a456-426614174999',
 				'answer',
-				'123e4567-e89b-12d3-a456-426614174001'
+				'123e4567-e89b-12d3-a456-426614174001',
 			)
 
 			expect(result.valid).toBe(false)
@@ -411,17 +440,17 @@ describe('Comments API Validation Logic', () => {
 						id: '123e4567-e89b-12d3-a456-426614174999',
 						type: 'comment',
 						project_id: '123e4567-e89b-12d3-a456-426614174001',
-						project_update_id: null
+						project_update_id: null,
 					},
-					error: null
-				})
+					error: null,
+				}),
 			)
 
 			const result = await validateParentComment(
 				mockSupabase,
 				'123e4567-e89b-12d3-a456-426614174999',
 				'question',
-				'123e4567-e89b-12d3-a456-426614174001'
+				'123e4567-e89b-12d3-a456-426614174001',
 			)
 
 			expect(result.valid).toBe(false)
@@ -436,17 +465,17 @@ describe('Comments API Validation Logic', () => {
 						id: '123e4567-e89b-12d3-a456-426614174999',
 						type: 'question',
 						project_id: '123e4567-e89b-12d3-a456-426614174001',
-						project_update_id: null
+						project_update_id: null,
 					},
-					error: null
-				})
+					error: null,
+				}),
 			)
 
 			const result = await validateParentComment(
 				mockSupabase,
 				'123e4567-e89b-12d3-a456-426614174999',
 				'comment',
-				'123e4567-e89b-12d3-a456-426614174001'
+				'123e4567-e89b-12d3-a456-426614174001',
 			)
 
 			expect(result.valid).toBe(true)
@@ -461,17 +490,17 @@ describe('Comments API Validation Logic', () => {
 						id: '123e4567-e89b-12d3-a456-426614174999',
 						type: 'comment',
 						project_id: '123e4567-e89b-12d3-a456-426614174001',
-						project_update_id: null
+						project_update_id: null,
 					},
-					error: null
-				})
+					error: null,
+				}),
 			)
 
 			const result = await validateParentComment(
 				mockSupabase,
 				'123e4567-e89b-12d3-a456-426614174999',
 				'comment',
-				'123e4567-e89b-12d3-a456-426614174001'
+				'123e4567-e89b-12d3-a456-426614174001',
 			)
 
 			expect(result.valid).toBe(true)
@@ -486,17 +515,17 @@ describe('Comments API Validation Logic', () => {
 						id: '123e4567-e89b-12d3-a456-426614174999',
 						type: 'answer', // Answers shouldn't be parents
 						project_id: '123e4567-e89b-12d3-a456-426614174001',
-						project_update_id: null
+						project_update_id: null,
 					},
-					error: null
-				})
+					error: null,
+				}),
 			)
 
 			const result = await validateParentComment(
 				mockSupabase,
 				'123e4567-e89b-12d3-a456-426614174999',
 				'comment',
-				'123e4567-e89b-12d3-a456-426614174001'
+				'123e4567-e89b-12d3-a456-426614174001',
 			)
 
 			expect(result.valid).toBe(false)
@@ -510,15 +539,15 @@ describe('Comments API Validation Logic', () => {
 			mockSupabase.single.mockReturnValue(
 				Promise.resolve({
 					data: null,
-					error: { message: 'Database connection error' }
-				})
+					error: { message: 'Database connection error' },
+				}),
 			)
 
 			const result = await validateParentComment(
 				mockSupabase,
 				'123e4567-e89b-12d3-a456-426614174999',
 				'answer',
-				'123e4567-e89b-12d3-a456-426614174001'
+				'123e4567-e89b-12d3-a456-426614174001',
 			)
 
 			expect(result.valid).toBe(false)
@@ -530,13 +559,15 @@ describe('Comments API Validation Logic', () => {
 				content: 'This is a test comment for update',
 				author_id: '123e4567-e89b-12d3-a456-426614174000',
 				project_update_id: '123e4567-e89b-12d3-a456-426614174001',
-				type: 'comment' as const
+				type: 'comment' as const,
 			}
 
 			const result = createCommentSchema.safeParse(validUpdateCommentData)
 			expect(result.success).toBe(true)
 			if (result.success) {
-				expect(result.data.project_update_id).toBe(validUpdateCommentData.project_update_id)
+				expect(result.data.project_update_id).toBe(
+					validUpdateCommentData.project_update_id,
+				)
 				expect(result.data.project_id).toBeUndefined()
 			}
 		})
@@ -546,7 +577,7 @@ describe('Comments API Validation Logic', () => {
 				content: 'This is a test comment',
 				author_id: '123e4567-e89b-12d3-a456-426614174000',
 				project_id: '123e4567-e89b-12d3-a456-426614174001',
-				type: 'question' as const
+				type: 'question' as const,
 			}
 
 			const result = createCommentSchema.safeParse(dataWithoutParent)
@@ -559,13 +590,16 @@ describe('Comments API Validation Logic', () => {
 		test('should handle custom metadata in schema', () => {
 			const dataWithMetadata = {
 				...validCommentData,
-				metadata: { is_official: true, priority: 'high' }
+				metadata: { is_official: true, priority: 'high' },
 			}
 
 			const result = createCommentSchema.safeParse(dataWithMetadata)
 			expect(result.success).toBe(true)
 			if (result.success) {
-				expect(result.data.metadata).toEqual({ is_official: true, priority: 'high' })
+				expect(result.data.metadata).toEqual({
+					is_official: true,
+					priority: 'high',
+				})
 			}
 		})
 	})

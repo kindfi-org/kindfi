@@ -8,14 +8,14 @@ const createCommentSchema = z
 	.object({
 		content: z
 			.string()
+			.trim()
 			.min(1, 'Content is required')
 			.max(5000, 'Content too long'),
-		author_id: z.string().uuid('Invalid author ID'),
 		parent_comment_id: z.string().uuid('Invalid parent comment ID').optional(),
 		project_id: z.string().uuid('Invalid project ID').optional(),
 		project_update_id: z.string().uuid('Invalid project update ID').optional(),
 		type: z.enum(['comment', 'question', 'answer']).default('comment'),
-		metadata: z.record(z.any()).default({}),
+		metadata: z.record(z.unknown()).default({}),
 	})
 	.refine(
 		(data) => data.project_id || data.project_update_id,
@@ -29,13 +29,21 @@ const createCommentSchema = z
 /**
  * Validates parent comment relationships and type hierarchy
  */
-async function validateParentComment(
-	supabase: ReturnType<typeof createSupabaseServerClient>,
-	parentCommentId: string,
-	commentType: string,
-	projectId?: string,
-	projectUpdateId?: string,
-): Promise<{ valid: boolean; error?: string }> {
+interface ParentValidationInput {
+	supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
+	parentCommentId: string
+	commentType: z.infer<typeof createCommentSchema>['type']
+	projectId?: string
+	projectUpdateId?: string
+}
+
+async function validateParentComment({
+	supabase,
+	parentCommentId,
+	commentType,
+	projectId,
+	projectUpdateId,
+}: ParentValidationInput): Promise<{ valid: boolean; error?: string }> {
 	// Check if parent comment exists
 	const { data: parentComment, error: fetchError } = await supabase
 		.from('comments')
@@ -97,15 +105,22 @@ export async function POST(req: NextRequest) {
 	try {
 		const supabase = await createSupabaseServerClient()
 
+		// Authenticate user and get session
+		const { data: authData, error: authError } = await supabase.auth.getUser()
+		if (authError || !authData?.user) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
 		// Parse and validate request body
 		const body = await req.json()
 		const parsed = createCommentSchema.safeParse(body)
 
 		if (!parsed.success) {
+			const { fieldErrors, formErrors } = parsed.error.flatten()
 			return NextResponse.json(
 				{
 					error: 'Invalid request data',
-					details: parsed.error.flatten().fieldErrors,
+					details: { fieldErrors, formErrors },
 				},
 				{ status: 400 },
 			)
@@ -113,23 +128,23 @@ export async function POST(req: NextRequest) {
 
 		const {
 			content,
-			author_id,
 			parent_comment_id,
 			project_id,
 			project_update_id,
 			type,
 			metadata,
 		} = parsed.data
+		const author_id = authData.user.id
 
 		// Validate parent comment relationships if parent_comment_id is provided
 		if (parent_comment_id) {
-			const parentValidation = await validateParentComment(
+			const parentValidation = await validateParentComment({
 				supabase,
-				parent_comment_id,
-				type,
-				project_id,
-				project_update_id,
-			)
+				parentCommentId: parent_comment_id,
+				commentType: type,
+				projectId: project_id,
+				projectUpdateId: project_update_id,
+			})
 
 			if (!parentValidation.valid) {
 				return NextResponse.json(
@@ -150,7 +165,7 @@ export async function POST(req: NextRequest) {
 		// Prepare comment data for insertion
 		const commentData: TablesInsert<'comments'> = {
 			content,
-			author_id,
+			author_id: authData.user.id,
 			parent_comment_id: parent_comment_id || null,
 			project_id: project_id || null,
 			project_update_id: project_update_id || null,
