@@ -117,9 +117,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
 		const { searchParams } = new URL(req.url)
 		const projectId = searchParams.get('project_id')
-		const type = searchParams.get('type') as 'comment' | 'question' | 'answer' | null
-		const limit = Number(searchParams.get('limit') ?? 50)
-		const offset = Number(searchParams.get('offset') ?? 0)
+		const typeParam = searchParams.get('type')
+		const type =
+			typeParam && ['comment', 'question', 'answer'].includes(typeParam)
+				? (typeParam as 'comment' | 'question' | 'answer')
+				: null
+		const limit = Math.max(1, Math.min(Number(searchParams.get('limit') ?? 50), 100))
+		const offset = Math.max(0, Number(searchParams.get('offset') ?? 0))
 
 		let query = supabase
 			.from('comments')
@@ -162,7 +166,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		// Authenticate user and get session
 		const { data: authData, error: authError } = await supabase.auth.getUser()
 		if (authError || !authData?.user) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+			return NextResponse.json(
+				{
+					success: false,
+					error: { code: 'UNAUTHORIZED', message: 'Unauthorized' },
+				},
+				{ status: 401 },
+			)
 		}
 
 		// Parse and validate request body

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextRequest } from 'next/server'
 import { GET, POST } from '../app/api/comments/route'
 
@@ -27,12 +26,17 @@ const mockSupabase = {
 
 describe('/api/comments', () => {
 	beforeEach(() => {
-		// Reset all mocks
-		Object.values(mockSupabase).forEach((fn: any) => {
-			if (fn.mock && fn.mock.clear) {
-				fn.mock.clear()
+		// Reset all mocks (including nested auth.getUser)
+		type MaybeMock = { mock?: { clear?: () => void } }
+		Object.values(mockSupabase).forEach((fn) => {
+			const maybe = fn as unknown as MaybeMock
+			if (typeof maybe.mock?.clear === 'function') {
+				maybe.mock.clear()
 			}
 		})
+		if (typeof mockSupabase.auth?.getUser?.mock?.clear === 'function') {
+			mockSupabase.auth.getUser.mock.clear()
+		}
 	})
 
 	describe('POST /api/comments', () => {
@@ -218,7 +222,7 @@ describe('/api/comments', () => {
 			expect(result.error.message).toBe('Invalid request data')
 		})
 
-		test('should return 400 for invalid UUID format', async () => {
+		test('should return 400 for invalid request data (empty content)', async () => {
 			const invalidData = {
 				...validCommentData,
 				content: '', // Empty content
@@ -279,6 +283,26 @@ describe('/api/comments', () => {
 
 			expect(response.status).toBe(201)
 			expect(result.success).toBe(true)
+		})
+
+		test('should return 401 when user is not authenticated', async () => {
+			// Mock unauthenticated user
+			mockSupabase.auth.getUser.mockResolvedValueOnce({
+				data: { user: null },
+				error: null,
+			})
+
+			const req = new NextRequest('http://localhost/api/comments', {
+				method: 'POST',
+				body: JSON.stringify(validCommentData),
+			})
+
+			const response = await POST(req)
+			const result = await response.json()
+
+			expect(response.status).toBe(401)
+			expect(result.success).toBe(false)
+			expect(result.error.message).toBe('Unauthorized')
 		})
 	})
 

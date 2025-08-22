@@ -19,12 +19,16 @@ interface MockQuery {
 interface MockClient {
 	from: (_table: string) => MockQuery
 }
-const mockSupabase: MockClient & Record<string, any> = {
+const mockSupabase: MockClient & Record<string, unknown> = {
 	from: mock(() => mockSupabase),
 	select: mock(() => mockSupabase),
 	eq: mock(() => mockSupabase),
 	single: mock(),
 }
+
+// Derive the validator's expected Supabase type to avoid `as any` casts
+type SupabaseParam = Parameters<typeof validateParentCommentRelationships>[0]
+const typedMockSupabase = mockSupabase as unknown as SupabaseParam
 
 describe('Comment Validation', () => {
 	beforeEach(() => {
@@ -178,7 +182,7 @@ describe('Comment Validation', () => {
 
 		test('should pass validation when no parent comment', async () => {
 			const result = await validateParentCommentRelationships(
-				mockSupabase as any,
+				typedMockSupabase,
 				validCommentData,
 			)
 			expect(result.isValid).toBe(true)
@@ -199,7 +203,7 @@ describe('Comment Validation', () => {
 			}
 
 			const result = await validateParentCommentRelationships(
-				mockSupabase as any,
+				typedMockSupabase,
 				commentWithParent,
 			)
 			expect(result.isValid).toBe(false)
@@ -222,7 +226,7 @@ describe('Comment Validation', () => {
 			}
 
 			const result = await validateParentCommentRelationships(
-				mockSupabase as any,
+				typedMockSupabase,
 				commentWithParent,
 			)
 			expect(result.isValid).toBe(false)
@@ -249,7 +253,7 @@ describe('Comment Validation', () => {
 			}
 
 			const result = await validateParentCommentRelationships(
-				mockSupabase as any,
+				typedMockSupabase,
 				commentWithParent,
 			)
 			expect(result.isValid).toBe(false)
@@ -275,7 +279,7 @@ describe('Comment Validation', () => {
 			}
 
 			const result = await validateParentCommentRelationships(
-				mockSupabase as any,
+				typedMockSupabase,
 				answerData,
 			)
 			expect(result.isValid).toBe(false)
@@ -299,7 +303,7 @@ describe('Comment Validation', () => {
 			}
 
 			const result = await validateParentCommentRelationships(
-				mockSupabase as any,
+				typedMockSupabase,
 				answerData,
 			)
 			expect(result.isValid).toBe(true)
@@ -345,7 +349,7 @@ describe('Comment Validation', () => {
 			}
 
 			const result = await validateParentCommentRelationships(
-				mockSupabase as any,
+				typedMockSupabase,
 				commentWithParent,
 			)
 			expect(result.isValid).toBe(false)
@@ -365,7 +369,7 @@ describe('Comment Validation', () => {
 
 		test('should pass validation for valid comment without parent', async () => {
 			const result = await validateComment(
-				mockSupabase as any,
+				typedMockSupabase,
 				validCommentData,
 			)
 			expect(result.isValid).toBe(true)
@@ -374,7 +378,7 @@ describe('Comment Validation', () => {
 
 		test('should fail validation for invalid comment data', async () => {
 			const invalidData = { ...validCommentData, content: '' }
-			const result = await validateComment(mockSupabase as any, invalidData)
+			const result = await validateComment(typedMockSupabase, invalidData)
 			expect(result.isValid).toBe(false)
 			expect(result.errors).toContain('Content cannot be empty')
 		})
@@ -391,7 +395,7 @@ describe('Comment Validation', () => {
 			}
 
 			const result = await validateComment(
-				mockSupabase as any,
+				typedMockSupabase,
 				commentWithParent,
 			)
 			expect(result.isValid).toBe(false)

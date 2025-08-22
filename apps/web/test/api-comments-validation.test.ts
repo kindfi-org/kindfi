@@ -118,10 +118,11 @@ async function validateParentComment(
 describe('Comments API Validation Logic', () => {
 	beforeEach(() => {
 		// Reset all mocks
+		type MaybeMock = { mock?: { clear?: () => void } }
 		Object.values(mockSupabase).forEach((fn) => {
-			// bun:test mock has a `mock` property with `clear`
-			if (typeof (fn as any)?.mock?.clear === 'function') {
-				;(fn as any).mock.clear()
+			const maybe = fn as unknown as MaybeMock
+			if (typeof maybe.mock?.clear === 'function') {
+				maybe.mock.clear()
 			}
 		})
 	})
