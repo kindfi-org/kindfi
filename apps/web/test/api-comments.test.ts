@@ -291,6 +291,34 @@ describe('/api/comments', () => {
 			expect(result.success).toBe(true)
 		})
 
+		test('should return 400 when parent belongs to different project update', async () => {
+			const data = {
+				content: 'Answer on wrong update',
+				project_update_id: '123e4567-e89b-12d3-a456-426614174001',
+				type: 'answer' as const,
+				parent_comment_id: '123e4567-e89b-12d3-a456-426614174002',
+			}
+			// First single(): parent fetch → different update
+			mockSupabase.single.mockResolvedValueOnce({
+				data: {
+					id: data.parent_comment_id,
+					type: 'question',
+					project_id: null,
+					project_update_id: '123e4567-e89b-12d3-a456-426614174999', // mismatch
+				},
+				error: null,
+			})
+			const req = new NextRequest('http://localhost/api/comments', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			})
+			const res = await POST(req)
+			const json = await res.json()
+			expect(res.status).toBe(400)
+			expect(json.success).toBe(false)
+			expect(json.error.message).toBe('Parent comment belongs to a different project update')
+		})
+
 		test('should return 401 when user is not authenticated', async () => {
 			// Mock unauthenticated user
 			mockSupabase.auth.getUser.mockResolvedValueOnce({

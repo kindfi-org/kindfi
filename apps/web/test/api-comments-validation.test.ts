@@ -36,7 +36,7 @@ interface MockQuery {
 }
 
 // Helper to cast mock to proper Supabase type for testing
-const typedMockSupabase = mockSupabase as unknown as Awaited<ReturnType<typeof import('@packages/lib/supabase-server').createSupabaseServerClient>>
+const typedMockSupabase = mockSupabase as unknown as import('../app/api/comments/validation').SupabaseLike
 
 describe('Comments API Validation Logic', () => {
 	beforeEach(() => {
@@ -484,7 +484,6 @@ describe('Comments API Validation Logic', () => {
 		test('should validate with project_update_id instead of project_id', async () => {
 			const validUpdateCommentData = {
 				content: 'This is a test comment for update',
-				author_id: '123e4567-e89b-12d3-a456-426614174000',
 				project_update_id: '123e4567-e89b-12d3-a456-426614174001',
 				type: 'comment' as const,
 			}
@@ -502,7 +501,6 @@ describe('Comments API Validation Logic', () => {
 		test('should handle optional parent_comment_id in schema', () => {
 			const dataWithoutParent = {
 				content: 'This is a test comment',
-				author_id: '123e4567-e89b-12d3-a456-426614174000',
 				project_id: '123e4567-e89b-12d3-a456-426614174001',
 				type: 'question' as const,
 			}

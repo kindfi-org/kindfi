@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
-import type { TablesInsert } from '@services/supabase'
+import type { Tables, TablesInsert } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { createCommentSchema, validateParentComment } from './validation'
 
@@ -19,6 +19,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
 		const { searchParams } = req.nextUrl
 		const projectId = searchParams.get('project_id')
+		const projectUpdateId = searchParams.get('project_update_id')
 		const typeParam = searchParams.get('type')
 		const type =
 			typeParam && ['comment', 'question', 'answer'].includes(typeParam)
@@ -38,9 +39,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
 		let query = supabase
 			.from('comments')
-			.select('*', { count: 'exact' })
+			.select('*', { count: 'planned' })
+			.returns<Tables<'comments'>[]>()
 			.order('created_at', { ascending: false })
 		if (projectId) query = query.eq('project_id', projectId)
+		if (projectUpdateId) query = query.eq('project_update_id', projectUpdateId)
 		if (type) query = query.eq('type', type)
 
 		const { data, error, count } = await query.range(offset, offset + limit - 1)
@@ -60,10 +63,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 			pagination: { limit, offset, total: count ?? 0 },
 		})
 	} catch (error) {
+		// Keep parity with POST logging
+		console.error('Unexpected error in GET /api/comments:', error)
 		return NextResponse.json(
 			{
 				success: false,
-				error: { code: 'UNEXPECTED', message: 'Internal server error' },
+				error: { code: 'INTERNAL_ERROR', message: 'Internal server error' },
 			},
 			{ status: 500 },
 		)

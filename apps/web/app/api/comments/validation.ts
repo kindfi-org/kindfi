@@ -30,11 +30,28 @@ export const createCommentSchema = z
 				message: 'Only one of project_id or project_update_id can be provided',
 				path: ['project_id'],
 			})
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Only one of project_id or project_update_id can be provided',
+				path: ['project_update_id'],
+			})
 		}
 	})
 
+export interface SupabaseLike {
+	from: (_table: 'comments') => {
+		select: (_cols: string) => {
+			returns: <T>() => {
+				eq: (_col: 'id', _val: string) => {
+					single: () => Promise<{ data: ParentCommentRow | null; error: { message: string } | null }>
+				}
+			}
+		}
+	}
+}
+
 export interface ParentValidationInput {
-	supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
+	supabase: SupabaseLike
 	parentCommentId: string
 	commentType: z.infer<typeof createCommentSchema>['type']
 	projectId?: string
@@ -47,7 +64,17 @@ type ParentCommentRow = Pick<
 >
 
 /**
- * Validates parent comment relationships and type hierarchy
+ * Validates that a provided parent_comment_id:
+ * - Exists in the comments table
+ * - Belongs to the same project or project update as the new comment
+ * - Satisfies type hierarchy rules (answer → question; question cannot have a parent; comment → question|comment)
+ *
+ * @param supabase Supabase client (minimal SupabaseLike surface)
+ * @param parentCommentId UUID of the parent comment to validate
+ * @param commentType Type of the new comment: 'comment' | 'question' | 'answer'
+ * @param projectId Optional project scope the new comment belongs to
+ * @param projectUpdateId Optional project update scope the new comment belongs to
+ * @returns {Promise<{ valid: boolean; error?: string }>} Validation result with optional error message on failure
  */
 export async function validateParentComment({
 	supabase,
