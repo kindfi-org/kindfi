@@ -85,8 +85,7 @@ describe('/api/comments', () => {
 					error: null,
 				})
 
-			// Mock status update
-			mockSupabase.update.mockResolvedValue({ error: null })
+
 
 			const req = new NextRequest('http://localhost/api/comments', {
 				method: 'POST',
@@ -304,6 +303,23 @@ describe('/api/comments', () => {
 			expect(result.success).toBe(false)
 			expect(result.error.message).toBe('Unauthorized')
 		})
+
+		test('should return 400 when answer has no parent', async () => {
+			const data = {
+				content: 'Answer w/o parent',
+				project_id: '123e4567-e89b-12d3-a456-426614174001',
+				type: 'answer' as const,
+			}
+			const req = new NextRequest('http://localhost/api/comments', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			})
+			const res = await POST(req)
+			const json = await res.json()
+			expect(res.status).toBe(400)
+			expect(json.success).toBe(false)
+			expect(json.error.message).toBe('Answers must have a parent question')
+		})
 	})
 
 	describe('GET /api/comments', () => {
@@ -409,6 +425,16 @@ describe('/api/comments', () => {
 				offset: 20,
 				total: 1,
 			})
+		})
+
+		test('GET should return 401 when user is not authenticated', async () => {
+			mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: null }, error: null })
+			const req = new NextRequest('http://localhost/api/comments')
+			const res = await GET(req)
+			const json = await res.json()
+			expect(res.status).toBe(401)
+			expect(json.success).toBe(false)
+			expect(json.error.message).toBe('Unauthorized')
 		})
 	})
 })

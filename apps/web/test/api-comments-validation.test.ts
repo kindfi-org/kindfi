@@ -1,28 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import { z } from 'zod'
-
-// Create the same validation schema that's used in the route
-const createCommentSchema = z
-	.object({
-		content: z
-			.string()
-			.trim()
-			.min(1, 'Content is required')
-			.max(5000, 'Content too long'),
-		parent_comment_id: z.string().uuid('Invalid parent comment ID').optional(),
-		project_id: z.string().uuid('Invalid project ID').optional(),
-		project_update_id: z.string().uuid('Invalid project update ID').optional(),
-		type: z.enum(['comment', 'question', 'answer']).default('comment'),
-		metadata: z.record(z.unknown()).default({}),
-	})
-	.refine(
-		(data) => data.project_id || data.project_update_id,
-		'Either project_id or project_update_id must be provided',
-	)
-	.refine(
-		(data) => !(data.project_id && data.project_update_id),
-		'Only one of project_id or project_update_id can be provided',
-	)
+import { createCommentSchema } from '../app/api/comments/validation'
 
 // Mock Supabase client for validation testing
 const mockSupabase: {
