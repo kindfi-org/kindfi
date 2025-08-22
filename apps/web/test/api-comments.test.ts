@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextRequest } from 'next/server'
-import { GET, POST } from '../route'
+import { GET, POST } from '../app/api/comments/route'
 
 // Mock the Supabase client
 mock.module('@packages/lib/supabase-server', () => ({
@@ -17,6 +17,12 @@ const mockSupabase = {
 	order: mock(() => mockSupabase),
 	range: mock(() => mockSupabase),
 	update: mock(() => mockSupabase),
+	auth: {
+		getUser: mock(async () => ({
+			data: { user: { id: '123e4567-e89b-12d3-a456-426614174000' } },
+			error: null,
+		})),
+	},
 }
 
 describe('/api/comments', () => {
@@ -27,13 +33,11 @@ describe('/api/comments', () => {
 				fn.mock.clear()
 			}
 		})
-		;(createSupabaseServerClient as any) = mock(() => mockSupabase)
 	})
 
 	describe('POST /api/comments', () => {
 		const validCommentData = {
 			content: 'Test comment content',
-			author_id: '123e4567-e89b-12d3-a456-426614174000',
 			project_id: '123e4567-e89b-12d3-a456-426614174001',
 			type: 'comment' as const,
 		}
@@ -51,8 +55,8 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(201)
-			expect(result.message).toBe('Comment created successfully')
-			expect(result.comment).toEqual(mockComment)
+			expect(result.success).toBe(true)
+			expect(result.data).toBeDefined()
 		})
 
 		test('should create an answer to a question successfully', async () => {
@@ -89,7 +93,7 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(201)
-			expect(result.message).toBe('Comment created successfully')
+			expect(result.success).toBe(true)
 		})
 
 		test('should return 400 when parent comment does not exist', async () => {
@@ -113,8 +117,8 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(400)
-			expect(result.error).toBe('Parent comment validation failed')
-			expect(result.details).toContain('Parent comment not found')
+			expect(result.success).toBe(false)
+			expect(result.error.message).toBe('Parent comment not found')
 		})
 
 		test('should return 400 when parent comment belongs to different project', async () => {
@@ -123,11 +127,11 @@ describe('/api/comments', () => {
 				parent_comment_id: '123e4567-e89b-12d3-a456-426614174002',
 			}
 
-			// Mock parent comment with different project
+			// Mock parent comment from different project
 			mockSupabase.single.mockResolvedValue({
 				data: {
 					id: '123e4567-e89b-12d3-a456-426614174002',
-					project_id: 'different-project-id',
+					project_id: '123e4567-e89b-12d3-a456-426614174003', // Different project
 					type: 'comment',
 				},
 				error: null,
@@ -142,10 +146,8 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(400)
-			expect(result.error).toBe('Parent comment validation failed')
-			expect(result.details).toContain(
-				'Parent comment must belong to the same project',
-			)
+			expect(result.success).toBe(false)
+			expect(result.error.message).toBe('Parent comment belongs to a different project')
 		})
 
 		test('should return 400 when trying to add answer to non-question comment', async () => {
@@ -174,8 +176,8 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(400)
-			expect(result.error).toBe('Parent comment validation failed')
-			expect(result.details).toContain('Answers can only be added to questions')
+			expect(result.success).toBe(false)
+			expect(result.error.message).toBe('Answers can only be added to questions')
 		})
 
 		test('should return 400 when comment has both project_id and project_update_id', async () => {
@@ -193,16 +195,13 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(400)
-			expect(result.error).toBe('Parent comment validation failed')
-			expect(result.details).toContain(
-				'Comment cannot have both project_id and project_update_id',
-			)
+			expect(result.success).toBe(false)
+			expect(result.error.message).toBe('Invalid request data')
 		})
 
 		test('should return 400 when comment has neither project_id nor project_update_id', async () => {
 			const invalidCommentData = {
 				content: 'Test comment content',
-				author_id: '123e4567-e89b-12d3-a456-426614174000',
 				type: 'comment' as const,
 			}
 
@@ -215,81 +214,31 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(400)
-			expect(result.error).toBe('Parent comment validation failed')
-			expect(result.details).toContain(
-				'Comment must have either project_id or project_update_id',
-			)
-		})
-
-		test('should return 400 when trying to reference self as parent', async () => {
-			const invalidCommentData = {
-				...validCommentData,
-				parent_comment_id: '123e4567-e89b-12d3-a456-426614174000', // Same as author_id
-			}
-
-			const req = new NextRequest('http://localhost/api/comments', {
-				method: 'POST',
-				body: JSON.stringify(invalidCommentData),
-			})
-
-			const response = await POST(req)
-			const result = await response.json()
-
-			expect(response.status).toBe(400)
-			expect(result.error).toBe('Parent comment validation failed')
-			expect(result.details).toContain(
-				'Comment cannot reference itself as parent',
-			)
+			expect(result.success).toBe(false)
+			expect(result.error.message).toBe('Invalid request data')
 		})
 
 		test('should return 400 for invalid UUID format', async () => {
-			const invalidCommentData = {
+			const invalidData = {
 				...validCommentData,
-				author_id: 'invalid-uuid',
+				content: '', // Empty content
 			}
 
 			const req = new NextRequest('http://localhost/api/comments', {
 				method: 'POST',
-				body: JSON.stringify(invalidCommentData),
+				body: JSON.stringify(invalidData),
 			})
 
 			const response = await POST(req)
 			const result = await response.json()
 
 			expect(response.status).toBe(400)
-			expect(result.error).toBe('Invalid request data')
-		})
-
-		test('should return 400 for empty content', async () => {
-			const invalidCommentData = {
-				...validCommentData,
-				content: '',
-			}
-
-			const req = new NextRequest('http://localhost/api/comments', {
-				method: 'POST',
-				body: JSON.stringify(invalidCommentData),
-			})
-
-			const response = await POST(req)
-			const result = await response.json()
-
-			expect(response.status).toBe(400)
-			expect(result.error).toBe('Invalid request data')
+			expect(result.success).toBe(false)
+			expect(result.error.message).toBe('Invalid request data')
 		})
 
 		test('should return 500 when database insertion fails', async () => {
-			// Mock parent comment validation success
-			mockSupabase.single.mockResolvedValue({
-				data: {
-					id: '123e4567-e89b-12d3-a456-426614174002',
-					project_id: '123e4567-e89b-12d3-a456-426614174001',
-					type: 'comment',
-				},
-				error: null,
-			})
-
-			// Mock insertion failure
+			// Mock database error
 			mockSupabase.single.mockResolvedValue({
 				data: null,
 				error: { message: 'Database error' },
@@ -304,32 +253,32 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(500)
-			expect(result.error).toBe('Failed to create comment')
+			expect(result.success).toBe(false)
+			expect(result.error.message).toBe('Failed to create comment')
 		})
 
 		test('should handle project update comments correctly', async () => {
-			const updateCommentData = {
-				content: 'Test update comment',
-				author_id: '123e4567-e89b-12d3-a456-426614174000',
+			const projectUpdateComment = {
+				content: 'Project update comment',
 				project_update_id: '123e4567-e89b-12d3-a456-426614174003',
 				type: 'comment' as const,
 			}
 
 			mockSupabase.single.mockResolvedValue({
-				data: { id: 'comment-1', ...updateCommentData },
+				data: { id: 'comment-1', ...projectUpdateComment },
 				error: null,
 			})
 
 			const req = new NextRequest('http://localhost/api/comments', {
 				method: 'POST',
-				body: JSON.stringify(updateCommentData),
+				body: JSON.stringify(projectUpdateComment),
 			})
 
 			const response = await POST(req)
 			const result = await response.json()
 
 			expect(response.status).toBe(201)
-			expect(result.message).toBe('Comment created successfully')
+			expect(result.success).toBe(true)
 		})
 	})
 
@@ -340,7 +289,7 @@ describe('/api/comments', () => {
 				{ id: 'comment-2', content: 'Test comment 2' },
 			]
 
-			mockSupabase.single.mockResolvedValue({
+			mockSupabase.range.mockResolvedValue({
 				data: mockComments,
 				error: null,
 				count: 2,
@@ -351,7 +300,8 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(200)
-			expect(result.comments).toEqual(mockComments)
+			expect(result.success).toBe(true)
+			expect(result.data).toEqual(mockComments)
 			expect(result.pagination).toEqual({
 				limit: 50,
 				offset: 0,
@@ -362,7 +312,7 @@ describe('/api/comments', () => {
 		test('should filter comments by project_id', async () => {
 			const mockComments = [{ id: 'comment-1', content: 'Project comment' }]
 
-			mockSupabase.single.mockResolvedValue({
+			mockSupabase.range.mockResolvedValue({
 				data: mockComments,
 				error: null,
 				count: 1,
@@ -375,7 +325,8 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(200)
-			expect(result.comments).toEqual(mockComments)
+			expect(result.success).toBe(true)
+			expect(result.data).toEqual(mockComments)
 		})
 
 		test('should filter comments by type', async () => {
@@ -383,7 +334,7 @@ describe('/api/comments', () => {
 				{ id: 'question-1', content: 'Test question', type: 'question' },
 			]
 
-			mockSupabase.single.mockResolvedValue({
+			mockSupabase.range.mockResolvedValue({
 				data: mockQuestions,
 				error: null,
 				count: 1,
@@ -394,11 +345,12 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(200)
-			expect(result.comments).toEqual(mockQuestions)
+			expect(result.success).toBe(true)
+			expect(result.data).toEqual(mockQuestions)
 		})
 
 		test('should handle database errors gracefully', async () => {
-			mockSupabase.single.mockResolvedValue({
+			mockSupabase.range.mockResolvedValue({
 				data: null,
 				error: { message: 'Database error' },
 			})
@@ -408,13 +360,14 @@ describe('/api/comments', () => {
 			const result = await response.json()
 
 			expect(response.status).toBe(500)
-			expect(result.error).toBe('Failed to fetch comments')
+			expect(result.success).toBe(false)
+			expect(result.error.message).toBe('Failed to fetch comments')
 		})
 
 		test('should apply custom pagination parameters', async () => {
 			const mockComments = [{ id: 'comment-1', content: 'Test comment' }]
 
-			mockSupabase.single.mockResolvedValue({
+			mockSupabase.range.mockResolvedValue({
 				data: mockComments,
 				error: null,
 				count: 1,

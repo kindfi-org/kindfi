@@ -25,7 +25,12 @@ const createCommentSchema = z
 	)
 
 // Mock Supabase client for validation testing
-const mockSupabase = {
+const mockSupabase: {
+	from: (table: string) => MockQuery
+	select: (cols: string) => MockQuery
+	eq: (col: string, val: string) => MockQuery
+	single: () => Promise<MockSingleResult>
+} = {
 	from: mock(() => mockSupabase),
 	select: mock(() => mockSupabase),
 	eq: mock(() => mockSupabase),

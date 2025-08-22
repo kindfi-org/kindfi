@@ -101,7 +101,61 @@ async function validateParentComment({
 	return { valid: true }
 }
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest): Promise<NextResponse> {
+	try {
+		const supabase = await createSupabaseServerClient()
+		const { data: authData } = await supabase.auth.getUser()
+		if (!authData?.user) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: { code: 'UNAUTHORIZED', message: 'Unauthorized' },
+				},
+				{ status: 401 },
+			)
+		}
+
+		const { searchParams } = new URL(req.url)
+		const projectId = searchParams.get('project_id')
+		const type = searchParams.get('type') as 'comment' | 'question' | 'answer' | null
+		const limit = Number(searchParams.get('limit') ?? 50)
+		const offset = Number(searchParams.get('offset') ?? 0)
+
+		let query = supabase
+			.from('comments')
+			.select('*', { count: 'exact' })
+			.order('created_at', { ascending: false })
+		if (projectId) query = query.eq('project_id', projectId)
+		if (type) query = query.eq('type', type)
+
+		const { data, error, count } = await query.range(offset, offset + limit - 1)
+		if (error) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: { code: 'FETCH_FAILED', message: 'Failed to fetch comments' },
+				},
+				{ status: 500 },
+			)
+		}
+
+		return NextResponse.json({
+			success: true,
+			data,
+			pagination: { limit, offset, total: count ?? 0 },
+		})
+	} catch (error) {
+		return NextResponse.json(
+			{
+				success: false,
+				error: { code: 'UNEXPECTED', message: 'Internal server error' },
+			},
+			{ status: 500 },
+		)
+	}
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
 	try {
 		const supabase = await createSupabaseServerClient()
 
@@ -119,8 +173,12 @@ export async function POST(req: NextRequest) {
 			const { fieldErrors, formErrors } = parsed.error.flatten()
 			return NextResponse.json(
 				{
-					error: 'Invalid request data',
-					details: { fieldErrors, formErrors },
+					success: false,
+					error: {
+						code: 'VALIDATION_ERROR',
+						message: 'Invalid request data',
+						details: { fieldErrors, formErrors },
+					},
 				},
 				{ status: 400 },
 			)
@@ -148,7 +206,13 @@ export async function POST(req: NextRequest) {
 
 			if (!parentValidation.valid) {
 				return NextResponse.json(
-					{ error: parentValidation.error },
+					{
+						success: false,
+						error: {
+							code: 'VALIDATION_ERROR',
+							message: parentValidation.error,
+						},
+					},
 					{ status: 400 },
 				)
 			}
@@ -156,7 +220,13 @@ export async function POST(req: NextRequest) {
 			// If no parent comment, ensure type hierarchy rules
 			if (type === 'answer') {
 				return NextResponse.json(
-					{ error: 'Answers must have a parent question' },
+					{
+						success: false,
+						error: {
+							code: 'VALIDATION_ERROR',
+							message: 'Answers must have a parent question',
+						},
+					},
 					{ status: 400 },
 				)
 			}
@@ -189,7 +259,13 @@ export async function POST(req: NextRequest) {
 		if (insertError) {
 			console.error('Error inserting comment:', insertError)
 			return NextResponse.json(
-				{ error: 'Failed to create comment' },
+				{
+					success: false,
+					error: {
+						code: 'INSERT_FAILED',
+						message: 'Failed to create comment',
+					},
+				},
 				{ status: 500 },
 			)
 		}
@@ -205,7 +281,13 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		console.error('Unexpected error in POST /api/comments:', error)
 		return NextResponse.json(
-			{ error: 'Internal server error' },
+			{
+				success: false,
+				error: {
+					code: 'INTERNAL_ERROR',
+					message: 'Internal server error',
+				},
+			},
 			{ status: 500 },
 		)
 	}

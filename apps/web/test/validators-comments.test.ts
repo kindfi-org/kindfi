@@ -10,7 +10,16 @@ import {
 } from '../comments'
 
 // Mock Supabase client
-const mockSupabase = {
+interface MockSingleResult { data: unknown; error: { message: string } | null }
+interface MockQuery {
+	select: (cols: string) => MockQuery
+	eq: (col: string, val: string) => MockQuery
+	single: () => Promise<MockSingleResult>
+}
+interface MockClient {
+	from: (_table: string) => MockQuery
+}
+const mockSupabase: MockClient & Record<string, any> = {
 	from: mock(() => mockSupabase),
 	select: mock(() => mockSupabase),
 	eq: mock(() => mockSupabase),
@@ -20,9 +29,11 @@ const mockSupabase = {
 describe('Comment Validation', () => {
 	beforeEach(() => {
 		// Reset all mocks
-		Object.values(mockSupabase).forEach((fn: any) => {
-			if (fn.mock && fn.mock.clear) {
-				fn.mock.clear()
+		type MaybeMock = { mock?: { clear?: () => void } }
+		Object.values(mockSupabase).forEach((fn) => {
+			const maybe = fn as unknown as MaybeMock
+			if (typeof maybe.mock?.clear === 'function') {
+				maybe.mock.clear()
 			}
 		})
 	})
@@ -131,17 +142,7 @@ describe('Comment Validation', () => {
 			expect(result.errors).toContain('Answers must have a parent comment')
 		})
 
-		test('should reject self-referencing parent comment', () => {
-			const invalidData = {
-				...validCommentData,
-				parent_comment_id: '123e4567-e89b-12d3-a456-426614174000', // Same as author_id
-			}
-			const result = validateCommentData(invalidData)
-			expect(result.isValid).toBe(false)
-			expect(result.errors).toContain(
-				'Comment cannot reference itself as parent',
-			)
-		})
+		// Removed: invalid self-reference test (author_id is not the comment id)
 
 		test('should accept valid project_update_id comment', () => {
 			const validData = {
