@@ -5,13 +5,27 @@
 # - Installs Bun non-interactively to $HOME/.bun
 # - Ensures Bun is available in PATH for current and future non-interactive sessions
 # - Avoids `source` (use only POSIX-compatible PATH exports)
-# - Optional: set RUN_BUN_INSTALL=1 to run `bun install` after setup
+# - Optional flags:
+#     RUN_BUN_INSTALL=1  -> run `bun install` after setup
+#     NO_SUDO=1          -> never use sudo (useful when already root or sudo unavailable)
 
 set -euo pipefail
 
 log() { printf "[init-bun] %s\n" "$*"; }
 warn() { printf "[init-bun][WARN] %s\n" "$*" >&2; }
 err() { printf "[init-bun][ERROR] %s\n" "$*" >&2; }
+
+# Decide how to elevate commands.
+maybe_sudo() {
+  if [ "${NO_SUDO:-0}" = "1" ] || [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo "$@"
+  else
+    warn "sudo not available; attempting without sudo: $*"
+    "$@"
+  fi
+}
 
 # Re-exec with bash if the script was invoked with sh
 if [ -z "${BASH_VERSION:-}" ]; then
@@ -21,17 +35,17 @@ if [ -z "${BASH_VERSION:-}" ]; then
     # Try to install bash if we have a package manager
     if command -v apt-get >/dev/null 2>&1; then
       log "Installing bash via apt-get..."
-      sudo apt-get update -y || apt-get update -y || true
-      sudo apt-get install -y bash || apt-get install -y bash
+      maybe_sudo apt-get update -y || apt-get update -y || true
+      maybe_sudo apt-get install -y bash || apt-get install -y bash
     elif command -v apk >/dev/null 2>&1; then
       log "Installing bash via apk..."
-      sudo apk add --no-cache bash || apk add --no-cache bash
+      maybe_sudo apk add --no-cache bash || apk add --no-cache bash
     elif command -v yum >/dev/null 2>&1; then
       log "Installing bash via yum..."
-      sudo yum install -y bash || yum install -y bash
+      maybe_sudo yum install -y bash || yum install -y bash
     elif command -v dnf >/dev/null 2>&1; then
       log "Installing bash via dnf..."
-      sudo dnf install -y bash || dnf install -y bash
+      maybe_sudo dnf install -y bash || dnf install -y bash
     else
       err "bash not found and no supported package manager available. Aborting."
       exit 1
@@ -47,17 +61,17 @@ ensure_tool() {
   fi
   if command -v apt-get >/dev/null 2>&1; then
     log "Installing $name via apt-get..."
-    sudo apt-get update -y || apt-get update -y || true
-    sudo apt-get install -y "$name" || apt-get install -y "$name"
+  maybe_sudo apt-get update -y || apt-get update -y || true
+  maybe_sudo apt-get install -y "$name" || apt-get install -y "$name"
   elif command -v apk >/dev/null 2>&1; then
     log "Installing $name via apk..."
-    sudo apk add --no-cache "$name" || apk add --no-cache "$name"
+  maybe_sudo apk add --no-cache "$name" || apk add --no-cache "$name"
   elif command -v yum >/dev/null 2>&1; then
     log "Installing $name via yum..."
-    sudo yum install -y "$name" || yum install -y "$name"
+  maybe_sudo yum install -y "$name" || yum install -y "$name"
   elif command -v dnf >/dev/null 2>&1; then
     log "Installing $name via dnf..."
-    sudo dnf install -y "$name" || dnf install -y "$name"
+  maybe_sudo dnf install -y "$name" || dnf install -y "$name"
   else
     err "Unable to install $name automatically. Please install it manually."
     return 1
@@ -77,10 +91,14 @@ persist_path_for_future_sessions() {
   # Prefer /etc/profile.d when writable (system-wide). Otherwise, fall back to user profiles.
   local snippet='\n# Bun\nif [ -d "$HOME/.bun/bin" ]; then\n  export PATH="$HOME/.bun/bin:$PATH"\nfi\n'
 
-  if [ -w /etc/profile.d ] 2>/dev/null; then
-    echo -e "$snippet" | sudo tee /etc/profile.d/bun.sh >/dev/null || true
-    sudo chmod 644 /etc/profile.d/bun.sh 2>/dev/null || true
-    log "Persisted PATH in /etc/profile.d/bun.sh"
+  if [ -w /etc/profile.d ] 2>/dev/null || [ "$(id -u)" -eq 0 ] || [ "${NO_SUDO:-0}" != "1" ]; then
+    if echo -e "$snippet" | maybe_sudo tee /etc/profile.d/bun.sh >/dev/null; then
+      maybe_sudo chmod 644 /etc/profile.d/bun.sh 2>/dev/null || true
+      log "Persisted PATH in /etc/profile.d/bun.sh"
+    else
+      warn "Could not write /etc/profile.d/bun.sh; falling back to user profile files."
+      # Fall back below
+    fi
   else
     # User-level fallbacks
     for f in "$HOME/.profile" "$HOME/.bashrc" "$HOME/.bash_profile"; do
@@ -99,9 +117,12 @@ persist_path_for_future_sessions() {
 
 link_bun_globally_if_possible() {
   local bun_bin="$1"
-  if [ -w /usr/local/bin ] 2>/dev/null; then
-    sudo ln -sf "$bun_bin" /usr/local/bin/bun || true
-    log "Linked bun to /usr/local/bin/bun"
+  if [ -w /usr/local/bin ] 2>/dev/null || [ "$(id -u)" -eq 0 ] || [ "${NO_SUDO:-0}" != "1" ]; then
+    if maybe_sudo ln -sf "$bun_bin" /usr/local/bin/bun 2>/dev/null; then
+      log "Linked bun to /usr/local/bin/bun"
+    else
+      warn "Could not link bun to /usr/local/bin; PATH persistence should cover it."
+    fi
   else
     warn "/usr/local/bin not writable. Skipping global symlink. PATH persistence should cover it."
   fi
