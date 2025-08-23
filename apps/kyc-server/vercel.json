@@ -1,25 +1,8 @@
 {
 	"version": 2,
+	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"installCommand": "bun install",
 	"buildCommand": "bun run vercel-build",
-	"builds": [
-		{
-			"src": "src/index.tsx",
-			"use": "@vercel/node",
-			"config": {
-				"includeFiles": "**"
-			}
-		}
-	],
-	"routes": [
-		{
-			"src": "/api/(.*)",
-			"dest": "/src/index.tsx"
-		},
-		{
-			"src": "/(.*)",
-			"dest": "/src/index.tsx"
-		}
-	],
+	"cleanUrls": true,
 	"outputDirectory": "dist"
 }
