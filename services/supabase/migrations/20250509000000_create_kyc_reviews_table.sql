@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS kyc_reviews (
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     status kyc_status_enum NOT NULL,
     verification_level kyc_verification_enum NOT NULL,
-    reviewer_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    reviewer_id UUID REFERENCES auth.users(id) ON DELETE SET NULL DEFAULT auth.uid(),
     notes TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -45,21 +45,18 @@ CREATE INDEX IF NOT EXISTS idx_kyc_admin_whitelist_user_id ON kyc_admin_whitelis
 
 -- Enable RLS on both tables
 ALTER TABLE kyc_reviews FORCE ROW LEVEL SECURITY;
-ALTER TABLE kyc_admin_whitelist ENABLE ROW LEVEL SECURITY;
+ALTER TABLE kyc_admin_whitelist FORCE ROW LEVEL SECURITY;
 
 -- Whitelist table policies
 CREATE POLICY "Allow reading admin whitelist" 
     ON kyc_admin_whitelist FOR SELECT 
     USING (true);
 
-CREATE POLICY "Whitelisted admins can manage whitelist" 
-    ON kyc_admin_whitelist FOR ALL 
-    USING (
-        EXISTS (
-            SELECT 1 FROM kyc_admin_whitelist 
-            WHERE user_id = auth.uid()
-        )
-    );
+
+CREATE POLICY "Whitelisted admins can manage whitelist"
+    ON kyc_admin_whitelist FOR ALL
+    USING (EXISTS (SELECT 1 FROM kyc_admin_whitelist WHERE user_id = auth.uid()))
+    WITH CHECK (EXISTS (SELECT 1 FROM kyc_admin_whitelist WHERE user_id = auth.uid()));
 
 -- KYC Reviews policies using whitelist
 CREATE POLICY "Whitelisted users can create KYC reviews"
@@ -69,6 +66,7 @@ CREATE POLICY "Whitelisted users can create KYC reviews"
             SELECT 1 FROM kyc_admin_whitelist 
             WHERE user_id = auth.uid()
         )
+        AND reviewer_id = auth.uid()
     );
 
 CREATE POLICY "Whitelisted users can view all KYC reviews"
@@ -98,6 +96,11 @@ CREATE POLICY "Users can view their own KYC reviews"
 CREATE OR REPLACE FUNCTION add_kyc_admin(target_user_id UUID, admin_notes TEXT DEFAULT NULL)
 RETURNS void AS $$
 BEGIN
+    PERFORM 1 FROM kyc_admin_whitelist WHERE user_id = auth.uid();
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'permission denied: caller is not a KYC admin' USING ERRCODE = '42501';
+    END IF;
+
     INSERT INTO kyc_admin_whitelist (user_id, created_by, notes)
     VALUES (target_user_id, auth.uid(), admin_notes)
     ON CONFLICT (user_id) DO UPDATE SET
@@ -106,10 +109,16 @@ BEGIN
         created_at = NOW();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+SET search_path = public, pg_temp;
 
 CREATE OR REPLACE FUNCTION remove_kyc_admin(target_user_id UUID)
 RETURNS void AS $$
 BEGIN
+    PERFORM 1 FROM kyc_admin_whitelist WHERE user_id = auth.uid();
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'permission denied: caller is not a KYC admin' USING ERRCODE = '42501';
+    END IF;
+
     DELETE FROM kyc_admin_whitelist WHERE user_id = target_user_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
