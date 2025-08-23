@@ -7,7 +7,7 @@ import type {
 	QuestionMetadata,
 	UserData,
 	UserRole,
-} from '../types/qa/types'
+} from '../types/project/project-qa.types'
 
 /**
  * Check if a user can mark an answer as official

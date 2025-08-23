@@ -39,3 +39,10 @@ export interface SortOptionItem {
 	label: string
 	icon: ReactNode
 }
+
+export type {
+	CommentData,
+	CommentWithAnswers,
+	CommentWithReplies,
+	UserData,
+} from './project-qa.types'

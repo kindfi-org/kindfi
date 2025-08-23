@@ -8,37 +8,26 @@ DROP POLICY IF EXISTS "update_question_status" ON comments;
 
 -- Create a helper function to get the current NextAuth user's profile
 CREATE OR REPLACE FUNCTION get_current_user_profile()
-RETURNS TABLE(user_id UUID, profile_id UUID, role user_role, next_auth_user_id UUID)
+RETURNS TABLE(user_id UUID, profile_id UUID, role user_role)
 LANGUAGE sql STABLE SECURITY DEFINER
 AS $$
   SELECT 
     na_user.id as user_id,
     p.id as profile_id,
-    p.role,
-    p.next_auth_user_id
+    p.role
   FROM next_auth.users na_user
-  LEFT JOIN profiles p ON p.next_auth_user_id = na_user.id
+  LEFT JOIN profiles p ON p.user_id = na_user.id
   WHERE na_user.id = next_auth.uid();
 $$;
 
--- First, update project_members table to work with NextAuth
--- Add next_auth_user_id column to project_members if it doesn't exist
+-- Update project_members table foreign key to reference next_auth.users
+-- First drop existing foreign key constraint
+ALTER TABLE project_members DROP CONSTRAINT IF EXISTS project_members_user_id_fkey;
+
+-- Add new foreign key constraint to next_auth.users
 ALTER TABLE project_members 
-  ADD COLUMN IF NOT EXISTS next_auth_user_id UUID,
-  ADD CONSTRAINT project_members_next_auth_user_id_fkey 
-    FOREIGN KEY (next_auth_user_id) REFERENCES next_auth.users(id) ON DELETE CASCADE;
-
--- Migrate existing project_members data to use next_auth_user_id
-UPDATE project_members pm
-SET next_auth_user_id = p.next_auth_user_id
-FROM profiles p
-WHERE pm.user_id = p.id
-AND pm.next_auth_user_id IS NULL
-AND p.next_auth_user_id IS NOT NULL;
-
--- Create index for performance
-CREATE INDEX IF NOT EXISTS idx_project_members_next_auth_user_id 
-ON project_members(next_auth_user_id);
+  ADD CONSTRAINT project_members_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES next_auth.users(id) ON DELETE CASCADE;
 
 -- Create a helper function to check if user is project team member
 CREATE OR REPLACE FUNCTION is_project_team_member(project_uuid UUID, user_uuid UUID)
@@ -48,7 +37,7 @@ AS $$
   SELECT EXISTS (
     SELECT 1 FROM project_members pm
     WHERE pm.project_id = project_uuid
-    AND pm.next_auth_user_id = user_uuid
+    AND pm.user_id = user_uuid
     AND pm.role IN ('admin', 'editor')
   );
 $$;
@@ -60,9 +49,8 @@ LANGUAGE sql STABLE SECURITY DEFINER
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM projects pr
-    JOIN profiles p ON p.id = pr.kindler_id
     WHERE pr.id = project_uuid
-    AND p.next_auth_user_id = user_uuid
+    AND pr.kindler_id = user_uuid
   );
 $$;
 
@@ -81,11 +69,7 @@ CREATE POLICY "Authenticated users can create questions" ON comments
   WITH CHECK (
     type = 'question' AND 
     next_auth.uid() IS NOT NULL AND
-    EXISTS (
-      SELECT 1 FROM profiles p 
-      WHERE p.next_auth_user_id = next_auth.uid() 
-      AND p.id = author_id
-    )
+    author_id = next_auth.uid()
   );
 
 -- Authenticated users can create answers
@@ -95,11 +79,7 @@ CREATE POLICY "Authenticated users can create answers" ON comments
     type = 'answer' AND 
     next_auth.uid() IS NOT NULL AND
     parent_comment_id IS NOT NULL AND
-    EXISTS (
-      SELECT 1 FROM profiles p 
-      WHERE p.next_auth_user_id = next_auth.uid() 
-      AND p.id = author_id
-    ) AND
+    author_id = next_auth.uid() AND
     EXISTS (
       SELECT 1 FROM comments parent 
       WHERE parent.id = parent_comment_id 
@@ -113,11 +93,7 @@ CREATE POLICY "Authenticated users can create comments" ON comments
   WITH CHECK (
     type = 'comment' AND 
     next_auth.uid() IS NOT NULL AND
-    EXISTS (
-      SELECT 1 FROM profiles p 
-      WHERE p.next_auth_user_id = next_auth.uid() 
-      AND p.id = author_id
-    ) AND
+    author_id = next_auth.uid() AND
     -- Ensure project exists and user has access to comment on it
     (project_id IS NULL OR EXISTS (SELECT 1 FROM projects WHERE id = project_id))
   );
@@ -161,11 +137,7 @@ CREATE POLICY "Authorized users can update question status" ON comments
     next_auth.uid() IS NOT NULL AND
     (
       -- Question author can update status
-      EXISTS (
-        SELECT 1 FROM profiles p 
-        WHERE p.next_auth_user_id = next_auth.uid() 
-        AND p.id = author_id
-      ) OR
+      author_id = next_auth.uid() OR
       -- Project team members can update status
       is_project_team_member(project_id, next_auth.uid()) OR
       -- Project owners can update status
@@ -176,11 +148,7 @@ CREATE POLICY "Authorized users can update question status" ON comments
     type = 'question' AND
     (
       -- Question author can update status
-      EXISTS (
-        SELECT 1 FROM profiles p 
-        WHERE p.next_auth_user_id = next_auth.uid() 
-        AND p.id = author_id
-      ) OR
+      author_id = next_auth.uid() OR
       -- Project team members can update status
       is_project_team_member(project_id, next_auth.uid()) OR
       -- Project owners can update status
@@ -199,18 +167,10 @@ CREATE POLICY "Authors can update their own content" ON comments
   FOR UPDATE
   USING (
     next_auth.uid() IS NOT NULL AND
-    EXISTS (
-      SELECT 1 FROM profiles p 
-      WHERE p.next_auth_user_id = next_auth.uid() 
-      AND p.id = author_id
-    )
+    author_id = next_auth.uid()
   )
   WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM profiles p 
-      WHERE p.next_auth_user_id = next_auth.uid() 
-      AND p.id = author_id
-    ) AND
+    author_id = next_auth.uid() AND
     -- Ensure type and structural fields remain unchanged
     type = type AND
     parent_comment_id IS NOT DISTINCT FROM parent_comment_id AND
@@ -233,11 +193,7 @@ CREATE POLICY "Authorized users can delete comments" ON comments
     next_auth.uid() IS NOT NULL AND
     (
       -- Author can delete their own content
-      EXISTS (
-        SELECT 1 FROM profiles p 
-        WHERE p.next_auth_user_id = next_auth.uid() 
-        AND p.id = author_id
-      ) OR
+      author_id = next_auth.uid() OR
       -- Project team members can delete
       is_project_team_member(project_id, next_auth.uid()) OR
       -- Project owners can delete
@@ -261,8 +217,8 @@ COMMENT ON POLICY "Authorized users can update question status" ON comments IS
 'Question authors, project team members, and project owners can update question status (new/answered/resolved)';
 
 -- Create indexes to optimize the new policy queries
-CREATE INDEX IF NOT EXISTS idx_profiles_next_auth_user_id_author 
-ON profiles(next_auth_user_id) WHERE next_auth_user_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_comments_author_id 
+ON comments(author_id) WHERE author_id IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS idx_project_members_project_user_role 
 ON project_members(project_id, user_id, role);
