@@ -73,8 +73,7 @@
 		"start": "cross-env NODE_ENV=production node dist/index.js",
 		"start:bun": "cross-env NODE_ENV=production bun src/index.tsx",
 		"test": "bun test src/__tests__/*.test.ts",
-		"test:watch": "bun test --watch src/__tests__/*.test.ts",
-		"vercel-build": "bun run build"
+		"test:watch": "bun test --watch src/__tests__/*.test.ts"
 	},
 	"type": "module",
 	"version": "0.1.0"
