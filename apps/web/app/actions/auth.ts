@@ -45,11 +45,26 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 	}
 	const supabase = await createSupabaseServerClient()
 	const email = formData.get('email') as string
+
+	// Check if user already exists
+	const { data: existingUser } = await supabase
+		.from('profiles')
+		.select('id, email')
+		.eq('email', email)
+		.single()
+
+	if (existingUser) {
+		console.warn(
+			'🔧 KindfiSupabaseAdapter: User already exists',
+			existingUser.id,
+		)
+		throw new Error('This account is already registered. Sign in instead!')
+	}
+
 	const signInWithOptOpt = {
 		email,
 		options: {
 			emailRedirectTo: `${appConfig.deployment.appUrl}/auth/callback?redirect_to=/otp-validation?email=${email}`,
-			shouldCreateUser: true,
 		},
 	}
 

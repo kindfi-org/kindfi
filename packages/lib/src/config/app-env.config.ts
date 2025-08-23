@@ -6,13 +6,7 @@ export function transformEnv(): AppEnvInterface {
 	const data = process.env as ValidatedEnvInput
 	return {
 		auth: {
-			secret:
-				data.NEXTAUTH_SECRET ||
-				(() => {
-					// Generate a random secret for development only
-					console.warn('⚠️ Using auto-generated NEXTAUTH_SECRET for development')
-					return require('crypto').randomBytes(32).toString('hex')
-				})(),
+			secret: data.NEXTAUTH_SECRET || 'nextauth-super-secret',
 			url: data.NEXTAUTH_URL || 'http://localhost:3000',
 			token: {
 				expiration: data.JWT_TOKEN_EXPIRATION || 60 * 60 * 24 * 30, // Default to 30 days
