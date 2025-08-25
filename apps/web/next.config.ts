@@ -5,6 +5,9 @@ import type { NextConfig } from 'next'
 const appConfig: AppEnvInterface = appEnvConfig('web')
 const isProduction = appConfig.env.nodeEnv === 'production'
 const nextConfig: NextConfig = {
+	experimental: {
+		mdxRs: true,
+	},
 	serverExternalPackages: ['@packages/lib'],
 	images: {
 		remotePatterns: [
