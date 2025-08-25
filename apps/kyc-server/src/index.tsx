@@ -47,7 +47,7 @@ async function startServer() {
 	}
 
 	const serverOptions = {
-		fetch(req: Request, server: Server): Response | Promise<Response> {
+		async fetch(req: Request, server: Server): Promise<Response> {
 			const url = new URL(req.url)
 
 			if (url.pathname === '/live') {
@@ -111,6 +111,7 @@ async function startServer() {
 					return new Response('File not found', { status: 404 })
 				}
 			}
+
 			const pathname = url.pathname
 			const route = routes[pathname as keyof typeof routes]
 
@@ -118,7 +119,7 @@ async function startServer() {
 				const method = req.method
 				if (method in route) {
 					// @ts-expect-error method is dynamically accessed
-					return route[method](req)
+					return await route[method](req)
 				}
 				return new Response('Method not allowed', { status: 405 })
 			}
@@ -162,7 +163,9 @@ async function startServer() {
 				kycWebSocketService.handleDisconnection(ws)
 			},
 		},
-		port: appConfig.deployment.port,
+		port: process.env.PORT
+			? parseInt(process.env.PORT, 10)
+			: appConfig.deployment.port,
 		routes,
 		development: appConfig.env.nodeEnv !== 'production',
 	} as const
