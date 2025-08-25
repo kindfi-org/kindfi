@@ -17,6 +17,7 @@ import {
 import { Avatar, AvatarImage } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import { UpdateForm } from './update-form'
 
 // Define the Update type based on actual DB structure
@@ -121,7 +122,7 @@ export function UpdateCard({
 									<div className="flex items-center gap-3 my-4">
 										<Avatar>
 											<AvatarImage
-												src="/placeholder.svg?height=40&width=40"
+												src={`${PLACEHOLDER_IMG}?height=40&width=40`}
 												alt="User"
 											/>
 										</Avatar>

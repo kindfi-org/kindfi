@@ -5,6 +5,7 @@ import { BookOpen, Clock, MessageSquare, ThumbsUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { Module } from './learning-materials'
 
 interface LearningModuleCardProps {
@@ -37,7 +38,7 @@ export function LearningModuleCard({ module, index }: LearningModuleCardProps) {
 			<div className="relative z-10 flex flex-col h-full">
 				<div className="h-48 bg-gray-100 relative overflow-hidden flex-shrink-0">
 					<Image
-						src={module.image || '/placeholder.svg'}
+						src={module.image || PLACEHOLDER_IMG}
 						alt={module.title || 'Learning module image'}
 						className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
 						width={400}
