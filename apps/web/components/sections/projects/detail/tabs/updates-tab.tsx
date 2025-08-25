@@ -8,6 +8,7 @@ import { Button } from '~/components/base/button'
 import { UserAvatar } from '~/components/base/user-avatar'
 import { CommentForm } from '~/components/sections/projects/detail/comment-form'
 import { CommentThread } from '~/components/sections/projects/detail/comment-thread'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { Comment, Update } from '~/lib/types/project/project-detail.types'
 
 interface UpdatesTabProps {
@@ -121,7 +122,7 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 
 								<div className="flex items-center gap-3 mb-4 min-w-0">
 									<UserAvatar
-										src={update.author.avatar || '/placeholder.svg'}
+										src={update.author.avatar || PLACEHOLDER_IMG}
 										alt={update.author.name}
 										name={update.author.name}
 									/>

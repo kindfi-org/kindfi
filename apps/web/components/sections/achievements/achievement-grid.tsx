@@ -30,6 +30,7 @@ import {
 import { ErrorFallback } from '~/components/fallbacks/error-fallback'
 import { LoadingFallback } from '~/components/fallbacks/loading-fallback'
 import { Paginations } from '~/components/shared/pagination'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import { ACHIEVEMENT_CARDS, NFTDATA } from '~/lib/mock-data/section'
 import type { NFTProps } from '~/lib/types'
 import { AchievementCard } from './achievement-card'
@@ -241,7 +242,7 @@ export function AchievementsGrid() {
 									</DialogDescription>
 								</DialogHeader>
 								<Image
-									src={selectedNFT.imageUrl || '/placeholder.svg'}
+									src={selectedNFT.imageUrl || PLACEHOLDER_IMG}
 									alt={selectedNFT.title}
 									className="w-full rounded-lg"
 									width={500}

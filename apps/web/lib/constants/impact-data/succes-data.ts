@@ -1,11 +1,12 @@
 import type { SuccessStory } from '~/lib/types/impact/impact-success-story.types'
+import { PLACEHOLDER_IMG } from '../paths'
 
 export const successStories: SuccessStory[] = [
 	{
 		id: 'clean-water',
 		title: 'Clean Water Initiative',
 		location: 'Rural Schools, Kenya',
-		image: '/placeholder.svg?height=400&width=600',
+		image: `${PLACEHOLDER_IMG}?height=400&width=600`,
 		donors: 500,
 		milestones: {
 			completed: 5,
@@ -18,7 +19,7 @@ export const successStories: SuccessStory[] = [
 		id: 'solar-power',
 		title: 'Solar Power for Communities',
 		location: 'Remote Villages, India',
-		image: '/placeholder.svg?height=400&width=600',
+		image: `${PLACEHOLDER_IMG}?height=400&width=600`,
 		donors: 650,
 		milestones: {
 			completed: 4,
@@ -31,7 +32,7 @@ export const successStories: SuccessStory[] = [
 		id: 'education-tech',
 		title: 'Education Technology Access',
 		location: 'Urban Schools, Brazil',
-		image: '/placeholder.svg?height=400&width=600',
+		image: `${PLACEHOLDER_IMG}?height=400&width=600`,
 		donors: 300,
 		milestones: {
 			completed: 3,
