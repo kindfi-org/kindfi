@@ -13,7 +13,8 @@ interface NewsCardProps {
 export function NewsCard({ update, className = '' }: NewsCardProps) {
 	return (
 		<Link href={`/news/${update.slug}`} className={`block group ${className}`}>
-			<article className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+			<article className="rounded-xl border-0 bg-white/80 backdrop-blur-sm text-card-foreground shadow-xl hover:shadow-green-200/50 hover:shadow-2xl transition-all duration-300 h-full overflow-hidden">
+				<div className="h-2 bg-gradient-to-r from-green-500 to-blue-700" />
 				{/* Image Container */}
 				{update.image && (
 					<div className="relative h-48 w-full overflow-hidden">
@@ -40,7 +41,7 @@ export function NewsCard({ update, className = '' }: NewsCardProps) {
 					</h3>
 
 					{/* Description */}
-					<p className="text-muted-foreground line-clamp-2">
+					<p className="text-muted-foreground line-clamp-3">
 						{update.description}
 					</p>
 

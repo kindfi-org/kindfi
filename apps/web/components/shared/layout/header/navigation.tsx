@@ -121,6 +121,21 @@ export function Navigation() {
 						</NavigationMenuLink>
 					</Link>
 				</NavigationMenuItem>
+
+				<NavigationMenuItem>
+					<Link href="/news" passHref>
+						<NavigationMenuLink
+							className={cn(
+								navigationMenuTriggerStyle(),
+								pathname?.startsWith('/news') && 'text-primary',
+							)}
+							aria-label="News"
+							aria-current={pathname?.startsWith('/news') ? 'page' : undefined}
+						>
+							News
+						</NavigationMenuLink>
+					</Link>
+				</NavigationMenuItem>
 			</NavigationMenuList>
 		</NavigationMenu>
 	)
