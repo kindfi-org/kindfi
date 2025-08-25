@@ -170,8 +170,12 @@ async function startServer() {
 		development: appConfig.env.nodeEnv !== 'production',
 	} as const
 
-	const server = serve(serverOptions)
-	console.log(`🚀 Server running at http://localhost:${server.port}/`)
+	const server = serve({
+		...serverOptions,
+		hostname: '0.0.0.0', // Bind to all interfaces, not just localhost
+	})
+	console.log(`🚀 Server running at http://0.0.0.0:${server.port}/`)
+	console.log(`🌐 Accessible externally at http://<your-ip>:${server.port}/`)
 	return server
 }
 

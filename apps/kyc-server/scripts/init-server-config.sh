@@ -188,6 +188,14 @@ main() {
     bun install
   fi
 
+  # Set default PORT if not already set
+  if [ -z "${PORT:-}" ]; then
+    export PORT=3001
+    log "PORT not set, defaulting to 3001"
+  else
+    log "PORT is set to $PORT"
+  fi
+
   log "Init complete."
 }
 
