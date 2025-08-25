@@ -5,6 +5,7 @@ import { Clock, MessageSquare, ThumbsUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { Resource } from './learning-materials'
 
 interface ResourceCardProps {
@@ -29,7 +30,7 @@ export function ResourceCard({ resource, index }: ResourceCardProps) {
 			<div className="relative z-10 flex flex-col h-full">
 				<div className="h-48 bg-gray-100 relative overflow-hidden flex-shrink-0">
 					<Image
-						src={resource.image || '/placeholder.svg'}
+						src={resource.image || PLACEHOLDER_IMG}
 						alt={resource.title}
 						className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
 						width={400}

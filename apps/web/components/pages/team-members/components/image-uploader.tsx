@@ -9,6 +9,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from '~/components/base/form'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import { cn } from '~/lib/utils'
 import type { formInputs } from '../team-members'
 
@@ -61,7 +62,7 @@ export function ImageUploader({ form, index }: ImageUploaderType) {
 								{field.value ? (
 									<div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-muted">
 										<Image
-											src={field.value || '/placeholder.svg'}
+											src={field.value || PLACEHOLDER_IMG}
 											alt="Profile preview"
 											fill
 											className="object-cover"

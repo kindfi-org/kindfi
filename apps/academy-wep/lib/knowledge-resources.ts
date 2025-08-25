@@ -1,3 +1,5 @@
+import { PLACEHOLDER_IMG } from './constants/paths'
+
 export interface ResourceType {
 	id: string
 	title: string
@@ -22,7 +24,7 @@ export const resourcesData: ResourceType[] = [
 			'A comprehensive guide to blockchain fundamentals and how they apply to social impact initiatives.',
 		category: 'Blockchain',
 		type: 'Article',
-		image: '/placeholder.svg?height=200&width=400',
+		image: `${PLACEHOLDER_IMG}?height=200&width=400`,
 		duration: 15,
 		level: 'Beginner',
 		tags: ['Blockchain', 'Fundamentals', 'Technology'],
@@ -38,7 +40,7 @@ export const resourcesData: ResourceType[] = [
 			'Step-by-step video tutorial on creating and securing your Stellar wallet for social impact projects.',
 		category: 'Stellar',
 		type: 'Video',
-		image: '/placeholder.svg?height=200&width=400',
+		image: `${PLACEHOLDER_IMG}?height=200&width=400`,
 		duration: 12,
 		level: 'Beginner',
 		tags: ['Stellar', 'Wallets', 'Security'],
@@ -54,7 +56,7 @@ export const resourcesData: ResourceType[] = [
 			'Learn the most effective strategies for running successful Web3 crowdfunding campaigns for social impact.',
 		category: 'Web3',
 		type: 'Guide',
-		image: '/placeholder.svg?height=200&width=400',
+		image: `${PLACEHOLDER_IMG}?height=200&width=400`,
 		duration: 20,
 		level: 'Intermediate',
 		tags: ['Web3', 'Crowdfunding', 'Best Practices'],

@@ -1,6 +1,7 @@
 import { Calendar } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { NewsUpdate } from '~/lib/types/learning.types'
 import { formatDate } from '~/lib/utils/date-utils'
 
@@ -18,7 +19,7 @@ export function NewsCard({ update, className = '' }: NewsCardProps) {
 				{update.image && (
 					<div className="relative h-48 w-full overflow-hidden">
 						<Image
-							src={update.image || '/images/placeholder.png'}
+							src={update.image || PLACEHOLDER_IMG}
 							alt={update.title}
 							fill
 							className="object-cover group-hover:scale-105 transition-transform duration-300"
