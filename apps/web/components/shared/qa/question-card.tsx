@@ -98,7 +98,7 @@ export function QuestionCard({
 						)}
 					</Button>
 
-					{!question.metadata?.is_resolved && effectiveUser && (
+					{question.metadata?.status !== 'resolved' && effectiveUser && (
 						<Button
 							variant="outline"
 							size="sm"

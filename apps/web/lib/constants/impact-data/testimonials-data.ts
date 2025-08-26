@@ -1,4 +1,5 @@
 import type { Testimonial } from '~/lib/types/impact/impact-testimonial.types'
+import { PLACEHOLDER_IMG } from '../paths'
 
 export const testimonials: Testimonial[] = [
 	{
@@ -8,7 +9,7 @@ export const testimonials: Testimonial[] = [
 		location: 'Costa Rica',
 		quote:
 			'The impact of this initiative has been transformative for our students. We now have modern learning tools that were previously just a dream.',
-		image: '/placeholder.svg?height=100&width=100',
+		image: `${PLACEHOLDER_IMG}?height=100&width=100`,
 	},
 	{
 		id: 'john',
@@ -17,7 +18,7 @@ export const testimonials: Testimonial[] = [
 		location: 'Kenya',
 		quote:
 			'Clean water access has changed everything for our village. The transparent funding process gave us confidence throughout the project.',
-		image: '/placeholder.svg?height=100&width=100',
+		image: `${PLACEHOLDER_IMG}?height=100&width=100`,
 	},
 	{
 		id: 'priya',
@@ -26,6 +27,6 @@ export const testimonials: Testimonial[] = [
 		location: 'India',
 		quote:
 			"The blockchain verification system made it easy to track and prove our project's impact. Donors could see their contributions at work.",
-		image: '/placeholder.svg?height=100&width=100',
+		image: `${PLACEHOLDER_IMG}?height=100&width=100`,
 	},
 ]

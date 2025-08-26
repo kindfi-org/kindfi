@@ -1,4 +1,11 @@
-import { BookOpen, CircleAlert, FileText, Home, Trophy } from 'lucide-react'
+import {
+	BookOpen,
+	CircleAlert,
+	CircleAlertIcon,
+	FileText,
+	Home,
+	Trophy,
+} from 'lucide-react'
 
 import type { LearningPath, NavigationRoute } from '../types/sidebar.types'
 
@@ -8,6 +15,7 @@ export const navigationRoutes: NavigationRoute[] = [
 	{ name: 'Resources', href: '/resources', icon: FileText },
 	{ name: 'Badges', href: '/badges', icon: Trophy },
 	{ name: 'About KindFi', href: '/about', icon: CircleAlert },
+	{ name: 'Connect', href: '/connect', icon: CircleAlertIcon },
 ]
 
 export const learningPaths: LearningPath[] = [

@@ -1,4 +1,3 @@
-import { supabase } from '@packages/lib/supabase'
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { Tables, TablesUpdate } from '@services/supabase'
 import type { CommentData, UserData } from '../types/project'
@@ -81,30 +80,4 @@ export async function fetchChildComments(
 					}
 				: null),
 	})) as CommentData[]
-}
-
-export async function insertComment(
-	payload: Partial<Tables<'comments'>>,
-): Promise<Tables<'comments'>> {
-	const { data, error } = await supabase
-		.from('comments')
-		.insert(payload)
-		.select()
-		.single()
-	if (error) throw error
-	return data
-}
-
-export async function updateComment(
-	id: string,
-	updates: TablesUpdate<'comments'>,
-): Promise<Tables<'comments'>> {
-	const { data, error } = await supabase
-		.from('comments')
-		.update(updates)
-		.eq('id', id)
-		.select()
-		.single()
-	if (error) throw error
-	return data
 }
