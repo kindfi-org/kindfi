@@ -663,54 +663,36 @@ export type Database = {
 					},
 				]
 			}
-			kyc_reviews: {
+			kyc_admin_whitelist: {
 				Row: {
-					additional_notes: string | null
 					created_at: string
-					decision: Database['public']['Enums']['kyc_status_enum']
+					created_by: string | null
 					id: string
-					kyc_status_id: string
-					reason: string | null
-					review_notes: string | null
-					reviewer_id: string
-					updated_at: string
+					notes: string | null
+					user_id: string
 				}
 				Insert: {
-					additional_notes?: string | null
 					created_at?: string
-					decision: Database['public']['Enums']['kyc_status_enum']
+					created_by?: string | null
 					id?: string
-					kyc_status_id: string
-					reason?: string | null
-					review_notes?: string | null
-					reviewer_id: string
-					updated_at?: string
+					notes?: string | null
+					user_id: string
 				}
 				Update: {
-					additional_notes?: string | null
 					created_at?: string
-					decision?: Database['public']['Enums']['kyc_status_enum']
+					created_by?: string | null
 					id?: string
-					kyc_status_id?: string
-					reason?: string | null
-					review_notes?: string | null
-					reviewer_id?: string
-					updated_at?: string
+					notes?: string | null
+					user_id?: string
 				}
-				Relationships: [
-					{
-						foreignKeyName: 'kyc_reviews_kyc_status_id_fkey'
-						columns: ['kyc_status_id']
-						isOneToOne: false
-						referencedRelation: 'kyc_status'
-						referencedColumns: ['id']
-					},
-				]
+				Relationships: []
 			}
-			kyc_status: {
+			kyc_reviews: {
 				Row: {
 					created_at: string
 					id: string
+					notes: string | null
+					reviewer_id: string | null
 					status: Database['public']['Enums']['kyc_status_enum']
 					updated_at: string
 					user_id: string
@@ -719,14 +701,18 @@ export type Database = {
 				Insert: {
 					created_at?: string
 					id?: string
-					status?: Database['public']['Enums']['kyc_status_enum']
+					notes?: string | null
+					reviewer_id?: string | null
+					status: Database['public']['Enums']['kyc_status_enum']
 					updated_at?: string
 					user_id: string
-					verification_level?: Database['public']['Enums']['kyc_verification_enum']
+					verification_level: Database['public']['Enums']['kyc_verification_enum']
 				}
 				Update: {
 					created_at?: string
 					id?: string
+					notes?: string | null
+					reviewer_id?: string | null
 					status?: Database['public']['Enums']['kyc_status_enum']
 					updated_at?: string
 					user_id?: string
@@ -1195,8 +1181,16 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
+			add_kyc_admin: {
+				Args: { admin_notes?: string; target_user_id: string }
+				Returns: undefined
+			}
 			cleanup_expired_challenges: {
 				Args: Record<PropertyKey, never>
+				Returns: undefined
+			}
+			remove_kyc_admin: {
+				Args: { target_user_id: string }
 				Returns: undefined
 			}
 			unaccent: {

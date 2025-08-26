@@ -323,6 +323,30 @@ export const kindlerProjectsUpdateSchema = z.object({
 	project_id: z.string().optional(),
 })
 
+export const kycAdminWhitelistRowSchema = z.object({
+	created_at: z.string(),
+	created_by: z.string().nullable(),
+	id: z.string(),
+	notes: z.string().nullable(),
+	user_id: z.string(),
+})
+
+export const kycAdminWhitelistInsertSchema = z.object({
+	created_at: z.string().optional(),
+	created_by: z.string().optional().nullable(),
+	id: z.string().optional(),
+	notes: z.string().optional().nullable(),
+	user_id: z.string(),
+})
+
+export const kycAdminWhitelistUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	created_by: z.string().optional().nullable(),
+	id: z.string().optional(),
+	notes: z.string().optional().nullable(),
+	user_id: z.string().optional(),
+})
+
 export const kycStatusEnumSchema = z.union([
 	z.literal('pending'),
 	z.literal('approved'),
@@ -330,47 +354,27 @@ export const kycStatusEnumSchema = z.union([
 	z.literal('verified'),
 ])
 
-export const kycReviewsInsertSchema = z.object({
-	additional_notes: z.string().optional().nullable(),
-	created_at: z.string().optional(),
-	decision: kycStatusEnumSchema,
-	id: z.string().optional(),
-	kyc_status_id: z.string(),
-	reason: z.string().optional().nullable(),
-	review_notes: z.string().optional().nullable(),
-	reviewer_id: z.string(),
-	updated_at: z.string().optional(),
-})
-
-export const kycReviewsUpdateSchema = z.object({
-	additional_notes: z.string().optional().nullable(),
-	created_at: z.string().optional(),
-	decision: kycStatusEnumSchema.optional(),
-	id: z.string().optional(),
-	kyc_status_id: z.string().optional(),
-	reason: z.string().optional().nullable(),
-	review_notes: z.string().optional().nullable(),
-	reviewer_id: z.string().optional(),
-	updated_at: z.string().optional(),
-})
-
 export const kycVerificationEnumSchema = z.union([
 	z.literal('basic'),
 	z.literal('enhanced'),
 ])
 
-export const kycStatusInsertSchema = z.object({
+export const kycReviewsInsertSchema = z.object({
 	created_at: z.string().optional(),
 	id: z.string().optional(),
-	status: kycStatusEnumSchema.optional(),
+	notes: z.string().optional().nullable(),
+	reviewer_id: z.string().optional().nullable(),
+	status: kycStatusEnumSchema,
 	updated_at: z.string().optional(),
 	user_id: z.string(),
-	verification_level: kycVerificationEnumSchema.optional(),
+	verification_level: kycVerificationEnumSchema,
 })
 
-export const kycStatusUpdateSchema = z.object({
+export const kycReviewsUpdateSchema = z.object({
 	created_at: z.string().optional(),
 	id: z.string().optional(),
+	notes: z.string().optional().nullable(),
+	reviewer_id: z.string().optional().nullable(),
 	status: kycStatusEnumSchema.optional(),
 	updated_at: z.string().optional(),
 	user_id: z.string().optional(),
@@ -784,20 +788,10 @@ export const escrowContractsRowSchema = z.object({
 })
 
 export const kycReviewsRowSchema = z.object({
-	additional_notes: z.string().nullable(),
-	created_at: z.string(),
-	decision: kycStatusEnumSchema,
-	id: z.string(),
-	kyc_status_id: z.string(),
-	reason: z.string().nullable(),
-	review_notes: z.string().nullable(),
-	reviewer_id: z.string(),
-	updated_at: z.string(),
-})
-
-export const kycStatusRowSchema = z.object({
 	created_at: z.string(),
 	id: z.string(),
+	notes: z.string().nullable(),
+	reviewer_id: z.string().nullable(),
 	status: kycStatusEnumSchema,
 	updated_at: z.string(),
 	user_id: z.string(),
