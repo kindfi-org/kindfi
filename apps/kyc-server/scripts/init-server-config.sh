@@ -184,8 +184,8 @@ main() {
 
   # Optional pre-install hook for pipelines
   if [ "${RUN_BUN_INSTALL:-0}" = "1" ] && [ -f package.json ]; then
-    log "RUN_BUN_INSTALL=1 detected; running 'bun install'..."
-    bun install
+    log "RUN_BUN_INSTALL=1 detected; running 'bun install --no-save' for reproducibility..."
+    bun install --no-save
   fi
 
   # Set default PORT if not already set
