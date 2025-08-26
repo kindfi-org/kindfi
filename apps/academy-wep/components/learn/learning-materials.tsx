@@ -8,6 +8,7 @@ import { Tabs, TabsContent } from '~/components/base/tabs'
 import { LearningModuleCard } from '~/components/learn/learning-module-card'
 import { ResourceCard } from '~/components/learn/resource-card'
 import { TabSelector } from '~/components/learn/tab-selector'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 
 // Define types for our data
 export interface Module {
@@ -112,7 +113,7 @@ export function LearningMaterials() {
 			duration: '25 min read',
 			likes: 132,
 			comments: 24,
-			image: '/placeholder.svg?height=240&width=400',
+			image: `${PLACEHOLDER_IMG}?height=240&width=400`,
 			tags: ['Assets', 'XLM', 'USDC'],
 		},
 		{
@@ -127,7 +128,7 @@ export function LearningMaterials() {
 			duration: '30 min read',
 			likes: 312,
 			comments: 67,
-			image: '/placeholder.svg?height=240&width=400',
+			image: `${PLACEHOLDER_IMG}?height=240&width=400`,
 			tags: ['Web3', 'Integration'],
 		},
 		{
@@ -143,7 +144,7 @@ export function LearningMaterials() {
 			duration: '20 min read',
 			likes: 178,
 			comments: 39,
-			image: '/placeholder.svg?height=240&width=400',
+			image: `${PLACEHOLDER_IMG}?height=240&width=400`,
 			tags: ['KindFi', 'Management'],
 		},
 	]

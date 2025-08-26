@@ -49,14 +49,12 @@ export const FeatureCreatorCard = ({
 				transition={{ type: 'spring', stiffness: 300 }}
 			>
 				<div className="flex flex-row items-center">
-					{avatarUrl && (
-						<UserAvatar
-							src={avatarUrl}
-							alt={`${name}'s avatar`}
-							name={name}
-							className="h-20 w-20"
-						/>
-					)}
+					<UserAvatar
+						src={avatarUrl}
+						alt={`${name}'s avatar`}
+						name={name}
+						className="h-20 w-20"
+					/>
 					<div className="text-left ml-4">
 						<h2 className="flex items-center text-xl font-bold">
 							{name}

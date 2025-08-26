@@ -3,8 +3,10 @@
 
 import { motion } from 'framer-motion'
 import { MapPin } from 'lucide-react'
+import Image from 'next/image'
 import { IoIosLink } from 'react-icons/io'
 import { Progress } from '~/components/base/progress'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { SuccessStory } from '~/lib/types/impact/impact-success-story.types'
 
 interface StoryCardProps {
@@ -24,8 +26,8 @@ export function StoryCard({ story }: StoryCardProps) {
 		>
 			<div className="relative h-[200px] overflow-hidden">
 				<div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/60" />
-				<img
-					src={story.image || '/placeholder.svg'}
+				<Image
+					src={story.image || PLACEHOLDER_IMG}
 					alt={story.title}
 					className="h-full w-full object-cover"
 				/>
