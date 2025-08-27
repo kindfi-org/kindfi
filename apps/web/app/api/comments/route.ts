@@ -1,9 +1,11 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
-import { createCommentSchema, validateParentComment, COMMENT_TYPES } from './validation'
-
-
+import {
+	COMMENT_TYPES,
+	createCommentSchema,
+	validateParentComment,
+} from './validation'
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
 	try {
@@ -24,10 +26,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 		const projectUpdateId = searchParams.get('project_update_id')
 		const typeParam = searchParams.get('type')
 		const type =
-			typeParam && COMMENT_TYPES.includes(typeParam as typeof COMMENT_TYPES[number])
-				? (typeParam as typeof COMMENT_TYPES[number])
+			typeParam &&
+			COMMENT_TYPES.includes(typeParam as (typeof COMMENT_TYPES)[number])
+				? (typeParam as (typeof COMMENT_TYPES)[number])
 				: null
-		
+
 		// Mirror POST semantics: do not allow both scopes at once
 		if (projectId && projectUpdateId) {
 			return NextResponse.json(
@@ -35,23 +38,27 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 					success: false,
 					error: {
 						code: 'VALIDATION_ERROR',
-						message: 'Only one of project_id or project_update_id can be provided',
+						message:
+							'Only one of project_id or project_update_id can be provided',
 					},
 				},
 				{ status: 400 },
 			)
 		}
-		
+
 		// Guard against NaN and negative values for pagination
 		const limitParam = searchParams.get('limit')
 		const rawLimit = limitParam ? Number(limitParam) : NaN
-		const limit = Number.isFinite(rawLimit) && rawLimit > 0
-			? Math.max(1, Math.min(Math.trunc(rawLimit), 100))
-			: 50
-			
+		const limit =
+			Number.isFinite(rawLimit) && rawLimit > 0
+				? Math.max(1, Math.min(Math.trunc(rawLimit), 100))
+				: 50
+
 		const offsetParam = searchParams.get('offset')
 		const rawOffset = offsetParam ? Number(offsetParam) : NaN
-		const offset = Number.isFinite(rawOffset) ? Math.max(0, Math.trunc(rawOffset)) : 0
+		const offset = Number.isFinite(rawOffset)
+			? Math.max(0, Math.trunc(rawOffset))
+			: 0
 
 		let query = supabase
 			.from('comments')
@@ -118,7 +125,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			return NextResponse.json(
 				{
 					success: false,
-					error: { code: 'INVALID_JSON', message: 'Request body must be valid JSON' },
+					error: {
+						code: 'INVALID_JSON',
+						message: 'Request body must be valid JSON',
+					},
 				},
 				{ status: 400 },
 			)

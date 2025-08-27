@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import { createCommentSchema, validateParentComment } from '../app/api/comments/validation'
+import {
+	createCommentSchema,
+	validateParentComment,
+} from '../app/api/comments/validation'
 
 // Mock Supabase client for validation testing
 const mockSupabase: {
@@ -36,7 +39,8 @@ interface MockQuery {
 }
 
 // Helper to cast mock to proper Supabase type for testing
-const typedMockSupabase = mockSupabase as unknown as import('../app/api/comments/validation').SupabaseLike
+const typedMockSupabase =
+	mockSupabase as unknown as import('../app/api/comments/validation').SupabaseLike
 
 describe('Comments API Validation Logic', () => {
 	beforeEach(() => {

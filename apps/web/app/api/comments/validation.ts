@@ -1,6 +1,6 @@
-import { z } from 'zod'
+import type { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { Tables } from '@services/supabase'
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { z } from 'zod'
 
 // Export comment types to prevent duplication
 export const COMMENT_TYPES = ['comment', 'question', 'answer'] as const
@@ -54,15 +54,13 @@ export interface ParentValidationInput {
 	projectUpdateId?: string
 }
 
-
-
 /**
  * Validates that a provided parent_comment_id:
  * - Exists in the comments table
  * - Belongs to the same project or project update as the new comment
  * - Satisfies type hierarchy rules (answer → question; question cannot have a parent; comment → question|comment)
  *
- * @param supabase Supabase client (minimal SupabaseLike surface)
+ * @param supabase Supabase server client
  * @param parentCommentId UUID of the parent comment to validate
  * @param commentType Type of the new comment: 'comment' | 'question' | 'answer'
  * @param projectId Optional project scope the new comment belongs to

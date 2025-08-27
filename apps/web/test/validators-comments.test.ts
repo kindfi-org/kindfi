@@ -10,7 +10,10 @@ import {
 } from '../comments'
 
 // Mock Supabase client
-interface MockSingleResult { data: unknown; error: { message: string } | null }
+interface MockSingleResult {
+	data: unknown
+	error: { message: string } | null
+}
 interface MockQuery {
 	select: (cols: string) => MockQuery
 	eq: (col: string, val: string) => MockQuery
@@ -368,10 +371,7 @@ describe('Comment Validation', () => {
 		}
 
 		test('should pass validation for valid comment without parent', async () => {
-			const result = await validateComment(
-				typedMockSupabase,
-				validCommentData,
-			)
+			const result = await validateComment(typedMockSupabase, validCommentData)
 			expect(result.isValid).toBe(true)
 			expect(result.errors).toHaveLength(0)
 		})
@@ -394,10 +394,7 @@ describe('Comment Validation', () => {
 				parent_comment_id: '123e4567-e89b-12d3-a456-426614174002',
 			}
 
-			const result = await validateComment(
-				typedMockSupabase,
-				commentWithParent,
-			)
+			const result = await validateComment(typedMockSupabase, commentWithParent)
 			expect(result.isValid).toBe(false)
 			expect(result.errors).toContain('Parent comment not found')
 		})

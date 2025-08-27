@@ -37,7 +37,7 @@ describe('/api/comments', () => {
 		if (typeof mockSupabase.auth?.getUser?.mock?.clear === 'function') {
 			mockSupabase.auth.getUser.mock.clear()
 		}
-		
+
 		// Reset specific mocks to default values
 		mockSupabase.range.mockResolvedValue({
 			data: [],
@@ -91,8 +91,6 @@ describe('/api/comments', () => {
 					data: { id: 'answer-1', ...answerData },
 					error: null,
 				})
-
-
 
 			const req = new NextRequest('http://localhost/api/comments', {
 				method: 'POST',
@@ -157,7 +155,9 @@ describe('/api/comments', () => {
 
 			expect(response.status).toBe(400)
 			expect(result.success).toBe(false)
-			expect(result.error.message).toBe('Parent comment belongs to a different project')
+			expect(result.error.message).toBe(
+				'Parent comment belongs to a different project',
+			)
 		})
 
 		test('should return 400 when trying to add answer to non-question comment', async () => {
@@ -187,7 +187,9 @@ describe('/api/comments', () => {
 
 			expect(response.status).toBe(400)
 			expect(result.success).toBe(false)
-			expect(result.error.message).toBe('Answers can only be added to questions')
+			expect(result.error.message).toBe(
+				'Answers can only be added to questions',
+			)
 		})
 
 		test('should return 400 when comment has both project_id and project_update_id', async () => {
@@ -316,7 +318,9 @@ describe('/api/comments', () => {
 			const json = await res.json()
 			expect(res.status).toBe(400)
 			expect(json.success).toBe(false)
-			expect(json.error.message).toBe('Parent comment belongs to a different project update')
+			expect(json.error.message).toBe(
+				'Parent comment belongs to a different project update',
+			)
 		})
 
 		test('should return 401 when user is not authenticated', async () => {
@@ -465,7 +469,10 @@ describe('/api/comments', () => {
 		})
 
 		test('GET should return 401 when user is not authenticated', async () => {
-			mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: null }, error: null })
+			mockSupabase.auth.getUser.mockResolvedValueOnce({
+				data: { user: null },
+				error: null,
+			})
 			const req = new NextRequest('http://localhost/api/comments')
 			const res = await GET(req)
 			const json = await res.json()
