@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
-import { createCommentSchema, validateParentComment } from './validation'
+import { createCommentSchema, validateParentComment, COMMENT_TYPES } from './validation'
 
 
 
@@ -24,8 +24,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 		const projectUpdateId = searchParams.get('project_update_id')
 		const typeParam = searchParams.get('type')
 		const type =
-			typeParam && ['comment', 'question', 'answer'].includes(typeParam)
-				? (typeParam as 'comment' | 'question' | 'answer')
+			typeParam && COMMENT_TYPES.includes(typeParam as typeof COMMENT_TYPES[number])
+				? (typeParam as typeof COMMENT_TYPES[number])
 				: null
 		
 		// Mirror POST semantics: do not allow both scopes at once
@@ -196,8 +196,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			project_id: project_id || null,
 			project_update_id: project_update_id || null,
 			type,
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			metadata: metadata as any,
+			metadata: metadata as TablesInsert<'comments'>['metadata'],
 		}
 
 		// Insert the comment

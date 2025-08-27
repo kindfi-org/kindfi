@@ -1,5 +1,9 @@
 import { z } from 'zod'
 import type { Tables } from '@services/supabase'
+import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+
+// Export comment types to prevent duplication
+export const COMMENT_TYPES = ['comment', 'question', 'answer'] as const
 
 // Schema for validating comment creation requests
 export const createCommentSchema = z
@@ -12,7 +16,7 @@ export const createCommentSchema = z
 		parent_comment_id: z.string().uuid('Invalid parent comment ID').optional(),
 		project_id: z.string().uuid('Invalid project ID').optional(),
 		project_update_id: z.string().uuid('Invalid project update ID').optional(),
-		type: z.enum(['comment', 'question', 'answer']).default('comment'),
+		type: z.enum(COMMENT_TYPES).default('comment'),
 		metadata: z.record(z.unknown()).default({}),
 	})
 	.superRefine((data, ctx) => {
@@ -43,7 +47,7 @@ export const createCommentSchema = z
 	})
 
 export interface ParentValidationInput {
-	supabase: unknown
+	supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 	parentCommentId: string
 	commentType: z.infer<typeof createCommentSchema>['type']
 	projectId?: string
@@ -73,8 +77,7 @@ export async function validateParentComment({
 	projectUpdateId,
 }: ParentValidationInput): Promise<{ valid: boolean; error?: string }> {
 	// Check if parent comment exists
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { data: parentComment, error: fetchError } = await (supabase as any)
+	const { data: parentComment, error: fetchError } = await supabase
 		.from('comments')
 		.select('id, type, project_id, project_update_id')
 		.eq('id', parentCommentId)
