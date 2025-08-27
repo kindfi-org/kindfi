@@ -37,6 +37,7 @@ const Footer = () => {
 					href: 'https://kindfi.gitbook.io/kindfi',
 					target: '_blank',
 				},
+				{ label: 'News', href: '/news' },
 				{ label: 'Tutorials', href: '/tutorials' },
 				{ label: 'FAQs', href: '/faqs' },
 			],

@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Badge } from '~/components/base/badge'
 import { Card, CardContent } from '~/components/base/card'
 import { fadeInUp, staggerChildren } from '~/lib/constants/animations'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import { investorsData } from '~/lib/mock-data/community-hero-data'
 import type { HeroInvestor } from '~/lib/types/investors/hero.types'
 
@@ -70,7 +71,7 @@ function InvestorCard({ investor }: { investor: HeroInvestor }) {
 						>
 							<div className="w-24 h-24 rounded-lg bg-gray-200 overflow-hidden">
 								<Image
-									src={investor.profileImg || '/placeholder.svg'}
+									src={investor.profileImg || PLACEHOLDER_IMG}
 									alt={investor.name}
 									className="w-full h-full object-cover"
 								/>

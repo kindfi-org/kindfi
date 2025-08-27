@@ -5,6 +5,7 @@ import { Calendar, Clock, MessageSquare, ThumbsUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { ResourceType } from '~/lib/knowledge-resources'
 
 interface ResourceCardProps {
@@ -35,7 +36,7 @@ export const ResourceCard = ({ resource, index }: ResourceCardProps) => {
 		>
 			<div className="relative h-48 bg-slate-200">
 				<Image
-					src={resource.image || '/placeholder.svg?height=200&width=400'}
+					src={resource.image || `${PLACEHOLDER_IMG}?height=200&width=400`}
 					alt={resource.title}
 					fill
 					className="object-cover"

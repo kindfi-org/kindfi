@@ -40,7 +40,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 		let query = supabase
 			.from('comments')
 			.select('*', { count: 'planned' })
-			.returns<Tables<'comments'>[]>()
 			.order('created_at', { ascending: false })
 		if (projectId) query = query.eq('project_id', projectId)
 		if (projectUpdateId) query = query.eq('project_update_id', projectUpdateId)

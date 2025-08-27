@@ -2,7 +2,7 @@ import { getAvatarFallback } from '~/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from './avatar'
 
 interface UserAvatarProps {
-	src: string
+	src: string | undefined
 	alt: string
 	name: string
 	className?: string

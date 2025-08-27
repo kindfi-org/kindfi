@@ -29,7 +29,8 @@ const isOriginAllowed = (
 	origin: string | null,
 	allowedOrigins: string[] | '*',
 ): boolean => {
-	if (!origin) return false
+	// If no origin header (direct navigation), allow it (for now)
+	if (!origin) return true
 	if (allowedOrigins === '*') return true
 
 	return allowedOrigins.some((allowedOrigin) => {
@@ -62,7 +63,7 @@ export const withCORS = (
 	return async (req: Request) => {
 		const origin = req.headers.get('origin')
 		const allowOrigin = isOriginAllowed(origin, corsOptions.allowedOrigins)
-			? origin
+			? origin || '*'
 			: corsOptions.allowedOrigins === '*'
 				? '*'
 				: null
