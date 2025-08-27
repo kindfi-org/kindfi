@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import type { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { Tables } from '@services/supabase'
 
 // Schema for validating comment creation requests
@@ -22,6 +21,11 @@ export const createCommentSchema = z
 				code: z.ZodIssueCode.custom,
 				message: 'Either project_id or project_update_id must be provided',
 				path: ['project_id'],
+			})
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Either project_id or project_update_id must be provided',
+				path: ['project_update_id'],
 			})
 		}
 		if (data.project_id && data.project_update_id) {
