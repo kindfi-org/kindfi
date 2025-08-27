@@ -3,6 +3,19 @@ import type { Tables, TablesInsert } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { createCommentSchema, validateParentComment } from './validation'
 
+type CommentListRow = Pick<
+	Tables<'comments'>,
+	| 'id'
+	| 'content'
+	| 'created_at'
+	| 'author_id'
+	| 'parent_comment_id'
+	| 'project_id'
+	| 'project_update_id'
+	| 'type'
+	| 'metadata'
+>
+
 export async function GET(req: NextRequest): Promise<NextResponse> {
 	try {
 		const supabase = await createSupabaseServerClient()
@@ -26,21 +39,38 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 				? (typeParam as 'comment' | 'question' | 'answer')
 				: null
 		
+		// Mirror POST semantics: do not allow both scopes at once
+		if (projectId && projectUpdateId) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: {
+						code: 'VALIDATION_ERROR',
+						message: 'Only one of project_id or project_update_id can be provided',
+					},
+				},
+				{ status: 400 },
+			)
+		}
+		
 		// Guard against NaN and negative values for pagination
 		const limitParam = searchParams.get('limit')
 		const rawLimit = limitParam ? Number(limitParam) : NaN
 		const limit = Number.isFinite(rawLimit) && rawLimit > 0
-			? Math.max(1, Math.min(rawLimit, 100))
+			? Math.max(1, Math.min(Math.trunc(rawLimit), 100))
 			: 50
 			
 		const offsetParam = searchParams.get('offset')
 		const rawOffset = offsetParam ? Number(offsetParam) : NaN
-		const offset = Number.isFinite(rawOffset) ? Math.max(0, rawOffset) : 0
+		const offset = Number.isFinite(rawOffset) ? Math.max(0, Math.trunc(rawOffset)) : 0
 
 		let query = supabase
 			.from('comments')
-			.select('*', { count: 'planned' })
-			.returns<Tables<'comments'>[]>()
+			.select(
+				'id, content, created_at, author_id, parent_comment_id, project_id, project_update_id, type, metadata',
+				{ count: 'planned' },
+			)
+			.returns<CommentListRow[]>()
 			.order('created_at', { ascending: false })
 		if (projectId) query = query.eq('project_id', projectId)
 		if (projectUpdateId) query = query.eq('project_update_id', projectUpdateId)
@@ -48,6 +78,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
 		const { data, error, count } = await query.range(offset, offset + limit - 1)
 		if (error) {
+			console.error('GET /api/comments fetch failed:', error)
 			return NextResponse.json(
 				{
 					success: false,
@@ -92,7 +123,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		}
 
 		// Parse and validate request body
-		const body = await req.json()
+		let body: unknown
+		try {
+			body = await req.json()
+		} catch {
+			return NextResponse.json(
+				{
+					success: false,
+					error: { code: 'INVALID_JSON', message: 'Request body must be valid JSON' },
+				},
+				{ status: 400 },
+			)
+		}
 		const parsed = createCommentSchema.safeParse(body)
 
 		if (!parsed.success) {
@@ -136,6 +178,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 						error: {
 							code: 'VALIDATION_ERROR',
 							message: parentValidation.error,
+							details: { field: 'parent_comment_id' },
 						},
 					},
 					{ status: 400 },
