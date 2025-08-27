@@ -42,30 +42,15 @@ export const createCommentSchema = z
 		}
 	})
 
-export interface SupabaseLike {
-	from: (_table: 'comments') => {
-		select: (_cols: string) => {
-			returns: <T>() => {
-				eq: (_col: 'id', _val: string) => {
-					single: () => Promise<{ data: ParentCommentRow | null; error: { message: string } | null }>
-				}
-			}
-		}
-	}
-}
-
 export interface ParentValidationInput {
-	supabase: SupabaseLike
+	supabase: unknown
 	parentCommentId: string
 	commentType: z.infer<typeof createCommentSchema>['type']
 	projectId?: string
 	projectUpdateId?: string
 }
 
-type ParentCommentRow = Pick<
-	Tables<'comments'>,
-	'id' | 'type' | 'project_id' | 'project_update_id'
->
+
 
 /**
  * Validates that a provided parent_comment_id:
@@ -88,10 +73,10 @@ export async function validateParentComment({
 	projectUpdateId,
 }: ParentValidationInput): Promise<{ valid: boolean; error?: string }> {
 	// Check if parent comment exists
-	const { data: parentComment, error: fetchError } = await supabase
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { data: parentComment, error: fetchError } = await (supabase as any)
 		.from('comments')
 		.select('id, type, project_id, project_update_id')
-		.returns<ParentCommentRow>()
 		.eq('id', parentCommentId)
 		.single()
 

@@ -1,20 +1,9 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
-import type { Tables, TablesInsert } from '@services/supabase'
+import type { TablesInsert } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { createCommentSchema, validateParentComment } from './validation'
 
-type CommentListRow = Pick<
-	Tables<'comments'>,
-	| 'id'
-	| 'content'
-	| 'created_at'
-	| 'author_id'
-	| 'parent_comment_id'
-	| 'project_id'
-	| 'project_update_id'
-	| 'type'
-	| 'metadata'
->
+
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
 	try {
@@ -70,7 +59,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 				'id, content, created_at, author_id, parent_comment_id, project_id, project_update_id, type, metadata',
 				{ count: 'planned' },
 			)
-			.returns<CommentListRow[]>()
 			.order('created_at', { ascending: false })
 		if (projectId) query = query.eq('project_id', projectId)
 		if (projectUpdateId) query = query.eq('project_update_id', projectUpdateId)
@@ -208,7 +196,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			project_id: project_id || null,
 			project_update_id: project_update_id || null,
 			type,
-			metadata,
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			metadata: metadata as any,
 		}
 
 		// Insert the comment
