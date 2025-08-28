@@ -75,7 +75,7 @@ export function KindfiSupabaseAdapter(): Adapter {
 				}
 				// Create corresponding profile in public schema
 				const { error: profileError } = await supabase.from('profiles').insert({
-					// @ts-ignore asking for full object, for now it is OK to ignore until more tests are done.
+					// @ts-expect-error asking for full object, for now it is OK to ignore until more tests are done.
 					next_auth_user_id: createdUser.id,
 					email: createdUser.email,
 					display_name: createdUser.name || null,
