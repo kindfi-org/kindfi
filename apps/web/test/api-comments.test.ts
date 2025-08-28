@@ -388,6 +388,7 @@ describe('/api/comments', () => {
 				offset: 0,
 				total: 2,
 			})
+			expect(mockSupabase.range).toHaveBeenCalledWith(0, 49)
 		})
 
 		test('should return 400 when both project_id and project_update_id are provided', async () => {
@@ -534,6 +535,7 @@ describe('/api/comments', () => {
 				offset: 0, // Should clamp to 0 for negative input
 				total: 1,
 			})
+			expect(mockSupabase.range).toHaveBeenCalledWith(0, 49)
 		})
 	})
 })
