@@ -215,7 +215,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			.insert(commentData)
 			.select(
 				`
-				*,
+				id, content, created_at, author_id, parent_comment_id,
+				project_id, project_update_id, type, metadata,
 				author:profiles (id, full_name, image_url)
 			`,
 			)

@@ -40,7 +40,9 @@ interface MockQuery {
 
 // Helper to cast mock to proper Supabase type for testing
 const typedMockSupabase =
-	mockSupabase as unknown as import('../app/api/comments/validation').SupabaseLike
+	mockSupabase as unknown as Awaited<
+		ReturnType<typeof import('@packages/lib/supabase-server').createSupabaseServerClient>
+	>
 
 describe('Comments API Validation Logic', () => {
 	beforeEach(() => {

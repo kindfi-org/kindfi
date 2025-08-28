@@ -390,6 +390,17 @@ describe('/api/comments', () => {
 			})
 		})
 
+		test('should return 400 when both project_id and project_update_id are provided', async () => {
+			const req = new NextRequest(
+				'http://localhost/api/comments?project_id=123&project_update_id=456',
+			)
+			const res = await GET(req)
+			const json = await res.json()
+			expect(res.status).toBe(400)
+			expect(json.success).toBe(false)
+			expect(json.error.code).toBe('VALIDATION_ERROR')
+		})
+
 		test('should filter comments by project_id', async () => {
 			const mockComments = [{ id: 'comment-1', content: 'Project comment' }]
 
