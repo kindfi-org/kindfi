@@ -38,6 +38,14 @@ describe('/api/comments', () => {
 			mockSupabase.auth.getUser.mock.clear()
 		}
 
+		// Restore default auth resolver
+		mockSupabase.auth.getUser.mockResolvedValue({
+			data: { user: { id: '123e4567-e89b-12d3-a456-426614174000' } },
+			error: null,
+		})
+		// Ensure single() has no stale resolver between tests
+		mockSupabase.single.mockReset()
+
 		// Reset specific mocks to default values
 		mockSupabase.range.mockResolvedValue({
 			data: [],
@@ -249,6 +257,19 @@ describe('/api/comments', () => {
 			expect(result.error.message).toBe('Invalid request data')
 		})
 
+		test('should return 400 with code INVALID_JSON for malformed JSON', async () => {
+			const req = new NextRequest('http://localhost/api/comments', {
+				method: 'POST',
+				// Intentionally malformed JSON
+				body: '{ "content": "oops", ',
+			})
+			const res = await POST(req)
+			const json = await res.json()
+			expect(res.status).toBe(400)
+			expect(json.success).toBe(false)
+			expect(json.error.code).toBe('INVALID_JSON')
+		})
+
 		test('should return 500 when database insertion fails', async () => {
 			// Mock database error
 			mockSupabase.single.mockResolvedValue({
@@ -440,6 +461,19 @@ describe('/api/comments', () => {
 			expect(response.status).toBe(200)
 			expect(result.success).toBe(true)
 			expect(result.data).toEqual(mockQuestions)
+		})
+
+		test('should ignore invalid type param', async () => {
+			mockSupabase.range.mockResolvedValue({
+				data: [],
+				error: null,
+				count: 0,
+			})
+			const req = new NextRequest('http://localhost/api/comments?type=bogus')
+			const res = await GET(req)
+			const json = await res.json()
+			expect(res.status).toBe(200)
+			expect(json.success).toBe(true)
 		})
 
 		test('should handle database errors gracefully', async () => {
