@@ -170,7 +170,13 @@ begin
   curr_hash := 'sha256:' || encode(extensions.digest(new_snapshot::text, 'sha256'), 'hex');
 
   -- resolve actor from the authenticated user id (UUID)
-  actor := auth.uid();
+  actor := coalesce(
+    nullif(current_setting('request.jwt.claim.sub', true), '')::uuid,
+    nullif(
+      (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub'),
+      ''
+    )::uuid
+  );
 
   -- detect changed fields by comparing key/value pairs
   changed_fields := coalesce((
