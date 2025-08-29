@@ -18,39 +18,24 @@ alter table public.escrow_milestones
   add column if not exists created_at timestamptz not null default now(),
   add column if not exists updated_at timestamptz not null default now();
 
--- generic set_updated_at (only if not exists)
-do $$
+-- generic set_updated_at (create or replace)
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $func$
 begin
-  if not exists (
-    select 1
-    from pg_proc p
-    join pg_namespace n on n.oid = p.pronamespace
-    where p.proname = 'set_updated_at'
-      and n.nspname = 'public'
-  ) then
-    create function public.set_updated_at()
-    returns trigger
-    language plpgsql
-    as $func$
-    begin
-      new.updated_at := now();
-      return new;
-    end;
-    $func$;
-  end if;
-end$$;
+  new.updated_at := now();
+  return new;
+end;
+$func$;
 
--- updated_at trigger (only if not exists)
-do $$
-begin
-  if not exists (
-    select 1 from pg_trigger where tgname = 'trg_set_updated_at_escrow_milestones'
-  ) then
-    create trigger trg_set_updated_at_escrow_milestones
-    before update on public.escrow_milestones
-    for each row execute function public.set_updated_at();
-  end if;
-end$$;
+-- updated_at trigger (drop + create to ensure correct configuration)
+drop trigger if exists trg_set_updated_at_escrow_milestones on public.escrow_milestones;
+
+create trigger trg_set_updated_at_escrow_milestones
+before update on public.escrow_milestones
+for each row
+execute function public.set_updated_at();
 
 -- per-FK indexes
 create index if not exists idx_escrow_milestones_escrow_id

@@ -31,39 +31,24 @@ create table if not exists public.project_escrows (
 -- enable row level security (mandatory in supabase)
 alter table public.project_escrows enable row level security;
 
--- generic updated_at function (create only if it does not already exist)
-do $$
+-- generic updated_at function (create or replace)
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $func$
 begin
-  if not exists (
-    select 1
-    from pg_proc p
-    join pg_namespace n on n.oid = p.pronamespace
-    where p.proname = 'set_updated_at'
-      and n.nspname = 'public'
-  ) then
-    create or replace function public.set_updated_at()
-    returns trigger
-    language plpgsql
-    as $func$
-    begin
-      new.updated_at := now();
-      return new;
-    end;
-    $func$;
-  end if;
-end$$;
+  new.updated_at := now();
+  return new;
+end;
+$func$;
 
--- updated_at trigger (create only if it does not already exist)
-do $$
-begin
-  if not exists (
-    select 1 from pg_trigger where tgname = 'trg_set_updated_at_project_escrows'
-  ) then
-    create trigger trg_set_updated_at_project_escrows
-    before update on public.project_escrows
-    for each row execute function public.set_updated_at();
-  end if;
-end$$;
+-- updated_at trigger (drop + create to guarantee exact config)
+drop trigger if exists trg_set_updated_at_project_escrows on public.project_escrows;
+
+create trigger trg_set_updated_at_project_escrows
+before update on public.project_escrows
+for each row
+execute function public.set_updated_at();
 
 -- performance indexes for one-sided lookups and efficient rls checks
 create index if not exists idx_project_escrows_project_id
