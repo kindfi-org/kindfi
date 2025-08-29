@@ -513,16 +513,22 @@ export type Database = {
 			}
 			escrow_milestones: {
 				Row: {
+					created_at: string
 					escrow_id: string
 					milestone_id: string
+					updated_at: string
 				}
 				Insert: {
+					created_at?: string
 					escrow_id: string
 					milestone_id: string
+					updated_at?: string
 				}
 				Update: {
+					created_at?: string
 					escrow_id?: string
 					milestone_id?: string
+					updated_at?: string
 				}
 				Relationships: [
 					{
@@ -890,6 +896,42 @@ export type Database = {
 				}
 				Relationships: []
 			}
+			project_escrows: {
+				Row: {
+					created_at: string
+					escrow_id: string
+					project_id: string
+					updated_at: string
+				}
+				Insert: {
+					created_at?: string
+					escrow_id: string
+					project_id: string
+					updated_at?: string
+				}
+				Update: {
+					created_at?: string
+					escrow_id?: string
+					project_id?: string
+					updated_at?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'project_escrows_escrow_id_fkey'
+						columns: ['escrow_id']
+						isOneToOne: false
+						referencedRelation: 'escrow_contracts'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'project_escrows_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: false
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+				]
+			}
 			project_members: {
 				Row: {
 					id: string
@@ -1071,11 +1113,13 @@ export type Database = {
 					image_url: string | null
 					kinder_count: number
 					kindler_id: string
+					metadata: Json
 					min_investment: number
 					percentage_complete: number
 					project_location: string
 					slug: string | null
 					social_links: Json
+					status: Database['public']['Enums']['project_status']
 					target_amount: number
 					title: string
 					updated_at: string | null
@@ -1089,11 +1133,13 @@ export type Database = {
 					image_url?: string | null
 					kinder_count?: number
 					kindler_id: string
+					metadata?: Json
 					min_investment: number
 					percentage_complete?: number
 					project_location: string
 					slug?: string | null
 					social_links?: Json
+					status?: Database['public']['Enums']['project_status']
 					target_amount: number
 					title: string
 					updated_at?: string | null
@@ -1107,11 +1153,13 @@ export type Database = {
 					image_url?: string | null
 					kinder_count?: number
 					kindler_id?: string
+					metadata?: Json
 					min_investment?: number
 					percentage_complete?: number
 					project_location?: string
 					slug?: string | null
 					social_links?: Json
+					status?: Database['public']['Enums']['project_status']
 					target_amount?: number
 					title?: string
 					updated_at?: string | null
@@ -1233,6 +1281,13 @@ export type Database = {
 				| 'community'
 				| 'core'
 				| 'others'
+			project_status:
+				| 'draft'
+				| 'review'
+				| 'active'
+				| 'paused'
+				| 'funded'
+				| 'rejected'
 			user_role: 'kinder' | 'kindler'
 		}
 		CompositeTypes: {
@@ -1399,6 +1454,14 @@ export const Constants = {
 				'community',
 				'core',
 				'others',
+			],
+			project_status: [
+				'draft',
+				'review',
+				'active',
+				'paused',
+				'funded',
+				'rejected',
 			],
 			user_role: ['kinder', 'kindler'],
 		},
