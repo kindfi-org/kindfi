@@ -2,8 +2,12 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { Tables } from '@services/supabase'
 import { Loader2 } from 'lucide-react'
 import { Suspense } from 'react'
-import type { QuestionData, UserData } from '~/lib/types/project/project-qa.types'
-import type { CommentData, QAProps } from '~/lib/types/project/project-qa.types'
+import type {
+	CommentData,
+	QAProps,
+	QuestionData,
+	UserData,
+} from '~/lib/types/project/project-qa.types'
 import QAClient from './qa-client'
 
 export default async function QA({ projectId, currentUser }: QAProps) {
@@ -46,13 +50,14 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 		questionsWithAuthors = initialQuestions.map((question) => ({
 			...question,
-			author: authorsMap[question.author_id] ||
+			author:
+				authorsMap[question.author_id] ||
 				(question.author_id?.includes('-')
 					? {
-						id: question.author_id,
-						full_name: 'Guest User',
-						is_team_member: false,
-					}
+							id: question.author_id,
+							full_name: 'Guest User',
+							is_team_member: false,
+						}
 					: undefined),
 		})) as unknown as QuestionData[]
 	}
