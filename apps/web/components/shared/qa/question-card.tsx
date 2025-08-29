@@ -17,7 +17,7 @@ import {
 	CardHeader,
 } from '~/components/base/card'
 import { Textarea } from '~/components/base/textarea'
-import type { CommentWithAnswers, UserData } from '~/lib/types/qa/types'
+import type { CommentWithAnswers, UserData } from '~/lib/types/project/project-qa.types'
 import { UserInfo } from './user-info'
 
 export interface QuestionCardProps {
@@ -67,10 +67,10 @@ export function QuestionCard({
 						size="sm"
 					/>
 					<div className="flex items-center gap-2">
-						{(question.metadata?.is_resolved as boolean) && (
+						{('status' in (question.metadata ?? {})) && (question.metadata as { status?: string })?.status === 'resolved' && (
 							<Badge variant="secondary" className="bg-green-50 text-green-700">
 								<CheckCircle className="mr-1 h-3 w-3" aria-hidden="true" />
-								Resolved \t \t
+								Resolved
 							</Badge>
 						)}
 					</div>
@@ -98,7 +98,7 @@ export function QuestionCard({
 						)}
 					</Button>
 
-					{question.metadata?.status !== 'resolved' && effectiveUser && (
+					{('status' in (question.metadata ?? {})) && (question.metadata as { status?: string })?.status !== 'resolved' && effectiveUser && (
 						<Button
 							variant="outline"
 							size="sm"

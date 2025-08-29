@@ -53,7 +53,9 @@ export interface QuestionWithAnswers extends QuestionData {
 	answers?: AnswerData[]
 }
 
-export type CommentWithAnswers = CommentWithReplies
+export interface CommentWithAnswers extends CommentData {
+	answers?: CommentWithReplies[]
+}
 
 export interface AnswerWithReplies extends AnswerData {
 	replies?: RegularCommentData[]
