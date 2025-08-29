@@ -58,7 +58,7 @@ alter table public.escrow_milestones
 -- RLS (ensure enabled)
 alter table public.escrow_milestones enable row level security;
 
--- replace policies (owner-only por milestone → project)
+-- replace policies (owner-only via milestone → project)
 drop policy if exists "Project owners can create escrow milestones" on public.escrow_milestones;
 drop policy if exists "Project owners can view escrow milestones"   on public.escrow_milestones;
 drop policy if exists "Project owners can update escrow milestones" on public.escrow_milestones;
