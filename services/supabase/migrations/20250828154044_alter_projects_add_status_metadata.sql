@@ -77,7 +77,7 @@ set metadata = jsonb_set(
                    'sha256:' ||
                    encode(
                      extensions.digest(
-                       (to_jsonb(p) - array['metadata','created_at','updated_at'])::text,
+                       (jsonb_strip_nulls(to_jsonb(p) - array['metadata','created_at','updated_at']))::text,
                        'sha256'
                      ),
                      'hex'
@@ -99,7 +99,7 @@ declare
   curr_hash text;
 begin
   -- canonical snapshot of the incoming row (excluding volatile fields)
-  new_snapshot := to_jsonb(new) - array['metadata','created_at','updated_at'];
+  new_snapshot := jsonb_strip_nulls(to_jsonb(new) - array['metadata','created_at','updated_at']);
 
   -- compute hash for the snapshot
   curr_hash := 'sha256:' ||
@@ -157,8 +157,8 @@ declare
   entry jsonb;
 begin
   -- build canonical snapshots (excluding volatile fields)
-  old_snapshot := to_jsonb(old) - array['metadata','created_at','updated_at'];
-  new_snapshot := to_jsonb(new) - array['metadata','created_at','updated_at'];
+  old_snapshot := jsonb_strip_nulls(to_jsonb(old) - array['metadata','created_at','updated_at']);
+  new_snapshot := jsonb_strip_nulls(to_jsonb(new) - array['metadata','created_at','updated_at']);
 
   -- if nothing relevant changed, skip
   if old_snapshot is not distinct from new_snapshot then

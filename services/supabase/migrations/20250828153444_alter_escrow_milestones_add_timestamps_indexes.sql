@@ -1,16 +1,19 @@
 /* 
-  migration: escrow_milestones — timestamps, indexes, CASCADE FKs & hardened RLS
+  migration: escrow_milestones — timestamps, indexes, CASCADE FKs & owner-only RLS
   purpose:
-    - add created_at / updated_at + trigger.
-    - add indexes by FK.
-    - enforce ON DELETE CASCADE on FKs.
-    - replace RLS policies to validate project ownership via milestone → project.kindler_id = next_auth.uid().
-  affected:
+    - add created_at / updated_at columns and an updated_at trigger.
+    - add per-FK indexes to support lookups and RLS evaluation.
+    - enforce ON DELETE CASCADE on both foreign keys.
+    - replace RLS with owner-only policies validated via milestone → project.kindler_id = <current user>.
+  affected objects:
     - table: public.escrow_milestones
-    - function: public.set_updated_at()
-    - policies: select/insert/update/delete on public.escrow_milestones
-  notes:
-    - best-effort idempotent (IF EXISTS / IF NOT EXISTS, drop+create by name).
+    - foreign keys: public.escrow_contracts(id), public.milestones(id)
+    - trigger: trg_set_updated_at_escrow_milestones → public.set_updated_at()
+    - policies: select / insert / update / delete on public.escrow_milestones
+  assumptions:
+    - ownership: a user “owns” a project when public.projects.kindler_id = (select next_auth.uid()).
+  safety:
+    - idempotent where reasonable (if not exists; drop+create for triggers).
 */
 
 -- ensure traceability columns
@@ -55,7 +58,7 @@ alter table public.escrow_milestones
   add constraint escrow_milestones_milestone_id_fkey
     foreign key (milestone_id) references public.milestones(id) on delete cascade;
 
--- RLS (ensure enabled)
+-- enable row level security
 alter table public.escrow_milestones enable row level security;
 
 -- replace policies (owner-only via milestone → project)
@@ -70,9 +73,12 @@ on public.escrow_milestones
 for select
 to authenticated
 using (
-  milestone_id IN (
-    SELECT id FROM milestones
-    WHERE project_id IN (SELECT id FROM projects WHERE kindler_id = next_auth.uid())
+  exists (
+    select 1
+    from public.milestones m
+    join public.projects p on p.id = m.project_id
+    where m.id = escrow_milestones.milestone_id
+      and p.kindler_id = next_auth.uid()
   )
 );
 
@@ -81,9 +87,12 @@ on public.escrow_milestones
 for insert
 to authenticated
 with check (
-  milestone_id IN (
-    SELECT id FROM milestones
-    WHERE project_id IN (SELECT id FROM projects WHERE kindler_id = next_auth.uid())
+  exists (
+    select 1
+    from public.milestones m
+    join public.projects p on p.id = m.project_id
+    where m.id = escrow_milestones.milestone_id
+      and p.kindler_id = next_auth.uid()
   )
 );
 
@@ -92,15 +101,21 @@ on public.escrow_milestones
 for update
 to authenticated
 using (
-  milestone_id IN (
-    SELECT id FROM milestones
-    WHERE project_id IN (SELECT id FROM projects WHERE kindler_id = next_auth.uid())
+  exists (
+    select 1
+    from public.milestones m
+    join public.projects p on p.id = m.project_id
+    where m.id = escrow_milestones.milestone_id
+      and p.kindler_id = next_auth.uid()
   )
 )
 with check (
-  milestone_id IN (
-    SELECT id FROM milestones
-    WHERE project_id IN (SELECT id FROM projects WHERE kindler_id = next_auth.uid())
+  exists (
+    select 1
+    from public.milestones m
+    join public.projects p on p.id = m.project_id
+    where m.id = escrow_milestones.milestone_id
+      and p.kindler_id = next_auth.uid()
   )
 );
 
@@ -109,8 +124,11 @@ on public.escrow_milestones
 for delete
 to authenticated
 using (
-  milestone_id IN (
-    SELECT id FROM milestones
-    WHERE project_id IN (SELECT id FROM projects WHERE kindler_id = next_auth.uid())
+  exists (
+    select 1
+    from public.milestones m
+    join public.projects p on p.id = m.project_id
+    where m.id = escrow_milestones.milestone_id
+      and p.kindler_id = next_auth.uid()
   )
 );
