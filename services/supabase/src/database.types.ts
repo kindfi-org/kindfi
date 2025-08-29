@@ -919,14 +919,14 @@ export type Database = {
 					{
 						foreignKeyName: 'project_escrows_escrow_id_fkey'
 						columns: ['escrow_id']
-						isOneToOne: false
+						isOneToOne: true
 						referencedRelation: 'escrow_contracts'
 						referencedColumns: ['id']
 					},
 					{
 						foreignKeyName: 'project_escrows_project_id_fkey'
 						columns: ['project_id']
-						isOneToOne: false
+						isOneToOne: true
 						referencedRelation: 'projects'
 						referencedColumns: ['id']
 					},
