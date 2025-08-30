@@ -1,14 +1,13 @@
-import { appEnvConfig } from '@packages/lib'
-import type { AppEnvInterface } from '@packages/lib/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
-
 interface KYCUpdate {
-	type: 'kyc_update'
-	userId: string
-	status: string
-	timestamp: string
+	type: 'kyc_status'
+	data: {
+		user_id: string
+		status: string
+		verification_level: string
+		timestamp: string
+	}
 }
 
 interface WebSocketError {
@@ -27,18 +26,11 @@ interface UseKYCWebSocketOptions {
 }
 
 const isValidKYCUpdate = (data: unknown): data is KYCUpdate => {
-	return (
+	return data && 
 		typeof data === 'object' &&
-		data !== null &&
-		'type' in data &&
-		data.type === 'kyc_update' &&
-		'userId' in data &&
-		typeof data.userId === 'string' &&
-		'status' in data &&
-		typeof data.status === 'string' &&
-		'timestamp' in data &&
-		typeof data.timestamp === 'string'
-	)
+		'type' in data && 
+		data.type === 'kyc_status' &&
+		'data' in data
 }
 
 export function useKYCWebSocket({
@@ -61,8 +53,9 @@ export function useKYCWebSocket({
 	}, [onUpdate])
 
 	const connect = useCallback(() => {
-		const protocol = appConfig.env.nodeEnv === 'production' ? 'wss' : 'ws'
-		const ws = new WebSocket(`${protocol}://${window.location.host}/live`)
+		const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
+		const wsUrl = `${protocol}://${window.location.host}/live`
+		const ws = new WebSocket(wsUrl)
 		wsRef.current = ws
 
 		connectionTimeoutRef.current = setTimeout(() => {
@@ -73,7 +66,6 @@ export function useKYCWebSocket({
 		}, connectionTimeout)
 
 		ws.onopen = () => {
-			console.log('WebSocket connected')
 			setIsConnected(true)
 			retryCountRef.current = 0
 			clearTimeout(connectionTimeoutRef.current)
@@ -90,22 +82,15 @@ export function useKYCWebSocket({
 				if (isValidKYCUpdate(data)) {
 					lastUpdateRef.current = data
 					onUpdateRef.current?.(data)
-				} else if (
-					data &&
-					typeof data === 'object' &&
-					'type' in data &&
-					data.type === 'error'
-				) {
+				} else if (data && typeof data === 'object' && 'type' in data && data.type === 'error') {
 					console.error('Server error:', (data as WebSocketError).message)
-				} else {
-					console.warn('Received unknown message format:', data)
 				}
 			} catch (error) {
 				console.error('Error parsing WebSocket message:', error)
 			}
 		}
 
-		ws.onclose = () => {
+		ws.onclose = (event) => {
 			console.log('WebSocket disconnected')
 			setIsConnected(false)
 			clearTimeout(connectionTimeoutRef.current)

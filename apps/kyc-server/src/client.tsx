@@ -6,6 +6,7 @@ import { ThemeProvider } from './components/provider/theme-provider'
 import About from './pages/About'
 import DashboardPage from './pages/dashboard'
 import Customers from './pages/dashboard/customers'
+import Users from './pages/dashboard/users'
 import WebSocketDemo from './pages/WebSocketDemo'
 
 import './index.css'
@@ -29,6 +30,7 @@ hydrateRoot(
 						/>
 						<Route path="/websocket" element={<WebSocketDemo />} />
 						<Route path="/dashboard/customers" element={<Customers />} />
+						<Route path="/dashboard/users" element={<Users />} />
 					</Routes>
 				</Layout>
 			</ThemeProvider>

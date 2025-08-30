@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { kycStatusUpdateSchema } from '@services/supabase'
+import { kycReviewsUpdateSchema } from '@services/supabase'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '~/components/base/button'
@@ -27,7 +27,7 @@ interface KycDetailsFormProps {
 
 export function KycDetailsForm({ item }: KycDetailsFormProps) {
 	const form = useForm<KycStatusUpdateValues>({
-		resolver: zodResolver(kycStatusUpdateSchema),
+		resolver: zodResolver(kycReviewsUpdateSchema),
 		defaultValues: {
 			user_id: item.user_id,
 			status: item.status,

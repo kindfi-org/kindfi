@@ -1,8 +1,7 @@
 import type {
 	kycReviewsInsertSchema,
 	kycReviewsRowSchema,
-	kycStatusRowSchema,
-	kycStatusUpdateSchema,
+	kycReviewsUpdateSchema,
 } from '@services/supabase'
 import type { LucideIcon } from 'lucide-react'
 import type { z } from 'zod'
@@ -25,9 +24,9 @@ export type TimeRangeOption = {
 	value: TimeRange
 }
 
-export type KycRecord = z.infer<typeof kycStatusRowSchema>
+export type KycRecord = z.infer<typeof kycReviewsRowSchema>
 export type KycReview = z.infer<typeof kycReviewsRowSchema>
-export type KycStatusUpdateValues = z.infer<typeof kycStatusUpdateSchema>
+export type KycStatusUpdateValues = z.infer<typeof kycReviewsUpdateSchema>
 export type KycReviewsInsertValues = z.infer<typeof kycReviewsInsertSchema>
 
 export interface KycStats {

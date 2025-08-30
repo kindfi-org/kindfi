@@ -31,7 +31,7 @@ const Header = () => {
 
 	const innerNavItems = [
 		{ path: '/dashboard', label: 'Dashboard' },
-		{ path: '/dashboard/customers', label: 'Customers' },
+		{ path: '/dashboard/users', label: 'Users' },
 		{ path: '/dashboard/projects', label: 'Projects' },
 		{ path: '/dashboard/analytics', label: 'Analytics' },
 		{ path: '/dashboard/settings', label: 'Settings' },

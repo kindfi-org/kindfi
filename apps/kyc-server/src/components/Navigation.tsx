@@ -6,11 +6,10 @@ interface NavigationProps {
 export const routes = [
 	{ path: '/', label: 'Home' },
 	{ path: '/dashboard', label: 'Dashboard' },
+	{ path: '/dashboard/users', label: 'Users' },
 	{ path: '/react', label: 'React Demo' },
 	{ path: '/websocket', label: 'WebSocket Demo' },
 	{ path: '/about', label: 'About' },
-	// Add new routes here
-	// { path: '/new-feature', label: 'New Feature' },
 ]
 
 // Log the routes for debugging
