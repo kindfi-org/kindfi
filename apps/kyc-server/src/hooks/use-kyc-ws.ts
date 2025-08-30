@@ -26,11 +26,13 @@ interface UseKYCWebSocketOptions {
 }
 
 const isValidKYCUpdate = (data: unknown): data is KYCUpdate => {
-	return data && 
+	return (
+		data &&
 		typeof data === 'object' &&
-		'type' in data && 
+		'type' in data &&
 		data.type === 'kyc_status' &&
 		'data' in data
+	)
 }
 
 export function useKYCWebSocket({
@@ -82,7 +84,12 @@ export function useKYCWebSocket({
 				if (isValidKYCUpdate(data)) {
 					lastUpdateRef.current = data
 					onUpdateRef.current?.(data)
-				} else if (data && typeof data === 'object' && 'type' in data && data.type === 'error') {
+				} else if (
+					data &&
+					typeof data === 'object' &&
+					'type' in data &&
+					data.type === 'error'
+				) {
 					console.error('Server error:', (data as WebSocketError).message)
 				}
 			} catch (error) {
