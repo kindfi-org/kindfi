@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-interface KYCUpdate {
+export type KYCStatus = 'pending' | 'approved' | 'rejected' | 'verified'
+export type VerificationLevel = 'basic' | 'enhanced'
+
+export interface KYCUpdate {
 	type: 'kyc_status'
 	data: {
 		user_id: string
-		status: string
-		verification_level: string
+		status: KYCStatus
+		verification_level: VerificationLevel
 		timestamp: string
 	}
 }
@@ -23,15 +26,39 @@ interface UseKYCWebSocketOptions {
 	maxRetries?: number
 	initialRetryDelay?: number
 	connectionTimeout?: number
+	basePath?: string
 }
 
 const isValidKYCUpdate = (data: unknown): data is KYCUpdate => {
+	if (!data || typeof data !== 'object' || data === null) {
+		return false
+	}
+
+	const obj = data as Record<string, unknown>
+
+	// Check top-level structure
+	if (typeof obj.type !== 'string' || obj.type !== 'kyc_status') {
+		return false
+	}
+
+	// Check that data.data exists and is an object
+	if (!obj.data || typeof obj.data !== 'object' || obj.data === null) {
+		return false
+	}
+
+	const payload = obj.data as Record<string, unknown>
+
+	// Check required nested fields with correct types and values
+	const validStatuses: KYCStatus[] = ['pending', 'approved', 'rejected', 'verified']
+	const validLevels: VerificationLevel[] = ['basic', 'enhanced']
+
 	return (
-		data &&
-		typeof data === 'object' &&
-		'type' in data &&
-		data.type === 'kyc_status' &&
-		'data' in data
+		typeof payload.user_id === 'string' &&
+		typeof payload.status === 'string' &&
+		validStatuses.includes(payload.status as KYCStatus) &&
+		typeof payload.verification_level === 'string' &&
+		validLevels.includes(payload.verification_level as VerificationLevel) &&
+		typeof payload.timestamp === 'string'
 	)
 }
 
@@ -41,6 +68,7 @@ export function useKYCWebSocket({
 	maxRetries = 5,
 	initialRetryDelay = 1000,
 	connectionTimeout = 10000,
+	basePath,
 }: UseKYCWebSocketOptions = {}) {
 	const [isConnected, setIsConnected] = useState(false)
 	const lastUpdateRef = useRef<KYCUpdate | null>(null)
@@ -56,7 +84,10 @@ export function useKYCWebSocket({
 
 	const connect = useCallback(() => {
 		const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
-		const wsUrl = `${protocol}://${window.location.host}/live`
+		const envBasePath = process.env.REACT_APP_WS_BASE_PATH || '/live'
+		const finalBasePath = basePath || envBasePath
+		const normalizedPath = finalBasePath.startsWith('/') ? finalBasePath : `/${finalBasePath}`
+		const wsUrl = `${protocol}://${window.location.host}${normalizedPath}`
 		const ws = new WebSocket(wsUrl)
 		wsRef.current = ws
 
@@ -115,7 +146,7 @@ export function useKYCWebSocket({
 			console.error('WebSocket error:', error)
 			setIsConnected(false)
 		}
-	}, [userId, maxRetries, initialRetryDelay, connectionTimeout])
+	}, [userId, maxRetries, initialRetryDelay, connectionTimeout, basePath])
 
 	useEffect(() => {
 		connect()

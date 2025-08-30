@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import About from '~/pages/About'
 import Dashboard from '~/pages/dashboard'
 import Customers from '~/pages/dashboard/customers'
-import Users from '~/pages/dashboard/users'
+import { Users } from '~/pages/dashboard/users'
 import WebSocketDemo from '../pages/WebSocketDemo'
 
 // Centralized content map for both client and server

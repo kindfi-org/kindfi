@@ -26,8 +26,10 @@ export type TimeRangeOption = {
 
 export type KycRecord = z.infer<typeof kycReviewsRowSchema>
 export type KycReview = z.infer<typeof kycReviewsRowSchema>
-export type KycStatusUpdateValues = z.infer<typeof kycReviewsUpdateSchema>
+export type KycReviewUpdateValues = z.infer<typeof kycReviewsUpdateSchema>
 export type KycReviewsInsertValues = z.infer<typeof kycReviewsInsertSchema>
+
+export type KycStatusUpdateValues = KycReviewUpdateValues
 
 export interface KycStats {
 	totalUsers: number

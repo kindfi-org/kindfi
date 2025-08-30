@@ -1,5 +1,5 @@
 import { Wifi, WifiOff } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useId, useState } from 'react'
 import {
 	Card,
 	CardDescription,
@@ -8,22 +8,13 @@ import {
 } from '~/components/base/card'
 import { KycTable } from '~/components/dashboard/table/kyc-table'
 import { useKYCWebSocket } from '~/hooks/use-kyc-ws'
+import type { KycRecord } from '~/lib/types/dashboard'
 import { mockKycRecords } from '~/lib/mock-data/dashboard'
 
-interface KYCUser {
-	id: string
-	user_id: string
-	status: 'pending' | 'approved' | 'rejected' | 'verified'
-	verification_level: 'basic' | 'enhanced'
-	created_at: string
-	updated_at: string
-	notes: string | null
-	reviewer_id: string | null
-}
-
-export default function Users() {
-	const [allUsers, setAllUsers] = useState<KYCUser[]>([])
-	const [filteredUsers, setFilteredUsers] = useState<KYCUser[]>([])
+export function Users() {
+	const searchId = useId()
+	const [allUsers, setAllUsers] = useState<KycRecord[]>([])
+	const [filteredUsers, setFilteredUsers] = useState<KycRecord[]>([])
 	const [loading, setLoading] = useState(true)
 	const [search, setSearch] = useState('')
 	const [stats, setStats] = useState({
@@ -37,71 +28,122 @@ export default function Users() {
 	const { isConnected } = useKYCWebSocket({
 		onUpdate: (update) => {
 			setAllUsers((currentUsers) => {
-				const updatedUsers = currentUsers.map((user) =>
-					user.user_id === update.data.user_id ||
-					user.id === update.data.user_id
-						? {
-								...user,
-								status: update.data.status as KYCUser['status'],
-								verification_level: update.data.verification_level as KYCUser['verification_level'],
-							}
-						: user,
-				)
+				const existingUserIndex = currentUsers.findIndex((user) => user.user_id === update.data.user_id)
+				
+				let finalUsers: KycRecord[]
+				if (existingUserIndex !== -1) {
+					finalUsers = currentUsers.map((user, index) =>
+						index === existingUserIndex
+							? {
+									...user,
+									status: update.data.status,
+									verification_level: update.data.verification_level,
+								}
+							: user,
+					)
+				} else {
+					const newUser: KycRecord = {
+						id: update.data.user_id,
+						user_id: update.data.user_id,
+						status: update.data.status,
+						verification_level: update.data.verification_level,
+						created_at: update.data.timestamp,
+						updated_at: update.data.timestamp,
+						notes: null,
+						reviewer_id: null,
+					}
+					finalUsers = [...currentUsers, newUser]
+				}
 
 				setStats({
-					total: updatedUsers.length,
-					pending: updatedUsers.filter((u) => u.status === 'pending').length,
-					approved: updatedUsers.filter((u) => u.status === 'approved').length,
-					rejected: updatedUsers.filter((u) => u.status === 'rejected').length,
-					verified: updatedUsers.filter((u) => u.status === 'verified').length,
+					total: finalUsers.length,
+					pending: finalUsers.filter((u) => u.status === 'pending').length,
+					approved: finalUsers.filter((u) => u.status === 'approved').length,
+					rejected: finalUsers.filter((u) => u.status === 'rejected').length,
+					verified: finalUsers.filter((u) => u.status === 'verified').length,
 				})
 
-				return updatedUsers
+				return finalUsers
 			})
 		},
 	})
 
 	const fetchUsers = useCallback(async () => {
+		const controller = new AbortController()
 		setLoading(true)
+		
 		try {
-			const res = await fetch(`/api/users?page=1&limit=100`)
+			const res = await fetch(`/api/users?page=1&limit=100`, { signal: controller.signal })
+			
+			if (!res.ok) {
+				throw new Error(`HTTP ${res.status}`)
+			}
+			
 			const data = await res.json()
+
+			if (controller.signal.aborted) return
 
 			if (data.users) {
 				setAllUsers(data.users)
 				setFilteredUsers(data.users)
 
-				setStats({
-					total: data.users.length,
-					pending: data.users.filter((u: KYCUser) => u.status === 'pending').length,
-					approved: data.users.filter((u: KYCUser) => u.status === 'approved').length,
-					rejected: data.users.filter((u: KYCUser) => u.status === 'rejected').length,
-					verified: data.users.filter((u: KYCUser) => u.status === 'verified').length,
-				})
+				const statsAccumulator = data.users.reduce(
+					(acc: { total: number; pending: number; approved: number; rejected: number; verified: number }, user: KycRecord) => {
+						acc.total++
+						if (user.status === 'pending') acc.pending++
+						else if (user.status === 'approved') acc.approved++
+						else if (user.status === 'rejected') acc.rejected++
+						else if (user.status === 'verified') acc.verified++
+						return acc
+					},
+					{ total: 0, pending: 0, approved: 0, rejected: 0, verified: 0 }
+				)
+
+				setStats(statsAccumulator)
 			}
-		} catch {
+		} catch (error) {
+			if (error instanceof Error && error.name === 'AbortError') {
+				return
+			}
+			
+			if (controller.signal.aborted) return
+
 			console.log('API failed, using mock data')
 			setAllUsers(mockKycRecords)
 			setFilteredUsers(mockKycRecords)
-			setStats({
-				total: mockKycRecords.length,
-				pending: mockKycRecords.filter((u: KYCUser) => u.status === 'pending').length,
-				approved: mockKycRecords.filter((u: KYCUser) => u.status === 'approved').length,
-				rejected: mockKycRecords.filter((u: KYCUser) => u.status === 'rejected').length,
-				verified: mockKycRecords.filter((u: KYCUser) => u.status === 'verified').length,
-			})
+			
+			const mockStatsAccumulator = mockKycRecords.reduce(
+				(acc: { total: number; pending: number; approved: number; rejected: number; verified: number }, user: KycRecord) => {
+					acc.total++
+					if (user.status === 'pending') acc.pending++
+					else if (user.status === 'approved') acc.approved++
+					else if (user.status === 'rejected') acc.rejected++
+					else if (user.status === 'verified') acc.verified++
+					return acc
+				},
+				{ total: 0, pending: 0, approved: 0, rejected: 0, verified: 0 }
+			)
+			
+			setStats(mockStatsAccumulator)
+		} finally {
+			if (!controller.signal.aborted) {
+				setLoading(false)
+			}
 		}
-		setLoading(false)
+		
+		return () => controller.abort()
 	}, [])
 
 	useEffect(() => {
-		if (!search) {
+		const q = search?.trim().toLowerCase()
+		
+		if (!q) {
 			setFilteredUsers(allUsers)
 			return
 		}
 
 		const filtered = allUsers.filter(
-			(user: KYCUser) => user.user_id?.includes(search) || user.id?.includes(search),
+			(user: KycRecord) => user.user_id?.toLowerCase().includes(q) || user.id?.toLowerCase().includes(q),
 		)
 		setFilteredUsers(filtered)
 	}, [search, allUsers])
@@ -131,7 +173,11 @@ export default function Users() {
 						</div>
 					</div>
 					<div className="flex gap-2">
+						<label htmlFor={searchId} className="sr-only">
+							Search users
+						</label>
 						<input
+							id={searchId}
 							type="text"
 							placeholder="Search user..."
 							value={search}
