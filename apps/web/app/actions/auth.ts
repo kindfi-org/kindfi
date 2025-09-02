@@ -1,6 +1,7 @@
 'use server'
 
 import { appEnvConfig } from '@packages/lib/config'
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
@@ -43,7 +44,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 			error: 'Invalid CSRF token',
 		}
 	}
-	const supabase = await createSupabaseServerClient()
+	const supabase = supabaseServiceRole
 	const email = formData.get('email') as string
 
 	// Check if user already exists
