@@ -71,6 +71,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 	try {
 		const { data, error } = await supabase.auth.signInWithOtp(signInWithOptOpt)
 		if (error) {
+			console.error('Error signing up with otp:', error)
 			return errorHandler.handleAuthError(error, 'sign_up')
 		}
 
@@ -84,6 +85,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 			data,
 		}
 	} catch (error) {
+		console.error('Error signing up in general:', error)
 		return errorHandler.handleAuthError(error as AuthError, 'sign_up')
 	}
 }
