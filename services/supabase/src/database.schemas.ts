@@ -512,7 +512,7 @@ export const userRoleSchema = z.union([
 export const profilesInsertSchema = z.object({
 	bio: z.string().optional().nullable(),
 	created_at: z.string().optional(),
-	display_name: z.string().optional(),
+	display_name: z.string().optional().nullable(),
 	email: z.string().optional().nullable(),
 	id: z.string(),
 	image_url: z.string().optional().nullable(),
@@ -524,7 +524,7 @@ export const profilesInsertSchema = z.object({
 export const profilesUpdateSchema = z.object({
 	bio: z.string().optional().nullable(),
 	created_at: z.string().optional(),
-	display_name: z.string().optional(),
+	display_name: z.string().optional().nullable(),
 	email: z.string().optional().nullable(),
 	id: z.string().optional(),
 	image_url: z.string().optional().nullable(),
@@ -853,7 +853,7 @@ export const notificationsRowSchema = z.object({
 export const profilesRowSchema = z.object({
 	bio: z.string().nullable(),
 	created_at: z.string(),
-	display_name: z.string(),
+	display_name: z.string().nullable(),
 	email: z.string().nullable(),
 	id: z.string(),
 	image_url: z.string().nullable(),
