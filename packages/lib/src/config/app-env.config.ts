@@ -71,7 +71,7 @@ export function transformEnv(): AppEnvInterface {
 			port: Number(data.PORT) || 3000,
 		},
 		kycServer: {
-			allowedOrigins: data.ALLOWED_ORIGINS || '',
+			allowedOrigins: data.ALLOWED_ORIGINS || '*',
 		},
 		indexer: {
 			chainId: data.CHAIN_ID || '',

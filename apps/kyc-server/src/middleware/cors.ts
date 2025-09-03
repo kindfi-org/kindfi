@@ -1,3 +1,5 @@
+import { appEnvConfig } from '@packages/lib'
+
 /**
  * CORS middleware to handle preflight requests and add CORS headers
  *
@@ -16,7 +18,8 @@ export type CorsOptions = {
 
 // Default CORS configuration
 const defaultCorsOptions: CorsOptions = {
-	allowedOrigins: '*',
+	allowedOrigins:
+		appEnvConfig('kyc-server').kycServer.allowedOrigins.split(','),
 	allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 	allowedHeaders: ['Content-Type', 'Authorization'],
 	maxAge: 86400, // 24 hours
