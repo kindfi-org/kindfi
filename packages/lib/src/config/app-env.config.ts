@@ -81,9 +81,11 @@ export function transformEnv(): AppEnvInterface {
 			redis: {
 				url: data.REDIS_URL || '',
 			},
-			rpId: data.RP_ID || ['localhost'],
-			rpName: data.RP_NAME || ['App'],
-			expectedOrigin: data.EXPECTED_ORIGIN || ['http://localhost:3000'],
+			rpId: JSON.parse(`${data.RP_ID}`) || ['localhost'],
+			rpName: JSON.parse(`${data.RP_NAME}`) || ['App'],
+			expectedOrigin: JSON.parse(`${data.EXPECTED_ORIGIN}`) || [
+				'http://localhost:3000',
+			],
 			challengeTtlSeconds: data.CHALLENGE_TTL_SECONDS || 60,
 			challengeTtlMs: (data.CHALLENGE_TTL_SECONDS || 60) * 1000,
 		},
