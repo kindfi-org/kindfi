@@ -1,5 +1,5 @@
 CREATE TABLE comments (
-    id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID NOT NULL PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     content TEXT NOT NULL,
     author_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     parent_comment_id UUID REFERENCES comments(id) ON DELETE CASCADE,

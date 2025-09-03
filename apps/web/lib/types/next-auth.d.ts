@@ -9,6 +9,11 @@ declare module 'next-auth' {
 			image: string
 			jwt: string
 			role: string
+			device?: {
+				credential_id: string
+				public_key: string
+				address: string
+			}
 		} & DefaultSession['user']
 		supabaseAccessToken?: string
 		device?: {

@@ -1,6 +1,6 @@
 -- Create escrow_reviews table as specified in the issue with modifications based on feedback
 CREATE TABLE escrow_reviews (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     escrow_id UUID NOT NULL REFERENCES escrow_contracts(id),
     milestone_id UUID REFERENCES escrow_milestones(id), -- Can be null for dispute type
     reviewer_address TEXT NOT NULL,
