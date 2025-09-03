@@ -34,7 +34,7 @@ export interface ProjectPitch {
 
 export interface TeamMember {
 	id: string
-	displayName: string
+	displayName: string | null
 	avatar: string | null
 	bio: string | null
 	role: Enums<'project_member_role'>

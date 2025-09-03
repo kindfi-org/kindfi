@@ -37,8 +37,8 @@ export function TeamTab({ team }: TeamTabProps) {
 							{/* Avatar */}
 							<UserAvatar
 								src={member.avatar || '/images/placeholder.png'}
-								alt={member.displayName}
-								name={member.displayName}
+								alt={member.displayName || 'Unknown'}
+								name={member.displayName || 'Unknown'}
 								className="h-20 w-20 mb-4"
 							/>
 

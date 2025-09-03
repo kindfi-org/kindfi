@@ -81,7 +81,7 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			userData: userData
 				? {
 						role: userData.role,
-						display_name: userData.display_name,
+						display_name: userData.display_name || undefined,
 						bio: userData.bio || undefined,
 						image_url: userData.image_url || undefined,
 					}
