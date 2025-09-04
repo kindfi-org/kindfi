@@ -52,7 +52,10 @@ export const nextAuthOption: NextAuthOptions = {
 						provider: account?.provider || 'webauthn',
 					},
 				}
-				token.supabaseAccessToken = jwt.sign(payload, signingSecret)
+				const supabaseJwt = jwt.sign(payload, signingSecret)
+				token.supabaseAccessToken = supabaseJwt
+				// Store the actual JWT for the session
+				token.sub = supabaseJwt
 			}
 
 			return token // Ensure the modified token is returned
@@ -71,18 +74,19 @@ export const nextAuthOption: NextAuthOptions = {
 				email: token.email as string,
 				name: token.name as string,
 				image: token.image as string,
-				jwt: token.sub as string,
+				jwt: token.sub as string, // This should now be the actual JWT
 				role: token.role as Enums<'user_role'>,
+			}
+
+			// Add device data for WebAuthn sessions
+			if (token.device) {
+				session.user.device = token.device
+				session.device = token.device
 			}
 
 			// Add Supabase access token for RLS
 			if (token.supabaseAccessToken) {
 				session.supabaseAccessToken = token.supabaseAccessToken
-			}
-
-			// Add device data for WebAuthn sessions
-			if (token.device) {
-				session.device = token.device
 			}
 
 			console.log(

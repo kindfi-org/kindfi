@@ -180,8 +180,8 @@ CREATE OR REPLACE FUNCTION public.handle_new_next_auth_user()
 RETURNS trigger AS $$
 BEGIN
     -- Ensure all required columns in public.profiles are handled
-    INSERT INTO public.profiles (next_auth_user_id, email, display_name)
-    VALUES (NEW.id, NEW.email, COALESCE(NEW.name, 'Anonymous'));
+    INSERT INTO public.profiles (id, next_auth_user_id, email, display_name)
+    VALUES (NEW.id, NEW.id, NEW.email, COALESCE(NEW.name, 'Anonymous'));
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -81,10 +81,10 @@ export function transformEnv(): AppEnvInterface {
 			redis: {
 				url: data.REDIS_URL || '',
 			},
-			rpId: JSON.parse(`${data.RP_ID || ['localhost']}`),
-			rpName: JSON.parse(`${data.RP_NAME || ['App']}`),
+			rpId: JSON.parse(`${data.RP_ID || '["localhost"]'}`),
+			rpName: JSON.parse(`${data.RP_NAME || '["App"]'}`),
 			expectedOrigin: JSON.parse(
-				`${data.EXPECTED_ORIGIN || ['http://localhost:3000']}`,
+				`${data.EXPECTED_ORIGIN || '["http://localhost:3000"]'}`,
 			),
 			challengeTtlSeconds: data.CHALLENGE_TTL_SECONDS || 60,
 			challengeTtlMs: (data.CHALLENGE_TTL_SECONDS || 60) * 1000,
@@ -403,7 +403,7 @@ export const baseEnvSchema = z.object({
 	RP_ID: z
 		.string()
 		.transform((val) => {
-			if (!val) return ['localhost']
+			if (!val) return '["localhost"]'
 			try {
 				return JSON.parse(val) as string[]
 			} catch {
@@ -414,7 +414,7 @@ export const baseEnvSchema = z.object({
 	RP_NAME: z
 		.string()
 		.transform((val) => {
-			if (!val) return ['App']
+			if (!val) return '["App"]'
 			try {
 				return JSON.parse(val) as string[]
 			} catch {
@@ -425,7 +425,7 @@ export const baseEnvSchema = z.object({
 	EXPECTED_ORIGIN: z
 		.string()
 		.transform((val) => {
-			if (!val) return ['http://localhost:3000']
+			if (!val) return '["http://localhost:3000"]'
 			try {
 				return JSON.parse(val) as string[]
 			} catch {
