@@ -14,6 +14,12 @@ declare module 'next-auth' {
 				public_key: string
 				address: string
 			}
+			userData?: {
+				role?: string
+				display_name?: string
+				bio?: string
+				image_url?: string
+			}
 		} & DefaultSession['user']
 		supabaseAccessToken?: string
 		device?: {

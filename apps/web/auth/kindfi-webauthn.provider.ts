@@ -28,7 +28,9 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			credentialId: credentials.credentialId,
 		}
 
-		// TODO: Add on-chain verification of the user device
+		// TODO: Add on-chain verification of the user device.
+		// ? We are only checking if the device exists in the database and the signature match but
+		// ? we don't check if is actually registered in the auth_controller contract.
 
 		// First, check if user exists in NextAuth users table (via profiles mapping instead of querying cross-schema directly)
 		const { data: profileUser, error: profileLookupError } = await supabase
@@ -53,7 +55,7 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			.select()
 			.eq('credential_id', deviceCredentials.credentialId)
 			.eq('public_key', deviceCredentials.pubKey)
-			.eq('next_auth_user_id', credentials.userId)
+			.eq('user_id', credentials.userId)
 			.single()
 
 		const deviceData = device as Tables<'devices'> | null

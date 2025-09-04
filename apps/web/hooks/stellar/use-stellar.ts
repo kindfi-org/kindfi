@@ -54,11 +54,12 @@ export const useStellar = () => {
 	const [loadingSign, setLoadingSign] = useState(false)
 	const [contractData, setContractData] = useState<unknown | null>(null) // TODO:Just for testing, add type
 	const [creatingDeployee, setCreatingDeployee] = useState(false)
-	const { data: session } = useSession()
+	const { data: session, ...restSessionData } = useSession()
+	console.log('restSessionData', restSessionData)
 	console.log('session', session)
 	const onRegister = async (registerRes: RegistrationResponseJSON) => {
 		// Handles registration with Stellar by deploying a contract
-		if (deployee) return
+		if (deployee) return deployee
 		try {
 			setLoadingRegister(true)
 			setStoredCredentialId(registerRes.id)
@@ -82,6 +83,8 @@ export const useStellar = () => {
 					aaguid,
 					credentialId: registerRes.id,
 				})
+
+				return deployee
 			}
 		} catch (error) {
 			console.error(error)
@@ -89,6 +92,7 @@ export const useStellar = () => {
 			setLoadingRegister(false)
 			setCreatingDeployee(false)
 		}
+		return ''
 	}
 
 	const updateDeviceWithDeployee = async ({

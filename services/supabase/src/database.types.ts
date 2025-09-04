@@ -125,6 +125,7 @@ export type Database = {
 			users: {
 				Row: {
 					email: string | null
+					email_verified: string | null
 					emailVerified: string | null
 					id: string
 					image: string | null
@@ -132,6 +133,7 @@ export type Database = {
 				}
 				Insert: {
 					email?: string | null
+					email_verified?: string | null
 					emailVerified?: string | null
 					id?: string
 					image?: string | null
@@ -139,6 +141,7 @@ export type Database = {
 				}
 				Update: {
 					email?: string | null
+					email_verified?: string | null
 					emailVerified?: string | null
 					id?: string
 					image?: string | null
