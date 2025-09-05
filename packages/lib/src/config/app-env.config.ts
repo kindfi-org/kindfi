@@ -46,6 +46,9 @@ export function transformEnv(): AppEnvInterface {
 			factoryContractId:
 				data.FACTORY_CONTRACT_ID ||
 				'CCZWIOWKT4WGJQHWZFF7ARCQJFVWRXPOKG4WGY6DOZ72OHZEMKXAEGRO',
+			controllerContractId:
+				data.CONTROLLER_CONTRACT_ID ||
+				'CCZWIOWKT4WGJQHWZFF7ARCQJFVWRXPOKG4WGY6DOZ72OHZEMKXAEGRO',
 			accountSecp256r1ContractWasm:
 				data.ACCOUNT_SECP256R1_CONTRACT_WASM ||
 				'23d8e1fbdb0bb903815feb7d07b675db98b5376feedab056aab61910d41e80c1',
@@ -133,6 +136,7 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(
 			networkUrl: z.string(),
 			networkPassphrase: z.string(),
 			factoryContractId: z.string(),
+			controllerContractId: z.string(),
 			accountSecp256r1ContractWasm: z.string(),
 			rpcUrl: z.string(),
 			horizonUrl: z.string(),
@@ -363,6 +367,7 @@ export const baseEnvSchema = z.object({
 		.optional(),
 	NETWORK_PASSPHRASE: z.string().optional(),
 	FACTORY_CONTRACT_ID: z.string().optional(),
+	CONTROLLER_CONTRACT_ID: z.string().optional(),
 	ACCOUNT_SECP256R1_CONTRACT_WASM: z.string().optional(),
 	RPC_URL: z.string().url('Invalid RPC URL format').optional(),
 	HORIZON_URL: z.string().url('Invalid Horizon URL format').optional(),

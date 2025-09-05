@@ -1,5 +1,6 @@
 'use client'
 
+import { useStellarSorobanAccount } from '@packages/lib/hooks'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Session, User } from '@supabase/supabase-js'
 import { SessionProvider } from 'next-auth/react'
@@ -8,11 +9,13 @@ import { createContext, useContext, useEffect, useState } from 'react'
 interface AuthContextType {
 	user: User | null
 	isLoading: boolean
+	stellar: ReturnType<typeof useStellarSorobanAccount> | Record<string, unknown>
 }
 
 const AuthContext = createContext<AuthContextType>({
 	user: null,
 	isLoading: true,
+	stellar: {},
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -20,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<User | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const supabase = createSupabaseBrowserClient()
+	const stellarSorobanAccountState = useStellarSorobanAccount()
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {
@@ -58,7 +62,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	// Always render children, but show loading state
 	return (
 		<SessionProvider>
-			<AuthContext.Provider value={{ user, isLoading }}>
+			<AuthContext.Provider
+				value={{
+					user,
+					isLoading,
+					stellar: stellarSorobanAccountState,
+				}}
+			>
 				{children}
 			</AuthContext.Provider>
 		</SessionProvider>

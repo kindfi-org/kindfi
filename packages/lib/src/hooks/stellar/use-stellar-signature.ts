@@ -1,6 +1,8 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import { startAuthentication } from '@simplewebauthn/browser'
+import jwt from 'jsonwebtoken'
+import type { User } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -155,6 +157,13 @@ export const useStellarSignature = (
 
 		try {
 			console.log('🌟 Creating Stellar account for user:', session.user.id)
+			const userData = jwt.decode(session.user.jwt)
+
+			if (!userData) {
+				throw new Error('User session not found. Please login first.')
+			}
+
+			const user = userData as User
 
 			const response = await fetch(
 				`${kycBaseUrl}/api/stellar/create-passkey-account`,
@@ -162,9 +171,9 @@ export const useStellarSignature = (
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						credentialId: session.device.credential_id,
-						publicKey: session.device.public_key,
-						userId: session.user.id,
+						credentialId: user.device?.credential_id,
+						publicKey: user.device?.public_key,
+						userId: user.id,
 					}),
 				},
 			)

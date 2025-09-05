@@ -41,6 +41,8 @@ interface StellarOperation {
 	asset?: string
 }
 
+const appConfig = appEnvConfig('kyc-server')
+
 /**
  * Stellar account management service for Passkey integration
  * Handles creation of Stellar accounts that are controlled by Passkey devices
@@ -52,11 +54,10 @@ export class StellarPasskeyAccountService {
 	private server: Server
 
 	// Auth contract IDs from deployment
-	// TODO: Add contractIds to env stellar config
 	private readonly AUTH_CONTROLLER_CONTRACT_ID =
-		'CAFUXCQI6MDILCV64Q34ORXUE5EHAS2K25UASSM7OREFCGOUP2W37EIC'
+		appConfig.stellar.controllerContractId
 	private readonly ACCOUNT_FACTORY_CONTRACT_ID =
-		'CBGTHMA3C77WUKGXF7LYWCLWHUV3H7IQFHMTWNBAMEBJHI4UY3N3ORNC'
+		appConfig.stellar.factoryContractId
 
 	constructor(
 		networkPassphrase: string = Networks.TESTNET,

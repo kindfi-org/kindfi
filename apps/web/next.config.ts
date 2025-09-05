@@ -42,11 +42,11 @@ const nextConfig: NextConfig = {
 							key: 'Content-Security-Policy',
 							value: `
                 default-src 'self';
-                script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com;
+                script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
                 style-src 'self' 'unsafe-inline';
                 img-src 'self' data: blob:;
                 font-src 'self' data:;
-                connect-src 'self' https://flagcdn.com https://*.kindfi.org https://*.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app;
+                connect-src 'self' https://flagcdn.com https://apis.google.com https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://*.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app;
                 frame-ancestors 'self';
                 upgrade-insecure-requests;
               `.replace(/\s{2,}/g, ' '),
