@@ -1,3 +1,4 @@
+import type { User } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -22,8 +23,7 @@ export interface StellarAccount {
  * Hook for managing Stellar Soroban accounts and contract interactions with Passkeys
  * Provides high-level operations for DeFi and smart contract interactions
  */
-export const useStellarSorobanAccount = () => {
-	const { data: session } = useSession()
+export const useStellarSorobanAccount = (session?: User) => {
 	const [account, setAccount] = useState<StellarAccount | null>(null)
 	const [isInitialized, setIsInitialized] = useState(false)
 
@@ -44,7 +44,7 @@ export const useStellarSorobanAccount = () => {
 	 * Initialize or load existing Stellar account for the current user
 	 */
 	const initializeAccount = useCallback(async (): Promise<StellarAccount> => {
-		if (!session?.user || !session?.device) {
+		if (!session || !session?.device) {
 			throw new Error('User not authenticated or no device available')
 		}
 
@@ -245,12 +245,7 @@ export const useStellarSorobanAccount = () => {
 
 	// Auto-initialize account when session is available
 	useEffect(() => {
-		if (
-			session?.user &&
-			session?.device &&
-			!isInitialized &&
-			!stellarSignature.isLoading
-		) {
+		if (session?.device && !isInitialized && !stellarSignature.isLoading) {
 			initializeAccount().catch(console.error)
 		}
 	}, [session, isInitialized, stellarSignature.isLoading, initializeAccount])
