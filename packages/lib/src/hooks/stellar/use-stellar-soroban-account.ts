@@ -53,16 +53,12 @@ export const useStellarSorobanAccount = () => {
 			const existingAddress = session.device.address
 
 			if (existingAddress && existingAddress !== '0x') {
-				// Load existing account info
-				// TODO: Get contractId from device data or database
-				const mockContractId = `passkey_${session.device.credential_id.substring(0, 8)}`
-
 				const accountInfo =
-					await stellarSignature.getAccountInfo(mockContractId)
+					await stellarSignature.getAccountInfo(existingAddress)
 
 				const accountData: StellarAccount = {
 					address: existingAddress,
-					contractId: mockContractId,
+					contractId: existingAddress,
 					balance: accountInfo.balance,
 					sequence: accountInfo.sequence,
 					status: accountInfo.status,

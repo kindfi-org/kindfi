@@ -47,14 +47,12 @@ ACCOUNT_WASM_HASH=$(stellar contract upload \
     --wasm target/wasm32-unknown-unknown/release/account_contract.wasm)
 
 # Convert credential ID to 32-byte hex hash (SHA-256 of the credential ID)
-# TODO: Set a testnet credential_id (supabase db superuser)
-CREDENTIAL_ID="S_Kj5QeUSkyguckpT-2kXA"
+CREDENTIAL_ID="8b5k8pR3N5o7JEvD4Aw70_738E8wBEQp6DT_vLf4Tp1mLnKkVonWTpKcmRTS1f_ndhKYLooSz2XFMXXaauZCqQ"
 DEVICE_ID_HASH=$(echo -n "$CREDENTIAL_ID" | shasum -a 256 | cut -d' ' -f1)
 
 # Convert base64 public key to hex format
 # Your WebAuthn public key in base64
-# TODO: Set a testnet public_key_base64 (supabase db superuser)
-PUBLIC_KEY_BASE64="pQECAyYgASFYINYWHQkaQvnILp78oIB5xmAkx9sy20FMy0r4fOyJe2ogIlgga6SFzW37nuqRRVxFR7c8+5JfQhWrQwjcs8N3huPrIg4="
+PUBLIC_KEY_BASE64="pQECAyYgASFYIIpRuCBPaYjG1Mf1RskFAkxONKCEzWRuWvjxsdvS4CoWIlggQdx5K9DQTVyp+rk2BZf8FVhifph0TltmV0sHmT9ugBs="
 
 # Decode base64 to hex
 PUBLIC_KEY_HEX=$(echo -n "$PUBLIC_KEY_BASE64" | base64 -d | xxd -p | tr -d '\n')
