@@ -1,5 +1,5 @@
+import { debounce } from 'lodash'
 import type { User } from 'next-auth'
-import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useStellarSignature } from './use-stellar-signature'
@@ -17,6 +17,7 @@ export interface StellarAccount {
 	balance: string
 	sequence: string
 	status: string
+	error?: string
 }
 
 /**
@@ -26,6 +27,7 @@ export interface StellarAccount {
 export const useStellarSorobanAccount = (session?: User) => {
 	const [account, setAccount] = useState<StellarAccount | null>(null)
 	const [isInitialized, setIsInitialized] = useState(false)
+	const [requestId, setRequestId] = useState<string | null>(null)
 
 	const stellarSignature = useStellarSignature({
 		onSuccess: (result) => {
@@ -48,50 +50,62 @@ export const useStellarSorobanAccount = (session?: User) => {
 			throw new Error('User not authenticated or no device available')
 		}
 
+		// Generate unique request ID to prevent duplicate requests
+		const currentRequestId = Math.random().toString(36).substring(7)
+		setRequestId(currentRequestId)
+
 		try {
 			// Check if user already has a Stellar account
 			const existingAddress = session.device.address
 
-			if (existingAddress && existingAddress !== '0x') {
-				const accountInfo =
-					await stellarSignature.getAccountInfo(existingAddress)
-
-				const accountData: StellarAccount = {
-					address: existingAddress,
-					contractId: existingAddress,
-					balance: accountInfo.balance,
-					sequence: accountInfo.sequence,
-					status: accountInfo.status,
-				}
-
-				setAccount(accountData)
-				setIsInitialized(true)
-				return accountData
+			if (!existingAddress || existingAddress === '0x') {
+				throw new Error('❌ No existing account for logged user.')
 			}
 
-			// Create new Stellar account
-			const newAccount = await stellarSignature.createStellarAccount()
+			const accountInfo = await stellarSignature.getAccountInfo(existingAddress)
 
 			const accountData: StellarAccount = {
-				address: newAccount.address,
-				contractId: newAccount.contractId,
-				balance: '0',
-				sequence: '0',
-				status: 'active',
+				address: existingAddress,
+				contractId: existingAddress,
+				balance: accountInfo.balance,
+				sequence: accountInfo.sequence,
+				status: accountInfo.status,
 			}
 
-			setAccount(accountData)
-			setIsInitialized(true)
+			if (accountData.status === 'not_found') {
+				// If no existing address, create new account
+				const newAccount = await stellarSignature.createStellarAccount()
 
-			// TODO: Update device record with new Stellar address
-			toast.success(`Stellar account created: ${newAccount.address}`)
+				const accountData: StellarAccount = {
+					address: newAccount.address,
+					contractId: newAccount.contractId,
+					balance: '0',
+					sequence: '0',
+					status: 'active',
+				}
 
+				if (requestId === currentRequestId) {
+					// Only update state if this is still the current request
+					setAccount(accountData)
+					setIsInitialized(true)
+					setRequestId(null)
+
+					// TODO: Update device record with new Stellar address
+					toast.success(`Stellar account created: ${newAccount.address}`)
+				}
+			} else if (requestId === currentRequestId) {
+				// Only update state if this is still the current request
+				setAccount(accountData)
+				setIsInitialized(true)
+				setRequestId(null)
+			}
 			return accountData
 		} catch (error) {
 			console.error('❌ Error initializing account:', error)
+			setRequestId(null)
 			throw error
 		}
-	}, [session, stellarSignature])
+	}, [session, stellarSignature, requestId])
 
 	/**
 	 * Refresh account information from the blockchain
@@ -245,16 +259,27 @@ export const useStellarSorobanAccount = (session?: User) => {
 
 	// Auto-initialize account when session is available
 	useEffect(() => {
-		if (session?.device && !isInitialized && !stellarSignature.isLoading) {
-			initializeAccount().catch(console.error)
+		if (
+			session?.device &&
+			!isInitialized &&
+			!stellarSignature.isLoading &&
+			!requestId
+		) {
+			debounce(() => initializeAccount().catch(console.error), 60000)()
 		}
-	}, [session, isInitialized, stellarSignature.isLoading, initializeAccount])
+	}, [
+		session,
+		isInitialized,
+		stellarSignature.isLoading,
+		requestId,
+		initializeAccount,
+	])
 
 	return {
 		// Account state
 		account,
 		isInitialized,
-		isLoading: stellarSignature.isLoading,
+		isLoading: stellarSignature.isLoading || !!requestId,
 		error: stellarSignature.error,
 
 		// Account management

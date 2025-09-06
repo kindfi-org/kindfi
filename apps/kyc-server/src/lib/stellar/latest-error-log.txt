@@ -1,0 +1,176 @@
+🔍 Verifying Factory Contract exists...
+✅ Factory Contract verified: CCNY3DQ42C63A3ZVPOSDJNMU34X24BICKKOBZYLOLMC33WADZAFJMEGQ
+💰 Checking funding account balance...
+✅ Funding account found with sequence: 2257112688230437
+✅ Auth Controller is initialized
+🔧 Contract Salt: 96e12af7b25e54d4a92258214337e6c4aaa23f8f8c06a9e59639f1853f8cf24c
+🔧 Account ID: 81d7d6908cf6968a715905a0aa054efc93c540d00476772b3cdc2356b56497c4
+🔧 Public Key length: 77
+📦 Deploying new Passkey contract...
+🔐 Deploying Passkey contract with Account Factory...
+🔧 Converting CBOR public key: a501020326200121582014442fecbd3a1b472e18375875b27dd00404c9f6c95d1bd221c3b14dff70b8b1225820de74941a66a7c1dd0eeb8d6a96f664f5c50d8beaa44e0662095b809fc39ebbd0
+✅ Parsed with cbor library: {}
+🔄 Converting Map to object...
+✅ Converted Map to object: {
+  "1": 2,
+  "3": -7,
+  "-1": 1,
+  "-2": {
+    "type": "Buffer",
+    "data": [
+      20,
+      68,
+      47,
+      236,
+      189,
+      58,
+      27,
+      71,
+      46,
+      24,
+      55,
+      88,
+      117,
+      178,
+      125,
+      208,
+      4,
+      4,
+      201,
+      246,
+      201,
+      93,
+      27,
+      210,
+      33,
+      195,
+      177,
+      77,
+      255,
+      112,
+      184,
+      177
+    ]
+  },
+  "-3": {
+    "type": "Buffer",
+    "data": [
+      222,
+      116,
+      148,
+      26,
+      102,
+      167,
+      193,
+      221,
+      14,
+      235,
+      141,
+      106,
+      150,
+      246,
+      100,
+      245,
+      197,
+      13,
+      139,
+      234,
+      164,
+      78,
+      6,
+      98,
+      9,
+      91,
+      128,
+      159,
+      195,
+      158,
+      187,
+      208
+    ]
+  }
+}
+🔍 Parsed CBOR structure: {
+  keys: [ "1", "3", "-1", "-2", "-3" ],
+  values: [
+    [ "1", 2 ], [ "3", -7 ], [ "-1", 1 ], [ "-2", "14442fecbd3a1b472e18375875b27dd00404c9f6c95d1bd221c3b14dff70b8b1" ], [ "-3", "de74941a66a7c1dd0eeb8d6a96f664f5c50d8beaa44e0662095b809fc39ebbd0" ]
+  ],
+  dataType: "object",
+}
+🔍 CBOR key components: {
+  kty: 2,
+  alg: -7,
+  crv: 1,
+  xCoordType: "object",
+  yCoordType: "object",
+  xLength: 32,
+  yLength: 32,
+  allKeys: [ "1", "3", "-1", "-2", "-3" ],
+  rawKeys: [ "1", "3", "-1", "-2", "-3" ],
+}
+✅ Extracted X coordinate: 14442fecbd3a1b472e18375875b27dd00404c9f6c95d1bd221c3b14dff70b8b1
+✅ Extracted Y coordinate: de74941a66a7c1dd0eeb8d6a96f664f5c50d8beaa44e0662095b809fc39ebbd0
+🔍 X coordinate validation: {
+  firstBytes: "14442fec",
+  lastBytes: "ff70b8b1",
+  allZero: false,
+}
+🔍 Y coordinate validation: {
+  firstBytes: "de74941a",
+  lastBytes: "c39ebbd0",
+  allZero: false,
+}
+✅ Created uncompressed public key: 0414442fecbd3a1b472e18375875b27dd00404c9f6c95d1bd221c3b14dff70b8b1de74941a66a7c1dd0eeb8d6a96f664f5c50d8beaa44e0662095b809fc39ebbd0
+🔍 Key structure validation: {
+  prefix: "4",
+  xStart: "14442fec",
+  yStart: "de74941a",
+  totalLength: 65,
+  parsingMethod: "cbor",
+}
+🔧 Converted public key length: 65
+🔍 Funding account details: {
+  publicKey: "GB7J4TPZ4VZBO734FQLYLFBKHQ2TB2A26MQHMCG3VQE62UOA7Y2UE7LU",
+  sequence: "2257112688230437",
+  accountId: "GB7J4TPZ4VZBO734FQLYLFBKHQ2TB2A26MQHMCG3VQE62UOA7Y2UE7LU",
+}
+🔍 Checking Auth Controller authorization requirements...
+✅ Auth Controller signers accessible
+🔍 Transaction simulation result: {
+  success: true,
+  type: "success",
+  error: undefined,
+}
+🔧 Assembling transaction with fresh account data...
+🔧 Fresh funding account sequence: 2257112688230437
+🔧 Original account sequence: 2257112688230439
+🔧 Sequence number changed, rebuilding transaction...
+❌ Error deploying Passkey contract: 396 |                                      body: new URLSearchParams({ tx: finalTransaction.toXDR() }),
+397 |                           })
+398 |                   ).json()
+399 | 
+400 |                   if (!txResp.successful) {
+401 |                           throw new Error(`Transaction failed: ${JSON.stringify(txResp)}`)
+                ^
+error: Transaction failed: {"type":"https://stellar.org/horizon-errors/transaction_failed","title":"Transaction Failed","status":400,"detail":"The transaction failed when submitted to the stellar network. The `extras.result_codes` field on this response contains further details.  Descriptions of each code can be found at: https://developers.stellar.org/api/errors/http-status-codes/horizon-specific/transaction-failed/","extras":{"envelope_xdr":"AAAAAgAAAAB+nk355XIXf3wsF4WUKjw1MOga8yB2CNusCe1RwP41QgADVf4ACATVAAAAJgAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAGAAAAAAAAAABm42OHNC9sG81e6Q0tZTfL64FAlKcHOFuWwW92APICpYAAAAGZGVwbG95AAAAAAADAAAADQAAACCW4Sr3sl5U1KkiWCFDN+bEqqI/j4wGqeWWOfGFP4zyTAAAAA0AAAAggdfWkIz2lopxWQWgqgVO/JPFQNAEdncrPNwjVrVkl8QAAAANAAAAQQQURC/svTobRy4YN1h1sn3QBATJ9sldG9Ihw7FN/3C4sd50lBpmp8HdDuuNapb2ZPXFDYvqpE4GYglbgJ/DnrvQAAAAAAAAAQAAAAEAAAABlu/kZHmhsMkRYBIbrngm1NTu10e+orhBpXHPsvnR1f1QxrGXurBxZgAAAAAAAAABAAAAAAAAAAGbjY4c0L2wbzV7pDS1lN8vrgUCUpwc4W5bBb3YA8gKlgAAAAZkZXBsb3kAAAAAAAMAAAANAAAAIJbhKveyXlTUqSJYIUM35sSqoj+PjAap5ZY58YU/jPJMAAAADQAAACCB19aQjPaWinFZBaCqBU78k8VA0AR2dys83CNWtWSXxAAAAA0AAABBBBREL+y9OhtHLhg3WHWyfdAEBMn2yV0b0iHDsU3/cLix3nSUGmanwd0O641qlvZk9cUNi+qkTgZiCVuAn8Oeu9AAAAAAAAAAAAAAAQAAAAAAAAAFAAAABgAAAAGW7+RkeaGwyRFgEhuueCbU1O7XR76iuEGlcc+y+dHV/QAAABQAAAABAAAABgAAAAGbjY4c0L2wbzV7pDS1lN8vrgUCUpwc4W5bBb3YA8gKlgAAABQAAAABAAAABx64S1IPxgRFX0rvI6TOPE+01cup+BymeXEMb5elqzZAAAAAB1KOsgZ3iPdHLoFhY5Vt7yukFWcajFQ5CXJuGlKyRlTWAAAAB7vddF2Aa/Gth/g5g+GBF5QK4CGv9Gw133Q35r+yjF+AAAAAAgAAAAYAAAABBrPvvaH5RO50Izhr6KCaRcwUMQMns7NkHC1T8iXJXeMAAAAUAAAAAQAAAAYAAAABlu/kZHmhsMkRYBIbrngm1NTu10e+orhBpXHPsvnR1f0AAAAVUMaxl7qwcWYAAAAAABwppwAAAAAAAAGsAAAAAAADVZoAAAABwP41QgAAAED0gBsgXJCHOd7WypqN2pBhgNS6fhmOtfiiklrEDzS4c4HzHcXcHNOeAwLM36rVDmM9fdtGUmYHVSZbyZL/vXAE","result_codes":{"transaction":"tx_failed","operations":["function_trapped"]},"result_xdr":"AAAAAAAAvLL/////AAAAAQAAAAAAAAAY/////gAAAAA="}}
+      at deployPasskeyContract (/Users/andler-mini/Development/monorepos/kindfi/apps/kyc-server/src/lib/stellar/stellar-passkey-service.ts:401:11)
+
+❌ Error creating Passkey account: 396 |                                        body: new URLSearchParams({ tx: finalTransaction.toXDR() }),
+397 |                           })
+398 |                   ).json()
+399 | 
+400 |                   if (!txResp.successful) {
+401 |                           throw new Error(`Transaction failed: ${JSON.stringify(txResp)}`)
+                ^
+error: Transaction failed: {"type":"https://stellar.org/horizon-errors/transaction_failed","title":"Transaction Failed","status":400,"detail":"The transaction failed when submitted to the stellar network. The `extras.result_codes` field on this response contains further details.  Descriptions of each code can be found at: https://developers.stellar.org/api/errors/http-status-codes/horizon-specific/transaction-failed/","extras":{"envelope_xdr":"AAAAAgAAAAB+nk355XIXf3wsF4WUKjw1MOga8yB2CNusCe1RwP41QgADVf4ACATVAAAAJgAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAGAAAAAAAAAABm42OHNC9sG81e6Q0tZTfL64FAlKcHOFuWwW92APICpYAAAAGZGVwbG95AAAAAAADAAAADQAAACCW4Sr3sl5U1KkiWCFDN+bEqqI/j4wGqeWWOfGFP4zyTAAAAA0AAAAggdfWkIz2lopxWQWgqgVO/JPFQNAEdncrPNwjVrVkl8QAAAANAAAAQQQURC/svTobRy4YN1h1sn3QBATJ9sldG9Ihw7FN/3C4sd50lBpmp8HdDuuNapb2ZPXFDYvqpE4GYglbgJ/DnrvQAAAAAAAAAQAAAAEAAAABlu/kZHmhsMkRYBIbrngm1NTu10e+orhBpXHPsvnR1f1QxrGXurBxZgAAAAAAAAABAAAAAAAAAAGbjY4c0L2wbzV7pDS1lN8vrgUCUpwc4W5bBb3YA8gKlgAAAAZkZXBsb3kAAAAAAAMAAAANAAAAIJbhKveyXlTUqSJYIUM35sSqoj+PjAap5ZY58YU/jPJMAAAADQAAACCB19aQjPaWinFZBaCqBU78k8VA0AR2dys83CNWtWSXxAAAAA0AAABBBBREL+y9OhtHLhg3WHWyfdAEBMn2yV0b0iHDsU3/cLix3nSUGmanwd0O641qlvZk9cUNi+qkTgZiCVuAn8Oeu9AAAAAAAAAAAAAAAQAAAAAAAAAFAAAABgAAAAGW7+RkeaGwyRFgEhuueCbU1O7XR76iuEGlcc+y+dHV/QAAABQAAAABAAAABgAAAAGbjY4c0L2wbzV7pDS1lN8vrgUCUpwc4W5bBb3YA8gKlgAAABQAAAABAAAABx64S1IPxgRFX0rvI6TOPE+01cup+BymeXEMb5elqzZAAAAAB1KOsgZ3iPdHLoFhY5Vt7yukFWcajFQ5CXJuGlKyRlTWAAAAB7vddF2Aa/Gth/g5g+GBF5QK4CGv9Gw133Q35r+yjF+AAAAAAgAAAAYAAAABBrPvvaH5RO50Izhr6KCaRcwUMQMns7NkHC1T8iXJXeMAAAAUAAAAAQAAAAYAAAABlu/kZHmhsMkRYBIbrngm1NTu10e+orhBpXHPsvnR1f0AAAAVUMaxl7qwcWYAAAAAABwppwAAAAAAAAGsAAAAAAADVZoAAAABwP41QgAAAED0gBsgXJCHOd7WypqN2pBhgNS6fhmOtfiiklrEDzS4c4HzHcXcHNOeAwLM36rVDmM9fdtGUmYHVSZbyZL/vXAE","result_codes":{"transaction":"tx_failed","operations":["function_trapped"]},"result_xdr":"AAAAAAAAvLL/////AAAAAQAAAAAAAAAY/////gAAAAA="}}
+      at deployPasskeyContract (/Users/andler-mini/Development/monorepos/kindfi/apps/kyc-server/src/lib/stellar/stellar-passkey-service.ts:401:11)
+
+Error: 235 |                            contractId: contractAddress,
+236 |                           transactionHash: deployResult.transactionHash,
+237 |                   }
+238 |           } catch (error) {
+239 |                   console.error('❌ Error creating Passkey account:', error)
+240 |                   throw new Error(`Failed to create Passkey account: ${error}`)
+               ^
+error: Failed to create Passkey account: Error: Transaction failed: {"type":"https://stellar.org/horizon-errors/transaction_failed","title":"Transaction Failed","status":400,"detail":"The transaction failed when submitted to the stellar network. The `extras.result_codes` field on this response contains further details.  Descriptions of each code can be found at: https://developers.stellar.org/api/errors/http-status-codes/horizon-specific/transaction-failed/","extras":{"envelope_xdr":"AAAAAgAAAAB+nk355XIXf3wsF4WUKjw1MOga8yB2CNusCe1RwP41QgADVf4ACATVAAAAJgAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAGAAAAAAAAAABm42OHNC9sG81e6Q0tZTfL64FAlKcHOFuWwW92APICpYAAAAGZGVwbG95AAAAAAADAAAADQAAACCW4Sr3sl5U1KkiWCFDN+bEqqI/j4wGqeWWOfGFP4zyTAAAAA0AAAAggdfWkIz2lopxWQWgqgVO/JPFQNAEdncrPNwjVrVkl8QAAAANAAAAQQQURC/svTobRy4YN1h1sn3QBATJ9sldG9Ihw7FN/3C4sd50lBpmp8HdDuuNapb2ZPXFDYvqpE4GYglbgJ/DnrvQAAAAAAAAAQAAAAEAAAABlu/kZHmhsMkRYBIbrngm1NTu10e+orhBpXHPsvnR1f1QxrGXurBxZgAAAAAAAAABAAAAAAAAAAGbjY4c0L2wbzV7pDS1lN8vrgUCUpwc4W5bBb3YA8gKlgAAAAZkZXBsb3kAAAAAAAMAAAANAAAAIJbhKveyXlTUqSJYIUM35sSqoj+PjAap5ZY58YU/jPJMAAAADQAAACCB19aQjPaWinFZBaCqBU78k8VA0AR2dys83CNWtWSXxAAAAA0AAABBBBREL+y9OhtHLhg3WHWyfdAEBMn2yV0b0iHDsU3/cLix3nSUGmanwd0O641qlvZk9cUNi+qkTgZiCVuAn8Oeu9AAAAAAAAAAAAAAAQAAAAAAAAAFAAAABgAAAAGW7+RkeaGwyRFgEhuueCbU1O7XR76iuEGlcc+y+dHV/QAAABQAAAABAAAABgAAAAGbjY4c0L2wbzV7pDS1lN8vrgUCUpwc4W5bBb3YA8gKlgAAABQAAAABAAAABx64S1IPxgRFX0rvI6TOPE+01cup+BymeXEMb5elqzZAAAAAB1KOsgZ3iPdHLoFhY5Vt7yukFWcajFQ5CXJuGlKyRlTWAAAAB7vddF2Aa/Gth/g5g+GBF5QK4CGv9Gw133Q35r+yjF+AAAAAAgAAAAYAAAABBrPvvaH5RO50Izhr6KCaRcwUMQMns7NkHC1T8iXJXeMAAAAUAAAAAQAAAAYAAAABlu/kZHmhsMkRYBIbrngm1NTu10e+orhBpXHPsvnR1f0AAAAVUMaxl7qwcWYAAAAAABwppwAAAAAAAAGsAAAAAAADVZoAAAABwP41QgAAAED0gBsgXJCHOd7WypqN2pBhgNS6fhmOtfiiklrEDzS4c4HzHcXcHNOeAwLM36rVDmM9fdtGUmYHVSZbyZL/vXAE","result_codes":{"transaction":"tx_failed","operations":["function_trapped"]},"result_xdr":"AAAAAAAAvLL/////AAAAAQAAAAAAAAAY/////gAAAAA="}}
+      at createPasskeyAccount (/Users/andler-mini/Development/monorepos/kindfi/apps/kyc-server/src/lib/stellar/stellar-passkey-service.ts:240:10)

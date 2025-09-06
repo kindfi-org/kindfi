@@ -1,3 +1,4 @@
+import { stellarRoutes } from '~/routes/stellar'
 import { passkeyRoutes } from './passkey'
 import { pingRoutes } from './ping'
 import { reactRoutes } from './react'
@@ -6,5 +7,6 @@ import { reactRoutes } from './react'
 export const routes = {
 	...pingRoutes,
 	...passkeyRoutes,
+	...stellarRoutes,
 	...reactRoutes,
 }

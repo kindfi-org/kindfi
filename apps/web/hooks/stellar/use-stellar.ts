@@ -10,6 +10,7 @@ import { Logger } from '~/lib/logger'
 import { handleDeploy } from '~/lib/passkey/deploy'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
+import { DeviceUpdateParams } from '~/lib/types/device'
 
 const logger = new Logger()
 
@@ -77,15 +78,13 @@ export const useStellar = () => {
 			setDeployee(deployee)
 
 			// Update device with deployee address and AAGUID
-			if (deployee && aaguid) {
-				await updateDeviceWithDeployee({
-					deployeeAddress: deployee,
-					aaguid,
-					credentialId: registerRes.id,
-				})
+			await updateDeviceWithDeployee({
+				deployeeAddress: deployee,
+				aaguid,
+				credentialId: registerRes.id,
+			})
 
-				return deployee
-			}
+			return deployee
 		} catch (error) {
 			console.error(error)
 		} finally {

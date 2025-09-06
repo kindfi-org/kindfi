@@ -103,19 +103,20 @@ export const usePasskeyRegistration = (
 						const stellarAddress = generateStellarAddress(
 							stellarData.contractSalt,
 						)
-
-						console.log('PRE Stellar Address', stellarAddress)
-
-						// Set device data with extracted stellar information
-						setDeviceData({
+						const deviceData = {
 							credentialId: registrationResponse.id,
 							publicKey: stellarData.publicKey?.toString('base64') || '',
 							address: stellarAddress,
 							contractSalt: stellarData.contractSalt?.toString('hex') || '',
-						})
+						}
+
+						console.log('PRE Stellar Address', stellarAddress)
+
+						// Set device data with extracted stellar information
+						setDeviceData(deviceData)
 
 						// Call the onRegister callback for any additional processing (without blockchain deployment)
-						await onRegister?.(registrationResponse)
+						await onRegister?.(registrationResponse, deviceData)
 					} catch (stellarError) {
 						console.warn('Failed to extract stellar data:', stellarError)
 						// Fallback to basic credential data
