@@ -1,10 +1,12 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
+import { TrustlessWorkConfig, development, mainNet } from '@trustless-work/escrow'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
+import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
 import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
 
@@ -63,6 +65,12 @@ export function Providers({ children }: ProvidersProps) {
 		}
 	}, [])
 
+	const trustlessBaseUrl =
+		process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
+		process.env.NODE_ENV === 'production'
+			? mainNet
+			: development
+
 	return (
 		<ReactQueryClientProvider>
 			<NextThemesProvider
@@ -74,7 +82,14 @@ export function Providers({ children }: ProvidersProps) {
 				<SessionProvider>
 					<AuthProvider>
 						<WaitlistProvider>
-							<StellarProvider>{children}</StellarProvider>
+							<TrustlessWorkConfig
+								baseURL={trustlessBaseUrl}
+								apiKey={process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY || ''}
+							>
+								<EscrowProvider>
+									<StellarProvider>{children}</StellarProvider>
+								</EscrowProvider>
+							</TrustlessWorkConfig>
 						</WaitlistProvider>
 					</AuthProvider>
 				</SessionProvider>
