@@ -63,7 +63,7 @@ export class StellarPasskeyAccountService {
 		appConfig.stellar.factoryContractId
 
 	constructor(
-		networkPassphrase: string = Networks.TESTNET,
+		networkPassphrase: string = Networks.FUTURENET,
 		sorobanRpcUrl: string = 'https://rpc-futurenet.stellar.org',
 		fundingSecretKey?: string,
 	) {

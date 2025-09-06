@@ -75,12 +75,13 @@ export const nextAuthOption: NextAuthOptions = {
 				email: token.email as string,
 				image: token.image as string,
 				jwt: token.sub as string, // This should now be the actual JWT
+				role: token.role as string, // Add the missing role property
 				userData: {
 					role: token.role as Enums<'user_role'>,
 					display_name: token.name as string,
 					bio: token.bio as string,
 				},
-			} as User
+			}
 
 			// Add device data for WebAuthn sessions
 			if (token.device) {
