@@ -116,7 +116,7 @@ export const usePasskeyRegistration = (
 						setDeviceData(deviceData)
 
 						// Call the onRegister callback for any additional processing (without blockchain deployment)
-						await onRegister?.(registrationResponse, deviceData)
+						await onRegister?.(registrationResponse)
 					} catch (stellarError) {
 						console.warn('Failed to extract stellar data:', stellarError)
 						// Fallback to basic credential data
