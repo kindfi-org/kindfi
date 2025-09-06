@@ -66,14 +66,14 @@ export function PasskeyRegistrationComponent() {
 
 	// Finalize after successful passkey registration: update profile and sign in via NextAuth
 	useEffect(() => {
+		if (!regSuccess || !userEmail || !userId || !deviceData) return () => {}
+
 		const timeout = setTimeout(() => {
 			finalize()
 			clearTimeout(timeout)
 		}, 1000)
 
 		async function finalize() {
-			if (!regSuccess || !userEmail || !userId || !deviceData) return
-
 			try {
 				const supabase = createSupabaseBrowserClient()
 				// Update profile with richer info (e.g. display name). Ignore result errors silently.

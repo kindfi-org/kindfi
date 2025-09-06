@@ -55,9 +55,8 @@ export const useStellar = () => {
 	const [loadingSign, setLoadingSign] = useState(false)
 	const [contractData, setContractData] = useState<unknown | null>(null) // TODO:Just for testing, add type
 	const [creatingDeployee, setCreatingDeployee] = useState(false)
-	const { data: session, ...restSessionData } = useSession()
-	console.log('restSessionData', restSessionData)
-	console.log('session', session)
+	const { data: session } = useSession()
+
 	const onRegister = async (registerRes: RegistrationResponseJSON) => {
 		// Handles registration with Stellar by deploying a contract
 		if (deployee) return deployee
@@ -190,8 +189,6 @@ export const useStellar = () => {
 			}
 		}
 	}
-
-	console.log('deployee', deployee)
 
 	const prepareSign = async (): Promise<PresignResponse> => {
 		// Prepares data for signing a transaction on the Stellar network

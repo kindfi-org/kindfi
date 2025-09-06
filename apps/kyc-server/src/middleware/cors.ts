@@ -96,7 +96,6 @@ export const withCORS = (
 					'Access-Control-Allow-Headers':
 						corsOptions.allowedHeaders?.join(', ') || '',
 					'Access-Control-Max-Age': corsOptions.maxAge?.toString() || '',
-					'Access-Control-Allow-Credentials': 'true',
 				},
 			})
 		}
