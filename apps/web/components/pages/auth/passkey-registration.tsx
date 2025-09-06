@@ -1,8 +1,10 @@
 'use client'
 
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { CheckCircle, Shield, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { signOutAction } from '~/app/actions/auth'
 
@@ -32,33 +34,23 @@ export function PasskeyRegistrationComponent() {
 		isCreatingPasskey,
 		regSuccess,
 		regError,
-		handleRegister,
 		isAlreadyRegistered,
+		deviceData,
+		handleRegister,
 		reset,
 	} = usePasskeyRegistration(userEmail, { onRegister, userId })
 
-	// Get user email from current session
+	// Retrieve Supabase auth user (pre-NextAuth) after OTP verify
 	useEffect(() => {
-		const getUserEmail = async () => {
-			try {
-				const response = await fetch('/api/auth/user')
-				if (response.ok) {
-					const { user } = await response.json()
-					if (user?.email) {
-						setUserEmail(user.email)
-						setUserId(user.id || '') // Set userId if available
-					} else {
-						// If no user session, redirect to sign-up
-						router.push('/sign-up')
-					}
-				}
-			} catch (error) {
-				console.error('Error getting user:', error)
+		const supabase = createSupabaseBrowserClient()
+		supabase.auth.getUser().then(({ data }) => {
+			if (data.user?.email) {
+				setUserEmail(data.user.email)
+				setUserId(data.user.id || '')
+			} else {
 				router.push('/sign-up')
 			}
-		}
-
-		getUserEmail()
+		})
 	}, [router])
 
 	const handleSkipForNow = async () => {
@@ -72,15 +64,45 @@ export function PasskeyRegistrationComponent() {
 		}
 	}
 
+	// Finalize after successful passkey registration: update profile and sign in via NextAuth
 	useEffect(() => {
-		if (regSuccess) {
-			// Wait a moment then redirect to dashboard
-			const timer = setTimeout(() => {
-				router.push('/dashboard?passkey=registered')
-			}, 2000)
-			return () => clearTimeout(timer)
+		if (!regSuccess || !userEmail || !userId || !deviceData) return () => {}
+
+		const timeout = setTimeout(() => {
+			finalize()
+			clearTimeout(timeout)
+		}, 1000)
+
+		async function finalize() {
+			try {
+				const supabase = createSupabaseBrowserClient()
+				// Update profile with richer info (e.g. display name). Ignore result errors silently.
+				await supabase
+					.from('profiles')
+					.update({
+						display_name: userEmail.split('@')[0],
+					})
+					.eq('next_auth_user_id', userId)
+				// Sign in through credentials provider once device/passkey ready
+				await signIn('credentials', {
+					redirect: true,
+					callbackUrl: '/profile',
+					userId,
+					email: userEmail,
+					credentialId: deviceData?.credentialId || '',
+					pubKey: deviceData?.publicKey || '',
+					address: deviceData?.address || '',
+				})
+			} catch (e) {
+				console.error('Finalize passkey registration error', e)
+				router.push('/sign-in')
+			}
 		}
-	}, [regSuccess, router])
+
+		return () => {
+			clearTimeout(timeout)
+		}
+	}, [regSuccess, userEmail, userId, router, deviceData])
 
 	if (!isWebAuthnSupported) {
 		return (

@@ -6,7 +6,9 @@ import {
 } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { generateStellarAddress } from '~/lib/passkey/deploy'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import { getPublicKeys } from '~/lib/passkey/stellar'
 
 export const usePasskeyRegistration = (
 	identifier: string,
@@ -21,6 +23,12 @@ export const usePasskeyRegistration = (
 	const [regSuccess, setRegSuccess] = useState<string>('')
 	const [regError, setRegError] = useState<string>('')
 	const [isAlreadyRegistered, setIsAlreadyRegistered] = useState<boolean>(false)
+	const [deviceData, setDeviceData] = useState<{
+		credentialId: string
+		publicKey: string
+		address?: string
+		contractSalt?: string
+	} | null>(null)
 
 	const reset = () => {
 		setIsCreatingPasskey(false)
@@ -85,8 +93,42 @@ export const usePasskeyRegistration = (
 			}
 
 			const verificationJSON = await verificationResp.json()
-
 			if (verificationJSON?.verified) {
+				// Extract stellar data using existing getPublicKeys function
+				if (registrationResponse?.rawId) {
+					try {
+						const stellarData = await getPublicKeys(registrationResponse)
+
+						// Generate stellar address without deploying to blockchain
+						const stellarAddress = generateStellarAddress(
+							stellarData.contractSalt,
+						)
+						const deviceData = {
+							credentialId: registrationResponse.id,
+							publicKey: stellarData.publicKey?.toString('base64') || '',
+							address: stellarAddress,
+							contractSalt: stellarData.contractSalt?.toString('hex') || '',
+						}
+
+						console.log('PRE Stellar Address', stellarAddress)
+
+						// Set device data with extracted stellar information
+						setDeviceData(deviceData)
+
+						// Call the onRegister callback for any additional processing (without blockchain deployment)
+						await onRegister?.(registrationResponse)
+					} catch (stellarError) {
+						console.warn('Failed to extract stellar data:', stellarError)
+						// Fallback to basic credential data
+						setDeviceData({
+							credentialId: registrationResponse.id,
+							publicKey: registrationResponse.response?.attestationObject || '',
+							address: verificationJSON?.address as string | undefined,
+						})
+						// Still call onRegister for any additional processing
+						await onRegister?.(registrationResponse)
+					}
+				}
 				const message = 'Authenticator registered!'
 				setRegSuccess(message)
 				toast.success(message)
@@ -125,9 +167,10 @@ export const usePasskeyRegistration = (
 		isCreatingPasskey,
 		regSuccess,
 		regError,
-		handleRegister,
 		isRegistered: Boolean(regSuccess),
 		isAlreadyRegistered,
+		deviceData,
+		handleRegister,
 		reset,
 	}
 }

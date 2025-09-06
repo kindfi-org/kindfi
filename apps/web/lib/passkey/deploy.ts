@@ -19,26 +19,7 @@ export async function handleDeploy(
 ): Promise<string> {
 	const config: AppEnvInterface = appEnvConfig('web')
 	const rpc = new Server(config.stellar.rpcUrl)
-	const deployee = StrKey.encodeContract(
-		hash(
-			xdr.HashIdPreimage.envelopeTypeContractId(
-				new xdr.HashIdPreimageContractId({
-					networkId: hash(
-						Buffer.from(config.stellar.networkPassphrase, 'utf-8'),
-					),
-					contractIdPreimage:
-						xdr.ContractIdPreimage.contractIdPreimageFromAddress(
-							new xdr.ContractIdPreimageFromAddress({
-								address: Address.fromString(
-									config.stellar.factoryContractId,
-								).toScAddress(),
-								salt: contractSalt,
-							}),
-						),
-				}),
-			).toXDR(),
-		),
-	)
+	const deployee = generateStellarAddress(contractSalt)
 
 	// This is a signup deploy vs a signin deploy. Look up if this contract has been already been deployed, otherwise fail
 	if (!publicKey) {
@@ -88,4 +69,29 @@ export async function handleDeploy(
 	if (txResp.successful) return deployee
 
 	throw txResp
+}
+
+export function generateStellarAddress(contractSalt: Buffer): string {
+	const config: AppEnvInterface = appEnvConfig('web')
+	const deployee = StrKey.encodeContract(
+		hash(
+			xdr.HashIdPreimage.envelopeTypeContractId(
+				new xdr.HashIdPreimageContractId({
+					networkId: hash(
+						Buffer.from(config.stellar.networkPassphrase, 'utf-8'),
+					),
+					contractIdPreimage:
+						xdr.ContractIdPreimage.contractIdPreimageFromAddress(
+							new xdr.ContractIdPreimageFromAddress({
+								address: Address.fromString(
+									config.stellar.factoryContractId,
+								).toScAddress(),
+								salt: contractSalt,
+							}),
+						),
+				}),
+			).toXDR(),
+		),
+	)
+	return deployee
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
+import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
@@ -70,11 +71,13 @@ export function Providers({ children }: ProvidersProps) {
 				forcedTheme="light"
 				disableTransitionOnChange
 			>
-				<AuthProvider>
-					<WaitlistProvider>
-						<StellarProvider>{children}</StellarProvider>
-					</WaitlistProvider>
-				</AuthProvider>
+				<SessionProvider>
+					<AuthProvider>
+						<WaitlistProvider>
+							<StellarProvider>{children}</StellarProvider>
+						</WaitlistProvider>
+					</AuthProvider>
+				</SessionProvider>
 			</NextThemesProvider>
 		</ReactQueryClientProvider>
 	)

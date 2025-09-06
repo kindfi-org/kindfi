@@ -1,9 +1,9 @@
 'use client'
 
-import type { User } from '@supabase/supabase-js'
 import { LogOut, Menu, Settings, User as UserIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import type { User } from 'next-auth'
 import { useState } from 'react'
 import { signOutAction } from '~/app/actions/auth'
 import { Avatar, AvatarFallback } from '~/components/base/avatar'
@@ -186,7 +186,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 			<div className="flex items-center space-x-4">
 				<Avatar className="h-8 w-8">
 					<AvatarFallback suppressHydrationWarning>
-						{getAvatarFallback(user.email)}
+						{getAvatarFallback(user.email || '')}
 					</AvatarFallback>
 				</Avatar>
 				<div className="space-y-1">

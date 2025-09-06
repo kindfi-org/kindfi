@@ -29,21 +29,24 @@ export const saveChallenge = async ({
 	challenge: string
 	userId?: string
 }): Promise<void> => {
-	// First, clean up any existing challenges for this identifier/rpId combination
+	// Upsert the challenge with 5-minute expiration
 	await db
-		.delete(challenges)
-		.where(
-			and(eq(challenges.identifier, identifier), eq(challenges.rpId, rpId)),
-		)
-
-	// Insert the new challenge with 5-minute expiration
-	await db.insert(challenges).values({
-		userId: userId || null,
-		identifier,
-		rpId,
-		challenge,
-		expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 minutes from now as ISO string
-	})
+		.insert(challenges)
+		.values({
+			userId: userId || null,
+			identifier,
+			rpId,
+			challenge,
+			expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 minutes from now as ISO string
+		})
+		.onConflictDoUpdate({
+			target: [challenges.identifier, challenges.rpId],
+			set: {
+				challenge,
+				expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+				userId: userId || null,
+			},
+		})
 }
 
 /**

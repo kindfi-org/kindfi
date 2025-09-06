@@ -8,7 +8,7 @@ CREATE TYPE escrow_status_type AS ENUM (
 );
 
 CREATE TABLE escrow_status (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     escrow_id TEXT NOT NULL,
     status escrow_status_type NOT NULL,
     current_milestone INTEGER,
