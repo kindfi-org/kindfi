@@ -34,7 +34,7 @@ export const nextAuthOption: NextAuthOptions = {
 			token.name = user.name
 
 			// Add device data for WebAuthn sessions
-			if (account?.provider === 'webauthn' && userData.device) {
+			if (account?.provider === 'credentials' && userData.device) {
 				token.device = userData.device
 			}
 
@@ -71,11 +71,16 @@ export const nextAuthOption: NextAuthOptions = {
 			// Attach the user details and JWT to the session object (maintain existing structure)
 			session.user = {
 				id: token.id as string,
-				email: token.email as string,
 				name: token.name as string,
+				email: token.email as string,
 				image: token.image as string,
 				jwt: token.sub as string, // This should now be the actual JWT
-				role: token.role as Enums<'user_role'>,
+				role: token.role as string, // Add the missing role property
+				userData: {
+					role: token.role as Enums<'user_role'>,
+					display_name: token.name as string,
+					bio: token.bio as string,
+				},
 			}
 
 			// Add device data for WebAuthn sessions

@@ -3,13 +3,59 @@
 
 echo "🚀 Starting Auth Contracts Deployment..."
 
-# Check if network parameter is provided
-NETWORK=${1:-testnet}
-SOURCE=${2:-bob}
+# Parse command line arguments
+NETWORK="futurenet"
+SOURCE="bob-f"
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --futurenet)
+            NETWORK="futurenet"
+            shift
+            ;;
+        --testnet)
+            NETWORK="testnet"
+            shift
+            ;;
+        --mainnet)
+            NETWORK="mainnet"
+            shift
+            ;;
+        --source)
+            SOURCE="$2"
+            shift 2
+            ;;
+        *)
+            # Backward compatibility: first positional arg is network, second is source
+            if [[ -z "$NETWORK_SET" ]]; then
+                NETWORK="$1"
+                NETWORK_SET=true
+            elif [[ -z "$SOURCE_SET" ]]; then
+                SOURCE="$1"
+                SOURCE_SET=true
+            fi
+            shift
+            ;;
+    esac
+done
 
 echo "📝 Configuration:"
 echo "Network: $NETWORK"
 echo "Source: $SOURCE"
+
+# Validate network
+case $NETWORK in
+    testnet|futurenet|mainnet)
+        echo "✅ Valid network selected: $NETWORK"
+        ;;
+    *)
+        echo "🔴 Invalid network: $NETWORK"
+        echo "Valid options: testnet, futurenet, mainnet"
+        echo "Usage: $0 [--testnet|--futurenet|--mainnet] [--source SOURCE_ACCOUNT]"
+        echo "   or: $0 [NETWORK] [SOURCE_ACCOUNT] (legacy format)"
+        exit 1
+        ;;
+esac
 
 echo "🛠️  Building auth contracts with Stellar CLI..."
 
@@ -112,7 +158,7 @@ echo "✅ Account Factory Contract deployed: $ACCOUNT_FACTORY_CONTRACT_ID"
 
 # Save deployment info
 echo "💾 Saving deployment information..."
-cat > auth-deployment-info.txt << EOF
+cat > auth-deployment-info-${NETWORK}.txt << EOF
 Network: $NETWORK
 Source Account: $SOURCE ($(stellar keys address $SOURCE))
 
@@ -131,5 +177,13 @@ Account Factory Contract:
 Deployment Date: $(date)
 EOF
 
-echo "🎉 All auth contracts deployed successfully!"
-echo "📄 Deployment info saved to auth-deployment-info.txt"
+echo "🎉 All auth contracts deployed successfully to $NETWORK!"
+echo "📄 Deployment info saved to auth-deployment-info-${NETWORK}.txt"
+
+# Display usage examples
+echo ""
+echo "📚 Usage examples:"
+echo "  Deploy to Futurenet:  $0 --futurenet --source alice"
+echo "  Deploy to Testnet:    $0 --testnet --source bob" 
+echo "  Deploy to Mainnet:    $0 --mainnet --source production"
+echo "  Legacy format:        $0 futurenet alice"
