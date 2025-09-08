@@ -22,8 +22,8 @@ const nextConfig: NextConfig = {
 	async headers() {
 		// Apply headers for both production and development
 		const connectSrc = isProduction
-			? `'self' https://flagcdn.com https://apis.google.com https://friendbot-futurenet.stellar.org https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app`
-			: `'self' https://friendbot-futurenet.stellar.org http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://flagcdn.com https://apis.google.com https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app`
+			? `'self' https://flagcdn.com https://apis.google.com https://friendbot-futurenet.stellar.org https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app https://api.trustlesswork.com`
+			: `'self' https://friendbot-futurenet.stellar.org http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://flagcdn.com https://apis.google.com https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com`
 
 		if (isProduction) {
 			return [
@@ -95,3 +95,4 @@ const nextConfig: NextConfig = {
 }
 
 module.exports = nextConfig
+
