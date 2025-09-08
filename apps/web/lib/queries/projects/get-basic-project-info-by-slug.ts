@@ -27,10 +27,7 @@ export async function getBasicProjectInfoBySlug(
 				tag:tag_id ( id, name, color )
 			),
 			project_escrows:project_escrows!left (
-				escrow:escrow_id (
-					contract_id,
-					metadata
-				)
+				escrow_id
 			)
 		`,
 		)
@@ -44,17 +41,13 @@ export async function getBasicProjectInfoBySlug(
 	const escrowRel = (
 		project as unknown as {
 			project_escrows?:
-				| { escrow?: { contract_id?: string; metadata?: unknown } }
-				| Array<{ escrow?: { contract_id?: string; metadata?: unknown } }>
+				| { escrow_id?: string }
+				| Array<{ escrow_id?: string }>
 		}
 	).project_escrows
-	const escrowObj = Array.isArray(escrowRel)
-		? escrowRel[0]?.escrow
-		: escrowRel?.escrow
-
-	// TODO: Remove this default, every escrow id should come from the supabase project table.
-	const DEFAULT_ESCROW_CONTRACT_ADDRESS =
-		'CC4I2AH4AJQ3KVTFD7SJZWRQEL3DSLQA7UDR6TO44HXZPDMTXWPJ6QH7'
+	const escrowId = Array.isArray(escrowRel)
+		? escrowRel[0]?.escrow_id
+		: escrowRel?.escrow_id
 
 	return {
 		id: project.id,
@@ -74,16 +67,7 @@ export async function getBasicProjectInfoBySlug(
 				? (project.social_links as SocialLinks)
 				: {},
 		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
-		escrowContractAddress:
-			escrowObj?.contract_id || DEFAULT_ESCROW_CONTRACT_ADDRESS,
-		escrowType: (():
-			| import('@trustless-work/escrow').EscrowType
-			| undefined => {
-			const meta = escrowObj?.metadata as Record<string, unknown> | undefined
-			const value = meta?.escrowType
-			return typeof value === 'string'
-				? (value as unknown as import('@trustless-work/escrow').EscrowType)
-				: undefined
-		})(),
+		escrowContractAddress: escrowId,
+		escrowType: undefined,
 	}
 }
