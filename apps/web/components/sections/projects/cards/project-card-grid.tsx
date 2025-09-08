@@ -11,14 +11,26 @@ import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
+import { useMemo } from 'react'
+import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 
 interface ProjectCardGridProps {
 	project: Project
 }
 
 export function ProjectCardGrid({ project }: ProjectCardGridProps) {
+  const { balance: onChainRaised } = useEscrowBalance({
+    escrowContractAddress: project.escrowContractAddress,
+    escrowType: 'multi-release',
+  })
+
+  const displayRaised = useMemo(
+    () => onChainRaised ?? project.raised,
+    [onChainRaised, project.raised],
+  )
+
 	const progressPercentage = Math.min(
-		Math.round((project.raised / project.goal) * 100),
+		Math.round((displayRaised / project.goal) * 100),
 		100,
 	)
 
@@ -72,7 +84,7 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 					</div>
 
 					<div className="flex justify-between text-sm text-gray-500 mb-3">
-						<span>${project.raised.toLocaleString()} raised</span>
+						<span>${displayRaised.toLocaleString()} raised</span>
 						<span>{progressPercentage}%</span>
 					</div>
 

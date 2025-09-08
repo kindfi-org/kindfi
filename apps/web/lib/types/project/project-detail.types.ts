@@ -1,4 +1,5 @@
 import type { Enums } from '@services/supabase'
+import type { EscrowType } from '@trustless-work/escrow'
 import type { Project } from './'
 
 export interface ProjectDetail extends Project {
@@ -9,6 +10,10 @@ export interface ProjectDetail extends Project {
 	milestones: Milestone[]
 	updates: Update[]
 	comments: Comment[]
+	/** Optional on-chain escrow contract address for this project */
+	escrowContractAddress?: string
+	/** Optional escrow type for this project's escrow */
+	escrowType?: EscrowType
 }
 
 export interface SocialLinks {

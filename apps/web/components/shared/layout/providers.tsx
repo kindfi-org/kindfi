@@ -6,6 +6,7 @@ import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
+import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
 import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
@@ -86,9 +87,11 @@ export function Providers({ children }: ProvidersProps) {
 								baseURL={trustlessBaseUrl}
 								apiKey={process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY || ''}
 							>
-								<EscrowProvider>
-									<StellarProvider>{children}</StellarProvider>
-								</EscrowProvider>
+								<WalletProvider>
+									<EscrowProvider>
+										<StellarProvider>{children}</StellarProvider>
+									</EscrowProvider>
+								</WalletProvider>
 							</TrustlessWorkConfig>
 						</WaitlistProvider>
 					</AuthProvider>
