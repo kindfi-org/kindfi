@@ -6,7 +6,7 @@ const appConfig: AppEnvInterface = appEnvConfig()
 
 export default {
 	// schema: './src/schema/*',
-	schemaFilter: ['public', 'auth'],
+	schemaFilter: ['public', 'auth', 'next_auth'],
 	out: './src/data',
 	dialect: 'postgresql',
 	dbCredentials: {
