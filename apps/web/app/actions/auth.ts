@@ -156,11 +156,16 @@ export async function signOutAction(): Promise<void> {
 	try {
 		// Clear NextAuth session
 		await signOut({ redirect: false })
-		const { error } = await supabase.auth.signOut()
 
-		if (error) {
-			const response = errorHandler.handleAuthError(error, 'sign_out')
-			redirect(`/?error=${encodeURIComponent(response.message)}`)
+		try {
+			const { error } = await supabase.auth.signOut()
+
+			if (error) {
+				const response = errorHandler.handleAuthError(error, 'sign_out')
+				redirect(`/?error=${encodeURIComponent(response.message)}`)
+			}
+		} catch (error) {
+			console.error('No supabase session', error)
 		}
 
 		redirect('/sign-in?success=Successfully signed out')
@@ -484,19 +489,25 @@ export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
 	}
 }
 
-export async function updateDeviceWithDeployee({
-	deployeeAddress,
-	aaguid,
-	credentialId,
-}: {
-	deployeeAddress: string
-	credentialId: string
-	aaguid?: string
-}) {
-	const session = await getServerSession()
-	console.log('Session in action:', session)
+export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
+	const {
+		deployeeAddress,
+		aaguid,
+		userId,
+		credentialId,
+	}: {
+		deployeeAddress: string
+		credentialId: string
+		userId: string
+		aaguid?: string
+	} = JSON.parse(deployeeUpdateData)
 	// Get current user from session or context
-	const userId = (session?.user as User).id
+	console.log('updateDeviceWithDeployee::>', {
+		deployeeAddress,
+		aaguid,
+		userId,
+		credentialId,
+	})
 	try {
 		if (!userId) {
 			throw new Error('User not authenticated')

@@ -96,7 +96,7 @@ export const getPublicKeys = async (
 		return {
 			contractSalt,
 			publicKey,
-			aaguid: base64url.encode(aaguid),
+			aaguid: base64url.encode(aaguid).toString(),
 		}
 	}
 	return {

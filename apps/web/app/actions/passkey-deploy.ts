@@ -4,24 +4,55 @@ import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,
-	Address,
-	hash,
-	type Keypair,
+	Keypair,
 	Operation,
-	StrKey,
 	TransactionBuilder,
 	xdr,
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
+import { generateStellarAddress } from '~/lib/passkey/deploy'
 
-export async function handleDeploy(
-	bundlerKey: Keypair,
-	contractSalt: Buffer,
-	publicKey?: Buffer,
-): Promise<string> {
+export async function handleDeploy(serializedData: string): Promise<string> {
+	const {
+		bundlerKey: bundlerKeyData,
+		contractSalt: contractSaltArray,
+		publicKey: publicKeyArray,
+	}: {
+		bundlerKey: { publicKey: string; secretKey: string }
+		contractSalt: number[]
+		publicKey?: number[]
+	} = JSON.parse(serializedData)
+
+	// Reconstruct the bundler keypair from the secret key
+	const bundlerKey = Keypair.fromSecret(bundlerKeyData.secretKey)
+
+	// Convert arrays back to Buffers with proper length validation
+	const contractSalt = Buffer.from(contractSaltArray)
+	const publicKey = publicKeyArray ? Buffer.from(publicKeyArray) : undefined
+
+	// Validate salt length (must be exactly 32 bytes for Stellar)
+	if (contractSalt.length !== 32) {
+		throw new Error(
+			`Invalid contract salt length: expected 32 bytes, got ${contractSalt.length}`,
+		)
+	}
+
+	// Validate public key length if provided
+	if (publicKey && publicKey.length !== 65) {
+		throw new Error(
+			`Invalid public key length: expected 65 bytes, got ${publicKey.length}`,
+		)
+	}
+
+	console.log('handleDeploy::', {
+		bundlerKeyPublic: bundlerKey.publicKey(),
+		contractSaltLength: contractSalt.length,
+		publicKeyLength: publicKey?.length,
+	})
+
 	const config: AppEnvInterface = appEnvConfig('web')
 	const rpc = new Server(config.stellar.rpcUrl)
-	const deployee = await generateStellarAddress(contractSalt)
+	const deployee = generateStellarAddress(contractSalt)
 
 	try {
 		// This is a signup deploy vs a signin deploy. Look up if this contract has been already been deployed, otherwise fail
@@ -46,6 +77,9 @@ export async function handleDeploy(
 					function: 'deploy',
 					args: [
 						xdr.ScVal.scvBytes(contractSalt),
+						xdr.ScVal.scvBytes(
+							Buffer.from(bundlerKeyAccount.accountId(), 'utf8'),
+						),
 						xdr.ScVal.scvBytes(publicKey),
 					],
 				}),
@@ -87,33 +121,6 @@ export async function handleDeploy(
 			'Return unapproved deployee address for future deployment:',
 			deployee,
 		)
-		return deployee
 	}
-}
-
-export async function generateStellarAddress(
-	contractSalt: Buffer,
-): Promise<string> {
-	const config: AppEnvInterface = appEnvConfig('web')
-	const deployee = await StrKey.encodeContract(
-		hash(
-			xdr.HashIdPreimage.envelopeTypeContractId(
-				new xdr.HashIdPreimageContractId({
-					networkId: hash(
-						Buffer.from(config.stellar.networkPassphrase, 'utf-8'),
-					),
-					contractIdPreimage:
-						xdr.ContractIdPreimage.contractIdPreimageFromAddress(
-							new xdr.ContractIdPreimageFromAddress({
-								address: Address.fromString(
-									config.stellar.factoryContractId,
-								).toScAddress(),
-								salt: contractSalt,
-							}),
-						),
-				}),
-			).toXDR(),
-		),
-	)
 	return deployee
 }

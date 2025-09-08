@@ -682,39 +682,37 @@ export class StellarPasskeyAccountService {
 
 			try {
 				// Method 1: Using cbor library
-				parsedData = cbor.decode(cborPublicKey)
+				const rawParsedData = cbor.decode(cborPublicKey)
 				parsingMethod = 'cbor'
+
+				console.log('🔍 Raw parsed data type:', typeof rawParsedData)
+				console.log('🔍 Is Map?', rawParsedData instanceof Map)
+				console.log('🔍 Raw parsed data:', rawParsedData)
+
+				// Handle Map structure properly
+				if (rawParsedData instanceof Map) {
+					console.log('🔄 Converting Map to object...')
+					parsedData = {}
+					for (const [key, value] of rawParsedData.entries()) {
+						parsedData[key] = value
+					}
+					console.log(
+						'✅ Converted Map to object:',
+						JSON.stringify(parsedData, null, 2),
+					)
+				} else {
+					parsedData = rawParsedData
+				}
+
 				console.log(
 					'✅ Parsed with cbor library:',
 					JSON.stringify(parsedData, null, 2),
 				)
 
-				// If we get an empty object, the CBOR might have Map keys that aren't strings
-				if (Object.keys(parsedData).length === 0 && parsedData instanceof Map) {
-					console.log('🔄 Converting Map to object...')
-					const mapObj: Record<string | number, unknown> = {}
-					for (const [key, value] of parsedData.entries()) {
-						mapObj[key] = value
-					}
-					parsedData = mapObj
-					console.log(
-						'✅ Converted Map to object:',
-						JSON.stringify(parsedData, null, 2),
-					)
-				}
-
-				// If still empty, check if it's some other structure
 				if (Object.keys(parsedData).length === 0) {
-					console.log('⚠️ Empty object from cbor library, checking structure...')
-					console.log('🔍 Parsed data type:', typeof parsedData)
 					console.log(
-						'🔍 Parsed data constructor:',
-						parsedData.constructor.name,
+						'⚠️ Empty object from cbor library, trying alternative approach...',
 					)
-					console.log('🔍 Is Map?', parsedData instanceof Map)
-					console.log('🔍 Raw parsed data:', parsedData)
-
-					// Force fallback to manual parsing
 					throw new Error('CBOR library returned empty object')
 				}
 			} catch (error1) {

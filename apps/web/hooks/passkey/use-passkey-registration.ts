@@ -6,8 +6,7 @@ import {
 } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { updateDeviceWithDeployee } from '~/app/actions/auth'
-import { generateStellarAddress } from '~/app/actions/passkey-deploy'
+import { generateStellarAddress } from '~/lib/passkey/deploy'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 
@@ -16,7 +15,10 @@ export const usePasskeyRegistration = (
 	{
 		onRegister,
 		userId,
-	}: { onRegister?: (res: RegistrationResponseJSON) => void; userId?: string },
+	}: {
+		onRegister: (res: RegistrationResponseJSON, userId: string) => void
+		userId?: string
+	},
 ) => {
 	const appConfig: AppEnvInterface = appEnvConfig('web')
 	const baseUrl = appConfig.externalApis.kyc.baseUrl
@@ -68,6 +70,48 @@ export const usePasskeyRegistration = (
 			}
 			const registrationOptions = await registrationOptionsResp.json()
 
+			// Ensure required algorithms are present to prevent registration failures
+			if (
+				!registrationOptions.pubKeyCredParams ||
+				registrationOptions.pubKeyCredParams.length === 0
+			) {
+				registrationOptions.pubKeyCredParams = [
+					{ alg: -7, type: 'public-key' }, // ES256
+					{ alg: -257, type: 'public-key' }, // RS256
+					{ alg: -8, type: 'public-key' }, // EdDSA
+				]
+			} else {
+				// Check if ES256, RS256, and EdDSA are present, add them if missing
+				const hasES256 = registrationOptions.pubKeyCredParams.some(
+					(param: Record<string, unknown>) => param.alg === -7,
+				)
+				const hasRS256 = registrationOptions.pubKeyCredParams.some(
+					(param: Record<string, unknown>) => param.alg === -257,
+				)
+				const hasEdDSA = registrationOptions.pubKeyCredParams.some(
+					(param: Record<string, unknown>) => param.alg === -8,
+				)
+
+				if (!hasES256) {
+					registrationOptions.pubKeyCredParams.push({
+						alg: -7,
+						type: 'public-key',
+					})
+				}
+				if (!hasRS256) {
+					registrationOptions.pubKeyCredParams.push({
+						alg: -257,
+						type: 'public-key',
+					})
+				}
+				if (!hasEdDSA) {
+					registrationOptions.pubKeyCredParams.push({
+						alg: -8,
+						type: 'public-key',
+					})
+				}
+			}
+
 			const registrationResponse = await startRegistration({
 				optionsJSON: registrationOptions,
 			})
@@ -98,47 +142,24 @@ export const usePasskeyRegistration = (
 				// Extract stellar data using existing getPublicKeys function
 				if (registrationResponse?.rawId) {
 					try {
-						const stellarData = await getPublicKeys(registrationResponse)
-
-						// Generate stellar address without deploying to blockchain
-						const stellarAddress = await generateStellarAddress(
-							stellarData.contractSalt,
-						)
-						// TODO: simplify this state: only pub key, cred and address req to hold in session
-						const deviceData = {
-							credentialId: registrationResponse.id,
-							publicKey: stellarData.publicKey?.toString('base64') || '',
-							address: stellarAddress,
-							contractSalt: '',
-						}
-
-						console.log('PRE Stellar Address', stellarAddress)
-
-						// Set device data with extracted stellar information
-						setDeviceData(deviceData)
-						await updateDeviceWithDeployee({
-							deployeeAddress: stellarAddress,
-							credentialId: registrationResponse.id,
-						})
-
 						// Call the onRegister callback for any additional processing (without blockchain deployment)
-						await onRegister?.(registrationResponse)
+						await onRegister(registrationResponse, userId as string)
+						updateDeviceData({
+							registrationResponse,
+							verificationJSON,
+						})
 					} catch (stellarError) {
 						console.warn('Failed to extract stellar data:', stellarError)
-						// Fallback to basic credential data
-						setDeviceData({
-							credentialId: registrationResponse.id,
-							publicKey: registrationResponse.response?.attestationObject || '',
-							address: verificationJSON?.address as string | undefined,
+
+						updateDeviceData({
+							registrationResponse,
+							verificationJSON,
 						})
-						// Still call onRegister for any additional processing
-						await onRegister?.(registrationResponse)
 					}
 				}
 				const message = 'Authenticator registered!'
 				setRegSuccess(message)
 				toast.success(message)
-				onRegister?.(registrationResponse)
 			} else {
 				const message = `Oh no, something went wrong! Response: ${JSON.stringify(verificationJSON)}`
 				setRegError(message)
@@ -166,6 +187,42 @@ export const usePasskeyRegistration = (
 			}
 		} finally {
 			setIsCreatingPasskey(false)
+		}
+	}
+
+	const updateDeviceData = async ({
+		registrationResponse,
+		verificationJSON,
+	}: {
+		verificationJSON: { verified: boolean }
+		registrationResponse: RegistrationResponseJSON
+	}) => {
+		try {
+			// Fallback to basic credential data
+			const stellarData = await getPublicKeys(registrationResponse)
+			// Generate stellar address without deploying to blockchain
+			const stellarAddress = generateStellarAddress(stellarData.contractSalt)
+			// TODO: simplify this state: only pub key, cred and address req to hold in session
+			const deviceData = {
+				credentialId: registrationResponse.id,
+				publicKey: stellarData.publicKey?.toString('base64') || '',
+				address: stellarAddress,
+				contractSalt: '',
+			}
+
+			console.log(
+				'off-chain (pre) Stellar Address (must match)',
+				stellarAddress,
+			)
+			console.log('verificationJSON', verificationJSON)
+
+			// Set device data with extracted stellar information
+			setDeviceData(deviceData)
+		} catch (error) {
+			console.warn(
+				'Failed to extract stellar data and set a default unauthorized address:',
+				error,
+			)
 		}
 	}
 

@@ -23,11 +23,6 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			return null
 		}
 
-		const deviceCredentials = {
-			pubKey: credentials.pubKey,
-			credentialId: credentials.credentialId,
-		}
-
 		// TODO: Add on-chain verification of the user device.
 		// ? We are only checking if the device exists in the database and the signature match but
 		// ? we don't check if is actually registered in the auth_controller contract.
@@ -36,6 +31,7 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			// First, check if user profile exists using Drizzle
 			const profileData = await db
 				.select({
+					id: profiles.id,
 					nextAuthUserId: profiles.nextAuthUserId,
 					displayName: profiles.displayName,
 					bio: profiles.bio,
@@ -68,19 +64,25 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 				.from(devices)
 				.where(
 					and(
-						eq(devices.credentialId, deviceCredentials.credentialId),
-						eq(devices.publicKey, deviceCredentials.pubKey),
-						eq(devices.userId, credentials.userId),
+						eq(devices.credentialId, credentials.credentialId),
+						// !BUG FOUND: pubkey is not the same while sign up and login hence, in sign up fails...
+						// ! This happens because the pre address is parsed in one way and the sing in the other (when data saves) hence, the values are unmatched
+						// TODO: Fix pre and actual user address to parse match.
+						// ? Fallback created to be /sign-in
+						eq(devices.publicKey, credentials.pubKey),
+						eq(devices.userId, userData.id),
 					),
 				)
 				.limit(1)
+
+			console.log('deviceData', deviceData)
 
 			const deviceInfo = deviceData[0]
 
 			if (!deviceInfo) {
 				console.error(
 					'Error fetching device data for credentialId:',
-					deviceCredentials.credentialId,
+					credentials.credentialId,
 				)
 				throw new Error('Device not found or credentials mismatch')
 			}

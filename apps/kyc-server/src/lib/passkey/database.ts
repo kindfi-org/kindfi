@@ -185,7 +185,7 @@ export const saveUser = async ({
 			// Insert new device
 			await db.insert(devices).values({
 				userId: userId || null,
-				next_auth_user_id: userId || null,
+				nextAuthUserId: userId || null,
 				identifier,
 				rpId,
 				credentialId: credential.id,
@@ -193,8 +193,8 @@ export const saveUser = async ({
 				signCount: credential.counter,
 				transports: credential.transports || [],
 				credentialType: 'public-key',
-				aaguid: credential.aaguid,
-				address: '',
+				aaguid: '',
+				address: '0x',
 				profileVerificationStatus: 'unverified',
 				deviceType: 'single_device',
 				backupState: 'not_backed_up',

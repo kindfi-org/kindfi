@@ -2,7 +2,6 @@ import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { RegistrationResponseJSON } from '@simplewebauthn/browser'
 import { Horizon, Keypair } from '@stellar/stellar-sdk'
-import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
 import { updateDeviceWithDeployee } from '~/app/actions/auth'
 import { handleDeploy } from '~/app/actions/passkey-deploy'
@@ -53,9 +52,11 @@ export const useStellar = () => {
 	const [loadingSign, setLoadingSign] = useState(false)
 	const [contractData, setContractData] = useState<unknown | null>(null) // TODO:Just for testing, add type
 	const [creatingDeployee, setCreatingDeployee] = useState(false)
-	const { data: session } = useSession()
 
-	const onRegister = async (registerRes: RegistrationResponseJSON) => {
+	const onRegister = async (
+		registerRes: RegistrationResponseJSON,
+		userId: string,
+	) => {
 		// Handles registration with Stellar by deploying a contract
 		if (deployee) return deployee
 		try {
@@ -65,26 +66,40 @@ export const useStellar = () => {
 				await getPublicKeys(registerRes)
 			if (!bundlerKey.current) throw new Error('Bundler key not found')
 			if (!contractSalt || !publicKey) throw new Error('Invalid public keys')
+
 			setCreatingDeployee(true)
-			const deployee = await handleDeploy(
-				bundlerKey.current,
-				contractSalt,
-				publicKey,
-			)
+
+			// Send raw data, not base64 - the server action will handle Buffer conversion
+			const deployData = {
+				bundlerKey: {
+					publicKey: bundlerKey.current.publicKey(),
+					secretKey: bundlerKey.current.secret(),
+				},
+				contractSalt: Array.from(contractSalt), // Convert Buffer to array for JSON transport
+				publicKey: Array.from(publicKey), // Convert Buffer to array for JSON transport
+			}
+
+			const deployee = await handleDeploy(JSON.stringify(deployData))
 			setStoredDeployee(deployee)
 			setDeployee(deployee)
 			console.log('Deployee address:', deployee)
-			console.log('Deployee session:', session)
 			// Update device with deployee address and AAGUID
-			await updateDeviceWithDeployee({
-				deployeeAddress: deployee,
-				aaguid,
-				credentialId: registerRes.id,
-			})
+			const { success, message, error } = await updateDeviceWithDeployee(
+				JSON.stringify({
+					deployeeAddress: deployee,
+					aaguid,
+					credentialId: registerRes.id,
+					userId,
+				}),
+			)
+
+			if (error && !success) {
+				throw new Error(`${error}:::${message}`)
+			}
 
 			return deployee
 		} catch (error) {
-			console.error(error)
+			console.error('❌ useStellar::onRegister::>', error)
 		} finally {
 			setLoadingRegister(false)
 			setCreatingDeployee(false)
