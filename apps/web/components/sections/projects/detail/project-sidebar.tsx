@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import type { EscrowType } from '@trustless-work/escrow'
 import { motion } from 'framer-motion'
 import { CircleAlert, CircleCheck, Heart, Share } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -18,11 +19,10 @@ import {
 	FormMessage,
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
-import { progressBarAnimation } from '~/lib/constants/animations'
-import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
-import type { EscrowType } from '@trustless-work/escrow'
+import { progressBarAnimation } from '~/lib/constants/animations'
+import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
 

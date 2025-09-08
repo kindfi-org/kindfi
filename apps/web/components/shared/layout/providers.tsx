@@ -1,13 +1,17 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
-import { TrustlessWorkConfig, development, mainNet } from '@trustless-work/escrow'
+import {
+	development,
+	mainNet,
+	TrustlessWorkConfig,
+} from '@trustless-work/escrow'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
-import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
-import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
+import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
+import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
 

@@ -59,18 +59,22 @@ export async function getAllProjects(
 
 	if (error) throw error
 
-	// TODO: Remove this default, every escrow id should come from the supabase project table. 
+	// TODO: Remove this default, every escrow id should come from the supabase project table.
 	const DEFAULT_ESCROW_CONTRACT_ADDRESS =
 		'CC4I2AH4AJQ3KVTFD7SJZWRQEL3DSLQA7UDR6TO44HXZPDMTXWPJ6QH7'
 
 	return (
 		data?.map((project) => {
-			const escrowRel = (project as unknown as {
-				project_escrows?:
-					| { escrow?: { contract_id?: string } }
-					| Array<{ escrow?: { contract_id?: string } }>
-			}).project_escrows
-			const escrow = Array.isArray(escrowRel) ? escrowRel[0]?.escrow : escrowRel?.escrow
+			const escrowRel = (
+				project as unknown as {
+					project_escrows?:
+						| { escrow?: { contract_id?: string } }
+						| Array<{ escrow?: { contract_id?: string } }>
+				}
+			).project_escrows
+			const escrow = Array.isArray(escrowRel)
+				? escrowRel[0]?.escrow
+				: escrowRel?.escrow
 
 			return {
 				id: project.id,
@@ -85,7 +89,8 @@ export async function getAllProjects(
 				createdAt: project.created_at,
 				category: project.category,
 				tags: project.project_tag_relationships.map((r) => r.tag),
-				escrowContractAddress: escrow?.contract_id || DEFAULT_ESCROW_CONTRACT_ADDRESS,
+				escrowContractAddress:
+					escrow?.contract_id || DEFAULT_ESCROW_CONTRACT_ADDRESS,
 			}
 		}) ?? []
 	)

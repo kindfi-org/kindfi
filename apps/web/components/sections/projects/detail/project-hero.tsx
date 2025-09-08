@@ -2,17 +2,17 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { useMemo } from 'react'
 import { AnimatedCounter } from '~/components/sections/projects/detail/animated-counter'
 import { SocialLinksDisplay } from '~/components/sections/projects/detail/social-links-display'
 import {
 	CategoryBadge,
 	CountryFlag,
 } from '~/components/sections/projects/shared'
-import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
-import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
-import { useMemo } from 'react'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
+import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
+import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
 
 interface ProjectHeroProps {
 	project: ProjectDetail

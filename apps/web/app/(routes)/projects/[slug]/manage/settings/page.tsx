@@ -1,5 +1,9 @@
 import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
-import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
+import {
+	dehydrate,
+	HydrationBoundary,
+	QueryClient,
+} from '@tanstack/react-query'
 import { EscrowAdminClientWrapper } from '~/components/sections/projects/manage/escrow/escrow-admin-client-wrapper'
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 

@@ -4,15 +4,14 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-
+import { useMemo } from 'react'
 import { Badge } from '~/components/base/badge'
 import { CategoryBadge } from '~/components/sections/projects/shared'
+import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
-import { useMemo } from 'react'
-import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 
 interface ProjectCardListProps {
 	project: Project

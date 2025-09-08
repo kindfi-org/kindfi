@@ -1,16 +1,15 @@
 /** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: any */
 'use client'
 
-import { motion, useInView } from 'framer-motion'
-import { useEffect, useMemo, useState } from 'react'
-import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import type {
 	EscrowType,
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
+import { motion, useInView } from 'framer-motion'
 import { AlertCircle, CheckCircle, Clock } from 'lucide-react'
-import { useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import type { Milestone } from '~/lib/types/project/project-detail.types'
 
 interface MilestonesTabProps {

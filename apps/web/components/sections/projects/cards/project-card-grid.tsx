@@ -4,30 +4,29 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-
+import { useMemo } from 'react'
 import { Badge } from '~/components/base/badge'
 import { CategoryBadge } from '~/components/sections/projects/shared'
+import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
-import { useMemo } from 'react'
-import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 
 interface ProjectCardGridProps {
 	project: Project
 }
 
 export function ProjectCardGrid({ project }: ProjectCardGridProps) {
-  const { balance: onChainRaised } = useEscrowBalance({
-    escrowContractAddress: project.escrowContractAddress,
-    escrowType: 'multi-release',
-  })
+	const { balance: onChainRaised } = useEscrowBalance({
+		escrowContractAddress: project.escrowContractAddress,
+		escrowType: 'multi-release',
+	})
 
-  const displayRaised = useMemo(
-    () => onChainRaised ?? project.raised,
-    [onChainRaised, project.raised],
-  )
+	const displayRaised = useMemo(
+		() => onChainRaised ?? project.raised,
+		[onChainRaised, project.raised],
+	)
 
 	const progressPercentage = Math.min(
 		Math.round((displayRaised / project.goal) * 100),

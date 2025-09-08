@@ -1,6 +1,5 @@
 'use client'
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import {
 	AlbedoModule,
 	FREIGHTER_ID,
@@ -8,6 +7,7 @@ import {
 	StellarWalletsKit,
 	WalletNetwork,
 } from '@creit.tech/stellar-wallets-kit'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 interface WalletContextValue {
 	address: string | null
@@ -88,7 +88,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		signTransaction,
 	}
 
-	return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
+	return (
+		<WalletContext.Provider value={value}>{children}</WalletContext.Provider>
+	)
 }
 
 export function useWallet() {
@@ -96,5 +98,3 @@ export function useWallet() {
 	if (!ctx) throw new Error('useWallet must be used within WalletProvider')
 	return ctx
 }
-
-
