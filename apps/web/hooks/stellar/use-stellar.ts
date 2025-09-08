@@ -10,6 +10,7 @@ import { Logger } from '~/lib/logger'
 import { handleDeploy } from '~/lib/passkey/deploy'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
+import { DeviceUpdateParams } from '~/lib/types/device'
 
 const logger = new Logger()
 
@@ -54,9 +55,8 @@ export const useStellar = () => {
 	const [loadingSign, setLoadingSign] = useState(false)
 	const [contractData, setContractData] = useState<unknown | null>(null) // TODO:Just for testing, add type
 	const [creatingDeployee, setCreatingDeployee] = useState(false)
-	const { data: session, ...restSessionData } = useSession()
-	console.log('restSessionData', restSessionData)
-	console.log('session', session)
+	const { data: session } = useSession()
+
 	const onRegister = async (registerRes: RegistrationResponseJSON) => {
 		// Handles registration with Stellar by deploying a contract
 		if (deployee) return deployee
@@ -77,15 +77,13 @@ export const useStellar = () => {
 			setDeployee(deployee)
 
 			// Update device with deployee address and AAGUID
-			if (deployee && aaguid) {
-				await updateDeviceWithDeployee({
-					deployeeAddress: deployee,
-					aaguid,
-					credentialId: registerRes.id,
-				})
+			await updateDeviceWithDeployee({
+				deployeeAddress: deployee,
+				aaguid,
+				credentialId: registerRes.id,
+			})
 
-				return deployee
-			}
+			return deployee
 		} catch (error) {
 			console.error(error)
 		} finally {
@@ -191,8 +189,6 @@ export const useStellar = () => {
 			}
 		}
 	}
-
-	console.log('deployee', deployee)
 
 	const prepareSign = async (): Promise<PresignResponse> => {
 		// Prepares data for signing a transaction on the Stellar network

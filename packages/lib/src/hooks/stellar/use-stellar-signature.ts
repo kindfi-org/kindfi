@@ -1,6 +1,7 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import { startAuthentication } from '@simplewebauthn/browser'
+import axios from 'axios'
 import jwt from 'jsonwebtoken'
 import type { User } from 'next-auth'
 import { useSession } from 'next-auth/react'
@@ -70,7 +71,6 @@ export const useStellarSignature = (
 					`${kycBaseUrl}/api/passkey/generate-authentication-options`,
 					{
 						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({
 							identifier: session.user.email,
 							userId: session.user.id,
@@ -94,7 +94,6 @@ export const useStellarSignature = (
 					`${kycBaseUrl}/api/stellar/execute-transaction`,
 					{
 						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({
 							contractId,
 							operation,
@@ -157,28 +156,26 @@ export const useStellarSignature = (
 
 		try {
 			console.log('🌟 Creating Stellar account for user:', session.user.id)
-			const userData = jwt.decode(session.user.jwt)
+			const userData = session.user
 
 			if (!userData) {
 				throw new Error('User session not found. Please login first.')
 			}
 
-			const user = userData as User
-
 			const response = await fetch(
 				`${kycBaseUrl}/api/stellar/create-passkey-account`,
 				{
 					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						credentialId: user.device?.credential_id,
-						publicKey: user.device?.public_key,
-						userId: user.id,
+						credentialId: userData.device?.credential_id,
+						publicKey: userData.device?.public_key,
+						userId: userData.id,
 					}),
 				},
 			)
 
 			if (!response.ok) {
+				console.error('response data', response)
 				throw new Error('Failed to create Stellar account')
 			}
 
@@ -216,10 +213,6 @@ export const useStellarSignature = (
 			try {
 				const response = await fetch(
 					`${kycBaseUrl}/api/stellar/account-info?contractId=${encodeURIComponent(contractId)}`,
-					{
-						method: 'GET',
-						headers: { 'Content-Type': 'application/json' },
-					},
 				)
 
 				if (!response.ok) {
@@ -258,7 +251,6 @@ export const useStellarSignature = (
 					`${kycBaseUrl}/api/stellar/verify-signature`,
 					{
 						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({
 							contractId,
 							signature,

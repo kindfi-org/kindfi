@@ -40,7 +40,7 @@ export function transformEnv(): AppEnvInterface {
 		},
 		stellar: {
 			networkUrl:
-				data.STELLAR_NETWORK_URL || 'https://horizon-testnet.stellar.org',
+				data.STELLAR_NETWORK_URL || 'https://horizon-futurenet.stellar.org',
 			networkPassphrase:
 				data.NETWORK_PASSPHRASE || 'Test SDF Future Network ; October 2022',
 			factoryContractId:
@@ -54,6 +54,7 @@ export function transformEnv(): AppEnvInterface {
 				'23d8e1fbdb0bb903815feb7d07b675db98b5376feedab056aab61910d41e80c1',
 			rpcUrl: data.RPC_URL || 'https://rpc-futurenet.stellar.org',
 			horizonUrl: data.HORIZON_URL || 'https://horizon-futurenet.stellar.org',
+			fundingAccount: data.STELLAR_FUNDING_SECRET_KEY || 'SB...4756',
 		},
 		externalApis: {
 			trustlessWork: {
@@ -138,6 +139,7 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(
 			factoryContractId: z.string(),
 			controllerContractId: z.string(),
 			accountSecp256r1ContractWasm: z.string(),
+			fundingAccount: z.string(),
 			rpcUrl: z.string(),
 			horizonUrl: z.string(),
 		}),
@@ -369,6 +371,7 @@ export const baseEnvSchema = z.object({
 	FACTORY_CONTRACT_ID: z.string().optional(),
 	CONTROLLER_CONTRACT_ID: z.string().optional(),
 	ACCOUNT_SECP256R1_CONTRACT_WASM: z.string().optional(),
+	STELLAR_FUNDING_SECRET_KEY: z.string().optional(),
 	RPC_URL: z.string().url('Invalid RPC URL format').optional(),
 	HORIZON_URL: z.string().url('Invalid Horizon URL format').optional(),
 
