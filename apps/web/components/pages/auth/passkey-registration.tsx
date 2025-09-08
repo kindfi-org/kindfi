@@ -85,14 +85,14 @@ export function PasskeyRegistrationComponent() {
 					.eq('next_auth_user_id', userId)
 				// Sign in through credentials provider once device/passkey ready
 				await signIn('credentials', {
-					redirect: true,
-					callbackUrl: '/profile',
+					redirect: false,
 					userId,
 					email: userEmail,
 					credentialId: deviceData?.credentialId || '',
 					pubKey: deviceData?.publicKey || '',
 					address: deviceData?.address || '',
 				})
+				router.push('/dashboard')
 			} catch (e) {
 				console.error('Finalize passkey registration error', e)
 				router.push('/sign-in')

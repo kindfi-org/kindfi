@@ -2,6 +2,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { ReactNode } from 'react'
+import { useId } from 'react'
 // import { Navigation } from './Navigation'
 
 interface HomeProps {
@@ -26,6 +27,7 @@ function getClientFilename(): string {
 export default function Home({ message }: HomeProps) {
 	// Get the client filename
 	const clientJs = getClientFilename()
+	const rootId = useId()
 
 	return (
 		<html lang="en">
@@ -38,7 +40,7 @@ export default function Home({ message }: HomeProps) {
 			</head>
 			<body>
 				{/* <h1>Kindfi KYC Server HOM</h1> */}
-				<div id="root">
+				<div id={rootId}>
 					{/* <Navigation currentPath={currentPath} /> */}
 					<div className="card">
 						{typeof message === 'string' ? <p>{message}</p> : message}
