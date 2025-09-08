@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm/relations'
 import {
+	accountsInNextAuth,
 	categories,
 	challenges,
 	comments,
@@ -33,6 +34,7 @@ import {
 	samlProvidersInAuth,
 	samlRelayStatesInAuth,
 	sessionsInAuth,
+	sessionsInNextAuth,
 	ssoDomainsInAuth,
 	ssoProvidersInAuth,
 	usersInAuth,
@@ -257,6 +259,8 @@ export const usersInNextAuthRelations = relations(
 		}),
 		devices: many(devices),
 		challenges: many(challenges),
+		sessionsInNextAuths: many(sessionsInNextAuth),
+		accountsInNextAuths: many(accountsInNextAuth),
 	}),
 )
 
@@ -448,6 +452,26 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 		references: [usersInAuth.id],
 	}),
 }))
+
+export const sessionsInNextAuthRelations = relations(
+	sessionsInNextAuth,
+	({ one }) => ({
+		usersInNextAuth: one(usersInNextAuth, {
+			fields: [sessionsInNextAuth.userId],
+			references: [usersInNextAuth.id],
+		}),
+	}),
+)
+
+export const accountsInNextAuthRelations = relations(
+	accountsInNextAuth,
+	({ one }) => ({
+		usersInNextAuth: one(usersInNextAuth, {
+			fields: [accountsInNextAuth.userId],
+			references: [usersInNextAuth.id],
+		}),
+	}),
+)
 
 export const projectTagRelationshipsRelations = relations(
 	projectTagRelationships,
