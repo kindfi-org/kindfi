@@ -1,5 +1,5 @@
-import { supabase } from '@packages/lib/supabase'
-import type { Tables } from '@services/supabase'
+import { db, devices, profiles } from '@packages/drizzle'
+import { and, eq } from 'drizzle-orm'
 import type { User } from 'next-auth'
 import CredentialsProvider, {
 	type CredentialInput,
@@ -32,62 +32,82 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 		// ? We are only checking if the device exists in the database and the signature match but
 		// ? we don't check if is actually registered in the auth_controller contract.
 
-		// First, check if user exists in NextAuth users table (via profiles mapping instead of querying cross-schema directly)
-		const { data: profileUser, error: profileLookupError } = await supabase
-			.from('profiles')
-			.select('next_auth_user_id, display_name, bio, image_url, role')
-			.eq('next_auth_user_id', credentials.userId)
-			.single()
+		try {
+			// First, check if user profile exists using Drizzle
+			const profileData = await db
+				.select({
+					nextAuthUserId: profiles.nextAuthUserId,
+					displayName: profiles.displayName,
+					bio: profiles.bio,
+					imageUrl: profiles.imageUrl,
+					role: profiles.role,
+				})
+				.from(profiles)
+				.where(eq(profiles.nextAuthUserId, credentials.userId))
+				.limit(1)
 
-		if (profileLookupError || !profileUser) {
-			console.error('NextAuth mapped profile not found:', {
-				error: profileLookupError,
-			})
-			throw new Error('NextAuth user not found')
-		}
+			const userData = profileData[0]
 
-		// Get user profile data (already retrieved above, but keep existing logic for clarity)
-		const userData = profileUser as Tables<'profiles'> | null
+			if (!userData) {
+				console.error(
+					'NextAuth mapped profile not found for userId:',
+					credentials.userId,
+				)
+				throw new Error('NextAuth user not found')
+			}
 
-		// Get device data
-		const { data: device, error: deviceError } = await supabase
-			.from('devices')
-			.select()
-			.eq('credential_id', deviceCredentials.credentialId)
-			.eq('public_key', deviceCredentials.pubKey)
-			.eq('user_id', credentials.userId)
-			.single()
+			// Get device data using Drizzle
+			const deviceData = await db
+				.select({
+					credentialId: devices.credentialId,
+					publicKey: devices.publicKey,
+					address: devices.address,
+					userId: devices.userId,
+					nextAuthUserId: devices.nextAuthUserId,
+				})
+				.from(devices)
+				.where(
+					and(
+						eq(devices.credentialId, deviceCredentials.credentialId),
+						eq(devices.publicKey, deviceCredentials.pubKey),
+						eq(devices.userId, credentials.userId),
+					),
+				)
+				.limit(1)
 
-		const deviceData = device as Tables<'devices'> | null
+			const deviceInfo = deviceData[0]
 
-		if (deviceError) {
-			console.error('Error fetching device data:', { error: deviceError })
-			throw new Error('Error fetching device data')
-		}
+			if (!deviceInfo) {
+				console.error(
+					'Error fetching device data for credentialId:',
+					deviceCredentials.credentialId,
+				)
+				throw new Error('Device not found or credentials mismatch')
+			}
 
-		console.log('🔓 User data fetched successfully: ', userData)
-		console.log('🔓 Device data fetched successfully: ', deviceData)
+			console.log('🔓 User data fetched successfully: ', userData)
+			console.log('🔓 Device data fetched successfully: ', deviceInfo)
 
-		return {
-			id: credentials.userId,
-			email: credentials.email,
-			name: userData?.display_name || credentials.email,
-			image: userData?.image_url || null,
-			device: deviceData
-				? {
-						credential_id: deviceData.credential_id,
-						public_key: deviceData.public_key,
-						address: deviceData.address,
-					}
-				: undefined,
-			userData: userData
-				? {
-						role: userData.role,
-						display_name: userData.display_name || undefined,
-						bio: userData.bio || undefined,
-						image_url: userData.image_url || undefined,
-					}
-				: undefined,
+			return {
+				id: credentials.userId,
+				email: credentials.email,
+				name: userData.displayName || credentials.email,
+				image: userData.imageUrl || null,
+				device: {
+					credential_id: deviceInfo.credentialId,
+					public_key: deviceInfo.publicKey,
+					address: deviceInfo.address,
+				},
+				userData: {
+					role: userData.role,
+					display_name: userData.displayName || undefined,
+					bio: userData.bio || undefined,
+					image_url: userData.imageUrl || undefined,
+				},
+			}
+		} catch (error) {
+			console.error('Database error during authorization:', error)
+			throw new Error('Authentication failed')
 		}
 	},
 })

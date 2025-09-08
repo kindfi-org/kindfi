@@ -6,7 +6,8 @@ import {
 } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { generateStellarAddress } from '~/lib/passkey/deploy'
+import { updateDeviceWithDeployee } from '~/app/actions/auth'
+import { generateStellarAddress } from '~/app/actions/passkey-deploy'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 
@@ -100,20 +101,25 @@ export const usePasskeyRegistration = (
 						const stellarData = await getPublicKeys(registrationResponse)
 
 						// Generate stellar address without deploying to blockchain
-						const stellarAddress = generateStellarAddress(
+						const stellarAddress = await generateStellarAddress(
 							stellarData.contractSalt,
 						)
+						// TODO: simplify this state: only pub key, cred and address req to hold in session
 						const deviceData = {
 							credentialId: registrationResponse.id,
 							publicKey: stellarData.publicKey?.toString('base64') || '',
 							address: stellarAddress,
-							contractSalt: stellarData.contractSalt?.toString('hex') || '',
+							contractSalt: '',
 						}
 
 						console.log('PRE Stellar Address', stellarAddress)
 
 						// Set device data with extracted stellar information
 						setDeviceData(deviceData)
+						await updateDeviceWithDeployee({
+							deployeeAddress: stellarAddress,
+							credentialId: registrationResponse.id,
+						})
 
 						// Call the onRegister callback for any additional processing (without blockchain deployment)
 						await onRegister?.(registrationResponse)
