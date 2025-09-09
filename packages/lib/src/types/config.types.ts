@@ -35,6 +35,9 @@ export interface AppEnvInterface {
 		privateKey: string
 		publicKey: string
 	}
+	resend: {
+		apiKey: string
+	}
 	env: {
 		nodeEnv: string
 		appEnv: string

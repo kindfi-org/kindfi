@@ -71,17 +71,12 @@ export function QuestionCard({
 						size="sm"
 					/>
 					<div className="flex items-center gap-2">
-						{'status' in (question.metadata ?? {}) &&
-							(question.metadata as { status?: string })?.status ===
-								'resolved' && (
-								<Badge
-									variant="secondary"
-									className="bg-green-50 text-green-700"
-								>
-									<CheckCircle className="mr-1 h-3 w-3" aria-hidden="true" />
-									Resolved
-								</Badge>
-							)}
+{question.metadata?.status === 'resolved' && (
+  <Badge variant="secondary" className="bg-green-50 text-green-700">
+    <CheckCircle className="mr-1 h-3 w-3" aria-hidden="true" />
+    Resolved
+  </Badge>
+)}
 					</div>
 				</div>
 			</CardHeader>
