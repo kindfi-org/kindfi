@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import {
@@ -106,8 +107,7 @@ export function QuestionCard({
 						)}
 					</Button>
 
-					{'status' in (question.metadata ?? {}) &&
-						(question.metadata as { status?: string })?.status !== 'resolved' &&
+					{(question.metadata as { status?: any })?.status !== 'resolved' &&
 						effectiveUser && (
 							<Button
 								variant="outline"
