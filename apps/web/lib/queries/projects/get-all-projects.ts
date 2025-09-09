@@ -83,7 +83,7 @@ export async function getAllProjects(
 				createdAt: project.created_at,
 				category: project.category,
 				tags: project.project_tag_relationships.map((r) => r.tag),
-				escrowContractAddress: escrowId
+				escrowContractAddress: escrowId,
 			}
 		}) ?? []
 	)

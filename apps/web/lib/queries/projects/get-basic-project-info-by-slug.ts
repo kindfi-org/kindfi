@@ -40,9 +40,7 @@ export async function getBasicProjectInfoBySlug(
 	// Normalize project_escrows shape (it may be object or array depending on RLS/relationship)
 	const escrowRel = (
 		project as unknown as {
-			project_escrows?:
-				| { escrow_id?: string }
-				| Array<{ escrow_id?: string }>
+			project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
 		}
 	).project_escrows
 	const escrowId = Array.isArray(escrowRel)
