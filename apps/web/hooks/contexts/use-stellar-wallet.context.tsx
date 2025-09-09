@@ -34,11 +34,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 	const kit = useMemo(
 		() =>
 			new StellarWalletsKit({
-				network:
-					process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
-					process.env.NODE_ENV === 'production'
-						? WalletNetwork.PUBLIC
-						: WalletNetwork.TESTNET,
+				network: WalletNetwork.TESTNET,
+				// process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
+				// process.env.NODE_ENV === 'production'
+				// 	? WalletNetwork.PUBLIC
+				// 	: WalletNetwork.TESTNET,
 				selectedWalletId: FREIGHTER_ID,
 				modules: [new FreighterModule(), new AlbedoModule()],
 			}),
@@ -70,11 +70,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		if (!address) throw new Error('Wallet not connected')
 		const { signedTxXdr } = await kit.signTransaction(unsignedXdr, {
 			address,
-			networkPassphrase:
-				process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
-				process.env.NODE_ENV === 'production'
-					? WalletNetwork.PUBLIC
-					: WalletNetwork.TESTNET,
+			networkPassphrase: WalletNetwork.TESTNET,
+			// process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
+			// process.env.NODE_ENV === 'production'
+			// 	? WalletNetwork.PUBLIC
+			// 	: WalletNetwork.TESTNET,
 		})
 		return signedTxXdr
 	}
