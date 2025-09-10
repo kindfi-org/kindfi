@@ -39,7 +39,7 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 					role: profiles.role,
 				})
 				.from(profiles)
-				.where(eq(profiles.nextAuthUserId, credentials.userId))
+				.where(eq(profiles.id, credentials.userId))
 				.limit(1)
 
 			const userData = profileData[0]

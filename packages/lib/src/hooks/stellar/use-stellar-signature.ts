@@ -191,7 +191,7 @@ export const useStellarSignature = (
 
 			setError(error.message)
 			options.onError?.(error)
-			toast.error(`Account creation failed: ${error.message}`)
+			// toast.error(`Account creation failed: ${error.message}`)
 
 			throw error
 		} finally {
