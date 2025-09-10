@@ -26,6 +26,7 @@
 		"@radix-ui/react-tooltip": "^1.1.4",
 		"@react-email/components": "^0.5.1",
 		"@react-email/tailwind": "^1.2.2",
+		"@sentry/nextjs": "^10.8.0",
 		"@services/supabase": "workspace:*",
 		"@simplewebauthn/browser": "^13.1.0",
 		"@simplewebauthn/server": "^13.1.1",
