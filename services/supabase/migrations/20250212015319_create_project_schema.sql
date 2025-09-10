@@ -1,5 +1,5 @@
 create table "public"."projects" (
-    "id" uuid not null default uuid_generate_v4(),
+    "id" uuid not null default extensions.uuid_generate_v4(),
     "title" text not null,
     "description" text not null,
     "current_amount" numeric(12,2) not null default 0,

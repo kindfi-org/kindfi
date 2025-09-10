@@ -25,6 +25,9 @@ export async function getBasicProjectInfoBySlug(
 			category:category_id ( * ),
 			project_tag_relationships (
 				tag:tag_id ( id, name, color )
+			),
+			project_escrows:project_escrows!left (
+				escrow_id
 			)
 		`,
 		)
@@ -33,6 +36,16 @@ export async function getBasicProjectInfoBySlug(
 
 	if (error) throw error
 	if (!project) return null
+
+	// Normalize project_escrows shape (it may be object or array depending on RLS/relationship)
+	const escrowRel = (
+		project as unknown as {
+			project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+		}
+	).project_escrows
+	const escrowId = Array.isArray(escrowRel)
+		? escrowRel[0]?.escrow_id
+		: escrowRel?.escrow_id
 
 	return {
 		id: project.id,
@@ -52,5 +65,7 @@ export async function getBasicProjectInfoBySlug(
 				? (project.social_links as SocialLinks)
 				: {},
 		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
+		escrowContractAddress: escrowId,
+		escrowType: undefined,
 	}
 }

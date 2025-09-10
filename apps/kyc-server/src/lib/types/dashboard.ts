@@ -1,11 +1,10 @@
 import type {
 	kycReviewsInsertSchema,
 	kycReviewsRowSchema,
-	kycStatusRowSchema,
-	kycStatusUpdateSchema,
 } from '@services/supabase'
 import type { LucideIcon } from 'lucide-react'
 import type { z } from 'zod'
+import type { statusEnum, verificationEnum } from '../schemas/kyc'
 
 export type MetricKey = keyof Omit<KycStats, 'trends'>
 
@@ -25,9 +24,7 @@ export type TimeRangeOption = {
 	value: TimeRange
 }
 
-export type KycRecord = z.infer<typeof kycStatusRowSchema>
 export type KycReview = z.infer<typeof kycReviewsRowSchema>
-export type KycStatusUpdateValues = z.infer<typeof kycStatusUpdateSchema>
 export type KycReviewsInsertValues = z.infer<typeof kycReviewsInsertSchema>
 
 export interface KycStats {
@@ -57,7 +54,7 @@ export interface MonthlyChartData {
 
 // API response types
 export interface KycApiResponse {
-	data: KycRecord[]
+	data: Record<string, unknown>
 	total: number
 	page: number
 	limit: number
@@ -71,12 +68,12 @@ export interface KycReviewApiResponse {
 // Form state types
 export interface KycFormData {
 	user_id: string
-	status: KycRecord['status']
-	verification_level: KycRecord['verification_level']
+	status: typeof statusEnum
+	verification_level: typeof verificationEnum
 }
 
 export interface ReviewFormData {
-	decision: KycReview['decision']
+	decision: string
 	review_notes: string
 	additional_notes?: string
 }

@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+	bigint,
 	bigserial,
 	boolean,
 	char,
@@ -26,6 +27,7 @@ import {
 } from 'drizzle-orm/pg-core'
 
 export const auth = pgSchema('auth')
+export const nextAuth = pgSchema('next_auth')
 export const aalLevelInAuth = auth.enum('aal_level', ['aal1', 'aal2', 'aal3'])
 export const codeChallengeMethodInAuth = auth.enum('code_challenge_method', [
 	's256',
@@ -115,141 +117,33 @@ export const projectMemberRole = pgEnum('project_member_role', [
 	'core',
 	'others',
 ])
+export const projectStatus = pgEnum('project_status', [
+	'draft',
+	'review',
+	'active',
+	'paused',
+	'funded',
+	'rejected',
+])
 export const userRole = pgEnum('user_role', ['kinder', 'kindler'])
 
 export const schemaMigrationsInAuth = auth.table('schema_migrations', {
-	version: varchar({ length: 255 }).notNull(),
+	version: varchar({ length: 255 }).primaryKey().notNull(),
 })
 
 export const instancesInAuth = auth.table('instances', {
-	id: uuid().notNull(),
+	id: uuid().primaryKey().notNull(),
 	uuid: uuid(),
 	rawBaseConfig: text('raw_base_config'),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
 	updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
 })
 
-export const auditLogEntriesInAuth = auth.table(
-	'audit_log_entries',
-	{
-		instanceId: uuid('instance_id'),
-		id: uuid().notNull(),
-		payload: json(),
-		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
-		ipAddress: varchar('ip_address', { length: 64 }).default('').notNull(),
-	},
-	(table) => [
-		index('audit_logs_instance_id_idx').using(
-			'btree',
-			table.instanceId.asc().nullsLast().op('uuid_ops'),
-		),
-	],
-)
-
-export const refreshTokensInAuth = auth.table(
-	'refresh_tokens',
-	{
-		instanceId: uuid('instance_id'),
-		id: bigserial({ mode: 'bigint' }).notNull(),
-		token: varchar({ length: 255 }),
-		userId: varchar('user_id', { length: 255 }),
-		revoked: boolean(),
-		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
-		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
-		parent: varchar({ length: 255 }),
-		sessionId: uuid('session_id'),
-	},
-	(table) => [
-		index('refresh_tokens_instance_id_idx').using(
-			'btree',
-			table.instanceId.asc().nullsLast().op('uuid_ops'),
-		),
-		index('refresh_tokens_instance_id_user_id_idx').using(
-			'btree',
-			table.instanceId.asc().nullsLast().op('text_ops'),
-			table.userId.asc().nullsLast().op('text_ops'),
-		),
-		index('refresh_tokens_parent_idx').using(
-			'btree',
-			table.parent.asc().nullsLast().op('text_ops'),
-		),
-		index('refresh_tokens_session_id_revoked_idx').using(
-			'btree',
-			table.sessionId.asc().nullsLast().op('bool_ops'),
-			table.revoked.asc().nullsLast().op('bool_ops'),
-		),
-		index('refresh_tokens_updated_at_idx').using(
-			'btree',
-			table.updatedAt.desc().nullsFirst().op('timestamptz_ops'),
-		),
-		foreignKey({
-			columns: [table.sessionId],
-			foreignColumns: [sessionsInAuth.id],
-			name: 'refresh_tokens_session_id_fkey',
-		}).onDelete('cascade'),
-	],
-)
-
-export const mfaFactorsInAuth = auth.table(
-	'mfa_factors',
-	{
-		id: uuid().notNull(),
-		userId: uuid('user_id').notNull(),
-		friendlyName: text('friendly_name'),
-		factorType: factorTypeInAuth('factor_type').notNull(),
-		status: factorStatusInAuth().notNull(),
-		createdAt: timestamp('created_at', {
-			withTimezone: true,
-			mode: 'string',
-		}).notNull(),
-		updatedAt: timestamp('updated_at', {
-			withTimezone: true,
-			mode: 'string',
-		}).notNull(),
-		secret: text(),
-		phone: text(),
-		lastChallengedAt: timestamp('last_challenged_at', {
-			withTimezone: true,
-			mode: 'string',
-		}),
-		webAuthnCredential: jsonb('web_authn_credential'),
-		webAuthnAaguid: uuid('web_authn_aaguid'),
-	},
-	(table) => [
-		index('factor_id_created_at_idx').using(
-			'btree',
-			table.userId.asc().nullsLast().op('timestamptz_ops'),
-			table.createdAt.asc().nullsLast().op('uuid_ops'),
-		),
-		uniqueIndex('mfa_factors_user_friendly_name_unique')
-			.using(
-				'btree',
-				table.friendlyName.asc().nullsLast().op('text_ops'),
-				table.userId.asc().nullsLast().op('uuid_ops'),
-			)
-			.where(sql`(TRIM(BOTH FROM friendly_name) <> ''::text)`),
-		index('mfa_factors_user_id_idx').using(
-			'btree',
-			table.userId.asc().nullsLast().op('uuid_ops'),
-		),
-		uniqueIndex('unique_phone_factor_per_user').using(
-			'btree',
-			table.userId.asc().nullsLast().op('text_ops'),
-			table.phone.asc().nullsLast().op('text_ops'),
-		),
-		foreignKey({
-			columns: [table.userId],
-			foreignColumns: [usersInAuth.id],
-			name: 'mfa_factors_user_id_fkey',
-		}).onDelete('cascade'),
-	],
-)
-
 export const usersInAuth = auth.table(
 	'users',
 	{
 		instanceId: uuid('instance_id'),
-		id: uuid().notNull(),
+		id: uuid().primaryKey().notNull(),
 		aud: varchar({ length: 255 }),
 		role: varchar({ length: 255 }),
 		email: varchar({ length: 255 }),
@@ -363,6 +257,7 @@ export const usersInAuth = auth.table(
 			'btree',
 			table.isAnonymous.asc().nullsLast().op('bool_ops'),
 		),
+		unique('users_phone_key').on(table.phone),
 		check(
 			'users_email_change_confirm_status_check',
 			sql`(email_change_confirm_status >= 0) AND (email_change_confirm_status <= 2)`,
@@ -370,10 +265,72 @@ export const usersInAuth = auth.table(
 	],
 )
 
+export const auditLogEntriesInAuth = auth.table(
+	'audit_log_entries',
+	{
+		instanceId: uuid('instance_id'),
+		id: uuid().primaryKey().notNull(),
+		payload: json(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
+		ipAddress: varchar('ip_address', { length: 64 }).default('').notNull(),
+	},
+	(table) => [
+		index('audit_logs_instance_id_idx').using(
+			'btree',
+			table.instanceId.asc().nullsLast().op('uuid_ops'),
+		),
+	],
+)
+
+export const refreshTokensInAuth = auth.table(
+	'refresh_tokens',
+	{
+		instanceId: uuid('instance_id'),
+		id: bigserial({ mode: 'bigint' }).primaryKey().notNull(),
+		token: varchar({ length: 255 }),
+		userId: varchar('user_id', { length: 255 }),
+		revoked: boolean(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
+		parent: varchar({ length: 255 }),
+		sessionId: uuid('session_id'),
+	},
+	(table) => [
+		index('refresh_tokens_instance_id_idx').using(
+			'btree',
+			table.instanceId.asc().nullsLast().op('uuid_ops'),
+		),
+		index('refresh_tokens_instance_id_user_id_idx').using(
+			'btree',
+			table.instanceId.asc().nullsLast().op('text_ops'),
+			table.userId.asc().nullsLast().op('text_ops'),
+		),
+		index('refresh_tokens_parent_idx').using(
+			'btree',
+			table.parent.asc().nullsLast().op('text_ops'),
+		),
+		index('refresh_tokens_session_id_revoked_idx').using(
+			'btree',
+			table.sessionId.asc().nullsLast().op('bool_ops'),
+			table.revoked.asc().nullsLast().op('bool_ops'),
+		),
+		index('refresh_tokens_updated_at_idx').using(
+			'btree',
+			table.updatedAt.desc().nullsFirst().op('timestamptz_ops'),
+		),
+		foreignKey({
+			columns: [table.sessionId],
+			foreignColumns: [sessionsInAuth.id],
+			name: 'refresh_tokens_session_id_fkey',
+		}).onDelete('cascade'),
+		unique('refresh_tokens_token_unique').on(table.token),
+	],
+)
+
 export const sessionsInAuth = auth.table(
 	'sessions',
 	{
-		id: uuid().notNull(),
+		id: uuid().primaryKey().notNull(),
 		userId: uuid('user_id').notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
@@ -407,10 +364,105 @@ export const sessionsInAuth = auth.table(
 	],
 )
 
+export const identitiesInAuth = auth.table(
+	'identities',
+	{
+		providerId: text('provider_id').notNull(),
+		userId: uuid('user_id').notNull(),
+		identityData: jsonb('identity_data').notNull(),
+		provider: text().notNull(),
+		lastSignInAt: timestamp('last_sign_in_at', {
+			withTimezone: true,
+			mode: 'string',
+		}),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
+		email: text().generatedAlwaysAs(
+			sql`lower((identity_data ->> 'email'::text))`,
+		),
+		id: uuid().defaultRandom().primaryKey().notNull(),
+	},
+	(table) => [
+		index('identities_email_idx').using(
+			'btree',
+			table.email.asc().nullsLast().op('text_pattern_ops'),
+		),
+		index('identities_user_id_idx').using(
+			'btree',
+			table.userId.asc().nullsLast().op('uuid_ops'),
+		),
+		foreignKey({
+			columns: [table.userId],
+			foreignColumns: [usersInAuth.id],
+			name: 'identities_user_id_fkey',
+		}).onDelete('cascade'),
+		unique('identities_provider_id_provider_unique').on(
+			table.providerId,
+			table.provider,
+		),
+	],
+)
+
+export const mfaFactorsInAuth = auth.table(
+	'mfa_factors',
+	{
+		id: uuid().primaryKey().notNull(),
+		userId: uuid('user_id').notNull(),
+		friendlyName: text('friendly_name'),
+		factorType: factorTypeInAuth('factor_type').notNull(),
+		status: factorStatusInAuth().notNull(),
+		createdAt: timestamp('created_at', {
+			withTimezone: true,
+			mode: 'string',
+		}).notNull(),
+		updatedAt: timestamp('updated_at', {
+			withTimezone: true,
+			mode: 'string',
+		}).notNull(),
+		secret: text(),
+		phone: text(),
+		lastChallengedAt: timestamp('last_challenged_at', {
+			withTimezone: true,
+			mode: 'string',
+		}),
+		webAuthnCredential: jsonb('web_authn_credential'),
+		webAuthnAaguid: uuid('web_authn_aaguid'),
+	},
+	(table) => [
+		index('factor_id_created_at_idx').using(
+			'btree',
+			table.userId.asc().nullsLast().op('timestamptz_ops'),
+			table.createdAt.asc().nullsLast().op('uuid_ops'),
+		),
+		uniqueIndex('mfa_factors_user_friendly_name_unique')
+			.using(
+				'btree',
+				table.friendlyName.asc().nullsLast().op('text_ops'),
+				table.userId.asc().nullsLast().op('uuid_ops'),
+			)
+			.where(sql`(TRIM(BOTH FROM friendly_name) <> ''::text)`),
+		index('mfa_factors_user_id_idx').using(
+			'btree',
+			table.userId.asc().nullsLast().op('uuid_ops'),
+		),
+		uniqueIndex('unique_phone_factor_per_user').using(
+			'btree',
+			table.userId.asc().nullsLast().op('text_ops'),
+			table.phone.asc().nullsLast().op('text_ops'),
+		),
+		foreignKey({
+			columns: [table.userId],
+			foreignColumns: [usersInAuth.id],
+			name: 'mfa_factors_user_id_fkey',
+		}).onDelete('cascade'),
+		unique('mfa_factors_last_challenged_at_key').on(table.lastChallengedAt),
+	],
+)
+
 export const mfaChallengesInAuth = auth.table(
 	'mfa_challenges',
 	{
-		id: uuid().notNull(),
+		id: uuid().primaryKey().notNull(),
 		factorId: uuid('factor_id').notNull(),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
@@ -440,15 +492,20 @@ export const mfaChallengesInAuth = auth.table(
 export const ssoProvidersInAuth = auth.table(
 	'sso_providers',
 	{
-		id: uuid().notNull(),
+		id: uuid().primaryKey().notNull(),
 		resourceId: text('resource_id'),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
+		disabled: boolean(),
 	},
-	(_table) => [
+	(table) => [
 		uniqueIndex('sso_providers_resource_id_idx').using(
 			'btree',
 			sql`lower(resource_id)`,
+		),
+		index('sso_providers_resource_id_pattern_idx').using(
+			'btree',
+			table.resourceId.asc().nullsLast().op('text_pattern_ops'),
 		),
 		check(
 			'resource_id not empty',
@@ -460,7 +517,7 @@ export const ssoProvidersInAuth = auth.table(
 export const ssoDomainsInAuth = auth.table(
 	'sso_domains',
 	{
-		id: uuid().notNull(),
+		id: uuid().primaryKey().notNull(),
 		ssoProviderId: uuid('sso_provider_id').notNull(),
 		domain: text().notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
@@ -481,66 +538,10 @@ export const ssoDomainsInAuth = auth.table(
 	],
 )
 
-export const mfaAmrClaimsInAuth = auth.table(
-	'mfa_amr_claims',
-	{
-		sessionId: uuid('session_id').notNull(),
-		createdAt: timestamp('created_at', {
-			withTimezone: true,
-			mode: 'string',
-		}).notNull(),
-		updatedAt: timestamp('updated_at', {
-			withTimezone: true,
-			mode: 'string',
-		}).notNull(),
-		authenticationMethod: text('authentication_method').notNull(),
-		id: uuid().notNull(),
-	},
-	(table) => [
-		foreignKey({
-			columns: [table.sessionId],
-			foreignColumns: [sessionsInAuth.id],
-			name: 'mfa_amr_claims_session_id_fkey',
-		}).onDelete('cascade'),
-	],
-)
-
-export const samlProvidersInAuth = auth.table(
-	'saml_providers',
-	{
-		id: uuid().notNull(),
-		ssoProviderId: uuid('sso_provider_id').notNull(),
-		entityId: text('entity_id').notNull(),
-		metadataXml: text('metadata_xml').notNull(),
-		metadataUrl: text('metadata_url'),
-		attributeMapping: jsonb('attribute_mapping'),
-		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
-		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
-		nameIdFormat: text('name_id_format'),
-	},
-	(table) => [
-		index('saml_providers_sso_provider_id_idx').using(
-			'btree',
-			table.ssoProviderId.asc().nullsLast().op('uuid_ops'),
-		),
-		foreignKey({
-			columns: [table.ssoProviderId],
-			foreignColumns: [ssoProvidersInAuth.id],
-			name: 'saml_providers_sso_provider_id_fkey',
-		}).onDelete('cascade'),
-		check('metadata_xml not empty', sql`char_length(metadata_xml) > 0`),
-		check(
-			'metadata_url not empty',
-			sql`(metadata_url = NULL::text) OR (char_length(metadata_url) > 0)`,
-		),
-		check('entity_id not empty', sql`char_length(entity_id) > 0`),
-	],
-)
-
 export const samlRelayStatesInAuth = auth.table(
 	'saml_relay_states',
 	{
-		id: uuid().notNull(),
+		id: uuid().primaryKey().notNull(),
 		ssoProviderId: uuid('sso_provider_id').notNull(),
 		requestId: text('request_id').notNull(),
 		forEmail: text('for_email'),
@@ -576,10 +577,71 @@ export const samlRelayStatesInAuth = auth.table(
 	],
 )
 
+export const mfaAmrClaimsInAuth = auth.table(
+	'mfa_amr_claims',
+	{
+		sessionId: uuid('session_id').notNull(),
+		createdAt: timestamp('created_at', {
+			withTimezone: true,
+			mode: 'string',
+		}).notNull(),
+		updatedAt: timestamp('updated_at', {
+			withTimezone: true,
+			mode: 'string',
+		}).notNull(),
+		authenticationMethod: text('authentication_method').notNull(),
+		id: uuid().primaryKey().notNull(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.sessionId],
+			foreignColumns: [sessionsInAuth.id],
+			name: 'mfa_amr_claims_session_id_fkey',
+		}).onDelete('cascade'),
+		unique('mfa_amr_claims_session_id_authentication_method_pkey').on(
+			table.sessionId,
+			table.authenticationMethod,
+		),
+	],
+)
+
+export const samlProvidersInAuth = auth.table(
+	'saml_providers',
+	{
+		id: uuid().primaryKey().notNull(),
+		ssoProviderId: uuid('sso_provider_id').notNull(),
+		entityId: text('entity_id').notNull(),
+		metadataXml: text('metadata_xml').notNull(),
+		metadataUrl: text('metadata_url'),
+		attributeMapping: jsonb('attribute_mapping'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
+		nameIdFormat: text('name_id_format'),
+	},
+	(table) => [
+		index('saml_providers_sso_provider_id_idx').using(
+			'btree',
+			table.ssoProviderId.asc().nullsLast().op('uuid_ops'),
+		),
+		foreignKey({
+			columns: [table.ssoProviderId],
+			foreignColumns: [ssoProvidersInAuth.id],
+			name: 'saml_providers_sso_provider_id_fkey',
+		}).onDelete('cascade'),
+		unique('saml_providers_entity_id_key').on(table.entityId),
+		check('metadata_xml not empty', sql`char_length(metadata_xml) > 0`),
+		check(
+			'metadata_url not empty',
+			sql`(metadata_url = NULL::text) OR (char_length(metadata_url) > 0)`,
+		),
+		check('entity_id not empty', sql`char_length(entity_id) > 0`),
+	],
+)
+
 export const flowStateInAuth = auth.table(
 	'flow_state',
 	{
-		id: uuid().notNull(),
+		id: uuid().primaryKey().notNull(),
 		userId: uuid('user_id'),
 		authCode: text('auth_code').notNull(),
 		codeChallengeMethod: codeChallengeMethodInAuth(
@@ -614,45 +676,10 @@ export const flowStateInAuth = auth.table(
 	],
 )
 
-export const identitiesInAuth = auth.table(
-	'identities',
-	{
-		providerId: text('provider_id').notNull(),
-		userId: uuid('user_id').notNull(),
-		identityData: jsonb('identity_data').notNull(),
-		provider: text().notNull(),
-		lastSignInAt: timestamp('last_sign_in_at', {
-			withTimezone: true,
-			mode: 'string',
-		}),
-		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
-		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
-		email: text().generatedAlwaysAs(
-			sql`lower((identity_data ->> 'email'::text))`,
-		),
-		id: uuid().defaultRandom().notNull(),
-	},
-	(table) => [
-		index('identities_email_idx').using(
-			'btree',
-			table.email.asc().nullsLast().op('text_pattern_ops'),
-		),
-		index('identities_user_id_idx').using(
-			'btree',
-			table.userId.asc().nullsLast().op('uuid_ops'),
-		),
-		foreignKey({
-			columns: [table.userId],
-			foreignColumns: [usersInAuth.id],
-			name: 'identities_user_id_fkey',
-		}).onDelete('cascade'),
-	],
-)
-
 export const oneTimeTokensInAuth = auth.table(
 	'one_time_tokens',
 	{
-		id: uuid().notNull(),
+		id: uuid().primaryKey().notNull(),
 		userId: uuid('user_id').notNull(),
 		tokenType: oneTimeTokenTypeInAuth('token_type').notNull(),
 		tokenHash: text('token_hash').notNull(),
@@ -684,6 +711,132 @@ export const oneTimeTokensInAuth = auth.table(
 			name: 'one_time_tokens_user_id_fkey',
 		}).onDelete('cascade'),
 		check('one_time_tokens_token_hash_check', sql`char_length(token_hash) > 0`),
+	],
+)
+
+export const escrowReviews = pgTable(
+	'escrow_reviews',
+	{
+		id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+		escrowId: uuid('escrow_id').notNull(),
+		milestoneId: uuid('milestone_id'),
+		reviewerAddress: text('reviewer_address').notNull(),
+		status: text().default('PENDING').notNull(),
+		reviewNotes: text('review_notes'),
+		createdAt: timestamp('created_at', {
+			withTimezone: true,
+			mode: 'string',
+		}).default(sql`CURRENT_TIMESTAMP`),
+		reviewedAt: timestamp('reviewed_at', {
+			withTimezone: true,
+			mode: 'string',
+		}),
+		disputerId: uuid('disputer_id'),
+		type: text().notNull(),
+		resolutionText: text('resolution_text'),
+		evidenceUrls: text('evidence_urls').array(),
+		transactionHash: text('transaction_hash'),
+	},
+	(table) => [
+		index('escrow_reviews_escrow_id_idx').using(
+			'btree',
+			table.escrowId.asc().nullsLast().op('uuid_ops'),
+		),
+		index('escrow_reviews_milestone_id_idx').using(
+			'btree',
+			table.milestoneId.asc().nullsLast().op('uuid_ops'),
+		),
+		index('escrow_reviews_type_idx').using(
+			'btree',
+			table.type.asc().nullsLast().op('text_ops'),
+		),
+		foreignKey({
+			columns: [table.escrowId],
+			foreignColumns: [escrowContracts.id],
+			name: 'escrow_reviews_escrow_id_fkey',
+		}),
+		foreignKey({
+			columns: [table.milestoneId],
+			foreignColumns: [milestones.id],
+			name: 'escrow_reviews_milestone_id_fkey',
+		}),
+		check(
+			'escrow_reviews_type_check',
+			sql`type = ANY (ARRAY['dispute'::text, 'milestone'::text])`,
+		),
+	],
+)
+
+export const profiles = pgTable(
+	'profiles',
+	{
+		id: uuid().primaryKey().notNull(),
+		role: userRole().default('kindler').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+			.defaultNow()
+			.notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+			.defaultNow()
+			.notNull(),
+		displayName: text('display_name').default(''),
+		bio: text().default(''),
+		imageUrl: text('image_url').default(''),
+		email: text(),
+		nextAuthUserId: uuid('next_auth_user_id'),
+	},
+	(table) => [
+		index('idx_profiles_next_auth_user_id').using(
+			'btree',
+			table.nextAuthUserId.asc().nullsLast().op('uuid_ops'),
+		),
+		foreignKey({
+			columns: [table.id],
+			foreignColumns: [usersInAuth.id],
+			name: 'profiles_id_fkey',
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [table.nextAuthUserId],
+			foreignColumns: [usersInNextAuth.id],
+			name: 'profiles_next_auth_user_id_fkey',
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [table.id],
+			foreignColumns: [usersInNextAuth.id],
+			name: 'profiles_id_fkey1',
+		})
+			.onUpdate('cascade')
+			.onDelete('cascade'),
+		pgPolicy('Public read access to profiles', {
+			as: 'permissive',
+			for: 'select',
+			to: ['public'],
+			using: sql`true`,
+		}),
+		pgPolicy('Users can insert their own profile', {
+			as: 'permissive',
+			for: 'insert',
+			to: ['authenticated'],
+		}),
+		pgPolicy('Users can update their own profile', {
+			as: 'permissive',
+			for: 'update',
+			to: ['authenticated'],
+		}),
+		pgPolicy('Users can view their own profile via NextAuth', {
+			as: 'permissive',
+			for: 'select',
+			to: ['public'],
+		}),
+		pgPolicy('Users can update their own profile via NextAuth', {
+			as: 'permissive',
+			for: 'update',
+			to: ['public'],
+		}),
+		pgPolicy('Service role can manage all profiles', {
+			as: 'permissive',
+			for: 'all',
+			to: ['service_role'],
+		}),
 	],
 )
 
@@ -799,167 +952,6 @@ export const escrowContracts = pgTable(
 	],
 )
 
-export const profiles = pgTable(
-	'profiles',
-	{
-		id: uuid().primaryKey().notNull(),
-		role: userRole().default('kindler').notNull(),
-		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
-			.defaultNow()
-			.notNull(),
-		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
-			.defaultNow()
-			.notNull(),
-		displayName: text('display_name').default('').notNull(),
-		bio: text().default(''),
-		imageUrl: text('image_url').default(''),
-		email: text(),
-	},
-	(table) => [
-		foreignKey({
-			columns: [table.id],
-			foreignColumns: [usersInAuth.id],
-			name: 'profiles_id_fkey',
-		}).onDelete('cascade'),
-		pgPolicy('Service role can manage all profiles', {
-			as: 'permissive',
-			for: 'all',
-			to: ['service_role'],
-			using: sql`true`,
-		}),
-		pgPolicy('Users can view their own profile', {
-			as: 'permissive',
-			for: 'select',
-			to: ['public'],
-		}),
-		pgPolicy('Users can update their own profile', {
-			as: 'permissive',
-			for: 'update',
-			to: ['authenticated'],
-		}),
-		pgPolicy('Users can insert their own profile', {
-			as: 'permissive',
-			for: 'insert',
-			to: ['authenticated'],
-		}),
-		pgPolicy('Public read access to profiles', {
-			as: 'permissive',
-			for: 'select',
-			to: ['public'],
-		}),
-	],
-)
-
-export const projects = pgTable(
-	'projects',
-	{
-		id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
-		title: text().notNull(),
-		description: text(),
-		currentAmount: numeric('current_amount', { precision: 12, scale: 2 })
-			.default('0')
-			.notNull(),
-		targetAmount: numeric('target_amount', {
-			precision: 12,
-			scale: 2,
-		}).notNull(),
-		minInvestment: numeric('min_investment', {
-			precision: 12,
-			scale: 2,
-		}).notNull(),
-		percentageComplete: numeric('percentage_complete', {
-			precision: 5,
-			scale: 2,
-		})
-			.default('0')
-			.notNull(),
-		kinderCount: integer('kinder_count').default(0).notNull(),
-		createdAt: timestamp('created_at', {
-			withTimezone: true,
-			mode: 'string',
-		}).default(sql`CURRENT_TIMESTAMP`),
-		updatedAt: timestamp('updated_at', {
-			withTimezone: true,
-			mode: 'string',
-		}).default(sql`CURRENT_TIMESTAMP`),
-		categoryId: uuid('category_id'),
-		imageUrl: text('image_url'),
-		kindlerId: uuid('kindler_id').notNull(),
-		slug: text().notNull(),
-		socialLinks: jsonb('social_links').default({}).notNull(),
-		projectLocation: char('project_location', { length: 3 }),
-	},
-	(table) => [
-		index('idx_projects_kindler_id').using(
-			'btree',
-			table.kindlerId.asc().nullsLast().op('uuid_ops'),
-		),
-		index('projects_project_location_idx').using(
-			'btree',
-			table.projectLocation.asc().nullsLast().op('bpchar_ops'),
-		),
-		uniqueIndex('projects_slug_key').using(
-			'btree',
-			table.slug.asc().nullsLast().op('text_ops'),
-		),
-		foreignKey({
-			columns: [table.kindlerId],
-			foreignColumns: [usersInAuth.id],
-			name: 'projects_kindler_id_fkey',
-		}),
-		foreignKey({
-			columns: [table.categoryId],
-			foreignColumns: [categories.id],
-			name: 'projects_category_id_fkey',
-		}).onDelete('set null'),
-		pgPolicy('Projects can be deleted by owner', {
-			as: 'permissive',
-			for: 'delete',
-			to: ['authenticated'],
-			using: sql`(auth.uid() = kindler_id)`,
-		}),
-		pgPolicy('Projects can be updated by owner', {
-			as: 'permissive',
-			for: 'update',
-			to: ['authenticated'],
-		}),
-		pgPolicy('Projects can be created by authenticated users', {
-			as: 'permissive',
-			for: 'insert',
-			to: ['authenticated'],
-		}),
-		pgPolicy('Projects are viewable by everyone', {
-			as: 'permissive',
-			for: 'select',
-			to: ['authenticated'],
-		}),
-		pgPolicy('Allow public read access to projects', {
-			as: 'permissive',
-			for: 'select',
-			to: ['public'],
-		}),
-		pgPolicy('Allow project owners to update their projects', {
-			as: 'permissive',
-			for: 'update',
-			to: ['public'],
-		}),
-		pgPolicy('Allow authenticated users to create projects', {
-			as: 'permissive',
-			for: 'insert',
-			to: ['public'],
-		}),
-		check(
-			'check_min_investment_less_than_target',
-			sql`min_investment <= target_amount`,
-		),
-		check('check_positive_target_amount', sql`target_amount > (0)::numeric`),
-		check(
-			'chk_project_location_alpha3',
-			sql`(project_location IS NULL) OR (project_location ~ '^[A-Z]{3}$'::text)`,
-		),
-	],
-)
-
 export const projectUpdates = pgTable(
 	'project_updates',
 	{
@@ -994,28 +986,26 @@ export const projectUpdates = pgTable(
 			foreignColumns: [usersInAuth.id],
 			name: 'project_updates_author_id_fkey',
 		}).onDelete('cascade'),
-		pgPolicy('Project updates can be deleted by authors or project owners', {
+		pgPolicy('Public read access to project updates', {
 			as: 'permissive',
-			for: 'delete',
-			to: ['authenticated'],
-			using: sql`((auth.uid() = author_id) OR (EXISTS ( SELECT 1
-   FROM projects
-  WHERE ((projects.id = project_updates.project_id) AND (projects.kindler_id = auth.uid())))))`,
-		}),
-		pgPolicy('Project updates can be modified by authors', {
-			as: 'permissive',
-			for: 'update',
-			to: ['authenticated'],
+			for: 'select',
+			to: ['public'],
+			using: sql`true`,
 		}),
 		pgPolicy('Project updates can be created by project members', {
 			as: 'permissive',
 			for: 'insert',
 			to: ['authenticated'],
 		}),
-		pgPolicy('Public read access to project updates', {
+		pgPolicy('Project updates can be modified by authors', {
 			as: 'permissive',
-			for: 'select',
-			to: ['public'],
+			for: 'update',
+			to: ['authenticated'],
+		}),
+		pgPolicy('Project updates can be deleted by authors or project owners', {
+			as: 'permissive',
+			for: 'delete',
+			to: ['authenticated'],
 		}),
 	],
 )
@@ -1025,7 +1015,7 @@ export const projectPitch = pgTable(
 	{
 		id: uuid().defaultRandom().primaryKey().notNull(),
 		title: text().notNull(),
-		story: text(),
+		story: text().notNull(),
 		pitchDeck: text('pitch_deck'),
 		videoUrl: text('video_url'),
 		projectId: uuid('project_id').notNull(),
@@ -1044,47 +1034,168 @@ export const projectPitch = pgTable(
 			foreignColumns: [projects.id],
 			name: 'project_pitch_project_id_fkey',
 		}).onDelete('cascade'),
-		pgPolicy('Users can delete their own project pitches', {
+		unique('project_pitch_project_id_key').on(table.projectId),
+		pgPolicy('Public read access to project pitches', {
 			as: 'permissive',
-			for: 'delete',
+			for: 'select',
 			to: ['public'],
-			using: sql`(project_id IN ( SELECT projects.id
-   FROM projects
-  WHERE ((projects.id = project_pitch.project_id) AND (projects.kindler_id = auth.uid()))))`,
+			using: sql`true`,
 		}),
-		pgPolicy('Users can update their own project pitches', {
-			as: 'permissive',
-			for: 'update',
-			to: ['public'],
-		}),
-		pgPolicy('Users can insert their own project pitches', {
+		pgPolicy('Temporary public insert access to project pitches', {
 			as: 'permissive',
 			for: 'insert',
 			to: ['public'],
 		}),
-		pgPolicy('Public read access to project pitches', {
+		pgPolicy('Temporary public update access to project pitches', {
 			as: 'permissive',
-			for: 'select',
+			for: 'update',
+			to: ['public'],
+		}),
+		pgPolicy('Users can delete their own project pitches', {
+			as: 'permissive',
+			for: 'delete',
 			to: ['public'],
 		}),
 	],
 )
 
-export const projectTags = pgTable(
-	'project_tags',
+export const projects = pgTable(
+	'projects',
 	{
-		id: uuid().defaultRandom().primaryKey().notNull(),
-		name: text().notNull(),
-		color: char({ length: 7 }).notNull(),
-		createdAt: timestamp('created_at', { mode: 'string' }).defaultNow(),
-		updatedAt: timestamp('updated_at', { mode: 'string' }).defaultNow(),
+		id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+		title: text().notNull(),
+		description: text().notNull(),
+		currentAmount: numeric('current_amount', { precision: 12, scale: 2 })
+			.default('0')
+			.notNull(),
+		targetAmount: numeric('target_amount', {
+			precision: 12,
+			scale: 2,
+		}).notNull(),
+		minInvestment: numeric('min_investment', {
+			precision: 12,
+			scale: 2,
+		}).notNull(),
+		percentageComplete: numeric('percentage_complete', {
+			precision: 5,
+			scale: 2,
+		})
+			.default('0')
+			.notNull(),
+		kinderCount: integer('kinder_count').default(0).notNull(),
+		createdAt: timestamp('created_at', {
+			withTimezone: true,
+			mode: 'string',
+		}).default(sql`CURRENT_TIMESTAMP`),
+		updatedAt: timestamp('updated_at', {
+			withTimezone: true,
+			mode: 'string',
+		}).default(sql`CURRENT_TIMESTAMP`),
+		categoryId: uuid('category_id').notNull(),
+		imageUrl: text('image_url'),
+		kindlerId: uuid('kindler_id').notNull(),
+		slug: text(),
+		socialLinks: jsonb('social_links').default({}).notNull(),
+		projectLocation: char('project_location', { length: 3 }).notNull(),
+		status: projectStatus().default('draft').notNull(),
+		metadata: jsonb().default({}).notNull(),
 	},
 	(table) => [
-		unique('project_tags_name_key').on(table.name),
-		check(
-			'project_tags_color_check',
-			sql`(color)::text ~ '^#[0-9A-Fa-f]{6}$'::text`,
+		index('idx_projects_kindler_id').using(
+			'btree',
+			table.kindlerId.asc().nullsLast().op('uuid_ops'),
 		),
+		index('projects_project_location_idx').using(
+			'btree',
+			table.projectLocation.asc().nullsLast().op('bpchar_ops'),
+		),
+		uniqueIndex('projects_slug_key').using(
+			'btree',
+			table.slug.asc().nullsLast().op('text_ops'),
+		),
+		index('projects_status_idx').using(
+			'btree',
+			table.status.asc().nullsLast().op('enum_ops'),
+		),
+		foreignKey({
+			columns: [table.kindlerId],
+			foreignColumns: [usersInAuth.id],
+			name: 'projects_kindler_id_fkey',
+		}),
+		foreignKey({
+			columns: [table.categoryId],
+			foreignColumns: [categories.id],
+			name: 'projects_category_id_fkey',
+		}).onDelete('set null'),
+		pgPolicy('Public read access to projects', {
+			as: 'permissive',
+			for: 'select',
+			to: ['public'],
+			using: sql`true`,
+		}),
+		pgPolicy('Temporary public insert access to projects', {
+			as: 'permissive',
+			for: 'insert',
+			to: ['public'],
+		}),
+		pgPolicy('Temporary public update access to projects', {
+			as: 'permissive',
+			for: 'update',
+			to: ['public'],
+		}),
+		pgPolicy('Projects can be deleted by owner', {
+			as: 'permissive',
+			for: 'delete',
+			to: ['authenticated'],
+		}),
+		check(
+			'check_min_investment_less_than_target',
+			sql`min_investment <= target_amount`,
+		),
+		check('check_positive_target_amount', sql`target_amount > (0)::numeric`),
+		check(
+			'chk_project_location_alpha3',
+			sql`project_location ~ '^[A-Z]{3}$'::text`,
+		),
+	],
+)
+
+export const community = pgTable(
+	'community',
+	{
+		id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+		projectId: uuid('project_id').notNull(),
+		updateId: uuid('update_id').notNull(),
+		commentId: uuid('comment_id').notNull(),
+		createdAt: timestamp('created_at', {
+			withTimezone: true,
+			mode: 'string',
+		}).default(sql`CURRENT_TIMESTAMP`),
+	},
+	(table) => [
+		index('community_project_id_idx').using(
+			'btree',
+			table.projectId.asc().nullsLast().op('uuid_ops'),
+		),
+		index('community_update_id_idx').using(
+			'btree',
+			table.updateId.asc().nullsLast().op('uuid_ops'),
+		),
+		foreignKey({
+			columns: [table.projectId],
+			foreignColumns: [projects.id],
+			name: 'community_project_id_fkey',
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [table.updateId],
+			foreignColumns: [projectUpdates.id],
+			name: 'community_update_id_fkey',
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [table.commentId],
+			foreignColumns: [comments.id],
+			name: 'comment_id_fkey',
+		}).onDelete('cascade'),
 	],
 )
 
@@ -1126,28 +1237,26 @@ export const projectMembers = pgTable(
 			table.projectId,
 			table.userId,
 		),
-		pgPolicy('Project owners can update member roles', {
+		pgPolicy('Public read access to project members', {
 			as: 'permissive',
-			for: 'update',
-			to: ['authenticated'],
-			using: sql`(EXISTS ( SELECT 1
-   FROM projects
-  WHERE ((projects.id = project_members.project_id) AND (projects.kindler_id = auth.uid()))))`,
-		}),
-		pgPolicy('Project owners can remove members', {
-			as: 'permissive',
-			for: 'delete',
-			to: ['authenticated'],
+			for: 'select',
+			to: ['public'],
+			using: sql`true`,
 		}),
 		pgPolicy('Project owners can add members', {
 			as: 'permissive',
 			for: 'insert',
 			to: ['authenticated'],
 		}),
-		pgPolicy('Public read access to project members', {
+		pgPolicy('Project owners can remove members', {
 			as: 'permissive',
-			for: 'select',
-			to: ['public'],
+			for: 'delete',
+			to: ['authenticated'],
+		}),
+		pgPolicy('Project owners can update member roles', {
+			as: 'permissive',
+			for: 'update',
+			to: ['authenticated'],
 		}),
 	],
 )
@@ -1178,69 +1287,48 @@ export const milestones = pgTable(
 			foreignColumns: [projects.id],
 			name: 'milestones_project_id_fkey',
 		}),
-		pgPolicy('Project owners can delete milestones', {
+		pgPolicy('Project owners can create milestones', {
 			as: 'permissive',
-			for: 'delete',
+			for: 'insert',
 			to: ['public'],
-			using: sql`(project_id IN ( SELECT projects.id
+			withCheck: sql`(project_id IN ( SELECT projects.id
    FROM projects
   WHERE (projects.kindler_id = auth.uid())))`,
-		}),
-		pgPolicy('Project owners can update milestones', {
-			as: 'permissive',
-			for: 'update',
-			to: ['public'],
 		}),
 		pgPolicy('Public read access to milestones', {
 			as: 'permissive',
 			for: 'select',
 			to: ['public'],
 		}),
-		pgPolicy('Project owners can create milestones', {
+		pgPolicy('Project owners can update milestones', {
 			as: 'permissive',
-			for: 'insert',
+			for: 'update',
+			to: ['public'],
+		}),
+		pgPolicy('Project owners can delete milestones', {
+			as: 'permissive',
+			for: 'delete',
 			to: ['public'],
 		}),
 		check('valid_milestone_amount', sql`amount > (0)::numeric`),
 	],
 )
 
-export const community = pgTable(
-	'community',
+export const projectTags = pgTable(
+	'project_tags',
 	{
-		id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
-		projectId: uuid('project_id').notNull(),
-		updateId: uuid('update_id').notNull(),
-		commentId: uuid('comment_id').notNull(),
-		createdAt: timestamp('created_at', {
-			withTimezone: true,
-			mode: 'string',
-		}).default(sql`CURRENT_TIMESTAMP`),
+		id: uuid().defaultRandom().primaryKey().notNull(),
+		name: text().notNull(),
+		color: char({ length: 7 }).notNull(),
+		createdAt: timestamp('created_at', { mode: 'string' }).defaultNow(),
+		updatedAt: timestamp('updated_at', { mode: 'string' }).defaultNow(),
 	},
 	(table) => [
-		index('community_project_id_idx').using(
-			'btree',
-			table.projectId.asc().nullsLast().op('uuid_ops'),
+		unique('project_tags_name_color_key').on(table.name, table.color),
+		check(
+			'project_tags_color_check',
+			sql`(color)::text ~ '^#[0-9A-Fa-f]{6}$'::text`,
 		),
-		index('community_update_id_idx').using(
-			'btree',
-			table.updateId.asc().nullsLast().op('uuid_ops'),
-		),
-		foreignKey({
-			columns: [table.projectId],
-			foreignColumns: [projects.id],
-			name: 'community_project_id_fkey',
-		}).onDelete('cascade'),
-		foreignKey({
-			columns: [table.updateId],
-			foreignColumns: [projectUpdates.id],
-			name: 'community_update_id_fkey',
-		}).onDelete('cascade'),
-		foreignKey({
-			columns: [table.commentId],
-			foreignColumns: [comments.id],
-			name: 'comment_id_fkey',
-		}).onDelete('cascade'),
 	],
 )
 
@@ -1304,21 +1392,20 @@ export const comments = pgTable(
 			foreignColumns: [projectUpdates.id],
 			name: 'comments_project_update_id_fkey',
 		}).onDelete('cascade'),
-		pgPolicy('update_question_status', {
+		pgPolicy('Public read access to comments', {
 			as: 'permissive',
-			for: 'update',
+			for: 'select',
 			to: ['public'],
-			using: sql`((type = 'question'::comment_type) AND (author_id = auth.uid()))`,
-			withCheck: sql`((type = 'question'::comment_type) AND (author_id = auth.uid()) AND (content = content) AND (NOT (parent_comment_id IS DISTINCT FROM parent_comment_id)) AND (project_id = project_id) AND true)`,
+			using: sql`true`,
 		}),
 		pgPolicy('update_answer_official', {
 			as: 'permissive',
 			for: 'update',
 			to: ['public'],
 		}),
-		pgPolicy('Public read access to comments', {
+		pgPolicy('update_question_status', {
 			as: 'permissive',
-			for: 'select',
+			for: 'update',
 			to: ['public'],
 		}),
 		check(
@@ -1332,69 +1419,15 @@ export const comments = pgTable(
 	],
 )
 
-export const escrowReviews = pgTable(
-	'escrow_reviews',
-	{
-		id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
-		escrowId: uuid('escrow_id').notNull(),
-		milestoneId: uuid('milestone_id'),
-		reviewerAddress: text('reviewer_address').notNull(),
-		status: text().default('PENDING').notNull(),
-		reviewNotes: text('review_notes'),
-		createdAt: timestamp('created_at', {
-			withTimezone: true,
-			mode: 'string',
-		}).default(sql`CURRENT_TIMESTAMP`),
-		reviewedAt: timestamp('reviewed_at', {
-			withTimezone: true,
-			mode: 'string',
-		}),
-		disputerId: uuid('disputer_id'),
-		type: text().notNull(),
-		resolutionText: text('resolution_text'),
-		evidenceUrls: text('evidence_urls').array(),
-		transactionHash: text('transaction_hash'),
-	},
-	(table) => [
-		index('escrow_reviews_escrow_id_idx').using(
-			'btree',
-			table.escrowId.asc().nullsLast().op('uuid_ops'),
-		),
-		index('escrow_reviews_milestone_id_idx').using(
-			'btree',
-			table.milestoneId.asc().nullsLast().op('uuid_ops'),
-		),
-		index('escrow_reviews_type_idx').using(
-			'btree',
-			table.type.asc().nullsLast().op('text_ops'),
-		),
-		foreignKey({
-			columns: [table.escrowId],
-			foreignColumns: [escrowContracts.id],
-			name: 'escrow_reviews_escrow_id_fkey',
-		}),
-		foreignKey({
-			columns: [table.milestoneId],
-			foreignColumns: [milestones.id],
-			name: 'escrow_reviews_milestone_id_fkey',
-		}),
-		check(
-			'escrow_reviews_type_check',
-			sql`type = ANY (ARRAY['dispute'::text, 'milestone'::text])`,
-		),
-	],
-)
-
 export const kycReviews = pgTable(
 	'kyc_reviews',
 	{
 		id: uuid().defaultRandom().primaryKey().notNull(),
-		kycStatusId: uuid('kyc_status_id').notNull(),
-		reviewerId: uuid('reviewer_id').notNull(),
-		decision: kycStatusEnum().notNull(),
-		reason: text(),
-		additionalNotes: text('additional_notes'),
-		reviewNotes: text('review_notes'),
+		userId: uuid('user_id').notNull(),
+		status: kycStatusEnum().notNull(),
+		verificationLevel: kycVerificationEnum('verification_level').notNull(),
+		reviewerId: uuid('reviewer_id').default(sql`auth.uid()`),
+		notes: text(),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
 			.defaultNow()
 			.notNull(),
@@ -1403,49 +1436,86 @@ export const kycReviews = pgTable(
 			.notNull(),
 	},
 	(table) => [
-		index('idx_kyc_reviews_kyc_status_id').using(
-			'btree',
-			table.kycStatusId.asc().nullsLast().op('uuid_ops'),
-		),
 		index('idx_kyc_reviews_reviewer_id').using(
 			'btree',
 			table.reviewerId.asc().nullsLast().op('uuid_ops'),
 		),
+		index('idx_kyc_reviews_user_id').using(
+			'btree',
+			table.userId.asc().nullsLast().op('uuid_ops'),
+		),
 		foreignKey({
-			columns: [table.kycStatusId],
-			foreignColumns: [kycStatus.id],
-			name: 'kyc_reviews_kyc_status_id_fkey',
+			columns: [table.userId],
+			foreignColumns: [usersInAuth.id],
+			name: 'kyc_reviews_user_id_fkey',
 		}).onDelete('cascade'),
 		foreignKey({
 			columns: [table.reviewerId],
 			foreignColumns: [usersInAuth.id],
 			name: 'kyc_reviews_reviewer_id_fkey',
-		}).onDelete('cascade'),
-		unique('kyc_reviews_kyc_status_id_reviewer_id_key').on(
-			table.kycStatusId,
-			table.reviewerId,
-		),
-		pgPolicy('Users can view their own KYC reviews', {
+		}).onDelete('set null'),
+		pgPolicy('Whitelisted users can create KYC reviews', {
+			as: 'permissive',
+			for: 'insert',
+			to: ['public'],
+			withCheck: sql`((EXISTS ( SELECT 1
+   FROM kyc_admin_whitelist
+  WHERE (kyc_admin_whitelist.user_id = auth.uid()))) AND (reviewer_id = auth.uid()))`,
+		}),
+		pgPolicy('Whitelisted users can view all KYC reviews', {
 			as: 'permissive',
 			for: 'select',
 			to: ['public'],
-			using: sql`(EXISTS ( SELECT 1
-   FROM kyc_status
-  WHERE ((kyc_status.id = kyc_reviews.kyc_status_id) AND (kyc_status.user_id = auth.uid()))))`,
 		}),
-		pgPolicy('Admins can update KYC reviews', {
+		pgPolicy('Whitelisted users can update KYC reviews', {
 			as: 'permissive',
 			for: 'update',
 			to: ['public'],
 		}),
-		pgPolicy('Admins can create KYC reviews', {
-			as: 'permissive',
-			for: 'insert',
-			to: ['public'],
-		}),
-		pgPolicy('Admins can view all KYC reviews', {
+		pgPolicy('Users can view their own KYC reviews', {
 			as: 'permissive',
 			for: 'select',
+			to: ['public'],
+		}),
+	],
+)
+
+export const kycAdminWhitelist = pgTable(
+	'kyc_admin_whitelist',
+	{
+		id: uuid().defaultRandom().primaryKey().notNull(),
+		userId: uuid('user_id').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+			.defaultNow()
+			.notNull(),
+		createdBy: uuid('created_by'),
+		notes: text(),
+	},
+	(table) => [
+		index('idx_kyc_admin_whitelist_user_id').using(
+			'btree',
+			table.userId.asc().nullsLast().op('uuid_ops'),
+		),
+		foreignKey({
+			columns: [table.userId],
+			foreignColumns: [usersInAuth.id],
+			name: 'kyc_admin_whitelist_user_id_fkey',
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [table.createdBy],
+			foreignColumns: [usersInAuth.id],
+			name: 'kyc_admin_whitelist_created_by_fkey',
+		}).onDelete('set null'),
+		unique('kyc_admin_whitelist_user_id_key').on(table.userId),
+		pgPolicy('Allow reading admin whitelist', {
+			as: 'permissive',
+			for: 'select',
+			to: ['public'],
+			using: sql`true`,
+		}),
+		pgPolicy('Whitelisted admins can manage whitelist', {
+			as: 'permissive',
+			for: 'all',
 			to: ['public'],
 		}),
 	],
@@ -1466,63 +1536,229 @@ export const categories = pgTable(
 		),
 		unique('categories_name_key').on(table.name),
 		unique('categories_color_key').on(table.color),
-		pgPolicy('Admins can write categories', {
-			as: 'permissive',
-			for: 'all',
-			to: ['public'],
-			using: sql`(current_setting('jwt.claims.role'::text, true) = 'admin'::text)`,
-			withCheck: sql`(current_setting('jwt.claims.role'::text, true) = 'admin'::text)`,
-		}),
 		pgPolicy('Public can read categories', {
 			as: 'permissive',
 			for: 'select',
+			to: ['public'],
+			using: sql`true`,
+		}),
+		pgPolicy('Admins can write categories', {
+			as: 'permissive',
+			for: 'all',
 			to: ['public'],
 		}),
 		check('chk_color_format', sql`color ~ '^#[0-9A-Fa-f]{6}$'::text`),
 	],
 )
 
-export const kycStatus = pgTable(
-	'kyc_status',
+export const devices = pgTable(
+	'devices',
 	{
 		id: uuid().defaultRandom().primaryKey().notNull(),
-		userId: uuid('user_id').notNull(),
-		status: kycStatusEnum().default('pending').notNull(),
-		verificationLevel: kycVerificationEnum('verification_level')
-			.default('basic')
+		userId: uuid('user_id'),
+		identifier: text().notNull(),
+		rpId: text('rp_id').notNull(),
+		deviceName: text('device_name'),
+		credentialType: credentialType('credential_type')
+			.default('public-key')
 			.notNull(),
+		credentialId: text('credential_id').notNull(),
+		aaguid: text().default('00000000-0000-0000-0000-000000000000').notNull(),
+		address: text().default('0x').notNull(),
+		signCount: integer('sign_count').default(0).notNull(),
+		transports: text().array().default(['']).notNull(),
+		profileVerificationStatus: profileVerificationStatus(
+			'profile_verification_status',
+		)
+			.default('unverified')
+			.notNull(),
+		deviceType: deviceType('device_type').default('single_device').notNull(),
+		backupState: backupState('backup_state').default('not_backed_up').notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
 			.defaultNow()
 			.notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
 			.defaultNow()
 			.notNull(),
+		lastUsedAt: timestamp('last_used_at', {
+			withTimezone: true,
+			mode: 'string',
+		}),
+		publicKey: text('public_key').notNull(),
+		nextAuthUserId: uuid('next_auth_user_id'),
 	},
 	(table) => [
-		index('idx_kyc_status_user_id').using(
+		index('idx_devices_credential_id').using(
+			'btree',
+			table.credentialId.asc().nullsLast().op('text_ops'),
+		),
+		index('idx_devices_identifier_rp_id').using(
+			'btree',
+			table.identifier.asc().nullsLast().op('text_ops'),
+			table.rpId.asc().nullsLast().op('text_ops'),
+		),
+		index('idx_devices_next_auth_user_id').using(
+			'btree',
+			table.nextAuthUserId.asc().nullsLast().op('uuid_ops'),
+		),
+		index('idx_devices_user_id').using(
 			'btree',
 			table.userId.asc().nullsLast().op('uuid_ops'),
 		),
 		foreignKey({
+			columns: [table.nextAuthUserId],
+			foreignColumns: [usersInNextAuth.id],
+			name: 'devices_next_auth_user_id_fkey',
+		}).onDelete('cascade'),
+		foreignKey({
 			columns: [table.userId],
 			foreignColumns: [usersInAuth.id],
-			name: 'kyc_status_user_id_fkey',
-		}).onDelete('cascade'),
-		unique('kyc_status_user_id_key').on(table.userId),
-		pgPolicy('Admins can update KYC statuses', {
+			name: 'devices_user_id_fkey',
+		}),
+		unique('devices_credential_id_key').on(table.credentialId),
+		pgPolicy('Service role can manage all devices', {
+			as: 'permissive',
+			for: 'all',
+			to: ['service_role'],
+			using: sql`true`,
+		}),
+		pgPolicy('Users can view their own devices via NextAuth', {
+			as: 'permissive',
+			for: 'select',
+			to: ['public'],
+		}),
+		pgPolicy('Users can insert their own devices via NextAuth', {
+			as: 'permissive',
+			for: 'insert',
+			to: ['public'],
+		}),
+		pgPolicy('Users can update their own devices via NextAuth', {
 			as: 'permissive',
 			for: 'update',
 			to: ['public'],
-			using: sql`((auth.jwt() ->> 'role'::text) = 'admin'::text)`,
 		}),
-		pgPolicy('Admins can view all KYC statuses', {
+		pgPolicy('Users can delete their own devices via NextAuth', {
 			as: 'permissive',
-			for: 'select',
+			for: 'delete',
 			to: ['public'],
 		}),
-		pgPolicy('Users can view their own KYC status', {
+	],
+)
+
+export const waitlistInterests = pgTable(
+	'waitlist_interests',
+	{
+		id: uuid().defaultRandom().primaryKey().notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+			.defaultNow()
+			.notNull(),
+		name: text().notNull(),
+		email: text(),
+		role: text().notNull(),
+		projectName: text('project_name'),
+		projectDescription: text('project_description'),
+		categoryId: uuid('category_id'),
+		location: text(),
+		source: text(),
+		consent: boolean().default(false).notNull(),
+	},
+	(table) => [
+		index('waitlist_interests_category_id_idx').using(
+			'btree',
+			table.categoryId.asc().nullsLast().op('uuid_ops'),
+		),
+		index('waitlist_interests_created_at_idx').using(
+			'btree',
+			table.createdAt.desc().nullsFirst().op('timestamptz_ops'),
+		),
+		index('waitlist_interests_email_idx').using('btree', sql`lower(email)`),
+		index('waitlist_interests_role_idx').using(
+			'btree',
+			table.role.asc().nullsLast().op('text_ops'),
+		),
+		foreignKey({
+			columns: [table.categoryId],
+			foreignColumns: [categories.id],
+			name: 'waitlist_interests_category_id_fkey',
+		}).onDelete('set null'),
+		pgPolicy('Allow public inserts', {
+			as: 'permissive',
+			for: 'insert',
+			to: ['public'],
+			withCheck: sql`true`,
+		}),
+		pgPolicy('No public select', {
 			as: 'permissive',
 			for: 'select',
+			to: ['authenticated'],
+		}),
+		pgPolicy('No public update', {
+			as: 'permissive',
+			for: 'update',
+			to: ['authenticated'],
+		}),
+		pgPolicy('No public delete', {
+			as: 'permissive',
+			for: 'delete',
+			to: ['authenticated'],
+		}),
+		check(
+			'waitlist_interests_role_check',
+			sql`role = ANY (ARRAY['project_creator'::text, 'supporter'::text, 'partner'::text])`,
+		),
+	],
+)
+
+export const challenges = pgTable(
+	'challenges',
+	{
+		id: uuid().defaultRandom().primaryKey().notNull(),
+		userId: uuid('user_id').default(sql`auth.uid()`),
+		identifier: text().notNull(),
+		rpId: text('rp_id').notNull(),
+		challenge: text().notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+			.defaultNow()
+			.notNull(),
+		expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'string' })
+			.default(sql`(now() + '00:05:00'::interval)`)
+			.notNull(),
+		nextAuthUserId: uuid('next_auth_user_id'),
+	},
+	(table) => [
+		index('idx_challenges_expires_at').using(
+			'btree',
+			table.expiresAt.asc().nullsLast().op('timestamptz_ops'),
+		),
+		index('idx_challenges_identifier_rp_id').using(
+			'btree',
+			table.identifier.asc().nullsLast().op('text_ops'),
+			table.rpId.asc().nullsLast().op('text_ops'),
+		),
+		index('idx_challenges_next_auth_user_id').using(
+			'btree',
+			table.nextAuthUserId.asc().nullsLast().op('uuid_ops'),
+		),
+		foreignKey({
+			columns: [table.userId],
+			foreignColumns: [usersInAuth.id],
+			name: 'challenges_user_id_fkey',
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [table.nextAuthUserId],
+			foreignColumns: [usersInNextAuth.id],
+			name: 'challenges_next_auth_user_id_fkey',
+		}).onDelete('cascade'),
+		unique('challenges_identifier_rp_id_key').on(table.identifier, table.rpId),
+		pgPolicy('Service role can manage all challenges', {
+			as: 'permissive',
+			for: 'all',
+			to: ['service_role'],
+			using: sql`true`,
+		}),
+		pgPolicy('Users can manage their own challenges via NextAuth', {
+			as: 'permissive',
+			for: 'all',
 			to: ['public'],
 		}),
 	],
@@ -1550,15 +1786,15 @@ export const notificationPreferences = pgTable(
 			foreignColumns: [usersInAuth.id],
 			name: 'notification_preferences_user_id_fkey',
 		}).onDelete('cascade'),
-		pgPolicy('Users can update their own notification preferences', {
-			as: 'permissive',
-			for: 'update',
-			to: ['public'],
-			using: sql`(auth.uid() = user_id)`,
-		}),
 		pgPolicy('Users can view their own notification preferences', {
 			as: 'permissive',
 			for: 'select',
+			to: ['public'],
+			using: sql`(auth.uid() = user_id)`,
+		}),
+		pgPolicy('Users can update their own notification preferences', {
+			as: 'permissive',
+			for: 'update',
 			to: ['public'],
 		}),
 	],
@@ -1611,155 +1847,166 @@ export const notifications = pgTable(
 			foreignColumns: [usersInAuth.id],
 			name: 'notifications_user_id_fkey',
 		}).onDelete('cascade'),
-		pgPolicy('Users can create their own notifications', {
+		pgPolicy('Users can view their own notifications', {
 			as: 'permissive',
-			for: 'insert',
+			for: 'select',
 			to: ['public'],
-			withCheck: sql`(auth.uid() = user_id)`,
-		}),
-		pgPolicy('Users can delete their own notifications', {
-			as: 'permissive',
-			for: 'delete',
-			to: ['public'],
+			using: sql`(auth.uid() = user_id)`,
 		}),
 		pgPolicy('Users can update their own notifications', {
 			as: 'permissive',
 			for: 'update',
 			to: ['public'],
 		}),
-		pgPolicy('Users can view their own notifications', {
+		pgPolicy('Users can delete their own notifications', {
 			as: 'permissive',
-			for: 'select',
+			for: 'delete',
+			to: ['public'],
+		}),
+		pgPolicy('Users can create their own notifications', {
+			as: 'permissive',
+			for: 'insert',
 			to: ['public'],
 		}),
 	],
 )
 
-export const challenges = pgTable(
-	'challenges',
+export const usersInNextAuth = nextAuth.table(
+	'users',
 	{
-		id: uuid().defaultRandom().primaryKey().notNull(),
-		userId: uuid('user_id').default(sql`auth.uid()`),
-		identifier: text().notNull(),
-		rpId: text('rp_id').notNull(),
-		challenge: text().notNull(),
-		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
-			.defaultNow()
-			.notNull(),
-		expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'string' })
-			.default(sql`(now() + '00:05:00'::interval)`)
-			.notNull(),
-	},
-	(table) => [
-		index('idx_challenges_expires_at').using(
-			'btree',
-			table.expiresAt.asc().nullsLast().op('timestamptz_ops'),
-		),
-		index('idx_challenges_identifier_rp_id').using(
-			'btree',
-			table.identifier.asc().nullsLast().op('text_ops'),
-			table.rpId.asc().nullsLast().op('text_ops'),
-		),
-		foreignKey({
-			columns: [table.userId],
-			foreignColumns: [usersInAuth.id],
-			name: 'challenges_user_id_fkey',
-		}).onDelete('cascade'),
-		unique('challenges_identifier_rp_id_key').on(table.identifier, table.rpId),
-		pgPolicy('Service role can manage all challenges', {
-			as: 'permissive',
-			for: 'all',
-			to: ['service_role'],
-			using: sql`true`,
-		}),
-		pgPolicy('Users can manage their own challenges', {
-			as: 'permissive',
-			for: 'all',
-			to: ['public'],
-		}),
-	],
-)
-
-export const devices = pgTable(
-	'devices',
-	{
-		id: uuid().defaultRandom().primaryKey().notNull(),
-		userId: uuid('user_id'),
-		identifier: text().notNull(),
-		rpId: text('rp_id').notNull(),
-		deviceName: text('device_name'),
-		credentialType: credentialType('credential_type')
-			.default('public-key')
-			.notNull(),
-		credentialId: text('credential_id').notNull(),
-		aaguid: text().default('00000000-0000-0000-0000-000000000000').notNull(),
-		address: text().default('0x').notNull(),
-		signCount: integer('sign_count').default(0).notNull(),
-		transports: text().array().default(['']).notNull(),
-		profileVerificationStatus: profileVerificationStatus(
-			'profile_verification_status',
-		)
-			.default('unverified')
-			.notNull(),
-		deviceType: deviceType('device_type').default('single_device').notNull(),
-		backupState: backupState('backup_state').default('not_backed_up').notNull(),
-		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
-			.defaultNow()
-			.notNull(),
-		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
-			.defaultNow()
-			.notNull(),
-		lastUsedAt: timestamp('last_used_at', {
+		id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+		name: text(),
+		email: text(),
+		image: text(),
+		emailVerified: timestamp('email_verified', {
 			withTimezone: true,
 			mode: 'string',
 		}),
-		publicKey: text('public_key').notNull(),
 	},
 	(table) => [
-		index('idx_devices_credential_id').using(
+		unique('email_unique').on(table.email),
+		pgPolicy('Users can view own user data', {
+			as: 'permissive',
+			for: 'select',
+			to: ['public'],
+			using: sql`(next_auth.uid() = id)`,
+		}),
+		pgPolicy('Service role can manage all users', {
+			as: 'permissive',
+			for: 'all',
+			to: ['service_role'],
+		}),
+	],
+)
+
+export const sessionsInNextAuth = nextAuth.table(
+	'sessions',
+	{
+		id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+		expires: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+		sessionToken: text('session_token').notNull(),
+		userId: uuid('user_id'),
+	},
+	(table) => [
+		index('idx_next_auth_sessions_session_token').using(
 			'btree',
-			table.credentialId.asc().nullsLast().op('text_ops'),
+			table.sessionToken.asc().nullsLast().op('text_ops'),
 		),
-		index('idx_devices_identifier_rp_id').using(
-			'btree',
-			table.identifier.asc().nullsLast().op('text_ops'),
-			table.rpId.asc().nullsLast().op('text_ops'),
-		),
-		index('idx_devices_user_id').using(
+		index('idx_next_auth_sessions_user_id').using(
 			'btree',
 			table.userId.asc().nullsLast().op('uuid_ops'),
 		),
 		foreignKey({
 			columns: [table.userId],
-			foreignColumns: [usersInAuth.id],
-			name: 'devices_user_id_fkey',
+			foreignColumns: [usersInNextAuth.id],
+			name: 'sessions_user_id_fkey',
 		}).onDelete('cascade'),
-		unique('devices_credential_id_key').on(table.credentialId),
-		pgPolicy('Service role can manage all devices', {
+		unique('sessiontoken_unique').on(table.sessionToken),
+		unique('sessions_session_token_key').on(table.sessionToken),
+		pgPolicy('Users can view own sessions', {
+			as: 'permissive',
+			for: 'select',
+			to: ['public'],
+			using: sql`(next_auth.uid() = user_id)`,
+		}),
+		pgPolicy('Service role can manage all sessions', {
+			as: 'permissive',
+			for: 'all',
+			to: ['service_role'],
+		}),
+	],
+)
+
+export const accountsInNextAuth = nextAuth.table(
+	'accounts',
+	{
+		id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+		type: text().notNull(),
+		provider: text().notNull(),
+		providerAccountId: text('provider_account_id').notNull(),
+		refreshToken: text('refresh_token'),
+		accessToken: text('access_token'),
+		// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+		expiresAt: bigint('expires_at', { mode: 'number' }),
+		tokenType: text('token_type'),
+		scope: text(),
+		idToken: text('id_token'),
+		sessionState: text('session_state'),
+		oauthTokenSecret: text('oauth_token_secret'),
+		oauthToken: text('oauth_token'),
+		userId: uuid('user_id'),
+	},
+	(table) => [
+		index('idx_next_auth_accounts_provider').using(
+			'btree',
+			table.provider.asc().nullsLast().op('text_ops'),
+			table.providerAccountId.asc().nullsLast().op('text_ops'),
+		),
+		index('idx_next_auth_accounts_user_id').using(
+			'btree',
+			table.userId.asc().nullsLast().op('uuid_ops'),
+		),
+		foreignKey({
+			columns: [table.userId],
+			foreignColumns: [usersInNextAuth.id],
+			name: 'accounts_user_id_fkey',
+		}).onDelete('cascade'),
+		unique('provider_unique').on(table.provider, table.providerAccountId),
+		unique('accounts_provider_provider_account_id_key').on(
+			table.provider,
+			table.providerAccountId,
+		),
+		pgPolicy('Users can view own accounts', {
+			as: 'permissive',
+			for: 'select',
+			to: ['public'],
+			using: sql`(next_auth.uid() = user_id)`,
+		}),
+		pgPolicy('Service role can manage all accounts', {
+			as: 'permissive',
+			for: 'all',
+			to: ['service_role'],
+		}),
+	],
+)
+
+export const verificationTokensInNextAuth = nextAuth.table(
+	'verification_tokens',
+	{
+		identifier: text(),
+		token: text().primaryKey().notNull(),
+		expires: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	},
+	(table) => [
+		unique('verification_tokens_identifier_token_key').on(
+			table.identifier,
+			table.token,
+		),
+		pgPolicy('Service role can manage all verification tokens', {
 			as: 'permissive',
 			for: 'all',
 			to: ['service_role'],
 			using: sql`true`,
-		}),
-		pgPolicy('Users can delete their own devices', {
-			as: 'permissive',
-			for: 'delete',
-			to: ['public'],
-		}),
-		pgPolicy('Users can update their own devices', {
-			as: 'permissive',
-			for: 'update',
-			to: ['public'],
-		}),
-		pgPolicy('Users can insert their own devices', {
-			as: 'permissive',
-			for: 'insert',
-			to: ['public'],
-		}),
-		pgPolicy('Users can view their own devices', {
-			as: 'permissive',
-			for: 'select',
-			to: ['public'],
 		}),
 	],
 )
@@ -1784,55 +2031,6 @@ export const projectTagRelationships = pgTable(
 		primaryKey({
 			columns: [table.projectId, table.tagId],
 			name: 'project_tag_relationships_pkey',
-		}),
-	],
-)
-
-export const escrowMilestones = pgTable(
-	'escrow_milestones',
-	{
-		escrowId: uuid('escrow_id').notNull(),
-		milestoneId: uuid('milestone_id').notNull(),
-	},
-	(table) => [
-		foreignKey({
-			columns: [table.escrowId],
-			foreignColumns: [escrowContracts.id],
-			name: 'escrow_milestones_escrow_id_fkey',
-		}),
-		foreignKey({
-			columns: [table.milestoneId],
-			foreignColumns: [milestones.id],
-			name: 'escrow_milestones_milestone_id_fkey',
-		}),
-		primaryKey({
-			columns: [table.escrowId, table.milestoneId],
-			name: 'escrow_milestones_pkey1',
-		}),
-		pgPolicy('Project owners can delete escrow milestones', {
-			as: 'permissive',
-			for: 'delete',
-			to: ['public'],
-			using: sql`(milestone_id IN ( SELECT milestones.id
-   FROM milestones
-  WHERE (milestones.project_id IN ( SELECT projects.id
-           FROM projects
-          WHERE (projects.kindler_id = auth.uid())))))`,
-		}),
-		pgPolicy('Project owners can update escrow milestones', {
-			as: 'permissive',
-			for: 'update',
-			to: ['public'],
-		}),
-		pgPolicy('Project owners can view escrow milestones', {
-			as: 'permissive',
-			for: 'select',
-			to: ['public'],
-		}),
-		pgPolicy('Project owners can create escrow milestones', {
-			as: 'permissive',
-			for: 'insert',
-			to: ['public'],
 		}),
 	],
 )
@@ -1865,20 +2063,137 @@ export const kindlerProjects = pgTable(
 			columns: [table.kindlerId, table.projectId],
 			name: 'kindler_projects_pkey',
 		}),
-		pgPolicy('Users can leave projects', {
+		pgPolicy('Kindler-project relationships viewable by everyone', {
 			as: 'permissive',
-			for: 'delete',
+			for: 'select',
 			to: ['authenticated'],
-			using: sql`(auth.uid() = kindler_id)`,
+			using: sql`true`,
 		}),
 		pgPolicy('Users can join projects as kindlers', {
 			as: 'permissive',
 			for: 'insert',
 			to: ['authenticated'],
 		}),
-		pgPolicy('Kindler-project relationships viewable by everyone', {
+		pgPolicy('Users can leave projects', {
+			as: 'permissive',
+			for: 'delete',
+			to: ['authenticated'],
+		}),
+	],
+)
+
+export const escrowMilestones = pgTable(
+	'escrow_milestones',
+	{
+		escrowId: uuid('escrow_id').notNull(),
+		milestoneId: uuid('milestone_id').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+			.defaultNow()
+			.notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+			.defaultNow()
+			.notNull(),
+	},
+	(table) => [
+		index('idx_escrow_milestones_escrow_id').using(
+			'btree',
+			table.escrowId.asc().nullsLast().op('uuid_ops'),
+		),
+		index('idx_escrow_milestones_milestone_id').using(
+			'btree',
+			table.milestoneId.asc().nullsLast().op('uuid_ops'),
+		),
+		foreignKey({
+			columns: [table.escrowId],
+			foreignColumns: [escrowContracts.id],
+			name: 'escrow_milestones_escrow_id_fkey',
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [table.milestoneId],
+			foreignColumns: [milestones.id],
+			name: 'escrow_milestones_milestone_id_fkey',
+		}).onDelete('cascade'),
+		primaryKey({
+			columns: [table.escrowId, table.milestoneId],
+			name: 'escrow_milestones_pkey1',
+		}),
+		pgPolicy('select escrow_milestones for owners', {
 			as: 'permissive',
 			for: 'select',
+			to: ['authenticated'],
+			using: sql`(EXISTS ( SELECT 1
+   FROM (milestones m
+     JOIN projects p ON ((p.id = m.project_id)))
+  WHERE ((m.id = escrow_milestones.milestone_id) AND (p.kindler_id = next_auth.uid()))))`,
+		}),
+		pgPolicy('insert escrow_milestones for owners', {
+			as: 'permissive',
+			for: 'insert',
+			to: ['authenticated'],
+		}),
+		pgPolicy('update escrow_milestones for owners', {
+			as: 'permissive',
+			for: 'update',
+			to: ['authenticated'],
+		}),
+		pgPolicy('delete escrow_milestones for owners', {
+			as: 'permissive',
+			for: 'delete',
+			to: ['authenticated'],
+		}),
+	],
+)
+
+export const projectEscrows = pgTable(
+	'project_escrows',
+	{
+		projectId: uuid('project_id').notNull(),
+		escrowId: uuid('escrow_id').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+			.defaultNow()
+			.notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+			.defaultNow()
+			.notNull(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.projectId],
+			foreignColumns: [projects.id],
+			name: 'project_escrows_project_id_fkey',
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [table.escrowId],
+			foreignColumns: [escrowContracts.id],
+			name: 'project_escrows_escrow_id_fkey',
+		}).onDelete('cascade'),
+		primaryKey({
+			columns: [table.projectId, table.escrowId],
+			name: 'project_escrows_pkey',
+		}),
+		unique('unique_project_id').on(table.projectId),
+		unique('unique_escrow_id').on(table.escrowId),
+		pgPolicy('select project_escrows for project owners', {
+			as: 'permissive',
+			for: 'select',
+			to: ['authenticated'],
+			using: sql`(EXISTS ( SELECT 1
+   FROM projects p
+  WHERE ((p.id = project_escrows.project_id) AND (p.kindler_id = next_auth.uid()))))`,
+		}),
+		pgPolicy('insert project_escrows for project owners', {
+			as: 'permissive',
+			for: 'insert',
+			to: ['authenticated'],
+		}),
+		pgPolicy('update project_escrows for project owners', {
+			as: 'permissive',
+			for: 'update',
+			to: ['authenticated'],
+		}),
+		pgPolicy('delete project_escrows for project owners', {
+			as: 'permissive',
+			for: 'delete',
 			to: ['authenticated'],
 		}),
 	],

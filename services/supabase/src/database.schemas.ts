@@ -210,18 +210,24 @@ export const escrowContractsUpdateSchema = z.object({
 })
 
 export const escrowMilestonesRowSchema = z.object({
+	created_at: z.string(),
 	escrow_id: z.string(),
 	milestone_id: z.string(),
+	updated_at: z.string(),
 })
 
 export const escrowMilestonesInsertSchema = z.object({
+	created_at: z.string().optional(),
 	escrow_id: z.string(),
 	milestone_id: z.string(),
+	updated_at: z.string().optional(),
 })
 
 export const escrowMilestonesUpdateSchema = z.object({
+	created_at: z.string().optional(),
 	escrow_id: z.string().optional(),
 	milestone_id: z.string().optional(),
+	updated_at: z.string().optional(),
 })
 
 export const escrowReviewsRowSchema = z.object({
@@ -506,7 +512,7 @@ export const userRoleSchema = z.union([
 export const profilesInsertSchema = z.object({
 	bio: z.string().optional().nullable(),
 	created_at: z.string().optional(),
-	display_name: z.string().optional(),
+	display_name: z.string().optional().nullable(),
 	email: z.string().optional().nullable(),
 	id: z.string(),
 	image_url: z.string().optional().nullable(),
@@ -518,12 +524,33 @@ export const profilesInsertSchema = z.object({
 export const profilesUpdateSchema = z.object({
 	bio: z.string().optional().nullable(),
 	created_at: z.string().optional(),
-	display_name: z.string().optional(),
+	display_name: z.string().optional().nullable(),
 	email: z.string().optional().nullable(),
 	id: z.string().optional(),
 	image_url: z.string().optional().nullable(),
 	next_auth_user_id: z.string().optional().nullable(),
 	role: userRoleSchema.optional(),
+	updated_at: z.string().optional(),
+})
+
+export const projectEscrowsRowSchema = z.object({
+	created_at: z.string(),
+	escrow_id: z.string(),
+	project_id: z.string(),
+	updated_at: z.string(),
+})
+
+export const projectEscrowsInsertSchema = z.object({
+	created_at: z.string().optional(),
+	escrow_id: z.string(),
+	project_id: z.string(),
+	updated_at: z.string().optional(),
+})
+
+export const projectEscrowsUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	escrow_id: z.string().optional(),
+	project_id: z.string().optional(),
 	updated_at: z.string().optional(),
 })
 
@@ -660,24 +687,14 @@ export const projectUpdatesUpdateSchema = z.object({
 	updated_at: z.string().optional(),
 })
 
-export const projectsRowSchema = z.object({
-	category_id: z.string(),
-	created_at: z.string().nullable(),
-	current_amount: z.number(),
-	description: z.string(),
-	id: z.string(),
-	image_url: z.string().nullable(),
-	kinder_count: z.number(),
-	kindler_id: z.string(),
-	min_investment: z.number(),
-	percentage_complete: z.number(),
-	project_location: z.string(),
-	slug: z.string().nullable(),
-	social_links: jsonSchema,
-	target_amount: z.number(),
-	title: z.string(),
-	updated_at: z.string().nullable(),
-})
+export const projectStatusSchema = z.union([
+	z.literal('draft'),
+	z.literal('review'),
+	z.literal('active'),
+	z.literal('paused'),
+	z.literal('funded'),
+	z.literal('rejected'),
+])
 
 export const projectsInsertSchema = z.object({
 	category_id: z.string(),
@@ -688,11 +705,13 @@ export const projectsInsertSchema = z.object({
 	image_url: z.string().optional().nullable(),
 	kinder_count: z.number().optional(),
 	kindler_id: z.string(),
+	metadata: jsonSchema.optional(),
 	min_investment: z.number(),
 	percentage_complete: z.number().optional(),
 	project_location: z.string(),
 	slug: z.string().optional().nullable(),
 	social_links: jsonSchema.optional(),
+	status: projectStatusSchema.optional(),
 	target_amount: z.number(),
 	title: z.string(),
 	updated_at: z.string().optional().nullable(),
@@ -707,11 +726,13 @@ export const projectsUpdateSchema = z.object({
 	image_url: z.string().optional().nullable(),
 	kinder_count: z.number().optional(),
 	kindler_id: z.string().optional(),
+	metadata: jsonSchema.optional(),
 	min_investment: z.number().optional(),
 	percentage_complete: z.number().optional(),
 	project_location: z.string().optional(),
 	slug: z.string().optional().nullable(),
 	social_links: jsonSchema.optional(),
+	status: projectStatusSchema.optional(),
 	target_amount: z.number().optional(),
 	title: z.string().optional(),
 	updated_at: z.string().optional().nullable(),
@@ -834,7 +855,7 @@ export const notificationsRowSchema = z.object({
 export const profilesRowSchema = z.object({
 	bio: z.string().nullable(),
 	created_at: z.string(),
-	display_name: z.string(),
+	display_name: z.string().nullable(),
 	email: z.string().nullable(),
 	id: z.string(),
 	image_url: z.string().nullable(),
@@ -852,4 +873,25 @@ export const projectMembersRowSchema = z.object({
 	title: z.string(),
 	updated_at: z.string(),
 	user_id: z.string(),
+})
+
+export const projectsRowSchema = z.object({
+	category_id: z.string(),
+	created_at: z.string().nullable(),
+	current_amount: z.number(),
+	description: z.string(),
+	id: z.string(),
+	image_url: z.string().nullable(),
+	kinder_count: z.number(),
+	kindler_id: z.string(),
+	metadata: jsonSchema,
+	min_investment: z.number(),
+	percentage_complete: z.number(),
+	project_location: z.string(),
+	slug: z.string().nullable(),
+	social_links: jsonSchema,
+	status: projectStatusSchema,
+	target_amount: z.number(),
+	title: z.string(),
+	updated_at: z.string().nullable(),
 })

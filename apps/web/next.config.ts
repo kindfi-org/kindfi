@@ -20,7 +20,11 @@ const nextConfig: NextConfig = {
 		],
 	},
 	async headers() {
-		// Only apply strict headers in production
+		// Apply headers for both production and development
+		const connectSrc = isProduction
+			? `'self' https://flagcdn.com https://apis.google.com https://friendbot-futurenet.stellar.org https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com`
+			: `'self' https://friendbot-futurenet.stellar.org http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://flagcdn.com https://apis.google.com https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com`
+
 		if (isProduction) {
 			return [
 				{
@@ -42,11 +46,11 @@ const nextConfig: NextConfig = {
 							key: 'Content-Security-Policy',
 							value: `
                 default-src 'self';
-                script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com;
+                script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
                 style-src 'self' 'unsafe-inline';
                 img-src 'self' data: blob:;
                 font-src 'self' data:;
-                connect-src 'self' https://flagcdn.com https://*.kindfi.org https://*.supabase.co https://*.vercel.app;
+                connect-src ${connectSrc};
                 frame-ancestors 'self';
                 upgrade-insecure-requests;
               `.replace(/\s{2,}/g, ' '),
@@ -62,21 +66,31 @@ const nextConfig: NextConfig = {
 					],
 				},
 			]
-			// biome-ignore lint/style/noUselessElse:  no useless else[refactor]
-		} else {
-			// Return minimal headers for development
-			return [
-				{
-					source: '/:path*',
-					headers: [
-						{
-							key: 'X-Content-Type-Options',
-							value: 'nosniff',
-						},
-					],
-				},
-			]
 		}
+		// Apply more permissive headers for development
+		return [
+			{
+				source: '/:path*',
+				headers: [
+					{
+						key: 'X-Content-Type-Options',
+						value: 'nosniff',
+					},
+					{
+						key: 'Content-Security-Policy',
+						value: `
+                default-src 'self';
+                script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
+                style-src 'self' 'unsafe-inline';
+                img-src 'self' data: blob:;
+                font-src 'self' data:;
+                connect-src ${connectSrc};
+                frame-ancestors 'self';
+              `.replace(/\s{2,}/g, ' '),
+					},
+				],
+			},
+		]
 	},
 }
 

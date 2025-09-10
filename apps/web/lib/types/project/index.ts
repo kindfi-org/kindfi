@@ -20,6 +20,8 @@ export interface Project {
 	investors: number
 	minInvestment: number
 	tags: Tag[]
+	/** Optional on-chain escrow contract address for this project */
+	escrowContractAddress?: string
 }
 
 export type SortOption =
