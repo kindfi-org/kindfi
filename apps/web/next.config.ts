@@ -1,6 +1,6 @@
-import { withSentryConfig } from '@sentry/nextjs';
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
+import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
@@ -98,13 +98,14 @@ export default withSentryConfig(nextConfig, {
 	// https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 
 	// Upload a larger set of source maps for prettier stack traces (increases build time)
+	authToken: process.env.SENTRY_AUTH_TOKEN,
 	widenClientFileUpload: true,
 
 	// Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
 	// This can increase your server load as well as your hosting bill.
 	// Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
 	// side errors will fail.
-	tunnelRoute: "/monitoring",
+	tunnelRoute: '/monitoring',
 
 	// Automatically tree-shake Sentry logger statements to reduce bundle size
 	disableLogger: true,
@@ -114,4 +115,4 @@ export default withSentryConfig(nextConfig, {
 	// https://docs.sentry.io/product/crons/
 	// https://vercel.com/docs/cron-jobs
 	automaticVercelMonitors: true,
-});
+})
