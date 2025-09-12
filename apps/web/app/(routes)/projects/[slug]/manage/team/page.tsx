@@ -185,6 +185,22 @@ export default function ProjectMembersPage() {
 		}
 	}
 
+	const handleChangeTitle = async (memberId: string, title: string) => {
+		const snapshot = members
+		setMembers((prev) =>
+			prev.map((m) => (m.id === memberId ? { ...m, title } : m)),
+		)
+		try {
+			await toast.promise(new Promise((r) => setTimeout(r, 500)), {
+				loading: 'Updating title…',
+				success: 'Member title has been updated.',
+				error: 'Failed to update title. Please try again.',
+			})
+		} catch {
+			setMembers(snapshot) // rollback
+		}
+	}
+
 	return (
 		<>
 			<div className="flex flex-col items-center justify-center mb-8">
@@ -236,6 +252,7 @@ export default function ProjectMembersPage() {
 						currentUserId="user-1" // This would come from auth context
 						onRemoveMember={handleRemoveMember}
 						onChangeRole={handleChangeRole}
+						onChangeTitle={handleChangeTitle}
 					/>
 				)}
 			</div>
