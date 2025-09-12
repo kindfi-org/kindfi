@@ -7,8 +7,8 @@ import { ensureCsrfTokenCookie } from '~/app/actions/csrf'
 type ExpectedRequestType = Parameters<typeof updateSession>[0]
 
 // Auth protected path prefixes / exact matches
-// const AUTH_PROTECTED_PATHS = ['/create-project', '/dashboard']
-const AUTH_PROTECTED_PATHS: string[] = []
+const AUTH_PROTECTED_PATHS = ['/create-project', '/profile']
+// const AUTH_PROTECTED_PATHS: string[] = []
 
 function isProtectedPath(pathname: string) {
 	return false
