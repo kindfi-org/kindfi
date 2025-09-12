@@ -61,10 +61,10 @@ export function EscrowAdminPanel({
 	])
 
 	// admin actions state
-	const [milestoneIndex, setMilestoneIndex] = useState('0')
+	const [milestoneIndex, _setMilestoneIndex] = useState('0')
 	const titleId = useId()
 	const amountId = useId()
-	const milestoneId = useId()
+	const _milestoneId = useId()
 	const engagementIdInputId = useId()
 	const escrowTypeLabelId = useId()
 	const trustlineAddressId = useId()
@@ -191,7 +191,7 @@ export function EscrowAdminPanel({
 		}
 	}
 
-	const handleApproveMilestone = async () => {
+	const _handleApproveMilestone = async () => {
 		if (!escrowContractAddress)
 			return toast.error('No escrow contract configured')
 		try {
@@ -215,7 +215,7 @@ export function EscrowAdminPanel({
 		}
 	}
 
-	const handleChangeMilestoneStatus = async () => {
+	const _handleChangeMilestoneStatus = async () => {
 		if (!escrowContractAddress)
 			return toast.error('No escrow contract configured')
 		try {

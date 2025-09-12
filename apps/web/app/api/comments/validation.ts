@@ -1,5 +1,4 @@
 import type { createSupabaseServerClient } from '@packages/lib/supabase-server'
-import type { Tables } from '@services/supabase'
 import { z } from 'zod'
 
 // Export comment types to prevent duplication
