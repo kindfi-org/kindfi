@@ -49,15 +49,24 @@ export function MobileMemberList({
 	const [editingId, setEditingId] = useState<string | null>(null)
 	const [tempTitle, setTempTitle] = useState<string>('')
 
-	const handleStartEdit = (memberId: string, current: string | null) => {
+	const handleStartEdit = (memberId: string, currentTitle?: string | null) => {
 		setEditingId(memberId)
-		setTempTitle(current ?? '')
+		setTempTitle((currentTitle ?? '').trim())
 	}
+
 	const handleCommitEdit = (memberId: string) => {
-		onChangeTitle?.(memberId, tempTitle.trim())
+		const next = tempTitle.trim()
+		const original = members.find((m) => m.id === memberId)?.title?.trim() ?? ''
+		if (!next || next === original) {
+			setEditingId(null)
+			setTempTitle('')
+			return
+		}
+		onChangeTitle?.(memberId, next)
 		setEditingId(null)
 		setTempTitle('')
 	}
+
 	const handleCancelEdit = () => {
 		setEditingId(null)
 		setTempTitle('')

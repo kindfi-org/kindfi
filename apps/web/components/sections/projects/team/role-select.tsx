@@ -44,7 +44,7 @@ export function RoleSelect({
 	const listboxId = useId()
 
 	const selected = memberRole[value]
-	const ariaLabel = value
+	const ariaLabel = selected
 		? `Change role, current: ${selected.label}`
 		: 'Select role'
 
@@ -60,7 +60,7 @@ export function RoleSelect({
 					className={cn('justify-between bg-white border-green-600', className)}
 					disabled={disabled}
 				>
-					{value ? (
+					{selected ? (
 						<Badge
 							className={cn(
 								'inline-flex items-center gap-1.5 px-2.5 py-1',
@@ -117,7 +117,7 @@ export function RoleSelect({
 											</Badge>
 
 											{value === roleKey && (
-												<Check className="h-4 w-4 text-primary" />
+												<Check aria-hidden className="h-4 w-4 text-primary" />
 											)}
 										</div>
 

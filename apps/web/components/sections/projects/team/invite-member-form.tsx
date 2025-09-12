@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import { Loader2, UserPlus } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '~/components/base/button'
 import {
@@ -81,7 +80,6 @@ export function InviteMemberForm({
 			form.reset()
 		} catch (error) {
 			console.error('Failed to invite member:', error)
-			toast.error('Failed to invite member. Please try again.')
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -97,7 +95,7 @@ export function InviteMemberForm({
 			<Card className="bg-white">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
-						<UserPlus className="h-5 w-5" />
+						<UserPlus aria-hidden className="h-5 w-5" />
 						Invite Team Member
 					</CardTitle>
 					<CardDescription>
@@ -125,6 +123,7 @@ export function InviteMemberForm({
 												<Input
 													placeholder="member@example.com"
 													type="email"
+													autoComplete="email"
 													className="bg-white border-green-600"
 													disabled={isLoading || isSubmitting}
 													{...field}
@@ -201,12 +200,12 @@ export function InviteMemberForm({
 								>
 									{isSubmitting ? (
 										<>
-											<Loader2 className="h-4 w-4 animate-spin" />
+											<Loader2 aria-hidden className="h-4 w-4 animate-spin" />
 											Sending...
 										</>
 									) : (
 										<>
-											<UserPlus className="h-4 w-4" />
+											<UserPlus aria-hidden className="h-4 w-4" />
 											Send Invite
 										</>
 									)}

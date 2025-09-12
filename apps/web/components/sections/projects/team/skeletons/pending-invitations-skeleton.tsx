@@ -72,7 +72,7 @@ export function PendingInvitationsSkeleton() {
 					<Skeleton className="h-5 w-5" />
 					<Skeleton className="h-6 w-48" />
 				</div>
-				<Skeleton className="h-4 w-80" />
+				<Skeleton className="h-4 w-full sm:w-80" />
 				{Array.from({ length: 2 }).map((_, i) => (
 					// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
 					<Card key={i} className="bg-white">
