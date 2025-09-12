@@ -1,4 +1,5 @@
 import { supabase } from '@packages/lib/supabase'
+import { logger } from '..'
 
 /**
  * Parameters for logging error events
@@ -84,10 +85,16 @@ export async function logError(params: LogErrorParams): Promise<void> {
 			},
 		})
 	} catch (logError) {
-		console.error('Failed to log error:', logError)
+		logger.error({
+			eventType: 'Log Error Failure',
+			error: logError instanceof Error ? logError.message : 'Unknown error',
+			details: logError,
+		})
 		throw params.error // Rethrow the original error after logging attempt
 	}
-}
+		throw params.error // Rethrow the original error after logging attempt
+	}
+
 
 /**
  * Retrieves logs for a specific notification
@@ -170,7 +177,11 @@ export class NotificationLogger {
 
 			if (dbError) throw dbError
 		} catch (logError) {
-			console.error('Failed to log error:', logError)
+			logger.error({
+				eventType: 'Log Error Failure',
+				error: logError instanceof Error ? logError.message : 'Unknown error',
+				details: logError,
+			})
 			// Don't throw to avoid disrupting the main flow
 		}
 	}
@@ -194,7 +205,11 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			console.error('Failed to log info:', logError)
+			logger.error({
+				eventType: 'Log Info Failure',
+				error: logError instanceof Error ? logError.message : 'Unknown error',
+				details: logError,
+			})
 			// Don't throw to avoid disrupting the main flow
 		}
 	}
@@ -218,7 +233,11 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			console.error('Failed to log warning:', logError)
+			logger.error({
+				eventType: 'Log Warning Failure',
+				error: logError instanceof Error ? logError.message : 'Unknown error',
+				details: logError,
+			})
 			// Don't throw to avoid disrupting the main flow
 		}
 	}
@@ -241,7 +260,11 @@ export class NotificationLogger {
 			if (error) throw error
 			return data || []
 		} catch (error) {
-			console.error('Failed to get notification logs:', error)
+			logger.error({
+				eventType: 'Get Notification Logs Failure',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			return []
 		}
 	}
@@ -264,7 +287,11 @@ export class NotificationLogger {
 			if (error) throw error
 			return data || []
 		} catch (error) {
-			console.error('Failed to get error logs:', error)
+			logger.error({
+				eventType: 'Get Error Logs Failure',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			return []
 		}
 	}

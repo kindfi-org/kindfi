@@ -1,6 +1,7 @@
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '~/lib'
 import { AppError } from '~/lib/error'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import type { DisputeSignPayload } from '~/lib/types/escrow/escrow-payload.types'
@@ -126,10 +127,12 @@ export async function POST(req: NextRequest) {
 					])
 
 				if (notificationError) {
-					console.error(
-						'Error creating dispute filed notifications:',
-						notificationError,
-					)
+					logger.error({
+						eventType: 'Dispute Filed Notification Error',
+						error: notificationError.message,
+						details: notificationError,
+					})
+					// Non-critical error, but log it
 					throw new Error(
 						`Failed to create dispute filed notifications: ${notificationError.message}`,
 					)
@@ -195,10 +198,11 @@ export async function POST(req: NextRequest) {
 					.eq('id', dispute.escrow_milestones.id)
 
 				if (milestoneUpdateError) {
-					console.error(
-						'Error updating milestone status:',
-						milestoneUpdateError,
-					)
+					logger.error({
+						eventType: 'Milestone Update Error',
+						error: milestoneUpdateError.message,
+						details: milestoneUpdateError,
+					})
 					throw new Error(
 						`Failed to update milestone status: ${milestoneUpdateError.message}`,
 					)
@@ -212,7 +216,11 @@ export async function POST(req: NextRequest) {
 					.single()
 
 				if (escrowError) {
-					console.error('Error fetching escrow contract:', escrowError)
+					logger.error({
+						eventType: 'Escrow Contract Fetch Error',
+						error: escrowError.message,
+						details: escrowError,
+					})
 					throw new Error(
 						`Failed to fetch escrow contract: ${escrowError.message}`,
 					)
@@ -238,7 +246,12 @@ export async function POST(req: NextRequest) {
 						])
 
 					if (notificationError) {
-						console.error('Error creating notifications:', notificationError)
+						logger.error({
+							eventType: 'Dispute Resolution Notification Error',
+							error: notificationError.message,
+							details: notificationError,
+						})
+						// Non-critical error, but log it
 						throw new Error(
 							`Failed to create notifications: ${notificationError.message}`,
 						)
@@ -265,7 +278,11 @@ export async function POST(req: NextRequest) {
 			{ status: 400 },
 		)
 	} catch (error) {
-		console.error('Dispute Sign Error:', error)
+		logger.error({
+			eventType: 'Dispute Sign Error',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
+		})
 
 		if (error instanceof AppError) {
 			return NextResponse.json(

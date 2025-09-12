@@ -26,6 +26,7 @@ import {
 } from '~/components/base/select'
 import { Textarea } from '~/components/base/textarea'
 import { useWaitlist } from '~/hooks/contexts/use-waitlist.context'
+import { logger } from '~/lib'
 import {
 	waitlistStepOneSchema,
 	waitlistStepThreeSchema,
@@ -102,12 +103,22 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 								if (!res.ok) {
 									const err = await res.json().catch(() => ({}) as unknown)
 									const message = err?.error || 'Failed to submit interest'
-									console.error('Waitlist submission failed:', err)
+									logger.error({
+										eventType: 'Waitlist Submission Error',
+										error: message,
+										details: err,
+									})
+							
 									throw new Error(message)
 								}
 								onOpenChange(false)
 							} catch (_e) {
-								console.error('Waitlist submit error:', _e)
+								logger.error({
+									eventType: 'Waitlist Submission Error',
+									error: _e instanceof Error ? _e.message : 'Unknown error',
+									details: _e,
+								})
+								// Optionally, show a user-friendly error message here
 							} finally {
 								setIsSubmitting(false)
 							}

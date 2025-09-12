@@ -2,6 +2,7 @@ import { updateSession } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
 import { type NextRequestWithAuth, withAuth } from 'next-auth/middleware'
 import { ensureCsrfTokenCookie } from '~/app/actions/csrf'
+import { logger } from './lib'
 
 // * Infer the type of the first parameter of updateSession
 type ExpectedRequestType = Parameters<typeof updateSession>[0]
@@ -42,7 +43,11 @@ export default withAuth(
 			// Pass through Supabase session refresh logic
 			return await updateSession(req as unknown as ExpectedRequestType, null)
 		} catch (error) {
-			console.error('Middleware error:', error)
+			logger.error({
+				eventType: 'Middleware Error',
+				error: (error as Error).message,
+				stack: (error as Error).stack,
+			})
 			return NextResponse.next({
 				request: { headers: req.headers },
 			})

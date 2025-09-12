@@ -19,6 +19,7 @@ import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import { UpdateForm } from './update-form'
+import { logger } from '~/lib'
 
 // Define the Update type based on actual DB structure
 type Update = {
@@ -70,7 +71,12 @@ export function UpdateCard({
 			setIsDeleting(true)
 			await onDelete(deletingUpdateId)
 		} catch (error) {
-			console.error('Error deleting update:', error)
+			logger.error({
+				eventType: 'Update Deletion Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
+			// Optionally, show a user-friendly error message here
 		} finally {
 			setIsDeleting(false)
 			setDeletingUpdateId(null)

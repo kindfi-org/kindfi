@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 
 import { Button } from '~/components/base/button'
+import { logger } from '~/lib'
 import { cn } from '~/lib/utils'
 
 interface ImageUploadProps {
@@ -25,7 +26,10 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 				const reader = new FileReader()
 				reader.onload = () => setPreview(reader.result as string)
 				reader.onerror = () => {
-					console.error('Error reading file')
+					logger.error({
+						eventType: 'Image Upload Error',
+						error: 'Error reading file',
+					})
 					setPreview(null)
 				}
 				reader.readAsDataURL(file)
@@ -58,7 +62,10 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 			const reader = new FileReader()
 			reader.onload = () => setPreview(reader.result as string)
 			reader.onerror = () => {
-				console.error('Error reading file')
+				logger.error({
+					eventType: 'Image Upload Error',
+					error: 'Error reading file',
+				})
 				setPreview(null)
 			}
 			reader.readAsDataURL(value)

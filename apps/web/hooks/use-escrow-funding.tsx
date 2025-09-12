@@ -2,6 +2,7 @@ import { appEnvConfig } from '@packages/lib'
 import type { AppEnvInterface } from '@packages/lib/types'
 import { Horizon } from '@stellar/stellar-sdk'
 import { useCallback, useEffect, useState } from 'react'
+import { logger } from '~/lib'
 
 interface FundingParams {
 	escrowContract: string
@@ -50,7 +51,11 @@ export const useEscrowFunding = ({
 			setTransactionHash(data.txHash)
 			setStatus('pending')
 		} catch (error) {
-			console.error('Failed to send funding transaction:', error)
+			logger.error({
+				eventType: 'Escrow Funding Failed',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			setError(
 				error instanceof Error ? error.message : 'Unknown error occurred',
 			)

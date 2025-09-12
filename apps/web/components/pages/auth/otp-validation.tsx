@@ -25,6 +25,7 @@ import {
 	InputOTPSlot,
 } from '~/components/base/input-otp'
 import { OTPTips } from '~/components/shared/otp-tips'
+import { logger } from '~/lib'
 
 export function VerifyOTPComponent() {
 	const router = useRouter()
@@ -92,7 +93,11 @@ export function VerifyOTPComponent() {
 				}, 2000)
 			}
 		} catch (err) {
-			console.error('OTP verification error:', err)
+			logger.error({
+				eventType: 'OTP Verification Error',
+				error: err instanceof Error ? err.message : 'Unknown error',
+				details: err,
+			})
 			if (err instanceof Error) {
 				setError(err.message)
 			} else {
@@ -125,7 +130,11 @@ export function VerifyOTPComponent() {
 			setTimeLeft(120)
 			setSuccess('Verification code resent! Please check your inbox.')
 		} catch (err) {
-			console.error('Resend OTP error:', err)
+			logger.error({
+				eventType: 'OTP Resend Error',
+				error: err instanceof Error ? err.message : 'Unknown error',
+				details: err,
+			})
 			if (err instanceof Error) {
 				setError(err.message)
 			} else {

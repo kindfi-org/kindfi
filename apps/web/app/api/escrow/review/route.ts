@@ -1,5 +1,6 @@
 import { supabase } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
+import { logger } from '~/lib'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import type { MilestoneReviewPayload } from '~/lib/types/escrow/escrow-payload.types'
@@ -170,7 +171,11 @@ export async function POST(req: NextRequest) {
 			{ status: 200 },
 		)
 	} catch (error) {
-		console.error('Milestone Review Error:', error)
+		logger.error({
+			eventType: 'Milestone Review Error',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
+		})
 
 		if (error instanceof AppError) {
 			return NextResponse.json(

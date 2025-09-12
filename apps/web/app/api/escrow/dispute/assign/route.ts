@@ -2,6 +2,7 @@ import { supabase } from '@packages/lib/supabase'
 import type { Enums } from '@services/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '~/lib'
 import { AppError } from '~/lib/error'
 import type { MediatorAssignmentPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { validateMediatorAssignment } from '~/lib/validators/dispute'
@@ -77,7 +78,11 @@ export async function POST(req: NextRequest) {
 			})
 
 		if (notificationError) {
-			console.error('Failed to send notification:', notificationError)
+			logger.error({
+				eventType: 'Mediator Assignment Notification Error',
+				error: notificationError.message,
+				details: notificationError,
+			})
 			// Non-critical error, don't throw
 		}
 
@@ -94,7 +99,11 @@ export async function POST(req: NextRequest) {
 			{ status: 200 },
 		)
 	} catch (error) {
-		console.error('Mediator Assignment Error:', error)
+		logger.error({
+			eventType: 'Mediator Assignment Error',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
+		})
 
 		if (error instanceof AppError) {
 			return NextResponse.json(

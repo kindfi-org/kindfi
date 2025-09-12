@@ -19,6 +19,7 @@ import { ExtractedInfoDisplay } from './extracted-info-display'
 import { FileUploadArea } from './file-upload-area'
 import { OCRProcessor } from './ocr-processor'
 import { ValidationDisplay } from './validation-display'
+import { logger } from '~/lib'
 
 type ToastType = {
 	title: string
@@ -175,7 +176,11 @@ const ProofOfAddressUpload = ({
 					title: 'Error',
 					description: 'An error occurred while processing the document.',
 				})
-				console.error('Error in handleFileUpload:', error)
+				logger.error({
+					eventType: 'File Upload Error',
+					error: error instanceof Error ? error.message : 'Unknown error',
+					details: error,
+				})
 			} finally {
 				setIsProcessing(false)
 			}

@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { BenefitItem } from '~/components/shared/benefits-items'
 import { CTAForm } from '~/components/shared/cta-form'
 import { Testimonial } from '~/components/shared/testimonial-card'
+import { logger } from '~/lib'
 import { benefits, testimonialData } from '~/lib/constants/community-data'
 
 export function Community() {
@@ -21,7 +22,11 @@ export function Community() {
 				message: 'Form submitted successfully!',
 			})
 		} catch (error) {
-			console.error(error) // Logs the error for debugging
+			logger.error({
+				eventType: 'Community Form Submission Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			setFormStatus({
 				type: 'error',
 				message: 'Failed to submit the form. Please try again.',

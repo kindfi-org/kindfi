@@ -84,7 +84,11 @@ export const useStellar = () => {
 				})
 			}
 		} catch (error) {
-			console.error(error)
+			logger.error({
+				eventType: 'Stellar Registration Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 		} finally {
 			setLoadingRegister(false)
 			setCreatingDeployee(false)
@@ -216,7 +220,11 @@ export const useStellar = () => {
 			// TODO: enable the logic to send the transaction to the Stellar network
 			setContractData({})
 		} catch (error) {
-			console.error(error)
+			logger.error({
+				eventType: 'Stellar Signing Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 		} finally {
 			setLoadingSign(false)
 		}
@@ -247,7 +255,11 @@ export const useStellar = () => {
 					setDeployee(storedDeployee)
 				}
 			} catch (error) {
-				console.error(error)
+				logger.error({
+					eventType: 'Stellar Initialization Error',
+					error: error instanceof Error ? error.message : 'Unknown error',
+					details: error,
+				})
 			} finally {
 				setLoadingDeployee(false)
 			}

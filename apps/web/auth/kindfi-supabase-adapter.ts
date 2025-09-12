@@ -3,6 +3,7 @@ import { SupabaseAdapter } from '@auth/supabase-adapter'
 import { appEnvConfig } from '@packages/lib'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Adapter, AdapterSession, AdapterUser } from 'next-auth/adapters'
+import { logger } from '~/lib'
 
 interface DeviceData {
 	credential_id: string
@@ -53,10 +54,11 @@ export function KindfiSupabaseAdapter(): Adapter {
 				// Only create profile if user creation was successful
 				if (!createdUser?.id || !createdUser?.email) {
 					// Handle user creation failure
-					console.error(
-						'🔧 KindfiSupabaseAdapter: User creation failed',
-						createdUser,
-					)
+					logger.error({
+						eventType: 'User Creation Error',
+						error: 'User creation failed in base adapter',
+						details: createdUser,
+					})
 					throw new Error('User creation failed')
 				}
 				// Check if profile already exists to avoid conflicts
@@ -86,10 +88,12 @@ export function KindfiSupabaseAdapter(): Adapter {
 				})
 
 				if (profileError) {
-					console.error(
-						'🔧 KindfiSupabaseAdapter: Profile creation error',
-						profileError,
-					)
+					logger.error({
+						eventType: 'Profile Creation Error',
+						error: profileError.message,
+						details: profileError,
+					})
+					// Note: Profile creation failure should not block user creation
 					// Don't throw here to avoid breaking the auth flow
 					// The profile can be created later if needed
 				}
@@ -100,7 +104,12 @@ export function KindfiSupabaseAdapter(): Adapter {
 				)
 				return createdUser
 			} catch (error) {
-				console.error('🔧 KindfiSupabaseAdapter: User creation error', error)
+				logger.error({
+					eventType: 'User Creation Error',
+					error: error instanceof Error ? error.message : 'Unknown error',
+					details: error,
+				})
+				// Rethrow to ensure the auth flow is aware of the failure
 				throw error
 			}
 		},
@@ -132,7 +141,11 @@ export function KindfiSupabaseAdapter(): Adapter {
 				console.log('🔧 KindfiSupabaseAdapter: User retrieved', user)
 				return user
 			} catch (error) {
-				console.error('🔧 KindfiSupabaseAdapter: Get user error', error)
+				logger.error({
+					eventType: 'Get User Error',
+					error: error instanceof Error ? error.message : 'Unknown error',
+					details: error,
+				})
 				return null
 			}
 		},
@@ -164,10 +177,12 @@ export function KindfiSupabaseAdapter(): Adapter {
 				console.log('🔧 KindfiSupabaseAdapter: User retrieved by email', user)
 				return user
 			} catch (error) {
-				console.error(
-					'🔧 KindfiSupabaseAdapter: Get user by email error',
-					error,
-				)
+				logger.error({
+					eventType: 'Get User By Email Error',
+					error: error instanceof Error ? error.message : 'Unknown error',
+					details: error,
+				})
+				// On error, return null to avoid breaking the auth flow
 				return null
 			}
 		},

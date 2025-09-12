@@ -7,6 +7,7 @@ import { Button } from '~/components/base/button'
 import { LoadMoreButton } from './load-more-button'
 import { UpdateCard } from './update-card'
 import { UpdateForm } from './update-form'
+import { logger } from '~/lib'
 
 // Define types for project updates based on actual DB structure
 type ProjectUpdate = {
@@ -48,7 +49,11 @@ export function ProjectUpdatesTabSection() {
 				.range((page - 1) * pageSize, page * pageSize - 1)
 
 			if (error) {
-				console.error('Error fetching updates:', error)
+				logger.error({
+					eventType: 'Fetch Project Updates Error',
+					error: error.message,
+					details: error,
+				})
 				throw error
 			}
 
@@ -56,7 +61,11 @@ export function ProjectUpdatesTabSection() {
 				page === 1 ? data : [...prevUpdates, ...data],
 			)
 		} catch (err) {
-			console.error('Failed to fetch updates:', err)
+			logger.error({
+				eventType: 'Fetch Project Updates Error',
+				error: err instanceof Error ? err.message : 'Unknown error',
+				details: err,
+			})
 			setError(
 				err instanceof Error ? err : new Error('Failed to fetch updates'),
 			)
@@ -87,7 +96,11 @@ export function ProjectUpdatesTabSection() {
 				.select()
 
 			if (error) {
-				console.error('Error creating update:', error)
+				logger.error({
+					eventType: 'Create Project Update Error',
+					error: error.message,
+					details: error,
+				})
 				throw new Error(`Insert error: ${error.message}`)
 			}
 
@@ -96,7 +109,11 @@ export function ProjectUpdatesTabSection() {
 			await fetchUpdates()
 			setIsCreatingUpdate(false)
 		} catch (err) {
-			console.error('Error creating update:', err)
+			logger.error({
+				eventType: 'Create Project Update Error',
+				error: err instanceof Error ? err.message : 'Unknown error',
+				details: err,
+			})
 			alert(
 				`Failed to create update: ${err instanceof Error ? err.message : 'Unknown error'}`,
 			)
@@ -117,14 +134,22 @@ export function ProjectUpdatesTabSection() {
 				.eq('id', id)
 
 			if (error) {
-				console.error('Error updating update:', error)
+				logger.error({
+					eventType: 'Update Project Update Error',
+					error: error.message,
+					details: error,
+				})
 				throw error
 			}
 
 			// Refetch updates after editing
 			await fetchUpdates()
 		} catch (err) {
-			console.error('Error updating update:', err)
+			logger.error({
+				eventType: 'Update Project Update Error',
+				error: err instanceof Error ? err.message : 'Unknown error',
+				details: err,
+			})
 			alert('Failed to update. Please try again.')
 		} finally {
 			setIsSubmitting(false)
@@ -142,15 +167,23 @@ export function ProjectUpdatesTabSection() {
 				.eq('id', id)
 
 			if (error) {
-				console.error('Error deleting update:', error)
+				logger.error({
+					eventType: 'Delete Project Update Error',
+					error: error.message,
+					details: error,
+				})
 				throw error
 			}
 
 			// Refetch updates after deleting
 			await fetchUpdates()
 			return Promise.resolve()
-		} catch (err) {
-			console.error('Error deleting update:', err)
+		} catch (err) {			
+			logger.error({
+				eventType: 'Delete Project Update Error',
+				error: err instanceof Error ? err.message : 'Unknown error',
+				details: err,
+			})
 			alert('Failed to delete update. Please try again.')
 			return Promise.reject(err)
 		}

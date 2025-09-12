@@ -2,6 +2,7 @@ import { supabase } from '@packages/lib/supabase'
 import { Networks } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '~/lib'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
@@ -78,7 +79,11 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Escrow Fund Error:', error)
+		logger.error({
+			eventType: 'Escrow Fund Error',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
+		})
 
 		if (error instanceof AppError) {
 			return NextResponse.json(
@@ -87,7 +92,11 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		console.error('Internal server error during escrow initialization:', error)
+		logger.error({
+			eventType: 'Internal Server Error during escrow Initialization',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
+		})
 
 		return NextResponse.json(
 			{

@@ -27,6 +27,7 @@ import {
 import { useAuth } from '~/hooks/use-auth'
 import { getAvatarFallback } from '~/lib/utils'
 import { Navigation } from './navigation'
+import { logger } from '~/lib'
 
 export const Header = () => {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -90,7 +91,12 @@ const UserMenu = ({ user }: { user: User }) => {
 			await signOutAction()
 			router.push('/')
 		} catch (error) {
-			console.error('Error signing out:', error)
+			logger.error({
+				eventType: 'Sign Out Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
+			// Optionally, show a user-friendly message here
 		}
 	}
 

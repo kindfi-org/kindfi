@@ -5,9 +5,10 @@ import jwt from 'jsonwebtoken'
 import type { NextAuthOptions, User } from 'next-auth'
 import { KindfiSupabaseAdapter } from '~/auth/kindfi-supabase-adapter'
 import { kindfiWebAuthnProvider } from '~/auth/kindfi-webauthn.provider'
+import { Logger } from '../logger'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
-
+const logger = new Logger()
 export const nextAuthOption: NextAuthOptions = {
 	adapter: KindfiSupabaseAdapter(),
 	providers: [kindfiWebAuthnProvider],
@@ -61,7 +62,10 @@ export const nextAuthOption: NextAuthOptions = {
 			console.log('🗝️ Session callback triggered with session:', session)
 			console.log('🗝️ Session callback triggered with token:', token)
 			if (!token || !session.user) {
-				console.error('No token found in session callback')
+				logger.error({
+					eventType: 'Session Callback Error',
+					error: 'No token found in session callback',
+				})
 				return session
 			}
 

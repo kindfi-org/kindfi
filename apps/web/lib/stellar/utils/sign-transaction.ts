@@ -1,5 +1,6 @@
 // todo: sign transaction function
 import { Keypair, Transaction } from '@stellar/stellar-sdk'
+import { logger } from '~/lib'
 import type { SignTransactionResponse } from '~/lib/types/escrow/escrow-response.types'
 
 export function signTransaction(
@@ -14,7 +15,11 @@ export function signTransaction(
 		const signedXDR = transaction.toXDR()
 		return signedXDR
 	} catch (error) {
-		console.error('Error sending transaction:', error)
+		logger.error({
+			eventType: 'Sign Transaction Error',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
+		})
 		throw error
 	}
 }

@@ -4,6 +4,7 @@ import type { User } from 'next-auth'
 import CredentialsProvider, {
 	type CredentialInput,
 } from 'next-auth/providers/credentials'
+import { logger } from '~/lib'
 
 export const kindfiWebAuthnProvider = CredentialsProvider({
 	name: 'Credentials',
@@ -19,7 +20,10 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 		console.log('🗝️ login with credentials -> ', credentials)
 
 		if (!credentials) {
-			console.error('No credentials provided')
+			logger.error({
+				eventType: 'WebAuthn Authorization Error',
+				error: 'No credentials provided',
+			})
 			return null
 		}
 
@@ -38,8 +42,9 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			.single()
 
 		if (profileLookupError || !profileUser) {
-			console.error('NextAuth mapped profile not found:', {
-				error: profileLookupError,
+			logger.error({
+				eventType: 'WebAuthn Authorization Error',
+				error: 'NextAuth user not found',
 			})
 			throw new Error('NextAuth user not found')
 		}
@@ -59,7 +64,11 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 		const deviceData = device as Tables<'devices'> | null
 
 		if (deviceError) {
-			console.error('Error fetching device data:', { error: deviceError })
+			logger.error({
+				eventType: 'WebAuthn Authorization Error',
+				error: 'Error fetching device data',
+				details: deviceError,
+			})
 			throw new Error('Error fetching device data')
 		}
 

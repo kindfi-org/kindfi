@@ -20,6 +20,7 @@ import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { usePasskeyRegistration } from '~/hooks/passkey/use-passkey-registration'
 import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
 import { useStellarContext } from '~/hooks/stellar/stellar-context'
+import { logger } from '~/lib'
 
 export function PasskeyRegistrationComponent() {
 	const router = useRouter()
@@ -53,7 +54,12 @@ export function PasskeyRegistrationComponent() {
 					}
 				}
 			} catch (error) {
-				console.error('Error getting user:', error)
+				logger.error({
+					eventType: 'Passkey Registration User Fetch Error',
+					error: error instanceof Error ? error.message : 'Unknown error',
+					details: error,
+				})
+				// On error, redirect to sign-up
 				router.push('/sign-up')
 			}
 		}
@@ -66,7 +72,11 @@ export function PasskeyRegistrationComponent() {
 		try {
 			await signOutAction()
 		} catch (error) {
-			console.error('Error signing out:', error)
+			logger.error({
+				eventType: 'Passkey Registration Sign-Out Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			// Even if sign out fails, redirect to home
 			router.push('/')
 		}

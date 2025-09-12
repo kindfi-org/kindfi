@@ -1,5 +1,6 @@
 import { supabase } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
+import { logger } from '~/lib'
 import { AppError } from '~/lib/error'
 import type { EscrowFundUpdateData } from '~/lib/types/escrow/escrow-payload.types'
 import { validateEscrowFundUpdate } from '~/lib/validators/escrow'
@@ -41,7 +42,11 @@ export async function POST(
 		)
 	} catch (error) {
 		if (error instanceof AppError) {
-			console.error('Escrow Fund error:', error)
+			logger.error({
+				eventType: 'Escrow Fund Error',
+				error: error.message,
+				details: error.details,
+			})
 			return NextResponse.json(
 				{
 					error: error.message,
@@ -51,7 +56,11 @@ export async function POST(
 			)
 		}
 
-		console.error('Internal server error during escrow fund:', error)
+		logger.error({
+			eventType: 'Internal Server Error during escrow fund',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
+		})
 		return NextResponse.json(
 			{
 				error:

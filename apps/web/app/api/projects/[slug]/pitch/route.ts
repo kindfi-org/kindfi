@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
+import { logger } from '~/lib'
 import {
 	deleteFolderFromBucket,
 	transformToEmbedUrl,
@@ -75,7 +76,11 @@ export async function POST(
 			.upsert(projectPitchData, { onConflict: 'project_id' })
 
 		if (error) {
-			console.error(error)
+			logger.error({
+				eventType: 'Project Pitch Upsert Error',
+				error: error.message,
+				details: error,
+			})
 			return NextResponse.json({ error: error.message }, { status: 500 })
 		}
 
@@ -83,7 +88,11 @@ export async function POST(
 			message: 'Project pitch upserted successfully',
 		})
 	} catch (err) {
-		console.error(err)
+		logger.error({
+			eventType: 'Project Pitch Upsert Error',
+			error: err instanceof Error ? err.message : 'Unknown error',
+			details: err,
+		})
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

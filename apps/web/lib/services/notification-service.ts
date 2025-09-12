@@ -8,6 +8,7 @@ import type {
 	UpdateNotificationDTO,
 } from '../types/notification'
 import { NotificationLogger } from './notification-logger'
+import { logger } from '..'
 
 function isNotification(data: unknown): data is BaseNotification {
 	return (
@@ -280,7 +281,11 @@ export class NotificationService {
 			if (error) throw error
 			return true
 		} catch (error) {
-			console.error('Failed to mark notification as read:', error)
+			logger.error({
+				eventType: 'Mark Notification As Read Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			return false
 		}
 	}
@@ -301,7 +306,11 @@ export class NotificationService {
 			if (error) throw error
 			return true
 		} catch (error) {
-			console.error('Failed to mark all notifications as read:', error)
+			logger.error({
+				eventType: 'Mark All Notifications As Read Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			return false
 		}
 	}
@@ -323,7 +332,11 @@ export class NotificationService {
 			if (error) throw error
 			return data || []
 		} catch (error) {
-			console.error('Failed to get unread notifications:', error)
+			logger.error({
+				eventType: 'Get Unread Notifications Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			return []
 		}
 	}

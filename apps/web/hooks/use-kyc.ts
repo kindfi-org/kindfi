@@ -1,6 +1,7 @@
 // hooks/use-kyc.ts
 import { useEffect, useState } from 'react'
 import type { KYCData } from '~/components/shared/kyc/kyc-modal'
+import { logger } from '~/lib'
 import { submitKYC } from '~/lib/services/kyc'
 
 const KYC_STORAGE_KEY = 'kyc-data'
@@ -42,7 +43,11 @@ export function useKYC() {
 				setKycData(data)
 			}
 		} catch (error) {
-			console.error('Failed to load KYC data from storage', error)
+			logger.error({
+				eventType: 'KYC Load Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 		}
 	}, [])
 
@@ -51,7 +56,11 @@ export function useKYC() {
 			const dataToSave = JSON.stringify({ step: currentStep, data: kycData })
 			localStorage.setItem(KYC_STORAGE_KEY, dataToSave)
 		} catch (error) {
-			console.error('Failed to save KYC data to storage', error)
+			logger.error({
+				eventType: 'Failed to save KYC data to storage',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 		}
 	}, [currentStep, kycData])
 

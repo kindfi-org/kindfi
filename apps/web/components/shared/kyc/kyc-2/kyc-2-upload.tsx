@@ -23,6 +23,7 @@ import { useDocumentFiles } from '~/hooks/kyc/use-document-files'
 import { useDocumentProcessor } from '~/hooks/kyc/use-document-processor'
 import { useDocumentValidation } from '~/hooks/kyc/use-document-validation'
 import { ValidationAlerts } from './validation-alerts'
+import { logger } from '~/lib'
 
 // pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
@@ -104,7 +105,11 @@ export default function IDDocumentUpload({
 					setBackExtractedData(processedData)
 				}
 			} catch (error) {
-				console.error('Error handling file upload:', error)
+				logger.error({
+					eventType: 'File Upload Processing Error',
+					error: error instanceof Error ? error.message : 'Unknown error',
+					details: error,
+				})
 				toast({
 					title: 'Error Processing Document File',
 					description:

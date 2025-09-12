@@ -6,6 +6,7 @@ import {
 	createCommentSchema,
 	validateParentComment,
 } from './validation'
+import { logger } from '~/lib'
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
 	try {
@@ -73,7 +74,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
 		const { data, error, count } = await query.range(offset, offset + limit - 1)
 		if (error) {
-			console.error('GET /api/comments fetch failed:', error)
+			logger.error({
+				eventType: 'GET /api/comments Fetch Error',
+				error: error.message,
+				details: error,
+			})
 			return NextResponse.json(
 				{
 					success: false,
@@ -90,7 +95,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 		})
 	} catch (error) {
 		// Keep parity with POST logging
-		console.error('Unexpected error in GET /api/comments:', error)
+		logger.error({
+			eventType: 'GET /api/comments Unexpected Error',
+			error: (error as Error).message,
+			stack: (error as Error).stack,
+		})
 		return NextResponse.json(
 			{
 				success: false,
@@ -223,7 +232,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			.single()
 
 		if (insertError) {
-			console.error('Error inserting comment:', insertError)
+			logger.error({
+				eventType: 'POST /api/comments Insert Error',
+				error: insertError.message,
+				details: insertError,
+			})
 			return NextResponse.json(
 				{
 					success: false,
@@ -245,7 +258,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Unexpected error in POST /api/comments:', error)
+		logger.error({
+			eventType: 'POST /api/comments Unexpected Error',
+			error: (error as Error).message,
+			stack: (error as Error).stack,
+		})
 		return NextResponse.json(
 			{
 				success: false,

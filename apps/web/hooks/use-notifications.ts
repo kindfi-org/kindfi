@@ -10,6 +10,7 @@ import type {
 	NotificationSort,
 	UpdateNotificationDTO,
 } from '../lib/types/notification'
+import { logger } from '~/lib'
 
 export function useNotifications(
 	filters: NotificationFilters = {},
@@ -128,7 +129,10 @@ export function useNotifications(
 			)
 			.subscribe((status) => {
 				if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
-					console.error('Notification subscription error')
+					logger.error({
+						eventType: 'Notification Subscription Error',
+						error: 'An error occurred with the notification subscription',
+					})
 					setConnectionState('disconnected')
 				} else if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
 					console.log('Notification subscription connected')

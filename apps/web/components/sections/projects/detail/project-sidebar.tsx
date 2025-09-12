@@ -18,6 +18,7 @@ import {
 	FormMessage,
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
+import { logger } from '~/lib'
 import { progressBarAnimation } from '~/lib/constants/animations'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
@@ -61,7 +62,11 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			// TODO: Send follow/unfollow request to backend
 			setIsFollowing(!isFollowing)
 		} catch (error) {
-			console.error(error)
+			logger.error({
+				eventType: 'Follow Toggle Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			toast.error('Unable to update follow status', {
 				icon: <CircleAlert className="text-destructive" />,
 			})
@@ -76,7 +81,11 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				icon: <CircleCheck className="text-primary" />,
 			})
 		} catch (error) {
-			console.error(error)
+			logger.error({
+				eventType: 'Donation Submission Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			toast.error('Something went wrong', {
 				description: "We couldn't process your donation. Please try again.",
 				icon: <CircleAlert className="text-destructive" />,

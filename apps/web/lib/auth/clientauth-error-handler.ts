@@ -1,8 +1,10 @@
 import type { AuthError } from '@supabase/supabase-js'
 import { ERROR_MESSAGES } from '../constants/error'
 import type { AuthResponse } from '../types/auth'
+import { Logger } from '../logger'
 
 export function handleClientAuthError(error: AuthError): AuthResponse {
+	const logger = new Logger()
 	const errorKey = Object.keys(ERROR_MESSAGES).find((key) =>
 		error.message.includes(key),
 	) as keyof typeof ERROR_MESSAGES | undefined
@@ -10,13 +12,14 @@ export function handleClientAuthError(error: AuthError): AuthResponse {
 	const message = errorKey
 		? ERROR_MESSAGES[errorKey]
 		: error.message || 'An unknown error occurred'
-
-	console.error('[Auth Error]', {
+	logger.error({
 		eventType: 'AUTH_ERROR',
 		errorMessage: error.message,
 		action: 'client_side_auth',
 		timestamp: new Date().toISOString(),
 	})
+	// Also report to Sentry in production via the
+	Logger
 
 	return {
 		success: false,

@@ -4,6 +4,7 @@ import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Session, User } from '@supabase/supabase-js'
 import { SessionProvider } from 'next-auth/react'
 import { createContext, useContext, useEffect, useState } from 'react'
+import { logger } from '~/lib'
 
 interface AuthContextType {
 	user: User | null
@@ -32,7 +33,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				console.log('Session check result:', session)
 				setUser(session?.user ?? null)
 			} catch (error) {
-				console.error('Auth check failed:', error)
+				logger.error({
+					eventType: 'Auth Check Failed',
+					error: error instanceof Error ? error.message : 'Unknown error',
+					details: error,
+				})
 				setUser(null)
 			} finally {
 				setIsLoading(false)

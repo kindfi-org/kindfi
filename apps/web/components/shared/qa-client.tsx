@@ -21,6 +21,7 @@ import {
 } from '~/components/base/tooltip'
 import { AskQuestionForm } from '~/components/shared/qa/ask-question-form'
 import { QuestionCard } from '~/components/shared/qa/question-card'
+import { logger } from '~/lib'
 import { fetchChildComments, fetchQuestions } from '~/lib/services/comments'
 import type {
 	CommentData,
@@ -117,7 +118,11 @@ export default function QAClient({
 				const mapped = await fetchQuestions(supabase, projectId)
 				return mapped
 			} catch (err) {
-				console.error('Error fetching questions:', err)
+				logger.error({
+					eventType: 'Fetch Questions Error',
+					error: err instanceof Error ? err.message : 'Unknown error',
+					details: err,
+				})
 				return []
 			}
 		},
@@ -139,7 +144,11 @@ export default function QAClient({
 				}
 				return data
 			} catch (err) {
-				console.error('Error fetching comments:', err)
+				logger.error({
+					eventType: 'Fetch Comments Error',
+					error: err instanceof Error ? err.message : 'Unknown error',
+					details: err,
+				})
 				return []
 			}
 		},
@@ -156,7 +165,11 @@ export default function QAClient({
 			const threads = buildQuestionThreads(questions, commentsData)
 			setProcessedQuestions(threads)
 		} catch (err) {
-			console.error('Error processing comments:', err)
+			logger.error({
+				eventType: 'Process Questions Error',
+				error: err instanceof Error ? err.message : 'Unknown error',
+				details: err,
+			})
 		}
 	}, [questions, commentsData])
 
@@ -357,7 +370,11 @@ export default function QAClient({
 			setTimeout(() => setRealtimeStatus(null), 3000)
 		},
 		onError: (error) => {
-			console.error('Error submitting question:', error)
+			logger.error({
+				eventType: 'Submit Question Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			setRealtimeStatus(
 				`Error: ${error instanceof Error ? error.message : String(error)}`,
 			)
@@ -410,7 +427,11 @@ export default function QAClient({
 			setTimeout(() => setRealtimeStatus(null), 3000)
 		},
 		onError: (error) => {
-			console.error('Error submitting answer:', error)
+			logger.error({
+				eventType: 'Submit Answer Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			setRealtimeStatus(
 				`Error: ${error instanceof Error ? error.message : String(error)}`,
 			)
@@ -457,7 +478,11 @@ export default function QAClient({
 			setTimeout(() => setRealtimeStatus(null), 3000)
 		},
 		onError: (error) => {
-			console.error('Error submitting reply:', error)
+			logger.error({
+				eventType: 'Error submitting reply',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			setRealtimeStatus(
 				`Error: ${error instanceof Error ? error.message : String(error)}`,
 			)
@@ -508,7 +533,11 @@ export default function QAClient({
 			setTimeout(() => setRealtimeStatus(null), 3000)
 		},
 		onError: (error) => {
-			console.error('Error marking as resolved:', error)
+			logger.error({
+				eventType: 'Mark Resolved Error',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			setRealtimeStatus(
 				`Error: ${error instanceof Error ? error.message : String(error)}`,
 			)

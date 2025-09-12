@@ -1,6 +1,7 @@
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '~/lib'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import type { DisputePayload } from '~/lib/types/escrow/escrow-payload.types'
@@ -115,7 +116,11 @@ export async function POST(req: NextRequest) {
 		// Note: The database updates and notifications will be handled by the /escrow/dispute/sign endpoint
 		// after the transaction is signed and submitted
 	} catch (error) {
-		console.error('Dispute Filing Error:', error)
+		logger.error({
+			eventType: 'Dispute Filing Error',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
+		})
 
 		if (error instanceof AppError) {
 			return NextResponse.json(
@@ -177,7 +182,11 @@ export async function GET(req: NextRequest) {
 			{ status: 200 },
 		)
 	} catch (error) {
-		console.error('Fetch Disputes Error:', error)
+		logger.error({
+			eventType: 'Fetch Disputes Error',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
+		})
 
 		if (error instanceof AppError) {
 			return NextResponse.json(

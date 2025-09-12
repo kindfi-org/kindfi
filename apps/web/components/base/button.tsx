@@ -3,6 +3,7 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
+import { logger } from '~/lib'
 
 import { cn } from '~/lib/utils'
 
@@ -135,9 +136,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 		// Warning for icon-only buttons without aria-label in development
 		if (appConfig.env.nodeEnv !== 'production' && isIconOnly && !ariaLabel) {
-			console.error(
-				`Accessibility error: Icon-only Button must have an aria-label to describe its purpose. Component: ${Button.displayName}`,
-			)
+			logger.error({
+				eventType: 'Accessibility Error',
+				error: 'Icon-only Button missing aria-label',
+				details: {
+					component: Button.displayName,
+				},
+			})
 		}
 
 		// Generate props based on component state
