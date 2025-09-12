@@ -61,7 +61,10 @@ export function StepOne({ onNext }: StepOneProps) {
 								name="title"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>What is your project's title? *</FormLabel>
+										<FormLabel>
+											What is your project's title?{' '}
+											<span className="text-destructive">*</span>
+										</FormLabel>
 										<FormControl>
 											<Input
 												placeholder="Enter your project title"
@@ -80,7 +83,8 @@ export function StepOne({ onNext }: StepOneProps) {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											Write a short description or tagline for your project *
+											Write a short description or tagline for your project{' '}
+											<span className="text-destructive">*</span>
 										</FormLabel>
 										<FormControl>
 											<Textarea
@@ -104,7 +108,8 @@ export function StepOne({ onNext }: StepOneProps) {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											How much funding are you aiming to raise? *
+											How much funding are you aiming to raise?{' '}
+											<span className="text-destructive">*</span>
 										</FormLabel>
 										<FormControl>
 											<div className="relative">
@@ -137,7 +142,8 @@ export function StepOne({ onNext }: StepOneProps) {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											What's the minimum amount someone can invest? *
+											What's the minimum amount someone can invest?{' '}
+											<span className="text-destructive">*</span>
 										</FormLabel>
 										<FormControl>
 											<div className="relative">

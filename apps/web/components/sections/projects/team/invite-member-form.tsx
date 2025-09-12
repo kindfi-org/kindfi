@@ -111,7 +111,10 @@ export function InviteMemberForm({
 									name="email"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Email Address *</FormLabel>
+											<FormLabel>
+												Email Address{' '}
+												<span className="text-destructive">*</span>
+											</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="member@example.com"
@@ -131,7 +134,9 @@ export function InviteMemberForm({
 									name="role"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Role *</FormLabel>
+											<FormLabel>
+												Role <span className="text-destructive">*</span>
+											</FormLabel>
 											<FormControl>
 												<RoleSelect
 													value={field.value}
@@ -165,7 +170,7 @@ export function InviteMemberForm({
 								name="title"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Title (Optional)</FormLabel>
+										<FormLabel>Title (optional)</FormLabel>
 										<FormControl>
 											<Input
 												placeholder="e.g., Software Engineer, Marketing Lead"
