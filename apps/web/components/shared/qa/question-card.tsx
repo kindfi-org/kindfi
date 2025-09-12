@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import {
@@ -20,6 +19,7 @@ import {
 import { Textarea } from '~/components/base/textarea'
 import type {
 	CommentWithAnswers,
+	QuestionMetadata,
 	UserData,
 } from '~/lib/types/project/project-qa.types'
 import { UserInfo } from './user-info'
@@ -71,7 +71,7 @@ export function QuestionCard({
 						size="sm"
 					/>
 					<div className="flex items-center gap-2">
-						{(question.metadata as { status?: any })?.status  === 'resolved' && (
+						{ (question.metadata as QuestionMetadata | undefined)?.status === 'resolved' && (
 						<Badge variant="secondary" className="bg-green-50 text-green-700">
 							<CheckCircle className="mr-1 h-3 w-3" aria-hidden="true" />
 							Resolved
@@ -102,7 +102,7 @@ export function QuestionCard({
 						)}
 					</Button>
 
-					{(question.metadata as { status?: any })?.status !== 'resolved' &&
+					{ (question.metadata as QuestionMetadata | undefined)?.status === 'resolved' && 
 						effectiveUser && (
 							<Button
 								variant="outline"
@@ -286,5 +286,3 @@ export function QuestionCard({
 		</Card>
 	)
 }
-
-export default QuestionCard
