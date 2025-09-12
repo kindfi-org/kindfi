@@ -1,7 +1,7 @@
 'use client'
 
 import type { Enums } from '@services/supabase'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { BreadcrumbContainer } from '~/components/sections/projects/shared'
 import { InviteMemberForm } from '~/components/sections/projects/team/invite-member-form'
@@ -59,15 +59,23 @@ const mockMembers: ProjectMember[] = [
 ]
 
 export default function ProjectMembersPage() {
-	const [isLoading, setIsLoading] = useState(false)
+	const [isLoading, setIsLoading] = useState(true)
 	const [pendingInvitations, setPendingInvitations] = useState<
 		PendingInvitation[]
 	>([])
-	const [members, setMembers] = useState<ProjectMember[]>(mockMembers)
+	const [members, setMembers] = useState<ProjectMember[]>([])
+
+	useEffect(() => {
+		// Simulate loading
+		const timer = setTimeout(() => {
+			setMembers(mockMembers)
+			setIsLoading(false)
+		}, 1000)
+
+		return () => clearTimeout(timer)
+	}, [])
 
 	const handleInviteMember = async (data: InviteMemberData) => {
-		setIsLoading(true)
-
 		// Simulate your real API (replace with fetch/server action)
 		const request = new Promise<void>((resolve) => setTimeout(resolve, 1000))
 
@@ -109,8 +117,6 @@ export default function ProjectMembersPage() {
 			setPendingInvitations((prev) =>
 				prev.filter((inv) => inv.id !== optimistic.id),
 			)
-		} finally {
-			setIsLoading(false)
 		}
 	}
 

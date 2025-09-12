@@ -58,8 +58,8 @@ export const memberRole: Record<
 	others: {
 		label: 'Other',
 		icon: Puzzle,
-		iconClass: 'text-gray-500',
+		iconClass: 'text-zinc-500',
 		badgeClass:
-			'bg-gray-100 text-gray-800 hover:bg-zinc-200 hover:text-zinc-900',
+			'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 hover:text-zinc-900',
 	},
 }

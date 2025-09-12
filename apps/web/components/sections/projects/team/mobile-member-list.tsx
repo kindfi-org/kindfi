@@ -49,16 +49,16 @@ export function MobileMemberList({
 	const [editingId, setEditingId] = useState<string | null>(null)
 	const [tempTitle, setTempTitle] = useState<string>('')
 
-	const startEdit = (memberId: string, current: string | null) => {
+	const handleStartEdit = (memberId: string, current: string | null) => {
 		setEditingId(memberId)
 		setTempTitle(current ?? '')
 	}
-	const commitEdit = (memberId: string) => {
+	const handleCommitEdit = (memberId: string) => {
 		onChangeTitle?.(memberId, tempTitle.trim())
 		setEditingId(null)
 		setTempTitle('')
 	}
-	const cancelEdit = () => {
+	const handleCancelEdit = () => {
 		setEditingId(null)
 		setTempTitle('')
 	}
@@ -117,7 +117,7 @@ export function MobileMemberList({
 													<span className="truncate">{member.email}</span>
 												</div>
 
-												{/* Título editable en mobile */}
+												{/* Editable title (mobile) */}
 												{editingId === member.id ? (
 													<div className="flex items-center gap-2 mb-2">
 														<Input
@@ -128,15 +128,16 @@ export function MobileMemberList({
 															aria-label={`Edit title for ${member.name}`}
 															autoFocus
 															onKeyDown={(e) => {
-																if (e.key === 'Enter') commitEdit(member.id)
-																if (e.key === 'Escape') cancelEdit()
+																if (e.key === 'Enter')
+																	handleCommitEdit(member.id)
+																if (e.key === 'Escape') handleCancelEdit()
 															}}
 														/>
 														<Button
 															size="icon"
 															variant="ghost"
 															aria-label={`Save title for ${member.name}`}
-															onClick={() => commitEdit(member.id)}
+															onClick={() => handleCommitEdit(member.id)}
 														>
 															<Check className="h-4 w-4" aria-hidden="true" />
 														</Button>
@@ -144,7 +145,7 @@ export function MobileMemberList({
 															size="icon"
 															variant="ghost"
 															aria-label={`Cancel title edit for ${member.name}`}
-															onClick={cancelEdit}
+															onClick={handleCancelEdit}
 														>
 															<XIcon className="h-4 w-4" aria-hidden="true" />
 														</Button>
@@ -163,7 +164,10 @@ export function MobileMemberList({
 																	variant="ghost"
 																	aria-label={`Edit title for ${member.name}`}
 																	onClick={() =>
-																		startEdit(member.id, member.title ?? '')
+																		handleStartEdit(
+																			member.id,
+																			member.title ?? '',
+																		)
 																	}
 																>
 																	<Pencil
@@ -222,11 +226,20 @@ export function MobileMemberList({
 													).map((rk) => {
 														const meta = memberRole[rk]
 														const Icon = meta.icon
+														const isCurrent = rk === member.role
 														return (
 															<DropdownMenuItem
 																key={rk}
-																className="cursor-pointer"
-																onClick={() => onChangeRole?.(member.id, rk)}
+																className={cn(
+																	'cursor-pointer',
+																	isCurrent && 'opacity-60 cursor-not-allowed',
+																)}
+																disabled={isCurrent}
+																aria-disabled={isCurrent}
+																onClick={() => {
+																	if (isCurrent) return
+																	onChangeRole?.(member.id, rk)
+																}}
 																aria-label={`Set role ${meta.label} for ${member.name}`}
 															>
 																<Badge

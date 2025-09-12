@@ -2,7 +2,7 @@
 
 import type { Enums } from '@services/supabase'
 import { Check, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -41,8 +41,9 @@ export function RoleSelect({
 	descriptions,
 }: RoleSelectProps) {
 	const [open, setOpen] = useState(false)
-	const selected = memberRole[value]
+	const listboxId = useId()
 
+	const selected = memberRole[value]
 	const ariaLabel = value
 		? `Change role, current: ${selected.label}`
 		: 'Select role'
@@ -52,10 +53,10 @@ export function RoleSelect({
 			<PopoverTrigger asChild>
 				<Button
 					variant="outline"
-					role="combobox"
 					aria-label={ariaLabel}
 					aria-haspopup="listbox"
 					aria-expanded={open}
+					aria-controls={open ? listboxId : undefined}
 					className={cn('justify-between bg-white border-green-600', className)}
 					disabled={disabled}
 				>
@@ -68,6 +69,7 @@ export function RoleSelect({
 							)}
 						>
 							<selected.icon
+								aria-hidden
 								className={cn('h-3.5 w-3.5', selected.iconClass)}
 							/>
 							{selected.label}
@@ -83,7 +85,7 @@ export function RoleSelect({
 				className="w-[--radix-popover-trigger-width] p-0"
 				align="start"
 			>
-				<Command className="bg-white" role="listbox">
+				<Command id={listboxId} className="bg-white" role="listbox">
 					<CommandEmpty>No role found.</CommandEmpty>
 					<CommandList>
 						<CommandGroup>
@@ -108,6 +110,7 @@ export function RoleSelect({
 												)}
 											>
 												<meta.icon
+													aria-hidden
 													className={cn('h-3.5 w-3.5', meta.iconClass)}
 												/>
 												{meta.label}

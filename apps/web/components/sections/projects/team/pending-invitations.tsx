@@ -145,7 +145,7 @@ export function PendingInvitations({
 															variant="ghost"
 															size="sm"
 															aria-label={menuAria}
-															className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+															className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 transition-opacity"
 														>
 															<MoreHorizontal
 																className="h-4 w-4"
@@ -157,7 +157,6 @@ export function PendingInvitations({
 														<DropdownMenuItem
 															className="cursor-pointer"
 															onClick={() => onResend?.(invitation.id)}
-															disabled={isExpired}
 															aria-label={resendAria}
 														>
 															<RefreshCw
@@ -250,7 +249,7 @@ export function PendingInvitations({
 														variant="ghost"
 														size="sm"
 														aria-label={menuAria}
-														className="h-8 w-8 p-0"
+														className="h-8 w-8 p-0 focus:opacity-100"
 													>
 														<MoreHorizontal
 															className="h-4 w-4"
@@ -262,7 +261,6 @@ export function PendingInvitations({
 													<DropdownMenuItem
 														className="cursor-pointer"
 														onClick={() => onResend?.(invitation.id)}
-														disabled={isExpired}
 														aria-label={resendAria}
 													>
 														<RefreshCw

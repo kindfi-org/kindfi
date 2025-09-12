@@ -5,8 +5,8 @@ import { motion } from 'framer-motion'
 import { Loader2, UserPlus } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
-
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -29,7 +29,12 @@ import type { InviteMemberData } from '~/lib/types/project/team-members.types'
 import { RoleSelect } from './role-select'
 
 const inviteSchema = z.object({
-	email: z.string().email('Please enter a valid email address'),
+	email: z
+		.string()
+		.trim()
+		.toLowerCase()
+		.email('Please enter a valid email address')
+		.max(254, 'Email is too long'),
 	role: z.enum([
 		'admin',
 		'editor',
@@ -38,7 +43,7 @@ const inviteSchema = z.object({
 		'core',
 		'others',
 	] as const),
-	title: z.string().optional(),
+	title: z.string().trim().max(80, 'Title is too long').optional(),
 })
 
 type InviteFormData = z.infer<typeof inviteSchema>
@@ -76,6 +81,7 @@ export function InviteMemberForm({
 			form.reset()
 		} catch (error) {
 			console.error('Failed to invite member:', error)
+			toast.error('Failed to invite member. Please try again.')
 		} finally {
 			setIsSubmitting(false)
 		}

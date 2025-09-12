@@ -11,9 +11,10 @@ import {
 
 export function MemberListSkeleton() {
 	return (
-		<div>
+		<div aria-busy="true">
+			<span className="sr-only">Loading members…</span>
 			{/* Desktop Skeleton */}
-			<Card className="hidden md:block">
+			<Card className="hidden md:block bg-white">
 				<CardHeader>
 					<div className="flex items-center gap-2">
 						<Skeleton className="h-5 w-5" />
@@ -70,9 +71,10 @@ export function MemberListSkeleton() {
 					<Skeleton className="h-5 w-5" />
 					<Skeleton className="h-6 w-40" />
 				</div>
+				<Skeleton className="h-4 w-80" />
 				{Array.from({ length: 3 }).map((_, i) => (
 					// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
-					<Card key={i}>
+					<Card key={i} className="bg-white">
 						<CardContent className="p-4">
 							<div className="flex items-start justify-between">
 								<div className="flex items-center gap-3 flex-1">

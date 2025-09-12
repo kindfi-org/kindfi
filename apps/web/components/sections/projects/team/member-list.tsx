@@ -68,18 +68,25 @@ export function MemberList({
 	const [editingId, setEditingId] = useState<string | null>(null)
 	const [tempTitle, setTempTitle] = useState<string>('')
 
-	const startEdit = (memberId: string, currentTitle: string | null) => {
+	const handleStartEdit = (memberId: string, currentTitle?: string | null) => {
 		setEditingId(memberId)
-		setTempTitle(currentTitle ?? '')
+		setTempTitle((currentTitle ?? '').trim())
 	}
 
-	const commitEdit = (memberId: string) => {
-		onChangeTitle?.(memberId, tempTitle.trim())
+	const handleCommitEdit = (memberId: string) => {
+		const next = tempTitle.trim()
+		const original = members.find((m) => m.id === memberId)?.title?.trim() ?? ''
+		if (!next || next === original) {
+			setEditingId(null)
+			setTempTitle('')
+			return
+		}
+		onChangeTitle?.(memberId, next)
 		setEditingId(null)
 		setTempTitle('')
 	}
 
-	const cancelEdit = () => {
+	const handleCancelEdit = () => {
 		setEditingId(null)
 		setTempTitle('')
 	}
@@ -131,6 +138,9 @@ export function MemberList({
 								{members.map((member, index) => {
 									const menuAria = `Open member menu for ${member.name}`
 									const removeAria = `Remove ${member.name} from team`
+									const saveDisabled =
+										tempTitle.trim() === (member.title?.trim() ?? '') ||
+										tempTitle.trim().length === 0
 
 									return (
 										<motion.tr
@@ -139,7 +149,7 @@ export function MemberList({
 											animate={{ opacity: 1, y: 0 }}
 											exit={{ opacity: 0, y: -20 }}
 											transition={{ duration: 0.2, delay: index * 0.05 }}
-											className="group"
+											className="group hover:bg-muted/50"
 										>
 											<TableCell>
 												<div className="flex items-center gap-3">
@@ -185,15 +195,18 @@ export function MemberList({
 															aria-label={`Edit title for ${member.name}`}
 															autoFocus
 															onKeyDown={(e) => {
-																if (e.key === 'Enter') commitEdit(member.id)
-																if (e.key === 'Escape') cancelEdit()
+																if (e.key === 'Enter')
+																	handleCommitEdit(member.id)
+																if (e.key === 'Escape') handleCancelEdit()
 															}}
 														/>
 														<Button
 															size="icon"
 															variant="ghost"
 															aria-label={`Save title for ${member.name}`}
-															onClick={() => commitEdit(member.id)}
+															onClick={() => handleCommitEdit(member.id)}
+															disabled={saveDisabled}
+															aria-disabled={saveDisabled}
 														>
 															<Check className="h-4 w-4" aria-hidden="true" />
 														</Button>
@@ -201,7 +214,7 @@ export function MemberList({
 															size="icon"
 															variant="ghost"
 															aria-label={`Cancel title edit for ${member.name}`}
-															onClick={cancelEdit}
+															onClick={handleCancelEdit}
 														>
 															<XIcon className="h-4 w-4" aria-hidden="true" />
 														</Button>
@@ -220,7 +233,10 @@ export function MemberList({
 																	variant="ghost"
 																	aria-label={`Edit title for ${member.name}`}
 																	onClick={() =>
-																		startEdit(member.id, member.title ?? '')
+																		handleStartEdit(
+																			member.id,
+																			member.title ?? '',
+																		)
 																	}
 																>
 																	<Pencil
@@ -248,7 +264,7 @@ export function MemberList({
 															<Button
 																variant="ghost"
 																size="sm"
-																className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+																className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100 transition-opacity"
 																aria-label={menuAria}
 															>
 																<MoreHorizontal
@@ -278,11 +294,15 @@ export function MemberList({
 																		key={rk}
 																		className={cn(
 																			'cursor-pointer',
-																			isCurrent && 'opacity-60',
+																			isCurrent &&
+																				'opacity-60 cursor-not-allowed',
 																		)}
-																		onClick={() =>
+																		disabled={isCurrent}
+																		aria-disabled={isCurrent}
+																		onClick={() => {
+																			if (isCurrent) return
 																			onChangeRole?.(member.id, rk)
-																		}
+																		}}
 																		aria-label={`Set role ${meta.label} for ${member.name}`}
 																	>
 																		<Badge

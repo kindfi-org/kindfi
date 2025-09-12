@@ -1,10 +1,10 @@
+import type { Enums } from '@services/supabase'
 import { Badge } from '~/components/base/badge'
-import type { PendingInvitation } from '~/lib/types/project/team-members.types'
 import { cn } from '~/lib/utils'
 import { memberRole } from '~/lib/utils/member-role'
 
-export function RoleBadge({ role }: { role: PendingInvitation['role'] }) {
-	const meta = memberRole[role]
+export function RoleBadge({ role }: { role: Enums<'project_member_role'> }) {
+	const meta = memberRole[role] ?? memberRole.others
 	const Icon = meta.icon
 	return (
 		<Badge
@@ -14,7 +14,7 @@ export function RoleBadge({ role }: { role: PendingInvitation['role'] }) {
 				meta.badgeClass,
 			)}
 		>
-			<Icon className={cn('h-3.5 w-3.5', meta.iconClass)} />
+			<Icon aria-hidden className={cn('h-3.5 w-3.5', meta.iconClass)} />
 			{meta.label}
 		</Badge>
 	)
