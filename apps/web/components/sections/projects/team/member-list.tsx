@@ -41,8 +41,9 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/base/table'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { ProjectMember } from '~/lib/types/project/team-members.types'
-import { cn } from '~/lib/utils'
+import { cn, getAvatarFallback } from '~/lib/utils'
 import { memberRole } from '~/lib/utils/member-role'
 import { MobileMemberList } from './mobile-member-list'
 import { RoleBadge } from './role-badge'
@@ -144,14 +145,11 @@ export function MemberList({
 												<div className="flex items-center gap-3">
 													<Avatar className="h-8 w-8">
 														<AvatarImage
-															src={member.avatar || '/images/placeholder.png'}
+															src={member.avatar || PLACEHOLDER_IMG}
 															alt={member.name}
 														/>
 														<AvatarFallback>
-															{member.name
-																.split(' ')
-																.map((n) => n[0])
-																.join('')}
+															{getAvatarFallback(member.name)}
 														</AvatarFallback>
 													</Avatar>
 													<div>

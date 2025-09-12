@@ -27,8 +27,9 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/base/dropdown-menu'
 import { Input } from '~/components/base/input'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { ProjectMember } from '~/lib/types/project/team-members.types'
-import { cn } from '~/lib/utils'
+import { cn, getAvatarFallback } from '~/lib/utils'
 import { memberRole } from '~/lib/utils/member-role'
 import { RoleBadge } from './role-badge'
 
@@ -92,14 +93,11 @@ export function MobileMemberList({
 										<div className="flex items-center gap-3 flex-1">
 											<Avatar className="h-10 w-10">
 												<AvatarImage
-													src={member.avatar || '/images/placeholder.png'}
+													src={member.avatar || PLACEHOLDER_IMG}
 													alt={member.name}
 												/>
 												<AvatarFallback>
-													{member.name
-														.split(' ')
-														.map((n) => n[0])
-														.join('')}
+													{getAvatarFallback(member.name)}
 												</AvatarFallback>
 											</Avatar>
 											<div className="flex-1 min-w-0">
