@@ -3,7 +3,6 @@
 import { Send, Server, User, Wifi, WifiOff } from 'lucide-react'
 import type { KeyboardEvent } from 'react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useLocation, useNavigation } from 'react-router-dom'
 import { Avatar, AvatarFallback } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'

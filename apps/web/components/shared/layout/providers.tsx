@@ -1,11 +1,7 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
-import {
-	development,
-	mainNet,
-	TrustlessWorkConfig,
-} from '@trustless-work/escrow'
+import { development, TrustlessWorkConfig } from '@trustless-work/escrow'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
