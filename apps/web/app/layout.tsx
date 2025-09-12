@@ -6,9 +6,7 @@ import { Header } from '~/components/shared/layout/header/header'
 import { Providers } from '~/components/shared/layout/providers'
 import './css/globals.css'
 import type { AppEnvInterface } from '@packages/lib/types'
-import * as Sentry from "@sentry/nextjs";
-
-
+import * as Sentry from '@sentry/nextjs'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
@@ -28,7 +26,7 @@ export const metadata = {
 		type: 'website',
 	},
 	other: {
-		...Sentry.getTraceData()
+		...Sentry.getTraceData(),
 	},
 }
 

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import type { ILogger, LoggerData } from './types/logger.types'
 
 type LogLevel = LoggerData['LogLevel']
@@ -34,6 +35,19 @@ export class Logger implements ILogger {
 			}
 			const jsonData = JSON.stringify(logData, null, 2)
 			logMethod(prefix, eventType, '\n', jsonData)
+
+			// Send to Sentry in production for errors
+			if (level === 'error' && process.env.NODE_ENV === 'production') {
+				Sentry.captureException(new Error(eventType), {
+					extra: {
+						...rest,
+						timestamp,
+					},
+					tags: {
+						source: 'Logger',
+					},
+				})
+			}
 		} catch (error) {
 			console.error(`Error stringifying log data: ${error}`)
 			logMethod(
@@ -42,6 +56,18 @@ export class Logger implements ILogger {
 				'\n',
 				'Error: Unable to stringify log data',
 			)
+
+			// Also report the logging error to Sentry
+			if (process.env.NODE_ENV === 'production') {
+				Sentry.captureException(error, {
+					extra: {
+						originalEventType: data.eventType,
+					},
+					tags: {
+						source: 'LoggerError',
+					},
+				})
+			}
 		}
 	}
 

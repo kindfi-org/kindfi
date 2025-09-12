@@ -1,6 +1,7 @@
 'use client'
+import * as Sentry from '@sentry/nextjs'
 import { AlertCircle } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { FallbackProps } from 'react-error-boundary'
 import { Button } from '~/components/base/button'
 
@@ -8,6 +9,7 @@ interface ErrorFallbackProps extends FallbackProps {
 	title?: string
 	message?: string
 	actionText?: string
+	reportToSentry?: boolean
 }
 
 export function ErrorFallback({
@@ -16,8 +18,21 @@ export function ErrorFallback({
 	title = 'An error occurred',
 	message = 'Please try again or contact support if the problem persists.',
 	actionText = 'Try Again',
+	reportToSentry = true,
 }: ErrorFallbackProps) {
 	const [isLoading, setIsLoading] = useState(false)
+
+	// Report error to Sentry when component mounts
+	useEffect(() => {
+		if (reportToSentry && process.env.NODE_ENV === 'production') {
+			Sentry.captureException(error, {
+				tags: {
+					component: 'ErrorFallback',
+					error_boundary: 'react-error-boundary',
+				},
+			})
+		}
+	}, [error, reportToSentry])
 
 	const handleReset = useCallback(() => {
 		setIsLoading(true)
