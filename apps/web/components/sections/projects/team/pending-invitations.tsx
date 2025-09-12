@@ -30,7 +30,7 @@ import {
 } from '~/components/base/table'
 import type { PendingInvitation } from '~/lib/types/project/team-members.types'
 import { cn } from '~/lib/utils'
-import { memberRole } from '~/lib/utils/member-role'
+import { RoleBadge } from './role-badge'
 
 interface PendingInvitationsProps {
 	invitations: PendingInvitation[]
@@ -90,6 +90,10 @@ export function PendingInvitations({
 							<AnimatePresence>
 								{invitations.map((invitation, index) => {
 									const isExpired = isAfter(new Date(), invitation.expiresAt)
+									const menuAria = `Open actions menu for ${invitation.email}`
+									const resendAria = `Resend invitation to ${invitation.email}`
+									const cancelAria = `Cancel invitation for ${invitation.email}`
+
 									return (
 										<motion.tr
 											key={invitation.id}
@@ -140,9 +144,13 @@ export function PendingInvitations({
 														<Button
 															variant="ghost"
 															size="sm"
+															aria-label={menuAria}
 															className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
 														>
-															<MoreHorizontal className="h-4 w-4" />
+															<MoreHorizontal
+																className="h-4 w-4"
+																aria-hidden="true"
+															/>
 														</Button>
 													</DropdownMenuTrigger>
 													<DropdownMenuContent className="bg-white" align="end">
@@ -150,16 +158,21 @@ export function PendingInvitations({
 															className="cursor-pointer"
 															onClick={() => onResend?.(invitation.id)}
 															disabled={isExpired}
+															aria-label={resendAria}
 														>
-															<RefreshCw className="mr-2 h-4 w-4" />
+															<RefreshCw
+																className="mr-2 h-4 w-4"
+																aria-hidden="true"
+															/>
 															Resend
 														</DropdownMenuItem>
 														<DropdownMenuSeparator />
 														<DropdownMenuItem
 															className="text-destructive cursor-pointer"
 															onClick={() => onCancel?.(invitation.id)}
+															aria-label={cancelAria}
 														>
-															<X className="mr-2 h-4 w-4" />
+															<X className="mr-2 h-4 w-4" aria-hidden="true" />
 															Cancel
 														</DropdownMenuItem>
 													</DropdownMenuContent>
@@ -188,6 +201,10 @@ export function PendingInvitations({
 				<AnimatePresence>
 					{invitations.map((invitation, index) => {
 						const isExpired = isAfter(new Date(), invitation.expiresAt)
+						const menuAria = `Open actions menu for ${invitation.email}`
+						const resendAria = `Resend invitation to ${invitation.email}`
+						const cancelAria = `Cancel invitation for ${invitation.email}`
+
 						return (
 							<motion.div
 								key={invitation.id}
@@ -232,25 +249,35 @@ export function PendingInvitations({
 													<Button
 														variant="ghost"
 														size="sm"
+														aria-label={menuAria}
 														className="h-8 w-8 p-0"
 													>
-														<MoreHorizontal className="h-4 w-4" />
+														<MoreHorizontal
+															className="h-4 w-4"
+															aria-hidden="true"
+														/>
 													</Button>
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="end">
 													<DropdownMenuItem
+														className="cursor-pointer"
 														onClick={() => onResend?.(invitation.id)}
 														disabled={isExpired}
+														aria-label={resendAria}
 													>
-														<RefreshCw className="mr-2 h-4 w-4" />
+														<RefreshCw
+															className="mr-2 h-4 w-4"
+															aria-hidden="true"
+														/>
 														Resend Invitation
 													</DropdownMenuItem>
 													<DropdownMenuSeparator />
 													<DropdownMenuItem
-														className="text-destructive"
+														className="text-destructive cursor-pointer"
 														onClick={() => onCancel?.(invitation.id)}
+														aria-label={cancelAria}
 													>
-														<X className="mr-2 h-4 w-4" />
+														<X className="mr-2 h-4 w-4" aria-hidden="true" />
 														Cancel Invitation
 													</DropdownMenuItem>
 												</DropdownMenuContent>
@@ -264,22 +291,5 @@ export function PendingInvitations({
 				</AnimatePresence>
 			</div>
 		</div>
-	)
-}
-
-function RoleBadge({ role }: { role: PendingInvitation['role'] }) {
-	const meta = memberRole[role]
-	const Icon = meta.icon
-	return (
-		<Badge
-			variant="secondary"
-			className={cn(
-				'inline-flex items-center gap-1.5 px-2.5 py-1 leading-none',
-				meta.badgeClass,
-			)}
-		>
-			<Icon className={cn('h-3.5 w-3.5', meta.iconClass)} />
-			{meta.label}
-		</Badge>
 	)
 }

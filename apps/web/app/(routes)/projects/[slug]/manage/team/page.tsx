@@ -1,24 +1,69 @@
 'use client'
 
+import type { Enums } from '@services/supabase'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { BreadcrumbContainer } from '~/components/sections/projects/shared'
 import { InviteMemberForm } from '~/components/sections/projects/team/invite-member-form'
+import { MemberList } from '~/components/sections/projects/team/member-list'
 import { PendingInvitations } from '~/components/sections/projects/team/pending-invitations'
 import {
 	InviteMemberFormSkeleton,
+	MemberListSkeleton,
 	PendingInvitationsSkeleton,
 } from '~/components/sections/projects/team/skeletons'
 import type {
 	InviteMemberData,
 	PendingInvitation,
+	ProjectMember,
 } from '~/lib/types/project/team-members.types'
+
+// Mock data - replace with actual API calls
+const mockMembers: ProjectMember[] = [
+	{
+		id: '1',
+		userId: 'user-1',
+		projectId: 'project-1',
+		email: 'sarah.johnson@example.com',
+		name: 'Sarah Johnson',
+		avatar: '/images/sarah-johnson.webp',
+		role: 'admin',
+		title: 'Project Lead',
+		joinedAt: new Date('2024-01-15'),
+		isOwner: true,
+	},
+	{
+		id: '2',
+		userId: 'user-2',
+		projectId: 'project-1',
+		email: 'michael.chen@example.com',
+		name: 'Michael Chen',
+		avatar: '/images/michael-chen.webp',
+		role: 'editor',
+		title: 'Software Engineer',
+		joinedAt: new Date('2024-02-01'),
+		isOwner: false,
+	},
+	{
+		id: '3',
+		userId: 'user-3',
+		projectId: 'project-1',
+		email: 'david.rodriguez@example.com',
+		name: 'David Rodriguez',
+		avatar: '/images/david-rodriguez.webp',
+		role: 'advisor',
+		title: 'UX Designer',
+		joinedAt: new Date('2024-02-10'),
+		isOwner: false,
+	},
+]
 
 export default function ProjectMembersPage() {
 	const [isLoading, setIsLoading] = useState(false)
 	const [pendingInvitations, setPendingInvitations] = useState<
 		PendingInvitation[]
 	>([])
+	const [members, setMembers] = useState<ProjectMember[]>(mockMembers)
 
 	const handleInviteMember = async (data: InviteMemberData) => {
 		setIsLoading(true)
@@ -58,7 +103,7 @@ export default function ProjectMembersPage() {
 				success: `Invitation sent to ${data.email}`,
 				error: 'Failed to send invitation. Please try again.',
 			})
-			// If your API returns final data, you could reconcile here (e.g. real id)
+			// If your API returns final data, reconcile here (e.g., real id)
 		} catch {
 			// Rollback if it fails
 			setPendingInvitations((prev) =>
@@ -78,14 +123,14 @@ export default function ProjectMembersPage() {
 				error: 'Failed to resend invitation. Please try again.',
 			})
 		} catch {
-			/* no-op, toast already shows error */
+			/* toast.promise already handled error */
 		}
 	}
 
 	const handleCancelInvitation = async (invitationId: string) => {
 		console.log(invitationId)
-		// Optimistic: remove first, rollback if it fails
 		const snapshot = pendingInvitations
+		// optimistic remove
 		setPendingInvitations((prev) =>
 			prev.filter((inv) => inv.id !== invitationId),
 		)
@@ -96,8 +141,47 @@ export default function ProjectMembersPage() {
 				error: 'Failed to cancel invitation. Please try again.',
 			})
 		} catch {
-			// Rollback
+			// rollback
 			setPendingInvitations(snapshot)
+		}
+	}
+
+	const handleRemoveMember = async (memberId: string) => {
+		// optimistic remove
+		const snapshot = members
+		setMembers((prev) => prev.filter((m) => m.id !== memberId))
+
+		try {
+			await toast.promise(new Promise((r) => setTimeout(r, 500)), {
+				loading: 'Removing member…',
+				success: 'Member removed from the project.',
+				error: 'Failed to remove member. Please try again.',
+			})
+		} catch {
+			// rollback
+			setMembers(snapshot)
+		}
+	}
+
+	const handleChangeRole = async (
+		memberId: string,
+		role: Enums<'project_member_role'>,
+	) => {
+		// optimistic update
+		const snapshot = members
+		setMembers((prev) =>
+			prev.map((m) => (m.id === memberId ? { ...m, role } : m)),
+		)
+
+		try {
+			await toast.promise(new Promise((r) => setTimeout(r, 500)), {
+				loading: 'Updating role…',
+				success: 'Member role has been updated.',
+				error: 'Failed to update role. Please try again.',
+			})
+		} catch {
+			// rollback
+			setMembers(snapshot)
 		}
 	}
 
@@ -140,6 +224,18 @@ export default function ProjectMembersPage() {
 						invitations={pendingInvitations}
 						onResend={handleResendInvitation}
 						onCancel={handleCancelInvitation}
+					/>
+				)}
+
+				{/* Active Members List */}
+				{isLoading ? (
+					<MemberListSkeleton />
+				) : (
+					<MemberList
+						members={members}
+						currentUserId="user-1" // This would come from auth context
+						onRemoveMember={handleRemoveMember}
+						onChangeRole={handleChangeRole}
 					/>
 				)}
 			</div>
