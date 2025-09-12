@@ -48,7 +48,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				console.log('🔒 Supabase Session check result:', supabaseSession)
 				setSupabaseUser(supabaseSession?.user)
 			} catch (error) {
-				console.error('Auth check failed:', error)
+
+				logger.error({
+					eventType: 'Auth check failed',
+					error: error instanceof Error ? error.message : 'Unknown error',
+					details: error,
+				})
 				setSupabaseUser(undefined)
 			} finally {
 				setIsSupabaseUserLoading(false)

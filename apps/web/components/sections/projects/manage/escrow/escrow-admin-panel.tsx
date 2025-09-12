@@ -20,6 +20,7 @@ import {
 } from '~/components/base/tooltip'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { logger } from '~/lib'
 
 export function EscrowAdminPanel({
 	projectId,
@@ -186,7 +187,11 @@ export function EscrowAdminPanel({
 				'Escrow initialized. Sign and broadcast next steps in flow.',
 			)
 		} catch (e) {
-			console.error(e)
+			logger.error({
+				eventType: 'Error Initializing escrow',
+				error: e instanceof Error ? e.message : 'Unknown error',
+				details: e,
+			})
 			toast.error('Failed to create escrow')
 		}
 	}
@@ -210,7 +215,11 @@ export function EscrowAdminPanel({
 				'Milestone approved (unsigned tx). Continue to sign & submit.',
 			)
 		} catch (e) {
-			console.error(e)
+			logger.error({
+				eventType: 'Error approving milestone',
+				error: e instanceof Error ? e.message : 'Unknown error',
+				details: e,
+			})
 			toast.error('Failed to approve milestone')
 		}
 	}
@@ -235,7 +244,11 @@ export function EscrowAdminPanel({
 				'Milestone status updated (unsigned tx). Continue to sign & submit.',
 			)
 		} catch (e) {
-			console.error(e)
+			logger.error({
+				eventType: 'Error updating milestone status',
+				error: e instanceof Error ? e.message : 'Unknown error',
+				details: e,
+			})
 			toast.error('Failed to update milestone status')
 		}
 	}

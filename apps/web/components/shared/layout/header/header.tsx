@@ -118,7 +118,11 @@ const UserMenu = ({ user }: { user: User }) => {
 			toast('Address copied successfully!')
 			setTimeout(() => setAddressCopied(false), 2000)
 		} catch (error) {
-			console.error('Failed to copy address:', error)
+			logger.error({
+				eventType: 'Error stringifying log data',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 		}
 	}
 

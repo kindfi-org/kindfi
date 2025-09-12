@@ -21,6 +21,7 @@ import {
 import { Input } from '~/components/base/input'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { logger } from '~/lib'
 import { progressBarAnimation } from '~/lib/constants/animations'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
@@ -101,7 +102,11 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			const first = balances?.[0]
 			if (first) setOnChainRaised(first.balance)
 		} catch (error) {
-			console.error('Failed to fetch escrow balance', error)
+			logger.error({
+				eventType: 'Failed to fetch escrow balance',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 		} finally {
 			setIsFetchingBalance(false)
 		}

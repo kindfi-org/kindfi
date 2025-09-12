@@ -10,6 +10,7 @@ import {
 	xdr,
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
+import { logger } from '~/lib'
 import { generateStellarAddress } from '~/lib/passkey/deploy'
 
 export async function handleDeploy(serializedData: string): Promise<string> {
@@ -116,7 +117,11 @@ export async function handleDeploy(serializedData: string): Promise<string> {
 
 		throw txResp
 	} catch (error) {
-		console.error('Error during deploy the new address in stellar:', error)
+		logger.error({
+					eventType: 'Error during deploy the new address in stellar',
+					error: error instanceof Error ? error.message : 'Unknown error',
+					details: error,
+				})
 		console.info(
 			'Return unapproved deployee address for future deployment:',
 			deployee,

@@ -99,7 +99,11 @@ export function PasskeyRegistrationComponent() {
 				})
 				router.push('/dashboard')
 			} catch (e) {
-				console.error('Finalize passkey registration error', e)
+									logger.error({
+						eventType: 'Finalize passkey registration error',
+						error: e instanceof Error ? e.message : 'Unknown error',
+						details: e,
+					})
 				router.push('/sign-in')
 			}
 		}

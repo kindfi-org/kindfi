@@ -49,10 +49,10 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			const userData = profileData[0]
 
 			if (!userData) {
-				console.error(
-					'NextAuth mapped profile not found for userId:',
-					credentials.userId,
-				)
+				logger.error({
+					eventType: 'NextAuth mapped profile not found for userId',
+					details: credentials.userId,
+				})
 				throw new Error('NextAuth user not found')
 			}
 
@@ -84,10 +84,9 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			const deviceInfo = deviceData[0]
 
 			if (!deviceInfo) {
-				console.error(
-					'Error fetching device data for credentialId:',
-					credentials.credentialId,
-				)
+				logger.error({
+			eventType: 'Error fetching device data for credentialId',
+		})
 				throw new Error('Device not found or credentials mismatch')
 			}
 
@@ -112,7 +111,11 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 				},
 			}
 		} catch (error) {
-			console.error('Database error during authorization:', error)
+logger.error({
+			eventType: 'Database error during authorization',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
+		})
 			throw new Error('Authentication failed')
 		}
 	},

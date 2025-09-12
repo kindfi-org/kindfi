@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs'
 import type { ILogger, LoggerData } from './types/logger.types'
+import { logger } from '.'
 
 type LogLevel = LoggerData['LogLevel']
 type LogData = LoggerData['LogData']
@@ -49,7 +50,11 @@ export class Logger implements ILogger {
 				})
 			}
 		} catch (error) {
-			console.error(`Error stringifying log data: ${error}`)
+			logger.error({
+				eventType: 'Error stringifying log data',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				details: error,
+			})
 			logMethod(
 				prefix,
 				data.eventType,
