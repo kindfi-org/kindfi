@@ -77,12 +77,12 @@ export function KindfiSupabaseAdapter(): Adapter {
 				}
 				// Create corresponding profile in public schema
 				const { error: profileError } = await supabase.from('profiles').insert({
-					// @ts-expect-error asking for full object, for now it is OK to ignore until more tests are done.
+					id: createdUser.id,
 					next_auth_user_id: createdUser.id,
 					email: createdUser.email,
 					display_name: createdUser.name || null,
 					image_url: createdUser.image || null,
-					role: 'USER', // Default role
+					role: 'kinder', // Default role
 					created_at: new Date().toISOString(),
 					updated_at: new Date().toISOString(),
 				})

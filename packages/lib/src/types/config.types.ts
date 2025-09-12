@@ -47,7 +47,9 @@ export interface AppEnvInterface {
 		networkUrl: string
 		networkPassphrase: string
 		factoryContractId: string
+		controllerContractId: string
 		accountSecp256r1ContractWasm: string
+		fundingAccount: string
 		rpcUrl: string
 		horizonUrl: string
 	}

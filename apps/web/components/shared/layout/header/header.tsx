@@ -1,10 +1,18 @@
 'use client'
 
-import type { User } from '@supabase/supabase-js'
-import { LogOut, Menu, Settings, User as UserIcon } from 'lucide-react'
+import {
+	ClipboardCheckIcon,
+	ClipboardCopyIcon,
+	LogOut,
+	Menu,
+	Settings,
+	User as UserIcon,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import type { User } from 'next-auth'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { signOutAction } from '~/app/actions/auth'
 import { Avatar, AvatarFallback } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
@@ -85,8 +93,9 @@ export const Header = () => {
 
 const UserMenu = ({ user }: { user: User }) => {
 	const router = useRouter()
+	const [addressCopied, setAddressCopied] = useState(false)
 
-	const _handleSignOutAction = async () => {
+	const handleSignOutAction = async () => {
 		try {
 			await signOutAction()
 			router.push('/')
@@ -97,6 +106,19 @@ const UserMenu = ({ user }: { user: User }) => {
 				details: error,
 			})
 			// Optionally, show a user-friendly message here
+		}
+	}
+
+	const copyAddress = async () => {
+		if (!user.device?.address) return
+
+		try {
+			await navigator.clipboard.writeText(user.device.address)
+			setAddressCopied(true)
+			toast('Address copied successfully!')
+			setTimeout(() => setAddressCopied(false), 2000)
+		} catch (error) {
+			console.error('Failed to copy address:', error)
 		}
 	}
 
@@ -125,9 +147,28 @@ const UserMenu = ({ user }: { user: User }) => {
 				<DropdownMenuLabel className="font-normal">
 					<div className="flex flex-col space-y-1">
 						<p className="text-sm font-medium">{user.email}</p>
-						<p className="text-xs text-muted-foreground">Account</p>
+						<p className="text-xs text-muted-foreground">{user.name}</p>
 					</div>
 				</DropdownMenuLabel>
+				{user.device?.address && (
+					<DropdownMenuLabel asChild>
+						<Button
+							onClick={copyAddress}
+							className="flex w-full justify-between"
+						>
+							<span className="text-sm font-medium text-muted-foreground">
+								{user.device.address.substring(0, 6)}
+								{'...'}
+								{user.device.address.substring(user.device.address.length - 6)}
+							</span>
+							{addressCopied ? (
+								<ClipboardCheckIcon className="size-4" />
+							) : (
+								<ClipboardCopyIcon className="size-4" />
+							)}
+						</Button>
+					</DropdownMenuLabel>
+				)}
 				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
 					<Link href="/protected" className="cursor-pointer">
@@ -137,7 +178,7 @@ const UserMenu = ({ user }: { user: User }) => {
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem>
-					<form action={signOutAction} className="w-full">
+					<form action={handleSignOutAction} className="w-full">
 						<button type="submit" className="flex w-full items-center">
 							<LogOut className="mr-2 h-4 w-4" />
 							Close session
@@ -192,7 +233,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 			<div className="flex items-center space-x-4">
 				<Avatar className="h-8 w-8">
 					<AvatarFallback suppressHydrationWarning>
-						{getAvatarFallback(user.email)}
+						{getAvatarFallback(user.email || '')}
 					</AvatarFallback>
 				</Avatar>
 				<div className="space-y-1">

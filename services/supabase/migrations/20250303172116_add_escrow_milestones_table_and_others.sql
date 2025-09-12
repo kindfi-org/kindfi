@@ -5,14 +5,14 @@ CREATE TYPE milestone_status AS ENUM ('pending',
 'disputed');
 
 CREATE TABLE project_milestones (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     project_id UUID NOT NULL REFERENCES projects(id),
     milestone_id UUID NOT NULL,
     UNIQUE (project_id, milestone_id)
 );
 
 CREATE TABLE escrow_milestones (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     escrow_id UUID NOT NULL REFERENCES escrow_contracts(id),
     project_milestone_id UUID NOT NULL,
     title TEXT NOT NULL,

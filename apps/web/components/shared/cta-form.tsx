@@ -1,11 +1,10 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowRight, Loader2, Rocket } from 'lucide-react'
+import { Rocket } from 'lucide-react'
 import { useState } from 'react'
 import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 import { Button } from '../base/button'
-import { Input } from '../base/input'
 
 interface CtaFormProps {
 	onSubmit: (data: { name: string; project: string }) => void
@@ -13,12 +12,12 @@ interface CtaFormProps {
 }
 
 export const CTAForm = ({ onSubmit, className = '' }: CtaFormProps) => {
-	const [formData, setFormData] = useState({ name: '', project: '' })
-	const [isLoading, setIsLoading] = useState(false)
-	const [isFocused, setIsFocused] = useState({ name: false, project: false })
+	const [formData, _setFormData] = useState({ name: '', project: '' })
+	const [_isLoading, setIsLoading] = useState(false)
+	const [_isFocused, _setIsFocused] = useState({ name: false, project: false })
 	const [waitlistOpen, setWaitlistOpen] = useState(false)
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const _handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setIsLoading(true)
 

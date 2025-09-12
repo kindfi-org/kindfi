@@ -1,7 +1,7 @@
 
 
 CREATE TABLE IF NOT EXISTS contributions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     project_id UUID NOT NULL REFERENCES projects(id),
     contributor_id UUID NOT NULL,
     amount NUMERIC(20,7) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS contributions (
 );
 
 CREATE TABLE IF NOT EXISTS escrow_contracts (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     engagement_id TEXT UNIQUE NOT NULL,
     contract_id TEXT UNIQUE NOT NULL,
     project_id UUID NOT NULL REFERENCES projects(id),

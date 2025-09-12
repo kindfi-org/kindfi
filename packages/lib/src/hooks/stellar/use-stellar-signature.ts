@@ -68,7 +68,6 @@ export const useStellarSignature = (
 					`${kycBaseUrl}/api/passkey/generate-authentication-options`,
 					{
 						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({
 							identifier: session.user.email,
 							userId: session.user.id,
@@ -92,7 +91,6 @@ export const useStellarSignature = (
 					`${kycBaseUrl}/api/stellar/execute-transaction`,
 					{
 						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({
 							contractId,
 							operation,
@@ -155,21 +153,26 @@ export const useStellarSignature = (
 
 		try {
 			console.log('🌟 Creating Stellar account for user:', session.user.id)
+			const userData = session.user
+
+			if (!userData) {
+				throw new Error('User session not found. Please login first.')
+			}
 
 			const response = await fetch(
 				`${kycBaseUrl}/api/stellar/create-passkey-account`,
 				{
 					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						credentialId: session.device.credential_id,
-						publicKey: session.device.public_key,
-						userId: session.user.id,
+						credentialId: userData.device?.credential_id,
+						publicKey: userData.device?.public_key,
+						userId: userData.id,
 					}),
 				},
 			)
 
 			if (!response.ok) {
+				console.error('response data', response)
 				throw new Error('Failed to create Stellar account')
 			}
 
@@ -188,7 +191,7 @@ export const useStellarSignature = (
 
 			setError(error.message)
 			options.onError?.(error)
-			toast.error(`Account creation failed: ${error.message}`)
+			// toast.error(`Account creation failed: ${error.message}`)
 
 			throw error
 		} finally {
@@ -207,10 +210,6 @@ export const useStellarSignature = (
 			try {
 				const response = await fetch(
 					`${kycBaseUrl}/api/stellar/account-info?contractId=${encodeURIComponent(contractId)}`,
-					{
-						method: 'GET',
-						headers: { 'Content-Type': 'application/json' },
-					},
 				)
 
 				if (!response.ok) {
@@ -249,7 +248,6 @@ export const useStellarSignature = (
 					`${kycBaseUrl}/api/stellar/verify-signature`,
 					{
 						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({
 							contractId,
 							signature,

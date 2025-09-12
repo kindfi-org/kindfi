@@ -16,7 +16,7 @@ export type CorsOptions = {
 
 // Default CORS configuration
 const defaultCorsOptions: CorsOptions = {
-	allowedOrigins: '*',
+	allowedOrigins: '*', // Fallback to wildcard for development
 	allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 	allowedHeaders: ['Content-Type', 'Authorization'],
 	maxAge: 86400, // 24 hours
@@ -29,7 +29,7 @@ const isOriginAllowed = (
 	origin: string | null,
 	allowedOrigins: string[] | '*',
 ): boolean => {
-	// If no origin header (direct navigation), allow it (for now)
+	// If no origin header (direct navigation), allow it
 	if (!origin) return true
 	if (allowedOrigins === '*') return true
 
@@ -41,6 +41,13 @@ const isOriginAllowed = (
 		if (allowedOrigin.startsWith('*.')) {
 			const domain = allowedOrigin.substring(2)
 			return origin.endsWith(domain) && origin.includes('.')
+		}
+
+		// Handle localhost with different ports for development
+		if (allowedOrigin.includes('localhost') || origin.includes('localhost')) {
+			const originUrl = new URL(origin)
+			const allowedUrl = new URL(allowedOrigin)
+			return originUrl.hostname === allowedUrl.hostname
 		}
 
 		return false
@@ -62,22 +69,26 @@ export const withCORS = (
 
 	return async (req: Request) => {
 		const origin = req.headers.get('origin')
-		const allowOrigin = isOriginAllowed(origin, corsOptions.allowedOrigins)
+		const isAllowed = isOriginAllowed(origin, corsOptions.allowedOrigins)
+
+		// Set appropriate Access-Control-Allow-Origin header
+		const allowOriginHeader = isAllowed
 			? origin || '*'
 			: corsOptions.allowedOrigins === '*'
 				? '*'
 				: null
 
-		// If origin is not allowed, return 403 Forbidden
-		if (!allowOrigin) {
+		// If origin is not allowed and we're not using wildcard, return 403
+		if (!allowOriginHeader && corsOptions.allowedOrigins !== '*') {
 			return new Response('CORS origin not allowed', { status: 403 })
 		}
 
 		// Handle preflight requests
 		if (req.method === 'OPTIONS') {
 			return new Response(null, {
+				status: 200,
 				headers: {
-					'Access-Control-Allow-Origin': allowOrigin,
+					'Access-Control-Allow-Origin': allowOriginHeader || '*',
 					'Access-Control-Allow-Methods':
 						corsOptions.allowedMethods?.join(', ') || '',
 					'Access-Control-Allow-Headers':
@@ -92,7 +103,7 @@ export const withCORS = (
 
 		// Add CORS headers to the response
 		const headers = new Headers(response.headers)
-		headers.set('Access-Control-Allow-Origin', allowOrigin)
+		headers.set('Access-Control-Allow-Origin', allowOriginHeader || '*')
 		headers.set(
 			'Access-Control-Allow-Methods',
 			corsOptions.allowedMethods?.join(', ') || '',
@@ -101,6 +112,7 @@ export const withCORS = (
 			'Access-Control-Allow-Headers',
 			corsOptions.allowedHeaders?.join(', ') || '',
 		)
+		headers.set('Access-Control-Allow-Credentials', 'true')
 
 		return new Response(response.body, {
 			status: response.status,

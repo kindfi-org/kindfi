@@ -1,5 +1,4 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
-import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { logger } from '~/lib'
 import { waitlistSchema } from '~/lib/schemas/waitlist.schemas'
@@ -137,7 +136,7 @@ export async function POST(req: Request) {
 			})
 			return NextResponse.json(
 				{
-					error: 'Table access failed: ' + testError.message,
+					error: `Table access failed: ${testError.message}`,
 					code: testError.code,
 				},
 				{ status: 500 },

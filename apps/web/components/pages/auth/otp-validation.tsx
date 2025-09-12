@@ -9,7 +9,7 @@ import {
 	Shield,
 } from 'lucide-react'
 import { redirect, useRouter, useSearchParams } from 'next/navigation'
-import { type SetStateAction, useEffect, useState } from 'react'
+import { type SetStateAction, useEffect, useId, useState } from 'react'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -67,6 +67,13 @@ export function VerifyOTPComponent() {
 		if (error) setError('')
 	}
 
+	// dynamic ids for a11y (avoid static lint warnings)
+	const labelId = useId()
+	const legendId = useId()
+	const instructionsId = useId()
+	const errorId = useId()
+	const successId = useId()
+
 	const handleVerify = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		if (otp.length !== 6) return
@@ -86,11 +93,32 @@ export function VerifyOTPComponent() {
 			}
 
 			if (data.user) {
+				// Ensure profile skeleton exists immediately after successful verification.
+				// The trigger migration should already have inserted next_auth.users row.
+				try {
+					const { error: profileInsertError } = await supabase
+						.from('profiles')
+						.insert({
+							id: data.user.id,
+							next_auth_user_id: data.user.id,
+							display_name: (data.user.email || '').split('@')[0] || null,
+							role: 'kinder',
+							bio: null,
+							image_url: null,
+						})
+					// Ignore conflict or RLS (duplicate) errors silently
+					if (profileInsertError) {
+						console.warn('Profile insert warning:', profileInsertError.message)
+					}
+				} catch (profileErr) {
+					console.warn('Profile insert (non-fatal) error:', profileErr)
+				}
+
 				setIsVerified(true)
 				setSuccess('Verification successful! Redirecting to passkey setup...')
 				setTimeout(() => {
 					router.push('/passkey-registration')
-				}, 2000)
+				}, 1200)
 			}
 		} catch (err) {
 			logger.error({
@@ -159,7 +187,7 @@ export function VerifyOTPComponent() {
 							</div>
 							<CardTitle
 								className="text-center text-2xl font-bold"
-								id="otp-label"
+								id={labelId}
 							>
 								Check Your Email
 							</CardTitle>
@@ -190,7 +218,7 @@ export function VerifyOTPComponent() {
 									<fieldset className="space-y-4">
 										<legend
 											className="text-base text-center font-medium"
-											id="otp-legend"
+											id={legendId}
 										>
 											Verification Code
 										</legend>
@@ -200,13 +228,13 @@ export function VerifyOTPComponent() {
 												value={otp}
 												onChange={handleOtpChange}
 												disabled={isVerifying || isVerified}
-												aria-labelledby="otp-label"
-												aria-describedby="otp-instructions"
+												aria-labelledby={labelId}
+												aria-describedby={instructionsId}
 												aria-invalid={!!error}
-												aria-errormessage={error ? 'otp-error' : undefined}
+												aria-errormessage={error ? errorId : undefined}
 												className="gap-3"
 											>
-												<p id="otp-instructions" className="sr-only">
+												<p id={instructionsId} className="sr-only">
 													Enter the 6-digit code sent to your email or phone.
 													Use the arrow keys to navigate.
 												</p>
@@ -258,7 +286,7 @@ export function VerifyOTPComponent() {
 										{/* Error message */}
 										{error && (
 											<div
-												id="otp-error"
+												id={errorId}
 												className="flex items-center justify-center gap-2 text-sm text-red-500"
 												aria-live="assertive"
 											>
@@ -270,7 +298,7 @@ export function VerifyOTPComponent() {
 										{/* Success message */}
 										{success && (
 											<div
-												id="otp-success"
+												id={successId}
 												className="flex items-center justify-center gap-2 text-sm text-green-500"
 												aria-live="assertive"
 											>

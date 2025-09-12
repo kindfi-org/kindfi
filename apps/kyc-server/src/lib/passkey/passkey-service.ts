@@ -157,11 +157,14 @@ export const verifyRegistration = async ({
 		if (!existingCredential) {
 			/**
 			 * Add the returned credential to the user's list of credentials
+			 *
+			 * NOTE: Address will be set later after Stellar deployment
 			 */
 			const newCredential: WebAuthnCredential = {
 				id: credential.id,
 				address: credential.address,
 				publicKey: credential.publicKey,
+				aaguid: credential.aaguid,
 				counter: credential.counter,
 				transports: registrationResponse.response.transports,
 			}

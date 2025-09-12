@@ -1,17 +1,16 @@
 import { appEnvConfig } from '@packages/lib/config'
-import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { RegistrationResponseJSON } from '@simplewebauthn/browser'
 import { Horizon, Keypair } from '@stellar/stellar-sdk'
-import type { User } from 'next-auth'
-import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
+import { updateDeviceWithDeployee } from '~/app/actions/auth'
+import { handleDeploy } from '~/app/actions/passkey-deploy'
+import { logger } from '~/lib'
 import { Logger } from '~/lib/logger'
-import { handleDeploy } from '~/lib/passkey/deploy'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
 
-const logger = new Logger()
+const _logger = new Logger()
 
 const getStoredDeployee = () => {
 	return localStorage.getItem('sp:deployee')
@@ -54,11 +53,13 @@ export const useStellar = () => {
 	const [loadingSign, setLoadingSign] = useState(false)
 	const [contractData, setContractData] = useState<unknown | null>(null) // TODO:Just for testing, add type
 	const [creatingDeployee, setCreatingDeployee] = useState(false)
-	const { data: session } = useSession()
-	console.log('session', session)
-	const onRegister = async (registerRes: RegistrationResponseJSON) => {
+
+	const onRegister = async (
+		registerRes: RegistrationResponseJSON,
+		userId: string,
+	) => {
 		// Handles registration with Stellar by deploying a contract
-		if (deployee) return
+		if (deployee) return deployee
 		try {
 			setLoadingRegister(true)
 			setStoredCredentialId(registerRes.id)
@@ -66,23 +67,38 @@ export const useStellar = () => {
 				await getPublicKeys(registerRes)
 			if (!bundlerKey.current) throw new Error('Bundler key not found')
 			if (!contractSalt || !publicKey) throw new Error('Invalid public keys')
+
 			setCreatingDeployee(true)
-			const deployee = await handleDeploy(
-				bundlerKey.current,
-				contractSalt,
-				publicKey,
-			)
+
+			// Send raw data, not base64 - the server action will handle Buffer conversion
+			const deployData = {
+				bundlerKey: {
+					publicKey: bundlerKey.current.publicKey(),
+					secretKey: bundlerKey.current.secret(),
+				},
+				contractSalt: Array.from(contractSalt), // Convert Buffer to array for JSON transport
+				publicKey: Array.from(publicKey), // Convert Buffer to array for JSON transport
+			}
+
+			const deployee = await handleDeploy(JSON.stringify(deployData))
 			setStoredDeployee(deployee)
 			setDeployee(deployee)
-
+			console.log('Deployee address:', deployee)
 			// Update device with deployee address and AAGUID
-			if (deployee && aaguid) {
-				await updateDeviceWithDeployee({
+			const { success, message, error } = await updateDeviceWithDeployee(
+				JSON.stringify({
 					deployeeAddress: deployee,
 					aaguid,
 					credentialId: registerRes.id,
-				})
+					userId,
+				}),
+			)
+
+			if (error && !success) {
+				throw new Error(`${error}:::${message}`)
 			}
+
+			return deployee
 		} catch (error) {
 			logger.error({
 				eventType: 'Stellar Registration Error',
@@ -93,106 +109,8 @@ export const useStellar = () => {
 			setLoadingRegister(false)
 			setCreatingDeployee(false)
 		}
+		return ''
 	}
-
-	const updateDeviceWithDeployee = async ({
-		deployeeAddress,
-		aaguid,
-		credentialId,
-	}: {
-		deployeeAddress: string
-		aaguid: string
-		credentialId: string
-	}) => {
-		// Get current user from session or context
-		const userId = (session?.user as User).id
-		try {
-			if (!userId) {
-				throw new Error('User not authenticated')
-			}
-
-			const supabase = createSupabaseBrowserClient()
-			// Validate input parameters
-			if (!userId || !credentialId || !deployeeAddress || !aaguid) {
-				return {
-					success: false,
-					message: 'Missing required parameters',
-					error: 'Invalid input parameters',
-				}
-			}
-
-			// Verify the device exists and belongs to the user
-			const { data: existingDevice, error: deviceError } = await supabase
-				.from('devices')
-				.select('id, user_id, credential_id')
-				.eq('user_id', userId)
-				.eq('credential_id', credentialId)
-				.single()
-
-			if (deviceError || !existingDevice) {
-				return {
-					success: false,
-					message: 'Device not found or does not belong to user',
-					error: 'Device verification failed',
-				}
-			}
-
-			// Update the device with deployee address and AAGUID
-			const { data: updatedDevice, error: updateError } = await supabase
-				.from('devices')
-				.update({
-					address: deployeeAddress,
-					aaguid: aaguid,
-					updated_at: new Date().toISOString(),
-				})
-				.eq('id', existingDevice.id)
-				.select()
-				.single()
-
-			if (updateError) {
-				logger.error({
-					eventType: 'DEVICE_UPDATE_ERROR',
-					error: updateError.message,
-					userId,
-					credentialId,
-				})
-				return {
-					success: false,
-					message: 'Failed to update device information',
-					error: updateError.message,
-				}
-			}
-
-			logger.info({
-				eventType: 'DEVICE_UPDATED',
-				userId,
-				credentialId,
-				deployeeAddress,
-				aaguid,
-			})
-
-			return {
-				success: true,
-				message: 'Device updated successfully',
-				data: updatedDevice,
-			}
-		} catch (error) {
-			logger.error({
-				eventType: 'DEVICE_UPDATE_EXCEPTION',
-				error: error instanceof Error ? error.message : 'Unknown error',
-				userId,
-				credentialId,
-			})
-
-			return {
-				success: false,
-				message: 'An error occurred while updating the device',
-				error: error instanceof Error ? error.message : 'Unknown error',
-			}
-		}
-	}
-
-	console.log('deployee', deployee)
 
 	const prepareSign = async (): Promise<PresignResponse> => {
 		// Prepares data for signing a transaction on the Stellar network

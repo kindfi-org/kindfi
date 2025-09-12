@@ -40,17 +40,21 @@ export function transformEnv(): AppEnvInterface {
 		},
 		stellar: {
 			networkUrl:
-				data.STELLAR_NETWORK_URL || 'https://horizon-testnet.stellar.org',
+				data.STELLAR_NETWORK_URL || 'https://horizon-futurenet.stellar.org',
 			networkPassphrase:
 				data.NETWORK_PASSPHRASE || 'Test SDF Future Network ; October 2022',
 			factoryContractId:
 				data.FACTORY_CONTRACT_ID ||
+				'CCZWIOWKT4WGJQHWZFF7ARCQJFVWRXPOKG4WGY6DOZ72OHZEMKXAEGRO',
+			controllerContractId:
+				data.CONTROLLER_CONTRACT_ID ||
 				'CCZWIOWKT4WGJQHWZFF7ARCQJFVWRXPOKG4WGY6DOZ72OHZEMKXAEGRO',
 			accountSecp256r1ContractWasm:
 				data.ACCOUNT_SECP256R1_CONTRACT_WASM ||
 				'23d8e1fbdb0bb903815feb7d07b675db98b5376feedab056aab61910d41e80c1',
 			rpcUrl: data.RPC_URL || 'https://rpc-futurenet.stellar.org',
 			horizonUrl: data.HORIZON_URL || 'https://horizon-futurenet.stellar.org',
+			fundingAccount: data.STELLAR_FUNDING_SECRET_KEY || 'SB...4756',
 		},
 		externalApis: {
 			trustlessWork: {
@@ -71,7 +75,7 @@ export function transformEnv(): AppEnvInterface {
 			port: Number(data.PORT) || 3000,
 		},
 		kycServer: {
-			allowedOrigins: data.ALLOWED_ORIGINS || '',
+			allowedOrigins: data.ALLOWED_ORIGINS || '*',
 		},
 		indexer: {
 			chainId: data.CHAIN_ID || '',
@@ -81,9 +85,11 @@ export function transformEnv(): AppEnvInterface {
 			redis: {
 				url: data.REDIS_URL || '',
 			},
-			rpId: data.RP_ID || ['localhost'],
-			rpName: data.RP_NAME || ['App'],
-			expectedOrigin: data.EXPECTED_ORIGIN || ['http://localhost:3000'],
+			rpId: JSON.parse(`${data.RP_ID || '["localhost"]'}`),
+			rpName: JSON.parse(`${data.RP_NAME || '["App"]'}`),
+			expectedOrigin: JSON.parse(
+				`${data.EXPECTED_ORIGIN || '["http://localhost:3000"]'}`,
+			),
 			challengeTtlSeconds: data.CHALLENGE_TTL_SECONDS || 60,
 			challengeTtlMs: (data.CHALLENGE_TTL_SECONDS || 60) * 1000,
 		},
@@ -131,7 +137,9 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(
 			networkUrl: z.string(),
 			networkPassphrase: z.string(),
 			factoryContractId: z.string(),
+			controllerContractId: z.string(),
 			accountSecp256r1ContractWasm: z.string(),
+			fundingAccount: z.string(),
 			rpcUrl: z.string(),
 			horizonUrl: z.string(),
 		}),
@@ -361,7 +369,9 @@ export const baseEnvSchema = z.object({
 		.optional(),
 	NETWORK_PASSPHRASE: z.string().optional(),
 	FACTORY_CONTRACT_ID: z.string().optional(),
+	CONTROLLER_CONTRACT_ID: z.string().optional(),
 	ACCOUNT_SECP256R1_CONTRACT_WASM: z.string().optional(),
+	STELLAR_FUNDING_SECRET_KEY: z.string().optional(),
 	RPC_URL: z.string().url('Invalid RPC URL format').optional(),
 	HORIZON_URL: z.string().url('Invalid Horizon URL format').optional(),
 
@@ -401,7 +411,7 @@ export const baseEnvSchema = z.object({
 	RP_ID: z
 		.string()
 		.transform((val) => {
-			if (!val) return ['localhost']
+			if (!val) return '["localhost"]'
 			try {
 				return JSON.parse(val) as string[]
 			} catch {
@@ -412,7 +422,7 @@ export const baseEnvSchema = z.object({
 	RP_NAME: z
 		.string()
 		.transform((val) => {
-			if (!val) return ['App']
+			if (!val) return '["App"]'
 			try {
 				return JSON.parse(val) as string[]
 			} catch {
@@ -423,7 +433,7 @@ export const baseEnvSchema = z.object({
 	EXPECTED_ORIGIN: z
 		.string()
 		.transform((val) => {
-			if (!val) return ['http://localhost:3000']
+			if (!val) return '["http://localhost:3000"]'
 			try {
 				return JSON.parse(val) as string[]
 			} catch {

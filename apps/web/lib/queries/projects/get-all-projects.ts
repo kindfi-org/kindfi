@@ -27,6 +27,9 @@ export async function getAllProjects(
       category:category_id ( * ),
       project_tag_relationships (
         tag:tag_id ( id, name, color )
+      ),
+      project_escrows:project_escrows!left (
+        escrow_id
       )
     `,
 		)
@@ -55,19 +58,33 @@ export async function getAllProjects(
 	if (error) throw error
 
 	return (
-		data?.map((project) => ({
-			id: project.id,
-			title: project.title,
-			slug: project.slug,
-			description: project.description,
-			image: project.image_url,
-			goal: project.target_amount,
-			raised: project.current_amount,
-			investors: project.kinder_count,
-			minInvestment: project.min_investment,
-			createdAt: project.created_at,
-			category: project.category,
-			tags: project.project_tag_relationships.map((r) => r.tag),
-		})) ?? []
+		data?.map((project) => {
+			const escrowRel = (
+				project as unknown as {
+					project_escrows?:
+						| { escrow_id?: string }
+						| Array<{ escrow_id?: string }>
+				}
+			).project_escrows
+			const escrowId = Array.isArray(escrowRel)
+				? escrowRel[0]?.escrow_id
+				: escrowRel?.escrow_id
+
+			return {
+				id: project.id,
+				title: project.title,
+				slug: project.slug,
+				description: project.description,
+				image: project.image_url,
+				goal: project.target_amount,
+				raised: project.current_amount,
+				investors: project.kinder_count,
+				minInvestment: project.min_investment,
+				createdAt: project.created_at,
+				category: project.category,
+				tags: project.project_tag_relationships.map((r) => r.tag),
+				escrowContractAddress: escrowId,
+			}
+		}) ?? []
 	)
 }

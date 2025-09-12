@@ -8,7 +8,8 @@ import { logger } from './lib'
 type ExpectedRequestType = Parameters<typeof updateSession>[0]
 
 // Auth protected path prefixes / exact matches
-const AUTH_PROTECTED_PATHS = ['/create-project', '/dashboard']
+const AUTH_PROTECTED_PATHS = ['/create-project', '/profile']
+// const AUTH_PROTECTED_PATHS: string[] = []
 
 function isProtectedPath(pathname: string) {
 	return (
@@ -19,6 +20,7 @@ function isProtectedPath(pathname: string) {
 }
 
 const AUTH_PAGES = ['/sign-in', '/sign-up', '/reset-password', '/reset-account']
+// const AUTH_PAGES: string[] = []
 
 export default withAuth(
 	async function middleware(req: NextRequestWithAuth) {
