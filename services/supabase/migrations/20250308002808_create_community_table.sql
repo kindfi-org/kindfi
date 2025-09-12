@@ -1,5 +1,5 @@
 CREATE TABLE community (
-    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
     project_id uuid NOT NULL,
     update_id uuid NOT NULL,
     comment_id uuid NOT NULL,

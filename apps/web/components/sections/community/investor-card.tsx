@@ -12,6 +12,7 @@ import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { fadeInUp } from '~/lib/constants/animations'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { Investor } from '~/lib/types/investors/top-investors.types'
 
 const iconMap = {
@@ -30,7 +31,7 @@ export function InvestorCard({ investor }: { investor: Investor }) {
 					<div className="flex items-start gap-4 mb-6">
 						<div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-400">
 							<Image
-								src={investor.image || '/placeholder.svg'}
+								src={investor.image || PLACEHOLDER_IMG}
 								alt=""
 								className="w-full h-full object-cover"
 							/>

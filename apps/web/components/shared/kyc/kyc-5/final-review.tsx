@@ -2,6 +2,7 @@
 'use client'
 
 import { ArrowLeft, Check, X } from 'lucide-react'
+import Image from 'next/image'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '~/components/base/button'
@@ -21,6 +22,7 @@ import {
 	DialogTrigger,
 } from '~/components/base/dialog'
 import { ScrollArea } from '~/components/base/scroll-area'
+import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { FinalReviewProps } from '~/lib/types/final-review-kyc5.types'
 import { ReviewSection } from './review-section'
 
@@ -112,8 +114,8 @@ export function FinalReview({
 									<div className="space-y-2">
 										<p className="font-medium">Front Side</p>
 										<div className="aspect-[3/2] relative bg-gray-100 rounded-lg overflow-hidden">
-											<img
-												src="/placeholder.svg?height=200&width=300"
+											<Image
+												src={`${PLACEHOLDER_IMG}?height=200&width=300`}
 												alt="ID Front"
 												className="object-cover w-full h-full"
 											/>
@@ -122,8 +124,8 @@ export function FinalReview({
 									<div className="space-y-2">
 										<p className="font-medium">Back Side</p>
 										<div className="aspect-[3/2] relative bg-gray-100 rounded-lg overflow-hidden">
-											<img
-												src="/placeholder.svg?height=200&width=300"
+											<Image
+												src={`${PLACEHOLDER_IMG}?height=200&width=300`}
 												alt="ID Back"
 												className="object-cover w-full h-full"
 											/>
@@ -155,8 +157,8 @@ export function FinalReview({
 								<div className="space-y-2">
 									<p className="font-medium">Proof Document</p>
 									<div className="aspect-[3/2] relative bg-gray-100 rounded-lg overflow-hidden">
-										<img
-											src="/placeholder.svg?height=200&width=300"
+										<Image
+											src={`${PLACEHOLDER_IMG}?height=200&width=300`}
 											alt="Proof of Address"
 											className="object-cover w-full h-full"
 										/>

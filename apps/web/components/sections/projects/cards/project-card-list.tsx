@@ -4,9 +4,10 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-
+import { useMemo } from 'react'
 import { Badge } from '~/components/base/badge'
 import { CategoryBadge } from '~/components/sections/projects/shared'
+import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
@@ -17,15 +18,25 @@ interface ProjectCardListProps {
 }
 
 export function ProjectCardList({ project }: ProjectCardListProps) {
+	const { balance: onChainRaised } = useEscrowBalance({
+		escrowContractAddress: project.escrowContractAddress,
+		escrowType: 'multi-release',
+	})
+
+	const displayRaised = useMemo(
+		() => onChainRaised ?? project.raised,
+		[onChainRaised, project.raised],
+	)
+
 	const progressPercentage = Math.min(
-		Math.round((project.raised / project.goal) * 100),
+		Math.round((displayRaised / project.goal) * 100),
 		100,
 	)
 
 	return (
 		<Link href={`/projects/${project.slug}`} className="h-full">
 			<motion.article
-				className="bg-white rounded-lg overflow-hidden shadow-md flex flex-row h-full"
+				className="flex overflow-hidden flex-row h-full bg-white rounded-lg shadow-md"
 				whileHover={cardHover}
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -43,9 +54,9 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 				</div>
 
 				{/* Content section */}
-				<div className="p-3 sm:p-4 md:p-5 flex flex-col flex-grow">
-					<div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2 mb-2">
-						<h3 className="text-base sm:text-lg md:text-xl font-bold line-clamp-1">
+				<div className="flex flex-col flex-grow p-3 sm:p-4 md:p-5">
+					<div className="flex flex-col gap-2 mb-2 md:flex-row md:justify-between md:items-start">
+						<h3 className="text-base font-bold sm:text-lg md:text-xl line-clamp-1">
 							{project.title}
 						</h3>
 						{project.category && (
@@ -58,7 +69,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 						)}
 					</div>
 
-					<p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 md:mb-4 line-clamp-2">
+					<p className="mb-2 text-xs sm:text-sm text-muted-foreground sm:mb-3 md:mb-4 line-clamp-2">
 						{project.description}
 					</p>
 
@@ -80,20 +91,20 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 							/>
 						</div>
 
-						<div className="flex justify-between text-xs sm:text-sm text-gray-500">
-							<span>${project.raised.toLocaleString()} raised</span>
+						<div className="flex justify-between text-xs text-gray-500 sm:text-sm">
+							<span>${displayRaised.toLocaleString()} raised</span>
 							<span>{progressPercentage}%</span>
 						</div>
 
 						<div className="grid grid-cols-3 gap-1 sm:gap-2">
 							<div className="text-center">
-								<p className="font-bold text-xs sm:text-sm">
+								<p className="text-xs font-bold sm:text-sm">
 									${project.goal.toLocaleString()}
 								</p>
 								<p className="text-[10px] sm:text-xs text-gray-500">Goal</p>
 							</div>
 							<div className="text-center">
-								<p className="font-bold text-xs sm:text-sm">
+								<p className="text-xs font-bold sm:text-sm">
 									{project.investors}
 								</p>
 								<p className="text-[10px] sm:text-xs text-gray-500">
@@ -101,7 +112,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 								</p>
 							</div>
 							<div className="text-center">
-								<p className="font-bold text-xs sm:text-sm">
+								<p className="text-xs font-bold sm:text-sm">
 									${project.minInvestment}
 								</p>
 								<p className="text-[10px] sm:text-xs text-gray-500">

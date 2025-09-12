@@ -12,7 +12,7 @@ CREATE TYPE "public"."notification_type" AS ENUM('info', 'success', 'warning', '
 CREATE TYPE "public"."project_member_role" AS ENUM('admin', 'editor');--> statement-breakpoint
 CREATE TYPE "public"."user_role" AS ENUM('kinder', 'kindler');--> statement-breakpoint
 CREATE TABLE "escrow_contracts" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"engagement_id" text NOT NULL,
 	"contract_id" text NOT NULL,
 	"project_id" uuid NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE "escrow_contracts" (
 --> statement-breakpoint
 ALTER TABLE "escrow_contracts" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "projects" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"title" text NOT NULL,
 	"description" text,
 	"current_amount" numeric(12, 2) DEFAULT '0' NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE "projects" (
 --> statement-breakpoint
 ALTER TABLE "projects" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "escrow_status" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"escrow_id" text NOT NULL,
 	"status" "escrow_status_type" NOT NULL,
 	"current_milestone" integer,
@@ -65,7 +65,7 @@ CREATE TABLE "escrow_status" (
 );
 --> statement-breakpoint
 CREATE TABLE "contributions" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"project_id" uuid NOT NULL,
 	"contributor_id" uuid NOT NULL,
 	"amount" numeric(20, 7) NOT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE "project_pitch" (
 --> statement-breakpoint
 ALTER TABLE "project_pitch" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "community" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"project_id" uuid NOT NULL,
 	"update_id" uuid NOT NULL,
 	"comment_id" uuid NOT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE "community" (
 );
 --> statement-breakpoint
 CREATE TABLE "milestones" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"title" text NOT NULL,
 	"description" text,
 	"amount" numeric(20, 7) NOT NULL,
@@ -153,7 +153,7 @@ CREATE TABLE "project_tags" (
 );
 --> statement-breakpoint
 CREATE TABLE "comments" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"content" text NOT NULL,
 	"author_id" uuid NOT NULL,
 	"parent_comment_id" uuid,
@@ -169,7 +169,7 @@ CREATE TABLE "comments" (
 --> statement-breakpoint
 ALTER TABLE "comments" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "escrow_reviews" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"escrow_id" uuid NOT NULL,
 	"milestone_id" uuid,
 	"reviewer_address" text NOT NULL,

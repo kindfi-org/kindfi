@@ -125,6 +125,7 @@ export type Database = {
 			users: {
 				Row: {
 					email: string | null
+					email_verified: string | null
 					emailVerified: string | null
 					id: string
 					image: string | null
@@ -132,6 +133,7 @@ export type Database = {
 				}
 				Insert: {
 					email?: string | null
+					email_verified?: string | null
 					emailVerified?: string | null
 					id?: string
 					image?: string | null
@@ -139,6 +141,7 @@ export type Database = {
 				}
 				Update: {
 					email?: string | null
+					email_verified?: string | null
 					emailVerified?: string | null
 					id?: string
 					image?: string | null
@@ -513,16 +516,22 @@ export type Database = {
 			}
 			escrow_milestones: {
 				Row: {
+					created_at: string
 					escrow_id: string
 					milestone_id: string
+					updated_at: string
 				}
 				Insert: {
+					created_at?: string
 					escrow_id: string
 					milestone_id: string
+					updated_at?: string
 				}
 				Update: {
+					created_at?: string
 					escrow_id?: string
 					milestone_id?: string
+					updated_at?: string
 				}
 				Relationships: [
 					{
@@ -663,54 +672,36 @@ export type Database = {
 					},
 				]
 			}
-			kyc_reviews: {
+			kyc_admin_whitelist: {
 				Row: {
-					additional_notes: string | null
 					created_at: string
-					decision: Database['public']['Enums']['kyc_status_enum']
+					created_by: string | null
 					id: string
-					kyc_status_id: string
-					reason: string | null
-					review_notes: string | null
-					reviewer_id: string
-					updated_at: string
+					notes: string | null
+					user_id: string
 				}
 				Insert: {
-					additional_notes?: string | null
 					created_at?: string
-					decision: Database['public']['Enums']['kyc_status_enum']
+					created_by?: string | null
 					id?: string
-					kyc_status_id: string
-					reason?: string | null
-					review_notes?: string | null
-					reviewer_id: string
-					updated_at?: string
+					notes?: string | null
+					user_id: string
 				}
 				Update: {
-					additional_notes?: string | null
 					created_at?: string
-					decision?: Database['public']['Enums']['kyc_status_enum']
+					created_by?: string | null
 					id?: string
-					kyc_status_id?: string
-					reason?: string | null
-					review_notes?: string | null
-					reviewer_id?: string
-					updated_at?: string
+					notes?: string | null
+					user_id?: string
 				}
-				Relationships: [
-					{
-						foreignKeyName: 'kyc_reviews_kyc_status_id_fkey'
-						columns: ['kyc_status_id']
-						isOneToOne: false
-						referencedRelation: 'kyc_status'
-						referencedColumns: ['id']
-					},
-				]
+				Relationships: []
 			}
-			kyc_status: {
+			kyc_reviews: {
 				Row: {
 					created_at: string
 					id: string
+					notes: string | null
+					reviewer_id: string | null
 					status: Database['public']['Enums']['kyc_status_enum']
 					updated_at: string
 					user_id: string
@@ -719,14 +710,18 @@ export type Database = {
 				Insert: {
 					created_at?: string
 					id?: string
-					status?: Database['public']['Enums']['kyc_status_enum']
+					notes?: string | null
+					reviewer_id?: string | null
+					status: Database['public']['Enums']['kyc_status_enum']
 					updated_at?: string
 					user_id: string
-					verification_level?: Database['public']['Enums']['kyc_verification_enum']
+					verification_level: Database['public']['Enums']['kyc_verification_enum']
 				}
 				Update: {
 					created_at?: string
 					id?: string
+					notes?: string | null
+					reviewer_id?: string | null
 					status?: Database['public']['Enums']['kyc_status_enum']
 					updated_at?: string
 					user_id?: string
@@ -872,7 +867,7 @@ export type Database = {
 				Row: {
 					bio: string | null
 					created_at: string
-					display_name: string
+					display_name: string | null
 					email: string | null
 					id: string
 					image_url: string | null
@@ -883,7 +878,7 @@ export type Database = {
 				Insert: {
 					bio?: string | null
 					created_at?: string
-					display_name?: string
+					display_name?: string | null
 					email?: string | null
 					id: string
 					image_url?: string | null
@@ -894,7 +889,7 @@ export type Database = {
 				Update: {
 					bio?: string | null
 					created_at?: string
-					display_name?: string
+					display_name?: string | null
 					email?: string | null
 					id?: string
 					image_url?: string | null
@@ -903,6 +898,42 @@ export type Database = {
 					updated_at?: string
 				}
 				Relationships: []
+			}
+			project_escrows: {
+				Row: {
+					created_at: string
+					escrow_id: string
+					project_id: string
+					updated_at: string
+				}
+				Insert: {
+					created_at?: string
+					escrow_id: string
+					project_id: string
+					updated_at?: string
+				}
+				Update: {
+					created_at?: string
+					escrow_id?: string
+					project_id?: string
+					updated_at?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'project_escrows_escrow_id_fkey'
+						columns: ['escrow_id']
+						isOneToOne: true
+						referencedRelation: 'escrow_contracts'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'project_escrows_project_id_fkey'
+						columns: ['project_id']
+						isOneToOne: true
+						referencedRelation: 'projects'
+						referencedColumns: ['id']
+					},
+				]
 			}
 			project_members: {
 				Row: {
@@ -1085,11 +1116,13 @@ export type Database = {
 					image_url: string | null
 					kinder_count: number
 					kindler_id: string
+					metadata: Json
 					min_investment: number
 					percentage_complete: number
 					project_location: string
 					slug: string | null
 					social_links: Json
+					status: Database['public']['Enums']['project_status']
 					target_amount: number
 					title: string
 					updated_at: string | null
@@ -1103,11 +1136,13 @@ export type Database = {
 					image_url?: string | null
 					kinder_count?: number
 					kindler_id: string
+					metadata?: Json
 					min_investment: number
 					percentage_complete?: number
 					project_location: string
 					slug?: string | null
 					social_links?: Json
+					status?: Database['public']['Enums']['project_status']
 					target_amount: number
 					title: string
 					updated_at?: string | null
@@ -1121,11 +1156,13 @@ export type Database = {
 					image_url?: string | null
 					kinder_count?: number
 					kindler_id?: string
+					metadata?: Json
 					min_investment?: number
 					percentage_complete?: number
 					project_location?: string
 					slug?: string | null
 					social_links?: Json
+					status?: Database['public']['Enums']['project_status']
 					target_amount?: number
 					title?: string
 					updated_at?: string | null
@@ -1195,8 +1232,16 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
+			add_kyc_admin: {
+				Args: { admin_notes?: string; target_user_id: string }
+				Returns: undefined
+			}
 			cleanup_expired_challenges: {
 				Args: Record<PropertyKey, never>
+				Returns: undefined
+			}
+			remove_kyc_admin: {
+				Args: { target_user_id: string }
 				Returns: undefined
 			}
 			unaccent: {
@@ -1239,6 +1284,13 @@ export type Database = {
 				| 'community'
 				| 'core'
 				| 'others'
+			project_status:
+				| 'draft'
+				| 'review'
+				| 'active'
+				| 'paused'
+				| 'funded'
+				| 'rejected'
 			user_role: 'kinder' | 'kindler'
 		}
 		CompositeTypes: {
@@ -1405,6 +1457,14 @@ export const Constants = {
 				'community',
 				'core',
 				'others',
+			],
+			project_status: [
+				'draft',
+				'review',
+				'active',
+				'paused',
+				'funded',
+				'rejected',
 			],
 			user_role: ['kinder', 'kindler'],
 		},

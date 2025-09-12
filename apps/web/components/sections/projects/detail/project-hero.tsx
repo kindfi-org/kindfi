@@ -2,12 +2,15 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { useMemo } from 'react'
 import { AnimatedCounter } from '~/components/sections/projects/detail/animated-counter'
 import { SocialLinksDisplay } from '~/components/sections/projects/detail/social-links-display'
 import {
 	CategoryBadge,
 	CountryFlag,
 } from '~/components/sections/projects/shared'
+import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
 
@@ -16,14 +19,26 @@ interface ProjectHeroProps {
 }
 
 export function ProjectHero({ project }: ProjectHeroProps) {
+	const { address } = useWallet()
+	const { balance: onChainRaised } = useEscrowBalance({
+		escrowContractAddress: project.escrowContractAddress,
+		escrowType: project.escrowType,
+		signer: address ?? undefined,
+	})
+
+	const displayRaised = useMemo(
+		() => onChainRaised ?? project.raised,
+		[onChainRaised, project.raised],
+	)
+
 	return (
 		<motion.section
-			className="bg-white rounded-xl shadow-md overflow-hidden mb-8"
+			className="overflow-hidden mb-8 bg-white rounded-xl shadow-md"
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.5 }}
 		>
-			<div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
+			<div className="overflow-hidden relative h-64 md:h-80 lg:h-96">
 				<Image
 					src={project.image || '/images/placeholder.png'}
 					alt={`${project.title} banner`}
@@ -39,15 +54,15 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 			</div>
 
 			<div className="p-6">
-				<h1 className="text-3xl md:text-4xl font-bold mb-3">{project.title}</h1>
+				<h1 className="mb-3 text-3xl font-bold md:text-4xl">{project.title}</h1>
 
-				<p className="text-muted-foreground mb-6">{project.description}</p>
+				<p className="mb-6 text-muted-foreground">{project.description}</p>
 
 				{/* Location + Social Links */}
 				{(project.location || project.socialLinks) && (
-					<div className="flex flex-wrap items-center justify-between mb-6 gap-2">
+					<div className="flex flex-wrap gap-2 justify-between items-center mb-6">
 						{project.location && (
-							<div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+							<div className="flex gap-2 items-center text-sm font-medium text-muted-foreground">
 								<span>Location:</span>
 								<CountryFlag countryCode={project.location} />
 								<span className="text-gray-700">
@@ -57,34 +72,34 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 						)}
 
 						{project.socialLinks && (
-							<div className="flex items-center gap-3">
+							<div className="flex gap-3 items-center">
 								<SocialLinksDisplay socialLinks={project.socialLinks} />
 							</div>
 						)}
 					</div>
 				)}
 
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-					<div className="bg-gray-50 p-4 rounded-lg text-center">
-						<p className="text-sm text-muted-foreground mb-1">Raised</p>
+				<div className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
+					<div className="p-4 text-center bg-gray-50 rounded-lg">
+						<p className="mb-1 text-sm text-muted-foreground">Raised</p>
 						<p className="text-xl font-bold">
-							$<AnimatedCounter value={project.raised} />
+							$<AnimatedCounter value={displayRaised} />
 						</p>
 					</div>
-					<div className="bg-gray-50 p-4 rounded-lg text-center">
-						<p className="text-sm text-muted-foreground mb-1">Goal</p>
+					<div className="p-4 text-center bg-gray-50 rounded-lg">
+						<p className="mb-1 text-sm text-muted-foreground">Goal</p>
 						<p className="text-xl font-bold">
 							$<AnimatedCounter value={project.goal} />
 						</p>
 					</div>
-					<div className="bg-gray-50 p-4 rounded-lg text-center">
-						<p className="text-sm text-muted-foreground mb-1">Supporters</p>
+					<div className="p-4 text-center bg-gray-50 rounded-lg">
+						<p className="mb-1 text-sm text-muted-foreground">Supporters</p>
 						<p className="text-xl font-bold">
 							<AnimatedCounter value={project.investors} />
 						</p>
 					</div>
-					<div className="bg-gray-50 p-4 rounded-lg text-center">
-						<p className="text-sm text-muted-foreground mb-1">
+					<div className="p-4 text-center bg-gray-50 rounded-lg">
+						<p className="mb-1 text-sm text-muted-foreground">
 							Minimum Donation
 						</p>
 						<p className="text-xl font-bold">

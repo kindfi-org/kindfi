@@ -16,7 +16,7 @@ const withConfiguredCORS = (
 const stellarService = new StellarPasskeyAccountService(
 	appConfig.stellar.networkPassphrase,
 	appConfig.stellar.rpcUrl,
-	appConfig.stellar.accountSecp256r1ContractWasm, // process.env.STELLAR_FUNDING_SECRET_KEY,
+	appConfig.stellar.fundingAccount,
 )
 
 export const stellarRoutes = {

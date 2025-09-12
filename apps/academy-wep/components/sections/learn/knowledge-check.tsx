@@ -85,7 +85,7 @@ export function KnowledgeCheck({
 						<RadioGroup
 							value={answers[question.id]?.toString() || ''}
 							onValueChange={(value) =>
-								handleAnswerChange(question.id, Number.parseInt(value))
+								handleAnswerChange(question.id, Number.parseInt(value, 10))
 							}
 							className="space-y-3"
 						>

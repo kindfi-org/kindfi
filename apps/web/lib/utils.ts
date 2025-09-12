@@ -53,3 +53,24 @@ export async function getAccountSequence(secretKey: string): Promise<number> {
 	)
 	return account.sequenceNumber
 }
+
+export function getAvatarFallback(name: string | undefined): string {
+	if (!name || name.trim() === '') {
+		return 'U' // Default AvatarFallback for a user with undefined or empty name
+	}
+
+	const trimmedName = name.trim()
+	const nameParts = trimmedName.split(/\s+/)
+
+	if (nameParts.length === 1) {
+		// Single name: return first two characters if available, otherwise first character
+		return nameParts[0].length > 1
+			? nameParts[0].substring(0, 2).toUpperCase()
+			: nameParts[0].charAt(0).toUpperCase()
+	}
+
+	// Multiple names: return first character of first and last name
+	const firstInitial = nameParts[0].charAt(0).toUpperCase()
+	const lastInitial = nameParts[nameParts.length - 1].charAt(0).toUpperCase()
+	return firstInitial + lastInitial
+}

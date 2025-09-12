@@ -19,8 +19,18 @@ export const corsConfig: CorsOptions = {
 		appConfig.env.nodeEnv === 'production'
 			? appConfig.kycServer.allowedOrigins
 				? appConfig.kycServer.allowedOrigins.split(',')
-				: ['https://app.kindfi.com']
-			: '*',
+				: [
+						'https://kindfi.org',
+						'https://*.kindfi.org',
+						'https://dev-api.dashboard.kindfi.org',
+					]
+			: [
+					'http://localhost:3000',
+					'http://localhost:3001',
+					'https://kindfi.org',
+					'https://*.kindfi.org',
+					'https://dev-api.dashboard.kindfi.org',
+				],
 
 	// HTTP methods allowed
 	allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

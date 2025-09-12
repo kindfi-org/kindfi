@@ -9,7 +9,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Bell, BellOff, LogIn, RefreshCw, User as UserIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import { Alert, AlertDescription, AlertTitle } from '~/components/base/alert'
 import { Button } from '~/components/base/button'
 import { Card } from '~/components/base/card'
@@ -22,12 +21,7 @@ import {
 } from '~/components/base/tooltip'
 import { AskQuestionForm } from '~/components/shared/qa/ask-question-form'
 import { QuestionCard } from '~/components/shared/qa/question-card'
-import {
-	fetchChildComments,
-	fetchQuestions,
-	insertComment,
-	updateComment,
-} from '~/lib/services/comments'
+import { fetchChildComments, fetchQuestions } from '~/lib/services/comments'
 import type {
 	CommentData,
 	CommentWithAnswers,
@@ -65,7 +59,7 @@ export default function QAClient({
 	const [processedQuestions, setProcessedQuestions] = useState<
 		CommentWithAnswers[]
 	>([])
-	const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false)
+	const [_isLoginDialogOpen, setIsLoginDialogOpen] = useState(false)
 	const [guestUserId, setGuestUserId] = useState<string | null>(null)
 	const [guestRemainingComments, setGuestRemainingComments] = useState(3)
 	const [isRealtimeEnabled, setIsRealtimeEnabled] = useState(true)
@@ -243,7 +237,10 @@ export default function QAClient({
 
 								setTimeout(() => setRealtimeStatus(null), 5000)
 							}
-						} else if (eventType === 'UPDATE' && metadata.is_resolved) {
+						} else if (
+							eventType === 'UPDATE' &&
+							metadata.status === 'resolved'
+						) {
 							setRealtimeStatus('A question has been marked as resolved')
 
 							setTimeout(() => setRealtimeStatus(null), 5000)
@@ -295,7 +292,7 @@ export default function QAClient({
 		router.push('/login')
 	}
 
-	const handleContinueAsGuest = () => {
+	const _handleContinueAsGuest = () => {
 		setIsLoginDialogOpen(false)
 
 		// Reset the guest comment count to allow 3 more comments
@@ -324,22 +321,20 @@ export default function QAClient({
 	// Mutation for submitting a new question
 	const submitQuestionMutation = useMutation({
 		mutationFn: async (questionContent: string) => {
-			if (!effectiveUser?.id) {
-				throw new Error('User ID is required')
-			}
-
-			const commentId = uuidv4()
-
-			const data = await insertComment({
-				id: commentId,
-				content: questionContent,
-				project_id: projectId,
-				author_id: effectiveUser.id,
-				type: 'question',
-				is_resolved: false,
-				parent_comment_id: null,
-			} as Partial<Tables<'comments'>>)
-			return data
+			if (!effectiveUser?.id) throw new Error('User ID is required')
+			const res = await fetch('/api/comments', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					content: questionContent,
+					project_id: projectId,
+					type: 'question',
+					parent_comment_id: null,
+				}),
+			})
+			const json = await res.json()
+			if (!res.ok) throw new Error(json.error || 'Failed to submit question')
+			return json.data as Tables<'comments'>
 		},
 		onSuccess: (newQuestion) => {
 			handleGuestCommentSuccess()
@@ -378,22 +373,20 @@ export default function QAClient({
 			questionId: string
 			answerContent: string
 		}) => {
-			if (!effectiveUser?.id) {
-				throw new Error('User ID is required')
-			}
-
-			const commentId = uuidv4()
-
-			const data = await insertComment({
-				id: commentId,
-				content: answerContent,
-				project_id: projectId,
-				author_id: effectiveUser.id,
-				type: 'answer',
-				parent_comment_id: questionId,
-				is_resolved: false,
-			} as Partial<Tables<'comments'>>)
-			return { data, questionId }
+			if (!effectiveUser?.id) throw new Error('User ID is required')
+			const res = await fetch('/api/comments', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					content: answerContent,
+					project_id: projectId,
+					type: 'answer',
+					parent_comment_id: questionId,
+				}),
+			})
+			const json = await res.json()
+			if (!res.ok) throw new Error(json.error || 'Failed to submit answer')
+			return { data: json.data as Tables<'comments'>, questionId }
 		},
 		onSuccess: ({ questionId }) => {
 			handleGuestCommentSuccess()
@@ -433,22 +426,20 @@ export default function QAClient({
 			answerId: string
 			replyContent: string
 		}) => {
-			if (!effectiveUser?.id) {
-				throw new Error('User ID is required')
-			}
-
-			const commentId = uuidv4()
-
-			const data = await insertComment({
-				id: commentId,
-				content: replyContent,
-				project_id: projectId,
-				author_id: effectiveUser.id,
-				type: 'comment',
-				parent_comment_id: answerId,
-				is_resolved: false,
-			} as Partial<Tables<'comments'>>)
-			return data
+			if (!effectiveUser?.id) throw new Error('User ID is required')
+			const res = await fetch('/api/comments', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					content: replyContent,
+					project_id: projectId,
+					type: 'comment',
+					parent_comment_id: answerId,
+				}),
+			})
+			const json = await res.json()
+			if (!res.ok) throw new Error(json.error || 'Failed to submit')
+			return json.data as Tables<'comments'>
 		},
 		onSuccess: () => {
 			handleGuestCommentSuccess()
@@ -476,14 +467,15 @@ export default function QAClient({
 
 	const markResolvedMutation = useMutation({
 		mutationFn: async (questionId: string) => {
-			if (!effectiveUser?.id) {
-				throw new Error('User ID is required')
-			}
-
-			const data = await updateComment(questionId, {
-				is_resolved: true,
-			} as TablesUpdate<'comments'>)
-			return data
+			if (!effectiveUser?.id) throw new Error('User ID is required')
+			const res = await fetch(`/api/comments/${questionId}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ is_resolved: true }),
+			})
+			const json = await res.json()
+			if (!res.ok) throw new Error(json.error || 'Failed to mark resolved')
+			return json.data as Tables<'comments'>
 		},
 		onSuccess: (updatedQuestion) => {
 			queryClient.setQueryData(
@@ -491,14 +483,24 @@ export default function QAClient({
 				(oldData: CommentData[] | undefined) => {
 					if (!oldData) return []
 					return oldData.map((q) =>
-						q.id === updatedQuestion.id ? { ...q, is_resolved: true } : q,
+						q.id === updatedQuestion.id
+							? {
+									...q,
+									metadata: { ...q.metadata, status: 'resolved' },
+								}
+							: q,
 					)
 				},
 			)
 
 			setProcessedQuestions((prev) =>
 				prev.map((q) =>
-					q.id === updatedQuestion.id ? { ...q, is_resolved: true } : q,
+					q.id === updatedQuestion.id
+						? {
+								...q,
+								metadata: { ...q.metadata, status: 'resolved' },
+							}
+						: q,
 				),
 			)
 

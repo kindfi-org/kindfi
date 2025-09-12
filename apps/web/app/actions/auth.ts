@@ -1,10 +1,14 @@
 'use server'
 
+import { db } from '@packages/drizzle'
+import { devices } from '@packages/drizzle/src/data/schema'
 import { appEnvConfig } from '@packages/lib/config'
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
+import { and, eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -43,19 +47,35 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 			error: 'Invalid CSRF token',
 		}
 	}
-	const supabase = await createSupabaseServerClient()
+	const supabase = supabaseServiceRole
 	const email = formData.get('email') as string
+
+	// Check if user already exists
+	const { data: existingUser } = await supabase
+		.from('profiles')
+		.select('id, email')
+		.eq('email', email)
+		.single()
+
+	if (existingUser) {
+		console.warn(
+			'🔧 KindfiSupabaseAdapter: User already exists',
+			existingUser.id,
+		)
+		throw new Error('This account is already registered. Sign in instead!')
+	}
+
 	const signInWithOptOpt = {
 		email,
 		options: {
 			emailRedirectTo: `${appConfig.deployment.appUrl}/auth/callback?redirect_to=/otp-validation?email=${email}`,
-			shouldCreateUser: true,
 		},
 	}
 
 	try {
 		const { data, error } = await supabase.auth.signInWithOtp(signInWithOptOpt)
 		if (error) {
+			console.error('Error signing up with otp:', error)
 			return errorHandler.handleAuthError(error, 'sign_up')
 		}
 
@@ -69,6 +89,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 			data,
 		}
 	} catch (error) {
+		console.error('Error signing up in general:', error)
 		return errorHandler.handleAuthError(error as AuthError, 'sign_up')
 	}
 }
@@ -134,11 +155,16 @@ export async function signOutAction(): Promise<void> {
 	try {
 		// Clear NextAuth session
 		await signOut({ redirect: false })
-		const { error } = await supabase.auth.signOut()
 
-		if (error) {
-			const response = errorHandler.handleAuthError(error, 'sign_out')
-			redirect(`/?error=${encodeURIComponent(response.message)}`)
+		try {
+			const { error } = await supabase.auth.signOut()
+
+			if (error) {
+				const response = errorHandler.handleAuthError(error, 'sign_out')
+				redirect(`/?error=${encodeURIComponent(response.message)}`)
+			}
+		} catch (error) {
+			console.error('No supabase session', error)
 		}
 
 		redirect('/sign-in?success=Successfully signed out')
@@ -457,6 +483,117 @@ export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
 		return {
 			success: false,
 			message: 'Failed to insert test record',
+			error: error instanceof Error ? error.message : 'Unknown error',
+		}
+	}
+}
+
+export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
+	const {
+		deployeeAddress,
+		aaguid,
+		userId,
+		credentialId,
+	}: {
+		deployeeAddress: string
+		credentialId: string
+		userId: string
+		aaguid?: string
+	} = JSON.parse(deployeeUpdateData)
+	// Get current user from session or context
+	console.log('updateDeviceWithDeployee::>', {
+		deployeeAddress,
+		aaguid,
+		userId,
+		credentialId,
+	})
+	try {
+		if (!userId) {
+			throw new Error('User not authenticated')
+		}
+
+		// Validate input parameters
+		if (!userId || !credentialId || !deployeeAddress || !aaguid) {
+			return {
+				success: false,
+				message: 'Missing required parameters',
+				error: 'Invalid input parameters',
+			}
+		}
+
+		// Verify the device exists and belongs to the user
+		const existingDevice = await db
+			.select({
+				id: devices.id,
+				userId: devices.userId,
+				aaguid: devices.aaguid,
+				credentialId: devices.credentialId,
+			})
+			.from(devices)
+			.where(
+				and(eq(devices.userId, userId), eq(devices.credentialId, credentialId)),
+			)
+			.limit(1)
+
+		if (!existingDevice.length) {
+			return {
+				success: false,
+				message: 'Device not found or does not belong to user',
+				error: 'Device verification failed',
+			}
+		}
+
+		const deviceToUpdate = existingDevice[0]
+
+		// Update the device with deployee address and AAGUID
+		const updatedDevice = await db
+			.update(devices)
+			.set({
+				address: deployeeAddress,
+				aaguid: aaguid || deviceToUpdate.aaguid,
+				updatedAt: new Date().toISOString(),
+			})
+			.where(eq(devices.id, deviceToUpdate.id))
+			.returning()
+
+		if (!updatedDevice.length) {
+			logger.error({
+				eventType: 'DEVICE_UPDATE_ERROR',
+				error: 'No device was updated',
+				userId,
+				credentialId,
+			})
+			return {
+				success: false,
+				message: 'Failed to update device information',
+				error: 'No device was updated',
+			}
+		}
+
+		logger.info({
+			eventType: 'DEVICE_UPDATED',
+			userId,
+			credentialId,
+			deployeeAddress,
+			aaguid,
+		})
+
+		return {
+			success: true,
+			message: 'Device updated successfully',
+			data: updatedDevice[0],
+		}
+	} catch (error) {
+		logger.error({
+			eventType: 'DEVICE_UPDATE_EXCEPTION',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			userId,
+			credentialId,
+		})
+
+		return {
+			success: false,
+			message: 'An error occurred while updating the device',
 			error: error instanceof Error ? error.message : 'Unknown error',
 		}
 	}

@@ -26,11 +26,6 @@ const projects: NavigationItem[] = [
 		href: '/create-project',
 		description: 'Start your social impact campaign with Web3 technology',
 	},
-	{
-		title: 'Featured Projects',
-		href: '/featured',
-		description: 'Explore the most successful initiatives from our community',
-	},
 ]
 
 const resources: NavigationItem[] = [
@@ -121,6 +116,21 @@ export function Navigation() {
 						</NavigationMenuLink>
 					</Link>
 				</NavigationMenuItem>
+
+				<NavigationMenuItem>
+					<Link href="/news" passHref>
+						<NavigationMenuLink
+							className={cn(
+								navigationMenuTriggerStyle(),
+								pathname?.startsWith('/news') && 'text-primary',
+							)}
+							aria-label="News"
+							aria-current={pathname?.startsWith('/news') ? 'page' : undefined}
+						>
+							News
+						</NavigationMenuLink>
+					</Link>
+				</NavigationMenuItem>
 			</NavigationMenuList>
 		</NavigationMenu>
 	)
@@ -136,13 +146,13 @@ const ListItem = React.forwardRef<
 				<a
 					ref={ref}
 					className={cn(
-						'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+						'block p-3 space-y-1 leading-none no-underline rounded-md transition-colors outline-none select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
 						className,
 					)}
 					{...props}
 				>
 					<div className="text-sm font-medium leading-none">{title}</div>
-					<p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+					<p className="text-sm leading-snug line-clamp-2 text-muted-foreground">
 						{children}
 					</p>
 				</a>

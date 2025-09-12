@@ -14,9 +14,16 @@ const defaultUrl = appConfig.deployment.vercelUrl
 	: 'http://localhost:3000'
 export const metadata = {
 	metadataBase: new URL(defaultUrl),
-	title: 'KindFi',
+	title: {
+		default: 'KindFi',
+		template: '%s | KindFi',
+	},
 	description:
 		'The first Web3 platform connecting supporters to impactful causes while driving blockchain adoption for social and environmental change',
+	openGraph: {
+		siteName: 'KindFi',
+		type: 'website',
+	},
 }
 
 export default function RootLayout({
@@ -28,7 +35,7 @@ export default function RootLayout({
 		<html lang="en" suppressHydrationWarning>
 			<body suppressHydrationWarning>
 				<Providers>
-					<div className="relative min-h-screen flex flex-col">
+					<div className="flex relative flex-col min-h-screen">
 						<Header />
 						<main className="flex-1">{children}</main>
 						<Toaster />

@@ -27,9 +27,9 @@ export const extractDate = (text: string): string | null => {
 		)
 		if (monthIndex !== -1) {
 			const date = new Date(
-				Number.parseInt(year),
+				Number.parseInt(year, 10),
 				monthIndex,
-				Number.parseInt(day),
+				Number.parseInt(day, 10),
 			)
 			return date.toISOString()
 		}

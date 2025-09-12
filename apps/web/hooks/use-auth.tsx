@@ -1,41 +1,56 @@
 'use client'
 
+import { useStellarSorobanAccount } from '@packages/lib/hooks'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import type { Session, User } from '@supabase/supabase-js'
-import { SessionProvider } from 'next-auth/react'
+import type { Session, User as SupabaseUser } from '@supabase/supabase-js'
+import jwt from 'jsonwebtoken'
+import type { User } from 'next-auth'
+import { useSession } from 'next-auth/react'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 interface AuthContextType {
-	user: User | null
-	isLoading: boolean
+	isSupabaseUserLoading: boolean
+	stellar: ReturnType<typeof useStellarSorobanAccount> | Record<string, unknown>
+	user?: User
+	supabaseUser?: SupabaseUser
 }
 
 const AuthContext = createContext<AuthContextType>({
-	user: null,
-	isLoading: true,
+	isSupabaseUserLoading: true,
+	stellar: {},
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	// Use null as initial state to prevent hydration mismatch
-	const [user, setUser] = useState<User | null>(null)
-	const [isLoading, setIsLoading] = useState(true)
+	const { data: session } = useSession()
+	const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | undefined>(
+		undefined,
+	)
+	const [isSupabaseUserLoading, setIsSupabaseUserLoading] = useState(true)
 	const supabase = createSupabaseBrowserClient()
+	const stellarSorobanAccountState = useStellarSorobanAccount(session?.user)
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {
 		// Move session check to useEffect to avoid hydration mismatch
 		const checkSession = async () => {
 			try {
+				console.log('🔑 Check User Data session result:', session)
+				console.log(
+					'🔑 Check User Data session decryption:',
+					jwt.decode(session?.user.jwt || ''),
+				)
+
 				const {
-					data: { session },
+					data: { session: supabaseSession },
 				} = await supabase.auth.getSession()
-				console.log('Session check result:', session)
-				setUser(session?.user ?? null)
+				console.log('🔒 Supabase Session check result:', supabaseSession)
+				setSupabaseUser(supabaseSession?.user)
 			} catch (error) {
 				console.error('Auth check failed:', error)
-				setUser(null)
+				setSupabaseUser(undefined)
 			} finally {
-				setIsLoading(false)
+				setIsSupabaseUserLoading(false)
 			}
 		}
 
@@ -45,23 +60,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange(
 			(_event: string, session: Session | null) => {
-				setUser(session?.user ?? null)
-				setIsLoading(false)
+				setSupabaseUser(session?.user)
+				setIsSupabaseUserLoading(false)
 			},
 		)
 
 		return () => {
 			subscription.unsubscribe()
 		}
-	}, [])
+	}, [session])
 
 	// Always render children, but show loading state
 	return (
-		<SessionProvider>
-			<AuthContext.Provider value={{ user, isLoading }}>
-				{children}
-			</AuthContext.Provider>
-		</SessionProvider>
+		<AuthContext.Provider
+			value={{
+				user: session?.user,
+				supabaseUser,
+				isSupabaseUserLoading,
+				stellar: stellarSorobanAccountState,
+			}}
+		>
+			{children}
+		</AuthContext.Provider>
 	)
 }
 

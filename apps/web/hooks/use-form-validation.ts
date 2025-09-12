@@ -36,7 +36,7 @@ export function useFormValidation(rules: ValidationRules = {}) {
 			if (!newEmailValidation) return
 			const { data } = await supabase
 				.from('profiles')
-				.select('id')
+				.select('id, email')
 				.eq('email', value)
 				.single()
 			setDoesEmailExist(data?.id || '')

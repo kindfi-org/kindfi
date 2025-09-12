@@ -3,7 +3,7 @@ import type {
 	WebAuthnCredential,
 } from '@simplewebauthn/server'
 import { and, desc, eq, gt, lt } from 'drizzle-orm'
-import { getDb } from '../db'
+import { getDb as db } from '../db'
 import { challenges, type Device, devices } from './schema'
 
 // Utility functions for data conversion
@@ -29,8 +29,6 @@ export const saveChallenge = async ({
 	challenge: string
 	userId?: string
 }): Promise<void> => {
-	const db = await getDb()
-
 	// First, clean up any existing challenges for this identifier/rpId combination
 	await db
 		.delete(challenges)
@@ -60,8 +58,6 @@ export const getChallenge = async ({
 	rpId: string
 	userId?: string
 }): Promise<string | null> => {
-	const db = await getDb()
-
 	const result = await db
 		.select()
 		.from(challenges)
@@ -90,8 +86,6 @@ export const deleteChallenge = async ({
 	rpId: string
 	userId?: string
 }): Promise<void> => {
-	const db = await getDb()
-
 	await db
 		.delete(challenges)
 		.where(
@@ -118,8 +112,6 @@ export const getUser = async ({
 	credentials: WebAuthnCredential[]
 } | null> => {
 	try {
-		const db = await getDb()
-
 		const deviceRecords = await db
 			.select()
 			.from(devices)
@@ -163,8 +155,6 @@ export const saveUser = async ({
 	user: { credentials: WebAuthnCredential[] }
 	userId?: string
 }): Promise<void> => {
-	const db = await getDb()
-
 	// Insert or update devices for this user
 	for (const credential of user.credentials) {
 		// Check if this credential already exists
@@ -195,6 +185,7 @@ export const saveUser = async ({
 			// Insert new device
 			await db.insert(devices).values({
 				userId: userId || null,
+				nextAuthUserId: userId || null,
 				identifier,
 				rpId,
 				credentialId: credential.id,
@@ -202,8 +193,8 @@ export const saveUser = async ({
 				signCount: credential.counter,
 				transports: credential.transports || [],
 				credentialType: 'public-key',
-				aaguid: credential.aaguid,
-				address: credential.address,
+				aaguid: '',
+				address: '0x',
 				profileVerificationStatus: 'unverified',
 				deviceType: 'single_device',
 				backupState: 'not_backed_up',
@@ -217,8 +208,6 @@ export const saveUser = async ({
  * Clean up expired challenges (can be called periodically)
  */
 export const cleanupExpiredChallenges = async (): Promise<void> => {
-	const db = await getDb()
-
 	await db
 		.delete(challenges)
 		.where(lt(challenges.expiresAt, new Date().toISOString()))
@@ -228,8 +217,6 @@ export const cleanupExpiredChallenges = async (): Promise<void> => {
  * Get all devices for a user
  */
 export const getUserDevices = async (userId: string): Promise<Device[]> => {
-	const db = await getDb()
-
 	return await db
 		.select()
 		.from(devices)
@@ -243,8 +230,6 @@ export const getUserDevices = async (userId: string): Promise<Device[]> => {
 export const updateDeviceLastUsed = async (
 	credentialId: string,
 ): Promise<void> => {
-	const db = await getDb()
-
 	await db
 		.update(devices)
 		.set({
@@ -261,8 +246,6 @@ export const removeDevice = async (
 	userId: string,
 	credentialId: string,
 ): Promise<void> => {
-	const db = await getDb()
-
 	await db
 		.delete(devices)
 		.where(

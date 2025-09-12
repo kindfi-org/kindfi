@@ -37,3 +37,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 /public/*
 # But keep the directory itself by not ignoring .gitkeep
 !/public/.gitkeep
+.vercel
+
+*-error-log.txt

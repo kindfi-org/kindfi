@@ -1,8 +1,12 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
+import { development, TrustlessWorkConfig } from '@trustless-work/escrow'
+import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
+import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
+import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
@@ -62,6 +66,12 @@ export function Providers({ children }: ProvidersProps) {
 		}
 	}, [])
 
+	const trustlessBaseUrl = development
+	// process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
+	// process.env.NODE_ENV === 'production'
+	// 	? mainNet
+	// 	: development
+
 	return (
 		<ReactQueryClientProvider>
 			<NextThemesProvider
@@ -70,11 +80,22 @@ export function Providers({ children }: ProvidersProps) {
 				forcedTheme="light"
 				disableTransitionOnChange
 			>
-				<AuthProvider>
-					<WaitlistProvider>
-						<StellarProvider>{children}</StellarProvider>
-					</WaitlistProvider>
-				</AuthProvider>
+				<SessionProvider>
+					<AuthProvider>
+						<WaitlistProvider>
+							<TrustlessWorkConfig
+								baseURL={trustlessBaseUrl}
+								apiKey={process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY || ''}
+							>
+								<WalletProvider>
+									<EscrowProvider>
+										<StellarProvider>{children}</StellarProvider>
+									</EscrowProvider>
+								</WalletProvider>
+							</TrustlessWorkConfig>
+						</WaitlistProvider>
+					</AuthProvider>
+				</SessionProvider>
 			</NextThemesProvider>
 		</ReactQueryClientProvider>
 	)

@@ -2,9 +2,9 @@
 
 import { motion } from 'framer-motion'
 import { BadgeCheck } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Card } from '~/components/base/card'
 import { CTAButtons } from '~/components/shared/cta-buttons'
+import { UserAvatar } from '../base/user-avatar'
 
 export interface FeatureCreatorCardProps {
 	name: string
@@ -49,13 +49,12 @@ export const FeatureCreatorCard = ({
 				transition={{ type: 'spring', stiffness: 300 }}
 			>
 				<div className="flex flex-row items-center">
-					<Avatar className="w-20 h-20">
-						{avatarUrl ? (
-							<AvatarImage src={avatarUrl} alt={`${name}'s avatar`} />
-						) : (
-							<AvatarFallback />
-						)}
-					</Avatar>
+					<UserAvatar
+						src={avatarUrl}
+						alt={`${name}'s avatar`}
+						name={name}
+						className="h-20 w-20"
+					/>
 					<div className="text-left ml-4">
 						<h2 className="flex items-center text-xl font-bold">
 							{name}
