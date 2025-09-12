@@ -43,12 +43,18 @@ export function RoleSelect({
 	const [open, setOpen] = useState(false)
 	const selected = memberRole[value]
 
+	const ariaLabel = value
+		? `Change role, current: ${selected.label}`
+		: 'Select role'
+
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button
 					variant="outline"
 					role="combobox"
+					aria-label={ariaLabel}
+					aria-haspopup="listbox"
 					aria-expanded={open}
 					className={cn('justify-between bg-white border-green-600', className)}
 					disabled={disabled}
@@ -73,8 +79,11 @@ export function RoleSelect({
 				</Button>
 			</PopoverTrigger>
 
-			<PopoverContent className="w-[300px] p-0" align="start">
-				<Command className="bg-white">
+			<PopoverContent
+				className="w-[--radix-popover-trigger-width] p-0"
+				align="start"
+			>
+				<Command className="bg-white" role="listbox">
 					<CommandEmpty>No role found.</CommandEmpty>
 					<CommandList>
 						<CommandGroup>
@@ -82,6 +91,8 @@ export function RoleSelect({
 								<CommandItem
 									key={roleKey}
 									value={roleKey}
+									role="option"
+									aria-selected={value === roleKey}
 									onSelect={() => {
 										onValueChange(roleKey as Enums<'project_member_role'>)
 										setOpen(false)

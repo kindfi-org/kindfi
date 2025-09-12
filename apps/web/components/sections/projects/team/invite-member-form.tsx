@@ -183,6 +183,9 @@ export function InviteMemberForm({
 								<Button
 									type="submit"
 									disabled={isLoading || isSubmitting}
+									aria-label={
+										isSubmitting ? 'Sending invitation' : 'Send invitation'
+									}
 									className="flex items-center gap-2 px-8 text-white gradient-btn"
 								>
 									{isSubmitting ? (
