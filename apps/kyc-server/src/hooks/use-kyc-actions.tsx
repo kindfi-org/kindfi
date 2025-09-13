@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react'
 
 interface UpdateKycStatusParams {
-	userId: string
+	recordId?: string  // Primary key ID of the kyc_reviews record
+	userId: string     // User ID for fallback
 	status: 'pending' | 'approved' | 'rejected' | 'verified'
 	notes?: string
 }
@@ -18,6 +19,7 @@ export function useKycActions(): UseKycActionsReturn {
 
 	const updateKycStatus = useCallback(
 		async ({
+			recordId,
 			userId,
 			status,
 			notes,
@@ -26,7 +28,9 @@ export function useKycActions(): UseKycActionsReturn {
 			setError(null)
 
 			try {
-				const response = await fetch(`/api/users/${userId}/status`, {
+				// Use recordId if available, otherwise fallback to userId
+				const endpoint = recordId ? `/api/kyc-reviews/${recordId}/status` : `/api/users/${userId}/status`
+				const response = await fetch(endpoint, {
 					method: 'PATCH',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ status, notes }),
@@ -39,7 +43,6 @@ export function useKycActions(): UseKycActionsReturn {
 
 				return true
 			} catch (err: any) {
-				console.log('Status update error:', err)
 				setError(err.message || 'Something went wrong')
 				return false
 			} finally {

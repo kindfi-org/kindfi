@@ -1,7 +1,13 @@
+const HEADER_WIDTHS = [72, 88, 120, 64, 96, 112, 80, 48] as const
+const CELL_WIDTHS = [16, 16, 96, 96, 64, 80, 100, 32] as const
+
 export function UserTableSkeleton() {
 	return (
 		<div
 			className="flex w-full flex-col justify-start gap-6"
+			role="status"
+			aria-busy="true"
+			aria-live="polite"
 			aria-label="Loading users table"
 		>
 			{/* Filters skeleton */}
@@ -33,9 +39,10 @@ export function UserTableSkeleton() {
 							<div className="flex items-center h-12 px-4">
 								{Array.from({ length: 8 }).map((_, i) => (
 									<div
+										// biome-ignore lint/suspicious/noArrayIndexKey: intentional use of index for stable skeleton rendering
 										key={i}
 										className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mr-4"
-										style={{ width: `${Math.random() * 40 + 60}px` }}
+										style={{ width: `${HEADER_WIDTHS[i % HEADER_WIDTHS.length]}px` }}
 									></div>
 								))}
 							</div>
@@ -43,23 +50,46 @@ export function UserTableSkeleton() {
 
 						{/* Rows skeleton */}
 						{Array.from({ length: 8 }).map((_, rowIndex) => (
-							<div key={rowIndex} className="flex items-center h-16 px-4">
+							<div 
+								// biome-ignore lint/suspicious/noArrayIndexKey: intentional use of index for stable skeleton rendering
+								key={rowIndex} 
+								className="flex items-center h-16 px-4"
+							>
 								{Array.from({ length: 8 }).map((_, colIndex) => (
-									<div key={colIndex} className="mr-4">
+									<div 
+										// biome-ignore lint/suspicious/noArrayIndexKey: intentional use of index for stable skeleton rendering
+										key={colIndex} 
+										className="mr-4"
+									>
 										{colIndex === 0 ? (
-											<div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+											<div 
+												className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
+												style={{ width: `${CELL_WIDTHS[0]}px` }}
+											></div>
 										) : colIndex === 1 ? (
-											<div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+											<div 
+												className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
+												style={{ width: `${CELL_WIDTHS[1]}px` }}
+											></div>
 										) : colIndex === 2 ? (
-											<div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+											<div 
+												className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
+												style={{ width: `${CELL_WIDTHS[2]}px` }}
+											></div>
 										) : colIndex === 4 ? (
-											<div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+											<div 
+												className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"
+												style={{ width: `${CELL_WIDTHS[4]}px` }}
+											></div>
 										) : colIndex === 5 ? (
-											<div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+											<div 
+												className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"
+												style={{ width: `${CELL_WIDTHS[5]}px` }}
+											></div>
 										) : (
 											<div
 												className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
-												style={{ width: `${Math.random() * 60 + 40}px` }}
+												style={{ width: `${CELL_WIDTHS[colIndex % CELL_WIDTHS.length]}px` }}
 											></div>
 										)}
 									</div>

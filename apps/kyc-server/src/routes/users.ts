@@ -353,4 +353,78 @@ export const usersRoutes = {
 		},
 		OPTIONS: withConfiguredCORS(() => new Response(null)),
 	},
+
+	'/api/kyc-reviews/:id/status': {
+		async PATCH(req: Request) {
+			return withConfiguredCORS(async () => {
+				try {
+					const url = new URL(req.url)
+					const pathSegments = url.pathname.split('/')
+					const recordId = pathSegments[pathSegments.length - 2] // Extract record ID from URL
+
+					if (!recordId) {
+						return Response.json(
+							{ error: 'Record ID is required' },
+							{ status: 400 },
+						)
+					}
+
+					const body = await req.json()
+					const { status, notes } = body
+
+					if (
+						!status ||
+						!['pending', 'approved', 'rejected', 'verified'].includes(status)
+					) {
+						return Response.json(
+							{
+								error:
+									'Invalid status. Must be one of: pending, approved, rejected, verified',
+							},
+							{ status: 400 },
+						)
+					}
+
+					const supabase = supabaseServiceRole as TypedSupabaseClient
+
+					// Use the primary key (id) instead of user_id to ensure only one record is updated
+					const { data, error } = await supabase
+						.from('kyc_reviews')
+						.update({
+							status: status as
+								| 'pending'
+								| 'approved'
+								| 'rejected'
+								| 'verified',
+							notes: notes || null,
+							updated_at: new Date().toISOString(),
+						})
+						.eq('id', recordId)  // Use primary key instead of user_id
+						.select()
+
+					if (error) {
+						console.error('Database error:', error)
+						return Response.json(
+							{ error: 'Failed to update KYC status' },
+							{ status: 500 },
+						)
+					}
+
+					if (!data || data.length === 0) {
+						return Response.json({ error: 'Record not found' }, { status: 404 })
+					}
+
+					return Response.json({
+						success: true,
+						data: data[0],
+						message: `KYC status updated to ${status}`,
+					})
+				} catch (error) {
+					console.error('Error updating KYC status:', error)
+					return handleError(error)
+				}
+			})(req)
+		},
+		OPTIONS: withConfiguredCORS(() => new Response(null)),
+	},
 }

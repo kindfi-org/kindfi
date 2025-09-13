@@ -1,8 +1,8 @@
 import {
 	MoreVerticalIcon,
+	RefreshCwIcon,
 	ShieldCheckIcon,
 	UserCheckIcon,
-	UserIcon,
 	XIcon,
 } from 'lucide-react'
 
@@ -15,9 +15,10 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/base/dropdown-menu'
 import { useKycActions } from '~/hooks/use-kyc-actions'
+import type { UserData } from './user-table-columns'
 
 interface UserActionsMenuProps {
-	user: any // TODO: should probably use proper types but this works for now
+	user: UserData
 	onStatusUpdate?: () => void
 }
 
@@ -27,8 +28,9 @@ export function UserActionsMenu({
 }: UserActionsMenuProps) {
 	const { updateKycStatus, isUpdating } = useKycActions()
 
-	const handleStatusUpdate = async (newStatus: 'approved' | 'rejected') => {
+	const handleStatusUpdate = async (newStatus: 'approved' | 'rejected' | 'pending') => {
 		const success = await updateKycStatus({
+			recordId: user.id,  // Use the primary key instead of user_id
 			userId: user.user_id,
 			status: newStatus,
 		})
@@ -36,6 +38,11 @@ export function UserActionsMenu({
 		if (success && onStatusUpdate) {
 			onStatusUpdate()
 		}
+	}
+
+	const handleRequestReupload = async () => {
+		// Reset status to pending to request reupload
+		await handleStatusUpdate('pending')
 	}
 
 	return (
@@ -46,6 +53,7 @@ export function UserActionsMenu({
 					className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
 					size="icon"
 					disabled={isUpdating}
+					aria-label={`Actions for ${user.display_name || user.email || user.user_id}`}
 				>
 					<MoreVerticalIcon className="size-4" />
 				</Button>
@@ -73,6 +81,16 @@ export function UserActionsMenu({
 					>
 						<XIcon className="mr-2 size-4" />
 						{isUpdating ? 'Loading...' : 'Reject'}
+					</DropdownMenuItem>
+				)}
+				{(user.status === 'approved' || user.status === 'rejected') && (
+					<DropdownMenuItem
+						className="text-orange-600"
+						disabled={isUpdating}
+						onClick={handleRequestReupload}
+					>
+						<RefreshCwIcon className="mr-2 size-4" />
+						{isUpdating ? 'Loading...' : 'Request reupload'}
 					</DropdownMenuItem>
 				)}
 				<DropdownMenuSeparator />

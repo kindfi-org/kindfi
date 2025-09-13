@@ -8,7 +8,18 @@ import { UserActionsMenu } from '~/components/dashboard/table/user-actions-menu'
 import { UserDetailsSheet } from '~/components/dashboard/table/user-details-sheet'
 import { getStatusColor, getStatusIcon } from '~/utils/table'
 
-type UserData = any
+export interface UserData {
+	id: string
+	user_id: string
+	email?: string | null
+	display_name?: string | null
+	status: 'pending' | 'approved' | 'rejected' | 'verified'
+	verification_level: 'basic' | 'enhanced'
+	reviewer_id?: string | null
+	notes?: string | null
+	created_at: string
+	updated_at: string
+}
 
 export const createUserTableColumns = (
 	onStatusUpdate?: () => void,

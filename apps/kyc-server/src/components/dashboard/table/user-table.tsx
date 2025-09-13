@@ -8,13 +8,11 @@ import {
 	KeyboardSensor,
 	MouseSensor,
 	TouchSensor,
-	type UniqueIdentifier,
 	useSensor,
 	useSensors,
 } from '@dnd-kit/core'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
-import { arrayMove } from '@dnd-kit/sortable'
-import { useCallback, useId, useMemo } from 'react'
+import { useCallback, useId } from 'react'
 
 import { Table } from '~/components/base/table'
 import { UserTableSkeleton } from '~/components/dashboard/skeletons/user-table-skeleton'
@@ -36,10 +34,6 @@ export function UserTable() {
 		useSensor(KeyboardSensor, {}),
 	)
 
-	const dataIds = useMemo<UniqueIdentifier[]>(
-		() => data?.map(({ id }) => id) || [],
-		[data],
-	)
 
 	const handleDragEnd = useCallback((event: DragEndEvent) => {
 		const { active, over } = event
@@ -99,7 +93,6 @@ export function UserTable() {
 							<UserTableHeader headerGroups={table.getHeaderGroups()} />
 							<UserTableBody
 								table={table}
-								dataIds={dataIds}
 								columnsLength={userTableColumns.length}
 							/>
 						</Table>
