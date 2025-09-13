@@ -1,19 +1,16 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import type { Table, UniqueIdentifier } from '@tanstack/react-table'
-import { flexRender } from '@tanstack/react-table'
+import type { Table } from '@tanstack/react-table'
 
 import { TableBody, TableCell, TableRow } from '~/components/base/table'
 import { UserTableRow } from './user-table-row'
 
 interface UserTableBodyProps<TData> {
 	table: Table<TData>
-	dataIds: UniqueIdentifier[]
 	columnsLength: number
 }
 
 export function UserTableBody<TData>({
 	table,
-	dataIds,
 	columnsLength,
 }: UserTableBodyProps<TData>) {
 	const rows = table.getRowModel().rows
@@ -39,7 +36,7 @@ export function UserTableBody<TData>({
 	}
 
 	return (
-		<SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
+		<SortableContext items={rows.map(row => row.id)} strategy={verticalListSortingStrategy}>
 			<TableBody>
 				{rows.map((row) => (
 					<UserTableRow key={row.id} row={row} />

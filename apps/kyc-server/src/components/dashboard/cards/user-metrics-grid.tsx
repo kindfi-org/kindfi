@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { UserMetricCard } from '~/components/dashboard/cards/user-metric-card'
 import { metricsConfig } from '~/lib/constants/dashboard'
 import { cn } from '~/lib/utils'
@@ -7,12 +7,30 @@ interface UserMetricsGridProps {
 	className?: string
 }
 
-export function UserMetricsGrid({ className }: UserMetricsGridProps) {
-	const [stats, setStats] = useState(null)
-	const [isLoading, setIsLoading] = useState(true)
-	const [error, setError] = useState(null)
+interface TrendData {
+	value: number
+	isPositive: boolean
+}
 
-	const fetchUserStats = async () => {
+interface UserMetrics {
+	totalUsers: number
+	pending: number
+	approved: number
+	rejected: number
+	trends: {
+		totalUsers: TrendData
+		pending: TrendData
+		approved: TrendData
+		rejected: TrendData
+	}
+}
+
+export function UserMetricsGrid({ className }: UserMetricsGridProps) {
+	const [stats, setStats] = useState<UserMetrics | null>(null)
+	const [isLoading, setIsLoading] = useState(true)
+	const [error, setError] = useState<string | null>(null)
+
+	const fetchUserStats = useCallback(async () => {
 		try {
 			setIsLoading(true)
 			setError(null)
@@ -29,13 +47,14 @@ export function UserMetricsGrid({ className }: UserMetricsGridProps) {
 			} else {
 				throw new Error('Invalid response')
 			}
-		} catch (err) {
+		} catch (err: unknown) {
 			console.log('Stats fetch error:', err)
-			setError(err.message || 'Something went wrong')
+			const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
+			setError(errorMessage)
 		} finally {
 			setIsLoading(false)
 		}
-	}
+	}, [])
 
 	useEffect(() => {
 		fetchUserStats()
@@ -43,7 +62,7 @@ export function UserMetricsGrid({ className }: UserMetricsGridProps) {
 		const interval = setInterval(fetchUserStats, 30000)
 
 		return () => clearInterval(interval)
-	}, [])
+	}, [fetchUserStats])
 
 	if (error) {
 		return (
@@ -52,6 +71,7 @@ export function UserMetricsGrid({ className }: UserMetricsGridProps) {
 					<p className="text-red-600">Failed to load stats</p>
 					<p className="text-red-500 text-sm">{error}</p>
 					<button
+						type="button"
 						onClick={fetchUserStats}
 						className="text-sm text-red-700 underline"
 					>
@@ -81,20 +101,24 @@ export function UserMetricsGrid({ className }: UserMetricsGridProps) {
 	}
 
 	return (
-		<div className="grid grid-cols-1 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 gap-4 px-4">
-			{metricsConfig.map((metric) => (
-				<UserMetricCard
-					key={metric.key}
-					title={metric.title}
-					value={stats[metric.key]}
-					trendValue={stats.trends[metric.key].value}
-					isPositive={stats.trends[metric.key].isPositive}
-					icon={metric.icon}
-					iconColor={metric.iconColor}
-					text={metric.text}
-					description={metric.description}
-				/>
-			))}
+		<div className={cn("grid grid-cols-1 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 gap-4 px-4", className)}>
+			{metricsConfig.map((metric) => {
+				const metricKey = metric.key as keyof Omit<UserMetrics, 'trends'>
+				const trend = stats.trends[metricKey]
+				return (
+					<UserMetricCard
+						key={metric.key}
+						title={metric.title}
+						value={stats[metricKey]}
+						trendValue={trend.value}
+						isPositive={trend.isPositive}
+						icon={metric.icon}
+						iconColor={metric.iconColor}
+						text={metric.text}
+						description={metric.description}
+					/>
+				)
+			})}
 		</div>
 	)
 }

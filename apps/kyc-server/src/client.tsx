@@ -1,13 +1,16 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { hydrateRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
+import { DashboardSkeleton } from './components/dashboard/skeletons/dashboard-skeleton'
 import { ThemeProvider } from './components/provider/theme-provider'
 import About from './pages/About'
 import DashboardPage from './pages/dashboard'
 import Customers from './pages/dashboard/customers'
-import Users from './pages/dashboard/users'
 import WebSocketDemo from './pages/WebSocketDemo'
+
+// Lazy load the Users page to reduce initial bundle size
+const Users = React.lazy(() => import('./pages/dashboard/users'))
 
 import './index.css'
 
@@ -38,7 +41,14 @@ hydrateRoot(
 						/>
 						<Route path="/websocket" element={<WebSocketDemo />} />
 						<Route path="/dashboard/customers" element={<Customers />} />
-						<Route path="/dashboard/users" element={<Users />} />
+						<Route 
+							path="/dashboard/users" 
+							element={
+								<Suspense fallback={<DashboardSkeleton />}>
+									<Users />
+								</Suspense>
+							} 
+						/>
 					</Routes>
 				</Layout>
 			</BrowserRouter>

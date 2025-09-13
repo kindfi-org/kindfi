@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '~/components/base/button'
 import { Separator } from '~/components/base/separator'
@@ -12,19 +12,9 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from '~/components/base/sheet'
-
-interface UserData {
-	id: string
-	user_id: string
-	email?: string | null
-	display_name?: string | null
-	status: 'pending' | 'approved' | 'rejected' | 'verified'
-	verification_level: 'basic' | 'enhanced'
-	reviewer_id?: string | null
-	notes?: string | null
-	created_at: string
-	updated_at: string
-}
+import { useKycActions } from '~/hooks/use-kyc-actions'
+import { getStatusPillColor } from '~/utils/table'
+import type { UserData } from './user-table-columns'
 
 interface UserDetailsSheetProps {
 	item: UserData
@@ -32,15 +22,69 @@ interface UserDetailsSheetProps {
 
 export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 	const [isLoading, setIsLoading] = useState(false)
+	const [isOpen, setIsOpen] = useState(false)
+	const timerRef = useRef<NodeJS.Timeout | null>(null)
+	const { updateKycStatus, isUpdating } = useKycActions()
 
-	// Simulate loading state when opening
+	// Clear timer on unmount
 	useEffect(() => {
-		setIsLoading(true)
-		const timer = setTimeout(() => {
-			setIsLoading(false)
-		}, 800)
-		return () => clearTimeout(timer)
+		return () => {
+			if (timerRef.current) {
+				clearTimeout(timerRef.current)
+			}
+		}
 	}, [])
+
+	// Handle sheet open/close state changes
+	useEffect(() => {
+		if (isOpen) {
+			// Start loading when sheet opens
+			setIsLoading(true)
+			timerRef.current = setTimeout(() => {
+				setIsLoading(false)
+			}, 800)
+		} else {
+			// Clear timer and reset loading when sheet closes
+			if (timerRef.current) {
+				clearTimeout(timerRef.current)
+				timerRef.current = null
+			}
+			setIsLoading(false)
+		}
+	}, [isOpen])
+
+	const handleApprove = async () => {
+		const success = await updateKycStatus({
+			recordId: item.id,  // Use the primary key instead of user_id
+			userId: item.user_id,
+			status: 'approved',
+		})
+		if (success) {
+			// Optionally close the sheet or refresh data
+		}
+	}
+
+	const handleReject = async () => {
+		const success = await updateKycStatus({
+			recordId: item.id,  // Use the primary key instead of user_id
+			userId: item.user_id,
+			status: 'rejected',
+		})
+		if (success) {
+			// Optionally close the sheet or refresh data
+			console.log('KYC rejected successfully')
+		}
+	}
+
+	const handleViewProfile = () => {
+		// Placeholder for view profile functionality
+		console.log('View profile for user:', item.user_id)
+	}
+
+	const handleContactUser = () => {
+		// Placeholder for contact user functionality
+		console.log('Contact user:', item.user_id)
+	}
 
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleString('en-US', {
@@ -52,21 +96,9 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 		})
 	}
 
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case 'pending':
-				return 'text-orange-600 bg-orange-50 border-orange-200'
-			case 'approved':
-				return 'text-green-600 bg-green-50 border-green-200'
-			case 'rejected':
-				return 'text-red-600 bg-red-50 border-red-200'
-			default:
-				return 'text-gray-600 bg-gray-50 border-gray-200'
-		}
-	}
 
 	return (
-		<Sheet>
+		<Sheet open={isOpen} onOpenChange={setIsOpen}>
 			<SheetTrigger asChild>
 				<Button
 					variant="link"
@@ -107,27 +139,27 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 
 								<div className="grid grid-cols-1 gap-4">
 									<div className="space-y-2">
-										<label className="text-sm font-medium text-muted-foreground">
+										<p className="text-sm font-medium text-muted-foreground">
 											User ID
-										</label>
+										</p>
 										<p className="text-sm font-mono bg-muted px-3 py-2 rounded">
 											{item.user_id}
 										</p>
 									</div>
 
 									<div className="space-y-2">
-										<label className="text-sm font-medium text-muted-foreground">
+										<p className="text-sm font-medium text-muted-foreground">
 											Display Name
-										</label>
+										</p>
 										<p className="text-sm">
 											{item.display_name || 'Not provided'}
 										</p>
 									</div>
 
 									<div className="space-y-2">
-										<label className="text-sm font-medium text-muted-foreground">
+										<p className="text-sm font-medium text-muted-foreground">
 											Email Address
-										</label>
+										</p>
 										<p className="text-sm">{item.email || 'Not provided'}</p>
 									</div>
 								</div>
@@ -141,11 +173,11 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 
 								<div className="grid grid-cols-1 gap-4">
 									<div className="space-y-2">
-										<label className="text-sm font-medium text-muted-foreground">
+										<p className="text-sm font-medium text-muted-foreground">
 											Current Status
-										</label>
+										</p>
 										<div
-											className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(item.status)}`}
+											className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusPillColor(item.status)}`}
 										>
 											{item.status.charAt(0).toUpperCase() +
 												item.status.slice(1)}
@@ -153,9 +185,9 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 									</div>
 
 									<div className="space-y-2">
-										<label className="text-sm font-medium text-muted-foreground">
+										<p className="text-sm font-medium text-muted-foreground">
 											Verification Level
-										</label>
+										</p>
 										<p className="text-sm">
 											{item.verification_level.charAt(0).toUpperCase() +
 												item.verification_level.slice(1)}
@@ -172,16 +204,16 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 
 								<div className="grid grid-cols-1 gap-4">
 									<div className="space-y-2">
-										<label className="text-sm font-medium text-muted-foreground">
+										<p className="text-sm font-medium text-muted-foreground">
 											Account Created
-										</label>
+										</p>
 										<p className="text-sm">{formatDate(item.created_at)}</p>
 									</div>
 
 									<div className="space-y-2">
-										<label className="text-sm font-medium text-muted-foreground">
+										<p className="text-sm font-medium text-muted-foreground">
 											Last Updated
-										</label>
+										</p>
 										<p className="text-sm">{formatDate(item.updated_at)}</p>
 									</div>
 								</div>
@@ -197,21 +229,33 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 									<Button
 										variant="outline"
 										size="sm"
-										disabled={item.status === 'approved'}
+										disabled={item.status === 'approved' || isUpdating}
+										onClick={handleApprove}
 									>
-										Approve KYC
+										{isUpdating ? 'Loading...' : 'Approve KYC'}
 									</Button>
 									<Button
 										variant="outline"
 										size="sm"
-										disabled={item.status === 'rejected'}
+										disabled={item.status === 'rejected' || isUpdating}
+										onClick={handleReject}
 									>
-										Reject KYC
+										{isUpdating ? 'Loading...' : 'Reject KYC'}
 									</Button>
-									<Button variant="outline" size="sm">
+									<Button 
+										variant="outline" 
+										size="sm"
+										onClick={handleViewProfile}
+										disabled={isUpdating}
+									>
 										View Profile
 									</Button>
-									<Button variant="outline" size="sm">
+									<Button 
+										variant="outline" 
+										size="sm"
+										onClick={handleContactUser}
+										disabled={isUpdating}
+									>
 										Contact User
 									</Button>
 								</div>
