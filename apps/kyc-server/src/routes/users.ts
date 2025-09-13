@@ -18,7 +18,6 @@ interface UsersQueryParams {
 	sortOrder?: 'asc' | 'desc'
 }
 
-
 export const usersRoutes = {
 	'/api/users': {
 		async GET(req: Request) {
@@ -32,7 +31,8 @@ export const usersRoutes = {
 						status: url.searchParams.get('status') || '',
 						verificationLevel: url.searchParams.get('verificationLevel') || '',
 						sortBy: url.searchParams.get('sortBy') || 'created_at',
-						sortOrder: (url.searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc',
+						sortOrder:
+							(url.searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc',
 					}
 
 					const page = parseInt(params.page || '1', 10)
@@ -41,9 +41,7 @@ export const usersRoutes = {
 
 					const supabase = supabaseServiceRole as TypedSupabaseClient
 
-					let query = supabase
-						.from('kyc_reviews')
-						.select(`
+					let query = supabase.from('kyc_reviews').select(`
 							id,
 							user_id,
 							status,
@@ -54,11 +52,25 @@ export const usersRoutes = {
 							updated_at
 						`)
 
-					if (params.status && ['pending', 'approved', 'rejected', 'verified'].includes(params.status)) {
-						query = query.eq('status', params.status as 'pending' | 'approved' | 'rejected' | 'verified')
+					if (
+						params.status &&
+						['pending', 'approved', 'rejected', 'verified'].includes(
+							params.status,
+						)
+					) {
+						query = query.eq(
+							'status',
+							params.status as 'pending' | 'approved' | 'rejected' | 'verified',
+						)
 					}
-					if (params.verificationLevel && ['basic', 'enhanced'].includes(params.verificationLevel)) {
-						query = query.eq('verification_level', params.verificationLevel as 'basic' | 'enhanced')
+					if (
+						params.verificationLevel &&
+						['basic', 'enhanced'].includes(params.verificationLevel)
+					) {
+						query = query.eq(
+							'verification_level',
+							params.verificationLevel as 'basic' | 'enhanced',
+						)
 					}
 
 					if (params.search) {
@@ -70,18 +82,38 @@ export const usersRoutes = {
 						query = query.order('created_at', { ascending: false })
 					} else {
 						query = query.order('status', { ascending: false })
-						query = query.order(params.sortBy as 'created_at' | 'updated_at' | 'verification_level', { ascending: params.sortOrder === 'asc' })
+						query = query.order(
+							params.sortBy as
+								| 'created_at'
+								| 'updated_at'
+								| 'verification_level',
+							{ ascending: params.sortOrder === 'asc' },
+						)
 					}
 
 					let countQuery = supabase
 						.from('kyc_reviews')
 						.select('*', { count: 'exact', head: true })
 
-					if (params.status && ['pending', 'approved', 'rejected', 'verified'].includes(params.status)) {
-						countQuery = countQuery.eq('status', params.status as 'pending' | 'approved' | 'rejected' | 'verified')
+					if (
+						params.status &&
+						['pending', 'approved', 'rejected', 'verified'].includes(
+							params.status,
+						)
+					) {
+						countQuery = countQuery.eq(
+							'status',
+							params.status as 'pending' | 'approved' | 'rejected' | 'verified',
+						)
 					}
-					if (params.verificationLevel && ['basic', 'enhanced'].includes(params.verificationLevel)) {
-						countQuery = countQuery.eq('verification_level', params.verificationLevel as 'basic' | 'enhanced')
+					if (
+						params.verificationLevel &&
+						['basic', 'enhanced'].includes(params.verificationLevel)
+					) {
+						countQuery = countQuery.eq(
+							'verification_level',
+							params.verificationLevel as 'basic' | 'enhanced',
+						)
 					}
 					if (params.search) {
 						countQuery = countQuery.or(`user_id.ilike.%${params.search}%`)
@@ -89,17 +121,23 @@ export const usersRoutes = {
 
 					const { count } = await countQuery
 
-					const { data: users, error } = await query
-						.range(offset, offset + limit - 1)
+					const { data: users, error } = await query.range(
+						offset,
+						offset + limit - 1,
+					)
 
 					if (error) {
 						return Response.json({ error: 'Database error' }, { status: 500 })
 					}
 
 					// Quick hack to get profile data - should probably join in one query
-					const userIds = users?.map(u => u.user_id) || []
-					let profiles: { id: string; email: string | null; display_name: string | null }[] = []
-					
+					const userIds = users?.map((u) => u.user_id) || []
+					let profiles: {
+						id: string
+						email: string | null
+						display_name: string | null
+					}[] = []
+
 					if (userIds.length) {
 						const { data } = await supabase
 							.from('profiles')
@@ -108,21 +146,22 @@ export const usersRoutes = {
 						profiles = data || []
 					}
 
-					const transformedUsers = users?.map(user => {
-						const profile = profiles.find(p => p.id === user.user_id)
-						return {
-							id: user.id,
-							user_id: user.user_id,
-							email: profile?.email || null,
-							display_name: profile?.display_name || null,
-							status: user.status,
-							verification_level: user.verification_level,
-							reviewer_id: user.reviewer_id,
-							notes: user.notes,
-							created_at: user.created_at,
-							updated_at: user.updated_at,
-						}
-					}) || []
+					const transformedUsers =
+						users?.map((user) => {
+							const profile = profiles.find((p) => p.id === user.user_id)
+							return {
+								id: user.id,
+								user_id: user.user_id,
+								email: profile?.email || null,
+								display_name: profile?.display_name || null,
+								status: user.status,
+								verification_level: user.verification_level,
+								reviewer_id: user.reviewer_id,
+								notes: user.notes,
+								created_at: user.created_at,
+								updated_at: user.updated_at,
+							}
+						}) || []
 
 					return Response.json({
 						success: true,
@@ -161,7 +200,10 @@ export const usersRoutes = {
 
 					if (statusError) {
 						console.error('Database error:', statusError)
-						return Response.json({ error: 'Failed to fetch user stats' }, { status: 500 })
+						return Response.json(
+							{ error: 'Failed to fetch user stats' },
+							{ status: 500 },
+						)
 					}
 
 					const stats = statusCounts?.reduce(
@@ -175,7 +217,7 @@ export const usersRoutes = {
 							pending: 0,
 							approved: 0,
 							rejected: 0,
-						}
+						},
 					) || { totalUsers: 0, pending: 0, approved: 0, rejected: 0 }
 
 					const thirtyDaysAgo = new Date()
@@ -201,13 +243,13 @@ export const usersRoutes = {
 							pending: 0,
 							approved: 0,
 							rejected: 0,
-						}
+						},
 					) || { totalUsers: 0, pending: 0, approved: 0, rejected: 0 }
 
 					const calculateTrend = (current: number, recent: number) => ({
-						value: recent > 0 ? ((recent / Math.max(current, 1)) * 100) : 0,
+						value: recent > 0 ? (recent / Math.max(current, 1)) * 100 : 0,
 						isPositive: recent > 0,
-	})
+					})
 
 					return Response.json({
 						success: true,
@@ -217,7 +259,10 @@ export const usersRoutes = {
 							approved: stats.approved,
 							rejected: stats.rejected,
 							trends: {
-								totalUsers: calculateTrend(stats.totalUsers, recentStats.totalUsers),
+								totalUsers: calculateTrend(
+									stats.totalUsers,
+									recentStats.totalUsers,
+								),
 								pending: calculateTrend(stats.pending, recentStats.pending),
 								approved: calculateTrend(stats.approved, recentStats.approved),
 								rejected: calculateTrend(stats.rejected, recentStats.rejected),
@@ -239,18 +284,28 @@ export const usersRoutes = {
 					const url = new URL(req.url)
 					const pathSegments = url.pathname.split('/')
 					const userId = pathSegments[pathSegments.length - 2] // Extract user ID from URL
-					
+
 					if (!userId) {
-						return Response.json({ error: 'User ID is required' }, { status: 400 })
+						return Response.json(
+							{ error: 'User ID is required' },
+							{ status: 400 },
+						)
 					}
 
 					const body = await req.json()
 					const { status, notes } = body
 
-					if (!status || !['pending', 'approved', 'rejected', 'verified'].includes(status)) {
-						return Response.json({ 
-							error: 'Invalid status. Must be one of: pending, approved, rejected, verified' 
-						}, { status: 400 })
+					if (
+						!status ||
+						!['pending', 'approved', 'rejected', 'verified'].includes(status)
+					) {
+						return Response.json(
+							{
+								error:
+									'Invalid status. Must be one of: pending, approved, rejected, verified',
+							},
+							{ status: 400 },
+						)
 					}
 
 					const supabase = supabaseServiceRole as TypedSupabaseClient
@@ -260,7 +315,11 @@ export const usersRoutes = {
 					const { data, error } = await supabase
 						.from('kyc_reviews')
 						.update({
-							status: status as 'pending' | 'approved' | 'rejected' | 'verified',
+							status: status as
+								| 'pending'
+								| 'approved'
+								| 'rejected'
+								| 'verified',
 							notes: notes || null,
 							updated_at: new Date().toISOString(),
 						})
@@ -269,7 +328,10 @@ export const usersRoutes = {
 
 					if (error) {
 						console.error('Database error:', error)
-						return Response.json({ error: 'Failed to update KYC status' }, { status: 500 })
+						return Response.json(
+							{ error: 'Failed to update KYC status' },
+							{ status: 500 },
+						)
 					}
 
 					if (!data || data.length === 0) {
@@ -281,7 +343,7 @@ export const usersRoutes = {
 					return Response.json({
 						success: true,
 						data: data[0],
-						message: `KYC status updated to ${status}`
+						message: `KYC status updated to ${status}`,
 					})
 				} catch (error) {
 					console.error('Error updating KYC status:', error)

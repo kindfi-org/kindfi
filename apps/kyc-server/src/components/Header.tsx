@@ -44,9 +44,7 @@ const Header = () => {
 				{/* Brand Logo */}
 				<div className="text-2xl font-semibold">
 					<Link to="/dashboard">
-						<span className="text-foreground">
-							KindFi KYC Server
-						</span>
+						<span className="text-foreground">KindFi KYC Server</span>
 					</Link>
 				</div>
 

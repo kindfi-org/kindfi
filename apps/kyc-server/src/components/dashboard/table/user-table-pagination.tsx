@@ -23,13 +23,17 @@ export function UserTablePagination<TData>({
 	const totalRows = table.getFilteredRowModel().rows.length
 
 	const startRow = table.getState().pagination.pageIndex * pageSize + 1
-	const endRow = Math.min((table.getState().pagination.pageIndex + 1) * pageSize, totalRows)
+	const endRow = Math.min(
+		(table.getState().pagination.pageIndex + 1) * pageSize,
+		totalRows,
+	)
 
 	return (
 		<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 			<div className="flex items-center gap-2 text-sm text-muted-foreground">
 				<span>
-					Showing {totalRows > 0 ? startRow : 0} to {endRow} of {totalRows} users
+					Showing {totalRows > 0 ? startRow : 0} to {endRow} of {totalRows}{' '}
+					users
 				</span>
 			</div>
 
@@ -61,7 +65,7 @@ export function UserTablePagination<TData>({
 					<span className="text-sm text-muted-foreground">
 						Page {currentPage} of {pageCount}
 					</span>
-					
+
 					<div className="flex items-center gap-1">
 						<Button
 							variant="outline"
@@ -102,11 +106,13 @@ export function UserTablePagination<TData>({
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent side="top" className="max-h-[200px]">
-								{Array.from({ length: pageCount }, (_, i) => i + 1).map((page) => (
-									<SelectItem key={page} value={`${page}`}>
-										{page}
-									</SelectItem>
-								))}
+								{Array.from({ length: pageCount }, (_, i) => i + 1).map(
+									(page) => (
+										<SelectItem key={page} value={`${page}`}>
+											{page}
+										</SelectItem>
+									),
+								)}
 							</SelectContent>
 						</Select>
 					</div>

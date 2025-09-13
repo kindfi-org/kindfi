@@ -16,14 +16,14 @@ export function UserMetricsGrid({ className }: UserMetricsGridProps) {
 		try {
 			setIsLoading(true)
 			setError(null)
-			
+
 			const response = await fetch('/api/users/stats')
 			const result = await response.json()
-			
+
 			if (!response.ok) {
 				throw new Error(result.error || 'Failed to fetch stats')
 			}
-			
+
 			if (result.success) {
 				setStats(result.data)
 			} else {
@@ -39,9 +39,9 @@ export function UserMetricsGrid({ className }: UserMetricsGridProps) {
 
 	useEffect(() => {
 		fetchUserStats()
-		
+
 		const interval = setInterval(fetchUserStats, 30000)
-		
+
 		return () => clearInterval(interval)
 	}, [])
 
@@ -51,7 +51,10 @@ export function UserMetricsGrid({ className }: UserMetricsGridProps) {
 				<div className="text-center">
 					<p className="text-red-600">Failed to load stats</p>
 					<p className="text-red-500 text-sm">{error}</p>
-					<button onClick={fetchUserStats} className="text-sm text-red-700 underline">
+					<button
+						onClick={fetchUserStats}
+						className="text-sm text-red-700 underline"
+					>
 						Try again
 					</button>
 				</div>
@@ -63,7 +66,10 @@ export function UserMetricsGrid({ className }: UserMetricsGridProps) {
 		return (
 			<div className="grid grid-cols-1 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 gap-4 px-4">
 				{metricsConfig.map((metric) => (
-					<div key={metric.key} className="h-32 rounded-lg border animate-pulse bg-gray-100">
+					<div
+						key={metric.key}
+						className="h-32 rounded-lg border animate-pulse bg-gray-100"
+					>
 						<div className="p-4 space-y-3">
 							<div className="h-4 bg-gray-200 rounded w-3/4"></div>
 							<div className="h-8 bg-gray-200 rounded w-1/2"></div>

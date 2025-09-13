@@ -1,6 +1,12 @@
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Button } from '~/components/base/button'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '~/components/base/card'
 
 export default async function ProjectManagementDashboardPage({
 	params,
@@ -37,7 +43,7 @@ export default async function ProjectManagementDashboardPage({
 					href={`/projects/${slug}/manage/highlights`}
 					cta="Add highlights"
 				/>
-					<SectionCard
+				<SectionCard
 					title="Team"
 					description="Add and manage your team members."
 					href={`/projects/${slug}/manage/team`}

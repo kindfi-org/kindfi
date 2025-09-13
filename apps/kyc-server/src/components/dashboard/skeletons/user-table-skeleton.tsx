@@ -1,6 +1,9 @@
 export function UserTableSkeleton() {
 	return (
-		<div className="flex w-full flex-col justify-start gap-6" aria-label="Loading users table">
+		<div
+			className="flex w-full flex-col justify-start gap-6"
+			aria-label="Loading users table"
+		>
 			{/* Filters skeleton */}
 			<div className="flex flex-col gap-4 px-4 lg:px-6">
 				<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -13,7 +16,7 @@ export function UserTableSkeleton() {
 						<div className="h-9 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
 					</div>
 				</div>
-				
+
 				{/* Search bar skeleton */}
 				<div className="flex gap-2">
 					<div className="h-10 flex-1 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
@@ -42,10 +45,7 @@ export function UserTableSkeleton() {
 						{Array.from({ length: 8 }).map((_, rowIndex) => (
 							<div key={rowIndex} className="flex items-center h-16 px-4">
 								{Array.from({ length: 8 }).map((_, colIndex) => (
-									<div
-										key={colIndex}
-										className="mr-4"
-									>
+									<div key={colIndex} className="mr-4">
 										{colIndex === 0 ? (
 											<div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
 										) : colIndex === 1 ? (
@@ -57,7 +57,7 @@ export function UserTableSkeleton() {
 										) : colIndex === 5 ? (
 											<div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
 										) : (
-											<div 
+											<div
 												className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
 												style={{ width: `${Math.random() * 60 + 40}px` }}
 											></div>

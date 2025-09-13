@@ -25,13 +25,15 @@ export function useUserTable() {
 	const [userData, setUserData] = useState([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState(null)
-	
+
 	const [searchFilter, setSearchFilter] = useState('')
 	const [statusFilter, setStatusFilter] = useState('all')
 	const [verificationLevelFilter, setVerificationLevelFilter] = useState('all')
 
 	const [rowSelection, setRowSelection] = useSetState<RowSelectionState>({})
-	const [columnVisibility, setColumnVisibility] = useSetState<VisibilityState>({})
+	const [columnVisibility, setColumnVisibility] = useSetState<VisibilityState>(
+		{},
+	)
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 	const [sorting, setSorting] = useState<SortingState>([])
 
@@ -44,14 +46,14 @@ export function useUserTable() {
 		try {
 			setIsLoading(true)
 			setError(null)
-			
+
 			const response = await fetch('/api/users?limit=100') // Get more data for pagination
 			const result = await response.json()
-			
+
 			if (!response.ok) {
 				throw new Error(result.error || 'Failed to fetch users')
 			}
-			
+
 			if (result.success) {
 				setUserData(result.data || [])
 			} else {
@@ -67,12 +69,15 @@ export function useUserTable() {
 
 	const filteredData = useMemo(() => {
 		return userData.filter((item) => {
-			const searchMatch = !searchFilter || 
+			const searchMatch =
+				!searchFilter ||
 				item.email?.toLowerCase().includes(searchFilter.toLowerCase()) ||
 				item.display_name?.toLowerCase().includes(searchFilter.toLowerCase()) ||
 				item.user_id.toLowerCase().includes(searchFilter.toLowerCase())
 			const statusMatch = statusFilter === 'all' || item.status === statusFilter
-			const levelMatch = verificationLevelFilter === 'all' || item.verification_level === verificationLevelFilter
+			const levelMatch =
+				verificationLevelFilter === 'all' ||
+				item.verification_level === verificationLevelFilter
 			return searchMatch && statusMatch && levelMatch
 		})
 	}, [userData, searchFilter, statusFilter, verificationLevelFilter])
@@ -85,9 +90,9 @@ export function useUserTable() {
 		})
 	}, [filteredData])
 
-	const columns = useMemo(() => 
-		createUserTableColumns(() => fetchUsers()), 
-		[fetchUsers]
+	const columns = useMemo(
+		() => createUserTableColumns(() => fetchUsers()),
+		[fetchUsers],
 	)
 
 	const table = useReactTable({
@@ -120,7 +125,7 @@ export function useUserTable() {
 	}, [fetchUsers])
 
 	const { isConnected } = useKYCWebSocket({
-		onUpdate: () => fetchUsers()
+		onUpdate: () => fetchUsers(),
 	})
 
 	useEffect(() => {

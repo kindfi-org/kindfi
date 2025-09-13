@@ -26,15 +26,8 @@ import { UserTablePagination } from '~/components/dashboard/table/user-table-pag
 import { useUserTable } from '~/hooks/use-user-table'
 
 export function UserTable() {
-	const {
-		table,
-		data,
-		isLoading,
-		error,
-		filters,
-		setFilters,
-		actions,
-	} = useUserTable()
+	const { table, data, isLoading, error, filters, setFilters, actions } =
+		useUserTable()
 
 	const sortableId = useId()
 	const sensors = useSensors(
@@ -48,15 +41,12 @@ export function UserTable() {
 		[data],
 	)
 
-	const handleDragEnd = useCallback(
-		(event: DragEndEvent) => {
-			const { active, over } = event
-			if (active && over && active.id !== over.id) {
-				console.log('Reordering rows:', { from: active.id, to: over.id })
-			}
-		},
-		[],
-	)
+	const handleDragEnd = useCallback((event: DragEndEvent) => {
+		const { active, over } = event
+		if (active && over && active.id !== over.id) {
+			console.log('Reordering rows:', { from: active.id, to: over.id })
+		}
+	}, [])
 
 	if (error) {
 		return (

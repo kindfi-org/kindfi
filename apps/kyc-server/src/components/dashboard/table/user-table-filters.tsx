@@ -2,7 +2,7 @@
 
 import type { Table } from '@tanstack/react-table'
 import { SearchIcon, XIcon } from 'lucide-react'
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
@@ -44,13 +44,17 @@ export function UserTableFilters({
 		onSearchChange('')
 	}, [onSearchChange])
 
-	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-		if (e.key === 'Enter') {
-			handleSearchSubmit()
-		}
-	}, [handleSearchSubmit])
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === 'Enter') {
+				handleSearchSubmit()
+			}
+		},
+		[handleSearchSubmit],
+	)
 
-	const hasActiveFilters = search || statusFilter !== 'all' || verificationLevelFilter !== 'all'
+	const hasActiveFilters =
+		search || statusFilter !== 'all' || verificationLevelFilter !== 'all'
 
 	const clearAllFilters = useCallback(() => {
 		setSearchInput('')
@@ -69,7 +73,7 @@ export function UserTableFilters({
 						Manage user verification status and KYC reviews
 					</p>
 				</div>
-				
+
 				{hasActiveFilters && (
 					<Button
 						variant="outline"
@@ -97,7 +101,7 @@ export function UserTableFilters({
 							className="pl-9"
 						/>
 					</div>
-					<Button 
+					<Button
 						onClick={handleSearchSubmit}
 						disabled={searchInput === search}
 					>
@@ -119,8 +123,8 @@ export function UserTableFilters({
 						</SelectContent>
 					</Select>
 
-					<Select 
-						value={verificationLevelFilter} 
+					<Select
+						value={verificationLevelFilter}
 						onValueChange={onVerificationLevelFilterChange}
 					>
 						<SelectTrigger className="w-[160px]">
@@ -162,11 +166,17 @@ export function UserTableFilters({
 			<div className="text-sm text-muted-foreground">
 				{table.getFilteredRowModel().rows.length > 0 ? (
 					<>
-						Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+						Showing{' '}
+						{table.getState().pagination.pageIndex *
+							table.getState().pagination.pageSize +
+							1}{' '}
+						to{' '}
 						{Math.min(
-							(table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-							table.getFilteredRowModel().rows.length
-						)} of {table.getFilteredRowModel().rows.length} users
+							(table.getState().pagination.pageIndex + 1) *
+								table.getState().pagination.pageSize,
+							table.getFilteredRowModel().rows.length,
+						)}{' '}
+						of {table.getFilteredRowModel().rows.length} users
 						{hasActiveFilters && ' (filtered)'}
 					</>
 				) : (

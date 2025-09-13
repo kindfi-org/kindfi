@@ -1,4 +1,10 @@
-import { MoreVerticalIcon, ShieldCheckIcon, UserCheckIcon, UserIcon, XIcon } from 'lucide-react'
+import {
+	MoreVerticalIcon,
+	ShieldCheckIcon,
+	UserCheckIcon,
+	UserIcon,
+	XIcon,
+} from 'lucide-react'
 
 import { Button } from '~/components/base/button'
 import {
@@ -11,11 +17,14 @@ import {
 import { useKycActions } from '~/hooks/use-kyc-actions'
 
 interface UserActionsMenuProps {
-	user: any  // TODO: should probably use proper types but this works for now
+	user: any // TODO: should probably use proper types but this works for now
 	onStatusUpdate?: () => void
 }
 
-export function UserActionsMenu({ user, onStatusUpdate }: UserActionsMenuProps) {
+export function UserActionsMenu({
+	user,
+	onStatusUpdate,
+}: UserActionsMenuProps) {
 	const { updateKycStatus, isUpdating } = useKycActions()
 
 	const handleStatusUpdate = async (newStatus: 'approved' | 'rejected') => {
@@ -47,7 +56,7 @@ export function UserActionsMenu({ user, onStatusUpdate }: UserActionsMenuProps) 
 					Review KYC
 				</DropdownMenuItem>
 				{user.status !== 'approved' && (
-					<DropdownMenuItem 
+					<DropdownMenuItem
 						className="text-green-600"
 						disabled={isUpdating}
 						onClick={() => handleStatusUpdate('approved')}
@@ -57,7 +66,7 @@ export function UserActionsMenu({ user, onStatusUpdate }: UserActionsMenuProps) 
 					</DropdownMenuItem>
 				)}
 				{user.status !== 'rejected' && (
-					<DropdownMenuItem 
+					<DropdownMenuItem
 						className="text-red-600"
 						disabled={isUpdating}
 						onClick={() => handleStatusUpdate('rejected')}
