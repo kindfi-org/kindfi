@@ -41,7 +41,7 @@ export function UserTableRow<TData>({ row }: UserTableRowProps<TData>) {
 		>
 			{row.getVisibleCells().map((cell, index) => {
 				const cellProps = index === 0 ? { ...listeners } : {}
-				
+
 				return (
 					<TableCell key={cell.id} {...cellProps}>
 						{flexRender(cell.column.columnDef.cell, cell.getContext())}

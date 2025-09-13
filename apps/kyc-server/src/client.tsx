@@ -18,15 +18,18 @@ if (!rootElement) {
 hydrateRoot(
 	rootElement,
 	<React.StrictMode>
-		<ThemeProvider 
-			attribute="class" 
-			defaultTheme="system" 
-			enableSystem
-		>
+		<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 			<BrowserRouter>
 				<Layout>
 					<Routes>
-						<Route path="/" element={<div className="card"><p>Welcome to Kindfi KYC Server</p></div>} />
+						<Route
+							path="/"
+							element={
+								<div className="card">
+									<p>Welcome to Kindfi KYC Server</p>
+								</div>
+							}
+						/>
 						<Route path="/dashboard" element={<DashboardPage />} />
 						<Route path="/about" element={<About />} />
 						<Route

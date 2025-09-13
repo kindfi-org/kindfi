@@ -95,7 +95,8 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 								User Details
 							</SheetTitle>
 							<SheetDescription id="user-details-description">
-								Detailed information and KYC status for {item.display_name || item.user_id}
+								Detailed information and KYC status for{' '}
+								{item.display_name || item.user_id}
 							</SheetDescription>
 						</SheetHeader>
 
@@ -103,7 +104,7 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 							{/* User Information */}
 							<div className="space-y-4">
 								<h3 className="text-lg font-medium">User Information</h3>
-								
+
 								<div className="grid grid-cols-1 gap-4">
 									<div className="space-y-2">
 										<label className="text-sm font-medium text-muted-foreground">
@@ -113,7 +114,7 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 											{item.user_id}
 										</p>
 									</div>
-									
+
 									<div className="space-y-2">
 										<label className="text-sm font-medium text-muted-foreground">
 											Display Name
@@ -122,14 +123,12 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 											{item.display_name || 'Not provided'}
 										</p>
 									</div>
-									
+
 									<div className="space-y-2">
 										<label className="text-sm font-medium text-muted-foreground">
 											Email Address
 										</label>
-										<p className="text-sm">
-											{item.email || 'Not provided'}
-										</p>
+										<p className="text-sm">{item.email || 'Not provided'}</p>
 									</div>
 								</div>
 							</div>
@@ -139,23 +138,27 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 							{/* KYC Status */}
 							<div className="space-y-4">
 								<h3 className="text-lg font-medium">KYC Status</h3>
-								
+
 								<div className="grid grid-cols-1 gap-4">
 									<div className="space-y-2">
 										<label className="text-sm font-medium text-muted-foreground">
 											Current Status
 										</label>
-										<div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(item.status)}`}>
-											{item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+										<div
+											className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(item.status)}`}
+										>
+											{item.status.charAt(0).toUpperCase() +
+												item.status.slice(1)}
 										</div>
 									</div>
-									
+
 									<div className="space-y-2">
 										<label className="text-sm font-medium text-muted-foreground">
 											Verification Level
 										</label>
 										<p className="text-sm">
-											{item.verification_level.charAt(0).toUpperCase() + item.verification_level.slice(1)}
+											{item.verification_level.charAt(0).toUpperCase() +
+												item.verification_level.slice(1)}
 										</p>
 									</div>
 								</div>
@@ -166,24 +169,20 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 							{/* Timestamps */}
 							<div className="space-y-4">
 								<h3 className="text-lg font-medium">Timeline</h3>
-								
+
 								<div className="grid grid-cols-1 gap-4">
 									<div className="space-y-2">
 										<label className="text-sm font-medium text-muted-foreground">
 											Account Created
 										</label>
-										<p className="text-sm">
-											{formatDate(item.created_at)}
-										</p>
+										<p className="text-sm">{formatDate(item.created_at)}</p>
 									</div>
-									
+
 									<div className="space-y-2">
 										<label className="text-sm font-medium text-muted-foreground">
 											Last Updated
 										</label>
-										<p className="text-sm">
-											{formatDate(item.updated_at)}
-										</p>
+										<p className="text-sm">{formatDate(item.updated_at)}</p>
 									</div>
 								</div>
 							</div>
@@ -193,17 +192,17 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 							{/* Actions */}
 							<div className="space-y-4">
 								<h3 className="text-lg font-medium">Quick Actions</h3>
-								
+
 								<div className="flex flex-wrap gap-2">
-									<Button 
-										variant="outline" 
+									<Button
+										variant="outline"
 										size="sm"
 										disabled={item.status === 'approved'}
 									>
 										Approve KYC
 									</Button>
-									<Button 
-										variant="outline" 
+									<Button
+										variant="outline"
 										size="sm"
 										disabled={item.status === 'rejected'}
 									>

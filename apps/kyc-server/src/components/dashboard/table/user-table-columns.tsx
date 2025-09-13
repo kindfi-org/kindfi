@@ -10,7 +10,9 @@ import { getStatusColor, getStatusIcon } from '~/utils/table'
 
 type UserData = any
 
-export const createUserTableColumns = (onStatusUpdate?: () => void): ColumnDef<UserData>[] => [
+export const createUserTableColumns = (
+	onStatusUpdate?: () => void,
+): ColumnDef<UserData>[] => [
 	{
 		id: 'drag',
 		header: () => null,
@@ -84,7 +86,11 @@ export const createUserTableColumns = (onStatusUpdate?: () => void): ColumnDef<U
 			const isEnhanced = row.original.verification_level === 'enhanced'
 			return (
 				<Badge variant="outline" className={isEnhanced ? 'text-blue-600' : ''}>
-					{isEnhanced ? <ShieldCheckIcon className="mr-1 size-3" /> : <UserCheckIcon className="mr-1 size-3" />}
+					{isEnhanced ? (
+						<ShieldCheckIcon className="mr-1 size-3" />
+					) : (
+						<UserCheckIcon className="mr-1 size-3" />
+					)}
 					{row.original.verification_level}
 				</Badge>
 			)
@@ -112,10 +118,7 @@ export const createUserTableColumns = (onStatusUpdate?: () => void): ColumnDef<U
 		id: 'actions',
 		header: () => <div className="text-center">Actions</div>,
 		cell: ({ row }) => (
-			<UserActionsMenu 
-				user={row.original} 
-				onStatusUpdate={onStatusUpdate}
-			/>
+			<UserActionsMenu user={row.original} onStatusUpdate={onStatusUpdate} />
 		),
 	},
 ]

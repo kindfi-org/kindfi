@@ -1,7 +1,4 @@
-import {
-	SortableContext,
-	verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import type { Table, UniqueIdentifier } from '@tanstack/react-table'
 import { flexRender } from '@tanstack/react-table'
 
