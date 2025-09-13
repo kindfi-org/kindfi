@@ -6,14 +6,13 @@ import { UserTableRow } from './user-table-row'
 
 interface UserTableBodyProps<TData> {
 	table: Table<TData>
-	columnsLength: number
 }
 
 export function UserTableBody<TData>({
 	table,
-	columnsLength,
 }: UserTableBodyProps<TData>) {
 	const rows = table.getRowModel().rows
+	const columnsLength = table.getVisibleLeafColumns().length
 
 	if (rows.length === 0) {
 		return (

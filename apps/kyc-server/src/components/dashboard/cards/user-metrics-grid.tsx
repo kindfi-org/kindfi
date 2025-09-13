@@ -48,7 +48,7 @@ export function UserMetricsGrid({ className }: UserMetricsGridProps) {
 				throw new Error('Invalid response')
 			}
 		} catch (err: unknown) {
-			console.log('Stats fetch error:', err)
+			console.error('Stats fetch error:', err)
 			const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
 			setError(errorMessage)
 		} finally {
@@ -66,7 +66,7 @@ export function UserMetricsGrid({ className }: UserMetricsGridProps) {
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-32 px-4 rounded-lg border border-red-200 bg-red-50">
+			<div className="flex items-center justify-center h-32 px-4 rounded-lg border border-red-200 bg-red-50" role="alert">
 				<div className="text-center">
 					<p className="text-red-600">Failed to load stats</p>
 					<p className="text-red-500 text-sm">{error}</p>

@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 
+import type { Enums } from '@services/supabase'
+
 interface KYCUpdate {
 	type: 'kyc_status'
 	data: {
 		user_id: string
-		status: string
+		status: Enums<'kyc_status_enum'>
 		verification_level: string
 		timestamp: string
 	}
@@ -15,8 +17,32 @@ interface UseKYCWebSocketOptions {
 }
 
 const isValidUpdate = (data: unknown): data is KYCUpdate => {
-	return typeof data === 'object' && data !== null && 
-		   'type' in data && (data as KYCUpdate).type === 'kyc_status'
+	if (typeof data !== 'object' || data === null) {
+		return false
+	}
+
+	const obj = data as Record<string, unknown>
+	
+	// Check for type property
+	if (!('type' in obj) || obj.type !== 'kyc_status') {
+		return false
+	}
+
+	// Check for data property and its structure
+	if (!('data' in obj) || typeof obj.data !== 'object' || obj.data === null) {
+		return false
+	}
+
+	const payload = obj.data as Record<string, unknown>
+	
+	// Validate required payload properties
+	return (
+		typeof payload.user_id === 'string' &&
+		typeof payload.status === 'string' &&
+		['pending', 'approved', 'rejected', 'verified'].includes(payload.status) &&
+		typeof payload.verification_level === 'string' &&
+		typeof payload.timestamp === 'string'
+	)
 }
 
 // Singleton WebSocket connection manager
@@ -44,7 +70,7 @@ class WebSocketManager {
 		}
 	}
 
-	private connect() {
+	private connect(): Promise<void> {
 		if (this.connectionPromise) return this.connectionPromise
 
 		this.connectionPromise = new Promise<void>((resolve, reject) => {
@@ -67,10 +93,18 @@ class WebSocketManager {
 								callback(data)
 							})
 						} else if (data && typeof data === 'object' && 'type' in data && data.type === 'error' && 'message' in data) {
-							console.log('WS error:', data.message)
+							console.error('WebSocket received error message:', {
+								message: data.message,
+								payload: data,
+								context: 'ws_error_message'
+							})
 						}
-					} catch {
-						console.log('WS parse error')
+					} catch (err) {
+						console.error('WebSocket message parse failed:', {
+							error: err,
+							rawMessage: event.data,
+							context: 'ws_parse_error'
+						})
 					}
 				}
 
@@ -88,8 +122,13 @@ class WebSocketManager {
 					}
 				}
 
-				this.ws.onerror = () => {
-					console.log('WebSocket error (singleton)')
+				this.ws.onerror = (event) => {
+					console.error('WebSocket connection error:', {
+						event,
+						context: 'ws_connection_error',
+						retryCount: this.retryCount,
+						maxRetries: this.maxRetries
+					})
 					this.isConnected = false
 					this.connectionPromise = null
 					reject(new Error('WebSocket connection failed'))
@@ -120,11 +159,17 @@ class WebSocketManager {
 		return this.isConnected
 	}
 
-	reconnect() {
+	reconnect(): void {
 		this.retryCount = 0
 		this.disconnect()
 		if (this.subscribers.size > 0) {
 			this.connect()
+		}
+	}
+
+	sendMessage(message: any): void {
+		if (this.ws && this.isConnected) {
+			this.ws.send(JSON.stringify(message))
 		}
 	}
 }
@@ -135,6 +180,7 @@ export function useKYCWebSocket({
 	onUpdate,
 }: UseKYCWebSocketOptions = {}) {
 	const [isConnected, setIsConnected] = useState(false)
+	const [lastUpdate, setLastUpdate] = useState<KYCUpdate | null>(null)
 	const onUpdateRef = useRef(onUpdate)
 
 	useEffect(() => {
@@ -143,6 +189,7 @@ export function useKYCWebSocket({
 
 	useEffect(() => {
 		const unsubscribe = wsManager.subscribe((update) => {
+			setLastUpdate(update)
 			onUpdateRef.current?.(update)
 		})
 
@@ -162,6 +209,10 @@ export function useKYCWebSocket({
 
 	return {
 		isConnected,
+		lastUpdate,
+		sendMessage: (message: any) => {
+			wsManager.sendMessage(message)
+		},
 		reconnect: () => {
 			wsManager.reconnect()
 		},
