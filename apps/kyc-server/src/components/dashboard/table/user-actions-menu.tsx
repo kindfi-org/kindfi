@@ -20,11 +20,13 @@ import type { UserData } from './user-table-columns'
 interface UserActionsMenuProps {
 	user: UserData
 	onStatusUpdate?: () => void
+	onReview?: (userId: string) => void
 }
 
 export function UserActionsMenu({
 	user,
 	onStatusUpdate,
+	onReview,
 }: UserActionsMenuProps) {
 	const { updateKycStatus, isUpdating } = useKycActions()
 
@@ -59,11 +61,14 @@ export function UserActionsMenu({
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
-				<DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={() => onReview?.(user.user_id)}
+					disabled={isUpdating}
+				>
 					<UserCheckIcon className="mr-2 size-4" />
 					Review KYC
 				</DropdownMenuItem>
-				{user.status !== 'approved' && (
+				{user.status !== 'approved' && user.status !== 'verified' && (
 					<DropdownMenuItem
 						className="text-green-600"
 						disabled={isUpdating}
@@ -73,7 +78,7 @@ export function UserActionsMenu({
 						{isUpdating ? 'Loading...' : 'Approve'}
 					</DropdownMenuItem>
 				)}
-				{user.status !== 'rejected' && (
+				{user.status !== 'rejected' && user.status !== 'verified' && (
 					<DropdownMenuItem
 						className="text-red-600"
 						disabled={isUpdating}
@@ -83,7 +88,7 @@ export function UserActionsMenu({
 						{isUpdating ? 'Loading...' : 'Reject'}
 					</DropdownMenuItem>
 				)}
-				{(user.status === 'approved' || user.status === 'rejected') && (
+				{(user.status === 'approved' || user.status === 'rejected') && user.status !== 'verified' && (
 					<DropdownMenuItem
 						className="text-orange-600"
 						disabled={isUpdating}

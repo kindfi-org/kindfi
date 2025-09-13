@@ -23,7 +23,7 @@ interface UserDetailsSheetProps {
 export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 	const [isLoading, setIsLoading] = useState(false)
 	const [isOpen, setIsOpen] = useState(false)
-	const timerRef = useRef<NodeJS.Timeout | null>(null)
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 	const { updateKycStatus, isUpdating } = useKycActions()
 
 	// Clear timer on unmount
@@ -101,6 +101,7 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
 			<SheetTrigger asChild>
 				<Button
+					type="button"
 					variant="link"
 					className="w-fit px-0 text-left text-foreground hover:text-primary"
 					aria-label={`View details for user ${item.display_name || item.user_id}`}
@@ -227,6 +228,7 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 
 								<div className="flex flex-wrap gap-2">
 									<Button
+										type="button"
 										variant="outline"
 										size="sm"
 										disabled={item.status === 'approved' || isUpdating}
@@ -235,6 +237,7 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 										{isUpdating ? 'Loading...' : 'Approve KYC'}
 									</Button>
 									<Button
+										type="button"
 										variant="outline"
 										size="sm"
 										disabled={item.status === 'rejected' || isUpdating}
@@ -243,6 +246,7 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 										{isUpdating ? 'Loading...' : 'Reject KYC'}
 									</Button>
 									<Button 
+										type="button"
 										variant="outline" 
 										size="sm"
 										onClick={handleViewProfile}
@@ -251,6 +255,7 @@ export function UserDetailsSheet({ item }: UserDetailsSheetProps) {
 										View Profile
 									</Button>
 									<Button 
+										type="button"
 										variant="outline" 
 										size="sm"
 										onClick={handleContactUser}

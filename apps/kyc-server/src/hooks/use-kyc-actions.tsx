@@ -1,9 +1,11 @@
 import { useCallback, useState } from 'react'
 
+import type { Enums } from '@services/supabase'
+
 interface UpdateKycStatusParams {
 	recordId?: string  // Primary key ID of the kyc_reviews record
 	userId: string     // User ID for fallback
-	status: 'pending' | 'approved' | 'rejected' | 'verified'
+	status: Enums<'kyc_status_enum'>
 	notes?: string
 }
 

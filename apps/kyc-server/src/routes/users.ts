@@ -401,22 +401,15 @@ export const usersRoutes = {
 						})
 						.eq('id', recordId)  // Use primary key instead of user_id
 						.select()
+						.single()
 
 					if (error) {
-						console.error('Database error:', error)
-						return Response.json(
-							{ error: 'Failed to update KYC status' },
-							{ status: 500 },
-						)
-					}
-
-					if (!data || data.length === 0) {
-						return Response.json({ error: 'Record not found' }, { status: 404 })
+						return handleError(error)
 					}
 
 					return Response.json({
 						success: true,
-						data: data[0],
+						data: data,
 						message: `KYC status updated to ${status}`,
 					})
 				} catch (error) {

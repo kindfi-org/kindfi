@@ -17,13 +17,14 @@ import { useCallback, useId } from 'react'
 import { Table } from '~/components/base/table'
 import { UserTableSkeleton } from '~/components/dashboard/skeletons/user-table-skeleton'
 import { UserTableBody } from '~/components/dashboard/table/user-table-body'
-import { userTableColumns } from '~/components/dashboard/table/user-table-columns'
 import { UserTableFilters } from '~/components/dashboard/table/user-table-filters'
 import { UserTableHeader } from '~/components/dashboard/table/user-table-header'
 import { UserTablePagination } from '~/components/dashboard/table/user-table-pagination'
 import { useUserTable } from '~/hooks/use-user-table'
 
 export function UserTable() {
+	// Feature flag for drag and drop - disabled until persistence is implemented
+	const ENABLE_DRAG_AND_DROP = false
 	const { table, data, isLoading, error, filters, setFilters, actions } =
 		useUserTable()
 
@@ -82,21 +83,29 @@ export function UserTable() {
 
 			<div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
 				<div className="overflow-hidden rounded-lg border">
-					<DndContext
-						collisionDetection={closestCenter}
-						modifiers={[restrictToVerticalAxis]}
-						onDragEnd={handleDragEnd}
-						sensors={sensors}
-						id={sortableId}
-					>
+					{ENABLE_DRAG_AND_DROP ? (
+						<DndContext
+							collisionDetection={closestCenter}
+							modifiers={[restrictToVerticalAxis]}
+							onDragEnd={handleDragEnd}
+							sensors={sensors}
+							id={sortableId}
+						>
+							<Table>
+								<UserTableHeader headerGroups={table.getHeaderGroups()} />
+								<UserTableBody
+									table={table}
+								/>
+							</Table>
+						</DndContext>
+					) : (
 						<Table>
 							<UserTableHeader headerGroups={table.getHeaderGroups()} />
 							<UserTableBody
 								table={table}
-								columnsLength={userTableColumns.length}
 							/>
 						</Table>
-					</DndContext>
+					)}
 				</div>
 
 				<UserTablePagination table={table} />

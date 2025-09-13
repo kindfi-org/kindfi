@@ -96,7 +96,7 @@ export const createUserTableColumns = (
 		cell: ({ row }) => {
 			const isEnhanced = row.original.verification_level === 'enhanced'
 			return (
-				<Badge variant="outline" className={isEnhanced ? 'text-blue-600' : ''}>
+				<Badge variant="outline" className={isEnhanced ? 'text-blue-600 dark:text-blue-400' : ''}>
 					{isEnhanced ? (
 						<ShieldCheckIcon className="mr-1 size-3" />
 					) : (
