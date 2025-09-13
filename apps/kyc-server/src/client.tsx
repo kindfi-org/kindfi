@@ -6,6 +6,7 @@ import { ThemeProvider } from './components/provider/theme-provider'
 import About from './pages/About'
 import DashboardPage from './pages/dashboard'
 import Customers from './pages/dashboard/customers'
+import Users from './pages/dashboard/users'
 import WebSocketDemo from './pages/WebSocketDemo'
 
 import './index.css'
@@ -17,10 +18,15 @@ if (!rootElement) {
 hydrateRoot(
 	rootElement,
 	<React.StrictMode>
-		<BrowserRouter>
-			<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+		<ThemeProvider 
+			attribute="class" 
+			defaultTheme="system" 
+			enableSystem
+		>
+			<BrowserRouter>
 				<Layout>
 					<Routes>
+						<Route path="/" element={<div className="card"><p>Welcome to Kindfi KYC Server</p></div>} />
 						<Route path="/dashboard" element={<DashboardPage />} />
 						<Route path="/about" element={<About />} />
 						<Route
@@ -29,9 +35,10 @@ hydrateRoot(
 						/>
 						<Route path="/websocket" element={<WebSocketDemo />} />
 						<Route path="/dashboard/customers" element={<Customers />} />
+						<Route path="/dashboard/users" element={<Users />} />
 					</Routes>
 				</Layout>
-			</ThemeProvider>
-		</BrowserRouter>
+			</BrowserRouter>
+		</ThemeProvider>
 	</React.StrictMode>,
 )

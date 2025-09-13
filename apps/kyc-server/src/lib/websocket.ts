@@ -67,13 +67,13 @@ export class KYCWebSocketService {
 		}
 
 		this.channel = this.supabase
-			.channel('kyc_status_changes')
+			.channel('kyc_reviews_changes')
 			.on(
 				'postgres_changes',
 				{
 					event: '*',
 					schema: 'public',
-					table: 'kyc_status',
+					table: 'kyc_reviews',
 				},
 				(payload: RealtimePostgresChangesPayload<KYCStatusRecord>) => {
 					console.log('Received KYC status change:', payload)
@@ -129,7 +129,7 @@ export class KYCWebSocketService {
 
 		try {
 			const { data: status, error } = await this.supabase
-				.from('kyc_status')
+				.from('kyc_reviews')
 				.select('*')
 				.eq('user_id', ws.data.userId || 'no-user-id')
 				.maybeSingle()
