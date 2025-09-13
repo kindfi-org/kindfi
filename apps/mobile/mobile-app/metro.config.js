@@ -1,7 +1,9 @@
-const { getDefaultConfig } = require('expo/metro-config')
 const { withNativeWind } = require('nativewind/metro')
+const {
+    getSentryExpoConfig
+} = require("@sentry/react-native/metro");
 
-const config = getDefaultConfig(__dirname)
+const config = getSentryExpoConfig(__dirname)
 
 // Preserve the default transformer while adding SVG support and enabling require.context
 config.transformer = {

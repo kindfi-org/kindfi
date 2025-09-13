@@ -1,49 +1,66 @@
 {
-	"expo": {
-		"android": {
-			"adaptiveIcon": {
-				"backgroundColor": "#ffffff",
-				"foregroundImage": "./assets/images/adaptive-icon.png"
-			}
-		},
-		"experiments": {
-			"typedRoutes": true
-		},
-		"icon": "./assets/images/icon.png",
-		"ios": {
-			"supportsTablet": true
-		},
-		"name": "test-expo",
-		"newArchEnabled": true,
-		"orientation": "portrait",
-		"plugins": [
-			"expo-router",
-			[
-				"expo-splash-screen",
-				{
-					"backgroundColor": "#ffffff",
-					"image": "./assets/images/splash-icon.png",
-					"imageWidth": 200,
-					"resizeMode": "contain"
-				}
-			],
-			[
-				"expo-image-picker",
-				{
-					"photosPermission": "The app needs access to your photos to let you upload images."
-				}
-			],
-			"expo-font",
-			"expo-web-browser"
-		],
-		"scheme": "myapp",
-		"slug": "test-expo",
-		"userInterfaceStyle": "automatic",
-		"version": "1.0.0",
-		"web": {
-			"bundler": "metro",
-			"favicon": "./assets/images/favicon.png",
-			"output": "static"
-		}
-	}
+  "expo": {
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff",
+        "foregroundImage": "./assets/images/adaptive-icon.png"
+      }
+    },
+    "experiments": {
+      "typedRoutes": true
+    },
+    "icon": "./assets/images/icon.png",
+    "ios": {
+      "supportsTablet": true
+    },
+    "name": "test-expo",
+    "newArchEnabled": true,
+    "orientation": "portrait",
+    "plugins": [
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "note": "Use SENTRY_AUTH_TOKEN env to authenticate with Sentry.",
+          "project": "kindif",
+          "organization": "kindif"
+        }
+      ],
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to let you upload images."
+        }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "javascript-nextjs",
+          "organization": "nnaji-benjamin"
+        }
+      ]
+    ],
+    "scheme": "myapp",
+    "slug": "test-expo",
+    "userInterfaceStyle": "automatic",
+    "version": "1.0.0",
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/images/favicon.png",
+      "output": "static"
+    }
+  }
 }

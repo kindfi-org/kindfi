@@ -10,10 +10,17 @@ Sentry.init({
 
 	// Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
 	tracesSampleRate: 1,
+	sendDefaultPii: true,
 
 	// Enable logs to be sent to Sentry
 	enableLogs: true,
+	  release: process.env.SENTRY_RELEASE || `kindfi-web@${Date.now()}`,
+  environment: process.env.NODE_ENV || 'development',
 
 	// Setting this option to true will print useful information to the console while you're setting up Sentry.
 	debug: false,
+	_experiments: {
+		// Improve source map resolution
+		sourceMapValidation: true,
+	},
 })

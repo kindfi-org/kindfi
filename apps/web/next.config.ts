@@ -6,6 +6,10 @@ import type { NextConfig } from 'next'
 const appConfig: AppEnvInterface = appEnvConfig('web')
 const isProduction = appConfig.env.nodeEnv === 'production'
 const nextConfig: NextConfig = {
+	productionBrowserSourceMaps: true,
+	widenClientFileUpload: true,
+	disableServerWebpackPlugin: false,
+	hideSourceMaps: false,
 	experimental: {
 		mdxRs: true,
 	},
@@ -100,7 +104,6 @@ module.exports = nextConfig
 export default withSentryConfig(nextConfig, {
 	// For all available options, see:
 	// https://www.npmjs.com/package/@sentry/webpack-plugin#options
-
 	org: process.env.NEXT_PUBLIC_ORG_NAME,
 
 	project: process.env.NEXT_PUBLIC_PROJECT_NAME,
@@ -114,6 +117,14 @@ export default withSentryConfig(nextConfig, {
 	// Upload a larger set of source maps for prettier stack traces (increases build time)
 	authToken: process.env.SENTRY_AUTH_TOKEN,
 	widenClientFileUpload: true,
+	sourcemaps: {
+		// Specify the assets to exclude from source map upload
+		ignore: ["**/node_modules/**"], // Files to exclude
+		// Point to your build output directory
+		assets: ['.next/static/chunks/**/*.js', '.next/static/css/**/*.css', "**/*.js", "**/*.js.map"],
+		deleteSourcemapsAfterUpload: true,
+		disable: false
+	},
 
 	// Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
 	// This can increase your server load as well as your hosting bill.
