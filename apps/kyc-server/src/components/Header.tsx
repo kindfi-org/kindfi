@@ -31,20 +31,20 @@ const Header = () => {
 
 	const innerNavItems = [
 		{ path: '/dashboard', label: 'Dashboard' },
-		{ path: '/dashboard/customers', label: 'Customers' },
+		{ path: '/dashboard/users', label: 'Users' },
 		{ path: '/dashboard/projects', label: 'Projects' },
 		{ path: '/dashboard/analytics', label: 'Analytics' },
 		{ path: '/dashboard/settings', label: 'Settings' },
 	]
 
 	return (
-		<div className=" border-b border-gray-200">
+		<div className="border-b border-border bg-background">
 			{/* Top Navigation Bar */}
-			<div className="px-6 py-4 flex items-center justify-between border-b">
+			<div className="px-6 py-4 flex items-center justify-between border-b border-border">
 				{/* Brand Logo */}
 				<div className="text-2xl font-semibold">
 					<Link to="/dashboard">
-						<span className="text-gray-900 dark:text-white">
+						<span className="text-foreground">
 							KindFi KYC Server
 						</span>
 					</Link>
@@ -59,8 +59,8 @@ const Header = () => {
 							className={cn(
 								'py-2 px-3 text-base font-medium rounded-md transition-colors',
 								currentPath === item.path
-									? 'bg-black text-white  dark:bg-gray-800 dark:text-white'
-									: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
+									? 'bg-primary text-primary-foreground'
+									: 'text-muted-foreground hover:text-foreground hover:bg-accent',
 							)}
 						>
 							{item.label}
@@ -79,7 +79,7 @@ const Header = () => {
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent
-								className="z-50  bg-white dark:bg-gray-800 py-4"
+								className="z-50 bg-popover border-border py-4"
 								align="end"
 								sideOffset={8}
 							>
@@ -131,17 +131,17 @@ const Header = () => {
 
 				{/* Mobile menu dropdown */}
 				{mobileMenuOpen && (
-					<div className="absolute top-16 left-0 w-full bg-white dark:bg-zinc-900 shadow-md z-90 flex flex-col space-y-1 px-4 py-4 md:hidden">
+					<div className="absolute top-16 left-0 w-full bg-popover border-border shadow-md z-90 flex flex-col space-y-1 px-4 py-4 md:hidden">
 						{mainNavItems.map((item) => (
 							<Link
 								key={item.path}
 								to={item.path}
 								onClick={() => setMobileMenuOpen(false)}
 								className={cn(
-									'block py-2 px-3 rounded-md text-base font-medium ',
+									'block py-2 px-3 rounded-md text-base font-medium',
 									currentPath === item.path
-										? 'bg-black text-white dark:bg-gray-800 dark:text-white'
-										: 'text-gray-600 hover:bg-gray-100',
+										? 'bg-primary text-primary-foreground'
+										: 'text-muted-foreground hover:bg-accent hover:text-foreground',
 								)}
 							>
 								{item.label}
@@ -153,7 +153,7 @@ const Header = () => {
 
 			{/* Inner Navigation Tabs */}
 			{currentPath.startsWith('/dashboard') && (
-				<div className="px-4 py-2 rounded-xl bg-gray-200 dark:bg-gray-900 inline-flex space-x-2">
+				<div className="px-4 py-2 rounded-xl bg-muted inline-flex space-x-2">
 					{innerNavItems.map((item) => {
 						const isActive = currentPath === item.path
 						return (
@@ -163,8 +163,8 @@ const Header = () => {
 								className={cn(
 									'px-4 py-2 text-sm font-medium rounded-md transition-all cursor-pointer',
 									isActive
-										? 'bg-white text-black shadow-sm dark:bg-gray-800 dark:text-white'
-										: 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
+										? 'bg-background text-foreground shadow-sm'
+										: 'text-muted-foreground hover:text-foreground',
 								)}
 							>
 								{item.label}

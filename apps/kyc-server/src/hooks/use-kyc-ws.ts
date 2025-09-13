@@ -1,59 +1,22 @@
-import { appEnvConfig } from '@packages/lib'
-import type { AppEnvInterface } from '@packages/lib/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
-
-interface KYCUpdate {
-	type: 'kyc_update'
-	userId: string
-	status: string
-	timestamp: string
-}
-
-interface WebSocketError {
-	type: 'error'
-	message: string
-}
-
-type WebSocketMessage = KYCUpdate | WebSocketError
-
 interface UseKYCWebSocketOptions {
-	userId?: string
-	onUpdate?: (update: KYCUpdate) => void
+	onUpdate?: (update: any) => void
 	maxRetries?: number
-	initialRetryDelay?: number
-	connectionTimeout?: number
 }
 
-const isValidKYCUpdate = (data: unknown): data is KYCUpdate => {
-	return (
-		typeof data === 'object' &&
-		data !== null &&
-		'type' in data &&
-		data.type === 'kyc_update' &&
-		'userId' in data &&
-		typeof data.userId === 'string' &&
-		'status' in data &&
-		typeof data.status === 'string' &&
-		'timestamp' in data &&
-		typeof data.timestamp === 'string'
-	)
+const isValidUpdate = (data: any) => {
+	return data && data.type === 'kyc_update'
 }
 
 export function useKYCWebSocket({
-	userId,
 	onUpdate,
-	maxRetries = 5,
-	initialRetryDelay = 1000,
-	connectionTimeout = 10000,
+	maxRetries = 3,
 }: UseKYCWebSocketOptions = {}) {
 	const [isConnected, setIsConnected] = useState(false)
-	const lastUpdateRef = useRef<KYCUpdate | null>(null)
-	const wsRef = useRef<WebSocket | null>(null)
-	const retryCountRef = useRef(0)
-	const retryTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
-	const connectionTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+	const wsRef = useRef(null)
+	const retryCount = useRef(0)
+	const retryTimeout = useRef(undefined)
 	const onUpdateRef = useRef(onUpdate)
 
 	useEffect(() => {
@@ -61,81 +24,54 @@ export function useKYCWebSocket({
 	}, [onUpdate])
 
 	const connect = useCallback(() => {
-		const protocol = appConfig.env.nodeEnv === 'production' ? 'wss' : 'ws'
-		const ws = new WebSocket(`${protocol}://${window.location.host}/live`)
+		const ws = new WebSocket(`ws://${window.location.host}/live`)
 		wsRef.current = ws
-
-		connectionTimeoutRef.current = setTimeout(() => {
-			if (ws.readyState !== WebSocket.OPEN) {
-				console.log('WebSocket connection timed out')
-				ws.close()
-			}
-		}, connectionTimeout)
 
 		ws.onopen = () => {
 			console.log('WebSocket connected')
 			setIsConnected(true)
-			retryCountRef.current = 0
-			clearTimeout(connectionTimeoutRef.current)
-
-			if (userId) {
-				ws.send(JSON.stringify({ type: 'subscribe', userId }))
-			}
+			retryCount.current = 0
 		}
 
 		ws.onmessage = (event) => {
 			try {
-				const data = JSON.parse(event.data) as WebSocketMessage
-
-				if (isValidKYCUpdate(data)) {
-					lastUpdateRef.current = data
+				const data = JSON.parse(event.data)
+				if (isValidUpdate(data)) {
 					onUpdateRef.current?.(data)
-				} else if (
-					data &&
-					typeof data === 'object' &&
-					'type' in data &&
-					data.type === 'error'
-				) {
-					console.error('Server error:', (data as WebSocketError).message)
-				} else {
-					console.warn('Received unknown message format:', data)
+				} else if (data.type === 'error') {
+					console.log('WS error:', data.message)
 				}
-			} catch (error) {
-				console.error('Error parsing WebSocket message:', error)
+			} catch (err) {
+				console.log('WS parse error')
 			}
 		}
 
 		ws.onclose = () => {
 			console.log('WebSocket disconnected')
 			setIsConnected(false)
-			clearTimeout(connectionTimeoutRef.current)
 
-			if (retryCountRef.current < maxRetries) {
-				const delay = initialRetryDelay * 2 ** retryCountRef.current
-				retryTimeoutRef.current = setTimeout(() => {
-					retryCountRef.current++
+			if (retryCount.current < maxRetries) {
+				retryTimeout.current = setTimeout(() => {
+					retryCount.current++
 					connect()
-				}, delay)
+				}, 2000)
 			}
 		}
 
-		ws.onerror = (error) => {
-			console.error('WebSocket error:', error)
+		ws.onerror = () => {
+			console.log('WebSocket error')
 			setIsConnected(false)
 		}
-	}, [userId, maxRetries, initialRetryDelay, connectionTimeout])
+	}, [maxRetries])
 
 	useEffect(() => {
 		connect()
 
 		return () => {
-			if (retryTimeoutRef.current) {
-				clearTimeout(retryTimeoutRef.current)
+			if (retryTimeout.current) {
+				clearTimeout(retryTimeout.current)
 			}
-			if (connectionTimeoutRef.current) {
-				clearTimeout(connectionTimeoutRef.current)
-			}
-			if (wsRef.current?.readyState === WebSocket.OPEN) {
+			if (wsRef.current) {
 				wsRef.current.close()
 			}
 		}
@@ -143,15 +79,9 @@ export function useKYCWebSocket({
 
 	return {
 		isConnected,
-		lastUpdate: lastUpdateRef.current,
-		sendMessage: <T extends Record<string, unknown>>(message: T) => {
-			if (wsRef.current?.readyState === WebSocket.OPEN) {
-				wsRef.current.send(JSON.stringify(message))
-			}
-		},
 		reconnect: () => {
-			retryCountRef.current = 0
-			if (wsRef.current?.readyState === WebSocket.OPEN) {
+			retryCount.current = 0
+			if (wsRef.current) {
 				wsRef.current.close()
 			} else {
 				connect()
