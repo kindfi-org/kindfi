@@ -27,26 +27,6 @@ import { Input } from '~/components/base/input'
 import type { InviteMemberData } from '~/lib/types/project/team-members.types'
 import { RoleSelect } from './role-select'
 
-const inviteSchema = z.object({
-	email: z
-		.string()
-		.trim()
-		.toLowerCase()
-		.email('Please enter a valid email address')
-		.max(254, 'Email is too long'),
-	role: z.enum([
-		'admin',
-		'editor',
-		'advisor',
-		'community',
-		'core',
-		'others',
-	] as const),
-	title: z.string().trim().max(80, 'Title is too long').optional(),
-})
-
-type InviteFormData = z.infer<typeof inviteSchema>
-
 interface InviteMemberFormProps {
 	onInvite: (data: InviteMemberData) => Promise<void>
 	isLoading?: boolean
@@ -218,3 +198,23 @@ export function InviteMemberForm({
 		</motion.div>
 	)
 }
+
+const inviteSchema = z.object({
+	email: z
+		.string()
+		.trim()
+		.toLowerCase()
+		.email('Please enter a valid email address')
+		.max(254, 'Email is too long'),
+	role: z.enum([
+		'admin',
+		'editor',
+		'advisor',
+		'community',
+		'core',
+		'others',
+	] as const),
+	title: z.string().trim().max(80, 'Title is too long').optional(),
+})
+
+type InviteFormData = z.infer<typeof inviteSchema>
