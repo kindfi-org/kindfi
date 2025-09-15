@@ -3,15 +3,15 @@
 import type { Enums } from '@services/supabase'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { BreadcrumbContainer } from '~/components/sections/projects/shared'
-import { InviteMemberForm } from '~/components/sections/projects/team/invite-member-form'
-import { MemberList } from '~/components/sections/projects/team/member-list'
-import { PendingInvitations } from '~/components/sections/projects/team/pending-invitations'
+import { InviteMemberForm } from '~/components/sections/projects/members/invite-member-form'
+import { MemberList } from '~/components/sections/projects/members/member-list'
+import { PendingInvitations } from '~/components/sections/projects/members/pending-invitations'
 import {
 	InviteMemberFormSkeleton,
 	MemberListSkeleton,
 	PendingInvitationsSkeleton,
-} from '~/components/sections/projects/team/skeletons'
+} from '~/components/sections/projects/members/skeletons'
+import { BreadcrumbContainer } from '~/components/sections/projects/shared'
 import type {
 	InviteMemberData,
 	PendingInvitation,
@@ -214,7 +214,7 @@ export default function ProjectMembersPage() {
 					category={{ name: 'Education', slug: 'education' }}
 					title="Empowering Education"
 					manageSection="Project Management"
-					subSection="Team"
+					subSection="Members"
 				/>
 				<div className="inline-flex items-center px-4 py-2 rounded-full font-medium text-purple-600 bg-purple-100 border-transparent mb-4">
 					Project Management
