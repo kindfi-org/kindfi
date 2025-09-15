@@ -1,11 +1,7 @@
 'use client'
 
-import { formatDistanceToNow, isAfter } from 'date-fns'
-import { AnimatePresence, motion } from 'framer-motion'
-import { Clock, Mail, MoreHorizontal, RefreshCw, X } from 'lucide-react'
-
-import { Badge } from '~/components/base/badge'
-import { Button } from '~/components/base/button'
+import { AnimatePresence } from 'framer-motion'
+import { Clock } from 'lucide-react'
 import {
 	Card,
 	CardContent,
@@ -14,23 +10,16 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from '~/components/base/dropdown-menu'
-import {
 	Table,
 	TableBody,
-	TableCell,
 	TableHead,
 	TableHeader,
 	TableRow,
 } from '~/components/base/table'
 import type { PendingInvitation } from '~/lib/types/project/team-members.types'
 import { cn } from '~/lib/utils'
-import { RoleBadge } from './role-badge'
+import { InvitationCard } from './invitation-card'
+import { InvitationRow } from './invitation-row'
 
 interface PendingInvitationsProps {
 	invitations: PendingInvitation[]
@@ -88,98 +77,15 @@ export function PendingInvitations({
 						</TableHeader>
 						<TableBody>
 							<AnimatePresence>
-								{invitations.map((invitation, index) => {
-									const isExpired = isAfter(new Date(), invitation.expiresAt)
-									const menuAria = `Open actions menu for ${invitation.email}`
-									const resendAria = `Resend invitation to ${invitation.email}`
-									const cancelAria = `Cancel invitation for ${invitation.email}`
-
-									return (
-										<motion.tr
-											key={invitation.id}
-											initial={{ opacity: 0, y: 20 }}
-											animate={{ opacity: 1, y: 0 }}
-											exit={{ opacity: 0, y: -20 }}
-											transition={{ duration: 0.2, delay: index * 0.05 }}
-											className="group hover:bg-muted/50"
-										>
-											<TableCell>
-												<div className="flex items-center gap-2">
-													<Mail className="h-4 w-4 text-muted-foreground" />
-													<span className="font-medium">
-														{invitation.email}
-													</span>
-												</div>
-											</TableCell>
-											<TableCell>
-												<RoleBadge role={invitation.role} />
-											</TableCell>
-											<TableCell>
-												{invitation.title ? (
-													<span className="text-sm">{invitation.title}</span>
-												) : (
-													<span className="text-sm text-muted-foreground">
-														—
-													</span>
-												)}
-											</TableCell>
-											<TableCell>
-												<span className="text-sm text-muted-foreground">
-													{formatDistanceToNow(invitation.invitedAt, {
-														addSuffix: true,
-													})}
-												</span>
-											</TableCell>
-											<TableCell>
-												<Badge
-													variant={isExpired ? 'destructive' : 'secondary'}
-													className="capitalize"
-												>
-													{isExpired ? 'Expired' : invitation.status}
-												</Badge>
-											</TableCell>
-											<TableCell>
-												<DropdownMenu>
-													<DropdownMenuTrigger asChild>
-														<Button
-															variant="ghost"
-															size="sm"
-															aria-label={menuAria}
-															className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 transition-opacity"
-														>
-															<MoreHorizontal
-																className="h-4 w-4"
-																aria-hidden="true"
-															/>
-														</Button>
-													</DropdownMenuTrigger>
-													<DropdownMenuContent className="bg-white" align="end">
-														<DropdownMenuItem
-															className="cursor-pointer"
-															onClick={() => onResend?.(invitation.id)}
-															aria-label={resendAria}
-														>
-															<RefreshCw
-																className="mr-2 h-4 w-4"
-																aria-hidden="true"
-															/>
-															Resend
-														</DropdownMenuItem>
-														<DropdownMenuSeparator />
-														<DropdownMenuItem
-															className="text-destructive cursor-pointer"
-															onClick={() => onCancel?.(invitation.id)}
-															aria-label={cancelAria}
-														>
-															<X className="mr-2 h-4 w-4" aria-hidden="true" />
-															Cancel
-														</DropdownMenuItem>
-													</DropdownMenuContent>
-												</DropdownMenu>
-											</TableCell>
-										</motion.tr>
-									)
-								})}
+								{invitations.map((invitation, index) => (
+									<InvitationRow
+										key={invitation.id}
+										invitation={invitation}
+										index={index}
+										onResend={onResend}
+										onCancel={onCancel}
+									/>
+								))}
 							</AnimatePresence>
 						</TableBody>
 					</Table>
@@ -197,95 +103,17 @@ export function PendingInvitations({
 				<p className="text-sm text-muted-foreground !mt-1.5">
 					Manage invitations that haven't been accepted yet.
 				</p>
-				<AnimatePresence>
-					{invitations.map((invitation, index) => {
-						const isExpired = isAfter(new Date(), invitation.expiresAt)
-						const menuAria = `Open actions menu for ${invitation.email}`
-						const resendAria = `Resend invitation to ${invitation.email}`
-						const cancelAria = `Cancel invitation for ${invitation.email}`
 
-						return (
-							<motion.div
-								key={invitation.id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								exit={{ opacity: 0, y: -20 }}
-								transition={{ duration: 0.2, delay: index * 0.05 }}
-							>
-								<Card className="bg-white">
-									<CardContent className="p-4">
-										<div className="flex items-start justify-between">
-											<div className="flex-1 min-w-0">
-												<div className="flex items-center gap-2 mb-2">
-													<Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-													<span className="font-medium truncate">
-														{invitation.email}
-													</span>
-												</div>
-												<div className="flex items-center gap-2 flex-wrap mb-2">
-													<RoleBadge role={invitation.role} />
-													{invitation.title && (
-														<Badge variant="outline" className="text-xs">
-															{invitation.title}
-														</Badge>
-													)}
-													<Badge
-														variant={isExpired ? 'destructive' : 'secondary'}
-														className="capitalize"
-													>
-														{isExpired ? 'Expired' : invitation.status}
-													</Badge>
-												</div>
-												<p className="text-xs text-muted-foreground">
-													Invited{' '}
-													{formatDistanceToNow(invitation.invitedAt, {
-														addSuffix: true,
-													})}
-												</p>
-											</div>
-											<DropdownMenu>
-												<DropdownMenuTrigger asChild>
-													<Button
-														variant="ghost"
-														size="sm"
-														aria-label={menuAria}
-														className="h-8 w-8 p-0 focus:opacity-100"
-													>
-														<MoreHorizontal
-															className="h-4 w-4"
-															aria-hidden="true"
-														/>
-													</Button>
-												</DropdownMenuTrigger>
-												<DropdownMenuContent align="end">
-													<DropdownMenuItem
-														className="cursor-pointer"
-														onClick={() => onResend?.(invitation.id)}
-														aria-label={resendAria}
-													>
-														<RefreshCw
-															className="mr-2 h-4 w-4"
-															aria-hidden="true"
-														/>
-														Resend Invitation
-													</DropdownMenuItem>
-													<DropdownMenuSeparator />
-													<DropdownMenuItem
-														className="text-destructive cursor-pointer"
-														onClick={() => onCancel?.(invitation.id)}
-														aria-label={cancelAria}
-													>
-														<X className="mr-2 h-4 w-4" aria-hidden="true" />
-														Cancel Invitation
-													</DropdownMenuItem>
-												</DropdownMenuContent>
-											</DropdownMenu>
-										</div>
-									</CardContent>
-								</Card>
-							</motion.div>
-						)
-					})}
+				<AnimatePresence>
+					{invitations.map((invitation, index) => (
+						<InvitationCard
+							key={invitation.id}
+							invitation={invitation}
+							index={index}
+							onResend={onResend}
+							onCancel={onCancel}
+						/>
+					))}
 				</AnimatePresence>
 			</div>
 		</div>
