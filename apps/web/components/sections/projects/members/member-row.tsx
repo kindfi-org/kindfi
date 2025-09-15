@@ -5,7 +5,6 @@ import { formatDistanceToNow } from 'date-fns'
 import { motion } from 'framer-motion'
 import {
 	Check,
-	Crown,
 	MoreHorizontal,
 	Pencil,
 	UserMinus,
@@ -14,7 +13,6 @@ import {
 import { useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
-import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import {
 	DropdownMenu,
@@ -66,8 +64,8 @@ export function MemberRow({
 		setIsEditing(false)
 	}
 
-	const menuAria = `Open member menu for ${member.name}`
-	const removeAria = `Remove ${member.name} from team`
+	const menuAria = `Open member menu for ${member.displayName}`
+	const removeAria = `Remove ${member.displayName} from team`
 
 	return (
 		<motion.tr
@@ -82,17 +80,14 @@ export function MemberRow({
 					<Avatar className="h-8 w-8">
 						<AvatarImage
 							src={member.avatar || PLACEHOLDER_IMG}
-							alt={member.name}
+							alt={member.displayName || 'User Avatar'}
 						/>
-						<AvatarFallback>{getAvatarFallback(member.name)}</AvatarFallback>
+						<AvatarFallback>
+							{getAvatarFallback(member.displayName || '')}
+						</AvatarFallback>
 					</Avatar>
-					<div>
-						<div className="flex items-center gap-2">
-							<span className="font-medium">{member.name}</span>
-							{member.isOwner && (
-								<Crown className="h-4 w-4 text-yellow-500" aria-hidden="true" />
-							)}
-						</div>
+					<div className="flex flex-col">
+						<span className="font-medium">{member.displayName}</span>
 						<span className="text-sm text-muted-foreground">
 							{member.email}
 						</span>
@@ -107,13 +102,13 @@ export function MemberRow({
 			{/* Title editable */}
 			<TableCell>
 				{isEditing ? (
-					<div className="flex items-center gap-2">
+					<div className="flex items-center justify-between gap-2">
 						<Input
 							value={tempTitle}
 							onChange={(e) => setTempTitle(e.target.value)}
 							placeholder="Enter a title"
 							className="h-8 bg-white"
-							aria-label={`Edit title for ${member.name}`}
+							aria-label={`Edit title for ${member.displayName}`}
 							autoFocus
 							onKeyDown={(e) => {
 								if (e.key === 'Enter') handleCommit()
@@ -126,7 +121,7 @@ export function MemberRow({
 						<Button
 							size="icon"
 							variant="ghost"
-							aria-label={`Save title for ${member.name}`}
+							aria-label={`Save title for ${member.displayName}`}
 							onClick={handleCommit}
 							disabled={saveDisabled}
 							aria-disabled={saveDisabled}
@@ -136,7 +131,7 @@ export function MemberRow({
 						<Button
 							size="icon"
 							variant="ghost"
-							aria-label={`Cancel title edit for ${member.name}`}
+							aria-label={`Cancel title edit for ${member.displayName}`}
 							onClick={() => {
 								setTempTitle(member.title ?? '')
 								setIsEditing(false)
@@ -146,15 +141,15 @@ export function MemberRow({
 						</Button>
 					</div>
 				) : (
-					<div className="flex items-center gap-2">
+					<div className="flex items-center justify-between gap-2">
 						<span className="text-sm">
 							{member.title || <span className="text-muted-foreground">—</span>}
 						</span>
-						{!member.isOwner && member.userId !== currentUserId && (
+						{member.userId !== currentUserId && (
 							<Button
 								size="icon"
 								variant="ghost"
-								aria-label={`Edit title for ${member.name}`}
+								aria-label={`Edit title for ${member.displayName}`}
 								onClick={() => setIsEditing(true)}
 							>
 								<Pencil className="h-4 w-4" aria-hidden="true" />
@@ -171,7 +166,7 @@ export function MemberRow({
 			</TableCell>
 
 			<TableCell>
-				{!member.isOwner && member.userId !== currentUserId && (
+				{member.userId !== currentUserId && (
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
@@ -192,7 +187,6 @@ export function MemberRow({
 								Object.keys(memberRole) as Array<Enums<'project_member_role'>>
 							).map((rk) => {
 								const meta = memberRole[rk]
-								const Icon = meta.icon
 								const isCurrent = rk === member.role
 								return (
 									<DropdownMenuItem
@@ -207,20 +201,9 @@ export function MemberRow({
 											if (isCurrent) return
 											onChangeRole?.(member.id, rk)
 										}}
-										aria-label={`Set role ${meta.label} for ${member.name}`}
+										aria-label={`Set role ${meta.label} for ${member.displayName}`}
 									>
-										<Badge
-											className={cn(
-												'inline-flex items-center gap-1.5 px-2.5 py-1 leading-none',
-												meta.badgeClass,
-											)}
-										>
-											<Icon
-												className={cn('h-3.5 w-3.5', meta.iconClass)}
-												aria-hidden="true"
-											/>
-											{meta.label}
-										</Badge>
+										<RoleBadge role={rk} />
 									</DropdownMenuItem>
 								)
 							})}

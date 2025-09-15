@@ -124,8 +124,8 @@ export function InviteMemberForm({
 											</FormLabel>
 											<FormControl>
 												<RoleSelect
-													value={field.value}
-													onValueChange={field.onChange}
+													role={field.value}
+													onRoleChange={field.onChange}
 													disabled={isLoading || isSubmitting}
 													className="w-full"
 													showDescription

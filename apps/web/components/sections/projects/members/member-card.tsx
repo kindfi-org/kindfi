@@ -5,7 +5,6 @@ import { formatDistanceToNow } from 'date-fns'
 import { motion } from 'framer-motion'
 import {
 	Check,
-	Crown,
 	Mail,
 	MoreHorizontal,
 	Pencil,
@@ -67,8 +66,8 @@ export function MemberCard({
 		setIsEditing(false)
 	}
 
-	const menuAria = `Open member menu for ${member.name}`
-	const removeAria = `Remove ${member.name} from team`
+	const menuAria = `Open member menu for ${member.displayName}`
+	const removeAria = `Remove ${member.displayName} from team`
 
 	return (
 		<motion.div
@@ -84,22 +83,16 @@ export function MemberCard({
 							<Avatar className="h-10 w-10">
 								<AvatarImage
 									src={member.avatar || PLACEHOLDER_IMG}
-									alt={member.name}
+									alt={member.displayName || 'User Avatar'}
 								/>
 								<AvatarFallback>
-									{getAvatarFallback(member.name)}
+									{getAvatarFallback(member.displayName || '')}
 								</AvatarFallback>
 							</Avatar>
 							<div className="flex-1 min-w-0">
-								<div className="flex items-center gap-2 mb-1">
-									<span className="font-medium truncate">{member.name}</span>
-									{member.isOwner && (
-										<Crown
-											className="h-4 w-4 text-yellow-500 flex-shrink-0"
-											aria-hidden="true"
-										/>
-									)}
-								</div>
+								<span className="font-medium truncate">
+									{member.displayName}
+								</span>
 
 								<div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
 									<Mail className="h-3 w-3" aria-hidden="true" />
@@ -114,7 +107,7 @@ export function MemberCard({
 											onChange={(e) => setTempTitle(e.target.value)}
 											placeholder="Enter a title"
 											className="h-8 bg-white"
-											aria-label={`Edit title for ${member.name}`}
+											aria-label={`Edit title for ${member.displayName}`}
 											autoFocus
 											onKeyDown={(e) => {
 												if (e.key === 'Enter') handleCommit()
@@ -127,7 +120,7 @@ export function MemberCard({
 										<Button
 											size="icon"
 											variant="ghost"
-											aria-label={`Save title for ${member.name}`}
+											aria-label={`Save title for ${member.displayName}`}
 											onClick={handleCommit}
 											disabled={saveDisabled}
 											aria-disabled={saveDisabled}
@@ -137,7 +130,7 @@ export function MemberCard({
 										<Button
 											size="icon"
 											variant="ghost"
-											aria-label={`Cancel title edit for ${member.name}`}
+											aria-label={`Cancel title edit for ${member.displayName}`}
 											onClick={() => {
 												setTempTitle(member.title ?? '')
 												setIsEditing(false)
@@ -153,11 +146,11 @@ export function MemberCard({
 												<span className="text-muted-foreground">—</span>
 											)}
 										</span>
-										{!member.isOwner && member.userId !== currentUserId && (
+										{member.userId !== currentUserId && (
 											<Button
 												size="icon"
 												variant="ghost"
-												aria-label={`Edit title for ${member.name}`}
+												aria-label={`Edit title for ${member.displayName}`}
 												onClick={() => setIsEditing(true)}
 											>
 												<Pencil className="h-4 w-4" aria-hidden="true" />
@@ -182,7 +175,7 @@ export function MemberCard({
 							</div>
 						</div>
 
-						{!member.isOwner && member.userId !== currentUserId && (
+						{member.userId !== currentUserId && (
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button
@@ -204,7 +197,6 @@ export function MemberCard({
 										>
 									).map((rk) => {
 										const meta = memberRole[rk]
-										const Icon = meta.icon
 										const isCurrent = rk === member.role
 										return (
 											<DropdownMenuItem
@@ -219,20 +211,9 @@ export function MemberCard({
 													if (isCurrent) return
 													onChangeRole?.(member.id, rk)
 												}}
-												aria-label={`Set role ${meta.label} for ${member.name}`}
+												aria-label={`Set role ${meta.label} for ${member.displayName}`}
 											>
-												<Badge
-													className={cn(
-														'inline-flex items-center gap-1.5 px-2.5 py-1 leading-none',
-														meta.badgeClass,
-													)}
-												>
-													<Icon
-														className={cn('h-3.5 w-3.5', meta.iconClass)}
-														aria-hidden="true"
-													/>
-													{meta.label}
-												</Badge>
+												<RoleBadge role={rk} />
 											</DropdownMenuItem>
 										)
 									})}

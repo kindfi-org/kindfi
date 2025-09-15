@@ -5,14 +5,12 @@ export type InvitationStatus = 'pending' | 'accepted' | 'rejected' | 'expired'
 export interface ProjectMember {
 	id: string
 	userId: string
-	projectId: string
-	email: string
-	name: string
-	avatar?: string
+	email: string | null
+	displayName: string | null
+	avatar: string | null
 	role: Enums<'project_member_role'>
-	title?: string
+	title: string
 	joinedAt: Date
-	isOwner?: boolean
 }
 
 export interface InviteMemberData {

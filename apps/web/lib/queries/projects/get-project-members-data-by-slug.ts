@@ -1,0 +1,67 @@
+import type { TypedSupabaseClient } from '@packages/lib/types'
+import { getProjectIdTitleAndCategoryBySlug } from './get-project-id-title-and-category-by-slug'
+
+export async function getProjectMembersDataBySlug(
+	client: TypedSupabaseClient,
+	slug: string,
+) {
+	// Get project ID and category
+	const { id, title, category } = await getProjectIdTitleAndCategoryBySlug(
+		client,
+		slug,
+	)
+
+	// Members for this project
+	const { data: members, error: membersError } = await client
+		.from('project_members')
+		.select('id, role, title, user_id, joined_at')
+		.eq('project_id', id)
+
+	if (membersError) throw membersError
+
+	// Early return if no members
+	if (!members || members.length === 0) {
+		return {
+			id,
+			title,
+			slug,
+			category,
+			team: [],
+		}
+	}
+
+	// Profiles for the collected user_ids
+	const userIds = members.map((m) => m.user_id)
+	const { data: profiles, error: profilesError } = await client
+		.from('profiles')
+		.select('id, display_name, email, image_url')
+		.in('id', userIds)
+
+	if (profilesError) throw profilesError
+
+	// Merge members + profiles
+	const team = members.flatMap((m) => {
+		const profile = profiles?.find((p) => p.id === m.user_id)
+		if (!profile) return []
+		return [
+			{
+				id: m.id,
+				userId: m.user_id,
+				role: m.role,
+				title: m.title,
+				joinedAt: m.joined_at,
+				displayName: profile.display_name,
+				email: profile.email,
+				avatar: profile.image_url,
+			},
+		]
+	})
+
+	return {
+		id,
+		title,
+		slug,
+		category,
+		team,
+	}
+}

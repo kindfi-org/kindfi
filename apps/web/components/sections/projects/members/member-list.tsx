@@ -1,7 +1,7 @@
 'use client'
 
 import type { Enums } from '@services/supabase'
-import { Shield } from 'lucide-react'
+import { Shield, User } from 'lucide-react'
 import {
 	Card,
 	CardContent,
@@ -42,14 +42,10 @@ export function MemberList({
 		return (
 			<Card className={cn(className, 'bg-white')}>
 				<CardContent className="flex flex-col items-center justify-center py-12">
-					<svg
-						aria-hidden
-						viewBox="0 0 24 24"
+					<User
 						className="h-12 w-12 text-muted-foreground mb-4"
-					>
-						<circle cx="12" cy="7" r="4" />
-						<path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
-					</svg>
+						aria-hidden="true"
+					/>
 					<h3 className="text-lg font-semibold mb-2">No team members yet</h3>
 					<p className="text-muted-foreground text-center">
 						Start building your team by inviting members to collaborate on your

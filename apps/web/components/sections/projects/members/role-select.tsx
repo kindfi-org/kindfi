@@ -4,7 +4,6 @@ import type { Enums } from '@services/supabase'
 import { Check, ChevronDown } from 'lucide-react'
 import { useId, useState } from 'react'
 
-import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import {
 	Command,
@@ -20,10 +19,11 @@ import {
 } from '~/components/base/popover'
 import { cn } from '~/lib/utils'
 import { memberRole } from '~/lib/utils/member-role'
+import { RoleBadge } from './role-badge'
 
 interface RoleSelectProps {
-	value: Enums<'project_member_role'>
-	onValueChange: (value: Enums<'project_member_role'>) => void
+	role: Enums<'project_member_role'>
+	onRoleChange: (role: Enums<'project_member_role'>) => void
 	disabled?: boolean
 	placeholder?: string
 	className?: string
@@ -32,8 +32,8 @@ interface RoleSelectProps {
 }
 
 export function RoleSelect({
-	value,
-	onValueChange,
+	role,
+	onRoleChange,
 	disabled = false,
 	placeholder = 'Select role...',
 	className,
@@ -43,10 +43,7 @@ export function RoleSelect({
 	const [open, setOpen] = useState(false)
 	const listboxId = useId()
 
-	const selected = memberRole[value]
-	const ariaLabel = selected
-		? `Change role, current: ${selected.label}`
-		: 'Select role'
+	const ariaLabel = role ? `Change role, current: ${role}` : 'Select role'
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
@@ -60,20 +57,8 @@ export function RoleSelect({
 					className={cn('justify-between bg-white border-green-600', className)}
 					disabled={disabled}
 				>
-					{selected ? (
-						<Badge
-							className={cn(
-								'inline-flex items-center gap-1.5 px-2.5 py-1',
-								'leading-none',
-								selected.badgeClass,
-							)}
-						>
-							<selected.icon
-								aria-hidden
-								className={cn('h-3.5 w-3.5', selected.iconClass)}
-							/>
-							{selected.label}
-						</Badge>
+					{role ? (
+						<RoleBadge role={role} />
 					) : (
 						<span className="text-muted-foreground">{placeholder}</span>
 					)}
@@ -89,34 +74,25 @@ export function RoleSelect({
 					<CommandEmpty>No role found.</CommandEmpty>
 					<CommandList>
 						<CommandGroup>
-							{Object.entries(memberRole).map(([roleKey, meta]) => (
+							{(
+								Object.keys(memberRole) as Array<Enums<'project_member_role'>>
+							).map((roleKey) => (
 								<CommandItem
 									key={roleKey}
 									value={roleKey}
 									role="option"
-									aria-selected={value === roleKey}
+									aria-selected={role === roleKey}
 									onSelect={() => {
-										onValueChange(roleKey as Enums<'project_member_role'>)
+										onRoleChange(roleKey as Enums<'project_member_role'>)
 										setOpen(false)
 									}}
 									className="flex items-center justify-between p-3"
 								>
 									<div className="flex flex-col gap-1">
 										<div className="flex items-center gap-2">
-											<Badge
-												className={cn(
-													'inline-flex items-center gap-1.5 px-2.5 py-1 leading-none',
-													meta.badgeClass,
-												)}
-											>
-												<meta.icon
-													aria-hidden
-													className={cn('h-3.5 w-3.5', meta.iconClass)}
-												/>
-												{meta.label}
-											</Badge>
+											<RoleBadge role={roleKey} />
 
-											{value === roleKey && (
+											{role === roleKey && (
 												<Check aria-hidden className="h-4 w-4 text-primary" />
 											)}
 										</div>

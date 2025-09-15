@@ -39,7 +39,7 @@ export function PendingInvitations({
 			<Card className={cn(className, 'bg-white')}>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
-						<Clock className="h-5 w-5" />
+						<Clock className="h-5 w-5" aria-hidden="true" />
 						Pending Invitations
 					</CardTitle>
 					<CardDescription>
@@ -56,7 +56,7 @@ export function PendingInvitations({
 			<Card className="hidden md:block bg-white">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
-						<Clock className="h-5 w-5" />
+						<Clock className="h-5 w-5" aria-hidden="true" />
 						Pending Invitations ({invitations.length})
 					</CardTitle>
 					<CardDescription>
@@ -95,7 +95,7 @@ export function PendingInvitations({
 			{/* Mobile Card View */}
 			<div className="md:hidden space-y-4">
 				<div className="flex items-center gap-2">
-					<Clock className="h-5 w-5" />
+					<Clock className="h-5 w-5" aria-hidden="true" />
 					<h3 className="text-2xl font-semibold">
 						Pending Invitations ({invitations.length})
 					</h3>
