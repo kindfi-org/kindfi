@@ -1,22 +1,19 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import { MoreVerticalIcon, ShieldCheckIcon, UserCheckIcon } from 'lucide-react'
+import { ShieldCheckIcon, UserCheckIcon } from 'lucide-react'
 
 import { Badge } from '~/components/base/badge'
-import { Button } from '~/components/base/button'
 import { Checkbox } from '~/components/base/checkbox'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from '~/components/base/dropdown-menu'
 import { DragHandle } from '~/components/dashboard/table/drag-handle'
+import { KycActionsMenu } from '~/components/dashboard/table/kyc-actions-menu'
 import { KycDetailsSheet } from '~/components/dashboard/table/kyc-details-sheet'
 import type { KycRecord } from '~/lib/types/dashboard'
 import { getStatusColor, getStatusIcon } from '~/utils/table'
 
-export const kycColumns: ColumnDef<KycRecord>[] = [
+// Create enhanced KYC table columns with actions support
+export const createKycTableColumns = (
+	onStatusUpdate?: () => void,
+	onReview?: (userId: string) => void,
+): ColumnDef<KycRecord>[] => [
 	{
 		id: 'drag',
 		header: () => null,
@@ -55,6 +52,27 @@ export const kycColumns: ColumnDef<KycRecord>[] = [
 			return <KycDetailsSheet item={row.original} />
 		},
 		enableHiding: false,
+	},
+	{
+		accessorKey: 'display_name',
+		header: 'Name',
+		cell: ({ row }) => (
+			<div className="flex items-center gap-2">
+				<UserCheckIcon className="size-4 text-muted-foreground" />
+				<span className="font-medium">
+					{row.original.display_name || row.original.email || 'No name'}
+				</span>
+			</div>
+		),
+	},
+	{
+		accessorKey: 'email',
+		header: 'Email',
+		cell: ({ row }) => (
+			<div className="text-sm text-muted-foreground">
+				{row.original.email || 'No email'}
+			</div>
+		),
 	},
 	{
 		accessorKey: 'status',
@@ -111,26 +129,17 @@ export const kycColumns: ColumnDef<KycRecord>[] = [
 	{
 		id: 'actions',
 		cell: ({ row }) => (
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						variant="ghost"
-						className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-						size="icon"
-						aria-label={`Actions for ${row.original.user_id}`}
-					>
-						<MoreVerticalIcon className="size-4" aria-hidden="true" />
-						<span className="sr-only">Open menu</span>
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-32">
-					<DropdownMenuItem>Review</DropdownMenuItem>
-					<DropdownMenuItem>Approve</DropdownMenuItem>
-					<DropdownMenuItem>Reject</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem>View Details</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
+			<KycActionsMenu
+				record={row.original}
+				onStatusUpdate={onStatusUpdate}
+				onReview={onReview}
+			/>
 		),
 	},
 ]
+
+// Backward compatibility - export with the old name
+export const kycColumns = createKycTableColumns()
+
+// Export type for external use
+export type { KycRecord }

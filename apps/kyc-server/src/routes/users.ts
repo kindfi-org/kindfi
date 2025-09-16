@@ -1,5 +1,5 @@
-import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
-import type { TypedSupabaseClient } from '@packages/lib/types'
+import { db, kycReviews, profiles, devices } from '@packages/drizzle'
+import { and, count, desc, asc, ilike, eq, sql } from 'drizzle-orm'
 import { corsConfig } from '../config/cors'
 import { withCORS } from '../middleware/cors'
 import { handleError } from '../utils/error-handler'
@@ -39,138 +39,94 @@ export const usersRoutes = {
 					const limit = Math.min(parseInt(params.limit || '10', 10), 100)
 					const offset = (page - 1) * limit
 
-					const supabase = supabaseServiceRole as TypedSupabaseClient
-
-					let query = supabase.from('kyc_reviews').select(`
-							id,
-							user_id,
-							status,
-							verification_level,
-							reviewer_id,
-							notes,
-							created_at,
-							updated_at
-						`)
-
-					if (
-						params.status &&
-						['pending', 'approved', 'rejected', 'verified'].includes(
-							params.status,
-						)
-					) {
-						query = query.eq(
-							'status',
-							params.status as 'pending' | 'approved' | 'rejected' | 'verified',
-						)
+					// Build where conditions
+					const conditions = []
+					
+					if (params.status && ['pending', 'approved', 'rejected', 'verified'].includes(params.status)) {
+						conditions.push(eq(kycReviews.status, params.status as 'pending' | 'approved' | 'rejected' | 'verified'))
 					}
-					if (
-						params.verificationLevel &&
-						['basic', 'enhanced'].includes(params.verificationLevel)
-					) {
-						query = query.eq(
-							'verification_level',
-							params.verificationLevel as 'basic' | 'enhanced',
-						)
+					
+					if (params.verificationLevel && ['basic', 'enhanced'].includes(params.verificationLevel)) {
+						conditions.push(eq(kycReviews.verificationLevel, params.verificationLevel as 'basic' | 'enhanced'))
 					}
-
+					
 					if (params.search) {
-						query = query.ilike('user_id', `%${params.search}%`)
+						conditions.push(ilike(kycReviews.userId, `%${params.search}%`))
 					}
 
-					if (params.sortBy === 'status') {
-						query = query.order('status', { ascending: false })
-						query = query.order('created_at', { ascending: false })
+					const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+
+					// Build order by
+					const orderBy = []
+					orderBy.push(desc(kycReviews.status)) // Always sort by status first
+					
+					if (params.sortBy === 'created_at') {
+						orderBy.push(params.sortOrder === 'asc' ? asc(kycReviews.createdAt) : desc(kycReviews.createdAt))
+					} else if (params.sortBy === 'updated_at') {
+						orderBy.push(params.sortOrder === 'asc' ? asc(kycReviews.updatedAt) : desc(kycReviews.updatedAt))
+					} else if (params.sortBy === 'verification_level') {
+						orderBy.push(params.sortOrder === 'asc' ? asc(kycReviews.verificationLevel) : desc(kycReviews.verificationLevel))
 					} else {
-						query = query.order('status', { ascending: false })
-						query = query.order(
-							params.sortBy as
-								| 'created_at'
-								| 'updated_at'
-								| 'verification_level',
-							{ ascending: params.sortOrder === 'asc' },
+						orderBy.push(desc(kycReviews.createdAt))
+					}
+
+					// Get total count
+					const [totalResult] = await db
+						.select({ count: count() })
+						.from(kycReviews)
+						.where(whereClause)
+
+					const totalCount = totalResult?.count || 0
+
+					// Get users with profile and device info
+					const users = await db
+						.select({
+							id: kycReviews.id,
+							user_id: kycReviews.userId,
+							status: kycReviews.status,
+							verification_level: kycReviews.verificationLevel,
+							reviewer_id: kycReviews.reviewerId,
+							notes: kycReviews.notes,
+							created_at: kycReviews.createdAt,
+							updated_at: kycReviews.updatedAt,
+							// Profile data
+							email: profiles.email,
+							display_name: profiles.displayName,
+							profile_image_url: profiles.imageUrl,
+							profile_role: profiles.role,
+							// Device count (non-sensitive info)
+							device_count: sql<number>`count(${devices.id})`.as('device_count'),
+						})
+						.from(kycReviews)
+						.leftJoin(profiles, eq(kycReviews.userId, profiles.id))
+						.leftJoin(devices, eq(kycReviews.userId, devices.userId))
+						.where(whereClause)
+						.groupBy(
+							kycReviews.id,
+							kycReviews.userId,
+							kycReviews.status,
+							kycReviews.verificationLevel,
+							kycReviews.reviewerId,
+							kycReviews.notes,
+							kycReviews.createdAt,
+							kycReviews.updatedAt,
+							profiles.email,
+							profiles.displayName,
+							profiles.imageUrl,
+							profiles.role
 						)
-					}
-
-					let countQuery = supabase
-						.from('kyc_reviews')
-						.select('*', { count: 'exact', head: true })
-
-					if (
-						params.status &&
-						['pending', 'approved', 'rejected', 'verified'].includes(
-							params.status,
-						)
-					) {
-						countQuery = countQuery.eq(
-							'status',
-							params.status as 'pending' | 'approved' | 'rejected' | 'verified',
-						)
-					}
-					if (
-						params.verificationLevel &&
-						['basic', 'enhanced'].includes(params.verificationLevel)
-					) {
-						countQuery = countQuery.eq(
-							'verification_level',
-							params.verificationLevel as 'basic' | 'enhanced',
-						)
-					}
-					if (params.search) {
-						countQuery = countQuery.or(`user_id.ilike.%${params.search}%`)
-					}
-
-					const { count } = await countQuery
-
-					const { data: users, error } = await query.range(
-						offset,
-						offset + limit - 1,
-					)
-
-					if (error) {
-						return Response.json({ error: 'Database error' }, { status: 500 })
-					}
-
-					// Quick hack to get profile data - should probably join in one query
-					const userIds = users?.map((u) => u.user_id) || []
-					let profiles: {
-						id: string
-						email: string | null
-						display_name: string | null
-					}[] = []
-
-					if (userIds.length) {
-						const { data } = await supabase
-							.from('profiles')
-							.select('id, email, display_name')
-							.in('id', userIds)
-						profiles = data || []
-					}
-
-					const transformedUsers =
-						users?.map((user) => {
-							const profile = profiles.find((p) => p.id === user.user_id)
-							return {
-								id: user.id,
-								user_id: user.user_id,
-								email: profile?.email || null,
-								display_name: profile?.display_name || null,
-								status: user.status,
-								verification_level: user.verification_level,
-								reviewer_id: user.reviewer_id,
-								notes: user.notes,
-								created_at: user.created_at,
-								updated_at: user.updated_at,
-							}
-						}) || []
+						.orderBy(...orderBy)
+						.limit(limit)
+						.offset(offset)
 
 					return Response.json({
 						success: true,
-						data: transformedUsers,
+						data: users,
 						pagination: {
 							page,
 							limit,
-							total: count || 0,
-							totalPages: Math.ceil((count || 0) / limit),
+							total: totalCount,
+							totalPages: Math.ceil(totalCount / limit),
 						},
 						filters: {
 							search: params.search,
@@ -192,24 +148,19 @@ export const usersRoutes = {
 		async GET(req: Request) {
 			return withConfiguredCORS(async () => {
 				try {
-					const supabase = supabaseServiceRole as TypedSupabaseClient
+					// Get all status counts
+					const statusCounts = await db
+						.select({
+							status: kycReviews.status,
+							count: count(),
+						})
+						.from(kycReviews)
+						.groupBy(kycReviews.status)
 
-					const { data: statusCounts, error: statusError } = await supabase
-						.from('kyc_reviews')
-						.select('status')
-
-					if (statusError) {
-						console.error('Database error:', statusError)
-						return Response.json(
-							{ error: 'Failed to fetch user stats' },
-							{ status: 500 },
-						)
-					}
-
-					const stats = statusCounts?.reduce(
-						(acc, user) => {
-							acc.totalUsers++
-							acc[user.status as keyof typeof acc]++
+					const stats = statusCounts.reduce(
+						(acc, item) => {
+							acc.totalUsers += item.count
+							acc[item.status] = item.count
 							return acc
 						},
 						{
@@ -217,25 +168,26 @@ export const usersRoutes = {
 							pending: 0,
 							approved: 0,
 							rejected: 0,
-						},
-					) || { totalUsers: 0, pending: 0, approved: 0, rejected: 0 }
+						}
+					)
 
+					// Get recent users (last 30 days)
 					const thirtyDaysAgo = new Date()
 					thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-					const { data: recentUsers, error: recentError } = await supabase
-						.from('kyc_reviews')
-						.select('status, created_at')
-						.gte('created_at', thirtyDaysAgo.toISOString())
+					const recentCounts = await db
+						.select({
+							status: kycReviews.status,
+							count: count(),
+						})
+						.from(kycReviews)
+						.where(sql`${kycReviews.createdAt} >= ${thirtyDaysAgo.toISOString()}`)
+						.groupBy(kycReviews.status)
 
-					if (recentError) {
-						console.error('Recent users error:', recentError)
-					}
-
-					const recentStats = recentUsers?.reduce(
-						(acc, user) => {
-							acc.totalUsers++
-							acc[user.status as keyof typeof acc]++
+					const recentStats = recentCounts.reduce(
+						(acc, item) => {
+							acc.totalUsers += item.count
+							acc[item.status] = item.count
 							return acc
 						},
 						{
@@ -243,8 +195,8 @@ export const usersRoutes = {
 							pending: 0,
 							approved: 0,
 							rejected: 0,
-						},
-					) || { totalUsers: 0, pending: 0, approved: 0, rejected: 0 }
+						}
+					)
 
 					const calculateTrend = (current: number, recent: number) => ({
 						value: recent > 0 ? (recent / Math.max(current, 1)) * 100 : 0,
@@ -308,33 +260,19 @@ export const usersRoutes = {
 						)
 					}
 
-					const supabase = supabaseServiceRole as TypedSupabaseClient
-
 					console.log(`🔄 Updating KYC status for user ${userId} to ${status}`)
 
-					const { data, error } = await supabase
-						.from('kyc_reviews')
-						.update({
-							status: status as
-								| 'pending'
-								| 'approved'
-								| 'rejected'
-								| 'verified',
+					const result = await db
+						.update(kycReviews)
+						.set({
+							status: status as 'pending' | 'approved' | 'rejected' | 'verified',
 							notes: notes || null,
-							updated_at: new Date().toISOString(),
+							updatedAt: new Date().toISOString(),
 						})
-						.eq('user_id', userId)
-						.select()
+						.where(eq(kycReviews.userId, userId))
+						.returning()
 
-					if (error) {
-						console.error('Database error:', error)
-						return Response.json(
-							{ error: 'Failed to update KYC status' },
-							{ status: 500 },
-						)
-					}
-
-					if (!data || data.length === 0) {
+					if (!result || result.length === 0) {
 						return Response.json({ error: 'User not found' }, { status: 404 })
 					}
 
@@ -342,7 +280,7 @@ export const usersRoutes = {
 
 					return Response.json({
 						success: true,
-						data: data[0],
+						data: result[0],
 						message: `KYC status updated to ${status}`,
 					})
 				} catch (error) {
@@ -385,31 +323,24 @@ export const usersRoutes = {
 						)
 					}
 
-					const supabase = supabaseServiceRole as TypedSupabaseClient
-
 					// Use the primary key (id) instead of user_id to ensure only one record is updated
-					const { data, error } = await supabase
-						.from('kyc_reviews')
-						.update({
-							status: status as
-								| 'pending'
-								| 'approved'
-								| 'rejected'
-								| 'verified',
+					const result = await db
+						.update(kycReviews)
+						.set({
+							status: status as 'pending' | 'approved' | 'rejected' | 'verified',
 							notes: notes || null,
-							updated_at: new Date().toISOString(),
+							updatedAt: new Date().toISOString(),
 						})
-						.eq('id', recordId)  // Use primary key instead of user_id
-						.select()
-						.single()
+						.where(eq(kycReviews.id, recordId))
+						.returning()
 
-					if (error) {
-						return handleError(error)
+					if (!result || result.length === 0) {
+						return Response.json({ error: 'Record not found' }, { status: 404 })
 					}
 
 					return Response.json({
 						success: true,
-						data: data,
+						data: result[0],
 						message: `KYC status updated to ${status}`,
 					})
 				} catch (error) {
