@@ -28,6 +28,11 @@ export function useKycActions(): UseKycActionsReturn {
 		setIsUpdating(true)
 		setError(null)
 
+		const controller = new AbortController()
+		const timeoutId = setTimeout(() => {
+			controller.abort()
+		}, 10000) // 10 second timeout
+
 		try {
 			// Use recordId if available, otherwise fallback to userId
 			const endpoint = recordId ? `/api/kyc-reviews/${recordId}/status` : `/api/users/${userId}/status`
@@ -35,6 +40,8 @@ export function useKycActions(): UseKycActionsReturn {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ status, notes }),
+				signal: controller.signal,
+				credentials: 'same-origin',
 			})
 
 			if (!response.ok) {
@@ -44,10 +51,15 @@ export function useKycActions(): UseKycActionsReturn {
 
 			return true
 		} catch (err: unknown) {
-			const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
-			setError(errorMessage)
+			if (err instanceof Error && err.name === 'AbortError') {
+				setError('Request timed out. Please try again.')
+			} else {
+				const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
+				setError(errorMessage)
+			}
 			return false
 		} finally {
+			clearTimeout(timeoutId)
 			setIsUpdating(false)
 		}
 	}

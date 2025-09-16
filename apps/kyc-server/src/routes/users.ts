@@ -1,5 +1,5 @@
 import { db, kycReviews, profiles, devices } from '@packages/drizzle'
-import { and, count, desc, asc, ilike, eq, sql } from 'drizzle-orm'
+import { and, count, desc, asc, ilike, eq, sql, or } from 'drizzle-orm'
 import { corsConfig } from '../config/cors'
 import { withCORS } from '../middleware/cors'
 import { handleError } from '../utils/error-handler'
@@ -7,6 +7,11 @@ import { handleError } from '../utils/error-handler'
 const withConfiguredCORS = (
 	handler: (req: Request) => Response | Promise<Response>,
 ) => withCORS(handler, corsConfig)
+
+// Helper to escape SQL LIKE wildcards
+const escapeLike = (str: string): string => {
+	return str.replace(/[%_]/g, '\\$&')
+}
 
 interface UsersQueryParams {
 	page?: string
@@ -51,14 +56,28 @@ export const usersRoutes = {
 					}
 					
 					if (params.search) {
-						conditions.push(ilike(kycReviews.userId, `%${params.search}%`))
+						const escapedSearch = escapeLike(params.search)
+						conditions.push(
+							or(
+								ilike(kycReviews.userId, `%${escapedSearch}%`),
+								ilike(profiles.email, `%${escapedSearch}%`),
+								ilike(profiles.displayName, `%${escapedSearch}%`)
+							)
+						)
 					}
 
 					const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
-					// Build order by
+					// Build order by - prioritize pending status first
 					const orderBy = []
-					orderBy.push(desc(kycReviews.status)) // Always sort by status first
+					// Custom status ordering: pending first, then alphabetical
+					orderBy.push(sql`CASE 
+						WHEN ${kycReviews.status} = 'pending' THEN 0
+						WHEN ${kycReviews.status} = 'approved' THEN 1  
+						WHEN ${kycReviews.status} = 'rejected' THEN 2
+						WHEN ${kycReviews.status} = 'verified' THEN 3
+						ELSE 4
+					END`)
 					
 					if (params.sortBy === 'created_at') {
 						orderBy.push(params.sortOrder === 'asc' ? asc(kycReviews.createdAt) : desc(kycReviews.createdAt))
@@ -168,14 +187,19 @@ export const usersRoutes = {
 							pending: 0,
 							approved: 0,
 							rejected: 0,
+							verified: 0,
 						}
 					)
 
-					// Get recent users (last 30 days)
+					// Period-over-period trend calculation (last 30 days vs prior 30 days)
 					const thirtyDaysAgo = new Date()
 					thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+					
+					const sixtyDaysAgo = new Date()
+					sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60)
 
-					const recentCounts = await db
+					// Last 30 days
+					const currentPeriodCounts = await db
 						.select({
 							status: kycReviews.status,
 							count: count(),
@@ -184,7 +208,7 @@ export const usersRoutes = {
 						.where(sql`${kycReviews.createdAt} >= ${thirtyDaysAgo.toISOString()}`)
 						.groupBy(kycReviews.status)
 
-					const recentStats = recentCounts.reduce(
+					const currentPeriodStats = currentPeriodCounts.reduce(
 						(acc, item) => {
 							acc.totalUsers += item.count
 							acc[item.status] = item.count
@@ -195,13 +219,49 @@ export const usersRoutes = {
 							pending: 0,
 							approved: 0,
 							rejected: 0,
+							verified: 0,
 						}
 					)
 
-					const calculateTrend = (current: number, recent: number) => ({
-						value: recent > 0 ? (recent / Math.max(current, 1)) * 100 : 0,
-						isPositive: recent > 0,
-					})
+					// Prior 30 days (30-60 days ago)
+					const priorPeriodCounts = await db
+						.select({
+							status: kycReviews.status,
+							count: count(),
+						})
+						.from(kycReviews)
+						.where(sql`${kycReviews.createdAt} >= ${sixtyDaysAgo.toISOString()} AND ${kycReviews.createdAt} < ${thirtyDaysAgo.toISOString()}`)
+						.groupBy(kycReviews.status)
+
+					const priorPeriodStats = priorPeriodCounts.reduce(
+						(acc, item) => {
+							acc.totalUsers += item.count
+							acc[item.status] = item.count
+							return acc
+						},
+						{
+							totalUsers: 0,
+							pending: 0,
+							approved: 0,
+							rejected: 0,
+							verified: 0,
+						}
+					)
+
+					const calculateTrend = (currentCount: number, priorCount: number) => {
+						const delta = currentCount - priorCount
+						const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'same'
+						const percentChange = priorCount > 0 ? (delta / priorCount) * 100 : (currentCount > 0 ? 100 : 0)
+						
+						return {
+							currentCount,
+							priorCount,
+							delta,
+							direction,
+							percentChange: Math.round(percentChange * 10) / 10, // Round to 1 decimal
+							isPositive: delta >= 0,
+						}
+					}
 
 					return Response.json({
 						success: true,
@@ -210,14 +270,16 @@ export const usersRoutes = {
 							pending: stats.pending,
 							approved: stats.approved,
 							rejected: stats.rejected,
+							verified: stats.verified,
 							trends: {
 								totalUsers: calculateTrend(
-									stats.totalUsers,
-									recentStats.totalUsers,
+									currentPeriodStats.totalUsers,
+									priorPeriodStats.totalUsers,
 								),
-								pending: calculateTrend(stats.pending, recentStats.pending),
-								approved: calculateTrend(stats.approved, recentStats.approved),
-								rejected: calculateTrend(stats.rejected, recentStats.rejected),
+								pending: calculateTrend(currentPeriodStats.pending, priorPeriodStats.pending),
+								approved: calculateTrend(currentPeriodStats.approved, priorPeriodStats.approved),
+								rejected: calculateTrend(currentPeriodStats.rejected, priorPeriodStats.rejected),
+								verified: calculateTrend(currentPeriodStats.verified, priorPeriodStats.verified),
 							},
 						},
 					})

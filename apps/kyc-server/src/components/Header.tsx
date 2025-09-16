@@ -129,7 +129,7 @@ const Header = () => {
 
 				{/* Mobile menu dropdown */}
 				{mobileMenuOpen && (
-					<div className="absolute top-16 left-0 w-full bg-popover border-border shadow-md z-90 flex flex-col space-y-1 px-4 py-4 md:hidden">
+					<div className="absolute top-16 left-0 w-full bg-popover border border-border shadow-md z-50 flex flex-col space-y-1 px-4 py-4 md:hidden">
 						{mainNavItems.map((item) => (
 							<Link
 								key={item.path}

@@ -30,6 +30,7 @@ interface KycTableProps {
 	isLoading?: boolean
 	onStatusUpdate?: () => void
 	onReview?: (userId: string) => void
+	isConnected?: boolean
 }
 
 export function KycTable({
@@ -37,6 +38,7 @@ export function KycTable({
 	isLoading = false,
 	onStatusUpdate,
 	onReview,
+	isConnected = false,
 }: KycTableProps) {
 	const {
 		table,
@@ -96,6 +98,12 @@ export function KycTable({
 			/>
 
 			<div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
+				{isConnected && (
+					<div className="flex items-center gap-1">
+						<div className="size-2 bg-green-500 rounded-full animate-pulse" />
+						<span className="text-xs text-green-600 font-medium">Live</span>
+					</div>
+				)}
 				<div className="overflow-hidden rounded-lg border">
 					<DndContext
 						collisionDetection={closestCenter}

@@ -1,8 +1,15 @@
+import type { Database } from '@services/supabase'
 import { z } from 'zod'
 
-export const kycStatusSchema = z.enum(['pending', 'approved', 'rejected', 'verified'])
+// Extract enum values from the database type to ensure consistency
+export const kycStatusValues = ['pending', 'approved', 'rejected', 'verified'] as const satisfies readonly Database['public']['Enums']['kyc_status_enum'][]
 
-export const kycVerificationLevelSchema = z.enum(['basic', 'enhanced'])
+export const kycVerificationLevelValues = ['basic', 'enhanced'] as const satisfies readonly Database['public']['Enums']['kyc_verification_enum'][]
+
+// Create Zod schemas from database-derived values
+export const kycStatusSchema = z.enum(kycStatusValues)
+
+export const kycVerificationLevelSchema = z.enum(kycVerificationLevelValues)
 
 export const kycUpdateDataSchema = z.object({
 	user_id: z.string().uuid(),

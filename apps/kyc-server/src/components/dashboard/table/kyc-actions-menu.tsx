@@ -1,10 +1,13 @@
 import {
+	HistoryIcon,
 	MoreVerticalIcon,
 	RefreshCwIcon,
 	ShieldCheckIcon,
 	UserCheckIcon,
+	UserIcon,
 	XIcon,
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '~/components/base/button'
 import {
@@ -28,21 +31,46 @@ export function KycActionsMenu({
 	onStatusUpdate,
 	onReview,
 }: KycActionsMenuProps) {
-	const { updateKycStatus, isUpdating } = useKycActions()
+	const { updateKycStatus, isUpdating, error } = useKycActions()
 
 	const handleStatusUpdate = async (newStatus: 'approved' | 'rejected' | 'pending') => {
-		const success = await updateKycStatus({
-			recordId: record.id,  // Use the primary key instead of user_id
-			userId: record.user_id,
-			status: newStatus,
-		})
+		try {
+			const success = await updateKycStatus({
+				recordId: record.id,  // Use the primary key instead of userId
+				userId: record.userId,
+				status: newStatus,
+			})
 
-		if (success && onStatusUpdate) {
-			onStatusUpdate()
+			if (!success) {
+				const errorMessage = error || 'Failed to update KYC status'
+				toast.error(`Update failed: ${errorMessage}`, {
+					description: `Could not update status to ${newStatus} for ${record.displayName || record.email || record.userId}`,
+				})
+				return
+			}
+
+			toast.success(`Status updated to ${newStatus}`, {
+				description: `Successfully updated KYC status for ${record.displayName || record.email || record.userId}`,
+			})
+
+			if (onStatusUpdate) {
+				onStatusUpdate()
+			}
+		} catch (err) {
+			const errorDetails = err instanceof Error ? err.message : 'Unknown error occurred'
+			toast.error(`Update failed: ${errorDetails}`, {
+				description: `Could not update status to ${newStatus} for ${record.displayName || record.email || record.userId}`,
+			})
+			console.error('KYC status update error:', err)
 		}
 	}
 
 	const handleRequestReupload = async () => {
+		// Guard against duplicate requests when already pending
+		if (record.status === 'pending') {
+			return
+		}
+
 		// Reset status to pending to request reupload
 		await handleStatusUpdate('pending')
 	}
@@ -55,14 +83,14 @@ export function KycActionsMenu({
 					className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
 					size="icon"
 					disabled={isUpdating}
-					aria-label={`Actions for ${record.display_name || record.email || record.user_id}`}
+					aria-label={`Actions for ${record.displayName || record.email || record.userId}`}
 				>
 					<MoreVerticalIcon className="size-4" />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
 				<DropdownMenuItem
-					onClick={() => onReview?.(record.user_id)}
+					onClick={() => onReview?.(record.userId)}
 					disabled={isUpdating}
 				>
 					<UserCheckIcon className="mr-2 size-4" />
@@ -88,7 +116,7 @@ export function KycActionsMenu({
 						{isUpdating ? 'Loading...' : 'Reject'}
 					</DropdownMenuItem>
 				)}
-				{(record.status === 'approved' || record.status === 'rejected') && record.status !== 'verified' && (
+				{(record.status === 'approved' || record.status === 'rejected') && record.status !== 'verified' && record.status !== 'pending' && (
 					<DropdownMenuItem
 						className="text-orange-600"
 						disabled={isUpdating}
@@ -99,8 +127,24 @@ export function KycActionsMenu({
 					</DropdownMenuItem>
 				)}
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>View Profile</DropdownMenuItem>
-				<DropdownMenuItem>View History</DropdownMenuItem>
+				<DropdownMenuItem 
+					disabled 
+					aria-disabled="true"
+					title="Profile view feature coming soon"
+				>
+					<UserIcon className="mr-2 size-4" />
+					View Profile
+					<span className="ml-auto text-xs text-muted-foreground">(Coming soon)</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem 
+					disabled 
+					aria-disabled="true"
+					title="History view feature coming soon"
+				>
+					<HistoryIcon className="mr-2 size-4" />
+					View History
+					<span className="ml-auto text-xs text-muted-foreground">(Coming soon)</span>
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { MetricsGrid } from '~/components/dashboard/cards/metrics-grid'
 import { MetricCardSkeleton } from '~/components/dashboard/skeletons/metric-card-skeleton'
+import { metricsConfig } from '~/lib/constants/dashboard'
 import type { KycStats } from '~/lib/types/dashboard'
 import { cn } from '~/lib/utils'
 
@@ -12,14 +13,33 @@ export function MetricsGridContainer({ className }: MetricsGridContainerProps) {
 	const [stats, setStats] = useState<KycStats | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
+	
+	const abortControllerRef = useRef<AbortController | null>(null)
+	const isMountedRef = useRef(true)
 
 	const fetchUserStats = useCallback(async () => {
+		if (abortControllerRef.current) {
+			abortControllerRef.current.abort()
+		}
+
+		const controller = new AbortController()
+		abortControllerRef.current = controller
+
+		if (!isMountedRef.current) return
+
 		try {
 			setIsLoading(true)
 			setError(null)
 
-			const response = await fetch('/api/users/stats')
+			const response = await fetch('/api/users/stats', {
+				signal: controller.signal
+			})
+
+			if (controller.signal.aborted || !isMountedRef.current) return
+
 			const result = await response.json()
+
+			if (controller.signal.aborted || !isMountedRef.current) return
 
 			if (!response.ok) {
 				throw new Error(result.error || 'Failed to fetch stats')
@@ -31,20 +51,61 @@ export function MetricsGridContainer({ className }: MetricsGridContainerProps) {
 				throw new Error('Invalid response')
 			}
 		} catch (err: unknown) {
+			if (controller.signal.aborted || !isMountedRef.current) return
+
+			if (err instanceof Error && err.name === 'AbortError') return
+
 			console.error('Stats fetch error:', err)
 			const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
 			setError(errorMessage)
 		} finally {
-			setIsLoading(false)
+			if (isMountedRef.current) {
+				setIsLoading(false)
+			}
 		}
 	}, [])
 
 	useEffect(() => {
-		fetchUserStats()
-		// Auto-refresh every 30 seconds
-		const interval = setInterval(fetchUserStats, 30000)
+		isMountedRef.current = true
 
-		return () => clearInterval(interval)
+		fetchUserStats()
+		
+		let intervalId: NodeJS.Timeout | null = null
+
+		const startInterval = () => {
+			if (!document.hidden && !intervalId && isMountedRef.current) {
+				intervalId = setInterval(fetchUserStats, 30000)
+			}
+		}
+
+		const stopInterval = () => {
+			if (intervalId) {
+				clearInterval(intervalId)
+				intervalId = null
+			}
+		}
+
+		const handleVisibilityChange = () => {
+			if (document.hidden) {
+				stopInterval()
+			} else {
+				startInterval()
+				fetchUserStats()
+			}
+		}
+
+		startInterval()
+
+		document.addEventListener('visibilitychange', handleVisibilityChange)
+
+		return () => {
+			isMountedRef.current = false
+			stopInterval()
+			document.removeEventListener('visibilitychange', handleVisibilityChange)
+			if (abortControllerRef.current) {
+				abortControllerRef.current.abort()
+			}
+		}
 	}, [fetchUserStats])
 
 	if (error) {
@@ -71,9 +132,8 @@ export function MetricsGridContainer({ className }: MetricsGridContainerProps) {
 				'*:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6',
 				className,
 			)}>
-				{Array.from({ length: 4 }).map((_, index) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: safe for static skeleton rendering
-					<MetricCardSkeleton key={index} />
+				{metricsConfig.map((metric) => (
+					<MetricCardSkeleton key={metric.key} />
 				))}
 			</div>
 		)

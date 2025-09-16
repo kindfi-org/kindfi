@@ -38,7 +38,7 @@ export const createKycTableColumns = (
 				<Checkbox
 					checked={row.getIsSelected()}
 					onCheckedChange={(value) => row.toggleSelected(!!value)}
-					aria-label={`Select row for ${row.original.user_id}`}
+					aria-label={`Select row for ${row.original.userId}`}
 				/>
 			</div>
 		),
@@ -46,7 +46,7 @@ export const createKycTableColumns = (
 		enableHiding: false,
 	},
 	{
-		accessorKey: 'user_id',
+		accessorKey: 'userId',
 		header: 'User ID',
 		cell: ({ row }) => {
 			return <KycDetailsSheet item={row.original} />
@@ -54,13 +54,13 @@ export const createKycTableColumns = (
 		enableHiding: false,
 	},
 	{
-		accessorKey: 'display_name',
+		accessorKey: 'displayName',
 		header: 'Name',
 		cell: ({ row }) => (
 			<div className="flex items-center gap-2">
 				<UserCheckIcon className="size-4 text-muted-foreground" />
 				<span className="font-medium">
-					{row.original.display_name || row.original.email || 'No name'}
+					{row.original.displayName || row.original.email || 'No name'}
 				</span>
 			</div>
 		),
@@ -89,40 +89,40 @@ export const createKycTableColumns = (
 		),
 	},
 	{
-		accessorKey: 'verification_level',
+		accessorKey: 'verificationLevel',
 		header: 'Verification Level',
 		cell: ({ row }) => (
 			<div className="w-32">
 				<Badge
 					variant="outline"
-					className={`px-1.5 ${row.original.verification_level === 'enhanced' ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
+					className={`px-1.5 ${row.original.verificationLevel === 'enhanced' ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
 				>
-					{row.original.verification_level === 'enhanced' ? (
+					{row.original.verificationLevel === 'enhanced' ? (
 						<ShieldCheckIcon className="mr-1 size-3" aria-hidden="true" />
 					) : (
 						<UserCheckIcon className="mr-1 size-3" aria-hidden="true" />
 					)}
-					{row.original.verification_level.charAt(0).toUpperCase() +
-						row.original.verification_level.slice(1)}
+					{row.original.verificationLevel.charAt(0).toUpperCase() +
+						row.original.verificationLevel.slice(1)}
 				</Badge>
 			</div>
 		),
 	},
 	{
-		accessorKey: 'created_at',
+		accessorKey: 'createdAt',
 		header: 'Created',
 		cell: ({ row }) => (
 			<div className="text-sm text-muted-foreground">
-				{new Date(row.original.created_at).toLocaleDateString()}
+				{new Date(row.original.createdAt).toLocaleDateString()}
 			</div>
 		),
 	},
 	{
-		accessorKey: 'updated_at',
+		accessorKey: 'updatedAt',
 		header: 'Updated',
 		cell: ({ row }) => (
 			<div className="text-sm text-muted-foreground">
-				{new Date(row.original.updated_at).toLocaleDateString()}
+				{new Date(row.original.updatedAt).toLocaleDateString()}
 			</div>
 		),
 	},
