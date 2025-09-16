@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react'
 import { hydrateRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import Layout from './components/Layout'
 import { DashboardSkeleton } from './components/dashboard/skeletons/dashboard-skeleton'
 import { ThemeProvider } from './components/provider/theme-provider'
@@ -20,7 +21,7 @@ if (!rootElement) {
 hydrateRoot(
 	rootElement,
 	<React.StrictMode>
-		<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+		<ThemeProvider>
 			<BrowserRouter>
 				<Layout>
 					<Routes>
@@ -42,9 +43,11 @@ hydrateRoot(
 						<Route 
 							path="/dashboard/users" 
 							element={
-								<Suspense fallback={<DashboardSkeleton />}>
-									<Users />
-								</Suspense>
+								<ErrorBoundary>
+									<Suspense fallback={<DashboardSkeleton />}>
+										<Users />
+									</Suspense>
+								</ErrorBoundary>
 							} 
 						/>
 					</Routes>

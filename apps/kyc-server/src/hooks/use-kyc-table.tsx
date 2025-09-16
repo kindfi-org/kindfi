@@ -53,7 +53,7 @@ export function useKycTable(
 			const statusMatch = statusFilter === 'all' || item.status === statusFilter
 			const levelMatch =
 				verificationLevelFilter === 'all' ||
-				item.verification_level === verificationLevelFilter
+				item.verificationLevel === verificationLevelFilter
 			return statusMatch && levelMatch
 		})
 	}, [kycData, statusFilter, verificationLevelFilter])

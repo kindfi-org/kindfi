@@ -28,19 +28,12 @@ export default function Users() {
 	return (
 		<div className="@container/main flex flex-1 flex-col gap-2 bg-background">
 			<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-				<div className="px-4 lg:px-6">
-					{isConnected && (
-						<div className="flex items-center gap-1">
-							<div className="size-2 bg-green-500 rounded-full animate-pulse" />
-							<span className="text-xs text-green-600 font-medium">Live</span>
-						</div>
-					)}
-				</div>
 				<MetricsGridContainer key={`metrics-${refreshTrigger}`} />
 				<KycTableContainer 
 					onStatusUpdate={handleStatusUpdate}
 					onReview={handleReview}
 					refreshTrigger={refreshTrigger}
+					isConnected={isConnected}
 				/>
 			</div>
 		</div>

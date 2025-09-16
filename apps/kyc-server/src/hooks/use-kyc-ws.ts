@@ -4,6 +4,8 @@ import { kycUpdateSchema, type KYCUpdate } from '~/lib/validation/kyc-schemas'
 
 interface UseKYCWebSocketOptions {
 	onUpdate?: (update: KYCUpdate) => void
+	maxRetries?: number
+	url?: string
 }
 
 const isValidUpdate = (data: unknown): data is KYCUpdate => {
@@ -17,6 +19,8 @@ const isValidUpdate = (data: unknown): data is KYCUpdate => {
 
 export function useKYCWebSocket({
 	onUpdate,
+	maxRetries = 3,
+	url,
 }: UseKYCWebSocketOptions = {}) {
 	const [isConnected, setIsConnected] = useState(false)
 	const [lastUpdate, setLastUpdate] = useState<KYCUpdate | null>(null)
@@ -24,7 +28,7 @@ export function useKYCWebSocket({
 	const onUpdateRef = useRef(onUpdate)
 	const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const retryCount = useRef(0)
-	const maxRetries = 3
+	const wsUrl = url || `ws://${window.location.host}/live`
 
 	useEffect(() => {
 		onUpdateRef.current = onUpdate
@@ -37,7 +41,7 @@ export function useKYCWebSocket({
 			if (!mounted) return
 
 			try {
-				const ws = new WebSocket(`ws://${window.location.host}/live`)
+				const ws = new WebSocket(wsUrl)
 				wsRef.current = ws
 
 				ws.onopen = () => {
@@ -99,7 +103,7 @@ export function useKYCWebSocket({
 				wsRef.current = null
 			}
 		}
-	}, [])
+	}, [wsUrl, maxRetries])
 
 	return {
 		isConnected,
