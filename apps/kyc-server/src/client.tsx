@@ -6,7 +6,6 @@ import { DashboardSkeleton } from './components/dashboard/skeletons/dashboard-sk
 import { ThemeProvider } from './components/provider/theme-provider'
 import About from './pages/About'
 import DashboardPage from './pages/dashboard'
-import Customers from './pages/dashboard/customers'
 import WebSocketDemo from './pages/WebSocketDemo'
 
 // Lazy load the Users page to reduce initial bundle size
@@ -40,7 +39,6 @@ hydrateRoot(
 							element={<div>This is a React demo page.</div>}
 						/>
 						<Route path="/websocket" element={<WebSocketDemo />} />
-						<Route path="/dashboard/customers" element={<Customers />} />
 						<Route 
 							path="/dashboard/users" 
 							element={

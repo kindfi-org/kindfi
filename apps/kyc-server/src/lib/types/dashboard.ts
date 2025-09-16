@@ -27,6 +27,20 @@ export type TimeRangeOption = {
 export type KycReview = z.infer<typeof kycReviewsRowSchema>
 export type KycReviewsInsertValues = z.infer<typeof kycReviewsInsertSchema>
 
+// KYC Record type - represents the data structure for KYC records in the table
+export interface KycRecord {
+	id: string
+	user_id: string
+	email?: string | null
+	display_name?: string | null
+	status: 'pending' | 'approved' | 'rejected' | 'verified'
+	verification_level: 'basic' | 'enhanced'
+	reviewer_id?: string | null
+	notes?: string | null
+	created_at: string
+	updated_at: string
+}
+
 export interface KycStats {
 	totalUsers: number
 	pending: number

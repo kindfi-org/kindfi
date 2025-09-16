@@ -15,25 +15,25 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/base/dropdown-menu'
 import { useKycActions } from '~/hooks/use-kyc-actions'
-import type { UserData } from './user-table-columns'
+import type { KycRecord } from '~/lib/types/dashboard'
 
-interface UserActionsMenuProps {
-	user: UserData
+interface KycActionsMenuProps {
+	record: KycRecord
 	onStatusUpdate?: () => void
 	onReview?: (userId: string) => void
 }
 
-export function UserActionsMenu({
-	user,
+export function KycActionsMenu({
+	record,
 	onStatusUpdate,
 	onReview,
-}: UserActionsMenuProps) {
+}: KycActionsMenuProps) {
 	const { updateKycStatus, isUpdating } = useKycActions()
 
 	const handleStatusUpdate = async (newStatus: 'approved' | 'rejected' | 'pending') => {
 		const success = await updateKycStatus({
-			recordId: user.id,  // Use the primary key instead of user_id
-			userId: user.user_id,
+			recordId: record.id,  // Use the primary key instead of user_id
+			userId: record.user_id,
 			status: newStatus,
 		})
 
@@ -55,20 +55,20 @@ export function UserActionsMenu({
 					className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
 					size="icon"
 					disabled={isUpdating}
-					aria-label={`Actions for ${user.display_name || user.email || user.user_id}`}
+					aria-label={`Actions for ${record.display_name || record.email || record.user_id}`}
 				>
 					<MoreVerticalIcon className="size-4" />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
 				<DropdownMenuItem
-					onClick={() => onReview?.(user.user_id)}
+					onClick={() => onReview?.(record.user_id)}
 					disabled={isUpdating}
 				>
 					<UserCheckIcon className="mr-2 size-4" />
 					Review KYC
 				</DropdownMenuItem>
-				{user.status !== 'approved' && user.status !== 'verified' && (
+				{record.status !== 'approved' && record.status !== 'verified' && (
 					<DropdownMenuItem
 						className="text-green-600"
 						disabled={isUpdating}
@@ -78,7 +78,7 @@ export function UserActionsMenu({
 						{isUpdating ? 'Loading...' : 'Approve'}
 					</DropdownMenuItem>
 				)}
-				{user.status !== 'rejected' && user.status !== 'verified' && (
+				{record.status !== 'rejected' && record.status !== 'verified' && (
 					<DropdownMenuItem
 						className="text-red-600"
 						disabled={isUpdating}
@@ -88,7 +88,7 @@ export function UserActionsMenu({
 						{isUpdating ? 'Loading...' : 'Reject'}
 					</DropdownMenuItem>
 				)}
-				{(user.status === 'approved' || user.status === 'rejected') && user.status !== 'verified' && (
+				{(record.status === 'approved' || record.status === 'rejected') && record.status !== 'verified' && (
 					<DropdownMenuItem
 						className="text-orange-600"
 						disabled={isUpdating}

@@ -77,7 +77,7 @@ const Header = () => {
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent
-								className="z-50 bg-popover border-border py-4"
+								className="z-50 bg-popover border border-border py-4"
 								align="end"
 								sideOffset={8}
 							>

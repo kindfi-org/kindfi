@@ -7,6 +7,12 @@ import type {
 } from '@supabase/supabase-js'
 import type { ServerWebSocket } from 'bun'
 
+import {
+	kycStatusRecordSchema,
+	kycUpdateDataSchema,
+	type KYCUpdate,
+} from '~/lib/validation/kyc-schemas'
+
 const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
 interface KYCWebSocketData {
@@ -15,22 +21,6 @@ interface KYCWebSocketData {
 	userId?: string
 }
 
-interface KYCStatusRecord {
-	user_id: string
-	status: string
-	verification_level: string
-	[key: string]: unknown
-}
-
-interface KYCUpdate {
-	type: 'kyc_status'
-	data: {
-		user_id: string
-		status: string
-		verification_level: string
-		timestamp: string
-	}
-}
 
 export class KYCWebSocketService {
 	private clients: Set<ServerWebSocket<KYCWebSocketData>> = new Set()
@@ -75,21 +65,31 @@ export class KYCWebSocketService {
 					schema: 'public',
 					table: 'kyc_reviews',
 				},
-				(payload: RealtimePostgresChangesPayload<KYCStatusRecord>) => {
+				(payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
 					console.log('Received KYC status change:', payload)
 
-					const newRecord = payload.new as KYCStatusRecord
+					try {
+						const newRecord = kycStatusRecordSchema.parse(payload.new)
 
-					const update: KYCUpdate = {
-						type: 'kyc_status',
-						data: {
+						const updateData = kycUpdateDataSchema.parse({
 							user_id: newRecord.user_id,
 							status: newRecord.status,
 							verification_level: newRecord.verification_level,
 							timestamp: new Date().toISOString(),
-						},
+						})
+
+						const update: KYCUpdate = {
+							type: 'kyc_status',
+							data: updateData,
+						}
+						this.broadcastUpdate(update)
+					} catch (error) {
+						console.error('Invalid KYC status record received:', {
+							error,
+							payload: payload.new,
+							context: 'kyc_status_validation_error'
+						})
 					}
-					this.broadcastUpdate(update)
 				},
 			)
 			.subscribe((status) => {
@@ -146,17 +146,33 @@ export class KYCWebSocketService {
 			}
 
 			if (status) {
-				const kycStatus = status as KYCStatusRecord
-				const update: KYCUpdate = {
-					type: 'kyc_status',
-					data: {
+				try {
+					const kycStatus = kycStatusRecordSchema.parse(status)
+					const updateData = kycUpdateDataSchema.parse({
 						user_id: kycStatus.user_id,
 						status: kycStatus.status,
 						verification_level: kycStatus.verification_level,
 						timestamp: new Date().toISOString(),
-					},
+					})
+
+					const update: KYCUpdate = {
+						type: 'kyc_status',
+						data: updateData,
+					}
+					ws.send(JSON.stringify(update))
+				} catch (error) {
+					console.error('Invalid KYC status record in database:', {
+						error,
+						status,
+						context: 'initial_status_validation_error'
+					})
+					ws.send(
+						JSON.stringify({
+							type: 'error',
+							message: 'Invalid KYC data format',
+						}),
+					)
 				}
-				ws.send(JSON.stringify(update))
 			} else {
 				ws.send(
 					JSON.stringify({
