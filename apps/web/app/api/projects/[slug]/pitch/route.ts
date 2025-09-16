@@ -13,6 +13,17 @@ export async function POST(
 ) {
 	try {
 		const supabase = await createSupabaseServerClient()
+
+		// Ensure the request is authenticated before processing
+		// Returns 401 if there's an auth error or no user present.
+		const {
+			data: { user },
+			error: authError,
+		} = await supabase.auth.getUser()
+		if (authError || !user) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
 		const formData = await req.formData()
 
 		const { slug: projectSlug } = await params

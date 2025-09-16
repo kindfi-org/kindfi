@@ -11,6 +11,17 @@ import {
 export async function POST(req: Request) {
 	try {
 		const supabase = await createSupabaseServerClient()
+
+		// Get the authenticated user
+		// Return 401 if there is an auth error or no user is present.
+		const {
+			data: { user },
+			error: authError,
+		} = await supabase.auth.getUser()
+		if (authError || !user) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
 		const formData = await req.formData()
 
 		// Extract fields from multipart form data
@@ -35,8 +46,7 @@ export async function POST(req: Request) {
 			min_investment: minimumInvestment,
 			project_location: location,
 			category_id: category,
-			// TODO: Replace with authenticated user ID after auth changes from issue #44. - @derianrddev
-			kindler_id: '00000000-0000-0000-0000-000000000001',
+			kindler_id: user.id,
 			social_links: buildSocialLinks(website, socialLinks),
 		}
 
