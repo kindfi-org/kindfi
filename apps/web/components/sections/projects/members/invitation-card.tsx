@@ -40,7 +40,7 @@ export function InvitationCard({
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			exit={{ opacity: 0, y: -20 }}
-			transition={{ duration: 0.2, delay: index * 0.05 }}
+			transition={{ duration: 0.2, delay: Math.min(index * 0.05, 0.6) }}
 		>
 			<Card className="bg-white">
 				<CardContent className="p-4">

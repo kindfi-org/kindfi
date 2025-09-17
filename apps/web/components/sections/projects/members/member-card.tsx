@@ -14,7 +14,6 @@ import {
 import { useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
-import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import {
@@ -163,18 +162,13 @@ export function MemberCard({
 									</div>
 								)}
 
-								<div className="flex items-center gap-2 flex-wrap">
-									<RoleBadge role={member.role} />
-									{member.title && (
-										<Badge variant="outline" className="text-xs">
-											{member.title}
-										</Badge>
-									)}
-								</div>
+								<RoleBadge role={member.role} />
 
 								<p className="text-xs text-muted-foreground mt-2">
 									Joined{' '}
-									{formatDistanceToNow(member.joinedAt, { addSuffix: true })}
+									{formatDistanceToNow(new Date(member.joinedAt), {
+										addSuffix: true,
+									})}
 								</p>
 							</div>
 						</div>

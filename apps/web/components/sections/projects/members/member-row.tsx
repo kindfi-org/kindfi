@@ -165,7 +165,7 @@ export function MemberRow({
 
 			<TableCell>
 				<span className="text-sm text-muted-foreground">
-					{formatDistanceToNow(member.joinedAt, { addSuffix: true })}
+					{formatDistanceToNow(new Date(member.joinedAt), { addSuffix: true })}
 				</span>
 			</TableCell>
 
