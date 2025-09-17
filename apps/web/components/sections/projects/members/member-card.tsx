@@ -29,6 +29,7 @@ import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { ProjectMember } from '~/lib/types/project/team-members.types'
 import { cn, getAvatarFallback } from '~/lib/utils'
 import { memberRole } from '~/lib/utils/member-role'
+import { ConfirmRemoveMemberDialog } from './confirm-remove-member-dialog'
 import { RoleBadge } from './role-badge'
 
 interface MemberCardProps {
@@ -50,6 +51,9 @@ export function MemberCard({
 }: MemberCardProps) {
 	const [isEditing, setIsEditing] = useState(false)
 	const [tempTitle, setTempTitle] = useState<string>(member.title ?? '')
+	const [deleteOpen, setDeleteOpen] = useState(false)
+
+	const isOwner = member.userId === currentUserId
 
 	const saveDisabled =
 		tempTitle.trim().length === 0 ||
@@ -100,7 +104,7 @@ export function MemberCard({
 								</div>
 
 								{/* Editable title (mobile card) */}
-								{isEditing ? (
+								{isOwner && isEditing ? (
 									<div className="flex items-center gap-2 mb-2">
 										<Input
 											value={tempTitle}
@@ -146,7 +150,7 @@ export function MemberCard({
 												<span className="text-muted-foreground">—</span>
 											)}
 										</span>
-										{member.userId !== currentUserId && (
+										{isOwner && (
 											<Button
 												size="icon"
 												variant="ghost"
@@ -175,60 +179,72 @@ export function MemberCard({
 							</div>
 						</div>
 
-						{member.userId !== currentUserId && (
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button
-										variant="ghost"
-										size="sm"
-										className="h-8 w-8 p-0"
-										aria-label={menuAria}
-									>
-										<MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end" className="min-w-[220px]">
-									<div className="px-2 py-1.5 text-xs text-muted-foreground">
-										Change role
-									</div>
-									{(
-										Object.keys(memberRole) as Array<
-											Enums<'project_member_role'>
+						{isOwner && (
+							<>
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button
+											variant="ghost"
+											size="sm"
+											className="h-8 w-8 p-0"
+											aria-label={menuAria}
 										>
-									).map((rk) => {
-										const meta = memberRole[rk]
-										const isCurrent = rk === member.role
-										return (
-											<DropdownMenuItem
-												key={rk}
-												className={cn(
-													'cursor-pointer',
-													isCurrent && 'opacity-60 cursor-not-allowed',
-												)}
-												disabled={isCurrent}
-												aria-disabled={isCurrent}
-												onClick={() => {
-													if (isCurrent) return
-													onChangeRole?.(member.id, rk)
-												}}
-												aria-label={`Set role ${meta.label} for ${member.displayName}`}
+											<MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end" className="min-w-[220px]">
+										<div className="px-2 py-1.5 text-xs text-muted-foreground">
+											Change role
+										</div>
+										{(
+											Object.keys(memberRole) as Array<
+												Enums<'project_member_role'>
 											>
-												<RoleBadge role={rk} />
-											</DropdownMenuItem>
-										)
-									})}
+										).map((rk) => {
+											const meta = memberRole[rk]
+											const isCurrent = rk === member.role
+											return (
+												<DropdownMenuItem
+													key={rk}
+													className={cn(
+														'cursor-pointer',
+														isCurrent && 'opacity-60 cursor-not-allowed',
+													)}
+													disabled={isCurrent}
+													aria-disabled={isCurrent}
+													onClick={() => {
+														if (isCurrent) return
+														onChangeRole?.(member.id, rk)
+													}}
+													aria-label={`Set role ${meta.label} for ${member.displayName}`}
+												>
+													<RoleBadge role={rk} />
+												</DropdownMenuItem>
+											)
+										})}
 
-									<DropdownMenuSeparator />
-									<DropdownMenuItem
-										className="text-destructive cursor-pointer"
-										onClick={() => onRemoveMember?.(member.id)}
-										aria-label={removeAria}
-									>
-										<UserMinus className="mr-2 h-4 w-4" aria-hidden="true" />
-										Remove Member
-									</DropdownMenuItem>
-								</DropdownMenuContent>
-							</DropdownMenu>
+										<DropdownMenuSeparator />
+										<DropdownMenuItem
+											className="text-destructive cursor-pointer"
+											onClick={() => setDeleteOpen(true)}
+											aria-label={removeAria}
+										>
+											<UserMinus className="mr-2 h-4 w-4" aria-hidden="true" />
+											Remove Member
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
+
+								<ConfirmRemoveMemberDialog
+									open={deleteOpen}
+									onOpenChange={setDeleteOpen}
+									memberDisplayName={member.displayName ?? 'Anonymous'}
+									onConfirm={() => {
+										setDeleteOpen(false)
+										onRemoveMember?.(member.id)
+									}}
+								/>
+							</>
 						)}
 					</div>
 				</CardContent>

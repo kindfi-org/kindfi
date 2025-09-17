@@ -2,7 +2,7 @@
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import type { Enums } from '@services/supabase'
-import { notFound } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { InviteMemberForm } from '~/components/sections/projects/members/invite-member-form'
@@ -14,6 +14,7 @@ import {
 	PendingInvitationsSkeleton,
 } from '~/components/sections/projects/members/skeletons'
 import { BreadcrumbContainer } from '~/components/sections/projects/shared'
+import { useMembersMutation } from '~/hooks/projects/use-members-mutation'
 import { getProjectMembersDataBySlug } from '~/lib/queries/projects/get-project-members-data-by-slug'
 import type {
 	InviteMemberData,
@@ -41,6 +42,9 @@ export function ProjectMembersWrapper({
 
 	if (error || !project) notFound()
 
+	// actual auth user id
+	const currentUserId = project.currentUserId ?? undefined
+
 	// Map server `team` to UI `ProjectMember[]`
 	const initialMembers: ProjectMember[] = useMemo(
 		() =>
@@ -57,6 +61,9 @@ export function ProjectMembersWrapper({
 			})),
 		[project.team],
 	)
+
+	const { updateRole, updateTitle, removeMember } = useMembersMutation()
+	const router = useRouter()
 
 	// Local UI state (optimistic updates)
 	const [members, setMembers] = useState<ProjectMember[]>(initialMembers)
@@ -140,22 +147,6 @@ export function ProjectMembersWrapper({
 		}
 	}
 
-	// TODO: replace with real server action / route
-	const handleRemoveMember = async (memberId: string) => {
-		const snapshot = members
-		setMembers((prev) => prev.filter((m) => m.id !== memberId))
-		try {
-			await toast.promise(new Promise((r) => setTimeout(r, 500)), {
-				loading: 'Removing member…',
-				success: 'Member removed from the project.',
-				error: 'Failed to remove member. Please try again.',
-			})
-		} catch {
-			setMembers(snapshot) // rollback
-		}
-	}
-
-	// TODO: replace with real server action / route
 	const handleChangeRole = async (
 		memberId: string,
 		role: Enums<'project_member_role'>,
@@ -164,29 +155,49 @@ export function ProjectMembersWrapper({
 		setMembers((prev) =>
 			prev.map((m) => (m.id === memberId ? { ...m, role } : m)),
 		)
+
 		try {
-			await toast.promise(new Promise((r) => setTimeout(r, 500)), {
-				loading: 'Updating role…',
-				success: 'Member role has been updated.',
-				error: 'Failed to update role. Please try again.',
+			await updateRole.mutateAsync({
+				projectId: project.id,
+				projectSlug,
+				memberId,
+				role,
+			})
+		} catch {
+			// rollback on error
+			setMembers(snapshot)
+		}
+	}
+
+	const handleChangeTitle = async (memberId: string, title: string) => {
+		const snapshot = members
+		setMembers((prev) =>
+			prev.map((m) => (m.id === memberId ? { ...m, title } : m)),
+		)
+
+		try {
+			await updateTitle.mutateAsync({
+				projectId: project.id,
+				projectSlug,
+				memberId,
+				title,
 			})
 		} catch {
 			setMembers(snapshot) // rollback
 		}
 	}
 
-	// TODO: replace with real server action / route
-	const handleChangeTitle = async (memberId: string, title: string) => {
+	const handleRemoveMember = async (memberId: string) => {
 		const snapshot = members
-		setMembers((prev) =>
-			prev.map((m) => (m.id === memberId ? { ...m, title } : m)),
-		)
+		setMembers((prev) => prev.filter((m) => m.id !== memberId))
+
 		try {
-			await toast.promise(new Promise((r) => setTimeout(r, 500)), {
-				loading: 'Updating title…',
-				success: 'Member title has been updated.',
-				error: 'Failed to update title. Please try again.',
+			await removeMember.mutateAsync({
+				projectId: project.id,
+				projectSlug,
+				memberId,
 			})
+			router.push(`/projects/${projectSlug}`)
 		} catch {
 			setMembers(snapshot) // rollback
 		}
@@ -247,8 +258,7 @@ export function ProjectMembersWrapper({
 				) : (
 					<MemberList
 						members={members}
-						// TODO: replace with current user id from your auth context/session
-						currentUserId="__replace_with_auth_user_id__"
+						currentUserId={currentUserId}
 						onRemoveMember={handleRemoveMember}
 						onChangeRole={handleChangeRole}
 						onChangeTitle={handleChangeTitle}

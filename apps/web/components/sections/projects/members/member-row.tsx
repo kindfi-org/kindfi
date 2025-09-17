@@ -27,6 +27,7 @@ import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { ProjectMember } from '~/lib/types/project/team-members.types'
 import { cn, getAvatarFallback } from '~/lib/utils'
 import { memberRole } from '~/lib/utils/member-role'
+import { ConfirmRemoveMemberDialog } from './confirm-remove-member-dialog'
 import { RoleBadge } from './role-badge'
 
 interface MemberRowProps {
@@ -48,6 +49,9 @@ export function MemberRow({
 }: MemberRowProps) {
 	const [isEditing, setIsEditing] = useState(false)
 	const [tempTitle, setTempTitle] = useState<string>(member.title ?? '')
+	const [deleteOpen, setDeleteOpen] = useState(false)
+
+	const isOwner = member.userId === currentUserId
 
 	const saveDisabled =
 		tempTitle.trim().length === 0 ||
@@ -101,7 +105,7 @@ export function MemberRow({
 
 			{/* Title editable */}
 			<TableCell>
-				{isEditing ? (
+				{isOwner && isEditing ? (
 					<div className="flex items-center justify-between gap-2">
 						<Input
 							value={tempTitle}
@@ -145,7 +149,7 @@ export function MemberRow({
 						<span className="text-sm">
 							{member.title || <span className="text-muted-foreground">—</span>}
 						</span>
-						{member.userId !== currentUserId && (
+						{isOwner && (
 							<Button
 								size="icon"
 								variant="ghost"
@@ -166,59 +170,74 @@ export function MemberRow({
 			</TableCell>
 
 			<TableCell>
-				{member.userId !== currentUserId && (
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant="ghost"
-								size="sm"
-								className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100 transition-opacity"
-								aria-label={menuAria}
-							>
-								<MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-							</Button>
-						</DropdownMenuTrigger>
+				{isOwner && (
+					<>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100 transition-opacity"
+									aria-label={menuAria}
+								>
+									<MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+								</Button>
+							</DropdownMenuTrigger>
 
-						<DropdownMenuContent className="bg-white min-w-[220px]" align="end">
-							<div className="px-2 py-1.5 text-xs text-muted-foreground">
-								Change role
-							</div>
-							{(
-								Object.keys(memberRole) as Array<Enums<'project_member_role'>>
-							).map((rk) => {
-								const meta = memberRole[rk]
-								const isCurrent = rk === member.role
-								return (
-									<DropdownMenuItem
-										key={rk}
-										className={cn(
-											'cursor-pointer',
-											isCurrent && 'opacity-60 cursor-not-allowed',
-										)}
-										disabled={isCurrent}
-										aria-disabled={isCurrent}
-										onClick={() => {
-											if (isCurrent) return
-											onChangeRole?.(member.id, rk)
-										}}
-										aria-label={`Set role ${meta.label} for ${member.displayName}`}
-									>
-										<RoleBadge role={rk} />
-									</DropdownMenuItem>
-								)
-							})}
-
-							<DropdownMenuSeparator />
-							<DropdownMenuItem
-								className="text-destructive cursor-pointer"
-								onClick={() => onRemoveMember?.(member.id)}
-								aria-label={removeAria}
+							<DropdownMenuContent
+								className="bg-white min-w-[220px]"
+								align="end"
 							>
-								<UserMinus className="mr-2 h-4 w-4" aria-hidden="true" />
-								Remove Member
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+								<div className="px-2 py-1.5 text-xs text-muted-foreground">
+									Change role
+								</div>
+								{(
+									Object.keys(memberRole) as Array<Enums<'project_member_role'>>
+								).map((rk) => {
+									const meta = memberRole[rk]
+									const isCurrent = rk === member.role
+									return (
+										<DropdownMenuItem
+											key={rk}
+											className={cn(
+												'cursor-pointer',
+												isCurrent && 'opacity-60 cursor-not-allowed',
+											)}
+											disabled={isCurrent}
+											aria-disabled={isCurrent}
+											onClick={() => {
+												if (isCurrent) return
+												onChangeRole?.(member.id, rk)
+											}}
+											aria-label={`Set role ${meta.label} for ${member.displayName}`}
+										>
+											<RoleBadge role={rk} />
+										</DropdownMenuItem>
+									)
+								})}
+
+								<DropdownMenuSeparator />
+								<DropdownMenuItem
+									className="text-destructive cursor-pointer"
+									onClick={() => setDeleteOpen(true)}
+									aria-label={removeAria}
+								>
+									<UserMinus className="mr-2 h-4 w-4" aria-hidden="true" />
+									Remove Member
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+
+						<ConfirmRemoveMemberDialog
+							open={deleteOpen}
+							onOpenChange={setDeleteOpen}
+							memberDisplayName={member.displayName ?? 'Anonymous'}
+							onConfirm={() => {
+								setDeleteOpen(false)
+								onRemoveMember?.(member.id)
+							}}
+						/>
+					</>
 				)}
 			</TableCell>
 		</motion.tr>

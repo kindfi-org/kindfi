@@ -11,6 +11,16 @@ export async function getProjectMembersDataBySlug(
 		slug,
 	)
 
+	// Get current authenticated user id (works with browser/server Supabase client)
+	// If auth is not available on this client type, currentUserId will be null.
+	let currentUserId: string | null = null
+	try {
+		const { data } = await client.auth.getUser()
+		currentUserId = data?.user?.id ?? null
+	} catch {
+		currentUserId = null
+	}
+
 	// Members for this project
 	const { data: members, error: membersError } = await client
 		.from('project_members')
@@ -26,6 +36,7 @@ export async function getProjectMembersDataBySlug(
 			title,
 			slug,
 			category,
+			currentUserId,
 			team: [],
 		}
 	}
@@ -62,6 +73,7 @@ export async function getProjectMembersDataBySlug(
 		title,
 		slug,
 		category,
+		currentUserId,
 		team,
 	}
 }
