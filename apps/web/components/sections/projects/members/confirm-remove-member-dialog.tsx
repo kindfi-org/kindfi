@@ -13,7 +13,6 @@ type ConfirmRemoveMemberDialogProps = {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 	onConfirm: () => void
-	memberDisplayName: string
 }
 
 export function ConfirmRemoveMemberDialog({

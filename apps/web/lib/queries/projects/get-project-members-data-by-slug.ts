@@ -42,7 +42,7 @@ export async function getProjectMembersDataBySlug(
 	}
 
 	// Profiles for the collected user_ids
-	const userIds = members.map((m) => m.user_id)
+	const userIds = Array.from(new Set(members.map((m) => m.user_id)))
 	const { data: profiles, error: profilesError } = await client
 		.from('profiles')
 		.select('id, display_name, email, image_url')
@@ -51,29 +51,20 @@ export async function getProjectMembersDataBySlug(
 	if (profilesError) throw profilesError
 
 	// Merge members + profiles
-	const team = members.flatMap((m) => {
-		const profile = profiles?.find((p) => p.id === m.user_id)
-		if (!profile) return []
-		return [
-			{
-				id: m.id,
-				userId: m.user_id,
-				role: m.role,
-				title: m.title,
-				joinedAt: m.joined_at,
-				displayName: profile.display_name,
-				email: profile.email,
-				avatar: profile.image_url,
-			},
-		]
+	const profilesById = new Map((profiles ?? []).map((p) => [p.id, p] as const))
+	const team = members.map((m) => {
+		const profile = profilesById.get(m.user_id)
+		return {
+			id: m.id,
+			userId: m.user_id,
+			role: m.role,
+			title: m.title,
+			joinedAt: m.joined_at,
+			displayName: profile?.display_name ?? null,
+			email: profile?.email ?? null,
+			avatar: profile?.image_url ?? null,
+		}
 	})
 
-	return {
-		id,
-		title,
-		slug,
-		category,
-		currentUserId,
-		team,
-	}
+	return { id, title, slug, category, currentUserId, team }
 }

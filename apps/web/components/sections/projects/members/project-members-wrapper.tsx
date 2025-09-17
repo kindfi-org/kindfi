@@ -3,7 +3,7 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import type { Enums } from '@services/supabase'
 import { notFound, useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { InviteMemberForm } from '~/components/sections/projects/members/invite-member-form'
 import { MemberList } from '~/components/sections/projects/members/member-list'
@@ -43,27 +43,12 @@ export function ProjectMembersWrapper({
 	if (error || !project) notFound()
 
 	// actual auth user id
-	const currentUserId = project.currentUserId ?? undefined
-
-	// Map server `team` to UI `ProjectMember[]`
-	const initialMembers: ProjectMember[] = useMemo(
-		() =>
-			(project.team ?? []).map((m) => ({
-				id: m.id,
-				userId: m.userId,
-				email: m.email ?? '',
-				displayName: m.displayName ?? '',
-				avatar: m.avatar ?? null,
-				role: m.role,
-				title: m.title ?? '',
-				// joined_at comes as string/Server date -> normalize to Date
-				joinedAt: m.joinedAt ? new Date(String(m.joinedAt)) : new Date(0),
-			})),
-		[project.team],
-	)
+	const currentUserId = project.currentUserId ?? null
 
 	const { updateRole, updateTitle, removeMember } = useMembersMutation()
 	const router = useRouter()
+
+	const initialMembers = project.team
 
 	// Local UI state (optimistic updates)
 	const [members, setMembers] = useState<ProjectMember[]>(initialMembers)
@@ -96,7 +81,7 @@ export function ProjectMembersWrapper({
 			email: data.email,
 			role: data.role,
 			title: data.title,
-			invitedBy: 'System', // TODO: inject from auth/user context
+			invitedBy: currentUserId,
 			invitedAt: new Date(),
 			expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 			status: 'pending',
@@ -132,7 +117,7 @@ export function ProjectMembersWrapper({
 
 	// TODO: replace with real server action / route
 	const handleCancelInvitation = async (invitationId: string) => {
-		const snapshot = pendingInvitations
+		const snapshot = [...pendingInvitations]
 		setPendingInvitations((prev) =>
 			prev.filter((inv) => inv.id !== invitationId),
 		)
@@ -151,7 +136,7 @@ export function ProjectMembersWrapper({
 		memberId: string,
 		role: Enums<'project_member_role'>,
 	) => {
-		const snapshot = members
+		const snapshot = [...members]
 		setMembers((prev) =>
 			prev.map((m) => (m.id === memberId ? { ...m, role } : m)),
 		)
@@ -170,7 +155,7 @@ export function ProjectMembersWrapper({
 	}
 
 	const handleChangeTitle = async (memberId: string, title: string) => {
-		const snapshot = members
+		const snapshot = [...members]
 		setMembers((prev) =>
 			prev.map((m) => (m.id === memberId ? { ...m, title } : m)),
 		)
@@ -188,7 +173,7 @@ export function ProjectMembersWrapper({
 	}
 
 	const handleRemoveMember = async (memberId: string) => {
-		const snapshot = members
+		const snapshot = [...members]
 		setMembers((prev) => prev.filter((m) => m.id !== memberId))
 
 		try {
@@ -238,7 +223,7 @@ export function ProjectMembersWrapper({
 				{isLoading ? (
 					<InviteMemberFormSkeleton />
 				) : (
-					<InviteMemberForm onInvite={handleInviteMember} isLoading={false} />
+					<InviteMemberForm onInvite={handleInviteMember} />
 				)}
 
 				{/* Pending Invitations */}

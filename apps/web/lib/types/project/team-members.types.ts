@@ -10,7 +10,7 @@ export interface ProjectMember {
 	avatar: string | null
 	role: Enums<'project_member_role'>
 	title: string
-	joinedAt: Date
+	joinedAt: string
 }
 
 export interface InviteMemberData {
@@ -26,7 +26,7 @@ export interface PendingInvitation {
 	email: string
 	role: Enums<'project_member_role'>
 	title?: string
-	invitedBy: string
+	invitedBy: string | null
 	invitedAt: Date
 	expiresAt: Date
 	status: InvitationStatus

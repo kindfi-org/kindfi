@@ -29,13 +29,11 @@ import { RoleSelect } from './role-select'
 
 interface InviteMemberFormProps {
 	onInvite: (data: InviteMemberData) => Promise<void>
-	isLoading?: boolean
 	className?: string
 }
 
 export function InviteMemberForm({
 	onInvite,
-	isLoading = false,
 	className,
 }: InviteMemberFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false)
@@ -105,7 +103,7 @@ export function InviteMemberForm({
 													type="email"
 													autoComplete="email"
 													className="bg-white border-green-600"
-													disabled={isLoading || isSubmitting}
+													disabled={isSubmitting}
 													{...field}
 												/>
 											</FormControl>
@@ -126,7 +124,7 @@ export function InviteMemberForm({
 												<RoleSelect
 													role={field.value}
 													onRoleChange={field.onChange}
-													disabled={isLoading || isSubmitting}
+													disabled={isSubmitting}
 													className="w-full"
 													showDescription
 													descriptions={{
@@ -160,7 +158,7 @@ export function InviteMemberForm({
 											<Input
 												placeholder="e.g., Software Engineer, Marketing Lead"
 												className="bg-white border-green-600"
-												disabled={isLoading || isSubmitting}
+												disabled={isSubmitting}
 												{...field}
 											/>
 										</FormControl>
@@ -172,7 +170,7 @@ export function InviteMemberForm({
 							<div className="flex justify-end">
 								<Button
 									type="submit"
-									disabled={isLoading || isSubmitting}
+									disabled={isSubmitting}
 									aria-label={
 										isSubmitting ? 'Sending invitation' : 'Send invitation'
 									}

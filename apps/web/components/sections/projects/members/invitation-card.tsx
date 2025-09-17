@@ -30,7 +30,7 @@ export function InvitationCard({
 	onResend,
 	onCancel,
 }: InvitationCardProps) {
-	const isExpired = isAfter(new Date(), invitation.expiresAt)
+	const isExpired = isAfter(new Date(), new Date(invitation.expiresAt))
 	const menuAria = `Open actions menu for ${invitation.email}`
 	const resendAria = `Resend invitation to ${invitation.email}`
 	const cancelAria = `Cancel invitation for ${invitation.email}`
@@ -66,7 +66,9 @@ export function InvitationCard({
 							</div>
 							<p className="text-xs text-muted-foreground">
 								Invited{' '}
-								{formatDistanceToNow(invitation.invitedAt, { addSuffix: true })}
+								{formatDistanceToNow(new Date(invitation.invitedAt), {
+									addSuffix: true,
+								})}
 							</p>
 						</div>
 

@@ -23,7 +23,7 @@ import { MemberRow } from './member-row'
 
 interface MemberListProps {
 	members: ProjectMember[]
-	currentUserId?: string
+	currentUserId: string | null
 	onRemoveMember?: (memberId: string) => void
 	onChangeRole?: (memberId: string, role: Enums<'project_member_role'>) => void
 	onChangeTitle?: (memberId: string, title: string) => void

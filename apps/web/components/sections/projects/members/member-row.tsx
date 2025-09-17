@@ -33,7 +33,7 @@ import { RoleBadge } from './role-badge'
 interface MemberRowProps {
 	member: ProjectMember
 	index: number
-	currentUserId?: string
+	currentUserId: string | null
 	onRemoveMember?: (memberId: string) => void
 	onChangeRole?: (memberId: string, role: Enums<'project_member_role'>) => void
 	onChangeTitle?: (memberId: string, title: string) => void
@@ -76,7 +76,7 @@ export function MemberRow({
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			exit={{ opacity: 0, y: -20 }}
-			transition={{ duration: 0.2, delay: index * 0.05 }}
+			transition={{ duration: 0.2, delay: Math.min(index * 0.05, 0.6) }}
 			className="group hover:bg-muted/50"
 		>
 			<TableCell>
@@ -231,7 +231,6 @@ export function MemberRow({
 						<ConfirmRemoveMemberDialog
 							open={deleteOpen}
 							onOpenChange={setDeleteOpen}
-							memberDisplayName={member.displayName ?? 'Anonymous'}
 							onConfirm={() => {
 								setDeleteOpen(false)
 								onRemoveMember?.(member.id)

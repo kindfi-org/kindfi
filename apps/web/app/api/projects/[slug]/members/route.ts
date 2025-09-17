@@ -34,7 +34,7 @@ export async function PATCH(
 		const role = formData.get('role') as string | null
 		const title = (formData.get('title') as string | null) ?? null
 
-		// Validate required fields (no eval)
+		// Validate required fields
 		const missing = listMissing({ projectId, memberId })
 		if (missing.length > 0) {
 			return NextResponse.json(
@@ -107,7 +107,7 @@ export async function DELETE(
 		const projectId = formData.get('projectId') as string
 		const memberId = formData.get('memberId') as string
 
-		// Validate required fields (no eval)
+		// Validate required fields
 		const missing = listMissing({ projectId, memberId })
 		if (missing.length > 0) {
 			return NextResponse.json(
