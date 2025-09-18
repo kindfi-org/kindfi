@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	buildSocialLinks,
 	deleteFolderFromBucket,
@@ -14,12 +16,9 @@ export async function PATCH(req: Request) {
 		const supabase = await createSupabaseServerClient()
 
 		// Ensure the request is authenticated before processing
-		// Returns 401 if there's an auth error or no user present.
-		const {
-			data: { user },
-			error: authError,
-		} = await supabase.auth.getUser()
-		if (authError || !user) {
+		const session = await getServerSession(nextAuthOption)
+		const userId = session?.user?.id
+		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 

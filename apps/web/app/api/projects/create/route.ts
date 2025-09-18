@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	buildSocialLinks,
 	parseFormData,
@@ -12,13 +14,10 @@ export async function POST(req: Request) {
 	try {
 		const supabase = await createSupabaseServerClient()
 
-		// Get the authenticated user
-		// Return 401 if there is an auth error or no user is present.
-		const {
-			data: { user },
-			error: authError,
-		} = await supabase.auth.getUser()
-		if (authError || !user) {
+		// Ensure the request is authenticated before processing
+		const session = await getServerSession(nextAuthOption)
+		const userId = session?.user?.id
+		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
@@ -46,7 +45,7 @@ export async function POST(req: Request) {
 			min_investment: minimumInvestment,
 			project_location: location,
 			category_id: category,
-			kindler_id: user.id,
+			kindler_id: userId,
 			social_links: buildSocialLinks(website, socialLinks),
 		}
 

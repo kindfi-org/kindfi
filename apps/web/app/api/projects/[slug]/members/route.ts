@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { Enums, TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 
 // Small helper to safely detect missing fields without using eval
 function listMissing(fields: Record<string, unknown>) {
@@ -17,12 +19,9 @@ export async function PATCH(
 		const supabase = await createSupabaseServerClient()
 
 		// Ensure the request is authenticated before processing
-		// Returns 401 if there's an auth error or no user present.
-		const {
-			data: { user },
-			error: authError,
-		} = await supabase.auth.getUser()
-		if (authError || !user) {
+		const session = await getServerSession(nextAuthOption)
+		const userId = session?.user?.id
+		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
@@ -92,12 +91,9 @@ export async function DELETE(
 		const supabase = await createSupabaseServerClient()
 
 		// Ensure the request is authenticated before processing
-		// Returns 401 if there's an auth error or no user present.
-		const {
-			data: { user },
-			error: authError,
-		} = await supabase.auth.getUser()
-		if (authError || !user) {
+		const session = await getServerSession(nextAuthOption)
+		const userId = session?.user?.id
+		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 

@@ -15,6 +15,7 @@ import {
 } from '~/components/sections/projects/members/skeletons'
 import { BreadcrumbContainer } from '~/components/sections/projects/shared'
 import { useMembersMutation } from '~/hooks/projects/use-members-mutation'
+import { useAuth } from '~/hooks/use-auth'
 import { getProjectMembersDataBySlug } from '~/lib/queries/projects/get-project-members-data-by-slug'
 import type {
 	InviteMemberData,
@@ -43,7 +44,8 @@ export function ProjectMembersWrapper({
 	if (error || !project) notFound()
 
 	// actual auth user id
-	const currentUserId = project.currentUserId ?? null
+	const { user } = useAuth()
+	const currentUserId = user?.id
 
 	const { updateRole, updateTitle, removeMember } = useMembersMutation()
 	const router = useRouter()

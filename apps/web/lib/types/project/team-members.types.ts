@@ -26,7 +26,7 @@ export interface PendingInvitation {
 	email: string
 	role: Enums<'project_member_role'>
 	title?: string
-	invitedBy: string | null
+	invitedBy?: string
 	invitedAt: Date
 	expiresAt: Date
 	status: InvitationStatus

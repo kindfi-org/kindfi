@@ -34,7 +34,7 @@ import { RoleBadge } from './role-badge'
 interface MemberCardProps {
 	member: ProjectMember
 	index: number
-	currentUserId: string | null
+	currentUserId?: string
 	onRemoveMember?: (memberId: string) => void
 	onChangeRole?: (memberId: string, role: Enums<'project_member_role'>) => void
 	onChangeTitle?: (memberId: string, title: string) => void
