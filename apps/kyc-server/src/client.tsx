@@ -21,7 +21,7 @@ if (!rootElement) {
 hydrateRoot(
 	rootElement,
 	<React.StrictMode>
-		<ThemeProvider>
+		<ThemeProvider suppressHydrationWarning>
 			<BrowserRouter>
 				<Layout>
 					<Routes>
