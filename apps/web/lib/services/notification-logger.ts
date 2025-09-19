@@ -92,9 +92,8 @@ export async function logError(params: LogErrorParams): Promise<void> {
 		})
 		throw params.error // Rethrow the original error after logging attempt
 	}
-		throw params.error // Rethrow the original error after logging attempt
-	}
-
+	throw params.error // Rethrow the original error after logging attempt
+}
 
 /**
  * Retrieves logs for a specific notification

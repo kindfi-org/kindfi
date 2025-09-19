@@ -13,13 +13,13 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import { useToast } from '~/components/base/toast'
+import { logger } from '~/lib'
 import { DocumentPreview } from './document-preview'
 import { DocumentTypeSelector } from './document-type-selector'
 import { ExtractedInfoDisplay } from './extracted-info-display'
 import { FileUploadArea } from './file-upload-area'
 import { OCRProcessor } from './ocr-processor'
 import { ValidationDisplay } from './validation-display'
-import { logger } from '~/lib'
 
 type ToastType = {
 	title: string

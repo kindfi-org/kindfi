@@ -6,9 +6,9 @@ import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { createSessionAction } from '~/app/actions/auth'
+import { logger } from '~/lib'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import type { PresignResponse, SignParams } from '~/lib/types'
-import { logger } from '~/lib'
 
 export const usePasskeyAuthentication = (
 	identifier: string,

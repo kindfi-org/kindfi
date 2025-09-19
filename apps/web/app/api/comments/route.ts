@@ -1,12 +1,12 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
+import { logger } from '~/lib'
 import {
 	COMMENT_TYPES,
 	createCommentSchema,
 	validateParentComment,
 } from './validation'
-import { logger } from '~/lib'
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
 	try {

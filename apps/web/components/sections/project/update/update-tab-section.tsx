@@ -4,10 +4,10 @@ import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { Loader2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/base/button'
+import { logger } from '~/lib'
 import { LoadMoreButton } from './load-more-button'
 import { UpdateCard } from './update-card'
 import { UpdateForm } from './update-form'
-import { logger } from '~/lib'
 
 // Define types for project updates based on actual DB structure
 type ProjectUpdate = {
@@ -178,7 +178,7 @@ export function ProjectUpdatesTabSection() {
 			// Refetch updates after deleting
 			await fetchUpdates()
 			return Promise.resolve()
-		} catch (err) {			
+		} catch (err) {
 			logger.error({
 				eventType: 'Delete Project Update Error',
 				error: err,

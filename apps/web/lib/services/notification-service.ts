@@ -1,4 +1,5 @@
 import { supabase } from '@packages/lib/supabase'
+import { logger } from '..'
 import type {
 	BaseNotification,
 	CreateNotificationDTO,
@@ -8,7 +9,6 @@ import type {
 	UpdateNotificationDTO,
 } from '../types/notification'
 import { NotificationLogger } from './notification-logger'
-import { logger } from '..'
 
 function isNotification(data: unknown): data is BaseNotification {
 	return (

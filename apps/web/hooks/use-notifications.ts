@@ -3,6 +3,7 @@ import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
+import { logger } from '~/lib'
 import { NotificationService } from '../lib/services/notification-service'
 import type {
 	CreateNotificationDTO,
@@ -10,7 +11,6 @@ import type {
 	NotificationSort,
 	UpdateNotificationDTO,
 } from '../lib/types/notification'
-import { logger } from '~/lib'
 
 export function useNotifications(
 	filters: NotificationFilters = {},

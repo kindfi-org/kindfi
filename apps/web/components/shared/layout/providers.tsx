@@ -58,7 +58,7 @@ export function Providers({ children }: ProvidersProps) {
 							// eventType: 'Periodic sync registration failed',
 							// error: error,
 							// details: error,
-						// })
+							// })
 							// 	})
 						}
 					} catch (error) {

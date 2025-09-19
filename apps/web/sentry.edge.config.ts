@@ -14,8 +14,8 @@ Sentry.init({
 
 	// Enable logs to be sent to Sentry
 	enableLogs: true,
-	  release: process.env.SENTRY_RELEASE || `kindfi-web@${Date.now()}`,
-  environment: process.env.NODE_ENV || 'development',
+	release: process.env.SENTRY_RELEASE || `kindfi-web@${Date.now()}`,
+	environment: process.env.NODE_ENV || 'development',
 
 	// Setting this option to true will print useful information to the console while you're setting up Sentry.
 	debug: false,

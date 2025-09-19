@@ -119,11 +119,16 @@ export default withSentryConfig(nextConfig, {
 	widenClientFileUpload: true,
 	sourcemaps: {
 		// Specify the assets to exclude from source map upload
-		ignore: ["**/node_modules/**"], // Files to exclude
+		ignore: ['**/node_modules/**'], // Files to exclude
 		// Point to your build output directory
-		assets: ['.next/static/chunks/**/*.js', '.next/static/css/**/*.css', "**/*.js", "**/*.js.map"],
+		assets: [
+			'.next/static/chunks/**/*.js',
+			'.next/static/css/**/*.css',
+			'**/*.js',
+			'**/*.js.map',
+		],
 		deleteSourcemapsAfterUpload: true,
-		disable: false
+		disable: false,
 	},
 
 	// Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.

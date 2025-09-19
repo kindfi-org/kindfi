@@ -17,9 +17,9 @@ import {
 import { Avatar, AvatarImage } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
+import { logger } from '~/lib'
 import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import { UpdateForm } from './update-form'
-import { logger } from '~/lib'
 
 // Define the Update type based on actual DB structure
 type Update = {

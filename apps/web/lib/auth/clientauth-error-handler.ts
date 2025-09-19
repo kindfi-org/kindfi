@@ -1,7 +1,7 @@
 import type { AuthError } from '@supabase/supabase-js'
 import { ERROR_MESSAGES } from '../constants/error'
-import type { AuthResponse } from '../types/auth'
 import { Logger } from '../logger'
+import type { AuthResponse } from '../types/auth'
 
 export function handleClientAuthError(error: AuthError): AuthResponse {
 	const logger = new Logger()

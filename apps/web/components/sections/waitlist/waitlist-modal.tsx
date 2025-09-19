@@ -108,7 +108,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 										error: message,
 										details: err,
 									})
-							
+
 									throw new Error(message)
 								}
 								onOpenChange(false)

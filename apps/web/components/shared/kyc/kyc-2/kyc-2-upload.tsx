@@ -22,8 +22,8 @@ import type {
 import { useDocumentFiles } from '~/hooks/kyc/use-document-files'
 import { useDocumentProcessor } from '~/hooks/kyc/use-document-processor'
 import { useDocumentValidation } from '~/hooks/kyc/use-document-validation'
-import { ValidationAlerts } from './validation-alerts'
 import { logger } from '~/lib'
+import { ValidationAlerts } from './validation-alerts'
 
 // pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
