@@ -24,7 +24,7 @@ export function Community() {
 		} catch (error) {
 			logger.error({
 				eventType: 'Community Form Submission Error',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 			setFormStatus({

@@ -146,7 +146,7 @@ export const usePasskeyAuthentication = (
 			}).catch((error) => {
 				logger.error({
 					eventType: 'SignIn Error',
-					error: error instanceof Error ? error.message : 'Unknown error',
+					error: error,
 					details: error,
 				})
 				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, error.message)
@@ -161,7 +161,7 @@ export const usePasskeyAuthentication = (
 		} catch (_error) {
 			logger.error({
 				eventType: 'Passkey Authentication Error',
-				error: _error instanceof Error ? _error.message : 'Unknown error',
+				error: _error,
 				details: _error,
 			})
 			const error = _error as Error

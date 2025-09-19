@@ -53,7 +53,7 @@ export const useEscrowFunding = ({
 		} catch (error) {
 			logger.error({
 				eventType: 'Escrow Funding Failed',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 			setError(

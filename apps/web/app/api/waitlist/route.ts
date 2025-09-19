@@ -145,7 +145,7 @@ export async function POST(req: Request) {
 	} catch (err) {
 		logger.error({
 			eventType: 'Waitlist POST Error',
-			error: err instanceof Error ? err.message : 'Unknown error',
+			error: err,
 			details: err,
 		})
 		return NextResponse.json(

@@ -102,7 +102,7 @@ export const useStellar = () => {
 		} catch (error) {
 			logger.error({
 				eventType: 'Stellar Registration Error',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 		} finally {
@@ -140,7 +140,7 @@ export const useStellar = () => {
 		} catch (error) {
 			logger.error({
 				eventType: 'Stellar Signing Error',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 		} finally {
@@ -175,7 +175,7 @@ export const useStellar = () => {
 			} catch (error) {
 				logger.error({
 					eventType: 'Stellar Initialization Error',
-					error: error instanceof Error ? error.message : 'Unknown error',
+					error: error,
 					details: error,
 				})
 			} finally {

@@ -115,7 +115,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 							} catch (_e) {
 								logger.error({
 									eventType: 'Waitlist Submission Error',
-									error: _e instanceof Error ? _e.message : 'Unknown error',
+									error: _e,
 									details: _e,
 								})
 								// Optionally, show a user-friendly error message here

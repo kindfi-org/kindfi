@@ -81,13 +81,13 @@ export async function logError(params: LogErrorParams): Promise<void> {
 					params.error instanceof Error
 						? params.error.message
 						: String(params.error),
-				stack: params.error instanceof Error ? params.error.stack : undefined,
+				stack: params.error,
 			},
 		})
 	} catch (logError) {
 		logger.error({
 			eventType: 'Log Error Failure',
-			error: logError instanceof Error ? logError.message : 'Unknown error',
+			error: logError,
 			details: logError,
 		})
 		throw params.error // Rethrow the original error after logging attempt
@@ -179,7 +179,7 @@ export class NotificationLogger {
 		} catch (logError) {
 			logger.error({
 				eventType: 'Log Error Failure',
-				error: logError instanceof Error ? logError.message : 'Unknown error',
+				error: logError,
 				details: logError,
 			})
 			// Don't throw to avoid disrupting the main flow
@@ -207,7 +207,7 @@ export class NotificationLogger {
 		} catch (logError) {
 			logger.error({
 				eventType: 'Log Info Failure',
-				error: logError instanceof Error ? logError.message : 'Unknown error',
+				error: logError,
 				details: logError,
 			})
 			// Don't throw to avoid disrupting the main flow
@@ -235,7 +235,7 @@ export class NotificationLogger {
 		} catch (logError) {
 			logger.error({
 				eventType: 'Log Warning Failure',
-				error: logError instanceof Error ? logError.message : 'Unknown error',
+				error: logError,
 				details: logError,
 			})
 			// Don't throw to avoid disrupting the main flow
@@ -262,7 +262,7 @@ export class NotificationLogger {
 		} catch (error) {
 			logger.error({
 				eventType: 'Get Notification Logs Failure',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 			return []
@@ -289,7 +289,7 @@ export class NotificationLogger {
 		} catch (error) {
 			logger.error({
 				eventType: 'Get Error Logs Failure',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 			return []

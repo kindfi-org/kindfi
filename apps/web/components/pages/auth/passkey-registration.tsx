@@ -61,7 +61,7 @@ export function PasskeyRegistrationComponent() {
     } catch (error) {
       logger.error({
         eventType: "Passkey Registration Sign-Out Error",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error,
         details: error,
       });
       // Even if sign out fails, redirect to home
@@ -101,7 +101,7 @@ export function PasskeyRegistrationComponent() {
       } catch (e) {
         logger.error({
           eventType: "Finalize passkey registration error",
-          error: e instanceof Error ? e.message : "Unknown error",
+          error: e,
           details: e,
         });
         router.push("/sign-in");

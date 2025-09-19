@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		logger.error({
 			eventType: 'Escrow Fund Error',
-			error: error instanceof Error ? error.message : 'Unknown error',
+			error: error,
 			details: error,
 		})
 
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
 
 		logger.error({
 			eventType: 'Internal Server Error during escrow Initialization',
-			error: error instanceof Error ? error.message : 'Unknown error',
+			error: error,
 			details: error,
 		})
 

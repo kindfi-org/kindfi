@@ -189,7 +189,7 @@ export function EscrowAdminPanel({
     } catch (e) {
       logger.error({
         eventType: "Error Initializing escrow",
-        error: e instanceof Error ? e.message : "Unknown error",
+        error: e,
         details: e,
       });
       toast.error("Failed to create escrow");
@@ -217,7 +217,7 @@ export function EscrowAdminPanel({
     } catch (e) {
       logger.error({
         eventType: "Error approving milestone",
-        error: e instanceof Error ? e.message : "Unknown error",
+        error: e,
         details: e,
       });
       toast.error("Failed to approve milestone");
@@ -246,7 +246,7 @@ export function EscrowAdminPanel({
     } catch (e) {
       logger.error({
         eventType: "Error updating milestone status",
-        error: e instanceof Error ? e.message : "Unknown error",
+        error: e,
         details: e,
       });
       toast.error("Failed to update milestone status");

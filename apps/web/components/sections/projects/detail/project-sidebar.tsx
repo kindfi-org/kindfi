@@ -80,7 +80,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
     } catch (error) {
       logger.error({
         eventType: "Follow Toggle Error",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error,
         details: error,
       });
       toast.error("Unable to update follow status", {
@@ -104,7 +104,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
     } catch (error) {
       logger.error({
         eventType: "Failed to fetch escrow balance",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error,
         details: error,
       });
     } finally {
@@ -169,7 +169,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
     } catch (error) {
       logger.error({
         eventType: "Donation Submission Error",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error,
         details: error,
       });
       toast.error("Something went wrong", {

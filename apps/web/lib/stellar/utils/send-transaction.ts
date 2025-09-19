@@ -17,7 +17,7 @@ export async function sendTransaction(
 	} catch (error) {
 		logger.error({
 			eventType: 'Send Transaction Error',
-			error: error instanceof Error ? error.message : 'Unknown error',
+			error: error,
 			details: error,
 		})
 		throw error

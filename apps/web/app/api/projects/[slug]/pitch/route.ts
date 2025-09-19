@@ -90,7 +90,7 @@ export async function POST(
 	} catch (err) {
 		logger.error({
 			eventType: 'Project Pitch Upsert Error',
-			error: err instanceof Error ? err.message : 'Unknown error',
+			error: err,
 			details: err,
 		})
 		return NextResponse.json(

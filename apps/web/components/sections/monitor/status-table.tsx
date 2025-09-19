@@ -115,11 +115,11 @@ export function EscrowTable() {
 		} catch (err) {
 			logger.error({
 				eventType: 'Escrow Status Update Error',
-				error: err instanceof Error ? err.message : 'Unknown error',
+				error: err,
 				details: err,
 			})
 			setState({
-				error: err instanceof Error ? err.message : 'Unknown error',
+				error: err,
 				isLoading: false,
 			})
 		}

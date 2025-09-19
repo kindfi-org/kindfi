@@ -77,7 +77,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
     if (error) {
       logger.error({
         eventType: "Error signing up with otp",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error,
         details: error,
       });
       return errorHandler.handleAuthError(error, "sign_up");
@@ -95,7 +95,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
   } catch (error) {
     logger.error({
       eventType: "Error signing up in general",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error,
       details: error,
     });
     return errorHandler.handleAuthError(error as AuthError, "sign_up");
@@ -149,7 +149,7 @@ export async function createSessionAction({
   } catch (error) {
     logger.error({
       eventType: "SESSION_CREATION_ERROR",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error,
       userId,
       email,
     });
@@ -174,7 +174,7 @@ export async function signOutAction(): Promise<void> {
     } catch (error) {
       logger.error({
         eventType: "No supabase session",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error,
         details: error,
       });
     }
@@ -325,7 +325,7 @@ export async function updateEscrowStatusAction(
   } catch (error) {
     logger.error({
       eventType: "ESCROW_STATUS_UPDATE_ERROR",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error,
       id,
       newStatus,
     });
@@ -372,7 +372,7 @@ export async function updateEscrowMilestoneAction(
   } catch (error) {
     logger.error({
       eventType: "ESCROW_MILESTONE_UPDATE_ERROR",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error,
       id,
       current,
       completed,
@@ -415,7 +415,7 @@ export async function updateEscrowFinancialsAction(
   } catch (error) {
     logger.error({
       eventType: "ESCROW_FINANCIALS_UPDATE_ERROR",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error,
       id,
       funded,
       released,
@@ -447,7 +447,7 @@ export async function getEscrowRecordsAction(): Promise<EscrowResponse> {
   } catch (error) {
     logger.error({
       eventType: "ESCROW_RECORDS_FETCH_ERROR",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error,
     });
     return {
       success: false,
@@ -492,7 +492,7 @@ export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
   } catch (error) {
     logger.error({
       eventType: "ESCROW_TEST_RECORD_INSERT_ERROR",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error,
     });
     return {
       success: false,
@@ -600,7 +600,7 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
   } catch (error) {
     logger.error({
       eventType: "DEVICE_UPDATE_EXCEPTION",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error,
       userId,
       credentialId,
     });

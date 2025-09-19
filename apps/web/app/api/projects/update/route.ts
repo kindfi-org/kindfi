@@ -102,7 +102,7 @@ export async function PATCH(req: Request) {
 	} catch (err) {
 		logger.error({
 			eventType: 'Project Update Error',
-			error: err instanceof Error ? err.message : 'Unknown error',
+			error: err,
 			details: err,
 		})
 		return NextResponse.json(

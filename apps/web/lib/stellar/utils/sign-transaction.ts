@@ -17,7 +17,7 @@ export function signTransaction(
 	} catch (error) {
 		logger.error({
 			eventType: 'Sign Transaction Error',
-			error: error instanceof Error ? error.message : 'Unknown error',
+			error: error,
 			details: error,
 		})
 		throw error

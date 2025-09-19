@@ -120,7 +120,7 @@ export default function QAClient({
 			} catch (err) {
 				logger.error({
 					eventType: 'Fetch Questions Error',
-					error: err instanceof Error ? err.message : 'Unknown error',
+					error: err,
 					details: err,
 				})
 				return []
@@ -146,7 +146,7 @@ export default function QAClient({
 			} catch (err) {
 				logger.error({
 					eventType: 'Fetch Comments Error',
-					error: err instanceof Error ? err.message : 'Unknown error',
+					error: err,
 					details: err,
 				})
 				return []
@@ -167,7 +167,7 @@ export default function QAClient({
 		} catch (err) {
 			logger.error({
 				eventType: 'Process Questions Error',
-				error: err instanceof Error ? err.message : 'Unknown error',
+				error: err,
 				details: err,
 			})
 		}
@@ -372,7 +372,7 @@ export default function QAClient({
 		onError: (error) => {
 			logger.error({
 				eventType: 'Submit Question Error',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 			setRealtimeStatus(
@@ -429,7 +429,7 @@ export default function QAClient({
 		onError: (error) => {
 			logger.error({
 				eventType: 'Submit Answer Error',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 			setRealtimeStatus(
@@ -480,7 +480,7 @@ export default function QAClient({
 		onError: (error) => {
 			logger.error({
 				eventType: 'Error submitting reply',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 			setRealtimeStatus(
@@ -535,7 +535,7 @@ export default function QAClient({
 		onError: (error) => {
 			logger.error({
 				eventType: 'Mark Resolved Error',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 			setRealtimeStatus(

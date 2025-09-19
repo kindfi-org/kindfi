@@ -149,7 +149,7 @@ export function useDocumentProcessor(
 			} catch (error) {
 				logger.error({
 					eventType: 'Error processing document',
-					error: error instanceof Error ? error.message : 'Unknown error',
+					error: error,
 					details: error,
 				})
 				toast({

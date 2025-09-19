@@ -102,7 +102,7 @@ const UserMenu = ({ user }: { user: User }) => {
     } catch (error) {
       logger.error({
         eventType: "Sign Out Error",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error,
         details: error,
       });
       // Optionally, show a user-friendly message here
@@ -120,7 +120,7 @@ const UserMenu = ({ user }: { user: User }) => {
     } catch (error) {
       logger.error({
         eventType: "Error stringifying log data",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error,
         details: error,
       });
     }

@@ -45,7 +45,7 @@ export function useKYC() {
 		} catch (error) {
 			logger.error({
 				eventType: 'KYC Load Error',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 		}
@@ -58,7 +58,7 @@ export function useKYC() {
 		} catch (error) {
 			logger.error({
 				eventType: 'Failed to save KYC data to storage',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: error,
 				details: error,
 			})
 		}
