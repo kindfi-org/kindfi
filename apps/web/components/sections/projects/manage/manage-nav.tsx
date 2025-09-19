@@ -12,7 +12,7 @@ const links: { href: (slug: string) => string; label: string }[] = [
 		href: (slug) => `/projects/${slug}/manage/highlights`,
 		label: 'Highlights',
 	},
-	{ href: (slug) => `/projects/${slug}/manage/team`, label: 'Team' },
+	{ href: (slug) => `/projects/${slug}/manage/members`, label: 'Members' },
 	{
 		href: (slug) => `/projects/${slug}/manage/settings`,
 		label: 'Escrow & Settings',

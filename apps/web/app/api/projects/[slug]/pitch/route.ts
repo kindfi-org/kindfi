@@ -1,7 +1,8 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
-import { logger } from '~/lib'
+import { getServerSession } from 'next-auth'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	deleteFolderFromBucket,
 	transformToEmbedUrl,
@@ -14,6 +15,14 @@ export async function POST(
 ) {
 	try {
 		const supabase = await createSupabaseServerClient()
+
+		// Ensure the request is authenticated before processing
+		const session = await getServerSession(nextAuthOption)
+		const userId = session?.user?.id
+		if (!userId) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
 		const formData = await req.formData()
 
 		const { slug: projectSlug } = await params

@@ -44,9 +44,9 @@ export default async function ProjectManagementDashboardPage({
 					cta="Add highlights"
 				/>
 				<SectionCard
-					title="Team"
+					title="Members"
 					description="Add and manage your team members."
-					href={`/projects/${slug}/manage/team`}
+					href={`/projects/${slug}/manage/members`}
 					cta="Add team members"
 				/>
 				<SectionCard

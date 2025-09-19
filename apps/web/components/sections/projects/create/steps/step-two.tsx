@@ -72,7 +72,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 								name="image"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Upload a project image</FormLabel>
+										<FormLabel>Upload a project image (optional)</FormLabel>
 										<FormControl>
 											<ImageUpload
 												value={field.value}
@@ -94,7 +94,9 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 								name="website"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>What's your project's website?</FormLabel>
+										<FormLabel>
+											What's your project's website? (optional)
+										</FormLabel>
 										<FormControl>
 											<Input
 												type="url"
@@ -114,7 +116,9 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 								name="socialLinks"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Add any additional social links</FormLabel>
+										<FormLabel>
+											Add any additional social links (optional)
+										</FormLabel>
 										<FormControl>
 											<SocialLinks
 												value={field.value ?? []}
