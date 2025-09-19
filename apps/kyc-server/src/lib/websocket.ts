@@ -8,9 +8,9 @@ import type {
 import type { ServerWebSocket } from 'bun'
 
 import {
+	type KYCUpdate,
 	kycStatusRecordSchema,
 	kycUpdateDataSchema,
-	type KYCUpdate,
 } from '~/lib/validation/kyc-schemas'
 
 const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
@@ -20,7 +20,6 @@ interface KYCWebSocketData {
 	joinedAt: string
 	userId?: string
 }
-
 
 export class KYCWebSocketService {
 	private clients: Set<ServerWebSocket<KYCWebSocketData>> = new Set()
@@ -87,7 +86,7 @@ export class KYCWebSocketService {
 						console.error('Invalid KYC status record received:', {
 							error,
 							payload: payload.new,
-							context: 'kyc_status_validation_error'
+							context: 'kyc_status_validation_error',
 						})
 					}
 				},
@@ -164,7 +163,7 @@ export class KYCWebSocketService {
 					console.error('Invalid KYC status record in database:', {
 						error,
 						status,
-						context: 'initial_status_validation_error'
+						context: 'initial_status_validation_error',
 					})
 					ws.send(
 						JSON.stringify({

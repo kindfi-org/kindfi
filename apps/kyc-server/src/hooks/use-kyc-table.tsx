@@ -28,7 +28,7 @@ interface UseKycTableOptions {
 
 export function useKycTable(
 	initialData: KycRecord[] = [],
-	options: UseKycTableOptions = {}
+	options: UseKycTableOptions = {},
 ) {
 	const { onStatusUpdate, onReview } = options
 	const [kycData, setKycData] = useState<KycRecord[]>(initialData)
@@ -60,7 +60,7 @@ export function useKycTable(
 
 	const columns = useMemo(
 		() => createKycTableColumns(onStatusUpdate, onReview),
-		[onStatusUpdate, onReview]
+		[onStatusUpdate, onReview],
 	)
 
 	const table = useReactTable({

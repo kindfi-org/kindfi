@@ -1,5 +1,5 @@
-import { db, kycReviews, profiles, devices } from '@packages/drizzle'
-import { and, count, desc, asc, ilike, eq, sql, or } from 'drizzle-orm'
+import { db, devices, kycReviews, profiles } from '@packages/drizzle'
+import { and, asc, count, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { corsConfig } from '../config/cors'
 import { withCORS } from '../middleware/cors'
 import { handleError } from '../utils/error-handler'
@@ -46,27 +46,50 @@ export const usersRoutes = {
 
 					// Build where conditions
 					const conditions = []
-					
-					if (params.status && ['pending', 'approved', 'rejected', 'verified'].includes(params.status)) {
-						conditions.push(eq(kycReviews.status, params.status as 'pending' | 'approved' | 'rejected' | 'verified'))
+
+					if (
+						params.status &&
+						['pending', 'approved', 'rejected', 'verified'].includes(
+							params.status,
+						)
+					) {
+						conditions.push(
+							eq(
+								kycReviews.status,
+								params.status as
+									| 'pending'
+									| 'approved'
+									| 'rejected'
+									| 'verified',
+							),
+						)
 					}
-					
-					if (params.verificationLevel && ['basic', 'enhanced'].includes(params.verificationLevel)) {
-						conditions.push(eq(kycReviews.verificationLevel, params.verificationLevel as 'basic' | 'enhanced'))
+
+					if (
+						params.verificationLevel &&
+						['basic', 'enhanced'].includes(params.verificationLevel)
+					) {
+						conditions.push(
+							eq(
+								kycReviews.verificationLevel,
+								params.verificationLevel as 'basic' | 'enhanced',
+							),
+						)
 					}
-					
+
 					if (params.search) {
 						const escapedSearch = escapeLike(params.search)
 						conditions.push(
 							or(
 								ilike(kycReviews.userId, `%${escapedSearch}%`),
 								ilike(profiles.email, `%${escapedSearch}%`),
-								ilike(profiles.displayName, `%${escapedSearch}%`)
-							)
+								ilike(profiles.displayName, `%${escapedSearch}%`),
+							),
 						)
 					}
 
-					const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+					const whereClause =
+						conditions.length > 0 ? and(...conditions) : undefined
 
 					// Build order by - prioritize pending status first
 					const orderBy = []
@@ -78,13 +101,25 @@ export const usersRoutes = {
 						WHEN ${kycReviews.status} = 'verified' THEN 3
 						ELSE 4
 					END`)
-					
+
 					if (params.sortBy === 'created_at') {
-						orderBy.push(params.sortOrder === 'asc' ? asc(kycReviews.createdAt) : desc(kycReviews.createdAt))
+						orderBy.push(
+							params.sortOrder === 'asc'
+								? asc(kycReviews.createdAt)
+								: desc(kycReviews.createdAt),
+						)
 					} else if (params.sortBy === 'updated_at') {
-						orderBy.push(params.sortOrder === 'asc' ? asc(kycReviews.updatedAt) : desc(kycReviews.updatedAt))
+						orderBy.push(
+							params.sortOrder === 'asc'
+								? asc(kycReviews.updatedAt)
+								: desc(kycReviews.updatedAt),
+						)
 					} else if (params.sortBy === 'verification_level') {
-						orderBy.push(params.sortOrder === 'asc' ? asc(kycReviews.verificationLevel) : desc(kycReviews.verificationLevel))
+						orderBy.push(
+							params.sortOrder === 'asc'
+								? asc(kycReviews.verificationLevel)
+								: desc(kycReviews.verificationLevel),
+						)
 					} else {
 						orderBy.push(desc(kycReviews.createdAt))
 					}
@@ -114,7 +149,9 @@ export const usersRoutes = {
 							profile_image_url: profiles.imageUrl,
 							profile_role: profiles.role,
 							// Device count (non-sensitive info)
-							device_count: sql<number>`count(${devices.id})`.as('device_count'),
+							device_count: sql<number>`count(${devices.id})`.as(
+								'device_count',
+							),
 						})
 						.from(kycReviews)
 						.leftJoin(profiles, eq(kycReviews.userId, profiles.id))
@@ -132,7 +169,7 @@ export const usersRoutes = {
 							profiles.email,
 							profiles.displayName,
 							profiles.imageUrl,
-							profiles.role
+							profiles.role,
 						)
 						.orderBy(...orderBy)
 						.limit(limit)
@@ -188,13 +225,13 @@ export const usersRoutes = {
 							approved: 0,
 							rejected: 0,
 							verified: 0,
-						}
+						},
 					)
 
 					// Period-over-period trend calculation (last 30 days vs prior 30 days)
 					const thirtyDaysAgo = new Date()
 					thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-					
+
 					const sixtyDaysAgo = new Date()
 					sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60)
 
@@ -205,7 +242,9 @@ export const usersRoutes = {
 							count: count(),
 						})
 						.from(kycReviews)
-						.where(sql`${kycReviews.createdAt} >= ${thirtyDaysAgo.toISOString()}`)
+						.where(
+							sql`${kycReviews.createdAt} >= ${thirtyDaysAgo.toISOString()}`,
+						)
 						.groupBy(kycReviews.status)
 
 					const currentPeriodStats = currentPeriodCounts.reduce(
@@ -220,7 +259,7 @@ export const usersRoutes = {
 							approved: 0,
 							rejected: 0,
 							verified: 0,
-						}
+						},
 					)
 
 					// Prior 30 days (30-60 days ago)
@@ -230,7 +269,9 @@ export const usersRoutes = {
 							count: count(),
 						})
 						.from(kycReviews)
-						.where(sql`${kycReviews.createdAt} >= ${sixtyDaysAgo.toISOString()} AND ${kycReviews.createdAt} < ${thirtyDaysAgo.toISOString()}`)
+						.where(
+							sql`${kycReviews.createdAt} >= ${sixtyDaysAgo.toISOString()} AND ${kycReviews.createdAt} < ${thirtyDaysAgo.toISOString()}`,
+						)
 						.groupBy(kycReviews.status)
 
 					const priorPeriodStats = priorPeriodCounts.reduce(
@@ -245,14 +286,19 @@ export const usersRoutes = {
 							approved: 0,
 							rejected: 0,
 							verified: 0,
-						}
+						},
 					)
 
 					const calculateTrend = (currentCount: number, priorCount: number) => {
 						const delta = currentCount - priorCount
 						const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'same'
-						const percentChange = priorCount > 0 ? (delta / priorCount) * 100 : (currentCount > 0 ? 100 : 0)
-						
+						const percentChange =
+							priorCount > 0
+								? (delta / priorCount) * 100
+								: currentCount > 0
+									? 100
+									: 0
+
 						return {
 							currentCount,
 							priorCount,
@@ -276,10 +322,22 @@ export const usersRoutes = {
 									currentPeriodStats.totalUsers,
 									priorPeriodStats.totalUsers,
 								),
-								pending: calculateTrend(currentPeriodStats.pending, priorPeriodStats.pending),
-								approved: calculateTrend(currentPeriodStats.approved, priorPeriodStats.approved),
-								rejected: calculateTrend(currentPeriodStats.rejected, priorPeriodStats.rejected),
-								verified: calculateTrend(currentPeriodStats.verified, priorPeriodStats.verified),
+								pending: calculateTrend(
+									currentPeriodStats.pending,
+									priorPeriodStats.pending,
+								),
+								approved: calculateTrend(
+									currentPeriodStats.approved,
+									priorPeriodStats.approved,
+								),
+								rejected: calculateTrend(
+									currentPeriodStats.rejected,
+									priorPeriodStats.rejected,
+								),
+								verified: calculateTrend(
+									currentPeriodStats.verified,
+									priorPeriodStats.verified,
+								),
 							},
 						},
 					})
@@ -327,7 +385,11 @@ export const usersRoutes = {
 					const result = await db
 						.update(kycReviews)
 						.set({
-							status: status as 'pending' | 'approved' | 'rejected' | 'verified',
+							status: status as
+								| 'pending'
+								| 'approved'
+								| 'rejected'
+								| 'verified',
 							notes: notes || null,
 							updatedAt: new Date().toISOString(),
 						})
@@ -389,7 +451,11 @@ export const usersRoutes = {
 					const result = await db
 						.update(kycReviews)
 						.set({
-							status: status as 'pending' | 'approved' | 'rejected' | 'verified',
+							status: status as
+								| 'pending'
+								| 'approved'
+								| 'rejected'
+								| 'verified',
 							notes: notes || null,
 							updatedAt: new Date().toISOString(),
 						})

@@ -33,10 +33,12 @@ export function KycActionsMenu({
 }: KycActionsMenuProps) {
 	const { updateKycStatus, isUpdating, error } = useKycActions()
 
-	const handleStatusUpdate = async (newStatus: 'approved' | 'rejected' | 'pending') => {
+	const handleStatusUpdate = async (
+		newStatus: 'approved' | 'rejected' | 'pending',
+	) => {
 		try {
 			const success = await updateKycStatus({
-				recordId: record.id,  // Use the primary key instead of userId
+				recordId: record.id, // Use the primary key instead of userId
 				userId: record.userId,
 				status: newStatus,
 			})
@@ -57,7 +59,8 @@ export function KycActionsMenu({
 				onStatusUpdate()
 			}
 		} catch (err) {
-			const errorDetails = err instanceof Error ? err.message : 'Unknown error occurred'
+			const errorDetails =
+				err instanceof Error ? err.message : 'Unknown error occurred'
 			toast.error(`Update failed: ${errorDetails}`, {
 				description: `Could not update status to ${newStatus} for ${record.displayName || record.email || record.userId}`,
 			})
@@ -116,34 +119,40 @@ export function KycActionsMenu({
 						{isUpdating ? 'Loading...' : 'Reject'}
 					</DropdownMenuItem>
 				)}
-				{(record.status === 'approved' || record.status === 'rejected') && record.status !== 'verified' && record.status !== 'pending' && (
-					<DropdownMenuItem
-						className="text-orange-600"
-						disabled={isUpdating}
-						onClick={handleRequestReupload}
-					>
-						<RefreshCwIcon className="mr-2 size-4" />
-						{isUpdating ? 'Loading...' : 'Request reupload'}
-					</DropdownMenuItem>
-				)}
+				{(record.status === 'approved' || record.status === 'rejected') &&
+					record.status !== 'verified' &&
+					record.status !== 'pending' && (
+						<DropdownMenuItem
+							className="text-orange-600"
+							disabled={isUpdating}
+							onClick={handleRequestReupload}
+						>
+							<RefreshCwIcon className="mr-2 size-4" />
+							{isUpdating ? 'Loading...' : 'Request reupload'}
+						</DropdownMenuItem>
+					)}
 				<DropdownMenuSeparator />
-				<DropdownMenuItem 
-					disabled 
+				<DropdownMenuItem
+					disabled
 					aria-disabled="true"
 					title="Profile view feature coming soon"
 				>
 					<UserIcon className="mr-2 size-4" />
 					View Profile
-					<span className="ml-auto text-xs text-muted-foreground">(Coming soon)</span>
+					<span className="ml-auto text-xs text-muted-foreground">
+						(Coming soon)
+					</span>
 				</DropdownMenuItem>
-				<DropdownMenuItem 
-					disabled 
+				<DropdownMenuItem
+					disabled
 					aria-disabled="true"
 					title="History view feature coming soon"
 				>
 					<HistoryIcon className="mr-2 size-4" />
 					View History
-					<span className="ml-auto text-xs text-muted-foreground">(Coming soon)</span>
+					<span className="ml-auto text-xs text-muted-foreground">
+						(Coming soon)
+					</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

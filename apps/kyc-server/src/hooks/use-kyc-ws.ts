@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { kycUpdateSchema, type KYCUpdate } from '~/lib/validation/kyc-schemas'
+import { type KYCUpdate, kycUpdateSchema } from '~/lib/validation/kyc-schemas'
 
 interface UseKYCWebSocketOptions {
 	onUpdate?: (update: KYCUpdate) => void
@@ -58,7 +58,12 @@ export function useKYCWebSocket({
 						if (isValidUpdate(data)) {
 							setLastUpdate(data)
 							onUpdateRef.current?.(data)
-						} else if (data && typeof data === 'object' && 'type' in data && data.type === 'error') {
+						} else if (
+							data &&
+							typeof data === 'object' &&
+							'type' in data &&
+							data.type === 'error'
+						) {
 							console.error('WebSocket received error:', data)
 						}
 					} catch (err) {

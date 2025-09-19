@@ -1,10 +1,9 @@
+import type { Enums } from '@services/supabase'
 import { useState } from 'react'
 
-import type { Enums } from '@services/supabase'
-
 interface UpdateKycStatusParams {
-	recordId?: string  // Primary key ID of the kyc_reviews record
-	userId: string     // User ID for fallback
+	recordId?: string // Primary key ID of the kyc_reviews record
+	userId: string // User ID for fallback
 	status: Enums<'kyc_status_enum'>
 	notes?: string
 }
@@ -35,7 +34,9 @@ export function useKycActions(): UseKycActionsReturn {
 
 		try {
 			// Use recordId if available, otherwise fallback to userId
-			const endpoint = recordId ? `/api/kyc-reviews/${recordId}/status` : `/api/users/${userId}/status`
+			const endpoint = recordId
+				? `/api/kyc-reviews/${recordId}/status`
+				: `/api/users/${userId}/status`
 			const response = await fetch(endpoint, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
@@ -54,7 +55,8 @@ export function useKycActions(): UseKycActionsReturn {
 			if (err instanceof Error && err.name === 'AbortError') {
 				setError('Request timed out. Please try again.')
 			} else {
-				const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
+				const errorMessage =
+					err instanceof Error ? err.message : 'Something went wrong'
 				setError(errorMessage)
 			}
 			return false

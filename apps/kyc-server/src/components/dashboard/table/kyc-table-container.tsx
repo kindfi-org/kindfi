@@ -21,16 +21,16 @@ interface ApiResponse {
 	}
 }
 
-export function KycTableContainer({ 
-	onStatusUpdate, 
+export function KycTableContainer({
+	onStatusUpdate,
 	onReview,
 	refreshTrigger = 0,
-	isConnected = false
+	isConnected = false,
 }: KycTableContainerProps) {
 	const [data, setData] = useState<KycRecord[]>([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
-	
+
 	const abortControllerRef = useRef<AbortController | null>(null)
 	const isMountedRef = useRef(true)
 
@@ -56,11 +56,11 @@ export function KycTableContainer({
 				page: '1',
 				limit: '50', // Fetch more records per request to reduce API calls
 				sortBy: 'created_at',
-				sortOrder: 'desc'
+				sortOrder: 'desc',
 			})
 
 			const response = await fetch(`/api/users?${searchParams.toString()}`, {
-				signal: controller.signal
+				signal: controller.signal,
 			})
 
 			// Check if request was aborted or component unmounted
@@ -76,7 +76,9 @@ export function KycTableContainer({
 			}
 
 			if (!response.ok) {
-				throw new Error(result.success === false ? 'Failed to fetch users' : 'Network error')
+				throw new Error(
+					result.success === false ? 'Failed to fetch users' : 'Network error',
+				)
 			}
 
 			if (result.success) {
@@ -100,7 +102,8 @@ export function KycTableContainer({
 			}
 
 			console.error('Users fetch error:', err)
-			const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
+			const errorMessage =
+				err instanceof Error ? err.message : 'Something went wrong'
 			setError(errorMessage)
 		} finally {
 			// Only set loading false if not aborted and still mounted
@@ -113,7 +116,7 @@ export function KycTableContainer({
 	// Mount/unmount effect for cleanup
 	useEffect(() => {
 		isMountedRef.current = true
-		
+
 		return () => {
 			isMountedRef.current = false
 			if (abortControllerRef.current) {
@@ -126,7 +129,7 @@ export function KycTableContainer({
 	useEffect(() => {
 		fetchUsers()
 	}, [fetchUsers])
-	
+
 	// Effect for manual refresh when refreshTrigger changes
 	useEffect(() => {
 		if (refreshTrigger > 0) {
@@ -156,8 +159,8 @@ export function KycTableContainer({
 							aria-disabled={isLoading}
 							aria-busy={isLoading}
 							className={`px-4 py-2 text-sm text-white rounded-md transition-colors ${
-								isLoading 
-									? 'bg-red-400 cursor-not-allowed opacity-50' 
+								isLoading
+									? 'bg-red-400 cursor-not-allowed opacity-50'
 									: 'bg-red-600 hover:bg-red-700'
 							}`}
 							type="button"
