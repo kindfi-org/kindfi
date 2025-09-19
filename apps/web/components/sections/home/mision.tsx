@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { CTAButtons } from '~/components/shared/cta-buttons'
 
 export const KindfiMission = () => {
 	return (

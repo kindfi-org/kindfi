@@ -30,6 +30,20 @@ export interface SocialLinks {
 	tiktok?: string
 }
 
+export interface SocialLinks {
+	website?: string
+	twitter?: string
+	facebook?: string
+	instagram?: string
+	linkedin?: string
+	github?: string
+	youtube?: string
+	telegram?: string
+	discord?: string
+	medium?: string
+	tiktok?: string
+}
+
 export interface ProjectPitch {
 	title: string
 	story: string

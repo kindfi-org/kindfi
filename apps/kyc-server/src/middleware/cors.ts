@@ -1,5 +1,3 @@
-import { appEnvConfig } from '@packages/lib'
-
 /**
  * CORS middleware to handle preflight requests and add CORS headers
  *

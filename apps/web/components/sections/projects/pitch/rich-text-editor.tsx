@@ -171,13 +171,13 @@ export function RichTextEditor({
 			icon: Undo,
 			action: () => editor?.chain().focus().undo().run(),
 			label: 'Undo',
-			disabled: !(editor && editor.can().undo()),
+			disabled: !editor?.can().undo(),
 		},
 		{
 			icon: Redo,
 			action: () => editor?.chain().focus().redo().run(),
 			label: 'Redo',
-			disabled: !(editor && editor.can().redo()),
+			disabled: !editor?.can().redo(),
 		},
 	]
 

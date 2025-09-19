@@ -11,16 +11,15 @@ const AUTH_PROTECTED_PATHS = ['/create-project', '/profile']
 // const AUTH_PROTECTED_PATHS: string[] = []
 
 function isProtectedPath(pathname: string) {
-	return false
-	// return (
-	// 	AUTH_PROTECTED_PATHS.includes(pathname) ||
-	// 	// /projects/[slug]/manage pattern
-	// 	(pathname.startsWith('/projects/') && pathname.endsWith('/manage'))
-	// )
+	return (
+		AUTH_PROTECTED_PATHS.includes(pathname) ||
+		// /projects/[slug]/manage pattern
+		(pathname.startsWith('/projects/') && pathname.endsWith('/manage'))
+	)
 }
 
-// const AUTH_PAGES = ['/sign-in', '/sign-up', '/reset-password', '/reset-account']
-const AUTH_PAGES: string[] = []
+const AUTH_PAGES = ['/sign-in', '/sign-up', '/reset-password', '/reset-account']
+// const AUTH_PAGES: string[] = []
 
 export default withAuth(
 	async function middleware(req: NextRequestWithAuth) {
@@ -59,13 +58,12 @@ export default withAuth(
 		},
 		callbacks: {
 			authorized: ({ token, req }) => {
+				const pathname = req.nextUrl.pathname
+				// Always allow auth utility pages & public paths
+				if (AUTH_PAGES.includes(pathname)) return true
+				// Enforce auth only for protected paths
+				if (isProtectedPath(pathname)) return !!token
 				return true
-				// const pathname = req.nextUrl.pathname
-				// // Always allow auth utility pages & public paths
-				// if (AUTH_PAGES.includes(pathname)) return true
-				// // Enforce auth only for protected paths
-				// if (isProtectedPath(pathname)) return !!token
-				// return true
 			},
 		},
 	},

@@ -38,6 +38,8 @@ export default function Home({ message }: HomeProps) {
 			</head>
 			<body>
 				{/* <h1>Kindfi KYC Server HOM</h1> */}
+
+				{/** biome-ignore lint/correctness/useUniqueElementIds: <explanation> */}
 				<div id="root">
 					{/* <Navigation currentPath={currentPath} /> */}
 					<div className="card">

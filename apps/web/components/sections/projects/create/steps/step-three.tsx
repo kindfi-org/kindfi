@@ -88,7 +88,10 @@ export function StepThree({
 								name="location"
 								render={({ field }) => (
 									<FormItem className="flex flex-col">
-										<FormLabel>Where is your project based? *</FormLabel>
+										<FormLabel>
+											Where is your project based?{' '}
+											<span className="text-destructive">*</span>
+										</FormLabel>
 										<FormControl>
 											<LocationSelect
 												value={field.value}
@@ -106,7 +109,8 @@ export function StepThree({
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											How would you categorize your project? *
+											How would you categorize your project?{' '}
+											<span className="text-destructive">*</span>
 										</FormLabel>
 										<FormControl>
 											<div className="mt-8 flex flex-wrap gap-2">
@@ -144,7 +148,7 @@ export function StepThree({
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											Add relevant keywords to describe your project
+											Add relevant keywords to describe your project (optional)
 										</FormLabel>
 										<FormControl>
 											<TagInput

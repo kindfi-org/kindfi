@@ -48,9 +48,10 @@ const nextConfig: NextConfig = {
                 default-src 'self';
                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
                 style-src 'self' 'unsafe-inline';
-                img-src 'self' data: blob:;
+                img-src 'self' data: blob: https://flagcdn.com;
                 font-src 'self' data:;
                 connect-src ${connectSrc};
+								frame-src 'self' https://www.youtube.com;
                 frame-ancestors 'self';
                 upgrade-insecure-requests;
               `.replace(/\s{2,}/g, ' '),
@@ -82,9 +83,10 @@ const nextConfig: NextConfig = {
                 default-src 'self';
                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
                 style-src 'self' 'unsafe-inline';
-                img-src 'self' data: blob:;
+                img-src 'self' data: blob: https://flagcdn.com https://randomuser.me http://127.0.0.1:54321;
                 font-src 'self' data:;
                 connect-src ${connectSrc};
+								frame-src 'self' https://www.youtube.com;
                 frame-ancestors 'self';
               `.replace(/\s{2,}/g, ' '),
 					},

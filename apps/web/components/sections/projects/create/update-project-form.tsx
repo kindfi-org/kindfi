@@ -101,7 +101,9 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									name="title"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Title</FormLabel>
+											<FormLabel>
+												Title <span className="text-destructive">*</span>
+											</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="Enter your project title"
@@ -120,7 +122,9 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									name="description"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Description</FormLabel>
+											<FormLabel>
+												Description <span className="text-destructive">*</span>
+											</FormLabel>
 											<FormControl>
 												<Textarea
 													placeholder="Describe your project in a few sentences"
@@ -140,7 +144,10 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 										name="targetAmount"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Target Amount</FormLabel>
+												<FormLabel>
+													Target Amount{' '}
+													<span className="text-destructive">*</span>
+												</FormLabel>
 												<FormControl>
 													<div className="relative">
 														<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -174,7 +181,10 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 										name="minimumInvestment"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Minimum Investment</FormLabel>
+												<FormLabel>
+													Minimum Investment{' '}
+													<span className="text-destructive">*</span>
+												</FormLabel>
 												<FormControl>
 													<div className="relative">
 														<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -209,7 +219,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									name="website"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Website</FormLabel>
+											<FormLabel>Website (optional)</FormLabel>
 											<FormControl>
 												<Input
 													type="url"
@@ -230,7 +240,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									name="socialLinks"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Social Links</FormLabel>
+											<FormLabel>Social Links (optional)</FormLabel>
 											<FormControl>
 												<SocialLinks
 													value={field.value ?? []}
@@ -249,7 +259,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									name="image"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Project Image</FormLabel>
+											<FormLabel>Project Image (optional)</FormLabel>
 											<FormControl>
 												<ImageUpload
 													value={field.value}
@@ -268,7 +278,9 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									name="location"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Location</FormLabel>
+											<FormLabel>
+												Location <span className="text-destructive">*</span>
+											</FormLabel>
 											<FormControl>
 												<LocationSelect
 													value={field.value}
@@ -286,7 +298,9 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									name="category"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Category</FormLabel>
+											<FormLabel>
+												Category <span className="text-destructive">*</span>
+											</FormLabel>
 											<FormControl>
 												<div className="mt-8 flex flex-wrap gap-2">
 													{isLoading ? (
@@ -323,7 +337,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									name="tags"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Tags</FormLabel>
+											<FormLabel>Tags (optional)</FormLabel>
 											<FormControl>
 												<TagInput
 													tags={field.value || []}
