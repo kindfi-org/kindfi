@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '~/lib'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	buildSocialLinks,
@@ -10,7 +11,6 @@ import {
 	uploadProjectImage,
 	upsertTags,
 } from '~/lib/utils/project-utils'
-import { logger } from '~/lib'
 
 export async function PATCH(req: Request) {
 	try {

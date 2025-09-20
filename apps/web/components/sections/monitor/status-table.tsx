@@ -118,7 +118,12 @@ export function EscrowTable() {
 				details: err,
 			})
 			setState({
-				error: err instanceof Error ? err.message : typeof err === 'string' ? err : 'Unknown error',
+				error:
+					err instanceof Error
+						? err.message
+						: typeof err === 'string'
+							? err
+							: 'Unknown error',
 				isLoading: false,
 			})
 		}
