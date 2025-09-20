@@ -178,7 +178,6 @@ const ProofOfAddressUpload = ({
 				})
 				logger.error({
 					eventType: 'File Upload Error',
-					error: error,
 					details: error,
 				})
 			} finally {

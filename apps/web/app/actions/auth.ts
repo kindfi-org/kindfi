@@ -74,7 +74,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
     const { data, error } = await supabase.auth.signInWithOtp(signInWithOptOpt)
 
     if (error) {
-      logger.error({ eventType: 'Error signing up with otp', error, details: error })
+      logger.error({ eventType: 'Error signing up with otp',  details: error })
       return errorHandler.handleAuthError(error, 'sign_up')
     }
 
@@ -88,7 +88,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
       data,
     }
   } catch (error) {
-    logger.error({ eventType: 'Error signing up in general', error, details: error })
+    logger.error({ eventType: 'Error signing up in general',  details: error })
     return errorHandler.handleAuthError(error as AuthError, 'sign_up')
   }
 }
@@ -129,7 +129,7 @@ export async function createSessionAction({
       data: userData,
     }
   } catch (error) {
-    logger.error({ eventType: 'SESSION_CREATION_ERROR', error, userId, email })
+    logger.error({ eventType: 'SESSION_CREATION_ERROR',  error, userId, email })
     return errorHandler.handleAuthError(error as AuthError, 'create_session')
   }
 }
@@ -147,7 +147,7 @@ export async function signOutAction(): Promise<void> {
         redirect(`/?error=${encodeURIComponent(response.message)}`)
       }
     } catch (error) {
-      logger.error({ eventType: 'No supabase session', error, details: error })
+      logger.error({ eventType: 'No supabase session', details: error })
     }
 
     redirect('/sign-in?success=Successfully signed out')

@@ -100,7 +100,6 @@ export async function POST(req: NextRequest) {
 
 		logger.error({
 			eventType: 'Internal Server Error during escrow Initialization',
-			error: error,
 			details: error,
 		})
 		return NextResponse.json(

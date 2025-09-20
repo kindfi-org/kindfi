@@ -9,6 +9,7 @@ import {
 	uploadProjectImage,
 	upsertTags,
 } from '~/lib/utils/project-utils'
+import { logger } from '~/lib'
 
 export async function POST(req: Request) {
 	try {
@@ -98,7 +99,6 @@ export async function POST(req: Request) {
 	} catch (err) {
 		logger.error({
 			eventType: 'Project Creation Error',
-			error: err,
 			details: err,
 		})
 		return NextResponse.json(

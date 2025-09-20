@@ -118,7 +118,6 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		logger.error({
 			eventType: 'Dispute Filing Error',
-			error: error,
 			details: error,
 		})
 
@@ -184,7 +183,6 @@ export async function GET(req: NextRequest) {
 	} catch (error) {
 		logger.error({
 			eventType: 'Fetch Disputes Error',
-			error: error,
 			details: error,
 		})
 

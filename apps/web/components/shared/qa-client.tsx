@@ -120,7 +120,6 @@ export default function QAClient({
 			} catch (err) {
 				logger.error({
 					eventType: 'Fetch Questions Error',
-					error: err,
 					details: err,
 				})
 				return []
@@ -146,7 +145,6 @@ export default function QAClient({
 			} catch (err) {
 				logger.error({
 					eventType: 'Fetch Comments Error',
-					error: err,
 					details: err,
 				})
 				return []
@@ -167,7 +165,6 @@ export default function QAClient({
 		} catch (err) {
 			logger.error({
 				eventType: 'Process Questions Error',
-				error: err,
 				details: err,
 			})
 		}
@@ -372,7 +369,6 @@ export default function QAClient({
 		onError: (error) => {
 			logger.error({
 				eventType: 'Submit Question Error',
-				error: error,
 				details: error,
 			})
 			setRealtimeStatus(
@@ -429,7 +425,6 @@ export default function QAClient({
 		onError: (error) => {
 			logger.error({
 				eventType: 'Submit Answer Error',
-				error: error,
 				details: error,
 			})
 			setRealtimeStatus(
@@ -480,7 +475,6 @@ export default function QAClient({
 		onError: (error) => {
 			logger.error({
 				eventType: 'Error submitting reply',
-				error: error,
 				details: error,
 			})
 			setRealtimeStatus(
@@ -535,7 +529,6 @@ export default function QAClient({
 		onError: (error) => {
 			logger.error({
 				eventType: 'Mark Resolved Error',
-				error: error,
 				details: error,
 			})
 			setRealtimeStatus(

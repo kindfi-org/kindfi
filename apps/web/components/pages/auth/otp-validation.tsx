@@ -123,7 +123,6 @@ export function VerifyOTPComponent() {
 		} catch (err) {
 			logger.error({
 				eventType: 'OTP Verification Error',
-				error: err,
 				details: err,
 			})
 			if (err instanceof Error) {
@@ -160,7 +159,6 @@ export function VerifyOTPComponent() {
 		} catch (err) {
 			logger.error({
 				eventType: 'OTP Resend Error',
-				error: err,
 				details: err,
 			})
 			if (err instanceof Error) {

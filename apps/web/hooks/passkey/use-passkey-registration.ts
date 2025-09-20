@@ -165,8 +165,8 @@ export const usePasskeyRegistration = (
 				setRegError(message)
 				toast.error(message)
 			}
-		} catch (_error) {
-			const error = _error as Error
+		} catch (err) {
+			const error = err as Error
 			if (error.name === 'InvalidStateError') {
 				const message =
 					'Error: Authenticator was probably already registered by user'

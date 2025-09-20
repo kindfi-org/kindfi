@@ -50,7 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			} catch (error) {
 				logger.error({
 					eventType: 'Auth check failed',
-					error: error,
 					details: error,
 				})
 				setSupabaseUser(undefined)

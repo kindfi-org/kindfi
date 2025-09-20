@@ -73,7 +73,6 @@ export function UpdateCard({
 		} catch (error) {
 			logger.error({
 				eventType: 'Update Deletion Error',
-				error: error,
 				details: error,
 			})
 			// Optionally, show a user-friendly error message here

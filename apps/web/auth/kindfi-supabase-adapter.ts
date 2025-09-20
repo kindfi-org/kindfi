@@ -106,7 +106,6 @@ export function KindfiSupabaseAdapter(): Adapter {
 			} catch (error) {
 				logger.error({
 					eventType: 'User Creation Error',
-					error: error,
 					details: error,
 				})
 				// Rethrow to ensure the auth flow is aware of the failure
@@ -143,7 +142,6 @@ export function KindfiSupabaseAdapter(): Adapter {
 			} catch (error) {
 				logger.error({
 					eventType: 'Get User Error',
-					error: error,
 					details: error,
 				})
 				return null
@@ -179,7 +177,6 @@ export function KindfiSupabaseAdapter(): Adapter {
 			} catch (error) {
 				logger.error({
 					eventType: 'Get User By Email Error',
-					error: error,
 					details: error,
 				})
 				// On error, return null to avoid breaking the auth flow

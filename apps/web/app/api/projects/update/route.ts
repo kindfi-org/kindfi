@@ -10,6 +10,7 @@ import {
 	uploadProjectImage,
 	upsertTags,
 } from '~/lib/utils/project-utils'
+import { logger } from '~/lib'
 
 export async function PATCH(req: Request) {
 	try {
@@ -111,7 +112,6 @@ export async function PATCH(req: Request) {
 	} catch (err) {
 		logger.error({
 			eventType: 'Project Update Error',
-			error: err,
 			details: err,
 		})
 		return NextResponse.json(

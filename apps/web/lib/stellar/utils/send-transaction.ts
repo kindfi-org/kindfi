@@ -17,7 +17,6 @@ export async function sendTransaction(
 	} catch (error) {
 		logger.error({
 			eventType: 'Send Transaction Error',
-			error: error,
 			details: error,
 		})
 		throw error

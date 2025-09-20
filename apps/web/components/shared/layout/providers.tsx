@@ -56,7 +56,6 @@ export function Providers({ children }: ProvidersProps) {
 							// 	.catch((error) => {
 							// logger.error({
 							// eventType: 'Periodic sync registration failed',
-							// error: error,
 							// details: error,
 							// })
 							// 	})
@@ -64,7 +63,6 @@ export function Providers({ children }: ProvidersProps) {
 					} catch (error) {
 						logger.error({
 							eventType: 'Periodic Sync Not Supported',
-							error: error,
 							details: error,
 						})
 					}
@@ -72,7 +70,6 @@ export function Providers({ children }: ProvidersProps) {
 				.catch((error) => {
 					logger.error({
 						eventType: 'Service Worker Registration Failed',
-						error: error,
 						details: error,
 					})
 				})

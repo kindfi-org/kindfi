@@ -58,7 +58,6 @@ export async function POST(
 
 		logger.error({
 			eventType: 'Internal Server Error during escrow fund',
-			error: error,
 			details: error,
 		})
 		return NextResponse.json(

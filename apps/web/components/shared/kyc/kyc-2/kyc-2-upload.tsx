@@ -107,7 +107,6 @@ export default function IDDocumentUpload({
 			} catch (error) {
 				logger.error({
 					eventType: 'File Upload Processing Error',
-					error: error,
 					details: error,
 				})
 				toast({

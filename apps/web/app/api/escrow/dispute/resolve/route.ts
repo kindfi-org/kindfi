@@ -103,7 +103,6 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		logger.error({
 			eventType: 'Dispute Resolution Error',
-			error: error,
 			details: error,
 		})
 

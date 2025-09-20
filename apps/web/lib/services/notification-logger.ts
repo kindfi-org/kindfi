@@ -87,7 +87,6 @@ export async function logError(params: LogErrorParams): Promise<void> {
 	} catch (logError) {
 		logger.error({
 			eventType: 'Log Error Failure',
-			error: logError,
 			details: logError,
 		})
 		throw params.error // Rethrow the original error after logging attempt
@@ -178,7 +177,6 @@ export class NotificationLogger {
 		} catch (logError) {
 			logger.error({
 				eventType: 'Log Error Failure',
-				error: logError,
 				details: logError,
 			})
 			// Don't throw to avoid disrupting the main flow
@@ -206,7 +204,6 @@ export class NotificationLogger {
 		} catch (logError) {
 			logger.error({
 				eventType: 'Log Info Failure',
-				error: logError,
 				details: logError,
 			})
 			// Don't throw to avoid disrupting the main flow
@@ -234,7 +231,6 @@ export class NotificationLogger {
 		} catch (logError) {
 			logger.error({
 				eventType: 'Log Warning Failure',
-				error: logError,
 				details: logError,
 			})
 			// Don't throw to avoid disrupting the main flow
@@ -261,7 +257,6 @@ export class NotificationLogger {
 		} catch (error) {
 			logger.error({
 				eventType: 'Get Notification Logs Failure',
-				error: error,
 				details: error,
 			})
 			return []
@@ -288,7 +283,6 @@ export class NotificationLogger {
 		} catch (error) {
 			logger.error({
 				eventType: 'Get Error Logs Failure',
-				error: error,
 				details: error,
 			})
 			return []

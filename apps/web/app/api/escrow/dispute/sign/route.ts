@@ -280,7 +280,6 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		logger.error({
 			eventType: 'Dispute Sign Error',
-			error: error,
 			details: error,
 		})
 

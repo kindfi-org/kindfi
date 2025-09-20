@@ -283,7 +283,6 @@ export class NotificationService {
 		} catch (error) {
 			logger.error({
 				eventType: 'Mark Notification As Read Error',
-				error: error,
 				details: error,
 			})
 			return false
@@ -308,7 +307,6 @@ export class NotificationService {
 		} catch (error) {
 			logger.error({
 				eventType: 'Mark All Notifications As Read Error',
-				error: error,
 				details: error,
 			})
 			return false
@@ -334,7 +332,6 @@ export class NotificationService {
 		} catch (error) {
 			logger.error({
 				eventType: 'Get Unread Notifications Error',
-				error: error,
 				details: error,
 			})
 			return []

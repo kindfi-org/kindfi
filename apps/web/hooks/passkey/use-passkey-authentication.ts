@@ -146,7 +146,6 @@ export const usePasskeyAuthentication = (
 			}).catch((error) => {
 				logger.error({
 					eventType: 'SignIn Error',
-					error: error,
 					details: error,
 				})
 				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, error.message)
@@ -158,13 +157,12 @@ export const usePasskeyAuthentication = (
 			setIsNotRegistered(false)
 			toast.success(message)
 			success = Boolean(loginResult?.ok)
-		} catch (_error) {
+		} catch (err) {
 			logger.error({
 				eventType: 'Passkey Authentication Error',
-				error: _error,
-				details: _error,
+				details: err,
 			})
-			const error = _error as Error
+			const error = err as Error
 			let message = error.toString()
 			if (
 				error.message.includes(

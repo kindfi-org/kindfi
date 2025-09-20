@@ -113,7 +113,6 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 		} catch (error) {
 			logger.error({
 				eventType: 'Database error during authorization',
-				error: error,
 				details: error,
 			})
 			throw new Error('Authentication failed')

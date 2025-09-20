@@ -8,6 +8,7 @@ import {
 	transformToEmbedUrl,
 	uploadPitchDeck,
 } from '~/lib/utils/project-utils'
+import { logger } from '~/lib'
 
 export async function POST(
 	req: Request,
@@ -99,7 +100,6 @@ export async function POST(
 	} catch (err) {
 		logger.error({
 			eventType: 'Project Pitch Upsert Error',
-			error: err,
 			details: err,
 		})
 		return NextResponse.json(

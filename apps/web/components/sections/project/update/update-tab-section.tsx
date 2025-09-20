@@ -63,7 +63,6 @@ export function ProjectUpdatesTabSection() {
 		} catch (err) {
 			logger.error({
 				eventType: 'Fetch Project Updates Error',
-				error: err,
 				details: err,
 			})
 			setError(
@@ -111,7 +110,6 @@ export function ProjectUpdatesTabSection() {
 		} catch (err) {
 			logger.error({
 				eventType: 'Create Project Update Error',
-				error: err,
 				details: err,
 			})
 			alert(
@@ -181,7 +179,6 @@ export function ProjectUpdatesTabSection() {
 		} catch (err) {
 			logger.error({
 				eventType: 'Delete Project Update Error',
-				error: err,
 				details: err,
 			})
 			alert('Failed to delete update. Please try again.')

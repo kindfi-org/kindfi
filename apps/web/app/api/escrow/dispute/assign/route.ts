@@ -101,7 +101,6 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		logger.error({
 			eventType: 'Mediator Assignment Error',
-			error: error,
 			details: error,
 		})
 

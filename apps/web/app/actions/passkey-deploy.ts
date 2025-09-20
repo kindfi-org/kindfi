@@ -116,7 +116,6 @@ export async function handleDeploy(serializedData: string): Promise<string> {
   } catch (error) {
     logger.error({
       eventType: 'Error during deploy of new address in Stellar',
-      error,
       details: error,
     })
     console.info(

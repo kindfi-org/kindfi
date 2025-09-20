@@ -115,11 +115,10 @@ export function EscrowTable() {
 		} catch (err) {
 			logger.error({
 				eventType: 'Escrow Status Update Error',
-				error: err,
 				details: err,
 			})
 			setState({
-				error: err,
+				error: err instanceof Error ? err.message : typeof err === 'string' ? err : 'Unknown error',
 				isLoading: false,
 			})
 		}
@@ -140,7 +139,6 @@ export function EscrowTable() {
 		} catch (err) {
 			logger.error({
 				eventType: 'Escrow Test Data Insertion Error',
-				error: err instanceof Error ? err.message : 'Unknown error',
 				details: err,
 			})
 			setState({

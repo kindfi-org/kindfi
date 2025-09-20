@@ -173,7 +173,6 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		logger.error({
 			eventType: 'Milestone Review Error',
-			error: error,
 			details: error,
 		})
 
