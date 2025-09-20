@@ -3,6 +3,8 @@ import { logger } from '.'
 import type { ILogger, LoggerData } from './types/logger.types'
 import getErrorMessageLog from './utils/error.utils'
 
+
+//Central logger with sentry integration
 type LogLevel = LoggerData['LogLevel']
 type LogData = LoggerData['LogData']
 
@@ -40,8 +42,6 @@ export class Logger implements ILogger {
 
 			const jsonData = JSON.stringify(logData, null, 2)
 			logMethod(prefix, eventType, '\n', jsonData)
-
-			// Send to Sentry in production for errors
 			if (level === 'error' && process.env.NODE_ENV === 'production') {
 				Sentry.captureException(
 					details instanceof Error ? details : new Error(eventType),
@@ -72,7 +72,6 @@ export class Logger implements ILogger {
 				'Error: Unable to stringify log data',
 			)
 
-			// Also report the logging error to Sentry
 			if (process.env.NODE_ENV === 'production') {
 				Sentry.captureException(error, {
 					extra: {
