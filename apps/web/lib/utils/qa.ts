@@ -1,4 +1,4 @@
-import type { CommentData, CommentWithAnswers } from '../types/qa/types'
+import type { CommentData, CommentWithAnswers } from '../types/project'
 
 const DEFAULT_GUEST_LIMIT = 3
 const GUEST_USER_ID_KEY = 'guestUserId'
