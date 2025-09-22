@@ -20,7 +20,7 @@ export const updateSession = async (
 	})
 	try {
 		const cookies = request.cookies
-		const supabase = createServerClient(
+		const _supabase = createServerClient(
 			appConfig.database.url,
 			appConfig.database.anonKey,
 			{

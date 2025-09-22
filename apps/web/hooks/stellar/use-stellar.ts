@@ -9,7 +9,7 @@ import { Logger } from '~/lib/logger'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
 
-const logger = new Logger()
+const _logger = new Logger()
 
 const getStoredDeployee = () => {
 	return localStorage.getItem('sp:deployee')

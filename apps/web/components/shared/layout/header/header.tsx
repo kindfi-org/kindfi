@@ -3,7 +3,6 @@
 import {
 	ClipboardCheckIcon,
 	ClipboardCopyIcon,
-	CopyIcon,
 	LogOut,
 	Menu,
 	Settings,

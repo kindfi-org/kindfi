@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	buildSocialLinks,
 	parseFormData,
@@ -11,6 +13,14 @@ import {
 export async function POST(req: Request) {
 	try {
 		const supabase = await createSupabaseServerClient()
+
+		// Ensure the request is authenticated before processing
+		const session = await getServerSession(nextAuthOption)
+		const userId = session?.user?.id
+		if (!userId) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
 		const formData = await req.formData()
 
 		// Extract fields from multipart form data
@@ -35,8 +45,7 @@ export async function POST(req: Request) {
 			min_investment: minimumInvestment,
 			project_location: location,
 			category_id: category,
-			// TODO: Replace with authenticated user ID after auth changes from issue #44. - @derianrddev
-			kindler_id: '00000000-0000-0000-0000-000000000001',
+			kindler_id: userId,
 			social_links: buildSocialLinks(website, socialLinks),
 		}
 

@@ -29,7 +29,6 @@ export function UserInfo({
 	let avatarUrl: string | null = null
 	let displayName: string = ''
 	let role: string | undefined
-
 	if ('display_name' in authorData) {
 		const profile = authorData as ProfileRow
 		avatarUrl = profile.image_url
