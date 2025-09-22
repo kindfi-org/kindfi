@@ -2,8 +2,12 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { Tables } from '@services/supabase'
 import { Loader2 } from 'lucide-react'
 import { Suspense } from 'react'
-import type { UserData } from '~/lib/types/qa'
-import type { CommentData, QAProps } from '~/lib/types/qa/types'
+import type {
+	CommentData,
+	QAProps,
+	QuestionData,
+	UserData,
+} from '~/lib/types/project/project-qa.types'
 import QAClient from './qa-client'
 
 export default async function QA({ projectId, currentUser }: QAProps) {
@@ -19,7 +23,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 		.is('parent_comment_id', null)
 		.order('created_at', { ascending: false })
 
-	let questionsWithAuthors: CommentData[] = []
+	let questionsWithAuthors: QuestionData[] = []
 
 	if (initialQuestions && initialQuestions.length > 0) {
 		const authorIds = [
@@ -55,7 +59,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 							is_team_member: false,
 						}
 					: undefined),
-		})) as CommentData[]
+		})) as unknown as QuestionData[]
 	}
 
 	const { data: commentsData } = await supabase

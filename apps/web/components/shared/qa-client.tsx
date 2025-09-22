@@ -27,7 +27,7 @@ import type {
 	CommentData,
 	CommentWithAnswers,
 	QAClientProps,
-} from '~/lib/types/qa/types'
+} from '~/lib/types/project/project-qa.types'
 import {
 	buildQuestionThreads,
 	getGuestRemainingComments as utilGetGuestRemainingComments,
