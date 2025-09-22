@@ -1,5 +1,6 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
-import type { CommentData, UserData } from '../types/qa/types'
+import type { Tables, TablesUpdate } from '@services/supabase'
+import type { CommentData, UserData } from '../types/project'
 
 export async function fetchQuestions(
 	client: TypedSupabaseClient,
