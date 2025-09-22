@@ -10,8 +10,8 @@ import { useId, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
-import { Textarea } from '~/components/base/textarea'
 import { RadioGroup, RadioGroupItem } from '~/components/base/radio-group'
+import { Textarea } from '~/components/base/textarea'
 import {
 	Tooltip,
 	TooltipContent,
@@ -53,18 +53,18 @@ export function EscrowAdminPanel({
 	const [description, setDescription] = useState<string>('')
 	type MilestoneItem = { id: string; description: string }
 	const genId = () =>
-		(typeof crypto !== 'undefined' && 'randomUUID' in crypto
+		typeof crypto !== 'undefined' && 'randomUUID' in crypto
 			? crypto.randomUUID()
-			: `m-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+			: `m-${Date.now()}-${Math.random().toString(36).slice(2)}`
 	const [milestones, setMilestones] = useState<MilestoneItem[]>([
 		{ id: genId(), description: 'Milestone 1' },
 	])
 
 	// admin actions state
-	const [milestoneIndex, setMilestoneIndex] = useState('0')
+	const [milestoneIndex, _setMilestoneIndex] = useState('0')
 	const titleId = useId()
 	const amountId = useId()
-	const milestoneId = useId()
+	const _milestoneId = useId()
 	const engagementIdInputId = useId()
 	const escrowTypeLabelId = useId()
 	const trustlineAddressId = useId()
@@ -143,8 +143,9 @@ export function EscrowAdminPanel({
 				toast.error('Please complete all required fields')
 				return
 			}
-			const effectiveEngagementId =
-				(engagementId || `project-${projectId}`).trim()
+			const effectiveEngagementId = (
+				engagementId || `project-${projectId}`
+			).trim()
 			const sanitizedMilestones = milestones
 				.map((m) => m.description)
 				.filter((desc) => desc.trim().length > 0)
@@ -153,7 +154,9 @@ export function EscrowAdminPanel({
 				receiverMemo.trim().length > 0
 					? `${description.trim()}\nReceiver Memo: ${receiverMemo.trim()}`
 					: description.trim()
-			const payload: InitializeSingleReleaseEscrowPayload | InitializeMultiReleaseEscrowPayload = {
+			const payload:
+				| InitializeSingleReleaseEscrowPayload
+				| InitializeMultiReleaseEscrowPayload = {
 				signer,
 				engagementId: effectiveEngagementId,
 				title: title.trim(),
@@ -188,7 +191,7 @@ export function EscrowAdminPanel({
 		}
 	}
 
-	const handleApproveMilestone = async () => {
+	const _handleApproveMilestone = async () => {
 		if (!escrowContractAddress)
 			return toast.error('No escrow contract configured')
 		try {
@@ -212,7 +215,7 @@ export function EscrowAdminPanel({
 		}
 	}
 
-	const handleChangeMilestoneStatus = async () => {
+	const _handleChangeMilestoneStatus = async () => {
 		if (!escrowContractAddress)
 			return toast.error('No escrow contract configured')
 		try {
@@ -244,14 +247,21 @@ export function EscrowAdminPanel({
 				<div className="space-y-6">
 					<div className="space-y-2">
 						<div className="flex gap-2 items-center">
-							<h2 className="text-lg font-semibold">Fill in the details of the Escrow</h2>
+							<h2 className="text-lg font-semibold">
+								Fill in the details of the Escrow
+							</h2>
 							<Tooltip>
-								<TooltipTrigger className="text-xs underline">More information</TooltipTrigger>
-								<TooltipContent>Provide all required fields to initialize the escrow.</TooltipContent>
+								<TooltipTrigger className="text-xs underline">
+									More information
+								</TooltipTrigger>
+								<TooltipContent>
+									Provide all required fields to initialize the escrow.
+								</TooltipContent>
 							</Tooltip>
 						</div>
 						<p className="text-sm text-muted-foreground">
-							Fill in the details below to set up a secure and reliable escrow agreement.
+							Fill in the details below to set up a secure and reliable escrow
+							agreement.
 						</p>
 					</div>
 
@@ -263,20 +273,39 @@ export function EscrowAdminPanel({
 							<RadioGroup
 								aria-labelledby={escrowTypeLabelId}
 								value={selectedEscrowType}
-								onValueChange={(val) => setSelectedEscrowType(val as EscrowType)}
+								onValueChange={(val) =>
+									setSelectedEscrowType(val as EscrowType)
+								}
 								className="grid grid-cols-1 gap-3 sm:grid-cols-2"
 							>
 								<div className="flex gap-2 items-center p-3 rounded-md border">
-									<RadioGroupItem id={singleReleaseRadioId} value="single-release" />
-									<label htmlFor={singleReleaseRadioId} className="text-sm font-medium">Single Release Escrow</label>
+									<RadioGroupItem
+										id={singleReleaseRadioId}
+										value="single-release"
+									/>
+									<label
+										htmlFor={singleReleaseRadioId}
+										className="text-sm font-medium"
+									>
+										Single Release Escrow
+									</label>
 								</div>
 								<div className="flex gap-2 items-center p-3 rounded-md border">
-									<RadioGroupItem id={multiReleaseRadioId} value="multi-release" />
-									<label htmlFor={multiReleaseRadioId} className="text-sm font-medium">Multi Release Escrow</label>
+									<RadioGroupItem
+										id={multiReleaseRadioId}
+										value="multi-release"
+									/>
+									<label
+										htmlFor={multiReleaseRadioId}
+										className="text-sm font-medium"
+									>
+										Multi Release Escrow
+									</label>
 								</div>
 							</RadioGroup>
 							<p className="text-xs text-muted-foreground">
-								A {selectedEscrowType === 'single-release' ? 'single' : 'multi'} payment will be released upon completion of milestones.
+								A {selectedEscrowType === 'single-release' ? 'single' : 'multi'}{' '}
+								payment will be released upon completion of milestones.
 							</p>
 						</div>
 
@@ -293,7 +322,10 @@ export function EscrowAdminPanel({
 								/>
 							</div>
 							<div className="grid gap-2">
-								<label htmlFor={engagementIdInputId} className="text-sm font-medium">
+								<label
+									htmlFor={engagementIdInputId}
+									className="text-sm font-medium"
+								>
 									Engagement <span className="text-destructive">*</span>
 								</label>
 								<Input
@@ -305,12 +337,19 @@ export function EscrowAdminPanel({
 							</div>
 							<div className="grid gap-2">
 								<div className="flex gap-2 items-center">
-									<label htmlFor={trustlineAddressId} className="text-sm font-medium">
+									<label
+										htmlFor={trustlineAddressId}
+										className="text-sm font-medium"
+									>
 										Trustline <span className="text-destructive">*</span>
 									</label>
 									<Tooltip>
-										<TooltipTrigger className="text-xs underline">More information</TooltipTrigger>
-										<TooltipContent>Provide the asset contract address and decimals.</TooltipContent>
+										<TooltipTrigger className="text-xs underline">
+											More information
+										</TooltipTrigger>
+										<TooltipContent>
+											Provide the asset contract address and decimals.
+										</TooltipContent>
 									</Tooltip>
 								</div>
 								<div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -326,7 +365,7 @@ export function EscrowAdminPanel({
 										value={trustlineDecimals}
 										onChange={(e) =>
 											setTrustlineDecimals(
-												e.target.value === '' ? '' : Number(e.target.value)
+												e.target.value === '' ? '' : Number(e.target.value),
 											)
 										}
 										placeholder="Decimals"
@@ -356,7 +395,10 @@ export function EscrowAdminPanel({
 								/>
 							</div>
 							<div className="grid gap-2">
-								<label htmlFor={releaseSignerId} className="text-sm font-medium">
+								<label
+									htmlFor={releaseSignerId}
+									className="text-sm font-medium"
+								>
 									Release Signer <span className="text-destructive">*</span>
 								</label>
 								<Input
@@ -367,7 +409,10 @@ export function EscrowAdminPanel({
 								/>
 							</div>
 							<div className="grid gap-2">
-								<label htmlFor={disputeResolverId} className="text-sm font-medium">
+								<label
+									htmlFor={disputeResolverId}
+									className="text-sm font-medium"
+								>
 									Dispute Resolver <span className="text-destructive">*</span>
 								</label>
 								<Input
@@ -378,7 +423,10 @@ export function EscrowAdminPanel({
 								/>
 							</div>
 							<div className="grid gap-2">
-								<label htmlFor={platformAddressId} className="text-sm font-medium">
+								<label
+									htmlFor={platformAddressId}
+									className="text-sm font-medium"
+								>
 									Platform Address <span className="text-destructive">*</span>
 								</label>
 								<Input
@@ -409,7 +457,7 @@ export function EscrowAdminPanel({
 									value={platformFee}
 									onChange={(e) =>
 										setPlatformFee(
-											e.target.value === '' ? '' : Number(e.target.value)
+											e.target.value === '' ? '' : Number(e.target.value),
 										)
 									}
 									placeholder="Enter platform fee"
@@ -425,7 +473,7 @@ export function EscrowAdminPanel({
 									value={amount}
 									onChange={(e) =>
 										setAmount(
-											e.target.value === '' ? '' : Number(e.target.value)
+											e.target.value === '' ? '' : Number(e.target.value),
 										)
 									}
 									placeholder="Enter amount"
@@ -462,8 +510,12 @@ export function EscrowAdminPanel({
 										Milestones <span className="text-destructive">*</span>
 									</h3>
 									<Tooltip>
-										<TooltipTrigger className="text-xs underline">More information</TooltipTrigger>
-										<TooltipContent>Provide one or more milestone descriptions.</TooltipContent>
+										<TooltipTrigger className="text-xs underline">
+											More information
+										</TooltipTrigger>
+										<TooltipContent>
+											Provide one or more milestone descriptions.
+										</TooltipContent>
 									</Tooltip>
 								</div>
 								<Button
@@ -482,7 +534,9 @@ export function EscrowAdminPanel({
 											onChange={(e) =>
 												setMilestones((prev) =>
 													prev.map((val, idx) =>
-														idx === i ? { ...val, description: e.target.value } : val,
+														idx === i
+															? { ...val, description: e.target.value }
+															: val,
 													),
 												)
 											}
@@ -501,19 +555,19 @@ export function EscrowAdminPanel({
 							</div>
 						</div>
 
-					<div className="flex gap-3 pt-4">
-						<Button
-							onClick={handleCreateEscrow}
-							disabled={!areRequiredFieldsValid}
-							className="px-6 py-2 font-semibold text-white bg-gradient-to-r rounded-lg shadow-md transition-colors duration-200 from-primary to-secondary hover:from-secondary hover:to-primary disabled:opacity-60 disabled:cursor-not-allowed"
-							size="lg"
-						>
-							<Plus className="mr-2 w-4 h-4" />
-							Initialize Escrow
-						</Button>
+						<div className="flex gap-3 pt-4">
+							<Button
+								onClick={handleCreateEscrow}
+								disabled={!areRequiredFieldsValid}
+								className="px-6 py-2 font-semibold text-white bg-gradient-to-r rounded-lg shadow-md transition-colors duration-200 from-primary to-secondary hover:from-secondary hover:to-primary disabled:opacity-60 disabled:cursor-not-allowed"
+								size="lg"
+							>
+								<Plus className="mr-2 w-4 h-4" />
+								Initialize Escrow
+							</Button>
+						</div>
 					</div>
 				</div>
-			</div>
 			</TooltipProvider>
 
 			<div className="h-px bg-gray-200" />

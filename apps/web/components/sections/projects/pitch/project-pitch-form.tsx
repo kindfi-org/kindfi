@@ -84,7 +84,9 @@ export function ProjectPitchForm({
 								name="title"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel className="pt-2">Title *</FormLabel>
+										<FormLabel className="pt-2">
+											Title <span className="text-destructive">*</span>
+										</FormLabel>
 										<FormControl>
 											<div className="relative">
 												<Input
@@ -113,7 +115,9 @@ export function ProjectPitchForm({
 								name="story"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Story *</FormLabel>
+										<FormLabel>
+											Story <span className="text-destructive">*</span>
+										</FormLabel>
 										<FormControl>
 											<RichTextEditor
 												value={field.value}
@@ -137,7 +141,7 @@ export function ProjectPitchForm({
 								name="pitchDeck"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Pitch Deck (Optional)</FormLabel>
+										<FormLabel>Pitch Deck (optional)</FormLabel>
 										<FormControl>
 											<FileUpload
 												value={field.value}
@@ -165,7 +169,7 @@ export function ProjectPitchForm({
 								name="videoUrl"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Video URL (Optional)</FormLabel>
+										<FormLabel>Video URL (optional)</FormLabel>
 										<FormControl>
 											<div className="relative">
 												<Video className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />

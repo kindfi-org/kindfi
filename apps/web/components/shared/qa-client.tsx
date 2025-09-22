@@ -59,7 +59,7 @@ export default function QAClient({
 	const [processedQuestions, setProcessedQuestions] = useState<
 		CommentWithAnswers[]
 	>([])
-	const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false)
+	const [_isLoginDialogOpen, setIsLoginDialogOpen] = useState(false)
 	const [guestUserId, setGuestUserId] = useState<string | null>(null)
 	const [guestRemainingComments, setGuestRemainingComments] = useState(3)
 	const [isRealtimeEnabled, setIsRealtimeEnabled] = useState(true)
@@ -292,7 +292,7 @@ export default function QAClient({
 		router.push('/login')
 	}
 
-	const handleContinueAsGuest = () => {
+	const _handleContinueAsGuest = () => {
 		setIsLoginDialogOpen(false)
 
 		// Reset the guest comment count to allow 3 more comments

@@ -9,7 +9,7 @@ const mockSupabase: {
 	from: (table: string) => MockQuery
 	select: (cols: string) => MockQuery
 	eq: (col: string, val: string) => MockQuery
-	returns: <T>() => MockQuery
+	returns: <_T>() => MockQuery
 	single: () => Promise<MockSingleResult>
 } = {
 	from: mock(() => mockSupabase),
@@ -34,7 +34,7 @@ interface MockSingleResult {
 interface MockQuery {
 	select: (cols: string) => MockQuery
 	eq: (col: string, val: string) => MockQuery
-	returns: <T>() => MockQuery
+	returns: <_T>() => MockQuery
 	single: () => Promise<MockSingleResult>
 }
 

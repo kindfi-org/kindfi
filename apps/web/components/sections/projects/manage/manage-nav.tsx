@@ -8,9 +8,15 @@ const links: { href: (slug: string) => string; label: string }[] = [
 	{ href: (slug) => `/projects/${slug}/manage`, label: 'Overview' },
 	{ href: (slug) => `/projects/${slug}/manage/basics`, label: 'Basics' },
 	{ href: (slug) => `/projects/${slug}/manage/pitch`, label: 'Pitch' },
-	{ href: (slug) => `/projects/${slug}/manage/highlights`, label: 'Highlights' },
-	{ href: (slug) => `/projects/${slug}/manage/team`, label: 'Team' },
-	{ href: (slug) => `/projects/${slug}/manage/settings`, label: 'Escrow & Settings' },
+	{
+		href: (slug) => `/projects/${slug}/manage/highlights`,
+		label: 'Highlights',
+	},
+	{ href: (slug) => `/projects/${slug}/manage/members`, label: 'Members' },
+	{
+		href: (slug) => `/projects/${slug}/manage/settings`,
+		label: 'Escrow & Settings',
+	},
 ]
 
 export function ManageNav({ slug }: { slug: string }) {

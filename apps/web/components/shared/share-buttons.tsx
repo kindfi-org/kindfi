@@ -1,11 +1,6 @@
 'use client'
 
-import {
-	LinkedinIcon,
-	Link as LinkIcon,
-	TwitterIcon,
-	XIcon,
-} from 'lucide-react'
+import { LinkedinIcon, Link as LinkIcon } from 'lucide-react'
 import { Button } from '~/components/base/button'
 
 interface ShareButtonsProps {
