@@ -2,7 +2,7 @@
   migration: update user references to NextAuth (next_auth.users)
   purpose:
     - Repoint all user-related foreign keys from auth.users(id) to next_auth.users(id).
-    - Ensure reviewer defaults and helper functions use next_auth.uid() (verified identity).
+    - Ensure reviewer defaults and helper functions use claim-derived public.current_auth_user_id().
   affected objects:
     - FKs: projects.kindler_id, project_updates.author_id, comments.author_id,
            kyc_admin_whitelist.user_id, kyc_admin_whitelist.created_by,
@@ -48,7 +48,7 @@ ALTER TABLE public.kyc_admin_whitelist
   ADD CONSTRAINT kyc_admin_whitelist_created_by_fkey
     FOREIGN KEY (created_by) REFERENCES next_auth.users(id) ON DELETE SET NULL;
 
--- kyc_reviews: update FKs to next_auth.users and default reviewer to next_auth.uid()
+-- kyc_reviews: update FKs to next_auth.users and default reviewer to current_auth_user_id()
 ALTER TABLE public.kyc_reviews
   DROP CONSTRAINT IF EXISTS kyc_reviews_user_id_fkey,
   DROP CONSTRAINT IF EXISTS kyc_reviews_reviewer_id_fkey;
@@ -59,27 +59,29 @@ ALTER TABLE public.kyc_reviews
   ADD CONSTRAINT kyc_reviews_reviewer_id_fkey
     FOREIGN KEY (reviewer_id) REFERENCES next_auth.users(id) ON DELETE SET NULL;
 
--- reviewer_id default bound to authenticated user (NextAuth)
+-- reviewer_id default bound to authenticated user (claim-derived)
 ALTER TABLE public.kyc_reviews
-  ALTER COLUMN reviewer_id SET DEFAULT next_auth.uid();
+  ALTER COLUMN reviewer_id SET DEFAULT public.current_auth_user_id();
 
--- kyc admin helpers: switch to next_auth.uid() for caller checks and created_by
+-- kyc admin helpers: switch to claim-derived current_auth_user_id() for caller checks and created_by
 CREATE OR REPLACE FUNCTION public.add_kyc_admin(target_user_id UUID, admin_notes TEXT DEFAULT NULL)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
+DECLARE
+  current_uid UUID := public.current_auth_user_id();
 BEGIN
-  PERFORM 1 FROM public.kyc_admin_whitelist WHERE user_id = (SELECT next_auth.uid());
+  PERFORM 1 FROM public.kyc_admin_whitelist WHERE user_id = current_uid;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'permission denied: caller is not a KYC admin' USING ERRCODE = '42501';
   END IF;
 
   INSERT INTO public.kyc_admin_whitelist (user_id, created_by, notes)
-  VALUES (target_user_id, (SELECT next_auth.uid()), admin_notes)
+  VALUES (target_user_id, current_uid, admin_notes)
   ON CONFLICT (user_id) DO UPDATE SET
     notes = EXCLUDED.notes,
-    created_by = (SELECT next_auth.uid()),
+    created_by = current_uid,
     created_at = NOW();
 END;
 $$;
@@ -89,8 +91,10 @@ RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
+DECLARE
+  current_uid UUID := public.current_auth_user_id();
 BEGIN
-  PERFORM 1 FROM public.kyc_admin_whitelist WHERE user_id = (SELECT next_auth.uid());
+  PERFORM 1 FROM public.kyc_admin_whitelist WHERE user_id = current_uid;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'permission denied: caller is not a KYC admin' USING ERRCODE = '42501';
   END IF;
