@@ -44,6 +44,7 @@ export const useStellarSorobanAccount = (session?: User) => {
 
 	/**
 	 * Initialize or load existing Stellar account for the current user
+	 * This simulates the approval process - in production, this should only happen after KYC approval
 	 */
 	const initializeAccount = useCallback(async (): Promise<StellarAccount> => {
 		if (!session || !session?.device) {
@@ -58,10 +59,7 @@ export const useStellarSorobanAccount = (session?: User) => {
 			// Check if user already has a Stellar account
 			const existingAddress = session.device.address
 
-			if (!existingAddress || existingAddress === '0x') {
-				throw new Error('❌ No existing account for logged user.')
-			}
-
+			// User has an existing address, get account info
 			const accountInfo = await stellarSignature.getAccountInfo(existingAddress)
 
 			const accountData: StellarAccount = {
@@ -72,8 +70,24 @@ export const useStellarSorobanAccount = (session?: User) => {
 				status: accountInfo.status,
 			}
 
+			if (requestId === currentRequestId) {
+				// Only update state if this is still the current request
+				setAccount(accountData)
+				setIsInitialized(true)
+				setRequestId(null)
+			}
+
 			if (accountData.status === 'not_found') {
-				// If no existing address, create new account
+				console.log(
+					'❌ No existing account for logged user, simulating approval process...',
+				)
+
+				// SIMULATION: In production, this should only happen after KYC approval
+				// For testing purposes, we'll simulate the account creation
+				console.log(
+					'🧪 SIMULATION: Creating Stellar account (this should only happen after approval)',
+				)
+
 				const newAccount = await stellarSignature.createStellarAccount()
 
 				const accountData: StellarAccount = {
@@ -91,14 +105,14 @@ export const useStellarSorobanAccount = (session?: User) => {
 					setRequestId(null)
 
 					// TODO: Update device record with new Stellar address
-					toast.success(`Stellar account created: ${newAccount.address}`)
+					toast.success(
+						`🧪 SIMULATION: Stellar account created: ${newAccount.address}`,
+					)
 				}
-			} else if (requestId === currentRequestId) {
-				// Only update state if this is still the current request
-				setAccount(accountData)
-				setIsInitialized(true)
-				setRequestId(null)
+
+				return accountData
 			}
+
 			return accountData
 		} catch (error) {
 			console.error('❌ Error initializing account:', error)
@@ -265,7 +279,7 @@ export const useStellarSorobanAccount = (session?: User) => {
 			!stellarSignature.isLoading &&
 			!requestId
 		) {
-			debounce(() => initializeAccount().catch(console.error), 60000)()
+			debounce(() => initializeAccount().catch(console.error), 6000)()
 		}
 	}, [
 		session,

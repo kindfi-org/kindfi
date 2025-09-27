@@ -1,11 +1,8 @@
 import { appEnvConfig } from '@packages/lib'
-import { Toaster } from 'sonner'
-import { GoogleAnalytics } from '~/components/shared/google-analytics'
-import { Footer } from '~/components/shared/layout/footer/footer'
-import { Header } from '~/components/shared/layout/header/header'
-import { Providers } from '~/components/shared/layout/providers'
-import './css/globals.css'
 import type { AppEnvInterface } from '@packages/lib/types'
+import { getServerSession } from 'next-auth'
+import { LayoutContainer } from '~/components/layout-container'
+import { GoogleAnalytics } from '~/components/shared/google-analytics'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
@@ -26,22 +23,16 @@ export const metadata = {
 	},
 }
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: {
 	children: React.ReactNode
 }) {
+	const session = await getServerSession()
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body suppressHydrationWarning>
-				<Providers>
-					<div className="flex relative flex-col min-h-screen">
-						<Header />
-						<main className="flex-1">{children}</main>
-						<Toaster />
-						<Footer />
-					</div>
-				</Providers>
+				<LayoutContainer session={session}>{children}</LayoutContainer>
 				<GoogleAnalytics GA_MEASUREMENT_ID={appConfig.analytics.gaId} />
 			</body>
 		</html>

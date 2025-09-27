@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
 	experimental: {
 		mdxRs: true,
 	},
+	transpilePackages: [
+		'passkey-kit',
+		'passkey-factory-sdk',
+		'passkey-kit-sdk',
+		'sac-sdk',
+	],
 	serverExternalPackages: ['@packages/lib'],
 	images: {
 		remotePatterns: [

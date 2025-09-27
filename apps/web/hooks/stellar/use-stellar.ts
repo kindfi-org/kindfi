@@ -4,8 +4,8 @@ import type { RegistrationResponseJSON } from '@simplewebauthn/browser'
 import { Horizon, Keypair } from '@stellar/stellar-sdk'
 import { useEffect, useRef, useState } from 'react'
 import { updateDeviceWithDeployee } from '~/app/actions/auth'
-import { handleDeploy } from '~/app/actions/passkey-deploy'
 import { Logger } from '~/lib/logger'
+import { generateStellarAddress } from '~/lib/passkey/deploy'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
 
@@ -57,7 +57,8 @@ export const useStellar = () => {
 		registerRes: RegistrationResponseJSON,
 		userId: string,
 	) => {
-		// Handles registration with Stellar by deploying a contract
+		// Handles registration by preparing Stellar data WITHOUT deploying the contract
+		// Contract deployment should only happen after KYC approval
 		if (deployee) return deployee
 		try {
 			setLoadingRegister(true)
@@ -67,23 +68,19 @@ export const useStellar = () => {
 			if (!bundlerKey.current) throw new Error('Bundler key not found')
 			if (!contractSalt || !publicKey) throw new Error('Invalid public keys')
 
-			setCreatingDeployee(true)
+			console.log(
+				'📋 Registration: Preparing Stellar account data (NOT deploying yet)',
+			)
 
-			// Send raw data, not base64 - the server action will handle Buffer conversion
-			const deployData = {
-				bundlerKey: {
-					publicKey: bundlerKey.current.publicKey(),
-					secretKey: bundlerKey.current.secret(),
-				},
-				contractSalt: Array.from(contractSalt), // Convert Buffer to array for JSON transport
-				publicKey: Array.from(publicKey), // Convert Buffer to array for JSON transport
-			}
+			// Pre-calculate the deployee address without actually deploying
+			const deployee = generateStellarAddress(contractSalt)
 
-			const deployee = await handleDeploy(JSON.stringify(deployData))
 			setStoredDeployee(deployee)
 			setDeployee(deployee)
-			console.log('Deployee address:', deployee)
-			// Update device with deployee address and AAGUID
+			console.log('📋 Prepared deployee address:', deployee)
+
+			// Update device with PREPARED address and AAGUID
+			// This address will be deployed later during approval
 			const { success, message, error } = await updateDeviceWithDeployee(
 				JSON.stringify({
 					deployeeAddress: deployee,
@@ -97,6 +94,9 @@ export const useStellar = () => {
 				throw new Error(`${error}:::${message}`)
 			}
 
+			console.log(
+				'✅ Registration complete: Device data saved, account prepared for future deployment',
+			)
 			return deployee
 		} catch (error) {
 			console.error('❌ useStellar::onRegister::>', error)
@@ -116,7 +116,6 @@ export const useStellar = () => {
 		return {} as PresignResponse
 	}
 
-	// biome-ignore lint/correctness/noUnusedFunctionParameters: any
 	const onSign = async ({ signRes, authTxn, lastLedger }: SignParams) => {
 		// Handles the signing of a transaction and sends it to the Stellar network
 		try {

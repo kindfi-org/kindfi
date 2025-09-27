@@ -19,9 +19,9 @@ import {
 } from '~/components/base/card'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
+import { useStellarContext } from '~/hooks/contexts/stellar-context'
 import { usePasskeyRegistration } from '~/hooks/passkey/use-passkey-registration'
 import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
-import { useStellarContext } from '~/hooks/stellar/stellar-context'
 
 export function PasskeyRegistrationComponent() {
 	const router = useRouter()

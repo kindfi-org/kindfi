@@ -33,6 +33,7 @@
 		"clsx": "^2.1.1",
 		"lucide-react": "^0.513.0",
 		"next-theme": "^0.1.5",
+		"passkey-kit": "^0.11.1",
 		"postgres": "^3.4.0",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
