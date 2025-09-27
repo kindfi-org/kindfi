@@ -4,7 +4,7 @@
     - Recreate RLS policies across core tables to use claim-derived current_auth_user_id() and role-aware rules.
     - Allow public read where intended; restrict writes to owners or editor roles (core/admin/editor).
     - Align Storage bucket policies (project_pitch_decks, project_thumbnails) to project slug folders.
-    - Make project_members self-managed (each user can CRUD only their own membership).
+    - Make project_members self-managed (users can edit their own membership; role changes limited unless project owner/admin/core).
     - Permit any project member to create project_updates; restrict updates to author while active.
     - Open read access to milestones/links; allow owner or editor roles to write.
     - Whitelist-driven KYC admin controls and reviewer defaults using claim-derived user id.
@@ -512,13 +512,70 @@ FOR INSERT
 TO authenticated
 WITH CHECK ( public.project_members.user_id = public.current_auth_user_id() );
 
--- Only the user themself can update their membership
-CREATE POLICY "Only the user can update their membership"
+-- User can update own membership (limited role changes) or privileged (owner/admin/core) can update any
+CREATE POLICY "User or privileged can update membership"
 ON public.project_members
 FOR UPDATE
 TO authenticated
-USING ( public.project_members.user_id = public.current_auth_user_id() )
-WITH CHECK ( public.project_members.user_id = public.current_auth_user_id() );
+USING (
+  -- Row visibility (who is allowed to attempt the update):
+  -- The membership owner
+  public.project_members.user_id = public.current_auth_user_id()
+
+  -- The project owner
+  OR EXISTS (
+    SELECT 1
+    FROM public.projects p
+    WHERE p.id = public.project_members.project_id
+      AND p.kindler_id = public.current_auth_user_id()
+  )
+
+  -- Project members with admin/core role
+  OR EXISTS (
+    SELECT 1
+    FROM public.project_members pm
+    WHERE pm.project_id = public.project_members.project_id
+      AND pm.user_id    = public.current_auth_user_id()
+      AND pm.role IN ('admin','core')
+  )
+)
+WITH CHECK (
+  -- New row validation (what values are allowed after the update):
+  -- Path A: Privileged users (project owner, admin, core) 
+  -- can freely update any field, including `role`.
+  EXISTS (
+    SELECT 1
+    FROM public.projects p
+    WHERE p.id = public.project_members.project_id
+      AND (
+        p.kindler_id = public.current_auth_user_id()
+        OR EXISTS (
+          SELECT 1
+          FROM public.project_members pm
+          WHERE pm.project_id = p.id
+            AND pm.user_id    = public.current_auth_user_id()
+            AND pm.role IN ('admin','core')
+        )
+      )
+  )
+  OR
+  -- Path B: The membership owner is updating their own row.
+  (
+    public.project_members.user_id = public.current_auth_user_id()
+    AND (
+      -- Case 1: The role is unchanged (safe update: e.g. updating title)
+      public.project_members.role = (
+        SELECT pm.role
+        FROM public.project_members pm
+        WHERE pm.project_id = public.project_members.project_id
+          AND pm.user_id    = public.project_members.user_id
+      )
+      -- Case 2: The role IS changing, but only allowed 
+      -- if the new role is NOT privileged (cannot escalate to admin/core/editor).
+      OR public.project_members.role NOT IN ('admin','core','editor')
+    )
+  )
+);
 
 -- Only the user themself can delete their membership
 CREATE POLICY "Only the user can delete their membership"
