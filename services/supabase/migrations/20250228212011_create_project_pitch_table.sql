@@ -23,7 +23,6 @@ ON public.project_pitch
 FOR SELECT
 USING (true);
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- Create policy for users to view project pitches they have access to
 -- CREATE POLICY "Users can view project pitches they have access to"
 -- ON public.project_pitch
@@ -51,7 +50,6 @@ CREATE POLICY "Temporary public insert access to project pitches"
     TO public
     WITH CHECK (true);
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- Create policy for users to insert their own project pitches
 -- CREATE POLICY "Users can insert their own project pitches"
 -- ON public.project_pitch
@@ -81,7 +79,6 @@ CREATE POLICY "Temporary public update access to project pitches"
     USING (true)
     WITH CHECK (true);
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- Create policy for users to update their own project pitches
 -- CREATE POLICY "Users can update their own project pitches"
 -- ON public.project_pitch

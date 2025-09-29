@@ -49,7 +49,6 @@ USING (
   bucket_id = 'project_pitch_decks'
 );
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- -- Upload policy (project owners only)
 -- create policy "Project owners can upload" on storage.objects
 -- for insert to authenticated with check (

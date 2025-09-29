@@ -311,24 +311,6 @@ export const escrowStatusUpdateSchema = z.object({
 	total_released: z.number().optional().nullable(),
 })
 
-export const kindlerProjectsRowSchema = z.object({
-	joined_at: z.string(),
-	kindler_id: z.string(),
-	project_id: z.string(),
-})
-
-export const kindlerProjectsInsertSchema = z.object({
-	joined_at: z.string().optional(),
-	kindler_id: z.string(),
-	project_id: z.string(),
-})
-
-export const kindlerProjectsUpdateSchema = z.object({
-	joined_at: z.string().optional(),
-	kindler_id: z.string().optional(),
-	project_id: z.string().optional(),
-})
-
 export const kycAdminWhitelistRowSchema = z.object({
 	created_at: z.string(),
 	created_by: z.string().nullable(),
@@ -566,7 +548,6 @@ export const projectMemberRoleSchema = z.union([
 export const projectMembersInsertSchema = z.object({
 	id: z.string().optional(),
 	joined_at: z.string().optional(),
-	next_auth_user_id: z.string().optional().nullable(),
 	project_id: z.string(),
 	role: projectMemberRoleSchema.optional(),
 	title: z.string().optional(),
@@ -577,7 +558,6 @@ export const projectMembersInsertSchema = z.object({
 export const projectMembersUpdateSchema = z.object({
 	id: z.string().optional(),
 	joined_at: z.string().optional(),
-	next_auth_user_id: z.string().optional().nullable(),
 	project_id: z.string().optional(),
 	role: projectMemberRoleSchema.optional(),
 	title: z.string().optional(),
@@ -867,7 +847,6 @@ export const profilesRowSchema = z.object({
 export const projectMembersRowSchema = z.object({
 	id: z.string(),
 	joined_at: z.string(),
-	next_auth_user_id: z.string().nullable(),
 	project_id: z.string(),
 	role: projectMemberRoleSchema,
 	title: z.string(),
