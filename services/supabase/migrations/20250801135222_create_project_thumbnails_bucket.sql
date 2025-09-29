@@ -54,7 +54,6 @@ USING (
   bucket_id = 'project_thumbnails'
 );
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Allow update/delete to project thumbnails for project members or kindler"
 -- ON storage.objects
 -- FOR ALL

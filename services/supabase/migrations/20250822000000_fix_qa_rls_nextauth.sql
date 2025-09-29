@@ -16,7 +16,7 @@ AS $$
     p.id as profile_id,
     p.role
   FROM next_auth.users na_user
-  LEFT JOIN profiles p ON p.user_id = na_user.id
+  LEFT JOIN profiles p ON p.id = na_user.id
   WHERE na_user.id = next_auth.uid();
 $$;
 

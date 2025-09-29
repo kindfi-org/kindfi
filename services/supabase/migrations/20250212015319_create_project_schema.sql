@@ -125,7 +125,6 @@ grant truncate on table "public"."projects" to "service_role";
 
 grant update on table "public"."projects" to "service_role";
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- create policy "Allow authenticated users to create projects"
 -- on "public"."projects"
 -- as permissive
@@ -133,7 +132,6 @@ grant update on table "public"."projects" to "service_role";
 -- to public
 -- with check (((auth.role() = 'authenticated'::text) AND (auth.uid() = kindler_id)));
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- create policy "Allow project owners to update their projects"
 -- on "public"."projects"
 -- as permissive
@@ -141,7 +139,6 @@ grant update on table "public"."projects" to "service_role";
 -- to public
 -- using ((auth.uid() = kindler_id));
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- create policy "Allow public read access to projects"
 -- on "public"."projects"
 -- as permissive

@@ -646,32 +646,6 @@ export type Database = {
 				}
 				Relationships: []
 			}
-			kindler_projects: {
-				Row: {
-					joined_at: string
-					kindler_id: string
-					project_id: string
-				}
-				Insert: {
-					joined_at?: string
-					kindler_id: string
-					project_id: string
-				}
-				Update: {
-					joined_at?: string
-					kindler_id?: string
-					project_id?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'kindler_projects_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
 			kyc_admin_whitelist: {
 				Row: {
 					created_at: string
@@ -1239,6 +1213,26 @@ export type Database = {
 			cleanup_expired_challenges: {
 				Args: Record<PropertyKey, never>
 				Returns: undefined
+			}
+			current_auth_user_id: {
+				Args: Record<PropertyKey, never>
+				Returns: string
+			}
+			get_current_user_profile: {
+				Args: Record<PropertyKey, never>
+				Returns: {
+					profile_id: string
+					role: Database['public']['Enums']['user_role']
+					user_id: string
+				}[]
+			}
+			is_project_owner: {
+				Args: { project_uuid: string; user_uuid: string }
+				Returns: boolean
+			}
+			is_project_team_member: {
+				Args: { project_uuid: string; user_uuid: string }
+				Returns: boolean
 			}
 			remove_kyc_admin: {
 				Args: { target_user_id: string }
