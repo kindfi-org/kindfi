@@ -3,6 +3,7 @@ import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
+import { logger } from '~/lib'
 import { NotificationService } from '../lib/services/notification-service'
 import type {
 	CreateNotificationDTO,
@@ -128,7 +129,10 @@ export function useNotifications(
 			)
 			.subscribe((status) => {
 				if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
-					console.error('Notification subscription error')
+					logger.error({
+						eventType: 'Notification Subscription Error',
+						error: 'An error occurred with the notification subscription',
+					})
 					setConnectionState('disconnected')
 				} else if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
 					console.log('Notification subscription connected')

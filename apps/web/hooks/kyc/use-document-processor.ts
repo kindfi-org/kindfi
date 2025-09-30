@@ -8,6 +8,7 @@ import {
 	type ExtractedData,
 	type ToastFunction,
 } from '~/components/shared/kyc/kyc-2/types'
+import { logger } from '~/lib'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
@@ -146,7 +147,10 @@ export function useDocumentProcessor(
 
 				return processedData
 			} catch (error) {
-				console.error('Error processing document:', error)
+				logger.error({
+					eventType: 'Error processing document',
+					details: error,
+				})
 				toast({
 					title: 'Error Processing File',
 					description:

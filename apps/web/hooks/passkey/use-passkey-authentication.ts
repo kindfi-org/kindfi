@@ -6,6 +6,7 @@ import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { createSessionAction } from '~/app/actions/auth'
+import { logger } from '~/lib'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import type { PresignResponse, SignParams } from '~/lib/types'
 
@@ -143,7 +144,10 @@ export const usePasskeyAuthentication = (
 				credentialId: verificationJSON.device.id,
 				address: verificationJSON.device.address,
 			}).catch((error) => {
-				console.error('Error during signIn:', error)
+				logger.error({
+					eventType: 'SignIn Error',
+					details: error,
+				})
 				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, error.message)
 			})
 
@@ -153,9 +157,12 @@ export const usePasskeyAuthentication = (
 			setIsNotRegistered(false)
 			toast.success(message)
 			success = Boolean(loginResult?.ok)
-		} catch (_error) {
-			console.error('🔴 Error during passkey authentication:', _error)
-			const error = _error as Error
+		} catch (err) {
+			logger.error({
+				eventType: 'Passkey Authentication Error',
+				details: err,
+			})
+			const error = err as Error
 			let message = error.toString()
 			if (
 				error.message.includes(

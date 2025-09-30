@@ -1,4 +1,5 @@
 import { supabase } from '@packages/lib/supabase'
+import { logger } from '..'
 import type {
 	BaseNotification,
 	CreateNotificationDTO,
@@ -280,7 +281,10 @@ export class NotificationService {
 			if (error) throw error
 			return true
 		} catch (error) {
-			console.error('Failed to mark notification as read:', error)
+			logger.error({
+				eventType: 'Mark Notification As Read Error',
+				details: error,
+			})
 			return false
 		}
 	}
@@ -301,7 +305,10 @@ export class NotificationService {
 			if (error) throw error
 			return true
 		} catch (error) {
-			console.error('Failed to mark all notifications as read:', error)
+			logger.error({
+				eventType: 'Mark All Notifications As Read Error',
+				details: error,
+			})
 			return false
 		}
 	}
@@ -323,7 +330,10 @@ export class NotificationService {
 			if (error) throw error
 			return data || []
 		} catch (error) {
-			console.error('Failed to get unread notifications:', error)
+			logger.error({
+				eventType: 'Get Unread Notifications Error',
+				details: error,
+			})
 			return []
 		}
 	}

@@ -5,6 +5,7 @@ import { Horizon, Keypair } from '@stellar/stellar-sdk'
 import { useEffect, useRef, useState } from 'react'
 import { updateDeviceWithDeployee } from '~/app/actions/auth'
 import { handleDeploy } from '~/app/actions/passkey-deploy'
+import { logger } from '~/lib'
 import { Logger } from '~/lib/logger'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
@@ -99,7 +100,10 @@ export const useStellar = () => {
 
 			return deployee
 		} catch (error) {
-			console.error('❌ useStellar::onRegister::>', error)
+			logger.error({
+				eventType: 'Stellar Registration Error',
+				details: error,
+			})
 		} finally {
 			setLoadingRegister(false)
 			setCreatingDeployee(false)
@@ -133,7 +137,10 @@ export const useStellar = () => {
 			// TODO: enable the logic to send the transaction to the Stellar network
 			setContractData({})
 		} catch (error) {
-			console.error(error)
+			logger.error({
+				eventType: 'Stellar Signing Error',
+				details: error,
+			})
 		} finally {
 			setLoadingSign(false)
 		}
@@ -164,7 +171,10 @@ export const useStellar = () => {
 					setDeployee(storedDeployee)
 				}
 			} catch (error) {
-				console.error(error)
+				logger.error({
+					eventType: 'Stellar Initialization Error',
+					details: error,
+				})
 			} finally {
 				setLoadingDeployee(false)
 			}

@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken'
 import type { User } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { createContext, useContext, useEffect, useState } from 'react'
+import { logger } from '~/lib'
 
 interface AuthContextType {
 	isSupabaseUserLoading: boolean
@@ -47,7 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				console.log('🔒 Supabase Session check result:', supabaseSession)
 				setSupabaseUser(supabaseSession?.user)
 			} catch (error) {
-				console.error('Auth check failed:', error)
+				logger.error({
+					eventType: 'Auth check failed',
+					details: error,
+				})
 				setSupabaseUser(undefined)
 			} finally {
 				setIsSupabaseUserLoading(false)

@@ -22,7 +22,7 @@ export function isValidRedirectUrl(url: string): boolean {
 	} catch (error) {
 		logger.error({
 			eventType: 'URL_VALIDATION_ERROR',
-			error: error instanceof Error ? error.message : 'Unknown error',
+			details: error,
 			url,
 			timestamp: new Date().toISOString(),
 		})

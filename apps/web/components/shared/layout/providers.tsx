@@ -10,6 +10,7 @@ import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
+import { logger } from '~/lib'
 
 interface ProvidersProps {
 	children: React.ReactNode
@@ -53,15 +54,24 @@ export function Providers({ children }: ProvidersProps) {
 							// 		minInterval: 24 * 60 * 60 * 1000, // 24 hours
 							// 	})
 							// 	.catch((error) => {
-							// 		console.error('Periodic sync registration failed:', error)
+							// logger.error({
+							// eventType: 'Periodic sync registration failed',
+							// details: error,
+							// })
 							// 	})
 						}
 					} catch (error) {
-						console.error('Periodic sync not supported:', error)
+						logger.error({
+							eventType: 'Periodic Sync Not Supported',
+							details: error,
+						})
 					}
 				})
 				.catch((error) => {
-					console.error('Service worker registration failed:', error)
+					logger.error({
+						eventType: 'Service Worker Registration Failed',
+						details: error,
+					})
 				})
 		}
 	}, [])

@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '~/lib'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	buildSocialLinks,
@@ -57,7 +58,11 @@ export async function POST(req: Request) {
 			.single()
 
 		if (insertError || !project) {
-			console.error(insertError)
+			logger.error({
+				eventType: 'Project Insertion Error',
+				error: insertError?.message,
+				details: insertError,
+			})
 			return NextResponse.json({ error: insertError?.message }, { status: 500 })
 		}
 
@@ -74,7 +79,11 @@ export async function POST(req: Request) {
 					.eq('id', project.id)
 
 				if (updateImageError) {
-					console.error(updateImageError)
+					logger.error({
+						eventType: 'Project Image URL Update Error',
+						error: updateImageError.message,
+						details: updateImageError,
+					})
 					return NextResponse.json(
 						{ error: updateImageError.message },
 						{ status: 500 },
@@ -88,7 +97,10 @@ export async function POST(req: Request) {
 
 		return NextResponse.json({ slug: project.slug }, { status: 201 })
 	} catch (err) {
-		console.error(err)
+		logger.error({
+			eventType: 'Project Creation Error',
+			details: err,
+		})
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

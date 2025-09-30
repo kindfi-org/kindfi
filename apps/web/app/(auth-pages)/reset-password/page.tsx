@@ -9,6 +9,7 @@ import { Label } from '~/components/base/label'
 import { FormMessage, type Message } from '~/components/form-message'
 import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { logger } from '~/lib'
 
 export default function ResetPassword(props: {
 	searchParams: Promise<Message>
@@ -22,7 +23,11 @@ export default function ResetPassword(props: {
 				const result = await props.searchParams
 				setMessage(result)
 			} catch (error) {
-				console.error('Error fetching message:', error)
+				logger.error({
+					eventType: 'ResetPassword Page Error',
+					error: (error as Error).message,
+					stack: (error as Error).stack,
+				})
 			}
 		}
 

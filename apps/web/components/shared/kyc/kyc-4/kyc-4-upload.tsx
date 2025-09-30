@@ -13,6 +13,7 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import { useToast } from '~/components/base/toast'
+import { logger } from '~/lib'
 import { DocumentPreview } from './document-preview'
 import { DocumentTypeSelector } from './document-type-selector'
 import { ExtractedInfoDisplay } from './extracted-info-display'
@@ -175,7 +176,10 @@ const ProofOfAddressUpload = ({
 					title: 'Error',
 					description: 'An error occurred while processing the document.',
 				})
-				console.error('Error in handleFileUpload:', error)
+				logger.error({
+					eventType: 'File Upload Error',
+					details: error,
+				})
 			} finally {
 				setIsProcessing(false)
 			}

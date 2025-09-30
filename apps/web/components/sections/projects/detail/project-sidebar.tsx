@@ -21,6 +21,7 @@ import {
 import { Input } from '~/components/base/input'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { logger } from '~/lib'
 import { progressBarAnimation } from '~/lib/constants/animations'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
@@ -77,7 +78,10 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			// TODO: Send follow/unfollow request to backend
 			setIsFollowing(!isFollowing)
 		} catch (error) {
-			console.error(error)
+			logger.error({
+				eventType: 'Follow Toggle Error',
+				details: error,
+			})
 			toast.error('Unable to update follow status', {
 				icon: <CircleAlert className="text-destructive" />,
 			})
@@ -97,7 +101,10 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			const first = balances?.[0]
 			if (first) setOnChainRaised(first.balance)
 		} catch (error) {
-			console.error('Failed to fetch escrow balance', error)
+			logger.error({
+				eventType: 'Failed to fetch escrow balance',
+				details: error,
+			})
 		} finally {
 			setIsFetchingBalance(false)
 		}
@@ -158,7 +165,10 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			// 5) Refresh balance
 			fetchEscrowBalance()
 		} catch (error) {
-			console.error(error)
+			logger.error({
+				eventType: 'Donation Submission Error',
+				details: error,
+			})
 			toast.error('Something went wrong', {
 				description: "We couldn't process your donation. Please try again.",
 				icon: <CircleAlert className="text-destructive" />,

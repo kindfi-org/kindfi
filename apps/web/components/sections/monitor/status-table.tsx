@@ -27,6 +27,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/base/table'
+import { logger } from '~/lib'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']
@@ -112,9 +113,17 @@ export function EscrowTable() {
 
 			await fetchRecords()
 		} catch (err) {
-			console.error('Error:', err)
+			logger.error({
+				eventType: 'Escrow Status Update Error',
+				details: err,
+			})
 			setState({
-				error: err instanceof Error ? err.message : 'Unknown error',
+				error:
+					err instanceof Error
+						? err.message
+						: typeof err === 'string'
+							? err
+							: 'Unknown error',
 				isLoading: false,
 			})
 		}
@@ -133,7 +142,10 @@ export function EscrowTable() {
 
 			await fetchRecords()
 		} catch (err) {
-			console.error('Error:', err)
+			logger.error({
+				eventType: 'Escrow Test Data Insertion Error',
+				details: err,
+			})
 			setState({
 				error: err instanceof Error ? err.message : 'Unknown error',
 				isLoading: false,

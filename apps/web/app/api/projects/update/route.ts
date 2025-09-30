@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '~/lib'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	buildSocialLinks,
@@ -87,7 +88,11 @@ export async function PATCH(req: Request) {
 			.eq('id', projectId)
 
 		if (updateError) {
-			console.error(updateError)
+			logger.error({
+				eventType: 'Project Update Error',
+				error: updateError.message,
+				details: updateError,
+			})
 			return NextResponse.json({ error: updateError.message }, { status: 500 })
 		}
 
@@ -105,7 +110,10 @@ export async function PATCH(req: Request) {
 			{ status: 200 },
 		)
 	} catch (err) {
-		console.error(err)
+		logger.error({
+			eventType: 'Project Update Error',
+			details: err,
+		})
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

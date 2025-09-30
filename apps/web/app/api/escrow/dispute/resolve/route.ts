@@ -1,6 +1,7 @@
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '~/lib'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import type { DisputeResolutionPayload } from '~/lib/types/escrow/escrow-payload.types'
@@ -100,7 +101,10 @@ export async function POST(req: NextRequest) {
 		// Note: Notifications will be handled by the /escrow/dispute/sign endpoint
 		// after the transaction is signed and submitted
 	} catch (error) {
-		console.error('Dispute Resolution Error:', error)
+		logger.error({
+			eventType: 'Dispute Resolution Error',
+			details: error,
+		})
 
 		if (error instanceof AppError) {
 			return NextResponse.json(

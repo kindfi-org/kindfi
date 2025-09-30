@@ -1,4 +1,5 @@
 import { supabase } from '@packages/lib/supabase'
+import { logger } from '..'
 
 /**
  * Parameters for logging error events
@@ -80,13 +81,17 @@ export async function logError(params: LogErrorParams): Promise<void> {
 					params.error instanceof Error
 						? params.error.message
 						: String(params.error),
-				stack: params.error instanceof Error ? params.error.stack : undefined,
+				stack: params.error,
 			},
 		})
 	} catch (logError) {
-		console.error('Failed to log error:', logError)
+		logger.error({
+			eventType: 'Log Error Failure',
+			details: logError,
+		})
 		throw params.error // Rethrow the original error after logging attempt
 	}
+	throw params.error // Rethrow the original error after logging attempt
 }
 
 /**
@@ -170,7 +175,10 @@ export class NotificationLogger {
 
 			if (dbError) throw dbError
 		} catch (logError) {
-			console.error('Failed to log error:', logError)
+			logger.error({
+				eventType: 'Log Error Failure',
+				details: logError,
+			})
 			// Don't throw to avoid disrupting the main flow
 		}
 	}
@@ -194,7 +202,10 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			console.error('Failed to log info:', logError)
+			logger.error({
+				eventType: 'Log Info Failure',
+				details: logError,
+			})
 			// Don't throw to avoid disrupting the main flow
 		}
 	}
@@ -218,7 +229,10 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			console.error('Failed to log warning:', logError)
+			logger.error({
+				eventType: 'Log Warning Failure',
+				details: logError,
+			})
 			// Don't throw to avoid disrupting the main flow
 		}
 	}
@@ -241,7 +255,10 @@ export class NotificationLogger {
 			if (error) throw error
 			return data || []
 		} catch (error) {
-			console.error('Failed to get notification logs:', error)
+			logger.error({
+				eventType: 'Get Notification Logs Failure',
+				details: error,
+			})
 			return []
 		}
 	}
@@ -264,7 +281,10 @@ export class NotificationLogger {
 			if (error) throw error
 			return data || []
 		} catch (error) {
-			console.error('Failed to get error logs:', error)
+			logger.error({
+				eventType: 'Get Error Logs Failure',
+				details: error,
+			})
 			return []
 		}
 	}

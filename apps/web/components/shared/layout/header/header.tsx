@@ -33,6 +33,7 @@ import {
 	SheetTrigger,
 } from '~/components/base/sheet'
 import { useAuth } from '~/hooks/use-auth'
+import { logger } from '~/lib'
 import { getAvatarFallback } from '~/lib/utils'
 import { Navigation } from './navigation'
 
@@ -99,7 +100,11 @@ const UserMenu = ({ user }: { user: User }) => {
 			await signOutAction()
 			router.push('/')
 		} catch (error) {
-			console.error('Error signing out:', error)
+			logger.error({
+				eventType: 'Sign Out Error',
+				details: error,
+			})
+			// Optionally, show a user-friendly message here
 		}
 	}
 
@@ -112,7 +117,10 @@ const UserMenu = ({ user }: { user: User }) => {
 			toast('Address copied successfully!')
 			setTimeout(() => setAddressCopied(false), 2000)
 		} catch (error) {
-			console.error('Failed to copy address:', error)
+			logger.error({
+				eventType: 'Error stringifying log data',
+				details: error,
+			})
 		}
 	}
 

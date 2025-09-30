@@ -1,3 +1,4 @@
+import { logger } from '~/lib'
 import { httpEscrow } from '~/lib/axios/http'
 import type { SendTransactionResponse } from '~/lib/types/escrow/escrow-response.types'
 
@@ -14,7 +15,10 @@ export async function sendTransaction(
 		)
 		return response.data
 	} catch (error) {
-		console.error('Error sending transaction:', error)
+		logger.error({
+			eventType: 'Send Transaction Error',
+			details: error,
+		})
 		throw error
 	}
 }

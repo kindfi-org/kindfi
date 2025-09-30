@@ -17,6 +17,14 @@
 		"newArchEnabled": true,
 		"orientation": "portrait",
 		"plugins": [
+			[
+				"@sentry/react-native/expo",
+				{
+					"url": "https://sentry.io/",
+					"project": "kindif",
+					"organization": "kindif-mobile"
+				}
+			],
 			"expo-router",
 			[
 				"expo-splash-screen",
@@ -34,7 +42,15 @@
 				}
 			],
 			"expo-font",
-			"expo-web-browser"
+			"expo-web-browser",
+			[
+				"@sentry/react-native/expo",
+				{
+					"url": "https://sentry.io/",
+					"project": "javascript-nextjs",
+					"organization": "nnaji-benjamin"
+				}
+			]
 		],
 		"scheme": "myapp",
 		"slug": "test-expo",

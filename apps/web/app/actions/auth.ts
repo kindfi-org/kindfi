@@ -40,6 +40,7 @@ const errorHandler = new AuthErrorHandler(logger)
 
 export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 	const appConfig: AppEnvInterface = appEnvConfig('web')
+
 	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
 		return {
 			success: false,
@@ -47,10 +48,10 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 			error: 'Invalid CSRF token',
 		}
 	}
+
 	const supabase = supabaseServiceRole
 	const email = formData.get('email') as string
 
-	// Check if user already exists
 	const { data: existingUser } = await supabase
 		.from('profiles')
 		.select('id, email')
@@ -74,13 +75,14 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 
 	try {
 		const { data, error } = await supabase.auth.signInWithOtp(signInWithOptOpt)
+
 		if (error) {
-			console.error('Error signing up with otp:', error)
+			logger.error({ eventType: 'Error signing up with otp', details: error })
 			return errorHandler.handleAuthError(error, 'sign_up')
 		}
 
 		revalidatePath('/sign-up', 'layout')
-		console.log('Sign up data: ', data)
+
 		return {
 			success: true,
 			message:
@@ -89,7 +91,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 			data,
 		}
 	} catch (error) {
-		console.error('Error signing up in general:', error)
+		logger.error({ eventType: 'Error signing up in general', details: error })
 		return errorHandler.handleAuthError(error as AuthError, 'sign_up')
 	}
 }
@@ -104,7 +106,6 @@ export async function createSessionAction({
 	const supabase = await createSupabaseServerClient()
 
 	try {
-		// Verify the user exists and the email matches
 		const { data: userData, error: userError } = await supabase
 			.from('profiles')
 			.select()
@@ -121,30 +122,18 @@ export async function createSessionAction({
 			}
 		}
 
-		logger.info({
-			eventType: 'SESSION_CREATED',
-			userId,
-			email,
-		})
+		logger.info({ eventType: 'SESSION_CREATED', userId, email })
 
-		if (userError) {
-			errorHandler.handleAuthError(userError, 'sign_in')
-		}
+		if (userError) errorHandler.handleAuthError(userError, 'sign_in')
 
 		return {
 			success: true,
 			message: 'Session created successfully',
 			redirect: '/dashboard',
-			// data: sessionData,
 			data: userData,
-		} as AuthResponse
+		}
 	} catch (error) {
-		logger.error({
-			eventType: 'SESSION_CREATION_ERROR',
-			error: error instanceof Error ? error.message : 'Unknown error',
-			userId,
-			email,
-		})
+		logger.error({ eventType: 'SESSION_CREATION_ERROR', error, userId, email })
 		return errorHandler.handleAuthError(error as AuthError, 'create_session')
 	}
 }
@@ -153,18 +142,16 @@ export async function signOutAction(): Promise<void> {
 	const supabase = await createSupabaseServerClient()
 
 	try {
-		// Clear NextAuth session
 		await signOut({ redirect: false })
 
 		try {
 			const { error } = await supabase.auth.signOut()
-
 			if (error) {
 				const response = errorHandler.handleAuthError(error, 'sign_out')
 				redirect(`/?error=${encodeURIComponent(response.message)}`)
 			}
 		} catch (error) {
-			console.error('No supabase session', error)
+			logger.error({ eventType: 'No supabase session', details: error })
 		}
 
 		redirect('/sign-in?success=Successfully signed out')
@@ -183,26 +170,14 @@ export async function requestResetAccountAction(
 	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
 		redirect('/reset-account?error=Invalid CSRF token')
 	}
+
 	const email = formData.get('email')?.toString()
 	const _supabase = await createSupabaseServerClient()
 	const _origin = (await headers()).get('origin')
 
-	if (!email) {
-		redirect('/reset-account?error=Email is required')
-	}
+	if (!email) redirect('/reset-account?error=Email is required')
 
 	try {
-		// TODO: Implement a proper reset account flow
-		// This is a placeholder for the actual reset account logic
-		// const { error } = await supabase.auth.resetPasswordForEmail(email, {
-		// 	redirectTo: `${origin}/auth/callback?redirect_to=//reset-account`,
-		// })
-
-		// if (error) {
-		// 	const response = errorHandler.handleAuthError(error, 'forgot_password')
-		// 	redirect(`/reset-account?error=${encodeURIComponent(response.message)}`)
-		// }
-
 		redirect(
 			'/reset-account?success=Check your email for a confirmation request to reset your account',
 		)
@@ -219,6 +194,7 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
 	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
 		redirect('/reset-password?error=Invalid CSRF token')
 	}
+
 	const password = formData.get('password') as string
 	const confirmPassword = formData.get('confirmPassword') as string
 
@@ -233,15 +209,11 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
 	const supabase = await createSupabaseServerClient()
 
 	try {
-		const { error } = await supabase.auth.updateUser({
-			password: password,
-		})
-
+		const { error } = await supabase.auth.updateUser({ password })
 		if (error) {
 			const response = errorHandler.handleAuthError(error, 'reset_password')
 			redirect(`/reset-password?error=${encodeURIComponent(response.message)}`)
 		}
-
 		redirect('/sign-in?success=Password updated successfully')
 	} catch (error) {
 		const response = errorHandler.handleAuthError(
@@ -252,7 +224,6 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
 	}
 }
 
-// Helper function to check auth status
 export async function checkAuthStatus(): Promise<AuthResponse> {
 	const supabase = await createSupabaseServerClient()
 
@@ -262,9 +233,7 @@ export async function checkAuthStatus(): Promise<AuthResponse> {
 			error,
 		} = await supabase.auth.getSession()
 
-		if (error) {
-			return errorHandler.handleAuthError(error, 'check_auth')
-		}
+		if (error) return errorHandler.handleAuthError(error, 'check_auth')
 
 		if (!session) {
 			return {
@@ -274,10 +243,7 @@ export async function checkAuthStatus(): Promise<AuthResponse> {
 			}
 		}
 
-		return {
-			success: true,
-			message: 'Active session found',
-		}
+		return { success: true, message: 'Active session found' }
 	} catch (error) {
 		return errorHandler.handleAuthError(error as AuthError, 'check_auth')
 	}
@@ -292,10 +258,7 @@ export async function updateEscrowStatusAction(
 	try {
 		const { data, error } = await supabase
 			.from('escrow_status')
-			.update({
-				status: newStatus,
-				last_updated: new Date().toISOString(),
-			})
+			.update({ status: newStatus, last_updated: new Date().toISOString() })
 			.eq('id', id)
 			.select()
 			.single()
@@ -303,15 +266,11 @@ export async function updateEscrowStatusAction(
 		if (error) throw error
 
 		revalidatePath('/admin/escrow')
-		return {
-			success: true,
-			message: `Status updated to ${newStatus}`,
-			data,
-		}
+		return { success: true, message: `Status updated to ${newStatus}`, data }
 	} catch (error) {
 		logger.error({
 			eventType: 'ESCROW_STATUS_UPDATE_ERROR',
-			error: error instanceof Error ? error.message : 'Unknown error',
+			error,
 			id,
 			newStatus,
 		})
@@ -335,12 +294,7 @@ export async function updateEscrowMilestoneAction(
 			.from('escrow_status')
 			.update({
 				current_milestone: current,
-				metadata: {
-					milestoneStatus: {
-						current,
-						completed,
-					},
-				},
+				metadata: { milestoneStatus: { current, completed } },
 				last_updated: new Date().toISOString(),
 			})
 			.eq('id', id)
@@ -350,15 +304,11 @@ export async function updateEscrowMilestoneAction(
 		if (error) throw error
 
 		revalidatePath('/admin/escrow')
-		return {
-			success: true,
-			message: 'Milestone updated successfully',
-			data,
-		}
+		return { success: true, message: 'Milestone updated successfully', data }
 	} catch (error) {
 		logger.error({
 			eventType: 'ESCROW_MILESTONE_UPDATE_ERROR',
-			error: error instanceof Error ? error.message : 'Unknown error',
+			error,
 			id,
 			current,
 			completed,
@@ -393,15 +343,11 @@ export async function updateEscrowFinancialsAction(
 		if (error) throw error
 
 		revalidatePath('/admin/escrow')
-		return {
-			success: true,
-			message: 'Financials updated successfully',
-			data,
-		}
+		return { success: true, message: 'Financials updated successfully', data }
 	} catch (error) {
 		logger.error({
 			eventType: 'ESCROW_FINANCIALS_UPDATE_ERROR',
-			error: error instanceof Error ? error.message : 'Unknown error',
+			error,
 			id,
 			funded,
 			released,
@@ -425,16 +371,9 @@ export async function getEscrowRecordsAction(): Promise<EscrowResponse> {
 
 		if (error) throw error
 
-		return {
-			success: true,
-			message: 'Records fetched successfully',
-			data,
-		}
+		return { success: true, message: 'Records fetched successfully', data }
 	} catch (error) {
-		logger.error({
-			eventType: 'ESCROW_RECORDS_FETCH_ERROR',
-			error: error instanceof Error ? error.message : 'Unknown error',
-		})
+		logger.error({ eventType: 'ESCROW_RECORDS_FETCH_ERROR', error })
 		return {
 			success: false,
 			message: 'Failed to fetch records',
@@ -456,12 +395,7 @@ export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
 					current_milestone: 1,
 					total_funded: 1000,
 					total_released: 0,
-					metadata: {
-						milestoneStatus: {
-							total: 3,
-							completed: 0,
-						},
-					},
+					metadata: { milestoneStatus: { total: 3, completed: 0 } },
 				},
 			])
 			.select()
@@ -476,10 +410,7 @@ export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
 			data,
 		}
 	} catch (error) {
-		logger.error({
-			eventType: 'ESCROW_TEST_RECORD_INSERT_ERROR',
-			error: error instanceof Error ? error.message : 'Unknown error',
-		})
+		logger.error({ eventType: 'ESCROW_TEST_RECORD_INSERT_ERROR', error })
 		return {
 			success: false,
 			message: 'Failed to insert test record',
@@ -500,19 +431,10 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 		userId: string
 		aaguid?: string
 	} = JSON.parse(deployeeUpdateData)
-	// Get current user from session or context
-	console.log('updateDeviceWithDeployee::>', {
-		deployeeAddress,
-		aaguid,
-		userId,
-		credentialId,
-	})
-	try {
-		if (!userId) {
-			throw new Error('User not authenticated')
-		}
 
-		// Validate input parameters
+	try {
+		if (!userId) throw new Error('User not authenticated')
+
 		if (!userId || !credentialId || !deployeeAddress || !aaguid) {
 			return {
 				success: false,
@@ -521,7 +443,6 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 			}
 		}
 
-		// Verify the device exists and belongs to the user
 		const existingDevice = await db
 			.select({
 				id: devices.id,
@@ -545,7 +466,6 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 
 		const deviceToUpdate = existingDevice[0]
 
-		// Update the device with deployee address and AAGUID
 		const updatedDevice = await db
 			.update(devices)
 			.set({
@@ -586,11 +506,10 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 	} catch (error) {
 		logger.error({
 			eventType: 'DEVICE_UPDATE_EXCEPTION',
-			error: error instanceof Error ? error.message : 'Unknown error',
+			error,
 			userId,
 			credentialId,
 		})
-
 		return {
 			success: false,
 			message: 'An error occurred while updating the device',

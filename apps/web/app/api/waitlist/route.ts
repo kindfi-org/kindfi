@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
+import { logger } from '~/lib'
 import { waitlistSchema } from '~/lib/schemas/waitlist.schemas'
 
 export async function POST(req: Request) {
@@ -111,7 +112,11 @@ export async function POST(req: Request) {
 
 			// If both failed, return the more detailed error
 			const error = insertError2 || insertError1
-			console.error('Both insert methods failed:', error)
+			logger.error({
+				eventType: 'Waitlist Insertion Error',
+				error: error?.message || 'Insert failed',
+				details: error,
+			})
 			return NextResponse.json(
 				{
 					error: error?.message || 'Insert failed',
@@ -124,7 +129,11 @@ export async function POST(req: Request) {
 			// biome-ignore lint/style/noUselessElse: <explanation>
 		} else {
 			// Table doesn't exist
-			console.error('Table access failed:', testError)
+			logger.error({
+				eventType: 'Waitlist Table Access Error',
+				error: testError.message,
+				details: testError,
+			})
 			return NextResponse.json(
 				{
 					error: `Table access failed: ${testError.message}`,
@@ -134,7 +143,10 @@ export async function POST(req: Request) {
 			)
 		}
 	} catch (err) {
-		console.error('Caught error in try/catch:', err)
+		logger.error({
+			eventType: 'Waitlist POST Error',
+			details: err,
+		})
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

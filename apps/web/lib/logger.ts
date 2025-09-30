@@ -1,5 +1,10 @@
+import * as Sentry from '@sentry/nextjs'
+import { logger } from '.'
 import type { ILogger, LoggerData } from './types/logger.types'
+import getErrorMessageLog from './utils/error.utils'
 
+
+//Central logger with sentry integration
 type LogLevel = LoggerData['LogLevel']
 type LogData = LoggerData['LogData']
 
@@ -26,22 +31,57 @@ export class Logger implements ILogger {
 		const prefix = `[${level.toUpperCase()}] ${timestamp}:`
 
 		try {
-			const { eventType, ...rest } = data
+			const { eventType, details, ...rest } = data
+
 			const logData = {
 				eventType,
 				timestamp,
+				error: rest?.error || getErrorMessageLog(details),
 				...rest,
 			}
+
 			const jsonData = JSON.stringify(logData, null, 2)
 			logMethod(prefix, eventType, '\n', jsonData)
+			if (level === 'error' && process.env.NODE_ENV === 'production') {
+				Sentry.captureException(
+					details instanceof Error ? details : new Error(eventType),
+					{
+						extra: {
+							...rest,
+							timestamp,
+						},
+						tags: {
+							source: 'Logger',
+						},
+					},
+				)
+			}
 		} catch (error) {
-			console.error(`Error stringifying log data: ${error}`)
+			const safeMessage = getErrorMessageLog(error)
+
+			logger.error({
+				eventType: 'Error stringifying log data',
+				error: safeMessage,
+				details: error,
+			})
+
 			logMethod(
 				prefix,
 				data.eventType,
 				'\n',
 				'Error: Unable to stringify log data',
 			)
+
+			if (process.env.NODE_ENV === 'production') {
+				Sentry.captureException(error, {
+					extra: {
+						originalEventType: data.eventType,
+					},
+					tags: {
+						source: 'LoggerError',
+					},
+				})
+			}
 		}
 	}
 

@@ -10,6 +10,7 @@ import {
 	xdr,
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
+import { logger } from '~/lib'
 import { generateStellarAddress } from '~/lib/passkey/deploy'
 
 export async function handleDeploy(serializedData: string): Promise<string> {
@@ -55,7 +56,7 @@ export async function handleDeploy(serializedData: string): Promise<string> {
 	const deployee = generateStellarAddress(contractSalt)
 
 	try {
-		// This is a signup deploy vs a signin deploy. Look up if this contract has been already been deployed, otherwise fail
+		// Signup deploy vs signin deploy: check if this contract already exists
 		if (!publicKey) {
 			await rpc.getContractData(
 				deployee,
@@ -67,6 +68,7 @@ export async function handleDeploy(serializedData: string): Promise<string> {
 		const bundlerKeyAccount = await rpc
 			.getAccount(bundlerKey.publicKey())
 			.then((res) => new Account(res.accountId(), res.sequenceNumber()))
+
 		const simTxn = new TransactionBuilder(bundlerKeyAccount, {
 			fee: '100',
 			networkPassphrase: config.stellar.networkPassphrase,
@@ -88,18 +90,15 @@ export async function handleDeploy(serializedData: string): Promise<string> {
 			.build()
 
 		const sim = await rpc.simulateTransaction(simTxn)
-
 		if (Api.isSimulationError(sim) || Api.isSimulationRestore(sim)) throw sim
 
 		const transaction = assembleTransaction(simTxn, sim).setTimeout(0).build()
 
 		console.log('Signing transaction with bundler key...', transaction)
-
 		await transaction.sign(bundlerKey)
 
-		// TODO failure here is resulting in sp:deployee undefined
-		// TODO handle archived entries
-
+		// TODO: failure here results in sp:deployee undefined
+		// TODO: handle archived entries
 		const txResp = await (
 			await fetch(`${config.stellar.horizonUrl}/transactions`, {
 				method: 'POST',
@@ -113,14 +112,17 @@ export async function handleDeploy(serializedData: string): Promise<string> {
 		if (txResp.successful) return deployee
 
 		console.log('txResp [NOT SUCCESSFUL] -->', txResp)
-
 		throw txResp
 	} catch (error) {
-		console.error('Error during deploy the new address in stellar:', error)
+		logger.error({
+			eventType: 'Error during deploy of new address in Stellar',
+			details: error,
+		})
 		console.info(
 			'Return unapproved deployee address for future deployment:',
 			deployee,
 		)
 	}
+
 	return deployee
 }

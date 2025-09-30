@@ -17,6 +17,7 @@ import {
 import { Avatar, AvatarImage } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
+import { logger } from '~/lib'
 import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import { UpdateForm } from './update-form'
 
@@ -70,7 +71,11 @@ export function UpdateCard({
 			setIsDeleting(true)
 			await onDelete(deletingUpdateId)
 		} catch (error) {
-			console.error('Error deleting update:', error)
+			logger.error({
+				eventType: 'Update Deletion Error',
+				details: error,
+			})
+			// Optionally, show a user-friendly error message here
 		} finally {
 			setIsDeleting(false)
 			setDeletingUpdateId(null)
