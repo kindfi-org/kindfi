@@ -12,26 +12,6 @@ import {
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 
-export interface PasskeyAccountCreationParams {
-	credentialId: string
-	publicKey: string // Base64 encoded CBOR public key
-	userId?: string
-}
-
-export interface PasskeyAccountResult {
-	address: string
-	contractId: string
-	transactionHash?: string
-	isExisting?: boolean
-}
-
-export interface PasskeyAccountInfo {
-	address: string
-	balance: string
-	sequence: string
-	status: 'active' | 'not_found' | 'inactive'
-}
-
 /**
  * Simplified Stellar Passkey Account Service
  * This service follows the recommended approach using Stellar's passkey patterns
@@ -43,17 +23,23 @@ export class StellarPasskeyService {
 	private factoryContractId: string
 	private fundingKeypair?: Keypair
 
+	private static config: AppEnvInterface = appEnvConfig('kyc-server')
+
+	private readonly STANDARD_FEE = '1000'
+
 	constructor(
 		networkPassphrase?: string,
 		rpcUrl?: string,
 		fundingSecretKey?: string,
 	) {
-		const config: AppEnvInterface = appEnvConfig('kyc-server')
-
 		this.networkPassphrase =
-			networkPassphrase || config.stellar.networkPassphrase
-		this.server = new Server(rpcUrl || config.stellar.rpcUrl)
-		this.factoryContractId = config.stellar.factoryContractId
+			networkPassphrase ||
+			StellarPasskeyService.config.stellar.networkPassphrase
+		this.server = new Server(
+			rpcUrl || StellarPasskeyService.config.stellar.rpcUrl,
+		)
+		this.factoryContractId =
+			StellarPasskeyService.config.stellar.factoryContractId
 
 		if (fundingSecretKey) {
 			this.fundingKeypair = Keypair.fromSecret(fundingSecretKey)
@@ -277,7 +263,7 @@ export class StellarPasskeyService {
 
 		// Build transaction
 		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: '1000', // Increased fee for better reliability
+			fee: this.STANDARD_FEE,
 			networkPassphrase: this.networkPassphrase,
 		})
 			.addOperation(
@@ -313,25 +299,34 @@ export class StellarPasskeyService {
 			.build()
 
 		assembledTransaction.sign(this.fundingKeypair)
+		console.log('📡 Submitting transaction to Stellar network...')
+		const result = await this.server.sendTransaction(assembledTransaction)
 
-		// Submit transaction
-		const config: AppEnvInterface = appEnvConfig('kyc-server')
-		const response = await fetch(`${config.stellar.horizonUrl}/transactions`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-			},
-			body: new URLSearchParams({
-				tx: assembledTransaction.toXDR(),
-			}),
-		})
-
-		const result = await response.json()
-
-		if (!result.successful) {
+		if (result?.errorResult) {
 			throw new Error(`Transaction failed: ${JSON.stringify(result)}`)
 		}
 
+		console.log('✅ Transaction successful:', result)
 		return result.hash
 	}
+}
+
+export interface PasskeyAccountCreationParams {
+	credentialId: string
+	publicKey: string // Base64 encoded CBOR public key
+	userId?: string
+}
+
+export interface PasskeyAccountResult {
+	address: string
+	contractId: string
+	transactionHash?: string
+	isExisting?: boolean
+}
+
+export interface PasskeyAccountInfo {
+	address: string
+	balance: string
+	sequence: string
+	status: 'active' | 'not_found' | 'inactive'
 }

@@ -48,7 +48,6 @@
 		"@supabase/ssr": "^0.7.0",
 		"@supabase/supabase-js": "^2.56.0",
 		"@tanstack/react-query": "^5.74.7",
-		"passkey-kit": "^0.11.1",
 		"tesseract.js": "^6.0.0"
 	},
 	"devDependencies": {},

@@ -18,53 +18,7 @@ import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 import * as cbor from 'cbor'
 import { eq } from 'drizzle-orm'
 import { getDb } from '../db'
-
-export interface PasskeyAccountCreationParams {
-	credentialId: string
-	publicKey: string // Base64 encoded CBOR public key
-	userId?: string
-}
-
-export interface PasskeyAccountResult {
-	address: string
-	contractId: string
-	transactionHash?: string
-	isExisting?: boolean
-}
-
-export interface PasskeyAccountInfo {
-	address: string
-	balance: string
-	sequence: string
-	status: 'active' | 'not_found' | 'inactive'
-}
-
-export interface AddDeviceOperation {
-	type: 'add_device'
-	deviceId: string
-	publicKey: string
-	isAdmin?: boolean
-	challenge?: string
-}
-
-export interface RemoveDeviceOperation {
-	type: 'remove_device'
-	deviceId: string
-	challenge?: string
-}
-
-export interface ContractInvocationOperation {
-	type: 'invoke_contract'
-	contractAddress?: string
-	functionName: string
-	args?: unknown[]
-	challenge?: string
-}
-
-export type PasskeyOperation =
-	| AddDeviceOperation
-	| RemoveDeviceOperation
-	| ContractInvocationOperation
+import { type RateLimitConfig, SignatureRateLimiter } from './rate-limiter'
 
 /**
  * Simplified Stellar Passkey Account Service V2
@@ -76,6 +30,10 @@ export class StellarPasskeyService {
 	private networkPassphrase: string
 	private factoryContractId: string
 	private fundingKeypair?: Keypair
+	private rateLimiter: SignatureRateLimiter
+
+	private readonly DEPLOYMENT_FEE = '1000000' // High fee for complex auth and deployment
+	private readonly STANDARD_FEE = '1000'
 
 	constructor(
 		networkPassphrase?: string,
@@ -92,6 +50,16 @@ export class StellarPasskeyService {
 		if (fundingSecretKey) {
 			this.fundingKeypair = Keypair.fromSecret(fundingSecretKey)
 		}
+
+		// Initialize rate limiter with configuration
+		const rateLimitConfig: RateLimitConfig = {
+			maxAttempts: config.stellar.signatureVerification?.maxAttempts ?? 5,
+			windowMs: config.stellar.signatureVerification?.windowMs ?? 60000, // 1 minute default
+			redisUrl: config.redis?.url,
+			redisToken: config.redis?.token,
+		}
+
+		this.rateLimiter = new SignatureRateLimiter(rateLimitConfig)
 	}
 
 	/**
@@ -303,8 +271,6 @@ export class StellarPasskeyService {
 	 * Converts CBOR-encoded public key to uncompressed format
 	 */
 	private convertCborToUncompressedKey(cborPublicKey: Buffer): Buffer {
-		const cbor = require('cbor')
-
 		try {
 			// Parse CBOR data
 			const parsedData = cbor.decode(cborPublicKey)
@@ -400,6 +366,32 @@ export class StellarPasskeyService {
 		transactionHash: string,
 	): Promise<boolean> {
 		try {
+			// Rate limit check BEFORE any verification work
+			console.log('🔒 Checking rate limit for contract:', contractId)
+
+			const rateLimitResult = await this.rateLimiter.checkLimit(contractId)
+
+			if (!rateLimitResult.allowed) {
+				console.warn('⚠️ Rate limit exceeded for signature verification:', {
+					contractId,
+					remaining: rateLimitResult.remaining,
+					resetAt: new Date(rateLimitResult.resetAt).toISOString(),
+				})
+
+				// Log potential brute-force attempt
+				console.error('🚨 Potential brute-force attack detected:', {
+					contractId,
+					timestamp: new Date().toISOString(),
+				})
+
+				return false
+			}
+
+			console.log('✅ Rate limit check passed:', {
+				remaining: rateLimitResult.remaining,
+				resetAt: new Date(rateLimitResult.resetAt).toISOString(),
+			})
+
 			console.log('🔍 Verifying passkey signature for contract:', contractId)
 
 			// Parse the signature data (should be WebAuthn assertion response)
@@ -447,6 +439,12 @@ export class StellarPasskeyService {
 				rawSignature,
 				publicKey,
 			)
+
+			// Reset rate limit counter on successful verification
+			if (isValid) {
+				console.log('✅ Signature valid, resetting rate limit counter')
+				await this.rateLimiter.reset(contractId)
+			}
 
 			console.log(isValid ? '✅ Signature valid' : '❌ Signature invalid')
 			return isValid
@@ -558,7 +556,7 @@ export class StellarPasskeyService {
 				.limit(1)
 
 			if (deviceRecord.length === 0) {
-				console.log('� No device found for contract:', contractId)
+				console.log('❌ No device found for contract:', contractId)
 				return null
 			}
 
@@ -673,7 +671,7 @@ export class StellarPasskeyService {
 
 		// Build transaction for adding device
 		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: '1000',
+			fee: this.STANDARD_FEE,
 			networkPassphrase: this.networkPassphrase,
 		})
 			.addOperation(
@@ -713,7 +711,7 @@ export class StellarPasskeyService {
 
 		// Build transaction for removing device
 		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: '1000',
+			fee: this.STANDARD_FEE,
 			networkPassphrase: this.networkPassphrase,
 		})
 			.addOperation(
@@ -764,7 +762,7 @@ export class StellarPasskeyService {
 
 		// Build transaction for contract invocation
 		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: '1000',
+			fee: this.STANDARD_FEE,
 			networkPassphrase: this.networkPassphrase,
 		})
 			.addOperation(
@@ -870,7 +868,7 @@ export class StellarPasskeyService {
 		// This means we need to let the transaction simulation handle the authorization
 		// The auth controller will sign the transaction during simulation/assembly
 		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: '1000000', // Very high fee for complex authorization and deployment
+			fee: this.DEPLOYMENT_FEE,
 			networkPassphrase: this.networkPassphrase,
 		})
 			.addOperation(
@@ -909,7 +907,7 @@ export class StellarPasskeyService {
 
 		// Build transaction to add account to auth-controller
 		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: '1000',
+			fee: this.STANDARD_FEE,
 			networkPassphrase: this.networkPassphrase,
 		})
 			.addOperation(
@@ -1164,7 +1162,7 @@ export class StellarPasskeyService {
 					}
 
 					// Still pending, continue waiting
-				} catch (error) {
+				} catch (_error) {
 					console.log(
 						`⏳ Waiting for transaction to appear (attempt ${attempts}/${maxAttempts})...`,
 					)
@@ -1177,4 +1175,58 @@ export class StellarPasskeyService {
 		console.log('✅ Transaction successful:', sendResult.hash)
 		return sendResult.hash
 	}
+
+	/**
+	 * Cleanup resources when service is destroyed
+	 */
+	async disconnect(): Promise<void> {
+		await this.rateLimiter.disconnect()
+	}
 }
+
+export interface PasskeyAccountCreationParams {
+	credentialId: string
+	publicKey: string // Base64 encoded CBOR public key
+	userId?: string
+}
+
+export interface PasskeyAccountResult {
+	address: string
+	contractId: string
+	transactionHash?: string
+	isExisting?: boolean
+}
+
+export interface PasskeyAccountInfo {
+	address: string
+	balance: string
+	sequence: string
+	status: 'active' | 'not_found' | 'inactive'
+}
+
+export interface AddDeviceOperation {
+	type: 'add_device'
+	deviceId: string
+	publicKey: string
+	isAdmin?: boolean
+	challenge?: string
+}
+
+export interface RemoveDeviceOperation {
+	type: 'remove_device'
+	deviceId: string
+	challenge?: string
+}
+
+export interface ContractInvocationOperation {
+	type: 'invoke_contract'
+	contractAddress?: string
+	functionName: string
+	args?: unknown[]
+	challenge?: string
+}
+
+export type PasskeyOperation =
+	| AddDeviceOperation
+	| RemoveDeviceOperation
+	| ContractInvocationOperation
