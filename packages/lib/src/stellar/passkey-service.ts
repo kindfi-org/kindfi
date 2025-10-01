@@ -11,6 +11,7 @@ import {
 	xdr,
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
+import * as CBOR from 'cbor-x/decode'
 
 /**
  * Simplified Stellar Passkey Account Service
@@ -223,25 +224,127 @@ export class StellarPasskeyService {
 
 	/**
 	 * Processes the public key from base64 CBOR to the required format
-	 * This is a simplified version - you may need to adjust based on your specific format
+	 * Converts COSE/CBOR public key to uncompressed 65-byte EC point (0x04 || X || Y)
 	 */
 	private processPublicKey(publicKeyBase64: string): Buffer {
-		// TODO: Implement proper CBOR parsing similar to the original service
-		// For now, assume it's already in the correct format
-		const publicKeyBuffer = Buffer.from(publicKeyBase64, 'base64')
+		try {
+			const rawPublicKey = Buffer.from(publicKeyBase64, 'base64')
 
-		// Validate length - should be 65 bytes for uncompressed format
-		if (publicKeyBuffer.length === 65) {
-			return publicKeyBuffer
+			console.log(
+				'🔧 Processing CBOR public key:',
+				rawPublicKey.toString('hex'),
+				'Length:',
+				rawPublicKey.length,
+			)
+
+			// If already uncompressed format (65 bytes with 0x04 prefix)
+			if (rawPublicKey.length === 65 && rawPublicKey[0] === 0x04) {
+				console.log('✅ Public key already in uncompressed format')
+				return rawPublicKey
+			}
+
+			// Parse CBOR to extract coordinates
+			return this.convertCborToUncompressedKey(rawPublicKey)
+		} catch (error) {
+			console.error('❌ Error processing public key:', error)
+			throw new Error(`Failed to process public key: ${error}`)
 		}
+	}
 
-		// If it's not 65 bytes, it might need CBOR processing
-		// This is where you'd implement the CBOR conversion logic
-		// from your original stellar-passkey-service.ts
-		console.warn(
-			`Public key length is ${publicKeyBuffer.length}, expected 65 bytes`,
-		)
-		return publicKeyBuffer
+	/**
+	 * Converts CBOR-encoded public key to uncompressed format
+	 * Extracts X and Y coordinates from COSE key and builds 0x04 || X || Y
+	 */
+	private convertCborToUncompressedKey(cborPublicKey: Buffer): Buffer {
+		try {
+			// Parse CBOR data
+			const parsedData = CBOR.decode(cborPublicKey)
+			console.log('🔍 Parsed CBOR data:', parsedData)
+
+			// Handle Map structure (common in CBOR)
+			let coseKey: Record<string | number, unknown>
+			if (parsedData instanceof Map) {
+				coseKey = {}
+				for (const [key, value] of parsedData.entries()) {
+					coseKey[key] = value
+				}
+			} else {
+				coseKey = parsedData
+			}
+
+			// Extract coordinates according to COSE Key format
+			// Debug: Log all key-value pairs to understand the structure
+			console.log('🔍 COSE Key structure:')
+			for (const [key, value] of Object.entries(coseKey)) {
+				console.log(
+					`  ${key}:`,
+					value instanceof Buffer ? `Buffer(${value.length})` : value,
+				)
+			}
+
+			// Standard COSE Key parameters:
+			// -1: curve identifier (1 for P-256)
+			// -2: x coordinate (32 bytes)
+			// -3: y coordinate (32 bytes)
+			const curve = coseKey[-1] as number
+			const xCoord = coseKey[-2] as Buffer
+			const yCoord = coseKey[-3] as Buffer
+
+			console.log('🔍 Extracted values:', {
+				curve,
+				xCoordType: typeof xCoord,
+				xCoordLength: xCoord?.length,
+				yCoordType: typeof yCoord,
+				yCoordLength: yCoord?.length,
+			})
+
+			if (!xCoord || !yCoord) {
+				throw new Error('Missing X or Y coordinates in COSE key')
+			}
+
+			if (curve !== 1) {
+				console.warn(
+					'⚠️ Unexpected curve value:',
+					curve,
+					'(expected 1 for P-256)',
+				)
+			}
+
+			// Ensure coordinates are Buffers
+			if (!(xCoord instanceof Buffer) || !(yCoord instanceof Buffer)) {
+				throw new Error('Coordinates must be Buffer objects')
+			}
+
+			// Validate coordinate lengths
+			if (xCoord.length !== 32 || yCoord.length !== 32) {
+				throw new Error(
+					`Invalid coordinate lengths: X=${xCoord.length}, Y=${yCoord.length} (expected 32 each)`,
+				)
+			}
+
+			// Construct uncompressed public key: 0x04 + X + Y
+			const uncompressedKey = Buffer.concat([
+				Buffer.from([0x04]), // Uncompressed point indicator
+				xCoord,
+				yCoord,
+			])
+
+			console.log('✅ Converted to uncompressed format:', {
+				length: uncompressedKey.length,
+				hex: uncompressedKey.toString('hex'),
+			})
+
+			if (uncompressedKey.length !== 65) {
+				throw new Error(
+					`Invalid uncompressed key length: ${uncompressedKey.length} (expected 65)`,
+				)
+			}
+
+			return uncompressedKey
+		} catch (error) {
+			console.error('❌ CBOR conversion failed:', error)
+			throw new Error(`CBOR conversion failed: ${error}`)
+		}
 	}
 
 	/**

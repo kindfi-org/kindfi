@@ -23,6 +23,11 @@ const AuthContext = createContext<AuthContextType>({
 	stellar: {},
 })
 
+/**
+ * AuthProvider component that combines NextAuth SessionProvider with Supabase auth context
+ * @param children - React child components to render
+ * @param initSession - Initial session from server-side to prevent hydration mismatch
+ */
 export function AuthProvider({
 	children,
 	initSession,

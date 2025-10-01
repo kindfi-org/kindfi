@@ -15,7 +15,7 @@ import {
 	xdr,
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
-import * as cbor from 'cbor'
+import * as CBOR from 'cbor-x/decode'
 import { eq } from 'drizzle-orm'
 import { getDb } from '../db'
 import { type RateLimitConfig, SignatureRateLimiter } from './rate-limiter'
@@ -273,7 +273,7 @@ export class StellarPasskeyService {
 	private convertCborToUncompressedKey(cborPublicKey: Buffer): Buffer {
 		try {
 			// Parse CBOR data
-			const parsedData = cbor.decode(cborPublicKey)
+			const parsedData = CBOR.decode(cborPublicKey)
 			console.log('🔍 Parsed CBOR data:', parsedData)
 
 			// Handle Map structure (common in CBOR)

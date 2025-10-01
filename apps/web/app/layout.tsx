@@ -3,6 +3,7 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import { getServerSession } from 'next-auth'
 import { LayoutContainer } from '~/components/layout-container'
 import { GoogleAnalytics } from '~/components/shared/google-analytics'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
@@ -28,7 +29,7 @@ export default async function RootLayout({
 }: {
 	children: React.ReactNode
 }) {
-	const session = await getServerSession()
+	const session = await getServerSession(nextAuthOption)
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body suppressHydrationWarning>
