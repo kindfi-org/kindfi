@@ -167,6 +167,7 @@ export const useStellarSignature = (
 						credentialId: userData.device?.credential_id,
 						publicKey: userData.device?.public_key,
 						userId: userData.id,
+						deployOnly: true,
 					}),
 				},
 			)

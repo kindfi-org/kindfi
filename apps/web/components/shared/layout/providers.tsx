@@ -2,17 +2,19 @@
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
 import { development, TrustlessWorkConfig } from '@trustless-work/escrow'
+import type { Session } from 'next-auth'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
+import { StellarProvider } from '~/hooks/contexts/stellar-context'
 import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
 import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
-import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
 
 interface ProvidersProps {
 	children: React.ReactNode
+	initSession: Session | null
 }
 
 interface ServiceWorkerRegistrationWithSync extends ServiceWorkerRegistration {
@@ -21,7 +23,7 @@ interface ServiceWorkerRegistrationWithSync extends ServiceWorkerRegistration {
 	}
 }
 
-export function Providers({ children }: ProvidersProps) {
+export function Providers({ children, initSession }: ProvidersProps) {
 	useEffect(() => {
 		if ('serviceWorker' in navigator) {
 			navigator.serviceWorker
@@ -81,7 +83,7 @@ export function Providers({ children }: ProvidersProps) {
 				disableTransitionOnChange
 			>
 				<SessionProvider>
-					<AuthProvider>
+					<AuthProvider initSession={initSession}>
 						<WaitlistProvider>
 							<TrustlessWorkConfig
 								baseURL={trustlessBaseUrl}
