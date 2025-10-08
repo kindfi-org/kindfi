@@ -2,11 +2,11 @@ Network: testnet
 Source Account: bob (GD3YZRV4WMPZG5JIX5HLNLERB4DRFT6WBNLGEJ2NKLUCR6IKFE34CUUH)
 
 Auth Controller Contract:
-  WASM Hash: 54d6
+  WASM Hash: ...54d6
   Contract ID: ...D44V
 
 Account Contract:
-  WASM Hash: bbdd745d806bf1ad87f83983e18117940ae021aff46c35df7437e6bfb28c5f80
+  WASM Hash: ...5f80
   Contract ID: ...PJZZ
 
 Account Factory Contract:
