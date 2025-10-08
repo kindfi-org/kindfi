@@ -32,7 +32,7 @@ export class StellarPasskeyService {
 	private fundingKeypair?: Keypair
 	private rateLimiter: SignatureRateLimiter
 
-	private readonly DEPLOYMENT_FEE = '1000000' // High fee for complex auth and deployment
+	private readonly DEPLOYMENT_FEE = '100000' // High fee for complex auth and deployment
 	private readonly STANDARD_FEE = '1000'
 
 	constructor(
