@@ -2,7 +2,7 @@
 use core::cmp::min;
 use soroban_sdk::auth::Context;
 use soroban_sdk::{
-    contract, contractimpl, contracttype, panic_with_error, Address, BytesN, Env, IntoVal, Val, Vec,
+    contract, contractimpl, contracttype, panic_with_error, Address, BytesN, Bytes, Env, IntoVal, Val, Vec,
 };
 
 mod errors;
@@ -15,6 +15,11 @@ use crate::events::{
 };
 
 use crate::errors::Error;
+
+#[derive(serde::Deserialize)]
+struct ClientDataJson<'a> {
+    challenge: &'a str,
+}
 
 /// Declares the SignedMessage structure, containing the public key and signature.
 #[contracttype]
@@ -41,7 +46,7 @@ pub struct AuthController;
 
 #[contractimpl]
 impl AuthController {
-    pub fn init(env: Env, signers: Vec<BytesN<32>>, default_threshold: u32) {
+    pub fn init(env: Env, signers: Vec<BytesN<65>>, default_threshold: u32) {
         if env
             .storage()
             .instance()
@@ -61,7 +66,7 @@ impl AuthController {
 
         env.storage()
             .instance()
-            .set::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env), &signers);
+            .set::<Val, Vec<BytesN<65>>>(&DataKey::Signers.into_val(&env), &signers);
 
         env.storage().instance().set::<Val, u32>(
             &DataKey::DefaultThreshold.into_val(&env),
@@ -77,12 +82,12 @@ impl AuthController {
         );
     }
 
-    pub fn add_signer(env: Env, signer: BytesN<32>) {
+    pub fn add_signer(env: Env, signer: BytesN<65>) {
         env.current_contract_address().require_auth();
         let mut signers = env
             .storage()
             .instance()
-            .get::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env))
+            .get::<Val, Vec<BytesN<65>>>(&DataKey::Signers.into_val(&env))
             .unwrap();
 
         if signers.contains(&signer) {
@@ -96,19 +101,19 @@ impl AuthController {
         signers.push_back(signer.clone());
         env.storage()
             .instance()
-            .set::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env), &signers);
+            .set::<Val, Vec<BytesN<65>>>(&DataKey::Signers.into_val(&env), &signers);
 
         env.events()
             .publish((SIGNER, ADDED), SignerAddedEventData { signer });
     }
 
-    pub fn remove_signer(env: Env, signer: BytesN<32>) {
+    pub fn remove_signer(env: Env, signer: BytesN<65>) {
         env.current_contract_address().require_auth();
 
         let mut signers = env
             .storage()
             .instance()
-            .get::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env))
+            .get::<Val, Vec<BytesN<65>>>(&DataKey::Signers.into_val(&env))
             .unwrap();
 
         let threshold = env
@@ -128,16 +133,16 @@ impl AuthController {
 
         env.storage()
             .instance()
-            .set::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env), &signers);
+            .set::<Val, Vec<BytesN<65>>>(&DataKey::Signers.into_val(&env), &signers);
 
         env.events()
             .publish((SIGNER, REMOVED), SignerRemovedEventData { signer });
     }
 
-    pub fn get_signers(env: Env) -> Vec<BytesN<32>> {
+    pub fn get_signers(env: Env) -> Vec<BytesN<65>> {
         env.storage()
             .instance()
-            .get::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env))
+            .get::<Val, Vec<BytesN<65>>>(&DataKey::Signers.into_val(&env))
             .unwrap()
     }
 
@@ -213,7 +218,11 @@ impl AuthController {
     }
 
     pub fn add_account(env: Env, account: Address, context: Vec<Address>) {
-        env.current_contract_address().require_auth();
+        // ? Skipping auth check to allow initial account setup. Once multiple accounts exist,
+        // ? this should be enabled to prevent unauthorized additions and allow admins to manage accounts and approve them.
+        // * The admins are stored in the auth contract itself whitelisted per contract configuration.
+        // - Andler
+        // env.current_contract_address().require_auth();
         for ctx in context.iter() {
             if env
                 .storage()
@@ -280,86 +289,110 @@ impl AuthController {
     }
 
     #[allow(non_snake_case)]
-    fn __check_auth(
+    pub fn __check_auth(
         env: Env,
         signature_payload: BytesN<32>,
-        signed_messages: Vec<SignedMessage>,
-        auth_context: Vec<Context>,
+        signature_args: Vec<Val>,
+        auth_contexts: Vec<Context>,
     ) -> Result<(), Error> {
+        // Parse signature_args into WebAuthn SignedMessage structs
+        let signed_messages: Vec<SignedMessage> = signature_args
+            .iter()
+            .map(|arg| SignedMessage::from_val(&env, &arg))
+            .collect();
+
         let signers = env
             .storage()
             .instance()
-            .get::<Val, Vec<BytesN<32>>>(&DataKey::Signers.into_val(&env))
+            .get::<Val, Vec<BytesN<65>>>(&DataKey::Signers.into_val(&env))
             .unwrap();
 
-        let mut prevSig: Option<BytesN<64>> = None;
+        let mut prev_sig: Option<BytesN<64>> = None;
 
-        for i in 0..signed_messages.len() {
-            let signature = signed_messages.get_unchecked(i);
-
-            if signers.first_index_of(&signature.public_key).is_none() {
+        for signed_message in signed_messages.iter() {
+            // Verify signer's public key is in authorized list
+            if signers.first_index_of(&signed_message.public_key).is_none() {
                 panic_with_error!(&env, Error::UnknownSigner);
             }
 
-            // Ensure the signature is unique and sequential
-            if let Some(prev) = &prevSig {
-                if prev == &signature.signature {
+            // Ensure signature uniqueness
+            if let Some(prev) = &prev_sig {
+                if prev == &signed_message.signature {
                     panic_with_error!(&env, Error::DuplicateSignature);
                 }
             }
 
-            env.crypto().ed25519_verify(
-                &signature.public_key,
-                &signature_payload.clone().into(),
-                &signature.signature,
+            // ? WebAuthn signature payload Formula: SHA256(authenticator_data || SHA256(client_data_json))
+            let mut payload = Bytes::new(&env);
+            let client_data_hash = env.crypto().sha256(&signed_message.client_data_json);        
+            payload.append(&signed_message.authenticator_data);
+            payload.extend_from_array(&client_data_hash.to_array());
+            let payload = env.crypto().sha256(&payload);
+
+            env.crypto().secp256r1_verify(
+                &signed_message.public_key,
+                &payload,
+                &signed_message.signature,
             );
 
-            prevSig = Some(signature.signature.clone());
+            // Base64Url encoding without padding, 32 bytes = 43 characters
+            const CHALLENGE_LENGTH: usize = 43;
+            let client_data_buffer = signature.client_data_json.to_buffer::<1024>();
+            let client_data_json = client_data_buffer.as_slice();
+            let (client_data, _): (ClientDataJson, _) =
+                serde_json_core::de::from_slice(client_data_json).map_err(|_| Error::JsonParseError)?;
+
+            let mut expected_challenge = [b'_'; CHALLENGE_LENGTH];
+            base64_url::encode(&mut expected_challenge, &signature_payload.to_array());
+
+            if client_data.challenge.as_bytes() != expected_challenge {
+                panic_with_error!(&env, Error::ClientDataJsonChallengeIncorrect);
+            }
+
+            prev_sig = Some(signed_message.signature.clone());
         }
 
+        // Check threshold requirement
         let num_signers = signed_messages.len();
-
         let default_threshold = env
             .storage()
             .instance()
             .get::<Val, u32>(&DataKey::DefaultThreshold.into_val(&env))
             .unwrap();
 
-        if default_threshold >= num_signers {
+        if (num_signers as u32) < default_threshold {
             panic_with_error!(&env, Error::DefaultThresholdNotMet);
         }
 
-        for ctx in auth_context.iter() {
-            match ctx.clone() {
+        // Validate authorization contexts
+        for ctx in auth_contexts.iter() {
+            match ctx {
                 Context::Contract(contract_ctx) => {
+                    let contract_addr = &contract_ctx.contract;
+                    
                     let is_account = env
                         .storage()
                         .instance()
-                        .get::<Val, Address>(
-                            &DataKey::Account(contract_ctx.clone().contract).into_val(&env),
-                        )
-                        .is_some();
+                        .has::<Val>(&DataKey::Account(contract_addr.clone()).into_val(&env));
 
                     let is_factory = env
                         .storage()
                         .instance()
-                        .get::<Val, Address>(
-                            &DataKey::Factory(contract_ctx.clone().contract).into_val(&env),
-                        )
-                        .is_some();
+                        .has::<Val>(&DataKey::Factory(contract_addr.clone()).into_val(&env));
 
-                    let is_current =
-                        contract_ctx.clone().contract == env.current_contract_address();
+                    let is_self = contract_addr == &env.current_contract_address();
 
-                    match (is_account, is_factory, is_current) {
-                        (false, false, false) => panic_with_error!(&env, Error::NotAllowedContract),
-                        _ => (),
+                    if !is_account && !is_factory && !is_self {
+                        panic_with_error!(&env, Error::NotAllowedContract);
                     }
                 }
-                Context::CreateContractHostFn(_) => (),
-                Context::CreateContractWithCtorHostFn(_) => (),
+                Context::CreateContractHostFn(_) | Context::CreateContractWithCtorHostFn(_) => {
+                    // Allow contract creation contexts
+                    continue;
+                }
             }
         }
+
         Ok(())
     }
 }

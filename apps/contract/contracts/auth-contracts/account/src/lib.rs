@@ -206,33 +206,40 @@ impl CustomAccountInterface for AccountContract {
         signature: Signature,
         _auth_contexts: Vec<Context>,
     ) -> Result<(), Error> {
+        #[cfg(test)]
+        log!(&env, "__check_auth called with device_id: {:?}", signature.device_id);
+
         let devices: Vec<DevicePublicKey> = env
             .storage()
             .instance()
             .get(&STORAGE_KEY_DEVICES)
             .ok_or(Error::NotInitiated)?;
-
-        if let Some(device_) = devices
+        let device = devices
             .iter()
-            .find(|device| device.device_id == signature.device_id)
-        {
-            let mut payload = Bytes::new(&env);
-            payload.append(&signature.authenticator_data);
-            payload.extend_from_array(&env.crypto().sha256(&signature.client_data_json).to_array());
-            let payload = env.crypto().sha256(&payload);
+            .find(|d| d.device_id == signature.device_id)
+            .ok_or(Error::DeviceNotFound)?;
 
-            env.crypto()
-                .secp256r1_verify(&device_.public_key, &payload, &signature.signature);
-        } else {
-            return Err(Error::DeviceNotFound);
-        }
+        // ? WebAuthn signature payload Formula: SHA256(authenticator_data || SHA256(client_data_json))
+        let mut payload = Bytes::new(&env);
+        let client_data_hash = env.crypto().sha256(&signature.client_data_json);      
+        payload.append(&signature.authenticator_data);
+        payload.extend_from_array(&client_data_hash.to_array());
+        let payload = env.crypto().sha256(&payload);
 
-        let client_data_json = signature.client_data_json.to_buffer::<1024>();
-        let client_data_json = client_data_json.as_slice();
+        env.crypto().secp256r1_verify(
+            &device.public_key,
+            &payload,
+            &signature.signature,
+        );
+
+        // Base64Url encoding without padding, 32 bytes = 43 characters
+        const CHALLENGE_LENGTH: usize = 43;
+        let client_data_buffer = signature.client_data_json.to_buffer::<1024>();
+        let client_data_json = client_data_buffer.as_slice();
         let (client_data, _): (ClientDataJson, _) =
             serde_json_core::de::from_slice(client_data_json).map_err(|_| Error::JsonParseError)?;
 
-        let mut expected_challenge = *b"___________________________________________";
+        let mut expected_challenge = [b'_'; CHALLENGE_LENGTH];
         base64_url::encode(&mut expected_challenge, &signature_payload.to_array());
 
         if client_data.challenge.as_bytes() != expected_challenge {
