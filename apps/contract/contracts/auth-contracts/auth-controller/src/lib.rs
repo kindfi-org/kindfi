@@ -1,10 +1,12 @@
 #![no_std]
 use core::cmp::min;
-use soroban_sdk::auth::Context;
 use soroban_sdk::{
-    contract, contractimpl, contracttype, panic_with_error, Address, BytesN, Bytes, Env, IntoVal, Val, Vec,
+    auth::{Context},
+    contract, contractimpl, contracttype,
+    panic_with_error, Address, BytesN, Bytes, Env, IntoVal, Val, Vec,
 };
 
+mod base64_url;
 mod errors;
 mod events;
 
@@ -25,8 +27,11 @@ struct ClientDataJson<'a> {
 #[contracttype]
 #[derive(Clone)]
 pub struct SignedMessage {
-    pub public_key: BytesN<32>,
-    pub signature: BytesN<64>,
+    pub device_id: BytesN<32>,
+    pub authenticator_data: Bytes,
+    pub client_data_json: Bytes,
+    pub public_key: BytesN<65>, // secp256r1 public key
+    pub signature: BytesN<64>, // secp256r1 signature
 }
 
 /// Enum to represent different keys used in storage for the contract.
@@ -337,7 +342,7 @@ impl AuthController {
 
             // Base64Url encoding without padding, 32 bytes = 43 characters
             const CHALLENGE_LENGTH: usize = 43;
-            let client_data_buffer = signature.client_data_json.to_buffer::<1024>();
+            let client_data_buffer = signed_message.client_data_json.to_buffer::<1024>();
             let client_data_json = client_data_buffer.as_slice();
             let (client_data, _): (ClientDataJson, _) =
                 serde_json_core::de::from_slice(client_data_json).map_err(|_| Error::JsonParseError)?;
