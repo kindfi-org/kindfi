@@ -3,7 +3,7 @@ use core::cmp::min;
 use soroban_sdk::{
     auth::{Context},
     contract, contractimpl, contracttype,
-    panic_with_error, Address, BytesN, Bytes, Env, IntoVal, Val, Vec,
+    panic_with_error, Address, BytesN, Bytes, Env, FromVal, IntoVal, Val, Vec,
 };
 
 mod base64_url;
@@ -301,10 +301,10 @@ impl AuthController {
         auth_contexts: Vec<Context>,
     ) -> Result<(), Error> {
         // Parse signature_args into WebAuthn SignedMessage structs
-        let signed_messages: Vec<SignedMessage> = signature_args
-            .iter()
-            .map(|arg| SignedMessage::from_val(&env, &arg))
-            .collect();
+        let mut signed_messages: Vec<SignedMessage> = Vec::new(&env);
+        for arg in signature_args.iter() {
+            signed_messages.push_back(SignedMessage::from_val(&env, &arg));
+        }
 
         let signers = env
             .storage()

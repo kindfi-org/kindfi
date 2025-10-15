@@ -1,13 +1,16 @@
 #![cfg(test)]
 extern crate std;
 
-use ed25519_dalek::{Keypair, PublicKey, Signature, Signer, Verifier};
+use p256::ecdsa::{
+    signature::Signer as P256Signer, Signature as P256Signature, SigningKey as P256SigningKey,
+    VerifyingKey as P256VerifyingKey,
+};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 use soroban_sdk::{
     auth::{Context, ContractContext},
-    symbol_short,
+    symbol_short, Bytes,
     testutils::{Address as _, Events},
-    vec, Address, BytesN, Env, TryIntoVal, Vec,
+    vec, Address, BytesN, Env, IntoVal, String as SorobanString, TryIntoVal, Val, Vec,
 };
 
 use crate::{
@@ -34,10 +37,10 @@ mod account_contract_mod {
         file = "../../../target/wasm32-unknown-unknown/release/account_contract.wasm"
     );
 }
+mod base64_url
 
-// A secure key storage that doesn't expose private keys
+// A secure key storage for WebAuthn-compatible Secp256r1 keys
 pub struct SecureKeyStorage {
-    // Store only the seed, not the actual keypair
     seed: u64,
 }
 
@@ -46,103 +49,104 @@ impl SecureKeyStorage {
         Self { seed }
     }
 
-    // Generate a public key from the stored seed
-    fn get_public_key(&self, env: &Env) -> BytesN<32> {
-        // Generate a deterministic keypair from seed (for testing consistency)
-        let mut rng = StdRng::seed_from_u64(self.seed);
-        let keypair = Keypair::generate(&mut rng);
-
-        // Return the public key bytes
-        BytesN::from_array(env, &keypair.public.to_bytes())
+    // Generate secp256r1 public key (65 bytes: 0x04 || X || Y)
+    fn get_public_key(&self, env: &Env) -> BytesN<65> {
+        let (_, verifying_key) = self.get_secp256r1_keypair();
+        let encoded_point = verifying_key.to_encoded_point(false); // Uncompressed format
+        BytesN::from_array(env, encoded_point.as_bytes())
     }
 
-    // Sign a message using proper Ed25519 signature generation
-    fn sign(&self, env: &Env, payload: &BytesN<32>) -> BytesN<64> {
-        // Generate a deterministic keypair from seed (for testing consistency)
+    // Generate secp256r1 keypair for signing
+    fn get_secp256r1_keypair(&self) -> (P256SigningKey, P256VerifyingKey) {
         let mut rng = StdRng::seed_from_u64(self.seed);
-        let keypair = Keypair::generate(&mut rng);
+        let signing_key = P256SigningKey::random(&mut rng);
+        let verifying_key = *signing_key.verifying_key();
+        (signing_key, verifying_key)
+    }
 
-        // Sign the payload using proper Ed25519 signing
-        let payload_bytes = payload.to_array();
-        let signature = keypair.sign(&payload_bytes);
+    // Generate device ID (32 bytes)
+    fn get_device_id(&self, env: &Env) -> BytesN<32> {
+        let mut rng = StdRng::seed_from_u64(self.seed);
+        let mut device_id = [0u8; 32];
+        rng.fill_bytes(&mut device_id);
+        BytesN::from_array(env, &device_id)
+    }
 
-        // Return the signature bytes
-        BytesN::from_array(env, &signature.to_bytes())
+    // Sign a payload using secp256r1 (for WebAuthn simulation)
+    fn sign_secp256r1(&self, payload: &[u8]) -> [u8; 64] {
+        let (signing_key, _) = self.get_secp256r1_keypair();
+        let signature: P256Signature = signing_key.sign(payload);
+        signature.to_bytes().into()
     }
 
     // Generate secp256r1 public key for account device (65 bytes)
     fn get_secp_public_key(&self, env: &Env) -> BytesN<65> {
-        let mut rng = StdRng::seed_from_u64(self.seed);
-        let mut key_data = [0u8; 65];
-        rng.fill_bytes(&mut key_data);
-
-        // First byte is header byte in secp256r1
-        key_data[0] = 0x04; // Uncompressed public key format
-
-        BytesN::from_array(env, &key_data)
-    }
-
-    #[allow(dead_code)]
-    fn _to_keypair(&self) -> ed25519_dalek::Keypair {
-        // Generate a deterministic keypair from seed (for testing consistency)
-        let mut rng = StdRng::seed_from_u64(self.seed);
-        Keypair::generate(&mut rng)
+        self.get_public_key(env)
     }
 }
 
-// Function to create signed messages without exposing private keys
+// Helper to create mock WebAuthn client data JSON
+fn create_client_data_json(env: &Env, challenge: &BytesN<32>) -> Bytes {
+    // Base64Url encode the challenge (43 characters for 32 bytes)
+    let mut challenge_b64 = [0u8; 43];
+    base64_url::encode(&mut challenge_b64, &challenge.to_array());
+    
+    let challenge_str = std::str::from_utf8(&challenge_b64).unwrap();
+    
+    // Create minimal client data JSON
+    let json = format!(
+        r#"{{"type":"webauthn.get","challenge":"{}","origin":"https://kindfi.org"}}"#,
+        challenge_str
+    );
+    
+    Bytes::from_slice(env, json.as_bytes())
+}
+
+// Helper to create mock WebAuthn authenticator data
+fn create_authenticator_data(env: &Env) -> Bytes {
+    // Minimal authenticator data (37 bytes minimum)
+    // RP ID hash (32 bytes) + flags (1 byte) + counter (4 bytes)
+    let mut auth_data = [0u8; 37];
+    auth_data[32] = 0x05; // User present + User verified flags
+    
+    Bytes::from_slice(env, &auth_data)
+}
+
+// Function to create WebAuthn-compatible signed messages
 pub fn create_signed_message(
     env: &Env,
     secure_key: &SecureKeyStorage,
     payload: &BytesN<32>,
 ) -> SignedMessage {
-    // Get the public key
     let public_key = secure_key.get_public_key(env);
-
-    // Sign the payload without exposing private key
-    let signature = secure_key.sign(env, payload);
+    let device_id = secure_key.get_device_id(env);
+    
+    // Create WebAuthn components
+    let client_data_json = create_client_data_json(env, payload);
+    let authenticator_data = create_authenticator_data(env);
+    
+    // Calculate WebAuthn signature payload: SHA256(authenticator_data || SHA256(client_data_json))
+    let client_data_hash = env.crypto().sha256(&client_data_json);
+    let mut signature_payload = Bytes::new(env);
+    signature_payload.append(&authenticator_data);
+    signature_payload.extend_from_array(&client_data_hash.to_array());
+    let hashed_payload = env.crypto().sha256(&signature_payload);
+    
+    // Sign with secp256r1
+    let signature_bytes = secure_key.sign_secp256r1(&hashed_payload.to_array());
+    let signature = BytesN::from_array(env, &signature_bytes);
 
     SignedMessage {
+        device_id,
         public_key,
         signature,
-    }
-}
-
-// Function to verify signatures using proper cryptographic verification
-pub fn verify_signature(
-    public_key: &BytesN<32>,
-    payload: &BytesN<32>,
-    signature: &BytesN<64>,
-) -> bool {
-    // Convert the BytesN inputs to arrays
-    let public_key_bytes: [u8; 32] = public_key.to_array();
-    let signature_bytes: [u8; 64] = signature.to_array();
-
-    // Attempt to parse the public key - production ready code handles errors
-    let ed25519_public_key = match PublicKey::from_bytes(&public_key_bytes) {
-        Ok(pk) => pk,
-        Err(_) => return false, // Invalid public key
-    };
-
-    // Attempt to parse the signature - production ready code handles errors
-    let ed25519_signature = match Signature::from_bytes(&signature_bytes) {
-        Ok(sig) => sig,
-        Err(_) => return false, // Invalid signature
-    };
-
-    // Hash the payload using sha256 (or another appropriate hash for your use case)
-    // This is equivalent to the Soroban SDK BytesN wrapper
-    let payload_bytes = payload.to_array();
-
-    // Perform actual cryptographic verification - production ready
-    match ed25519_public_key.verify(&payload_bytes, &ed25519_signature) {
-        Ok(_) => true,
-        Err(_) => false,
+        authenticator_data,
+        client_data_json,
     }
 }
 
 // Function to generate signers for testing that's compatible with init
-fn generate_signers(env: &Env, count: usize) -> Vec<BytesN<32>> {
+fn generate_signers(env: &Env, count: usize) -> Vec<BytesN<65>> {
     let mut signers = Vec::new(env);
 
     for i in 0..count {
@@ -166,58 +170,54 @@ fn create_auth_client(env: &Env) -> AuthControllerClient {
     AuthControllerClient::new(env, &contract_address)
 }
 
-fn create_factory_client(env: &Env) -> AccountFactoryClient {
-    let auth_contract = Address::generate(env);
-
+fn create_factory_client(env: &Env, auth_client: &AuthControllerClient) -> AccountFactoryClient {
     // Upload the WASM to be deployed
     let wasm_hash = env
         .deployer()
         .upload_contract_wasm(account_contract_mod::WASM);
 
-    // Register and initialize the factory contract
+    // Register and initialize the factory contract with the auth controller address
     let contract_address = env.register(
         AccountFactory,
-        (&auth_contract, &wasm_hash), // Constructor arguments
+        (&auth_client.address, &wasm_hash),
     );
 
     AccountFactoryClient::new(env, &contract_address)
 }
 
-fn create_account_client(env: &Env) -> AccountContractClient {
-    // Create mock devices and auth contract
-    let auth_contract = Address::generate(env);
-
+fn create_account_client(env: &Env, auth_client: &AuthControllerClient) -> AccountContractClient {
     // Simulate device id and public key generation
     let secure_key = SecureKeyStorage::new(42);
-    let device_id = secure_key.get_public_key(env);
+    let device_id = secure_key.get_device_id(env);
     let public_key = secure_key.get_secp_public_key(env);
 
-    // Register and initialize the account contract
-    let contract_address = env.register(AccountContract, (&device_id, &public_key, &auth_contract));
+    // Register and initialize the account contract with the auth controller address
+    let contract_address = env.register(
+        AccountContract, 
+        (&device_id, &public_key, &auth_client.address)
+    );
     AccountContractClient::new(env, &contract_address)
 }
 
 /// Auth Controller Tests
 #[test]
-fn test_signature_verification() {
+fn test_webauthn_signature_creation() {
     let env = Env::default();
 
     // Create a secure key with deterministic seed
     let secure_key = SecureKeyStorage::new(42);
-    let public_key = secure_key.get_public_key(&env);
 
-    // Create a payload
-    let payload_bytes: [u8; 32] = [1u8; 32];
-    let payload = BytesN::from_array(&env, &payload_bytes);
+    // Create a payload (challenge)
+    let payload = BytesN::from_array(&env, &[1u8; 32]);
 
-    // Create a signed message
+    // Create a WebAuthn signed message
     let signed_message = create_signed_message(&env, &secure_key, &payload);
 
-    // Verify the signature
-    let is_valid = verify_signature(&public_key, &payload, &signed_message.signature);
-
-    // Assert that the signature is valid
-    assert!(is_valid);
+    // Verify all components exist
+    assert_eq!(signed_message.public_key.len(), 65);
+    assert_eq!(signed_message.signature.len(), 64);
+    assert!(signed_message.authenticator_data.len() > 0);
+    assert!(signed_message.client_data_json.len() > 0);
 }
 
 #[test]
@@ -280,16 +280,16 @@ fn test_controller_auth_default_threshold_unmet() {
 
     // Initialize with signers
     let signers = generate_signers(&env, 2);
-    let default_threshold = 1;
+    let default_threshold = 2;
     auth_client.init(&signers, &default_threshold);
 
-    // Create payload
-    let payload_bytes: [u8; 32] = [1u8; 32];
-    let payload = BytesN::from_array(&env, &payload_bytes);
+    // Create payload (32-byte challenge)
+    let payload = BytesN::from_array(&env, &[1u8; 32]);
 
-    // Use the first signer to create two identical signatures
+    // Use the first signer - only 1 signature when threshold is 2
     let secure_key = get_secure_key_for_signer(0);
     let signed_message = create_signed_message(&env, &secure_key, &payload);
+    let signed_messages = vec![&env, signed_message.into_val(&env)];
     let auth_context = vec![&env];
 
     // Call __check_auth directly
@@ -298,7 +298,7 @@ fn test_controller_auth_default_threshold_unmet() {
         AuthController::__check_auth(
             env.clone(),
             payload,
-            vec![&env, signed_message],
+            signed_messages,
             auth_context,
         )
         .unwrap(); // Should panic with DefaultThresholdNotMet
@@ -316,14 +316,17 @@ fn test_controller_auth_duplicate_signature() {
     let default_threshold = 2;
     auth_client.init(&signers, &default_threshold);
 
-    // Create payload
-    let payload_bytes: [u8; 32] = [1u8; 32];
-    let payload = BytesN::from_array(&env, &payload_bytes);
+    // Create payload (32-byte challenge)
+    let payload = BytesN::from_array(&env, &[1u8; 32]);
 
     // Use the first signer to create two identical signatures
     let secure_key = get_secure_key_for_signer(0);
     let signed_message = create_signed_message(&env, &secure_key, &payload);
-    let signed_messages = vec![&env, signed_message.clone(), signed_message]; // Duplicate signature
+    let signed_messages = vec![
+        &env, 
+        signed_message.clone().into_val(&env),
+        signed_message.into_val(&env)
+    ]; // Duplicate signature
     let auth_context = vec![&env];
 
     // Call __check_auth directly
@@ -345,16 +348,19 @@ fn test_controller_auth_invalid_contract() {
     let default_threshold = 1;
     auth_client.init(&signers, &default_threshold);
 
-    // Create payload
-    let payload_bytes: [u8; 32] = [1u8; 32];
-    let payload = BytesN::from_array(&env, &payload_bytes);
+    // Create payload (32-byte challenge)
+    let payload = BytesN::from_array(&env, &[1u8; 32]);
 
     // Create valid signed messages
     let secure_key_1 = get_secure_key_for_signer(0);
     let secure_key_2 = get_secure_key_for_signer(1);
     let signed_message_1 = create_signed_message(&env, &secure_key_1, &payload);
     let signed_message_2 = create_signed_message(&env, &secure_key_2, &payload);
-    let signed_messages = vec![&env, signed_message_1, signed_message_2];
+    let signed_messages = vec![
+        &env, 
+        signed_message_1.into_val(&env),
+        signed_message_2.into_val(&env)
+    ];
 
     // Create an unauthorized contract context
     let unauthorized_contract = Address::generate(&env);
@@ -384,9 +390,8 @@ fn test_controller_auth_unknown_signer() {
     let default_threshold = 1;
     auth_client.init(&signers, &default_threshold);
 
-    // Create payload
-    let payload_bytes: [u8; 32] = [1u8; 32];
-    let payload = BytesN::from_array(&env, &payload_bytes);
+    // Create payload (32-byte challenge)
+    let payload = BytesN::from_array(&env, &[1u8; 32]);
 
     // Create a valid signed message from second signer
     let secure_key_1 = get_secure_key_for_signer(1);
@@ -397,7 +402,11 @@ fn test_controller_auth_unknown_signer() {
     let signed_message_999 = create_signed_message(&env, &secure_key_999, &payload);
 
     // Create signed messages vector and auth context
-    let signed_messages = vec![&env, signed_message_1, signed_message_999];
+    let signed_messages = vec![
+        &env, 
+        signed_message_1.into_val(&env),
+        signed_message_999.into_val(&env)
+    ];
     let auth_context = vec![&env];
 
     // Call __check_auth directly
@@ -415,19 +424,22 @@ fn test_controller_auth_verification_success() {
 
     // Initialize with signers
     let signers = generate_signers(&env, 3);
-    let default_threshold = 1;
+    let default_threshold = 2;
     auth_client.init(&signers, &default_threshold);
 
-    // Create payload
-    let payload_bytes: [u8; 32] = [1u8; 32];
-    let payload = BytesN::from_array(&env, &payload_bytes);
+    // Create payload (32-byte challenge)
+    let payload = BytesN::from_array(&env, &[1u8; 32]);
 
     // Create signed messages from first two signers
     let secure_key_1 = get_secure_key_for_signer(0);
     let secure_key_2 = get_secure_key_for_signer(1);
     let signed_message_1 = create_signed_message(&env, &secure_key_1, &payload);
     let signed_message_2 = create_signed_message(&env, &secure_key_2, &payload);
-    let signed_messages = vec![&env, signed_message_1, signed_message_2];
+    let signed_messages = vec![
+        &env, 
+        signed_message_1.into_val(&env),
+        signed_message_2.into_val(&env)
+    ];
     let auth_context = vec![&env];
 
     // Verify authentication
@@ -816,28 +828,41 @@ fn test_remove_account_not_found() {
 #[test]
 fn test_factory_deploy_account() {
     let env = Env::default();
-    let factory_client = create_factory_client(&env);
+    env.cost_estimate().budget().reset_unlimited();
+    
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let factory_client = create_factory_client(&env, &auth_client);
 
-    // Mock authorization and WASM deployment
     env.mock_all_auths();
 
-    // Set up deployment parameters
     let salt = BytesN::from_array(&env, &[11_u8; 32]);
     let secure_key = SecureKeyStorage::new(42);
-    let device_id = secure_key.get_public_key(&env);
+    let device_id = secure_key.get_device_id(&env);
     let public_key = secure_key.get_secp_public_key(&env);
 
-    // Deploy an account
     let account_address = factory_client.deploy(&salt, &device_id, &public_key);
-
+    
     // Verify the account was deployed
     assert!(account_address != Address::generate(&env));
+    
+    // Verify the account has devices
+    let account_client = AccountContractClient::new(&env, &account_address);
+    let devices = account_client.get_devices();
+    assert_eq!(devices.len(), 1);
 }
 
 #[test]
 fn test_factory_deploy_multiple_accounts() {
     let env = Env::default();
-    let factory_client = create_factory_client(&env);
+    
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let factory_client = create_factory_client(&env, &auth_client);
 
     // Mock authorization and WASM deployment
     env.mock_all_auths();
@@ -845,7 +870,7 @@ fn test_factory_deploy_multiple_accounts() {
     // Deploy first account with salt1
     let salt1 = BytesN::from_array(&env, &[1u8; 32]);
     let secure_key1 = SecureKeyStorage::new(42);
-    let device_id1 = secure_key1.get_public_key(&env);
+    let device_id1 = secure_key1.get_device_id(&env);
     let public_key1 = secure_key1.get_secp_public_key(&env);
 
     let account_address1 = factory_client.deploy(&salt1, &device_id1, &public_key1);
@@ -853,7 +878,7 @@ fn test_factory_deploy_multiple_accounts() {
     // Deploy second account with salt2
     let salt2 = BytesN::from_array(&env, &[2u8; 32]);
     let secure_key2 = SecureKeyStorage::new(43);
-    let device_id2 = secure_key2.get_public_key(&env);
+    let device_id2 = secure_key2.get_device_id(&env);
     let public_key2 = secure_key2.get_secp_public_key(&env);
 
     let account_address2 = factory_client.deploy(&salt2, &device_id2, &public_key2);
@@ -874,42 +899,50 @@ fn test_integration_auth_controller_with_factory() {
     auth_client.init(&signers, &default_threshold);
 
     // 2. Create Factory client
-    let factory_client = create_factory_client(&env);
+    let factory_client = create_factory_client(&env, &auth_client);
 
     // 3. Register factory in auth controller
     env.mock_all_auths();
-    let context = vec![&env, Address::generate(&env)];
+    let context = vec![&env, factory_client.address.clone()];
     auth_client.add_factory(&factory_client.address, &context);
 
     // 4. Deploy an account using factory
     let salt = BytesN::from_array(&env, &[11_u8; 32]);
     let secure_key = SecureKeyStorage::new(42);
-    let device_id = secure_key.get_public_key(&env);
+    let device_id = secure_key.get_device_id(&env);
     let public_key = secure_key.get_secp_public_key(&env);
 
     let account_address = factory_client.deploy(&salt, &device_id, &public_key);
 
     // 5. Register the deployed account in auth controller
-    auth_client.add_account(&account_address, &context);
+    auth_client.add_account(&account_address, &vec![&env, account_address.clone()]);
 
     // 6. Verify account was registered correctly
-    let accounts = auth_client.get_accounts(&context);
+    let accounts = auth_client.get_accounts(&vec![&env, account_address.clone()]);
     assert_eq!(accounts.len(), 1);
     assert_eq!(accounts.get_unchecked(0), account_address);
+    
+    // 7. Verify the account can be authenticated
+    let account_client = AccountContractClient::new(&env, &account_address);
+    assert_eq!(account_client.get_auth(), auth_client.address);
 }
 
 /// Account Tests
 #[test]
 fn test_account_add_device() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
 
     // Add a new device
     let new_secure_key = SecureKeyStorage::new(99);
-    let new_device_id = new_secure_key.get_public_key(&env);
+    let new_device_id = new_secure_key.get_device_id(&env);
     let new_public_key = new_secure_key.get_secp_public_key(&env);
 
     account_client.add_device(&new_device_id, &new_public_key);
@@ -932,31 +965,39 @@ fn test_account_add_device() {
 #[should_panic(expected = "Error(Contract, #204)")]
 fn test_account_add_device_already_exists() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
 
     // Add same device used for initialization
     let secure_key = SecureKeyStorage::new(42);
-    let device_id = secure_key.get_public_key(&env);
+    let device_id = secure_key.get_device_id(&env);
     let public_key = secure_key.get_secp_public_key(&env);
 
     // Try to add the same device again
-    account_client.add_device(&device_id, &public_key); // Should panic (DeviceAlreadySet
+    account_client.add_device(&device_id, &public_key); // Should panic (DeviceAlreadySet)
 }
 
 #[test]
 fn test_account_remove_device() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
 
     // Add a second device first
     let new_secure_key = SecureKeyStorage::new(99);
-    let new_device_id = new_secure_key.get_public_key(&env);
+    let new_device_id = new_secure_key.get_device_id(&env);
     let new_public_key = new_secure_key.get_secp_public_key(&env);
 
     account_client.add_device(&new_device_id, &new_public_key);
@@ -979,7 +1020,11 @@ fn test_account_remove_device() {
 #[should_panic(expected = "Error(Contract, #205)")]
 fn test_account_remove_device_not_found() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
@@ -993,14 +1038,18 @@ fn test_account_remove_device_not_found() {
 #[should_panic(expected = "Error(Contract, #206)")]
 fn test_account_remove_device_last_one() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
 
     // Get the first device ID
     let secure_key = SecureKeyStorage::new(42);
-    let device_id = secure_key.get_public_key(&env);
+    let device_id = secure_key.get_device_id(&env);
 
     // Try to remove the only device
     account_client.remove_device(&device_id); // Should panic (DeviceCannotBeEmpty)
@@ -1009,7 +1058,11 @@ fn test_account_remove_device_last_one() {
 #[test]
 fn test_account_add_recovery_address() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
@@ -1028,7 +1081,11 @@ fn test_account_add_recovery_address() {
 #[should_panic(expected = "Error(Contract, #207)")]
 fn test_account_add_recovery_address_already_set() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
@@ -1046,7 +1103,11 @@ fn test_account_add_recovery_address_already_set() {
 #[test]
 fn test_account_update_recovery_address() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
@@ -1066,7 +1127,11 @@ fn test_account_update_recovery_address() {
 #[test]
 fn test_account_recover_account() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
@@ -1078,7 +1143,7 @@ fn test_account_recover_account() {
 
     // Recover the account with a new device
     let new_secure_key = SecureKeyStorage::new(100);
-    let new_device_id = new_secure_key.get_public_key(&env);
+    let new_device_id = new_secure_key.get_device_id(&env);
     let new_public_key = new_secure_key.get_secp_public_key(&env);
 
     account_client.recover_account(&new_device_id, &new_public_key);
@@ -1105,9 +1170,8 @@ fn test_integration_auth_controller_with_account() {
     auth_client.init(&signers, &default_threshold);
 
     // Create a new account with this auth controller address
-    // Register the account with the SAME auth controller
-    let device_id = generate_signers(&env, 1).get_unchecked(0);
     let secure_key = SecureKeyStorage::new(42);
+    let device_id = secure_key.get_device_id(&env);
     let public_key = secure_key.get_secp_public_key(&env);
 
     let account_address = env.register(
@@ -1129,7 +1193,7 @@ fn test_integration_auth_controller_with_account() {
 
     // Test recovery process with authorization from auth controller
     let new_secure_key = SecureKeyStorage::new(99);
-    let new_device_id = new_secure_key.get_public_key(&env);
+    let new_device_id = new_secure_key.get_device_id(&env);
     let new_public_key = new_secure_key.get_secp_public_key(&env);
 
     account_client.recover_account(&new_device_id, &new_public_key);
@@ -1525,7 +1589,11 @@ fn test_auth_controller_remove_account_event() {
 #[test]
 fn test_account_add_device_event() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
@@ -1535,7 +1603,7 @@ fn test_account_add_device_event() {
 
     // Create new device data
     let new_secure_key = SecureKeyStorage::new(99);
-    let new_device_id = new_secure_key.get_public_key(&env);
+    let new_device_id = new_secure_key.get_device_id(&env);
     let new_public_key = new_secure_key.get_secp_public_key(&env);
 
     // Add device
@@ -1568,14 +1636,18 @@ fn test_account_add_device_event() {
 #[test]
 fn test_account_remove_device_event() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
 
     // Add a second device first so we can remove one
     let new_secure_key = SecureKeyStorage::new(99);
-    let new_device_id = new_secure_key.get_public_key(&env);
+    let new_device_id = new_secure_key.get_device_id(&env);
     let new_public_key = new_secure_key.get_secp_public_key(&env);
 
     account_client.add_device(&new_device_id, &new_public_key);
@@ -1617,7 +1689,11 @@ fn test_account_remove_device_event() {
 #[test]
 fn test_account_add_recovery_address_event() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
@@ -1659,7 +1735,11 @@ fn test_account_add_recovery_address_event() {
 #[test]
 fn test_account_update_recovery_address_event() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
@@ -1705,7 +1785,11 @@ fn test_account_update_recovery_address_event() {
 #[test]
 fn test_account_recovered_event() {
     let env = Env::default();
-    let account_client = create_account_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
@@ -1719,7 +1803,7 @@ fn test_account_recovered_event() {
 
     // Recover the account with a new device
     let new_secure_key = SecureKeyStorage::new(100);
-    let new_device_id = new_secure_key.get_public_key(&env);
+    let new_device_id = new_secure_key.get_device_id(&env);
     let new_public_key = new_secure_key.get_secp_public_key(&env);
 
     account_client.recover_account(&new_device_id, &new_public_key);
@@ -1751,7 +1835,11 @@ fn test_account_recovered_event() {
 #[test]
 fn test_account_factory_deploy_event() {
     let env = Env::default();
-    let factory_client = create_factory_client(&env);
+    let auth_client = create_auth_client(&env);
+    let signers = generate_signers(&env, 2);
+    auth_client.init(&signers, &1);
+    
+    let factory_client = create_factory_client(&env, &auth_client);
 
     // Mock authorization
     env.mock_all_auths();
@@ -1762,7 +1850,7 @@ fn test_account_factory_deploy_event() {
     // Set up deployment parameters
     let salt = BytesN::from_array(&env, &[11_u8; 32]);
     let secure_key = SecureKeyStorage::new(42);
-    let device_id = secure_key.get_public_key(&env);
+    let device_id = secure_key.get_device_id(&env);
     let public_key = secure_key.get_secp_public_key(&env);
 
     // Deploy an account

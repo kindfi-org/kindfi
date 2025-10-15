@@ -28,21 +28,21 @@ pub const UPDATED: Symbol = symbol_short!("UPDATED");
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InitEventData {
     pub threshold: u32,
-    pub signers: Vec<BytesN<32>>,
+    pub signers: Vec<BytesN<65>>,
 }
 
 // Event data for when a signer is added.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SignerAddedEventData {
-    pub signer: BytesN<32>,
+    pub signer: BytesN<65>,
 }
 
 // Event data for when a signer is removed.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SignerRemovedEventData {
-    pub signer: BytesN<32>,
+    pub signer: BytesN<65>,
 }
 
 // Event data for when a factory is added along with its associated context.

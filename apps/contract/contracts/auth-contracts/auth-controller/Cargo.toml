@@ -15,9 +15,10 @@ serde-json-core = { version = "0.6.0", default-features = false }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
-ed25519-dalek = { version = "1.0.1" }
-rand = { version = "0.7.3" }
+p256 = { version = "0.13", features = ["ecdsa"], default-features = false }
+rand = { version = "0.8", default-features = false, features = ["std_rng"] }
 hex = { version = "0.4.3" }
+serde_json = { version = "1.0" }
 account_contract = { path = "../account" }
 account_factory = { path = "../account-factory" }
 
