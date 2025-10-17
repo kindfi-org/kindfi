@@ -10,7 +10,7 @@ import { useI18n } from '~/lib/i18n'
 
 export function JoinUs() {
 	const { t } = useI18n()
-	
+
 	// Translated features
 	const translatedFeatures = [
 		{
@@ -29,7 +29,7 @@ export function JoinUs() {
 			description: t('home.feature3Desc'),
 		},
 	]
-	
+
 	return (
 		<section className="relative py-24 overflow-hidden">
 			{/* Background */}
@@ -38,21 +38,21 @@ export function JoinUs() {
 			</div>
 
 			<SectionContainer className="relative">
-			{/* Section Caption */}
-			<motion.div {...fadeInUpAnimation}>
-				<SectionCaption
-					title={t('home.joinUsTitle')}
-					subtitle={t('home.joinUsSubtitle')}
-					highlightWords={[
-						'Support Change. Earn Trust. Build Impact',
-						'KindFi',
-					]}
-				/>
-			</motion.div>
+				{/* Section Caption */}
+				<motion.div {...fadeInUpAnimation}>
+					<SectionCaption
+						title={t('home.joinUsTitle')}
+						subtitle={t('home.joinUsSubtitle')}
+						highlightWords={[
+							'Support Change. Earn Trust. Build Impact',
+							'KindFi',
+						]}
+					/>
+				</motion.div>
 
-			{/* Feature Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 mb-16">
-				{translatedFeatures.map((feature, index) => (
+				{/* Feature Cards */}
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 mb-16">
+					{translatedFeatures.map((feature, index) => (
 						<motion.div
 							key={feature.id}
 							initial={{ opacity: 0, y: 20 }}

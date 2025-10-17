@@ -9,7 +9,7 @@ import { useI18n } from '~/lib/i18n'
 
 export function NewUserGuide() {
 	const { t } = useI18n()
-	
+
 	// Translated steps
 	const translatedSteps = [
 		{
@@ -28,7 +28,7 @@ export function NewUserGuide() {
 			description: t('home.guideStep3Desc'),
 		},
 	]
-	
+
 	return (
 		<section className="relative py-24 overflow-hidden">
 			<SectionContainer className="relative">
@@ -41,27 +41,27 @@ export function NewUserGuide() {
 					transition={{ duration: 0.6 }}
 					className="text-center mb-20"
 				>
-				<h2 className="text-4xl font-bold text-gray-900 mb-6">
-					<span className="block">{t('home.newUserTitle1')}</span>
-					<span className="block gradient-text">
-						{t('home.newUserTitle2')}
-					</span>
-				</h2>
-				<p className="text-lg text-gray-600 max-w-2xl mx-auto">
-					{t('home.newUserSubtitle')}
-				</p>
+					<h2 className="text-4xl font-bold text-gray-900 mb-6">
+						<span className="block">{t('home.newUserTitle1')}</span>
+						<span className="block gradient-text">
+							{t('home.newUserTitle2')}
+						</span>
+					</h2>
+					<p className="text-lg text-gray-600 max-w-2xl mx-auto">
+						{t('home.newUserSubtitle')}
+					</p>
 				</motion.div>
 
-			{/* Steps */}
-			<div className="max-w-4xl mx-auto space-y-20">
-				{translatedSteps.map((step, index) => (
-					<StepCard
-						key={`step-${step.stepNumber}`}
-						{...step}
-						isReversed={index % 2 !== 0}
-					/>
-				))}
-			</div>
+				{/* Steps */}
+				<div className="max-w-4xl mx-auto space-y-20">
+					{translatedSteps.map((step, index) => (
+						<StepCard
+							key={`step-${step.stepNumber}`}
+							{...step}
+							isReversed={index % 2 !== 0}
+						/>
+					))}
+				</div>
 			</SectionContainer>
 		</section>
 	)

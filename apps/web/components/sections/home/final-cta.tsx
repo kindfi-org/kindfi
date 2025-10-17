@@ -38,15 +38,15 @@ export const FinalCTA = () => {
 					}}
 					className="text-center mb-16 max-w-3xl mx-auto"
 				>
-				<h2 className="text-4xl font-bold text-gray-900 mb-6">
-					{t('home.finalCtaTitle')}
-					<span className="block gradient-text">
-						{t('home.finalCtaSubtitle')}
-					</span>
-				</h2>
-				<p className="text-lg text-gray-600 leading-relaxed">
-					{t('home.finalCtaDescription')}
-				</p>
+					<h2 className="text-4xl font-bold text-gray-900 mb-6">
+						{t('home.finalCtaTitle')}
+						<span className="block gradient-text">
+							{t('home.finalCtaSubtitle')}
+						</span>
+					</h2>
+					<p className="text-lg text-gray-600 leading-relaxed">
+						{t('home.finalCtaDescription')}
+					</p>
 				</motion.div>
 
 				{/* Main Content */}

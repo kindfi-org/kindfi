@@ -36,7 +36,11 @@ export function LanguageSelector() {
 					aria-label={t('language.select')}
 					className="relative h-8 w-8 rounded-full p-0 hover:bg-accent"
 				>
-					<span className="text-xl" role="img" aria-label={languageNames[language]}>
+					<span
+						className="text-xl"
+						role="img"
+						aria-label={languageNames[language]}
+					>
 						{flagIcons[language]}
 					</span>
 				</Button>
@@ -64,4 +68,3 @@ export function LanguageSelector() {
 		</DropdownMenu>
 	)
 }
-

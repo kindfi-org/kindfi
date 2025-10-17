@@ -100,15 +100,17 @@ export function UserJourney() {
 			<SectionContainer className="relative">
 				{/* Header */}
 				<div className="text-center mb-16">
-				<motion.div {...fadeInUpAnimation}>
-					<h2 className="text-4xl font-bold text-gray-900 mb-4">
-						{t('home.journeyTitle')} <br />
-						<span className="gradient-text">{t('home.journeyTitleHighlight')}</span>
-					</h2>
-					<p className="text-gray-600 max-w-2xl mx-auto text-lg">
-						{t('home.journeyDescription')}
-					</p>
-				</motion.div>
+					<motion.div {...fadeInUpAnimation}>
+						<h2 className="text-4xl font-bold text-gray-900 mb-4">
+							{t('home.journeyTitle')} <br />
+							<span className="gradient-text">
+								{t('home.journeyTitleHighlight')}
+							</span>
+						</h2>
+						<p className="text-gray-600 max-w-2xl mx-auto text-lg">
+							{t('home.journeyDescription')}
+						</p>
+					</motion.div>
 
 					{/* Toggle Buttons */}
 					<motion.div
@@ -116,45 +118,45 @@ export function UserJourney() {
 						{...fadeInUpAnimation}
 					>
 						<div className="inline-flex rounded-full p-1 bg-white shadow-sm border border-gray-100">
-					<Button
-						variant={activeView === 'project' ? 'default' : 'ghost'}
-						className={cn(
-							'rounded-full px-6 py-2 text-sm font-medium transition-all duration-200',
-							activeView === 'project'
-								? 'gradient-btn text-white'
-								: 'text-gray-600 hover:text-emerald-600',
-						)}
-						onClick={() => setActiveView('project')}
-						aria-pressed={activeView === 'project'}
-						aria-label="Show project creator journey"
-						onKeyDown={(e) => {
-							if (e.key === 'ArrowRight') {
-								e.preventDefault()
-								setActiveView('investor')
-							}
-						}}
-					>
-						{t('home.forKindlers')}
-					</Button>
-					<Button
-						variant={activeView === 'investor' ? 'default' : 'ghost'}
-						className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
-							activeView === 'investor'
-								? 'gradient-btn text-white'
-								: 'text-gray-600 hover:text-emerald-600'
-						}`}
-						onClick={() => setActiveView('investor')}
-						aria-pressed={activeView === 'investor'}
-						aria-label="Show investor journey"
-						onKeyDown={(e) => {
-							if (e.key === 'ArrowLeft') {
-								e.preventDefault()
-								setActiveView('project')
-							}
-						}}
-					>
-						{t('home.forKinders')}
-					</Button>
+							<Button
+								variant={activeView === 'project' ? 'default' : 'ghost'}
+								className={cn(
+									'rounded-full px-6 py-2 text-sm font-medium transition-all duration-200',
+									activeView === 'project'
+										? 'gradient-btn text-white'
+										: 'text-gray-600 hover:text-emerald-600',
+								)}
+								onClick={() => setActiveView('project')}
+								aria-pressed={activeView === 'project'}
+								aria-label="Show project creator journey"
+								onKeyDown={(e) => {
+									if (e.key === 'ArrowRight') {
+										e.preventDefault()
+										setActiveView('investor')
+									}
+								}}
+							>
+								{t('home.forKindlers')}
+							</Button>
+							<Button
+								variant={activeView === 'investor' ? 'default' : 'ghost'}
+								className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
+									activeView === 'investor'
+										? 'gradient-btn text-white'
+										: 'text-gray-600 hover:text-emerald-600'
+								}`}
+								onClick={() => setActiveView('investor')}
+								aria-pressed={activeView === 'investor'}
+								aria-label="Show investor journey"
+								onKeyDown={(e) => {
+									if (e.key === 'ArrowLeft') {
+										e.preventDefault()
+										setActiveView('project')
+									}
+								}}
+							>
+								{t('home.forKinders')}
+							</Button>
 						</div>
 					</motion.div>
 				</div>
@@ -196,33 +198,33 @@ export function UserJourney() {
 					animate={{ opacity: 1 }}
 					transition={{ duration: 0.5, delay: 0.8 }}
 				>
-				{activeView === 'project' ? (
-					<>
+					{activeView === 'project' ? (
+						<>
+							<Button
+								size="lg"
+								className="gradient-border-btn text-white px-8"
+								onClick={() => setWaitlistOpen(true)}
+								aria-label={t('home.waitlistYourProject')}
+								variant="outline"
+							>
+								{t('home.waitlistYourProject')}
+							</Button>
+							<WaitlistModal
+								open={waitlistOpen}
+								onOpenChange={setWaitlistOpen}
+							/>
+						</>
+					) : (
 						<Button
 							size="lg"
 							className="gradient-border-btn text-white px-8"
-							onClick={() => setWaitlistOpen(true)}
-							aria-label={t('home.waitlistYourProject')}
+							asChild
+							aria-label={t('home.exploreCauses')}
 							variant="outline"
 						>
-							{t('home.waitlistYourProject')}
+							<Link href="/projects">{t('home.exploreCauses')}</Link>
 						</Button>
-						<WaitlistModal
-							open={waitlistOpen}
-							onOpenChange={setWaitlistOpen}
-						/>
-					</>
-				) : (
-					<Button
-						size="lg"
-						className="gradient-border-btn text-white px-8"
-						asChild
-						aria-label={t('home.exploreCauses')}
-						variant="outline"
-					>
-						<Link href="/projects">{t('home.exploreCauses')}</Link>
-					</Button>
-				)}
+					)}
 				</motion.div>
 			</SectionContainer>
 		</section>

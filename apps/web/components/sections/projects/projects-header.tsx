@@ -8,7 +8,7 @@ export function ProjectsHeader() {
 	return (
 		<div className="mb-6">
 			<h1 className="text-4xl md:text-5xl font-bold mb-4 py-2 sm:text-center gradient-text">
-				{t("projects.pageTitle")}
+				{t('projects.pageTitle')}
 			</h1>
 		</div>
 	)

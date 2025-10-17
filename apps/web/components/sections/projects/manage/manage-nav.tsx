@@ -2,27 +2,51 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '~/lib/utils'
 import {
-	IoSpeedometerOutline,
 	IoCreateOutline,
 	IoMegaphoneOutline,
-	IoStarOutline,
 	IoPeopleOutline,
 	IoSettingsOutline,
+	IoSpeedometerOutline,
+	IoStarOutline,
 } from 'react-icons/io5'
+import { cn } from '~/lib/utils'
 
 const links: {
 	href: (slug: string) => string
 	label: string
 	Icon: React.ComponentType<{ size?: number; className?: string }>
 }[] = [
-	{ href: (slug) => `/projects/${slug}/manage`, label: 'Overview', Icon: IoSpeedometerOutline },
-	{ href: (slug) => `/projects/${slug}/manage/basics`, label: 'Basics', Icon: IoCreateOutline },
-	{ href: (slug) => `/projects/${slug}/manage/pitch`, label: 'Pitch', Icon: IoMegaphoneOutline },
-	{ href: (slug) => `/projects/${slug}/manage/highlights`, label: 'Highlights', Icon: IoStarOutline },
-	{ href: (slug) => `/projects/${slug}/manage/members`, label: 'Members', Icon: IoPeopleOutline },
-	{ href: (slug) => `/projects/${slug}/manage/settings`, label: 'Escrow & Settings', Icon: IoSettingsOutline },
+	{
+		href: (slug) => `/projects/${slug}/manage`,
+		label: 'Overview',
+		Icon: IoSpeedometerOutline,
+	},
+	{
+		href: (slug) => `/projects/${slug}/manage/basics`,
+		label: 'Basics',
+		Icon: IoCreateOutline,
+	},
+	{
+		href: (slug) => `/projects/${slug}/manage/pitch`,
+		label: 'Pitch',
+		Icon: IoMegaphoneOutline,
+	},
+	{
+		href: (slug) => `/projects/${slug}/manage/highlights`,
+		label: 'Highlights',
+		Icon: IoStarOutline,
+	},
+	{
+		href: (slug) => `/projects/${slug}/manage/members`,
+		label: 'Members',
+		Icon: IoPeopleOutline,
+	},
+	{
+		href: (slug) => `/projects/${slug}/manage/settings`,
+		label: 'Escrow & Settings',
+		Icon: IoSettingsOutline,
+	},
 ]
 
 export function ManageNav({ slug }: { slug: string }) {
@@ -48,7 +72,15 @@ export function ManageNav({ slug }: { slug: string }) {
 										: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
 								)}
 							>
-								<Icon className={cn('shrink-0', isActive ? 'opacity-100' : 'opacity-80 group-hover:opacity-100')} size={16} />
+								<Icon
+									className={cn(
+										'shrink-0',
+										isActive
+											? 'opacity-100'
+											: 'opacity-80 group-hover:opacity-100',
+									)}
+									size={16}
+								/>
 								<span className="truncate">{label}</span>
 							</Link>
 						</li>

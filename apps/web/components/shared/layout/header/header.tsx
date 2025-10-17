@@ -56,39 +56,39 @@ export const Header = () => {
 						<Navigation />
 					</div>
 
-				{/* Action Buttons */}
-				<div className="flex items-center space-x-4">
-					<LanguageSelector />
-					{user ? <UserMenu user={user} /> : <AuthButtons />}
+					{/* Action Buttons */}
+					<div className="flex items-center space-x-4">
+						<LanguageSelector />
+						{user ? <UserMenu user={user} /> : <AuthButtons />}
 
-					{/* Mobile menu */}
-					<Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-						<SheetTrigger asChild>
-							<Button
-								variant="ghost"
-								size="sm"
-								aria-label={t('aria.openMobileMenu')}
-								aria-expanded={mobileMenuOpen}
-								className="md:hidden"
-							>
-								<Menu className="h-5 w-5" />
-							</Button>
-						</SheetTrigger>
-						<SheetContent side="right" className="w-80">
-							<SheetHeader>
-								<SheetTitle>{t('nav.menu')}</SheetTitle>
-							</SheetHeader>
-						<div className="mt-8 flex flex-col gap-4">
-							<div className="pb-4 border-b">
-								<LanguageSelector />
-							</div>
-							<MobileNavigation />
-							{user ? (
-								<MobileUserMenu user={user} />
-							) : (
-								<MobileAuthButtons />
-							)}
-						</div>
+						{/* Mobile menu */}
+						<Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+							<SheetTrigger asChild>
+								<Button
+									variant="ghost"
+									size="sm"
+									aria-label={t('aria.openMobileMenu')}
+									aria-expanded={mobileMenuOpen}
+									className="md:hidden"
+								>
+									<Menu className="h-5 w-5" />
+								</Button>
+							</SheetTrigger>
+							<SheetContent side="right" className="w-80">
+								<SheetHeader>
+									<SheetTitle>{t('nav.menu')}</SheetTitle>
+								</SheetHeader>
+								<div className="mt-8 flex flex-col gap-4">
+									<div className="pb-4 border-b">
+										<LanguageSelector />
+									</div>
+									<MobileNavigation />
+									{user ? (
+										<MobileUserMenu user={user} />
+									) : (
+										<MobileAuthButtons />
+									)}
+								</div>
 							</SheetContent>
 						</Sheet>
 					</div>
@@ -98,7 +98,13 @@ export const Header = () => {
 	)
 }
 
-const WalletCopyButton = ({ address, className }: { address: string; className?: string }) => {
+const WalletCopyButton = ({
+	address,
+	className,
+}: {
+	address: string
+	className?: string
+}) => {
 	const { t } = useI18n()
 	const [copied, setCopied] = useState(false)
 
@@ -117,7 +123,12 @@ const WalletCopyButton = ({ address, className }: { address: string; className?:
 	const end = address.substring(address.length - 6)
 
 	return (
-		<Button onClick={handleCopy} className={["flex w-full justify-between", className].filter(Boolean).join(' ')}>
+		<Button
+			onClick={handleCopy}
+			className={['flex w-full justify-between', className]
+				.filter(Boolean)
+				.join(' ')}
+		>
 			<span className="text-sm font-medium text-muted-foreground">
 				{start}
 				{'...'}
@@ -159,11 +170,11 @@ const UserMenu = ({ user }: { user: User }) => {
 							{getAvatarFallback(user.email || '')}
 						</AvatarFallback>
 					</Avatar>
-				{user.email?.split('@')[0] && (
-					<span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white">
-						<span className="sr-only">{t('user.online')}</span>
-					</span>
-				)}
+					{user.email?.split('@')[0] && (
+						<span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white">
+							<span className="sr-only">{t('user.online')}</span>
+						</span>
+					)}
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-56">
@@ -179,21 +190,21 @@ const UserMenu = ({ user }: { user: User }) => {
 					</DropdownMenuLabel>
 				)}
 				<DropdownMenuSeparator />
-			<DropdownMenuItem asChild>
-				<Link href="/profile" className="cursor-pointer">
-					<UserIcon className="mr-2 h-4 w-4" />
-					{t('nav.dashboard')}
-				</Link>
-			</DropdownMenuItem>
-			<DropdownMenuSeparator />
-			<DropdownMenuItem>
-				<form action={handleSignOutAction} className="w-full">
-					<button type="submit" className="flex w-full items-center">
-						<LogOut className="mr-2 h-4 w-4" />
-						{t('nav.closeSession')}
-					</button>
-				</form>
-			</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<Link href="/profile" className="cursor-pointer">
+						<UserIcon className="mr-2 h-4 w-4" />
+						{t('nav.dashboard')}
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem>
+					<form action={handleSignOutAction} className="w-full">
+						<button type="submit" className="flex w-full items-center">
+							<LogOut className="mr-2 h-4 w-4" />
+							{t('nav.closeSession')}
+						</button>
+					</form>
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)

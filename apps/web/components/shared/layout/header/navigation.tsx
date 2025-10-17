@@ -38,14 +38,14 @@ export function Navigation() {
 	return (
 		<NavigationMenu aria-label="Main navigation">
 			<NavigationMenuList>
-			<NavigationMenuItem>
-				<NavigationMenuTrigger
-					aria-label={t('aria.projectsMenu')}
-					label={t('aria.projectsMenu')}
-				>
-					{t('nav.projects')}
-				</NavigationMenuTrigger>
-				<NavigationMenuContent aria-label={t('aria.projectOptions')}>
+				<NavigationMenuItem>
+					<NavigationMenuTrigger
+						aria-label={t('aria.projectsMenu')}
+						label={t('aria.projectsMenu')}
+					>
+						{t('nav.projects')}
+					</NavigationMenuTrigger>
+					<NavigationMenuContent aria-label={t('aria.projectOptions')}>
 						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
 							{projects.map((project) => (
 								<ListItem
@@ -62,16 +62,16 @@ export function Navigation() {
 					</NavigationMenuContent>
 				</NavigationMenuItem>
 
-			{resources.length > 0 && (
-				<NavigationMenuItem>
-					<NavigationMenuTrigger
-						aria-label={t('aria.resourcesMenu')}
-						label={t('aria.resourcesMenu')}
-					>
-						{t('nav.resources')}
-					</NavigationMenuTrigger>
+				{resources.length > 0 && (
+					<NavigationMenuItem>
+						<NavigationMenuTrigger
+							aria-label={t('aria.resourcesMenu')}
+							label={t('aria.resourcesMenu')}
+						>
+							{t('nav.resources')}
+						</NavigationMenuTrigger>
 
-					<NavigationMenuContent aria-label={t('aria.resourceOptions')}>
+						<NavigationMenuContent aria-label={t('aria.resourceOptions')}>
 							<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
 								{resources.map((resource) => (
 									<ListItem
@@ -87,36 +87,36 @@ export function Navigation() {
 							</ul>
 						</NavigationMenuContent>
 					</NavigationMenuItem>
-			)}
+				)}
 
-			<NavigationMenuItem>
-				<Link href="/about" passHref>
-					<NavigationMenuLink
-						className={cn(
-							navigationMenuTriggerStyle(),
-							pathname === '/about' && 'text-primary',
-						)}
-						aria-label={t('nav.about')}
-						aria-current={pathname === '/about' ? 'page' : undefined}
-					>
-						{t('nav.about')}
-					</NavigationMenuLink>
-				</Link>
-			</NavigationMenuItem>
+				<NavigationMenuItem>
+					<Link href="/about" passHref>
+						<NavigationMenuLink
+							className={cn(
+								navigationMenuTriggerStyle(),
+								pathname === '/about' && 'text-primary',
+							)}
+							aria-label={t('nav.about')}
+							aria-current={pathname === '/about' ? 'page' : undefined}
+						>
+							{t('nav.about')}
+						</NavigationMenuLink>
+					</Link>
+				</NavigationMenuItem>
 
-			<NavigationMenuItem>
-				<Link href="/news" passHref>
-					<NavigationMenuLink
-						className={cn(
-							navigationMenuTriggerStyle(),
-							pathname?.startsWith('/news') && 'text-primary',
-						)}
-						aria-current={pathname?.startsWith('/news') ? 'page' : undefined}
-					>
-						{t('nav.news')}
-					</NavigationMenuLink>
-				</Link>
-			</NavigationMenuItem>
+				<NavigationMenuItem>
+					<Link href="/news" passHref>
+						<NavigationMenuLink
+							className={cn(
+								navigationMenuTriggerStyle(),
+								pathname?.startsWith('/news') && 'text-primary',
+							)}
+							aria-current={pathname?.startsWith('/news') ? 'page' : undefined}
+						>
+							{t('nav.news')}
+						</NavigationMenuLink>
+					</Link>
+				</NavigationMenuItem>
 			</NavigationMenuList>
 		</NavigationMenu>
 	)

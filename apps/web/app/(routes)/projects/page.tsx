@@ -1,4 +1,3 @@
-
 import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 import {
 	dehydrate,
@@ -8,7 +7,6 @@ import {
 import { ProjectsClientWrapper } from '~/components/sections/projects/projects-client-wrapper'
 import { ProjectsHeader } from '~/components/sections/projects/projects-header'
 import { getAllProjects } from '~/lib/queries/projects'
-
 
 export default async function ProjectsPage({
 	searchParams,

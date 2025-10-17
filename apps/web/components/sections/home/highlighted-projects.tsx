@@ -61,11 +61,11 @@ export function HighlightedProjects() {
 							<ProjectCardGridSkeleton key={i} />
 						))}
 					</div>
-			) : error ? (
-				<p className="text-sm text-destructive text-center mt-8">
-					{t('home.failedToLoadProjects')}
-				</p>
-			) : (
+				) : error ? (
+					<p className="text-sm text-destructive text-center mt-8">
+						{t('home.failedToLoadProjects')}
+					</p>
+				) : (
 					<div className="relative mt-8">
 						<Carousel
 							opts={{
@@ -82,9 +82,9 @@ export function HighlightedProjects() {
 						>
 							<CarouselContent className="-ml-2 md:-ml-4">
 								{projects.map((project) => (
-								<CarouselItem
+									<CarouselItem
 										key={project.id}
-									className="pl-2 md:pl-4 basis-full sm:basis-full md:basis-1/2 lg:basis-1/2 xl:basis-1/3"
+										className="pl-2 md:pl-4 basis-full sm:basis-full md:basis-1/2 lg:basis-1/2 xl:basis-1/3"
 										aria-roledescription="slide"
 									>
 										<ProjectCardGrid project={project} />

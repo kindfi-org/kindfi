@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '~/components/base/card'
 import { Icon } from '~/components/base/icon'
-import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 import { useTranslation } from '~/hooks/use-translation'
+import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 interface Problem {
 	title: string
@@ -13,25 +13,25 @@ interface Problem {
 }
 
 const Problems = () => {
-    const { t } = useTranslation()
-    const problems: Problem[] = mockAboutUs.problems
+	const { t } = useTranslation()
+	const problems: Problem[] = mockAboutUs.problems
 
-    const titleToKey: Record<string, string> = {
-        'Lack of Transparency': 'lack-transparency',
-        'High Costs': 'high-costs',
-        'Limited Engagement': 'limited-engagement',
-        'No Proof of Progress': 'no-proof',
-    }
+	const titleToKey: Record<string, string> = {
+		'Lack of Transparency': 'lack-transparency',
+		'High Costs': 'high-costs',
+		'Limited Engagement': 'limited-engagement',
+		'No Proof of Progress': 'no-proof',
+	}
 
-    function getProblemKey(title: string): string {
-        const mapped = titleToKey[title]
-        if (mapped) return mapped
-        return title
-            .trim()
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-    }
+	function getProblemKey(title: string): string {
+		const mapped = titleToKey[title]
+		if (mapped) return mapped
+		return title
+			.trim()
+			.toLowerCase()
+			.replace(/[^a-z0-9\s-]/g, '')
+			.replace(/\s+/g, '-')
+	}
 
 	// Animation variants for staggered children
 	const containerVariants = {
@@ -64,13 +64,13 @@ const Problems = () => {
 					transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
 					viewport={{ once: true, amount: 0.2 }}
 				>
-                    <h2 className="text-3xl md:text-4xl font-bold gradient-text inline-block mb-4">
-                        {t('about.problems.title')}
-                    </h2>
+					<h2 className="text-3xl md:text-4xl font-bold gradient-text inline-block mb-4">
+						{t('about.problems.title')}
+					</h2>
 					<div className="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto rounded-full mb-4" />
-                    <p className="text-gray-700 text-lg max-w-2xl mx-auto">
-                        {t('about.problems.subtitle')}
-                    </p>
+					<p className="text-gray-700 text-lg max-w-2xl mx-auto">
+						{t('about.problems.subtitle')}
+					</p>
 				</motion.div>
 
 				<motion.div
@@ -111,14 +111,18 @@ const Problems = () => {
 									>
 										<Icon name={problem.icon} className="text-4xl" />
 									</div>
-                                    <CardContent className="flex flex-col text-center p-0 flex-1">
-                                        <h3 className="text-xl font-bold text-gray-800 mb-3">
-                                            {t(`about.problems.items.${getProblemKey(problem.title)}.title`)}
-                                        </h3>
-                                        <p className="text-gray-700 text-base leading-relaxed">
-                                            {t(`about.problems.items.${getProblemKey(problem.title)}.description`)}
-                                        </p>
-                                    </CardContent>
+									<CardContent className="flex flex-col text-center p-0 flex-1">
+										<h3 className="text-xl font-bold text-gray-800 mb-3">
+											{t(
+												`about.problems.items.${getProblemKey(problem.title)}.title`,
+											)}
+										</h3>
+										<p className="text-gray-700 text-base leading-relaxed">
+											{t(
+												`about.problems.items.${getProblemKey(problem.title)}.description`,
+											)}
+										</p>
+									</CardContent>
 								</div>
 							</Card>
 						</motion.div>

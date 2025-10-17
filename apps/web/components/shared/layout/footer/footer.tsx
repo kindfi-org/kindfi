@@ -83,42 +83,40 @@ const Footer = () => {
 						<Link href="/" className="flex items-center space-x-2">
 							<span className="text-xl font-bold text-black">KindFi</span>
 						</Link>
-					<p className="text-sm text-gray-600">
-						{t('footer.description')}
-					</p>
-					{/* Newsletter Subscription */}
-					<div className="mt-4">
-						<h3 id="newsletter-label" className="mb-2 text-sm font-semibold">
-							{t('footer.keepInTouch')}
-						</h3>
-						<form onSubmit={resetValidation}>
-							<div className="flex gap-2">
-								<Input
-									type="email"
-									name="email"
-									placeholder={t('footer.emailPlaceholder')}
-									className="max-w-[200px]"
-									aria-labelledby="newsletter-label"
-									aria-describedby={`${isEmailInvalid ? 'newsletter-error' : 'newsletter-description'}`}
-									required
-									aria-invalid={isEmailInvalid}
-									onChange={handleValidation}
-								/>
-								<Button
-									size="sm"
-									className="bg-blue-600 hover:bg-blue-900 text-white"
-								>
-									{t('footer.subscribe')}
-								</Button>
-							</div>
-							<span id="newsletter-description" className="sr-only">
-								{t('footer.enterEmail')}
-							</span>
-							<span id="newsletter-error" className="sr-only">
-								{t('footer.invalidEmail')}
-							</span>
-						</form>
-					</div>
+						<p className="text-sm text-gray-600">{t('footer.description')}</p>
+						{/* Newsletter Subscription */}
+						<div className="mt-4">
+							<h3 id="newsletter-label" className="mb-2 text-sm font-semibold">
+								{t('footer.keepInTouch')}
+							</h3>
+							<form onSubmit={resetValidation}>
+								<div className="flex gap-2">
+									<Input
+										type="email"
+										name="email"
+										placeholder={t('footer.emailPlaceholder')}
+										className="max-w-[200px]"
+										aria-labelledby="newsletter-label"
+										aria-describedby={`${isEmailInvalid ? 'newsletter-error' : 'newsletter-description'}`}
+										required
+										aria-invalid={isEmailInvalid}
+										onChange={handleValidation}
+									/>
+									<Button
+										size="sm"
+										className="bg-blue-600 hover:bg-blue-900 text-white"
+									>
+										{t('footer.subscribe')}
+									</Button>
+								</div>
+								<span id="newsletter-description" className="sr-only">
+									{t('footer.enterEmail')}
+								</span>
+								<span id="newsletter-error" className="sr-only">
+									{t('footer.invalidEmail')}
+								</span>
+							</form>
+						</div>
 					</div>
 
 					{/* Links Columns */}
@@ -160,17 +158,18 @@ const Footer = () => {
 								</a>
 							))}
 						</div>
-					<p className="text-sm text-gray-600">
-						© {new Date().getFullYear()} KindFi. {t('footer.allRightsReserved')}.
-					</p>
-					<div className="flex items-center gap-2">
-						<Button variant="outline" size="sm">
-							{t('footer.documentation')}
-						</Button>
-						<Button variant="outline" size="sm">
-							{t('footer.contact')}
-						</Button>
-					</div>
+						<p className="text-sm text-gray-600">
+							© {new Date().getFullYear()} KindFi.{' '}
+							{t('footer.allRightsReserved')}.
+						</p>
+						<div className="flex items-center gap-2">
+							<Button variant="outline" size="sm">
+								{t('footer.documentation')}
+							</Button>
+							<Button variant="outline" size="sm">
+								{t('footer.contact')}
+							</Button>
+						</div>
 					</div>
 				</div>
 			</div>

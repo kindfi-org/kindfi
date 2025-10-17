@@ -12,7 +12,7 @@ import { useI18n } from '~/lib/i18n'
 
 export function Hero() {
 	const { t } = useI18n()
-	
+
 	const HERO_WORDS = [
 		t('home.heroWords.impact'),
 		t('home.heroWords.causes'),
@@ -22,7 +22,7 @@ export function Hero() {
 		t('home.heroWords.adoption'),
 		t('home.heroWords.needs'),
 	]
-	
+
 	const { displayText, longestWordCh } = useTypewriter(HERO_WORDS, {
 		typingSpeedMs: 120,
 		deletingSpeedMs: 70,
@@ -40,22 +40,22 @@ export function Hero() {
 		>
 			<SectionContainer>
 				<div className="text-center">
-				<motion.h2
-					className="text-xl font-semibold text-gray-800 mb-2"
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5 }}
-				>
-					{t('home.heroSubtitle')}
-				</motion.h2>
+					<motion.h2
+						className="text-xl font-semibold text-gray-800 mb-2"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5 }}
+					>
+						{t('home.heroSubtitle')}
+					</motion.h2>
 
-				<motion.h1
-					className="text-8xl font-bold gradient-text mb-4 py-4 text-center"
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5, delay: 0.2 }}
-				>
-					{t('home.heroTitle')}
+					<motion.h1
+						className="text-8xl font-bold gradient-text mb-4 py-4 text-center"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5, delay: 0.2 }}
+					>
+						{t('home.heroTitle')}
 						<span
 							className="inline-flex items-center"
 							style={{ minWidth: `${longestWordCh}ch` }}
@@ -69,14 +69,14 @@ export function Hero() {
 						</span>
 					</motion.h1>
 
-				<motion.p
-					className="text-lg text-gray-700 m-12"
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5, delay: 0.4 }}
-				>
-					{t('home.heroDescription')}
-				</motion.p>
+					<motion.p
+						className="text-lg text-gray-700 m-12"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5, delay: 0.4 }}
+					>
+						{t('home.heroDescription')}
+					</motion.p>
 
 					<motion.div
 						className="flex flex-col sm:flex-row gap-4 justify-center"
@@ -92,10 +92,10 @@ export function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.6 }}
 					>
-					<div className="mt-8 flex flex-col items-center gap-3">
-						<span className="text-lg text-muted-foreground">
-							{t('home.supportedBy')}
-						</span>
+						<div className="mt-8 flex flex-col items-center gap-3">
+							<span className="text-lg text-muted-foreground">
+								{t('home.supportedBy')}
+							</span>
 							<a
 								href="https://stellar.org/"
 								target="_blank"

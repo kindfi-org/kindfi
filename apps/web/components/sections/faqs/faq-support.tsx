@@ -15,24 +15,24 @@ export function FaqSupport() {
 					{t('faqs.support.description')}
 				</p>
 				<div className="mt-6 flex flex-col gap-4 justify-center items-center md:flex-row">
-				<Link href="/">
-					<Button className="bg-black text-white">
-						<ArrowRight />
-						{t('about.seeHowItWorks')}
-					</Button>
-				</Link>
-				<Link href="/community">
-					<Button className="border border-[#E6E6E6] text-black">
-						<MessageCircle />
-						{t('faqs.support.seeCommunity')}
-					</Button>
-				</Link>
-				<Link href="/create-project">
-					<Button className="border border-[#E6E6E6] text-white bg-[#466E23]">
-						<Lightbulb />
-						{t('faqs.support.startCampaign')}
-					</Button>
-				</Link>
+					<Link href="/">
+						<Button className="bg-black text-white">
+							<ArrowRight />
+							{t('about.seeHowItWorks')}
+						</Button>
+					</Link>
+					<Link href="/community">
+						<Button className="border border-[#E6E6E6] text-black">
+							<MessageCircle />
+							{t('faqs.support.seeCommunity')}
+						</Button>
+					</Link>
+					<Link href="/create-project">
+						<Button className="border border-[#E6E6E6] text-white bg-[#466E23]">
+							<Lightbulb />
+							{t('faqs.support.startCampaign')}
+						</Button>
+					</Link>
 				</div>
 			</div>
 		</section>

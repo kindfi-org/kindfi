@@ -139,5 +139,3 @@ export function ProjectsToolbar({
 		</div>
 	)
 }
-
-

@@ -2,12 +2,12 @@
 
 import type { Tables } from '@services/supabase'
 import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 import { CategoryBadge } from '~/components/sections/projects/shared'
 import { CategoryBadgeSkeleton } from '~/components/sections/projects/skeletons'
+import useReducedMotion from '~/hooks/use-reduced-motion'
 import { useI18n } from '~/lib/i18n'
 import { buildProjectsCategoryUrl, cn } from '~/lib/utils'
-import { useEffect, useRef, useState } from 'react'
-import useReducedMotion from '~/hooks/use-reduced-motion'
 
 interface CategoryPillsProps {
 	categories: Tables<'categories'>[]
@@ -84,7 +84,10 @@ export function CategoryPills({
 				// reset back to start for a loop effect
 				element.scrollTo({ left: 0, behavior: 'auto' })
 			} else {
-				element.scrollTo({ left: element.scrollLeft + deltaPx, behavior: 'auto' })
+				element.scrollTo({
+					left: element.scrollLeft + deltaPx,
+					behavior: 'auto',
+				})
 			}
 			rafId = requestAnimationFrame(step)
 		}
@@ -94,7 +97,13 @@ export function CategoryPills({
 		return () => {
 			if (rafId) cancelAnimationFrame(rafId)
 		}
-	}, [enableAutoScroll, prefersReducedMotion, isHovered, isInteracting, autoScrollSpeed])
+	}, [
+		enableAutoScroll,
+		prefersReducedMotion,
+		isHovered,
+		isInteracting,
+		autoScrollSpeed,
+	])
 
 	const scrollByAmount = (amount: number) => {
 		const element = scrollRef.current
@@ -195,20 +204,20 @@ export function CategoryPills({
 						{t('home.failedToLoadCategories')}
 					</p>
 				) : (
-						<div className="flex items-center gap-2 pr-8">
-							{categories.map((category) => (
-								<CategoryBadge
-									key={category.id}
-									category={category}
-									onClick={
-										handleCategoryClick
-											? () => handleCategoryClick(category)
-											: undefined
-									}
-								/>
-							))}
-						</div>
-					)}
+					<div className="flex items-center gap-2 pr-8">
+						{categories.map((category) => (
+							<CategoryBadge
+								key={category.id}
+								category={category}
+								onClick={
+									handleCategoryClick
+										? () => handleCategoryClick(category)
+										: undefined
+								}
+							/>
+						))}
+					</div>
+				)}
 			</div>
 		</div>
 	)

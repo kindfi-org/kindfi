@@ -110,21 +110,21 @@ export function ProjectsClientWrapper() {
 		)
 	}
 
-    return (
-    	<div>
-    		<motion.div
-    			className="mb-6"
-    			initial={{ opacity: 0, y: 8 }}
-    			animate={{ opacity: 1, y: 0 }}
-    			transition={{ duration: 0.25, ease: 'easeOut' }}
-    		>
+	return (
+		<div>
+			<motion.div
+				className="mb-6"
+				initial={{ opacity: 0, y: 8 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.25, ease: 'easeOut' }}
+			>
 				{isLoadingCategories ? (
 					<div className="flex flex-wrap gap-2">
 						{Array.from({ length: 12 }).map((_, i) => (
 							// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
 							<CategoryBadgeSkeleton key={i} />
 						))}
-	    		</div>
+					</div>
 				) : (
 					<CategoryFilters
 						categories={categories}
@@ -134,26 +134,28 @@ export function ProjectsClientWrapper() {
 					/>
 				)}
 
-			<div className="flex flex-col md:flex-row gap-4 justify-between">
-				<div className="flex flex-row items-center justify-between gap-2 md:gap-4">
-					<h2 className="text-xl font-semibold">{t('nav.exploreProjects')}</h2>
-					<p className="text-sm text-gray-500 md:hidden">
-						{selectedCategories.length > 0
-							? `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`
-							: `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`}
-					</p>
-				</div>
+				<div className="flex flex-col md:flex-row gap-4 justify-between">
+					<div className="flex flex-row items-center justify-between gap-2 md:gap-4">
+						<h2 className="text-xl font-semibold">
+							{t('nav.exploreProjects')}
+						</h2>
+						<p className="text-sm text-gray-500 md:hidden">
+							{selectedCategories.length > 0
+								? `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`
+								: `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`}
+						</p>
+					</div>
 
-				<div className="flex flex-row items-center gap-0 md:gap-4 justify-between md:justify-end">
-					<p className="hidden md:block text-sm text-gray-500">
-						{selectedCategories.length > 0
-							? `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`
-							: `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`}
-					</p>
-					<SortDropdown value={sortOption} onChange={handleSortChange} />
-					<ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+					<div className="flex flex-row items-center gap-0 md:gap-4 justify-between md:justify-end">
+						<p className="hidden md:block text-sm text-gray-500">
+							{selectedCategories.length > 0
+								? `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`
+								: `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`}
+						</p>
+						<SortDropdown value={sortOption} onChange={handleSortChange} />
+						<ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+					</div>
 				</div>
-			</div>
 			</motion.div>
 			<AnimatePresence mode="wait">
 				<motion.div

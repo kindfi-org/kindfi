@@ -59,8 +59,17 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 					<div className="absolute inset-0 flex items-end justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
 						<span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 shadow-sm backdrop-blur">
 							Explore
-							<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="h-4 w-4">
-								<path fillRule="evenodd" d="M10.293 3.293a1 1 0 0 1 1.414 0l5 5a1 1 0 0 1-1.414 1.414L11 6.414V16a1 1 0 1 1-2 0V6.414l-4.293 4.293A1 1 0 0 1 3.293 8.293l5-5Z" clipRule="evenodd" />
+							<svg
+								viewBox="0 0 20 20"
+								fill="currentColor"
+								aria-hidden="true"
+								className="h-4 w-4"
+							>
+								<path
+									fillRule="evenodd"
+									d="M10.293 3.293a1 1 0 0 1 1.414 0l5 5a1 1 0 0 1-1.414 1.414L11 6.414V16a1 1 0 1 1-2 0V6.414l-4.293 4.293A1 1 0 0 1 3.293 8.293l5-5Z"
+									clipRule="evenodd"
+								/>
 							</svg>
 						</span>
 					</div>
@@ -119,7 +128,10 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 							return (
 								<Badge
 									key={tag.id}
-									className={cn('uppercase transition-transform duration-200 group-hover:-translate-y-0.5', textColor)}
+									className={cn(
+										'uppercase transition-transform duration-200 group-hover:-translate-y-0.5',
+										textColor,
+									)}
 									style={{ backgroundColor: bg }}
 								>
 									{tag.name}

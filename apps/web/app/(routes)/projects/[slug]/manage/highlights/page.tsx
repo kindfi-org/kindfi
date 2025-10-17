@@ -1,7 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { IoCheckmark, IoInformationCircleOutline, IoAddOutline } from 'react-icons/io5'
+import {
+	IoAddOutline,
+	IoCheckmark,
+	IoInformationCircleOutline,
+} from 'react-icons/io5'
 import { Button } from '~/components/base/button'
 import { Card } from '~/components/base/card'
 import { ExampleHighlights } from '~/components/sections/project/highlights/example-highlights'

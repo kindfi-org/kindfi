@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { ManageNav } from '../../../../../components/sections/projects/manage/manage-nav'
 import { Card } from '~/components/base/card'
+import { ManageNav } from '../../../../../components/sections/projects/manage/manage-nav'
 
 export default async function ManageLayout({
 	children,

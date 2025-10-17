@@ -32,9 +32,7 @@ export function PlatformOverview() {
 							{t('home.platformTitle2')}
 						</span>
 					</h2>
-					<p className="text-lg text-gray-600">
-						{t('home.platformSubtitle')}
-					</p>
+					<p className="text-lg text-gray-600">{t('home.platformSubtitle')}</p>
 				</motion.div>
 
 				{/* Features Grid */}

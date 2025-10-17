@@ -13,7 +13,7 @@ export function Community() {
 	const prefersReducedMotion = useReducedMotion()
 	const [formStatus, setFormStatus] = useState<FormStatus | null>(null)
 	const { t } = useI18n()
-	
+
 	// Translated benefits
 	const translatedBenefits = [
 		{ ...benefits[0], text: t('home.benefit1') },
@@ -21,7 +21,7 @@ export function Community() {
 		{ ...benefits[2], text: t('home.benefit3') },
 		{ ...benefits[3], text: t('home.benefit4') },
 	]
-	
+
 	// Translated testimonial
 	const translatedTestimonial = {
 		...testimonialData,
@@ -61,33 +61,33 @@ export function Community() {
 					}}
 					className="text-center mb-20 max-w-3xl mx-auto"
 				>
-				<h2 className="text-4xl font-bold text-gray-900 mb-6">
-					<span className="block">{t('home.communityTitle')}</span>
-					<span className="block gradient-text">
-						{t('home.communitySubtitle')}
-					</span>
-				</h2>
-				<p className="text-lg font-medium text-gray-600 leading-relaxed text-justify">
-					{t('home.communityDescription')}
-				</p>
+					<h2 className="text-4xl font-bold text-gray-900 mb-6">
+						<span className="block">{t('home.communityTitle')}</span>
+						<span className="block gradient-text">
+							{t('home.communitySubtitle')}
+						</span>
+					</h2>
+					<p className="text-lg font-medium text-gray-600 leading-relaxed text-justify">
+						{t('home.communityDescription')}
+					</p>
 				</motion.div>
 
-			{/* Main Content */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
-				{/* Benefits List */}
-				<div className="container space-y-2">
-					{translatedBenefits.map((benefit, index) => (
-						<BenefitItem
-							key={benefit.id}
-							{...benefit}
-							isActive={index === 0}
-						/>
-					))}
-				</div>
+				{/* Main Content */}
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
+					{/* Benefits List */}
+					<div className="container space-y-2">
+						{translatedBenefits.map((benefit, index) => (
+							<BenefitItem
+								key={benefit.id}
+								{...benefit}
+								isActive={index === 0}
+							/>
+						))}
+					</div>
 
-				{/* Testimonial */}
-				<Testimonial {...translatedTestimonial} />
-			</div>
+					{/* Testimonial */}
+					<Testimonial {...translatedTestimonial} />
+				</div>
 
 				{/* CTA Form */}
 				<CTAForm onSubmit={handleFormSubmission} />

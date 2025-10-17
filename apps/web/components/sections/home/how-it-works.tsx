@@ -8,7 +8,7 @@ import { useI18n } from '~/lib/i18n'
 
 export function HowItWorks() {
 	const { t } = useI18n()
-	
+
 	// Translated models
 	const translatedModels = [
 		{
@@ -42,7 +42,7 @@ export function HowItWorks() {
 			],
 		},
 	]
-	
+
 	return (
 		<section className="w-full py-20 bg-white">
 			<SectionContainer>

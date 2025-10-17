@@ -75,12 +75,12 @@ export function LoginComponent() {
 			<Card className="w-full max-w-md">
 				<CardHeader className="space-y-2">
 					<div className="flex justify-between mb-4">
-					<div className="flex-col">
-						<h1 className="gradient-text text-2xl mb-2 text-start font-semibold tracking-tight">
-							{t('auth.welcomeBack')}
-						</h1>
-						<h2>{t('auth.signInSubtitle')}</h2>
-					</div>
+						<div className="flex-col">
+							<h1 className="gradient-text text-2xl mb-2 text-start font-semibold tracking-tight">
+								{t('auth.welcomeBack')}
+							</h1>
+							<h2>{t('auth.signInSubtitle')}</h2>
+						</div>
 						<div className="flex justify-center items-center rounded-full bg-blue-500/10 w-12 h-12">
 							<Fingerprint className="h-6 w-6 text-primary text-2xl" />
 						</div>
@@ -88,48 +88,48 @@ export function LoginComponent() {
 				</CardHeader>
 				<CardContent>
 					<form className="space-y-4" aria-label="Sign in" onSubmit={onSubmit}>
-					{isNotRegistered && (
-						<legend
-							className="border border-zinc-600/50 rounded-lg p-4 space-y-4 text-yellow-600"
-							role="alert"
-							aria-live="assertive"
-						>
-							{t('auth.deviceNotFound')}{' '}
-							<Link
-								className="text-primary font-medium hover:underline"
-								href="/sign-up"
+						{isNotRegistered && (
+							<legend
+								className="border border-zinc-600/50 rounded-lg p-4 space-y-4 text-yellow-600"
+								role="alert"
+								aria-live="assertive"
 							>
-								{t('auth.signUp')}
-							</Link>{' '}
-							{t('auth.first')}.
-						</legend>
-					)}
+								{t('auth.deviceNotFound')}{' '}
+								<Link
+									className="text-primary font-medium hover:underline"
+									href="/sign-up"
+								>
+									{t('auth.signUp')}
+								</Link>{' '}
+								{t('auth.first')}.
+							</legend>
+						)}
 
-					{authError && !isNotRegistered && (
-						<legend
-							className="border border-zinc-600/50 rounded-lg p-4 space-y-4 text-red-600"
-							role="alert"
-							aria-live="assertive"
-						>
-							{t('auth.authError')}
-						</legend>
-					)}
+						{authError && !isNotRegistered && (
+							<legend
+								className="border border-zinc-600/50 rounded-lg p-4 space-y-4 text-red-600"
+								role="alert"
+								aria-live="assertive"
+							>
+								{t('auth.authError')}
+							</legend>
+						)}
 
-					{authSuccess && (
-						<output className="text-green-600" aria-live="polite">
-							{t('auth.authSuccess')}
-						</output>
-					)}
-					<div className="space-y-2">
-						<Label htmlFor="email" id="email-label">
-							{t('auth.email')}
-						</Label>
-						<div className="space-y-1 pb-6 relative">
-							<Input
-								id="email"
-								name="email"
-								type="email"
-								placeholder={t('auth.emailPlaceholder')}
+						{authSuccess && (
+							<output className="text-green-600" aria-live="polite">
+								{t('auth.authSuccess')}
+							</output>
+						)}
+						<div className="space-y-2">
+							<Label htmlFor="email" id="email-label">
+								{t('auth.email')}
+							</Label>
+							<div className="space-y-1 pb-6 relative">
+								<Input
+									id="email"
+									name="email"
+									type="email"
+									placeholder={t('auth.emailPlaceholder')}
 									required
 									aria-labelledby="email-label"
 									aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
@@ -144,67 +144,67 @@ export function LoginComponent() {
 											!isEmailInvalid && doesEmailExist,
 									})}
 								/>
-							{isEmailInvalid && (
-								<span
-									className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
-									role="alert"
-									aria-live="assertive"
-								>
-									{t('auth.invalidEmail')}
-								</span>
-							)}
-							{!isEmailInvalid && !doesEmailExist && email && (
-								<span
-									className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
-									role="alert"
-									aria-live="polite"
-								>
-									{t('auth.accountNotRegistered')}{' '}
-									<Link
-										className="text-primary font-medium hover:underline"
-										href="/sign-up"
+								{isEmailInvalid && (
+									<span
+										className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
+										role="alert"
+										aria-live="assertive"
 									>
-										{t('auth.signUp')}
-									</Link>{' '}
-									{t('auth.first')}.
-								</span>
-							)}
+										{t('auth.invalidEmail')}
+									</span>
+								)}
+								{!isEmailInvalid && !doesEmailExist && email && (
+									<span
+										className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
+										role="alert"
+										aria-live="polite"
+									>
+										{t('auth.accountNotRegistered')}{' '}
+										<Link
+											className="text-primary font-medium hover:underline"
+											href="/sign-up"
+										>
+											{t('auth.signUp')}
+										</Link>{' '}
+										{t('auth.first')}.
+									</span>
+								)}
 							</div>
 						</div>
 
-					<Button
-						size="lg"
-						className="gradient-btn text-white w-full mt-10"
-						type="submit"
-						// formAction={signInAction}
-						aria-live="polite"
-						aria-busy={isAuthenticating}
-						disabled={
-							!email || !doesEmailExist || isAuthenticating || isEmailInvalid
-						}
-					>
-						{isAuthenticating ? (
-							t('auth.authenticating')
-						) : (
-							<>
-								{t('auth.signInWithPasskey')} <Fingerprint />
-							</>
-						)}
-					</Button>
+						<Button
+							size="lg"
+							className="gradient-btn text-white w-full mt-10"
+							type="submit"
+							// formAction={signInAction}
+							aria-live="polite"
+							aria-busy={isAuthenticating}
+							disabled={
+								!email || !doesEmailExist || isAuthenticating || isEmailInvalid
+							}
+						>
+							{isAuthenticating ? (
+								t('auth.authenticating')
+							) : (
+								<>
+									{t('auth.signInWithPasskey')} <Fingerprint />
+								</>
+							)}
+						</Button>
 						<PasskeyInfoDialog />
 					</form>
 				</CardContent>
-			<CardFooter className="flex flex-col space-y-4 border-t p-6">
-				<div className="text-sm text-center text-muted-foreground">
-					{t('auth.dontHaveAccount')}{' '}
-					<Link
-						className="text-primary font-medium hover:underline"
-						href="/sign-up"
-					>
-						{t('auth.createNewOne')}
-					</Link>
-				</div>
-			</CardFooter>
+				<CardFooter className="flex flex-col space-y-4 border-t p-6">
+					<div className="text-sm text-center text-muted-foreground">
+						{t('auth.dontHaveAccount')}{' '}
+						<Link
+							className="text-primary font-medium hover:underline"
+							href="/sign-up"
+						>
+							{t('auth.createNewOne')}
+						</Link>
+					</div>
+				</CardFooter>
 			</Card>
 		</AuthLayout>
 	)

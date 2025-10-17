@@ -1,4 +1,12 @@
 import Link from 'next/link'
+import {
+	IoChevronForwardOutline,
+	IoCreateOutline,
+	IoMegaphoneOutline,
+	IoPeopleOutline,
+	IoSettingsOutline,
+	IoStarOutline,
+} from 'react-icons/io5'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -7,14 +15,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
-import {
-	IoCreateOutline,
-	IoMegaphoneOutline,
-	IoStarOutline,
-	IoPeopleOutline,
-	IoSettingsOutline,
-	IoChevronForwardOutline,
-} from 'react-icons/io5'
 
 export default async function ProjectManagementDashboardPage({
 	params,
@@ -101,7 +101,12 @@ function SectionCard({
 			</CardHeader>
 			<CardContent>
 				<Link replace href={href} className="inline-block">
-					<Button variant="primary-gradient" endIcon={<IoChevronForwardOutline />}>{cta}</Button>
+					<Button
+						variant="primary-gradient"
+						endIcon={<IoChevronForwardOutline />}
+					>
+						{cta}
+					</Button>
 				</Link>
 			</CardContent>
 		</Card>

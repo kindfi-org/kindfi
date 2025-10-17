@@ -19,8 +19,7 @@ export function FaqContainer() {
 
 	return (
 		<section className="w-full flex flex-col justify-center items-center bg-gradient-to-b from-white to-gray-50 py-24 md:py-32">
-			<FaqHeader
-			/>
+			<FaqHeader />
 			<FaqTabs
 				activeTab={activeTab}
 				selectedQuestion={selectedQuestion}
