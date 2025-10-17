@@ -3,20 +3,26 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '~/lib/utils'
+import {
+	IoSpeedometerOutline,
+	IoCreateOutline,
+	IoMegaphoneOutline,
+	IoStarOutline,
+	IoPeopleOutline,
+	IoSettingsOutline,
+} from 'react-icons/io5'
 
-const links: { href: (slug: string) => string; label: string }[] = [
-	{ href: (slug) => `/projects/${slug}/manage`, label: 'Overview' },
-	{ href: (slug) => `/projects/${slug}/manage/basics`, label: 'Basics' },
-	{ href: (slug) => `/projects/${slug}/manage/pitch`, label: 'Pitch' },
-	{
-		href: (slug) => `/projects/${slug}/manage/highlights`,
-		label: 'Highlights',
-	},
-	{ href: (slug) => `/projects/${slug}/manage/members`, label: 'Members' },
-	{
-		href: (slug) => `/projects/${slug}/manage/settings`,
-		label: 'Escrow & Settings',
-	},
+const links: {
+	href: (slug: string) => string
+	label: string
+	Icon: React.ComponentType<{ size?: number; className?: string }>
+}[] = [
+	{ href: (slug) => `/projects/${slug}/manage`, label: 'Overview', Icon: IoSpeedometerOutline },
+	{ href: (slug) => `/projects/${slug}/manage/basics`, label: 'Basics', Icon: IoCreateOutline },
+	{ href: (slug) => `/projects/${slug}/manage/pitch`, label: 'Pitch', Icon: IoMegaphoneOutline },
+	{ href: (slug) => `/projects/${slug}/manage/highlights`, label: 'Highlights', Icon: IoStarOutline },
+	{ href: (slug) => `/projects/${slug}/manage/members`, label: 'Members', Icon: IoPeopleOutline },
+	{ href: (slug) => `/projects/${slug}/manage/settings`, label: 'Escrow & Settings', Icon: IoSettingsOutline },
 ]
 
 export function ManageNav({ slug }: { slug: string }) {
@@ -28,7 +34,7 @@ export function ManageNav({ slug }: { slug: string }) {
 				Manage Project
 			</h2>
 			<ul className="mt-2 space-y-1">
-				{links.map(({ href, label }) => {
+				{links.map(({ href, label, Icon }) => {
 					const url = href(slug)
 					const isActive = pathname === url
 					return (
@@ -36,13 +42,14 @@ export function ManageNav({ slug }: { slug: string }) {
 							<Link
 								href={url}
 								className={cn(
-									'flex gap-2 items-center px-3 py-2 text-sm rounded-md transition-colors',
+									'group flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
 									isActive
 										? 'bg-primary text-primary-foreground'
-										: 'hover:bg-accent hover:text-accent-foreground',
+										: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
 								)}
 							>
-								{label}
+								<Icon className={cn('shrink-0', isActive ? 'opacity-100' : 'opacity-80 group-hover:opacity-100')} size={16} />
+								<span className="truncate">{label}</span>
 							</Link>
 						</li>
 					)

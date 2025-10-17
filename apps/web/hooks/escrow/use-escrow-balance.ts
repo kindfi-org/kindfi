@@ -7,13 +7,11 @@ import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 interface UseEscrowBalanceParams {
 	escrowContractAddress?: string
 	escrowType?: EscrowType
-	signer?: string
 }
 
 export function useEscrowBalance({
 	escrowContractAddress,
 	escrowType,
-	signer,
 }: UseEscrowBalanceParams) {
 	const { getMultipleBalances } = useEscrow()
 	const [balance, setBalance] = useState<number | null>(null)
@@ -26,12 +24,7 @@ export function useEscrowBalance({
 			setIsLoading(true)
 			setError(null)
 			const balances = await getMultipleBalances(
-				{
-					signer:
-						signer ||
-						'GCRYH6M5YLTGZTCAALJPIJGQZY4Z6XFFUVTINCELQG4OGLADUBTAE3OU',
-					addresses: [escrowContractAddress],
-				},
+				{ addresses: [escrowContractAddress] },
 				escrowType || 'multi-release',
 			)
 			const first = balances?.[0]
@@ -41,7 +34,7 @@ export function useEscrowBalance({
 		} finally {
 			setIsLoading(false)
 		}
-	}, [escrowContractAddress, escrowType, getMultipleBalances, signer])
+	}, [escrowContractAddress, escrowType, getMultipleBalances])
 
 	useEffect(() => {
 		fetchBalance()

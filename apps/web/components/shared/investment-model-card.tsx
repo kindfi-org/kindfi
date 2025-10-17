@@ -2,6 +2,7 @@ import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardFooter } from '~/components/base/card'
 import { ModelVariant } from '~/lib/types'
+import { useI18n } from '~/lib/i18n'
 
 const variantStyles = {
 	[ModelVariant.SECURE]:
@@ -28,6 +29,7 @@ export const InvestmentModelCard = ({
 	capabilities,
 	onLearnMore,
 }: InvestmentModelCardProps) => {
+	const { t } = useI18n()
 	return (
 		<Card
 			className={`transition-all duration-200 ${variantStyles[variant]} border`}
@@ -53,15 +55,15 @@ export const InvestmentModelCard = ({
 			</CardContent>
 
 			<CardFooter className="p-6 pt-0">
-				<Button
-					variant="ghost"
-					aria-label={`Learn More about ${title} investment model`}
-					className="w-full flex items-center justify-center gap-2 hover:bg-white/50"
-					onClick={onLearnMore}
-				>
-					Learn More
-					<ArrowRight className="w-4 h-4" />
-				</Button>
+			<Button
+				variant="ghost"
+				aria-label={`Learn More about ${title} investment model`}
+				className="w-full flex items-center justify-center gap-2 hover:bg-white/50"
+				onClick={onLearnMore}
+			>
+				{t('common.learnMore')}
+				<ArrowRight className="w-4 h-4" />
+			</Button>
 			</CardFooter>
 		</Card>
 	)

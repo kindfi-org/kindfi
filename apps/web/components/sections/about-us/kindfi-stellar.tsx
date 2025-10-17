@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { FloatingFeature } from '~/components/shared/floating-feature'
 import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
+import { useTranslation } from '~/hooks/use-translation'
 
 const containerVariants = {
 	hidden: { opacity: 0 },
@@ -15,29 +16,28 @@ const containerVariants = {
 }
 
 const KindFiStellar = () => {
-	return (
+    const { t } = useTranslation()
+    return (
 		<section className="relative py-16 overflow-hidden">
 			<div className="container mx-auto px-6 text-center">
-				<motion.h2
+                <motion.h2
 					initial={{ opacity: 0, y: -20 }}
 					whileInView={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5 }}
 					viewport={{ once: true, amount: 0.2 }}
 					className="text-3xl md:text-4xl font-bold"
 				>
-					KindFi + Stellar: A Shared Vision
+                    {t('about.kindfiStellar.title')}
 				</motion.h2>
 
-				<motion.p
+                <motion.p
 					initial={{ opacity: 0 }}
 					whileInView={{ opacity: 1 }}
 					transition={{ delay: 0.2, duration: 0.5 }}
 					viewport={{ once: true, amount: 0.2 }}
 					className="text-gray-600 max-w-2xl mx-auto mt-4"
 				>
-					With Stellar, KindFi brings trustless, efficient, and borderless
-					collaboration to impact-driven communities from small NGOs in Costa
-					Rica to large donor collectives across LATAM.
+                    {t('about.kindfiStellar.description')}
 				</motion.p>
 
 				<motion.div
@@ -47,11 +47,11 @@ const KindFiStellar = () => {
 					viewport={{ once: true, amount: 0.2 }}
 					className="relative mt-12 flex flex-wrap justify-center items-center gap-8"
 				>
-					{mockAboutUs.kindfiStellarFeatures.map((feature) => (
+                    {mockAboutUs.kindfiStellarFeatures.map((feature) => (
 						<FloatingFeature
 							key={feature.id}
 							icon={feature.icon}
-							title={feature.title}
+                            title={t(`about.kindfiStellar.features.${feature.id}.title`)}
 						/>
 					))}
 				</motion.div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { IoCheckmark, IoInformationCircleOutline } from 'react-icons/io5'
+import { IoCheckmark, IoInformationCircleOutline, IoAddOutline } from 'react-icons/io5'
 import { Button } from '~/components/base/button'
 import { Card } from '~/components/base/card'
 import { ExampleHighlights } from '~/components/sections/project/highlights/example-highlights'
@@ -65,7 +65,7 @@ export default function ProjectHighlights() {
 					stand out.
 				</p>
 
-				<Card className="p-6 shadow-lg bg-white border-none">
+				<Card className="p-6 shadow-sm">
 					<div className="space-y-6">
 						<h2 className="text-2xl font-semibold">Highlights</h2>
 
@@ -81,10 +81,11 @@ export default function ProjectHighlights() {
 
 						<Button
 							variant="outline"
-							className="w-full border-gray-200 bg-white hover:text-primary"
+							className="w-full border-gray-200 bg-background hover:text-primary"
 							onClick={addHighlight}
+							startIcon={<IoAddOutline />}
 						>
-							+ Add Another Highlight
+							Add another highlight
 						</Button>
 
 						<div className="flex flex-start gap-2 p-4 bg-white border border-gray-200 rounded-lg">
@@ -100,14 +101,17 @@ export default function ProjectHighlights() {
 					</div>
 				</Card>
 
-				<Button
-					className="mt-8 w-full sm:w-auto text-white float-right"
-					disabled={!isValid}
-					onClick={handleSave}
-					variant="secondary"
-				>
-					<IoCheckmark className="text-white" size={20} /> Save & Continue
-				</Button>
+				<div className="mt-8 flex justify-end">
+					<Button
+						className="w-full sm:w-auto text-white"
+						disabled={!isValid}
+						onClick={handleSave}
+						variant="primary-gradient"
+						endIcon={<IoCheckmark size={18} />}
+					>
+						Save & Continue
+					</Button>
+				</div>
 			</div>
 
 			<div className="lg:w-[400px] space-y-8 ">

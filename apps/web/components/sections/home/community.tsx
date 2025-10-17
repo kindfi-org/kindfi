@@ -4,12 +4,31 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 import { BenefitItem } from '~/components/shared/benefits-items'
 import { CTAForm } from '~/components/shared/cta-form'
+import { SectionContainer } from '~/components/shared/section-container'
 import { Testimonial } from '~/components/shared/testimonial-card'
 import { benefits, testimonialData } from '~/lib/constants/community-data'
+import { useI18n } from '~/lib/i18n'
 
 export function Community() {
 	const prefersReducedMotion = useReducedMotion()
 	const [formStatus, setFormStatus] = useState<FormStatus | null>(null)
+	const { t } = useI18n()
+	
+	// Translated benefits
+	const translatedBenefits = [
+		{ ...benefits[0], text: t('home.benefit1') },
+		{ ...benefits[1], text: t('home.benefit2') },
+		{ ...benefits[2], text: t('home.benefit3') },
+		{ ...benefits[3], text: t('home.benefit4') },
+	]
+	
+	// Translated testimonial
+	const translatedTestimonial = {
+		...testimonialData,
+		quote: t('home.testimonialQuote'),
+		author: t('home.testimonialAuthor'),
+		role: t('home.testimonialRole'),
+	}
 
 	const handleFormSubmission = async (data: FormData) => {
 		setFormStatus(null)
@@ -31,7 +50,7 @@ export function Community() {
 
 	return (
 		<section className="py-20">
-			<div className="container mx-auto px-4">
+			<SectionContainer>
 				{/* Header */}
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
@@ -42,36 +61,33 @@ export function Community() {
 					}}
 					className="text-center mb-20 max-w-3xl mx-auto"
 				>
-					<h2 className="text-4xl font-bold text-gray-900 mb-6">
-						<span className="block">More Than Crowdfunding</span>
-						<span className="block gradient-text">
-							A Blockchain Movement for Good
-						</span>
-					</h2>
-					<p className="text-lg font-medium text-gray-600 leading-relaxed text-justify">
-						KindFi is building a global community where purpose meets
-						technology. Every campaign is not just about funding it is about
-						creating a ripple of verified impact, led by contributors, creators,
-						and change-makers using blockchain for real-world change.
-					</p>
+				<h2 className="text-4xl font-bold text-gray-900 mb-6">
+					<span className="block">{t('home.communityTitle')}</span>
+					<span className="block gradient-text">
+						{t('home.communitySubtitle')}
+					</span>
+				</h2>
+				<p className="text-lg font-medium text-gray-600 leading-relaxed text-justify">
+					{t('home.communityDescription')}
+				</p>
 				</motion.div>
 
-				{/* Main Content */}
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
-					{/* Benefits List */}
-					<div className="container space-y-2">
-						{benefits.map((benefit, index) => (
-							<BenefitItem
-								key={benefit.id}
-								{...benefit}
-								isActive={index === 0}
-							/>
-						))}
-					</div>
-
-					{/* Testimonial */}
-					<Testimonial {...testimonialData} />
+			{/* Main Content */}
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
+				{/* Benefits List */}
+				<div className="container space-y-2">
+					{translatedBenefits.map((benefit, index) => (
+						<BenefitItem
+							key={benefit.id}
+							{...benefit}
+							isActive={index === 0}
+						/>
+					))}
 				</div>
+
+				{/* Testimonial */}
+				<Testimonial {...translatedTestimonial} />
+			</div>
 
 				{/* CTA Form */}
 				<CTAForm onSubmit={handleFormSubmission} />
@@ -88,7 +104,7 @@ export function Community() {
 						{formStatus.message}
 					</div>
 				)}
-			</div>
+			</SectionContainer>
 		</section>
 	)
 }

@@ -783,8 +783,10 @@ export const profiles = pgTable(
 		imageUrl: text('image_url').default(''),
 		email: text(),
 		nextAuthUserId: uuid('next_auth_user_id'),
+        slug: text('slug'),
 	},
 	(table) => [
+        uniqueIndex('profiles_slug_key').using('btree', table.slug.asc().nullsLast().op('text_ops')),
 		index('idx_profiles_next_auth_user_id').using(
 			'btree',
 			table.nextAuthUserId.asc().nullsLast().op('uuid_ops'),
@@ -2080,6 +2082,57 @@ export const kindlerProjects = pgTable(
 			to: ['authenticated'],
 		}),
 	],
+)
+
+export const userFollows = pgTable(
+    'user_follows',
+    {
+        followerId: uuid('follower_id').notNull(),
+        followingId: uuid('following_id').notNull(),
+        createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+            .defaultNow()
+            .notNull(),
+    },
+    (table) => [
+        index('idx_user_follows_follower').using(
+            'btree',
+            table.followerId.asc().nullsLast().op('uuid_ops'),
+        ),
+        index('idx_user_follows_following').using(
+            'btree',
+            table.followingId.asc().nullsLast().op('uuid_ops'),
+        ),
+        foreignKey({
+            columns: [table.followerId],
+            foreignColumns: [profiles.id],
+            name: 'user_follows_follower_id_fkey',
+        }).onDelete('cascade'),
+        foreignKey({
+            columns: [table.followingId],
+            foreignColumns: [profiles.id],
+            name: 'user_follows_following_id_fkey',
+        }).onDelete('cascade'),
+        primaryKey({
+            columns: [table.followerId, table.followingId],
+            name: 'user_follows_pkey',
+        }),
+        pgPolicy('user_follows_select', {
+            as: 'permissive',
+            for: 'select',
+            to: ['public'],
+            using: sql`true`,
+        }),
+        pgPolicy('user_follows_insert', {
+            as: 'permissive',
+            for: 'insert',
+            to: ['authenticated'],
+        }),
+        pgPolicy('user_follows_delete', {
+            as: 'permissive',
+            for: 'delete',
+            to: ['authenticated'],
+        }),
+    ],
 )
 
 export const escrowMilestones = pgTable(

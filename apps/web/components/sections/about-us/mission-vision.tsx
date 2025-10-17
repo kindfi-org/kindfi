@@ -8,9 +8,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
+import { SectionContainer } from '~/components/shared/section-container'
+import { useI18n } from '~/lib/i18n'
 import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 const MissionVision = () => {
+	const { t } = useI18n()
 	const mission = mockAboutUs?.missionVision?.mission
 	const vision = mockAboutUs?.missionVision?.vision
 
@@ -22,8 +25,9 @@ const MissionVision = () => {
 			whileInView={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
 			viewport={{ once: true, amount: 0.2 }}
-			className="container mx-auto px-6 flex flex-col items-center relative"
+			className="flex flex-col items-center relative"
 		>
+			<SectionContainer>
 			{/* Section title */}
 			<motion.div
 				className="text-center mb-16"
@@ -32,9 +36,9 @@ const MissionVision = () => {
 				transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
 				viewport={{ once: true, amount: 0.2 }}
 			>
-				<h2 className="text-3xl md:text-4xl font-bold gradient-text inline-block mb-4">
-					Our Purpose
-				</h2>
+			<h2 className="text-3xl md:text-4xl font-bold gradient-text inline-block mb-4">
+				{t('about.ourPurpose')}
+			</h2>
 			</motion.div>
 
 			<div className="flex flex-col md:flex-row gap-8 justify-center items-stretch z-10 max-w-5xl">
@@ -53,16 +57,16 @@ const MissionVision = () => {
 								<div className="p-3 rounded-lg bg-purple-100 text-green-600">
 									<Target size={24} strokeWidth={2} />
 								</div>
-								<CardTitle className="text-2xl font-bold text-gray-800">
-									{mission.title}
-								</CardTitle>
-							</div>
-						</CardHeader>
-						<CardContent className="pb-8">
-							<p className="text-gray-700 text-lg leading-relaxed">
-								{mission.description}
-							</p>
-						</CardContent>
+						<CardTitle className="text-2xl font-bold text-gray-800">
+							{t('about.missionTitle')}
+						</CardTitle>
+					</div>
+				</CardHeader>
+				<CardContent className="pb-8">
+					<p className="text-gray-700 text-lg leading-relaxed">
+						{t('about.missionDesc')}
+					</p>
+				</CardContent>
 					</Card>
 				</motion.div>
 
@@ -81,19 +85,20 @@ const MissionVision = () => {
 								<div className="p-3 rounded-lg bg-indigo-100 text-indigo-600">
 									<EyeIcon size={24} strokeWidth={2} />
 								</div>
-								<CardTitle className="text-2xl font-bold text-gray-800">
-									{vision.title}
-								</CardTitle>
-							</div>
-						</CardHeader>
-						<CardContent className="pb-8">
-							<p className="text-gray-700 text-lg leading-relaxed">
-								{vision.description}
-							</p>
-						</CardContent>
+						<CardTitle className="text-2xl font-bold text-gray-800">
+							{t('about.visionTitle')}
+						</CardTitle>
+					</div>
+				</CardHeader>
+				<CardContent className="pb-8">
+					<p className="text-gray-700 text-lg leading-relaxed">
+						{t('about.visionDesc')}
+					</p>
+				</CardContent>
 					</Card>
 				</motion.div>
 			</div>
+			</SectionContainer>
 		</motion.section>
 	)
 }

@@ -1,10 +1,13 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
+import { SectionContainer } from '~/components/shared/section-container'
 import { features } from '~/lib/constants/final-cta-data'
+import { useI18n } from '~/lib/i18n'
 
 export const FinalCTA = () => {
 	const shouldReduceMotion = useReducedMotion()
+	const { t } = useI18n()
 
 	return (
 		<section className="relative py-24 overflow-hidden">
@@ -21,7 +24,7 @@ export const FinalCTA = () => {
 				/>
 			</div>
 
-			<div className="relative container mx-auto px-4">
+			<SectionContainer className="relative">
 				{/* Header */}
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
@@ -35,21 +38,15 @@ export const FinalCTA = () => {
 					}}
 					className="text-center mb-16 max-w-3xl mx-auto"
 				>
-					<h2 className="text-4xl font-bold text-gray-900 mb-6">
-						Built by Web3 Developers
-						<span className="block gradient-text">
-							Designed for Real-World Change
-						</span>
-					</h2>
-					<p className="text-lg text-gray-600 leading-relaxed">
-						KindFi is the first crowdfunding platform built by Web3 developers
-						specifically for verified social impact. Backed by the Stellar
-						blockchain, we bridge crypto transparency with human needs uniting
-						cause creators, collaborators, and communities across Latin America
-						and beyond. When you launch on KindFi, you are not just raising
-						funds. You are joining a movement to make social good unstoppable
-						and accountable.
-					</p>
+				<h2 className="text-4xl font-bold text-gray-900 mb-6">
+					{t('home.finalCtaTitle')}
+					<span className="block gradient-text">
+						{t('home.finalCtaSubtitle')}
+					</span>
+				</h2>
+				<p className="text-lg text-gray-600 leading-relaxed">
+					{t('home.finalCtaDescription')}
+				</p>
 				</motion.div>
 
 				{/* Main Content */}
@@ -75,7 +72,7 @@ export const FinalCTA = () => {
 						</motion.div>
 					))}
 				</div>
-			</div>
+			</SectionContainer>
 		</section>
 	)
 }

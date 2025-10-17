@@ -18,12 +18,8 @@ export function FaqContainer() {
 	} = useFaqs()
 
 	return (
-		<section className="w-full bg-white flex flex-col justify-center items-center py-32">
+		<section className="w-full flex flex-col justify-center items-center bg-gradient-to-b from-white to-gray-50 py-24 md:py-32">
 			<FaqHeader
-				filteredQuestions={filteredQuestions}
-				inputValue={inputValue}
-				handleSearch={handleSearch}
-				handleSelectQuestion={handleSelectQuestion}
 			/>
 			<FaqTabs
 				activeTab={activeTab}

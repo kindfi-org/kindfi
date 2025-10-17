@@ -24,8 +24,8 @@ export const SectionCaption = ({
 	}
 
 	return (
-		<div className={`mx-auto mb-12 max-w-3xl text-center ${className}`}>
-			<h2 className="mb-4 text-3xl font-semibold md:text-4xl">
+		<div className={`mx-auto mb-12 text-center ${className}`}>
+			<h2 className="mb-4 text-4xl font-semibold md:text-4xl">
 				{highlightText(title)}
 			</h2>
 			<p className="text-gray-600">{subtitle}</p>

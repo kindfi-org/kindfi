@@ -18,10 +18,12 @@ import { Label } from '~/components/base/label'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { useFormValidation } from '~/hooks/use-form-validation'
+import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 
 export function SignupComponent() {
 	const router = useRouter()
+	const { t } = useI18n()
 	const [{ email, isSubmitting, error, success }, setSignUpState] = useSetState(
 		{
 			email: '',
@@ -79,12 +81,12 @@ export function SignupComponent() {
 			<Card className="w-full max-w-md">
 				<CardHeader className="space-y-2 text-center">
 					<div className="flex justify-between mb-4">
-						<div className="flex-col">
-							<h1 className="gradient-text text-2xl mb-2 text-start font-semibold tracking-tight">
-								Create an account
-							</h1>
-							<h3> Enter your details below to create your account</h3>
-						</div>
+				<div className="flex-col">
+					<h1 className="gradient-text text-2xl mb-2 text-start font-semibold tracking-tight">
+						{t('auth.createAccount')}
+					</h1>
+					<h3>{t('auth.signUpSubtitle')}</h3>
+				</div>
 						<div className="flex justify-center items-center rounded-full bg-blue-500/10 w-12 h-12">
 							<UserPlus className="h-6 w-6 text-primary" />
 						</div>
@@ -113,20 +115,20 @@ export function SignupComponent() {
 							</output>
 						)}
 
-						<div className="space-y-2">
-							<Label htmlFor="email" id="email-label">
-								Email
-							</Label>
-							<div className="space-y-1 pb-6 relative">
-								<Mail
-									className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
-									aria-hidden="true"
-								/>
-								<Input
-									id="email"
-									name="email"
-									type="email"
-									placeholder="you@example.com"
+					<div className="space-y-2">
+						<Label htmlFor="email" id="email-label">
+							{t('auth.email')}
+						</Label>
+						<div className="space-y-1 pb-6 relative">
+							<Mail
+								className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
+								aria-hidden="true"
+							/>
+							<Input
+								id="email"
+								name="email"
+								type="email"
+								placeholder={t('auth.emailPlaceholder')}
 									required
 									aria-labelledby="email-label"
 									aria-describedby={
@@ -144,62 +146,62 @@ export function SignupComponent() {
 											!isEmailInvalid && !doesEmailExist && email,
 									})}
 								/>
-								{email &&
-									(isEmailInvalid || (!isEmailInvalid && doesEmailExist)) && (
-										<span
-											className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
-											role="alert"
-											aria-live="polite"
-										>
-											{isEmailInvalid ? (
-												'Please enter a valid email address.'
-											) : (
-												<>
-													Account is already registered. Please{' '}
-													<Link
-														className="text-primary font-medium hover:underline"
-														href="/sign-in"
-													>
-														sign in
-													</Link>{' '}
-													instead.
-												</>
-											)}
-										</span>
-									)}
+							{email &&
+								(isEmailInvalid || (!isEmailInvalid && doesEmailExist)) && (
+									<span
+										className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
+										role="alert"
+										aria-live="polite"
+									>
+										{isEmailInvalid ? (
+											t('auth.invalidEmail')
+										) : (
+											<>
+												{t('auth.accountExists')}{' '}
+												<Link
+													className="text-primary font-medium hover:underline"
+													href="/sign-in"
+												>
+													{t('auth.signIn')}
+												</Link>{' '}
+												{t('auth.instead')}.
+											</>
+										)}
+									</span>
+								)}
 							</div>
 						</div>
 
-						<Button
-							className="w-full gradient-btn text-white"
-							type="submit"
-							disabled={isSubmitting || isEmailInvalid || !email}
-							aria-live="polite"
-							aria-busy={isSubmitting}
-						>
-							{isSubmitting ? (
-								'Creating account...'
-							) : (
-								<>
-									Create account <UserPlus className="ml-2 h-4 w-4" />
-								</>
-							)}
-						</Button>
+					<Button
+						className="w-full gradient-btn text-white"
+						type="submit"
+						disabled={isSubmitting || isEmailInvalid || !email}
+						aria-live="polite"
+						aria-busy={isSubmitting}
+					>
+						{isSubmitting ? (
+							t('auth.creatingAccount')
+						) : (
+							<>
+								{t('auth.createAccountBtn')} <UserPlus className="ml-2 h-4 w-4" />
+							</>
+						)}
+					</Button>
 
 						<PasskeyInfoDialog />
 					</form>
 				</CardContent>
-				<CardFooter className="flex flex-col space-y-4 border-t p-6">
-					<div className="text-center text-muted-foreground">
-						Already have an account?{' '}
-						<Link
-							href="/sign-in"
-							className="text-primary underline hover:text-primary/80"
-						>
-							Sign in
-						</Link>
-					</div>
-				</CardFooter>
+			<CardFooter className="flex flex-col space-y-4 border-t p-6">
+				<div className="text-center text-muted-foreground">
+					{t('auth.alreadyHaveAccount')}{' '}
+					<Link
+						href="/sign-in"
+						className="text-primary underline hover:text-primary/80"
+					>
+						{t('nav.signIn')}
+					</Link>
+				</div>
+			</CardFooter>
 			</Card>
 		</AuthLayout>
 	)

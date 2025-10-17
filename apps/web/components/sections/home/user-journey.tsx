@@ -5,7 +5,8 @@ import Link from 'next/link'
 import React from 'react'
 import { Button } from '~/components/base/button'
 import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
-import { investorSteps, projectSteps } from '~/lib/constants/user-journey-data'
+import { SectionContainer } from '~/components/shared/section-container'
+import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 
 type ViewType = 'project' | 'investor'
@@ -13,6 +14,64 @@ type ViewType = 'project' | 'investor'
 export function UserJourney() {
 	const [activeView, setActiveView] = React.useState<ViewType>('project')
 	const [waitlistOpen, setWaitlistOpen] = React.useState(false)
+	const { t } = useI18n()
+
+	// Translated steps
+	const projectSteps = [
+		{
+			number: 1,
+			title: t('home.kindlerStep1Title'),
+			description: t('home.kindlerStep1Desc'),
+		},
+		{
+			number: 2,
+			title: t('home.kindlerStep2Title'),
+			description: t('home.kindlerStep2Desc'),
+		},
+		{
+			number: 3,
+			title: t('home.kindlerStep3Title'),
+			description: t('home.kindlerStep3Desc'),
+		},
+		{
+			number: 4,
+			title: t('home.kindlerStep4Title'),
+			description: t('home.kindlerStep4Desc'),
+		},
+		{
+			number: 5,
+			title: t('home.kindlerStep5Title'),
+			description: t('home.kindlerStep5Desc'),
+		},
+	]
+
+	const investorSteps = [
+		{
+			number: 1,
+			title: t('home.kinderStep1Title'),
+			description: t('home.kinderStep1Desc'),
+		},
+		{
+			number: 2,
+			title: t('home.kinderStep2Title'),
+			description: t('home.kinderStep2Desc'),
+		},
+		{
+			number: 3,
+			title: t('home.kinderStep3Title'),
+			description: t('home.kinderStep3Desc'),
+		},
+		{
+			number: 4,
+			title: t('home.kinderStep4Title'),
+			description: t('home.kinderStep4Desc'),
+		},
+		{
+			number: 5,
+			title: t('home.kinderStep5Title'),
+			description: t('home.kinderStep5Desc'),
+		},
+	]
 
 	const steps = activeView === 'project' ? projectSteps : investorSteps
 
@@ -35,24 +94,21 @@ export function UserJourney() {
 	}, [])
 
 	return (
-		<section className="gradient-bg-blue-purple relative overflow-hidden px-4 py-14">
+		<section className=" relative overflow-hidden py-14 bg-white">
 			{/* Background Pattern */}
 			<div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
-			<div className="relative mx-auto max-w-7xl">
+			<SectionContainer className="relative">
 				{/* Header */}
 				<div className="text-center mb-16">
-					<motion.div {...fadeInUpAnimation}>
-						<h2 className="text-4xl font-bold text-gray-900 mb-4">
-							Transform Real-World Impact with the <br />
-							<span className="gradient-text">Power of Stellar Blockchain</span>
-						</h2>
-						<p className="text-gray-600 max-w-2xl mx-auto text-lg">
-							Whether you're launching a cause or supporting one, KindFi offers
-							a transparent path to creating real change. Every step is designed
-							to build trust, maximize visibility, and ensure funding is tied to
-							real outcomes.
-						</p>
-					</motion.div>
+				<motion.div {...fadeInUpAnimation}>
+					<h2 className="text-4xl font-bold text-gray-900 mb-4">
+						{t('home.journeyTitle')} <br />
+						<span className="gradient-text">{t('home.journeyTitleHighlight')}</span>
+					</h2>
+					<p className="text-gray-600 max-w-2xl mx-auto text-lg">
+						{t('home.journeyDescription')}
+					</p>
+				</motion.div>
 
 					{/* Toggle Buttons */}
 					<motion.div
@@ -60,45 +116,45 @@ export function UserJourney() {
 						{...fadeInUpAnimation}
 					>
 						<div className="inline-flex rounded-full p-1 bg-white shadow-sm border border-gray-100">
-							<Button
-								variant={activeView === 'project' ? 'default' : 'ghost'}
-								className={cn(
-									'rounded-full px-6 py-2 text-sm font-medium transition-all duration-200',
-									activeView === 'project'
-										? 'gradient-btn text-white'
-										: 'text-gray-600 hover:text-emerald-600',
-								)}
-								onClick={() => setActiveView('project')}
-								aria-pressed={activeView === 'project'}
-								aria-label="Show project creator journey"
-								onKeyDown={(e) => {
-									if (e.key === 'ArrowRight') {
-										e.preventDefault()
-										setActiveView('investor')
-									}
-								}}
-							>
-								For Kindlers
-							</Button>
-							<Button
-								variant={activeView === 'investor' ? 'default' : 'ghost'}
-								className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
-									activeView === 'investor'
-										? 'gradient-btn text-white'
-										: 'text-gray-600 hover:text-emerald-600'
-								}`}
-								onClick={() => setActiveView('investor')}
-								aria-pressed={activeView === 'investor'}
-								aria-label="Show investor journey"
-								onKeyDown={(e) => {
-									if (e.key === 'ArrowLeft') {
-										e.preventDefault()
-										setActiveView('project')
-									}
-								}}
-							>
-								For Kinders
-							</Button>
+					<Button
+						variant={activeView === 'project' ? 'default' : 'ghost'}
+						className={cn(
+							'rounded-full px-6 py-2 text-sm font-medium transition-all duration-200',
+							activeView === 'project'
+								? 'gradient-btn text-white'
+								: 'text-gray-600 hover:text-emerald-600',
+						)}
+						onClick={() => setActiveView('project')}
+						aria-pressed={activeView === 'project'}
+						aria-label="Show project creator journey"
+						onKeyDown={(e) => {
+							if (e.key === 'ArrowRight') {
+								e.preventDefault()
+								setActiveView('investor')
+							}
+						}}
+					>
+						{t('home.forKindlers')}
+					</Button>
+					<Button
+						variant={activeView === 'investor' ? 'default' : 'ghost'}
+						className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
+							activeView === 'investor'
+								? 'gradient-btn text-white'
+								: 'text-gray-600 hover:text-emerald-600'
+						}`}
+						onClick={() => setActiveView('investor')}
+						aria-pressed={activeView === 'investor'}
+						aria-label="Show investor journey"
+						onKeyDown={(e) => {
+							if (e.key === 'ArrowLeft') {
+								e.preventDefault()
+								setActiveView('project')
+							}
+						}}
+					>
+						{t('home.forKinders')}
+					</Button>
 						</div>
 					</motion.div>
 				</div>
@@ -140,35 +196,35 @@ export function UserJourney() {
 					animate={{ opacity: 1 }}
 					transition={{ duration: 0.5, delay: 0.8 }}
 				>
-					{activeView === 'project' ? (
-						<>
-							<Button
-								size="lg"
-								className="gradient-border-btn text-white px-8"
-								onClick={() => setWaitlistOpen(true)}
-								aria-label="Waitlist your project"
-								variant="outline"
-							>
-								Waitlist Your Project
-							</Button>
-							<WaitlistModal
-								open={waitlistOpen}
-								onOpenChange={setWaitlistOpen}
-							/>
-						</>
-					) : (
+				{activeView === 'project' ? (
+					<>
 						<Button
 							size="lg"
 							className="gradient-border-btn text-white px-8"
-							asChild
-							aria-label="Explore causes"
+							onClick={() => setWaitlistOpen(true)}
+							aria-label={t('home.waitlistYourProject')}
 							variant="outline"
 						>
-							<Link href="/projects">Explore Causes</Link>
+							{t('home.waitlistYourProject')}
 						</Button>
-					)}
+						<WaitlistModal
+							open={waitlistOpen}
+							onOpenChange={setWaitlistOpen}
+						/>
+					</>
+				) : (
+					<Button
+						size="lg"
+						className="gradient-border-btn text-white px-8"
+						asChild
+						aria-label={t('home.exploreCauses')}
+						variant="outline"
+					>
+						<Link href="/projects">{t('home.exploreCauses')}</Link>
+					</Button>
+				)}
 				</motion.div>
-			</div>
+			</SectionContainer>
 		</section>
 	)
 }
