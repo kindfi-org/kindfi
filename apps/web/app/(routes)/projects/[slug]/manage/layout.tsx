@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Card } from '~/components/base/card'
 import { ManageNav } from '../../../../../components/sections/projects/manage/manage-nav'
 
 export default async function ManageLayout({
@@ -12,9 +13,11 @@ export default async function ManageLayout({
 
 	return (
 		<section className="container mx-auto px-4 py-8 md:py-12">
-			<div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
+			<div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
 				<aside className="lg:sticky lg:top-24 h-fit">
-					<ManageNav slug={slug} />
+					<Card className="p-4">
+						<ManageNav slug={slug} />
+					</Card>
 				</aside>
 				<main className="min-w-0">{children}</main>
 			</div>

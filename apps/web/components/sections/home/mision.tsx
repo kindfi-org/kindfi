@@ -1,8 +1,10 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useI18n } from '~/lib/i18n'
 
 export const KindfiMission = () => {
+	const { t } = useI18n()
 	return (
 		<div className="relative py-16 px-4 overflow-hidden">
 			{/* Enhanced gradient background with subtle animation */}
@@ -29,7 +31,7 @@ export const KindfiMission = () => {
 						animate={{ opacity: 1 }}
 						transition={{ duration: 0.6, delay: 0.2 }}
 					>
-						KindFi
+						{t('home.missionTitle')}
 					</motion.h4>
 
 					<motion.div
@@ -38,18 +40,13 @@ export const KindfiMission = () => {
 						transition={{ duration: 0.6, delay: 0.4 }}
 					>
 						<p className="text-gray-700 mb-6 leading-relaxed text-center sm:text-left">
-							Born in Latin America and powered by secure blockchain technology,
-							KindFi connects donors and social projects to create measurable
-							impact worldwide.
+							{t('home.missionText1')}
 						</p>
 
 						<p className="text-gray-700 mb-8 leading-relaxed text-center sm:text-left">
-							From clean water to children&apos;s education and animal rescue,
-							every verified campaign is backed by real people, transparent
-							systems, and milestone-based progress you can see.
+							{t('home.missionText2')}
 							<span className="block mt-4 font-medium text-teal-700">
-								This is social impact reimagined — where every wallet becomes a
-								voice for good.
+								{t('home.missionHighlight')}
 							</span>
 						</p>
 					</motion.div>

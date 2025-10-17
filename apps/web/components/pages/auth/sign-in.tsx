@@ -18,11 +18,13 @@ import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { useStellarContext } from '~/hooks/contexts/stellar-context'
 import { usePasskeyAuthentication } from '~/hooks/passkey/use-passkey-authentication'
 import { useFormValidation } from '~/hooks/use-form-validation'
+import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 
 export function LoginComponent() {
 	const [email, setEmail] = useState('')
 	const _router = useRouter()
+	const { t } = useI18n()
 
 	const {
 		onSign,
@@ -75,9 +77,9 @@ export function LoginComponent() {
 					<div className="flex justify-between mb-4">
 						<div className="flex-col">
 							<h1 className="gradient-text text-2xl mb-2 text-start font-semibold tracking-tight">
-								Welcome Back
+								{t('auth.welcomeBack')}
 							</h1>
-							<h2>Sign in with your passkey to continue</h2>
+							<h2>{t('auth.signInSubtitle')}</h2>
 						</div>
 						<div className="flex justify-center items-center rounded-full bg-blue-500/10 w-12 h-12">
 							<Fingerprint className="h-6 w-6 text-primary text-2xl" />
@@ -92,14 +94,14 @@ export function LoginComponent() {
 								role="alert"
 								aria-live="assertive"
 							>
-								Device account not found. Please{' '}
+								{t('auth.deviceNotFound')}{' '}
 								<Link
 									className="text-primary font-medium hover:underline"
 									href="/sign-up"
 								>
-									sign up
+									{t('auth.signUp')}
 								</Link>{' '}
-								first.
+								{t('auth.first')}.
 							</legend>
 						)}
 
@@ -109,25 +111,25 @@ export function LoginComponent() {
 								role="alert"
 								aria-live="assertive"
 							>
-								There was an error during authentication. Please try again.
+								{t('auth.authError')}
 							</legend>
 						)}
 
 						{authSuccess && (
 							<output className="text-green-600" aria-live="polite">
-								Authentication successful! Redirecting...
+								{t('auth.authSuccess')}
 							</output>
 						)}
 						<div className="space-y-2">
 							<Label htmlFor="email" id="email-label">
-								Email
+								{t('auth.email')}
 							</Label>
 							<div className="space-y-1 pb-6 relative">
 								<Input
 									id="email"
 									name="email"
 									type="email"
-									placeholder="you@example.com"
+									placeholder={t('auth.emailPlaceholder')}
 									required
 									aria-labelledby="email-label"
 									aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
@@ -148,7 +150,7 @@ export function LoginComponent() {
 										role="alert"
 										aria-live="assertive"
 									>
-										Please enter a valid email address.
+										{t('auth.invalidEmail')}
 									</span>
 								)}
 								{!isEmailInvalid && !doesEmailExist && email && (
@@ -157,14 +159,14 @@ export function LoginComponent() {
 										role="alert"
 										aria-live="polite"
 									>
-										Account is not registered. Please{' '}
+										{t('auth.accountNotRegistered')}{' '}
 										<Link
 											className="text-primary font-medium hover:underline"
 											href="/sign-up"
 										>
-											sign up
+											{t('auth.signUp')}
 										</Link>{' '}
-										first.
+										{t('auth.first')}.
 									</span>
 								)}
 							</div>
@@ -182,10 +184,10 @@ export function LoginComponent() {
 							}
 						>
 							{isAuthenticating ? (
-								'Authenticating...'
+								t('auth.authenticating')
 							) : (
 								<>
-									Sign in with passkey <Fingerprint />
+									{t('auth.signInWithPasskey')} <Fingerprint />
 								</>
 							)}
 						</Button>
@@ -194,12 +196,12 @@ export function LoginComponent() {
 				</CardContent>
 				<CardFooter className="flex flex-col space-y-4 border-t p-6">
 					<div className="text-sm text-center text-muted-foreground">
-						Don&apos;t have an account yet?{' '}
+						{t('auth.dontHaveAccount')}{' '}
 						<Link
 							className="text-primary font-medium hover:underline"
 							href="/sign-up"
 						>
-							Create new one
+							{t('auth.createNewOne')}
 						</Link>
 					</div>
 				</CardFooter>

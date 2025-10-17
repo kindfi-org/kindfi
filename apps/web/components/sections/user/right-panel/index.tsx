@@ -2,7 +2,7 @@
 /** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: any */
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Card } from '~/components/base/card'
 import { ScrollArea } from '~/components/base/scroll-area'
 import { Tabs, TabsList, TabsTrigger } from '~/components/base/tabs'
@@ -16,8 +16,16 @@ import {
 	UpdatesSkeleton,
 } from './lazy-components'
 
-export function RightPanel() {
+export function RightPanel({
+	initialMode = 'user',
+}: {
+	initialMode?: DashboardMode
+}) {
 	const [mode, setMode] = useState<DashboardMode>('user')
+
+	useEffect(() => {
+		setMode(initialMode)
+	}, [initialMode])
 
 	return (
 		<Card

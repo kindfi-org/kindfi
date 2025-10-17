@@ -11,6 +11,8 @@ import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
 import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { AuthProvider } from '~/hooks/use-auth'
+import { I18nProvider } from '~/lib/i18n/context'
+import { translations } from '~/lib/i18n/translations'
 
 interface ProvidersProps {
 	children: React.ReactNode
@@ -76,29 +78,31 @@ export function Providers({ children, initSession }: ProvidersProps) {
 
 	return (
 		<ReactQueryClientProvider>
-			<NextThemesProvider
-				attribute="class"
-				defaultTheme="light"
-				forcedTheme="light"
-				disableTransitionOnChange
-			>
-				<SessionProvider>
-					<AuthProvider initSession={initSession}>
-						<WaitlistProvider>
-							<TrustlessWorkConfig
-								baseURL={trustlessBaseUrl}
-								apiKey={process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY || ''}
-							>
-								<WalletProvider>
-									<EscrowProvider>
-										<StellarProvider>{children}</StellarProvider>
-									</EscrowProvider>
-								</WalletProvider>
-							</TrustlessWorkConfig>
-						</WaitlistProvider>
-					</AuthProvider>
-				</SessionProvider>
-			</NextThemesProvider>
+			<I18nProvider translations={translations}>
+				<NextThemesProvider
+					attribute="class"
+					defaultTheme="light"
+					forcedTheme="light"
+					disableTransitionOnChange
+				>
+					<SessionProvider>
+						<AuthProvider initSession={initSession}>
+							<WaitlistProvider>
+								<TrustlessWorkConfig
+									baseURL={trustlessBaseUrl}
+									apiKey={process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY || ''}
+								>
+									<WalletProvider>
+										<EscrowProvider>
+											<StellarProvider>{children}</StellarProvider>
+										</EscrowProvider>
+									</WalletProvider>
+								</TrustlessWorkConfig>
+							</WaitlistProvider>
+						</AuthProvider>
+					</SessionProvider>
+				</NextThemesProvider>
+			</I18nProvider>
 		</ReactQueryClientProvider>
 	)
 }
