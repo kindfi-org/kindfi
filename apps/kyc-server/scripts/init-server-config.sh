@@ -8,6 +8,7 @@
 # - Optional flags:
 #     RUN_BUN_INSTALL=1  -> run `bun install` after setup
 #     NO_SUDO=1          -> never use sudo (useful when already root or sudo unavailable)
+#     INSTALL_DIR=<path> -> directory from which to run `bun install` (defaults to current directory)
 
 set -euo pipefail
 
@@ -183,9 +184,31 @@ main() {
   fi
 
   # Optional pre-install hook for pipelines
-  if [ "${RUN_BUN_INSTALL:-0}" = "1" ] && [ -f package.json ]; then
-    log "RUN_BUN_INSTALL=1 detected; running 'bun install --no-save' for reproducibility..."
-    bun install --no-save
+  if [ "${RUN_BUN_INSTALL:-0}" = "1" ]; then
+    local install_dir="${INSTALL_DIR:-$PWD}"
+    
+    # Determine if we're in a monorepo and need to install at root
+    local workspace_root="$install_dir"
+    if [ -f "$install_dir/../../package.json" ] && grep -q '"workspaces"' "$install_dir/../../package.json" 2>/dev/null; then
+      workspace_root="$(cd "$install_dir/../.." && pwd)"
+      log "Detected monorepo workspace root at: $workspace_root"
+    fi
+    
+    # Install at workspace root first if different from install_dir
+    if [ "$workspace_root" != "$install_dir" ] && [ -f "$workspace_root/package.json" ]; then
+      log "Running 'bun install --no-save' at workspace root: $workspace_root"
+      # (cd "$workspace_root" && bun install --no-save)
+      (cd "$workspace_root" && bun install)
+    fi
+    
+    # Then install at the specific directory if it has a package.json
+    if [ -f "$install_dir/package.json" ]; then
+      log "Running 'bun install --no-save' at: $install_dir"
+      # (cd "$install_dir" && bun install --no-save)
+      (cd "$install_dir" && bun install)
+    elif [ ! -f "$workspace_root/package.json" ]; then
+      warn "No package.json found at $install_dir or workspace root. Skipping bun install."
+    fi
   fi
 
   # Set default PORT if not already set
