@@ -37,7 +37,7 @@ mod account_contract_mod {
         file = "../../../target/wasm32-unknown-unknown/release/account_contract.wasm"
     );
 }
-mod base64_url
+mod base64_url;
 
 // A secure key storage for WebAuthn-compatible Secp256r1 keys
 pub struct SecureKeyStorage {

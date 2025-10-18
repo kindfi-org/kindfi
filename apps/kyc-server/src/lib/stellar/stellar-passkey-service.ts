@@ -863,10 +863,8 @@ export class StellarPasskeyService {
 			sequence: fundingAccount.sequenceNumber(),
 		})
 
-		// Build transaction for factory deployment
-		// NOTE: The factory contract requires auth_contract.require_auth()
-		// This means we need to let the transaction simulation handle the authorization
-		// The auth controller will sign the transaction during simulation/assembly
+		// Build transaction for factory deployment WITHOUT manual auth entries
+		// The assembleTransaction will handle auth requirements from simulation
 		const transaction = new TransactionBuilder(fundingAccount, {
 			fee: this.DEPLOYMENT_FEE,
 			networkPassphrase: this.networkPassphrase,
@@ -963,16 +961,18 @@ export class StellarPasskeyService {
 			const simulation = await this.server.simulateTransaction(checkTxn)
 
 			if (Api.isSimulationError(simulation)) {
-				console.log(
-					'❌ Auth controller not initialized, attempting to initialize...',
+				console.error(
+					'❌ Auth controller not initialized. Please run the deployment script to initialize it.',
 				)
-				await this.initializeAuthController()
-			} else {
-				console.log('✅ Auth controller is properly initialized')
-
-				// Check if factory is registered
-				await this.ensureFactoryIsRegistered()
+				throw new Error(
+					'Auth controller not initialized. Run: cd apps/contract && ./scripts/deploy-auth.sh --futurenet --source bob-f',
+				)
 			}
+
+			console.log('✅ Auth controller is properly initialized')
+
+			// Check if factory is registered
+			await this.ensureFactoryIsRegistered()
 		} catch (error) {
 			console.error('❌ Auth controller configuration check failed:', error)
 			throw new Error(`Auth controller configuration failed: ${error}`)
@@ -980,49 +980,21 @@ export class StellarPasskeyService {
 	}
 
 	/**
-	 * Initializes the auth controller with proper signers
+	 * NOTE: This method (initializeAuthController) is intentionally removed.
+	 *
+	 * The auth-controller expects 65-byte secp256r1 public keys (WebAuthn format),
+	 * but the funding account uses Ed25519 keys. They are incompatible.
+	 *
+	 * After removing the factory's auth requirement, the funding account doesn't
+	 * need to be an authorized signer in the auth-controller. It only needs to:
+	 * 1. Pay transaction fees
+	 * 2. Sign transactions with its Ed25519 key
+	 *
+	 * The auth-controller initialization must be done via the deployment script
+	 * with WebAuthn public keys only.
+	 *
+	 * See: apps/contract/scripts/deploy-auth.sh
 	 */
-	private async initializeAuthController(): Promise<void> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for initialization')
-		}
-
-		const config: AppEnvInterface = appEnvConfig('kyc-server')
-
-		try {
-			console.log('🔧 Initializing auth controller...')
-
-			const fundingAccount = await this.server
-				.getAccount(this.fundingKeypair.publicKey())
-				.then((res) => new Account(res.accountId(), res.sequenceNumber()))
-
-			// Create signer hash from funding account public key
-			const signerHash = hash(this.fundingKeypair.rawPublicKey())
-
-			const initTxn = new TransactionBuilder(fundingAccount, {
-				fee: '100000',
-				networkPassphrase: this.networkPassphrase,
-			})
-				.addOperation(
-					Operation.invokeContractFunction({
-						contract: config.stellar.controllerContractId,
-						function: 'init',
-						args: [
-							xdr.ScVal.scvVec([xdr.ScVal.scvBytes(signerHash)]),
-							xdr.ScVal.scvU32(1), // threshold
-						],
-					}),
-				)
-				.setTimeout(60)
-				.build()
-
-			const txHash = await this.submitTransaction(initTxn)
-			console.log('✅ Auth controller initialized:', txHash)
-		} catch (error) {
-			console.error('❌ Auth controller initialization failed:', error)
-			throw error
-		}
-	}
 
 	/**
 	 * Ensures the factory contract is registered with the auth controller
@@ -1064,7 +1036,7 @@ export class StellarPasskeyService {
 			} else {
 				console.log('✅ Factory already registered or registration not needed')
 			}
-		} catch (error) {
+		} catch (_error) {
 			console.log(
 				'⚠️ Factory registration check completed (might already be registered)',
 			)
@@ -1151,7 +1123,13 @@ export class StellarPasskeyService {
 					}
 
 					if (txResult.status === Api.GetTransactionStatus.FAILED) {
-						console.error('❌ Transaction failed:', txResult)
+						console.error('❌ Transaction failed:', {
+							envelopeXdr: txResult.envelopeXdr.toXDR().toBase64(),
+							metaXdr: txResult.resultMetaXdr.toXDR().toBase64(),
+							results: txResult.resultXdr.toXDR().toBase64(),
+							trnx: txResult.txHash,
+							status: txResult.status,
+						})
 						throw new Error(`Transaction failed: ${JSON.stringify(txResult)}`)
 					}
 
