@@ -55,22 +55,9 @@ export const StepCard = ({
 					viewport={{ once: true }}
 					transition={{ duration: 0.6, delay: 0.2 }}
 				>
-					{/* Step Number */}
-					<div className="flex items-center gap-3 mb-4">
-						<div className="text-sm font-medium gradient-text">
-							Step {stepNumber}
-						</div>
-					</div>
-
 					{/* Content */}
 					<h3 className="text-2xl font-semibold text-gray-900 mb-4">{title}</h3>
 					<p className="text-gray-600 leading-relaxed">{description}</p>
-
-					{/* Optional: Interactive Element */}
-					<div className="mt-6 inline-flex items-center text-sm font-medium gradient-text group cursor-pointer">
-						Learn More
-						<ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
-					</div>
 				</motion.div>
 			</div>
 		</motion.div>

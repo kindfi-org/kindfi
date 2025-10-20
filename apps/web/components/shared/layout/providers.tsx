@@ -2,17 +2,21 @@
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
 import { development, TrustlessWorkConfig } from '@trustless-work/escrow'
+import type { Session } from 'next-auth'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
+import { StellarProvider } from '~/hooks/contexts/stellar-context'
 import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
 import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
-import { StellarProvider } from '~/hooks/stellar/stellar-context'
 import { AuthProvider } from '~/hooks/use-auth'
+import { I18nProvider } from '~/lib/i18n/context'
+import { translations } from '~/lib/i18n/translations'
 
 interface ProvidersProps {
 	children: React.ReactNode
+	initSession: Session | null
 }
 
 interface ServiceWorkerRegistrationWithSync extends ServiceWorkerRegistration {
@@ -21,7 +25,7 @@ interface ServiceWorkerRegistrationWithSync extends ServiceWorkerRegistration {
 	}
 }
 
-export function Providers({ children }: ProvidersProps) {
+export function Providers({ children, initSession }: ProvidersProps) {
 	useEffect(() => {
 		if ('serviceWorker' in navigator) {
 			navigator.serviceWorker
@@ -74,29 +78,31 @@ export function Providers({ children }: ProvidersProps) {
 
 	return (
 		<ReactQueryClientProvider>
-			<NextThemesProvider
-				attribute="class"
-				defaultTheme="light"
-				forcedTheme="light"
-				disableTransitionOnChange
-			>
-				<SessionProvider>
-					<AuthProvider>
-						<WaitlistProvider>
-							<TrustlessWorkConfig
-								baseURL={trustlessBaseUrl}
-								apiKey={process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY || ''}
-							>
-								<WalletProvider>
-									<EscrowProvider>
-										<StellarProvider>{children}</StellarProvider>
-									</EscrowProvider>
-								</WalletProvider>
-							</TrustlessWorkConfig>
-						</WaitlistProvider>
-					</AuthProvider>
-				</SessionProvider>
-			</NextThemesProvider>
+			<I18nProvider translations={translations}>
+				<NextThemesProvider
+					attribute="class"
+					defaultTheme="light"
+					forcedTheme="light"
+					disableTransitionOnChange
+				>
+					<SessionProvider>
+						<AuthProvider initSession={initSession}>
+							<WaitlistProvider>
+								<TrustlessWorkConfig
+									baseURL={trustlessBaseUrl}
+									apiKey={process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY || ''}
+								>
+									<WalletProvider>
+										<EscrowProvider>
+											<StellarProvider>{children}</StellarProvider>
+										</EscrowProvider>
+									</WalletProvider>
+								</TrustlessWorkConfig>
+							</WaitlistProvider>
+						</AuthProvider>
+					</SessionProvider>
+				</NextThemesProvider>
+			</I18nProvider>
 		</ReactQueryClientProvider>
 	)
 }

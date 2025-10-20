@@ -15,10 +15,13 @@ import { ProjectCardGridSkeleton } from '~/components/sections/projects/skeleton
 import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 import { CTAButtons } from '~/components/shared/cta-buttons'
 import { SectionCaption } from '~/components/shared/section-caption'
+import { SectionContainer } from '~/components/shared/section-container'
+import { useI18n } from '~/lib/i18n'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
 
 export function HighlightedProjects() {
 	const [waitlistOpen, setWaitlistOpen] = useState(false)
+	const { t } = useI18n()
 	const {
 		data: projects = [],
 		isLoading,
@@ -37,12 +40,12 @@ export function HighlightedProjects() {
 	})
 
 	return (
-		<section className="w-full px-4 py-10 sm:px-6 lg:px-8">
-			<div className="mx-auto max-w-[1400px]">
+		<section className="py-10 bg-white">
+			<SectionContainer>
 				<SectionCaption
-					title="Change Lives One Block at a Time"
-					subtitle="From clean water and education to healthcare and child welfare, each project on KindFi represents a real-world AID opportunity to make a difference. Explore verified community-backed campaigns, track progress transparently, and support what moves you all through the power of blockchain"
-					highlightWords={['Change Lives One Block at a Time']}
+					title={t('home.highlightedProjectsTitle')}
+					subtitle={t('home.highlightedProjectsSubtitle')}
+					highlightWords={[t('home.highlightedProjectsTitle')]}
 				/>
 
 				<CategoryPills
@@ -52,7 +55,7 @@ export function HighlightedProjects() {
 				/>
 
 				{isLoading ? (
-					<div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+					<div className="mt-8 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 						{Array.from({ length: 6 }).map((_, i) => (
 							// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
 							<ProjectCardGridSkeleton key={i} />
@@ -60,7 +63,7 @@ export function HighlightedProjects() {
 					</div>
 				) : error ? (
 					<p className="text-sm text-destructive text-center mt-8">
-						Failed to load featured projects. Please try again later.
+						{t('home.failedToLoadProjects')}
 					</p>
 				) : (
 					<div className="relative mt-8">
@@ -81,7 +84,7 @@ export function HighlightedProjects() {
 								{projects.map((project) => (
 									<CarouselItem
 										key={project.id}
-										className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
+										className="pl-2 md:pl-4 basis-full sm:basis-full md:basis-1/2 lg:basis-1/2 xl:basis-1/3"
 										aria-roledescription="slide"
 									>
 										<ProjectCardGrid project={project} />
@@ -94,8 +97,8 @@ export function HighlightedProjects() {
 
 				<div className="mt-12 flex justify-center">
 					<CTAButtons
-						primaryText="Waitlist Your Project"
-						secondaryText="Explore Causes"
+						primaryText={t('home.waitlistYourProject')}
+						secondaryText={t('home.exploreCauses')}
 						primaryHref={''}
 						secondaryHref={'/projects'}
 						onPrimaryClick={() => setWaitlistOpen(true)}
@@ -103,7 +106,7 @@ export function HighlightedProjects() {
 					/>
 					<WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
 				</div>
-			</div>
+			</SectionContainer>
 		</section>
 	)
 }

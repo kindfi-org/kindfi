@@ -3,16 +3,19 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
+import { SectionContainer } from '~/components/shared/section-container'
+import { useI18n } from '~/lib/i18n'
 
 export function Hero() {
+	const { t } = useI18n()
 	return (
 		// biome-ignore lint/a11y/useSemanticElements: can't use role with section
 		<section
-			className="relative z-0 min-h-[60vh] px-4 pt-20"
+			className="relative z-0 min-h-[60vh] pt-20"
 			aria-labelledby="hero-title"
 			role="banner"
 		>
-			<div className="container mx-auto max-w-6xl">
+			<SectionContainer maxWidth="6xl">
 				<div className="text-center">
 					<motion.h2
 						className="text-2xl font-bold mb-6"
@@ -20,7 +23,7 @@ export function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5 }}
 					>
-						Reimagining Social Impact
+						{t('about.heroSubtitle')}
 					</motion.h2>
 
 					<motion.h1
@@ -29,7 +32,7 @@ export function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.2 }}
 					>
-						Redefining Crowdfunding with Blockchain Transparency
+						{t('about.heroTitle')}
 					</motion.h1>
 
 					<motion.p
@@ -38,10 +41,7 @@ export function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.4 }}
 					>
-						KindFi is the first Web3 platform built to fund verified social
-						impact using Stellar blockchain, smart contract escrows, and
-						AI-powered verification. We make it possible to support or launch
-						trusted causes—securely, transparently, and on-chain
+						{t('about.heroDescription')}
 					</motion.p>
 
 					<motion.div
@@ -56,7 +56,7 @@ export function Hero() {
 							rel="noopener noreferrer"
 						>
 							<Button size="lg" className="gradient-btn text-white">
-								See how it works in minutes
+								{t('about.seeHowItWorks')}
 							</Button>
 						</a>
 						<Link href="/projects">
@@ -65,12 +65,12 @@ export function Hero() {
 								variant="outline"
 								className="gradient-border-btn"
 							>
-								Discover causes or launch yours
+								{t('about.discoverCauses')}
 							</Button>
 						</Link>
 					</motion.div>
 				</div>
-			</div>
+			</SectionContainer>
 		</section>
 	)
 }

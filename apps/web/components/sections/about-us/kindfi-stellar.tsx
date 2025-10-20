@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { FloatingFeature } from '~/components/shared/floating-feature'
+import { useTranslation } from '~/hooks/use-translation'
 import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 const containerVariants = {
@@ -15,6 +16,7 @@ const containerVariants = {
 }
 
 const KindFiStellar = () => {
+	const { t } = useTranslation()
 	return (
 		<section className="relative py-16 overflow-hidden">
 			<div className="container mx-auto px-6 text-center">
@@ -25,7 +27,7 @@ const KindFiStellar = () => {
 					viewport={{ once: true, amount: 0.2 }}
 					className="text-3xl md:text-4xl font-bold"
 				>
-					KindFi + Stellar: A Shared Vision
+					{t('about.kindfiStellar.title')}
 				</motion.h2>
 
 				<motion.p
@@ -35,9 +37,7 @@ const KindFiStellar = () => {
 					viewport={{ once: true, amount: 0.2 }}
 					className="text-gray-600 max-w-2xl mx-auto mt-4"
 				>
-					With Stellar, KindFi brings trustless, efficient, and borderless
-					collaboration to impact-driven communities from small NGOs in Costa
-					Rica to large donor collectives across LATAM.
+					{t('about.kindfiStellar.description')}
 				</motion.p>
 
 				<motion.div
@@ -51,7 +51,7 @@ const KindFiStellar = () => {
 						<FloatingFeature
 							key={feature.id}
 							icon={feature.icon}
-							title={feature.title}
+							title={t(`about.kindfiStellar.features.${feature.id}.title`)}
 						/>
 					))}
 				</motion.div>

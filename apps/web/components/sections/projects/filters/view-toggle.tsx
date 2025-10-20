@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { LayoutGrid, List } from 'lucide-react'
 
 import { Button } from '~/components/base/button'
+import { useI18n } from '~/lib/i18n'
 
 type ViewMode = 'grid' | 'list'
 
@@ -14,6 +15,7 @@ interface ViewToggleProps {
 }
 
 export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
+	const { t } = useI18n()
 	return (
 		<div
 			className="flex items-center space-x-2 bg-gray-100 p-1 rounded-md"
@@ -24,7 +26,7 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
 				size="sm"
 				onClick={() => onViewModeChange('grid')}
 				className={`relative ${viewMode === 'grid' ? 'text-primary' : 'text-gray-500'}`}
-				aria-label="Grid view"
+				aria-label={t('projects.grid')}
 				aria-checked={viewMode === 'grid'}
 				role="radio"
 			>
@@ -43,7 +45,7 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
 				size="sm"
 				onClick={() => onViewModeChange('list')}
 				className={`relative ${viewMode === 'list' ? 'text-primary' : 'text-gray-500'}`}
-				aria-label="List view"
+				aria-label={t('projects.list')}
 				aria-checked={viewMode === 'list'}
 				role="radio"
 			>

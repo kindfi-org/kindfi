@@ -173,7 +173,6 @@ export function EscrowAdminPanel({
 				platformFee: platformFee as number,
 				trustline: {
 					address: trustlineAddress.trim(),
-					decimals: trustlineDecimals as number,
 				},
 				milestones: sanitizedMilestones,
 			}
@@ -201,7 +200,6 @@ export function EscrowAdminPanel({
 					contractId: escrowContractAddress,
 					milestoneIndex,
 					approver: signer,
-					newFlag: true,
 				},
 				(escrowType as EscrowType) || 'single-release',
 			)

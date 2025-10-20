@@ -4,14 +4,12 @@ export function HomeDashboard() {
 	return (
 		<>
 			<DynamicComponents.Hero />
-			<DynamicComponents.UserJourney />
 			<DynamicComponents.HighlightedProjects />
+			<DynamicComponents.NewUserGuide />
+			<DynamicComponents.UserJourney />
 			<DynamicComponents.JoinUs />
 			<DynamicComponents.HowItWorks />
-			<DynamicComponents.NewUserGuide />
 			<DynamicComponents.PlatformOverview />
-			<DynamicComponents.Community />
-			<DynamicComponents.FinalCTA />
 		</>
 	)
 }

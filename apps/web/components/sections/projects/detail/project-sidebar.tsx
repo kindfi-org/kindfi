@@ -88,10 +88,8 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		if (!project.escrowContractAddress) return
 		try {
 			setIsFetchingBalance(true)
-			const signer =
-				address || 'GCRYH6M5YLTGZTCAALJPIJGQZY4Z6XFFUVTINCELQG4OGLADUBTAE3OU'
 			const balances = await getMultipleBalances(
-				{ signer, addresses: [project.escrowContractAddress] },
+				{ addresses: [project.escrowContractAddress] },
 				(project.escrowType as EscrowType) || 'single-release',
 			)
 			const first = balances?.[0]
@@ -101,12 +99,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		} finally {
 			setIsFetchingBalance(false)
 		}
-	}, [
-		address,
-		getMultipleBalances,
-		project.escrowContractAddress,
-		project.escrowType,
-	])
+	}, [getMultipleBalances, project.escrowContractAddress, project.escrowType])
 
 	useEffect(() => {
 		fetchEscrowBalance()
