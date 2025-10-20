@@ -21,8 +21,7 @@ const Footer = () => {
 			title: t('footer.projects'),
 			links: [
 				{ label: t('footer.socialProjects'), href: '/projects' },
-				{ label: t('footer.startCampaign'), href: '/create' },
-				{ label: t('footer.featuredProjects'), href: '/featured' },
+				{ label: t('footer.startCampaign'), href: '/create-project' },
 				{ label: t('footer.recentInvestments'), href: '/investments' },
 			],
 		},

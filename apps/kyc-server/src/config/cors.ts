@@ -21,6 +21,7 @@ export const corsConfig: CorsOptions = {
 				? appConfig.kycServer.allowedOrigins.split(',')
 				: [
 						'https://kindfi.org',
+						'https://www.kindfi.org',
 						'https://*.kindfi.org',
 						'https://dev-api.dashboard.kindfi.org',
 					]
