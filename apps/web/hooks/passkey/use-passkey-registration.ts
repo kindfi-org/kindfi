@@ -144,17 +144,8 @@ export const usePasskeyRegistration = (
 					try {
 						// Call the onRegister callback for any additional processing (without blockchain deployment)
 						await onRegister(registrationResponse, userId as string)
-						updateDeviceData({
-							registrationResponse,
-							verificationJSON,
-						})
 					} catch (stellarError) {
 						console.warn('Failed to extract stellar data:', stellarError)
-
-						updateDeviceData({
-							registrationResponse,
-							verificationJSON,
-						})
 					}
 				}
 				const message = 'Authenticator registered!'
@@ -187,42 +178,6 @@ export const usePasskeyRegistration = (
 			}
 		} finally {
 			setIsCreatingPasskey(false)
-		}
-	}
-
-	const updateDeviceData = async ({
-		registrationResponse,
-		verificationJSON,
-	}: {
-		verificationJSON: { verified: boolean }
-		registrationResponse: RegistrationResponseJSON
-	}) => {
-		try {
-			// Fallback to basic credential data
-			const stellarData = await getPublicKeys(registrationResponse)
-			// Generate stellar address without deploying to blockchain
-			const stellarAddress = generateStellarAddress(stellarData.contractSalt)
-			// TODO: simplify this state: only pub key, cred and address req to hold in session
-			const deviceData = {
-				credentialId: registrationResponse.id,
-				publicKey: stellarData.publicKey?.toString('base64') || '',
-				address: stellarAddress,
-				contractSalt: '',
-			}
-
-			console.log(
-				'off-chain (pre) Stellar Address (must match)',
-				stellarAddress,
-			)
-			console.log('verificationJSON', verificationJSON)
-
-			// Set device data with extracted stellar information
-			setDeviceData(deviceData)
-		} catch (error) {
-			console.warn(
-				'Failed to extract stellar data and set a default unauthorized address:',
-				error,
-			)
 		}
 	}
 

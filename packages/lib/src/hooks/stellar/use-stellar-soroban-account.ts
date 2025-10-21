@@ -88,7 +88,7 @@ export const useStellarSorobanAccount = (session?: User) => {
 					'🧪 SIMULATION: Creating Stellar account (this should only happen after approval)',
 				)
 
-				const newAccount = await stellarSignature.createStellarAccount()
+				const newAccount = await stellarSignature.approveKYCAccount()
 
 				const accountData: StellarAccount = {
 					address: newAccount.address,
