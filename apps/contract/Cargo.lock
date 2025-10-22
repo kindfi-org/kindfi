@@ -214,10 +214,13 @@ version = "0.1.0"
 dependencies = [
  "account_contract",
  "account_factory",
- "ed25519-dalek 1.0.1",
  "hex",
- "rand 0.7.3",
+ "p256",
+ "rand 0.8.5",
  "rand_chacha 0.9.0",
+ "serde",
+ "serde-json-core",
+ "serde_json",
  "sha3",
  "soroban-sdk",
 ]

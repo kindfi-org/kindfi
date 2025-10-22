@@ -2,12 +2,12 @@ import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type {
 	AuthenticationResponseJSON,
+	WebAuthnCredential as BaseWebAuthnCredential,
 	GenerateAuthenticationOptionsOpts,
 	GenerateRegistrationOptionsOpts,
 	RegistrationResponseJSON,
 	VerifyAuthenticationResponseOpts,
 	VerifyRegistrationResponseOpts,
-	WebAuthnCredential,
 } from '@simplewebauthn/server'
 import {
 	generateAuthenticationOptions,
@@ -17,6 +17,7 @@ import {
 } from '@simplewebauthn/server'
 import base64url from 'base64url'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import { StellarPasskeyService } from '../stellar/stellar-passkey-service'
 import {
 	deleteChallenge,
 	getChallenge,
@@ -25,7 +26,20 @@ import {
 	saveUser,
 } from './database'
 
+// Extended WebAuthnCredential with Stellar address support
+export interface WebAuthnCredential extends BaseWebAuthnCredential {
+	address?: string // Smart wallet contract address (C... format)
+	aaguid?: string
+}
+
 const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
+
+// Initialize Stellar passkey service for smart wallet deployment
+const stellarService = new StellarPasskeyService(
+	appConfig.stellar.networkPassphrase,
+	appConfig.stellar.rpcUrl,
+	appConfig.stellar.fundingAccount,
+)
 
 /**
  * Retrieves the RP ID corresponding to the provided host.
@@ -147,6 +161,8 @@ export const verifyRegistration = async ({
 	}
 	const { verified, registrationInfo } = await verifyRegistrationResponse(opts)
 
+	let contractAddress: string | undefined
+
 	if (verified && registrationInfo) {
 		const { credential } = registrationInfo
 
@@ -156,15 +172,43 @@ export const verifyRegistration = async ({
 
 		if (!existingCredential) {
 			/**
+			 * Deploy smart wallet contract on-chain during registration
+			 * This creates the user's Stellar account as a smart contract
+			 */
+			try {
+				console.log('🚀 Deploying smart wallet for new passkey:', credential.id)
+
+				// Extract public key from attestation response
+				const publicKeyBase64 = credential.publicKey.toBase64()
+
+				// Deploy smart wallet via account-factory
+				const deploymentResult = await stellarService.deployPasskeyAccount({
+					credentialId: credential.id,
+					publicKey: publicKeyBase64,
+					userId,
+				})
+
+				contractAddress = deploymentResult.address
+
+				console.log('✅ Smart wallet deployed:', contractAddress)
+			} catch (error) {
+				console.error('❌ Failed to deploy smart wallet:', error)
+				throw new InAppError(
+					ErrorCode.UNEXPECTED_ERROR,
+					`Smart wallet deployment failed: ${error}`,
+				)
+			}
+
+			/**
 			 * Add the returned credential to the user's list of credentials
-			 *
-			 * NOTE: Address will be set later after Stellar deployment
+			 * Store the smart wallet contract address with the credential
 			 */
 			const newCredential: WebAuthnCredential = {
 				id: credential.id,
-				address: credential.address,
+				address: contractAddress, // Store contract address (C... format)
 				publicKey: credential.publicKey,
-				aaguid: credential.aaguid,
+				aaguid: (credential as BaseWebAuthnCredential & { aaguid?: string })
+					.aaguid,
 				counter: credential.counter,
 				transports: registrationResponse.response.transports,
 			}
@@ -180,7 +224,7 @@ export const verifyRegistration = async ({
 	}
 
 	await deleteChallenge({ identifier, rpId, userId })
-	return { verified }
+	return { verified, address: contractAddress }
 }
 
 export const getAuthenticationOptions = async ({
@@ -294,7 +338,7 @@ export const verifyAuthentication = async ({
 	const device = {
 		id: dbCredential.id,
 		pubKey: dbCredential.publicKey,
-		address: dbCredential.address,
+		address: dbCredential.address || '',
 		transports: dbCredential.transports,
 	}
 

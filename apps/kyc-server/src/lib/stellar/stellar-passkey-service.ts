@@ -6,34 +6,32 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,
 	Address,
+	Contract,
 	hash,
 	Keypair,
 	Operation,
-	StrKey,
 	type Transaction,
 	TransactionBuilder,
 	xdr,
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
-import * as CBOR from 'cbor-x/decode'
 import { eq } from 'drizzle-orm'
 import { getDb } from '../db'
 import { type RateLimitConfig, SignatureRateLimiter } from './rate-limiter'
 
 /**
- * Simplified Stellar Passkey Account Service V2
- * This service follows the recommended approach using Stellar's passkey patterns
- * without the overdeveloped complexity of the previous implementation
+ * KindFi Smart Wallet Service
+ * Deploys auth-contracts smart wallets with passkey authentication
  */
 export class StellarPasskeyService {
 	private server: Server
 	private networkPassphrase: string
 	private factoryContractId: string
+	private controllerContractId: string
 	private fundingKeypair?: Keypair
 	private rateLimiter: SignatureRateLimiter
 
-	private readonly DEPLOYMENT_FEE = '100000' // High fee for complex auth and deployment
-	private readonly STANDARD_FEE = '1000'
+	private readonly STANDARD_FEE = '100000' // Higher fee for contract deployment
 
 	constructor(
 		networkPassphrase?: string,
@@ -46,6 +44,7 @@ export class StellarPasskeyService {
 			networkPassphrase || config.stellar.networkPassphrase
 		this.server = new Server(rpcUrl || config.stellar.rpcUrl)
 		this.factoryContractId = config.stellar.factoryContractId
+		this.controllerContractId = config.stellar.controllerContractId
 
 		if (fundingSecretKey) {
 			this.fundingKeypair = Keypair.fromSecret(fundingSecretKey)
@@ -63,134 +62,95 @@ export class StellarPasskeyService {
 	}
 
 	/**
-	 * Creates or retrieves a Stellar account for a passkey
-	 * This method only creates the account address and checks if it exists
-	 * It does NOT deploy the contract - that should be done separately on approval
-	 */
-	async preparePasskeyAccount(
-		params: PasskeyAccountCreationParams,
-	): Promise<PasskeyAccountResult> {
-		try {
-			console.log(
-				'🔍 Preparing Stellar account for passkey:',
-				params.credentialId,
-			)
-
-			// Generate deterministic salt from credential ID
-			const contractSalt = hash(Buffer.from(params.credentialId, 'base64'))
-
-			// Pre-calculate the contract address that would be created
-			const contractAddress = this.calculateContractAddress(contractSalt)
-
-			// Check if the contract already exists
-			const exists = await this.contractExists(contractAddress)
-
-			if (exists) {
-				console.log('✅ Contract already exists:', contractAddress)
-				return {
-					address: contractAddress,
-					contractId: contractAddress,
-					isExisting: true,
-				}
-			}
-
-			console.log('📋 Contract address prepared:', contractAddress)
-			return {
-				address: contractAddress,
-				contractId: contractAddress,
-				isExisting: false,
-			}
-		} catch (error) {
-			console.error('❌ Error preparing passkey account:', error)
-			throw new Error(`Failed to prepare passkey account: ${error}`)
-		}
-	}
-
-	/**
-	 * Actually deploys the passkey contract to Stellar
-	 * This should only be called after user approval/verification
+	 * Deploys smart wallet contract via account-factory
+	 * Returns the ACTUAL contract address from the on-chain response
 	 */
 	async deployPasskeyAccount(
-		params: PasskeyAccountCreationParams,
+		params: PasskeyAccountCreationParams & { salt?: string; deviceId?: string },
 	): Promise<PasskeyAccountResult> {
 		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for contract deployment')
+			throw new Error('Funding keypair required for smart wallet deployment')
 		}
 
 		try {
-			console.log(
-				'🚀 Deploying Stellar account for passkey:',
-				params.credentialId,
+			console.log('🚀 Deploying smart wallet for passkey:', params.credentialId)
+
+			// Use provided salt/deviceId or generate from credential
+			const salt = params.salt
+				? Buffer.from(params.salt, 'hex')
+				: hash(Buffer.from(params.credentialId, 'base64'))
+			const deviceId = params.deviceId
+				? Buffer.from(params.deviceId, 'hex')
+				: hash(Buffer.from(params.credentialId, 'base64'))
+
+			// Process public key to uncompressed secp256r1 format
+			const publicKeyBuffer = this.convertCborToUncompressedKey(
+				Buffer.from(params.publicKey, 'base64'),
 			)
 
-			// Generate deterministic parameters
-			const contractSalt = hash(Buffer.from(params.credentialId, 'base64'))
-			const accountId = hash(
-				Buffer.from(`${params.credentialId}_account`, 'utf-8'),
-			)
-			const contractAddress = this.calculateContractAddress(contractSalt)
+			console.log('📝 Deployment parameters:', {
+				salt: salt.toString('hex').substring(0, 16) + '...',
+				deviceId: deviceId.toString('hex').substring(0, 16) + '...',
+				publicKey: publicKeyBuffer.toString('hex').substring(0, 32) + '...',
+			})
 
-			// Check if already deployed
-			if (await this.contractExists(contractAddress)) {
-				console.log('✅ Contract already deployed:', contractAddress)
-				return {
-					address: contractAddress,
-					contractId: contractAddress,
-					isExisting: true,
-				}
-			}
-
-			// Convert public key to proper format
-			const publicKeyBuffer = this.processPublicKey(params.publicKey)
-
-			// Deploy the contract
-			const transactionHash = await this.executeDeployment(
-				contractSalt,
-				accountId,
+			// Deploy via account-factory
+			const contractAddress = await this.deployViaFactory(
+				salt,
+				deviceId,
 				publicKeyBuffer,
 			)
 
-			console.log('✅ Contract deployed successfully:', {
-				address: contractAddress,
-				transactionHash,
-			})
+			console.log('✅ Smart wallet deployed:', contractAddress)
 
 			return {
 				address: contractAddress,
-				contractId: contractAddress,
-				transactionHash,
 				isExisting: false,
 			}
 		} catch (error) {
-			console.error('❌ Error deploying passkey account:', error)
-			throw new Error(`Failed to deploy passkey account: ${error}`)
+			console.error('❌ Error deploying smart wallet:', error)
+			throw new Error(`Failed to deploy smart wallet: ${error}`)
 		}
 	}
 
 	/**
-	 * Gets account information for a passkey-controlled account
+	 * Gets contract information for a smart wallet
 	 */
-	async getAccountInfo(contractId: string): Promise<PasskeyAccountInfo> {
+	async getAccountInfo(contractAddress: string): Promise<PasskeyAccountInfo> {
 		try {
-			// Try to get contract data to see if it exists
-			await this.server.getContractData(
-				contractId,
-				xdr.ScVal.scvLedgerKeyContractInstance(),
-			)
+			// Check if contract exists
+			const contract = new Contract(contractAddress)
 
-			// If we get here, the contract exists
-			// For now, return basic info - in a real implementation,
-			// you'd query the contract for balance and other details
-			return {
-				address: contractId,
-				balance: '0', // TODO: Query actual balance
-				sequence: '0', // TODO: Query actual sequence
-				status: 'active',
+			// Try to call a read-only method to verify existence
+			// Using 'get_devices' or similar contract method
+			const ledgerKey = contract.getFootprint()
+
+			try {
+				console.log('ℹ️ Got account info from contractAddress', contractAddress)
+				const ledgerEntries = await this.server.getLedgerEntries(ledgerKey)
+				// console.log(
+				// 	'ℹ️ LedgerEntries for webauthn account',
+				// 	JSON.stringify(ledgerEntries.entries, null, 2),
+				// )
+				// TODO: Substract contract balances... to get smart wallet user balances
+				return {
+					address: contractAddress,
+					balance: '0', // Contracts don't have balances directly
+					sequence: '0',
+					status: 'active',
+				}
+			} catch {
+				return {
+					address: contractAddress,
+					balance: '0',
+					sequence: '0',
+					status: 'not_found',
+				}
 			}
-		} catch {
-			console.log('Contract not found:', contractId)
+		} catch (error) {
+			console.log('Contract not found:', contractAddress, error)
 			return {
-				address: contractId,
+				address: contractAddress,
 				balance: '0',
 				sequence: '0',
 				status: 'not_found',
@@ -199,117 +159,135 @@ export class StellarPasskeyService {
 	}
 
 	/**
-	 * Calculates the contract address that would be created with the given salt
+	 * Deploys smart wallet via account-factory contract
+	 * Returns the ACTUAL contract address from the on-chain event/response
 	 */
-	private calculateContractAddress(contractSalt: Buffer): string {
-		return StrKey.encodeContract(
-			hash(
-				xdr.HashIdPreimage.envelopeTypeContractId(
-					new xdr.HashIdPreimageContractId({
-						networkId: hash(Buffer.from(this.networkPassphrase, 'utf-8')),
-						contractIdPreimage:
-							xdr.ContractIdPreimage.contractIdPreimageFromAddress(
-								new xdr.ContractIdPreimageFromAddress({
-									address: Address.fromString(
-										this.factoryContractId,
-									).toScAddress(),
-									salt: contractSalt,
-								}),
-							),
-					}),
-				).toXDR(),
-			),
-		)
-	}
-
-	/**
-	 * Checks if a contract exists on the network
-	 */
-	private async contractExists(contractAddress: string): Promise<boolean> {
-		try {
-			await this.server.getContractData(
-				contractAddress,
-				xdr.ScVal.scvLedgerKeyContractInstance(),
-			)
-			return true
-		} catch {
-			return false
+	private async deployViaFactory(
+		salt: Buffer,
+		deviceId: Buffer,
+		publicKey: Buffer,
+	): Promise<string> {
+		if (!this.fundingKeypair) {
+			throw new Error('Funding keypair required for factory deployment')
 		}
-	}
 
-	/**
-	 * Processes the public key from base64 CBOR to the required format
-	 * Converts CBOR-encoded WebAuthn public key to uncompressed format (65 bytes)
-	 * Expected format: 0x04 + 32 bytes X coordinate + 32 bytes Y coordinate
-	 */
-	private processPublicKey(publicKeyBase64: string): Buffer {
 		try {
-			const cborPublicKey = Buffer.from(publicKeyBase64, 'base64')
+			console.log('� Deploying via account-factory...')
 
-			console.log(
-				'🔧 Processing CBOR public key:',
-				cborPublicKey.toString('hex'),
-				'Length:',
-				cborPublicKey.length,
+			const fundingAccount = await this.server.getAccount(
+				this.fundingKeypair.publicKey(),
 			)
 
-			// If already uncompressed format (65 bytes with 0x04 prefix)
-			if (cborPublicKey.length === 65 && cborPublicKey[0] === 0x04) {
-				console.log('✅ Public key already in uncompressed format')
-				return cborPublicKey
+			// Build factory.deploy() call
+			const factory = new Contract(this.factoryContractId)
+			const deployOp = factory.call(
+				'deploy',
+				xdr.ScVal.scvBytes(salt),
+				xdr.ScVal.scvBytes(deviceId),
+				xdr.ScVal.scvBytes(publicKey),
+			)
+
+			const transaction = new TransactionBuilder(fundingAccount, {
+				fee: this.STANDARD_FEE,
+				networkPassphrase: this.networkPassphrase,
+			})
+				.addOperation(deployOp)
+				.setTimeout(60)
+				.build()
+
+			console.log('🔄 Simulating deployment transaction...')
+			const simulation = await this.server.simulateTransaction(transaction)
+
+			if (Api.isSimulationError(simulation)) {
+				console.error('❌ Simulation failed:', simulation)
+				throw new Error(`Simulation failed: ${JSON.stringify(simulation)}`)
 			}
 
-			// Parse CBOR to extract coordinates
-			return this.convertCborToUncompressedKey(cborPublicKey)
+			console.log('✅ Simulation successful, assembling transaction...')
+			const assembledTx = assembleTransaction(transaction, simulation).build()
+			assembledTx.sign(this.fundingKeypair)
+
+			console.log('🚀 Submitting deployment transaction...')
+			const result = await this.server.sendTransaction(assembledTx)
+
+			if (result.status === 'ERROR') {
+				throw new Error(`Deployment failed: ${JSON.stringify(result)}`)
+			}
+
+			console.log('⏳ Waiting for transaction confirmation...')
+			let attempts = 0
+			const maxAttempts = 60
+
+			while (attempts < maxAttempts) {
+				await new Promise((resolve) => setTimeout(resolve, 1000))
+				attempts++
+
+				try {
+					const txResult = await this.server.getTransaction(result.hash)
+
+					if (txResult.status === Api.GetTransactionStatus.SUCCESS) {
+						console.log('✅ Deployment successful!')
+
+						// Extract contract address from result
+						// The factory.deploy() returns Address type
+						const returnValue = txResult.returnValue
+
+						if (!returnValue) {
+							throw new Error('No return value from deployment')
+						}
+
+						// Parse the Address from ScVal
+						const contractAddress = Address.fromScVal(returnValue).toString()
+
+						console.log('📋 Deployed contract address:', contractAddress)
+						return contractAddress
+					}
+
+					if (txResult.status === Api.GetTransactionStatus.FAILED) {
+						throw new Error(`Deployment failed: ${JSON.stringify(txResult)}`)
+					}
+				} catch (error) {
+					if (attempts === maxAttempts) {
+						throw error
+					}
+				}
+			}
+
+			throw new Error('Deployment timeout')
 		} catch (error) {
-			console.error('❌ Error processing public key:', error)
-			throw new Error(`Failed to process public key: ${error}`)
+			console.error('❌ Factory deployment failed:', error)
+			throw new Error(`Factory deployment failed: ${error}`)
 		}
 	}
 
 	/**
-	 * Converts CBOR-encoded public key to uncompressed format
+	 * Converts CBOR-encoded public key to uncompressed secp256r1 format
+	 * Extracts X and Y coordinates from COSE key and builds 0x04 || X || Y
 	 */
 	private convertCborToUncompressedKey(cborPublicKey: Buffer): Buffer {
 		try {
-			// Parse CBOR data
-			const parsedData = CBOR.decode(cborPublicKey)
-			console.log('🔍 Parsed CBOR data:', parsedData)
+			// Import CBOR decoder
+			const CBOR = require('cbor-x/decode')
 
-			// Handle Map structure (common in CBOR)
-			let coseKey: Record<string | number, unknown>
-			if (parsedData instanceof Map) {
-				coseKey = {}
-				for (const [key, value] of parsedData.entries()) {
-					coseKey[key] = value
-				}
-			} else {
-				coseKey = parsedData
-			}
+			console.log('🔍 Parsing CBOR public key...')
 
-			// Extract coordinates according to COSE Key format
-			// Debug: Log all key-value pairs to understand the structure
-			console.log('🔍 COSE Key structure:')
-			for (const [key, value] of Object.entries(coseKey)) {
-				console.log(
-					`  ${key}:`,
-					value instanceof Buffer ? `Buffer(${value.length})` : value,
-				)
-			}
+			// Decode CBOR attestation object
+			const decoded = CBOR.decode(cborPublicKey)
 
-			// Standard COSE Key parameters:
+			// Extract COSE key from attestation data
+			// COSE key format (CBOR map):
 			// -1: curve identifier (1 for P-256)
 			// -2: x coordinate (32 bytes)
 			// -3: y coordinate (32 bytes)
+			const coseKey = decoded
+
 			const curve = coseKey[-1] as number
 			const xCoord = coseKey[-2] as Buffer
 			const yCoord = coseKey[-3] as Buffer
 
-			console.log('🔍 Extracted values:', {
+			console.log('🔍 Extracted COSE values:', {
 				curve,
-				xCoordType: typeof xCoord,
 				xCoordLength: xCoord?.length,
-				yCoordType: typeof yCoord,
 				yCoordLength: yCoord?.length,
 			})
 
@@ -323,11 +301,6 @@ export class StellarPasskeyService {
 					curve,
 					'(expected 1 for P-256)',
 				)
-			}
-
-			// Ensure coordinates are Buffers
-			if (!(xCoord instanceof Buffer) || !(yCoord instanceof Buffer)) {
-				throw new Error('Coordinates must be Buffer objects')
 			}
 
 			// Validate coordinate lengths
@@ -346,7 +319,7 @@ export class StellarPasskeyService {
 
 			console.log('✅ Converted to uncompressed format:', {
 				length: uncompressedKey.length,
-				hex: uncompressedKey.toString('hex'),
+				hex: uncompressedKey.toString('hex').substring(0, 32) + '...',
 			})
 
 			return uncompressedKey
@@ -361,26 +334,26 @@ export class StellarPasskeyService {
 	 * This is essential for the `/api/stellar/verify-signature` endpoint
 	 */
 	async verifyPasskeySignature(
-		contractId: string,
+		address: string,
 		signature: string,
 		transactionHash: string,
 	): Promise<boolean> {
 		try {
 			// Rate limit check BEFORE any verification work
-			console.log('🔒 Checking rate limit for contract:', contractId)
+			console.log('🔒 Checking rate limit for address:', address)
 
-			const rateLimitResult = await this.rateLimiter.checkLimit(contractId)
+			const rateLimitResult = await this.rateLimiter.checkLimit(address)
 
 			if (!rateLimitResult.allowed) {
 				console.warn('⚠️ Rate limit exceeded for signature verification:', {
-					contractId,
+					address,
 					remaining: rateLimitResult.remaining,
 					resetAt: new Date(rateLimitResult.resetAt).toISOString(),
 				})
 
 				// Log potential brute-force attempt
 				console.error('🚨 Potential brute-force attack detected:', {
-					contractId,
+					address,
 					timestamp: new Date().toISOString(),
 				})
 
@@ -392,7 +365,7 @@ export class StellarPasskeyService {
 				resetAt: new Date(rateLimitResult.resetAt).toISOString(),
 			})
 
-			console.log('🔍 Verifying passkey signature for contract:', contractId)
+			console.log('🔍 Verifying passkey signature for address:', address)
 
 			// Parse the signature data (should be WebAuthn assertion response)
 			const signatureData = JSON.parse(signature)
@@ -426,10 +399,10 @@ export class StellarPasskeyService {
 			// TODO: Add proper origin verification based on your environment config
 			console.log('🔍 Client origin:', clientData.origin)
 
-			// Get the public key for this contract
-			const publicKey = await this.getPublicKeyForContract(contractId)
+			// Get the public key for this address
+			const publicKey = await this.getPublicKeyForContract(address)
 			if (!publicKey) {
-				throw new Error('Public key not found for contract')
+				throw new Error('Public key not found for address')
 			}
 
 			// Verify the signature using secp256r1
@@ -443,7 +416,7 @@ export class StellarPasskeyService {
 			// Reset rate limit counter on successful verification
 			if (isValid) {
 				console.log('✅ Signature valid, resetting rate limit counter')
-				await this.rateLimiter.reset(contractId)
+				await this.rateLimiter.reset(address)
 			}
 
 			console.log(isValid ? '✅ Signature valid' : '❌ Signature invalid')
@@ -535,7 +508,7 @@ export class StellarPasskeyService {
 	}
 
 	/**
-	 * Gets the public key for a contract (placeholder - implement based on your storage)
+	 * Gets the public key for a contract
 	 */
 	private async getPublicKeyForContract(
 		contractId: string,
@@ -605,7 +578,7 @@ export class StellarPasskeyService {
 	 * This handles operations after signature verification
 	 */
 	async executePasskeyTransaction(
-		contractId: string,
+		address: string,
 		operation: string,
 		signature: string,
 	): Promise<string> {
@@ -615,7 +588,7 @@ export class StellarPasskeyService {
 
 		try {
 			console.log('🚀 Executing passkey transaction:', {
-				contractId,
+				address,
 				operation,
 			})
 
@@ -625,7 +598,7 @@ export class StellarPasskeyService {
 
 			// Verify signature before execution
 			const isValidSignature = await this.verifyPasskeySignature(
-				contractId,
+				address,
 				signature,
 				operationData.challenge || `op_${Date.now()}`,
 			)
@@ -637,11 +610,15 @@ export class StellarPasskeyService {
 			// Execute the specific operation
 			switch (operationData.type) {
 				case 'add_device':
-					return await this.executeAddDevice(contractId, operationData)
+					return await this.executeAddDevice(address, operationData)
 				case 'remove_device':
-					return await this.executeRemoveDevice(contractId, operationData)
+					return await this.executeRemoveDevice(address, operationData)
 				case 'invoke_contract':
-					return await this.executeContractInvocation(contractId, operationData)
+					return await this.executeContractInvocation(
+						address,
+						address,
+						operationData,
+					)
 				default:
 					throw new Error('Unsupported operation type')
 			}
@@ -655,7 +632,7 @@ export class StellarPasskeyService {
 	 * Executes add device operation on the passkey contract
 	 */
 	private async executeAddDevice(
-		contractId: string,
+		address: string,
 		operationData: AddDeviceOperation,
 	): Promise<string> {
 		if (!this.fundingKeypair) {
@@ -676,7 +653,7 @@ export class StellarPasskeyService {
 		})
 			.addOperation(
 				Operation.invokeContractFunction({
-					contract: contractId,
+					contract: address,
 					function: 'add',
 					args: [
 						xdr.ScVal.scvBytes(Buffer.from(deviceId, 'utf-8')),
@@ -695,7 +672,7 @@ export class StellarPasskeyService {
 	 * Executes remove device operation on the passkey contract
 	 */
 	private async executeRemoveDevice(
-		contractId: string,
+		address: string,
 		operationData: RemoveDeviceOperation,
 	): Promise<string> {
 		if (!this.fundingKeypair) {
@@ -716,7 +693,7 @@ export class StellarPasskeyService {
 		})
 			.addOperation(
 				Operation.invokeContractFunction({
-					contract: contractId,
+					contract: address,
 					function: 'remove',
 					args: [xdr.ScVal.scvBytes(Buffer.from(deviceId, 'utf-8'))],
 				}),
@@ -731,6 +708,7 @@ export class StellarPasskeyService {
 	 * Executes general contract invocation
 	 */
 	private async executeContractInvocation(
+		_address: string,
 		contractId: string,
 		operationData: ContractInvocationOperation,
 	): Promise<string> {
@@ -776,299 +754,6 @@ export class StellarPasskeyService {
 			.build()
 
 		return await this.submitTransaction(transaction)
-	}
-
-	/**
-	 * Executes the actual contract deployment with auth-controller integration
-	 */
-	private async executeDeployment(
-		contractSalt: Buffer,
-		accountId: Buffer,
-		publicKey: Buffer,
-	): Promise<string> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required')
-		}
-
-		try {
-			// Step 1: Ensure auth controller is properly configured
-			await this.ensureAuthControllerConfiguration()
-
-			// Step 2: Deploy the passkey account via factory
-			const deployTxHash = await this.deployViaFactory(
-				contractSalt,
-				accountId,
-				publicKey,
-			)
-
-			// Step 3: Add the account to auth-controller storage
-			const contractAddress = this.calculateContractAddress(contractSalt)
-			const authTxHash = await this.addAccountToAuthController(contractAddress)
-
-			console.log('✅ Deployment complete:', {
-				deployTxHash,
-				authTxHash,
-				contractAddress,
-			})
-
-			return deployTxHash
-		} catch (error) {
-			console.error('❌ Deployment failed:', error)
-			throw error
-		}
-	}
-
-	/**
-	 * Deploys the account via factory contract (following Passkey Kit pattern)
-	 */
-	private async deployViaFactory(
-		contractSalt: Buffer,
-		accountId: Buffer,
-		publicKey: Buffer,
-	): Promise<string> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for deployment')
-		}
-
-		console.log('🔧 Building factory deployment transaction...')
-		console.log('📋 Parameters:', {
-			contractSalt: contractSalt.toString('hex'),
-			accountId: accountId.toString('hex'),
-			publicKeyLength: publicKey.length,
-			factoryContract: this.factoryContractId,
-		})
-
-		// First, check that the factory contract is properly configured
-		try {
-			console.log('🔍 Checking factory contract configuration...')
-			const factoryData = await this.server.getContractData(
-				this.factoryContractId,
-				xdr.ScVal.scvLedgerKeyContractInstance(),
-			)
-			console.log('✅ Factory contract exists and is accessible')
-		} catch (error) {
-			console.error('❌ Factory contract not accessible:', error)
-			throw new Error(
-				`Factory contract not accessible: ${this.factoryContractId}`,
-			)
-		}
-
-		// Get funding account
-		const fundingAccount = await this.server
-			.getAccount(this.fundingKeypair.publicKey())
-			.then((res) => new Account(res.accountId(), res.sequenceNumber()))
-
-		console.log('💰 Funding account:', {
-			publicKey: this.fundingKeypair.publicKey(),
-			sequence: fundingAccount.sequenceNumber(),
-		})
-
-		// Build transaction for factory deployment
-		// NOTE: The factory contract requires auth_contract.require_auth()
-		// This means we need to let the transaction simulation handle the authorization
-		// The auth controller will sign the transaction during simulation/assembly
-		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: this.DEPLOYMENT_FEE,
-			networkPassphrase: this.networkPassphrase,
-		})
-			.addOperation(
-				Operation.invokeContractFunction({
-					contract: this.factoryContractId,
-					function: 'deploy',
-					args: [
-						xdr.ScVal.scvBytes(contractSalt),
-						xdr.ScVal.scvBytes(accountId),
-						xdr.ScVal.scvBytes(publicKey),
-					],
-				}),
-			)
-			.setTimeout(60)
-			.build()
-
-		return await this.submitTransaction(transaction)
-	}
-
-	/**
-	 * Adds the newly deployed account to auth-controller storage
-	 */
-	private async addAccountToAuthController(
-		contractAddress: string,
-	): Promise<string> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for auth controller operation')
-		}
-
-		const config: AppEnvInterface = appEnvConfig('kyc-server')
-
-		// Get funding account for auth operation
-		const fundingAccount = await this.server
-			.getAccount(this.fundingKeypair.publicKey())
-			.then((res) => new Account(res.accountId(), res.sequenceNumber()))
-
-		// Build transaction to add account to auth-controller
-		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: this.STANDARD_FEE,
-			networkPassphrase: this.networkPassphrase,
-		})
-			.addOperation(
-				Operation.invokeContractFunction({
-					contract: config.stellar.controllerContractId,
-					function: 'add_account',
-					args: [
-						Address.fromString(contractAddress).toScVal(),
-						xdr.ScVal.scvVec([Address.fromString(contractAddress).toScVal()]), // context
-					],
-				}),
-			)
-			.setTimeout(60)
-			.build()
-
-		return await this.submitTransaction(transaction)
-	}
-
-	/**
-	 * Ensures the auth controller is properly configured for deployments
-	 */
-	private async ensureAuthControllerConfiguration(): Promise<void> {
-		if (!this.fundingKeypair) {
-			throw new Error(
-				'Funding keypair required for auth controller configuration',
-			)
-		}
-
-		const config: AppEnvInterface = appEnvConfig('kyc-server')
-
-		try {
-			console.log('🔍 Checking auth controller configuration...')
-
-			// Check if auth controller is initialized by trying to get signers
-			const fundingAccount = await this.server
-				.getAccount(this.fundingKeypair.publicKey())
-				.then((res) => new Account(res.accountId(), res.sequenceNumber()))
-
-			const checkTxn = new TransactionBuilder(fundingAccount, {
-				fee: '100',
-				networkPassphrase: this.networkPassphrase,
-			})
-				.addOperation(
-					Operation.invokeContractFunction({
-						contract: config.stellar.controllerContractId,
-						function: 'get_signers',
-						args: [],
-					}),
-				)
-				.setTimeout(30)
-				.build()
-
-			const simulation = await this.server.simulateTransaction(checkTxn)
-
-			if (Api.isSimulationError(simulation)) {
-				console.log(
-					'❌ Auth controller not initialized, attempting to initialize...',
-				)
-				await this.initializeAuthController()
-			} else {
-				console.log('✅ Auth controller is properly initialized')
-
-				// Check if factory is registered
-				await this.ensureFactoryIsRegistered()
-			}
-		} catch (error) {
-			console.error('❌ Auth controller configuration check failed:', error)
-			throw new Error(`Auth controller configuration failed: ${error}`)
-		}
-	}
-
-	/**
-	 * Initializes the auth controller with proper signers
-	 */
-	private async initializeAuthController(): Promise<void> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for initialization')
-		}
-
-		const config: AppEnvInterface = appEnvConfig('kyc-server')
-
-		try {
-			console.log('🔧 Initializing auth controller...')
-
-			const fundingAccount = await this.server
-				.getAccount(this.fundingKeypair.publicKey())
-				.then((res) => new Account(res.accountId(), res.sequenceNumber()))
-
-			// Create signer hash from funding account public key
-			const signerHash = hash(this.fundingKeypair.rawPublicKey())
-
-			const initTxn = new TransactionBuilder(fundingAccount, {
-				fee: '100000',
-				networkPassphrase: this.networkPassphrase,
-			})
-				.addOperation(
-					Operation.invokeContractFunction({
-						contract: config.stellar.controllerContractId,
-						function: 'init',
-						args: [
-							xdr.ScVal.scvVec([xdr.ScVal.scvBytes(signerHash)]),
-							xdr.ScVal.scvU32(1), // threshold
-						],
-					}),
-				)
-				.setTimeout(60)
-				.build()
-
-			const txHash = await this.submitTransaction(initTxn)
-			console.log('✅ Auth controller initialized:', txHash)
-		} catch (error) {
-			console.error('❌ Auth controller initialization failed:', error)
-			throw error
-		}
-	}
-
-	/**
-	 * Ensures the factory contract is registered with the auth controller
-	 */
-	private async ensureFactoryIsRegistered(): Promise<void> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for factory registration')
-		}
-
-		const config: AppEnvInterface = appEnvConfig('kyc-server')
-
-		try {
-			console.log('🔍 Ensuring factory is registered with auth controller...')
-
-			const fundingAccount = await this.server
-				.getAccount(this.fundingKeypair.publicKey())
-				.then((res) => new Account(res.accountId(), res.sequenceNumber()))
-
-			const addFactoryTxn = new TransactionBuilder(fundingAccount, {
-				fee: '100000',
-				networkPassphrase: this.networkPassphrase,
-			})
-				.addOperation(
-					Operation.invokeContractFunction({
-						contract: config.stellar.controllerContractId,
-						function: 'add_factory',
-						args: [Address.fromString(this.factoryContractId).toScVal()],
-					}),
-				)
-				.setTimeout(60)
-				.build()
-
-			// Try to simulate first - if it fails, factory might already be registered
-			const simulation = await this.server.simulateTransaction(addFactoryTxn)
-
-			if (!Api.isSimulationError(simulation)) {
-				const txHash = await this.submitTransaction(addFactoryTxn)
-				console.log('✅ Factory registered with auth controller:', txHash)
-			} else {
-				console.log('✅ Factory already registered or registration not needed')
-			}
-		} catch (error) {
-			console.log(
-				'⚠️ Factory registration check completed (might already be registered)',
-			)
-		}
 	}
 
 	/**
@@ -1151,7 +836,13 @@ export class StellarPasskeyService {
 					}
 
 					if (txResult.status === Api.GetTransactionStatus.FAILED) {
-						console.error('❌ Transaction failed:', txResult)
+						console.error('❌ Transaction failed:', {
+							envelopeXdr: txResult.envelopeXdr.toXDR().toBase64(),
+							metaXdr: txResult.resultMetaXdr.toXDR().toBase64(),
+							results: txResult.resultXdr.toXDR().toBase64(),
+							trnx: txResult.txHash,
+							status: txResult.status,
+						})
 						throw new Error(`Transaction failed: ${JSON.stringify(txResult)}`)
 					}
 
@@ -1186,15 +877,16 @@ export class StellarPasskeyService {
 
 export interface PasskeyAccountCreationParams {
 	credentialId: string
-	publicKey: string // Base64 encoded CBOR public key
+	publicKey: string // Base64 encoded CBOR public key (for WebAuthn verification)
 	userId?: string
 }
 
 export interface PasskeyAccountResult {
-	address: string
-	contractId: string
+	address: string // Smart wallet contract address (C... format)
 	transactionHash?: string
 	isExisting?: boolean
+	salt?: string // Deployment salt (hex string)
+	deviceId?: string // Device ID (hex string)
 }
 
 export interface PasskeyAccountInfo {

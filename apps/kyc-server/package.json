@@ -31,6 +31,7 @@
 		"clsx": "^2.1.1",
 		"lucide-react": "^0.513.0",
 		"next-theme": "^0.1.5",
+		"passkey-kit": "^0.11.3",
 		"postgres": "^3.4.0",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
@@ -65,7 +66,7 @@
 	"name": "kyc-server",
 	"private": true,
 	"scripts": {
-		"build": "bun build src/index.tsx --outdir dist --target bun --sourcemap --external tailwindcss --external bun-plugin-tailwind --external tailwind-merge --external autoprefixer --external postcss",
+		"build": "bun build src/index.tsx --outdir dist --target bun --sourcemap --packages external --external tailwindcss --external bun-plugin-tailwind --external tailwind-merge --external autoprefixer --external postcss",
 		"build:node": "bun build src/index.tsx --outdir dist --target node --format esm",
 		"db:generate": "drizzle-kit generate:pg",
 		"db:push": "drizzle-kit push:pg",

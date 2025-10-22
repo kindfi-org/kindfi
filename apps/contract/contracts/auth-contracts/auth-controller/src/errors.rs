@@ -18,4 +18,6 @@ pub enum Error {
     FactoryExists = 1011,
     FactoryDoesNotExist = 1012,
     NotAllowedContract = 1013,
+    ClientDataJsonChallengeIncorrect = 201,
+    JsonParseError = 203,
 }
