@@ -6,6 +6,7 @@ import { Horizon, Keypair } from '@stellar/stellar-sdk'
 import { useEffect, useRef, useState } from 'react'
 import { updateDeviceWithDeployee } from '~/app/actions/auth'
 import { Logger } from '~/lib/logger'
+import { generateStellarAddress } from '~/lib/passkey/deploy'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
 
