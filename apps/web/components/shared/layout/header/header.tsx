@@ -33,12 +33,15 @@ import {
 	SheetTrigger,
 } from '~/components/base/sheet'
 import { useAuth } from '~/hooks/use-auth'
+import { useI18n } from '~/lib/i18n/context'
 import { getAvatarFallback } from '~/lib/utils'
+import { LanguageSelector } from './language-selector'
 import { Navigation } from './navigation'
 
 export const Header = () => {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 	const { user } = useAuth()
+	const { t } = useI18n()
 	return (
 		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 			<div className="container max-w-screen-xl mx-auto">
@@ -55,6 +58,7 @@ export const Header = () => {
 
 					{/* Action Buttons */}
 					<div className="flex items-center space-x-4">
+						<LanguageSelector />
 						{user ? <UserMenu user={user} /> : <AuthButtons />}
 
 						{/* Mobile menu */}
@@ -63,7 +67,8 @@ export const Header = () => {
 								<Button
 									variant="ghost"
 									size="sm"
-									aria-label="Open Mobile Navigation Menu"
+									aria-label={t('aria.openMobileMenu')}
+									aria-expanded={mobileMenuOpen}
 									className="md:hidden"
 								>
 									<Menu className="h-5 w-5" />
@@ -71,9 +76,12 @@ export const Header = () => {
 							</SheetTrigger>
 							<SheetContent side="right" className="w-80">
 								<SheetHeader>
-									<SheetTitle>Menu</SheetTitle>
+									<SheetTitle>{t('nav.menu')}</SheetTitle>
 								</SheetHeader>
 								<div className="mt-8 flex flex-col gap-4">
+									<div className="pb-4 border-b">
+										<LanguageSelector />
+									</div>
 									<MobileNavigation />
 									{user ? (
 										<MobileUserMenu user={user} />
@@ -90,9 +98,54 @@ export const Header = () => {
 	)
 }
 
+const WalletCopyButton = ({
+	address,
+	className,
+}: {
+	address: string
+	className?: string
+}) => {
+	const { t } = useI18n()
+	const [copied, setCopied] = useState(false)
+
+	const handleCopy = async () => {
+		try {
+			await navigator.clipboard.writeText(address)
+			setCopied(true)
+			toast(t('user.addressCopied'))
+			setTimeout(() => setCopied(false), 2000)
+		} catch (error) {
+			console.error('Failed to copy address:', error)
+		}
+	}
+
+	const start = address.substring(0, 6)
+	const end = address.substring(address.length - 6)
+
+	return (
+		<Button
+			onClick={handleCopy}
+			className={['flex w-full justify-between', className]
+				.filter(Boolean)
+				.join(' ')}
+		>
+			<span className="text-sm font-medium text-muted-foreground">
+				{start}
+				{'...'}
+				{end}
+			</span>
+			{copied ? (
+				<ClipboardCheckIcon className="size-4" />
+			) : (
+				<ClipboardCopyIcon className="size-4" />
+			)}
+		</Button>
+	)
+}
+
 const UserMenu = ({ user }: { user: User }) => {
 	const router = useRouter()
-	const [addressCopied, setAddressCopied] = useState(false)
+	const { t } = useI18n()
 
 	const handleSignOutAction = async () => {
 		try {
@@ -103,36 +156,23 @@ const UserMenu = ({ user }: { user: User }) => {
 		}
 	}
 
-	const copyAddress = async () => {
-		if (!user.device?.address) return
-
-		try {
-			await navigator.clipboard.writeText(user.device.address)
-			setAddressCopied(true)
-			toast('Address copied successfully!')
-			setTimeout(() => setAddressCopied(false), 2000)
-		} catch (error) {
-			console.error('Failed to copy address:', error)
-		}
-	}
-
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Button
 					variant="ghost"
 					size="sm"
-					aria-label="Open User Account Menu"
+					aria-label={t('aria.openUserMenu')}
 					className="relative h-8 w-8 rounded-full"
 				>
 					<Avatar className="h-8 w-8 border border-zinc-500/50">
 						<AvatarFallback suppressHydrationWarning>
-							{user.email?.[0].toUpperCase()}
+							{getAvatarFallback(user.email || '')}
 						</AvatarFallback>
 					</Avatar>
 					{user.email?.split('@')[0] && (
 						<span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white">
-							<span className="sr-only">Online</span>
+							<span className="sr-only">{t('user.online')}</span>
 						</span>
 					)}
 				</Button>
@@ -146,28 +186,14 @@ const UserMenu = ({ user }: { user: User }) => {
 				</DropdownMenuLabel>
 				{user.device?.address && (
 					<DropdownMenuLabel asChild>
-						<Button
-							onClick={copyAddress}
-							className="flex w-full justify-between"
-						>
-							<span className="text-sm font-medium text-muted-foreground">
-								{user.device.address.substring(0, 6)}
-								{'...'}
-								{user.device.address.substring(user.device.address.length - 6)}
-							</span>
-							{addressCopied ? (
-								<ClipboardCheckIcon className="size-4" />
-							) : (
-								<ClipboardCopyIcon className="size-4" />
-							)}
-						</Button>
+						<WalletCopyButton address={user.device.address} />
 					</DropdownMenuLabel>
 				)}
 				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
-					<Link href="/protected" className="cursor-pointer">
+					<Link href="/profile" className="cursor-pointer">
 						<UserIcon className="mr-2 h-4 w-4" />
-						Dashboard
+						{t('nav.dashboard')}
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
@@ -175,7 +201,7 @@ const UserMenu = ({ user }: { user: User }) => {
 					<form action={handleSignOutAction} className="w-full">
 						<button type="submit" className="flex w-full items-center">
 							<LogOut className="mr-2 h-4 w-4" />
-							Close session
+							{t('nav.closeSession')}
 						</button>
 					</form>
 				</DropdownMenuItem>
@@ -185,16 +211,17 @@ const UserMenu = ({ user }: { user: User }) => {
 }
 
 const AuthButtons = () => {
+	const { t } = useI18n()
 	return (
 		<div className="flex items-center gap-2">
 			<Link href="/sign-in" passHref>
 				<Button variant="ghost" size="sm" className="hidden sm:inline-flex">
-					Sign in
+					{t('nav.signIn')}
 				</Button>
 			</Link>
 			<Link href="/sign-up" passHref>
 				<Button variant="default" size="sm" className="hidden sm:inline-flex">
-					Sign up
+					{t('nav.signUp')}
 				</Button>
 			</Link>
 		</div>
@@ -202,19 +229,20 @@ const AuthButtons = () => {
 }
 
 const MobileNavigation = () => {
+	const { t } = useI18n()
 	return (
 		<nav className="flex flex-col space-y-4">
 			<Link
 				href="/projects"
 				className="text-sm font-medium transition-colors hover:text-primary"
 			>
-				Social Projects
+				{t('nav.projects')}
 			</Link>
 			<Link
 				href="/about"
 				className="text-sm font-medium transition-colors hover:text-primary"
 			>
-				About KindFi
+				{t('nav.about')}
 			</Link>
 			{/* Add other navigation items */}
 		</nav>
@@ -222,6 +250,7 @@ const MobileNavigation = () => {
 }
 
 const MobileUserMenu = ({ user }: { user: User }) => {
+	const { t } = useI18n()
 	return (
 		<div className="flex flex-col space-y-4">
 			<div className="flex items-center space-x-4">
@@ -232,24 +261,17 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 				</Avatar>
 				<div className="space-y-1">
 					<p className="text-sm font-medium">{user.email}</p>
-					<p className="text-xs text-muted-foreground">Account</p>
+					<p className="text-xs text-muted-foreground">{t('user.account')}</p>
 				</div>
 			</div>
+			{user.device?.address && (
+				<WalletCopyButton address={user.device.address} className="w-full" />
+			)}
 			<div className="flex flex-col space-y-2">
-				<Link href="/protected">
+				<Link href="/profile">
 					<Button variant="ghost" className="w-full justify-start">
 						<UserIcon className="mr-2 h-4 w-4" />
-						Dashboard
-					</Button>
-				</Link>
-				<Link href="/settings">
-					<Button
-						variant="ghost"
-						aria-label="Settings"
-						className="w-full justify-start"
-					>
-						<Settings className="mr-2 h-4 w-4" />
-						Config
+						{t('nav.dashboard')}
 					</Button>
 				</Link>
 				<form action={signOutAction}>
@@ -259,7 +281,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 						type="submit"
 					>
 						<LogOut className="mr-2 h-4 w-4" />
-						Sign Out
+						{t('nav.signOut')}
 					</Button>
 				</form>
 			</div>
@@ -268,16 +290,17 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 }
 
 const MobileAuthButtons = () => {
+	const { t } = useI18n()
 	return (
 		<div className="flex flex-col space-y-2">
 			<Link href="/sign-in">
 				<Button variant="ghost" className="w-full justify-start">
-					Sign in
+					{t('nav.signIn')}
 				</Button>
 			</Link>
 			<Link href="/sign-up">
 				<Button variant="default" className="w-full justify-start">
-					Sign up
+					{t('nav.signUp')}
 				</Button>
 			</Link>
 		</div>

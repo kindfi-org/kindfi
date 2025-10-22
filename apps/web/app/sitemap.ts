@@ -7,8 +7,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		'',
 		'/about',
 		'/impact',
-		'/learn',
-		'/community',
 		'/featured',
 		'/projects',
 		'/news',

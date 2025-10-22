@@ -36,7 +36,6 @@ export function MilestonesTab({
 				setIsLoadingOnChain(true)
 				const resp = await getEscrowByContractIds({
 					contractIds: [escrowContractAddress],
-					signer: 'GCRYH6M5YLTGZTCAALJPIJGQZY4Z6XFFUVTINCELQG4OGLADUBTAE3OU',
 					validateOnChain: false,
 				})
 				// Handle both object and array responses from the indexer

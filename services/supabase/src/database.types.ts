@@ -847,6 +847,7 @@ export type Database = {
 					image_url: string | null
 					next_auth_user_id: string | null
 					role: Database['public']['Enums']['user_role']
+					slug: string | null
 					updated_at: string
 				}
 				Insert: {
@@ -858,6 +859,7 @@ export type Database = {
 					image_url?: string | null
 					next_auth_user_id?: string | null
 					role?: Database['public']['Enums']['user_role']
+					slug?: string | null
 					updated_at?: string
 				}
 				Update: {
@@ -869,6 +871,7 @@ export type Database = {
 					image_url?: string | null
 					next_auth_user_id?: string | null
 					role?: Database['public']['Enums']['user_role']
+					slug?: string | null
 					updated_at?: string
 				}
 				Relationships: []
@@ -1147,6 +1150,39 @@ export type Database = {
 						columns: ['category_id']
 						isOneToOne: false
 						referencedRelation: 'categories'
+						referencedColumns: ['id']
+					},
+				]
+			}
+			user_follows: {
+				Row: {
+					created_at: string
+					follower_id: string
+					following_id: string
+				}
+				Insert: {
+					created_at?: string
+					follower_id: string
+					following_id: string
+				}
+				Update: {
+					created_at?: string
+					follower_id?: string
+					following_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'user_follows_follower_id_fkey'
+						columns: ['follower_id']
+						isOneToOne: false
+						referencedRelation: 'profiles'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'user_follows_following_id_fkey'
+						columns: ['following_id']
+						isOneToOne: false
+						referencedRelation: 'profiles'
 						referencedColumns: ['id']
 					},
 				]

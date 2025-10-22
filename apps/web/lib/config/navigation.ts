@@ -26,27 +26,7 @@ const projects: NavigationItem[] = [
 	},
 ]
 
-const resources: NavigationItem[] = [
-	{
-		id: 'learn-web3-id',
-		title: 'Learn Web3',
-		href: '/learn',
-		description:
-			'Access guides and resources to understand blockchain and crypto',
-	},
-	{
-		id: 'community-id',
-		title: 'Community',
-		href: '/community',
-		description: 'Join our decentralized and collaborative community',
-	},
-	{
-		id: 'social-impact-id',
-		title: 'Social Impact',
-		href: '/social-impact',
-		description: 'Learn about the social impact initiatives and their outcomes',
-	},
-]
+const resources: NavigationItem[] = []
 
 export interface NavigationSection {
 	section: string

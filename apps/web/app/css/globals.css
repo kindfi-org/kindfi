@@ -175,6 +175,15 @@
 	.grid-auto-fit-wide {
 		@apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8;
 	}
+
+	/* Hide scrollbars but keep scrolling functionality */
+	.no-scrollbar {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+	.no-scrollbar::-webkit-scrollbar {
+		display: none; /* Chrome, Safari, Opera */
+	}
 }
 
 /* Custom Gradients */

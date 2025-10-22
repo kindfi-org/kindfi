@@ -8,47 +8,48 @@ import Link from 'next/link'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { useFormValidation } from '~/hooks/use-form-validation'
+import { useI18n } from '~/lib/i18n'
 
 const Footer = () => {
+	const { t } = useI18n()
 	const { isEmailInvalid, handleValidation, resetValidation } =
 		useFormValidation({
 			email: true,
 		})
 	const mainLinks = [
 		{
-			title: 'Projects',
+			title: t('footer.projects'),
 			links: [
-				{ label: 'Social Projects', href: '/projects' },
-				{ label: 'Start a Campaign', href: '/create' },
-				{ label: 'Featured Projects', href: '/featured' },
-				{ label: 'Recent Investments', href: '/investments' },
+				{ label: t('footer.socialProjects'), href: '/projects' },
+				{ label: t('footer.startCampaign'), href: '/create-project' },
+				{ label: t('footer.recentInvestments'), href: '/investments' },
 			],
 		},
 		{
-			title: 'Resources',
+			title: t('footer.resources'),
 			links: [
 				{
-					label: 'Trustless Work',
+					label: t('footer.trustlessWork'),
 					href: 'https://www.trustlesswork.com/',
 					target: '_blank',
 				},
 				{
-					label: 'Documentation',
+					label: t('footer.documentation'),
 					href: 'https://kindfi.gitbook.io/kindfi',
 					target: '_blank',
 				},
-				{ label: 'News', href: '/news' },
-				{ label: 'Tutorials', href: '/tutorials' },
-				{ label: 'FAQs', href: '/faqs' },
+				{ label: t('footer.news'), href: '/news' },
+				{ label: t('footer.tutorials'), href: '/tutorials' },
+				{ label: t('footer.faqs'), href: '/faqs' },
 			],
 		},
 		{
-			title: 'Legal',
+			title: t('footer.legal'),
 			links: [
-				{ label: 'Terms of Use', href: '/terms' },
-				{ label: 'Privacy Policy', href: '/privacy' },
-				{ label: 'Cookie Policy', href: '/cookies' },
-				{ label: 'Licenses', href: '/licenses' },
+				{ label: t('footer.termsOfUse'), href: '/terms' },
+				{ label: t('footer.privacyPolicy'), href: '/privacy' },
+				{ label: t('footer.cookiePolicy'), href: '/cookies' },
+				{ label: t('footer.licenses'), href: '/licenses' },
 			],
 		},
 	]
@@ -81,22 +82,18 @@ const Footer = () => {
 						<Link href="/" className="flex items-center space-x-2">
 							<span className="text-xl font-bold text-black">KindFi</span>
 						</Link>
-						<p className="text-sm text-gray-600">
-							The first Web3 platform connecting supporters to impactful causes
-							while driving blockchain adoption for social and environmental
-							change.
-						</p>
+						<p className="text-sm text-gray-600">{t('footer.description')}</p>
 						{/* Newsletter Subscription */}
 						<div className="mt-4">
 							<h3 id="newsletter-label" className="mb-2 text-sm font-semibold">
-								Keep in touch
+								{t('footer.keepInTouch')}
 							</h3>
 							<form onSubmit={resetValidation}>
 								<div className="flex gap-2">
 									<Input
 										type="email"
 										name="email"
-										placeholder="tu@email.com"
+										placeholder={t('footer.emailPlaceholder')}
 										className="max-w-[200px]"
 										aria-labelledby="newsletter-label"
 										aria-describedby={`${isEmailInvalid ? 'newsletter-error' : 'newsletter-description'}`}
@@ -108,15 +105,14 @@ const Footer = () => {
 										size="sm"
 										className="bg-blue-600 hover:bg-blue-900 text-white"
 									>
-										Keep in touch
+										{t('footer.subscribe')}
 									</Button>
 								</div>
 								<span id="newsletter-description" className="sr-only">
-									Enter your email address to receive our updates and
-									newsletters
+									{t('footer.enterEmail')}
 								</span>
 								<span id="newsletter-error" className="sr-only">
-									Please enter a valid email address
+									{t('footer.invalidEmail')}
 								</span>
 							</form>
 						</div>
@@ -162,14 +158,15 @@ const Footer = () => {
 							))}
 						</div>
 						<p className="text-sm text-gray-600">
-							© {new Date().getFullYear()} KindFi. All rights reserved.
+							© {new Date().getFullYear()} KindFi.{' '}
+							{t('footer.allRightsReserved')}.
 						</p>
 						<div className="flex items-center gap-2">
 							<Button variant="outline" size="sm">
-								Documentation
+								{t('footer.documentation')}
 							</Button>
 							<Button variant="outline" size="sm">
-								Contact
+								{t('footer.contact')}
 							</Button>
 						</div>
 					</div>
