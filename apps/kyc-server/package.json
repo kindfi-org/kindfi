@@ -79,5 +79,5 @@
 	},
 	"type": "module",
 	"version": "0.1.1",
-	"packageManager": "bun@1.2.0"
+	"packageManager": "bun@1.2.21"
 }
