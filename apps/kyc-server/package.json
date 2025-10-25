@@ -66,7 +66,7 @@
 	"name": "kyc-server",
 	"private": true,
 	"scripts": {
-		"build": "bun build src/index.tsx --outdir dist --target bun --sourcemap  --external tailwindcss --external bun-plugin-tailwind --external tailwind-merge --external autoprefixer --external postcss",
+		"build": "bun build src/index.tsx --outdir dist --target bun --sourcemap --external tailwindcss --external bun-plugin-tailwind --external tailwind-merge --external autoprefixer --external postcss --external @stellar/stellar-sdk --external @stellar/stellar-base --external @simplewebauthn/server --external passkey-kit",
 		"build:node": "bun build src/index.tsx --outdir dist --target node --format esm",
 		"db:generate": "drizzle-kit generate:pg",
 		"db:push": "drizzle-kit push:pg",
@@ -79,5 +79,6 @@
 		"test:watch": "bun test --watch src/__tests__/*.test.ts"
 	},
 	"type": "module",
-	"version": "0.1.0"
+	"version": "0.1.1",
+	"packageManager": "bun@1.2.0"
 }
