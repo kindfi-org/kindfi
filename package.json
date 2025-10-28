@@ -27,7 +27,7 @@
 		}
 	},
 	"name": "kindfi",
-	"packageManager": "bun@1.2.211",
+	"packageManager": "bun@1.2.21",
 	"peerDependencies": {
 		"typescript": "^5.8.2"
 	},
