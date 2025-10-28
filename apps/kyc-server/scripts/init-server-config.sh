@@ -123,9 +123,9 @@ install_bun() {
 
   log "Installing Bun into $BUN_INSTALL ..."
   if command -v curl >/dev/null 2>&1; then
-    curl -fsSL https://bun.sh/install | bash
+    curl -fsSL https://bun.sh/install | bash -s "bun-v1.2.21"
   else
-    wget -qO- https://bun.sh/install | bash
+    wget -qO- https://bun.sh/install | bash -s "bun-v1.2.21"
   fi
 
   local bun_bin="$BUN_INSTALL/bin/bun"
