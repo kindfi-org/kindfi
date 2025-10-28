@@ -1,4 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config'
+import { useStellarSignature } from '@packages/lib/hooks'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { RegistrationResponseJSON } from '@simplewebauthn/browser'
 import { Horizon, Keypair } from '@stellar/stellar-sdk'
@@ -52,6 +53,18 @@ export const useStellar = () => {
 	const [loadingSign, setLoadingSign] = useState(false)
 	const [contractData, setContractData] = useState<unknown | null>(null) // TODO:Just for testing, add type
 	const [creatingDeployee, setCreatingDeployee] = useState(false)
+	const stellarSignature = useStellarSignature({
+		onSuccess: (result) => {
+			console.log('✅ Transaction successful:', result)
+			// Refresh account info after successful transaction
+			if (deployee) {
+				stellarSignature.getAccountInfo(deployee)
+			}
+		},
+		onError: (error) => {
+			console.error('❌ Transaction failed:', error)
+		},
+	})
 
 	const onRegister = async (
 		registerRes: RegistrationResponseJSON,
@@ -72,18 +85,10 @@ export const useStellar = () => {
 				'📋 Registration: Preparing Stellar account data (NOT deploying yet)',
 			)
 
-			// Pre-calculate the deployee address without actually deploying
-			const deployee = generateStellarAddress(contractSalt)
-
-			setStoredDeployee(deployee)
-			setDeployee(deployee)
-			console.log('📋 Prepared deployee address:', deployee)
-
 			// Update device with PREPARED address and AAGUID
 			// This address will be deployed later during approval
 			const { success, message, error } = await updateDeviceWithDeployee(
 				JSON.stringify({
-					deployeeAddress: deployee,
 					aaguid,
 					credentialId: registerRes.id,
 					userId,

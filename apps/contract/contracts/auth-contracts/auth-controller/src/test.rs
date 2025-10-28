@@ -25,7 +25,7 @@ fn gen_random_bytes<const N: usize>(env: &Env) -> BytesN<N> {
     BytesN::from_array(env, &random_bytes)
 }
 
-fn signer_public_key(e: &Env, signing_key: &SigningKey) -> BytesN<32> {
+fn signer_public_key(e: &Env, signing_key: &SigningKey) -> BytesN<65> {
     let verifying_key_bytes: [u8; PUBLIC_KEY_LENGTH] = signing_key.verifying_key().to_bytes();
     BytesN::from_array(e, &verifying_key_bytes)
 }
@@ -35,7 +35,7 @@ fn get_signature_bytes(e: &Env, signature: &Signature) -> BytesN<64> {
     BytesN::from_array(e, &signature_bytes)
 }
 
-fn sign(e: &Env, signing_key: &SigningKey, payload: &BytesN<32>) -> Val {
+fn sign(e: &Env, signing_key: &SigningKey, payload: &BytesN<65>) -> Val {
     SignedMessage {
         public_key: signer_public_key(e, signing_key),
         signature: get_signature_bytes(e, &signing_key.sign(payload.to_array().as_slice())),
@@ -49,7 +49,7 @@ struct Controller {
     client: AuthControllerClient<'static>,
     threshold: u32,
     signers: [SigningKey; 2],
-    signers_bytes: Vec<BytesN<32>>,
+    signers_bytes: Vec<BytesN<65>>,
 }
 
 impl Controller {

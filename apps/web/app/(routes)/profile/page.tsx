@@ -8,7 +8,7 @@ export default async function ProfilePage() {
 		data: { user },
 	} = await supabase.auth.getUser()
 
-	if (!user) redirect('/(auth-pages)/sign-in')
+	if (!user) redirect('/sign-in')
 
 	const { data: profile } = await supabase
 		.from('profiles')

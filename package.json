@@ -1,62 +1,62 @@
 {
-  "dependencies": {
-    "date-fns": "^4.1.0",
-    "react-error-boundary": "^5.0.0",
-    "react-webcam": "^7.2.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.1.2",
-    "@biomejs/cli-darwin-x64": "^2.1.2",
-    "@commitlint/cli": "^19.6.1",
-    "@commitlint/config-conventional": "^19.6.0",
-    "@types/bun": "latest",
-    "@types/web-push": "^3.6.4",
-    "autoprefixer": "^10.4.21",
-    "husky": "^9.1.7",
-    "postcss": "^8.5.6",
-    "postcss-flexbugs-fixes": "^5.0.2",
-    "postcss-preset-env": "^10.2.4",
-    "tailwindcss": "^4.1.4"
-  },
-  "engines": {
-    "bun": "1.x"
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
-  "name": "kindfi",
-  "packageManager": "bun@1.2.0",
-  "peerDependencies": {
-    "typescript": "^5.8.2"
-  },
-  "private": true,
-  "scripts": {
-    "clean": "git clean -xdf node_modules",
-    "clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-    "format-and-lint": "biome check .",
-    "format-and-lint:fix": "biome check . --write",
-    "husky:prepare": "husky",
-    "init": "bun install && bun husky:prepare",
-    "prepare": "husky"
-  },
-  "version": "0.0.1",
-  "workspaces": {
-    "nohoist": [
-      "**/cbw-sdk",
-      "**/cbw-sdk/**",
-      "**/wagmi",
-      "**/pino-pretty",
-      "**/wagmi/**",
-      "**/pino-pretty/**"
-    ],
-    "packages": [
-      "apps/*",
-      "services/*",
-      "packages/*"
-    ]
-  },
-  "module": "index.ts",
-  "type": "module"
+	"dependencies": {
+		"date-fns": "^4.1.0",
+		"react-error-boundary": "^5.0.0",
+		"react-webcam": "^7.2.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.1.2",
+		"@biomejs/cli-darwin-x64": "^2.1.2",
+		"@commitlint/cli": "^19.6.1",
+		"@commitlint/config-conventional": "^19.6.0",
+		"@types/bun": "1.2.21",
+		"@types/web-push": "^3.6.4",
+		"autoprefixer": "^10.4.21",
+		"husky": "^9.1.7",
+		"postcss": "^8.5.6",
+		"postcss-flexbugs-fixes": "^5.0.2",
+		"postcss-preset-env": "^10.2.4",
+		"tailwindcss": "^4.1.4"
+	},
+	"engines": {
+		"bun": "1.2.21"
+	},
+	"husky": {
+		"hooks": {
+			"commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+		}
+	},
+	"name": "kindfi",
+	"packageManager": "bun@1.2.21",
+	"peerDependencies": {
+		"typescript": "^5.8.2"
+	},
+	"private": true,
+	"scripts": {
+		"clean": "git clean -xdf node_modules",
+		"clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
+		"format-and-lint": "biome check .",
+		"format-and-lint:fix": "biome check . --write",
+		"husky:prepare": "husky",
+		"init": "bun install && bun husky:prepare",
+		"prepare": "husky"
+	},
+	"version": "0.0.1",
+	"workspaces": {
+		"nohoist": [
+			"**/cbw-sdk",
+			"**/cbw-sdk/**",
+			"**/wagmi",
+			"**/pino-pretty",
+			"**/wagmi/**",
+			"**/pino-pretty/**"
+		],
+		"packages": [
+			"apps/*",
+			"services/*",
+			"packages/*"
+		]
+	},
+	"module": "index.ts",
+	"type": "module"
 }

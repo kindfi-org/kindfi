@@ -78,5 +78,6 @@
 		"test:watch": "bun test --watch src/__tests__/*.test.ts"
 	},
 	"type": "module",
-	"version": "0.1.0"
+	"version": "0.1.1",
+	"packageManager": "bun@1.2.21"
 }

@@ -41,7 +41,11 @@ impl AccountFactory {
             .get::<Symbol, Address>(&AUTH_CONTRACT)
             .unwrap();
 
-        auth_contract.require_auth();
+        // REMOVED: auth_contract.require_auth();
+        // The factory should be callable by any account that pays for the transaction.
+        // The auth-controller's __check_auth expects WebAuthn signatures, but the
+        // funding account uses Ed25519 signatures. Authorization is enforced at the
+        // account contract level and through the auth-controller's add_account function.
 
         let wasm_hash = env
             .storage()

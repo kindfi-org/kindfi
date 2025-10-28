@@ -136,69 +136,73 @@ export const useStellarSignature = (
 	/**
 	 * Creates a new Stellar account controlled by the current Passkey
 	 */
-	const createStellarAccount = useCallback(async (): Promise<{
-		address: string
-		contractId: string
-	}> => {
-		if (!session?.user) {
-			throw new Error('User not authenticated')
-		}
-
-		if (!session.device) {
-			throw new Error('No device information available')
-		}
-
-		setIsLoading(true)
-		setError(null)
-
-		try {
-			console.log('🌟 Creating Stellar account for user:', session.user.id)
-			const userData = session.user
-
-			if (!userData) {
-				throw new Error('User session not found. Please login first.')
+	const approveKYCAccount = useCallback(
+		async (
+			deployOnly = false,
+		): Promise<{
+			address: string
+			contractId: string
+		}> => {
+			if (!session?.user) {
+				throw new Error('User not authenticated')
 			}
 
-			const response = await fetch(
-				`${kycBaseUrl}/api/stellar/create-passkey-account`,
-				{
-					method: 'POST',
-					body: JSON.stringify({
-						credentialId: userData.device?.credential_id,
-						publicKey: userData.device?.public_key,
-						userId: userData.id,
-						deployOnly: true,
-					}),
-				},
-			)
-
-			if (!response.ok) {
-				console.error('response data', response)
-				throw new Error('Failed to create Stellar account')
+			if (!session.device) {
+				throw new Error('No device information available')
 			}
 
-			const result = await response.json()
+			setIsLoading(true)
+			setError(null)
 
-			toast.success('Stellar account created successfully!')
+			try {
+				console.log('🌟 Creating Stellar account for user:', session.user.id)
+				const userData = session.user
 
-			return {
-				address: result.data.address,
-				contractId: result.data.contractId,
+				if (!userData) {
+					throw new Error('User session not found. Please login first.')
+				}
+
+				const response = await fetch(
+					`${kycBaseUrl}/api/stellar/create-passkey-account`,
+					{
+						method: 'POST',
+						body: JSON.stringify({
+							credentialId: userData.device?.credential_id,
+							publicKey: userData.device?.public_key,
+							userId: userData.id,
+						}),
+					},
+				)
+
+				if (!response.ok) {
+					console.error('response data', response)
+					throw new Error('Failed to create Stellar account')
+				}
+
+				const result = await response.json()
+
+				toast.success('Stellar account created successfully!')
+
+				return {
+					address: result.data.address,
+					contractId: result.data.contractId,
+				}
+			} catch (err) {
+				const error =
+					err instanceof Error ? err : new Error('Unknown error occurred')
+				console.error('❌ Error creating Stellar account:', error)
+
+				setError(error.message)
+				options.onError?.(error)
+				// toast.error(`Account creation failed: ${error.message}`)
+
+				throw error
+			} finally {
+				setIsLoading(false)
 			}
-		} catch (err) {
-			const error =
-				err instanceof Error ? err : new Error('Unknown error occurred')
-			console.error('❌ Error creating Stellar account:', error)
-
-			setError(error.message)
-			options.onError?.(error)
-			// toast.error(`Account creation failed: ${error.message}`)
-
-			throw error
-		} finally {
-			setIsLoading(false)
-		}
-	}, [session, kycBaseUrl, options])
+		},
+		[session, kycBaseUrl, options],
+	)
 
 	/**
 	 * Gets information about a Stellar account controlled by a Passkey
@@ -210,7 +214,7 @@ export const useStellarSignature = (
 
 			try {
 				const response = await fetch(
-					`${kycBaseUrl}/api/stellar/account-info?contractId=${encodeURIComponent(contractId)}`,
+					`${kycBaseUrl}/api/stellar/account-info?address=${encodeURIComponent(contractId)}`,
 				)
 
 				if (!response.ok) {
@@ -288,7 +292,7 @@ export const useStellarSignature = (
 
 		// Actions
 		signTransaction,
-		createStellarAccount,
+		approveKYCAccount,
 		getAccountInfo,
 		verifySignature,
 		reset,

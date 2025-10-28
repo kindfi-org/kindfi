@@ -56,8 +56,8 @@ export function transformEnv(): AppEnvInterface {
 			horizonUrl: data.HORIZON_URL || 'https://horizon-futurenet.stellar.org',
 			fundingAccount: data.STELLAR_FUNDING_SECRET_KEY || 'SB...4756',
 			signatureVerification: {
-				maxAttempts: data.STELLAR_SIGNATURE_MAX_ATTEMPTS || 5,
-				windowMs: data.STELLAR_SIGNATURE_WINDOW_MS || 60000,
+				maxAttempts: Number(data.STELLAR_SIGNATURE_MAX_ATTEMPTS || 5),
+				windowMs: Number(data.STELLAR_SIGNATURE_WINDOW_MS || 60000),
 			},
 		},
 		externalApis: {
@@ -150,6 +150,12 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(
 			fundingAccount: z.string(),
 			rpcUrl: z.string(),
 			horizonUrl: z.string(),
+			signatureVerification: z
+				.object({
+					maxAttempts: z.number(),
+					windowMs: z.number(),
+				})
+				.optional(),
 		}),
 		externalApis: z.object({
 			trustlessWork: z.object({
