@@ -9,10 +9,10 @@ import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transa
  */
 export async function GET(
 	_req: NextRequest,
-	{ params }: { params: { address: string } },
+	{ params }: { params: Promise<{ address: string }> },
 ) {
 	try {
-		const { address } = params
+		const { address } = await params
 
 		if (!address) {
 			return NextResponse.json(
