@@ -12,4 +12,6 @@ pub enum Error {
     RecoveryAddressSet = 207,
     RecoveryAddressNotSet = 208,
     NotInitiated = 209,
+    InvalidAmount = 210,
+    InsufficientBalance = 211,
 }

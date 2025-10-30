@@ -2,22 +2,22 @@ Network: testnet
 Source Account: bob (GD3YZRV4WMPZG5JIX5HLNLERB4DRFT6WBNLGEJ2NKLUCR6IKFE34CUUH)
 
 Auth Controller Contract:
-  WASM Hash: ...e95b
-  Contract ID: ...4YCK
+  WASM Hash: ...e95b  
+  Contract ID: ...BTKF
   Status: Initialized with admin signer
   Default Threshold: 1
 
 Account Contract:
   WASM Hash: ...a403
-  Contract ID: ...I3RW
+  Contract ID: ...FUMH
 
 Account Factory Contract:
   WASM Hash: ...15ac
-  Contract ID: ...UXM3
+  Contract ID: ...TN5J
   Status: Registered with auth-controller
 
 Configuration:
   Admin Public Key (hex): ...801b
   Admin Credential ID: ...ZCqQ
 
-Deployment Date: Mon Oct 20 21:41:27 CST 2025
+Deployment Date: Tue Oct 28 11:29:11 CST 2025
