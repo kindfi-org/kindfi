@@ -201,7 +201,7 @@ export function VerifyOTPComponent() {
 										Verification Successful!
 									</p>
 									<p className="text-center text-sm text-muted-foreground">
-										Redirecting you to dashboard...
+										Redirecting you to your profile...
 									</p>
 								</div>
 							) : (

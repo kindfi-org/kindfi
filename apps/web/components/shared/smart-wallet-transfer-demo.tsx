@@ -47,7 +47,8 @@ export function SmartWalletTransferDemo() {
 		try {
 			setIsLoading(true)
 			const response = await fetch(
-				`/api/stellar/balances/${smartWalletAddress}`,
+				`/api/stellar/balances/CAAA322AAKGBZRQ5JHSROZ742VCL3ZLBP54LJBN5UVVJCZ52SR7IH6IT`,
+				// `/api/stellar/balances/${smartWalletAddress}`,
 			)
 
 			if (!response.ok) {

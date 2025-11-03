@@ -320,11 +320,16 @@ export class StellarPasskeyService {
 			// Provide actionable error message
 			if (
 				error instanceof Error &&
-				error.message.includes('scecMissingValue')
+				(error.message.includes('scecMissingValue') ||
+					error.message.includes('HostContextError') ||
+					error.message.includes('HostStorageError'))
 			) {
 				throw new Error(
-					'Factory deployment failed: Auth controller contract function not found. ' +
-						'Please verify that the controller contract is deployed and properly initialized on this network.',
+					'Factory deployment failed: Auth controller contract not properly configured. ' +
+						'Please verify that:\n' +
+						'1. The controller contract is deployed and initialized on this network\n' +
+						'2. The factory contract is registered in the auth controller\n' +
+						'3. The admin signer public key is correctly added to the auth controller',
 				)
 			}
 

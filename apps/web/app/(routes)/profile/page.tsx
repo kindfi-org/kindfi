@@ -1,28 +1,34 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 
 export default async function ProfilePage() {
+	const session = await getServerSession(nextAuthOption)
+
+	if (!session?.user) {
+		redirect('/sign-in')
+	}
+
 	const supabase = await createSupabaseServerClient()
-	const {
-		data: { user },
-	} = await supabase.auth.getUser()
-
-	if (!user) redirect('/sign-in')
-
-	const { data: profile } = await supabase
+	const { data: profileData, error } = await supabase
 		.from('profiles')
-		.select('role, display_name, bio, image_url')
-		.eq('id', user.id)
+		.select('role, display_name, bio, image_url, slug, created_at')
+		.eq('id', session.user.id)
 		.single()
+
+	if (error || !profileData) {
+		redirect('/sign-in')
+	}
 
 	return (
 		<ProfileDashboard
 			user={{
-				id: user.id,
-				email: user.email ?? '',
-				created_at: user.created_at ?? '',
-				profile,
+				id: session.user.id,
+				email: session.user.email || '',
+				created_at: profileData.created_at,
+				profile: profileData,
 			}}
 		/>
 	)

@@ -252,15 +252,18 @@ export const getAuthenticationOptions = async ({
 	if (credentials.length === 0) throw new InAppError(ErrorCode.USER_NOT_FOUND)
 
 	const opts: GenerateAuthenticationOptionsOpts = {
+		userVerification: 'preferred',
+		rpID: rpId,
+		// TODO: Check this, we should always have a mapped challenge that both Stellar and Devices supports
+		challenge: challenge
+			? new Uint8Array(base64url.toBuffer(challenge))
+			: undefined,
 		timeout: appConfig.passkey.challengeTtlMs,
 		allowCredentials: credentials.map((cred) => ({
 			id: cred.id,
-			type: 'public-key',
+			type: 'public-key' as const,
 			transports: cred.transports,
 		})),
-		...(challenge && { challenge: base64url.toBuffer(challenge) }),
-		userVerification: 'preferred',
-		rpID: rpId,
 	}
 
 	const options = await generateAuthenticationOptions(opts)
