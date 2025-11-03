@@ -2,15 +2,22 @@ Network: futurenet
 Source Account: bob-f (GB7J4TPZ4VZBO734FQLYLFBKHQ2TB2A26MQHMCG3VQE62UOA7Y2UE7LU)
 
 Auth Controller Contract:
-  WASM Hash: ...54d6  
-  Contract ID: ...2YOX
+  WASM Hash: ...e95b
+  Contract ID: ...KNO4
+  Status: Initialized with admin signer
+  Default Threshold: 1
 
 Account Contract:
-  WASM Hash: ...5f80
-  Contract ID: ...UDMH
+  WASM Hash: ...279a
+  Contract ID: ...SXN3
 
 Account Factory Contract:
-  WASM Hash: ...3640
-  Contract ID: ...MEGQ
+  WASM Hash: ...15ac
+  Contract ID: ...6WN6
+  Status: Registered with auth-controller
 
-Deployment Date: Sat Sep  6 01:20:41 CST 2025
+Configuration:
+  Admin Public Key (hex): ...801b
+  Admin Credential ID: ...ZCqQ
+
+Deployment Date: Thu Oct 30 22:47:21 CST 2025

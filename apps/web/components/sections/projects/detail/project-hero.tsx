@@ -9,7 +9,6 @@ import {
 	CategoryBadge,
 	CountryFlag,
 } from '~/components/sections/projects/shared'
-import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
@@ -19,11 +18,9 @@ interface ProjectHeroProps {
 }
 
 export function ProjectHero({ project }: ProjectHeroProps) {
-	const { address } = useWallet()
 	const { balance: onChainRaised } = useEscrowBalance({
 		escrowContractAddress: project.escrowContractAddress,
 		escrowType: project.escrowType,
-		signer: address ?? undefined,
 	})
 
 	const displayRaised = useMemo(

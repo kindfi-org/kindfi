@@ -2,9 +2,12 @@
 
 import { useStellarSorobanAccount } from '@packages/lib/hooks'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import type { Session, User as SupabaseUser } from '@supabase/supabase-js'
+import type {
+	Session as SupabaseSession,
+	User as SupabaseUser,
+} from '@supabase/supabase-js'
 import jwt from 'jsonwebtoken'
-import type { User } from 'next-auth'
+import type { Session, User } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { createContext, useContext, useEffect, useState } from 'react'
 
@@ -20,9 +23,21 @@ const AuthContext = createContext<AuthContextType>({
 	stellar: {},
 })
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+/**
+ * AuthProvider component that combines NextAuth SessionProvider with Supabase auth context
+ * @param children - React child components to render
+ * @param initSession - Initial session from server-side to prevent hydration mismatch
+ */
+export function AuthProvider({
+	children,
+	initSession,
+}: {
+	children: React.ReactNode
+	initSession: Session | null
+}) {
 	// Use null as initial state to prevent hydration mismatch
 	const { data: session } = useSession()
+	const userSession = (session ?? initSession) as Session | null
 	const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | undefined>(
 		undefined,
 	)
@@ -38,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				console.log('🔑 Check User Data session result:', session)
 				console.log(
 					'🔑 Check User Data session decryption:',
-					jwt.decode(session?.user.jwt || ''),
+					jwt.decode(userSession?.user.jwt || ''),
 				)
 
 				const {
@@ -59,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange(
-			(_event: string, session: Session | null) => {
+			(_event: string, session: SupabaseSession | null) => {
 				setSupabaseUser(session?.user)
 				setIsSupabaseUserLoading(false)
 			},
@@ -74,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	return (
 		<AuthContext.Provider
 			value={{
-				user: session?.user,
+				user: userSession?.user,
 				supabaseUser,
 				isSupabaseUserLoading,
 				stellar: stellarSorobanAccountState,

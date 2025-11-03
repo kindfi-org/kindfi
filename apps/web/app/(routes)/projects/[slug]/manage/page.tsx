@@ -1,4 +1,12 @@
 import Link from 'next/link'
+import {
+	IoChevronForwardOutline,
+	IoCreateOutline,
+	IoMegaphoneOutline,
+	IoPeopleOutline,
+	IoSettingsOutline,
+	IoStarOutline,
+} from 'react-icons/io5'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -30,30 +38,35 @@ export default async function ProjectManagementDashboardPage({
 					description="Core details like name, category, location, and metadata."
 					href={`/projects/${slug}/manage/basics`}
 					cta="Edit basics"
+					Icon={IoCreateOutline}
 				/>
 				<SectionCard
 					title="Pitch"
 					description="Your story, problem statement, solution, and roadmap."
 					href={`/projects/${slug}/manage/pitch`}
 					cta="Improve pitch"
+					Icon={IoMegaphoneOutline}
 				/>
 				<SectionCard
 					title="Highlights"
 					description="Key achievements, traction and notable metrics."
 					href={`/projects/${slug}/manage/highlights`}
 					cta="Add highlights"
+					Icon={IoStarOutline}
 				/>
 				<SectionCard
 					title="Members"
 					description="Add and manage your team members."
 					href={`/projects/${slug}/manage/members`}
 					cta="Add team members"
+					Icon={IoPeopleOutline}
 				/>
 				<SectionCard
 					title="Escrow & Settings"
 					description="Initialize and manage escrow, roles, and milestone approvals."
 					href={`/projects/${slug}/manage/settings`}
 					cta="Open settings"
+					Icon={IoSettingsOutline}
 				/>
 			</div>
 		</div>
@@ -65,21 +78,35 @@ function SectionCard({
 	description,
 	href,
 	cta,
+	Icon,
 }: {
 	title: string
 	description: string
 	href: string
 	cta: string
+	Icon: React.ComponentType<{ size?: number; className?: string }>
 }) {
 	return (
-		<Card>
+		<Card className="transition-all hover:shadow-md hover:border-primary/30">
 			<CardHeader>
-				<CardTitle>{title}</CardTitle>
-				<CardDescription>{description}</CardDescription>
+				<div className="flex items-start gap-3">
+					<div className="mt-1 rounded-md bg-primary/10 p-2 text-primary">
+						<Icon size={18} />
+					</div>
+					<div className="min-w-0">
+						<CardTitle className="text-xl">{title}</CardTitle>
+						<CardDescription>{description}</CardDescription>
+					</div>
+				</div>
 			</CardHeader>
 			<CardContent>
 				<Link replace href={href} className="inline-block">
-					<Button className="text-white">{cta}</Button>
+					<Button
+						variant="primary-gradient"
+						endIcon={<IoChevronForwardOutline />}
+					>
+						{cta}
+					</Button>
 				</Link>
 			</CardContent>
 		</Card>

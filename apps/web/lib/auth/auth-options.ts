@@ -17,65 +17,72 @@ export const nextAuthOption: NextAuthOptions = {
 		// signOut: '/sign-out',
 	},
 	callbacks: {
-		async jwt({ token, user, account }) {
-			if (!user) {
-				return token
-			}
+		async jwt({ token, user, account, trigger }) {
+			// On sign in, populate the token with user data
+			if (user) {
+				console.log('🗝️ JWT callback - New sign in:', {
+					userId: user.id,
+					provider: account?.provider,
+				})
 
-			console.log('🗝️ JWT callback triggered with user:', user)
-			console.log('🗝️ JWT callback triggered with account:', account)
-			console.log('🗝️ JWT callback triggered with token:', token)
-			const userData = user as User
-			// Maintain the existing JWT structure for compatibility
-			token.role = userData.userData?.role as Enums<'user_role'>
-			token.id = userData.id
-			token.email = userData.email
-			token.provider = account?.provider || 'webauthn'
-			token.name = user.name
+				const userData = user as User
 
-			// Add device data for WebAuthn sessions
-			if (account?.provider === 'credentials' && userData.device) {
-				token.device = userData.device
-			}
+				// Set core NextAuth token properties
+				token.id = userData.id
+				token.email = userData.email
+				token.name = user.name
+				token.role = userData.userData?.role as Enums<'user_role'>
+				token.provider = account?.provider || 'webauthn'
 
-			// Generate Supabase access token for RLS
-			const signingSecret = process.env.SUPABASE_JWT_SECRET
-			if (signingSecret) {
-				const payload = {
-					aud: 'authenticated',
-					exp: Math.floor(Date.now() / 1000) + appConfig.auth.token.expiration,
-					sub: user.id,
-					email: user.email,
-					role: 'authenticated',
-					user_metadata: {
-						role: userData.userData?.role,
-						provider: account?.provider || 'webauthn',
-					},
+				// Add device data for WebAuthn sessions
+				if (account?.provider === 'credentials' && userData.device) {
+					token.device = userData.device
 				}
-				const supabaseJwt = jwt.sign(payload, signingSecret)
-				token.supabaseAccessToken = supabaseJwt
-				// Store the actual JWT for the session
-				token.sub = supabaseJwt
+
+				// Generate separate Supabase access token for RLS (different from NextAuth token)
+				const signingSecret = process.env.SUPABASE_JWT_SECRET
+				if (signingSecret) {
+					const supabasePayload = {
+						aud: 'authenticated',
+						exp:
+							Math.floor(Date.now() / 1000) + appConfig.auth.token.expiration,
+						sub: user.id,
+						email: user.email,
+						role: 'authenticated',
+						user_metadata: {
+							role: userData.userData?.role,
+							provider: account?.provider || 'webauthn',
+						},
+					}
+					const supabaseJwt = jwt.sign(supabasePayload, signingSecret)
+					token.supabaseAccessToken = supabaseJwt
+					token.sub = supabaseJwt
+				}
 			}
 
-			return token // Ensure the modified token is returned
+			// Always return the token to maintain session
+			return token
 		},
 		async session({ session, token }) {
-			console.log('🗝️ Session callback triggered with session:', session)
-			console.log('🗝️ Session callback triggered with token:', token)
-			if (!token || !session.user) {
-				console.error('No token found in session callback')
+			if (!token) {
+				console.error('❌ No token found in session callback')
 				return session
 			}
 
-			// Attach the user details and JWT to the session object (maintain existing structure)
+			console.log('🗝️ Session callback - Building session:', {
+				hasToken: !!token,
+				tokenId: token.id,
+				tokenSub: token.sub,
+			})
+
+			// Build session from token
 			session.user = {
 				id: token.id as string,
 				name: token.name as string,
 				email: token.email as string,
 				image: token.image as string,
-				jwt: token.sub as string, // This should now be the actual JWT
-				role: token.role as string, // Add the missing role property
+				jwt: token.sub as string, // NextAuth's primary token identifier
+				role: token.role as string,
 				userData: {
 					role: token.role as Enums<'user_role'>,
 					display_name: token.name as string,
@@ -89,15 +96,17 @@ export const nextAuthOption: NextAuthOptions = {
 				session.device = token.device
 			}
 
-			// Add Supabase access token for RLS
+			// Add Supabase-specific JWT for RLS (separate from NextAuth token)
 			if (token.supabaseAccessToken) {
-				session.supabaseAccessToken = token.supabaseAccessToken
+				session.supabaseAccessToken = token.supabaseAccessToken as string
 			}
 
-			console.log(
-				'🗝️ Session created with Hasura JWT ',
-				session.user?.jwt ? 'Present' : 'Missing',
-			)
+			console.log('🗝️ Session created:', {
+				hasNextAuthToken: !!session.user?.jwt,
+				hasSupabaseToken: !!session.supabaseAccessToken,
+				userId: session.user?.id,
+			})
+
 			return session
 		},
 		// @ts-expect-error auth param is OK on this scenario as we only return it.
@@ -105,8 +114,10 @@ export const nextAuthOption: NextAuthOptions = {
 			return !!auth?.user
 		},
 		async signIn({ user, account }) {
-			// TODO: Add custom sign-in logic if needed?
-			console.log('🗝️ SignIn callback triggered with user:', { user, account })
+			console.log('🗝️ SignIn callback triggered:', {
+				userId: user.id,
+				provider: account?.provider,
+			})
 			return true
 		},
 	},

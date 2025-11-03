@@ -134,7 +134,7 @@ export async function createSessionAction({
 		return {
 			success: true,
 			message: 'Session created successfully',
-			redirect: '/dashboard',
+			redirect: '/profile',
 			// data: sessionData,
 			data: userData,
 		} as AuthResponse
@@ -490,19 +490,16 @@ export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
 
 export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 	const {
-		deployeeAddress,
 		aaguid,
 		userId,
 		credentialId,
 	}: {
-		deployeeAddress: string
 		credentialId: string
 		userId: string
 		aaguid?: string
 	} = JSON.parse(deployeeUpdateData)
 	// Get current user from session or context
 	console.log('updateDeviceWithDeployee::>', {
-		deployeeAddress,
 		aaguid,
 		userId,
 		credentialId,
@@ -513,7 +510,7 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 		}
 
 		// Validate input parameters
-		if (!userId || !credentialId || !deployeeAddress || !aaguid) {
+		if (!userId || !credentialId || !aaguid) {
 			return {
 				success: false,
 				message: 'Missing required parameters',
@@ -549,7 +546,6 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 		const updatedDevice = await db
 			.update(devices)
 			.set({
-				address: deployeeAddress,
 				aaguid: aaguid || deviceToUpdate.aaguid,
 				updatedAt: new Date().toISOString(),
 			})
@@ -574,7 +570,6 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 			eventType: 'DEVICE_UPDATED',
 			userId,
 			credentialId,
-			deployeeAddress,
 			aaguid,
 		})
 

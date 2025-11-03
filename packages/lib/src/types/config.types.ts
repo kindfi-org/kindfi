@@ -52,6 +52,10 @@ export interface AppEnvInterface {
 		fundingAccount: string
 		rpcUrl: string
 		horizonUrl: string
+		signatureVerification?: {
+			maxAttempts: number
+			windowMs: number
+		}
 	}
 	externalApis: {
 		trustlessWork: {
@@ -87,5 +91,10 @@ export interface AppEnvInterface {
 		expectedOrigin: string[]
 		challengeTtlSeconds: number
 		challengeTtlMs: number
+	}
+	/** Redis configuration (Upstash) */
+	redis?: {
+		url: string
+		token: string
 	}
 }

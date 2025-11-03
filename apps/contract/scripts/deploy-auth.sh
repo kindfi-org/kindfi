@@ -85,6 +85,10 @@ AUTH_CONTROLLER_CONTRACT_ID=$(stellar contract deploy \
 
 echo "✅ Auth Controller Contract deployed: $AUTH_CONTROLLER_CONTRACT_ID"
 
+# Get the funding account's public key in the required format
+FUNDING_PUBLIC_KEY=$(stellar keys address "$SOURCE")
+echo "📝 Funding account public key: $FUNDING_PUBLIC_KEY"
+
 # Generate sample device_id and public_key for Account Contract
 echo "📦 Deploying Account Contract..."
 ACCOUNT_WASM_HASH=$(stellar contract upload \
@@ -156,6 +160,45 @@ ACCOUNT_FACTORY_CONTRACT_ID=$(stellar contract deploy \
 
 echo "✅ Account Factory Contract deployed: $ACCOUNT_FACTORY_CONTRACT_ID"
 
+# Initialize Auth Controller with WebAuthn public keys ONLY
+echo "🔧 Initializing Auth Controller with authorized signers..."
+
+##! IMPORTANT: The auth-controller expects 65-byte uncompressed secp256r1 public keys (WebAuthn format)
+##! The funding account ($SOURCE) uses Ed25519 keys and is NOT registered as a signer.
+## 
+##? Why? After removing require_auth() from the factory contract:
+##? - Funding account ONLY pays transaction fees and signs with Ed25519.
+##? - Auth-controller signers are ONLY for WebAuthn-based account operations.
+##? - The factory contract is now open for any funded deployment.
+##? - Individual account security is enforced at the account contract level.
+
+echo "Initializing with WebAuthn public key as the admin signer..."
+
+stellar contract invoke \
+    --network "$NETWORK" \
+    --source "$SOURCE" \
+    --id "$AUTH_CONTROLLER_CONTRACT_ID" \
+    -- \
+    init \
+    --signers "[\"$PUBLIC_KEY_HEX\"]" \
+    --default_threshold 1
+
+echo "✅ Auth Controller initialized with admin WebAuthn public key"
+
+# Register the factory contract with the auth controller
+echo "📝 Registering factory contract with auth controller..."
+echo "Note: Factory registration uses empty context - auth is handled by WebAuthn at account level"
+stellar contract invoke \
+    --network "$NETWORK" \
+    --source "$SOURCE" \
+    --id "$AUTH_CONTROLLER_CONTRACT_ID" \
+    -- \
+    add_factory \
+    --factory "$ACCOUNT_FACTORY_CONTRACT_ID" \
+    # --context "[\"$ACCOUNT_FACTORY_CONTRACT_ID\"]"
+
+echo "✅ Factory contract registered with auth controller"
+
 # Save deployment info
 echo "💾 Saving deployment information..."
 cat > auth-deployment-info-${NETWORK}.txt << EOF
@@ -165,6 +208,8 @@ Source Account: $SOURCE ($(stellar keys address $SOURCE))
 Auth Controller Contract:
   WASM Hash: $AUTH_CONTROLLER_WASM_HASH  
   Contract ID: $AUTH_CONTROLLER_CONTRACT_ID
+  Status: Initialized with admin signer
+  Default Threshold: 1
 
 Account Contract:
   WASM Hash: $ACCOUNT_WASM_HASH
@@ -173,6 +218,11 @@ Account Contract:
 Account Factory Contract:
   WASM Hash: $ACCOUNT_FACTORY_WASM_HASH
   Contract ID: $ACCOUNT_FACTORY_CONTRACT_ID
+  Status: Registered with auth-controller
+
+Configuration:
+  Admin Public Key (hex): $PUBLIC_KEY_HEX
+  Admin Credential ID: $CREDENTIAL_ID
 
 Deployment Date: $(date)
 EOF

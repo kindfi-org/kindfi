@@ -13,7 +13,6 @@ ON public.profiles
 FOR SELECT
 USING (true);
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Profiles are viewable by everyone"
 --     ON profiles
 --     FOR SELECT
@@ -41,7 +40,6 @@ ON projects
 FOR SELECT
 USING (true);
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Projects are viewable by everyone"
 --     ON projects
 --     FOR SELECT
@@ -56,7 +54,6 @@ CREATE POLICY "Temporary public insert access to projects"
     TO public
     WITH CHECK (true);
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Projects can be created by authenticated users"
 --     ON projects
 --     FOR INSERT
@@ -72,7 +69,6 @@ CREATE POLICY "Temporary public update access to projects"
     USING (true)
     WITH CHECK (true);
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Projects can be updated by owner"
 --     ON projects
 --     FOR UPDATE
@@ -121,7 +117,6 @@ ON public.project_updates
 FOR SELECT
 USING (true);
 
--- TODO: Re-enable after auth changes from issue #44. - @derianrddev
 -- CREATE POLICY "Project updates are viewable by everyone"
 --     ON project_updates
 --     FOR SELECT

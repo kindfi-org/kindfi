@@ -1,36 +1,39 @@
 import { ArrowRight, Lightbulb, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
+import { useTranslation } from '~/hooks/use-translation'
 
 export function FaqSupport() {
+	const { t } = useTranslation()
 	return (
-		<section className="w-full px-7 pt-24 bg-white flex flex-col gap-7 justify-center items-center">
-			<h2 className="gradient-text font-semibold text-3xl md:text-4xl">
-				Still Have Questions?
-			</h2>
-			<p className="text-[#727276] text-center line-clamp-2 text-sm md:text-base">
-				Can't find what you're looking for? Join our community for real-time
-				support and discussions
-			</p>
-			<div className="flex flex-col gap-4 justify-center items-center md:flex-row">
-				<Link href="/">
-					<Button className="bg-black text-white">
-						<ArrowRight />
-						See How It Works
-					</Button>
-				</Link>
-				<Link href="/community">
-					<Button className="border border-[#E6E6E6] text-black">
-						<MessageCircle />
-						See The Community
-					</Button>
-				</Link>
-				<Link href="/create-project">
-					<Button className="border border-[#E6E6E6] text-white bg-[#466E23]">
-						<Lightbulb />
-						Start a Campaign
-					</Button>
-				</Link>
+		<section className="w-full px-7 pt-24 bg-transparent flex flex-col gap-7 justify-center items-center">
+			<div className="w-full max-w-4xl bg-white border border-[#E6E6E6] rounded-2xl p-6 md:p-10 shadow-sm">
+				<h2 className="gradient-text font-semibold text-3xl md:text-4xl text-center">
+					{t('faqs.support.title')}
+				</h2>
+				<p className="text-[#727276] text-center mt-2 text-sm md:text-base">
+					{t('faqs.support.description')}
+				</p>
+				<div className="mt-6 flex flex-col gap-4 justify-center items-center md:flex-row">
+					<Link href="/">
+						<Button className="bg-black text-white">
+							<ArrowRight />
+							{t('about.seeHowItWorks')}
+						</Button>
+					</Link>
+					<Link href="/community">
+						<Button className="border border-[#E6E6E6] text-black">
+							<MessageCircle />
+							{t('faqs.support.seeCommunity')}
+						</Button>
+					</Link>
+					<Link href="/create-project">
+						<Button className="border border-[#E6E6E6] text-white bg-[#466E23]">
+							<Lightbulb />
+							{t('faqs.support.startCampaign')}
+						</Button>
+					</Link>
+				</div>
 			</div>
 		</section>
 	)

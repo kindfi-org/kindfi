@@ -1,7 +1,8 @@
 import { appEnvConfig } from '@packages/lib'
 import type { AppEnvInterface } from '@packages/lib/types'
+import { registerAccountOnChain } from '~/lib/stellar/auth-controller-service'
+import { StellarPasskeyService } from '~/lib/stellar/stellar-passkey-service'
 import { corsConfig } from '../config/cors'
-import { StellarPasskeyAccountService } from '../lib/stellar/stellar-passkey-service'
 import { withCORS } from '../middleware/cors'
 import { handleError } from '../utils/error-handler'
 
@@ -12,8 +13,8 @@ const withConfiguredCORS = (
 	handler: (req: Request) => Response | Promise<Response>,
 ) => withCORS(handler, corsConfig)
 
-// Initialize Stellar service
-const stellarService = new StellarPasskeyAccountService(
+// Initialize Stellar service (V2 - simplified)
+const stellarService = new StellarPasskeyService(
 	appConfig.stellar.networkPassphrase,
 	appConfig.stellar.rpcUrl,
 	appConfig.stellar.fundingAccount,
@@ -24,22 +25,34 @@ export const stellarRoutes = {
 		async POST(req: Request) {
 			return withConfiguredCORS(async () => {
 				try {
-					const { credentialId, publicKey, userId } = await req.json()
+					const { contractAddress, contexts } = await req.json()
 
-					if (!credentialId || !publicKey || !userId) {
+					if (!contractAddress) {
 						return Response.json(
-							{ error: 'Missing required parameters' },
+							{
+								error:
+									'Missing required parameter: contractAddress (smart wallet C... address)',
+							},
 							{ status: 400 },
 						)
 					}
 
-					const result = await stellarService.createPasskeyAccount({
-						credentialId,
-						publicKey,
-					})
+					console.log('✅ Approving account for KYC:', contractAddress)
+
+					// Add account to auth-controller for KYC approval
+					// This registers the smart wallet as an authorized account
+					// contexts should be an array of contract addresses (stringified)
+					const contextArray = Array.isArray(contexts)
+						? contexts
+						: [contractAddress]
+					const result = await registerAccountOnChain(
+						contractAddress,
+						contextArray,
+					)
 
 					return Response.json({
 						success: true,
+						message: 'Account approved and registered in auth-controller',
 						data: result,
 					})
 				} catch (error) {
@@ -54,9 +67,9 @@ export const stellarRoutes = {
 		async POST(req: Request) {
 			return withConfiguredCORS(async () => {
 				try {
-					const { contractId, signature, transactionHash } = await req.json()
+					const { address, signature, transactionHash } = await req.json()
 
-					if (!contractId || !signature || !transactionHash) {
+					if (!address || !signature || !transactionHash) {
 						return Response.json(
 							{ error: 'Missing required parameters' },
 							{ status: 400 },
@@ -64,7 +77,7 @@ export const stellarRoutes = {
 					}
 
 					const isValid = await stellarService.verifyPasskeySignature(
-						contractId,
+						address,
 						signature,
 						transactionHash,
 					)
@@ -85,9 +98,9 @@ export const stellarRoutes = {
 		async POST(req: Request) {
 			return withConfiguredCORS(async () => {
 				try {
-					const { contractId, operation, signature } = await req.json()
+					const { address, operation, signature } = await req.json()
 
-					if (!contractId || !operation || !signature) {
+					if (!address || !operation || !signature) {
 						return Response.json(
 							{ error: 'Missing required parameters' },
 							{ status: 400 },
@@ -96,7 +109,7 @@ export const stellarRoutes = {
 
 					const transactionHash =
 						await stellarService.executePasskeyTransaction(
-							contractId,
+							address,
 							operation,
 							signature,
 						)
@@ -118,17 +131,16 @@ export const stellarRoutes = {
 			return withConfiguredCORS(async () => {
 				try {
 					const url = new URL(req.url)
-					const contractId = url.searchParams.get('contractId')
+					const address = url.searchParams.get('address')
 
-					if (!contractId) {
+					if (!address) {
 						return Response.json(
-							{ error: 'Missing contractId parameter' },
+							{ error: 'Missing address parameter' },
 							{ status: 400 },
 						)
 					}
 
-					const accountInfo =
-						await stellarService.getPasskeyAccountInfo(contractId)
+					const accountInfo = await stellarService.getAccountInfo(address)
 
 					return Response.json({
 						success: true,

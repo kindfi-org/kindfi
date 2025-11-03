@@ -1,10 +1,16 @@
 import type {
 	AuthenticatorTransportFuture,
-	WebAuthnCredential,
+	WebAuthnCredential as BaseWebAuthnCredential,
 } from '@simplewebauthn/server'
 import { and, desc, eq, gt, lt } from 'drizzle-orm'
 import { getDb as db } from '../db'
 import { challenges, type Device, devices } from './schema'
+
+// Extended WebAuthnCredential with Stellar address support (matches passkey-service.ts)
+export interface WebAuthnCredential extends BaseWebAuthnCredential {
+	address?: string // Stellar address (G... format)
+	aaguid?: string
+}
 
 // Utility functions for data conversion
 const uint8ArrayToBase64 = (array: Uint8Array): string => {
@@ -193,8 +199,8 @@ export const saveUser = async ({
 				signCount: credential.counter,
 				transports: credential.transports || [],
 				credentialType: 'public-key',
-				aaguid: '',
-				address: '0x',
+				aaguid: credential.aaguid || '',
+				address: credential.address || '0x',
 				profileVerificationStatus: 'unverified',
 				deviceType: 'single_device',
 				backupState: 'not_backed_up',

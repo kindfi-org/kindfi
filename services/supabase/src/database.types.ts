@@ -646,32 +646,6 @@ export type Database = {
 				}
 				Relationships: []
 			}
-			kindler_projects: {
-				Row: {
-					joined_at: string
-					kindler_id: string
-					project_id: string
-				}
-				Insert: {
-					joined_at?: string
-					kindler_id: string
-					project_id: string
-				}
-				Update: {
-					joined_at?: string
-					kindler_id?: string
-					project_id?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'kindler_projects_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
 			kyc_admin_whitelist: {
 				Row: {
 					created_at: string
@@ -873,6 +847,7 @@ export type Database = {
 					image_url: string | null
 					next_auth_user_id: string | null
 					role: Database['public']['Enums']['user_role']
+					slug: string | null
 					updated_at: string
 				}
 				Insert: {
@@ -884,6 +859,7 @@ export type Database = {
 					image_url?: string | null
 					next_auth_user_id?: string | null
 					role?: Database['public']['Enums']['user_role']
+					slug?: string | null
 					updated_at?: string
 				}
 				Update: {
@@ -895,6 +871,7 @@ export type Database = {
 					image_url?: string | null
 					next_auth_user_id?: string | null
 					role?: Database['public']['Enums']['user_role']
+					slug?: string | null
 					updated_at?: string
 				}
 				Relationships: []
@@ -939,7 +916,6 @@ export type Database = {
 				Row: {
 					id: string
 					joined_at: string
-					next_auth_user_id: string | null
 					project_id: string
 					role: Database['public']['Enums']['project_member_role']
 					title: string
@@ -949,7 +925,6 @@ export type Database = {
 				Insert: {
 					id?: string
 					joined_at?: string
-					next_auth_user_id?: string | null
 					project_id: string
 					role?: Database['public']['Enums']['project_member_role']
 					title?: string
@@ -959,7 +934,6 @@ export type Database = {
 				Update: {
 					id?: string
 					joined_at?: string
-					next_auth_user_id?: string | null
 					project_id?: string
 					role?: Database['public']['Enums']['project_member_role']
 					title?: string
@@ -1180,6 +1154,39 @@ export type Database = {
 					},
 				]
 			}
+			user_follows: {
+				Row: {
+					created_at: string
+					follower_id: string
+					following_id: string
+				}
+				Insert: {
+					created_at?: string
+					follower_id: string
+					following_id: string
+				}
+				Update: {
+					created_at?: string
+					follower_id?: string
+					following_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: 'user_follows_follower_id_fkey'
+						columns: ['follower_id']
+						isOneToOne: false
+						referencedRelation: 'profiles'
+						referencedColumns: ['id']
+					},
+					{
+						foreignKeyName: 'user_follows_following_id_fkey'
+						columns: ['following_id']
+						isOneToOne: false
+						referencedRelation: 'profiles'
+						referencedColumns: ['id']
+					},
+				]
+			}
 			waitlist_interests: {
 				Row: {
 					category_id: string | null
@@ -1243,13 +1250,16 @@ export type Database = {
 				Args: Record<PropertyKey, never>
 				Returns: undefined
 			}
+			current_auth_user_id: {
+				Args: Record<PropertyKey, never>
+				Returns: string
+			}
 			get_current_user_profile: {
 				Args: Record<PropertyKey, never>
 				Returns: {
-					user_id: string
 					profile_id: string
 					role: Database['public']['Enums']['user_role']
-					next_auth_user_id: string
+					user_id: string
 				}[]
 			}
 			is_project_owner: {
@@ -1259,7 +1269,7 @@ export type Database = {
 			is_project_team_member: {
 				Args: { project_uuid: string; user_uuid: string }
 				Returns: boolean
-      }
+			}
 			remove_kyc_admin: {
 				Args: { target_user_id: string }
 				Returns: undefined

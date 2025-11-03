@@ -175,7 +175,7 @@ export const usePasskeyAuthentication = (
 			setIsAuthenticating(false)
 			if (success) {
 				// Redirect to the dashboard or any other page after successful authentication
-				redirect('/dashboard', RedirectType.replace)
+				redirect('/profile', RedirectType.replace)
 			}
 		}
 	}

@@ -1,5 +1,7 @@
+import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { ManageNav } from '../../../../../components/sections/projects/manage/manage-nav'
+import { IoChevronBackOutline } from 'react-icons/io5'
+import { Button } from '~/components/base/button'
 
 export default async function ManageLayout({
 	children,
@@ -12,12 +14,14 @@ export default async function ManageLayout({
 
 	return (
 		<section className="container mx-auto px-4 py-8 md:py-12">
-			<div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
-				<aside className="lg:sticky lg:top-24 h-fit">
-					<ManageNav slug={slug} />
-				</aside>
-				<main className="min-w-0">{children}</main>
+			<div className="mb-6">
+				<Link href={`/projects/${slug}`} className="inline-block">
+					<Button variant="ghost" startIcon={<IoChevronBackOutline />}>
+						Back to project
+					</Button>
+				</Link>
 			</div>
+			<main className="min-w-0">{children}</main>
 		</section>
 	)
 }

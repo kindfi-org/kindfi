@@ -9,7 +9,7 @@
 		"@biomejs/cli-darwin-x64": "^2.1.2",
 		"@commitlint/cli": "^19.6.1",
 		"@commitlint/config-conventional": "^19.6.0",
-		"@types/bun": "latest",
+		"@types/bun": "1.2.21",
 		"@types/web-push": "^3.6.4",
 		"autoprefixer": "^10.4.21",
 		"husky": "^9.1.7",
@@ -19,7 +19,7 @@
 		"tailwindcss": "^4.1.4"
 	},
 	"engines": {
-		"bun": "1.x"
+		"bun": "1.2.21"
 	},
 	"husky": {
 		"hooks": {
@@ -27,7 +27,7 @@
 		}
 	},
 	"name": "kindfi",
-	"packageManager": "bun@1.2.0",
+	"packageManager": "bun@1.2.21",
 	"peerDependencies": {
 		"typescript": "^5.8.2"
 	},
@@ -56,5 +56,7 @@
 			"services/*",
 			"packages/*"
 		]
-	}
+	},
+	"module": "index.ts",
+	"type": "module"
 }

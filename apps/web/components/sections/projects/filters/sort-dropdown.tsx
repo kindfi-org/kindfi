@@ -10,6 +10,7 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/base/dropdown-menu'
 import { sortOptions } from '~/lib/constants/projects'
+import { useI18n } from '~/lib/i18n'
 import type { SortOption } from '~/lib/types/project'
 
 interface SortDropdownProps {
@@ -18,7 +19,24 @@ interface SortDropdownProps {
 }
 
 export function SortDropdown({ value, onChange }: SortDropdownProps) {
+	const { t } = useI18n()
 	const selectedOption = sortOptions.find((option) => option.value === value)
+
+	// Translate sort option labels
+	const getSortLabel = (option: SortOption) => {
+		switch (option) {
+			case 'Most Popular':
+				return t('projects.sortMostPopular')
+			case 'Most Recent':
+				return t('projects.sortMostRecent')
+			case 'Most Funded':
+				return t('projects.sortAlmostFunded')
+			case 'Most Supporters':
+				return t('projects.sortMostSupporters')
+			default:
+				return option
+		}
+	}
 
 	return (
 		<DropdownMenu>
@@ -28,7 +46,7 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
 					className="flex items-center gap-2 gradient-border-btn"
 				>
 					{selectedOption?.icon}
-					{selectedOption?.label}
+					{selectedOption && getSortLabel(selectedOption.value)}
 					<ChevronDown className="h-4 w-4 ml-2" aria-hidden="true" />
 				</Button>
 			</DropdownMenuTrigger>
@@ -44,7 +62,7 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
 						aria-selected={option.value === value}
 					>
 						{option.icon}
-						{option.label}
+						{getSortLabel(option.value)}
 					</DropdownMenuItem>
 				))}
 			</DropdownMenuContent>

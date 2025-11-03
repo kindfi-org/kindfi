@@ -114,7 +114,7 @@ This section provides a comprehensive overview of all test cases for the auth co
 - **test_account_add_device**: Tests successful addition of a new device
 - **test_account_add_device_already_exists**: Confirms rejection when adding a duplicate device
 - **test_account_remove_device**: Verifies proper removal of a device
-- **test_remove_device__not_found**: Verifies rejection when removing a non-existent device
+- **test_remove_device\_\_not_found**: Verifies rejection when removing a non-existent device
 - **test_account_remove_device_last_one**: Tests rejection when attempting to remove the last device
 
 #### Recovery Management Tests
@@ -290,6 +290,7 @@ The auth contracts system employs two different cryptographic schemes:
 
 1. **Ed25519** used by the Auth Controller for multi-sig operations
 2. **Secp256r1** (P256) used by Account Contract for device authentication (WebAuthn compatibility)
+
 - **verify_signature**: Helper function that implements proper cryptographic verification
 - **sign**: Helper function that generates cryptographically secure signatures
 
@@ -363,5 +364,26 @@ If tests are failing, check the following:
 2. **Contract Changes**: If the AuthController contract has changed, tests may need to be updated
 3. **WASM Compilation**: Ensure the contract WASMs have been compiled successfully, especially for the AccountFactory contract.
 4. **Test Dependencies**: Some tests may depend on other contracts being compiled first
+
+### Common Deployment Issues
+
+**Error: "parsing argument context: expected value at line 1 column 2"**
+
+- This error occurs when the `--context` parameter is not properly formatted as a JSON array
+- **Solution**: Ensure contract addresses are quoted and wrapped in a JSON array: `--context "[\"$CONTRACT_ID\"]"`
+- **Example**: `--context "[\"CA...XYZ\"]"` for a single context, or `--context "[\"CA...XYZ\",\"CB...ABC\"]"` for multiple
+
+**Error: "Factory deployment failed: Auth controller contract function not found"**
+
+- This indicates the auth-controller contract is not properly deployed or initialized
+- **Solution**:
+  1. Verify the auth-controller contract is deployed with `stellar contract info --id $AUTH_CONTROLLER_ID`
+  2. Ensure it's initialized with admin signers using `stellar contract invoke ... -- init`
+  3. Register the factory contract using `stellar contract invoke ... -- add_factory`
+
+**Error: "Invalid context address format"**
+
+- Context addresses must be valid Stellar contract addresses starting with 'C'
+- **Solution**: Verify all context addresses are properly formatted contract IDs (not account public keys starting with 'G')
 
 For more details, refer to the [Soroban SDK documentation](https://soroban.stellar.org/docs) and the [KindFi Contracts Documentation](../../../README.md).

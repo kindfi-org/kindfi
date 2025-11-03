@@ -3,12 +3,15 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { Users } from 'lucide-react'
 import { Card, CardContent } from '~/components/base/card'
+import { SectionContainer } from '~/components/shared/section-container'
 import { Web3FeatureCard } from '~/components/shared/web3-feature-card'
 import { fadeInUpAnimation } from '~/lib/constants/animations'
 import { features, stats } from '~/lib/constants/platform-overview-data'
+import { useI18n } from '~/lib/i18n'
 
 export function PlatformOverview() {
 	const shouldReduceMotion = useReducedMotion()
+	const { t } = useI18n()
 
 	return (
 		<section className="relative py-24 overflow-hidden">
@@ -17,74 +20,57 @@ export function PlatformOverview() {
 				<div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
 			</div>
 
-			<div className="relative container mx-auto px-4">
+			<SectionContainer className="relative">
 				{/* Header */}
 				<motion.div
 					{...fadeInUpAnimation}
 					className="text-center mb-16 max-w-3xl mx-auto"
 				>
 					<h2 className="text-4xl font-bold text-gray-900 mb-6">
-						<span className="block">Transforming Social Impact in LATAM</span>
+						<span className="block">{t('home.platformTitle1')}</span>
 						<span className="block gradient-text">
-							With Blockchain You Can Trust
+							{t('home.platformTitle2')}
 						</span>
 					</h2>
-					<p className="text-lg text-gray-600">
-						KindFi connects real-world causes with crypto-powered transparency.
-						Built on Stellar, our escrow system ensures that every contribution
-						is safe, trackable, and only released when impact is proven.
-					</p>
+					<p className="text-lg text-gray-600">{t('home.platformSubtitle')}</p>
 				</motion.div>
 
 				{/* Features Grid */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16">
-					{features.map((feature) => (
-						<Web3FeatureCard key={feature.id} {...feature} />
-					))}
+					<Web3FeatureCard
+						key={features[0].id}
+						{...features[0]}
+						title={t('home.platformFeature1Title')}
+						description={t('home.platformFeature1Desc')}
+						stats={{
+							value: t('home.platformFeature1StatValue'),
+							label: t('home.platformFeature1StatLabel'),
+						}}
+					/>
+					<Web3FeatureCard
+						key={features[1].id}
+						{...features[1]}
+						title={t('home.platformFeature2Title')}
+						description={t('home.platformFeature2Desc')}
+						stats={{
+							value: t('home.platformFeature2StatValue'),
+							label: t('home.platformFeature2StatLabel'),
+						}}
+					/>
+					<Web3FeatureCard
+						key={features[2].id}
+						{...features[2]}
+						title={t('home.platformFeature3Title')}
+						description={t('home.platformFeature3Desc')}
+						checkList={[
+							{ id: 'metrics', text: t('home.platformFeature3Check1') },
+							{ id: 'escrows', text: t('home.platformFeature3Check2') },
+							{ id: 'governance', text: t('home.platformFeature3Check3') },
+							{ id: 'blockchain', text: t('home.platformFeature3Check4') },
+						]}
+					/>
 				</div>
-
-				{/* Bottom Info */}
-				<motion.div {...fadeInUpAnimation}>
-					<Card className="bg-gradient-to-r from-purple-50 to-purple-50 max-w-4xl mx-auto border-none shadow-sm">
-						<CardContent className="p-8 text-center">
-							<div className="flex items-center justify-center mb-6">
-								<Users className="w-8 h-8 text-purple-700" />
-							</div>
-							<p className="text-gray-600 leading-relaxed font-medium text-center">
-								Every project on KindFi runs on a secure, milestone-based escrow
-								system built with Stellar smart contracts. Funds are only
-								released when real progress is verified — no shortcuts, no empty
-								promises. With on-chain transparency and real-time
-								accountability, we are connecting Web3 with causes that truly
-								matter across Latin America and beyond.
-							</p>
-						</CardContent>
-					</Card>
-				</motion.div>
-
-				{/* Stats Section */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
-					{stats.map((stat, index) => (
-						<motion.div
-							key={stat.id}
-							initial={{ opacity: 0, y: 20 }}
-							whileInView={{ opacity: 1, y: 0 }}
-							viewport={{ once: true }}
-							transition={{
-								duration: shouldReduceMotion ? 0.3 : 0.5,
-								delay: shouldReduceMotion ? 0 : index * 0.1,
-							}}
-							className="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-all duration-300"
-						>
-							<div className="flex justify-center mb-4">{stat.icon}</div>
-							<div className="text-3xl font-bold gradient-text mb-2">
-								{stat.value}
-							</div>
-							<div className="text-sm text-gray-600">{stat.label}</div>
-						</motion.div>
-					))}
-				</div>
-			</div>
+			</SectionContainer>
 		</section>
 	)
 }

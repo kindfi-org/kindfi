@@ -18,10 +18,12 @@ import { Label } from '~/components/base/label'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { useFormValidation } from '~/hooks/use-form-validation'
+import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 
 export function SignupComponent() {
 	const router = useRouter()
+	const { t } = useI18n()
 	const [{ email, isSubmitting, error, success }, setSignUpState] = useSetState(
 		{
 			email: '',
@@ -81,9 +83,9 @@ export function SignupComponent() {
 					<div className="flex justify-between mb-4">
 						<div className="flex-col">
 							<h1 className="gradient-text text-2xl mb-2 text-start font-semibold tracking-tight">
-								Create an account
+								{t('auth.createAccount')}
 							</h1>
-							<h3> Enter your details below to create your account</h3>
+							<h3>{t('auth.signUpSubtitle')}</h3>
 						</div>
 						<div className="flex justify-center items-center rounded-full bg-blue-500/10 w-12 h-12">
 							<UserPlus className="h-6 w-6 text-primary" />
@@ -115,7 +117,7 @@ export function SignupComponent() {
 
 						<div className="space-y-2">
 							<Label htmlFor="email" id="email-label">
-								Email
+								{t('auth.email')}
 							</Label>
 							<div className="space-y-1 pb-6 relative">
 								<Mail
@@ -126,7 +128,7 @@ export function SignupComponent() {
 									id="email"
 									name="email"
 									type="email"
-									placeholder="you@example.com"
+									placeholder={t('auth.emailPlaceholder')}
 									required
 									aria-labelledby="email-label"
 									aria-describedby={
@@ -152,17 +154,17 @@ export function SignupComponent() {
 											aria-live="polite"
 										>
 											{isEmailInvalid ? (
-												'Please enter a valid email address.'
+												t('auth.invalidEmail')
 											) : (
 												<>
-													Account is already registered. Please{' '}
+													{t('auth.accountExists')}{' '}
 													<Link
 														className="text-primary font-medium hover:underline"
 														href="/sign-in"
 													>
-														sign in
+														{t('auth.signIn')}
 													</Link>{' '}
-													instead.
+													{t('auth.instead')}.
 												</>
 											)}
 										</span>
@@ -178,10 +180,11 @@ export function SignupComponent() {
 							aria-busy={isSubmitting}
 						>
 							{isSubmitting ? (
-								'Creating account...'
+								t('auth.creatingAccount')
 							) : (
 								<>
-									Create account <UserPlus className="ml-2 h-4 w-4" />
+									{t('auth.createAccountBtn')}{' '}
+									<UserPlus className="ml-2 h-4 w-4" />
 								</>
 							)}
 						</Button>
@@ -191,12 +194,12 @@ export function SignupComponent() {
 				</CardContent>
 				<CardFooter className="flex flex-col space-y-4 border-t p-6">
 					<div className="text-center text-muted-foreground">
-						Already have an account?{' '}
+						{t('auth.alreadyHaveAccount')}{' '}
 						<Link
 							href="/sign-in"
 							className="text-primary underline hover:text-primary/80"
 						>
-							Sign in
+							{t('nav.signIn')}
 						</Link>
 					</div>
 				</CardFooter>

@@ -12,55 +12,40 @@ import {
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
 } from '~/components/base/navigation-menu'
+import { useI18n } from '~/lib/i18n/context'
 import type { NavigationItem } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
-const projects: NavigationItem[] = [
-	{
-		title: 'Explore Projects',
-		href: '/projects',
-		description: 'Discover verified social initiatives powered by blockchain',
-	},
-	{
-		title: 'Create a Project',
-		href: '/create-project',
-		description: 'Start your social impact campaign with Web3 technology',
-	},
-]
-
-const resources: NavigationItem[] = [
-	{
-		title: 'Learn Web3',
-		href: '/learn',
-		description:
-			'Access guides and resources to understand blockchain and crypto',
-	},
-	{
-		title: 'Community',
-		href: '/community',
-		description: 'Join our decentralized and collaborative community',
-	},
-	{
-		title: 'Social Impact',
-		href: '/impact',
-		description: 'Track metrics and results from impactful social projects',
-	},
-]
-
 export function Navigation() {
 	const pathname = usePathname()
+	const { t } = useI18n()
+
+	const projects: NavigationItem[] = [
+		{
+			title: t('nav.exploreProjects'),
+			href: '/projects',
+			description: t('nav.exploreProjectsDesc'),
+		},
+		{
+			title: t('nav.createProject'),
+			href: '/create-project',
+			description: t('nav.createProjectDesc'),
+		},
+	]
+
+	const resources: NavigationItem[] = []
 
 	return (
 		<NavigationMenu aria-label="Main navigation">
 			<NavigationMenuList>
 				<NavigationMenuItem>
 					<NavigationMenuTrigger
-						aria-label="Projects menu"
-						label="Projects menu"
+						aria-label={t('aria.projectsMenu')}
+						label={t('aria.projectsMenu')}
 					>
-						Projects
+						{t('nav.projects')}
 					</NavigationMenuTrigger>
-					<NavigationMenuContent aria-label="Project options list">
+					<NavigationMenuContent aria-label={t('aria.projectOptions')}>
 						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
 							{projects.map((project) => (
 								<ListItem
@@ -77,30 +62,32 @@ export function Navigation() {
 					</NavigationMenuContent>
 				</NavigationMenuItem>
 
-				<NavigationMenuItem>
-					<NavigationMenuTrigger
-						aria-label="Resources menu"
-						label="Resources menu"
-					>
-						Resources
-					</NavigationMenuTrigger>
+				{resources.length > 0 && (
+					<NavigationMenuItem>
+						<NavigationMenuTrigger
+							aria-label={t('aria.resourcesMenu')}
+							label={t('aria.resourcesMenu')}
+						>
+							{t('nav.resources')}
+						</NavigationMenuTrigger>
 
-					<NavigationMenuContent aria-label="Resource options list">
-						<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-							{resources.map((resource) => (
-								<ListItem
-									key={resource.title}
-									title={resource.title}
-									href={resource.href}
-									role="menuitem"
-									aria-label={`${resource.title}: ${resource.description}`}
-								>
-									{resource.description}
-								</ListItem>
-							))}
-						</ul>
-					</NavigationMenuContent>
-				</NavigationMenuItem>
+						<NavigationMenuContent aria-label={t('aria.resourceOptions')}>
+							<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+								{resources.map((resource) => (
+									<ListItem
+										key={resource.title}
+										title={resource.title}
+										href={resource.href}
+										role="menuitem"
+										aria-label={`${resource.title}: ${resource.description}`}
+									>
+										{resource.description}
+									</ListItem>
+								))}
+							</ul>
+						</NavigationMenuContent>
+					</NavigationMenuItem>
+				)}
 
 				<NavigationMenuItem>
 					<Link href="/about" passHref>
@@ -109,10 +96,10 @@ export function Navigation() {
 								navigationMenuTriggerStyle(),
 								pathname === '/about' && 'text-primary',
 							)}
-							aria-label="About KindFi"
+							aria-label={t('nav.about')}
 							aria-current={pathname === '/about' ? 'page' : undefined}
 						>
-							About KindFi
+							{t('nav.about')}
 						</NavigationMenuLink>
 					</Link>
 				</NavigationMenuItem>
@@ -124,10 +111,9 @@ export function Navigation() {
 								navigationMenuTriggerStyle(),
 								pathname?.startsWith('/news') && 'text-primary',
 							)}
-							aria-label="News"
 							aria-current={pathname?.startsWith('/news') ? 'page' : undefined}
 						>
-							News
+							{t('nav.news')}
 						</NavigationMenuLink>
 					</Link>
 				</NavigationMenuItem>

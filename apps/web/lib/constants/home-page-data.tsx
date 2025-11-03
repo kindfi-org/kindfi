@@ -1,7 +1,5 @@
 import dynamic from 'next/dynamic'
 import {
-	SkeletonCommunity,
-	SkeletonFinalCTA,
 	SkeletonHero,
 	SkeletonHighlightedProjects,
 	SkeletonHowItWorks,
@@ -69,24 +67,6 @@ export const DynamicComponents = {
 			),
 		{
 			loading: SkeletonPlatformOverview,
-		},
-	),
-	Community: dynamic(
-		() =>
-			import('~/components/sections/home/community').then(
-				(mod) => mod.Community,
-			),
-		{
-			loading: SkeletonCommunity,
-		},
-	),
-	FinalCTA: dynamic(
-		() =>
-			import('~/components/sections/home/final-cta').then(
-				(mod) => mod.FinalCTA,
-			),
-		{
-			loading: SkeletonFinalCTA,
 		},
 	),
 }

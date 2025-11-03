@@ -55,6 +55,10 @@ export function transformEnv(): AppEnvInterface {
 			rpcUrl: data.RPC_URL || 'https://rpc-futurenet.stellar.org',
 			horizonUrl: data.HORIZON_URL || 'https://horizon-futurenet.stellar.org',
 			fundingAccount: data.STELLAR_FUNDING_SECRET_KEY || 'SB...4756',
+			signatureVerification: {
+				maxAttempts: Number(data.STELLAR_SIGNATURE_MAX_ATTEMPTS || 5),
+				windowMs: Number(data.STELLAR_SIGNATURE_WINDOW_MS || 60000),
+			},
 		},
 		externalApis: {
 			trustlessWork: {
@@ -92,6 +96,10 @@ export function transformEnv(): AppEnvInterface {
 			),
 			challengeTtlSeconds: data.CHALLENGE_TTL_SECONDS || 60,
 			challengeTtlMs: (data.CHALLENGE_TTL_SECONDS || 60) * 1000,
+		},
+		redis: {
+			url: data.UPSTASH_REDIS_REST_URL || data.REDIS_URL || '',
+			token: data.UPSTASH_REDIS_REST_TOKEN || '',
 		},
 	} as const
 }
@@ -142,6 +150,12 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(
 			fundingAccount: z.string(),
 			rpcUrl: z.string(),
 			horizonUrl: z.string(),
+			signatureVerification: z
+				.object({
+					maxAttempts: z.number(),
+					windowMs: z.number(),
+				})
+				.optional(),
 		}),
 		externalApis: z.object({
 			trustlessWork: z.object({
@@ -177,6 +191,10 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(
 			challengeTtlSeconds: z.number(),
 			challengeTtlMs: z.number(),
 		}),
+		redis: z.object({
+			url: z.string(),
+			token: z.string(),
+		}),
 	})
 
 	// Create validation rules based on app requirements
@@ -208,6 +226,8 @@ function createValidationRules<T extends keyof typeof appRequirements>(
 		ALLOWED_ORIGINS: ['kycServer', 'allowedOrigins'],
 		PORT: ['deployment', 'port'],
 		RESEND_SMTP_API_KEY: ['resend', 'apiKey'],
+		UPSTASH_REDIS_REST_URL: ['redis', 'url'],
+		UPSTASH_REDIS_REST_TOKEN: ['redis', 'token'],
 	}
 
 	// Mark required fields
@@ -444,6 +464,17 @@ export const baseEnvSchema = z.object({
 		})
 		.optional(),
 	CHALLENGE_TTL_SECONDS: z.coerce.number().optional(),
+
+	// Redis Configuration (Upstash)
+	UPSTASH_REDIS_REST_URL: z
+		.string()
+		.url('Invalid Redis REST URL format')
+		.optional(),
+	UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+
+	// Stellar Signature Verification Rate Limiting
+	STELLAR_SIGNATURE_MAX_ATTEMPTS: z.coerce.number().optional(),
+	STELLAR_SIGNATURE_WINDOW_MS: z.coerce.number().optional(),
 })
 
 // App-specific requirement configurations
@@ -471,6 +502,10 @@ export const appRequirements = {
 			'CHALLENGE_TTL_SECONDS',
 			'REDIS_URL',
 			'SUPABASE_DB_URL',
+			'UPSTASH_REDIS_REST_URL',
+			'UPSTASH_REDIS_REST_TOKEN',
+			'STELLAR_SIGNATURE_MAX_ATTEMPTS',
+			'STELLAR_SIGNATURE_WINDOW_MS',
 		] as const,
 	},
 	'kyc-server': {
@@ -488,6 +523,10 @@ export const appRequirements = {
 			'CHALLENGE_TTL_SECONDS',
 			'ALLOWED_ORIGINS',
 			'PORT',
+			'UPSTASH_REDIS_REST_URL',
+			'UPSTASH_REDIS_REST_TOKEN',
+			'STELLAR_SIGNATURE_MAX_ATTEMPTS',
+			'STELLAR_SIGNATURE_WINDOW_MS',
 		] as const,
 	},
 } as const
