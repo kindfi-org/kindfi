@@ -66,6 +66,12 @@ export function PasskeyRegistrationComponent() {
 
 	// Finalize after successful passkey registration: update profile and sign in via NextAuth
 	useEffect(() => {
+		console.log('Passkey registration success effect triggered', {
+			regSuccess,
+			userEmail,
+			userId,
+			deviceData,
+		})
 		if (!regSuccess || !userEmail || !userId || !deviceData) return () => {}
 
 		const timeout = setTimeout(() => {
@@ -92,7 +98,7 @@ export function PasskeyRegistrationComponent() {
 					pubKey: deviceData?.publicKey || '',
 					address: deviceData?.address || '',
 				})
-				router.push('/dashboard')
+				router.push('/profile')
 			} catch (e) {
 				console.error('Finalize passkey registration error', e)
 				router.push('/sign-in')
@@ -148,7 +154,7 @@ export function PasskeyRegistrationComponent() {
 					</CardHeader>
 					<CardContent className="text-center">
 						<p className="text-sm text-muted-foreground">
-							Redirecting you to dashboard...
+							Redirecting you to your new profile...
 						</p>
 					</CardContent>
 				</Card>
@@ -234,7 +240,7 @@ export function PasskeyRegistrationComponent() {
 								A passkey is already registered for this email.
 								<Button
 									variant="link"
-									onClick={() => router.push('/dashboard?passkey=registered')}
+									onClick={() => router.push('/profile?passkey=registered')}
 									className="ml-2 text-yellow-600 underline"
 								>
 									Continue

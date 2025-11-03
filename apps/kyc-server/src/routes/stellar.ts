@@ -41,9 +41,13 @@ export const stellarRoutes = {
 
 					// Add account to auth-controller for KYC approval
 					// This registers the smart wallet as an authorized account
+					// contexts should be an array of contract addresses (stringified)
+					const contextArray = Array.isArray(contexts)
+						? contexts
+						: [contractAddress]
 					const result = await registerAccountOnChain(
 						contractAddress,
-						contexts || [], // Optional context addresses
+						contextArray,
 					)
 
 					return Response.json({

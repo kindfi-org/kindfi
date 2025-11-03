@@ -85,7 +85,7 @@ export function Providers({ children, initSession }: ProvidersProps) {
 					forcedTheme="light"
 					disableTransitionOnChange
 				>
-					<SessionProvider>
+					<SessionProvider session={initSession}>
 						<AuthProvider initSession={initSession}>
 							<WaitlistProvider>
 								<TrustlessWorkConfig

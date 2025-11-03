@@ -1,5 +1,6 @@
 import { updateSession } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 import { type NextRequestWithAuth, withAuth } from 'next-auth/middleware'
 import { ensureCsrfTokenCookie } from '~/app/actions/csrf'
 
@@ -26,15 +27,28 @@ export default withAuth(
 		try {
 			const { pathname } = req.nextUrl
 
-			// Skip NextAuth internal API & static auth pages handling (withAuth already ran token decode)
-			if (pathname.startsWith('/api/auth') || AUTH_PAGES.includes(pathname)) {
-				return NextResponse.next({ request: { headers: req.headers } })
-			}
-
 			await ensureCsrfTokenCookie()
+			// Getting token from encrypted cookie - NextAuth handles decryption
+			const token = await getToken({
+				req,
+				secret: process.env.NEXTAUTH_SECRET,
+				// Use the same cookie name as NextAuth configuration
+				cookieName:
+					process.env.NODE_ENV === 'production'
+						? '__Secure-next-auth.session-token'
+						: 'next-auth.session-token',
+			})
+
+			console.log('🔑 Middleware token check:', {
+				hasToken: !!token,
+				tokenSub: token?.sub,
+				pathname,
+				isProtected: isProtectedPath(pathname),
+			})
 
 			// Redirect unauthenticated access to protected paths only
-			if (isProtectedPath(pathname) && !req.nextauth?.token) {
+			if (isProtectedPath(pathname) && !token?.sub) {
+				console.warn('⚠️ Unauthorized access attempt to:', pathname)
 				const url = req.nextUrl.clone()
 				url.pathname = '/sign-in'
 				url.searchParams.set('callbackUrl', pathname)
@@ -62,7 +76,7 @@ export default withAuth(
 				// Always allow auth utility pages & public paths
 				if (AUTH_PAGES.includes(pathname)) return true
 				// Enforce auth only for protected paths
-				if (isProtectedPath(pathname)) return !!token
+				if (isProtectedPath(pathname)) return !!token?.sub
 				return true
 			},
 		},

@@ -173,7 +173,18 @@ export class StellarPasskeyService {
 		}
 
 		try {
-			console.log('� Deploying via account-factory...')
+			console.log('🏭 Deploying via account-factory...')
+			console.log('📍 Factory Contract ID:', this.factoryContractId)
+			console.log('📍 Controller Contract ID:', this.controllerContractId)
+
+			// Verify factory contract exists
+			await this.verifyContractExists(this.factoryContractId, 'Account Factory')
+
+			// Verify controller contract exists
+			await this.verifyContractExists(
+				this.controllerContractId,
+				'Auth Controller',
+			)
 
 			const fundingAccount = await this.server.getAccount(
 				this.fundingKeypair.publicKey(),
@@ -201,7 +212,32 @@ export class StellarPasskeyService {
 
 			if (Api.isSimulationError(simulation)) {
 				console.error('❌ Simulation failed:', simulation)
-				throw new Error(`Simulation failed: ${JSON.stringify(simulation)}`)
+
+				// Enhanced error reporting for diagnostic events
+				if (simulation.error) {
+					console.error('🔍 Simulation error details:', {
+						error: simulation.error,
+					})
+				}
+
+				// Parse diagnostic events if available
+				// biome-ignore lint/suspicious/noExplicitAny: SDK types not fully typed
+				const diagnosticEvents = (simulation as any).events || []
+				if (diagnosticEvents.length > 0) {
+					console.error('🔍 Diagnostic events:')
+					for (const event of diagnosticEvents) {
+						try {
+							const decoded = this.decodeDiagnosticEvent(event)
+							console.error('  -', decoded)
+						} catch {
+							console.error('  - Raw event:', event)
+						}
+					}
+				}
+
+				throw new Error(
+					`Simulation failed: ${simulation.error || JSON.stringify(simulation)}`,
+				)
 			}
 
 			console.log('✅ Simulation successful, assembling transaction...')
@@ -245,7 +281,30 @@ export class StellarPasskeyService {
 					}
 
 					if (txResult.status === Api.GetTransactionStatus.FAILED) {
-						throw new Error(`Deployment failed: ${JSON.stringify(txResult)}`)
+						console.error('❌ Transaction failed with details:', {
+							status: txResult.status,
+							hash: result.hash,
+							ledger: txResult.ledger,
+						})
+
+						// Extract diagnostic information
+						// biome-ignore lint/suspicious/noExplicitAny: SDK types not fully typed
+						const diagnosticEvents = (txResult as any).diagnosticEventsXdr || []
+						if (diagnosticEvents.length > 0) {
+							console.error('🔍 Transaction diagnostic events:')
+							for (const event of diagnosticEvents) {
+								try {
+									const decoded = this.decodeDiagnosticEvent(event)
+									console.error('  -', decoded)
+								} catch {
+									// Ignore decoding errors
+								}
+							}
+						}
+
+						throw new Error(
+							`Deployment failed - Transaction hash: ${result.hash}. Check if auth-controller contract is properly deployed and initialized.`,
+						)
 					}
 				} catch (error) {
 					if (attempts === maxAttempts) {
@@ -257,7 +316,107 @@ export class StellarPasskeyService {
 			throw new Error('Deployment timeout')
 		} catch (error) {
 			console.error('❌ Factory deployment failed:', error)
+
+			// Provide actionable error message
+			if (
+				error instanceof Error &&
+				(error.message.includes('scecMissingValue') ||
+					error.message.includes('HostContextError') ||
+					error.message.includes('HostStorageError'))
+			) {
+				throw new Error(
+					'Factory deployment failed: Auth controller contract not properly configured. ' +
+						'Please verify that:\n' +
+						'1. The controller contract is deployed and initialized on this network\n' +
+						'2. The factory contract is registered in the auth controller\n' +
+						'3. The admin signer public key is correctly added to the auth controller',
+				)
+			}
+
 			throw new Error(`Factory deployment failed: ${error}`)
+		}
+	}
+
+	/**
+	 * Verifies that a contract exists on-chain
+	 */
+	private async verifyContractExists(
+		contractId: string,
+		contractName: string,
+	): Promise<void> {
+		try {
+			const contract = new Contract(contractId)
+			const ledgerKey = contract.getFootprint()
+			const ledgerEntries = await this.server.getLedgerEntries(ledgerKey)
+
+			if (!ledgerEntries.entries || ledgerEntries.entries.length === 0) {
+				throw new Error(
+					`${contractName} (${contractId}) not found on network. Please deploy the contract first.`,
+				)
+			}
+
+			console.log(`✅ ${contractName} verified on network`)
+		} catch (error) {
+			console.error(`❌ Failed to verify ${contractName}:`, error)
+			throw new Error(
+				`${contractName} (${contractId}) verification failed: ${error}. ` +
+					'Please ensure the contract is deployed on this network.',
+			)
+		}
+	}
+
+	/**
+	 * Decodes diagnostic events from XDR for debugging
+	 */
+	// biome-ignore lint/suspicious/noExplicitAny: XDR event types are complex and not fully typed
+	private decodeDiagnosticEvent(eventXdr: any): string {
+		try {
+			// Extract event data for logging
+			const event = eventXdr._attributes?.event || eventXdr
+			const topics = event._attributes?.body?._value?._attributes?.topics || []
+			const data = event._attributes?.body?._value?._attributes?.data
+
+			const topicStrings = topics
+				// biome-ignore lint/suspicious/noExplicitAny: XDR topic types vary
+				.map((topic: any) => {
+					try {
+						if (topic._arm === 'sym') {
+							return topic._value?.toString('utf-8') || ''
+						}
+						if (topic._arm === 'str') {
+							return topic._value?.toString('utf-8') || ''
+						}
+						return ''
+					} catch {
+						return ''
+					}
+				})
+				.filter(Boolean)
+
+			let dataString = ''
+			if (data?._arm === 'str') {
+				dataString = data._value?.toString('utf-8') || ''
+			} else if (data?._arm === 'vec') {
+				const vecItems = data._value || []
+				dataString = vecItems
+					// biome-ignore lint/suspicious/noExplicitAny: XDR data types vary
+					.map((item: any) => {
+						if (item._arm === 'str') {
+							return item._value?.toString('utf-8')
+						}
+						return ''
+					})
+					.filter(Boolean)
+					.join(' ')
+			}
+
+			if (topicStrings.length > 0 || dataString) {
+				return `[${topicStrings.join(', ')}] ${dataString}`.trim()
+			}
+
+			return 'Unable to decode event'
+		} catch {
+			return 'Unable to decode event'
 		}
 	}
 

@@ -8,6 +8,7 @@ use soroban_sdk::{
 mod base64_url;
 mod errors;
 pub mod events;
+mod transfers;
 
 use crate::events::{
     AccountRecoveredEventData, DeviceAddedEventData, DeviceRemovedEventData,
@@ -192,6 +193,45 @@ impl AccountContract {
                 public_key: new_public_key,
             },
         );
+    }
+
+    // ===== TRANSFER & PAYMENT FUNCTIONS =====
+
+    /// Transfer native XLM to another address
+    /// Requires WebAuthn authentication via __check_auth
+    pub fn transfer_xlm(env: Env, to: Address, amount: i128) {
+        transfers::transfer_xlm(&env, to, amount)
+            .unwrap_or_else(|e| panic_with_error!(&env, e));
+    }
+
+    /// Transfer any Stellar Asset (SAC token) to another address
+    /// Requires WebAuthn authentication via __check_auth
+    pub fn transfer_token(env: Env, token: Address, to: Address, amount: i128) {
+        transfers::transfer_token(&env, token, to, amount)
+            .unwrap_or_else(|e| panic_with_error!(&env, e));
+    }
+
+    /// Invoke arbitrary contract function on behalf of smart wallet
+    /// Enables DeFi interactions (swaps, staking, etc.)
+    /// Requires WebAuthn authentication via __check_auth
+    pub fn invoke_contract(
+        env: Env,
+        contract: Address,
+        function: Symbol,
+        args: Vec<soroban_sdk::Val>,
+    ) -> soroban_sdk::Val {
+        transfers::invoke_contract(&env, contract, function, args)
+            .unwrap_or_else(|e| panic_with_error!(&env, e))
+    }
+
+    /// Get XLM balance for this smart wallet
+    pub fn get_xlm_balance(env: Env) -> i128 {
+        transfers::get_xlm_balance(&env)
+    }
+
+    /// Get token balance for this smart wallet
+    pub fn get_token_balance(env: Env, token: Address) -> i128 {
+        transfers::get_token_balance(&env, token)
     }
 }
 

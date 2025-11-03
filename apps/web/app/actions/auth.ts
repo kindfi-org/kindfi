@@ -134,7 +134,7 @@ export async function createSessionAction({
 		return {
 			success: true,
 			message: 'Session created successfully',
-			redirect: '/dashboard',
+			redirect: '/profile',
 			// data: sessionData,
 			data: userData,
 		} as AuthResponse
