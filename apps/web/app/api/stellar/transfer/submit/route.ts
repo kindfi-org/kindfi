@@ -33,14 +33,24 @@ export async function POST(req: NextRequest) {
 		// TODO: Assemble transaction with WebAuthn signature
 		// For now, we'll parse the transaction directly
 		// In production, implement proper signature verification and assembly
-		const signedTx = TransactionBuilder.fromXDR(
+		const parsedTx = TransactionBuilder.fromXDR(
 			transactionXDR,
 			process.env.STELLAR_NETWORK_PASSPHRASE ||
 				'Test SDF Network ; September 2015',
 		)
 
+		// Type guard: ensure we have a regular Transaction, not a FeeBumpTransaction
+		if ('innerTransaction' in parsedTx) {
+			return NextResponse.json(
+				{
+					error: 'FeeBumpTransaction is not supported',
+				},
+				{ status: 400 },
+			)
+		}
+
 		// Submit to network
-		const txHash = await txService.submitTransaction(signedTx)
+		const txHash = await txService.submitTransaction(parsedTx)
 
 		return NextResponse.json({
 			success: true,
