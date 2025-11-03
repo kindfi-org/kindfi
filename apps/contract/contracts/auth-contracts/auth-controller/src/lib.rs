@@ -183,7 +183,17 @@ impl AuthController {
     }
 
     pub fn add_factory(env: Env, factory: Address, context: Vec<Address>) {
-        env.current_contract_address().require_auth();
+        // ? Skipping auth check to allow initial factory registration during deployment.
+        // ? Smart contracts (factories) don't have traditional signing keys - they use
+        // ? WebAuthn credentials from the deploying account. The factory itself will
+        // ? enforce security by requiring WebAuthn signatures when deploying new accounts.
+        // ? Once deployed, factory operations are controlled by the account's WebAuthn devices.
+        // ? - Auth removed for deployment compatibility. 
+        // ! As it is now, anyone can deploy the factory and create accounts.
+        // ! Until we have a set of admin accounts to deploy, we then re-apply this auth guard
+        // @AndlerRL
+        // env.current_contract_address().require_auth();
+        
         for ctx in context.iter() {
             if env
                 .storage()
@@ -202,7 +212,15 @@ impl AuthController {
     }
 
     pub fn remove_factory(env: Env, factory: Address, context: Vec<Address>) {
-        env.current_contract_address().require_auth();
+        // ? Skipping auth check for factory removal to allow administrative operations
+        // ? without requiring smart contract authentication. Factory removal is an
+        // ? administrative operation that should be controlled at the deployment level.
+        // ? - Auth removed for deployment compatibility. 
+        // ! As it is now, anyone can deploy the factory and create accounts.
+        // ! Until we have a set of admin accounts to deploy, we then re-apply this auth guard
+        // @AndlerRL
+        // env.current_contract_address().require_auth();
+        
         for ctx in context.iter() {
             if !env
                 .storage()
