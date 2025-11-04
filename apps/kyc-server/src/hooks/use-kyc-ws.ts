@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { type KYCUpdate, kycUpdateSchema } from '~/lib/validation/kyc-schemas'
 
 interface UseKYCWebSocketOptions {
+	userId?: string
 	onUpdate?: (update: KYCUpdate) => void
 	maxRetries?: number
 	url?: string
@@ -18,6 +19,7 @@ const isValidUpdate = (data: unknown): data is KYCUpdate => {
 }
 
 export function useKYCWebSocket({
+	userId,
 	onUpdate,
 	maxRetries = 3,
 	url,

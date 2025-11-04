@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { kycReviews } from '@packages/drizzle'
 import { kycReviewsInsertSchema } from '@services/supabase'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -21,19 +20,20 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
+import type { KycRecord } from '~/lib/types/dashboard'
 
 interface KycDetailsFormProps {
-	item: typeof kycReviews.$inferSelect
-	userId: string
+	item: KycRecord
 }
 
-export function KycDetailsForm({ item, userId }: KycDetailsFormProps) {
+export function KycDetailsForm({ item }: KycDetailsFormProps) {
 	const form = useForm<z.infer<typeof kycReviewsInsertSchema>>({
 		resolver: zodResolver(kycReviewsInsertSchema),
 		defaultValues: {
-			user_id: userId,
-			status: item.decision,
-			verification_level: 'basic',
+			user_id: item.userId,
+			status: item.status || 'pending',
+			verification_level: item.verificationLevel || 'basic',
+			notes: item.notes || '',
 			created_at: item.createdAt,
 			updated_at: item.updatedAt,
 		},

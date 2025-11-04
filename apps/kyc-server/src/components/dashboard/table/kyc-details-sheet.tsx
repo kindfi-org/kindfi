@@ -34,15 +34,18 @@ export function KycDetailsSheet({ item }: KycDetailsSheetProps) {
 		return () => clearTimeout(timer)
 	}, [])
 
+	const shortUserId = item.userId.split('-').pop()
+
 	return (
 		<Sheet>
 			<SheetTrigger asChild>
 				<Button
 					variant="link"
-					className="w-fit px-0 text-left text-foreground"
-					aria-label={`View details for user ${item.user_id}`}
+					className="w-fit px-0 text-left text-foreground cursor-pointer"
+					aria-label={`View details for user ${item.userId}`}
 				>
-					{item.user_id}
+					...
+					{shortUserId?.substring(shortUserId.length - 6, shortUserId.length)}
 				</Button>
 			</SheetTrigger>
 			<SheetContent
@@ -51,7 +54,7 @@ export function KycDetailsSheet({ item }: KycDetailsSheetProps) {
 				aria-describedby="kyc-details-description"
 			>
 				<SheetHeader className="gap-1">
-					<SheetTitle>KYC Details - {item.user_id}</SheetTitle>
+					<SheetTitle>KYC Details - {item.userId}</SheetTitle>
 					<SheetDescription id="kyc-details-description">
 						User verification status and review history
 					</SheetDescription>
@@ -68,7 +71,7 @@ export function KycDetailsSheet({ item }: KycDetailsSheetProps) {
 					<Separator />
 
 					{/* Add Review Section */}
-					<AddReviewForm userId={item.user_id} />
+					<AddReviewForm userId={item.userId} />
 				</div>
 			</SheetContent>
 		</Sheet>

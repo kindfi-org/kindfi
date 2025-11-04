@@ -83,7 +83,7 @@ export function KycActionsMenu({
 			<DropdownMenuTrigger asChild>
 				<Button
 					variant="ghost"
-					className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
+					className="flex size-8 text-muted-foreground data-[state=open]:bg-muted cursor-pointer"
 					size="icon"
 					disabled={isUpdating}
 					aria-label={`Actions for ${record.displayName || record.email || record.userId}`}
@@ -119,18 +119,16 @@ export function KycActionsMenu({
 						{isUpdating ? 'Loading...' : 'Reject'}
 					</DropdownMenuItem>
 				)}
-				{(record.status === 'approved' || record.status === 'rejected') &&
-					record.status !== 'verified' &&
-					record.status !== 'pending' && (
-						<DropdownMenuItem
-							className="text-orange-600"
-							disabled={isUpdating}
-							onClick={handleRequestReupload}
-						>
-							<RefreshCwIcon className="mr-2 size-4" />
-							{isUpdating ? 'Loading...' : 'Request reupload'}
-						</DropdownMenuItem>
-					)}
+				{(record.status === 'approved' || record.status === 'rejected') && (
+					<DropdownMenuItem
+						className="text-orange-600"
+						disabled={isUpdating}
+						onClick={handleRequestReupload}
+					>
+						<RefreshCwIcon className="mr-2 size-4" />
+						{isUpdating ? 'Loading...' : 'Request reupload'}
+					</DropdownMenuItem>
+				)}
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					disabled

@@ -31,12 +31,16 @@ export type KycReviewsInsertValues = z.infer<typeof kycReviewsInsertSchema>
 export interface KycRecordApi {
 	id: string
 	user_id: string
-	status: 'pending' | 'approved' | 'rejected' | 'verified'
-	verification_level: 'basic' | 'enhanced'
+	status: 'pending' | 'approved' | 'rejected' | 'verified' | null
+	verification_level: 'basic' | 'enhanced' | null
 	reviewer_id?: string | null
 	notes?: string | null
 	created_at: string
 	updated_at: string
+	// KYC-specific timestamps (when user has KYC record)
+	kyc_id?: string | null
+	kyc_created_at?: string | null
+	kyc_updated_at?: string | null
 	// Profile data from join
 	email?: string | null
 	display_name?: string | null
@@ -52,8 +56,8 @@ export interface KycRecord {
 	userId: string
 	email?: string | null
 	displayName?: string | null
-	status: 'pending' | 'approved' | 'rejected' | 'verified'
-	verificationLevel: 'basic' | 'enhanced'
+	status: 'pending' | 'approved' | 'rejected' | 'verified' | null
+	verificationLevel: 'basic' | 'enhanced' | null
 	reviewerId?: string | null
 	notes?: string | null
 	createdAt: string
@@ -66,20 +70,29 @@ export interface KycRecord {
 // Mapping function to convert API response to domain type
 export function mapKycRecordApiToDomain(apiRecord: KycRecordApi): KycRecord {
 	return {
-		id: apiRecord.id,
+		id: apiRecord.kyc_id || apiRecord.id,
 		userId: apiRecord.user_id,
 		email: apiRecord.email,
 		displayName: apiRecord.display_name,
-		status: apiRecord.status,
-		verificationLevel: apiRecord.verification_level,
+		status: apiRecord.status || null,
+		verificationLevel: apiRecord.verification_level || null,
 		reviewerId: apiRecord.reviewer_id,
 		notes: apiRecord.notes,
-		createdAt: apiRecord.created_at,
-		updatedAt: apiRecord.updated_at,
+		createdAt: apiRecord.kyc_created_at || apiRecord.created_at,
+		updatedAt: apiRecord.kyc_updated_at || apiRecord.updated_at,
 		profileImageUrl: apiRecord.profile_image_url,
 		profileRole: apiRecord.profile_role,
 		deviceCount: apiRecord.device_count,
 	}
+}
+
+export type KycStatsTrends = {
+	currentCount: number
+	delta: number
+	direction: 'same' | 'up' | 'down'
+	isPositive: boolean
+	percentChange: number
+	priorCount: number
 }
 
 export interface KycStats {
@@ -88,23 +101,23 @@ export interface KycStats {
 	approved: number
 	rejected: number
 	trends: {
-		totalUsers: { value: number; isPositive: boolean }
-		pending: { value: number; isPositive: boolean }
-		approved: { value: number; isPositive: boolean }
-		rejected: { value: number; isPositive: boolean }
+		totalUsers: KycStatsTrends
+		pending: KycStatsTrends
+		approved: KycStatsTrends
+		rejected: KycStatsTrends
 	}
 }
 
 export interface ChartDataPoint {
 	date: string
-	basic: number
-	enhanced: number
+	signups: number
+	kycStarts: number
 }
 
 export interface MonthlyChartData {
 	month: string
-	basic: number
-	enhanced: number
+	signups: number
+	kycStarts: number
 }
 
 // API response types

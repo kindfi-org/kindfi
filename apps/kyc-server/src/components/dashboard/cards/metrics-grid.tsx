@@ -17,13 +17,18 @@ export function MetricsGrid({ stats, className }: MetricsGridProps) {
 			)}
 		>
 			{metricsConfig.map((metric) => {
+				const value = stats[metric.key] ?? 0
+				const trend = stats.trends[metric.key]
+				const trendValue = trend?.percentChange ?? 0
+				const isPositive = trend?.isPositive ?? false
+
 				return (
 					<MetricCard
 						key={metric.key}
 						title={metric.title}
-						value={stats[metric.key]}
-						trendValue={stats.trends[metric.key].value}
-						isPositive={stats.trends[metric.key].isPositive}
+						value={value}
+						trendValue={trendValue}
+						isPositive={isPositive}
 						icon={metric.icon}
 						iconColor={metric.iconColor}
 						text={metric.text}

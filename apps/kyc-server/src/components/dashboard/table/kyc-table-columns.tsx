@@ -77,36 +77,57 @@ export const createKycTableColumns = (
 	{
 		accessorKey: 'status',
 		header: 'Status',
-		cell: ({ row }) => (
-			<Badge
-				variant="outline"
-				className={`flex gap-1 px-1.5 [&_svg]:size-3 ${getStatusColor(row.original.status)}`}
-			>
-				{getStatusIcon(row.original.status)}
-				{row.original.status.charAt(0).toUpperCase() +
-					row.original.status.slice(1)}
-			</Badge>
-		),
+		cell: ({ row }) => {
+			const status = row.original.status
+			if (!status) {
+				return (
+					<Badge variant="outline" className="flex gap-1 px-1.5 text-muted-foreground">
+						<span>No KYC</span>
+					</Badge>
+				)
+			}
+			return (
+				<Badge
+					variant="outline"
+					className={`flex gap-1 px-1.5 [&_svg]:size-3 ${getStatusColor(status)}`}
+				>
+					{getStatusIcon(status)}
+					{status.charAt(0).toUpperCase() + status.slice(1)}
+				</Badge>
+			)
+		},
 	},
 	{
 		accessorKey: 'verificationLevel',
 		header: 'Verification Level',
-		cell: ({ row }) => (
-			<div className="w-32">
-				<Badge
-					variant="outline"
-					className={`px-1.5 ${row.original.verificationLevel === 'enhanced' ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
-				>
-					{row.original.verificationLevel === 'enhanced' ? (
-						<ShieldCheckIcon className="mr-1 size-3" aria-hidden="true" />
-					) : (
-						<UserCheckIcon className="mr-1 size-3" aria-hidden="true" />
-					)}
-					{row.original.verificationLevel.charAt(0).toUpperCase() +
-						row.original.verificationLevel.slice(1)}
-				</Badge>
-			</div>
-		),
+		cell: ({ row }) => {
+			const verificationLevel = row.original.verificationLevel
+			if (!verificationLevel) {
+				return (
+					<div className="w-32">
+						<Badge variant="outline" className="px-1.5 text-muted-foreground">
+							<span>N/A</span>
+						</Badge>
+					</div>
+				)
+			}
+			return (
+				<div className="w-32">
+					<Badge
+						variant="outline"
+						className={`px-1.5 ${verificationLevel === 'enhanced' ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
+					>
+						{verificationLevel === 'enhanced' ? (
+							<ShieldCheckIcon className="mr-1 size-3" aria-hidden="true" />
+						) : (
+							<UserCheckIcon className="mr-1 size-3" aria-hidden="true" />
+						)}
+						{verificationLevel.charAt(0).toUpperCase() +
+							verificationLevel.slice(1)}
+					</Badge>
+				</div>
+			)
+		},
 	},
 	{
 		accessorKey: 'createdAt',

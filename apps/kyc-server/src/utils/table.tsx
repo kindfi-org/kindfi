@@ -1,7 +1,11 @@
 import type { Enums } from '@services/supabase'
 import { CheckCircle2, Clock, Loader, XCircle } from 'lucide-react'
 
-export const getStatusIcon = (status: Enums<'kyc_status_enum'>) => {
+export const getStatusIcon = (
+	status: Enums<'kyc_status_enum'> | null | undefined,
+) => {
+	if (!status) return <Loader className="text-muted-foreground" />
+
 	switch (status) {
 		case 'approved':
 		case 'verified':
@@ -11,11 +15,15 @@ export const getStatusIcon = (status: Enums<'kyc_status_enum'>) => {
 		case 'rejected':
 			return <XCircle className="text-red-500 dark:text-red-400" />
 		default:
-			return <Loader />
+			return <Loader className="text-muted-foreground" />
 	}
 }
 
-export const getStatusColor = (status: Enums<'kyc_status_enum'>) => {
+export const getStatusColor = (
+	status: Enums<'kyc_status_enum'> | null | undefined,
+) => {
+	if (!status) return 'text-muted-foreground'
+
 	switch (status) {
 		case 'approved':
 		case 'verified':
@@ -29,7 +37,12 @@ export const getStatusColor = (status: Enums<'kyc_status_enum'>) => {
 	}
 }
 
-export const getStatusPillColor = (status: Enums<'kyc_status_enum'>) => {
+export const getStatusPillColor = (
+	status: Enums<'kyc_status_enum'> | null | undefined,
+) => {
+	if (!status)
+		return 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800 dark:border-gray-700'
+
 	switch (status) {
 		case 'approved':
 		case 'verified':

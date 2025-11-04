@@ -9,14 +9,11 @@ import { filterDataByTimeRange } from '~/utils/chart'
 
 export const chartConfig = {
 	signups: {
-		label: 'New Signups',
-	},
-	basic: {
-		label: 'Basic KYC',
+		label: 'User Regs',
 		color: 'hsl(var(--chart-1))',
 	},
-	enhanced: {
-		label: 'Enhanced KYC',
+	kycStarts: {
+		label: 'KYC Init',
 		color: 'hsl(var(--chart-2))',
 	},
 } satisfies ChartConfig

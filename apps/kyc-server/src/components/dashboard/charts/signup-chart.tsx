@@ -4,6 +4,7 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
+	CardFooter,
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
@@ -31,7 +32,7 @@ export function SignupChart({ data }: SignupChartProps) {
 				<div className="flex flex-col gap-1">
 					<CardTitle className="text-lg sm:text-xl">New User Signups</CardTitle>
 					<CardDescription className="text-sm">
-						KYC registrations in the last{' '}
+						User registrations in the last{' '}
 						{timeRange === '7d'
 							? '7 days'
 							: timeRange === '30d'
@@ -55,27 +56,27 @@ export function SignupChart({ data }: SignupChartProps) {
 				>
 					<AreaChart data={filteredData}>
 						<defs>
-							<linearGradient id="fillBasic" x1="0" y1="0" x2="0" y2="1">
+							<linearGradient id="fillSignups" x1="0" y1="0" x2="0" y2="1">
 								<stop
 									offset="5%"
-									stopColor="var(--color-basic)"
+									stopColor="var(--color-signups)"
 									stopOpacity={1.0}
 								/>
 								<stop
 									offset="95%"
-									stopColor="var(--color-basic)"
+									stopColor="var(--color-signups)"
 									stopOpacity={0.1}
 								/>
 							</linearGradient>
-							<linearGradient id="fillEnhanced" x1="0" y1="0" x2="0" y2="1">
+							<linearGradient id="fillKycStarts" x1="0" y1="0" x2="0" y2="1">
 								<stop
 									offset="5%"
-									stopColor="var(--color-enhanced)"
+									stopColor="var(--color-kycStarts)"
 									stopOpacity={0.8}
 								/>
 								<stop
 									offset="95%"
-									stopColor="var(--color-enhanced)"
+									stopColor="var(--color-kycStarts)"
 									stopOpacity={0.1}
 								/>
 							</linearGradient>
@@ -104,22 +105,28 @@ export function SignupChart({ data }: SignupChartProps) {
 							}
 						/>
 						<Area
-							dataKey="enhanced"
+							dataKey="kycStarts"
 							type="natural"
-							fill="url(#fillEnhanced)"
-							stroke="var(--color-enhanced)"
+							fill="url(#fillKycStarts)"
+							stroke="var(--color-kycStarts)"
 							stackId="a"
 						/>
 						<Area
-							dataKey="basic"
+							dataKey="signups"
 							type="natural"
-							fill="url(#fillBasic)"
-							stroke="var(--color-basic)"
+							fill="url(#fillSignups)"
+							stroke="var(--color-signups)"
 							stackId="a"
 						/>
 					</AreaChart>
 				</ChartContainer>
 			</CardContent>
+			<CardFooter>
+				<div className="text-xs text-muted-foreground">
+					Showing user registrations and KYC process initiations over time.
+					Updated in real-time.
+				</div>
+			</CardFooter>
 		</Card>
 	)
 }
