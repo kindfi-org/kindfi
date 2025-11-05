@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
                 default-src 'self';
                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
                 style-src 'self' 'unsafe-inline';
-                img-src 'self' data: blob: https://flagcdn.com;
+                img-src 'self' data: blob: https://flagcdn.com https://*.jsdelivr.net https://cdn.jsdelivr.net https://unpkg.com https://*.unpkg.com https://raw.githubusercontent.com https://*.githubusercontent.com https://freighter.app https://albedo.link https://rabet.io https://xbull.app https://walletconnect.org https://*.walletconnect.org https://*.walletconnect.com https://stellar.creit.tech;
                 font-src 'self' data:;
                 connect-src ${connectSrc};
 								frame-src 'self' https://www.youtube.com;
@@ -84,7 +84,7 @@ const nextConfig: NextConfig = {
                 default-src 'self';
                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
                 style-src 'self' 'unsafe-inline';
-                img-src 'self' data: blob: https://flagcdn.com https://randomuser.me http://127.0.0.1:54321;
+                img-src 'self' data: blob: https://flagcdn.com https://randomuser.me http://127.0.0.1:54321 https://*.jsdelivr.net https://cdn.jsdelivr.net https://unpkg.com https://*.unpkg.com https://raw.githubusercontent.com https://*.githubusercontent.com https://freighter.app https://albedo.link https://rabet.io https://xbull.app https://walletconnect.org https://*.walletconnect.org https://*.walletconnect.com https://stellar.creit.tech;
                 font-src 'self' data:;
                 connect-src ${connectSrc};
 								frame-src 'self' https://www.youtube.com;
