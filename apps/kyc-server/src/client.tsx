@@ -5,7 +5,7 @@ import { DashboardSkeleton } from './components/dashboard/skeletons/dashboard-sk
 import { ErrorBoundary } from './components/ErrorBoundary'
 import Layout from './components/Layout'
 import { ThemeProvider } from './components/provider/theme-provider'
-import About from './pages/About'
+import About from './pages/about'
 import WebSocketDemo from './pages/websocket-health'
 
 // Lazy load the Users page to reduce initial bundle size

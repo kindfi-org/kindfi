@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import About from '~/pages/About'
+import About from '~/pages/about'
 import Dashboard from '~/pages/dashboard'
 import Users from '~/pages/dashboard/users'
 import WebSocketDemo from '../pages/websocket-health'
