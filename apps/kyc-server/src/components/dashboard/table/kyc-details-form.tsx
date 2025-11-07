@@ -295,6 +295,7 @@ export function KycDetailsForm({ data }: KycDetailsFormProps) {
 						/>
 					</div>
 
+					{/* // TODO: Implement right timestamps. These should be with profile creation and update dates */}
 					{/* Timestamps */}
 					<div className="grid grid-cols-2 gap-3">
 						<div className="space-y-1.5">
