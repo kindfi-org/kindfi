@@ -1,12 +1,12 @@
 import { db, devices, kycReviews, profiles } from '@packages/drizzle'
 import { and, asc, count, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { corsConfig } from '../config/cors'
+import { handleError } from '../lib/error-handler'
 import {
 	isSupabaseConfigured,
 	supabaseServiceRole,
 } from '../lib/supabase-client'
 import { withCORS } from '../middleware/cors'
-import { handleError } from '../utils/error-handler'
 
 const withConfiguredCORS = (
 	handler: (req: Request) => Response | Promise<Response>,
@@ -441,8 +441,35 @@ export const usersRoutes = {
 						.where(eq(kycReviews.userId, userId))
 						.returning()
 
-					if (!result || result.length === 0) {
-						return Response.json({ error: 'User not found' }, { status: 404 })
+					if ((!result || result.length === 0) && status === 'pending') {
+						// No KYC record found. Creating an initial review.
+						const newReview = await db
+							.insert(kycReviews)
+							.values({
+								userId,
+								status,
+								notes: notes || null,
+								verificationLevel: 'basic', // <-- Add default verificationLevel
+								createdAt: new Date().toISOString(),
+								updatedAt: new Date().toISOString(),
+							})
+							.returning()
+
+						if (!newReview || newReview.length === 0) {
+							return Response.json(
+								{ error: 'Failed to create KYC review' },
+								{ status: 500 },
+							)
+						}
+
+						console.log(
+							`✅ Successfully created initial KYC review for user ${userId}`,
+						)
+					} else if (!result || result.length === 0) {
+						return Response.json(
+							{ error: 'KYC review not found for user' },
+							{ status: 404 },
+						)
 					}
 
 					console.log(`✅ Successfully updated KYC status for user ${userId}`)
@@ -493,6 +520,8 @@ export const usersRoutes = {
 						.select()
 						.from(kycReviews)
 						.where(eq(kycReviews.userId, userId))
+						// Get the latest created first
+						.orderBy(desc(kycReviews.createdAt))
 						.limit(1)
 
 					// 3. Get user devices
@@ -552,7 +581,7 @@ export const usersRoutes = {
 					}
 
 					// 5. Compile comprehensive response
-					const comprehensiveData = {
+					const userDetails = {
 						profile: {
 							id: userProfile.id,
 							email: userProfile.email,
@@ -585,6 +614,8 @@ export const usersRoutes = {
 								backupState: device.backupState,
 								createdAt: device.createdAt,
 								lastUsedAt: device.lastUsedAt,
+								publicKey: `${device.publicKey.slice(0, 8)}...${device.publicKey.slice(-8)}`,
+								address: device.address,
 							})),
 						},
 						documents: kycDocuments,
@@ -607,7 +638,7 @@ export const usersRoutes = {
 
 					return Response.json({
 						success: true,
-						data: comprehensiveData,
+						data: userDetails,
 					})
 				} catch (error) {
 					console.error('Error fetching user status:', error)
@@ -757,6 +788,41 @@ export const usersRoutes = {
 						},
 					})
 				} catch (error) {
+					return handleError(error)
+				}
+			})(req)
+		},
+		OPTIONS: withConfiguredCORS(() => new Response(null)),
+	},
+
+	'/api/users/:id/reviews': {
+		async GET(req: Request) {
+			return withConfiguredCORS(async () => {
+				try {
+					const url = new URL(req.url)
+					const pathSegments = url.pathname.split('/')
+					const userId = pathSegments[pathSegments.length - 2]
+
+					if (!userId) {
+						return Response.json(
+							{ error: 'User ID is required' },
+							{ status: 400 },
+						)
+					}
+
+					// Fetch all KYC reviews for this user
+					const reviews = await db
+						.select()
+						.from(kycReviews)
+						.where(eq(kycReviews.userId, userId))
+						.orderBy(desc(kycReviews.createdAt))
+
+					return Response.json({
+						success: true,
+						data: reviews,
+					})
+				} catch (error) {
+					console.error('Error fetching user reviews:', error)
 					return handleError(error)
 				}
 			})(req)

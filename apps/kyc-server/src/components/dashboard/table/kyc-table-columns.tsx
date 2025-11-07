@@ -6,8 +6,8 @@ import { Checkbox } from '~/components/base/checkbox'
 import { DragHandle } from '~/components/dashboard/table/drag-handle'
 import { KycActionsMenu } from '~/components/dashboard/table/kyc-actions-menu'
 import { KycDetailsSheet } from '~/components/dashboard/table/kyc-details-sheet'
+import { getStatusColor, getStatusIcon } from '~/lib/table'
 import type { KycRecord } from '~/lib/types/dashboard'
-import { getStatusColor, getStatusIcon } from '~/utils/table'
 
 // Create enhanced KYC table columns with actions support
 export const createKycTableColumns = (
@@ -81,7 +81,10 @@ export const createKycTableColumns = (
 			const status = row.original.status
 			if (!status) {
 				return (
-					<Badge variant="outline" className="flex gap-1 px-1.5 text-muted-foreground">
+					<Badge
+						variant="outline"
+						className="flex gap-1 px-1.5 text-muted-foreground"
+					>
 						<span>No KYC</span>
 					</Badge>
 				)

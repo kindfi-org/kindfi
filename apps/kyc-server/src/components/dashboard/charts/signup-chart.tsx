@@ -14,8 +14,8 @@ import {
 	ChartTooltipContent,
 } from '~/components/base/chart'
 import { useSignupChartConfig } from '~/hooks/use-signup-chart-config'
+import { formatDateTick } from '~/lib/chart'
 import type { ChartDataPoint } from '~/lib/types/dashboard'
-import { formatDateTick } from '~/utils/chart'
 import { TimeRangeSelector } from './time-range-selector'
 
 interface SignupChartProps {

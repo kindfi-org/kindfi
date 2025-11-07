@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 
 import type { ChartConfig } from '~/components/base/chart'
 import { useIsMobile } from '~/hooks/use-mobile'
+import { filterDataByTimeRange } from '~/lib/chart'
 import type { ChartDataPoint, TimeRange } from '~/lib/types/dashboard'
-import { filterDataByTimeRange } from '~/utils/chart'
 
 export const chartConfig = {
 	signups: {

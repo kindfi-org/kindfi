@@ -1,10 +1,7 @@
-import type {
-	kycReviewsInsertSchema,
-	kycReviewsRowSchema,
-} from '@services/supabase'
+import type { kycReviews } from '@packages/drizzle'
+import type { kycReviewsInsertSchema } from '@services/supabase'
 import type { LucideIcon } from 'lucide-react'
-import type { z } from 'zod'
-import type { statusEnum, verificationEnum } from '../schemas/kyc'
+import type { KycStatusType, KycVerificationType } from './kyc-enums'
 
 export type MetricKey = keyof Omit<KycStats, 'trends'>
 
@@ -24,21 +21,21 @@ export type TimeRangeOption = {
 	value: TimeRange
 }
 
-export type KycReview = z.infer<typeof kycReviewsRowSchema>
-export type KycReviewsInsertValues = z.infer<typeof kycReviewsInsertSchema>
+export type KycReview = typeof kycReviews.$inferSelect
+export type KycReviewsInsertValues = typeof kycReviewsInsertSchema._input
 
 // API Response type - snake_case fields as returned by the backend
 export interface KycRecordApi {
 	id: string
+	kyc_id: string | null
 	user_id: string
-	status: 'pending' | 'approved' | 'rejected' | 'verified' | null
-	verification_level: 'basic' | 'enhanced' | null
+	status: KycStatusType | null
+	verification_level: KycVerificationType | null
 	reviewer_id?: string | null
 	notes?: string | null
 	created_at: string
 	updated_at: string
 	// KYC-specific timestamps (when user has KYC record)
-	kyc_id?: string | null
 	kyc_created_at?: string | null
 	kyc_updated_at?: string | null
 	// Profile data from join
@@ -54,10 +51,10 @@ export interface KycRecordApi {
 export interface KycRecord {
 	id: string
 	userId: string
-	email?: string | null
-	displayName?: string | null
-	status: 'pending' | 'approved' | 'rejected' | 'verified' | null
-	verificationLevel: 'basic' | 'enhanced' | null
+	email: string
+	displayName: string
+	status: KycStatusType | null
+	verificationLevel: KycVerificationType | null
 	reviewerId?: string | null
 	notes?: string | null
 	createdAt: string
@@ -65,25 +62,6 @@ export interface KycRecord {
 	profileImageUrl?: string | null
 	profileRole?: string | null
 	deviceCount: number
-}
-
-// Mapping function to convert API response to domain type
-export function mapKycRecordApiToDomain(apiRecord: KycRecordApi): KycRecord {
-	return {
-		id: apiRecord.kyc_id || apiRecord.id,
-		userId: apiRecord.user_id,
-		email: apiRecord.email,
-		displayName: apiRecord.display_name,
-		status: apiRecord.status || null,
-		verificationLevel: apiRecord.verification_level || null,
-		reviewerId: apiRecord.reviewer_id,
-		notes: apiRecord.notes,
-		createdAt: apiRecord.kyc_created_at || apiRecord.created_at,
-		updatedAt: apiRecord.kyc_updated_at || apiRecord.updated_at,
-		profileImageUrl: apiRecord.profile_image_url,
-		profileRole: apiRecord.profile_role,
-		deviceCount: apiRecord.device_count,
-	}
 }
 
 export type KycStatsTrends = {
@@ -133,11 +111,113 @@ export interface KycReviewApiResponse {
 	total: number
 }
 
+// User Details API Response - matches /api/users/:id/status response structure
+export interface UserDetails {
+	profile: {
+		id: string
+		email: string | null
+		displayName: string | null
+		bio: string | null
+		imageUrl: string | null
+		role: 'kinder' | 'kindler'
+		slug: string | null
+		createdAt: string
+		updatedAt: string
+	}
+	kyc: {
+		id: string
+		status: KycStatusType
+		verificationLevel: KycVerificationType
+		reviewerId: string | null
+		notes: string | null
+		createdAt: string
+		updatedAt: string
+	} | null
+	devices: {
+		count: number
+		devices: Array<{
+			id: string
+			deviceName: string | null
+			deviceType: 'single_device' | 'multi_device'
+			credentialType: 'public-key'
+			backupState: 'not_backed_up' | 'backed_up'
+			createdAt: string
+			lastUsedAt: string | null
+			publicKey: string
+			address: string
+		}>
+	}
+	documents: {
+		hasDocuments: boolean
+		documentCount: number
+		documents: Array<{
+			name: string
+			size: number
+			updatedAt: string
+		}>
+	}
+	verification: {
+		hasProfile: boolean
+		hasKycRecord: boolean
+		hasDocuments: boolean
+		isComplete: boolean
+	}
+}
+
+// Helper type for KYC details in forms - extracted from UserDetails
+export interface KycDetailsFormData {
+	userId: string
+	email: string | null
+	displayName: string | null
+	status: KycStatusType
+	verificationLevel: KycVerificationType
+	notes: string | null
+	createdAt: string
+	updatedAt: string
+	kycId?: string
+	// Additional user information
+	bio: string | null
+	imageUrl: string | null
+	role: 'kinder' | 'kindler'
+	// Devices information
+	devices: {
+		count: number
+		devices: Array<{
+			id: string
+			deviceName: string | null
+			deviceType: 'single_device' | 'multi_device'
+			credentialType: 'public-key'
+			backupState: 'not_backed_up' | 'backed_up'
+			createdAt: string
+			lastUsedAt: string | null
+			publicKey: string
+			address: string
+		}>
+	}
+	// Documents information
+	documents: {
+		hasDocuments: boolean
+		documentCount: number
+		documents: Array<{
+			name: string
+			size: number
+			updatedAt: string
+		}>
+	}
+	// Verification status
+	verification: {
+		hasProfile: boolean
+		hasKycRecord: boolean
+		hasDocuments: boolean
+		isComplete: boolean
+	}
+}
+
 // Form state types
 export interface KycFormData {
 	user_id: string
-	status: typeof statusEnum
-	verification_level: typeof verificationEnum
+	status: KycStatusType
+	verification_level: KycVerificationType
 }
 
 export interface ReviewFormData {

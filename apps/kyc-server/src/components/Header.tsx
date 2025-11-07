@@ -23,18 +23,17 @@ const Header = () => {
 
 	const mainNavItems = [
 		{ path: '/signin', label: 'Sign In' },
-		{ path: '/dashboard', label: 'Dashboard', active: true },
-		{ path: '/react', label: 'React Demo' },
-		{ path: '/websocket', label: 'WebSocket Demo' },
+		{ path: '/', label: 'Dashboard', active: true },
+		{ path: '/websocket', label: 'WebSocket Health' },
 		{ path: '/about', label: 'About' },
 	]
 
 	const innerNavItems = [
-		{ path: '/dashboard', label: 'Dashboard' },
-		{ path: '/dashboard/users', label: 'Users' },
-		{ path: '/dashboard/projects', label: 'Projects' },
-		{ path: '/dashboard/analytics', label: 'Analytics' },
-		{ path: '/dashboard/settings', label: 'Settings' },
+		{ path: '/', label: 'Stats' },
+		{ path: '/users', label: 'Users' },
+		{ path: '/projects', label: 'Projects' },
+		{ path: '/analytics', label: 'Analytics' },
+		{ path: '/settings', label: 'Settings' },
 	]
 
 	return (
@@ -43,7 +42,7 @@ const Header = () => {
 			<div className="px-6 py-4 flex items-center justify-between border-b border-border">
 				{/* Brand Logo */}
 				<div className="text-2xl font-semibold">
-					<Link to="/dashboard">
+					<Link to="/">
 						<span className="text-foreground">KindFi KYC Server</span>
 					</Link>
 				</div>
@@ -150,8 +149,8 @@ const Header = () => {
 			</div>
 
 			{/* Inner Navigation Tabs */}
-			{currentPath.startsWith('/dashboard') && (
-				<div className="px-4 py-2 rounded-xl bg-muted inline-flex space-x-2">
+			{currentPath.startsWith('/') && (
+				<div className="w-full px-4 py-2 bg-gradient-to-r from-muted/5 via-muted/80 to-muted/5 backdrop-blur-sm inline-flex space-x-2">
 					{innerNavItems.map((item) => {
 						const isActive = currentPath === item.path
 						return (
@@ -159,10 +158,10 @@ const Header = () => {
 								key={item.path}
 								to={item.path}
 								className={cn(
-									'px-4 py-2 text-sm font-medium rounded-md transition-all cursor-pointer',
+									'px-4 py-2 text-sm font-medium rounded-md transition-all border cursor-pointer backdrop-blur-sm',
 									isActive
-										? 'bg-background text-foreground shadow-sm'
-										: 'text-muted-foreground hover:text-foreground',
+										? 'bg-background/90 border-muted text-foreground shadow-sm'
+										: 'bg-muted/15 text-muted-foreground hover:bg-muted/25 border-muted/50 hover:text-foreground',
 								)}
 							>
 								{item.label}

@@ -17,7 +17,7 @@ import {
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 import * as CBOR from 'cbor-x/decode'
 import { eq } from 'drizzle-orm'
-import { getDb } from '../db'
+import { getDb } from '../services/db'
 import { type RateLimitConfig, SignatureRateLimiter } from './rate-limiter'
 
 /**

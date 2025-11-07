@@ -34,6 +34,7 @@ export async function buildClient() {
 		minify: appConfig.env.nodeEnv === 'production',
 		target: 'browser',
 		format: 'esm',
+		external: ['pg'],
 	})
 
 	if (!result.success) {

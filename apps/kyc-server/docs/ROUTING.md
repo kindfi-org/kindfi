@@ -136,15 +136,31 @@ export function App() {
               to="/"
               className={location.pathname === '/' ? 'active' : ''}
             >
-              Home
+              Dashboard
             </Link>
           </li>
           <li>
             <Link
-              to="/react"
-              className={location.pathname === '/react' ? 'active' : ''}
+              to="/users"
+              className={location.pathname === '/users' ? 'active' : ''}
             >
-              React Demo
+              Users
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/websocket"
+              className={location.pathname === '/websocket' ? 'active' : ''}
+            >
+              WS Health
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/about"
+              className={location.pathname === '/about' ? 'active' : ''}
+            >
+              About
             </Link>
           </li>
         </ul>
@@ -171,13 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
 ## How It Works Together
 
 1. **Initial Request**:
-
    - User requests a page (e.g., `/` or `/react`)
    - Server renders the full HTML using the `Home` component
    - HTML includes links to the client-side JavaScript
 
 2. **Hydration**:
-
    - Browser loads the client-side JavaScript
    - React hydrates the server-rendered HTML
    - React Router takes over navigation

@@ -30,13 +30,19 @@ export function useKYCWebSocket({
 	const onUpdateRef = useRef(onUpdate)
 	const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const retryCount = useRef(0)
-	const wsUrl = url || `ws://${window.location.host}/live`
+	// Guard window access for SSR compatibility
+	const wsUrl =
+		url ||
+		(typeof window !== 'undefined' ? `ws://${window.location.host}/live` : '')
 
 	useEffect(() => {
 		onUpdateRef.current = onUpdate
 	}, [onUpdate])
 
 	useEffect(() => {
+		// Skip WebSocket connection during SSR
+		if (typeof window === 'undefined' || !wsUrl) return
+
 		let mounted = true
 
 		const connect = () => {

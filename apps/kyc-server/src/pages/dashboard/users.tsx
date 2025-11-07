@@ -1,3 +1,5 @@
+'use client'
+
 import { useCallback, useState } from 'react'
 import { MetricsGridContainer } from '~/components/dashboard/cards/metrics-grid-container'
 import { KycTableContainer } from '~/components/dashboard/table/kyc-table-container'

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { KycTable } from '~/components/dashboard/table/kyc-table'
 import type { KycRecord, KycRecordApi } from '~/lib/types/dashboard'
-import { mapKycRecordApiToDomain } from '~/lib/types/dashboard'
+import { mapKycRecordApiToDomain } from '~/lib/utils'
 
 interface KycTableContainerProps {
 	onStatusUpdate?: () => void
