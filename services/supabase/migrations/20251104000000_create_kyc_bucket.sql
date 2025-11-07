@@ -108,6 +108,5 @@ WITH CHECK (bucket_id = 'kyc');
 -- );
 
 -- Comment on the bucket
-COMMENT ON TABLE storage.buckets IS 'Storage bucket for user KYC verification documents. Documents are organized in folders by user ID. Currently in TESTING PHASE with open RLS policies.';
 
 
