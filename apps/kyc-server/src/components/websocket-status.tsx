@@ -9,7 +9,8 @@ interface KYCStatusProps {
 	initialStatus?: 'pending' | 'approved' | 'rejected' | 'verified'
 }
 
-export function KYCStatus({
+// TODO: Connect to Websocket pages as status widget or small UI signal to also reconnect with chats, notifications, etc.
+export function WebsocketStatus({
 	userId,
 	initialStatus = 'pending',
 }: KYCStatusProps) {
@@ -19,7 +20,7 @@ export function KYCStatus({
 	const { isConnected, lastUpdate, reconnect } = useKYCWebSocket({
 		userId,
 		onUpdate: (update) => {
-			setStatus(update.status as KYCStatusValue)
+			setStatus(update.data.status as KYCStatusValue)
 			setIsLoading(false)
 		},
 	})
@@ -70,7 +71,7 @@ export function KYCStatus({
 				</div>
 				{lastUpdate && (
 					<p className="mt-2 text-sm text-gray-500">
-						Last updated: {new Date(lastUpdate.timestamp).toLocaleString()}
+						Last updated: {new Date(lastUpdate.data.timestamp).toLocaleString()}
 					</p>
 				)}
 			</div>

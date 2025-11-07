@@ -13,7 +13,7 @@ import {
 } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
 import { useSetState } from 'react-use'
-import { kycColumns } from '~/components/dashboard/table/kyc-table-columns'
+import { createKycTableColumns } from '~/components/dashboard/table/kyc-table-columns'
 import type { KycRecord } from '~/lib/types/dashboard'
 
 type PaginationState = {
@@ -21,7 +21,16 @@ type PaginationState = {
 	pageSize: number
 }
 
-export function useKycTable(initialData: KycRecord[] = []) {
+interface UseKycTableOptions {
+	onStatusUpdate?: () => void
+	onReview?: (userId: string) => void
+}
+
+export function useKycTable(
+	initialData: KycRecord[] = [],
+	options: UseKycTableOptions = {},
+) {
+	const { onStatusUpdate, onReview } = options
 	const [kycData, setKycData] = useState<KycRecord[]>(initialData)
 
 	const [statusFilter, setStatusFilter] = useState('all')
@@ -44,14 +53,19 @@ export function useKycTable(initialData: KycRecord[] = []) {
 			const statusMatch = statusFilter === 'all' || item.status === statusFilter
 			const levelMatch =
 				verificationLevelFilter === 'all' ||
-				item.verification_level === verificationLevelFilter
+				item.verificationLevel === verificationLevelFilter
 			return statusMatch && levelMatch
 		})
 	}, [kycData, statusFilter, verificationLevelFilter])
 
+	const columns = useMemo(
+		() => createKycTableColumns(onStatusUpdate, onReview),
+		[onStatusUpdate, onReview],
+	)
+
 	const table = useReactTable({
 		data: filteredData,
-		columns: kycColumns,
+		columns,
 		state: {
 			pagination,
 			sorting,

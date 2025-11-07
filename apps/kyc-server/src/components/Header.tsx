@@ -23,30 +23,27 @@ const Header = () => {
 
 	const mainNavItems = [
 		{ path: '/signin', label: 'Sign In' },
-		{ path: '/dashboard', label: 'Dashboard', active: true },
-		{ path: '/react', label: 'React Demo' },
-		{ path: '/websocket', label: 'WebSocket Demo' },
+		{ path: '/', label: 'Dashboard', active: true },
+		{ path: '/websocket', label: 'WebSocket Health' },
 		{ path: '/about', label: 'About' },
 	]
 
 	const innerNavItems = [
-		{ path: '/dashboard', label: 'Dashboard' },
-		{ path: '/dashboard/customers', label: 'Customers' },
-		{ path: '/dashboard/projects', label: 'Projects' },
-		{ path: '/dashboard/analytics', label: 'Analytics' },
-		{ path: '/dashboard/settings', label: 'Settings' },
+		{ path: '/', label: 'Stats' },
+		{ path: '/users', label: 'Users' },
+		{ path: '/projects', label: 'Projects' },
+		{ path: '/analytics', label: 'Analytics' },
+		{ path: '/settings', label: 'Settings' },
 	]
 
 	return (
-		<div className=" border-b border-gray-200">
+		<div className="border-b border-border bg-background">
 			{/* Top Navigation Bar */}
-			<div className="px-6 py-4 flex items-center justify-between border-b">
+			<div className="px-6 py-4 flex items-center justify-between border-b border-border">
 				{/* Brand Logo */}
 				<div className="text-2xl font-semibold">
-					<Link to="/dashboard">
-						<span className="text-gray-900 dark:text-white">
-							KindFi KYC Server
-						</span>
+					<Link to="/">
+						<span className="text-foreground">KindFi KYC Server</span>
 					</Link>
 				</div>
 
@@ -59,8 +56,8 @@ const Header = () => {
 							className={cn(
 								'py-2 px-3 text-base font-medium rounded-md transition-colors',
 								currentPath === item.path
-									? 'bg-black text-white  dark:bg-gray-800 dark:text-white'
-									: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
+									? 'bg-primary text-primary-foreground'
+									: 'text-muted-foreground hover:text-foreground hover:bg-accent',
 							)}
 						>
 							{item.label}
@@ -79,7 +76,7 @@ const Header = () => {
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent
-								className="z-50  bg-white dark:bg-gray-800 py-4"
+								className="z-50 bg-popover border border-border py-4"
 								align="end"
 								sideOffset={8}
 							>
@@ -131,17 +128,17 @@ const Header = () => {
 
 				{/* Mobile menu dropdown */}
 				{mobileMenuOpen && (
-					<div className="absolute top-16 left-0 w-full bg-white dark:bg-zinc-900 shadow-md z-90 flex flex-col space-y-1 px-4 py-4 md:hidden">
+					<div className="absolute top-16 left-0 w-full bg-popover border border-border shadow-md z-50 flex flex-col space-y-1 px-4 py-4 md:hidden">
 						{mainNavItems.map((item) => (
 							<Link
 								key={item.path}
 								to={item.path}
 								onClick={() => setMobileMenuOpen(false)}
 								className={cn(
-									'block py-2 px-3 rounded-md text-base font-medium ',
+									'block py-2 px-3 rounded-md text-base font-medium',
 									currentPath === item.path
-										? 'bg-black text-white dark:bg-gray-800 dark:text-white'
-										: 'text-gray-600 hover:bg-gray-100',
+										? 'bg-primary text-primary-foreground'
+										: 'text-muted-foreground hover:bg-accent hover:text-foreground',
 								)}
 							>
 								{item.label}
@@ -152,8 +149,8 @@ const Header = () => {
 			</div>
 
 			{/* Inner Navigation Tabs */}
-			{currentPath.startsWith('/dashboard') && (
-				<div className="px-4 py-2 rounded-xl bg-gray-200 dark:bg-gray-900 inline-flex space-x-2">
+			{currentPath.startsWith('/') && (
+				<div className="w-full px-4 py-2 bg-gradient-to-r from-muted/5 via-muted/80 to-muted/5 backdrop-blur-sm inline-flex space-x-2">
 					{innerNavItems.map((item) => {
 						const isActive = currentPath === item.path
 						return (
@@ -161,10 +158,10 @@ const Header = () => {
 								key={item.path}
 								to={item.path}
 								className={cn(
-									'px-4 py-2 text-sm font-medium rounded-md transition-all cursor-pointer',
+									'px-4 py-2 text-sm font-medium rounded-md transition-all border cursor-pointer backdrop-blur-sm',
 									isActive
-										? 'bg-white text-black shadow-sm dark:bg-gray-800 dark:text-white'
-										: 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
+										? 'bg-background/90 border-muted text-foreground shadow-sm'
+										: 'bg-muted/15 text-muted-foreground hover:bg-muted/25 border-muted/50 hover:text-foreground',
 								)}
 							>
 								{item.label}

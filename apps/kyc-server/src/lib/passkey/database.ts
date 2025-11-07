@@ -3,7 +3,7 @@ import type {
 	WebAuthnCredential as BaseWebAuthnCredential,
 } from '@simplewebauthn/server'
 import { and, desc, eq, gt, lt } from 'drizzle-orm'
-import { getDb as db } from '../db'
+import { getDb as db } from '../services/db'
 import { challenges, type Device, devices } from './schema'
 
 // Extended WebAuthnCredential with Stellar address support (matches passkey-service.ts)

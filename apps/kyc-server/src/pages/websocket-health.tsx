@@ -24,7 +24,8 @@ interface Message {
 	timestamp: number
 }
 
-export default function WebSocketDemo() {
+// ? Test Websocket health connection and chat. After auth system should connect between connected admin users. - @Andler
+export default function WebSocketHealthComponent() {
 	const [connected, setConnected] = useState(false)
 	const [messages, setMessages] = useState<Message[]>([])
 	const [inputValue, setInputValue] = useState('')

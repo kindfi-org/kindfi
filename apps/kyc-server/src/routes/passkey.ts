@@ -1,4 +1,5 @@
 import { corsConfig } from '../config/cors'
+import { handleError } from '../lib/error-handler'
 import {
 	getAuthenticationOptions,
 	getRegistrationOptions,
@@ -6,7 +7,6 @@ import {
 	verifyRegistration,
 } from '../lib/passkey/passkey-service'
 import { withCORS } from '../middleware/cors'
-import { handleError } from '../utils/error-handler'
 
 // Create a configured CORS handler
 const withConfiguredCORS = (

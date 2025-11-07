@@ -19,7 +19,6 @@ import { useCallback, useEffect, useId, useMemo } from 'react'
 import { Table } from '~/components/base/table'
 import { KycTableSkeleton } from '~/components/dashboard/skeletons/kyc-table-skeleton'
 import { KycTableBody } from '~/components/dashboard/table/kyc-table-body'
-import { kycColumns } from '~/components/dashboard/table/kyc-table-columns'
 import { KycTableFilters } from '~/components/dashboard/table/kyc-table-filters'
 import { KycTableHeader } from '~/components/dashboard/table/kyc-table-header'
 import { KycTablePagination } from '~/components/dashboard/table/kyc-table-pagination'
@@ -29,11 +28,17 @@ import type { KycRecord } from '~/lib/types/dashboard'
 interface KycTableProps {
 	data?: KycRecord[]
 	isLoading?: boolean
+	onStatusUpdate?: () => void
+	onReview?: (userId: string) => void
+	isConnected?: boolean
 }
 
 export function KycTable({
 	data: initialData,
 	isLoading = false,
+	onStatusUpdate,
+	onReview,
+	isConnected = false,
 }: KycTableProps) {
 	const {
 		table,
@@ -41,7 +46,7 @@ export function KycTable({
 		setKycData,
 		filters: { statusFilter, verificationLevelFilter },
 		setFilters: { setStatusFilter, setVerificationLevelFilter },
-	} = useKycTable(initialData)
+	} = useKycTable(initialData, { onStatusUpdate, onReview })
 
 	const sortableId = useId()
 	const sensors = useSensors(
@@ -93,6 +98,12 @@ export function KycTable({
 			/>
 
 			<div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
+				{isConnected && (
+					<div className="flex items-center gap-1">
+						<div className="size-2 bg-green-500 rounded-full animate-pulse" />
+						<span className="text-xs text-green-600 font-medium">Live</span>
+					</div>
+				)}
 				<div className="overflow-hidden rounded-lg border">
 					<DndContext
 						collisionDetection={closestCenter}
@@ -106,7 +117,7 @@ export function KycTable({
 							<KycTableBody
 								table={table}
 								dataIds={dataIds}
-								columnsLength={kycColumns.length}
+								columnsLength={table.getVisibleLeafColumns().length}
 							/>
 						</Table>
 					</DndContext>

@@ -3,8 +3,8 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import { registerAccountOnChain } from '~/lib/stellar/auth-controller-service'
 import { StellarPasskeyService } from '~/lib/stellar/stellar-passkey-service'
 import { corsConfig } from '../config/cors'
+import { handleError } from '../lib/error-handler'
 import { withCORS } from '../middleware/cors'
-import { handleError } from '../utils/error-handler'
 
 const appConfig: AppEnvInterface = appEnvConfig()
 
