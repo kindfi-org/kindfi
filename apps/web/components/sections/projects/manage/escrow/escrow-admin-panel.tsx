@@ -6,10 +6,12 @@ import type {
 	InitializeSingleReleaseEscrowPayload,
 } from '@trustless-work/escrow'
 import { Plus, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useId, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
+import { Label } from '~/components/base/label'
 import { RadioGroup, RadioGroupItem } from '~/components/base/radio-group'
 import { Textarea } from '~/components/base/textarea'
 import {
@@ -20,18 +22,23 @@ import {
 } from '~/components/base/tooltip'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { saveEscrowContractAction } from '~/app/actions/escrow/save-escrow-contract'
 
 export function EscrowAdminPanel({
 	projectId,
+	projectSlug,
 	escrowContractAddress,
 	escrowType,
 }: {
 	projectId: string
+	projectSlug: string
 	escrowContractAddress?: string
 	escrowType?: EscrowType
 }) {
-	const { deployEscrow, approveMilestone, changeMilestoneStatus } = useEscrow()
-	const { isConnected, connect, address } = useWallet()
+	const router = useRouter()
+	const { deployEscrow, approveMilestone, changeMilestoneStatus, sendTransaction } =
+		useEscrow()
+	const { isConnected, connect, address, signTransaction } = useWallet()
 
 	// form state
 	const [selectedEscrowType, setSelectedEscrowType] = useState<EscrowType>(
@@ -40,7 +47,6 @@ export function EscrowAdminPanel({
 	const [title, setTitle] = useState('')
 	const [engagementId, setEngagementId] = useState<string>('')
 	const [trustlineAddress, setTrustlineAddress] = useState<string>('')
-	const [trustlineDecimals, setTrustlineDecimals] = useState<number | ''>(7)
 	const [approver, setApprover] = useState<string>('')
 	const [serviceProvider, setServiceProvider] = useState<string>('')
 	const [releaseSigner, setReleaseSigner] = useState<string>('')
@@ -51,14 +57,27 @@ export function EscrowAdminPanel({
 	const [amount, setAmount] = useState<number | ''>('')
 	const [receiverMemo, setReceiverMemo] = useState<string>('')
 	const [description, setDescription] = useState<string>('')
-	type MilestoneItem = { id: string; description: string }
+	type MilestoneItem =
+		| { id: string; description: string }
+		| { id: string; description: string; amount: number | ''; receiver: string }
 	const genId = () =>
 		typeof crypto !== 'undefined' && 'randomUUID' in crypto
 			? crypto.randomUUID()
 			: `m-${Date.now()}-${Math.random().toString(36).slice(2)}`
-	const [milestones, setMilestones] = useState<MilestoneItem[]>([
-		{ id: genId(), description: 'Milestone 1' },
-	])
+	const [milestones, setMilestones] = useState<MilestoneItem[]>(() => {
+		const initialType = escrowType || 'single-release'
+		if (initialType === 'multi-release') {
+			return [
+				{
+					id: genId(),
+					description: 'Milestone 1',
+					amount: '',
+					receiver: '',
+				},
+			]
+		}
+		return [{ id: genId(), description: 'Milestone 1' }]
+	})
 
 	// admin actions state
 	const [milestoneIndex, _setMilestoneIndex] = useState('0')
@@ -68,7 +87,6 @@ export function EscrowAdminPanel({
 	const engagementIdInputId = useId()
 	const escrowTypeLabelId = useId()
 	const trustlineAddressId = useId()
-	const trustlineDecimalsId = useId()
 	const approverId = useId()
 	const spId = useId()
 	const releaseSignerId = useId()
@@ -88,31 +106,49 @@ export function EscrowAdminPanel({
 	}
 
 	const areRequiredFieldsValid = useMemo(() => {
-		return (
+		const baseValid =
 			title.trim().length > 0 &&
 			(engagementId || `project-${projectId}`).trim().length > 0 &&
 			trustlineAddress.trim().length > 0 &&
-			typeof trustlineDecimals === 'number' &&
-			Number.isFinite(trustlineDecimals) &&
 			approver.trim().length > 0 &&
 			serviceProvider.trim().length > 0 &&
 			releaseSigner.trim().length > 0 &&
 			disputeResolver.trim().length > 0 &&
 			platformAddress.trim().length > 0 &&
-			receiver.trim().length > 0 &&
 			typeof platformFee === 'number' &&
 			Number.isFinite(platformFee) &&
-			typeof amount === 'number' &&
-			Number.isFinite(amount) &&
 			description.trim().length > 0 &&
 			milestones.filter((m) => m.description.trim().length > 0).length > 0
-		)
+
+		if (selectedEscrowType === 'single-release') {
+			return (
+				baseValid &&
+				receiver.trim().length > 0 &&
+				typeof amount === 'number' &&
+				Number.isFinite(amount)
+			)
+		} else {
+			// Multi-release: validate milestones have amount and receiver
+			return (
+				baseValid &&
+				milestones.every((m) => {
+					if ('amount' in m && 'receiver' in m) {
+						return (
+							typeof m.amount === 'number' &&
+							Number.isFinite(m.amount) &&
+							m.amount > 0 &&
+							m.receiver.trim().length > 0
+						)
+					}
+					return false
+				})
+			)
+		}
 	}, [
 		title,
 		engagementId,
 		projectId,
 		trustlineAddress,
-		trustlineDecimals,
 		approver,
 		serviceProvider,
 		releaseSigner,
@@ -123,13 +159,26 @@ export function EscrowAdminPanel({
 		amount,
 		description,
 		milestones,
+		selectedEscrowType,
 	])
 
 	const handleAddMilestone = () => {
+		if (selectedEscrowType === 'multi-release') {
+			setMilestones((prev) => [
+				...prev,
+				{
+					id: genId(),
+					description: `Milestone ${prev.length + 1}`,
+					amount: '',
+					receiver: '',
+				},
+			])
+		} else {
 		setMilestones((prev) => [
 			...prev,
 			{ id: genId(), description: `Milestone ${prev.length + 1}` },
 		])
+		}
 	}
 
 	const handleRemoveMilestone = (id: string) => {
@@ -146,17 +195,18 @@ export function EscrowAdminPanel({
 			const effectiveEngagementId = (
 				engagementId || `project-${projectId}`
 			).trim()
-			const sanitizedMilestones = milestones
-				.map((m) => m.description)
-				.filter((desc) => desc.trim().length > 0)
-				.map((desc) => ({ description: desc.trim() }))
 			const composedDescription =
 				receiverMemo.trim().length > 0
 					? `${description.trim()}\nReceiver Memo: ${receiverMemo.trim()}`
 					: description.trim()
-			const payload:
-				| InitializeSingleReleaseEscrowPayload
-				| InitializeMultiReleaseEscrowPayload = {
+
+			if (selectedEscrowType === 'single-release') {
+				const sanitizedMilestones = milestones
+					.map((m) => m.description)
+					.filter((desc) => desc.trim().length > 0)
+					.map((desc) => ({ description: desc.trim() }))
+
+				const payload: InitializeSingleReleaseEscrowPayload = {
 				signer,
 				engagementId: effectiveEngagementId,
 				title: title.trim(),
@@ -176,17 +226,143 @@ export function EscrowAdminPanel({
 				},
 				milestones: sanitizedMilestones,
 			}
-			const res = await deployEscrow(
-				payload,
-				(selectedEscrowType as EscrowType) || 'single-release',
-			)
-			if (res.status !== 'SUCCESS') throw new Error('Failed to create escrow')
-			toast.success(
-				'Escrow initialized. Sign and broadcast next steps in flow.',
-			)
+
+				// 1) Execute function from Trustless Work -> returns unsigned XDR
+				const deployResponse = await deployEscrow(payload, 'single-release')
+
+				if (deployResponse.status !== 'SUCCESS') {
+					throw new Error('Failed to create escrow')
+				}
+
+				if (!deployResponse.unsignedTransaction) {
+					throw new Error('No unsigned transaction returned')
+				}
+
+				// 2) Sign transaction with wallet
+				const signedXdr = await signTransaction(deployResponse.unsignedTransaction)
+
+				// 3) Send signed transaction
+				const sendResult = await sendTransaction(signedXdr)
+				if (sendResult?.status !== 'SUCCESS') {
+					throw new Error('Transaction failed')
+				}
+
+				// 4) Save escrow contract ID to database
+				if (
+					'contractId' in sendResult &&
+					sendResult.contractId
+				) {
+					const saveResult = await saveEscrowContractAction({
+						projectId,
+						contractId: sendResult.contractId,
+					})
+
+					if (!saveResult.success) {
+						console.error('Failed to save escrow:', saveResult.error)
+						toast.error('Escrow created but failed to save to database', {
+							description: saveResult.error,
+						})
+						return
+					}
+				}
+
+				toast.success('Escrow successfully created and deployed!', {
+					description: 'The escrow contract has been initialized on the blockchain.',
+				})
+
+				// Redirect to manage page after a short delay to show the success message
+				setTimeout(() => {
+					router.push(`/projects/${projectSlug}/manage`)
+				}, 1500)
+			} else {
+				// Multi-release escrow
+				const sanitizedMilestones = milestones
+					.filter((m) => m.description.trim().length > 0)
+					.map((m) => {
+						if ('amount' in m && 'receiver' in m) {
+							return {
+								description: m.description.trim(),
+								amount: m.amount as number,
+								receiver: m.receiver.trim(),
+							}
+						}
+						throw new Error('Invalid milestone data for multi-release')
+					})
+
+				const payload: InitializeMultiReleaseEscrowPayload = {
+					signer,
+					engagementId: effectiveEngagementId,
+					title: title.trim(),
+					roles: {
+						approver: approver.trim(),
+						serviceProvider: serviceProvider.trim(),
+						platformAddress: platformAddress.trim(),
+						releaseSigner: releaseSigner.trim(),
+						disputeResolver: disputeResolver.trim(),
+						// Note: receiver is NOT in roles for multi-release
+					},
+					description: composedDescription,
+					// Note: amount is NOT at top level for multi-release
+					platformFee: platformFee as number,
+					trustline: {
+						address: trustlineAddress.trim(),
+					},
+					milestones: sanitizedMilestones,
+				}
+
+				// 1) Execute function from Trustless Work -> returns unsigned XDR
+				const deployResponse = await deployEscrow(payload, 'multi-release')
+
+				if (deployResponse.status !== 'SUCCESS') {
+					throw new Error('Failed to create escrow')
+				}
+
+				if (!deployResponse.unsignedTransaction) {
+					throw new Error('No unsigned transaction returned')
+				}
+
+				// 2) Sign transaction with wallet
+				const signedXdr = await signTransaction(deployResponse.unsignedTransaction)
+
+				// 3) Send signed transaction
+				const sendResult = await sendTransaction(signedXdr)
+				if (sendResult?.status !== 'SUCCESS') {
+					throw new Error('Transaction failed')
+				}
+
+				// 4) Save escrow contract ID to database
+				if (
+					'contractId' in sendResult &&
+					sendResult.contractId
+				) {
+					const saveResult = await saveEscrowContractAction({
+						projectId,
+						contractId: sendResult.contractId,
+					})
+
+					if (!saveResult.success) {
+						console.error('Failed to save escrow:', saveResult.error)
+						toast.error('Escrow created but failed to save to database', {
+							description: saveResult.error,
+						})
+						return
+					}
+				}
+
+				toast.success('Escrow successfully created and deployed!', {
+					description: 'The escrow contract has been initialized on the blockchain.',
+				})
+
+				// Redirect to manage page after a short delay to show the success message
+				setTimeout(() => {
+					router.push(`/projects/${projectSlug}/manage`)
+				}, 1500)
+			}
 		} catch (e) {
 			console.error(e)
-			toast.error('Failed to create escrow')
+			const errorMessage =
+				e instanceof Error ? e.message : 'Failed to create escrow'
+			toast.error(errorMessage)
 		}
 	}
 
@@ -271,9 +447,35 @@ export function EscrowAdminPanel({
 							<RadioGroup
 								aria-labelledby={escrowTypeLabelId}
 								value={selectedEscrowType}
-								onValueChange={(val) =>
-									setSelectedEscrowType(val as EscrowType)
-								}
+								onValueChange={(val) => {
+									const newType = val as EscrowType
+									setSelectedEscrowType(newType)
+									// Convert milestones when switching types
+									if (newType === 'multi-release') {
+										setMilestones((prev) =>
+											prev.map((m) => {
+												if ('amount' in m && 'receiver' in m) {
+													return m
+												}
+												return {
+													...m,
+													amount: '',
+													receiver: '',
+												}
+											}),
+										)
+									} else {
+										setMilestones((prev) =>
+											prev.map((m) => {
+												if ('amount' in m && 'receiver' in m) {
+													const { amount, receiver, ...rest } = m
+													return rest
+												}
+												return m
+											}),
+										)
+									}
+								}}
 								className="grid grid-cols-1 gap-3 sm:grid-cols-2"
 							>
 								<div className="flex gap-2 items-center p-3 rounded-md border">
@@ -339,36 +541,23 @@ export function EscrowAdminPanel({
 										htmlFor={trustlineAddressId}
 										className="text-sm font-medium"
 									>
-										Trustline <span className="text-destructive">*</span>
+										Trustline Address <span className="text-destructive">*</span>
 									</label>
 									<Tooltip>
 										<TooltipTrigger className="text-xs underline">
 											More information
 										</TooltipTrigger>
 										<TooltipContent>
-											Provide the asset contract address and decimals.
+											The asset contract address (e.g., USDC contract address on Stellar).
 										</TooltipContent>
 									</Tooltip>
 								</div>
-								<div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
 									<Input
 										id={trustlineAddressId}
 										value={trustlineAddress}
 										onChange={(e) => setTrustlineAddress(e.target.value)}
-										placeholder="Asset contract address"
-									/>
-									<Input
-										id={trustlineDecimalsId}
-										type="number"
-										value={trustlineDecimals}
-										onChange={(e) =>
-											setTrustlineDecimals(
-												e.target.value === '' ? '' : Number(e.target.value),
-											)
-										}
-										placeholder="Decimals"
-									/>
-								</div>
+									placeholder="Asset contract address (e.g., USDC)"
+								/>
 							</div>
 							<div className="grid gap-2">
 								<label htmlFor={approverId} className="text-sm font-medium">
@@ -437,12 +626,18 @@ export function EscrowAdminPanel({
 							<div className="grid gap-2">
 								<label htmlFor={receiverId} className="text-sm font-medium">
 									Receiver <span className="text-destructive">*</span>
+									{selectedEscrowType === 'multi-release' && (
+										<span className="text-xs text-muted-foreground ml-2">
+											(Not needed for multi-release)
+										</span>
+									)}
 								</label>
 								<Input
 									id={receiverId}
 									value={receiver}
 									onChange={(e) => setReceiver(e.target.value)}
 									placeholder="Enter receiver address"
+									disabled={selectedEscrowType === 'multi-release'}
 								/>
 							</div>
 							<div className="grid gap-2">
@@ -461,6 +656,7 @@ export function EscrowAdminPanel({
 									placeholder="Enter platform fee"
 								/>
 							</div>
+							{selectedEscrowType === 'single-release' && (
 							<div className="grid gap-2">
 								<label htmlFor={amountId} className="text-sm font-medium">
 									Amount <span className="text-destructive">*</span>
@@ -477,6 +673,7 @@ export function EscrowAdminPanel({
 									placeholder="Enter amount"
 								/>
 							</div>
+							)}
 							<div className="grid gap-2">
 								<label htmlFor={receiverMemoId} className="text-sm font-medium">
 									Receiver Memo (optional)
@@ -512,7 +709,9 @@ export function EscrowAdminPanel({
 											More information
 										</TooltipTrigger>
 										<TooltipContent>
-											Provide one or more milestone descriptions.
+											{selectedEscrowType === 'multi-release'
+												? 'For multi-release escrows, each milestone must have an amount and receiver address.'
+												: 'Provide one or more milestone descriptions.'}
 										</TooltipContent>
 									</Tooltip>
 								</div>
@@ -524,8 +723,111 @@ export function EscrowAdminPanel({
 									<Plus className="w-4 h-4" /> Add Item
 								</Button>
 							</div>
-							<div className="space-y-2">
-								{milestones.map((m, i) => (
+							<div className="space-y-3">
+								{milestones.map((m, i) => {
+									if (selectedEscrowType === 'multi-release') {
+										if ('amount' in m && 'receiver' in m) {
+											return (
+												<div
+													key={m.id}
+													className="p-4 rounded-lg border bg-card space-y-3"
+												>
+													<div className="flex items-center justify-between">
+														<span className="text-sm font-medium">
+															Milestone {i + 1}
+														</span>
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={() => handleRemoveMilestone(m.id)}
+															className="h-8 w-8 p-0"
+															aria-label={`Remove milestone ${i + 1}`}
+														>
+															<Trash2 className="w-4 h-4" />
+														</Button>
+													</div>
+													<div className="grid gap-3 sm:grid-cols-3">
+														<div className="sm:col-span-3">
+															<Label className="text-xs text-muted-foreground">
+																Description
+															</Label>
+															<Input
+																value={m.description}
+																onChange={(e) =>
+																	setMilestones((prev) =>
+																		prev.map((val, idx) =>
+																			idx === i
+																				? {
+																						...val,
+																						description: e.target.value,
+																					}
+																				: val,
+																		),
+																	)
+																}
+																placeholder="Milestone description"
+															/>
+														</div>
+														<div>
+															<Label className="text-xs text-muted-foreground">
+																Amount <span className="text-destructive">*</span>
+															</Label>
+															<Input
+																type="number"
+																value={m.amount}
+																onChange={(e) =>
+																	setMilestones((prev) =>
+																		prev.map((val, idx) =>
+																			idx === i &&
+																			'amount' in val &&
+																			'receiver' in val
+																				? {
+																						...val,
+																						amount:
+																							e.target.value === ''
+																								? ''
+																								: Number(e.target.value),
+																					}
+																				: val,
+																		),
+																	)
+																}
+																placeholder="0.00"
+																min="0"
+																step="0.01"
+															/>
+														</div>
+														<div className="sm:col-span-2">
+															<Label className="text-xs text-muted-foreground">
+																Receiver Address{' '}
+																<span className="text-destructive">*</span>
+															</Label>
+															<Input
+																value={m.receiver}
+																onChange={(e) =>
+																	setMilestones((prev) =>
+																		prev.map((val, idx) =>
+																			idx === i &&
+																			'amount' in val &&
+																			'receiver' in val
+																				? {
+																						...val,
+																						receiver: e.target.value,
+																					}
+																				: val,
+																		),
+																	)
+																}
+																placeholder="Enter Stellar address"
+															/>
+														</div>
+													</div>
+												</div>
+											)
+										}
+									}
+									// Single release milestone
+									return (
 									<div key={m.id} className="flex gap-2 items-center">
 										<Input
 											value={m.description}
@@ -549,7 +851,8 @@ export function EscrowAdminPanel({
 											<Trash2 className="w-4 h-4" />
 										</Button>
 									</div>
-								))}
+									)
+								})}
 							</div>
 						</div>
 

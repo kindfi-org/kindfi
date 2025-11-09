@@ -203,7 +203,7 @@
         "@tiptap/pm": "^3.0.9",
         "@tiptap/react": "^3.0.9",
         "@tiptap/starter-kit": "^3.0.9",
-        "@trustless-work/escrow": "^3.0.0",
+        "@trustless-work/escrow": "^3.0.2",
         "@types/web-push": "^3.6.4",
         "@upstash/redis": "^1.34.4",
         "axios": "^1.13.2",
@@ -1580,7 +1580,7 @@
 
     "@trezor/websocket-client": ["@trezor/websocket-client@1.2.4", "", { "dependencies": { "@trezor/utils": "9.4.4", "ws": "^8.18.0" }, "peerDependencies": { "tslib": "^2.6.2" } }, "sha512-UgU31gFX8gY0abeI5DjRVnH4RfbXqHcOb019ogkR51KlfjkiWXTvUWKRLLqwslWiUIMEAI3ZFeXQds84b7Uw/Q=="],
 
-    "@trustless-work/escrow": ["@trustless-work/escrow@3.0.0", "", { "dependencies": { "axios": "^1.9.0" }, "peerDependencies": { "react": ">=18.0.0 <20.0.0", "react-dom": ">=18.0.0 <20.0.0" } }, "sha512-Lpg0zSXkrBU7fskdNPN1v624bTJG/OqbZ0ElK8NsjgJ9CnKg6UhbnZ7qbuqZEGNqQVTl//WIRlI4ADzwYtxUbg=="],
+    "@trustless-work/escrow": ["@trustless-work/escrow@3.0.2", "", { "dependencies": { "axios": "^1.9.0" }, "peerDependencies": { "react": ">=18.0.0 <20.0.0", "react-dom": ">=18.0.0 <20.0.0" } }, "sha512-mM28WKeFgG/y6WlHBIqrLotviCyXmVZyAcLYkAMUkppuu01XTAHX39cRkOMY9cl2GuhPn/JO+3Ka2c2o6IkNuw=="],
 
     "@tsconfig/node10": ["@tsconfig/node10@1.0.11", "", {}, "sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw=="],
 
@@ -4853,8 +4853,6 @@
     "@trezor/utxo-lib/bn.js": ["bn.js@5.2.2", "", {}, "sha512-v2YAxEmKaBLahNwE1mjp4WON6huMNeuDvagFZW+ASCuA/ku0bXR9hSMw0XpiqMoA3+rmnyck/tPRSFQkoC9Cuw=="],
 
     "@trezor/websocket-client/@trezor/utils": ["@trezor/utils@9.4.4", "", { "dependencies": { "bignumber.js": "^9.3.1" }, "peerDependencies": { "tslib": "^2.6.2" } }, "sha512-08ciafbBqhApn58q3KkewdLQ3dCA71MsK/BOUfD43EB2GpB420zzky7REilXhOONc3giD0fBbTG3Zdt3HNL0/Q=="],
-
-    "@trustless-work/escrow/axios": ["axios@1.12.2", "", { "dependencies": { "follow-redirects": "^1.15.6", "form-data": "^4.0.4", "proxy-from-env": "^1.1.0" } }, "sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw=="],
 
     "@types/bn.js/@types/node": ["@types/node@22.18.12", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-BICHQ67iqxQGFSzfCFTT7MRQ5XcBjG5aeKh5Ok38UBbPe5fxTyE+aHFxwVrGyr8GNlqFMLKD1D3P2K/1ks8tog=="],
 

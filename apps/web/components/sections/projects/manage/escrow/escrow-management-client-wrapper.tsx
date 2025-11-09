@@ -3,9 +3,9 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { notFound } from 'next/navigation'
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
-import { EscrowAdminPanel } from './escrow-admin-panel'
+import { EscrowManagementPanel } from './escrow-management-panel'
 
-export function EscrowAdminClientWrapper({
+export function EscrowManagementClientWrapper({
 	projectSlug,
 }: {
 	projectSlug: string
@@ -18,12 +18,24 @@ export function EscrowAdminClientWrapper({
 
 	if (error || !project) notFound()
 
+	if (!project.escrowContractAddress) {
+		return (
+			<div className="space-y-4 rounded-lg border p-6">
+				<h2 className="text-xl font-semibold">No Escrow Found</h2>
+				<p className="text-sm text-muted-foreground">
+					This project doesn't have an escrow contract yet. Please create one
+					from the settings page.
+				</p>
+			</div>
+		)
+	}
+
 	return (
-		<EscrowAdminPanel
+		<EscrowManagementPanel
 			projectId={project.id}
-			projectSlug={projectSlug}
 			escrowContractAddress={project.escrowContractAddress}
 			escrowType={project.escrowType}
 		/>
 	)
 }
+
