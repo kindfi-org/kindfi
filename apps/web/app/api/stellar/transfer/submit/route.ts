@@ -1,3 +1,4 @@
+import { appEnvConfig } from '@packages/lib/config'
 import { TransactionBuilder } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -23,11 +24,14 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Initialize service
+		// Get configuration
+		const config = appEnvConfig('web')
+
+		// Initialize service with proper config
 		const txService = new SmartWalletTransactionService(
-			process.env.STELLAR_NETWORK_PASSPHRASE,
-			process.env.STELLAR_RPC_URL,
-			process.env.STELLAR_FUNDING_SECRET_KEY,
+			config.stellar.networkPassphrase,
+			config.stellar.rpcUrl,
+			config.stellar.fundingAccount,
 		)
 
 		// TODO: Assemble transaction with WebAuthn signature
@@ -35,8 +39,7 @@ export async function POST(req: NextRequest) {
 		// In production, implement proper signature verification and assembly
 		const parsedTx = TransactionBuilder.fromXDR(
 			transactionXDR,
-			process.env.STELLAR_NETWORK_PASSPHRASE ||
-				'Test SDF Network ; September 2015',
+			config.stellar.networkPassphrase,
 		)
 
 		// Type guard: ensure we have a regular Transaction, not a FeeBumpTransaction

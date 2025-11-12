@@ -35,10 +35,53 @@ export function SmartWalletTransferDemo() {
 		asset: 'native',
 	})
 	const [isLoading, setIsLoading] = useState(false)
+	const [isFunding, setIsFunding] = useState(false)
 	const [balance, setBalance] = useState<string | null>(null)
 	const [smartWalletAddress] = useState<string>(
 		session?.device?.address || session?.user.device?.address || '',
 	)
+
+	/**
+	 * Fund smart wallet with testnet XLM
+	 */
+	const fundWallet = async (amount = '10') => {
+		try {
+			setIsFunding(true)
+
+			const response = await fetch('/api/stellar/faucet', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					address: smartWalletAddress,
+					amount,
+				}),
+			})
+
+			if (!response.ok) {
+				const errorData = await response.json()
+				throw new Error(errorData.details || 'Failed to fund wallet')
+			}
+
+			const result = await response.json()
+
+			toast.success(`Wallet funded successfully!`, {
+				description: `Added ${result.data.amount} XLM to your wallet`,
+				duration: 5000,
+			})
+
+			// Refresh balance after funding
+			await fetchBalance()
+		} catch (error) {
+			console.error('Error funding wallet:', error)
+			toast.error(
+				error instanceof Error ? error.message : 'Failed to fund wallet',
+			)
+		} finally {
+			setIsFunding(false)
+		}
+	}
 
 	/**
 	 * Fetch wallet balances
@@ -47,8 +90,7 @@ export function SmartWalletTransferDemo() {
 		try {
 			setIsLoading(true)
 			const response = await fetch(
-				`/api/stellar/balances/CAAA322AAKGBZRQ5JHSROZ742VCL3ZLBP54LJBN5UVVJCZ52SR7IH6IT`,
-				// `/api/stellar/balances/${smartWalletAddress}`,
+				`/api/stellar/balances/${smartWalletAddress}`,
 			)
 
 			if (!response.ok) {
@@ -212,7 +254,7 @@ export function SmartWalletTransferDemo() {
 						<div className="text-xs font-mono break-all text-muted-foreground">
 							{smartWalletAddress}
 						</div>
-						<div className="mt-2 flex items-center gap-2">
+						<div className="mt-3 flex items-center gap-2 flex-wrap">
 							<Button
 								size="sm"
 								variant="outline"
@@ -221,8 +263,18 @@ export function SmartWalletTransferDemo() {
 							>
 								{isLoading ? 'Loading...' : 'Check Balance'}
 							</Button>
+							<Button
+								size="sm"
+								variant="secondary"
+								onClick={() => fundWallet('10')}
+								disabled={isFunding}
+							>
+								{isFunding ? 'Funding...' : '💰 Fund Wallet (10 XLM)'}
+							</Button>
 							{balance && (
-								<span className="text-sm font-medium">{balance} XLM</span>
+								<span className="text-sm font-medium bg-green-50 dark:bg-green-950 px-3 py-1 rounded-md">
+									{balance} XLM
+								</span>
 							)}
 						</div>
 					</div>
@@ -290,6 +342,18 @@ export function SmartWalletTransferDemo() {
 						>
 							{isLoading ? 'Preparing...' : 'Prepare Transfer'}
 						</Button>
+					</div>
+
+					{/* Faucet Info */}
+					<div className="rounded-lg bg-amber-50 dark:bg-amber-950 p-4 text-sm">
+						<div className="font-medium mb-1 flex items-center gap-2">
+							💰 Testnet Faucet
+						</div>
+						<div className="text-muted-foreground">
+							Your smart wallet needs XLM to pay for transactions. Use the
+							"Fund Wallet" button to get testnet XLM for testing. This only
+							works on Stellar Testnet.
+						</div>
 					</div>
 
 					{/* Info Box */}

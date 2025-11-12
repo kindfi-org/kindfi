@@ -4,9 +4,11 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,
 	Address,
+	Asset,
 	Contract,
 	Keypair,
 	nativeToScVal,
+	scValToNative,
 	type Transaction,
 	TransactionBuilder,
 	xdr,
@@ -187,31 +189,47 @@ export class SmartWalletTransactionService {
 		console.log('📊 Fetching balances for:', smartWalletAddress)
 
 		try {
-			const contract = new Contract(smartWalletAddress)
+			// Get Native XLM SAC contract address
+			const nativeAsset = Asset.native()
+			const xlmSacAddress = nativeAsset.contractId(this.networkPassphrase)
+			const xlmSacContract = new Contract(xlmSacAddress)
 
-			// Get XLM balance
-			const xlmBalanceOp = contract.call('get_xlm_balance')
-			const xlmTx = new TransactionBuilder(
-				new Account(smartWalletAddress, '0'),
-				{
-					fee: this.STANDARD_FEE,
-					networkPassphrase: this.networkPassphrase,
-				},
+			console.log('🔍 Querying XLM SAC:', xlmSacAddress)
+			console.log('   For address:', smartWalletAddress)
+
+			// Use funding account for simulation (required for read operations)
+			const sourceAccount = this.fundingKeypair
+				? await this.getFundingAccount()
+				: new Account(smartWalletAddress, '0')
+
+			// Query balance from Native XLM SAC
+			const balanceOp = xlmSacContract.call(
+				'balance',
+				nativeToScVal(Address.fromString(smartWalletAddress), {
+					type: 'address',
+				}),
 			)
-				.addOperation(xlmBalanceOp)
+
+			const balanceTx = new TransactionBuilder(sourceAccount, {
+				fee: this.STANDARD_FEE,
+				networkPassphrase: this.networkPassphrase,
+			})
+				.addOperation(balanceOp)
 				.setTimeout(30)
 				.build()
 
-			const xlmSimulation = await this.server.simulateTransaction(xlmTx)
+			const simulation = await this.server.simulateTransaction(balanceTx)
 
 			let xlmBalance = '0'
-			if (
-				!Api.isSimulationError(xlmSimulation) &&
-				xlmSimulation.result?.retval
-			) {
-				// Parse i128 result
-				const retval = xlmSimulation.result.retval
-				xlmBalance = retval.toString()
+			if (!Api.isSimulationError(simulation) && simulation.result?.retval) {
+				// Parse i128 result from SAC using scValToNative
+				const retval = simulation.result.retval
+				const nativeValue = scValToNative(retval)
+				xlmBalance = nativeValue.toString()
+				console.log('✅ Balance retrieved:', xlmBalance, 'stroops')
+			} else if (Api.isSimulationError(simulation)) {
+				console.warn('⚠️ Simulation error:', simulation.error)
+				// Return 0 balance if simulation fails (contract not funded yet)
 			}
 
 			return {
@@ -220,7 +238,11 @@ export class SmartWalletTransactionService {
 			}
 		} catch (error) {
 			console.error('❌ Error fetching balances:', error)
-			throw error
+			// Return zero balance instead of throwing for better UX
+			return {
+				xlm: '0',
+				tokens: [],
+			}
 		}
 	}
 

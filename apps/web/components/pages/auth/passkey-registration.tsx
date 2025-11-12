@@ -73,7 +73,9 @@ export function PasskeyRegistrationComponent() {
 			deviceData,
 		})
 		if (!regSuccess || !userEmail || !userId || !deviceData) {
-			router.push('/sign-in')
+			if (regSuccess && !deviceData) {
+				router.push('/sign-in')
+			}
 			return () => {}
 		}
 
