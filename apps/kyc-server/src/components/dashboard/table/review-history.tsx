@@ -1,7 +1,10 @@
 import { ClockIcon, LoaderIcon } from 'lucide-react'
 
 import { Badge } from '~/components/base/badge'
+import { Label } from '~/components/base/label'
+import { STATUS_OPTIONS } from '~/lib/constants/dashboard'
 import type { KycReview } from '~/lib/types/dashboard'
+import { cn } from '~/lib/utils'
 
 interface ReviewHistoryProps {
 	isLoading: boolean
@@ -38,54 +41,71 @@ export function ReviewHistory({ isLoading, reviews }: ReviewHistoryProps) {
 				</div>
 			) : (
 				<div className="space-y-4">
-					{reviews.map((review) => (
-						<article
-							key={review.id}
-							className="rounded-lg border p-4 space-y-3"
-						>
-							<div className="flex items-center justify-between">
-								<Badge
-									variant="outline"
-									className={
-										review.decision === 'approved'
-											? 'text-green-600'
-											: 'text-red-600'
-									}
-								>
-									{review.decision.charAt(0).toUpperCase() +
-										review.decision.slice(1)}
-								</Badge>
-								<time
-									className="text-xs text-muted-foreground"
-									dateTime={review.created_at}
-								>
-									{new Date(review.created_at).toLocaleDateString()}
-								</time>
-							</div>
-							<div className="space-y-2">
-								<div>
-									<p className="text-xs font-medium text-muted-foreground m-0">
-										Reviewer
-									</p>
-									<p className="text-sm">{review.reviewer_id}</p>
+					{reviews.length ? (
+						reviews.map((review) => (
+							<article
+								key={review.id}
+								className="rounded-lg border p-4 space-y-3"
+							>
+								<div className="flex items-center justify-between">
+									{review.status && (
+										<Badge
+											variant="outline"
+											className={cn(
+												'text-sm inline-flex items-center gap-1',
+												STATUS_OPTIONS[review.status].color,
+												STATUS_OPTIONS[review.status].borderColor,
+												STATUS_OPTIONS[review.status].bgColor,
+											)}
+										>
+											{(() => {
+												const Icon = STATUS_OPTIONS[review.status].icon
+												return (
+													<Icon
+														className="inline mr-1 size-4 align-text-bottom"
+														aria-hidden="true"
+													/>
+												)
+											})()}
+											{STATUS_OPTIONS[review.status].label}
+										</Badge>
+									)}
+									<time
+										className="text-xs text-muted-foreground"
+										dateTime={review.createdAt}
+									>
+										{new Intl.DateTimeFormat(undefined, {
+											year: 'numeric',
+											month: 'short',
+											day: 'numeric',
+											hour: '2-digit',
+											minute: '2-digit',
+										}).format(new Date(review.createdAt))}
+									</time>
 								</div>
+
 								<div>
-									<p className="text-xs font-medium text-muted-foreground m-0">
+									<p className="text-xs text-muted-foreground m-0">Reviewer</p>
+									<p className="text-sm font-medium">
+										{review.reviewerId || 'KindFi Admins'}
+									</p>
+								</div>
+
+								<div className="space-y-2">
+									<Label className="text-xs text-muted-foreground m-0">
 										Review Notes
+									</Label>
+									<p className="text-sm font-medium">
+										{review.notes || 'No additional notes provided'}
 									</p>
-									<p className="text-sm">{review.review_notes}</p>
 								</div>
-								{review.additional_notes && (
-									<div>
-										<p className="text-xs font-medium text-muted-foreground m-0">
-											Additional Notes
-										</p>
-										<p className="text-sm">{review.additional_notes}</p>
-									</div>
-								)}
-							</div>
-						</article>
-					))}
+							</article>
+						))
+					) : (
+						<div className="text-center text-muted-foreground py-8">
+							No previous reviews found.
+						</div>
+					)}
 				</div>
 			)}
 		</section>

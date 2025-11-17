@@ -100,7 +100,11 @@ export function PasskeyRegistrationComponent() {
 			userId,
 			deviceData,
 		})
-		if (!regSuccess || !userEmail || !userId || !deviceData) return
+
+		if (!regSuccess || !userEmail || !userId || !deviceData) {
+			router.push('/sign-in')
+			return () => {}
+		}
 
 		const timeout = setTimeout(() => {
 			handleFinalize()

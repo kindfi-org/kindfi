@@ -23,7 +23,7 @@ function getClientFilename(): string {
 	return 'client.js'
 }
 
-export default function Home({ message }: HomeProps) {
+export default function Home({ message, currentPath }: HomeProps) {
 	// Get the client filename
 	const clientJs = getClientFilename()
 
@@ -40,8 +40,7 @@ export default function Home({ message }: HomeProps) {
 				{/* <h1>Kindfi KYC Server HOM</h1> */}
 
 				{/** biome-ignore lint/correctness/useUniqueElementIds: <explanation> */}
-				<div id="root">
-					{/* <Navigation currentPath={currentPath} /> */}
+				<div id="root" data-path={currentPath}>
 					<div className="card">
 						{typeof message === 'string' ? <p>{message}</p> : message}
 					</div>

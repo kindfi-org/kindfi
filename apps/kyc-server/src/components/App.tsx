@@ -1,23 +1,24 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
+import { ToastProvider, ToastViewport } from '~/components/base/toast'
 
 export function App() {
 	const location = useLocation()
 
 	return (
-		<>
+		<ToastProvider>
 			<nav>
 				<ul>
 					<li>
 						<Link to="/" className={location.pathname === '/' ? 'active' : ''}>
-							Home
+							Dashboard
 						</Link>
 					</li>
 					<li>
 						<Link
-							to="/react"
-							className={location.pathname === '/react' ? 'active' : ''}
+							to="/users"
+							className={location.pathname === '/users' ? 'active' : ''}
 						>
-							React Demo
+							Users
 						</Link>
 					</li>
 					<li>
@@ -25,12 +26,21 @@ export function App() {
 							to="/websocket"
 							className={location.pathname === '/websocket' ? 'active' : ''}
 						>
-							WebSocket Demo
+							WS Health
+						</Link>
+					</li>
+					<li>
+						<Link
+							to="/about"
+							className={location.pathname === '/about' ? 'active' : ''}
+						>
+							About
 						</Link>
 					</li>
 				</ul>
 			</nav>
 			<Outlet />
-		</>
+			<ToastViewport />
+		</ToastProvider>
 	)
 }

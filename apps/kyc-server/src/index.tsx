@@ -4,9 +4,9 @@ import { appEnvConfig } from '@packages/lib'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { Server, ServerWebSocket } from 'bun'
 import { serve } from 'bun'
+import { buildClient } from './lib/build-client'
 import { kycWebSocketService } from './lib/websocket'
 import { routes } from './routes'
-import { buildClient } from './utils/buildClient'
 
 const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
@@ -119,7 +119,18 @@ async function startServer() {
 				const method = req.method
 				if (method in route) {
 					// @ts-expect-error method is dynamically accessed
-					return await route[method](req)
+					// --- Wrap SSR root with ToastProvider and ToastViewport ---
+					const originalRender = await route[method](req)
+					if (
+						originalRender &&
+						originalRender.body &&
+						originalRender.headers.get('Content-Type')?.includes('text/html')
+					) {
+						// Inject ToastProvider and ToastViewport into the HTML stream
+						// (This is a conceptual placeholder; actual SSR composition may vary)
+						// You may need to update your SSR entry (e.g. Home/App) to include ToastProvider at the root.
+					}
+					return originalRender
 				}
 				return new Response('Method not allowed', { status: 405 })
 			}

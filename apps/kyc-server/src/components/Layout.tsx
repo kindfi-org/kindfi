@@ -8,11 +8,11 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
 	return (
-		<div className="grid min-h-screen w-full">
+		<div className="grid min-h-screen w-full bg-background text-foreground">
 			{/* Main content */}
 			<div className="flex flex-col">
 				<Header />
-				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
 					<Suspense fallback={<DashboardSkeleton />}>{children}</Suspense>
 				</main>
 			</div>
