@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
 				port: appConfig.database.port || '54321',
 				pathname: '/storage/v1/object/public/project_thumbnails/**',
 			},
+			{
+				protocol: 'https',
+				hostname: '*.supabase.co',
+				pathname: '/storage/v1/object/public/**',
+			},
 		],
 	},
 	async headers() {

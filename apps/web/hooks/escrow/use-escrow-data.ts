@@ -61,30 +61,34 @@ export function useEscrowData({
 			}
 
 			// Convert Firebase timestamp format to Date if needed
-			if (
-				escrowData.createdAt &&
-				typeof escrowData.createdAt === 'object' &&
-				'_seconds' in escrowData.createdAt
-			) {
-				escrowData.createdAt = new Date(
-					(escrowData.createdAt as { _seconds: number; _nanoseconds?: number })
-						._seconds * 1000,
-				) as unknown as Date
-			}
+			const processedEscrowData = {
+				...escrowData,
+				createdAt:
+					escrowData.createdAt &&
+					typeof escrowData.createdAt === 'object' &&
+					'_seconds' in escrowData.createdAt
+						? (new Date(
+								(escrowData.createdAt as {
+									_seconds: number
+									_nanoseconds?: number
+								})._seconds * 1000,
+							) as unknown as Date)
+						: escrowData.createdAt,
+				updatedAt:
+					escrowData.updatedAt &&
+					typeof escrowData.updatedAt === 'object' &&
+					'_seconds' in escrowData.updatedAt
+						? (new Date(
+								(escrowData.updatedAt as {
+									_seconds: number
+									_nanoseconds?: number
+								})._seconds * 1000,
+							) as unknown as Date)
+						: escrowData.updatedAt,
+			} as unknown as GetEscrowsFromIndexerResponse
 
-			if (
-				escrowData.updatedAt &&
-				typeof escrowData.updatedAt === 'object' &&
-				'_seconds' in escrowData.updatedAt
-			) {
-				escrowData.updatedAt = new Date(
-					(escrowData.updatedAt as { _seconds: number; _nanoseconds?: number })
-						._seconds * 1000,
-				) as unknown as Date
-			}
-
-			console.log('Processed escrow data:', escrowData)
-			setEscrowData(escrowData)
+			console.log('Processed escrow data:', processedEscrowData)
+			setEscrowData(processedEscrowData)
 		} catch (err) {
 			console.error('Failed to fetch escrow data:', err)
 			const errorMessage =
