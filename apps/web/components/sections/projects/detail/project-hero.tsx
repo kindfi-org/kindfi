@@ -10,6 +10,7 @@ import {
 	CountryFlag,
 } from '~/components/sections/projects/shared'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
+import { useProjectSupportersCount } from '~/hooks/projects/use-project-supporters-count'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
 
@@ -23,9 +24,18 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 		escrowType: project.escrowType,
 	})
 
+	const { supportersCount } = useProjectSupportersCount({
+		projectId: project.id,
+	})
+
 	const displayRaised = useMemo(
 		() => onChainRaised ?? project.raised,
 		[onChainRaised, project.raised],
+	)
+
+	const displaySupporters = useMemo(
+		() => supportersCount ?? project.investors,
+		[supportersCount, project.investors],
 	)
 
 	return (
@@ -92,7 +102,7 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 					<div className="p-4 text-center bg-gray-50 rounded-lg">
 						<p className="mb-1 text-sm text-muted-foreground">Supporters</p>
 						<p className="text-xl font-bold">
-							<AnimatedCounter value={project.investors} />
+							<AnimatedCounter value={displaySupporters} />
 						</p>
 					</div>
 					<div className="p-4 text-center bg-gray-50 rounded-lg">

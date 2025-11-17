@@ -5,7 +5,7 @@ import { CheckCircle, Shield, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { signOutAction } from '~/app/actions/auth'
 
 import { Button } from '~/components/base/button'
@@ -65,6 +65,34 @@ export function PasskeyRegistrationComponent() {
 	}
 
 	// Finalize after successful passkey registration: update profile and sign in via NextAuth
+	const handleFinalize = useCallback(async () => {
+		if (!regSuccess || !userEmail || !userId || !deviceData) return
+
+		try {
+			const supabase = createSupabaseBrowserClient()
+			// Update profile with richer info (e.g. display name). Ignore result errors silently.
+			await supabase
+				.from('profiles')
+				.update({
+					display_name: userEmail.split('@')[0],
+				})
+				.eq('next_auth_user_id', userId)
+			// Sign in through credentials provider once device/passkey ready
+			await signIn('credentials', {
+				redirect: false,
+				userId,
+				email: userEmail,
+				credentialId: deviceData?.credentialId || '',
+				pubKey: deviceData?.publicKey || '',
+				address: deviceData?.address || '',
+			})
+			router.push('/profile')
+		} catch (e) {
+			console.error('Finalize passkey registration error', e)
+			router.push('/sign-in')
+		}
+	}, [regSuccess, userEmail, userId, deviceData, router])
+
 	useEffect(() => {
 		console.log('Passkey registration success effect triggered', {
 			regSuccess,
@@ -72,46 +100,20 @@ export function PasskeyRegistrationComponent() {
 			userId,
 			deviceData,
 		})
+
 		if (!regSuccess || !userEmail || !userId || !deviceData) {
 			router.push('/sign-in')
 			return () => {}
 		}
 
 		const timeout = setTimeout(() => {
-			finalize()
-			clearTimeout(timeout)
+			handleFinalize()
 		}, 1000)
-
-		async function finalize() {
-			try {
-				const supabase = createSupabaseBrowserClient()
-				// Update profile with richer info (e.g. display name). Ignore result errors silently.
-				await supabase
-					.from('profiles')
-					.update({
-						display_name: userEmail.split('@')[0],
-					})
-					.eq('next_auth_user_id', userId)
-				// Sign in through credentials provider once device/passkey ready
-				await signIn('credentials', {
-					redirect: false,
-					userId,
-					email: userEmail,
-					credentialId: deviceData?.credentialId || '',
-					pubKey: deviceData?.publicKey || '',
-					address: deviceData?.address || '',
-				})
-				router.push('/profile')
-			} catch (e) {
-				console.error('Finalize passkey registration error', e)
-				router.push('/sign-in')
-			}
-		}
 
 		return () => {
 			clearTimeout(timeout)
 		}
-	}, [regSuccess, userEmail, userId, router, deviceData])
+	}, [regSuccess, userEmail, userId, deviceData, handleFinalize])
 
 	if (!isWebAuthnSupported) {
 		return (
@@ -157,9 +159,17 @@ export function PasskeyRegistrationComponent() {
 					</CardHeader>
 					<CardContent className="text-center">
 						<p className="text-sm text-muted-foreground">
-							Redirecting you to your new profile...
+							Redirecting you to sign in
 						</p>
 					</CardContent>
+					<CardFooter>
+						<Button
+							onClick={handleFinalize}
+							className="w-full gradient-btn text-white"
+						>
+							Continue to Sign In
+						</Button>
+					</CardFooter>
 				</Card>
 			</AuthLayout>
 		)

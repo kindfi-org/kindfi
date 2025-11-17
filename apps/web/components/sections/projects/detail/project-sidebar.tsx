@@ -20,11 +20,15 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { progressBarAnimation } from '~/lib/constants/animations'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
+import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
+import Link from 'next/link'
+import { ExternalLink } from 'lucide-react'
 
 interface ProjectSidebarProps {
 	project: ProjectDetail
@@ -44,6 +48,15 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 	const [onChainRaised, setOnChainRaised] = useState<number | null>(null)
 	const [isFetchingBalance, setIsFetchingBalance] = useState(false)
+
+	// Fetch escrow data to get the correct escrow type
+	const { escrowData } = useEscrowData({
+		escrowContractAddress: project.escrowContractAddress || '',
+		escrowType: project.escrowType,
+	})
+
+	// Determine the correct escrow type - prefer from API, fallback to project prop, then default
+	const effectiveEscrowType = escrowData?.type || project.escrowType || 'multi-release'
 
 	const progressPercentage = useMemo(() => {
 		const raised = onChainRaised ?? project.raised
@@ -90,7 +103,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			setIsFetchingBalance(true)
 			const balances = await getMultipleBalances(
 				{ addresses: [project.escrowContractAddress] },
-				(project.escrowType as EscrowType) || 'single-release',
+				effectiveEscrowType,
 			)
 			const first = balances?.[0]
 			if (first) setOnChainRaised(first.balance)
@@ -99,7 +112,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		} finally {
 			setIsFetchingBalance(false)
 		}
-	}, [getMultipleBalances, project.escrowContractAddress, project.escrowType])
+	}, [getMultipleBalances, project.escrowContractAddress, effectiveEscrowType])
 
 	useEffect(() => {
 		fetchEscrowBalance()
@@ -127,7 +140,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					contractId: project.escrowContractAddress,
 					signer: address,
 				},
-				(project.escrowType as EscrowType) || 'single-release',
+				effectiveEscrowType,
 			)
 
 			if (!fundResponse.unsignedTransaction) {
@@ -261,9 +274,40 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 				<div className="p-3 my-4 text-sm text-amber-900 bg-amber-50 rounded-md border border-amber-300">
 					Donating without logging in means you will miss out on features like
-					reputation, contributor NFTs, and future perks. If that’s fine, you
+					reputation, contributor NFTs, and future perks. If that's fine, you
 					can still donate anonymously.
 				</div>
+
+				{project.escrowContractAddress && (
+					<div className="p-3 my-4 text-sm bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-900">
+						<div className="flex items-start justify-between gap-2">
+							<div className="flex-1">
+								<p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+									Escrow Contract
+								</p>
+								<p className="text-xs text-blue-800 dark:text-blue-200 mb-2">
+									All funds are secured in an on-chain escrow contract. You can
+									audit the contract on Stellar Explorer.
+								</p>
+							</div>
+							<Button
+								variant="ghost"
+								size="sm"
+								asChild
+								className="h-auto p-2 flex-shrink-0"
+							>
+								<Link
+									href={getStellarExplorerUrl(project.escrowContractAddress)}
+									target="_blank"
+									rel="noopener noreferrer"
+									title="View escrow contract on Stellar Explorer"
+								>
+									<ExternalLink className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+								</Link>
+							</Button>
+						</div>
+					</div>
+				)}
 
 				<div className="flex gap-4">
 					<Button
