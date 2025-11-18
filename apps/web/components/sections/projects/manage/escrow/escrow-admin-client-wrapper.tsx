@@ -21,6 +21,7 @@ export function EscrowAdminClientWrapper({
 	return (
 		<EscrowAdminPanel
 			projectId={project.id}
+			projectSlug={projectSlug}
 			escrowContractAddress={project.escrowContractAddress}
 			escrowType={project.escrowType}
 		/>

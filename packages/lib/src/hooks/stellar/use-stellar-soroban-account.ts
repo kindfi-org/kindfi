@@ -1,5 +1,7 @@
+'use client'
+
 import { debounce } from 'lodash'
-import type { User } from 'next-auth'
+import type { Session, User } from 'next-auth'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useStellarSignature } from './use-stellar-signature'
@@ -24,7 +26,7 @@ export interface StellarAccount {
  * Hook for managing Stellar Soroban accounts and contract interactions with Passkeys
  * Provides high-level operations for DeFi and smart contract interactions
  */
-export const useStellarSorobanAccount = (session?: User) => {
+export const useStellarSorobanAccount = (session?: Session | null) => {
 	const [account, setAccount] = useState<StellarAccount | null>(null)
 	const [isInitialized, setIsInitialized] = useState(false)
 	const [requestId, setRequestId] = useState<string | null>(null)
@@ -40,6 +42,9 @@ export const useStellarSorobanAccount = (session?: User) => {
 		onError: (error) => {
 			console.error('❌ Transaction failed:', error)
 		},
+		// Pass session directly to avoid useSession call inside useStellarSignature
+		// This prevents the SessionProvider requirement error
+		session: session ?? null,
 	})
 
 	/**
@@ -47,7 +52,7 @@ export const useStellarSorobanAccount = (session?: User) => {
 	 * This simulates the approval process - in production, this should only happen after KYC approval
 	 */
 	const initializeAccount = useCallback(async (): Promise<StellarAccount> => {
-		if (!session || !session?.device) {
+		if (!session?.user || !session?.user?.device) {
 			throw new Error('User not authenticated or no device available')
 		}
 
@@ -57,7 +62,7 @@ export const useStellarSorobanAccount = (session?: User) => {
 
 		try {
 			// Check if user already has a Stellar account
-			const existingAddress = session.device.address
+			const existingAddress = session.user.device.address
 
 			// User has an existing address, get account info
 			const accountInfo = await stellarSignature.getAccountInfo(existingAddress)
@@ -172,109 +177,10 @@ export const useStellarSorobanAccount = (session?: User) => {
 		[account?.contractId, stellarSignature],
 	)
 
-	/**
-	 * Transfer XLM to another address
-	 */
-	const transferXLM = useCallback(
-		async (destination: string, amount: string) => {
-			if (!account?.contractId) {
-				throw new Error('Account not initialized')
-			}
-
-			const operation = {
-				type: 'payment',
-				destination,
-				amount,
-				asset: 'native', // XLM
-			}
-
-			return await stellarSignature.signTransaction(
-				operation,
-				account.contractId,
-			)
-		},
-		[account?.contractId, stellarSignature],
-	)
-
-	/**
-	 * Transfer a Stellar asset to another address
-	 */
-	const transferAsset = useCallback(
-		async (
-			destination: string,
-			amount: string,
-			assetCode: string,
-			assetIssuer: string,
-		) => {
-			if (!account?.contractId) {
-				throw new Error('Account not initialized')
-			}
-
-			const operation = {
-				type: 'payment',
-				destination,
-				amount,
-				asset: `${assetCode}:${assetIssuer}`,
-			}
-
-			return await stellarSignature.signTransaction(
-				operation,
-				account.contractId,
-			)
-		},
-		[account?.contractId, stellarSignature],
-	)
-
-	/**
-	 * Create a trustline for a Stellar asset
-	 */
-	const createTrustline = useCallback(
-		async (assetCode: string, assetIssuer: string, limit?: string) => {
-			if (!account?.contractId) {
-				throw new Error('Account not initialized')
-			}
-
-			const operation = {
-				type: 'change_trust',
-				asset: `${assetCode}:${assetIssuer}`,
-				limit: limit || undefined,
-			}
-
-			return await stellarSignature.signTransaction(
-				operation,
-				account.contractId,
-			)
-		},
-		[account?.contractId, stellarSignature],
-	)
-
-	/**
-	 * Deploy a new Soroban smart contract
-	 */
-	const deployContract = useCallback(
-		async (contractWasm: Uint8Array, initArgs: unknown[] = []) => {
-			if (!account?.contractId) {
-				throw new Error('Account not initialized')
-			}
-
-			const operation = {
-				type: 'deploy_contract',
-				wasmBytes: Array.from(contractWasm),
-				initArgs,
-			}
-
-			return await stellarSignature.signTransaction(
-				operation,
-				account.contractId,
-			)
-		},
-		[account?.contractId, stellarSignature],
-	)
-
 	// Auto-initialize account when session is available
 	useEffect(() => {
 		if (
-			session?.device &&
+			session?.user?.device &&
 			!isInitialized &&
 			!stellarSignature.isLoading &&
 			!requestId
@@ -302,10 +208,6 @@ export const useStellarSorobanAccount = (session?: User) => {
 
 		// Transaction operations
 		invokeContract,
-		transferXLM,
-		transferAsset,
-		createTrustline,
-		deployContract,
 
 		// Low-level access
 		signTransaction: stellarSignature.signTransaction,

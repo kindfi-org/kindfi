@@ -2,9 +2,9 @@ import type { ReactNode } from 'react'
 import { renderToReadableStream } from 'react-dom/server'
 import { routes } from '../components/Navigation'
 import { corsConfig } from '../config/cors'
+import { contentMap } from '../lib/content-map'
 import { withCORS } from '../middleware/cors'
-import Home from '../pages/Home'
-import { contentMap } from '../utils/contentMap'
+import Home from '../pages/root'
 
 // Create a configured CORS handler
 const withConfiguredCORS = (

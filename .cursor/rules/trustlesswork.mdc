@@ -1,5 +1,5 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
 You are a **Senior Front-End Developer** and **Expert** in:
 - ReactJS, NextJS, JavaScript, TypeScript

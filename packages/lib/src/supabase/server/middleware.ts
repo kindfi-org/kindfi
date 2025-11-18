@@ -29,13 +29,18 @@ export const updateSession = async (
 						return cookies.getAll()
 					},
 					setAll(cookiesToSet) {
-						cookiesToSet.forEach(({ name, value }) => cookies.set(name, value))
+						// First, set cookies in the request
+						for (const { name, value } of cookiesToSet) {
+							cookies.set(name, value)
+						}
+						// Create new response
 						response = NextResponse.next({
 							request,
 						})
-						cookiesToSet.forEach(({ name, value, options }) =>
-							response.cookies.set(name, value, options),
-						)
+						// Then set cookies in the response
+						for (const { name, value, options } of cookiesToSet) {
+							response.cookies.set(name, value, options)
+						}
 					},
 				},
 			},

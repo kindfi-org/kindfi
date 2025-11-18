@@ -50,13 +50,22 @@ export async function registerAccountOnChain(
 		// Create contract instance
 		const contract = new Contract(controllerAddress)
 
+		// Validate and convert contexts to Address ScVals
+		const contextAddresses = contexts.map((ctx) => {
+			try {
+				return Address.fromString(ctx).toScVal()
+			} catch (error) {
+				throw new Error(
+					`Invalid context address format: ${ctx}. Expected Stellar contract address (C...)`,
+				)
+			}
+		})
+
 		// Build add_account operation
 		const operation = contract.call(
 			'add_account',
 			Address.fromString(contractId).toScVal(),
-			xdr.ScVal.scvVec(
-				contexts.map((ctx) => Address.fromString(ctx).toScVal()),
-			),
+			xdr.ScVal.scvVec(contextAddresses),
 		)
 
 		// Build transaction

@@ -1,7 +1,11 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
-import { development, TrustlessWorkConfig } from '@trustless-work/escrow'
+import {
+	development,
+	mainNet,
+	TrustlessWorkConfig,
+} from '@trustless-work/escrow'
 import type { Session } from 'next-auth'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
@@ -70,11 +74,11 @@ export function Providers({ children, initSession }: ProvidersProps) {
 		}
 	}, [])
 
-	const trustlessBaseUrl = development
-	// process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
-	// process.env.NODE_ENV === 'production'
-	// 	? mainNet
-	// 	: development
+	const trustlessBaseUrl =
+		process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
+		process.env.NODE_ENV === 'production'
+			? mainNet
+			: development
 
 	return (
 		<ReactQueryClientProvider>
@@ -85,7 +89,7 @@ export function Providers({ children, initSession }: ProvidersProps) {
 					forcedTheme="light"
 					disableTransitionOnChange
 				>
-					<SessionProvider>
+					<SessionProvider session={initSession}>
 						<AuthProvider initSession={initSession}>
 							<WaitlistProvider>
 								<TrustlessWorkConfig

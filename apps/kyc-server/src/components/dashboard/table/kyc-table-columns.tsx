@@ -1,22 +1,19 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import { MoreVerticalIcon, ShieldCheckIcon, UserCheckIcon } from 'lucide-react'
+import { ShieldCheckIcon, UserCheckIcon } from 'lucide-react'
 
 import { Badge } from '~/components/base/badge'
-import { Button } from '~/components/base/button'
 import { Checkbox } from '~/components/base/checkbox'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from '~/components/base/dropdown-menu'
 import { DragHandle } from '~/components/dashboard/table/drag-handle'
+import { KycActionsMenu } from '~/components/dashboard/table/kyc-actions-menu'
 import { KycDetailsSheet } from '~/components/dashboard/table/kyc-details-sheet'
+import { getStatusColor, getStatusIcon } from '~/lib/table'
 import type { KycRecord } from '~/lib/types/dashboard'
-import { getStatusColor, getStatusIcon } from '~/utils/table'
 
-export const kycColumns: ColumnDef<KycRecord>[] = [
+// Create enhanced KYC table columns with actions support
+export const createKycTableColumns = (
+	onStatusUpdate?: () => void,
+	onReview?: (userId: string) => void,
+): ColumnDef<KycRecord>[] => [
 	{
 		id: 'drag',
 		header: () => null,
@@ -41,7 +38,7 @@ export const kycColumns: ColumnDef<KycRecord>[] = [
 				<Checkbox
 					checked={row.getIsSelected()}
 					onCheckedChange={(value) => row.toggleSelected(!!value)}
-					aria-label={`Select row for ${row.original.user_id}`}
+					aria-label={`Select row for ${row.original.userId}`}
 				/>
 			</div>
 		),
@@ -49,7 +46,7 @@ export const kycColumns: ColumnDef<KycRecord>[] = [
 		enableHiding: false,
 	},
 	{
-		accessorKey: 'user_id',
+		accessorKey: 'userId',
 		header: 'User ID',
 		cell: ({ row }) => {
 			return <KycDetailsSheet item={row.original} />
@@ -57,80 +54,116 @@ export const kycColumns: ColumnDef<KycRecord>[] = [
 		enableHiding: false,
 	},
 	{
-		accessorKey: 'status',
-		header: 'Status',
+		accessorKey: 'displayName',
+		header: 'Name',
 		cell: ({ row }) => (
-			<Badge
-				variant="outline"
-				className={`flex gap-1 px-1.5 [&_svg]:size-3 ${getStatusColor(row.original.status)}`}
-			>
-				{getStatusIcon(row.original.status)}
-				{row.original.status.charAt(0).toUpperCase() +
-					row.original.status.slice(1)}
-			</Badge>
-		),
-	},
-	{
-		accessorKey: 'verification_level',
-		header: 'Verification Level',
-		cell: ({ row }) => (
-			<div className="w-32">
-				<Badge
-					variant="outline"
-					className={`px-1.5 ${row.original.verification_level === 'enhanced' ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
-				>
-					{row.original.verification_level === 'enhanced' ? (
-						<ShieldCheckIcon className="mr-1 size-3" aria-hidden="true" />
-					) : (
-						<UserCheckIcon className="mr-1 size-3" aria-hidden="true" />
-					)}
-					{row.original.verification_level.charAt(0).toUpperCase() +
-						row.original.verification_level.slice(1)}
-				</Badge>
+			<div className="flex items-center gap-2">
+				<UserCheckIcon className="size-4 text-muted-foreground" />
+				<span className="font-medium">
+					{row.original.displayName || row.original.email || 'No name'}
+				</span>
 			</div>
 		),
 	},
 	{
-		accessorKey: 'created_at',
+		accessorKey: 'email',
+		header: 'Email',
+		cell: ({ row }) => (
+			<div className="text-sm text-muted-foreground">
+				{row.original.email || 'No email'}
+			</div>
+		),
+	},
+	{
+		accessorKey: 'status',
+		header: 'Status',
+		cell: ({ row }) => {
+			const status = row.original.status
+			if (!status) {
+				return (
+					<Badge
+						variant="outline"
+						className="flex gap-1 px-1.5 text-muted-foreground"
+					>
+						<span>No KYC</span>
+					</Badge>
+				)
+			}
+			return (
+				<Badge
+					variant="outline"
+					className={`flex gap-1 px-1.5 [&_svg]:size-3 ${getStatusColor(status)}`}
+				>
+					{getStatusIcon(status)}
+					{status.charAt(0).toUpperCase() + status.slice(1)}
+				</Badge>
+			)
+		},
+	},
+	{
+		accessorKey: 'verificationLevel',
+		header: 'Verification Level',
+		cell: ({ row }) => {
+			const verificationLevel = row.original.verificationLevel
+			if (!verificationLevel) {
+				return (
+					<div className="w-32">
+						<Badge variant="outline" className="px-1.5 text-muted-foreground">
+							<span>N/A</span>
+						</Badge>
+					</div>
+				)
+			}
+			return (
+				<div className="w-32">
+					<Badge
+						variant="outline"
+						className={`px-1.5 ${verificationLevel === 'enhanced' ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
+					>
+						{verificationLevel === 'enhanced' ? (
+							<ShieldCheckIcon className="mr-1 size-3" aria-hidden="true" />
+						) : (
+							<UserCheckIcon className="mr-1 size-3" aria-hidden="true" />
+						)}
+						{verificationLevel.charAt(0).toUpperCase() +
+							verificationLevel.slice(1)}
+					</Badge>
+				</div>
+			)
+		},
+	},
+	{
+		accessorKey: 'createdAt',
 		header: 'Created',
 		cell: ({ row }) => (
 			<div className="text-sm text-muted-foreground">
-				{new Date(row.original.created_at).toLocaleDateString()}
+				{new Date(row.original.createdAt).toLocaleDateString()}
 			</div>
 		),
 	},
 	{
-		accessorKey: 'updated_at',
+		accessorKey: 'updatedAt',
 		header: 'Updated',
 		cell: ({ row }) => (
 			<div className="text-sm text-muted-foreground">
-				{new Date(row.original.updated_at).toLocaleDateString()}
+				{new Date(row.original.updatedAt).toLocaleDateString()}
 			</div>
 		),
 	},
 	{
 		id: 'actions',
 		cell: ({ row }) => (
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						variant="ghost"
-						className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-						size="icon"
-						aria-label={`Actions for ${row.original.user_id}`}
-					>
-						<MoreVerticalIcon className="size-4" aria-hidden="true" />
-						<span className="sr-only">Open menu</span>
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-32">
-					<DropdownMenuItem>Review</DropdownMenuItem>
-					<DropdownMenuItem>Approve</DropdownMenuItem>
-					<DropdownMenuItem>Reject</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem>View Details</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
+			<KycActionsMenu
+				record={row.original}
+				onStatusUpdate={onStatusUpdate}
+				onReview={onReview}
+			/>
 		),
 	},
 ]
+
+// Backward compatibility - export with the old name
+export const kycColumns = createKycTableColumns()
+
+// Export type for external use
+export type { KycRecord }

@@ -4,19 +4,16 @@ import { useEffect, useMemo, useState } from 'react'
 
 import type { ChartConfig } from '~/components/base/chart'
 import { useIsMobile } from '~/hooks/use-mobile'
+import { filterDataByTimeRange } from '~/lib/chart'
 import type { ChartDataPoint, TimeRange } from '~/lib/types/dashboard'
-import { filterDataByTimeRange } from '~/utils/chart'
 
 export const chartConfig = {
 	signups: {
-		label: 'New Signups',
-	},
-	basic: {
-		label: 'Basic KYC',
+		label: 'User Regs',
 		color: 'hsl(var(--chart-1))',
 	},
-	enhanced: {
-		label: 'Enhanced KYC',
+	kycStarts: {
+		label: 'KYC Init',
 		color: 'hsl(var(--chart-2))',
 	},
 } satisfies ChartConfig

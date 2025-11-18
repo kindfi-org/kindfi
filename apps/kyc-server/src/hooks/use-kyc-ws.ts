@@ -1,160 +1,135 @@
-import { appEnvConfig } from '@packages/lib'
-import type { AppEnvInterface } from '@packages/lib/types'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
-
-interface KYCUpdate {
-	type: 'kyc_update'
-	userId: string
-	status: string
-	timestamp: string
-}
-
-interface WebSocketError {
-	type: 'error'
-	message: string
-}
-
-type WebSocketMessage = KYCUpdate | WebSocketError
+import { type KYCUpdate, kycUpdateSchema } from '~/lib/validation/kyc-schemas'
 
 interface UseKYCWebSocketOptions {
 	userId?: string
 	onUpdate?: (update: KYCUpdate) => void
 	maxRetries?: number
-	initialRetryDelay?: number
-	connectionTimeout?: number
+	url?: string
 }
 
-const isValidKYCUpdate = (data: unknown): data is KYCUpdate => {
-	return (
-		typeof data === 'object' &&
-		data !== null &&
-		'type' in data &&
-		data.type === 'kyc_update' &&
-		'userId' in data &&
-		typeof data.userId === 'string' &&
-		'status' in data &&
-		typeof data.status === 'string' &&
-		'timestamp' in data &&
-		typeof data.timestamp === 'string'
-	)
+const isValidUpdate = (data: unknown): data is KYCUpdate => {
+	try {
+		kycUpdateSchema.parse(data)
+		return true
+	} catch {
+		return false
+	}
 }
 
 export function useKYCWebSocket({
 	userId,
 	onUpdate,
-	maxRetries = 5,
-	initialRetryDelay = 1000,
-	connectionTimeout = 10000,
+	maxRetries = 3,
+	url,
 }: UseKYCWebSocketOptions = {}) {
 	const [isConnected, setIsConnected] = useState(false)
-	const lastUpdateRef = useRef<KYCUpdate | null>(null)
+	const [lastUpdate, setLastUpdate] = useState<KYCUpdate | null>(null)
 	const wsRef = useRef<WebSocket | null>(null)
-	const retryCountRef = useRef(0)
-	const retryTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
-	const connectionTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 	const onUpdateRef = useRef(onUpdate)
+	const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+	const retryCount = useRef(0)
+	// Guard window access for SSR compatibility
+	const wsUrl =
+		url ||
+		(typeof window !== 'undefined' ? `ws://${window.location.host}/live` : '')
 
 	useEffect(() => {
 		onUpdateRef.current = onUpdate
 	}, [onUpdate])
 
-	const connect = useCallback(() => {
-		const protocol = appConfig.env.nodeEnv === 'production' ? 'wss' : 'ws'
-		const ws = new WebSocket(`${protocol}://${window.location.host}/live`)
-		wsRef.current = ws
+	useEffect(() => {
+		// Skip WebSocket connection during SSR
+		if (typeof window === 'undefined' || !wsUrl) return
 
-		connectionTimeoutRef.current = setTimeout(() => {
-			if (ws.readyState !== WebSocket.OPEN) {
-				console.log('WebSocket connection timed out')
-				ws.close()
-			}
-		}, connectionTimeout)
+		let mounted = true
 
-		ws.onopen = () => {
-			console.log('WebSocket connected')
-			setIsConnected(true)
-			retryCountRef.current = 0
-			clearTimeout(connectionTimeoutRef.current)
+		const connect = () => {
+			if (!mounted) return
 
-			if (userId) {
-				ws.send(JSON.stringify({ type: 'subscribe', userId }))
-			}
-		}
-
-		ws.onmessage = (event) => {
 			try {
-				const data = JSON.parse(event.data) as WebSocketMessage
+				const ws = new WebSocket(wsUrl)
+				wsRef.current = ws
 
-				if (isValidKYCUpdate(data)) {
-					lastUpdateRef.current = data
-					onUpdateRef.current?.(data)
-				} else if (
-					data &&
-					typeof data === 'object' &&
-					'type' in data &&
-					data.type === 'error'
-				) {
-					console.error('Server error:', (data as WebSocketError).message)
-				} else {
-					console.warn('Received unknown message format:', data)
+				ws.onopen = () => {
+					if (!mounted) return
+					console.log('WebSocket connected')
+					setIsConnected(true)
+					retryCount.current = 0
+				}
+
+				ws.onmessage = (event) => {
+					if (!mounted) return
+					try {
+						const data = JSON.parse(event.data)
+						if (isValidUpdate(data)) {
+							setLastUpdate(data)
+							onUpdateRef.current?.(data)
+						} else if (
+							data &&
+							typeof data === 'object' &&
+							'type' in data &&
+							data.type === 'error'
+						) {
+							console.error('WebSocket received error:', data)
+						}
+					} catch (err) {
+						console.error('WebSocket message parse failed:', err)
+					}
+				}
+
+				ws.onclose = () => {
+					if (!mounted) return
+					console.log('WebSocket disconnected')
+					setIsConnected(false)
+					wsRef.current = null
+
+					if (retryCount.current < maxRetries) {
+						retryTimeoutRef.current = setTimeout(() => {
+							retryCount.current++
+							connect()
+						}, 2000)
+					}
+				}
+
+				ws.onerror = (error) => {
+					console.error('WebSocket connection error:', error)
+					setIsConnected(false)
 				}
 			} catch (error) {
-				console.error('Error parsing WebSocket message:', error)
+				console.error('Failed to create WebSocket:', error)
+				setIsConnected(false)
 			}
 		}
 
-		ws.onclose = () => {
-			console.log('WebSocket disconnected')
-			setIsConnected(false)
-			clearTimeout(connectionTimeoutRef.current)
-
-			if (retryCountRef.current < maxRetries) {
-				const delay = initialRetryDelay * 2 ** retryCountRef.current
-				retryTimeoutRef.current = setTimeout(() => {
-					retryCountRef.current++
-					connect()
-				}, delay)
-			}
-		}
-
-		ws.onerror = (error) => {
-			console.error('WebSocket error:', error)
-			setIsConnected(false)
-		}
-	}, [userId, maxRetries, initialRetryDelay, connectionTimeout])
-
-	useEffect(() => {
 		connect()
 
 		return () => {
+			mounted = false
 			if (retryTimeoutRef.current) {
 				clearTimeout(retryTimeoutRef.current)
+				retryTimeoutRef.current = null
 			}
-			if (connectionTimeoutRef.current) {
-				clearTimeout(connectionTimeoutRef.current)
-			}
-			if (wsRef.current?.readyState === WebSocket.OPEN) {
+			if (wsRef.current) {
 				wsRef.current.close()
+				wsRef.current = null
 			}
 		}
-	}, [connect])
+	}, [wsUrl, maxRetries])
 
 	return {
 		isConnected,
-		lastUpdate: lastUpdateRef.current,
-		sendMessage: <T extends Record<string, unknown>>(message: T) => {
-			if (wsRef.current?.readyState === WebSocket.OPEN) {
+		lastUpdate,
+		sendMessage: (message: Record<string, unknown>) => {
+			if (wsRef.current && isConnected) {
 				wsRef.current.send(JSON.stringify(message))
 			}
 		},
 		reconnect: () => {
-			retryCountRef.current = 0
-			if (wsRef.current?.readyState === WebSocket.OPEN) {
+			retryCount.current = 0
+			if (wsRef.current) {
 				wsRef.current.close()
-			} else {
-				connect()
 			}
 		},
 	}

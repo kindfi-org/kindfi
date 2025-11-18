@@ -1,36 +1,14 @@
-import { useEffect, useState } from 'react'
-import { MetricsGrid } from '~/components/dashboard/cards/metrics-grid'
-import { SignupChart } from '~/components/dashboard/charts/signup-chart'
-import { DashboardSkeleton } from '~/components/dashboard/skeletons/dashboard-skeleton'
-import { KycTable } from '~/components/dashboard/table/kyc-table'
-import {
-	mockKycRecords,
-	mockKycStats,
-	mockSignupChartData,
-} from '~/lib/mock-data/dashboard'
+import { MetricsGridContainer } from '~/components/dashboard/cards/metrics-grid-container'
+import { SignupChartContainer } from '~/components/dashboard/charts/signup-chart-container'
 
 export default function Dashboard() {
-	const [isLoading, setIsLoading] = useState(true)
-
-	// Simulate loading state
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			setIsLoading(false)
-		}, 2000) // 2 second loading simulation
-
-		return () => clearTimeout(timer)
-	}, [])
-
-	return isLoading ? (
-		<DashboardSkeleton />
-	) : (
+	return (
 		<div className="@container/main flex flex-1 flex-col gap-2">
 			<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-				<MetricsGrid stats={mockKycStats} />
+				<MetricsGridContainer />
 				<div className="px-4 lg:px-6">
-					<SignupChart data={mockSignupChartData} />
+					<SignupChartContainer />
 				</div>
-				<KycTable data={mockKycRecords} />
 			</div>
 		</div>
 	)

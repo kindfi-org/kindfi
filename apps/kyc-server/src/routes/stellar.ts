@@ -3,8 +3,8 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import { registerAccountOnChain } from '~/lib/stellar/auth-controller-service'
 import { StellarPasskeyService } from '~/lib/stellar/stellar-passkey-service'
 import { corsConfig } from '../config/cors'
+import { handleError } from '../lib/error-handler'
 import { withCORS } from '../middleware/cors'
-import { handleError } from '../utils/error-handler'
 
 const appConfig: AppEnvInterface = appEnvConfig()
 
@@ -41,9 +41,13 @@ export const stellarRoutes = {
 
 					// Add account to auth-controller for KYC approval
 					// This registers the smart wallet as an authorized account
+					// contexts should be an array of contract addresses (stringified)
+					const contextArray = Array.isArray(contexts)
+						? contexts
+						: [contractAddress]
 					const result = await registerAccountOnChain(
 						contractAddress,
-						contexts || [], // Optional context addresses
+						contextArray,
 					)
 
 					return Response.json({
