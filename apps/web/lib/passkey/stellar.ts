@@ -182,3 +182,81 @@ export const convertEcdsaSignatureAsnToCompact = (sig: Buffer) => {
 
 	return signature64
 }
+
+/**
+ * Convert DER-encoded ECDSA signature to compact R+S format for secp256r1 (P-256)
+ * WebAuthn signatures are DER-encoded ASN.1, but Soroban expects raw 64-byte R+S
+ */
+export const convertP256SignatureAsnToCompact = (sig: Buffer): Buffer => {
+	// Define the order of the curve secp256r1 (P-256)
+	// https://github.com/RustCrypto/elliptic-curves/blob/master/p256/src/lib.rs#L72
+	const q = Buffer.from(
+		'ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551',
+		'hex',
+	)
+
+	// ASN Sequence
+	let offset = 0
+	if (sig[offset] !== 0x30) {
+		throw new Error('signature is not a sequence')
+	}
+	offset += 1
+
+	// ASN Sequence Byte Length
+	offset += 1
+
+	// ASN Integer (R)
+	if (sig[offset] !== 0x02) {
+		throw new Error('first element in sequence is not an integer')
+	}
+	offset += 1
+
+	// ASN Integer (R) Byte Length
+	const rLen = sig[offset]
+	offset += 1
+
+	// ASN Integer (R) Byte Value
+	if (rLen >= 33) {
+		if (rLen !== 33 || sig[offset] !== 0x00) {
+			throw new Error(
+				"can only handle larger than 32 byte R's that are len 33 and lead with zero",
+			)
+		}
+		offset += 1
+	}
+	const r = sig.slice(offset, offset + 32)
+	offset += 32
+
+	// ASN Integer (S)
+	if (sig[offset] !== 0x02) {
+		throw new Error('second element in sequence is not an integer')
+	}
+	offset += 1
+
+	// ASN Integer (S) Byte Length
+	const sLen = sig[offset]
+	offset += 1
+
+	// ASN Integer (S) Byte Value
+	if (sLen >= 33) {
+		if (sLen !== 33 || sig[offset] !== 0x00) {
+			throw new Error(
+				"can only handle larger than 32 byte S's that are len 33 and lead with zero",
+			)
+		}
+		offset += 1
+	}
+
+	const s = sig.slice(offset, offset + 32)
+
+	// Force low S range (canonical form required by secp256r1)
+	// https://github.com/stellar/stellar-protocol/discussions/1435#discussioncomment-8809175
+	if (bufToBigint(s) > (bufToBigint(q) - BigInt(1)) / BigInt(2)) {
+		const lowS = Buffer.from(
+			new Uint8Array(bigintToBuf(bufToBigint(q) - bufToBigint(s))),
+		)
+		return Buffer.from([...r, ...lowS])
+	}
+
+	return Buffer.from([...r, ...s])
+}

@@ -1,10 +1,10 @@
+import { challenges, devices } from '@packages/drizzle'
 import type {
 	AuthenticatorTransportFuture,
 	WebAuthnCredential as BaseWebAuthnCredential,
 } from '@simplewebauthn/server'
 import { and, desc, eq, gt, lt } from 'drizzle-orm'
 import { getDb as db } from '../services/db'
-import { challenges, type Device, devices } from './schema'
 
 // Extended WebAuthnCredential with Stellar address support (matches passkey-service.ts)
 export interface WebAuthnCredential extends BaseWebAuthnCredential {
@@ -129,13 +129,16 @@ export const getUser = async ({
 				),
 			)
 
-		const credentials: WebAuthnCredential[] = deviceRecords.map((device) => ({
-			id: device.credentialId,
-			address: device.address,
-			publicKey: base64ToUint8Array(device.publicKey),
-			counter: device.signCount,
-			transports: device.transports as AuthenticatorTransportFuture[],
-		}))
+		const credentials = deviceRecords.map(
+			(device) =>
+				({
+					id: device.credentialId,
+					address: device.address,
+					publicKey: base64ToUint8Array(device.publicKey),
+					counter: device.signCount,
+					transports: device.transports as AuthenticatorTransportFuture[],
+				}) as WebAuthnCredential,
+		)
 
 		return {
 			identifier,
@@ -189,13 +192,24 @@ export const saveUser = async ({
 				.where(eq(devices.id, existingDevice[0].id))
 		} else {
 			// Insert new device
+			// Store COSE format for @simplewebauthn/server verification
+			// Device ID (for Stellar) is computed on-demand from COSE key using computeDeviceIdFromCoseKey()
+			const cosePublicKey = credential.publicKey
+			const cosePublicKeyBase64 = uint8ArrayToBase64(cosePublicKey)
+
+			console.log('📝 Saving device with COSE public key:', {
+				credentialId: credential.id,
+				coseLength: cosePublicKey.length,
+				coseBase64Preview: cosePublicKeyBase64.substring(0, 32) + '...',
+			})
+
 			await db.insert(devices).values({
 				userId: userId || null,
 				nextAuthUserId: userId || null,
 				identifier,
 				rpId,
 				credentialId: credential.id,
-				publicKey: uint8ArrayToBase64(credential.publicKey),
+				publicKey: cosePublicKeyBase64,
 				signCount: credential.counter,
 				transports: credential.transports || [],
 				credentialType: 'public-key',
@@ -222,7 +236,7 @@ export const cleanupExpiredChallenges = async (): Promise<void> => {
 /**
  * Get all devices for a user
  */
-export const getUserDevices = async (userId: string): Promise<Device[]> => {
+export const getUserDevices = async (userId: string) => {
 	return await db
 		.select()
 		.from(devices)

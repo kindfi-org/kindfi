@@ -30,7 +30,7 @@ export class SmartWalletTransactionService {
 	private networkPassphrase: string
 	private fundingKeypair?: Keypair
 
-	private readonly STANDARD_FEE = '100000' // 0.01 XLM
+	private readonly STANDARD_FEE = '1000000' // 0.1 XLM
 
 	constructor(
 		networkPassphrase?: string,
@@ -293,6 +293,16 @@ export class SmartWalletTransactionService {
 	/**
 	 * Builds a transaction for WebAuthn signing
 	 * Returns the transaction envelope and challenge hash
+	 *
+	 * CRITICAL: The challenge must be the signature_payload that Soroban will generate,
+	 * not the transaction hash! The contract validates:
+	 *   client_data.challenge == base64url(signature_payload)
+	 *
+	 * To get the signature_payload, we:
+	 * 1. Build transaction with funding account signature
+	 * 2. Simulate to get auth entry structure
+	 * 3. Extract signature_payload hash from auth entry
+	 * 4. Use that as WebAuthn challenge
 	 */
 	private async buildTransaction(
 		params: BuildTransactionParams,
@@ -317,28 +327,298 @@ export class SmartWalletTransactionService {
 
 		const transaction = txBuilder.setTimeout(300).build()
 
-		// Simulate to get auth requirements
-		console.log('🔄 Simulating transaction...')
+		// If sponsoring fees, sign with funding account before simulation
+		if (sponsorFees && this.fundingKeypair) {
+			transaction.sign(this.fundingKeypair)
+		}
+
+		console.log('🔄 Simulating transaction to extract signature_payload...')
+
+		// Simulate to get auth entry with signature_payload
 		const simulation = await this.server.simulateTransaction(transaction)
 
 		if (Api.isSimulationError(simulation)) {
-			throw new Error(`Simulation failed: ${JSON.stringify(simulation)}`)
+			console.error('❌ Simulation error:', simulation.error)
+			throw new Error(
+				`Transaction simulation failed: ${simulation.error || 'Unknown error'}`,
+			)
 		}
 
-		// Assemble with auth entries
+		// Get current ledger to set valid signature expiration
+		const latestLedger = await this.server.getLatestLedger()
+		const validityWindow = 300 // ~25 minutes (300 ledgers × 5 seconds)
+		const signatureExpirationLedger = latestLedger.sequence + validityWindow
+
+		console.log('📅 Setting signature expiration:', {
+			currentLedger: latestLedger.sequence,
+			validityWindow,
+			signatureExpirationLedger,
+		})
+
+		// CRITICAL FIX: Modify the simulation result BEFORE assembling
+		// The simulation.result.auth contains the auth entries that will be used
+		// We need to update the signatureExpirationLedger in the simulation BEFORE calling assembleTransaction
+		if (
+			!Api.isSimulationError(simulation) &&
+			simulation.result?.auth &&
+			simulation.result.auth.length > 0
+		) {
+			// Get the first auth entry from simulation
+			const simAuthEntry = simulation.result.auth[0]
+
+			console.log('🔍 PRE-MODIFICATION: Original simulation auth entry:', {
+				hasAuth: true,
+				credentialsType: simAuthEntry.credentials().switch().name,
+			})
+
+			// Check if it's an address credentials type
+			if (
+				simAuthEntry.credentials().switch() ===
+				xdr.SorobanCredentialsType.sorobanCredentialsAddress()
+			) {
+				const addressCredentials = simAuthEntry.credentials().address()
+
+				console.log('🔍 PRE-MODIFICATION: Simulation auth entry values:', {
+					nonce: addressCredentials.nonce().toString(),
+					signatureExpirationLedger: addressCredentials
+						.signatureExpirationLedger()
+						.toString(),
+				})
+
+				// Create NEW credentials with valid expiration
+				const newCredentials = new xdr.SorobanAddressCredentials({
+					address: addressCredentials.address(),
+					nonce: addressCredentials.nonce(),
+					signatureExpirationLedger: signatureExpirationLedger,
+					signature: addressCredentials.signature(),
+				})
+
+				// Create new auth entry with updated credentials
+				const newAuthEntry = new xdr.SorobanAuthorizationEntry({
+					credentials:
+						xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
+					rootInvocation: simAuthEntry.rootInvocation(),
+				})
+
+				// Replace the auth entry in the simulation result
+				simulation.result.auth[0] = newAuthEntry
+
+				console.log(
+					'✅ Updated simulation auth entry with signatureExpirationLedger:',
+					signatureExpirationLedger,
+				)
+
+				// VERIFY: Check that modification worked
+				const verifyCredentials = simulation.result.auth[0]
+					.credentials()
+					.address()
+				console.log(
+					'🔍 POST-MODIFICATION: Simulation auth entry (should match new value):',
+					{
+						nonce: verifyCredentials.nonce().toString(),
+						signatureExpirationLedger: verifyCredentials
+							.signatureExpirationLedger()
+							.toString(),
+						expectedExpiration: signatureExpirationLedger,
+						matches:
+							verifyCredentials.signatureExpirationLedger().toString() ===
+							signatureExpirationLedger.toString(),
+					},
+				)
+			}
+		}
+
+		// NOW assemble the transaction with our modified simulation
+		// This will bake in the correct signatureExpirationLedger
+		console.log('🔧 Calling assembleTransaction() with modified simulation...')
 		const assembledTx = assembleTransaction(transaction, simulation).build()
+		console.log('✅ Transaction assembled successfully')
 
-		// Generate challenge hash for WebAuthn
+		// IMPORTANT: Extract signature_payload from the ASSEMBLED transaction
+		// The assembly process may modify auth entry values, so we must use the final values
+		const signaturePayload =
+			this.extractSignaturePayloadFromTransaction(assembledTx)
+
+		if (!signaturePayload) {
+			// Fallback to transaction hash if we can't extract signature_payload
+			console.warn(
+				'⚠️  Could not extract signature_payload, falling back to tx hash',
+			)
+			const txHash = assembledTx.hash()
+			const challenge = txHash.toString('base64url')
+
+			console.log('✅ Transaction prepared for signing')
+			console.log('🔑 WebAuthn challenge (tx hash):', challenge)
+
+			return {
+				transactionXDR: assembledTx.toXDR(),
+				challenge,
+				hash: txHash.toString('hex'),
+			}
+		}
+
+		// Use signature_payload as the WebAuthn challenge
+		const challenge = Buffer.from(signaturePayload, 'hex').toString('base64url')
 		const txHash = assembledTx.hash()
-		const challenge = txHash.toString('base64url')
 
-		console.log('✅ Transaction built successfully')
+		console.log('✅ Transaction prepared for signing')
+		console.log('🔑 Signature Payload (hex):', signaturePayload)
 		console.log('🔑 WebAuthn challenge:', challenge)
+		console.log('📋 Transaction hash:', txHash.toString('hex'))
+
+		// DIAGNOSTIC: Verify XDR encoding contains correct values
+		const transactionXDR = assembledTx.toXDR()
+		console.log('🔍 XDR CHECK: Verifying XDR encoding...')
+		try {
+			const xdrCheck = TransactionBuilder.fromXDR(
+				transactionXDR,
+				this.networkPassphrase,
+			) as Transaction
+			// biome-ignore lint: accessing auth entries requires type assertion
+			const checkOp = xdrCheck.operations[0] as any
+			const checkAuthEntries = checkOp?.auth || []
+			if (checkAuthEntries.length > 0) {
+				const checkAuthEntry = checkAuthEntries[0]
+				if (
+					checkAuthEntry.credentials().switch() ===
+					xdr.SorobanCredentialsType.sorobanCredentialsAddress()
+				) {
+					const checkCredentials = checkAuthEntry.credentials().address()
+					console.log('🔍 XDR CHECK: Decoded values from returned XDR:', {
+						nonce: checkCredentials.nonce().toString(),
+						signatureExpirationLedger: checkCredentials
+							.signatureExpirationLedger()
+							.toString(),
+						expectedExpiration: signatureExpirationLedger,
+						matches:
+							checkCredentials.signatureExpirationLedger().toString() ===
+							signatureExpirationLedger.toString(),
+					})
+
+					if (
+						checkCredentials.signatureExpirationLedger().toString() !==
+						signatureExpirationLedger.toString()
+					) {
+						console.error(
+							'❌ CRITICAL: XDR bytes do NOT contain correct expiration!',
+						)
+						console.error(
+							'   This means the XDR encoding is wrong, not just logging',
+						)
+					}
+				}
+			}
+		} catch (error) {
+			console.error('❌ Error verifying XDR:', error)
+		}
 
 		return {
-			transactionXDR: assembledTx.toXDR(),
+			transactionXDR,
 			challenge,
 			hash: txHash.toString('hex'),
+		}
+	}
+
+	/**
+	 * Extract signature_payload from an assembled transaction
+	 * This is used after assembleTransaction() to get the final signature_payload
+	 * based on the actual auth entry values in the assembled transaction
+	 */
+	private extractSignaturePayloadFromTransaction(
+		transaction: Transaction,
+	): string | null {
+		try {
+			// Get auth entries from the transaction
+			// biome-ignore lint: accessing auth entries requires type assertion
+			const sorobanData = transaction.operations[0] as any
+			const authEntries = sorobanData?.auth || []
+
+			if (authEntries.length === 0) {
+				console.warn('⚠️  No auth entries in assembled transaction')
+				return null
+			}
+
+			// Get the first auth entry (should be the smart wallet)
+			const authEntry = authEntries[0]
+
+			// Get the auth entry components
+			if (
+				authEntry.credentials().switch() !==
+				xdr.SorobanCredentialsType.sorobanCredentialsAddress()
+			) {
+				console.warn('⚠️  Auth entry is not SorobanCredentialsAddress type')
+				return null
+			}
+
+			const addressCredentials = authEntry.credentials().address()
+			const rootInvocation = authEntry.rootInvocation()
+
+			// Extract components needed for signature_payload
+			const address = addressCredentials.address()
+			const nonce = addressCredentials.nonce()
+			const signatureExpirationLedger =
+				addressCredentials.signatureExpirationLedger()
+
+			console.log('📋 Assembled transaction auth entry:', {
+				nonce: nonce.toString(),
+				signatureExpirationLedger: signatureExpirationLedger.toString(),
+			})
+
+			// Compute signature_payload using Soroban's algorithm
+			const crypto = require('node:crypto')
+
+			// 1. Hash network passphrase
+			const networkIdHash = crypto
+				.createHash('sha256')
+				.update(this.networkPassphrase, 'utf8')
+				.digest()
+
+			// 2. Contract address (32 bytes from ScAddress)
+			const contractAddressBytes = address.toXDR()
+
+			// 3. Nonce (8 bytes as i64 in big-endian)
+			const nonceBuffer = Buffer.allocUnsafe(8)
+			nonceBuffer.writeBigInt64BE(BigInt(nonce.toString()))
+
+			// 4. Signature expiration ledger (4 bytes as u32 in big-endian)
+			const signatureExpirationBuffer = Buffer.allocUnsafe(4)
+			signatureExpirationBuffer.writeUInt32BE(
+				Number(signatureExpirationLedger.toString()),
+			)
+
+			// 5. Hash the root invocation
+			const invocationBytes = rootInvocation.toXDR()
+			const invocationHash = crypto
+				.createHash('sha256')
+				.update(invocationBytes)
+				.digest()
+
+			// 6. Concatenate all components and hash
+			const payload = Buffer.concat([
+				networkIdHash,
+				contractAddressBytes,
+				nonceBuffer,
+				signatureExpirationBuffer,
+				invocationHash,
+			])
+
+			const signaturePayloadHash = crypto
+				.createHash('sha256')
+				.update(payload)
+				.digest('hex')
+
+			console.log(
+				'🔐 Computed signature_payload from assembled tx:',
+				signaturePayloadHash,
+			)
+
+			return signaturePayloadHash
+		} catch (error) {
+			console.error(
+				'❌ Error extracting signature_payload from transaction:',
+				error,
+			)
+			return null
 		}
 	}
 

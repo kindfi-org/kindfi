@@ -39,12 +39,12 @@ export default withAuth(
 						: 'next-auth.session-token',
 			})
 
-			console.log('🔑 Middleware token check:', {
-				hasToken: !!token,
-				tokenSub: token?.sub,
-				pathname,
-				isProtected: isProtectedPath(pathname),
-			})
+			// console.log('🔑 Middleware token check:', {
+			// 	hasToken: !!token,
+			// 	tokenSub: token?.sub,
+			// 	pathname,
+			// 	isProtected: isProtectedPath(pathname),
+			// })
 
 			// Redirect unauthenticated access to protected paths only
 			if (isProtectedPath(pathname) && !token?.sub) {

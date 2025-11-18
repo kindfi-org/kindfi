@@ -36,10 +36,52 @@ export function SmartWalletTransferDemo() {
 	})
 	const [isLoading, setIsLoading] = useState(false)
 	const [isFunding, setIsFunding] = useState(false)
+	const [isApproving, setIsApproving] = useState(false)
 	const [balance, setBalance] = useState<string | null>(null)
 	const [smartWalletAddress] = useState<string>(
 		session?.device?.address || session?.user.device?.address || '',
 	)
+
+	/**
+	 * Approve smart wallet in auth-controller
+	 * Required before wallet can perform authenticated operations
+	 */
+	const approveAccount = async () => {
+		try {
+			setIsApproving(true)
+
+			const response = await fetch('/api/stellar/account/approve', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					accountAddress: smartWalletAddress,
+				}),
+			})
+
+			if (!response.ok) {
+				const error = await response.json()
+				throw new Error(error.details || 'Failed to approve account')
+			}
+
+			const result = await response.json()
+
+			toast.success('Account approved successfully!', {
+				description: `Your smart wallet is now registered in the auth-controller`,
+				duration: 5000,
+			})
+
+			console.log('Account approval tx:', result.data.hash)
+		} catch (error) {
+			console.error('Error approving account:', error)
+			toast.error(
+				error instanceof Error ? error.message : 'Failed to approve account',
+			)
+		} finally {
+			setIsApproving(false)
+		}
+	}
 
 	/**
 	 * Fund smart wallet with testnet XLM
@@ -184,6 +226,12 @@ export function SmartWalletTransferDemo() {
 				description: 'Please wait while we process your transaction',
 			})
 
+			console.log('📝 WebAuthn response:', {
+				id: authResponse.id,
+				type: authResponse.type,
+				rawId: authResponse.rawId,
+			})
+
 			// Submit the signed transaction
 			const submitResponse = await fetch('/api/stellar/transfer/submit', {
 				method: 'POST',
@@ -192,8 +240,8 @@ export function SmartWalletTransferDemo() {
 				},
 				body: JSON.stringify({
 					transactionXDR: data.transactionXDR,
-					authResponse,
-					deviceId: session?.device?.credential_id,
+					authResponse: authResponse,
+					userDevice: session?.device || session?.user.device,
 				}),
 			})
 
@@ -255,6 +303,14 @@ export function SmartWalletTransferDemo() {
 							{smartWalletAddress}
 						</div>
 						<div className="mt-3 flex items-center gap-2 flex-wrap">
+							<Button
+								size="sm"
+								variant="outline"
+								onClick={approveAccount}
+								disabled={isApproving}
+							>
+								{isApproving ? 'Approving...' : 'Approve Account'}
+							</Button>
 							<Button
 								size="sm"
 								variant="outline"
@@ -350,9 +406,9 @@ export function SmartWalletTransferDemo() {
 							💰 Testnet Faucet
 						</div>
 						<div className="text-muted-foreground">
-							Your smart wallet needs XLM to pay for transactions. Use the
-							"Fund Wallet" button to get testnet XLM for testing. This only
-							works on Stellar Testnet.
+							Your smart wallet needs XLM to pay for transactions. Use the "Fund
+							Wallet" button to get testnet XLM for testing. This only works on
+							Stellar Testnet.
 						</div>
 					</div>
 
