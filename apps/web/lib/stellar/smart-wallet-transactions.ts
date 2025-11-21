@@ -1,4 +1,5 @@
 import { Buffer } from 'node:buffer'
+import { createHash } from 'node:crypto'
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
@@ -554,7 +555,6 @@ export class SmartWalletTransactionService {
 			const rootInvocation = authEntry.rootInvocation()
 
 			// Extract components needed for signature_payload
-			const address = addressCredentials.address()
 			const nonce = addressCredentials.nonce()
 			const signatureExpirationLedger =
 				addressCredentials.signatureExpirationLedger()
@@ -565,46 +565,28 @@ export class SmartWalletTransactionService {
 			})
 
 			// Compute signature_payload using Soroban's algorithm
-			const crypto = require('node:crypto')
 
 			// 1. Hash network passphrase
-			const networkIdHash = crypto
-				.createHash('sha256')
+			const networkIdHash = createHash('sha256')
 				.update(this.networkPassphrase, 'utf8')
 				.digest()
 
-			// 2. Contract address (32 bytes from ScAddress)
-			const contractAddressBytes = address.toXDR()
+			// 2. Construct HashIdPreimageSorobanAuthorization
+			const sorobanAuthPreimage = new xdr.HashIdPreimageSorobanAuthorization({
+				networkId: networkIdHash,
+				nonce: nonce,
+				signatureExpirationLedger: signatureExpirationLedger,
+				invocation: rootInvocation,
+			})
 
-			// 3. Nonce (8 bytes as i64 in big-endian)
-			const nonceBuffer = Buffer.allocUnsafe(8)
-			nonceBuffer.writeBigInt64BE(BigInt(nonce.toString()))
+			// 3. Wrap in HashIdPreimage
+			const preimage =
+				xdr.HashIdPreimage.envelopeTypeSorobanAuthorization(sorobanAuthPreimage)
 
-			// 4. Signature expiration ledger (4 bytes as u32 in big-endian)
-			const signatureExpirationBuffer = Buffer.allocUnsafe(4)
-			signatureExpirationBuffer.writeUInt32BE(
-				Number(signatureExpirationLedger.toString()),
-			)
-
-			// 5. Hash the root invocation
-			const invocationBytes = rootInvocation.toXDR()
-			const invocationHash = crypto
-				.createHash('sha256')
-				.update(invocationBytes)
-				.digest()
-
-			// 6. Concatenate all components and hash
-			const payload = Buffer.concat([
-				networkIdHash,
-				contractAddressBytes,
-				nonceBuffer,
-				signatureExpirationBuffer,
-				invocationHash,
-			])
-
-			const signaturePayloadHash = crypto
-				.createHash('sha256')
-				.update(payload)
+			// 4. Encode to XDR and Hash
+			const preimageXdr = preimage.toXDR()
+			const signaturePayloadHash = createHash('sha256')
+				.update(preimageXdr)
 				.digest('hex')
 
 			console.log(

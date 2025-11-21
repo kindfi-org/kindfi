@@ -55,7 +55,9 @@ async function migratePublicKeys() {
 						updatedAt: new Date().toISOString(),
 					})
 					.where(eq(devices.id, device.id))
-				console.log('   ⚠️  WARNING: publicKey still has uncompressed format, needs COSE backup')
+				console.log(
+					'   ⚠️  WARNING: publicKey still has uncompressed format, needs COSE backup',
+				)
 				migratedCount++
 				continue
 			}

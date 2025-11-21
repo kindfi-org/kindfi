@@ -70,7 +70,11 @@ async function debugPublicKeys() {
 	try {
 		const dbPublicKeyHex = base64ToHexUncompressedKey(dbPublicKey)
 		console.log('   Public Key (hex):', dbPublicKeyHex.substring(0, 32) + '...')
-		console.log('   Hex length:', dbPublicKeyHex.length, 'chars (should be 130)')
+		console.log(
+			'   Hex length:',
+			dbPublicKeyHex.length,
+			'chars (should be 130)',
+		)
 
 		if (dbPublicKeyHex.length !== 130) {
 			console.warn(
@@ -177,7 +181,10 @@ async function debugPublicKeys() {
 								console.log('\n   🔑 Public Key Comparison:')
 								console.log('      Database key:', dbPublicKeyHex)
 								console.log('      Contract key:', contractPublicKey)
-								console.log('      Match:', dbPublicKeyHex === contractPublicKey)
+								console.log(
+									'      Match:',
+									dbPublicKeyHex === contractPublicKey,
+								)
 
 								if (dbPublicKeyHex !== contractPublicKey) {
 									console.error('\n❌ PUBLIC KEY MISMATCH!')
@@ -187,7 +194,12 @@ async function debugPublicKeys() {
 									console.error('   Contract length:', contractPublicKey.length)
 
 									// Find first difference
-									for (let i = 0; i < Math.max(dbPublicKeyHex.length, contractPublicKey.length); i++) {
+									for (
+										let i = 0;
+										i <
+										Math.max(dbPublicKeyHex.length, contractPublicKey.length);
+										i++
+									) {
 										if (dbPublicKeyHex[i] !== contractPublicKey[i]) {
 											console.error(
 												`   First diff at position ${i}:`,
@@ -200,7 +212,9 @@ async function debugPublicKeys() {
 									}
 								} else {
 									console.log('\n✅ PUBLIC KEYS MATCH!')
-									console.log('The issue is likely in signature format or challenge')
+									console.log(
+										'The issue is likely in signature format or challenge',
+									)
 								}
 							}
 						}

@@ -182,7 +182,16 @@ export async function POST(req: NextRequest) {
 		}
 
 		// The transaction is ready - no need to re-sign since we already signed earlier
+		// UPDATE: We MUST re-sign because:
+		// 1. assembleTransaction() in prepare creates a new transaction (stripping signatures)
+		// 2. We modified the auth entry above, which changes the transaction hash
+		// 3. The funding account (source) signature is required or we may experience txBadAuth errors
 		console.log('📝 Transaction ready for submission')
+
+		// Re-sign with funding account (as it is the source/fee payer)
+		console.log('✍️  Signing transaction with funding account...')
+		transaction.sign(fundingKeypair)
+
 		console.log('   Hash:', transaction.hash().toString('hex'))
 
 		// Submit to network
