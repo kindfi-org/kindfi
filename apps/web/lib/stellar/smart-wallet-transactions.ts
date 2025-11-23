@@ -9,6 +9,7 @@ import {
 	Contract,
 	Keypair,
 	nativeToScVal,
+	SorobanDataBuilder,
 	scValToNative,
 	type Transaction,
 	TransactionBuilder,
@@ -31,7 +32,7 @@ export class SmartWalletTransactionService {
 	private networkPassphrase: string
 	private fundingKeypair?: Keypair
 
-	private readonly STANDARD_FEE = '1000000' // 0.1 XLM
+	private readonly STANDARD_FEE = '1000500' // 0.105 XLM
 
 	constructor(
 		networkPassphrase?: string,
@@ -314,7 +315,6 @@ export class SmartWalletTransactionService {
 		const sourceAccount = sponsorFees
 			? await this.getFundingAccount()
 			: await this.getSmartWalletAccount(smartWalletAddress)
-
 		// Build transaction
 		let txBuilder = new TransactionBuilder(sourceAccount, {
 			fee: this.STANDARD_FEE,
@@ -336,7 +336,10 @@ export class SmartWalletTransactionService {
 		console.log('🔄 Simulating transaction to extract signature_payload...')
 
 		// Simulate to get auth entry with signature_payload
-		const simulation = await this.server.simulateTransaction(transaction)
+		const simulation = await this.server.simulateTransaction(transaction, {
+			// TODO: Dynamic cpu calculation according to action to execute in the Soroban Contracts
+			cpuInstructions: 1_500_000,
+		})
 
 		if (Api.isSimulationError(simulation)) {
 			console.error('❌ Simulation error:', simulation.error)
@@ -344,7 +347,6 @@ export class SmartWalletTransactionService {
 				`Transaction simulation failed: ${simulation.error || 'Unknown error'}`,
 			)
 		}
-
 		// Get current ledger to set valid signature expiration
 		const latestLedger = await this.server.getLatestLedger()
 		const validityWindow = 300 // ~25 minutes (300 ledgers × 5 seconds)
@@ -432,8 +434,26 @@ export class SmartWalletTransactionService {
 		// NOW assemble the transaction with our modified simulation
 		// This will bake in the correct signatureExpirationLedger
 		console.log('🔧 Calling assembleTransaction() with modified simulation...')
-		const assembledTx = assembleTransaction(transaction, simulation).build()
-		console.log('✅ Transaction assembled successfully')
+		const assembledTx = assembleTransaction(transaction, simulation)
+			// .setSorobanData(sorobanData)
+			.build()
+		console.log('✅ Transaction assembled successfully', {
+			assembledTx: {
+				...assembledTx,
+				xdr: assembledTx.toXDR(),
+				signatures: assembledTx.signatures.map((s) => s.toXDR('base64')),
+				signatureBase: assembledTx.signatureBase().toString('base64'),
+				operations: assembledTx.operations.map((opt) => ({
+					...opt,
+				})),
+				source: assembledTx.source,
+				hash: assembledTx.hash().toString('base64'),
+				sequence: assembledTx.sequence,
+				fee: assembledTx.fee,
+				ledgerBounds: assembledTx.ledgerBounds,
+				memo: assembledTx.memo.toXDRObject().toXDR('base64'),
+			},
+		})
 
 		// IMPORTANT: Extract signature_payload from the ASSEMBLED transaction
 		// The assembly process may modify auth entry values, so we must use the final values

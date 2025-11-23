@@ -34,4 +34,8 @@
   - `Done: Phases {…}. Next: Phase X. Files: {…}. Constraints: {…}.`
   - Then: “continue Phase X”.
 
+## Debugging & Research
+
+- When logic is uncertain (after checking docs/communities), read source code in `node_modules` to understand dependency logic.
+
 > Last instruction: At the end of each plan, give me a list of unresolved questions to answer, if any. Make the questions extremely concise. Sacrifice grammar for the sake of concision.

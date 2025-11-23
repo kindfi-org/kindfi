@@ -92,11 +92,8 @@ export async function POST(req: NextRequest) {
 			transaction.hash().toString('hex'),
 		)
 
-		// Get Soroban transaction data where auth entries are stored
-		// The transaction from prepare already has the correct auth entry structure
 		// biome-ignore lint: accessing auth entries requires type assertion
-		const sorobanData = transaction.operations[0] as any
-		const authEntries = sorobanData?.auth || []
+		const authEntries = (transaction.operations[0] as any)?.auth || []
 
 		console.log('📝 Auth entries count:', authEntries.length)
 

@@ -203,7 +203,13 @@ export const convertP256SignatureAsnToCompact = (sig: Buffer): Buffer => {
 	offset += 1
 
 	// ASN Sequence Byte Length
+	// Skip length byte(s)
+	const seqLen = sig[offset]
 	offset += 1
+	if (seqLen & 0x80) {
+		const lenBytes = seqLen & 0x7f
+		offset += lenBytes
+	}
 
 	// ASN Integer (R)
 	if (sig[offset] !== 0x02) {
@@ -215,17 +221,9 @@ export const convertP256SignatureAsnToCompact = (sig: Buffer): Buffer => {
 	const rLen = sig[offset]
 	offset += 1
 
-	// ASN Integer (R) Byte Value
-	if (rLen >= 33) {
-		if (rLen !== 33 || sig[offset] !== 0x00) {
-			throw new Error(
-				"can only handle larger than 32 byte R's that are len 33 and lead with zero",
-			)
-		}
-		offset += 1
-	}
-	const r = sig.slice(offset, offset + 32)
-	offset += 32
+	// Read R
+	const rBytes = sig.slice(offset, offset + rLen)
+	offset += rLen
 
 	// ASN Integer (S)
 	if (sig[offset] !== 0x02) {
@@ -237,26 +235,23 @@ export const convertP256SignatureAsnToCompact = (sig: Buffer): Buffer => {
 	const sLen = sig[offset]
 	offset += 1
 
-	// ASN Integer (S) Byte Value
-	if (sLen >= 33) {
-		if (sLen !== 33 || sig[offset] !== 0x00) {
-			throw new Error(
-				"can only handle larger than 32 byte S's that are len 33 and lead with zero",
-			)
-		}
-		offset += 1
-	}
+	// Read S
+	const sBytes = sig.slice(offset, offset + sLen)
+	offset += sLen
 
-	const s = sig.slice(offset, offset + 32)
+	// Convert to BigInt
+	const rBigInt = bufToBigint(rBytes)
+	let sBigInt = bufToBigint(sBytes)
 
 	// Force low S range (canonical form required by secp256r1)
-	// https://github.com/stellar/stellar-protocol/discussions/1435#discussioncomment-8809175
-	if (bufToBigint(s) > (bufToBigint(q) - BigInt(1)) / BigInt(2)) {
-		const lowS = Buffer.from(
-			new Uint8Array(bigintToBuf(bufToBigint(q) - bufToBigint(s))),
-		)
-		return Buffer.from([...r, ...lowS])
+	const qBigInt = bufToBigint(q)
+	if (sBigInt > (qBigInt - BigInt(1)) / BigInt(2)) {
+		sBigInt = qBigInt - sBigInt
 	}
 
-	return Buffer.from([...r, ...s])
+	// Pad to 32 bytes
+	const rHex = rBigInt.toString(16).padStart(64, '0')
+	const sHex = sBigInt.toString(16).padStart(64, '0')
+
+	return Buffer.from(rHex + sHex, 'hex')
 }
