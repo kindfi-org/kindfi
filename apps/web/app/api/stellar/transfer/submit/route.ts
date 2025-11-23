@@ -1,5 +1,8 @@
-import { createHash } from 'node:crypto'
-import { appEnvConfig, computeDeviceIdFromCoseKey } from '@packages/lib'
+import {
+	appEnvConfig,
+	buildWebAuthnSignatureScVal,
+	computeDeviceIdFromCoseKey,
+} from '@packages/lib'
 import {
 	Address,
 	Contract,
@@ -11,7 +14,6 @@ import {
 import { Api, Server } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { convertP256SignatureAsnToCompact } from '~/lib/passkey/stellar'
 
 /**
  * POST /api/stellar/transfer/submit
@@ -98,16 +100,61 @@ export async function POST(req: NextRequest) {
 		console.log('📝 Auth entries count:', authEntries.length)
 
 		if (authEntries.length > 0) {
-			// Build the signature ScVal with computed device_id
-			const signatureScVal = buildSignatureScVal(authResponse, deviceIdBytes)
-
-			console.log('🔍 Signature ScVal built:', {
-				hasAuthenticatorData: true,
-				hasClientDataJSON: true,
-				hasDeviceId: true,
-				deviceIdHex: deviceIdBytes.toString('hex'),
-				hasSignature: true,
+			const signatureResult = buildWebAuthnSignatureScVal({
+				assertion: authResponse,
+				deviceIdBytes,
 			})
+			const {
+				signatureScVal,
+				authenticatorData,
+				clientData,
+				webauthnPayload,
+				webauthnPayloadHash,
+				signature,
+				challenge,
+				challengeBytes,
+			} = signatureResult
+
+			console.log('🔍 Signature payload assembled:', {
+				deviceIdHex: deviceIdBytes.toString('hex'),
+				authenticatorDataBytes: authenticatorData.length,
+				clientDataJsonBytes: signatureResult.clientDataJSON.length,
+				signatureBytes: signature.length,
+				webauthnPayloadBytes: webauthnPayload.length,
+			})
+
+			console.log('📋 Client Data JSON:', {
+				type: clientData.type,
+				challenge: clientData.challenge,
+				origin: clientData.origin,
+			})
+
+			console.log('🔐 Contract will verify signature against:')
+			console.log(
+				'   authenticator_data || SHA256(client_data_json) length:',
+				webauthnPayload.length,
+				'bytes',
+			)
+			console.log(
+				'   SHA256(authenticator_data || SHA256(client_data_json)):',
+				webauthnPayloadHash.toString('hex'),
+			)
+
+			console.log('🔍 Challenge validation:')
+			console.log('   Challenge in client_data_json:', challenge)
+			if (challengeBytes) {
+				console.log(
+					'   Challenge (decoded hex):',
+					challengeBytes.toString('hex'),
+				)
+				console.log(
+					'   Challenge (decoded length):',
+					challengeBytes.length,
+					'bytes',
+				)
+			} else {
+				console.warn('⚠️  Missing challenge bytes in client_data_json')
+			}
 
 			// Find and update the auth entry for the smart wallet
 			for (const authEntry of authEntries) {
@@ -296,136 +343,4 @@ async function queryContractDevices(
 		console.error('❌ Error querying contract devices:', error)
 		return []
 	}
-}
-
-/**
- * Build Soroban Signature ScVal from WebAuthn response
- * @param authResponse - WebAuthn authentication response
- * @param deviceIdBytes - Pre-computed 32-byte device ID (SHA256 of uncompressed public key)
- */
-function buildSignatureScVal(
-	authResponse: {
-		id: string
-		response: {
-			authenticatorData: string
-			clientDataJSON: string
-			signature: string
-		}
-	},
-	deviceIdBytes: Buffer,
-): xdr.ScVal {
-	// Convert base64url to Buffer
-	const authenticatorData = Buffer.from(
-		authResponse.response.authenticatorData,
-		'base64url',
-	)
-	const clientDataJSON = Buffer.from(
-		authResponse.response.clientDataJSON,
-		'base64url',
-	)
-	const derSignature = Buffer.from(authResponse.response.signature, 'base64url')
-
-	console.log('🔍 Raw WebAuthn signature length:', derSignature.length)
-	console.log('🔑 Credential ID:', authResponse.id)
-	console.log('🔑 Device ID (from COSE key):', deviceIdBytes.toString('hex'))
-
-	// Decode and log client data JSON for debugging
-	const clientDataObj = JSON.parse(clientDataJSON.toString('utf8'))
-	console.log('📋 Client Data JSON:', {
-		type: clientDataObj.type,
-		challenge: clientDataObj.challenge,
-		origin: clientDataObj.origin,
-	})
-
-	// Log authenticator data details
-	console.log(
-		'🔐 Authenticator Data length:',
-		authenticatorData.length,
-		'bytes',
-	)
-	console.log(
-		'🔐 Authenticator Data (hex, first 64 chars):',
-		authenticatorData.toString('hex').substring(0, 64) + '...',
-	)
-
-	// Convert DER-encoded signature (70 bytes) to raw R+S format (64 bytes)
-	// WebAuthn signatures are DER-encoded ASN.1, but Soroban expects raw R+S
-	const signature = convertP256SignatureAsnToCompact(derSignature)
-
-	console.log('✅ Converted signature length:', signature.length)
-	console.log(
-		'✅ Signature (hex, first 32 chars):',
-		signature.toString('hex').substring(0, 32) + '...',
-	)
-
-	// Ensure signature is exactly 64 bytes (secp256r1)
-	if (signature.length !== 64) {
-		throw new Error(
-			`Invalid signature length: ${signature.length} (expected 64 bytes)`,
-		)
-	}
-
-	// Ensure device ID is exactly 32 bytes
-	if (deviceIdBytes.length !== 32) {
-		throw new Error(
-			`Invalid device ID length: ${deviceIdBytes.length} (expected 32 bytes)`,
-		)
-	}
-
-	// Log what the contract will verify
-	// The contract computes: SHA256(authenticator_data || SHA256(client_data_json))
-	const clientDataHash = createHash('sha256').update(clientDataJSON).digest()
-	const webauthnPayload = Buffer.concat([authenticatorData, clientDataHash])
-	const webauthnPayloadHash = createHash('sha256')
-		.update(webauthnPayload)
-		.digest()
-
-	console.log('🔐 Contract will verify signature against:')
-	console.log('   SHA256(client_data_json):', clientDataHash.toString('hex'))
-	console.log(
-		'   authenticator_data || SHA256(client_data_json) length:',
-		webauthnPayload.length,
-		'bytes',
-	)
-	console.log(
-		'   SHA256(authenticator_data || SHA256(client_data_json)):',
-		webauthnPayloadHash.toString('hex'),
-	)
-
-	// CRITICAL: Log what Soroban expects as the challenge
-	// The contract validates: client_data.challenge == base64url(signature_payload)
-	console.log('🔍 Challenge validation:')
-	console.log('   Challenge in client_data_json:', clientDataObj.challenge)
-	console.log('   Challenge length:', clientDataObj.challenge.length, 'chars')
-	const challengeBytes = Buffer.from(clientDataObj.challenge, 'base64url')
-	console.log('   Challenge (decoded hex):', challengeBytes.toString('hex'))
-	console.log('   Challenge (decoded length):', challengeBytes.length, 'bytes')
-
-	// Build the Signature struct matching the contract definition:
-	// pub struct Signature {
-	//     pub authenticator_data: Bytes,
-	//     pub client_data_json: Bytes,
-	//     pub device_id: BytesN<32>,
-	//     pub signature: BytesN<64>,
-	// }
-	const signatureStruct = xdr.ScVal.scvMap([
-		new xdr.ScMapEntry({
-			key: xdr.ScVal.scvSymbol('authenticator_data'),
-			val: xdr.ScVal.scvBytes(authenticatorData),
-		}),
-		new xdr.ScMapEntry({
-			key: xdr.ScVal.scvSymbol('client_data_json'),
-			val: xdr.ScVal.scvBytes(clientDataJSON),
-		}),
-		new xdr.ScMapEntry({
-			key: xdr.ScVal.scvSymbol('device_id'),
-			val: xdr.ScVal.scvBytes(deviceIdBytes),
-		}),
-		new xdr.ScMapEntry({
-			key: xdr.ScVal.scvSymbol('signature'),
-			val: xdr.ScVal.scvBytes(signature),
-		}),
-	])
-
-	return signatureStruct
 }
