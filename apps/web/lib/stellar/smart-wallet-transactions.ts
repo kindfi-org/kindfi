@@ -293,17 +293,7 @@ export class SmartWalletTransactionService {
 
 	/**
 	 * Builds a transaction for WebAuthn signing
-	 * Returns the transaction envelope and challenge hash
-	 *
-	 * CRITICAL: The challenge must be the signature_payload that Soroban will generate,
-	 * not the transaction hash! The contract validates:
-	 *   client_data.challenge == base64url(signature_payload)
-	 *
-	 * To get the signature_payload, we:
-	 * 1. Build transaction with funding account signature
-	 * 2. Simulate to get auth entry structure
-	 * 3. Extract signature_payload hash from auth entry
-	 * 4. Use that as WebAuthn challenge
+	 * @returns the transaction envelope and challenge hash
 	 */
 	private async buildTransaction(
 		params: BuildTransactionParams,
@@ -337,7 +327,7 @@ export class SmartWalletTransactionService {
 		// Simulate to get auth entry with signature_payload
 		const simulation = await this.server.simulateTransaction(transaction, {
 			// TODO: Dynamic cpu calculation according to action to execute in the Soroban Contracts
-			cpuInstructions: 1_500_000,
+			cpuInstructions: 2_500_000,
 		})
 
 		if (Api.isSimulationError(simulation)) {
@@ -454,10 +444,10 @@ export class SmartWalletTransactionService {
 			},
 		})
 
-		// IMPORTANT: Extract signature_payload from the ASSEMBLED transaction
-		// The assembly process may modify auth entry values, so we must use the final values
+		// IMPORTANT: Extract signature_payload from the SIMULATION transaction
+		// The assembly process will have the definitive auth entry values, so we must use the values linked to the transaction (simulation)
 		const signaturePayloadResult = deriveSignaturePayload({
-			transaction: assembledTx,
+			transactionResult: simulation?.result as Api.SimulateHostFunctionResult,
 			networkPassphrase: this.networkPassphrase,
 		})
 
@@ -466,17 +456,7 @@ export class SmartWalletTransactionService {
 			console.warn(
 				'⚠️  Could not extract signature_payload, falling back to tx hash',
 			)
-			const txHash = assembledTx.hash()
-			const challenge = txHash.toString('base64url')
-
-			console.log('✅ Transaction prepared for signing')
-			console.log('🔑 WebAuthn challenge (tx hash):', challenge)
-
-			return {
-				transactionXDR: assembledTx.toXDR(),
-				challenge,
-				hash: txHash.toString('hex'),
-			}
+			throw new Error('⚠️  Could not extract signature_payload')
 		}
 
 		// Use signature_payload as the WebAuthn challenge

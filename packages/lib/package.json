@@ -49,8 +49,11 @@
 		"@supabase/supabase-js": "^2.56.0",
 		"@tanstack/react-query": "^5.74.7",
 		"cbor-x": "^1.6.0",
+		"lodash": "^4.17.21",
 		"tesseract.js": "^6.0.0"
 	},
-	"devDependencies": {},
+	"devDependencies": {
+		"@types/lodash": "^4.17.21"
+	},
 	"type": "module"
 }

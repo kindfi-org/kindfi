@@ -110,7 +110,7 @@ export class StellarPasskeyService {
 
 			// Generate deterministic parameters
 			const contractSalt = hash(Buffer.from(params.credentialId, 'base64'))
-			const accountId = hash(
+			const deviceId = hash(
 				Buffer.from(`${params.credentialId}_account`, 'utf-8'),
 			)
 			const contractAddress = this.calculateContractAddress(contractSalt)
@@ -131,7 +131,7 @@ export class StellarPasskeyService {
 			// Deploy the contract
 			const transactionHash = await this.executeDeployment(
 				contractSalt,
-				accountId,
+				deviceId,
 				publicKeyBuffer,
 			)
 
@@ -256,7 +256,7 @@ export class StellarPasskeyService {
 	 */
 	private async executeDeployment(
 		contractSalt: Buffer,
-		accountId: Buffer,
+		deviceId: Buffer,
 		publicKey: Buffer,
 	): Promise<string> {
 		if (!this.fundingKeypair) {
@@ -279,7 +279,7 @@ export class StellarPasskeyService {
 					function: 'deploy',
 					args: [
 						xdr.ScVal.scvBytes(contractSalt),
-						xdr.ScVal.scvBytes(accountId),
+						xdr.ScVal.scvBytes(deviceId),
 						xdr.ScVal.scvBytes(publicKey),
 					],
 				}),

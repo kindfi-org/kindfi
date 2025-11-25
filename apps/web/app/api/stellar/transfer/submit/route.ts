@@ -1,8 +1,4 @@
-import {
-	appEnvConfig,
-	buildWebAuthnSignatureScVal,
-	computeDeviceIdFromCoseKey,
-} from '@packages/lib'
+import { appEnvConfig, buildWebAuthnSignatureScVal } from '@packages/lib'
 import {
 	Address,
 	Contract,
@@ -12,6 +8,7 @@ import {
 	xdr,
 } from '@stellar/stellar-sdk'
 import { Api, Server } from '@stellar/stellar-sdk/rpc'
+import isEqual from 'lodash/isEqual'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
@@ -47,19 +44,12 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Compute device_id from COSE public key (not stored in DB for security)
-		const deviceIdHex = computeDeviceIdFromCoseKey(cosePublicKey)
-		const deviceIdBytes = Buffer.from(deviceIdHex, 'hex')
-
 		// Get configuration
 		const config = appEnvConfig('web')
 		const server = new Server(config.stellar.rpcUrl)
 		const fundingKeypair = Keypair.fromSecret(config.stellar.fundingAccount)
 
 		console.log('📤 Assembling and submitting transaction')
-		console.log('   Smart Wallet:', smartWalletAddress)
-		console.log('   Credential ID:', authResponse.id)
-		console.log('   Device ID (computed):', deviceIdHex)
 
 		// Query and log devices registered in the contract
 		const devices = await queryContractDevices(
@@ -88,122 +78,40 @@ export async function POST(req: NextRequest) {
 		) as Transaction
 
 		console.log('✅ Loaded pre-assembled transaction from prepare endpoint')
-		console.log('   Transaction already signed with funding account in prepare')
-		console.log(
-			'📋 SUBMIT - Transaction hash:',
-			transaction.hash().toString('hex'),
-		)
 
-		// biome-ignore lint: accessing auth entries requires type assertion
-		const authEntries = (transaction.operations[0] as any)?.auth || []
+		const authEntries =
+			(transaction.operations[0] as unknown as Api.SimulateHostFunctionResult)
+				.auth || []
 
 		console.log('📝 Auth entries count:', authEntries.length)
 
-		if (authEntries.length > 0) {
+		if (authEntries.length) {
 			const signatureResult = buildWebAuthnSignatureScVal({
 				assertion: authResponse,
-				deviceIdBytes,
+				userDevice,
 			})
 			const {
 				signatureScVal,
-				authenticatorData,
-				clientData,
-				webauthnPayload,
-				webauthnPayloadHash,
-				signature,
-				challenge,
-				challengeBytes,
+				// authenticatorData,
+				// clientData,
+				// webauthnPayload,
+				// webauthnPayloadHash,
+				// signature,
+				// challenge,
+				// challengeBytes,
 			} = signatureResult
 
-			console.log('🔍 Signature payload assembled:', {
-				deviceIdHex: deviceIdBytes.toString('hex'),
-				authenticatorDataBytes: authenticatorData.length,
-				clientDataJsonBytes: signatureResult.clientDataJSON.length,
-				signatureBytes: signature.length,
-				webauthnPayloadBytes: webauthnPayload.length,
-			})
-
-			console.log('📋 Client Data JSON:', {
-				type: clientData.type,
-				challenge: clientData.challenge,
-				origin: clientData.origin,
-			})
-
-			console.log('🔐 Contract will verify signature against:')
-			console.log(
-				'   authenticator_data || SHA256(client_data_json) length:',
-				webauthnPayload.length,
-				'bytes',
-			)
-			console.log(
-				'   SHA256(authenticator_data || SHA256(client_data_json)):',
-				webauthnPayloadHash.toString('hex'),
-			)
-
-			console.log('🔍 Challenge validation:')
-			console.log('   Challenge in client_data_json:', challenge)
-			if (challengeBytes) {
-				console.log(
-					'   Challenge (decoded hex):',
-					challengeBytes.toString('hex'),
-				)
-				console.log(
-					'   Challenge (decoded length):',
-					challengeBytes.length,
-					'bytes',
-				)
-			} else {
-				console.warn('⚠️  Missing challenge bytes in client_data_json')
-			}
+			console.log('🔐 Contract will verify signature')
 
 			// Find and update the auth entry for the smart wallet
 			for (const authEntry of authEntries) {
-				if (
-					authEntry.credentials().switch() ===
-					xdr.SorobanCredentialsType.sorobanCredentialsAddress()
-				) {
+				// ? Since both are Sets, they aren't necessary equal by passing the entire Set, we need to make a copy to compare them properly
+				const isSameCredentialMapping = isEqual(
+					{ ...authEntry.credentials().switch() },
+					{ ...xdr.SorobanCredentialsType.sorobanCredentialsAddress() },
+				)
+				if (isSameCredentialMapping) {
 					const addressCredentials = authEntry.credentials().address()
-					const authEntryAddressScVal = addressCredentials.address()
-
-					// Convert XDR ScAddress to Stellar address string
-					// Use Address.fromScAddress() to convert the XDR address object
-					let authEntryAddress = '[conversion failed]'
-					try {
-						const addressObj = Address.fromScAddress(authEntryAddressScVal)
-						authEntryAddress = addressObj.toString()
-					} catch (e) {
-						console.error('❌ Error converting ScAddress to string:', e)
-						console.log('   Raw address object:', authEntryAddressScVal)
-					}
-
-					console.log(
-						'📋 SUBMIT - Auth entry details (received from prepare):',
-						{
-							address: authEntryAddress,
-							nonce: addressCredentials.nonce().toString(),
-							signatureExpirationLedger: addressCredentials
-								.signatureExpirationLedger()
-								.toString(),
-						},
-					)
-
-					console.log('🔍 Comparing addresses:')
-					console.log('   Smart Wallet (expected):', smartWalletAddress)
-					console.log('   Auth Entry Address:', authEntryAddress)
-					console.log('   Match:', authEntryAddress === smartWalletAddress)
-
-					// DIAGNOSTIC: Compare with what was expected from prepare
-					const expirationValue = addressCredentials
-						.signatureExpirationLedger()
-						.toString()
-					if (expirationValue === '0') {
-						console.error('❌ CRITICAL: Expiration is 0 in submit endpoint!')
-						console.error(
-							'   This means the prepare endpoint did NOT set it correctly',
-						)
-					} else {
-						console.log('✅ Expiration is non-zero:', expirationValue)
-					}
 
 					// Create new address credentials with our WebAuthn signature
 					const newCredentials = new xdr.SorobanAddressCredentials({

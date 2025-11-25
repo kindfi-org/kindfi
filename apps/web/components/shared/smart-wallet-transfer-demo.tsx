@@ -230,6 +230,7 @@ export function SmartWalletTransferDemo() {
 				id: authResponse.id,
 				type: authResponse.type,
 				rawId: authResponse.rawId,
+				authResponse,
 			})
 
 			// Submit the signed transaction
