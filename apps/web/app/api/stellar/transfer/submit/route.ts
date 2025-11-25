@@ -11,6 +11,7 @@ import { Api, Server } from '@stellar/stellar-sdk/rpc'
 import isEqual from 'lodash/isEqual'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { getPublicKeys } from '~/lib/passkey/stellar'
 
 /**
  * POST /api/stellar/transfer/submit
@@ -20,9 +21,18 @@ import { NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()
-		const { transactionXDR, authResponse, userDevice } = body
+		const { transactionXDR, authResponse, userDevice, verificationJSON } = body
 		const smartWalletAddress = userDevice?.address
 		const cosePublicKey = userDevice?.public_key
+		const attestationPublicKey = await getPublicKeys(authResponse)
+
+		console.log(
+			'verificationJSON: WebAuthn Key Verified. user is now authored to sign. getting attestation public key',
+			attestationPublicKey.publicKey,
+			attestationPublicKey.contractSalt,
+		)
+
+		// const verificationResponse = await verifyAuthenticationResponse()
 
 		// Validate inputs
 		if (!transactionXDR || !authResponse || !smartWalletAddress) {

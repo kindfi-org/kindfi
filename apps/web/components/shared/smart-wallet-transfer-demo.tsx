@@ -14,6 +14,7 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import { Input } from '~/components/base/input'
+import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 
 interface TransferFormData {
 	to: string
@@ -222,6 +223,36 @@ export function SmartWalletTransferDemo() {
 				optionsJSON: authOptions,
 			})
 
+			const verificationResp = await fetch(
+				`${baseUrl}/api/passkey/verify-authentication`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						identifier: session?.user?.email,
+						authenticationResponse: authResponse,
+						origin: window.location.origin,
+						userId: session?.user?.id,
+					}),
+				},
+			)
+
+			if (!verificationResp.ok) {
+				const verificationJSON = await verificationResp.json()
+				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, verificationJSON.error)
+			}
+
+			const verificationJSON = await verificationResp.json()
+
+			if (!verificationJSON?.verified) {
+				throw new InAppError(
+					ErrorCode.AUTHENTICATOR_NOT_REGISTERED,
+					'Authentication verification failed',
+				)
+			}
+
 			toast.info('Verifying signature...', {
 				description: 'Please wait while we process your transaction',
 			})
@@ -241,6 +272,7 @@ export function SmartWalletTransferDemo() {
 				},
 				body: JSON.stringify({
 					transactionXDR: data.transactionXDR,
+					verificationJSON,
 					authResponse: authResponse,
 					userDevice: session?.device || session?.user.device,
 				}),

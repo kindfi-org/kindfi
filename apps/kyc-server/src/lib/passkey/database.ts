@@ -8,7 +8,7 @@ import { getDb as db } from '../services/db'
 
 // Extended WebAuthnCredential with Stellar address support (matches passkey-service.ts)
 export interface WebAuthnCredential extends BaseWebAuthnCredential {
-	address?: string // Stellar address (G... format)
+	address?: string // Stellar address (C... format)
 	aaguid?: string
 }
 

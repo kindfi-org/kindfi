@@ -4,6 +4,7 @@ import { hash, xdr } from '@stellar/stellar-sdk'
 import type { Api } from '@stellar/stellar-sdk/rpc'
 import { createHash } from 'crypto'
 import isEqual from 'lodash/isEqual'
+import { computeDeviceIdFromCoseKey } from './webauthn-keys'
 
 const P256_ORDER = Buffer.from(
 	'ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551',
@@ -24,11 +25,8 @@ export function buildWebAuthnSignatureScVal({
 	const derSignature = base64UrlToBuffer(assertion.response.signature)
 	const signature = convertP256SignatureAsnToCompact(derSignature)
 	// const contractSalt = hash(Buffer.from(userDevice.credential_id, 'base64'))
-	const deviceId = hash(
-		// Buffer.from(`${userDevice.credential_id}_account`, 'utf-8'),
-		Buffer.from(`${userDevice.public_key}_account`, 'utf-8'),
-		// Buffer.from(`${userDevice.public_key}`, 'utf-8'),
-	)
+	const deviceIdHex = computeDeviceIdFromCoseKey(userDevice.public_key)
+	const deviceId = Buffer.from(deviceIdHex, 'hex')
 
 	console.log('deviceId hex', deviceId.toString('hex'))
 

@@ -1,339 +1,350 @@
+// TODO: Relocating to packages instead of kyc-server for apps usage...
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
+import type {
+	AuthenticationResponseJSON,
+	WebAuthnCredential as BaseWebAuthnCredential,
+	GenerateAuthenticationOptionsOpts,
+	GenerateRegistrationOptionsOpts,
+	RegistrationResponseJSON,
+	VerifyAuthenticationResponseOpts,
+	VerifyRegistrationResponseOpts,
+} from '@simplewebauthn/server'
 import {
-	Account,
-	Address,
-	hash,
-	Keypair,
-	Operation,
-	StrKey,
-	TransactionBuilder,
-	xdr,
-} from '@stellar/stellar-sdk'
-import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
-import { convertCoseToUncompressedPublicKey } from './webauthn-keys'
+	generateAuthenticationOptions,
+	generateRegistrationOptions,
+	verifyAuthenticationResponse,
+	verifyRegistrationResponse,
+} from '@simplewebauthn/server'
+import base64url from 'base64url'
+import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import { StellarPasskeyService } from '../stellar/stellar-passkey-service'
+import {
+	deleteChallenge,
+	getChallenge,
+	getUser,
+	saveChallenge,
+	saveUser,
+} from './database'
+
+// Extended WebAuthnCredential with Stellar address support
+export interface WebAuthnCredential extends BaseWebAuthnCredential {
+	address?: string // Smart wallet contract address (C... format)
+	aaguid?: string
+}
+
+const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
+
+// Initialize Stellar passkey service for smart wallet deployment
+const stellarService = new StellarPasskeyService(
+	appConfig.stellar.networkPassphrase,
+	appConfig.stellar.rpcUrl,
+	appConfig.stellar.fundingAccount,
+)
 
 /**
- * Simplified Stellar Passkey Account Service
- * This service follows the recommended approach using Stellar's passkey patterns
- * without the overdeveloped complexity of the previous implementation
+ * Retrieves the RP ID corresponding to the provided host.
  */
-export class StellarPasskeyService {
-	private server: Server
-	private networkPassphrase: string
-	private factoryContractId: string
-	private fundingKeypair?: Keypair
+const getRpInfo = (
+	origin: string,
+): { rpName: string; rpId: string; expectedOrigin: string } => {
+	const expectedOrigins = appConfig.passkey.expectedOrigin
+	const rpIds = appConfig.passkey.rpId
+	const rpNames = appConfig.passkey.rpName
 
-	private static config: AppEnvInterface = appEnvConfig('kyc-server')
+	const index = expectedOrigins.findIndex(
+		(expectedOrigin: string) => origin === expectedOrigin,
+	)
 
-	private readonly STANDARD_FEE = '1000'
-
-	constructor(
-		networkPassphrase?: string,
-		rpcUrl?: string,
-		fundingSecretKey?: string,
-	) {
-		this.networkPassphrase =
-			networkPassphrase ||
-			StellarPasskeyService.config.stellar.networkPassphrase
-		this.server = new Server(
-			rpcUrl || StellarPasskeyService.config.stellar.rpcUrl,
-		)
-		this.factoryContractId =
-			StellarPasskeyService.config.stellar.factoryContractId
-
-		if (fundingSecretKey) {
-			this.fundingKeypair = Keypair.fromSecret(fundingSecretKey)
-		}
+	if (index === -1) {
+		throw new Error(`Origin ${origin} not found in expected origins`)
 	}
 
-	/**
-	 * Creates or retrieves a Stellar account for a passkey
-	 * This method only creates the account address and checks if it exists
-	 * It does NOT deploy the contract - that should be done separately on approval
-	 */
-	async preparePasskeyAccount(
-		params: PasskeyAccountCreationParams,
-	): Promise<PasskeyAccountResult> {
-		try {
-			console.log(
-				'🔍 Preparing Stellar account for passkey:',
-				params.credentialId,
-			)
-
-			// Generate deterministic salt from credential ID
-			const contractSalt = hash(Buffer.from(params.credentialId, 'base64'))
-
-			// Pre-calculate the contract address that would be created
-			const contractAddress = this.calculateContractAddress(contractSalt)
-
-			// Check if the contract already exists
-			const exists = await this.contractExists(contractAddress)
-
-			if (exists) {
-				console.log('✅ Contract already exists:', contractAddress)
-				return {
-					address: contractAddress,
-					contractId: contractAddress,
-					isExisting: true,
-				}
-			}
-
-			console.log('📋 Contract address prepared:', contractAddress)
-			return {
-				address: contractAddress,
-				contractId: contractAddress,
-				isExisting: false,
-			}
-		} catch (error) {
-			console.error('❌ Error preparing passkey account:', error)
-			throw new Error(`Failed to prepare passkey account: ${error}`)
-		}
-	}
-
-	/**
-	 * Actually deploys the passkey contract to Stellar
-	 * This should only be called after user approval/verification
-	 */
-	async deployPasskeyAccount(
-		params: PasskeyAccountCreationParams,
-	): Promise<PasskeyAccountResult> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for contract deployment')
-		}
-
-		try {
-			console.log(
-				'🚀 Deploying Stellar account for passkey:',
-				params.credentialId,
-			)
-
-			// Generate deterministic parameters
-			const contractSalt = hash(Buffer.from(params.credentialId, 'base64'))
-			const deviceId = hash(
-				Buffer.from(`${params.credentialId}_account`, 'utf-8'),
-			)
-			const contractAddress = this.calculateContractAddress(contractSalt)
-
-			// Check if already deployed
-			if (await this.contractExists(contractAddress)) {
-				console.log('✅ Contract already deployed:', contractAddress)
-				return {
-					address: contractAddress,
-					contractId: contractAddress,
-					isExisting: true,
-				}
-			}
-
-			// Convert public key to proper format
-			const publicKeyBuffer = this.processPublicKey(params.publicKey)
-
-			// Deploy the contract
-			const transactionHash = await this.executeDeployment(
-				contractSalt,
-				deviceId,
-				publicKeyBuffer,
-			)
-
-			console.log('✅ Contract deployed successfully:', {
-				address: contractAddress,
-				transactionHash,
-			})
-
-			return {
-				address: contractAddress,
-				contractId: contractAddress,
-				transactionHash,
-				isExisting: false,
-			}
-		} catch (error) {
-			console.error('❌ Error deploying passkey account:', error)
-			throw new Error(`Failed to deploy passkey account: ${error}`)
-		}
-	}
-
-	/**
-	 * Gets account information for a passkey-controlled account
-	 */
-	async getAccountInfo(contractId: string): Promise<PasskeyAccountInfo> {
-		try {
-			// Try to get contract data to see if it exists
-			await this.server.getContractData(
-				contractId,
-				xdr.ScVal.scvLedgerKeyContractInstance(),
-			)
-
-			// If we get here, the contract exists
-			// For now, return basic info - in a real implementation,
-			// you'd query the contract for balance and other details
-			return {
-				address: contractId,
-				balance: '0', // TODO: Query actual balance
-				sequence: '0', // TODO: Query actual sequence
-				status: 'active',
-			}
-		} catch {
-			console.log('Contract not found:', contractId)
-			return {
-				address: contractId,
-				balance: '0',
-				sequence: '0',
-				status: 'not_found',
-			}
-		}
-	}
-
-	/**
-	 * Calculates the contract address that would be created with the given salt
-	 */
-	private calculateContractAddress(contractSalt: Buffer): string {
-		return StrKey.encodeContract(
-			hash(
-				xdr.HashIdPreimage.envelopeTypeContractId(
-					new xdr.HashIdPreimageContractId({
-						networkId: hash(Buffer.from(this.networkPassphrase, 'utf-8')),
-						contractIdPreimage:
-							xdr.ContractIdPreimage.contractIdPreimageFromAddress(
-								new xdr.ContractIdPreimageFromAddress({
-									address: Address.fromString(
-										this.factoryContractId,
-									).toScAddress(),
-									salt: contractSalt,
-								}),
-							),
-					}),
-				).toXDR(),
-			),
-		)
-	}
-
-	/**
-	 * Checks if a contract exists on the network
-	 */
-	private async contractExists(contractAddress: string): Promise<boolean> {
-		try {
-			await this.server.getContractData(
-				contractAddress,
-				xdr.ScVal.scvLedgerKeyContractInstance(),
-			)
-			return true
-		} catch {
-			return false
-		}
-	}
-
-	/**
-	 * Processes the public key from base64 CBOR to the required format
-	 * Converts COSE/CBOR public key to uncompressed 65-byte EC point (0x04 || X || Y)
-	 */
-	private processPublicKey(publicKeyBase64: string): Buffer {
-		try {
-			const rawPublicKey = Buffer.from(publicKeyBase64, 'base64')
-
-			console.log(
-				'🔧 Processing CBOR public key:',
-				rawPublicKey.toString('hex'),
-				'Length:',
-				rawPublicKey.length,
-			)
-
-			// If already uncompressed format (65 bytes with 0x04 prefix)
-			if (rawPublicKey.length === 65 && rawPublicKey[0] === 0x04) {
-				console.log('✅ Public key already in uncompressed format')
-				return rawPublicKey
-			}
-
-			// Parse CBOR to extract coordinates using shared utility
-			return convertCoseToUncompressedPublicKey(rawPublicKey)
-		} catch (error) {
-			console.error('❌ Error processing public key:', error)
-			throw new Error(`Failed to process public key: ${error}`)
-		}
-	}
-
-	/**
-	 * Executes the actual contract deployment
-	 */
-	private async executeDeployment(
-		contractSalt: Buffer,
-		deviceId: Buffer,
-		publicKey: Buffer,
-	): Promise<string> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required')
-		}
-
-		// Get funding account
-		const fundingAccount = await this.server
-			.getAccount(this.fundingKeypair.publicKey())
-			.then((res) => new Account(res.accountId(), res.sequenceNumber()))
-
-		// Build transaction
-		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: this.STANDARD_FEE,
-			networkPassphrase: this.networkPassphrase,
-		})
-			.addOperation(
-				Operation.invokeContractFunction({
-					contract: this.factoryContractId,
-					function: 'deploy',
-					args: [
-						xdr.ScVal.scvBytes(contractSalt),
-						xdr.ScVal.scvBytes(deviceId),
-						xdr.ScVal.scvBytes(publicKey),
-					],
-				}),
-			)
-			.setTimeout(30) // 30 second timeout
-			.build()
-
-		// Simulate transaction
-		const simulation = await this.server.simulateTransaction(transaction)
-
-		if (Api.isSimulationError(simulation)) {
-			throw new Error(`Simulation failed: ${JSON.stringify(simulation)}`)
-		}
-
-		if (Api.isSimulationRestore(simulation)) {
-			throw new Error(
-				`Transaction requires restore: ${JSON.stringify(simulation)}`,
-			)
-		}
-
-		// Assemble and sign transaction
-		const assembledTransaction = assembleTransaction(transaction, simulation)
-			.setTimeout(30)
-			.build()
-
-		assembledTransaction.sign(this.fundingKeypair)
-		console.log('📡 Submitting transaction to Stellar network...')
-		const result = await this.server.sendTransaction(assembledTransaction)
-
-		if (result?.errorResult) {
-			throw new Error(`Transaction failed: ${JSON.stringify(result)}`)
-		}
-
-		console.log('✅ Transaction successful:', result)
-		return result.hash
+	return {
+		rpName: rpNames[index] || rpNames[0],
+		rpId: rpIds[index] || rpIds[0],
+		expectedOrigin: expectedOrigins[index],
 	}
 }
 
-export interface PasskeyAccountCreationParams {
-	credentialId: string
-	publicKey: string // Base64 encoded CBOR public key
+export const getRegistrationOptions = async ({
+	identifier,
+	origin,
+	userId,
+}: {
+	identifier: string
+	origin: string
 	userId?: string
+}) => {
+	const { rpId, rpName } = getRpInfo(origin)
+	const userResponse = await getUser({
+		rpId,
+		identifier,
+		userId,
+	})
+	if (!userResponse) throw new InAppError(ErrorCode.UNEXPECTED_ERROR)
+	const { credentials } = userResponse
+
+	const opts: GenerateRegistrationOptionsOpts = {
+		rpName,
+		rpID: rpId,
+		userName: identifier,
+		timeout: appConfig.passkey.challengeTtlMs,
+		attestationType: 'none',
+		/**
+		 * Passing in a user's list of already-registered credential IDs here prevents users from
+		 * registering the same authenticator multiple times. The authenticator will simply throw an
+		 * error in the browser if it's asked to perform registration when it recognizes one of the
+		 * credential ID's.
+		 */
+		excludeCredentials: credentials.map((cred) => ({
+			id: cred.id,
+			type: 'public-key',
+			transports: cred.transports,
+		})),
+		authenticatorSelection: {
+			residentKey: 'discouraged',
+			/**
+			 * https://passkeys.dev/docs/use-cases/bootstrapping/#a-note-about-user-verification
+			 */
+			userVerification: 'preferred',
+		},
+		/**
+		 * Support the most common algorithm: ES256
+		 */
+		supportedAlgorithmIDs: [-7],
+	}
+
+	const options = await generateRegistrationOptions(opts)
+	await saveChallenge({
+		identifier,
+		rpId,
+		challenge: options.challenge,
+		userId,
+	})
+
+	return options
 }
 
-export interface PasskeyAccountResult {
-	address: string
-	contractId: string
-	transactionHash?: string
-	isExisting?: boolean
+export const verifyRegistration = async ({
+	identifier,
+	registrationResponse,
+	origin,
+	userId,
+}: {
+	identifier: string
+	registrationResponse: RegistrationResponseJSON
+	origin: string
+	userId?: string
+}) => {
+	const { rpId, expectedOrigin } = getRpInfo(origin)
+	const expectedChallenge = await getChallenge({
+		identifier,
+		rpId,
+		userId,
+	})
+	if (!expectedChallenge) throw new InAppError(ErrorCode.CHALLENGE_NOT_FOUND)
+
+	const userResponse = await getUser({
+		rpId,
+		identifier,
+		userId,
+	})
+	if (!userResponse) throw new InAppError(ErrorCode.UNEXPECTED_ERROR)
+	const { credentials } = userResponse
+
+	const opts: VerifyRegistrationResponseOpts = {
+		response: registrationResponse,
+		expectedChallenge,
+		expectedOrigin: expectedOrigin,
+		expectedRPID: rpId,
+		requireUserVerification: false,
+	}
+	const { verified, registrationInfo } = await verifyRegistrationResponse(opts)
+
+	let contractAddress: string | undefined
+
+	if (verified && registrationInfo) {
+		const { credential } = registrationInfo
+
+		const existingCredential = credentials.find(
+			(cred) => cred.id === credential.id,
+		)
+
+		if (!existingCredential) {
+			/**
+			 * Deploy smart wallet contract on-chain during registration
+			 * This creates the user's Stellar account as a smart contract
+			 */
+			try {
+				console.log('🚀 Deploying smart wallet for new passkey:', credential.id)
+
+				// Extract public key from attestation response
+				const publicKeyBase64 = credential.publicKey.toBase64()
+
+				// Deploy smart wallet via account-factory
+				const deploymentResult = await stellarService.deployPasskeyAccount({
+					credentialId: credential.id,
+					publicKey: publicKeyBase64,
+					userId,
+				})
+
+				contractAddress = deploymentResult.address
+
+				console.log('✅ Smart wallet deployed:', contractAddress)
+			} catch (error) {
+				console.error('❌ Failed to deploy smart wallet:', error)
+				throw new InAppError(
+					ErrorCode.UNEXPECTED_ERROR,
+					`Smart wallet deployment failed: ${error}`,
+				)
+			}
+
+			/**
+			 * Add the returned credential to the user's list of credentials
+			 * Store the smart wallet contract address with the credential
+			 */
+			const newCredential: WebAuthnCredential = {
+				id: credential.id,
+				address: contractAddress, // Store contract address (C... format)
+				publicKey: credential.publicKey,
+				aaguid: (credential as BaseWebAuthnCredential & { aaguid?: string })
+					.aaguid,
+				counter: credential.counter,
+				transports: registrationResponse.response.transports,
+			}
+			await saveUser({
+				rpId,
+				identifier,
+				user: {
+					credentials: [...credentials, newCredential],
+				},
+				userId,
+			})
+		}
+	}
+
+	await deleteChallenge({ identifier, rpId, userId })
+	return { verified, address: contractAddress }
 }
 
-export interface PasskeyAccountInfo {
-	address: string
-	balance: string
-	sequence: string
-	status: 'active' | 'not_found' | 'inactive'
+export const getAuthenticationOptions = async ({
+	identifier,
+	origin,
+	challenge,
+	userId,
+}: {
+	identifier: string
+	origin: string
+	challenge?: string
+	userId?: string
+}) => {
+	const { rpId } = getRpInfo(origin)
+	const userResponse = await getUser({
+		rpId,
+		identifier,
+		userId,
+	})
+	if (!userResponse) throw new InAppError(ErrorCode.UNEXPECTED_ERROR)
+
+	const { credentials } = userResponse
+
+	// If no user is found or no credentials are available, throw an error
+	if (credentials.length === 0) throw new InAppError(ErrorCode.USER_NOT_FOUND)
+
+	const opts: GenerateAuthenticationOptionsOpts = {
+		userVerification: 'preferred',
+		rpID: rpId,
+		// TODO: Check this, we should always have a mapped challenge that both Stellar and Devices supports
+		challenge: challenge
+			? new Uint8Array(base64url.toBuffer(challenge))
+			: undefined,
+		timeout: appConfig.passkey.challengeTtlMs,
+		allowCredentials: credentials.map((cred) => ({
+			id: cred.id,
+			type: 'public-key' as const,
+			transports: cred.transports,
+		})),
+	}
+
+	const options = await generateAuthenticationOptions(opts)
+	await saveChallenge({
+		identifier,
+		rpId,
+		challenge: options.challenge,
+		userId,
+	})
+
+	return options
+}
+
+export const verifyAuthentication = async ({
+	identifier,
+	authenticationResponse,
+	origin,
+	userId,
+}: {
+	identifier: string
+	authenticationResponse: AuthenticationResponseJSON
+	origin: string
+	userId?: string
+}) => {
+	const { rpId, expectedOrigin } = getRpInfo(origin)
+	const expectedChallenge = await getChallenge({
+		identifier,
+		rpId,
+		userId,
+	})
+	if (!expectedChallenge) throw new InAppError(ErrorCode.CHALLENGE_NOT_FOUND)
+
+	const userResponse = await getUser({
+		rpId,
+		identifier,
+		userId,
+	})
+	if (!userResponse) throw new InAppError(ErrorCode.UNEXPECTED_ERROR)
+	const { credentials } = userResponse
+
+	// Find the credential in the user's list of credentials
+	const dbCredentialIndex = credentials.findIndex(
+		(cred) => cred.id === authenticationResponse.id,
+	)
+	if (dbCredentialIndex === -1)
+		throw new InAppError(ErrorCode.AUTHENTICATOR_NOT_REGISTERED)
+	const dbCredential = credentials[dbCredentialIndex]
+
+	const opts: VerifyAuthenticationResponseOpts = {
+		response: authenticationResponse,
+		expectedChallenge,
+		expectedOrigin: expectedOrigin,
+		expectedRPID: rpId,
+		credential: dbCredential,
+		requireUserVerification: false,
+	}
+	const { verified, authenticationInfo } =
+		await verifyAuthenticationResponse(opts)
+
+	if (verified) {
+		// Update the credential's counter in the DB to the newest count in the authentication
+		credentials[dbCredentialIndex].counter = authenticationInfo.newCounter
+		await saveUser({
+			rpId,
+			identifier,
+			user: {
+				credentials,
+			},
+			userId,
+		})
+	}
+
+	await deleteChallenge({ identifier, rpId, userId })
+
+	const device = {
+		id: dbCredential.id,
+		pubKey: dbCredential.publicKey,
+		address: dbCredential.address || '',
+		transports: dbCredential.transports,
+	}
+
+	return { verified, device }
 }
