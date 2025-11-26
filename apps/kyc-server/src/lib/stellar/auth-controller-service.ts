@@ -3,7 +3,7 @@
  * Manages on-chain account authorization tracking
  */
 
-import { appEnvConfig } from '@packages/lib'
+import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Address,

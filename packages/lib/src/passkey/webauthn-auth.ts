@@ -1,6 +1,6 @@
 // import { createHash } from 'node:crypto'
 
-import { hash, xdr } from '@stellar/stellar-sdk'
+import { xdr } from '@stellar/stellar-sdk'
 import type { Api } from '@stellar/stellar-sdk/rpc'
 import { createHash } from 'crypto'
 import isEqual from 'lodash/isEqual'

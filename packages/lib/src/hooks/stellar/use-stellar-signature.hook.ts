@@ -1,9 +1,9 @@
-import { appEnvConfig } from '@packages/lib/config'
-import type { AppEnvInterface } from '@packages/lib/types'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { useSession } from 'next-auth/react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+import { appEnvConfig } from '../../config'
+import type { AppEnvInterface } from '../../types'
 
 export interface StellarOperation {
 	type: string

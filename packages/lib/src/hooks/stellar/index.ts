@@ -1,11 +1,11 @@
 export type {
+	ContractOperation,
+	StellarAccount,
+} from './use-smart-wallet.hook'
+export { useStellarSorobanAccount } from './use-smart-wallet.hook'
+export type {
 	SignatureResult,
 	StellarOperation,
 	UseStellarSignatureOptions,
-} from './use-stellar-signature'
-export { useStellarSignature } from './use-stellar-signature'
-export type {
-	ContractOperation,
-	StellarAccount,
-} from './use-stellar-soroban-account'
-export { useStellarSorobanAccount } from './use-stellar-soroban-account'
+} from './use-stellar-signature.hook'
+export { useStellarSignature } from './use-stellar-signature.hook'

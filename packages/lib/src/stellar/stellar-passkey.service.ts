@@ -1,12 +1,6 @@
 import { Buffer } from 'node:buffer'
 import { createHash, createPublicKey, createVerify } from 'node:crypto'
-import { devices } from '@packages/drizzle'
-import {
-	computeDeviceIdFromCoseKey,
-	convertCoseToUncompressedPublicKey,
-} from '@packages/lib'
-import { appEnvConfig } from '@packages/lib/config'
-import type { AppEnvInterface } from '@packages/lib/types'
+import { db, devices } from '@packages/drizzle'
 import {
 	Account,
 	Address,
@@ -20,7 +14,12 @@ import {
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 import { eq } from 'drizzle-orm'
-import { getDb } from '../services/db'
+import { appEnvConfig } from '../config'
+import {
+	computeDeviceIdFromCoseKey,
+	convertCoseToUncompressedPublicKey,
+} from '../passkey'
+import type { AppEnvInterface } from '../types'
 import { type RateLimitConfig, SignatureRateLimiter } from './rate-limiter'
 
 /**
@@ -623,7 +622,6 @@ export class StellarPasskeyService {
 			console.log('🔍 Looking up public key for contract:', contractId)
 
 			// Query database for device record with this contract address
-			const db = getDb
 			const deviceRecord = await db
 				.select({
 					publicKey: devices.publicKey,

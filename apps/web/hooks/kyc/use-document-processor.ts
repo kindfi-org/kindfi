@@ -1,5 +1,5 @@
 'use client'
-import { processFile } from '@packages/lib'
+import { processFile } from '@packages/lib/doc-utils'
 import * as pdfjsLib from 'pdfjs-dist'
 import { useCallback, useState } from 'react'
 import {

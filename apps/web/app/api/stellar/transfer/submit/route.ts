@@ -1,4 +1,5 @@
-import { appEnvConfig, buildWebAuthnSignatureScVal } from '@packages/lib'
+import { appEnvConfig } from '@packages/lib/config'
+import { buildWebAuthnSignatureScVal } from '@packages/lib/passkey'
 import {
 	Address,
 	Contract,

@@ -1,4 +1,4 @@
-import type { ExtractedData } from '@packages/lib'
+import type { ExtractedData } from '@packages/lib/doc-utils'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '~/components/base/alert'
 

@@ -9,7 +9,12 @@ const nextConfig: NextConfig = {
 		mdxRs: true,
 		esmExternals: 'loose',
 	},
-	serverExternalPackages: ['@packages/lib'],
+	serverExternalPackages: [
+		'@packages/lib/stellar',
+		'@packages/lib/passkey',
+		'@packages/lib/db',
+		'@packages/lib/supabase-server',
+	],
 	images: {
 		remotePatterns: [
 			{

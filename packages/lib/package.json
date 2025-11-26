@@ -3,10 +3,6 @@
 	"version": "0.0.1",
 	"private": true,
 	"exports": {
-		".": {
-			"import": "./src/index.ts",
-			"require": "./src/index.ts"
-		},
 		"./config": {
 			"import": "./src/config/index.ts",
 			"require": "./src/config/index.ts"
@@ -22,6 +18,18 @@
 		"./providers": {
 			"import": "./src/providers/index.ts",
 			"require": "./src/providers/index.ts"
+		},
+		"./stellar": {
+			"import": "./src/stellar/index.ts",
+			"require": "./src/stellar/index.ts"
+		},
+		"./passkey": {
+			"import": "./src/passkey/index.ts",
+			"require": "./src/passkey/index.ts"
+		},
+		"./db": {
+			"import": "./src/db/index.ts",
+			"require": "./src/db/index.ts"
 		},
 		"./supabase": {
 			"import": "./src/supabase/index.ts",
@@ -46,7 +54,7 @@
 	"dependencies": {
 		"@services/supabase": "workspace:*",
 		"@supabase/ssr": "^0.7.0",
-		"@supabase/supabase-js": "^2.56.0",
+		"@supabase/supabase-js": "^2.75.1",
 		"@tanstack/react-query": "^5.74.7",
 		"cbor-x": "^1.6.0",
 		"lodash": "^4.17.21",

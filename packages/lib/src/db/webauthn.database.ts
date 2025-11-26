@@ -1,10 +1,9 @@
-import { challenges, devices } from '@packages/drizzle'
+import { challenges, db, devices } from '@packages/drizzle'
 import type {
 	AuthenticatorTransportFuture,
 	WebAuthnCredential as BaseWebAuthnCredential,
 } from '@simplewebauthn/server'
 import { and, desc, eq, gt, lt } from 'drizzle-orm'
-import { getDb as db } from '../services/db'
 
 // Extended WebAuthnCredential with Stellar address support (matches passkey-service.ts)
 export interface WebAuthnCredential extends BaseWebAuthnCredential {

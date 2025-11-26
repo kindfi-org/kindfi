@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer'
-import { deriveSignaturePayload } from '@packages/lib'
 import { appEnvConfig } from '@packages/lib/config'
+import { deriveSignaturePayload } from '@packages/lib/passkey'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,

@@ -1,4 +1,4 @@
-import type { ExtractedData } from '@packages/lib'
+import type { ExtractedData } from '@packages/lib/doc-utils'
 import { Loader2, X } from 'lucide-react'
 import Image from 'next/image'
 import type React from 'react'

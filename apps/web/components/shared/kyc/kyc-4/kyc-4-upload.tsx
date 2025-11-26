@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 'use client'
-import type { DocumentType, ExtractedData } from '@packages/lib'
-import { processFile, validateDocument } from '@packages/lib'
+
+import type { DocumentType, ExtractedData } from '@packages/lib/doc-utils'
+import { processFile, validateDocument } from '@packages/lib/doc-utils'
 import { AlertCircle } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
