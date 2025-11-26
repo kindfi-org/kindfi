@@ -4,7 +4,6 @@ import { xdr } from '@stellar/stellar-sdk'
 import type { Api } from '@stellar/stellar-sdk/rpc'
 import { createHash } from 'crypto'
 import isEqual from 'lodash/isEqual'
-import { computeDeviceIdFromCoseKey } from './webauthn-keys'
 
 const P256_ORDER = Buffer.from(
 	'ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551',
@@ -16,7 +15,7 @@ const HALF_ORDER =
 
 export function buildWebAuthnSignatureScVal({
 	assertion,
-	userDevice,
+	userData,
 }: BuildWebAuthnSignatureScValParams): BuildWebAuthnSignatureScValResult {
 	const authenticatorData = base64UrlToBuffer(
 		assertion.response.authenticatorData,
@@ -24,11 +23,7 @@ export function buildWebAuthnSignatureScVal({
 	const clientDataJSON = base64UrlToBuffer(assertion.response.clientDataJSON)
 	const derSignature = base64UrlToBuffer(assertion.response.signature)
 	const signature = convertP256SignatureAsnToCompact(derSignature)
-	// const contractSalt = hash(Buffer.from(userDevice.credential_id, 'base64'))
-	const deviceIdHex = computeDeviceIdFromCoseKey(userDevice.public_key)
-	const deviceId = Buffer.from(deviceIdHex, 'hex')
-
-	console.log('deviceId hex', deviceId.toString('hex'))
+	const deviceId = Buffer.from(userData.device_id_hex, 'hex')
 
 	if (signature.length !== 64) {
 		throw new Error('signature must be 64 bytes after conversion')
@@ -201,10 +196,10 @@ export interface WebAuthnClientDataJSON {
 
 export interface BuildWebAuthnSignatureScValParams {
 	assertion: WebAuthnAssertionResponse
-	userDevice: {
-		address: string
+	userData: {
 		public_key: string
 		credential_id: string
+		device_id_hex: string
 	}
 }
 

@@ -15,6 +15,7 @@ import {
 } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import type { verifyAuthentication } from '../../../../packages/lib/src/passkey/passkey.service'
 
 interface TransferFormData {
 	to: string
@@ -244,7 +245,9 @@ export function SmartWalletTransferDemo() {
 				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, verificationJSON.error)
 			}
 
-			const verificationJSON = await verificationResp.json()
+			const verificationJSON = await (verificationResp.json() as ReturnType<
+				typeof verifyAuthentication
+			>)
 
 			if (!verificationJSON?.verified) {
 				throw new InAppError(
@@ -272,9 +275,9 @@ export function SmartWalletTransferDemo() {
 				},
 				body: JSON.stringify({
 					transactionXDR: data.transactionXDR,
-					verificationJSON,
-					authResponse: authResponse,
 					userDevice: session?.device || session?.user.device,
+					verificationJSON,
+					authResponse,
 				}),
 			})
 

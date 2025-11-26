@@ -33,5 +33,10 @@
 		"noPropertyAccessFromIndexSignature": false
 	},
 	"exclude": ["dist", "node_modules"],
-	"include": ["**/*.ts", "**/*.tsx", "../../packages/lib/src/stellar/stellar-passkey.service.ts", "../../packages/lib/src/stellar/rate-limiter.ts"]
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		"../../packages/lib/src/stellar/stellar-passkey.service.ts",
+		"../../packages/lib/src/stellar/rate-limiter.ts"
+	]
 }

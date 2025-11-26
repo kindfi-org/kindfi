@@ -1,7 +1,10 @@
 import { appEnvConfig } from '@packages/lib/config'
-import { buildWebAuthnSignatureScVal } from '@packages/lib/passkey'
 import {
-	Address,
+	buildWebAuthnSignatureScVal,
+	computeDeviceIdFromCoseKey,
+	type verifyAuthentication,
+} from '@packages/lib/passkey'
+import {
 	Contract,
 	Keypair,
 	type Transaction,
@@ -12,7 +15,8 @@ import { Api, Server } from '@stellar/stellar-sdk/rpc'
 import isEqual from 'lodash/isEqual'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { getPublicKeys } from '~/lib/passkey/stellar'
+
+const appConfig = appEnvConfig('web')
 
 /**
  * POST /api/stellar/transfer/submit
@@ -22,43 +26,35 @@ import { getPublicKeys } from '~/lib/passkey/stellar'
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()
-		const { transactionXDR, authResponse, userDevice, verificationJSON } = body
+		const { transactionXDR, authResponse, userDevice } = body
 		const smartWalletAddress = userDevice?.address
-		const cosePublicKey = userDevice?.public_key
-		const attestationPublicKey = await getPublicKeys(authResponse)
-
+		const verificationJSON = body.verificationJSON as Awaited<
+			ReturnType<typeof verifyAuthentication>
+		>
 		console.log(
 			'verificationJSON: WebAuthn Key Verified. user is now authored to sign. getting attestation public key',
-			attestationPublicKey.publicKey,
-			attestationPublicKey.contractSalt,
+			{ verificationJSON },
 		)
 
-		// const verificationResponse = await verifyAuthenticationResponse()
-
 		// Validate inputs
-		if (!transactionXDR || !authResponse || !smartWalletAddress) {
+		if (
+			!transactionXDR ||
+			!authResponse ||
+			!smartWalletAddress ||
+			!verificationJSON.device.pubKey
+		) {
 			return NextResponse.json(
 				{
 					error:
-						'Missing required fields: transactionXDR, authResponse, smartWalletAddress',
-				},
-				{ status: 400 },
-			)
-		}
-
-		if (!cosePublicKey) {
-			return NextResponse.json(
-				{
-					error: 'Missing COSE public key in userDevice',
+						'Missing required fields: transactionXDR, authResponse, smartWalletAddress, Public Key',
 				},
 				{ status: 400 },
 			)
 		}
 
 		// Get configuration
-		const config = appEnvConfig('web')
-		const server = new Server(config.stellar.rpcUrl)
-		const fundingKeypair = Keypair.fromSecret(config.stellar.fundingAccount)
+		const server = new Server(appConfig.stellar.rpcUrl)
+		const fundingKeypair = Keypair.fromSecret(appConfig.stellar.fundingAccount)
 
 		console.log('📤 Assembling and submitting transaction')
 
@@ -67,7 +63,7 @@ export async function POST(req: NextRequest) {
 			server,
 			smartWalletAddress,
 			fundingKeypair,
-			config.stellar.networkPassphrase,
+			appConfig.stellar.networkPassphrase,
 		)
 
 		console.log('📱 Devices registered in contract:', devices.length)
@@ -85,7 +81,7 @@ export async function POST(req: NextRequest) {
 		// ALSO: DO NOT re-sign with funding account - it was already signed in prepare!
 		const transaction = TransactionBuilder.fromXDR(
 			transactionXDR,
-			config.stellar.networkPassphrase,
+			appConfig.stellar.networkPassphrase,
 		) as Transaction
 
 		console.log('✅ Loaded pre-assembled transaction from prepare endpoint')
@@ -97,9 +93,24 @@ export async function POST(req: NextRequest) {
 		console.log('📝 Auth entries count:', authEntries.length)
 
 		if (authEntries.length) {
+			const publicKeyArray =
+				verificationJSON.device.pubKey instanceof Uint8Array
+					? verificationJSON.device.pubKey
+					: new Uint8Array(
+							Object.values(
+								verificationJSON.device.pubKey as Record<string, number>,
+							),
+						)
+			const publicKey = Buffer.from(publicKeyArray).toString('base64')
+			const credentialId = verificationJSON.device.id
+			const deviceIdHex = computeDeviceIdFromCoseKey(publicKey)
 			const signatureResult = buildWebAuthnSignatureScVal({
 				assertion: authResponse,
-				userDevice,
+				userData: {
+					credential_id: credentialId,
+					public_key: publicKey,
+					device_id_hex: deviceIdHex,
+				},
 			})
 			const {
 				signatureScVal,

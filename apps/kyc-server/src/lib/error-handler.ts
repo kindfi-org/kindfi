@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES, InAppError } from './passkey/errors'
+import { ERROR_MESSAGES, InAppError } from '@packages/lib/stellar'
 
 /**
  * Helper function to handle errors consistently

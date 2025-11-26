@@ -31,7 +31,8 @@ export class SmartWalletTransactionService {
 	private networkPassphrase: string
 	private fundingKeypair?: Keypair
 
-	private readonly STANDARD_FEE = '2500000' // 0.105 XLM
+	// ? WebAuthn Signatures requires a lot of GAS
+	private readonly STANDARD_FEE = '3500000' // 0.35 XLM
 
 	constructor(
 		networkPassphrase?: string,
@@ -327,7 +328,7 @@ export class SmartWalletTransactionService {
 		// Simulate to get auth entry with signature_payload
 		const simulation = await this.server.simulateTransaction(transaction, {
 			// TODO: Dynamic cpu calculation according to action to execute in the Soroban Contracts
-			cpuInstructions: 2_500_000,
+			cpuInstructions: 3_500_000,
 		})
 
 		if (Api.isSimulationError(simulation)) {
@@ -476,7 +477,6 @@ export class SmartWalletTransactionService {
 			'   signatureExpirationLedger:',
 			signaturePayloadResult.signatureExpirationLedger,
 		)
-		console.log('🔑 WebAuthn challenge:', challenge)
 		console.log('📋 Transaction hash:', txHash.toString('hex'))
 
 		// DIAGNOSTIC: Verify XDR encoding contains correct values

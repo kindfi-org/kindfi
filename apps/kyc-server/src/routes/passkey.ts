@@ -1,11 +1,11 @@
-import { corsConfig } from '../config/cors'
-import { handleError } from '../lib/error-handler'
 import {
 	getAuthenticationOptions,
 	getRegistrationOptions,
 	verifyAuthentication,
 	verifyRegistration,
-} from '../lib/passkey/passkey-service'
+} from '@packages/lib/passkey'
+import { corsConfig } from '../config/cors'
+import { handleError } from '../lib/error-handler'
 import { withCORS } from '../middleware/cors'
 
 // Create a configured CORS handler
