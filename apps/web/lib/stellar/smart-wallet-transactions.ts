@@ -16,6 +16,8 @@ import {
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 
+const appConfig: AppEnvInterface = appEnvConfig('web')
+
 /**
  * Smart Wallet Transaction Service
  *
@@ -32,18 +34,16 @@ export class SmartWalletTransactionService {
 	private fundingKeypair?: Keypair
 
 	// ? WebAuthn Signatures requires a lot of GAS
-	private readonly STANDARD_FEE = '3500000' // 0.35 XLM
+	private readonly STANDARD_FEE = '5000000' // 0.41 XLM
 
 	constructor(
 		networkPassphrase?: string,
 		rpcUrl?: string,
 		fundingSecretKey?: string,
 	) {
-		const config: AppEnvInterface = appEnvConfig('web')
-
 		this.networkPassphrase =
-			networkPassphrase || config.stellar.networkPassphrase
-		this.server = new Server(rpcUrl || config.stellar.rpcUrl)
+			networkPassphrase || appConfig.stellar.networkPassphrase
+		this.server = new Server(rpcUrl || appConfig.stellar.rpcUrl)
 
 		if (fundingSecretKey) {
 			this.fundingKeypair = Keypair.fromSecret(fundingSecretKey)

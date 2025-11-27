@@ -50,14 +50,13 @@ export function buildWebAuthnSignatureScVal({
 
 	return {
 		signatureScVal,
+		signature,
 		// authenticatorData,
 		// clientDataJSON,
 		// clientData: parsedClientData,
 		// clientDataHash,
 		// webauthnPayload,
 		// webauthnPayloadHash,
-		// signature,
-		// deviceIdBytes: deviceId,
 		// challenge,
 		// challengeBytes,
 	}
@@ -116,12 +115,15 @@ export function deriveSignaturePayload({
 }
 
 export function convertP256SignatureAsnToCompact(sig: Buffer): Buffer {
+	// ASN Sequence
 	let offset = 0
 	if (sig[offset] !== 0x30) {
 		throw new Error('signature is not a sequence')
 	}
 	offset += 1
 
+	// ASN Sequence Byte Length
+	// Skip length byte(s)
 	const seqLen = sig[offset]
 	offset += 1
 	if (seqLen & 0x80) {
@@ -130,36 +132,47 @@ export function convertP256SignatureAsnToCompact(sig: Buffer): Buffer {
 	}
 
 	if (sig[offset] !== 0x02) {
+		// ASN Integer (R)
 		throw new Error('first element in sequence is not an integer')
 	}
 	offset += 1
 
+	// ASN Integer (R) Byte Length
 	const rLen = sig[offset]
 	offset += 1
+
+	// Read R
 	const rBytes = sig.subarray(offset, offset + rLen)
 	offset += rLen
 
 	if (sig[offset] !== 0x02) {
+		// ASN Integer (S)
 		throw new Error('second element in sequence is not an integer')
 	}
 	offset += 1
 
+	// ASN Integer (S) Byte Length
 	const sLen = sig[offset]
 	offset += 1
-	const sBytes = sig.subarray(offset, offset + sLen)
 
+	// Read S
+	const sBytes = sig.subarray(offset, offset + sLen)
 	offset += sLen
 
+	// Convert to BigInt
 	const rBigInt = bufferToBigint(rBytes)
 	let sBigInt = bufferToBigint(sBytes)
 
+	// Force low S range (canonical form required by secp256r1)
 	const orderBigInt = bufferToBigint(P256_ORDER)
-	if (sBigInt > HALF_ORDER) {
+	if (sBigInt > (orderBigInt - BigInt(1)) / BigInt(2) || sBigInt > HALF_ORDER) {
 		sBigInt = orderBigInt - sBigInt
 	}
 
+	// Pad to 32 bytes
 	const rHex = rBigInt.toString(16).padStart(64, '0')
 	const sHex = sBigInt.toString(16).padStart(64, '0')
+
 	return Buffer.from(rHex + sHex, 'hex')
 }
 
@@ -205,13 +218,13 @@ export interface BuildWebAuthnSignatureScValParams {
 
 export interface BuildWebAuthnSignatureScValResult {
 	signatureScVal: xdr.ScVal
+	signature: Buffer
 	// authenticatorData: Buffer
 	// clientDataJSON: Buffer
 	// clientData: WebAuthnClientDataJSON
 	// clientDataHash: Buffer
 	// webauthnPayload: Buffer
 	// webauthnPayloadHash: Buffer
-	// signature: Buffer
 	// deviceIdBytes: Buffer
 	// challenge?: string
 	// challengeBytes?: Buffer

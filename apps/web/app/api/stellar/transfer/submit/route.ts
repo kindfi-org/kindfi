@@ -4,6 +4,7 @@ import {
 	computeDeviceIdFromCoseKey,
 	type verifyAuthentication,
 } from '@packages/lib/passkey'
+import { StellarPasskeyService } from '@packages/lib/stellar'
 import {
 	Contract,
 	Keypair,
@@ -17,6 +18,12 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 const appConfig = appEnvConfig('web')
+
+const stellarService = new StellarPasskeyService(
+	appConfig.stellar.networkPassphrase,
+	appConfig.stellar.rpcUrl,
+	appConfig.stellar.fundingAccount,
+)
 
 /**
  * POST /api/stellar/transfer/submit
@@ -114,16 +121,22 @@ export async function POST(req: NextRequest) {
 			})
 			const {
 				signatureScVal,
+				signature,
 				// authenticatorData,
 				// clientData,
 				// webauthnPayload,
 				// webauthnPayloadHash,
-				// signature,
 				// challenge,
 				// challengeBytes,
 			} = signatureResult
 
-			console.log('🔐 Contract will verify signature')
+			const verificationResults = await stellarService.verifyPasskeySignature(
+				userDevice.address,
+				signature.toString('base64'),
+				transaction.hash().toString('base64'),
+			)
+
+			console.log('🔐 Contract will verify signature', { verificationResults })
 
 			// Find and update the auth entry for the smart wallet
 			for (const authEntry of authEntries) {
