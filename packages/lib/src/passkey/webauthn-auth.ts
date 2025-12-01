@@ -29,6 +29,14 @@ export function buildWebAuthnSignatureScVal({
 		throw new Error('signature must be 64 bytes after conversion')
 	}
 
+	// Parse clientDataJSON to object
+	let parsedClientData: WebAuthnClientDataJSON = {}
+	try {
+		parsedClientData = JSON.parse(clientDataJSON.toString('utf8'))
+	} catch (e) {
+		// leave as empty object if parsing fails
+	}
+
 	const signatureScVal = xdr.ScVal.scvMap([
 		new xdr.ScMapEntry({
 			key: xdr.ScVal.scvSymbol('authenticator_data'),
@@ -48,17 +56,41 @@ export function buildWebAuthnSignatureScVal({
 		}),
 	])
 
+	// Compute clientDataHash
+	const clientDataHash = createHash('sha256').update(clientDataJSON).digest()
+
+	// Compose webauthnPayload (authenticatorData + clientDataHash)
+	const webauthnPayload = Buffer.concat([authenticatorData, clientDataHash])
+
+	// Compute webauthnPayloadHash
+	const webauthnPayloadHash = createHash('sha256')
+		.update(webauthnPayload)
+		.digest()
+
+	// Extract challenge and challengeBytes if present
+	let challenge: string | undefined
+	let challengeBytes: Buffer | undefined
+	if (parsedClientData && typeof parsedClientData.challenge === 'string') {
+		challenge = parsedClientData.challenge
+		try {
+			challengeBytes = base64UrlToBuffer(challenge)
+		} catch {
+			challengeBytes = undefined
+		}
+	}
+
 	return {
 		signatureScVal,
 		signature,
-		// authenticatorData,
-		// clientDataJSON,
-		// clientData: parsedClientData,
-		// clientDataHash,
-		// webauthnPayload,
-		// webauthnPayloadHash,
-		// challenge,
-		// challengeBytes,
+		authenticatorData,
+		clientDataJSON,
+		clientData: parsedClientData,
+		clientDataHash,
+		webauthnPayload,
+		webauthnPayloadHash,
+		deviceIdBytes: deviceId,
+		challenge,
+		challengeBytes,
 	}
 }
 
@@ -219,15 +251,15 @@ export interface BuildWebAuthnSignatureScValParams {
 export interface BuildWebAuthnSignatureScValResult {
 	signatureScVal: xdr.ScVal
 	signature: Buffer
-	// authenticatorData: Buffer
-	// clientDataJSON: Buffer
-	// clientData: WebAuthnClientDataJSON
-	// clientDataHash: Buffer
-	// webauthnPayload: Buffer
-	// webauthnPayloadHash: Buffer
-	// deviceIdBytes: Buffer
-	// challenge?: string
-	// challengeBytes?: Buffer
+	authenticatorData: Buffer
+	clientDataJSON: Buffer
+	clientData: WebAuthnClientDataJSON
+	clientDataHash: Buffer
+	webauthnPayload: Buffer
+	webauthnPayloadHash: Buffer
+	deviceIdBytes: Buffer
+	challenge?: string
+	challengeBytes?: Buffer
 }
 
 export interface DeviceIdOptions {

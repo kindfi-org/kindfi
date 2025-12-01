@@ -270,18 +270,6 @@ export function SmartWalletTransferDemo() {
 				authResponse,
 			})
 
-			// TODO: If the attestation can be verified here, then it should go through the stellar blockchain
-			// ! Strategy still not the same... simplify. A verification already happening, but is not "preparing" the signature to on-chain verification
-			const signatureVerification = await smartWalletActions.verifySignature(
-				verificationJSON.device.address,
-				JSON.stringify(authResponse.response),
-				data.hash,
-			)
-
-			if (!signatureVerification) {
-				throw new Error('Signature verification failed')
-			}
-
 			// Submit the signed transaction
 			const submitResponse = await fetch('/api/stellar/transfer/submit', {
 				method: 'POST',
@@ -289,7 +277,7 @@ export function SmartWalletTransferDemo() {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					transactionXDR: data.transactionXDR,
+					transactionData: data,
 					userDevice: session?.device || session?.user.device,
 					verificationJSON,
 					authResponse,

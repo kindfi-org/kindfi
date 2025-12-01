@@ -249,40 +249,67 @@ impl CustomAccountInterface for AccountContract {
         #[cfg(test)]
         log!(&env, "__check_auth called with device_id: {:?}", signature.device_id);
 
-        let devices: Vec<DevicePublicKey> = env
-            .storage()
-            .instance()
-            .get(&STORAGE_KEY_DEVICES)
-            .ok_or(Error::NotInitiated)?;
-        let device = devices
-            .iter()
-            .find(|d| d.device_id == signature.device_id)
-            .ok_or(Error::DeviceNotFound)?;
+        // Defensive: always return explicit error, never panic/unwrap
+        let devices: Vec<DevicePublicKey> = match env.storage().instance().get(&STORAGE_KEY_DEVICES) {
+            Some(devs) => devs,
+            None => {
+                #[cfg(test)]
+                log!(&env, "__check_auth: NotInitiated");
+                return Err(Error::NotInitiated);
+            }
+        };
 
-        // ? WebAuthn signature payload Formula: SHA256(authenticator_data || SHA256(client_data_json))
+        let device = match devices.iter().find(|d| d.device_id == signature.device_id) {
+            Some(dev) => dev,
+            None => {
+                #[cfg(test)]
+                log!(&env, "__check_auth: DeviceNotFound");
+                return Err(Error::DeviceNotFound);
+            }
+        };
+
+        // WebAuthn signature payload: SHA256(authenticator_data || SHA256(client_data_json))
         let mut payload = Bytes::new(&env);
-        let client_data_hash = env.crypto().sha256(&signature.client_data_json);      
+        let client_data_hash = env.crypto().sha256(&signature.client_data_json);
         payload.append(&signature.authenticator_data);
         payload.extend_from_array(&client_data_hash.to_array());
         let payload = env.crypto().sha256(&payload);
 
-        env.crypto().secp256r1_verify(
+        let verify_result = env.crypto().secp256r1_verify(
             &device.public_key,
             &payload,
             &signature.signature,
         );
+        // If the function returns (), treat as error (always fail)
+        // If it returns bool, check for false
+        let is_valid = core::any::type_name_of_val(&verify_result) == "bool" && unsafe {
+            core::mem::transmute_copy::<_, bool>(&verify_result)
+        };
+        if !is_valid {
+            #[cfg(test)]
+            log!(&env, "__check_auth: Secp256r1VerifyFailed");
+            return Err(Error::Secp256r1VerifyFailed);
+        }
 
         // Base64Url encoding without padding, 32 bytes = 43 characters
         const CHALLENGE_LENGTH: usize = 43;
         let client_data_buffer = signature.client_data_json.to_buffer::<1024>();
         let client_data_json = client_data_buffer.as_slice();
-        let (client_data, _): (ClientDataJson, _) =
-            serde_json_core::de::from_slice(client_data_json).map_err(|_| Error::JsonParseError)?;
+        let (client_data, _): (ClientDataJson, _) = match serde_json_core::de::from_slice(client_data_json) {
+            Ok(val) => val,
+            Err(_) => {
+                #[cfg(test)]
+                log!(&env, "__check_auth: JsonParseError");
+                return Err(Error::JsonParseError);
+            }
+        };
 
         let mut expected_challenge = [b'_'; CHALLENGE_LENGTH];
         base64_url::encode(&mut expected_challenge, &signature_payload.to_array());
 
         if client_data.challenge.as_bytes() != expected_challenge {
+            #[cfg(test)]
+            log!(&env, "__check_auth: ClientDataJsonChallengeIncorrect");
             return Err(Error::ClientDataJsonChallengeIncorrect);
         }
 

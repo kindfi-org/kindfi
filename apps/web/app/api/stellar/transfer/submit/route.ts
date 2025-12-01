@@ -33,7 +33,8 @@ const stellarService = new StellarPasskeyService(
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()
-		const { transactionXDR, authResponse, userDevice } = body
+		const { transactionData, authResponse, userDevice } = body
+		const { transactionXDR, hash } = transactionData
 		const smartWalletAddress = userDevice?.address
 		const verificationJSON = body.verificationJSON as Awaited<
 			ReturnType<typeof verifyAuthentication>
@@ -122,18 +123,39 @@ export async function POST(req: NextRequest) {
 			const {
 				signatureScVal,
 				signature,
-				// authenticatorData,
-				// clientData,
-				// webauthnPayload,
-				// webauthnPayloadHash,
-				// challenge,
-				// challengeBytes,
+				authenticatorData,
+				clientData,
+				webauthnPayload,
+				webauthnPayloadHash,
+				challenge,
+				challengeBytes,
 			} = signatureResult
 
+			// Logging WebAuthn Signature Details
+			console.log('🔏 WebAuthn Signature Details:')
+			console.log('   Signature (base64):', signature.toString('base64'))
+			console.log(
+				'   Authenticator Data (base64):',
+				authenticatorData.toString('base64'),
+			)
+			console.log('   Client Data (object):', clientData)
+			console.log(
+				'   WebAuthn Payload (base64):',
+				webauthnPayload.toString('base64'),
+			)
+			console.log(
+				'   WebAuthn Payload Hash (hex):',
+				webauthnPayloadHash.toString('hex'),
+			)
+			console.log('   Challenge (utf8):', challenge)
+			console.log('   Challenge Bytes (hex):', challengeBytes?.toString('hex'))
+
+			// TODO: If the attestation can be verified here, then it should go through the stellar blockchain
+			// ! Strategy still not the same... simplify. A verification already happening, but is not "preparing" the signature to on-chain verification
 			const verificationResults = await stellarService.verifyPasskeySignature(
-				userDevice.address,
-				signature.toString('base64'),
-				transaction.hash().toString('base64'),
+				verificationJSON.device.address,
+				JSON.stringify(authResponse.response),
+				hash,
 			)
 
 			console.log('🔐 Contract will verify signature', { verificationResults })
