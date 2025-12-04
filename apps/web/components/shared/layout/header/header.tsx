@@ -1,8 +1,7 @@
 'use client'
 
 import {
-	ClipboardCheckIcon,
-	ClipboardCopyIcon,
+	ExternalLink,
 	LogOut,
 	Menu,
 	Settings,
@@ -36,6 +35,7 @@ import { useAuth } from '~/hooks/use-auth'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
 import { getAvatarFallback } from '~/lib/utils'
+import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { LanguageSelector } from './language-selector'
 import { Navigation } from './navigation'
 
@@ -106,40 +106,32 @@ const WalletCopyButton = ({
 	address: string
 	className?: string
 }) => {
-	const { t } = useI18n()
-	const [copied, setCopied] = useState(false)
-
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(address)
-			setCopied(true)
-			toast(t('user.addressCopied'))
-			setTimeout(() => setCopied(false), 2000)
-		} catch (error) {
-			console.error('Failed to copy address:', error)
-		}
-	}
+	const explorerUrl = getStellarExplorerUrl(address)
 
 	const start = address.substring(0, 6)
 	const end = address.substring(address.length - 6)
 
 	return (
 		<Button
-			onClick={handleCopy}
+			asChild
+			variant="outline"
 			className={['flex w-full justify-between', className]
 				.filter(Boolean)
 				.join(' ')}
 		>
-			<span className="text-sm font-medium text-muted-foreground">
-				{start}
-				{'...'}
-				{end}
-			</span>
-			{copied ? (
-				<ClipboardCheckIcon className="size-4" />
-			) : (
-				<ClipboardCopyIcon className="size-4" />
-			)}
+			<a
+				href={explorerUrl}
+				target="_blank"
+				rel="noopener noreferrer"
+				className="flex w-full items-center justify-between"
+			>
+				<span className="text-sm font-medium text-muted-foreground">
+					{start}
+					{'...'}
+					{end}
+				</span>
+				<ExternalLink className="size-4 text-muted-foreground" />
+			</a>
 		</Button>
 	)
 }

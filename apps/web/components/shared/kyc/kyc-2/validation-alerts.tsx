@@ -48,9 +48,27 @@ export function ValidationAlerts({
 	return (
 		<>
 			{errors.length > 0 && (
-				<Alert variant="destructive">
+				<Alert
+					variant={documentType === 'Passport' ? 'default' : 'destructive'}
+					className={
+						documentType === 'Passport'
+							? 'bg-yellow-50 border-yellow-200 text-yellow-900'
+							: ''
+					}
+				>
 					<AlertCircle className="h-4 w-4" />
 					<AlertDescription>
+						<p className="font-medium mb-2">
+							{documentType === 'Passport'
+								? 'Verification Warnings:'
+								: 'Validation Errors:'}
+						</p>
+						{documentType === 'Passport' && (
+							<p className="text-sm mb-2 text-yellow-800">
+								Some information could not be automatically extracted. Please verify
+								all information manually before proceeding.
+							</p>
+						)}
 						<ul className="list-disc pl-4 mt-2">
 							{errors.map((error) => (
 								<li key={`error-${error}`}>{error}</li>

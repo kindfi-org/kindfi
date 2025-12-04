@@ -43,9 +43,18 @@ export function Calendar({
 		today.getDate(),
 	)
 
-	// Start the calendar view at 18 years ago
+	// Start the calendar view at selected date or 18 years ago
 	// eslint-disable-next-line react-hooks/rules-of-hooks
-	const [currentDate, setCurrentDate] = React.useState(eighteenYearsAgo)
+	const [currentDate, setCurrentDate] = React.useState(
+		selected || eighteenYearsAgo,
+	)
+
+	// Sync currentDate with selected date when it changes
+	React.useEffect(() => {
+		if (selected) {
+			setCurrentDate(selected)
+		}
+	}, [selected])
 
 	const daysInMonth = new Date(
 		currentDate.getFullYear(),

@@ -93,27 +93,9 @@ export function PasskeyRegistrationComponent() {
 		}
 	}, [regSuccess, userEmail, userId, deviceData, router])
 
-	useEffect(() => {
-		console.log('Passkey registration success effect triggered', {
-			regSuccess,
-			userEmail,
-			userId,
-			deviceData,
-		})
-
-		if (!regSuccess || !userEmail || !userId || !deviceData) {
-			router.push('/sign-in')
-			return () => {}
-		}
-
-		const timeout = setTimeout(() => {
-			handleFinalize()
-		}, 1000)
-
-		return () => {
-			clearTimeout(timeout)
-		}
-	}, [regSuccess, userEmail, userId, deviceData, handleFinalize])
+	// Removed automatic redirection - user will manually choose to continue
+	// Note: We keep the user on this page even if registration succeeds
+	// so they can choose their next action
 
 	if (!isWebAuthnSupported) {
 		return (
@@ -159,15 +141,22 @@ export function PasskeyRegistrationComponent() {
 					</CardHeader>
 					<CardContent className="text-center">
 						<p className="text-sm text-muted-foreground">
-							Redirecting you to sign in
+							You can now sign in using your passkey or continue to your profile.
 						</p>
 					</CardContent>
-					<CardFooter>
+					<CardFooter className="flex flex-col space-y-2">
 						<Button
 							onClick={handleFinalize}
 							className="w-full gradient-btn text-white"
 						>
-							Continue to Sign In
+							Continue to Profile
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() => router.push('/sign-in')}
+							className="w-full"
+						>
+							Go to Login
 						</Button>
 					</CardFooter>
 				</Card>

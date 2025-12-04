@@ -115,9 +115,11 @@ export function FinalReview({
 										<p className="font-medium">Front Side</p>
 										<div className="aspect-[3/2] relative bg-gray-100 rounded-lg overflow-hidden">
 											<Image
-												src={`${PLACEHOLDER_IMG}?height=200&width=300`}
+												src={PLACEHOLDER_IMG}
 												alt="ID Front"
-												className="object-cover w-full h-full"
+												fill
+												className="object-cover"
+												sizes="(max-width: 768px) 100vw, 50vw"
 											/>
 										</div>
 									</div>
@@ -125,9 +127,11 @@ export function FinalReview({
 										<p className="font-medium">Back Side</p>
 										<div className="aspect-[3/2] relative bg-gray-100 rounded-lg overflow-hidden">
 											<Image
-												src={`${PLACEHOLDER_IMG}?height=200&width=300`}
+												src={PLACEHOLDER_IMG}
 												alt="ID Back"
-												className="object-cover w-full h-full"
+												fill
+												className="object-cover"
+												sizes="(max-width: 768px) 100vw, 50vw"
 											/>
 										</div>
 									</div>
@@ -158,9 +162,11 @@ export function FinalReview({
 									<p className="font-medium">Proof Document</p>
 									<div className="aspect-[3/2] relative bg-gray-100 rounded-lg overflow-hidden">
 										<Image
-											src={`${PLACEHOLDER_IMG}?height=200&width=300`}
+											src={PLACEHOLDER_IMG}
 											alt="Proof of Address"
-											className="object-cover w-full h-full"
+											fill
+											className="object-cover"
+											sizes="(max-width: 768px) 100vw, 50vw"
 										/>
 									</div>
 								</div>
