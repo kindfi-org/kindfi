@@ -180,6 +180,19 @@ export default function IDDocumentUpload({
 		if (!frontExtractedData || !documentType || !frontFile) {
 			toast({
 				title: 'Incomplete Information',
+				description:
+					documentType === 'Passport'
+						? 'Please upload your passport.'
+						: 'Please upload both sides of your ID document.',
+				className: 'bg-destructive text-destructive-foreground',
+			} as ToastType)
+			return
+		}
+
+		// For non-passport documents, require back file
+		if (documentType !== 'Passport' && !backFile) {
+			toast({
+				title: 'Incomplete Information',
 				description: 'Please upload both sides of your ID document.',
 				className: 'bg-destructive text-destructive-foreground',
 			} as ToastType)
@@ -188,7 +201,20 @@ export default function IDDocumentUpload({
 
 		const { isValid, errors } = validateDocument(frontExtractedData)
 
-		if (isValid) {
+		// For passports, allow proceeding even with validation warnings
+		// Show warnings but don't block submission
+		if (documentType === 'Passport') {
+			if (errors.length > 0) {
+				setValidationErrors(errors)
+				toast({
+					title: 'Verification Warnings',
+					description:
+						'Some information could not be automatically extracted. ' +
+						'Please review the warnings and verify all information manually before submitting.',
+					className: 'bg-yellow-500 text-yellow-900',
+				} as ToastType)
+			}
+			// Allow proceeding even with warnings
 			if (onNext) {
 				onNext({
 					documentType,
@@ -198,12 +224,24 @@ export default function IDDocumentUpload({
 				})
 			}
 		} else {
-			setValidationErrors(errors)
-			toast({
-				title: 'Validation Failed',
-				description: 'Please review the document requirements.',
-				className: 'bg-destructive text-destructive-foreground',
-			} as ToastType)
+			// For other documents, require valid extraction
+			if (isValid) {
+				if (onNext) {
+					onNext({
+						documentType,
+						extractedData: frontExtractedData,
+						frontImage: frontFile,
+						backImage: backFile,
+					})
+				}
+			} else {
+				setValidationErrors(errors)
+				toast({
+					title: 'Validation Failed',
+					description: 'Please review the document requirements.',
+					className: 'bg-destructive text-destructive-foreground',
+				} as ToastType)
+			}
 		}
 	}, [
 		frontExtractedData,
@@ -217,13 +255,15 @@ export default function IDDocumentUpload({
 	])
 
 	return (
-		<Card className="w-full max-w-xl mx-auto max-h-[90vh] flex flex-col">
+		<Card className="w-full mx-auto border-0 shadow-none max-h-[90vh] flex flex-col">
 			<CardHeader className="flex-shrink-0">
 				<CardTitle className="text-2xl font-semibold">
 					Upload ID Document
 				</CardTitle>
 				<p className="text-gray-500">
-					Please provide clear photos of both sides of your ID document.
+					{documentType === 'Passport'
+						? 'Please provide a clear photo of your passport.'
+						: 'Please provide clear photos of both sides of your ID document.'}
 				</p>
 			</CardHeader>
 
@@ -237,7 +277,13 @@ export default function IDDocumentUpload({
 
 				<DocumentTypeSelector
 					value={documentType}
-					onChange={(value) => setDocumentType(value)}
+					onChange={(value) => {
+						setDocumentType(value)
+						// Clear back file when switching to passport
+						if (value === 'Passport' && backFile) {
+							removeFile(false)
+						}
+					}}
 				/>
 
 				<div className="grid grid-cols-1 gap-4">
@@ -263,27 +309,29 @@ export default function IDDocumentUpload({
 						/>
 					</div>
 
-					<div>
-						<DocumentUploadZone
-							side="back"
-							previewUrl={backPreviewUrl}
-							isProcessing={isProcessing}
-							progress={progress}
-							onDrop={(e) =>
-								handleDrop(e as React.DragEvent<HTMLDivElement>, false)
-							}
-							onFileSelect={(e) => handleFileSelect(e, false)}
-							onRemove={() => removeFile(false)}
-							isDisabled={!documentType}
-						/>
-						<ExtractedDataDisplay
-							data={backExtractedData}
-							side="back"
-							isProcessing={Boolean(
-								isProcessing && backFile && !backExtractedData,
-							)}
-						/>
-					</div>
+					{documentType !== 'Passport' && (
+						<div>
+							<DocumentUploadZone
+								side="back"
+								previewUrl={backPreviewUrl}
+								isProcessing={isProcessing}
+								progress={progress}
+								onDrop={(e) =>
+									handleDrop(e as React.DragEvent<HTMLDivElement>, false)
+								}
+								onFileSelect={(e) => handleFileSelect(e, false)}
+								onRemove={() => removeFile(false)}
+								isDisabled={!documentType}
+							/>
+							<ExtractedDataDisplay
+								data={backExtractedData}
+								side="back"
+								isProcessing={Boolean(
+									isProcessing && backFile && !backExtractedData,
+								)}
+							/>
+						</div>
+					)}
 				</div>
 
 				<ValidationAlerts
@@ -298,7 +346,12 @@ export default function IDDocumentUpload({
 				</Button>
 				<Button
 					onClick={handleContinue}
-					disabled={isProcessing || !frontFile || !backFile || !documentType}
+					disabled={
+						isProcessing ||
+						!frontFile ||
+						!documentType ||
+						(documentType !== 'Passport' && !backFile)
+					}
 				>
 					Continue <ArrowRight className="w-4 h-4 ml-2" />
 				</Button>

@@ -276,8 +276,14 @@ function getNestedValue<T = unknown>(
 
 // App detection helper
 function detectApp(): AppName | undefined {
-	// Check package.json name or process.cwd() to determine app
-	if (typeof process !== 'undefined') {
+	// First check environment variable (works in all runtimes including Edge)
+	if (process.env.APP_NAME) {
+		return process.env.APP_NAME as AppName
+	}
+
+	// Check package.json name or process.cwd() to determine app (Node.js runtime only)
+	// Skip process.cwd() in Edge Runtime as it's not available
+	if (typeof process !== 'undefined' && typeof process.cwd === 'function') {
 		try {
 			const packagePath = process.cwd() || process.env.PWD || ''
 			if (packagePath.includes('/apps/web')) return 'web'
@@ -287,7 +293,9 @@ function detectApp(): AppName | undefined {
 			return process.env.APP_NAME as AppName
 		}
 	}
-	return (process.env.APP_NAME as 'web' | 'kyc-server') || undefined
+	
+	// Default fallback
+	return undefined
 }
 
 // Generic appEnvConfig function that validates transformed config

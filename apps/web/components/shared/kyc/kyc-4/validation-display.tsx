@@ -11,16 +11,23 @@ export const ValidationDisplay: React.FC<ValidationDisplayProps> = ({
 	if (validationErrors.length === 0) return null
 
 	return (
-		<Alert variant="destructive">
+		<Alert
+			variant="default"
+			className="bg-yellow-50 border-yellow-200 text-yellow-900"
+		>
 			<AlertCircle className="h-4 w-4" />
 			<AlertDescription>
 				<div className="mt-2">
-					<p className="font-medium">Validation Errors:</p>
+					<p className="font-medium mb-2">Verification Warnings:</p>
+					<p className="text-sm mb-2 text-yellow-800">
+						Some information could not be automatically extracted. Please verify
+						all information manually before proceeding.
+					</p>
 					<ul className="list-disc pl-6 mt-2 space-y-1">
 						{validationErrors.map((error) => (
 							<li
 								key={error.replace(/\s/g, '-').toLowerCase()?.substring(0, 16)}
-								className="text-destructive"
+								className="text-yellow-800"
 							>
 								{error}
 							</li>

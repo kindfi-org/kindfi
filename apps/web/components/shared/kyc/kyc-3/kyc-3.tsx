@@ -1,7 +1,6 @@
 'use client'
 
 import { AlertCircle } from 'lucide-react'
-import Image from 'next/image'
 import type React from 'react'
 import { useCallback, useRef, useState } from 'react'
 import Webcam from 'react-webcam'
@@ -65,7 +64,7 @@ const ProofOffaceVerification: React.FC<Props> = ({ onCancel, onContinue }) => {
 		onContinue(image)
 	}
 	return (
-		<Card className="w-full max-w-xl mx-auto">
+		<Card className="w-full mx-auto border-0 shadow-none">
 			<CardHeader>
 				<CardTitle className="text-2xl font-semibold flex items-center gap-2">
 					<span>
@@ -117,10 +116,11 @@ const ProofOffaceVerification: React.FC<Props> = ({ onCancel, onContinue }) => {
 								className="w-full h-full object-cover"
 							/>
 						) : (
-							<Image
+							// eslint-disable-next-line @next/next/no-img-element
+							<img
 								src={image}
 								alt="Captured"
-								className="w-full h-full object-cover"
+								className="w-full h-full object-cover rounded-lg"
 							/>
 						)}
 						<button

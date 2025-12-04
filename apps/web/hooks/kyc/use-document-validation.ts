@@ -34,11 +34,25 @@ export function useDocumentValidation(documentType: DocumentType) {
 
 			switch (documentType) {
 				case 'Passport':
+					// For passports, make validation less strict - show warnings but don't block
+					// Users can verify manually if OCR didn't extract perfectly
 					if (!data.nationality) {
-						errors.push('No nationality information found')
+						errors.push('No nationality information found (please verify manually)')
 					}
-					if (!data.idNumber?.match(DocumentPatterns.Passport.idNumber)) {
-						errors.push('Invalid passport number format')
+					// Only validate format if idNumber exists
+					if (data.idNumber && !DocumentPatterns.Passport.idNumber.test(data.idNumber)) {
+						// Try alternative patterns before marking as invalid
+						const alternativePatterns = [
+							/[A-Z0-9]{6,12}/i,
+							/[A-Z]{1,2}[0-9]{6,9}/,
+							/[0-9]{9}/,
+						]
+						const isValidFormat = alternativePatterns.some((pattern) =>
+							pattern.test(data.idNumber!),
+						)
+						if (!isValidFormat) {
+							errors.push('Passport number format may be invalid (please verify manually)')
+						}
 					}
 					break
 

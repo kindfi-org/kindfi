@@ -7,7 +7,6 @@ const isProduction = appConfig.env.nodeEnv === 'production'
 const nextConfig: NextConfig = {
 	experimental: {
 		mdxRs: true,
-		esmExternals: 'loose',
 	},
 	serverExternalPackages: ['@packages/lib'],
 	images: {

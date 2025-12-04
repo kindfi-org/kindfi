@@ -2,8 +2,9 @@
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Plus, TrendingUp } from 'lucide-react'
+import { ArrowRight, Plus, Settings, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { Button } from '~/components/base/button'
 import { Badge } from '~/components/base/badge'
@@ -11,6 +12,7 @@ import { getUserCreatedProjects } from '~/lib/queries/projects/get-user-projects
 import { Progress } from '~/components/base/progress'
 import Image from 'next/image'
 import { staggerContainer } from '~/lib/constants/animations'
+import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 
 interface CreatorProfileProps {
 	userId: string
@@ -43,11 +45,91 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 		},
 	)
 
-	const activeProjects = projects.filter(
+	const { getMultipleBalances } = useEscrow()
+	const [escrowBalances, setEscrowBalances] = useState<
+		Record<string, number>
+	>({})
+	const [isLoadingBalances, setIsLoadingBalances] = useState(false)
+
+	// Fetch escrow balances for all projects that have escrow addresses
+	useEffect(() => {
+		const fetchBalances = async (showLoading = true) => {
+			const projectsWithEscrow = projects.filter(
+				(p) => p.escrowContractAddress,
+			)
+			if (projectsWithEscrow.length === 0) return
+
+			try {
+				if (showLoading) setIsLoadingBalances(true)
+				const addresses = projectsWithEscrow.map(
+					(p) => p.escrowContractAddress!,
+				)
+				const balances = await getMultipleBalances(
+					{ addresses },
+					'multi-release', // Default to multi-release, could be enhanced to detect type
+				)
+
+				// Create a map of address -> balance
+				// Balances are returned in the same order as addresses
+				const balanceMap: Record<string, number> = {}
+				addresses.forEach((address, index) => {
+					const balanceResponse = balances[index]
+					if (balanceResponse?.balance !== undefined) {
+						balanceMap[address] = balanceResponse.balance
+					}
+				})
+				setEscrowBalances(balanceMap)
+			} catch (error) {
+				console.error('Failed to fetch escrow balances', error)
+			} finally {
+				if (showLoading) setIsLoadingBalances(false)
+			}
+		}
+
+		if (projects.length > 0) {
+			// Initial fetch with loading state
+			fetchBalances(true)
+
+			// Set up polling to refresh balances every 10 seconds (without loading state)
+			const intervalId = setInterval(() => {
+				fetchBalances(false)
+			}, 10000) // Poll every 10 seconds
+
+			return () => {
+				clearInterval(intervalId)
+			}
+		}
+	}, [projects, getMultipleBalances])
+
+	// Create projects with escrow balances
+	const projectsWithBalances = useMemo(() => {
+		return projects.map((project) => {
+			const escrowBalance =
+				project.escrowContractAddress &&
+				escrowBalances[project.escrowContractAddress]
+			const raised = Number(escrowBalance ?? project.raised ?? 0)
+			const goal = Number(project.goal ?? 0)
+			const percentageComplete =
+				goal > 0 ? Math.min((raised / goal) * 100, 100) : 0
+
+			return {
+				...project,
+				raised,
+				percentageComplete,
+			}
+		})
+	}, [projects, escrowBalances])
+
+	const activeProjects = projectsWithBalances.filter(
 		(p) => p.status === 'active' || p.status === 'review',
 	)
-	const completedProjects = projects.filter((p) => p.status === 'funded')
-	const totalRaised = projects.reduce((sum, p) => sum + Number(p.raised || 0), 0)
+	const completedProjects = projectsWithBalances.filter(
+		(p) => p.status === 'funded',
+	)
+	const totalRaised = projectsWithBalances.reduce(
+		(sum, p) => sum + Number(p.raised || 0),
+		0,
+	)
 
 	return (
 		<motion.div
@@ -193,22 +275,22 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 							</motion.div>
 							Active Campaigns
 						</h3>
-						<motion.div
-							variants={staggerContainer}
-							initial="initial"
-							animate="animate"
-							className="grid gap-4 md:grid-cols-2"
-						>
+					<motion.div
+						variants={staggerContainer}
+						initial="initial"
+						animate="animate"
+						className="grid gap-4 md:grid-cols-2"
+					>
 						{activeProjects.map((project, index) => (
-								<motion.div
-									key={project.id}
-									variants={cardVariants}
-									custom={index}
-								>
-									<ProjectCard project={project} />
-								</motion.div>
-							))}
-						</motion.div>
+							<motion.div
+								key={project.id}
+								variants={cardVariants}
+								custom={index}
+							>
+								<ProjectCard project={project} />
+							</motion.div>
+						))}
+					</motion.div>
 					</motion.div>
 				) : (
 					<motion.div
@@ -217,30 +299,12 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0 }}
 					>
-						<Card className="border-0 bg-card">
-							<CardContent className="py-12 text-center">
-								<p className="text-muted-foreground mb-4">
-									You don't have any active campaigns yet
-								</p>
-								<motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-									<Button 
-										asChild
-										className="bg-primary hover:bg-primary/90 text-primary-foreground"
-									>
-										<Link href="/create-project">
-											<Plus className="h-4 w-4 mr-2" />
-											Create Your First Campaign
-										</Link>
-									</Button>
-								</motion.div>
-					</CardContent>
-				</Card>
 					</motion.div>
 				)}
 			</AnimatePresence>
 
 			{/* All Campaigns */}
-			{projects.length > 0 && (
+			{projectsWithBalances.length > 0 && (
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -256,7 +320,7 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 						animate="animate"
 						className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
 					>
-						{projects.map((project, index) => (
+						{projectsWithBalances.map((project, index) => (
 							<motion.div
 								key={project.id}
 								variants={cardVariants}
@@ -291,6 +355,7 @@ function ProjectCard({
 	compact?: boolean
 }) {
 	const percentage = project.percentageComplete ?? 0
+	const displayRaised = project.raised ?? 0
 	const statusColors: Record<string, string> = {
 		active: 'bg-primary text-primary-foreground border-0',
 		review: 'bg-secondary text-secondary-foreground border-0',
@@ -344,7 +409,7 @@ function ProjectCard({
 						<div className="flex justify-between text-sm">
 							<span className="text-muted-foreground font-medium">Raised</span>
 							<span className="font-bold text-primary">
-								${Number(project.raised).toLocaleString()} / ${Number(project.goal).toLocaleString()}
+								${Number(displayRaised).toLocaleString()} / ${Number(project.goal).toLocaleString()}
 							</span>
 						</div>
 						<div className="relative h-3 bg-muted rounded-full overflow-hidden">
@@ -379,20 +444,42 @@ function ProjectCard({
 									</Badge>
 								</motion.div>
 							))}
-		</div>
+						</div>
 					)}
-					<motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-						<Button 
-							asChild 
-							variant="outline" 
-							className="w-full mt-auto border-border hover:bg-muted"
+					<div className="flex gap-2 mt-auto">
+						<motion.div 
+							whileHover={{ scale: 1.02 }} 
+							whileTap={{ scale: 0.98 }}
+							className="flex-1"
 						>
-							<Link href={`/projects/${project.slug || project.id}`}>
-								View Campaign
-								<ArrowRight className="h-4 w-4 ml-2" />
-							</Link>
-						</Button>
-					</motion.div>
+							<Button 
+								asChild 
+								variant="outline" 
+								className="w-full border-border hover:bg-muted"
+							>
+								<Link href={`/projects/${project.slug || project.id}`}>
+									View Campaign
+									<ArrowRight className="h-4 w-4 ml-2" />
+								</Link>
+							</Button>
+						</motion.div>
+						<motion.div 
+							whileHover={{ scale: 1.02 }} 
+							whileTap={{ scale: 0.98 }}
+							className="flex-1"
+						>
+							<Button 
+								asChild 
+								variant="outline" 
+								className="w-full border-border hover:bg-muted"
+							>
+								<Link href={`/projects/${project.slug || project.id}/manage`}>
+									<Settings className="h-4 w-4 mr-2" />
+									Manage
+								</Link>
+							</Button>
+						</motion.div>
+					</div>
 				</CardContent>
 			</Card>
 		</motion.div>

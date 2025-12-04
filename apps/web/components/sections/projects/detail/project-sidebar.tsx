@@ -22,6 +22,7 @@ import { Input } from '~/components/base/input'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useAuth } from '~/hooks/use-auth'
 import { progressBarAnimation } from '~/lib/constants/animations'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
@@ -45,6 +46,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		disconnect,
 		signTransaction,
 	} = useWallet()
+	const { user } = useAuth()
 
 	const [onChainRaised, setOnChainRaised] = useState<number | null>(null)
 	const [isFetchingBalance, setIsFetchingBalance] = useState(false)
@@ -156,12 +158,40 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				throw new Error('Transaction failed')
 			}
 
+			// 5) Create contribution record in database
+			if (user?.id) {
+				try {
+					const txHash = 'txHash' in sendResult ? sendResult.txHash : undefined
+					const response = await fetch('/api/contributions/create', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							projectId: project.id,
+							contractId: project.escrowContractAddress,
+							amount: data.investmentAmount,
+							transactionHash: txHash,
+						}),
+					})
+
+					if (!response.ok) {
+						const errorData = await response.json()
+						console.error('Failed to create contribution:', errorData)
+						// Don't throw - donation succeeded on-chain, just log the error
+					}
+				} catch (error) {
+					console.error('Error creating contribution record:', error)
+					// Don't throw - donation succeeded on-chain
+				}
+			}
+
 			toast.success('Thank you for your support!', {
 				description: `You've donated $${data.investmentAmount.toLocaleString()}`,
 				icon: <CircleCheck className="text-primary" />,
 			})
 
-			// 5) Refresh balance
+			// 6) Refresh balance
 			fetchEscrowBalance()
 		} catch (error) {
 			console.error(error)
@@ -333,7 +363,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				{/* Wallet status & controls */}
 				<div className="p-3 mt-4 text-sm bg-white rounded-md border border-gray-200">
 					<div className="flex justify-between items-center mb-2">
-						<span className="font-medium">Anonymous Donor</span>
+						<span className="font-medium">Donor details</span>
 						<span className={isConnected ? 'text-green-600' : 'text-red-600'}>
 							{isConnected ? 'Connected' : 'Not connected'}
 						</span>

@@ -4,7 +4,8 @@ import type { Session } from 'next-auth'
 import { appEnvConfig } from '../../config'
 import type { AppEnvInterface } from '../../types'
 
-const appConfig: AppEnvInterface = appEnvConfig()
+// Pass 'web' explicitly to avoid Edge Runtime detection issues
+const appConfig: AppEnvInterface = appEnvConfig('web')
 
 export const updateSession = async (
 	request: NextRequest,
