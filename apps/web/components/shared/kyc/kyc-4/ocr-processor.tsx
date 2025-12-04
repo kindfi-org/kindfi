@@ -70,7 +70,6 @@ const handleContinue = (
 			description:
 				'Some information could not be automatically extracted. ' +
 				'Please review the warnings and verify all information manually before submitting.',
-			className: 'bg-yellow-500 text-yellow-900',
 		})
 	}
 

@@ -1,20 +1,28 @@
 import { supabase } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 
-export async function GET(
-	_request: NextRequest,
-	_response: NextResponse,
-	{ params }: { params: { tagId: string } },
-) {
+type TagRouteContext = {
+	params: Promise<{
+		tagId: string
+	}>
+}
+
+async function resolveTagParams(context: TagRouteContext) {
+	const params = await context.params
+	return params?.tagId
+}
+
+export async function GET(_request: NextRequest, context: TagRouteContext) {
 	try {
-		if (!params || !params.tagId) {
+		const tagId = await resolveTagParams(context)
+		if (!tagId) {
 			return NextResponse.json({ error: 'Tag ID is required' }, { status: 400 })
 		}
 
 		const { data, error } = await supabase
 			.from('project_tags')
 			.select('*')
-			.eq('id', params.tagId)
+			.eq('id', tagId)
 			.single()
 
 		if (error || !data) {
@@ -30,13 +38,9 @@ export async function GET(
 	}
 }
 
-export async function PUT(
-	request: NextRequest,
-	_Response: NextResponse,
-	context: { params: { tagId: string } },
-) {
+export async function PUT(request: NextRequest, context: TagRouteContext) {
 	try {
-		const { tagId } = context.params
+		const tagId = await resolveTagParams(context)
 		if (!tagId) {
 			return NextResponse.json({ error: 'Tag ID is required' }, { status: 400 })
 		}
@@ -88,13 +92,9 @@ export async function PUT(
 	}
 }
 
-export async function DELETE(
-	_request: NextRequest,
-	_response: NextResponse,
-	context: { params: { tagId: string } },
-) {
+export async function DELETE(_request: NextRequest, context: TagRouteContext) {
 	try {
-		const { tagId } = context.params
+		const tagId = await resolveTagParams(context)
 		if (!tagId) {
 			return NextResponse.json({ error: 'Tag ID is required' }, { status: 400 })
 		}

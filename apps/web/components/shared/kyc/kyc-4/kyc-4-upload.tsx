@@ -157,7 +157,6 @@ const ProofOfAddressUpload = ({
 						description:
 							`OCR processing encountered an issue: ${result.error}. ` +
 							'You can still proceed - please verify all information manually.',
-						className: 'bg-yellow-500 text-yellow-900',
 					})
 					// Set empty extracted data to allow proceeding
 					setExtractedData({
@@ -175,13 +174,11 @@ const ProofOfAddressUpload = ({
 							description:
 								'Some information could not be automatically extracted. ' +
 								'You can still proceed - please verify all information manually.',
-							className: 'bg-yellow-500 text-yellow-900',
 						})
 					} else {
 						toast({
 							title: 'Success',
 							description: 'Document processed successfully!',
-							className: 'bg-green-500 text-green-900',
 						})
 					}
 				}
@@ -194,7 +191,6 @@ const ProofOfAddressUpload = ({
 					description:
 						'An error occurred while processing the document. ' +
 						'You can still proceed - please verify all information manually.',
-					className: 'bg-yellow-500 text-yellow-900',
 				})
 				// Set empty extracted data to allow proceeding
 				setExtractedData({
@@ -250,7 +246,6 @@ const ProofOfAddressUpload = ({
 			toast({
 				title: 'Incomplete Information',
 				description: 'Please upload a document and select a document type.',
-				className: 'bg-destructive text-destructive-foreground',
 			} as ToastType)
 			return
 		}
@@ -266,7 +261,6 @@ const ProofOfAddressUpload = ({
 				description:
 					'Some information could not be automatically extracted. ' +
 					'Please review the warnings and verify all information manually before submitting.',
-				className: 'bg-yellow-500 text-yellow-900',
 			} as ToastType)
 		}
 
@@ -282,7 +276,6 @@ const ProofOfAddressUpload = ({
 			toast({
 				title: 'Validation Successful',
 				description: 'Your document has been validated and processed.',
-				className: 'bg-green-500',
 			} as ToastType)
 		}
 	}
