@@ -487,8 +487,8 @@ export class SmartWalletTransactionService {
 				transactionXDR,
 				this.networkPassphrase,
 			) as Transaction
-			// biome-ignore lint: accessing auth entries requires type assertion
-			const checkOp = xdrCheck.operations[0] as any
+			const checkOp = xdrCheck
+				.operations[0] as unknown as Api.SimulateHostFunctionResult
 			const checkAuthEntries = checkOp?.auth || []
 			if (checkAuthEntries.length > 0) {
 				const checkAuthEntry = checkAuthEntries[0]
