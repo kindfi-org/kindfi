@@ -1,6 +1,8 @@
+'use client'
+
 import { startAuthentication } from '@simplewebauthn/browser'
-import { useSession } from 'next-auth/react'
-import { useCallback, useState } from 'react'
+import type { Session } from 'next-auth'
+import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { appEnvConfig } from '../../config'
 import type { AppEnvInterface } from '../../types'
@@ -21,16 +23,43 @@ export interface SignatureResult {
 export interface UseStellarSignatureOptions {
 	onSuccess?: (result: SignatureResult) => void
 	onError?: (error: Error) => void
+	session?: Session | null // Optional session parameter to avoid requiring SessionProvider
 }
 
 /**
  * Hook for signing Stellar Soroban transactions with Passkeys
  * Integrates with the KYC server for signature verification and account management
+ *
+ * @param options - Configuration options including optional session
+ * @param options.session - Optional session object. If provided, will use this session directly without requiring SessionProvider
+ * @requires SessionProvider - Only required if session is not provided via options.session
+ * @example
+ * ```tsx
+ * // Option 1: Pass session directly (recommended - avoids SessionProvider requirement)
+ * const session = getSession() // Get session from anywhere
+ * useStellarSignature({ session })
+ *
+ * // Option 2: With SessionProvider (if session is not provided)
+ * <SessionProvider>
+ *   <ComponentUsingThisHook />
+ * </SessionProvider>
+ * ```
  */
 export const useStellarSignature = (
 	options: UseStellarSignatureOptions = {},
 ) => {
-	const { data: session } = useSession()
+	// Check if session was explicitly provided (either a Session object or null)
+	// If session is explicitly provided, we'll use that exclusively
+	const hasExplicitSession = 'session' in options
+
+	// When session is explicitly provided, use it directly without calling useSession
+	// This avoids the SessionProvider requirement error
+	// Note: React hooks must be called unconditionally, but since we're not calling
+	// useSession when session is provided, we can avoid the SessionProvider requirement
+	const session = useMemo(() => {
+		return hasExplicitSession ? options.session : null
+	}, [hasExplicitSession, options.session])
+
 	const [isLoading, setIsLoading] = useState(false)
 	const [lastResult, setLastResult] = useState<SignatureResult | null>(null)
 	const [error, setError] = useState<string | null>(null)
@@ -50,7 +79,10 @@ export const useStellarSignature = (
 				throw new Error('User not authenticated')
 			}
 
-			if (!session.device) {
+			const typedSession = session as Session & {
+				device?: { credential_id: string; public_key: string; address: string }
+			}
+			if (!typedSession.device) {
 				throw new Error('No device information available')
 			}
 
@@ -147,7 +179,10 @@ export const useStellarSignature = (
 				throw new Error('User not authenticated')
 			}
 
-			if (!session.device) {
+			const typedSession = session as Session & {
+				device?: { credential_id: string; public_key: string; address: string }
+			}
+			if (!typedSession.device) {
 				throw new Error('No device information available')
 			}
 

@@ -8,11 +8,11 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
-import { and, eq } from 'drizzle-orm'
+import { and, eq } from '@packages/drizzle'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { signOut } from 'next-auth/react'
 import { validateCsrfToken } from '~/app/actions/csrf'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { Logger } from '~/lib/logger'
@@ -150,25 +150,42 @@ export async function createSessionAction({
 }
 
 export async function signOutAction(): Promise<void> {
-	const supabase = await createSupabaseServerClient()
+	const cookieStore = await cookies()
 
 	try {
-		// Clear NextAuth session
-		await signOut({ redirect: false })
+		// Clear NextAuth session cookie
+		const cookieName =
+			process.env.NODE_ENV === 'production'
+				? '__Secure-next-auth.session-token'
+				: 'next-auth.session-token'
+		
+		cookieStore.delete(cookieName)
 
+		// Also clear the CSRF token cookie if it exists
+		cookieStore.delete('csrf-token')
+
+		// Sign out from Supabase
 		try {
+			const supabase = await createSupabaseServerClient()
 			const { error } = await supabase.auth.signOut()
 
 			if (error) {
-				const response = errorHandler.handleAuthError(error, 'sign_out')
-				redirect(`/?error=${encodeURIComponent(response.message)}`)
+				console.error('Supabase sign out error:', error)
+				// Continue with redirect even if Supabase sign out fails
 			}
 		} catch (error) {
-			console.error('No supabase session', error)
+			console.error('No supabase session or error during sign out:', error)
+			// Continue with redirect even if Supabase sign out fails
 		}
 
 		redirect('/sign-in?success=Successfully signed out')
 	} catch (error) {
+		// If redirect fails, it might be a NEXT_REDIRECT error which is expected
+		// @ts-expect-error - NEXT_REDIRECT is a special Next.js error type
+		if (error && typeof error === 'object' && 'digest' in error && error.digest?.startsWith('NEXT_REDIRECT')) {
+			throw error
+		}
+
 		const response = errorHandler.handleAuthError(
 			error as AuthError,
 			'sign_out',

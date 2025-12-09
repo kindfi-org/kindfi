@@ -129,7 +129,7 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent
-				className="p-0 sm:max-w-xl"
+				className="p-0 w-[95vw] sm:w-full sm:max-w-xl max-h-[90vh] my-4 mx-auto overflow-hidden flex flex-col"
 				aria-label="KYC Verification Process"
 				aria-describedby="kyc-step-description"
 			>
@@ -139,40 +139,42 @@ export function KYCModal({ isOpen, onClose }: KYCModalProps) {
 				{isLoading && <div className="p-4">Submitting...</div>}
 				{error && <div className="p-4 text-red-500">{error}</div>}
 
-				{currentStep === 1 && (
-					<IdentityVerification
-						onCancel={handleCancel}
-						onNext={handleIdentitySubmit}
-						defaultValues={identityDefaultValues}
-					/>
-				)}
+				<div className="overflow-y-auto flex-1 min-h-0">
+					{currentStep === 1 && (
+						<IdentityVerification
+							onCancel={handleCancel}
+							onNext={handleIdentitySubmit}
+							defaultValues={identityDefaultValues}
+						/>
+					)}
 
-				{currentStep === 2 && (
-					<IDDocumentUpload onBack={prevStep} onNext={handleDocumentSubmit} />
-				)}
+					{currentStep === 2 && (
+						<IDDocumentUpload onBack={prevStep} onNext={handleDocumentSubmit} />
+					)}
 
-				{currentStep === 3 && (
-					<ProofOffaceVerification
-						onCancel={prevStep}
-						onContinue={handleFaceVerificationSubmit}
-					/>
-				)}
+					{currentStep === 3 && (
+						<ProofOffaceVerification
+							onCancel={prevStep}
+							onContinue={handleFaceVerificationSubmit}
+						/>
+					)}
 
-				{currentStep === 4 && (
-					<ProofOfAddressUpload
-						onBack={prevStep}
-						onNext={handleProofOfAddressSubmit}
-					/>
-				)}
+					{currentStep === 4 && (
+						<ProofOfAddressUpload
+							onBack={prevStep}
+							onNext={handleProofOfAddressSubmit}
+						/>
+					)}
 
-				{currentStep === 5 && (
-					<FinalReview
-						onBack={prevStep}
-						onSubmit={handleFinalSubmit}
-						onStepChange={goToStep}
-						kycData={kycData}
-					/>
-				)}
+					{currentStep === 5 && (
+						<FinalReview
+							onBack={prevStep}
+							onSubmit={handleFinalSubmit}
+							onStepChange={goToStep}
+							kycData={kycData}
+						/>
+					)}
+				</div>
 			</DialogContent>
 		</Dialog>
 	)

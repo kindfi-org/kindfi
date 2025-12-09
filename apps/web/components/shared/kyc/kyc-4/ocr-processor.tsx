@@ -51,22 +51,30 @@ const handleContinue = (
 	toast: ReturnType<typeof useToast>['toast'],
 	setValidationErrors: React.Dispatch<React.SetStateAction<string[]>>,
 ) => {
-	if (!extractedData) {
-		toast({ title: 'Error', description: 'No data extracted' })
-		return
-	}
+	// Create minimal extractedData if null (allows proceeding even if OCR failed)
+	const dataToUse: ExtractedData =
+		extractedData ||
+		({
+			date: null,
+			address: null,
+		} as ExtractedData)
 
-	const validation = validateDocument(extractedData)
-	if (!validation.isValid) {
+	const validation = validateDocument(dataToUse)
+
+	// For proof of address documents, allow proceeding even with validation warnings
+	// Show warnings but don't block submission
+	if (validation.errors.length > 0) {
 		setValidationErrors(validation.errors)
 		toast({
-			title: 'Validation Error',
-			description: 'Document validation failed',
+			title: 'Verification Warnings',
+			description:
+				'Some information could not be automatically extracted. ' +
+				'Please review the warnings and verify all information manually before submitting.',
 		})
-		return
 	}
 
-	onNext({ documentType, extractedData })
+	// Allow proceeding even with warnings
+	onNext({ documentType, extractedData: dataToUse })
 }
 
 export const OCRProcessor: React.FC<OCRProcessorProps> = ({
@@ -97,7 +105,7 @@ export const OCRProcessor: React.FC<OCRProcessorProps> = ({
 						)
 					}
 				}}
-				disabled={isProcessing || !extractedData || !documentType}
+				disabled={isProcessing || !documentType}
 			>
 				Continue <ArrowRight className="ml-2 h-4 w-4" />
 			</Button>

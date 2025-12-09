@@ -1,7 +1,8 @@
 // TODO: REFACTOR THIS TO DO HOOK FOR SMART WALLET MANAGEMENT (transferXML/USDC, transaction invoke, balances, verification)
+'use client'
 
 import { debounce } from 'lodash'
-import type { User } from 'next-auth'
+import type { Session, User } from 'next-auth'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useStellarSignature } from './use-stellar-signature.hook'
@@ -26,7 +27,7 @@ export interface StellarAccount {
  * Hook for managing Stellar Soroban accounts and contract interactions with Passkeys
  * Provides high-level operations for DeFi and smart contract interactions
  */
-export const useStellarSorobanAccount = (session?: User) => {
+export const useStellarSorobanAccount = (session?: Session | null) => {
 	const [account, setAccount] = useState<StellarAccount | null>(null)
 	const [isInitialized, setIsInitialized] = useState(false)
 	const [requestId, setRequestId] = useState<string | null>(null)
@@ -42,6 +43,9 @@ export const useStellarSorobanAccount = (session?: User) => {
 		onError: (error) => {
 			console.error('❌ Transaction failed:', error)
 		},
+		// Pass session directly to avoid useSession call inside useStellarSignature
+		// This prevents the SessionProvider requirement error
+		session: session ?? null,
 	})
 
 	/**
@@ -49,7 +53,7 @@ export const useStellarSorobanAccount = (session?: User) => {
 	 * This simulates the approval process - in production, this should only happen after KYC approval
 	 */
 	const initializeAccount = useCallback(async (): Promise<StellarAccount> => {
-		if (!session || !session?.device) {
+		if (!session?.user || !session?.user?.device) {
 			throw new Error('User not authenticated or no device available')
 		}
 
@@ -59,7 +63,7 @@ export const useStellarSorobanAccount = (session?: User) => {
 
 		try {
 			// Check if user already has a Stellar account
-			const existingAddress = session.device.address
+			const existingAddress = session.user.device.address
 
 			// User has an existing address, get account info
 			const accountInfo = await stellarSignature.getAccountInfo(existingAddress)
@@ -177,7 +181,7 @@ export const useStellarSorobanAccount = (session?: User) => {
 	// Auto-initialize account when session is available
 	useEffect(() => {
 		if (
-			session?.device &&
+			session?.user?.device &&
 			!isInitialized &&
 			!stellarSignature.isLoading &&
 			!requestId

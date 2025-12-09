@@ -7,7 +7,6 @@ const isProduction = appConfig.env.nodeEnv === 'production'
 const nextConfig: NextConfig = {
 	experimental: {
 		mdxRs: true,
-		esmExternals: 'loose',
 	},
 	serverExternalPackages: [
 		'@packages/lib/stellar',
@@ -23,13 +22,18 @@ const nextConfig: NextConfig = {
 				port: appConfig.database.port || '54321',
 				pathname: '/storage/v1/object/public/project_thumbnails/**',
 			},
+			{
+				protocol: 'https',
+				hostname: '*.supabase.co',
+				pathname: '/storage/v1/object/public/**',
+			},
 		],
 	},
 	async headers() {
 		// Apply headers for both production and development
-		const connectSrc = isProduction
-			? `'self' https://flagcdn.com https://apis.google.com https://friendbot-futurenet.stellar.org https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com`
-			: `'self' https://friendbot-futurenet.stellar.org http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://flagcdn.com https://apis.google.com https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com`
+	const connectSrc = isProduction
+		? `'self' https://flagcdn.com https://apis.google.com https://friendbot-futurenet.stellar.org https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com https://api.trustlesswork.com`
+		: `'self' https://friendbot-futurenet.stellar.org http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://flagcdn.com https://apis.google.com https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com https://api.trustlesswork.com`
 
 		if (isProduction) {
 			return [
@@ -54,7 +58,7 @@ const nextConfig: NextConfig = {
                 default-src 'self';
                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
                 style-src 'self' 'unsafe-inline';
-                img-src 'self' data: blob: https://flagcdn.com;
+                img-src 'self' data: blob: https://flagcdn.com https://*.jsdelivr.net https://cdn.jsdelivr.net https://unpkg.com https://*.unpkg.com https://raw.githubusercontent.com https://*.githubusercontent.com https://freighter.app https://albedo.link https://rabet.io https://xbull.app https://walletconnect.org https://*.walletconnect.org https://*.walletconnect.com https://stellar.creit.tech;
                 font-src 'self' data:;
                 connect-src ${connectSrc};
 								frame-src 'self' https://www.youtube.com;
@@ -89,7 +93,7 @@ const nextConfig: NextConfig = {
                 default-src 'self';
                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
                 style-src 'self' 'unsafe-inline';
-                img-src 'self' data: blob: https://flagcdn.com https://randomuser.me http://127.0.0.1:54321;
+                img-src 'self' data: blob: https://flagcdn.com https://randomuser.me http://127.0.0.1:54321 https://*.jsdelivr.net https://cdn.jsdelivr.net https://unpkg.com https://*.unpkg.com https://raw.githubusercontent.com https://*.githubusercontent.com https://freighter.app https://albedo.link https://rabet.io https://xbull.app https://walletconnect.org https://*.walletconnect.org https://*.walletconnect.com https://stellar.creit.tech;
                 font-src 'self' data:;
                 connect-src ${connectSrc};
 								frame-src 'self' https://www.youtube.com;

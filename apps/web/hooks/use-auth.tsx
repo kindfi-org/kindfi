@@ -43,7 +43,10 @@ export function AuthProvider({
 	)
 	const [isSupabaseUserLoading, setIsSupabaseUserLoading] = useState(true)
 	const supabase = createSupabaseBrowserClient()
-	const stellarSorobanAccountState = useStellarSorobanAccount(session?.user)
+	// Pass the full session object to useStellarSorobanAccount so it can pass it to useStellarSignature
+	// This avoids the SessionProvider requirement error in nested hooks
+	// Pass the full session object so useStellarSignature can use it instead of calling useSession
+	const stellarSorobanAccountState = useStellarSorobanAccount(userSession)
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {

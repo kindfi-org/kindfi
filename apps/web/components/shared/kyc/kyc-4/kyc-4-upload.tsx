@@ -151,16 +151,30 @@ const ProofOfAddressUpload = ({
 				const result = await processFile(uploadedFile)
 
 				if (result.error) {
-					setValidationErrors([result.error])
-					toast({ title: 'Error', description: result.error })
+					// For proof of address documents, allow proceeding even if OCR fails
+					// Show warning but don't block
+					toast({
+						title: 'OCR Processing Warning',
+						description:
+							`OCR processing encountered an issue: ${result.error}. ` +
+							'You can still proceed - please verify all information manually.',
+					})
+					// Set empty extracted data to allow proceeding
+					setExtractedData({
+						date: null,
+						address: null,
+					} as ExtractedData)
+					setValidationErrors([])
 				} else {
 					setExtractedData(result.extractedData)
 					setValidationErrors(result.validationErrors)
 
 					if (result.validationErrors.length > 0) {
 						toast({
-							title: 'Warning',
-							description: 'Document has validation errors.',
+							title: 'Validation Warnings',
+							description:
+								'Some information could not be automatically extracted. ' +
+								'You can still proceed - please verify all information manually.',
 						})
 					} else {
 						toast({
@@ -172,11 +186,19 @@ const ProofOfAddressUpload = ({
 
 				setProgress(result.progress)
 			} catch (error) {
-				toast({
-					title: 'Error',
-					description: 'An error occurred while processing the document.',
-				})
 				console.error('Error in handleFileUpload:', error)
+				toast({
+					title: 'OCR Processing Warning',
+					description:
+						'An error occurred while processing the document. ' +
+						'You can still proceed - please verify all information manually.',
+				})
+				// Set empty extracted data to allow proceeding
+				setExtractedData({
+					date: null,
+					address: null,
+				} as ExtractedData)
+				setValidationErrors([])
 			} finally {
 				setIsProcessing(false)
 			}
@@ -225,38 +247,42 @@ const ProofOfAddressUpload = ({
 			toast({
 				title: 'Incomplete Information',
 				description: 'Please upload a document and select a document type.',
-				className: 'bg-destructive text-destructive-foreground',
 			} as ToastType)
 			return
 		}
 
 		const { isValid, errors } = validateDocument(extractedData, toast)
 
-		if (isValid) {
-			if (onNext) {
-				onNext({
-					documentType,
-					extractedData,
-				})
-			}
+		// For proof of address documents, allow proceeding even with validation warnings
+		// Show warnings but don't block submission
+		if (errors.length > 0) {
+			setValidationErrors(errors)
+			toast({
+				title: 'Verification Warnings',
+				description:
+					'Some information could not be automatically extracted. ' +
+					'Please review the warnings and verify all information manually before submitting.',
+			} as ToastType)
+		}
 
+		// Allow proceeding even with warnings (similar to passport handling)
+		if (onNext) {
+			onNext({
+				documentType,
+				extractedData,
+			})
+		}
+
+		if (isValid) {
 			toast({
 				title: 'Validation Successful',
 				description: 'Your document has been validated and processed.',
-				className: 'bg-green-500',
-			} as ToastType)
-		} else {
-			setValidationErrors(errors)
-			toast({
-				title: 'Validation Failed',
-				description: 'Please review the document requirements.',
-				className: 'bg-destructive text-destructive-foreground',
 			} as ToastType)
 		}
 	}
 
 	return (
-		<Card className="w-full max-w-xl mx-auto">
+		<Card className="w-full mx-auto border-0 shadow-none">
 			<CardHeader>
 				<CardTitle className="text-2xl font-semibold">
 					Upload Proof of Address

@@ -1,8 +1,7 @@
 'use client'
 
 import {
-	ClipboardCheckIcon,
-	ClipboardCopyIcon,
+	ExternalLink,
 	LogOut,
 	Menu,
 	Settings,
@@ -33,8 +32,10 @@ import {
 	SheetTrigger,
 } from '~/components/base/sheet'
 import { useAuth } from '~/hooks/use-auth'
+import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
 import { getAvatarFallback } from '~/lib/utils'
+import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { LanguageSelector } from './language-selector'
 import { Navigation } from './navigation'
 
@@ -105,40 +106,32 @@ const WalletCopyButton = ({
 	address: string
 	className?: string
 }) => {
-	const { t } = useI18n()
-	const [copied, setCopied] = useState(false)
-
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(address)
-			setCopied(true)
-			toast(t('user.addressCopied'))
-			setTimeout(() => setCopied(false), 2000)
-		} catch (error) {
-			console.error('Failed to copy address:', error)
-		}
-	}
+	const explorerUrl = getStellarExplorerUrl(address)
 
 	const start = address.substring(0, 6)
 	const end = address.substring(address.length - 6)
 
 	return (
 		<Button
-			onClick={handleCopy}
+			asChild
+			variant="outline"
 			className={['flex w-full justify-between', className]
 				.filter(Boolean)
 				.join(' ')}
 		>
-			<span className="text-sm font-medium text-muted-foreground">
-				{start}
-				{'...'}
-				{end}
-			</span>
-			{copied ? (
-				<ClipboardCheckIcon className="size-4" />
-			) : (
-				<ClipboardCopyIcon className="size-4" />
-			)}
+			<a
+				href={explorerUrl}
+				target="_blank"
+				rel="noopener noreferrer"
+				className="flex w-full items-center justify-between"
+			>
+				<span className="text-sm font-medium text-muted-foreground">
+					{start}
+					{'...'}
+					{end}
+				</span>
+				<ExternalLink className="size-4 text-muted-foreground" />
+			</a>
 		</Button>
 	)
 }
@@ -146,13 +139,41 @@ const WalletCopyButton = ({
 const UserMenu = ({ user }: { user: User }) => {
 	const router = useRouter()
 	const { t } = useI18n()
+	const { disconnect } = useWallet()
+	const [isSigningOut, setIsSigningOut] = useState(false)
 
 	const handleSignOutAction = async () => {
+		if (isSigningOut) return
+
 		try {
+			setIsSigningOut(true)
+			
+			// Disconnect wallet/passkey first
+			try {
+				disconnect()
+			} catch (error) {
+				console.error('Error disconnecting wallet:', error)
+				// Continue with sign out even if wallet disconnect fails
+			}
+
+			// Then sign out from Supabase
+			// Note: signOutAction may throw a NEXT_REDIRECT error, which is expected
+			// and should be allowed to propagate so Next.js can handle the redirect
 			await signOutAction()
-			router.push('/')
 		} catch (error) {
+			// Check if this is a Next.js redirect error (which is expected)
+			// @ts-expect-error - NEXT_REDIRECT is a special Next.js error type
+			if (error && typeof error === 'object' && 'digest' in error && error.digest?.startsWith('NEXT_REDIRECT')) {
+				// This is a redirect, let it propagate
+				throw error
+			}
+			
+			// Handle actual errors
 			console.error('Error signing out:', error)
+			toast.error(t('auth.signOutError') || 'Error signing out')
+			// Redirect to home even on error
+			router.push('/')
+			setIsSigningOut(false)
 		}
 	}
 
@@ -197,13 +218,16 @@ const UserMenu = ({ user }: { user: User }) => {
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>
-					<form action={handleSignOutAction} className="w-full">
-						<button type="submit" className="flex w-full items-center">
-							<LogOut className="mr-2 h-4 w-4" />
-							{t('nav.closeSession')}
-						</button>
-					</form>
+				<DropdownMenuItem asChild>
+					<button
+						type="button"
+						onClick={handleSignOutAction}
+						disabled={isSigningOut}
+						className="flex w-full items-center cursor-pointer"
+					>
+						<LogOut className="mr-2 h-4 w-4" />
+						{isSigningOut ? t('auth.signingOut') || 'Signing out...' : t('nav.closeSession')}
+					</button>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
@@ -250,7 +274,46 @@ const MobileNavigation = () => {
 }
 
 const MobileUserMenu = ({ user }: { user: User }) => {
+	const router = useRouter()
 	const { t } = useI18n()
+	const { disconnect } = useWallet()
+	const [isSigningOut, setIsSigningOut] = useState(false)
+
+	const handleSignOutAction = async () => {
+		if (isSigningOut) return
+
+		try {
+			setIsSigningOut(true)
+			
+			// Disconnect wallet/passkey first
+			try {
+				disconnect()
+			} catch (error) {
+				console.error('Error disconnecting wallet:', error)
+				// Continue with sign out even if wallet disconnect fails
+			}
+
+			// Then sign out from Supabase
+			// Note: signOutAction may throw a NEXT_REDIRECT error, which is expected
+			// and should be allowed to propagate so Next.js can handle the redirect
+			await signOutAction()
+		} catch (error) {
+			// Check if this is a Next.js redirect error (which is expected)
+			// @ts-expect-error - NEXT_REDIRECT is a special Next.js error type
+			if (error && typeof error === 'object' && 'digest' in error && error.digest?.startsWith('NEXT_REDIRECT')) {
+				// This is a redirect, let it propagate
+				throw error
+			}
+			
+			// Handle actual errors
+			console.error('Error signing out:', error)
+			toast.error(t('auth.signOutError') || 'Error signing out')
+			// Redirect to home even on error
+			router.push('/')
+			setIsSigningOut(false)
+		}
+	}
+
 	return (
 		<div className="flex flex-col space-y-4">
 			<div className="flex items-center space-x-4">
@@ -274,16 +337,16 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 						{t('nav.dashboard')}
 					</Button>
 				</Link>
-				<form action={signOutAction}>
-					<Button
-						variant="ghost"
-						className="w-full justify-start"
-						type="submit"
-					>
-						<LogOut className="mr-2 h-4 w-4" />
-						{t('nav.signOut')}
-					</Button>
-				</form>
+				<Button
+					variant="ghost"
+					className="w-full justify-start"
+					type="button"
+					onClick={handleSignOutAction}
+					disabled={isSigningOut}
+				>
+					<LogOut className="mr-2 h-4 w-4" />
+					{isSigningOut ? t('auth.signingOut') || 'Signing out...' : t('nav.signOut')}
+				</Button>
 			</div>
 		</div>
 	)

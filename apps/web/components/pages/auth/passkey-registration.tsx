@@ -5,7 +5,7 @@ import { CheckCircle, Shield, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { signOutAction } from '~/app/actions/auth'
 
 import { Button } from '~/components/base/button'
@@ -79,41 +79,40 @@ export function PasskeyRegistrationComponent() {
 			return () => {}
 		}
 
-		const timeout = setTimeout(() => {
-			finalize()
-			clearTimeout(timeout)
-		}, 1000)
+		handleFinalize()
+	}, [regSuccess, userEmail, userId, deviceData, router])
 
-		async function finalize() {
-			try {
-				const supabase = createSupabaseBrowserClient()
-				// Update profile with richer info (e.g. display name). Ignore result errors silently.
-				await supabase
-					.from('profiles')
-					.update({
-						display_name: userEmail.split('@')[0],
-					})
-					.eq('next_auth_user_id', userId)
-				// Sign in through credentials provider once device/passkey ready
-				await signIn('credentials', {
-					redirect: false,
-					userId,
-					email: userEmail,
-					credentialId: deviceData?.credentialId || '',
-					pubKey: deviceData?.publicKey || '',
-					address: deviceData?.address || '',
+	const handleFinalize = useCallback(async () => {
+		if (!regSuccess || !userEmail || !userId || !deviceData) return
+
+		try {
+			const supabase = createSupabaseBrowserClient()
+			// Update profile with richer info (e.g. display name). Ignore result errors silently.
+			await supabase
+				.from('profiles')
+				.update({
+					display_name: userEmail.split('@')[0],
 				})
-				router.push('/profile')
-			} catch (e) {
-				console.error('Finalize passkey registration error', e)
-				router.push('/sign-in')
-			}
+				.eq('next_auth_user_id', userId)
+			// Sign in through credentials provider once device/passkey ready
+			await signIn('credentials', {
+				redirect: false,
+				userId,
+				email: userEmail,
+				credentialId: deviceData?.credentialId || '',
+				pubKey: deviceData?.publicKey || '',
+				address: deviceData?.address || '',
+			})
+			router.push('/profile')
+		} catch (e) {
+			console.error('Finalize passkey registration error', e)
+			router.push('/sign-in')
 		}
+	}, [regSuccess, userEmail, userId, deviceData, router])
 
-		return () => {
-			clearTimeout(timeout)
-		}
-	}, [regSuccess, userEmail, userId, router, deviceData])
+	// Removed automatic redirection - user will manually choose to continue
+	// Note: We keep the user on this page even if registration succeeds
+	// so they can choose their next action
 
 	if (!isWebAuthnSupported) {
 		return (
@@ -159,9 +158,25 @@ export function PasskeyRegistrationComponent() {
 					</CardHeader>
 					<CardContent className="text-center">
 						<p className="text-sm text-muted-foreground">
-							Redirecting you to your new profile...
+							You can now sign in using your passkey or continue to your
+							profile.
 						</p>
 					</CardContent>
+					<CardFooter className="flex flex-col space-y-2">
+						<Button
+							onClick={handleFinalize}
+							className="w-full gradient-btn text-white"
+						>
+							Continue to Profile
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() => router.push('/sign-in')}
+							className="w-full"
+						>
+							Go to Login
+						</Button>
+					</CardFooter>
 				</Card>
 			</AuthLayout>
 		)
