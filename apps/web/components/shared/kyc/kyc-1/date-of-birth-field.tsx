@@ -40,7 +40,10 @@ export function DateOfBirthField({ control }: FormFieldProps) {
 	const maxYear = eighteenYearsAgo
 
 	// Generate years array
-	const years = Array.from({ length: maxYear - minYear + 1 }, (_, i) => maxYear - i)
+	const years = Array.from(
+		{ length: maxYear - minYear + 1 },
+		(_, i) => maxYear - i,
+	)
 	const months = [
 		'January',
 		'February',
@@ -70,7 +73,14 @@ export function DateOfBirthField({ control }: FormFieldProps) {
 					const newDate = new Date(
 						Number.parseInt(year, 10),
 						selectedMonth,
-						Math.min(selectedDay, new Date(Number.parseInt(year, 10), selectedMonth + 1, 0).getDate()),
+						Math.min(
+							selectedDay,
+							new Date(
+								Number.parseInt(year, 10),
+								selectedMonth + 1,
+								0,
+							).getDate(),
+						),
 					)
 					field.onChange(newDate)
 				}
@@ -80,7 +90,10 @@ export function DateOfBirthField({ control }: FormFieldProps) {
 					const newDate = new Date(
 						selectedYear,
 						monthIndex,
-						Math.min(selectedDay, new Date(selectedYear, monthIndex + 1, 0).getDate()),
+						Math.min(
+							selectedDay,
+							new Date(selectedYear, monthIndex + 1, 0).getDate(),
+						),
 					)
 					field.onChange(newDate)
 				}
@@ -147,26 +160,26 @@ export function DateOfBirthField({ control }: FormFieldProps) {
 										{field.value ? formatDate(field.value) : 'Pick a day'}
 									</Button>
 								</PopoverTrigger>
-							<PopoverContent className="w-auto p-0" align="start">
-								<Calendar
-									mode="single"
-									selected={field.value}
-									onSelect={(date) => {
-										if (date) {
-											field.onChange(date)
-											setIsOpen(false)
-										}
-									}}
-									disabled={(date) => {
-										const eighteenYearsAgoDate = new Date(
-											today.getFullYear() - 18,
-											today.getMonth(),
-											today.getDate(),
-										)
-										return date > eighteenYearsAgoDate
-									}}
-								/>
-							</PopoverContent>
+								<PopoverContent className="w-auto p-0" align="start">
+									<Calendar
+										mode="single"
+										selected={field.value}
+										onSelect={(date) => {
+											if (date) {
+												field.onChange(date)
+												setIsOpen(false)
+											}
+										}}
+										disabled={(date) => {
+											const eighteenYearsAgoDate = new Date(
+												today.getFullYear() - 18,
+												today.getMonth(),
+												today.getDate(),
+											)
+											return date > eighteenYearsAgoDate
+										}}
+									/>
+								</PopoverContent>
 							</Popover>
 						</div>
 						<p className="text-sm text-gray-500 mt-1">

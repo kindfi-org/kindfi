@@ -65,8 +65,8 @@ export function ValidationAlerts({
 						</p>
 						{documentType === 'Passport' && (
 							<p className="text-sm mb-2 text-yellow-800">
-								Some information could not be automatically extracted. Please verify
-								all information manually before proceeding.
+								Some information could not be automatically extracted. Please
+								verify all information manually before proceeding.
 							</p>
 						)}
 						<ul className="list-disc pl-4 mt-2">

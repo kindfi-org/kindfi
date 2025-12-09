@@ -22,13 +22,15 @@ export type ToastType = {
 export const DocumentPatterns = {
 	Passport: {
 		// Flexible passport number patterns - accepts various formats
-		idNumber: /(?:PASSPORT|PASSPORT\s*NO|PASSPORT\s*NUMBER|P\s*NO|P\s*NUMBER)[\s:]*([A-Z0-9]{6,12})|([A-Z]{1,2}[0-9]{6,9})|([0-9]{9})/i,
+		idNumber:
+			/(?:PASSPORT|PASSPORT\s*NO|PASSPORT\s*NUMBER|P\s*NO|P\s*NUMBER)[\s:]*([A-Z0-9]{6,12})|([A-Z]{1,2}[0-9]{6,9})|([0-9]{9})/i,
 		// Flexible name patterns - handles all caps, mixed case
 		name: /(?:SURNAME|LAST\s*NAME|FAMILY\s*NAME)[\s:]*([A-Z\s]{3,40})|(?:GIVEN\s*NAMES|FIRST\s*NAME|FORENAMES)[\s:]*([A-Z\s]{3,40})|([A-Z][A-Z\s]{5,50})/i,
 		// Date patterns - various formats
 		date: /\d{1,2}[\s./-]\d{1,2}[\s./-]\d{2,4}|\d{4}[\s./-]\d{1,2}[\s./-]\d{1,2}/,
 		// Flexible nationality patterns
-		nationality: /(?:NATIONALITY|NAT)[\s:]*([A-Z]{2,3})|([A-Z]{2,3})(?:\s*NATIONALITY)/i,
+		nationality:
+			/(?:NATIONALITY|NAT)[\s:]*([A-Z]{2,3})|([A-Z]{2,3})(?:\s*NATIONALITY)/i,
 	},
 	'National ID': {
 		idNumber: /\d{8}[A-Z]/i,

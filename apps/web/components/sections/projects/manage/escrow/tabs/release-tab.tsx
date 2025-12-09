@@ -79,7 +79,9 @@ export function ReleaseTab({
 				throw new Error('Failed to prepare release transaction')
 			}
 
-			const signedXdr = await signTransaction(releaseResponse.unsignedTransaction)
+			const signedXdr = await signTransaction(
+				releaseResponse.unsignedTransaction,
+			)
 			const sendResult = await sendTransaction(signedXdr)
 			if (sendResult?.status !== 'SUCCESS') {
 				throw new Error('Transaction failed')
@@ -175,4 +177,3 @@ export function ReleaseTab({
 		</Card>
 	)
 }
-

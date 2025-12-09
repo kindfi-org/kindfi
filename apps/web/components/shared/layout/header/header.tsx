@@ -31,8 +31,8 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from '~/components/base/sheet'
-import { useAuth } from '~/hooks/use-auth'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useAuth } from '~/hooks/use-auth'
 import { useI18n } from '~/lib/i18n/context'
 import { getAvatarFallback } from '~/lib/utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
@@ -147,7 +147,7 @@ const UserMenu = ({ user }: { user: User }) => {
 
 		try {
 			setIsSigningOut(true)
-			
+
 			// Disconnect wallet/passkey first
 			try {
 				disconnect()
@@ -163,11 +163,16 @@ const UserMenu = ({ user }: { user: User }) => {
 		} catch (error) {
 			// Check if this is a Next.js redirect error (which is expected)
 			// @ts-expect-error - NEXT_REDIRECT is a special Next.js error type
-			if (error && typeof error === 'object' && 'digest' in error && error.digest?.startsWith('NEXT_REDIRECT')) {
+			if (
+				error &&
+				typeof error === 'object' &&
+				'digest' in error &&
+				error.digest?.startsWith('NEXT_REDIRECT')
+			) {
 				// This is a redirect, let it propagate
 				throw error
 			}
-			
+
 			// Handle actual errors
 			console.error('Error signing out:', error)
 			toast.error(t('auth.signOutError') || 'Error signing out')
@@ -226,7 +231,9 @@ const UserMenu = ({ user }: { user: User }) => {
 						className="flex w-full items-center cursor-pointer"
 					>
 						<LogOut className="mr-2 h-4 w-4" />
-						{isSigningOut ? t('auth.signingOut') || 'Signing out...' : t('nav.closeSession')}
+						{isSigningOut
+							? t('auth.signingOut') || 'Signing out...'
+							: t('nav.closeSession')}
 					</button>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
@@ -284,7 +291,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 
 		try {
 			setIsSigningOut(true)
-			
+
 			// Disconnect wallet/passkey first
 			try {
 				disconnect()
@@ -300,11 +307,16 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 		} catch (error) {
 			// Check if this is a Next.js redirect error (which is expected)
 			// @ts-expect-error - NEXT_REDIRECT is a special Next.js error type
-			if (error && typeof error === 'object' && 'digest' in error && error.digest?.startsWith('NEXT_REDIRECT')) {
+			if (
+				error &&
+				typeof error === 'object' &&
+				'digest' in error &&
+				error.digest?.startsWith('NEXT_REDIRECT')
+			) {
 				// This is a redirect, let it propagate
 				throw error
 			}
-			
+
 			// Handle actual errors
 			console.error('Error signing out:', error)
 			toast.error(t('auth.signOutError') || 'Error signing out')
@@ -345,7 +357,9 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 					disabled={isSigningOut}
 				>
 					<LogOut className="mr-2 h-4 w-4" />
-					{isSigningOut ? t('auth.signingOut') || 'Signing out...' : t('nav.signOut')}
+					{isSigningOut
+						? t('auth.signingOut') || 'Signing out...'
+						: t('nav.signOut')}
 				</Button>
 			</div>
 		</div>

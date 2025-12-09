@@ -1,6 +1,6 @@
 'use server'
 
-import { db } from '@packages/drizzle'
+import { and, db, eq } from '@packages/drizzle'
 import { devices } from '@packages/drizzle/src/data/schema'
 import { appEnvConfig } from '@packages/lib/config'
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
@@ -8,10 +8,8 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
-import { and, eq } from '@packages/drizzle'
 import { revalidatePath } from 'next/cache'
-import { cookies } from 'next/headers'
-import { headers } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { validateCsrfToken } from '~/app/actions/csrf'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
@@ -158,7 +156,7 @@ export async function signOutAction(): Promise<void> {
 			process.env.NODE_ENV === 'production'
 				? '__Secure-next-auth.session-token'
 				: 'next-auth.session-token'
-		
+
 		cookieStore.delete(cookieName)
 
 		// Also clear the CSRF token cookie if it exists
@@ -182,7 +180,12 @@ export async function signOutAction(): Promise<void> {
 	} catch (error) {
 		// If redirect fails, it might be a NEXT_REDIRECT error which is expected
 		// @ts-expect-error - NEXT_REDIRECT is a special Next.js error type
-		if (error && typeof error === 'object' && 'digest' in error && error.digest?.startsWith('NEXT_REDIRECT')) {
+		if (
+			error &&
+			typeof error === 'object' &&
+			'digest' in error &&
+			error.digest?.startsWith('NEXT_REDIRECT')
+		) {
 			throw error
 		}
 

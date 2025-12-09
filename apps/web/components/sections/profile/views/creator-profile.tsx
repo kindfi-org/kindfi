@@ -3,16 +3,21 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, Plus, Settings, TrendingUp } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
-import { Button } from '~/components/base/button'
 import { Badge } from '~/components/base/badge'
-import { getUserCreatedProjects } from '~/lib/queries/projects/get-user-projects'
+import { Button } from '~/components/base/button'
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from '~/components/base/card'
 import { Progress } from '~/components/base/progress'
-import Image from 'next/image'
-import { staggerContainer } from '~/lib/constants/animations'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { staggerContainer } from '~/lib/constants/animations'
+import { getUserCreatedProjects } from '~/lib/queries/projects/get-user-projects'
 
 interface CreatorProfileProps {
 	userId: string
@@ -21,8 +26,8 @@ interface CreatorProfileProps {
 
 const cardVariants = {
 	hidden: { opacity: 0, y: 20 },
-	show: { 
-		opacity: 1, 
+	show: {
+		opacity: 1,
 		y: 0,
 		transition: {
 			type: 'spring',
@@ -46,17 +51,15 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 	)
 
 	const { getMultipleBalances } = useEscrow()
-	const [escrowBalances, setEscrowBalances] = useState<
-		Record<string, number>
-	>({})
+	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>(
+		{},
+	)
 	const [isLoadingBalances, setIsLoadingBalances] = useState(false)
 
 	// Fetch escrow balances for all projects that have escrow addresses
 	useEffect(() => {
 		const fetchBalances = async (showLoading = true) => {
-			const projectsWithEscrow = projects.filter(
-				(p) => p.escrowContractAddress,
-			)
+			const projectsWithEscrow = projects.filter((p) => p.escrowContractAddress)
 			if (projectsWithEscrow.length === 0) return
 
 			try {
@@ -152,8 +155,8 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 					</p>
 				</div>
 				<motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-					<Button 
-						asChild 
+					<Button
+						asChild
 						className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
 					>
 						<Link href="/create-project">
@@ -198,7 +201,7 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 							<CardTitle className="text-sm font-medium text-muted-foreground">
 								Active Campaigns
 							</CardTitle>
-					</CardHeader>
+						</CardHeader>
 						<CardContent className="relative z-10">
 							<motion.div
 								initial={{ scale: 0 }}
@@ -208,8 +211,8 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 							>
 								{activeProjects.length}
 							</motion.div>
-					</CardContent>
-				</Card>
+						</CardContent>
+					</Card>
 				</motion.div>
 				<motion.div variants={cardVariants}>
 					<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-xl transition-all duration-300 relative group">
@@ -218,7 +221,7 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 							<CardTitle className="text-sm font-medium text-muted-foreground">
 								Total Raised
 							</CardTitle>
-					</CardHeader>
+						</CardHeader>
 						<CardContent className="relative z-10">
 							<motion.div
 								initial={{ scale: 0 }}
@@ -275,22 +278,22 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 							</motion.div>
 							Active Campaigns
 						</h3>
-					<motion.div
-						variants={staggerContainer}
-						initial="initial"
-						animate="animate"
-						className="grid gap-4 md:grid-cols-2"
-					>
-						{activeProjects.map((project, index) => (
-							<motion.div
-								key={project.id}
-								variants={cardVariants}
-								custom={index}
-							>
-								<ProjectCard project={project} />
-							</motion.div>
-						))}
-					</motion.div>
+						<motion.div
+							variants={staggerContainer}
+							initial="initial"
+							animate="animate"
+							className="grid gap-4 md:grid-cols-2"
+						>
+							{activeProjects.map((project, index) => (
+								<motion.div
+									key={project.id}
+									variants={cardVariants}
+									custom={index}
+								>
+									<ProjectCard project={project} />
+								</motion.div>
+							))}
+						</motion.div>
 					</motion.div>
 				) : (
 					<motion.div
@@ -298,8 +301,7 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0 }}
-					>
-					</motion.div>
+					></motion.div>
 				)}
 			</AnimatePresence>
 
@@ -372,9 +374,9 @@ function ProjectCard({
 			<Card className="border-0 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col bg-card relative group">
 				{/* Decorative overlay */}
 				<div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-all duration-300 pointer-events-none" />
-				
+
 				{project.image && (
-					<motion.div 
+					<motion.div
 						className="relative h-48 w-full overflow-hidden"
 						whileHover={{ scale: 1.05 }}
 						transition={{ duration: 0.3 }}
@@ -390,7 +392,9 @@ function ProjectCard({
 				)}
 				<CardHeader className="relative z-10">
 					<div className="flex items-start justify-between gap-2">
-						<CardTitle className="text-lg line-clamp-2 font-bold">{project.title}</CardTitle>
+						<CardTitle className="text-lg line-clamp-2 font-bold">
+							{project.title}
+						</CardTitle>
 						<Badge
 							variant="outline"
 							className={`${statusColors[project.status] || statusColors.draft} font-semibold shadow-sm`}
@@ -409,7 +413,8 @@ function ProjectCard({
 						<div className="flex justify-between text-sm">
 							<span className="text-muted-foreground font-medium">Raised</span>
 							<span className="font-bold text-primary">
-								${Number(displayRaised).toLocaleString()} / ${Number(project.goal).toLocaleString()}
+								${Number(displayRaised).toLocaleString()} / $
+								{Number(project.goal).toLocaleString()}
 							</span>
 						</div>
 						<div className="relative h-3 bg-muted rounded-full overflow-hidden">
@@ -447,14 +452,14 @@ function ProjectCard({
 						</div>
 					)}
 					<div className="flex gap-2 mt-auto">
-						<motion.div 
-							whileHover={{ scale: 1.02 }} 
+						<motion.div
+							whileHover={{ scale: 1.02 }}
 							whileTap={{ scale: 0.98 }}
 							className="flex-1"
 						>
-							<Button 
-								asChild 
-								variant="outline" 
+							<Button
+								asChild
+								variant="outline"
 								className="w-full border-border hover:bg-muted"
 							>
 								<Link href={`/projects/${project.slug || project.id}`}>
@@ -463,14 +468,14 @@ function ProjectCard({
 								</Link>
 							</Button>
 						</motion.div>
-						<motion.div 
-							whileHover={{ scale: 1.02 }} 
+						<motion.div
+							whileHover={{ scale: 1.02 }}
 							whileTap={{ scale: 0.98 }}
 							className="flex-1"
 						>
-							<Button 
-								asChild 
-								variant="outline" 
+							<Button
+								asChild
+								variant="outline"
 								className="w-full border-border hover:bg-muted"
 							>
 								<Link href={`/projects/${project.slug || project.id}/manage`}>

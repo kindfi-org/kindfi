@@ -1,9 +1,8 @@
 'use client'
 
-import { StellarWalletsKit } from '@creit-tech/stellar-wallets-kit/sdk'
-import { KitEventType } from '@creit-tech/stellar-wallets-kit/types'
 import { defaultModules } from '@creit-tech/stellar-wallets-kit/modules/utils'
-import { Networks } from '@creit-tech/stellar-wallets-kit/types'
+import { StellarWalletsKit } from '@creit-tech/stellar-wallets-kit/sdk'
+import { KitEventType, Networks } from '@creit-tech/stellar-wallets-kit/types'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { getStellarWalletTheme } from '~/lib/config/stellar-wallet-theme'
 
@@ -70,10 +69,15 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 			// Listen to state updates
 			const unsubscribeState = StellarWalletsKit.on(
 				KitEventType.STATE_UPDATED,
-				(event: { payload: { address?: string; networkPassphrase: string } }) => {
+				(event: {
+					payload: { address?: string; networkPassphrase: string }
+				}) => {
 					if (event.payload.address) {
 						setAddress(event.payload.address)
-						localStorage.setItem('stellar_wallet_address', event.payload.address)
+						localStorage.setItem(
+							'stellar_wallet_address',
+							event.payload.address,
+						)
 					} else {
 						setAddress(null)
 						localStorage.removeItem('stellar_wallet_address')
@@ -171,10 +175,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		try {
-			const { signedTxXdr } = await StellarWalletsKit.signTransaction(unsignedXdr, {
-				address,
-				networkPassphrase: Networks.TESTNET,
-			})
+			const { signedTxXdr } = await StellarWalletsKit.signTransaction(
+				unsignedXdr,
+				{
+					address,
+					networkPassphrase: Networks.TESTNET,
+				},
+			)
 			return signedTxXdr
 		} catch (error) {
 			console.error('Failed to sign transaction:', error)

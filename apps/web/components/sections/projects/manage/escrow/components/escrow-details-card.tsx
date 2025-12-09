@@ -1,7 +1,15 @@
 'use client'
 
 import type { GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
-import { Calendar, CheckCircle2, Copy, Send, XCircle, AlertCircle, ExternalLink } from 'lucide-react'
+import {
+	AlertCircle,
+	Calendar,
+	CheckCircle2,
+	Copy,
+	ExternalLink,
+	Send,
+	XCircle,
+} from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
@@ -81,9 +89,7 @@ export function EscrowDetailsCard({
 						</div>
 					</div>
 					<div className="space-y-1">
-						<Label className="text-xs text-muted-foreground">
-							Contract ID
-						</Label>
+						<Label className="text-xs text-muted-foreground">Contract ID</Label>
 						<div className="flex items-center gap-2">
 							<p className="font-mono text-sm break-all">
 								{escrowData.contractId || escrowContractAddress}
@@ -142,11 +148,13 @@ export function EscrowDetailsCard({
 								? formatEscrowAmount(escrowData.amount)
 								: 'N/A'}
 						</p>
-						{escrowData.amount === undefined && escrowData.milestones && escrowData.milestones.length > 0 && (
-							<p className="text-xs text-muted-foreground mt-1">
-								Multi-release: Amounts are per milestone
-							</p>
-						)}
+						{escrowData.amount === undefined &&
+							escrowData.milestones &&
+							escrowData.milestones.length > 0 && (
+								<p className="text-xs text-muted-foreground mt-1">
+									Multi-release: Amounts are per milestone
+								</p>
+							)}
 					</div>
 					<div className="space-y-1">
 						<Label className="text-xs text-muted-foreground">
@@ -163,17 +171,13 @@ export function EscrowDetailsCard({
 					{escrowData.signer && (
 						<div className="space-y-1">
 							<Label className="text-xs text-muted-foreground">Signer</Label>
-							<p className="font-mono text-sm break-all">
-								{escrowData.signer}
-							</p>
+							<p className="font-mono text-sm break-all">{escrowData.signer}</p>
 						</div>
 					)}
 					{escrowData.user && (
 						<div className="space-y-1">
 							<Label className="text-xs text-muted-foreground">User</Label>
-							<p className="font-mono text-sm break-all">
-								{escrowData.user}
-							</p>
+							<p className="font-mono text-sm break-all">{escrowData.user}</p>
 						</div>
 					)}
 				</div>
@@ -223,4 +227,3 @@ export function EscrowDetailsCard({
 		</Card>
 	)
 }
-

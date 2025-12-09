@@ -50,4 +50,3 @@ export function getStellarExplorerAccountUrl(
 	// User addresses are contract addresses, so use contract endpoint
 	return `https://stellar.expert/explorer/${explorerNetwork}/contract/${address}`
 }
-

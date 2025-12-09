@@ -9,6 +9,7 @@ import { Plus, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useId, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { saveEscrowContractAction } from '~/app/actions/escrow/save-escrow-contract'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
@@ -22,7 +23,6 @@ import {
 } from '~/components/base/tooltip'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
-import { saveEscrowContractAction } from '~/app/actions/escrow/save-escrow-contract'
 
 export function EscrowAdminPanel({
 	projectId,
@@ -36,8 +36,12 @@ export function EscrowAdminPanel({
 	escrowType?: EscrowType
 }) {
 	const router = useRouter()
-	const { deployEscrow, approveMilestone, changeMilestoneStatus, sendTransaction } =
-		useEscrow()
+	const {
+		deployEscrow,
+		approveMilestone,
+		changeMilestoneStatus,
+		sendTransaction,
+	} = useEscrow()
 	const { isConnected, connect, address, signTransaction } = useWallet()
 
 	// form state
@@ -127,23 +131,22 @@ export function EscrowAdminPanel({
 				typeof amount === 'number' &&
 				Number.isFinite(amount)
 			)
-		} else {
-			// Multi-release: validate milestones have amount and receiver
-			return (
-				baseValid &&
-				milestones.every((m) => {
-					if ('amount' in m && 'receiver' in m) {
-						return (
-							typeof m.amount === 'number' &&
-							Number.isFinite(m.amount) &&
-							m.amount > 0 &&
-							m.receiver.trim().length > 0
-						)
-					}
-					return false
-				})
-			)
 		}
+		// Multi-release: validate milestones have amount and receiver
+		return (
+			baseValid &&
+			milestones.every((m) => {
+				if ('amount' in m && 'receiver' in m) {
+					return (
+						typeof m.amount === 'number' &&
+						Number.isFinite(m.amount) &&
+						m.amount > 0 &&
+						m.receiver.trim().length > 0
+					)
+				}
+				return false
+			})
+		)
 	}, [
 		title,
 		engagementId,
@@ -174,10 +177,10 @@ export function EscrowAdminPanel({
 				},
 			])
 		} else {
-		setMilestones((prev) => [
-			...prev,
-			{ id: genId(), description: `Milestone ${prev.length + 1}` },
-		])
+			setMilestones((prev) => [
+				...prev,
+				{ id: genId(), description: `Milestone ${prev.length + 1}` },
+			])
 		}
 	}
 
@@ -207,25 +210,25 @@ export function EscrowAdminPanel({
 					.map((desc) => ({ description: desc.trim() }))
 
 				const payload: InitializeSingleReleaseEscrowPayload = {
-				signer,
-				engagementId: effectiveEngagementId,
-				title: title.trim(),
-				roles: {
-					approver: approver.trim(),
-					serviceProvider: serviceProvider.trim(),
-					platformAddress: platformAddress.trim(),
-					releaseSigner: releaseSigner.trim(),
-					disputeResolver: disputeResolver.trim(),
-					receiver: receiver.trim(),
-				},
-				description: composedDescription,
-				amount: amount as number,
-				platformFee: platformFee as number,
-				trustline: {
-					address: trustlineAddress.trim(),
-				},
-				milestones: sanitizedMilestones,
-			}
+					signer,
+					engagementId: effectiveEngagementId,
+					title: title.trim(),
+					roles: {
+						approver: approver.trim(),
+						serviceProvider: serviceProvider.trim(),
+						platformAddress: platformAddress.trim(),
+						releaseSigner: releaseSigner.trim(),
+						disputeResolver: disputeResolver.trim(),
+						receiver: receiver.trim(),
+					},
+					description: composedDescription,
+					amount: amount as number,
+					platformFee: platformFee as number,
+					trustline: {
+						address: trustlineAddress.trim(),
+					},
+					milestones: sanitizedMilestones,
+				}
 
 				// 1) Execute function from Trustless Work -> returns unsigned XDR
 				const deployResponse = await deployEscrow(payload, 'single-release')
@@ -239,7 +242,9 @@ export function EscrowAdminPanel({
 				}
 
 				// 2) Sign transaction with wallet
-				const signedXdr = await signTransaction(deployResponse.unsignedTransaction)
+				const signedXdr = await signTransaction(
+					deployResponse.unsignedTransaction,
+				)
 
 				// 3) Send signed transaction
 				const sendResult = await sendTransaction(signedXdr)
@@ -248,10 +253,7 @@ export function EscrowAdminPanel({
 				}
 
 				// 4) Save escrow contract ID to database
-				if (
-					'contractId' in sendResult &&
-					sendResult.contractId
-				) {
+				if ('contractId' in sendResult && sendResult.contractId) {
 					const saveResult = await saveEscrowContractAction({
 						projectId,
 						contractId: sendResult.contractId,
@@ -267,7 +269,8 @@ export function EscrowAdminPanel({
 				}
 
 				toast.success('Escrow successfully created and deployed!', {
-					description: 'The escrow contract has been initialized on the blockchain.',
+					description:
+						'The escrow contract has been initialized on the blockchain.',
 				})
 
 				// Redirect to manage page after a short delay to show the success message
@@ -322,7 +325,9 @@ export function EscrowAdminPanel({
 				}
 
 				// 2) Sign transaction with wallet
-				const signedXdr = await signTransaction(deployResponse.unsignedTransaction)
+				const signedXdr = await signTransaction(
+					deployResponse.unsignedTransaction,
+				)
 
 				// 3) Send signed transaction
 				const sendResult = await sendTransaction(signedXdr)
@@ -331,10 +336,7 @@ export function EscrowAdminPanel({
 				}
 
 				// 4) Save escrow contract ID to database
-				if (
-					'contractId' in sendResult &&
-					sendResult.contractId
-				) {
+				if ('contractId' in sendResult && sendResult.contractId) {
 					const saveResult = await saveEscrowContractAction({
 						projectId,
 						contractId: sendResult.contractId,
@@ -350,7 +352,8 @@ export function EscrowAdminPanel({
 				}
 
 				toast.success('Escrow successfully created and deployed!', {
-					description: 'The escrow contract has been initialized on the blockchain.',
+					description:
+						'The escrow contract has been initialized on the blockchain.',
 				})
 
 				// Redirect to manage page after a short delay to show the success message
@@ -541,21 +544,23 @@ export function EscrowAdminPanel({
 										htmlFor={trustlineAddressId}
 										className="text-sm font-medium"
 									>
-										Trustline Address <span className="text-destructive">*</span>
+										Trustline Address{' '}
+										<span className="text-destructive">*</span>
 									</label>
 									<Tooltip>
 										<TooltipTrigger className="text-xs underline">
 											More information
 										</TooltipTrigger>
 										<TooltipContent>
-											The asset contract address (e.g., USDC contract address on Stellar).
+											The asset contract address (e.g., USDC contract address on
+											Stellar).
 										</TooltipContent>
 									</Tooltip>
 								</div>
-									<Input
-										id={trustlineAddressId}
-										value={trustlineAddress}
-										onChange={(e) => setTrustlineAddress(e.target.value)}
+								<Input
+									id={trustlineAddressId}
+									value={trustlineAddress}
+									onChange={(e) => setTrustlineAddress(e.target.value)}
 									placeholder="Asset contract address (e.g., USDC)"
 								/>
 							</div>
@@ -657,22 +662,22 @@ export function EscrowAdminPanel({
 								/>
 							</div>
 							{selectedEscrowType === 'single-release' && (
-							<div className="grid gap-2">
-								<label htmlFor={amountId} className="text-sm font-medium">
-									Amount <span className="text-destructive">*</span>
-								</label>
-								<Input
-									id={amountId}
-									type="number"
-									value={amount}
-									onChange={(e) =>
-										setAmount(
-											e.target.value === '' ? '' : Number(e.target.value),
-										)
-									}
-									placeholder="Enter amount"
-								/>
-							</div>
+								<div className="grid gap-2">
+									<label htmlFor={amountId} className="text-sm font-medium">
+										Amount <span className="text-destructive">*</span>
+									</label>
+									<Input
+										id={amountId}
+										type="number"
+										value={amount}
+										onChange={(e) =>
+											setAmount(
+												e.target.value === '' ? '' : Number(e.target.value),
+											)
+										}
+										placeholder="Enter amount"
+									/>
+								</div>
 							)}
 							<div className="grid gap-2">
 								<label htmlFor={receiverMemoId} className="text-sm font-medium">
@@ -770,7 +775,8 @@ export function EscrowAdminPanel({
 														</div>
 														<div>
 															<Label className="text-xs text-muted-foreground">
-																Amount <span className="text-destructive">*</span>
+																Amount{' '}
+																<span className="text-destructive">*</span>
 															</Label>
 															<Input
 																type="number"
@@ -828,29 +834,29 @@ export function EscrowAdminPanel({
 									}
 									// Single release milestone
 									return (
-									<div key={m.id} className="flex gap-2 items-center">
-										<Input
-											value={m.description}
-											onChange={(e) =>
-												setMilestones((prev) =>
-													prev.map((val, idx) =>
-														idx === i
-															? { ...val, description: e.target.value }
-															: val,
-													),
-												)
-											}
-											placeholder="Milestone Description"
-										/>
-										<Button
-											variant="ghost"
-											onClick={() => handleRemoveMilestone(m.id)}
-											className="p-0 w-8 h-8"
-											aria-label={`Remove milestone ${i + 1}`}
-										>
-											<Trash2 className="w-4 h-4" />
-										</Button>
-									</div>
+										<div key={m.id} className="flex gap-2 items-center">
+											<Input
+												value={m.description}
+												onChange={(e) =>
+													setMilestones((prev) =>
+														prev.map((val, idx) =>
+															idx === i
+																? { ...val, description: e.target.value }
+																: val,
+														),
+													)
+												}
+												placeholder="Milestone Description"
+											/>
+											<Button
+												variant="ghost"
+												onClick={() => handleRemoveMilestone(m.id)}
+												className="p-0 w-8 h-8"
+												aria-label={`Remove milestone ${i + 1}`}
+											>
+												<Trash2 className="w-4 h-4" />
+											</Button>
+										</div>
 									)
 								})}
 							</div>

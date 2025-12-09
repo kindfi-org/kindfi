@@ -82,7 +82,9 @@ export function MilestonesTab({
 				throw new Error('Failed to prepare approval transaction')
 			}
 
-			const signedXdr = await signTransaction(approveResponse.unsignedTransaction)
+			const signedXdr = await signTransaction(
+				approveResponse.unsignedTransaction,
+			)
 			const sendResult = await sendTransaction(signedXdr)
 			if (sendResult?.status !== 'SUCCESS') {
 				throw new Error('Transaction failed')
@@ -93,9 +95,7 @@ export function MilestonesTab({
 		} catch (error) {
 			console.error(error)
 			const errorMessage =
-				error instanceof Error
-					? error.message
-					: 'Failed to approve milestone'
+				error instanceof Error ? error.message : 'Failed to approve milestone'
 			toast.error(errorMessage)
 		} finally {
 			setIsProcessing(false)
@@ -125,7 +125,9 @@ export function MilestonesTab({
 				throw new Error('Failed to prepare status change transaction')
 			}
 
-			const signedXdr = await signTransaction(changeResponse.unsignedTransaction)
+			const signedXdr = await signTransaction(
+				changeResponse.unsignedTransaction,
+			)
 			const sendResult = await sendTransaction(signedXdr)
 			if (sendResult?.status !== 'SUCCESS') {
 				throw new Error('Transaction failed')
@@ -168,7 +170,8 @@ export function MilestonesTab({
 					<div className="flex flex-col items-center justify-center space-y-4">
 						<FileText className="h-8 w-8 text-muted-foreground" />
 						<p className="text-sm text-muted-foreground">
-							No milestones found. Milestones are defined when creating the escrow.
+							No milestones found. Milestones are defined when creating the
+							escrow.
 						</p>
 					</div>
 				</CardContent>
@@ -222,7 +225,10 @@ export function MilestonesTab({
 												<span>
 													Amount:{' '}
 													<span className="font-semibold">
-														${(milestone as MultiReleaseMilestone).amount?.toLocaleString()}
+														$
+														{(
+															milestone as MultiReleaseMilestone
+														).amount?.toLocaleString()}
 													</span>
 												</span>
 												{milestone.evidence && (
@@ -260,9 +266,7 @@ export function MilestonesTab({
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="approve-milestone-select">
-								Select Milestone
-							</Label>
+							<Label htmlFor="approve-milestone-select">Select Milestone</Label>
 							<Select
 								value={selectedMilestoneIndex}
 								onValueChange={setSelectedMilestoneIndex}
@@ -388,4 +392,3 @@ export function MilestonesTab({
 		</>
 	)
 }
-
