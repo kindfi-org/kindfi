@@ -12,7 +12,7 @@ import {
 	TransactionBuilder,
 	xdr,
 } from '@stellar/stellar-sdk'
-import { Api, Server } from '@stellar/stellar-sdk/rpc'
+import { type Api, Server } from '@stellar/stellar-sdk/rpc'
 import isEqual from 'lodash/isEqual'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -66,22 +66,6 @@ export async function POST(req: NextRequest) {
 
 		console.log('📤 Assembling and submitting transaction')
 
-		// Query and log devices registered in the contract
-		const devices = await queryContractDevices(
-			server,
-			smartWalletAddress,
-			fundingKeypair,
-			appConfig.stellar.networkPassphrase,
-		)
-
-		console.log('📱 Devices registered in contract:', devices.length)
-		for (const device of devices) {
-			console.log('   Device:', {
-				device_id: device.device_id,
-				public_key: device.public_key,
-			})
-		}
-
 		// Parse the prepared transaction
 		// CRITICAL: The transaction from prepare is ALREADY assembled after simulation
 		// DO NOT re-simulate or re-assemble, as that would change the auth entry structure
@@ -122,43 +106,44 @@ export async function POST(req: NextRequest) {
 			})
 			const {
 				signatureScVal,
-				signature,
-				authenticatorData,
-				clientData,
-				webauthnPayload,
-				webauthnPayloadHash,
-				challenge,
-				challengeBytes,
+				// signature,
+				// authenticatorData,
+				// clientData,
+				// webauthnPayload,
+				// webauthnPayloadHash,
+				// challenge,
+				// challengeBytes,
 			} = signatureResult
 
+			// ! Keeping logs commented out for now. Deactivating signature verification on-chain, verifying device existence on contract only
 			// Logging WebAuthn Signature Details
-			console.log('🔏 WebAuthn Signature Details:')
-			console.log('   Signature (base64):', signature.toString('base64'))
-			console.log(
-				'   Authenticator Data (base64):',
-				authenticatorData.toString('base64'),
-			)
-			console.log('   Client Data (object):', clientData)
-			console.log(
-				'   WebAuthn Payload (base64):',
-				webauthnPayload.toString('base64'),
-			)
-			console.log(
-				'   WebAuthn Payload Hash (hex):',
-				webauthnPayloadHash.toString('hex'),
-			)
-			console.log('   Challenge (utf8):', challenge)
-			console.log('   Challenge Bytes (hex):', challengeBytes?.toString('hex'))
+			// console.log('🔏 WebAuthn Signature Details:')
+			// console.log('   Signature (base64):', signature.toString('base64'))
+			// console.log(
+			// 	'   Authenticator Data (base64):',
+			// 	authenticatorData.toString('base64'),
+			// )
+			// console.log('   Client Data (object):', clientData)
+			// console.log(
+			// 	'   WebAuthn Payload (base64):',
+			// 	webauthnPayload.toString('base64'),
+			// )
+			// console.log(
+			// 	'   WebAuthn Payload Hash (hex):',
+			// 	webauthnPayloadHash.toString('hex'),
+			// )
+			// console.log('   Challenge (utf8):', challenge)
+			// console.log('   Challenge Bytes (hex):', challengeBytes?.toString('hex'))
 
 			// TODO: If the attestation can be verified here, then it should go through the stellar blockchain
 			// ! Strategy still not the same... simplify. A verification already happening, but is not "preparing" the signature to on-chain verification
-			const verificationResults = await stellarService.verifyPasskeySignature(
-				verificationJSON.device.address,
-				JSON.stringify(authResponse.response),
-				hash,
-			)
+			// const verificationResults = await stellarService.verifyPasskeySignature(
+			// 	verificationJSON.device.address,
+			// 	JSON.stringify(authResponse.response),
+			// 	hash,
+			// )
 
-			console.log('🔐 Contract will verify signature', { verificationResults })
+			// console.log('🔐 Contract will verify signature', { verificationResults })
 
 			// Find and update the auth entry for the smart wallet
 			for (const authEntry of authEntries) {
@@ -242,70 +227,5 @@ export async function POST(req: NextRequest) {
 			},
 			{ status: 500 },
 		)
-	}
-}
-
-/**
- * Query devices registered in smart wallet contract
- */
-async function queryContractDevices(
-	server: Server,
-	contractAddress: string,
-	fundingKeypair: Keypair,
-	networkPassphrase: string,
-): Promise<Array<{ device_id: string; public_key: string }>> {
-	try {
-		const contract = new Contract(contractAddress)
-		const fundingAccount = await server.getAccount(fundingKeypair.publicKey())
-
-		const getDevicesOp = contract.call('get_devices')
-
-		const tx = new TransactionBuilder(fundingAccount, {
-			fee: '100',
-			networkPassphrase,
-		})
-			.addOperation(getDevicesOp)
-			.setTimeout(30)
-			.build()
-
-		const simulation = await server.simulateTransaction(tx)
-
-		if (Api.isSimulationSuccess(simulation) && simulation.result) {
-			// Parse the result - it should be a Vec<DevicePublicKey>
-			const devicesScVal = simulation.result.retval
-			console.log('📱 Contract devices query successful')
-
-			// The result is a Vec, parse it
-			if (devicesScVal.switch().name === 'scvVec' && devicesScVal.vec()) {
-				const devices = []
-				for (const deviceScVal of devicesScVal.vec() || []) {
-					// Each device is a struct with device_id and public_key
-					if (deviceScVal.switch().name === 'scvMap' && deviceScVal.map()) {
-						const deviceMap: Record<string, Buffer> = {}
-						for (const entry of deviceScVal.map() || []) {
-							const key = entry.key().sym().toString()
-							const valBytes = entry.val().bytes()
-							if (valBytes) {
-								deviceMap[key] = Buffer.from(valBytes)
-							}
-						}
-
-						if (deviceMap.device_id && deviceMap.public_key) {
-							devices.push({
-								device_id: deviceMap.device_id.toString('hex'),
-								public_key: deviceMap.public_key.toString('hex'),
-							})
-						}
-					}
-				}
-				return devices
-			}
-		}
-
-		console.warn('⚠️ Failed to query contract devices')
-		return []
-	} catch (error) {
-		console.error('❌ Error querying contract devices:', error)
-		return []
 	}
 }

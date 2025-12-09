@@ -34,9 +34,7 @@ export function useKycActions(): UseKycActionsReturn {
 
 		try {
 			// Use recordId if available, otherwise fallback to userId
-			const endpoint = recordId
-				? `/api/kyc-reviews/${recordId}/status`
-				: `/api/users/${userId}/status`
+			const endpoint = `/api/users/${userId}/status`
 			const response = await fetch(endpoint, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },

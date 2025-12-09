@@ -50,32 +50,20 @@ export function SmartWalletTransferDemo() {
 	 * Required before wallet can perform authenticated operations
 	 */
 	const approveAccount = async () => {
+		setIsApproving(true)
+
 		try {
-			setIsApproving(true)
-
-			const response = await fetch('/api/stellar/account/approve', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					accountAddress: smartWalletAddress,
-				}),
-			})
-
-			if (!response.ok) {
-				const error = await response.json()
-				throw new Error(error.details || 'Failed to approve account')
-			}
-
-			const result = await response.json()
-
-			toast.success('Account approved successfully!', {
-				description: `Your smart wallet is now registered in the auth-controller`,
+			toast.info('You will be redirected shortly.', {
+				description: `Approving account flow is KYC Server action ONLY. Connecting from here to simulate admin approval...`,
 				duration: 5000,
 			})
 
-			console.log('Account approval tx:', result.data.hash)
+			await new Promise((resolve) => setTimeout(resolve, 3000)) // Wait for toast to show
+
+			window.open(
+				`${appEnvConfig('web').externalApis.kyc.baseUrl}/users?id=${session?.user.id}`,
+				'_blank',
+			)
 		} catch (error) {
 			console.error('Error approving account:', error)
 			toast.error(
@@ -116,6 +104,8 @@ export function SmartWalletTransferDemo() {
 				duration: 5000,
 			})
 
+			await new Promise((resolve) => setTimeout(resolve, 3000)) // Wait for balance to update
+
 			// Refresh balance after funding
 			await fetchBalance()
 		} catch (error) {
@@ -153,6 +143,8 @@ export function SmartWalletTransferDemo() {
 		}
 	}
 
+	// TODO: Move the demo actions to a separate hook for reuse like this one below...
+	// It might be ready already... double-check useStellarSorobanAccount. - @andler
 	const smartWalletActions = useStellarSorobanAccount(session?.user)
 
 	/**
@@ -298,6 +290,8 @@ export function SmartWalletTransferDemo() {
 
 			// Reset form
 			setFormData({ to: '', amount: '', asset: 'native' })
+
+			await new Promise((resolve) => setTimeout(resolve, 3000)) // Wait for balance to update
 
 			// Refresh balance
 			await fetchBalance()

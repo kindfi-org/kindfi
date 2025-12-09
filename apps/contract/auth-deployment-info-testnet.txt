@@ -3,21 +3,21 @@ Source Account: bob (GD3YZRV4WMPZG5JIX5HLNLERB4DRFT6WBNLGEJ2NKLUCR6IKFE34CUUH)
 
 Auth Controller Contract:
   WASM Hash: ...e8fc
-  Contract ID: ...GJY2
+  Contract ID: ...QAYR
   Status: Initialized with admin signer
   Default Threshold: 1
 
 Account Contract:
-  WASM Hash: ...04e2
-  Contract ID: ...MSD3
+  WASM Hash: ...b76f
+  Contract ID: ...HEBI
 
 Account Factory Contract:
   WASM Hash: ...15ac
-  Contract ID: ...BNAB
+  Contract ID: ...NFK3
   Status: Registered with auth-controller
 
 Configuration:
   Admin Public Key (hex): ...801b
   Admin Credential ID: ...ZCqQ
 
-Deployment Date: Fri Nov 28 11:34:39 CST 2025
+Deployment Date: Tue Dec  9 11:58:14 CST 2025

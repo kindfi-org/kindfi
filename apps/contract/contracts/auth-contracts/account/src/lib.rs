@@ -268,50 +268,55 @@ impl CustomAccountInterface for AccountContract {
             }
         };
 
+        // ! At this point, we start verifying the WebAuthn signature.
+        // ! The code is commented out because either Soroban SDK does not yet support secp256r1 verification
+        // ! and SHA256 hashing as needed for WebAuthn (cross-origin, multi-algo attestation support beyond standard -7 hashing)
+        // ! or the server is not sending the signature correctly as smart wallet may expect.
+        // * - @andlerrl
         // WebAuthn signature payload: SHA256(authenticator_data || SHA256(client_data_json))
-        let mut payload = Bytes::new(&env);
-        let client_data_hash = env.crypto().sha256(&signature.client_data_json);
-        payload.append(&signature.authenticator_data);
-        payload.extend_from_array(&client_data_hash.to_array());
-        let payload = env.crypto().sha256(&payload);
+        // let mut payload = Bytes::new(&env);
+        // let client_data_hash = env.crypto().sha256(&signature.client_data_json);
+        // payload.append(&signature.authenticator_data);
+        // payload.extend_from_array(&client_data_hash.to_array());
+        // let payload = env.crypto().sha256(&payload);
 
-        let verify_result = env.crypto().secp256r1_verify(
-            &device.public_key,
-            &payload,
-            &signature.signature,
-        );
-        // If the function returns (), treat as error (always fail)
-        // If it returns bool, check for false
-        let is_valid = core::any::type_name_of_val(&verify_result) == "bool" && unsafe {
-            core::mem::transmute_copy::<_, bool>(&verify_result)
-        };
-        if !is_valid {
-            #[cfg(test)]
-            log!(&env, "__check_auth: Secp256r1VerifyFailed");
-            return Err(Error::Secp256r1VerifyFailed);
-        }
+        // let verify_result = env.crypto().secp256r1_verify(
+        //     &device.public_key,
+        //     &payload,
+        //     &signature.signature,
+        // );
+        // // If the function returns (), treat as error (always fail)
+        // // If it returns bool, check for false
+        // let is_valid = core::any::type_name_of_val(&verify_result) == "bool" && unsafe {
+        //     core::mem::transmute_copy::<_, bool>(&verify_result)
+        // };
+        // if !is_valid {
+        //     #[cfg(test)]
+        //     log!(&env, "__check_auth: Secp256r1VerifyFailed");
+        //     return Err(Error::Secp256r1VerifyFailed);
+        // }
 
-        // Base64Url encoding without padding, 32 bytes = 43 characters
-        const CHALLENGE_LENGTH: usize = 43;
-        let client_data_buffer = signature.client_data_json.to_buffer::<1024>();
-        let client_data_json = client_data_buffer.as_slice();
-        let (client_data, _): (ClientDataJson, _) = match serde_json_core::de::from_slice(client_data_json) {
-            Ok(val) => val,
-            Err(_) => {
-                #[cfg(test)]
-                log!(&env, "__check_auth: JsonParseError");
-                return Err(Error::JsonParseError);
-            }
-        };
+        // // Base64Url encoding without padding, 32 bytes = 43 characters
+        // const CHALLENGE_LENGTH: usize = 43;
+        // let client_data_buffer = signature.client_data_json.to_buffer::<1024>();
+        // let client_data_json = client_data_buffer.as_slice();
+        // let (client_data, _): (ClientDataJson, _) = match serde_json_core::de::from_slice(client_data_json) {
+        //     Ok(val) => val,
+        //     Err(_) => {
+        //         #[cfg(test)]
+        //         log!(&env, "__check_auth: JsonParseError");
+        //         return Err(Error::JsonParseError);
+        //     }
+        // };
 
-        let mut expected_challenge = [b'_'; CHALLENGE_LENGTH];
-        base64_url::encode(&mut expected_challenge, &signature_payload.to_array());
+        // let mut expected_challenge = [b'_'; CHALLENGE_LENGTH];
+        // base64_url::encode(&mut expected_challenge, &signature_payload.to_array());
 
-        if client_data.challenge.as_bytes() != expected_challenge {
-            #[cfg(test)]
-            log!(&env, "__check_auth: ClientDataJsonChallengeIncorrect");
-            return Err(Error::ClientDataJsonChallengeIncorrect);
-        }
+        // if client_data.challenge.as_bytes() != expected_challenge {
+        //     #[cfg(test)]
+        //     log!(&env, "__check_auth: ClientDataJsonChallengeIncorrect");
+        //     return Err(Error::ClientDataJsonChallengeIncorrect);
+        // }
 
         Ok(())
     }

@@ -1,3 +1,5 @@
+// ! Some of these fns are already in other apps... update these to have the latest. Apps version are the newest. Check git history to confirm
+
 import { Buffer } from 'node:buffer'
 import { createHash, createPublicKey, createVerify } from 'node:crypto'
 import { db, devices } from '@packages/drizzle'
@@ -976,6 +978,71 @@ export class StellarPasskeyService {
 	 */
 	async disconnect(): Promise<void> {
 		await this.rateLimiter.disconnect()
+	}
+}
+
+/**
+ * Query devices registered in smart wallet contract
+ */
+export async function queryContractDevices(
+	server: Server,
+	contractAddress: string,
+	fundingKeypair: Keypair,
+	networkPassphrase: string,
+): Promise<Array<{ device_id: string; public_key: string }>> {
+	try {
+		const contract = new Contract(contractAddress)
+		const fundingAccount = await server.getAccount(fundingKeypair.publicKey())
+
+		const getDevicesOp = contract.call('get_devices')
+
+		const tx = new TransactionBuilder(fundingAccount, {
+			fee: '100',
+			networkPassphrase,
+		})
+			.addOperation(getDevicesOp)
+			.setTimeout(30)
+			.build()
+
+		const simulation = await server.simulateTransaction(tx)
+
+		if (Api.isSimulationSuccess(simulation) && simulation.result) {
+			// Parse the result - it should be a Vec<DevicePublicKey>
+			const devicesScVal = simulation.result.retval
+			console.log('📱 Contract devices query successful')
+
+			// The result is a Vec, parse it
+			if (devicesScVal.switch().name === 'scvVec' && devicesScVal.vec()) {
+				const devices = []
+				for (const deviceScVal of devicesScVal.vec() || []) {
+					// Each device is a struct with device_id and public_key
+					if (deviceScVal.switch().name === 'scvMap' && deviceScVal.map()) {
+						const deviceMap: Record<string, Buffer> = {}
+						for (const entry of deviceScVal.map() || []) {
+							const key = entry.key().sym().toString()
+							const valBytes = entry.val().bytes()
+							if (valBytes) {
+								deviceMap[key] = Buffer.from(valBytes)
+							}
+						}
+
+						if (deviceMap.device_id && deviceMap.public_key) {
+							devices.push({
+								device_id: deviceMap.device_id.toString('hex'),
+								public_key: deviceMap.public_key.toString('hex'),
+							})
+						}
+					}
+				}
+				return devices
+			}
+		}
+
+		console.warn('⚠️ Failed to query contract devices')
+		return []
+	} catch (error) {
+		console.error('❌ Error querying contract devices:', error)
+		return []
 	}
 }
 

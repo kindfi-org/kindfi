@@ -82,7 +82,7 @@ export async function registerAccountOnChain(
 
 		if (Api.isSimulationError(simulation)) {
 			console.error('❌ Simulation failed:', simulation)
-			throw new Error(`Simulation failed: ${JSON.stringify(simulation)}`)
+			throw new Error(simulation.error)
 		}
 
 		console.log('✅ Simulation successful, assembling transaction...')
