@@ -1,3 +1,7 @@
+// TODO: Use the queryContractDevices here to check approval status
+// ! queryContractDevices returns the deviceID and the publicKey already parsed as base64
+// ! We need to check if the address is in the list of approved accounts in the auth-controller by asking for the credential_id in their devices off-chain
+
 import { appEnvConfig } from '@packages/lib/config'
 import { Contract, nativeToScVal } from '@stellar/stellar-sdk'
 import { Server } from '@stellar/stellar-sdk/rpc'
@@ -11,10 +15,10 @@ import { NextResponse } from 'next/server'
  */
 export async function GET(
 	_req: NextRequest,
-	{ params }: { params: { address: string } },
+	{ params }: { params: Promise<{ address: string }> },
 ) {
 	try {
-		const { address } = params
+		const { address } = await params
 
 		if (!address) {
 			return NextResponse.json(
