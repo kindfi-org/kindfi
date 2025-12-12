@@ -1,67 +1,67 @@
 {
-	"name": "@packages/lib",
-	"version": "0.0.1",
-	"private": true,
-	"exports": {
-		".": {
-			"import": "./src/index.ts",
-			"require": "./src/index.ts"
-		},
-		"./config": {
-			"import": "./src/config/index.ts",
-			"require": "./src/config/index.ts"
-		},
-		"./doc-utils": {
-			"import": "./src/doc-utils/index.ts",
-			"require": "./src/doc-utils/index.ts"
-		},
-		"./hooks": {
-			"import": "./src/hooks/index.ts",
-			"require": "./src/hooks/index.ts"
-		},
-		"./providers": {
-			"import": "./src/providers/index.ts",
-			"require": "./src/providers/index.ts"
-		},
-		"./supabase": {
-			"import": "./src/supabase/index.ts",
-			"require": "./src/supabase/index.ts"
-		},
-		"./supabase-server": {
-			"import": "./src/supabase/server/index.ts",
-			"require": "./src/supabase/server/index.ts"
-		},
-		"./supabase-client": {
-			"import": "./src/supabase/client/index.ts",
-			"require": "./src/supabase/client/index.ts"
-		},
-		"./types": {
-			"import": "./src/types/index.ts",
-			"require": "./src/types/index.ts"
-		}
-	},
-	"main": "./src/index.ts",
-	"types": "./src/index.ts",
-	"license": "MIT",
-	"dependencies": {
-		"@services/supabase": "workspace:*",
-		"@simplewebauthn/browser": "^13.1.0",
-		"@stellar/stellar-sdk": "13.1.0",
-		"@supabase/ssr": "^0.7.0",
-		"@supabase/supabase-js": "^2.56.0",
-		"@tanstack/react-query": "^5.74.7",
-		"cbor-x": "^1.6.0",
-		"lodash": "^4.17.21",
-		"next-auth": "^4.24.11",
-		"react": "^19.0.0",
-		"sonner": "^1.7.1",
-		"tesseract.js": "^6.0.0",
-		"zod": "^3.23.8"
-	},
-	"devDependencies": {
-		"@types/lodash": "^4.17.17",
-		"@types/react": "^19",
-		"next": "^15.4.6"
-	},
-	"type": "module"
+  "name": "@packages/lib",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
+    },
+    "./config": {
+      "import": "./src/config/index.ts",
+      "require": "./src/config/index.ts"
+    },
+    "./doc-utils": {
+      "import": "./src/doc-utils/index.ts",
+      "require": "./src/doc-utils/index.ts"
+    },
+    "./hooks": {
+      "import": "./src/hooks/index.ts",
+      "require": "./src/hooks/index.ts"
+    },
+    "./providers": {
+      "import": "./src/providers/index.ts",
+      "require": "./src/providers/index.ts"
+    },
+    "./supabase": {
+      "import": "./src/supabase/index.ts",
+      "require": "./src/supabase/index.ts"
+    },
+    "./supabase-server": {
+      "import": "./src/supabase/server/index.ts",
+      "require": "./src/supabase/server/index.ts"
+    },
+    "./supabase-client": {
+      "import": "./src/supabase/client/index.ts",
+      "require": "./src/supabase/client/index.ts"
+    },
+    "./types": {
+      "import": "./src/types/index.ts",
+      "require": "./src/types/index.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "@services/supabase": "workspace:*",
+    "@simplewebauthn/browser": "^13.1.0",
+    "@stellar/stellar-sdk": "13.1.0",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.56.0",
+    "@tanstack/react-query": "^5.74.7",
+    "cbor-x": "^1.6.0",
+    "lodash": "^4.17.21",
+    "next-auth": "^4.24.11",
+    "react": "^19.0.0",
+    "sonner": "^1.7.1",
+    "tesseract.js": "^6.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.17",
+    "@types/react": "^19",
+    "next": "15.4.10"
+  },
+  "type": "module"
 }
