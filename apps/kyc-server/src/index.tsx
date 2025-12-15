@@ -122,8 +122,7 @@ async function startServer() {
 					// --- Wrap SSR root with ToastProvider and ToastViewport ---
 					const originalRender = await route[method](req)
 					if (
-						originalRender &&
-						originalRender.body &&
+						originalRender?.body &&
 						originalRender.headers.get('Content-Type')?.includes('text/html')
 					) {
 						// Inject ToastProvider and ToastViewport into the HTML stream

@@ -179,12 +179,11 @@ export async function signOutAction(): Promise<void> {
 		redirect('/sign-in?success=Successfully signed out')
 	} catch (error) {
 		// If redirect fails, it might be a NEXT_REDIRECT error which is expected
-		// @ts-expect-error - NEXT_REDIRECT is a special Next.js error type
 		if (
 			error &&
 			typeof error === 'object' &&
 			'digest' in error &&
-			error.digest?.startsWith('NEXT_REDIRECT')
+			(error.digest as string | undefined)?.startsWith('NEXT_REDIRECT')
 		) {
 			throw error
 		}

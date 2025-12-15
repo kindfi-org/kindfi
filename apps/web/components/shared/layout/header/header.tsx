@@ -162,12 +162,11 @@ const UserMenu = ({ user }: { user: User }) => {
 			await signOutAction()
 		} catch (error) {
 			// Check if this is a Next.js redirect error (which is expected)
-			// @ts-expect-error - NEXT_REDIRECT is a special Next.js error type
 			if (
 				error &&
 				typeof error === 'object' &&
 				'digest' in error &&
-				error.digest?.startsWith('NEXT_REDIRECT')
+				(error.digest as string | undefined)?.startsWith('NEXT_REDIRECT')
 			) {
 				// This is a redirect, let it propagate
 				throw error
@@ -306,12 +305,11 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 			await signOutAction()
 		} catch (error) {
 			// Check if this is a Next.js redirect error (which is expected)
-			// @ts-expect-error - NEXT_REDIRECT is a special Next.js error type
 			if (
 				error &&
 				typeof error === 'object' &&
 				'digest' in error &&
-				error.digest?.startsWith('NEXT_REDIRECT')
+				(error.digest as string | undefined)?.startsWith('NEXT_REDIRECT')
 			) {
 				// This is a redirect, let it propagate
 				throw error
