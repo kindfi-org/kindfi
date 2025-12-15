@@ -63,7 +63,12 @@ export function EscrowAdminPanel({
 	const [description, setDescription] = useState<string>('')
 	type MilestoneItem =
 		| { id: string; description: string }
-		| { id: string; description: string; amount: number | ''; receiver: string }
+		| {
+				id: string
+				description: string
+				amount: number | ''
+				receiver: string
+		  }
 	const genId = () =>
 		typeof crypto !== 'undefined' && 'randomUUID' in crypto
 			? crypto.randomUUID()
@@ -226,6 +231,7 @@ export function EscrowAdminPanel({
 					platformFee: platformFee as number,
 					trustline: {
 						address: trustlineAddress.trim(),
+						symbol: 'USDC',
 					},
 					milestones: sanitizedMilestones,
 				}
@@ -309,6 +315,7 @@ export function EscrowAdminPanel({
 					platformFee: platformFee as number,
 					trustline: {
 						address: trustlineAddress.trim(),
+						symbol: 'USDC',
 					},
 					milestones: sanitizedMilestones,
 				}

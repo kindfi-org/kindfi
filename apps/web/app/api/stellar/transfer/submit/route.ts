@@ -6,7 +6,6 @@ import {
 } from '@packages/lib/passkey'
 import { StellarPasskeyService } from '@packages/lib/stellar'
 import {
-	Contract,
 	Keypair,
 	type Transaction,
 	TransactionBuilder,
@@ -146,6 +145,8 @@ export async function POST(req: NextRequest) {
 			// console.log('🔐 Contract will verify signature', { verificationResults })
 
 			// Find and update the auth entry for the smart wallet
+			// const signatureScVal = xdr.ScVal.fromXDR(signatureScValRaw.toXDR())
+
 			for (const authEntry of authEntries) {
 				// ? Since both are Sets, they aren't necessary equal by passing the entire Set, we need to make a copy to compare them properly
 				const isSameCredentialMapping = isEqual(
@@ -161,8 +162,7 @@ export async function POST(req: NextRequest) {
 						nonce: addressCredentials.nonce(),
 						signatureExpirationLedger:
 							addressCredentials.signatureExpirationLedger(),
-						// ? TODO: fix TS def conflict between root and app node_modules
-						signature: signatureScVal as unknown as xdr.ScVal,
+						signature: signatureScVal,
 					})
 
 					// Update the auth entry with the new credentials containing our signature

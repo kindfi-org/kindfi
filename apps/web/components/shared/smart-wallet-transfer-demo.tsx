@@ -3,6 +3,7 @@
 import { appEnvConfig } from '@packages/lib/config'
 import { useStellarSorobanAccount } from '@packages/lib/hooks'
 import { startAuthentication } from '@simplewebauthn/browser'
+import type { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -145,7 +146,9 @@ export function SmartWalletTransferDemo() {
 
 	// TODO: Move the demo actions to a separate hook for reuse like this one below...
 	// It might be ready already... double-check useStellarSorobanAccount. - @andler
-	const smartWalletActions = useStellarSorobanAccount(session?.user)
+	const smartWalletActions = useStellarSorobanAccount(
+		session?.user as unknown as Session | null,
+	)
 
 	/**
 	 * Prepare transfer transaction
