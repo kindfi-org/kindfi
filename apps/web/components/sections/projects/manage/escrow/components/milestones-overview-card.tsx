@@ -4,13 +4,7 @@ import type {
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import {
-	AlertCircle,
-	CheckCircle2,
-	Clock,
-	FileText,
-	Send,
-} from 'lucide-react'
+import { AlertCircle, CheckCircle2, Clock, FileText, Send } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import {
 	Card,
@@ -106,7 +100,8 @@ export function MilestonesOverviewCard({
 												<span>
 													Amount:{' '}
 													<span className="font-semibold">
-														${multiMilestone.amount?.toLocaleString(undefined, {
+														$
+														{multiMilestone.amount?.toLocaleString(undefined, {
 															minimumFractionDigits: 2,
 															maximumFractionDigits: 7,
 														}) || '0.00'}
@@ -156,4 +151,3 @@ export function MilestonesOverviewCard({
 		</Card>
 	)
 }
-

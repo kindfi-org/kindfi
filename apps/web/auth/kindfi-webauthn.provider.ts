@@ -1,5 +1,4 @@
-import { db, devices, profiles } from '@packages/drizzle'
-import { and, eq } from '@packages/drizzle'
+import { and, db, devices, eq, profiles } from '@packages/drizzle'
 import type { User } from 'next-auth'
 import CredentialsProvider, {
 	type CredentialInput,

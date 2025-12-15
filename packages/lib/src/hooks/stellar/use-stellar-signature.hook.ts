@@ -1,11 +1,11 @@
 'use client'
 
-import { appEnvConfig } from '@packages/lib/config'
-import type { AppEnvInterface } from '@packages/lib/types'
-import type { Session } from 'next-auth'
 import { startAuthentication } from '@simplewebauthn/browser'
-import { useCallback, useState, useMemo } from 'react'
+import type { Session } from 'next-auth'
+import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { appEnvConfig } from '../../config'
+import type { AppEnvInterface } from '../../types'
 
 export interface StellarOperation {
 	type: string
@@ -38,7 +38,7 @@ export interface UseStellarSignatureOptions {
  * // Option 1: Pass session directly (recommended - avoids SessionProvider requirement)
  * const session = getSession() // Get session from anywhere
  * useStellarSignature({ session })
- * 
+ *
  * // Option 2: With SessionProvider (if session is not provided)
  * <SessionProvider>
  *   <ComponentUsingThisHook />
@@ -51,7 +51,7 @@ export const useStellarSignature = (
 	// Check if session was explicitly provided (either a Session object or null)
 	// If session is explicitly provided, we'll use that exclusively
 	const hasExplicitSession = 'session' in options
-	
+
 	// When session is explicitly provided, use it directly without calling useSession
 	// This avoids the SessionProvider requirement error
 	// Note: React hooks must be called unconditionally, but since we're not calling
@@ -59,7 +59,7 @@ export const useStellarSignature = (
 	const session = useMemo(() => {
 		return hasExplicitSession ? options.session : null
 	}, [hasExplicitSession, options.session])
-	
+
 	const [isLoading, setIsLoading] = useState(false)
 	const [lastResult, setLastResult] = useState<SignatureResult | null>(null)
 	const [error, setError] = useState<string | null>(null)
@@ -79,7 +79,9 @@ export const useStellarSignature = (
 				throw new Error('User not authenticated')
 			}
 
-			const typedSession = session as Session & { device?: { credential_id: string; public_key: string; address: string } }
+			const typedSession = session as Session & {
+				device?: { credential_id: string; public_key: string; address: string }
+			}
 			if (!typedSession.device) {
 				throw new Error('No device information available')
 			}
@@ -177,7 +179,9 @@ export const useStellarSignature = (
 				throw new Error('User not authenticated')
 			}
 
-			const typedSession = session as Session & { device?: { credential_id: string; public_key: string; address: string } }
+			const typedSession = session as Session & {
+				device?: { credential_id: string; public_key: string; address: string }
+			}
 			if (!typedSession.device) {
 				throw new Error('No device information available')
 			}

@@ -3,7 +3,7 @@
  * Manages on-chain account authorization tracking
  */
 
-import { appEnvConfig } from '@packages/lib'
+import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Address,
@@ -82,7 +82,7 @@ export async function registerAccountOnChain(
 
 		if (Api.isSimulationError(simulation)) {
 			console.error('❌ Simulation failed:', simulation)
-			throw new Error(`Simulation failed: ${JSON.stringify(simulation)}`)
+			throw new Error(simulation.error)
 		}
 
 		console.log('✅ Simulation successful, assembling transaction...')

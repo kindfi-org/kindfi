@@ -6,9 +6,7 @@ import {
 } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { generateStellarAddress } from '~/lib/passkey/deploy'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
-import { getPublicKeys } from '~/lib/passkey/stellar'
 
 export const usePasskeyRegistration = (
 	identifier: string,

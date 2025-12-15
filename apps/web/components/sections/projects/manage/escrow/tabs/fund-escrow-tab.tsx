@@ -121,9 +121,7 @@ export function FundEscrowTab({
 						type="number"
 						value={fundAmount}
 						onChange={(e) =>
-							setFundAmount(
-								e.target.value === '' ? '' : Number(e.target.value),
-							)
+							setFundAmount(e.target.value === '' ? '' : Number(e.target.value))
 						}
 						placeholder="0.00"
 						min="0"
@@ -179,4 +177,3 @@ export function FundEscrowTab({
 		</Card>
 	)
 }
-

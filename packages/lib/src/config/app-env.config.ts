@@ -293,7 +293,7 @@ function detectApp(): AppName | undefined {
 			return process.env.APP_NAME as AppName
 		}
 	}
-	
+
 	// Default fallback
 	return undefined
 }

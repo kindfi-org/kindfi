@@ -172,10 +172,7 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
-			uid: {
-				Args: Record<PropertyKey, never>
-				Returns: string
-			}
+			uid: { Args: never; Returns: string }
 		}
 		Enums: {
 			[_ in never]: never
@@ -390,6 +387,7 @@ export type Database = {
 					created_at: string
 					credential_id: string
 					credential_type: Database['public']['Enums']['credential_type']
+					device_id: string | null
 					device_name: string | null
 					device_type: Database['public']['Enums']['device_type']
 					id: string
@@ -411,6 +409,7 @@ export type Database = {
 					created_at?: string
 					credential_id: string
 					credential_type?: Database['public']['Enums']['credential_type']
+					device_id?: string | null
 					device_name?: string | null
 					device_type?: Database['public']['Enums']['device_type']
 					id?: string
@@ -432,6 +431,7 @@ export type Database = {
 					created_at?: string
 					credential_id?: string
 					credential_type?: Database['public']['Enums']['credential_type']
+					device_id?: string | null
 					device_name?: string | null
 					device_type?: Database['public']['Enums']['device_type']
 					id?: string
@@ -1246,16 +1246,10 @@ export type Database = {
 				Args: { admin_notes?: string; target_user_id: string }
 				Returns: undefined
 			}
-			cleanup_expired_challenges: {
-				Args: Record<PropertyKey, never>
-				Returns: undefined
-			}
-			current_auth_user_id: {
-				Args: Record<PropertyKey, never>
-				Returns: string
-			}
+			cleanup_expired_challenges: { Args: never; Returns: undefined }
+			current_auth_user_id: { Args: never; Returns: string }
 			get_current_user_profile: {
-				Args: Record<PropertyKey, never>
+				Args: never
 				Returns: {
 					profile_id: string
 					role: Database['public']['Enums']['user_role']
@@ -1270,18 +1264,8 @@ export type Database = {
 				Args: { project_uuid: string; user_uuid: string }
 				Returns: boolean
 			}
-			remove_kyc_admin: {
-				Args: { target_user_id: string }
-				Returns: undefined
-			}
-			unaccent: {
-				Args: { '': string }
-				Returns: string
-			}
-			unaccent_init: {
-				Args: { '': unknown }
-				Returns: unknown
-			}
+			remove_kyc_admin: { Args: { target_user_id: string }; Returns: undefined }
+			unaccent: { Args: { '': string }; Returns: string }
 		}
 		Enums: {
 			backup_state: 'not_backed_up' | 'backed_up'

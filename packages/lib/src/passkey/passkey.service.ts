@@ -1,5 +1,3 @@
-import { appEnvConfig } from '@packages/lib/config'
-import type { AppEnvInterface } from '@packages/lib/types'
 import type {
 	AuthenticationResponseJSON,
 	WebAuthnCredential as BaseWebAuthnCredential,
@@ -16,15 +14,17 @@ import {
 	verifyRegistrationResponse,
 } from '@simplewebauthn/server'
 import base64url from 'base64url'
-import { ErrorCode, InAppError } from '~/lib/passkey/errors'
-import { StellarPasskeyService } from '../stellar/stellar-passkey-service'
+import { appEnvConfig } from '../config'
 import {
 	deleteChallenge,
 	getChallenge,
 	getUser,
 	saveChallenge,
 	saveUser,
-} from './database'
+} from '../db/webauthn.database'
+import { ErrorCode, InAppError } from '../stellar/errors'
+import { StellarPasskeyService } from '../stellar/stellar-passkey.service'
+import type { AppEnvInterface } from '../types'
 
 // Extended WebAuthnCredential with Stellar address support
 export interface WebAuthnCredential extends BaseWebAuthnCredential {

@@ -1,7 +1,7 @@
 'use client'
 
 import type { GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
-import { Shield, Users, Wallet, Send } from 'lucide-react'
+import { Send, Shield, Users, Wallet } from 'lucide-react'
 import {
 	Card,
 	CardContent,
@@ -85,9 +85,7 @@ export function RolesCard({ escrowData }: RolesCardProps) {
 									</Label>
 								</TooltipTrigger>
 								<TooltipContent className="max-w-xs">
-									<p>
-										Address of the entity that owns the escrow platform.
-									</p>
+									<p>Address of the entity that owns the escrow platform.</p>
 								</TooltipContent>
 							</Tooltip>
 							<p className="font-mono text-sm break-all">
@@ -158,4 +156,3 @@ export function RolesCard({ escrowData }: RolesCardProps) {
 		</Card>
 	)
 }
-

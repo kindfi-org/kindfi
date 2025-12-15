@@ -1,4 +1,4 @@
-import { appEnvConfig } from '@packages/lib'
+import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import { getServerSession } from 'next-auth'
 import { LayoutContainer } from '~/components/layout-container'

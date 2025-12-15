@@ -1,5 +1,5 @@
 'use client'
-import { processFile } from '@packages/lib'
+import { processFile } from '@packages/lib/doc-utils'
 import * as pdfjsLib from 'pdfjs-dist'
 import { useCallback, useState } from 'react'
 import {
@@ -49,7 +49,7 @@ export function useDocumentProcessor(
 		(text: string, pattern: RegExp): string | null => {
 			const match = text.match(pattern)
 			if (!match) return null
-			
+
 			// Return the first non-empty capture group, or the full match
 			for (let i = 1; i < match.length; i++) {
 				if (match[i] && match[i].trim().length > 0) {
@@ -138,8 +138,14 @@ export function useDocumentProcessor(
 					.toUpperCase()
 
 				// Debug: Log extracted text for troubleshooting (only in development)
-				if (process.env.NODE_ENV === 'development' && documentType === 'Passport') {
-					console.log('Extracted text from passport:', cleanedText.substring(0, 500))
+				if (
+					process.env.NODE_ENV === 'development' &&
+					documentType === 'Passport'
+				) {
+					console.log(
+						'Extracted text from passport:',
+						cleanedText.substring(0, 500),
+					)
 				}
 
 				const processedData: ExtractedData = {
@@ -156,27 +162,48 @@ export function useDocumentProcessor(
 							// Try multiple patterns for passport number
 							processedData.idNumber =
 								extractText(cleanedText, DocumentPatterns.Passport.idNumber) ||
-								extractText(cleanedText, /PASSPORT[\s:]*NO[.:\s]*([A-Z0-9]{6,12})/i) ||
+								extractText(
+									cleanedText,
+									/PASSPORT[\s:]*NO[.:\s]*([A-Z0-9]{6,12})/i,
+								) ||
 								extractText(cleanedText, /([A-Z]{1,2}[0-9]{6,9})/) ||
 								extractText(cleanedText, /([0-9]{9})/)
 
 							// Try multiple patterns for name
 							processedData.fullName =
 								extractText(cleanedText, DocumentPatterns.Passport.name) ||
-								extractText(cleanedText, /(?:SURNAME|LAST\s*NAME)[\s:]*([A-Z\s]{3,30})/i) ||
-								extractText(cleanedText, /(?:GIVEN\s*NAMES|FIRST\s*NAME)[\s:]*([A-Z\s]{3,30})/i) ||
+								extractText(
+									cleanedText,
+									/(?:SURNAME|LAST\s*NAME)[\s:]*([A-Z\s]{3,30})/i,
+								) ||
+								extractText(
+									cleanedText,
+									/(?:GIVEN\s*NAMES|FIRST\s*NAME)[\s:]*([A-Z\s]{3,30})/i,
+								) ||
 								extractText(cleanedText, /([A-Z][A-Z\s]{5,40})/)
 
 							// Try multiple patterns for nationality
 							processedData.nationality =
-								extractText(cleanedText, DocumentPatterns.Passport.nationality) ||
-								extractText(cleanedText, /(?:NATIONALITY|NAT)[\s:]*([A-Z]{2,3})/i) ||
+								extractText(
+									cleanedText,
+									DocumentPatterns.Passport.nationality,
+								) ||
+								extractText(
+									cleanedText,
+									/(?:NATIONALITY|NAT)[\s:]*([A-Z]{2,3})/i,
+								) ||
 								extractText(cleanedText, /([A-Z]{2,3})(?:\s*NATIONALITY)/i)
 
 							// Also try to extract expiry date from passport front (many passports have it)
 							processedData.expiryDate =
-								extractText(cleanedText, /(?:EXPIRY|EXPIRES|DATE\s*OF\s*EXPIRY)[\s:]*(\d{1,2}[\s./-]\d{1,2}[\s./-]\d{2,4})/i) ||
-								extractText(cleanedText, /(\d{1,2}[\s./-]\d{1,2}[\s./-]\d{2,4})/)
+								extractText(
+									cleanedText,
+									/(?:EXPIRY|EXPIRES|DATE\s*OF\s*EXPIRY)[\s:]*(\d{1,2}[\s./-]\d{1,2}[\s./-]\d{2,4})/i,
+								) ||
+								extractText(
+									cleanedText,
+									/(\d{1,2}[\s./-]\d{1,2}[\s./-]\d{2,4})/,
+								)
 							break
 
 						case 'National ID':

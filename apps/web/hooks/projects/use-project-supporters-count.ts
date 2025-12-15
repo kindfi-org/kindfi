@@ -63,4 +63,3 @@ export function useProjectSupportersCount({
 		[supportersCount, isLoading, error, refetch],
 	)
 }
-

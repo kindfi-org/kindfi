@@ -22,7 +22,7 @@ import type {
 import type {
 	DocumentType as ProofOfAddressDocumentType,
 	ExtractedData as ProofOfAddressExtractedData,
-} from '@packages/lib'
+} from '@packages/lib/doc-utils'
 
 // Define a comprehensive type for all collected KYC data
 export type KYCData = FinalReviewProps['kycData'] & {

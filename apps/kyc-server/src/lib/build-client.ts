@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync } from 'node:fs'
 import { readdir, rename, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { appEnvConfig } from '@packages/lib'
+import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import { build } from 'bun'
 import tailwindPlugin from 'bun-plugin-tailwind'

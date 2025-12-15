@@ -1,7 +1,9 @@
 'use client'
 
 import { appEnvConfig } from '@packages/lib/config'
+import { useStellarSorobanAccount } from '@packages/lib/hooks'
 import { startAuthentication } from '@simplewebauthn/browser'
+import type { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -14,6 +16,8 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import { Input } from '~/components/base/input'
+import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import type { verifyAuthentication } from '../../../../packages/lib/src/passkey/passkey.service'
 
 interface TransferFormData {
 	to: string
@@ -35,10 +39,85 @@ export function SmartWalletTransferDemo() {
 		asset: 'native',
 	})
 	const [isLoading, setIsLoading] = useState(false)
+	const [isFunding, setIsFunding] = useState(false)
+	const [isApproving, setIsApproving] = useState(false)
 	const [balance, setBalance] = useState<string | null>(null)
 	const [smartWalletAddress] = useState<string>(
 		session?.device?.address || session?.user.device?.address || '',
 	)
+
+	/**
+	 * Approve smart wallet in auth-controller
+	 * Required before wallet can perform authenticated operations
+	 */
+	const approveAccount = async () => {
+		setIsApproving(true)
+
+		try {
+			toast.info('You will be redirected shortly.', {
+				description: `Approving account flow is KYC Server action ONLY. Connecting from here to simulate admin approval...`,
+				duration: 5000,
+			})
+
+			await new Promise((resolve) => setTimeout(resolve, 3000)) // Wait for toast to show
+
+			window.open(
+				`${appEnvConfig('web').externalApis.kyc.baseUrl}/users?id=${session?.user.id}`,
+				'_blank',
+			)
+		} catch (error) {
+			console.error('Error approving account:', error)
+			toast.error(
+				error instanceof Error ? error.message : 'Failed to approve account',
+			)
+		} finally {
+			setIsApproving(false)
+		}
+	}
+
+	/**
+	 * Fund smart wallet with testnet XLM
+	 */
+	const fundWallet = async (amount = '10') => {
+		try {
+			setIsFunding(true)
+
+			const response = await fetch('/api/stellar/faucet', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					address: smartWalletAddress,
+					amount,
+				}),
+			})
+
+			if (!response.ok) {
+				const errorData = await response.json()
+				throw new Error(errorData.details || 'Failed to fund wallet')
+			}
+
+			const result = await response.json()
+
+			toast.success(`Wallet funded successfully!`, {
+				description: `Added ${result.data.amount} XLM to your wallet`,
+				duration: 5000,
+			})
+
+			await new Promise((resolve) => setTimeout(resolve, 3000)) // Wait for balance to update
+
+			// Refresh balance after funding
+			await fetchBalance()
+		} catch (error) {
+			console.error('Error funding wallet:', error)
+			toast.error(
+				error instanceof Error ? error.message : 'Failed to fund wallet',
+			)
+		} finally {
+			setIsFunding(false)
+		}
+	}
 
 	/**
 	 * Fetch wallet balances
@@ -47,8 +126,7 @@ export function SmartWalletTransferDemo() {
 		try {
 			setIsLoading(true)
 			const response = await fetch(
-				`/api/stellar/balances/CAAA322AAKGBZRQ5JHSROZ742VCL3ZLBP54LJBN5UVVJCZ52SR7IH6IT`,
-				// `/api/stellar/balances/${smartWalletAddress}`,
+				`/api/stellar/balances/${smartWalletAddress}`,
 			)
 
 			if (!response.ok) {
@@ -65,6 +143,12 @@ export function SmartWalletTransferDemo() {
 			setIsLoading(false)
 		}
 	}
+
+	// TODO: Move the demo actions to a separate hook for reuse like this one below...
+	// It might be ready already... double-check useStellarSorobanAccount. - @andler
+	const smartWalletActions = useStellarSorobanAccount(
+		session?.user as unknown as Session | null,
+	)
 
 	/**
 	 * Prepare transfer transaction
@@ -138,8 +222,47 @@ export function SmartWalletTransferDemo() {
 				optionsJSON: authOptions,
 			})
 
+			const verificationResp = await fetch(
+				`${baseUrl}/api/passkey/verify-authentication`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						identifier: session?.user?.email,
+						authenticationResponse: authResponse,
+						origin: window.location.origin,
+						userId: session?.user?.id,
+					}),
+				},
+			)
+
+			if (!verificationResp.ok) {
+				const verificationJSON = await verificationResp.json()
+				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, verificationJSON.error)
+			}
+
+			const verificationJSON = await (verificationResp.json() as ReturnType<
+				typeof verifyAuthentication
+			>)
+
+			if (!verificationJSON?.verified) {
+				throw new InAppError(
+					ErrorCode.AUTHENTICATOR_NOT_REGISTERED,
+					'Authentication verification failed',
+				)
+			}
+
 			toast.info('Verifying signature...', {
 				description: 'Please wait while we process your transaction',
+			})
+
+			console.log('📝 WebAuthn response:', {
+				id: authResponse.id,
+				type: authResponse.type,
+				rawId: authResponse.rawId,
+				authResponse,
 			})
 
 			// Submit the signed transaction
@@ -149,9 +272,10 @@ export function SmartWalletTransferDemo() {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					transactionXDR: data.transactionXDR,
+					transactionData: data,
+					userDevice: session?.device || session?.user.device,
+					verificationJSON,
 					authResponse,
-					deviceId: session?.device?.credential_id,
 				}),
 			})
 
@@ -169,6 +293,8 @@ export function SmartWalletTransferDemo() {
 
 			// Reset form
 			setFormData({ to: '', amount: '', asset: 'native' })
+
+			await new Promise((resolve) => setTimeout(resolve, 3000)) // Wait for balance to update
 
 			// Refresh balance
 			await fetchBalance()
@@ -212,7 +338,15 @@ export function SmartWalletTransferDemo() {
 						<div className="text-xs font-mono break-all text-muted-foreground">
 							{smartWalletAddress}
 						</div>
-						<div className="mt-2 flex items-center gap-2">
+						<div className="mt-3 flex items-center gap-2 flex-wrap">
+							<Button
+								size="sm"
+								variant="outline"
+								onClick={approveAccount}
+								disabled={isApproving}
+							>
+								{isApproving ? 'Approving...' : 'Approve Account'}
+							</Button>
 							<Button
 								size="sm"
 								variant="outline"
@@ -221,8 +355,18 @@ export function SmartWalletTransferDemo() {
 							>
 								{isLoading ? 'Loading...' : 'Check Balance'}
 							</Button>
+							<Button
+								size="sm"
+								variant="secondary"
+								onClick={() => fundWallet('10')}
+								disabled={isFunding}
+							>
+								{isFunding ? 'Funding...' : '💰 Fund Wallet (10 XLM)'}
+							</Button>
 							{balance && (
-								<span className="text-sm font-medium">{balance} XLM</span>
+								<span className="text-sm font-medium bg-green-50 dark:bg-green-950 px-3 py-1 rounded-md">
+									{balance} XLM
+								</span>
 							)}
 						</div>
 					</div>
@@ -290,6 +434,18 @@ export function SmartWalletTransferDemo() {
 						>
 							{isLoading ? 'Preparing...' : 'Prepare Transfer'}
 						</Button>
+					</div>
+
+					{/* Faucet Info */}
+					<div className="rounded-lg bg-amber-50 dark:bg-amber-950 p-4 text-sm">
+						<div className="font-medium mb-1 flex items-center gap-2">
+							💰 Testnet Faucet
+						</div>
+						<div className="text-muted-foreground">
+							Your smart wallet needs XLM to pay for transactions. Use the "Fund
+							Wallet" button to get testnet XLM for testing. This only works on
+							Stellar Testnet.
+						</div>
 					</div>
 
 					{/* Info Box */}

@@ -1,10 +1,11 @@
+// TODO: REFACTOR THIS TO DO HOOK FOR SMART WALLET MANAGEMENT (transferXML/USDC, transaction invoke, balances, verification)
 'use client'
 
 import { debounce } from 'lodash'
 import type { Session, User } from 'next-auth'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useStellarSignature } from './use-stellar-signature'
+import { useStellarSignature } from './use-stellar-signature.hook'
 
 export interface ContractOperation {
 	contractAddress: string

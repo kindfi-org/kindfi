@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { appEnvConfig } from '@packages/lib'
+import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { Server, ServerWebSocket } from 'bun'
 import { serve } from 'bun'
@@ -47,7 +47,7 @@ async function startServer() {
 	}
 
 	const serverOptions = {
-		async fetch(req: Request, server: Server): Promise<Response> {
+		async fetch(req: Request, server: Server<ClientData>): Promise<Response> {
 			const url = new URL(req.url)
 
 			if (url.pathname === '/live') {
@@ -122,8 +122,7 @@ async function startServer() {
 					// --- Wrap SSR root with ToastProvider and ToastViewport ---
 					const originalRender = await route[method](req)
 					if (
-						originalRender &&
-						originalRender.body &&
+						originalRender?.body &&
 						originalRender.headers.get('Content-Type')?.includes('text/html')
 					) {
 						// Inject ToastProvider and ToastViewport into the HTML stream

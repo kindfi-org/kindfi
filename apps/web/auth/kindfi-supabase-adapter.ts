@@ -1,6 +1,6 @@
 import type { AdapterAccount } from '@auth/core/adapters'
 import { SupabaseAdapter } from '@auth/supabase-adapter'
-import { appEnvConfig } from '@packages/lib'
+import { appEnvConfig } from '@packages/lib/config'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Adapter, AdapterSession, AdapterUser } from 'next-auth/adapters'
 

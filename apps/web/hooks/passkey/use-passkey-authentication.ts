@@ -94,7 +94,7 @@ export const usePasskeyAuthentication = (
 
 			const verificationJSON = await verificationResp.json()
 
-			if (!verificationJSON?.verified) {
+			if (!verificationJSON?.verified || !userId) {
 				throw new InAppError(
 					ErrorCode.AUTHENTICATOR_NOT_REGISTERED,
 					'Authentication verification failed',
@@ -103,7 +103,7 @@ export const usePasskeyAuthentication = (
 
 			// Create session after successful passkey verification
 			const sessionResult = await createSessionAction({
-				userId: userId || verificationJSON.userId,
+				userId,
 				email: identifier, // identifier should be the email
 			})
 

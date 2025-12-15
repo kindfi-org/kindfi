@@ -1,8 +1,8 @@
+// ! Some of these fns are already in other apps... update these to have the latest. Apps version are the newest. Check git history to confirm
+
 import { Buffer } from 'node:buffer'
 import { createHash, createPublicKey, createVerify } from 'node:crypto'
-import { devices } from '@packages/drizzle'
-import { appEnvConfig } from '@packages/lib/config'
-import type { AppEnvInterface } from '@packages/lib/types'
+import { db, devices } from '@packages/drizzle'
 import {
 	Account,
 	Address,
@@ -15,9 +15,13 @@ import {
 	xdr,
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
-import * as CBOR from 'cbor-x/decode'
 import { eq } from 'drizzle-orm'
-import { getDb } from '../services/db'
+import { appEnvConfig } from '../config'
+import {
+	computeDeviceIdFromCoseKey,
+	convertCoseToUncompressedPublicKey,
+} from '../passkey'
+import type { AppEnvInterface } from '../types'
 import { type RateLimitConfig, SignatureRateLimiter } from './rate-limiter'
 
 /**
@@ -65,6 +69,8 @@ export class StellarPasskeyService {
 	/**
 	 * Deploys smart wallet contract via account-factory
 	 * Returns the ACTUAL contract address from the on-chain response
+	 *
+	 * @param params.publicKey - Can be either COSE format (will be converted) or already uncompressed base64
 	 */
 	async deployPasskeyAccount(
 		params: PasskeyAccountCreationParams & { salt?: string; deviceId?: string },
@@ -76,18 +82,28 @@ export class StellarPasskeyService {
 		try {
 			console.log('🚀 Deploying smart wallet for passkey:', params.credentialId)
 
-			// Use provided salt/deviceId or generate from credential
+			// Use provided salt or generate from credential
 			const salt = params.salt
 				? Buffer.from(params.salt, 'hex')
 				: hash(Buffer.from(params.credentialId, 'base64'))
-			const deviceId = params.deviceId
-				? Buffer.from(params.deviceId, 'hex')
-				: hash(Buffer.from(params.credentialId, 'base64'))
 
-			// Process public key to uncompressed secp256r1 format
-			const publicKeyBuffer = this.convertCborToUncompressedKey(
+			// Process public key to uncompressed secp256r1 format using shared utility
+			// The publicKey parameter should be COSE format from WebAuthn
+			const publicKeyBuffer = convertCoseToUncompressedPublicKey(
 				Buffer.from(params.publicKey, 'base64'),
 			)
+
+			// ! CRITICAL: Compute device_id using the SAME method as submit route
+			// device_id = SHA256(uncompressed_public_key)
+			// NOT SHA256(credential_id)
+			let deviceId: Buffer
+			if (params.deviceId) {
+				deviceId = Buffer.from(params.deviceId, 'hex')
+			} else {
+				// Compute device_id from public key (same as submit route)
+				const deviceIdHex = computeDeviceIdFromCoseKey(params.publicKey)
+				deviceId = Buffer.from(deviceIdHex, 'hex')
+			}
 
 			console.log('📝 Deployment parameters:', {
 				salt: salt.toString('hex').substring(0, 16) + '...',
@@ -421,72 +437,6 @@ export class StellarPasskeyService {
 	}
 
 	/**
-	 * Converts CBOR-encoded public key to uncompressed secp256r1 format
-	 * Extracts X and Y coordinates from COSE key and builds 0x04 || X || Y
-	 */
-	private convertCborToUncompressedKey(cborPublicKey: Buffer): Buffer {
-		try {
-			console.log('🔍 Parsing CBOR public key...')
-
-			// Decode CBOR attestation object
-			const decoded = CBOR.decode(cborPublicKey)
-
-			// Extract COSE key from attestation data
-			// COSE key format (CBOR map):
-			// -1: curve identifier (1 for P-256)
-			// -2: x coordinate (32 bytes)
-			// -3: y coordinate (32 bytes)
-			const coseKey = decoded
-
-			const curve = coseKey[-1] as number
-			const xCoord = coseKey[-2] as Buffer
-			const yCoord = coseKey[-3] as Buffer
-
-			console.log('🔍 Extracted COSE values:', {
-				curve,
-				xCoordLength: xCoord?.length,
-				yCoordLength: yCoord?.length,
-			})
-
-			if (!xCoord || !yCoord) {
-				throw new Error('Missing X or Y coordinates in COSE key')
-			}
-
-			if (curve !== 1) {
-				console.warn(
-					'⚠️ Unexpected curve value:',
-					curve,
-					'(expected 1 for P-256)',
-				)
-			}
-
-			// Validate coordinate lengths
-			if (xCoord.length !== 32 || yCoord.length !== 32) {
-				throw new Error(
-					`Invalid coordinate lengths: X=${xCoord.length}, Y=${yCoord.length} (expected 32 each)`,
-				)
-			}
-
-			// Construct uncompressed public key: 0x04 + X + Y
-			const uncompressedKey = Buffer.concat([
-				Buffer.from([0x04]), // Uncompressed point indicator
-				xCoord,
-				yCoord,
-			])
-
-			console.log('✅ Converted to uncompressed format:', {
-				length: uncompressedKey.length,
-				hex: uncompressedKey.toString('hex').substring(0, 32) + '...',
-			})
-
-			return uncompressedKey
-		} catch (error) {
-			console.error('❌ CBOR conversion failed:', error)
-			throw new Error(`CBOR conversion failed: ${error}`)
-		}
-	}
-
-	/**
 	 * Verifies a passkey signature for transaction authentication
 	 * This is essential for the `/api/stellar/verify-signature` endpoint
 	 */
@@ -674,7 +624,6 @@ export class StellarPasskeyService {
 			console.log('🔍 Looking up public key for contract:', contractId)
 
 			// Query database for device record with this contract address
-			const db = getDb
 			const deviceRecord = await db
 				.select({
 					publicKey: devices.publicKey,
@@ -1029,6 +978,71 @@ export class StellarPasskeyService {
 	 */
 	async disconnect(): Promise<void> {
 		await this.rateLimiter.disconnect()
+	}
+}
+
+/**
+ * Query devices registered in smart wallet contract
+ */
+export async function queryContractDevices(
+	server: Server,
+	contractAddress: string,
+	fundingKeypair: Keypair,
+	networkPassphrase: string,
+): Promise<Array<{ device_id: string; public_key: string }>> {
+	try {
+		const contract = new Contract(contractAddress)
+		const fundingAccount = await server.getAccount(fundingKeypair.publicKey())
+
+		const getDevicesOp = contract.call('get_devices')
+
+		const tx = new TransactionBuilder(fundingAccount, {
+			fee: '100',
+			networkPassphrase,
+		})
+			.addOperation(getDevicesOp)
+			.setTimeout(30)
+			.build()
+
+		const simulation = await server.simulateTransaction(tx)
+
+		if (Api.isSimulationSuccess(simulation) && simulation.result) {
+			// Parse the result - it should be a Vec<DevicePublicKey>
+			const devicesScVal = simulation.result.retval
+			console.log('📱 Contract devices query successful')
+
+			// The result is a Vec, parse it
+			if (devicesScVal.switch().name === 'scvVec' && devicesScVal.vec()) {
+				const devices = []
+				for (const deviceScVal of devicesScVal.vec() || []) {
+					// Each device is a struct with device_id and public_key
+					if (deviceScVal.switch().name === 'scvMap' && deviceScVal.map()) {
+						const deviceMap: Record<string, Buffer> = {}
+						for (const entry of deviceScVal.map() || []) {
+							const key = entry.key().sym().toString()
+							const valBytes = entry.val().bytes()
+							if (valBytes) {
+								deviceMap[key] = Buffer.from(valBytes)
+							}
+						}
+
+						if (deviceMap.device_id && deviceMap.public_key) {
+							devices.push({
+								device_id: deviceMap.device_id.toString('hex'),
+								public_key: deviceMap.public_key.toString('hex'),
+							})
+						}
+					}
+				}
+				return devices
+			}
+		}
+
+		console.warn('⚠️ Failed to query contract devices')
+		return []
+	} catch (error) {
+		console.error('❌ Error querying contract devices:', error)
+		return []
 	}
 }
 

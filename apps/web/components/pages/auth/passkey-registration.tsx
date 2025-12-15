@@ -65,6 +65,23 @@ export function PasskeyRegistrationComponent() {
 	}
 
 	// Finalize after successful passkey registration: update profile and sign in via NextAuth
+	useEffect(() => {
+		console.log('Passkey registration success effect triggered', {
+			regSuccess,
+			userEmail,
+			userId,
+			deviceData,
+		})
+		if (!regSuccess || !userEmail || !userId || !deviceData) {
+			if (regSuccess && !deviceData) {
+				router.push('/sign-in')
+			}
+			return () => {}
+		}
+
+		handleFinalize()
+	}, [regSuccess, userEmail, userId, deviceData, router])
+
 	const handleFinalize = useCallback(async () => {
 		if (!regSuccess || !userEmail || !userId || !deviceData) return
 
@@ -141,7 +158,8 @@ export function PasskeyRegistrationComponent() {
 					</CardHeader>
 					<CardContent className="text-center">
 						<p className="text-sm text-muted-foreground">
-							You can now sign in using your passkey or continue to your profile.
+							You can now sign in using your passkey or continue to your
+							profile.
 						</p>
 					</CardContent>
 					<CardFooter className="flex flex-col space-y-2">

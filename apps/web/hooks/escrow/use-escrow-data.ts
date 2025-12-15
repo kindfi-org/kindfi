@@ -68,10 +68,12 @@ export function useEscrowData({
 					typeof escrowData.createdAt === 'object' &&
 					'_seconds' in escrowData.createdAt
 						? (new Date(
-								(escrowData.createdAt as {
-									_seconds: number
-									_nanoseconds?: number
-								})._seconds * 1000,
+								(
+									escrowData.createdAt as {
+										_seconds: number
+										_nanoseconds?: number
+									}
+								)._seconds * 1000,
 							) as unknown as Date)
 						: escrowData.createdAt,
 				updatedAt:
@@ -79,10 +81,12 @@ export function useEscrowData({
 					typeof escrowData.updatedAt === 'object' &&
 					'_seconds' in escrowData.updatedAt
 						? (new Date(
-								(escrowData.updatedAt as {
-									_seconds: number
-									_nanoseconds?: number
-								})._seconds * 1000,
+								(
+									escrowData.updatedAt as {
+										_seconds: number
+										_nanoseconds?: number
+									}
+								)._seconds * 1000,
 							) as unknown as Date)
 						: escrowData.updatedAt,
 			} as unknown as GetEscrowsFromIndexerResponse
@@ -112,4 +116,3 @@ export function useEscrowData({
 		refetch: fetchEscrowData,
 	}
 }
-

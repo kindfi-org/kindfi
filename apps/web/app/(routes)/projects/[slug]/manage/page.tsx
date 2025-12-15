@@ -8,6 +8,7 @@ import {
 	IoSettingsOutline,
 	IoStarOutline,
 } from 'react-icons/io5'
+import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -16,7 +17,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
-import { Badge } from '~/components/base/badge'
 
 interface Section {
 	title: string
@@ -62,7 +62,8 @@ const sections: Section[] = [
 	},
 	{
 		title: 'Escrow Creation',
-		description: 'Initialize and configure your escrow contract, roles, and milestones.',
+		description:
+			'Initialize and configure your escrow contract, roles, and milestones.',
 		href: 'settings',
 		cta: 'Create escrow',
 		Icon: IoSettingsOutline,
@@ -70,7 +71,8 @@ const sections: Section[] = [
 	},
 	{
 		title: 'Escrow Management',
-		description: 'Fund escrow, approve milestones, release funds, and track balance.',
+		description:
+			'Fund escrow, approve milestones, release funds, and track balance.',
 		href: 'settings/manage',
 		cta: 'Manage escrow',
 		Icon: IoLockClosedOutline,
@@ -81,18 +83,24 @@ const sections: Section[] = [
 const categoryConfig = {
 	content: {
 		label: 'Content',
-		color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900',
-		gradient: 'from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20',
+		color:
+			'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900',
+		gradient:
+			'from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20',
 	},
 	team: {
 		label: 'Team',
-		color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-900',
-		gradient: 'from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20',
+		color:
+			'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-900',
+		gradient:
+			'from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20',
 	},
 	escrow: {
 		label: 'Escrow',
-		color: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900',
-		gradient: 'from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20',
+		color:
+			'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900',
+		gradient:
+			'from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20',
 	},
 }
 
@@ -112,21 +120,20 @@ export default async function ProjectManagementDashboardPage({
 			<header className="space-y-3">
 				<div className="flex items-center gap-3">
 					<div className="h-1 w-12 rounded-full bg-gradient-to-r from-primary to-primary/50" />
-					<h1 className="text-4xl font-bold tracking-tight">Project Management</h1>
+					<h1 className="text-4xl font-bold tracking-tight">
+						Project Management
+					</h1>
 				</div>
 				<p className="text-lg text-muted-foreground max-w-2xl">
-					Manage your project content, team, and escrow settings. Keep everything
-					up to date and running smoothly.
+					Manage your project content, team, and escrow settings. Keep
+					everything up to date and running smoothly.
 				</p>
 			</header>
 
 			{/* Content Section */}
 			<div className="space-y-4">
 				<div className="flex items-center gap-3">
-					<Badge
-						variant="outline"
-						className={categoryConfig.content.color}
-					>
+					<Badge variant="outline" className={categoryConfig.content.color}>
 						{categoryConfig.content.label}
 					</Badge>
 					<div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
@@ -146,10 +153,7 @@ export default async function ProjectManagementDashboardPage({
 			{/* Team Section */}
 			<div className="space-y-4">
 				<div className="flex items-center gap-3">
-					<Badge
-						variant="outline"
-						className={categoryConfig.team.color}
-					>
+					<Badge variant="outline" className={categoryConfig.team.color}>
 						{categoryConfig.team.label}
 					</Badge>
 					<div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
@@ -169,10 +173,7 @@ export default async function ProjectManagementDashboardPage({
 			{/* Escrow Section */}
 			<div className="space-y-4">
 				<div className="flex items-center gap-3">
-					<Badge
-						variant="outline"
-						className={categoryConfig.escrow.color}
-					>
+					<Badge variant="outline" className={categoryConfig.escrow.color}>
 						{categoryConfig.escrow.label}
 					</Badge>
 					<div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
@@ -225,11 +226,16 @@ function SectionCard({
 				</div>
 			</CardHeader>
 			<CardContent className="relative z-10 pt-0">
-				<Link href={`/projects/${slug}/manage/${href}`} className="inline-block">
+				<Link
+					href={`/projects/${slug}/manage/${href}`}
+					className="inline-block"
+				>
 					<Button
 						variant="outline"
 						className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300"
-						endIcon={<IoChevronForwardOutline className="group-hover:translate-x-1 transition-transform" />}
+						endIcon={
+							<IoChevronForwardOutline className="group-hover:translate-x-1 transition-transform" />
+						}
 					>
 						{cta}
 					</Button>

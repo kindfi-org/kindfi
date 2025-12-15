@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { or } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
@@ -6,7 +7,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 
 export default async function ProfilePage() {
 	const session = await getServerSession(nextAuthOption)
-
+	console.log('📝 ProfilePage session:', session)
 	if (!session?.user) {
 		redirect('/sign-in')
 	}
@@ -19,6 +20,8 @@ export default async function ProfilePage() {
 		.single()
 
 	if (error || !profileData) {
+		console.error('⚠️ ProfilePage profile fetch error:', error)
+		console.log('📝 ProfilePage profile data:', profileData)
 		redirect('/sign-in')
 	}
 

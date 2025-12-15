@@ -22,6 +22,7 @@ import {
 } from '~/components/base/select'
 import { Textarea } from '~/components/base/textarea'
 import { useToast } from '~/components/base/toast'
+import { useKycActions } from '~/hooks/use-kyc-actions'
 import { STATUS_OPTIONS } from '~/lib/constants/dashboard'
 
 const addReviewSchema = z.object({
@@ -37,8 +38,8 @@ interface AddReviewFormProps {
 }
 
 export function AddReviewForm({ userId, onReviewAdded }: AddReviewFormProps) {
-	const [isSubmitting, setIsSubmitting] = useState(false)
-	const { toast, toasts } = useToast()
+	const { toast } = useToast()
+	const { updateKycStatus, isUpdating, error: updateError } = useKycActions()
 
 	const form = useForm<AddReviewFormData>({
 		resolver: zodResolver(addReviewSchema),
@@ -49,26 +50,11 @@ export function AddReviewForm({ userId, onReviewAdded }: AddReviewFormProps) {
 	})
 
 	async function onSubmit(data: AddReviewFormData) {
-		setIsSubmitting(true)
-
 		try {
-			const response = await fetch(`/api/users/${userId}/status`, {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					status: data.status,
-					notes: data.notes || null,
-				}),
+			await updateKycStatus({
+				...data,
+				userId,
 			})
-
-			if (!response.ok) {
-				const error = await response.json()
-				throw new Error(error.error || 'Failed to update KYC status')
-			}
-
-			await response.json()
 
 			toast({
 				title: 'Review added successfully',
@@ -87,8 +73,6 @@ export function AddReviewForm({ userId, onReviewAdded }: AddReviewFormProps) {
 				description:
 					error instanceof Error ? error.message : 'Please try again later',
 			})
-		} finally {
-			setIsSubmitting(false)
 		}
 	}
 
@@ -111,7 +95,7 @@ export function AddReviewForm({ userId, onReviewAdded }: AddReviewFormProps) {
 								<Select
 									value={field.value}
 									onValueChange={field.onChange}
-									disabled={isSubmitting}
+									disabled={isUpdating}
 								>
 									<FormControl>
 										<SelectTrigger aria-label="Select review decision">
@@ -151,7 +135,7 @@ export function AddReviewForm({ userId, onReviewAdded }: AddReviewFormProps) {
 										value={field.value ?? ''}
 										placeholder="Enter your review notes..."
 										className="min-h-[120px]"
-										disabled={isSubmitting}
+										disabled={isUpdating}
 										aria-describedby="review-notes-description"
 									/>
 								</FormControl>
@@ -160,8 +144,17 @@ export function AddReviewForm({ userId, onReviewAdded }: AddReviewFormProps) {
 						)}
 					/>
 
-					<Button type="submit" className="w-full" disabled={isSubmitting}>
-						{isSubmitting ? 'Submitting...' : 'Add Review'}
+					{updateError && (
+						<p
+							className="text-sm text-red-600 p-2 rounded-md border border-red-600 bg-red-50"
+							role="alert"
+						>
+							Failed to add review: {updateError}
+						</p>
+					)}
+
+					<Button type="submit" className="w-full" disabled={isUpdating}>
+						{isUpdating ? 'Submitting...' : 'Add Review'}
 					</Button>
 				</form>
 			</Form>

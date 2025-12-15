@@ -1,4 +1,8 @@
 import { db, devices, kycReviews, profiles } from '@packages/drizzle'
+import { appEnvConfig } from '@packages/lib/config'
+import { queryContractDevices } from '@packages/lib/stellar'
+import { Keypair } from '@stellar/stellar-sdk'
+import { Server } from '@stellar/stellar-sdk/rpc'
 import { and, asc, count, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { corsConfig } from '../config/cors'
 import { handleError } from '../lib/error-handler'
@@ -410,7 +414,13 @@ export const usersRoutes = {
 					}
 
 					const body = await req.json()
-					const { status, notes } = body
+					const { notes } = body
+					const status = body.status as
+						| 'pending'
+						| 'approved'
+						| 'rejected'
+						| 'verified'
+						| undefined
 
 					if (
 						!status ||
@@ -425,23 +435,94 @@ export const usersRoutes = {
 						)
 					}
 
+					const userDeviceData = await db.query.devices.findFirst({
+						where: eq(devices.userId, userId),
+					})
+
+					if (!userDeviceData) {
+						return Response.json(
+							{ error: 'No device found for user to register account' },
+							{ status: 404 },
+						)
+					}
+
 					console.log(`🔄 Updating KYC status for user ${userId} to ${status}`)
+
+					if (status === 'approved') {
+						try {
+							const passkeyUrl = new URL(
+								'/api/stellar/create-passkey-account',
+								req.url,
+							)
+							const passkeyResponse = await fetch(passkeyUrl, {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify({
+									contractAddress: userDeviceData?.address,
+									contexts: [userDeviceData?.address], // Register with self as context
+								}),
+							})
+
+							const passkeyResult = await passkeyResponse.json()
+							// ? Auth Controller Error 109: Account Exist
+							const registeredDeviceError = (
+								passkeyResult.error as string | undefined
+							)?.startsWith('HostError: Error(Contract, #109)')
+
+							if (
+								!registeredDeviceError &&
+								(!passkeyResponse.ok || passkeyResult.error)
+							) {
+								console.error('❌ KYC server error:', passkeyResult.error)
+								throw new Error(
+									passkeyResult.error || 'Failed to register account',
+								)
+							}
+
+							if (passkeyResult.data?.transactionHash) {
+								console.log('✅ Account registered successfully')
+								console.log(
+									'   Transaction hash:',
+									passkeyResult.data.transactionHash,
+								)
+							} else {
+								console.log(
+									'✅ Account already registered successfully. Updating off-chain',
+								)
+							}
+
+							await db
+								.update(devices)
+								.set({
+									profileVerificationStatus: 'verified',
+								})
+								.where(eq(devices.userId, userId))
+
+							console.log(
+								`✅ Updated device profileVerificationStatus to verified for user ${userId}`,
+							)
+						} catch (error) {
+							console.error('❌ Error registering account on-chain:', error)
+							return Response.json(
+								{ error: 'Failed to register account on-chain' },
+								{ status: 500 },
+							)
+						}
+					}
 
 					const result = await db
 						.update(kycReviews)
 						.set({
-							status: status as
-								| 'pending'
-								| 'approved'
-								| 'rejected'
-								| 'verified',
+							status,
 							notes: notes || null,
 							updatedAt: new Date().toISOString(),
 						})
 						.where(eq(kycReviews.userId, userId))
 						.returning()
 
-					if ((!result || result.length === 0) && status === 'pending') {
+					if ((!result || result.length === 0) && status !== 'pending') {
 						// No KYC record found. Creating an initial review.
 						const newReview = await db
 							.insert(kycReviews)
@@ -642,70 +723,6 @@ export const usersRoutes = {
 					})
 				} catch (error) {
 					console.error('Error fetching user status:', error)
-					return handleError(error)
-				}
-			})(req)
-		},
-		OPTIONS: withConfiguredCORS(() => new Response(null)),
-	},
-
-	'/api/kyc-reviews/:id/status': {
-		async PATCH(req: Request) {
-			return withConfiguredCORS(async () => {
-				try {
-					const url = new URL(req.url)
-					const pathSegments = url.pathname.split('/')
-					const recordId = pathSegments[pathSegments.length - 2] // Extract record ID from URL
-
-					if (!recordId) {
-						return Response.json(
-							{ error: 'Record ID is required' },
-							{ status: 400 },
-						)
-					}
-
-					const body = await req.json()
-					const { status, notes } = body
-
-					if (
-						!status ||
-						!['pending', 'approved', 'rejected', 'verified'].includes(status)
-					) {
-						return Response.json(
-							{
-								error:
-									'Invalid status. Must be one of: pending, approved, rejected, verified',
-							},
-							{ status: 400 },
-						)
-					}
-
-					// Use the primary key (id) instead of user_id to ensure only one record is updated
-					const result = await db
-						.update(kycReviews)
-						.set({
-							status: status as
-								| 'pending'
-								| 'approved'
-								| 'rejected'
-								| 'verified',
-							notes: notes || null,
-							updatedAt: new Date().toISOString(),
-						})
-						.where(eq(kycReviews.id, recordId))
-						.returning()
-
-					if (!result || result.length === 0) {
-						return Response.json({ error: 'Record not found' }, { status: 404 })
-					}
-
-					return Response.json({
-						success: true,
-						data: result[0],
-						message: `KYC status updated to ${status}`,
-					})
-				} catch (error) {
-					console.error('Error updating KYC status:', error)
 					return handleError(error)
 				}
 			})(req)

@@ -19,8 +19,8 @@ export function getMilestoneStatus(
 	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
 ): boolean {
 	return isSingleReleaseMilestone(milestone)
-		? milestone.approved ?? false
-		: milestone.flags?.approved ?? false
+		? (milestone.approved ?? false)
+		: (milestone.flags?.approved ?? false)
 }
 
 /**
@@ -37,9 +37,7 @@ export function calculateMilestoneProgress(
 /**
  * Format amount with proper decimals
  */
-export function formatEscrowAmount(
-	amount: number | undefined | null,
-): string {
+export function formatEscrowAmount(amount: number | undefined | null): string {
 	if (amount === undefined || amount === null) return 'N/A'
 	return `$${amount.toLocaleString(undefined, {
 		minimumFractionDigits: 2,
@@ -55,4 +53,3 @@ export function truncateAddress(address: string, length = 8): string {
 	if (address.length <= length * 2) return address
 	return `${address.substring(0, length)}...${address.substring(address.length - length)}`
 }
-
