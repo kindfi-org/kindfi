@@ -448,7 +448,8 @@ export class SmartWalletTransactionService {
 		// IMPORTANT: Extract signature_payload from the SIMULATION transaction
 		// The assembly process will have the definitive auth entry values, so we must use the values linked to the transaction (simulation)
 		const signaturePayloadResult = deriveSignaturePayload({
-			transactionResult: simulation?.result as Api.SimulateHostFunctionResult,
+			transactionResult:
+				simulation?.result as unknown as DeriveSignaturePayloadParams['transactionResult'],
 			networkPassphrase: this.networkPassphrase,
 		})
 
@@ -621,3 +622,5 @@ interface BuildTransactionParams {
 	operations: xdr.Operation[]
 	sponsorFees: boolean
 }
+
+type DeriveSignaturePayloadParams = Parameters<typeof deriveSignaturePayload>[0]

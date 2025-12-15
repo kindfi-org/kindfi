@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
 				},
 			})
 			const {
-				signatureScVal,
+				signatureScVal: signatureScValRaw,
 				// signature,
 				// authenticatorData,
 				// clientData,
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
 			// console.log('🔐 Contract will verify signature', { verificationResults })
 
 			// Find and update the auth entry for the smart wallet
-			// const signatureScVal = xdr.ScVal.fromXDR(signatureScValRaw.toXDR())
+			const signatureScVal = xdr.ScVal.fromXDR(signatureScValRaw.toXDR())
 
 			for (const authEntry of authEntries) {
 				// ? Since both are Sets, they aren't necessary equal by passing the entire Set, we need to make a copy to compare them properly
