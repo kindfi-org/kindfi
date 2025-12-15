@@ -161,7 +161,8 @@ export async function POST(req: NextRequest) {
 						nonce: addressCredentials.nonce(),
 						signatureExpirationLedger:
 							addressCredentials.signatureExpirationLedger(),
-						signature: signatureScVal,
+						// ? TODO: fix TS def conflict between root and app node_modules
+						signature: signatureScVal as unknown as xdr.ScVal,
 					})
 
 					// Update the auth entry with the new credentials containing our signature
