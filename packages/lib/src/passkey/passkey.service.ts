@@ -34,12 +34,19 @@ export interface WebAuthnCredential extends BaseWebAuthnCredential {
 
 const appConfig: AppEnvInterface = appEnvConfig('kyc-server')
 
-// Initialize Stellar passkey service for smart wallet deployment
-const stellarService = new StellarPasskeyService(
-	appConfig.stellar.networkPassphrase,
-	appConfig.stellar.rpcUrl,
-	appConfig.stellar.fundingAccount,
-)
+// Lazy initialization of Stellar passkey service to avoid circular dependency
+let stellarServiceInstance: StellarPasskeyService | null = null
+
+const getStellarService = (): StellarPasskeyService => {
+	if (!stellarServiceInstance) {
+		stellarServiceInstance = new StellarPasskeyService(
+			appConfig.stellar.networkPassphrase,
+			appConfig.stellar.rpcUrl,
+			appConfig.stellar.fundingAccount,
+		)
+	}
+	return stellarServiceInstance
+}
 
 /**
  * Retrieves the RP ID corresponding to the provided host.
@@ -182,6 +189,8 @@ export const verifyRegistration = async ({
 				const publicKeyBase64 = credential.publicKey.toBase64()
 
 				// Deploy smart wallet via account-factory
+				// Note: This uses the old StellarPasskeyService - consider migrating to Smart Account Kit
+				const stellarService = getStellarService()
 				const deploymentResult = await stellarService.deployPasskeyAccount({
 					credentialId: credential.id,
 					publicKey: publicKeyBase64,

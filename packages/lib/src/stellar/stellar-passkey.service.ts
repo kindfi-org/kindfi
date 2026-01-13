@@ -20,7 +20,7 @@ import { appEnvConfig } from '../config'
 import {
 	computeDeviceIdFromCoseKey,
 	convertCoseToUncompressedPublicKey,
-} from '../passkey'
+} from '../passkey/webauthn-keys'
 import type { AppEnvInterface } from '../types'
 import { type RateLimitConfig, SignatureRateLimiter } from './rate-limiter'
 

@@ -19,8 +19,7 @@ import {
 } from '~/components/base/card'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
-import { useStellarContext } from '~/hooks/contexts/stellar-context'
-import { usePasskeyRegistration } from '~/hooks/passkey/use-passkey-registration'
+import { useSmartAccountRegistration } from '~/hooks/passkey/use-smart-account-registration'
 import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
 
 export function PasskeyRegistrationComponent() {
@@ -28,17 +27,16 @@ export function PasskeyRegistrationComponent() {
 	const [userEmail, setUserEmail] = useState('')
 	const [userId, setUserId] = useState('')
 	const isWebAuthnSupported = useWebAuthnSupport()
-	const { onRegister } = useStellarContext()
 
 	const {
 		isCreatingPasskey,
 		regSuccess,
 		regError,
 		isAlreadyRegistered,
-		deviceData,
+		smartAccountAddress,
 		handleRegister,
 		reset,
-	} = usePasskeyRegistration(userEmail, { onRegister, userId })
+	} = useSmartAccountRegistration(userEmail, userId)
 
 	// Retrieve Supabase auth user (pre-NextAuth) after OTP verify
 	useEffect(() => {
@@ -70,20 +68,20 @@ export function PasskeyRegistrationComponent() {
 			regSuccess,
 			userEmail,
 			userId,
-			deviceData,
+			smartAccountAddress,
 		})
-		if (!regSuccess || !userEmail || !userId || !deviceData) {
-			if (regSuccess && !deviceData) {
+		if (!regSuccess || !userEmail || !userId || !smartAccountAddress) {
+			if (regSuccess && !smartAccountAddress) {
 				router.push('/sign-in')
 			}
 			return () => {}
 		}
 
 		handleFinalize()
-	}, [regSuccess, userEmail, userId, deviceData, router])
+	}, [regSuccess, userEmail, userId, smartAccountAddress, router])
 
 	const handleFinalize = useCallback(async () => {
-		if (!regSuccess || !userEmail || !userId || !deviceData) return
+		if (!regSuccess || !userEmail || !userId || !smartAccountAddress) return
 
 		try {
 			const supabase = createSupabaseBrowserClient()
@@ -99,16 +97,14 @@ export function PasskeyRegistrationComponent() {
 				redirect: false,
 				userId,
 				email: userEmail,
-				credentialId: deviceData?.credentialId || '',
-				pubKey: deviceData?.publicKey || '',
-				address: deviceData?.address || '',
+				address: smartAccountAddress || '',
 			})
 			router.push('/profile')
 		} catch (e) {
 			console.error('Finalize passkey registration error', e)
 			router.push('/sign-in')
 		}
-	}, [regSuccess, userEmail, userId, deviceData, router])
+	}, [regSuccess, userEmail, userId, smartAccountAddress, router])
 
 	// Removed automatic redirection - user will manually choose to continue
 	// Note: We keep the user on this page even if registration succeeds
