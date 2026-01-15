@@ -1,6 +1,8 @@
 import { Buffer } from 'node:buffer'
 import { appEnvConfig } from '@packages/lib/config'
 import { deriveSignaturePayload } from '@packages/lib/passkey'
+import type { WebAuthnSignatureData } from '@packages/lib/stellar'
+import { ChannelsClientService } from '@packages/lib/stellar'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,
@@ -9,6 +11,7 @@ import {
 	Contract,
 	Keypair,
 	nativeToScVal,
+	type Operation,
 	scValToNative,
 	type Transaction,
 	TransactionBuilder,
@@ -32,6 +35,7 @@ export class SmartWalletTransactionService {
 	private server: Server
 	private networkPassphrase: string
 	private fundingKeypair?: Keypair
+	private channelsClient: ChannelsClientService
 
 	// ? WebAuthn Signatures requires a lot of GAS
 	private readonly STANDARD_FEE = '5000000' // 0.41 XLM
@@ -48,6 +52,9 @@ export class SmartWalletTransactionService {
 		if (fundingSecretKey) {
 			this.fundingKeypair = Keypair.fromSecret(fundingSecretKey)
 		}
+
+		// Initialize Channels client
+		this.channelsClient = new ChannelsClientService(appConfig)
 	}
 
 	/**
@@ -249,7 +256,38 @@ export class SmartWalletTransactionService {
 	}
 
 	/**
-	 * Submit a signed transaction to the network
+	 * Submit a signed transaction using WebAuthn signature via Channels service
+	 * This uses OpenZeppelin Channels for automatic fee payment and parallel processing
+	 *
+	 * NOTE: This method requires Smart Account Kit SDK to be properly configured.
+	 * For now, use the legacy submitTransaction method or configure Smart Account Kit.
+	 *
+	 * @param params Transaction submission parameters with WebAuthn signature
+	 * @returns Transaction hash and status
+	 */
+	async submitTransactionWithWebAuthn(params: {
+		smartWalletAddress: string
+		operation: Operation
+		webAuthnSignature: WebAuthnSignatureData
+		publicKey: Uint8Array
+	}): Promise<{ transactionHash: string; status: string }> {
+		console.log('🚀 Submitting transaction via Channels service...')
+		console.warn(
+			'⚠️ submitTransactionWithWebAuthn requires Smart Account Kit SDK. ' +
+				'Use SmartAccountKitService.signAndSubmit() instead, or use legacy submitTransaction() method.',
+		)
+
+		// This would require Smart Account Kit SDK integration
+		// For now, throw helpful error
+		throw new Error(
+			'WebAuthn transaction submission via Channels requires Smart Account Kit SDK. ' +
+				'Install smart-account-kit and use SmartAccountKitService.signAndSubmit() instead.',
+		)
+	}
+
+	/**
+	 * Submit a signed transaction to the network (legacy method)
+	 * For backward compatibility - consider using submitTransactionWithWebAuthn instead
 	 *
 	 * @param signedTransaction Fully signed and assembled transaction
 	 * @returns Transaction hash

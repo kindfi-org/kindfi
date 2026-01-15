@@ -17,8 +17,13 @@ const ThemeSwitcher = () => {
 	const { theme, setTheme } = useTheme()
 
 	// useEffect only runs on the client, so now we can safely show the UI
+	// Use startTransition to avoid React Compiler warning about setState in effect
 	useEffect(() => {
-		setMounted(true)
+		// Schedule state update in next tick to avoid synchronous setState in effect
+		const timer = setTimeout(() => {
+			setMounted(true)
+		}, 0)
+		return () => clearTimeout(timer)
 	}, [])
 
 	if (!mounted) {

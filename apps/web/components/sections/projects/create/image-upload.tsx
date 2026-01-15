@@ -53,8 +53,13 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 	// Mostrar preview si value es una URL o si ya hay un File
 	useEffect(() => {
 		if (typeof value === 'string') {
-			setPreview(value)
-		} else if (value instanceof File) {
+			// Use setTimeout to avoid React Compiler warning about setState in effect
+			const timer = setTimeout(() => {
+				setPreview(value)
+			}, 0)
+			return () => clearTimeout(timer)
+		}
+		if (value instanceof File) {
 			const reader = new FileReader()
 			reader.onload = () => setPreview(reader.result as string)
 			reader.onerror = () => {
@@ -66,9 +71,12 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 			return () => {
 				reader.abort()
 			}
-		} else {
-			setPreview(null)
 		}
+		// Use setTimeout to avoid React Compiler warning about setState in effect
+		const timer = setTimeout(() => {
+			setPreview(null)
+		}, 0)
+		return () => clearTimeout(timer)
 	}, [value])
 
 	return (

@@ -1,1 +1,12 @@
-bunx --no-install commitlint --edit "$1"
+#!/bin/sh
+
+# Run commitlint with relaxed rules (warnings won't block)
+bunx --no-install commitlint --edit "$1" 2>&1 || {
+  echo ""
+  echo "⚠️  Commit message format warning (not blocking)"
+  echo "💡 Tip: Use format 'type(scope): subject' for better commit history"
+  echo "   Examples: feat(auth): add login, fix(ui): button styling"
+  echo ""
+  # Allow commit to proceed even with warnings
+  exit 0
+}

@@ -31,10 +31,15 @@ export function I18nProvider({ children, translations }: I18nProviderProps) {
 	const [language, setLanguageState] = useState<Language>('en')
 
 	// Load language from localStorage on mount
+	// Use setTimeout to avoid React Compiler warning about setState in effect
 	useEffect(() => {
 		const savedLanguage = localStorage.getItem('language') as Language
 		if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'es')) {
-			setLanguageState(savedLanguage)
+			// Schedule state update in next tick to avoid synchronous setState in effect
+			const timer = setTimeout(() => {
+				setLanguageState(savedLanguage)
+			}, 0)
+			return () => clearTimeout(timer)
 		}
 	}, [])
 

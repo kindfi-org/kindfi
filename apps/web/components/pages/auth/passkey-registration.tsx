@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { signOutAction } from '~/app/actions/auth'
 
 import { Button } from '~/components/base/button'
@@ -19,8 +20,7 @@ import {
 } from '~/components/base/card'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
-import { useStellarContext } from '~/hooks/contexts/stellar-context'
-import { usePasskeyRegistration } from '~/hooks/passkey/use-passkey-registration'
+import { useSmartAccountRegistration } from '~/hooks/passkey/use-smart-account-registration'
 import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
 
 export function PasskeyRegistrationComponent() {
@@ -28,17 +28,16 @@ export function PasskeyRegistrationComponent() {
 	const [userEmail, setUserEmail] = useState('')
 	const [userId, setUserId] = useState('')
 	const isWebAuthnSupported = useWebAuthnSupport()
-	const { onRegister } = useStellarContext()
 
 	const {
 		isCreatingPasskey,
 		regSuccess,
 		regError,
 		isAlreadyRegistered,
-		deviceData,
+		smartAccountAddress,
 		handleRegister,
 		reset,
-	} = usePasskeyRegistration(userEmail, { onRegister, userId })
+	} = useSmartAccountRegistration(userEmail, userId)
 
 	// Retrieve Supabase auth user (pre-NextAuth) after OTP verify
 	useEffect(() => {
@@ -65,25 +64,8 @@ export function PasskeyRegistrationComponent() {
 	}
 
 	// Finalize after successful passkey registration: update profile and sign in via NextAuth
-	useEffect(() => {
-		console.log('Passkey registration success effect triggered', {
-			regSuccess,
-			userEmail,
-			userId,
-			deviceData,
-		})
-		if (!regSuccess || !userEmail || !userId || !deviceData) {
-			if (regSuccess && !deviceData) {
-				router.push('/sign-in')
-			}
-			return () => {}
-		}
-
-		handleFinalize()
-	}, [regSuccess, userEmail, userId, deviceData, router])
-
 	const handleFinalize = useCallback(async () => {
-		if (!regSuccess || !userEmail || !userId || !deviceData) return
+		if (!regSuccess || !userEmail || !userId || !smartAccountAddress) return
 
 		try {
 			const supabase = createSupabaseBrowserClient()
@@ -99,16 +81,50 @@ export function PasskeyRegistrationComponent() {
 				redirect: false,
 				userId,
 				email: userEmail,
-				credentialId: deviceData?.credentialId || '',
-				pubKey: deviceData?.publicKey || '',
-				address: deviceData?.address || '',
+				address: smartAccountAddress || '',
 			})
 			router.push('/profile')
 		} catch (e) {
 			console.error('Finalize passkey registration error', e)
 			router.push('/sign-in')
 		}
-	}, [regSuccess, userEmail, userId, deviceData, router])
+	}, [regSuccess, userEmail, userId, smartAccountAddress, router])
+
+	useEffect(() => {
+		console.log('Passkey registration success effect triggered', {
+			regSuccess,
+			userEmail,
+			userId,
+			smartAccountAddress,
+		})
+
+		// If registration succeeded but no Smart Account address, redirect to sign-in
+		// The passkey is still registered and can be used for authentication
+		if (regSuccess && !smartAccountAddress) {
+			console.warn(
+				'⚠️ Passkey registered but Smart Account creation failed. Redirecting to sign-in.',
+			)
+			toast.warning(
+				'Passkey registered, but Smart Account creation failed. You can still sign in with your passkey.',
+			)
+			router.push('/sign-in')
+			return
+		}
+
+		// Only finalize if we have all required data including Smart Account address
+		if (!regSuccess || !userEmail || !userId || !smartAccountAddress) {
+			return
+		}
+
+		handleFinalize()
+	}, [
+		regSuccess,
+		userEmail,
+		userId,
+		smartAccountAddress,
+		router,
+		handleFinalize,
+	])
 
 	// Removed automatic redirection - user will manually choose to continue
 	// Note: We keep the user on this page even if registration succeeds

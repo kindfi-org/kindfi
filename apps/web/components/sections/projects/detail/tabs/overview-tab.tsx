@@ -1,8 +1,8 @@
 'use client'
 
+import DOMPurify from 'dompurify'
 import { motion } from 'framer-motion'
 import parse from 'html-react-parser'
-import DOMPurify from 'isomorphic-dompurify'
 import { Download } from 'lucide-react'
 import { useMemo } from 'react'
 import { Button } from '~/components/base/button'

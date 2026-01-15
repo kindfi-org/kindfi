@@ -1,6 +1,5 @@
 'use client'
 
-import { appEnvConfig } from '@packages/lib/config'
 import { useStellarSorobanAccount } from '@packages/lib/hooks'
 import { startAuthentication } from '@simplewebauthn/browser'
 import type { Session } from 'next-auth'
@@ -17,7 +16,6 @@ import {
 } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
-import type { verifyAuthentication } from '../../../../packages/lib/src/passkey/passkey.service'
 
 interface TransferFormData {
 	to: string
@@ -54,17 +52,35 @@ export function SmartWalletTransferDemo() {
 		setIsApproving(true)
 
 		try {
-			toast.info('You will be redirected shortly.', {
-				description: `Approving account flow is KYC Server action ONLY. Connecting from here to simulate admin approval...`,
-				duration: 5000,
+			if (!smartWalletAddress) {
+				throw new Error('Smart wallet address not found')
+			}
+
+			toast.info('Approving account...', {
+				description: 'Registering smart wallet in auth-controller',
 			})
 
-			await new Promise((resolve) => setTimeout(resolve, 3000)) // Wait for toast to show
+			const response = await fetch('/api/stellar/account/approve', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					accountAddress: smartWalletAddress,
+				}),
+			})
 
-			window.open(
-				`${appEnvConfig('web').externalApis.kyc.baseUrl}/users?id=${session?.user.id}`,
-				'_blank',
-			)
+			if (!response.ok) {
+				const errorData = await response.json()
+				throw new Error(errorData.details || 'Failed to approve account')
+			}
+
+			const result = await response.json()
+
+			toast.success('Account approved successfully!', {
+				description: result.data?.message || 'Smart wallet is now active',
+				duration: 5000,
+			})
 		} catch (error) {
 			console.error('Error approving account:', error)
 			toast.error(
@@ -191,13 +207,10 @@ export function SmartWalletTransferDemo() {
 			toast.success('Transaction prepared successfully!')
 			console.log('Transaction prepared:', data)
 
-			// Implement WebAuthn signing
-			const appConfig = appEnvConfig('web')
-			const baseUrl = appConfig.externalApis.kyc.baseUrl
-
-			// Get authentication options from KYC server
+			// Implement WebAuthn signing using local API routes
+			// Get authentication options from local API
 			const authOptionsResponse = await fetch(
-				`${baseUrl}/api/passkey/generate-authentication-options`,
+				`/api/passkey/generate-auth-options`,
 				{
 					method: 'POST',
 					headers: {
@@ -206,7 +219,7 @@ export function SmartWalletTransferDemo() {
 					body: JSON.stringify({
 						identifier: session?.user?.email,
 						origin: window.location.origin,
-						challenge: data.challenge,
+						userId: session?.user?.id,
 					}),
 				},
 			)
@@ -222,30 +235,28 @@ export function SmartWalletTransferDemo() {
 				optionsJSON: authOptions,
 			})
 
-			const verificationResp = await fetch(
-				`${baseUrl}/api/passkey/verify-authentication`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						identifier: session?.user?.email,
-						authenticationResponse: authResponse,
-						origin: window.location.origin,
-						userId: session?.user?.id,
-					}),
+			const verificationResp = await fetch(`/api/passkey/verify-auth`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			)
+				body: JSON.stringify({
+					identifier: session?.user?.email,
+					authenticationResponse: authResponse,
+					origin: window.location.origin,
+					userId: session?.user?.id,
+				}),
+			})
 
 			if (!verificationResp.ok) {
 				const verificationJSON = await verificationResp.json()
 				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, verificationJSON.error)
 			}
 
-			const verificationJSON = await (verificationResp.json() as ReturnType<
-				typeof verifyAuthentication
-			>)
+			const verificationJSON = (await verificationResp.json()) as {
+				verified: boolean
+				error?: string
+			}
 
 			if (!verificationJSON?.verified) {
 				throw new InAppError(
@@ -335,15 +346,40 @@ export function SmartWalletTransferDemo() {
 					{/* Wallet Info */}
 					<div className="rounded-lg bg-muted p-4">
 						<div className="text-sm font-medium mb-2">Your Smart Wallet</div>
-						<div className="text-xs font-mono break-all text-muted-foreground">
-							{smartWalletAddress}
+						<div className="text-xs font-mono break-all text-muted-foreground mb-2">
+							{smartWalletAddress || 'Not initialized'}
 						</div>
+						{smartWalletAddress && (
+							<a
+								href={`https://stellar.expert/explorer/testnet/account/${smartWalletAddress}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-xs text-blue-600 hover:underline mb-3 inline-block"
+							>
+								View on Stellar Explorer →
+							</a>
+						)}
+						{smartWalletActions.isLoading && (
+							<div className="text-xs text-muted-foreground mb-2">
+								⏳ Initializing account...
+							</div>
+						)}
+						{smartWalletActions.error && (
+							<div className="text-xs text-red-600 mb-2">
+								❌ {smartWalletActions.error}
+							</div>
+						)}
+						{smartWalletActions.isReady && (
+							<div className="text-xs text-green-600 mb-2">
+								✅ Account ready
+							</div>
+						)}
 						<div className="mt-3 flex items-center gap-2 flex-wrap">
 							<Button
 								size="sm"
 								variant="outline"
 								onClick={approveAccount}
-								disabled={isApproving}
+								disabled={isApproving || !smartWalletAddress}
 							>
 								{isApproving ? 'Approving...' : 'Approve Account'}
 							</Button>
@@ -351,7 +387,7 @@ export function SmartWalletTransferDemo() {
 								size="sm"
 								variant="outline"
 								onClick={fetchBalance}
-								disabled={isLoading}
+								disabled={isLoading || !smartWalletAddress}
 							>
 								{isLoading ? 'Loading...' : 'Check Balance'}
 							</Button>
@@ -359,7 +395,7 @@ export function SmartWalletTransferDemo() {
 								size="sm"
 								variant="secondary"
 								onClick={() => fundWallet('10')}
-								disabled={isFunding}
+								disabled={isFunding || !smartWalletAddress}
 							>
 								{isFunding ? 'Funding...' : '💰 Fund Wallet (10 XLM)'}
 							</Button>
@@ -429,11 +465,16 @@ export function SmartWalletTransferDemo() {
 
 						<Button
 							onClick={prepareTransfer}
-							disabled={isLoading}
+							disabled={isLoading || !smartWalletAddress}
 							className="w-full"
 						>
 							{isLoading ? 'Preparing...' : 'Prepare Transfer'}
 						</Button>
+						{!smartWalletAddress && (
+							<p className="text-xs text-muted-foreground text-center">
+								Please wait for your smart wallet to initialize...
+							</p>
+						)}
 					</div>
 
 					{/* Faucet Info */}

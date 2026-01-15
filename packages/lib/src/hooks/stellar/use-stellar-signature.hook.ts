@@ -241,6 +241,7 @@ export const useStellarSignature = (
 
 	/**
 	 * Gets information about a Stellar account controlled by a Passkey
+	 * Uses local API route instead of external KYC server
 	 */
 	const getAccountInfo = useCallback(
 		async (contractId: string) => {
@@ -248,12 +249,16 @@ export const useStellarSignature = (
 			setError(null)
 
 			try {
+				// Use local API route instead of external KYC server
 				const response = await fetch(
-					`${kycBaseUrl}/api/stellar/account-info?address=${encodeURIComponent(contractId)}`,
+					`/api/stellar/account-info?address=${encodeURIComponent(contractId)}`,
 				)
 
 				if (!response.ok) {
-					throw new Error('Failed to get account information')
+					const errorData = await response.json().catch(() => ({}))
+					throw new Error(
+						errorData.error || 'Failed to get account information',
+					)
 				}
 
 				const result = await response.json()
@@ -271,7 +276,7 @@ export const useStellarSignature = (
 				setIsLoading(false)
 			}
 		},
-		[kycBaseUrl, options],
+		[options],
 	)
 
 	/**
