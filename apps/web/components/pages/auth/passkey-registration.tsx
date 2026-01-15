@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { signOutAction } from '~/app/actions/auth'
 
 import { Button } from '~/components/base/button'
@@ -63,23 +64,6 @@ export function PasskeyRegistrationComponent() {
 	}
 
 	// Finalize after successful passkey registration: update profile and sign in via NextAuth
-	useEffect(() => {
-		console.log('Passkey registration success effect triggered', {
-			regSuccess,
-			userEmail,
-			userId,
-			smartAccountAddress,
-		})
-		if (!regSuccess || !userEmail || !userId || !smartAccountAddress) {
-			if (regSuccess && !smartAccountAddress) {
-				router.push('/sign-in')
-			}
-			return () => {}
-		}
-
-		handleFinalize()
-	}, [regSuccess, userEmail, userId, smartAccountAddress, router])
-
 	const handleFinalize = useCallback(async () => {
 		if (!regSuccess || !userEmail || !userId || !smartAccountAddress) return
 
@@ -105,6 +89,42 @@ export function PasskeyRegistrationComponent() {
 			router.push('/sign-in')
 		}
 	}, [regSuccess, userEmail, userId, smartAccountAddress, router])
+
+	useEffect(() => {
+		console.log('Passkey registration success effect triggered', {
+			regSuccess,
+			userEmail,
+			userId,
+			smartAccountAddress,
+		})
+
+		// If registration succeeded but no Smart Account address, redirect to sign-in
+		// The passkey is still registered and can be used for authentication
+		if (regSuccess && !smartAccountAddress) {
+			console.warn(
+				'⚠️ Passkey registered but Smart Account creation failed. Redirecting to sign-in.',
+			)
+			toast.warning(
+				'Passkey registered, but Smart Account creation failed. You can still sign in with your passkey.',
+			)
+			router.push('/sign-in')
+			return
+		}
+
+		// Only finalize if we have all required data including Smart Account address
+		if (!regSuccess || !userEmail || !userId || !smartAccountAddress) {
+			return
+		}
+
+		handleFinalize()
+	}, [
+		regSuccess,
+		userEmail,
+		userId,
+		smartAccountAddress,
+		router,
+		handleFinalize,
+	])
 
 	// Removed automatic redirection - user will manually choose to continue
 	// Note: We keep the user on this page even if registration succeeds

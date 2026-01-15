@@ -1,6 +1,8 @@
 import { appEnvConfig } from '@packages/lib/config'
-import { ChannelsClientService } from '@packages/lib/stellar'
-import type { WebAuthnSignatureData } from '@packages/lib/stellar/types'
+import {
+	ChannelsClientService,
+	type WebAuthnSignatureData,
+} from '@packages/lib/stellar'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Address,
@@ -373,9 +375,10 @@ export interface SmartWalletBalances {
 
 interface BuildTransactionParamsV2 {
 	smartWalletAddress: string
-	operation: Operation
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	operation: Operation | any // Accept Operation or Operation2<InvokeHostFunction>
 }
 
 // Import Account and TransactionBuilder for balance queries
 import { Account, TransactionBuilder } from '@stellar/stellar-sdk'
-import { Api } from '@stellar/stellar-sdk/rpc'
+// Api is already imported at the top of the file

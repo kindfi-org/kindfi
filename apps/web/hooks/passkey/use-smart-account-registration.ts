@@ -108,10 +108,21 @@ export const useSmartAccountRegistration = (
 			const verificationJSON = await verificationResp.json()
 
 			if (verificationJSON?.verified) {
-				const message = 'Passkey registered and Smart Account created!'
-				setRegSuccess(message)
-				setSmartAccountAddress(verificationJSON.smartAccountAddress)
-				toast.success(message)
+				if (verificationJSON.smartAccountAddress) {
+					const message = 'Passkey registered and Smart Account created!'
+					setRegSuccess(message)
+					setSmartAccountAddress(verificationJSON.smartAccountAddress)
+					toast.success(message)
+				} else {
+					// Passkey registered but Smart Account creation failed
+					const warning =
+						verificationJSON.warning || 'Smart Account creation failed'
+					console.warn('⚠️ Smart Account creation failed:', warning)
+					setRegSuccess('Passkey registered successfully')
+					setSmartAccountAddress(null)
+					toast.warning(warning)
+					// Still show success for passkey registration, but log the warning
+				}
 			} else {
 				const message = `Registration failed: ${JSON.stringify(verificationJSON)}`
 				setRegError(message)

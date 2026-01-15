@@ -31,7 +31,18 @@ export type ChannelsTransactionResponse = {
 
 /**
  * Service for interacting with OpenZeppelin Channels service
- * Handles transaction submission with automatic fee payment and parallel processing
+ *
+ * Channels is OpenZeppelin's managed infrastructure for submitting Stellar Soroban transactions
+ * with automatic parallel processing and fee management.
+ *
+ * This is separate from Smart Account Kit's relayerUrl configuration.
+ * Channels uses API keys for authentication (CHANNELS_API_KEY env var).
+ *
+ * Get your API key:
+ * - Testnet: https://channels.openzeppelin.com/testnet/gen
+ * - Mainnet: https://channels.openzeppelin.com/gen
+ *
+ * @see https://docs.openzeppelin.com/relayer/1.3.x/guides/stellar-channels-guide
  */
 export class ChannelsClientService {
 	private client: any
@@ -44,13 +55,15 @@ export class ChannelsClientService {
 			? 'https://channels.openzeppelin.com/testnet'
 			: 'https://channels.openzeppelin.com'
 
-		// Get API key from environment variable
+		// Get API key from environment variable (server-side only)
+		// Note: This should NOT be NEXT_PUBLIC_ as it's sensitive and server-only
 		this.apiKey = process.env.CHANNELS_API_KEY || ''
 
 		if (!this.apiKey) {
 			console.warn(
 				'⚠️ CHANNELS_API_KEY not set. Get your API key from:',
 				this.baseUrl + '/gen',
+				'\n   Channels service provides fee-sponsored transactions with automatic parallel processing.',
 			)
 		}
 

@@ -205,7 +205,7 @@
         "resend": "^6.0.1",
         "shiki": "^1.22.0",
         "simple-icons": "^14.1.0",
-        "smart-account-kit": "^0.2.5",
+        "smart-account-kit": "^0.2.9",
         "sonner": "^1.7.1",
         "stellar-sdk": "^13.3.0",
         "tailwind-merge": "^3.0.1",
@@ -1426,7 +1426,7 @@
 
     "@stellar/stellar-base": ["@stellar/stellar-base@13.1.0", "", { "dependencies": { "@stellar/js-xdr": "^3.1.2", "base32.js": "^0.1.0", "bignumber.js": "^9.1.2", "buffer": "^6.0.3", "sha.js": "^2.3.6", "tweetnacl": "^1.0.3" }, "optionalDependencies": { "sodium-native": "^4.3.3" } }, "sha512-90EArG+eCCEzDGj3OJNoCtwpWDwxjv+rs/RNPhvg4bulpjN/CSRj+Ys/SalRcfM4/WRC5/qAfjzmJBAuquWhkA=="],
 
-    "@stellar/stellar-sdk": ["@stellar/stellar-sdk@14.4.2", "", { "dependencies": { "@stellar/stellar-base": "^14.0.3", "axios": "^1.12.2", "bignumber.js": "^9.3.1", "eventsource": "^2.0.2", "feaxios": "^0.0.23", "randombytes": "^2.1.0", "toml": "^3.0.0", "urijs": "^1.19.1" } }, "sha512-CYEYEoVXKM/Sw1j/5lhG4FcVq5WkqmSB+OBiEYxdTiwTy7rBzjPoyzzmDvO+cAoFTSkEGFikjDOFUFbgm+ntlQ=="],
+    "@stellar/stellar-sdk": ["@stellar/stellar-sdk@14.4.3", "", { "dependencies": { "@stellar/stellar-base": "^14.0.4", "axios": "^1.13.2", "bignumber.js": "^9.3.1", "eventsource": "^2.0.2", "feaxios": "^0.0.23", "randombytes": "^2.1.0", "toml": "^3.0.0", "urijs": "^1.19.1" } }, "sha512-QfaScSNd4Ku0GGfaZjR8679+M5gLHG+09OLLqV3Bv1VaDKXjHmhf8ikalz2jlx3oFnmlEpEgnqXIdf4kdD2x/w=="],
 
     "@subql/cli": ["@subql/cli@6.6.0", "", { "dependencies": { "@apollo/client": "^3.14.0", "@inquirer/prompts": "^5.3.6", "@modelcontextprotocol/sdk": "^1.17.2", "@oclif/core": "^4.3.3", "@subql/common": "~5.8.2-0", "@subql/contract-sdk": "^1.9.0", "@subql/network-clients": "^1.1.0", "@subql/utils": "~2.22.1", "@walletconnect/sign-client": "^2.17.2", "@walletconnect/types": "^2.17.2", "@walletconnect/utils": "^2.17.2", "chalk": "^4", "dotenv": "^16.4.5", "ejs": "^3.1.10", "fuzzy": "^0.1.3", "glob": "^10.4", "graphql": "^16.11.0", "graphql-request": "^7.2.0", "json5": "^2.2.3", "jsonc-parser": "^3.3.1", "qrcode-terminal": "^0.12.0", "resolve-from": "^5.0.0", "rimraf": "^5.0.10", "semver": "^7.6.3", "simple-git": "^3.28.0", "siwe": "^3.0.0", "terser-webpack-plugin": "^5.3.14", "ts-loader": "^9.5.1", "ts-node": "^10.9.2", "tsconfig-paths-webpack-plugin": "^4.2.0", "tslib": "^2.6.3", "typescript": "^5.7.3", "update-notifier": "^5.1.0", "webpack": "^5.101.3", "webpack-merge": "^6.0.1", "ws": "^8.18.0", "yaml": "^2.8.1", "zod": "^3.25.67" }, "bin": { "subql": "./bin/run" } }, "sha512-RHbpc2W34nB9tq0/7sNooRhAmPZjQ5EWjHfJCN7VcjhCbVTS01jxQZmDP0VpC0H0x2YcUGAt9+PsWXOqO76cMw=="],
 
@@ -4092,9 +4092,9 @@
 
     "slow-redact": ["slow-redact@0.3.2", "", {}, "sha512-MseHyi2+E/hBRqdOi5COy6wZ7j7DxXRz9NkseavNYSvvWC06D8a5cidVZX3tcG5eCW3NIyVU4zT63hw0Q486jw=="],
 
-    "smart-account-kit": ["smart-account-kit@0.2.5", "", { "dependencies": { "@simplewebauthn/browser": "^13.2.2", "@stellar/stellar-sdk": ">=14.4.2", "base64url": "^3.0.1", "smart-account-kit-bindings": "0.1.0" }, "peerDependencies": { "@creit-tech/stellar-wallets-kit": ">=2.0.0" }, "optionalPeers": ["@creit-tech/stellar-wallets-kit"] }, "sha512-5PEKjePQ8zHoUtPbggomFk9ihq9tvR+/uYYLqeo7npxhrFjxlOlpKPpvjDt4WV1I6haSRI2JXOvNN4TUdZHDEw=="],
+    "smart-account-kit": ["smart-account-kit@0.2.9", "", { "dependencies": { "@simplewebauthn/browser": "^13.2.2", "@stellar/stellar-sdk": ">=14.4.3", "base64url": "^3.0.1", "smart-account-kit-bindings": "0.1.1" }, "peerDependencies": { "@creit-tech/stellar-wallets-kit": ">=2.0.0" }, "optionalPeers": ["@creit-tech/stellar-wallets-kit"] }, "sha512-Wm5L18Upd+mNXmkIdVtOAMD+saLnD3Nu1oW7kqAQPtJJ1KbECRsyjMd+EBczeL1f+9PntqxFuAjzoZo1Ctid4w=="],
 
-    "smart-account-kit-bindings": ["smart-account-kit-bindings@0.1.0", "", { "dependencies": { "@stellar/stellar-sdk": "^14.4.1", "buffer": "6.0.3" } }, "sha512-iCEIJAMpU0LmrzrEV4fMPLQia58glLWdJMDnKWlE/nm1kreDApS4nhyocP1aMqMcMfqtH8X8eJIFzGAjW0mHFQ=="],
+    "smart-account-kit-bindings": ["smart-account-kit-bindings@0.1.1", "", { "dependencies": { "buffer": "6.0.3" }, "peerDependencies": { "@stellar/stellar-sdk": ">=14.0.0" } }, "sha512-S1JeMcZRueaADUD/7FdLGeFSVNTymt6TnkdObrCkJD95GD+VCuxePlx936FjeMrcrkQBkY1ChFcFlah9WkHNdw=="],
 
     "smart-buffer": ["smart-buffer@4.2.0", "", {}, "sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg=="],
 
@@ -4698,6 +4698,8 @@
 
     "@oclif/core/minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
 
+    "@openzeppelin/relayer-plugin-channels/@stellar/stellar-sdk": ["@stellar/stellar-sdk@14.4.2", "", { "dependencies": { "@stellar/stellar-base": "^14.0.3", "axios": "^1.12.2", "bignumber.js": "^9.3.1", "eventsource": "^2.0.2", "feaxios": "^0.0.23", "randombytes": "^2.1.0", "toml": "^3.0.0", "urijs": "^1.19.1" } }, "sha512-CYEYEoVXKM/Sw1j/5lhG4FcVq5WkqmSB+OBiEYxdTiwTy7rBzjPoyzzmDvO+cAoFTSkEGFikjDOFUFbgm+ntlQ=="],
+
     "@packages/drizzle/dotenv": ["dotenv@16.6.1", "", {}, "sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow=="],
 
     "@polkadot/api/@polkadot/util": ["@polkadot/util@14.0.1", "", { "dependencies": { "@polkadot/x-bigint": "14.0.1", "@polkadot/x-global": "14.0.1", "@polkadot/x-textdecoder": "14.0.1", "@polkadot/x-textencoder": "14.0.1", "@types/bn.js": "^5.1.6", "bn.js": "^5.2.1", "tslib": "^2.8.0" } }, "sha512-764HhxkPV3x5rM0/p6QdynC2dw26n+SaE+jisjx556ViCd4E28Ke4xSPef6C0Spy4aoXf2gt0PuLEcBvd6fVZg=="],
@@ -4888,11 +4890,13 @@
 
     "@stellar/freighter-api/semver": ["semver@7.7.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA=="],
 
-    "@stellar/stellar-sdk/@stellar/stellar-base": ["@stellar/stellar-base@14.0.3", "", { "dependencies": { "@noble/curves": "^1.9.6", "@stellar/js-xdr": "^3.1.2", "base32.js": "^0.1.0", "bignumber.js": "^9.3.1", "buffer": "^6.0.3", "sha.js": "^2.4.12" } }, "sha512-mBxNArxWq4wKNJATPJpXB2vIRQ3vUzIvjMCloSsGbfKRrSy96ie8yy7DWh9vSOHV6tNwe85hd3v+p/shlyosqA=="],
+    "@stellar/stellar-sdk/@stellar/stellar-base": ["@stellar/stellar-base@14.0.4", "", { "dependencies": { "@noble/curves": "^1.9.6", "@stellar/js-xdr": "^3.1.2", "base32.js": "^0.1.0", "bignumber.js": "^9.3.1", "buffer": "^6.0.3", "sha.js": "^2.4.12" } }, "sha512-UbNW6zbdOBXJwLAV2mMak0bIC9nw3IZVlQXkv2w2dk1jgCbJjy3oRVC943zeGE5JAm0Z9PHxrIjmkpGhayY7kw=="],
 
     "@subql/cli/dotenv": ["dotenv@16.6.1", "", {}, "sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow=="],
 
     "@subql/network-clients/axios": ["axios@0.27.2", "", { "dependencies": { "follow-redirects": "^1.14.9", "form-data": "^4.0.0" } }, "sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ=="],
+
+    "@subql/types-stellar/@stellar/stellar-sdk": ["@stellar/stellar-sdk@14.4.2", "", { "dependencies": { "@stellar/stellar-base": "^14.0.3", "axios": "^1.12.2", "bignumber.js": "^9.3.1", "eventsource": "^2.0.2", "feaxios": "^0.0.23", "randombytes": "^2.1.0", "toml": "^3.0.0", "urijs": "^1.19.1" } }, "sha512-CYEYEoVXKM/Sw1j/5lhG4FcVq5WkqmSB+OBiEYxdTiwTy7rBzjPoyzzmDvO+cAoFTSkEGFikjDOFUFbgm+ntlQ=="],
 
     "@subql/utils/graphql": ["graphql@15.10.1", "", {}, "sha512-BL/Xd/T9baO6NFzoMpiMD7YUZ62R6viR5tp/MULVEnbYJXZA//kRNW7J0j1w/wXArgL0sCxhDfK5dczSKn3+cg=="],
 
@@ -5178,6 +5182,8 @@
 
     "jsdom/whatwg-url": ["whatwg-url@15.1.0", "", { "dependencies": { "tr46": "^6.0.0", "webidl-conversions": "^8.0.0" } }, "sha512-2ytDk0kiEj/yu90JOAp44PVPUkO9+jVhyf+SybKlRHSDlvOOZhdPIrr7xTH64l4WixO2cP+wQIcgujkGBPPz6g=="],
 
+    "kyc-server/@stellar/stellar-sdk": ["@stellar/stellar-sdk@14.4.2", "", { "dependencies": { "@stellar/stellar-base": "^14.0.3", "axios": "^1.12.2", "bignumber.js": "^9.3.1", "eventsource": "^2.0.2", "feaxios": "^0.0.23", "randombytes": "^2.1.0", "toml": "^3.0.0", "urijs": "^1.19.1" } }, "sha512-CYEYEoVXKM/Sw1j/5lhG4FcVq5WkqmSB+OBiEYxdTiwTy7rBzjPoyzzmDvO+cAoFTSkEGFikjDOFUFbgm+ntlQ=="],
+
     "kyc-server/@types/bun": ["@types/bun@1.3.4", "", { "dependencies": { "bun-types": "1.3.4" } }, "sha512-EEPTKXHP+zKGPkhRLv+HI0UEX8/o+65hqARxLy8Ov5rIxMBPNTjeZww00CIihrIQGEQBYg+0roO5qOnS/7boGA=="],
 
     "kyc-server/drizzle-kit": ["drizzle-kit@0.20.18", "", { "dependencies": { "@esbuild-kit/esm-loader": "^2.5.5", "@hono/node-server": "^1.9.0", "@hono/zod-validator": "^0.2.0", "camelcase": "^7.0.1", "chalk": "^5.2.0", "commander": "^9.4.1", "env-paths": "^3.0.0", "esbuild": "^0.19.7", "esbuild-register": "^3.5.0", "glob": "^8.1.0", "hanji": "^0.0.5", "hono": "^4.1.4", "json-diff": "0.9.0", "minimatch": "^7.4.3", "semver": "^7.5.4", "superjson": "^2.2.1", "zod": "^3.20.2" }, "bin": { "drizzle-kit": "bin.cjs" } }, "sha512-fLTwcnLqtBxGd+51H/dEm9TC0FW6+cIX/RVPyNcitBO77X9+nkogEfMAJebpd/8Yl4KucmePHRYRWWvUlW0rqg=="],
@@ -5234,6 +5240,10 @@
 
     "parse5/entities": ["entities@6.0.1", "", {}, "sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g=="],
 
+    "passkey-kit/@stellar/stellar-sdk": ["@stellar/stellar-sdk@14.4.2", "", { "dependencies": { "@stellar/stellar-base": "^14.0.3", "axios": "^1.12.2", "bignumber.js": "^9.3.1", "eventsource": "^2.0.2", "feaxios": "^0.0.23", "randombytes": "^2.1.0", "toml": "^3.0.0", "urijs": "^1.19.1" } }, "sha512-CYEYEoVXKM/Sw1j/5lhG4FcVq5WkqmSB+OBiEYxdTiwTy7rBzjPoyzzmDvO+cAoFTSkEGFikjDOFUFbgm+ntlQ=="],
+
+    "passkey-kit-sdk/@stellar/stellar-sdk": ["@stellar/stellar-sdk@14.4.2", "", { "dependencies": { "@stellar/stellar-base": "^14.0.3", "axios": "^1.12.2", "bignumber.js": "^9.3.1", "eventsource": "^2.0.2", "feaxios": "^0.0.23", "randombytes": "^2.1.0", "toml": "^3.0.0", "urijs": "^1.19.1" } }, "sha512-CYEYEoVXKM/Sw1j/5lhG4FcVq5WkqmSB+OBiEYxdTiwTy7rBzjPoyzzmDvO+cAoFTSkEGFikjDOFUFbgm+ntlQ=="],
+
     "path-scurry/lru-cache": ["lru-cache@10.4.3", "", {}, "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="],
 
     "postcss-attribute-case-insensitive/postcss-selector-parser": ["postcss-selector-parser@7.1.1", "", { "dependencies": { "cssesc": "^3.0.0", "util-deprecate": "^1.0.2" } }, "sha512-orRsuYpJVw8LdAwqqLykBj9ecS5/cRHlI5+nvTo8LcCKmzDmqVORXtOIYEEQuL9D4BxtA1lm5isAqzQZCoQ6Eg=="],
@@ -5281,6 +5291,8 @@
     "rpc-websockets/eventemitter3": ["eventemitter3@5.0.1", "", {}, "sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA=="],
 
     "rpc-websockets/uuid": ["uuid@8.3.2", "", { "bin": { "uuid": "dist/bin/uuid" } }, "sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg=="],
+
+    "sac-sdk/@stellar/stellar-sdk": ["@stellar/stellar-sdk@14.4.2", "", { "dependencies": { "@stellar/stellar-base": "^14.0.3", "axios": "^1.12.2", "bignumber.js": "^9.3.1", "eventsource": "^2.0.2", "feaxios": "^0.0.23", "randombytes": "^2.1.0", "toml": "^3.0.0", "urijs": "^1.19.1" } }, "sha512-CYEYEoVXKM/Sw1j/5lhG4FcVq5WkqmSB+OBiEYxdTiwTy7rBzjPoyzzmDvO+cAoFTSkEGFikjDOFUFbgm+ntlQ=="],
 
     "schema-utils/ajv": ["ajv@8.17.1", "", { "dependencies": { "fast-deep-equal": "^3.1.3", "fast-uri": "^3.0.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2" } }, "sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g=="],
 
@@ -5508,6 +5520,8 @@
 
     "@next/eslint-plugin-next/fast-glob/glob-parent": ["glob-parent@5.1.2", "", { "dependencies": { "is-glob": "^4.0.1" } }, "sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow=="],
 
+    "@openzeppelin/relayer-plugin-channels/@stellar/stellar-sdk/@stellar/stellar-base": ["@stellar/stellar-base@14.0.3", "", { "dependencies": { "@noble/curves": "^1.9.6", "@stellar/js-xdr": "^3.1.2", "base32.js": "^0.1.0", "bignumber.js": "^9.3.1", "buffer": "^6.0.3", "sha.js": "^2.4.12" } }, "sha512-mBxNArxWq4wKNJATPJpXB2vIRQ3vUzIvjMCloSsGbfKRrSy96ie8yy7DWh9vSOHV6tNwe85hd3v+p/shlyosqA=="],
+
     "@polkadot/api-augment/@polkadot/util/@polkadot/x-bigint": ["@polkadot/x-bigint@14.0.1", "", { "dependencies": { "@polkadot/x-global": "14.0.1", "tslib": "^2.8.0" } }, "sha512-gfozjGnebr2rqURs31KtaWumbW4rRZpbiluhlmai6luCNrf5u8pB+oLA35kPEntrsLk9PnIG9OsC/n4hEtx4OQ=="],
 
     "@polkadot/api-augment/@polkadot/util/@polkadot/x-global": ["@polkadot/x-global@14.0.1", "", { "dependencies": { "tslib": "^2.8.0" } }, "sha512-aCI44DJU4fU0XXqrrSGIpi7JrZXK2kpe0jaQ2p6oDVXOOYEnZYXnMhTTmBE1lF/xtxzX50MnZrrU87jziU0qbA=="],
@@ -5718,6 +5732,8 @@
 
     "@solana/web3.js/bs58/base-x": ["base-x@3.0.11", "", { "dependencies": { "safe-buffer": "^5.0.1" } }, "sha512-xz7wQ8xDhdyP7tQxwdteLYeFfS68tSMNCZ/Y37WJ4bhGfKPpqEIlmIyueQHqOyoPhE6xNUqjzRr8ra0eF9VRvA=="],
 
+    "@subql/types-stellar/@stellar/stellar-sdk/@stellar/stellar-base": ["@stellar/stellar-base@14.0.3", "", { "dependencies": { "@noble/curves": "^1.9.6", "@stellar/js-xdr": "^3.1.2", "base32.js": "^0.1.0", "bignumber.js": "^9.3.1", "buffer": "^6.0.3", "sha.js": "^2.4.12" } }, "sha512-mBxNArxWq4wKNJATPJpXB2vIRQ3vUzIvjMCloSsGbfKRrSy96ie8yy7DWh9vSOHV6tNwe85hd3v+p/shlyosqA=="],
+
     "@walletconnect/logger/pino/pino-std-serializers": ["pino-std-serializers@7.0.0", "", {}, "sha512-e906FRY0+tV27iq4juKzSYPbUj2do2X2JX4EzSca1631EB2QJQUqGbDuERal7LCtOpxl6x3+nvo9NPZcmjkiFA=="],
 
     "@walletconnect/logger/pino/process-warning": ["process-warning@5.0.0", "", {}, "sha512-a39t9ApHNx2L4+HBnQKqxxHNs1r7KF+Intd8Q/g1bUh6q0WIp9voPXJ/x0j+ZL45KF1pJd9+q2jLIRMfvEshkA=="],
@@ -5794,6 +5810,8 @@
 
     "jsdom/whatwg-url/tr46": ["tr46@6.0.0", "", { "dependencies": { "punycode": "^2.3.1" } }, "sha512-bLVMLPtstlZ4iMQHpFHTR7GAGj2jxi8Dg0s2h2MafAE4uSWF98FC/3MomU51iQAMf8/qDUbKWf5GxuvvVcXEhw=="],
 
+    "kyc-server/@stellar/stellar-sdk/@stellar/stellar-base": ["@stellar/stellar-base@14.0.3", "", { "dependencies": { "@noble/curves": "^1.9.6", "@stellar/js-xdr": "^3.1.2", "base32.js": "^0.1.0", "bignumber.js": "^9.3.1", "buffer": "^6.0.3", "sha.js": "^2.4.12" } }, "sha512-mBxNArxWq4wKNJATPJpXB2vIRQ3vUzIvjMCloSsGbfKRrSy96ie8yy7DWh9vSOHV6tNwe85hd3v+p/shlyosqA=="],
+
     "kyc-server/@types/bun/bun-types": ["bun-types@1.3.4", "", { "dependencies": { "@types/node": "*" } }, "sha512-5ua817+BZPZOlNaRgGBpZJOSAQ9RQ17pkwPD0yR7CfJg+r8DgIILByFifDTa+IPDDxzf5VNhtNlcKqFzDgJvlQ=="],
 
     "kyc-server/drizzle-kit/chalk": ["chalk@5.6.2", "", {}, "sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA=="],
@@ -5822,6 +5840,10 @@
 
     "near-api-js/http-errors/toidentifier": ["toidentifier@1.0.0", "", {}, "sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw=="],
 
+    "passkey-kit-sdk/@stellar/stellar-sdk/@stellar/stellar-base": ["@stellar/stellar-base@14.0.3", "", { "dependencies": { "@noble/curves": "^1.9.6", "@stellar/js-xdr": "^3.1.2", "base32.js": "^0.1.0", "bignumber.js": "^9.3.1", "buffer": "^6.0.3", "sha.js": "^2.4.12" } }, "sha512-mBxNArxWq4wKNJATPJpXB2vIRQ3vUzIvjMCloSsGbfKRrSy96ie8yy7DWh9vSOHV6tNwe85hd3v+p/shlyosqA=="],
+
+    "passkey-kit/@stellar/stellar-sdk/@stellar/stellar-base": ["@stellar/stellar-base@14.0.3", "", { "dependencies": { "@noble/curves": "^1.9.6", "@stellar/js-xdr": "^3.1.2", "base32.js": "^0.1.0", "bignumber.js": "^9.3.1", "buffer": "^6.0.3", "sha.js": "^2.4.12" } }, "sha512-mBxNArxWq4wKNJATPJpXB2vIRQ3vUzIvjMCloSsGbfKRrSy96ie8yy7DWh9vSOHV6tNwe85hd3v+p/shlyosqA=="],
+
     "qrcode/yargs/cliui": ["cliui@6.0.0", "", { "dependencies": { "string-width": "^4.2.0", "strip-ansi": "^6.0.0", "wrap-ansi": "^6.2.0" } }, "sha512-t6wbgtoCXvAzst7QgXxJYqPt0usEfbgQdftEPbLL/cvv6HPE5VgvqCuAIDR0NgU52ds6rFwqrgakNLrHEjCbrQ=="],
 
     "qrcode/yargs/find-up": ["find-up@4.1.0", "", { "dependencies": { "locate-path": "^5.0.0", "path-exists": "^4.0.0" } }, "sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw=="],
@@ -5829,6 +5851,8 @@
     "qrcode/yargs/y18n": ["y18n@4.0.3", "", {}, "sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ=="],
 
     "qrcode/yargs/yargs-parser": ["yargs-parser@18.1.3", "", { "dependencies": { "camelcase": "^5.0.0", "decamelize": "^1.2.0" } }, "sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ=="],
+
+    "sac-sdk/@stellar/stellar-sdk/@stellar/stellar-base": ["@stellar/stellar-base@14.0.3", "", { "dependencies": { "@noble/curves": "^1.9.6", "@stellar/js-xdr": "^3.1.2", "base32.js": "^0.1.0", "bignumber.js": "^9.3.1", "buffer": "^6.0.3", "sha.js": "^2.4.12" } }, "sha512-mBxNArxWq4wKNJATPJpXB2vIRQ3vUzIvjMCloSsGbfKRrSy96ie8yy7DWh9vSOHV6tNwe85hd3v+p/shlyosqA=="],
 
     "schema-utils/ajv/json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
 

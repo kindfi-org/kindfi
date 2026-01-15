@@ -1,8 +1,8 @@
 import { Buffer } from 'node:buffer'
 import { appEnvConfig } from '@packages/lib/config'
 import { deriveSignaturePayload } from '@packages/lib/passkey'
+import type { WebAuthnSignatureData } from '@packages/lib/stellar'
 import { ChannelsClientService } from '@packages/lib/stellar'
-import type { WebAuthnSignatureData } from '@packages/lib/stellar/types'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,

@@ -193,14 +193,35 @@ export class StellarPasskeyService {
 			console.log('📍 Factory Contract ID:', this.factoryContractId)
 			console.log('📍 Controller Contract ID:', this.controllerContractId)
 
-			// Verify factory contract exists
-			await this.verifyContractExists(this.factoryContractId, 'Account Factory')
+			// Verify factory contract exists (non-blocking - will fail during deployment if missing)
+			try {
+				await this.verifyContractExists(
+					this.factoryContractId,
+					'Account Factory',
+				)
+			} catch (verifyError) {
+				console.warn(
+					`⚠️ Factory contract verification failed: ${verifyError instanceof Error ? verifyError.message : String(verifyError)}`,
+				)
+				console.warn(
+					'⚠️ Continuing with deployment attempt. If contract is not deployed, deployment will fail.',
+				)
+			}
 
-			// Verify controller contract exists
-			await this.verifyContractExists(
-				this.controllerContractId,
-				'Auth Controller',
-			)
+			// Verify controller contract exists (non-blocking)
+			try {
+				await this.verifyContractExists(
+					this.controllerContractId,
+					'Auth Controller',
+				)
+			} catch (verifyError) {
+				console.warn(
+					`⚠️ Controller contract verification failed: ${verifyError instanceof Error ? verifyError.message : String(verifyError)}`,
+				)
+				console.warn(
+					'⚠️ Continuing with deployment attempt. If contract is not deployed, deployment will fail.',
+				)
+			}
 
 			const fundingAccount = await this.server.getAccount(
 				this.fundingKeypair.publicKey(),

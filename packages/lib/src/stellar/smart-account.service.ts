@@ -85,7 +85,7 @@ export class SmartAccountService {
 		throw new Error(
 			'Smart Account creation requires Smart Account Kit SDK. ' +
 				'Install with: bun add smart-account-kit ' +
-				'And configure: VITE_ACCOUNT_WASM_HASH and VITE_WEBAUTHN_VERIFIER_ADDRESS',
+				'And configure: NEXT_PUBLIC_ACCOUNT_WASM_HASH and NEXT_PUBLIC_WEBAUTHN_VERIFIER_ADDRESS',
 		)
 	}
 
