@@ -4,7 +4,6 @@ import {
 	computeDeviceIdFromCoseKey,
 	type verifyAuthentication,
 } from '@packages/lib/passkey'
-import { StellarPasskeyService } from '@packages/lib/stellar'
 import {
 	Keypair,
 	type Transaction,
@@ -16,13 +15,8 @@ import isEqual from 'lodash/isEqual'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-const appConfig = appEnvConfig('web')
-
-const stellarService = new StellarPasskeyService(
-	appConfig.stellar.networkPassphrase,
-	appConfig.stellar.rpcUrl,
-	appConfig.stellar.fundingAccount,
-)
+// Don't initialize services at module level - do it inside the route handler
+// This prevents build-time errors when environment variables are not available
 
 /**
  * POST /api/stellar/transfer/submit
@@ -31,6 +25,10 @@ const stellarService = new StellarPasskeyService(
  */
 export async function POST(req: NextRequest) {
 	try {
+		// Initialize config and services inside the route handler
+		// This prevents build-time errors when environment variables are not available
+		const appConfig = appEnvConfig('web')
+
 		const body = await req.json()
 		const { transactionData, authResponse, userDevice } = body
 		const { transactionXDR, hash } = transactionData
@@ -48,7 +46,7 @@ export async function POST(req: NextRequest) {
 			!transactionXDR ||
 			!authResponse ||
 			!smartWalletAddress ||
-			!verificationJSON.device.pubKey
+			!verificationJSON?.device?.pubKey
 		) {
 			return NextResponse.json(
 				{
@@ -59,9 +57,42 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
+		// Validate transactionXDR is a valid string
+		if (typeof transactionXDR !== 'string' || !transactionXDR.trim()) {
+			return NextResponse.json(
+				{
+					error: 'Invalid transactionXDR: must be a non-empty string',
+				},
+				{ status: 400 },
+			)
+		}
+
 		// Get configuration
 		const server = new Server(appConfig.stellar.rpcUrl)
-		const fundingKeypair = Keypair.fromSecret(appConfig.stellar.fundingAccount)
+
+		// Validate funding account secret before creating keypair
+		if (!appConfig.stellar.fundingAccount) {
+			return NextResponse.json(
+				{
+					error: 'Funding account not configured',
+				},
+				{ status: 500 },
+			)
+		}
+
+		let fundingKeypair: Keypair
+		try {
+			fundingKeypair = Keypair.fromSecret(appConfig.stellar.fundingAccount)
+		} catch (error) {
+			console.error('❌ Invalid funding account secret:', error)
+			return NextResponse.json(
+				{
+					error: 'Invalid funding account configuration',
+					details: error instanceof Error ? error.message : String(error),
+				},
+				{ status: 500 },
+			)
+		}
 
 		console.log('📤 Assembling and submitting transaction')
 
@@ -70,10 +101,22 @@ export async function POST(req: NextRequest) {
 		// DO NOT re-simulate or re-assemble, as that would change the auth entry structure
 		// and invalidate the WebAuthn signature which was signed against the original auth entry
 		// ALSO: DO NOT re-sign with funding account - it was already signed in prepare!
-		const transaction = TransactionBuilder.fromXDR(
-			transactionXDR,
-			appConfig.stellar.networkPassphrase,
-		) as Transaction
+		let transaction: Transaction
+		try {
+			transaction = TransactionBuilder.fromXDR(
+				transactionXDR,
+				appConfig.stellar.networkPassphrase,
+			) as Transaction
+		} catch (error) {
+			console.error('❌ Invalid transactionXDR:', error)
+			return NextResponse.json(
+				{
+					error: 'Invalid transactionXDR format',
+					details: error instanceof Error ? error.message : String(error),
+				},
+				{ status: 400 },
+			)
+		}
 
 		console.log('✅ Loaded pre-assembled transaction from prepare endpoint')
 
