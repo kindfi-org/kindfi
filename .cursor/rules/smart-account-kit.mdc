@@ -1,0 +1,842 @@
+---
+alwaysApply: true
+---
+
+# Smart Account Kit
+
+TypeScript SDK for deploying and managing OpenZeppelin Smart Account contracts on Stellar/Soroban with WebAuthn passkey authentication.
+
+## Features
+
+- **Passkey Authentication**: Create and manage smart wallets secured by WebAuthn passkeys
+- **Session Management**: Automatic session persistence for seamless reconnection
+- **Multiple Signer Types**: Support for passkeys (secp256r1), Ed25519 keys, and policy signers
+- **Context Rules**: Fine-grained authorization control for different operations
+- **Policy Support**: Threshold multisig, spending limits, and custom policies
+- **Storage Adapters**: Flexible credential storage (IndexedDB, localStorage, custom)
+
+## Installation
+
+```bash
+pnpm add smart-account-kit
+```
+
+## Quick Start
+
+```typescript
+import { SmartAccountKit, IndexedDBStorage } from 'smart-account-kit';
+
+// Initialize the SDK
+const kit = new SmartAccountKit({
+  rpcUrl: 'https://soroban-testnet.stellar.org',
+  networkPassphrase: 'Test SDF Network ; September 2015',
+  accountWasmHash: 'YOUR_ACCOUNT_WASM_HASH',
+  webauthnVerifierAddress: 'CWEBAUTHN_VERIFIER_ADDRESS',
+  storage: new IndexedDBStorage(),
+});
+
+// On page load - silent restore from stored session
+const result = await kit.connectWallet();
+if (!result) {
+  // No stored session, show connect button
+  showConnectButton();
+}
+
+// User clicks "Create Wallet"
+const { contractId, credentialId } = await kit.createWallet('My App', 'user@example.com', {
+  autoSubmit: true,
+});
+
+// User clicks "Connect Wallet" - prompts for passkey selection
+await kit.connectWallet({ prompt: true });
+
+// Sign and submit a transaction
+const result = await kit.signAndSubmit(transaction);
+```
+
+## Configuration
+
+### SmartAccountKit Options
+
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `rpcUrl` | string | Yes | Stellar RPC URL |
+| `networkPassphrase` | string | Yes | Network passphrase |
+| `accountWasmHash` | string | Yes | Smart account WASM hash |
+| `webauthnVerifierAddress` | string | Yes | WebAuthn verifier contract address |
+| `timeoutInSeconds` | number | No | Transaction timeout (default: 30) |
+| `storage` | StorageAdapter | No | Credential storage adapter |
+| `rpId` | string | No | WebAuthn relying party ID |
+| `rpName` | string | No | WebAuthn relying party name |
+| `relayerUrl` | string | No | Relayer proxy URL for fee sponsoring |
+
+### Fee Sponsoring
+
+Configure a relayer URL to enable gasless transactions. The SDK posts `{ func, auth }` for
+invokeHostFunction flows and `{ xdr }` for signed transactions (e.g., deployments).
+
+```typescript
+const kit = new SmartAccountKit({
+  // ... other config
+  relayerUrl: 'https://my-relayer-proxy.example.com',
+});
+
+// Transactions automatically use the Relayer if configured
+await kit.transfer(tokenContract, recipient, amount);
+
+// To bypass the Relayer for specific operations
+await kit.transfer(tokenContract, recipient, amount, { forceMethod: 'rpc' });
+```
+
+### Storage Adapters
+
+```typescript
+import {
+  IndexedDBStorage,    // Recommended for web apps
+  LocalStorageAdapter, // Simple fallback
+  MemoryStorage,       // For testing
+} from 'smart-account-kit';
+
+// Use IndexedDB (recommended)
+const storage = new IndexedDBStorage();
+
+// Or implement your own
+class MyStorage implements StorageAdapter {
+  async save(credential: StoredCredential): Promise<void> { ... }
+  async get(credentialId: string): Promise<StoredCredential | null> { ... }
+  async saveSession(session: StoredSession): Promise<void> { ... }
+  async getSession(): Promise<StoredSession | null> { ... }
+  // ... other methods
+}
+```
+
+## API Reference
+
+### SmartAccountKit
+
+The main SDK client class.
+
+```typescript
+import { SmartAccountKit } from 'smart-account-kit';
+```
+
+#### Core Methods
+
+| Method | Description |
+|--------|-------------|
+| `constructor(config: SmartAccountConfig)` | Initialize SDK with configuration |
+| `createWallet(appName, userName, options?)` | Create new smart wallet with passkey |
+| `connectWallet(options?)` | Connect to existing wallet |
+| `disconnect()` | Disconnect and clear session |
+| `authenticatePasskey()` | Authenticate with passkey without connecting |
+| `discoverContractsByCredential(credentialId)` | Find contracts by credential ID via indexer |
+| `discoverContractsByAddress(address)` | Find contracts by G/C-address via indexer |
+| `sign(transaction, options?)` | Sign auth entries (use `signAndSubmit` instead) |
+| `signAndSubmit(transaction, options?)` | Sign, re-simulate, and submit (recommended) |
+| `signAuthEntry(authEntry, options?)` | Sign a single auth entry |
+| `fundWallet(nativeTokenContract)` | Fund via Friendbot (testnet) |
+| `transfer(tokenContract, recipient, amount)` | Direct token transfer |
+| `getContractDetailsFromIndexer(contractId)` | Get contract details from indexer |
+| `convertPolicyParams(params)` | Convert policy params to ScVal |
+| `buildPoliciesScVal(policies)` | Build policies ScVal for context rules |
+
+#### Sub-Manager Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `kit.signers` | `SignerManager` | Manage signers on rules |
+| `kit.rules` | `ContextRuleManager` | CRUD for context rules |
+| `kit.policies` | `PolicyManager` | Manage policies on rules |
+| `kit.credentials` | `CredentialManager` | Credential lifecycle |
+| `kit.multiSigners` | `MultiSignerManager` | Multi-signer flows |
+| `kit.externalSigners` | `ExternalSignerManager` | G-address signers |
+| `kit.indexer` | `IndexerClient \| null` | Indexer client for contract discovery |
+| `kit.events` | `SmartAccountEventEmitter` | Event subscription |
+
+#### Usage Examples
+
+```typescript
+// Create a new wallet
+const { contractId, credentialId } = await kit.createWallet('My App', 'user@example.com', {
+  autoSubmit: true,  // Automatically deploy the wallet
+  autoFund: true,    // Fund via Friendbot (testnet only)
+  nativeTokenContract: 'CDLZFC3...',
+});
+
+// Connect to existing wallet
+const result = await kit.connectWallet();           // Silent restore from session
+await kit.connectWallet({ prompt: true });          // Prompt user to select passkey
+await kit.connectWallet({ fresh: true });           // Ignore session, always prompt
+await kit.connectWallet({ credentialId: '...' });   // Connect with specific credential
+await kit.connectWallet({ contractId: 'C...' });    // Connect with specific contract
+
+// Transfer tokens
+const result = await kit.transfer('CTOKEN...', 'GRECIPIENT...', 100);
+
+// Disconnect
+await kit.disconnect();
+```
+
+---
+
+### Sub-Managers
+
+#### SignerManager (`kit.signers`)
+
+Manage signers on context rules.
+
+| Method | Description |
+|--------|-------------|
+| `addPasskey(contextRuleId, appName, userName, options?)` | Add passkey signer |
+| `addDelegated(contextRuleId, address)` | Add G-address signer |
+| `remove(contextRuleId, signer)` | Remove a signer |
+| `removePasskey(contextRuleId, credentialId)` | Remove passkey by credential ID |
+
+```typescript
+// Add a new passkey signer
+const { credentialId, transaction } = await kit.signers.addPasskey(
+  0,               // Context rule ID
+  'My App',        // App name
+  'Recovery Key',  // User name
+  { nickname: 'Backup YubiKey' }
+);
+
+// Add a delegated signer (Stellar account)
+await kit.signers.addDelegated(0, 'GABC...');
+
+// Remove a signer
+await kit.signers.remove(0, signer);
+await kit.signers.removePasskey(0, 'credential-id');
+```
+
+#### ContextRuleManager (`kit.rules`)
+
+Manage context rules.
+
+| Method | Description |
+|--------|-------------|
+| `add(contextType, name, signers, policies)` | Create rule |
+| `get(contextRuleId)` | Get single rule |
+| `getAll(contextRuleType)` | Get all rules of type |
+| `remove(contextRuleId)` | Delete rule |
+| `updateName(contextRuleId, name)` | Update rule name |
+| `updateExpiration(contextRuleId, ledger)` | Update expiration ledger |
+
+```typescript
+// Add a new context rule
+await kit.rules.add(contextType, 'Rule Name', signers, policies);
+
+// Get context rules
+const rule = await kit.rules.get(0);
+const allRules = await kit.rules.getAll(contextType);
+
+// Update rules
+await kit.rules.updateName(0, 'New Name');
+await kit.rules.updateExpiration(0, expirationLedger);
+
+// Remove a rule
+await kit.rules.remove(0);
+```
+
+#### PolicyManager (`kit.policies`)
+
+Manage policies on context rules.
+
+| Method | Description |
+|--------|-------------|
+| `add(contextRuleId, policyAddress, installParams)` | Add policy to rule |
+| `remove(contextRuleId, policyAddress)` | Remove policy from rule |
+
+```typescript
+// Add a policy
+await kit.policies.add(0, 'CPOLICY...', installParams);
+
+// Remove a policy
+await kit.policies.remove(0, 'CPOLICY...');
+```
+
+#### CredentialManager (`kit.credentials`)
+
+Manage stored credentials.
+
+| Method | Description |
+|--------|-------------|
+| `getAll()` | Get all stored credentials |
+| `getForWallet()` | Get credentials for current wallet |
+| `getPending()` | Get pending deployments |
+| `create(options?)` | Create new credential |
+| `save(credential)` | Save credential to storage |
+| `deploy(credentialId, options?)` | Deploy pending credential |
+| `markDeployed(credentialId)` | Mark as deployed |
+| `markFailed(credentialId, error?)` | Mark as failed |
+| `sync(credentialId)` | Sync with on-chain state |
+| `syncAll()` | Sync all credentials |
+| `delete(credentialId)` | Delete credential |
+
+```typescript
+// Get credentials
+const all = await kit.credentials.getAll();
+const pending = await kit.credentials.getPending();
+const walletCreds = await kit.credentials.getForWallet();
+
+// Deploy a pending credential
+const result = await kit.credentials.deploy('credential-id', { autoSubmit: true });
+
+// Sync with on-chain state
+await kit.credentials.syncAll();
+
+// Delete a pending credential
+await kit.credentials.delete('credential-id');
+```
+
+#### MultiSignerManager (`kit.multiSigners`)
+
+Multi-signer transaction flows.
+
+| Method | Description |
+|--------|-------------|
+| `transfer(tokenContract, recipient, amount, selectedSigners)` | Multi-sig transfer |
+| `getAvailableSigners()` | Get all signers from rules |
+| `extractCredentialId(signer)` | Get credential ID from signer |
+| `signerMatchesCredential(signer, credentialId)` | Check if signer matches credential |
+| `signerMatchesAddress(signer, address)` | Check if signer matches address |
+| `needsMultiSigner(signers)` | Check if multi-sig is needed |
+| `buildSelectedSigners(signers, activeCredentialId?)` | Build signer selection |
+| `operation(assembledTx, selectedSigners, options?)` | Execute generic multi-sig operation |
+
+```typescript
+// Get all available signers
+const signers = await kit.multiSigners.getAvailableSigners();
+
+// Check if multi-sig is needed
+if (kit.multiSigners.needsMultiSigner(signers)) {
+  // Build selected signers for transaction
+  const selected = kit.multiSigners.buildSelectedSigners(signers, activeCredentialId);
+
+  // Execute multi-sig transfer
+  const result = await kit.multiSigners.transfer(
+    'CTOKEN...',
+    'GRECIPIENT...',
+    '100',
+    selected
+  );
+}
+```
+
+---
+
+### External Signer Support
+
+```typescript
+import { ExternalSignerManager } from 'smart-account-kit';
+```
+
+#### ExternalSignerManager (`kit.externalSigners`)
+
+Manage G-address (delegated) signers.
+
+| Method | Description |
+|--------|-------------|
+| `addFromSecret(secretKey)` | Add keypair signer (memory only) |
+| `addFromWallet(adapter)` | Connect external wallet |
+| `restoreConnections()` | Restore persisted wallet connections |
+| `canSignFor(address)` | Check if can sign for address |
+| `signAuthEntry(address, authEntry)` | Sign auth entry for address |
+| `getAll()` | List all external signers |
+| `remove(address)` | Remove signer |
+
+```typescript
+// Add a keypair signer
+kit.externalSigners.addFromSecret('SXXX...');
+
+// Connect external wallet
+await kit.externalSigners.addFromWallet(walletAdapter);
+
+// Check signing capability
+if (kit.externalSigners.canSignFor('GABC...')) {
+  const signedEntry = await kit.externalSigners.signAuthEntry('GABC...', authEntry);
+}
+```
+
+---
+
+### Types
+
+#### Configuration Types
+
+```typescript
+import type {
+  SmartAccountConfig,     // SDK initialization config
+  PolicyConfig,           // Policy contract config
+  SubmissionOptions,      // Transaction submission options
+} from 'smart-account-kit';
+```
+
+#### Credential & Session Types
+
+```typescript
+import type {
+  StoredCredential,           // Full credential metadata
+  StoredSession,              // Auto-reconnect session data
+  CredentialDeploymentStatus, // "pending" | "failed"
+  StorageAdapter,             // Storage backend interface
+} from 'smart-account-kit';
+```
+
+#### Result Types
+
+```typescript
+import type {
+  CreateWalletResult,   // Wallet creation outcome
+  ConnectWalletResult,  // Connection outcome
+  TransactionResult,    // Transaction outcome (success/failure)
+} from 'smart-account-kit';
+```
+
+#### External Wallet Types
+
+```typescript
+import type {
+  ExternalWalletAdapter,  // Interface for wallet extensions
+  ConnectedWallet,        // Single wallet connection info
+  SelectedSigner,         // Signer selection for multi-sig
+} from 'smart-account-kit';
+```
+
+#### Contract Types (from smart-account bindings)
+
+```typescript
+import type {
+  ContractSigner,                  // On-chain signer type (alias: Signer)
+  ContractSignerId,                // Signer ID type
+  ContextRule,                     // Context rule structure
+  ContextRuleType,                 // Rule type enum
+  ContextRuleMeta,                 // Rule metadata (alias: Meta)
+  WebAuthnSigData,                 // WebAuthn signature format
+  Signatures,                      // Signature map type
+  SimpleThresholdAccountParams,    // M-of-N multisig params
+  WeightedThresholdAccountParams,  // Weighted voting params
+  SpendingLimitAccountParams,      // Time-limited spending params
+} from 'smart-account-kit';
+```
+
+---
+
+### Builder Functions
+
+#### Signer Builders
+
+```typescript
+import {
+  createDelegatedSigner,  // Create Stellar account signer (G-address)
+  createExternalSigner,   // Create custom verifier signer
+  createWebAuthnSigner,   // Create passkey signer
+  createEd25519Signer,    // Create Ed25519 signer
+} from 'smart-account-kit';
+
+// Create a delegated signer
+const signer = createDelegatedSigner('GABC...', 'ed25519-verifier-address');
+
+// Create a WebAuthn signer
+const passkeySigner = createWebAuthnSigner(verifierAddress, publicKey, credentialId);
+```
+
+#### Context Rule Type Builders
+
+```typescript
+import {
+  createDefaultContext,         // Default rule (matches any operation)
+  createCallContractContext,    // Rule for specific contract calls
+  createCreateContractContext,  // Rule for contract deployments
+} from 'smart-account-kit';
+
+// Create a context for calling a specific contract
+const context = createCallContractContext('CCONTRACT...');
+```
+
+#### Policy Parameter Builders
+
+```typescript
+import {
+  createThresholdParams,          // M-of-N multisig
+  createWeightedThresholdParams,  // Weighted voting
+  createSpendingLimitParams,      // Time-limited spending
+  LEDGERS_PER_HOUR,               // ~720 ledgers
+  LEDGERS_PER_DAY,                // ~17,280 ledgers
+  LEDGERS_PER_WEEK,               // ~120,960 ledgers
+} from 'smart-account-kit';
+
+// Create 2-of-3 multisig params
+const thresholdParams = createThresholdParams(2);
+
+// Create spending limit params
+const spendingParams = createSpendingLimitParams(
+  'CTOKEN...',                    // Token contract
+  BigInt(1000 * 10_000_000),      // 1000 tokens in stroops
+  LEDGERS_PER_DAY                 // Reset period
+);
+```
+
+#### Signer Helper Functions
+
+```typescript
+import {
+  getCredentialIdFromSigner,  // Extract credential ID from signer
+  describeSignerType,         // Human-readable signer type
+  formatSignerForDisplay,     // UI-friendly signer display
+  signersEqual,               // Compare two signers
+  getSignerKey,               // Unique signer identifier
+  collectUniqueSigners,       // Deduplicate signers
+} from 'smart-account-kit';
+```
+
+#### Display Helpers
+
+```typescript
+import {
+  truncateAddress,    // Truncate address for UI (e.g., "GABC...XYZ")
+  formatContextType,  // Human-readable context type
+} from 'smart-account-kit';
+```
+
+---
+
+### Utility Functions
+
+```typescript
+import {
+  // Conversion
+  xlmToStroops,       // Convert XLM to stroops
+  stroopsToXlm,       // Convert stroops to XLM
+
+  // Validation
+  validateAddress,    // Validate Stellar address (G... or C...)
+  validateAmount,     // Validate positive amount
+  validateNotEmpty,   // Validate non-empty string
+} from 'smart-account-kit';
+```
+
+---
+
+### Constants
+
+```typescript
+import {
+  WEBAUTHN_TIMEOUT_MS,    // WebAuthn timeout (60000ms)
+  BASE_FEE,               // Transaction base fee
+  STROOPS_PER_XLM,        // 10,000,000
+  FRIENDBOT_RESERVE_XLM,  // Friendbot reserve amount
+} from 'smart-account-kit';
+```
+
+---
+
+### Error Classes
+
+```typescript
+import {
+  SmartAccountError,        // Base error class
+  SmartAccountErrorCode,    // Error codes enum
+  WalletNotConnectedError,  // No wallet connected
+  CredentialNotFoundError,  // Credential not found in storage
+  SignerNotFoundError,      // Signer not found on-chain
+  SimulationError,          // Transaction simulation failed
+  SubmissionError,          // Transaction submission failed
+  ValidationError,          // Input validation failed
+  WebAuthnError,            // WebAuthn operation failed
+  SessionError,             // Session management error
+  wrapError,                // Error wrapper utility
+} from 'smart-account-kit';
+
+// Error handling
+try {
+  await kit.transfer(...);
+} catch (error) {
+  if (error instanceof WalletNotConnectedError) {
+    // Handle not connected
+  } else if (error instanceof SimulationError) {
+    // Handle simulation failure
+  }
+}
+```
+
+---
+
+### Event System
+
+```typescript
+import { SmartAccountEventEmitter } from 'smart-account-kit';
+import type { SmartAccountEventMap, SmartAccountEvent, EventListener } from 'smart-account-kit';
+```
+
+#### Available Events
+
+| Event | Description |
+|-------|-------------|
+| `walletConnected` | When connected to wallet |
+| `walletDisconnected` | When disconnected |
+| `credentialCreated` | When passkey registered |
+| `credentialDeleted` | When credential removed |
+| `sessionExpired` | When session expires |
+| `transactionSigned` | When auth entries signed |
+| `transactionSubmitted` | When tx submitted |
+
+```typescript
+// Listen to events
+kit.events.on('walletConnected', ({ contractId }) => {
+  console.log('Connected to:', contractId);
+});
+
+kit.events.on('transactionSubmitted', ({ hash, success }) => {
+  console.log('Transaction:', hash, success ? 'succeeded' : 'failed');
+});
+
+// One-time listener
+kit.events.once('walletConnected', handler);
+
+// Remove listener
+kit.events.off('walletConnected', handler);
+```
+
+---
+
+### Wallet Adapters
+
+```typescript
+import { StellarWalletsKitAdapter } from 'smart-account-kit';
+import type { StellarWalletsKitAdapterConfig } from 'smart-account-kit';
+
+// Create adapter for StellarWalletsKit integration
+const adapter = new StellarWalletsKitAdapter({
+  kit: stellarWalletsKit,
+  onConnectionChange: (connected) => {
+    console.log('Wallet connection changed:', connected);
+  },
+});
+
+// Use with external signers
+await kit.externalSigners.addFromWallet(adapter);
+```
+
+---
+
+### Relayer Client
+
+The SDK includes a Relayer client for fee-sponsored transaction submission via the Relayer proxy.
+
+```typescript
+import {
+  RelayerClient,
+  RelayerErrorCodes,
+} from 'smart-account-kit';
+
+import type {
+  RelayerResponse,
+  RelayerSendOptions,
+  RelayerErrorCode,
+} from 'smart-account-kit';
+```
+
+#### Using via SmartAccountKit (Recommended)
+
+When the Relayer is configured in SmartAccountKit, it's used automatically for all transaction submissions:
+
+```typescript
+const kit = new SmartAccountKit({
+  // ... other config
+  relayerUrl: 'https://my-relayer-proxy.example.com',
+});
+
+// Transactions automatically use the Relayer
+await kit.transfer(tokenContract, recipient, amount);
+
+// Bypass the Relayer for specific operations
+await kit.transfer(tokenContract, recipient, amount, { forceMethod: 'rpc' });
+
+// Access the Relayer client directly
+if (kit.relayer) {
+  const result = await kit.relayer.sendXdr(signedTransaction);
+}
+```
+
+#### Using RelayerClient Directly
+
+```typescript
+const relayer = new RelayerClient('https://my-relayer-proxy.example.com');
+
+// Submit a transaction for fee sponsoring (func + auth)
+const result = await relayer.send(funcXdr, authXdrs);
+
+// Or submit a signed transaction for fee-bumping
+const xdrResult = await relayer.sendXdr(signedTransaction);
+
+if (result.success) {
+  console.log('Transaction hash:', result.hash);
+} else {
+  console.error('Failed:', result.error, result.errorCode);
+}
+```
+
+---
+
+### Indexer Client
+
+The SDK includes an indexer client for reverse lookups from signer credentials to smart account contracts.
+
+```typescript
+import {
+  IndexerClient,
+  IndexerError,
+  DEFAULT_INDEXER_URLS,
+} from 'smart-account-kit';
+
+import type {
+  IndexerConfig,
+  IndexedContractSummary,
+  IndexedSigner,
+  IndexedPolicy,
+  IndexedContextRule,
+  CredentialLookupResponse,
+  AddressLookupResponse,
+  ContractDetailsResponse,
+  IndexerStatsResponse,
+} from 'smart-account-kit';
+```
+
+#### Using via SmartAccountKit (Recommended)
+
+```typescript
+// Indexer is auto-configured for testnet
+const kit = new SmartAccountKit({ /* config */ });
+
+// Discover contracts by credential ID
+const contracts = await kit.discoverContractsByCredential(credentialId);
+
+// Discover contracts by address
+const contracts = await kit.discoverContractsByAddress('GABC...');
+
+// Get contract details
+const details = await kit.getContractDetailsFromIndexer('CABC...');
+
+// Or use the indexer client directly
+if (kit.indexer) {
+  const stats = await kit.indexer.getStats();
+  const healthy = await kit.indexer.isHealthy();
+}
+```
+
+#### Using IndexerClient Directly
+
+```typescript
+// Create client for a specific network
+const indexer = IndexerClient.forNetwork('Test SDF Network ; September 2015');
+
+// Or with custom URL
+const indexer = new IndexerClient({
+  baseUrl: 'https://smart-account-indexer.sdf-ecosystem.workers.dev',
+  timeout: 10000,
+});
+
+// Lookup by credential ID
+const { contracts } = await indexer.lookupByCredentialId(credentialIdHex);
+
+// Lookup by address
+const { contracts } = await indexer.lookupByAddress('GABC...');
+
+// Get full contract details
+const details = await indexer.getContractDetails('CABC...');
+```
+
+---
+
+### Re-exported Types
+
+```typescript
+import type { AssembledTransaction } from 'smart-account-kit';
+```
+
+## Building from Source
+
+### Prerequisites
+
+- Node.js >= 20
+- pnpm (`npm install -g pnpm`)
+- Stellar CLI ([installation guide](https://developers.stellar.org/docs/tools/stellar-cli))
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/kalepail/smart-account-kit
+cd smart-account-kit
+
+# Configure demo environment (has testnet defaults)
+cp demo/.env.example demo/.env
+# Edit demo/.env if needed
+
+# Install dependencies
+pnpm install
+
+# Build everything (generates bindings from network, builds packages)
+pnpm run build:all
+```
+
+### Environment Configuration
+
+The build script reads configuration from `demo/.env` to generate TypeScript bindings by fetching contract metadata from the Stellar network. The demo comes pre-configured with testnet contract addresses.
+
+Key variables in `demo/.env`:
+- `VITE_RPC_URL` - Stellar RPC endpoint
+- `VITE_NETWORK_PASSPHRASE` - Network passphrase
+- `VITE_ACCOUNT_WASM_HASH` - Smart account contract WASM hash
+
+### Getting Contract WASM Hashes
+
+The Smart Account Kit uses contracts from [OpenZeppelin's stellar-contracts](https://github.com/OpenZeppelin/stellar-contracts). You can:
+
+1. **Use pre-deployed testnet contracts** (recommended for development):
+   - The `demo/.env.example` includes testnet WASM hashes that are ready to use
+
+2. **Deploy your own contracts**:
+   - Clone [stellar-contracts](https://github.com/OpenZeppelin/stellar-contracts)
+   - Build and deploy the contracts
+   - Use the resulting WASM hashes or contract IDs
+
+### Build Commands
+
+| Command | Description |
+|---------|-------------|
+| `pnpm run build` | Build SDK only (requires bindings already generated) |
+| `pnpm run build:all` | Full build: generate bindings from network + build SDK |
+| `pnpm run build:demo` | Build SDK and demo application |
+| `pnpm run build:watch` | Watch mode for SDK development |
+| `pnpm run test` | Run tests |
+| `pnpm run clean` | Remove build artifacts |
+
+### Publishing
+
+```bash
+# Ensure you're logged in to npm
+npm login
+
+# Bump version (updates package.json)
+pnpm version patch  # or minor, major
+
+# Publish (runs build:all automatically via prepublishOnly)
+pnpm publish
+
+# Or publish with specific tag
+pnpm publish --tag beta
+```
+
+**Note:** The `prepublishOnly` script automatically runs `pnpm run build:all` before publishing.
+
+## Related
+
+- [OpenZeppelin stellar-contracts](https://github.com/OpenZeppelin/stellar-contracts) - Smart account contracts this SDK interacts with
+- [Demo Application](./demo) - Interactive demo for testing the SDK
+- [Indexer](./indexer) - Backend service for contract discovery
+
+## License
+
+MIT License - see LICENSE file for details.

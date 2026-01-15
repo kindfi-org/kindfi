@@ -1,7 +1,7 @@
 import { supabase } from '@packages/lib/supabase'
-import { getServerSession } from 'next-auth'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { AppError } from '~/lib/error'
 
@@ -9,10 +9,7 @@ export async function POST(req: NextRequest) {
 	try {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
-			return NextResponse.json(
-				{ error: 'Unauthorized' },
-				{ status: 401 },
-			)
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
 		const body = await req.json()
@@ -23,11 +20,12 @@ export async function POST(req: NextRequest) {
 		if (!finalProjectId && contractId) {
 			// Find the escrow_contracts record by contract_id (Stellar contract address)
 			// escrow_contracts has a direct project_id field
-			const { data: escrowContract, error: escrowContractError } = await supabase
-				.from('escrow_contracts')
-				.select('project_id')
-				.eq('contract_id', contractId)
-				.single()
+			const { data: escrowContract, error: escrowContractError } =
+				await supabase
+					.from('escrow_contracts')
+					.select('project_id')
+					.eq('contract_id', contractId)
+					.single()
 
 			if (escrowContractError || !escrowContract) {
 				return NextResponse.json(
@@ -41,7 +39,10 @@ export async function POST(req: NextRequest) {
 
 		if (!finalProjectId || !amount || amount <= 0) {
 			return NextResponse.json(
-				{ error: 'Invalid request. projectId (or contractId) and amount are required.' },
+				{
+					error:
+						'Invalid request. projectId (or contractId) and amount are required.',
+				},
 				{ status: 400 },
 			)
 		}
@@ -65,7 +66,11 @@ export async function POST(req: NextRequest) {
 
 				if (existingContribution) {
 					return NextResponse.json(
-						{ success: true, contributionId: existingContribution.id, message: 'Contribution already exists' },
+						{
+							success: true,
+							contributionId: existingContribution.id,
+							message: 'Contribution already exists',
+						},
 						{ status: 200 },
 					)
 				}
@@ -86,16 +91,22 @@ export async function POST(req: NextRequest) {
 		if (contributionError) {
 			console.error('Error creating contribution:', contributionError)
 			return NextResponse.json(
-				{ error: 'Failed to create contribution', details: contributionError.message },
+				{
+					error: 'Failed to create contribution',
+					details: contributionError.message,
+				},
 				{ status: 500 },
 			)
 		}
 
 		// Update project's current_amount (raised amount)
-		const { error: updateError } = await supabase.rpc('increment_project_amount', {
-			project_id_param: finalProjectId,
-			amount_param: Number(amount),
-		})
+		const { error: updateError } = await supabase.rpc(
+			'increment_project_amount',
+			{
+				project_id_param: finalProjectId,
+				amount_param: Number(amount),
+			},
+		)
 
 		// If RPC doesn't exist, fallback to manual update
 		if (updateError) {

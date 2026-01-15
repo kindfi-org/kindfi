@@ -500,6 +500,7 @@ export const profilesInsertSchema = z.object({
 	image_url: z.string().optional().nullable(),
 	next_auth_user_id: z.string().optional().nullable(),
 	role: userRoleSchema.optional(),
+	slug: z.string().optional().nullable(),
 	updated_at: z.string().optional(),
 })
 
@@ -512,6 +513,7 @@ export const profilesUpdateSchema = z.object({
 	image_url: z.string().optional().nullable(),
 	next_auth_user_id: z.string().optional().nullable(),
 	role: userRoleSchema.optional(),
+	slug: z.string().optional().nullable(),
 	updated_at: z.string().optional(),
 })
 
@@ -718,6 +720,24 @@ export const projectsUpdateSchema = z.object({
 	updated_at: z.string().optional().nullable(),
 })
 
+export const userFollowsRowSchema = z.object({
+	created_at: z.string(),
+	follower_id: z.string(),
+	following_id: z.string(),
+})
+
+export const userFollowsInsertSchema = z.object({
+	created_at: z.string().optional(),
+	follower_id: z.string(),
+	following_id: z.string(),
+})
+
+export const userFollowsUpdateSchema = z.object({
+	created_at: z.string().optional(),
+	follower_id: z.string().optional(),
+	following_id: z.string().optional(),
+})
+
 export const waitlistInterestsRowSchema = z.object({
 	category_id: z.string().nullable(),
 	consent: z.boolean(),
@@ -841,6 +861,7 @@ export const profilesRowSchema = z.object({
 	image_url: z.string().nullable(),
 	next_auth_user_id: z.string().nullable(),
 	role: userRoleSchema,
+	slug: z.string().nullable(),
 	updated_at: z.string(),
 })
 

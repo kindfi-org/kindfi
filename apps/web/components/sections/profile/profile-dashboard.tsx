@@ -3,7 +3,14 @@
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Database } from '@services/supabase'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CheckCircle2, Copy, Pencil, Shield, Sparkles, Wallet } from 'lucide-react'
+import {
+	CheckCircle2,
+	Copy,
+	Pencil,
+	Shield,
+	Sparkles,
+	Wallet,
+} from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
@@ -33,8 +40,8 @@ import {
 } from '~/components/base/tabs'
 import { Textarea } from '~/components/base/textarea'
 import { KYCModal } from '~/components/shared/kyc/kyc-modal'
-import { staggerContainer } from '~/lib/constants/animations'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { staggerContainer } from '~/lib/constants/animations'
 import { CreatorProfile } from './views/creator-profile'
 import { DonorProfile } from './views/donor-profile'
 
@@ -69,8 +76,8 @@ const containerVariants = {
 
 const itemVariants = {
 	hidden: { opacity: 0, y: 20 },
-	show: { 
-		opacity: 1, 
+	show: {
+		opacity: 1,
 		y: 0,
 		transition: {
 			type: 'spring',
@@ -137,19 +144,19 @@ export function ProfileDashboard({
 			<motion.div variants={itemVariants}>
 				<Tabs defaultValue={defaultTab} className="space-y-6">
 					<TabsList className="grid w-full grid-cols-2 lg:w-auto lg:inline-flex bg-muted p-1">
-						<TabsTrigger 
+						<TabsTrigger
 							value="overview"
 							className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
 						>
 							Overview
 						</TabsTrigger>
-						<TabsTrigger 
+						<TabsTrigger
 							value="settings"
 							className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
 						>
 							Settings
 						</TabsTrigger>
-				</TabsList>
+					</TabsList>
 
 					<AnimatePresence mode="wait">
 						<TabsContent value="overview" className="space-y-6">
@@ -159,13 +166,13 @@ export function ProfileDashboard({
 								exit={{ opacity: 0, x: 20 }}
 								transition={{ duration: 0.2 }}
 							>
-					{role === 'kindler' ? (
-						<CreatorProfile userId={user.id} displayName={displayName} />
-					) : (
-						<DonorProfile userId={user.id} displayName={displayName} />
-					)}
+								{role === 'kindler' ? (
+									<CreatorProfile userId={user.id} displayName={displayName} />
+								) : (
+									<DonorProfile userId={user.id} displayName={displayName} />
+								)}
 							</motion.div>
-				</TabsContent>
+						</TabsContent>
 
 						<TabsContent value="settings" className="space-y-6">
 							<motion.div
@@ -176,10 +183,10 @@ export function ProfileDashboard({
 								className="grid gap-6 md:grid-cols-2"
 							>
 								<PersonalInfoCard
-							userId={user.id}
-							displayName={user.profile?.display_name ?? ''}
-							bio={user.profile?.bio ?? ''}
-							imageUrl={user.profile?.image_url ?? ''}
+									userId={user.id}
+									displayName={user.profile?.display_name ?? ''}
+									bio={user.profile?.bio ?? ''}
+									imageUrl={user.profile?.image_url ?? ''}
 									email={user.email}
 								/>
 								<AccountInfoCard
@@ -188,9 +195,9 @@ export function ProfileDashboard({
 									slug={user.profile?.slug ?? ''}
 								/>
 							</motion.div>
-				</TabsContent>
+						</TabsContent>
 					</AnimatePresence>
-			</Tabs>
+				</Tabs>
 			</motion.div>
 
 			<KYCModal
@@ -232,7 +239,7 @@ function ProfileHeader({
 				<div className="absolute -top-20 -right-20 w-72 h-72 bg-primary/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
 				<div className="absolute -bottom-20 -left-20 w-72 h-72 bg-secondary/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
 				<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-primary/5 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000" />
-				</div>
+			</div>
 
 			<CardContent className="p-6 relative z-10">
 				<div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
@@ -240,12 +247,12 @@ function ProfileHeader({
 						whileHover={{ scale: 1.05, rotate: 2 }}
 						transition={{ type: 'spring', stiffness: 300 }}
 					>
-					<Avatar className="h-32 w-32 border-4 border-background shadow-2xl ring-4 ring-primary/20">
-						<AvatarImage src={imageUrl || undefined} alt={displayName} />
-						<AvatarFallback className="text-3xl font-bold bg-primary text-primary-foreground">
-							{getAvatarFallback(displayName)}
-						</AvatarFallback>
-					</Avatar>
+						<Avatar className="h-32 w-32 border-4 border-background shadow-2xl ring-4 ring-primary/20">
+							<AvatarImage src={imageUrl || undefined} alt={displayName} />
+							<AvatarFallback className="text-3xl font-bold bg-primary text-primary-foreground">
+								{getAvatarFallback(displayName)}
+							</AvatarFallback>
+						</Avatar>
 					</motion.div>
 					<div className="flex-1 space-y-3">
 						<div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -270,7 +277,7 @@ function ProfileHeader({
 									{roleLabel}
 								</Badge>
 							</motion.div>
-				</div>
+						</div>
 						<motion.p
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
@@ -285,7 +292,8 @@ function ProfileHeader({
 							transition={{ delay: 0.5 }}
 							className="text-sm text-muted-foreground"
 						>
-							Member since {new Date(createdAt).toLocaleDateString('en-US', {
+							Member since{' '}
+							{new Date(createdAt).toLocaleDateString('en-US', {
 								month: 'long',
 								year: 'numeric',
 							})}
@@ -333,7 +341,7 @@ function WalletCard({
 			<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-2xl transition-all duration-300 relative group">
 				{/* Decorative shape */}
 				<div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
-				
+
 				<CardHeader className="pb-3 relative z-10">
 					<div className="flex items-center justify-between">
 						<CardTitle className="text-base font-semibold flex items-center gap-2 text-foreground">
@@ -361,8 +369,13 @@ function WalletCard({
 					{isConnected && address ? (
 						<>
 							<div className="flex items-center justify-between p-3 bg-muted/50 backdrop-blur-sm rounded-xl border border-border">
-								<code className="text-sm font-mono text-foreground">{displayAddress}</code>
-								<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+								<code className="text-sm font-mono text-foreground">
+									{displayAddress}
+								</code>
+								<motion.div
+									whileHover={{ scale: 1.1 }}
+									whileTap={{ scale: 0.9 }}
+								>
 									<Button
 										variant="ghost"
 										size="sm"
@@ -392,9 +405,12 @@ function WalletCard({
 							<p className="text-sm text-muted-foreground">
 								Connect your Stellar wallet to start contributing
 							</p>
-							<motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-								<Button 
-									onClick={onConnect} 
+							<motion.div
+								whileHover={{ scale: 1.02 }}
+								whileTap={{ scale: 0.98 }}
+							>
+								<Button
+									onClick={onConnect}
 									className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
 									size="sm"
 								>
@@ -420,7 +436,7 @@ function KYCCard({ onStartKYC }: { onStartKYC: () => void }) {
 				{/* Decorative elements */}
 				<div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
 				<div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full -ml-12 -mb-12 rotate-45" />
-				
+
 				<CardHeader className="pb-3 relative z-10">
 					<CardTitle className="text-base font-semibold flex items-center gap-2 text-foreground">
 						<motion.div
@@ -474,7 +490,9 @@ function RoleCard({
 			if (error) throw error
 
 			setSelectedRole(newRole)
-			toast.success(`Role updated to ${newRole === 'kindler' ? 'Creator' : 'Donor'}`)
+			toast.success(
+				`Role updated to ${newRole === 'kindler' ? 'Creator' : 'Donor'}`,
+			)
 			// Reload page to reflect changes
 			window.location.reload()
 		} catch (error) {
@@ -492,9 +510,11 @@ function RoleCard({
 		>
 			<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-2xl transition-all duration-300 relative group">
 				<div className="absolute top-0 left-0 w-32 h-32 bg-secondary/10 rounded-full -ml-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
-				
+
 				<CardHeader className="pb-3 relative z-10">
-					<CardTitle className="text-base font-semibold text-foreground">User Type</CardTitle>
+					<CardTitle className="text-base font-semibold text-foreground">
+						User Type
+					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-3 relative z-10">
 					<Select
@@ -540,16 +560,16 @@ function PersonalInfoCard({
 	async function onUpdateProfile(formData: FormData) {
 		setIsSaving(true)
 		try {
-		const supabase = createSupabaseBrowserClient()
-		const payload = {
-			display_name: (formData.get('display_name') as string) ?? '',
-			bio: (formData.get('bio') as string) ?? '',
-			image_url: (formData.get('image_url') as string) ?? '',
-		}
-		const { error } = await supabase
-			.from('profiles')
-			.update(payload)
-			.eq('id', userId)
+			const supabase = createSupabaseBrowserClient()
+			const payload = {
+				display_name: (formData.get('display_name') as string) ?? '',
+				bio: (formData.get('bio') as string) ?? '',
+				image_url: (formData.get('image_url') as string) ?? '',
+			}
+			const { error } = await supabase
+				.from('profiles')
+				.update(payload)
+				.eq('id', userId)
 
 			if (error) throw error
 
@@ -573,7 +593,7 @@ function PersonalInfoCard({
 		>
 			<Card className="border-0 shadow-xl bg-card hover:shadow-2xl transition-all duration-300 overflow-hidden relative group">
 				<div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
-				
+
 				<CardHeader className="relative z-10">
 					<div className="flex items-center justify-between">
 						<div>
@@ -602,21 +622,21 @@ function PersonalInfoCard({
 							</Button>
 						</motion.div>
 					</div>
-			</CardHeader>
+				</CardHeader>
 				<CardContent className="relative z-10">
-				<form action={onUpdateProfile} className="space-y-4">
-					<div className="space-y-2">
+					<form action={onUpdateProfile} className="space-y-4">
+						<div className="space-y-2">
 							<Label htmlFor="display_name">Display Name</Label>
-						<Input
-							id="display_name"
-							name="display_name"
-							defaultValue={displayName}
+							<Input
+								id="display_name"
+								name="display_name"
+								defaultValue={displayName}
 								disabled={!isEditing}
 								required
 								className="transition-all duration-200 disabled:bg-muted/50"
-						/>
-					</div>
-					<div className="space-y-2">
+							/>
+						</div>
+						<div className="space-y-2">
 							<Label htmlFor="bio">Bio</Label>
 							<Textarea
 								id="bio"
@@ -627,8 +647,8 @@ function PersonalInfoCard({
 								placeholder="Tell us about yourself..."
 								className="transition-all duration-200 disabled:bg-muted/50 resize-none"
 							/>
-					</div>
-					<div className="space-y-2">
+						</div>
+						<div className="space-y-2">
 							<Label htmlFor="image_url">Avatar URL</Label>
 							<Input
 								id="image_url"
@@ -639,7 +659,7 @@ function PersonalInfoCard({
 								placeholder="https://example.com/avatar.jpg"
 								className="transition-all duration-200 disabled:bg-muted/50"
 							/>
-					</div>
+						</div>
 						<AnimatePresence>
 							{isEditing && (
 								<motion.div
@@ -648,9 +668,9 @@ function PersonalInfoCard({
 									exit={{ opacity: 0, height: 0 }}
 									transition={{ duration: 0.2 }}
 								>
-									<Button 
-										type="submit" 
-										disabled={isSaving} 
+									<Button
+										type="submit"
+										disabled={isSaving}
 										className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
 									>
 										{isSaving ? 'Saving...' : 'Save Changes'}
@@ -658,9 +678,9 @@ function PersonalInfoCard({
 								</motion.div>
 							)}
 						</AnimatePresence>
-				</form>
-			</CardContent>
-		</Card>
+					</form>
+				</CardContent>
+			</Card>
 		</motion.div>
 	)
 }
@@ -719,7 +739,7 @@ function AccountInfoCard({
 		>
 			<Card className="border-0 shadow-xl bg-card hover:shadow-2xl transition-all duration-300 overflow-hidden relative group">
 				<div className="absolute top-0 left-0 w-40 h-40 bg-secondary/5 rounded-full -ml-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
-				
+
 				<CardHeader className="relative z-10">
 					<div className="flex items-center justify-between">
 						<div>
@@ -748,21 +768,25 @@ function AccountInfoCard({
 							</Button>
 						</motion.div>
 					</div>
-			</CardHeader>
+				</CardHeader>
 				<CardContent className="space-y-4 relative z-10">
-					<motion.div 
+					<motion.div
 						className="space-y-2"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						transition={{ delay: 0.1 }}
 					>
 						<Label>Email</Label>
-						<Input value={userEmail} readOnly className="bg-muted/50 border-blue-200" />
+						<Input
+							value={userEmail}
+							readOnly
+							className="bg-muted/50 border-blue-200"
+						/>
 						<p className="text-xs text-muted-foreground">
 							Email cannot be changed here
 						</p>
 					</motion.div>
-					<motion.div 
+					<motion.div
 						className="space-y-2"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
@@ -803,9 +827,9 @@ function AccountInfoCard({
 									exit={{ opacity: 0, height: 0 }}
 									transition={{ duration: 0.2 }}
 								>
-									<Button 
-										type="submit" 
-										disabled={isSaving} 
+									<Button
+										type="submit"
+										disabled={isSaving}
 										className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
 									>
 										{isSaving ? 'Saving...' : 'Save Handle'}
@@ -814,8 +838,8 @@ function AccountInfoCard({
 							)}
 						</AnimatePresence>
 					</form>
-			</CardContent>
-		</Card>
+				</CardContent>
+			</Card>
 		</motion.div>
 	)
 }

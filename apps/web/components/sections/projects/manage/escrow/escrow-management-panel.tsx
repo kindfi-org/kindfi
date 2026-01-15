@@ -1,13 +1,11 @@
 'use client'
 
 import type { EscrowType } from '@trustless-work/escrow'
-import { Info, Loader2, Wallet, XCircle } from 'lucide-react'
+import { ExternalLink, Info, Loader2, Wallet, XCircle } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-} from '~/components/base/card'
+import { Card, CardContent } from '~/components/base/card'
 import {
 	Tabs,
 	TabsContent,
@@ -20,6 +18,9 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '~/components/base/tooltip'
+import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
+import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
+import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { EscrowDetailsCard } from './components/escrow-details-card'
 import { MilestonesOverviewCard } from './components/milestones-overview-card'
 import { RolesCard } from './components/roles-card'
@@ -27,11 +28,6 @@ import { TrustlineAndFundsCard } from './components/trustline-and-funds-card'
 import { FundEscrowTab } from './tabs/fund-escrow-tab'
 import { MilestonesTab } from './tabs/milestones-tab'
 import { ReleaseTab } from './tabs/release-tab'
-import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
-import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
-import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
-import Link from 'next/link'
-import { ExternalLink } from 'lucide-react'
 
 export function EscrowManagementPanel({
 	projectId,
@@ -42,16 +38,23 @@ export function EscrowManagementPanel({
 	escrowContractAddress: string
 	escrowType?: EscrowType
 }) {
-	const { escrowData, isLoading: isLoadingEscrow, error, refetch } =
-		useEscrowData({
-			escrowContractAddress,
-			escrowType,
-		})
-	const { balance, isLoading: isLoadingBalance, refetch: refetchBalance } =
-		useEscrowBalance({
-			escrowContractAddress,
-			escrowType,
-		})
+	const {
+		escrowData,
+		isLoading: isLoadingEscrow,
+		error,
+		refetch,
+	} = useEscrowData({
+		escrowContractAddress,
+		escrowType,
+	})
+	const {
+		balance,
+		isLoading: isLoadingBalance,
+		refetch: refetchBalance,
+	} = useEscrowBalance({
+		escrowContractAddress,
+		escrowType,
+	})
 
 	const [activeTab, setActiveTab] = useState('overview')
 
@@ -74,12 +77,7 @@ export function EscrowManagementPanel({
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						asChild
-						className="gap-2"
-					>
+					<Button variant="outline" size="sm" asChild className="gap-2">
 						<Link
 							href={getStellarExplorerUrl(escrowContractAddress)}
 							target="_blank"
@@ -166,7 +164,11 @@ export function EscrowManagementPanel({
 				</Card>
 			</div>
 
-			<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+			<Tabs
+				value={activeTab}
+				onValueChange={setActiveTab}
+				className="space-y-6"
+			>
 				<TabsList className="grid w-full grid-cols-4">
 					<TabsTrigger value="overview">Overview</TabsTrigger>
 					<TabsTrigger value="fund">Fund</TabsTrigger>

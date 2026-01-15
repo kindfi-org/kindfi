@@ -1,6 +1,6 @@
-import { appEnvConfig } from '@packages/lib/config'
-import type { AppEnvInterface } from '@packages/lib/types'
 import { Address, hash, Keypair, StrKey, xdr } from '@stellar/stellar-sdk'
+import { appEnvConfig } from '../config'
+import type { AppEnvInterface } from '../types'
 
 /**
  * Generates a Stellar contract address from a contract salt

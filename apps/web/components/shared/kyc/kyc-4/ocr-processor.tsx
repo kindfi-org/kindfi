@@ -1,4 +1,4 @@
-import type { DocumentType, ExtractedData } from '@packages/lib'
+import type { DocumentType, ExtractedData } from '@packages/lib/doc-utils'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import type React from 'react'
 import { Button } from '~/components/base/button'

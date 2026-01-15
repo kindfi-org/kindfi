@@ -1,4 +1,4 @@
-import { appEnvConfig } from '@packages/lib'
+import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import { type ClassValue, clsx } from 'clsx'
 import { redirect } from 'next/navigation'

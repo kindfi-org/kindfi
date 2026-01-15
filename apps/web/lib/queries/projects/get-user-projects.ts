@@ -131,7 +131,9 @@ export async function getUserSupportedProjects(
 				kinder_count: number
 				status: string
 				category: unknown
-				project_tag_relationships: Array<{ tag: { id: string; name: string; color: string } }>
+				project_tag_relationships: Array<{
+					tag: { id: string; name: string; color: string }
+				}>
 				project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
 			}
 
@@ -162,4 +164,3 @@ export async function getUserSupportedProjects(
 		}) ?? []
 	)
 }
-

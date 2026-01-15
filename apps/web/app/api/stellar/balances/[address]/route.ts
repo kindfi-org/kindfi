@@ -1,3 +1,4 @@
+import { appEnvConfig } from '@packages/lib/config'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transactions'
@@ -23,11 +24,14 @@ export async function GET(
 			)
 		}
 
-		// Initialize service
+		// Get configuration
+		const config = appEnvConfig('web')
+
+		// Initialize service with proper config
 		const txService = new SmartWalletTransactionService(
-			process.env.STELLAR_NETWORK_PASSPHRASE,
-			process.env.STELLAR_RPC_URL,
-			process.env.STELLAR_FUNDING_SECRET_KEY,
+			config.stellar.networkPassphrase,
+			config.stellar.rpcUrl,
+			config.stellar.fundingAccount,
 		)
 
 		const balances = await txService.getBalances(address)

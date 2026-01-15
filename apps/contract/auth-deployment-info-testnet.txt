@@ -1,23 +1,23 @@
 Network: testnet
-Source Account: bob (GD3YZRV4WMPZG5JIX5HLNLERB4DRFT6WBNLGEJ2NKLUCR6IKFE34CUUH)
+Source Account: bran (GAC63U4ZEGRCIDFMUJM34EVIGOW4PSMJ6B66ELCWSF6ZVYSONKL6LIEA)
 
 Auth Controller Contract:
-  WASM Hash: ...e95b  
-  Contract ID: ...YTJ2
+  WASM Hash: d887023f89062ef5d3585b3ac78f41ad704098b201f1da763371dc7c3929ab29  
+  Contract ID: CAXLM3X6QF6YUZWUVNV3CFE4SMDTEJEWH3KN7ZTGO4WMYIFOLJJV66FE
   Status: Initialized with admin signer
   Default Threshold: 1
 
 Account Contract:
-  WASM Hash: ...279a
-  Contract ID: ...DBE6
+  WASM Hash: ec1ff19a693aa031f1b554eeebcb5a2658dfee3bc21bb61f42a1f066e7427dfb
+  Contract ID: CBD4PVOPBSNKQ4LLNYLVKCY3PW6UXNDZ5GAQDXZDNFGVEKXPO3OVZLYA
 
 Account Factory Contract:
-  WASM Hash: ...15ac
-  Contract ID: ...FGDX
+  WASM Hash: 22785ec38f9d1a7843c00bd650429f1b4d0b1f8a0a221dcadf42dad330bd60d1
+  Contract ID: CDEA3HFVIMUJ3MZPUST4CRZ5SVV3FMPB6PILU6MGSDQZKDLTVTQHRM4D
   Status: Registered with auth-controller
 
 Configuration:
-  Admin Public Key (hex): ...801b
-  Admin Credential ID: ...ZCqQ
+  Admin Public Key (hex): 0404f6988c6d4c7f546c905024c4e34a084cd646e5af8f1b1dbd2e02a1622582041dc792bd0d04d5ca9fab9360597fc1558627e98744e5b66574b07993f6e801b
+  Admin Credential ID: 8b5k8pR3N5o7JEvD4Aw70_738E8wBEQp6DT_vLf4Tp1mLnKkVonWTpKcmRTS1f_ndhKYLooSz2XFMXXaauZCqQ
 
-Deployment Date: Fri Oct 31 11:45:17 CST 2025
+Deployment Date: Wed Jan 14 15:29:28 CST 2026

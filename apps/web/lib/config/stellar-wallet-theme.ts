@@ -1,4 +1,7 @@
-import { SwkAppLightTheme, type SwkAppTheme } from '@creit-tech/stellar-wallets-kit/types'
+import {
+	SwkAppLightTheme,
+	type SwkAppTheme,
+} from '@creit-tech/stellar-wallets-kit/types'
 
 /**
  * Custom theme configuration for Stellar Wallets Kit
@@ -36,4 +39,3 @@ export function getStellarWalletTheme(): SwkAppTheme {
 		'font-family': 'inherit', // Use app's font family
 	}
 }
-

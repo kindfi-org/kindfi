@@ -182,3 +182,76 @@ export const convertEcdsaSignatureAsnToCompact = (sig: Buffer) => {
 
 	return signature64
 }
+
+/**
+ * Convert DER-encoded ECDSA signature to compact R+S format for secp256r1 (P-256)
+ * WebAuthn signatures are DER-encoded ASN.1, but Soroban expects raw 64-byte R+S
+ */
+export const convertP256SignatureAsnToCompact = (sig: Buffer): Buffer => {
+	// Define the order of the curve secp256r1 (P-256)
+	// https://github.com/RustCrypto/elliptic-curves/blob/master/p256/src/lib.rs#L72
+	const q = Buffer.from(
+		'ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551',
+		'hex',
+	)
+
+	// ASN Sequence
+	let offset = 0
+	if (sig[offset] !== 0x30) {
+		throw new Error('signature is not a sequence')
+	}
+	offset += 1
+
+	// ASN Sequence Byte Length
+	// Skip length byte(s)
+	const seqLen = sig[offset]
+	offset += 1
+	if (seqLen & 0x80) {
+		const lenBytes = seqLen & 0x7f
+		offset += lenBytes
+	}
+
+	// ASN Integer (R)
+	if (sig[offset] !== 0x02) {
+		throw new Error('first element in sequence is not an integer')
+	}
+	offset += 1
+
+	// ASN Integer (R) Byte Length
+	const rLen = sig[offset]
+	offset += 1
+
+	// Read R
+	const rBytes = sig.slice(offset, offset + rLen)
+	offset += rLen
+
+	// ASN Integer (S)
+	if (sig[offset] !== 0x02) {
+		throw new Error('second element in sequence is not an integer')
+	}
+	offset += 1
+
+	// ASN Integer (S) Byte Length
+	const sLen = sig[offset]
+	offset += 1
+
+	// Read S
+	const sBytes = sig.slice(offset, offset + sLen)
+	offset += sLen
+
+	// Convert to BigInt
+	const rBigInt = bufToBigint(rBytes)
+	let sBigInt = bufToBigint(sBytes)
+
+	// Force low S range (canonical form required by secp256r1)
+	const qBigInt = bufToBigint(q)
+	if (sBigInt > (qBigInt - BigInt(1)) / BigInt(2)) {
+		sBigInt = qBigInt - sBigInt
+	}
+
+	// Pad to 32 bytes
+	const rHex = rBigInt.toString(16).padStart(64, '0')
+	const sHex = sBigInt.toString(16).padStart(64, '0')
+
+	return Buffer.from(rHex + sHex, 'hex')
+}

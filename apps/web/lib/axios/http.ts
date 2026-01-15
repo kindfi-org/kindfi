@@ -1,4 +1,4 @@
-import { appEnvConfig } from '@packages/lib'
+import { appEnvConfig } from '@packages/lib/config'
 import axios, { type CreateAxiosDefaults } from 'axios'
 
 export const createHttpRequest = (

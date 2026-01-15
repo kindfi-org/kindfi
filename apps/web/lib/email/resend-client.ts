@@ -1,4 +1,4 @@
-import { appEnvConfig } from '@packages/lib'
+import { appEnvConfig } from '@packages/lib/config'
 import { Resend } from 'resend'
 
 let resendClient: Resend | null = null

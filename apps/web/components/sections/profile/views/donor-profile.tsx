@@ -1,21 +1,33 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
+import { formatDistanceToNow } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, BarChart2, Calendar, Heart, RefreshCw, Trophy } from 'lucide-react'
+import {
+	ArrowRight,
+	BarChart2,
+	Calendar,
+	Heart,
+	RefreshCw,
+	Trophy,
+} from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
-import { Button } from '~/components/base/button'
 import { Badge } from '~/components/base/badge'
-import { getUserSupportedProjects } from '~/lib/queries/projects/get-user-projects'
+import { Button } from '~/components/base/button'
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from '~/components/base/card'
 import { Progress } from '~/components/base/progress'
-import Image from 'next/image'
 import { AchievementsGrid } from '~/components/sections/achievements/achievement-grid'
-import { formatDistanceToNow } from 'date-fns'
+import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { staggerContainer } from '~/lib/constants/animations'
+import { getUserSupportedProjects } from '~/lib/queries/projects/get-user-projects'
 
 interface DonorProfileProps {
 	userId: string
@@ -24,8 +36,8 @@ interface DonorProfileProps {
 
 const cardVariants = {
 	hidden: { opacity: 0, y: 20 },
-	show: { 
-		opacity: 1, 
+	show: {
+		opacity: 1,
 		y: 0,
 		transition: {
 			type: 'spring',
@@ -51,9 +63,9 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 	)
 
 	const { getMultipleBalances } = useEscrow()
-	const [escrowBalances, setEscrowBalances] = useState<
-		Record<string, number>
-	>({})
+	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>(
+		{},
+	)
 	const [isLoadingBalances, setIsLoadingBalances] = useState(false)
 
 	// Fetch escrow balances for all supported projects that have escrow addresses
@@ -127,9 +139,13 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 
 	const handleSyncDonation = async () => {
 		// Prompt user for donation details
-		const contractId = prompt('Enter the escrow contract ID (Stellar contract address):\n(Leave empty if you have the project ID)')
-		const projectId = prompt('Enter the project ID (UUID):\n(Leave empty if you provided contract ID)')
-		
+		const contractId = prompt(
+			'Enter the escrow contract ID (Stellar contract address):\n(Leave empty if you have the project ID)',
+		)
+		const projectId = prompt(
+			'Enter the project ID (UUID):\n(Leave empty if you provided contract ID)',
+		)
+
 		if (!contractId && !projectId) {
 			toast.error('Please provide either contract ID or project ID')
 			return
@@ -173,7 +189,8 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 		} catch (error) {
 			console.error('Sync error:', error)
 			toast.error('Failed to sync donation', {
-				description: error instanceof Error ? error.message : 'Please try again.',
+				description:
+					error instanceof Error ? error.message : 'Please try again.',
 			})
 		} finally {
 			setIsSyncing(false)
@@ -206,15 +223,17 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 		: null
 
 	// Calculate total impact (sum of all contributions to active/completed projects)
-	const totalImpact = projectsWithBalances.reduce(
-		(sum, p) => {
-			if (p.status === 'active' || p.status === 'funding' || p.status === 'completed' || p.status === 'funded') {
-				return sum + Number(p.contributionAmount || 0)
-			}
-			return sum
-		},
-		0,
-	)
+	const totalImpact = projectsWithBalances.reduce((sum, p) => {
+		if (
+			p.status === 'active' ||
+			p.status === 'funding' ||
+			p.status === 'completed' ||
+			p.status === 'funded'
+		) {
+			return sum + Number(p.contributionAmount || 0)
+		}
+		return sum
+	}, 0)
 
 	return (
 		<motion.div
@@ -316,9 +335,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 								>
 									<Trophy className="h-8 w-8 text-primary" />
 								</motion.div>
-								<span className="text-foreground">
-									{impactScore}
-								</span>
+								<span className="text-foreground">{impactScore}</span>
 							</motion.div>
 						</CardContent>
 					</Card>
@@ -326,10 +343,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 			</motion.div>
 
 			{/* Impact Overview - Derived from actual donations */}
-			<motion.div
-				variants={cardVariants}
-				whileHover={{ y: -2 }}
-			>
+			<motion.div variants={cardVariants} whileHover={{ y: -2 }}>
 				<Card className="border-0 shadow-xl bg-card hover:shadow-2xl transition-all duration-300 overflow-hidden relative group">
 					<div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
 					<CardHeader className="relative z-10">
@@ -350,13 +364,15 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 									transition={{ delay: 0.1, type: 'spring' }}
 									className="text-3xl font-extrabold text-primary"
 								>
-									${totalImpact.toLocaleString(undefined, {
+									$
+									{totalImpact.toLocaleString(undefined, {
 										minimumFractionDigits: 2,
 										maximumFractionDigits: 2,
 									})}
 								</motion.div>
 								<p className="text-xs text-muted-foreground">
-									From {projectsWithBalances.length} project{projectsWithBalances.length !== 1 ? 's' : ''}
+									From {projectsWithBalances.length} project
+									{projectsWithBalances.length !== 1 ? 's' : ''}
 								</p>
 							</div>
 							<div className="space-y-2">
@@ -401,14 +417,13 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 									transition={{ delay: 0.4, type: 'spring' }}
 									className="text-3xl font-extrabold text-foreground"
 								>
-									${avgContribution.toLocaleString(undefined, {
+									$
+									{avgContribution.toLocaleString(undefined, {
 										minimumFractionDigits: 0,
 										maximumFractionDigits: 0,
 									})}
 								</motion.div>
-								<p className="text-xs text-muted-foreground">
-									Per project
-								</p>
+								<p className="text-xs text-muted-foreground">Per project</p>
 							</div>
 						</div>
 					</CardContent>
@@ -480,8 +495,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0 }}
-					>
-					</motion.div>
+					></motion.div>
 				)}
 			</AnimatePresence>
 
@@ -505,11 +519,11 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 								</motion.div>
 								Badges & Achievements
 							</CardTitle>
-					</CardHeader>
+						</CardHeader>
 						<CardContent className="relative z-10">
-						<AchievementsGrid />
-					</CardContent>
-				</Card>
+							<AchievementsGrid />
+						</CardContent>
+					</Card>
 				</motion.div>
 
 				<motion.div variants={cardVariants}>
@@ -519,11 +533,11 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 							<CardTitle className="text-foreground">
 								Donation History
 							</CardTitle>
-					</CardHeader>
+						</CardHeader>
 						<CardContent className="relative z-10">
 							<DonationHistory donations={projectsWithBalances} />
-					</CardContent>
-				</Card>
+						</CardContent>
+					</Card>
 				</motion.div>
 			</motion.div>
 		</motion.div>
@@ -581,7 +595,8 @@ function DonationHistory({
 							</div>
 						</div>
 						<span className="font-bold text-primary ml-4 flex-shrink-0">
-							${amount.toLocaleString(undefined, {
+							$
+							{amount.toLocaleString(undefined, {
 								minimumFractionDigits: 2,
 								maximumFractionDigits: 2,
 							})}
@@ -622,9 +637,9 @@ function SupportedProjectCard({
 			<Card className="border-0 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col bg-card relative group">
 				{/* Decorative overlay */}
 				<div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-all duration-300 pointer-events-none" />
-				
+
 				{project.image && (
-					<motion.div 
+					<motion.div
 						className="relative h-48 w-full overflow-hidden"
 						whileHover={{ scale: 1.05 }}
 						transition={{ duration: 0.3 }}
@@ -639,7 +654,9 @@ function SupportedProjectCard({
 					</motion.div>
 				)}
 				<CardHeader className="relative z-10">
-					<CardTitle className="text-lg line-clamp-2 font-bold">{project.title}</CardTitle>
+					<CardTitle className="text-lg line-clamp-2 font-bold">
+						{project.title}
+					</CardTitle>
 				</CardHeader>
 				<CardContent className="flex-1 flex flex-col gap-4 relative z-10">
 					{project.description && (
@@ -649,15 +666,20 @@ function SupportedProjectCard({
 					)}
 					<div className="space-y-2">
 						<div className="flex justify-between text-sm">
-							<span className="text-muted-foreground font-medium">Your Contribution</span>
+							<span className="text-muted-foreground font-medium">
+								Your Contribution
+							</span>
 							<span className="font-bold text-primary">
 								${contributionAmount.toLocaleString()}
 							</span>
 						</div>
 						<div className="flex justify-between text-sm">
-							<span className="text-muted-foreground font-medium">Total Raised</span>
+							<span className="text-muted-foreground font-medium">
+								Total Raised
+							</span>
 							<span className="font-bold">
-								${Number(project.raised).toLocaleString()} / ${Number(project.goal).toLocaleString()}
+								${Number(project.raised).toLocaleString()} / $
+								{Number(project.goal).toLocaleString()}
 							</span>
 						</div>
 						<div className="relative h-3 bg-muted rounded-full overflow-hidden">
@@ -692,12 +714,12 @@ function SupportedProjectCard({
 									</Badge>
 								</motion.div>
 							))}
-		</div>
+						</div>
 					)}
 					<motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-						<Button 
-							asChild 
-							variant="outline" 
+						<Button
+							asChild
+							variant="outline"
 							className="flex-1 border-border hover:bg-muted"
 						>
 							<Link href={`/projects/${project.slug}`}>

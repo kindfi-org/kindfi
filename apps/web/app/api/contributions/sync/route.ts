@@ -1,7 +1,7 @@
 import { supabase } from '@packages/lib/supabase'
-import { getServerSession } from 'next-auth'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 
 /**
@@ -12,10 +12,7 @@ export async function POST(req: NextRequest) {
 	try {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
-			return NextResponse.json(
-				{ error: 'Unauthorized' },
-				{ status: 401 },
-			)
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
 		const body = await req.json()
@@ -23,7 +20,10 @@ export async function POST(req: NextRequest) {
 
 		if ((!contractId && !providedProjectId) || !amount || amount <= 0) {
 			return NextResponse.json(
-				{ error: 'Invalid request. contractId (or projectId) and amount are required.' },
+				{
+					error:
+						'Invalid request. contractId (or projectId) and amount are required.',
+				},
 				{ status: 400 },
 			)
 		}
@@ -46,10 +46,11 @@ export async function POST(req: NextRequest) {
 				// In this case, we'll allow creating the contribution if projectId is provided
 				// or return a helpful error message
 				return NextResponse.json(
-					{ 
+					{
 						error: 'Escrow contract not found in database',
-						message: 'The escrow contract address exists on-chain but is not recorded in our database. Please provide the project ID directly.',
-						hint: 'You can find the project ID in the project page URL (e.g., /projects/[slug] - check the page source or network tab) or contact support.'
+						message:
+							'The escrow contract address exists on-chain but is not recorded in our database. Please provide the project ID directly.',
+						hint: 'You can find the project ID in the project page URL (e.g., /projects/[slug] - check the page source or network tab) or contact support.',
 					},
 					{ status: 404 },
 				)
@@ -74,10 +75,10 @@ export async function POST(req: NextRequest) {
 
 		if (existingContribution) {
 			return NextResponse.json(
-				{ 
-					success: true, 
+				{
+					success: true,
 					contributionId: existingContribution.id,
-					message: 'Contribution already exists' 
+					message: 'Contribution already exists',
 				},
 				{ status: 200 },
 			)
@@ -97,16 +98,22 @@ export async function POST(req: NextRequest) {
 		if (contributionError) {
 			console.error('Error creating contribution:', contributionError)
 			return NextResponse.json(
-				{ error: 'Failed to create contribution', details: contributionError.message },
+				{
+					error: 'Failed to create contribution',
+					details: contributionError.message,
+				},
 				{ status: 500 },
 			)
 		}
 
 		// Update project's current_amount (raised amount)
-		const { error: updateError } = await supabase.rpc('increment_project_amount', {
-			project_id_param: projectId,
-			amount_param: Number(amount),
-		})
+		const { error: updateError } = await supabase.rpc(
+			'increment_project_amount',
+			{
+				project_id_param: projectId,
+				amount_param: Number(amount),
+			},
+		)
 
 		// If RPC doesn't exist, fallback to manual update
 		if (updateError) {
@@ -144,4 +151,3 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
-

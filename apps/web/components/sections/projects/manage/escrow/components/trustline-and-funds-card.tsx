@@ -45,9 +45,7 @@ export function TrustlineAndFundsCard({
 									<Label className="text-xs text-muted-foreground">
 										Token Name
 									</Label>
-									<p className="font-semibold">
-										{escrowData.trustline.name}
-									</p>
+									<p className="font-semibold">{escrowData.trustline.name}</p>
 								</div>
 							)}
 						</>
@@ -106,4 +104,3 @@ export function TrustlineAndFundsCard({
 		</div>
 	)
 }
-

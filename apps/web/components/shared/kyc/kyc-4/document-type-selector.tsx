@@ -1,4 +1,4 @@
-import type { DocumentType } from '@packages/lib'
+import type { DocumentType } from '@packages/lib/doc-utils'
 import {
 	Select,
 	SelectContent,

@@ -6,7 +6,6 @@ import { Horizon, Keypair } from '@stellar/stellar-sdk'
 import { useEffect, useRef, useState } from 'react'
 import { updateDeviceWithDeployee } from '~/app/actions/auth'
 import { Logger } from '~/lib/logger'
-import { generateStellarAddress } from '~/lib/passkey/deploy'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
 
@@ -14,10 +13,6 @@ const _logger = new Logger()
 
 const getStoredDeployee = () => {
 	return localStorage.getItem('sp:deployee')
-}
-
-const setStoredDeployee = (deployee: string) => {
-	localStorage.setItem('sp:deployee', deployee)
 }
 
 const removeStoredDeployee = () => {

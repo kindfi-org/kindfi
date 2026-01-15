@@ -29,9 +29,7 @@ export async function saveEscrowContractAction(
 			)
 
 		if (upsertError) {
-			throw new Error(
-				`Failed to save escrow contract: ${upsertError.message}`,
-			)
+			throw new Error(`Failed to save escrow contract: ${upsertError.message}`)
 		}
 
 		// Revalidate relevant paths
@@ -46,8 +44,9 @@ export async function saveEscrowContractAction(
 		return {
 			success: false,
 			error:
-				error instanceof Error ? error.message : 'Failed to save escrow contract',
+				error instanceof Error
+					? error.message
+					: 'Failed to save escrow contract',
 		}
 	}
 }
-

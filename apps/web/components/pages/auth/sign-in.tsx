@@ -2,8 +2,7 @@
 
 import { Fingerprint } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { type ChangeEvent, useEffect, useState } from 'react'
+import { type ChangeEvent, useState } from 'react'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -15,22 +14,14 @@ import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
-import { useStellarContext } from '~/hooks/contexts/stellar-context'
-import { usePasskeyAuthentication } from '~/hooks/passkey/use-passkey-authentication'
+import { useSmartAccountAuth } from '~/hooks/passkey/use-smart-account-auth'
 import { useFormValidation } from '~/hooks/use-form-validation'
 import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 
 export function LoginComponent() {
 	const [email, setEmail] = useState('')
-	const _router = useRouter()
 	const { t } = useI18n()
-
-	const {
-		onSign,
-		prepareSign,
-		deployee: stellarUserAddress,
-	} = useStellarContext()
 
 	const { isEmailInvalid, doesEmailExist, handleValidation, resetValidation } =
 		useFormValidation({
@@ -43,11 +34,7 @@ export function LoginComponent() {
 		authError,
 		handleAuth,
 		isNotRegistered,
-	} = usePasskeyAuthentication(email, {
-		onSign,
-		prepareSign,
-		userId: doesEmailExist,
-	})
+	} = useSmartAccountAuth(email)
 
 	const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
 		handleValidation(e as ChangeEvent<HTMLInputElement & { name: 'email' }>)
@@ -61,14 +48,6 @@ export function LoginComponent() {
 		if (!isEmailInvalid) handleAuth()
 		resetValidation()
 	}
-
-	useEffect(() => {
-		if (authSuccess) {
-			// If the user is authenticated, we can use the stellarUserAddress later
-			console.log('stellarUserAddress', stellarUserAddress)
-			// router.push('/dashboard')
-		}
-	}, [authSuccess, stellarUserAddress])
 
 	return (
 		<AuthLayout>

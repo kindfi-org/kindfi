@@ -11,7 +11,7 @@ interface ManageNavigationProps {
 
 export function ManageNavigation({ slug }: ManageNavigationProps) {
 	const pathname = usePathname()
-	
+
 	// Check if we're on the main manage page (exactly /projects/[slug]/manage)
 	const isMainManagePage = pathname === `/projects/${slug}/manage`
 
@@ -33,4 +33,3 @@ export function ManageNavigation({ slug }: ManageNavigationProps) {
 		</div>
 	)
 }
-

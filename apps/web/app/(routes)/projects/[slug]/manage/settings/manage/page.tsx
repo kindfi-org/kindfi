@@ -32,4 +32,3 @@ export default async function EscrowManagePage({
 		</section>
 	)
 }
-

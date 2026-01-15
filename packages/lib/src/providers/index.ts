@@ -1,1 +1,1 @@
-export * from './react-query-client-provider'
+export * from './react-query-client.provider'

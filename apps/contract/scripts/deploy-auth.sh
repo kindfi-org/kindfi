@@ -5,7 +5,8 @@ echo "🚀 Starting Auth Contracts Deployment..."
 
 # Parse command line arguments
 NETWORK="futurenet"
-SOURCE="bob-f"
+# Default source based on network (can be overridden with --source)
+SOURCE="bob-f"  # Default for futurenet
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -38,6 +39,27 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Set default source based on network if not provided
+if [[ "$SOURCE" == "bob-f" ]]; then
+    case $NETWORK in
+        testnet)
+            # Check if bran exists, otherwise use bob-f
+            if stellar keys address bran &>/dev/null 2>&1; then
+                SOURCE="bran"
+                echo "ℹ️  Using existing 'bran' identity for testnet"
+            else
+                echo "⚠️  'bran' identity not found. Using 'bob-f' (you may need to create it)"
+            fi
+            ;;
+        futurenet)
+            SOURCE="bob-f"
+            ;;
+        mainnet)
+            SOURCE="production"
+            ;;
+    esac
+fi
 
 echo "📝 Configuration:"
 echo "Network: $NETWORK"
@@ -187,7 +209,7 @@ echo "✅ Auth Controller initialized with admin WebAuthn public key"
 
 # Register the factory contract with the auth controller
 echo "📝 Registering factory contract with auth controller..."
-echo "Note: Factory registration uses empty context - auth is handled by WebAuthn at account level"
+echo "Note: Factory registration may use empty context - auth is handled by WebAuthn at account level"
 stellar contract invoke \
     --network "$NETWORK" \
     --source "$SOURCE" \
@@ -195,7 +217,7 @@ stellar contract invoke \
     -- \
     add_factory \
     --factory "$ACCOUNT_FACTORY_CONTRACT_ID" \
-    # --context "[\"$ACCOUNT_FACTORY_CONTRACT_ID\"]"
+    --context "[\"$ACCOUNT_FACTORY_CONTRACT_ID\"]"
 
 echo "✅ Factory contract registered with auth controller"
 

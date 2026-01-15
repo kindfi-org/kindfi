@@ -3,7 +3,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { EscrowType } from '@trustless-work/escrow'
 import { motion } from 'framer-motion'
-import { CircleAlert, CircleCheck, Heart, Share } from 'lucide-react'
+import {
+	CircleAlert,
+	CircleCheck,
+	ExternalLink,
+	Heart,
+	Share,
+} from 'lucide-react'
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -20,16 +27,14 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import { useAuth } from '~/hooks/use-auth'
 import { progressBarAnimation } from '~/lib/constants/animations'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
-import Link from 'next/link'
-import { ExternalLink } from 'lucide-react'
 
 interface ProjectSidebarProps {
 	project: ProjectDetail
@@ -58,7 +63,8 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 	})
 
 	// Determine the correct escrow type - prefer from API, fallback to project prop, then default
-	const effectiveEscrowType = escrowData?.type || project.escrowType || 'multi-release'
+	const effectiveEscrowType =
+		escrowData?.type || project.escrowType || 'multi-release'
 
 	const progressPercentage = useMemo(() => {
 		const raised = onChainRaised ?? project.raised
