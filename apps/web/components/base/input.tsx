@@ -75,6 +75,27 @@ export const InputBase = React.forwardRef<
 
 	const controlRef = React.useRef<HTMLElement>(null)
 
+	// Memoize the click handler to avoid React Compiler warning about ref access
+	const handleClick = React.useCallback(
+		(event: React.MouseEvent<HTMLDivElement>) => {
+			// Access ref in event handler, not during render
+			const control = controlRef.current
+			if (control && event.currentTarget === event.target) {
+				control.focus()
+			}
+		},
+		[],
+	)
+
+	// Combine onClick handlers manually to avoid React Compiler ref access warning
+	const combinedOnClick = React.useCallback(
+		(event: React.MouseEvent<HTMLDivElement>) => {
+			onClick?.(event)
+			handleClick(event)
+		},
+		[onClick, handleClick],
+	)
+
 	return (
 		<InputBaseContext.Provider
 			value={{
@@ -86,11 +107,7 @@ export const InputBase = React.forwardRef<
 		>
 			<Primitive.div
 				ref={ref}
-				onClick={composeEventHandlers(onClick, (event) => {
-					if (controlRef.current && event.currentTarget === event.target) {
-						controlRef.current.focus()
-					}
-				})}
+				onClick={combinedOnClick}
 				className={cn(
 					'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 duration-200',
 					disabled && 'cursor-not-allowed opacity-50',

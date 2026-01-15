@@ -114,6 +114,7 @@ export const getUser = async ({
 	userId?: string
 }): Promise<{
 	identifier: string
+	userId?: string
 	credentials: WebAuthnCredential[]
 } | null> => {
 	try {
@@ -128,6 +129,10 @@ export const getUser = async ({
 				),
 			)
 
+		if (deviceRecords.length === 0) {
+			return null
+		}
+
 		const credentials = deviceRecords.map(
 			(device) =>
 				({
@@ -139,8 +144,10 @@ export const getUser = async ({
 				}) as WebAuthnCredential,
 		)
 
+		// Return userId from the first device record (all devices for a user should have the same userId)
 		return {
 			identifier,
+			userId: deviceRecords[0]?.userId || userId || undefined,
 			credentials,
 		}
 	} catch (error) {

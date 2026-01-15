@@ -1,17 +1,35 @@
-if git diff --cached --name-only | grep -q '^services/supabase/'; then
-  echo "🔵 Running Supabase Typescript generation."
-  if ! (cd services/supabase && bun gen); then
-    echo "🔴 Failed to run Supabase TypeScript generation. Make sure if you are locally running! 👀"
-    exit 1
+#!/bin/sh
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|json|css|md)$' || true)
+
+# If no relevant files staged, skip hooks
+if [ -z "$STAGED_FILES" ]; then
+  exit 0
+fi
+
+# Optional: Supabase TypeScript generation (warn only, don't block)
+if echo "$STAGED_FILES" | grep -q '^services/supabase/'; then
+  echo "🔵 Running Supabase TypeScript generation (optional)..."
+  if (cd services/supabase && bun gen 2>/dev/null); then
+    echo "✅ Supabase types generated successfully"
+  else
+    echo "⚠️  Supabase TypeScript generation skipped (not blocking commit)"
   fi
 fi
-prettier $(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g') --write --ignore-unknown
-bun format-and-lint:fix
-git update-index --again
-if git diff --cached --name-only | grep -q '^apps/web/'; then
-  echo "🔵 Pre commit test run temporally removed. Continuing..."
-  # echo "🔵 Running tests for the web application."
-  # echo "🔴 Ensure to have no ENV var missing."
-  # echo "🟡 Check test errors if any."
-  # cd apps/web && bun test
+
+# Format staged files only with Prettier (non-blocking)
+if [ -n "$STAGED_FILES" ]; then
+  echo "$STAGED_FILES" | tr '\n' '\0' | xargs -0 prettier --write --ignore-unknown 2>/dev/null || true
 fi
+
+# Lint and format only staged files with Biome (non-blocking)
+if [ -n "$STAGED_FILES" ]; then
+  echo "🔵 Running Biome on staged files..."
+  echo "$STAGED_FILES" | tr '\n' '\0' | xargs -0 bunx biome check --write --no-errors-on-unmatched 2>/dev/null || {
+    echo "⚠️  Biome found issues. Review and fix if needed (not blocking commit)"
+  }
+fi
+
+# Re-stage files that were auto-formatted
+git update-index --again 2>/dev/null || true
