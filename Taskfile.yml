@@ -75,7 +75,7 @@ tasks:
   indexer:prepack:
     desc: "Prepare the Subquery Indexer for packaging"
     cmds:
-      - cd apps/indexer && bun preapack
+      - cd apps/indexer && bun prepack
 
   indexer:dev:
     desc: "Run the Subquery Indexer in development mode"
@@ -83,6 +83,38 @@ tasks:
       - cd apps/indexer && bun dev
 
   indexer:start-docker:
-    desc: "Start the Subquery Indexer in a Docker container with an indexer, PostgeSQL DB, and a query service"
+    desc: "Start the Subquery Indexer in a Docker container with an indexer, PostgreSQL DB, and a query service"
     cmds:
       - cd apps/indexer && bun start:docker
+
+  # ? Academy Web App tasks
+  academy:dev:
+    desc: "Run the development server for the Academy web app"
+    cmds:
+      - cd apps/academy-wep && bun dev
+
+  academy:build:
+    desc: "Build the Academy web app"
+    cmds:
+      - cd apps/academy-wep && bun run build
+
+  academy:start:
+    desc: "Start the production server for the Academy web app"
+    cmds:
+      - cd apps/academy-wep && bun run start
+
+  academy:test:
+    desc: "Run tests for the Academy web app"
+    cmds:
+      - cd apps/academy-wep && bun test
+
+  # ? AI Service tasks
+  ai:dev:
+    desc: "Run the AI service in development mode"
+    cmds:
+      - cd services/ai && bun start
+
+  ai:test:
+    desc: "Run tests for the AI service"
+    cmds:
+      - cd services/ai && bun test

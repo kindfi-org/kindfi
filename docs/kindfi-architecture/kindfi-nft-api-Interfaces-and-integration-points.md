@@ -68,219 +68,175 @@ This hybrid approach enables us to deliver rich, evolving NFTs while maintaining
 Our NFT contract extends [OpenZeppelin’s Soroban contract](https://developers.stellar.org/docs/tools/developer-tools/openzepplin-contracts#openzeppelin-stellar-contracts-and-utilities) implementations to ensure we follow established security patterns and standards:
 
 ```rust
-use soroban_sdk::{contract, contractimpl, Address, BytesN, Env, String, Vec};
-use soroban_openzellin::token::{TokenClient, TokenMetadata};
-use soroban_openzellin::sft::SFTClient;
+#![no_std]
 
-// Import OpenZeppelin interfaces
-use soroban_openzellin::contracts::nft::{
-    NonFungibleToken, NonFungibleTokenTrait, NonFungibleTokenEvents
-};
+mod types;
+mod metadata;
+mod mint;
+mod burn;
+
+use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
+use stellar_access_control::{set_admin, AccessControl};
+use stellar_access_control_macros::only_role;
+use stellar_default_impl_macro::default_impl;
+use stellar_non_fungible::{Base, NonFungibleToken};
+use crate::types::NFTMetadata;
 
 #[contract]
-pub struct KindfiNFTContract;
+pub struct KindfiNFT;
 
 #[contractimpl]
-impl NonFungibleTokenTrait for KindfiNFTContract {
-    // Implement required OpenZeppelin NFT methods
-    fn name(&self, env: Env) -> String {
-        String::from_slice(&env, "KindFi Kinder NFT")
+impl KindfiNFT {
+    /// Constructor initializes the contract with admin, name, symbol, and base URI
+    pub fn __constructor(
+        e: &Env,
+        admin: Address,
+        name: String,
+        symbol: String,
+        base_uri: String,
+    ) {
+        set_admin(e, &admin);
+        Base::set_metadata(e, base_uri, name, symbol);
+        e.storage().instance().set(&types::TokenCounterKey::Counter, &0u32);
     }
 
-    fn symbol(&self, env: Env) -> String {
-        String::from_slice(&env, "KINDER")
+    /// Mint a new NFT with custom metadata
+    /// Requires "minter" role
+    #[only_role(caller, "minter")]
+    pub fn mint_with_metadata(
+        e: &Env,
+        caller: Address,
+        to: Address,
+        metadata: NFTMetadata,
+    ) -> u32 {
+        mint::mint_with_metadata(e, caller, to, &metadata)
     }
 
-    fn token_uri(&self, env: Env, token_id: u32) -> String {
-        // Get URI from storage
-        let storage = env.storage();
-        let key = DataKey::TokenUri(token_id);
-        storage.get_unchecked(key).unwrap()
+    /// Update metadata for an existing NFT
+    /// Requires "metadata_manager" role
+    #[only_role(caller, "metadata_manager")]
+    pub fn update_metadata(
+        e: &Env,
+        caller: Address,
+        token_id: u32,
+        metadata: NFTMetadata,
+    ) {
+        metadata::set_metadata(e, token_id, &metadata);
     }
 
-    fn owner_of(&self, env: Env, token_id: u32) -> Address {
-        // Get owner from storage
-        let storage = env.storage();
-        let key = DataKey::Owner(token_id);
-        storage.get_unchecked(key).unwrap()
+    /// Get metadata for a specific token
+    pub fn get_metadata(e: &Env, token_id: u32) -> Option<NFTMetadata> {
+        metadata::get_metadata(e, token_id)
     }
 
-    fn transfer_from(&self, env: Env, from: Address, to: Address, token_id: u32) -> Result<(), Error> {
-        // Verify caller is authorized
-        self.require_auth_for_token(&env, token_id)?;
-
-        // Transfer ownership
-        let storage = env.storage();
-        storage.set(DataKey::Owner(token_id), to);
-
-        // Emit transfer event
-        env.events().publish((
-            Symbol::from_str("transfer"),
-            from,
-            to,
-            token_id,
-        ));
-
-        Ok(())
+    /// Get total supply of minted tokens
+    pub fn total_supply(e: &Env) -> u32 {
+        e.storage()
+            .instance()
+            .get(&types::TokenCounterKey::Counter)
+            .unwrap_or(0)
     }
 
-    // Other OpenZeppelin NFT interface implementations...
+    /// Burn an NFT (remove from circulation)
+    /// Requires "burner" role
+    #[only_role(from, "burner")]
+    pub fn burn(e: &Env, from: Address, token_id: u32) {
+        burn::burn(e, from, token_id);
+    }
+
+    /// Burn an NFT from another address (with authorization)
+    /// Requires "burner" role on spender
+    #[only_role(spender, "burner")]
+    pub fn burn_from(e: &Env, spender: Address, from: Address, token_id: u32) {
+        burn::burn_from(e, spender, from, token_id);
+    }
 }
 
-// KindFi-specific extension methods
+/// Default implementation of NonFungibleToken trait using Base
+#[default_impl]
 #[contractimpl]
-impl KindfiNFTContract {
-    pub fn mint(&self, env: Env, to: Address, metadata_hash: BytesN<32>) -> Result<u32, Error> {
-        // Verify caller is authorized minter
-        let caller = env.invoker();
-        if !self.is_authorized_minter(&env, &caller) {
-            return Err(Error::Unauthorized);
-        }
-
-        // Check with AuthController
-        self.authenticate_with_auth_controller(&env, Action::Mint)?;
-
-        // Get next token ID
-        let storage = env.storage();
-        let next_id = storage.get(DataKey::NextTokenId).unwrap_or(0);
-
-        // Store token data
-        storage.set(DataKey::Owner(next_id), to);
-        storage.set(DataKey::MetadataHash(next_id), metadata_hash);
-        storage.set(DataKey::NextTokenId, next_id + 1);
-
-        // Set initial token level
-        storage.set(DataKey::TokenLevel(next_id), 1); // Start at Rookie level
-
-        // Emit mint event
-        env.events().publish((
-            Symbol::from_str("mint"),
-            to,
-            next_id,
-            metadata_hash,
-        ));
-
-        Ok(next_id)
-    }
-
-    pub fn update_metadata(&self, env: Env, token_id: u32, new_metadata_hash: BytesN<32>) -> Result<(), Error> {
-        // Verify caller is authorized
-        let caller = env.invoker();
-        if !self.is_authorized_updater(&env, &caller) {
-            return Err(Error::Unauthorized);
-        }
-
-        // Update metadata hash
-        let storage = env.storage();
-        storage.set(DataKey::MetadataHash(token_id), new_metadata_hash);
-
-        // Emit update event
-        env.events().publish((
-            Symbol::from_str("metadata_update"),
-            token_id,
-            new_metadata_hash,
-        ));
-
-        Ok(())
-    }
-
-    pub fn upgrade_level(&self, env: Env, token_id: u32, new_level: u32) -> Result<(), Error> {
-        // Verify caller is authorized
-        let caller = env.invoker();
-        if !self.is_authorized_upgrader(&env, &caller) {
-            return Err(Error::Unauthorized);
-        }
-
-        // Ensure level is valid (1-5)
-        if new_level < 1 || new_level > 5 {
-            return Err(Error::InvalidLevel);
-        }
-
-        // Get current level
-        let storage = env.storage();
-        let current_level = storage.get(DataKey::TokenLevel(token_id)).unwrap_or(1);
-
-        // Only allow level increases
-        if new_level <= current_level {
-            return Err(Error::InvalidLevelChange);
-        }
-
-        // Update level
-        storage.set(DataKey::TokenLevel(token_id), new_level);
-
-        // Emit upgrade event
-        env.events().publish((
-            Symbol::from_str("level_upgrade"),
-            token_id,
-            current_level,
-            new_level,
-        ));
-
-        Ok(())
-    }
-
-    pub fn authenticate_with_auth_controller(&self, env: Env, action: Action) -> Result<(), Error> {
-        // Get AuthController address
-        let auth_controller = self.get_auth_controller_address(&env);
-
-        // Create AuthController client
-        let auth_client = AuthControllerClient::new(&env, &auth_controller);
-
-        // Authenticate action
-        let result = auth_client.authenticate(env.invoker(), action);
-        if !result {
-            return Err(Error::Unauthorized);
-        }
-
-        Ok(())
-    }
-
-    pub fn get_token_level(&self, env: Env, token_id: u32) -> u32 {
-        let storage = env.storage();
-        storage.get(DataKey::TokenLevel(token_id)).unwrap_or(1)
-    }
-
-    pub fn verify_metadata(&self, env: Env, token_id: u32, metadata_hash: BytesN<32>) -> bool {
-        let storage = env.storage();
-        let stored_hash = storage.get(DataKey::MetadataHash(token_id));
-
-        if let Some(hash) = stored_hash {
-            return hash == metadata_hash;
-        }
-
-        false
-    }
-
-    // Permission management methods
-    fn is_authorized_minter(&self, env: &Env, address: &Address) -> bool {
-        let storage = env.storage();
-        storage.get(DataKey::AuthorizedMinter(*address)).unwrap_or(false)
-    }
-
-    fn is_authorized_updater(&self, env: &Env, address: &Address) -> bool {
-        let storage = env.storage();
-        storage.get(DataKey::AuthorizedUpdater(*address)).unwrap_or(false)
-    }
-
-    fn is_authorized_upgrader(&self, env: &Env, address: &Address) -> bool {
-        let storage = env.storage();
-        storage.get(DataKey::AuthorizedUpgrader(*address)).unwrap_or(false)
-    }
-
-    // Admin methods for managing permissions
-    pub fn add_authorized_minter(&self, env: Env, address: Address) -> Result<(), Error> {
-        // Verify caller is admin
-        self.require_admin(&env)?;
-
-        // Add minter permission
-        let storage = env.storage();
-        storage.set(DataKey::AuthorizedMinter(address), true);
-
-        Ok(())
-    }
-
-    // Other permission management methods...
+impl NonFungibleToken for KindfiNFT {
+    type ContractType = Base;
 }
+
+/// Default implementation of AccessControl trait
+#[default_impl]
+#[contractimpl]
+impl AccessControl for KindfiNFT {}
+```
+
+**Metadata Structure:**
+
+```rust
+use soroban_sdk::{contracttype, String, Vec};
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[contracttype]
+pub struct NFTMetadata {
+    pub name: String,
+    pub description: String,
+    pub image_uri: String,
+    pub external_url: String,
+    pub attributes: Vec<String>,
+}
+
+#[contracttype]
+pub enum TokenCounterKey {
+    Counter,
+}
+```
+
+**Minting Implementation:**
+
+```rust
+use soroban_sdk::{Env, Address};
+use crate::types::{TokenCounterKey, NFTMetadata};
+use crate::metadata;
+use stellar_non_fungible::Base;
+
+pub fn mint_with_metadata(e: &Env, _caller: Address, to: Address, metadata: &NFTMetadata) -> u32 {
+    // Increment counter for sequential token IDs
+    let token_id: u32 = e.storage().instance().get(&TokenCounterKey::Counter).unwrap_or(0);
+    e.storage().instance().set(&TokenCounterKey::Counter, &(token_id + 1));
+
+    // Mint using OpenZeppelin Base implementation
+    Base::mint(e, &to, token_id);
+
+    // Store custom metadata
+    metadata::set_metadata(e, token_id, metadata);
+
+    token_id
+}
+```
+
+**Key Features:**
+
+1. **OpenZeppelin Base Implementation**: Uses `stellar_non_fungible::Base` which provides standard NFT functionality including:
+   - `name()`, `symbol()`, `token_uri()` - Standard metadata queries
+   - `owner_of()`, `balance_of()` - Ownership queries
+   - `transfer()`, `transfer_from()` - Transfer operations
+   - `approve()`, `set_approval_for_all()` - Approval management
+
+2. **Role-Based Access Control**: Uses `stellar_access_control` with three roles:
+   - **minter**: Can mint new NFTs via `mint_with_metadata()`
+   - **burner**: Can burn NFTs via `burn()` or `burn_from()`
+   - **metadata_manager**: Can update NFT metadata via `update_metadata()`
+
+3. **Sequential Minting**: Uses a counter-based approach for sequential token IDs starting from 0
+
+4. **On-Chain Metadata Storage**: Custom metadata structure stored on-chain for each token, separate from the base URI
+
+5. **Default Implementation Pattern**: Uses `default_impl` macro to automatically implement standard traits (`NonFungibleToken`, `AccessControl`)
+
+**Contract Dependencies:**
+
+```toml
+[dependencies]
+soroban-sdk = { workspace = true }
+stellar-access-control = { workspace = true }
+stellar-access-control-macros = { workspace = true }
+stellar-default-impl-macro = { workspace = true }
+stellar-non-fungible = { workspace = true }
 ```
 
 This contract extends OpenZeppelin’s NFT standards while adding KindFi-specific functionality for our reputation system. It integrates with our AuthController for permission verification and implements the necessary logic for NFT evolution.
