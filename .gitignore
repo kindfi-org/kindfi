@@ -180,3 +180,6 @@ dist
 bun.lockb
 
 .swp
+
+# GitHub issue templates (temporary helper files)
+.github/ISSUES/
