@@ -8,7 +8,7 @@ import {
 	verifyDiditWebhookSignatureV2,
 } from '~/lib/services/didit'
 
-interface DiditWebhookEvent {
+interface DiditWebhookEvent extends Record<string, unknown> {
 	session_id: string
 	status:
 		| 'Not Started'

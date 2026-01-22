@@ -1,5 +1,7 @@
 // lib/services/didit.ts
 
+import * as crypto from 'crypto'
+
 const DIDIT_API_BASE_URL = 'https://verification.didit.me'
 
 interface CreateSessionRequest {
@@ -184,9 +186,6 @@ export function verifyDiditWebhookSignatureV2(
 	secretKey: string,
 ): boolean {
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
-		const crypto = require('crypto')
-
 		// Check timestamp freshness (within 5 minutes)
 		const currentTime = Math.floor(Date.now() / 1000)
 		const incomingTime = Number.parseInt(timestampHeader, 10)
@@ -224,9 +223,6 @@ export function verifyDiditWebhookSignatureSimple(
 	secretKey: string,
 ): boolean {
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
-		const crypto = require('crypto')
-
 		// Check timestamp freshness (within 5 minutes)
 		const currentTime = Math.floor(Date.now() / 1000)
 		const incomingTime = Number.parseInt(timestampHeader, 10)
@@ -263,8 +259,6 @@ export function verifyDiditWebhookSignature(
 	secret: string,
 ): boolean {
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
-		const crypto = require('crypto')
 		const expectedSignature = crypto
 			.createHmac('sha256', secret)
 			.update(payload)

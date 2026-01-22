@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Shield } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '~/components/base/button'
 import {
 	Dialog,
@@ -29,11 +29,19 @@ export function KYCRedirectModal({
 	countdownSeconds = 3,
 }: KYCRedirectModalProps) {
 	const [redirectCountdown, setRedirectCountdown] = useState(countdownSeconds)
+	const prevOpenRef = useRef(open)
 
-	// Reset countdown when modal opens
+	// Reset countdown when modal opens (only when transitioning from closed to open)
 	useEffect(() => {
-		if (open) {
-			setRedirectCountdown(countdownSeconds)
+		const wasClosed = !prevOpenRef.current
+		prevOpenRef.current = open
+
+		if (open && wasClosed) {
+			// Modal just opened, reset countdown in next tick to avoid synchronous setState
+			const timeoutId = setTimeout(() => {
+				setRedirectCountdown(countdownSeconds)
+			}, 0)
+			return () => clearTimeout(timeoutId)
 		}
 	}, [open, countdownSeconds])
 

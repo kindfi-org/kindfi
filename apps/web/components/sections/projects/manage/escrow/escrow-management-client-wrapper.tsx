@@ -23,8 +23,8 @@ export function EscrowManagementClientWrapper({
 			<div className="space-y-4 rounded-lg border p-6">
 				<h2 className="text-xl font-semibold">No Escrow Found</h2>
 				<p className="text-sm text-muted-foreground">
-					This project doesn't have an escrow contract yet. Please create one
-					from the settings page.
+					This project doesn&apos;t have an escrow contract yet. Please create
+					one from the settings page.
 				</p>
 			</div>
 		)
