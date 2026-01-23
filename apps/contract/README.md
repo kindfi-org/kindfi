@@ -146,6 +146,7 @@ All contracts are built using:
 
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   rustup target add wasm32-unknown-unknown
    ```
 
 2. **Install Stellar CLI**:
@@ -153,6 +154,9 @@ All contracts are built using:
    ```bash
    cargo install stellar-cli
    ```
+
+   **Note**: The Stellar CLI installation will ensure you have a compatible Rust version.
+   The SDK version (22.0.6) will determine the minimum Rust version required.
 
 3. **Setup Stellar Account**:
 
