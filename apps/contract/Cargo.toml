@@ -19,18 +19,11 @@ members = [
 ]
 
 [workspace.dependencies]
-soroban-sdk = "22.0.6"
-stellar-access-control = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-access-control-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-constants = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-default-impl-macro = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-non-fungible = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-ownable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-ownable-macro = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-pausable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-pausable-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-upgradeable = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
-stellar-upgradeable-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.3.0" }
+soroban-sdk = "23.4.0"
+stellar-access = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
+stellar-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
+stellar-tokens = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
+stellar-contract-utils = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
 
 
 [profile.release]
