@@ -8,7 +8,7 @@ mod mint;
 mod types;
 
 use soroban_sdk::{contract, contractimpl, panic_with_error, Address, Env, String, Symbol};
-use stellar_access_control::{
+use stellar_access::access_control::{
     accept_admin_transfer as storage_accept_admin_transfer, get_admin as storage_get_admin,
     get_role_admin as storage_get_role_admin, get_role_member as storage_get_role_member,
     get_role_member_count as storage_get_role_member_count, grant_role as storage_grant_role,
@@ -17,8 +17,8 @@ use stellar_access_control::{
     set_role_admin as storage_set_role_admin,
     transfer_admin_role as storage_transfer_admin_role, AccessControl,
 };
-use stellar_access_control_macros::{has_role, only_role};
-use stellar_non_fungible::{burnable::NonFungibleBurnable, Base, NonFungibleToken};
+use stellar_macros::{has_role, only_role};
+use stellar_tokens::non_fungible::{burnable::NonFungibleBurnable, Base, NonFungibleToken};
 
 use crate::errors::Error;
 use crate::events::{MetadataUpdatedEventData, METADATA, NFT, UPDATED};
@@ -220,10 +220,12 @@ impl NonFungibleToken for KindfiNFT {
         live_until_ledger: u32,
     ) {
         Self::ContractType::approve(e, &approver, &approved, token_id, live_until_ledger);
+        KindfiNFT::extend_instance_ttl(e);
     }
 
     fn approve_for_all(e: &Env, owner: Address, operator: Address, live_until_ledger: u32) {
         Self::ContractType::approve_for_all(e, &owner, &operator, live_until_ledger);
+        KindfiNFT::extend_instance_ttl(e);
     }
 
     fn get_approved(e: &Env, token_id: u32) -> Option<Address> {
@@ -304,18 +306,18 @@ impl AccessControl for KindfiNFT {
         storage_get_admin(e)
     }
 
-    fn grant_role(e: &Env, caller: Address, account: Address, role: Symbol) {
-        storage_grant_role(e, &caller, &account, &role);
+    fn grant_role(e: &Env, account: Address, role: Symbol, caller: Address) {
+        storage_grant_role(e, &account, &role, &caller);
         KindfiNFT::extend_instance_ttl(e);
     }
 
-    fn revoke_role(e: &Env, caller: Address, account: Address, role: Symbol) {
-        storage_revoke_role(e, &caller, &account, &role);
+    fn revoke_role(e: &Env, account: Address, role: Symbol, caller: Address) {
+        storage_revoke_role(e, &account, &role, &caller);
         KindfiNFT::extend_instance_ttl(e);
     }
 
-    fn renounce_role(e: &Env, caller: Address, role: Symbol) {
-        storage_renounce_role(e, &caller, &role);
+    fn renounce_role(e: &Env, role: Symbol, caller: Address) {
+        storage_renounce_role(e, &role, &caller);
         KindfiNFT::extend_instance_ttl(e);
     }
 

@@ -1,5 +1,5 @@
 use soroban_sdk::{panic_with_error, Address, Env};
-use stellar_non_fungible::Base;
+use stellar_tokens::non_fungible::Base;
 
 use crate::errors::Error;
 use crate::events::{MintedEventData, MINTED, NFT};

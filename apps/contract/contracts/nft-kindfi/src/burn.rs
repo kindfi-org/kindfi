@@ -1,5 +1,5 @@
 use soroban_sdk::{Address, Env};
-use stellar_non_fungible::Base;
+use stellar_tokens::non_fungible::Base;
 
 use crate::events::{BurnedEventData, BURNED, NFT};
 use crate::metadata;
