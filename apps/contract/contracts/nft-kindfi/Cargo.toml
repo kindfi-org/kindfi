@@ -1,10 +1,15 @@
 [package]
 name = "nft-kindfi"
-version = "0.6.0"
-edition = "2021"
+description = "KindFi NFT contract - A non-fungible token contract for the KindFi platform's reputation and incentivization system"
+version = "0.0.0"
+authors = ["Kindfi Org <contact@kindfi.org>"]
+license = "MIT"
+edition.workspace = true
+repository.workspace = true
+publish = false
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib"]
 doctest = false
 
 [dependencies]
@@ -15,6 +20,3 @@ stellar-tokens = { workspace = true }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
-
-[features]
-testutils = ["soroban-sdk/testutils"]
