@@ -2,13 +2,15 @@
 resolver = "2"
 
 members = [
-  # Auth contracts (implemented)
+  # Auth contracts
   "contracts/auth-contracts/account",
   "contracts/auth-contracts/account-factory",
   "contracts/auth-contracts/auth-controller",
-  # NFT contracts (implemented)
+
+  # NFT contracts
   "contracts/nft-kindfi",
-  # TODO: Implement these contracts
+
+  # TODO: Implement these contracts or delete them
   # "contracts/academy-graduation-nft",
   # "contracts/academy-verifier",
   # "contracts/academy-progress-tracker",
@@ -17,6 +19,14 @@ members = [
   # "contracts/mock_progress_tracker",
   # "contracts/reputation",
 ]
+
+[workspace.package]
+authors = ["Kindfi Org"]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/kindfi-org/kindfi.git"
+categories = ["no-std", "wasm"]
+version = "0.1.0"
 
 [workspace.dependencies]
 soroban-sdk = "23.4.0"
