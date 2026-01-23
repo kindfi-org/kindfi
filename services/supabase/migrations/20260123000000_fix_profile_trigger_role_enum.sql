@@ -1,6 +1,6 @@
--- Migration: Fix profile creation triggers conflict
--- Problem: Two triggers fire on auth.users INSERT causing conflicts
--- Solution: Consolidate into a single trigger that handles both cases
+-- Migration: Fix profile creation trigger role enum value and add pending/admin roles
+-- Problem: Trigger function uses 'kindler' but enum only accepts 'donor' | 'creator'
+-- Solution: Add 'pending' and 'admin' to enum, update function to use 'pending' as default
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -13,7 +13,21 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
--- Create a unified function that handles both profile and next_auth.users creation
+-- Add new enum values: 'pending' (for unselected users) and 'admin' (manually assigned)
+ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'pending';
+ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'admin';
+
+-- Update the column's DEFAULT value to 'pending' (was 'kindler' or 'donor')
+ALTER TABLE public.profiles ALTER COLUMN role SET DEFAULT 'pending';
+
+-- Drop old trigger function if it exists (it doesn't set role explicitly, relies on DEFAULT)
+DROP FUNCTION IF EXISTS public.create_profile_for_new_user() CASCADE;
+
+-- Ensure we're using the correct trigger (drop and recreate to be safe)
+DROP TRIGGER IF EXISTS "on_auth_user_created" ON "auth"."users";
+DROP TRIGGER IF EXISTS "after_auth_user_created" ON "auth"."users";
+
+-- Update the function to use 'pending' instead of 'kindler' or 'donor'
 CREATE OR REPLACE FUNCTION public.create_profile_and_sync_next_auth()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -64,20 +78,13 @@ EXCEPTION
 END;
 $$;
 
--- Drop the old conflicting triggers
-DROP TRIGGER IF EXISTS "on_auth_user_created" ON "auth"."users";
-DROP TRIGGER IF EXISTS "after_auth_user_created" ON "auth"."users";
+-- Grant necessary permissions
+GRANT EXECUTE ON FUNCTION public.create_profile_and_sync_next_auth() TO service_role, postgres, authenticated;
 
--- Create a single unified trigger
+-- Recreate the trigger to ensure it's using the updated function
 CREATE TRIGGER "on_auth_user_created"
   AFTER INSERT ON "auth"."users"
   FOR EACH ROW
   EXECUTE FUNCTION "public"."create_profile_and_sync_next_auth"();
-
--- Grant necessary permissions
-GRANT EXECUTE ON FUNCTION public.create_profile_and_sync_next_auth() TO service_role, postgres, authenticated;
-
--- Ensure next_auth schema exists
-CREATE SCHEMA IF NOT EXISTS next_auth;
 
 RESET ALL;

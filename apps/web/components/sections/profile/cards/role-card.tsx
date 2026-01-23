@@ -43,7 +43,7 @@ export function RoleCard({ userId, currentRole }: RoleCardProps) {
 
 			setSelectedRole(newRole)
 			toast.success(
-				`Role updated to ${newRole === 'kindler' ? 'Creator' : 'Donor'}`,
+				`Role updated to ${newRole === 'creator' ? 'Creator' : 'Donor'}`,
 			)
 			// Reload page to reflect changes
 			window.location.reload()
@@ -78,12 +78,12 @@ export function RoleCard({ userId, currentRole }: RoleCardProps) {
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="kindler">Creator</SelectItem>
-							<SelectItem value="kinder">Donor</SelectItem>
+							<SelectItem value="creator">Creator</SelectItem>
+							<SelectItem value="donor">Donor</SelectItem>
 						</SelectContent>
 					</Select>
 					<p className="text-xs text-muted-foreground">
-						{selectedRole === 'kindler'
+						{selectedRole === 'creator'
 							? 'Create and manage campaigns'
 							: 'Support projects and track your impact'}
 					</p>

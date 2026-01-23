@@ -66,53 +66,52 @@ export function AccountInfoCard({
 		<motion.div
 			initial={{ opacity: 0, x: 20 }}
 			animate={{ opacity: 1, x: 0 }}
-			whileHover={{ y: -2 }}
-			transition={{ type: 'spring', stiffness: 200 }}
+			transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+			className="h-full"
 		>
-			<Card className="border-0 shadow-xl bg-card hover:shadow-2xl transition-all duration-300 overflow-hidden relative group">
-				<div className="absolute top-0 left-0 w-40 h-40 bg-secondary/5 rounded-full -ml-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
+			<Card className="h-full border-0 overflow-hidden bg-white/90 backdrop-blur-sm rounded-xl shadow-lg transition-all duration-300">
+				{/* Top gradient bar */}
+				<div className="h-2 bg-gradient-to-r from-[#000124] to-[#000124]/70" />
 
-				<CardHeader className="relative z-10">
-					<div className="flex items-center justify-between">
-						<div>
-							<CardTitle className="text-foreground">
+				<CardHeader className="pb-5 pt-6 border-b border-gray-200">
+					<div className="flex items-start justify-between gap-4">
+						<div className="flex-1">
+							<CardTitle className="text-xl font-bold text-gray-800 mb-2">
 								Account Information
 							</CardTitle>
-							<CardDescription>
+							<CardDescription className="text-sm font-medium text-gray-600">
 								Manage your account settings and preferences
 							</CardDescription>
 						</div>
-						<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => setIsEditing(!isEditing)}
-								className="hover:bg-muted"
-							>
-								{isEditing ? (
-									<>Cancel</>
-								) : (
-									<>
-										<Pencil className="h-4 w-4 mr-2" />
-										Edit
-									</>
-								)}
-							</Button>
-						</motion.div>
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() => setIsEditing(!isEditing)}
+							className="hover:bg-gray-100 rounded-lg"
+						>
+							{isEditing ? (
+								<>Cancel</>
+							) : (
+								<>
+									<Pencil className="h-4 w-4 mr-2" />
+									Edit
+								</>
+							)}
+						</Button>
 					</div>
 				</CardHeader>
-				<CardContent className="space-y-4 relative z-10">
+				<CardContent className="space-y-5 pt-6">
 					<motion.div
 						className="space-y-2"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						transition={{ delay: 0.1 }}
 					>
-						<Label>Email</Label>
+						<Label className="text-sm font-medium">Email</Label>
 						<Input
 							value={userEmail}
 							readOnly
-							className="bg-muted/50 border-blue-200"
+							className="bg-muted/60 border-border/50 cursor-not-allowed"
 						/>
 						<p className="text-xs text-muted-foreground">
 							Email cannot be changed here
@@ -124,7 +123,7 @@ export function AccountInfoCard({
 						animate={{ opacity: 1 }}
 						transition={{ delay: 0.2 }}
 					>
-						<Label>Member Since</Label>
+						<Label className="text-sm font-medium">Member Since</Label>
 						<Input
 							value={new Date(createdAt).toLocaleDateString('en-US', {
 								month: 'long',
@@ -132,13 +131,15 @@ export function AccountInfoCard({
 								year: 'numeric',
 							})}
 							readOnly
-							className="bg-muted/50 border-blue-200"
+							className="bg-muted/60 border-border/50 cursor-not-allowed"
 						/>
 					</motion.div>
 					<form action={onUpdateSlug} className="space-y-2">
-						<Label htmlFor="slug">Profile Handle</Label>
-						<div className="flex gap-2">
-							<span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground text-sm font-medium border-border">
+						<Label htmlFor="slug" className="text-sm font-medium">
+							Profile Handle
+						</Label>
+						<div className="flex gap-0">
+							<span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted/80 text-muted-foreground text-sm font-medium border-border/50">
 								kindfi.io/profile/
 							</span>
 							<Input
@@ -147,7 +148,7 @@ export function AccountInfoCard({
 								defaultValue={slug}
 								placeholder="your-handle"
 								disabled={!isEditing}
-								className="rounded-l-none border-border transition-all duration-200 disabled:bg-muted/50"
+								className="rounded-l-none border-border/50 transition-all duration-200 disabled:bg-muted/60 disabled:cursor-not-allowed focus:border-[#000124]/50"
 								required
 							/>
 						</div>
@@ -162,7 +163,7 @@ export function AccountInfoCard({
 									<Button
 										type="submit"
 										disabled={isSaving}
-										className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
+										className="w-full bg-[#000124] hover:bg-[#000124]/90 text-white transition-all font-semibold shadow-md hover:shadow-lg"
 									>
 										{isSaving ? 'Saving...' : 'Save Handle'}
 									</Button>

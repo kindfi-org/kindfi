@@ -141,6 +141,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 				created_at: profileData.created_at,
 				profile: profileData,
 			}}
+			smartAccountAddress={
+				session.device?.address || session.user.device?.address || null
+			}
 			kycCompleted={kycCompleted}
 		/>
 	)

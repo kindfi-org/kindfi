@@ -66,56 +66,59 @@ export function PersonalInfoCard({
 		<motion.div
 			initial={{ opacity: 0, x: -20 }}
 			animate={{ opacity: 1, x: 0 }}
-			whileHover={{ y: -2 }}
-			transition={{ type: 'spring', stiffness: 200 }}
+			transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+			className="h-full"
 		>
-			<Card className="border-0 shadow-xl bg-card hover:shadow-2xl transition-all duration-300 overflow-hidden relative group">
-				<div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
+			<Card className="h-full border-0 overflow-hidden bg-white/90 backdrop-blur-sm rounded-xl shadow-lg transition-all duration-300">
+				{/* Top gradient bar */}
+				<div className="h-2 bg-gradient-to-r from-[#000124] to-[#000124]/70" />
 
-				<CardHeader className="relative z-10">
-					<div className="flex items-center justify-between">
-						<div>
-							<CardTitle className="text-foreground">
+				<CardHeader className="pb-5 pt-6 border-b border-gray-200">
+					<div className="flex items-start justify-between gap-4">
+						<div className="flex-1">
+							<CardTitle className="text-xl font-bold text-gray-800 mb-2">
 								Personal Information
 							</CardTitle>
-							<CardDescription>
+							<CardDescription className="text-sm font-medium text-gray-600">
 								Update your profile details and public information
 							</CardDescription>
 						</div>
-						<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => setIsEditing(!isEditing)}
-								className="hover:bg-muted"
-							>
-								{isEditing ? (
-									<>Cancel</>
-								) : (
-									<>
-										<Pencil className="h-4 w-4 mr-2" />
-										Edit
-									</>
-								)}
-							</Button>
-						</motion.div>
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() => setIsEditing(!isEditing)}
+							className="hover:bg-gray-100 rounded-lg"
+						>
+							{isEditing ? (
+								<>Cancel</>
+							) : (
+								<>
+									<Pencil className="h-4 w-4 mr-2" />
+									Edit
+								</>
+							)}
+						</Button>
 					</div>
 				</CardHeader>
-				<CardContent className="relative z-10">
-					<form action={onUpdateProfile} className="space-y-4">
+				<CardContent className="space-y-5 pt-6">
+					<form action={onUpdateProfile} className="space-y-5">
 						<div className="space-y-2">
-							<Label htmlFor="display_name">Display Name</Label>
+							<Label htmlFor="display_name" className="text-sm font-medium">
+								Display Name
+							</Label>
 							<Input
 								id="display_name"
 								name="display_name"
 								defaultValue={displayName}
 								disabled={!isEditing}
 								required
-								className="transition-all duration-200 disabled:bg-muted/50"
+								className="transition-all duration-200 disabled:bg-muted/60 disabled:cursor-not-allowed border-border/50 focus:border-[#000124]/50"
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="bio">Bio</Label>
+							<Label htmlFor="bio" className="text-sm font-medium">
+								Bio
+							</Label>
 							<Textarea
 								id="bio"
 								name="bio"
@@ -123,11 +126,13 @@ export function PersonalInfoCard({
 								disabled={!isEditing}
 								rows={4}
 								placeholder="Tell us about yourself..."
-								className="transition-all duration-200 disabled:bg-muted/50 resize-none"
+								className="transition-all duration-200 disabled:bg-muted/60 disabled:cursor-not-allowed resize-none border-border/50 focus:border-[#000124]/50"
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="image_url">Avatar URL</Label>
+							<Label htmlFor="image_url" className="text-sm font-medium">
+								Avatar URL
+							</Label>
 							<Input
 								id="image_url"
 								name="image_url"
@@ -135,7 +140,7 @@ export function PersonalInfoCard({
 								defaultValue={imageUrl}
 								disabled={!isEditing}
 								placeholder="https://example.com/avatar.jpg"
-								className="transition-all duration-200 disabled:bg-muted/50"
+								className="transition-all duration-200 disabled:bg-muted/60 disabled:cursor-not-allowed border-border/50 focus:border-[#000124]/50"
 							/>
 						</div>
 						<AnimatePresence>
@@ -149,7 +154,7 @@ export function PersonalInfoCard({
 									<Button
 										type="submit"
 										disabled={isSaving}
-										className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
+										className="w-full bg-[#000124] hover:bg-[#000124]/90 text-white transition-all font-semibold shadow-md hover:shadow-lg"
 									>
 										{isSaving ? 'Saving...' : 'Save Changes'}
 									</Button>
