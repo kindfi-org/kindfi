@@ -136,6 +136,9 @@ export const useSmartAccountAuth = (identifier: string) => {
 			setAuthSuccess(message)
 			toast.success(message)
 
+			// Mark this as a new session so role selection modal can be shown
+			sessionStorage.setItem('kindfi_new_session', 'true')
+
 			// Redirect to profile page after a short delay to allow session to update
 			setTimeout(() => {
 				router.push('/profile')

@@ -1,5 +1,1 @@
-export * from './kyc/kyc-1'
-export { default as IDDocumentUpload } from './kyc/kyc-2/kyc-2-upload'
-export { ProofOffaceVerification } from './kyc/kyc-3/kyc-3'
-export { ProofOfAddressUpload } from './kyc/kyc-4/kyc-4-upload'
-export { FinalReview } from './kyc/kyc-5/final-review'
+// KYC components removed - using Didit integration instead

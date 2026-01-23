@@ -157,7 +157,7 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 				<motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
 					<Button
 						asChild
-						className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
+						className="bg-[#000124] hover:bg-[#000124]/90 text-white shadow-lg"
 					>
 						<Link href="/create-project">
 							<Plus className="h-4 w-4 mr-2" />
@@ -176,7 +176,7 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 			>
 				<motion.div variants={cardVariants}>
 					<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-xl transition-all duration-300 relative group">
-						<div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
+						<div className="absolute top-0 right-0 w-24 h-24 bg-[#000124]/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
 						<CardHeader className="pb-3 relative z-10">
 							<CardTitle className="text-sm font-medium text-muted-foreground">
 								Total Campaigns
@@ -196,7 +196,7 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 				</motion.div>
 				<motion.div variants={cardVariants}>
 					<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-xl transition-all duration-300 relative group">
-						<div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
+						<div className="absolute top-0 right-0 w-24 h-24 bg-[#000124]/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
 						<CardHeader className="pb-3 relative z-10">
 							<CardTitle className="text-sm font-medium text-muted-foreground">
 								Active Campaigns
@@ -207,7 +207,7 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 								initial={{ scale: 0 }}
 								animate={{ scale: 1 }}
 								transition={{ delay: 0.3, type: 'spring' }}
-								className="text-4xl font-extrabold text-primary"
+								className="text-4xl font-extrabold text-[#000124]"
 							>
 								{activeProjects.length}
 							</motion.div>
@@ -216,7 +216,7 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 				</motion.div>
 				<motion.div variants={cardVariants}>
 					<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-xl transition-all duration-300 relative group">
-						<div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
+						<div className="absolute top-0 right-0 w-24 h-24 bg-[#000124]/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
 						<CardHeader className="pb-3 relative z-10">
 							<CardTitle className="text-sm font-medium text-muted-foreground">
 								Total Raised
@@ -274,7 +274,7 @@ export function CreatorProfile({ userId, displayName }: CreatorProfileProps) {
 								animate={{ rotate: [0, 360] }}
 								transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
 							>
-								<TrendingUp className="h-5 w-5 text-primary" />
+								<TrendingUp className="h-5 w-5 text-[#000124]" />
 							</motion.div>
 							Active Campaigns
 						</h3>
@@ -359,9 +359,9 @@ function ProjectCard({
 	const percentage = project.percentageComplete ?? 0
 	const displayRaised = project.raised ?? 0
 	const statusColors: Record<string, string> = {
-		active: 'bg-primary text-primary-foreground border-0',
+		active: 'bg-[#000124] text-white border-0',
 		review: 'bg-secondary text-secondary-foreground border-0',
-		funded: 'bg-primary/80 text-primary-foreground border-0',
+		funded: 'bg-[#000124]/80 text-white border-0',
 		draft: 'bg-muted text-muted-foreground border-border',
 		paused: 'bg-destructive text-destructive-foreground border-0',
 	}
@@ -373,7 +373,7 @@ function ProjectCard({
 		>
 			<Card className="border-0 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col bg-card relative group">
 				{/* Decorative overlay */}
-				<div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-all duration-300 pointer-events-none" />
+				<div className="absolute inset-0 bg-[#000124]/0 group-hover:bg-[#000124]/5 transition-all duration-300 pointer-events-none" />
 
 				{project.image && (
 					<motion.div
@@ -412,14 +412,14 @@ function ProjectCard({
 					<div className="space-y-2">
 						<div className="flex justify-between text-sm">
 							<span className="text-muted-foreground font-medium">Raised</span>
-							<span className="font-bold text-primary">
+							<span className="font-bold text-[#000124]">
 								${Number(displayRaised).toLocaleString()} / $
 								{Number(project.goal).toLocaleString()}
 							</span>
 						</div>
 						<div className="relative h-3 bg-muted rounded-full overflow-hidden">
 							<motion.div
-								className="h-full bg-primary rounded-full"
+								className="h-full bg-[#000124] rounded-full"
 								initial={{ width: 0 }}
 								animate={{ width: `${percentage}%` }}
 								transition={{ duration: 1, ease: 'easeOut' }}

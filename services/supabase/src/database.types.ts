@@ -7,179 +7,10 @@ export type Json =
 	| Json[]
 
 export type Database = {
-	graphql_public: {
-		Tables: {
-			[_ in never]: never
-		}
-		Views: {
-			[_ in never]: never
-		}
-		Functions: {
-			graphql: {
-				Args: {
-					extensions?: Json
-					operationName?: string
-					query?: string
-					variables?: Json
-				}
-				Returns: Json
-			}
-		}
-		Enums: {
-			[_ in never]: never
-		}
-		CompositeTypes: {
-			[_ in never]: never
-		}
-	}
-	next_auth: {
-		Tables: {
-			accounts: {
-				Row: {
-					access_token: string | null
-					expires_at: number | null
-					id: string
-					id_token: string | null
-					oauth_token: string | null
-					oauth_token_secret: string | null
-					provider: string
-					provider_account_id: string
-					refresh_token: string | null
-					scope: string | null
-					session_state: string | null
-					token_type: string | null
-					type: string
-					user_id: string | null
-				}
-				Insert: {
-					access_token?: string | null
-					expires_at?: number | null
-					id?: string
-					id_token?: string | null
-					oauth_token?: string | null
-					oauth_token_secret?: string | null
-					provider: string
-					provider_account_id: string
-					refresh_token?: string | null
-					scope?: string | null
-					session_state?: string | null
-					token_type?: string | null
-					type: string
-					user_id?: string | null
-				}
-				Update: {
-					access_token?: string | null
-					expires_at?: number | null
-					id?: string
-					id_token?: string | null
-					oauth_token?: string | null
-					oauth_token_secret?: string | null
-					provider?: string
-					provider_account_id?: string
-					refresh_token?: string | null
-					scope?: string | null
-					session_state?: string | null
-					token_type?: string | null
-					type?: string
-					user_id?: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'accounts_user_id_fkey'
-						columns: ['user_id']
-						isOneToOne: false
-						referencedRelation: 'users'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			sessions: {
-				Row: {
-					expires: string
-					id: string
-					session_token: string
-					user_id: string | null
-				}
-				Insert: {
-					expires: string
-					id?: string
-					session_token: string
-					user_id?: string | null
-				}
-				Update: {
-					expires?: string
-					id?: string
-					session_token?: string
-					user_id?: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'sessions_user_id_fkey'
-						columns: ['user_id']
-						isOneToOne: false
-						referencedRelation: 'users'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			users: {
-				Row: {
-					email: string | null
-					email_verified: string | null
-					emailVerified: string | null
-					id: string
-					image: string | null
-					name: string | null
-				}
-				Insert: {
-					email?: string | null
-					email_verified?: string | null
-					emailVerified?: string | null
-					id?: string
-					image?: string | null
-					name?: string | null
-				}
-				Update: {
-					email?: string | null
-					email_verified?: string | null
-					emailVerified?: string | null
-					id?: string
-					image?: string | null
-					name?: string | null
-				}
-				Relationships: []
-			}
-			verification_tokens: {
-				Row: {
-					expires: string
-					identifier: string | null
-					token: string
-				}
-				Insert: {
-					expires: string
-					identifier?: string | null
-					token: string
-				}
-				Update: {
-					expires?: string
-					identifier?: string | null
-					token?: string
-				}
-				Relationships: []
-			}
-		}
-		Views: {
-			[_ in never]: never
-		}
-		Functions: {
-			uid: { Args: never; Returns: string }
-		}
-		Enums: {
-			[_ in never]: never
-		}
-		CompositeTypes: {
-			[_ in never]: never
-		}
+	// Allows to automatically instantiate createClient with right options
+	// instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+	__InternalSupabase: {
+		PostgrestVersion: '14.1'
 	}
 	public: {
 		Tables: {
@@ -387,7 +218,6 @@ export type Database = {
 					created_at: string
 					credential_id: string
 					credential_type: Database['public']['Enums']['credential_type']
-					device_id: string | null
 					device_name: string | null
 					device_type: Database['public']['Enums']['device_type']
 					id: string
@@ -409,7 +239,6 @@ export type Database = {
 					created_at?: string
 					credential_id: string
 					credential_type?: Database['public']['Enums']['credential_type']
-					device_id?: string | null
 					device_name?: string | null
 					device_type?: Database['public']['Enums']['device_type']
 					id?: string
@@ -431,7 +260,6 @@ export type Database = {
 					created_at?: string
 					credential_id?: string
 					credential_type?: Database['public']['Enums']['credential_type']
-					device_id?: string | null
 					device_name?: string | null
 					device_type?: Database['public']['Enums']['device_type']
 					id?: string
@@ -1264,7 +1092,10 @@ export type Database = {
 				Args: { project_uuid: string; user_uuid: string }
 				Returns: boolean
 			}
-			remove_kyc_admin: { Args: { target_user_id: string }; Returns: undefined }
+			remove_kyc_admin: {
+				Args: { target_user_id: string }
+				Returns: undefined
+			}
 			unaccent: { Args: { '': string }; Returns: string }
 		}
 		Enums: {
@@ -1305,7 +1136,7 @@ export type Database = {
 				| 'paused'
 				| 'funded'
 				| 'rejected'
-			user_role: 'kinder' | 'kindler'
+			user_role: 'donor' | 'creator' | 'pending' | 'admin'
 		}
 		CompositeTypes: {
 			[_ in never]: never
@@ -1431,12 +1262,6 @@ export type CompositeTypes<
 		: never
 
 export const Constants = {
-	graphql_public: {
-		Enums: {},
-	},
-	next_auth: {
-		Enums: {},
-	},
 	public: {
 		Enums: {
 			backup_state: ['not_backed_up', 'backed_up'],
@@ -1480,7 +1305,7 @@ export const Constants = {
 				'funded',
 				'rejected',
 			],
-			user_role: ['kinder', 'kindler'],
+			user_role: ['donor', 'creator', 'pending', 'admin'],
 		},
 	},
 } as const
