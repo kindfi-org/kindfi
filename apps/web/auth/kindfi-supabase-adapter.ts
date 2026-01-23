@@ -80,7 +80,7 @@ export function KindfiSupabaseAdapter(): Adapter {
 					email: createdUser.email,
 					display_name: createdUser.name || null,
 					image_url: createdUser.image || null,
-					role: 'kinder', // Default role
+					role: 'pending', // Default role: unselected until user chooses donor or creator
 					created_at: new Date().toISOString(),
 					updated_at: new Date().toISOString(),
 				})

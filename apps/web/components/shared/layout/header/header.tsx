@@ -1,18 +1,13 @@
 'use client'
 
-import {
-	ExternalLink,
-	LogOut,
-	Menu,
-	Settings,
-	User as UserIcon,
-} from 'lucide-react'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
+import { ExternalLink, LogOut, Menu, User as UserIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { User } from 'next-auth'
+import { signOut } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { signOutAction } from '~/app/actions/auth'
 import { Avatar, AvatarFallback } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import {
@@ -148,34 +143,25 @@ const UserMenu = ({ user }: { user: User }) => {
 		try {
 			setIsSigningOut(true)
 
-			// Disconnect wallet/passkey first
 			try {
 				disconnect()
 			} catch (error) {
 				console.error('Error disconnecting wallet:', error)
-				// Continue with sign out even if wallet disconnect fails
 			}
 
-			// Then sign out from Supabase
-			// Note: signOutAction may throw a NEXT_REDIRECT error, which is expected
-			// and should be allowed to propagate so Next.js can handle the redirect
-			await signOutAction()
+			try {
+				const supabase = createSupabaseBrowserClient()
+				await supabase.auth.signOut()
+			} catch (error) {
+				console.error('Error signing out from Supabase:', error)
+			}
+
+			await signOut({
+				callbackUrl: '/sign-in?success=Successfully signed out',
+			})
 		} catch (error) {
-			// Check if this is a Next.js redirect error (which is expected)
-			if (
-				error &&
-				typeof error === 'object' &&
-				'digest' in error &&
-				(error.digest as string | undefined)?.startsWith('NEXT_REDIRECT')
-			) {
-				// This is a redirect, let it propagate
-				throw error
-			}
-
-			// Handle actual errors
 			console.error('Error signing out:', error)
-			toast.error(t('auth.signOutError') || 'Error signing out')
-			// Redirect to home even on error
+			toast.error(t('auth.signOutError'))
 			router.push('/')
 			setIsSigningOut(false)
 		}
@@ -230,9 +216,7 @@ const UserMenu = ({ user }: { user: User }) => {
 						className="flex w-full items-center cursor-pointer"
 					>
 						<LogOut className="mr-2 h-4 w-4" />
-						{isSigningOut
-							? t('auth.signingOut') || 'Signing out...'
-							: t('nav.closeSession')}
+						{isSigningOut ? t('auth.signingOut') : t('nav.closeSession')}
 					</button>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
@@ -291,34 +275,25 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 		try {
 			setIsSigningOut(true)
 
-			// Disconnect wallet/passkey first
 			try {
 				disconnect()
 			} catch (error) {
 				console.error('Error disconnecting wallet:', error)
-				// Continue with sign out even if wallet disconnect fails
 			}
 
-			// Then sign out from Supabase
-			// Note: signOutAction may throw a NEXT_REDIRECT error, which is expected
-			// and should be allowed to propagate so Next.js can handle the redirect
-			await signOutAction()
+			try {
+				const supabase = createSupabaseBrowserClient()
+				await supabase.auth.signOut()
+			} catch (error) {
+				console.error('Error signing out from Supabase:', error)
+			}
+
+			await signOut({
+				callbackUrl: '/sign-in?success=Successfully signed out',
+			})
 		} catch (error) {
-			// Check if this is a Next.js redirect error (which is expected)
-			if (
-				error &&
-				typeof error === 'object' &&
-				'digest' in error &&
-				(error.digest as string | undefined)?.startsWith('NEXT_REDIRECT')
-			) {
-				// This is a redirect, let it propagate
-				throw error
-			}
-
-			// Handle actual errors
 			console.error('Error signing out:', error)
-			toast.error(t('auth.signOutError') || 'Error signing out')
-			// Redirect to home even on error
+			toast.error(t('auth.signOutError'))
 			router.push('/')
 			setIsSigningOut(false)
 		}
@@ -355,9 +330,7 @@ const MobileUserMenu = ({ user }: { user: User }) => {
 					disabled={isSigningOut}
 				>
 					<LogOut className="mr-2 h-4 w-4" />
-					{isSigningOut
-						? t('auth.signingOut') || 'Signing out...'
-						: t('nav.signOut')}
+					{isSigningOut ? t('auth.signingOut') : t('nav.signOut')}
 				</Button>
 			</div>
 		</div>

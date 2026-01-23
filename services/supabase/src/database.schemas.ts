@@ -487,8 +487,10 @@ export const notificationsUpdateSchema = z.object({
 })
 
 export const userRoleSchema = z.union([
-	z.literal('kinder'),
-	z.literal('kindler'),
+	z.literal('donor'),
+	z.literal('creator'),
+	z.literal('pending'),
+	z.literal('admin'),
 ])
 
 export const profilesInsertSchema = z.object({

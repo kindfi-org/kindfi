@@ -17,6 +17,7 @@
 		"db:push": "supabase db push --local",
 		"gen": "bun run types && bun run schemas",
 		"gen:remote": "bun run types:remote && bun run schemas",
+		"gen:remote:script": "./generate-types.sh",
 		"migrate": "supabase migration up",
 		"reset": "supabase db reset",
 		"schemas": "supabase-to-zod --input src/database.types.ts --output src/database.schemas.ts",
@@ -24,7 +25,7 @@
 		"status": "supabase status",
 		"stop": "supabase stop",
 		"types": "supabase gen types typescript --local > src/database.types.ts",
-		"types:remote": "supabase gen types typescript --project-id ${PROJECT_ID} > src/database.types.ts"
+		"types:remote": "supabase gen types typescript --project-id ${PROJECT_ID:-${SUPABASE_PROJECT_ID}} > src/database.types.ts"
 	},
 	"type": "module",
 	"types": "./src/index.ts",
