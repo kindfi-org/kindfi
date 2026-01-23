@@ -101,7 +101,7 @@ export function VerifyOTPComponent() {
 							id: data.user.id,
 							next_auth_user_id: data.user.id,
 							display_name: (data.user.email || '').split('@')[0] || null,
-							role: 'kinder',
+							role: 'pending',
 							bio: null,
 							image_url: null,
 						})

@@ -47,10 +47,34 @@ This will start the Supabase local development environment, including the databa
 
 Generate the necessary types and schemas for the Supabase service:
 
+**For Remote Supabase (Production/Staging):**
+
 ```sh
-bun gen:remote # generates what it is in the linked (remote) database
+# Option 1: Using the helper script (recommended)
+./generate-types.sh <YOUR_PROJECT_ID>
+
+# Option 2: Using npm script with PROJECT_ID env variable
+PROJECT_ID=<YOUR_PROJECT_ID> bun run gen:remote
+
+# Option 3: Direct command
+supabase gen types typescript --project-id <YOUR_PROJECT_ID> > src/database.types.ts
+bun run schemas
+```
+
+**To find your PROJECT_ID:**
+
+1. Go to https://supabase.com/dashboard
+2. Select your project
+3. Go to Settings > General
+4. Copy the "Reference ID" (this is your PROJECT_ID)
+
+**For Local Supabase:**
+
+```sh
 bun gen # generates what it is in local database
 ```
+
+**Important:** After generating types from remote, commit the `src/database.types.ts` file to your repository so Vercel builds have access to the types.
 
 3. **Environment Variables**
 

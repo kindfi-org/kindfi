@@ -83,6 +83,8 @@ export function PasskeyRegistrationComponent() {
 				email: userEmail,
 				address: smartAccountAddress || '',
 			})
+			// Mark this as a new session so role selection modal can be shown
+			sessionStorage.setItem('kindfi_new_session', 'true')
 			router.push('/profile')
 		} catch (e) {
 			console.error('Finalize passkey registration error', e)
