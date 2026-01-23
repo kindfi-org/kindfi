@@ -1,0 +1,20 @@
+[package]
+name = "nft-kindfi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+stellar-access-control = { workspace = true }
+stellar-access-control-macros = { workspace = true }
+stellar-non-fungible = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+
+[features]
+testutils = ["soroban-sdk/testutils"]
