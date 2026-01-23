@@ -78,6 +78,7 @@ impl KindfiNFT {
     /// * `Error::AlreadyInitialized` - If the contract has already been initialized
     pub fn __constructor(e: &Env, admin: Address, name: String, symbol: String, base_uri: String) {
         // Check if already initialized by checking if admin is set
+        admin.require_auth();
         if storage_get_admin(e).is_some() {
             panic_with_error!(e, Error::AlreadyInitialized);
         }
