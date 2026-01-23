@@ -20,6 +20,15 @@ pub struct BurnedEventData {
     pub from: Address,
 }
 
+/// Event data emitted when NFT metadata is set.
+#[contractevent]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MetadataSetEventData {
+    #[topic]
+    pub token_id: u32,
+    pub metadata: NFTMetadata,
+}
+
 /// Event data emitted when NFT metadata is updated.
 #[contractevent]
 #[derive(Clone, Debug, Eq, PartialEq)]
