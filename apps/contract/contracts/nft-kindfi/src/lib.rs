@@ -21,7 +21,7 @@ use stellar_macros::{has_role, only_role};
 use stellar_tokens::non_fungible::{burnable::NonFungibleBurnable, Base, NonFungibleToken};
 
 use crate::errors::Error;
-use crate::events::{MetadataUpdatedEventData, METADATA, NFT, UPDATED};
+use crate::events::{MetadataUpdatedEventData};
 use crate::types::NFTMetadata;
 
 // ============================================================================
@@ -140,13 +140,10 @@ impl KindfiNFT {
         metadata::set_metadata(e, token_id, &nft_metadata);
 
         // Emit metadata updated event
-        e.events().publish(
-            (NFT, METADATA, UPDATED),
-            MetadataUpdatedEventData {
-                token_id,
-                metadata: nft_metadata,
-            },
-        );
+        MetadataUpdatedEventData {
+            token_id,
+            metadata: nft_metadata,
+        }.publish(e);
 
         Self::extend_instance_ttl(e);
     }

@@ -1,7 +1,7 @@
 use soroban_sdk::{Address, Env};
 use stellar_tokens::non_fungible::Base;
 
-use crate::events::{BurnedEventData, BURNED, NFT};
+use crate::events::{BurnedEventData};
 use crate::metadata;
 
 /// Burn an NFT owned by the caller.
@@ -15,13 +15,10 @@ pub fn burn(e: &Env, from: &Address, token_id: u32) {
     metadata::remove_metadata(e, token_id);
 
     // Emit burned event
-    e.events().publish(
-        (NFT, BURNED),
-        BurnedEventData {
-            token_id,
-            from: from.clone(),
-        },
-    );
+    BurnedEventData {
+        token_id,
+        from: from.clone(),
+    }.publish(e);
 }
 
 /// Burn an NFT from another address (requires approval).
@@ -35,11 +32,8 @@ pub fn burn_from(e: &Env, spender: &Address, from: &Address, token_id: u32) {
     metadata::remove_metadata(e, token_id);
 
     // Emit burned event
-    e.events().publish(
-        (NFT, BURNED),
-        BurnedEventData {
-            token_id,
-            from: from.clone(),
-        },
-    );
+    BurnedEventData {
+        token_id,
+        from: from.clone(),
+    }.publish(e);
 }

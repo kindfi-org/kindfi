@@ -2,7 +2,7 @@ use soroban_sdk::{panic_with_error, Address, Env};
 use stellar_tokens::non_fungible::Base;
 
 use crate::errors::Error;
-use crate::events::{MintedEventData, MINTED, NFT};
+use crate::events::{MintedEventData};
 use crate::metadata;
 use crate::types::{NFTMetadata, StorageKey};
 
@@ -40,14 +40,11 @@ pub fn mint_with_metadata(e: &Env, to: &Address, nft_metadata: &NFTMetadata) -> 
     metadata::set_metadata(e, token_id, nft_metadata);
 
     // Emit minted event with metadata
-    e.events().publish(
-        (NFT, MINTED),
-        MintedEventData {
-            token_id,
-            to: to.clone(),
-            metadata: nft_metadata.clone(),
-        },
-    );
+    MintedEventData {
+        token_id,
+        to: to.clone(),
+        metadata: nft_metadata.clone(),
+    }.publish(e);
 
     token_id
 }
