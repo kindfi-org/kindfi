@@ -883,7 +883,7 @@ checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 
 [[package]]
 name = "nft-kindfi"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "soroban-sdk",
  "stellar-access",
@@ -1114,6 +1114,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.114",
+]
+
+[[package]]
+name = "reputation"
+version = "0.0.0"
+dependencies = [
+ "soroban-sdk",
+ "stellar-access",
+ "stellar-macros",
 ]
 
 [[package]]
