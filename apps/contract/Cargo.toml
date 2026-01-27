@@ -7,8 +7,11 @@ members = [
   "contracts/auth-contracts/account-factory",
   "contracts/auth-contracts/auth-controller",
 
-  # NFT contracts
+  # NFT contract
   "contracts/nft-kindfi",
+
+  # Reputation contract
+  "contracts/reputation",
 
   # TODO: Implement these contracts or delete them
   # "contracts/academy-graduation-nft",
@@ -17,7 +20,6 @@ members = [
   # "contracts/academy-badge-tracker",
   # "contracts/mock_badge_tracker",
   # "contracts/mock_progress_tracker",
-  # "contracts/reputation",
 ]
 
 [workspace.package]
