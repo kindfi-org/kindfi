@@ -159,18 +159,19 @@ export function ProfileDashboard({
 									"KYC verification is under review. We will notify you once it's complete.",
 								)
 							}
+							// Clean URL params only after successful API update
+							window.history.replaceState({}, '', '/profile')
 							// Reload page to show updated status (server already updated database)
 							window.location.reload()
 						} else {
-							console.error('Failed to update KYC status via API')
+							toast.error(
+								'Failed to update KYC status. Please refresh to retry.',
+							)
 						}
 					})
-					.catch((error) => {
-						console.error('Failed to update KYC status:', error)
+					.catch(() => {
+						toast.error('Failed to update KYC status. Please refresh to retry.')
 					})
-
-				// Remove query params from URL immediately
-				window.history.replaceState({}, '', '/profile')
 			} else {
 				toast.info('KYC verification completed! Checking your status...')
 			}
