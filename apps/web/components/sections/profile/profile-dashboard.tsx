@@ -100,6 +100,8 @@ export function ProfileDashboard({
 	// Show success message if user just completed KYC and trigger status refresh
 	useEffect(() => {
 		if (kycCompleted) {
+			const kycUpdateErrorMessage =
+				'Failed to update KYC status. Please refresh to retry.'
 			// Check URL params for status
 			const urlParams = new URLSearchParams(window.location.search)
 			const status = urlParams.get('status')
@@ -164,13 +166,11 @@ export function ProfileDashboard({
 							// Reload page to show updated status (server already updated database)
 							window.location.reload()
 						} else {
-							toast.error(
-								'Failed to update KYC status. Please refresh to retry.',
-							)
+							toast.error(kycUpdateErrorMessage)
 						}
 					})
 					.catch(() => {
-						toast.error('Failed to update KYC status. Please refresh to retry.')
+						toast.error(kycUpdateErrorMessage)
 					})
 			} else {
 				toast.info('KYC verification completed! Checking your status...')
