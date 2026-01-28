@@ -7,7 +7,7 @@ use soroban_sdk::{
     Address, Env, String,
 };
 
-use crate::types::NFTMetadata;
+use crate::types::{NFTAttribute, NFTMetadata};
 use crate::{KindfiNFT, KindfiNFTClient};
 
 /// Helper to create a test environment with an initialized contract.
@@ -45,8 +45,18 @@ impl TestEnv {
             external_url: String::from_str(&self.env, "https://kindfi.org"),
             attributes: soroban_sdk::vec![
                 &self.env,
-                String::from_str(&self.env, "level:bronze"),
-                String::from_str(&self.env, "badge:early_supporter"),
+                NFTAttribute {
+                    trait_type: String::from_str(&self.env, "level"),
+                    value: String::from_str(&self.env, "bronze"),
+                    display_type: None,
+                    max_value: None,
+                },
+                NFTAttribute {
+                    trait_type: String::from_str(&self.env, "badge"),
+                    value: String::from_str(&self.env, "early_supporter"),
+                    display_type: Some(String::from_str(&self.env, "string")),
+                    max_value: None,
+                },
             ],
         }
     }
@@ -205,8 +215,18 @@ fn test_update_metadata() {
         external_url: String::from_str(&test.env, "https://kindfi.org/updated"),
         attributes: soroban_sdk::vec![
             &test.env,
-            String::from_str(&test.env, "level:gold"),
-            String::from_str(&test.env, "badge:veteran"),
+            NFTAttribute {
+                trait_type: String::from_str(&test.env, "level"),
+                value: String::from_str(&test.env, "gold"),
+                display_type: None,
+                max_value: Some(String::from_str(&test.env, "5")),
+            },
+            NFTAttribute {
+                trait_type: String::from_str(&test.env, "badge"),
+                value: String::from_str(&test.env, "veteran"),
+                display_type: Some(String::from_str(&test.env, "string")),
+                max_value: None,
+            },
         ],
     };
 
