@@ -14,8 +14,19 @@ use soroban_sdk::{contracttype, Address, ConversionError, Env, IntoVal, InvokeEr
 use crate::types::Level;
 
 // ============================================================================
-// NFT Metadata Type (mirrors nft-kindfi NFTMetadata)
+// NFT Metadata Types (mirrors nft-kindfi types, SEP-0050 compliant)
 // ============================================================================
+
+/// NFT attribute following SEP-0050 JSON schema.
+/// Must match the nft-kindfi NFTAttribute structure exactly.
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NFTAttribute {
+    pub trait_type: String,
+    pub value: String,
+    pub display_type: Option<String>,
+    pub max_value: Option<String>,
+}
 
 /// NFT Metadata structure matching the nft-kindfi contract.
 /// Used for cross-contract calls to update NFT metadata.
@@ -26,48 +37,57 @@ pub struct NFTMetadata {
     pub description: String,
     pub image_uri: String,
     pub external_url: String,
-    pub attributes: Vec<String>,
+    pub attributes: Vec<NFTAttribute>,
 }
 
 // ============================================================================
 // Level Attribute Helpers
 // ============================================================================
 
-/// All valid level attribute strings
-const LEVEL_ROOKIE: &str = "level:rookie";
-const LEVEL_BRONZE: &str = "level:bronze";
-const LEVEL_SILVER: &str = "level:silver";
-const LEVEL_GOLD: &str = "level:gold";
-const LEVEL_DIAMOND: &str = "level:diamond";
+/// The trait type used for level attributes
+const LEVEL_TRAIT_TYPE: &str = "level";
 
-/// Build level attribute string from Level enum
-pub fn build_level_attribute(e: &Env, level: Level) -> String {
+/// Level value constants
+const LEVEL_VALUE_ROOKIE: &str = "rookie";
+const LEVEL_VALUE_BRONZE: &str = "bronze";
+const LEVEL_VALUE_SILVER: &str = "silver";
+const LEVEL_VALUE_GOLD: &str = "gold";
+const LEVEL_VALUE_DIAMOND: &str = "diamond";
+
+/// Get the string value for a level
+fn level_to_value(level: Level) -> &'static str {
     match level {
-        Level::Rookie => String::from_str(e, LEVEL_ROOKIE),
-        Level::Bronze => String::from_str(e, LEVEL_BRONZE),
-        Level::Silver => String::from_str(e, LEVEL_SILVER),
-        Level::Gold => String::from_str(e, LEVEL_GOLD),
-        Level::Diamond => String::from_str(e, LEVEL_DIAMOND),
+        Level::Rookie => LEVEL_VALUE_ROOKIE,
+        Level::Bronze => LEVEL_VALUE_BRONZE,
+        Level::Silver => LEVEL_VALUE_SILVER,
+        Level::Gold => LEVEL_VALUE_GOLD,
+        Level::Diamond => LEVEL_VALUE_DIAMOND,
     }
 }
 
-/// Check if a Soroban String is a level attribute.
-fn is_level_attribute(e: &Env, attr: &String) -> bool {
-    *attr == String::from_str(e, LEVEL_ROOKIE)
-        || *attr == String::from_str(e, LEVEL_BRONZE)
-        || *attr == String::from_str(e, LEVEL_SILVER)
-        || *attr == String::from_str(e, LEVEL_GOLD)
-        || *attr == String::from_str(e, LEVEL_DIAMOND)
+/// Build level attribute from Level enum (SEP-0050 compliant)
+pub fn build_level_attribute(e: &Env, level: Level) -> NFTAttribute {
+    NFTAttribute {
+        trait_type: String::from_str(e, LEVEL_TRAIT_TYPE),
+        value: String::from_str(e, level_to_value(level)),
+        display_type: Some(String::from_str(e, "string")),
+        max_value: None,
+    }
+}
+
+/// Check if an NFTAttribute is a level attribute.
+fn is_level_attribute(e: &Env, attr: &NFTAttribute) -> bool {
+    attr.trait_type == String::from_str(e, LEVEL_TRAIT_TYPE)
 }
 
 /// Create updated attributes vector with new level.
 /// Removes any existing level attribute and adds the new one.
 pub fn update_attributes_with_level(
     e: &Env,
-    current_attributes: &Vec<String>,
+    current_attributes: &Vec<NFTAttribute>,
     new_level: Level,
-) -> Vec<String> {
-    let mut new_attrs: Vec<String> = Vec::new(e);
+) -> Vec<NFTAttribute> {
+    let mut new_attrs: Vec<NFTAttribute> = Vec::new(e);
 
     // Copy non-level attributes
     for attr in current_attributes.iter() {
@@ -194,36 +214,41 @@ mod tests {
     fn test_build_level_attribute() {
         let env = Env::default();
 
-        assert_eq!(
-            build_level_attribute(&env, Level::Rookie).to_string(),
-            "level:rookie"
-        );
-        assert_eq!(
-            build_level_attribute(&env, Level::Bronze).to_string(),
-            "level:bronze"
-        );
-        assert_eq!(
-            build_level_attribute(&env, Level::Silver).to_string(),
-            "level:silver"
-        );
-        assert_eq!(
-            build_level_attribute(&env, Level::Gold).to_string(),
-            "level:gold"
-        );
-        assert_eq!(
-            build_level_attribute(&env, Level::Diamond).to_string(),
-            "level:diamond"
-        );
+        let rookie_attr = build_level_attribute(&env, Level::Rookie);
+        assert_eq!(rookie_attr.trait_type.to_string(), "level");
+        assert_eq!(rookie_attr.value.to_string(), "rookie");
+
+        let bronze_attr = build_level_attribute(&env, Level::Bronze);
+        assert_eq!(bronze_attr.value.to_string(), "bronze");
+
+        let silver_attr = build_level_attribute(&env, Level::Silver);
+        assert_eq!(silver_attr.value.to_string(), "silver");
+
+        let gold_attr = build_level_attribute(&env, Level::Gold);
+        assert_eq!(gold_attr.value.to_string(), "gold");
+
+        let diamond_attr = build_level_attribute(&env, Level::Diamond);
+        assert_eq!(diamond_attr.value.to_string(), "diamond");
     }
 
     #[test]
     fn test_update_attributes_keeps_non_level_attrs() {
         let env = Env::default();
 
-        // Create initial attributes without a level
-        let mut attrs: Vec<String> = Vec::new(&env);
-        attrs.push_back(String::from_str(&env, "badge:early_supporter"));
-        attrs.push_back(String::from_str(&env, "tier:standard"));
+        // Create initial attributes without a level (SEP-0050 format)
+        let mut attrs: Vec<NFTAttribute> = Vec::new(&env);
+        attrs.push_back(NFTAttribute {
+            trait_type: String::from_str(&env, "badge"),
+            value: String::from_str(&env, "early_supporter"),
+            display_type: Some(String::from_str(&env, "string")),
+            max_value: None,
+        });
+        attrs.push_back(NFTAttribute {
+            trait_type: String::from_str(&env, "tier"),
+            value: String::from_str(&env, "standard"),
+            display_type: None,
+            max_value: None,
+        });
 
         // Update to Bronze level
         let new_attrs = update_attributes_with_level(&env, &attrs, Level::Bronze);
@@ -237,7 +262,7 @@ mod tests {
         let env = Env::default();
 
         // Create empty attributes
-        let attrs: Vec<String> = Vec::new(&env);
+        let attrs: Vec<NFTAttribute> = Vec::new(&env);
 
         // Update to Diamond level
         let new_attrs = update_attributes_with_level(&env, &attrs, Level::Diamond);
@@ -247,18 +272,34 @@ mod tests {
 
         // Check that we have the diamond level
         let attr = new_attrs.get(0).unwrap();
-        assert_eq!(attr.to_string(), "level:diamond");
+        assert_eq!(attr.trait_type.to_string(), "level");
+        assert_eq!(attr.value.to_string(), "diamond");
     }
 
     #[test]
     fn test_update_attributes_replaces_level() {
         let env = Env::default();
 
-        // Create initial attributes with a level
-        let mut attrs: Vec<String> = Vec::new(&env);
-        attrs.push_back(String::from_str(&env, "badge:early_supporter"));
-        attrs.push_back(String::from_str(&env, "level:rookie"));
-        attrs.push_back(String::from_str(&env, "tier:standard"));
+        // Create initial attributes with a level (SEP-0050 format)
+        let mut attrs: Vec<NFTAttribute> = Vec::new(&env);
+        attrs.push_back(NFTAttribute {
+            trait_type: String::from_str(&env, "badge"),
+            value: String::from_str(&env, "early_supporter"),
+            display_type: Some(String::from_str(&env, "string")),
+            max_value: None,
+        });
+        attrs.push_back(NFTAttribute {
+            trait_type: String::from_str(&env, "level"),
+            value: String::from_str(&env, "rookie"),
+            display_type: Some(String::from_str(&env, "string")),
+            max_value: None,
+        });
+        attrs.push_back(NFTAttribute {
+            trait_type: String::from_str(&env, "tier"),
+            value: String::from_str(&env, "standard"),
+            display_type: None,
+            max_value: None,
+        });
 
         // Update to Gold level
         let new_attrs = update_attributes_with_level(&env, &attrs, Level::Gold);
@@ -270,12 +311,13 @@ mod tests {
         let mut has_gold = false;
         let mut has_rookie = false;
         for attr in new_attrs.iter() {
-            let s = attr.to_string();
-            if s == "level:gold" {
-                has_gold = true;
-            }
-            if s == "level:rookie" {
-                has_rookie = true;
+            if attr.trait_type.to_string() == "level" {
+                if attr.value.to_string() == "gold" {
+                    has_gold = true;
+                }
+                if attr.value.to_string() == "rookie" {
+                    has_rookie = true;
+                }
             }
         }
 
