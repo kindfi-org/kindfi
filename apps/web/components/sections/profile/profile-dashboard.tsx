@@ -166,10 +166,14 @@ export function ProfileDashboard({
 							// Reload page to show updated status (server already updated database)
 							window.location.reload()
 						} else {
+							console.error(
+								'[KYC] Failed to update status - API returned error',
+							)
 							toast.error(kycUpdateErrorMessage)
 						}
 					})
-					.catch(() => {
+					.catch((error) => {
+						console.error('[KYC] Critical failure updating status:', error)
 						toast.error(kycUpdateErrorMessage)
 					})
 			} else {
