@@ -272,3 +272,25 @@ export function verifyDiditWebhookSignature(
 		return false
 	}
 }
+
+/**
+ * Mapea los estados de sesión de Didit a los estados de KYC internos de Kindfi.
+ * Referencia: Issue #770
+ */
+export type KYCStatus = 'pending' | 'approved' | 'rejected' | 'verified'
+
+export function mapDiditStatusToKYC(diditStatus: string): KYCStatus {
+	switch (diditStatus) {
+		case 'Approved':
+			return 'approved'
+		case 'Declined':
+			return 'rejected'
+		case 'In Progress':
+		case 'In Review':
+			return 'pending'
+		case 'Not Started':
+		case 'Abandoned':
+		default:
+			return 'pending'
+	}
+}

@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { getDiditSessionStatus } from '~/lib/services/didit'
+import { mapDiditStatusToKYC } from '../../../../../lib/services/didit'
 
 /**
  * POST /api/kyc/didit/check-status
@@ -66,24 +67,7 @@ export async function POST(_req: NextRequest) {
 		// Check status directly from Didit
 		const diditStatus = await getDiditSessionStatus(sessionId)
 
-		// Map Didit status to our KYC status enum
-		let kycStatus: 'pending' | 'approved' | 'rejected' | 'verified'
-		switch (diditStatus.status) {
-			case 'Approved':
-				kycStatus = 'approved'
-				break
-			case 'Declined':
-				kycStatus = 'rejected'
-				break
-			case 'In Progress':
-			case 'In Review':
-				kycStatus = 'pending'
-				break
-			case 'Not Started':
-			case 'Abandoned':
-			default:
-				kycStatus = 'pending'
-		}
+		const kycStatus = mapDiditStatusToKYC(diditStatus.status)
 
 		// Update our database with the latest status
 		const { error: updateError } = await supabaseServiceRole

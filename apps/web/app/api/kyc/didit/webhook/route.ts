@@ -7,6 +7,7 @@ import {
 	verifyDiditWebhookSignatureSimple,
 	verifyDiditWebhookSignatureV2,
 } from '~/lib/services/didit'
+import { mapDiditStatusToKYC } from '../../../../../lib/services/didit'
 
 interface DiditWebhookEvent extends Record<string, unknown> {
 	session_id: string
@@ -109,25 +110,7 @@ export async function POST(req: NextRequest) {
 				? JSON.parse(kycRecord.notes)
 				: kycRecord.notes
 
-		// Map Didit status to our KYC status enum
-		let kycStatus: 'pending' | 'approved' | 'rejected' | 'verified'
-		switch (jsonBody.status) {
-			case 'Approved':
-				kycStatus = 'approved'
-				break
-			case 'Declined':
-				kycStatus = 'rejected'
-				break
-			case 'In Progress':
-			case 'In Review':
-				kycStatus = 'pending'
-				break
-			case 'Not Started':
-			case 'Abandoned':
-			default:
-				kycStatus = 'pending'
-		}
-
+		const kycStatus = mapDiditStatusToKYC(jsonBody.status)
 		// Update KYC record
 		const { error: updateError } = await supabase
 			.from('kyc_reviews')
