@@ -4,10 +4,10 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import {
+	mapDiditStatusToKYC,
 	verifyDiditWebhookSignatureSimple,
 	verifyDiditWebhookSignatureV2,
 } from '~/lib/services/didit'
-import { mapDiditStatusToKYC } from '../../../../../lib/services/didit'
 
 interface DiditWebhookEvent extends Record<string, unknown> {
 	session_id: string

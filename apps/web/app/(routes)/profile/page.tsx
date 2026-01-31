@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { mapDiditStatusToKYC } from '../../../lib/services/didit'
+import { mapDiditStatusToKYC } from '~/lib/services/didit'
 
 interface ProfilePageProps {
 	searchParams: Promise<{
@@ -89,7 +89,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 			}
 		} else {
 			// Create a new record if none exists
-			console.log('Creating new KYC record for declined status')
+
+			console.log('Creating new KYC record with status:', kycStatus)
 			await supabaseServiceRole.from('kyc_reviews').insert({
 				user_id: session.user.id,
 				status: kycStatus,

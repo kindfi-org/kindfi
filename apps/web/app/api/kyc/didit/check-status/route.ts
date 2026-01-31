@@ -3,8 +3,10 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { getDiditSessionStatus } from '~/lib/services/didit'
-import { mapDiditStatusToKYC } from '../../../../../lib/services/didit'
+import {
+	getDiditSessionStatus,
+	mapDiditStatusToKYC,
+} from '~/lib/services/didit'
 
 /**
  * POST /api/kyc/didit/check-status
