@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { mapDiditStatusToKYC } from '~/lib/services/didit'
 
 interface ProfilePageProps {
 	searchParams: Promise<{
@@ -25,25 +26,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
 	// If we have callback parameters, update the KYC status directly
 	if (params.verificationSessionId && params.status && kycCompleted) {
-		// Map Didit status to our KYC status enum
-		let kycStatus: 'pending' | 'approved' | 'rejected' | 'verified'
-		switch (params.status) {
-			case 'Approved':
-				kycStatus = 'approved'
-				break
-			case 'Declined':
-				kycStatus = 'rejected'
-				break
-			case 'In Progress':
-			case 'In Review':
-				kycStatus = 'pending'
-				break
-			case 'Not Started':
-			case 'Abandoned':
-			default:
-				kycStatus = 'pending'
-		}
-
+		const kycStatus = mapDiditStatusToKYC(params.status)
 		// Find and update the KYC record
 		// Try multiple strategies to find the record:
 		// 1. First try to find by session ID in notes
@@ -100,13 +83,14 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 				.select()
 
 			if (updateResult.error) {
-				console.error('❌ Failed to update KYC record:', updateResult.error)
+				console.error(' Failed to update KYC record:', updateResult.error)
 			} else {
-				console.log('✅ Successfully updated KYC status to:', kycStatus)
+				console.log(' Successfully updated KYC status to:', kycStatus)
 			}
 		} else {
 			// Create a new record if none exists
-			console.log('📝 Creating new KYC record for declined status')
+
+			console.log('Creating new KYC record with status:', kycStatus)
 			await supabaseServiceRole.from('kyc_reviews').insert({
 				user_id: session.user.id,
 				status: kycStatus,
