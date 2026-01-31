@@ -272,3 +272,21 @@ export function verifyDiditWebhookSignature(
 		return false
 	}
 }
+
+export type KYCStatus = 'pending' | 'approved' | 'rejected' | 'verified'
+
+export const mapDiditStatusToKYC = (diditStatus: string): KYCStatus => {
+	switch (diditStatus) {
+		case 'Approved':
+			return 'approved'
+		case 'Declined':
+			return 'rejected'
+		case 'In Progress':
+		case 'In Review':
+			return 'pending'
+		case 'Not Started':
+		case 'Abandoned':
+		default:
+			return 'pending'
+	}
+}
