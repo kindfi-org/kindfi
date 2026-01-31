@@ -684,7 +684,7 @@ function SupportedProjectCard({
 						</div>
 						<div className="relative h-3 bg-muted rounded-full overflow-hidden">
 							<motion.div
-								className="h-full bg-[#000124] rounded-full"
+								className="h-full bg-primary rounded-full"
 								initial={{ width: 0 }}
 								animate={{ width: `${percentage}%` }}
 								transition={{ duration: 1, ease: 'easeOut' }}
