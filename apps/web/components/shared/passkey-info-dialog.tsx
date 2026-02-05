@@ -68,8 +68,9 @@ export function PasskeyInfoDialog() {
 						<div className="ml-4">
 							<h2 className="font-semibold text-black mb-2">Easier to Use</h2>
 							<p className="text-zinc-800">
-								No more remembering complex passwords. Just use your device's
-								biometric authentication or pin to sign in instantly.
+								No more remembering complex passwords. Just use your
+								device&apos;s biometric authentication or pin to sign in
+								instantly.
 							</p>
 						</div>
 					</section>

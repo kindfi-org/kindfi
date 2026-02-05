@@ -146,6 +146,7 @@ All contracts are built using:
 
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   rustup target add wasm32-unknown-unknown
    ```
 
 2. **Install Stellar CLI**:
@@ -153,6 +154,9 @@ All contracts are built using:
    ```bash
    cargo install stellar-cli
    ```
+
+   **Note**: The Stellar CLI installation will ensure you have a compatible Rust version.
+   The SDK version (22.0.6) will determine the minimum Rust version required.
 
 3. **Setup Stellar Account**:
 
@@ -225,17 +229,115 @@ The script will:
 
 ### NFT Contract Deployment
 
-Deploy the KindFi NFT contract:
+Deploy the KindFi NFT contract using the deployment script:
 
 ```bash
 # Testnet (default)
-./scripts/deploy.sh testnet
+./scripts/deploy-nft.sh --testnet
 
-# Mainnet
-./scripts/deploy.sh public <account_name>
+# Futurenet
+./scripts/deploy-nft.sh --futurenet
+
+# Mainnet (with confirmation prompt)
+./scripts/deploy-nft.sh --mainnet
+
+# With custom options
+./scripts/deploy-nft.sh --testnet --source alice --name "My NFT" --symbol "MNFT"
 ```
 
-The script saves deployment information to `deployment-info.txt`.
+**Options:**
+- `--testnet|--futurenet|--mainnet`: Target network
+- `--source NAME`: Stellar account identity to use
+- `--admin ADDRESS`: Admin address for the contract
+- `--name NAME`: NFT collection name (default: "KindFi Kinder NFT")
+- `--symbol SYMBOL`: NFT collection symbol (default: "KINDER")
+- `--base-uri URI`: Base URI for token metadata
+
+The script will:
+1. Build the NFT contract
+2. Upload WASM to network
+3. Deploy contract instance with initialization
+4. Save deployment info to `nft-deployment-info-<network>.txt`
+
+**Post-Deployment Setup:**
+```bash
+# Grant minter role
+stellar contract invoke --network testnet --source alice --id <NFT_CONTRACT_ID> \
+  -- grant_role --account <MINTER_ADDRESS> --role 'minter' --caller <ADMIN_ADDRESS>
+
+# Grant metadata_manager role to Reputation contract
+stellar contract invoke --network testnet --source alice --id <NFT_CONTRACT_ID> \
+  -- grant_role --account <REPUTATION_CONTRACT_ID> --role 'metadata_manager' --caller <ADMIN_ADDRESS>
+```
+
+### Reputation Contract Deployment
+
+Deploy the KindFi Reputation contract:
+
+```bash
+# Testnet (default)
+./scripts/deploy-reputation.sh --testnet
+
+# With NFT contract integration
+./scripts/deploy-reputation.sh --testnet --nft-contract <NFT_CONTRACT_ID>
+
+# Futurenet
+./scripts/deploy-reputation.sh --futurenet
+
+# Mainnet (with confirmation prompt)
+./scripts/deploy-reputation.sh --mainnet
+```
+
+**Options:**
+- `--testnet|--futurenet|--mainnet`: Target network
+- `--source NAME`: Stellar account identity to use
+- `--admin ADDRESS`: Admin address for the contract
+- `--nft-contract ID`: NFT contract ID for integration (optional)
+
+The script will:
+1. Build the Reputation contract
+2. Upload WASM to network
+3. Deploy contract instance with initialization
+4. Save deployment info to `reputation-deployment-info-<network>.txt`
+
+**Post-Deployment Setup:**
+```bash
+# Grant recorder role (can record reputation events)
+stellar contract invoke --network testnet --source alice --id <REPUTATION_CONTRACT_ID> \
+  -- grant_role --account <RECORDER_ADDRESS> --role 'recorder' --caller <ADMIN_ADDRESS>
+
+# Grant config role (can update thresholds)
+stellar contract invoke --network testnet --source alice --id <REPUTATION_CONTRACT_ID> \
+  -- grant_role --account <CONFIG_ADDRESS> --role 'config' --caller <ADMIN_ADDRESS>
+
+# Set NFT contract (if not set during deployment)
+stellar contract invoke --network testnet --source alice --id <REPUTATION_CONTRACT_ID> \
+  -- set_nft_contract --caller <ADMIN_ADDRESS> --nft_address <NFT_CONTRACT_ID>
+```
+
+### Full Deployment Flow (NFT + Reputation)
+
+For a complete deployment with NFT integration:
+
+```bash
+# 1. Deploy NFT contract
+./scripts/deploy-nft.sh --testnet --source alice
+# Note the NFT_CONTRACT_ID from output
+
+# 2. Deploy Reputation contract with NFT integration
+./scripts/deploy-reputation.sh --testnet --source alice --nft-contract <NFT_CONTRACT_ID>
+# Note the REPUTATION_CONTRACT_ID from output
+
+# 3. Grant metadata_manager role to Reputation contract on NFT contract
+stellar contract invoke --network testnet --source alice --id <NFT_CONTRACT_ID> \
+  -- grant_role --account <REPUTATION_CONTRACT_ID> --role 'metadata_manager' --caller <ADMIN_ADDRESS>
+
+# 4. Grant recorder role on Reputation contract
+stellar contract invoke --network testnet --source alice --id <REPUTATION_CONTRACT_ID> \
+  -- grant_role --account <RECORDER_ADDRESS> --role 'recorder' --caller <ADMIN_ADDRESS>
+```
+
+Now when users level up, their NFT metadata will automatically update with the new level attribute.
 
 ### Individual Contract Deployment
 
@@ -326,22 +428,41 @@ stellar contract invoke \
 
 ## 📝 Environment Variables
 
-Create a `.env` file (see `.env.sample`):
+Create a `.env` file from the example:
+
+```bash
+cp .env.example .env
+```
+
+Key variables:
 
 ```env
 # Network Configuration
-NETWORK_PASSPHRASE="Test SDF Network ; September 2015"  # testnet
+NETWORK="testnet"
+NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
 RPC_URL="https://soroban-testnet.stellar.org"
 HORIZON_URL="https://horizon-testnet.stellar.org"
 
-# Contract Addresses (from deployment)
-FACTORY_CONTRACT_ID="<factory_contract_id>"
-CONTROLLER_CONTRACT_ID="<controller_contract_id>"
-ACCOUNT_CONTRACT_ID="<account_contract_id>"
+# Auth Contracts (from auth deployment)
+AUTH_CONTROLLER_CONTRACT_ID=""
+ACCOUNT_FACTORY_CONTRACT_ID=""
+ACCOUNT_CONTRACT_ID=""
 
-# Funding Account
-STELLAR_FUNDING_SECRET_KEY="<your_secret_key>"
+# NFT Contract (from NFT deployment)
+NFT_CONTRACT_ID=""
+NFT_WASM_HASH=""
+NFT_ADMIN_ADDRESS=""
+
+# Reputation Contract (from reputation deployment)
+REPUTATION_CONTRACT_ID=""
+REPUTATION_WASM_HASH=""
+REPUTATION_ADMIN_ADDRESS=""
+
+# Account identity
+SOURCE_ACCOUNT="bran"
 ```
+
+See `.env.example` for all available configuration options.
 
 ## 🔧 Development Workflow
 
@@ -386,13 +507,80 @@ All contracts use OpenZeppelin Stellar Contracts:
 - [Rust Book](https://doc.rust-lang.org/book/)
 - [Soroban CLI Reference](https://soroban.stellar.org/docs/reference/cli)
 
-## 🐛 Common Issues
+## 🐛 Common Issues & Troubleshooting
+
+### General Issues
 
 1. **"Invalid account"**: Ensure your account is funded with XLM
 2. **"Invalid sequence number"**: Wait a moment and retry the transaction
 3. **"Contract already exists"**: Use a new WASM hash or deploy to a different network
 4. **Build errors**: Ensure Rust toolchain is up to date: `rustup update`
 5. **WASM upload fails**: Check network connectivity and account balance
+
+### NFT Contract Issues
+
+1. **"Unauthorized" when minting**: Ensure the caller has the `minter` role
+   ```bash
+   stellar contract invoke --network testnet --id <NFT_CONTRACT_ID> \
+     -- has_role --account <CALLER_ADDRESS> --role 'minter'
+   ```
+
+2. **"Unauthorized" when updating metadata**: Ensure the caller has `metadata_manager` role
+   ```bash
+   stellar contract invoke --network testnet --id <NFT_CONTRACT_ID> \
+     -- has_role --account <CALLER_ADDRESS> --role 'metadata_manager'
+   ```
+
+3. **Token not found**: Verify token exists using `total_supply` and check token ID is valid
+
+### Reputation Contract Issues
+
+1. **"Unauthorized" when recording events**: Ensure the caller has the `recorder` role
+   ```bash
+   stellar contract invoke --network testnet --id <REPUTATION_CONTRACT_ID> \
+     -- has_role --account <CALLER_ADDRESS> --role 'recorder'
+   ```
+
+2. **NFT not updating on level up**:
+   - Verify NFT contract is set: `stellar contract invoke ... -- get_admin`
+   - Verify Reputation contract has `metadata_manager` role on NFT contract
+   - Verify user's NFT token ID is registered with `register_user_nft`
+
+3. **"PointsOverflow" error**: User points would exceed u32 max. This is rare but check current points first.
+
+### Cross-Contract Integration Issues
+
+1. **NFT metadata not updating automatically**:
+   - Step 1: Verify NFT contract address is set in Reputation contract
+   - Step 2: Verify Reputation contract has `metadata_manager` role on NFT contract
+   - Step 3: Verify user has an NFT token ID registered via `register_user_nft`
+   - Step 4: Verify the NFT token actually exists
+
+2. **Role grants failing**: Ensure you're using the correct admin address and it has proper authorization
+
+### Network-Specific Considerations
+
+- **Testnet**: Use for development. Free XLM from Friendbot.
+- **Futurenet**: Use for testing new Stellar features. May have instability.
+- **Mainnet**: Production only. Real XLM required. Always test on testnet first.
+
+### Debugging Commands
+
+```bash
+# Check contract admin
+stellar contract invoke --network testnet --id <CONTRACT_ID> -- get_admin
+
+# Check if address has a specific role
+stellar contract invoke --network testnet --id <CONTRACT_ID> \
+  -- has_role --account <ADDRESS> --role '<ROLE_NAME>'
+
+# Get role member count
+stellar contract invoke --network testnet --id <CONTRACT_ID> \
+  -- get_role_member_count --role '<ROLE_NAME>'
+
+# Inspect contract
+stellar contract inspect --network testnet --id <CONTRACT_ID>
+```
 
 ## 📄 License
 

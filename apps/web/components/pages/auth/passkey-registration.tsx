@@ -83,6 +83,8 @@ export function PasskeyRegistrationComponent() {
 				email: userEmail,
 				address: smartAccountAddress || '',
 			})
+			// Mark this as a new session so role selection modal can be shown
+			sessionStorage.setItem('kindfi_new_session', 'true')
 			router.push('/profile')
 		} catch (e) {
 			console.error('Finalize passkey registration error', e)
@@ -142,8 +144,8 @@ export function PasskeyRegistrationComponent() {
 							WebAuthn Not Supported
 						</CardTitle>
 						<CardDescription>
-							Your browser doesn't support passkeys. To be able to interact with
-							the website, please use a browser that supports WebAuthn.
+							Your browser doesn&apos;t support passkeys. To be able to interact
+							with the website, please use a browser that supports WebAuthn.
 						</CardDescription>
 					</CardHeader>
 					<CardFooter>
@@ -227,8 +229,8 @@ export function PasskeyRegistrationComponent() {
 							</p>
 							<p>
 								A passkey is a secure, passwordless way to sign in using your
-								device's biometrics (like Face ID or fingerprint) or security
-								key.
+								device&apos;s biometrics (like Face ID or fingerprint) or
+								security key.
 							</p>
 						</div>
 

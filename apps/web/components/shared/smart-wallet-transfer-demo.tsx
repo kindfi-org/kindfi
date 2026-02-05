@@ -483,9 +483,9 @@ export function SmartWalletTransferDemo() {
 							💰 Testnet Faucet
 						</div>
 						<div className="text-muted-foreground">
-							Your smart wallet needs XLM to pay for transactions. Use the "Fund
-							Wallet" button to get testnet XLM for testing. This only works on
-							Stellar Testnet.
+							Your smart wallet needs XLM to pay for transactions. Use the
+							&quot;Fund Wallet&quot; button to get testnet XLM for testing.
+							This only works on Stellar Testnet.
 						</div>
 					</div>
 

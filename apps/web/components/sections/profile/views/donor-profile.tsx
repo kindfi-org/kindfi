@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -23,7 +23,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
-import { Progress } from '~/components/base/progress'
 import { AchievementsGrid } from '~/components/sections/achievements/achievement-grid'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { staggerContainer } from '~/lib/constants/animations'
@@ -47,7 +46,10 @@ const cardVariants = {
 	},
 }
 
-export function DonorProfile({ userId, displayName }: DonorProfileProps) {
+export function DonorProfile({
+	userId,
+	displayName: _displayName,
+}: DonorProfileProps) {
 	const [isSyncing, setIsSyncing] = useState(false)
 	const {
 		data: supportedProjects = [],
@@ -66,7 +68,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>(
 		{},
 	)
-	const [isLoadingBalances, setIsLoadingBalances] = useState(false)
+	const [_isLoadingBalances, setIsLoadingBalances] = useState(false)
 
 	// Fetch escrow balances for all supported projects that have escrow addresses
 	useEffect(() => {
@@ -218,7 +220,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 			: 0
 
 	// Get most recent contribution
-	const mostRecentContribution = projectsWithBalances[0]?.contributionDate
+	const _mostRecentContribution = projectsWithBalances[0]?.contributionDate
 		? new Date(projectsWithBalances[0].contributionDate)
 		: null
 
@@ -252,7 +254,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 						Your Impact
 					</h2>
 					<p className="text-muted-foreground mt-1">
-						Track your contributions and the projects you're supporting
+						Track your contributions and the projects you&apos;re supporting
 					</p>
 				</div>
 				<Button
@@ -276,7 +278,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 			>
 				<motion.div variants={cardVariants}>
 					<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-xl transition-all duration-300 relative group">
-						<div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
+						<div className="absolute top-0 right-0 w-24 h-24 bg-[#000124]/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
 						<CardHeader className="pb-3 relative z-10">
 							<CardTitle className="text-sm font-medium text-muted-foreground">
 								Projects Supported
@@ -296,7 +298,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 				</motion.div>
 				<motion.div variants={cardVariants}>
 					<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-xl transition-all duration-300 relative group">
-						<div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
+						<div className="absolute top-0 right-0 w-24 h-24 bg-[#000124]/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
 						<CardHeader className="pb-3 relative z-10">
 							<CardTitle className="text-sm font-medium text-muted-foreground">
 								Total Contributed
@@ -307,7 +309,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 								initial={{ scale: 0 }}
 								animate={{ scale: 1 }}
 								transition={{ delay: 0.3, type: 'spring' }}
-								className="text-4xl font-extrabold text-primary"
+								className="text-4xl font-extrabold text-[#000124]"
 							>
 								${totalContributed.toLocaleString()}
 							</motion.div>
@@ -316,7 +318,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 				</motion.div>
 				<motion.div variants={cardVariants}>
 					<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-xl transition-all duration-300 relative group">
-						<div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
+						<div className="absolute top-0 right-0 w-24 h-24 bg-[#000124]/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
 						<CardHeader className="pb-3 relative z-10">
 							<CardTitle className="text-sm font-medium text-muted-foreground">
 								Impact Score
@@ -333,7 +335,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 									animate={{ rotate: [0, 10, -10, 0] }}
 									transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
 								>
-									<Trophy className="h-8 w-8 text-primary" />
+									<Trophy className="h-8 w-8 text-[#000124]" />
 								</motion.div>
 								<span className="text-foreground">{impactScore}</span>
 							</motion.div>
@@ -345,10 +347,10 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 			{/* Impact Overview - Derived from actual donations */}
 			<motion.div variants={cardVariants} whileHover={{ y: -2 }}>
 				<Card className="border-0 shadow-xl bg-card hover:shadow-2xl transition-all duration-300 overflow-hidden relative group">
-					<div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
+					<div className="absolute top-0 right-0 w-40 h-40 bg-purple-50/50 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
 					<CardHeader className="relative z-10">
 						<CardTitle className="flex items-center gap-2 text-foreground">
-							<BarChart2 className="h-5 w-5 text-primary" />
+							<BarChart2 className="h-5 w-5 text-[#000124]" />
 							Impact Overview
 						</CardTitle>
 					</CardHeader>
@@ -399,7 +401,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 									initial={{ scale: 0 }}
 									animate={{ scale: 1 }}
 									transition={{ delay: 0.3, type: 'spring' }}
-									className="text-3xl font-extrabold text-green-600"
+									className="text-3xl font-extrabold text-purple-600"
 								>
 									{completedProjects}
 								</motion.div>
@@ -468,7 +470,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 								animate={{ scale: [1, 1.2, 1] }}
 								transition={{ duration: 1.5, repeat: Infinity }}
 							>
-								<Heart className="h-5 w-5 fill-primary text-primary" />
+								<Heart className="h-5 w-5 fill-[#000124] text-[#000124]" />
 							</motion.div>
 							Supported Projects
 						</h3>
@@ -508,14 +510,14 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 			>
 				<motion.div variants={cardVariants}>
 					<Card className="border-0 shadow-xl bg-card hover:shadow-2xl transition-all duration-300 overflow-hidden relative group">
-						<div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
+						<div className="absolute top-0 right-0 w-40 h-40 bg-purple-50/50 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
 						<CardHeader className="relative z-10">
 							<CardTitle className="flex items-center gap-2 text-foreground">
 								<motion.div
 									animate={{ rotate: [0, 10, -10, 0] }}
 									transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
 								>
-									<Trophy className="h-5 w-5 text-primary" />
+									<Trophy className="h-5 w-5 text-[#000124]" />
 								</motion.div>
 								Badges & Achievements
 							</CardTitle>
@@ -581,8 +583,8 @@ function DonationHistory({
 						className="flex items-center justify-between py-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
 					>
 						<div className="flex items-center gap-3 flex-1 min-w-0">
-							<div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
-								<Heart className="h-4 w-4 text-primary fill-primary" />
+							<div className="p-2 rounded-full bg-[#000124]/10 flex-shrink-0">
+								<Heart className="h-4 w-4 text-[#000124] fill-[#000124]" />
 							</div>
 							<div className="flex-1 min-w-0">
 								<p className="font-medium truncate">
@@ -594,7 +596,7 @@ function DonationHistory({
 								</p>
 							</div>
 						</div>
-						<span className="font-bold text-primary ml-4 flex-shrink-0">
+						<span className="font-bold text-[#000124] ml-4 flex-shrink-0">
 							$
 							{amount.toLocaleString(undefined, {
 								minimumFractionDigits: 2,
@@ -636,7 +638,7 @@ function SupportedProjectCard({
 		>
 			<Card className="border-0 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col bg-card relative group">
 				{/* Decorative overlay */}
-				<div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-all duration-300 pointer-events-none" />
+				<div className="absolute inset-0 bg-[#000124]/0 group-hover:bg-[#000124]/5 transition-all duration-300 pointer-events-none" />
 
 				{project.image && (
 					<motion.div
@@ -669,7 +671,7 @@ function SupportedProjectCard({
 							<span className="text-muted-foreground font-medium">
 								Your Contribution
 							</span>
-							<span className="font-bold text-primary">
+							<span className="font-bold text-[#000124]">
 								${contributionAmount.toLocaleString()}
 							</span>
 						</div>

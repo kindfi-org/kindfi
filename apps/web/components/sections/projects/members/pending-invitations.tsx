@@ -60,7 +60,7 @@ export function PendingInvitations({
 						Pending Invitations ({invitations.length})
 					</CardTitle>
 					<CardDescription>
-						Manage invitations that haven't been accepted yet.
+						Manage invitations that haven&apos;t been accepted yet.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -101,7 +101,7 @@ export function PendingInvitations({
 					</h3>
 				</div>
 				<p className="text-sm text-muted-foreground !mt-1.5">
-					Manage invitations that haven't been accepted yet.
+					Manage invitations that haven&apos;t been accepted yet.
 				</p>
 
 				<AnimatePresence>

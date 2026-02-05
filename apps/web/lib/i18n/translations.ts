@@ -3,8 +3,9 @@ export const translations = {
 		// Navigation
 		nav: {
 			projects: 'Projects',
+			foundations: 'Foundations',
 			resources: 'Resources',
-			about: 'About KindFi',
+			about: 'About',
 			news: 'News',
 			signIn: 'Sign in',
 			signUp: 'Sign up',
@@ -505,6 +506,8 @@ export const translations = {
 			emailPlaceholder: 'you@example.com',
 			signInWithPasskey: 'Sign in with passkey',
 			authenticating: 'Authenticating...',
+			signingOut: 'Signing out...',
+			signOutError: 'Error signing out',
 			dontHaveAccount: "Don't have an account yet?",
 			createNewOne: 'Create new one',
 			deviceNotFound: 'Device account not found. Please',
@@ -643,8 +646,9 @@ export const translations = {
 		// Navigation
 		nav: {
 			projects: 'Proyectos',
+			foundations: 'Fundaciones',
 			resources: 'Recursos',
-			about: 'Acerca de KindFi',
+			about: 'Acerca de',
 			news: 'Noticias',
 			signIn: 'Iniciar sesión',
 			signUp: 'Registrarse',
@@ -1148,6 +1152,8 @@ export const translations = {
 			emailPlaceholder: 'tu@ejemplo.com',
 			signInWithPasskey: 'Iniciar sesión con passkey',
 			authenticating: 'Autenticando...',
+			signingOut: 'Cerrando sesión...',
+			signOutError: 'Error al cerrar sesión',
 			dontHaveAccount: '¿Aún no tienes una cuenta?',
 			createNewOne: 'Crear una nueva',
 			deviceNotFound: 'Cuenta de dispositivo no encontrada. Por favor',

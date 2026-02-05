@@ -45,7 +45,7 @@ BEGIN
     NEW.id,
     NEW.email, 
     COALESCE(NEW.raw_user_meta_data->>'name', 'Anonymous'),
-    'kindler' -- Default role
+    'pending' -- Default role: unselected until user chooses donor or creator
   )
   ON CONFLICT (id) DO UPDATE SET
     next_auth_user_id = COALESCE(EXCLUDED.next_auth_user_id, public.profiles.next_auth_user_id),

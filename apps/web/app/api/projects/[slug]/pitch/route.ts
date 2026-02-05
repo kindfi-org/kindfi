@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
@@ -14,8 +14,6 @@ export async function POST(
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
 	try {
-		const supabase = await createSupabaseServerClient()
-
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
 		const userId = session?.user?.id
@@ -24,9 +22,48 @@ export async function POST(
 		}
 
 		const formData = await req.formData()
-
 		const { slug: projectSlug } = await params
 		const projectId = formData.get('projectId') as string
+
+		// Verify user has permission to update this project
+		// Check if user is the project owner or has editor role
+		const { data: project, error: projectError } = await supabaseServiceRole
+			.from('projects')
+			.select('id, kindler_id')
+			.eq('id', projectId)
+			.single()
+
+		if (projectError || !project) {
+			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+		}
+
+		// Check if user is the project owner
+		const isOwner = project.kindler_id === userId
+
+		// Check if user is a project member with editor role
+		const { data: memberData } = await supabaseServiceRole
+			.from('project_members')
+			.select('role')
+			.eq('project_id', projectId)
+			.eq('user_id', userId)
+			.in('role', ['core', 'admin', 'editor'])
+			.single()
+
+		const hasEditorRole = !!memberData
+
+		if (!isOwner && !hasEditorRole) {
+			return NextResponse.json(
+				{
+					error: 'Forbidden: You do not have permission to update this project',
+				},
+				{ status: 403 },
+			)
+		}
+
+		// Use service role client for pitch update with manual authorization check
+		// This bypasses RLS but we've already verified the user has permission
+		const supabase = supabaseServiceRole
+
 		const title = formData.get('title') as string
 		const story = formData.get('story') as string
 		const rawVideoUrl = formData.get('videoUrl') as string | null

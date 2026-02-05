@@ -30,7 +30,7 @@ import { MilestonesTab } from './tabs/milestones-tab'
 import { ReleaseTab } from './tabs/release-tab'
 
 export function EscrowManagementPanel({
-	projectId,
+	projectId: _projectId,
 	escrowContractAddress,
 	escrowType,
 }: {

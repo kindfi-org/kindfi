@@ -1,0 +1,21 @@
+[package]
+name = "reputation"
+description = "KindFi Reputation contract - Tracks user reputation points, calculates levels, and integrates with NFT contracts for automatic upgrades"
+version = "0.0.0"
+authors = ["Kindfi Org <contact@kindfi.org>"]
+license = "MIT"
+edition.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+stellar-access = { workspace = true }
+stellar-macros = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }

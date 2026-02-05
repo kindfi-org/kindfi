@@ -5,7 +5,7 @@ import {
 	QueryClient,
 } from '@tanstack/react-query'
 import { ProjectMembersWrapper } from '~/components/sections/projects/members/project-members-wrapper'
-import { getProjectMembersDataBySlug } from '~/lib/queries/projects/get-project-members-data-by-slug'
+import { getProjectTeamBySlug } from '~/lib/queries/projects/get-project-team-by-slug'
 
 export default async function ProjectMembersPage({
 	params,
@@ -15,11 +15,11 @@ export default async function ProjectMembersPage({
 	const { slug } = await params
 	const queryClient = new QueryClient()
 
-	// Prefetch project members data
+	// Prefetch project team data
 	await prefetchSupabaseQuery(
 		queryClient,
-		'project-members',
-		(client) => getProjectMembersDataBySlug(client, slug),
+		'project-team',
+		(client) => getProjectTeamBySlug(client, slug),
 		[slug],
 	)
 

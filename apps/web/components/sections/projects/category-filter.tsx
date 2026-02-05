@@ -116,6 +116,7 @@ export function CategoryFilter({
 			container.removeEventListener('scroll', handleScroll)
 			window.removeEventListener('resize', updateThumbSize)
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- init only; updateThumbPosition would cause unstable deps
 	}, [])
 
 	// Handle thumb drag start

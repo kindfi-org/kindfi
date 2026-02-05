@@ -95,7 +95,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											What's your project's website? (optional)
+											What&apos;s your project&apos;s website? (optional)
 										</FormLabel>
 										<FormControl>
 											<Input

@@ -49,14 +49,26 @@ export function FundEscrowTab({
 			return
 		}
 
+		const amount = Number(fundAmount)
+
+		// Validate amount is reasonable (prevent accidental large amounts)
+		if (amount > 1_000_000) {
+			toast.error('Amount too large', {
+				description: 'Please enter an amount less than $1,000,000',
+			})
+			return
+		}
+
 		try {
 			setIsProcessing(true)
 			const signer = await ensureWallet()
 
 			// 1) Get unsigned transaction
+			// Trustless Work expects amount in dollars (not stroops) - it handles conversion internally
+			// Note: The escrow contract and signer must have the USDC trustline established first
 			const fundResponse = await fundEscrow(
 				{
-					amount: Number(fundAmount),
+					amount,
 					contractId: escrowContractAddress,
 					signer,
 				},
@@ -86,10 +98,31 @@ export function FundEscrowTab({
 			setFundAmount('')
 			onSuccess()
 		} catch (error) {
-			console.error(error)
+			console.error('Fund escrow error:', error)
+
+			// Check for specific error messages
 			const errorMessage =
-				error instanceof Error ? error.message : 'Failed to fund escrow'
-			toast.error(errorMessage)
+				error instanceof Error ? error.message : String(error)
+			let userFriendlyMessage = 'Failed to fund escrow'
+
+			if (
+				errorMessage.includes('Storage, MissingValue') ||
+				errorMessage.includes('balance')
+			) {
+				userFriendlyMessage =
+					'The escrow contract needs a USDC trustline established. Please ensure the escrow is properly configured.'
+			} else if (
+				errorMessage.includes('insufficient funds') ||
+				errorMessage.includes('sufficient funds')
+			) {
+				userFriendlyMessage =
+					'Insufficient funds. Please ensure your wallet has enough USDC balance.'
+			} else if (errorMessage.includes('trustline')) {
+				userFriendlyMessage =
+					'Trustline required. The escrow contract or your wallet needs a USDC trustline established.'
+			}
+
+			toast.error(userFriendlyMessage)
 		} finally {
 			setIsProcessing(false)
 		}
@@ -105,7 +138,7 @@ export function FundEscrowTab({
 					<div>
 						<CardTitle>Fund Escrow</CardTitle>
 						<CardDescription>
-							Add funds to your escrow contract. You'll need to approve the
+							Add funds to your escrow contract. You&apos;ll need to approve the
 							transaction in your wallet.
 						</CardDescription>
 					</div>

@@ -171,7 +171,7 @@ export class SmartWalletTransactionServiceV2 {
 	 * @param params Transaction submission parameters
 	 * @returns Transaction hash and status
 	 */
-	async submitTransactionWithWebAuthn(params: {
+	async submitTransactionWithWebAuthn(_params: {
 		smartWalletAddress: string
 		operation: Operation
 		webAuthnSignature: WebAuthnSignatureData
@@ -297,7 +297,7 @@ export class SmartWalletTransactionServiceV2 {
 
 		// Construct signature payload hash (this becomes the WebAuthn challenge)
 		// Format: SHA256(network_id || nonce || signature_expiration_ledger || invocation)
-		const networkId = Buffer.from(this.networkPassphrase, 'utf-8').toString(
+		const _networkId = Buffer.from(this.networkPassphrase, 'utf-8').toString(
 			'hex',
 		)
 
