@@ -3,6 +3,7 @@ import { getUser, saveChallenge } from '@packages/lib/db'
 import { generateAuthenticationOptions } from '@simplewebauthn/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 
 /**
  * POST /api/passkey/generate-auth-options
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		const config = appEnvConfig('web')
-		const rpId = config.passkey.rpId[0] || 'localhost'
+		const rpId = getRpIdFromOrigin(origin)
 
 		// Get user from database
 		const userResponse = await getUser({

@@ -10,6 +10,7 @@ import type { RegistrationResponseJSON } from '@simplewebauthn/server'
 import { verifyRegistrationResponse } from '@simplewebauthn/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 
 /**
  * POST /api/passkey/verify-registration
@@ -40,14 +41,16 @@ export async function POST(req: NextRequest) {
 		}
 
 		const config = appEnvConfig('web')
-		const rpId = config.passkey.rpId[0] || 'localhost'
-		const expectedOrigin = config.passkey.expectedOrigin.find(
-			(o) => o === origin,
-		)
+		const rpId = getRpIdFromOrigin(origin)
+		// Use the origin as expectedOrigin (it's already validated by getRpIdFromOrigin)
+		const expectedOrigin = origin
 
-		if (!expectedOrigin) {
-			return NextResponse.json({ error: 'Invalid origin' }, { status: 400 })
-		}
+		console.log('🔐 Verifying registration:', {
+			origin,
+			rpId,
+			expectedOrigin,
+			identifier,
+		})
 
 		// Get challenge
 		const expectedChallenge = await getChallenge({
