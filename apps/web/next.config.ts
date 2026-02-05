@@ -7,6 +7,7 @@ const isProduction = appConfig.env.nodeEnv === 'production'
 const nextConfig: NextConfig = {
 	experimental: {
 		mdxRs: true,
+		optimizePackageImports: ['react-icons'],
 	},
 	serverExternalPackages: [
 		'@packages/lib/stellar',
@@ -26,6 +27,11 @@ const nextConfig: NextConfig = {
 				protocol: 'https',
 				hostname: '*.supabase.co',
 				pathname: '/storage/v1/object/public/**',
+			},
+			{
+				protocol: 'https',
+				hostname: 'randomuser.me',
+				pathname: '/api/portraits/**',
 			},
 		],
 	},

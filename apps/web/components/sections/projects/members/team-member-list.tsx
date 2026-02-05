@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { User } from 'lucide-react'
 import {
 	Card,

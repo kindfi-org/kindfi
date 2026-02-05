@@ -23,7 +23,7 @@ export function EmptyProject({
 			<p className="text-gray-600 mb-6 max-w-md">
 				{selectedCategories.length > 0 ? (
 					<>
-						We couldn't find any projects matching your selected{' '}
+						We couldn&apos;t find any projects matching your selected{' '}
 						{selectedCategories.length > 1 ? 'categories' : 'category'}.
 					</>
 				) : (

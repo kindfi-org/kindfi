@@ -20,6 +20,11 @@ export function Navigation() {
 		if (path === '/projects') {
 			return pathname === '/projects' || pathname?.startsWith('/projects/')
 		}
+		if (path === '/foundations') {
+			return (
+				pathname === '/foundations' || pathname?.startsWith('/foundations/')
+			)
+		}
 		if (path === '/about') {
 			return pathname === '/about'
 		}
@@ -46,6 +51,24 @@ export function Navigation() {
 							aria-current={isActive('/projects') ? 'page' : undefined}
 						>
 							{t('nav.projects')}
+						</NavigationMenuLink>
+					</Link>
+				</NavigationMenuItem>
+
+				<NavigationMenuItem>
+					<Link href="/foundations" passHref>
+						<NavigationMenuLink
+							className={cn(
+								navigationMenuTriggerStyle(),
+								'data-[active]:bg-green-900/10 data-[active]:text-green-900',
+								'hover:bg-green-900/10 hover:text-green-900',
+								isActive('/foundations') &&
+									'bg-green-900/10 text-green-900 font-medium',
+							)}
+							aria-label={t('nav.foundations')}
+							aria-current={isActive('/foundations') ? 'page' : undefined}
+						>
+							{t('nav.foundations')}
 						</NavigationMenuLink>
 					</Link>
 				</NavigationMenuItem>

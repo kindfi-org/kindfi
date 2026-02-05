@@ -1,16 +1,13 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
-import { Users } from 'lucide-react'
-import { Card, CardContent } from '~/components/base/card'
+import { motion } from 'framer-motion'
 import { SectionContainer } from '~/components/shared/section-container'
 import { Web3FeatureCard } from '~/components/shared/web3-feature-card'
 import { fadeInUpAnimation } from '~/lib/constants/animations'
-import { features, stats } from '~/lib/constants/platform-overview-data'
+import { features } from '~/lib/constants/platform-overview-data'
 import { useI18n } from '~/lib/i18n'
 
 export function PlatformOverview() {
-	const shouldReduceMotion = useReducedMotion()
 	const { t } = useI18n()
 
 	return (

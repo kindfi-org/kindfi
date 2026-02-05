@@ -41,7 +41,7 @@ export default async function CreateProjectPage() {
 						Create Project
 					</div>
 					<h1 className="text-3xl md:text-4xl font-bold mb-4 py-2 sm:text-center gradient-text">
-						Let's get your KindFi project started
+						Let&apos;s get your KindFi project started
 					</h1>
 					<p className="text-xl text-muted-foreground max-w-2xl mx-auto">
 						Create a crowdfunding campaign and make an impact with the power of

@@ -138,7 +138,7 @@ export function FundEscrowTab({
 					<div>
 						<CardTitle>Fund Escrow</CardTitle>
 						<CardDescription>
-							Add funds to your escrow contract. You'll need to approve the
+							Add funds to your escrow contract. You&apos;ll need to approve the
 							transaction in your wallet.
 						</CardDescription>
 					</div>

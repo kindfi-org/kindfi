@@ -3,6 +3,7 @@ export const translations = {
 		// Navigation
 		nav: {
 			projects: 'Projects',
+			foundations: 'Foundations',
 			resources: 'Resources',
 			about: 'About',
 			news: 'News',
@@ -645,6 +646,7 @@ export const translations = {
 		// Navigation
 		nav: {
 			projects: 'Proyectos',
+			foundations: 'Fundaciones',
 			resources: 'Recursos',
 			about: 'Acerca de',
 			news: 'Noticias',

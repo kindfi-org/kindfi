@@ -183,7 +183,7 @@ export function VerifyOTPComponent() {
 								Check Your Email
 							</CardTitle>
 							<CardDescription className="text-center">
-								We've sent a verification code to{' '}
+								We&apos;ve sent a verification code to{' '}
 								{email && <span className="font-medium">{email}</span>}. Enter
 								the 6-digit code below to complete your account setup.
 								<div className="mt-2 font-medium text-primary">
@@ -333,7 +333,7 @@ export function VerifyOTPComponent() {
 
 									<div className="flex items-center justify-center space-x-1 pt-2">
 										<span className="text-sm text-muted-foreground">
-											Didn't receive the code?
+											Didn&apos;t receive the code?
 										</span>
 										<Button
 											variant="link"

@@ -23,7 +23,6 @@ const WalletCopyButton = ({
 	className?: string
 }) => {
 	const explorerUrl = getStellarExplorerUrl(address)
-	const { t } = useI18n()
 
 	const start = address.substring(0, 6)
 	const end = address.substring(address.length - 6)
@@ -62,6 +61,11 @@ export const MobileNavigation = () => {
 		if (path === '/projects') {
 			return pathname === '/projects' || pathname?.startsWith('/projects/')
 		}
+		if (path === '/foundations') {
+			return (
+				pathname === '/foundations' || pathname?.startsWith('/foundations/')
+			)
+		}
 		if (path === '/about') {
 			return pathname === '/about'
 		}
@@ -83,6 +87,17 @@ export const MobileNavigation = () => {
 				)}
 			>
 				{t('nav.projects')}
+			</Link>
+			<Link
+				href="/foundations"
+				className={cn(
+					'text-sm font-medium transition-colors px-3 py-2 rounded-md',
+					isActive('/foundations')
+						? 'bg-green-900/10 text-green-900 font-semibold'
+						: 'hover:bg-green-900/10 hover:text-green-900',
+				)}
+			>
+				{t('nav.foundations')}
 			</Link>
 			<Link
 				href="/about"

@@ -4,9 +4,7 @@ import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { notFound } from 'next/navigation'
 import { IoSettingsOutline } from 'react-icons/io5'
-import { BreadcrumbContainer } from '~/components/sections/projects/shared'
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
-import { BreadcrumbSkeleton } from '../../detail/skeletons'
 import { EscrowAdminPanel } from './escrow-admin-panel'
 
 export function EscrowAdminClientWrapper({
@@ -18,7 +16,7 @@ export function EscrowAdminClientWrapper({
 	const {
 		data: project,
 		error,
-		isLoading,
+		isLoading: _isLoading,
 	} = useSupabaseQuery(
 		'basic-project-info',
 		(client) => getBasicProjectInfoBySlug(client, projectSlug),
@@ -27,7 +25,7 @@ export function EscrowAdminClientWrapper({
 
 	if (error || !project) notFound()
 
-	const category = project.category?.slug
+	const _category = project.category?.slug
 		? { name: project.category.name, slug: project.category.slug }
 		: undefined
 

@@ -55,6 +55,7 @@ export function CommentForm({
 		},
 	})
 
+	// eslint-disable-next-line react-hooks/incompatible-library -- watch() for character count only; value not passed to memoized children
 	const characterCount = form.watch('content').length
 	const isOverLimit = characterCount > maxLength
 

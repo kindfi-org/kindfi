@@ -5,12 +5,7 @@ import { Edit2, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader } from '~/components/base/card'
 import {
 	Dialog,
 	DialogContent,
@@ -20,7 +15,6 @@ import {
 	DialogTrigger,
 } from '~/components/base/dialog'
 import type { ProjectTeamMember } from '~/lib/types/project/project-team.types'
-import { cn } from '~/lib/utils'
 import { getInitials } from '~/lib/utils/avatar'
 
 interface TeamMemberCardProps {

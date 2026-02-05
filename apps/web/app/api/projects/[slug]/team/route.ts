@@ -19,7 +19,7 @@ export async function POST(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const { slug: projectSlug } = await params
+		const { slug: _projectSlug } = await params
 		const body: CreateTeamMemberData & { projectId: string } = await req.json()
 		const { projectId, fullName, roleTitle, bio, photoUrl, yearsInvolved } =
 			body
@@ -137,7 +137,7 @@ export async function PATCH(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const { slug: projectSlug } = await params
+		const { slug: _projectSlug } = await params
 		const body: UpdateTeamMemberData & { projectId: string; memberId: string } =
 			await req.json()
 		const {
@@ -250,7 +250,7 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const { slug: projectSlug } = await params
+		const { slug: _projectSlug } = await params
 		const { searchParams } = new URL(req.url)
 		const projectId = searchParams.get('projectId')
 		const memberId = searchParams.get('memberId')

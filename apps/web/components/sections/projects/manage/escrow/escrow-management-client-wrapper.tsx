@@ -11,9 +11,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
-import { BreadcrumbContainer } from '~/components/sections/projects/shared'
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
-import { BreadcrumbSkeleton } from '../../detail/skeletons'
 import { EscrowManagementPanel } from './escrow-management-panel'
 
 export function EscrowManagementClientWrapper({
@@ -25,7 +23,7 @@ export function EscrowManagementClientWrapper({
 	const {
 		data: project,
 		error,
-		isLoading,
+		isLoading: _isLoading,
 	} = useSupabaseQuery(
 		'basic-project-info',
 		(client) => getBasicProjectInfoBySlug(client, projectSlug),
@@ -34,7 +32,7 @@ export function EscrowManagementClientWrapper({
 
 	if (error || !project) notFound()
 
-	const category = project.category?.slug
+	const _category = project.category?.slug
 		? { name: project.category.name, slug: project.category.slug }
 		: undefined
 

@@ -5,7 +5,7 @@
  * @param title - Project title to extract words from
  * @returns Words string (e.g., "solar-energy-initiative")
  */
-function extractWordsFromTitle(title: string): string {
+function _extractWordsFromTitle(title: string): string {
 	return title
 		.toLowerCase()
 		.replace(/&/g, 'and')

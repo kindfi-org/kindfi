@@ -17,6 +17,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from '~/components/base/form'
+import { FoundationSelect } from '~/components/sections/projects/create/foundation-select'
 import { LocationSelect } from '~/components/sections/projects/create/location-select'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/shared'
@@ -54,6 +55,7 @@ export function StepThree({
 		defaultValues: {
 			location: formData.location,
 			category: formData.category,
+			foundationId: (formData as { foundationId?: string }).foundationId || '',
 			tags: formData.tags,
 		},
 		mode: 'onBlur', // Validate on blur for better UX
@@ -220,6 +222,33 @@ export function StepThree({
 													project&apos;s primary focus.
 												</p>
 											)}
+									</FormItem>
+								)}
+							/>
+
+							{/* Foundation Field */}
+							<FormField
+								control={form.control}
+								name="foundationId"
+								render={({ field }) => (
+									<FormItem className="space-y-2">
+										<FormLabel>
+											Assign to Foundation{' '}
+											<span className="text-muted-foreground font-normal">
+												(optional)
+											</span>
+										</FormLabel>
+										<FormControl>
+											<FoundationSelect
+												value={field.value || ''}
+												onChange={(value) => field.onChange(value || undefined)}
+											/>
+										</FormControl>
+										<FormMessage />
+										<p className="text-sm text-muted-foreground">
+											If this campaign is part of a foundation, select it here.
+											This helps build trust and organize your campaigns.
+										</p>
 									</FormItem>
 								)}
 							/>

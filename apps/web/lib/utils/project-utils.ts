@@ -204,6 +204,7 @@ export function parseFormData(formData: FormData) {
 		tags: JSON.parse(formData.get('tags') as string),
 		socialLinks: JSON.parse(formData.get('socialLinks') as string),
 		image: formData.get('image') as File | null,
+		foundationId: (formData.get('foundationId') as string) || undefined,
 	}
 }
 
@@ -251,6 +252,36 @@ export async function uploadProjectImage(
 	supabase: TypedSupabaseClient,
 ): Promise<string | null> {
 	const adapter = makeSupabaseAdapter(supabase, 'project_thumbnails')
+	return uploadFile({
+		client: adapter,
+		folder: slug,
+		file: image,
+		generateFilename: (slug, file) => {
+			const ext = file.name.split('.').pop() || 'png'
+			return `${slug}/${uuidv4()}.${ext}`
+		},
+		deleteExisting: true,
+		cacheControl: '3600', // 1 hour
+	})
+}
+
+/**
+ * Uploads a foundation's logo image into the "foundation_logos" bucket.
+ *
+ * Removes all existing files in the same folder before upload.
+ *
+ * @param slug - The slug of the foundation (used as folder path in the bucket)
+ * @param image - The image File to upload
+ * @param supabase - The Supabase client instance
+ * @returns The public URL of the uploaded image, or null if upload failed
+ * @throws If listing, deleting, or uploading the image fails
+ */
+export async function uploadFoundationLogo(
+	slug: string,
+	image: File,
+	supabase: TypedSupabaseClient,
+): Promise<string | null> {
+	const adapter = makeSupabaseAdapter(supabase, 'foundation_logos')
 	return uploadFile({
 		client: adapter,
 		folder: slug,

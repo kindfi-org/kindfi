@@ -70,6 +70,7 @@ export async function POST(req: Request) {
 			tags,
 			socialLinks,
 			image,
+			foundationId,
 		} = parseFormData(formData)
 
 		// Prepare project data to insert
@@ -82,6 +83,7 @@ export async function POST(req: Request) {
 			category_id: category,
 			kindler_id: userId,
 			social_links: buildSocialLinks(website, socialLinks),
+			...(foundationId && { foundation_id: foundationId }),
 		}
 
 		// Insert new project and retrieve its ID and slug

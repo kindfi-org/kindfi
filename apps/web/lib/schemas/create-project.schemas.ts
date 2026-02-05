@@ -51,6 +51,7 @@ export const stepTwoSchema = z.object({
 export const stepThreeSchema = z.object({
 	location: z.string().length(3, 'Select a valid country'), // e.g. "CRI"
 	category: z.string().min(1, 'Please select a category'),
+	foundationId: z.string().uuid().optional().or(z.literal('')),
 	tags: z
 		.array(
 			z.object({

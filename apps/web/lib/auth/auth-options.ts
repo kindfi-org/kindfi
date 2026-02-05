@@ -17,7 +17,7 @@ export const nextAuthOption: NextAuthOptions = {
 		// signOut: '/sign-out',
 	},
 	callbacks: {
-		async jwt({ token, user, account, trigger }) {
+		async jwt({ token, user, account, trigger: _trigger }) {
 			// On sign in, populate the token with user data
 			if (user) {
 				console.log('🗝️ JWT callback - New sign in:', {

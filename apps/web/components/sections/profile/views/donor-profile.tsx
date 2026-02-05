@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -23,7 +23,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
-import { Progress } from '~/components/base/progress'
 import { AchievementsGrid } from '~/components/sections/achievements/achievement-grid'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { staggerContainer } from '~/lib/constants/animations'
@@ -47,7 +46,10 @@ const cardVariants = {
 	},
 }
 
-export function DonorProfile({ userId, displayName }: DonorProfileProps) {
+export function DonorProfile({
+	userId,
+	displayName: _displayName,
+}: DonorProfileProps) {
 	const [isSyncing, setIsSyncing] = useState(false)
 	const {
 		data: supportedProjects = [],
@@ -66,7 +68,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>(
 		{},
 	)
-	const [isLoadingBalances, setIsLoadingBalances] = useState(false)
+	const [_isLoadingBalances, setIsLoadingBalances] = useState(false)
 
 	// Fetch escrow balances for all supported projects that have escrow addresses
 	useEffect(() => {
@@ -218,7 +220,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 			: 0
 
 	// Get most recent contribution
-	const mostRecentContribution = projectsWithBalances[0]?.contributionDate
+	const _mostRecentContribution = projectsWithBalances[0]?.contributionDate
 		? new Date(projectsWithBalances[0].contributionDate)
 		: null
 
@@ -252,7 +254,7 @@ export function DonorProfile({ userId, displayName }: DonorProfileProps) {
 						Your Impact
 					</h2>
 					<p className="text-muted-foreground mt-1">
-						Track your contributions and the projects you're supporting
+						Track your contributions and the projects you&apos;re supporting
 					</p>
 				</div>
 				<Button

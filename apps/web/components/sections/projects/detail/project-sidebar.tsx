@@ -1,9 +1,9 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { EscrowType } from '@trustless-work/escrow'
 import { motion } from 'framer-motion'
 import {
+	Building2,
 	CircleAlert,
 	CircleCheck,
 	ExternalLink,
@@ -345,8 +345,8 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 				<div className="p-3 my-4 text-sm text-amber-900 bg-amber-50 rounded-md border border-amber-300">
 					Donating without logging in means you will miss out on features like
-					reputation, contributor NFTs, and future perks. If that's fine, you
-					can still donate anonymously.
+					reputation, contributor NFTs, and future perks. If that&apos;s fine,
+					you can still donate anonymously.
 				</div>
 
 				{project.escrowContractAddress && (
@@ -429,6 +429,33 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					)}
 				</div>
 			</div>
+
+			{project.foundation && (
+				<div className="p-6 bg-purple-50/50 border-t border-gray-200">
+					<h3 className="mb-2 font-medium">Foundation</h3>
+					<Link
+						href={`/foundations/${project.foundation.slug}`}
+						className="flex items-center gap-3 p-3 rounded-lg border border-purple-200 bg-white hover:bg-purple-50 hover:border-purple-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+					>
+						<div className="p-2 rounded-lg bg-purple-100 shrink-0">
+							<Building2
+								className="h-5 w-5 text-purple-600"
+								aria-hidden="true"
+							/>
+						</div>
+						<div className="min-w-0 flex-1">
+							<p className="font-semibold text-purple-900 truncate">
+								{project.foundation.name}
+							</p>
+							<p className="text-xs text-muted-foreground">View foundation</p>
+						</div>
+						<ExternalLink
+							className="h-4 w-4 text-purple-600 shrink-0"
+							aria-hidden="true"
+						/>
+					</Link>
+				</div>
+			)}
 
 			<div className="p-6 bg-gray-50 border-t border-gray-200">
 				<h3 className="mb-2 font-medium">Project Tags</h3>

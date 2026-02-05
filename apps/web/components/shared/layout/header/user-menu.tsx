@@ -6,6 +6,7 @@ import {
 	Copy,
 	ExternalLink,
 	LogOut,
+	Shield,
 	User as UserIcon,
 	Wallet,
 } from 'lucide-react'
@@ -199,6 +200,17 @@ export const UserMenu = ({ user }: { user: User }) => {
 							<span className="font-medium">{t('nav.dashboard')}</span>
 						</Link>
 					</DropdownMenuItem>
+					{(user as { role?: string })?.role === 'admin' && (
+						<DropdownMenuItem asChild className="cursor-pointer">
+							<Link
+								href="/admin"
+								className="flex items-center gap-2 px-2 py-2 rounded-md transition-colors hover:bg-accent"
+							>
+								<Shield className="h-4 w-4 text-purple-600" />
+								<span className="font-medium">Admin Dashboard</span>
+							</Link>
+						</DropdownMenuItem>
+					)}
 				</div>
 
 				<DropdownMenuSeparator />

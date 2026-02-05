@@ -265,7 +265,7 @@ export class SmartWalletTransactionService {
 	 * @param params Transaction submission parameters with WebAuthn signature
 	 * @returns Transaction hash and status
 	 */
-	async submitTransactionWithWebAuthn(params: {
+	async submitTransactionWithWebAuthn(_params: {
 		smartWalletAddress: string
 		operation: Operation
 		webAuthnSignature: WebAuthnSignatureData

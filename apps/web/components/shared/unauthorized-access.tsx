@@ -24,7 +24,7 @@ export function UnauthorizedAccess({ userRole }: UnauthorizedAccessProps) {
 						</div>
 						<CardTitle className="text-2xl">Access Restricted</CardTitle>
 						<CardDescription className="text-base">
-							You don't have permission to access this page
+							You don&apos;t have permission to access this page
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">

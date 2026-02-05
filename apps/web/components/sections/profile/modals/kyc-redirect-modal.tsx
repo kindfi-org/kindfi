@@ -91,12 +91,13 @@ export function KYCRedirectModal({
 					</div>
 					<DialogDescription className="text-base space-y-3 pt-2">
 						<p>
-							You're about to be redirected to our secure verification partner,{' '}
-							<strong>Didit</strong>, to complete your identity verification.
+							You&apos;re about to be redirected to our secure verification
+							partner, <strong>Didit</strong>, to complete your identity
+							verification.
 						</p>
 						<p className="text-sm text-muted-foreground">
-							This process typically takes 2-5 minutes. You'll be redirected
-							back to your profile once verification is complete.
+							This process typically takes 2-5 minutes. You&apos;ll be
+							redirected back to your profile once verification is complete.
 						</p>
 						{redirectCountdown > 0 && (
 							<div className="flex items-center gap-2 pt-2">

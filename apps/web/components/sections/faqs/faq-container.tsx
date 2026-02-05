@@ -7,12 +7,8 @@ import { FaqTabs } from './faq-tabs'
 
 export function FaqContainer() {
 	const {
-		inputValue,
-		filteredQuestions,
 		activeTab,
 		selectedQuestion,
-		handleSearch,
-		handleSelectQuestion,
 		handleActiveFaq,
 		handleSelectedQuestion,
 	} = useFaqs()

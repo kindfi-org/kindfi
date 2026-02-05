@@ -56,6 +56,13 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 			fd.append('tags', JSON.stringify(formData.tags))
 			fd.append('socialLinks', JSON.stringify(formData.socialLinks))
 
+			if ((formData as { foundationId?: string }).foundationId) {
+				fd.append(
+					'foundationId',
+					(formData as { foundationId: string }).foundationId,
+				)
+			}
+
 			const res = await fetch(
 				isUpdate ? '/api/projects/update' : '/api/projects/create',
 				{
