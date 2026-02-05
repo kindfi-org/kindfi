@@ -65,6 +65,70 @@ export interface CreateWalletResult {
 }
 
 /**
+ * Get the appropriate RP ID based on the current environment
+ * In the browser, uses the current hostname to match WebAuthn requirements
+ */
+function getRpId(appConfig: AppEnvInterface, providedRpId?: string): string {
+	// If explicitly provided, use it
+	if (providedRpId) {
+		return providedRpId
+	}
+
+	// In the browser, use the current hostname
+	if (typeof window !== 'undefined') {
+		const hostname = window.location.hostname
+
+		// Try to match the current origin with expected origins
+		const currentOrigin = window.location.origin
+		const expectedOrigins = appConfig.passkey.expectedOrigin
+		const rpIds = appConfig.passkey.rpId
+
+		const originIndex = expectedOrigins.findIndex(
+			(expectedOrigin) => expectedOrigin === currentOrigin,
+		)
+
+		if (originIndex !== -1 && rpIds[originIndex]) {
+			return rpIds[originIndex]
+		}
+
+		// If no match found, use the hostname directly (without port)
+		// This ensures WebAuthn works correctly in production
+		return hostname
+	}
+
+	// Server-side: use the first configured RP ID or fallback to localhost
+	return appConfig.passkey.rpId[0] || 'localhost'
+}
+
+/**
+ * Get the appropriate RP Name based on the current environment
+ */
+function getRpName(appConfig: AppEnvInterface, providedRpName?: string): string {
+	// If explicitly provided, use it
+	if (providedRpName) {
+		return providedRpName
+	}
+
+	// In the browser, try to match with expected origins
+	if (typeof window !== 'undefined') {
+		const currentOrigin = window.location.origin
+		const expectedOrigins = appConfig.passkey.expectedOrigin
+		const rpNames = appConfig.passkey.rpName
+
+		const originIndex = expectedOrigins.findIndex(
+			(expectedOrigin) => expectedOrigin === currentOrigin,
+		)
+
+		if (originIndex !== -1 && rpNames[originIndex]) {
+			return rpNames[originIndex]
+		}
+	}
+
+	// Fallback to first configured RP name or default
+	return appConfig.passkey.rpName[0] || 'App'
+}
+
+/**
  * Smart Account Kit Service
  * Provides methods for managing OpenZeppelin Smart Accounts
  */
@@ -106,8 +170,8 @@ export class SmartAccountKitService {
 				config?.relayerUrl ||
 				process.env.NEXT_PUBLIC_RELAYER_URL ||
 				process.env.RELAYER_URL,
-			rpId: config?.rpId || appConfig.passkey.rpId[0],
-			rpName: config?.rpName || appConfig.passkey.rpName[0],
+			rpId: getRpId(appConfig, config?.rpId),
+			rpName: getRpName(appConfig, config?.rpName),
 			timeoutInSeconds: config?.timeoutInSeconds || 30,
 			storage: config?.storage, // Allow custom storage adapter
 		}
@@ -225,8 +289,12 @@ export class SmartAccountKitService {
 					hasEd25519Verifier: !!this.config.ed25519VerifierAddress,
 					hasNativeTokenContract: !!this.config.nativeTokenContract,
 					hasRelayerUrl: !!this.config.relayerUrl,
+					rpId: this.config.rpId,
+					rpName: this.config.rpName,
 					storageType,
 					isServerSide,
+					currentOrigin:
+						typeof window !== 'undefined' ? window.location.origin : 'N/A',
 				})
 			} catch (error) {
 				console.error('❌ Failed to initialize Smart Account Kit:', error)
