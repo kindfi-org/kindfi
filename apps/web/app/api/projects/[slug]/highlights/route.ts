@@ -3,15 +3,11 @@ import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import {
-	buildSocialLinks,
-	deleteFolderFromBucket,
-	parseFormData,
-	uploadProjectImage,
-	upsertTags,
-} from '~/lib/utils/project-utils'
 
-export async function PATCH(req: Request) {
+export async function POST(
+	req: Request,
+	_params: { params: Promise<{ slug: string }> },
+) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -20,29 +16,41 @@ export async function PATCH(req: Request) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const formData = await req.formData()
+		const body = await req.json()
+		const { projectId, highlights } = body
 
-		// Extract fields from multipart form data
-		const {
-			projectId,
-			slug,
-			title,
-			description,
-			targetAmount,
-			minimumInvestment,
-			website,
-			location,
-			category,
-			tags,
-			socialLinks,
-			image,
-		} = parseFormData(formData)
-
-		const removeImage = formData.get('removeImage') === 'true'
-
-		if (!projectId) {
+		// Validate required fields
+		if (!projectId || !highlights) {
 			return NextResponse.json(
-				{ error: 'Project id is missing' },
+				{ error: 'Missing required fields: projectId and highlights' },
+				{ status: 400 },
+			)
+		}
+
+		// Validate highlights structure
+		if (!Array.isArray(highlights)) {
+			return NextResponse.json(
+				{ error: 'Highlights must be an array' },
+				{ status: 400 },
+			)
+		}
+
+		// Validate minimum highlights requirement
+		if (highlights.length < 2) {
+			return NextResponse.json(
+				{ error: 'At least 2 highlights are required' },
+				{ status: 400 },
+			)
+		}
+
+		// Validate each highlight has required fields
+		const invalidHighlights = highlights.filter(
+			(h: { title?: string; description?: string }) =>
+				!h.title?.trim() || !h.description?.trim(),
+		)
+		if (invalidHighlights.length > 0) {
+			return NextResponse.json(
+				{ error: 'All highlights must have a title and description' },
 				{ status: 400 },
 			)
 		}
@@ -51,7 +59,7 @@ export async function PATCH(req: Request) {
 		// Check if user is the project owner or has editor role
 		const { data: project, error: projectError } = await supabaseServiceRole
 			.from('projects')
-			.select('id, kindler_id')
+			.select('id, kindler_id, metadata')
 			.eq('id', projectId)
 			.single()
 
@@ -83,41 +91,28 @@ export async function PATCH(req: Request) {
 		}
 
 		// Use service role client for project update with manual authorization check
-		// This bypasses RLS but we've already verified the user has permission
 		const supabase = supabaseServiceRole
 
-		// Prepare project update payload
+		// Prepare highlights data (remove client-side IDs, keep only title and description)
+		const highlightsData = highlights.map(
+			(h: { title: string; description: string }) => ({
+				title: h.title.trim(),
+				description: h.description.trim(),
+			}),
+		)
+
+		// Merge with existing metadata, preserving other metadata fields
+		const currentMetadata = (project.metadata as Record<string, unknown>) || {}
+		const updatedMetadata = {
+			...currentMetadata,
+			highlights: highlightsData,
+		}
+
+		// Update the project metadata
 		const updateData: TablesUpdate<'projects'> = {
-			title,
-			description,
-			target_amount: targetAmount,
-			min_investment: minimumInvestment,
-			project_location: location,
-			category_id: category,
-			social_links: buildSocialLinks(website, socialLinks),
+			metadata: updatedMetadata,
 		}
 
-		// If the image was updated, upload new one and attach to project
-		if (image instanceof File) {
-			if (!slug) throw new Error('Project slug is missing')
-
-			const imageUrl = await uploadProjectImage(slug, image, supabase)
-			updateData.image_url = imageUrl
-		} else if (removeImage) {
-			// Remove image from the database
-			updateData.image_url = null
-
-			if (slug) {
-				try {
-					// Delete all files in the project's thumbnail folder
-					await deleteFolderFromBucket(supabase, 'project_thumbnails', slug)
-				} catch (e) {
-					console.warn('Failed to cleanup thumbnails:', (e as Error).message)
-				}
-			}
-		}
-
-		// Update the project record in the database
 		const { error: updateError } = await supabase
 			.from('projects')
 			.update(updateData)
@@ -128,19 +123,9 @@ export async function PATCH(req: Request) {
 			return NextResponse.json({ error: updateError.message }, { status: 500 })
 		}
 
-		// Remove old tag relationships before inserting updated ones
-		await supabase
-			.from('project_tag_relationships')
-			.delete()
-			.eq('project_id', projectId)
-
-		// Upsert new tag relationships
-		await upsertTags(projectId, tags, supabase)
-
-		return NextResponse.json(
-			{ message: 'Project updated successfully' },
-			{ status: 200 },
-		)
+		return NextResponse.json({
+			message: 'Highlights saved successfully',
+		})
 	} catch (err) {
 		console.error(err)
 		return NextResponse.json(

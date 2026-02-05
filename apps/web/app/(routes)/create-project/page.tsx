@@ -1,7 +1,38 @@
+import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
 import { CreateProjectForm } from '~/components/sections/projects/create/create-project-form'
+import { UnauthorizedAccess } from '~/components/shared/unauthorized-access'
 import { CreateProjectProvider } from '~/hooks/contexts/use-create-project.context'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 
-export default function CreateProjectPage() {
+export default async function CreateProjectPage() {
+	const session = await getServerSession(nextAuthOption)
+
+	if (!session?.user) {
+		redirect('/sign-in?callbackUrl=/create-project')
+	}
+
+	// Fetch user profile to check role
+	const supabase = await createSupabaseServerClient()
+	const { data: profileData, error } = await supabase
+		.from('profiles')
+		.select('role')
+		.eq('id', session.user.id)
+		.single()
+
+	if (error || !profileData) {
+		console.error('Error fetching user profile:', error)
+		redirect('/sign-in')
+	}
+
+	const userRole = profileData.role
+
+	// Only allow admin and creator roles
+	if (userRole !== 'admin' && userRole !== 'creator') {
+		return <UnauthorizedAccess userRole={userRole} />
+	}
+
 	return (
 		<CreateProjectProvider>
 			<section className="container mx-auto px-4 py-8 md:py-12">

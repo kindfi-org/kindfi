@@ -47,6 +47,19 @@ export async function getBasicProjectInfoBySlug(
 		? escrowRel[0]?.escrow_id
 		: escrowRel?.escrow_id
 
+	// Fetch the actual contract_id from escrow_contracts table
+	let escrowContractAddress: string | undefined
+
+	if (escrowId) {
+		const { data: escrowContract } = await client
+			.from('escrow_contracts')
+			.select('contract_id')
+			.eq('id', escrowId)
+			.maybeSingle()
+
+		escrowContractAddress = escrowContract?.contract_id
+	}
+
 	return {
 		id: project.id,
 		title: project.title,
@@ -65,7 +78,7 @@ export async function getBasicProjectInfoBySlug(
 				? (project.social_links as SocialLinks)
 				: {},
 		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
-		escrowContractAddress: escrowId,
-		escrowType: undefined,
+		escrowContractAddress,
+		escrowType: undefined, // TODO: Determine escrow type from contract data or metadata
 	}
 }

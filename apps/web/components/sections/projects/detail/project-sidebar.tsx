@@ -141,7 +141,18 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			}
 			if (!address) throw new Error('Wallet address missing')
 
+			// Validate amount is reasonable (prevent accidental large amounts)
+			if (data.investmentAmount > 1_000_000) {
+				toast.error('Amount too large', {
+					description: 'Please enter an amount less than $1,000,000',
+					icon: <CircleAlert className="text-destructive" />,
+				})
+				return
+			}
+
 			// 2) Prepare fund escrow request -> returns unsigned XDR
+			// Trustless Work expects amount in dollars (not stroops) - it handles conversion internally
+			// Note: The escrow contract and signer must have the USDC trustline established first
 			const fundResponse = await fundEscrow(
 				{
 					amount: data.investmentAmount,
@@ -200,9 +211,33 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			// 6) Refresh balance
 			fetchEscrowBalance()
 		} catch (error) {
-			console.error(error)
-			toast.error('Something went wrong', {
-				description: "We couldn't process your donation. Please try again.",
+			console.error('Fund escrow error:', error)
+
+			// Check for specific error messages
+			const errorMessage =
+				error instanceof Error ? error.message : String(error)
+			let userFriendlyMessage =
+				"We couldn't process your donation. Please try again."
+
+			if (
+				errorMessage.includes('Storage, MissingValue') ||
+				errorMessage.includes('balance')
+			) {
+				userFriendlyMessage =
+					'The escrow contract needs a USDC trustline established. Please contact support or ensure the escrow is properly configured.'
+			} else if (
+				errorMessage.includes('insufficient funds') ||
+				errorMessage.includes('sufficient funds')
+			) {
+				userFriendlyMessage =
+					'Insufficient funds. Please ensure your wallet has enough USDC balance.'
+			} else if (errorMessage.includes('trustline')) {
+				userFriendlyMessage =
+					'Trustline required. The escrow contract or your wallet needs a USDC trustline established.'
+			}
+
+			toast.error('Donation failed', {
+				description: userFriendlyMessage,
 				icon: <CircleAlert className="text-destructive" />,
 			})
 		}

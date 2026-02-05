@@ -38,14 +38,24 @@ export function useProjectPitchMutation() {
 			})
 
 			if (!res.ok) {
+				// Clone response to avoid "body stream already read" error
+				const clonedRes = res.clone()
+				let errorMessage = 'Failed to submit pitch'
+
 				try {
-					const error = await res.json()
-					throw new Error(error?.error || 'Failed to submit pitch')
+					const contentType = clonedRes.headers.get('content-type')
+					if (contentType?.includes('application/json')) {
+						const error = await clonedRes.json()
+						errorMessage = error?.error || errorMessage
+					} else {
+						const text = await clonedRes.text()
+						errorMessage = text || errorMessage
+					}
 				} catch {
-					// Fallback for non-JSON responses
-					const text = await res.text()
-					throw new Error(text || 'Failed to submit pitch')
+					// If reading fails, use default message
 				}
+
+				throw new Error(errorMessage)
 			}
 
 			return res.json()

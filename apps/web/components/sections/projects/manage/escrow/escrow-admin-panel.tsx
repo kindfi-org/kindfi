@@ -1,13 +1,17 @@
 'use client'
 
+import { useSupabaseQuery } from '@packages/lib/hooks'
 import type {
+	EscrowRequestResponse,
 	EscrowType,
 	InitializeMultiReleaseEscrowPayload,
+	InitializeMultiReleaseEscrowResponse,
 	InitializeSingleReleaseEscrowPayload,
+	InitializeSingleReleaseEscrowResponse,
 } from '@trustless-work/escrow'
 import { Plus, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { saveEscrowContractAction } from '~/app/actions/escrow/save-escrow-contract'
 import { Button } from '~/components/base/button'
@@ -23,15 +27,22 @@ import {
 } from '~/components/base/tooltip'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { DEFAULT_USDC_CONTRACT_ADDRESS } from '~/lib/constants/escrow'
+import { getEscrowCountByProject } from '~/lib/queries/escrow/get-escrow-count-by-project'
+import { generateEngagementId, generateEscrowTitle } from '~/lib/utils/escrow'
 
 export function EscrowAdminPanel({
 	projectId,
 	projectSlug,
+	projectTitle,
+	projectDescription,
 	escrowContractAddress,
 	escrowType,
 }: {
 	projectId: string
 	projectSlug: string
+	projectTitle?: string
+	projectDescription?: string
 	escrowContractAddress?: string
 	escrowType?: EscrowType
 }) {
@@ -44,13 +55,47 @@ export function EscrowAdminPanel({
 	} = useEscrow()
 	const { isConnected, connect, address, signTransaction } = useWallet()
 
+	// Fetch escrow count to determine consecutive number
+	const { data: escrowCount = 0 } = useSupabaseQuery(
+		'escrow-count',
+		(client) => getEscrowCountByProject(client, projectId),
+		{ additionalKeyValues: [projectId] },
+	)
+
+	// Calculate consecutive number (existing escrows + 1)
+	const consecutiveNumber = (escrowCount ?? 0) + 1
+
+	// Generate pre-filled values from project data
+	const suggestedTitle = useMemo(() => {
+		if (projectTitle) {
+			return generateEscrowTitle(projectTitle, consecutiveNumber)
+		}
+		return `Kindfi - Project ${projectId} - ${consecutiveNumber}`
+	}, [projectTitle, projectId, consecutiveNumber])
+
+	const suggestedDescription = useMemo(
+		() => projectDescription || '',
+		[projectDescription],
+	)
+
+	const suggestedEngagementId = useMemo(() => {
+		if (projectTitle) {
+			return generateEngagementId(projectTitle, consecutiveNumber)
+		}
+		return `Kindfi - project-${projectId} - ${consecutiveNumber}`
+	}, [projectTitle, projectId, consecutiveNumber])
+
 	// form state
 	const [selectedEscrowType, setSelectedEscrowType] = useState<EscrowType>(
-		escrowType || 'single-release',
+		escrowType || 'multi-release',
 	)
-	const [title, setTitle] = useState('')
-	const [engagementId, setEngagementId] = useState<string>('')
-	const [trustlineAddress, setTrustlineAddress] = useState<string>('')
+	const [title, setTitle] = useState(suggestedTitle)
+	const [engagementId, setEngagementId] = useState<string>(
+		suggestedEngagementId,
+	)
+	const [trustlineAddress, setTrustlineAddress] = useState<string>(
+		DEFAULT_USDC_CONTRACT_ADDRESS,
+	)
 	const [approver, setApprover] = useState<string>('')
 	const [serviceProvider, setServiceProvider] = useState<string>('')
 	const [releaseSigner, setReleaseSigner] = useState<string>('')
@@ -60,7 +105,47 @@ export function EscrowAdminPanel({
 	const [platformFee, setPlatformFee] = useState<number | ''>('')
 	const [amount, setAmount] = useState<number | ''>('')
 	const [receiverMemo, setReceiverMemo] = useState<string>('')
-	const [description, setDescription] = useState<string>('')
+	const [description, setDescription] = useState<string>(suggestedDescription)
+
+	// Sync pre-filled values when project data changes (only if fields are empty)
+	useEffect(() => {
+		if (!title.trim() && suggestedTitle) {
+			setTitle(suggestedTitle)
+		}
+	}, [suggestedTitle, title])
+
+	useEffect(() => {
+		if (!engagementId.trim() && suggestedEngagementId) {
+			setEngagementId(suggestedEngagementId)
+		}
+	}, [suggestedEngagementId, engagementId])
+
+	useEffect(() => {
+		if (!description.trim() && suggestedDescription) {
+			setDescription(suggestedDescription)
+		}
+	}, [suggestedDescription, description])
+
+	// Sync role fields with connected wallet address
+	useEffect(() => {
+		if (address) {
+			// Pre-fill role fields with connected wallet address if they're empty
+			if (!approver.trim()) setApprover(address)
+			if (!serviceProvider.trim()) setServiceProvider(address)
+			if (!releaseSigner.trim()) setReleaseSigner(address)
+			if (!disputeResolver.trim()) setDisputeResolver(address)
+			if (!platformAddress.trim()) setPlatformAddress(address)
+			if (!receiver.trim()) setReceiver(address)
+		}
+	}, [
+		address,
+		approver,
+		serviceProvider,
+		releaseSigner,
+		disputeResolver,
+		platformAddress,
+		receiver,
+	])
 	type MilestoneItem =
 		| { id: string; description: string }
 		| {
@@ -74,19 +159,34 @@ export function EscrowAdminPanel({
 			? crypto.randomUUID()
 			: `m-${Date.now()}-${Math.random().toString(36).slice(2)}`
 	const [milestones, setMilestones] = useState<MilestoneItem[]>(() => {
-		const initialType = escrowType || 'single-release'
+		const initialType = escrowType || 'multi-release'
 		if (initialType === 'multi-release') {
 			return [
 				{
 					id: genId(),
 					description: 'Milestone 1',
 					amount: '',
-					receiver: '',
+					// Pre-fill with connected wallet address if available
+					receiver: address || '',
 				},
 			]
 		}
 		return [{ id: genId(), description: 'Milestone 1' }]
 	})
+
+	// Update milestone receivers when wallet address changes
+	useEffect(() => {
+		if (address && selectedEscrowType === 'multi-release') {
+			setMilestones((prev) =>
+				prev.map((m) => {
+					if ('receiver' in m && !m.receiver.trim()) {
+						return { ...m, receiver: address }
+					}
+					return m
+				}),
+			)
+		}
+	}, [address, selectedEscrowType])
 
 	// admin actions state
 	const [milestoneIndex, _setMilestoneIndex] = useState('0')
@@ -107,12 +207,6 @@ export function EscrowAdminPanel({
 	const descriptionId = useId()
 	const singleReleaseRadioId = useId()
 	const multiReleaseRadioId = useId()
-
-	const ensureWallet = async () => {
-		if (!isConnected) await connect()
-		if (!address) throw new Error('Wallet address missing')
-		return address
-	}
 
 	const areRequiredFieldsValid = useMemo(() => {
 		const baseValid =
@@ -178,7 +272,8 @@ export function EscrowAdminPanel({
 					id: genId(),
 					description: `Milestone ${prev.length + 1}`,
 					amount: '',
-					receiver: '',
+					// Pre-fill with connected wallet address if available
+					receiver: address || '',
 				},
 			])
 		} else {
@@ -195,7 +290,17 @@ export function EscrowAdminPanel({
 
 	const handleCreateEscrow = async () => {
 		try {
-			const signer = await ensureWallet()
+			// Ensure wallet is connected (Stellar Wallets Kit)
+			if (!isConnected) {
+				await connect()
+			}
+			if (!address) {
+				toast.error('Please connect a Stellar wallet to continue')
+				return
+			}
+
+			const signer = address
+
 			if (!areRequiredFieldsValid) {
 				toast.error('Please complete all required fields')
 				return
@@ -236,33 +341,357 @@ export function EscrowAdminPanel({
 					milestones: sanitizedMilestones,
 				}
 
-				// 1) Execute function from Trustless Work -> returns unsigned XDR
-				const deployResponse = await deployEscrow(payload, 'single-release')
+				// Validate payload before sending
+				console.log('📤 Sending single-release escrow payload:', {
+					hasSigner: !!payload.signer,
+					hasEngagementId: !!payload.engagementId,
+					hasTitle: !!payload.title,
+					hasRoles: !!payload.roles,
+					hasDescription: !!payload.description,
+					hasAmount: typeof payload.amount === 'number' && payload.amount > 0,
+					hasPlatformFee: typeof payload.platformFee === 'number',
+					hasTrustline: !!payload.trustline,
+					milestonesCount: payload.milestones.length,
+					payload: JSON.stringify(payload, null, 2),
+				})
 
-				if (deployResponse.status !== 'SUCCESS') {
-					throw new Error('Failed to create escrow')
+				// Validate amount
+				if (!payload.amount || payload.amount <= 0) {
+					const errorMsg = 'Invalid amount: Amount must be greater than 0'
+					console.error('❌ Invalid amount:', payload.amount)
+					toast.error('Invalid amount', {
+						description: errorMsg,
+					})
+					throw new Error(errorMsg)
+				}
+
+				// 1) Execute function from Trustless Work -> returns unsigned XDR
+				let deployResponse: EscrowRequestResponse
+				try {
+					deployResponse = await deployEscrow(payload, 'single-release')
+				} catch (error) {
+					console.error('❌ deployEscrow error:', error)
+					const errorMessage =
+						error instanceof Error
+							? error.message
+							: 'Failed to create escrow: API request failed'
+					toast.error('Failed to deploy escrow', {
+						description: errorMessage,
+					})
+					throw new Error(errorMessage)
+				}
+
+				if (!deployResponse || deployResponse.status !== 'SUCCESS') {
+					const errorMsg =
+						'Escrow deployment failed: Invalid request or API error'
+					console.error('❌ deployEscrow failed:', {
+						status: deployResponse?.status,
+						response: deployResponse,
+					})
+					toast.error('Failed to deploy escrow', {
+						description: errorMsg,
+					})
+					throw new Error(errorMsg)
 				}
 
 				if (!deployResponse.unsignedTransaction) {
+					console.error(
+						'❌ No unsigned transaction in response:',
+						deployResponse,
+					)
+					toast.error('Failed to deploy escrow', {
+						description: 'No unsigned transaction returned from API',
+					})
 					throw new Error('No unsigned transaction returned')
 				}
 
-				// 2) Sign transaction with wallet
-				const signedXdr = await signTransaction(
-					deployResponse.unsignedTransaction,
-				)
-
-				// 3) Send signed transaction
-				const sendResult = await sendTransaction(signedXdr)
-				if (sendResult?.status !== 'SUCCESS') {
-					throw new Error('Transaction failed')
+				// 2) Sign transaction with Stellar Wallets Kit
+				let signedXdr: string
+				try {
+					signedXdr = await signTransaction(deployResponse.unsignedTransaction)
+				} catch (error) {
+					console.error('❌ signTransaction error:', error)
+					const errorMessage =
+						error instanceof Error
+							? error.message
+							: 'Failed to sign transaction'
+					toast.error('Failed to sign transaction', {
+						description: errorMessage,
+					})
+					throw new Error(errorMessage)
 				}
 
-				// 4) Save escrow contract ID to database
-				if ('contractId' in sendResult && sendResult.contractId) {
+				// 3) Send signed transaction
+				let sendResult:
+					| InitializeSingleReleaseEscrowResponse
+					| InitializeMultiReleaseEscrowResponse
+					| { status: string }
+				try {
+					sendResult = await sendTransaction(signedXdr)
+				} catch (error) {
+					console.error('❌ sendTransaction error:', error)
+					const errorMessage =
+						error instanceof Error
+							? error.message
+							: 'Failed to send transaction'
+					toast.error('Failed to send transaction', {
+						description: errorMessage,
+					})
+					throw new Error(errorMessage)
+				}
+
+				if (
+					!sendResult ||
+					(sendResult as { status?: string }).status !== 'SUCCESS'
+				) {
+					const status = (sendResult as { status?: string })?.status
+					const errorMsg =
+						status === 'ERROR'
+							? 'Transaction submission failed'
+							: 'Transaction failed: Invalid response'
+					console.error('❌ sendTransaction failed:', {
+						status,
+						response: sendResult,
+					})
+					toast.error('Transaction failed', {
+						description: errorMsg,
+					})
+					throw new Error(errorMsg)
+				}
+
+				// Get contract ID and escrow data from response
+				// Use Record type to safely access properties
+				const responseAny = sendResult as Record<string, unknown>
+				const contractId =
+					(responseAny.contractId as string | undefined) ||
+					(responseAny.contract_id as string | undefined) ||
+					undefined
+
+				// Extract escrow data - the response has an 'escrow' property
+				const escrowDataRaw = responseAny.escrow as
+					| Record<string, unknown>
+					| undefined
+				const escrowData = escrowDataRaw
+					? {
+							engagementId: escrowDataRaw.engagementId as string | undefined,
+							title: escrowDataRaw.title as string | undefined,
+							description: escrowDataRaw.description as string | undefined,
+							roles: escrowDataRaw.roles as
+								| {
+										approver?: string
+										serviceProvider?: string
+										disputeResolver?: string
+										platformAddress?: string
+										releaseSigner?: string
+								  }
+								| undefined,
+							platformFee: escrowDataRaw.platformFee as number | undefined,
+							milestones: escrowDataRaw.milestones as
+								| Array<{
+										amount: number
+										receiver: string
+										description?: string
+								  }>
+								| undefined,
+							amount: escrowDataRaw.amount as number | undefined,
+							receiver: escrowDataRaw.receiver as string | undefined,
+							receiverMemo: escrowDataRaw.receiverMemo as number | undefined,
+						}
+					: undefined
+
+				console.log('📦 Escrow save data (single-release):', {
+					contractId,
+					hasEscrowData: !!escrowData,
+					escrowData,
+					responseKeys: Object.keys(responseAny),
+					hasEscrowInResponse: 'escrow' in responseAny,
+					fullResponse: responseAny,
+				})
+
+				// Validate that we have a contract ID before proceeding
+				if (!contractId) {
+					console.error(
+						'❌ No contract ID in transaction response:',
+						responseAny,
+					)
+					toast.error('Escrow deployed but contract ID not found', {
+						description: 'Please check the transaction result manually',
+					})
+					// Don't throw - allow user to see the success message but warn about missing contract ID
+					return
+				}
+
+				// 3) Save escrow contract ID to database
+				if (contractId) {
+					// Always provide escrow data - use response data or fallback to form data
+					const escrowDataToSave = escrowData
+						? {
+								engagementId: escrowData.engagementId || effectiveEngagementId,
+								title: escrowData.title || title.trim(),
+								description: escrowData.description || description.trim(),
+								roles: {
+									approver: escrowData.roles?.approver || approver.trim(),
+									serviceProvider:
+										escrowData.roles?.serviceProvider || serviceProvider.trim(),
+									disputeResolver:
+										escrowData.roles?.disputeResolver || disputeResolver.trim(),
+									platformAddress:
+										escrowData.roles?.platformAddress || platformAddress.trim(),
+									releaseSigner:
+										escrowData.roles?.releaseSigner || releaseSigner.trim(),
+								},
+								platformFee: escrowData.platformFee || (platformFee as number),
+								milestones:
+									escrowData.milestones?.map(
+										(m: {
+											amount: number
+											receiver: string
+											description?: string
+										}) => ({
+											amount: m.amount,
+											receiver: m.receiver,
+										}),
+									) || undefined,
+								amount: 'amount' in escrowData ? escrowData.amount : undefined,
+								receiver:
+									'receiver' in escrowData ? escrowData.receiver : undefined,
+								receiverMemo:
+									'receiverMemo' in escrowData
+										? escrowData.receiverMemo
+										: undefined,
+							}
+						: {
+								// Fallback to form data if response doesn't have escrow data (single-release)
+								engagementId: effectiveEngagementId,
+								title: title.trim(),
+								description: description.trim(),
+								roles: {
+									approver: approver.trim(),
+									serviceProvider: serviceProvider.trim(),
+									disputeResolver: disputeResolver.trim(),
+									platformAddress: platformAddress.trim(),
+									releaseSigner: releaseSigner.trim(),
+								},
+								platformFee: platformFee as number,
+								amount:
+									typeof amount === 'number'
+										? amount
+										: typeof amount === 'string'
+											? parseFloat(amount) || 0
+											: 0,
+								receiver: receiver.trim() || serviceProvider.trim(),
+								receiverMemo:
+									typeof receiverMemo === 'number'
+										? receiverMemo
+										: typeof receiverMemo === 'string'
+											? Number(receiverMemo) || 0
+											: 0,
+							}
+
+					console.log('💾 Saving escrow contract (single-release):', {
+						contractId,
+						hasEscrowDataToSave: !!escrowDataToSave,
+						escrowDataToSaveKeys: escrowDataToSave
+							? Object.keys(escrowDataToSave)
+							: [],
+						engagementId: escrowDataToSave?.engagementId,
+						hasRoles: !!escrowDataToSave?.roles,
+						escrowDataToSaveFull: escrowDataToSave,
+					})
+
+					// Ensure escrowDataToSave is always defined and has required fields
+					if (
+						!escrowDataToSave ||
+						!escrowDataToSave.engagementId ||
+						!escrowDataToSave.roles
+					) {
+						console.error(
+							'❌ Invalid escrowDataToSave structure:',
+							escrowDataToSave,
+						)
+						toast.error('Failed to prepare escrow data for saving')
+						return
+					}
+
+					// Create a clean, serializable object for the server action
+					// Next.js server actions need plain objects without undefined values
+					// Ensure all required fields are present and not undefined
+					const serializableEscrowData = {
+						engagementId:
+							escrowDataToSave.engagementId || effectiveEngagementId,
+						title: escrowDataToSave.title || title.trim() || 'Untitled Escrow',
+						description:
+							escrowDataToSave.description || description.trim() || '',
+						roles: {
+							approver: escrowDataToSave.roles.approver || approver.trim(),
+							serviceProvider:
+								escrowDataToSave.roles.serviceProvider ||
+								serviceProvider.trim(),
+							disputeResolver:
+								escrowDataToSave.roles.disputeResolver ||
+								disputeResolver.trim(),
+							platformAddress:
+								escrowDataToSave.roles.platformAddress ||
+								platformAddress.trim(),
+							releaseSigner:
+								escrowDataToSave.roles.releaseSigner || releaseSigner.trim(),
+						},
+						platformFee:
+							escrowDataToSave.platformFee ?? (platformFee as number),
+						...(escrowDataToSave.milestones &&
+							escrowDataToSave.milestones.length > 0 && {
+								milestones: escrowDataToSave.milestones.map((m) => ({
+									amount: m.amount,
+									receiver: m.receiver,
+								})),
+							}),
+						...(escrowDataToSave.amount !== undefined &&
+							escrowDataToSave.amount !== null && {
+								amount: escrowDataToSave.amount,
+							}),
+						...(escrowDataToSave.receiver?.trim() && {
+							receiver: escrowDataToSave.receiver,
+						}),
+						...(escrowDataToSave.receiverMemo !== undefined &&
+							escrowDataToSave.receiverMemo !== null && {
+								receiverMemo: escrowDataToSave.receiverMemo,
+							}),
+					}
+
+					// Final validation before sending
+					if (
+						!serializableEscrowData.engagementId ||
+						!serializableEscrowData.roles ||
+						!serializableEscrowData.roles.approver
+					) {
+						console.error(
+							'❌ Invalid serializableEscrowData structure:',
+							serializableEscrowData,
+						)
+						toast.error('Failed to prepare escrow data for saving', {
+							description: 'Missing required fields in escrow data',
+						})
+						return
+					}
+
+					console.log('📤 Sending to server action (single-release):', {
+						contractId,
+						hasSerializableData: !!serializableEscrowData,
+						serializableKeys: Object.keys(serializableEscrowData),
+						hasEngagementId: !!serializableEscrowData.engagementId,
+						hasRoles: !!serializableEscrowData.roles,
+						rolesKeys: serializableEscrowData.roles
+							? Object.keys(serializableEscrowData.roles)
+							: [],
+						fullSerializableData: JSON.stringify(serializableEscrowData),
+					})
+
+					// Ensure we always pass engagementId even if escrowData is missing
 					const saveResult = await saveEscrowContractAction({
 						projectId,
-						contractId: sendResult.contractId,
+						contractId,
+						engagementId: effectiveEngagementId,
+						escrowData: serializableEscrowData || undefined, // Explicitly pass undefined if null
 					})
 
 					if (!saveResult.success) {
@@ -272,6 +701,12 @@ export function EscrowAdminPanel({
 						})
 						return
 					}
+				} else {
+					// If contractId is not in deployResponse, we might need to extract it
+					// from the transaction result or query it separately
+					toast.warning(
+						'Escrow transaction submitted, but contract ID not available yet',
+					)
 				}
 
 				toast.success('Escrow successfully created and deployed!', {
@@ -320,33 +755,365 @@ export function EscrowAdminPanel({
 					milestones: sanitizedMilestones,
 				}
 
-				// 1) Execute function from Trustless Work -> returns unsigned XDR
-				const deployResponse = await deployEscrow(payload, 'multi-release')
+				// Validate payload before sending
+				console.log('📤 Sending multi-release escrow payload:', {
+					hasSigner: !!payload.signer,
+					hasEngagementId: !!payload.engagementId,
+					hasTitle: !!payload.title,
+					hasRoles: !!payload.roles,
+					hasDescription: !!payload.description,
+					hasPlatformFee: typeof payload.platformFee === 'number',
+					hasTrustline: !!payload.trustline,
+					milestonesCount: payload.milestones.length,
+					payload: JSON.stringify(payload, null, 2),
+				})
 
-				if (deployResponse.status !== 'SUCCESS') {
-					throw new Error('Failed to create escrow')
+				// Validate milestones have required fields
+				const invalidMilestones = sanitizedMilestones.filter(
+					(m) =>
+						!m.amount || m.amount <= 0 || !m.receiver || !m.receiver.trim(),
+				)
+				if (invalidMilestones.length > 0) {
+					const errorMsg =
+						'Invalid milestone data: All milestones must have amount > 0 and receiver address'
+					console.error('❌ Invalid milestones:', invalidMilestones)
+					toast.error('Invalid milestone data', {
+						description: errorMsg,
+					})
+					throw new Error(errorMsg)
+				}
+
+				// 1) Execute function from Trustless Work -> returns unsigned XDR
+				let deployResponse: EscrowRequestResponse
+				try {
+					deployResponse = await deployEscrow(payload, 'multi-release')
+				} catch (error) {
+					console.error('❌ deployEscrow error:', error)
+					const errorMessage =
+						error instanceof Error
+							? error.message
+							: 'Failed to create escrow: API request failed'
+					toast.error('Failed to deploy escrow', {
+						description: errorMessage,
+					})
+					throw new Error(errorMessage)
+				}
+
+				if (!deployResponse || deployResponse.status !== 'SUCCESS') {
+					const errorMsg =
+						'Escrow deployment failed: Invalid request or API error'
+					console.error('❌ deployEscrow failed:', {
+						status: deployResponse?.status,
+						response: deployResponse,
+					})
+					toast.error('Failed to deploy escrow', {
+						description: errorMsg,
+					})
+					throw new Error(errorMsg)
 				}
 
 				if (!deployResponse.unsignedTransaction) {
+					console.error(
+						'❌ No unsigned transaction in response:',
+						deployResponse,
+					)
+					toast.error('Failed to deploy escrow', {
+						description: 'No unsigned transaction returned from API',
+					})
 					throw new Error('No unsigned transaction returned')
 				}
 
-				// 2) Sign transaction with wallet
-				const signedXdr = await signTransaction(
-					deployResponse.unsignedTransaction,
-				)
+				// 2) Sign transaction with Stellar Wallets Kit
+				let signedXdr: string
+				try {
+					signedXdr = await signTransaction(deployResponse.unsignedTransaction)
+				} catch (error) {
+					console.error('❌ signTransaction error:', error)
+					const errorMessage =
+						error instanceof Error
+							? error.message
+							: 'Failed to sign transaction'
+					toast.error('Failed to sign transaction', {
+						description: errorMessage,
+					})
+					throw new Error(errorMessage)
+				}
 
 				// 3) Send signed transaction
-				const sendResult = await sendTransaction(signedXdr)
-				if (sendResult?.status !== 'SUCCESS') {
-					throw new Error('Transaction failed')
+				let sendResult:
+					| InitializeSingleReleaseEscrowResponse
+					| InitializeMultiReleaseEscrowResponse
+					| { status: string }
+				try {
+					sendResult = await sendTransaction(signedXdr)
+				} catch (error) {
+					console.error('❌ sendTransaction error:', error)
+					const errorMessage =
+						error instanceof Error
+							? error.message
+							: 'Failed to send transaction'
+					toast.error('Failed to send transaction', {
+						description: errorMessage,
+					})
+					throw new Error(errorMessage)
+				}
+
+				if (
+					!sendResult ||
+					(sendResult as { status?: string }).status !== 'SUCCESS'
+				) {
+					const status = (sendResult as { status?: string })?.status
+					const errorMsg =
+						status === 'ERROR'
+							? 'Transaction submission failed'
+							: 'Transaction failed: Invalid response'
+					console.error('❌ sendTransaction failed:', {
+						status,
+						response: sendResult,
+					})
+					toast.error('Transaction failed', {
+						description: errorMsg,
+					})
+					throw new Error(errorMsg)
+				}
+
+				// Get contract ID and escrow data from response
+				// Use Record type to safely access properties
+				const responseAny = sendResult as Record<string, unknown>
+				const contractId =
+					(responseAny.contractId as string | undefined) ||
+					(responseAny.contract_id as string | undefined) ||
+					undefined
+
+				// Extract escrow data - the response has an 'escrow' property
+				const escrowDataRaw = responseAny.escrow as
+					| Record<string, unknown>
+					| undefined
+				const escrowData = escrowDataRaw
+					? {
+							engagementId: escrowDataRaw.engagementId as string | undefined,
+							title: escrowDataRaw.title as string | undefined,
+							description: escrowDataRaw.description as string | undefined,
+							roles: escrowDataRaw.roles as
+								| {
+										approver?: string
+										serviceProvider?: string
+										disputeResolver?: string
+										platformAddress?: string
+										releaseSigner?: string
+								  }
+								| undefined,
+							platformFee: escrowDataRaw.platformFee as number | undefined,
+							milestones: escrowDataRaw.milestones as
+								| Array<{
+										amount: number
+										receiver: string
+										description?: string
+								  }>
+								| undefined,
+							amount: escrowDataRaw.amount as number | undefined,
+							receiver: escrowDataRaw.receiver as string | undefined,
+							receiverMemo: escrowDataRaw.receiverMemo as number | undefined,
+						}
+					: undefined
+
+				console.log('📦 Escrow save data (multi-release):', {
+					contractId,
+					hasEscrowData: !!escrowData,
+					escrowData,
+					responseKeys: Object.keys(responseAny),
+					hasEscrowInResponse: 'escrow' in responseAny,
+					fullResponse: responseAny,
+				})
+
+				// Validate that we have a contract ID before proceeding
+				if (!contractId) {
+					console.error(
+						'❌ No contract ID in transaction response:',
+						responseAny,
+					)
+					toast.error('Escrow deployed but contract ID not found', {
+						description: 'Please check the transaction result manually',
+					})
+					// Don't throw - allow user to see the success message but warn about missing contract ID
+					return
 				}
 
 				// 4) Save escrow contract ID to database
-				if ('contractId' in sendResult && sendResult.contractId) {
+				if (contractId) {
+					// Always provide escrow data - use response data or fallback to form data
+					const escrowDataToSave = escrowData
+						? {
+								engagementId: escrowData.engagementId || effectiveEngagementId,
+								title: escrowData.title || title.trim(),
+								description: escrowData.description || description.trim(),
+								roles: {
+									approver: escrowData.roles?.approver || approver.trim(),
+									serviceProvider:
+										escrowData.roles?.serviceProvider || serviceProvider.trim(),
+									disputeResolver:
+										escrowData.roles?.disputeResolver || disputeResolver.trim(),
+									platformAddress:
+										escrowData.roles?.platformAddress || platformAddress.trim(),
+									releaseSigner:
+										escrowData.roles?.releaseSigner || releaseSigner.trim(),
+								},
+								platformFee: escrowData.platformFee || (platformFee as number),
+								milestones:
+									escrowData.milestones?.map(
+										(m: {
+											amount: number
+											receiver: string
+											description?: string
+										}) => ({
+											amount: m.amount,
+											receiver: m.receiver,
+										}),
+									) || undefined,
+								amount: 'amount' in escrowData ? escrowData.amount : undefined,
+								receiver:
+									'receiver' in escrowData ? escrowData.receiver : undefined,
+								receiverMemo:
+									'receiverMemo' in escrowData
+										? escrowData.receiverMemo
+										: undefined,
+							}
+						: {
+								// Fallback to form data if response doesn't have escrow data
+								engagementId: effectiveEngagementId,
+								title: title.trim(),
+								description: description.trim(),
+								roles: {
+									approver: approver.trim(),
+									serviceProvider: serviceProvider.trim(),
+									disputeResolver: disputeResolver.trim(),
+									platformAddress: platformAddress.trim(),
+									releaseSigner: releaseSigner.trim(),
+								},
+								platformFee: platformFee as number,
+								milestones: milestones
+									.filter((m) => m.description.trim().length > 0)
+									.map((m) => {
+										if ('amount' in m && 'receiver' in m) {
+											return {
+												amount: m.amount as number,
+												receiver: m.receiver.trim(),
+											}
+										}
+										return null
+									})
+									.filter(
+										(m): m is { amount: number; receiver: string } =>
+											m !== null,
+									),
+							}
+
+					console.log('💾 Saving escrow contract (multi-release):', {
+						contractId,
+						hasEscrowDataToSave: !!escrowDataToSave,
+						escrowDataToSaveKeys: escrowDataToSave
+							? Object.keys(escrowDataToSave)
+							: [],
+						engagementId: escrowDataToSave?.engagementId,
+						hasRoles: !!escrowDataToSave?.roles,
+						hasMilestones: !!escrowDataToSave?.milestones,
+						milestonesCount: escrowDataToSave?.milestones?.length || 0,
+						escrowDataToSaveFull: escrowDataToSave,
+					})
+
+					// Ensure escrowDataToSave is always defined and has required fields
+					if (
+						!escrowDataToSave ||
+						!escrowDataToSave.engagementId ||
+						!escrowDataToSave.roles
+					) {
+						console.error(
+							'❌ Invalid escrowDataToSave structure:',
+							escrowDataToSave,
+						)
+						toast.error('Failed to prepare escrow data for saving')
+						return
+					}
+
+					// Create a clean, serializable object for the server action
+					// Next.js server actions need plain objects without undefined values
+					// Ensure all required fields are present and not undefined
+					const serializableEscrowData = {
+						engagementId:
+							escrowDataToSave.engagementId || effectiveEngagementId,
+						title: escrowDataToSave.title || title.trim() || 'Untitled Escrow',
+						description:
+							escrowDataToSave.description || description.trim() || '',
+						roles: {
+							approver: escrowDataToSave.roles.approver || approver.trim(),
+							serviceProvider:
+								escrowDataToSave.roles.serviceProvider ||
+								serviceProvider.trim(),
+							disputeResolver:
+								escrowDataToSave.roles.disputeResolver ||
+								disputeResolver.trim(),
+							platformAddress:
+								escrowDataToSave.roles.platformAddress ||
+								platformAddress.trim(),
+							releaseSigner:
+								escrowDataToSave.roles.releaseSigner || releaseSigner.trim(),
+						},
+						platformFee:
+							escrowDataToSave.platformFee ?? (platformFee as number),
+						...(escrowDataToSave.milestones &&
+							escrowDataToSave.milestones.length > 0 && {
+								milestones: escrowDataToSave.milestones.map((m) => ({
+									amount: m.amount,
+									receiver: m.receiver,
+								})),
+							}),
+						...(escrowDataToSave.amount !== undefined &&
+							escrowDataToSave.amount !== null && {
+								amount: escrowDataToSave.amount,
+							}),
+						...(escrowDataToSave.receiver?.trim() && {
+							receiver: escrowDataToSave.receiver,
+						}),
+						...(escrowDataToSave.receiverMemo !== undefined &&
+							escrowDataToSave.receiverMemo !== null && {
+								receiverMemo: escrowDataToSave.receiverMemo,
+							}),
+					}
+
+					// Final validation before sending
+					if (
+						!serializableEscrowData.engagementId ||
+						!serializableEscrowData.roles ||
+						!serializableEscrowData.roles.approver
+					) {
+						console.error(
+							'❌ Invalid serializableEscrowData structure:',
+							serializableEscrowData,
+						)
+						toast.error('Failed to prepare escrow data for saving', {
+							description: 'Missing required fields in escrow data',
+						})
+						return
+					}
+
+					console.log('📤 Sending to server action (multi-release):', {
+						contractId,
+						hasSerializableData: !!serializableEscrowData,
+						serializableKeys: Object.keys(serializableEscrowData),
+						hasEngagementId: !!serializableEscrowData.engagementId,
+						hasRoles: !!serializableEscrowData.roles,
+						rolesKeys: serializableEscrowData.roles
+							? Object.keys(serializableEscrowData.roles)
+							: [],
+						fullSerializableData: JSON.stringify(serializableEscrowData),
+					})
+
+					// Ensure we always pass engagementId even if escrowData is missing
 					const saveResult = await saveEscrowContractAction({
 						projectId,
-						contractId: sendResult.contractId,
+						contractId,
+						engagementId: effectiveEngagementId,
+						escrowData: serializableEscrowData || undefined, // Explicitly pass undefined if null
 					})
 
 					if (!saveResult.success) {
@@ -356,6 +1123,12 @@ export function EscrowAdminPanel({
 						})
 						return
 					}
+				} else {
+					// If contractId is not in sendResult, we might need to extract it
+					// from the transaction result or query it separately
+					toast.warning(
+						'Escrow transaction submitted, but contract ID not available yet',
+					)
 				}
 
 				toast.success('Escrow successfully created and deployed!', {
@@ -380,12 +1153,18 @@ export function EscrowAdminPanel({
 		if (!escrowContractAddress)
 			return toast.error('No escrow contract configured')
 		try {
-			const signer = await ensureWallet()
+			if (!isConnected) {
+				await connect()
+			}
+			if (!address) {
+				toast.error('Please connect a Stellar wallet to continue')
+				return
+			}
 			const res = await approveMilestone(
 				{
 					contractId: escrowContractAddress,
 					milestoneIndex,
-					approver: signer,
+					approver: address,
 				},
 				(escrowType as EscrowType) || 'single-release',
 			)
@@ -403,14 +1182,20 @@ export function EscrowAdminPanel({
 		if (!escrowContractAddress)
 			return toast.error('No escrow contract configured')
 		try {
-			const signer = await ensureWallet()
+			if (!isConnected) {
+				await connect()
+			}
+			if (!address) {
+				toast.error('Please connect a Stellar wallet to continue')
+				return
+			}
 			const res = await changeMilestoneStatus(
 				{
 					contractId: escrowContractAddress,
 					milestoneIndex,
 					newStatus: 'approved',
 					newEvidence: 'Updated via admin panel',
-					serviceProvider: signer,
+					serviceProvider: address,
 				},
 				(escrowType as EscrowType) || 'multi-release',
 			)
@@ -478,7 +1263,12 @@ export function EscrowAdminPanel({
 										setMilestones((prev) =>
 											prev.map((m) => {
 												if ('amount' in m && 'receiver' in m) {
-													const { amount, receiver, ...rest } = m
+													// eslint-disable-next-line @typescript-eslint/no-unused-vars
+													const {
+														amount: _amount,
+														receiver: _receiver,
+														...rest
+													} = m
 													return rest
 												}
 												return m
@@ -559,8 +1349,9 @@ export function EscrowAdminPanel({
 											More information
 										</TooltipTrigger>
 										<TooltipContent>
-											The asset contract address (e.g., USDC contract address on
-											Stellar).
+											The asset contract address for the trustline. For USDC
+											testnet (Soroban-wrapped), use:
+											CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA
 										</TooltipContent>
 									</Tooltip>
 								</div>
@@ -568,7 +1359,7 @@ export function EscrowAdminPanel({
 									id={trustlineAddressId}
 									value={trustlineAddress}
 									onChange={(e) => setTrustlineAddress(e.target.value)}
-									placeholder="Asset contract address (e.g., USDC)"
+									placeholder="Asset contract address (e.g., USDC Soroban contract)"
 								/>
 							</div>
 							<div className="grid gap-2">
@@ -831,8 +1622,14 @@ export function EscrowAdminPanel({
 																		),
 																	)
 																}
-																placeholder="Enter Stellar address"
+																placeholder="Enter Stellar address (must have USDC trustline)"
 															/>
+															<p className="text-xs text-muted-foreground mt-1">
+																⚠️ The receiver address must have a USDC
+																trustline established. Use a Stellar account
+																address (G-address) with an active USDC
+																trustline.
+															</p>
 														</div>
 													</div>
 												</div>

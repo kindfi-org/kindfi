@@ -1,108 +1,68 @@
-import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import type { Database, Json } from '@services/supabase'
-
-type Tables = Database['public']['Tables']
-type EscrowRecord = Tables['escrow_status']['Row']
-type EscrowStatusType =
-	| 'NEW'
-	| 'FUNDED'
-	| 'ACTIVE'
-	| 'COMPLETED'
-	| 'DISPUTED'
-	| 'CANCELLED'
-
-interface MilestoneMetadata {
-	milestoneStatus: {
-		total: number
-		completed: number
-	}
+/**
+ * Generates words from a title for use in escrow identifiers.
+ * Similar to slug generation, extracts key words from the title.
+ *
+ * @param title - Project title to extract words from
+ * @returns Words string (e.g., "solar-energy-initiative")
+ */
+function extractWordsFromTitle(title: string): string {
+	return title
+		.toLowerCase()
+		.replace(/&/g, 'and')
+		.replace(/[^a-z0-9]+/g, '-')
+		.split('-')
+		.filter((word) => word.length > 0)
+		.slice(0, 5) // Limit to first 5 words to keep it concise
+		.join('-')
 }
 
-export const updateEscrowStatus = async (
-	recordId: string,
-	newStatus: EscrowStatusType,
-): Promise<EscrowRecord> => {
-	const supabase = createSupabaseBrowserClient()
-
-	const { data, error: updateError } = await supabase
-		.from('escrow_status')
-		.update({
-			status: newStatus,
-			last_updated: new Date().toISOString(),
-		})
-		.eq('id', recordId)
-		.select()
-		.single()
-
-	if (updateError) throw updateError
-	if (!data) throw new Error('Failed to update escrow status')
-
-	return data
+/**
+ * Generates an engagement ID for escrow contracts.
+ * Format: "Kindfi - {Project Title} - {consecutive number}"
+ *
+ * @param title - Project title
+ * @param consecutiveNumber - Consecutive number for this escrow (1, 2, 3, etc.)
+ * @returns Engagement ID string
+ */
+export function generateEngagementId(
+	title: string,
+	consecutiveNumber: number,
+): string {
+	return `Kindfi - ${title} - ${consecutiveNumber}`
 }
 
-export const updateEscrowMilestone = async (
-	recordId: string,
-	current: number,
-	completed: number,
-	metadata?: Partial<MilestoneMetadata>,
-): Promise<EscrowRecord> => {
-	const supabase = createSupabaseBrowserClient()
-
-	if (current < 1 || completed < 0) {
-		throw new Error('Milestone numbers must be positive')
-	}
-
-	const total = metadata?.milestoneStatus?.total ?? completed
-	if (completed > total) {
-		throw new Error('Completed milestones cannot exceed total milestones')
-	}
-
-	const updatedMetadata: MilestoneMetadata = {
-		milestoneStatus: {
-			total,
-			completed,
-		},
-	}
-	const { data, error: updateError } = await supabase
-		.from('escrow_status')
-		.update({
-			current_milestone: current,
-			metadata: updatedMetadata as unknown as Json,
-			last_updated: new Date().toISOString(),
-		})
-		.eq('id', recordId)
-		.select()
-		.single()
-	if (updateError) throw updateError
-	if (!data) throw new Error('Failed to update milestone')
-
-	return data
+/**
+ * Generates a title for escrow contracts.
+ * Format: "Kindfi - {Project Title} - {consecutive number}"
+ *
+ * @param title - Project title
+ * @param consecutiveNumber - Consecutive number for this escrow (1, 2, 3, etc.)
+ * @returns Escrow title string
+ */
+export function generateEscrowTitle(
+	title: string,
+	consecutiveNumber: number,
+): string {
+	return `Kindfi - ${title} - ${consecutiveNumber}`
 }
 
-export const updateEscrowFinancials = async (
-	recordId: string,
-	funded: number,
-	released: number,
-): Promise<EscrowRecord> => {
-	const supabase = createSupabaseBrowserClient()
+/**
+ * USDC has 7 decimal places
+ * Converts dollars to stroops (smallest unit)
+ *
+ * @param dollars - Amount in dollars (e.g., 100)
+ * @returns Amount in stroops (e.g., 1000000000 for 100 USDC)
+ */
+export function dollarsToStroops(dollars: number): number {
+	return Math.floor(dollars * 10_000_000)
+}
 
-	if (funded < released) {
-		throw new Error('Total funded cannot be less than total released')
-	}
-
-	const { data, error: updateError } = await supabase
-		.from('escrow_status')
-		.update({
-			total_funded: funded,
-			total_released: released,
-			last_updated: new Date().toISOString(),
-		})
-		.eq('id', recordId)
-		.select()
-		.single()
-
-	if (updateError) throw updateError
-	if (!data) throw new Error('Failed to update financials')
-
-	return data
+/**
+ * Converts stroops back to dollars
+ *
+ * @param stroops - Amount in stroops (e.g., 1000000000)
+ * @returns Amount in dollars (e.g., 100)
+ */
+export function stroopsToDollars(stroops: number): number {
+	return stroops / 10_000_000
 }
