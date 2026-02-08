@@ -1,4 +1,3 @@
-import { appEnvConfig } from '@packages/lib/config'
 import {
 	deleteChallenge,
 	getChallenge,
@@ -39,7 +38,6 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		const config = appEnvConfig('web')
 		const rpId = getRpIdFromOrigin(origin)
 		// Use the origin as expectedOrigin (it's already validated by getRpIdFromOrigin)
 		const expectedOrigin = origin

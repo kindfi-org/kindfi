@@ -24,6 +24,7 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import { AchievementsGrid } from '~/components/sections/achievements/achievement-grid'
+import { GamificationSection } from '~/components/sections/gamification/gamification-section'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { staggerContainer } from '~/lib/constants/animations'
 import { getUserSupportedProjects } from '~/lib/queries/projects/get-user-projects'
@@ -500,6 +501,11 @@ export function DonorProfile({
 					></motion.div>
 				)}
 			</AnimatePresence>
+
+			{/* Gamification Section */}
+			<motion.div variants={cardVariants}>
+				<GamificationSection />
+			</motion.div>
 
 			{/* Rewards & Achievements */}
 			<motion.div
