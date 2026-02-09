@@ -152,7 +152,8 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 			// 2) Prepare fund escrow request -> returns unsigned XDR
 			// Trustless Work expects amount in dollars (not stroops) - it handles conversion internally
-			// Note: The escrow contract and signer must have the USDC trustline established first
+			// Note: The user's wallet must have a trustline/approval for the token before funding
+			// The escrow contract will check the user's balance, which requires the trustline to exist
 			const fundResponse = await fundEscrow(
 				{
 					amount: data.investmentAmount,
@@ -213,27 +214,61 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		} catch (error) {
 			console.error('Fund escrow error:', error)
 
-			// Check for specific error messages
-			const errorMessage =
-				error instanceof Error ? error.message : String(error)
+			// Extract error message from various error formats
+			let errorMessage = ''
+			let apiErrorMessage = ''
+
+			if (error instanceof Error) {
+				errorMessage = error.message
+			} else if (typeof error === 'object' && error !== null) {
+				// Check for axios error response
+				if ('response' in error && error.response) {
+					const response = error.response as {
+						data?: { message?: string; error?: string }
+					}
+					if (response.data?.message) {
+						apiErrorMessage = response.data.message
+					} else if (response.data?.error) {
+						apiErrorMessage = response.data.error
+					}
+				}
+				errorMessage = String(error)
+			} else {
+				errorMessage = String(error)
+			}
+
+			// Combine error messages for checking
+			const combinedMessage = `${errorMessage} ${apiErrorMessage}`.toLowerCase()
+
 			let userFriendlyMessage =
 				"We couldn't process your donation. Please try again."
 
+			// Check for missing trustline/balance errors
 			if (
-				errorMessage.includes('Storage, MissingValue') ||
-				errorMessage.includes('balance')
+				combinedMessage.includes('storage, missingvalue') ||
+				combinedMessage.includes('missingvalue') ||
+				(combinedMessage.includes('balance') &&
+					combinedMessage.includes('non-existing'))
 			) {
-				userFriendlyMessage =
-					'The escrow contract needs a USDC trustline established. Please contact support or ensure the escrow is properly configured.'
+				const tokenAddress = escrowData?.trustline?.address
+				if (tokenAddress) {
+					userFriendlyMessage = `Your wallet needs to establish a trustline for the token (${tokenAddress.slice(0, 8)}...) before donating. Please ensure your wallet has approved this token contract.`
+				} else {
+					userFriendlyMessage =
+						'Your wallet needs to establish a trustline for the token before donating. Please ensure your wallet has approved the token contract.'
+				}
 			} else if (
-				errorMessage.includes('insufficient funds') ||
-				errorMessage.includes('sufficient funds')
+				combinedMessage.includes('insufficient funds') ||
+				combinedMessage.includes('sufficient funds')
 			) {
 				userFriendlyMessage =
-					'Insufficient funds. Please ensure your wallet has enough USDC balance.'
-			} else if (errorMessage.includes('trustline')) {
+					'Insufficient funds. Please ensure your wallet has enough token balance.'
+			} else if (combinedMessage.includes('trustline')) {
 				userFriendlyMessage =
-					'Trustline required. The escrow contract or your wallet needs a USDC trustline established.'
+					'Trustline required. Your wallet needs to establish a trustline for the token before donating.'
+			} else if (apiErrorMessage) {
+				// Use API error message if available
+				userFriendlyMessage = apiErrorMessage
 			}
 
 			toast.error('Donation failed', {
