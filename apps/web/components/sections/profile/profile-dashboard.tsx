@@ -4,14 +4,15 @@ import type { Database } from '@services/supabase'
 import { AnimatePresence, motion } from 'framer-motion'
 import { startTransition, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { staggerContainer } from '~/lib/constants/animations'
+import { useSearchParams } from 'next/navigation'
 import {
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
-import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
-import { staggerContainer } from '~/lib/constants/animations'
 import { AccountInfoCard } from './cards/account-info-card'
 import { KYCCard } from './cards/kyc-card'
 import { PersonalInfoCard } from './cards/personal-info-card'
@@ -76,9 +77,12 @@ export function ProfileDashboard({
 		() => user.profile?.display_name || user.email?.split('@')[0] || 'You',
 		[user.profile?.display_name, user.email],
 	)
-	const { address: externalWalletAddress, connect, isConnected } = useWallet()
+	const { address: externalWalletAddress, connect, disconnect, isConnected } =
+		useWallet()
 	const imageUrl = user.profile?.image_url ?? null
 	const [showRoleModal, setShowRoleModal] = useState(false)
+	const searchParams = useSearchParams()
+	const activeSection = searchParams?.get('section') || defaultTab
 
 	// Check if user needs to select role (show modal if role is pending or they haven't chosen)
 	useEffect(() => {
@@ -191,10 +195,10 @@ export function ProfileDashboard({
 				variants={containerVariants}
 				initial="hidden"
 				animate="show"
-				className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 max-w-7xl space-y-8 lg:space-y-12 relative z-10"
+				className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 max-w-7xl relative z-10"
 			>
 				{/* Profile Header */}
-				<motion.div variants={itemVariants}>
+				<motion.div variants={itemVariants} className="mb-8">
 					<ProfileHeader
 						displayName={displayName}
 						email={user.email}
@@ -209,7 +213,7 @@ export function ProfileDashboard({
 					variants={staggerContainer}
 					initial="initial"
 					animate="animate"
-					className="grid gap-6 md:grid-cols-3 md:gap-6 lg:gap-8"
+					className="grid gap-6 md:grid-cols-3 md:gap-6 lg:gap-8 mb-8"
 				>
 					{/* Wallet Card - Takes 2 columns on desktop, full width on mobile */}
 					<motion.div variants={itemVariants} className="md:col-span-2 flex">
@@ -218,6 +222,7 @@ export function ProfileDashboard({
 							externalWalletAddress={externalWalletAddress}
 							isExternalConnected={isConnected}
 							onConnectExternal={connect}
+							onDisconnectExternal={disconnect}
 						/>
 					</motion.div>
 					{/* KYC Card - Takes 1 column on desktop, full width on mobile */}
@@ -228,17 +233,65 @@ export function ProfileDashboard({
 
 				{/* Main Content Tabs */}
 				<motion.div variants={itemVariants}>
-					<Tabs defaultValue={defaultTab} className="space-y-8">
-						<TabsList className="inline-flex h-auto items-center justify-center gap-1 bg-transparent p-0 w-full sm:w-auto border-b border-gray-200">
+					<Tabs
+						value={activeSection}
+						onValueChange={(value) => {
+							const params = new URLSearchParams(searchParams?.toString() || '')
+							params.set('section', value)
+							window.history.pushState(
+								{},
+								'',
+								`${window.location.pathname}?${params.toString()}`,
+							)
+						}}
+						className="space-y-8"
+					>
+						<TabsList className="inline-flex h-auto items-center justify-center gap-1 bg-transparent p-0 w-full sm:w-auto border-b border-gray-200 overflow-x-auto">
 							<TabsTrigger
 								value="overview"
-								className="data-[state=active]:text-[#000124] data-[state=active]:border-b-[3px] data-[state=active]:border-[#000124] data-[state=active]:font-bold data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent data-[state=inactive]:font-medium transition-all duration-200 rounded-none px-6 py-3 text-base -mb-px"
+								className="data-[state=active]:text-[#000124] data-[state=active]:border-b-[3px] data-[state=active]:border-[#000124] data-[state=active]:font-bold data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent data-[state=inactive]:font-medium transition-all duration-200 rounded-none px-4 sm:px-6 py-3 text-sm sm:text-base -mb-px whitespace-nowrap"
 							>
 								Overview
 							</TabsTrigger>
 							<TabsTrigger
+								value="gamification"
+								className="data-[state=active]:text-[#000124] data-[state=active]:border-b-[3px] data-[state=active]:border-[#000124] data-[state=active]:font-bold data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent data-[state=inactive]:font-medium transition-all duration-200 rounded-none px-4 sm:px-6 py-3 text-sm sm:text-base -mb-px whitespace-nowrap"
+							>
+								Gamification
+							</TabsTrigger>
+							{role === 'donor' && (
+								<TabsTrigger
+									value="donations"
+									className="data-[state=active]:text-[#000124] data-[state=active]:border-b-[3px] data-[state=active]:border-[#000124] data-[state=active]:font-bold data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent data-[state=inactive]:font-medium transition-all duration-200 rounded-none px-4 sm:px-6 py-3 text-sm sm:text-base -mb-px whitespace-nowrap"
+								>
+									Donations
+								</TabsTrigger>
+							)}
+							{role === 'creator' && (
+								<>
+									<TabsTrigger
+										value="campaigns"
+										className="data-[state=active]:text-[#000124] data-[state=active]:border-b-[3px] data-[state=active]:border-[#000124] data-[state=active]:font-bold data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent data-[state=inactive]:font-medium transition-all duration-200 rounded-none px-4 sm:px-6 py-3 text-sm sm:text-base -mb-px whitespace-nowrap"
+									>
+										Campaigns
+									</TabsTrigger>
+									<TabsTrigger
+										value="foundations"
+										className="data-[state=active]:text-[#000124] data-[state=active]:border-b-[3px] data-[state=active]:border-[#000124] data-[state=active]:font-bold data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent data-[state=inactive]:font-medium transition-all duration-200 rounded-none px-4 sm:px-6 py-3 text-sm sm:text-base -mb-px whitespace-nowrap"
+									>
+										Foundations
+									</TabsTrigger>
+								</>
+							)}
+							<TabsTrigger
+								value="nfts"
+								className="data-[state=active]:text-[#000124] data-[state=active]:border-b-[3px] data-[state=active]:border-[#000124] data-[state=active]:font-bold data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent data-[state=inactive]:font-medium transition-all duration-200 rounded-none px-4 sm:px-6 py-3 text-sm sm:text-base -mb-px whitespace-nowrap"
+							>
+								NFTs
+							</TabsTrigger>
+							<TabsTrigger
 								value="settings"
-								className="data-[state=active]:text-[#000124] data-[state=active]:border-b-[3px] data-[state=active]:border-[#000124] data-[state=active]:font-bold data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent data-[state=inactive]:font-medium transition-all duration-200 rounded-none px-6 py-3 text-base -mb-px"
+								className="data-[state=active]:text-[#000124] data-[state=active]:border-b-[3px] data-[state=active]:border-[#000124] data-[state=active]:font-bold data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent data-[state=inactive]:font-medium transition-all duration-200 rounded-none px-4 sm:px-6 py-3 text-sm sm:text-base -mb-px whitespace-nowrap"
 							>
 								Settings
 							</TabsTrigger>
@@ -247,6 +300,7 @@ export function ProfileDashboard({
 						<AnimatePresence mode="wait">
 							<TabsContent value="overview" className="space-y-8 mt-8">
 								<motion.div
+									key="overview"
 									initial={{ opacity: 0, y: 10 }}
 									animate={{ opacity: 1, y: 0 }}
 									exit={{ opacity: 0, y: -10 }}
@@ -256,18 +310,129 @@ export function ProfileDashboard({
 										<CreatorProfile
 											userId={user.id}
 											displayName={displayName}
+											showSection="overview"
 										/>
 									) : role === 'donor' ? (
-										<DonorProfile userId={user.id} displayName={displayName} />
+										<DonorProfile
+											userId={user.id}
+											displayName={displayName}
+											showSection="overview"
+										/>
 									) : (
-										// Show donor profile as fallback for pending/admin roles
-										<DonorProfile userId={user.id} displayName={displayName} />
+										<DonorProfile
+											userId={user.id}
+											displayName={displayName}
+											showSection="overview"
+										/>
+									)}
+								</motion.div>
+							</TabsContent>
+
+							<TabsContent value="gamification" className="space-y-8 mt-8">
+								<motion.div
+									key="gamification"
+									initial={{ opacity: 0, y: 10 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -10 }}
+									transition={{ duration: 0.3, ease: 'easeOut' }}
+								>
+									{role === 'creator' ? (
+										<CreatorProfile
+											userId={user.id}
+											displayName={displayName}
+											showSection="gamification"
+										/>
+									) : (
+										<DonorProfile
+											userId={user.id}
+											displayName={displayName}
+											showSection="gamification"
+										/>
+									)}
+								</motion.div>
+							</TabsContent>
+
+							{role === 'donor' && (
+								<TabsContent value="donations" className="space-y-8 mt-8">
+									<motion.div
+										key="donations"
+										initial={{ opacity: 0, y: 10 }}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0, y: -10 }}
+										transition={{ duration: 0.3, ease: 'easeOut' }}
+									>
+										<DonorProfile
+											userId={user.id}
+											displayName={displayName}
+											showSection="donations"
+										/>
+									</motion.div>
+								</TabsContent>
+							)}
+
+							{role === 'creator' && (
+								<>
+									<TabsContent value="campaigns" className="space-y-8 mt-8">
+										<motion.div
+											key="campaigns"
+											initial={{ opacity: 0, y: 10 }}
+											animate={{ opacity: 1, y: 0 }}
+											exit={{ opacity: 0, y: -10 }}
+											transition={{ duration: 0.3, ease: 'easeOut' }}
+										>
+											<CreatorProfile
+												userId={user.id}
+												displayName={displayName}
+												showSection="campaigns"
+											/>
+										</motion.div>
+									</TabsContent>
+
+									<TabsContent value="foundations" className="space-y-8 mt-8">
+										<motion.div
+											key="foundations"
+											initial={{ opacity: 0, y: 10 }}
+											animate={{ opacity: 1, y: 0 }}
+											exit={{ opacity: 0, y: -10 }}
+											transition={{ duration: 0.3, ease: 'easeOut' }}
+										>
+											<CreatorProfile
+												userId={user.id}
+												displayName={displayName}
+												showSection="foundations"
+											/>
+										</motion.div>
+									</TabsContent>
+								</>
+							)}
+
+							<TabsContent value="nfts" className="space-y-8 mt-8">
+								<motion.div
+									key="nfts"
+									initial={{ opacity: 0, y: 10 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -10 }}
+									transition={{ duration: 0.3, ease: 'easeOut' }}
+								>
+									{role === 'creator' ? (
+										<CreatorProfile
+											userId={user.id}
+											displayName={displayName}
+											showSection="nfts"
+										/>
+									) : (
+										<DonorProfile
+											userId={user.id}
+											displayName={displayName}
+											showSection="nfts"
+										/>
 									)}
 								</motion.div>
 							</TabsContent>
 
 							<TabsContent value="settings" className="space-y-8 mt-8">
 								<motion.div
+									key="settings"
 									initial={{ opacity: 0, y: 10 }}
 									animate={{ opacity: 1, y: 0 }}
 									exit={{ opacity: 0, y: -10 }}

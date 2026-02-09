@@ -23,8 +23,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
-import { AchievementsGrid } from '~/components/sections/achievements/achievement-grid'
 import { GamificationSection } from '~/components/sections/gamification/gamification-section'
+import { NFTCollection } from '~/components/sections/gamification/nft-collection'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { staggerContainer } from '~/lib/constants/animations'
 import { getUserSupportedProjects } from '~/lib/queries/projects/get-user-projects'
@@ -32,6 +32,7 @@ import { getUserSupportedProjects } from '~/lib/queries/projects/get-user-projec
 interface DonorProfileProps {
 	userId: string
 	displayName: string
+	showSection?: 'overview' | 'gamification' | 'donations' | 'nfts'
 }
 
 const cardVariants = {
@@ -50,6 +51,7 @@ const cardVariants = {
 export function DonorProfile({
 	userId,
 	displayName: _displayName,
+	showSection = 'overview',
 }: DonorProfileProps) {
 	const [isSyncing, setIsSyncing] = useState(false)
 	const {
@@ -238,6 +240,73 @@ export function DonorProfile({
 		return sum
 	}, 0)
 
+	// Render different sections based on showSection prop
+	if (showSection === 'gamification') {
+		return (
+			<motion.div
+				variants={staggerContainer}
+				initial="initial"
+				animate="animate"
+				className="space-y-6"
+			>
+				<motion.div variants={cardVariants}>
+					<GamificationSection />
+				</motion.div>
+			</motion.div>
+		)
+	}
+
+	if (showSection === 'donations') {
+		return (
+			<motion.div
+				variants={staggerContainer}
+				initial="initial"
+				animate="animate"
+				className="space-y-6"
+			>
+				<motion.div variants={cardVariants}>
+					<Card className="border-0 shadow-xl bg-card hover:shadow-2xl transition-all duration-300 overflow-hidden relative group">
+						<div className="absolute top-0 left-0 w-40 h-40 bg-secondary/5 rounded-full -ml-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
+						<CardHeader className="relative z-10">
+							<CardTitle className="text-foreground">
+								Donation History
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="relative z-10">
+							<DonationHistory donations={projectsWithBalances} />
+						</CardContent>
+					</Card>
+				</motion.div>
+			</motion.div>
+		)
+	}
+
+	if (showSection === 'nfts') {
+		return (
+			<motion.div
+				variants={staggerContainer}
+				initial="initial"
+				animate="animate"
+				className="space-y-6"
+			>
+				<motion.div variants={cardVariants}>
+					<Card className="border-0 shadow-xl bg-card">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2 text-foreground">
+								<Trophy className="h-5 w-5 text-primary" />
+								NFT Collection
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<NFTCollection />
+						</CardContent>
+					</Card>
+				</motion.div>
+			</motion.div>
+		)
+	}
+
+	// Default: show overview section
 	return (
 		<motion.div
 			variants={staggerContainer}
@@ -502,52 +571,6 @@ export function DonorProfile({
 				)}
 			</AnimatePresence>
 
-			{/* Gamification Section */}
-			<motion.div variants={cardVariants}>
-				<GamificationSection />
-			</motion.div>
-
-			{/* Rewards & Achievements */}
-			<motion.div
-				variants={staggerContainer}
-				initial="initial"
-				animate="animate"
-				className="grid gap-6 lg:grid-cols-2"
-			>
-				<motion.div variants={cardVariants}>
-					<Card className="border-0 shadow-xl bg-card hover:shadow-2xl transition-all duration-300 overflow-hidden relative group">
-						<div className="absolute top-0 right-0 w-40 h-40 bg-purple-50/50 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
-						<CardHeader className="relative z-10">
-							<CardTitle className="flex items-center gap-2 text-foreground">
-								<motion.div
-									animate={{ rotate: [0, 10, -10, 0] }}
-									transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
-								>
-									<Trophy className="h-5 w-5 text-[#000124]" />
-								</motion.div>
-								Badges & Achievements
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="relative z-10">
-							<AchievementsGrid />
-						</CardContent>
-					</Card>
-				</motion.div>
-
-				<motion.div variants={cardVariants}>
-					<Card className="border-0 shadow-xl bg-card hover:shadow-2xl transition-all duration-300 overflow-hidden relative group">
-						<div className="absolute top-0 left-0 w-40 h-40 bg-secondary/5 rounded-full -ml-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
-						<CardHeader className="relative z-10">
-							<CardTitle className="text-foreground">
-								Donation History
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="relative z-10">
-							<DonationHistory donations={projectsWithBalances} />
-						</CardContent>
-					</Card>
-				</motion.div>
-			</motion.div>
 		</motion.div>
 	)
 }

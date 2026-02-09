@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { CheckCircle2, Copy, Link2, Wallet } from 'lucide-react'
+import { CheckCircle2, Copy, Link2, LogOut, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
@@ -18,6 +18,7 @@ interface WalletCardProps {
 	externalWalletAddress: string | null
 	isExternalConnected: boolean
 	onConnectExternal: () => Promise<void>
+	onDisconnectExternal?: () => void
 }
 
 export function WalletCard({
@@ -25,6 +26,7 @@ export function WalletCard({
 	externalWalletAddress,
 	isExternalConnected,
 	onConnectExternal,
+	onDisconnectExternal,
 }: WalletCardProps) {
 	const [copiedSmartAccount, setCopiedSmartAccount] = useState(false)
 	const [copiedExternal, setCopiedExternal] = useState(false)
@@ -195,15 +197,31 @@ export function WalletCard({
 										</Button>
 									</motion.div>
 								</div>
-								<Button
-									variant="outline"
-									size="sm"
-									className="w-full border-gray-300 hover:bg-gray-50 hover:border-[#000124]/30 transition-all"
-									onClick={handleCopyExternal}
-								>
-									<Copy className="h-3.5 w-3.5 mr-2" />
-									Copy Full Address
-								</Button>
+								<div className="flex gap-2">
+									<Button
+										variant="outline"
+										size="sm"
+										className="flex-1 border-gray-300 hover:bg-gray-50 hover:border-[#000124]/30 transition-all"
+										onClick={handleCopyExternal}
+									>
+										<Copy className="h-3.5 w-3.5 mr-2" />
+										Copy Address
+									</Button>
+									{onDisconnectExternal && (
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => {
+												onDisconnectExternal()
+												toast.success('External wallet disconnected')
+											}}
+											className="border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all"
+										>
+											<LogOut className="h-3.5 w-3.5 mr-2" />
+											Disconnect
+										</Button>
+									)}
+								</div>
 							</>
 						) : (
 							<motion.div

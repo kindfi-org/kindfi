@@ -8,6 +8,7 @@ import {
 	Plus,
 	Settings,
 	Target,
+	Trophy,
 	TrendingUp,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -27,6 +28,8 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
+import { GamificationSection } from '~/components/sections/gamification/gamification-section'
+import { NFTCollection } from '~/components/sections/gamification/nft-collection'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { staggerContainer } from '~/lib/constants/animations'
 import { getUserCreatedProjects } from '~/lib/queries/projects/get-user-projects'
@@ -35,6 +38,7 @@ import { FoundationsSection } from './foundations-section'
 interface CreatorProfileProps {
 	userId: string
 	displayName: string
+	showSection?: 'overview' | 'gamification' | 'campaigns' | 'foundations' | 'nfts'
 }
 
 const cardVariants = {
@@ -53,6 +57,7 @@ const cardVariants = {
 export function CreatorProfile({
 	userId,
 	displayName: _displayName,
+	showSection = 'overview',
 }: CreatorProfileProps) {
 	const {
 		data: projects = [],
@@ -146,6 +151,255 @@ export function CreatorProfile({
 		0,
 	)
 
+	// Render different sections based on showSection prop
+	if (showSection === 'gamification') {
+		return (
+			<motion.div
+				variants={staggerContainer}
+				initial="initial"
+				animate="animate"
+				className="space-y-6"
+			>
+				<motion.div variants={cardVariants}>
+					<GamificationSection />
+				</motion.div>
+			</motion.div>
+		)
+	}
+
+	if (showSection === 'campaigns') {
+		return (
+			<motion.div
+				variants={staggerContainer}
+				initial="initial"
+				animate="animate"
+				className="space-y-6"
+			>
+				{/* Stats Overview */}
+				<motion.div
+					variants={staggerContainer}
+					initial="initial"
+					animate="animate"
+					className="grid gap-4 md:grid-cols-3"
+				>
+					<motion.div variants={cardVariants}>
+						<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-xl transition-shadow duration-300 relative group">
+							<div className="absolute top-0 right-0 w-24 h-24 bg-[#000124]/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
+							<CardHeader className="pb-3 relative z-10">
+								<CardTitle className="text-sm font-medium text-muted-foreground">
+									Total Campaigns
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="relative z-10">
+								<motion.div
+									initial={shouldReduceMotion ? { scale: 1 } : { scale: 0 }}
+									animate={{ scale: 1 }}
+									transition={{
+										delay: shouldReduceMotion ? 0 : 0.2,
+										type: 'spring',
+									}}
+									className="text-4xl font-extrabold text-foreground tabular-nums"
+								>
+									{projects.length}
+								</motion.div>
+							</CardContent>
+						</Card>
+					</motion.div>
+					<motion.div variants={cardVariants}>
+						<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-xl transition-shadow duration-300 relative group">
+							<div className="absolute top-0 right-0 w-24 h-24 bg-[#000124]/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
+							<CardHeader className="pb-3 relative z-10">
+								<CardTitle className="text-sm font-medium text-muted-foreground">
+									Active Campaigns
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="relative z-10">
+								<motion.div
+									initial={shouldReduceMotion ? { scale: 1 } : { scale: 0 }}
+									animate={{ scale: 1 }}
+									transition={{
+										delay: shouldReduceMotion ? 0 : 0.3,
+										type: 'spring',
+									}}
+									className="text-4xl font-extrabold text-[#000124] tabular-nums"
+								>
+									{activeProjects.length}
+								</motion.div>
+							</CardContent>
+						</Card>
+					</motion.div>
+					<motion.div variants={cardVariants}>
+						<Card className="border-0 overflow-hidden bg-card shadow-lg hover:shadow-xl transition-shadow duration-300 relative group">
+							<div className="absolute top-0 right-0 w-24 h-24 bg-[#000124]/10 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500" />
+							<CardHeader className="pb-3 relative z-10">
+								<CardTitle className="text-sm font-medium text-muted-foreground">
+									Total Raised
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="relative z-10">
+								<motion.div
+									initial={shouldReduceMotion ? { scale: 1 } : { scale: 0 }}
+									animate={{ scale: 1 }}
+									transition={{
+										delay: shouldReduceMotion ? 0 : 0.4,
+										type: 'spring',
+									}}
+									className="text-4xl font-extrabold text-foreground tabular-nums"
+								>
+									{new Intl.NumberFormat('en-US', {
+										style: 'currency',
+										currency: 'USD',
+										minimumFractionDigits: 0,
+										maximumFractionDigits: 0,
+									}).format(totalRaised)}
+								</motion.div>
+							</CardContent>
+						</Card>
+					</motion.div>
+				</motion.div>
+
+				{/* Campaigns Tab Content */}
+				<Tabs defaultValue="campaigns" className="space-y-6">
+					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200 pb-4">
+						<TabsList className="inline-flex h-auto items-center justify-start gap-1 bg-transparent p-0 border-0">
+							<TabsTrigger
+								value="campaigns"
+								className="data-[state=active]:text-[#000124] data-[state=active]:border-b-[3px] data-[state=active]:border-[#000124] data-[state=active]:font-bold data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent data-[state=inactive]:font-medium transition-all duration-200 rounded-none px-6 py-3 text-base -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000124] focus-visible:ring-offset-2"
+							>
+								<Target className="h-4 w-4 mr-2" aria-hidden="true" />
+								Campaigns
+							</TabsTrigger>
+						</TabsList>
+						<div className="flex gap-3 flex-wrap">
+							<motion.div
+								whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+								whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+								className="flex-shrink-0"
+							>
+								<Button
+									asChild
+									className="bg-[#000124] hover:bg-[#000124]/90 text-white shadow-lg transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#000124] focus-visible:ring-offset-2"
+								>
+									<Link href="/create-project">
+										<Plus className="h-4 w-4 mr-2" aria-hidden="true" />
+										Create Campaign
+									</Link>
+								</Button>
+							</motion.div>
+						</div>
+					</div>
+					<TabsContent value="campaigns" className="mt-6">
+						<AnimatePresence mode="wait">
+							{isLoading ? (
+								<motion.div
+									key="loading"
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									exit={{ opacity: 0 }}
+									className="text-center py-12 text-muted-foreground"
+								>
+									Loading campaigns...
+								</motion.div>
+							) : error ? (
+								<motion.div
+									key="error"
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									exit={{ opacity: 0 }}
+								>
+									<Card className="border-0 bg-red-50">
+										<CardContent className="py-12 text-center text-red-600">
+											Error loading campaigns. Please try again.
+										</CardContent>
+									</Card>
+								</motion.div>
+							) : projectsWithBalances.length > 0 ? (
+								<motion.div
+									key="campaigns"
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									exit={{ opacity: 0 }}
+									className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+								>
+									{projectsWithBalances.map((project) => (
+										<ProjectCard key={project.id} project={project} />
+									))}
+								</motion.div>
+							) : (
+								<motion.div
+									key="empty"
+									initial={{ opacity: 0, scale: 0.9 }}
+									animate={{ opacity: 1, scale: 1 }}
+									exit={{ opacity: 0 }}
+								>
+									<Card>
+										<CardContent className="py-12 text-center">
+											<Target
+												className="h-16 w-16 text-muted-foreground mx-auto mb-4"
+												aria-hidden="true"
+											/>
+											<h3 className="text-xl font-semibold mb-2">
+												No Campaigns Yet
+											</h3>
+											<p className="text-muted-foreground mb-6">
+												Start your first fundraising campaign and make an impact.
+											</p>
+											<Button asChild>
+												<Link href="/create-project">
+													<Plus className="h-4 w-4 mr-2" aria-hidden="true" />
+													Create Your First Campaign
+												</Link>
+											</Button>
+										</CardContent>
+									</Card>
+								</motion.div>
+							)}
+						</AnimatePresence>
+					</TabsContent>
+				</Tabs>
+			</motion.div>
+		)
+	}
+
+	if (showSection === 'foundations') {
+		return (
+			<motion.div
+				variants={staggerContainer}
+				initial="initial"
+				animate="animate"
+				className="space-y-6"
+			>
+				<FoundationsSection userId={userId} />
+			</motion.div>
+		)
+	}
+
+	if (showSection === 'nfts') {
+		return (
+			<motion.div
+				variants={staggerContainer}
+				initial="initial"
+				animate="animate"
+				className="space-y-6"
+			>
+				<motion.div variants={cardVariants}>
+					<Card className="border-0 shadow-xl bg-card">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2 text-foreground">
+								<Trophy className="h-5 w-5 text-primary" />
+								NFT Collection
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<NFTCollection />
+						</CardContent>
+					</Card>
+				</motion.div>
+			</motion.div>
+		)
+	}
+
+	// Default: show overview section
 	return (
 		<motion.div
 			variants={staggerContainer}
