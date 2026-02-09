@@ -1,0 +1,33 @@
+{
+  "name": "trustless-work-dev-skill",
+  "version": "1.0.0",
+  "description": "Comprehensive AI skill for Trustless Work platform development",
+  "main": "SKILL.md",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Trustless-Work/trustless-work-dev-skill.git"
+  },
+  "keywords": [
+    "trustless-work",
+    "escrow",
+    "stellar",
+    "soroban",
+    "smart-contracts",
+    "cursor",
+    "ai-skill",
+    "milestone-payments"
+  ],
+  "author": "Trustless Work",
+  "license": "Apache-2.0",
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "LICENSE",
+    "skills/**/*"
+  ]
+}
