@@ -17,8 +17,7 @@ export async function GET(_req: NextRequest) {
 
 		const supabase = await createSupabaseServerClient()
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: streaks, error } = await (supabase as any)
+		const { data: streaks, error } = await supabase
 			.from('user_streaks')
 			.select('*')
 			.eq('user_id', session.user.id)
@@ -68,8 +67,7 @@ export async function POST(req: NextRequest) {
 		const timestamp = donation_timestamp || new Date().toISOString()
 
 		// Get existing streak or create new
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: existingStreak } = await (supabase as any)
+		const { data: existingStreak } = await supabase
 			.from('user_streaks')
 			.select('*')
 			.eq('user_id', user_id)
@@ -114,8 +112,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		if (existingStreak) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const { data: streak, error } = await (supabase as any)
+			const { data: streak, error } = await supabase
 				.from('user_streaks')
 				.update(streakData)
 				.eq('user_id', user_id)
@@ -135,27 +132,26 @@ export async function POST(req: NextRequest) {
 				streak,
 				bonus_points: current_streak > 1 ? 25 : 0, // Award bonus for maintaining streak
 			})
-		} else {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const { data: streak, error } = await (supabase as any)
-				.from('user_streaks')
-				.insert(streakData)
-				.select()
-				.single()
-
-			if (error) {
-				console.error('Error creating streak:', error)
-				return NextResponse.json(
-					{ error: 'Failed to create streak' },
-					{ status: 500 },
-				)
-			}
-
-			return NextResponse.json({
-				streak,
-				bonus_points: 0,
-			})
 		}
+
+		const { data: streak, error } = await supabase
+			.from('user_streaks')
+			.insert(streakData)
+			.select()
+			.single()
+
+		if (error) {
+			console.error('Error creating streak:', error)
+			return NextResponse.json(
+				{ error: 'Failed to create streak' },
+				{ status: 500 },
+			)
+		}
+
+		return NextResponse.json({
+			streak,
+			bonus_points: 0,
+		})
 	} catch (error) {
 		console.error('Error in POST /api/streaks:', error)
 		return NextResponse.json(

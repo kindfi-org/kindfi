@@ -28,9 +28,7 @@ export async function POST(req: NextRequest) {
 		const supabase = await createSupabaseServerClient()
 
 		// Get quest definition
-		// Note: Type assertion needed until Supabase types are regenerated
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: quest, error: questError } = await (supabase as any)
+		const { data: quest, error: questError } = await supabase
 			.from('quest_definitions')
 			.select('*')
 			.eq('quest_id', quest_id)
@@ -59,9 +57,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Get or create progress
-		// Note: Type assertion needed until Supabase types are regenerated
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: existingProgress } = await (supabase as any)
+		const { data: existingProgress } = await supabase
 			.from('user_quest_progress')
 			.select('*')
 			.eq('user_id', user_id)
@@ -73,9 +69,7 @@ export async function POST(req: NextRequest) {
 
 		if (existingProgress) {
 			// Update existing progress
-			// Note: Type assertion needed until Supabase types are regenerated
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const { data: progress, error } = await (supabase as any)
+			const { data: progress, error } = await supabase
 				.from('user_quest_progress')
 				.update({
 					current_value: progress_value,
@@ -103,9 +97,7 @@ export async function POST(req: NextRequest) {
 			})
 		} else {
 			// Create new progress
-			// Note: Type assertion needed until Supabase types are regenerated
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const { data: progress, error } = await (supabase as any)
+			const { data: progress, error } = await supabase
 				.from('user_quest_progress')
 				.insert({
 					user_id,

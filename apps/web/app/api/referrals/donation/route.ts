@@ -28,8 +28,7 @@ export async function POST(req: NextRequest) {
 		const supabase = await createSupabaseServerClient()
 
 		// Get referral record
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: referral, error: refError } = await (supabase as any)
+		const { data: referral, error: refError } = await supabase
 			.from('referral_records')
 			.select('*')
 			.eq('referred_id', referred_id)
@@ -70,8 +69,7 @@ export async function POST(req: NextRequest) {
 			updateData.status = new_status
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: updatedReferral, error: updateError } = await (supabase as any)
+		const { data: updatedReferral, error: updateError } = await supabase
 			.from('referral_records')
 			.update(updateData)
 			.eq('referred_id', referred_id)
@@ -88,8 +86,7 @@ export async function POST(req: NextRequest) {
 
 		// Award reward points if first donation
 		if (reward_points > 0) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const { data: stats } = await (supabase as any)
+			const { data: stats } = await supabase
 				.from('referrer_statistics')
 				.select('*')
 				.eq('referrer_id', referral.referrer_id)
@@ -105,8 +102,7 @@ export async function POST(req: NextRequest) {
 					updateStats.active_referrals = stats.active_referrals + 1
 				}
 
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				await (supabase as any)
+				await supabase
 					.from('referrer_statistics')
 					.update(updateStats)
 					.eq('referrer_id', referral.referrer_id)

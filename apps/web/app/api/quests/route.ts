@@ -18,9 +18,7 @@ export async function GET(_req: NextRequest) {
 		const supabase = await createSupabaseServerClient()
 
 		// Get all active quests
-		// Note: Type assertion needed until Supabase types are regenerated
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: quests, error } = await (supabase as any)
+		const { data: quests, error } = await supabase
 			.from('quest_definitions')
 			.select('*')
 			.eq('is_active', true)
@@ -35,9 +33,7 @@ export async function GET(_req: NextRequest) {
 		}
 
 		// Get user's progress for each quest
-		// Note: Type assertion needed until Supabase types are regenerated
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: progress, error: progressError } = await (supabase as any)
+		const { data: progress, error: progressError } = await supabase
 			.from('user_quest_progress')
 			.select('*')
 			.eq('user_id', session.user.id)
@@ -47,10 +43,8 @@ export async function GET(_req: NextRequest) {
 		}
 
 		// Merge quests with user progress
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const questsWithProgress = quests?.map((quest: any) => {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const userProgress = progress?.find((p: any) => p.quest_id === quest.quest_id)
+		const questsWithProgress = quests?.map((quest) => {
+			const userProgress = progress?.find((p) => p.quest_id === quest.quest_id)
 			return {
 				...quest,
 				progress: userProgress || {
@@ -114,9 +108,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Get next quest_id (simple increment from max)
-		// Note: Type assertion needed until Supabase types are regenerated
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: maxQuest } = await (supabase as any)
+		const { data: maxQuest } = await supabase
 			.from('quest_definitions')
 			.select('quest_id')
 			.order('quest_id', { ascending: false })
@@ -125,8 +117,7 @@ export async function POST(req: NextRequest) {
 
 		const quest_id = (maxQuest?.quest_id || 0) + 1
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: quest, error } = await (supabase as any)
+		const { data: quest, error } = await supabase
 			.from('quest_definitions')
 			.insert({
 				quest_id,

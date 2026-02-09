@@ -28,8 +28,7 @@ export async function POST(req: NextRequest) {
 		const supabase = await createSupabaseServerClient()
 
 		// Get referral record
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: referral, error: refError } = await (supabase as any)
+		const { data: referral, error: refError } = await supabase
 			.from('referral_records')
 			.select('*')
 			.eq('referred_id', referred_id)
@@ -51,8 +50,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Update referral status
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: updatedReferral, error: updateError } = await (supabase as any)
+		const { data: updatedReferral, error: updateError } = await supabase
 			.from('referral_records')
 			.update({
 				status: 'onboarded',
@@ -72,16 +70,14 @@ export async function POST(req: NextRequest) {
 
 		// Update referrer statistics
 		const reward_points = 50 // Onboarding reward
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: stats } = await (supabase as any)
+		const { data: stats } = await supabase
 			.from('referrer_statistics')
 			.select('*')
 			.eq('referrer_id', referral.referrer_id)
 			.single()
 
 		if (stats) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			await (supabase as any)
+			await supabase
 				.from('referrer_statistics')
 				.update({
 					total_reward_points: stats.total_reward_points + reward_points,
