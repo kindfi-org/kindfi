@@ -1182,6 +1182,117 @@ export type Database = {
           },
         ]
       }
+      quest_definitions: {
+        Row: {
+          contract_address: string | null
+          created_at: string
+          description: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          name: string
+          quest_id: number
+          quest_type: Database["public"]["Enums"]["quest_type"]
+          reward_points: number
+          target_value: number
+          updated_at: string
+        }
+        Insert: {
+          contract_address?: string | null
+          created_at?: string
+          description: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          quest_id: number
+          quest_type: Database["public"]["Enums"]["quest_type"]
+          reward_points?: number
+          target_value: number
+          updated_at?: string
+        }
+        Update: {
+          contract_address?: string | null
+          created_at?: string
+          description?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          quest_id?: number
+          quest_type?: Database["public"]["Enums"]["quest_type"]
+          reward_points?: number
+          target_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      referral_records: {
+        Row: {
+          contract_address: string | null
+          created_at: string
+          first_donation_at: string | null
+          id: string
+          onboarded_at: string | null
+          referred_id: string
+          referrer_id: string
+          status: Database["public"]["Enums"]["referral_status"]
+          total_donations: number
+        }
+        Insert: {
+          contract_address?: string | null
+          created_at?: string
+          first_donation_at?: string | null
+          id?: string
+          onboarded_at?: string | null
+          referred_id: string
+          referrer_id: string
+          status?: Database["public"]["Enums"]["referral_status"]
+          total_donations?: number
+        }
+        Update: {
+          contract_address?: string | null
+          created_at?: string
+          first_donation_at?: string | null
+          id?: string
+          onboarded_at?: string | null
+          referred_id?: string
+          referrer_id?: string
+          status?: Database["public"]["Enums"]["referral_status"]
+          total_donations?: number
+        }
+        Relationships: []
+      }
+      referrer_statistics: {
+        Row: {
+          active_referrals: number
+          created_at: string
+          id: string
+          referrer_id: string
+          total_referrals: number
+          total_reward_points: number
+          updated_at: string
+        }
+        Insert: {
+          active_referrals?: number
+          created_at?: string
+          id?: string
+          referrer_id: string
+          total_referrals?: number
+          total_reward_points?: number
+          updated_at?: string
+        }
+        Update: {
+          active_referrals?: number
+          created_at?: string
+          id?: string
+          referrer_id?: string
+          total_referrals?: number
+          total_reward_points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_follows: {
         Row: {
           created_at: string
@@ -1214,6 +1325,128 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_nfts: {
+        Row: {
+          contract_address: string
+          created_at: string
+          evolved_at: string | null
+          id: string
+          image_ipfs_hash: string | null
+          metadata_ipfs_hash: string | null
+          minted_at: string
+          stellar_address: string
+          tier: string
+          token_id: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contract_address: string
+          created_at?: string
+          evolved_at?: string | null
+          id?: string
+          image_ipfs_hash?: string | null
+          metadata_ipfs_hash?: string | null
+          minted_at?: string
+          stellar_address: string
+          tier?: string
+          token_id: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contract_address?: string
+          created_at?: string
+          evolved_at?: string | null
+          id?: string
+          image_ipfs_hash?: string | null
+          metadata_ipfs_hash?: string | null
+          minted_at?: string
+          stellar_address?: string
+          tier?: string
+          token_id?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_quest_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          id: string
+          is_completed: boolean
+          quest_id: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          is_completed?: boolean
+          quest_id: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          is_completed?: boolean
+          quest_id?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_quest_progress_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quest_definitions"
+            referencedColumns: ["quest_id"]
+          },
+        ]
+      }
+      user_streaks: {
+        Row: {
+          contract_address: string | null
+          created_at: string
+          current_streak: number
+          id: string
+          last_donation_timestamp: string | null
+          longest_streak: number
+          period: Database["public"]["Enums"]["streak_period"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contract_address?: string | null
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_donation_timestamp?: string | null
+          longest_streak?: number
+          period: Database["public"]["Enums"]["streak_period"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contract_address?: string | null
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_donation_timestamp?: string | null
+          longest_streak?: number
+          period?: Database["public"]["Enums"]["streak_period"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       waitlist_interests: {
         Row: {
@@ -1294,6 +1527,21 @@ export type Database = {
       }
       remove_kyc_admin: { Args: { target_user_id: string }; Returns: undefined }
       unaccent: { Args: { "": string }; Returns: string }
+      upsert_escrow_contract: {
+        Args: {
+          p_amount: number
+          p_contract_id: string
+          p_contribution_id: string
+          p_current_state?: Database["public"]["Enums"]["escrow_status_type"]
+          p_engagement_id: string
+          p_metadata?: Json
+          p_payer_address: string
+          p_platform_fee: number
+          p_project_id: string
+          p_receiver_address: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       backup_state: "not_backed_up" | "backed_up"
@@ -1333,6 +1581,16 @@ export type Database = {
         | "paused"
         | "funded"
         | "rejected"
+      quest_status: "active" | "completed" | "expired"
+      quest_type:
+        | "multi_region_donation"
+        | "weekly_streak"
+        | "multi_category_donation"
+        | "referral_quest"
+        | "total_donation_amount"
+        | "quest_master"
+      referral_status: "pending" | "onboarded" | "first_donation" | "active"
+      streak_period: "weekly" | "monthly"
       user_role:
         | "donor"
         | "creator"
@@ -1508,6 +1766,17 @@ export const Constants = {
         "funded",
         "rejected",
       ],
+      quest_status: ["active", "completed", "expired"],
+      quest_type: [
+        "multi_region_donation",
+        "weekly_streak",
+        "multi_category_donation",
+        "referral_quest",
+        "total_donation_amount",
+        "quest_master",
+      ],
+      referral_status: ["pending", "onboarded", "first_donation", "active"],
+      streak_period: ["weekly", "monthly"],
       user_role: ["donor", "creator", "pending", "admin", "kinder", "kindler"],
     },
   },
