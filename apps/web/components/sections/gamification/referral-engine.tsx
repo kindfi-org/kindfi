@@ -9,7 +9,8 @@ import {
 	TrendingUp,
 	Users,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -46,7 +47,23 @@ interface ReferrerStats {
 	total_reward_points: number
 }
 
+/**
+ * Generate a deterministic, URL-safe referral code from a user ID.
+ * Uses the first 8 hex chars of a simple hash so the code is short and stable.
+ */
+function buildReferralCode(userId: string): string {
+	let hash = 0
+	for (let i = 0; i < userId.length; i++) {
+		hash = (hash * 31 + userId.charCodeAt(i)) | 0
+	}
+	// Use unsigned 32-bit hex + first chars of the UUID for uniqueness
+	const hex = (hash >>> 0).toString(16).toUpperCase()
+	const suffix = userId.replace(/-/g, '').slice(0, 4).toUpperCase()
+	return `${hex}${suffix}`.slice(0, 8)
+}
+
 export function ReferralEngine() {
+	const { data: session } = useSession()
 	const [showShareDialog, setShowShareDialog] = useState(false)
 
 	const { data, isLoading, error } = useQuery<{
@@ -65,25 +82,18 @@ export function ReferralEngine() {
 		refetchInterval: 30000,
 	})
 
-	// Generate referral code from user ID (in production, use a proper referral code system)
-	const generateReferralCode = () => {
-		// This is a placeholder - in production, you'd generate a unique code
-		if (typeof window !== 'undefined') {
-			const userId = localStorage.getItem('userId') || 'user'
-			return btoa(userId).slice(0, 8).toUpperCase()
-		}
-		return 'REF12345'
-	}
+	const referralCode = useMemo(
+		() => (session?.user?.id ? buildReferralCode(session.user.id) : 'LOADING'),
+		[session],
+	)
 
 	const handleCopyReferralCode = () => {
-		const code = generateReferralCode()
-		navigator.clipboard.writeText(code)
+		navigator.clipboard.writeText(referralCode)
 		toast.success('Referral code copied to clipboard!')
 	}
 
 	const handleShare = () => {
-		const code = generateReferralCode()
-		const shareUrl = `${window.location.origin}/sign-up?ref=${code}`
+		const shareUrl = `${window.location.origin}/sign-up?ref=${referralCode}`
 		navigator.clipboard.writeText(shareUrl)
 		toast.success('Referral link copied to clipboard!')
 		setShowShareDialog(false)
@@ -157,9 +167,9 @@ export function ReferralEngine() {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="flex items-center gap-2">
-						<code className="flex-1 px-4 py-3 bg-white rounded-lg border-2 border-primary/20 font-mono text-lg font-bold">
-							{generateReferralCode()}
-						</code>
+					<code className="flex-1 px-4 py-3 bg-white rounded-lg border-2 border-primary/20 font-mono text-lg font-bold">
+						{referralCode}
+					</code>
 						<Button onClick={handleCopyReferralCode} variant="outline" size="sm">
 							<Copy className="h-4 w-4 mr-2" />
 							Copy
@@ -183,7 +193,7 @@ export function ReferralEngine() {
 										<input
 											type="text"
 											readOnly
-											value={`${window.location.origin}/sign-up?ref=${generateReferralCode()}`}
+											value={`${window.location.origin}/sign-up?ref=${referralCode}`}
 											className="flex-1 px-3 py-2 border rounded-lg"
 										/>
 										<Button onClick={handleShare} size="sm">

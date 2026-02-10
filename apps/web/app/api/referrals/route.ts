@@ -2,11 +2,34 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+
+/**
+ * Resolve a user ID to a Stellar address (G... or C...) via devices table.
+ * Returns null if no address is found.
+ */
+async function resolveUserStellarAddress(
+	supabase: import('@packages/lib/types').TypedSupabaseClient,
+	userId: string,
+): Promise<string | null> {
+	const { data: devices } = await supabase
+		.from('devices')
+		.select('address')
+		.eq('user_id', userId)
+		.not('address', 'eq', '0x')
+		.not('address', 'is', null)
+		.limit(1)
+
+	return devices?.[0]?.address ?? null
+}
 
 /**
  * GET /api/referrals
  * Get user's referral information
+ *
+ * Uses service role client because RLS policies use auth.uid() (Supabase Auth)
+ * but this app authenticates via NextAuth. The session check above ensures
+ * only authenticated users can access this endpoint.
  */
 export async function GET(_req: NextRequest) {
 	try {
@@ -15,7 +38,8 @@ export async function GET(_req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const supabase = await createSupabaseServerClient()
+		// Use service role client to bypass RLS — auth is handled by NextAuth session above
+		const { supabase } = await import('@packages/lib/supabase')
 
 		// Get referrals where user is referrer
 		const { data: referrals, error: referralsError } = await supabase
@@ -67,6 +91,9 @@ export async function GET(_req: NextRequest) {
 /**
  * POST /api/referrals
  * Create a referral relationship (service/recorder role)
+ *
+ * Now also calls create_referral on the Soroban Referral contract
+ * so the on-chain state stays in sync with the database.
  */
 export async function POST(req: NextRequest) {
 	try {
@@ -92,7 +119,8 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		const supabase = await createSupabaseServerClient()
+		// Use service role client to bypass RLS — auth is handled by NextAuth session above
+		const { supabase } = await import('@packages/lib/supabase')
 
 		// Check if referral already exists
 		const { data: existing } = await supabase
@@ -108,7 +136,7 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Create referral record
+		// Create referral record in DB
 		const { data: referral, error } = await supabase
 			.from('referral_records')
 			.insert({
@@ -151,7 +179,49 @@ export async function POST(req: NextRequest) {
 			})
 		}
 
-		return NextResponse.json({ referral }, { status: 201 })
+		// ---- On-chain: create_referral ----
+		let contractResult: { success: boolean; error?: string } | null = null
+		const referralContractAddress =
+			process.env.REFERRAL_CONTRACT_ADDRESS ||
+			process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
+
+		if (referralContractAddress && process.env.SOROBAN_PRIVATE_KEY) {
+			const referrerAddress = await resolveUserStellarAddress(supabase, referrer_id)
+			const referredAddress = await resolveUserStellarAddress(supabase, referred_id)
+
+			console.log('[Referral API] On-chain create_referral addresses:', {
+				referrerAddress,
+				referredAddress,
+			})
+
+			if (referrerAddress && referredAddress) {
+				try {
+					const contractService = new GamificationContractService()
+					contractResult = await contractService.createReferral(
+						referralContractAddress,
+						{ referrerAddress, referredAddress },
+					)
+
+					if (!contractResult.success) {
+						console.error(
+							'[Referral API] On-chain create_referral failed:',
+							contractResult.error,
+						)
+					} else {
+						console.log('[Referral API] On-chain create_referral succeeded')
+					}
+				} catch (err) {
+					console.error('[Referral API] Error calling create_referral on-chain:', err)
+				}
+			} else {
+				console.warn('[Referral API] Skipping on-chain create_referral — missing Stellar addresses')
+			}
+		}
+
+		return NextResponse.json(
+			{ referral, onChain: contractResult?.success ?? false },
+			{ status: 201 },
+		)
 	} catch (error) {
 		console.error('Error in POST /api/referrals:', error)
 		return NextResponse.json(

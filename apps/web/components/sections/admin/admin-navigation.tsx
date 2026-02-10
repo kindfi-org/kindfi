@@ -6,6 +6,7 @@ import {
 	IoBusinessOutline,
 	IoChevronForwardOutline,
 	IoFolderOutline,
+	IoGiftOutline,
 	IoHomeOutline,
 	IoPeopleOutline,
 	IoSettingsOutline,
@@ -31,6 +32,7 @@ const entityItems: NavItem[] = [
 	{ href: '/admin/foundations', label: 'Foundations', Icon: IoBusinessOutline },
 	{ href: '/admin/users', label: 'Users', Icon: IoPeopleOutline },
 	{ href: '/admin/escrows', label: 'Escrows', Icon: IoShieldCheckmarkOutline },
+	{ href: '/admin/gamification', label: 'Gamification', Icon: IoGiftOutline },
 ]
 
 const insightsItems: NavItem[] = [

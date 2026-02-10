@@ -2,11 +2,15 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
 /**
  * POST /api/referrals/donation
  * Record a donation by a referred user (service/recorder role)
+ *
+ * Uses service role client because RLS policies use auth.uid() (Supabase Auth)
+ * but this app authenticates via NextAuth. The session check above ensures
+ * only authenticated users can access this endpoint.
  */
 export async function POST(req: NextRequest) {
 	try {
@@ -16,7 +20,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { referred_id } = body
+		const { referred_id, referred_address } = body
 
 		if (!referred_id) {
 			return NextResponse.json(
@@ -25,7 +29,25 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		const supabase = await createSupabaseServerClient()
+		// Use service role client to bypass RLS — auth is handled by NextAuth session above
+		const { supabase } = await import('@packages/lib/supabase')
+
+		// Get user's Stellar address if not provided
+		let stellarAddress = referred_address
+		if (!stellarAddress) {
+			// Try to get from user's device/smart account (handle multiple devices)
+			const { data: devices } = await supabase
+				.from('devices')
+				.select('address')
+				.eq('user_id', referred_id)
+				.not('address', 'eq', '0x')
+				.not('address', 'is', null)
+				.limit(1)
+
+			if (devices && devices.length > 0 && devices[0]?.address) {
+				stellarAddress = devices[0].address
+			}
+		}
 
 		// Get referral record
 		const { data: referral, error: refError } = await supabase
@@ -39,6 +61,63 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({
 				reward_points: 0,
 				message: 'Not a referred user',
+			})
+		}
+
+		// Call smart contract if address is available and SOROBAN_PRIVATE_KEY is set
+		let contractResult: {
+			success: boolean
+			rewardPoints?: number
+			error?: string
+		} | null = null
+
+		console.log('[Referral API] Contract call conditions:', {
+			hasStellarAddress: !!stellarAddress,
+			hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
+			stellarAddress: stellarAddress || 'N/A',
+			referred_id,
+		})
+
+		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
+			try {
+				const contractService = new GamificationContractService()
+				const referralContractAddress =
+					process.env.REFERRAL_CONTRACT_ADDRESS ||
+					process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
+
+				console.log('[Referral API] Referral contract address:', referralContractAddress || 'NOT SET')
+
+				if (referralContractAddress) {
+					console.log('[Referral API] Calling referral contract...')
+					contractResult = await contractService.recordReferralDonation(
+						referralContractAddress,
+						{
+							referredAddress: stellarAddress,
+						},
+					)
+
+					console.log('[Referral API] Contract call result:', contractResult)
+
+					if (!contractResult.success) {
+						console.error(
+							'[Referral API] Failed to record referral donation on-chain:',
+							contractResult.error,
+						)
+						// Continue with database update even if contract call fails
+					} else {
+						console.log('[Referral API] Successfully recorded referral donation on-chain')
+					}
+				} else {
+					console.warn('[Referral API] Referral contract address not configured')
+				}
+			} catch (error) {
+				console.error('[Referral API] Error calling referral contract:', error)
+				// Continue with database update even if contract call fails
+			}
+		} else {
+			console.log('[Referral API] Skipping contract call - missing requirements:', {
+				hasStellarAddress: !!stellarAddress,
+				hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
 			})
 		}
 

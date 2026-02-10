@@ -16,3 +16,5 @@
   - [User Flow](kyc-integration/user-flow.md)
   - [Troubleshooting](kyc-integration/troubleshooting.md)
   - [Audit Log](kyc-integration/audit.md)
+- [Gamification System](../apps/web/docs/gamification/quest-creation.md)
+  - [Quest Creation Guide](../apps/web/docs/gamification/quest-creation.md)

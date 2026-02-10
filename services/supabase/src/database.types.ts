@@ -1326,6 +1326,51 @@ export type Database = {
           },
         ]
       }
+      user_nfts: {
+        Row: {
+          contract_address: string
+          created_at: string
+          evolved_at: string | null
+          id: string
+          image_ipfs_hash: string | null
+          metadata_ipfs_hash: string | null
+          minted_at: string
+          stellar_address: string
+          tier: string
+          token_id: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contract_address: string
+          created_at?: string
+          evolved_at?: string | null
+          id?: string
+          image_ipfs_hash?: string | null
+          metadata_ipfs_hash?: string | null
+          minted_at?: string
+          stellar_address: string
+          tier?: string
+          token_id: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contract_address?: string
+          created_at?: string
+          evolved_at?: string | null
+          id?: string
+          image_ipfs_hash?: string | null
+          metadata_ipfs_hash?: string | null
+          minted_at?: string
+          stellar_address?: string
+          tier?: string
+          token_id?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_quest_progress: {
         Row: {
           completed_at: string | null
@@ -1482,6 +1527,21 @@ export type Database = {
       }
       remove_kyc_admin: { Args: { target_user_id: string }; Returns: undefined }
       unaccent: { Args: { "": string }; Returns: string }
+      upsert_escrow_contract: {
+        Args: {
+          p_amount: number
+          p_contract_id: string
+          p_contribution_id: string
+          p_current_state?: Database["public"]["Enums"]["escrow_status_type"]
+          p_engagement_id: string
+          p_metadata?: Json
+          p_payer_address: string
+          p_platform_fee: number
+          p_project_id: string
+          p_receiver_address: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       backup_state: "not_backed_up" | "backed_up"
@@ -1721,4 +1781,3 @@ export const Constants = {
     },
   },
 } as const
-
