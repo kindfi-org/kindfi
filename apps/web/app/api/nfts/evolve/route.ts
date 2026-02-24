@@ -15,8 +15,8 @@ import {
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
 // --- Rate Limiting Configuration ---
-const RATE_LIMIT_MAX_REQUESTS = 3
-const RATE_LIMIT_WINDOW_SECONDS = 60
+const rateLimitMaxRequests = 3
+const rateLimitWindowSeconds = 60
 // Module-level Redis singleton to avoid per-request connection churn
 const redis = Redis.fromEnv()
 
@@ -42,8 +42,8 @@ export async function POST(req: NextRequest) {
 		try {
 			// Secure key using strictly the authenticated session identity
 			const rateLimitKey = `rate_limit:nft_evolve:${session.user.id}`
-			const MAX_REQUESTS = RATE_LIMIT_MAX_REQUESTS
-			const WINDOW_SECONDS = RATE_LIMIT_WINDOW_SECONDS
+			const MAX_REQUESTS = rateLimitMaxRequests
+			const WINDOW_SECONDS = rateLimitWindowSeconds
 
 			// Atomically increment and set TTL on first request using a Lua script
 			// This prevents a leaked key (where INCR succeeds but EXPIRE fails)
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
 
-		// Get user's existing NFT (Using the requested userId, which may differ from session identity for admin actions)
+		// Get user's existing NFT
 		const { data: existingNFT, error: nftError } = await supabase
 			.from('user_nfts')
 			.select('*')
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		console.log('[NFT Evolve] Upgrading tier:', {
-			userId, // It is generally acceptable to log the target userId here, as this is a successful business logic action
+			userId,
 			from: currentTier,
 			to: newTier,
 			impactScore: stats.impactScore,
