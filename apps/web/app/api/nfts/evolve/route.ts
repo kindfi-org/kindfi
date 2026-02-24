@@ -1,17 +1,18 @@
+import { Redis } from '@upstash/redis'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import {
 	buildNFTMetadata,
 	determineTier,
 	generateTierSVG,
+	type NFTTier,
 	TIER_CONFIGS,
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
-	type NFTTier,
 } from '~/lib/services/pinata'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
 /**
  * POST /api/nfts/evolve
@@ -30,6 +31,35 @@ export async function POST(req: NextRequest) {
 
 		const body = await req.json()
 		const userId = body.user_id || session.user.id
+
+		// --- Rate Limiting via Upstash Redis ---
+		try {
+			const redis = Redis.fromEnv()
+			const rateLimitKey = `rate_limit:nft_evolve:${userId}`
+			const MAX_REQUESTS = 3
+			const WINDOW_SECONDS = 60
+
+			const requests = await redis.incr(rateLimitKey)
+
+			// If this is the first request in the window, set the expiration
+			if (requests === 1) {
+				await redis.expire(rateLimitKey, WINDOW_SECONDS)
+			}
+
+			if (requests > MAX_REQUESTS) {
+				console.warn(
+					`[Rate Limit Exceeded] User ${userId} attempted to evolve NFT too frequently.`,
+				)
+				return NextResponse.json(
+					{ error: 'Too many requests. Please try again later.' },
+					{ status: 429 },
+				)
+			}
+		} catch (redisError) {
+			// Fail open: If Redis goes down, we log it but don't block the user from evolving their NFT
+			console.error('[Rate Limiting] Redis error:', redisError)
+		}
+		// --- End Rate Limiting ---
 
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
@@ -103,7 +133,10 @@ export async function POST(req: NextRequest) {
 			imageUri = uploadResult.ipfsUrl
 			imageIpfsHash = uploadResult.ipfsHash
 		} catch (err) {
-			console.warn('[NFT Evolve] Failed to upload image, using placeholder:', err)
+			console.warn(
+				'[NFT Evolve] Failed to upload image, using placeholder:',
+				err,
+			)
 			imageUri = `https://kindfi.org/images/nft-${newTier}.svg`
 		}
 
