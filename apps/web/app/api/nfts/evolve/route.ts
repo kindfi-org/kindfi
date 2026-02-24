@@ -14,6 +14,12 @@ import {
 } from '~/lib/services/pinata'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
+// --- Rate Limiting Configuration ---
+const RATE_LIMIT_MAX_REQUESTS = 3
+const RATE_LIMIT_WINDOW_SECONDS = 60
+// Module-level Redis singleton to avoid per-request connection churn
+const redis = Redis.fromEnv()
+
 /**
  * POST /api/nfts/evolve
  *
@@ -34,25 +40,35 @@ export async function POST(req: NextRequest) {
 
 		// --- Rate Limiting via Upstash Redis ---
 		try {
-			const redis = Redis.fromEnv()
-			const rateLimitKey = `rate_limit:nft_evolve:${userId}`
-			const MAX_REQUESTS = 3
-			const WINDOW_SECONDS = 60
+			// Secure key using strictly the authenticated session identity
+			const rateLimitKey = `rate_limit:nft_evolve:${session.user.id}`
+			const MAX_REQUESTS = RATE_LIMIT_MAX_REQUESTS
+			const WINDOW_SECONDS = RATE_LIMIT_WINDOW_SECONDS
 
-			const requests = await redis.incr(rateLimitKey)
+			// Atomically increment and set TTL on first request using a Lua script
+			// This prevents a leaked key (where INCR succeeds but EXPIRE fails)
+			const requests = (await redis.eval(
+				`local count = redis.call("INCR", KEYS[1])
+                 if count == 1 then
+                   redis.call("EXPIRE", KEYS[1], ARGV[1])
+                 end
+                 return count`,
+				[rateLimitKey],
+				[WINDOW_SECONDS],
+			)) as number
 
-			// If this is the first request in the window, set the expiration
-			if (requests === 1) {
-				await redis.expire(rateLimitKey, WINDOW_SECONDS)
-			}
-
-			if (requests > MAX_REQUESTS) {
+			if (requests && requests > MAX_REQUESTS) {
 				console.warn(
-					`[Rate Limit Exceeded] User ${userId} attempted to evolve NFT too frequently.`,
+					'[Rate Limit Exceeded] User attempted to evolve NFT too frequently.',
 				)
 				return NextResponse.json(
 					{ error: 'Too many requests. Please try again later.' },
-					{ status: 429 },
+					{
+						status: 429,
+						headers: {
+							'Retry-After': WINDOW_SECONDS.toString(),
+						},
+					},
 				)
 			}
 		} catch (redisError) {
@@ -64,7 +80,7 @@ export async function POST(req: NextRequest) {
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
 
-		// Get user's existing NFT
+		// Get user's existing NFT (Using the requested userId, which may differ from session identity for admin actions)
 		const { data: existingNFT, error: nftError } = await supabase
 			.from('user_nfts')
 			.select('*')
@@ -113,7 +129,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		console.log('[NFT Evolve] Upgrading tier:', {
-			userId,
+			userId, // It is generally acceptable to log the target userId here, as this is a successful business logic action
 			from: currentTier,
 			to: newTier,
 			impactScore: stats.impactScore,
