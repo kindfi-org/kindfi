@@ -1,8 +1,11 @@
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { nextAuthOption } from "~/lib/auth/auth-options";
-import { GamificationContractService } from "~/lib/stellar/gamification-contracts";
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { headers } from 'next/headers'
+import { nextAuthOption } from '~/lib/auth/auth-options'
+import { RateLimiter } from '~/lib/auth/rate-limiter'
+import { Logger } from '~/lib/logger'
+
 import {
   buildNFTMetadata,
   determineTier,
@@ -13,6 +16,9 @@ import {
 } from '~/lib/services/pinata'
 import { getUserStats } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+
+const rateLimiter = new RateLimiter()
+const logger = new Logger()
 
 /**
  * POST /api/nfts/mint
@@ -30,6 +36,23 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(nextAuthOption)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limiting by client IP
+    const headersList = await headers()
+    const clientIp = headersList.get('x-forwarded-for') || 'unknown'
+
+    const rateLimitResult = await rateLimiter.increment(clientIp, 'mintNFT')
+    if (rateLimitResult.isBlocked) {
+      logger.warn({
+        eventType: 'RATE_LIMIT_EXCEEDED',
+        clientIp,
+        action: 'mintNFT',
+      })
+      return NextResponse.json(
+        { error: 'Too many mint requests. Please try again later.' },
+        { status: 429 },
+      )
     }
 
     const body = await req.json()
@@ -96,6 +119,7 @@ export async function POST(req: NextRequest) {
     const stats = await getUserStats({ supabase, userId })
     const tier: NFTTier = determineTier(stats.impactScore)
 
+
     // Generate and upload tier image to IPFS via Pinata
     let imageUri = ''
     let imageIpfsHash = ''
@@ -117,7 +141,6 @@ export async function POST(req: NextRequest) {
       )
       imageUri = `https://kindfi.org/images/nft-${tier}.svg`
     }
-
 
     // Upload metadata JSON to IPFS as backup
     let metadataIpfsHash = ''
