@@ -1,5 +1,13 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 
+
+export const IMPACT_SCORE_WEIGHTS = {
+  DONATIONS: 10,
+  QUESTS: 25,
+  STREAKS: 5,
+  REFERRALS: 15,
+} as const
+
 interface GetUserStatsParams {
   supabase: TypedSupabaseClient
   userId: string
@@ -50,10 +58,10 @@ export const getUserStats = async ({
   const referralCount = referrals?.length ?? 0
 
   const impactScore =
-    totalDonations * 10 +
-    questsCompleted * 25 +
-    streakDays * 5 +
-    referralCount * 15
+    totalDonations * IMPACT_SCORE_WEIGHTS.DONATIONS +
+    questsCompleted * IMPACT_SCORE_WEIGHTS.QUESTS +
+    streakDays * IMPACT_SCORE_WEIGHTS.STREAKS +
+    referralCount * IMPACT_SCORE_WEIGHTS.REFERRALS
 
   return {
     impactScore,

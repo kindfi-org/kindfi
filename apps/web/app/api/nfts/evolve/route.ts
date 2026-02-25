@@ -12,6 +12,7 @@ import {
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
 } from '~/lib/services/pinata'
+import { IMPACT_SCORE_WEIGHTS } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
 // --- Rate Limiting Configuration ---
@@ -280,11 +281,13 @@ async function getUserStats(
 
 	const referralCount = referrals?.length ?? 0
 
+	// TODO: Refactor this local function to use the centralized getUserStats service from ~/lib/services/user-stats
+	// This local implementation is kept temporarily to avoid breaking changes while API stabilization is in progress.
 	const impactScore =
-		totalDonations * 10 +
-		questsCompleted * 25 +
-		streakDays * 5 +
-		referralCount * 15
+		totalDonations * IMPACT_SCORE_WEIGHTS.DONATIONS +
+		questsCompleted * IMPACT_SCORE_WEIGHTS.QUESTS +
+		streakDays * IMPACT_SCORE_WEIGHTS.STREAKS +
+		referralCount * IMPACT_SCORE_WEIGHTS.REFERRALS
 
 	return {
 		impactScore,
