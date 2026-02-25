@@ -27,7 +27,8 @@ const logger = new Logger()
  * Called automatically when a user first donates, or manually from the UI.
  *
  * Body: { user_id?: string, stellar_address?: string }
- * - If user_id is not provided, uses the session user
+ * - Only admins may provide `user_id` or `stellar_address` overrides
+ * - If user_id is not provided (or caller is non-admin), uses the session user
  * - If stellar_address is not provided, resolves from devices table
  */
 export async function POST(req: NextRequest) {
