@@ -3,6 +3,10 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { RateLimiter } from '~/lib/auth/rate-limiter'
+
+const rateLimiter = new RateLimiter()
+const QUEST_PROGRESS_ALLOWED_ROLES = ['service', 'recorder'] as const
 
 /**
  * POST /api/quests/progress
@@ -13,6 +17,28 @@ export async function POST(req: NextRequest) {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const rateLimitResult = await rateLimiter.increment(
+			session.user.id,
+			'quest_progress',
+		)
+		if (rateLimitResult.isBlocked) {
+			return NextResponse.json(
+				{ error: 'Too many requests' },
+				{ status: 429 },
+			)
+		}
+
+		const userRole = session.user.role
+		const isAllowedRole = userRole
+			? QUEST_PROGRESS_ALLOWED_ROLES.includes(
+					userRole as (typeof QUEST_PROGRESS_ALLOWED_ROLES)[number],
+				)
+			: false
+
+		if (!isAllowedRole) {
+			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 		}
 
 		const body = await req.json()
