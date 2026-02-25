@@ -1,7 +1,8 @@
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { nextAuthOption } from '~/lib/auth/auth-options'
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { nextAuthOption } from "~/lib/auth/auth-options";
+import { GamificationContractService } from "~/lib/stellar/gamification-contracts";
 import {
   buildNFTMetadata,
   determineTier,
@@ -20,7 +21,8 @@ import { GamificationContractService } from '~/lib/stellar/gamification-contract
  * Called automatically when a user first donates, or manually from the UI.
  *
  * Body: { user_id?: string, stellar_address?: string }
- * - If user_id is not provided, uses the session user
+ * - Only admins may provide `user_id` or `stellar_address` overrides
+ * - If user_id is not provided (or caller is non-admin), uses the session user
  * - If stellar_address is not provided, resolves from devices table
  */
 export async function POST(req: NextRequest) {
