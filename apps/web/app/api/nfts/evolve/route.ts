@@ -35,9 +35,38 @@ export async function POST(req: NextRequest) {
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
-
 		const body = await req.json()
-		const userId = body.user_id || session.user.id
+		const sessionUserId = session.user.id
+		const requestedUserId = body.user_id
+
+		let userId: string
+
+		if (requestedUserId && requestedUserId !== sessionUserId) {
+			const isAdmin = session.user.role === 'admin'
+
+			if (!isAdmin) {
+				return new Response(
+					JSON.stringify({
+						error:
+							'Forbidden: Only administrators can evolve NFTs for other users.',
+					}),
+					{
+						status: 403,
+						headers: { 'Content-Type': 'application/json' },
+					},
+				)
+			}
+			userId = requestedUserId
+		} else {
+			userId = sessionUserId
+		}
+
+		if (!body.nft_id) {
+			return new Response(
+				JSON.stringify({ error: 'Bad Request: Missing nft_id in payload.' }),
+				{ status: 400 },
+			)
+		}
 
 		// --- Rate Limiting via Upstash Redis ---
 		try {
