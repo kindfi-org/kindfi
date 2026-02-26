@@ -8,7 +8,7 @@
 //! For the cross-contract calls to work:
 //! 1. The Reputation contract needs `metadata_manager` role on the NFT contract
 //! 2. Register user NFT token IDs using `register_user_nft`
-
+use itoa;
 use soroban_sdk::{contracttype, Address, ConversionError, Env, IntoVal, InvokeError, String, Symbol, Vec};
 
 use crate::types::Level;
@@ -80,6 +80,12 @@ fn is_level_attribute(e: &Env, attr: &NFTAttribute) -> bool {
     attr.trait_type == String::from_str(e, LEVEL_TRAIT_TYPE)
 }
 
+
+pub fn u32_to_string(env: &Env, value: u32) -> String {
+    let mut buffer = itoa::Buffer::new();
+    let formatted = buffer.format(value);
+    String::from_str(env, formatted)
+}
 /// Create updated attributes vector with new level.
 /// Removes any existing level attribute and adds the new one.
 pub fn update_attributes_with_level(
@@ -324,4 +330,16 @@ mod tests {
         assert!(has_gold, "Should have level:gold");
         assert!(!has_rookie, "Should not have level:rookie");
     }
+
+     
+    #[test]
+    fn test_u32_to_string_integrity() {
+        let env = Env::default();
+        // Casos fallidos reportados en el issue #787
+        assert_eq!(u32_to_string(&env, 123).to_string(), "123");
+        assert_eq!(u32_to_string(&env, 1234).to_string(), "1234");
+        assert_eq!(u32_to_string(&env, 2500).to_string(), "2500");
+    }
+
+
 }
