@@ -56,7 +56,31 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const userId = body.user_id || session.user.id
+		const sessionUserId = session.user.id
+		const requestedUserId = body.user_id
+
+		let userId: string
+
+		if (requestedUserId && requestedUserId !== sessionUserId) {
+			const isAdmin = session.user.role === 'admin'
+
+			if (!isAdmin) {
+				return new Response(
+					JSON.stringify({
+						error:
+							'Forbidden: You do not have permission to mint NFTs for other users.',
+					}),
+					{
+						status: 403,
+						headers: { 'Content-Type': 'application/json' },
+					},
+				)
+			}
+			userId = requestedUserId
+		} else {
+			userId = sessionUserId
+		}
+
 		let stellarAddress: string | null = body.stellar_address || null
 
 		// Use service role client to bypass RLS
