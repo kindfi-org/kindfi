@@ -103,7 +103,10 @@ function getRpId(appConfig: AppEnvInterface, providedRpId?: string): string {
 /**
  * Get the appropriate RP Name based on the current environment
  */
-function getRpName(appConfig: AppEnvInterface, providedRpName?: string): string {
+function getRpName(
+	appConfig: AppEnvInterface,
+	providedRpName?: string,
+): string {
 	// If explicitly provided, use it
 	if (providedRpName) {
 		return providedRpName

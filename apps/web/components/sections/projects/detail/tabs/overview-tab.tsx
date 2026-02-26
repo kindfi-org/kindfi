@@ -13,7 +13,9 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ pitch }: OverviewTabProps) {
-	const [DOMPurify, setDOMPurify] = useState<typeof import('dompurify').default | null>(null)
+	const [DOMPurify, setDOMPurify] = useState<
+		typeof import('dompurify').default | null
+	>(null)
 
 	// Load DOMPurify only in the browser
 	useEffect(() => {
@@ -27,12 +29,12 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 	// Sanitize user-provided HTML to prevent XSS before parsing/rendering
 	const safeStory = useMemo(() => {
 		if (!pitch.story) return ''
-		
+
 		// Only sanitize in the browser where DOMPurify is available
 		if (DOMPurify) {
 			return DOMPurify.sanitize(pitch.story)
 		}
-		
+
 		// Fallback for SSR: return original story (will be sanitized on client hydration)
 		return pitch.story
 	}, [pitch.story, DOMPurify])

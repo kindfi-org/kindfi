@@ -3,13 +3,7 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { formatDistanceToNow } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-	ArrowRight,
-	BarChart2,
-	Calendar,
-	Heart,
-	Trophy,
-} from 'lucide-react'
+import { ArrowRight, BarChart2, Calendar, Heart, Trophy } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
@@ -48,7 +42,9 @@ export function DonorProfile({
 	)
 
 	const { getMultipleBalances } = useEscrow()
-	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>({})
+	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>(
+		{},
+	)
 
 	// Fetch escrow balances for projects with escrow addresses
 	useEffect(() => {
@@ -362,7 +358,11 @@ function DonationHistory({
 							</div>
 						</div>
 						<span className="font-bold text-foreground ml-4 flex-shrink-0 tabular-nums">
-							${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+							$
+							{amount.toLocaleString(undefined, {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2,
+							})}
 						</span>
 					</div>
 				)
@@ -418,12 +418,15 @@ function SupportedProjectCard({
 				<div className="space-y-2 mt-auto">
 					<div className="flex justify-between text-sm">
 						<span className="text-muted-foreground">Your Contribution</span>
-						<span className="font-semibold">${contributionAmount.toLocaleString()}</span>
+						<span className="font-semibold">
+							${contributionAmount.toLocaleString()}
+						</span>
 					</div>
 					<div className="flex justify-between text-sm">
 						<span className="text-muted-foreground">Total Raised</span>
 						<span className="font-semibold">
-							${Number(project.raised).toLocaleString()} / ${Number(project.goal).toLocaleString()}
+							${Number(project.raised).toLocaleString()} / $
+							{Number(project.goal).toLocaleString()}
 						</span>
 					</div>
 					<div className="relative h-2 bg-muted rounded-full overflow-hidden">

@@ -2,13 +2,7 @@
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { AnimatePresence } from 'framer-motion'
-import {
-	ArrowRight,
-	Plus,
-	Settings,
-	Target,
-	Trophy,
-} from 'lucide-react'
+import { ArrowRight, Plus, Settings, Target, Trophy } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
@@ -48,7 +42,9 @@ export function CreatorProfile({
 	)
 
 	const { getMultipleBalances } = useEscrow()
-	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>({})
+	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>(
+		{},
+	)
 
 	// Fetch escrow balances
 	useEffect(() => {
@@ -57,9 +53,9 @@ export function CreatorProfile({
 			if (projectsWithEscrow.length === 0) return
 
 			try {
-			const addresses = projectsWithEscrow.map(
-				(p) => p.escrowContractAddress as string,
-			)
+				const addresses = projectsWithEscrow.map(
+					(p) => p.escrowContractAddress as string,
+				)
 				const balances = await getMultipleBalances(
 					{ addresses },
 					'multi-release',
@@ -145,7 +141,10 @@ export function CreatorProfile({
 				{/* Stats */}
 				<div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
 					<StatCard label="Total Campaigns" value={String(projects.length)} />
-					<StatCard label="Active Campaigns" value={String(activeProjects.length)} />
+					<StatCard
+						label="Active Campaigns"
+						value={String(activeProjects.length)}
+					/>
 					<StatCard label="Total Raised" value={formatCurrency(totalRaised)} />
 				</div>
 
@@ -205,7 +204,10 @@ export function CreatorProfile({
 			{/* Stats */}
 			<div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
 				<StatCard label="Total Campaigns" value={String(projects.length)} />
-				<StatCard label="Active Campaigns" value={String(activeProjects.length)} />
+				<StatCard
+					label="Active Campaigns"
+					value={String(activeProjects.length)}
+				/>
 				<StatCard label="Total Raised" value={formatCurrency(totalRaised)} />
 			</div>
 

@@ -10,38 +10,38 @@ import { getUserStats } from '~/lib/services/user-stats'
  * Also returns computed stats (impact score, etc.) for tier progress display.
  */
 export async function GET() {
-  try {
-    const session = await getServerSession(nextAuthOption)
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+	try {
+		const session = await getServerSession(nextAuthOption)
+		if (!session?.user?.id) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
 
-    const { supabase } = await import('@packages/lib/supabase')
+		const { supabase } = await import('@packages/lib/supabase')
 
-    const [nftResult, stats] = await Promise.all([
-      supabase
-        .from('user_nfts')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .single(),
-      getUserStats({ supabase, userId: session.user.id }),
-    ])
+		const [nftResult, stats] = await Promise.all([
+			supabase
+				.from('user_nfts')
+				.select('*')
+				.eq('user_id', session.user.id)
+				.single(),
+			getUserStats({ supabase, userId: session.user.id }),
+		])
 
-    const { data: nft, error } = nftResult
+		const { data: nft, error } = nftResult
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching user NFT:', error)
-    }
+		if (error && error.code !== 'PGRST116') {
+			console.error('Error fetching user NFT:', error)
+		}
 
-    return NextResponse.json({
-      nft: nft || null,
-      stats,
-    })
-  } catch (error) {
-    console.error('Error in GET /api/nfts/user:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 },
-    )
-  }
+		return NextResponse.json({
+			nft: nft || null,
+			stats,
+		})
+	} catch (error) {
+		console.error('Error in GET /api/nfts/user:', error)
+		return NextResponse.json(
+			{ error: 'Internal server error' },
+			{ status: 500 },
+		)
+	}
 }

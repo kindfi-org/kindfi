@@ -158,10 +158,7 @@ export async function saveEscrowContractAction(
 				.single()
 
 			if (contribError || !newContribution?.id) {
-				console.error(
-					'❌ Failed to create contribution record:',
-					contribError,
-				)
+				console.error('❌ Failed to create contribution record:', contribError)
 				return {
 					success: false,
 					error: `Failed to create contribution record: ${contribError?.message || 'Unknown error'}`,
@@ -207,9 +204,7 @@ export async function saveEscrowContractAction(
 				totalAmount,
 				platformFee,
 				hasEscrowData: !!params.escrowData,
-				escrowDataKeys: params.escrowData
-					? Object.keys(params.escrowData)
-					: [],
+				escrowDataKeys: params.escrowData ? Object.keys(params.escrowData) : [],
 			})
 			return {
 				success: false,

@@ -176,17 +176,14 @@ function StreakCard({
 		: null
 	const daysSinceLastDonation = lastDonation
 		? Math.floor(
-				(new Date().getTime() - lastDonation.getTime()) /
-					(1000 * 60 * 60 * 24),
+				(new Date().getTime() - lastDonation.getTime()) / (1000 * 60 * 60 * 24),
 			)
 		: null
 
 	const periodDays = streak.period === 'weekly' ? 7 : 30
 	const isActive =
 		daysSinceLastDonation !== null && daysSinceLastDonation <= periodDays
-	const daysRemaining = isActive
-		? periodDays - (daysSinceLastDonation || 0)
-		: 0
+	const daysRemaining = isActive ? periodDays - (daysSinceLastDonation || 0) : 0
 
 	return (
 		<motion.div
@@ -257,13 +254,11 @@ function StreakCard({
 									Streak Active!
 								</p>
 								<p className="text-xs text-orange-700">
-									{daysRemaining} day{daysRemaining !== 1 ? 's' : ''} until
-									next donation
+									{daysRemaining} day{daysRemaining !== 1 ? 's' : ''} until next
+									donation
 								</p>
 							</div>
-							<Badge className="bg-orange-600">
-								+{bonusPoints} pts
-							</Badge>
+							<Badge className="bg-orange-600">+{bonusPoints} pts</Badge>
 						</motion.div>
 					)}
 
@@ -288,7 +283,9 @@ function StreakCard({
 
 					{!lastDonation && (
 						<div className="text-center py-4 text-muted-foreground">
-							<p className="text-sm">Start your streak with your first donation</p>
+							<p className="text-sm">
+								Start your streak with your first donation
+							</p>
 						</div>
 					)}
 				</CardContent>

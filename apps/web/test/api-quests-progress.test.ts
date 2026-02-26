@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
+
 const mockGetServerSession = mock()
 const mockRateLimiterIncrement = mock()
 
@@ -39,16 +40,13 @@ describe('/api/quests/progress', () => {
 	test('returns 401 when user is not authenticated', async () => {
 		mockGetServerSession.mockResolvedValueOnce(null)
 
-		const req = new Request(
-			'http://localhost/api/quests/progress',
-			{
-				method: 'POST',
-				body: JSON.stringify({
-					quest_id: 'quest-1',
-					progress_value: 10,
-				}),
-			},
-		) as any
+		const req = new Request('http://localhost/api/quests/progress', {
+			method: 'POST',
+			body: JSON.stringify({
+				quest_id: 'quest-1',
+				progress_value: 10,
+			}),
+		}) as any
 
 		const response = await POST(req)
 		const body = await response.json()
@@ -70,16 +68,13 @@ describe('/api/quests/progress', () => {
 			attemptsRemaining: 0,
 		})
 
-		const req = new Request(
-			'http://localhost/api/quests/progress',
-			{
-				method: 'POST',
-				body: JSON.stringify({
-					quest_id: 'quest-1',
-					progress_value: 10,
-				}),
-			},
-		) as any
+		const req = new Request('http://localhost/api/quests/progress', {
+			method: 'POST',
+			body: JSON.stringify({
+				quest_id: 'quest-1',
+				progress_value: 10,
+			}),
+		}) as any
 
 		const response = await POST(req)
 		const body = await response.json()
@@ -105,16 +100,13 @@ describe('/api/quests/progress', () => {
 			attemptsRemaining: 5,
 		})
 
-		const req = new Request(
-			'http://localhost/api/quests/progress',
-			{
-				method: 'POST',
-				body: JSON.stringify({
-					quest_id: 'quest-1',
-					progress_value: 10,
-				}),
-			},
-		) as any
+		const req = new Request('http://localhost/api/quests/progress', {
+			method: 'POST',
+			body: JSON.stringify({
+				quest_id: 'quest-1',
+				progress_value: 10,
+			}),
+		}) as any
 
 		const response = await POST(req)
 		const body = await response.json()
@@ -123,4 +115,3 @@ describe('/api/quests/progress', () => {
 		expect(body).toEqual({ error: 'Forbidden' })
 	})
 })
-

@@ -14,6 +14,7 @@ doctest = false
 
 [dependencies]
 soroban-sdk = { workspace = true }
+itoa = { version = "1.0", default-features = false }
 stellar-access = { workspace = true }
 stellar-macros = { workspace = true }
 

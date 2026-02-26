@@ -53,7 +53,9 @@ function getPinataHeaders(): Record<string, string> {
 		}
 	}
 
-	throw new Error('Pinata credentials not configured (PINATA_JWT or PINATA_API_KEY + PINATA_API_SECRET)')
+	throw new Error(
+		'Pinata credentials not configured (PINATA_JWT or PINATA_API_KEY + PINATA_API_SECRET)',
+	)
 }
 
 /**
@@ -106,10 +108,7 @@ export async function uploadFileToIPFS(
 	// Buffer extends Uint8Array; Blob accepts it at runtime but TS types are strict
 	const blob = new Blob([fileBuffer as BlobPart], { type: mimeType })
 	formData.append('file', blob, fileName)
-	formData.append(
-		'pinataMetadata',
-		JSON.stringify({ name: fileName }),
-	)
+	formData.append('pinataMetadata', JSON.stringify({ name: fileName }))
 
 	const response = await fetch(`${PINATA_API_URL}/pinning/pinFileToIPFS`, {
 		method: 'POST',
@@ -119,7 +118,9 @@ export async function uploadFileToIPFS(
 
 	if (!response.ok) {
 		const errorText = await response.text()
-		throw new Error(`Pinata file upload failed (${response.status}): ${errorText}`)
+		throw new Error(
+			`Pinata file upload failed (${response.status}): ${errorText}`,
+		)
 	}
 
 	const data = (await response.json()) as PinataUploadResponse
@@ -255,7 +256,10 @@ export function buildNFTMetadata(
 		image: imageUri,
 		external_url: 'https://kindfi.org/profile?section=gamification',
 		attributes: [
-			{ trait_type: 'Tier', value: tier.charAt(0).toUpperCase() + tier.slice(1) },
+			{
+				trait_type: 'Tier',
+				value: tier.charAt(0).toUpperCase() + tier.slice(1),
+			},
 			{
 				trait_type: 'Impact Score',
 				value: String(stats.impactScore),

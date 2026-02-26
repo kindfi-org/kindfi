@@ -6,9 +6,14 @@ import {
 	IoStatsChartOutline,
 	IoTrophyOutline,
 } from 'react-icons/io5'
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from '~/components/base/tabs'
 import { AdminQuestManager } from '~/components/sections/admin/admin-quest-manager'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 
 export function AdminGamificationManager() {
 	const [activeTab, setActiveTab] = useState('quests')
@@ -44,8 +49,8 @@ export function AdminGamificationManager() {
 					<div className="rounded-lg border border-border bg-card p-6">
 						<h2 className="text-lg font-semibold mb-4">Streak Management</h2>
 						<p className="text-sm text-muted-foreground">
-							Streak tracking is automatically managed by the system. View streak
-							statistics and settings here.
+							Streak tracking is automatically managed by the system. View
+							streak statistics and settings here.
 						</p>
 						{/* TODO: Add streak statistics and management */}
 					</div>
@@ -55,8 +60,8 @@ export function AdminGamificationManager() {
 					<div className="rounded-lg border border-border bg-card p-6">
 						<h2 className="text-lg font-semibold mb-4">Referral Management</h2>
 						<p className="text-sm text-muted-foreground">
-							Referral tracking is automatically managed by the system. View referral
-							statistics and manage referral settings here.
+							Referral tracking is automatically managed by the system. View
+							referral statistics and manage referral settings here.
 						</p>
 						{/* TODO: Add referral statistics and management */}
 					</div>

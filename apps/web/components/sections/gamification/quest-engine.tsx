@@ -75,9 +75,7 @@ export function QuestEngine() {
 	const _completedQuests = useMemo(
 		() =>
 			new Set(
-				quests
-					.filter((q) => q.progress?.is_completed)
-					.map((q) => q.quest_id),
+				quests.filter((q) => q.progress?.is_completed).map((q) => q.quest_id),
 			),
 		[quests],
 	)
@@ -186,15 +184,15 @@ export function QuestEngine() {
 
 function QuestCard({ quest, index }: { quest: Quest; index: number }) {
 	const Icon = questTypeIcons[quest.quest_type] || Target
-	const typeColor = questTypeColors[quest.quest_type] || 'bg-gray-100 text-gray-600'
+	const typeColor =
+		questTypeColors[quest.quest_type] || 'bg-gray-100 text-gray-600'
 	const progress = quest.progress || { current_value: 0, is_completed: false }
 	const progressPercentage = Math.min(
 		(progress.current_value / quest.target_value) * 100,
 		100,
 	)
 	const isCompleted = progress.is_completed
-	const isExpired =
-		quest.expires_at && new Date(quest.expires_at) < new Date()
+	const isExpired = quest.expires_at && new Date(quest.expires_at) < new Date()
 
 	return (
 		<motion.div
@@ -270,8 +268,7 @@ function QuestCard({ quest, index }: { quest: Quest; index: number }) {
 						<div className="flex items-center gap-2 text-sm text-green-600">
 							<CheckCircle2 className="h-4 w-4" />
 							<span>
-								Completed{' '}
-								{new Date(progress.completed_at).toLocaleDateString()}
+								Completed {new Date(progress.completed_at).toLocaleDateString()}
 							</span>
 						</div>
 					)}
@@ -280,8 +277,7 @@ function QuestCard({ quest, index }: { quest: Quest; index: number }) {
 						<div className="flex items-center gap-2 text-xs text-muted-foreground">
 							<Clock className="h-3 w-3" />
 							<span>
-								Expires{' '}
-								{new Date(quest.expires_at).toLocaleDateString()}
+								Expires {new Date(quest.expires_at).toLocaleDateString()}
 							</span>
 						</div>
 					)}
