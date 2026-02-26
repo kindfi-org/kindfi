@@ -1,7 +1,16 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
+import { motion, useReducedMotion } from 'framer-motion'
 import { notFound } from 'next/navigation'
+import { IoLockClosedOutline } from 'react-icons/io5'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '~/components/base/card'
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import { EscrowManagementPanel } from './escrow-management-panel'
 
@@ -10,7 +19,12 @@ export function EscrowManagementClientWrapper({
 }: {
 	projectSlug: string
 }) {
-	const { data: project, error } = useSupabaseQuery(
+	const prefersReducedMotion = useReducedMotion()
+	const {
+		data: project,
+		error,
+		isLoading: _isLoading,
+	} = useSupabaseQuery(
 		'basic-project-info',
 		(client) => getBasicProjectInfoBySlug(client, projectSlug),
 		{ additionalKeyValues: [projectSlug] },
@@ -18,23 +32,135 @@ export function EscrowManagementClientWrapper({
 
 	if (error || !project) notFound()
 
+	const _category = project.category?.slug
+		? { name: project.category.name, slug: project.category.slug }
+		: undefined
+
 	if (!project.escrowContractAddress) {
 		return (
-			<div className="space-y-4 rounded-lg border p-6">
-				<h2 className="text-xl font-semibold">No Escrow Found</h2>
-				<p className="text-sm text-muted-foreground">
-					This project doesn&apos;t have an escrow contract yet. Please create
-					one from the settings page.
-				</p>
+			<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
+				{/* Subtle background pattern */}
+				<div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,1,36,0.03)_1px,transparent_0)] bg-[size:32px_32px] opacity-40" />
+
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
+					className="relative z-10"
+				>
+					<motion.header
+						initial={{ opacity: 0, y: -10 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							delay: prefersReducedMotion ? 0 : 0.1,
+							duration: prefersReducedMotion ? 0 : 0.3,
+						}}
+						className="flex flex-col items-center justify-center mb-8"
+					>
+						<div className="flex items-center gap-3 mt-4">
+							<div className="rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 p-3 text-white shadow-sm">
+								<IoLockClosedOutline size={24} className="relative z-10" />
+							</div>
+							<div>
+								<h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">
+									Escrow Management
+								</h1>
+								<p className="text-lg md:text-xl text-muted-foreground mt-2 text-center">
+									Fund escrow, approve milestones, release funds, and track
+									balance
+								</p>
+							</div>
+						</div>
+					</motion.header>
+
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						transition={{
+							delay: prefersReducedMotion ? 0 : 0.2,
+							duration: prefersReducedMotion ? 0 : 0.3,
+						}}
+						className="max-w-2xl mx-auto"
+					>
+						<Card className="border-border bg-card">
+							<CardHeader>
+								<CardTitle>No Escrow Found</CardTitle>
+								<CardDescription>
+									This project doesn&apos;t have an escrow contract yet.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<p className="text-sm text-muted-foreground">
+									Please create an escrow contract from the{' '}
+									<a
+										href={`/projects/${projectSlug}/manage/settings`}
+										className="text-primary hover:underline"
+									>
+										escrow creation page
+									</a>
+									.
+								</p>
+							</CardContent>
+						</Card>
+					</motion.div>
+				</motion.div>
 			</div>
 		)
 	}
 
 	return (
-		<EscrowManagementPanel
-			projectId={project.id}
-			escrowContractAddress={project.escrowContractAddress}
-			escrowType={project.escrowType}
-		/>
+		<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
+			{/* Subtle background pattern */}
+			<div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,1,36,0.03)_1px,transparent_0)] bg-[size:32px_32px] opacity-40" />
+
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
+				className="relative z-10"
+			>
+				{/* Header */}
+				<motion.header
+					initial={{ opacity: 0, y: -10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{
+						delay: prefersReducedMotion ? 0 : 0.1,
+						duration: prefersReducedMotion ? 0 : 0.3,
+					}}
+					className="flex flex-col  mb-8"
+				>
+					<div className="flex items-center gap-3 mt-4">
+						<div className="rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 p-3 text-white shadow-sm">
+							<IoLockClosedOutline size={24} className="relative z-10" />
+						</div>
+						<div>
+							<h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">
+								Escrow Management
+							</h1>
+							<p className="text-lg md:text-xl text-muted-foreground mt-2">
+								Fund escrow, approve milestones, release funds, and track
+								balance
+							</p>
+						</div>
+					</div>
+				</motion.header>
+
+				{/* Content */}
+				<motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{
+						delay: prefersReducedMotion ? 0 : 0.2,
+						duration: prefersReducedMotion ? 0 : 0.3,
+					}}
+				>
+					<EscrowManagementPanel
+						projectId={project.id}
+						escrowContractAddress={project.escrowContractAddress}
+						escrowType={project.escrowType}
+					/>
+				</motion.div>
+			</motion.div>
+		</div>
 	)
 }

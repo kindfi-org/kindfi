@@ -1,4 +1,3 @@
-import { appEnvConfig } from '@packages/lib/config'
 import {
 	deleteChallenge,
 	getChallenge,
@@ -9,6 +8,7 @@ import type { AuthenticationResponseJSON } from '@simplewebauthn/server'
 import { verifyAuthenticationResponse } from '@simplewebauthn/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 
 /**
  * POST /api/passkey/verify-auth
@@ -38,15 +38,9 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		const config = appEnvConfig('web')
-		const rpId = config.passkey.rpId[0] || 'localhost'
-		const expectedOrigin = config.passkey.expectedOrigin.find(
-			(o) => o === origin,
-		)
-
-		if (!expectedOrigin) {
-			return NextResponse.json({ error: 'Invalid origin' }, { status: 400 })
-		}
+		const rpId = getRpIdFromOrigin(origin)
+		// Use the origin as expectedOrigin (it's already validated by getRpIdFromOrigin)
+		const expectedOrigin = origin
 
 		// Get challenge
 		const expectedChallenge = await getChallenge({

@@ -19,27 +19,34 @@ interface WalletContextValue {
 const WalletContext = createContext<WalletContextValue | undefined>(undefined)
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-	const [address, setAddress] = useState<string | null>(null)
-	const [walletName, setWalletName] = useState<string | null>(null)
+	// Initialize state from localStorage if available (client-side only)
+	const [address, setAddress] = useState<string | null>(() => {
+		if (typeof window === 'undefined') return null
+		return localStorage.getItem('stellar_wallet_address')
+	})
+	const [walletName, setWalletName] = useState<string | null>(() => {
+		if (typeof window === 'undefined') return null
+		return localStorage.getItem('stellar_wallet_name')
+	})
 	const [isInitialized, setIsInitialized] = useState(false)
 	const subscriptionsRef = useRef<Array<() => void>>([])
 
+	// Initialize wallet kit once on mount - intentionally not including address in deps
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Only run once on mount
 	useEffect(() => {
 		// Initialize wallet kit only on client side
 		if (typeof window === 'undefined') return
 
-		// Load stored address from localStorage
-		const storedAddress = localStorage.getItem('stellar_wallet_address')
-		const storedName = localStorage.getItem('stellar_wallet_name')
-		if (storedAddress) {
-			setAddress(storedAddress)
-			setWalletName(storedName)
-		}
-
 		// Initialize StellarWalletsKit with custom theme
 		try {
+			const modules = defaultModules()
+			console.log(
+				'🔌 Initializing Stellar Wallets Kit with modules:',
+				modules.map((m) => m.productName),
+			)
+
 			StellarWalletsKit.init({
-				modules: defaultModules(),
+				modules,
 				network: Networks.TESTNET,
 				theme: getStellarWalletTheme(),
 				authModal: {
@@ -47,14 +54,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 					hideUnsupportedWallets: false,
 				},
 			})
-			setIsInitialized(true)
-
-			// Try to get address if already connected
+			// Try to get address if already connected (read from localStorage directly to avoid dependency)
+			const storedAddress = localStorage.getItem('stellar_wallet_address')
 			if (storedAddress) {
 				StellarWalletsKit.getAddress()
-					.then(({ address: currentAddress }: { address: string }) => {
-						if (currentAddress) {
-							setAddress(currentAddress)
+					.then(({ address: fetchedAddress }: { address: string }) => {
+						if (fetchedAddress && fetchedAddress !== storedAddress) {
+							setAddress(fetchedAddress)
 						}
 					})
 					.catch(() => {
@@ -65,6 +71,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 						localStorage.removeItem('stellar_wallet_name')
 					})
 			}
+
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+			setIsInitialized(true)
+			console.log('✅ Stellar Wallets Kit initialized successfully')
 
 			// Listen to state updates
 			const unsubscribeState = StellarWalletsKit.on(
@@ -124,12 +134,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				unsubscribeWalletSelected,
 			]
 		} catch (error) {
-			console.error('Failed to initialize StellarWalletsKit:', error)
+			console.error('❌ Failed to initialize StellarWalletsKit:', error)
+			// Still set initialized to false so we can retry
+			setIsInitialized(false)
 		}
 
 		// Cleanup subscriptions on unmount
 		return () => {
-			subscriptionsRef.current.forEach((unsubscribe) => unsubscribe())
+			subscriptionsRef.current.forEach((unsubscribe) => {
+				unsubscribe()
+			})
 			subscriptionsRef.current = []
 		}
 	}, [])
@@ -140,15 +154,31 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		try {
+			console.log('🔌 Opening wallet connection modal...')
+			// Refresh supported wallets before showing modal to ensure latest availability
+			const supportedWallets = await StellarWalletsKit.refreshSupportedWallets()
+			console.log(
+				'📋 Available wallets:',
+				supportedWallets.map(
+					(w: { name: string; isAvailable: boolean }) =>
+						`${w.name} (${w.isAvailable ? 'available' : 'unavailable'})`,
+				),
+			)
+
 			const { address: newAddress } = await StellarWalletsKit.authModal()
 			if (newAddress) {
+				console.log('✅ Wallet connected:', newAddress)
 				setAddress(newAddress)
 				localStorage.setItem('stellar_wallet_address', newAddress)
 				// Try to get wallet name from the selected wallet
 				// This might need adjustment based on actual API behavior
 			}
 		} catch (error) {
-			console.error('Failed to connect wallet:', error)
+			console.error('❌ Failed to connect wallet:', error)
+			// Re-throw with more context
+			if (error && typeof error === 'object' && 'message' in error) {
+				throw new Error(`Wallet connection failed: ${error.message}`)
+			}
 			throw error
 		}
 	}

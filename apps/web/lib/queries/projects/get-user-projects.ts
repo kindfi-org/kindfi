@@ -115,9 +115,12 @@ export async function getUserSupportedProjects(
 
 	if (contributionsError) throw contributionsError
 
-	return (
-		contributions?.map((contribution) => {
-			const project = contribution.project as unknown as {
+	// Group contributions by project ID so the same project only appears once
+	// with the total contributed amount and the most recent contribution date
+	const projectMap = new Map<
+		string,
+		{
+			project: {
 				id: string
 				title: string
 				slug: string
@@ -136,7 +139,56 @@ export async function getUserSupportedProjects(
 				}>
 				project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
 			}
+			totalAmount: number
+			latestDate: string | null
+			contributionCount: number
+		}
+	>()
 
+	for (const contribution of contributions ?? []) {
+		const project = contribution.project as unknown as {
+			id: string
+			title: string
+			slug: string
+			description: string
+			image_url: string
+			created_at: string
+			current_amount: number
+			target_amount: number
+			min_investment: number
+			percentage_complete: number
+			kinder_count: number
+			status: string
+			category: unknown
+			project_tag_relationships: Array<{
+				tag: { id: string; name: string; color: string }
+			}>
+			project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+		}
+
+		const existing = projectMap.get(project.id)
+		const amount = Number(contribution.amount ?? 0)
+		const date = contribution.created_at
+
+		if (existing) {
+			existing.totalAmount += amount
+			existing.contributionCount += 1
+			// Keep the most recent date
+			if (date && (!existing.latestDate || date > existing.latestDate)) {
+				existing.latestDate = date
+			}
+		} else {
+			projectMap.set(project.id, {
+				project,
+				totalAmount: amount,
+				latestDate: date,
+				contributionCount: 1,
+			})
+		}
+	}
+
+	return Array.from(projectMap.values()).map(
+		({ project, totalAmount, latestDate }) => {
 			const escrowRel = project.project_escrows
 			const escrowId = Array.isArray(escrowRel)
 				? escrowRel[0]?.escrow_id
@@ -158,9 +210,9 @@ export async function getUserSupportedProjects(
 				category: project.category,
 				tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
 				escrowContractAddress: escrowId,
-				contributionAmount: contribution.amount,
-				contributionDate: contribution.created_at,
+				contributionAmount: totalAmount,
+				contributionDate: latestDate,
 			}
-		}) ?? []
+		},
 	)
 }

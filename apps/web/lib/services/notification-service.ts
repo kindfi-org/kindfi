@@ -3,7 +3,6 @@ import type {
 	BaseNotification,
 	CreateNotificationDTO,
 	NotificationFilters,
-	NotificationResponse,
 	NotificationSort,
 	UpdateNotificationDTO,
 } from '../types/notification'

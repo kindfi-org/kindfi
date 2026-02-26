@@ -162,15 +162,15 @@ export function ProjectUpdatesTabSection() {
 	}
 
 	// Fetch updates when component mounts or page changes
-	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {
 		if (!isCreatingUpdate) {
 			fetchUpdates()
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates is stable; adding it causes unnecessary refetches
 	}, [page, projectId, isCreatingUpdate])
 
 	// Setup real-time subscription
-	// biome-ignore lint/correctness/useExhaustiveDependencies: any
+	// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates intentionally omitted to avoid resubscribing on every fetch
 	useEffect(() => {
 		if (isCreatingUpdate) return
 
@@ -197,6 +197,7 @@ export function ProjectUpdatesTabSection() {
 		return () => {
 			supabase.removeChannel(channel)
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates intentionally omitted to avoid resubscribing on every fetch
 	}, [projectId, isCreatingUpdate])
 
 	return (

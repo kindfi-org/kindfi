@@ -29,6 +29,7 @@ export interface CreateProjectFormData {
 	// Step 3: Location and Classification
 	location: string
 	category: string
+	foundationId?: string
 	tags: Tag[]
 }
 

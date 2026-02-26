@@ -1,9 +1,9 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { EscrowType } from '@trustless-work/escrow'
 import { motion } from 'framer-motion'
 import {
+	Building2,
 	CircleAlert,
 	CircleCheck,
 	ExternalLink,
@@ -141,7 +141,19 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			}
 			if (!address) throw new Error('Wallet address missing')
 
+			// Validate amount is reasonable (prevent accidental large amounts)
+			if (data.investmentAmount > 1_000_000) {
+				toast.error('Amount too large', {
+					description: 'Please enter an amount less than $1,000,000',
+					icon: <CircleAlert className="text-destructive" />,
+				})
+				return
+			}
+
 			// 2) Prepare fund escrow request -> returns unsigned XDR
+			// Trustless Work expects amount in dollars (not stroops) - it handles conversion internally
+			// Note: The user's wallet must have a trustline/approval for the token before funding
+			// The escrow contract will check the user's balance, which requires the trustline to exist
 			const fundResponse = await fundEscrow(
 				{
 					amount: data.investmentAmount,
@@ -200,9 +212,67 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			// 6) Refresh balance
 			fetchEscrowBalance()
 		} catch (error) {
-			console.error(error)
-			toast.error('Something went wrong', {
-				description: "We couldn't process your donation. Please try again.",
+			console.error('Fund escrow error:', error)
+
+			// Extract error message from various error formats
+			let errorMessage = ''
+			let apiErrorMessage = ''
+
+			if (error instanceof Error) {
+				errorMessage = error.message
+			} else if (typeof error === 'object' && error !== null) {
+				// Check for axios error response
+				if ('response' in error && error.response) {
+					const response = error.response as {
+						data?: { message?: string; error?: string }
+					}
+					if (response.data?.message) {
+						apiErrorMessage = response.data.message
+					} else if (response.data?.error) {
+						apiErrorMessage = response.data.error
+					}
+				}
+				errorMessage = String(error)
+			} else {
+				errorMessage = String(error)
+			}
+
+			// Combine error messages for checking
+			const combinedMessage = `${errorMessage} ${apiErrorMessage}`.toLowerCase()
+
+			let userFriendlyMessage =
+				"We couldn't process your donation. Please try again."
+
+			// Check for missing trustline/balance errors
+			if (
+				combinedMessage.includes('storage, missingvalue') ||
+				combinedMessage.includes('missingvalue') ||
+				(combinedMessage.includes('balance') &&
+					combinedMessage.includes('non-existing'))
+			) {
+				const tokenAddress = escrowData?.trustline?.address
+				if (tokenAddress) {
+					userFriendlyMessage = `Your wallet needs to establish a trustline for the token (${tokenAddress.slice(0, 8)}...) before donating. Please ensure your wallet has approved this token contract.`
+				} else {
+					userFriendlyMessage =
+						'Your wallet needs to establish a trustline for the token before donating. Please ensure your wallet has approved the token contract.'
+				}
+			} else if (
+				combinedMessage.includes('insufficient funds') ||
+				combinedMessage.includes('sufficient funds')
+			) {
+				userFriendlyMessage =
+					'Insufficient funds. Please ensure your wallet has enough token balance.'
+			} else if (combinedMessage.includes('trustline')) {
+				userFriendlyMessage =
+					'Trustline required. Your wallet needs to establish a trustline for the token before donating.'
+			} else if (apiErrorMessage) {
+				// Use API error message if available
+				userFriendlyMessage = apiErrorMessage
+			}
+
+			toast.error('Donation failed', {
+				description: userFriendlyMessage,
 				icon: <CircleAlert className="text-destructive" />,
 			})
 		}
@@ -310,8 +380,8 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 				<div className="p-3 my-4 text-sm text-amber-900 bg-amber-50 rounded-md border border-amber-300">
 					Donating without logging in means you will miss out on features like
-					reputation, contributor NFTs, and future perks. If that's fine, you
-					can still donate anonymously.
+					reputation, contributor NFTs, and future perks. If that&apos;s fine,
+					you can still donate anonymously.
 				</div>
 
 				{project.escrowContractAddress && (
@@ -394,6 +464,33 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					)}
 				</div>
 			</div>
+
+			{project.foundation && (
+				<div className="p-6 bg-purple-50/50 border-t border-gray-200">
+					<h3 className="mb-2 font-medium">Foundation</h3>
+					<Link
+						href={`/foundations/${project.foundation.slug}`}
+						className="flex items-center gap-3 p-3 rounded-lg border border-purple-200 bg-white hover:bg-purple-50 hover:border-purple-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+					>
+						<div className="p-2 rounded-lg bg-purple-100 shrink-0">
+							<Building2
+								className="h-5 w-5 text-purple-600"
+								aria-hidden="true"
+							/>
+						</div>
+						<div className="min-w-0 flex-1">
+							<p className="font-semibold text-purple-900 truncate">
+								{project.foundation.name}
+							</p>
+							<p className="text-xs text-muted-foreground">View foundation</p>
+						</div>
+						<ExternalLink
+							className="h-4 w-4 text-purple-600 shrink-0"
+							aria-hidden="true"
+						/>
+					</Link>
+				</div>
+			)}
 
 			<div className="p-6 bg-gray-50 border-t border-gray-200">
 				<h3 className="mb-2 font-medium">Project Tags</h3>

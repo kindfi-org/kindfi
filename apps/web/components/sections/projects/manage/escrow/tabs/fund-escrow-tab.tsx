@@ -49,14 +49,26 @@ export function FundEscrowTab({
 			return
 		}
 
+		const amount = Number(fundAmount)
+
+		// Validate amount is reasonable (prevent accidental large amounts)
+		if (amount > 1_000_000) {
+			toast.error('Amount too large', {
+				description: 'Please enter an amount less than $1,000,000',
+			})
+			return
+		}
+
 		try {
 			setIsProcessing(true)
 			const signer = await ensureWallet()
 
 			// 1) Get unsigned transaction
+			// Trustless Work expects amount in dollars (not stroops) - it handles conversion internally
+			// Note: The escrow contract and signer must have the USDC trustline established first
 			const fundResponse = await fundEscrow(
 				{
-					amount: Number(fundAmount),
+					amount,
 					contractId: escrowContractAddress,
 					signer,
 				},
@@ -86,10 +98,60 @@ export function FundEscrowTab({
 			setFundAmount('')
 			onSuccess()
 		} catch (error) {
-			console.error(error)
-			const errorMessage =
-				error instanceof Error ? error.message : 'Failed to fund escrow'
-			toast.error(errorMessage)
+			console.error('Fund escrow error:', error)
+
+			// Extract error message from various error formats
+			let errorMessage = ''
+			let apiErrorMessage = ''
+
+			if (error instanceof Error) {
+				errorMessage = error.message
+			} else if (typeof error === 'object' && error !== null) {
+				// Check for axios error response
+				if ('response' in error && error.response) {
+					const response = error.response as {
+						data?: { message?: string; error?: string }
+					}
+					if (response.data?.message) {
+						apiErrorMessage = response.data.message
+					} else if (response.data?.error) {
+						apiErrorMessage = response.data.error
+					}
+				}
+				errorMessage = String(error)
+			} else {
+				errorMessage = String(error)
+			}
+
+			// Combine error messages for checking
+			const combinedMessage = `${errorMessage} ${apiErrorMessage}`.toLowerCase()
+
+			let userFriendlyMessage = 'Failed to fund escrow'
+
+			// Check for missing trustline/balance errors
+			if (
+				combinedMessage.includes('storage, missingvalue') ||
+				combinedMessage.includes('missingvalue') ||
+				(combinedMessage.includes('balance') &&
+					combinedMessage.includes('non-existing'))
+			) {
+				userFriendlyMessage =
+					'Your wallet needs to establish a trustline for the token before funding. Please ensure your wallet has approved the token contract.'
+			} else if (
+				combinedMessage.includes('insufficient funds') ||
+				combinedMessage.includes('sufficient funds')
+			) {
+				userFriendlyMessage =
+					'Insufficient funds. Please ensure your wallet has enough token balance.'
+			} else if (combinedMessage.includes('trustline')) {
+				userFriendlyMessage =
+					'Trustline required. Your wallet needs to establish a trustline for the token before funding.'
+			} else if (apiErrorMessage) {
+				// Use API error message if available
+				userFriendlyMessage = apiErrorMessage
+			}
+
+			toast.error(userFriendlyMessage)
 		} finally {
 			setIsProcessing(false)
 		}
@@ -105,7 +167,7 @@ export function FundEscrowTab({
 					<div>
 						<CardTitle>Fund Escrow</CardTitle>
 						<CardDescription>
-							Add funds to your escrow contract. You'll need to approve the
+							Add funds to your escrow contract. You&apos;ll need to approve the
 							transaction in your wallet.
 						</CardDescription>
 					</div>

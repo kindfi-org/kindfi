@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
 		const body = await req.json()
 		const { transactionData, authResponse, userDevice } = body
-		const { transactionXDR, hash } = transactionData
+		const { transactionXDR, hash: _hash } = transactionData
 		const smartWalletAddress = userDevice?.address
 		const verificationJSON = body.verificationJSON as Awaited<
 			ReturnType<typeof verifyAuthentication>

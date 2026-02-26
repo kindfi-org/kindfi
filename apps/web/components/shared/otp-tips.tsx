@@ -56,7 +56,7 @@ export function OTPTips() {
 							<span>
 								{' '}
 								- The code should arrive within 1 minute. Check your spam folder
-								if you don't see it.
+								if you don&apos;t see it.
 							</span>
 						</p>
 					</li>

@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { Enums, TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
@@ -16,8 +16,6 @@ export async function PATCH(
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
 	try {
-		const supabase = await createSupabaseServerClient()
-
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
 		const userId = session?.user?.id
@@ -49,6 +47,67 @@ export async function PATCH(
 				{ status: 400 },
 			)
 		}
+
+		// Verify user has permission to update project members
+		// Check if user is the project owner or has admin/core role
+		const { data: project, error: projectError } = await supabaseServiceRole
+			.from('projects')
+			.select('id, kindler_id')
+			.eq('id', projectId)
+			.single()
+
+		if (projectError || !project) {
+			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+		}
+
+		// Check if user is the project owner
+		const isOwner = project.kindler_id === userId
+
+		// Check if user is a project member with admin/core role
+		const { data: memberData } = await supabaseServiceRole
+			.from('project_members')
+			.select('role')
+			.eq('project_id', projectId)
+			.eq('user_id', userId)
+			.in('role', ['core', 'admin'])
+			.single()
+
+		const hasAdminRole = !!memberData
+
+		// Also check if user is updating their own membership (allowed for non-privileged role changes)
+		const { data: targetMember } = await supabaseServiceRole
+			.from('project_members')
+			.select('user_id, role')
+			.eq('id', memberId)
+			.eq('project_id', projectId)
+			.single()
+
+		const isUpdatingSelf = targetMember?.user_id === userId
+
+		// Allow update if:
+		// 1. User is project owner or admin/core member (can update anyone)
+		// 2. User is updating themselves (can update own membership, but role changes are restricted)
+		if (!isOwner && !hasAdminRole && !isUpdatingSelf) {
+			return NextResponse.json(
+				{
+					error: 'Forbidden: You do not have permission to update this member',
+				},
+				{ status: 403 },
+			)
+		}
+
+		// If user is updating themselves and trying to change role to a privileged one, deny
+		if (isUpdatingSelf && !isOwner && !hasAdminRole && role) {
+			if (['core', 'admin', 'editor'].includes(role)) {
+				return NextResponse.json(
+					{ error: 'Forbidden: You cannot assign yourself a privileged role' },
+					{ status: 403 },
+				)
+			}
+		}
+
+		// Use service role client for member update with manual authorization check
+		const supabase = supabaseServiceRole
 
 		// Build update payload
 		const updateData: TablesUpdate<'project_members'> = {}
@@ -88,8 +147,6 @@ export async function DELETE(
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
 	try {
-		const supabase = await createSupabaseServerClient()
-
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
 		const userId = session?.user?.id
@@ -111,6 +168,57 @@ export async function DELETE(
 				{ status: 400 },
 			)
 		}
+
+		// Verify user has permission to delete project members
+		// Check if user is the project owner or has admin/core role
+		const { data: project, error: projectError } = await supabaseServiceRole
+			.from('projects')
+			.select('id, kindler_id')
+			.eq('id', projectId)
+			.single()
+
+		if (projectError || !project) {
+			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+		}
+
+		// Check if user is the project owner
+		const isOwner = project.kindler_id === userId
+
+		// Check if user is a project member with admin/core role
+		const { data: memberData } = await supabaseServiceRole
+			.from('project_members')
+			.select('role')
+			.eq('project_id', projectId)
+			.eq('user_id', userId)
+			.in('role', ['core', 'admin'])
+			.single()
+
+		const hasAdminRole = !!memberData
+
+		// Also check if user is deleting their own membership (allowed)
+		const { data: targetMember } = await supabaseServiceRole
+			.from('project_members')
+			.select('user_id')
+			.eq('id', memberId)
+			.eq('project_id', projectId)
+			.single()
+
+		const isDeletingSelf = targetMember?.user_id === userId
+
+		// Allow delete if:
+		// 1. User is project owner or admin/core member (can delete anyone)
+		// 2. User is deleting themselves (can remove own membership)
+		if (!isOwner && !hasAdminRole && !isDeletingSelf) {
+			return NextResponse.json(
+				{
+					error: 'Forbidden: You do not have permission to remove this member',
+				},
+				{ status: 403 },
+			)
+		}
+
+		// Use service role client for member deletion with manual authorization check
+		const supabase = supabaseServiceRole
 
 		const { error } = await supabase
 			.from('project_members')

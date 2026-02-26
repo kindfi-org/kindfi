@@ -131,10 +131,12 @@ fi
 # Step 1: Build Reputation contract
 echo ""
 echo "=== Step 1: Building Reputation Contract ==="
-cargo build --target wasm32-unknown-unknown --release --manifest-path ./contracts/reputation/Cargo.toml || {
+cd contracts/reputation
+stellar contract build || {
     echo "Failed to build Reputation Contract"
     exit 1
 }
+cd ../..
 echo "Reputation Contract built successfully!"
 
 # Step 2: Upload WASM
@@ -143,7 +145,7 @@ echo "=== Step 2: Uploading WASM ==="
 REPUTATION_WASM_HASH=$(stellar contract upload \
     --network "$NETWORK" \
     --source "$SOURCE" \
-    --wasm target/wasm32-unknown-unknown/release/reputation.wasm)
+    --wasm target/wasm32v1-none/release/reputation.wasm)
 
 echo "WASM Hash: $REPUTATION_WASM_HASH"
 
@@ -159,7 +161,7 @@ if [[ -n "$NFT_CONTRACT_ID" ]]; then
         --wasm-hash "$REPUTATION_WASM_HASH" \
         -- \
         --admin "$ADMIN_ADDRESS" \
-        --nft_contract "$NFT_CONTRACT_ID")
+        --nft_contract '"'"$NFT_CONTRACT_ID"'"')
 else
     REPUTATION_CONTRACT_ID=$(stellar contract deploy \
         --network "$NETWORK" \

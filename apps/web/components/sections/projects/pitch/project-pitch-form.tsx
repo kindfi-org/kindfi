@@ -101,8 +101,8 @@ export function ProjectPitchForm({
 											</div>
 										</FormControl>
 										<FormDescription>
-											A clear, compelling title that captures your project's
-											essence
+											A clear, compelling title that captures your
+											project&apos;s essence
 										</FormDescription>
 										<FormMessage />
 									</FormItem>

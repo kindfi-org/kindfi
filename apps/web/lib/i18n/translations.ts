@@ -3,8 +3,9 @@ export const translations = {
 		// Navigation
 		nav: {
 			projects: 'Projects',
+			foundations: 'Foundations',
 			resources: 'Resources',
-			about: 'About KindFi',
+			about: 'About',
 			news: 'News',
 			signIn: 'Sign in',
 			signUp: 'Sign up',
@@ -645,8 +646,9 @@ export const translations = {
 		// Navigation
 		nav: {
 			projects: 'Proyectos',
+			foundations: 'Fundaciones',
 			resources: 'Recursos',
-			about: 'Acerca de KindFi',
+			about: 'Acerca de',
 			news: 'Noticias',
 			signIn: 'Iniciar sesión',
 			signUp: 'Registrarse',

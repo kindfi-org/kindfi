@@ -14,6 +14,8 @@ export interface ProjectDetail extends Project {
 	escrowContractAddress?: string
 	/** Optional escrow type for this project's escrow */
 	escrowType?: EscrowType
+	/** Foundation this campaign is associated with, if any */
+	foundation?: { id: string; name: string; slug: string }
 }
 
 export interface SocialLinks {

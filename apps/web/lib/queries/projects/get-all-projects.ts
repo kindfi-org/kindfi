@@ -24,6 +24,7 @@ export async function getAllProjects(
       min_investment,
       percentage_complete,
       kinder_count,
+      status,
       category:category_id ( * ),
       project_tag_relationships (
         tag:tag_id ( id, name, color )
@@ -81,6 +82,7 @@ export async function getAllProjects(
 				investors: project.kinder_count,
 				minInvestment: project.min_investment,
 				createdAt: project.created_at,
+				status: (project as { status?: string }).status,
 				category: project.category,
 				tags: project.project_tag_relationships.map((r) => r.tag),
 				escrowContractAddress: escrowId,

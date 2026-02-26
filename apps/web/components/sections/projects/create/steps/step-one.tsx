@@ -62,7 +62,7 @@ export function StepOne({ onNext }: StepOneProps) {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											What is your project's title?{' '}
+											What is your project&apos;s title?{' '}
 											<span className="text-destructive">*</span>
 										</FormLabel>
 										<FormControl>
@@ -142,7 +142,7 @@ export function StepOne({ onNext }: StepOneProps) {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											What's the minimum amount someone can invest?{' '}
+											What&apos;s the minimum amount someone can invest?{' '}
 											<span className="text-destructive">*</span>
 										</FormLabel>
 										<FormControl>

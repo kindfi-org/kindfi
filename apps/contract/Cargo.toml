@@ -13,6 +13,15 @@ members = [
   # Reputation contract
   "contracts/reputation",
 
+  # Quest contract
+  "contracts/quest",
+
+  # Streak contract
+  "contracts/streak",
+
+  # Referral contract
+  "contracts/referral",
+
   # TODO: Implement these contracts or delete them
   # "contracts/academy-graduation-nft",
   # "contracts/academy-verifier",

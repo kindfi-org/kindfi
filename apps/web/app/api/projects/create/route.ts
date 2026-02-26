@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
@@ -12,14 +12,49 @@ import {
 
 export async function POST(req: Request) {
 	try {
-		const supabase = await createSupabaseServerClient()
-
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
 		const userId = session?.user?.id
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
+
+		// Check user role - only admin and creator can create projects
+		// Use service role client to bypass RLS for permission check
+		const { data: profileData, error: profileError } = await supabaseServiceRole
+			.from('profiles')
+			.select('role')
+			.eq('id', userId)
+			.single()
+
+		if (profileError || !profileData) {
+			console.error('Profile lookup error:', {
+				error: profileError,
+				userId,
+			})
+			return NextResponse.json(
+				{
+					error: 'Failed to verify user permissions',
+					details: profileError?.message || 'Profile not found',
+				},
+				{ status: 403 },
+			)
+		}
+
+		const userRole = profileData.role
+		if (userRole !== 'admin' && userRole !== 'creator') {
+			return NextResponse.json(
+				{
+					error: 'Forbidden',
+					message: 'Only creators and administrators can create projects',
+				},
+				{ status: 403 },
+			)
+		}
+
+		// Use service role client for project creation with manual authorization check
+		// This bypasses RLS but we've already verified the user has permission
+		const supabase = supabaseServiceRole
 
 		const formData = await req.formData()
 
@@ -35,6 +70,7 @@ export async function POST(req: Request) {
 			tags,
 			socialLinks,
 			image,
+			foundationId,
 		} = parseFormData(formData)
 
 		// Prepare project data to insert
@@ -47,6 +83,7 @@ export async function POST(req: Request) {
 			category_id: category,
 			kindler_id: userId,
 			social_links: buildSocialLinks(website, socialLinks),
+			...(foundationId && { foundation_id: foundationId }),
 		}
 
 		// Insert new project and retrieve its ID and slug

@@ -1,10 +1,9 @@
 'use client'
 
-import DOMPurify from 'dompurify'
 import { motion } from 'framer-motion'
 import parse from 'html-react-parser'
 import { Download } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '~/components/base/button'
 import { FileIcon } from '~/components/sections/projects/shared'
 import type { ProjectPitch } from '~/lib/types/project/project-detail.types'
@@ -14,11 +13,31 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ pitch }: OverviewTabProps) {
+	const [DOMPurify, setDOMPurify] = useState<
+		typeof import('dompurify').default | null
+	>(null)
+
+	// Load DOMPurify only in the browser
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			import('dompurify').then((mod) => {
+				setDOMPurify(() => mod.default)
+			})
+		}
+	}, [])
+
 	// Sanitize user-provided HTML to prevent XSS before parsing/rendering
-	const safeStory = useMemo(
-		() => (pitch.story ? DOMPurify.sanitize(pitch.story) : ''),
-		[pitch.story],
-	)
+	const safeStory = useMemo(() => {
+		if (!pitch.story) return ''
+
+		// Only sanitize in the browser where DOMPurify is available
+		if (DOMPurify) {
+			return DOMPurify.sanitize(pitch.story)
+		}
+
+		// Fallback for SSR: return original story (will be sanitized on client hydration)
+		return pitch.story
+	}, [pitch.story, DOMPurify])
 
 	return (
 		<motion.div

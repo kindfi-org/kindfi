@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import { ChevronRight } from 'lucide-react'
 import { Card, CardContent } from '~/components/base/card'
 
 interface StepCardProps {
@@ -11,7 +10,7 @@ interface StepCardProps {
 }
 
 export const StepCard = ({
-	stepNumber,
+	stepNumber: _stepNumber,
 	title,
 	description,
 	Icon,

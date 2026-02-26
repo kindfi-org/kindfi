@@ -457,7 +457,7 @@ export function SmartWalletTransferDemo() {
 								className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
 							>
 								<option value="native">XLM (Native)</option>
-								<option value="CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA">
+								<option value="GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5">
 									USDC (Testnet)
 								</option>
 							</select>
@@ -483,9 +483,9 @@ export function SmartWalletTransferDemo() {
 							💰 Testnet Faucet
 						</div>
 						<div className="text-muted-foreground">
-							Your smart wallet needs XLM to pay for transactions. Use the "Fund
-							Wallet" button to get testnet XLM for testing. This only works on
-							Stellar Testnet.
+							Your smart wallet needs XLM to pay for transactions. Use the
+							&quot;Fund Wallet&quot; button to get testnet XLM for testing.
+							This only works on Stellar Testnet.
 						</div>
 					</div>
 

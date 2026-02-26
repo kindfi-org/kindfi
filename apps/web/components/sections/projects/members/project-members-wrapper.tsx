@@ -1,28 +1,14 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
-import type { Enums } from '@services/supabase'
-import { notFound, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
-import { InviteMemberForm } from '~/components/sections/projects/members/invite-member-form'
-import { MemberList } from '~/components/sections/projects/members/member-list'
-import { PendingInvitations } from '~/components/sections/projects/members/pending-invitations'
-import {
-	InviteMemberFormSkeleton,
-	MemberListSkeleton,
-	PendingInvitationsSkeleton,
-} from '~/components/sections/projects/members/skeletons'
-import { BreadcrumbContainer } from '~/components/sections/projects/shared'
-import { useMembersMutation } from '~/hooks/projects/use-members-mutation'
-import { useAuth } from '~/hooks/use-auth'
-import { getProjectMembersDataBySlug } from '~/lib/queries/projects/get-project-members-data-by-slug'
-import type {
-	InviteMemberData,
-	PendingInvitation,
-	ProjectMember,
-} from '~/lib/types/project/team-members.types'
-import { BreadcrumbSkeleton } from '../detail/skeletons'
+import { motion, useReducedMotion } from 'framer-motion'
+import { notFound } from 'next/navigation'
+import { IoPeopleOutline } from 'react-icons/io5'
+import { AddTeamMemberForm } from '~/components/sections/projects/members/add-team-member-form'
+import { TeamMemberList } from '~/components/sections/projects/members/team-member-list'
+import { useTeamMutation } from '~/hooks/projects/use-team-mutation'
+import { getProjectTeamBySlug } from '~/lib/queries/projects/get-project-team-by-slug'
+import type { CreateTeamMemberData } from '~/lib/types/project/project-team.types'
 
 interface ProjectMembersWrapperProps {
 	projectSlug: string
@@ -31,227 +17,107 @@ interface ProjectMembersWrapperProps {
 export function ProjectMembersWrapper({
 	projectSlug,
 }: ProjectMembersWrapperProps) {
-	const {
-		data: project,
-		isLoading,
-		error,
-	} = useSupabaseQuery(
-		'project-members',
-		(client) => getProjectMembersDataBySlug(client, projectSlug),
-		{ additionalKeyValues: [projectSlug] },
+	const { data: teamData, isLoading } = useSupabaseQuery(
+		'project-team',
+		(client) => getProjectTeamBySlug(client, projectSlug),
+		{
+			additionalKeyValues: [projectSlug],
+			refetchOnMount: 'always',
+			refetchOnWindowFocus: true,
+			staleTime: 0, // Always consider data stale to ensure fresh fetches
+		},
 	)
 
-	if (error || !project) notFound()
+	// Only call notFound if project doesn't exist (teamData is null)
+	// Errors are handled gracefully by returning empty team array
+	if (!teamData) notFound()
 
-	// actual auth user id
-	const { user } = useAuth()
-	const currentUserId = user?.id
+	const { createMember, deleteMember } = useTeamMutation()
 
-	const { updateRole, updateTitle, removeMember } = useMembersMutation()
-	const router = useRouter()
+	// Use teamData directly instead of local state to avoid sync issues
+	// React Query will handle the updates automatically
+	const teamMembers = teamData.team
 
-	const initialMembers = project.team
-
-	// Local UI state (optimistic updates)
-	const [members, setMembers] = useState<ProjectMember[]>(initialMembers)
-	const [pendingInvitations, setPendingInvitations] = useState<
-		PendingInvitation[]
-	>([])
-
-	// Sync local members when server data changes (after load)
-	useEffect(() => {
-		setMembers(initialMembers)
-	}, [initialMembers])
-
-	// TODO: replace with real server action / route
-	const handleInviteMember = async (data: InviteMemberData) => {
-		const request = new Promise<void>((resolve) => setTimeout(resolve, 900))
-
-		const id =
-			typeof crypto !== 'undefined' && 'randomUUID' in crypto
-				? crypto.randomUUID()
-				: `inv-${Date.now()}`
-		const miid =
-			typeof crypto !== 'undefined' && 'randomUUID' in crypto
-				? crypto.randomUUID()
-				: Math.random().toString(36).slice(2, 11)
-
-		const optimistic: PendingInvitation = {
-			id,
-			miid,
-			projectId: project.id,
-			email: data.email,
-			role: data.role,
-			title: data.title,
-			invitedBy: currentUserId,
-			invitedAt: new Date(),
-			expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-			status: 'pending',
-		}
-
-		setPendingInvitations((prev) => [optimistic, ...prev])
-
-		try {
-			await toast.promise(request, {
-				loading: 'Sending invitation…',
-				success: `Invitation sent to ${data.email}`,
-				error: 'Failed to send invitation. Please try again.',
-			})
-			// Reconcile with API response if needed
-		} catch {
-			// Rollback
-			setPendingInvitations((prev) =>
-				prev.filter((inv) => inv.id !== optimistic.id),
-			)
-		}
+	const handleAddMember = async (data: CreateTeamMemberData) => {
+		await createMember.mutateAsync({
+			projectId: teamData.projectId,
+			projectSlug,
+			...data,
+		})
 	}
 
-	// TODO: replace with real server action / route
-	const handleResendInvitation = async (invitationId: string) => {
-		try {
-			await toast.promise(new Promise((r) => setTimeout(r, 500)), {
-				loading: 'Resending…',
-				success: 'Invitation has been resent successfully.',
-				error: 'Failed to resend invitation. Please try again.',
-			})
-		} catch {}
+	const handleDeleteMember = async (memberId: string) => {
+		await deleteMember.mutateAsync({
+			projectId: teamData.projectId,
+			projectSlug,
+			memberId,
+		})
 	}
 
-	// TODO: replace with real server action / route
-	const handleCancelInvitation = async (invitationId: string) => {
-		const snapshot = [...pendingInvitations]
-		setPendingInvitations((prev) =>
-			prev.filter((inv) => inv.id !== invitationId),
-		)
-		try {
-			await toast.promise(new Promise((r) => setTimeout(r, 500)), {
-				loading: 'Cancelling…',
-				success: 'Invitation has been cancelled successfully.',
-				error: 'Failed to cancel invitation. Please try again.',
-			})
-		} catch {
-			setPendingInvitations(snapshot) // rollback
-		}
-	}
-
-	const handleChangeRole = async (
-		memberId: string,
-		role: Enums<'project_member_role'>,
-	) => {
-		const snapshot = [...members]
-		setMembers((prev) =>
-			prev.map((m) => (m.id === memberId ? { ...m, role } : m)),
-		)
-
-		try {
-			await updateRole.mutateAsync({
-				projectId: project.id,
-				projectSlug,
-				memberId,
-				role,
-			})
-		} catch {
-			// rollback on error
-			setMembers(snapshot)
-		}
-	}
-
-	const handleChangeTitle = async (memberId: string, title: string) => {
-		const snapshot = [...members]
-		setMembers((prev) =>
-			prev.map((m) => (m.id === memberId ? { ...m, title } : m)),
-		)
-
-		try {
-			await updateTitle.mutateAsync({
-				projectId: project.id,
-				projectSlug,
-				memberId,
-				title,
-			})
-		} catch {
-			setMembers(snapshot) // rollback
-		}
-	}
-
-	const handleRemoveMember = async (memberId: string) => {
-		const snapshot = [...members]
-		setMembers((prev) => prev.filter((m) => m.id !== memberId))
-
-		try {
-			await removeMember.mutateAsync({
-				projectId: project.id,
-				projectSlug,
-				memberId,
-			})
-			router.push(`/projects/${projectSlug}`)
-		} catch {
-			setMembers(snapshot) // rollback
-		}
-	}
-
-	const category = project.category?.slug
-		? { name: project.category.name, slug: project.category.slug }
-		: undefined
+	const prefersReducedMotion = useReducedMotion()
 
 	return (
-		<>
-			<div className="flex flex-col items-center justify-center mb-8">
-				{isLoading ? (
-					<BreadcrumbSkeleton />
-				) : (
-					<BreadcrumbContainer
-						category={category}
-						title={project.title}
-						manageSection="Project Management"
-						subSection="Members"
-					/>
-				)}
+		<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
+			{/* Subtle background pattern */}
+			<div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,1,36,0.03)_1px,transparent_0)] bg-[size:32px_32px] opacity-40" />
 
-				<div className="inline-flex items-center px-4 py-2 rounded-full font-medium text-purple-600 bg-purple-100 border-transparent mb-4">
-					Project Management
-				</div>
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
+				className="relative z-10 max-w-7xl mx-auto px-4 py-8 md:py-12"
+			>
+				{/* Header */}
+				<motion.header
+					initial={{ opacity: 0, y: -10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{
+						delay: prefersReducedMotion ? 0 : 0.1,
+						duration: prefersReducedMotion ? 0 : 0.3,
+					}}
+					className="flex flex-col items-center justify-center mb-8"
+				>
+					<div className="flex items-center gap-3">
+						<div className="rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 p-3 text-white shadow-sm">
+							<IoPeopleOutline size={24} className="relative z-10" />
+						</div>
+						<div>
+							<h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">
+								Project Team
+							</h1>
+							<p className="text-lg md:text-xl text-muted-foreground mt-2 text-center">
+								Showcase who&apos;s behind this project and their contributions
+							</p>
+						</div>
+					</div>
+				</motion.header>
 
-				<h1 className="text-3xl md:text-4xl font-bold mb-4 py-2 sm:text-center gradient-text">
-					Team Members
-				</h1>
-				<p className="text-xl text-muted-foreground max-w-5xl mx-auto">
-					Manage your project team members, roles, and invitations.
-				</p>
-			</div>
+				{/* Content */}
+				<motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{
+						delay: prefersReducedMotion ? 0 : 0.2,
+						duration: prefersReducedMotion ? 0 : 0.3,
+					}}
+					className="space-y-8 max-w-4xl mx-auto"
+				>
+					{/* Add Team Member Form */}
+					{!isLoading && <AddTeamMemberForm onAdd={handleAddMember} />}
 
-			<div className="space-y-8 max-w-2xl mx-auto">
-				{/* Invite Member Form */}
-				{isLoading ? (
-					<InviteMemberFormSkeleton />
-				) : (
-					<InviteMemberForm onInvite={handleInviteMember} />
-				)}
-
-				{/* Pending Invitations */}
-				{isLoading ? (
-					<PendingInvitationsSkeleton />
-				) : (
-					<PendingInvitations
-						invitations={pendingInvitations}
-						onResend={handleResendInvitation}
-						onCancel={handleCancelInvitation}
-					/>
-				)}
-
-				{/* Active Members List */}
-				{isLoading ? (
-					<MemberListSkeleton />
-				) : (
-					<MemberList
-						members={members}
-						currentUserId={currentUserId}
-						onRemoveMember={handleRemoveMember}
-						onChangeRole={handleChangeRole}
-						onChangeTitle={handleChangeTitle}
-					/>
-				)}
-			</div>
-		</>
+					{/* Team Members List */}
+					{isLoading ? (
+						<div className="animate-pulse">
+							<div className="h-64 bg-muted rounded-lg" />
+						</div>
+					) : (
+						<TeamMemberList
+							members={teamMembers}
+							onDelete={handleDeleteMember}
+						/>
+					)}
+				</motion.div>
+			</motion.div>
+		</div>
 	)
 }
