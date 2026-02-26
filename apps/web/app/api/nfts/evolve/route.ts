@@ -1,17 +1,24 @@
+import { Redis } from '@upstash/redis'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import {
 	buildNFTMetadata,
 	determineTier,
 	generateTierSVG,
+	type NFTTier,
 	TIER_CONFIGS,
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
-	type NFTTier,
 } from '~/lib/services/pinata'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+
+// --- Rate Limiting Configuration ---
+const rateLimitMaxRequests = 3
+const rateLimitWindowSeconds = 60
+// Module-level Redis singleton to avoid per-request connection churn
+const redis = Redis.fromEnv()
 
 /**
  * POST /api/nfts/evolve
@@ -30,6 +37,45 @@ export async function POST(req: NextRequest) {
 
 		const body = await req.json()
 		const userId = body.user_id || session.user.id
+
+		// --- Rate Limiting via Upstash Redis ---
+		try {
+			// Secure key using strictly the authenticated session identity
+			const rateLimitKey = `rate_limit:nft_evolve:${session.user.id}`
+			const MAX_REQUESTS = rateLimitMaxRequests
+			const WINDOW_SECONDS = rateLimitWindowSeconds
+
+			// Atomically increment and set TTL on first request using a Lua script
+			// This prevents a leaked key (where INCR succeeds but EXPIRE fails)
+			const requests = (await redis.eval(
+				`local count = redis.call("INCR", KEYS[1])
+                 if count == 1 then
+                   redis.call("EXPIRE", KEYS[1], ARGV[1])
+                 end
+                 return count`,
+				[rateLimitKey],
+				[WINDOW_SECONDS],
+			)) as number
+
+			if (requests && requests > MAX_REQUESTS) {
+				console.warn(
+					'[Rate Limit Exceeded] User attempted to evolve NFT too frequently.',
+				)
+				return NextResponse.json(
+					{ error: 'Too many requests. Please try again later.' },
+					{
+						status: 429,
+						headers: {
+							'Retry-After': WINDOW_SECONDS.toString(),
+						},
+					},
+				)
+			}
+		} catch (redisError) {
+			// Fail open: If Redis goes down, we log it but don't block the user from evolving their NFT
+			console.error('[Rate Limiting] Redis error:', redisError)
+		}
+		// --- End Rate Limiting ---
 
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
@@ -103,7 +149,10 @@ export async function POST(req: NextRequest) {
 			imageUri = uploadResult.ipfsUrl
 			imageIpfsHash = uploadResult.ipfsHash
 		} catch (err) {
-			console.warn('[NFT Evolve] Failed to upload image, using placeholder:', err)
+			console.warn(
+				'[NFT Evolve] Failed to upload image, using placeholder:',
+				err,
+			)
 			imageUri = `https://kindfi.org/images/nft-${newTier}.svg`
 		}
 
