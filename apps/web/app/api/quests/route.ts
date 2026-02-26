@@ -1,7 +1,7 @@
+import { Keypair } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { Keypair } from '@stellar/stellar-sdk'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
@@ -167,15 +167,18 @@ export async function POST(req: NextRequest) {
 				: 0
 
 		// Sync quest to on-chain contract
-		let onChainResult: { success: boolean; questId?: number; error?: string } | null =
-			null
+		let onChainResult: {
+			success: boolean
+			questId?: number
+			error?: string
+		} | null = null
 		const questContractAddress =
 			contract_address || process.env.QUEST_CONTRACT_ADDRESS
 
 		if (questContractAddress) {
 			try {
 				console.log('[Quest API] Syncing quest to on-chain contract...')
-				
+
 				// Use admin private key if available, otherwise use recorder keypair
 				// (assuming recorder has admin role granted)
 				const adminPrivateKey =

@@ -139,16 +139,25 @@ export async function POST(req: NextRequest) {
 				// Get user's Stellar address for on-chain contract calls
 				// Try multiple sources: smart account (devices table), session device, or request body
 				let userStellarAddress: string | null = null
-				
+
 				// 1. Check session for device address (smart account)
 				if (session?.device?.address && session.device.address !== '0x') {
 					userStellarAddress = session.device.address
-					console.log('[Gamification] Using smart account address from session:', userStellarAddress)
-				} else if (session?.user?.device?.address && session.user.device.address !== '0x') {
+					console.log(
+						'[Gamification] Using smart account address from session:',
+						userStellarAddress,
+					)
+				} else if (
+					session?.user?.device?.address &&
+					session.user.device.address !== '0x'
+				) {
 					userStellarAddress = session.user.device.address
-					console.log('[Gamification] Using smart account address from session.user:', userStellarAddress)
+					console.log(
+						'[Gamification] Using smart account address from session.user:',
+						userStellarAddress,
+					)
 				}
-				
+
 				// 2. Check devices table (handle multiple devices - get first valid address)
 				if (!userStellarAddress) {
 					try {
@@ -161,23 +170,44 @@ export async function POST(req: NextRequest) {
 							.limit(1)
 
 						if (deviceError) {
-							console.log('[Gamification] Device lookup error:', deviceError.message)
+							console.log(
+								'[Gamification] Device lookup error:',
+								deviceError.message,
+							)
 						} else if (devices && devices.length > 0 && devices[0]?.address) {
 							userStellarAddress = devices[0].address
-							console.log('[Gamification] Using address from devices table:', userStellarAddress)
+							console.log(
+								'[Gamification] Using address from devices table:',
+								userStellarAddress,
+							)
 						}
 					} catch (error) {
 						console.log('[Gamification] Error fetching device address:', error)
 					}
 				}
 
-				console.log('[Gamification] Final user Stellar address:', userStellarAddress || 'NOT FOUND')
+				console.log(
+					'[Gamification] Final user Stellar address:',
+					userStellarAddress || 'NOT FOUND',
+				)
 
-				console.log('[Gamification] SOROBAN_PRIVATE_KEY available:', !!process.env.SOROBAN_PRIVATE_KEY)
+				console.log(
+					'[Gamification] SOROBAN_PRIVATE_KEY available:',
+					!!process.env.SOROBAN_PRIVATE_KEY,
+				)
 				console.log('[Gamification] Contract addresses:', {
-					streak: process.env.STREAK_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_STREAK_CONTRACT_ADDRESS || 'NOT SET',
-					referral: process.env.REFERRAL_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS || 'NOT SET',
-					quest: process.env.QUEST_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS || 'NOT SET',
+					streak:
+						process.env.STREAK_CONTRACT_ADDRESS ||
+						process.env.NEXT_PUBLIC_STREAK_CONTRACT_ADDRESS ||
+						'NOT SET',
+					referral:
+						process.env.REFERRAL_CONTRACT_ADDRESS ||
+						process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS ||
+						'NOT SET',
+					quest:
+						process.env.QUEST_CONTRACT_ADDRESS ||
+						process.env.NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS ||
+						'NOT SET',
 				})
 
 				// Import handlers directly to avoid fetch issues
@@ -211,13 +241,21 @@ export async function POST(req: NextRequest) {
 							donation_timestamp: donationTimestamp,
 							user_address: userStellarAddress,
 						}),
-					).then((response) => {
-						console.log('[Gamification] Weekly streak update response:', response.status)
-						return response
-					}).catch((error) => {
-						console.error('[Gamification] Error updating weekly streak:', error)
-						throw error
-					}),
+					)
+						.then((response) => {
+							console.log(
+								'[Gamification] Weekly streak update response:',
+								response.status,
+							)
+							return response
+						})
+						.catch((error) => {
+							console.error(
+								'[Gamification] Error updating weekly streak:',
+								error,
+							)
+							throw error
+						}),
 					streaksPOST(
 						createMockRequest({
 							user_id: userId,
@@ -225,15 +263,26 @@ export async function POST(req: NextRequest) {
 							donation_timestamp: donationTimestamp,
 							user_address: userStellarAddress,
 						}),
-					).then((response) => {
-						console.log('[Gamification] Monthly streak update response:', response.status)
-						return response
-					}).catch((error) => {
-						console.error('[Gamification] Error updating monthly streak:', error)
-						throw error
-					}),
+					)
+						.then((response) => {
+							console.log(
+								'[Gamification] Monthly streak update response:',
+								response.status,
+							)
+							return response
+						})
+						.catch((error) => {
+							console.error(
+								'[Gamification] Error updating monthly streak:',
+								error,
+							)
+							throw error
+						}),
 				])
-				console.log('[Gamification] Streak updates completed:', streakResults.map(r => r.status))
+				console.log(
+					'[Gamification] Streak updates completed:',
+					streakResults.map((r) => r.status),
+				)
 
 				// 2. Update referral donation (if user was referred) - includes on-chain contract calls if address available
 				console.log('[Gamification] Updating referral donation...')
@@ -242,35 +291,50 @@ export async function POST(req: NextRequest) {
 						referred_id: userId,
 						referred_address: userStellarAddress,
 					}),
-				).then((response) => {
-					console.log('[Gamification] Referral donation update response:', response.status)
-					return response
-				}).catch((error) => {
-					// Silently fail if not a referred user or other error
-					console.log('[Gamification] Referral donation update skipped (not a referred user or error):', error.message)
-				})
+				)
+					.then((response) => {
+						console.log(
+							'[Gamification] Referral donation update response:',
+							response.status,
+						)
+						return response
+					})
+					.catch((error) => {
+						// Silently fail if not a referred user or other error
+						console.log(
+							'[Gamification] Referral donation update skipped (not a referred user or error):',
+							error.message,
+						)
+					})
 
 				// 3. Update quest progress for donation-related quests
 				// Find active quests that match donation actions
 				console.log('[Gamification] Fetching active donation quests...')
-				const { data: donationQuests, error: questsError } = await supabaseClient
-					.from('quest_definitions')
-					.select('quest_id, quest_type, target_value')
-					.eq('is_active', true)
-					.in('quest_type', [
-						'total_donation_amount',
-						'multi_region_donation',
-						'multi_category_donation',
-					])
+				const { data: donationQuests, error: questsError } =
+					await supabaseClient
+						.from('quest_definitions')
+						.select('quest_id, quest_type, target_value')
+						.eq('is_active', true)
+						.in('quest_type', [
+							'total_donation_amount',
+							'multi_region_donation',
+							'multi_category_donation',
+						])
 
 				if (questsError) {
 					console.error('[Gamification] Error fetching quests:', questsError)
 				}
 
-				console.log('[Gamification] Found active quests:', donationQuests?.length || 0)
+				console.log(
+					'[Gamification] Found active quests:',
+					donationQuests?.length || 0,
+				)
 
 				if (donationQuests && donationQuests.length > 0) {
-					console.log('[Gamification] Processing quests:', donationQuests.map(q => ({ id: q.quest_id, type: q.quest_type })))
+					console.log(
+						'[Gamification] Processing quests:',
+						donationQuests.map((q) => ({ id: q.quest_id, type: q.quest_type })),
+					)
 					// Calculate progress for each quest type
 					for (const quest of donationQuests) {
 						let progressValue = 0
@@ -304,8 +368,7 @@ export async function POST(req: NextRequest) {
 										index ===
 										self.findIndex(
 											(pr) =>
-												pr.projects?.category_id ===
-												p.projects?.category_id,
+												pr.projects?.category_id === p.projects?.category_id,
 										),
 								).length || 1
 						} else if (quest.quest_type === 'multi_category_donation') {
@@ -321,14 +384,15 @@ export async function POST(req: NextRequest) {
 										index ===
 										self.findIndex(
 											(pr) =>
-												pr.projects?.category_id ===
-												p.projects?.category_id,
+												pr.projects?.category_id === p.projects?.category_id,
 										),
 								).length || 1
 						}
 
 						// Update quest progress - includes on-chain contract calls if address available
-						console.log(`[Gamification] Updating quest ${quest.quest_id} (${quest.quest_type}) with progress: ${progressValue}/${quest.target_value}`)
+						console.log(
+							`[Gamification] Updating quest ${quest.quest_id} (${quest.quest_type}) with progress: ${progressValue}/${quest.target_value}`,
+						)
 						questsProgressPOST(
 							createMockRequest({
 								user_id: userId,
@@ -336,22 +400,31 @@ export async function POST(req: NextRequest) {
 								progress_value: progressValue,
 								user_address: userStellarAddress,
 							}),
-						).then((response) => {
-							console.log(`[Gamification] Quest ${quest.quest_id} update response:`, response.status)
-							return response
-						}).catch((error) => {
-							console.error(
-								`[Gamification] Error updating quest ${quest.quest_id}:`,
-								error,
-							)
-						})
+						)
+							.then((response) => {
+								console.log(
+									`[Gamification] Quest ${quest.quest_id} update response:`,
+									response.status,
+								)
+								return response
+							})
+							.catch((error) => {
+								console.error(
+									`[Gamification] Error updating quest ${quest.quest_id}:`,
+									error,
+								)
+							})
 					}
 				}
 				// 4. Handle NFT minting / evolution
 				console.log('[Gamification] Checking NFT status...')
 				try {
-					const { POST: nftMintPOST } = await import('~/app/api/nfts/mint/route')
-					const { POST: nftEvolvePOST } = await import('~/app/api/nfts/evolve/route')
+					const { POST: nftMintPOST } = await import(
+						'~/app/api/nfts/mint/route'
+					)
+					const { POST: nftEvolvePOST } = await import(
+						'~/app/api/nfts/evolve/route'
+					)
 
 					// Check if user already has an NFT (user_nfts table recently added, types not yet regenerated)
 					const { supabase: svcClient } = await import('@packages/lib/supabase')
@@ -371,21 +444,32 @@ export async function POST(req: NextRequest) {
 								stellar_address: userStellarAddress,
 							}),
 						)
-						console.log('[Gamification] NFT mint response:', mintResponse.status)
+						console.log(
+							'[Gamification] NFT mint response:',
+							mintResponse.status,
+						)
 					} else {
 						// Existing NFT → check if tier should evolve
-						console.log('[Gamification] Existing NFT found, checking evolution...')
+						console.log(
+							'[Gamification] Existing NFT found, checking evolution...',
+						)
 						const evolveResponse = await nftEvolvePOST(
 							createMockRequest({ user_id: userId }),
 						)
-						console.log('[Gamification] NFT evolve response:', evolveResponse.status)
+						console.log(
+							'[Gamification] NFT evolve response:',
+							evolveResponse.status,
+						)
 					}
 				} catch (nftError) {
 					console.error('[Gamification] NFT mint/evolve error:', nftError)
 				}
 			} catch (error) {
 				// Log but don't throw - gamification updates shouldn't block donations
-				console.error('[Gamification] Fatal error in gamification updates:', error)
+				console.error(
+					'[Gamification] Fatal error in gamification updates:',
+					error,
+				)
 			} finally {
 				console.log('[Gamification] Gamification updates completed')
 			}
@@ -394,7 +478,10 @@ export async function POST(req: NextRequest) {
 		// Trigger gamification updates asynchronously
 		console.log('[Gamification] Triggering async gamification updates...')
 		gamificationUpdates().catch((error) => {
-			console.error('[Gamification] Unhandled error in gamification updates:', error)
+			console.error(
+				'[Gamification] Unhandled error in gamification updates:',
+				error,
+			)
 		})
 
 		return NextResponse.json(

@@ -8,6 +8,7 @@ import {
 	IoCheckmarkCircleOutline,
 	IoCloseCircleOutline,
 } from 'react-icons/io5'
+import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import {
@@ -35,7 +36,6 @@ import {
 	SelectValue,
 } from '~/components/base/select'
 import { Textarea } from '~/components/base/textarea'
-import { toast } from 'sonner'
 
 type QuestType =
 	| 'multi_region_donation'
@@ -236,7 +236,10 @@ export function AdminQuestManager() {
 										min="0"
 										value={formData.reward_points}
 										onChange={(e) =>
-											setFormData({ ...formData, reward_points: e.target.value })
+											setFormData({
+												...formData,
+												reward_points: e.target.value,
+											})
 										}
 										placeholder="e.g., 50"
 									/>
@@ -329,7 +332,8 @@ export function AdminQuestManager() {
 										{quest.reward_points} points
 									</div>
 									<div>
-										<span className="font-medium">Quest ID:</span> {quest.quest_id}
+										<span className="font-medium">Quest ID:</span>{' '}
+										{quest.quest_id}
 									</div>
 								</div>
 								{quest.expires_at && (

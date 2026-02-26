@@ -55,7 +55,9 @@ async function main() {
 
 	for (const contract of contracts) {
 		if (!contract.address) {
-			console.log(`⚠️  Skipping ${contract.name}: no contract address configured`)
+			console.log(
+				`⚠️  Skipping ${contract.name}: no contract address configured`,
+			)
 			continue
 		}
 
@@ -63,8 +65,14 @@ async function main() {
 
 		// Check current status
 		console.log('Checking current has_role...')
-		const before = await service.hasRole(contract.address, recorderAddress, 'recorder')
-		console.log(`  has_role before: ${before.hasRole}${before.error ? ` (error: ${before.error})` : ''}`)
+		const before = await service.hasRole(
+			contract.address,
+			recorderAddress,
+			'recorder',
+		)
+		console.log(
+			`  has_role before: ${before.hasRole}${before.error ? ` (error: ${before.error})` : ''}`,
+		)
 
 		if (before.hasRole) {
 			console.log(`✅ Recorder role already granted on ${contract.name}`)
@@ -93,7 +101,9 @@ async function main() {
 				'admin',
 				adminKeypair,
 			)
-			console.log(`  Admin self-grant: ${adminGrant.success ? 'success' : adminGrant.error}`)
+			console.log(
+				`  Admin self-grant: ${adminGrant.success ? 'success' : adminGrant.error}`,
+			)
 
 			if (adminGrant.success) {
 				console.log('Retrying recorder role grant...')
@@ -106,20 +116,30 @@ async function main() {
 				if (retry.success) {
 					console.log(`✅ grant_role succeeded on retry for ${contract.name}`)
 				} else {
-					console.error(`❌ grant_role failed on retry for ${contract.name}: ${retry.error}`)
+					console.error(
+						`❌ grant_role failed on retry for ${contract.name}: ${retry.error}`,
+					)
 				}
 			}
 		}
 
 		// Verify after grant
 		console.log('Verifying has_role after grant...')
-		const after = await service.hasRole(contract.address, recorderAddress, 'recorder')
-		console.log(`  has_role after: ${after.hasRole}${after.error ? ` (error: ${after.error})` : ''}`)
+		const after = await service.hasRole(
+			contract.address,
+			recorderAddress,
+			'recorder',
+		)
+		console.log(
+			`  has_role after: ${after.hasRole}${after.error ? ` (error: ${after.error})` : ''}`,
+		)
 
 		if (after.hasRole) {
 			console.log(`✅ VERIFIED: Recorder role is granted on ${contract.name}`)
 		} else {
-			console.error(`❌ VERIFICATION FAILED: Recorder role NOT granted on ${contract.name}`)
+			console.error(
+				`❌ VERIFICATION FAILED: Recorder role NOT granted on ${contract.name}`,
+			)
 		}
 	}
 

@@ -72,7 +72,9 @@ export async function POST(req: NextRequest) {
 
 		// Use service role client to bypass RLS, but ensure user_id matches session
 		// This is necessary because these operations are triggered server-side after donations
-		const { supabase: supabaseServiceRole } = await import('@packages/lib/supabase')
+		const { supabase: supabaseServiceRole } = await import(
+			'@packages/lib/supabase'
+		)
 		const supabase = supabaseServiceRole
 
 		const timestamp = donation_timestamp || new Date().toISOString()
@@ -98,9 +100,12 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Call smart contract if address is available and SOROBAN_PRIVATE_KEY is set
-		let contractResult: { success: boolean; streak?: number; error?: string } | null =
-			null
-		
+		let contractResult: {
+			success: boolean
+			streak?: number
+			error?: string
+		} | null = null
+
 		console.log('[Streak API] Contract call conditions:', {
 			hasStellarAddress: !!stellarAddress,
 			hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
@@ -116,7 +121,10 @@ export async function POST(req: NextRequest) {
 					process.env.STREAK_CONTRACT_ADDRESS ||
 					process.env.NEXT_PUBLIC_STREAK_CONTRACT_ADDRESS
 
-				console.log('[Streak API] Streak contract address:', streakContractAddress || 'NOT SET')
+				console.log(
+					'[Streak API] Streak contract address:',
+					streakContractAddress || 'NOT SET',
+				)
 
 				if (streakContractAddress) {
 					console.log('[Streak API] Calling streak contract...')
@@ -148,10 +156,13 @@ export async function POST(req: NextRequest) {
 				// Continue with database update even if contract call fails
 			}
 		} else {
-			console.log('[Streak API] Skipping contract call - missing requirements:', {
-				hasStellarAddress: !!stellarAddress,
-				hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
-			})
+			console.log(
+				'[Streak API] Skipping contract call - missing requirements:',
+				{
+					hasStellarAddress: !!stellarAddress,
+					hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
+				},
+			)
 		}
 
 		// Get existing streak or create new (use maybeSingle to handle missing records)
@@ -188,10 +199,7 @@ export async function POST(req: NextRequest) {
 			if (lastDonation > 0 && timeSinceLast <= periodMs) {
 				// Streak continues
 				current_streak = existingStreak.current_streak + 1
-				longest_streak = Math.max(
-					current_streak,
-					existingStreak.longest_streak,
-				)
+				longest_streak = Math.max(current_streak, existingStreak.longest_streak)
 			} else {
 				// Streak broken or first donation
 				current_streak = 1

@@ -186,8 +186,14 @@ export async function POST(req: NextRequest) {
 			process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
 
 		if (referralContractAddress && process.env.SOROBAN_PRIVATE_KEY) {
-			const referrerAddress = await resolveUserStellarAddress(supabase, referrer_id)
-			const referredAddress = await resolveUserStellarAddress(supabase, referred_id)
+			const referrerAddress = await resolveUserStellarAddress(
+				supabase,
+				referrer_id,
+			)
+			const referredAddress = await resolveUserStellarAddress(
+				supabase,
+				referred_id,
+			)
 
 			console.log('[Referral API] On-chain create_referral addresses:', {
 				referrerAddress,
@@ -211,10 +217,15 @@ export async function POST(req: NextRequest) {
 						console.log('[Referral API] On-chain create_referral succeeded')
 					}
 				} catch (err) {
-					console.error('[Referral API] Error calling create_referral on-chain:', err)
+					console.error(
+						'[Referral API] Error calling create_referral on-chain:',
+						err,
+					)
 				}
 			} else {
-				console.warn('[Referral API] Skipping on-chain create_referral — missing Stellar addresses')
+				console.warn(
+					'[Referral API] Skipping on-chain create_referral — missing Stellar addresses',
+				)
 			}
 		}
 

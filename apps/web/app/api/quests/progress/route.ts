@@ -2,8 +2,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
 const rateLimiter = new RateLimiter()
 const QUEST_PROGRESS_ALLOWED_ROLES = ['service', 'recorder'] as const
@@ -24,10 +24,7 @@ export async function POST(req: NextRequest) {
 			'quest_progress',
 		)
 		if (rateLimitResult.isBlocked) {
-			return NextResponse.json(
-				{ error: 'Too many requests' },
-				{ status: 429 },
-			)
+			return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 		}
 
 		const userRole = session.user.role
@@ -56,7 +53,9 @@ export async function POST(req: NextRequest) {
 
 		// Use service role client to bypass RLS, but ensure user_id matches session
 		// This is necessary because these operations are triggered server-side after donations
-		const { supabase: supabaseServiceRole } = await import('@packages/lib/supabase')
+		const { supabase: supabaseServiceRole } = await import(
+			'@packages/lib/supabase'
+		)
 		const supabase = supabaseServiceRole
 
 		// Get user's Stellar address if not provided
@@ -84,10 +83,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (questError || !quest) {
-			return NextResponse.json(
-				{ error: 'Quest not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Quest not found' }, { status: 404 })
 		}
 
 		// Call smart contract if address is available and SOROBAN_PRIVATE_KEY is set
@@ -113,7 +109,10 @@ export async function POST(req: NextRequest) {
 					process.env.QUEST_CONTRACT_ADDRESS ||
 					process.env.NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS
 
-				console.log('[Quest API] Quest contract address:', questContractAddress || 'NOT SET')
+				console.log(
+					'[Quest API] Quest contract address:',
+					questContractAddress || 'NOT SET',
+				)
 
 				if (questContractAddress) {
 					console.log('[Quest API] Calling quest contract...')
@@ -135,7 +134,9 @@ export async function POST(req: NextRequest) {
 						)
 						// Continue with database update even if contract call fails
 					} else {
-						console.log('[Quest API] Successfully updated quest progress on-chain')
+						console.log(
+							'[Quest API] Successfully updated quest progress on-chain',
+						)
 					}
 				} else {
 					console.warn('[Quest API] Quest contract address not configured')
@@ -145,10 +146,13 @@ export async function POST(req: NextRequest) {
 				// Continue with database update even if contract call fails
 			}
 		} else {
-			console.log('[Quest API] Skipping contract call - missing requirements:', {
-				hasStellarAddress: !!stellarAddress,
-				hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
-			})
+			console.log(
+				'[Quest API] Skipping contract call - missing requirements:',
+				{
+					hasStellarAddress: !!stellarAddress,
+					hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
+				},
+			)
 		}
 
 		if (!quest.is_active) {
@@ -160,10 +164,7 @@ export async function POST(req: NextRequest) {
 
 		// Check expiration
 		if (quest.expires_at && new Date(quest.expires_at) < new Date()) {
-			return NextResponse.json(
-				{ error: 'Quest has expired' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Quest has expired' }, { status: 400 })
 		}
 
 		// Get or create progress (use maybeSingle to handle missing records)

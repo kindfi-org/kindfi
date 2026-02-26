@@ -2,19 +2,19 @@
 
 import type { Database } from '@services/supabase'
 import { motion } from 'framer-motion'
+import { useSearchParams } from 'next/navigation'
 import { startTransition, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
-import { useSearchParams } from 'next/navigation'
 import {
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
+import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { AccountInfoCard } from './cards/account-info-card'
 import { KYCCard } from './cards/kyc-card'
 import { PersonalInfoCard } from './cards/personal-info-card'
-import { AccountInfoCard } from './cards/account-info-card'
 import { WalletCard } from './cards/wallet-card'
 import { RoleSelectionModal } from './modals/role-selection-modal'
 import { ProfileHeader } from './profile-header'
@@ -66,8 +66,12 @@ export function ProfileDashboard({
 		() => user.profile?.display_name || user.email?.split('@')[0] || 'You',
 		[user.profile?.display_name, user.email],
 	)
-	const { address: externalWalletAddress, connect, disconnect, isConnected } =
-		useWallet()
+	const {
+		address: externalWalletAddress,
+		connect,
+		disconnect,
+		isConnected,
+	} = useWallet()
 	const imageUrl = user.profile?.image_url ?? null
 	const [showRoleModal, setShowRoleModal] = useState(false)
 	const searchParams = useSearchParams()
@@ -102,11 +106,20 @@ export function ProfileDashboard({
 
 		const normalizedStatus = status.replace(/\+/g, ' ')
 		if (normalizedStatus === 'Approved') {
-			toast.success('KYC verification approved! Your status is being updated...')
+			toast.success(
+				'KYC verification approved! Your status is being updated...',
+			)
 		} else if (normalizedStatus === 'Declined') {
-			toast.error('KYC verification was declined. Please review the requirements and try again.')
-		} else if (normalizedStatus === 'In Review' || normalizedStatus === 'In Progress') {
-			toast.info("KYC verification is under review. We will notify you once it's complete.")
+			toast.error(
+				'KYC verification was declined. Please review the requirements and try again.',
+			)
+		} else if (
+			normalizedStatus === 'In Review' ||
+			normalizedStatus === 'In Progress'
+		) {
+			toast.info(
+				"KYC verification is under review. We will notify you once it's complete.",
+			)
 		} else {
 			toast.info('KYC verification completed! Checking your status...')
 		}
@@ -114,17 +127,22 @@ export function ProfileDashboard({
 		fetch('/api/kyc/didit/callback', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ verificationSessionId: sessionId, status: normalizedStatus }),
+			body: JSON.stringify({
+				verificationSessionId: sessionId,
+				status: normalizedStatus,
+			}),
 		})
 			.then(async (res) => {
 				if (res.ok) {
 					const result = await res.json()
 					if (result.status === 'approved' || result.status === 'verified') {
-						toast.success('KYC verification approved! Your status has been updated.')
+						toast.success(
+							'KYC verification approved! Your status has been updated.',
+						)
 					} else if (result.status === 'rejected') {
 						toast.error('KYC verification was declined.')
 					} else if (result.status === 'pending') {
-						toast.info("KYC verification is under review.")
+						toast.info('KYC verification is under review.')
 					}
 					window.history.replaceState({}, '', '/profile')
 					window.location.reload()
@@ -140,7 +158,11 @@ export function ProfileDashboard({
 	const handleTabChange = (value: string) => {
 		const params = new URLSearchParams(searchParams?.toString() || '')
 		params.set('section', value)
-		window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`)
+		window.history.pushState(
+			{},
+			'',
+			`${window.location.pathname}?${params.toString()}`,
+		)
 	}
 
 	/** Renders the correct profile view for a given section */
@@ -150,7 +172,15 @@ export function ProfileDashboard({
 			<ProfileView
 				userId={user.id}
 				displayName={displayName}
-				showSection={section as 'overview' | 'gamification' | 'donations' | 'nfts' | 'campaigns' | 'foundations'}
+				showSection={
+					section as
+						| 'overview'
+						| 'gamification'
+						| 'donations'
+						| 'nfts'
+						| 'campaigns'
+						| 'foundations'
+				}
 			/>
 		)
 	}

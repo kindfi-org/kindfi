@@ -1,13 +1,12 @@
 'use client'
 
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
 	ArrowUp,
 	ChevronDown,
 	ChevronUp,
-	ExternalLink,
 	Diamond,
+	ExternalLink,
 	ImageIcon,
 	Info,
 	Sparkles,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
+import { useState } from 'react'
 import { Badge } from '~/components/base/badge'
 import {
 	Card,
@@ -80,10 +80,38 @@ interface UserStats {
 // ============================================================================
 
 const TIERS = {
-	bronze: { label: 'Bronze', color: 'bg-orange-100 text-orange-700 border-orange-300', accent: '#CD7F32', minPts: 0, nextPts: 100, votes: 1 },
-	silver: { label: 'Silver', color: 'bg-gray-100 text-gray-700 border-gray-300', accent: '#C0C0C0', minPts: 100, nextPts: 500, votes: 3 },
-	gold: { label: 'Gold', color: 'bg-yellow-100 text-yellow-700 border-yellow-300', accent: '#FFD700', minPts: 500, nextPts: 2000, votes: 5 },
-	diamond: { label: 'Diamond', color: 'bg-cyan-100 text-cyan-700 border-cyan-300', accent: '#B9F2FF', minPts: 2000, nextPts: null, votes: 10 },
+	bronze: {
+		label: 'Bronze',
+		color: 'bg-orange-100 text-orange-700 border-orange-300',
+		accent: '#CD7F32',
+		minPts: 0,
+		nextPts: 100,
+		votes: 1,
+	},
+	silver: {
+		label: 'Silver',
+		color: 'bg-gray-100 text-gray-700 border-gray-300',
+		accent: '#C0C0C0',
+		minPts: 100,
+		nextPts: 500,
+		votes: 3,
+	},
+	gold: {
+		label: 'Gold',
+		color: 'bg-yellow-100 text-yellow-700 border-yellow-300',
+		accent: '#FFD700',
+		minPts: 500,
+		nextPts: 2000,
+		votes: 5,
+	},
+	diamond: {
+		label: 'Diamond',
+		color: 'bg-cyan-100 text-cyan-700 border-cyan-300',
+		accent: '#B9F2FF',
+		minPts: 2000,
+		nextPts: null,
+		votes: 10,
+	},
 } as const
 
 type Tier = keyof typeof TIERS
@@ -198,7 +226,14 @@ export function NFTCollection() {
 	const currentPts = Number(impactScore) || userStats?.impactScore || 0
 	const nextTierPts = tierConfig.nextPts
 	const progressPct = nextTierPts
-		? Math.min(100, Math.round(((currentPts - tierConfig.minPts) / (nextTierPts - tierConfig.minPts)) * 100))
+		? Math.min(
+				100,
+				Math.round(
+					((currentPts - tierConfig.minPts) /
+						(nextTierPts - tierConfig.minPts)) *
+						100,
+				),
+			)
 		: 100
 
 	const nftContractAddress = dbNft?.contract_address
@@ -225,7 +260,10 @@ export function NFTCollection() {
 						)}
 						{(nft || dbNft) && (
 							<div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-								#{(nft?.tokenId ?? dbNft?.token_id ?? 0).toString().padStart(4, '0')}
+								#
+								{(nft?.tokenId ?? dbNft?.token_id ?? 0)
+									.toString()
+									.padStart(4, '0')}
 							</div>
 						)}
 					</div>
@@ -256,7 +294,9 @@ export function NFTCollection() {
 										<ArrowUp className="inline h-3 w-3 mr-0.5" />
 										Next tier at {nextTierPts} pts
 									</span>
-									<span>{currentPts} / {nextTierPts} pts</span>
+									<span>
+										{currentPts} / {nextTierPts} pts
+									</span>
 								</div>
 								<Progress value={progressPct} className="h-2" />
 							</div>
@@ -269,7 +309,10 @@ export function NFTCollection() {
 
 						{/* Governance votes */}
 						<p className="text-xs text-muted-foreground">
-							Governance votes: <span className="font-semibold text-foreground">{govVotes || tierConfig.votes}</span>
+							Governance votes:{' '}
+							<span className="font-semibold text-foreground">
+								{govVotes || tierConfig.votes}
+							</span>
 						</p>
 
 						{/* Stellar Expert link */}
@@ -319,7 +362,12 @@ export function NFTCollection() {
 						<div className="grid gap-3 text-sm">
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Token ID</span>
-								<span className="font-mono">#{(nft?.tokenId ?? dbNft?.token_id ?? 0).toString().padStart(4, '0')}</span>
+								<span className="font-mono">
+									#
+									{(nft?.tokenId ?? dbNft?.token_id ?? 0)
+										.toString()
+										.padStart(4, '0')}
+								</span>
 							</div>
 							{nft?.metadata?.name && (
 								<div className="flex justify-between">
@@ -329,13 +377,17 @@ export function NFTCollection() {
 							)}
 							{nft?.metadata?.description && (
 								<div className="flex justify-between gap-4">
-									<span className="text-muted-foreground shrink-0">Description</span>
+									<span className="text-muted-foreground shrink-0">
+										Description
+									</span>
 									<span className="text-right">{nft.metadata.description}</span>
 								</div>
 							)}
 							{nft?.metadata?.image_uri && (
 								<div className="flex justify-between gap-2">
-									<span className="text-muted-foreground shrink-0">Image URI</span>
+									<span className="text-muted-foreground shrink-0">
+										Image URI
+									</span>
 									<a
 										href={nft.metadata.image_uri}
 										target="_blank"
@@ -348,7 +400,9 @@ export function NFTCollection() {
 							)}
 							{nft?.metadata?.external_url && (
 								<div className="flex justify-between gap-2">
-									<span className="text-muted-foreground shrink-0">External URL</span>
+									<span className="text-muted-foreground shrink-0">
+										External URL
+									</span>
 									<a
 										href={nft.metadata.external_url}
 										target="_blank"
@@ -362,28 +416,47 @@ export function NFTCollection() {
 						</div>
 						{(attrs.length > 0 || userStats) && (
 							<div>
-								<p className="text-xs font-medium text-muted-foreground mb-2">Attributes</p>
+								<p className="text-xs font-medium text-muted-foreground mb-2">
+									Attributes
+								</p>
 								<div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
 									{attrs.length > 0
 										? attrs.map((a) => (
-											<div
-												key={a.trait_type}
-												className="bg-muted/60 rounded px-2 py-1.5 text-xs"
-											>
-												<span className="text-muted-foreground">{a.trait_type}:</span>{' '}
-												<span className="font-medium">{a.value}</span>
-											</div>
-										))
+												<div
+													key={a.trait_type}
+													className="bg-muted/60 rounded px-2 py-1.5 text-xs"
+												>
+													<span className="text-muted-foreground">
+														{a.trait_type}:
+													</span>{' '}
+													<span className="font-medium">{a.value}</span>
+												</div>
+											))
 										: userStats && (
-											<>
-												<AttrChip label="Impact Score" value={String(userStats.impactScore)} />
-												<AttrChip label="Total Donations" value={String(userStats.totalDonations)} />
-												<AttrChip label="Quests Completed" value={String(userStats.questsCompleted)} />
-												<AttrChip label="Streak Days" value={String(userStats.streakDays)} />
-												<AttrChip label="Referrals" value={String(userStats.referralCount)} />
-												<AttrChip label="Tier" value={tierConfig.label} />
-											</>
-										)}
+												<>
+													<AttrChip
+														label="Impact Score"
+														value={String(userStats.impactScore)}
+													/>
+													<AttrChip
+														label="Total Donations"
+														value={String(userStats.totalDonations)}
+													/>
+													<AttrChip
+														label="Quests Completed"
+														value={String(userStats.questsCompleted)}
+													/>
+													<AttrChip
+														label="Streak Days"
+														value={String(userStats.streakDays)}
+													/>
+													<AttrChip
+														label="Referrals"
+														value={String(userStats.referralCount)}
+													/>
+													<AttrChip label="Tier" value={tierConfig.label} />
+												</>
+											)}
 								</div>
 							</div>
 						)}
@@ -461,7 +534,8 @@ export function NFTCollection() {
 				<CardHeader className="pb-3">
 					<CardTitle className="text-sm">Tier Roadmap</CardTitle>
 					<p className="text-xs text-muted-foreground mt-1">
-						You have one Kinder NFT that evolves through tiers. Marked tiers = achieved.
+						You have one Kinder NFT that evolves through tiers. Marked tiers =
+						achieved.
 					</p>
 				</CardHeader>
 				<CardContent>
@@ -469,8 +543,7 @@ export function NFTCollection() {
 						{(Object.entries(TIERS) as [Tier, (typeof TIERS)[Tier]][]).map(
 							([key, cfg]) => {
 								const isActive = key === tier
-								const isPast =
-									TIERS[tier].minPts >= cfg.minPts && !isActive
+								const isPast = TIERS[tier].minPts >= cfg.minPts && !isActive
 								return (
 									<div
 										key={key}
@@ -501,7 +574,10 @@ export function NFTCollection() {
 // Helpers
 // ============================================================================
 
-function findAttr(attrs: NFTAttribute[], traitType: string): string | undefined {
+function findAttr(
+	attrs: NFTAttribute[],
+	traitType: string,
+): string | undefined {
 	return attrs.find((a) => a.trait_type === traitType)?.value
 }
 

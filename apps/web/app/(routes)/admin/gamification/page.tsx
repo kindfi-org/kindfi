@@ -1,10 +1,10 @@
+import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 import {
 	dehydrate,
 	HydrationBoundary,
 	QueryClient,
 } from '@tanstack/react-query'
 import { AdminGamificationManager } from '~/components/sections/admin/admin-gamification-manager'
-import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 
 export default async function AdminGamificationPage() {
 	const queryClient = new QueryClient()

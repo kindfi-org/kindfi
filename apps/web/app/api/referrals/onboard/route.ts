@@ -39,10 +39,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (refError || !referral) {
-			return NextResponse.json(
-				{ error: 'Referral not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Referral not found' }, { status: 404 })
 		}
 
 		if (referral.status !== 'pending') {
@@ -132,7 +129,10 @@ export async function POST(req: NextRequest) {
 						)
 					}
 				} catch (err) {
-					console.error('[Referral Onboard API] Error calling mark_onboarded on-chain:', err)
+					console.error(
+						'[Referral Onboard API] Error calling mark_onboarded on-chain:',
+						err,
+					)
 				}
 			} else {
 				console.warn(

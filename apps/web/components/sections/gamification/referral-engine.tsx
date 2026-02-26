@@ -2,13 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import {
-	Copy,
-	Gift,
-	Share2,
-	TrendingUp,
-	Users,
-} from 'lucide-react'
+import { Copy, Gift, Share2, TrendingUp, Users } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -167,10 +161,14 @@ export function ReferralEngine() {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="flex items-center gap-2">
-					<code className="flex-1 px-4 py-3 bg-white rounded-lg border-2 border-primary/20 font-mono text-lg font-bold">
-						{referralCode}
-					</code>
-						<Button onClick={handleCopyReferralCode} variant="outline" size="sm">
+						<code className="flex-1 px-4 py-3 bg-white rounded-lg border-2 border-primary/20 font-mono text-lg font-bold">
+							{referralCode}
+						</code>
+						<Button
+							onClick={handleCopyReferralCode}
+							variant="outline"
+							size="sm"
+						>
 							<Copy className="h-4 w-4 mr-2" />
 							Copy
 						</Button>
@@ -261,7 +259,11 @@ export function ReferralEngine() {
 					<CardContent>
 						<div className="space-y-3">
 							{referrals.map((referral, index) => (
-								<ReferralItem key={referral.id} referral={referral} index={index} />
+								<ReferralItem
+									key={referral.id}
+									referral={referral}
+									index={index}
+								/>
 							))}
 						</div>
 					</CardContent>
