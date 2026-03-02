@@ -13,13 +13,16 @@ import { mapDiditStatusToKYC } from '~/lib/services/didit'
  */
 export async function POST(req: NextRequest) {
 	try {
-		const session = await getServerSession(nextAuthOption)
+		// Get session and parse body in parallel
+		const [session, body] = await Promise.all([
+			getServerSession(nextAuthOption),
+			req.json(),
+		])
 
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const body = await req.json()
 		const { verificationSessionId, status } = body
 
 		if (!verificationSessionId || !status) {
