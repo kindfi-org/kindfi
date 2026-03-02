@@ -49,12 +49,33 @@ export async function PATCH(
 		}
 
 		// Verify user has permission to update project members
-		// Check if user is the project owner or has admin/core role
-		const { data: project, error: projectError } = await supabaseServiceRole
-			.from('projects')
-			.select('id, kindler_id')
-			.eq('id', projectId)
-			.single()
+		// Check project, user role, and target member in parallel
+		const [projectResult, memberResult, targetMemberResult] = await Promise.all(
+			[
+				supabaseServiceRole
+					.from('projects')
+					.select('id, kindler_id')
+					.eq('id', projectId)
+					.single(),
+				supabaseServiceRole
+					.from('project_members')
+					.select('role')
+					.eq('project_id', projectId)
+					.eq('user_id', userId)
+					.in('role', ['core', 'admin'])
+					.single(),
+				supabaseServiceRole
+					.from('project_members')
+					.select('user_id, role')
+					.eq('id', memberId)
+					.eq('project_id', projectId)
+					.single(),
+			],
+		)
+
+		const { data: project, error: projectError } = projectResult
+		const { data: memberData } = memberResult
+		const { data: targetMember } = targetMemberResult
 
 		if (projectError || !project) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
@@ -62,26 +83,7 @@ export async function PATCH(
 
 		// Check if user is the project owner
 		const isOwner = project.kindler_id === userId
-
-		// Check if user is a project member with admin/core role
-		const { data: memberData } = await supabaseServiceRole
-			.from('project_members')
-			.select('role')
-			.eq('project_id', projectId)
-			.eq('user_id', userId)
-			.in('role', ['core', 'admin'])
-			.single()
-
 		const hasAdminRole = !!memberData
-
-		// Also check if user is updating their own membership (allowed for non-privileged role changes)
-		const { data: targetMember } = await supabaseServiceRole
-			.from('project_members')
-			.select('user_id, role')
-			.eq('id', memberId)
-			.eq('project_id', projectId)
-			.single()
-
 		const isUpdatingSelf = targetMember?.user_id === userId
 
 		// Allow update if:
@@ -170,12 +172,33 @@ export async function DELETE(
 		}
 
 		// Verify user has permission to delete project members
-		// Check if user is the project owner or has admin/core role
-		const { data: project, error: projectError } = await supabaseServiceRole
-			.from('projects')
-			.select('id, kindler_id')
-			.eq('id', projectId)
-			.single()
+		// Check project, user role, and target member in parallel
+		const [projectResult, memberResult, targetMemberResult] = await Promise.all(
+			[
+				supabaseServiceRole
+					.from('projects')
+					.select('id, kindler_id')
+					.eq('id', projectId)
+					.single(),
+				supabaseServiceRole
+					.from('project_members')
+					.select('role')
+					.eq('project_id', projectId)
+					.eq('user_id', userId)
+					.in('role', ['core', 'admin'])
+					.single(),
+				supabaseServiceRole
+					.from('project_members')
+					.select('user_id')
+					.eq('id', memberId)
+					.eq('project_id', projectId)
+					.single(),
+			],
+		)
+
+		const { data: project, error: projectError } = projectResult
+		const { data: memberData } = memberResult
+		const { data: targetMember } = targetMemberResult
 
 		if (projectError || !project) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
@@ -183,26 +206,7 @@ export async function DELETE(
 
 		// Check if user is the project owner
 		const isOwner = project.kindler_id === userId
-
-		// Check if user is a project member with admin/core role
-		const { data: memberData } = await supabaseServiceRole
-			.from('project_members')
-			.select('role')
-			.eq('project_id', projectId)
-			.eq('user_id', userId)
-			.in('role', ['core', 'admin'])
-			.single()
-
 		const hasAdminRole = !!memberData
-
-		// Also check if user is deleting their own membership (allowed)
-		const { data: targetMember } = await supabaseServiceRole
-			.from('project_members')
-			.select('user_id')
-			.eq('id', memberId)
-			.eq('project_id', projectId)
-			.single()
-
 		const isDeletingSelf = targetMember?.user_id === userId
 
 		// Allow delete if:
