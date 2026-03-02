@@ -106,8 +106,15 @@ export async function POST(req: NextRequest) {
 					.single(),
 			])
 
-			const { data: escrow } = escrowResult
-			const { data: milestone } = milestoneResult
+			const { data: escrow, error: escrowError } = escrowResult
+			const { data: milestone, error: milestoneError } = milestoneResult
+
+			if (escrowError) {
+				console.error('Error fetching escrow contract:', escrowError)
+			}
+			if (milestoneError) {
+				console.error('Error fetching milestone:', milestoneError)
+			}
 
 			// Create notifications for all parties involved
 			if (escrow && milestone) {

@@ -5,6 +5,11 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { mapDiditStatusToKYC } from '~/lib/services/didit'
 
+interface DiditCallbackBody {
+	verificationSessionId: string
+	status: string
+}
+
 /**
  * POST /api/kyc/didit/callback
  *
@@ -16,7 +21,7 @@ export async function POST(req: NextRequest) {
 		// Get session and parse body in parallel
 		const [session, body] = await Promise.all([
 			getServerSession(nextAuthOption),
-			req.json(),
+			req.json() as Promise<DiditCallbackBody>,
 		])
 
 		if (!session?.user?.id) {

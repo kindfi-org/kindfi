@@ -51,9 +51,12 @@ export async function GET(_req: NextRequest) {
 			console.error('Error fetching quest progress:', progressError)
 		}
 
+		// Build a Map for O(1) lookup instead of O(n) Array.find
+		const progressMap = new Map(progress?.map((p) => [p.quest_id, p]) ?? [])
+
 		// Merge quests with user progress
 		const questsWithProgress = quests?.map((quest) => {
-			const userProgress = progress?.find((p) => p.quest_id === quest.quest_id)
+			const userProgress = progressMap.get(quest.quest_id)
 			return {
 				...quest,
 				progress: userProgress || {

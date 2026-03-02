@@ -70,7 +70,11 @@ export async function POST(req: NextRequest) {
 		])
 
 		const { data: updatedReferral, error: updateError } = updateResult
-		const { data: stats } = statsResult
+		const { data: stats, error: statsError } = statsResult
+
+		if (statsError && statsError.code !== 'PGRST116') {
+			console.error('Error fetching referrer statistics:', statsError)
+		}
 
 		if (updateError) {
 			console.error('Error updating referral:', updateError)

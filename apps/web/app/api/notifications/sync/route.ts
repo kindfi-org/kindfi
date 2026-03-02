@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 		if (updateError) {
 			// Log error (non-blocking)
 			after(() => {
-				logger.logError({
+				void logger.logError({
 					message: 'Database update failed',
 					error: updateError,
 					context: payload,
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 		}
 		// Log error (non-blocking)
 		after(() => {
-			logger.logError({
+			void logger.logError({
 				message: 'Sync error',
 				error,
 				context: notificationId ? { notificationId } : undefined,

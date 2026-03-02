@@ -324,7 +324,7 @@ async function getUserStats(
 		)
 	}
 
-	const totalDonations = contributionsResult.data?.length ?? 0
+	const donationCount = contributionsResult.data?.length ?? 0
 	const questsCompleted = questsResult.data?.length ?? 0
 	const streakDays = streaksResult.data?.[0]?.current_streak ?? 0
 	const referralCount = referralsResult.data?.length ?? 0
@@ -332,14 +332,14 @@ async function getUserStats(
 	// TODO: Refactor this local function to use the centralized getUserStats service from ~/lib/services/user-stats
 	// This local implementation is kept temporarily to avoid breaking changes while API stabilization is in progress.
 	const impactScore =
-		totalDonations * IMPACT_SCORE_WEIGHTS.DONATIONS +
+		donationCount * IMPACT_SCORE_WEIGHTS.DONATIONS +
 		questsCompleted * IMPACT_SCORE_WEIGHTS.QUESTS +
 		streakDays * IMPACT_SCORE_WEIGHTS.STREAKS +
 		referralCount * IMPACT_SCORE_WEIGHTS.REFERRALS
 
 	return {
 		impactScore,
-		totalDonations,
+		donationCount,
 		questsCompleted,
 		streakDays,
 		referralCount,

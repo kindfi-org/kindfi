@@ -179,10 +179,14 @@ export async function PATCH(
 		])
 
 		const { data: project, error: projectError } = projectResult
-		const { data: memberData } = memberResult
+		const { data: memberData, error: memberError } = memberResult
 
 		if (projectError || !project) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+		}
+
+		if (memberError && memberError.code !== 'PGRST116') {
+			console.error('Error checking user permissions:', memberError)
 		}
 
 		const isOwner = project.kindler_id === userId
@@ -286,10 +290,14 @@ export async function DELETE(
 		])
 
 		const { data: project, error: projectError } = projectResult
-		const { data: memberData } = memberResult
+		const { data: memberData, error: memberError } = memberResult
 
 		if (projectError || !project) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+		}
+
+		if (memberError && memberError.code !== 'PGRST116') {
+			console.error('Error checking user permissions:', memberError)
 		}
 
 		const isOwner = project.kindler_id === userId

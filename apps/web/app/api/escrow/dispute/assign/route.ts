@@ -2,12 +2,23 @@ import { supabase } from '@packages/lib/supabase'
 import type { Enums } from '@services/supabase'
 import type { NextRequest } from 'next/server'
 import { after, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 import { AppError } from '~/lib/error'
 import type { MediatorAssignmentPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { validateMediatorAssignment } from '~/lib/validators/dispute'
 
 export async function POST(req: NextRequest) {
 	try {
+		// Authenticate user from session - never trust client-provided user IDs
+		const session = await getServerSession(nextAuthOption)
+		if (!session?.user?.id) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		// Derive assignedById from authenticated session
+		const assignedById = session.user.id
+
 		// 1. Parse and validate the mediator assignment data
 		const assignmentData = await req.json()
 		const validationResult = validateMediatorAssignment(assignmentData)
@@ -24,20 +35,20 @@ export async function POST(req: NextRequest) {
 
 		const validatedData = validationResult.data as MediatorAssignmentPayload
 
-		const { disputeId, mediatorId, assignedById } = validatedData
+		const { disputeId, mediatorId } = validatedData
 
 		// 2 & 4. Verify dispute exists and assigner is authorized in parallel
 		const [disputeResult, assignerResult] = await Promise.all([
 			supabase
 				.from('escrow_reviews')
-				.select('*')
+				.select('id, status, type, escrow_id, milestone_id')
 				.eq('id', disputeId)
 				.eq('status', 'PENDING')
 				.eq('type', 'dispute')
 				.single(),
 			supabase
 				.from('users')
-				.select('*, user_roles!inner(role)')
+				.select('id, user_roles!inner(role)')
 				.eq('id', assignedById)
 				.single(),
 		])
