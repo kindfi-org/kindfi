@@ -279,34 +279,66 @@ async function getUserStats(
 	supabase: import('@packages/lib/types').TypedSupabaseClient,
 	userId: string,
 ) {
-	const { data: contributions } = await supabase
+	const contributionsResult = await supabase
 		.from('contributions')
 		.select('amount')
 		.eq('contributor_id', userId)
 
+	if (contributionsResult.error) {
+		throw new Error(
+			`nfts/evolve:getUserStats: failed to fetch contributions for userId=${userId} (code=${contributionsResult.error.code ?? 'unknown'}): ${contributionsResult.error.message}`,
+		)
+	}
+
+	const contributions = contributionsResult.data
+
 	const totalDonations = contributions?.length ?? 0
 
-	const { data: quests } = await supabase
+	const questsResult = await supabase
 		.from('user_quest_progress')
 		.select('id')
 		.eq('user_id', userId)
 		.eq('is_completed', true)
 
+	if (questsResult.error) {
+		throw new Error(
+			`nfts/evolve:getUserStats: failed to fetch user_quest_progress for userId=${userId} (code=${questsResult.error.code ?? 'unknown'}): ${questsResult.error.message}`,
+		)
+	}
+
+	const quests = questsResult.data
+
 	const questsCompleted = quests?.length ?? 0
 
-	const { data: streaks } = await supabase
+	const streaksResult = await supabase
 		.from('user_streaks')
 		.select('current_streak')
 		.eq('user_id', userId)
 		.order('current_streak', { ascending: false })
 		.limit(1)
 
+	if (streaksResult.error) {
+		throw new Error(
+			`nfts/evolve:getUserStats: failed to fetch user_streaks for userId=${userId} (code=${streaksResult.error.code ?? 'unknown'}): ${streaksResult.error.message}`,
+		)
+	}
+
+	const streaks = streaksResult.data
+
 	const streakDays = streaks?.[0]?.current_streak ?? 0
 
-	const { data: referrals } = await supabase
+	const referralsResult = await supabase
 		.from('referral_records')
 		.select('id')
 		.eq('referrer_id', userId)
+
+	if (referralsResult.error) {
+		throw new Error(
+			`nfts/evolve:getUserStats: failed to fetch referral_records for userId=${userId} (code=${referralsResult.error.code ?? 'unknown'}): ${referralsResult.error.message}`,
+		)
+	}
+
+	const referrals = referralsResult.data
 
 	const referralCount = referrals?.length ?? 0
 
