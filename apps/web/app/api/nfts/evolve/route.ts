@@ -279,10 +279,26 @@ async function getUserStats(
 	supabase: import('@packages/lib/types').TypedSupabaseClient,
 	userId: string,
 ) {
-	const contributionsResult = await supabase
-		.from('contributions')
-		.select('amount')
-		.eq('contributor_id', userId)
+	// Execute all independent queries in parallel for better performance
+	const [contributionsResult, questsResult, streaksResult, referralsResult] =
+		await Promise.all([
+			supabase
+				.from('contributions')
+				.select('amount')
+				.eq('contributor_id', userId),
+			supabase
+				.from('user_quest_progress')
+				.select('id')
+				.eq('user_id', userId)
+				.eq('is_completed', true),
+			supabase
+				.from('user_streaks')
+				.select('current_streak')
+				.eq('user_id', userId)
+				.order('current_streak', { ascending: false })
+				.limit(1),
+			supabase.from('referral_records').select('id').eq('referrer_id', userId),
+		])
 
 	if (contributionsResult.error) {
 		throw new Error(
@@ -290,32 +306,11 @@ async function getUserStats(
 		)
 	}
 
-	const contributions = contributionsResult.data
-
-	const totalDonations = contributions?.length ?? 0
-
-	const questsResult = await supabase
-		.from('user_quest_progress')
-		.select('id')
-		.eq('user_id', userId)
-		.eq('is_completed', true)
-
 	if (questsResult.error) {
 		throw new Error(
 			`nfts/evolve:getUserStats: failed to fetch user_quest_progress for userId=${userId} (code=${questsResult.error.code ?? 'unknown'}): ${questsResult.error.message}`,
 		)
 	}
-
-	const quests = questsResult.data
-
-	const questsCompleted = quests?.length ?? 0
-
-	const streaksResult = await supabase
-		.from('user_streaks')
-		.select('current_streak')
-		.eq('user_id', userId)
-		.order('current_streak', { ascending: false })
-		.limit(1)
 
 	if (streaksResult.error) {
 		throw new Error(
@@ -323,24 +318,16 @@ async function getUserStats(
 		)
 	}
 
-	const streaks = streaksResult.data
-
-	const streakDays = streaks?.[0]?.current_streak ?? 0
-
-	const referralsResult = await supabase
-		.from('referral_records')
-		.select('id')
-		.eq('referrer_id', userId)
-
 	if (referralsResult.error) {
 		throw new Error(
 			`nfts/evolve:getUserStats: failed to fetch referral_records for userId=${userId} (code=${referralsResult.error.code ?? 'unknown'}): ${referralsResult.error.message}`,
 		)
 	}
 
-	const referrals = referralsResult.data
-
-	const referralCount = referrals?.length ?? 0
+	const totalDonations = contributionsResult.data?.length ?? 0
+	const questsCompleted = questsResult.data?.length ?? 0
+	const streakDays = streaksResult.data?.[0]?.current_streak ?? 0
+	const referralCount = referralsResult.data?.length ?? 0
 
 	// TODO: Refactor this local function to use the centralized getUserStats service from ~/lib/services/user-stats
 	// This local implementation is kept temporarily to avoid breaking changes while API stabilization is in progress.
