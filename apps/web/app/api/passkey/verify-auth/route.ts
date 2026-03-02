@@ -42,12 +42,11 @@ export async function POST(req: NextRequest) {
 		// Use the origin as expectedOrigin (it's already validated by getRpIdFromOrigin)
 		const expectedOrigin = origin
 
-		// Get challenge
-		const expectedChallenge = await getChallenge({
-			identifier,
-			rpId,
-			userId,
-		})
+		// Get challenge and user in parallel
+		const [expectedChallenge, userResponse] = await Promise.all([
+			getChallenge({ identifier, rpId, userId }),
+			getUser({ rpId, identifier, userId }),
+		])
 
 		if (!expectedChallenge) {
 			return NextResponse.json(
@@ -55,13 +54,6 @@ export async function POST(req: NextRequest) {
 				{ status: 400 },
 			)
 		}
-
-		// Get user
-		const userResponse = await getUser({
-			rpId,
-			identifier,
-			userId,
-		})
 
 		if (!userResponse) {
 			return NextResponse.json({ error: 'User not found' }, { status: 404 })
