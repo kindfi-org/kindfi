@@ -43,12 +43,18 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Step 1: Validate Milestone Exists
-		const { data: milestone, error: milestoneError } = await supabase
-			.from('escrow_milestones')
-			.select('*')
-			.eq('id', milestoneId)
-			.single()
+		// Step 1 & 2: Validate Milestone and Reviewer exist in parallel
+		const [milestoneResult, reviewerResult] = await Promise.all([
+			supabase
+				.from('escrow_milestones')
+				.select('*')
+				.eq('id', milestoneId)
+				.single(),
+			supabase.from('reviewers').select('*').eq('id', reviewerId).single(),
+		])
+
+		const { data: milestone, error: milestoneError } = milestoneResult
+		const { data: reviewer, error: reviewerError } = reviewerResult
 
 		if (milestoneError || !milestone) {
 			return NextResponse.json(
@@ -56,13 +62,6 @@ export async function POST(req: NextRequest) {
 				{ status: 404 },
 			)
 		}
-
-		// Step 2: Validate Reviewer Exists
-		const { data: reviewer, error: reviewerError } = await supabase
-			.from('reviewers')
-			.select('*')
-			.eq('id', reviewerId)
-			.single()
 
 		if (reviewerError || !reviewer) {
 			return NextResponse.json(
