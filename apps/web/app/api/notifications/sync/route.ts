@@ -1,5 +1,5 @@
 import { supabase } from '@packages/lib/supabase'
-import { NextResponse } from 'next/server'
+import { after, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { NotificationLogger } from '~/lib/services/notification-logger'
 
@@ -51,10 +51,13 @@ export async function POST(request: Request) {
 			.eq('id', payload.notificationId)
 
 		if (updateError) {
-			await logger.logError({
-				message: 'Database update failed',
-				error: updateError,
-				context: payload,
+			// Log error (non-blocking)
+			after(() => {
+				logger.logError({
+					message: 'Database update failed',
+					error: updateError,
+					context: payload,
+				})
 			})
 			return NextResponse.json(
 				{ error: 'Failed to update notification status' },
@@ -68,10 +71,13 @@ export async function POST(request: Request) {
 		if (hasNotificationId(error)) {
 			notificationId = error.notificationId
 		}
-		await logger.logError({
-			message: 'Sync error',
-			error,
-			context: notificationId ? { notificationId } : undefined,
+		// Log error (non-blocking)
+		after(() => {
+			logger.logError({
+				message: 'Sync error',
+				error,
+				context: notificationId ? { notificationId } : undefined,
+			})
 		})
 
 		if (error instanceof z.ZodError) {
