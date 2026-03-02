@@ -266,7 +266,7 @@ export function buildNFTMetadata(
 				display_type: 'number',
 			},
 			{
-				trait_type: 'Total Donations',
+				trait_type: 'Donation Count',
 				value: String(stats.donationCount),
 				display_type: 'number',
 			},

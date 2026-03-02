@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
+const ONBOARDING_REWARD_POINTS = 50
+
 /**
  * POST /api/referrals/onboard
  * Mark a referred user as onboarded (service/recorder role)
@@ -51,7 +53,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Update referral status and get referrer statistics in parallel
-		const reward_points = 50 // Onboarding reward
+		const reward_points = ONBOARDING_REWARD_POINTS
 		const [updateResult, statsResult] = await Promise.all([
 			supabase
 				.from('referral_records')
@@ -73,7 +75,10 @@ export async function POST(req: NextRequest) {
 		const { data: stats, error: statsError } = statsResult
 
 		if (statsError && statsError.code !== 'PGRST116') {
-			console.error('Error fetching referrer statistics:', statsError)
+			console.error(
+				'[Referral Onboard API] Error fetching referrer statistics:',
+				statsError,
+			)
 		}
 
 		if (updateError) {
