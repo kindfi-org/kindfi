@@ -8,12 +8,16 @@ export async function POST(
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
 	try {
-		const session = await getServerSession(nextAuthOption)
+		// Get session and params in parallel
+		const [session, { slug }] = await Promise.all([
+			getServerSession(nextAuthOption),
+			params,
+		])
+
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const { slug } = await params
 		if (!slug) {
 			return NextResponse.json(
 				{ error: 'Foundation slug is required' },
