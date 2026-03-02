@@ -41,34 +41,36 @@ export async function GET(_req: NextRequest) {
 		// Use service role client to bypass RLS — auth is handled by NextAuth session above
 		const { supabase } = await import('@packages/lib/supabase')
 
-		// Get referrals where user is referrer
-		const { data: referrals, error: referralsError } = await supabase
-			.from('referral_records')
-			.select('*')
-			.eq('referrer_id', session.user.id)
-			.order('created_at', { ascending: false })
+		// Get referrals, statistics, and referred record in parallel
+		const [referralsResult, statsResult, referredResult] = await Promise.all([
+			supabase
+				.from('referral_records')
+				.select('*')
+				.eq('referrer_id', session.user.id)
+				.order('created_at', { ascending: false }),
+			supabase
+				.from('referrer_statistics')
+				.select('*')
+				.eq('referrer_id', session.user.id)
+				.single(),
+			supabase
+				.from('referral_records')
+				.select('*')
+				.eq('referred_id', session.user.id)
+				.single(),
+		])
+
+		const { data: referrals, error: referralsError } = referralsResult
+		const { data: stats, error: statsError } = statsResult
+		const { data: referredRecord } = referredResult
 
 		if (referralsError) {
 			console.error('Error fetching referrals:', referralsError)
 		}
 
-		// Get referrer statistics
-		const { data: stats, error: statsError } = await supabase
-			.from('referrer_statistics')
-			.select('*')
-			.eq('referrer_id', session.user.id)
-			.single()
-
 		if (statsError && statsError.code !== 'PGRST116') {
 			console.error('Error fetching referrer stats:', statsError)
 		}
-
-		// Check if user was referred
-		const { data: referredRecord } = await supabase
-			.from('referral_records')
-			.select('*')
-			.eq('referred_id', session.user.id)
-			.single()
 
 		return NextResponse.json({
 			referrals: referrals || [],
@@ -186,14 +188,11 @@ export async function POST(req: NextRequest) {
 			process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
 
 		if (referralContractAddress && process.env.SOROBAN_PRIVATE_KEY) {
-			const referrerAddress = await resolveUserStellarAddress(
-				supabase,
-				referrer_id,
-			)
-			const referredAddress = await resolveUserStellarAddress(
-				supabase,
-				referred_id,
-			)
+			// Resolve both addresses in parallel
+			const [referrerAddress, referredAddress] = await Promise.all([
+				resolveUserStellarAddress(supabase, referrer_id),
+				resolveUserStellarAddress(supabase, referred_id),
+			])
 
 			console.log('[Referral API] On-chain create_referral addresses:', {
 				referrerAddress,
