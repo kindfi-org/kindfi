@@ -14,14 +14,16 @@ export async function PATCH(
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
 	try {
-		const { slug } = await params
-		const session = await getServerSession(nextAuthOption)
+		// Get params, session and supabase client in parallel
+		const [{ slug }, session, supabase] = await Promise.all([
+			params,
+			getServerSession(nextAuthOption),
+			createSupabaseServerClient(),
+		])
 
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
-
-		const supabase = await createSupabaseServerClient()
 		const foundation = await getFoundationBySlug(supabase, slug)
 
 		if (!foundation) {
