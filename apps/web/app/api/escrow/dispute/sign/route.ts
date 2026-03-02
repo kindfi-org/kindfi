@@ -92,19 +92,22 @@ export async function POST(req: NextRequest) {
 				)
 			}
 
-			// Get escrow contract details for notifications
-			const { data: escrow } = await supabase
-				.from('escrow_contracts')
-				.select('service_provider_id, approver_id')
-				.eq('id', escrowId)
-				.single()
+			// Get escrow contract and milestone details for notifications in parallel
+			const [escrowResult, milestoneResult] = await Promise.all([
+				supabase
+					.from('escrow_contracts')
+					.select('service_provider_id, approver_id')
+					.eq('id', escrowId)
+					.single(),
+				supabase
+					.from('escrow_milestones')
+					.select('title')
+					.eq('id', milestoneId)
+					.single(),
+			])
 
-			// Get milestone details for notifications
-			const { data: milestone } = await supabase
-				.from('escrow_milestones')
-				.select('title')
-				.eq('id', milestoneId)
-				.single()
+			const { data: escrow } = escrowResult
+			const { data: milestone } = milestoneResult
 
 			// Create notifications for all parties involved
 			if (escrow && milestone) {
