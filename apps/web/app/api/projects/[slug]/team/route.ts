@@ -34,27 +34,40 @@ export async function POST(
 			)
 		}
 
-		// Verify user has permission
-		const { data: project, error: projectError } = await supabaseServiceRole
-			.from('projects')
-			.select('id, kindler_id')
-			.eq('id', projectId)
-			.single()
+		// Verify user has permission and get max order_index in parallel
+		const [projectResult, memberResult, existingTeamResult] = await Promise.all(
+			[
+				supabaseServiceRole
+					.from('projects')
+					.select('id, kindler_id')
+					.eq('id', projectId)
+					.single(),
+				supabaseServiceRole
+					.from('project_members')
+					.select('role')
+					.eq('project_id', projectId)
+					.eq('user_id', userId)
+					.in('role', ['core', 'admin', 'editor'])
+					.single(),
+				supabaseServiceRole
+					.from('project_team')
+					.select('order_index')
+					.eq('project_id', projectId)
+					.order('order_index', { ascending: false })
+					.limit(1)
+					.single(),
+			],
+		)
+
+		const { data: project, error: projectError } = projectResult
+		const { data: memberData } = memberResult
+		const { data: existingTeam } = existingTeamResult
 
 		if (projectError || !project) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
 
 		const isOwner = project.kindler_id === userId
-
-		const { data: memberData } = await supabaseServiceRole
-			.from('project_members')
-			.select('role')
-			.eq('project_id', projectId)
-			.eq('user_id', userId)
-			.in('role', ['core', 'admin', 'editor'])
-			.single()
-
 		const hasEditorRole = !!memberData
 
 		if (!isOwner && !hasEditorRole) {
@@ -66,15 +79,6 @@ export async function POST(
 				{ status: 403 },
 			)
 		}
-
-		// Get current max order_index
-		const { data: existingTeam } = await supabaseServiceRole
-			.from('project_team')
-			.select('order_index')
-			.eq('project_id', projectId)
-			.order('order_index', { ascending: false })
-			.limit(1)
-			.single()
 
 		const nextOrderIndex = existingTeam?.order_index
 			? existingTeam.order_index + 1
@@ -158,27 +162,30 @@ export async function PATCH(
 			)
 		}
 
-		// Verify user has permission
-		const { data: project, error: projectError } = await supabaseServiceRole
-			.from('projects')
-			.select('id, kindler_id')
-			.eq('id', projectId)
-			.single()
+		// Verify user has permission in parallel
+		const [projectResult, memberResult] = await Promise.all([
+			supabaseServiceRole
+				.from('projects')
+				.select('id, kindler_id')
+				.eq('id', projectId)
+				.single(),
+			supabaseServiceRole
+				.from('project_members')
+				.select('role')
+				.eq('project_id', projectId)
+				.eq('user_id', userId)
+				.in('role', ['core', 'admin', 'editor'])
+				.single(),
+		])
+
+		const { data: project, error: projectError } = projectResult
+		const { data: memberData } = memberResult
 
 		if (projectError || !project) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
 
 		const isOwner = project.kindler_id === userId
-
-		const { data: memberData } = await supabaseServiceRole
-			.from('project_members')
-			.select('role')
-			.eq('project_id', projectId)
-			.eq('user_id', userId)
-			.in('role', ['core', 'admin', 'editor'])
-			.single()
-
 		const hasEditorRole = !!memberData
 
 		if (!isOwner && !hasEditorRole) {
@@ -262,27 +269,30 @@ export async function DELETE(
 			)
 		}
 
-		// Verify user has permission
-		const { data: project, error: projectError } = await supabaseServiceRole
-			.from('projects')
-			.select('id, kindler_id')
-			.eq('id', projectId)
-			.single()
+		// Verify user has permission in parallel
+		const [projectResult, memberResult] = await Promise.all([
+			supabaseServiceRole
+				.from('projects')
+				.select('id, kindler_id')
+				.eq('id', projectId)
+				.single(),
+			supabaseServiceRole
+				.from('project_members')
+				.select('role')
+				.eq('project_id', projectId)
+				.eq('user_id', userId)
+				.in('role', ['core', 'admin', 'editor'])
+				.single(),
+		])
+
+		const { data: project, error: projectError } = projectResult
+		const { data: memberData } = memberResult
 
 		if (projectError || !project) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
 
 		const isOwner = project.kindler_id === userId
-
-		const { data: memberData } = await supabaseServiceRole
-			.from('project_members')
-			.select('role')
-			.eq('project_id', projectId)
-			.eq('user_id', userId)
-			.in('role', ['core', 'admin', 'editor'])
-			.single()
-
 		const hasEditorRole = !!memberData
 
 		if (!isOwner && !hasEditorRole) {
