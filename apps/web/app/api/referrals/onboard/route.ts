@@ -50,16 +50,27 @@ export async function POST(req: NextRequest) {
 			})
 		}
 
-		// Update referral status in DB
-		const { data: updatedReferral, error: updateError } = await supabase
-			.from('referral_records')
-			.update({
-				status: 'onboarded',
-				onboarded_at: new Date().toISOString(),
-			})
-			.eq('referred_id', referred_id)
-			.select()
-			.single()
+		// Update referral status and get referrer statistics in parallel
+		const reward_points = 50 // Onboarding reward
+		const [updateResult, statsResult] = await Promise.all([
+			supabase
+				.from('referral_records')
+				.update({
+					status: 'onboarded',
+					onboarded_at: new Date().toISOString(),
+				})
+				.eq('referred_id', referred_id)
+				.select()
+				.single(),
+			supabase
+				.from('referrer_statistics')
+				.select('*')
+				.eq('referrer_id', referral.referrer_id)
+				.single(),
+		])
+
+		const { data: updatedReferral, error: updateError } = updateResult
+		const { data: stats } = statsResult
 
 		if (updateError) {
 			console.error('Error updating referral:', updateError)
@@ -68,14 +79,6 @@ export async function POST(req: NextRequest) {
 				{ status: 500 },
 			)
 		}
-
-		// Update referrer statistics in DB
-		const reward_points = 50 // Onboarding reward
-		const { data: stats } = await supabase
-			.from('referrer_statistics')
-			.select('*')
-			.eq('referrer_id', referral.referrer_id)
-			.single()
 
 		if (stats) {
 			await supabase
