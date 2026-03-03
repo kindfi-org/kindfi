@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
+const ONBOARDING_REWARD_POINTS = 50
+
 /**
  * POST /api/referrals/onboard
  * Mark a referred user as onboarded (service/recorder role)
@@ -50,16 +52,34 @@ export async function POST(req: NextRequest) {
 			})
 		}
 
-		// Update referral status in DB
-		const { data: updatedReferral, error: updateError } = await supabase
-			.from('referral_records')
-			.update({
-				status: 'onboarded',
-				onboarded_at: new Date().toISOString(),
-			})
-			.eq('referred_id', referred_id)
-			.select()
-			.single()
+		// Update referral status and get referrer statistics in parallel
+		const reward_points = ONBOARDING_REWARD_POINTS
+		const [updateResult, statsResult] = await Promise.all([
+			supabase
+				.from('referral_records')
+				.update({
+					status: 'onboarded',
+					onboarded_at: new Date().toISOString(),
+				})
+				.eq('referred_id', referred_id)
+				.select()
+				.single(),
+			supabase
+				.from('referrer_statistics')
+				.select('*')
+				.eq('referrer_id', referral.referrer_id)
+				.single(),
+		])
+
+		const { data: updatedReferral, error: updateError } = updateResult
+		const { data: stats, error: statsError } = statsResult
+
+		if (statsError && statsError.code !== 'PGRST116') {
+			console.error(
+				'[Referral Onboard API] Error fetching referrer statistics:',
+				statsError,
+			)
+		}
 
 		if (updateError) {
 			console.error('Error updating referral:', updateError)
@@ -68,14 +88,6 @@ export async function POST(req: NextRequest) {
 				{ status: 500 },
 			)
 		}
-
-		// Update referrer statistics in DB
-		const reward_points = 50 // Onboarding reward
-		const { data: stats } = await supabase
-			.from('referrer_statistics')
-			.select('*')
-			.eq('referrer_id', referral.referrer_id)
-			.single()
 
 		if (stats) {
 			await supabase

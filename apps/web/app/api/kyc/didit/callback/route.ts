@@ -5,6 +5,22 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { mapDiditStatusToKYC } from '~/lib/services/didit'
 
+interface DiditCallbackBody {
+	verificationSessionId: string
+	status: string
+}
+
+function isValidCallbackBody(data: unknown): data is DiditCallbackBody {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		typeof (data as DiditCallbackBody).verificationSessionId === 'string' &&
+		(data as DiditCallbackBody).verificationSessionId.length > 0 &&
+		typeof (data as DiditCallbackBody).status === 'string' &&
+		(data as DiditCallbackBody).status.length > 0
+	)
+}
+
 /**
  * POST /api/kyc/didit/callback
  *
@@ -12,6 +28,24 @@ import { mapDiditStatusToKYC } from '~/lib/services/didit'
  * Called when user is redirected back from Didit verification
  */
 export async function POST(req: NextRequest) {
+	// Parse body first to return proper 400 for malformed JSON
+	let body: unknown
+	try {
+		body = await req.json()
+	} catch {
+		return NextResponse.json(
+			{ error: 'Invalid JSON in request body' },
+			{ status: 400 },
+		)
+	}
+
+	if (!isValidCallbackBody(body)) {
+		return NextResponse.json(
+			{ error: 'Missing or invalid verificationSessionId or status' },
+			{ status: 400 },
+		)
+	}
+
 	try {
 		const session = await getServerSession(nextAuthOption)
 
@@ -19,7 +53,6 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const body = await req.json()
 		const { verificationSessionId, status } = body
 
 		if (!verificationSessionId || !status) {

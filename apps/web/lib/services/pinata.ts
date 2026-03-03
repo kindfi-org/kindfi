@@ -241,7 +241,7 @@ export function buildNFTMetadata(
 	tokenId: number,
 	stats: {
 		impactScore: number
-		totalDonations: number
+		donationCount: number
 		questsCompleted: number
 		streakDays: number
 		referralCount: number
@@ -266,8 +266,8 @@ export function buildNFTMetadata(
 				display_type: 'number',
 			},
 			{
-				trait_type: 'Total Donations',
-				value: String(stats.totalDonations),
+				trait_type: 'Donation Count',
+				value: String(stats.donationCount),
 				display_type: 'number',
 			},
 			{

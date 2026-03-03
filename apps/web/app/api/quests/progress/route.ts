@@ -58,30 +58,35 @@ export async function POST(req: NextRequest) {
 		)
 		const supabase = supabaseServiceRole
 
-		// Get user's Stellar address if not provided
+		// Run independent queries in parallel
+		const [devicesResult, questResult] = await Promise.all([
+			// Get user's Stellar address if not provided
+			user_address
+				? Promise.resolve({ data: null })
+				: supabase
+						.from('devices')
+						.select('address')
+						.eq('user_id', user_id)
+						.not('address', 'eq', '0x')
+						.not('address', 'is', null)
+						.limit(1),
+			// Get quest definition
+			supabase
+				.from('quest_definitions')
+				.select('*')
+				.eq('quest_id', quest_id)
+				.single(),
+		])
+
 		let stellarAddress = user_address
 		if (!stellarAddress) {
-			// Try to get from user's device/smart account (handle multiple devices)
-			const { data: devices } = await supabase
-				.from('devices')
-				.select('address')
-				.eq('user_id', user_id)
-				.not('address', 'eq', '0x')
-				.not('address', 'is', null)
-				.limit(1)
-
+			const devices = devicesResult.data
 			if (devices && devices.length > 0 && devices[0]?.address) {
 				stellarAddress = devices[0].address
 			}
 		}
 
-		// Get quest definition
-		const { data: quest, error: questError } = await supabase
-			.from('quest_definitions')
-			.select('*')
-			.eq('quest_id', quest_id)
-			.single()
-
+		const { data: quest, error: questError } = questResult
 		if (questError || !quest) {
 			return NextResponse.json({ error: 'Quest not found' }, { status: 404 })
 		}

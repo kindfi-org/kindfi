@@ -16,7 +16,7 @@ interface GetUserStatsParams {
 
 export interface UserStats {
 	impactScore: number
-	totalDonations: number
+	donationCount: number
 	totalAmount: number
 	questsCompleted: number
 	streakDays: number
@@ -76,7 +76,7 @@ export const getUserStats = async ({
 	const streaks = streaksResult.data
 	const referrals = referralsResult.data
 
-	const totalDonations = contributions?.length ?? 0
+	const donationCount = contributions?.length ?? 0
 	const totalAmount =
 		(contributions as ContributionRow[] | null | undefined)?.reduce(
 			(sum: number, c: ContributionRow) => sum + Number(c.amount ?? 0),
@@ -87,14 +87,14 @@ export const getUserStats = async ({
 	const referralCount = referrals?.length ?? 0
 
 	const impactScore =
-		totalDonations * IMPACT_SCORE_WEIGHTS.DONATIONS +
+		donationCount * IMPACT_SCORE_WEIGHTS.DONATIONS +
 		questsCompleted * IMPACT_SCORE_WEIGHTS.QUESTS +
 		streakDays * IMPACT_SCORE_WEIGHTS.STREAKS +
 		referralCount * IMPACT_SCORE_WEIGHTS.REFERRALS
 
 	return {
 		impactScore,
-		totalDonations,
+		donationCount,
 		totalAmount,
 		questsCompleted,
 		streakDays,

@@ -32,30 +32,35 @@ export async function POST(req: NextRequest) {
 		// Use service role client to bypass RLS — auth is handled by NextAuth session above
 		const { supabase } = await import('@packages/lib/supabase')
 
-		// Get user's Stellar address if not provided
+		// Run independent queries in parallel
+		const [devicesResult, referralResult] = await Promise.all([
+			// Get user's Stellar address if not provided
+			referred_address
+				? Promise.resolve({ data: null })
+				: supabase
+						.from('devices')
+						.select('address')
+						.eq('user_id', referred_id)
+						.not('address', 'eq', '0x')
+						.not('address', 'is', null)
+						.limit(1),
+			// Get referral record
+			supabase
+				.from('referral_records')
+				.select('*')
+				.eq('referred_id', referred_id)
+				.single(),
+		])
+
 		let stellarAddress = referred_address
 		if (!stellarAddress) {
-			// Try to get from user's device/smart account (handle multiple devices)
-			const { data: devices } = await supabase
-				.from('devices')
-				.select('address')
-				.eq('user_id', referred_id)
-				.not('address', 'eq', '0x')
-				.not('address', 'is', null)
-				.limit(1)
-
+			const devices = devicesResult.data
 			if (devices && devices.length > 0 && devices[0]?.address) {
 				stellarAddress = devices[0].address
 			}
 		}
 
-		// Get referral record
-		const { data: referral, error: refError } = await supabase
-			.from('referral_records')
-			.select('*')
-			.eq('referred_id', referred_id)
-			.single()
-
+		const { data: referral, error: refError } = referralResult
 		if (refError || !referral) {
 			// Not a referred user, skip silently
 			return NextResponse.json({

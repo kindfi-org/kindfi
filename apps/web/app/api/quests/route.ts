@@ -23,12 +23,21 @@ export async function GET(_req: NextRequest) {
 		// Use service role client to bypass RLS — auth is handled by NextAuth session above
 		const { supabase } = await import('@packages/lib/supabase')
 
-		// Get all active quests
-		const { data: quests, error } = await supabase
-			.from('quest_definitions')
-			.select('*')
-			.eq('is_active', true)
-			.order('created_at', { ascending: false })
+		// Get all active quests and user's progress in parallel
+		const [questsResult, progressResult] = await Promise.all([
+			supabase
+				.from('quest_definitions')
+				.select('*')
+				.eq('is_active', true)
+				.order('created_at', { ascending: false }),
+			supabase
+				.from('user_quest_progress')
+				.select('*')
+				.eq('user_id', session.user.id),
+		])
+
+		const { data: quests, error } = questsResult
+		const { data: progress, error: progressError } = progressResult
 
 		if (error) {
 			console.error('Error fetching quests:', error)
@@ -38,19 +47,16 @@ export async function GET(_req: NextRequest) {
 			)
 		}
 
-		// Get user's progress for each quest
-		const { data: progress, error: progressError } = await supabase
-			.from('user_quest_progress')
-			.select('*')
-			.eq('user_id', session.user.id)
-
 		if (progressError) {
 			console.error('Error fetching quest progress:', progressError)
 		}
 
+		// Build a Map for O(1) lookup instead of O(n) Array.find
+		const progressMap = new Map(progress?.map((p) => [p.quest_id, p]) ?? [])
+
 		// Merge quests with user progress
 		const questsWithProgress = quests?.map((quest) => {
-			const userProgress = progress?.find((p) => p.quest_id === quest.quest_id)
+			const userProgress = progressMap.get(quest.quest_id)
 			return {
 				...quest,
 				progress: userProgress || {
