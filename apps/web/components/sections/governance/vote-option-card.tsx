@@ -2,7 +2,14 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { ExternalLink, ThumbsDown, ThumbsUp } from 'lucide-react'
+import {
+	CheckCircle2,
+	ExternalLink,
+	Loader2,
+	ThumbsDown,
+	ThumbsUp,
+	Trophy,
+} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
@@ -20,6 +27,7 @@ interface VoteOptionCardProps {
 	totalRoundWeight: number
 	allocationPercent: number
 	isWinner?: boolean
+	index?: number
 }
 
 export function VoteOptionCard({
@@ -31,6 +39,7 @@ export function VoteOptionCard({
 	totalRoundWeight,
 	allocationPercent,
 	isWinner,
+	index = 0,
 }: VoteOptionCardProps) {
 	const queryClient = useQueryClient()
 
@@ -68,20 +77,23 @@ export function VoteOptionCard({
 		<motion.div
 			initial={{ opacity: 0, y: 8 }}
 			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.2 }}
+			transition={{ duration: 0.2, delay: index * 0.05 }}
 		>
 			<Card
 				className={cn(
 					'overflow-hidden transition-all duration-200',
-					option.user_voted && 'ring-2 ring-primary/40',
-					isWinner && 'ring-2 ring-yellow-400 shadow-lg shadow-yellow-400/10',
+					option.user_voted &&
+						'ring-2 ring-primary/30 shadow-sm shadow-primary/5',
+					isWinner &&
+						'ring-2 ring-amber-400/60 shadow-md shadow-amber-400/10',
 				)}
 			>
 				{/* Winner banner */}
 				{isWinner && (
-					<div className="bg-gradient-to-r from-yellow-400 to-amber-500 px-4 py-1.5 flex items-center gap-2">
-						<span className="text-xs font-bold text-yellow-900 uppercase tracking-wider">
-							🏆 Winner
+					<div className="bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2 flex items-center gap-2">
+						<Trophy className="h-3.5 w-3.5 text-amber-900" />
+						<span className="text-xs font-bold text-amber-900 uppercase tracking-wider">
+							Winner — Receives community fund allocation
 						</span>
 					</div>
 				)}
@@ -89,7 +101,7 @@ export function VoteOptionCard({
 				<div className="flex flex-col sm:flex-row">
 					{/* Image */}
 					{option.image_url && (
-						<div className="relative w-full sm:w-32 h-32 sm:h-auto bg-muted shrink-0">
+						<div className="relative w-full sm:w-36 h-36 sm:h-auto bg-muted shrink-0">
 							<Image
 								src={option.image_url}
 								alt={option.title}
@@ -100,15 +112,15 @@ export function VoteOptionCard({
 						</div>
 					)}
 
-					<CardContent className="flex-1 p-4 space-y-3">
+					<CardContent className="flex-1 p-5 space-y-4">
 						{/* Header */}
-						<div className="flex items-start justify-between gap-2">
-							<div className="min-w-0">
+						<div className="flex items-start justify-between gap-3">
+							<div className="min-w-0 space-y-1">
 								<h3 className="font-semibold text-base leading-tight">
 									{option.title}
 								</h3>
 								{option.description && (
-									<p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+									<p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
 										{option.description}
 									</p>
 								)}
@@ -116,110 +128,119 @@ export function VoteOptionCard({
 							{option.project_slug && (
 								<Link
 									href={`/projects/${option.project_slug}`}
-									className="inline-flex items-center gap-1 text-xs text-primary hover:underline shrink-0"
+									className="inline-flex items-center gap-1 text-xs text-primary hover:underline shrink-0 font-medium"
 								>
 									<ExternalLink className="h-3 w-3" />
-									Project
+									View project
 								</Link>
 							)}
 						</div>
 
-						{/* Vote weight bar */}
+						{/* Progress bar */}
 						{(roundStatus === 'active' || roundStatus === 'ended') &&
 							totalRoundWeight > 0 && (
-								<div>
-									<div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-										<span>
-											{upWeight} weighted upvote
-											{upWeight !== 1 ? 's' : ''}
+								<div className="space-y-1.5">
+									<div className="flex items-center justify-between text-xs">
+										<span className="text-muted-foreground">
+											{upWeight} weighted upvote{upWeight !== 1 ? 's' : ''}
 										</span>
-										<span className="font-medium text-foreground">
-											{allocationPercent}% projected
+										<span className="font-semibold tabular-nums">
+											{allocationPercent}% allocation
 										</span>
 									</div>
-									<div className="h-2 rounded-full bg-muted overflow-hidden">
+									<div className="h-2.5 rounded-full bg-muted overflow-hidden">
 										<motion.div
 											className={cn(
 												'h-full rounded-full',
 												isWinner
-													? 'bg-gradient-to-r from-yellow-400 to-amber-500'
-													: 'bg-primary',
+													? 'bg-gradient-to-r from-amber-400 to-yellow-500'
+													: 'bg-gradient-to-r from-primary/80 to-primary',
 											)}
 											initial={{ width: 0 }}
 											animate={{ width: `${allocationPercent}%` }}
-											transition={{ duration: 0.6, ease: 'easeOut' }}
+											transition={{ duration: 0.7, ease: 'easeOut' }}
 										/>
 									</div>
 								</div>
 							)}
 
-						{/* Stats row */}
-						<div className="flex items-center gap-3 flex-wrap">
-							<div className="flex items-center gap-1 text-sm">
-								<ThumbsUp className="h-3.5 w-3.5 text-green-500" />
-								<span className="font-medium">{upWeight}</span>
-								<span className="text-muted-foreground text-xs">weight</span>
-							</div>
-							<div className="flex items-center gap-1 text-sm">
-								<ThumbsDown className="h-3.5 w-3.5 text-red-400" />
-								<span className="font-medium">{downWeight}</span>
-								<span className="text-muted-foreground text-xs">weight</span>
-							</div>
-							{netWeight !== 0 && (
-								<Badge
-									variant="outline"
-									className={cn(
-										'text-xs',
-										netWeight > 0
-											? 'border-green-300 text-green-700'
-											: 'border-red-300 text-red-600',
-									)}
-								>
-									{netWeight > 0 ? '+' : ''}
-									{netWeight} net
-								</Badge>
-							)}
-							{option.user_voted && (
-								<Badge
-									variant="outline"
-									className="text-xs border-primary/40 text-primary"
-								>
-									Your vote:{' '}
-									{option.user_vote_type === 'up' ? '👍 Up' : '👎 Down'}
-								</Badge>
-							)}
-						</div>
-
-						{/* Vote buttons */}
-						{roundStatus === 'active' && !hasVotedInRound && (
-							<div className="flex items-center gap-2 pt-1">
-								<Button
-									size="sm"
-									variant="outline"
-									onClick={() => castVote('up')}
-									disabled={!canVote}
-									className="gap-1.5 hover:border-green-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
-								>
-									<ThumbsUp className="h-3.5 w-3.5" />
-									Upvote
-								</Button>
-								<Button
-									size="sm"
-									variant="outline"
-									onClick={() => castVote('down')}
-									disabled={!canVote}
-									className="gap-1.5 hover:border-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
-								>
-									<ThumbsDown className="h-3.5 w-3.5" />
-									Downvote
-								</Button>
-								{!isEligible && (
-									<p className="text-xs text-muted-foreground">
-										Requires Kinders NFT
-									</p>
+						{/* Stats + vote buttons row */}
+						<div className="flex items-center justify-between gap-3 flex-wrap">
+							<div className="flex items-center gap-3">
+								<div className="flex items-center gap-1.5 text-sm">
+									<ThumbsUp className="h-3.5 w-3.5 text-green-500" />
+									<span className="font-semibold tabular-nums">{upWeight}</span>
+								</div>
+								<div className="flex items-center gap-1.5 text-sm">
+									<ThumbsDown className="h-3.5 w-3.5 text-red-400" />
+									<span className="font-semibold tabular-nums">
+										{downWeight}
+									</span>
+								</div>
+								{netWeight !== 0 && (
+									<Badge
+										variant="outline"
+										className={cn(
+											'text-xs tabular-nums',
+											netWeight > 0
+												? 'border-green-300 text-green-700 dark:text-green-400'
+												: 'border-red-300 text-red-600 dark:text-red-400',
+										)}
+									>
+										{netWeight > 0 ? '+' : ''}
+										{netWeight} net
+									</Badge>
+								)}
+								{option.user_voted && (
+									<Badge
+										variant="outline"
+										className="text-xs gap-1 border-primary/30 text-primary"
+									>
+										<CheckCircle2 className="h-3 w-3" />
+										{option.user_vote_type === 'up' ? 'Upvoted' : 'Downvoted'}
+									</Badge>
 								)}
 							</div>
-						)}
+
+							{/* Vote buttons */}
+							{roundStatus === 'active' && !hasVotedInRound && (
+								<div className="flex items-center gap-2">
+									{!isEligible && (
+										<p className="text-xs text-muted-foreground mr-1">
+											NFT required
+										</p>
+									)}
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() => castVote('up')}
+										disabled={!canVote}
+										className="gap-1.5 h-8 px-3 hover:border-green-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
+									>
+										{isPending ? (
+											<Loader2 className="h-3.5 w-3.5 animate-spin" />
+										) : (
+											<ThumbsUp className="h-3.5 w-3.5" />
+										)}
+										Upvote
+									</Button>
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() => castVote('down')}
+										disabled={!canVote}
+										className="gap-1.5 h-8 px-3 hover:border-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+									>
+										{isPending ? (
+											<Loader2 className="h-3.5 w-3.5 animate-spin" />
+										) : (
+											<ThumbsDown className="h-3.5 w-3.5" />
+										)}
+										Downvote
+									</Button>
+								</div>
+							)}
+						</div>
 					</CardContent>
 				</div>
 			</Card>

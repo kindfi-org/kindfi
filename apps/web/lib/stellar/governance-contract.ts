@@ -1,31 +1,27 @@
 /**
  * Governance Contract Service
  *
- * Calls the KindFi Governance Soroban contract using the backend service account.
- * The service account (SOROBAN_PRIVATE_KEY / kindfi-backend) holds both the
- * "admin" role (create_round, add_option) and the "recorder" role (record_vote).
+ * Calls the KindFi Governance Soroban contract using the Stellar CLI.
+ *
+ * Uses the CLI instead of the JS SDK for contract invocations because
+ * stellar-sdk v14 cannot parse Protocol 22 auth XDR returned by the
+ * Soroban RPC ("Bad union switch: 4"). The CLI (Rust SDK) handles this
+ * correctly. The JS SDK is still used for simple RPC reads (getLatestLedger).
  *
  * Required env vars:
  *   GOVERNANCE_CONTRACT_ADDRESS  — deployed contract address
  *   SOROBAN_PRIVATE_KEY          — service account secret key (admin + recorder)
- *   RPC_URL                      — Stellar Soroban RPC endpoint
- *   NETWORK_PASSPHRASE           — Stellar network passphrase
  */
 
-import {
-	Account,
-	Address,
-	Keypair,
-	Networks,
-	nativeToScVal,
-	Operation,
-	TransactionBuilder,
-	type xdr,
-} from '@stellar/stellar-sdk'
-import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
+import { execFile as execFileCb } from 'node:child_process'
+import { promisify } from 'node:util'
+
+import { Keypair } from '@stellar/stellar-sdk'
+import { Server } from '@stellar/stellar-sdk/rpc'
 import type { NftTier } from '~/lib/governance/types'
 
-// Approximate seconds per ledger on Stellar
+const execFile = promisify(execFileCb)
+
 const SECONDS_PER_LEDGER = 5
 
 const TIER_TO_U32: Record<NftTier, number> = {
@@ -41,73 +37,40 @@ const VOTE_TYPE_TO_U32: Record<'up' | 'down', number> = {
 }
 
 // ============================================================================
-// Core simulate-and-submit helper
+// Stellar CLI wrapper
 // ============================================================================
 
-async function simulateAndSend(
-	server: Server,
-	networkPassphrase: string,
-	keypair: Keypair,
+async function stellarInvoke(
+	secretKey: string,
 	contractAddress: string,
 	functionName: string,
-	args: xdr.ScVal[],
-): Promise<{ success: boolean; returnValue?: xdr.ScVal; error?: string }> {
+	fnArgs: string[],
+): Promise<{ success: boolean; output?: string; error?: string }> {
+	const cliArgs = [
+		'contract',
+		'invoke',
+		'--source-account',
+		secretKey,
+		'--id',
+		contractAddress,
+		'--network',
+		'testnet',
+		'--fee',
+		'10000000',
+		'--',
+		functionName,
+		...fnArgs,
+	]
+
 	try {
-		const accountData = await server.getAccount(keypair.publicKey())
-		const source = new Account(
-			accountData.accountId(),
-			accountData.sequenceNumber(),
-		)
-
-		const tx = new TransactionBuilder(source, {
-			fee: '1000000',
-			networkPassphrase,
+		const { stdout } = await execFile('stellar', cliArgs, {
+			timeout: 120_000,
 		})
-			.addOperation(
-				Operation.invokeContractFunction({
-					contract: contractAddress,
-					function: functionName,
-					args,
-				}),
-			)
-			.setTimeout(30)
-			.build()
-
-		const simResult = await server.simulateTransaction(tx)
-
-		if (Api.isSimulationError(simResult)) {
-			return { success: false, error: simResult.error }
-		}
-
-		const assembled = assembleTransaction(tx, simResult)
-		assembled.sign(keypair)
-
-		const sendResult = await server.sendTransaction(assembled)
-		if (sendResult.status === 'ERROR') {
-			return {
-				success: false,
-				error: `Send failed: ${sendResult.errorResult?.toXDR('base64') ?? 'unknown'}`,
-			}
-		}
-
-		// Poll for confirmation (max ~15 s)
-		for (let i = 0; i < 10; i++) {
-			const getResult = await server.getTransaction(sendResult.hash)
-			if (getResult.status === Api.GetTransactionStatus.SUCCESS) {
-				return { success: true, returnValue: getResult.returnValue }
-			}
-			if (getResult.status === Api.GetTransactionStatus.FAILED) {
-				return { success: false, error: `Transaction failed on-chain` }
-			}
-			await new Promise((r) => setTimeout(r, 1500))
-		}
-
-		return { success: false, error: 'Confirmation timeout' }
-	} catch (err) {
-		return {
-			success: false,
-			error: err instanceof Error ? err.message : String(err),
-		}
+		return { success: true, output: stdout.trim() }
+	} catch (err: unknown) {
+		const execErr = err as { stderr?: string; message?: string }
+		const msg = execErr.stderr?.trim() || execErr.message || String(err)
+		return { success: false, error: msg }
 	}
 }
 
@@ -117,13 +80,12 @@ async function simulateAndSend(
 
 export class GovernanceContractService {
 	private server: Server
-	private networkPassphrase: string
-	private keypair: Keypair
+	private secretKey: string
+	private publicKey: string
 	private contractAddress: string
 
 	constructor() {
 		const rpcUrl = process.env.RPC_URL ?? 'https://soroban-testnet.stellar.org'
-		const passphrase = process.env.NETWORK_PASSPHRASE ?? Networks.TESTNET
 		const secretKey = process.env.SOROBAN_PRIVATE_KEY
 		const contractAddr = process.env.GOVERNANCE_CONTRACT_ADDRESS
 
@@ -132,14 +94,10 @@ export class GovernanceContractService {
 			throw new Error('GOVERNANCE_CONTRACT_ADDRESS is not configured')
 
 		this.server = new Server(rpcUrl)
-		this.networkPassphrase = passphrase
-		this.keypair = Keypair.fromSecret(secretKey)
+		this.secretKey = secretKey
+		this.publicKey = Keypair.fromSecret(secretKey).publicKey()
 		this.contractAddress = contractAddr
 	}
-
-	// --------------------------------------------------------------------------
-	// Helpers
-	// --------------------------------------------------------------------------
 
 	/**
 	 * Convert an ISO timestamp string to an approximate Stellar ledger sequence
@@ -151,21 +109,14 @@ export class GovernanceContractService {
 		const diffSeconds = (targetMs - nowMs) / 1000
 
 		const latestLedger = await this.server.getLatestLedger()
-		const currentSeq = latestLedger.sequence
-
 		const ledgerOffset = Math.round(diffSeconds / SECONDS_PER_LEDGER)
-		return Math.max(1, currentSeq + ledgerOffset)
+		return Math.max(1, latestLedger.sequence + ledgerOffset)
 	}
 
 	// --------------------------------------------------------------------------
 	// Admin operations
 	// --------------------------------------------------------------------------
 
-	/**
-	 * Register a new governance round on-chain.
-	 * Accepts ISO timestamps and converts them to approximate ledger sequences.
-	 * Returns the on-chain round ID assigned by the contract.
-	 */
 	async createRound(params: {
 		title: string
 		startsAt: string
@@ -179,26 +130,24 @@ export class GovernanceContractService {
 			this.timestampToLedger(endsAt),
 		])
 
-		// fund_amount stored as i128 in stroops-equivalent (multiply by 1e7)
 		const fundAmountI128 = BigInt(Math.round(fundAmount * 10_000_000))
 
-		const callerAddr = Address.fromString(this.keypair.publicKey())
-
-		const args: xdr.ScVal[] = [
-			nativeToScVal(callerAddr, { type: 'address' }),
-			nativeToScVal(title, { type: 'string' }),
-			nativeToScVal(startLedger, { type: 'u32' }),
-			nativeToScVal(endLedger, { type: 'u32' }),
-			nativeToScVal(fundAmountI128, { type: 'i128' }),
-		]
-
-		const result = await simulateAndSend(
-			this.server,
-			this.networkPassphrase,
-			this.keypair,
+		const result = await stellarInvoke(
+			this.secretKey,
 			this.contractAddress,
 			'create_round',
-			args,
+			[
+				'--caller',
+				this.publicKey,
+				'--title',
+				title,
+				'--start_ledger',
+				String(startLedger),
+				'--end_ledger',
+				String(endLedger),
+				'--fund_amount',
+				String(fundAmountI128),
+			],
 		)
 
 		if (!result.success) {
@@ -206,34 +155,31 @@ export class GovernanceContractService {
 			return { success: false, error: result.error }
 		}
 
-		const roundId = result.returnValue?.u32?.()
-		return { success: true, roundId }
+		const roundId = Number.parseInt(result.output ?? '', 10)
+		return {
+			success: true,
+			roundId: Number.isNaN(roundId) ? undefined : roundId,
+		}
 	}
 
-	/**
-	 * Add an option to an existing on-chain round.
-	 * Returns the on-chain option ID assigned by the contract.
-	 */
 	async addOption(params: {
 		roundId: number
 		title: string
 	}): Promise<{ success: boolean; optionId?: number; error?: string }> {
 		const { roundId, title } = params
-		const callerAddr = Address.fromString(this.keypair.publicKey())
 
-		const args: xdr.ScVal[] = [
-			nativeToScVal(callerAddr, { type: 'address' }),
-			nativeToScVal(roundId, { type: 'u32' }),
-			nativeToScVal(title, { type: 'string' }),
-		]
-
-		const result = await simulateAndSend(
-			this.server,
-			this.networkPassphrase,
-			this.keypair,
+		const result = await stellarInvoke(
+			this.secretKey,
 			this.contractAddress,
 			'add_option',
-			args,
+			[
+				'--caller',
+				this.publicKey,
+				'--round_id',
+				String(roundId),
+				'--title',
+				title,
+			],
 		)
 
 		if (!result.success) {
@@ -241,18 +187,17 @@ export class GovernanceContractService {
 			return { success: false, error: result.error }
 		}
 
-		const optionId = result.returnValue?.u32?.()
-		return { success: true, optionId }
+		const optionId = Number.parseInt(result.output ?? '', 10)
+		return {
+			success: true,
+			optionId: Number.isNaN(optionId) ? undefined : optionId,
+		}
 	}
 
 	// --------------------------------------------------------------------------
 	// Recorder operations
 	// --------------------------------------------------------------------------
 
-	/**
-	 * Record a vote on-chain via the recorder role.
-	 * Called by /api/governance/vote after all off-chain checks pass.
-	 */
 	async recordVote(params: {
 		voterAddress: string
 		roundId: number
@@ -262,26 +207,24 @@ export class GovernanceContractService {
 	}): Promise<{ success: boolean; weight?: number; error?: string }> {
 		const { voterAddress, roundId, optionId, voteType, tier } = params
 
-		const callerAddr = Address.fromString(this.keypair.publicKey())
-		const voterAddr = Address.fromString(voterAddress)
-
-		// Contract enums: VoteType { Up = 0, Down = 1 }, NftTier { Bronze=1..Diamond=4 }
-		const args: xdr.ScVal[] = [
-			nativeToScVal(callerAddr, { type: 'address' }),
-			nativeToScVal(voterAddr, { type: 'address' }),
-			nativeToScVal(roundId, { type: 'u32' }),
-			nativeToScVal(optionId, { type: 'u32' }),
-			nativeToScVal(VOTE_TYPE_TO_U32[voteType], { type: 'u32' }),
-			nativeToScVal(TIER_TO_U32[tier], { type: 'u32' }),
-		]
-
-		const result = await simulateAndSend(
-			this.server,
-			this.networkPassphrase,
-			this.keypair,
+		const result = await stellarInvoke(
+			this.secretKey,
 			this.contractAddress,
 			'record_vote',
-			args,
+			[
+				'--caller',
+				this.publicKey,
+				'--voter',
+				voterAddress,
+				'--round_id',
+				String(roundId),
+				'--option_id',
+				String(optionId),
+				'--vote_type',
+				String(VOTE_TYPE_TO_U32[voteType]),
+				'--tier',
+				String(TIER_TO_U32[tier]),
+			],
 		)
 
 		if (!result.success) {
@@ -289,7 +232,10 @@ export class GovernanceContractService {
 			return { success: false, error: result.error }
 		}
 
-		const weight = result.returnValue?.u32?.()
-		return { success: true, weight }
+		const weight = Number.parseInt(result.output ?? '', 10)
+		return {
+			success: true,
+			weight: Number.isNaN(weight) ? undefined : weight,
+		}
 	}
 }

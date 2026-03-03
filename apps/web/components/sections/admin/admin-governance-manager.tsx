@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
 	Calendar,
 	Check,
+	CheckCircle2,
 	ChevronDown,
 	ChevronsUpDown,
 	ChevronUp,
@@ -182,8 +183,15 @@ function ProjectPicker({
 // Create Round Dialog
 // ============================================================================
 
+interface CreateRoundResult {
+	success: boolean
+	onChain: boolean
+	data: GovernanceRound & { contract_round_id: number | null }
+}
+
 function CreateRoundDialog({ onCreated }: { onCreated: () => void }) {
 	const [open, setOpen] = useState(false)
+	const [result, setResult] = useState<CreateRoundResult | null>(null)
 	const [form, setForm] = useState({
 		title: '',
 		description: '',
@@ -225,8 +233,7 @@ function CreateRoundDialog({ onCreated }: { onCreated: () => void }) {
 		})
 	}
 
-	const handleClose = () => {
-		setOpen(false)
+	const resetForm = () => {
 		setForm({
 			title: '',
 			description: '',
@@ -236,10 +243,17 @@ function CreateRoundDialog({ onCreated }: { onCreated: () => void }) {
 			fundCurrency: 'XLM',
 		})
 		setOptionRows([{ ...EMPTY_ROW }])
+		setResult(null)
+	}
+
+	const handleClose = () => {
+		if (result) onCreated()
+		setOpen(false)
+		resetForm()
 	}
 
 	const { mutate: createRound, isPending } = useMutation({
-		mutationFn: async () => {
+		mutationFn: async (): Promise<CreateRoundResult> => {
 			const roundPayload: CreateRoundPayload = {
 				title: form.title,
 				description: form.description || undefined,
@@ -267,21 +281,23 @@ function CreateRoundDialog({ onCreated }: { onCreated: () => void }) {
 
 			const json = await res.json()
 			if (!res.ok) throw new Error(json.error ?? 'Failed to create round')
-			return json
+			return json as CreateRoundResult
 		},
-		onSuccess: () => {
-			handleClose()
-			onCreated()
+		onSuccess: (data) => {
+			setResult(data)
 		},
 	})
 
 	const validOptionCount = optionRows.filter((r) => r.title.trim()).length
 	const canSubmit =
 		!isPending &&
+		!result &&
 		form.title &&
 		form.startsAt &&
 		form.endsAt &&
 		validOptionCount > 0
+
+	const contractAddress = process.env.NEXT_PUBLIC_GOVERNANCE_CONTRACT_ADDRESS ?? ''
 
 	return (
 		<Dialog
@@ -299,195 +315,278 @@ function CreateRoundDialog({ onCreated }: { onCreated: () => void }) {
 					<DialogTitle>Create Governance Round</DialogTitle>
 				</DialogHeader>
 
-				<div className="space-y-4 py-2">
-					{/* Round metadata */}
-					<div className="space-y-1.5">
-						<Label htmlFor="gr-title">Title *</Label>
-						<Input
-							id="gr-title"
-							placeholder="Round #1 – Q1 2026"
-							value={form.title}
-							onChange={(e) => setForm({ ...form, title: e.target.value })}
-						/>
-					</div>
-
-					<div className="space-y-1.5">
-						<Label htmlFor="gr-desc">Description</Label>
-						<Textarea
-							id="gr-desc"
-							placeholder="Describe the purpose of this voting round…"
-							value={form.description}
-							onChange={(e) =>
-								setForm({ ...form, description: e.target.value })
-							}
-							rows={2}
-						/>
-					</div>
-
-					<div className="grid grid-cols-2 gap-3">
-						<div className="space-y-1.5">
-							<Label htmlFor="gr-starts">Starts At *</Label>
-							<Input
-								id="gr-starts"
-								type="datetime-local"
-								value={form.startsAt}
-								onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
-							/>
-						</div>
-						<div className="space-y-1.5">
-							<Label htmlFor="gr-ends">Ends At *</Label>
-							<Input
-								id="gr-ends"
-								type="datetime-local"
-								value={form.endsAt}
-								onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
-							/>
-						</div>
-					</div>
-
-					<div className="grid grid-cols-2 gap-3">
-						<div className="space-y-1.5">
-							<Label htmlFor="gr-amount">Fund Amount</Label>
-							<Input
-								id="gr-amount"
-								type="number"
-								placeholder="10000"
-								value={form.totalFundAmount}
-								onChange={(e) =>
-									setForm({ ...form, totalFundAmount: e.target.value })
-								}
-							/>
-						</div>
-						<div className="space-y-1.5">
-							<Label htmlFor="gr-currency">Currency</Label>
-							<Input
-								id="gr-currency"
-								placeholder="XLM"
-								value={form.fundCurrency}
-								onChange={(e) =>
-									setForm({ ...form, fundCurrency: e.target.value })
-								}
-							/>
-						</div>
-					</div>
-
-					{/* Redistribution Options */}
-					<div>
-						<div className="flex items-center justify-between mb-2">
-							<p className="text-sm font-semibold">Redistribution Options</p>
-							<span className="text-xs text-muted-foreground">
-								{validOptionCount} selected
-							</span>
-						</div>
-
-						{loadingProjects && (
-							<div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
-								<Loader2 className="h-3.5 w-3.5 animate-spin" />
-								Loading projects…
+				{/* ── Success screen ────────────────────────────────────────────── */}
+				{result ? (
+					<div className="py-6 space-y-4">
+						<div className="flex flex-col items-center gap-3 text-center">
+							<CheckCircle2 className="h-12 w-12 text-emerald-500" />
+							<div>
+								<p className="font-semibold text-base">Round created!</p>
+								<p className="text-sm text-muted-foreground mt-1">
+									{result.data.title}
+								</p>
 							</div>
-						)}
+						</div>
 
-						<div className="space-y-3">
-							{optionRows.map((row, i) => (
-								<div
-									key={`option-row-${
-										// biome-ignore lint/suspicious/noArrayIndexKey: index is intentional here
-										i
-									}`}
-									className="border rounded-lg p-3 space-y-2.5"
-								>
-									<div className="flex items-center justify-between">
-										<p className="text-xs font-medium text-muted-foreground">
-											Option {i + 1}
-										</p>
-										{optionRows.length > 1 && (
-											<button
-												type="button"
-												onClick={() =>
-													setOptionRows(
-														optionRows.filter((_, idx) => idx !== i),
-													)
-												}
-												className="text-destructive hover:opacity-70"
-											>
-												<Trash2 className="h-3.5 w-3.5" />
-											</button>
+						<div className="rounded-lg border p-4 space-y-2 text-sm">
+							{result.onChain && result.data.contract_round_id != null ? (
+								<>
+									<div className="flex items-center gap-2 text-emerald-700 font-medium">
+										<span className="h-2 w-2 rounded-full bg-emerald-500" />
+										Recorded on Stellar blockchain
+									</div>
+									<p className="text-muted-foreground text-xs">
+										On-chain round ID:{' '}
+										<span className="font-mono font-semibold text-foreground">
+											#{result.data.contract_round_id}
+										</span>
+									</p>
+									{contractAddress && (
+										<a
+											href={getStellarExplorerUrl(contractAddress)}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline mt-1"
+										>
+											View governance contract on Stellar Expert
+											<ExternalLink className="h-3 w-3" />
+										</a>
+									)}
+								</>
+							) : (
+								<div className="flex items-center gap-2 text-amber-700">
+									<span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+									<span className="text-xs">
+										Saved to database — on-chain recording is pending (will
+										retry automatically).
+									</span>
+								</div>
+							)}
+						</div>
+					</div>
+				) : (
+					/* ── Form ───────────────────────────────────────────────────────── */
+					<div className="space-y-4 py-2">
+						{/* Round metadata */}
+						<div className="space-y-1.5">
+							<Label htmlFor="gr-title">Title *</Label>
+							<Input
+								id="gr-title"
+								placeholder="Round #1 – Q1 2026"
+								value={form.title}
+								onChange={(e) => setForm({ ...form, title: e.target.value })}
+								disabled={isPending}
+							/>
+						</div>
+
+						<div className="space-y-1.5">
+							<Label htmlFor="gr-desc">Description</Label>
+							<Textarea
+								id="gr-desc"
+								placeholder="Describe the purpose of this voting round…"
+								value={form.description}
+								onChange={(e) =>
+									setForm({ ...form, description: e.target.value })
+								}
+								rows={2}
+								disabled={isPending}
+							/>
+						</div>
+
+						<div className="grid grid-cols-2 gap-3">
+							<div className="space-y-1.5">
+								<Label htmlFor="gr-starts">Starts At *</Label>
+								<Input
+									id="gr-starts"
+									type="datetime-local"
+									value={form.startsAt}
+									onChange={(e) =>
+										setForm({ ...form, startsAt: e.target.value })
+									}
+									disabled={isPending}
+								/>
+							</div>
+							<div className="space-y-1.5">
+								<Label htmlFor="gr-ends">Ends At *</Label>
+								<Input
+									id="gr-ends"
+									type="datetime-local"
+									value={form.endsAt}
+									onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
+									disabled={isPending}
+								/>
+							</div>
+						</div>
+
+						<div className="grid grid-cols-2 gap-3">
+							<div className="space-y-1.5">
+								<Label htmlFor="gr-amount">Fund Amount</Label>
+								<Input
+									id="gr-amount"
+									type="number"
+									placeholder="10000"
+									value={form.totalFundAmount}
+									onChange={(e) =>
+										setForm({ ...form, totalFundAmount: e.target.value })
+									}
+									disabled={isPending}
+								/>
+							</div>
+							<div className="space-y-1.5">
+								<Label htmlFor="gr-currency">Currency</Label>
+								<Input
+									id="gr-currency"
+									placeholder="XLM"
+									value={form.fundCurrency}
+									onChange={(e) =>
+										setForm({ ...form, fundCurrency: e.target.value })
+									}
+									disabled={isPending}
+								/>
+							</div>
+						</div>
+
+						{/* Redistribution Options */}
+						<div>
+							<div className="flex items-center justify-between mb-2">
+								<p className="text-sm font-semibold">Redistribution Options</p>
+								<span className="text-xs text-muted-foreground">
+									{validOptionCount} selected
+								</span>
+							</div>
+
+							{loadingProjects && (
+								<div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+									<Loader2 className="h-3.5 w-3.5 animate-spin" />
+									Loading projects…
+								</div>
+							)}
+
+							<div className="space-y-3">
+								{optionRows.map((row, i) => (
+									<div
+										key={`option-row-${
+											// biome-ignore lint/suspicious/noArrayIndexKey: index is intentional here
+											i
+										}`}
+										className="border rounded-lg p-3 space-y-2.5"
+									>
+										<div className="flex items-center justify-between">
+											<p className="text-xs font-medium text-muted-foreground">
+												Option {i + 1}
+											</p>
+											{optionRows.length > 1 && (
+												<button
+													type="button"
+													disabled={isPending}
+													onClick={() =>
+														setOptionRows(
+															optionRows.filter((_, idx) => idx !== i),
+														)
+													}
+													className="text-destructive hover:opacity-70 disabled:opacity-30"
+												>
+													<Trash2 className="h-3.5 w-3.5" />
+												</button>
+											)}
+										</div>
+
+										<div className="space-y-1">
+											<Label className="text-xs">Project *</Label>
+											<ProjectPicker
+												projects={projects}
+												selectedId={row.projectId}
+												onSelect={(p) => handleProjectSelect(i, p)}
+												disabled={loadingProjects || isPending}
+											/>
+										</div>
+
+										{row.projectId && (
+											<>
+												<div className="space-y-1">
+													<Label className="text-xs">
+														Option title
+														<span className="text-muted-foreground ml-1 font-normal">
+															(auto-filled, editable)
+														</span>
+													</Label>
+													<Input
+														placeholder="Campaign or project name"
+														value={row.title}
+														disabled={isPending}
+														onChange={(e) =>
+															updateRow(i, { title: e.target.value })
+														}
+													/>
+												</div>
+
+												<div className="space-y-1">
+													<Label className="text-xs">
+														Notes for voters
+														<span className="text-muted-foreground ml-1 font-normal">
+															(optional)
+														</span>
+													</Label>
+													<Textarea
+														placeholder="Why should the community fund this project?"
+														value={row.description}
+														rows={2}
+														disabled={isPending}
+														onChange={(e) =>
+															updateRow(i, { description: e.target.value })
+														}
+													/>
+												</div>
+											</>
 										)}
 									</div>
+								))}
 
-									{/* Project picker */}
-									<div className="space-y-1">
-										<Label className="text-xs">Project *</Label>
-										<ProjectPicker
-											projects={projects}
-											selectedId={row.projectId}
-											onSelect={(p) => handleProjectSelect(i, p)}
-											disabled={loadingProjects}
-										/>
-									</div>
-
-									{/* Title — auto-filled but editable */}
-									{row.projectId && (
-										<>
-											<div className="space-y-1">
-												<Label className="text-xs">
-													Option title
-													<span className="text-muted-foreground ml-1 font-normal">
-														(auto-filled, editable)
-													</span>
-												</Label>
-												<Input
-													placeholder="Campaign or project name"
-													value={row.title}
-													onChange={(e) =>
-														updateRow(i, { title: e.target.value })
-													}
-												/>
-											</div>
-
-											<div className="space-y-1">
-												<Label className="text-xs">
-													Notes for voters
-													<span className="text-muted-foreground ml-1 font-normal">
-														(optional)
-													</span>
-												</Label>
-												<Textarea
-													placeholder="Why should the community fund this project?"
-													value={row.description}
-													rows={2}
-													onChange={(e) =>
-														updateRow(i, { description: e.target.value })
-													}
-												/>
-											</div>
-										</>
-									)}
-								</div>
-							))}
-
-							<Button
-								type="button"
-								variant="outline"
-								size="sm"
-								className="w-full gap-1.5"
-								onClick={() => setOptionRows([...optionRows, { ...EMPTY_ROW }])}
-							>
-								<Plus className="h-3.5 w-3.5" />
-								Add Option
-							</Button>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									disabled={isPending}
+									className="w-full gap-1.5"
+									onClick={() =>
+										setOptionRows([...optionRows, { ...EMPTY_ROW }])
+									}
+								>
+									<Plus className="h-3.5 w-3.5" />
+									Add Option
+								</Button>
+							</div>
 						</div>
 					</div>
-				</div>
+				)}
 
 				<DialogFooter>
-					<Button variant="outline" onClick={handleClose} disabled={isPending}>
-						Cancel
-					</Button>
-					<Button onClick={() => createRound()} disabled={!canSubmit}>
-						{isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-						Create Round
-					</Button>
+					{result ? (
+						<Button onClick={handleClose} className="gap-2">
+							<Check className="h-4 w-4" />
+							Done
+						</Button>
+					) : (
+						<>
+							<Button
+								variant="outline"
+								onClick={handleClose}
+								disabled={isPending}
+							>
+								Cancel
+							</Button>
+							<Button onClick={() => createRound()} disabled={!canSubmit}>
+								{isPending ? (
+									<>
+										<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+										Confirming on blockchain…
+									</>
+								) : (
+									'Create Round'
+								)}
+							</Button>
+						</>
+					)}
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
@@ -651,11 +750,11 @@ export function AdminGovernanceManager() {
 						Create and manage community fund voting rounds.
 					</p>
 				</div>
-				<CreateRoundDialog
-					onCreated={() =>
-						queryClient.invalidateQueries({ queryKey: ['governance-rounds'] })
-					}
-				/>
+			<CreateRoundDialog
+				onCreated={() => {
+					queryClient.invalidateQueries({ queryKey: ['governance-rounds'] })
+				}}
+			/>
 			</div>
 
 			{/* Stats */}

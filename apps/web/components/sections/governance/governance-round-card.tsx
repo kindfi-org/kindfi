@@ -2,7 +2,14 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { Calendar, Clock, Loader2, Vote } from 'lucide-react'
+import {
+	Calendar,
+	Clock,
+	ExternalLink,
+	Loader2,
+	Users,
+	Vote,
+} from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { Badge } from '~/components/base/badge'
 import {
@@ -12,45 +19,52 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import type { EligibilityResult, GovernanceRound } from '~/lib/governance/types'
-
-function formatRelative(date: Date, now: Date): string {
-	const diffMs = Math.abs(date.getTime() - now.getTime())
-	const diffMins = Math.floor(diffMs / 60_000)
-	const diffHours = Math.floor(diffMins / 60)
-	const diffDays = Math.floor(diffHours / 24)
-
-	if (diffMins < 1) return 'just now'
-	if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`
-	if (diffHours < 24)
-		return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`
-	return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`
-}
-
 import { calcAllocationPercents } from '~/lib/governance/vote-weight'
 import { cn } from '~/lib/utils'
+import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { ResultsVisualization } from './results-visualization'
 import { VoteOptionCard } from './vote-option-card'
 
 interface GovernanceRoundCardProps {
 	roundId: string
-	fundBalance?: string
+	fundBalance?: number
 }
 
 const STATUS_CONFIG = {
 	upcoming: {
 		label: 'Upcoming',
 		className: 'border-blue-300 text-blue-600 bg-blue-50 dark:bg-blue-950/30',
+		dot: 'bg-blue-400',
 	},
 	active: {
 		label: 'Voting Open',
 		className:
 			'border-green-300 text-green-700 bg-green-50 dark:bg-green-950/30',
+		dot: 'bg-green-500 animate-pulse',
 	},
 	ended: {
 		label: 'Ended',
 		className: 'border-gray-300 text-gray-600 bg-gray-50 dark:bg-gray-900/40',
+		dot: 'bg-gray-400',
 	},
 } as const
+
+function formatTimeRemaining(target: Date, now: Date): string {
+	const diffMs = target.getTime() - now.getTime()
+	const isPast = diffMs < 0
+	const absDiffMs = Math.abs(diffMs)
+
+	const mins = Math.floor(absDiffMs / 60_000)
+	const hours = Math.floor(mins / 60)
+	const days = Math.floor(hours / 24)
+
+	let label: string
+	if (days > 0) label = `${days}d ${hours % 24}h`
+	else if (hours > 0) label = `${hours}h ${mins % 60}m`
+	else label = `${mins}m`
+
+	return isPast ? `${label} ago` : `${label} left`
+}
 
 export function GovernanceRoundCard({
 	roundId,
@@ -87,9 +101,9 @@ export function GovernanceRoundCard({
 
 	if (roundLoading) {
 		return (
-			<Card>
-				<CardContent className="py-12 flex items-center justify-center">
-					<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+			<Card className="border-border/60">
+				<CardContent className="py-16 flex items-center justify-center">
+					<Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
 				</CardContent>
 			</Card>
 		)
@@ -105,12 +119,8 @@ export function GovernanceRoundCard({
 	const endsAt = new Date(round.ends_at)
 	const startsAt = new Date(round.starts_at)
 	const now = new Date()
-	const timeLabel =
-		endsAt < now
-			? `Ended ${formatRelative(endsAt, now)}`
-			: startsAt <= now
-				? `Ends ${formatRelative(endsAt, now)}`
-				: `Starts ${formatRelative(startsAt, now)}`
+	const contractAddress =
+		process.env.NEXT_PUBLIC_GOVERNANCE_CONTRACT_ADDRESS ?? ''
 
 	const allocationPercents = calcAllocationPercents(
 		options.map((o) => ({ id: o.id, weighted_upvotes: o.weighted_upvotes })),
@@ -121,75 +131,103 @@ export function GovernanceRoundCard({
 		0,
 	)
 
-	// Count total distinct voters from upvotes + downvotes (approx from options)
 	const totalVoters =
-		round.options?.reduce(
+		options.reduce(
 			(sum, o) => sum + (o.upvotes ?? 0) + (o.downvotes ?? 0),
 			0,
-		) ?? 0
+		)
 
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 12 }}
 			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.25 }}
+			transition={{ duration: 0.3 }}
 			className="space-y-4"
 		>
-			{/* Round header */}
-			<Card>
-				<CardHeader className="pb-3">
-					<div className="flex items-start justify-between gap-3 flex-wrap">
-						<div className="min-w-0">
-							<CardTitle className="text-lg">{round.title}</CardTitle>
+			{/* Round header card */}
+			<Card className="overflow-hidden">
+				<CardHeader className="pb-4">
+					<div className="flex items-start justify-between gap-3">
+						<div className="space-y-1 min-w-0">
+							<div className="flex items-center gap-2 flex-wrap">
+								<CardTitle className="text-xl leading-tight">
+									{round.title}
+								</CardTitle>
+								<Badge
+									variant="outline"
+									className={cn(
+										'shrink-0 font-medium gap-1.5',
+										statusConfig.className,
+									)}
+								>
+									<span
+										className={cn('h-1.5 w-1.5 rounded-full', statusConfig.dot)}
+									/>
+									{statusConfig.label}
+								</Badge>
+							</div>
 							{round.description && (
-								<p className="text-sm text-muted-foreground mt-1">
+								<p className="text-sm text-muted-foreground leading-relaxed">
 									{round.description}
 								</p>
 							)}
 						</div>
-						<Badge
-							variant="outline"
-							className={cn('shrink-0 font-medium', statusConfig.className)}
-						>
-							{isActive && (
-								<span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-							)}
-							{statusConfig.label}
-						</Badge>
 					</div>
+				</CardHeader>
 
-					<div className="flex items-center gap-4 flex-wrap mt-2 text-xs text-muted-foreground">
+				<CardContent className="pt-0 pb-5">
+					{/* Info row */}
+					<div className="flex items-center gap-x-5 gap-y-2 flex-wrap text-sm text-muted-foreground">
 						<span className="flex items-center gap-1.5">
 							{isEnded ? (
 								<Calendar className="h-3.5 w-3.5" />
 							) : (
 								<Clock className="h-3.5 w-3.5" />
 							)}
-							{timeLabel}
+							{isEnded
+								? `Ended ${formatTimeRemaining(endsAt, now)}`
+								: startsAt > now
+									? `Starts in ${formatTimeRemaining(startsAt, now)}`
+									: formatTimeRemaining(endsAt, now)}
 						</span>
 						<span className="flex items-center gap-1.5">
 							<Vote className="h-3.5 w-3.5" />
 							{options.length} option{options.length !== 1 ? 's' : ''}
 						</span>
+						<span className="flex items-center gap-1.5">
+							<Users className="h-3.5 w-3.5" />
+							{totalVoters} vote{totalVoters !== 1 ? 's' : ''}
+						</span>
 						{round.total_fund_amount > 0 && (
-							<span className="font-medium text-foreground">
+							<span className="font-semibold text-foreground">
 								{Number(round.total_fund_amount).toLocaleString('en-US', {
 									maximumFractionDigits: 2,
 								})}{' '}
 								{round.fund_currency} at stake
 							</span>
 						)}
+						{round.contract_round_id != null && contractAddress && (
+							<a
+								href={getStellarExplorerUrl(contractAddress)}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:underline font-medium"
+							>
+								On-chain #{round.contract_round_id}
+								<ExternalLink className="h-3 w-3" />
+							</a>
+						)}
 					</div>
-				</CardHeader>
+				</CardContent>
 			</Card>
 
 			{/* Options */}
 			{options.length > 0 && (
 				<div className="space-y-3">
-					<p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
+					<p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
 						Redistribution Options
 					</p>
-					{options.map((opt) => (
+					{options.map((opt, i) => (
 						<VoteOptionCard
 							key={opt.id}
 							option={opt}
@@ -200,12 +238,13 @@ export function GovernanceRoundCard({
 							totalRoundWeight={totalWeight}
 							allocationPercent={allocationPercents[opt.id] ?? 0}
 							isWinner={isEnded && round.winner_option_id === opt.id}
+							index={i}
 						/>
 					))}
 				</div>
 			)}
 
-			{/* Results visualization */}
+			{/* Results */}
 			{(isActive || isEnded) && options.length > 0 && (
 				<ResultsVisualization
 					round={round}

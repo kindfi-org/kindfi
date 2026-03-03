@@ -32,12 +32,14 @@ export function EligibilityBadge() {
 
 	if (sessionStatus === 'loading' || isLoading) {
 		return (
-			<Card className="border-border/60">
-				<CardContent className="p-4 flex items-center gap-3">
-					<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-					<span className="text-sm text-muted-foreground">
-						Checking eligibility…
-					</span>
+			<Card className="border-border/60 h-full">
+				<CardContent className="p-6 flex items-center justify-center h-full">
+					<div className="flex items-center gap-2">
+						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+						<span className="text-sm text-muted-foreground">
+							Checking eligibility…
+						</span>
+					</div>
 				</CardContent>
 			</Card>
 		)
@@ -45,13 +47,15 @@ export function EligibilityBadge() {
 
 	if (!session?.user?.id) {
 		return (
-			<Card className="border-border/60">
-				<CardContent className="p-4 flex items-center gap-3">
-					<Shield className="h-5 w-5 text-muted-foreground" />
+			<Card className="border-border/60 h-full">
+				<CardContent className="p-6 flex items-center gap-4 h-full">
+					<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-muted">
+						<Shield className="h-6 w-6 text-muted-foreground" />
+					</div>
 					<div>
-						<p className="text-sm font-medium">Sign in to vote</p>
-						<p className="text-xs text-muted-foreground">
-							Connect your wallet and sign in to participate in governance.
+						<p className="text-sm font-semibold">Sign in to vote</p>
+						<p className="text-xs text-muted-foreground mt-0.5">
+							Connect your wallet to participate in governance.
 						</p>
 					</div>
 				</CardContent>
@@ -61,16 +65,17 @@ export function EligibilityBadge() {
 
 	if (!data?.eligible) {
 		return (
-			<Card className="border-orange-200 bg-orange-50/50 dark:border-orange-900/40 dark:bg-orange-950/20">
-				<CardContent className="p-4 flex items-start gap-3">
-					<AlertCircle className="h-5 w-5 text-orange-500 mt-0.5 shrink-0" />
+			<Card className="border-orange-200/60 bg-orange-50/30 dark:border-orange-900/30 dark:bg-orange-950/10 h-full">
+				<CardContent className="p-6 flex items-center gap-4 h-full">
+					<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 dark:bg-orange-900/30">
+						<AlertCircle className="h-6 w-6 text-orange-500" />
+					</div>
 					<div>
 						<p className="text-sm font-semibold text-orange-700 dark:text-orange-400">
 							Not yet eligible
 						</p>
-						<p className="text-xs text-orange-600/80 dark:text-orange-400/70 mt-0.5">
-							Make your first donation to receive a Kinders NFT and unlock
-							governance voting.
+						<p className="text-xs text-muted-foreground mt-0.5">
+							Make your first donation to receive a Kinders NFT and unlock voting.
 						</p>
 					</div>
 				</CardContent>
@@ -84,25 +89,29 @@ export function EligibilityBadge() {
 	const tierColor = TIER_COLORS[tier]
 
 	return (
-		<Card className="border-green-200 bg-green-50/50 dark:border-green-900/40 dark:bg-green-950/20">
-			<CardContent className="p-4 flex items-center justify-between gap-3 flex-wrap">
-				<div className="flex items-center gap-3">
-					<CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+		<Card className="border-green-200/60 bg-green-50/30 dark:border-green-900/30 dark:bg-green-950/10 h-full">
+			<CardContent className="p-6 flex items-center justify-between gap-4 h-full">
+				<div className="flex items-center gap-4">
+					<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-green-100 dark:bg-green-900/30">
+						<CheckCircle2 className="h-6 w-6 text-green-600" />
+					</div>
 					<div>
 						<p className="text-sm font-semibold text-green-700 dark:text-green-400">
 							Eligible to vote
 						</p>
 						<p className="text-xs text-muted-foreground mt-0.5">
-							Your Kinders NFT grants you governance rights.
+							Your Kinders NFT grants governance rights.
 						</p>
 					</div>
 				</div>
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-3">
 					<Badge className={`${tierColor} border`}>{tierLabel}</Badge>
 					<div className="text-center">
-						<p className="text-lg font-bold leading-none">{voteWeight}</p>
+						<p className="text-2xl font-bold leading-none tabular-nums">
+							{voteWeight}
+						</p>
 						<p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
-							vote weight
+							weight
 						</p>
 					</div>
 				</div>

@@ -27,20 +27,19 @@ export function CommunityFundBalance() {
 		})
 
 	const balance = data?.data
+	const currency = process.env.NEXT_PUBLIC_COMMUNITY_FUND_CURRENCY ?? 'USDC'
 
 	return (
-		<Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+		<Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 h-full">
 			<CardContent className="p-6">
-				<div className="flex flex-col sm:flex-row sm:items-center gap-4">
-					{/* Icon */}
-					<div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-						<Vault className="h-7 w-7 text-primary" />
+				<div className="flex items-start gap-4">
+					<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+						<Vault className="h-6 w-6 text-primary" />
 					</div>
 
-					{/* Main content */}
 					<div className="flex-1 min-w-0">
-						<div className="flex items-center gap-2 mb-1">
-							<p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+						<div className="flex items-center gap-2 mb-2">
+							<p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
 								Community Fund
 							</p>
 							<Badge
@@ -49,60 +48,61 @@ export function CommunityFundBalance() {
 							>
 								Live
 							</Badge>
+							<button
+								type="button"
+								onClick={() => refetch()}
+								disabled={isFetching}
+								className="ml-auto p-1 rounded-md hover:bg-muted transition-colors disabled:opacity-50"
+								aria-label="Refresh balance"
+							>
+								<RefreshCw
+									className={`h-3.5 w-3.5 text-muted-foreground ${isFetching ? 'animate-spin' : ''}`}
+								/>
+							</button>
 						</div>
 
 						{isLoading ? (
-							<div className="h-9 w-48 animate-pulse rounded-md bg-muted" />
+							<div className="h-8 w-40 animate-pulse rounded-md bg-muted" />
 						) : isError ? (
 							<p className="text-sm text-destructive">Failed to load balance</p>
 						) : (
-							<div className="flex items-baseline gap-2 flex-wrap">
-								<span className="text-3xl font-bold tracking-tight tabular-nums">
-									{Number(balance?.balance ?? 0).toLocaleString('en-US', {
-										minimumFractionDigits: 2,
-										maximumFractionDigits: 2,
-									})}
-								</span>
-								<span className="text-lg font-semibold text-muted-foreground">
-									{process.env.NEXT_PUBLIC_COMMUNITY_FUND_CURRENCY ?? 'USDC'}
-								</span>
-								<span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
-									<TrendingUp className="h-3 w-3" />
-									Held in escrow
-								</span>
-							</div>
-						)}
+							<>
+								<div className="flex items-baseline gap-2 flex-wrap">
+									<span className="text-2xl font-bold tracking-tight tabular-nums">
+										{Number(balance?.balance ?? 0).toLocaleString('en-US', {
+											minimumFractionDigits: 2,
+											maximumFractionDigits: 2,
+										})}
+									</span>
+									<span className="text-base font-semibold text-muted-foreground">
+										{currency}
+									</span>
+									<span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+										<TrendingUp className="h-3 w-3" />
+										Escrow
+									</span>
+								</div>
 
-						{balance?.address && (
-							<div className="flex items-center gap-2 mt-2 flex-wrap">
-								<code className="text-xs text-muted-foreground font-mono truncate max-w-[220px]">
-									{balance.address.slice(0, 8)}…{balance.address.slice(-6)}
-								</code>
-								<a
-									href={getStellarExplorerAddressUrl(balance.address)}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-								>
-									<ExternalLink className="h-3 w-3" />
-									Verify on-chain
-								</a>
-							</div>
+								{balance?.address && (
+									<div className="flex items-center gap-2 mt-2">
+										<code className="text-[11px] text-muted-foreground font-mono">
+											{balance.address.slice(0, 6)}…
+											{balance.address.slice(-4)}
+										</code>
+										<a
+											href={getStellarExplorerAddressUrl(balance.address)}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+										>
+											<ExternalLink className="h-2.5 w-2.5" />
+											Verify
+										</a>
+									</div>
+								)}
+							</>
 						)}
 					</div>
-
-					{/* Refresh */}
-					<button
-						type="button"
-						onClick={() => refetch()}
-						disabled={isFetching}
-						className="self-start sm:self-center p-2 rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
-						aria-label="Refresh balance"
-					>
-						<RefreshCw
-							className={`h-4 w-4 text-muted-foreground ${isFetching ? 'animate-spin' : ''}`}
-						/>
-					</button>
 				</div>
 			</CardContent>
 		</Card>

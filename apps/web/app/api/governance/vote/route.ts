@@ -148,7 +148,8 @@ export async function POST(req: NextRequest) {
 			p_weight: voteWeight,
 		})
 
-		// 7. Record vote on-chain (best-effort — does not fail the API call if contract is unavailable)
+		// 7. Record vote on-chain (synchronous — awaits confirmation)
+		let onChain = false
 		const contractAddress = process.env.GOVERNANCE_CONTRACT_ADDRESS
 		const stellarAddress = nft.stellar_address
 
@@ -159,60 +160,47 @@ export async function POST(req: NextRequest) {
 				)
 				const govService = new GovernanceContractService()
 
-				// Find on-chain round_id and option_id via the Supabase records
-				// We store contract round/option IDs in the DB alongside UUID IDs
-				const { data: roundRecord } = await supabase
-					.from('governance_rounds')
-					.select('contract_round_id')
-					.eq('id', roundId)
-					.single()
-
-				const { data: optionRecord } = await supabase
-					.from('governance_options')
-					.select('contract_option_id')
-					.eq('id', optionId)
-					.single()
+				const [{ data: roundRecord }, { data: optionRecord }] =
+					await Promise.all([
+						supabase
+							.from('governance_rounds')
+							.select('contract_round_id')
+							.eq('id', roundId)
+							.single(),
+						supabase
+							.from('governance_options')
+							.select('contract_option_id')
+							.eq('id', optionId)
+							.single(),
+					])
 
 				const contractRoundId = roundRecord?.contract_round_id
 				const contractOptionId = optionRecord?.contract_option_id
 
 				if (
-					contractRoundId !== null &&
-					contractRoundId !== undefined &&
-					contractOptionId !== null &&
-					contractOptionId !== undefined
+					contractRoundId != null &&
+					contractOptionId != null
 				) {
-					govService
-						.recordVote({
-							voterAddress: stellarAddress,
-							roundId: contractRoundId,
-							optionId: contractOptionId,
-							voteType,
-							tier,
-						})
-						.then((result) => {
-							if (!result.success) {
-								console.error(
-									'[governance/vote] On-chain record_vote failed (non-blocking):',
-									result.error,
-								)
-							}
-						})
-						.catch((err) => {
-							console.error(
-								'[governance/vote] On-chain record_vote threw (non-blocking):',
-								err,
-							)
-						})
+					const result = await govService.recordVote({
+						voterAddress: stellarAddress,
+						roundId: contractRoundId,
+						optionId: contractOptionId,
+						voteType,
+						tier,
+					})
+					onChain = result.success
+					if (!result.success) {
+						console.warn('[governance/vote] on-chain record_vote failed:', result.error)
+					}
 				}
 			} catch (err) {
-				// Contract not deployed or service unavailable — log and continue
-				console.warn('[governance/vote] Skipping on-chain record:', err)
+				console.warn('[governance/vote] on-chain record error:', err)
 			}
 		}
 
 		return NextResponse.json({
 			success: true,
+			onChain,
 			data: {
 				voteWeight,
 				tier,

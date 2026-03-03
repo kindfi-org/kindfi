@@ -181,37 +181,30 @@ export async function POST(req: NextRequest) {
 			}
 		}
 
-		// ── On-chain recording (best-effort, non-blocking) ──────────────────────
-		// Runs in background — Supabase is the source of truth for the UI.
-		// On success, back-fills contract_round_id / contract_option_id.
-		void (async () => {
-			try {
-				const contract = new GovernanceContractService()
+		// ── On-chain recording (synchronous) ─────────────────────────────────────
+		// Awaited so the response tells the caller exactly what landed on-chain.
+		// The backend service account (SOROBAN_PRIVATE_KEY) holds the admin role.
+		let contractRoundId: number | null = null
+		try {
+			const contract = new GovernanceContractService()
 
-				const roundResult = await contract.createRound({
-					title: round.title,
-					startsAt: round.starts_at,
-					endsAt: round.ends_at,
-					fundAmount: round.total_fund_amount ?? 0,
-				})
+			const roundResult = await contract.createRound({
+				title: round.title,
+				startsAt: round.starts_at,
+				endsAt: round.ends_at,
+				fundAmount: round.total_fund_amount ?? 0,
+			})
 
-				if (!roundResult.success || roundResult.roundId === undefined) {
-					console.warn(
-						'[Governance] on-chain create_round failed:',
-						roundResult.error,
-					)
-					return
-				}
+			if (!roundResult.success || roundResult.roundId === undefined) {
+				console.warn('[Governance] create_round failed:', roundResult.error)
+			} else {
+				contractRoundId = roundResult.roundId
 
-				const contractRoundId = roundResult.roundId
-
-				// Persist the on-chain round ID
 				await supabase
 					.from('governance_rounds')
 					.update({ contract_round_id: contractRoundId })
 					.eq('id', round.id)
 
-				// Add each option on-chain and store its contract ID
 				for (const opt of insertedOptions) {
 					const optResult = await contract.addOption({
 						roundId: contractRoundId,
@@ -223,22 +216,21 @@ export async function POST(req: NextRequest) {
 							.update({ contract_option_id: optResult.optionId })
 							.eq('id', opt.id)
 					} else {
-						console.warn(
-							'[Governance] on-chain add_option failed:',
-							optResult.error,
-						)
+						console.warn('[Governance] add_option failed:', optResult.error)
 					}
 				}
 
-				console.info(
-					`[Governance] Round ${round.id} recorded on-chain as contract round #${contractRoundId}`,
-				)
-			} catch (err) {
-				console.error('[Governance] on-chain round recording error:', err)
+				console.info(`[Governance] Round ${round.id} → on-chain #${contractRoundId}`)
 			}
-		})()
+		} catch (err) {
+			console.error('[Governance] on-chain recording error:', err)
+		}
 
-		return NextResponse.json({ success: true, data: round }, { status: 201 })
+		return NextResponse.json({
+			success: true,
+			data: { ...round, contract_round_id: contractRoundId },
+			onChain: contractRoundId !== null,
+		}, { status: 201 })
 	} catch (error) {
 		console.error('Error in POST /api/governance/rounds:', error)
 		return NextResponse.json(

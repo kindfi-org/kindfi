@@ -2,7 +2,13 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { History, Loader2, Vote } from 'lucide-react'
+import {
+	Globe,
+	History,
+	ShieldCheck,
+	Sparkles,
+	Vote,
+} from 'lucide-react'
 import { useState } from 'react'
 import {
 	Tabs,
@@ -56,62 +62,78 @@ export function GovernanceSection() {
 		(r) => r.status === 'active' || r.status === 'upcoming',
 	)
 	const pastRounds = allRounds.filter((r) => r.status === 'ended')
-	const fundBalance = balanceData?.data?.xlm
+	const fundBalance = balanceData?.data?.balance
 
 	return (
-		<div className="space-y-6">
-			{/* Header */}
-			<div className="flex items-center gap-3">
-				<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-					<Vote className="h-5 w-5 text-primary" />
-				</div>
-				<div>
-					<h2 className="text-xl font-bold text-foreground">
+		<div className="space-y-8">
+			{/* Hero */}
+			<div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/5 via-background to-violet-500/5 p-8">
+				<div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_0%,#000_40%,transparent)]" />
+				<div className="relative space-y-4">
+					<div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+						<Sparkles className="h-3 w-3" />
+						Community-driven allocation
+					</div>
+					<h1 className="text-3xl font-extrabold tracking-tight">
 						Community Governance
-					</h2>
-					<p className="text-sm text-muted-foreground">
-						Vote on how the community fund is redistributed
+					</h1>
+					<p className="max-w-lg text-muted-foreground leading-relaxed">
+						Shape the impact of the KindFi community fund. Your Kinders NFT
+						gives you voting power — higher tiers carry more weight.
 					</p>
+					<div className="flex items-center gap-6 text-sm text-muted-foreground pt-2">
+						<span className="flex items-center gap-1.5">
+							<ShieldCheck className="h-4 w-4 text-green-500" />
+							On-chain verified
+						</span>
+						<span className="flex items-center gap-1.5">
+							<Globe className="h-4 w-4 text-blue-500" />
+							Transparent results
+						</span>
+					</div>
 				</div>
 			</div>
 
-			{/* Community Fund Balance */}
-			<FundBalanceWidget />
-
-			{/* Eligibility */}
-			<EligibilityBadge />
+			{/* Fund balance + Eligibility side by side on desktop */}
+			<div className="grid gap-4 md:grid-cols-2">
+				<FundBalanceWidget />
+				<EligibilityBadge />
+			</div>
 
 			{/* Rounds tabs */}
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-				<TabsList className="grid w-full grid-cols-2">
-					<TabsTrigger value="active" className="gap-1.5">
-						<span className="h-2 w-2 rounded-full bg-green-500" />
+				<TabsList className="grid w-full grid-cols-2 h-11">
+					<TabsTrigger value="active" className="gap-2 text-sm">
+						<Vote className="h-4 w-4" />
 						Active Rounds
 						{activeRounds.length > 0 && (
-							<span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
+							<span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground font-bold">
 								{activeRounds.length}
 							</span>
 						)}
 					</TabsTrigger>
-					<TabsTrigger value="past" className="gap-1.5">
-						<History className="h-3.5 w-3.5" />
+					<TabsTrigger value="past" className="gap-2 text-sm">
+						<History className="h-4 w-4" />
 						Past Rounds
+						{pastRounds.length > 0 && (
+							<span className="ml-0.5 text-muted-foreground text-xs">
+								({pastRounds.length})
+							</span>
+						)}
 					</TabsTrigger>
 				</TabsList>
 
 				<AnimatePresence mode="wait">
-					<TabsContent value="active" className="mt-4">
+					<TabsContent value="active" className="mt-6">
 						<motion.div
 							key="active"
-							initial={{ opacity: 0, y: 8 }}
+							initial={{ opacity: 0, y: 10 }}
 							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -8 }}
-							transition={{ duration: 0.15 }}
+							exit={{ opacity: 0, y: -10 }}
+							transition={{ duration: 0.2 }}
 						>
 							{isLoading ? (
-								<div className="flex items-center justify-center py-16">
-									<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-								</div>
+								<LoadingSkeleton />
 							) : activeRounds.length === 0 ? (
 								<EmptyState
 									icon={Vote}
@@ -132,18 +154,16 @@ export function GovernanceSection() {
 						</motion.div>
 					</TabsContent>
 
-					<TabsContent value="past" className="mt-4">
+					<TabsContent value="past" className="mt-6">
 						<motion.div
 							key="past"
-							initial={{ opacity: 0, y: 8 }}
+							initial={{ opacity: 0, y: 10 }}
 							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -8 }}
-							transition={{ duration: 0.15 }}
+							exit={{ opacity: 0, y: -10 }}
+							transition={{ duration: 0.2 }}
 						>
 							{isLoading ? (
-								<div className="flex items-center justify-center py-16">
-									<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-								</div>
+								<LoadingSkeleton />
 							) : pastRounds.length === 0 ? (
 								<EmptyState
 									icon={History}
@@ -169,6 +189,19 @@ export function GovernanceSection() {
 	)
 }
 
+function LoadingSkeleton() {
+	return (
+		<div className="space-y-4">
+			{[1, 2].map((i) => (
+				<div
+					key={i}
+					className="h-40 animate-pulse rounded-xl border bg-muted/30"
+				/>
+			))}
+		</div>
+	)
+}
+
 function EmptyState({
 	icon: Icon,
 	title,
@@ -179,12 +212,16 @@ function EmptyState({
 	description: string
 }) {
 	return (
-		<div className="text-center py-16 space-y-3">
-			<Icon className="h-12 w-12 mx-auto text-muted-foreground opacity-30" />
-			<p className="font-semibold text-foreground">{title}</p>
-			<p className="text-sm text-muted-foreground max-w-xs mx-auto">
-				{description}
-			</p>
+		<div className="text-center py-20 space-y-4 border rounded-xl bg-muted/10">
+			<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50">
+				<Icon className="h-8 w-8 text-muted-foreground/50" />
+			</div>
+			<div className="space-y-1">
+				<p className="font-semibold text-foreground">{title}</p>
+				<p className="text-sm text-muted-foreground max-w-xs mx-auto">
+					{description}
+				</p>
+			</div>
 		</div>
 	)
 }
