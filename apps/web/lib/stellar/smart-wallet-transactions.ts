@@ -256,6 +256,20 @@ export class SmartWalletTransactionService {
 	}
 
 	/**
+	 * Simulate a transaction (for read-only operations like NFT balance/metadata queries)
+	 */
+	async simulateTransaction(transaction: Transaction) {
+		return this.server.simulateTransaction(transaction)
+	}
+
+	/**
+	 * Get funding account for simulation (required when simulating read operations)
+	 */
+	async getFundingAccountForSimulation(): Promise<Account> {
+		return this.getFundingAccount()
+	}
+
+	/**
 	 * Submit a signed transaction using WebAuthn signature via Channels service
 	 * This uses OpenZeppelin Channels for automatic fee payment and parallel processing
 	 *

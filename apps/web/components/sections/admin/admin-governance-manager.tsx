@@ -15,6 +15,7 @@ import {
 	Trash2,
 	Vote,
 } from 'lucide-react'
+import Image from 'next/image'
 import { useState } from 'react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -147,10 +148,11 @@ function ProjectPicker({
 									className="gap-2"
 								>
 									{project.image_url ? (
-										// biome-ignore lint/performance/noImgElement: small thumbnail, no Next/Image needed
-										<img
+										<Image
 											src={project.image_url}
 											alt=""
+											width={24}
+											height={24}
 											className="h-6 w-6 rounded object-cover shrink-0"
 										/>
 									) : (

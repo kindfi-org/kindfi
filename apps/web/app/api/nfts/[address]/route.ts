@@ -58,10 +58,8 @@ export async function GET(
 		)
 
 		// Use funding account for simulation (required for read operations)
-		// Access private method via type assertion (workaround for read-only operations)
 		const sourceAccount = config.stellar.fundingAccount
-			? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-				await (txService as any).getFundingAccount()
+			? await txService.getFundingAccountForSimulation()
 			: new Account(address, '0')
 
 		const nftContract = new Contract(nftContractAddress)
@@ -80,10 +78,7 @@ export async function GET(
 			.setTimeout(30)
 			.build()
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const balanceSim = await (txService as any).server.simulateTransaction(
-			balanceTx,
-		)
+		const balanceSim = await txService.simulateTransaction(balanceTx)
 
 		let balance = 0
 		if (!Api.isSimulationError(balanceSim) && balanceSim.result?.retval) {
@@ -169,10 +164,8 @@ export async function GET(
 							.setTimeout(30)
 							.build()
 
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						const metadataSim = await (
-							txService as any
-						).server.simulateTransaction(metadataTx)
+						const metadataSim =
+							await txService.simulateTransaction(metadataTx)
 
 						if (
 							!Api.isSimulationError(metadataSim) &&
