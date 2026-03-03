@@ -22,6 +22,9 @@ members = [
   # Referral contract
   "contracts/referral",
 
+  # Governance contract
+  "contracts/governance",
+
   # TODO: Implement these contracts or delete them
   # "contracts/academy-graduation-nft",
   # "contracts/academy-verifier",

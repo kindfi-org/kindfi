@@ -26,7 +26,14 @@ const projects: NavigationItem[] = [
 	},
 ]
 
-const resources: NavigationItem[] = []
+const resources: NavigationItem[] = [
+	{
+		id: 'governance-id',
+		title: 'Community Governance',
+		href: '/governance',
+		description: 'Vote on fund redistribution using your Kinders NFT',
+	},
+]
 
 export interface NavigationSection {
 	section: string
