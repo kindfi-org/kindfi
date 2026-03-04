@@ -15,33 +15,67 @@ export async function POST(req: NextRequest) {
 		const body = await req.json()
 		const { projectId, contractId, amount, transactionHash } = body
 
-		// If contractId is provided but projectId is not, find project by escrow contract address
-		let finalProjectId = projectId
-		if (!finalProjectId && contractId) {
-			// Find the escrow_contracts record by contract_id (Stellar contract address)
-			// escrow_contracts has a direct project_id field
+		const numericAmount = Number(amount)
+		const MAX_CONTRIBUTION_AMOUNT = 1_000_000
+
+		if (
+			typeof numericAmount !== 'number' ||
+			Number.isNaN(numericAmount) ||
+			numericAmount <= 0
+		) {
+			return NextResponse.json(
+				{ error: 'Invalid request. amount must be a positive number.' },
+				{ status: 400 },
+			)
+		}
+		if (numericAmount > MAX_CONTRIBUTION_AMOUNT) {
+			return NextResponse.json(
+				{
+					error: `Amount exceeds maximum allowed ($${MAX_CONTRIBUTION_AMOUNT.toLocaleString()}).`,
+				},
+				{ status: 400 },
+			)
+		}
+
+		// Resolve project from contractId when provided (authoritative source for escrow)
+		let finalProjectId: string | null = null
+		if (contractId && typeof contractId === 'string') {
 			const { data: escrowContract, error: escrowContractError } =
 				await supabase
 					.from('escrow_contracts')
 					.select('project_id')
 					.eq('contract_id', contractId)
-					.single()
+					.maybeSingle()
 
-			if (escrowContractError || !escrowContract) {
+			if (escrowContractError) {
 				return NextResponse.json(
-					{ error: 'Escrow contract not found for the provided contract ID' },
-					{ status: 404 },
+					{ error: 'Failed to verify escrow contract' },
+					{ status: 500 },
 				)
 			}
-
-			finalProjectId = escrowContract.project_id
+			if (escrowContract?.project_id) finalProjectId = escrowContract.project_id
 		}
 
-		if (!finalProjectId || !amount || amount <= 0) {
+		// If client sent projectId: when we have contractId, verify projectId matches (prevent attribution abuse)
+		if (projectId && typeof projectId === 'string') {
+			if (finalProjectId && projectId !== finalProjectId) {
+				return NextResponse.json(
+					{
+						error:
+							'Project does not match escrow contract. Use the contractId from the project page.',
+					},
+					{ status: 400 },
+				)
+			}
+			// No contractId sent: use projectId (backward compat; prefer sending contractId)
+			if (!finalProjectId) finalProjectId = projectId
+		}
+
+		if (!finalProjectId) {
 			return NextResponse.json(
 				{
 					error:
-						'Invalid request. projectId (or contractId) and amount are required.',
+						'Invalid request. contractId or projectId is required.',
 				},
 				{ status: 400 },
 			)
@@ -83,7 +117,7 @@ export async function POST(req: NextRequest) {
 			.insert({
 				project_id: finalProjectId,
 				contributor_id: session.user.id,
-				amount: Number(amount),
+				amount: numericAmount,
 			})
 			.select('id')
 			.single()
@@ -104,7 +138,7 @@ export async function POST(req: NextRequest) {
 			'increment_project_amount',
 			{
 				project_id_param: finalProjectId,
-				amount_param: Number(amount),
+				amount_param: numericAmount,
 			},
 		)
 
@@ -120,7 +154,7 @@ export async function POST(req: NextRequest) {
 				await supabase
 					.from('projects')
 					.update({
-						current_amount: (project.current_amount || 0) + Number(amount),
+						current_amount: (project.current_amount || 0) + numericAmount,
 					})
 					.eq('id', finalProjectId)
 			}

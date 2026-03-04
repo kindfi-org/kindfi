@@ -1,13 +1,14 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import {
 	Building2,
 	CircleAlert,
 	CircleCheck,
 	ExternalLink,
 	Heart,
+	Loader2,
 	Share,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -41,6 +42,7 @@ interface ProjectSidebarProps {
 }
 
 export function ProjectSidebar({ project }: ProjectSidebarProps) {
+	const reducedMotion = useReducedMotion()
 	const [isFollowing, setIsFollowing] = useState(false)
 	const { getMultipleBalances, fundEscrow, sendTransaction } = useEscrow()
 	const {
@@ -205,7 +207,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			}
 
 			toast.success('Thank you for your support!', {
-				description: `You've donated $${data.investmentAmount.toLocaleString()}`,
+				description: `You've donated ${new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(data.investmentAmount)}`,
 				icon: <CircleCheck className="text-primary" />,
 			})
 
@@ -298,9 +300,9 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 	return (
 		<motion.div
 			className="overflow-hidden sticky top-16 bg-white rounded-xl shadow-md"
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.5, delay: 0.2 }}
+			initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+			animate={reducedMotion ? false : { opacity: 1, y: 0 }}
+			transition={reducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
 		>
 			<div className="p-6">
 				<h2 className="mb-2 text-xl font-bold">Support This Project</h2>
@@ -325,10 +327,10 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					/>
 				</div>
 
-				<div className="flex justify-between mb-3 text-sm text-gray-500">
+				<div className="flex justify-between mb-3 text-sm text-gray-500 tabular-nums">
 					<span>
-						${(onChainRaised ?? project.raised).toLocaleString()} raised
-						{isFetchingBalance ? ' (updating...)' : ''}
+						{new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(onChainRaised ?? project.raised)} raised
+						{isFetchingBalance ? ' (Updating…)' : ''}
 					</span>
 					<span>{progressPercentage}%</span>
 				</div>
@@ -348,8 +350,10 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 										<FormControl>
 											<Input
 												type="number"
-												placeholder={`Min. $${project.minInvestment}`}
+												placeholder={`Min. $${project.minInvestment}…`}
 												className="pl-6 bg-white border-green-600"
+												aria-label="Donation amount in USD"
+												autoComplete="off"
 												{...field}
 												onChange={(e) => {
 													const value =
@@ -371,9 +375,17 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 							type="submit"
 							className="mt-4 w-full text-white gradient-btn"
 							size="lg"
-							disabled={!form.formState.isValid}
+							disabled={!form.formState.isValid || form.formState.isSubmitting}
+							aria-busy={form.formState.isSubmitting}
 						>
-							Support Now
+							{form.formState.isSubmitting ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+									Supporting…
+								</>
+							) : (
+								'Support Now'
+							)}
 						</Button>
 					</form>
 				</Form>
@@ -420,9 +432,11 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 						variant="outline"
 						className="flex gap-2 justify-center items-center w-full bg-white gradient-border-btn"
 						onClick={handleToggleFollow}
+						aria-label={isFollowing ? 'Unfollow project' : 'Follow project'}
 					>
 						<Heart
 							className={`h-4 w-4 ${isFollowing ? 'text-red-500 fill-red-500' : ''}`}
+							aria-hidden
 						/>
 						{isFollowing ? 'Following' : 'Follow'}
 					</Button>
@@ -431,8 +445,9 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 						variant="outline"
 						className="flex gap-2 justify-center items-center w-full bg-white gradient-border-btn"
 						onClick={handleShare}
+						aria-label="Share project"
 					>
-						<Share className="w-4 h-4" />
+						<Share className="w-4 h-4" aria-hidden />
 						Share
 					</Button>
 				</div>

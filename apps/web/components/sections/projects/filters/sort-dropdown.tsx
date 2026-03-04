@@ -44,6 +44,8 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
 				<Button
 					variant="outline"
 					className="flex items-center gap-2 gradient-border-btn"
+					aria-label="Sort projects"
+					aria-haspopup="listbox"
 				>
 					{selectedOption?.icon}
 					{selectedOption && getSortLabel(selectedOption.value)}

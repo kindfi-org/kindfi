@@ -45,5 +45,8 @@ export function AnimatedCounter({
 		}
 	}, [isInView, value, duration])
 
-	return <span ref={ref}>{count.toLocaleString()}</span>
+	const formatted = new Intl.NumberFormat(undefined, {
+		maximumFractionDigits: 0,
+	}).format(count)
+	return <span ref={ref}>{formatted}</span>
 }

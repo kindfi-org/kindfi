@@ -1,5 +1,6 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
+import { validateSlug } from '~/lib/validation/foundation-api'
 
 export async function GET(req: Request) {
 	try {
@@ -8,6 +9,16 @@ export async function GET(req: Request) {
 
 		if (!slug) {
 			return NextResponse.json({ error: 'Slug is required' }, { status: 400 })
+		}
+
+		if (!validateSlug(slug)) {
+			return NextResponse.json(
+				{
+					error:
+						'Slug must be 3–30 characters, lowercase alphanumeric with hyphens',
+				},
+				{ status: 400 },
+			)
 		}
 
 		const { data, error } = await supabaseServiceRole

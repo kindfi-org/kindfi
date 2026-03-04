@@ -11,23 +11,24 @@ export function Hero() {
 	return (
 		// biome-ignore lint/a11y/useSemanticElements: can't use role with section
 		<section
-			className="relative z-0 min-h-[60vh] pt-20"
+			className="relative z-0 min-h-[70vh] bg-gradient-to-b from-violet-50/80 via-white to-white pt-24 pb-16 sm:pt-28 sm:pb-20"
 			aria-labelledby="hero-title"
 			role="banner"
 		>
 			<SectionContainer maxWidth="6xl">
 				<div className="text-center">
-					<motion.h2
-						className="text-2xl font-bold mb-6"
+					<motion.p
+						className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5 }}
 					>
 						{t('about.heroSubtitle')}
-					</motion.h2>
+					</motion.p>
 
 					<motion.h1
-						className="text-4xl md:text-5xl font-bold gradient-text mb-8 py-4"
+						id="hero-title"
+						className="text-3xl font-bold tracking-tight gradient-text mb-6 sm:text-4xl md:text-5xl lg:text-6xl sm:mb-8"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.2 }}
@@ -36,7 +37,7 @@ export function Hero() {
 					</motion.h1>
 
 					<motion.p
-						className="text-lg text-gray-700 pt-2 my-6"
+						className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed sm:text-lg mt-6 mb-10"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.4 }}
@@ -54,6 +55,7 @@ export function Hero() {
 							href="https://www.youtube.com/watch?v=Hlh4R8u-lWU"
 							target="_blank"
 							rel="noopener noreferrer"
+							aria-label={t('about.seeHowItWorks')}
 						>
 							<Button size="lg" className="gradient-btn text-white">
 								{t('about.seeHowItWorks')}

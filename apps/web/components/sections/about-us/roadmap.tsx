@@ -7,6 +7,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
+import { SectionContainer } from '~/components/shared/section-container'
 import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 const Roadmap = () => {
@@ -34,62 +35,60 @@ const Roadmap = () => {
 		},
 	}
 
-	// Get the total roadmap items length for progress indicator
-	const _totalSteps = mockAboutUs.roadmap.length
-
 	return (
-		<div className="container mx-auto py-6 relative z-10">
-			{/* Section header */}
-			<motion.div
-				className="text-center mb-16"
-				initial={{ opacity: 0, y: 20 }}
-				whileInView={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-				viewport={{ once: true, amount: 0.2 }}
-			>
-				<h2 className="text-3xl md:text-4xl font-bold gradient-text mb-4">
-					Designed to Scale Social Good
-				</h2>
-				<div className="w-20 h-1 bg-gradient-to-r from-green-500 to-indigo-500 mx-auto rounded-full mb-4" />
-				<p className="text-lg text-gray-700 max-w-2xl mx-auto">
-					Our vision for transforming social impact with blockchain, AI, and
-					community governance.
-				</p>
-			</motion.div>
-
-			{/* Roadmap cards container */}
-			<motion.div
-				className="flex flex-wrap justify-center lg:flex-nowrap gap-8 w-full max-w-6xl mx-auto"
-				variants={containerVariants}
-				initial="hidden"
-				whileInView="visible"
-				viewport={{ once: true, amount: 0.1 }}
-			>
-				{mockAboutUs.roadmap.map((item, _index) => (
-					<motion.div
-						key={item.id}
-						variants={cardVariants}
-						className="flex-1 min-w-[300px] max-w-sm relative"
-						whileHover={{ y: -10, transition: { duration: 0.3 } }}
+		<section
+			className="py-16 sm:py-20 lg:py-24 relative z-10 bg-gray-50/60"
+			aria-labelledby="roadmap-heading"
+		>
+			<SectionContainer>
+				<motion.div
+					className="text-center mb-10 max-w-3xl mx-auto sm:mb-14"
+					initial={{ opacity: 0, y: 20 }}
+					whileInView={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+					viewport={{ once: true, amount: 0.2 }}
+				>
+					<h2
+						id="roadmap-heading"
+						className="text-3xl font-bold tracking-tight gradient-text mb-3 sm:text-4xl"
 					>
-						<Card className="h-full rounded-xl shadow-lg bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all duration-300 border-0 overflow-hidden">
-							{/* Top gradient bar */}
-							<div className="h-1.5 w-full bg-gradient-to-r from-green-500 to-indigo-400" />
+						Designed to Scale Social Good
+					</h2>
+					<p className="text-muted-foreground text-base leading-relaxed sm:text-lg">
+						Our vision for transforming social impact with blockchain, AI, and
+						community governance.
+					</p>
+				</motion.div>
 
-							<CardHeader className="pt-20 pb-4 px-6">
-								<CardTitle className="text-xl font-bold text-gray-800">
-									{item.title}
-								</CardTitle>
-							</CardHeader>
-
-							<CardContent className="px-6 pb-6 text-gray-600">
-								{item.details}
-							</CardContent>
-						</Card>
-					</motion.div>
-				))}
-			</motion.div>
-		</div>
+				<motion.div
+					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 w-full max-w-6xl mx-auto"
+					variants={containerVariants}
+					initial="hidden"
+					whileInView="visible"
+					viewport={{ once: true, amount: 0.1 }}
+				>
+					{mockAboutUs.roadmap.map((item) => (
+						<motion.div
+							key={item.id}
+							variants={cardVariants}
+							className="h-full"
+						>
+							<Card className="h-full rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+								<div className="h-1 w-full bg-gradient-to-r from-emerald-500 to-indigo-500" />
+								<CardHeader className="pt-6 pb-2 px-6">
+									<CardTitle className="text-lg font-semibold text-gray-900">
+										{item.title}
+									</CardTitle>
+								</CardHeader>
+								<CardContent className="px-6 pb-6 pt-0 text-muted-foreground text-sm leading-relaxed">
+									{item.details}
+								</CardContent>
+							</Card>
+						</motion.div>
+					))}
+				</motion.div>
+			</SectionContainer>
+		</section>
 	)
 }
 

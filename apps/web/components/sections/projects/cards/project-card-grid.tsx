@@ -15,9 +15,11 @@ import { getContrastTextColor } from '~/lib/utils/color-utils'
 
 interface ProjectCardGridProps {
 	project: Project
+	/** Pass index from parent to set priority loading for first 6 cards (above-fold). */
+	index?: number
 }
 
-export function ProjectCardGrid({ project }: ProjectCardGridProps) {
+export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 	const { balance: onChainRaised } = useEscrowBalance({
 		escrowContractAddress: project.escrowContractAddress,
 		escrowType: 'multi-release',
@@ -33,10 +35,15 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 		100,
 	)
 
+	const imageSrc = project.image || '/images/placeholder.png'
+
 	return (
-		<Link href={`/projects/${project.slug}`} className="h-full">
+		<Link
+			href={`/projects/${project.slug}`}
+			className="h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl"
+		>
 			<motion.article
-				className="group relative bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-xl"
+				className="group relative bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm flex flex-col h-full transition-shadow duration-300 hover:shadow-xl"
 				whileHover={cardHover}
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -44,11 +51,13 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 			>
 				<div className="relative h-48 overflow-hidden">
 					<Image
-						src={project.image || '/images/placeholder.png'}
+						src={imageSrc}
 						alt={`${project.title} project thumbnail`}
 						fill
 						className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-						priority
+						sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+						priority={index < 6}
+						loading={index >= 6 ? 'lazy' : undefined}
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 					{project.category && (
@@ -100,14 +109,27 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 						/>
 					</div>
 
-					<div className="flex justify-between text-sm text-gray-500 mb-3">
-						<span>${displayRaised.toLocaleString()} raised</span>
+					<div className="flex justify-between text-sm text-gray-500 mb-3 tabular-nums">
+						<span>
+							{new Intl.NumberFormat(undefined, {
+								style: 'currency',
+								currency: 'USD',
+								maximumFractionDigits: 0,
+							}).format(displayRaised)}{' '}
+							raised
+						</span>
 						<span>{progressPercentage}%</span>
 					</div>
 
-					<div className="grid grid-cols-3 gap-2 mb-3">
+					<div className="grid grid-cols-3 gap-2 mb-3 tabular-nums">
 						<div className="text-center">
-							<p className="font-bold">${project.goal.toLocaleString()}</p>
+							<p className="font-bold">
+								{new Intl.NumberFormat(undefined, {
+									style: 'currency',
+									currency: 'USD',
+									maximumFractionDigits: 0,
+								}).format(project.goal)}
+							</p>
 							<p className="text-xs text-gray-500">Goal</p>
 						</div>
 						<div className="text-center">
@@ -115,7 +137,13 @@ export function ProjectCardGrid({ project }: ProjectCardGridProps) {
 							<p className="text-xs text-gray-500">Supporters</p>
 						</div>
 						<div className="text-center">
-							<p className="font-bold">${project.minInvestment}</p>
+							<p className="font-bold">
+								{new Intl.NumberFormat(undefined, {
+									style: 'currency',
+									currency: 'USD',
+									maximumFractionDigits: 0,
+								}).format(project.minInvestment)}
+							</p>
 							<p className="text-xs text-gray-500">Min Donation</p>
 						</div>
 					</div>

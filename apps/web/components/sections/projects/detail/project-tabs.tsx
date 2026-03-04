@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
 	Tabs,
 	TabsContent,
@@ -15,14 +16,35 @@ import {
 	UpdatesTab,
 } from './tabs'
 
+const TAB_VALUES = ['overview', 'team', 'milestones', 'updates', 'community'] as const
+type TabValue = (typeof TAB_VALUES)[number]
+
+function parseTab(param: string | null): TabValue {
+	if (param && TAB_VALUES.includes(param as TabValue)) return param as TabValue
+	return 'overview'
+}
+
 interface ProjectTabsProps {
 	project: ProjectDetail
 }
 
 export function ProjectTabs({ project }: ProjectTabsProps) {
+	const router = useRouter()
+	const pathname = usePathname()
+	const searchParams = useSearchParams()
+	const tab = parseTab(searchParams.get('tab'))
+
+	const setTab = (value: string) => {
+		const params = new URLSearchParams(searchParams.toString())
+		if (value === 'overview') params.delete('tab')
+		else params.set('tab', value)
+		const q = params.toString()
+		router.replace(q ? `${pathname}?${q}` : pathname ?? '/', { scroll: false })
+	}
+
 	return (
-		<Tabs defaultValue="overview" className="w-full">
-			<TabsList className="grid grid-cols-2 md:grid-cols-5 bg-muted mb-20 md:mb-8">
+		<Tabs value={tab} onValueChange={setTab} className="w-full">
+			<TabsList className="grid grid-cols-2 md:grid-cols-5 bg-muted mb-20 md:mb-8" aria-label="Project sections">
 				<TabsTrigger value="overview">Overview</TabsTrigger>
 				<TabsTrigger value="team">Team</TabsTrigger>
 				<TabsTrigger value="milestones">Milestones</TabsTrigger>

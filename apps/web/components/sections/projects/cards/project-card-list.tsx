@@ -34,7 +34,10 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 	)
 
 	return (
-		<Link href={`/projects/${project.slug}`} className="h-full">
+		<Link
+			href={`/projects/${project.slug}`}
+			className="h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+		>
 			<motion.article
 				className="flex overflow-hidden flex-row h-full bg-white rounded-lg shadow-md"
 				whileHover={cardHover}
@@ -42,14 +45,14 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.3 }}
 			>
-				{/* Image section - responsive width */}
 				<div className="relative w-1/4 min-w-[100px] max-w-[180px] overflow-hidden">
 					<Image
 						src={project.image || '/images/placeholder.png'}
 						alt={`${project.title} project thumbnail`}
 						fill
 						className="object-cover"
-						priority
+						sizes="(max-width: 768px) 100vw, 180px"
+						loading="lazy"
 					/>
 				</div>
 
@@ -91,15 +94,26 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 							/>
 						</div>
 
-						<div className="flex justify-between text-xs text-gray-500 sm:text-sm">
-							<span>${displayRaised.toLocaleString()} raised</span>
+						<div className="flex justify-between text-xs text-gray-500 sm:text-sm tabular-nums">
+							<span>
+								{new Intl.NumberFormat(undefined, {
+									style: 'currency',
+									currency: 'USD',
+									maximumFractionDigits: 0,
+								}).format(displayRaised)}{' '}
+								raised
+							</span>
 							<span>{progressPercentage}%</span>
 						</div>
 
-						<div className="grid grid-cols-3 gap-1 sm:gap-2">
+						<div className="grid grid-cols-3 gap-1 sm:gap-2 tabular-nums">
 							<div className="text-center">
 								<p className="text-xs font-bold sm:text-sm">
-									${project.goal.toLocaleString()}
+									{new Intl.NumberFormat(undefined, {
+										style: 'currency',
+										currency: 'USD',
+										maximumFractionDigits: 0,
+									}).format(project.goal)}
 								</p>
 								<p className="text-[10px] sm:text-xs text-gray-500">Goal</p>
 							</div>
@@ -113,7 +127,11 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 							</div>
 							<div className="text-center">
 								<p className="text-xs font-bold sm:text-sm">
-									${project.minInvestment}
+									{new Intl.NumberFormat(undefined, {
+										style: 'currency',
+										currency: 'USD',
+										maximumFractionDigits: 0,
+									}).format(project.minInvestment)}
 								</p>
 								<p className="text-[10px] sm:text-xs text-gray-500">
 									Minimum Donation

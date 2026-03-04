@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Home, Layers } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
@@ -31,18 +31,19 @@ export function BreadcrumbContainer({
 }: BreadcrumbContainerProps) {
 	const pathname = usePathname()
 	const params = useParams()
+	const reducedMotion = useReducedMotion()
 	const projectSlug = params?.slug as string | undefined
 
-	// Only show breadcrumbs on /projects pages
 	if (!pathname.includes('/projects')) {
 		return null
 	}
 
 	return (
-		<motion.div
-			initial={{ opacity: 0, y: -10 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.3 }}
+		<motion.nav
+			aria-label="Breadcrumb"
+			initial={reducedMotion ? false : { opacity: 0, y: -10 }}
+			animate={reducedMotion ? false : { opacity: 1, y: 0 }}
+			transition={reducedMotion ? { duration: 0 } : { duration: 0.3 }}
 			className="mb-4"
 		>
 			<Breadcrumb>
@@ -128,6 +129,6 @@ export function BreadcrumbContainer({
 					)}
 				</BreadcrumbList>
 			</Breadcrumb>
-		</motion.div>
+		</motion.nav>
 	)
 }

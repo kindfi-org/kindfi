@@ -30,7 +30,7 @@ interface CommentFormProps {
 export function CommentForm({
 	userAvatar = '/abstract-geometric-shapes.png',
 	userName = 'You',
-	placeholder = 'Add a comment...',
+	placeholder = 'Add a comment…',
 	buttonText = 'Submit',
 	maxLength = 500,
 	onSubmit,

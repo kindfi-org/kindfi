@@ -1,63 +1,68 @@
 import { Calendar } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
+import { cn } from '~/lib/utils'
 import type { NewsUpdate } from '~/lib/types/learning.types'
 import { formatDate } from '~/lib/utils/date-utils'
+
+const PLACEHOLDER_IMG = '/images/placeholder.png'
 
 interface NewsCardProps {
 	update: NewsUpdate
 	className?: string
 }
 
-export function NewsCard({ update, className = '' }: NewsCardProps) {
+export function NewsCard({ update, className }: NewsCardProps) {
+	const href = `/news/${update.slug}`
+	const imageSrc = update.image || PLACEHOLDER_IMG
+	const hasTags = Array.isArray(update.tags) && update.tags.length > 0
+
 	return (
-		<Link href={`/news/${update.slug}`} className={`block group ${className}`}>
-			<article className="rounded-xl border-0 bg-white/80 backdrop-blur-sm text-card-foreground shadow-xl hover:shadow-green-200/50 hover:shadow-2xl transition-all duration-300 h-full overflow-hidden">
-				<div className="h-2 bg-gradient-to-r from-green-500 to-blue-700" />
-				{/* Image Container */}
-				{update.image && (
-					<div className="relative h-48 w-full overflow-hidden">
+		<Link
+			href={href}
+			className={cn('block group', className)}
+			aria-label={`Read article: ${update.title}`}
+		>
+			<article className="rounded-xl border border-gray-200 bg-white text-card-foreground shadow-sm transition-all duration-300 h-full overflow-hidden hover:shadow-md hover:border-emerald-800/20 hover:-translate-y-0.5">
+				{update.image ? (
+					<div className="relative h-44 w-full overflow-hidden rounded-t-xl">
 						<Image
-							src={update.image || PLACEHOLDER_IMG}
+							src={imageSrc}
 							alt={update.title}
 							fill
-							className="object-cover group-hover:scale-105 transition-transform duration-300"
+							className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+							sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
 						/>
+						<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 					</div>
-				)}
+				) : null}
 
-				{/* Content Container */}
-				<div className="p-6">
-					{/* Date */}
-					<div className="flex items-center gap-2 text-muted-foreground mb-3">
-						<Calendar className="w-4 h-4" />
+				<div className="p-5">
+					<div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider mb-2">
+						<Calendar className="w-3.5 h-3.5 shrink-0" aria-hidden />
 						<time dateTime={update.date}>{formatDate(update.date)}</time>
 					</div>
 
-					{/* Title */}
-					<h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
+					<h3 className="text-lg font-semibold text-gray-900 mb-2 transition-colors group-hover:text-emerald-800">
 						{update.title}
 					</h3>
 
-					{/* Description */}
-					<p className="text-muted-foreground line-clamp-3">
+					<p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
 						{update.description}
 					</p>
 
-					{/* Tags */}
-					{update.tags && update.tags.length > 0 && (
-						<div className="flex gap-2 mt-4 flex-wrap">
+					{hasTags ? (
+						<ul className="flex gap-1.5 mt-3 flex-wrap list-none p-0 m-0">
 							{update.tags.map((tag: string) => (
-								<span
+								<li
 									key={tag}
-									className="text-xs px-2.5 py-1 bg-muted text-muted-foreground rounded-full"
+									className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
 								>
 									{tag}
-								</span>
+								</li>
 							))}
-						</div>
-					)}
+						</ul>
+					) : null}
 				</div>
 			</article>
 		</Link>

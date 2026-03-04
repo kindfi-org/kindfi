@@ -1,7 +1,7 @@
 'use client'
 
 import type { Tables } from '@services/supabase'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '~/components/base/button'
@@ -24,6 +24,7 @@ export function CategoryFilters({
 	onResetCategories,
 }: CategoryFiltersProps) {
 	const { t } = useI18n()
+	const reducedMotion = useReducedMotion()
 	const scrollRef = useRef<HTMLDivElement | null>(null)
 	const [showLeftFade, setShowLeftFade] = useState(false)
 	const [showRightFade, setShowRightFade] = useState(false)
@@ -57,9 +58,9 @@ export function CategoryFilters({
 	return (
 		<motion.div
 			className="flex flex-col space-y-3 mb-6 relative"
-			initial={{ opacity: 0, y: 8 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.25, ease: 'easeOut' }}
+			initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+			animate={reducedMotion ? false : { opacity: 1, y: 0 }}
+			transition={reducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
 		>
 			<div className="flex justify-between items-center">
 				<h3 className="font-medium">{t('projects.filterByCategory')}</h3>
@@ -89,14 +90,18 @@ export function CategoryFilters({
 				className={cn(
 					'flex overflow-x-auto overflow-y-hidden no-scrollbar gap-2 py-1',
 				)}
-				variants={staggerContainer}
-				initial="initial"
-				animate="animate"
+				variants={reducedMotion ? undefined : staggerContainer}
+				initial={reducedMotion ? false : 'initial'}
+				animate={reducedMotion ? false : 'animate'}
 				role="group"
 				aria-label={t('projects.filterByCategory')}
 			>
 				{categories.map((category) => (
-					<motion.div key={category.id} variants={fadeIn} className="shrink-0">
+					<motion.div
+						key={category.id}
+						variants={reducedMotion ? undefined : fadeIn}
+						className="shrink-0"
+					>
 						<CategoryBadge
 							category={category}
 							selected={selectedCategories.includes(category.slug ?? '')}

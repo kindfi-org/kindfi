@@ -20,6 +20,7 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
 		<div
 			className="flex items-center space-x-2 bg-gray-100 p-1 rounded-md"
 			role="radiogroup"
+			aria-label="View mode: grid or list"
 		>
 			<Button
 				variant="ghost"

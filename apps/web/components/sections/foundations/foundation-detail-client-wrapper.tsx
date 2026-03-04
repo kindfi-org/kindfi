@@ -377,7 +377,7 @@ export function FoundationDetailClientWrapper({
 								completed
 							</span>
 						</div>
-						{foundation.totalCampaignsOpen > 0 && (
+						{foundation.totalCampaignsOpen > 0 ? (
 							<div className="flex items-center gap-2 text-muted-foreground">
 								<Users className="h-5 w-5 text-blue-600" aria-hidden="true" />
 								<span className="text-sm md:text-base">
@@ -387,7 +387,7 @@ export function FoundationDetailClientWrapper({
 									active campaigns
 								</span>
 							</div>
-						)}
+						) : null}
 						<div className="flex items-center gap-2 text-muted-foreground">
 							<Heart className="h-5 w-5 text-pink-600" aria-hidden="true" />
 							<span className="text-sm md:text-base">
