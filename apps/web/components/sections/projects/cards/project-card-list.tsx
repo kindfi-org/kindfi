@@ -62,14 +62,22 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 						<h3 className="text-base font-bold sm:text-lg md:text-xl line-clamp-1">
 							{project.title}
 						</h3>
-						{project.category && (
-							<div className="shrink-0">
+						<div className="flex shrink-0 flex-wrap gap-1.5">
+							{project.category && (
 								<CategoryBadge
 									category={project.category}
 									className="text-xs sm:text-sm"
 								/>
-							</div>
-						)}
+							)}
+							{project.escrowContractAddress && (
+								<Badge
+									className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-green-600/90 text-white border-0"
+									aria-label="This project accepts donations"
+								>
+									Accepting donations
+								</Badge>
+							)}
+						</div>
 					</div>
 
 					<p className="mb-2 text-xs sm:text-sm text-muted-foreground sm:mb-3 md:mb-4 line-clamp-2">
