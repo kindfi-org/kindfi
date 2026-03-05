@@ -10,7 +10,10 @@ import { motion, useInView } from 'framer-motion'
 import { AlertCircle, CheckCircle, Clock } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import type { Milestone } from '~/lib/types/project/project-detail.types'
+import type {
+	Milestone,
+	MilestoneStatus,
+} from '~/lib/types/project/project-detail.types'
 import {
 	getMilestoneStatus,
 	isSingleReleaseMilestone,
@@ -51,12 +54,12 @@ export function MilestonesTab({
 			const mapped: Milestone[] = ms.map((m, idx) => {
 				const isApproved = getMilestoneStatus(m)
 				const isSingle = isSingleReleaseMilestone(m)
-				let status: string
+				let status: MilestoneStatus
 
 				if (isApproved) {
 					status = 'approved'
 				} else if (!isSingle && m.status) {
-					status = m.status
+					status = (m.status as MilestoneStatus) ?? 'pending'
 				} else {
 					status = 'pending'
 				}

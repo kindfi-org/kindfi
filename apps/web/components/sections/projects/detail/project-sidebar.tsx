@@ -44,15 +44,12 @@ interface ProjectSidebarProps {
 const buildFormSchema = (minInvestment: number) =>
 	z.object({
 		investmentAmount: z.coerce
-			.number({
-				invalid_type_error: 'Investment amount must be a number',
-				required_error: 'Investment amount is required',
-			})
+			.number({ error: 'Investment amount must be a valid number' })
 			.positive('Investment amount must be greater than zero')
 			.min(minInvestment, `Minimum investment is $${minInvestment}`),
 	})
 
-type FormValues = { investmentAmount: string }
+type FormValues = z.infer<ReturnType<typeof buildFormSchema>>
 
 export function ProjectSidebar({ project }: ProjectSidebarProps) {
 	const reducedMotion = useReducedMotion()
@@ -96,7 +93,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		resolver: zodResolver(formSchema),
 		mode: 'onBlur',
 		defaultValues: {
-			investmentAmount: String(project.minInvestment),
+			investmentAmount: project.minInvestment,
 		},
 	})
 
