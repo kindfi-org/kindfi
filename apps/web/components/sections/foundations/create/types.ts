@@ -33,7 +33,7 @@ export const createFoundationSchema = z.object({
 	vision: z.string().max(MAX_VISION_LENGTH).optional(),
 	websiteUrl: z.string().url().optional().or(z.literal('')),
 	socialLinks: z
-		.record(z.string().url())
+		.record(z.string(), z.string().url())
 		.refine(
 			(obj) => Object.keys(obj).length <= MAX_SOCIAL_LINKS_KEYS,
 			`At most ${MAX_SOCIAL_LINKS_KEYS} social links`,

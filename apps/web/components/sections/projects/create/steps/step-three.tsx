@@ -104,6 +104,7 @@ export function StepThree({
 
 	// Derive submit-ability from watched values so the button responds to
 	// field.onChange (e.g. badge clicks) without needing a blur event.
+	// eslint-disable-next-line react-hooks/incompatible-library -- watch() is intentional for submit button state
 	const locationValue = form.watch('location')
 	const categoryValue = form.watch('category')
 	const canSubmit =

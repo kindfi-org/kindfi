@@ -163,7 +163,7 @@ export function ProjectsClientWrapper() {
 					key={viewMode}
 					initial={reducedMotion ? false : { opacity: 0 }}
 					animate={reducedMotion ? false : { opacity: 1 }}
-					exit={reducedMotion ? false : { opacity: 0 }}
+					exit={reducedMotion ? undefined : { opacity: 0 }}
 					transition={reducedMotion ? { duration: 0 } : { duration: 0.2 }}
 				>
 					{isLoadingProjects ? (

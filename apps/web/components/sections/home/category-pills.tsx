@@ -42,7 +42,7 @@ export function CategoryPills({
 	const router = useRouter()
 	const { t } = useI18n()
 	const prefersReducedMotion = useReducedMotion()
-	const scrollRef = useRef<HTMLNavElement | null>(null)
+	const scrollRef = useRef<HTMLElement | null>(null)
 	const [isHovered, setIsHovered] = useState(false)
 	const [isInteracting, setIsInteracting] = useState(false)
 	const [showLeftFade, setShowLeftFade] = useState(false)

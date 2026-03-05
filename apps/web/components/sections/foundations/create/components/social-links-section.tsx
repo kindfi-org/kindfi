@@ -143,7 +143,7 @@ export function SocialLinksSection() {
 														{platform}
 													</div>
 													<div className="text-xs text-muted-foreground truncate">
-														{url}
+														{String(url)}
 													</div>
 												</div>
 												<Button

@@ -77,8 +77,10 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 	const formSchema = z.object({
 		investmentAmount: z
 			.number({
-				required_error: 'Investment amount is required',
-				invalid_type_error: 'Investment amount must be a number',
+				error: (issue) =>
+					issue.input === undefined
+						? 'Investment amount is required'
+						: 'Investment amount must be a number',
 			})
 			.min(
 				project.minInvestment,
