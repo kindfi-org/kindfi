@@ -3,6 +3,8 @@ import { TransactionBuilder } from '@stellar/stellar-sdk'
 import { Api, Server } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { signAndSubmitSchema } from '~/lib/schemas/escrow-sign.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/escrow/sign-and-submit
@@ -14,16 +16,9 @@ export async function POST(req: NextRequest) {
 	try {
 		const appConfig = appEnvConfig('web')
 		const body = await req.json()
-		const { unsignedTransactionXDR, userDevice } = body
-
-		if (!unsignedTransactionXDR || !userDevice?.address) {
-			return NextResponse.json(
-				{
-					error: 'Missing required fields: unsignedTransactionXDR, userDevice',
-				},
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(signAndSubmitSchema, body)
+		if (!validation.success) return validation.response
+		const { unsignedTransactionXDR, userDevice } = validation.data
 
 		// Parse the unsigned transaction
 		const transaction = TransactionBuilder.fromXDR(

@@ -12,6 +12,8 @@ import {
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
 } from '~/lib/services/pinata'
+import { evolveNftSchema } from '~/lib/schemas/nft.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 import { IMPACT_SCORE_WEIGHTS } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
@@ -36,8 +38,12 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 		const body = await req.json()
+		const validation = validateRequest(evolveNftSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
 		const sessionUserId = session.user.id
-		const requestedUserId = body.user_id
+		const requestedUserId = validation.data.user_id
 
 		let userId: string
 
@@ -61,12 +67,6 @@ export async function POST(req: NextRequest) {
 			userId = sessionUserId
 		}
 
-		if (!body.nft_id) {
-			return new Response(
-				JSON.stringify({ error: 'Bad Request: Missing nft_id in payload.' }),
-				{ status: 400 },
-			)
-		}
 
 		// --- Rate Limiting via Upstash Redis ---
 		try {

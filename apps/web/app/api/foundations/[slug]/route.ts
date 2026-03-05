@@ -2,7 +2,9 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { foundationSlugParamSchema, foundationUpdateFormSchema } from '~/lib/schemas/foundation.schemas'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function PATCH(
 	req: Request,
@@ -16,12 +18,9 @@ export async function PATCH(
 		}
 
 		const { slug } = await params
-		if (!slug) {
-			return NextResponse.json(
-				{ error: 'Foundation slug is required' },
-				{ status: 400 },
-			)
-		}
+		const slugValidation = validateRequest(foundationSlugParamSchema, { slug })
+		if (!slugValidation.success) return slugValidation.response
+		const { slug: validatedSlug } = slugValidation.data
 
 		const supabase = supabaseServiceRole
 
@@ -29,7 +28,7 @@ export async function PATCH(
 		const { data: foundation, error: fetchError } = await supabase
 			.from('foundations')
 			.select('id, founder_id')
-			.eq('slug', slug)
+			.eq('slug', validatedSlug)
 			.maybeSingle()
 
 		if (fetchError) {
@@ -52,38 +51,30 @@ export async function PATCH(
 		}
 
 		const formData = await req.formData()
-		const name = formData.get('name') as string | null
-		const description = formData.get('description') as string | null
-		const foundedYearRaw = formData.get('foundedYear')
-		const foundedYear =
-			typeof foundedYearRaw === 'string'
-				? Number.parseInt(foundedYearRaw, 10)
-				: null
-		const mission = (formData.get('mission') as string) || null
-		const vision = (formData.get('vision') as string) || null
-		const websiteUrl = (formData.get('websiteUrl') as string) || null
-		const socialLinksRaw = formData.get('socialLinks') as string | null
-		let socialLinks: Record<string, string> = {}
-		if (socialLinksRaw) {
-			try {
-				socialLinks = JSON.parse(socialLinksRaw) as Record<string, string>
-			} catch {
-				// Invalid JSON, use empty object
-			}
+		const formPayload = {
+			name: formData.get('name') ?? '',
+			description: formData.get('description') ?? '',
+			foundedYear: (() => {
+				const raw = formData.get('foundedYear')
+				return typeof raw === 'string' ? Number.parseInt(raw, 10) : NaN
+			})(),
+			mission: (formData.get('mission') as string) || null,
+			vision: (formData.get('vision') as string) || null,
+			websiteUrl: (formData.get('websiteUrl') as string) || null,
+			socialLinks: (() => {
+				const raw = formData.get('socialLinks') as string | null
+				if (!raw) return {}
+				try {
+					return JSON.parse(raw) as Record<string, string>
+				} catch {
+					return {}
+				}
+			})(),
+			logo: formData.get('logo') as File | null,
 		}
-		const logo = formData.get('logo') as File | null
-
-		if (
-			!name ||
-			!description ||
-			foundedYear == null ||
-			Number.isNaN(foundedYear)
-		) {
-			return NextResponse.json(
-				{ error: 'Missing required fields: name, description, foundedYear' },
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(foundationUpdateFormSchema, formPayload)
+		if (!validation.success) return validation.response
+		const { name, description, foundedYear, mission, vision, websiteUrl, socialLinks, logo } = validation.data
 
 		const updatePayload: Record<string, unknown> = {
 			name,
@@ -109,7 +100,7 @@ export async function PATCH(
 			)
 		}
 
-		if (logo instanceof File && logo.size > 0) {
+		if (logo && logo instanceof File && logo.size > 0) {
 			const logoUrl = await uploadFoundationLogo(slug, logo, supabase)
 			if (logoUrl) {
 				const { error: logoUpdateError } = await supabase
@@ -127,7 +118,7 @@ export async function PATCH(
 			}
 		}
 
-		return NextResponse.json({ slug }, { status: 200 })
+		return NextResponse.json({ slug: validatedSlug }, { status: 200 })
 	} catch (err) {
 		console.error(err)
 		return NextResponse.json(

@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { recordStreakSchema } from '~/lib/schemas/streak.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * GET /api/streaks
@@ -58,17 +60,14 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { period, donation_timestamp, user_address } = body
+		const validation = validateRequest(recordStreakSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { period, donation_timestamp, user_address } = validation.data
 
 		// Use session user_id to ensure RLS policies work correctly
 		const user_id = session.user.id
-
-		if (!period) {
-			return NextResponse.json(
-				{ error: 'Missing required fields: period' },
-				{ status: 400 },
-			)
-		}
 
 		// Use service role client to bypass RLS, but ensure user_id matches session
 		// This is necessary because these operations are triggered server-side after donations

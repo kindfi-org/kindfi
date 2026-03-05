@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
+import { createFoundationFormSchema } from '~/lib/schemas/foundation-create.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: Request) {
 	try {
@@ -51,32 +53,39 @@ export async function POST(req: Request) {
 
 		const formData = await req.formData()
 
-		// Extract fields from multipart form data
-		const name = formData.get('name') as string
-		const description = formData.get('description') as string
-		const slug = formData.get('slug') as string
-		const foundedYear = Number(formData.get('foundedYear'))
-		const mission = formData.get('mission') as string | null
-		const vision = formData.get('vision') as string | null
-		const websiteUrl = formData.get('websiteUrl') as string | null
-		const socialLinksRaw = formData.get('socialLinks') as string | null
-		let socialLinks: Record<string, string> = {}
-		if (socialLinksRaw) {
-			try {
-				socialLinks = JSON.parse(socialLinksRaw) as Record<string, string>
-			} catch {
-				// Invalid JSON, use empty object
-			}
+		const formDataObj = {
+			name: formData.get('name') ?? '',
+			description: formData.get('description') ?? '',
+			slug: formData.get('slug') ?? '',
+			foundedYear: formData.get('foundedYear') ?? '',
+			mission: formData.get('mission') ?? undefined,
+			vision: formData.get('vision') ?? undefined,
+			websiteUrl: formData.get('websiteUrl') ?? undefined,
+			socialLinks: (() => {
+				const raw = formData.get('socialLinks') as string | null
+				if (!raw) return {}
+				try {
+					return JSON.parse(raw) as Record<string, string>
+				} catch {
+					return {}
+				}
+			})(),
 		}
+		const validation = validateRequest(createFoundationFormSchema, formDataObj)
+		if (!validation.success) {
+			return validation.response
+		}
+		const {
+			name,
+			description,
+			slug,
+			foundedYear,
+			mission,
+			vision,
+			websiteUrl,
+			socialLinks,
+		} = validation.data
 		const logo = formData.get('logo') as File | null
-
-		// Validate required fields
-		if (!name || !description || !slug || !foundedYear) {
-			return NextResponse.json(
-				{ error: 'Missing required fields' },
-				{ status: 400 },
-			)
-		}
 
 		// Check if slug already exists
 		const { data: existing } = await supabase

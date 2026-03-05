@@ -3,11 +3,13 @@ import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { projectPitchFormSchema } from '~/lib/schemas/project.schemas'
 import {
 	deleteFolderFromBucket,
 	transformToEmbedUrl,
 	uploadPitchDeck,
 } from '~/lib/utils/project-utils'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(
 	req: Request,
@@ -23,7 +25,18 @@ export async function POST(
 
 		const formData = await req.formData()
 		const { slug: projectSlug } = await params
-		const projectId = formData.get('projectId') as string
+		const formPayload = {
+			projectId: formData.get('projectId') as string,
+			projectSlug,
+			title: formData.get('title') as string,
+			story: formData.get('story') as string,
+			videoUrl: (formData.get('videoUrl') as string) || null,
+			pitchDeck: formData.get('pitchDeck') as File | null,
+			removePitchDeck: formData.get('removePitchDeck') === 'true',
+		}
+		const validation = validateRequest(projectPitchFormSchema, formPayload)
+		if (!validation.success) return validation.response
+		const { projectId, projectSlug: validatedSlug, title, story, videoUrl: rawVideoUrl, pitchDeck, removePitchDeck } = validation.data
 
 		// Verify user has permission to update this project
 		// Check if user is the project owner or has editor role in parallel
@@ -65,30 +78,7 @@ export async function POST(
 		// Use service role client for pitch update with manual authorization check
 		// This bypasses RLS but we've already verified the user has permission
 		const supabase = supabaseServiceRole
-
-		const title = formData.get('title') as string
-		const story = formData.get('story') as string
-		const rawVideoUrl = formData.get('videoUrl') as string | null
 		const videoUrl = rawVideoUrl ? transformToEmbedUrl(rawVideoUrl) : null
-		const pitchDeck = formData.get('pitchDeck') as File | null
-		const removePitchDeck = formData.get('removePitchDeck') === 'true'
-
-		// Single guard clause that also reports which required fields are missing
-		const missingFields = Object.entries({
-			projectId,
-			projectSlug,
-			title,
-			story,
-		})
-			.filter(([, v]) => !v)
-			.map(([k]) => k)
-			.join(', ')
-		if (missingFields) {
-			return NextResponse.json(
-				{ error: `Missing required fields: ${missingFields}` },
-				{ status: 400 },
-			)
-		}
 
 		const projectPitchData: TablesInsert<'project_pitch'> = {
 			project_id: projectId,
@@ -99,7 +89,7 @@ export async function POST(
 
 		if (pitchDeck instanceof File) {
 			projectPitchData.pitch_deck =
-				(await uploadPitchDeck(projectSlug, pitchDeck, supabase)) ?? undefined
+				(await uploadPitchDeck(validatedSlug, pitchDeck, supabase)) ?? undefined
 		} else if (removePitchDeck) {
 			// Remove pitch deck from the database
 			projectPitchData.pitch_deck = null
@@ -109,7 +99,7 @@ export async function POST(
 				await deleteFolderFromBucket(
 					supabase,
 					'project_pitch_decks',
-					projectSlug,
+					validatedSlug,
 				)
 			} catch (e) {
 				console.warn(

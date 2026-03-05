@@ -1,8 +1,8 @@
 import { supabase } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
-import type { EscrowFundUpdateData } from '~/lib/types/escrow/escrow-payload.types'
-import { validateEscrowFundUpdate } from '~/lib/validators/escrow'
+import { escrowFundUpdateSchema } from '~/lib/schemas/escrow.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(
 	req: NextRequest,
@@ -10,21 +10,12 @@ export async function POST(
 ) {
 	try {
 		const transactionHash = (await params).transactionHash
-		const updateData: EscrowFundUpdateData = await req.json()
-
-		const validationResult = validateEscrowFundUpdate(updateData)
-
-		if (!validationResult.success) {
-			return NextResponse.json(
-				{
-					error: 'Invalid escrow fund update data',
-					details: validationResult.errors,
-				},
-				{ status: 400 },
-			)
+		const body = await req.json()
+		const validation = validateRequest(escrowFundUpdateSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
-
-		const { escrowId, status } = updateData
+		const { escrowId, status } = validation.data
 
 		// Update transaction status
 		const { data, error } = await supabase

@@ -4,11 +4,15 @@ import {
 	getUser,
 	saveUser,
 } from '@packages/lib/db'
-import type { AuthenticationResponseJSON } from '@simplewebauthn/server'
-import { verifyAuthenticationResponse } from '@simplewebauthn/server'
+import {
+	type AuthenticationResponseJSON,
+	verifyAuthenticationResponse,
+} from '@simplewebauthn/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
+import { verifyAuthSchema } from '~/lib/schemas/passkey.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/passkey/verify-auth
@@ -19,24 +23,11 @@ import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()
-		const {
-			identifier,
-			authenticationResponse,
-			origin,
-			userId,
-		}: {
-			identifier: string
-			authenticationResponse: AuthenticationResponseJSON
-			origin: string
-			userId?: string
-		} = body
-
-		if (!identifier || !authenticationResponse || !origin) {
-			return NextResponse.json(
-				{ error: 'Missing required fields' },
-				{ status: 400 },
-			)
+		const validation = validateRequest(verifyAuthSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
+		const { identifier, authenticationResponse, origin, userId } = validation.data
 
 		const rpId = getRpIdFromOrigin(origin)
 		// Use the origin as expectedOrigin (it's already validated by getRpIdFromOrigin)
@@ -77,7 +68,7 @@ export async function POST(req: NextRequest) {
 
 		// Verify authentication
 		const verification = await verifyAuthenticationResponse({
-			response: authenticationResponse,
+			response: authenticationResponse as AuthenticationResponseJSON,
 			expectedChallenge,
 			expectedOrigin,
 			expectedRPID: rpId,

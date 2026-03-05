@@ -4,6 +4,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
 	try {
@@ -13,7 +15,11 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { projectId, contractId, amount, transactionHash } = body
+		const validation = validateRequest(createContributionSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { projectId, contractId, amount, transactionHash } = validation.data
 
 		// If contractId is provided but projectId is not, find project by escrow contract address
 		let finalProjectId = projectId
@@ -37,15 +43,6 @@ export async function POST(req: NextRequest) {
 			finalProjectId = escrowContract.project_id
 		}
 
-		if (!finalProjectId || !amount || amount <= 0) {
-			return NextResponse.json(
-				{
-					error:
-						'Invalid request. projectId (or contractId) and amount are required.',
-				},
-				{ status: 400 },
-			)
-		}
 
 		// Check if contribution already exists for this transaction hash (to avoid duplicates)
 		if (transactionHash) {

@@ -1,7 +1,9 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { addressParamSchema } from '~/lib/schemas/stellar.schemas'
 import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transactions'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * GET /api/stellar/balances/[address]
@@ -14,15 +16,9 @@ export async function GET(
 ) {
 	try {
 		const { address } = await params
-
-		if (!address) {
-			return NextResponse.json(
-				{
-					error: 'Missing smart wallet address',
-				},
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(addressParamSchema, { address })
+		if (!validation.success) return validation.response
+		const { address: validatedAddress } = validation.data
 
 		// Get configuration
 		const config = appEnvConfig('web')
@@ -34,7 +30,7 @@ export async function GET(
 			config.stellar.fundingAccount,
 		)
 
-		const balances = await txService.getBalances(address)
+		const balances = await txService.getBalances(validatedAddress)
 
 		// Convert stroops to XLM for display
 		const xlmBalance = (Number(balances.xlm) / 10_000_000).toFixed(7)

@@ -1,11 +1,8 @@
 import { supabase } from '@packages/lib/supabase'
 import type { TablesUpdate } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
-
-interface UpdateCommentBody {
-	is_resolved?: boolean
-	content?: string
-}
+import { updateCommentSchema } from '../validation'
+import { validateRequest } from '~/lib/utils/validation'
 
 // PATCH /api/comments/[id]
 // Updates an existing comment
@@ -18,15 +15,17 @@ export async function PATCH(
 	if (!id) {
 		return NextResponse.json({ error: 'Missing id' }, { status: 400 })
 	}
-	let body: UpdateCommentBody | null = null
+	let body: unknown
 	try {
-		body = (await req.json()) as UpdateCommentBody
+		body = await req.json()
 	} catch {
 		return NextResponse.json({ error: 'Invalid Request body' }, { status: 400 })
 	}
-	if (!body || Object.keys(body).length === 0) {
-		return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
+	const validation = validateRequest(updateCommentSchema, body)
+	if (!validation.success) {
+		return validation.response
 	}
+	const bodyData = validation.data
 
 	// Auth check
 	const {
@@ -59,16 +58,10 @@ export async function PATCH(
 
 	// Allow marking resolved only on questions
 	const updates: TablesUpdate<'comments'> = {}
-	if (typeof body.content === 'string') {
-		if (body.content.trim().length === 0) {
-			return NextResponse.json(
-				{ error: 'Content cannot be empty' },
-				{ status: 400 },
-			)
-		}
-		updates.content = body.content.trim() as string
+	if (typeof bodyData.content === 'string') {
+		updates.content = bodyData.content as string
 	}
-	if (typeof body.is_resolved === 'boolean') {
+	if (typeof bodyData.is_resolved === 'boolean') {
 		if (existing.type !== 'question') {
 			return NextResponse.json(
 				{ error: 'Only questions can be marked resolved' },
@@ -78,7 +71,7 @@ export async function PATCH(
 		const currentMetadata = (existing.metadata as Record<string, unknown>) || {}
 		updates.metadata = {
 			...currentMetadata,
-			status: body.is_resolved ? 'resolved' : 'new',
+			status: bodyData.is_resolved ? 'resolved' : 'new',
 		}
 	}
 

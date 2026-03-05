@@ -2,24 +2,16 @@ import { supabase } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
-import type { MilestoneReviewPayload } from '~/lib/types/escrow/escrow-payload.types'
-import { validateMilestoneReview } from '~/lib/validators/escrow'
+import { milestoneReviewSchema } from '~/lib/schemas/escrow.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
 	try {
-		const reviewData: MilestoneReviewPayload = await req.json()
-		const validationResult = validateMilestoneReview(reviewData)
-
-		if (!validationResult.success) {
-			return NextResponse.json(
-				{
-					error: 'Invalid milestone review data',
-					details: validationResult.errors,
-				},
-				{ status: 400 },
-			)
+		const body = await req.json()
+		const validation = validateRequest(milestoneReviewSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
-
 		const {
 			milestoneId,
 			reviewerId,
@@ -27,7 +19,7 @@ export async function POST(req: NextRequest) {
 			comments,
 			signer,
 			escrowContractAddress,
-		} = reviewData
+		} = validation.data
 
 		// Verify authenticated user matches reviewerId
 		const {

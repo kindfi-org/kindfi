@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { referralDonationSchema } from '~/lib/schemas/referral.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/referrals/donation
@@ -20,14 +22,11 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { referred_id, referred_address } = body
-
-		if (!referred_id) {
-			return NextResponse.json(
-				{ error: 'Missing required field: referred_id' },
-				{ status: 400 },
-			)
+		const validation = validateRequest(referralDonationSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
+		const { referred_id, referred_address } = validation.data
 
 		// Use service role client to bypass RLS — auth is handled by NextAuth session above
 		const { supabase } = await import('@packages/lib/supabase')
