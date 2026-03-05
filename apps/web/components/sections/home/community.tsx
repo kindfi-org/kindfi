@@ -93,7 +93,7 @@ export function Community() {
 				<CTAForm onSubmit={handleFormSubmission} />
 
 				{/* Form Status Message */}
-				{formStatus && (
+				{formStatus ? (
 					<div
 						className={`mt-4 p-4 rounded-lg ${
 							formStatus.type === 'success'
@@ -103,7 +103,7 @@ export function Community() {
 					>
 						{formStatus.message}
 					</div>
-				)}
+				) : null}
 			</SectionContainer>
 		</section>
 	)

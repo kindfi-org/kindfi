@@ -2,7 +2,6 @@
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import Autoplay from 'embla-carousel-autoplay'
-import router from 'next/router'
 import { useState } from 'react'
 import {
 	Carousel,
@@ -40,7 +39,7 @@ export function HighlightedProjects() {
 	})
 
 	return (
-		<section className="py-10 bg-white">
+		<section className="py-16 bg-white sm:py-20 lg:py-24">
 			<SectionContainer>
 				<SectionCaption
 					title={t('home.highlightedProjectsTitle')}
@@ -99,10 +98,8 @@ export function HighlightedProjects() {
 					<CTAButtons
 						primaryText={t('home.waitlistYourProject')}
 						secondaryText={t('home.exploreCauses')}
-						primaryHref={''}
-						secondaryHref={'/projects'}
+						secondaryHref="/projects"
 						onPrimaryClick={() => setWaitlistOpen(true)}
-						onSecondaryClick={() => router.push('/projects')}
 					/>
 					<WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
 				</div>

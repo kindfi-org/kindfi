@@ -3,6 +3,15 @@ import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import {
+	validateFoundedYear,
+	validateOptionalString,
+	validateOptionalUrl,
+	validateRequiredString,
+	validateSlug,
+	validateSocialLinks,
+	foundationValidationLimits,
+} from '~/lib/validation/foundation-api'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 
 export async function POST(req: Request) {
@@ -51,32 +60,122 @@ export async function POST(req: Request) {
 
 		const formData = await req.formData()
 
-		// Extract fields from multipart form data
-		const name = formData.get('name') as string
-		const description = formData.get('description') as string
-		const slug = formData.get('slug') as string
-		const foundedYear = Number(formData.get('foundedYear'))
-		const mission = formData.get('mission') as string | null
-		const vision = formData.get('vision') as string | null
-		const websiteUrl = formData.get('websiteUrl') as string | null
-		const socialLinksRaw = formData.get('socialLinks') as string | null
-		let socialLinks: Record<string, string> = {}
-		if (socialLinksRaw) {
-			try {
-				socialLinks = JSON.parse(socialLinksRaw) as Record<string, string>
-			} catch {
-				// Invalid JSON, use empty object
-			}
-		}
-		const logo = formData.get('logo') as File | null
+		// Extract and validate required fields
+		const nameRaw = formData.get('name')
+		const descriptionRaw = formData.get('description')
+		const slugRaw = formData.get('slug')
+		const foundedYearRaw = formData.get('foundedYear')
+		const foundedYear =
+			typeof foundedYearRaw === 'string'
+				? Number.parseInt(foundedYearRaw, 10)
+				: Number(foundedYearRaw)
 
-		// Validate required fields
-		if (!name || !description || !slug || !foundedYear) {
+		if (
+			!validateRequiredString(nameRaw, foundationValidationLimits.MAX_NAME_LENGTH)
+		) {
 			return NextResponse.json(
-				{ error: 'Missing required fields' },
+				{ error: 'Name is required and must be at most 200 characters' },
 				{ status: 400 },
 			)
 		}
+		if (
+			!validateRequiredString(
+				descriptionRaw,
+				foundationValidationLimits.MAX_DESCRIPTION_LENGTH,
+			)
+		) {
+			return NextResponse.json(
+				{
+					error:
+						'Description is required and must be at most 5000 characters',
+				},
+				{ status: 400 },
+			)
+		}
+		if (!validateSlug(slugRaw)) {
+			return NextResponse.json(
+				{
+					error:
+						'Slug must be 3–30 characters, lowercase alphanumeric with hyphens',
+				},
+				{ status: 400 },
+			)
+		}
+		if (!validateFoundedYear(foundedYear)) {
+			return NextResponse.json(
+				{ error: 'Founded year must be between 1900 and current year' },
+				{ status: 400 },
+			)
+		}
+
+		const name = String(nameRaw).trim()
+		const description = String(descriptionRaw).trim()
+		const slug = String(slugRaw).trim().toLowerCase()
+
+		const missionRaw = formData.get('mission')
+		const visionRaw = formData.get('vision')
+		const websiteUrlRaw = formData.get('websiteUrl')
+		if (
+			!validateOptionalString(
+				missionRaw,
+				foundationValidationLimits.MAX_MISSION_LENGTH,
+			)
+		) {
+			return NextResponse.json(
+				{ error: 'Mission must be at most 2000 characters' },
+				{ status: 400 },
+			)
+		}
+		if (
+			!validateOptionalString(
+				visionRaw,
+				foundationValidationLimits.MAX_VISION_LENGTH,
+			)
+		) {
+			return NextResponse.json(
+				{ error: 'Vision must be at most 2000 characters' },
+				{ status: 400 },
+			)
+		}
+		if (websiteUrlRaw != null && websiteUrlRaw !== '' && !validateOptionalUrl(websiteUrlRaw)) {
+			return NextResponse.json(
+				{ error: 'Website URL must be a valid http(s) URL' },
+				{ status: 400 },
+			)
+		}
+
+		const socialLinksRaw = formData.get('socialLinks')
+		let socialLinks: Record<string, string> = {}
+		if (socialLinksRaw != null && socialLinksRaw !== '') {
+			try {
+				const parsed = JSON.parse(String(socialLinksRaw)) as unknown
+				const result = validateSocialLinks(parsed)
+				if (!result.ok) {
+					return NextResponse.json({ error: result.error }, { status: 400 })
+				}
+				socialLinks = result.value
+			} catch {
+				return NextResponse.json(
+					{ error: 'Invalid socialLinks JSON' },
+					{ status: 400 },
+				)
+			}
+		}
+
+		const mission =
+			missionRaw != null && String(missionRaw).trim() !== ''
+				? String(missionRaw).trim()
+				: null
+		const vision =
+			visionRaw != null && String(visionRaw).trim() !== ''
+				? String(visionRaw).trim()
+				: null
+		const websiteUrl =
+			websiteUrlRaw != null && String(websiteUrlRaw).trim() !== ''
+				? String(websiteUrlRaw).trim()
+				: null
+
+		const logo = formData.get('logo') as File | null
 
 		// Check if slug already exists
 		const { data: existing } = await supabase

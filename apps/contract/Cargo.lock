@@ -680,6 +680,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "governance"
+version = "0.0.0"
+dependencies = [
+ "soroban-sdk",
+ "stellar-access",
+ "stellar-macros",
+]
+
+[[package]]
 name = "group"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -883,7 +892,7 @@ checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 
 [[package]]
 name = "nft-kindfi"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "soroban-sdk",
  "stellar-access",
@@ -1023,6 +1032,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "quest"
+version = "0.0.0"
+dependencies = [
+ "soroban-sdk",
+ "stellar-access",
+ "stellar-macros",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1117,9 +1135,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "referral"
+version = "0.0.0"
+dependencies = [
+ "soroban-sdk",
+ "stellar-access",
+ "stellar-macros",
+]
+
+[[package]]
 name = "reputation"
 version = "0.0.0"
 dependencies = [
+ "itoa",
  "soroban-sdk",
  "stellar-access",
  "stellar-macros",
@@ -1614,6 +1642,15 @@ dependencies = [
  "serde_with",
  "sha2",
  "stellar-strkey",
+]
+
+[[package]]
+name = "streak"
+version = "0.0.0"
+dependencies = [
+ "soroban-sdk",
+ "stellar-access",
+ "stellar-macros",
 ]
 
 [[package]]

@@ -1,7 +1,7 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
-import { supabase } from '@packages/lib/supabase'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { Tables, TablesUpdate } from '@services/supabase'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
@@ -195,6 +195,7 @@ export default function QAClient({
 
 	// Setup Supabase real-time subscriptions
 	useEffect(() => {
+		const supabase = createSupabaseBrowserClient()
 		if (isRealtimeEnabled) {
 			if (subscriptionRef.current) {
 				supabase.removeChannel(subscriptionRef.current)

@@ -42,7 +42,7 @@ export function CategoryPills({
 	const router = useRouter()
 	const { t } = useI18n()
 	const prefersReducedMotion = useReducedMotion()
-	const scrollRef = useRef<HTMLDivElement | null>(null)
+	const scrollRef = useRef<HTMLElement | null>(null)
 	const [isHovered, setIsHovered] = useState(false)
 	const [isInteracting, setIsInteracting] = useState(false)
 	const [showLeftFade, setShowLeftFade] = useState(false)
@@ -147,7 +147,7 @@ export function CategoryPills({
 	return (
 		<div className={cn('mt-8 relative', className)}>
 			{/* Scroll buttons */}
-			{showScrollButtons && (
+			{showScrollButtons ? (
 				<>
 					<button
 						type="button"
@@ -166,23 +166,22 @@ export function CategoryPills({
 						<span aria-hidden>›</span>
 					</button>
 				</>
-			)}
+			) : null}
 
 			{/* Edge fade masks - appear only when scrollable on each side */}
-			{showLeftFade && (
+			{showLeftFade ? (
 				<div className="pointer-events-none absolute inset-y-0 left-0 w-8 z-10 bg-gradient-to-r from-white dark:from-background to-transparent" />
-			)}
-			{showRightFade && (
+			) : null}
+			{showRightFade ? (
 				<div className="pointer-events-none absolute inset-y-0 right-0 w-8 z-10 bg-gradient-to-l from-white dark:from-background to-transparent" />
-			)}
+			) : null}
 
 			{/* Horizontal scroll area */}
-			<div
+			<nav
 				ref={scrollRef}
 				className={cn(
 					'group relative flex overflow-x-auto overflow-y-hidden no-scrollbar gap-2 p-4',
 				)}
-				role="navigation"
 				aria-label={t('home.categories')}
 				onMouseEnter={() => setIsHovered(true)}
 				onMouseLeave={() => {
@@ -218,7 +217,7 @@ export function CategoryPills({
 						))}
 					</div>
 				)}
-			</div>
+			</nav>
 		</div>
 	)
 }

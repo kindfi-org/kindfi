@@ -25,7 +25,7 @@ export const Web3FeatureCard = ({
 		transition={{ duration: 0.5, type: 'spring' }}
 		whileHover={{ y: -5 }}
 		whileFocus={{ y: -5 }}
-		className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
+		className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2"
 		aria-label={`Feature: ${title}`}
 	>
 		<div className="flex items-center gap-4 mb-6">

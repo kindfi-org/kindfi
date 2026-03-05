@@ -2,7 +2,7 @@ import { useSupabaseQuery } from '@packages/lib/hooks'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NotificationService } from '../lib/services/notification-service'
 import type {
 	CreateNotificationDTO,
@@ -24,7 +24,11 @@ export function useNotifications(
 	>('disconnected')
 	const notificationService = useMemo(() => new NotificationService(), [])
 
-	// Query for notifications using the shared hook
+	// Stabilize userId so the realtime effect only re-runs when the ID actually changes
+	const userId = filters.user_id ?? null
+	const hasUserId = !!userId
+
+	// Query for notifications using the shared hook (only when user is logged in)
 	const {
 		data: notificationsData,
 		isLoading,
@@ -34,36 +38,39 @@ export function useNotifications(
 		'notifications',
 		() => notificationService.getNotifications(filters, sort, page, pageSize),
 		{
-			additionalKeyValues: [filters, sort, page, pageSize],
+			additionalKeyValues: [userId, sort, page, pageSize],
 			staleTime: 1000 * 60 * 5, // 5 minutes
+			enabled: hasUserId,
 		},
 	)
 
-	// Query for unread count using the shared hook
+	// Query for unread count using the shared hook (only when user is logged in)
 	const { data: count } = useSupabaseQuery(
 		'unread-count',
-		async (client) => {
-			const {
-				data: { session },
-			} = await client.auth.getSession()
-			if (!session?.user?.id) {
-				return 0 // No unread notifications for unauthenticated users
-			}
-			return notificationService.getUnreadCount(session.user.id)
+		async () => {
+			if (!userId) return 0
+			return notificationService.getUnreadCount(userId)
 		},
 		{
+			additionalKeyValues: [userId],
 			staleTime: 1000 * 60 * 2, // 2 minutes
+			enabled: hasUserId,
 		},
 	)
 
-	const onSuccessUpdate = () => {
-		queryClient.invalidateQueries({
-			queryKey: ['supabase', 'notifications'],
-		})
-		queryClient.invalidateQueries({
-			queryKey: ['supabase', 'unread-count'],
-		})
-	}
+	// Stable invalidation callback — won't change between renders
+	const invalidateQueries = useCallback(() => {
+		queryClient.invalidateQueries({ queryKey: ['supabase', 'notifications'] })
+		queryClient.invalidateQueries({ queryKey: ['supabase', 'unread-count'] })
+	}, [queryClient])
+
+	// Keep a ref to refetch so the realtime effect doesn't need it as a dep
+	const refetchRef = useRef(refetch)
+	useEffect(() => {
+		refetchRef.current = refetch
+	})
+
+	const onSuccessUpdate = invalidateQueries
 
 	// Mutation for creating a notification
 	const createNotification = useMutation({
@@ -88,13 +95,8 @@ export function useNotifications(
 	// Mutation for marking all notifications as read
 	const markAllAsRead = useMutation({
 		mutationFn: async () => {
-			const {
-				data: { session },
-			} = await supabase.auth.getSession()
-			if (!session?.user?.id) {
-				throw new Error('User not authenticated')
-			}
-			return notificationService.markAllAsRead(session.user.id)
+			if (!userId) throw new Error('User not authenticated')
+			return notificationService.markAllAsRead(userId)
 		},
 		onSuccess: onSuccessUpdate,
 	})
@@ -105,21 +107,24 @@ export function useNotifications(
 		onSuccess: onSuccessUpdate,
 	})
 
-	// Set up real-time subscription for notifications
+	// Set up real-time subscription for notifications (only when user is logged in)
 	useEffect(() => {
+		if (!userId) return
+
 		let isMounted = true
 		const channel = supabase
-			.channel('notifications')
+			.channel(`notifications:${userId}`)
 			.on(
 				'postgres_changes',
 				{
 					event: '*',
 					schema: 'public',
 					table: 'notifications',
+					filter: `user_id=eq.${userId}`,
 				},
 				() => {
 					if (isMounted) {
-						refetch()
+						refetchRef.current()
 						queryClient.invalidateQueries({
 							queryKey: ['supabase', 'unread-count'],
 						})
@@ -128,10 +133,8 @@ export function useNotifications(
 			)
 			.subscribe((status) => {
 				if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
-					console.error('Notification subscription error')
 					setConnectionState('disconnected')
 				} else if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
-					console.log('Notification subscription connected')
 					setConnectionState('connected')
 				}
 			})
@@ -140,7 +143,7 @@ export function useNotifications(
 			isMounted = false
 			channel.unsubscribe()
 		}
-	}, [supabase, refetch, queryClient])
+	}, [supabase, queryClient, userId])
 
 	return {
 		notifications: notificationsData?.data || [],

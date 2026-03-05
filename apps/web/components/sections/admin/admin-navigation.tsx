@@ -3,9 +3,11 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
+	IoBarChartOutline,
 	IoBusinessOutline,
 	IoChevronForwardOutline,
 	IoFolderOutline,
+	IoGiftOutline,
 	IoHomeOutline,
 	IoPeopleOutline,
 	IoSettingsOutline,
@@ -31,6 +33,12 @@ const entityItems: NavItem[] = [
 	{ href: '/admin/foundations', label: 'Foundations', Icon: IoBusinessOutline },
 	{ href: '/admin/users', label: 'Users', Icon: IoPeopleOutline },
 	{ href: '/admin/escrows', label: 'Escrows', Icon: IoShieldCheckmarkOutline },
+	{ href: '/admin/gamification', label: 'Gamification', Icon: IoGiftOutline },
+	{
+		href: '/admin/governance',
+		label: 'Governance',
+		Icon: IoBarChartOutline,
+	},
 ]
 
 const insightsItems: NavItem[] = [

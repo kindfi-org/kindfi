@@ -11,7 +11,7 @@ export function PlatformOverview() {
 	const { t } = useI18n()
 
 	return (
-		<section className="relative py-24 overflow-hidden">
+		<section className="relative py-16 overflow-hidden sm:py-20 lg:py-24">
 			{/* Background */}
 			<div className="absolute inset-0">
 				<div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
@@ -21,19 +21,21 @@ export function PlatformOverview() {
 				{/* Header */}
 				<motion.div
 					{...fadeInUpAnimation}
-					className="text-center mb-16 max-w-3xl mx-auto"
+					className="text-center mb-12 max-w-3xl mx-auto sm:mb-16"
 				>
-					<h2 className="text-4xl font-bold text-gray-900 mb-6">
+					<h2 className="text-3xl font-bold text-gray-900 mb-4 sm:text-4xl sm:mb-6">
 						<span className="block">{t('home.platformTitle1')}</span>
 						<span className="block gradient-text">
 							{t('home.platformTitle2')}
 						</span>
 					</h2>
-					<p className="text-lg text-gray-600">{t('home.platformSubtitle')}</p>
+					<p className="text-base text-muted-foreground leading-relaxed sm:text-lg">
+						{t('home.platformSubtitle')}
+					</p>
 				</motion.div>
 
 				{/* Features Grid */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12 lg:mb-16">
 					<Web3FeatureCard
 						key={features[0].id}
 						{...features[0]}

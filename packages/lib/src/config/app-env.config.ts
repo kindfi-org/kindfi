@@ -33,6 +33,9 @@ export function transformEnv(): AppEnvInterface {
 		},
 		resend: {
 			apiKey: data.RESEND_SMTP_API_KEY || '',
+			fromEmail:
+				data.RESEND_FROM_EMAIL || 'notifications@kindfi.org',
+			fromName: data.RESEND_FROM_NAME || 'KindFi',
 		},
 		env: {
 			nodeEnv: data.NODE_ENV || 'development',
@@ -136,6 +139,8 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(
 		}),
 		resend: z.object({
 			apiKey: z.string(),
+			fromEmail: z.string(),
+			fromName: z.string(),
 		}),
 		env: z.object({
 			nodeEnv: z.enum(['development', 'production', 'test']),
@@ -354,6 +359,8 @@ export const baseEnvSchema = z.object({
 
 	// RESEND Configuration
 	RESEND_SMTP_API_KEY: z.string().optional(),
+	RESEND_FROM_EMAIL: z.string().email().optional(),
+	RESEND_FROM_NAME: z.string().optional(),
 
 	// Auth Configuration
 	NEXTAUTH_SECRET: z.string().optional(),

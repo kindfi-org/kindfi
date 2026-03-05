@@ -2,6 +2,7 @@ import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardFooter } from '~/components/base/card'
 import { useI18n } from '~/lib/i18n'
+import { cn } from '~/lib/utils'
 import { ModelVariant } from '~/lib/types'
 
 const variantStyles = {
@@ -32,7 +33,10 @@ export const InvestmentModelCard = ({
 	const { t } = useI18n()
 	return (
 		<Card
-			className={`transition-all duration-200 ${variantStyles[variant]} border`}
+			className={cn(
+				'rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-lg focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2',
+				variantStyles[variant],
+			)}
 		>
 			<CardContent className="p-6">
 				<div className="flex flex-col items-center text-center mb-6">

@@ -52,12 +52,11 @@ export async function POST(req: NextRequest) {
 			identifier,
 		})
 
-		// Get challenge
-		const expectedChallenge = await getChallenge({
-			identifier,
-			rpId,
-			userId,
-		})
+		// Get challenge and user in parallel
+		const [expectedChallenge, userResponse] = await Promise.all([
+			getChallenge({ identifier, rpId, userId }),
+			getUser({ rpId, identifier, userId }),
+		])
 
 		if (!expectedChallenge) {
 			return NextResponse.json(
@@ -66,13 +65,7 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Get user (or create empty credentials array if new user)
-		const userResponse = await getUser({
-			rpId,
-			identifier,
-			userId,
-		})
-
+		// Use existing credentials or create empty array if new user
 		const credentials = userResponse?.credentials || []
 
 		// Verify registration

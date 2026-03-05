@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { FloatingFeature } from '~/components/shared/floating-feature'
+import { SectionContainer } from '~/components/shared/section-container'
 import { useTranslation } from '~/hooks/use-translation'
 import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
@@ -18,14 +19,18 @@ const containerVariants = {
 const KindFiStellar = () => {
 	const { t } = useTranslation()
 	return (
-		<section className="relative py-16 overflow-hidden">
-			<div className="container mx-auto px-6 text-center">
+		<section
+			className="relative py-16 sm:py-20 lg:py-24 overflow-hidden bg-white"
+			aria-labelledby="about-kindfi-stellar-heading"
+		>
+			<SectionContainer className="text-center">
 				<motion.h2
-					initial={{ opacity: 0, y: -20 }}
+					id="about-kindfi-stellar-heading"
+					initial={{ opacity: 0, y: 16 }}
 					whileInView={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5 }}
 					viewport={{ once: true, amount: 0.2 }}
-					className="text-3xl md:text-4xl font-bold"
+					className="text-3xl font-bold tracking-tight gradient-text mb-3 sm:text-4xl"
 				>
 					{t('about.kindfiStellar.title')}
 				</motion.h2>
@@ -33,9 +38,9 @@ const KindFiStellar = () => {
 				<motion.p
 					initial={{ opacity: 0 }}
 					whileInView={{ opacity: 1 }}
-					transition={{ delay: 0.2, duration: 0.5 }}
+					transition={{ delay: 0.1, duration: 0.5 }}
 					viewport={{ once: true, amount: 0.2 }}
-					className="text-gray-600 max-w-2xl mx-auto mt-4"
+					className="text-muted-foreground text-base max-w-2xl mx-auto mt-4 leading-relaxed sm:text-lg"
 				>
 					{t('about.kindfiStellar.description')}
 				</motion.p>
@@ -45,7 +50,7 @@ const KindFiStellar = () => {
 					initial="hidden"
 					whileInView="show"
 					viewport={{ once: true, amount: 0.2 }}
-					className="relative mt-12 flex flex-wrap justify-center items-center gap-8"
+					className="relative mt-10 sm:mt-14 flex flex-wrap justify-center items-center gap-5 sm:gap-6"
 				>
 					{mockAboutUs.kindfiStellarFeatures.map((feature) => (
 						<FloatingFeature
@@ -55,7 +60,7 @@ const KindFiStellar = () => {
 						/>
 					))}
 				</motion.div>
-			</div>
+			</SectionContainer>
 		</section>
 	)
 }

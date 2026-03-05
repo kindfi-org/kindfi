@@ -1,4 +1,5 @@
-import { supabase } from '@packages/lib/supabase'
+import type { Database } from '@services/supabase'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type {
 	BaseNotification,
 	CreateNotificationDTO,
@@ -6,25 +7,33 @@ import type {
 	NotificationSort,
 	UpdateNotificationDTO,
 } from '../types/notification'
+import type { NotificationType } from '../types/notification'
+import { notificationTypeToCategory } from '../types/notification'
 import { NotificationLogger } from './notification-logger'
 
-function isNotification(data: unknown): data is BaseNotification {
-	return (
-		typeof data === 'object' &&
-		data !== null &&
-		'id' in data &&
-		'title' in data &&
-		'body' in data &&
-		'type' in data &&
-		'priority' in data &&
-		'is_read' in data &&
-		'user_id' in data &&
-		'created_at' in data
-	)
+type DbNotificationRow = {
+	id: string
+	title: string
+	body: string
+	type: 'info' | 'success' | 'warning' | 'error'
+	priority: string
+	is_read: boolean
+	user_id: string
+	created_at: string
+	updated_at: string | null
+	metadata?: Record<string, unknown> | null
+	[key: string]: unknown
 }
 
-function isNotificationArray(data: unknown): data is BaseNotification[] {
-	return Array.isArray(data) && data.every(isNotification)
+function mapDbRowToBaseNotification(row: DbNotificationRow): BaseNotification {
+	const semanticType =
+		(row.metadata as Record<string, string>)?.['notificationType'] ?? row.type
+	return {
+		...row,
+		message: row.body,
+		type: semanticType as NotificationType,
+		priority: row.priority as BaseNotification['priority'],
+	} as BaseNotification
 }
 
 export interface NotificationPreferences {
@@ -33,12 +42,9 @@ export interface NotificationPreferences {
 	in_app: boolean
 }
 
-type NotificationUpdate = Partial<
-	Omit<BaseNotification, 'id' | 'created_at' | 'updated_at'>
->
-
 export class NotificationService {
 	private logger: NotificationLogger
+	private supabase = createSupabaseBrowserClient()
 
 	constructor() {
 		this.logger = new NotificationLogger()
@@ -58,14 +64,16 @@ export class NotificationService {
 		page = 1,
 		pageSize = 20,
 	): Promise<{ data: BaseNotification[]; count: number }> {
-		let query = supabase.from('notifications').select('*', { count: 'exact' })
+		let query = this.supabase.from('notifications').select('*', { count: 'exact' })
 
 		// Apply filters
 		if (filters.is_read !== undefined) {
 			query = query.eq('is_read', filters.is_read)
 		}
-		if (filters.type) {
-			query = query.eq('type', filters.type)
+		// DB type column uses 'info'|'success'|'warning'|'error'; only filter when it matches
+		const dbTypes = ['info', 'success', 'warning', 'error'] as const
+		if (filters.type && dbTypes.includes(filters.type as (typeof dbTypes)[number])) {
+			query = query.eq('type', filters.type as (typeof dbTypes)[number])
 		}
 		if (filters.priority) {
 			query = query.eq('priority', filters.priority)
@@ -99,15 +107,9 @@ export class NotificationService {
 			throw new Error(`Failed to fetch notifications: ${error.message}`)
 		}
 
-		if (!isNotificationArray(data)) {
-			const validationError = new Error('Invalid notification data structure')
-			await this.logger.logError({
-				message: 'Invalid notification data structure',
-				error: validationError,
-				context: { filters, sort, page, pageSize },
-			})
-			throw validationError
-		}
+		const mapped = (data ?? []).map((row) =>
+			mapDbRowToBaseNotification(row as DbNotificationRow),
+		)
 
 		await this.logger.logInfo({
 			message: 'Notifications fetched successfully',
@@ -115,13 +117,13 @@ export class NotificationService {
 		})
 
 		return {
-			data: data as BaseNotification[],
+			data: mapped,
 			count: count || 0,
 		}
 	}
 
 	async getUnreadCount(userId: string): Promise<number> {
-		const { count, error } = await supabase
+		const { count, error } = await this.supabase
 			.from('notifications')
 			.select('*', { count: 'exact', head: true })
 			.eq('user_id', userId)
@@ -148,17 +150,22 @@ export class NotificationService {
 		notification: CreateNotificationDTO,
 	): Promise<BaseNotification | null> {
 		try {
-			const { data, error } = await supabase
+			// DB type column uses 'info'|'success'|'warning'|'error'; map from semantic type
+			const dbType = notificationTypeToCategory[notification.type]
+			const { data, error } = await this.supabase
 				.from('notifications')
 				.insert({
 					user_id: notification.user_id,
 					title: notification.title,
 					body: notification.message,
-					type: notification.type,
+					type: dbType,
 					priority: notification.priority || 'medium',
 					is_read: false,
 					expires_at: notification.expires_at,
-					metadata: notification.metadata,
+					metadata: {
+						...notification.metadata,
+						notificationType: notification.type,
+					},
 				})
 				.select()
 				.single()
@@ -171,7 +178,12 @@ export class NotificationService {
 				context: { notification: data },
 			})
 
-			return data
+			// Map DB response (body) to BaseNotification (message)
+			return {
+				...data,
+				message: data.body,
+				type: (data.metadata as Record<string, string>)?.['notificationType'] ?? data.type,
+			} as BaseNotification
 		} catch (error) {
 			await this.logger.logError({
 				message: 'Failed to create notification',
@@ -183,7 +195,7 @@ export class NotificationService {
 	}
 
 	async getNotification(id: string): Promise<BaseNotification> {
-		const { data, error } = await supabase
+		const { data, error } = await this.supabase
 			.from('notifications')
 			.select('*')
 			.eq('id', id)
@@ -198,7 +210,7 @@ export class NotificationService {
 			throw new Error(`Failed to get notification: ${error.message}`)
 		}
 
-		if (!data || !isNotification(data)) {
+		if (!data) {
 			const notFoundError = new Error(
 				`Notification ${id} not found or invalid data structure`,
 			)
@@ -210,16 +222,22 @@ export class NotificationService {
 			throw notFoundError
 		}
 
-		return data
+		return mapDbRowToBaseNotification(data as DbNotificationRow)
 	}
 
 	async updateNotification(
 		id: string,
 		data: UpdateNotificationDTO,
 	): Promise<BaseNotification> {
-		const { data: notification, error } = await supabase
+		const updatePayload = {
+			...(data.is_read !== undefined && { is_read: data.is_read }),
+			...(data.priority !== undefined && { priority: data.priority }),
+			...(data.expires_at !== undefined && { expires_at: data.expires_at }),
+			...(data.metadata !== undefined && { metadata: data.metadata }),
+		}
+		const { data: row, error } = await this.supabase
 			.from('notifications')
-			.update(data satisfies NotificationUpdate)
+			.update(updatePayload as Database['public']['Tables']['notifications']['Update'])
 			.eq('id', id)
 			.select()
 			.single()
@@ -233,21 +251,25 @@ export class NotificationService {
 			throw new Error(`Failed to update notification: ${error.message}`)
 		}
 
-		if (!notification || !isNotification(notification)) {
+		if (!row) {
 			throw new Error('Failed to update notification: Invalid data returned')
 		}
 
 		await this.logger.logInfo({
-			notificationId: notification.id,
+			notificationId: row.id,
 			message: 'Notification updated successfully',
 			context: { id, ...data },
 		})
 
-		return notification
+		return {
+			...row,
+			message: row.body,
+			type: (row.metadata as Record<string, string>)?.['notificationType'] ?? row.type,
+		} as BaseNotification
 	}
 
 	async deleteNotification(id: string): Promise<void> {
-		const { error } = await supabase.from('notifications').delete().eq('id', id)
+		const { error } = await this.supabase.from('notifications').delete().eq('id', id)
 
 		if (error) {
 			await this.logger.logError({
@@ -271,10 +293,10 @@ export class NotificationService {
 	 */
 	async markAsRead(notificationId: string): Promise<boolean> {
 		try {
-			const { error } = await supabase
-				.from('notifications')
-				.update({ is_read: true })
-				.eq('id', notificationId)
+		const { error } = await this.supabase
+			.from('notifications')
+			.update({ is_read: true })
+			.eq('id', notificationId)
 
 			if (error) throw error
 			return true
@@ -291,10 +313,10 @@ export class NotificationService {
 	 */
 	async markAllAsRead(userId: string): Promise<boolean> {
 		try {
-			const { error } = await supabase
-				.from('notifications')
-				.update({ is_read: true })
-				.eq('user_id', userId)
+		const { error } = await this.supabase
+			.from('notifications')
+			.update({ is_read: true })
+			.eq('user_id', userId)
 				.eq('is_read', false)
 
 			if (error) throw error
@@ -312,7 +334,7 @@ export class NotificationService {
 	 */
 	async getUnreadNotifications(userId: string): Promise<BaseNotification[]> {
 		try {
-			const { data, error } = await supabase
+			const { data, error } = await this.supabase
 				.from('notifications')
 				.select('*')
 				.eq('user_id', userId)
@@ -320,7 +342,9 @@ export class NotificationService {
 				.order('created_at', { ascending: false })
 
 			if (error) throw error
-			return data || []
+			return (data ?? []).map((row) =>
+				mapDbRowToBaseNotification(row as DbNotificationRow),
+			)
 		} catch (error) {
 			console.error('Failed to get unread notifications:', error)
 			return []
@@ -336,7 +360,7 @@ export class NotificationService {
 		userId: string,
 	): Promise<NotificationPreferences | null> {
 		try {
-			const { data, error } = await supabase
+			const { data, error } = await this.supabase
 				.from('notification_preferences')
 				.select('*')
 				.eq('user_id', userId)
@@ -344,7 +368,12 @@ export class NotificationService {
 
 			if (error) throw error
 
-			return data
+			if (!data) return null
+			return {
+				email: data.email ?? true,
+				push: data.push ?? true,
+				in_app: data.in_app ?? true,
+			}
 		} catch (error) {
 			await this.logger.logError({
 				message: 'Failed to get notification preferences',
@@ -366,7 +395,7 @@ export class NotificationService {
 		preferences: Partial<NotificationPreferences>,
 	): Promise<boolean> {
 		try {
-			const { error } = await supabase.from('notification_preferences').upsert({
+			const { error } = await this.supabase.from('notification_preferences').upsert({
 				user_id: userId,
 				...preferences,
 			})

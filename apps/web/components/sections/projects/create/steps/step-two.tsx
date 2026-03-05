@@ -1,6 +1,6 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'

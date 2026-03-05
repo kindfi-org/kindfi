@@ -1351,7 +1351,7 @@ export function EscrowAdminPanel({
 										<TooltipContent>
 											The asset contract address for the trustline. For USDC
 											testnet (Soroban-wrapped), use:
-											CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA
+											GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5
 										</TooltipContent>
 									</Tooltip>
 								</div>

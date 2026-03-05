@@ -200,8 +200,26 @@ impl Reputation {
             }
             .publish(e);
 
-            // Try to upgrade NFT
-            Self::try_upgrade_nft_internal(e, user, new_level);
+            // Try to upgrade NFT with new level and points
+            Self::try_upgrade_nft_internal(e, user, new_level, new_total);
+        } else {
+            // Even if level didn't change, update NFT points if user has an NFT
+            // This ensures points attribute stays current
+            if let Some(nft_contract) = get_nft_contract(e) {
+                if let Some(token_id) = get_user_nft_token_id(e, user) {
+                    let reputation_contract = e.current_contract_address();
+                    
+                    // Update NFT points even if level didn't change
+                    let _ = nft_client::try_upgrade_nft(
+                        e,
+                        &nft_contract,
+                        &reputation_contract,
+                        token_id,
+                        old_level, // Keep same level
+                        new_total, // Update points
+                    );
+                }
+            }
         }
 
         Self::extend_instance_ttl(e);
@@ -451,9 +469,9 @@ impl Reputation {
     // NFT Integration
     // ========================================================================
 
-    /// Try to upgrade the user's NFT with the new level.
+    /// Try to upgrade the user's NFT with the new level and points.
     /// Gracefully handles cases where NFT is not configured or user has no NFT.
-    fn try_upgrade_nft_internal(e: &Env, user: &Address, new_level: Level) {
+    fn try_upgrade_nft_internal(e: &Env, user: &Address, new_level: Level, total_points: u32) {
         // Check if NFT contract is configured
         let nft_contract = match get_nft_contract(e) {
             Some(addr) => addr,
@@ -470,13 +488,14 @@ impl Reputation {
         // The reputation contract needs the metadata_manager role on the NFT contract
         let reputation_contract = e.current_contract_address();
 
-        // Try to upgrade the NFT metadata with the new level
+        // Try to upgrade the NFT metadata with the new level and points
         let success = nft_client::try_upgrade_nft(
             e,
             &nft_contract,
             &reputation_contract,
             token_id,
             new_level,
+            total_points,
         );
 
         // Emit event if upgrade was successful

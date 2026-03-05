@@ -1,13 +1,14 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { motion } from 'framer-motion'
+import { zodResolver } from '~/lib/form/zod-resolver'
+import { motion, useReducedMotion } from 'framer-motion'
 import {
 	Building2,
 	CircleAlert,
 	CircleCheck,
 	ExternalLink,
 	Heart,
+	Loader2,
 	Share,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -40,7 +41,18 @@ interface ProjectSidebarProps {
 	project: ProjectDetail
 }
 
+const buildFormSchema = (minInvestment: number) =>
+	z.object({
+		investmentAmount: z.coerce
+			.number({ error: 'Investment amount must be a valid number' })
+			.positive('Investment amount must be greater than zero')
+			.min(minInvestment, `Minimum investment is $${minInvestment}`),
+	})
+
+type FormValues = z.infer<ReturnType<typeof buildFormSchema>>
+
 export function ProjectSidebar({ project }: ProjectSidebarProps) {
+	const reducedMotion = useReducedMotion()
 	const [isFollowing, setIsFollowing] = useState(false)
 	const { getMultipleBalances, fundEscrow, sendTransaction } = useEscrow()
 	const {
@@ -71,23 +83,15 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		return Math.min(Math.round((raised / project.goal) * 100), 100)
 	}, [onChainRaised, project.goal, project.raised])
 
-	// Define the form schema with zod
-	const formSchema = z.object({
-		investmentAmount: z
-			.number({
-				required_error: 'Investment amount is required',
-				invalid_type_error: 'Investment amount must be a number',
-			})
-			.min(
-				project.minInvestment,
-				`Minimum investment is $${project.minInvestment}`,
-			),
-	})
+	const formSchema = useMemo(
+		() => buildFormSchema(project.minInvestment),
+		[project.minInvestment],
+	)
 
 	// Set up react-hook-form with zod validation
-	const form = useForm<z.infer<typeof formSchema>>({
+	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
-		mode: 'onChange',
+		mode: 'onBlur',
 		defaultValues: {
 			investmentAmount: project.minInvestment,
 		},
@@ -152,7 +156,8 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 			// 2) Prepare fund escrow request -> returns unsigned XDR
 			// Trustless Work expects amount in dollars (not stroops) - it handles conversion internally
-			// Note: The escrow contract and signer must have the USDC trustline established first
+			// Note: The user's wallet must have a trustline/approval for the token before funding
+			// The escrow contract will check the user's balance, which requires the trustline to exist
 			const fundResponse = await fundEscrow(
 				{
 					amount: data.investmentAmount,
@@ -204,7 +209,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			}
 
 			toast.success('Thank you for your support!', {
-				description: `You've donated $${data.investmentAmount.toLocaleString()}`,
+				description: `You've donated ${new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(data.investmentAmount)}`,
 				icon: <CircleCheck className="text-primary" />,
 			})
 
@@ -213,27 +218,61 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		} catch (error) {
 			console.error('Fund escrow error:', error)
 
-			// Check for specific error messages
-			const errorMessage =
-				error instanceof Error ? error.message : String(error)
+			// Extract error message from various error formats
+			let errorMessage = ''
+			let apiErrorMessage = ''
+
+			if (error instanceof Error) {
+				errorMessage = error.message
+			} else if (typeof error === 'object' && error !== null) {
+				// Check for axios error response
+				if ('response' in error && error.response) {
+					const response = error.response as {
+						data?: { message?: string; error?: string }
+					}
+					if (response.data?.message) {
+						apiErrorMessage = response.data.message
+					} else if (response.data?.error) {
+						apiErrorMessage = response.data.error
+					}
+				}
+				errorMessage = String(error)
+			} else {
+				errorMessage = String(error)
+			}
+
+			// Combine error messages for checking
+			const combinedMessage = `${errorMessage} ${apiErrorMessage}`.toLowerCase()
+
 			let userFriendlyMessage =
 				"We couldn't process your donation. Please try again."
 
+			// Check for missing trustline/balance errors
 			if (
-				errorMessage.includes('Storage, MissingValue') ||
-				errorMessage.includes('balance')
+				combinedMessage.includes('storage, missingvalue') ||
+				combinedMessage.includes('missingvalue') ||
+				(combinedMessage.includes('balance') &&
+					combinedMessage.includes('non-existing'))
 			) {
-				userFriendlyMessage =
-					'The escrow contract needs a USDC trustline established. Please contact support or ensure the escrow is properly configured.'
+				const tokenAddress = escrowData?.trustline?.address
+				if (tokenAddress) {
+					userFriendlyMessage = `Your wallet needs to establish a trustline for the token (${tokenAddress.slice(0, 8)}...) before donating. Please ensure your wallet has approved this token contract.`
+				} else {
+					userFriendlyMessage =
+						'Your wallet needs to establish a trustline for the token before donating. Please ensure your wallet has approved the token contract.'
+				}
 			} else if (
-				errorMessage.includes('insufficient funds') ||
-				errorMessage.includes('sufficient funds')
+				combinedMessage.includes('insufficient funds') ||
+				combinedMessage.includes('sufficient funds')
 			) {
 				userFriendlyMessage =
-					'Insufficient funds. Please ensure your wallet has enough USDC balance.'
-			} else if (errorMessage.includes('trustline')) {
+					'Insufficient funds. Please ensure your wallet has enough token balance.'
+			} else if (combinedMessage.includes('trustline')) {
 				userFriendlyMessage =
-					'Trustline required. The escrow contract or your wallet needs a USDC trustline established.'
+					'Trustline required. Your wallet needs to establish a trustline for the token before donating.'
+			} else if (apiErrorMessage) {
+				// Use API error message if available
+				userFriendlyMessage = apiErrorMessage
 			}
 
 			toast.error('Donation failed', {
@@ -263,9 +302,9 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 	return (
 		<motion.div
 			className="overflow-hidden sticky top-16 bg-white rounded-xl shadow-md"
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.5, delay: 0.2 }}
+			initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+			animate={reducedMotion ? false : { opacity: 1, y: 0 }}
+			transition={reducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
 		>
 			<div className="p-6">
 				<h2 className="mb-2 text-xl font-bold">Support This Project</h2>
@@ -290,10 +329,10 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					/>
 				</div>
 
-				<div className="flex justify-between mb-3 text-sm text-gray-500">
+				<div className="flex justify-between mb-3 text-sm text-gray-500 tabular-nums">
 					<span>
-						${(onChainRaised ?? project.raised).toLocaleString()} raised
-						{isFetchingBalance ? ' (updating...)' : ''}
+						{new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(onChainRaised ?? project.raised)} raised
+						{isFetchingBalance ? ' (Updating…)' : ''}
 					</span>
 					<span>{progressPercentage}%</span>
 				</div>
@@ -312,18 +351,13 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 										</div>
 										<FormControl>
 											<Input
-												type="number"
-												placeholder={`Min. $${project.minInvestment}`}
+												type="text"
+												inputMode="decimal"
+												placeholder={`Min. $${project.minInvestment}…`}
 												className="pl-6 bg-white border-green-600"
+												aria-label="Donation amount in USD"
+												autoComplete="off"
 												{...field}
-												onChange={(e) => {
-													const value =
-														e.target.value === ''
-															? undefined
-															: Number(e.target.value)
-													field.onChange(value)
-												}}
-												value={field.value ?? ''}
 											/>
 										</FormControl>
 									</div>
@@ -336,9 +370,17 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 							type="submit"
 							className="mt-4 w-full text-white gradient-btn"
 							size="lg"
-							disabled={!form.formState.isValid}
+							disabled={!form.formState.isValid || form.formState.isSubmitting}
+							aria-busy={form.formState.isSubmitting}
 						>
-							Support Now
+							{form.formState.isSubmitting ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+									Supporting…
+								</>
+							) : (
+								'Support Now'
+							)}
 						</Button>
 					</form>
 				</Form>
@@ -385,9 +427,11 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 						variant="outline"
 						className="flex gap-2 justify-center items-center w-full bg-white gradient-border-btn"
 						onClick={handleToggleFollow}
+						aria-label={isFollowing ? 'Unfollow project' : 'Follow project'}
 					>
 						<Heart
 							className={`h-4 w-4 ${isFollowing ? 'text-red-500 fill-red-500' : ''}`}
+							aria-hidden
 						/>
 						{isFollowing ? 'Following' : 'Follow'}
 					</Button>
@@ -396,8 +440,9 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 						variant="outline"
 						className="flex gap-2 justify-center items-center w-full bg-white gradient-border-btn"
 						onClick={handleShare}
+						aria-label="Share project"
 					>
-						<Share className="w-4 h-4" />
+						<Share className="w-4 h-4" aria-hidden />
 						Share
 					</Button>
 				</div>

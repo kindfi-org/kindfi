@@ -3,6 +3,7 @@
 import { formatDistanceToNow } from 'date-fns'
 import { Bell } from 'lucide-react'
 import { useCallback, useState } from 'react'
+import { useAuth } from '../../hooks/use-auth'
 import { useNotifications } from '../../hooks/use-notifications'
 import type { BaseNotification } from '../../lib/types/notification'
 import { cn } from '../../lib/utils'
@@ -18,8 +19,9 @@ import { ScrollArea } from '../base/scroll-area'
 
 export function NotificationBell() {
 	const [isOpen, setIsOpen] = useState(false)
+	const { user } = useAuth()
 	const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } =
-		useNotifications()
+		useNotifications({ user_id: user?.id })
 
 	const truncateMessage = useCallback((message: string, maxLength = 100) => {
 		if (message.length <= maxLength) return message
@@ -100,7 +102,11 @@ export function NotificationBell() {
 									</span>
 								</div>
 								<p className="text-sm text-muted-foreground">
-									{truncateMessage(notification.message)}
+									{truncateMessage(
+										(notification as BaseNotification & { body?: string }).body ??
+											notification.message ??
+											'',
+									)}
 								</p>
 							</DropdownMenuItem>
 						))

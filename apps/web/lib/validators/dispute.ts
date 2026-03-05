@@ -52,8 +52,10 @@ export const disputeResolutionSchema = z.object({
 	mediatorId: uuidValidator.describe('Mediator ID'),
 	resolution: z
 		.enum(['APPROVED', 'REJECTED', 'RESOLVED'] as const, {
-			required_error: 'Resolution status is required',
-			invalid_type_error: 'Invalid resolution status',
+			error: (issue) =>
+				issue.input === undefined
+					? 'Resolution status is required'
+					: 'Invalid resolution status',
 		})
 		.describe('Resolution decision'),
 	resolutionNotes: nonEmptyString.describe('Notes explaining the resolution'),
@@ -83,8 +85,10 @@ export const evidenceSubmissionSchema = z.object({
 	evidenceType: z.enum(
 		['DOCUMENT', 'IMAGE', 'VIDEO', 'LINK', 'TEXT'] as const,
 		{
-			required_error: 'Evidence type is required',
-			invalid_type_error: 'Invalid evidence type',
+			error: (issue) =>
+				issue.input === undefined
+					? 'Evidence type is required'
+					: 'Invalid evidence type',
 		},
 	),
 	evidenceUrl: z
@@ -93,28 +97,6 @@ export const evidenceSubmissionSchema = z.object({
 		.describe('URL to the evidence'),
 	description: nonEmptyString.describe('Description of the evidence'),
 })
-
-// Define the shape of the dispute sign schema first to avoid circular references
-// biome-ignore lint/correctness/noUnusedVariables: <explanation>
-type DisputeSignSchemaShape = {
-	signedTransaction: z.ZodString
-	type: z.ZodEnum<['file', 'resolve']>
-	// For filing a dispute - required if type is 'file'
-	escrowId: z.ZodOptional<z.ZodString>
-	milestoneId: z.ZodOptional<z.ZodString>
-	filerAddress: z.ZodOptional<z.ZodString>
-	disputeReason: z.ZodOptional<z.ZodString>
-	evidenceUrls: z.ZodOptional<z.ZodArray<z.ZodString>>
-	escrowParticipantId: z.ZodOptional<z.ZodString>
-	// For resolving a dispute - required if type is 'resolve'
-	disputeId: z.ZodOptional<z.ZodString>
-	mediatorId: z.ZodOptional<z.ZodString>
-	resolution: z.ZodOptional<z.ZodEnum<['APPROVED', 'REJECTED', 'RESOLVED']>>
-	resolutionNotes: z.ZodOptional<z.ZodString>
-	approverAmount: z.ZodOptional<z.ZodString>
-	serviceProviderAmount: z.ZodOptional<z.ZodString>
-	escrowContractAddress: z.ZodOptional<z.ZodString>
-}
 
 // Type for the data passed to validation functions
 type DisputeSignData = {
@@ -162,8 +144,10 @@ export const disputeSignSchema = z
 		mediatorId: uuidValidator.optional().describe('Mediator ID'),
 		resolution: z
 			.enum(['APPROVED', 'REJECTED', 'RESOLVED'] as const, {
-				required_error: 'Resolution status is required',
-				invalid_type_error: 'Invalid resolution status',
+				error: (issue) =>
+					issue.input === undefined
+						? 'Resolution status is required'
+						: 'Invalid resolution status',
 			})
 			.optional()
 			.describe('Resolution decision'),

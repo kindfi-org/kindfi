@@ -8,7 +8,7 @@
 //! For the cross-contract calls to work:
 //! 1. The Reputation contract needs `metadata_manager` role on the NFT contract
 //! 2. Register user NFT token IDs using `register_user_nft`
-
+use itoa;
 use soroban_sdk::{contracttype, Address, ConversionError, Env, IntoVal, InvokeError, String, Symbol, Vec};
 
 use crate::types::Level;
@@ -47,6 +47,9 @@ pub struct NFTMetadata {
 /// The trait type used for level attributes
 const LEVEL_TRAIT_TYPE: &str = "level";
 
+/// The trait type used for points attributes
+const POINTS_TRAIT_TYPE: &str = "points";
+
 /// Level value constants
 const LEVEL_VALUE_ROOKIE: &str = "rookie";
 const LEVEL_VALUE_BRONZE: &str = "bronze";
@@ -80,7 +83,58 @@ fn is_level_attribute(e: &Env, attr: &NFTAttribute) -> bool {
     attr.trait_type == String::from_str(e, LEVEL_TRAIT_TYPE)
 }
 
+
+pub fn u32_to_string(env: &Env, value: u32) -> String {
+    let mut buffer = itoa::Buffer::new();
+    let formatted = buffer.format(value);
+    String::from_str(env, formatted)
+}
+
+/// Check if an NFTAttribute is a points attribute.
+fn is_points_attribute(e: &Env, attr: &NFTAttribute) -> bool {
+    attr.trait_type == String::from_str(e, POINTS_TRAIT_TYPE)
+}
+
+/// Build points attribute from u32 value (SEP-0050 compliant)
+pub fn build_points_attribute(e: &Env, points: u32) -> NFTAttribute {
+    // Aquí usamos nuestra nueva función itoa para que el valor sea EXACTO
+    let value_str = u32_to_string(e, points);
+    
+    NFTAttribute {
+        trait_type: String::from_str(e, POINTS_TRAIT_TYPE),
+        value: value_str,
+        display_type: Some(String::from_str(e, "number")),
+        max_value: None,
+    }
+}
+
+/// Create updated attributes vector with new level and points.
+/// Removes any existing level and points attributes and adds the new ones.
+pub fn update_attributes_with_level_and_points(
+    e: &Env,
+    current_attributes: &Vec<NFTAttribute>,
+    new_level: Level,
+    total_points: u32,
+) -> Vec<NFTAttribute> {
+    let mut new_attrs: Vec<NFTAttribute> = Vec::new(e);
+
+    // Copy non-level and non-points attributes
+    for attr in current_attributes.iter() {
+        if !is_level_attribute(e, &attr) && !is_points_attribute(e, &attr) {
+            new_attrs.push_back(attr);
+        }
+    }
+
+    // Add new level attribute
+    new_attrs.push_back(build_level_attribute(e, new_level));
+    
+    // Add new points attribute
+    new_attrs.push_back(build_points_attribute(e, total_points));
+
+    new_attrs
+}
 /// Create updated attributes vector with new level.
+=======
 /// Removes any existing level attribute and adds the new one.
 pub fn update_attributes_with_level(
     e: &Env,
@@ -159,7 +213,7 @@ fn try_update_nft_metadata(
     matches!(result, Ok(Ok(())))
 }
 
-/// Try to upgrade user's NFT metadata with new level.
+/// Try to upgrade user's NFT metadata with new level and points.
 /// This function makes a cross-contract call to the NFT contract.
 ///
 /// # Arguments
@@ -168,6 +222,7 @@ fn try_update_nft_metadata(
 /// * `reputation_contract` - Address of this contract (caller for metadata update)
 /// * `token_id` - The NFT token ID to update
 /// * `new_level` - The new level to set in the metadata
+/// * `total_points` - The total reputation points to set in the metadata
 ///
 /// # Returns
 /// * `true` if the upgrade was successful
@@ -178,6 +233,7 @@ pub fn try_upgrade_nft(
     reputation_contract: &Address,
     token_id: u32,
     new_level: Level,
+    total_points: u32,
 ) -> bool {
     // Try to get current metadata
     let current_metadata = match try_get_nft_metadata(e, nft_contract, token_id) {
@@ -185,9 +241,9 @@ pub fn try_upgrade_nft(
         None => return false,
     };
 
-    // Update attributes with new level
+    // Update attributes with new level and points
     let updated_attributes =
-        update_attributes_with_level(e, &current_metadata.attributes, new_level);
+        update_attributes_with_level_and_points(e, &current_metadata.attributes, new_level, total_points);
 
     // Create updated metadata
     let updated_metadata = NFTMetadata {
@@ -324,4 +380,16 @@ mod tests {
         assert!(has_gold, "Should have level:gold");
         assert!(!has_rookie, "Should not have level:rookie");
     }
+
+     
+    #[test]
+    fn test_u32_to_string_integrity() {
+        let env = Env::default();
+        // Casos fallidos reportados en el issue #787
+        assert_eq!(u32_to_string(&env, 123).to_string(), "123");
+        assert_eq!(u32_to_string(&env, 1234).to_string(), "1234");
+        assert_eq!(u32_to_string(&env, 2500).to_string(), "2500");
+    }
+
+
 }

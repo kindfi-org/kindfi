@@ -106,6 +106,12 @@ web_modules/
 .env.production.local
 .env.local
 
+# Deployment files with sensitive information
+apps/contract/*-deployment-info-*.txt
+apps/contract/*-service-account-setup.txt
+apps/contract/complete-deployment-summary-*.txt
+apps/contract/backend-service-account-setup.txt
+
 # parcel-bundler cache (https://parceljs.org/)
 
 .parcel-cache

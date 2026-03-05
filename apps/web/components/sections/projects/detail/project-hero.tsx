@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import Image from 'next/image'
 import { useMemo } from 'react'
 import { AnimatedCounter } from '~/components/sections/projects/detail/animated-counter'
@@ -19,6 +19,7 @@ interface ProjectHeroProps {
 }
 
 export function ProjectHero({ project }: ProjectHeroProps) {
+	const reducedMotion = useReducedMotion()
 	const { balance: onChainRaised } = useEscrowBalance({
 		escrowContractAddress: project.escrowContractAddress,
 		escrowType: project.escrowType,
@@ -41,9 +42,10 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 	return (
 		<motion.section
 			className="overflow-hidden mb-8 bg-white rounded-xl shadow-md"
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.5 }}
+			initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+			animate={reducedMotion ? false : { opacity: 1, y: 0 }}
+			transition={reducedMotion ? { duration: 0 } : { duration: 0.5 }}
+			aria-labelledby="project-hero-title"
 		>
 			<div className="overflow-hidden relative h-64 md:h-80 lg:h-96">
 				<Image
@@ -52,6 +54,7 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 					fill
 					className="object-cover"
 					priority
+					sizes="(max-width: 768px) 100vw, (max-width: 1024px) 66vw, 66vw"
 				/>
 				{project.category && (
 					<div className="absolute top-4 left-4">
@@ -61,7 +64,12 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 			</div>
 
 			<div className="p-6">
-				<h1 className="mb-3 text-3xl font-bold md:text-4xl">{project.title}</h1>
+				<h1
+					id="project-hero-title"
+					className="mb-3 text-3xl font-bold md:text-4xl text-balance"
+				>
+					{project.title}
+				</h1>
 
 				<p className="mb-6 text-muted-foreground">{project.description}</p>
 
@@ -86,22 +94,25 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 					</div>
 				)}
 
-				<div className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
+				<section
+					className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4"
+					aria-label="Project funding stats"
+				>
 					<div className="p-4 text-center bg-gray-50 rounded-lg">
 						<p className="mb-1 text-sm text-muted-foreground">Raised</p>
-						<p className="text-xl font-bold">
+						<p className="text-xl font-bold tabular-nums">
 							$<AnimatedCounter value={displayRaised} />
 						</p>
 					</div>
 					<div className="p-4 text-center bg-gray-50 rounded-lg">
 						<p className="mb-1 text-sm text-muted-foreground">Goal</p>
-						<p className="text-xl font-bold">
+						<p className="text-xl font-bold tabular-nums">
 							$<AnimatedCounter value={project.goal} />
 						</p>
 					</div>
 					<div className="p-4 text-center bg-gray-50 rounded-lg">
 						<p className="mb-1 text-sm text-muted-foreground">Supporters</p>
-						<p className="text-xl font-bold">
+						<p className="text-xl font-bold tabular-nums">
 							<AnimatedCounter value={displaySupporters} />
 						</p>
 					</div>
@@ -109,11 +120,11 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 						<p className="mb-1 text-sm text-muted-foreground">
 							Minimum Donation
 						</p>
-						<p className="text-xl font-bold">
+						<p className="text-xl font-bold tabular-nums">
 							$<AnimatedCounter value={project.minInvestment} />
 						</p>
 					</div>
-				</div>
+				</section>
 			</div>
 		</motion.section>
 	)

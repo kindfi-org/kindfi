@@ -1,6 +1,6 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
-import { NextResponse } from 'next/server'
+import { after, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { NotificationLogger } from '~/lib/services/notification-logger'
 import { NotificationService } from '~/lib/services/notification-service'
@@ -21,7 +21,7 @@ const notificationSchema = z.object({
 	body: z.string().min(1),
 	icon: z.string().url().optional(),
 	badge: z.string().url().optional(),
-	data: z.record(z.unknown()).optional(),
+	data: z.record(z.string(), z.unknown()).optional(),
 })
 
 const requestSchema = z.object({
@@ -60,29 +60,33 @@ export async function POST(request: Request) {
 			)
 		}
 
-		// Log successful push notification
-		await logger.logInfo({
-			message: 'Push notification sent successfully',
-			context: {
-				endpoint: subscription.endpoint,
-				notification: {
-					title: notification.title,
-					body: notification.body,
+		// Log successful push notification (non-blocking)
+		after(() => {
+			logger.logInfo({
+				message: 'Push notification sent successfully',
+				context: {
+					endpoint: subscription.endpoint,
+					notification: {
+						title: notification.title,
+						body: notification.body,
+					},
 				},
-			},
+			})
 		})
 
 		return NextResponse.json({ success: true })
 	} catch (error) {
-		// Log error and return appropriate response
-		await logger.logError({
-			message: 'Failed to send push notification',
-			error: error instanceof Error ? error : new Error(String(error)),
+		// Log error (non-blocking) and return appropriate response
+		after(() => {
+			logger.logError({
+				message: 'Failed to send push notification',
+				error: error instanceof Error ? error : new Error(String(error)),
+			})
 		})
 
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Invalid request data', details: error.errors },
+				{ error: 'Invalid request data', details: error.issues },
 				{ status: 400 },
 			)
 		}

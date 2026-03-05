@@ -1,6 +1,6 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { AlertCircle, Check, ChevronLeft, Loader2 } from 'lucide-react'
@@ -58,7 +58,7 @@ export function StepThree({
 			foundationId: (formData as { foundationId?: string }).foundationId || '',
 			tags: formData.tags,
 		},
-		mode: 'onBlur', // Validate on blur for better UX
+		mode: 'onBlur',
 	})
 
 	// Memoize category selection handler to prevent unnecessary re-renders
@@ -102,7 +102,16 @@ export function StepThree({
 		[prefersReducedMotion],
 	)
 
-	const isFormValid = form.formState.isValid
+	// Derive submit-ability from watched values so the button responds to
+	// field.onChange (e.g. badge clicks) without needing a blur event.
+	// eslint-disable-next-line react-hooks/incompatible-library -- watch() is intentional for submit button state
+	const locationValue = form.watch('location')
+	const categoryValue = form.watch('category')
+	const canSubmit =
+		locationValue?.length === 3 &&
+		categoryValue?.length > 0 &&
+		!isPending
+
 	const hasErrors = Object.keys(form.formState.errors).length > 0
 
 	return (
@@ -297,17 +306,17 @@ export function StepThree({
 									Previous
 								</Button>
 
-								<Button
-									type="submit"
-									disabled={!isFormValid || isPending || hasErrors}
-									className="flex items-center justify-center gap-2 gradient-btn text-white w-full sm:w-auto touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-2"
-									aria-label={
-										isPending
-											? 'Submitting project…'
-											: isFormValid
-												? 'Submit project for review'
-												: 'Complete required fields to submit'
-									}
+							<Button
+								type="submit"
+								disabled={!canSubmit || hasErrors}
+								className="flex items-center justify-center gap-2 gradient-btn text-white w-full sm:w-auto touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-2"
+								aria-label={
+									isPending
+										? 'Submitting project…'
+										: canSubmit
+											? 'Submit project for review'
+											: 'Complete required fields to submit'
+								}
 								>
 									{isPending ? (
 										<>

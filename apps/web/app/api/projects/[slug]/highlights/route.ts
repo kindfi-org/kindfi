@@ -56,12 +56,24 @@ export async function POST(
 		}
 
 		// Verify user has permission to update this project
-		// Check if user is the project owner or has editor role
-		const { data: project, error: projectError } = await supabaseServiceRole
-			.from('projects')
-			.select('id, kindler_id, metadata')
-			.eq('id', projectId)
-			.single()
+		// Check if user is the project owner or has editor role in parallel
+		const [projectResult, memberResult] = await Promise.all([
+			supabaseServiceRole
+				.from('projects')
+				.select('id, kindler_id, metadata')
+				.eq('id', projectId)
+				.single(),
+			supabaseServiceRole
+				.from('project_members')
+				.select('role')
+				.eq('project_id', projectId)
+				.eq('user_id', userId)
+				.in('role', ['core', 'admin', 'editor'])
+				.single(),
+		])
+
+		const { data: project, error: projectError } = projectResult
+		const { data: memberData } = memberResult
 
 		if (projectError || !project) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
@@ -69,16 +81,6 @@ export async function POST(
 
 		// Check if user is the project owner
 		const isOwner = project.kindler_id === userId
-
-		// Check if user is a project member with editor role
-		const { data: memberData } = await supabaseServiceRole
-			.from('project_members')
-			.select('role')
-			.eq('project_id', projectId)
-			.eq('user_id', userId)
-			.in('role', ['core', 'admin', 'editor'])
-			.single()
-
 		const hasEditorRole = !!memberData
 
 		if (!isOwner && !hasEditorRole) {

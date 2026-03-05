@@ -30,13 +30,9 @@ export async function createSupabaseServerClient(supabaseServerClientProps?: {
 	const projectRef = url.hostname.split('.')[0]
 	const authCookieName = `sb-${projectRef}-auth-token`
 
-	// If a JWT is provided, use it as accessToken for proper RLS authentication
-	// This allows RLS policies to identify the user via current_auth_user_id()
-	const resolvedAccessToken = accessToken
-		? accessToken
-		: jwt
-			? async () => jwt
-			: undefined
+	// If accessToken is explicitly provided, use it (but this disables onAuthStateChange)
+	// Otherwise, if jwt is provided, inject it as a cookie instead to avoid the error
+	const resolvedAccessToken = accessToken ? accessToken : undefined
 
 	return createServerClient<Database>(
 		appConfig.database.url,
@@ -52,7 +48,8 @@ export async function createSupabaseServerClient(supabaseServerClientProps?: {
 					const allCookies = cookieStore.getAll()
 
 					// If a custom JWT is provided and no accessToken function exists,
-					// inject it as a Supabase auth cookie as fallback
+					// inject it as a Supabase auth cookie to avoid the onAuthStateChange error
+					// This allows RLS policies to identify the user via current_auth_user_id()
 					if (jwt && !accessToken) {
 						const existingAuthCookie = allCookies.find(
 							(cookie) => cookie.name === authCookieName,
