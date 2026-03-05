@@ -90,12 +90,16 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		[project.minInvestment],
 	)
 
+	// When !hasEscrow, use empty string so the placeholder "Donations coming soon" is visible
+	// (placeholders only show when the input value is empty)
+	const initialInvestmentAmount = hasEscrow ? project.minInvestment : ''
+
 	// Set up react-hook-form with zod validation
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		mode: 'onBlur',
 		defaultValues: {
-			investmentAmount: project.minInvestment,
+			investmentAmount: initialInvestmentAmount as FormValues['investmentAmount'],
 		},
 	})
 
