@@ -64,7 +64,7 @@ interface EscrowActionsContext {
 	// get by contract ids
 	getEscrowByContractIds: (
 		params: GetEscrowFromIndexerByContractIdsParams,
-	) => Promise<GetEscrowsFromIndexerResponse>
+	) => Promise<GetEscrowsFromIndexerResponse[]>
 
 	// update
 	updateEscrow: (

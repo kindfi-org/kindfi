@@ -33,8 +33,7 @@ export function transformEnv(): AppEnvInterface {
 		},
 		resend: {
 			apiKey: data.RESEND_SMTP_API_KEY || '',
-			fromEmail:
-				data.RESEND_FROM_EMAIL || 'notifications@kindfi.org',
+			fromEmail: data.RESEND_FROM_EMAIL || 'notifications@kindfi.org',
 			fromName: data.RESEND_FROM_NAME || 'KindFi',
 		},
 		env: {
@@ -318,16 +317,17 @@ export function appEnvConfig<T extends keyof typeof appRequirements>(
 			const result = schema.safeParse(transformedConfig)
 
 			if (!result.success) {
+				const issues = result.error.issues
 				console.error('❌ Config validation failed:', {
-					errorCount: result.error.errors.length,
-					errors: result.error.errors.map((err) => ({
+					errorCount: issues.length,
+					errors: issues.map((err) => ({
 						path: err.path.join('.'),
 						message: err.message,
 						code: err.code,
 					})),
 				})
 
-				const missingVars = result.error.errors
+				const missingVars = issues
 					.map((err) => `  • ${err.path.join('.')}: ${err.message}`)
 					.join('\n')
 				throw new Error(

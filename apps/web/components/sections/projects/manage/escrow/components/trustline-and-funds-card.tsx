@@ -19,6 +19,10 @@ interface TrustlineAndFundsCardProps {
 export function TrustlineAndFundsCard({
 	escrowData,
 }: TrustlineAndFundsCardProps) {
+	const trustline = escrowData.trustline as
+		| { address: string; name?: string }
+		| undefined
+
 	return (
 		<div className="grid gap-6 md:grid-cols-2">
 			<Card>
@@ -30,22 +34,22 @@ export function TrustlineAndFundsCard({
 					<CardDescription>Token details for this escrow</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					{escrowData.trustline && (
+					{trustline && (
 						<>
 							<div className="space-y-1">
 								<Label className="text-xs text-muted-foreground">
 									Token Address
 								</Label>
 								<p className="font-mono text-sm break-all">
-									{escrowData.trustline.address}
+									{trustline.address}
 								</p>
 							</div>
-							{escrowData.trustline.name && (
+							{trustline.name && (
 								<div className="space-y-1">
 									<Label className="text-xs text-muted-foreground">
 										Token Name
 									</Label>
-									<p className="font-semibold">{escrowData.trustline.name}</p>
+									<p className="font-semibold">{trustline.name}</p>
 								</div>
 							)}
 						</>
