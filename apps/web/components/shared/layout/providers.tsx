@@ -1,11 +1,7 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
-import {
-	development,
-	mainNet,
-	TrustlessWorkConfig,
-} from '@trustless-work/escrow'
+import { development, TrustlessWorkConfig } from '@trustless-work/escrow'
 import type { Session } from 'next-auth'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
@@ -74,11 +70,10 @@ export function Providers({ children, initSession }: ProvidersProps) {
 		}
 	}, [])
 
-	const trustlessBaseUrl =
-		process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
-		process.env.NODE_ENV === 'production'
-			? mainNet
-			: development
+	// Use development API until mainnet release (post-Stellar audit).
+	// When ready for mainnet: import mainNet, then use:
+	// trustlessBaseUrl = process.env.NEXT_PUBLIC_STELLAR_NETWORK === 'mainnet' ? mainNet : development
+	const trustlessBaseUrl = development
 
 	return (
 		<ReactQueryClientProvider>
