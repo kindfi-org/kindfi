@@ -1,5 +1,6 @@
 {
 	"dependencies": {
+		"@hookform/resolvers": "^5.2.2",
 		"date-fns": "^4.1.0",
 		"react-error-boundary": "^5.0.0",
 		"react-webcam": "^7.2.0"
