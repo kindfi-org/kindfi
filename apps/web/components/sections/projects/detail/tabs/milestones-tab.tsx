@@ -11,6 +11,10 @@ import { AlertCircle, CheckCircle, Clock } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import type { Milestone } from '~/lib/types/project/project-detail.types'
+import {
+	getMilestoneStatus,
+	isSingleReleaseMilestone,
+} from '~/lib/utils/escrow/milestone-utils'
 
 interface MilestonesTabProps {
 	milestones: Milestone[]
@@ -44,22 +48,29 @@ export function MilestonesTab({
 					(escrow?.milestones as
 						| (SingleReleaseMilestone | MultiReleaseMilestone)[]
 						| undefined) || []
-				const isSingle = (
-					m: SingleReleaseMilestone | MultiReleaseMilestone,
-				): m is SingleReleaseMilestone => 'approved' in m
-				const mapped: Milestone[] = ms.map((m, idx) => ({
+			const mapped: Milestone[] = ms.map((m, idx) => {
+				const isApproved = getMilestoneStatus(m)
+				const isSingle = isSingleReleaseMilestone(m)
+				let status: string
+
+				if (isApproved) {
+					status = 'approved'
+				} else if (!isSingle && m.status) {
+					status = m.status
+				} else {
+					status = 'pending'
+				}
+
+				return {
 					id: String(idx),
 					title: m.description || `Milestone ${idx + 1}`,
 					description: m.description || '',
 					amount: (m as MultiReleaseMilestone).amount ?? 0,
 					deadline: new Date().toISOString(),
-					status: isSingle(m)
-						? m.approved
-							? 'approved'
-							: 'pending'
-						: 'pending',
+					status,
 					orderIndex: idx,
-				}))
+				}
+			})
 				setOnChainMilestones(mapped)
 			} finally {
 				setIsLoadingOnChain(false)

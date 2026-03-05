@@ -1,4 +1,4 @@
-import { supabase } from '@packages/lib/supabase'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 
 /**
  * Parameters for logging error events
@@ -70,6 +70,7 @@ export interface LogResult<T> {
  */
 export async function logError(params: LogErrorParams): Promise<void> {
 	try {
+		const supabase = createSupabaseBrowserClient()
 		await supabase.from('notification_logs').insert({
 			notification_id: params.notificationId,
 			level: 'error',
@@ -98,6 +99,7 @@ export async function getNotificationLogs(
 	notificationId: string,
 ): Promise<LogResult<NotificationLog[]>> {
 	try {
+		const supabase = createSupabaseBrowserClient()
 		const { data, error } = await supabase
 			.from('notification_logs')
 			.select('*')
@@ -126,6 +128,7 @@ export async function getRecentLogs(
 	offset = 0,
 ): Promise<LogResult<NotificationLog[]>> {
 	try {
+		const supabase = createSupabaseBrowserClient()
 		const { data, error } = await supabase
 			.from('notification_logs')
 			.select('*')
@@ -155,6 +158,7 @@ export class NotificationLogger {
 		notificationId,
 	}: LogErrorParams): Promise<void> {
 		try {
+			const supabase = createSupabaseBrowserClient()
 			const { error: dbError } = await supabase
 				.from('notification_logs')
 				.insert({
@@ -185,6 +189,7 @@ export class NotificationLogger {
 		context,
 	}: LogInfoParams): Promise<void> {
 		try {
+			const supabase = createSupabaseBrowserClient()
 			const { error } = await supabase.from('notification_logs').insert({
 				level: 'info',
 				message: message,
@@ -209,6 +214,7 @@ export class NotificationLogger {
 		context,
 	}: LogWarningParams): Promise<void> {
 		try {
+			const supabase = createSupabaseBrowserClient()
 			const { error } = await supabase.from('notification_logs').insert({
 				level: 'warning',
 				message: message,
@@ -232,6 +238,7 @@ export class NotificationLogger {
 		notificationId: string,
 	): Promise<NotificationLog[]> {
 		try {
+			const supabase = createSupabaseBrowserClient()
 			const { data, error } = await supabase
 				.from('notification_logs')
 				.select('*')
@@ -252,8 +259,9 @@ export class NotificationLogger {
 	 * @param {number} [offset=0] - Number of logs to skip
 	 * @returns {Promise<NotificationLog[]>} Array of error logs
 	 */
-	async getErrorLogs(limit = 100, offset = 0): Promise<NotificationLog[]> {
+	async getErrorLogs(limit = 100, offset = 0	): Promise<NotificationLog[]> {
 		try {
+			const supabase = createSupabaseBrowserClient()
 			const { data, error } = await supabase
 				.from('notification_logs')
 				.select('*')

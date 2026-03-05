@@ -1,36 +1,36 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
+import type { TeamMember } from '~/lib/types/project/project-detail.types'
 
 export async function getProjectTeam(
 	client: TypedSupabaseClient,
 	projectId: string,
-) {
-	const { data: members, error: membersError } = await client
-		.from('project_members')
-		.select('id, role, title, user_id')
+): Promise<TeamMember[]> {
+	const { data: members, error } = await client
+		.from('project_team')
+		.select('id, full_name, role_title, bio, photo_url, order_index')
 		.eq('project_id', projectId)
+		.order('order_index', { ascending: true })
+		.order('created_at', { ascending: true })
 
-	if (membersError) throw membersError
+	if (error) {
+		// Table may not exist in all environments — return empty instead of throwing
+		if (
+			error.message?.includes('does not exist') ||
+			error.message?.includes('relation') ||
+			error.code === '42P01'
+		) {
+			console.warn('project_team table not found')
+			return []
+		}
+		throw error
+	}
 
-	const userIds = members.map((m) => m.user_id)
-	const { data: profiles, error: profilesError } = await client
-		.from('profiles')
-		.select('id, display_name, bio, image_url')
-		.in('id', userIds)
-
-	if (profilesError) throw profilesError
-
-	return members.flatMap((m) => {
-		const profile = profiles.find((p) => p.id === m.user_id)
-		if (!profile) return []
-		return [
-			{
-				id: m.id,
-				displayName: profile.display_name,
-				avatar: profile.image_url,
-				bio: profile.bio,
-				role: m.role,
-				title: m.title,
-			},
-		]
-	})
+	return (members ?? []).map((m) => ({
+		id: m.id,
+		displayName: m.full_name,
+		avatar: m.photo_url ?? null,
+		bio: m.bio ?? null,
+		role: 'core' as const,
+		title: m.role_title ?? 'Member',
+	}))
 }

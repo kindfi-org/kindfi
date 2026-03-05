@@ -37,76 +37,69 @@ export function Navigation() {
 	return (
 		<NavigationMenu aria-label="Main navigation">
 			<NavigationMenuList>
-				<NavigationMenuItem>
-					<Link href="/projects" passHref>
-						<NavigationMenuLink
-							className={cn(
-								navigationMenuTriggerStyle(),
-								'data-[active]:bg-green-900/10 data-[active]:text-green-900',
-								'hover:bg-green-900/10 hover:text-green-900',
-								isActive('/projects') &&
-									'bg-green-900/10 text-green-900 font-medium',
-							)}
-							aria-label={t('nav.projects')}
-							aria-current={isActive('/projects') ? 'page' : undefined}
-						>
-							{t('nav.projects')}
-						</NavigationMenuLink>
-					</Link>
-				</NavigationMenuItem>
+			<NavigationMenuItem>
+				<NavigationMenuLink
+					asChild
+					className={cn(
+						navigationMenuTriggerStyle(),
+						'data-[active]:bg-green-900/10 data-[active]:text-green-900',
+						'hover:bg-green-900/10 hover:text-green-900',
+						isActive('/projects') && 'bg-green-900/10 text-green-900 font-medium',
+					)}
+					aria-label={t('nav.projects')}
+					aria-current={isActive('/projects') ? 'page' : undefined}
+				>
+					<Link href="/projects">{t('nav.projects')}</Link>
+				</NavigationMenuLink>
+			</NavigationMenuItem>
 
-				<NavigationMenuItem>
-					<Link href="/foundations" passHref>
-						<NavigationMenuLink
-							className={cn(
-								navigationMenuTriggerStyle(),
-								'data-[active]:bg-green-900/10 data-[active]:text-green-900',
-								'hover:bg-green-900/10 hover:text-green-900',
-								isActive('/foundations') &&
-									'bg-green-900/10 text-green-900 font-medium',
-							)}
-							aria-label={t('nav.foundations')}
-							aria-current={isActive('/foundations') ? 'page' : undefined}
-						>
-							{t('nav.foundations')}
-						</NavigationMenuLink>
-					</Link>
-				</NavigationMenuItem>
+			<NavigationMenuItem>
+				<NavigationMenuLink
+					asChild
+					className={cn(
+						navigationMenuTriggerStyle(),
+						'data-[active]:bg-green-900/10 data-[active]:text-green-900',
+						'hover:bg-green-900/10 hover:text-green-900',
+						isActive('/foundations') &&
+							'bg-green-900/10 text-green-900 font-medium',
+					)}
+					aria-label={t('nav.foundations')}
+					aria-current={isActive('/foundations') ? 'page' : undefined}
+				>
+					<Link href="/foundations">{t('nav.foundations')}</Link>
+				</NavigationMenuLink>
+			</NavigationMenuItem>
 
-				<NavigationMenuItem>
-					<Link href="/about" passHref>
-						<NavigationMenuLink
-							className={cn(
-								navigationMenuTriggerStyle(),
-								'data-[active]:bg-green-900/10 data-[active]:text-green-900',
-								'hover:bg-green-900/10 hover:text-green-900',
-								isActive('/about') &&
-									'bg-green-900/10 text-green-900 font-medium',
-							)}
-							aria-label={t('nav.about')}
-							aria-current={isActive('/about') ? 'page' : undefined}
-						>
-							{t('nav.about')}
-						</NavigationMenuLink>
-					</Link>
-				</NavigationMenuItem>
+			<NavigationMenuItem>
+				<NavigationMenuLink
+					asChild
+					className={cn(
+						navigationMenuTriggerStyle(),
+						'data-[active]:bg-green-900/10 data-[active]:text-green-900',
+						'hover:bg-green-900/10 hover:text-green-900',
+						isActive('/about') && 'bg-green-900/10 text-green-900 font-medium',
+					)}
+					aria-label={t('nav.about')}
+					aria-current={isActive('/about') ? 'page' : undefined}
+				>
+					<Link href="/about">{t('nav.about')}</Link>
+				</NavigationMenuLink>
+			</NavigationMenuItem>
 
-				<NavigationMenuItem>
-					<Link href="/news" passHref>
-						<NavigationMenuLink
-							className={cn(
-								navigationMenuTriggerStyle(),
-								'data-[active]:bg-green-900/10 data-[active]:text-green-900',
-								'hover:bg-green-900/10 hover:text-green-900',
-								isActive('/news') &&
-									'bg-green-900/10 text-green-900 font-medium',
-							)}
-							aria-current={isActive('/news') ? 'page' : undefined}
-						>
-							{t('nav.news')}
-						</NavigationMenuLink>
-					</Link>
-				</NavigationMenuItem>
+			<NavigationMenuItem>
+				<NavigationMenuLink
+					asChild
+					className={cn(
+						navigationMenuTriggerStyle(),
+						'data-[active]:bg-green-900/10 data-[active]:text-green-900',
+						'hover:bg-green-900/10 hover:text-green-900',
+						isActive('/news') && 'bg-green-900/10 text-green-900 font-medium',
+					)}
+					aria-current={isActive('/news') ? 'page' : undefined}
+				>
+					<Link href="/news">{t('nav.news')}</Link>
+				</NavigationMenuLink>
+			</NavigationMenuItem>
 			</NavigationMenuList>
 		</NavigationMenu>
 	)

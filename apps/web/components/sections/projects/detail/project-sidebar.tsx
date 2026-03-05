@@ -41,6 +41,19 @@ interface ProjectSidebarProps {
 	project: ProjectDetail
 }
 
+const buildFormSchema = (minInvestment: number) =>
+	z.object({
+		investmentAmount: z.coerce
+			.number({
+				invalid_type_error: 'Investment amount must be a number',
+				required_error: 'Investment amount is required',
+			})
+			.positive('Investment amount must be greater than zero')
+			.min(minInvestment, `Minimum investment is $${minInvestment}`),
+	})
+
+type FormValues = { investmentAmount: string }
+
 export function ProjectSidebar({ project }: ProjectSidebarProps) {
 	const reducedMotion = useReducedMotion()
 	const [isFollowing, setIsFollowing] = useState(false)
@@ -73,27 +86,17 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		return Math.min(Math.round((raised / project.goal) * 100), 100)
 	}, [onChainRaised, project.goal, project.raised])
 
-	// Define the form schema with zod
-	const formSchema = z.object({
-		investmentAmount: z
-			.number({
-				error: (issue) =>
-					issue.input === undefined
-						? 'Investment amount is required'
-						: 'Investment amount must be a number',
-			})
-			.min(
-				project.minInvestment,
-				`Minimum investment is $${project.minInvestment}`,
-			),
-	})
+	const formSchema = useMemo(
+		() => buildFormSchema(project.minInvestment),
+		[project.minInvestment],
+	)
 
 	// Set up react-hook-form with zod validation
-	const form = useForm<z.infer<typeof formSchema>>({
+	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
-		mode: 'onChange',
+		mode: 'onBlur',
 		defaultValues: {
-			investmentAmount: project.minInvestment,
+			investmentAmount: String(project.minInvestment),
 		},
 	})
 
@@ -351,20 +354,13 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 										</div>
 										<FormControl>
 											<Input
-												type="number"
+												type="text"
+												inputMode="decimal"
 												placeholder={`Min. $${project.minInvestment}…`}
 												className="pl-6 bg-white border-green-600"
 												aria-label="Donation amount in USD"
 												autoComplete="off"
 												{...field}
-												onChange={(e) => {
-													const value =
-														e.target.value === ''
-															? undefined
-															: Number(e.target.value)
-													field.onChange(value)
-												}}
-												value={field.value ?? ''}
 											/>
 										</FormControl>
 									</div>

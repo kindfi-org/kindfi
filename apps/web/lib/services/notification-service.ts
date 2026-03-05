@@ -1,4 +1,4 @@
-import { supabase } from '@packages/lib/supabase'
+import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type {
 	BaseNotification,
 	CreateNotificationDTO,
@@ -39,6 +39,7 @@ type NotificationUpdate = Partial<
 
 export class NotificationService {
 	private logger: NotificationLogger
+	private supabase = createSupabaseBrowserClient()
 
 	constructor() {
 		this.logger = new NotificationLogger()
@@ -58,7 +59,7 @@ export class NotificationService {
 		page = 1,
 		pageSize = 20,
 	): Promise<{ data: BaseNotification[]; count: number }> {
-		let query = supabase.from('notifications').select('*', { count: 'exact' })
+		let query = this.supabase.from('notifications').select('*', { count: 'exact' })
 
 		// Apply filters
 		if (filters.is_read !== undefined) {
@@ -121,7 +122,7 @@ export class NotificationService {
 	}
 
 	async getUnreadCount(userId: string): Promise<number> {
-		const { count, error } = await supabase
+		const { count, error } = await this.supabase
 			.from('notifications')
 			.select('*', { count: 'exact', head: true })
 			.eq('user_id', userId)
@@ -148,7 +149,7 @@ export class NotificationService {
 		notification: CreateNotificationDTO,
 	): Promise<BaseNotification | null> {
 		try {
-			const { data, error } = await supabase
+			const { data, error } = await this.supabase
 				.from('notifications')
 				.insert({
 					user_id: notification.user_id,
@@ -183,7 +184,7 @@ export class NotificationService {
 	}
 
 	async getNotification(id: string): Promise<BaseNotification> {
-		const { data, error } = await supabase
+		const { data, error } = await this.supabase
 			.from('notifications')
 			.select('*')
 			.eq('id', id)
@@ -217,7 +218,7 @@ export class NotificationService {
 		id: string,
 		data: UpdateNotificationDTO,
 	): Promise<BaseNotification> {
-		const { data: notification, error } = await supabase
+		const { data: notification, error } = await this.supabase
 			.from('notifications')
 			.update(data satisfies NotificationUpdate)
 			.eq('id', id)
@@ -247,7 +248,7 @@ export class NotificationService {
 	}
 
 	async deleteNotification(id: string): Promise<void> {
-		const { error } = await supabase.from('notifications').delete().eq('id', id)
+		const { error } = await this.supabase.from('notifications').delete().eq('id', id)
 
 		if (error) {
 			await this.logger.logError({
@@ -271,10 +272,10 @@ export class NotificationService {
 	 */
 	async markAsRead(notificationId: string): Promise<boolean> {
 		try {
-			const { error } = await supabase
-				.from('notifications')
-				.update({ is_read: true })
-				.eq('id', notificationId)
+		const { error } = await this.supabase
+			.from('notifications')
+			.update({ is_read: true })
+			.eq('id', notificationId)
 
 			if (error) throw error
 			return true
@@ -291,10 +292,10 @@ export class NotificationService {
 	 */
 	async markAllAsRead(userId: string): Promise<boolean> {
 		try {
-			const { error } = await supabase
-				.from('notifications')
-				.update({ is_read: true })
-				.eq('user_id', userId)
+		const { error } = await this.supabase
+			.from('notifications')
+			.update({ is_read: true })
+			.eq('user_id', userId)
 				.eq('is_read', false)
 
 			if (error) throw error
@@ -312,7 +313,7 @@ export class NotificationService {
 	 */
 	async getUnreadNotifications(userId: string): Promise<BaseNotification[]> {
 		try {
-			const { data, error } = await supabase
+			const { data, error } = await this.supabase
 				.from('notifications')
 				.select('*')
 				.eq('user_id', userId)
@@ -336,7 +337,7 @@ export class NotificationService {
 		userId: string,
 	): Promise<NotificationPreferences | null> {
 		try {
-			const { data, error } = await supabase
+			const { data, error } = await this.supabase
 				.from('notification_preferences')
 				.select('*')
 				.eq('user_id', userId)
@@ -366,7 +367,7 @@ export class NotificationService {
 		preferences: Partial<NotificationPreferences>,
 	): Promise<boolean> {
 		try {
-			const { error } = await supabase.from('notification_preferences').upsert({
+			const { error } = await this.supabase.from('notification_preferences').upsert({
 				user_id: userId,
 				...preferences,
 			})
