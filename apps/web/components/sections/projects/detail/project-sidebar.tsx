@@ -384,8 +384,8 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 												className="pl-6 bg-white border-green-600 disabled:opacity-60 disabled:cursor-not-allowed"
 												aria-label="Donation amount in USD"
 												autoComplete="off"
-												disabled={!hasEscrow}
 												{...field}
+												disabled={!hasEscrow}
 											/>
 										</FormControl>
 									</div>
