@@ -78,6 +78,8 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 	const effectiveEscrowType =
 		escrowData?.type || project.escrowType || 'multi-release'
 
+	const hasEscrow = Boolean(project.escrowContractAddress)
+
 	const progressPercentage = useMemo(() => {
 		const raised = onChainRaised ?? project.raised
 		return Math.min(Math.round((raised / project.goal) * 100), 100)
@@ -88,12 +90,16 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		[project.minInvestment],
 	)
 
+	// When !hasEscrow, use empty string so the placeholder "Donations coming soon" is visible
+	// (placeholders only show when the input value is empty)
+	const initialInvestmentAmount = hasEscrow ? project.minInvestment : ''
+
 	// Set up react-hook-form with zod validation
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		mode: 'onBlur',
 		defaultValues: {
-			investmentAmount: project.minInvestment,
+			investmentAmount: initialInvestmentAmount as FormValues['investmentAmount'],
 		},
 	})
 
@@ -307,9 +313,30 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			transition={reducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
 		>
 			<div className="p-6">
-				<h2 className="mb-2 text-xl font-bold">Support This Project</h2>
+				<div className="flex items-center gap-2 mb-2">
+					<h2 className="text-xl font-bold">Support This Project</h2>
+					{hasEscrow ? (
+						<Badge
+							variant="secondary"
+							className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-0"
+							aria-label="This project accepts donations"
+						>
+							Accepting donations
+						</Badge>
+					) : (
+						<Badge
+							variant="secondary"
+							className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-0"
+							aria-label="Donations coming soon"
+						>
+							Donations coming soon
+						</Badge>
+					)}
+				</div>
 				<p className="mb-4 text-muted-foreground">
-					Your contribution matters. Join the change.
+					{hasEscrow
+						? 'Your contribution matters. Join the change.'
+						: 'This project is still setting up secure escrow. Donations will be available soon.'}
 				</p>
 
 				<div
@@ -353,11 +380,16 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 											<Input
 												type="text"
 												inputMode="decimal"
-												placeholder={`Min. $${project.minInvestment}…`}
-												className="pl-6 bg-white border-green-600"
+												placeholder={
+													hasEscrow
+														? `Min. $${project.minInvestment}…`
+														: 'Donations coming soon'
+												}
+												className="pl-6 bg-white border-green-600 disabled:opacity-60 disabled:cursor-not-allowed"
 												aria-label="Donation amount in USD"
 												autoComplete="off"
 												{...field}
+												disabled={!hasEscrow}
 											/>
 										</FormControl>
 									</div>
@@ -370,7 +402,11 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 							type="submit"
 							className="mt-4 w-full text-white gradient-btn"
 							size="lg"
-							disabled={!form.formState.isValid || form.formState.isSubmitting}
+							disabled={
+								!hasEscrow ||
+								!form.formState.isValid ||
+								form.formState.isSubmitting
+							}
 							aria-busy={form.formState.isSubmitting}
 						>
 							{form.formState.isSubmitting ? (
@@ -385,11 +421,23 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					</form>
 				</Form>
 
-				<div className="p-3 my-4 text-sm text-amber-900 bg-amber-50 rounded-md border border-amber-300">
-					Donating without logging in means you will miss out on features like
-					reputation, contributor NFTs, and future perks. If that&apos;s fine,
-					you can still donate anonymously.
-				</div>
+				{hasEscrow && (
+					<div className="p-3 my-4 text-sm text-amber-900 bg-amber-50 rounded-md border border-amber-300">
+						Donating without logging in means you will miss out on features like
+						reputation, contributor NFTs, and future perks. If that&apos;s fine,
+						you can still donate anonymously.
+					</div>
+				)}
+
+				{!hasEscrow && (
+					<div className="p-3 my-4 text-sm text-amber-900 bg-amber-50 rounded-md border border-amber-300">
+						<p className="font-medium mb-1">Donations not yet available</p>
+						<p className="text-amber-800">
+							This project is still setting up its secure escrow contract.
+							Check back soon to support this cause.
+						</p>
+					</div>
+				)}
 
 				{project.escrowContractAddress && (
 					<div className="p-3 my-4 text-sm bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-900">
