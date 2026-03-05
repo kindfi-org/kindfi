@@ -3,6 +3,15 @@ import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import {
+	validateFoundedYear,
+	validateOptionalString,
+	validateOptionalUrl,
+	validateRequiredString,
+	validateSlug,
+	validateSocialLinks,
+	foundationValidationLimits,
+} from '~/lib/validation/foundation-api'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { createFoundationFormSchema } from '~/lib/schemas/foundation-create.schemas'
 import { validateRequest } from '~/lib/utils/validation'

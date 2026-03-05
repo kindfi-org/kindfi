@@ -1,4 +1,5 @@
 import { supabase } from '@packages/lib/supabase'
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
@@ -38,8 +39,8 @@ export async function POST(req: NextRequest) {
 		// Step 1 & 2: Validate Milestone and Reviewer exist in parallel
 		const [milestoneResult, reviewerResult] = await Promise.all([
 			supabase
-				.from('escrow_milestones')
-				.select('*')
+				.from('milestones')
+				.select('id, title, order_index, project_id')
 				.eq('id', milestoneId)
 				.single(),
 			supabase.from('reviewers').select('*').eq('id', reviewerId).single(),
@@ -131,21 +132,29 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Step 7: Send Notification
-		const { error: notificationError } = await supabase
-			.from('notifications')
-			.insert({
-				user_id: milestone.user_id,
-				milestone_id: milestoneId,
-				message: `Your milestone status has been updated to ${status}.${isApproved ? ' Admins are finalizing the transaction for approval.' : ''}`,
-			})
+		// Step 7: Send email + in-app notification (when approved)
+		if (isApproved) {
+			const { data: project } = await supabaseServiceRole
+				.from('projects')
+				.select('title, slug, kindler_id')
+				.eq('id', milestone.project_id)
+				.single()
 
-		if (notificationError) {
-			throw new AppError(
-				`Failed to send notification: ${notificationError.message}`,
-				500,
-				notificationError,
-			)
+			if (project?.kindler_id) {
+				import('~/lib/email/email-notification-service')
+					.then(({ sendMilestoneApprovedNotification }) =>
+						sendMilestoneApprovedNotification({
+							userId: project.kindler_id,
+							projectTitle: project.title ?? 'Your project',
+							projectSlug: project.slug ?? '',
+							milestoneTitle: milestone.title ?? undefined,
+							milestoneIndex: milestone.order_index ?? 0,
+						}),
+					)
+					.catch((err) =>
+						console.error('[Escrow review] Notification error:', err),
+					)
+			}
 		}
 
 		return NextResponse.json(

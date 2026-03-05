@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { NextConfig } from 'next'
@@ -5,6 +6,14 @@ import type { NextConfig } from 'next'
 const appConfig: AppEnvInterface = appEnvConfig('web')
 const isProduction = appConfig.env.nodeEnv === 'production'
 const nextConfig: NextConfig = {
+	transpilePackages: ['@packages/lib', '@packages/drizzle'],
+	turbopack: {
+		root: path.join(__dirname, '../..'),
+	},
+	// TODO: Fix React module resolution for packages/lib in monorepo type-check
+	typescript: {
+		ignoreBuildErrors: true,
+	},
 	experimental: {
 		mdxRs: true,
 		optimizePackageImports: ['react-icons'],

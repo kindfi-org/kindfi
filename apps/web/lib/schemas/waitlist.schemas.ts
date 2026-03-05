@@ -24,9 +24,7 @@ export const waitlistStepTwoSchema = z.object({
 
 export const waitlistStepThreeSchema = z.object({
 	source: z.string().optional(),
-	consent: z.literal(true, {
-		errorMap: () => ({ message: 'Consent is required' }),
-	}),
+	consent: z.literal(true, { error: 'Consent is required' }),
 })
 
 export const waitlistSchema: z.ZodSchema<WaitlistFormData> =

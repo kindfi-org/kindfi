@@ -14,6 +14,7 @@ import {
 } from '~/components/base/sheet'
 import { useAuth } from '~/hooks/use-auth'
 import { useI18n } from '~/lib/i18n/context'
+import { NotificationBell } from '~/components/shared/notification-bell'
 import { LanguageSelector } from './language-selector'
 import {
 	MobileAuthButtons,
@@ -62,7 +63,14 @@ export const Header = () => {
 					{/* Action Buttons */}
 					<div className="flex items-center space-x-4">
 						<LanguageSelector />
-						{user ? <UserMenu user={user} /> : <AuthButtons />}
+						{user ? (
+							<>
+								<NotificationBell />
+								<UserMenu user={user} />
+							</>
+						) : (
+							<AuthButtons />
+						)}
 
 						{/* Mobile menu */}
 						<Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -82,8 +90,9 @@ export const Header = () => {
 									<SheetTitle>{t('nav.menu')}</SheetTitle>
 								</SheetHeader>
 								<div className="mt-8 flex flex-col gap-4">
-									<div className="pb-4 border-b">
+									<div className="pb-4 border-b flex items-center gap-2">
 										<LanguageSelector />
+										{user && <NotificationBell />}
 									</div>
 									<MobileNavigation />
 									{user ? (

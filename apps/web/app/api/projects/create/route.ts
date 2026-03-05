@@ -126,6 +126,17 @@ export async function POST(req: Request) {
 		// Create tag relationships for the new project
 		await upsertTags(project.id, tags ?? [], supabase)
 
+		// Send email + in-app notifications (non-blocking)
+		import('~/lib/email/email-notification-service')
+			.then(({ sendNewProjectEmails }) =>
+				sendNewProjectEmails({
+					projectTitle: title,
+					projectSlug: project.slug ?? '',
+					creatorId: userId,
+				}),
+			)
+			.catch((err) => console.error('[Project create] Notification error:', err))
+
 		return NextResponse.json({ slug: project.slug }, { status: 201 })
 	} catch (err) {
 		console.error(err)

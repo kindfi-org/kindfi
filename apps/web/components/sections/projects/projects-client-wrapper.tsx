@@ -1,7 +1,7 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
@@ -27,6 +27,7 @@ export function ProjectsClientWrapper() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const { t } = useI18n()
+	const reducedMotion = useReducedMotion()
 	const initialCategoryParams = searchParams.getAll('category')
 	const sortParam = searchParams.get('sort') ?? 'most-popular'
 
@@ -114,9 +115,9 @@ export function ProjectsClientWrapper() {
 		<div>
 			<motion.div
 				className="mb-6"
-				initial={{ opacity: 0, y: 8 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.25, ease: 'easeOut' }}
+				initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+				animate={reducedMotion ? false : { opacity: 1, y: 0 }}
+				transition={reducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
 			>
 				{isLoadingCategories ? (
 					<div className="flex flex-wrap gap-2">
@@ -160,10 +161,10 @@ export function ProjectsClientWrapper() {
 			<AnimatePresence mode="wait">
 				<motion.div
 					key={viewMode}
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					transition={{ duration: 0.2 }}
+					initial={reducedMotion ? false : { opacity: 0 }}
+					animate={reducedMotion ? false : { opacity: 1 }}
+					exit={reducedMotion ? undefined : { opacity: 0 }}
+					transition={reducedMotion ? { duration: 0 } : { duration: 0.2 }}
 				>
 					{isLoadingProjects ? (
 						<div className="flex gap-4 flex-wrap">
@@ -180,22 +181,26 @@ export function ProjectsClientWrapper() {
 					) : viewMode === 'grid' ? (
 						<motion.div
 							className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"
-							variants={staggerContainer}
-							initial="initial"
-							animate="animate"
+							variants={reducedMotion ? undefined : staggerContainer}
+							initial={reducedMotion ? false : 'initial'}
+							animate={reducedMotion ? false : 'animate'}
 							role="feed"
 							aria-label="Projects grid view"
 						>
-							{filteredProjects.map((project) => (
-								<ProjectCardGrid key={project.id} project={project} />
+							{filteredProjects.map((project, index) => (
+								<ProjectCardGrid
+									key={project.id}
+									project={project}
+									index={index}
+								/>
 							))}
 						</motion.div>
 					) : (
 						<motion.div
 							className="flex flex-col gap-6"
-							variants={staggerContainer}
-							initial="initial"
-							animate="animate"
+							variants={reducedMotion ? undefined : staggerContainer}
+							initial={reducedMotion ? false : 'initial'}
+							animate={reducedMotion ? false : 'animate'}
 							role="feed"
 							aria-label="Projects list view"
 						>

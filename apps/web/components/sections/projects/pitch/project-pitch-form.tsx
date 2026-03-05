@@ -1,6 +1,6 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { Loader2, Save, Video } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -193,40 +193,41 @@ export function ProjectPitchForm({
 								)}
 							/>
 
-							{/* Submit Button */}
-							<div className="pt-6 border-t border-gray-200">
-								<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-									<div className="text-sm text-muted-foreground">
-										{isDirty ? (
-											<span className="text-amber-600 font-medium">
-												You have unsaved changes
-											</span>
-										) : (
-											<span>All changes saved</span>
-										)}
-									</div>
-
-									<Button
-										type="submit"
-										disabled={!isDirty || isPending}
-										className="flex items-center gap-2 px-8 text-white gradient-btn"
-										size="lg"
-										aria-label="Save changes"
-									>
-										{isPending ? (
-											<>
-												<Loader2 className="w-4 h-4 animate-spin" />
-												Saving...
-											</>
-										) : (
-											<>
-												<Save className="h-4 w-4" />
-												Save Changes
-											</>
-										)}
-									</Button>
+						{/* Actions */}
+						<div className="pt-6 border-t border-gray-200 space-y-4">
+							<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+								<div className="text-sm text-muted-foreground">
+									{isDirty ? (
+										<span className="text-amber-600 font-medium">
+											You have unsaved changes
+										</span>
+									) : (
+										<span>All changes saved</span>
+									)}
 								</div>
+
+								<Button
+									type="submit"
+									disabled={!isDirty || isPending}
+									className="flex items-center gap-2 px-8 text-white gradient-btn"
+									size="lg"
+									aria-label="Save changes"
+								>
+									{isPending ? (
+										<>
+											<Loader2 className="w-4 h-4 animate-spin" />
+											Saving...
+										</>
+									) : (
+										<>
+											<Save className="h-4 w-4" />
+											Save Changes
+										</>
+									)}
+								</Button>
 							</div>
+
+						</div>
 						</form>
 					</Form>
 				</CardContent>

@@ -37,6 +37,8 @@ export interface AppEnvInterface {
 	}
 	resend: {
 		apiKey: string
+		fromEmail: string
+		fromName: string
 	}
 	env: {
 		nodeEnv: string

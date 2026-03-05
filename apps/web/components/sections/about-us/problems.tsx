@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '~/components/base/card'
 import { Icon } from '~/components/base/icon'
+import { SectionContainer } from '~/components/shared/section-container'
 import { useTranslation } from '~/hooks/use-translation'
 import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
@@ -55,26 +56,31 @@ const Problems = () => {
 	}
 
 	return (
-		<section className="py-24 relative overflow-hidden">
-			<div className="container mx-auto px-6 flex flex-col items-center relative z-10">
+		<section
+			className="py-16 sm:py-20 lg:py-24 relative overflow-hidden bg-gray-50/60"
+			aria-labelledby="about-problems-heading"
+		>
+			<SectionContainer className="flex flex-col items-center">
 				<motion.div
-					className="text-center mb-16"
+					className="text-center mb-10 max-w-3xl mx-auto sm:mb-14"
 					initial={{ opacity: 0, y: 20 }}
 					whileInView={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
 					viewport={{ once: true, amount: 0.2 }}
 				>
-					<h2 className="text-3xl md:text-4xl font-bold gradient-text inline-block mb-4">
+					<h2
+						id="about-problems-heading"
+						className="text-3xl font-bold tracking-tight gradient-text mb-3 sm:text-4xl"
+					>
 						{t('about.problems.title')}
 					</h2>
-					<div className="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto rounded-full mb-4" />
-					<p className="text-gray-700 text-lg max-w-2xl mx-auto">
+					<p className="text-muted-foreground text-base leading-relaxed sm:text-lg">
 						{t('about.problems.subtitle')}
 					</p>
 				</motion.div>
 
 				<motion.div
-					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8 max-w-7xl"
+					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 w-full max-w-6xl"
 					variants={containerVariants}
 					initial="hidden"
 					whileInView="visible"
@@ -84,40 +90,37 @@ const Problems = () => {
 						<motion.div
 							key={problem.title || `problem-${index}`}
 							variants={itemVariants}
-							whileHover={{
-								y: -8,
-								transition: { duration: 0.3 },
-							}}
+							className="h-full"
 						>
-							<Card className="h-full flex flex-col bg-white/90 backdrop-blur-sm border-0 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:shadow-green-200/50">
+							<Card className="h-full flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
 								<div
-									className={`h-1.5 ${
+									className={`h-1 ${
 										index % 3 === 0
-											? 'bg-gradient-to-r from-green-500 to-blue-400'
+											? 'bg-gradient-to-r from-emerald-500 to-teal-500'
 											: index % 3 === 1
-												? 'bg-gradient-to-r from-blue-500 to-green-400'
-												: 'bg-gradient-to-r from-violet-500 to-green-400'
+												? 'bg-gradient-to-r from-blue-500 to-indigo-500'
+												: 'bg-gradient-to-r from-violet-500 to-purple-500'
 									}`}
 								/>
-								<div className="flex flex-col justify-start items-center p-8 h-full">
+								<div className="flex flex-col flex-1 p-6 sm:p-7">
 									<div
-										className={`w-16 h-16 rounded-xl flex items-center justify-center mb-6 ${
+										className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
 											index % 3 === 0
-												? 'bg-green-100 text-green-600'
+												? 'bg-emerald-50 text-emerald-600'
 												: index % 3 === 1
-													? 'bg-blue-100 text-blue-600'
-													: 'bg-violet-100 text-violet-600'
+													? 'bg-blue-50 text-blue-600'
+													: 'bg-violet-50 text-violet-600'
 										}`}
 									>
-										<Icon name={problem.icon} className="text-4xl" />
+										<Icon name={problem.icon} className="text-2xl" />
 									</div>
-									<CardContent className="flex flex-col text-center p-0 flex-1">
-										<h3 className="text-xl font-bold text-gray-800 mb-3">
+									<CardContent className="flex flex-col text-left p-0 flex-1">
+										<h3 className="text-lg font-semibold text-gray-900 mb-2">
 											{t(
 												`about.problems.items.${getProblemKey(problem.title)}.title`,
 											)}
 										</h3>
-										<p className="text-gray-700 text-base leading-relaxed">
+										<p className="text-muted-foreground text-sm leading-relaxed">
 											{t(
 												`about.problems.items.${getProblemKey(problem.title)}.description`,
 											)}
@@ -128,7 +131,7 @@ const Problems = () => {
 						</motion.div>
 					))}
 				</motion.div>
-			</div>
+			</SectionContainer>
 		</section>
 	)
 }

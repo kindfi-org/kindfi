@@ -33,6 +33,8 @@ export function transformEnv(): AppEnvInterface {
 		},
 		resend: {
 			apiKey: data.RESEND_SMTP_API_KEY || '',
+			fromEmail: data.RESEND_FROM_EMAIL || 'notifications@kindfi.org',
+			fromName: data.RESEND_FROM_NAME || 'KindFi',
 		},
 		env: {
 			nodeEnv: data.NODE_ENV || 'development',
@@ -136,6 +138,8 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(
 		}),
 		resend: z.object({
 			apiKey: z.string(),
+			fromEmail: z.string(),
+			fromName: z.string(),
 		}),
 		env: z.object({
 			nodeEnv: z.enum(['development', 'production', 'test']),
@@ -313,16 +317,17 @@ export function appEnvConfig<T extends keyof typeof appRequirements>(
 			const result = schema.safeParse(transformedConfig)
 
 			if (!result.success) {
+				const issues = result.error.issues
 				console.error('❌ Config validation failed:', {
-					errorCount: result.error.errors.length,
-					errors: result.error.errors.map((err) => ({
+					errorCount: issues.length,
+					errors: issues.map((err) => ({
 						path: err.path.join('.'),
 						message: err.message,
 						code: err.code,
 					})),
 				})
 
-				const missingVars = result.error.errors
+				const missingVars = issues
 					.map((err) => `  • ${err.path.join('.')}: ${err.message}`)
 					.join('\n')
 				throw new Error(
@@ -354,6 +359,8 @@ export const baseEnvSchema = z.object({
 
 	// RESEND Configuration
 	RESEND_SMTP_API_KEY: z.string().optional(),
+	RESEND_FROM_EMAIL: z.string().email().optional(),
+	RESEND_FROM_NAME: z.string().optional(),
 
 	// Auth Configuration
 	NEXTAUTH_SECRET: z.string().optional(),

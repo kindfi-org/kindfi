@@ -21,7 +21,7 @@ const notificationSchema = z.object({
 	body: z.string().min(1),
 	icon: z.string().url().optional(),
 	badge: z.string().url().optional(),
-	data: z.record(z.unknown()).optional(),
+	data: z.record(z.string(), z.unknown()).optional(),
 })
 
 const requestSchema = z.object({
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
 
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Invalid request data', details: error.errors },
+				{ error: 'Invalid request data', details: error.issues },
 				{ status: 400 },
 			)
 		}

@@ -44,7 +44,7 @@ export function HowItWorks() {
 	]
 
 	return (
-		<section className="w-full py-20 bg-white">
+		<section className="w-full py-16 bg-white sm:py-20 lg:py-24">
 			<SectionContainer>
 				<SectionCaption
 					title={t('home.howItWorksTitle')}
@@ -52,7 +52,7 @@ export function HowItWorks() {
 					highlightWords={['Trust Built']}
 				/>
 
-				<div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+				<div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3">
 					{translatedModels.map((model) => (
 						<InvestmentModelCard
 							key={model.id}

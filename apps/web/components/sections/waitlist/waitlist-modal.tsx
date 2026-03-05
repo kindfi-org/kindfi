@@ -1,6 +1,6 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { useState } from 'react'
@@ -133,7 +133,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 function StepOne({ onNext }: { onNext: () => void }) {
 	const { formData, updateFormData } = useWaitlist()
 	const form = useForm<WaitlistStepOneData>({
-		resolver: zodResolver(waitlistStepOneSchema),
+		resolver: zodResolver<WaitlistStepOneData>(waitlistStepOneSchema),
 		defaultValues: {
 			name: formData.name,
 			email: formData.email || '',
@@ -240,7 +240,7 @@ function StepTwo({
 }) {
 	const { formData, updateFormData } = useWaitlist()
 	const form = useForm<WaitlistStepTwoData>({
-		resolver: zodResolver(waitlistStepTwoSchema),
+		resolver: zodResolver<WaitlistStepTwoData>(waitlistStepTwoSchema),
 		defaultValues: {
 			projectName: formData.projectName || '',
 			projectDescription: formData.projectDescription || '',
@@ -342,7 +342,7 @@ function StepThree({
 }) {
 	const { formData, updateFormData } = useWaitlist()
 	const form = useForm<WaitlistStepThreeData>({
-		resolver: zodResolver(waitlistStepThreeSchema),
+		resolver: zodResolver<WaitlistStepThreeData>(waitlistStepThreeSchema),
 		defaultValues: {
 			source: formData.source || '',
 			consent: formData.consent,

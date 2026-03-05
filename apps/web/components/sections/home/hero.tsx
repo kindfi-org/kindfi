@@ -3,7 +3,7 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '~/components/base/button'
 import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 import { SectionContainer } from '~/components/shared/section-container'
@@ -13,17 +13,20 @@ import { useI18n } from '~/lib/i18n'
 export function Hero() {
 	const { t } = useI18n()
 
-	const HERO_WORDS = [
-		t('home.heroWords.impact'),
-		t('home.heroWords.causes'),
-		t('home.heroWords.world'),
-		t('home.heroWords.support'),
-		t('home.heroWords.trust'),
-		t('home.heroWords.adoption'),
-		t('home.heroWords.needs'),
-	]
+	const heroWords = useMemo(
+		() => [
+			t('home.heroWords.impact'),
+			t('home.heroWords.causes'),
+			t('home.heroWords.world'),
+			t('home.heroWords.support'),
+			t('home.heroWords.trust'),
+			t('home.heroWords.adoption'),
+			t('home.heroWords.needs'),
+		],
+		[t],
+	)
 
-	const { displayText, longestWordCh } = useTypewriter(HERO_WORDS, {
+	const { displayText, longestWordCh } = useTypewriter(heroWords, {
 		typingSpeedMs: 120,
 		deletingSpeedMs: 70,
 		fullWordPauseMs: 1200,
@@ -32,16 +35,16 @@ export function Hero() {
 		loop: true,
 	})
 
-	return (
+		return (
 		<section
-			className="relative z-0 min-h-[80vh] bg-gradient-to-b from-purple to-white pt-20 pb-8"
+			className="relative z-0 min-h-[85vh] bg-gradient-to-b from-violet-50 via-white/80 to-white pt-24 pb-16 sm:pt-28 sm:pb-20"
 			aria-labelledby="hero-title"
 			role="banner"
 		>
 			<SectionContainer>
 				<div className="text-center">
 					<motion.h2
-						className="text-xl font-semibold text-gray-800 mb-2"
+						className="text-base sm:text-lg font-semibold text-gray-600 mb-3 tracking-wide uppercase"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5 }}
@@ -50,7 +53,8 @@ export function Hero() {
 					</motion.h2>
 
 					<motion.h1
-						className="text-8xl font-bold gradient-text mb-4 py-4 text-center"
+						id="hero-title"
+						className="text-4xl font-bold tracking-tight gradient-text mb-6 py-2 text-center sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl sm:mb-8 sm:py-4"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.2 }}
@@ -70,7 +74,7 @@ export function Hero() {
 					</motion.h1>
 
 					<motion.p
-						className="text-lg text-gray-700 m-12"
+						className="text-base text-gray-600 max-w-2xl mx-auto px-4 mt-8 mb-10 leading-relaxed sm:text-lg sm:mt-10 sm:mb-12"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.4 }}
@@ -79,21 +83,16 @@ export function Hero() {
 					</motion.p>
 
 					<motion.div
-						className="flex flex-col sm:flex-row gap-4 justify-center"
+						className="flex flex-col items-center gap-10 sm:gap-12"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.6 }}
 					>
-						<WaitlistCTA />
-					</motion.div>
-					<motion.div
-						className="flex flex-col sm:flex-row gap-4 justify-center"
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.6 }}
-					>
-						<div className="mt-8 flex flex-col items-center gap-3">
-							<span className="text-lg text-muted-foreground">
+						<div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
+							<WaitlistCTA />
+						</div>
+						<div className="flex flex-col items-center gap-4 pt-4 border-t border-gray-200/80">
+							<span className="text-sm font-medium text-muted-foreground">
 								{t('home.supportedBy')}
 							</span>
 							<a
@@ -101,13 +100,14 @@ export function Hero() {
 								target="_blank"
 								rel="noopener noreferrer"
 								aria-label="Visit Stellar.org"
+								className="opacity-90 hover:opacity-100 transition-opacity"
 							>
 								<Image
 									src="/images/SDF.webp"
 									alt="Stellar Development Foundation"
 									width={420}
 									height={110}
-									className="h-[72px] w-auto"
+									className="h-14 sm:h-[72px] w-auto"
 									priority
 								/>
 							</a>

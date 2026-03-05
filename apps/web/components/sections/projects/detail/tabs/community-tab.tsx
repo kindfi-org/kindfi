@@ -83,7 +83,7 @@ export function CommunityTab({ comments }: CommunityTabProps) {
 				</Button>
 			</div>
 
-			{showQuestionForm && (
+			{showQuestionForm ? (
 				<motion.div
 					className="mb-8"
 					initial={{ opacity: 0, y: -10 }}
@@ -98,7 +98,7 @@ export function CommunityTab({ comments }: CommunityTabProps) {
 						onCancel={() => setShowQuestionForm(false)}
 					/>
 				</motion.div>
-			)}
+			) : null}
 
 			{sortedCurrentComments.length === 0 ? (
 				<div className="text-center py-12 text-gray-500" aria-live="polite">

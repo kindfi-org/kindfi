@@ -11,14 +11,23 @@ export function EmptyProject({
 	onClearFilters,
 }: EmptyStateProps) {
 	return (
-		<div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+		<section
+			className="flex flex-col items-center justify-center py-16 px-4 text-center"
+			aria-labelledby="empty-projects-heading"
+		>
 			<div className="bg-gray-50 p-6 rounded-full mb-6">
-				<SearchX className="h-12 w-12 text-gray-400" />
+				<SearchX
+					className="h-12 w-12 text-gray-400"
+					aria-hidden="true"
+				/>
 			</div>
 
-			<h3 className="text-xl font-semibold text-gray-900 mb-2">
+			<h2
+				id="empty-projects-heading"
+				className="text-xl font-semibold text-gray-900 mb-2"
+			>
 				No projects found
-			</h3>
+			</h2>
 
 			<p className="text-gray-600 mb-6 max-w-md">
 				{selectedCategories.length > 0 ? (
@@ -31,17 +40,16 @@ export function EmptyProject({
 				)}
 			</p>
 
-			{selectedCategories.length > 0 && (
+			{selectedCategories.length > 0 ? (
 				<div className="flex flex-col space-y-3">
 					<Button onClick={onClearFilters} variant="outline">
 						Clear {selectedCategories.length > 1 ? 'filters' : 'filter'}
 					</Button>
-
 					<span className="text-sm text-gray-500">
 						Selected: {selectedCategories.join(', ')}
 					</span>
 				</div>
-			)}
-		</div>
+			) : null}
+		</section>
 	)
 }

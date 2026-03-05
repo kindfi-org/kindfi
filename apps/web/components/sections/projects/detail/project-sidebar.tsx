@@ -1,13 +1,14 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { motion } from 'framer-motion'
+import { zodResolver } from '~/lib/form/zod-resolver'
+import { motion, useReducedMotion } from 'framer-motion'
 import {
 	Building2,
 	CircleAlert,
 	CircleCheck,
 	ExternalLink,
 	Heart,
+	Loader2,
 	Share,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -40,7 +41,18 @@ interface ProjectSidebarProps {
 	project: ProjectDetail
 }
 
+const buildFormSchema = (minInvestment: number) =>
+	z.object({
+		investmentAmount: z.coerce
+			.number({ error: 'Investment amount must be a valid number' })
+			.positive('Investment amount must be greater than zero')
+			.min(minInvestment, `Minimum investment is $${minInvestment}`),
+	})
+
+type FormValues = z.infer<ReturnType<typeof buildFormSchema>>
+
 export function ProjectSidebar({ project }: ProjectSidebarProps) {
+	const reducedMotion = useReducedMotion()
 	const [isFollowing, setIsFollowing] = useState(false)
 	const { getMultipleBalances, fundEscrow, sendTransaction } = useEscrow()
 	const {
@@ -71,23 +83,15 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		return Math.min(Math.round((raised / project.goal) * 100), 100)
 	}, [onChainRaised, project.goal, project.raised])
 
-	// Define the form schema with zod
-	const formSchema = z.object({
-		investmentAmount: z
-			.number({
-				required_error: 'Investment amount is required',
-				invalid_type_error: 'Investment amount must be a number',
-			})
-			.min(
-				project.minInvestment,
-				`Minimum investment is $${project.minInvestment}`,
-			),
-	})
+	const formSchema = useMemo(
+		() => buildFormSchema(project.minInvestment),
+		[project.minInvestment],
+	)
 
 	// Set up react-hook-form with zod validation
-	const form = useForm<z.infer<typeof formSchema>>({
+	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
-		mode: 'onChange',
+		mode: 'onBlur',
 		defaultValues: {
 			investmentAmount: project.minInvestment,
 		},
@@ -205,7 +209,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			}
 
 			toast.success('Thank you for your support!', {
-				description: `You've donated $${data.investmentAmount.toLocaleString()}`,
+				description: `You've donated ${new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(data.investmentAmount)}`,
 				icon: <CircleCheck className="text-primary" />,
 			})
 
@@ -298,9 +302,9 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 	return (
 		<motion.div
 			className="overflow-hidden sticky top-16 bg-white rounded-xl shadow-md"
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.5, delay: 0.2 }}
+			initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+			animate={reducedMotion ? false : { opacity: 1, y: 0 }}
+			transition={reducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
 		>
 			<div className="p-6">
 				<h2 className="mb-2 text-xl font-bold">Support This Project</h2>
@@ -325,10 +329,10 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					/>
 				</div>
 
-				<div className="flex justify-between mb-3 text-sm text-gray-500">
+				<div className="flex justify-between mb-3 text-sm text-gray-500 tabular-nums">
 					<span>
-						${(onChainRaised ?? project.raised).toLocaleString()} raised
-						{isFetchingBalance ? ' (updating...)' : ''}
+						{new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(onChainRaised ?? project.raised)} raised
+						{isFetchingBalance ? ' (Updating…)' : ''}
 					</span>
 					<span>{progressPercentage}%</span>
 				</div>
@@ -347,18 +351,13 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 										</div>
 										<FormControl>
 											<Input
-												type="number"
-												placeholder={`Min. $${project.minInvestment}`}
+												type="text"
+												inputMode="decimal"
+												placeholder={`Min. $${project.minInvestment}…`}
 												className="pl-6 bg-white border-green-600"
+												aria-label="Donation amount in USD"
+												autoComplete="off"
 												{...field}
-												onChange={(e) => {
-													const value =
-														e.target.value === ''
-															? undefined
-															: Number(e.target.value)
-													field.onChange(value)
-												}}
-												value={field.value ?? ''}
 											/>
 										</FormControl>
 									</div>
@@ -371,9 +370,17 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 							type="submit"
 							className="mt-4 w-full text-white gradient-btn"
 							size="lg"
-							disabled={!form.formState.isValid}
+							disabled={!form.formState.isValid || form.formState.isSubmitting}
+							aria-busy={form.formState.isSubmitting}
 						>
-							Support Now
+							{form.formState.isSubmitting ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+									Supporting…
+								</>
+							) : (
+								'Support Now'
+							)}
 						</Button>
 					</form>
 				</Form>
@@ -420,9 +427,11 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 						variant="outline"
 						className="flex gap-2 justify-center items-center w-full bg-white gradient-border-btn"
 						onClick={handleToggleFollow}
+						aria-label={isFollowing ? 'Unfollow project' : 'Follow project'}
 					>
 						<Heart
 							className={`h-4 w-4 ${isFollowing ? 'text-red-500 fill-red-500' : ''}`}
+							aria-hidden
 						/>
 						{isFollowing ? 'Following' : 'Follow'}
 					</Button>
@@ -431,8 +440,9 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 						variant="outline"
 						className="flex gap-2 justify-center items-center w-full bg-white gradient-border-btn"
 						onClick={handleShare}
+						aria-label="Share project"
 					>
-						<Share className="w-4 h-4" />
+						<Share className="w-4 h-4" aria-hidden />
 						Share
 					</Button>
 				</div>

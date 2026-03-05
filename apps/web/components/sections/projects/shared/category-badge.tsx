@@ -1,7 +1,7 @@
 'use client'
 
 import type { Tables } from '@services/supabase'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
 import { cn } from '~/lib/utils'
 import { categoryIcons } from '~/lib/utils/category-icons'
@@ -24,27 +24,27 @@ export function CategoryBadge({
 }: CategoryBadgeProps) {
 	const Icon = categoryIcons[category.name]
 	const isInteractive = !!onClick
+	const reducedMotion = useReducedMotion()
 
 	const textColor = getContrastTextColor(category.color)
 
 	return (
 		<motion.button
 			type="button"
-			whileHover={{ scale: isInteractive ? 1.05 : 1 }}
-			whileTap={{ scale: isInteractive ? 0.95 : 1 }}
+			whileHover={reducedMotion ? undefined : { scale: isInteractive ? 1.05 : 1 }}
+			whileTap={reducedMotion ? undefined : { scale: isInteractive ? 0.95 : 1 }}
 			onClick={onClick}
 			className={cn(
 				'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors max-w-full',
 				selected
-					? `${textColor} focus:ring-2 focus:ring-offset-2`
-					: 'text-gray-700 bg-white border hover:bg-gray-50 focus:ring-2 focus:ring-offset-2',
+					? `${textColor} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2`
+					: 'text-gray-700 bg-white border hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
 				isInteractive ? 'cursor-pointer' : 'cursor-default',
 				className,
 			)}
 			style={{
 				backgroundColor: selected ? category.color : undefined,
 				borderColor: category.color,
-				// Set focus ring color to match category color
 				...(isInteractive && { '--tw-ring-color': category.color }),
 			}}
 			disabled={!isInteractive}

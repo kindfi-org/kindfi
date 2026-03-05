@@ -19,8 +19,8 @@ interface TimelineProps {
  */
 const Timeline = ({ steps }: TimelineProps) => {
 	return (
-		<section className="py-16">
-			<div className="container mx-auto max-w-3xl px-4">
+		<div className="pt-8 sm:pt-10">
+			<div className="mx-auto max-w-3xl">
 				{/* Timeline container */}
 				<div className="relative">
 					{/* Vertical center line */}
@@ -42,7 +42,7 @@ const Timeline = ({ steps }: TimelineProps) => {
 					</div>
 				</div>
 			</div>
-		</section>
+		</div>
 	)
 }
 

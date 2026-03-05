@@ -31,7 +31,7 @@ export function JoinUs() {
 	]
 
 	return (
-		<section className="relative py-24 overflow-hidden">
+		<section className="relative py-16 overflow-hidden sm:py-20 lg:py-24">
 			{/* Background */}
 			<div className="absolute inset-0">
 				<div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
@@ -51,7 +51,7 @@ export function JoinUs() {
 				</motion.div>
 
 				{/* Feature Cards */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 mb-16">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 mb-12 lg:mb-16">
 					{translatedFeatures.map((feature, index) => (
 						<motion.div
 							key={feature.id}
@@ -61,7 +61,7 @@ export function JoinUs() {
 							transition={{ duration: 0.5, delay: index * 0.1 }}
 						>
 							<article
-								className="group h-full bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
+								className="group h-full bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2"
 								aria-labelledby={`feature-title-${feature.id}`}
 							>
 								{feature.icon}

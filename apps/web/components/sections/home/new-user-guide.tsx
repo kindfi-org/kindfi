@@ -30,7 +30,7 @@ export function NewUserGuide() {
 	]
 
 	return (
-		<section className="relative py-24 overflow-hidden">
+		<section className="relative py-16 overflow-hidden sm:py-20 lg:py-24">
 			<SectionContainer className="relative">
 				{/* Header */}
 				<motion.div
@@ -39,15 +39,15 @@ export function NewUserGuide() {
 					whileInView="visible"
 					viewport={{ once: true }}
 					transition={{ duration: 0.6 }}
-					className="text-center mb-20"
+					className="text-center mb-12 max-w-3xl mx-auto sm:mb-20"
 				>
-					<h2 className="text-4xl font-bold text-gray-900 mb-6">
+					<h2 className="text-3xl font-bold text-gray-900 mb-4 sm:text-4xl sm:mb-6">
 						<span className="block">{t('home.newUserTitle1')}</span>
 						<span className="block gradient-text">
 							{t('home.newUserTitle2')}
 						</span>
 					</h2>
-					<p className="text-lg text-gray-600 max-w-2xl mx-auto">
+					<p className="text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto sm:text-lg">
 						{t('home.newUserSubtitle')}
 					</p>
 				</motion.div>

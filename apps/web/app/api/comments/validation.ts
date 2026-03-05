@@ -16,7 +16,7 @@ export const createCommentSchema = z
 		project_id: z.string().uuid('Invalid project ID').optional(),
 		project_update_id: z.string().uuid('Invalid project update ID').optional(),
 		type: z.enum(COMMENT_TYPES).default('comment'),
-		metadata: z.record(z.unknown()).default({}),
+		metadata: z.record(z.string(), z.unknown()).default({}),
 	})
 	.superRefine((data, ctx) => {
 		if (!data.project_id && !data.project_update_id) {

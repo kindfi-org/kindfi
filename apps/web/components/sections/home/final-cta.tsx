@@ -10,7 +10,7 @@ export const FinalCTA = () => {
 	const { t } = useI18n()
 
 	return (
-		<section className="relative py-24 overflow-hidden">
+		<section className="relative py-16 overflow-hidden sm:py-20 lg:py-24">
 			{/* Background */}
 			<div
 				className="absolute inset-0 gradient-bg-blue-purple to-white"
@@ -36,21 +36,21 @@ export const FinalCTA = () => {
 					transition={{
 						duration: shouldReduceMotion ? 0.3 : 0.6,
 					}}
-					className="text-center mb-16 max-w-3xl mx-auto"
+					className="text-center mb-12 max-w-3xl mx-auto sm:mb-16"
 				>
-					<h2 className="text-4xl font-bold text-gray-900 mb-6">
+					<h2 className="text-3xl font-bold text-gray-900 mb-4 sm:text-4xl sm:mb-6">
 						{t('home.finalCtaTitle')}
 						<span className="block gradient-text">
 							{t('home.finalCtaSubtitle')}
 						</span>
 					</h2>
-					<p className="text-lg text-gray-600 leading-relaxed">
+					<p className="text-base text-muted-foreground leading-relaxed sm:text-lg">
 						{t('home.finalCtaDescription')}
 					</p>
 				</motion.div>
 
 				{/* Main Content */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-8 items-stretch">
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 items-stretch">
 					{features.map((feature, index) => (
 						<motion.div
 							key={feature.id}
@@ -58,7 +58,7 @@ export const FinalCTA = () => {
 							whileInView={{ opacity: 1, x: 0 }}
 							viewport={{ once: true }}
 							transition={{ duration: 0.5, delay: index * 0.1 }}
-							className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full"
+							className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col h-full focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2"
 						>
 							<div className="flex items-center gap-4 mb-4">
 								<div className="p-2 rounded-xl bg-teal-50">{feature.icon}</div>

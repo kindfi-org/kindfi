@@ -94,20 +94,20 @@ export function UserJourney() {
 	}, [])
 
 	return (
-		<section className=" relative overflow-hidden py-14 bg-white">
+		<section className="relative overflow-hidden py-16 bg-white sm:py-20 lg:py-24">
 			{/* Background Pattern */}
 			<div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
 			<SectionContainer className="relative">
 				{/* Header */}
-				<div className="text-center mb-16">
+				<div className="text-center mb-12 max-w-3xl mx-auto sm:mb-16">
 					<motion.div {...fadeInUpAnimation}>
-						<h2 className="text-4xl font-bold text-gray-900 mb-4">
+						<h2 className="text-3xl font-bold text-gray-900 mb-4 sm:text-4xl">
 							{t('home.journeyTitle')} <br />
 							<span className="gradient-text">
 								{t('home.journeyTitleHighlight')}
 							</span>
 						</h2>
-						<p className="text-gray-600 max-w-2xl mx-auto text-lg">
+						<p className="text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto sm:text-lg">
 							{t('home.journeyDescription')}
 						</p>
 					</motion.div>

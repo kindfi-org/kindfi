@@ -32,6 +32,7 @@ export const DynamicComponents = {
 				(mod) => mod.HighlightedProjects,
 			),
 		{
+			ssr: true,
 			loading: SkeletonHighlightedProjects,
 		},
 	),

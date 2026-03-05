@@ -53,8 +53,9 @@ const SkeletonGrid: FC<SkeletonGridProps> = ({
 
 export const SkeletonHero = () => (
 	<section
-		className="relative z-0 min-h-[100vh] bg-gradient-to-b from-purple-50/50 to-white px-4 py-20"
-		aria-labelledby="hero-title"
+		className="relative z-0 min-h-[85vh] bg-gradient-to-b from-violet-50/50 via-white/80 to-white px-4 pt-24 pb-16 sm:pt-28 sm:pb-20"
+		aria-label="Loading hero section"
+		aria-busy="true"
 		role="banner"
 	>
 		<div className="container mx-auto max-w-6xl">

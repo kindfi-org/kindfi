@@ -1,4 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { Clock, Heart } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'

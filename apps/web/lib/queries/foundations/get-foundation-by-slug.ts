@@ -48,13 +48,6 @@ export async function getFoundationBySlug(
 		return null
 	}
 
-	// Fetch profile separately since founder_id references users.id, not profiles.id
-	const { data: profileData } = await client
-		.from('profiles')
-		.select('id, display_name, image_url, slug, bio')
-		.eq('id', (data as { founder_id: string }).founder_id)
-		.maybeSingle()
-
 	const foundation = data as unknown as {
 		id: string
 		name: string
@@ -74,13 +67,6 @@ export async function getFoundationBySlug(
 		created_at: string
 		updated_at: string
 		metadata: Record<string, unknown>
-		profiles: {
-			id: string
-			display_name: string | null
-			image_url: string | null
-			slug: string | null
-			bio: string | null
-		} | null
 		foundation_milestones: Array<{
 			id: string
 			title: string
@@ -91,11 +77,17 @@ export async function getFoundationBySlug(
 		}>
 	}
 
-	// Fetch escrows separately to avoid complex nested query issues
-	const { data: escrowsData } = await client
-		.from('foundation_escrows')
-		.select(
-			`
+	// Parallel fetch: profile, escrows, campaigns (async-parallel)
+	const [profileResult, escrowsResult, campaignsResult] = await Promise.all([
+		client
+			.from('profiles')
+			.select('id, display_name, image_url, slug, bio')
+			.eq('id', foundation.founder_id)
+			.maybeSingle(),
+		client
+			.from('foundation_escrows')
+			.select(
+				`
       escrow_id,
       escrow_contracts:escrow_id (
         id,
@@ -104,24 +96,12 @@ export async function getFoundationBySlug(
         amount
       )
     `,
-		)
-		.eq('foundation_id', foundation.id)
-
-	const foundationEscrows = (escrowsData || []) as unknown as Array<{
-		escrow_id: string
-		escrow_contracts: {
-			id: string
-			contract_id: string
-			current_state: string
-			amount: string
-		} | null
-	}>
-
-	// Fetch campaigns (projects) assigned to this foundation
-	const { data: campaignsData } = await client
-		.from('projects')
-		.select(
-			`
+			)
+			.eq('foundation_id', foundation.id),
+		client
+			.from('projects')
+			.select(
+				`
 			id,
 			title,
 			slug,
@@ -133,11 +113,24 @@ export async function getFoundationBySlug(
 			kinder_count,
 			status
 		`,
-		)
-		.eq('foundation_id', foundation.id)
-		.order('created_at', { ascending: false })
+			)
+			.eq('foundation_id', foundation.id)
+			.order('created_at', { ascending: false }),
+	])
 
-	const campaigns = (campaignsData ?? []).map((p) => ({
+	const profileData = profileResult.data
+	const foundationEscrows = ((escrowsResult.data || []) as unknown) as Array<{
+		escrow_id: string
+		escrow_contracts: {
+			id: string
+			contract_id: string
+			current_state: string
+			amount: string
+		} | null
+	}>
+	const campaignsData = campaignsResult.data ?? []
+
+	const campaigns = campaignsData.map((p) => ({
 		id: p.id,
 		title: p.title,
 		slug: p.slug,

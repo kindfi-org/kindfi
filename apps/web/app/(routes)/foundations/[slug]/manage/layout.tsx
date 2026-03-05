@@ -1,7 +1,10 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { getServerSession } from 'next-auth'
+import { notFound, redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { FoundationManageCommandCenter } from '~/components/sections/foundations/manage/foundation-manage-command-center'
-import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
+import { nextAuthOption } from '~/lib/auth/auth-options'
+import { getFoundationManageMeta } from '~/lib/queries/foundations/get-foundation-manage-meta'
 
 export default async function FoundationManageLayout({
 	children,
@@ -11,8 +14,20 @@ export default async function FoundationManageLayout({
 	params: Promise<{ slug: string }>
 }) {
 	const { slug } = await params
-	const supabase = await createSupabaseServerClient()
-	const foundation = await getFoundationBySlug(supabase, slug)
+	const [session, supabase] = await Promise.all([
+		getServerSession(nextAuthOption),
+		createSupabaseServerClient(),
+	])
+
+	const foundationMeta = await getFoundationManageMeta(supabase, slug)
+	if (!foundationMeta) {
+		notFound()
+	}
+
+	const userId = session?.user?.id
+	if (!userId || foundationMeta.founderId !== userId) {
+		redirect(`/foundations/${slug}`)
+	}
 
 	return (
 		<section
@@ -21,7 +36,7 @@ export default async function FoundationManageLayout({
 		>
 			<FoundationManageCommandCenter
 				slug={slug}
-				foundationName={foundation?.name ?? null}
+				foundationName={foundationMeta.name}
 			/>
 			<main className="min-w-0 pt-6">{children}</main>
 		</section>

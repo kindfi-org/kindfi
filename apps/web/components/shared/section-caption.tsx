@@ -1,3 +1,5 @@
+import { cn } from '~/lib/utils'
+
 interface SectionCaptionProps {
 	title: string
 	subtitle: string
@@ -24,11 +26,18 @@ export const SectionCaption = ({
 	}
 
 	return (
-		<div className={`mx-auto mb-12 text-center ${className}`}>
-			<h2 className="mb-4 text-4xl font-semibold md:text-4xl">
+		<div
+			className={cn(
+				'mx-auto mb-12 text-center max-w-3xl',
+				className,
+			)}
+		>
+			<h2 className="mb-4 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl lg:text-[2.5rem]">
 				{highlightText(title)}
 			</h2>
-			<p className="text-gray-600">{subtitle}</p>
+			<p className="text-base text-muted-foreground leading-relaxed sm:text-lg">
+				{subtitle}
+			</p>
 		</div>
 	)
 }

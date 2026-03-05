@@ -13,6 +13,16 @@ export async function GET(req: Request) {
 		}
 		const { slug } = validation.data
 
+		if (!validateSlug(slug)) {
+			return NextResponse.json(
+				{
+					error:
+						'Slug must be 3–30 characters, lowercase alphanumeric with hyphens',
+				},
+				{ status: 400 },
+			)
+		}
+
 		const { data, error } = await supabaseServiceRole
 			.from('foundations')
 			.select('id')
