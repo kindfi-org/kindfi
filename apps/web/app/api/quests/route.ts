@@ -22,22 +22,29 @@ export async function GET(_req: NextRequest) {
 
 		// Use service role client to bypass RLS — auth is handled by NextAuth session above
 		const { supabase } = await import('@packages/lib/supabase')
+		const userId = session.user.id
 
-		// Get all active quests and user's progress in parallel
-		const [questsResult, progressResult] = await Promise.all([
-			supabase
-				.from('quest_definitions')
-				.select('*')
-				.eq('is_active', true)
-				.order('created_at', { ascending: false }),
-			supabase
-				.from('user_quest_progress')
-				.select('*')
-				.eq('user_id', session.user.id),
-		])
+		// Get all active quests, user's progress, and contribution count in parallel
+		const [questsResult, progressResult, contributionsCountResult] =
+			await Promise.all([
+				supabase
+					.from('quest_definitions')
+					.select('*')
+					.eq('is_active', true)
+					.order('created_at', { ascending: false }),
+				supabase
+					.from('user_quest_progress')
+					.select('*')
+					.eq('user_id', userId),
+				supabase
+					.from('contributions')
+					.select('id', { count: 'exact', head: true })
+					.eq('contributor_id', userId),
+			])
 
 		const { data: quests, error } = questsResult
 		const { data: progress, error: progressError } = progressResult
+		const hasContributions = (contributionsCountResult.count ?? 0) > 0
 
 		if (error) {
 			console.error('Error fetching quests:', error)
@@ -54,11 +61,39 @@ export async function GET(_req: NextRequest) {
 		// Build a Map for O(1) lookup instead of O(n) Array.find
 		const progressMap = new Map(progress?.map((p) => [p.quest_id, p]) ?? [])
 
-		// Merge quests with user progress
+		// Backfill quest progress for donation-related quests when the user has
+		// contributions but no progress records (e.g. earlier failures prevented writes).
+		const donationQuestTypes = [
+			'total_donation_amount',
+			'multi_region_donation',
+			'multi_category_donation',
+		]
+		const questsMissingProgress = (quests ?? []).filter(
+			(q) =>
+				donationQuestTypes.includes(q.quest_type) &&
+				!progressMap.has(q.quest_id),
+		)
+
+		if (hasContributions && questsMissingProgress.length > 0) {
+			try {
+				await syncQuestProgress(supabase, userId, questsMissingProgress, progressMap)
+			} catch (syncErr) {
+				console.error('[Quests] Error syncing quest progress:', syncErr)
+			}
+		}
+
+		// Resolve quest contract address (DB field or env fallback)
+		const fallbackQuestContract =
+			process.env.QUEST_CONTRACT_ADDRESS ||
+			process.env.NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS ||
+			null
+
+		// Merge quests with user progress and resolved contract address
 		const questsWithProgress = quests?.map((quest) => {
 			const userProgress = progressMap.get(quest.quest_id)
 			return {
 				...quest,
+				contract_address: quest.contract_address || fallbackQuestContract,
 				progress: userProgress || {
 					current_value: 0,
 					is_completed: false,
@@ -252,5 +287,92 @@ export async function POST(req: NextRequest) {
 			{ error: 'Internal server error' },
 			{ status: 500 },
 		)
+	}
+}
+
+/**
+ * Backfill missing quest progress from existing contributions.
+ * Mutates progressMap in-place so the caller can use the updated values.
+ */
+async function syncQuestProgress(
+	supabase: Awaited<typeof import('@packages/lib/supabase')>['supabase'],
+	userId: string,
+	missingQuests: Array<{ quest_id: number; quest_type: string; target_value: number }>,
+	progressMap: Map<number, Record<string, unknown>>,
+) {
+	const questTypes = new Set(missingQuests.map((q) => q.quest_type))
+
+	// Fetch contribution data needed for each quest type in parallel
+	const [amountResult, categoryResult] = await Promise.all([
+		questTypes.has('total_donation_amount')
+			? supabase
+					.from('contributions')
+					.select('amount')
+					.eq('contributor_id', userId)
+			: Promise.resolve({ data: null }),
+		questTypes.has('multi_category_donation') || questTypes.has('multi_region_donation')
+			? supabase
+					.from('contributions')
+					.select('project_id, projects!inner(category_id)')
+					.eq('contributor_id', userId)
+			: Promise.resolve({ data: null }),
+	])
+
+	for (const quest of missingQuests) {
+		let progressValue = 0
+
+		if (quest.quest_type === 'total_donation_amount' && amountResult.data) {
+			progressValue = Math.floor(
+				amountResult.data.reduce(
+					(sum, c) => sum + Number(c.amount || 0),
+					0,
+				),
+			)
+		} else if (
+			(quest.quest_type === 'multi_category_donation' ||
+				quest.quest_type === 'multi_region_donation') &&
+			categoryResult.data
+		) {
+			progressValue =
+				categoryResult.data.filter(
+					(p, index, self) =>
+						index ===
+						self.findIndex(
+							(pr) => pr.projects?.category_id === p.projects?.category_id,
+						),
+				).length || 0
+		}
+
+		if (progressValue <= 0) continue
+
+		const is_completed = progressValue >= quest.target_value
+		const completed_at = is_completed ? new Date().toISOString() : null
+
+		const { data: inserted, error } = await supabase
+			.from('user_quest_progress')
+			.insert({
+				user_id: userId,
+				quest_id: quest.quest_id,
+				current_value: progressValue,
+				is_completed,
+				completed_at,
+			})
+			.select()
+			.single()
+
+		if (error) {
+			console.error(
+				`[Quests] Failed to backfill progress for quest ${quest.quest_id}:`,
+				error,
+			)
+			continue
+		}
+
+		if (inserted) {
+			progressMap.set(quest.quest_id, inserted)
+			console.log(
+				`[Quests] Backfilled quest ${quest.quest_id}: ${progressValue}/${quest.target_value} (completed: ${is_completed})`,
+			)
+		}
 	}
 }

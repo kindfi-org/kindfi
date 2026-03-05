@@ -67,6 +67,9 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 	const [onChainRaised, setOnChainRaised] = useState<number | null>(null)
 	const [isFetchingBalance, setIsFetchingBalance] = useState(false)
+	const [isMounted, setIsMounted] = useState(false)
+
+	useEffect(() => setIsMounted(true), [])
 
 	// Fetch escrow data to get the correct escrow type
 	const { escrowData } = useEscrowData({
@@ -494,31 +497,39 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 						Share
 					</Button>
 				</div>
-				{/* Wallet status & controls */}
+				{/* Wallet status & controls - deferred until mount to avoid hydration mismatch */}
 				<div className="p-3 mt-4 text-sm bg-white rounded-md border border-gray-200">
 					<div className="flex justify-between items-center mb-2">
 						<span className="font-medium">Donor details</span>
-						<span className={isConnected ? 'text-green-600' : 'text-red-600'}>
-							{isConnected ? 'Connected' : 'Not connected'}
-						</span>
+						{isMounted ? (
+							<span className={isConnected ? 'text-green-600' : 'text-red-600'}>
+								{isConnected ? 'Connected' : 'Not connected'}
+							</span>
+						) : (
+							<span className="text-muted-foreground">Checking…</span>
+						)}
 					</div>
-					{isConnected ? (
-						<div className="text-gray-700 break-all">
-							<p className="mb-1">{walletName || 'Wallet'}</p>
-							<p className="text-xs">{address}</p>
-							<Button
-								variant="outline"
-								size="sm"
-								className="mt-3"
-								onClick={disconnect}
-							>
-								Disconnect wallet
+					{isMounted ? (
+						isConnected ? (
+							<div className="text-gray-700 break-all">
+								<p className="mb-1">{walletName || 'Wallet'}</p>
+								<p className="text-xs">{address}</p>
+								<Button
+									variant="outline"
+									size="sm"
+									className="mt-3"
+									onClick={disconnect}
+								>
+									Disconnect wallet
+								</Button>
+							</div>
+						) : (
+							<Button variant="outline" size="sm" onClick={connect}>
+								Connect wallet
 							</Button>
-						</div>
+						)
 					) : (
-						<Button variant="outline" size="sm" onClick={connect}>
-							Connect wallet
-						</Button>
+						<div className="h-9 rounded border border-gray-200 bg-gray-50 animate-pulse" />
 					)}
 				</div>
 			</div>
