@@ -1,6 +1,6 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import clsx from 'clsx'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'

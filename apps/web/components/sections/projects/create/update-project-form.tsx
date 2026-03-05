@@ -1,6 +1,6 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion } from 'framer-motion'
 import { Loader2, Save } from 'lucide-react'
@@ -62,7 +62,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 	})
 
 	const form = useForm<CreateProjectFormData>({
-		resolver: zodResolver(updateProjectSchema),
+		resolver: zodResolver<CreateProjectFormData>(updateProjectSchema),
 		defaultValues: normalizeProjectToFormDefaults(project),
 	})
 
