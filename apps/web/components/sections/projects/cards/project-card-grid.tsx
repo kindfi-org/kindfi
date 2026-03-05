@@ -60,11 +60,19 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 						loading={index >= 6 ? 'lazy' : undefined}
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-					{project.category && (
-						<div className="absolute top-3 left-3 drop-shadow">
+					<div className="absolute top-3 left-3 flex flex-col gap-2 drop-shadow">
+						{project.category && (
 							<CategoryBadge category={project.category} />
-						</div>
-					)}
+						)}
+						{project.escrowContractAddress && (
+							<Badge
+								className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-green-600/90 text-white border-0"
+								aria-label="This project accepts donations"
+							>
+								Accepting donations
+							</Badge>
+						)}
+					</div>
 					<div className="absolute inset-0 flex items-end justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
 						<span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 shadow-sm backdrop-blur">
 							Explore
