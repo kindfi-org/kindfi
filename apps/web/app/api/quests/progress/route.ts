@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { questProgressSchema } from '~/lib/schemas/quest.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 const rateLimiter = new RateLimiter()
 const QUEST_PROGRESS_ALLOWED_ROLES = ['service', 'recorder'] as const
@@ -39,17 +41,14 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { quest_id, progress_value, user_address } = body
+		const validation = validateRequest(questProgressSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { quest_id, progress_value, user_address } = validation.data
 
 		// Use session user_id to ensure RLS policies work correctly
 		const user_id = session.user.id
-
-		if (quest_id === undefined || progress_value === undefined) {
-			return NextResponse.json(
-				{ error: 'Missing required fields: quest_id, progress_value' },
-				{ status: 400 },
-			)
-		}
 
 		// Use service role client to bypass RLS, but ensure user_id matches session
 		// This is necessary because these operations are triggered server-side after donations

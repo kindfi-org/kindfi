@@ -3,6 +3,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { syncContributionSchema } from '~/lib/schemas/contribution.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * Sync an existing on-chain donation to the contributions table
@@ -16,17 +18,11 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { contractId, projectId: providedProjectId, amount } = body
-
-		if ((!contractId && !providedProjectId) || !amount || amount <= 0) {
-			return NextResponse.json(
-				{
-					error:
-						'Invalid request. contractId (or projectId) and amount are required.',
-				},
-				{ status: 400 },
-			)
+		const validation = validateRequest(syncContributionSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
+		const { contractId, projectId: providedProjectId, amount } = validation.data
 
 		let projectId = providedProjectId
 

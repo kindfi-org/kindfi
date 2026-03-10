@@ -6,6 +6,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { createDiditSession } from '~/lib/services/didit'
+import { createDiditSessionSchema } from '~/lib/schemas/kyc.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/kyc/didit/create-session
@@ -22,7 +24,11 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { redirectUrl, metadata } = body
+		const validation = validateRequest(createDiditSessionSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { redirectUrl, metadata } = validation.data
 
 		// Create Didit session
 		const diditSession = await createDiditSession(

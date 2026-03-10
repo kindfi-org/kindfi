@@ -3,12 +3,14 @@ import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { projectCreateFormSchema } from '~/lib/schemas/project.schemas'
 import {
 	buildSocialLinks,
 	parseFormData,
 	uploadProjectImage,
 	upsertTags,
 } from '~/lib/utils/project-utils'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: Request) {
 	try {
@@ -57,8 +59,9 @@ export async function POST(req: Request) {
 		const supabase = supabaseServiceRole
 
 		const formData = await req.formData()
-
-		// Extract fields from multipart form data
+		const parsed = parseFormData(formData)
+		const validation = validateRequest(projectCreateFormSchema, parsed)
+		if (!validation.success) return validation.response
 		const {
 			title,
 			description,
@@ -71,7 +74,7 @@ export async function POST(req: Request) {
 			socialLinks,
 			image,
 			foundationId,
-		} = parseFormData(formData)
+		} = validation.data
 
 		// Prepare project data to insert
 		const insertData: TablesInsert<'projects'> = {
@@ -121,7 +124,7 @@ export async function POST(req: Request) {
 		}
 
 		// Create tag relationships for the new project
-		await upsertTags(project.id, tags, supabase)
+		await upsertTags(project.id, tags ?? [], supabase)
 
 		// Send email + in-app notifications (non-blocking)
 		import('~/lib/email/email-notification-service')

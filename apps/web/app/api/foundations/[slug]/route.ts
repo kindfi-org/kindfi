@@ -2,15 +2,9 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import {
-	validateFoundedYear,
-	validateOptionalString,
-	validateOptionalUrl,
-	validateRequiredString,
-	validateSocialLinks,
-	foundationValidationLimits,
-} from '~/lib/validation/foundation-api'
+import { foundationSlugParamSchema, foundationUpdateFormSchema } from '~/lib/schemas/foundation.schemas'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function PATCH(
 	req: Request,
@@ -24,12 +18,9 @@ export async function PATCH(
 		}
 
 		const { slug } = await params
-		if (!slug) {
-			return NextResponse.json(
-				{ error: 'Foundation slug is required' },
-				{ status: 400 },
-			)
-		}
+		const slugValidation = validateRequest(foundationSlugParamSchema, { slug })
+		if (!slugValidation.success) return slugValidation.response
+		const { slug: validatedSlug } = slugValidation.data
 
 		const supabase = supabaseServiceRole
 
@@ -37,7 +28,7 @@ export async function PATCH(
 		const { data: foundation, error: fetchError } = await supabase
 			.from('foundations')
 			.select('id, founder_id')
-			.eq('slug', slug)
+			.eq('slug', validatedSlug)
 			.maybeSingle()
 
 		if (fetchError) {
@@ -60,110 +51,30 @@ export async function PATCH(
 		}
 
 		const formData = await req.formData()
-		const nameRaw = formData.get('name')
-		const descriptionRaw = formData.get('description')
-		const foundedYearRaw = formData.get('foundedYear')
-		const foundedYear =
-			typeof foundedYearRaw === 'string'
-				? Number.parseInt(foundedYearRaw, 10)
-				: Number(foundedYearRaw)
-
-		if (
-			!validateRequiredString(nameRaw, foundationValidationLimits.MAX_NAME_LENGTH)
-		) {
-			return NextResponse.json(
-				{ error: 'Name is required and must be at most 200 characters' },
-				{ status: 400 },
-			)
-		}
-		if (
-			!validateRequiredString(
-				descriptionRaw,
-				foundationValidationLimits.MAX_DESCRIPTION_LENGTH,
-			)
-		) {
-			return NextResponse.json(
-				{
-					error:
-						'Description is required and must be at most 5000 characters',
-				},
-				{ status: 400 },
-			)
-		}
-		if (!validateFoundedYear(foundedYear)) {
-			return NextResponse.json(
-				{ error: 'Founded year must be between 1900 and current year' },
-				{ status: 400 },
-			)
-		}
-
-		const name = String(nameRaw).trim()
-		const description = String(descriptionRaw).trim()
-
-		const missionRaw = formData.get('mission')
-		const visionRaw = formData.get('vision')
-		const websiteUrlRaw = formData.get('websiteUrl')
-		if (
-			!validateOptionalString(
-				missionRaw,
-				foundationValidationLimits.MAX_MISSION_LENGTH,
-			)
-		) {
-			return NextResponse.json(
-				{ error: 'Mission must be at most 2000 characters' },
-				{ status: 400 },
-			)
-		}
-		if (
-			!validateOptionalString(
-				visionRaw,
-				foundationValidationLimits.MAX_VISION_LENGTH,
-			)
-		) {
-			return NextResponse.json(
-				{ error: 'Vision must be at most 2000 characters' },
-				{ status: 400 },
-			)
-		}
-		if (websiteUrlRaw != null && websiteUrlRaw !== '' && !validateOptionalUrl(websiteUrlRaw)) {
-			return NextResponse.json(
-				{ error: 'Website URL must be a valid http(s) URL' },
-				{ status: 400 },
-			)
-		}
-
-		const socialLinksRaw = formData.get('socialLinks')
-		let socialLinks: Record<string, string> = {}
-		if (socialLinksRaw != null && socialLinksRaw !== '') {
-			try {
-				const parsed = JSON.parse(String(socialLinksRaw)) as unknown
-				const result = validateSocialLinks(parsed)
-				if (!result.ok) {
-					return NextResponse.json({ error: result.error }, { status: 400 })
+		const formPayload = {
+			name: formData.get('name') ?? '',
+			description: formData.get('description') ?? '',
+			foundedYear: (() => {
+				const raw = formData.get('foundedYear')
+				return typeof raw === 'string' ? Number.parseInt(raw, 10) : NaN
+			})(),
+			mission: (formData.get('mission') as string) || null,
+			vision: (formData.get('vision') as string) || null,
+			websiteUrl: (formData.get('websiteUrl') as string) || null,
+			socialLinks: (() => {
+				const raw = formData.get('socialLinks') as string | null
+				if (!raw) return {}
+				try {
+					return JSON.parse(raw) as Record<string, string>
+				} catch {
+					return {}
 				}
-				socialLinks = result.value
-			} catch {
-				return NextResponse.json(
-					{ error: 'Invalid socialLinks JSON' },
-					{ status: 400 },
-				)
-			}
+			})(),
+			logo: formData.get('logo') as File | null,
 		}
-
-		const mission =
-			missionRaw != null && String(missionRaw).trim() !== ''
-				? String(missionRaw).trim()
-				: null
-		const vision =
-			visionRaw != null && String(visionRaw).trim() !== ''
-				? String(visionRaw).trim()
-				: null
-		const websiteUrl =
-			websiteUrlRaw != null && String(websiteUrlRaw).trim() !== ''
-				? String(websiteUrlRaw).trim()
-				: null
-
-		const logo = formData.get('logo') as File | null
+		const validation = validateRequest(foundationUpdateFormSchema, formPayload)
+		if (!validation.success) return validation.response
+		const { name, description, foundedYear, mission, vision, websiteUrl, socialLinks, logo } = validation.data
 
 		const updatePayload: Record<string, unknown> = {
 			name,
@@ -189,7 +100,7 @@ export async function PATCH(
 			)
 		}
 
-		if (logo instanceof File && logo.size > 0) {
+		if (logo && logo instanceof File && logo.size > 0) {
 			const logoUrl = await uploadFoundationLogo(slug, logo, supabase)
 			if (logoUrl) {
 				const { error: logoUpdateError } = await supabase
@@ -207,7 +118,7 @@ export async function PATCH(
 			}
 		}
 
-		return NextResponse.json({ slug }, { status: 200 })
+		return NextResponse.json({ slug: validatedSlug }, { status: 200 })
 	} catch (err) {
 		console.error(err)
 		return NextResponse.json(

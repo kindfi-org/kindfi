@@ -1,4 +1,6 @@
 import { appEnvConfig } from '@packages/lib/config'
+import { faucetSchema } from '~/lib/schemas/stellar.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 import {
 	Address,
 	Asset,
@@ -36,28 +38,11 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { address, amount = '10' } = body
-
-		// Validate inputs
-		if (!address) {
-			return NextResponse.json(
-				{
-					error: 'Missing required field: address',
-				},
-				{ status: 400 },
-			)
+		const validation = validateRequest(faucetSchema, { ...body, amount: body.amount ?? '10' })
+		if (!validation.success) {
+			return validation.response
 		}
-
-		// Validate amount
-		const fundAmount = Number.parseFloat(amount)
-		if (Number.isNaN(fundAmount) || fundAmount <= 0 || fundAmount > 100) {
-			return NextResponse.json(
-				{
-					error: 'Amount must be between 0 and 100 XLM',
-				},
-				{ status: 400 },
-			)
-		}
+		const { address, amount: fundAmount } = validation.data
 
 		console.log('💰 Funding smart wallet:', {
 			address,

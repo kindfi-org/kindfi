@@ -2,6 +2,8 @@
 
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
+import { updateSlugSchema } from '~/lib/schemas/profile.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(request: Request) {
 	try {
@@ -13,10 +15,11 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
 		const body = await request.json()
-		const slug = (body?.slug as string | undefined)?.trim().toLowerCase()
-		if (!slug || !/^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])?$/.test(slug)) {
-			return NextResponse.json({ error: 'Invalid slug' }, { status: 400 })
+		const validation = validateRequest(updateSlugSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
+		const { slug } = validation.data
 
 		// Ensure uniqueness
 		const { data: existing } = await supabase

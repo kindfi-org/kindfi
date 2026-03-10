@@ -2,7 +2,9 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import type { CastVotePayload, NftTier } from '~/lib/governance/types'
+import type { NftTier } from '~/lib/governance/types'
+import { castVoteSchema } from '~/lib/schemas/governance.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 import { getVoteWeight } from '~/lib/governance/vote-weight'
 
 /**
@@ -19,22 +21,12 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const body = (await req.json()) as CastVotePayload
-		const { roundId, optionId, voteType } = body
-
-		if (!roundId || !optionId || !voteType) {
-			return NextResponse.json(
-				{ error: 'roundId, optionId, and voteType are required' },
-				{ status: 400 },
-			)
+		const body = await req.json()
+		const validation = validateRequest(castVoteSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
-
-		if (voteType !== 'up' && voteType !== 'down') {
-			return NextResponse.json(
-				{ error: 'voteType must be "up" or "down"' },
-				{ status: 400 },
-			)
-		}
+		const { roundId, optionId, voteType } = validation.data
 
 		const { supabase } = await import('@packages/lib/supabase')
 

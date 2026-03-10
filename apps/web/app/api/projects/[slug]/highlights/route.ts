@@ -3,6 +3,8 @@ import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { highlightsUpdateSchema } from '~/lib/schemas/project.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(
 	req: Request,
@@ -17,43 +19,9 @@ export async function POST(
 		}
 
 		const body = await req.json()
-		const { projectId, highlights } = body
-
-		// Validate required fields
-		if (!projectId || !highlights) {
-			return NextResponse.json(
-				{ error: 'Missing required fields: projectId and highlights' },
-				{ status: 400 },
-			)
-		}
-
-		// Validate highlights structure
-		if (!Array.isArray(highlights)) {
-			return NextResponse.json(
-				{ error: 'Highlights must be an array' },
-				{ status: 400 },
-			)
-		}
-
-		// Validate minimum highlights requirement
-		if (highlights.length < 2) {
-			return NextResponse.json(
-				{ error: 'At least 2 highlights are required' },
-				{ status: 400 },
-			)
-		}
-
-		// Validate each highlight has required fields
-		const invalidHighlights = highlights.filter(
-			(h: { title?: string; description?: string }) =>
-				!h.title?.trim() || !h.description?.trim(),
-		)
-		if (invalidHighlights.length > 0) {
-			return NextResponse.json(
-				{ error: 'All highlights must have a title and description' },
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(highlightsUpdateSchema, body)
+		if (!validation.success) return validation.response
+		const { projectId, highlights } = validation.data
 
 		// Verify user has permission to update this project
 		// Check if user is the project owner or has editor role in parallel
@@ -96,12 +64,10 @@ export async function POST(
 		const supabase = supabaseServiceRole
 
 		// Prepare highlights data (remove client-side IDs, keep only title and description)
-		const highlightsData = highlights.map(
-			(h: { title: string; description: string }) => ({
-				title: h.title.trim(),
-				description: h.description.trim(),
-			}),
-		)
+		const highlightsData = highlights.map((h) => ({
+			title: h.title,
+			description: h.description,
+		}))
 
 		// Merge with existing metadata, preserving other metadata fields
 		const currentMetadata = (project.metadata as Record<string, unknown>) || {}

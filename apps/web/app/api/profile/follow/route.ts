@@ -2,6 +2,8 @@
 
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
+import { followActionSchema } from '~/lib/schemas/profile.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(request: Request) {
 	const supabase = await createSupabaseServerClient()
@@ -11,10 +13,12 @@ export async function POST(request: Request) {
 	if (!user)
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-	const { targetUserId, action } = await request.json()
-	if (!targetUserId || !['follow', 'unfollow'].includes(action)) {
-		return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+	const body = await request.json()
+	const validation = validateRequest(followActionSchema, body)
+	if (!validation.success) {
+		return validation.response
 	}
+	const { targetUserId, action } = validation.data
 
 	if (action === 'follow') {
 		const { error } = await supabase

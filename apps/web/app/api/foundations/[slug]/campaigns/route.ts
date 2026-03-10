@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
+import { foundationCampaignsSchema } from '~/lib/schemas/foundation.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * PATCH /api/foundations/[slug]/campaigns
@@ -39,14 +41,9 @@ export async function PATCH(
 		}
 
 		const body = await req.json()
-		const { projectId, assign } = body
-
-		if (!projectId || typeof assign !== 'boolean') {
-			return NextResponse.json(
-				{ error: 'projectId and assign (boolean) are required' },
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(foundationCampaignsSchema, body)
+		if (!validation.success) return validation.response
+		const { projectId, assign } = validation.data
 
 		// Verify the project belongs to the user
 		const { data: project, error: projectError } = await supabaseServiceRole

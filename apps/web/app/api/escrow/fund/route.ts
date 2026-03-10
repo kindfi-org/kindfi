@@ -6,22 +6,17 @@ import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
-import type { EscrowFundData } from '~/lib/types/escrow/escrow-payload.types'
-import { validateEscrowFunding } from '~/lib/validators/escrow'
+import { escrowFundSchema } from '~/lib/schemas/escrow.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
 	try {
-		const fundingData: EscrowFundData = await req.json()
-		const validationResult = validateEscrowFunding(fundingData)
-
-		if (!validationResult.success) {
-			return NextResponse.json(
-				{ error: 'Invalid escrow fund data', details: validationResult.errors },
-				{ status: 400 },
-			)
+		const body = await req.json()
+		const validation = validateRequest(escrowFundSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
-
-		const { signer, fundParams, metadata } = fundingData
+		const { signer, fundParams, metadata } = validation.data
 		const { userId, amount, transactionType, escrowContract } = fundParams
 
 		const { unsignedTransaction } = await createEscrowRequest({
