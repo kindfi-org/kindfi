@@ -4,24 +4,17 @@ import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
-import type { EscrowPayload } from '~/lib/types/escrow/escrow-payload.types'
-import { validateEscrowInitialization } from '~/lib/validators/escrow'
+import { escrowInitializeSchema } from '~/lib/schemas/escrow.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
 	try {
-		// 1. Validate the request payload
-		const initializationData: EscrowPayload = await req.json()
-		const validationResult = validateEscrowInitialization(initializationData)
-
-		if (!validationResult.success) {
-			return NextResponse.json(
-				{
-					error: 'Invalid escrow initialization',
-					details: validationResult.errors,
-				},
-				{ status: 400 },
-			)
+		const body = await req.json()
+		const validation = validateRequest(escrowInitializeSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
+		const initializationData = body
 
 		/* 2. Create the escrow contract through the initialize escrow - Trustless Work API
 		- The Trustless Work API will return an unsigned transaction XDR	

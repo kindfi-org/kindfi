@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { createReferralSchema } from '~/lib/schemas/referral.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * Resolve a user ID to a Stellar address (G... or C...) via devices table.
@@ -105,21 +107,11 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { referrer_id, referred_id } = body
-
-		if (!referrer_id || !referred_id) {
-			return NextResponse.json(
-				{ error: 'Missing required fields: referrer_id, referred_id' },
-				{ status: 400 },
-			)
+		const validation = validateRequest(createReferralSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
-
-		if (referrer_id === referred_id) {
-			return NextResponse.json(
-				{ error: 'Cannot refer yourself' },
-				{ status: 400 },
-			)
-		}
+		const { referrer_id, referred_id } = validation.data
 
 		// Use service role client to bypass RLS — auth is handled by NextAuth session above
 		const { supabase } = await import('@packages/lib/supabase')

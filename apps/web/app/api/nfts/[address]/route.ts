@@ -10,7 +10,9 @@ import {
 import { Api } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { addressParamSchema } from '~/lib/schemas/stellar.schemas'
 import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transactions'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * GET /api/nfts/[address]
@@ -24,15 +26,9 @@ export async function GET(
 ) {
 	try {
 		const { address } = await params
-
-		if (!address) {
-			return NextResponse.json(
-				{
-					error: 'Missing wallet address',
-				},
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(addressParamSchema, { address })
+		if (!validation.success) return validation.response
+		const { address: validatedAddress } = validation.data
 
 		const nftContractAddress =
 			process.env.NFT_CONTRACT_ADDRESS ||
@@ -60,14 +56,14 @@ export async function GET(
 		// Use funding account for simulation (required for read operations)
 		const sourceAccount = config.stellar.fundingAccount
 			? await txService.getFundingAccountForSimulation()
-			: new Account(address, '0')
+			: new Account(validatedAddress, '0')
 
 		const nftContract = new Contract(nftContractAddress)
 
 		// Get balance (number of NFTs owned)
 		const balanceOp = nftContract.call(
 			'balance',
-			nativeToScVal(Address.fromString(address), { type: 'address' }),
+			nativeToScVal(Address.fromString(validatedAddress), { type: 'address' }),
 		)
 
 		const balanceTx = new TransactionBuilder(sourceAccount, {
@@ -150,7 +146,7 @@ export async function GET(
 					// If this address owns the token, get metadata
 					if (
 						ownerAddress &&
-						String(ownerAddress).toLowerCase() === address.toLowerCase()
+						String(ownerAddress).toLowerCase() === validatedAddress.toLowerCase()
 					) {
 						const metadataOp = nftContract.call(
 							'get_metadata',

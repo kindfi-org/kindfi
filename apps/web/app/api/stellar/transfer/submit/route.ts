@@ -3,6 +3,7 @@ import {
 	buildWebAuthnSignatureScVal,
 	computeDeviceIdFromCoseKey,
 	type verifyAuthentication,
+	type WebAuthnAssertionResponse,
 } from '@packages/lib/passkey'
 import {
 	Keypair,
@@ -14,6 +15,8 @@ import { type Api, Server } from '@stellar/stellar-sdk/rpc'
 import isEqual from 'lodash/isEqual'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { transferSubmitSchema } from '~/lib/schemas/stellar.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 // Don't initialize services at module level - do it inside the route handler
 // This prevents build-time errors when environment variables are not available
@@ -30,42 +33,18 @@ export async function POST(req: NextRequest) {
 		const appConfig = appEnvConfig('web')
 
 		const body = await req.json()
-		const { transactionData, authResponse, userDevice } = body
+		const validation = validateRequest(transferSubmitSchema, body)
+		if (!validation.success) return validation.response
+		const { transactionData, authResponse, userDevice, verificationJSON } = validation.data
 		const { transactionXDR, hash: _hash } = transactionData
-		const smartWalletAddress = userDevice?.address
-		const verificationJSON = body.verificationJSON as Awaited<
+		const smartWalletAddress = userDevice.address
+		const verificationJSONTyped = verificationJSON as Awaited<
 			ReturnType<typeof verifyAuthentication>
 		>
 		console.log(
 			'verificationJSON: WebAuthn Key Verified. user is now authored to sign. getting attestation public key',
-			{ verificationJSON },
+			{ verificationJSON: verificationJSONTyped },
 		)
-
-		// Validate inputs
-		if (
-			!transactionXDR ||
-			!authResponse ||
-			!smartWalletAddress ||
-			!verificationJSON?.device?.pubKey
-		) {
-			return NextResponse.json(
-				{
-					error:
-						'Missing required fields: transactionXDR, authResponse, smartWalletAddress, Public Key',
-				},
-				{ status: 400 },
-			)
-		}
-
-		// Validate transactionXDR is a valid string
-		if (typeof transactionXDR !== 'string' || !transactionXDR.trim()) {
-			return NextResponse.json(
-				{
-					error: 'Invalid transactionXDR: must be a non-empty string',
-				},
-				{ status: 400 },
-			)
-		}
 
 		// Get configuration
 		const server = new Server(appConfig.stellar.rpcUrl)
@@ -139,9 +118,9 @@ export async function POST(req: NextRequest) {
 			const credentialId = verificationJSON.device.id
 			const deviceIdHex = computeDeviceIdFromCoseKey(publicKey)
 			const signatureResult = buildWebAuthnSignatureScVal({
-				assertion: authResponse,
+				assertion: authResponse as WebAuthnAssertionResponse,
 				userData: {
-					credential_id: credentialId,
+					credential_id: String(credentialId ?? ''),
 					public_key: publicKey,
 					device_id_hex: deviceIdHex,
 				},

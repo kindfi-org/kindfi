@@ -7,6 +7,8 @@ import { Contract, nativeToScVal } from '@stellar/stellar-sdk'
 import { Server } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { addressParamSchema } from '~/lib/schemas/stellar.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * GET /api/stellar/account/check-approval/[address]
@@ -19,19 +21,15 @@ export async function GET(
 ) {
 	try {
 		const { address } = await params
-
-		if (!address) {
-			return NextResponse.json(
-				{ error: 'Missing address parameter' },
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(addressParamSchema, { address })
+		if (!validation.success) return validation.response
+		const { address: validatedAddress } = validation.data
 
 		const config = appEnvConfig('web')
 		const server = new Server(config.stellar.rpcUrl)
 
 		console.log('🔍 Checking account approval status')
-		console.log('   Account:', address)
+		console.log('   Account:', validatedAddress)
 		console.log('   Controller:', config.stellar.controllerContractId)
 
 		// Build get_accounts invocation with empty context
@@ -72,7 +70,7 @@ export async function GET(
 		return NextResponse.json({
 			success: true,
 			data: {
-				address,
+				address: validatedAddress,
 				isApproved,
 				note: 'Account approval check - implementation needs ScVal parsing',
 			},

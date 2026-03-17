@@ -13,6 +13,8 @@ import {
 	foundationValidationLimits,
 } from '~/lib/validation/foundation-api'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
+import { createFoundationFormSchema } from '~/lib/schemas/foundation-create.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: Request) {
 	try {
@@ -60,121 +62,38 @@ export async function POST(req: Request) {
 
 		const formData = await req.formData()
 
-		// Extract and validate required fields
-		const nameRaw = formData.get('name')
-		const descriptionRaw = formData.get('description')
-		const slugRaw = formData.get('slug')
-		const foundedYearRaw = formData.get('foundedYear')
-		const foundedYear =
-			typeof foundedYearRaw === 'string'
-				? Number.parseInt(foundedYearRaw, 10)
-				: Number(foundedYearRaw)
-
-		if (
-			!validateRequiredString(nameRaw, foundationValidationLimits.MAX_NAME_LENGTH)
-		) {
-			return NextResponse.json(
-				{ error: 'Name is required and must be at most 200 characters' },
-				{ status: 400 },
-			)
-		}
-		if (
-			!validateRequiredString(
-				descriptionRaw,
-				foundationValidationLimits.MAX_DESCRIPTION_LENGTH,
-			)
-		) {
-			return NextResponse.json(
-				{
-					error:
-						'Description is required and must be at most 5000 characters',
-				},
-				{ status: 400 },
-			)
-		}
-		if (!validateSlug(slugRaw)) {
-			return NextResponse.json(
-				{
-					error:
-						'Slug must be 3–30 characters, lowercase alphanumeric with hyphens',
-				},
-				{ status: 400 },
-			)
-		}
-		if (!validateFoundedYear(foundedYear)) {
-			return NextResponse.json(
-				{ error: 'Founded year must be between 1900 and current year' },
-				{ status: 400 },
-			)
-		}
-
-		const name = String(nameRaw).trim()
-		const description = String(descriptionRaw).trim()
-		const slug = String(slugRaw).trim().toLowerCase()
-
-		const missionRaw = formData.get('mission')
-		const visionRaw = formData.get('vision')
-		const websiteUrlRaw = formData.get('websiteUrl')
-		if (
-			!validateOptionalString(
-				missionRaw,
-				foundationValidationLimits.MAX_MISSION_LENGTH,
-			)
-		) {
-			return NextResponse.json(
-				{ error: 'Mission must be at most 2000 characters' },
-				{ status: 400 },
-			)
-		}
-		if (
-			!validateOptionalString(
-				visionRaw,
-				foundationValidationLimits.MAX_VISION_LENGTH,
-			)
-		) {
-			return NextResponse.json(
-				{ error: 'Vision must be at most 2000 characters' },
-				{ status: 400 },
-			)
-		}
-		if (websiteUrlRaw != null && websiteUrlRaw !== '' && !validateOptionalUrl(websiteUrlRaw)) {
-			return NextResponse.json(
-				{ error: 'Website URL must be a valid http(s) URL' },
-				{ status: 400 },
-			)
-		}
-
-		const socialLinksRaw = formData.get('socialLinks')
-		let socialLinks: Record<string, string> = {}
-		if (socialLinksRaw != null && socialLinksRaw !== '') {
-			try {
-				const parsed = JSON.parse(String(socialLinksRaw)) as unknown
-				const result = validateSocialLinks(parsed)
-				if (!result.ok) {
-					return NextResponse.json({ error: result.error }, { status: 400 })
+		const formDataObj = {
+			name: formData.get('name') ?? '',
+			description: formData.get('description') ?? '',
+			slug: formData.get('slug') ?? '',
+			foundedYear: formData.get('foundedYear') ?? '',
+			mission: formData.get('mission') ?? undefined,
+			vision: formData.get('vision') ?? undefined,
+			websiteUrl: formData.get('websiteUrl') ?? undefined,
+			socialLinks: (() => {
+				const raw = formData.get('socialLinks') as string | null
+				if (!raw) return {}
+				try {
+					return JSON.parse(raw) as Record<string, string>
+				} catch {
+					return {}
 				}
-				socialLinks = result.value
-			} catch {
-				return NextResponse.json(
-					{ error: 'Invalid socialLinks JSON' },
-					{ status: 400 },
-				)
-			}
+			})(),
 		}
-
-		const mission =
-			missionRaw != null && String(missionRaw).trim() !== ''
-				? String(missionRaw).trim()
-				: null
-		const vision =
-			visionRaw != null && String(visionRaw).trim() !== ''
-				? String(visionRaw).trim()
-				: null
-		const websiteUrl =
-			websiteUrlRaw != null && String(websiteUrlRaw).trim() !== ''
-				? String(websiteUrlRaw).trim()
-				: null
-
+		const validation = validateRequest(createFoundationFormSchema, formDataObj)
+		if (!validation.success) {
+			return validation.response
+		}
+		const {
+			name,
+			description,
+			slug,
+			foundedYear,
+			mission,
+			vision,
+			websiteUrl,
+			socialLinks,
+		} = validation.data
 		const logo = formData.get('logo') as File | null
 
 		// Check if slug already exists

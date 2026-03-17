@@ -1,5 +1,7 @@
 import { supabase } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
+import { updateTagSchema } from '~/lib/schemas/tag.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 type TagRouteContext = {
 	params: Promise<{
@@ -46,29 +48,11 @@ export async function PUT(request: NextRequest, context: TagRouteContext) {
 		}
 
 		const body = await request.json()
-
-		if (!body.name) {
-			return NextResponse.json(
-				{ error: 'Tag name is required' },
-				{ status: 400 },
-			)
+		const validation = validateRequest(updateTagSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
-
-		const sanitizedName = body.name.trim()
-
-		if (sanitizedName.length > 50) {
-			return NextResponse.json(
-				{ error: 'Tag name must be 50 characters or less' },
-				{ status: 400 },
-			)
-		}
-
-		if (!/^[a-zA-Z0-9\s-_]+$/.test(sanitizedName)) {
-			return NextResponse.json(
-				{ error: 'Tag name contains invalid characters' },
-				{ status: 400 },
-			)
-		}
+		const sanitizedName = validation.data.name
 
 		const { data, error } = await supabase
 			.from('project_tags')

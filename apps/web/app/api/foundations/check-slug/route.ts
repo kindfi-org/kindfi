@@ -1,15 +1,17 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
-import { validateSlug } from '~/lib/validation/foundation-api'
+import { checkSlugQuerySchema } from '~/lib/schemas/foundation.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function GET(req: Request) {
 	try {
 		const { searchParams } = new URL(req.url)
-		const slug = searchParams.get('slug')
-
-		if (!slug) {
-			return NextResponse.json({ error: 'Slug is required' }, { status: 400 })
+		const queryData = { slug: searchParams.get('slug') ?? '' }
+		const validation = validateRequest(checkSlugQuerySchema, queryData)
+		if (!validation.success) {
+			return validation.response
 		}
+		const { slug } = validation.data
 
 		if (!validateSlug(slug)) {
 			return NextResponse.json(

@@ -4,7 +4,9 @@ import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import type { DisputePayload } from '~/lib/types/escrow/escrow-payload.types'
+import { listDisputesQuerySchema } from '~/lib/schemas/escrow-dispute.schemas'
 import { validateDispute } from '~/lib/validators/dispute'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
 	try {
@@ -136,15 +138,15 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
 	try {
 		const url = new URL(req.url)
-		const escrowId = url.searchParams.get('escrowId')
-		const status = url.searchParams.get('status')
-
-		if (!escrowId) {
-			return NextResponse.json(
-				{ error: 'Escrow ID is required' },
-				{ status: 400 },
-			)
+		const queryData = {
+			escrowId: url.searchParams.get('escrowId') ?? '',
+			status: url.searchParams.get('status') ?? undefined,
 		}
+		const validation = validateRequest(listDisputesQuerySchema, queryData)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { escrowId, status } = validation.data
 
 		let query = supabase
 			.from('escrow_reviews')

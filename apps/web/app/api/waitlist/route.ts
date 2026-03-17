@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
 import { waitlistSchema } from '~/lib/schemas/waitlist.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: Request) {
 	try {
@@ -12,20 +13,12 @@ export async function POST(req: Request) {
 		const body = await req.json()
 		console.log('Request body:', body)
 
-		// Validate the request body using the schema
-		const parsed = waitlistSchema.safeParse(body)
-		if (!parsed.success) {
-			console.log('Validation failed:', parsed.error)
-			return NextResponse.json(
-				{
-					error:
-						parsed.error.flatten().formErrors.join(', ') || 'Invalid payload',
-				},
-				{ status: 400 },
-			)
+		const validation = validateRequest(waitlistSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
 
-		console.log('Validation passed:', parsed.data)
+		console.log('Validation passed:', validation.data)
 
 		const {
 			name,
@@ -36,7 +29,7 @@ export async function POST(req: Request) {
 			location,
 			source,
 			consent,
-		} = parsed.data
+		} = validation.data
 
 		// Prepare waitlist data to insert
 		const insertData = {

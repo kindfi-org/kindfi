@@ -6,11 +6,15 @@ import {
 	saveUser,
 } from '@packages/lib/db'
 import { StellarPasskeyService } from '@packages/lib/stellar'
-import type { RegistrationResponseJSON } from '@simplewebauthn/server'
-import { verifyRegistrationResponse } from '@simplewebauthn/server'
+import {
+	type RegistrationResponseJSON,
+	verifyRegistrationResponse,
+} from '@simplewebauthn/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
+import { verifyRegistrationSchema } from '~/lib/schemas/passkey.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/passkey/verify-registration
@@ -21,24 +25,12 @@ import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()
-		const {
-			registrationResponse,
-			identifier,
-			origin,
-			userId,
-		}: {
-			registrationResponse: RegistrationResponseJSON
-			identifier: string
-			origin: string
-			userId?: string
-		} = body
-
-		if (!registrationResponse || !identifier || !origin) {
-			return NextResponse.json(
-				{ error: 'Missing required fields' },
-				{ status: 400 },
-			)
+		const validation = validateRequest(verifyRegistrationSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
+		const { registrationResponse, identifier, origin, userId } =
+			validation.data
 
 		const config = appEnvConfig('web')
 		const rpId = getRpIdFromOrigin(origin)
@@ -70,7 +62,7 @@ export async function POST(req: NextRequest) {
 
 		// Verify registration
 		const verification = await verifyRegistrationResponse({
-			response: registrationResponse,
+			response: registrationResponse as RegistrationResponseJSON,
 			expectedChallenge,
 			expectedOrigin,
 			expectedRPID: rpId,
@@ -199,7 +191,10 @@ export async function POST(req: NextRequest) {
 					rpId,
 					identifier,
 					user: {
-						credentials: [...credentials, newCredential],
+						credentials: [
+							...credentials,
+							newCredential as (typeof credentials)[number],
+						],
 					},
 					userId,
 				})

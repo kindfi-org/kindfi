@@ -14,6 +14,8 @@ import {
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
 } from '~/lib/services/pinata'
+import { mintNftSchema } from '~/lib/schemas/nft.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 import { getUserStats } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
@@ -56,8 +58,12 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
+		const validation = validateRequest(mintNftSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
 		const sessionUserId = session.user.id
-		const requestedUserId = body.user_id
+		const requestedUserId = validation.data.user_id
 
 		let userId: string
 
@@ -81,7 +87,8 @@ export async function POST(req: NextRequest) {
 			userId = sessionUserId
 		}
 
-		let stellarAddress: string | null = body.stellar_address || null
+		let stellarAddress: string | null =
+			validation.data.stellar_address || null
 
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')

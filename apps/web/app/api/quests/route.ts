@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { createQuestSchema } from '~/lib/schemas/quest.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * GET /api/quests
@@ -138,6 +140,10 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
+		const validation = validateRequest(createQuestSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
 		const {
 			quest_type,
 			name,
@@ -146,14 +152,7 @@ export async function POST(req: NextRequest) {
 			reward_points,
 			expires_at,
 			contract_address,
-		} = body
-
-		if (!quest_type || !name || !description || !target_value) {
-			return NextResponse.json(
-				{ error: 'Missing required fields' },
-				{ status: 400 },
-			)
-		}
+		} = validation.data
 
 		// Get next quest_id (simple increment from max)
 		const { data: maxQuest } = await supabase

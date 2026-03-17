@@ -3,6 +3,7 @@ import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { projectUpdateFormSchema } from '~/lib/schemas/project.schemas'
 import {
 	buildSocialLinks,
 	deleteFolderFromBucket,
@@ -10,6 +11,7 @@ import {
 	uploadProjectImage,
 	upsertTags,
 } from '~/lib/utils/project-utils'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function PATCH(req: Request) {
 	try {
@@ -21,8 +23,12 @@ export async function PATCH(req: Request) {
 		}
 
 		const formData = await req.formData()
-
-		// Extract fields from multipart form data
+		const parsed = {
+			...parseFormData(formData),
+			removeImage: formData.get('removeImage') === 'true',
+		}
+		const validation = validateRequest(projectUpdateFormSchema, parsed)
+		if (!validation.success) return validation.response
 		const {
 			projectId,
 			slug,
@@ -36,16 +42,8 @@ export async function PATCH(req: Request) {
 			tags,
 			socialLinks,
 			image,
-		} = parseFormData(formData)
-
-		const removeImage = formData.get('removeImage') === 'true'
-
-		if (!projectId) {
-			return NextResponse.json(
-				{ error: 'Project id is missing' },
-				{ status: 400 },
-			)
-		}
+			removeImage,
+		} = validation.data
 
 		// Verify user has permission to update this project
 		// Check if user is the project owner or has editor role in parallel
@@ -137,7 +135,7 @@ export async function PATCH(req: Request) {
 			.eq('project_id', projectId)
 
 		// Upsert new tag relationships
-		await upsertTags(projectId, tags, supabase)
+		await upsertTags(projectId, tags ?? [], supabase)
 
 		return NextResponse.json(
 			{ message: 'Project updated successfully' },

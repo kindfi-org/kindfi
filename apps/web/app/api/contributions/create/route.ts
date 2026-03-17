@@ -4,6 +4,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
 	try {
@@ -13,7 +15,11 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { projectId, contractId, amount, transactionHash } = body
+		const validation = validateRequest(createContributionSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { projectId, contractId, amount, transactionHash } = validation.data
 
 		const numericAmount = Number(amount)
 		const MAX_CONTRIBUTION_AMOUNT = 1_000_000
@@ -71,15 +77,6 @@ export async function POST(req: NextRequest) {
 			if (!finalProjectId) finalProjectId = projectId
 		}
 
-		if (!finalProjectId) {
-			return NextResponse.json(
-				{
-					error:
-						'Invalid request. contractId or projectId is required.',
-				},
-				{ status: 400 },
-			)
-		}
 
 		// Check if contribution already exists for this transaction hash (to avoid duplicates)
 		if (transactionHash) {
