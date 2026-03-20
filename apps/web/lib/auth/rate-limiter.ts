@@ -1,11 +1,22 @@
 import { Redis } from '@upstash/redis'
 import { AuthErrorType } from '../types/auth'
 
-const redis = Redis.fromEnv()
-
 const RATE_LIMIT_ATTEMPTS = 5
 const RATE_LIMIT_WINDOW = 60 * 15 // 15 minutes in seconds
 const RATE_LIMIT_BLOCK_DURATION = 60 * 60 // 1 hour in seconds
+
+let redis: Redis | null = null
+
+function getRedis(): Redis | null {
+	if (redis) return redis
+	try {
+		redis = Redis.fromEnv()
+		return redis
+	} catch (err) {
+		console.warn('[RateLimiter] Failed to initialize Redis — rate limiting disabled:', err)
+		return null
+	}
+}
 
 export class RateLimiter {
 	private getKey(identifier: string, action: string): string {
@@ -17,9 +28,17 @@ export class RateLimiter {
 	}
 
 	async isBlocked(identifier: string, action: string): Promise<boolean> {
-		const blockKey = this.getBlockKey(identifier, action)
-		const isBlocked = await redis.exists(blockKey)
-		return isBlocked === 1
+		const client = getRedis()
+		if (!client) return false
+
+		try {
+			const blockKey = this.getBlockKey(identifier, action)
+			const isBlocked = await client.exists(blockKey)
+			return isBlocked === 1
+		} catch (err) {
+			console.warn('[RateLimiter] Redis error in isBlocked — failing open:', err)
+			return false
+		}
 	}
 
 	async increment(
@@ -30,49 +49,60 @@ export class RateLimiter {
 		attemptsRemaining: number
 		error?: AuthErrorType
 	}> {
-		const key = this.getKey(identifier, action)
-		const blockKey = this.getBlockKey(identifier, action)
+		const client = getRedis()
+		if (!client) {
+			return { isBlocked: false, attemptsRemaining: RATE_LIMIT_ATTEMPTS }
+		}
 
-		// Check if already blocked
-		if (await this.isBlocked(identifier, action)) {
-			return {
-				isBlocked: true,
-				attemptsRemaining: 0,
-				error: AuthErrorType.RATE_LIMIT_EXCEEDED,
+		try {
+			const key = this.getKey(identifier, action)
+			const blockKey = this.getBlockKey(identifier, action)
+
+			if (await this.isBlocked(identifier, action)) {
+				return {
+					isBlocked: true,
+					attemptsRemaining: 0,
+					error: AuthErrorType.RATE_LIMIT_EXCEEDED,
+				}
 			}
-		}
 
-		// Increment attempts
-		const attempts = await redis.incr(key)
+			const attempts = await client.incr(key)
 
-		// Set expiry for first attempt
-		if (attempts === 1) {
-			await redis.expire(key, RATE_LIMIT_WINDOW)
-		}
+			if (attempts === 1) {
+				await client.expire(key, RATE_LIMIT_WINDOW)
+			}
 
-		// Check if exceeded
-		if (attempts > RATE_LIMIT_ATTEMPTS) {
-			// Block the identifier
-			await redis.setex(blockKey, RATE_LIMIT_BLOCK_DURATION, '1')
-			await redis.del(key)
+			if (attempts > RATE_LIMIT_ATTEMPTS) {
+				await client.setex(blockKey, RATE_LIMIT_BLOCK_DURATION, '1')
+				await client.del(key)
+
+				return {
+					isBlocked: true,
+					attemptsRemaining: 0,
+					error: AuthErrorType.RATE_LIMIT_EXCEEDED,
+				}
+			}
 
 			return {
-				isBlocked: true,
-				attemptsRemaining: 0,
-				error: AuthErrorType.RATE_LIMIT_EXCEEDED,
+				isBlocked: false,
+				attemptsRemaining: RATE_LIMIT_ATTEMPTS - attempts,
 			}
-		}
-
-		return {
-			isBlocked: false,
-			attemptsRemaining: RATE_LIMIT_ATTEMPTS - attempts,
+		} catch (err) {
+			console.warn('[RateLimiter] Redis error in increment — failing open:', err)
+			return { isBlocked: false, attemptsRemaining: RATE_LIMIT_ATTEMPTS }
 		}
 	}
 
 	async reset(identifier: string, action: string): Promise<void> {
-		const key = this.getKey(identifier, action)
-		const blockKey = this.getBlockKey(identifier, action)
+		const client = getRedis()
+		if (!client) return
 
-		await Promise.all([redis.del(key), redis.del(blockKey)])
+		try {
+			const key = this.getKey(identifier, action)
+			const blockKey = this.getBlockKey(identifier, action)
+			await Promise.all([client.del(key), client.del(blockKey)])
+		} catch (err) {
+			console.warn('[RateLimiter] Redis error in reset — failing open:', err)
+		}
 	}
 }

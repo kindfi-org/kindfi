@@ -20,8 +20,17 @@ import { GamificationContractService } from '~/lib/stellar/gamification-contract
 // --- Rate Limiting Configuration ---
 const rateLimitMaxRequests = 3
 const rateLimitWindowSeconds = 60
-// Module-level Redis singleton to avoid per-request connection churn
-const redis = Redis.fromEnv()
+
+let redis: Redis | null = null
+function getRedis(): Redis | null {
+	if (redis) return redis
+	try {
+		redis = Redis.fromEnv()
+		return redis
+	} catch {
+		return null
+	}
+}
 
 /**
  * POST /api/nfts/evolve
@@ -70,39 +79,38 @@ export async function POST(req: NextRequest) {
 
 		// --- Rate Limiting via Upstash Redis ---
 		try {
-			// Secure key using strictly the authenticated session identity
-			const rateLimitKey = `rate_limit:nft_evolve:${session.user.id}`
-			const MAX_REQUESTS = rateLimitMaxRequests
-			const WINDOW_SECONDS = rateLimitWindowSeconds
+			const redisClient = getRedis()
+			if (redisClient) {
+				const rateLimitKey = `rate_limit:nft_evolve:${session.user.id}`
+				const MAX_REQUESTS = rateLimitMaxRequests
+				const WINDOW_SECONDS = rateLimitWindowSeconds
 
-			// Atomically increment and set TTL on first request using a Lua script
-			// This prevents a leaked key (where INCR succeeds but EXPIRE fails)
-			const requests = (await redis.eval(
-				`local count = redis.call("INCR", KEYS[1])
+				const requests = (await redisClient.eval(
+					`local count = redis.call("INCR", KEYS[1])
                  if count == 1 then
                    redis.call("EXPIRE", KEYS[1], ARGV[1])
                  end
                  return count`,
-				[rateLimitKey],
-				[WINDOW_SECONDS],
-			)) as number
+					[rateLimitKey],
+					[WINDOW_SECONDS],
+				)) as number
 
-			if (requests && requests > MAX_REQUESTS) {
-				console.warn(
-					'[Rate Limit Exceeded] User attempted to evolve NFT too frequently.',
-				)
-				return NextResponse.json(
-					{ error: 'Too many requests. Please try again later.' },
-					{
-						status: 429,
-						headers: {
-							'Retry-After': WINDOW_SECONDS.toString(),
+				if (requests && requests > MAX_REQUESTS) {
+					console.warn(
+						'[Rate Limit Exceeded] User attempted to evolve NFT too frequently.',
+					)
+					return NextResponse.json(
+						{ error: 'Too many requests. Please try again later.' },
+						{
+							status: 429,
+							headers: {
+								'Retry-After': WINDOW_SECONDS.toString(),
+							},
 						},
-					},
-				)
+					)
+				}
 			}
 		} catch (redisError) {
-			// Fail open: If Redis goes down, we log it but don't block the user from evolving their NFT
 			console.error('[Rate Limiting] Redis error:', redisError)
 		}
 		// --- End Rate Limiting ---

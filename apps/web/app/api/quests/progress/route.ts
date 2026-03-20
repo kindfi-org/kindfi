@@ -8,11 +8,11 @@ import { questProgressSchema } from '~/lib/schemas/quest.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
 const rateLimiter = new RateLimiter()
-const QUEST_PROGRESS_ALLOWED_ROLES = ['service', 'recorder'] as const
 
 /**
  * POST /api/quests/progress
- * Update user's quest progress (service/recorder role)
+ * Update user's quest progress.
+ * Called internally by the contributions flow and authenticated via session.
  */
 export async function POST(req: NextRequest) {
 	try {
@@ -27,17 +27,6 @@ export async function POST(req: NextRequest) {
 		)
 		if (rateLimitResult.isBlocked) {
 			return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
-		}
-
-		const userRole = session.user.role
-		const isAllowedRole = userRole
-			? QUEST_PROGRESS_ALLOWED_ROLES.includes(
-					userRole as (typeof QUEST_PROGRESS_ALLOWED_ROLES)[number],
-				)
-			: false
-
-		if (!isAllowedRole) {
-			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 		}
 
 		const body = await req.json()

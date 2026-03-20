@@ -207,7 +207,11 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			console.error('Failed to log info:', logError)
+			console.error('[NotificationLogger] Failed to log info:', {
+				message,
+				notificationId,
+				error: logError,
+			})
 			// Don't throw to avoid disrupting the main flow
 		}
 	}
