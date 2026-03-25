@@ -3,7 +3,9 @@ import { TransactionBuilder } from '@stellar/stellar-sdk'
 import { Api, Server } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import { signAndSubmitSchema } from '~/lib/schemas/escrow-sign.schemas'
+import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -13,11 +15,24 @@ import { validateRequest } from '~/lib/utils/validation'
  * and submits it to the network
  */
 export async function POST(req: NextRequest) {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
 		const appConfig = appEnvConfig('web')
 		const body = await req.json()
 		const validation = validateRequest(signAndSubmitSchema, body)
-		if (!validation.success) return validation.response
+		if (!validation.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.sign_and_submit',
+				resourceType: 'escrow',
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
+			return validation.response
+		}
 		const { unsignedTransactionXDR, userDevice } = validation.data
 
 		// Parse the unsigned transaction
@@ -90,6 +105,15 @@ export async function POST(req: NextRequest) {
 
 		const authOptions = await authOptionsResponse.json()
 
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.sign_and_submit',
+			resourceType: 'escrow',
+			actorId: userDevice.address ? AuditLogger.maskAddress(userDevice.address) : undefined,
+			status: 'success',
+			durationMs: Date.now() - startTime,
+		})
+
 		// Return auth options to client for WebAuthn signing
 		return NextResponse.json({
 			authOptions,
@@ -99,6 +123,15 @@ export async function POST(req: NextRequest) {
 		})
 	} catch (error) {
 		console.error('Error in sign-and-submit:', error)
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.sign_and_submit',
+			resourceType: 'escrow',
+			status: 'failure',
+			errorCode: '500',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 		return NextResponse.json(
 			{
 				error: 'Failed to prepare transaction for signing',

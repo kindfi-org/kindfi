@@ -5,10 +5,16 @@ import { after, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { AppError } from '~/lib/error'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import type { MediatorAssignmentPayload } from '~/lib/types/escrow/escrow-payload.types'
+import { generateUniqueId } from '~/lib/utils/id'
 import { validateMediatorAssignment } from '~/lib/validators/dispute'
 
 export async function POST(req: NextRequest) {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
 		// Authenticate user from session - never trust client-provided user IDs
 		const session = await getServerSession(nextAuthOption)
@@ -24,6 +30,14 @@ export async function POST(req: NextRequest) {
 		const validationResult = validateMediatorAssignment(assignmentData)
 
 		if (!validationResult.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.dispute.assign_mediator',
+				resourceType: 'dispute',
+				actorId: session.user.id,
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
 			return NextResponse.json(
 				{
 					error: 'Invalid mediator assignment data',
@@ -96,6 +110,17 @@ export async function POST(req: NextRequest) {
 			}
 		})
 
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.dispute.assign_mediator',
+			resourceType: 'dispute',
+			resourceId: disputeId,
+			actorId: session.user.id,
+			status: 'success',
+			durationMs: Date.now() - startTime,
+			metadata: { mediatorId },
+		})
+
 		return NextResponse.json(
 			{
 				success: true,
@@ -110,6 +135,16 @@ export async function POST(req: NextRequest) {
 		)
 	} catch (error) {
 		console.error('Mediator Assignment Error:', error)
+
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.dispute.assign_mediator',
+			resourceType: 'dispute',
+			status: 'failure',
+			errorCode: error instanceof AppError ? String(error.statusCode) : '500',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 
 		if (error instanceof AppError) {
 			return NextResponse.json(

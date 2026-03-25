@@ -2,15 +2,28 @@ import { supabase } from '@packages/lib/supabase'
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { milestoneReviewSchema } from '~/lib/schemas/escrow.schemas'
+import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
 		const body = await req.json()
 		const validation = validateRequest(milestoneReviewSchema, body)
 		if (!validation.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.review',
+				resourceType: 'milestone',
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
 			return validation.response
 		}
 		const {
@@ -157,6 +170,17 @@ export async function POST(req: NextRequest) {
 			}
 		}
 
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.review',
+			resourceType: 'milestone',
+			resourceId: milestoneId,
+			actorId: reviewerId,
+			status: 'success',
+			durationMs: Date.now() - startTime,
+			metadata: { reviewStatus: status, isApproved },
+		})
+
 		return NextResponse.json(
 			{
 				success: true,
@@ -173,6 +197,15 @@ export async function POST(req: NextRequest) {
 		console.error('Milestone Review Error:', error)
 
 		if (error instanceof AppError) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.review',
+				resourceType: 'milestone',
+				status: 'failure',
+				errorCode: String(error.statusCode),
+				durationMs: Date.now() - startTime,
+				metadata: { error: error.message },
+			})
 			return NextResponse.json(
 				{ error: error.message, details: error.details },
 				{ status: error.statusCode },
@@ -180,12 +213,30 @@ export async function POST(req: NextRequest) {
 		}
 
 		if (error instanceof SyntaxError && error.message.includes('JSON')) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.review',
+				resourceType: 'milestone',
+				status: 'failure',
+				errorCode: '400',
+				durationMs: Date.now() - startTime,
+				metadata: { error: 'Invalid JSON format' },
+			})
 			return NextResponse.json(
 				{ error: 'Invalid JSON format in request body' },
 				{ status: 400 },
 			)
 		}
 
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.review',
+			resourceType: 'milestone',
+			status: 'failure',
+			errorCode: '400',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 		return NextResponse.json(
 			{
 				error: 'An unexpected error occurred',
