@@ -2,17 +2,30 @@ import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import type { DisputeSignPayload } from '~/lib/types/escrow/escrow-payload.types'
+import { generateUniqueId } from '~/lib/utils/id'
 import { validateDisputeSign } from '~/lib/validators/dispute'
 
 export async function POST(req: NextRequest) {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
 		// 1. Parse and validate the dispute sign data
 		const signData = await req.json()
 		const validationResult = validateDisputeSign(signData)
 
 		if (!validationResult.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.dispute.sign',
+				resourceType: 'dispute',
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
 			return NextResponse.json(
 				{
 					error: 'Invalid dispute sign data',
@@ -146,6 +159,22 @@ export async function POST(req: NextRequest) {
 				}
 			}
 
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.dispute.sign',
+				resourceType: 'dispute',
+				resourceId: dispute.id,
+				actorId: filerAddress ? AuditLogger.maskAddress(filerAddress) : undefined,
+				status: 'success',
+				durationMs: Date.now() - startTime,
+				metadata: {
+					type: 'file',
+					transactionHash: txResponse.txHash,
+					escrowId,
+					milestoneId,
+				},
+			})
+
 			return NextResponse.json(
 				{
 					success: true,
@@ -256,6 +285,23 @@ export async function POST(req: NextRequest) {
 				}
 			}
 
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.dispute.sign',
+				resourceType: 'dispute',
+				resourceId: disputeId,
+				actorId: mediatorId ?? undefined,
+				status: 'success',
+				durationMs: Date.now() - startTime,
+				metadata: {
+					type: 'resolve',
+					transactionHash: txResponse.txHash,
+					resolution,
+					approverAmount,
+					serviceProviderAmount,
+				},
+			})
+
 			return NextResponse.json(
 				{
 					success: true,
@@ -276,6 +322,16 @@ export async function POST(req: NextRequest) {
 		)
 	} catch (error) {
 		console.error('Dispute Sign Error:', error)
+
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.dispute.sign',
+			resourceType: 'dispute',
+			status: 'failure',
+			errorCode: error instanceof AppError ? String(error.statusCode) : '500',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 
 		if (error instanceof AppError) {
 			return NextResponse.json(

@@ -2,19 +2,32 @@ import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import type { DisputePayload } from '~/lib/types/escrow/escrow-payload.types'
 import { listDisputesQuerySchema } from '~/lib/schemas/escrow-dispute.schemas'
+import { generateUniqueId } from '~/lib/utils/id'
 import { validateDispute } from '~/lib/validators/dispute'
 import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
 		// 1. Parse and validate the dispute data
 		const disputeData = await req.json()
 		const validationResult = validateDispute(disputeData)
 
 		if (!validationResult.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.dispute.create',
+				resourceType: 'dispute',
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
 			return NextResponse.json(
 				{
 					error: 'Invalid dispute data',
@@ -96,6 +109,17 @@ export async function POST(req: NextRequest) {
 			throw new Error('Failed to retrieve unsigned transaction XDR')
 		}
 
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.dispute.create',
+			resourceType: 'dispute',
+			resourceId: escrowId,
+			actorId: AuditLogger.maskAddress(signer),
+			status: 'success',
+			durationMs: Date.now() - startTime,
+			metadata: { milestoneId, escrowContractAddress },
+		})
+
 		// 6. Return the unsigned transaction to the client for signing
 		// The client will sign the transaction and send it to the /escrow/dispute/sign endpoint
 		// to finalize the signature and update the database
@@ -120,12 +144,30 @@ export async function POST(req: NextRequest) {
 		console.error('Dispute Filing Error:', error)
 
 		if (error instanceof AppError) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.dispute.create',
+				resourceType: 'dispute',
+				status: 'failure',
+				errorCode: String(error.statusCode),
+				durationMs: Date.now() - startTime,
+				metadata: { error: error.message },
+			})
 			return NextResponse.json(
 				{ error: error.message, details: error.details },
 				{ status: error.statusCode },
 			)
 		}
 
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.dispute.create',
+			resourceType: 'dispute',
+			status: 'failure',
+			errorCode: '500',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 		return NextResponse.json(
 			{
 				error: error instanceof Error ? error.message : 'Internal server error',

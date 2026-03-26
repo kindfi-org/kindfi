@@ -2,18 +2,31 @@ import { supabase } from '@packages/lib/supabase'
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import { escrowFundUpdateSchema } from '~/lib/schemas/escrow.schemas'
+import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(
 	req: NextRequest,
 	{ params }: { params: Promise<{ transactionHash: string }> },
 ) {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
 		const transactionHash = (await params).transactionHash
 		const body = await req.json()
 		const validation = validateRequest(escrowFundUpdateSchema, body)
 		if (!validation.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.fund.update',
+				resourceType: 'transaction',
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
 			return validation.response
 		}
 		const { escrowId, status } = validation.data
@@ -66,6 +79,16 @@ export async function POST(
 			}
 		}
 
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.fund.update',
+			resourceType: 'transaction',
+			resourceId: transactionHash,
+			status: 'success',
+			durationMs: Date.now() - startTime,
+			metadata: { escrowId, newStatus: status },
+		})
+
 		return NextResponse.json(
 			{ message: 'Transaction updated', data },
 			{ status: 200 },
@@ -73,6 +96,15 @@ export async function POST(
 	} catch (error) {
 		if (error instanceof AppError) {
 			console.error('Escrow Fund error:', error)
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.fund.update',
+				resourceType: 'transaction',
+				status: 'failure',
+				errorCode: String(error.statusCode),
+				durationMs: Date.now() - startTime,
+				metadata: { error: error.message },
+			})
 			return NextResponse.json(
 				{
 					error: error.message,
@@ -83,6 +115,15 @@ export async function POST(
 		}
 
 		console.error('Internal server error during escrow fund:', error)
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.fund.update',
+			resourceType: 'transaction',
+			status: 'failure',
+			errorCode: '500',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 		return NextResponse.json(
 			{
 				error:

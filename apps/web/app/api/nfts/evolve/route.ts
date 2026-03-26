@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import {
 	buildNFTMetadata,
 	determineTier,
@@ -13,6 +14,7 @@ import {
 	uploadMetadataToIPFS,
 } from '~/lib/services/pinata'
 import { evolveNftSchema } from '~/lib/schemas/nft.schemas'
+import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 import { IMPACT_SCORE_WEIGHTS } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
@@ -41,6 +43,10 @@ function getRedis(): Redis | null {
  * Body: { user_id?: string }
  */
 export async function POST(req: NextRequest) {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
@@ -49,6 +55,14 @@ export async function POST(req: NextRequest) {
 		const body = await req.json()
 		const validation = validateRequest(evolveNftSchema, body)
 		if (!validation.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'nft.evolve',
+				resourceType: 'nft',
+				actorId: session.user.id,
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
 			return validation.response
 		}
 		const sessionUserId = session.user.id
@@ -262,6 +276,22 @@ export async function POST(req: NextRequest) {
 			to: newTier,
 		})
 
+		await auditLogger.log({
+			correlationId,
+			operation: 'nft.evolve',
+			resourceType: 'nft',
+			resourceId: existingNFT.id,
+			actorId: session.user.id,
+			status: 'success',
+			durationMs: Date.now() - startTime,
+			metadata: {
+				tokenId: existingNFT.token_id,
+				previousTier: currentTier,
+				newTier,
+				impactScore: stats.impactScore,
+			},
+		})
+
 		return NextResponse.json({
 			success: true,
 			evolved: true,
@@ -273,6 +303,15 @@ export async function POST(req: NextRequest) {
 		})
 	} catch (error) {
 		console.error('Error in POST /api/nfts/evolve:', error)
+		await auditLogger.log({
+			correlationId,
+			operation: 'nft.evolve',
+			resourceType: 'nft',
+			status: 'failure',
+			errorCode: '500',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

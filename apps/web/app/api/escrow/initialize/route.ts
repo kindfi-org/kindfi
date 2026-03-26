@@ -2,22 +2,35 @@ import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import { escrowInitializeSchema } from '~/lib/schemas/escrow.schemas'
+import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
 		const body = await req.json()
 		const validation = validateRequest(escrowInitializeSchema, body)
 		if (!validation.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.initialize',
+				resourceType: 'escrow',
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
 			return validation.response
 		}
 		const initializationData = body
 
 		/* 2. Create the escrow contract through the initialize escrow - Trustless Work API
-		- The Trustless Work API will return an unsigned transaction XDR	
+		- The Trustless Work API will return an unsigned transaction XDR
 		*/
 		const responseCreateEscrowRequest = await createEscrowRequest({
 			action: 'initiate',
@@ -65,6 +78,16 @@ export async function POST(req: NextRequest) {
 				.update({ current_state: 'INITIALIZED' })
 				.eq('id', dbResult.id)
 
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.initialize',
+				resourceType: 'escrow',
+				resourceId: dbResult.id,
+				status: 'success',
+				durationMs: Date.now() - startTime,
+				metadata: { contractAddress: response.contract_id },
+			})
+
 			return NextResponse.json(
 				{
 					escrowId: dbResult.id,
@@ -77,6 +100,15 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		if (error instanceof AppError) {
 			console.error('Escrow initialization error:', error)
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.initialize',
+				resourceType: 'escrow',
+				status: 'failure',
+				errorCode: String(error.statusCode),
+				durationMs: Date.now() - startTime,
+				metadata: { error: error.message },
+			})
 			return NextResponse.json(
 				{
 					error: (error as AppError).message,
@@ -87,6 +119,15 @@ export async function POST(req: NextRequest) {
 		}
 
 		console.error('Internal server error during escrow initialization:', error)
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.initialize',
+			resourceType: 'escrow',
+			status: 'failure',
+			errorCode: '500',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 		return NextResponse.json(
 			{
 				error: 'Internal server error during escrow initialization',
