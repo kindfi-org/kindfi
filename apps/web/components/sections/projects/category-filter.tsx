@@ -105,7 +105,7 @@ export function CategoryFilter({
 			updateThumbPosition()
 		}
 
-		container.addEventListener('scroll', handleScroll)
+		container.addEventListener('scroll', handleScroll, { passive: true })
 		window.addEventListener('resize', updateThumbSize)
 
 		// Initial calculations
@@ -157,7 +157,7 @@ export function CategoryFilter({
 		}
 
 		if (isDragging) {
-			window.addEventListener('mousemove', handleMouseMove)
+			window.addEventListener('mousemove', handleMouseMove, { passive: true })
 			window.addEventListener('mouseup', handleMouseUp)
 		}
 
