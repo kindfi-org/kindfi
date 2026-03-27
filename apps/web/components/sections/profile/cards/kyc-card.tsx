@@ -9,7 +9,7 @@ import {
 	Sparkles,
 	XCircle,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -40,10 +40,15 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 	}, [refreshStatus])
 
 	// Listen for KYC status update events and refresh when callback completes
+	const refreshRef = useRef(refreshStatus)
+
+	useEffect(() => {
+		refreshRef.current = refreshStatus
+	})
+
 	useEffect(() => {
 		const handleStatusUpdate = () => {
-			// Refresh status immediately when callback completes
-			refreshStatus()
+			refreshRef.current()
 		}
 
 		window.addEventListener('kyc-status-updated', handleStatusUpdate)
@@ -51,7 +56,7 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 		return () => {
 			window.removeEventListener('kyc-status-updated', handleStatusUpdate)
 		}
-	}, [refreshStatus])
+	}, [])
 
 	// Refresh when shouldRefresh prop changes (triggered by parent after callback)
 	useEffect(() => {
