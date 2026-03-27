@@ -41,10 +41,7 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 
 	// Listen for KYC status update events and refresh when callback completes
 	const refreshRef = useRef(refreshStatus)
-
-	useEffect(() => {
-		refreshRef.current = refreshStatus
-	})
+	refreshRef.current = refreshStatus
 
 	useEffect(() => {
 		const handleStatusUpdate = () => {
