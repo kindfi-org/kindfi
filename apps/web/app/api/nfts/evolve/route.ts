@@ -1,8 +1,8 @@
-import { Redis } from '@upstash/redis'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import {
 	buildNFTMetadata,
@@ -19,21 +19,6 @@ import { validateRequest } from '~/lib/utils/validation'
 import { IMPACT_SCORE_WEIGHTS } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
-// --- Rate Limiting Configuration ---
-const rateLimitMaxRequests = 3
-const rateLimitWindowSeconds = 60
-
-let redis: Redis | null = null
-function getRedis(): Redis | null {
-	if (redis) return redis
-	try {
-		redis = Redis.fromEnv()
-		return redis
-	} catch {
-		return null
-	}
-}
-
 /**
  * POST /api/nfts/evolve
  *
@@ -42,7 +27,7 @@ function getRedis(): Redis | null {
  *
  * Body: { user_id?: string }
  */
-export async function POST(req: NextRequest) {
+async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 	const auditLogger = new AuditLogger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
@@ -90,44 +75,6 @@ export async function POST(req: NextRequest) {
 			userId = sessionUserId
 		}
 
-
-		// --- Rate Limiting via Upstash Redis ---
-		try {
-			const redisClient = getRedis()
-			if (redisClient) {
-				const rateLimitKey = `rate_limit:nft_evolve:${session.user.id}`
-				const MAX_REQUESTS = rateLimitMaxRequests
-				const WINDOW_SECONDS = rateLimitWindowSeconds
-
-				const requests = (await redisClient.eval(
-					`local count = redis.call("INCR", KEYS[1])
-                 if count == 1 then
-                   redis.call("EXPIRE", KEYS[1], ARGV[1])
-                 end
-                 return count`,
-					[rateLimitKey],
-					[WINDOW_SECONDS],
-				)) as number
-
-				if (requests && requests > MAX_REQUESTS) {
-					console.warn(
-						'[Rate Limit Exceeded] User attempted to evolve NFT too frequently.',
-					)
-					return NextResponse.json(
-						{ error: 'Too many requests. Please try again later.' },
-						{
-							status: 429,
-							headers: {
-								'Retry-After': WINDOW_SECONDS.toString(),
-							},
-						},
-					)
-				}
-			}
-		} catch (redisError) {
-			console.error('[Rate Limiting] Redis error:', redisError)
-		}
-		// --- End Rate Limiting ---
 
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
@@ -381,3 +328,14 @@ async function getUserStats(
 		referralCount,
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: async (req) => {
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? req.ip ?? 'anonymous'
+		},
+	},
+	evolveHandler,
+)
