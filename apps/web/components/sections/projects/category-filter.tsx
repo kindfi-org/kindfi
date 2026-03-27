@@ -47,7 +47,6 @@ export function CategoryFilter({
 
 	// DEBUG: Log selected categories to see what's being tracked
 	useEffect(() => {
-		console.log('Selected Categories:', selectedCategories)
 	}, [selectedCategories])
 
 	// Calculate how far right the thumb can go
@@ -173,7 +172,6 @@ export function CategoryFilter({
 		const isSelected = selectedCategories.some(
 			(selected) => selected.toLowerCase() === category.toLowerCase(),
 		)
-		console.log(`Category: ${category}, Selected: ${isSelected}`)
 		return isSelected
 	}
 
@@ -227,7 +225,6 @@ export function CategoryFilter({
 										: `bg-gray-100 text-gray-600 hover:${color}`
 								}`}
 								onClick={() => {
-									console.log(`Clicked: ${category}`)
 									onCategoryToggle(category)
 								}}
 								aria-pressed={isSelected}

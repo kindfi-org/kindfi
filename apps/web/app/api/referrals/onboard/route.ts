@@ -134,10 +134,6 @@ export async function POST(req: NextRequest) {
 							contractResult.error,
 						)
 					} else {
-						console.log(
-							'[Referral Onboard API] On-chain mark_onboarded succeeded, reward:',
-							contractResult.rewardPoints,
-						)
 					}
 				} catch (err) {
 					console.error(

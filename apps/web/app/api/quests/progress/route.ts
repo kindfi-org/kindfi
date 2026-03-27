@@ -86,13 +86,6 @@ export async function POST(req: NextRequest) {
 			error?: string
 		} | null = null
 
-		console.log('[Quest API] Contract call conditions:', {
-			hasStellarAddress: !!stellarAddress,
-			hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
-			stellarAddress: stellarAddress || 'N/A',
-			questId: quest_id,
-			progress_value,
-		})
 
 		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			try {
@@ -102,13 +95,8 @@ export async function POST(req: NextRequest) {
 					process.env.QUEST_CONTRACT_ADDRESS ||
 					process.env.NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS
 
-				console.log(
-					'[Quest API] Quest contract address:',
-					questContractAddress || 'NOT SET',
-				)
 
 				if (questContractAddress) {
-					console.log('[Quest API] Calling quest contract...')
 					contractResult = await contractService.updateQuestProgress(
 						questContractAddress,
 						{
@@ -118,7 +106,6 @@ export async function POST(req: NextRequest) {
 						},
 					)
 
-					console.log('[Quest API] Contract call result:', contractResult)
 
 					if (!contractResult.success) {
 						console.error(
@@ -127,9 +114,6 @@ export async function POST(req: NextRequest) {
 						)
 						// Continue with database update even if contract call fails
 					} else {
-						console.log(
-							'[Quest API] Successfully updated quest progress on-chain',
-						)
 					}
 				} else {
 					console.warn('[Quest API] Quest contract address not configured')
@@ -139,13 +123,6 @@ export async function POST(req: NextRequest) {
 				// Continue with database update even if contract call fails
 			}
 		} else {
-			console.log(
-				'[Quest API] Skipping contract call - missing requirements:',
-				{
-					hasStellarAddress: !!stellarAddress,
-					hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
-				},
-			)
 		}
 
 		if (!quest.is_active) {

@@ -21,6 +21,7 @@
 				"allowTaggedTemplates": false
 			}
 		],
-		"react/no-unescaped-entities": "warn"
+		"react/no-unescaped-entities": "warn",
+		"no-console": ["warn", { "allow": ["warn", "error"] }]
 	}
 }

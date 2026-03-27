@@ -187,7 +187,6 @@ export async function POST(req: NextRequest) {
 			)
 			imageUri = uploadResult.ipfsUrl
 			imageIpfsHash = uploadResult.ipfsHash
-			console.log('[NFT Mint] Image uploaded to IPFS:', imageUri)
 		} catch (err) {
 			console.warn(
 				'[NFT Mint] Failed to upload image to Pinata, using placeholder:',
@@ -205,7 +204,6 @@ export async function POST(req: NextRequest) {
 				`kindfi-kinder-metadata-${userId.slice(0, 8)}`,
 			)
 			metadataIpfsHash = metaResult.ipfsHash
-			console.log('[NFT Mint] Metadata uploaded to IPFS:', metaResult.ipfsUrl)
 		} catch (err) {
 			console.warn('[NFT Mint] Failed to upload metadata to Pinata:', err)
 		}
@@ -261,12 +259,6 @@ export async function POST(req: NextRequest) {
 			})
 		}
 
-		console.log('[NFT Mint] Successfully minted NFT:', {
-			tokenId,
-			tier,
-			userId,
-			stellarAddress,
-		})
 
 		await auditLogger.log({
 			correlationId,

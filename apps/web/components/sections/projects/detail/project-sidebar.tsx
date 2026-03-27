@@ -299,7 +299,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					text: project.description ?? '',
 					url: window.location.href,
 				})
-				.catch((error) => console.log('Error sharing', error))
+				.catch(() => { /* sharing error ignored */ })
 		} else {
 			navigator.clipboard.writeText(window.location.href)
 			toast('Link copied to clipboard ✅', {

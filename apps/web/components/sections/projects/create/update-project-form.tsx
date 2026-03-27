@@ -70,7 +70,6 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 		if (project.slug) {
 			data.slug = project.slug
 		}
-		console.log('Updating project:', data)
 		await updateProject(data, {
 			onSuccess: () => {
 				form.reset(data)

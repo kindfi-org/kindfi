@@ -58,7 +58,6 @@ export function HowItWorks() {
 							key={model.id}
 							{...model}
 							onLearnMore={() =>
-								console.log(`Learn more about model ${model.variant}`)
 							}
 						/>
 					))}

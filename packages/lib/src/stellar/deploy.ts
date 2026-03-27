@@ -51,7 +51,6 @@ export async function handleDeploy(params: {
 	const { credentialId, contractSalt } = params
 
 	try {
-		console.log('🚀 Starting Stellar account deployment for:', credentialId)
 
 		// Pre-calculate the contract address
 		const contractAddress = generateStellarAddress(contractSalt)
@@ -59,7 +58,6 @@ export async function handleDeploy(params: {
 		// TODO: Implement actual deployment logic using Passkey Kit
 		// This should use the official Passkey Kit library instead of our custom implementation
 		// For now, return the pre-calculated address
-		console.log('✅ Generated contract address:', contractAddress)
 
 		return {
 			address: contractAddress,

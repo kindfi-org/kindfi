@@ -29,12 +29,6 @@ export async function POST(req: NextRequest) {
 		const rpId = getRpIdFromOrigin(origin)
 		const rpName = getRpNameFromOrigin(origin)
 
-		console.log('🔐 Generating registration options:', {
-			origin,
-			rpId,
-			rpName,
-			identifier,
-		})
 
 		// Get user from database (or create empty credentials array if new user)
 		const userResponse = await getUser({

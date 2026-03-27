@@ -23,9 +23,6 @@ export async function POST(req: NextRequest) {
 		// KYC server URL - use environment variable or default to localhost
 		const kycServerUrl = config.externalApis.kyc.baseUrl
 
-		console.log('🔐 Registering account in auth-controller via KYC server')
-		console.log('   Account:', accountAddress)
-		console.log('   KYC Server:', kycServerUrl)
 
 		// Call KYC server's create-passkey-account endpoint
 		// which handles the auth-controller registration
@@ -51,8 +48,6 @@ export async function POST(req: NextRequest) {
 
 		const result = await response.json()
 
-		console.log('✅ Account registered successfully')
-		console.log('   Transaction hash:', result.data?.transactionHash)
 
 		return NextResponse.json({
 			success: true,
