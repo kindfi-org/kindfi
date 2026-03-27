@@ -18,7 +18,7 @@ export function useGlowEffect() {
 			card.style.setProperty('--yPos', `${y}px`)
 		}
 
-		card.addEventListener('mousemove', handleMouseMove)
+		card.addEventListener('mousemove', handleMouseMove, { passive: true })
 
 		return () => {
 			card.removeEventListener('mousemove', handleMouseMove)
