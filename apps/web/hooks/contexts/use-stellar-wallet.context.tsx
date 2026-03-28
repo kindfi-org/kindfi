@@ -40,10 +40,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		// Initialize StellarWalletsKit with custom theme
 		try {
 			const modules = defaultModules()
-			console.log(
-				'🔌 Initializing Stellar Wallets Kit with modules:',
-				modules.map((m) => m.productName),
-			)
 
 			StellarWalletsKit.init({
 				modules,
@@ -74,7 +70,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 			setIsInitialized(true)
-			console.log('✅ Stellar Wallets Kit initialized successfully')
 
 			// Listen to state updates
 			const unsubscribeState = StellarWalletsKit.on(
@@ -154,20 +149,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		try {
-			console.log('🔌 Opening wallet connection modal...')
 			// Refresh supported wallets before showing modal to ensure latest availability
 			const supportedWallets = await StellarWalletsKit.refreshSupportedWallets()
-			console.log(
-				'📋 Available wallets:',
-				supportedWallets.map(
-					(w: { name: string; isAvailable: boolean }) =>
-						`${w.name} (${w.isAvailable ? 'available' : 'unavailable'})`,
-				),
-			)
 
 			const { address: newAddress } = await StellarWalletsKit.authModal()
 			if (newAddress) {
-				console.log('✅ Wallet connected:', newAddress)
 				setAddress(newAddress)
 				localStorage.setItem('stellar_wallet_address', newAddress)
 				// Try to get wallet name from the selected wallet

@@ -183,7 +183,6 @@ export const verifyRegistration = async ({
 			 * This creates the user's Stellar account as a smart contract
 			 */
 			try {
-				console.log('🚀 Deploying smart wallet for new passkey:', credential.id)
 
 				// Extract public key from attestation response
 				const publicKeyBase64 = credential.publicKey.toBase64()
@@ -199,7 +198,6 @@ export const verifyRegistration = async ({
 
 				contractAddress = deploymentResult.address
 
-				console.log('✅ Smart wallet deployed:', contractAddress)
 			} catch (error) {
 				console.error('❌ Failed to deploy smart wallet:', error)
 				throw new InAppError(

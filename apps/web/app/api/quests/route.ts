@@ -217,7 +217,6 @@ export async function POST(req: NextRequest) {
 
 		if (questContractAddress) {
 			try {
-				console.log('[Quest API] Syncing quest to on-chain contract...')
 
 				// Use admin private key if available, otherwise use recorder keypair
 				// (assuming recorder has admin role granted)
@@ -246,10 +245,6 @@ export async function POST(req: NextRequest) {
 					)
 
 					if (onChainResult.success) {
-						console.log(
-							'[Quest API] Quest synced to on-chain successfully',
-							onChainResult,
-						)
 					} else {
 						console.error(
 							'[Quest API] Failed to sync quest to on-chain:',
@@ -369,9 +364,6 @@ async function syncQuestProgress(
 
 		if (inserted) {
 			progressMap.set(quest.quest_id, inserted)
-			console.log(
-				`[Quests] Backfilled quest ${quest.quest_id}: ${progressValue}/${quest.target_value} (completed: ${is_completed})`,
-			)
 		}
 	}
 }

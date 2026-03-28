@@ -229,18 +229,12 @@ export class SmartAccountKitService {
 					if (kitModule.MemoryStorage) {
 						storageAdapter = new kitModule.MemoryStorage()
 						storageType = 'MemoryStorage'
-						console.log(
-							'📦 Using MemoryStorage for server-side Smart Account Kit',
-						)
 					}
 				} else {
 					// Client-side: use IndexedDBStorage for persistence
 					if (kitModule.IndexedDBStorage) {
 						storageAdapter = new kitModule.IndexedDBStorage()
 						storageType = 'IndexedDBStorage'
-						console.log(
-							'📦 Using IndexedDBStorage for client-side Smart Account Kit',
-						)
 					}
 				}
 
@@ -283,22 +277,6 @@ export class SmartAccountKitService {
 				this.kit = new kitModule.SmartAccountKit(kitConfig)
 				this.isInitialized = true
 
-				console.log('✅ Smart Account Kit initialized', {
-					rpcUrl: this.config.rpcUrl,
-					networkPassphrase:
-						this.config.networkPassphrase.substring(0, 20) + '...',
-					hasAccountWasmHash: !!this.config.accountWasmHash,
-					hasWebAuthnVerifier: !!this.config.webauthnVerifierAddress,
-					hasEd25519Verifier: !!this.config.ed25519VerifierAddress,
-					hasNativeTokenContract: !!this.config.nativeTokenContract,
-					hasRelayerUrl: !!this.config.relayerUrl,
-					rpId: this.config.rpId,
-					rpName: this.config.rpName,
-					storageType,
-					isServerSide,
-					currentOrigin:
-						typeof window !== 'undefined' ? window.location.origin : 'N/A',
-				})
 			} catch (error) {
 				console.error('❌ Failed to initialize Smart Account Kit:', error)
 				throw error
@@ -339,12 +317,6 @@ export class SmartAccountKitService {
 		await this.ensureReady()
 
 		try {
-			console.log('📝 Creating wallet with Smart Account Kit:', {
-				appName,
-				userName,
-				autoSubmit: options?.autoSubmit ?? true,
-				hasKit: !!this.kit,
-			})
 
 			const result = await this.kit.createWallet(appName, userName, {
 				autoSubmit: options?.autoSubmit ?? true,
@@ -353,10 +325,6 @@ export class SmartAccountKitService {
 					options?.nativeTokenContract || this.config.nativeTokenContract,
 			})
 
-			console.log('✅ Wallet creation result:', {
-				contractId: result.contractId,
-				credentialId: result.credentialId,
-			})
 
 			return {
 				contractId: result.contractId,

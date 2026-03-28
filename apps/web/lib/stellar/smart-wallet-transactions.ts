@@ -66,12 +66,6 @@ export class SmartWalletTransactionService {
 	async transferXLM(params: TransferXLMParams): Promise<TransactionChallenge> {
 		const { from, to, amount, sponsorFees = false } = params
 
-		console.log('💸 Building XLM transfer transaction:', {
-			from,
-			to,
-			amount: `${amount / 10_000_000} XLM`,
-			sponsorFees,
-		})
 
 		// Build contract invocation for transfer_xlm
 		const contract = new Contract(from)
@@ -100,13 +94,6 @@ export class SmartWalletTransactionService {
 	): Promise<TransactionChallenge> {
 		const { from, to, tokenAddress, amount, sponsorFees = false } = params
 
-		console.log('💸 Building token transfer transaction:', {
-			from,
-			to,
-			token: tokenAddress,
-			amount,
-			sponsorFees,
-		})
 
 		// Build contract invocation for transfer_token
 		const contract = new Contract(from)
@@ -142,12 +129,6 @@ export class SmartWalletTransactionService {
 			sponsorFees = false,
 		} = params
 
-		console.log('🔧 Building contract invocation transaction:', {
-			from,
-			contract: contractAddress,
-			function: functionName,
-			sponsorFees,
-		})
 
 		// Convert arguments to ScVal format
 		const scArgs = args.map((arg) => {
@@ -195,7 +176,6 @@ export class SmartWalletTransactionService {
 	 * @returns Balances for XLM and tokens
 	 */
 	async getBalances(smartWalletAddress: string): Promise<SmartWalletBalances> {
-		console.log('📊 Fetching balances for:', smartWalletAddress)
 
 		try {
 			// Get Native XLM SAC contract address
@@ -203,8 +183,6 @@ export class SmartWalletTransactionService {
 			const xlmSacAddress = nativeAsset.contractId(this.networkPassphrase)
 			const xlmSacContract = new Contract(xlmSacAddress)
 
-			console.log('🔍 Querying XLM SAC:', xlmSacAddress)
-			console.log('   For address:', smartWalletAddress)
 
 			// Use funding account for simulation (required for read operations)
 			const sourceAccount = this.fundingKeypair
@@ -235,7 +213,6 @@ export class SmartWalletTransactionService {
 				const retval = simulation.result.retval
 				const nativeValue = scValToNative(retval)
 				xlmBalance = nativeValue.toString()
-				console.log('✅ Balance retrieved:', xlmBalance, 'stroops')
 			} else if (Api.isSimulationError(simulation)) {
 				console.warn('⚠️ Simulation error:', simulation.error)
 				// Return 0 balance if simulation fails (contract not funded yet)
@@ -285,7 +262,6 @@ export class SmartWalletTransactionService {
 		webAuthnSignature: WebAuthnSignatureData
 		publicKey: Uint8Array
 	}): Promise<{ transactionHash: string; status: string }> {
-		console.log('🚀 Submitting transaction via Channels service...')
 		console.warn(
 			'⚠️ submitTransactionWithWebAuthn requires Smart Account Kit SDK. ' +
 				'Use SmartAccountKitService.signAndSubmit() instead, or use legacy submitTransaction() method.',
@@ -307,7 +283,6 @@ export class SmartWalletTransactionService {
 	 * @returns Transaction hash
 	 */
 	async submitTransaction(signedTransaction: Transaction): Promise<string> {
-		console.log('🚀 Submitting signed transaction...')
 
 		const result = await this.server.sendTransaction(signedTransaction)
 
@@ -315,7 +290,6 @@ export class SmartWalletTransactionService {
 			throw new Error(`Transaction failed: ${JSON.stringify(result)}`)
 		}
 
-		console.log('⏳ Waiting for transaction confirmation...')
 		let attempts = 0
 		const maxAttempts = 120
 
@@ -327,7 +301,6 @@ export class SmartWalletTransactionService {
 				const txResult = await this.server.getTransaction(result.hash)
 
 				if (txResult.status === Api.GetTransactionStatus.SUCCESS) {
-					console.log('✅ Transaction successful:', result.hash)
 					return result.hash
 				}
 
@@ -375,7 +348,6 @@ export class SmartWalletTransactionService {
 			transaction.sign(this.fundingKeypair)
 		}
 
-		console.log('🔄 Simulating transaction to extract signature_payload...')
 
 		// Simulate to get auth entry with signature_payload
 		const simulation = await this.server.simulateTransaction(transaction, {
@@ -394,11 +366,6 @@ export class SmartWalletTransactionService {
 		const validityWindow = 300 // ~25 minutes (300 ledgers × 5 seconds)
 		const signatureExpirationLedger = latestLedger.sequence + validityWindow
 
-		console.log('📅 Setting signature expiration:', {
-			currentLedger: latestLedger.sequence,
-			validityWindow,
-			signatureExpirationLedger,
-		})
 
 		// CRITICAL FIX: Modify the simulation result BEFORE assembling
 		// The simulation.result.auth contains the auth entries that will be used
@@ -411,10 +378,6 @@ export class SmartWalletTransactionService {
 			// Get the first auth entry from simulation
 			const simAuthEntry = simulation.result.auth[0]
 
-			console.log('🔍 PRE-MODIFICATION: Original simulation auth entry:', {
-				hasAuth: true,
-				credentialsType: simAuthEntry.credentials().switch().name,
-			})
 
 			// Check if it's an address credentials type
 			if (
@@ -423,12 +386,6 @@ export class SmartWalletTransactionService {
 			) {
 				const addressCredentials = simAuthEntry.credentials().address()
 
-				console.log('🔍 PRE-MODIFICATION: Simulation auth entry values:', {
-					nonce: addressCredentials.nonce().toString(),
-					signatureExpirationLedger: addressCredentials
-						.signatureExpirationLedger()
-						.toString(),
-				})
 
 				// Create NEW credentials with valid expiration
 				const newCredentials = new xdr.SorobanAddressCredentials({
@@ -448,54 +405,19 @@ export class SmartWalletTransactionService {
 				// Replace the auth entry in the simulation result
 				simulation.result.auth[0] = newAuthEntry
 
-				console.log(
-					'✅ Updated simulation auth entry with signatureExpirationLedger:',
-					signatureExpirationLedger,
-				)
 
 				// VERIFY: Check that modification worked
 				const verifyCredentials = simulation.result.auth[0]
 					.credentials()
 					.address()
-				console.log(
-					'🔍 POST-MODIFICATION: Simulation auth entry (should match new value):',
-					{
-						nonce: verifyCredentials.nonce().toString(),
-						signatureExpirationLedger: verifyCredentials
-							.signatureExpirationLedger()
-							.toString(),
-						expectedExpiration: signatureExpirationLedger,
-						matches:
-							verifyCredentials.signatureExpirationLedger().toString() ===
-							signatureExpirationLedger.toString(),
-					},
-				)
 			}
 		}
 
 		// NOW assemble the transaction with our modified simulation
 		// This will bake in the correct signatureExpirationLedger
-		console.log('🔧 Calling assembleTransaction() with modified simulation...')
 		const assembledTx = assembleTransaction(transaction, simulation)
 			// .setSorobanData(sorobanData)
 			.build()
-		console.log('✅ Transaction assembled successfully', {
-			assembledTx: {
-				...assembledTx,
-				xdr: assembledTx.toXDR(),
-				signatures: assembledTx.signatures.map((s) => s.toXDR('base64')),
-				signatureBase: assembledTx.signatureBase().toString('base64'),
-				operations: assembledTx.operations.map((opt) => ({
-					...opt,
-				})),
-				source: assembledTx.source,
-				hash: assembledTx.hash().toString('base64'),
-				sequence: assembledTx.sequence,
-				fee: assembledTx.fee,
-				ledgerBounds: assembledTx.ledgerBounds,
-				memo: assembledTx.memo.toXDRObject().toXDR('base64'),
-			},
-		})
 
 		// IMPORTANT: Extract signature_payload from the SIMULATION transaction
 		// The assembly process will have the definitive auth entry values, so we must use the values linked to the transaction (simulation)
@@ -520,21 +442,9 @@ export class SmartWalletTransactionService {
 		).toString('base64url')
 		const txHash = assembledTx.hash()
 
-		console.log('✅ Transaction prepared for signing')
-		console.log(
-			'🔑 Signature Payload (hex):',
-			signaturePayloadResult.payloadHex,
-		)
-		console.log('   nonce:', signaturePayloadResult.nonce)
-		console.log(
-			'   signatureExpirationLedger:',
-			signaturePayloadResult.signatureExpirationLedger,
-		)
-		console.log('📋 Transaction hash:', txHash.toString('hex'))
 
 		// DIAGNOSTIC: Verify XDR encoding contains correct values
 		const transactionXDR = assembledTx.toXDR()
-		console.log('🔍 XDR CHECK: Verifying XDR encoding...')
 		try {
 			const xdrCheck = TransactionBuilder.fromXDR(
 				transactionXDR,
@@ -550,16 +460,6 @@ export class SmartWalletTransactionService {
 					xdr.SorobanCredentialsType.sorobanCredentialsAddress()
 				) {
 					const checkCredentials = checkAuthEntry.credentials().address()
-					console.log('🔍 XDR CHECK: Decoded values from returned XDR:', {
-						nonce: checkCredentials.nonce().toString(),
-						signatureExpirationLedger: checkCredentials
-							.signatureExpirationLedger()
-							.toString(),
-						expectedExpiration: signatureExpirationLedger,
-						matches:
-							checkCredentials.signatureExpirationLedger().toString() ===
-							signatureExpirationLedger.toString(),
-					})
 
 					if (
 						checkCredentials.signatureExpirationLedger().toString() !==

@@ -37,12 +37,6 @@ export async function POST(req: NextRequest) {
 		// Use the origin as expectedOrigin (it's already validated by getRpIdFromOrigin)
 		const expectedOrigin = origin
 
-		console.log('🔐 Verifying registration:', {
-			origin,
-			rpId,
-			expectedOrigin,
-			identifier,
-		})
 
 		// Get challenge and user in parallel
 		const [expectedChallenge, userResponse] = await Promise.all([
@@ -102,13 +96,6 @@ export async function POST(req: NextRequest) {
 						throw new Error(errorMsg)
 					}
 
-					console.log('📋 Deployment configuration:', {
-						hasFundingAccount: !!config.stellar.fundingAccount,
-						factoryContractId: config.stellar.factoryContractId,
-						rpcUrl: config.stellar.rpcUrl,
-						networkPassphrase:
-							config.stellar.networkPassphrase.substring(0, 20) + '...',
-					})
 
 					const stellarService = new StellarPasskeyService(
 						config.stellar.networkPassphrase,
@@ -120,14 +107,6 @@ export async function POST(req: NextRequest) {
 					const publicKeyBase64 = Buffer.from(credential.publicKey).toString(
 						'base64',
 					)
-					console.log(
-						'🚀 Deploying Smart Account with StellarPasskeyService...',
-					)
-					console.log(
-						'   Credential ID:',
-						credential.id.substring(0, 20) + '...',
-					)
-					console.log('   Public key length:', publicKeyBase64.length)
 
 					const deploymentResult = await stellarService.deployPasskeyAccount({
 						credentialId: credential.id,
@@ -136,34 +115,19 @@ export async function POST(req: NextRequest) {
 					})
 
 					smartAccountAddress = deploymentResult.address
-					console.log(
-						'✅ Smart Account created with custom contracts:',
-						smartAccountAddress,
-					)
 				} catch (deploymentError) {
 					// Smart Account deployment failed
 					const errorMessage =
 						deploymentError instanceof Error
 							? deploymentError.message
 							: String(deploymentError)
-					const errorStack =
-						deploymentError instanceof Error ? deploymentError.stack : undefined
 
-					console.error('❌ Smart Account deployment failed:', {
-						error: errorMessage,
-						stack: errorStack,
-						credentialId: credential.id,
-					})
+					console.error('❌ Smart Account deployment failed:', { error: errorMessage })
 
 					// Log detailed error for debugging
 					console.error('Smart Account deployment error details:', {
 						fundingAccount: config.stellar.fundingAccount ? 'set' : 'missing',
-						factoryContractId: config.stellar.factoryContractId
-							? 'set'
-							: 'missing',
-						rpcUrl: config.stellar.rpcUrl,
-						networkPassphrase:
-							config.stellar.networkPassphrase.substring(0, 20) + '...',
+						factoryContractId: config.stellar.factoryContractId ? 'set' : 'missing',
 					})
 
 					// For now, we'll continue without Smart Account creation
@@ -215,10 +179,6 @@ export async function POST(req: NextRequest) {
 
 		if (smartAccountAddress) {
 			response.smartAccountAddress = smartAccountAddress
-			console.log(
-				'✅ Registration complete with Smart Account:',
-				smartAccountAddress,
-			)
 		} else if (verification.verified) {
 			// Registration verified but Smart Account creation failed
 			const warningMessage =
@@ -239,7 +199,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(response)
 	} catch (error) {
-		console.error('❌ Error verifying registration:', error)
+		console.error('❌ Error verifying registration:', error instanceof Error ? error.message : String(error))
 		return NextResponse.json(
 			{
 				error: 'Failed to verify registration',

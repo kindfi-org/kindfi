@@ -53,7 +53,6 @@ export function ProjectPitchForm({
 			projectSlug,
 		}
 
-		console.log('Pitch data:', data)
 
 		await savePitch(payload, {
 			onSuccess: () => {

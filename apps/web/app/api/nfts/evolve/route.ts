@@ -180,12 +180,6 @@ export async function POST(req: NextRequest) {
 			})
 		}
 
-		console.log('[NFT Evolve] Upgrading tier:', {
-			userId,
-			from: currentTier,
-			to: newTier,
-			impactScore: stats.impactScore,
-		})
 
 		// Generate and upload new tier image
 		let imageUri = ''
@@ -270,11 +264,6 @@ export async function POST(req: NextRequest) {
 			console.error('[NFT Evolve] Database update failed:', dbError)
 		}
 
-		console.log('[NFT Evolve] Successfully evolved NFT:', {
-			tokenId: existingNFT.token_id,
-			from: currentTier,
-			to: newTier,
-		})
 
 		await auditLogger.log({
 			correlationId,

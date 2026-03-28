@@ -41,10 +41,6 @@ export async function POST(req: NextRequest) {
 		const verificationJSONTyped = verificationJSON as Awaited<
 			ReturnType<typeof verifyAuthentication>
 		>
-		console.log(
-			'verificationJSON: WebAuthn Key Verified. user is now authored to sign. getting attestation public key',
-			{ verificationJSON: verificationJSONTyped },
-		)
 
 		// Get configuration
 		const server = new Server(appConfig.stellar.rpcUrl)
@@ -73,7 +69,6 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		console.log('📤 Assembling and submitting transaction')
 
 		// Parse the prepared transaction
 		// CRITICAL: The transaction from prepare is ALREADY assembled after simulation
@@ -97,13 +92,11 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		console.log('✅ Loaded pre-assembled transaction from prepare endpoint')
 
 		const authEntries =
 			(transaction.operations[0] as unknown as Api.SimulateHostFunctionResult)
 				.auth || []
 
-		console.log('📝 Auth entries count:', authEntries.length)
 
 		if (authEntries.length) {
 			const publicKeyArray =
@@ -192,7 +185,6 @@ export async function POST(req: NextRequest) {
 						xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
 					)
 
-					console.log('✅ WebAuthn signature added to auth entry')
 					break
 				}
 			}
@@ -203,16 +195,12 @@ export async function POST(req: NextRequest) {
 		// 1. assembleTransaction() in prepare creates a new transaction (stripping signatures)
 		// 2. We modified the auth entry above, which changes the transaction hash
 		// 3. The funding account (source) signature is required or we may experience txBadAuth errors
-		console.log('📝 Transaction ready for submission')
 
 		// Re-sign with funding account (as it is the source/fee payer)
-		console.log('✍️  Signing transaction with funding account...')
 		transaction.sign(fundingKeypair)
 
-		console.log('   Hash:', transaction.hash().toString('hex'))
 
 		// Submit to network
-		console.log('🚀 Submitting to Stellar network...')
 		const submitResult = await server.sendTransaction(transaction)
 
 		if (submitResult.status === 'ERROR') {
@@ -223,8 +211,6 @@ export async function POST(req: NextRequest) {
 		}
 
 		const txHash = submitResult.hash
-		console.log('Hash:', txHash)
-		console.log(`🔗 https://stellar.expert/explorer/testnet/tx/${txHash}`)
 
 		if (submitResult?.errorResult) {
 			console.error('❌ Submit error (false positive):', submitResult)
@@ -233,7 +219,6 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		console.log('✅ Transaction submitted successfully')
 		return NextResponse.json({
 			success: true,
 			data: {

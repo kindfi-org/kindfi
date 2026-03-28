@@ -41,9 +41,6 @@ async function main() {
 	const adminKeypair = Keypair.fromSecret(adminSecret)
 	const recorderAddress = Keypair.fromSecret(recorderSecret).publicKey()
 
-	console.log('Admin address:   ', adminKeypair.publicKey())
-	console.log('Recorder address:', recorderAddress)
-	console.log()
 
 	const contracts = [
 		{ name: 'Streak', address: process.env.STREAK_CONTRACT_ADDRESS },

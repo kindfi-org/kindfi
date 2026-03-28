@@ -75,12 +75,6 @@ export async function POST(req: NextRequest) {
 			error?: string
 		} | null = null
 
-		console.log('[Referral API] Contract call conditions:', {
-			hasStellarAddress: !!stellarAddress,
-			hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
-			stellarAddress: stellarAddress || 'N/A',
-			referred_id,
-		})
 
 		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			try {
@@ -89,13 +83,8 @@ export async function POST(req: NextRequest) {
 					process.env.REFERRAL_CONTRACT_ADDRESS ||
 					process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
 
-				console.log(
-					'[Referral API] Referral contract address:',
-					referralContractAddress || 'NOT SET',
-				)
 
 				if (referralContractAddress) {
-					console.log('[Referral API] Calling referral contract...')
 					contractResult = await contractService.recordReferralDonation(
 						referralContractAddress,
 						{
@@ -103,7 +92,6 @@ export async function POST(req: NextRequest) {
 						},
 					)
 
-					console.log('[Referral API] Contract call result:', contractResult)
 
 					if (!contractResult.success) {
 						console.error(
@@ -112,9 +100,6 @@ export async function POST(req: NextRequest) {
 						)
 						// Continue with database update even if contract call fails
 					} else {
-						console.log(
-							'[Referral API] Successfully recorded referral donation on-chain',
-						)
 					}
 				} else {
 					console.warn(
@@ -126,13 +111,6 @@ export async function POST(req: NextRequest) {
 				// Continue with database update even if contract call fails
 			}
 		} else {
-			console.log(
-				'[Referral API] Skipping contract call - missing requirements:',
-				{
-					hasStellarAddress: !!stellarAddress,
-					hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
-				},
-			)
 		}
 
 		const old_status = referral.status

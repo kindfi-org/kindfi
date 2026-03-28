@@ -36,8 +36,6 @@ export function useEscrowData({
 			})
 
 			// Log response for debugging
-			console.log('Escrow data response:', response)
-			console.log('Response is array:', Array.isArray(response))
 
 			// Handle array response (API returns array of escrows)
 			let escrowData: GetEscrowsFromIndexerResponse | null = null
@@ -91,7 +89,6 @@ export function useEscrowData({
 						: escrowData.updatedAt,
 			} as unknown as GetEscrowsFromIndexerResponse
 
-			console.log('Processed escrow data:', processedEscrowData)
 			setEscrowData(processedEscrowData)
 		} catch (err) {
 			console.error('Failed to fetch escrow data:', err)

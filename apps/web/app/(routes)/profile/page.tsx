@@ -16,7 +16,6 @@ interface ProfilePageProps {
 
 export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 	const session = await getServerSession(nextAuthOption)
-	console.log('📝 ProfilePage session:', session)
 	if (!session?.user) {
 		redirect('/sign-in')
 	}
@@ -43,7 +42,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
 		if (kycRecordsBySession && kycRecordsBySession.length > 0) {
 			kycRecord = kycRecordsBySession[0]
-			console.log('✅ Found KYC record by session ID:', kycRecord.id)
 		} else {
 			// Fallback: get the most recent KYC record for this user
 			const { data: kycRecordsRecent } = await supabaseServiceRole
@@ -55,9 +53,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
 			if (kycRecordsRecent && kycRecordsRecent.length > 0) {
 				kycRecord = kycRecordsRecent[0]
-				console.log('✅ Found KYC record by most recent:', kycRecord.id)
 			} else {
-				console.log('⚠️ No KYC record found for user:', session.user.id)
 			}
 		}
 
@@ -85,12 +81,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 			if (updateResult.error) {
 				console.error(' Failed to update KYC record:', updateResult.error)
 			} else {
-				console.log(' Successfully updated KYC status to:', kycStatus)
 			}
 		} else {
 			// Create a new record if none exists
 
-			console.log('Creating new KYC record with status:', kycStatus)
 			await supabaseServiceRole.from('kyc_reviews').insert({
 				user_id: session.user.id,
 				status: kycStatus,
@@ -113,7 +107,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
 	if (error || !profileData) {
 		console.error('⚠️ ProfilePage profile fetch error:', error)
-		console.log('📝 ProfilePage profile data:', profileData)
 		redirect('/sign-in')
 	}
 

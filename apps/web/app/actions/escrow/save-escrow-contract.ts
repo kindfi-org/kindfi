@@ -36,18 +36,6 @@ export async function saveEscrowContractAction(
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		// Log received parameters for debugging
-		console.log('📥 saveEscrowContractAction received:', {
-			contractId: params.contractId,
-			projectId: params.projectId,
-			hasEscrowData: !!params.escrowData,
-			escrowDataKeys: params.escrowData ? Object.keys(params.escrowData) : [],
-			engagementId: params.engagementId,
-			escrowDataStructure: params.escrowData
-				? JSON.stringify(params.escrowData, null, 2)
-				: 'none',
-			escrowDataType: typeof params.escrowData,
-			escrowDataValue: params.escrowData,
-		})
 
 		// Ensure the request is authenticated
 		const session = await getServerSession(nextAuthOption)
@@ -213,11 +201,6 @@ export async function saveEscrowContractAction(
 		}
 
 		const escrowContractUuid = upsertedEscrow.id
-		console.log('✅ Upserted escrow_contracts record:', {
-			id: escrowContractUuid,
-			contractId: params.contractId,
-			engagementId,
-		})
 
 		// Upsert project_escrows - link project to escrow using the UUID
 		// Since project can only have one escrow, we'll upsert by project_id

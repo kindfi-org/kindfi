@@ -33,7 +33,6 @@ export class SignatureRateLimiter {
 					url: config.redisUrl,
 					token: config.redisToken,
 				})
-				console.log('✅ Connected to Upstash Redis for rate limiting')
 			} catch (error) {
 				console.warn(
 					'⚠️ Failed to initialize Upstash Redis, using in-memory store:',
@@ -41,7 +40,6 @@ export class SignatureRateLimiter {
 				)
 			}
 		} else {
-			console.log('⚠️ Redis credentials not provided, using in-memory store')
 		}
 
 		// Start cleanup interval for in-memory store

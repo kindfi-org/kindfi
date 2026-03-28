@@ -203,12 +203,6 @@ export const saveUser = async ({
 			const cosePublicKey = credential.publicKey
 			const cosePublicKeyBase64 = uint8ArrayToBase64(cosePublicKey)
 
-			console.log('📝 Saving device with COSE public key:', {
-				credentialId: credential.id,
-				coseLength: cosePublicKey.length,
-				coseBase64Preview: cosePublicKeyBase64.substring(0, 32) + '...',
-			})
-
 			await db.insert(devices).values({
 				userId: userId || null,
 				nextAuthUserId: userId || null,

@@ -28,9 +28,6 @@ export async function GET(
 		const config = appEnvConfig('web')
 		const server = new Server(config.stellar.rpcUrl)
 
-		console.log('🔍 Checking account approval status')
-		console.log('   Account:', validatedAddress)
-		console.log('   Controller:', config.stellar.controllerContractId)
 
 		// Build get_accounts invocation with empty context
 		const authController = new Contract(config.stellar.controllerContractId)
@@ -62,7 +59,6 @@ export async function GET(
 		const isApproved = false
 		if (!('error' in simulation) && simulation.result?.retval) {
 			// Parse the result (should be a Vec<Address>)
-			console.log('   Result:', simulation.result.retval)
 			// For now, we'll just return that we need to check the result
 			// TODO: Parse the ScVal result properly
 		}

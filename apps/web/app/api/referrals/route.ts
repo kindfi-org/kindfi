@@ -186,10 +186,6 @@ export async function POST(req: NextRequest) {
 				resolveUserStellarAddress(supabase, referred_id),
 			])
 
-			console.log('[Referral API] On-chain create_referral addresses:', {
-				referrerAddress,
-				referredAddress,
-			})
 
 			if (referrerAddress && referredAddress) {
 				try {
@@ -205,7 +201,6 @@ export async function POST(req: NextRequest) {
 							contractResult.error,
 						)
 					} else {
-						console.log('[Referral API] On-chain create_referral succeeded')
 					}
 				} catch (err) {
 					console.error(
