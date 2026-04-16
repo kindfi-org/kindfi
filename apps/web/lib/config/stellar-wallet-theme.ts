@@ -1,7 +1,30 @@
-import {
-	SwkAppLightTheme,
-	type SwkAppTheme,
-} from '@creit-tech/stellar-wallets-kit/types'
+import type { SwkAppTheme } from '@creit-tech/stellar-wallets-kit/types'
+
+/**
+ * Default light palette from the kit (inlined) so we never import the `types` package
+ * entry at runtime — that barrel pulls UI modules which initialize kit `localStorage` state
+ * and breaks under Node / invalid `--localstorage-file`.
+ */
+const swkAppLightThemeBase: SwkAppTheme = {
+	background: '#fcfcfcff',
+	'background-secondary': '#f8f8f8ff',
+	'foreground-strong': '#000000',
+	foreground: '#161619ff',
+	'foreground-secondary': '#2d2d31ff',
+	primary: '#3b82f6',
+	'primary-foreground': '#ffffff',
+	transparent: 'rgba(0, 0, 0, 0)',
+	lighter: '#fcfcfc',
+	light: '#f8f8f8',
+	'light-gray': 'oklch(0.800 0.006 286.033)',
+	gray: 'oklch(0.600 0.006 286.033)',
+	danger: 'oklch(57.7% 0.245 27.325)',
+	border: 'rgba(0, 0, 0, 0.15)',
+	shadow:
+		'0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+	'border-radius': '0.5rem',
+	'font-family': 'sans-serif',
+}
 
 /**
  * Custom theme configuration for Stellar Wallets Kit
@@ -14,7 +37,7 @@ import {
  */
 export function getStellarWalletTheme(): SwkAppTheme {
 	return {
-		...SwkAppLightTheme,
+		...swkAppLightThemeBase,
 		// Solid background colors - no transparency
 		// Use pure white for modal content to ensure visibility
 		background: '#ffffff', // Pure white for modal background

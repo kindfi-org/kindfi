@@ -1,62 +1,89 @@
 import { Calendar } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { cn } from '~/lib/utils'
 import type { NewsUpdate } from '~/lib/types/learning.types'
+import { cn } from '~/lib/utils'
 import { formatDate } from '~/lib/utils/date-utils'
-
-const PLACEHOLDER_IMG = '/images/placeholder.png'
+import { formatNewsCategoryLabel } from '~/lib/utils/news'
 
 interface NewsCardProps {
 	update: NewsUpdate
 	className?: string
+	/** When true, show category chip above the title (index / hub views). */
+	showCategory?: boolean
 }
 
-export function NewsCard({ update, className }: NewsCardProps) {
+export function NewsCard({
+	update,
+	className,
+	showCategory = false,
+}: NewsCardProps) {
 	const href = `/news/${update.slug}`
-	const imageSrc = update.image || PLACEHOLDER_IMG
 	const hasTags = Array.isArray(update.tags) && update.tags.length > 0
+	const showImage = Boolean(update.image)
 
 	return (
 		<Link
 			href={href}
-			className={cn('block group', className)}
+			className={cn('group block h-full', className)}
 			aria-label={`Read article: ${update.title}`}
 		>
-			<article className="rounded-xl border border-gray-200 bg-white text-card-foreground shadow-sm transition-all duration-300 h-full overflow-hidden hover:shadow-md hover:border-emerald-800/20 hover:-translate-y-0.5">
-				{update.image ? (
-					<div className="relative h-44 w-full overflow-hidden rounded-t-xl">
+			<article
+				className={cn(
+					'flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-300',
+					'hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md',
+				)}
+			>
+				{showImage ? (
+					<div className="relative h-44 w-full shrink-0 overflow-hidden">
 						<Image
-							src={imageSrc}
-							alt={update.title}
+							src={update.image as string}
+							alt=""
 							fill
 							className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
 							sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
 						/>
-						<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+						<div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 					</div>
-				) : null}
+				) : (
+					<div
+						className="h-2 shrink-0 bg-gradient-to-r from-primary/80 to-primary/40"
+						aria-hidden
+					/>
+				)}
 
-				<div className="p-5">
-					<div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider mb-2">
-						<Calendar className="w-3.5 h-3.5 shrink-0" aria-hidden />
-						<time dateTime={update.date}>{formatDate(update.date)}</time>
+				<div className="flex flex-1 flex-col p-5">
+					<div className="mb-2 flex flex-wrap items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+						<span className="inline-flex items-center gap-1.5">
+							<Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
+							<time dateTime={update.date}>{formatDate(update.date)}</time>
+						</span>
+						{showCategory && update.category ? (
+							<>
+								<span className="text-border" aria-hidden>
+									·
+								</span>
+								<span className="font-medium normal-case text-primary">
+									{formatNewsCategoryLabel(update.category)}
+								</span>
+							</>
+						) : null}
 					</div>
 
-					<h3 className="text-lg font-semibold text-gray-900 mb-2 transition-colors group-hover:text-emerald-800">
+					<h3 className="mb-2 text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
 						{update.title}
 					</h3>
 
-					<p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
+					<p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
 						{update.description}
 					</p>
 
 					{hasTags ? (
-						<ul className="flex gap-1.5 mt-3 flex-wrap list-none p-0 m-0">
-							{update.tags.map((tag: string) => (
+						<ul className="mt-3 flex list-none flex-wrap gap-1.5 p-0">
+							{update.tags.slice(0, 4).map((tag: string) => (
 								<li
 									key={tag}
-									className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
+									className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground"
 								>
 									{tag}
 								</li>

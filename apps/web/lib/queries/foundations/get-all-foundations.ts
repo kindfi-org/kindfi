@@ -1,6 +1,21 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 
-const sortMap: Record<string, { column: string; ascending: boolean }> = {
+/** Sort options for the public foundations directory (labels + query mapping). */
+export const FOUNDATION_LIST_SORT_NAV = [
+	{ slug: 'most-recent', label: 'Most recent' },
+	{ slug: 'most-donations', label: 'Most raised' },
+	{ slug: 'most-campaigns', label: 'Most campaigns' },
+	{ slug: 'newest', label: 'Newest (year)' },
+	{ slug: 'oldest', label: 'Oldest (year)' },
+] as const
+
+export type FoundationListSortSlug =
+	(typeof FOUNDATION_LIST_SORT_NAV)[number]['slug']
+
+const sortMap: Record<
+	FoundationListSortSlug,
+	{ column: string; ascending: boolean }
+> = {
 	'most-recent': { column: 'created_at', ascending: false },
 	'most-donations': { column: 'total_donations_received', ascending: false },
 	'most-campaigns': { column: 'total_campaigns_completed', ascending: false },
@@ -8,12 +23,22 @@ const sortMap: Record<string, { column: string; ascending: boolean }> = {
 	newest: { column: 'founded_year', ascending: false },
 }
 
+export function normalizeFoundationListSort(
+	slug: string | null | undefined,
+): FoundationListSortSlug {
+	const raw = slug ?? 'most-recent'
+	return FOUNDATION_LIST_SORT_NAV.some((o) => o.slug === raw)
+		? (raw as FoundationListSortSlug)
+		: 'most-recent'
+}
+
 export async function getAllFoundations(
 	client: TypedSupabaseClient,
 	sortSlug = 'most-recent',
 	limit?: number,
 ) {
-	const { column, ascending } = sortMap[sortSlug] ?? sortMap['most-recent']
+	const normalized = normalizeFoundationListSort(sortSlug)
+	const { column, ascending } = sortMap[normalized]
 
 	let query = client
 		.from('foundations')

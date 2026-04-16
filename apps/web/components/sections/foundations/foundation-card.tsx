@@ -74,17 +74,16 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 	return (
 		<Link
 			href={`/foundations/${foundation.slug}`}
-			className="h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 rounded-xl"
+			className="h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 		>
 			<motion.article
-				className="group relative bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:border-purple-200"
+				className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:border-primary/25 hover:shadow-md"
 				whileHover={shouldReduceMotion ? {} : cardHover}
 				initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
 			>
-				{/* Cover Image */}
-				<div className="relative h-40 overflow-hidden bg-gradient-to-br from-purple-500/20 via-blue-500/20 to-pink-500/20">
+				<div className="relative h-40 overflow-hidden bg-gradient-to-br from-primary/15 via-muted to-primary/5">
 					{foundation.coverImageUrl ? (
 						<>
 							<Image
@@ -95,29 +94,27 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 								loading="lazy"
 								sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
 							/>
-							<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+							<div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 						</>
 					) : (
-						<div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 via-blue-500/30 to-pink-500/30" />
+						<div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-muted to-primary/10" />
 					)}
 
-					{/* Active Badge */}
-					{hasActiveCampaigns && (
-						<div className="absolute top-4 right-4">
-							<span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/90 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-white shadow-lg">
+					{hasActiveCampaigns ? (
+						<div className="absolute right-4 top-4">
+							<span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm">
 								<span className="relative flex h-2 w-2">
-									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
-									<span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-foreground/60 opacity-75" />
+									<span className="relative inline-flex h-2 w-2 rounded-full bg-primary-foreground" />
 								</span>
 								Active
 							</span>
 						</div>
-					)}
+					) : null}
 
-					{/* Explore CTA on Hover */}
 					<div className="absolute inset-0 flex items-end justify-end p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-						<span className="inline-flex items-center gap-2 rounded-full bg-white/95 backdrop-blur-sm px-4 py-2 text-sm font-medium text-gray-900 shadow-lg">
-							Explore Foundation
+						<span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/95 px-4 py-2 text-sm font-medium text-foreground shadow-sm backdrop-blur-sm">
+							Explore foundation
 							<ArrowRight
 								className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
 								aria-hidden="true"
@@ -126,12 +123,10 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 					</div>
 				</div>
 
-				{/* Content */}
-				<div className="flex flex-col flex-grow p-6">
-					{/* Logo Section - Prominent Display */}
+				<div className="flex flex-grow flex-col p-6">
 					{foundation.logoUrl ? (
-						<div className="flex justify-center mb-4 -mt-12 relative z-10">
-							<div className="relative h-28 w-28 overflow-hidden rounded-2xl border-4 border-white bg-white shadow-xl ring-4 ring-purple-50 transition-all duration-300 group-hover:scale-105 group-hover:ring-purple-100 group-hover:shadow-2xl">
+						<div className="relative z-10 -mt-12 mb-4 flex justify-center">
+							<div className="relative h-28 w-28 overflow-hidden rounded-2xl border-4 border-card bg-card shadow-lg ring-2 ring-border transition-all duration-300 group-hover:scale-[1.02] group-hover:ring-primary/25">
 								<Image
 									src={foundation.logoUrl}
 									alt={`${foundation.name} logo`}
@@ -142,44 +137,41 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 							</div>
 						</div>
 					) : (
-						<div className="flex justify-center mb-4 -mt-12 relative z-10">
-							<div className="relative h-28 w-28 overflow-hidden rounded-2xl border-4 border-white bg-gradient-to-br from-purple-500 via-blue-500 to-pink-500 shadow-xl ring-4 ring-purple-50 flex items-center justify-center">
+						<div className="relative z-10 -mt-12 mb-4 flex justify-center">
+							<div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border-4 border-card bg-gradient-to-br from-primary to-primary/70 shadow-lg ring-2 ring-border">
 								<Building2
-									className="h-12 w-12 text-white"
+									className="h-12 w-12 text-primary-foreground"
 									aria-hidden="true"
 								/>
 							</div>
 						</div>
 					)}
 
-					{/* Foundation Name */}
-					<h3 className="text-xl font-bold mb-2 text-center line-clamp-1 text-wrap-balance group-hover:text-purple-600 transition-colors">
+					<h3 className="mb-2 line-clamp-1 text-center text-xl font-bold text-balance transition-colors group-hover:text-primary">
 						{foundation.name}
 					</h3>
 
-					{/* Description */}
-					<p className="text-muted-foreground mb-6 text-sm text-center line-clamp-2 min-w-0">
+					<p className="mb-6 line-clamp-2 min-w-0 text-center text-sm text-muted-foreground">
 						{foundation.description}
 					</p>
 
-					{/* Stats Grid */}
 					<div
 						className={cn(
-							'grid gap-4 mb-6 pb-6 border-b border-gray-100',
+							'mb-6 grid gap-4 border-b border-border pb-6',
 							yearFounded != null ? 'grid-cols-3' : 'grid-cols-2',
 						)}
 					>
 						{yearFounded != null ? (
 							<div className="text-center">
-								<div className="flex items-center justify-center gap-1 text-purple-600 mb-1">
+								<div className="mb-1 flex items-center justify-center gap-1 text-primary">
 									<Calendar className="h-4 w-4" aria-hidden="true" />
 								</div>
 								<p className="text-lg font-bold tabular-nums">{yearFounded}</p>
-								<p className="text-xs text-muted-foreground">Year Founded</p>
+								<p className="text-xs text-muted-foreground">Founded</p>
 							</div>
 						) : null}
 						<div className="text-center">
-							<div className="flex items-center justify-center gap-1 text-green-600 mb-1">
+							<div className="mb-1 flex items-center justify-center gap-1 text-emerald-600 dark:text-emerald-400">
 								<Building2 className="h-4 w-4" aria-hidden="true" />
 							</div>
 							<p className="text-lg font-bold tabular-nums">
@@ -188,7 +180,7 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 							<p className="text-xs text-muted-foreground">Completed</p>
 						</div>
 						<div className="text-center">
-							<div className="flex items-center justify-center gap-1 text-blue-600 mb-1">
+							<div className="mb-1 flex items-center justify-center gap-1 text-primary">
 								<Heart className="h-4 w-4" aria-hidden="true" />
 							</div>
 							<p className="text-lg font-bold tabular-nums">
@@ -203,22 +195,18 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 						</div>
 					</div>
 
-					{/* Social Links */}
 					{hasSocialLinks ? (
-						<div className="flex flex-wrap items-center gap-2 mb-4">
+						<div className="mb-4 flex flex-wrap items-center gap-2">
 							{foundation.websiteUrl ? (
 								<a
 									href={foundation.websiteUrl}
 									target="_blank"
 									rel="noopener noreferrer"
 									onClick={(e) => e.stopPropagation()}
-									className="p-2 rounded-lg border border-gray-200 hover:bg-purple-50 hover:border-purple-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1"
+									className="rounded-lg border border-border p-2 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 									aria-label="Visit website"
 								>
-									<Globe
-										className="h-4 w-4 text-purple-600"
-										aria-hidden="true"
-									/>
+									<Globe className="h-4 w-4 text-primary" aria-hidden="true" />
 								</a>
 							) : null}
 							{foundation.socialLinks != null
@@ -232,11 +220,11 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 													target="_blank"
 													rel="noopener noreferrer"
 													onClick={(e) => e.stopPropagation()}
-													className="p-2 rounded-lg border border-gray-200 hover:bg-purple-50 hover:border-purple-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1"
+													className="rounded-lg border border-border p-2 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 													aria-label={`Visit ${platform}`}
 												>
 													<Icon
-														className="h-4 w-4 text-purple-600"
+														className="h-4 w-4 text-primary"
 														aria-hidden="true"
 													/>
 												</a>
@@ -247,11 +235,10 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 						</div>
 					) : null}
 
-					{/* Founder */}
 					{foundation.founder ? (
-						<div className="flex items-center gap-3 mt-auto">
+						<div className="mt-auto flex items-center gap-3">
 							{foundation.founder.imageUrl ? (
-								<div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-gray-100">
+								<div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-border">
 									<Image
 										src={foundation.founder.imageUrl}
 										alt=""
@@ -261,7 +248,7 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 									/>
 								</div>
 							) : (
-								<div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex-shrink-0" />
+								<div className="h-8 w-8 flex-shrink-0 rounded-full bg-muted" />
 							)}
 							<div className="min-w-0 flex-1">
 								<p className="text-xs text-muted-foreground">Founded by</p>
@@ -269,12 +256,12 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 									<Link
 										href={`/u/${foundation.founder.slug}`}
 										onClick={(e) => e.stopPropagation()}
-										className="text-sm font-semibold hover:text-purple-600 transition-colors line-clamp-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1 rounded"
+										className="line-clamp-1 rounded text-sm font-semibold transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 									>
 										{foundation.founder.displayName ?? 'Anonymous'}
 									</Link>
 								) : (
-									<p className="text-sm font-semibold line-clamp-1">
+									<p className="line-clamp-1 text-sm font-semibold">
 										{foundation.founder.displayName ?? 'Anonymous'}
 									</p>
 								)}

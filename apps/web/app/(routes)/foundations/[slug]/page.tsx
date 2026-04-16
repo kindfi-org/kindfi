@@ -8,6 +8,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 import { FoundationDetailClientWrapper } from '~/components/sections/foundations/foundation-detail-client-wrapper'
+import { SectionContainer } from '~/components/shared/section-container'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
 
 interface FoundationDetailPageProps {
@@ -102,10 +103,15 @@ export default async function FoundationDetailPage({
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<main className="container mx-auto p-4 md:p-12">
-			<HydrationBoundary state={dehydratedState}>
-				<FoundationDetailClientWrapper slug={slug} />
-			</HydrationBoundary>
+		<main
+			className="min-h-screen bg-muted/30"
+			aria-label={`${foundation.name} foundation profile`}
+		>
+			<SectionContainer maxWidth="6xl" className="py-10 sm:py-14 lg:py-16">
+				<HydrationBoundary state={dehydratedState}>
+					<FoundationDetailClientWrapper slug={slug} />
+				</HydrationBoundary>
+			</SectionContainer>
 		</main>
 	)
 }

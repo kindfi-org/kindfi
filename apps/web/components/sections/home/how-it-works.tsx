@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { InvestmentModelCard } from '~/components/shared/investment-model-card'
 import { SectionCaption } from '~/components/shared/section-caption'
 import { SectionContainer } from '~/components/shared/section-container'
@@ -8,6 +9,11 @@ import { useI18n } from '~/lib/i18n'
 
 export function HowItWorks() {
 	const { t } = useI18n()
+	const router = useRouter()
+
+	const handleLearnMore = () => {
+		router.push('/about')
+	}
 
 	// Translated models
 	const translatedModels = [
@@ -57,8 +63,7 @@ export function HowItWorks() {
 						<InvestmentModelCard
 							key={model.id}
 							{...model}
-							onLearnMore={() =>
-							}
+							onLearnMore={handleLearnMore}
 						/>
 					))}
 				</div>

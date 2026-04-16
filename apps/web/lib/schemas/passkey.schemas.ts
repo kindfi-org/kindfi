@@ -16,7 +16,7 @@ const authenticationResponseSchema = z
 				.transform((v) => (v === null ? undefined : v)),
 		}),
 		type: z.literal('public-key'),
-		clientExtensionResults: z.record(z.unknown()).default({}),
+		clientExtensionResults: z.record(z.string(), z.unknown()).default({}),
 	})
 	.passthrough()
 
@@ -33,7 +33,7 @@ const registrationResponseSchema = z
 			})
 			.passthrough(),
 		type: z.literal('public-key'),
-		clientExtensionResults: z.record(z.unknown()).default({}),
+		clientExtensionResults: z.record(z.string(), z.unknown()).default({}),
 	})
 	.passthrough()
 

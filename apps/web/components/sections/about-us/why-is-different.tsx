@@ -9,12 +9,17 @@ import {
 } from '~/components/base/card'
 import { Icon } from '~/components/base/icon'
 import { SectionContainer } from '~/components/shared/section-container'
-import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
+import { useI18n } from '~/lib/i18n'
+
+const ITEMS = [
+	{ id: 'transparency' as const, icon: 'eye' as const },
+	{ id: 'escrow' as const, icon: 'lock' as const },
+	{ id: 'access' as const, icon: 'globe' as const },
+]
 
 export function WhyKindFiIsDifferent() {
-	const { whyIsDifferent } = mockAboutUs
+	const { t } = useI18n()
 
-	// Animation variants for consistent animations
 	const containerVariants = {
 		hidden: { opacity: 0 },
 		visible: {
@@ -28,76 +33,75 @@ export function WhyKindFiIsDifferent() {
 		visible: {
 			opacity: 1,
 			y: 0,
-			transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+			transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
 		},
 	}
 
 	return (
 		<section
-			className="w-full py-16 sm:py-20 lg:py-24 relative overflow-hidden bg-white"
+			className="relative overflow-hidden bg-background py-16 sm:py-20 lg:py-24"
 			aria-labelledby="about-why-different-heading"
 		>
-			<SectionContainer>
+			<SectionContainer maxWidth="6xl">
 				<motion.header
-					initial={{ opacity: 0, y: 20 }}
+					initial={{ opacity: 0, y: 16 }}
 					whileInView={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+					transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
 					viewport={{ once: true }}
-					className="text-center max-w-3xl mx-auto mb-10 sm:mb-14"
+					className="mx-auto mb-10 max-w-3xl text-center sm:mb-14"
 				>
 					<h2
 						id="about-why-different-heading"
-						className="text-3xl font-bold tracking-tight gradient-text mb-3 sm:text-4xl"
+						className="mb-3 text-3xl font-bold tracking-tight gradient-text sm:text-4xl"
 					>
-						Why KindFi Is Different
+						{t('about.whyDifferentTitle')}
 					</h2>
-					<p className="text-muted-foreground text-base leading-relaxed sm:text-lg">
-						Discover how KindFi transforms crowdfunding with transparency,
-						accountability, and borderless participation powered by blockchain.
+					<p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
+						{t('about.whyDifferentSubtitle')}
 					</p>
 				</motion.header>
 
 				<motion.div
-					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full max-w-6xl mx-auto"
+					className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
 					variants={containerVariants}
 					initial="hidden"
 					whileInView="visible"
-					viewport={{ once: true, amount: 0.1 }}
+					viewport={{ once: true, amount: 0.12 }}
 				>
-					{whyIsDifferent.map((feature, index) => (
+					{ITEMS.map((item, index) => (
 						<motion.div
-							key={feature.title || `feature-${index}`}
+							key={item.id}
 							variants={cardVariants}
 							className="h-full"
 						>
-							<Card className="h-full rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+							<Card className="h-full overflow-hidden rounded-2xl border bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
 								<div
-									className={`h-1 bg-gradient-to-r ${
+									className={
 										index % 3 === 0
-											? 'from-emerald-500 to-teal-500'
+											? 'h-1 bg-gradient-to-r from-emerald-500 to-teal-500'
 											: index % 3 === 1
-												? 'from-indigo-500 to-violet-500'
-												: 'from-teal-500 to-emerald-500'
-									}`}
+												? 'h-1 bg-gradient-to-r from-indigo-500 to-violet-500'
+												: 'h-1 bg-gradient-to-r from-teal-500 to-emerald-500'
+									}
 								/>
-								<CardHeader className="flex flex-col items-center pt-6 pb-2 px-6">
+								<CardHeader className="flex flex-col items-start px-6 pb-2 pt-6">
 									<div
-										className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
+										className={
 											index % 3 === 0
-												? 'bg-emerald-50 text-emerald-600'
+												? 'mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600'
 												: index % 3 === 1
-													? 'bg-indigo-50 text-indigo-600'
-													: 'bg-teal-50 text-teal-600'
-										}`}
+													? 'mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600'
+													: 'mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-teal-500/10 text-teal-600'
+										}
 									>
-										<Icon name={feature.icon || 'lock'} className="w-6 h-6" />
+										<Icon name={item.icon} className="h-6 w-6" />
 									</div>
-									<CardTitle className="text-lg font-semibold text-gray-900 mb-1 text-center">
-										{feature.title}
+									<CardTitle className="text-lg font-semibold text-foreground">
+										{t(`about.whyDifferentItems.${item.id}.title`)}
 									</CardTitle>
 								</CardHeader>
-								<CardContent className="px-6 pb-6 pt-0 text-muted-foreground text-sm leading-relaxed text-center">
-									{feature.description}
+								<CardContent className="px-6 pb-6 pt-0 text-sm leading-relaxed text-muted-foreground">
+									{t(`about.whyDifferentItems.${item.id}.description`)}
 								</CardContent>
 							</Card>
 						</motion.div>

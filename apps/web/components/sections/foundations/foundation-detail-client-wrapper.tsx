@@ -7,6 +7,7 @@ import {
 	Building2,
 	Calendar,
 	CheckCircle2,
+	ChevronLeft,
 	Eye,
 	Facebook,
 	Globe,
@@ -36,6 +37,9 @@ import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by
 interface FoundationDetailClientWrapperProps {
 	slug: string
 }
+
+const shareActionClass =
+	'inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
 
 /**
  * Social sharing buttons component
@@ -77,7 +81,7 @@ const SocialShareButtons = ({
 				href={shareData.twitter}
 				target="_blank"
 				rel="noopener noreferrer"
-				className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+				className={shareActionClass}
 				aria-label="Share on X (Twitter)"
 			>
 				<svg
@@ -99,7 +103,7 @@ const SocialShareButtons = ({
 				href={shareData.facebook}
 				target="_blank"
 				rel="noopener noreferrer"
-				className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+				className={shareActionClass}
 				aria-label="Share on Facebook"
 			>
 				<svg
@@ -121,7 +125,7 @@ const SocialShareButtons = ({
 				href={shareData.linkedin}
 				target="_blank"
 				rel="noopener noreferrer"
-				className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+				className={shareActionClass}
 				aria-label="Share on LinkedIn"
 			>
 				<LinkedinIcon className="h-4 w-4" aria-hidden="true" />
@@ -130,7 +134,7 @@ const SocialShareButtons = ({
 			<button
 				type="button"
 				onClick={handleCopyLink}
-				className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+				className={shareActionClass}
 				aria-label="Copy link to clipboard"
 			>
 				<LinkIcon className="h-4 w-4" aria-hidden="true" />
@@ -218,15 +222,15 @@ export function FoundationDetailClientWrapper({
 	if (isLoading) {
 		return (
 			<div className="space-y-8">
-				<div className="relative h-80 md:h-96 w-full overflow-hidden rounded-2xl bg-muted animate-pulse" />
+				<div className="relative h-64 w-full animate-pulse overflow-hidden rounded-2xl border border-border bg-card md:h-96" />
 				<div className="space-y-6">
-					<div className="h-12 bg-muted animate-pulse rounded-lg w-1/2" />
-					<div className="h-6 bg-muted animate-pulse rounded-lg w-2/3" />
-					<div className="grid md:grid-cols-3 gap-4">
+					<div className="h-12 w-1/2 animate-pulse rounded-lg bg-muted" />
+					<div className="h-6 w-2/3 animate-pulse rounded-lg bg-muted" />
+					<div className="grid gap-4 md:grid-cols-3">
 						{[1, 2, 3].map((i) => (
 							<div
 								key={`skeleton-${i}`}
-								className="h-24 bg-muted animate-pulse rounded-lg"
+								className="h-24 animate-pulse rounded-xl border border-border bg-card"
 							/>
 						))}
 					</div>
@@ -237,52 +241,60 @@ export function FoundationDetailClientWrapper({
 
 	if (error || !foundation) {
 		return (
-			<div className="text-center py-16">
+			<div className="rounded-2xl border border-border bg-card px-6 py-16 text-center">
 				<Building2
-					className="h-16 w-16 text-muted-foreground mx-auto mb-4"
+					className="mx-auto mb-4 h-14 w-14 text-muted-foreground"
 					aria-hidden="true"
 				/>
-				<h2 className="text-2xl font-bold mb-2">Foundation Not Found</h2>
-				<p className="text-muted-foreground mb-6">
-					The foundation you&apos;re looking for doesn&apos;t exist or has been
-					removed.
+				<h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
+					Foundation not found
+				</h2>
+				<p className="mx-auto mt-2 max-w-md text-muted-foreground">
+					This profile may have been removed or the link is incorrect.
 				</p>
-				<Button asChild>
-					<Link href="/foundations">Browse All Foundations</Link>
+				<Button asChild className="mt-6">
+					<Link href="/foundations">Back to foundations</Link>
 				</Button>
 			</div>
 		)
 	}
 
 	return (
-		<div className="space-y-8">
-			{/* Hero Section with Cover Image */}
+		<div className="space-y-10 sm:space-y-12">
+			<nav aria-label="Breadcrumb">
+				<Link
+					href="/foundations"
+					className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md"
+				>
+					<ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
+					All foundations
+				</Link>
+			</nav>
+
 			<div className="relative">
 				{foundation.coverImageUrl ? (
-					<div className="relative h-64 md:h-96 w-full overflow-hidden rounded-2xl">
+					<div className="relative h-64 w-full overflow-hidden rounded-2xl border border-border md:h-96">
 						<Image
 							src={foundation.coverImageUrl}
 							alt=""
 							fill
 							className="object-cover"
 							priority
-							sizes="100vw"
+							sizes="(max-width: 1152px) 100vw, 72rem"
 						/>
-						<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+						<div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
 					</div>
 				) : (
-					<div className="relative h-64 md:h-96 w-full overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 via-blue-600 to-pink-600">
-						<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+					<div className="relative h-64 w-full overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/25 via-muted to-primary/10 md:h-96">
+						<div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
 					</div>
 				)}
 			</div>
 
-			{/* Foundation Header with Logo */}
-			<div className="flex flex-col md:flex-row gap-8 items-start md:items-center">
-				{/* Logo - Prominent Display */}
+			<div className="flex flex-col items-start gap-8 md:flex-row md:items-center">
 				{foundation.logoUrl ? (
-					<div className="flex-shrink-0 mx-auto md:mx-0">
-						<div className="relative h-32 w-32 md:h-40 md:w-40 overflow-hidden rounded-2xl border-4 border-white bg-white shadow-2xl ring-8 ring-purple-50">
+					<div className="mx-auto shrink-0 md:mx-0">
+						<div className="relative h-32 w-32 overflow-hidden rounded-2xl border-4 border-card bg-card shadow-lg ring-2 ring-border md:h-40 md:w-40">
 							<Image
 								src={foundation.logoUrl}
 								alt={`${foundation.name} logo`}
@@ -293,25 +305,23 @@ export function FoundationDetailClientWrapper({
 						</div>
 					</div>
 				) : (
-					<div className="flex-shrink-0 mx-auto md:mx-0">
-						<div className="relative h-32 w-32 md:h-40 md:w-40 overflow-hidden rounded-2xl border-4 border-white bg-gradient-to-br from-purple-500 via-blue-500 to-pink-500 shadow-2xl ring-8 ring-purple-50 flex items-center justify-center">
+					<div className="mx-auto shrink-0 md:mx-0">
+						<div className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl border-4 border-card bg-gradient-to-br from-primary to-primary/70 shadow-lg ring-2 ring-border md:h-40 md:w-40">
 							<Building2
-								className="h-16 w-16 md:h-20 md:w-20 text-white"
+								className="h-16 w-16 text-primary-foreground md:h-20 md:w-20"
 								aria-hidden="true"
 							/>
 						</div>
 					</div>
 				)}
 
-				{/* Foundation Info */}
-				<div className="flex-1 min-w-0 text-center md:text-left">
-					<div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
-						<div className="flex-1 min-w-0">
-							<h1 className="text-3xl md:text-5xl font-extrabold mb-3 text-wrap-balance">
+				<div className="min-w-0 flex-1 text-center md:text-left">
+					<div className="mb-4 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+						<div className="min-w-0 flex-1">
+							<h1 className="mb-3 text-3xl font-bold tracking-tight text-balance gradient-text md:text-5xl">
 								{foundation.name}
 							</h1>
-							{/* Full Description - No Truncation */}
-							<p className="text-muted-foreground text-lg md:text-xl mb-6 leading-relaxed">
+							<p className="mb-6 text-lg leading-relaxed text-muted-foreground md:text-xl">
 								{foundation.description}
 							</p>
 						</div>
@@ -319,27 +329,23 @@ export function FoundationDetailClientWrapper({
 
 					{isFounder ? (
 						<div className="mb-6">
-							<Button
-								asChild
-								className="focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-							>
+							<Button asChild>
 								<Link href={`/foundations/${slug}/manage`}>
-									<Settings2 className="h-4 w-4 mr-2" aria-hidden="true" />
-									Manage &amp; edit foundation
+									<Settings2 className="mr-2 h-4 w-4" aria-hidden="true" />
+									Manage foundation
 								</Link>
 							</Button>
 						</div>
 					) : null}
 
-					{/* Share Buttons */}
 					<div className="mb-6">
-						<div className="flex items-center gap-3 mb-3">
+						<div className="mb-3 flex items-center gap-3">
 							<Share2
 								className="h-5 w-5 text-muted-foreground"
 								aria-hidden="true"
 							/>
 							<span className="text-sm font-medium text-muted-foreground">
-								Share this foundation:
+								Share
 							</span>
 						</div>
 						<SocialShareButtons
@@ -349,17 +355,16 @@ export function FoundationDetailClientWrapper({
 						/>
 					</div>
 
-					{/* Quick Stats */}
-					<div className="flex flex-wrap gap-4 md:gap-6 justify-center md:justify-start">
+					<div className="flex flex-wrap justify-center gap-4 md:justify-start md:gap-6">
 						{yearFounded != null ? (
 							<div className="flex items-center gap-2 text-muted-foreground">
 								<Calendar
-									className="h-5 w-5 text-purple-600"
+									className="h-5 w-5 shrink-0 text-primary"
 									aria-hidden="true"
 								/>
 								<span className="text-sm md:text-base">
 									Founded{' '}
-									<strong className="font-bold tabular-nums">
+									<strong className="font-bold tabular-nums text-foreground">
 										{yearFounded}
 									</strong>
 								</span>
@@ -367,11 +372,11 @@ export function FoundationDetailClientWrapper({
 						) : null}
 						<div className="flex items-center gap-2 text-muted-foreground">
 							<CheckCircle2
-								className="h-5 w-5 text-green-600"
+								className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400"
 								aria-hidden="true"
 							/>
 							<span className="text-sm md:text-base">
-								<strong className="font-bold tabular-nums">
+								<strong className="font-bold tabular-nums text-foreground">
 									{foundation.totalCampaignsCompleted}
 								</strong>{' '}
 								completed
@@ -379,19 +384,25 @@ export function FoundationDetailClientWrapper({
 						</div>
 						{foundation.totalCampaignsOpen > 0 ? (
 							<div className="flex items-center gap-2 text-muted-foreground">
-								<Users className="h-5 w-5 text-blue-600" aria-hidden="true" />
+								<Users
+									className="h-5 w-5 shrink-0 text-primary"
+									aria-hidden="true"
+								/>
 								<span className="text-sm md:text-base">
-									<strong className="font-bold tabular-nums">
+									<strong className="font-bold tabular-nums text-foreground">
 										{foundation.totalCampaignsOpen}
 									</strong>{' '}
-									active campaigns
+									active
 								</span>
 							</div>
 						) : null}
 						<div className="flex items-center gap-2 text-muted-foreground">
-							<Heart className="h-5 w-5 text-pink-600" aria-hidden="true" />
+							<Heart
+								className="h-5 w-5 shrink-0 text-primary"
+								aria-hidden="true"
+							/>
 							<span className="text-sm md:text-base">
-								<strong className="font-bold tabular-nums">
+								<strong className="font-bold tabular-nums text-foreground">
 									{formattedDonations}
 								</strong>{' '}
 								raised
@@ -401,9 +412,8 @@ export function FoundationDetailClientWrapper({
 				</div>
 			</div>
 
-			{/* Mission & Vision Cards */}
 			{(foundation.mission || foundation.vision) && (
-				<div className="grid md:grid-cols-2 gap-6">
+				<div className="grid gap-6 md:grid-cols-2">
 					{foundation.mission && (
 						<motion.div
 							initial={
@@ -412,18 +422,20 @@ export function FoundationDetailClientWrapper({
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: shouldReduceMotion ? 0 : 0.1 }}
 						>
-							<Card className="h-full border-2 border-purple-100 bg-gradient-to-br from-purple-50/50 to-white hover:shadow-lg transition-shadow">
+							<Card className="h-full border-border bg-card shadow-sm transition-shadow hover:shadow-md">
 								<CardContent className="p-6 md:p-8">
-									<div className="flex items-center gap-3 mb-4">
-										<div className="p-2 rounded-lg bg-purple-100">
+									<div className="mb-4 flex items-center gap-3">
+										<div className="rounded-lg bg-primary/10 p-2">
 											<Target
-												className="h-5 w-5 text-purple-600"
+												className="h-5 w-5 text-primary"
 												aria-hidden="true"
 											/>
 										</div>
-										<h2 className="text-2xl font-bold">Mission</h2>
+										<h2 className="text-2xl font-bold tracking-tight">
+											Mission
+										</h2>
 									</div>
-									<p className="text-muted-foreground leading-relaxed">
+									<p className="leading-relaxed text-muted-foreground">
 										{foundation.mission}
 									</p>
 								</CardContent>
@@ -438,18 +450,20 @@ export function FoundationDetailClientWrapper({
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: shouldReduceMotion ? 0 : 0.2 }}
 						>
-							<Card className="h-full border-2 border-blue-100 bg-gradient-to-br from-blue-50/50 to-white hover:shadow-lg transition-shadow">
+							<Card className="h-full border-border bg-card shadow-sm transition-shadow hover:shadow-md">
 								<CardContent className="p-6 md:p-8">
-									<div className="flex items-center gap-3 mb-4">
-										<div className="p-2 rounded-lg bg-blue-100">
+									<div className="mb-4 flex items-center gap-3">
+										<div className="rounded-lg bg-primary/10 p-2">
 											<Eye
-												className="h-5 w-5 text-blue-600"
+												className="h-5 w-5 text-primary"
 												aria-hidden="true"
 											/>
 										</div>
-										<h2 className="text-2xl font-bold">Vision</h2>
+										<h2 className="text-2xl font-bold tracking-tight">
+											Vision
+										</h2>
 									</div>
-									<p className="text-muted-foreground leading-relaxed">
+									<p className="leading-relaxed text-muted-foreground">
 										{foundation.vision}
 									</p>
 								</CardContent>
@@ -459,21 +473,22 @@ export function FoundationDetailClientWrapper({
 				</div>
 			)}
 
-			{/* Milestones */}
 			{foundation.milestones && foundation.milestones.length > 0 && (
 				<motion.div
 					initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: shouldReduceMotion ? 0 : 0.3 }}
 				>
-					<div className="flex items-center gap-3 mb-6">
+					<div className="mb-6 flex items-center gap-3">
 						<TrendingUp
-							className="h-6 w-6 text-purple-600"
+							className="h-6 w-6 text-primary"
 							aria-hidden="true"
 						/>
-						<h2 className="text-3xl font-bold">Key Milestones</h2>
+						<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+							Key milestones
+						</h2>
 					</div>
-					<div className="grid md:grid-cols-2 gap-4">
+					<div className="grid gap-4 md:grid-cols-2">
 						{foundation.milestones.map((milestone, index) => (
 							<motion.div
 								key={milestone.id}
@@ -483,10 +498,10 @@ export function FoundationDetailClientWrapper({
 								animate={{ opacity: 1, x: 0 }}
 								transition={{ delay: shouldReduceMotion ? 0 : 0.1 * index }}
 							>
-								<Card className="h-full hover:shadow-md transition-shadow border-l-4 border-l-purple-500">
+								<Card className="h-full border-l-4 border-l-primary transition-shadow hover:shadow-md">
 									<CardContent className="p-6">
-										<div className="flex items-start justify-between gap-4 mb-3">
-											<h3 className="text-lg font-semibold flex-1">
+										<div className="mb-3 flex items-start justify-between gap-4">
+											<h3 className="flex-1 text-lg font-semibold">
 												{milestone.title}
 											</h3>
 											<Badge variant="outline" className="shrink-0">
@@ -498,16 +513,14 @@ export function FoundationDetailClientWrapper({
 											</Badge>
 										</div>
 										{milestone.description && (
-											<p className="text-sm text-muted-foreground mb-3">
+											<p className="mb-3 text-sm text-muted-foreground">
 												{milestone.description}
 											</p>
 										)}
 										{milestone.impactMetric && (
-											<div className="flex items-center gap-2 text-green-600 font-semibold">
+											<div className="flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
 												<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-												<span className="text-sm">
-													{milestone.impactMetric}
-												</span>
+												<span>{milestone.impactMetric}</span>
 											</div>
 										)}
 									</CardContent>
@@ -518,18 +531,19 @@ export function FoundationDetailClientWrapper({
 				</motion.div>
 			)}
 
-			{/* Campaigns */}
 			{campaignsWithSlug.length > 0 ? (
 				<motion.div
 					initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: shouldReduceMotion ? 0 : 0.35 }}
 				>
-					<div className="flex items-center gap-3 mb-6">
-						<Megaphone className="h-6 w-6 text-purple-600" aria-hidden="true" />
-						<h2 className="text-3xl font-bold">Campaigns</h2>
+					<div className="mb-6 flex items-center gap-3">
+						<Megaphone className="h-6 w-6 text-primary" aria-hidden="true" />
+						<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+							Campaigns
+						</h2>
 					</div>
-					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{campaignsWithSlug.map((campaign, index) => (
 							<motion.div
 								key={campaign.id}
@@ -541,15 +555,15 @@ export function FoundationDetailClientWrapper({
 							>
 								<Link
 									href={`/projects/${campaign.slug}`}
-									className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 rounded-xl"
+									className="block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 								>
-									<Card className="h-full hover:shadow-lg transition-[box-shadow] border-2 border-transparent hover:border-purple-200 overflow-hidden group">
+									<Card className="group h-full overflow-hidden border-border transition-[box-shadow,border-color] hover:border-primary/25 hover:shadow-md">
 										<CardContent className="p-6">
-											<h3 className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+											<h3 className="mb-2 line-clamp-2 text-lg font-semibold transition-colors group-hover:text-primary">
 												{campaign.title}
 											</h3>
 											{campaign.description ? (
-												<p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+												<p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
 													{campaign.description}
 												</p>
 											) : null}
@@ -572,9 +586,9 @@ export function FoundationDetailClientWrapper({
 														}).format(campaign.goal)}
 													</span>
 												</div>
-												<div className="h-2 rounded-full bg-muted overflow-hidden">
+												<div className="h-2 overflow-hidden rounded-full bg-muted">
 													<div
-														className="h-full rounded-full bg-purple-500 transition-all duration-300"
+														className="h-full rounded-full bg-primary transition-all duration-300"
 														style={{
 															width: `${Math.min(100, campaign.percentageComplete)}%`,
 														}}
@@ -582,14 +596,14 @@ export function FoundationDetailClientWrapper({
 												</div>
 											</div>
 											<div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-												<Users className="h-4 w-4" aria-hidden="true" />
+												<Users className="h-4 w-4 shrink-0" aria-hidden="true" />
 												<span className="tabular-nums">
 													{campaign.investors} supporters
 												</span>
 												<span className="ml-auto inline-flex items-center gap-1">
-													View campaign
+													View
 													<ArrowRight
-														className="h-4 w-4 group-hover:translate-x-1 transition-transform"
+														className="h-4 w-4 transition-transform group-hover:translate-x-1"
 														aria-hidden="true"
 													/>
 												</span>
@@ -603,9 +617,7 @@ export function FoundationDetailClientWrapper({
 				</motion.div>
 			) : null}
 
-			{/* Founder & Connect Section */}
-			<div className="grid md:grid-cols-2 gap-6">
-				{/* Founder */}
+			<div className="grid gap-6 md:grid-cols-2">
 				{foundation.founder && (
 					<motion.div
 						initial={
@@ -614,45 +626,53 @@ export function FoundationDetailClientWrapper({
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: shouldReduceMotion ? 0 : 0.4 }}
 					>
-						<Card className="h-full">
+						<Card className="h-full border-border shadow-sm">
 							<CardContent className="p-6 md:p-8">
-								<h2 className="text-2xl font-bold mb-6">Founder</h2>
+								<h2 className="mb-6 text-2xl font-bold tracking-tight">Founder</h2>
 								<div className="flex items-start gap-4">
 									{foundation.founder.imageUrl ? (
-										<Link
-											href={
-												foundation.founder.slug
-													? `/u/${foundation.founder.slug}`
-													: '#'
-											}
-											className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-full ring-4 ring-purple-100 hover:ring-purple-200 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-										>
-											<Image
-												src={foundation.founder.imageUrl}
-												alt=""
-												fill
-												className="object-cover"
-												sizes="80px"
-											/>
-										</Link>
+										foundation.founder.slug ? (
+											<Link
+												href={`/u/${foundation.founder.slug}`}
+												className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-border transition-shadow hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+											>
+												<Image
+													src={foundation.founder.imageUrl}
+													alt=""
+													fill
+													className="object-cover"
+													sizes="80px"
+												/>
+											</Link>
+										) : (
+											<div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-border">
+												<Image
+													src={foundation.founder.imageUrl}
+													alt=""
+													fill
+													className="object-cover"
+													sizes="80px"
+												/>
+											</div>
+										)
 									) : (
-										<div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex-shrink-0 ring-4 ring-purple-100" />
+										<div className="h-20 w-20 shrink-0 rounded-full bg-muted ring-2 ring-border" />
 									)}
-									<div className="flex-1 min-w-0">
+									<div className="min-w-0 flex-1">
 										{foundation.founder.slug ? (
 											<Link
 												href={`/u/${foundation.founder.slug}`}
-												className="text-xl font-bold hover:text-purple-600 transition-colors block mb-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1 rounded"
+												className="mb-2 block rounded text-xl font-bold transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 											>
 												{foundation.founder.displayName || 'Anonymous'}
 											</Link>
 										) : (
-											<p className="text-xl font-bold mb-2">
+											<p className="mb-2 text-xl font-bold">
 												{foundation.founder.displayName || 'Anonymous'}
 											</p>
 										)}
 										{foundation.founder.bio && (
-											<p className="text-muted-foreground text-sm leading-relaxed">
+											<p className="text-sm leading-relaxed text-muted-foreground">
 												{foundation.founder.bio}
 											</p>
 										)}
@@ -663,7 +683,6 @@ export function FoundationDetailClientWrapper({
 					</motion.div>
 				)}
 
-				{/* Connect Links */}
 				{(foundation.websiteUrl ||
 					Object.keys(foundation.socialLinks).length > 0) && (
 					<motion.div
@@ -673,26 +692,26 @@ export function FoundationDetailClientWrapper({
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: shouldReduceMotion ? 0 : 0.5 }}
 					>
-						<Card className="h-full">
+						<Card className="h-full border-border shadow-sm">
 							<CardContent className="p-6 md:p-8">
-								<h2 className="text-2xl font-bold mb-6">Connect</h2>
+								<h2 className="mb-6 text-2xl font-bold tracking-tight">Connect</h2>
 								<div className="flex flex-col gap-3">
 									{foundation.websiteUrl && (
 										<a
 											href={foundation.websiteUrl}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="flex items-center gap-3 p-3 rounded-lg border hover:bg-purple-50 hover:border-purple-200 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+											className="group flex items-center gap-3 rounded-xl border border-border p-3 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 										>
-											<div className="p-2 rounded-lg bg-purple-100 group-hover:bg-purple-200 transition-colors">
+											<div className="rounded-lg bg-primary/10 p-2 transition-colors group-hover:bg-primary/15">
 												<Globe
-													className="h-5 w-5 text-purple-600"
+													className="h-5 w-5 text-primary"
 													aria-hidden="true"
 												/>
 											</div>
-											<span className="font-medium flex-1">Visit Website</span>
+											<span className="flex-1 font-medium">Website</span>
 											<ArrowRight
-												className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 group-hover:translate-x-1 transition-all"
+												className="h-4 w-4 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-primary"
 												aria-hidden="true"
 											/>
 										</a>
@@ -706,17 +725,17 @@ export function FoundationDetailClientWrapper({
 													href={url}
 													target="_blank"
 													rel="noopener noreferrer"
-													className="flex items-center gap-3 p-3 rounded-lg border hover:bg-purple-50 hover:border-purple-200 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 capitalize"
+													className="group flex items-center gap-3 rounded-xl border border-border p-3 capitalize transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 												>
-													<div className="p-2 rounded-lg bg-purple-100 group-hover:bg-purple-200 transition-colors">
+													<div className="rounded-lg bg-primary/10 p-2 transition-colors group-hover:bg-primary/15">
 														<Icon
-															className="h-5 w-5 text-purple-600"
+															className="h-5 w-5 text-primary"
 															aria-hidden="true"
 														/>
 													</div>
-													<span className="font-medium flex-1">{platform}</span>
+													<span className="flex-1 font-medium">{platform}</span>
 													<ArrowRight
-														className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 group-hover:translate-x-1 transition-all"
+														className="h-4 w-4 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-primary"
 														aria-hidden="true"
 													/>
 												</a>

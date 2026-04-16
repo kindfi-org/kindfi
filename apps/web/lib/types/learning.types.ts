@@ -28,7 +28,8 @@ export interface Resource {
 export interface NewsUpdate {
 	tags: string[]
 	description: ReactNode
-	image: string
+	/** Omitted when the post has no cover image (card shows accent bar instead). */
+	image?: string
 	slug: string
 	id: number
 	title: string

@@ -11,20 +11,17 @@ import { WhyKindFiIsDifferent } from '~/components/sections/about-us/why-is-diff
 export const metadata: Metadata = {
 	title: 'About Us | KindFi',
 	description:
-		'Learn how KindFi is transforming crowdfunding with transparent, milestone-based funding, blockchain, and AI. Our mission, vision, and roadmap for social impact.',
+		'Mission, how KindFi works, and why milestone-based funding on Stellar is built for transparent social impact.',
 	openGraph: {
 		title: 'About Us | KindFi',
 		description:
-			'Learn how KindFi is transforming crowdfunding with transparent, milestone-based funding, blockchain, and AI.',
+			'Milestone-based crowdfunding on Stellar: mission, product story, and roadmap.',
 	},
 }
 
 export default function AboutPage() {
 	return (
-		<main
-			className="w-full flex flex-col items-center text-center"
-			aria-label="About KindFi"
-		>
+		<main className="w-full flex flex-col" aria-label="About KindFi">
 			<Hero />
 			<MissionVision />
 			<Problems />

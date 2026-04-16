@@ -10,14 +10,9 @@ import {
 } from '~/components/base/card'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useI18n } from '~/lib/i18n'
-import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
 const MissionVision = () => {
 	const { t } = useI18n()
-	const mission = mockAboutUs?.missionVision?.mission
-	const vision = mockAboutUs?.missionVision?.vision
-
-	if (!mission || !vision) return null
 
 	return (
 		<motion.section
@@ -25,12 +20,12 @@ const MissionVision = () => {
 			whileInView={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
 			viewport={{ once: true, amount: 0.2 }}
-			className="flex flex-col items-center relative py-16 sm:py-20 lg:py-24 bg-white"
+			className="relative bg-muted/30 py-16 sm:py-20 lg:py-24"
 			aria-labelledby="about-our-purpose-heading"
 		>
-			<SectionContainer>
+			<SectionContainer maxWidth="6xl">
 				<motion.div
-					className="text-center mb-12 max-w-3xl mx-auto sm:mb-16"
+					className="mx-auto mb-12 max-w-3xl text-center sm:mb-16"
 					initial={{ opacity: 0, y: 20 }}
 					whileInView={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -38,37 +33,40 @@ const MissionVision = () => {
 				>
 					<h2
 						id="about-our-purpose-heading"
-						className="text-3xl font-bold tracking-tight gradient-text mb-3 sm:text-4xl"
+						className="mb-3 text-3xl font-bold tracking-tight gradient-text sm:text-4xl"
 					>
 						{t('about.ourPurpose')}
 					</h2>
-					<p className="text-muted-foreground text-base leading-relaxed sm:text-lg">
-						Our mission and vision for transparent, impact-driven crowdfunding.
+					<p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
+						{t('about.purposeLead')}
 					</p>
 				</motion.div>
 
-				<div className="flex flex-col md:flex-row gap-6 sm:gap-8 justify-center items-stretch z-10 max-w-5xl mx-auto">
+				<div className="mx-auto grid max-w-5xl grid-cols-1 items-stretch gap-6 md:grid-cols-2 md:gap-8">
 					<motion.div
 						initial={{ opacity: 0, y: 24 }}
 						whileInView={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+						transition={{
+							duration: 0.5,
+							ease: [0.22, 1, 0.36, 1],
+							delay: 0.05,
+						}}
 						viewport={{ once: true, amount: 0.2 }}
-						className="w-full"
 					>
-						<Card className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:border-emerald-100">
+						<Card className="h-full overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow duration-300 hover:shadow-md">
 							<div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
-							<CardHeader className="pt-6 pb-2 px-6">
+							<CardHeader className="px-6 pb-2 pt-6">
 								<div className="flex items-center gap-3">
-									<div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
-										<Target size={22} strokeWidth={2} />
+									<div className="rounded-xl bg-emerald-500/10 p-2.5 text-emerald-600">
+										<Target size={22} strokeWidth={2} aria-hidden />
 									</div>
-									<CardTitle className="text-xl font-semibold text-gray-900">
+									<CardTitle className="text-xl font-semibold text-foreground">
 										{t('about.missionTitle')}
 									</CardTitle>
 								</div>
 							</CardHeader>
-							<CardContent className="pb-6 px-6 pt-0">
-								<p className="text-muted-foreground text-base leading-relaxed">
+							<CardContent className="px-6 pb-6 pt-0 text-left">
+								<p className="text-base leading-relaxed text-muted-foreground">
 									{t('about.missionDesc')}
 								</p>
 							</CardContent>
@@ -78,24 +76,23 @@ const MissionVision = () => {
 					<motion.div
 						initial={{ opacity: 0, y: 24 }}
 						whileInView={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+						transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
 						viewport={{ once: true, amount: 0.2 }}
-						className="w-full"
 					>
-						<Card className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:border-indigo-100">
+						<Card className="h-full overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow duration-300 hover:shadow-md">
 							<div className="h-1 bg-gradient-to-r from-indigo-500 to-violet-600" />
-							<CardHeader className="pt-6 pb-2 px-6">
+							<CardHeader className="px-6 pb-2 pt-6">
 								<div className="flex items-center gap-3">
-									<div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
-										<EyeIcon size={22} strokeWidth={2} />
+									<div className="rounded-xl bg-indigo-500/10 p-2.5 text-indigo-600">
+										<EyeIcon size={22} strokeWidth={2} aria-hidden />
 									</div>
-									<CardTitle className="text-xl font-semibold text-gray-900">
+									<CardTitle className="text-xl font-semibold text-foreground">
 										{t('about.visionTitle')}
 									</CardTitle>
 								</div>
 							</CardHeader>
-							<CardContent className="pb-6 px-6 pt-0">
-								<p className="text-muted-foreground text-base leading-relaxed">
+							<CardContent className="px-6 pb-6 pt-0 text-left">
+								<p className="text-base leading-relaxed text-muted-foreground">
 									{t('about.visionDesc')}
 								</p>
 							</CardContent>
