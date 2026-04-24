@@ -5,23 +5,33 @@ import { NextResponse } from 'next/server'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { isValidRedirectUrl } from '~/lib/config/validate-url'
 import { Logger } from '~/lib/logger'
+import { authCallbackQuerySchema } from '~/lib/schemas/auth.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
 export async function GET(request: NextRequest) {
 	const requestUrl = new URL(request.url)
-	const code = requestUrl.searchParams.get('code')
-	const redirectUrl = requestUrl.searchParams.get('redirect')
+	const queryData = {
+		code: requestUrl.searchParams.get('code') ?? undefined,
+		redirect: requestUrl.searchParams.get('redirect') ?? '',
+	}
 
 	logger.info({
 		eventType: 'AUTH_CALLBACK_REQUEST',
 		url: requestUrl.toString(),
-		redirectUrl,
-		hasCode: !!code,
+		redirectUrl: queryData.redirect,
+		hasCode: !!queryData.code,
 	})
 
-	// If redirect URL is missing or invalid, return a JSON error
-	if (!redirectUrl || !isValidRedirectUrl(redirectUrl)) {
+	const validation = validateRequest(authCallbackQuerySchema, queryData)
+	if (!validation.success) {
+		return validation.response
+	}
+	const { code, redirect: redirectUrl } = validation.data
+
+	// If redirect URL is invalid (not in allowed domains), return a JSON error
+	if (!isValidRedirectUrl(redirectUrl)) {
 		logger.warn({
 			eventType: 'INVALID_REDIRECT_URL',
 			redirectUrl,

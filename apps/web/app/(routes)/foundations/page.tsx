@@ -7,12 +7,16 @@ import {
 import type { Metadata } from 'next'
 import { FoundationsClientWrapper } from '~/components/sections/foundations/foundations-client-wrapper'
 import { FoundationsHeader } from '~/components/sections/foundations/foundations-header'
-import { getAllFoundations } from '~/lib/queries/foundations/get-all-foundations'
+import { SectionContainer } from '~/components/shared/section-container'
+import {
+	getAllFoundations,
+	normalizeFoundationListSort,
+} from '~/lib/queries/foundations/get-all-foundations'
 
 export const metadata: Metadata = {
 	title: 'Foundations | KindFi',
 	description:
-		'Discover and support impactful foundations. Explore their missions, campaigns, and impact.',
+		'Discover nonprofit and community foundations on KindFi—missions, campaigns, and transparent impact.',
 }
 
 export default async function FoundationsPage({
@@ -22,7 +26,7 @@ export default async function FoundationsPage({
 }) {
 	const queryClient = new QueryClient()
 	const { sort } = await searchParams
-	const sortSlug = sort ?? 'most-recent'
+	const sortSlug = normalizeFoundationListSort(sort)
 
 	await prefetchSupabaseQuery(
 		queryClient,
@@ -34,11 +38,16 @@ export default async function FoundationsPage({
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<main className="container mx-auto p-4 md:p-12">
-			<FoundationsHeader />
-			<HydrationBoundary state={dehydratedState}>
-				<FoundationsClientWrapper />
-			</HydrationBoundary>
+		<main className="min-h-screen bg-muted/30" aria-label="Foundations directory">
+			<SectionContainer
+				maxWidth="6xl"
+				className="py-10 sm:py-14 lg:py-16"
+			>
+				<FoundationsHeader activeSort={sortSlug} />
+				<HydrationBoundary state={dehydratedState}>
+					<FoundationsClientWrapper />
+				</HydrationBoundary>
+			</SectionContainer>
 		</main>
 	)
 }

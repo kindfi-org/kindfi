@@ -121,7 +121,6 @@ export const usePasskeyAuthentication = (
 				})
 			}
 
-			console.log('verificationJSON:', verificationJSON)
 
 			// Convert pubKey object to Uint8Array, then to base64 string
 			const pubKeyArray =
@@ -134,7 +133,6 @@ export const usePasskeyAuthentication = (
 						)
 			const pubKeyString = Buffer.from(pubKeyArray).toString('base64')
 
-			console.log('base64PubKey:', pubKeyString)
 			const loginResult = await signIn('credentials', {
 				redirect: false,
 				userId: userId || verificationJSON.userId,
@@ -147,7 +145,6 @@ export const usePasskeyAuthentication = (
 				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, error.message)
 			})
 
-			console.log('Login result:', loginResult)
 
 			setAuthSuccess(message)
 			setIsNotRegistered(false)

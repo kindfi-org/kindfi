@@ -1,5 +1,10 @@
 import { supabase } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
+import {
+	createTagSchema,
+	paginationQuerySchema,
+} from '~/lib/schemas/tag.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 function generateColor(name: string): string {
 	const hash = [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0)
@@ -9,11 +14,16 @@ function generateColor(name: string): string {
 export async function GET(request: Request) {
 	try {
 		const { searchParams } = new URL(request.url)
-		const page = Number.parseInt(searchParams.get('page') || '1', 10)
-		const pageSize = Number.parseInt(searchParams.get('pageSize') || '20', 10)
-
-		const validPageSize = Math.min(Math.max(pageSize, 1), 100)
-		const validPage = Math.max(page, 1)
+		const queryData = {
+			page: searchParams.get('page'),
+			pageSize: searchParams.get('pageSize'),
+		}
+		const validation = validateRequest(paginationQuerySchema, queryData)
+		if (!validation.success) {
+			return validation.response
+		}
+		const validPage = validation.data.page ?? 1
+		const validPageSize = validation.data.pageSize ?? 20
 		const offset = (validPage - 1) * validPageSize
 
 		const { data, error, count } = await supabase
@@ -48,30 +58,12 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
 	try {
 		const body = await request.json()
-		if (!body.name) {
-			return NextResponse.json(
-				{ error: 'Tag name is required' },
-				{ status: 400 },
-			)
+		const validation = validateRequest(createTagSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
-
-		const tagName = body.name.trim()
-
-		if (tagName.length === 0) {
-			return NextResponse.json(
-				{ error: 'Tag name cannot be empty' },
-				{ status: 400 },
-			)
-		}
-
-		if (tagName.length > 50) {
-			return NextResponse.json(
-				{ error: 'Tag name must be 50 characters or less' },
-				{ status: 400 },
-			)
-		}
-
-		const color = body.color || generateColor(tagName)
+		const { name: tagName, color: colorInput } = validation.data
+		const color = colorInput || generateColor(tagName)
 
 		const { data, error } = await supabase
 			.from('project_tags')

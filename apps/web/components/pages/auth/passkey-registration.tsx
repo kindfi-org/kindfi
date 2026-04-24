@@ -93,12 +93,6 @@ export function PasskeyRegistrationComponent() {
 	}, [regSuccess, userEmail, userId, smartAccountAddress, router])
 
 	useEffect(() => {
-		console.log('Passkey registration success effect triggered', {
-			regSuccess,
-			userEmail,
-			userId,
-			smartAccountAddress,
-		})
 
 		// If registration succeeded but no Smart Account address, redirect to sign-in
 		// The passkey is still registered and can be used for authentication

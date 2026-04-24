@@ -81,6 +81,7 @@
 		"node-fetch": "^2.7.0",
 		"passkey-kit": "^0.11.3",
 		"pdfjs-dist": "^4.10.38",
+		"pg": "^8.20.0",
 		"react": "19.2.1",
 		"react-dom": "19.2.1",
 		"react-dropzone": "^14.3.8",

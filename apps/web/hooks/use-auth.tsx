@@ -6,7 +6,6 @@ import type {
 	Session as SupabaseSession,
 	User as SupabaseUser,
 } from '@supabase/supabase-js'
-import jwt from 'jsonwebtoken'
 import type { Session, User } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { createContext, useContext, useEffect, useState } from 'react'
@@ -53,16 +52,9 @@ export function AuthProvider({
 		// Move session check to useEffect to avoid hydration mismatch
 		const checkSession = async () => {
 			try {
-				console.log('🔑 Check User Data session result:', session)
-				console.log(
-					'🔑 Check User Data session decryption:',
-					jwt.decode(userSession?.user.jwt || ''),
-				)
-
 				const {
 					data: { session: supabaseSession },
 				} = await supabase.auth.getSession()
-				console.log('🔒 Supabase Session check result:', supabaseSession)
 				setSupabaseUser(supabaseSession?.user)
 			} catch (error) {
 				console.error('Auth check failed:', error)

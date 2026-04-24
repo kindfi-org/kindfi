@@ -1,6 +1,8 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { accountApproveSchema } from '~/lib/schemas/stellar.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/stellar/account/approve
@@ -13,22 +15,14 @@ import { NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()
-		const { accountAddress } = body
-
-		if (!accountAddress) {
-			return NextResponse.json(
-				{ error: 'Missing required field: accountAddress' },
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(accountApproveSchema, body)
+		if (!validation.success) return validation.response
+		const { accountAddress } = validation.data
 
 		const config = appEnvConfig('web')
 		// KYC server URL - use environment variable or default to localhost
 		const kycServerUrl = config.externalApis.kyc.baseUrl
 
-		console.log('🔐 Registering account in auth-controller via KYC server')
-		console.log('   Account:', accountAddress)
-		console.log('   KYC Server:', kycServerUrl)
 
 		// Call KYC server's create-passkey-account endpoint
 		// which handles the auth-controller registration
@@ -54,8 +48,6 @@ export async function POST(req: NextRequest) {
 
 		const result = await response.json()
 
-		console.log('✅ Account registered successfully')
-		console.log('   Transaction hash:', result.data?.transactionHash)
 
 		return NextResponse.json({
 			success: true,

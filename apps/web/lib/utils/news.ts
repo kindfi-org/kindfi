@@ -1,7 +1,14 @@
 import type { MdxPost } from '~/lib/mdx'
 import type { NewsUpdate } from '~/lib/types/learning.types'
 
-const PLACEHOLDER_IMG = '/images/placeholder.png'
+/** Human-readable label for URL slug categories (e.g. `product-update` → `Product update`). */
+export function formatNewsCategoryLabel(category: string): string {
+	return category
+		.split(/[-_]/g)
+		.filter(Boolean)
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+		.join(' ')
+}
 
 /**
  * Maps an MDX post to the shape expected by NewsCard.
@@ -13,7 +20,7 @@ export function mapPostToNewsUpdate(post: MdxPost, id = 0): NewsUpdate {
 		slug: post.slug,
 		title: post.title,
 		description: post.description,
-		image: post.image ?? PLACEHOLDER_IMG,
+		...(post.image ? { image: post.image } : {}),
 		date: post.date,
 		category: post.category ?? 'news',
 		tags: post.tags ?? [],

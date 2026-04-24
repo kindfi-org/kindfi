@@ -3,14 +3,17 @@ import {
 	Banknote,
 	CheckCircle,
 	Clock,
+	Eye,
 	FileCode,
 	Globe,
 	Lock,
 	type LucideIcon,
 	Network,
 	Shield,
+	ShieldCheck,
 	Star,
 	Users,
+	Zap,
 } from 'lucide-react'
 import * as React from 'react'
 import { cn } from '~/lib/utils'
@@ -18,6 +21,7 @@ import { cn } from '~/lib/utils'
 const icons: Record<string, LucideIcon> = {
 	lock: Lock,
 	shield: Shield,
+	'shield-check': ShieldCheck,
 	users: Users,
 	globe: Globe,
 	'check-circle': CheckCircle,
@@ -27,6 +31,8 @@ const icons: Record<string, LucideIcon> = {
 	'file-code': FileCode,
 	'badge-dollar-sign': BadgeDollarSign,
 	network: Network,
+	eye: Eye,
+	zap: Zap,
 }
 
 interface IconProps {

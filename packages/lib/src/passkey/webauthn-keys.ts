@@ -35,12 +35,8 @@ export function convertCoseToUncompressedPublicKey(
 			keyBuffer = cborPublicKey
 		}
 
-		console.log('🔍 Converting COSE public key to uncompressed format...')
-		console.log('   Input length:', keyBuffer.length, 'bytes')
-
 		// If already uncompressed format (65 bytes with 0x04 prefix)
 		if (keyBuffer.length === 65 && keyBuffer[0] === 0x04) {
-			console.log('✅ Public key already in uncompressed format')
 			return keyBuffer
 		}
 
@@ -69,14 +65,6 @@ export function convertCoseToUncompressedPublicKey(
 		const crv = coseKey[-1] as number
 		const xCoord = coseKey[-2] as Buffer
 		const yCoord = coseKey[-3] as Buffer
-
-		console.log('🔍 COSE key parameters:', {
-			kty: kty,
-			alg: alg,
-			crv: crv,
-			xCoordLength: xCoord?.length,
-			yCoordLength: yCoord?.length,
-		})
 
 		// Validate key type
 		if (kty && kty !== 2) {
@@ -118,10 +106,6 @@ export function convertCoseToUncompressedPublicKey(
 			yCoord, // Y coordinate (32 bytes)
 		])
 
-		console.log('✅ Converted to uncompressed secp256r1 format')
-		console.log('   Output length:', uncompressedKey.length, 'bytes')
-		console.log('   Hex:', uncompressedKey.toString('hex'))
-
 		if (uncompressedKey.length !== 65) {
 			throw new Error(
 				`Invalid uncompressed key length: ${uncompressedKey.length} (expected 65)`,
@@ -130,10 +114,6 @@ export function convertCoseToUncompressedPublicKey(
 
 		return uncompressedKey
 	} catch (error) {
-		console.error(
-			'❌ Failed to convert COSE key to uncompressed format:',
-			error,
-		)
 		throw new Error(
 			`COSE key conversion failed: ${error instanceof Error ? error.message : String(error)}`,
 		)
@@ -251,12 +231,6 @@ export function computeDeviceIdFromCoseKey(
 
 	// Hash the uncompressed key to get 32-byte device_id
 	const deviceIdBytes = createHash('sha256').update(uncompressedKey).digest()
-
-	console.log('🔑 Computed device_id from COSE public key:', {
-		coseLength: cosePublicKeyBase64.length,
-		uncompressedLength: uncompressedKey.length,
-		deviceId: deviceIdBytes.toString('hex'),
-	})
 
 	return deviceIdBytes.toString('hex')
 }

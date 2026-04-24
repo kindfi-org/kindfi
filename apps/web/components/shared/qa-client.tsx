@@ -214,7 +214,6 @@ export default function QAClient({
 					(
 						payload: RealtimePostgresChangesPayload<TablesUpdate<'comments'>>,
 					) => {
-						console.log('Real-time update received:', payload)
 
 						setRealtimeActivity(true)
 						setTimeout(() => setRealtimeActivity(false), 3000)
@@ -249,7 +248,6 @@ export default function QAClient({
 					},
 				)
 				.subscribe((status) => {
-					console.log('Subscription status:', status)
 					if (status === 'SUBSCRIBED') {
 						setRealtimeStatus('Real-time connection established')
 						setTimeout(() => setRealtimeStatus(null), 3000)

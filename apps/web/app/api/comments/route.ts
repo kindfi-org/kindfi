@@ -2,10 +2,11 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import {
-	COMMENT_TYPES,
+	commentsQuerySchema,
 	createCommentSchema,
 	validateParentComment,
 } from './validation'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
 	try {
@@ -22,43 +23,21 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 		}
 
 		const { searchParams } = req.nextUrl
-		const projectId = searchParams.get('project_id')
-		const projectUpdateId = searchParams.get('project_update_id')
-		const typeParam = searchParams.get('type')
-		const type =
-			typeParam &&
-			COMMENT_TYPES.includes(typeParam as (typeof COMMENT_TYPES)[number])
-				? (typeParam as (typeof COMMENT_TYPES)[number])
-				: null
-
-		// Mirror POST semantics: do not allow both scopes at once
-		if (projectId && projectUpdateId) {
-			return NextResponse.json(
-				{
-					success: false,
-					error: {
-						code: 'VALIDATION_ERROR',
-						message:
-							'Only one of project_id or project_update_id can be provided',
-					},
-				},
-				{ status: 400 },
-			)
+		const queryData = {
+			project_id: searchParams.get('project_id'),
+			project_update_id: searchParams.get('project_update_id'),
+			type: searchParams.get('type'),
+			limit: searchParams.get('limit'),
+			offset: searchParams.get('offset'),
 		}
-
-		// Guard against NaN and negative values for pagination
-		const limitParam = searchParams.get('limit')
-		const rawLimit = limitParam ? Number(limitParam) : NaN
-		const limit =
-			Number.isFinite(rawLimit) && rawLimit > 0
-				? Math.max(1, Math.min(Math.trunc(rawLimit), 100))
-				: 50
-
-		const offsetParam = searchParams.get('offset')
-		const rawOffset = offsetParam ? Number(offsetParam) : NaN
-		const offset = Number.isFinite(rawOffset)
-			? Math.max(0, Math.trunc(rawOffset))
-			: 0
+		const validation = validateRequest(commentsQuerySchema, queryData)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { project_id: projectId, project_update_id: projectUpdateId, type } =
+			validation.data
+		const limit = validation.data.limit ?? 50
+		const offset = validation.data.offset ?? 0
 
 		let query = supabase
 			.from('comments')

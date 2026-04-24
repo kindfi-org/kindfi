@@ -34,11 +34,27 @@
 			},
 			"suspicious": {
 				"recommended": true,
-				"noExplicitAny": "error"
+				"noExplicitAny": "error",
+				"noConsole": {
+					"level": "error",
+					"options": { "allow": ["warn", "error"] }
+				}
 			}
 		}
 	},
 	"javascript": {
 		"formatter": { "quoteStyle": "single", "semicolons": "asNeeded" }
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["**/scripts/**"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noConsole": "off"
+					}
+				}
+			}
+		}
+	]
 }

@@ -13,7 +13,6 @@ export function handleClientAuthError(error: AuthError): AuthResponse {
 
 	console.error('[Auth Error]', {
 		eventType: 'AUTH_ERROR',
-		errorMessage: error.message,
 		action: 'client_side_auth',
 		timestamp: new Date().toISOString(),
 	})

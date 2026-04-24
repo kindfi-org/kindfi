@@ -20,10 +20,6 @@ export const nextAuthOption: NextAuthOptions = {
 		async jwt({ token, user, account, trigger: _trigger }) {
 			// On sign in, populate the token with user data
 			if (user) {
-				console.log('🗝️ JWT callback - New sign in:', {
-					userId: user.id,
-					provider: account?.provider,
-				})
 
 				const userData = user as User
 
@@ -69,11 +65,6 @@ export const nextAuthOption: NextAuthOptions = {
 				return session
 			}
 
-			console.log('🗝️ Session callback - Building session:', {
-				hasToken: !!token,
-				tokenId: token.id,
-				tokenSub: token.sub,
-			})
 
 			// Build session from token
 			session.user = {
@@ -101,11 +92,6 @@ export const nextAuthOption: NextAuthOptions = {
 				session.supabaseAccessToken = token.supabaseAccessToken as string
 			}
 
-			console.log('🗝️ Session created:', {
-				hasNextAuthToken: !!session.user?.jwt,
-				hasSupabaseToken: !!session.supabaseAccessToken,
-				userId: session.user?.id,
-			})
 
 			return session
 		},
@@ -114,10 +100,6 @@ export const nextAuthOption: NextAuthOptions = {
 			return !!auth?.user
 		},
 		async signIn({ user, account }) {
-			console.log('🗝️ SignIn callback triggered:', {
-				userId: user.id,
-				provider: account?.provider,
-			})
 			return true
 		},
 	},

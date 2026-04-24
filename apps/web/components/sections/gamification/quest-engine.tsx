@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import {
 	CheckCircle2,
 	Clock,
+	ExternalLink,
 	Flag,
 	Sparkles,
 	Target,
@@ -20,6 +21,7 @@ import {
 } from '~/components/base/card'
 import { Progress } from '~/components/base/progress'
 import { staggerContainer } from '~/lib/constants/animations'
+import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 
 interface Quest {
 	id: string
@@ -31,6 +33,7 @@ interface Quest {
 	reward_points: number
 	expires_at: string | null
 	is_active: boolean
+	contract_address: string | null
 	progress?: {
 		current_value: number
 		is_completed: boolean
@@ -280,6 +283,18 @@ function QuestCard({ quest, index }: { quest: Quest; index: number }) {
 								Expires {new Date(quest.expires_at).toLocaleDateString()}
 							</span>
 						</div>
+					)}
+
+					{quest.contract_address && (
+						<a
+							href={getStellarExplorerUrl(quest.contract_address)}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+						>
+							<ExternalLink className="h-3 w-3" />
+							View on Stellar Expert
+						</a>
 					)}
 				</CardContent>
 			</Card>

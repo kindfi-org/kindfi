@@ -54,11 +54,6 @@ export class SmartWalletTransactionServiceV2 {
 	): Promise<TransactionChallengeV2> {
 		const { from, to, amount } = params
 
-		console.log('💸 Building XLM transfer transaction:', {
-			from,
-			to,
-			amount: `${amount / 10_000_000} XLM`,
-		})
 
 		// Build contract invocation for transfer_xlm
 		const contract = new Contract(from)
@@ -86,12 +81,6 @@ export class SmartWalletTransactionServiceV2 {
 	): Promise<TransactionChallengeV2> {
 		const { from, to, tokenAddress, amount } = params
 
-		console.log('💸 Building token transfer transaction:', {
-			from,
-			to,
-			token: tokenAddress,
-			amount,
-		})
 
 		// Build contract invocation for transfer_token
 		const contract = new Contract(from)
@@ -121,11 +110,6 @@ export class SmartWalletTransactionServiceV2 {
 	): Promise<TransactionChallengeV2> {
 		const { from, contractAddress, functionName, args = [] } = params
 
-		console.log('🔧 Building contract invocation transaction:', {
-			from,
-			contract: contractAddress,
-			function: functionName,
-		})
 
 		// Convert arguments to ScVal format
 		const scArgs = args.map((arg) => {
@@ -177,7 +161,6 @@ export class SmartWalletTransactionServiceV2 {
 		webAuthnSignature: WebAuthnSignatureData
 		publicKey: Uint8Array
 	}): Promise<{ transactionHash: string; status: string }> {
-		console.log('🚀 Submitting transaction via Channels service...')
 		console.warn(
 			'⚠️ submitTransactionWithWebAuthn requires Smart Account Kit SDK. ' +
 				'Use SmartAccountKitService.signAndSubmit() instead.',
@@ -197,7 +180,6 @@ export class SmartWalletTransactionServiceV2 {
 	 * @returns Balances for XLM and tokens
 	 */
 	async getBalances(smartWalletAddress: string): Promise<SmartWalletBalances> {
-		console.log('📊 Fetching balances for:', smartWalletAddress)
 
 		try {
 			// Get Native XLM SAC contract address
@@ -230,7 +212,6 @@ export class SmartWalletTransactionServiceV2 {
 				const retval = simulation.result.retval
 				const nativeValue = scValToNative(retval)
 				xlmBalance = nativeValue.toString()
-				console.log('✅ Balance retrieved:', xlmBalance, 'stroops')
 			}
 
 			return {
@@ -255,7 +236,6 @@ export class SmartWalletTransactionServiceV2 {
 	): Promise<TransactionChallengeV2> {
 		const { smartWalletAddress, operation } = params
 
-		console.log('🔧 Building transaction for Smart Account signing...')
 
 		// Simulate transaction to get auth requirements
 		const dummyAccount = new Account(smartWalletAddress, '0')
@@ -301,9 +281,6 @@ export class SmartWalletTransactionServiceV2 {
 			'hex',
 		)
 
-		console.log('✅ Transaction prepared for signing')
-		console.log('   Nonce:', nonce.toString())
-		console.log('   Signature expiration ledger:', signatureExpirationLedger)
 
 		return {
 			operation,

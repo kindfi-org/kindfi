@@ -3,25 +3,33 @@ import { Networks } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
-import type { EscrowFundData } from '~/lib/types/escrow/escrow-payload.types'
-import { validateEscrowFunding } from '~/lib/validators/escrow'
+import { escrowFundSchema } from '~/lib/schemas/escrow.schemas'
+import { generateUniqueId } from '~/lib/utils/id'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
-		const fundingData: EscrowFundData = await req.json()
-		const validationResult = validateEscrowFunding(fundingData)
-
-		if (!validationResult.success) {
-			return NextResponse.json(
-				{ error: 'Invalid escrow fund data', details: validationResult.errors },
-				{ status: 400 },
-			)
+		const body = await req.json()
+		const validation = validateRequest(escrowFundSchema, body)
+		if (!validation.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.fund',
+				resourceType: 'transaction',
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
+			return validation.response
 		}
-
-		const { signer, fundParams, metadata } = fundingData
+		const { signer, fundParams, metadata } = validation.data
 		const { userId, amount, transactionType, escrowContract } = fundParams
 
 		const { unsignedTransaction } = await createEscrowRequest({
@@ -69,6 +77,22 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.fund',
+			resourceType: 'transaction',
+			resourceId: dbResult.id,
+			actorId: fundParams.userId,
+			status: 'success',
+			durationMs: Date.now() - startTime,
+			metadata: {
+				transactionHash: txResponse.txHash,
+				amount,
+				escrowContract,
+				signer: AuditLogger.maskAddress(signer),
+			},
+		})
+
 		return NextResponse.json(
 			{
 				transactionId: dbResult.id,
@@ -81,6 +105,15 @@ export async function POST(req: NextRequest) {
 		console.error('Escrow Fund Error:', error)
 
 		if (error instanceof AppError) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.fund',
+				resourceType: 'transaction',
+				status: 'failure',
+				errorCode: String(error.statusCode),
+				durationMs: Date.now() - startTime,
+				metadata: { error: error.message },
+			})
 			return NextResponse.json(
 				{ error: error.message, details: error.details },
 				{ status: error.statusCode },
@@ -88,6 +121,16 @@ export async function POST(req: NextRequest) {
 		}
 
 		console.error('Internal server error during escrow initialization:', error)
+
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.fund',
+			resourceType: 'transaction',
+			status: 'failure',
+			errorCode: '500',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 
 		return NextResponse.json(
 			{

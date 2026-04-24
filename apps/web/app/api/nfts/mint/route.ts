@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { Logger } from '~/lib/logger'
+import { AuditLogger } from '~/lib/services/audit-logger'
 
 import {
 	buildNFTMetadata,
@@ -14,6 +15,9 @@ import {
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
 } from '~/lib/services/pinata'
+import { mintNftSchema } from '~/lib/schemas/nft.schemas'
+import { generateUniqueId } from '~/lib/utils/id'
+import { validateRequest } from '~/lib/utils/validation'
 import { getUserStats } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
@@ -32,6 +36,10 @@ const logger = new Logger()
  * - If stellar_address is not provided, resolves from devices table
  */
 export async function POST(req: NextRequest) {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
@@ -56,8 +64,20 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
+		const validation = validateRequest(mintNftSchema, body)
+		if (!validation.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'nft.mint',
+				resourceType: 'nft',
+				actorId: session.user.id,
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
+			return validation.response
+		}
 		const sessionUserId = session.user.id
-		const requestedUserId = body.user_id
+		const requestedUserId = validation.data.user_id
 
 		let userId: string
 
@@ -81,7 +101,8 @@ export async function POST(req: NextRequest) {
 			userId = sessionUserId
 		}
 
-		let stellarAddress: string | null = body.stellar_address || null
+		let stellarAddress: string | null =
+			validation.data.stellar_address || null
 
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
@@ -94,6 +115,16 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (existingNFT) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'nft.mint',
+				resourceType: 'nft',
+				resourceId: existingNFT.id,
+				actorId: session.user.id,
+				status: 'success',
+				durationMs: Date.now() - startTime,
+				metadata: { alreadyExists: true, tier: existingNFT.tier },
+			})
 			return NextResponse.json({
 				success: true,
 				message: 'User already has an NFT',
@@ -156,7 +187,6 @@ export async function POST(req: NextRequest) {
 			)
 			imageUri = uploadResult.ipfsUrl
 			imageIpfsHash = uploadResult.ipfsHash
-			console.log('[NFT Mint] Image uploaded to IPFS:', imageUri)
 		} catch (err) {
 			console.warn(
 				'[NFT Mint] Failed to upload image to Pinata, using placeholder:',
@@ -174,7 +204,6 @@ export async function POST(req: NextRequest) {
 				`kindfi-kinder-metadata-${userId.slice(0, 8)}`,
 			)
 			metadataIpfsHash = metaResult.ipfsHash
-			console.log('[NFT Mint] Metadata uploaded to IPFS:', metaResult.ipfsUrl)
 		} catch (err) {
 			console.warn('[NFT Mint] Failed to upload metadata to Pinata:', err)
 		}
@@ -230,11 +259,21 @@ export async function POST(req: NextRequest) {
 			})
 		}
 
-		console.log('[NFT Mint] Successfully minted NFT:', {
-			tokenId,
-			tier,
-			userId,
-			stellarAddress,
+
+		await auditLogger.log({
+			correlationId,
+			operation: 'nft.mint',
+			resourceType: 'nft',
+			resourceId: nftRecord?.id,
+			actorId: session.user.id,
+			status: 'success',
+			durationMs: Date.now() - startTime,
+			metadata: {
+				tokenId,
+				tier,
+				stellarAddress: AuditLogger.maskAddress(stellarAddress),
+				contractAddress: nftContractAddress,
+			},
 		})
 
 		return NextResponse.json({
@@ -246,6 +285,15 @@ export async function POST(req: NextRequest) {
 		})
 	} catch (error) {
 		console.error('Error in POST /api/nfts/mint:', error)
+		await auditLogger.log({
+			correlationId,
+			operation: 'nft.mint',
+			resourceType: 'nft',
+			status: 'failure',
+			errorCode: '500',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

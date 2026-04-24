@@ -2,6 +2,8 @@ import { appEnvConfig } from '@packages/lib/config'
 import { StellarPasskeyService } from '@packages/lib/stellar'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { accountInfoQuerySchema } from '~/lib/schemas/stellar.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * GET /api/stellar/account-info
@@ -12,14 +14,10 @@ import { NextResponse } from 'next/server'
 export async function GET(req: NextRequest) {
 	try {
 		const { searchParams } = new URL(req.url)
-		const address = searchParams.get('address')
-
-		if (!address) {
-			return NextResponse.json(
-				{ error: 'Missing address parameter' },
-				{ status: 400 },
-			)
-		}
+		const query = { address: searchParams.get('address') }
+		const validation = validateRequest(accountInfoQuerySchema, query)
+		if (!validation.success) return validation.response
+		const { address } = validation.data
 
 		const config = appEnvConfig('web')
 

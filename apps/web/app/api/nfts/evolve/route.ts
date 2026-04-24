@@ -1,8 +1,9 @@
-import { Redis } from '@upstash/redis'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import {
 	buildNFTMetadata,
 	determineTier,
@@ -12,14 +13,11 @@ import {
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
 } from '~/lib/services/pinata'
+import { evolveNftSchema } from '~/lib/schemas/nft.schemas'
+import { generateUniqueId } from '~/lib/utils/id'
+import { validateRequest } from '~/lib/utils/validation'
 import { IMPACT_SCORE_WEIGHTS } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
-
-// --- Rate Limiting Configuration ---
-const rateLimitMaxRequests = 3
-const rateLimitWindowSeconds = 60
-// Module-level Redis singleton to avoid per-request connection churn
-const redis = Redis.fromEnv()
 
 /**
  * POST /api/nfts/evolve
@@ -29,15 +27,31 @@ const redis = Redis.fromEnv()
  *
  * Body: { user_id?: string }
  */
-export async function POST(req: NextRequest) {
+async function evolveHandler(req: NextRequest): Promise<NextResponse> {
+	const auditLogger = new AuditLogger()
+	const correlationId = generateUniqueId('audit-')
+	const startTime = Date.now()
+
 	try {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 		const body = await req.json()
+		const validation = validateRequest(evolveNftSchema, body)
+		if (!validation.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'nft.evolve',
+				resourceType: 'nft',
+				actorId: session.user.id,
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+			})
+			return validation.response
+		}
 		const sessionUserId = session.user.id
-		const requestedUserId = body.user_id
+		const requestedUserId = validation.data.user_id
 
 		let userId: string
 
@@ -61,51 +75,6 @@ export async function POST(req: NextRequest) {
 			userId = sessionUserId
 		}
 
-		if (!body.nft_id) {
-			return new Response(
-				JSON.stringify({ error: 'Bad Request: Missing nft_id in payload.' }),
-				{ status: 400 },
-			)
-		}
-
-		// --- Rate Limiting via Upstash Redis ---
-		try {
-			// Secure key using strictly the authenticated session identity
-			const rateLimitKey = `rate_limit:nft_evolve:${session.user.id}`
-			const MAX_REQUESTS = rateLimitMaxRequests
-			const WINDOW_SECONDS = rateLimitWindowSeconds
-
-			// Atomically increment and set TTL on first request using a Lua script
-			// This prevents a leaked key (where INCR succeeds but EXPIRE fails)
-			const requests = (await redis.eval(
-				`local count = redis.call("INCR", KEYS[1])
-                 if count == 1 then
-                   redis.call("EXPIRE", KEYS[1], ARGV[1])
-                 end
-                 return count`,
-				[rateLimitKey],
-				[WINDOW_SECONDS],
-			)) as number
-
-			if (requests && requests > MAX_REQUESTS) {
-				console.warn(
-					'[Rate Limit Exceeded] User attempted to evolve NFT too frequently.',
-				)
-				return NextResponse.json(
-					{ error: 'Too many requests. Please try again later.' },
-					{
-						status: 429,
-						headers: {
-							'Retry-After': WINDOW_SECONDS.toString(),
-						},
-					},
-				)
-			}
-		} catch (redisError) {
-			// Fail open: If Redis goes down, we log it but don't block the user from evolving their NFT
-			console.error('[Rate Limiting] Redis error:', redisError)
-		}
-		// --- End Rate Limiting ---
 
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
@@ -158,12 +127,6 @@ export async function POST(req: NextRequest) {
 			})
 		}
 
-		console.log('[NFT Evolve] Upgrading tier:', {
-			userId,
-			from: currentTier,
-			to: newTier,
-			impactScore: stats.impactScore,
-		})
 
 		// Generate and upload new tier image
 		let imageUri = ''
@@ -248,10 +211,21 @@ export async function POST(req: NextRequest) {
 			console.error('[NFT Evolve] Database update failed:', dbError)
 		}
 
-		console.log('[NFT Evolve] Successfully evolved NFT:', {
-			tokenId: existingNFT.token_id,
-			from: currentTier,
-			to: newTier,
+
+		await auditLogger.log({
+			correlationId,
+			operation: 'nft.evolve',
+			resourceType: 'nft',
+			resourceId: existingNFT.id,
+			actorId: session.user.id,
+			status: 'success',
+			durationMs: Date.now() - startTime,
+			metadata: {
+				tokenId: existingNFT.token_id,
+				previousTier: currentTier,
+				newTier,
+				impactScore: stats.impactScore,
+			},
 		})
 
 		return NextResponse.json({
@@ -265,6 +239,15 @@ export async function POST(req: NextRequest) {
 		})
 	} catch (error) {
 		console.error('Error in POST /api/nfts/evolve:', error)
+		await auditLogger.log({
+			correlationId,
+			operation: 'nft.evolve',
+			resourceType: 'nft',
+			status: 'failure',
+			errorCode: '500',
+			durationMs: Date.now() - startTime,
+			metadata: { error: error instanceof Error ? error.message : String(error) },
+		})
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },
@@ -345,3 +328,14 @@ async function getUserStats(
 		referralCount,
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: async (req) => {
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? req.ip ?? 'anonymous'
+		},
+	},
+	evolveHandler,
+)

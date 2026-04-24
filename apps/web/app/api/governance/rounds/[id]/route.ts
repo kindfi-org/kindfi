@@ -2,6 +2,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { governanceRoundIdParamSchema } from '~/lib/schemas/governance.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * GET /api/governance/rounds/[id]
@@ -15,6 +17,9 @@ export async function GET(
 ) {
 	try {
 		const { id } = await params
+		const validation = validateRequest(governanceRoundIdParamSchema, { id })
+		if (!validation.success) return validation.response
+		const { id: validatedId } = validation.data
 		const session = await getServerSession(nextAuthOption)
 		const { supabase } = await import('@packages/lib/supabase')
 
@@ -27,7 +32,7 @@ export async function GET(
 			.select(
 				`*, options:governance_options!governance_options_round_id_fkey(*)`,
 			)
-			.eq('id', id)
+			.eq('id', validatedId)
 			.single()
 
 		if (error || !round) {
@@ -38,7 +43,7 @@ export async function GET(
 		const { data: votes } = await supabase
 			.from('governance_votes')
 			.select('option_id, vote_type, vote_weight, user_id')
-			.eq('round_id', id)
+			.eq('round_id', validatedId)
 
 		const weightMap: Record<string, { up: number; down: number }> = {}
 		let userVote: { option_id: string; vote_type: string } | null = null

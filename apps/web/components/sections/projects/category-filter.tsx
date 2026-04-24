@@ -47,7 +47,6 @@ export function CategoryFilter({
 
 	// DEBUG: Log selected categories to see what's being tracked
 	useEffect(() => {
-		console.log('Selected Categories:', selectedCategories)
 	}, [selectedCategories])
 
 	// Calculate how far right the thumb can go
@@ -105,7 +104,7 @@ export function CategoryFilter({
 			updateThumbPosition()
 		}
 
-		container.addEventListener('scroll', handleScroll)
+		container.addEventListener('scroll', handleScroll, { passive: true })
 		window.addEventListener('resize', updateThumbSize)
 
 		// Initial calculations
@@ -157,7 +156,7 @@ export function CategoryFilter({
 		}
 
 		if (isDragging) {
-			window.addEventListener('mousemove', handleMouseMove)
+			window.addEventListener('mousemove', handleMouseMove, { passive: true })
 			window.addEventListener('mouseup', handleMouseUp)
 		}
 
@@ -173,7 +172,6 @@ export function CategoryFilter({
 		const isSelected = selectedCategories.some(
 			(selected) => selected.toLowerCase() === category.toLowerCase(),
 		)
-		console.log(`Category: ${category}, Selected: ${isSelected}`)
 		return isSelected
 	}
 
@@ -227,7 +225,6 @@ export function CategoryFilter({
 										: `bg-gray-100 text-gray-600 hover:${color}`
 								}`}
 								onClick={() => {
-									console.log(`Clicked: ${category}`)
 									onCategoryToggle(category)
 								}}
 								aria-pressed={isSelected}

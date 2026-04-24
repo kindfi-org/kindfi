@@ -6,6 +6,7 @@ import type { NextRequest } from 'next/server'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { Logger } from '~/lib/logger'
+import { authConfirmQuerySchema } from '~/lib/schemas/auth.schemas'
 
 const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
@@ -13,24 +14,28 @@ const rateLimiter = new RateLimiter()
 
 export async function GET(request: NextRequest) {
 	const { searchParams } = new URL(request.url)
-	const tokenHash = searchParams.get('token_hash')
-	const type = searchParams.get('type') as EmailOtpType | null
-	const next = searchParams.get('next') ?? '/'
+	const queryData = {
+		token_hash: searchParams.get('token_hash') ?? '',
+		type: searchParams.get('type') ?? '',
+		next: searchParams.get('next') ?? '/',
+	}
 
 	logger.info({
 		eventType: 'EMAIL_VERIFICATION_REQUEST',
-		hasToken: !!tokenHash,
-		type,
+		hasToken: !!queryData.token_hash,
+		type: queryData.type,
 	})
 
-	if (!tokenHash || !type) {
+	const parsed = authConfirmQuerySchema.safeParse(queryData)
+	if (!parsed.success) {
 		logger.warn({
 			eventType: 'INVALID_VERIFICATION_REQUEST',
-			hasToken: !!tokenHash,
-			hasType: !!type,
+			hasToken: !!queryData.token_hash,
+			hasType: !!queryData.type,
 		})
 		redirect('/error?reason=missing_parameters')
 	}
+	const { token_hash: tokenHash, type, next } = parsed.data
 
 	// Get client IP for rate limiting
 	const headersList = await headers()
@@ -56,7 +61,7 @@ export async function GET(request: NextRequest) {
 	try {
 		const supabase = await createSupabaseServerClient()
 		const { error } = await supabase.auth.verifyOtp({
-			type,
+			type: type as EmailOtpType,
 			token_hash: tokenHash,
 		})
 

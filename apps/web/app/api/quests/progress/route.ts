@@ -4,13 +4,15 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { questProgressSchema } from '~/lib/schemas/quest.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 const rateLimiter = new RateLimiter()
-const QUEST_PROGRESS_ALLOWED_ROLES = ['service', 'recorder'] as const
 
 /**
  * POST /api/quests/progress
- * Update user's quest progress (service/recorder role)
+ * Update user's quest progress.
+ * Called internally by the contributions flow and authenticated via session.
  */
 export async function POST(req: NextRequest) {
 	try {
@@ -27,29 +29,15 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 		}
 
-		const userRole = session.user.role
-		const isAllowedRole = userRole
-			? QUEST_PROGRESS_ALLOWED_ROLES.includes(
-					userRole as (typeof QUEST_PROGRESS_ALLOWED_ROLES)[number],
-				)
-			: false
-
-		if (!isAllowedRole) {
-			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-		}
-
 		const body = await req.json()
-		const { quest_id, progress_value, user_address } = body
+		const validation = validateRequest(questProgressSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { quest_id, progress_value, user_address } = validation.data
 
 		// Use session user_id to ensure RLS policies work correctly
 		const user_id = session.user.id
-
-		if (quest_id === undefined || progress_value === undefined) {
-			return NextResponse.json(
-				{ error: 'Missing required fields: quest_id, progress_value' },
-				{ status: 400 },
-			)
-		}
 
 		// Use service role client to bypass RLS, but ensure user_id matches session
 		// This is necessary because these operations are triggered server-side after donations
@@ -98,13 +86,6 @@ export async function POST(req: NextRequest) {
 			error?: string
 		} | null = null
 
-		console.log('[Quest API] Contract call conditions:', {
-			hasStellarAddress: !!stellarAddress,
-			hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
-			stellarAddress: stellarAddress || 'N/A',
-			questId: quest_id,
-			progress_value,
-		})
 
 		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			try {
@@ -114,13 +95,8 @@ export async function POST(req: NextRequest) {
 					process.env.QUEST_CONTRACT_ADDRESS ||
 					process.env.NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS
 
-				console.log(
-					'[Quest API] Quest contract address:',
-					questContractAddress || 'NOT SET',
-				)
 
 				if (questContractAddress) {
-					console.log('[Quest API] Calling quest contract...')
 					contractResult = await contractService.updateQuestProgress(
 						questContractAddress,
 						{
@@ -130,7 +106,6 @@ export async function POST(req: NextRequest) {
 						},
 					)
 
-					console.log('[Quest API] Contract call result:', contractResult)
 
 					if (!contractResult.success) {
 						console.error(
@@ -139,9 +114,6 @@ export async function POST(req: NextRequest) {
 						)
 						// Continue with database update even if contract call fails
 					} else {
-						console.log(
-							'[Quest API] Successfully updated quest progress on-chain',
-						)
 					}
 				} else {
 					console.warn('[Quest API] Quest contract address not configured')
@@ -151,13 +123,6 @@ export async function POST(req: NextRequest) {
 				// Continue with database update even if contract call fails
 			}
 		} else {
-			console.log(
-				'[Quest API] Skipping contract call - missing requirements:',
-				{
-					hasStellarAddress: !!stellarAddress,
-					hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
-				},
-			)
 		}
 
 		if (!quest.is_active) {

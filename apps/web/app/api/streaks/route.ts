@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { recordStreakSchema } from '~/lib/schemas/streak.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * GET /api/streaks
@@ -58,17 +60,14 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { period, donation_timestamp, user_address } = body
+		const validation = validateRequest(recordStreakSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { period, donation_timestamp, user_address } = validation.data
 
 		// Use session user_id to ensure RLS policies work correctly
 		const user_id = session.user.id
-
-		if (!period) {
-			return NextResponse.json(
-				{ error: 'Missing required fields: period' },
-				{ status: 400 },
-			)
-		}
 
 		// Use service role client to bypass RLS, but ensure user_id matches session
 		// This is necessary because these operations are triggered server-side after donations
@@ -106,13 +105,6 @@ export async function POST(req: NextRequest) {
 			error?: string
 		} | null = null
 
-		console.log('[Streak API] Contract call conditions:', {
-			hasStellarAddress: !!stellarAddress,
-			hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
-			stellarAddress: stellarAddress || 'N/A',
-			period,
-			donationTimestamp: donationTimestampUnix,
-		})
 
 		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			try {
@@ -121,13 +113,8 @@ export async function POST(req: NextRequest) {
 					process.env.STREAK_CONTRACT_ADDRESS ||
 					process.env.NEXT_PUBLIC_STREAK_CONTRACT_ADDRESS
 
-				console.log(
-					'[Streak API] Streak contract address:',
-					streakContractAddress || 'NOT SET',
-				)
 
 				if (streakContractAddress) {
-					console.log('[Streak API] Calling streak contract...')
 					contractResult = await contractService.recordStreakDonation(
 						streakContractAddress,
 						{
@@ -137,7 +124,6 @@ export async function POST(req: NextRequest) {
 						},
 					)
 
-					console.log('[Streak API] Contract call result:', contractResult)
 
 					if (!contractResult.success) {
 						console.error(
@@ -146,7 +132,6 @@ export async function POST(req: NextRequest) {
 						)
 						// Continue with database update even if contract call fails
 					} else {
-						console.log('[Streak API] Successfully recorded streak on-chain')
 					}
 				} else {
 					console.warn('[Streak API] Streak contract address not configured')
@@ -156,13 +141,6 @@ export async function POST(req: NextRequest) {
 				// Continue with database update even if contract call fails
 			}
 		} else {
-			console.log(
-				'[Streak API] Skipping contract call - missing requirements:',
-				{
-					hasStellarAddress: !!stellarAddress,
-					hasSorobanKey: !!process.env.SOROBAN_PRIVATE_KEY,
-				},
-			)
 		}
 
 		// Get existing streak or create new (use maybeSingle to handle missing records)

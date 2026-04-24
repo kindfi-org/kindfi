@@ -1,6 +1,8 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { transferPrepareSchema } from '~/lib/schemas/stellar.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 import {
 	SmartWalletTransactionService,
 	type TransactionChallenge,
@@ -14,17 +16,11 @@ import {
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()
-		const { from, to, amount, asset, sponsorFees } = body
-
-		// Validate inputs
-		if (!from || !to || !amount) {
-			return NextResponse.json(
-				{
-					error: 'Missing required fields: from, to, amount',
-				},
-				{ status: 400 },
-			)
+		const validation = validateRequest(transferPrepareSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
+		const { from, to, amount, asset, sponsorFees } = validation.data
 
 		// Get configuration
 		const config = appEnvConfig('web')

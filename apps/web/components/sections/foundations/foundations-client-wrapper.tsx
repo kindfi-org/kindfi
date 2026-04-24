@@ -3,16 +3,20 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Building2 } from 'lucide-react'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useMemo } from 'react'
 import { Button } from '~/components/base/button'
 import { FoundationCard } from '~/components/sections/foundations/foundation-card'
 import { staggerContainer } from '~/lib/constants/animations'
-import { getAllFoundations } from '~/lib/queries/foundations/get-all-foundations'
+import {
+	getAllFoundations,
+	normalizeFoundationListSort,
+} from '~/lib/queries/foundations/get-all-foundations'
 
 export function FoundationsClientWrapper() {
 	const searchParams = useSearchParams()
-	const sortParam = searchParams.get('sort') ?? 'most-recent'
+	const sortSlug = normalizeFoundationListSort(searchParams.get('sort'))
 
 	const {
 		data: foundations = [],
@@ -20,9 +24,9 @@ export function FoundationsClientWrapper() {
 		error,
 	} = useSupabaseQuery(
 		'foundations',
-		(client) => getAllFoundations(client, sortParam),
+		(client) => getAllFoundations(client, sortSlug),
 		{
-			additionalKeyValues: [sortParam],
+			additionalKeyValues: [sortSlug],
 		},
 	)
 
@@ -31,8 +35,7 @@ export function FoundationsClientWrapper() {
 			['a', 'b', 'c', 'd', 'e', 'f'].map((id) => (
 				<div
 					key={`skeleton-${id}`}
-					className="h-full bg-muted animate-pulse rounded-xl"
-					style={{ minHeight: '400px' }}
+					className="min-h-[22rem] animate-pulse rounded-2xl border border-border bg-card"
 				/>
 			)),
 		[],
@@ -40,7 +43,7 @@ export function FoundationsClientWrapper() {
 
 	if (isLoading) {
 		return (
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 				{loadingSkeletons}
 			</div>
 		)
@@ -48,31 +51,48 @@ export function FoundationsClientWrapper() {
 
 	if (error) {
 		return (
-			<div className="text-center py-16">
+			<div className="rounded-2xl border border-border bg-card px-6 py-16 text-center">
 				<Building2
-					className="h-16 w-16 text-muted-foreground mx-auto mb-4"
+					className="mx-auto mb-4 h-14 w-14 text-muted-foreground"
 					aria-hidden="true"
 				/>
-				<h2 className="text-2xl font-bold mb-2">Error Loading Foundations</h2>
-				<p className="text-muted-foreground mb-6">
-					We couldn&apos;t load the foundations. Please try again later.
+				<h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
+					We couldn&apos;t load foundations
+				</h2>
+				<p className="mx-auto mt-2 max-w-md text-muted-foreground">
+					Check your connection and try again. If the problem continues, try back
+					later.
 				</p>
-				<Button onClick={() => window.location.reload()}>Retry</Button>
+				<Button
+					className="mt-6"
+					onClick={() => window.location.reload()}
+					type="button"
+				>
+					Retry
+				</Button>
 			</div>
 		)
 	}
 
 	if (foundations.length === 0) {
 		return (
-			<div className="text-center py-16">
-				<div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-purple-100 mb-6">
-					<Building2 className="h-10 w-10 text-purple-600" aria-hidden="true" />
+			<div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
+				<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+					<Building2
+						className="h-8 w-8 text-muted-foreground"
+						aria-hidden="true"
+					/>
 				</div>
-				<h2 className="text-2xl font-bold mb-2">No Foundations Yet</h2>
-				<p className="text-muted-foreground max-w-md mx-auto">
-					Explore back later to discover foundations making an impact in their
-					communities.
+				<h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
+					No foundations yet
+				</h2>
+				<p className="mx-auto mt-2 max-w-md text-muted-foreground">
+					When organizations join KindFi, they will appear here. You can register
+					your foundation to get started.
 				</p>
+				<Button asChild className="mt-6">
+					<Link href="/create-foundation">Create a foundation</Link>
+				</Button>
 			</div>
 		)
 	}
@@ -80,12 +100,12 @@ export function FoundationsClientWrapper() {
 	return (
 		<AnimatePresence mode="wait">
 			<motion.div
-				key={sortParam}
+				key={sortSlug}
 				variants={staggerContainer}
 				initial="initial"
 				animate="animate"
 				exit="exit"
-				className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+				className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
 			>
 				{foundations.map((foundation, index) => (
 					<motion.div

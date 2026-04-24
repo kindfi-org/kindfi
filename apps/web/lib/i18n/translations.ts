@@ -605,6 +605,82 @@ export const translations = {
 			visionTitle: 'Vision',
 			visionDesc:
 				'A world where every donation is verifiable, every project is trusted, and every supporter becomes an agent of change through decentralized technology.',
+			purposeLead:
+				'Mission and vision guide how we design products, partnerships, and on-chain fund flows end to end.',
+
+			howItWorksSectionTitle: 'How KindFi works',
+			howItWorksSectionSubtitle:
+				'From campaign intake to milestone payouts—each stage is built to reduce risk for donors and friction for creators.',
+			howSteps: {
+				one: {
+					title: 'Campaign intake and review',
+					description:
+						'Creators define goals and milestones. We help catch gaps early so serious, well scoped campaigns reach donors.',
+				},
+				two: {
+					title: 'Donations held in escrow',
+					description:
+						'Contributions settle on Stellar and stay in programmable escrow until milestones are satisfied—reducing misuse and restoring trust.',
+				},
+				three: {
+					title: 'Evidence based releases',
+					description:
+						'Funds unlock in tranches when verified proof is submitted. Supporters see what was promised and what actually shipped.',
+				},
+				four: {
+					title: 'Community reputation',
+					description:
+						'Quests, streaks, and lightweight governance reward long term participation so the network strengthens over time.',
+				},
+			},
+
+			whyDifferentTitle: 'Why KindFi is different',
+			whyDifferentSubtitle:
+				'We combine Stellar efficiency with contract enforced milestones so social impact stays measurable, not aspirational.',
+			whyDifferentItems: {
+				transparency: {
+					title: 'Verifiable by default',
+					description:
+						'Funding state and milestone history are anchored on-chain so anyone can audit progress without privileged access.',
+				},
+				escrow: {
+					title: 'Progress tied payouts',
+					description:
+						'Escrow releases value when work is demonstrated—designing out the take the money and disappear failure mode.',
+				},
+				access: {
+					title: 'Built for global donors',
+					description:
+						'Fast settlement and predictable fees make cross border support practical—especially for LATAM communities.',
+				},
+			},
+
+			roadmapSectionTitle: 'What we are building next',
+			roadmapSectionSubtitle:
+				'Priorities that make transparent crowdfunding safer to launch and easier to participate in.',
+			roadmapItems: {
+				ai: {
+					title: 'Smarter, safer onboarding',
+					description:
+						'Assist creators with structured narratives and consistency checks while keeping human review before budgets go live.',
+				},
+				partnerships: {
+					title: 'Partnerships that scale trust',
+					description:
+						'Collaborate with NGOs and foundations to bring verified programs on chain with shared accountability.',
+				},
+				soroban: {
+					title: 'Stronger on chain controls',
+					description:
+						'Extend Soroban escrows for disputes, referrals, and transparent program accounts as adoption grows.',
+				},
+				rails: {
+					title: 'Simpler paths to contribute',
+					description:
+						'Improve on ramps and asset choice so more people can fund causes without fighting infrastructure.',
+				},
+			},
+
 			values: 'Our Values',
 			team: 'Our Team',
 			partners: 'Partners',
@@ -1254,6 +1330,82 @@ export const translations = {
 			visionTitle: 'Visión',
 			visionDesc:
 				'Un mundo donde cada donación sea verificable, cada proyecto sea confiable y cada partidario se convierta en un agente de cambio a través de tecnología descentralizada.',
+			purposeLead:
+				'Misión y visión guían cómo diseñamos productos, alianzas y flujos de fondos on-chain de punta a punta.',
+
+			howItWorksSectionTitle: 'Cómo funciona KindFi',
+			howItWorksSectionSubtitle:
+				'Desde la recepción de la campaña hasta los pagos por hitos—cada etapa reduce riesgo para donantes y fricción para creadores.',
+			howSteps: {
+				one: {
+					title: 'Recepción y revisión de campañas',
+					description:
+						'Los creadores definen metas e hitos. Ayudamos a detectar vacíos temprano para que solo campañas serias lleguen a los donantes.',
+				},
+				two: {
+					title: 'Donaciones en custodia (escrow)',
+					description:
+						'Las contribuciones se liquidan en Stellar y permanecen en un escrow programable hasta cumplir hitos—menos mal uso y más confianza.',
+				},
+				three: {
+					title: 'Liberaciones basadas en evidencia',
+					description:
+						'Los fondos se liberan por tramos cuando hay pruebas verificadas. Los partidarios ven lo prometido y lo entregado.',
+				},
+				four: {
+					title: 'Reputación comunitaria',
+					description:
+						'Misiones, rachas y gobernanza ligera premian la participación a largo plazo para fortalecer la red con el tiempo.',
+				},
+			},
+
+			whyDifferentTitle: 'Por qué KindFi es distinto',
+			whyDifferentSubtitle:
+				'Combinamos la eficiencia de Stellar con hitos exigibles por contrato para que el impacto social sea medible, no solo aspiracional.',
+			whyDifferentItems: {
+				transparency: {
+					title: 'Verificable por diseño',
+					description:
+						'El estado de los fondos y el historial de hitos quedan anclados on-chain para que cualquiera audite el progreso sin acceso privilegiado.',
+				},
+				escrow: {
+					title: 'Pagos ligados al avance',
+					description:
+						'El escrow libera valor cuando el trabajo está demostrado—reduciendo el riesgo de tomar el dinero y desaparecer.',
+				},
+				access: {
+					title: 'Pensado para donantes globales',
+					description:
+						'Liquidación rápida y comisiones predecibles hacen viable el apoyo transfronterizo—especialmente en comunidades de LATAM.',
+				},
+			},
+
+			roadmapSectionTitle: 'Qué estamos construyendo',
+			roadmapSectionSubtitle:
+				'Prioridades para que el crowdfunding transparente sea más seguro de lanzar y más fácil de usar.',
+			roadmapItems: {
+				ai: {
+					title: 'Incorporación más inteligente y segura',
+					description:
+						'Apoyar a creadores con narrativas estructuradas y chequeos de consistencia, con revisión humana antes de activar presupuestos.',
+				},
+				partnerships: {
+					title: 'Alianzas que escalan la confianza',
+					description:
+						'Colaborar con ONG y fundaciones para llevar programas verificados on-chain con responsabilidad compartida.',
+				},
+				soroban: {
+					title: 'Controles on-chain más sólidos',
+					description:
+						'Ampliar escrows en Soroban para disputas, referidos y cuentas de programa transparentes a medida que crece la adopción.',
+				},
+				rails: {
+					title: 'Formas más simples de aportar',
+					description:
+						'Mejorar rampas fiat y la elección de activos para que más personas financien causas sin pelearse con la infraestructura.',
+				},
+			},
+
 			values: 'Nuestros Valores',
 			team: 'Nuestro Equipo',
 			partners: 'Socios',

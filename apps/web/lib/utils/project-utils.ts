@@ -190,6 +190,15 @@ export function normalizeProjectToFormDefaults(
  * @param formData - The FormData object from a POST or PATCH request
  * @returns An object containing normalized values for project fields
  */
+function safeJsonParse<T>(raw: string | null, fallback: T): T {
+	if (!raw) return fallback
+	try {
+		return JSON.parse(raw) as T
+	} catch {
+		return fallback
+	}
+}
+
 export function parseFormData(formData: FormData) {
 	return {
 		projectId: formData.get('projectId') as string | null,
@@ -201,8 +210,8 @@ export function parseFormData(formData: FormData) {
 		website: formData.get('website') as string,
 		location: formData.get('location') as string,
 		category: formData.get('category') as string,
-		tags: JSON.parse(formData.get('tags') as string),
-		socialLinks: JSON.parse(formData.get('socialLinks') as string),
+		tags: safeJsonParse(formData.get('tags') as string, [] as { name: string; color: string }[]),
+		socialLinks: safeJsonParse(formData.get('socialLinks') as string, [] as string[]),
 		image: formData.get('image') as File | null,
 		foundationId: (formData.get('foundationId') as string) || undefined,
 	}

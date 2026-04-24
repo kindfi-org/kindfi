@@ -7,6 +7,8 @@ import {
 	getRpIdFromOrigin,
 	getRpNameFromOrigin,
 } from '@/lib/passkey/rp-id-helper'
+import { generateRegistrationOptionsSchema } from '~/lib/schemas/passkey.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/passkey/generate-registration-options
@@ -17,25 +19,16 @@ import {
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()
-		const { identifier, origin, userId } = body
-
-		if (!identifier || !origin) {
-			return NextResponse.json(
-				{ error: 'Missing required fields: identifier, origin' },
-				{ status: 400 },
-			)
+		const validation = validateRequest(generateRegistrationOptionsSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
+		const { identifier, origin, userId } = validation.data
 
 		const config = appEnvConfig('web')
 		const rpId = getRpIdFromOrigin(origin)
 		const rpName = getRpNameFromOrigin(origin)
 
-		console.log('🔐 Generating registration options:', {
-			origin,
-			rpId,
-			rpName,
-			identifier,
-		})
 
 		// Get user from database (or create empty credentials array if new user)
 		const userResponse = await getUser({

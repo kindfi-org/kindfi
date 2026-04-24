@@ -34,7 +34,6 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 
 	const stellarSignature = useStellarSignature({
 		onSuccess: (result) => {
-			console.log('✅ Transaction successful:', result)
 			// Refresh account info after successful transaction
 			if (account?.contractId) {
 				refreshAccountInfo()
@@ -84,15 +83,9 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 			}
 
 			if (accountData.status === 'not_found') {
-				console.log(
-					'❌ No existing account for logged user, simulating approval process...',
-				)
 
 				// SIMULATION: In production, this should only happen after KYC approval
 				// For testing purposes, we'll simulate the account creation
-				console.log(
-					'🧪 SIMULATION: Creating Stellar account (this should only happen after approval)',
-				)
 
 				const newAccount = await stellarSignature.approveKYCAccount()
 

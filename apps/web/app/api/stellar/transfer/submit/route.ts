@@ -3,6 +3,7 @@ import {
 	buildWebAuthnSignatureScVal,
 	computeDeviceIdFromCoseKey,
 	type verifyAuthentication,
+	type WebAuthnAssertionResponse,
 } from '@packages/lib/passkey'
 import {
 	Keypair,
@@ -14,6 +15,8 @@ import { type Api, Server } from '@stellar/stellar-sdk/rpc'
 import isEqual from 'lodash/isEqual'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { transferSubmitSchema } from '~/lib/schemas/stellar.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 // Don't initialize services at module level - do it inside the route handler
 // This prevents build-time errors when environment variables are not available
@@ -30,42 +33,14 @@ export async function POST(req: NextRequest) {
 		const appConfig = appEnvConfig('web')
 
 		const body = await req.json()
-		const { transactionData, authResponse, userDevice } = body
+		const validation = validateRequest(transferSubmitSchema, body)
+		if (!validation.success) return validation.response
+		const { transactionData, authResponse, userDevice, verificationJSON } = validation.data
 		const { transactionXDR, hash: _hash } = transactionData
-		const smartWalletAddress = userDevice?.address
-		const verificationJSON = body.verificationJSON as Awaited<
+		const smartWalletAddress = userDevice.address
+		const verificationJSONTyped = verificationJSON as Awaited<
 			ReturnType<typeof verifyAuthentication>
 		>
-		console.log(
-			'verificationJSON: WebAuthn Key Verified. user is now authored to sign. getting attestation public key',
-			{ verificationJSON },
-		)
-
-		// Validate inputs
-		if (
-			!transactionXDR ||
-			!authResponse ||
-			!smartWalletAddress ||
-			!verificationJSON?.device?.pubKey
-		) {
-			return NextResponse.json(
-				{
-					error:
-						'Missing required fields: transactionXDR, authResponse, smartWalletAddress, Public Key',
-				},
-				{ status: 400 },
-			)
-		}
-
-		// Validate transactionXDR is a valid string
-		if (typeof transactionXDR !== 'string' || !transactionXDR.trim()) {
-			return NextResponse.json(
-				{
-					error: 'Invalid transactionXDR: must be a non-empty string',
-				},
-				{ status: 400 },
-			)
-		}
 
 		// Get configuration
 		const server = new Server(appConfig.stellar.rpcUrl)
@@ -94,7 +69,6 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		console.log('📤 Assembling and submitting transaction')
 
 		// Parse the prepared transaction
 		// CRITICAL: The transaction from prepare is ALREADY assembled after simulation
@@ -118,13 +92,11 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		console.log('✅ Loaded pre-assembled transaction from prepare endpoint')
 
 		const authEntries =
 			(transaction.operations[0] as unknown as Api.SimulateHostFunctionResult)
 				.auth || []
 
-		console.log('📝 Auth entries count:', authEntries.length)
 
 		if (authEntries.length) {
 			const publicKeyArray =
@@ -139,9 +111,9 @@ export async function POST(req: NextRequest) {
 			const credentialId = verificationJSON.device.id
 			const deviceIdHex = computeDeviceIdFromCoseKey(publicKey)
 			const signatureResult = buildWebAuthnSignatureScVal({
-				assertion: authResponse,
+				assertion: authResponse as WebAuthnAssertionResponse,
 				userData: {
-					credential_id: credentialId,
+					credential_id: String(credentialId ?? ''),
 					public_key: publicKey,
 					device_id_hex: deviceIdHex,
 				},
@@ -213,7 +185,6 @@ export async function POST(req: NextRequest) {
 						xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
 					)
 
-					console.log('✅ WebAuthn signature added to auth entry')
 					break
 				}
 			}
@@ -224,16 +195,12 @@ export async function POST(req: NextRequest) {
 		// 1. assembleTransaction() in prepare creates a new transaction (stripping signatures)
 		// 2. We modified the auth entry above, which changes the transaction hash
 		// 3. The funding account (source) signature is required or we may experience txBadAuth errors
-		console.log('📝 Transaction ready for submission')
 
 		// Re-sign with funding account (as it is the source/fee payer)
-		console.log('✍️  Signing transaction with funding account...')
 		transaction.sign(fundingKeypair)
 
-		console.log('   Hash:', transaction.hash().toString('hex'))
 
 		// Submit to network
-		console.log('🚀 Submitting to Stellar network...')
 		const submitResult = await server.sendTransaction(transaction)
 
 		if (submitResult.status === 'ERROR') {
@@ -244,8 +211,6 @@ export async function POST(req: NextRequest) {
 		}
 
 		const txHash = submitResult.hash
-		console.log('Hash:', txHash)
-		console.log(`🔗 https://stellar.expert/explorer/testnet/tx/${txHash}`)
 
 		if (submitResult?.errorResult) {
 			console.error('❌ Submit error (false positive):', submitResult)
@@ -254,7 +219,6 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		console.log('✅ Transaction submitted successfully')
 		return NextResponse.json({
 			success: true,
 			data: {

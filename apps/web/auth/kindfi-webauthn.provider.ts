@@ -15,10 +15,8 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 	} as Record<keyof KindfiWebAuthnCredentials, CredentialInput>,
 	async authorize(credentialsArg, _req): Promise<User | null> {
 		const credentials = credentialsArg as KindfiWebAuthnCredentials | undefined
-		console.log('🗝️ login with credentials -> ', credentials)
 
 		if (!credentials) {
-			console.error('No credentials provided')
 			return null
 		}
 
@@ -44,10 +42,6 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			const userData = profileData[0]
 
 			if (!userData) {
-				console.error(
-					'NextAuth mapped profile not found for userId:',
-					credentials.userId,
-				)
 				throw new Error('NextAuth user not found')
 			}
 
@@ -74,20 +68,12 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 				)
 				.limit(1)
 
-			console.log('deviceData', deviceData)
-
 			const deviceInfo = deviceData[0]
 
 			if (!deviceInfo) {
-				console.error(
-					'Error fetching device data for credentialId:',
-					credentials.credentialId,
-				)
 				throw new Error('Device not found or credentials mismatch')
 			}
 
-			console.log('🔓 User data fetched successfully: ', userData)
-			console.log('🔓 Device data fetched successfully: ', deviceInfo)
 
 			return {
 				id: credentials.userId,
@@ -106,8 +92,7 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 					image_url: userData.imageUrl || undefined,
 				},
 			}
-		} catch (error) {
-			console.error('Database error during authorization:', error)
+		} catch (_error) {
 			throw new Error('Authentication failed')
 		}
 	},

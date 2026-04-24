@@ -1,5 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { devicesSchema } from '~/lib/schemas/stellar.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/stellar/devices
@@ -10,14 +12,9 @@ import { NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()
-		const { address, operation, signature } = body
-
-		if (!address || !operation || !signature) {
-			return NextResponse.json(
-				{ error: 'Missing required parameters: address, operation, signature' },
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(devicesSchema, body)
+		if (!validation.success) return validation.response
+		const { address, operation, signature } = validation.data
 
 		// TODO: Import and initialize StellarPasskeyService from web app
 		// For now, this is a placeholder that should call the kyc-server API

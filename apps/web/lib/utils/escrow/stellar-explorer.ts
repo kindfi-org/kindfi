@@ -70,3 +70,21 @@ export function getStellarExplorerAddressUrl(
 	const path = address.startsWith('G') ? 'account' : 'contract'
 	return `https://stellar.expert/explorer/${explorerNetwork}/${path}/${address}`
 }
+
+/**
+ * Get Stellar Explorer URL for a transaction hash.
+ */
+export function getStellarExplorerTxUrl(
+	txHash: string,
+	network?: 'testnet' | 'mainnet',
+): string {
+	if (!txHash) return ''
+	const explorerNetwork =
+		network === 'mainnet'
+			? 'public'
+			: process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
+					process.env.NODE_ENV === 'production'
+				? 'public'
+				: 'testnet'
+	return `https://stellar.expert/explorer/${explorerNetwork}/tx/${txHash}`
+}

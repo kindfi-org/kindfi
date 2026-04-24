@@ -70,7 +70,6 @@ export async function POST(req: NextRequest) {
 				webhookSecret,
 			)
 			if (isValid) {
-				console.log('Webhook verified with X-Signature-V2')
 			}
 		}
 
@@ -82,7 +81,6 @@ export async function POST(req: NextRequest) {
 				webhookSecret,
 			)
 			if (isValid) {
-				console.log('Webhook verified with X-Signature-Simple (fallback)')
 			}
 		}
 

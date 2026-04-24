@@ -1,4 +1,6 @@
 import { appEnvConfig } from '@packages/lib/config'
+import { faucetSchema } from '~/lib/schemas/stellar.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 import {
 	Address,
 	Asset,
@@ -36,33 +38,12 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { address, amount = '10' } = body
-
-		// Validate inputs
-		if (!address) {
-			return NextResponse.json(
-				{
-					error: 'Missing required field: address',
-				},
-				{ status: 400 },
-			)
+		const validation = validateRequest(faucetSchema, { ...body, amount: body.amount ?? '10' })
+		if (!validation.success) {
+			return validation.response
 		}
+		const { address, amount: fundAmount } = validation.data
 
-		// Validate amount
-		const fundAmount = Number.parseFloat(amount)
-		if (Number.isNaN(fundAmount) || fundAmount <= 0 || fundAmount > 100) {
-			return NextResponse.json(
-				{
-					error: 'Amount must be between 0 and 100 XLM',
-				},
-				{ status: 400 },
-			)
-		}
-
-		console.log('💰 Funding smart wallet:', {
-			address,
-			amount: `${fundAmount} XLM`,
-		})
 
 		// Initialize funding account
 		const fundingKeypair = Keypair.fromSecret(config.stellar.fundingAccount)
@@ -85,7 +66,6 @@ export async function POST(req: NextRequest) {
 		let result: { hash: string }
 
 		if (isContractAddress) {
-			console.log('🔧 Funding contract address via SAC...')
 			result = await fundContractViaSAC(
 				config,
 				address,
@@ -94,7 +74,6 @@ export async function POST(req: NextRequest) {
 				fundingAccountData,
 			)
 		} else {
-			console.log('💳 Funding regular account via Horizon...')
 			result = await fundAccountViaHorizon(
 				horizonUrl,
 				address,
@@ -105,7 +84,6 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		console.log('✅ Smart wallet funded successfully:', result.hash)
 
 		return NextResponse.json({
 			success: true,
@@ -145,8 +123,6 @@ async function fundContractViaSAC(
 	const xlmSacAddress = nativeAsset.contractId(config.stellar.networkPassphrase)
 	const xlmSacContract = new Contract(xlmSacAddress)
 
-	console.log('� Using XLM SAC:', xlmSacAddress)
-	console.log('   Amount (stroops):', Math.floor(amount * 10_000_000))
 
 	// Build SAC transfer transaction
 	const transaction = new TransactionBuilder(
@@ -178,10 +154,8 @@ async function fundContractViaSAC(
 		.build()
 
 	// Simulate transaction
-	console.log('🔄 Simulating SAC transfer...')
 	const simulation = await server.simulateTransaction(transaction)
 
-	console.log('📊 Simulation result:', JSON.stringify(simulation, null, 2))
 
 	if (Api.isSimulationError(simulation)) {
 		console.error('❌ Simulation error:', JSON.stringify(simulation, null, 2))
@@ -190,17 +164,14 @@ async function fundContractViaSAC(
 		)
 	}
 
-	console.log('✅ Simulation successful, assembling transaction...')
 
 	// Assemble with simulation results
 	const assembledTx = assembleTransaction(transaction, simulation).build()
 	assembledTx.sign(fundingKeypair)
 
 	// Submit to network
-	console.log('🚀 Submitting SAC transfer...')
 	const submitResult = await server.sendTransaction(assembledTx)
 
-	console.log('📤 Submit result:', submitResult)
 
 	if (submitResult.status === 'ERROR') {
 		console.error('❌ Submit error:', submitResult)
@@ -209,11 +180,6 @@ async function fundContractViaSAC(
 
 	// Return immediately with the transaction hash
 	// The network will process it asynchronously
-	console.log('✅ Transaction submitted successfully:', submitResult.hash)
-	console.log('🔗 Check status on Stellar Expert:')
-	console.log(
-		`   https://stellar.expert/explorer/testnet/tx/${submitResult.hash}`,
-	)
 
 	return { hash: submitResult.hash }
 }

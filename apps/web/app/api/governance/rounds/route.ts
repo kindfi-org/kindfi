@@ -2,11 +2,13 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import type {
-	CreateOptionPayload,
-	CreateRoundPayload,
-} from '~/lib/governance/types'
+import type { CreateOptionPayload } from '~/lib/governance/types'
 import { GovernanceContractService } from '~/lib/stellar/governance-contract'
+import {
+	createGovernanceRoundSchema,
+	governanceRoundsQuerySchema,
+} from '~/lib/schemas/governance.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * GET /api/governance/rounds
@@ -18,7 +20,12 @@ export async function GET(req: NextRequest) {
 	try {
 		const { supabase } = await import('@packages/lib/supabase')
 		const { searchParams } = new URL(req.url)
-		const status = searchParams.get('status')
+		const queryData = { status: searchParams.get('status') ?? undefined }
+		const validation = validateRequest(governanceRoundsQuerySchema, queryData)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { status } = validation.data
 
 		// Auto-activate and close rounds based on current time
 		await supabase.rpc('activate_governance_rounds')
@@ -115,19 +122,12 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 		}
 
-		const body = (await req.json()) as {
-			round: CreateRoundPayload
-			options?: Omit<CreateOptionPayload, 'roundId'>[]
+		const body = await req.json()
+		const validation = validateRequest(createGovernanceRoundSchema, body)
+		if (!validation.success) {
+			return validation.response
 		}
-
-		const { round: roundPayload, options: optionPayloads = [] } = body
-
-		if (!roundPayload.title || !roundPayload.startsAt || !roundPayload.endsAt) {
-			return NextResponse.json(
-				{ error: 'title, startsAt, and endsAt are required' },
-				{ status: 400 },
-			)
-		}
+		const { round: roundPayload, options: optionPayloads } = validation.data
 
 		const startsAt = new Date(roundPayload.startsAt)
 		const endsAt = new Date(roundPayload.endsAt)
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
 
 		// Insert options if provided
 		const insertedOptions: { id: string; title: string }[] = []
-		if (optionPayloads.length > 0) {
+		if (optionPayloads && optionPayloads.length > 0) {
 			const { data: opts, error: optError } = await supabase
 				.from('governance_options')
 				.insert(

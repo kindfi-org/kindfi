@@ -16,9 +16,7 @@ export function errorHandler(
 ): void {
 	console.error('Error details:', {
 		message: err.message,
-		stack: err.stack,
 		name: err.name,
-		cause: err.cause,
 	})
 
 	// Handle specific Buffer serialization errors

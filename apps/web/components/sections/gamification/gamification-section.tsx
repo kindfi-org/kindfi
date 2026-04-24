@@ -31,7 +31,7 @@ export function GamificationSection() {
 					<TabsTrigger value="nfts">NFTs</TabsTrigger>
 				</TabsList>
 				<AnimatePresence mode="wait">
-					<TabsContent value="quests" className="mt-4">
+					<TabsContent key="quests" value="quests" className="mt-4">
 						<motion.div
 							key="quests"
 							initial={{ opacity: 0, y: 10 }}
@@ -42,7 +42,7 @@ export function GamificationSection() {
 							<QuestEngine />
 						</motion.div>
 					</TabsContent>
-					<TabsContent value="streaks" className="mt-4">
+					<TabsContent key="streaks" value="streaks" className="mt-4">
 						<motion.div
 							key="streaks"
 							initial={{ opacity: 0, y: 10 }}
@@ -53,7 +53,7 @@ export function GamificationSection() {
 							<StreakTracker />
 						</motion.div>
 					</TabsContent>
-					<TabsContent value="referrals" className="mt-4">
+					<TabsContent key="referrals" value="referrals" className="mt-4">
 						<motion.div
 							key="referrals"
 							initial={{ opacity: 0, y: 10 }}
@@ -64,7 +64,7 @@ export function GamificationSection() {
 							<ReferralEngine />
 						</motion.div>
 					</TabsContent>
-					<TabsContent value="nfts" className="mt-4">
+					<TabsContent key="nfts" value="nfts" className="mt-4">
 						<motion.div
 							key="nfts"
 							initial={{ opacity: 0, y: 10 }}

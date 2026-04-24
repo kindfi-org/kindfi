@@ -33,16 +33,11 @@ export function Providers({ children, initSession }: ProvidersProps) {
 					scope: '/',
 				})
 				.then((registration) => {
-					console.log(
-						'Service Worker registered with scope:',
-						registration.scope,
-					)
 
 					// Request notification permission
 					if ('Notification' in window) {
 						Notification.requestPermission().then((permission) => {
 							if (permission === 'granted') {
-								console.log('Notification permission granted')
 							}
 						})
 					}

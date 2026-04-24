@@ -2,6 +2,11 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import {
+	foundationMilestoneCreateSchema,
+	foundationSlugParamSchema,
+} from '~/lib/schemas/foundation.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(
 	req: Request,
@@ -18,28 +23,14 @@ export async function POST(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		if (!slug) {
-			return NextResponse.json(
-				{ error: 'Foundation slug is required' },
-				{ status: 400 },
-			)
-		}
+		const slugValidation = validateRequest(foundationSlugParamSchema, { slug })
+		if (!slugValidation.success) return slugValidation.response
+		const { slug: validatedSlug } = slugValidation.data
 
 		const body = await req.json()
-		const title = body.title as string | undefined
-		const description = (body.description as string) || null
-		const achievedDate = body.achievedDate as string | undefined
-		const impactMetric = (body.impactMetric as string) || null
-
-		if (!title?.trim()) {
-			return NextResponse.json({ error: 'Title is required' }, { status: 400 })
-		}
-		if (!achievedDate) {
-			return NextResponse.json(
-				{ error: 'Achieved date is required' },
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(foundationMilestoneCreateSchema, body)
+		if (!validation.success) return validation.response
+		const { title, description, achievedDate, impactMetric } = validation.data
 
 		// Use service role client after manual authorization check
 		const supabase = supabaseServiceRole
@@ -47,7 +38,7 @@ export async function POST(
 		const { data: foundation, error: fetchError } = await supabase
 			.from('foundations')
 			.select('id, founder_id')
-			.eq('slug', slug)
+			.eq('slug', validatedSlug)
 			.maybeSingle()
 
 		if (fetchError || !foundation) {
@@ -65,10 +56,10 @@ export async function POST(
 			.from('foundation_milestones')
 			.insert({
 				foundation_id: foundation.id,
-				title: title.trim(),
-				description,
+				title,
+				description: description ?? null,
 				achieved_date: achievedDate,
-				impact_metric: impactMetric,
+				impact_metric: impactMetric ?? null,
 				metadata: {},
 			})
 

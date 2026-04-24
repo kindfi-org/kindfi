@@ -50,7 +50,6 @@ export const useStellar = () => {
 	const [creatingDeployee, setCreatingDeployee] = useState(false)
 	const stellarSignature = useStellarSignature({
 		onSuccess: (result) => {
-			console.log('✅ Transaction successful:', result)
 			// Refresh account info after successful transaction
 			if (deployee) {
 				stellarSignature.getAccountInfo(deployee)
@@ -76,9 +75,6 @@ export const useStellar = () => {
 			if (!bundlerKey.current) throw new Error('Bundler key not found')
 			if (!contractSalt || !publicKey) throw new Error('Invalid public keys')
 
-			console.log(
-				'📋 Registration: Preparing Stellar account data (NOT deploying yet)',
-			)
 
 			// Update device with PREPARED address and AAGUID
 			// This address will be deployed later during approval
@@ -94,9 +90,6 @@ export const useStellar = () => {
 				throw new Error(`${error}:::${message}`)
 			}
 
-			console.log(
-				'✅ Registration complete: Device data saved, account prepared for future deployment',
-			)
 			return deployee
 		} catch (error) {
 			console.error('❌ useStellar::onRegister::>', error)
@@ -120,11 +113,6 @@ export const useStellar = () => {
 		// Handles the signing of a transaction and sends it to the Stellar network
 		try {
 			setLoadingSign(true)
-			console.log('{ signRes, authTxn, lastLedger }::onSign from use-stellar', {
-				signRes,
-				authTxn,
-				lastLedger,
-			})
 			// TODO: disable for now, enable the signing logic when the transaction is ready
 			// if (!bundlerKey.current) throw new Error('Bundler key not found')
 			// if (!deployee) throw new Error('Deployee not found')

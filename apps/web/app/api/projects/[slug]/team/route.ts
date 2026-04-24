@@ -3,10 +3,12 @@ import type { TablesInsert, TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import type {
-	CreateTeamMemberData,
-	UpdateTeamMemberData,
-} from '~/lib/types/project/project-team.types'
+import {
+	teamMemberCreateSchema,
+	teamMemberUpdateSchema,
+	teamMemberDeleteQuerySchema,
+} from '~/lib/schemas/project.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(
 	req: Request,
@@ -20,19 +22,11 @@ export async function POST(
 		}
 
 		const { slug: _projectSlug } = await params
-		const body: CreateTeamMemberData & { projectId: string } = await req.json()
+		const body = await req.json()
+		const validation = validateRequest(teamMemberCreateSchema, body)
+		if (!validation.success) return validation.response
 		const { projectId, fullName, roleTitle, bio, photoUrl, yearsInvolved } =
-			body
-
-		// Validate required fields
-		if (!projectId || !fullName?.trim() || !roleTitle?.trim()) {
-			return NextResponse.json(
-				{
-					error: 'Missing required fields: projectId, fullName, and roleTitle',
-				},
-				{ status: 400 },
-			)
-		}
+			validation.data
 
 		// Verify user has permission and get max order_index in parallel
 		const [projectResult, memberResult, existingTeamResult] = await Promise.all(
@@ -87,8 +81,8 @@ export async function POST(
 		// Insert new team member
 		const insertData: TablesInsert<'project_team'> = {
 			project_id: projectId,
-			full_name: fullName.trim(),
-			role_title: roleTitle.trim(),
+			full_name: fullName,
+			role_title: roleTitle,
 			bio: bio?.trim() || null,
 			photo_url: photoUrl?.trim() || null,
 			years_involved: yearsInvolved || null,
@@ -142,8 +136,9 @@ export async function PATCH(
 		}
 
 		const { slug: _projectSlug } = await params
-		const body: UpdateTeamMemberData & { projectId: string; memberId: string } =
-			await req.json()
+		const body = await req.json()
+		const validation = validateRequest(teamMemberUpdateSchema, body)
+		if (!validation.success) return validation.response
 		const {
 			projectId,
 			memberId,
@@ -153,14 +148,7 @@ export async function PATCH(
 			photoUrl,
 			yearsInvolved,
 			orderIndex,
-		} = body
-
-		if (!projectId || !memberId) {
-			return NextResponse.json(
-				{ error: 'Missing required fields: projectId and memberId' },
-				{ status: 400 },
-			)
-		}
+		} = validation.data
 
 		// Verify user has permission in parallel
 		const [projectResult, memberResult] = await Promise.all([
@@ -204,8 +192,8 @@ export async function PATCH(
 
 		// Build update data
 		const updateData: TablesUpdate<'project_team'> = {}
-		if (fullName !== undefined) updateData.full_name = fullName.trim()
-		if (roleTitle !== undefined) updateData.role_title = roleTitle.trim()
+		if (fullName !== undefined) updateData.full_name = fullName?.trim() ?? null
+		if (roleTitle !== undefined) updateData.role_title = roleTitle?.trim() ?? null
 		if (bio !== undefined) updateData.bio = bio?.trim() || null
 		if (photoUrl !== undefined) updateData.photo_url = photoUrl?.trim() || null
 		if (yearsInvolved !== undefined)
@@ -263,15 +251,13 @@ export async function DELETE(
 
 		const { slug: _projectSlug } = await params
 		const { searchParams } = new URL(req.url)
-		const projectId = searchParams.get('projectId')
-		const memberId = searchParams.get('memberId')
-
-		if (!projectId || !memberId) {
-			return NextResponse.json(
-				{ error: 'Missing required query parameters: projectId and memberId' },
-				{ status: 400 },
-			)
+		const queryData = {
+			projectId: searchParams.get('projectId'),
+			memberId: searchParams.get('memberId'),
 		}
+		const validation = validateRequest(teamMemberDeleteQuerySchema, queryData)
+		if (!validation.success) return validation.response
+		const { projectId, memberId } = validation.data
 
 		// Verify user has permission in parallel
 		const [projectResult, memberResult] = await Promise.all([

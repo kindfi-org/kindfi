@@ -28,9 +28,6 @@ export function getRpIdFromOrigin(origin: string): string {
 		// Remove 'www.' prefix if present for consistency
 		const rpId = hostname.replace(/^www\./, '')
 
-		console.log(
-			`⚠️ Origin ${origin} not found in expected origins. Using hostname as RP ID: ${rpId}`,
-		)
 
 		return rpId
 	} catch {

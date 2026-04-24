@@ -1,6 +1,8 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { contractInvokeSchema } from '~/lib/schemas/stellar.schemas'
 import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transactions'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/stellar/contract/invoke
@@ -10,17 +12,9 @@ import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transa
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()
-		const { from, contractAddress, functionName, args, sponsorFees } = body
-
-		// Validate inputs
-		if (!from || !contractAddress || !functionName) {
-			return NextResponse.json(
-				{
-					error: 'Missing required fields: from, contractAddress, functionName',
-				},
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(contractInvokeSchema, body)
+		if (!validation.success) return validation.response
+		const { from, contractAddress, functionName, args, sponsorFees } = validation.data
 
 		// Initialize service
 		const txService = new SmartWalletTransactionService(
@@ -34,8 +28,8 @@ export async function POST(req: NextRequest) {
 			from,
 			contractAddress,
 			functionName,
-			args: args || [],
-			sponsorFees: sponsorFees ?? false,
+			args,
+			sponsorFees,
 		})
 
 		return NextResponse.json({

@@ -3,6 +3,35 @@ import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 // notification_logs table is not in generated Supabase types
 const NOTIFICATION_LOGS_TABLE = 'notification_logs' as const
 
+/** Supabase / Postgrest errors often stringify to `{}` in the console; normalize for debugging. */
+/** Typed client omits `notification_logs`; single escape hatch for inserts/selects. */
+function supabaseNotificationLogs(): ReturnType<
+	typeof createSupabaseBrowserClient
+> {
+	// biome-ignore lint/suspicious/noExplicitAny: table not in generated Supabase types
+	return createSupabaseBrowserClient() as any
+}
+
+function serializeClientLogError(value: unknown): Record<string, unknown> {
+	if (value instanceof Error) {
+		return {
+			name: value.name,
+			message: value.message,
+			stack: value.stack,
+		}
+	}
+	if (value !== null && typeof value === 'object') {
+		const o = value as Record<string, unknown>
+		return {
+			message: o.message,
+			code: o.code,
+			details: o.details,
+			hint: o.hint,
+		}
+	}
+	return { message: String(value) }
+}
+
 /**
  * Parameters for logging error events
  * @property {string} message - Error message to be logged
@@ -73,9 +102,8 @@ export interface LogResult<T> {
  */
 export async function logError(params: LogErrorParams): Promise<void> {
 	try {
-		const supabase = createSupabaseBrowserClient()
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- notification_logs not in generated types
-		await (supabase as any).from(NOTIFICATION_LOGS_TABLE).insert({
+		const supabase = supabaseNotificationLogs()
+		await supabase.from(NOTIFICATION_LOGS_TABLE).insert({
 			notification_id: params.notificationId,
 			level: 'error',
 			message: params.message,
@@ -89,7 +117,7 @@ export async function logError(params: LogErrorParams): Promise<void> {
 			},
 		})
 	} catch (logError) {
-		console.error('Failed to log error:', logError)
+		console.error('Failed to log error:', serializeClientLogError(logError))
 		throw params.error // Rethrow the original error after logging attempt
 	}
 }
@@ -103,9 +131,8 @@ export async function getNotificationLogs(
 	notificationId: string,
 ): Promise<LogResult<NotificationLog[]>> {
 	try {
-		const supabase = createSupabaseBrowserClient()
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- notification_logs not in generated types
-		const { data, error } = await (supabase as any)
+		const supabase = supabaseNotificationLogs()
+		const { data, error } = await supabase
 			.from(NOTIFICATION_LOGS_TABLE)
 			.select('*')
 			.eq('notification_id', notificationId)
@@ -133,9 +160,8 @@ export async function getRecentLogs(
 	offset = 0,
 ): Promise<LogResult<NotificationLog[]>> {
 	try {
-		const supabase = createSupabaseBrowserClient()
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- notification_logs not in generated types
-		const { data, error } = await (supabase as any)
+		const supabase = supabaseNotificationLogs()
+		const { data, error } = await supabase
 			.from(NOTIFICATION_LOGS_TABLE)
 			.select('*')
 			.order('created_at', { ascending: false })
@@ -164,9 +190,8 @@ export class NotificationLogger {
 		notificationId,
 	}: LogErrorParams): Promise<void> {
 		try {
-			const supabase = createSupabaseBrowserClient()
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- notification_logs not in generated types
-			const { error: dbError } = await (supabase as any)
+			const supabase = supabaseNotificationLogs()
+			const { error: dbError } = await supabase
 				.from(NOTIFICATION_LOGS_TABLE)
 				.insert({
 					notification_id: notificationId,
@@ -181,7 +206,7 @@ export class NotificationLogger {
 
 			if (dbError) throw dbError
 		} catch (logError) {
-			console.error('Failed to log error:', logError)
+			console.error('Failed to log error:', serializeClientLogError(logError))
 			// Don't throw to avoid disrupting the main flow
 		}
 	}
@@ -196,9 +221,8 @@ export class NotificationLogger {
 		context,
 	}: LogInfoParams): Promise<void> {
 		try {
-			const supabase = createSupabaseBrowserClient()
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- notification_logs not in generated types
-			const { error } = await (supabase as any).from(NOTIFICATION_LOGS_TABLE).insert({
+			const supabase = supabaseNotificationLogs()
+			const { error } = await supabase.from(NOTIFICATION_LOGS_TABLE).insert({
 				level: 'info',
 				message: message,
 				notification_id: notificationId,
@@ -207,7 +231,11 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			console.error('Failed to log info:', logError)
+			console.error('[NotificationLogger] Failed to log info:', {
+				message,
+				notificationId,
+				error: serializeClientLogError(logError),
+			})
 			// Don't throw to avoid disrupting the main flow
 		}
 	}
@@ -222,9 +250,8 @@ export class NotificationLogger {
 		context,
 	}: LogWarningParams): Promise<void> {
 		try {
-			const supabase = createSupabaseBrowserClient()
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- notification_logs not in generated types
-			const { error } = await (supabase as any).from(NOTIFICATION_LOGS_TABLE).insert({
+			const supabase = supabaseNotificationLogs()
+			const { error } = await supabase.from(NOTIFICATION_LOGS_TABLE).insert({
 				level: 'warning',
 				message: message,
 				notification_id: notificationId,
@@ -233,7 +260,7 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			console.error('Failed to log warning:', logError)
+			console.error('Failed to log warning:', serializeClientLogError(logError))
 			// Don't throw to avoid disrupting the main flow
 		}
 	}
@@ -247,9 +274,8 @@ export class NotificationLogger {
 		notificationId: string,
 	): Promise<NotificationLog[]> {
 		try {
-			const supabase = createSupabaseBrowserClient()
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- notification_logs not in generated types
-			const { data, error } = await (supabase as any)
+			const supabase = supabaseNotificationLogs()
+			const { data, error } = await supabase
 				.from(NOTIFICATION_LOGS_TABLE)
 				.select('*')
 				.eq('notification_id', notificationId)
@@ -269,11 +295,10 @@ export class NotificationLogger {
 	 * @param {number} [offset=0] - Number of logs to skip
 	 * @returns {Promise<NotificationLog[]>} Array of error logs
 	 */
-	async getErrorLogs(limit = 100, offset = 0	): Promise<NotificationLog[]> {
+	async getErrorLogs(limit = 100, offset = 0): Promise<NotificationLog[]> {
 		try {
-			const supabase = createSupabaseBrowserClient()
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- notification_logs not in generated types
-			const { data, error } = await (supabase as any)
+			const supabase = supabaseNotificationLogs()
+			const { data, error } = await supabase
 				.from(NOTIFICATION_LOGS_TABLE)
 				.select('*')
 				.eq('level', 'error')

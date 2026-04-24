@@ -45,6 +45,35 @@ export const createCommentSchema = z
 		}
 	})
 
+/** Query params for GET /api/comments */
+export const commentsQuerySchema = z
+	.object({
+		project_id: z.string().uuid().optional().nullable(),
+		project_update_id: z.string().uuid().optional().nullable(),
+		type: z.enum(COMMENT_TYPES).optional().nullable(),
+		limit: z.coerce.number().int().min(1).max(100).default(50),
+		offset: z.coerce.number().int().min(0).default(0),
+	})
+	.superRefine((data, ctx) => {
+		if (data.project_id && data.project_update_id) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Only one of project_id or project_update_id can be provided',
+				path: ['project_id'],
+			})
+		}
+	})
+
+/** Body for PATCH /api/comments/[id] */
+export const updateCommentSchema = z
+	.object({
+		content: z.string().trim().min(1).optional(),
+		is_resolved: z.boolean().optional(),
+	})
+	.refine((data) => Object.keys(data).length > 0, {
+		message: 'No fields to update',
+	})
+
 export interface ParentValidationInput {
 	supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 	parentCommentId: string

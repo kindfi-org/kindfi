@@ -186,9 +186,9 @@ export function VerifyOTPComponent() {
 								We&apos;ve sent a verification code to{' '}
 								{email && <span className="font-medium">{email}</span>}. Enter
 								the 6-digit code below to complete your account setup.
-								<div className="mt-2 font-medium text-primary">
+								<span className="mt-2 block font-medium text-primary">
 									Please check your inbox and spam folder
-								</div>
+								</span>
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">

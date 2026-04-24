@@ -18,7 +18,6 @@ export function useProjectsFilter() {
 			if (selectedCategories.length === 0) return projects
 
 			// Debug selected categories
-			console.log('Filtering with categories:', selectedCategories)
 
 			return projects.filter((project) => {
 				// Handle different ways categories might be stored
@@ -108,7 +107,6 @@ export function useProjectsFilter() {
 	return {
 		selectedCategories,
 		setSelectedCategories: (val: string[]) => {
-			console.log('Setting categories to:', val)
 			setState((prev) => ({ ...prev, selectedCategories: val }))
 		},
 		sortOption,

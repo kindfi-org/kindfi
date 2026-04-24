@@ -78,7 +78,6 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 		}
 
 		revalidatePath('/sign-up', 'layout')
-		console.log('Sign up data: ', data)
 		return {
 			success: true,
 			message:
@@ -518,11 +517,6 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 		aaguid?: string
 	} = JSON.parse(deployeeUpdateData)
 	// Get current user from session or context
-	console.log('updateDeviceWithDeployee::>', {
-		aaguid,
-		userId,
-		credentialId,
-	})
 	try {
 		if (!userId) {
 			throw new Error('User not authenticated')

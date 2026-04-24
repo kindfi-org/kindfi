@@ -5,7 +5,6 @@ export function validateEnvVars(requiredEnvVars: string[]) {
 		}
 	})
 
-	console.log('All required environment variables are present.')
 }
 
 export function validateSupabaseEnvVars() {
@@ -32,6 +31,4 @@ export function validatePasskeyEnvVars() {
 	]
 
 	validateEnvVars(requiredEnvVars)
-	console.log('Core passkey environment variables validated.')
-	console.log(`Optional passkey variables: ${optionalEnvVars.join(', ')}`)
 }

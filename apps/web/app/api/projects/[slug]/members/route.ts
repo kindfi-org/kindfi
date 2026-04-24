@@ -3,13 +3,11 @@ import type { Enums, TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-
-// Small helper to safely detect missing fields without using eval
-function listMissing(fields: Record<string, unknown>) {
-	return Object.entries(fields)
-		.filter(([, v]) => v == null || (typeof v === 'string' && v.trim() === ''))
-		.map(([k]) => k)
-}
+import {
+	projectMemberUpdateFormSchema,
+	projectMemberDeleteFormSchema,
+} from '~/lib/schemas/project.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 export async function PATCH(
 	req: Request,
@@ -26,27 +24,15 @@ export async function PATCH(
 		const formData = await req.formData()
 		const { slug } = await params
 
-		const projectId = formData.get('projectId') as string
-		const memberId = formData.get('memberId') as string
-		const role = formData.get('role') as string | null
-		const title = (formData.get('title') as string | null) ?? null
-
-		// Validate required fields
-		const missing = listMissing({ projectId, memberId })
-		if (missing.length > 0) {
-			return NextResponse.json(
-				{ error: `Missing required fields: ${missing.join(', ')}` },
-				{ status: 400 },
-			)
+		const formPayload = {
+			projectId: formData.get('projectId'),
+			memberId: formData.get('memberId'),
+			role: formData.get('role'),
+			title: formData.get('title'),
 		}
-
-		// Validate that at least one editable field is present
-		if (role == null && title == null) {
-			return NextResponse.json(
-				{ error: 'Nothing to update. Provide "role" and/or "title".' },
-				{ status: 400 },
-			)
-		}
+		const validation = validateRequest(projectMemberUpdateFormSchema, formPayload)
+		if (!validation.success) return validation.response
+		const { projectId, memberId, role, title } = validation.data
 
 		// Verify user has permission to update project members
 		// Check project, user role, and target member in parallel
@@ -100,7 +86,7 @@ export async function PATCH(
 
 		// If user is updating themselves and trying to change role to a privileged one, deny
 		if (isUpdatingSelf && !isOwner && !hasAdminRole && role) {
-			if (['core', 'admin', 'editor'].includes(role)) {
+			if (['core', 'admin', 'editor'].includes(role as string)) {
 				return NextResponse.json(
 					{ error: 'Forbidden: You cannot assign yourself a privileged role' },
 					{ status: 403 },
@@ -159,17 +145,13 @@ export async function DELETE(
 		const formData = await req.formData()
 		const { slug } = await params
 
-		const projectId = formData.get('projectId') as string
-		const memberId = formData.get('memberId') as string
-
-		// Validate required fields
-		const missing = listMissing({ projectId, memberId })
-		if (missing.length > 0) {
-			return NextResponse.json(
-				{ error: `Missing required fields: ${missing.join(', ')}` },
-				{ status: 400 },
-			)
+		const formPayload = {
+			projectId: formData.get('projectId'),
+			memberId: formData.get('memberId'),
 		}
+		const validation = validateRequest(projectMemberDeleteFormSchema, formPayload)
+		if (!validation.success) return validation.response
+		const { projectId, memberId } = validation.data
 
 		// Verify user has permission to delete project members
 		// Check project, user role, and target member in parallel

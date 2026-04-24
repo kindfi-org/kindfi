@@ -205,7 +205,6 @@ export function SmartWalletTransferDemo() {
 			const { data } = await response.json()
 
 			toast.success('Transaction prepared successfully!')
-			console.log('Transaction prepared:', data)
 
 			// Implement WebAuthn signing using local API routes
 			// Get authentication options from local API
@@ -269,12 +268,6 @@ export function SmartWalletTransferDemo() {
 				description: 'Please wait while we process your transaction',
 			})
 
-			console.log('📝 WebAuthn response:', {
-				id: authResponse.id,
-				type: authResponse.type,
-				rawId: authResponse.rawId,
-				authResponse,
-			})
 
 			// Submit the signed transaction
 			const submitResponse = await fetch('/api/stellar/transfer/submit', {

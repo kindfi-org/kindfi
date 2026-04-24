@@ -90,11 +90,6 @@ export const useStellarSignature = (
 			setError(null)
 
 			try {
-				console.log('🔐 Starting Stellar transaction signature:', {
-					operation,
-					contractId,
-				})
-
 				// Step 1: Generate authentication options for the signature
 				const authOptionsResponse = await fetch(
 					`${kycBaseUrl}/api/passkey/generate-authentication-options`,
@@ -190,7 +185,6 @@ export const useStellarSignature = (
 			setError(null)
 
 			try {
-				console.log('🌟 Creating Stellar account for user:', session.user.id)
 				const userData = session.user
 
 				if (!userData) {
@@ -210,7 +204,6 @@ export const useStellarSignature = (
 				)
 
 				if (!response.ok) {
-					console.error('response data', response)
 					throw new Error('Failed to create Stellar account')
 				}
 
