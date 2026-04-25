@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
 				correlationId,
 				operation: 'escrow.initialize',
 				resourceType: 'escrow',
+				actorId: user.id,
 				status: 'validation_error',
 				durationMs: Date.now() - startTime,
 			})
@@ -52,62 +53,87 @@ export async function POST(req: NextRequest) {
 		// 4. Send the signed transaction to the Stellar network through the send transaction - Trustless Work API
 		const response = await sendTransaction(signedTxXdr || '')
 
-		if (response) {
-			const { data: dbResult, error: dbError } = await supabase
-				.from('escrow_contracts')
-				.insert({
-					engagement_id: response.escrow.engagementId,
-					contract_id: response.contract_id,
-					amount: response.escrow.amount,
-					platform_fee: response.escrow.platformFee,
-					current_state: 'PENDING',
-				})
-				.select('id')
-				.single()
-
-			if (dbError) {
-				return error('Failed to track escrow contract', {
-					status: 500,
-					code: 'DB_INSERT_FAILED',
-					details: dbError,
-					log: dbError,
-				})
-			}
-
-			// If successful, update the state to INITIALIZED
-			await supabase
-				.from('escrow_contracts')
-				.update({ current_state: 'INITIALIZED' })
-				.eq('id', dbResult.id)
-
+		if (!response) {
 			await auditLogger.log({
 				correlationId,
 				operation: 'escrow.initialize',
 				resourceType: 'escrow',
-				resourceId: dbResult.id,
 				actorId: user.id,
-				status: 'success',
+				status: 'failure',
+				errorCode: 'TX_SEND_FAILED',
 				durationMs: Date.now() - startTime,
-				metadata: { contractAddress: response.contract_id },
 			})
-
-			return respond(
-				{
-					escrowId: dbResult.id,
-					contractAddress: response.contract_id,
-					status: 'INITIALIZED',
-				},
-				{ status: 201 },
-			)
+			return error('Failed to send escrow transaction', {
+				status: 502,
+				code: 'TX_SEND_FAILED',
+			})
 		}
+
+		const { data: dbResult, error: dbError } = await supabase
+			.from('escrow_contracts')
+			.insert({
+				engagement_id: response.escrow.engagementId,
+				contract_id: response.contract_id,
+				amount: response.escrow.amount,
+				platform_fee: response.escrow.platformFee,
+				current_state: 'PENDING',
+			})
+			.select('id')
+			.single()
+
+		if (dbError) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.initialize',
+				resourceType: 'escrow',
+				actorId: user.id,
+				status: 'failure',
+				errorCode: 'DB_INSERT_FAILED',
+				durationMs: Date.now() - startTime,
+				metadata: { error: dbError.message },
+			})
+			return error('Failed to track escrow contract', {
+				status: 500,
+				code: 'DB_INSERT_FAILED',
+				details: dbError,
+				log: dbError,
+			})
+		}
+
+		// If successful, update the state to INITIALIZED
+		await supabase
+			.from('escrow_contracts')
+			.update({ current_state: 'INITIALIZED' })
+			.eq('id', dbResult.id)
+
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.initialize',
+			resourceType: 'escrow',
+			resourceId: dbResult.id,
+			actorId: user.id,
+			status: 'success',
+			durationMs: Date.now() - startTime,
+			metadata: { contractAddress: response.contract_id },
+		})
+
+		return respond(
+			{
+				escrowId: dbResult.id,
+				contractAddress: response.contract_id,
+				status: 'INITIALIZED',
+			},
+			{ status: 201 },
+		)
 	} catch (err) {
 		if (err instanceof AppError) {
 			await auditLogger.log({
 				correlationId,
 				operation: 'escrow.initialize',
 				resourceType: 'escrow',
+				actorId: user.id,
 				status: 'failure',
-				errorCode: String(err.statusCode),
+				errorCode: 'ESCROW_INIT_ERROR',
 				durationMs: Date.now() - startTime,
 				metadata: { error: err.message },
 			})
@@ -123,8 +149,9 @@ export async function POST(req: NextRequest) {
 			correlationId,
 			operation: 'escrow.initialize',
 			resourceType: 'escrow',
+			actorId: user.id,
 			status: 'failure',
-			errorCode: '500',
+			errorCode: 'INTERNAL_ERROR',
 			durationMs: Date.now() - startTime,
 			metadata: { error: err instanceof Error ? err.message : String(err) },
 		})
