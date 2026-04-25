@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { AuditLogger } from '~/lib/services/audit-logger'
@@ -50,30 +51,28 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			})
 			return validation.response
 		}
-		const sessionUserId = session.user.id
-		const requestedUserId = validation.data.user_id
-
-		let userId: string
-
-		if (requestedUserId && requestedUserId !== sessionUserId) {
-			const isAdmin = session.user.role === 'admin'
-
-			if (!isAdmin) {
-				return new Response(
-					JSON.stringify({
-						error:
-							'Forbidden: Only administrators can evolve NFTs for other users.',
-					}),
-					{
-						status: 403,
-						headers: { 'Content-Type': 'application/json' },
-					},
-				)
-			}
-			userId = requestedUserId
-		} else {
-			userId = sessionUserId
+		const authorization = authorizeUserOverride({
+			session,
+			requestedUserId: validation.data.user_id,
+			resource: 'evolve NFTs',
+		})
+		if (!authorization.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'nft.evolve',
+				resourceType: 'nft',
+				actorId: session.user.id,
+				status: 'failure',
+				errorCode: '403',
+				durationMs: Date.now() - startTime,
+				metadata: {
+					reason: 'forbidden_user_override',
+					requestedUserId: validation.data.user_id,
+				},
+			})
+			return authorization.response
 		}
+		const { userId } = authorization
 
 
 		// Use service role client to bypass RLS
