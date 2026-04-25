@@ -29,14 +29,14 @@ export function EscrowAdminPanel({
 				title: suggestedTitle,
 				engagementId: suggestedEngagementId,
 				description: suggestedDescription,
+				suggestedTitle,
+				suggestedEngagementId,
+				suggestedDescription,
 			}}
 		>
 			<EscrowAdminPanelContent
 				projectId={projectId}
 				projectSlug={projectSlug}
-				suggestedTitle={suggestedTitle}
-				suggestedEngagementId={suggestedEngagementId}
-				suggestedDescription={suggestedDescription}
 			/>
 		</EscrowFormProvider>
 	)
