@@ -9,7 +9,7 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { validateCsrfToken } from '~/app/actions/csrf'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
@@ -291,30 +291,17 @@ export async function requestResetAccountAction(
 		redirect('/reset-account?error=Too many requests. Try again later.')
 	}
 
-	const _supabase = await createSupabaseServerClient()
-	const _origin = (await headers()).get('origin')
-
-	try {
-		// TODO: Implement a proper reset account flow
-		// This is a placeholder for the actual reset account logic.
-		redirect(
-			'/reset-account?success=Check your email for a confirmation request to reset your account',
-		)
-	} catch (error) {
-		if (
-			error &&
-			typeof error === 'object' &&
-			'digest' in error &&
-			(error.digest as string | undefined)?.startsWith('NEXT_REDIRECT')
-		) {
-			throw error
-		}
-		const response = errorHandler.handleAuthError(
-			error as AuthError,
-			'reset_account',
-		)
-		redirect(`/reset-account?error=${encodeURIComponent(response.message)}`)
-	}
+	// TODO: Implement a proper reset account flow.
+	// Until the reset email/token logic is in place we must not pretend the
+	// request succeeded — that would let users believe a recovery email is
+	// on its way when nothing has been sent.
+	logger.warn({
+		eventType: 'RESET_ACCOUNT_NOT_IMPLEMENTED',
+		email,
+	})
+	redirect(
+		'/reset-account?error=Account recovery is temporarily unavailable. Please contact support.',
+	)
 }
 
 export async function resetPasswordAction(formData: FormData): Promise<void> {

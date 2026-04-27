@@ -111,8 +111,10 @@ export function validateInput<T>(
 
 /**
  * Apply a rate limit keyed by `identifier` for `action`. Throws RATE_LIMITED
- * when the caller has exceeded the configured budget. Fails open if Redis is
- * unavailable so the action remains usable in dev environments.
+ * when the caller has exceeded the configured budget. Outside development the
+ * helper fails closed when the rate limiter itself errors, so abuse protection
+ * is preserved even during a Redis outage; in dev/test it falls back to
+ * allowing the request to keep local flows usable.
  */
 export async function enforceRateLimit(
 	identifier: string,
@@ -133,12 +135,19 @@ export async function enforceRateLimit(
 		}
 	} catch (error) {
 		if (error instanceof ServerActionError) throw error
-		// Rate limiter unavailable — log and continue.
+
 		logger.warn({
 			eventType: 'SERVER_ACTION_RATE_LIMIT_UNAVAILABLE',
 			action,
 			error: error instanceof Error ? error.message : 'Unknown error',
 		})
+
+		if (process.env.NODE_ENV === 'production') {
+			throw new ServerActionError(
+				'Service temporarily unavailable. Please try again later.',
+				'RATE_LIMITED',
+			)
+		}
 	}
 }
 

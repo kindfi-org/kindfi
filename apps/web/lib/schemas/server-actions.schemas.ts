@@ -22,11 +22,16 @@ export const updateEscrowMilestoneInputSchema = z.object({
 	completed: z.number().int().min(0),
 })
 
-export const updateEscrowFinancialsInputSchema = z.object({
-	id: z.string().uuid('Invalid escrow record id'),
-	funded: z.number().min(0),
-	released: z.number().min(0),
-})
+export const updateEscrowFinancialsInputSchema = z
+	.object({
+		id: z.string().uuid('Invalid escrow record id'),
+		funded: z.number().min(0),
+		released: z.number().min(0),
+	})
+	.refine((data) => data.released <= data.funded, {
+		message: 'Released amount cannot exceed funded amount',
+		path: ['released'],
+	})
 
 export const updateDeviceWithDeployeeInputSchema = z.object({
 	credentialId: z.string().min(1, 'credentialId is required'),
@@ -66,7 +71,7 @@ const stellarAddressSchema = z
 
 const escrowMilestoneSchema = z.object({
 	amount: z.number().positive('Milestone amount must be positive'),
-	receiver: z.string().min(1, 'Milestone receiver is required'),
+	receiver: stellarAddressSchema,
 })
 
 const escrowDataSchema = z
@@ -75,16 +80,16 @@ const escrowDataSchema = z
 		title: z.string().min(1),
 		description: z.string().min(1),
 		roles: z.object({
-			approver: z.string().min(1),
-			serviceProvider: z.string().min(1),
-			disputeResolver: z.string().min(1),
-			platformAddress: z.string().min(1),
-			releaseSigner: z.string().min(1),
+			approver: stellarAddressSchema,
+			serviceProvider: stellarAddressSchema,
+			disputeResolver: stellarAddressSchema,
+			platformAddress: stellarAddressSchema,
+			releaseSigner: stellarAddressSchema,
 		}),
 		platformFee: z.number().min(0).max(100),
 		milestones: z.array(escrowMilestoneSchema).optional(),
 		amount: z.number().positive().optional(),
-		receiver: z.string().optional(),
+		receiver: stellarAddressSchema.optional(),
 		receiverMemo: z.number().int().optional(),
 	})
 	.refine(
@@ -104,7 +109,7 @@ export const saveEscrowContractInputSchema = z.object({
 		.min(1, 'contractId is required')
 		.max(120, 'contractId is too long'),
 	engagementId: z.string().min(1).optional(),
-	escrowData: escrowDataSchema.optional(),
+	escrowData: escrowDataSchema,
 })
 
 export const createFoundationInputSchema = z.object({

@@ -17,7 +17,7 @@ interface SaveEscrowContractParams {
 	projectId: string
 	contractId: string
 	engagementId?: string
-	escrowData?: {
+	escrowData: {
 		engagementId: string
 		title: string
 		description: string
@@ -122,29 +122,35 @@ export async function saveEscrowContractAction(
 
 		const supabase = supabaseServiceRole
 
-		const engagementId =
-			validated.escrowData?.engagementId ||
-			validated.engagementId ||
-			`project-${validated.projectId}`
+		const { escrowData } = validated
+		const engagementId = escrowData.engagementId
+		const payerAddress = escrowData.roles.serviceProvider
+		const platformFee = escrowData.platformFee
 
-		const totalAmount = validated.escrowData?.milestones
-			? validated.escrowData.milestones.reduce((sum, m) => sum + m.amount, 0)
-			: validated.escrowData?.amount || 1
-
-		const payerAddress =
-			validated.escrowData?.roles?.serviceProvider ||
-			validated.escrowData?.roles?.approver ||
-			'G000000000000000000000000000000000000000'
-
-		const receiverAddress =
-			validated.escrowData?.milestones &&
-			validated.escrowData.milestones.length > 0
-				? validated.escrowData.milestones[0]?.receiver
-				: validated.escrowData?.receiver ||
-					validated.escrowData?.roles?.serviceProvider ||
-					payerAddress
-
-		const platformFee = validated.escrowData?.platformFee ?? 0
+		const milestones = escrowData.milestones
+		let totalAmount: number
+		let receiverAddress: string
+		if (milestones && milestones.length > 0) {
+			totalAmount = milestones.reduce((sum, m) => sum + m.amount, 0)
+			receiverAddress = milestones[0].receiver
+		} else if (
+			escrowData.amount !== undefined &&
+			escrowData.receiver !== undefined
+		) {
+			totalAmount = escrowData.amount
+			receiverAddress = escrowData.receiver
+		} else {
+			logger.warn({
+				eventType: 'ESCROW_CONTRACT_INVALID_PAYLOAD',
+				userId,
+				projectId: validated.projectId,
+			})
+			return {
+				success: false,
+				error:
+					'Escrow data must include either milestones or single-release amount and receiver',
+			}
+		}
 
 		const { data: existingContribution } = await supabase
 			.from('contributions')
