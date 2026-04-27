@@ -13,18 +13,30 @@ import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { validateCsrfToken } from '~/app/actions/csrf'
 import { AuthErrorHandler } from '~/lib/auth/error-handler'
+import {
+	enforceRateLimit,
+	getAuthenticatedSession,
+	requireAdminSession,
+	requireAuthenticatedSession,
+	type ServerActionFailure,
+	toServerActionFailure,
+	validateInput,
+} from '~/lib/auth/server-action-auth'
 import { Logger } from '~/lib/logger'
+import {
+	createSessionInputSchema,
+	requestResetAccountInputSchema,
+	resetPasswordInputSchema,
+	signUpInputSchema,
+	updateDeviceWithDeployeeInputSchema,
+	updateEscrowFinancialsInputSchema,
+	updateEscrowMilestoneInputSchema,
+	updateEscrowStatusInputSchema,
+} from '~/lib/schemas/server-actions.schemas'
 import type { AuthResponse } from '~/lib/types/auth'
 
 type Tables = Database['public']['Tables']
 type EscrowRecord = Tables['escrow_status']['Row']
-type EscrowStatusType =
-	| 'NEW'
-	| 'FUNDED'
-	| 'ACTIVE'
-	| 'COMPLETED'
-	| 'DISPUTED'
-	| 'CANCELLED'
 
 type EscrowResponse = {
 	success: boolean
@@ -36,19 +48,60 @@ type EscrowResponse = {
 const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
 
+function escrowFailureFromAction(
+	failure: ServerActionFailure,
+	fallbackMessage: string,
+): EscrowResponse {
+	return {
+		success: false,
+		message: failure.error || fallbackMessage,
+		error: failure.error,
+	}
+}
+
 export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 	const appConfig: AppEnvInterface = appEnvConfig('web')
-	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
+	if (!(await validateCsrfToken(formData.get('csrfToken')?.toString()))) {
 		return {
 			success: false,
 			message: 'Invalid CSRF token',
 			error: 'Invalid CSRF token',
 		}
 	}
-	const supabase = supabaseServiceRole
-	const email = formData.get('email') as string
 
-	// Check if user already exists
+	let email: string
+	try {
+		const validated = validateInput(
+			signUpInputSchema,
+			{ email: formData.get('email')?.toString() },
+			'signUpAction',
+		)
+		email = validated.email
+	} catch (error) {
+		const failure = toServerActionFailure(error, 'Invalid input')
+		return {
+			success: false,
+			message: failure.error,
+			error: failure.error,
+		}
+	}
+
+	try {
+		await enforceRateLimit(email.toLowerCase(), 'sign_up')
+	} catch (error) {
+		const failure = toServerActionFailure(
+			error,
+			'Too many requests. Please try again later.',
+		)
+		return {
+			success: false,
+			message: failure.error,
+			error: failure.error,
+		}
+	}
+
+	const supabase = supabaseServiceRole
+
 	const { data: existingUser } = await supabase
 		.from('profiles')
 		.select('id, email')
@@ -56,11 +109,11 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 		.single()
 
 	if (existingUser) {
-		console.warn(
-			'🔧 KindfiSupabaseAdapter: User already exists',
-			existingUser.id,
-		)
-		throw new Error('This account is already registered. Sign in instead!')
+		return {
+			success: false,
+			message: 'This account is already registered. Sign in instead!',
+			error: 'User already exists',
+		}
 	}
 
 	const signInWithOptOpt = {
@@ -73,7 +126,6 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 	try {
 		const { data, error } = await supabase.auth.signInWithOtp(signInWithOptOpt)
 		if (error) {
-			console.error('Error signing up with otp:', error)
 			return errorHandler.handleAuthError(error, 'sign_up')
 		}
 
@@ -86,27 +138,52 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 			data,
 		}
 	} catch (error) {
-		console.error('Error signing up in general:', error)
 		return errorHandler.handleAuthError(error as AuthError, 'sign_up')
 	}
 }
 
-export async function createSessionAction({
-	userId,
-	email,
-}: {
+export async function createSessionAction(input: {
 	userId: string
 	email: string
 }): Promise<AuthResponse> {
+	let validated: { userId: string; email: string }
+	try {
+		validated = validateInput(
+			createSessionInputSchema,
+			input,
+			'createSessionAction',
+		)
+	} catch (error) {
+		const failure = toServerActionFailure(error, 'Invalid input')
+		return {
+			success: false,
+			message: failure.error,
+			error: failure.error,
+		}
+	}
+
+	try {
+		await enforceRateLimit(validated.userId, 'create_session')
+	} catch (error) {
+		const failure = toServerActionFailure(
+			error,
+			'Too many requests. Please try again later.',
+		)
+		return {
+			success: false,
+			message: failure.error,
+			error: failure.error,
+		}
+	}
+
 	const supabase = await createSupabaseServerClient()
 
 	try {
-		// Verify the user exists and the email matches
 		const { data: userData, error: userError } = await supabase
 			.from('profiles')
 			.select()
-			.eq('id', userId)
-			.eq('email', email)
+			.eq('id', validated.userId)
+			.eq('email', validated.email)
 			.single()
 
 		if (userError || !userData) {
@@ -120,27 +197,22 @@ export async function createSessionAction({
 
 		logger.info({
 			eventType: 'SESSION_CREATED',
-			userId,
-			email,
+			userId: validated.userId,
+			email: validated.email,
 		})
-
-		if (userError) {
-			errorHandler.handleAuthError(userError, 'sign_in')
-		}
 
 		return {
 			success: true,
 			message: 'Session created successfully',
 			redirect: '/profile',
-			// data: sessionData,
 			data: userData,
 		} as AuthResponse
 	} catch (error) {
 		logger.error({
 			eventType: 'SESSION_CREATION_ERROR',
 			error: error instanceof Error ? error.message : 'Unknown error',
-			userId,
-			email,
+			userId: validated.userId,
+			email: validated.email,
 		})
 		return errorHandler.handleAuthError(error as AuthError, 'create_session')
 	}
@@ -150,34 +222,33 @@ export async function signOutAction(): Promise<void> {
 	const cookieStore = await cookies()
 
 	try {
-		// Clear NextAuth session cookie
 		const cookieName =
 			process.env.NODE_ENV === 'production'
 				? '__Secure-next-auth.session-token'
 				: 'next-auth.session-token'
 
 		cookieStore.delete(cookieName)
-
-		// Also clear the CSRF token cookie if it exists
 		cookieStore.delete('csrf-token')
 
-		// Sign out from Supabase
 		try {
 			const supabase = await createSupabaseServerClient()
 			const { error } = await supabase.auth.signOut()
 
 			if (error) {
-				console.error('Supabase sign out error:', error)
-				// Continue with redirect even if Supabase sign out fails
+				logger.warn({
+					eventType: 'SUPABASE_SIGN_OUT_ERROR',
+					error: error.message,
+				})
 			}
 		} catch (error) {
-			console.error('No supabase session or error during sign out:', error)
-			// Continue with redirect even if Supabase sign out fails
+			logger.warn({
+				eventType: 'SUPABASE_SIGN_OUT_EXCEPTION',
+				error: error instanceof Error ? error.message : 'Unknown error',
+			})
 		}
 
 		redirect('/sign-in?success=Successfully signed out')
 	} catch (error) {
-		// If redirect fails, it might be a NEXT_REDIRECT error which is expected
 		if (
 			error &&
 			typeof error === 'object' &&
@@ -198,33 +269,46 @@ export async function signOutAction(): Promise<void> {
 export async function requestResetAccountAction(
 	formData: FormData,
 ): Promise<void> {
-	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
+	if (!(await validateCsrfToken(formData.get('csrfToken')?.toString()))) {
 		redirect('/reset-account?error=Invalid CSRF token')
 	}
-	const email = formData.get('email')?.toString()
-	const _supabase = await createSupabaseServerClient()
-	const _origin = (await headers()).get('origin')
 
-	if (!email) {
-		redirect('/reset-account?error=Email is required')
+	let email: string
+	try {
+		const validated = validateInput(
+			requestResetAccountInputSchema,
+			{ email: formData.get('email')?.toString() },
+			'requestResetAccountAction',
+		)
+		email = validated.email
+	} catch (_error) {
+		redirect('/reset-account?error=A valid email is required')
 	}
 
 	try {
+		await enforceRateLimit(email.toLowerCase(), 'request_reset_account')
+	} catch (_error) {
+		redirect('/reset-account?error=Too many requests. Try again later.')
+	}
+
+	const _supabase = await createSupabaseServerClient()
+	const _origin = (await headers()).get('origin')
+
+	try {
 		// TODO: Implement a proper reset account flow
-		// This is a placeholder for the actual reset account logic
-		// const { error } = await supabase.auth.resetPasswordForEmail(email, {
-		// 	redirectTo: `${origin}/auth/callback?redirect_to=//reset-account`,
-		// })
-
-		// if (error) {
-		// 	const response = errorHandler.handleAuthError(error, 'forgot_password')
-		// 	redirect(`/reset-account?error=${encodeURIComponent(response.message)}`)
-		// }
-
+		// This is a placeholder for the actual reset account logic.
 		redirect(
 			'/reset-account?success=Check your email for a confirmation request to reset your account',
 		)
 	} catch (error) {
+		if (
+			error &&
+			typeof error === 'object' &&
+			'digest' in error &&
+			(error.digest as string | undefined)?.startsWith('NEXT_REDIRECT')
+		) {
+			throw error
+		}
 		const response = errorHandler.handleAuthError(
 			error as AuthError,
 			'reset_account',
@@ -234,26 +318,44 @@ export async function requestResetAccountAction(
 }
 
 export async function resetPasswordAction(formData: FormData): Promise<void> {
-	if (!validateCsrfToken(formData.get('csrfToken')?.toString())) {
+	if (!(await validateCsrfToken(formData.get('csrfToken')?.toString()))) {
 		redirect('/reset-password?error=Invalid CSRF token')
 	}
-	const password = formData.get('password') as string
-	const confirmPassword = formData.get('confirmPassword') as string
 
-	if (!password || !confirmPassword) {
-		redirect('/reset-password?error=Password and confirm password are required')
+	const session = await getAuthenticatedSession()
+	if (!session) {
+		redirect(
+			'/reset-password?error=You must follow the recovery link sent to your email before resetting your password.',
+		)
 	}
 
-	if (password !== confirmPassword) {
-		redirect('/reset-password?error=Passwords do not match')
+	let password: string
+	try {
+		const validated = validateInput(
+			resetPasswordInputSchema,
+			{
+				password: formData.get('password')?.toString() ?? '',
+				confirmPassword: formData.get('confirmPassword')?.toString() ?? '',
+			},
+			'resetPasswordAction',
+		)
+		password = validated.password
+	} catch (_error) {
+		redirect(
+			'/reset-password?error=Password must be at least 8 characters and match the confirmation.',
+		)
+	}
+
+	try {
+		await enforceRateLimit(session.user.id, 'reset_password')
+	} catch (_error) {
+		redirect('/reset-password?error=Too many requests. Try again later.')
 	}
 
 	const supabase = await createSupabaseServerClient()
 
 	try {
-		const { error } = await supabase.auth.updateUser({
-			password: password,
-		})
+		const { error } = await supabase.auth.updateUser({ password })
 
 		if (error) {
 			const response = errorHandler.handleAuthError(error, 'reset_password')
@@ -262,6 +364,14 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
 
 		redirect('/sign-in?success=Password updated successfully')
 	} catch (error) {
+		if (
+			error &&
+			typeof error === 'object' &&
+			'digest' in error &&
+			(error.digest as string | undefined)?.startsWith('NEXT_REDIRECT')
+		) {
+			throw error
+		}
 		const response = errorHandler.handleAuthError(
 			error as AuthError,
 			'reset_password',
@@ -270,7 +380,6 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
 	}
 }
 
-// Helper function to check auth status
 export async function checkAuthStatus(): Promise<AuthResponse> {
 	const supabase = await createSupabaseServerClient()
 
@@ -303,18 +412,41 @@ export async function checkAuthStatus(): Promise<AuthResponse> {
 
 export async function updateEscrowStatusAction(
 	id: string,
-	newStatus: EscrowStatusType,
+	newStatus: string,
 ): Promise<EscrowResponse> {
+	try {
+		await requireAdminSession('updateEscrowStatusAction')
+	} catch (error) {
+		return escrowFailureFromAction(
+			toServerActionFailure(error, 'Forbidden'),
+			'Forbidden',
+		)
+	}
+
+	let validated: { id: string; newStatus: EscrowRecord['status'] }
+	try {
+		validated = validateInput(
+			updateEscrowStatusInputSchema,
+			{ id, newStatus },
+			'updateEscrowStatusAction',
+		) as { id: string; newStatus: EscrowRecord['status'] }
+	} catch (error) {
+		return escrowFailureFromAction(
+			toServerActionFailure(error, 'Invalid input'),
+			'Invalid input',
+		)
+	}
+
 	const supabase = await createSupabaseServerClient()
 
 	try {
 		const { data, error } = await supabase
 			.from('escrow_status')
 			.update({
-				status: newStatus,
+				status: validated.newStatus,
 				last_updated: new Date().toISOString(),
 			})
-			.eq('id', id)
+			.eq('id', validated.id)
 			.select()
 			.single()
 
@@ -323,15 +455,15 @@ export async function updateEscrowStatusAction(
 		revalidatePath('/admin/escrow')
 		return {
 			success: true,
-			message: `Status updated to ${newStatus}`,
+			message: `Status updated to ${validated.newStatus}`,
 			data,
 		}
 	} catch (error) {
 		logger.error({
 			eventType: 'ESCROW_STATUS_UPDATE_ERROR',
 			error: error instanceof Error ? error.message : 'Unknown error',
-			id,
-			newStatus,
+			id: validated.id,
+			newStatus: validated.newStatus,
 		})
 		return {
 			success: false,
@@ -346,22 +478,45 @@ export async function updateEscrowMilestoneAction(
 	current: number,
 	completed: number,
 ): Promise<EscrowResponse> {
+	try {
+		await requireAdminSession('updateEscrowMilestoneAction')
+	} catch (error) {
+		return escrowFailureFromAction(
+			toServerActionFailure(error, 'Forbidden'),
+			'Forbidden',
+		)
+	}
+
+	let validated: { id: string; current: number; completed: number }
+	try {
+		validated = validateInput(
+			updateEscrowMilestoneInputSchema,
+			{ id, current, completed },
+			'updateEscrowMilestoneAction',
+		)
+	} catch (error) {
+		return escrowFailureFromAction(
+			toServerActionFailure(error, 'Invalid input'),
+			'Invalid input',
+		)
+	}
+
 	const supabase = await createSupabaseServerClient()
 
 	try {
 		const { data, error } = await supabase
 			.from('escrow_status')
 			.update({
-				current_milestone: current,
+				current_milestone: validated.current,
 				metadata: {
 					milestoneStatus: {
-						current,
-						completed,
+						current: validated.current,
+						completed: validated.completed,
 					},
 				},
 				last_updated: new Date().toISOString(),
 			})
-			.eq('id', id)
+			.eq('id', validated.id)
 			.select()
 			.single()
 
@@ -377,9 +532,9 @@ export async function updateEscrowMilestoneAction(
 		logger.error({
 			eventType: 'ESCROW_MILESTONE_UPDATE_ERROR',
 			error: error instanceof Error ? error.message : 'Unknown error',
-			id,
-			current,
-			completed,
+			id: validated.id,
+			current: validated.current,
+			completed: validated.completed,
 		})
 		return {
 			success: false,
@@ -394,17 +549,40 @@ export async function updateEscrowFinancialsAction(
 	funded: number,
 	released: number,
 ): Promise<EscrowResponse> {
+	try {
+		await requireAdminSession('updateEscrowFinancialsAction')
+	} catch (error) {
+		return escrowFailureFromAction(
+			toServerActionFailure(error, 'Forbidden'),
+			'Forbidden',
+		)
+	}
+
+	let validated: { id: string; funded: number; released: number }
+	try {
+		validated = validateInput(
+			updateEscrowFinancialsInputSchema,
+			{ id, funded, released },
+			'updateEscrowFinancialsAction',
+		)
+	} catch (error) {
+		return escrowFailureFromAction(
+			toServerActionFailure(error, 'Invalid input'),
+			'Invalid input',
+		)
+	}
+
 	const supabase = await createSupabaseServerClient()
 
 	try {
 		const { data, error } = await supabase
 			.from('escrow_status')
 			.update({
-				total_funded: funded,
-				total_released: released,
+				total_funded: validated.funded,
+				total_released: validated.released,
 				last_updated: new Date().toISOString(),
 			})
-			.eq('id', id)
+			.eq('id', validated.id)
 			.select()
 			.single()
 
@@ -420,9 +598,9 @@ export async function updateEscrowFinancialsAction(
 		logger.error({
 			eventType: 'ESCROW_FINANCIALS_UPDATE_ERROR',
 			error: error instanceof Error ? error.message : 'Unknown error',
-			id,
-			funded,
-			released,
+			id: validated.id,
+			funded: validated.funded,
+			released: validated.released,
 		})
 		return {
 			success: false,
@@ -433,6 +611,15 @@ export async function updateEscrowFinancialsAction(
 }
 
 export async function getEscrowRecordsAction(): Promise<EscrowResponse> {
+	try {
+		await requireAdminSession('getEscrowRecordsAction')
+	} catch (error) {
+		return escrowFailureFromAction(
+			toServerActionFailure(error, 'Forbidden'),
+			'Forbidden',
+		)
+	}
+
 	const supabase = await createSupabaseServerClient()
 
 	try {
@@ -462,6 +649,23 @@ export async function getEscrowRecordsAction(): Promise<EscrowResponse> {
 }
 
 export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
+	if (process.env.NODE_ENV === 'production') {
+		return {
+			success: false,
+			message: 'Test record insertion is disabled in production',
+			error: 'Forbidden',
+		}
+	}
+
+	try {
+		await requireAdminSession('insertTestEscrowRecordAction')
+	} catch (error) {
+		return escrowFailureFromAction(
+			toServerActionFailure(error, 'Forbidden'),
+			'Forbidden',
+		)
+	}
+
 	const supabase = await createSupabaseServerClient()
 
 	try {
@@ -470,7 +674,7 @@ export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
 			.insert([
 				{
 					escrow_id: `test-${Date.now()}`,
-					status: 'NEW' as EscrowStatusType,
+					status: 'NEW',
 					current_milestone: 1,
 					total_funded: 1000,
 					total_released: 0,
@@ -507,31 +711,49 @@ export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
 }
 
 export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
-	const {
-		aaguid,
-		userId,
-		credentialId,
-	}: {
-		credentialId: string
-		userId: string
-		aaguid?: string
-	} = JSON.parse(deployeeUpdateData)
-	// Get current user from session or context
+	let session: Awaited<ReturnType<typeof requireAuthenticatedSession>>
 	try {
-		if (!userId) {
-			throw new Error('User not authenticated')
+		session = await requireAuthenticatedSession('updateDeviceWithDeployee')
+	} catch (error) {
+		const failure = toServerActionFailure(error, 'Unauthorized')
+		return {
+			success: false,
+			message: failure.error,
+			error: failure.error,
 		}
+	}
 
-		// Validate input parameters
-		if (!userId || !credentialId || !aaguid) {
-			return {
-				success: false,
-				message: 'Missing required parameters',
-				error: 'Invalid input parameters',
-			}
+	let parsed: unknown
+	try {
+		parsed = JSON.parse(deployeeUpdateData)
+	} catch (_error) {
+		return {
+			success: false,
+			message: 'Invalid payload: not valid JSON',
+			error: 'Invalid payload',
 		}
+	}
 
-		// Verify the device exists and belongs to the user
+	let validated: { credentialId: string; aaguid: string }
+	try {
+		validated = validateInput(
+			updateDeviceWithDeployeeInputSchema,
+			parsed,
+			'updateDeviceWithDeployee',
+		)
+	} catch (error) {
+		const failure = toServerActionFailure(error, 'Invalid input parameters')
+		return {
+			success: false,
+			message: failure.error,
+			error: failure.error,
+		}
+	}
+
+	const userId = session.user.id
+	const { credentialId, aaguid } = validated
+
+	try {
 		const existingDevice = await db
 			.select({
 				id: devices.id,
@@ -555,7 +777,6 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 
 		const deviceToUpdate = existingDevice[0]
 
-		// Update the device with deployee address and AAGUID
 		const updatedDevice = await db
 			.update(devices)
 			.set({
