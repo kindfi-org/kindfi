@@ -2,6 +2,7 @@ import { headers } from 'next/headers'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { Logger } from '~/lib/logger'
@@ -76,30 +77,28 @@ export async function POST(req: NextRequest) {
 			})
 			return validation.response
 		}
-		const sessionUserId = session.user.id
-		const requestedUserId = validation.data.user_id
-
-		let userId: string
-
-		if (requestedUserId && requestedUserId !== sessionUserId) {
-			const isAdmin = session.user.role === 'admin'
-
-			if (!isAdmin) {
-				return new Response(
-					JSON.stringify({
-						error:
-							'Forbidden: You do not have permission to mint NFTs for other users.',
-					}),
-					{
-						status: 403,
-						headers: { 'Content-Type': 'application/json' },
-					},
-				)
-			}
-			userId = requestedUserId
-		} else {
-			userId = sessionUserId
+		const authorization = authorizeUserOverride({
+			session,
+			requestedUserId: validation.data.user_id,
+			resource: 'mint NFTs',
+		})
+		if (!authorization.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'nft.mint',
+				resourceType: 'nft',
+				actorId: session.user.id,
+				status: 'failure',
+				errorCode: '403',
+				durationMs: Date.now() - startTime,
+				metadata: {
+					reason: 'forbidden_user_override',
+					requestedUserId: validation.data.user_id,
+				},
+			})
+			return authorization.response
 		}
+		const { userId } = authorization
 
 		let stellarAddress: string | null =
 			validation.data.stellar_address || null
