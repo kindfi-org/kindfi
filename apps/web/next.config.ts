@@ -10,10 +10,6 @@ const nextConfig: NextConfig = {
 	turbopack: {
 		root: path.join(__dirname, '../..'),
 	},
-	// TODO: Fix React module resolution for packages/lib in monorepo type-check
-	typescript: {
-		ignoreBuildErrors: true,
-	},
 	experimental: {
 		mdxRs: true,
 		optimizePackageImports: ['react-icons'],

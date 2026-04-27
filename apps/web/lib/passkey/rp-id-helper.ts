@@ -11,9 +11,7 @@ export function getRpIdFromOrigin(origin: string): string {
 	const rpIds = config.passkey.rpId
 
 	// Try to match the origin with expected origins
-	const originIndex = expectedOrigins.findIndex(
-		(expectedOrigin) => expectedOrigin === origin,
-	)
+	const originIndex = expectedOrigins.indexOf(origin)
 
 	if (originIndex !== -1 && rpIds[originIndex]) {
 		return rpIds[originIndex]
@@ -27,7 +25,6 @@ export function getRpIdFromOrigin(origin: string): string {
 
 		// Remove 'www.' prefix if present for consistency
 		const rpId = hostname.replace(/^www\./, '')
-
 
 		return rpId
 	} catch {
@@ -48,9 +45,7 @@ export function getRpNameFromOrigin(origin: string): string {
 	const rpNames = config.passkey.rpName
 
 	// Try to match the origin with expected origins
-	const originIndex = expectedOrigins.findIndex(
-		(expectedOrigin) => expectedOrigin === origin,
-	)
+	const originIndex = expectedOrigins.indexOf(origin)
 
 	if (originIndex !== -1 && rpNames[originIndex]) {
 		return rpNames[originIndex]

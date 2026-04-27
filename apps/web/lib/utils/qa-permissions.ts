@@ -99,7 +99,7 @@ export function canDeleteQAContent(
  */
 export function getUserRole(
 	userData: UserData | null,
-	projectId: string,
+	_projectId: string,
 	projectMembers: ProjectMemberRole[],
 	projectOwnerId: string | null,
 ): UserRole | null {
