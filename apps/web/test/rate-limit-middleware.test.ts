@@ -148,9 +148,9 @@ describe('withRateLimit', () => {
 
 				const res = await wrapped(makeRequest())
 
-				expect((res.headers as Record<string, string>)['Retry-After']).toBe(
-					RATE_LIMIT_PRESETS[preset].block.toString(),
-				)
+				const actual = (res.headers as Record<string, string>)['Retry-After']
+				const expected = RATE_LIMIT_PRESETS[preset].block.toString()
+				expect(actual).toBe(expected, `preset "${preset}"`)
 			}
 		})
 
