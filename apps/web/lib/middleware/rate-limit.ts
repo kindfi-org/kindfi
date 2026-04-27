@@ -32,7 +32,7 @@ export function withRateLimit(
 					{ error: 'Too many requests. Please try again later.' },
 					{
 						status: 429,
-						headers: { 'Retry-After': preset.window.toString() },
+						headers: { 'Retry-After': preset.block.toString() },
 					},
 				)
 			}
