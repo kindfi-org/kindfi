@@ -4,19 +4,12 @@ import { useEscrowForm } from '../context/escrow-form-context'
 
 /**
  * Syncs connected wallet address into empty role fields and milestone receivers.
- * Also syncs suggested project defaults into empty text fields.
+ * Also syncs suggested project defaults into empty text fields (read from context).
  */
-export function useWalletSync({
-	suggestedTitle,
-	suggestedEngagementId,
-	suggestedDescription,
-}: {
-	suggestedTitle: string
-	suggestedEngagementId: string
-	suggestedDescription: string
-}) {
+export function useWalletSync() {
 	const { address } = useWallet()
-	const { formData, setField } = useEscrowForm()
+	const { formData, setField, suggestions } = useEscrowForm()
+	const { suggestedTitle, suggestedEngagementId, suggestedDescription } = suggestions
 
 	// Sync suggested values when they arrive (only if field is still empty)
 	useEffect(() => {

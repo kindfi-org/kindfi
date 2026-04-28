@@ -17,8 +17,15 @@ function genId(): string {
 		: `m-${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
+interface EscrowSuggestions {
+	suggestedTitle: string
+	suggestedEngagementId: string
+	suggestedDescription: string
+}
+
 interface EscrowFormContextValue {
 	formData: EscrowFormData
+	suggestions: EscrowSuggestions
 	setField: <K extends keyof EscrowFormData>(
 		field: K,
 		value: EscrowFormData[K],
@@ -38,15 +45,33 @@ interface EscrowFormProviderProps {
 	initialData: Pick<
 		EscrowFormData,
 		'title' | 'engagementId' | 'description' | 'selectedEscrowType'
-	> & { walletAddress?: string | null }
+	> & {
+		walletAddress?: string | null
+		suggestedTitle?: string
+		suggestedEngagementId?: string
+		suggestedDescription?: string
+	}
 }
 
 export function EscrowFormProvider({
 	children,
 	initialData,
 }: EscrowFormProviderProps) {
-	const { walletAddress, selectedEscrowType, title, engagementId, description } =
-		initialData
+	const {
+		walletAddress,
+		selectedEscrowType,
+		title,
+		engagementId,
+		description,
+		suggestedTitle = '',
+		suggestedEngagementId = '',
+		suggestedDescription = '',
+	} = initialData
+
+	const suggestions: EscrowSuggestions = useMemo(
+		() => ({ suggestedTitle, suggestedEngagementId, suggestedDescription }),
+		[suggestedTitle, suggestedEngagementId, suggestedDescription],
+	)
 
 	const [formData, setFormData] = useState<EscrowFormData>(() => ({
 		selectedEscrowType,
@@ -140,6 +165,7 @@ export function EscrowFormProvider({
 	const value = useMemo(
 		() => ({
 			formData,
+			suggestions,
 			setField,
 			addMilestone,
 			removeMilestone,
@@ -148,6 +174,7 @@ export function EscrowFormProvider({
 		}),
 		[
 			formData,
+			suggestions,
 			setField,
 			addMilestone,
 			removeMilestone,
