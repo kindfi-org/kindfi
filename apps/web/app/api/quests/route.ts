@@ -3,8 +3,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { createQuestSchema } from '~/lib/schemas/quest.schemas'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -34,10 +34,7 @@ export async function GET(_req: NextRequest) {
 					.select('*')
 					.eq('is_active', true)
 					.order('created_at', { ascending: false }),
-				supabase
-					.from('user_quest_progress')
-					.select('*')
-					.eq('user_id', userId),
+				supabase.from('user_quest_progress').select('*').eq('user_id', userId),
 				supabase
 					.from('contributions')
 					.select('id', { count: 'exact', head: true })
@@ -78,7 +75,12 @@ export async function GET(_req: NextRequest) {
 
 		if (hasContributions && questsMissingProgress.length > 0) {
 			try {
-				await syncQuestProgress(supabase, userId, questsMissingProgress, progressMap)
+				await syncQuestProgress(
+					supabase,
+					userId,
+					questsMissingProgress,
+					progressMap,
+				)
 			} catch (syncErr) {
 				console.error('[Quests] Error syncing quest progress:', syncErr)
 			}
@@ -217,7 +219,6 @@ export async function POST(req: NextRequest) {
 
 		if (questContractAddress) {
 			try {
-
 				// Use admin private key if available, otherwise use recorder keypair
 				// (assuming recorder has admin role granted)
 				const adminPrivateKey =
@@ -291,7 +292,11 @@ export async function POST(req: NextRequest) {
 async function syncQuestProgress(
 	supabase: Awaited<typeof import('@packages/lib/supabase')>['supabase'],
 	userId: string,
-	missingQuests: Array<{ quest_id: number; quest_type: string; target_value: number }>,
+	missingQuests: Array<{
+		quest_id: number
+		quest_type: string
+		target_value: number
+	}>,
 	progressMap: Map<number, Record<string, unknown>>,
 ) {
 	const questTypes = new Set(missingQuests.map((q) => q.quest_type))
@@ -304,7 +309,8 @@ async function syncQuestProgress(
 					.select('amount')
 					.eq('contributor_id', userId)
 			: Promise.resolve({ data: null }),
-		questTypes.has('multi_category_donation') || questTypes.has('multi_region_donation')
+		questTypes.has('multi_category_donation') ||
+		questTypes.has('multi_region_donation')
 			? supabase
 					.from('contributions')
 					.select('project_id, projects!inner(category_id)')
@@ -317,10 +323,7 @@ async function syncQuestProgress(
 
 		if (quest.quest_type === 'total_donation_amount' && amountResult.data) {
 			progressValue = Math.floor(
-				amountResult.data.reduce(
-					(sum, c) => sum + Number(c.amount || 0),
-					0,
-				),
+				amountResult.data.reduce((sum, c) => sum + Number(c.amount || 0), 0),
 			)
 		} else if (
 			(quest.quest_type === 'multi_category_donation' ||
@@ -332,7 +335,7 @@ async function syncQuestProgress(
 					(p, index, self) =>
 						index ===
 						self.findIndex(
-							(pr) => pr.projects?.category_id === p.projects?.category_id,
+							(pr) => pr.projects[0].category_id === p.projects[0].category_id,
 						),
 				).length || 0
 		}

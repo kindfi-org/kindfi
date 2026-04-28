@@ -2,12 +2,11 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import type { CreateOptionPayload } from '~/lib/governance/types'
-import { GovernanceContractService } from '~/lib/stellar/governance-contract'
 import {
 	createGovernanceRoundSchema,
 	governanceRoundsQuerySchema,
 } from '~/lib/schemas/governance.schemas'
+import { GovernanceContractService } from '~/lib/stellar/governance-contract'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -219,18 +218,19 @@ export async function POST(req: NextRequest) {
 						console.warn('[Governance] add_option failed:', optResult.error)
 					}
 				}
-
-				console.info(`[Governance] Round ${round.id} → on-chain #${contractRoundId}`)
 			}
 		} catch (err) {
 			console.error('[Governance] on-chain recording error:', err)
 		}
 
-		return NextResponse.json({
-			success: true,
-			data: { ...round, contract_round_id: contractRoundId },
-			onChain: contractRoundId !== null,
-		}, { status: 201 })
+		return NextResponse.json(
+			{
+				success: true,
+				data: { ...round, contract_round_id: contractRoundId },
+				onChain: contractRoundId !== null,
+			},
+			{ status: 201 },
+		)
 	} catch (error) {
 		console.error('Error in POST /api/governance/rounds:', error)
 		return NextResponse.json(

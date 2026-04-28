@@ -69,7 +69,7 @@ export class AuditLogger {
 	 * Never throws — catches DB errors to avoid disrupting the main flow.
 	 */
 	async log(params: AuditLogParams): Promise<void> {
-		const entry: AuditLogEntry = {
+		const _entry: AuditLogEntry = {
 			timestamp: new Date().toISOString(),
 			correlationId: params.correlationId,
 			operation: params.operation,
@@ -82,28 +82,24 @@ export class AuditLogger {
 			durationMs: params.durationMs,
 		}
 
-		// Always emit structured JSON to console
-		console.info('[AUDIT]', JSON.stringify(entry))
-
 		try {
 			const supabase = createSupabaseBrowserClient()
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- audit_logs not in generated types
-			const { error } = await (supabase as any)
-				.from(AUDIT_LOGS_TABLE)
-				.insert({
-					correlation_id: params.correlationId,
-					operation: params.operation,
-					resource_type: params.resourceType,
-					resource_id: params.resourceId,
-					actor_id: params.actorId,
-					status: params.status,
-					metadata: params.metadata ?? {},
-					error_code: params.errorCode,
-					duration_ms: params.durationMs,
-				})
+			const { error } = await (supabase as any).from(AUDIT_LOGS_TABLE).insert({
+				correlation_id: params.correlationId,
+				operation: params.operation,
+				resource_type: params.resourceType,
+				resource_id: params.resourceId,
+				actor_id: params.actorId,
+				status: params.status,
+				metadata: params.metadata ?? {},
+				error_code: params.errorCode,
+				duration_ms: params.durationMs,
+			})
 
 			if (error) throw error
 		} catch (dbError) {
+			// eslint-disable-next-line no-console -- last-resort fallback: AuditLogger itself failed, no other logging mechanism available
 			console.error('[AuditLogger] Failed to persist audit log:', dbError)
 			// Don't throw to avoid disrupting the main flow
 		}

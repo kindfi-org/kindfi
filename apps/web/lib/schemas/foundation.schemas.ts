@@ -14,7 +14,10 @@ export const foundationCampaignsSchema = z.object({
 })
 
 export const foundationMilestoneCreateSchema = z.object({
-	title: z.string().min(1, 'Title is required').transform((s) => s.trim()),
+	title: z
+		.string()
+		.min(1, 'Title is required')
+		.transform((s) => s.trim()),
 	description: z.string().nullable().optional(),
 	achievedDate: z.string().min(1, 'Achieved date is required'),
 	impactMetric: z.string().nullable().optional(),
@@ -32,6 +35,6 @@ export const foundationUpdateFormSchema = z.object({
 	mission: z.string().nullable().optional(),
 	vision: z.string().nullable().optional(),
 	websiteUrl: z.string().nullable().optional(),
-	socialLinks: z.record(z.string()).optional().default({}),
+	socialLinks: z.record(z.string(), z.string()).optional().default({}),
 	logo: z.union([z.instanceof(File), z.null()]).optional(),
 })
