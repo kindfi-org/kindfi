@@ -55,5 +55,5 @@ jobs:
       - name: Install test dependencies
         run: bun add --dev @subql/node-stellar
       - name: Run tests with Subquery Node
-        run: bunx subql-node-stellar test -f ${{ github.workspace }}
+        run: bunx subql-node-stellar test -f .
         timeout-minutes: 15
