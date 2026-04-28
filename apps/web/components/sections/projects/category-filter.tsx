@@ -46,8 +46,7 @@ export function CategoryFilter({
 	const [hasOverflow, setHasOverflow] = useState(false)
 
 	// DEBUG: Log selected categories to see what's being tracked
-	useEffect(() => {
-	}, [selectedCategories])
+	useEffect(() => {}, [])
 
 	// Calculate how far right the thumb can go
 	const getMaxThumbPosition = () => {

@@ -35,7 +35,7 @@ const escrowTransactionMetadataSchema = z.object({
 	payerAddress: z.string().min(1, 'Payer address is required'),
 	referenceId: z.string().optional(),
 	createdAt: z.string(),
-	additionalData: z.record(z.string()).optional(),
+	additionalData: z.record(z.string(), z.string()).optional(),
 })
 
 export const escrowFundSchema = z
@@ -91,16 +91,12 @@ export const escrowFundSchema = z
 export const milestoneReviewSchema = z.object({
 	milestoneId: z.string().min(1, 'Milestone ID is required'),
 	reviewerId: z.string().min(1, 'Reviewer ID is required'),
-	status: z.enum([
-		'pending',
-		'approved',
-		'rejected',
-		'completed',
-		'disputed',
-	]),
+	status: z.enum(['pending', 'approved', 'rejected', 'completed', 'disputed']),
 	comments: z.string().optional(),
 	signer: z.string().min(1, 'Signer is required'),
-	escrowContractAddress: z.string().min(1, 'Escrow contract address is required'),
+	escrowContractAddress: z
+		.string()
+		.min(1, 'Escrow contract address is required'),
 })
 
 export const escrowFundUpdateSchema = z.object({

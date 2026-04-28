@@ -83,9 +83,7 @@ function getRpId(appConfig: AppEnvInterface, providedRpId?: string): string {
 		const expectedOrigins = appConfig.passkey.expectedOrigin
 		const rpIds = appConfig.passkey.rpId
 
-		const originIndex = expectedOrigins.findIndex(
-			(expectedOrigin) => expectedOrigin === currentOrigin,
-		)
+		const originIndex = expectedOrigins.indexOf(currentOrigin)
 
 		if (originIndex !== -1 && rpIds[originIndex]) {
 			return rpIds[originIndex]
@@ -118,9 +116,7 @@ function getRpName(
 		const expectedOrigins = appConfig.passkey.expectedOrigin
 		const rpNames = appConfig.passkey.rpName
 
-		const originIndex = expectedOrigins.findIndex(
-			(expectedOrigin) => expectedOrigin === currentOrigin,
-		)
+		const originIndex = expectedOrigins.indexOf(currentOrigin)
 
 		if (originIndex !== -1 && rpNames[originIndex]) {
 			return rpNames[originIndex]
@@ -219,22 +215,22 @@ export class SmartAccountKitService {
 				const isServerSide = typeof window === 'undefined'
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				let storageAdapter: any // StorageAdapter (dynamically imported)
-				let storageType = 'none'
+				let _storageType = 'none'
 
 				if (this.config.storage) {
 					storageAdapter = this.config.storage
-					storageType = 'custom'
+					_storageType = 'custom'
 				} else if (isServerSide) {
 					// Server-side: use MemoryStorage (no persistence needed for one-time wallet creation)
 					if (kitModule.MemoryStorage) {
 						storageAdapter = new kitModule.MemoryStorage()
-						storageType = 'MemoryStorage'
+						_storageType = 'MemoryStorage'
 					}
 				} else {
 					// Client-side: use IndexedDBStorage for persistence
 					if (kitModule.IndexedDBStorage) {
 						storageAdapter = new kitModule.IndexedDBStorage()
-						storageType = 'IndexedDBStorage'
+						_storageType = 'IndexedDBStorage'
 					}
 				}
 
@@ -276,7 +272,6 @@ export class SmartAccountKitService {
 
 				this.kit = new kitModule.SmartAccountKit(kitConfig)
 				this.isInitialized = true
-
 			} catch (error) {
 				console.error('❌ Failed to initialize Smart Account Kit:', error)
 				throw error
@@ -317,14 +312,12 @@ export class SmartAccountKitService {
 		await this.ensureReady()
 
 		try {
-
 			const result = await this.kit.createWallet(appName, userName, {
 				autoSubmit: options?.autoSubmit ?? true,
 				autoFund: options?.autoFund ?? false,
 				nativeTokenContract:
 					options?.nativeTokenContract || this.config.nativeTokenContract,
 			})
-
 
 			return {
 				contractId: result.contractId,
@@ -342,8 +335,7 @@ export class SmartAccountKitService {
 					hasAccountWasmHash: !!this.config.accountWasmHash,
 					hasWebAuthnVerifier: !!this.config.webauthnVerifierAddress,
 					rpcUrl: this.config.rpcUrl,
-					networkPassphrase:
-						this.config.networkPassphrase.substring(0, 20) + '...',
+					networkPassphrase: `${this.config.networkPassphrase.substring(0, 20)}...`,
 				},
 			})
 			throw error

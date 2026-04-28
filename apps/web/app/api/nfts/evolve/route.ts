@@ -331,8 +331,10 @@ export const POST = withRateLimit(
 	{
 		preset: 'strict',
 		identifier: async (req) => {
+			const headerList = req.headers
+			const ip = headerList.get('x-forwarded-for')
 			const session = await getServerSession(nextAuthOption)
-			return session?.user?.id ?? req.ip ?? 'anonymous'
+			return session?.user?.id ?? ip ?? 'anonymous'
 		},
 	},
 	evolveHandler,

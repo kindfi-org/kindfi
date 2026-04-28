@@ -76,8 +76,8 @@ describe('requireSession', () => {
 			expect(result.user).toBeNull()
 			expect(result.error).not.toBeNull()
 
-			const json = await result.error!.json()
-			expect(result.error!.status).toBe(401)
+			const json = await result.error?.json()
+			expect(result.error?.status).toBe(401)
 			expect(json.success).toBe(false)
 			expect(json.error.code).toBe('UNAUTHORIZED')
 			expect(json.error.message).toBe('Unauthorized')
@@ -92,8 +92,8 @@ describe('requireSession', () => {
 			const result = await requireSession()
 
 			expect(result.user).toBeNull()
-			const json = await result.error!.json()
-			expect(result.error!.status).toBe(401)
+			const json = await result.error?.json()
+			expect(result.error?.status).toBe(401)
 			expect(json.error.code).toBe('UNAUTHORIZED')
 		})
 
@@ -131,8 +131,8 @@ describe('requireSession', () => {
 			const result = await requireSession({ provider: 'nextauth' })
 
 			expect(result.user).toBeNull()
-			const json = await result.error!.json()
-			expect(result.error!.status).toBe(401)
+			const json = await result.error?.json()
+			expect(result.error?.status).toBe(401)
 			expect(json.success).toBe(false)
 			expect(json.error.code).toBe('UNAUTHORIZED')
 		})
@@ -145,7 +145,7 @@ describe('requireSession', () => {
 			const result = await requireSession({ provider: 'nextauth' })
 
 			expect(result.user).toBeNull()
-			expect(result.error!.status).toBe(401)
+			expect(result.error?.status).toBe(401)
 		})
 	})
 })

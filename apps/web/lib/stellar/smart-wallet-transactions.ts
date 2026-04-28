@@ -66,7 +66,6 @@ export class SmartWalletTransactionService {
 	async transferXLM(params: TransferXLMParams): Promise<TransactionChallenge> {
 		const { from, to, amount, sponsorFees = false } = params
 
-
 		// Build contract invocation for transfer_xlm
 		const contract = new Contract(from)
 		const transferOp = contract.call(
@@ -93,7 +92,6 @@ export class SmartWalletTransactionService {
 		params: TransferTokenParams,
 	): Promise<TransactionChallenge> {
 		const { from, to, tokenAddress, amount, sponsorFees = false } = params
-
 
 		// Build contract invocation for transfer_token
 		const contract = new Contract(from)
@@ -128,7 +126,6 @@ export class SmartWalletTransactionService {
 			args = [],
 			sponsorFees = false,
 		} = params
-
 
 		// Convert arguments to ScVal format
 		const scArgs = args.map((arg) => {
@@ -176,13 +173,11 @@ export class SmartWalletTransactionService {
 	 * @returns Balances for XLM and tokens
 	 */
 	async getBalances(smartWalletAddress: string): Promise<SmartWalletBalances> {
-
 		try {
 			// Get Native XLM SAC contract address
 			const nativeAsset = Asset.native()
 			const xlmSacAddress = nativeAsset.contractId(this.networkPassphrase)
 			const xlmSacContract = new Contract(xlmSacAddress)
-
 
 			// Use funding account for simulation (required for read operations)
 			const sourceAccount = this.fundingKeypair
@@ -283,7 +278,6 @@ export class SmartWalletTransactionService {
 	 * @returns Transaction hash
 	 */
 	async submitTransaction(signedTransaction: Transaction): Promise<string> {
-
 		const result = await this.server.sendTransaction(signedTransaction)
 
 		if (result.status === 'ERROR') {
@@ -348,7 +342,6 @@ export class SmartWalletTransactionService {
 			transaction.sign(this.fundingKeypair)
 		}
 
-
 		// Simulate to get auth entry with signature_payload
 		const simulation = await this.server.simulateTransaction(transaction, {
 			// TODO: Dynamic cpu calculation according to action to execute in the Soroban Contracts
@@ -366,7 +359,6 @@ export class SmartWalletTransactionService {
 		const validityWindow = 300 // ~25 minutes (300 ledgers × 5 seconds)
 		const signatureExpirationLedger = latestLedger.sequence + validityWindow
 
-
 		// CRITICAL FIX: Modify the simulation result BEFORE assembling
 		// The simulation.result.auth contains the auth entries that will be used
 		// We need to update the signatureExpirationLedger in the simulation BEFORE calling assembleTransaction
@@ -378,14 +370,12 @@ export class SmartWalletTransactionService {
 			// Get the first auth entry from simulation
 			const simAuthEntry = simulation.result.auth[0]
 
-
 			// Check if it's an address credentials type
 			if (
 				simAuthEntry.credentials().switch() ===
 				xdr.SorobanCredentialsType.sorobanCredentialsAddress()
 			) {
 				const addressCredentials = simAuthEntry.credentials().address()
-
 
 				// Create NEW credentials with valid expiration
 				const newCredentials = new xdr.SorobanAddressCredentials({
@@ -405,9 +395,8 @@ export class SmartWalletTransactionService {
 				// Replace the auth entry in the simulation result
 				simulation.result.auth[0] = newAuthEntry
 
-
 				// VERIFY: Check that modification worked
-				const verifyCredentials = simulation.result.auth[0]
+				const _verifyCredentials = simulation.result.auth[0]
 					.credentials()
 					.address()
 			}
@@ -441,7 +430,6 @@ export class SmartWalletTransactionService {
 			'hex',
 		).toString('base64url')
 		const txHash = assembledTx.hash()
-
 
 		// DIAGNOSTIC: Verify XDR encoding contains correct values
 		const transactionXDR = assembledTx.toXDR()

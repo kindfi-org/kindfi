@@ -146,7 +146,8 @@ export async function GET(
 					// If this address owns the token, get metadata
 					if (
 						ownerAddress &&
-						String(ownerAddress).toLowerCase() === validatedAddress.toLowerCase()
+						String(ownerAddress).toLowerCase() ===
+							validatedAddress.toLowerCase()
 					) {
 						const metadataOp = nftContract.call(
 							'get_metadata',
@@ -160,8 +161,7 @@ export async function GET(
 							.setTimeout(30)
 							.build()
 
-						const metadataSim =
-							await txService.simulateTransaction(metadataTx)
+						const metadataSim = await txService.simulateTransaction(metadataTx)
 
 						if (
 							!Api.isSimulationError(metadataSim) &&
@@ -194,10 +194,7 @@ export async function GET(
 						}
 					}
 				}
-			} catch (error) {
-				// Token might not exist or be burned, continue
-				console.debug(`Token ${tokenId} check failed:`, error)
-			}
+			} catch (_error) {}
 		}
 
 		return NextResponse.json({

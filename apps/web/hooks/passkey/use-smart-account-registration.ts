@@ -2,10 +2,7 @@
 
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
-import {
-	type RegistrationResponseJSON,
-	startRegistration,
-} from '@simplewebauthn/browser'
+import { startRegistration } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
@@ -18,7 +15,7 @@ export const useSmartAccountRegistration = (
 	identifier: string,
 	userId?: string,
 ) => {
-	const appConfig: AppEnvInterface = appEnvConfig('web')
+	const _appConfig: AppEnvInterface = appEnvConfig('web')
 	const [isCreatingPasskey, setIsCreatingPasskey] = useState<boolean>(false)
 	const [regSuccess, setRegSuccess] = useState<string>('')
 	const [regError, setRegError] = useState<string>('')

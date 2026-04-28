@@ -1,13 +1,13 @@
-import type { Database } from '@services/supabase'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
+import type { Database } from '@services/supabase'
 import type {
 	BaseNotification,
 	CreateNotificationDTO,
 	NotificationFilters,
 	NotificationSort,
+	NotificationType,
 	UpdateNotificationDTO,
 } from '../types/notification'
-import type { NotificationType } from '../types/notification'
 import { notificationTypeToCategory } from '../types/notification'
 import { NotificationLogger } from './notification-logger'
 
@@ -27,7 +27,7 @@ type DbNotificationRow = {
 
 function mapDbRowToBaseNotification(row: DbNotificationRow): BaseNotification {
 	const semanticType =
-		(row.metadata as Record<string, string>)?.['notificationType'] ?? row.type
+		(row.metadata as Record<string, string>)?.notificationType ?? row.type
 	return {
 		...row,
 		message: row.body,
@@ -64,7 +64,9 @@ export class NotificationService {
 		page = 1,
 		pageSize = 20,
 	): Promise<{ data: BaseNotification[]; count: number }> {
-		let query = this.supabase.from('notifications').select('*', { count: 'exact' })
+		let query = this.supabase
+			.from('notifications')
+			.select('*', { count: 'exact' })
 
 		// Apply filters
 		if (filters.is_read !== undefined) {
@@ -72,7 +74,10 @@ export class NotificationService {
 		}
 		// DB type column uses 'info'|'success'|'warning'|'error'; only filter when it matches
 		const dbTypes = ['info', 'success', 'warning', 'error'] as const
-		if (filters.type && dbTypes.includes(filters.type as (typeof dbTypes)[number])) {
+		if (
+			filters.type &&
+			dbTypes.includes(filters.type as (typeof dbTypes)[number])
+		) {
 			query = query.eq('type', filters.type as (typeof dbTypes)[number])
 		}
 		if (filters.priority) {
@@ -182,7 +187,9 @@ export class NotificationService {
 			return {
 				...data,
 				message: data.body,
-				type: (data.metadata as Record<string, string>)?.['notificationType'] ?? data.type,
+				type:
+					(data.metadata as Record<string, string>)?.notificationType ??
+					data.type,
 			} as BaseNotification
 		} catch (error) {
 			await this.logger.logError({
@@ -237,7 +244,9 @@ export class NotificationService {
 		}
 		const { data: row, error } = await this.supabase
 			.from('notifications')
-			.update(updatePayload as Database['public']['Tables']['notifications']['Update'])
+			.update(
+				updatePayload as Database['public']['Tables']['notifications']['Update'],
+			)
 			.eq('id', id)
 			.select()
 			.single()
@@ -264,12 +273,16 @@ export class NotificationService {
 		return {
 			...row,
 			message: row.body,
-			type: (row.metadata as Record<string, string>)?.['notificationType'] ?? row.type,
+			type:
+				(row.metadata as Record<string, string>)?.notificationType ?? row.type,
 		} as BaseNotification
 	}
 
 	async deleteNotification(id: string): Promise<void> {
-		const { error } = await this.supabase.from('notifications').delete().eq('id', id)
+		const { error } = await this.supabase
+			.from('notifications')
+			.delete()
+			.eq('id', id)
 
 		if (error) {
 			await this.logger.logError({
@@ -293,10 +306,10 @@ export class NotificationService {
 	 */
 	async markAsRead(notificationId: string): Promise<boolean> {
 		try {
-		const { error } = await this.supabase
-			.from('notifications')
-			.update({ is_read: true })
-			.eq('id', notificationId)
+			const { error } = await this.supabase
+				.from('notifications')
+				.update({ is_read: true })
+				.eq('id', notificationId)
 
 			if (error) throw error
 			return true
@@ -313,10 +326,10 @@ export class NotificationService {
 	 */
 	async markAllAsRead(userId: string): Promise<boolean> {
 		try {
-		const { error } = await this.supabase
-			.from('notifications')
-			.update({ is_read: true })
-			.eq('user_id', userId)
+			const { error } = await this.supabase
+				.from('notifications')
+				.update({ is_read: true })
+				.eq('user_id', userId)
 				.eq('is_read', false)
 
 			if (error) throw error
@@ -395,10 +408,12 @@ export class NotificationService {
 		preferences: Partial<NotificationPreferences>,
 	): Promise<boolean> {
 		try {
-			const { error } = await this.supabase.from('notification_preferences').upsert({
-				user_id: userId,
-				...preferences,
-			})
+			const { error } = await this.supabase
+				.from('notification_preferences')
+				.upsert({
+					user_id: userId,
+					...preferences,
+				})
 
 			if (error) throw error
 
