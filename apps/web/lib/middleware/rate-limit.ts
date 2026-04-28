@@ -21,7 +21,12 @@ export function withRateLimit(
 ) {
 	return async (req: NextRequest): Promise<NextResponse> => {
 		const preset = RATE_LIMIT_PRESETS[config.preset ?? 'moderate']
-		const limiter = new RateLimiter()
+		const limiter = new RateLimiter({
+			maxAttempts: preset.attempts,
+			windowSecs: preset.window,
+			blockSecs: preset.block,
+			configId: config.preset ?? 'moderate',
+		})
 
 		try {
 			const id = await config.identifier(req)

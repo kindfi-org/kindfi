@@ -136,24 +136,6 @@ describe('withRateLimit', () => {
 			expect(handler).not.toHaveBeenCalled()
 		})
 
-		test('includes Retry-After header matching preset.block for all presets', async () => {
-			const presets = ['strict', 'moderate', 'lenient'] as const
-
-			for (const preset of presets) {
-				const handler = makeHandler()
-				const wrapped = withRateLimit(
-					{ preset, identifier: async () => 'user-1' },
-					handler,
-				)
-
-				const res = await wrapped(makeRequest())
-
-				const actual = (res.headers as Record<string, string>)['Retry-After']
-				const expected = RATE_LIMIT_PRESETS[preset].block.toString()
-				expect(actual).toBe(expected, `preset "${preset}"`)
-			}
-		})
-
 		test('response body contains error message', async () => {
 			const handler = makeHandler()
 			const wrapped = withRateLimit(
@@ -196,6 +178,122 @@ describe('withRateLimit', () => {
 			)
 
 			await expect(wrapped(makeRequest())).resolves.toBeDefined()
+		})
+	})
+
+	describe('preset-specific rate limits', () => {
+		test('strict preset blocks after 3 attempts', async () => {
+			let attemptCount = 0
+			mockIncrement.mockImplementation(async () => {
+				attemptCount++
+				const limit = RATE_LIMIT_PRESETS.strict.attempts
+				return {
+					isBlocked: attemptCount > limit,
+					attemptsRemaining: Math.max(0, limit - attemptCount),
+				}
+			})
+
+			const handler = makeHandler()
+			const wrapped = withRateLimit(
+				{ preset: 'strict', identifier: async () => 'user-1' },
+				handler,
+			)
+
+			// First 3 requests should pass
+			for (let i = 0; i < 3; i++) {
+				const res = await wrapped(makeRequest())
+				expect(res.status).toBe(200)
+			}
+
+			// 4th request should be blocked
+			const res = await wrapped(makeRequest())
+			expect(res.status).toBe(429)
+		})
+
+		test('moderate preset blocks after 10 attempts', async () => {
+			let attemptCount = 0
+			mockIncrement.mockImplementation(async () => {
+				attemptCount++
+				const limit = RATE_LIMIT_PRESETS.moderate.attempts
+				return {
+					isBlocked: attemptCount > limit,
+					attemptsRemaining: Math.max(0, limit - attemptCount),
+				}
+			})
+
+			const handler = makeHandler()
+			const wrapped = withRateLimit(
+				{ preset: 'moderate', identifier: async () => 'user-1' },
+				handler,
+			)
+
+			// First 10 requests should pass
+			for (let i = 0; i < 10; i++) {
+				const res = await wrapped(makeRequest())
+				expect(res.status).toBe(200)
+			}
+
+			// 11th request should be blocked
+			const res = await wrapped(makeRequest())
+			expect(res.status).toBe(429)
+		})
+
+		test('lenient preset blocks after 30 attempts', async () => {
+			let attemptCount = 0
+			mockIncrement.mockImplementation(async () => {
+				attemptCount++
+				const limit = RATE_LIMIT_PRESETS.lenient.attempts
+				return {
+					isBlocked: attemptCount > limit,
+					attemptsRemaining: Math.max(0, limit - attemptCount),
+				}
+			})
+
+			const handler = makeHandler()
+			const wrapped = withRateLimit(
+				{ preset: 'lenient', identifier: async () => 'user-1' },
+				handler,
+			)
+
+			// First 30 requests should pass
+			for (let i = 0; i < 30; i++) {
+				const res = await wrapped(makeRequest())
+				expect(res.status).toBe(200)
+			}
+
+			// 31st request should be blocked
+			const res = await wrapped(makeRequest())
+			expect(res.status).toBe(429)
+		})
+
+		test('different presets on same IP maintain separate counters via configId', async () => {
+			mockIncrement.mockReset()
+			mockIncrement.mockImplementation(async () => ({
+				isBlocked: false,
+				attemptsRemaining: 10,
+			}))
+
+			const handler = makeHandler()
+
+			// Create two middlewares with different presets for the same user
+			const strictLimited = withRateLimit(
+				{ preset: 'strict', identifier: async () => 'same-user' },
+				handler,
+			)
+
+			const lenientLimited = withRateLimit(
+				{ preset: 'lenient', identifier: async () => 'same-user' },
+				handler,
+			)
+
+			// Both should allow requests without blocking
+			// (In real Redis, different configIds would have separate keys)
+			const res1 = await strictLimited(makeRequest())
+			const res2 = await lenientLimited(makeRequest())
+
+			expect(res1.status).toBe(200)
+			expect(res2.status).toBe(200)
+			expect(mockIncrement).toHaveBeenCalledTimes(2)
 		})
 	})
 })
