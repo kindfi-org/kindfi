@@ -1,5 +1,4 @@
 import path from 'node:path'
-import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	StellarDatasourceKind,
 	StellarHandlerKind,

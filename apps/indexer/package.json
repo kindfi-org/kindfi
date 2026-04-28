@@ -1,7 +1,6 @@
 {
 	"author": "kindfi-org",
 	"dependencies": {
-		"@packages/lib": "workspace:*",
 		"@subql/common": "latest",
 		"@subql/types-stellar": "latest",
 		"soroban-client": "latest",
