@@ -49,7 +49,7 @@ export const useStellar = () => {
 	const [contractData, setContractData] = useState<unknown | null>(null) // TODO:Just for testing, add type
 	const [creatingDeployee, setCreatingDeployee] = useState(false)
 	const stellarSignature = useStellarSignature({
-		onSuccess: (result) => {
+		onSuccess: (_result) => {
 			// Refresh account info after successful transaction
 			if (deployee) {
 				stellarSignature.getAccountInfo(deployee)
@@ -74,7 +74,6 @@ export const useStellar = () => {
 				await getPublicKeys(registerRes)
 			if (!bundlerKey.current) throw new Error('Bundler key not found')
 			if (!contractSalt || !publicKey) throw new Error('Invalid public keys')
-
 
 			// Update device with PREPARED address and AAGUID
 			// This address will be deployed later during approval

@@ -23,10 +23,10 @@ describe('NFT mint route validation helpers', () => {
 			'../app/api/nfts/mint/route'
 		)
 
-		const good = 'G' + 'A'.repeat(55)
+		const good = `G${'A'.repeat(55)}`
 		expect(validateStellarAddress(good)).toBe(true)
-		expect(validateStellarAddress('X' + 'A'.repeat(55))).toBe(false)
-		expect(validateStellarAddress('G' + 'A'.repeat(10))).toBe(false)
+		expect(validateStellarAddress(`X${'A'.repeat(55)}`)).toBe(false)
+		expect(validateStellarAddress(`G${'A'.repeat(10)}`)).toBe(false)
 		expect(validateStellarAddress(null)).toBe(false)
 	})
 })

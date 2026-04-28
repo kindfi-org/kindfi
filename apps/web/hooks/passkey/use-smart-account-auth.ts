@@ -17,7 +17,7 @@ import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 export const useSmartAccountAuth = (identifier: string) => {
 	const { data: session, update: updateSession } = useSession()
 	const router = useRouter()
-	const appConfig: AppEnvInterface = appEnvConfig('web')
+	const _appConfig: AppEnvInterface = appEnvConfig('web')
 	const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false)
 	const [authSuccess, setAuthSuccess] = useState<string>('')
 	const [authError, setAuthError] = useState<string>('')

@@ -549,7 +549,7 @@ export function NFTCollection() {
 										key={key}
 										className={`flex-1 text-center py-2 px-1 rounded-lg text-xs font-medium transition-colors ${
 											isActive
-												? cfg.color + ' border'
+												? `${cfg.color} border`
 												: isPast
 													? 'bg-muted text-muted-foreground line-through'
 													: 'bg-muted/50 text-muted-foreground'

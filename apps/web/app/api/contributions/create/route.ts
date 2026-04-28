@@ -77,7 +77,6 @@ export async function POST(req: NextRequest) {
 			if (!finalProjectId) finalProjectId = projectId
 		}
 
-
 		// Check if contribution already exists for this transaction hash (to avoid duplicates)
 		if (transactionHash) {
 			const { data: existingTransaction } = await supabase
@@ -199,8 +198,6 @@ export async function POST(req: NextRequest) {
 					}
 				}
 
-
-
 				// Import handlers directly to avoid fetch issues
 				const { POST: streaksPOST } = await import('~/app/api/streaks/route')
 				const { POST: referralsDonationPOST } = await import(
@@ -223,7 +220,7 @@ export async function POST(req: NextRequest) {
 				}
 
 				// 1. Update streaks (weekly and monthly) - includes on-chain contract calls if address available
-				const streakResults = await Promise.allSettled([
+				const _streakResults = await Promise.allSettled([
 					streaksPOST(
 						createMockRequest({
 							user_id: userId,
@@ -272,7 +269,7 @@ export async function POST(req: NextRequest) {
 					.then((response) => {
 						return response
 					})
-					.catch((error) => {
+					.catch((_error) => {
 						// Silently fail if not a referred user or other error
 					})
 
@@ -292,7 +289,6 @@ export async function POST(req: NextRequest) {
 				if (questsError) {
 					console.error('[Gamification] Error fetching quests:', questsError)
 				}
-
 
 				if (donationQuests && donationQuests.length > 0) {
 					// Calculate progress for each quest type
@@ -389,7 +385,7 @@ export async function POST(req: NextRequest) {
 
 					if (!existingNFT) {
 						// First-time donor → mint Bronze NFT
-						const mintResponse = await nftMintPOST(
+						const _mintResponse = await nftMintPOST(
 							createMockRequest({
 								user_id: userId,
 								stellar_address: userStellarAddress,
@@ -397,7 +393,7 @@ export async function POST(req: NextRequest) {
 						)
 					} else {
 						// Existing NFT → check if tier should evolve
-						const evolveResponse = await nftEvolvePOST(
+						const _evolveResponse = await nftEvolvePOST(
 							createMockRequest({ user_id: userId }),
 						)
 					}
