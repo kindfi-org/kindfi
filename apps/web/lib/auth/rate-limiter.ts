@@ -13,7 +13,10 @@ function getRedis(): Redis | null {
 		redis = Redis.fromEnv()
 		return redis
 	} catch (err) {
-		console.warn('[RateLimiter] Failed to initialize Redis — rate limiting disabled:', err)
+		console.warn(
+			'[RateLimiter] Failed to initialize Redis — rate limiting disabled:',
+			err,
+		)
 		return null
 	}
 }
@@ -36,7 +39,10 @@ export class RateLimiter {
 			const isBlocked = await client.exists(blockKey)
 			return isBlocked === 1
 		} catch (err) {
-			console.warn('[RateLimiter] Redis error in isBlocked — failing open:', err)
+			console.warn(
+				'[RateLimiter] Redis error in isBlocked — failing open:',
+				err,
+			)
 			return false
 		}
 	}
@@ -51,7 +57,11 @@ export class RateLimiter {
 	}> {
 		const client = getRedis()
 		if (!client) {
-			return { isBlocked: false, attemptsRemaining: RATE_LIMIT_ATTEMPTS }
+			return {
+				isBlocked: false,
+				attemptsRemaining: RATE_LIMIT_ATTEMPTS,
+				error: AuthErrorType.SERVER_ERROR,
+			}
 		}
 
 		try {
@@ -88,8 +98,15 @@ export class RateLimiter {
 				attemptsRemaining: RATE_LIMIT_ATTEMPTS - attempts,
 			}
 		} catch (err) {
-			console.warn('[RateLimiter] Redis error in increment — failing open:', err)
-			return { isBlocked: false, attemptsRemaining: RATE_LIMIT_ATTEMPTS }
+			console.warn(
+				'[RateLimiter] Redis error in increment — failing open:',
+				err,
+			)
+			return {
+				isBlocked: false,
+				attemptsRemaining: RATE_LIMIT_ATTEMPTS,
+				error: AuthErrorType.SERVER_ERROR,
+			}
 		}
 	}
 

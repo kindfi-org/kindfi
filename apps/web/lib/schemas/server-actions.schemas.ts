@@ -101,6 +101,18 @@ const escrowDataSchema = z
 				'Either milestones or single-release amount/receiver must be provided',
 		},
 	)
+	.refine(
+		(data) => {
+			if (!data.milestones || data.milestones.length === 0) return true
+			const first = data.milestones[0].receiver
+			return data.milestones.every((m) => m.receiver === first)
+		},
+		{
+			message:
+				'All milestones must share the same receiver address (multi-receiver escrows are not supported)',
+			path: ['milestones'],
+		},
+	)
 
 export const saveEscrowContractInputSchema = z.object({
 	projectId: z.string().uuid('Invalid projectId'),

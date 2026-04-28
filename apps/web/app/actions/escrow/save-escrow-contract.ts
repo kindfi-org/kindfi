@@ -124,7 +124,10 @@ export async function saveEscrowContractAction(
 
 		const { escrowData } = validated
 		const engagementId = escrowData.engagementId
-		const payerAddress = escrowData.roles.serviceProvider
+		// `approver` is the entity requiring the service (the funder); the
+		// `serviceProvider` delivers work and receives payment. The escrow
+		// payer is therefore the approver.
+		const payerAddress = escrowData.roles.approver
 		const platformFee = escrowData.platformFee
 
 		const milestones = escrowData.milestones
@@ -132,6 +135,8 @@ export async function saveEscrowContractAction(
 		let receiverAddress: string
 		if (milestones && milestones.length > 0) {
 			totalAmount = milestones.reduce((sum, m) => sum + m.amount, 0)
+			// Schema guarantees every milestone shares the same receiver, so
+			// reading the first is safe and represents the single receiver.
 			receiverAddress = milestones[0].receiver
 		} else if (
 			escrowData.amount !== undefined &&

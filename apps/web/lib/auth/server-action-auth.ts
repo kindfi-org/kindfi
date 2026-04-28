@@ -1,6 +1,6 @@
 import type { Session } from 'next-auth'
 import { getServerSession } from 'next-auth'
-import type { ZodSchema } from 'zod'
+import { treeifyError, type ZodSchema } from 'zod'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { Logger } from '~/lib/logger'
@@ -95,16 +95,13 @@ export function validateInput<T>(
 ): T {
 	const result = schema.safeParse(input)
 	if (!result.success) {
+		const details = treeifyError(result.error)
 		logger.warn({
 			eventType: 'SERVER_ACTION_VALIDATION_ERROR',
 			action,
-			details: result.error.format(),
+			details,
 		})
-		throw new ServerActionError(
-			'Invalid input.',
-			'VALIDATION_ERROR',
-			result.error.format(),
-		)
+		throw new ServerActionError('Invalid input.', 'VALIDATION_ERROR', details)
 	}
 	return result.data
 }
@@ -122,6 +119,7 @@ export async function enforceRateLimit(
 ): Promise<void> {
 	try {
 		const result = await rateLimiter.increment(identifier, action)
+
 		if (result.isBlocked) {
 			logger.warn({
 				eventType: 'SERVER_ACTION_RATE_LIMITED',
@@ -133,9 +131,32 @@ export async function enforceRateLimit(
 				'RATE_LIMITED',
 			)
 		}
+
+		// `RateLimiter.increment` catches Redis errors internally and returns
+		// `{ isBlocked: false, error }` so it fails open. Detect that case here
+		// and fail closed in production so abuse protection is preserved during
+		// a Redis outage.
+		if (result.error) {
+			logger.warn({
+				eventType: 'SERVER_ACTION_RATE_LIMIT_UNAVAILABLE',
+				action,
+				identifier,
+				error: result.error,
+			})
+
+			if (process.env.NODE_ENV === 'production') {
+				throw new ServerActionError(
+					'Service temporarily unavailable. Please try again later.',
+					'RATE_LIMITED',
+				)
+			}
+		}
 	} catch (error) {
 		if (error instanceof ServerActionError) throw error
 
+		// Defensive fallback — `rateLimiter.increment` is not expected to throw,
+		// but if a future change makes it throw we still want the fail-closed
+		// behavior in production.
 		logger.warn({
 			eventType: 'SERVER_ACTION_RATE_LIMIT_UNAVAILABLE',
 			action,

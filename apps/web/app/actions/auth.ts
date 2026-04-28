@@ -741,6 +741,20 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 	const { credentialId, aaguid } = validated
 
 	try {
+		await enforceRateLimit(userId, 'update_device_with_deployee')
+	} catch (error) {
+		const failure = toServerActionFailure(
+			error,
+			'Too many requests. Please try again later.',
+		)
+		return {
+			success: false,
+			message: failure.error,
+			error: failure.error,
+		}
+	}
+
+	try {
 		const existingDevice = await db
 			.select({
 				id: devices.id,
