@@ -7,11 +7,14 @@ import type {
 } from '@trustless-work/escrow'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Logger } from '~/lib/logger'
 import { toast } from 'sonner'
 import { saveEscrowContractAction } from '~/app/actions/escrow/save-escrow-contract'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import type { EscrowFormData } from '../types'
+
+const logger = new Logger()
 
 interface UseEscrowTransactionParams {
 	projectId: string
@@ -73,7 +76,7 @@ export function useEscrowTransaction({
 				})
 			}
 		} catch (e) {
-			console.error(e)
+			logger.error({ eventType: 'escrow.create.error', error: e instanceof Error ? e.message : String(e) })
 			toast.error(e instanceof Error ? e.message : 'Failed to create escrow')
 		} finally {
 			setIsSubmitting(false)
