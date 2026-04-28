@@ -4,7 +4,8 @@
 		"@subql/common": "latest",
 		"@subql/types-stellar": "latest",
 		"soroban-client": "latest",
-		"stellar-sdk": "latest"
+		"stellar-sdk": "latest",
+		"tslib": "latest"
 	},
 	"description": "SubQL Indexer to process all userbase in the kindfi platform blockchain activity and contributions, to push it to the off-chain data for his cosumption.",
 	"devDependencies": {
