@@ -1,15 +1,13 @@
+import { Address, type Horizon, type xdr } from '@stellar/stellar-sdk'
 import type {
 	SorobanEvent,
 	StellarEffect,
 	StellarOperation,
 } from '@subql/types-stellar'
-import { Address, type xdr } from 'soroban-client'
-import type { Horizon } from 'stellar-sdk'
-import type {
-	AccountCredited,
-	AccountDebited,
-} from 'stellar-sdk/lib/horizon/types/effects'
 import { Account, Credit, Debit, Payment, Transfer } from '../types'
+
+type AccountCredited = any
+type AccountDebited = any
 
 export async function handleOperation(
 	op: StellarOperation<Horizon.HorizonApi.PaymentOperationResponse>,
@@ -138,8 +136,12 @@ async function checkAndGetAccount(
 // scValToNative not works, temp solution
 function decodeAddress(scVal: xdr.ScVal): string {
 	try {
-		return Address.account(scVal.address().accountId().ed25519()).toString()
+		return Address.account(
+			Buffer.from(scVal.address().accountId().ed25519() as any),
+		).toString()
 	} catch (_e) {
-		return Address.contract(scVal.address().contractId()).toString()
+		return Address.contract(
+			Buffer.from(scVal.address().contractId() as any),
+		).toString()
 	}
 }

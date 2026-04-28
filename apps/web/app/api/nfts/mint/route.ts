@@ -1,12 +1,12 @@
-import { headers } from 'next/headers'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { Logger } from '~/lib/logger'
+import { mintNftSchema } from '~/lib/schemas/nft.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
-
 import {
 	buildNFTMetadata,
 	determineTier,
@@ -15,14 +15,12 @@ import {
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
 } from '~/lib/services/pinata'
-import { mintNftSchema } from '~/lib/schemas/nft.schemas'
-import { generateUniqueId } from '~/lib/utils/id'
-import { validateRequest } from '~/lib/utils/validation'
 import { getUserStats } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { generateUniqueId } from '~/lib/utils/id'
+import { validateRequest } from '~/lib/utils/validation'
 
-const rateLimiter = new RateLimiter()
-const logger = new Logger()
+
 
 /**
  * POST /api/nfts/mint
@@ -35,7 +33,7 @@ const logger = new Logger()
  * - If user_id is not provided (or caller is non-admin), uses the session user
  * - If stellar_address is not provided, resolves from devices table
  */
-export async function POST(req: NextRequest) {
+async function mintHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
@@ -44,23 +42,6 @@ export async function POST(req: NextRequest) {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-		}
-
-		// Rate limiting by client IP
-		const headersList = await headers()
-		const clientIp = headersList.get('x-forwarded-for') || 'unknown'
-
-		const rateLimitResult = await rateLimiter.increment(clientIp, 'mintNFT')
-		if (rateLimitResult.isBlocked) {
-			logger.warn({
-				eventType: 'RATE_LIMIT_EXCEEDED',
-				clientIp,
-				action: 'mintNFT',
-			})
-			return NextResponse.json(
-				{ error: 'Too many mint requests. Please try again later.' },
-				{ status: 429 },
-			)
 		}
 
 		const body = await req.json()
@@ -76,33 +57,30 @@ export async function POST(req: NextRequest) {
 			})
 			return validation.response
 		}
-		const sessionUserId = session.user.id
-		const requestedUserId = validation.data.user_id
-
-		let userId: string
-
-		if (requestedUserId && requestedUserId !== sessionUserId) {
-			const isAdmin = session.user.role === 'admin'
-
-			if (!isAdmin) {
-				return new Response(
-					JSON.stringify({
-						error:
-							'Forbidden: You do not have permission to mint NFTs for other users.',
-					}),
-					{
-						status: 403,
-						headers: { 'Content-Type': 'application/json' },
-					},
-				)
-			}
-			userId = requestedUserId
-		} else {
-			userId = sessionUserId
+		const authorization = authorizeUserOverride({
+			session,
+			requestedUserId: validation.data.user_id,
+			resource: 'mint NFTs',
+		})
+		if (!authorization.success) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'nft.mint',
+				resourceType: 'nft',
+				actorId: session.user.id,
+				status: 'failure',
+				errorCode: '403',
+				durationMs: Date.now() - startTime,
+				metadata: {
+					reason: 'forbidden_user_override',
+					requestedUserId: validation.data.user_id,
+				},
+			})
+			return authorization.response
 		}
+		const { userId } = authorization
 
-		let stellarAddress: string | null =
-			validation.data.stellar_address || null
+		let stellarAddress: string | null = validation.data.stellar_address || null
 
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
@@ -259,7 +237,6 @@ export async function POST(req: NextRequest) {
 			})
 		}
 
-
 		await auditLogger.log({
 			correlationId,
 			operation: 'nft.mint',
@@ -292,7 +269,9 @@ export async function POST(req: NextRequest) {
 			status: 'failure',
 			errorCode: '500',
 			durationMs: Date.now() - startTime,
-			metadata: { error: error instanceof Error ? error.message : String(error) },
+			metadata: {
+				error: error instanceof Error ? error.message : String(error),
+			},
 		})
 		return NextResponse.json(
 			{ error: 'Internal server error' },
@@ -300,3 +279,14 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: async (req) => {
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? req.ip ?? 'anonymous'
+		},
+	},
+	mintHandler,
+)

@@ -3,13 +3,12 @@ import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 // notification_logs table is not in generated Supabase types
 const NOTIFICATION_LOGS_TABLE = 'notification_logs' as const
 
-/** Supabase / Postgrest errors often stringify to `{}` in the console; normalize for debugging. */
-/** Typed client omits `notification_logs`; single escape hatch for inserts/selects. */
-function supabaseNotificationLogs(): ReturnType<
-	typeof createSupabaseBrowserClient
-> {
-	// biome-ignore lint/suspicious/noExplicitAny: table not in generated Supabase types
-	return createSupabaseBrowserClient() as any
+type UntypedSupabase = ReturnType<typeof createSupabaseBrowserClient> & {
+	from: (table: string) => any
+}
+
+function supabaseNotificationLogs(): UntypedSupabase {
+	return createSupabaseBrowserClient() as UntypedSupabase
 }
 
 function serializeClientLogError(value: unknown): Record<string, unknown> {

@@ -1,6 +1,6 @@
 // lib/services/didit.ts
 
-import * as crypto from 'crypto'
+import * as crypto from 'node:crypto'
 
 const DIDIT_API_BASE_URL = 'https://verification.didit.me'
 
@@ -284,8 +284,6 @@ export const mapDiditStatusToKYC = (diditStatus: string): KYCStatus => {
 		case 'In Progress':
 		case 'In Review':
 			return 'pending'
-		case 'Not Started':
-		case 'Abandoned':
 		default:
 			return 'pending'
 	}

@@ -14,8 +14,8 @@
  *   - RPC_URL or STELLAR_RPC_URL
  */
 
+import { resolve } from 'node:path'
 import { config } from 'dotenv'
-import { resolve } from 'path'
 
 // Load .env from apps/web
 config({ path: resolve(__dirname, '../.env') })
@@ -40,7 +40,6 @@ async function main() {
 
 	const adminKeypair = Keypair.fromSecret(adminSecret)
 	const recorderAddress = Keypair.fromSecret(recorderSecret).publicKey()
-
 
 	const contracts = [
 		{ name: 'Streak', address: process.env.STREAK_CONTRACT_ADDRESS },

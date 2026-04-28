@@ -24,7 +24,7 @@ export const usePasskeyRegistration = (
 	const [regSuccess, setRegSuccess] = useState<string>('')
 	const [regError, setRegError] = useState<string>('')
 	const [isAlreadyRegistered, setIsAlreadyRegistered] = useState<boolean>(false)
-	const [deviceData, setDeviceData] = useState<{
+	const [deviceData, _setDeviceData] = useState<{
 		credentialId: string
 		publicKey: string
 		address?: string
