@@ -43,17 +43,31 @@ export function useWalletSync({
 		if (!formData.disputeResolver.trim()) setField('disputeResolver', address)
 		if (!formData.platformAddress.trim()) setField('platformAddress', address)
 		if (!formData.receiver.trim()) setField('receiver', address)
-	}, [address, formData, setField])
+	}, [
+		address,
+		formData.approver,
+		formData.serviceProvider,
+		formData.releaseSigner,
+		formData.disputeResolver,
+		formData.platformAddress,
+		formData.receiver,
+		setField,
+	])
 
 	// Sync wallet address into empty multi-release milestone receivers
+	const milestoneReceiversKey = formData.milestones
+		.map((m) => ('receiver' in m ? m.receiver : ''))
+		.join('|')
+
 	useEffect(() => {
 		if (!address || formData.selectedEscrowType !== 'multi-release') return
 		const updated = formData.milestones.map((m) => {
-			if ('receiver' in m && !m.receiver.trim()) return { ...m, receiver: address }
+			if ('receiver' in m && !m.receiver.trim())
+				return { ...m, receiver: address }
 			return m
 		})
 		// Only update if something changed
 		const changed = updated.some((m, i) => m !== formData.milestones[i])
 		if (changed) setField('milestones', updated)
-	}, [address, formData.selectedEscrowType, formData.milestones, setField])
+	}, [address, formData.selectedEscrowType, milestoneReceiversKey, setField])
 }

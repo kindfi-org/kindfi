@@ -22,12 +22,29 @@ function getRedis(): Redis | null {
 }
 
 export class RateLimiter {
+	private maxAttempts: number
+	private windowSecs: number
+	private blockSecs: number
+	private configId: string
+
+	constructor(config?: {
+		maxAttempts?: number
+		windowSecs?: number
+		blockSecs?: number
+		configId?: string
+	}) {
+		this.maxAttempts = config?.maxAttempts ?? RATE_LIMIT_ATTEMPTS
+		this.windowSecs = config?.windowSecs ?? RATE_LIMIT_WINDOW
+		this.blockSecs = config?.blockSecs ?? RATE_LIMIT_BLOCK_DURATION
+		this.configId = config?.configId ?? 'default'
+	}
+
 	private getKey(identifier: string, action: string): string {
-		return `rate_limit:${action}:${identifier}`
+		return `rate_limit:${action}:${this.configId}:${identifier}`
 	}
 
 	private getBlockKey(identifier: string, action: string): string {
-		return `rate_limit_block:${action}:${identifier}`
+		return `rate_limit_block:${action}:${this.configId}:${identifier}`
 	}
 
 	async isBlocked(identifier: string, action: string): Promise<boolean> {
@@ -59,7 +76,7 @@ export class RateLimiter {
 		if (!client) {
 			return {
 				isBlocked: false,
-				attemptsRemaining: RATE_LIMIT_ATTEMPTS,
+				attemptsRemaining: this.maxAttempts,
 				error: AuthErrorType.SERVER_ERROR,
 			}
 		}
@@ -79,11 +96,11 @@ export class RateLimiter {
 			const attempts = await client.incr(key)
 
 			if (attempts === 1) {
-				await client.expire(key, RATE_LIMIT_WINDOW)
+				await client.expire(key, this.windowSecs)
 			}
 
-			if (attempts > RATE_LIMIT_ATTEMPTS) {
-				await client.setex(blockKey, RATE_LIMIT_BLOCK_DURATION, '1')
+			if (attempts > this.maxAttempts) {
+				await client.setex(blockKey, this.blockSecs, '1')
 				await client.del(key)
 
 				return {
@@ -95,7 +112,7 @@ export class RateLimiter {
 
 			return {
 				isBlocked: false,
-				attemptsRemaining: RATE_LIMIT_ATTEMPTS - attempts,
+				attemptsRemaining: this.maxAttempts - attempts,
 			}
 		} catch (err) {
 			console.warn(
@@ -104,7 +121,7 @@ export class RateLimiter {
 			)
 			return {
 				isBlocked: false,
-				attemptsRemaining: RATE_LIMIT_ATTEMPTS,
+				attemptsRemaining: this.maxAttempts,
 				error: AuthErrorType.SERVER_ERROR,
 			}
 		}
