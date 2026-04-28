@@ -1,11 +1,9 @@
-import { headers } from 'next/headers'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { RateLimiter } from '~/lib/auth/rate-limiter'
-import { Logger } from '~/lib/logger'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { AuditLogger } from '~/lib/services/audit-logger'
 
 import {
@@ -22,8 +20,7 @@ import { validateRequest } from '~/lib/utils/validation'
 import { getUserStats } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 
-const rateLimiter = new RateLimiter()
-const logger = new Logger()
+
 
 /**
  * POST /api/nfts/mint
@@ -36,7 +33,7 @@ const logger = new Logger()
  * - If user_id is not provided (or caller is non-admin), uses the session user
  * - If stellar_address is not provided, resolves from devices table
  */
-export async function POST(req: NextRequest) {
+async function mintHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
@@ -45,23 +42,6 @@ export async function POST(req: NextRequest) {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-		}
-
-		// Rate limiting by client IP
-		const headersList = await headers()
-		const clientIp = headersList.get('x-forwarded-for') || 'unknown'
-
-		const rateLimitResult = await rateLimiter.increment(clientIp, 'mintNFT')
-		if (rateLimitResult.isBlocked) {
-			logger.warn({
-				eventType: 'RATE_LIMIT_EXCEEDED',
-				clientIp,
-				action: 'mintNFT',
-			})
-			return NextResponse.json(
-				{ error: 'Too many mint requests. Please try again later.' },
-				{ status: 429 },
-			)
 		}
 
 		const body = await req.json()
@@ -299,3 +279,14 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: async (req) => {
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? req.ip ?? 'anonymous'
+		},
+	},
+	mintHandler,
+)
