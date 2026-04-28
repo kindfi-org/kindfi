@@ -15,21 +15,15 @@ import { useWalletSync } from './hooks/use-wallet-sync'
 interface EscrowAdminPanelContentProps {
 	projectId: string
 	projectSlug: string
-	suggestedTitle: string
-	suggestedEngagementId: string
-	suggestedDescription: string
 }
 
 export function EscrowAdminPanelContent({
 	projectId,
 	projectSlug,
-	suggestedTitle,
-	suggestedEngagementId,
-	suggestedDescription,
 }: EscrowAdminPanelContentProps) {
 	const { formData } = useEscrowForm()
 
-	useWalletSync({ suggestedTitle, suggestedEngagementId, suggestedDescription })
+	useWalletSync()
 
 	const isValid = useEscrowValidation(formData, projectId)
 	const { handleCreateEscrow, isSubmitting } = useEscrowTransaction({
