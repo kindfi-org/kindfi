@@ -35,6 +35,7 @@ import { validateRequest } from '~/lib/utils/validation'
  */
 async function mintHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
+	const logger = new Logger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
 
@@ -166,10 +167,10 @@ async function mintHandler(req: NextRequest) {
 			imageUri = uploadResult.ipfsUrl
 			imageIpfsHash = uploadResult.ipfsHash
 		} catch (err) {
-			console.warn(
-				'[NFT Mint] Failed to upload image to Pinata, using placeholder:',
-				err,
-			)
+			logger.warn({
+				eventType: 'nft.mint.image_upload_failed',
+				error: err instanceof Error ? err.message : String(err),
+			})
 			imageUri = `https://kindfi.org/images/nft-${tier}.svg`
 		}
 
@@ -183,7 +184,10 @@ async function mintHandler(req: NextRequest) {
 			)
 			metadataIpfsHash = metaResult.ipfsHash
 		} catch (err) {
-			console.warn('[NFT Mint] Failed to upload metadata to Pinata:', err)
+			logger.warn({
+				eventType: 'nft.mint.metadata_upload_failed',
+				error: err instanceof Error ? err.message : String(err),
+			})
 		}
 
 		// Mint on-chain
@@ -200,7 +204,10 @@ async function mintHandler(req: NextRequest) {
 		})
 
 		if (!mintResult.success) {
-			console.error('[NFT Mint] On-chain mint failed:', mintResult.error)
+			logger.error({
+				eventType: 'nft.mint.onchain_failed',
+				error: mintResult.error,
+			})
 			return NextResponse.json(
 				{ error: `Failed to mint NFT on-chain: ${mintResult.error}` },
 				{ status: 500 },
@@ -225,7 +232,10 @@ async function mintHandler(req: NextRequest) {
 			.single()
 
 		if (dbError) {
-			console.error('[NFT Mint] Database insert failed:', dbError)
+			logger.error({
+				eventType: 'nft.mint.db_insert_failed',
+				error: dbError.message,
+			})
 			// The on-chain mint succeeded, so we still return success
 			return NextResponse.json({
 				success: true,
@@ -261,7 +271,10 @@ async function mintHandler(req: NextRequest) {
 			imageUri,
 		})
 	} catch (error) {
-		console.error('Error in POST /api/nfts/mint:', error)
+		logger.error({
+			eventType: 'nft.mint.unhandled_error',
+			error: error instanceof Error ? error.message : String(error),
+		})
 		await auditLogger.log({
 			correlationId,
 			operation: 'nft.mint',

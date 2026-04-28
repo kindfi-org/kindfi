@@ -99,6 +99,7 @@ export class AuditLogger {
 
 			if (error) throw error
 		} catch (dbError) {
+			// eslint-disable-next-line no-console -- last-resort fallback: AuditLogger itself failed, no other logging mechanism available
 			console.error('[AuditLogger] Failed to persist audit log:', dbError)
 			// Don't throw to avoid disrupting the main flow
 		}
