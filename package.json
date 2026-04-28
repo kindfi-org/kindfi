@@ -11,6 +11,8 @@
 		"@commitlint/cli": "^19.6.1",
 		"@commitlint/config-conventional": "^19.6.0",
 		"@types/bun": "1.2.21",
+		"@types/react": "19",
+		"@types/react-dom": "19",
 		"@types/web-push": "^3.6.4",
 		"autoprefixer": "^10.4.21",
 		"husky": "^9.1.7",

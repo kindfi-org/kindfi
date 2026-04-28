@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, type ReactNode, useContext, useState } from 'react'
+import { createContext, type ReactNode, useContext } from 'react'
 import { useSetState } from 'react-use'
 
 export interface CreateFoundationFormData {

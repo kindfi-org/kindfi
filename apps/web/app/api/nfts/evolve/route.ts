@@ -1,9 +1,10 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { evolveNftSchema } from '~/lib/schemas/nft.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import {
 	buildNFTMetadata,
@@ -14,11 +15,10 @@ import {
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
 } from '~/lib/services/pinata'
-import { evolveNftSchema } from '~/lib/schemas/nft.schemas'
-import { generateUniqueId } from '~/lib/utils/id'
-import { validateRequest } from '~/lib/utils/validation'
 import { IMPACT_SCORE_WEIGHTS } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { generateUniqueId } from '~/lib/utils/id'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/nfts/evolve
@@ -74,7 +74,6 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 		}
 		const { userId } = authorization
 
-
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
 
@@ -125,7 +124,6 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 						: null,
 			})
 		}
-
 
 		// Generate and upload new tier image
 		let imageUri = ''
@@ -210,7 +208,6 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			console.error('[NFT Evolve] Database update failed:', dbError)
 		}
 
-
 		await auditLogger.log({
 			correlationId,
 			operation: 'nft.evolve',
@@ -245,7 +242,9 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			status: 'failure',
 			errorCode: '500',
 			durationMs: Date.now() - startTime,
-			metadata: { error: error instanceof Error ? error.message : String(error) },
+			metadata: {
+				error: error instanceof Error ? error.message : String(error),
+			},
 		})
 		return NextResponse.json(
 			{ error: 'Internal server error' },
@@ -332,8 +331,10 @@ export const POST = withRateLimit(
 	{
 		preset: 'strict',
 		identifier: async (req) => {
+			const headerList = req.headers
+			const ip = headerList.get('x-forwarded-for')
 			const session = await getServerSession(nextAuthOption)
-			return session?.user?.id ?? req.ip ?? 'anonymous'
+			return session?.user?.id ?? ip ?? 'anonymous'
 		},
 	},
 	evolveHandler,

@@ -1,19 +1,10 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
-import type { TablesInsert } from '@services/supabase'
+import type { Json, TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import {
-	validateFoundedYear,
-	validateOptionalString,
-	validateOptionalUrl,
-	validateRequiredString,
-	validateSlug,
-	validateSocialLinks,
-	foundationValidationLimits,
-} from '~/lib/validation/foundation-api'
-import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { createFoundationFormSchema } from '~/lib/schemas/foundation-create.schemas'
+import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: Request) {
@@ -120,7 +111,7 @@ export async function POST(req: Request) {
 			mission: mission || null,
 			vision: vision || null,
 			website_url: websiteUrl || null,
-			social_links: socialLinks,
+			social_links: socialLinks as Json,
 		}
 
 		// Insert new foundation and retrieve its ID and slug
