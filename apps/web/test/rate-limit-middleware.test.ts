@@ -136,18 +136,22 @@ describe('withRateLimit', () => {
 			expect(handler).not.toHaveBeenCalled()
 		})
 
-		test('includes Retry-After header matching the preset window', async () => {
-			const handler = makeHandler()
-			const wrapped = withRateLimit(
-				{ preset: 'strict', identifier: async () => 'user-1' },
-				handler,
-			)
+		test('includes Retry-After header matching preset.block for all presets', async () => {
+			const presets = ['strict', 'moderate', 'lenient'] as const
 
-			const res = await wrapped(makeRequest())
+			for (const preset of presets) {
+				const handler = makeHandler()
+				const wrapped = withRateLimit(
+					{ preset, identifier: async () => 'user-1' },
+					handler,
+				)
 
-			expect((res.headers as Record<string, string>)['Retry-After']).toBe(
-				RATE_LIMIT_PRESETS.strict.window.toString(),
-			)
+				const res = await wrapped(makeRequest())
+
+				const actual = (res.headers as Record<string, string>)['Retry-After']
+				const expected = RATE_LIMIT_PRESETS[preset].block.toString()
+				expect(actual).toBe(expected, `preset "${preset}"`)
+			}
 		})
 
 		test('response body contains error message', async () => {
