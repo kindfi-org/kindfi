@@ -21,7 +21,12 @@ export function withRateLimit(
 ) {
 	return async (req: NextRequest): Promise<NextResponse> => {
 		const preset = RATE_LIMIT_PRESETS[config.preset ?? 'moderate']
-		const limiter = new RateLimiter()
+		const limiter = new RateLimiter({
+			maxAttempts: preset.attempts,
+			windowSecs: preset.window,
+			blockSecs: preset.block,
+			configId: config.preset ?? 'moderate',
+		})
 
 		try {
 			const id = await config.identifier(req)
@@ -32,7 +37,7 @@ export function withRateLimit(
 					{ error: 'Too many requests. Please try again later.' },
 					{
 						status: 429,
-						headers: { 'Retry-After': preset.window.toString() },
+						headers: { 'Retry-After': preset.block.toString() },
 					},
 				)
 			}
