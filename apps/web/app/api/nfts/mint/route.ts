@@ -1,11 +1,12 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
+import { RateLimiter } from '~/lib/auth/rate-limiter'
+import { Logger } from '~/lib/logger'
+import { mintNftSchema } from '~/lib/schemas/nft.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
-
 import {
 	buildNFTMetadata,
 	determineTier,
@@ -14,11 +15,10 @@ import {
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
 } from '~/lib/services/pinata'
-import { mintNftSchema } from '~/lib/schemas/nft.schemas'
-import { generateUniqueId } from '~/lib/utils/id'
-import { validateRequest } from '~/lib/utils/validation'
 import { getUserStats } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { generateUniqueId } from '~/lib/utils/id'
+import { validateRequest } from '~/lib/utils/validation'
 
 
 
@@ -80,8 +80,7 @@ async function mintHandler(req: NextRequest) {
 		}
 		const { userId } = authorization
 
-		let stellarAddress: string | null =
-			validation.data.stellar_address || null
+		let stellarAddress: string | null = validation.data.stellar_address || null
 
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
@@ -238,7 +237,6 @@ async function mintHandler(req: NextRequest) {
 			})
 		}
 
-
 		await auditLogger.log({
 			correlationId,
 			operation: 'nft.mint',
@@ -271,7 +269,9 @@ async function mintHandler(req: NextRequest) {
 			status: 'failure',
 			errorCode: '500',
 			durationMs: Date.now() - startTime,
-			metadata: { error: error instanceof Error ? error.message : String(error) },
+			metadata: {
+				error: error instanceof Error ? error.message : String(error),
+			},
 		})
 		return NextResponse.json(
 			{ error: 'Internal server error' },

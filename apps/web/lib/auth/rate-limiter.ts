@@ -74,7 +74,11 @@ export class RateLimiter {
 	}> {
 		const client = getRedis()
 		if (!client) {
-			return { isBlocked: false, attemptsRemaining: this.maxAttempts }
+			return {
+				isBlocked: false,
+				attemptsRemaining: this.maxAttempts,
+				error: AuthErrorType.SERVER_ERROR,
+			}
 		}
 
 		try {
@@ -115,7 +119,11 @@ export class RateLimiter {
 				'[RateLimiter] Redis error in increment — failing open:',
 				err,
 			)
-			return { isBlocked: false, attemptsRemaining: this.maxAttempts }
+			return {
+				isBlocked: false,
+				attemptsRemaining: this.maxAttempts,
+				error: AuthErrorType.SERVER_ERROR,
+			}
 		}
 	}
 

@@ -55,7 +55,7 @@ export function useWalletSync({
 	])
 
 	// Sync wallet address into empty multi-release milestone receivers
-	const _milestoneReceiversKey = formData.milestones
+	const milestoneReceiversKey = formData.milestones
 		.map((m) => ('receiver' in m ? m.receiver : ''))
 		.join('|')
 
@@ -69,5 +69,5 @@ export function useWalletSync({
 		// Only update if something changed
 		const changed = updated.some((m, i) => m !== formData.milestones[i])
 		if (changed) setField('milestones', updated)
-	}, [address, formData.selectedEscrowType, setField, formData.milestones])
+	}, [address, formData.selectedEscrowType, milestoneReceiversKey, setField])
 }
