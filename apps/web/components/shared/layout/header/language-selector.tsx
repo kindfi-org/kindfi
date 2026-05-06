@@ -7,8 +7,10 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '~/components/base/dropdown-menu'
+import { useHasMounted } from '~/hooks/use-has-mounted'
 import type { Language } from '~/lib/i18n/context'
 import { useI18n } from '~/lib/i18n/context'
+import { cn } from '~/lib/utils'
 
 const flagIcons = {
 	en: '🇺🇸',
@@ -22,9 +24,33 @@ const languageNames = {
 
 export function LanguageSelector() {
 	const { language, setLanguage, t } = useI18n()
+	const hasMounted = useHasMounted()
 
 	const handleLanguageChange = (lang: Language) => {
 		setLanguage(lang)
+	}
+
+	if (!hasMounted) {
+		return (
+			<Button
+				variant="ghost"
+				size="sm"
+				type="button"
+				tabIndex={-1}
+				aria-label={t('language.select')}
+				className={cn(
+					'relative h-8 w-8 rounded-full p-0 hover:bg-accent pointer-events-none select-none',
+				)}
+			>
+				<span
+					className="text-xl"
+					role="img"
+					aria-label={languageNames[language]}
+				>
+					{flagIcons[language]}
+				</span>
+			</Button>
+		)
 	}
 
 	return (

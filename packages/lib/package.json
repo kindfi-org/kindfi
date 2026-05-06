@@ -76,10 +76,12 @@
 		"zod": "^4.3.6"
 	},
 	"peerDependencies": {
+		"next": "^16.0.0",
 		"next-auth": "^4.24.11"
 	},
 	"devDependencies": {
-		"@types/lodash": "^4.17.21"
+		"@types/lodash": "^4.17.21",
+		"next": "16.0.10"
 	},
 	"type": "module"
 }

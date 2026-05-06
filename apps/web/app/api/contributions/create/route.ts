@@ -156,6 +156,54 @@ export async function POST(req: NextRequest) {
 			}
 		}
 
+		// Fire-and-forget: send contribution notifications (in-app + email)
+		const notifyContribution = async () => {
+			try {
+				const { data: project } = await supabase
+					.from('projects')
+					.select('kindler_id, title, slug, target_amount, current_amount')
+					.eq('id', finalProjectId)
+					.single()
+
+				if (!project) return
+
+				const { sendContributionNotifications, sendCampaignGoalReachedNotifications } =
+					await import('~/lib/email/email-notification-service')
+
+				const formattedAmount = `$${numericAmount.toLocaleString()}`
+
+				await sendContributionNotifications({
+					contributorId: session.user.id,
+					creatorId: project.kindler_id,
+					projectTitle: project.title,
+					projectSlug: project.slug,
+					amount: formattedAmount,
+				})
+
+				// Check if this contribution just reached the funding goal
+				const newTotal = (project.current_amount ?? 0) + numericAmount
+				if (
+					project.target_amount &&
+					project.current_amount < project.target_amount &&
+					newTotal >= project.target_amount
+				) {
+					await sendCampaignGoalReachedNotifications({
+						creatorId: project.kindler_id,
+						projectId: finalProjectId as string,
+						projectTitle: project.title,
+						projectSlug: project.slug,
+						targetAmount: `$${Number(project.target_amount).toLocaleString()}`,
+					})
+				}
+			} catch (err) {
+				console.error('[Contributions] Notification error:', err)
+			}
+		}
+
+		notifyContribution().catch((err) => {
+			console.error('[Contributions] Unhandled notification error:', err)
+		})
+
 		// Trigger gamification updates (fire and forget - don't block response)
 		// Call handlers directly to ensure they execute properly
 		const gamificationUpdates = async () => {

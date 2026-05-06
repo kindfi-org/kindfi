@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { Logger } from '~/lib/logger'
 import { mintNftSchema } from '~/lib/schemas/nft.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
@@ -297,8 +298,9 @@ export const POST = withRateLimit(
 	{
 		preset: 'strict',
 		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
 			const session = await getServerSession(nextAuthOption)
-			return session?.user?.id ?? req.ip ?? 'anonymous'
+			return session?.user?.id ?? ip ?? 'anonymous'
 		},
 	},
 	mintHandler,

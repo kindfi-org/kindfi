@@ -15,6 +15,7 @@ import {
 } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
+import { CSRFTokenField } from '~/components/base/form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { useFormValidation } from '~/hooks/use-form-validation'
@@ -51,8 +52,7 @@ export function SignupComponent() {
 		setSignUpState({ isSubmitting: true, error: '', success: '' })
 
 		try {
-			const formData = new FormData()
-			formData.append('email', email)
+			const formData = new FormData(e.currentTarget)
 
 			const result = await signUpAction(formData)
 
@@ -95,6 +95,7 @@ export function SignupComponent() {
 
 				<CardContent>
 					<form className="space-y-4" aria-label="Sign up" onSubmit={onSubmit}>
+						<CSRFTokenField />
 						{success && (
 							<output
 								className="text-green-600 text-sm text-center"

@@ -80,6 +80,20 @@ export function KindfiSupabaseAdapter(): Adapter {
 				// The profile can be created later if needed
 			}
 
+			// Fire-and-forget: send welcome email without blocking auth flow
+			const displayName = createdUser.name || createdUser.email.split('@')[0]
+			import('~/lib/email/email-notification-service')
+				.then(({ sendWelcomeEmail }) =>
+					sendWelcomeEmail({
+						userId: createdUser.id,
+						displayName,
+						hasKyc: false,
+					}),
+				)
+				.catch((err) => {
+					console.error('[Auth] Welcome email error:', err)
+				})
+
 			return createdUser
 		},
 
