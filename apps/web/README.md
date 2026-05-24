@@ -130,7 +130,7 @@ apps/web/
 
 ### Prerequisites
 
-- **Bun** >= 1.3.1
+- **Bun** >= 1.3.14
 - **Node.js** >= 20
 - **Supabase** account (for database)
 - **Stellar** testnet/mainnet access

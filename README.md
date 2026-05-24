@@ -155,7 +155,7 @@ If you have questions about contributing, feel free to:
 
 ### Prerequisites
 
-- **Bun** >= 1.3.1 (see [package.json](./package.json) for exact version)
+- **Bun** >= 1.3.14 (see [package.json](./package.json) for exact version)
 - **Node.js** >= 20 (for some tooling)
 - **Rust** (for smart contract development)
 

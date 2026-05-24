@@ -26,7 +26,7 @@ jobs:
           node-version: 20
       - uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: 1.3.14
       - name: Verify Bun installation
         run: bun --version
       - name: Cache dependencies
