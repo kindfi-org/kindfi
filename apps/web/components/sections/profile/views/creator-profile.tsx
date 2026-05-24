@@ -17,7 +17,11 @@ import {
 import { GamificationSection } from '~/components/sections/gamification/gamification-section'
 import { NFTCollection } from '~/components/sections/gamification/nft-collection'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { useI18n } from '~/lib/i18n'
 import { getUserCreatedProjects } from '~/lib/queries/projects/get-user-projects'
+import { ProfileSectionHeader } from '../profile-section-header'
+import { ProfileStatCard } from '../profile-stat-card'
+import { ProfileSurfaceCard } from '../profile-surface-card'
 import { FoundationsSection } from './foundations-section'
 
 interface CreatorProfileProps {
@@ -31,6 +35,7 @@ export function CreatorProfile({
 	displayName: _displayName,
 	showSection = 'overview',
 }: CreatorProfileProps) {
+	const { t } = useI18n()
 	const {
 		data: projects = [],
 		isLoading,
@@ -138,60 +143,55 @@ export function CreatorProfile({
 	if (showSection === 'campaigns') {
 		return (
 			<div className="space-y-6">
-				{/* Stats */}
 				<div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-					<StatCard label="Total Campaigns" value={String(projects.length)} />
-					<StatCard
-						label="Active Campaigns"
+					<ProfileStatCard label={t('profile.totalCampaigns')} value={String(projects.length)} />
+					<ProfileStatCard
+						label={t('profile.activeCampaigns')}
 						value={String(activeProjects.length)}
 					/>
-					<StatCard label="Total Raised" value={formatCurrency(totalRaised)} />
+					<ProfileStatCard label={t('profile.totalRaised')} value={formatCurrency(totalRaised)} />
 				</div>
 
-				{/* Actions */}
 				<div className="flex gap-3">
-					<Button asChild>
+					<Button asChild className="gradient-btn rounded-full text-white">
 						<Link href="/create-project">
 							<Plus className="h-4 w-4 mr-2" />
-							Create Campaign
+							{t('profile.createCampaign')}
 						</Link>
 					</Button>
 				</div>
 
-				{/* Campaign List */}
 				<AnimatePresence mode="wait">
 					{isLoading ? (
-						<div className="text-center py-12 text-muted-foreground">
-							Loading campaigns...
-						</div>
+						<p className="py-12 text-center text-muted-foreground">
+							{t('profile.loadingCampaigns')}
+						</p>
 					) : error ? (
-						<Card>
-							<CardContent className="py-12 text-center text-destructive">
-								Error loading campaigns. Please try again.
-							</CardContent>
-						</Card>
+						<ProfileSurfaceCard>
+							<p className="py-8 text-center text-destructive">
+								{t('profile.campaignsError')}
+							</p>
+						</ProfileSurfaceCard>
 					) : projectsWithBalances.length > 0 ? (
 						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 							{projectsWithBalances.map((project) => (
-								<ProjectCard key={project.id} project={project} />
+								<ProjectCard key={project.id} project={project} t={t} />
 							))}
 						</div>
 					) : (
-						<Card>
-							<CardContent className="py-16 text-center">
-								<Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-								<h3 className="text-lg font-semibold mb-2">No Campaigns Yet</h3>
-								<p className="text-muted-foreground mb-6 text-sm">
-									Start your first fundraising campaign and make an impact.
-								</p>
-								<Button asChild>
-									<Link href="/create-project">
-										<Plus className="h-4 w-4 mr-2" />
-										Create Your First Campaign
-									</Link>
-								</Button>
-							</CardContent>
-						</Card>
+						<ProfileSurfaceCard className="py-12 text-center">
+							<Target className="mx-auto mb-4 h-12 w-12 text-emerald-600/70" />
+							<h3 className="mb-2 text-lg font-semibold">{t('profile.noCampaignsTitle')}</h3>
+							<p className="mx-auto mb-6 max-w-md text-sm text-muted-foreground">
+								{t('profile.noCampaignsDescription')}
+							</p>
+							<Button asChild className="gradient-btn rounded-full text-white">
+								<Link href="/create-project">
+									<Plus className="h-4 w-4 mr-2" />
+									{t('profile.createFirstCampaign')}
+								</Link>
+							</Button>
+						</ProfileSurfaceCard>
 					)}
 				</AnimatePresence>
 			</div>
@@ -200,82 +200,82 @@ export function CreatorProfile({
 
 	// Default: overview
 	return (
-		<div className="space-y-6">
-			{/* Stats */}
+		<div className="space-y-8">
+			<ProfileSectionHeader
+				title={t('profile.creatorOverviewTitle')}
+				highlight={t('profile.creatorOverviewHighlight')}
+				description={t('profile.creatorOverviewDescription')}
+			/>
+
 			<div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-				<StatCard label="Total Campaigns" value={String(projects.length)} />
-				<StatCard
-					label="Active Campaigns"
+				<ProfileStatCard label={t('profile.totalCampaigns')} value={String(projects.length)} />
+				<ProfileStatCard
+					label={t('profile.activeCampaigns')}
 					value={String(activeProjects.length)}
 				/>
-				<StatCard label="Total Raised" value={formatCurrency(totalRaised)} />
+				<ProfileStatCard label={t('profile.totalRaised')} value={formatCurrency(totalRaised)} />
 			</div>
 
-			{/* Quick Actions */}
 			<div className="flex flex-wrap gap-3">
-				<Button asChild>
+				<Button asChild className="gradient-btn rounded-full text-white">
 					<Link href="/create-project">
 						<Plus className="h-4 w-4 mr-2" />
-						Create Campaign
+						{t('profile.createCampaign')}
 					</Link>
 				</Button>
-				<Button asChild variant="outline">
+				<Button asChild variant="outline" className="rounded-full bg-white/80">
 					<Link href="/create-foundation">
 						<Plus className="h-4 w-4 mr-2" />
-						Create Foundation
+						{t('profile.tabFoundations')}
 					</Link>
 				</Button>
 			</div>
 
-			{/* Active Campaigns */}
 			{activeProjects.length > 0 && (
-				<div className="space-y-3">
-					<h3 className="text-lg font-semibold">Active Campaigns</h3>
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold">{t('profile.activeCampaignsSection')}</h3>
 					<div className="grid gap-4 sm:grid-cols-2">
 						{activeProjects.map((project) => (
-							<ProjectCard key={project.id} project={project} />
+							<ProjectCard key={project.id} project={project} t={t} />
 						))}
 					</div>
 				</div>
 			)}
 
-			{/* All Campaigns */}
 			<AnimatePresence mode="wait">
 				{isLoading ? (
-					<div className="text-center py-12 text-muted-foreground">
-						Loading campaigns...
-					</div>
+					<p className="py-12 text-center text-muted-foreground">
+						{t('profile.loadingCampaigns')}
+					</p>
 				) : error ? (
-					<Card>
-						<CardContent className="py-12 text-center text-destructive">
-							Error loading campaigns. Please try again.
-						</CardContent>
-					</Card>
+					<ProfileSurfaceCard>
+						<p className="py-8 text-center text-destructive">
+							{t('profile.campaignsError')}
+						</p>
+					</ProfileSurfaceCard>
 				) : projectsWithBalances.length > 0 ? (
-					<div className="space-y-3">
-						<h3 className="text-lg font-semibold">All Campaigns</h3>
+					<div className="space-y-4">
+						<h3 className="text-lg font-semibold">{t('profile.allCampaignsSection')}</h3>
 						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 							{projectsWithBalances.map((project) => (
-								<ProjectCard key={project.id} project={project} compact />
+								<ProjectCard key={project.id} project={project} compact t={t} />
 							))}
 						</div>
 					</div>
 				) : !isLoading ? (
-					<Card>
-						<CardContent className="py-16 text-center">
-							<Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-							<h3 className="text-lg font-semibold mb-2">No Campaigns Yet</h3>
-							<p className="text-muted-foreground mb-6 text-sm">
-								Start your first fundraising campaign and make an impact.
-							</p>
-							<Button asChild>
-								<Link href="/create-project">
-									<Plus className="h-4 w-4 mr-2" />
-									Create Your First Campaign
-								</Link>
-							</Button>
-						</CardContent>
-					</Card>
+					<ProfileSurfaceCard className="py-12 text-center">
+						<Target className="mx-auto mb-4 h-12 w-12 text-emerald-600/70" />
+						<h3 className="mb-2 text-lg font-semibold">{t('profile.noCampaignsTitle')}</h3>
+						<p className="mx-auto mb-6 max-w-md text-sm text-muted-foreground">
+							{t('profile.noCampaignsDescription')}
+						</p>
+						<Button asChild className="gradient-btn rounded-full text-white">
+							<Link href="/create-project">
+								<Plus className="h-4 w-4 mr-2" />
+								{t('profile.createFirstCampaign')}
+							</Link>
+						</Button>
+					</ProfileSurfaceCard>
 				) : null}
 			</AnimatePresence>
 		</div>
@@ -283,23 +283,6 @@ export function CreatorProfile({
 }
 
 /* ── Subcomponents ── */
-
-function StatCard({ label, value }: { label: string; value: string }) {
-	return (
-		<Card>
-			<CardHeader className="pb-2">
-				<CardTitle className="text-sm font-medium text-muted-foreground">
-					{label}
-				</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<p className="text-3xl font-bold text-foreground tabular-nums">
-					{value}
-				</p>
-			</CardContent>
-		</Card>
-	)
-}
 
 const STATUS_COLORS: Record<string, string> = {
 	active: 'bg-primary text-primary-foreground',
@@ -312,6 +295,7 @@ const STATUS_COLORS: Record<string, string> = {
 function ProjectCard({
 	project,
 	compact = false,
+	t,
 }: {
 	project: {
 		id: string
@@ -326,6 +310,7 @@ function ProjectCard({
 		tags: Array<{ name: string; color: string | null }>
 	}
 	compact?: boolean
+	t: (key: string) => string
 }) {
 	const percentage = project.percentageComplete ?? 0
 
@@ -338,7 +323,7 @@ function ProjectCard({
 		}).format(amount)
 
 	return (
-		<Card className="overflow-hidden h-full flex flex-col group hover:shadow-md transition-shadow">
+		<ProfileSurfaceCard padding="sm" className="group flex h-full flex-col overflow-hidden p-0 transition-shadow hover:shadow-md">
 			{project.image && (
 				<div className="relative h-44 w-full overflow-hidden">
 					<Image
@@ -351,7 +336,7 @@ function ProjectCard({
 					/>
 				</div>
 			)}
-			<CardHeader className="pb-2">
+			<CardHeader className="px-5 pb-2 pt-5">
 				<div className="flex items-start justify-between gap-2">
 					<CardTitle className="text-base line-clamp-2 min-w-0">
 						{project.title}
@@ -364,7 +349,7 @@ function ProjectCard({
 					</Badge>
 				</div>
 			</CardHeader>
-			<CardContent className="flex-1 flex flex-col gap-3">
+			<CardContent className="flex flex-1 flex-col gap-3 px-5 pb-5">
 				{!compact && project.description && (
 					<p className="text-sm text-muted-foreground line-clamp-2">
 						{project.description}
@@ -410,21 +395,21 @@ function ProjectCard({
 						))}
 					</div>
 				)}
-				<div className="flex gap-2">
-					<Button asChild variant="outline" size="sm" className="flex-1">
+					<div className="flex gap-2">
+					<Button asChild variant="outline" size="sm" className="flex-1 rounded-full">
 						<Link href={`/projects/${project.slug || project.id}`}>
-							View Campaign
+							{t('profile.viewCampaign')}
 							<ArrowRight className="h-4 w-4 ml-2" />
 						</Link>
 					</Button>
-					<Button asChild variant="outline" size="sm" className="flex-1">
+					<Button asChild variant="outline" size="sm" className="flex-1 rounded-full">
 						<Link href={`/projects/${project.slug || project.id}/manage`}>
 							<Settings className="h-4 w-4 mr-2" />
-							Manage
+							{t('profile.manageCampaign')}
 						</Link>
 					</Button>
 				</div>
 			</CardContent>
-		</Card>
+		</ProfileSurfaceCard>
 	)
 }

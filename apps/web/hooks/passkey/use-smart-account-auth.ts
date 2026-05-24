@@ -10,6 +10,23 @@ import { toast } from 'sonner'
 import { createSessionAction } from '~/app/actions/auth'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 
+const mapPasskeyApiError = (errorMessage: string): InAppError => {
+	if (errorMessage === 'User not found') {
+		return new InAppError(ErrorCode.USER_NOT_FOUND)
+	}
+
+	if (errorMessage === 'No passkeys registered for this user') {
+		return new InAppError(ErrorCode.AUTHENTICATOR_NOT_REGISTERED, errorMessage)
+	}
+
+	return new InAppError(ErrorCode.UNEXPECTED_ERROR, errorMessage)
+}
+
+const isUserCancelledAuth = (message: string): boolean =>
+	message.includes('The operation either timed out or was not allowed.') ||
+	message.includes('NotAllowedError') ||
+	message.includes('Operation cancelled or not allowed')
+
 /**
  * Hook for Smart Account authentication using WebAuthn passkeys
  * Replaces the KYC server-based authentication flow
@@ -55,7 +72,7 @@ export const useSmartAccountAuth = (identifier: string) => {
 
 			if (!authOptionsResponse.ok) {
 				const errorData = await authOptionsResponse.json()
-				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, errorData.error)
+				throw mapPasskeyApiError(errorData.error)
 			}
 
 			const authenticationOptions = await authOptionsResponse.json()
@@ -81,7 +98,7 @@ export const useSmartAccountAuth = (identifier: string) => {
 
 			if (!verificationResp.ok) {
 				const verificationJSON = await verificationResp.json()
-				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, verificationJSON.error)
+				throw mapPasskeyApiError(verificationJSON.error)
 			}
 
 			const verificationJSON = await verificationResp.json()
@@ -151,26 +168,33 @@ export const useSmartAccountAuth = (identifier: string) => {
 				credentialId: verificationJSON.credentialId,
 			}
 		} catch (error) {
-			console.error('🔴 Error during Smart Account authentication:', error)
-			const err = error as Error
-			let message = err.toString()
+			const err =
+				error instanceof InAppError
+					? error
+					: new InAppError(
+							ErrorCode.UNEXPECTED_ERROR,
+							error instanceof Error ? error.message : String(error),
+						)
 
-			if (
-				err.message.includes(
-					'The operation either timed out or was not allowed.',
-				)
-			) {
-				message = 'Operation cancelled or not allowed'
-			} else if (err.message.includes('User not found')) {
-				message = 'User not registered. Please register first.'
+			if (err.code === ErrorCode.USER_NOT_FOUND) {
 				setIsNotRegistered(true)
-			} else {
-				message = `Authentication failed: ${err.message}`
+				return { verified: false }
 			}
+
+			if (isUserCancelledAuth(err.message)) {
+				return { verified: false }
+			}
+
+			console.error('Error during Smart Account authentication:', err)
+
+			const message =
+				err.code === ErrorCode.AUTHENTICATOR_NOT_REGISTERED
+					? err.message
+					: `Authentication failed: ${err.message}`
 
 			setAuthError(message)
 			toast.error(message)
-			throw error
+			return { verified: false }
 		} finally {
 			setIsAuthenticating(false)
 		}

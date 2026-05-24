@@ -116,11 +116,6 @@ export class NotificationService {
 			mapDbRowToBaseNotification(row as DbNotificationRow),
 		)
 
-		await this.logger.logInfo({
-			message: 'Notifications fetched successfully',
-			context: { filters, sort, page, pageSize, count: count || 0 },
-		})
-
 		return {
 			data: mapped,
 			count: count || 0,

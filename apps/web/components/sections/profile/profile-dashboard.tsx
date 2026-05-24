@@ -2,7 +2,7 @@
 
 import type { Database } from '@services/supabase'
 import { motion } from 'framer-motion'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { startTransition, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import {
@@ -11,13 +11,18 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
+import { SectionContainer } from '~/components/shared/section-container'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useI18n } from '~/lib/i18n'
+import { cn } from '~/lib/utils'
 import { AccountInfoCard } from './cards/account-info-card'
 import { KYCCard } from './cards/kyc-card'
 import { PersonalInfoCard } from './cards/personal-info-card'
 import { WalletCard } from './cards/wallet-card'
 import { RoleSelectionModal } from './modals/role-selection-modal'
+import { profileFadeUp } from './profile-motion'
 import { ProfileHeader } from './profile-header'
+import { ProfileShell } from './profile-shell'
 import { CreatorProfile } from './views/creator-profile'
 import { DonorProfile } from './views/donor-profile'
 
@@ -41,19 +46,11 @@ interface ProfileDashboardProps {
 	kycCompleted?: boolean
 }
 
-/** Shared class for all profile-level tab triggers */
-const tabTriggerClass = [
-	'data-[state=active]:text-foreground',
-	'data-[state=active]:border-b-2',
-	'data-[state=active]:border-foreground',
-	'data-[state=active]:font-semibold',
-	'data-[state=inactive]:text-muted-foreground',
-	'data-[state=inactive]:hover:text-foreground/80',
-	'data-[state=inactive]:border-b',
-	'data-[state=inactive]:border-transparent',
-	'transition-colors duration-150',
-	'rounded-none px-4 py-2.5 text-sm -mb-px whitespace-nowrap',
-].join(' ')
+const TAB_TRIGGER_CLASS = cn(
+	'rounded-full px-4 py-2 text-sm font-medium transition-all',
+	'data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm',
+	'data-[state=inactive]:text-slate-500 data-[state=inactive]:hover:text-gray-800',
+)
 
 export function ProfileDashboard({
 	user,
@@ -61,6 +58,8 @@ export function ProfileDashboard({
 	defaultTab = 'overview',
 	kycCompleted = false,
 }: ProfileDashboardProps) {
+	const { t } = useI18n()
+	const router = useRouter()
 	const role: Role | null = user.profile?.role ?? null
 	const displayName = useMemo(
 		() => user.profile?.display_name || user.email?.split('@')[0] || 'You',
@@ -73,16 +72,14 @@ export function ProfileDashboard({
 		isConnected,
 	} = useWallet()
 	const imageUrl = user.profile?.image_url ?? null
+	const bio = user.profile?.bio ?? null
 	const [showRoleModal, setShowRoleModal] = useState(false)
 	const searchParams = useSearchParams()
 	const activeSection = searchParams?.get('section') || defaultTab
 
-	// Show role selection if role is pending or null
 	useEffect(() => {
 		if (role === 'pending' || role === null) {
-			startTransition(() => {
-				setShowRoleModal(true)
-			})
+			startTransition(() => setShowRoleModal(true))
 		}
 	}, [role])
 
@@ -91,7 +88,6 @@ export function ProfileDashboard({
 		setShowRoleModal(false)
 	}
 
-	// Handle KYC callback
 	useEffect(() => {
 		if (!kycCompleted) return
 
@@ -100,28 +96,22 @@ export function ProfileDashboard({
 		const sessionId = urlParams.get('verificationSessionId')
 
 		if (!status || !sessionId) {
-			toast.info('KYC verification completed! Checking your status...')
+			toast.info(t('profile.kycCallbackChecking'))
 			return
 		}
 
 		const normalizedStatus = status.replace(/\+/g, ' ')
 		if (normalizedStatus === 'Approved') {
-			toast.success(
-				'KYC verification approved! Your status is being updated...',
-			)
+			toast.success(t('profile.kycCallbackApproved'))
 		} else if (normalizedStatus === 'Declined') {
-			toast.error(
-				'KYC verification was declined. Please review the requirements and try again.',
-			)
+			toast.error(t('profile.kycCallbackDeclined'))
 		} else if (
 			normalizedStatus === 'In Review' ||
 			normalizedStatus === 'In Progress'
 		) {
-			toast.info(
-				"KYC verification is under review. We will notify you once it's complete.",
-			)
+			toast.info(t('profile.kycCallbackReview'))
 		} else {
-			toast.info('KYC verification completed! Checking your status...')
+			toast.info(t('profile.kycCallbackChecking'))
 		}
 
 		fetch('/api/kyc/didit/callback', {
@@ -136,36 +126,31 @@ export function ProfileDashboard({
 				if (res.ok) {
 					const result = await res.json()
 					if (result.status === 'approved' || result.status === 'verified') {
-						toast.success(
-							'KYC verification approved! Your status has been updated.',
-						)
+						toast.success(t('profile.kycUpdatedApproved'))
 					} else if (result.status === 'rejected') {
-						toast.error('KYC verification was declined.')
+						toast.error(t('profile.kycUpdatedDeclined'))
 					} else if (result.status === 'pending') {
-						toast.info('KYC verification is under review.')
+						toast.info(t('profile.kycUpdatedReview'))
 					}
 					window.history.replaceState({}, '', '/profile')
 					window.location.reload()
 				} else {
-					toast.error('Failed to update KYC status. Please refresh to retry.')
+					toast.error(t('profile.kycUpdateFailed'))
 				}
 			})
 			.catch(() => {
-				toast.error('Failed to update KYC status. Please refresh to retry.')
+				toast.error(t('profile.kycUpdateFailed'))
 			})
-	}, [kycCompleted])
+	}, [kycCompleted, t])
 
 	const handleTabChange = (value: string) => {
 		const params = new URLSearchParams(searchParams?.toString() || '')
 		params.set('section', value)
-		window.history.pushState(
-			{},
-			'',
-			`${window.location.pathname}?${params.toString()}`,
-		)
+		router.push(`/profile?${params.toString()}`, { scroll: false })
 	}
 
-	/** Renders the correct profile view for a given section */
+	const openSettings = () => handleTabChange('settings')
+
 	const renderSection = (section: string) => {
 		const ProfileView = role === 'creator' ? CreatorProfile : DonorProfile
 		return (
@@ -186,152 +171,119 @@ export function ProfileDashboard({
 	}
 
 	return (
-		<div className="min-h-screen bg-background">
-			<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 max-w-6xl space-y-6">
-				{/* Profile Header */}
-				<ProfileHeader
-					displayName={displayName}
-					email={user.email}
-					imageUrl={imageUrl}
-					role={role}
-					createdAt={user.created_at}
-				/>
+		<ProfileShell>
+			<SectionContainer maxWidth="6xl" className="py-8 sm:py-10 lg:py-12">
+				<div className="space-y-6 lg:space-y-8">
+					<ProfileHeader
+						displayName={displayName}
+						email={user.email}
+						imageUrl={imageUrl}
+						bio={bio}
+						role={role}
+						createdAt={user.created_at}
+						onOpenSettings={openSettings}
+					/>
 
-				{/* Wallet + KYC Row */}
-				<div className="grid gap-5 md:grid-cols-3">
-					<div className="md:col-span-2">
-						<WalletCard
-							smartAccountAddress={smartAccountAddress ?? null}
-							externalWalletAddress={externalWalletAddress}
-							isExternalConnected={isConnected}
-							onConnectExternal={connect}
-							onDisconnectExternal={disconnect}
-						/>
-					</div>
-					<div>
-						<KYCCard userId={user.id} shouldRefresh={kycCompleted} />
-					</div>
+					<motion.div
+						{...profileFadeUp(0.08)}
+						className="grid gap-5 lg:grid-cols-5"
+					>
+						<div className="lg:col-span-3">
+							<WalletCard
+								smartAccountAddress={smartAccountAddress ?? null}
+								externalWalletAddress={externalWalletAddress}
+								isExternalConnected={isConnected}
+								onConnectExternal={connect}
+								onDisconnectExternal={disconnect}
+							/>
+						</div>
+						<div className="lg:col-span-2">
+							<KYCCard userId={user.id} shouldRefresh={kycCompleted} />
+						</div>
+					</motion.div>
+
+					<motion.div {...profileFadeUp(0.12)}>
+						<Tabs
+							value={activeSection}
+							onValueChange={handleTabChange}
+							className="space-y-6"
+						>
+							<div className="overflow-x-auto pb-1">
+								<TabsList className="inline-flex h-auto w-max min-w-full gap-1 rounded-full border border-white/70 bg-white/60 p-1.5 shadow-sm backdrop-blur-sm sm:min-w-0">
+									<TabsTrigger value="overview" className={TAB_TRIGGER_CLASS}>
+										{t('profile.tabOverview')}
+									</TabsTrigger>
+									<TabsTrigger
+										value="gamification"
+										className={TAB_TRIGGER_CLASS}
+									>
+										{t('profile.tabGamification')}
+									</TabsTrigger>
+									{role === 'donor' ? (
+										<TabsTrigger value="donations" className={TAB_TRIGGER_CLASS}>
+											{t('profile.tabDonations')}
+										</TabsTrigger>
+									) : null}
+									{role === 'creator' ? (
+										<>
+											<TabsTrigger value="campaigns" className={TAB_TRIGGER_CLASS}>
+												{t('profile.tabCampaigns')}
+											</TabsTrigger>
+											<TabsTrigger
+												value="foundations"
+												className={TAB_TRIGGER_CLASS}
+											>
+												{t('profile.tabFoundations')}
+											</TabsTrigger>
+										</>
+									) : null}
+									<TabsTrigger value="settings" className={TAB_TRIGGER_CLASS}>
+										{t('profile.tabSettings')}
+									</TabsTrigger>
+								</TabsList>
+							</div>
+
+							<TabsContent value="overview" className="mt-0">
+								{renderSection('overview')}
+							</TabsContent>
+							<TabsContent value="gamification" className="mt-0">
+								{renderSection('gamification')}
+							</TabsContent>
+							{role === 'donor' ? (
+								<TabsContent value="donations" className="mt-0">
+									{renderSection('donations')}
+								</TabsContent>
+							) : null}
+							{role === 'creator' ? (
+								<>
+									<TabsContent value="campaigns" className="mt-0">
+										{renderSection('campaigns')}
+									</TabsContent>
+									<TabsContent value="foundations" className="mt-0">
+										{renderSection('foundations')}
+									</TabsContent>
+								</>
+							) : null}
+							<TabsContent value="settings" className="mt-0">
+								<div className="grid gap-6 lg:grid-cols-2">
+									<PersonalInfoCard
+										userId={user.id}
+										displayName={user.profile?.display_name ?? ''}
+										bio={user.profile?.bio ?? ''}
+										imageUrl={user.profile?.image_url ?? ''}
+										_email={user.email}
+									/>
+									<AccountInfoCard
+										userEmail={user.email}
+										createdAt={user.created_at}
+										slug={user.profile?.slug ?? ''}
+									/>
+								</div>
+							</TabsContent>
+						</Tabs>
+					</motion.div>
 				</div>
 
-				{/* Main Content Tabs */}
-				<Tabs
-					value={activeSection}
-					onValueChange={handleTabChange}
-					className="space-y-6"
-				>
-					<TabsList className="inline-flex h-auto items-center gap-0.5 bg-transparent p-0 w-full border-b border-border overflow-x-auto">
-						<TabsTrigger value="overview" className={tabTriggerClass}>
-							Overview
-						</TabsTrigger>
-						<TabsTrigger value="gamification" className={tabTriggerClass}>
-							Gamification
-						</TabsTrigger>
-						{role === 'donor' && (
-							<TabsTrigger value="donations" className={tabTriggerClass}>
-								Donations
-							</TabsTrigger>
-						)}
-						{role === 'creator' && (
-							<>
-								<TabsTrigger value="campaigns" className={tabTriggerClass}>
-									Campaigns
-								</TabsTrigger>
-								<TabsTrigger value="foundations" className={tabTriggerClass}>
-									Foundations
-								</TabsTrigger>
-							</>
-						)}
-						<TabsTrigger value="settings" className={tabTriggerClass}>
-							Settings
-						</TabsTrigger>
-					</TabsList>
-
-					<TabsContent value="overview" className="mt-6">
-						<motion.div
-							key="overview"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ duration: 0.2 }}
-						>
-							{renderSection('overview')}
-						</motion.div>
-					</TabsContent>
-
-					<TabsContent value="gamification" className="mt-6">
-						<motion.div
-							key="gamification"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ duration: 0.2 }}
-						>
-							{renderSection('gamification')}
-						</motion.div>
-					</TabsContent>
-
-					{role === 'donor' && (
-						<TabsContent value="donations" className="mt-6">
-							<motion.div
-								key="donations"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ duration: 0.2 }}
-							>
-								{renderSection('donations')}
-							</motion.div>
-						</TabsContent>
-					)}
-
-					{role === 'creator' && (
-						<>
-							<TabsContent value="campaigns" className="mt-6">
-								<motion.div
-									key="campaigns"
-									initial={{ opacity: 0 }}
-									animate={{ opacity: 1 }}
-									transition={{ duration: 0.2 }}
-								>
-									{renderSection('campaigns')}
-								</motion.div>
-							</TabsContent>
-
-							<TabsContent value="foundations" className="mt-6">
-								<motion.div
-									key="foundations"
-									initial={{ opacity: 0 }}
-									animate={{ opacity: 1 }}
-									transition={{ duration: 0.2 }}
-								>
-									{renderSection('foundations')}
-								</motion.div>
-							</TabsContent>
-						</>
-					)}
-
-					<TabsContent value="settings" className="mt-6">
-						<motion.div
-							key="settings"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ duration: 0.2 }}
-							className="grid gap-6 md:grid-cols-2"
-						>
-							<PersonalInfoCard
-								userId={user.id}
-								displayName={user.profile?.display_name ?? ''}
-								bio={user.profile?.bio ?? ''}
-								imageUrl={user.profile?.image_url ?? ''}
-								_email={user.email}
-							/>
-							<AccountInfoCard
-								userEmail={user.email}
-								createdAt={user.created_at}
-								slug={user.profile?.slug ?? ''}
-							/>
-						</motion.div>
-					</TabsContent>
-				</Tabs>
-
-				{/* Role Selection Modal */}
 				<RoleSelectionModal
 					open={showRoleModal}
 					onOpenChange={setShowRoleModal}
@@ -339,7 +291,7 @@ export function ProfileDashboard({
 					currentRole={role}
 					onRoleSelected={handleRoleSelected}
 				/>
-			</div>
-		</div>
+			</SectionContainer>
+		</ProfileShell>
 	)
 }

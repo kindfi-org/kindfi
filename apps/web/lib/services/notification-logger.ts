@@ -1,43 +1,5 @@
-import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
+export type LogLevel = 'error' | 'info' | 'warning'
 
-// notification_logs table is not in generated Supabase types
-const NOTIFICATION_LOGS_TABLE = 'notification_logs' as const
-
-type UntypedSupabase = ReturnType<typeof createSupabaseBrowserClient> & {
-	from: (table: string) => any
-}
-
-function supabaseNotificationLogs(): UntypedSupabase {
-	return createSupabaseBrowserClient() as UntypedSupabase
-}
-
-function serializeClientLogError(value: unknown): Record<string, unknown> {
-	if (value instanceof Error) {
-		return {
-			name: value.name,
-			message: value.message,
-			stack: value.stack,
-		}
-	}
-	if (value !== null && typeof value === 'object') {
-		const o = value as Record<string, unknown>
-		return {
-			message: o.message,
-			code: o.code,
-			details: o.details,
-			hint: o.hint,
-		}
-	}
-	return { message: String(value) }
-}
-
-/**
- * Parameters for logging error events
- * @property {string} message - Error message to be logged
- * @property {unknown} error - The error object or message
- * @property {Record<string, unknown>} [context] - Optional additional context data
- * @property {string} [notificationId] - Optional ID of the related notification
- */
 interface LogErrorParams {
 	message: string
 	error: unknown
@@ -45,41 +7,18 @@ interface LogErrorParams {
 	notificationId?: string
 }
 
-/**
- * Parameters for logging info events
- * @property {string} [notificationId] - Optional ID of the related notification
- * @property {string} message - Info message to be logged
- * @property {Record<string, unknown>} [context] - Optional additional context data
- */
 interface LogInfoParams {
 	notificationId?: string
 	message: string
 	context?: Record<string, unknown>
 }
 
-/**
- * Parameters for logging warning events
- * @property {string} [notificationId] - Optional ID of the related notification
- * @property {string} message - Warning message to be logged
- * @property {Record<string, unknown>} [context] - Optional additional context data
- */
 interface LogWarningParams {
 	notificationId?: string
 	message: string
 	context?: Record<string, unknown>
 }
 
-export type LogLevel = 'error' | 'info' | 'warning'
-
-/**
- * Represents a notification log entry from the database
- * @property {string} id - Unique identifier for the log entry
- * @property {string | null} notification_id - ID of the related notification, if any
- * @property {'error' | 'info' | 'warning'} action - Log level indicating the type of entry
- * @property {string} message - The logged message
- * @property {Record<string, unknown>} [metadata] - Additional context data
- * @property {string} created_at - Timestamp of when the log was created
- */
 interface NotificationLog {
 	id: string
 	notification_id: string | null
@@ -95,220 +34,36 @@ export interface LogResult<T> {
 }
 
 /**
- * Logs an error event to the notification logs
- * @param {LogErrorParams} params - Parameters for the error log
- * @throws {Error} Re-throws the original error after logging attempt
+ * Client-safe notification logger. Persistence is handled server-side only
+ * via notification-logger.server.ts to avoid RLS issues and leaking credentials.
  */
-export async function logError(params: LogErrorParams): Promise<void> {
-	try {
-		const supabase = supabaseNotificationLogs()
-		await supabase.from(NOTIFICATION_LOGS_TABLE).insert({
-			notification_id: params.notificationId,
-			level: 'error',
-			message: params.message,
-			metadata: {
-				...params.context,
-				error:
-					params.error instanceof Error
-						? params.error.message
-						: String(params.error),
-				stack: params.error instanceof Error ? params.error.stack : undefined,
-			},
-		})
-	} catch (logError) {
-		console.error('Failed to log error:', serializeClientLogError(logError))
-		throw params.error // Rethrow the original error after logging attempt
-	}
-}
-
-/**
- * Retrieves logs for a specific notification
- * @param {string} notificationId - ID of the notification to fetch logs for
- * @returns {Promise<LogResult<NotificationLog[]>>} Array of logs or error
- */
-export async function getNotificationLogs(
-	notificationId: string,
-): Promise<LogResult<NotificationLog[]>> {
-	try {
-		const supabase = supabaseNotificationLogs()
-		const { data, error } = await supabase
-			.from(NOTIFICATION_LOGS_TABLE)
-			.select('*')
-			.eq('notification_id', notificationId)
-			.order('created_at', { ascending: false })
-
-		if (error) throw error
-		return { data, error: null }
-	} catch (error) {
-		return {
-			data: null,
-			error:
-				error instanceof Error ? error : new Error('Unknown error occurred'),
-		}
-	}
-}
-
-/**
- * Retrieves recent logs with pagination support
- * @param {number} [limit=100] - Maximum number of logs to retrieve
- * @param {number} [offset=0] - Number of logs to skip
- * @returns {Promise<LogResult<NotificationLog[]>>} Array of logs or error
- */
-export async function getRecentLogs(
-	limit = 100,
-	offset = 0,
-): Promise<LogResult<NotificationLog[]>> {
-	try {
-		const supabase = supabaseNotificationLogs()
-		const { data, error } = await supabase
-			.from(NOTIFICATION_LOGS_TABLE)
-			.select('*')
-			.order('created_at', { ascending: false })
-			.range(offset, offset + limit - 1)
-
-		if (error) throw error
-		return { data, error: null }
-	} catch (error) {
-		return {
-			data: null,
-			error:
-				error instanceof Error ? error : new Error('Unknown error occurred'),
-		}
-	}
-}
-
 export class NotificationLogger {
-	/**
-	 * Logs an error event to the notification logs
-	 * @param {LogErrorParams} params - Parameters for the error log
-	 */
-	async logError({
-		message,
-		error,
-		context,
-		notificationId,
-	}: LogErrorParams): Promise<void> {
-		try {
-			const supabase = supabaseNotificationLogs()
-			const { error: dbError } = await supabase
-				.from(NOTIFICATION_LOGS_TABLE)
-				.insert({
-					notification_id: notificationId,
-					level: 'error',
-					message,
-					metadata: {
-						...context,
-						error: error instanceof Error ? error.message : String(error),
-						stack: error instanceof Error ? error.stack : undefined,
-					},
-				})
+	async logError(_params: LogErrorParams): Promise<void> {}
 
-			if (dbError) throw dbError
-		} catch (logError) {
-			console.error('Failed to log error:', serializeClientLogError(logError))
-			// Don't throw to avoid disrupting the main flow
-		}
+	async logInfo(_params: LogInfoParams): Promise<void> {}
+
+	async logWarning(_params: LogWarningParams): Promise<void> {}
+
+	async getNotificationLogs(_notificationId: string): Promise<NotificationLog[]> {
+		return []
 	}
 
-	/**
-	 * Logs an informational event to the notification logs
-	 * @param {LogInfoParams} params - Parameters for the info log
-	 */
-	async logInfo({
-		notificationId,
-		message,
-		context,
-	}: LogInfoParams): Promise<void> {
-		try {
-			const supabase = supabaseNotificationLogs()
-			const { error } = await supabase.from(NOTIFICATION_LOGS_TABLE).insert({
-				level: 'info',
-				message: message,
-				notification_id: notificationId,
-				metadata: context,
-			})
-
-			if (error) throw error
-		} catch (logError) {
-			console.error('[NotificationLogger] Failed to log info:', {
-				message,
-				notificationId,
-				error: serializeClientLogError(logError),
-			})
-			// Don't throw to avoid disrupting the main flow
-		}
+	async getErrorLogs(_limit = 100, _offset = 0): Promise<NotificationLog[]> {
+		return []
 	}
+}
 
-	/**
-	 * Logs a warning event to the notification logs
-	 * @param {LogWarningParams} params - Parameters for the warning log
-	 */
-	async logWarning({
-		notificationId,
-		message,
-		context,
-	}: LogWarningParams): Promise<void> {
-		try {
-			const supabase = supabaseNotificationLogs()
-			const { error } = await supabase.from(NOTIFICATION_LOGS_TABLE).insert({
-				level: 'warning',
-				message: message,
-				notification_id: notificationId,
-				metadata: context,
-			})
+export async function logError(_params: LogErrorParams): Promise<void> {}
 
-			if (error) throw error
-		} catch (logError) {
-			console.error('Failed to log warning:', serializeClientLogError(logError))
-			// Don't throw to avoid disrupting the main flow
-		}
-	}
+export async function getNotificationLogs(
+	_notificationId: string,
+): Promise<LogResult<NotificationLog[]>> {
+	return { data: [], error: null }
+}
 
-	/**
-	 * Retrieves logs for a specific notification
-	 * @param {string} notificationId - ID of the notification to fetch logs for
-	 * @returns {Promise<NotificationLog[]>} Array of logs
-	 */
-	async getNotificationLogs(
-		notificationId: string,
-	): Promise<NotificationLog[]> {
-		try {
-			const supabase = supabaseNotificationLogs()
-			const { data, error } = await supabase
-				.from(NOTIFICATION_LOGS_TABLE)
-				.select('*')
-				.eq('notification_id', notificationId)
-				.order('created_at', { ascending: false })
-
-			if (error) throw error
-			return data || []
-		} catch (error) {
-			console.error('Failed to get notification logs:', error)
-			return []
-		}
-	}
-
-	/**
-	 * Retrieves error logs with pagination support
-	 * @param {number} [limit=100] - Maximum number of logs to retrieve
-	 * @param {number} [offset=0] - Number of logs to skip
-	 * @returns {Promise<NotificationLog[]>} Array of error logs
-	 */
-	async getErrorLogs(limit = 100, offset = 0): Promise<NotificationLog[]> {
-		try {
-			const supabase = supabaseNotificationLogs()
-			const { data, error } = await supabase
-				.from(NOTIFICATION_LOGS_TABLE)
-				.select('*')
-				.eq('level', 'error')
-				.order('created_at', { ascending: false })
-				.range(offset, offset + limit - 1)
-
-			if (error) throw error
-			return data || []
-		} catch (error) {
-			console.error('Failed to get error logs:', error)
-			return []
-		}
-	}
+export async function getRecentLogs(
+	_limit = 100,
+	_offset = 0,
+): Promise<LogResult<NotificationLog[]>> {
+	return { data: [], error: null }
 }

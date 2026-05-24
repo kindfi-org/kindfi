@@ -23,10 +23,9 @@ export function LoginComponent() {
 	const [email, setEmail] = useState('')
 	const { t } = useI18n()
 
-	const { isEmailInvalid, doesEmailExist, handleValidation, resetValidation } =
-		useFormValidation({
-			email: true,
-		})
+	const { isEmailInvalid, handleValidation, resetValidation } = useFormValidation({
+		email: true,
+	})
 
 	const {
 		isAuthenticating,
@@ -34,12 +33,14 @@ export function LoginComponent() {
 		authError,
 		handleAuth,
 		isNotRegistered,
+		reset,
 	} = useSmartAccountAuth(email)
 
 	const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
 		handleValidation(e as ChangeEvent<HTMLInputElement & { name: 'email' }>)
 		const emailValue = e.target.value.trim()
 		setEmail(emailValue)
+		reset()
 	}
 
 	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -117,10 +118,7 @@ export function LoginComponent() {
 									aria-required="true"
 									className={cn({
 										'border-red-500 outline-none ring-2 ring-red-500':
-											isEmailInvalid ||
-											(!isEmailInvalid && !doesEmailExist && email),
-										'border-green-500 outline-none ring-2 ring-green-500':
-											!isEmailInvalid && doesEmailExist,
+											isEmailInvalid,
 									})}
 								/>
 								{isEmailInvalid && (
@@ -130,22 +128,6 @@ export function LoginComponent() {
 										aria-live="assertive"
 									>
 										{t('auth.invalidEmail')}
-									</span>
-								)}
-								{!isEmailInvalid && !doesEmailExist && email && (
-									<span
-										className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
-										role="alert"
-										aria-live="polite"
-									>
-										{t('auth.accountNotRegistered')}{' '}
-										<Link
-											className="text-primary font-medium hover:underline"
-											href="/sign-up"
-										>
-											{t('auth.signUp')}
-										</Link>{' '}
-										{t('auth.first')}.
 									</span>
 								)}
 							</div>
@@ -158,9 +140,7 @@ export function LoginComponent() {
 							// formAction={signInAction}
 							aria-live="polite"
 							aria-busy={isAuthenticating}
-							disabled={
-								!email || !doesEmailExist || isAuthenticating || isEmailInvalid
-							}
+							disabled={!email || isAuthenticating || isEmailInvalid}
 						>
 							{isAuthenticating ? (
 								t('auth.authenticating')
