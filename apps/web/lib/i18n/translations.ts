@@ -93,20 +93,20 @@ export const translations = {
 
 		// Home Page
 		home: {
-			heroSubtitle: 'Connect. Support. See the Change.',
-			heroTitle: 'Where Blockchain Meets Real-',
+			heroEyebrow: 'Crowdfunding for LATAM NGOs',
+			heroPainStatement:
+				'NGOs across Latin America carry urgent, life-changing work on fragile funding. Donors want to help — but too often, they never know if their support truly arrives.',
+			heroTitle: 'Where Your Support Creates Real-',
 			heroWords: {
 				impact: 'Impact',
-				causes: 'Causes',
-				world: 'World',
-				support: 'Support',
+				change: 'Change',
+				hope: 'Hope',
+				results: 'Results',
 				trust: 'Trust',
-				adoption: 'Adoption',
-				needs: 'Needs',
+				progress: 'Progress',
 			},
-			heroDescription:
-				'KindFi is a platform that connects donors and social projects for real change. Built on secure blockchain technology, we make giving transparent, safe, and easy. With live progress updates so you know your support is making a difference. Start your campaign or find a cause to support today.',
 			supportedBy: 'Supported by',
+			builtUsing: 'Built with',
 			waitlistProject: 'Waitlist your project',
 			howItWorksTitle: 'Trust Built In. Impact Locked On',
 			howItWorksSubtitle:
@@ -184,9 +184,14 @@ export const translations = {
 				'Receive exclusive rewards like NFTs, tokens, or access to special activities as the projects you supported reach completion.',
 
 			// Highlighted Projects
-			highlightedProjectsTitle: 'Explore Real Causes',
+			highlightedProjectsEyebrow: 'Verified NGOs across Latin America',
+			highlightedProjectsTitle: 'Explore',
+			highlightedProjectsTitleHighlight: 'Real Causes',
 			highlightedProjectsSubtitle:
-				'From clean water and education to healthcare and child welfare, each project on KindFi represents a real-world AID opportunity to make a difference.',
+				'From clean water and education to healthcare and child welfare — every project here is verified, milestone-tracked, and waiting for someone who cares.',
+			highlightedProjectsTrustLine:
+				'Verified projects · Milestone funding · Progress you can follow',
+			highlightedProjectsBrowseLabel: 'Browse by cause',
 			failedToLoadProjects:
 				'Failed to load featured projects. Please try again later.',
 
@@ -686,6 +691,62 @@ export const translations = {
 			partners: 'Partners',
 		},
 
+		waitlist: {
+			stepLabel: 'Step',
+			stepOneTitle: 'Tell us about you',
+			stepOneDescription:
+				'Join the waitlist to launch your NGO campaign or stay close to new causes in LATAM.',
+			stepTwoTitle: 'About your cause',
+			stepTwoDescription:
+				'Share a few details about your project. You can skip this if you are joining as a supporter or partner.',
+			stepThreeTitle: 'Review and confirm',
+			stepThreeDescription:
+				'Check your details and confirm you want to hear from us about KindFi.',
+			successTitle: 'You are on the list',
+			successDescription:
+				'Thanks for your interest. We will reach out when KindFi opens new spots for NGOs and supporters in your region.',
+			reviewTitle: 'Your details',
+			fields: {
+				name: 'Full name',
+				namePlaceholder: 'Maria Lopez',
+				email: 'Email',
+				emailPlaceholder: 'you@example.com',
+				emailHint: 'Optional, but helps us follow up with you.',
+				role: 'I am joining as',
+				projectName: 'Project or NGO name',
+				projectNamePlaceholder: 'Agua Limpia en Lima',
+				projectDescription: 'What impact do you want to create?',
+				projectDescriptionPlaceholder:
+					'Briefly describe the community you serve and the change you are working toward.',
+				location: 'Location',
+				locationPlaceholder: 'City, Country',
+				source: 'How did you hear about KindFi?',
+				sourcePlaceholder: 'Friend, social media, event, etc.',
+			},
+			roles: {
+				projectCreator: 'NGO / Project',
+				projectCreatorDesc: 'I want to raise funds for a verified cause.',
+				supporter: 'Supporter',
+				supporterDesc: 'I want to discover and support LATAM NGOs.',
+				partner: 'Partner',
+				partnerDesc: 'I represent an organization exploring KindFi.',
+			},
+			consent:
+				'I agree to be contacted about KindFi updates and early access.',
+			actions: {
+				back: 'Back',
+				continue: 'Continue',
+				skip: 'Skip for now',
+				submit: 'Join waitlist',
+				submitting: 'Submitting...',
+				close: 'Close',
+			},
+			errors: {
+				submitFailed:
+					'We could not save your request. Please try again in a moment.',
+			},
+		},
+
 		// Footer
 		footer: {
 			description:
@@ -812,20 +873,20 @@ export const translations = {
 
 		// Home Page
 		home: {
-			heroSubtitle: 'Conecta. Apoya. Ve el Cambio.',
-			heroTitle: 'Donde Blockchain Conecta  ',
+			heroEyebrow: 'Donaciones para ONGs en LATAM',
+			heroPainStatement:
+				'Las ONGs en América Latina sostienen un trabajo urgente y transformador con recursos frágiles. Los donantes quieren ayudar — pero muchas veces nunca saben si su apoyo llega de verdad.',
+			heroTitle: 'Donde Tu Apoyo Genera ',
 			heroWords: {
-				impact: 'El Impacto',
-				causes: 'Las Causas',
-				world: 'El Mundo',
-				support: 'El Apoyo',
-				trust: 'La Confianza',
-				adoption: 'La Adopción',
-				needs: 'Las Necesidades',
+				impact: 'Impacto Real',
+				change: 'Cambio Real',
+				hope: 'Esperanza Real',
+				results: 'Resultados Reales',
+				trust: 'Confianza Real',
+				progress: 'Progreso Real',
 			},
-			heroDescription:
-				'KindFi es una plataforma que conecta donadores y proyectos sociales para un cambio real. Construida sobre tecnología blockchain segura, hacemos que dar sea transparente, seguro y fácil. Con actualizaciones de progreso en vivo para que sepas que tu apoyo está marcando la diferencia. Inicia tu campaña o encuentra una causa para apoyar hoy.',
 			supportedBy: 'Con el apoyo de',
+			builtUsing: 'Construido con',
 			waitlistProject: 'Registra tu proyecto',
 			howItWorksTitle:
 				'Confianza Integrada. Impacto Asegurado. Impulsado por Stellar',
@@ -904,9 +965,14 @@ export const translations = {
 				'Recibe recompensas exclusivas como NFTs, tokens o acceso a actividades especiales a medida que los proyectos que apoyaste alcanzan la finalización.',
 
 			// Highlighted Projects
-			highlightedProjectsTitle: 'Explorar Causas Reales',
+			highlightedProjectsEyebrow: 'ONGs verificadas en América Latina',
+			highlightedProjectsTitle: 'Explora',
+			highlightedProjectsTitleHighlight: 'Causas Reales',
 			highlightedProjectsSubtitle:
-				'Desde agua potable y educación hasta atención médica y bienestar infantil, cada proyecto en KindFi representa una oportunidad real de AYUDA para marcar la diferencia.',
+				'Desde agua potable y educación hasta salud y bienestar infantil — cada proyecto aquí está verificado, con hitos claros, y esperando a alguien que se preocupe de verdad.',
+			highlightedProjectsTrustLine:
+				'Proyectos verificados · Fondos por hitos · Progreso que puedes seguir',
+			highlightedProjectsBrowseLabel: 'Explorar por causa',
 			failedToLoadProjects:
 				'Error al cargar proyectos destacados. Por favor, inténtalo de nuevo más tarde.',
 
@@ -1409,6 +1475,62 @@ export const translations = {
 			values: 'Nuestros Valores',
 			team: 'Nuestro Equipo',
 			partners: 'Socios',
+		},
+
+		waitlist: {
+			stepLabel: 'Paso',
+			stepOneTitle: 'Cuéntanos sobre ti',
+			stepOneDescription:
+				'Únete a la lista de espera para lanzar tu campaña de ONG o mantente cerca de nuevas causas en LATAM.',
+			stepTwoTitle: 'Sobre tu causa',
+			stepTwoDescription:
+				'Comparte algunos detalles de tu proyecto. Puedes omitir esto si te unes como partidario o aliado.',
+			stepThreeTitle: 'Revisa y confirma',
+			stepThreeDescription:
+				'Verifica tus datos y confirma que deseas recibir novedades de KindFi.',
+			successTitle: 'Ya estás en la lista',
+			successDescription:
+				'Gracias por tu interés. Te contactaremos cuando KindFi abra nuevos cupos para ONGs y partidarios en tu región.',
+			reviewTitle: 'Tus datos',
+			fields: {
+				name: 'Nombre completo',
+				namePlaceholder: 'Maria Lopez',
+				email: 'Correo electrónico',
+				emailPlaceholder: 'tu@ejemplo.com',
+				emailHint: 'Opcional, pero nos ayuda a dar seguimiento.',
+				role: 'Me uno como',
+				projectName: 'Nombre del proyecto u ONG',
+				projectNamePlaceholder: 'Agua Limpia en Lima',
+				projectDescription: '¿Qué impacto quieres crear?',
+				projectDescriptionPlaceholder:
+					'Describe brevemente a la comunidad que apoyas y el cambio que buscas.',
+				location: 'Ubicación',
+				locationPlaceholder: 'Ciudad, País',
+				source: '¿Cómo conociste KindFi?',
+				sourcePlaceholder: 'Amigo, redes sociales, evento, etc.',
+			},
+			roles: {
+				projectCreator: 'ONG / Proyecto',
+				projectCreatorDesc: 'Quiero recaudar fondos para una causa verificada.',
+				supporter: 'Partidario',
+				supporterDesc: 'Quiero descubrir y apoyar ONGs en LATAM.',
+				partner: 'Aliado',
+				partnerDesc: 'Represento una organización que explora KindFi.',
+			},
+			consent:
+				'Acepto ser contactado sobre novedades y acceso anticipado a KindFi.',
+			actions: {
+				back: 'Atrás',
+				continue: 'Continuar',
+				skip: 'Omitir por ahora',
+				submit: 'Unirme a la lista',
+				submitting: 'Enviando...',
+				close: 'Cerrar',
+			},
+			errors: {
+				submitFailed:
+					'No pudimos guardar tu solicitud. Por favor, inténtalo de nuevo.',
+			},
 		},
 
 		// Footer
