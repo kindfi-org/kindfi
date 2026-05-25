@@ -3,7 +3,7 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
 	ProjectCardGrid,
 	ProjectCardList,
@@ -44,7 +44,10 @@ export function ProjectsClientWrapper() {
 	const { t } = useI18n()
 	const reducedMotion = useReducedMotion()
 	const categoryParams = searchParams.getAll('category')
+	const categoryFilterKey = categoryParams.join(',')
 	const sortParam = searchParams.get('sort') ?? 'most-popular'
+	const selectedCategories = categoryParams
+	const sortOption = sortSlugToOption(sortParam)
 
 	const {
 		data: projects = [],
@@ -54,7 +57,7 @@ export function ProjectsClientWrapper() {
 		'projects',
 		(client) => getAllProjects(client, categoryParams, sortParam),
 		{
-			additionalKeyValues: [categoryParams, sortParam],
+			additionalKeyValues: [categoryFilterKey, sortParam],
 		},
 	)
 
@@ -67,24 +70,12 @@ export function ProjectsClientWrapper() {
 		gcTime: 1000 * 60 * 60,
 	})
 
-	const [selectedCategories, setSelectedCategories] = useState<string[]>(categoryParams)
-	const [sortOption, setSortOption] = useState<SortOption>(sortSlugToOption(sortParam))
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-
-	useEffect(() => {
-		setSelectedCategories(categoryParams)
-	}, [categoryParams])
-
-	useEffect(() => {
-		setSortOption(sortSlugToOption(sortParam))
-	}, [sortParam])
 
 	const handleCategoryToggle = (categorySlug: string) => {
 		const next = selectedCategories.includes(categorySlug)
 			? selectedCategories.filter((slug) => slug !== categorySlug)
 			: [...selectedCategories, categorySlug]
-
-		setSelectedCategories(next)
 
 		const params = new URLSearchParams(searchParams.toString())
 		params.delete('category')
@@ -95,14 +86,12 @@ export function ProjectsClientWrapper() {
 	}
 
 	const handleResetCategories = () => {
-		setSelectedCategories([])
 		const params = new URLSearchParams(searchParams.toString())
 		params.delete('category')
 		router.push(`?${params.toString()}`, { scroll: false })
 	}
 
 	const handleSortChange = (newSort: SortOption) => {
-		setSortOption(newSort)
 		const params = new URLSearchParams(searchParams.toString())
 		params.set('sort', newSort.toLowerCase().replace(/ /g, '-'))
 		router.push(`?${params.toString()}`, { scroll: false })

@@ -1,7 +1,6 @@
 'use client'
 
 import type { Tables } from '@services/supabase'
-import { motion, useReducedMotion } from 'framer-motion'
 
 import { cn } from '~/lib/utils'
 import { categoryIcons } from '~/lib/utils/category-icons'
@@ -24,22 +23,20 @@ export function CategoryBadge({
 }: CategoryBadgeProps) {
 	const Icon = categoryIcons[category.name]
 	const isInteractive = !!onClick
-	const reducedMotion = useReducedMotion()
 
 	const textColor = getContrastTextColor(category.color)
 
 	return (
-		<motion.button
+		<button
 			type="button"
-			whileHover={reducedMotion ? undefined : { scale: isInteractive ? 1.05 : 1 }}
-			whileTap={reducedMotion ? undefined : { scale: isInteractive ? 0.95 : 1 }}
 			onClick={onClick}
 			className={cn(
-				'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors max-w-full',
+				'inline-flex max-w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-[transform,colors]',
+				isInteractive && 'cursor-pointer hover:scale-105 active:scale-95',
 				selected
 					? `${textColor} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2`
-					: 'text-gray-700 bg-white border hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-				isInteractive ? 'cursor-pointer' : 'cursor-default',
+					: 'border bg-white text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+				!isInteractive && 'cursor-default',
 				className,
 			)}
 			style={{
@@ -68,6 +65,6 @@ export function CategoryBadge({
 			>
 				{category.name}
 			</span>
-		</motion.button>
+		</button>
 	)
 }

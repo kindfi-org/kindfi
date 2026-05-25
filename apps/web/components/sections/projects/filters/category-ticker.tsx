@@ -2,7 +2,7 @@
 
 import type { Tables } from '@services/supabase'
 import { Heart, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '~/components/base/button'
 import { CategoryBadge } from '~/components/sections/projects/shared'
 import useReducedMotion from '~/hooks/use-reduced-motion'
@@ -29,6 +29,11 @@ export function CategoryTicker({
 	const { t } = useI18n()
 	const prefersReducedMotion = useReducedMotion()
 	const [isPaused, setIsPaused] = useState(false)
+	const [isMounted, setIsMounted] = useState(false)
+
+	useEffect(() => {
+		setIsMounted(true)
+	}, [])
 
 	const tickerCategories = useMemo(
 		() => categories.filter((category) => Boolean(category.slug)),
@@ -37,7 +42,9 @@ export function CategoryTicker({
 
 	const hasSelection = selectedCategories.length > 0
 	const shouldMarquee =
-		!prefersReducedMotion && tickerCategories.length > 4
+		isMounted &&
+		!prefersReducedMotion &&
+		tickerCategories.length > 4
 
 	return (
 		<div
