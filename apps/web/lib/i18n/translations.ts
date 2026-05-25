@@ -297,8 +297,34 @@ export const translations = {
 		projects: {
 			title: 'Social Projects',
 			subtitle: 'Discover and support verified projects making real impact',
-			pageTitle: 'Causes that change lives',
-			pageSubtitle: 'Your support can make a lasting impact.',
+			pageEyebrow: 'Explore causes',
+			pageTitle: 'Causes that',
+			pageTitleHighlight: 'change lives',
+			pageSubtitle:
+				'Discover verified social impact campaigns, filter by category, and support causes secured on-chain with Trustless Work escrow.',
+			pageTrustLine: 'Verified campaigns · On-chain escrow · Transparent impact',
+			browseCauses: 'Browse causes',
+			statTotalCauses: 'Causes listed',
+			statAcceptingDonations: 'Accepting donations',
+			statCategories: 'Categories',
+			statsAriaLabel: 'Projects overview statistics',
+			categoryTickerMessage: 'What cause speaks to your heart?',
+			categoryTickerSubline:
+				'Explore verified campaigns making real impact — tap a category to begin.',
+			categoryTickerFiltering: 'You are exploring the causes you selected',
+			categoryTickerFilteringHint:
+				'Keep browsing or clear filters to see every campaign again.',
+			noCategories: 'No categories available yet',
+			filterHint: 'Tap one or more categories to narrow the list.',
+			resultsCountOne: '{count} cause found',
+			resultsCountMany: '{count} causes found',
+			emptyDescription:
+				'There are no projects available at the moment. Start a campaign or check back soon.',
+			emptyFilteredDescription:
+				'No projects match your selected categories. Try clearing filters or choosing different categories.',
+			acceptingDonations: 'Accepting donations',
+			explore: 'Explore',
+			minDonation: 'Min. donation',
 			createNew: 'Create New Project',
 			noProjects: 'No projects found',
 			viewProject: 'View Project',
@@ -560,6 +586,11 @@ export const translations = {
 			copyAddress: 'Copy address',
 			disconnect: 'Disconnect',
 			connectExternalWallet: 'Connect external wallet',
+			trustlessWalletRequired: 'External wallet required for escrow',
+			trustlessWalletRequiredDescription:
+				'Trustless Work escrow actions (create, fund, release, milestones) must be signed with an external Stellar wallet (G-address). Smart accounts are not supported yet.',
+			externalWalletTrustlessNote:
+				'Required for Trustless Work: donations, escrow funding, milestones, and releases.',
 			addressCopied: 'Address copied',
 			addressCopyFailed: 'Failed to copy address',
 			walletDisconnected: 'External wallet disconnected',
@@ -1198,8 +1229,34 @@ export const translations = {
 			title: 'Proyectos Sociales',
 			subtitle:
 				'Descubre y apoya proyectos verificados que generan impacto real',
-			pageTitle: 'Causas que cambian vidas',
-			pageSubtitle: 'Tu apoyo puede marcar la diferencia.',
+			pageEyebrow: 'Explorar causas',
+			pageTitle: 'Causas que',
+			pageTitleHighlight: 'cambian vidas',
+			pageSubtitle:
+				'Descubre campañas de impacto social verificadas, filtra por categoría y apoya causas aseguradas on-chain con escrow de Trustless Work.',
+			pageTrustLine: 'Campañas verificadas · Escrow on-chain · Impacto transparente',
+			browseCauses: 'Explorar causas',
+			statTotalCauses: 'Causas listadas',
+			statAcceptingDonations: 'Aceptan donaciones',
+			statCategories: 'Categorías',
+			statsAriaLabel: 'Estadísticas generales de proyectos',
+			categoryTickerMessage: '¿Qué causa te mueve el corazón?',
+			categoryTickerSubline:
+				'Explora campañas verificadas con impacto real — toca una categoría para empezar.',
+			categoryTickerFiltering: 'Estás explorando las causas que elegiste',
+			categoryTickerFilteringHint:
+				'Sigue navegando o limpia los filtros para ver todas las campañas.',
+			noCategories: 'Aún no hay categorías disponibles',
+			filterHint: 'Toca una o más categorías para acotar la lista.',
+			resultsCountOne: '{count} causa encontrada',
+			resultsCountMany: '{count} causas encontradas',
+			emptyDescription:
+				'No hay proyectos disponibles por ahora. Crea una campaña o vuelve pronto.',
+			emptyFilteredDescription:
+				'Ningún proyecto coincide con las categorías seleccionadas. Prueba limpiar filtros o elegir otras categorías.',
+			acceptingDonations: 'Acepta donaciones',
+			explore: 'Explorar',
+			minDonation: 'Donación mín.',
 			createNew: 'Crear Nuevo Proyecto',
 			noProjects: 'No se encontraron proyectos',
 			viewProject: 'Ver Proyecto',
@@ -1466,6 +1523,11 @@ export const translations = {
 			copyAddress: 'Copiar dirección',
 			disconnect: 'Desconectar',
 			connectExternalWallet: 'Conectar billetera externa',
+			trustlessWalletRequired: 'Billetera externa requerida para escrow',
+			trustlessWalletRequiredDescription:
+				'Las acciones de escrow en Trustless Work (crear, fondear, liberar, hitos) deben firmarse con una billetera Stellar externa (dirección G). Las cuentas inteligentes aún no están soportadas.',
+			externalWalletTrustlessNote:
+				'Requerida para Trustless Work: donaciones, fondeo de escrow, hitos y liberaciones.',
 			addressCopied: 'Dirección copiada',
 			addressCopyFailed: 'No se pudo copiar la dirección',
 			walletDisconnected: 'Billetera externa desconectada',

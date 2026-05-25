@@ -108,10 +108,9 @@ export function SocialLinksSection() {
 										}}
 										onKeyDown={handleKeyDown}
 										className={cn(
-											'h-11 border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500 flex-1',
-											linkError
-												? 'border-destructive focus-visible:border-destructive focus-visible:ring-destructive'
-												: '',
+											'flex-1',
+											linkError &&
+												'border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20',
 										)}
 										aria-label="Social media URL"
 									/>

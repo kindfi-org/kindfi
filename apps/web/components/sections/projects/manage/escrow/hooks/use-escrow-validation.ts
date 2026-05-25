@@ -1,5 +1,9 @@
 import { useMemo } from 'react'
+import { isExternalStellarWalletAddress } from '~/lib/utils/escrow/trustless-signer'
 import type { EscrowFormData } from '../types'
+
+const isValidTrustlessRoleAddress = (value: string) =>
+	isExternalStellarWalletAddress(value.trim())
 
 export function useEscrowValidation(
 	formData: EscrowFormData,
@@ -27,11 +31,11 @@ export function useEscrowValidation(
 			title.trim().length > 0 &&
 			(engagementId || `project-${projectId}`).trim().length > 0 &&
 			trustlineAddress.trim().length > 0 &&
-			approver.trim().length > 0 &&
-			serviceProvider.trim().length > 0 &&
-			releaseSigner.trim().length > 0 &&
-			disputeResolver.trim().length > 0 &&
-			platformAddress.trim().length > 0 &&
+			isValidTrustlessRoleAddress(approver) &&
+			isValidTrustlessRoleAddress(serviceProvider) &&
+			isValidTrustlessRoleAddress(releaseSigner) &&
+			isValidTrustlessRoleAddress(disputeResolver) &&
+			isValidTrustlessRoleAddress(platformAddress) &&
 			typeof platformFee === 'number' &&
 			Number.isFinite(platformFee) &&
 			description.trim().length > 0 &&
@@ -40,7 +44,7 @@ export function useEscrowValidation(
 		if (selectedEscrowType === 'single-release') {
 			return (
 				baseValid &&
-				receiver.trim().length > 0 &&
+				isValidTrustlessRoleAddress(receiver) &&
 				typeof amount === 'number' &&
 				Number.isFinite(amount)
 			)
@@ -54,7 +58,7 @@ export function useEscrowValidation(
 						typeof m.amount === 'number' &&
 						Number.isFinite(m.amount) &&
 						m.amount > 0 &&
-						m.receiver.trim().length > 0
+						isValidTrustlessRoleAddress(m.receiver)
 					)
 				}
 				return false

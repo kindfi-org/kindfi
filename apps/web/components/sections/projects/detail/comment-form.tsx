@@ -90,7 +90,7 @@ export function CommentForm({
 												{...field}
 												placeholder={placeholder}
 												className={clsx(
-													'resize-none min-h-[80px] border-green-600',
+													'resize-none min-h-[80px]',
 													{
 														'border-red-500 focus-visible:ring-red-500':
 															isOverLimit,

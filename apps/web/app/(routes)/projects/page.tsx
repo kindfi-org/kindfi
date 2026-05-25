@@ -6,7 +6,7 @@ import {
 	QueryClient,
 } from '@tanstack/react-query'
 import { ProjectsClientWrapper } from '~/components/sections/projects/projects-client-wrapper'
-import { ProjectsHeader } from '~/components/sections/projects/projects-header'
+import { ProjectsHero } from '~/components/sections/projects/projects-hero'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
 
 export const metadata: Metadata = {
@@ -30,7 +30,6 @@ export default async function ProjectsPage({
 			? [category]
 			: []
 
-	// Prefetch projects and categories in parallel (async-parallel)
 	await Promise.all([
 		prefetchSupabaseQuery(
 			queryClient,
@@ -44,14 +43,9 @@ export default async function ProjectsPage({
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<main
-			className="container mx-auto p-4 md:p-12"
-			aria-label="Explore projects"
-		>
-			<ProjectsHeader />
-			<HydrationBoundary state={dehydratedState}>
-				<ProjectsClientWrapper />
-			</HydrationBoundary>
-		</main>
+		<HydrationBoundary state={dehydratedState}>
+			<ProjectsHero categorySlugs={categorySlugs} sortSlug={sortSlug} />
+			<ProjectsClientWrapper />
+		</HydrationBoundary>
 	)
 }

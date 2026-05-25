@@ -54,7 +54,7 @@ export function RoleSelect({
 					aria-haspopup="listbox"
 					aria-expanded={open}
 					aria-controls={open ? listboxId : undefined}
-					className={cn('justify-between bg-white border-green-600', className)}
+					className={cn('justify-between', className)}
 					disabled={disabled}
 				>
 					{role ? (
@@ -70,7 +70,7 @@ export function RoleSelect({
 				className="w-[--radix-popover-trigger-width] p-0"
 				align="start"
 			>
-				<Command id={listboxId} className="bg-white" role="listbox">
+				<Command id={listboxId}  role="listbox">
 					<CommandEmpty>No role found.</CommandEmpty>
 					<CommandList>
 						<CommandGroup>

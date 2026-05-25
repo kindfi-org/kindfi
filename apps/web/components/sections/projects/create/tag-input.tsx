@@ -181,7 +181,7 @@ export function TagInput({
 						value={newTag}
 						onChange={(e) => setNewTag(e.target.value)}
 						onKeyDown={handleKeyPress}
-						className="pr-12 border-green-600 bg-white"
+						className="pr-12"
 						aria-label="Add tag"
 						maxLength={20}
 					/>

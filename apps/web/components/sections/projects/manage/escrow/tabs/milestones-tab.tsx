@@ -26,7 +26,7 @@ import {
 	SelectValue,
 } from '~/components/base/select'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import {
 	getMilestoneStatus,
 	isSingleReleaseMilestone,
@@ -49,22 +49,16 @@ export function MilestonesTab({
 }: MilestonesTabProps) {
 	const { approveMilestone, changeMilestoneStatus, sendTransaction } =
 		useEscrow()
-	const { isConnected, connect, address, signTransaction } = useWallet()
+	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState('0')
 	const [milestoneStatus, setMilestoneStatus] = useState('approved')
 	const [milestoneEvidence, setMilestoneEvidence] = useState('')
 	const [isProcessing, setIsProcessing] = useState(false)
 
-	const ensureWallet = async () => {
-		if (!isConnected) await connect()
-		if (!address) throw new Error('Wallet address missing')
-		return address
-	}
-
 	const handleApproveMilestone = async () => {
 		try {
 			setIsProcessing(true)
-			const signer = await ensureWallet()
+			const signer = await ensureTrustlessSigner()
 
 			const approveResponse = await approveMilestone(
 				{
@@ -82,7 +76,7 @@ export function MilestonesTab({
 				throw new Error('Failed to prepare approval transaction')
 			}
 
-			const signedXdr = await signTransaction(
+			const signedXdr = await signTrustlessTransaction(
 				approveResponse.unsignedTransaction,
 			)
 			const sendResult = await sendTransaction(signedXdr)
@@ -105,7 +99,7 @@ export function MilestonesTab({
 	const handleChangeMilestoneStatus = async () => {
 		try {
 			setIsProcessing(true)
-			const signer = await ensureWallet()
+			const signer = await ensureTrustlessSigner()
 
 			const changeResponse = await changeMilestoneStatus(
 				{
@@ -125,7 +119,7 @@ export function MilestonesTab({
 				throw new Error('Failed to prepare status change transaction')
 			}
 
-			const signedXdr = await signTransaction(
+			const signedXdr = await signTrustlessTransaction(
 				changeResponse.unsignedTransaction,
 			)
 			const sendResult = await sendTransaction(signedXdr)

@@ -86,7 +86,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 			transition={{ duration: 0.5 }}
 		>
 			<div className="max-w-2xl mx-auto">
-				<Card className="bg-white">
+				<Card >
 					<CardContent>
 						<Form {...form}>
 							<form
@@ -106,7 +106,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 											<FormControl>
 												<Input
 													placeholder="Enter your project title"
-													className="bg-white border-green-600"
+													
 													{...field}
 												/>
 											</FormControl>
@@ -127,7 +127,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 											<FormControl>
 												<Textarea
 													placeholder="Describe your project in a few sentences"
-													className="min-h-[120px] border-green-600 bg-white"
+													className="min-h-[120px]"
 													{...field}
 												/>
 											</FormControl>
@@ -157,7 +157,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 														<Input
 															type="number"
 															placeholder="50000"
-															className="bg-white border-green-600 pl-7"
+															className=" pl-7"
 															value={field.value ?? ''}
 															onChange={(e) =>
 																field.onChange(
@@ -194,7 +194,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 														<Input
 															type="number"
 															placeholder="100"
-															className="bg-white border-green-600 pl-7"
+															className=" pl-7"
 															value={field.value ?? ''}
 															onChange={(e) =>
 																field.onChange(
@@ -223,7 +223,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 												<Input
 													type="url"
 													placeholder="https://yourproject.com"
-													className="bg-white border-green-600"
+													
 													value={field.value ?? ''}
 													onChange={(e) => field.onChange(e.target.value)}
 												/>

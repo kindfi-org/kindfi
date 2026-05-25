@@ -3,6 +3,7 @@
 import { Plus } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { TooltipProvider } from '~/components/base/tooltip'
+import { TrustlessExternalWalletBanner } from './components/trustless-external-wallet-banner'
 import { EscrowBasicFields } from './components/escrow-basic-fields'
 import { EscrowMilestones } from './components/escrow-milestones'
 import { EscrowRoleFields } from './components/escrow-role-fields'
@@ -34,6 +35,7 @@ export function EscrowAdminPanelContent({
 	return (
 		<div className="space-y-8">
 			<h1 className="text-2xl font-bold">Escrow Admin</h1>
+			<TrustlessExternalWalletBanner />
 			<TooltipProvider>
 				<div className="space-y-6">
 					<div className="space-y-2">

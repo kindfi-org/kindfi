@@ -5,6 +5,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { signAndSubmitSchema } from '~/lib/schemas/escrow-sign.schemas'
+import { isSmartAccountAddress } from '~/lib/utils/escrow/trustless-signer'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -34,6 +35,26 @@ export async function POST(req: NextRequest) {
 			return validation.response
 		}
 		const { unsignedTransactionXDR, userDevice } = validation.data
+
+		if (isSmartAccountAddress(userDevice.address)) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.sign_and_submit',
+				resourceType: 'escrow',
+				status: 'validation_error',
+				durationMs: Date.now() - startTime,
+				metadata: {
+					reason: 'smart_account_not_supported_for_trustless',
+				},
+			})
+			return NextResponse.json(
+				{
+					error:
+						'Smart accounts cannot sign Trustless Work escrow transactions. Connect an external Stellar wallet (G-address).',
+				},
+				{ status: 400 },
+			)
+		}
 
 		// Parse the unsigned transaction
 		const transaction = TransactionBuilder.fromXDR(

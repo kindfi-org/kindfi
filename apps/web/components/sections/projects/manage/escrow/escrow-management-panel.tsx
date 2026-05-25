@@ -21,6 +21,7 @@ import {
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
+import { TrustlessExternalWalletBanner } from './components/trustless-external-wallet-banner'
 import { EscrowDetailsCard } from './components/escrow-details-card'
 import { MilestonesOverviewCard } from './components/milestones-overview-card'
 import { RolesCard } from './components/roles-card'
@@ -68,6 +69,7 @@ export function EscrowManagementPanel({
 
 	return (
 		<div className="space-y-6">
+			<TrustlessExternalWalletBanner />
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>

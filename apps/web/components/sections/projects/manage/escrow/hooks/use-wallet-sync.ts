@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { isExternalStellarWalletAddress } from '~/lib/utils/escrow/trustless-signer'
 import { useEscrowForm } from '../context/escrow-form-context'
 
 /**
@@ -27,9 +28,9 @@ export function useWalletSync() {
 			setField('description', suggestedDescription)
 	}, [suggestedDescription, formData.description, setField])
 
-	// Sync wallet address into empty role fields
+	// Sync external wallet (G-address) into empty role fields
 	useEffect(() => {
-		if (!address) return
+		if (!isExternalStellarWalletAddress(address)) return
 		if (!formData.approver.trim()) setField('approver', address)
 		if (!formData.serviceProvider.trim()) setField('serviceProvider', address)
 		if (!formData.releaseSigner.trim()) setField('releaseSigner', address)
@@ -53,7 +54,7 @@ export function useWalletSync() {
 		.join('|')
 
 	useEffect(() => {
-		if (!address || formData.selectedEscrowType !== 'multi-release') return
+		if (!isExternalStellarWalletAddress(address) || formData.selectedEscrowType !== 'multi-release') return
 		const updated = formData.milestones.map((m) => {
 			if ('receiver' in m && !m.receiver.trim())
 				return { ...m, receiver: address }

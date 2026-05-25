@@ -199,7 +199,7 @@ export function QuestionCard({
 															onReplyChange(answer.id, e.target.value)
 														}
 														placeholder="Write a reply..."
-														className="min-h-16 text-sm w-full bg-gray-50"
+														className="min-h-16 w-full text-sm"
 													/>
 													<div className="flex justify-end gap-2 mt-2">
 														<Button
@@ -213,7 +213,7 @@ export function QuestionCard({
 														</Button>
 														<Button
 															size="sm"
-															className="bg-blue-500 hover:bg-blue-600 text-white text-xs"
+															className="gradient-btn rounded-full text-xs text-white"
 															onClick={() => onSubmitReply(answer.id)}
 															disabled={
 																!replyContent[answer.id]?.trim() ||
@@ -247,18 +247,20 @@ export function QuestionCard({
 						)}
 
 						{effectiveUser && (
-							<div className="answer-form w-full border p-4 rounded-md bg-gray-50">
-								<h4 className="text-base font-medium mb-2">Add Your Answer</h4>
+							<div className="answer-form w-full rounded-xl border border-slate-200 bg-[#fafbfc] p-4">
+								<h4 className="mb-2 text-base font-medium text-slate-900">
+									Add Your Answer
+								</h4>
 								<Textarea
 									value={replyContent[question.id] || ''}
 									onChange={(e) => onReplyChange(question.id, e.target.value)}
 									placeholder="Write your answer here..."
-									className="min-h-20 text-sm w-full bg-white mb-2"
+									className="mb-2 min-h-20 w-full text-sm"
 								/>
-								<div className="flex justify-end mt-2">
+								<div className="mt-2 flex justify-end">
 									<Button
 										size="sm"
-										className="bg-blue-500 hover:bg-blue-600 text-white"
+										className="gradient-btn rounded-full text-white"
 										onClick={() => onSubmitAnswer(question.id)}
 										disabled={
 											!replyContent[question.id]?.trim() ||

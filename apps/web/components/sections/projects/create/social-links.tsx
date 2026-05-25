@@ -59,10 +59,10 @@ export function SocialLinks({ value, onChange, error }: SocialLinksProps) {
 						}}
 						onKeyDown={handleKeyDown}
 						className={cn(
-							'bg-white',
+							'',
 							linkError
 								? 'border-red-500 focus-visible:ring-red-500 focus-visible:ring-offset-2'
-								: 'border-green-600',
+								: '',
 						)}
 						aria-label="Add social link"
 					/>

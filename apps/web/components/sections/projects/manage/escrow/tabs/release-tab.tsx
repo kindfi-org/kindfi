@@ -25,7 +25,7 @@ import {
 	SelectValue,
 } from '~/components/base/select'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 
 interface ReleaseTabProps {
 	escrowContractAddress: string
@@ -41,22 +41,16 @@ export function ReleaseTab({
 	onSuccess,
 }: ReleaseTabProps) {
 	const { releaseFunds, sendTransaction } = useEscrow()
-	const { isConnected, connect, address, signTransaction } = useWallet()
+	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState('0')
 	const [isProcessing, setIsProcessing] = useState(false)
 
 	const isSingleRelease = escrowType === 'single-release'
 
-	const ensureWallet = async () => {
-		if (!isConnected) await connect()
-		if (!address) throw new Error('Wallet address missing')
-		return address
-	}
-
 	const handleReleaseFunds = async () => {
 		try {
 			setIsProcessing(true)
-			const signer = await ensureWallet()
+			const signer = await ensureTrustlessSigner()
 
 			const releaseResponse = await releaseFunds(
 				isSingleRelease
@@ -79,7 +73,7 @@ export function ReleaseTab({
 				throw new Error('Failed to prepare release transaction')
 			}
 
-			const signedXdr = await signTransaction(
+			const signedXdr = await signTrustlessTransaction(
 				releaseResponse.unsignedTransaction,
 			)
 			const sendResult = await sendTransaction(signedXdr)

@@ -130,17 +130,25 @@ export function WalletCard({
 									</Button>
 								) : null}
 							</div>
+							<p className="text-xs text-muted-foreground">
+								{t('profile.externalWalletTrustlessNote')}
+							</p>
 						</div>
 					) : (
-						<Button
-							onClick={onConnectExternal}
-							variant="outline"
-							className="w-full rounded-full"
-							size="sm"
-						>
-							<Link2 className="mr-2 h-4 w-4" />
-							{t('profile.connectExternalWallet')}
-						</Button>
+						<div className="space-y-3">
+							<Button
+								onClick={onConnectExternal}
+								variant="outline"
+								className="w-full rounded-full"
+								size="sm"
+							>
+								<Link2 className="mr-2 h-4 w-4" />
+								{t('profile.connectExternalWallet')}
+							</Button>
+							<p className="text-xs text-muted-foreground">
+								{t('profile.externalWalletTrustlessNote')}
+							</p>
+						</div>
 					)}
 				</div>
 			</div>

@@ -5,10 +5,11 @@ import { useEffect, useState } from 'react'
 import { resetPasswordAction } from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
-import { Label } from '~/components/base/label'
 import { FormMessage, type Message } from '~/components/form-message'
-import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { FormFieldGroup } from '~/components/shared/form/form-field-group'
+import { FormShell } from '~/components/shared/form/form-shell'
+import { formLayoutClasses } from '~/lib/form/form-styles'
 
 export default function ResetPassword(props: {
 	searchParams: Promise<Message>
@@ -16,7 +17,6 @@ export default function ResetPassword(props: {
 	const [message, setMessage] = useState<Message | null>(null)
 
 	useEffect(() => {
-		// Resolve the promise when component mounts
 		const fetchMessage = async () => {
 			try {
 				const result = await props.searchParams
@@ -31,49 +31,50 @@ export default function ResetPassword(props: {
 
 	return (
 		<AuthLayout>
-			<AuthForm
-				title="Restablecer contraseña"
-				subtitle="Por favor, ingresa tu nueva contraseña a continuación."
+			<FormShell
+				title="Reset password"
+				subtitle="Enter your new password below."
+				footer={
+					<div className="w-full text-center text-sm text-muted-foreground">
+						<Link href="/sign-in" className="font-medium text-primary hover:underline">
+							Back to sign in
+						</Link>
+					</div>
+				}
 			>
-				<form className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="password">New Password</Label>
+				<form className={formLayoutClasses.stack}>
+					<FormFieldGroup id="password" label="New password" required>
 						<Input
 							id="password"
 							type="password"
 							name="password"
-							placeholder="Ingresa tu nueva contraseña"
+							placeholder="Enter your new password"
 							required
+							autoComplete="new-password"
 						/>
-					</div>
+					</FormFieldGroup>
 
-					<div className="space-y-2">
-						<Label htmlFor="confirmPassword">Repeat password</Label>
+					<FormFieldGroup id="confirmPassword" label="Confirm password" required>
 						<Input
 							id="confirmPassword"
 							type="password"
 							name="confirmPassword"
-							placeholder="Confirma tu nueva contraseña"
+							placeholder="Confirm your new password"
 							required
+							autoComplete="new-password"
 						/>
-					</div>
+					</FormFieldGroup>
 
-					<Button className="w-full" formAction={resetPasswordAction}>
+					<Button
+						className="gradient-btn w-full text-white"
+						formAction={resetPasswordAction}
+					>
 						Update Password
 					</Button>
 
-					{message && <FormMessage message={message} />}
+					{message ? <FormMessage message={message} /> : null}
 				</form>
-
-				<div className="mt-4 text-center">
-					<Link
-						href="/sign-in"
-						className="text-sm text-primary hover:underline"
-					>
-						Back to home
-					</Link>
-				</div>
-			</AuthForm>
+			</FormShell>
 		</AuthLayout>
 	)
 }

@@ -43,8 +43,8 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
 			<DropdownMenuTrigger asChild>
 				<Button
 					variant="outline"
-					className="flex items-center gap-2 gradient-border-btn"
-					aria-label="Sort projects"
+					className="flex items-center gap-2 rounded-full border-slate-200 bg-white px-4"
+					aria-label={t('projects.sort')}
 					aria-haspopup="listbox"
 				>
 					{selectedOption?.icon}
@@ -54,13 +54,13 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
 				align="end"
-				className="w-[--radix-dropdown-menu-trigger-width] gradient-border-btn"
+				className="w-[--radix-dropdown-menu-trigger-width] rounded-xl border-slate-200"
 			>
 				{sortOptions.map((option) => (
 					<DropdownMenuItem
 						key={option.value}
 						onClick={() => onChange(option.value)}
-						className="flex items-center cursor-pointer focus:bg-green-100 focus:text-primary"
+						className="flex cursor-pointer items-center focus:bg-emerald-50 focus:text-emerald-900"
 						aria-selected={option.value === value}
 					>
 						{option.icon}

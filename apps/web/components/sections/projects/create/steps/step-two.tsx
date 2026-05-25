@@ -63,7 +63,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 			exit={{ opacity: 0, x: -50 }}
 			transition={{ duration: 0.3 }}
 		>
-			<Card className="bg-white">
+			<Card >
 				<CardContent className="pt-6">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -100,7 +100,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 										<FormControl>
 											<Input
 												type="url"
-												className="border-green-600 bg-white"
+												
 												placeholder="https://yourproject.com"
 												value={field.value ?? ''}
 												onChange={(e) => field.onChange(e.target.value)}
@@ -136,7 +136,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 									type="button"
 									variant="outline"
 									onClick={handlePrevious}
-									className="flex items-center gap-2 gradient-border-btn bg-white"
+									className="flex items-center gap-2 gradient-border-btn"
 								>
 									<ChevronLeft className="h-4 w-4" />
 									Previous

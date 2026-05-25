@@ -4,20 +4,16 @@ import { Fingerprint } from 'lucide-react'
 import Link from 'next/link'
 import { type ChangeEvent, useState } from 'react'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-} from '~/components/base/card'
 import { Input } from '~/components/base/input'
-import { Label } from '~/components/base/label'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { FormAlert } from '~/components/shared/form/form-alert'
+import { FormFieldGroup } from '~/components/shared/form/form-field-group'
+import { FormShell } from '~/components/shared/form/form-shell'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { useSmartAccountAuth } from '~/hooks/passkey/use-smart-account-auth'
 import { useFormValidation } from '~/hooks/use-form-validation'
 import { useI18n } from '~/lib/i18n'
-import { cn } from '~/lib/utils'
+import { formLayoutClasses } from '~/lib/form/form-styles'
 
 export function LoginComponent() {
 	const [email, setEmail] = useState('')
@@ -52,119 +48,81 @@ export function LoginComponent() {
 
 	return (
 		<AuthLayout>
-			<Card className="w-full max-w-md">
-				<CardHeader className="space-y-2">
-					<div className="flex justify-between mb-4">
-						<div className="flex-col">
-							<h1 className="gradient-text text-2xl mb-2 text-start font-semibold tracking-tight">
-								{t('auth.welcomeBack')}
-							</h1>
-							<h2>{t('auth.signInSubtitle')}</h2>
-						</div>
-						<div className="flex justify-center items-center rounded-full bg-blue-500/10 w-12 h-12">
-							<Fingerprint className="h-6 w-6 text-primary text-2xl" />
-						</div>
-					</div>
-				</CardHeader>
-				<CardContent>
-					<form className="space-y-4" aria-label="Sign in" onSubmit={onSubmit}>
-						{isNotRegistered && (
-							<legend
-								className="border border-zinc-600/50 rounded-lg p-4 space-y-4 text-yellow-600"
-								role="alert"
-								aria-live="assertive"
-							>
-								{t('auth.deviceNotFound')}{' '}
-								<Link
-									className="text-primary font-medium hover:underline"
-									href="/sign-up"
-								>
-									{t('auth.signUp')}
-								</Link>{' '}
-								{t('auth.first')}.
-							</legend>
-						)}
-
-						{authError && !isNotRegistered && (
-							<legend
-								className="border border-zinc-600/50 rounded-lg p-4 space-y-4 text-red-600"
-								role="alert"
-								aria-live="assertive"
-							>
-								{t('auth.authError')}
-							</legend>
-						)}
-
-						{authSuccess && (
-							<output className="text-green-600" aria-live="polite">
-								{t('auth.authSuccess')}
-							</output>
-						)}
-						<div className="space-y-2">
-							<Label htmlFor="email" id="email-label">
-								{t('auth.email')}
-							</Label>
-							<div className="space-y-1 pb-6 relative">
-								<Input
-									id="email"
-									name="email"
-									type="email"
-									placeholder={t('auth.emailPlaceholder')}
-									required
-									aria-labelledby="email-label"
-									aria-describedby={`${isEmailInvalid ? 'email-error' : 'email-description'}`}
-									aria-invalid={isEmailInvalid}
-									onChange={onEmailChange}
-									aria-required="true"
-									className={cn({
-										'border-red-500 outline-none ring-2 ring-red-500':
-											isEmailInvalid,
-									})}
-								/>
-								{isEmailInvalid && (
-									<span
-										className="text-red-600 text-sm absolute bottom-0 left-0 mt-1"
-										role="alert"
-										aria-live="assertive"
-									>
-										{t('auth.invalidEmail')}
-									</span>
-								)}
-							</div>
-						</div>
-
-						<Button
-							size="lg"
-							className="gradient-btn text-white w-full mt-10"
-							type="submit"
-							// formAction={signInAction}
-							aria-live="polite"
-							aria-busy={isAuthenticating}
-							disabled={!email || isAuthenticating || isEmailInvalid}
-						>
-							{isAuthenticating ? (
-								t('auth.authenticating')
-							) : (
-								<>
-									{t('auth.signInWithPasskey')} <Fingerprint />
-								</>
-							)}
-						</Button>
-						<PasskeyInfoDialog />
-					</form>
-				</CardContent>
-				<CardFooter className="flex flex-col space-y-4 border-t p-6">
-					<div className="text-sm text-center text-muted-foreground">
+			<FormShell
+				title={t('auth.welcomeBack')}
+				subtitle={t('auth.signInSubtitle')}
+				icon={Fingerprint}
+				footer={
+					<div className="w-full text-center text-sm text-muted-foreground">
 						{t('auth.dontHaveAccount')}{' '}
 						<Link
-							className="text-primary font-medium hover:underline"
+							className="font-medium text-primary hover:underline"
 							href="/sign-up"
 						>
 							{t('auth.createNewOne')}
 						</Link>
 					</div>
-				</CardFooter>
-			</Card>
+				}
+			>
+				<form className={formLayoutClasses.stack} aria-label="Sign in" onSubmit={onSubmit}>
+					{isNotRegistered ? (
+						<FormAlert variant="warning">
+							{t('auth.deviceNotFound')}{' '}
+							<Link
+								className="font-medium text-primary hover:underline"
+								href="/sign-up"
+							>
+								{t('auth.signUp')}
+							</Link>{' '}
+							{t('auth.first')}.
+						</FormAlert>
+					) : null}
+
+					{authError && !isNotRegistered ? (
+						<FormAlert variant="error">{t('auth.authError')}</FormAlert>
+					) : null}
+
+					{authSuccess ? (
+						<FormAlert variant="success">{t('auth.authSuccess')}</FormAlert>
+					) : null}
+
+					<FormFieldGroup
+						id="email"
+						label={t('auth.email')}
+						error={isEmailInvalid ? t('auth.invalidEmail') : undefined}
+						required
+					>
+						<Input
+							id="email"
+							name="email"
+							type="email"
+							placeholder={t('auth.emailPlaceholder')}
+							required
+							aria-invalid={isEmailInvalid}
+							onChange={onEmailChange}
+							autoComplete="email"
+						/>
+					</FormFieldGroup>
+
+					<Button
+						size="lg"
+						className="gradient-btn mt-2 w-full text-white"
+						type="submit"
+						aria-live="polite"
+						aria-busy={isAuthenticating}
+						disabled={!email || isAuthenticating || isEmailInvalid}
+					>
+						{isAuthenticating ? (
+							t('auth.authenticating')
+						) : (
+							<>
+								{t('auth.signInWithPasskey')} <Fingerprint className="ml-2 h-4 w-4" />
+							</>
+						)}
+					</Button>
+					<PasskeyInfoDialog />
+				</form>
+			</FormShell>
 		</AuthLayout>
 	)
 }

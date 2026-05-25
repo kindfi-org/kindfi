@@ -120,7 +120,7 @@ export function LinkDialog({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-			<DialogContent className={cn('sm:max-w-md bg-white', className)}>
+			<DialogContent className={cn('sm:max-w-md', className)}>
 				<DialogHeader>
 					<DialogTitle>{initialUrl ? 'Edit Link' : 'Insert Link'}</DialogTitle>
 					<DialogDescription>
@@ -141,7 +141,7 @@ export function LinkDialog({
 											placeholder="https://example.com"
 											autoFocus
 											{...field}
-											className="bg-white border-green-600"
+											
 										/>
 									</FormControl>
 									<FormMessage />
@@ -159,7 +159,7 @@ export function LinkDialog({
 										<Input
 											placeholder="Link text"
 											{...field}
-											className="bg-white border-green-600"
+											
 										/>
 									</FormControl>
 									<p className="text-xs text-muted-foreground">
@@ -176,7 +176,7 @@ export function LinkDialog({
 									type="button"
 									variant="outline"
 									onClick={handleRemove}
-									className="mr-auto flex items-center gap-2 gradient-border-btn bg-white"
+									className="mr-auto flex items-center gap-2 gradient-border-btn"
 								>
 									Remove Link
 								</Button>
