@@ -7,10 +7,6 @@ on:
     paths:
       - 'apps/indexer/**'
       - '.github/workflows/pr.yml'
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
