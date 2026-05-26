@@ -8,6 +8,7 @@ import {
 	LogOut,
 	Shield,
 	User as UserIcon,
+	Vote,
 	Wallet,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -198,6 +199,15 @@ export const UserMenu = ({ user }: { user: User }) => {
 						>
 							<UserIcon className="h-4 w-4 text-muted-foreground" />
 							<span className="font-medium">{t('nav.dashboard')}</span>
+						</Link>
+					</DropdownMenuItem>
+					<DropdownMenuItem asChild className="cursor-pointer">
+						<Link
+							href="/governance"
+							className="flex items-center gap-2 px-2 py-2 rounded-md transition-colors hover:bg-accent"
+						>
+							<Vote className="h-4 w-4 text-emerald-600" />
+							<span className="font-medium">{t('nav.governance')}</span>
 						</Link>
 					</DropdownMenuItem>
 					{(user as { role?: string })?.role === 'admin' && (

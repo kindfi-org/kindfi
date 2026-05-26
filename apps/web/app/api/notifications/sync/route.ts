@@ -1,7 +1,7 @@
 import { supabase } from '@packages/lib/supabase'
 import { after, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { NotificationLogger } from '~/lib/services/notification-logger'
+import { NotificationLogger } from '~/lib/services/notification-logger.server'
 
 const logger = new NotificationLogger()
 

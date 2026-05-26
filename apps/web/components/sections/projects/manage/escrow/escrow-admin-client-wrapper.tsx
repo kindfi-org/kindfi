@@ -80,7 +80,6 @@ export function EscrowAdminClientWrapper({
 						projectSlug={projectSlug}
 						projectTitle={project.title}
 						projectDescription={project.description}
-						escrowContractAddress={project.escrowContractAddress}
 						escrowType={project.escrowType}
 					/>
 				</motion.div>

@@ -77,7 +77,6 @@ export async function POST(req: NextRequest) {
 			if (!finalProjectId) finalProjectId = projectId
 		}
 
-
 		// Check if contribution already exists for this transaction hash (to avoid duplicates)
 		if (transactionHash) {
 			const { data: existingTransaction } = await supabase
@@ -157,6 +156,54 @@ export async function POST(req: NextRequest) {
 			}
 		}
 
+		// Fire-and-forget: send contribution notifications (in-app + email)
+		const notifyContribution = async () => {
+			try {
+				const { data: project } = await supabase
+					.from('projects')
+					.select('kindler_id, title, slug, target_amount, current_amount')
+					.eq('id', finalProjectId)
+					.single()
+
+				if (!project) return
+
+				const { sendContributionNotifications, sendCampaignGoalReachedNotifications } =
+					await import('~/lib/email/email-notification-service')
+
+				const formattedAmount = `$${numericAmount.toLocaleString()}`
+
+				await sendContributionNotifications({
+					contributorId: session.user.id,
+					creatorId: project.kindler_id,
+					projectTitle: project.title,
+					projectSlug: project.slug,
+					amount: formattedAmount,
+				})
+
+				// Check if this contribution just reached the funding goal
+				const newTotal = (project.current_amount ?? 0) + numericAmount
+				if (
+					project.target_amount &&
+					project.current_amount < project.target_amount &&
+					newTotal >= project.target_amount
+				) {
+					await sendCampaignGoalReachedNotifications({
+						creatorId: project.kindler_id,
+						projectId: finalProjectId as string,
+						projectTitle: project.title,
+						projectSlug: project.slug,
+						targetAmount: `$${Number(project.target_amount).toLocaleString()}`,
+					})
+				}
+			} catch (err) {
+				console.error('[Contributions] Notification error:', err)
+			}
+		}
+
+		notifyContribution().catch((err) => {
+			console.error('[Contributions] Unhandled notification error:', err)
+		})
+
 		// Trigger gamification updates (fire and forget - don't block response)
 		// Call handlers directly to ensure they execute properly
 		const gamificationUpdates = async () => {
@@ -199,8 +246,6 @@ export async function POST(req: NextRequest) {
 					}
 				}
 
-
-
 				// Import handlers directly to avoid fetch issues
 				const { POST: streaksPOST } = await import('~/app/api/streaks/route')
 				const { POST: referralsDonationPOST } = await import(
@@ -223,7 +268,7 @@ export async function POST(req: NextRequest) {
 				}
 
 				// 1. Update streaks (weekly and monthly) - includes on-chain contract calls if address available
-				const streakResults = await Promise.allSettled([
+				const _streakResults = await Promise.allSettled([
 					streaksPOST(
 						createMockRequest({
 							user_id: userId,
@@ -272,7 +317,7 @@ export async function POST(req: NextRequest) {
 					.then((response) => {
 						return response
 					})
-					.catch((error) => {
+					.catch((_error) => {
 						// Silently fail if not a referred user or other error
 					})
 
@@ -292,7 +337,6 @@ export async function POST(req: NextRequest) {
 				if (questsError) {
 					console.error('[Gamification] Error fetching quests:', questsError)
 				}
-
 
 				if (donationQuests && donationQuests.length > 0) {
 					// Calculate progress for each quest type
@@ -389,7 +433,7 @@ export async function POST(req: NextRequest) {
 
 					if (!existingNFT) {
 						// First-time donor → mint Bronze NFT
-						const mintResponse = await nftMintPOST(
+						const _mintResponse = await nftMintPOST(
 							createMockRequest({
 								user_id: userId,
 								stellar_address: userStellarAddress,
@@ -397,7 +441,7 @@ export async function POST(req: NextRequest) {
 						)
 					} else {
 						// Existing NFT → check if tier should evolve
-						const evolveResponse = await nftEvolvePOST(
+						const _evolveResponse = await nftEvolvePOST(
 							createMockRequest({ user_id: userId }),
 						)
 					}

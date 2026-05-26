@@ -9,6 +9,7 @@ import { Badge } from '~/components/base/badge'
 import { CategoryBadge } from '~/components/sections/projects/shared'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
+import { useI18n } from '~/lib/i18n'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
@@ -20,6 +21,7 @@ interface ProjectCardGridProps {
 }
 
 export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
+	const { t } = useI18n()
 	const { balance: onChainRaised } = useEscrowBalance({
 		escrowContractAddress: project.escrowContractAddress,
 		escrowType: 'multi-release',
@@ -43,7 +45,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 			className="h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl"
 		>
 			<motion.article
-				className="group relative bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm flex flex-col h-full transition-shadow duration-300 hover:shadow-xl"
+				className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200/80 hover:shadow-lg"
 				whileHover={cardHover}
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -66,16 +68,16 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 						)}
 						{project.escrowContractAddress && (
 							<Badge
-								className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-green-600/90 text-white border-0"
-								aria-label="This project accepts donations"
+								className="rounded-full border-0 bg-emerald-600/90 px-1.5 py-0.5 text-[9px] font-medium text-white"
+								aria-label={t('projects.acceptingDonations')}
 							>
-								Accepting donations
+								{t('projects.acceptingDonations')}
 							</Badge>
 						)}
 					</div>
 					<div className="absolute inset-0 flex items-end justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
 						<span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 shadow-sm backdrop-blur">
-							Explore
+							{t('projects.explore')}
 							<svg
 								viewBox="0 0 20 20"
 								fill="currentColor"
@@ -124,7 +126,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 								currency: 'USD',
 								maximumFractionDigits: 0,
 							}).format(displayRaised)}{' '}
-							raised
+							{t('projects.raised').toLowerCase()}
 						</span>
 						<span>{progressPercentage}%</span>
 					</div>
@@ -138,11 +140,11 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 									maximumFractionDigits: 0,
 								}).format(project.goal)}
 							</p>
-							<p className="text-xs text-gray-500">Goal</p>
+							<p className="text-xs text-gray-500">{t('projects.goal')}</p>
 						</div>
 						<div className="text-center">
 							<p className="font-bold">{project.investors}</p>
-							<p className="text-xs text-gray-500">Supporters</p>
+							<p className="text-xs text-gray-500">{t('projects.supporters')}</p>
 						</div>
 						<div className="text-center">
 							<p className="font-bold">
@@ -152,7 +154,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 									maximumFractionDigits: 0,
 								}).format(project.minInvestment)}
 							</p>
-							<p className="text-xs text-gray-500">Min Donation</p>
+							<p className="text-xs text-gray-500">{t('projects.minDonation')}</p>
 						</div>
 					</div>
 

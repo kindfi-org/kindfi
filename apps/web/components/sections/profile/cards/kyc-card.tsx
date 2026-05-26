@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import {
 	CheckCircle2,
 	Clock,
-	Lock,
 	Shield,
 	Sparkles,
 	XCircle,
@@ -13,13 +12,11 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
 import { useDiditKYC } from '~/hooks/use-didit-kyc'
+import { useI18n } from '~/lib/i18n'
+import { cn } from '~/lib/utils'
+import { profileFadeUp } from '../profile-motion'
+import { ProfileSurfaceCard } from '../profile-surface-card'
 import { KYCRedirectModal } from '../modals/kyc-redirect-modal'
 
 interface KYCCardProps {
@@ -28,18 +25,16 @@ interface KYCCardProps {
 }
 
 export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
-	// Always call hooks unconditionally (React rules)
+	const { t } = useI18n()
 	const { kycStatus, createSession, refreshStatus } = useDiditKYC(userId || '')
 	const [isCreating, setIsCreating] = useState(false)
 	const [showRedirectModal, setShowRedirectModal] = useState(false)
 	const [verificationUrl, setVerificationUrl] = useState<string | null>(null)
 
-	// Load status on mount
 	useEffect(() => {
 		refreshStatus()
 	}, [refreshStatus])
 
-	// Listen for KYC status update events and refresh when callback completes
 	const refreshRef = useRef(refreshStatus)
 	refreshRef.current = refreshStatus
 
@@ -47,306 +42,191 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 		const handleStatusUpdate = () => {
 			refreshRef.current()
 		}
-
 		window.addEventListener('kyc-status-updated', handleStatusUpdate)
-
-		return () => {
-			window.removeEventListener('kyc-status-updated', handleStatusUpdate)
-		}
+		return () => window.removeEventListener('kyc-status-updated', handleStatusUpdate)
 	}, [])
 
-	// Refresh when shouldRefresh prop changes (triggered by parent after callback)
 	useEffect(() => {
-		if (shouldRefresh) {
-			refreshStatus()
-		}
+		if (shouldRefresh) refreshStatus()
 	}, [shouldRefresh, refreshStatus])
 
 	const handleStartKYC = async () => {
 		setIsCreating(true)
 		try {
-			// Set callback URL to redirect back to profile page after verification
 			const callbackUrl = `${window.location.origin}/profile?kyc=completed`
 			const result = await createSession(callbackUrl)
 
 			if (result.success && result.verificationUrl) {
-				// Show modal first, then redirect
 				setVerificationUrl(result.verificationUrl)
 				setShowRedirectModal(true)
 			} else {
-				toast.error(result.error || 'Failed to start verification')
+				toast.error(result.error || t('profile.kycStartFailed'))
 			}
 		} catch (error) {
 			console.error('Failed to start KYC:', error)
-			toast.error('Failed to start verification process')
+			toast.error(t('profile.kycStartFailed'))
 		} finally {
 			setIsCreating(false)
 		}
 	}
 
-	const handleCancelRedirect = () => {
-		setShowRedirectModal(false)
-		setVerificationUrl(null)
-	}
+	const statusConfig = getStatusConfig(kycStatus.status, kycStatus.isLoading, kycStatus.error, t)
 
-	const getStatusBadge = () => {
-		if (kycStatus.isLoading) {
-			return (
-				<Badge variant="outline" className="bg-muted">
-					Loading...
-				</Badge>
-			)
-		}
-
-		if (kycStatus.error) {
-			return (
-				<Badge
-					variant="outline"
-					className="bg-orange-500/10 text-orange-600 border-orange-500"
-				>
-					Error
-				</Badge>
-			)
-		}
-
-		switch (kycStatus.status) {
-			case 'approved':
-			case 'verified':
-				return (
-					<Badge className="bg-[#000124] text-white">
-						<CheckCircle2 className="h-3 w-3 mr-1.5" />
-						Verified
-					</Badge>
-				)
-			case 'pending':
-				return (
-					<Badge
-						variant="outline"
-						className="bg-yellow-50 text-yellow-600 border-yellow-300"
-					>
-						In Progress
-					</Badge>
-				)
-			case 'rejected':
-				return (
-					<Badge
-						variant="outline"
-						className="bg-red-50 text-red-600 border-red-300"
-					>
-						Rejected
-					</Badge>
-				)
-			default:
-				// Always show a badge, even when status is null
-				return (
-					<Badge
-						variant="outline"
-						className="bg-gray-50 text-gray-600 border-gray-300"
-					>
-						Not Started
-					</Badge>
-				)
-		}
-	}
-
-	const getStatusMessage = () => {
-		if (kycStatus.error) {
-			return `Error loading status: ${kycStatus.error}. Please refresh the page.`
-		}
-
-		switch (kycStatus.status) {
-			case 'approved':
-			case 'verified':
-				return 'Your identity has been verified successfully'
-			case 'pending':
-				return 'Your verification is in progress. Please wait for review.'
-			case 'rejected':
-				return 'Verification was rejected. Please review the requirements and try again.'
-			default:
-				return 'Complete verification to unlock all features and build trust with the community.'
-		}
-	}
-
-	const getStatusIcon = () => {
-		switch (kycStatus.status) {
-			case 'approved':
-			case 'verified':
-				return <CheckCircle2 className="h-16 w-16 text-[#000124]" />
-			case 'pending':
-				return <Clock className="h-16 w-16 text-yellow-500" />
-			case 'rejected':
-				return <XCircle className="h-16 w-16 text-red-500" />
-			default:
-				return <Lock className="h-16 w-16 text-gray-400" />
-		}
-	}
-
-	const getStatusColor = () => {
-		switch (kycStatus.status) {
-			case 'approved':
-			case 'verified':
-				return 'bg-[#000124]/5'
-			case 'pending':
-				return 'bg-yellow-50'
-			case 'rejected':
-				return 'bg-red-50'
-			default:
-				return 'bg-gray-50'
-		}
-	}
-
-	const getBenefits = () => {
-		if (kycStatus.status === 'approved' || kycStatus.status === 'verified') {
-			return [
-				{
-					icon: CheckCircle2,
-					text: 'Full platform access',
-					color: 'text-[#000124]',
-				},
-				{ icon: Shield, text: 'Enhanced security', color: 'text-[#000124]' },
-				{
-					icon: Sparkles,
-					text: 'Trust badge visible',
-					color: 'text-[#000124]',
-				},
-			]
-		}
-		return [
-			{ icon: Lock, text: 'Unlock all features', color: 'text-gray-600' },
-			{ icon: Shield, text: 'Build community trust', color: 'text-gray-600' },
-			{ icon: Sparkles, text: 'Get verified badge', color: 'text-gray-600' },
-		]
-	}
-
-	// Show button if no status, rejected, or error occurred
 	const shouldShowButton =
 		!kycStatus.status ||
 		kycStatus.status === 'rejected' ||
 		kycStatus.error !== null
 
-	// Ensure userId is valid
 	if (!userId) {
 		return (
-			<Card className="overflow-hidden bg-card shadow-lg border-2 border-red-500">
-				<CardHeader>
-					<CardTitle className="text-red-500 flex items-center gap-2">
-						<Shield className="h-5 w-5" />
-						KYC Verification - Error
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<p className="text-sm text-muted-foreground">
-						User ID is missing. Please refresh the page or contact support.
-					</p>
-				</CardContent>
-			</Card>
+			<ProfileSurfaceCard className="border-red-200 bg-red-50/50">
+				<p className="text-sm text-red-700">{t('profile.kycUserMissing')}</p>
+			</ProfileSurfaceCard>
 		)
 	}
 
 	return (
 		<>
-			<motion.div
-				whileHover={{ y: -4 }}
-				transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-				className="h-full"
-			>
-				<Card className="h-full overflow-hidden bg-white/90 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col">
-					{/* Top gradient bar */}
-					<div className="h-2 bg-gradient-to-r from-[#000124] to-[#000124]/70" />
-
-					<CardHeader className="pb-4 pt-6 flex-shrink-0">
-						<div className="flex items-center justify-between gap-3 mb-4">
-							<CardTitle className="text-lg font-bold flex items-center gap-2.5 text-gray-800">
-								<div className="p-2 rounded-lg bg-[#000124]/10 text-[#000124]">
-									<Shield className="h-4 w-4" />
-								</div>
-								<span>KYC Verification</span>
-							</CardTitle>
-							<div className="flex-shrink-0">{getStatusBadge()}</div>
+			<motion.div {...profileFadeUp(0.05)} className="h-full">
+				<ProfileSurfaceCard className="flex h-full flex-col">
+					<div className="flex items-start justify-between gap-3">
+						<div className="flex items-center gap-3">
+							<div
+								className={cn(
+									'flex h-11 w-11 items-center justify-center rounded-xl',
+									statusConfig.iconWrapClass,
+								)}
+							>
+								<statusConfig.Icon className="h-5 w-5" />
+							</div>
+							<div>
+								<h3 className="text-base font-semibold text-gray-900">
+									{t('profile.kycTitle')}
+								</h3>
+								<p className="text-sm text-muted-foreground">
+									{statusConfig.message}
+								</p>
+							</div>
 						</div>
-					</CardHeader>
-					<CardContent className="flex flex-col flex-1 min-h-0 px-6 pb-6">
-						{/* Status Icon Section */}
-						<div
-							className={`flex justify-center items-center mb-6 p-6 rounded-xl ${getStatusColor()} transition-colors`}
+						<Badge className={cn('rounded-full', statusConfig.badgeClass)}>
+							{statusConfig.badgeLabel}
+						</Badge>
+					</div>
+
+					<ul className="mt-5 space-y-2.5">
+						{statusConfig.benefits.map((benefit) => (
+							<li
+								key={benefit}
+								className="flex items-center gap-2 text-xs font-medium text-slate-600"
+							>
+								<Sparkles className="h-3.5 w-3.5 text-emerald-600" />
+								{benefit}
+							</li>
+						))}
+					</ul>
+
+					{shouldShowButton ? (
+						<Button
+							onClick={handleStartKYC}
+							disabled={isCreating || kycStatus.isLoading}
+							className="gradient-btn mt-auto w-full rounded-full text-white"
+							size="sm"
 						>
-							<motion.div
-								initial={{ scale: 0.8, opacity: 0 }}
-								animate={{ scale: 1, opacity: 1 }}
-								transition={{ duration: 0.3 }}
-							>
-								{getStatusIcon()}
-							</motion.div>
-						</div>
-
-						{/* Status Message */}
-						<p className="text-sm text-gray-700 leading-relaxed font-medium text-center mb-6">
-							{getStatusMessage()}
-						</p>
-
-						{/* Benefits List */}
-						<div className="space-y-3 mb-6 flex-1">
-							{(() => {
-								const benefits = getBenefits()
-								return benefits.map((benefit, index) => {
-									const IconComponent = benefit.icon
-									return (
-										<motion.div
-											key={benefit.text}
-											initial={{ opacity: 0, x: -10 }}
-											animate={{ opacity: 1, x: 0 }}
-											transition={{ delay: index * 0.1 }}
-											className="flex items-center gap-3"
-										>
-											<div
-												className={`p-1.5 rounded-md ${benefit.color.includes('gray') ? 'bg-gray-100' : 'bg-[#000124]/10'}`}
-											>
-												<IconComponent className={`h-4 w-4 ${benefit.color}`} />
-											</div>
-											<span className={`text-xs font-medium ${benefit.color}`}>
-												{benefit.text}
-											</span>
-										</motion.div>
-									)
-								})
-							})()}
-						</div>
-
-						{/* Action Button */}
-						{shouldShowButton && (
-							<motion.div
-								whileHover={{ scale: 1.02 }}
-								whileTap={{ scale: 0.98 }}
-								className="mt-auto"
-							>
-								<Button
-									onClick={handleStartKYC}
-									disabled={isCreating || kycStatus.isLoading}
-									className="w-full bg-[#000124] hover:bg-[#000124]/90 text-white font-semibold transition-all shadow-md hover:shadow-lg"
-									size="sm"
-								>
-									<Shield className="h-4 w-4 mr-2" />
-									{isCreating
-										? 'Starting...'
-										: kycStatus.status === 'rejected'
-											? 'Retry Verification'
-											: 'Start KYC Process'}
-								</Button>
-							</motion.div>
-						)}
-					</CardContent>
-				</Card>
+							<Shield className="mr-2 h-4 w-4" />
+							{isCreating
+								? t('profile.kycStarting')
+								: kycStatus.status === 'rejected'
+									? t('profile.kycRetry')
+									: t('profile.kycStart')}
+						</Button>
+					) : null}
+				</ProfileSurfaceCard>
 			</motion.div>
 
-			{/* Redirect Confirmation Modal */}
-			{verificationUrl && (
+			{verificationUrl ? (
 				<KYCRedirectModal
 					open={showRedirectModal}
 					onOpenChange={setShowRedirectModal}
 					verificationUrl={verificationUrl}
-					onCancel={handleCancelRedirect}
+					onCancel={() => {
+						setShowRedirectModal(false)
+						setVerificationUrl(null)
+					}}
 				/>
-			)}
+			) : null}
 		</>
 	)
+}
+
+function getStatusConfig(
+	status: string | null,
+	isLoading: boolean,
+	error: string | null,
+	t: (key: string) => string,
+) {
+	if (isLoading) {
+		return {
+			Icon: Clock,
+			iconWrapClass: 'bg-slate-100 text-slate-500',
+			badgeClass: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
+			badgeLabel: t('profile.kycLoading'),
+			message: t('profile.kycLoadingMessage'),
+			benefits: [t('profile.kycBenefit1'), t('profile.kycBenefit2')],
+		}
+	}
+
+	if (error) {
+		return {
+			Icon: XCircle,
+			iconWrapClass: 'bg-orange-50 text-orange-600',
+			badgeClass: 'bg-orange-50 text-orange-700 hover:bg-orange-50',
+			badgeLabel: t('profile.kycError'),
+			message: t('profile.kycErrorMessage'),
+			benefits: [t('profile.kycBenefit1'), t('profile.kycBenefit2')],
+		}
+	}
+
+	switch (status) {
+		case 'approved':
+		case 'verified':
+			return {
+				Icon: CheckCircle2,
+				iconWrapClass: 'bg-emerald-50 text-emerald-700',
+				badgeClass: 'bg-emerald-50 text-emerald-800 hover:bg-emerald-50',
+				badgeLabel: t('profile.kycVerified'),
+				message: t('profile.kycVerifiedMessage'),
+				benefits: [
+					t('profile.kycVerifiedBenefit1'),
+					t('profile.kycVerifiedBenefit2'),
+					t('profile.kycVerifiedBenefit3'),
+				],
+			}
+		case 'pending':
+			return {
+				Icon: Clock,
+				iconWrapClass: 'bg-amber-50 text-amber-700',
+				badgeClass: 'bg-amber-50 text-amber-800 hover:bg-amber-50',
+				badgeLabel: t('profile.kycPending'),
+				message: t('profile.kycPendingMessage'),
+				benefits: [t('profile.kycBenefit1'), t('profile.kycBenefit2')],
+			}
+		case 'rejected':
+			return {
+				Icon: XCircle,
+				iconWrapClass: 'bg-red-50 text-red-600',
+				badgeClass: 'bg-red-50 text-red-700 hover:bg-red-50',
+				badgeLabel: t('profile.kycRejected'),
+				message: t('profile.kycRejectedMessage'),
+				benefits: [t('profile.kycBenefit1'), t('profile.kycBenefit2')],
+			}
+		default:
+			return {
+				Icon: Shield,
+				iconWrapClass: 'bg-slate-100 text-slate-600',
+				badgeClass: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
+				badgeLabel: t('profile.kycNotStarted'),
+				message: t('profile.kycNotStartedMessage'),
+				benefits: [t('profile.kycBenefit1'), t('profile.kycBenefit2'), t('profile.kycBenefit3')],
+			}
+	}
 }

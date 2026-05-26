@@ -60,7 +60,7 @@ export function BasicInfoSection({
 						<FormControl>
 							<Input
 								placeholder="e.g., Green Earth Foundation"
-								className="h-11 border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500"
+								className="h-11"
 								{...field}
 								autoComplete="organization"
 							/>
@@ -89,7 +89,7 @@ export function BasicInfoSection({
 								<Input
 									placeholder="foundation-name"
 									className={cn(
-										'h-11 pl-28 border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500',
+										'pl-28',
 										!slugReadOnly &&
 											slug &&
 											slug.length >= 3 &&
@@ -159,7 +159,7 @@ export function BasicInfoSection({
 									placeholder="2020"
 									min="1900"
 									max={new Date().getFullYear()}
-									className="h-11 border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500"
+									className="h-11"
 									{...field}
 									onChange={(e) => field.onChange(Number(e.target.value))}
 									inputMode="numeric"
@@ -186,7 +186,7 @@ export function BasicInfoSection({
 								<Input
 									type="url"
 									placeholder="https://example.com"
-									className="h-11 border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500"
+									className="h-11"
 									{...field}
 									autoComplete="url"
 								/>
@@ -211,7 +211,7 @@ export function BasicInfoSection({
 						<FormControl>
 							<Textarea
 								placeholder="Describe your foundation's purpose, impact, and what makes it unique…"
-								className="min-h-[120px] border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500 resize-none"
+								className="min-h-[120px] resize-none"
 								{...field}
 							/>
 						</FormControl>

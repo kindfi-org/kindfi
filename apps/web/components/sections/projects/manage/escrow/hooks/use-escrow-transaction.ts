@@ -7,11 +7,14 @@ import type {
 } from '@trustless-work/escrow'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Logger } from '~/lib/logger'
 import { toast } from 'sonner'
 import { saveEscrowContractAction } from '~/app/actions/escrow/save-escrow-contract'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import type { EscrowFormData } from '../types'
+
+const logger = new Logger()
 
 interface UseEscrowTransactionParams {
 	projectId: string
@@ -24,19 +27,16 @@ export function useEscrowTransaction({
 }: UseEscrowTransactionParams) {
 	const router = useRouter()
 	const { deployEscrow, sendTransaction } = useEscrow()
-	const { isConnected, connect, address, signTransaction } = useWallet()
+	const {
+		ensureTrustlessSigner,
+		signTrustlessTransaction,
+	} = useTrustlessSigner()
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const handleCreateEscrow = async (formData: EscrowFormData) => {
 		setIsSubmitting(true)
 		try {
-			if (!isConnected) await connect()
-			if (!address) {
-				toast.error('Please connect a Stellar wallet to continue')
-				return
-			}
-
-			const signer = address
+			const signer = await ensureTrustlessSigner()
 			const effectiveEngagementId = (
 				formData.engagementId || `project-${projectId}`
 			).trim()
@@ -54,7 +54,7 @@ export function useEscrowTransaction({
 					projectId,
 					projectSlug,
 					deployEscrow,
-					signTransaction,
+					signTransaction: signTrustlessTransaction,
 					sendTransaction,
 					router,
 				})
@@ -67,13 +67,13 @@ export function useEscrowTransaction({
 					projectId,
 					projectSlug,
 					deployEscrow,
-					signTransaction,
+					signTransaction: signTrustlessTransaction,
 					sendTransaction,
 					router,
 				})
 			}
 		} catch (e) {
-			console.error(e)
+			logger.error({ eventType: 'escrow.create.error', error: e instanceof Error ? e.message : String(e) })
 			toast.error(e instanceof Error ? e.message : 'Failed to create escrow')
 		} finally {
 			setIsSubmitting(false)

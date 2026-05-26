@@ -39,6 +39,7 @@ const Footer = () => {
 					target: '_blank',
 				},
 				{ label: t('footer.news'), href: '/news' },
+				{ label: t('footer.communityGovernance'), href: '/governance' },
 				{ label: t('footer.tutorials'), href: '/tutorials' },
 				{ label: t('footer.faqs'), href: '/faqs' },
 			],
@@ -101,10 +102,10 @@ const Footer = () => {
 										aria-invalid={isEmailInvalid}
 										onChange={handleValidation}
 									/>
-									<Button
-										size="sm"
-										className="bg-blue-600 hover:bg-blue-900 text-white"
-									>
+						<Button
+							size="sm"
+							className="gradient-btn rounded-full text-white"
+						>
 										{t('footer.subscribe')}
 									</Button>
 								</div>

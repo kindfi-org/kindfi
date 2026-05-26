@@ -1,16 +1,12 @@
 'use client'
 
 import { CheckCircle2, Copy, Link2, LogOut, Wallet } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { useI18n } from '~/lib/i18n'
+import { ProfileSurfaceCard } from '../profile-surface-card'
 
 interface WalletCardProps {
 	smartAccountAddress: string | null
@@ -21,7 +17,7 @@ interface WalletCardProps {
 }
 
 const truncateAddress = (address: string) =>
-	`${address.slice(0, 8)}...${address.slice(-8)}`
+	`${address.slice(0, 6)}...${address.slice(-6)}`
 
 export function WalletCard({
 	smartAccountAddress,
@@ -30,8 +26,19 @@ export function WalletCard({
 	onConnectExternal,
 	onDisconnectExternal,
 }: WalletCardProps) {
+	const { t } = useI18n()
+	const [isMounted, setIsMounted] = useState(false)
 	const [copiedSmartAccount, setCopiedSmartAccount] = useState(false)
 	const [copiedExternal, setCopiedExternal] = useState(false)
+
+	useEffect(() => {
+		setIsMounted(true)
+	}, [])
+
+	const connectedExternalAddress =
+		isMounted && isExternalConnected && externalWalletAddress
+			? externalWalletAddress
+			: null
 
 	const handleCopy = async (address: string, type: 'smart' | 'external') => {
 		try {
@@ -43,33 +50,44 @@ export function WalletCard({
 				setCopiedExternal(true)
 				setTimeout(() => setCopiedExternal(false), 2000)
 			}
-			toast.success('Address copied!')
+			toast.success(t('profile.addressCopied'))
 		} catch {
-			toast.error('Failed to copy address')
+			toast.error(t('profile.addressCopyFailed'))
 		}
 	}
 
 	return (
-		<Card className="h-full flex flex-col">
-			<CardHeader className="pb-4">
-				<CardTitle className="text-base font-semibold flex items-center gap-2">
-					<Wallet className="h-4 w-4 text-primary" />
-					Wallets
-				</CardTitle>
-			</CardHeader>
-			<CardContent className="space-y-4 flex flex-col flex-1 min-h-0">
-				{/* Smart Account */}
+		<ProfileSurfaceCard className="h-full">
+			<div className="flex items-start justify-between gap-3">
+				<div className="flex items-center gap-3">
+					<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+						<Wallet className="h-5 w-5" />
+					</div>
+					<div>
+						<h3 className="text-base font-semibold text-gray-900">
+							{t('profile.walletsTitle')}
+						</h3>
+						<p className="text-sm text-muted-foreground">
+							{t('profile.walletsSubtitle')}
+						</p>
+					</div>
+				</div>
+				<Badge className="rounded-full bg-emerald-50 text-emerald-800 hover:bg-emerald-50">
+					{t('profile.passkeySecured')}
+				</Badge>
+			</div>
+
+			<div className="mt-5 space-y-4">
 				{smartAccountAddress ? (
 					<div className="space-y-2">
-						<div className="flex items-center justify-between">
-							<span className="text-sm font-medium">Smart Account</span>
-							<Badge variant="secondary" className="text-xs">
-								Primary
+						<div className="flex items-center justify-between gap-2">
+							<p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+								{t('profile.smartAccount')}
+							</p>
+							<Badge variant="secondary" className="rounded-full text-[10px]">
+								{t('profile.primaryWallet')}
 							</Badge>
 						</div>
-						<p className="text-xs text-muted-foreground">
-							Your secure smart wallet for receiving funds and transactions.
-						</p>
 						<AddressRow
 							address={smartAccountAddress}
 							isCopied={copiedSmartAccount}
@@ -77,83 +95,76 @@ export function WalletCard({
 						/>
 					</div>
 				) : (
-					<div className="p-4 bg-muted/50 rounded-lg text-center">
-						<p className="text-sm text-muted-foreground">
-							Smart Account will be created when you complete registration
+					<div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-5 text-center text-sm text-muted-foreground">
+						{t('profile.smartAccountPending')}
+					</div>
+				)}
+
+				<div className="border-t border-slate-100 pt-4">
+					<div className="mb-2 flex items-center gap-2">
+						<Link2 className="h-4 w-4 text-slate-400" />
+						<p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+							{t('profile.externalWallet')}
 						</p>
 					</div>
-				)}
 
-				{/* Divider */}
-				{smartAccountAddress && (
-					<div className="relative">
-						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-t border-border" />
-						</div>
-						<div className="relative flex justify-center text-xs uppercase">
-							<span className="bg-card px-2 text-muted-foreground">
-								Optional
-							</span>
-						</div>
-					</div>
-				)}
-
-				{/* External Wallet */}
-				<div className="space-y-2 mt-auto">
-					<div className="flex items-center gap-2">
-						<Link2 className="h-4 w-4 text-muted-foreground" />
-						<span className="text-sm font-medium">External Wallet</span>
-					</div>
-					<p className="text-xs text-muted-foreground">
-						Connect an additional Stellar wallet (like Freighter or Albedo).
-					</p>
-					{isExternalConnected && externalWalletAddress ? (
-						<>
+					{connectedExternalAddress ? (
+						<div className="space-y-3">
 							<AddressRow
-								address={externalWalletAddress}
+								address={connectedExternalAddress}
 								isCopied={copiedExternal}
-								onCopy={() => handleCopy(externalWalletAddress, 'external')}
+								onCopy={() => handleCopy(connectedExternalAddress, 'external')}
 							/>
 							<div className="flex gap-2">
 								<Button
 									variant="outline"
 									size="sm"
-									className="flex-1"
-									onClick={() => handleCopy(externalWalletAddress, 'external')}
+									className="flex-1 rounded-full"
+									onClick={() =>
+										handleCopy(connectedExternalAddress, 'external')
+									}
 								>
-									<Copy className="h-3.5 w-3.5 mr-2" />
-									Copy Address
+									<Copy className="mr-2 h-3.5 w-3.5" />
+									{t('profile.copyAddress')}
 								</Button>
-								{onDisconnectExternal && (
+								{onDisconnectExternal ? (
 									<Button
 										variant="outline"
 										size="sm"
+										className="rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
 										onClick={() => {
 											onDisconnectExternal()
-											toast.success('External wallet disconnected')
+											toast.success(t('profile.walletDisconnected'))
 										}}
-										className="text-destructive hover:bg-destructive/10 hover:text-destructive"
 									>
-										<LogOut className="h-3.5 w-3.5 mr-2" />
-										Disconnect
+										<LogOut className="mr-2 h-3.5 w-3.5" />
+										{t('profile.disconnect')}
 									</Button>
-								)}
+								) : null}
 							</div>
-						</>
+							<p className="text-xs text-muted-foreground">
+								{t('profile.externalWalletTrustlessNote')}
+							</p>
+						</div>
 					) : (
-						<Button
-							onClick={onConnectExternal}
-							variant="outline"
-							className="w-full"
-							size="sm"
-						>
-							<Link2 className="h-4 w-4 mr-2" />
-							Connect External Wallet
-						</Button>
+						<div className="space-y-3">
+							<Button
+								onClick={onConnectExternal}
+								variant="outline"
+								className="w-full rounded-full"
+								size="sm"
+							>
+								<Link2 className="mr-2 h-4 w-4" />
+								{t('profile.connectExternalWallet')}
+							</Button>
+							<p className="text-xs text-muted-foreground">
+								{t('profile.externalWalletTrustlessNote')}
+							</p>
+						</div>
 					)}
 				</div>
-			</CardContent>
-		</Card>
+			</div>
+		</ProfileSurfaceCard>
 	)
 }
 
@@ -167,18 +178,13 @@ function AddressRow({
 	onCopy: () => void
 }) {
 	return (
-		<div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border">
-			<code className="text-sm font-mono text-foreground tracking-wide">
+		<div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-2.5">
+			<code className="truncate font-mono text-sm tracking-wide text-gray-900">
 				{truncateAddress(address)}
 			</code>
-			<Button
-				variant="ghost"
-				size="sm"
-				onClick={onCopy}
-				className="h-8 w-8 p-0"
-			>
+			<Button variant="ghost" size="sm" onClick={onCopy} className="h-8 w-8 shrink-0 p-0">
 				{isCopied ? (
-					<CheckCircle2 className="h-4 w-4 text-primary" />
+					<CheckCircle2 className="h-4 w-4 text-emerald-600" />
 				) : (
 					<Copy className="h-4 w-4" />
 				)}

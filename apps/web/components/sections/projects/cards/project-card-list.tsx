@@ -9,6 +9,7 @@ import { Badge } from '~/components/base/badge'
 import { CategoryBadge } from '~/components/sections/projects/shared'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
+import { useI18n } from '~/lib/i18n'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
@@ -18,6 +19,7 @@ interface ProjectCardListProps {
 }
 
 export function ProjectCardList({ project }: ProjectCardListProps) {
+	const { t } = useI18n()
 	const { balance: onChainRaised } = useEscrowBalance({
 		escrowContractAddress: project.escrowContractAddress,
 		escrowType: 'multi-release',
@@ -39,7 +41,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 			className="h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
 		>
 			<motion.article
-				className="flex overflow-hidden flex-row h-full bg-white rounded-lg shadow-md"
+				className="flex h-full flex-row overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200/80 hover:shadow-md"
 				whileHover={cardHover}
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -71,10 +73,10 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 							)}
 							{project.escrowContractAddress && (
 								<Badge
-									className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-green-600/90 text-white border-0"
-									aria-label="This project accepts donations"
+									className="rounded-full border-0 bg-emerald-600/90 px-1.5 py-0.5 text-[9px] font-medium text-white"
+									aria-label={t('projects.acceptingDonations')}
 								>
-									Accepting donations
+									{t('projects.acceptingDonations')}
 								</Badge>
 							)}
 						</div>
@@ -109,7 +111,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 									currency: 'USD',
 									maximumFractionDigits: 0,
 								}).format(displayRaised)}{' '}
-								raised
+								{t('projects.raised').toLowerCase()}
 							</span>
 							<span>{progressPercentage}%</span>
 						</div>
@@ -123,14 +125,14 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 										maximumFractionDigits: 0,
 									}).format(project.goal)}
 								</p>
-								<p className="text-[10px] sm:text-xs text-gray-500">Goal</p>
+								<p className="text-[10px] text-gray-500 sm:text-xs">{t('projects.goal')}</p>
 							</div>
 							<div className="text-center">
 								<p className="text-xs font-bold sm:text-sm">
 									{project.investors}
 								</p>
-								<p className="text-[10px] sm:text-xs text-gray-500">
-									Supporters
+								<p className="text-[10px] text-gray-500 sm:text-xs">
+									{t('projects.supporters')}
 								</p>
 							</div>
 							<div className="text-center">
@@ -141,8 +143,8 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 										maximumFractionDigits: 0,
 									}).format(project.minInvestment)}
 								</p>
-								<p className="text-[10px] sm:text-xs text-gray-500">
-									Minimum Donation
+								<p className="text-[10px] text-gray-500 sm:text-xs">
+									{t('projects.minDonation')}
 								</p>
 							</div>
 						</div>

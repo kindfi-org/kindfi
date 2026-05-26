@@ -31,6 +31,9 @@ export function Navigation() {
 		if (path === '/news') {
 			return pathname?.startsWith('/news')
 		}
+		if (path === '/governance') {
+			return pathname === '/governance' || pathname?.startsWith('/governance/')
+		}
 		return false
 	}
 
@@ -67,6 +70,23 @@ export function Navigation() {
 					aria-current={isActive('/foundations') ? 'page' : undefined}
 				>
 					<Link href="/foundations">{t('nav.foundations')}</Link>
+				</NavigationMenuLink>
+			</NavigationMenuItem>
+
+			<NavigationMenuItem>
+				<NavigationMenuLink
+					asChild
+					className={cn(
+						navigationMenuTriggerStyle(),
+						'data-[active]:bg-green-900/10 data-[active]:text-green-900',
+						'hover:bg-green-900/10 hover:text-green-900',
+						isActive('/governance') &&
+							'bg-green-900/10 text-green-900 font-medium',
+					)}
+					aria-label={t('nav.governance')}
+					aria-current={isActive('/governance') ? 'page' : undefined}
+				>
+					<Link href="/governance">{t('nav.governance')}</Link>
 				</NavigationMenuLink>
 			</NavigationMenuItem>
 

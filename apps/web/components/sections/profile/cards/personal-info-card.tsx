@@ -6,16 +6,11 @@ import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { Textarea } from '~/components/base/textarea'
+import { useI18n } from '~/lib/i18n'
+import { ProfileSurfaceCard } from '../profile-surface-card'
 
 interface PersonalInfoCardProps {
 	userId: string
@@ -32,6 +27,7 @@ export function PersonalInfoCard({
 	imageUrl,
 	_email,
 }: PersonalInfoCardProps) {
+	const { t } = useI18n()
 	const [isEditing, setIsEditing] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 
@@ -51,119 +47,99 @@ export function PersonalInfoCard({
 
 			if (error) throw error
 
-			toast.success('Profile updated successfully!')
+			toast.success(t('profile.profileUpdated'))
 			setIsEditing(false)
 			window.location.reload()
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to update profile')
+			toast.error(t('profile.profileUpdateFailed'))
 		} finally {
 			setIsSaving(false)
 		}
 	}
 
 	return (
-		<motion.div
-			initial={{ opacity: 0, x: -20 }}
-			animate={{ opacity: 1, x: 0 }}
-			transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-			className="h-full"
-		>
-			<Card className="h-full border-0 overflow-hidden bg-white/90 backdrop-blur-sm rounded-xl shadow-lg transition-all duration-300">
-				{/* Top gradient bar */}
-				<div className="h-2 bg-gradient-to-r from-[#000124] to-[#000124]/70" />
+		<ProfileSurfaceCard className="h-full">
+			<div className="mb-6 flex items-start justify-between gap-4 border-b border-slate-100 pb-5">
+				<div>
+					<h3 className="text-lg font-semibold text-gray-900">
+						{t('profile.personalInfoTitle')}
+					</h3>
+					<p className="mt-1 text-sm text-muted-foreground">
+						{t('profile.personalInfoDescription')}
+					</p>
+				</div>
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={() => setIsEditing(!isEditing)}
+					className="rounded-full"
+				>
+					{isEditing ? (
+						t('profile.cancel')
+					) : (
+						<>
+							<Pencil className="mr-2 h-4 w-4" />
+							{t('profile.edit')}
+						</>
+					)}
+				</Button>
+			</div>
 
-				<CardHeader className="pb-5 pt-6 border-b border-gray-200">
-					<div className="flex items-start justify-between gap-4">
-						<div className="flex-1">
-							<CardTitle className="text-xl font-bold text-gray-800 mb-2">
-								Personal Information
-							</CardTitle>
-							<CardDescription className="text-sm font-medium text-gray-600">
-								Update your profile details and public information
-							</CardDescription>
-						</div>
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setIsEditing(!isEditing)}
-							className="hover:bg-gray-100 rounded-lg"
+			<form action={onUpdateProfile} className="space-y-5">
+				<div className="space-y-2">
+					<Label htmlFor="display_name">{t('profile.displayName')}</Label>
+					<Input
+						id="display_name"
+						name="display_name"
+						defaultValue={displayName}
+						disabled={!isEditing}
+						required
+						className="rounded-xl disabled:bg-slate-50"
+					/>
+				</div>
+				<div className="space-y-2">
+					<Label htmlFor="bio">{t('profile.bio')}</Label>
+					<Textarea
+						id="bio"
+						name="bio"
+						defaultValue={bio}
+						disabled={!isEditing}
+						rows={4}
+						placeholder={t('profile.bioPlaceholder')}
+						className="resize-none rounded-xl disabled:bg-slate-50"
+					/>
+				</div>
+				<div className="space-y-2">
+					<Label htmlFor="image_url">{t('profile.avatarUrl')}</Label>
+					<Input
+						id="image_url"
+						name="image_url"
+						type="url"
+						defaultValue={imageUrl}
+						disabled={!isEditing}
+						placeholder="https://example.com/avatar.jpg"
+						className="rounded-xl disabled:bg-slate-50"
+					/>
+				</div>
+				<AnimatePresence>
+					{isEditing ? (
+						<motion.div
+							initial={{ opacity: 0, height: 0 }}
+							animate={{ opacity: 1, height: 'auto' }}
+							exit={{ opacity: 0, height: 0 }}
 						>
-							{isEditing ? (
-								<>Cancel</>
-							) : (
-								<>
-									<Pencil className="h-4 w-4 mr-2" />
-									Edit
-								</>
-							)}
-						</Button>
-					</div>
-				</CardHeader>
-				<CardContent className="space-y-5 pt-6">
-					<form action={onUpdateProfile} className="space-y-5">
-						<div className="space-y-2">
-							<Label htmlFor="display_name" className="text-sm font-medium">
-								Display Name
-							</Label>
-							<Input
-								id="display_name"
-								name="display_name"
-								defaultValue={displayName}
-								disabled={!isEditing}
-								required
-								className="transition-all duration-200 disabled:bg-muted/60 disabled:cursor-not-allowed border-border/50 focus:border-[#000124]/50"
-							/>
-						</div>
-						<div className="space-y-2">
-							<Label htmlFor="bio" className="text-sm font-medium">
-								Bio
-							</Label>
-							<Textarea
-								id="bio"
-								name="bio"
-								defaultValue={bio}
-								disabled={!isEditing}
-								rows={4}
-								placeholder="Tell us about yourself..."
-								className="transition-all duration-200 disabled:bg-muted/60 disabled:cursor-not-allowed resize-none border-border/50 focus:border-[#000124]/50"
-							/>
-						</div>
-						<div className="space-y-2">
-							<Label htmlFor="image_url" className="text-sm font-medium">
-								Avatar URL
-							</Label>
-							<Input
-								id="image_url"
-								name="image_url"
-								type="url"
-								defaultValue={imageUrl}
-								disabled={!isEditing}
-								placeholder="https://example.com/avatar.jpg"
-								className="transition-all duration-200 disabled:bg-muted/60 disabled:cursor-not-allowed border-border/50 focus:border-[#000124]/50"
-							/>
-						</div>
-						<AnimatePresence>
-							{isEditing && (
-								<motion.div
-									initial={{ opacity: 0, height: 0 }}
-									animate={{ opacity: 1, height: 'auto' }}
-									exit={{ opacity: 0, height: 0 }}
-									transition={{ duration: 0.2 }}
-								>
-									<Button
-										type="submit"
-										disabled={isSaving}
-										className="w-full bg-[#000124] hover:bg-[#000124]/90 text-white transition-all font-semibold shadow-md hover:shadow-lg"
-									>
-										{isSaving ? 'Saving...' : 'Save Changes'}
-									</Button>
-								</motion.div>
-							)}
-						</AnimatePresence>
-					</form>
-				</CardContent>
-			</Card>
-		</motion.div>
+							<Button
+								type="submit"
+								disabled={isSaving}
+								className="gradient-btn w-full rounded-full text-white"
+							>
+								{isSaving ? t('profile.saving') : t('profile.saveChanges')}
+							</Button>
+						</motion.div>
+					) : null}
+				</AnimatePresence>
+			</form>
+		</ProfileSurfaceCard>
 	)
 }

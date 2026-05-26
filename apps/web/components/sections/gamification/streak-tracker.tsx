@@ -175,9 +175,7 @@ function StreakCard({
 		? new Date(streak.last_donation_timestamp)
 		: null
 	const daysSinceLastDonation = lastDonation
-		? Math.floor(
-				(new Date().getTime() - lastDonation.getTime()) / (1000 * 60 * 60 * 24),
-			)
+		? Math.floor((Date.now() - lastDonation.getTime()) / (1000 * 60 * 60 * 24))
 		: null
 
 	const periodDays = streak.period === 'weekly' ? 7 : 30

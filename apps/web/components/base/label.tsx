@@ -5,6 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+import { formFieldClasses } from '~/lib/form/form-styles'
 
 /**
  *  ShadCN/UI Reference:https://ui.shadcn.com/docs/components/label
@@ -40,9 +41,7 @@ import { cn } from '~/lib/utils'
  * @remarks
  * This component uses React.forwardRef to allow ref forwarding to the underlying Radix UI Label component.
  */
-const labelVariants = cva(
-	'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-)
+const labelVariants = cva(formFieldClasses.label)
 
 const Label = React.forwardRef<
 	React.ElementRef<typeof LabelPrimitive.Root>,

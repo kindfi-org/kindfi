@@ -2,7 +2,7 @@ import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import { after, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { NotificationLogger } from '~/lib/services/notification-logger'
+import { NotificationLogger } from '~/lib/services/notification-logger.server'
 import { NotificationService } from '~/lib/services/notification-service'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')

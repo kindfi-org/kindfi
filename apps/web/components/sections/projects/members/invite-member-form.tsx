@@ -70,7 +70,7 @@ export function InviteMemberForm({
 			transition={{ duration: 0.3 }}
 			className={className}
 		>
-			<Card className="bg-white">
+			<Card >
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<UserPlus aria-hidden className="h-5 w-5" />
@@ -102,7 +102,7 @@ export function InviteMemberForm({
 													placeholder="member@example.com"
 													type="email"
 													autoComplete="email"
-													className="bg-white border-green-600"
+													
 													disabled={isSubmitting}
 													{...field}
 												/>
@@ -157,7 +157,7 @@ export function InviteMemberForm({
 										<FormControl>
 											<Input
 												placeholder="e.g., Software Engineer, Marketing Lead"
-												className="bg-white border-green-600"
+												
 												disabled={isSubmitting}
 												{...field}
 											/>

@@ -1,5 +1,9 @@
-import { SearchX } from 'lucide-react'
+'use client'
+
+import { SearchX, Sparkles } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '~/components/base/button'
+import { useI18n } from '~/lib/i18n'
 
 interface EmptyStateProps {
 	selectedCategories: string[]
@@ -10,46 +14,48 @@ export function EmptyProject({
 	selectedCategories,
 	onClearFilters,
 }: EmptyStateProps) {
+	const { t } = useI18n()
+	const hasFilters = selectedCategories.length > 0
+
 	return (
 		<section
-			className="flex flex-col items-center justify-center py-16 px-4 text-center"
+			className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-[#fafbfc] px-6 py-16 text-center"
 			aria-labelledby="empty-projects-heading"
 		>
-			<div className="bg-gray-50 p-6 rounded-full mb-6">
-				<SearchX
-					className="h-12 w-12 text-gray-400"
-					aria-hidden="true"
-				/>
+			<div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+				<SearchX className="h-8 w-8" aria-hidden="true" />
 			</div>
 
 			<h2
 				id="empty-projects-heading"
-				className="text-xl font-semibold text-gray-900 mb-2"
+				className="text-xl font-semibold tracking-tight text-slate-900"
 			>
-				No projects found
+				{t('projects.noProjects')}
 			</h2>
 
-			<p className="text-gray-600 mb-6 max-w-md">
-				{selectedCategories.length > 0 ? (
-					<>
-						We couldn&apos;t find any projects matching your selected{' '}
-						{selectedCategories.length > 1 ? 'categories' : 'category'}.
-					</>
-				) : (
-					'There are no projects available at the moment. Please check back later.'
-				)}
+			<p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+				{hasFilters
+					? t('projects.emptyFilteredDescription')
+					: t('projects.emptyDescription')}
 			</p>
 
-			{selectedCategories.length > 0 ? (
-				<div className="flex flex-col space-y-3">
-					<Button onClick={onClearFilters} variant="outline">
-						Clear {selectedCategories.length > 1 ? 'filters' : 'filter'}
+			<div className="mt-8 flex flex-col gap-3 sm:flex-row">
+				{hasFilters ? (
+					<Button
+						onClick={onClearFilters}
+						variant="outline"
+						className="rounded-full border-slate-200 bg-white"
+					>
+						{t('projects.clearCategories')}
 					</Button>
-					<span className="text-sm text-gray-500">
-						Selected: {selectedCategories.join(', ')}
-					</span>
-				</div>
-			) : null}
+				) : null}
+				<Button asChild className="gradient-btn rounded-full text-white">
+					<Link href="/create-project">
+						<Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
+						{t('projects.createNew')}
+					</Link>
+				</Button>
+			</div>
 		</section>
 	)
 }

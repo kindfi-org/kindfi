@@ -2,7 +2,7 @@
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { formatDistanceToNow } from 'date-fns'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { ArrowRight, BarChart2, Calendar, Heart, Trophy } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -18,7 +18,11 @@ import {
 import { GamificationSection } from '~/components/sections/gamification/gamification-section'
 import { NFTCollection } from '~/components/sections/gamification/nft-collection'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { useI18n } from '~/lib/i18n'
 import { getUserSupportedProjects } from '~/lib/queries/projects/get-user-projects'
+import { ProfileSectionHeader } from '../profile-section-header'
+import { ProfileStatCard } from '../profile-stat-card'
+import { ProfileSurfaceCard } from '../profile-surface-card'
 
 interface DonorProfileProps {
 	userId: string
@@ -31,6 +35,7 @@ export function DonorProfile({
 	displayName: _displayName,
 	showSection = 'overview',
 }: DonorProfileProps) {
+	const { t } = useI18n()
 	const {
 		data: supportedProjects = [],
 		isLoading,
@@ -138,14 +143,10 @@ export function DonorProfile({
 
 	if (showSection === 'donations') {
 		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>Donation History</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<DonationHistory donations={projectsWithBalances} />
-				</CardContent>
-			</Card>
+			<ProfileSurfaceCard>
+				<h3 className="mb-4 text-lg font-semibold">{t('profile.donationHistory')}</h3>
+				<DonationHistory donations={projectsWithBalances} t={t} />
+			</ProfileSurfaceCard>
 		)
 	}
 
@@ -167,93 +168,78 @@ export function DonorProfile({
 
 	// Default: overview
 	return (
-		<div className="space-y-6">
-			{/* Header */}
-			<div>
-				<h2 className="text-2xl font-bold text-foreground">Your Impact</h2>
-				<p className="text-muted-foreground text-sm mt-1">
-					Track your contributions and the projects you&apos;re supporting
-				</p>
-			</div>
+		<div className="space-y-8">
+			<ProfileSectionHeader
+				title={t('profile.donorOverviewTitle')}
+				highlight={t('profile.donorOverviewHighlight')}
+				description={t('profile.donorOverviewDescription')}
+			/>
 
-			{/* Quick Stats */}
 			<div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-				<StatCard
-					label="Projects Supported"
+				<ProfileStatCard
+					label={t('profile.projectsSupported')}
 					value={String(supportedProjects.length)}
 				/>
-				<StatCard
-					label="Total Contributed"
+				<ProfileStatCard
+					label={t('profile.totalContributed')}
 					value={`$${stats.totalContributed.toLocaleString()}`}
 				/>
-				<StatCard
-					label="Impact Score"
+				<ProfileStatCard
+					label={t('profile.impactScore')}
 					value={String(stats.impactScore)}
-					icon={<Trophy className="h-5 w-5 text-primary" />}
+					icon={Trophy}
 				/>
 			</div>
 
-			{/* Impact Overview */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2 text-base">
-						<BarChart2 className="h-4 w-4 text-primary" />
-						Impact Overview
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-						<ImpactMetric
-							label="Total Impact"
-							value={`$${stats.totalImpact.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-							description={`From ${projectsWithBalances.length} project${projectsWithBalances.length !== 1 ? 's' : ''}`}
-						/>
-						<ImpactMetric
-							label="Active Projects"
-							value={String(stats.activeProjects)}
-							description="Currently supporting"
-						/>
-						<ImpactMetric
-							label="Completed Projects"
-							value={String(stats.completedProjects)}
-							description="Successfully funded"
-						/>
-						<ImpactMetric
-							label="Avg. Contribution"
-							value={`$${stats.avgContribution.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
-							description="Per project"
-						/>
-					</div>
-				</CardContent>
-			</Card>
+			<ProfileSurfaceCard>
+				<h3 className="mb-5 flex items-center gap-2 text-base font-semibold">
+					<BarChart2 className="h-4 w-4 text-emerald-600" />
+					{t('profile.impactOverview')}
+				</h3>
+				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+					<ImpactMetric
+						label={t('profile.totalContributed')}
+						value={`$${stats.totalImpact.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+						description={`${projectsWithBalances.length} projects`}
+					/>
+					<ImpactMetric
+						label={t('profile.activeProjectsLabel')}
+						value={String(stats.activeProjects)}
+						description="Currently supporting"
+					/>
+					<ImpactMetric
+						label={t('profile.completedProjectsLabel')}
+						value={String(stats.completedProjects)}
+						description="Successfully funded"
+					/>
+					<ImpactMetric
+						label={t('profile.avgContribution')}
+						value={`$${stats.avgContribution.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+						description="Per project"
+					/>
+				</div>
+			</ProfileSurfaceCard>
 
-			{/* Supported Projects */}
 			<AnimatePresence mode="wait">
 				{isLoading ? (
-					<motion.div
-						key="loading"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						className="text-center py-12 text-muted-foreground"
-					>
-						Loading supported projects...
-					</motion.div>
+					<p className="py-12 text-center text-muted-foreground">
+						{t('profile.loadingProjects')}
+					</p>
 				) : error ? (
-					<Card key="error">
-						<CardContent className="py-12 text-center text-destructive">
-							Error loading projects. Please try again.
-						</CardContent>
-					</Card>
+					<ProfileSurfaceCard>
+						<p className="py-8 text-center text-destructive">
+							{t('profile.projectsError')}
+						</p>
+					</ProfileSurfaceCard>
 				) : projectsWithBalances.length > 0 ? (
-					<div key="projects" className="space-y-4">
-						<h3 className="text-lg font-semibold flex items-center gap-2">
-							<Heart className="h-4 w-4 text-primary fill-primary" />
-							Supported Projects
+					<div className="space-y-4">
+						<h3 className="flex items-center gap-2 text-lg font-semibold">
+							<Heart className="h-4 w-4 fill-emerald-600 text-emerald-600" />
+							{t('profile.supportedProjects')}
 						</h3>
 						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 							{projectsWithBalances.map((project) => (
-								<SupportedProjectCard key={project.id} project={project} />
+								<SupportedProjectCard key={project.id} project={project} t={t} />
 							))}
 						</div>
 					</div>
@@ -264,32 +250,6 @@ export function DonorProfile({
 }
 
 /* ── Subcomponents ── */
-
-function StatCard({
-	label,
-	value,
-	icon,
-}: {
-	label: string
-	value: string
-	icon?: React.ReactNode
-}) {
-	return (
-		<Card>
-			<CardHeader className="pb-2">
-				<CardTitle className="text-sm font-medium text-muted-foreground">
-					{label}
-				</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<div className="text-3xl font-bold text-foreground flex items-center gap-2">
-					{icon}
-					{value}
-				</div>
-			</CardContent>
-		</Card>
-	)
-}
 
 function ImpactMetric({
 	label,
@@ -311,6 +271,7 @@ function ImpactMetric({
 
 function DonationHistory({
 	donations,
+	t,
 }: {
 	donations: Array<{
 		id: string
@@ -318,11 +279,12 @@ function DonationHistory({
 		contributionAmount: string | number
 		contributionDate: string | null
 	}>
+	t: (key: string) => string
 }) {
 	if (donations.length === 0) {
 		return (
-			<div className="text-center py-8 text-muted-foreground">
-				<p>No donation history yet</p>
+			<div className="py-8 text-center text-muted-foreground">
+				<p>{t('profile.noDonations')}</p>
 			</div>
 		)
 	}
@@ -344,8 +306,8 @@ function DonationHistory({
 						className="flex items-center justify-between py-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
 					>
 						<div className="flex items-center gap-3 flex-1 min-w-0">
-							<div className="p-2 rounded-full bg-[#000124]/10 flex-shrink-0">
-								<Heart className="h-4 w-4 text-[#000124] fill-[#000124]" />
+							<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50">
+								<Heart className="h-4 w-4 fill-emerald-600 text-emerald-600" />
 							</div>
 							<div className="flex-1 min-w-0">
 								<p className="font-medium text-sm truncate">
@@ -373,6 +335,7 @@ function DonationHistory({
 
 function SupportedProjectCard({
 	project,
+	t,
 }: {
 	project: {
 		id: string
@@ -388,12 +351,13 @@ function SupportedProjectCard({
 		contributionAmount: string | number
 		contributionDate: string | null
 	}
+	t: (key: string) => string
 }) {
 	const percentage = project.percentageComplete ?? 0
 	const contributionAmount = Number(project.contributionAmount)
 
 	return (
-		<Card className="overflow-hidden h-full flex flex-col group hover:shadow-md transition-shadow">
+		<ProfileSurfaceCard padding="sm" className="group flex h-full flex-col overflow-hidden p-0 transition-shadow hover:shadow-md">
 			{project.image && (
 				<div className="relative h-40 w-full overflow-hidden">
 					<Image
@@ -404,12 +368,12 @@ function SupportedProjectCard({
 					/>
 				</div>
 			)}
-			<CardHeader className="pb-2">
+			<CardHeader className="px-5 pb-2 pt-5">
 				<CardTitle className="text-base line-clamp-2">
 					{project.title}
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="flex-1 flex flex-col gap-3">
+			<CardContent className="flex flex-1 flex-col gap-3 px-5 pb-5">
 				{project.description && (
 					<p className="text-sm text-muted-foreground line-clamp-2">
 						{project.description}
@@ -456,13 +420,13 @@ function SupportedProjectCard({
 						))}
 					</div>
 				)}
-				<Button asChild variant="outline" size="sm" className="w-full">
+				<Button asChild variant="outline" size="sm" className="w-full rounded-full">
 					<Link href={`/projects/${project.slug}`}>
-						View Project
+						{t('profile.viewProject')}
 						<ArrowRight className="h-4 w-4 ml-2" />
 					</Link>
 				</Button>
 			</CardContent>
-		</Card>
+		</ProfileSurfaceCard>
 	)
 }

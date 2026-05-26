@@ -15,7 +15,7 @@ import {
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 
 interface FundEscrowTabProps {
 	escrowContractAddress: string
@@ -33,15 +33,9 @@ export function FundEscrowTab({
 	onSuccess,
 }: FundEscrowTabProps) {
 	const { fundEscrow, sendTransaction } = useEscrow()
-	const { isConnected, connect, address, signTransaction } = useWallet()
+	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
 	const [fundAmount, setFundAmount] = useState<number | ''>('')
 	const [isProcessing, setIsProcessing] = useState(false)
-
-	const ensureWallet = async () => {
-		if (!isConnected) await connect()
-		if (!address) throw new Error('Wallet address missing')
-		return address
-	}
 
 	const handleFundEscrow = async () => {
 		if (!fundAmount || Number(fundAmount) <= 0) {
@@ -61,7 +55,7 @@ export function FundEscrowTab({
 
 		try {
 			setIsProcessing(true)
-			const signer = await ensureWallet()
+			const signer = await ensureTrustlessSigner()
 
 			// 1) Get unsigned transaction
 			// Trustless Work expects amount in dollars (not stroops) - it handles conversion internally
@@ -83,7 +77,7 @@ export function FundEscrowTab({
 			}
 
 			// 2) Sign transaction
-			const signedXdr = await signTransaction(fundResponse.unsignedTransaction)
+			const signedXdr = await signTrustlessTransaction(fundResponse.unsignedTransaction)
 
 			// 3) Send transaction
 			const sendResult = await sendTransaction(signedXdr)

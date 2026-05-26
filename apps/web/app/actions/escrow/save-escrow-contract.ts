@@ -2,14 +2,22 @@
 
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { revalidatePath } from 'next/cache'
-import { getServerSession } from 'next-auth'
-import { nextAuthOption } from '~/lib/auth/auth-options'
+import {
+	enforceRateLimit,
+	requireAuthenticatedSession,
+	toServerActionFailure,
+	validateInput,
+} from '~/lib/auth/server-action-auth'
+import { Logger } from '~/lib/logger'
+import { saveEscrowContractInputSchema } from '~/lib/schemas/server-actions.schemas'
+
+const logger = new Logger()
 
 interface SaveEscrowContractParams {
 	projectId: string
 	contractId: string
 	engagementId?: string
-	escrowData?: {
+	escrowData: {
 		engagementId: string
 		title: string
 		description: string
@@ -25,8 +33,8 @@ interface SaveEscrowContractParams {
 			amount: number
 			receiver: string
 		}>
-		amount?: number // For single-release escrows
-		receiver?: string // For single-release escrows
+		amount?: number
+		receiver?: string
 		receiverMemo?: number
 	}
 }
@@ -34,17 +42,39 @@ interface SaveEscrowContractParams {
 export async function saveEscrowContractAction(
 	params: SaveEscrowContractParams,
 ): Promise<{ success: boolean; error?: string }> {
+	let session: Awaited<ReturnType<typeof requireAuthenticatedSession>>
 	try {
-		// Log received parameters for debugging
+		session = await requireAuthenticatedSession('saveEscrowContractAction')
+	} catch (error) {
+		const failure = toServerActionFailure(error, 'Unauthorized')
+		return { success: false, error: failure.error }
+	}
 
-		// Ensure the request is authenticated
-		const session = await getServerSession(nextAuthOption)
-		const userId = session?.user?.id
-		if (!userId) {
-			return { success: false, error: 'Unauthorized' }
-		}
+	const userId = session.user.id
 
-		// Check if user is a platform admin
+	let validated: SaveEscrowContractParams
+	try {
+		validated = validateInput(
+			saveEscrowContractInputSchema,
+			params,
+			'saveEscrowContractAction',
+		) as SaveEscrowContractParams
+	} catch (error) {
+		const failure = toServerActionFailure(error, 'Invalid input')
+		return { success: false, error: failure.error }
+	}
+
+	try {
+		await enforceRateLimit(userId, 'save_escrow_contract')
+	} catch (error) {
+		const failure = toServerActionFailure(
+			error,
+			'Too many requests. Please try again later.',
+		)
+		return { success: false, error: failure.error }
+	}
+
+	try {
 		const { data: profileData } = await supabaseServiceRole
 			.from('profiles')
 			.select('role')
@@ -53,28 +83,23 @@ export async function saveEscrowContractAction(
 
 		const isPlatformAdmin = profileData?.role === 'admin'
 
-		// If user is platform admin, skip project permission checks
 		if (!isPlatformAdmin) {
-			// Verify user has permission to update escrow for this project
-			// Check if user is the project owner or has editor role
 			const { data: project, error: projectError } = await supabaseServiceRole
 				.from('projects')
 				.select('id, kindler_id')
-				.eq('id', params.projectId)
+				.eq('id', validated.projectId)
 				.single()
 
 			if (projectError || !project) {
 				return { success: false, error: 'Project not found' }
 			}
 
-			// Check if user is the project owner
 			const isOwner = project.kindler_id === userId
 
-			// Check if user is a project member with editor role
 			const { data: memberData } = await supabaseServiceRole
 				.from('project_members')
 				.select('role')
-				.eq('project_id', params.projectId)
+				.eq('project_id', validated.projectId)
 				.eq('user_id', userId)
 				.in('role', ['core', 'admin', 'editor'])
 				.single()
@@ -82,6 +107,11 @@ export async function saveEscrowContractAction(
 			const hasEditorRole = !!memberData
 
 			if (!isOwner && !hasEditorRole) {
+				logger.warn({
+					eventType: 'ESCROW_CONTRACT_SAVE_FORBIDDEN',
+					userId,
+					projectId: validated.projectId,
+				})
 				return {
 					success: false,
 					error:
@@ -90,40 +120,47 @@ export async function saveEscrowContractAction(
 			}
 		}
 
-		// Use service role client for escrow update with manual authorization check
 		const supabase = supabaseServiceRole
 
-		// Prepare escrow data
-		const engagementId =
-			params.escrowData?.engagementId ||
-			params.engagementId ||
-			`project-${params.projectId}`
+		const { escrowData } = validated
+		const engagementId = escrowData.engagementId
+		// `approver` is the entity requiring the service (the funder); the
+		// `serviceProvider` delivers work and receives payment. The escrow
+		// payer is therefore the approver.
+		const payerAddress = escrowData.roles.approver
+		const platformFee = escrowData.platformFee
 
-		// Calculate amount: for multi-release, sum milestone amounts; for single-release, use amount
-		const totalAmount = params.escrowData?.milestones
-			? params.escrowData.milestones.reduce((sum, m) => sum + m.amount, 0)
-			: params.escrowData?.amount || 1 // Minimum amount to satisfy constraint
+		const milestones = escrowData.milestones
+		let totalAmount: number
+		let receiverAddress: string
+		if (milestones && milestones.length > 0) {
+			totalAmount = milestones.reduce((sum, m) => sum + m.amount, 0)
+			// Schema guarantees every milestone shares the same receiver, so
+			// reading the first is safe and represents the single receiver.
+			receiverAddress = milestones[0].receiver
+		} else if (
+			escrowData.amount !== undefined &&
+			escrowData.receiver !== undefined
+		) {
+			totalAmount = escrowData.amount
+			receiverAddress = escrowData.receiver
+		} else {
+			logger.warn({
+				eventType: 'ESCROW_CONTRACT_INVALID_PAYLOAD',
+				userId,
+				projectId: validated.projectId,
+			})
+			return {
+				success: false,
+				error:
+					'Escrow data must include either milestones or single-release amount and receiver',
+			}
+		}
 
-		// Determine payer and receiver addresses - use escrowData if available, otherwise use placeholder
-		const payerAddress =
-			params.escrowData?.roles?.serviceProvider ||
-			params.escrowData?.roles?.approver ||
-			'G000000000000000000000000000000000000000' // Placeholder Stellar address
-
-		const receiverAddress =
-			params.escrowData?.milestones && params.escrowData.milestones.length > 0
-				? params.escrowData.milestones[0]?.receiver
-				: params.escrowData?.receiver ||
-					params.escrowData?.roles?.serviceProvider ||
-					payerAddress
-
-		const platformFee = params.escrowData?.platformFee ?? 0
-
-		// Check if a contribution exists for this project, or create a placeholder
 		const { data: existingContribution } = await supabase
 			.from('contributions')
 			.select('id')
-			.eq('project_id', params.projectId)
+			.eq('project_id', validated.projectId)
 			.order('created_at', { ascending: false })
 			.limit(1)
 			.maybeSingle()
@@ -133,20 +170,23 @@ export async function saveEscrowContractAction(
 		if (existingContribution?.id) {
 			contributionId = existingContribution.id
 		} else {
-			// Create a placeholder contribution for the escrow
-			// This represents the project's escrow setup, not an actual contribution
 			const { data: newContribution, error: contribError } = await supabase
 				.from('contributions')
 				.insert({
-					project_id: params.projectId,
-					contributor_id: userId, // Use current user as placeholder
+					project_id: validated.projectId,
+					contributor_id: userId,
 					amount: totalAmount,
 				})
 				.select('id')
 				.single()
 
 			if (contribError || !newContribution?.id) {
-				console.error('❌ Failed to create contribution record:', contribError)
+				logger.error({
+					eventType: 'ESCROW_CONTRIBUTION_CREATE_ERROR',
+					error: contribError?.message ?? 'Unknown error',
+					userId,
+					projectId: validated.projectId,
+				})
 				return {
 					success: false,
 					error: `Failed to create contribution record: ${contribError?.message || 'Unknown error'}`,
@@ -156,15 +196,13 @@ export async function saveEscrowContractAction(
 			contributionId = newContribution.id
 		}
 
-		// Upsert escrow_contracts record using ON CONFLICT to prevent duplicates
-		// This will insert if contract_id doesn't exist, or update if it does
 		const { data: upsertedEscrow, error: escrowUpsertError } = await supabase
 			.from('escrow_contracts')
 			.upsert(
 				{
-					contract_id: params.contractId,
+					contract_id: validated.contractId,
 					engagement_id: engagementId,
-					project_id: params.projectId,
+					project_id: validated.projectId,
 					contribution_id: contributionId,
 					payer_address: payerAddress,
 					receiver_address: receiverAddress,
@@ -181,34 +219,26 @@ export async function saveEscrowContractAction(
 			.single()
 
 		if (escrowUpsertError || !upsertedEscrow?.id) {
-			console.error('❌ Failed to upsert escrow_contracts record:', {
-				error: escrowUpsertError,
-				contractId: params.contractId,
-				engagementId,
-				projectId: params.projectId,
-				contributionId,
-				payerAddress,
-				receiverAddress,
-				totalAmount,
-				platformFee,
-				hasEscrowData: !!params.escrowData,
-				escrowDataKeys: params.escrowData ? Object.keys(params.escrowData) : [],
+			logger.error({
+				eventType: 'ESCROW_CONTRACT_UPSERT_ERROR',
+				error: escrowUpsertError?.message ?? 'Unknown error',
+				userId,
+				contractId: validated.contractId,
+				projectId: validated.projectId,
 			})
 			return {
 				success: false,
-				error: `Failed to upsert escrow contract record: ${escrowUpsertError?.message || 'Unknown error'}. Details: ${JSON.stringify(escrowUpsertError)}`,
+				error: `Failed to upsert escrow contract record: ${escrowUpsertError?.message || 'Unknown error'}`,
 			}
 		}
 
 		const escrowContractUuid = upsertedEscrow.id
 
-		// Upsert project_escrows - link project to escrow using the UUID
-		// Since project can only have one escrow, we'll upsert by project_id
 		const { error: upsertError } = await supabase
 			.from('project_escrows')
 			.upsert(
 				{
-					project_id: params.projectId,
+					project_id: validated.projectId,
 					escrow_id: escrowContractUuid,
 				},
 				{
@@ -220,7 +250,13 @@ export async function saveEscrowContractAction(
 			throw new Error(`Failed to save escrow contract: ${upsertError.message}`)
 		}
 
-		// Revalidate relevant paths
+		logger.info({
+			eventType: 'ESCROW_CONTRACT_SAVED',
+			userId,
+			projectId: validated.projectId,
+			contractId: validated.contractId,
+		})
+
 		revalidatePath(`/projects/[slug]/manage/settings`)
 		revalidatePath(`/projects/[slug]/manage/settings/manage`)
 
@@ -228,7 +264,11 @@ export async function saveEscrowContractAction(
 			success: true,
 		}
 	} catch (error) {
-		console.error('Error saving escrow contract:', error)
+		logger.error({
+			eventType: 'ESCROW_CONTRACT_SAVE_EXCEPTION',
+			error: error instanceof Error ? error.message : 'Unknown error',
+			userId,
+		})
 		return {
 			success: false,
 			error:

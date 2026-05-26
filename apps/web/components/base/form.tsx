@@ -14,6 +14,7 @@ import {
 import { getCsrfTokenFromCookie } from '~/app/actions/csrf'
 import { Label } from '~/components/base/label'
 import { cn } from '~/lib/utils'
+import { formFieldClasses } from '~/lib/form/form-styles'
 
 /**
  * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/form
@@ -109,7 +110,7 @@ const FormItem = React.forwardRef<
 
 	return (
 		<FormItemContext.Provider value={{ id }}>
-			<div ref={ref} className={cn('space-y-2', className)} {...props} />
+			<div ref={ref} className={cn(formFieldClasses.item, className)} {...props} />
 		</FormItemContext.Provider>
 	)
 })
@@ -129,7 +130,7 @@ const FormLabel = React.forwardRef<
 	return (
 		<Label
 			ref={ref}
-			className={cn(error && 'text-destructive', className)}
+			className={cn(formFieldClasses.label, error && 'text-destructive', className)}
 			htmlFor={formItemId}
 			{...props}
 		/>
@@ -179,7 +180,7 @@ const FormDescription = React.forwardRef<
 		<p
 			ref={ref}
 			id={formDescriptionId}
-			className={cn('text-[0.8rem] text-muted-foreground', className)}
+			className={cn(formFieldClasses.description, className)}
 			{...props}
 		/>
 	)
@@ -202,11 +203,7 @@ const FormMessage = React.forwardRef<
 		<p
 			ref={ref}
 			id={formMessageId}
-			className={cn(
-				'text-[0.8rem] font-medium text-destructive',
-				!body && 'hidden',
-				className,
-			)}
+			className={cn(formFieldClasses.error, !body && 'hidden', className)}
 			{...props}
 		>
 			{body}

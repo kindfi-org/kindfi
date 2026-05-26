@@ -47,7 +47,7 @@ export function LocationSelect({ value, onChange }: LocationSelectProps) {
 					aria-expanded={open}
 					aria-label="Select a country"
 					className={cn(
-						'w-full justify-between border-green-600 bg-white text-sm font-medium text-gray-700 hover:text-gray-700',
+						'w-full justify-between text-sm font-medium text-gray-700 hover:text-gray-700',
 						!selected && 'text-muted-foreground',
 					)}
 				>

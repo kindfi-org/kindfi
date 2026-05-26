@@ -28,7 +28,8 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
+import { TrustlessExternalWalletBanner } from '~/components/sections/projects/manage/escrow/components/trustless-external-wallet-banner'
 import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import { useAuth } from '~/hooks/use-auth'
 import { progressBarAnimation } from '~/lib/constants/animations'
@@ -61,8 +62,9 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		isConnected,
 		connect,
 		disconnect,
-		signTransaction,
-	} = useWallet()
+		ensureTrustlessSigner,
+		signTrustlessTransaction,
+	} = useTrustlessSigner()
 	const { user } = useAuth()
 
 	const [onChainRaised, setOnChainRaised] = useState<number | null>(null)
@@ -148,13 +150,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		}
 
 		try {
-			// 1) Ensure wallet is connected before creating the unsigned tx
-			if (!isConnected) {
-				await connect()
-			}
-			if (!address) throw new Error('Wallet address missing')
-
-			// Validate amount is reasonable (prevent accidental large amounts)
+			const signer = await ensureTrustlessSigner()
 			if (data.investmentAmount > 1_000_000) {
 				toast.error('Amount too large', {
 					description: 'Please enter an amount less than $1,000,000',
@@ -171,7 +167,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				{
 					amount: data.investmentAmount,
 					contractId: project.escrowContractAddress,
-					signer: address,
+					signer,
 				},
 				effectiveEscrowType,
 			)
@@ -181,7 +177,9 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			}
 
 			// 3) Sign with wallet kit
-			const signedXdr = await signTransaction(fundResponse.unsignedTransaction)
+			const signedXdr = await signTrustlessTransaction(
+				fundResponse.unsignedTransaction,
+			)
 
 			// 4) Submit signed XDR
 			const sendResult = await sendTransaction(signedXdr)
@@ -310,7 +308,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 	return (
 		<motion.div
-			className="overflow-hidden sticky top-16 bg-white rounded-xl shadow-md"
+			className="overflow-hidden sticky top-16 rounded-xl shadow-md"
 			initial={reducedMotion ? false : { opacity: 0, y: 20 }}
 			animate={reducedMotion ? false : { opacity: 1, y: 0 }}
 			transition={reducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
@@ -367,6 +365,12 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					<span>{progressPercentage}%</span>
 				</div>
 
+				{hasEscrow && (
+					<div className="mb-4">
+						<TrustlessExternalWalletBanner />
+					</div>
+				)}
+
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="mb-6">
 						<FormField
@@ -388,7 +392,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 														? `Min. $${project.minInvestment}…`
 														: 'Donations coming soon'
 												}
-												className="pl-6 bg-white border-green-600 disabled:opacity-60 disabled:cursor-not-allowed"
+												className="pl-6 disabled:opacity-60 disabled:cursor-not-allowed"
 												aria-label="Donation amount in USD"
 												autoComplete="off"
 												{...field}
@@ -476,7 +480,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				<div className="flex gap-4">
 					<Button
 						variant="outline"
-						className="flex gap-2 justify-center items-center w-full bg-white gradient-border-btn"
+						className="flex gap-2 justify-center items-center w-full gradient-border-btn"
 						onClick={handleToggleFollow}
 						aria-label={isFollowing ? 'Unfollow project' : 'Follow project'}
 					>
@@ -489,7 +493,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 					<Button
 						variant="outline"
-						className="flex gap-2 justify-center items-center w-full bg-white gradient-border-btn"
+						className="flex gap-2 justify-center items-center w-full gradient-border-btn"
 						onClick={handleShare}
 						aria-label="Share project"
 					>
@@ -498,7 +502,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					</Button>
 				</div>
 				{/* Wallet status & controls - deferred until mount to avoid hydration mismatch */}
-				<div className="p-3 mt-4 text-sm bg-white rounded-md border border-gray-200">
+				<div className="p-3 mt-4 text-sm rounded-md border border-gray-200">
 					<div className="flex justify-between items-center mb-2">
 						<span className="font-medium">Donor details</span>
 						{isMounted ? (
@@ -539,7 +543,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					<h3 className="mb-2 font-medium">Foundation</h3>
 					<Link
 						href={`/foundations/${project.foundation.slug}`}
-						className="flex items-center gap-3 p-3 rounded-lg border border-purple-200 bg-white hover:bg-purple-50 hover:border-purple-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+						className="flex items-center gap-3 p-3 rounded-lg border border-purple-200 hover:bg-purple-50 hover:border-purple-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
 					>
 						<div className="p-2 rounded-lg bg-purple-100 shrink-0">
 							<Building2

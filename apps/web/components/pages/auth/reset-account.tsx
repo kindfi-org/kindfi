@@ -1,13 +1,12 @@
-'use client'
-
 import Link from 'next/link'
 import { requestResetAccountAction } from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
-import { Label } from '~/components/base/label'
 import { FormMessage, type Message } from '~/components/form-message'
-import { AuthForm } from '~/components/shared/layout/auth/auth-form'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
+import { FormFieldGroup } from '~/components/shared/form/form-field-group'
+import { FormShell } from '~/components/shared/form/form-shell'
+import { formLayoutClasses } from '~/lib/form/form-styles'
 
 export async function ResetAccountComponent({
 	searchParams,
@@ -16,40 +15,43 @@ export async function ResetAccountComponent({
 }) {
 	return (
 		<AuthLayout>
-			<AuthForm
+			<FormShell
 				title="Forgot Your Password?"
 				subtitle="Enter your email address and we’ll send you a link to reset it."
-				footerContent={
-					<div>
+				footer={
+					<div className="w-full text-center text-sm text-muted-foreground">
 						Remembered your password?{' '}
 						<Link
 							href="/sign-in"
-							className="text-primary font-medium hover:underline"
+							className="font-medium text-primary hover:underline"
 						>
 							Go back to login
 						</Link>
 					</div>
 				}
 			>
-				<form className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="email">Email</Label>
+				<form className={formLayoutClasses.stack}>
+					<FormFieldGroup id="email" label="Email" required>
 						<Input
 							id="email"
 							type="email"
 							name="email"
 							placeholder="you@example.com"
 							required
+							autoComplete="email"
 						/>
-					</div>
+					</FormFieldGroup>
 
-					<Button className="w-full" formAction={requestResetAccountAction}>
+					<Button
+						className="gradient-btn w-full text-white"
+						formAction={requestResetAccountAction}
+					>
 						Send Recovery Link
 					</Button>
 
-					{searchParams && <FormMessage message={searchParams} />}
+					{searchParams ? <FormMessage message={searchParams} /> : null}
 				</form>
-			</AuthForm>
+			</FormShell>
 		</AuthLayout>
 	)
 }

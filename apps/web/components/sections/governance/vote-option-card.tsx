@@ -5,17 +5,17 @@ import { motion } from 'framer-motion'
 import {
 	CheckCircle2,
 	ExternalLink,
+	Heart,
 	Loader2,
-	ThumbsDown,
-	ThumbsUp,
+	MinusCircle,
 	Trophy,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import { Card, CardContent } from '~/components/base/card'
 import type { GovernanceOption, VoteType } from '~/lib/governance/types'
+import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 
 interface VoteOptionCardProps {
@@ -41,6 +41,7 @@ export function VoteOptionCard({
 	isWinner,
 	index = 0,
 }: VoteOptionCardProps) {
+	const { t } = useI18n()
 	const queryClient = useQueryClient()
 
 	const { mutate: castVote, isPending } = useMutation({
@@ -79,29 +80,27 @@ export function VoteOptionCard({
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.2, delay: index * 0.05 }}
 		>
-			<Card
+			<div
 				className={cn(
-					'overflow-hidden transition-all duration-200',
+					'overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 shadow-sm shadow-slate-200/40 transition-all duration-200',
 					option.user_voted &&
-						'ring-2 ring-primary/30 shadow-sm shadow-primary/5',
+						'border-emerald-200/80 ring-2 ring-emerald-100',
 					isWinner &&
-						'ring-2 ring-amber-400/60 shadow-md shadow-amber-400/10',
+						'border-amber-200/80 ring-2 ring-amber-100 shadow-md shadow-amber-100/40',
 				)}
 			>
-				{/* Winner banner */}
-				{isWinner && (
-					<div className="bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2 flex items-center gap-2">
-						<Trophy className="h-3.5 w-3.5 text-amber-900" />
-						<span className="text-xs font-bold text-amber-900 uppercase tracking-wider">
-							Winner — Receives community fund allocation
+				{isWinner ? (
+					<div className="flex items-center gap-2 bg-gradient-to-r from-amber-100 via-amber-50 to-yellow-50 px-4 py-2.5">
+						<Trophy className="h-3.5 w-3.5 text-amber-700" aria-hidden="true" />
+						<span className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">
+							{t('governancePage.winnerBanner')}
 						</span>
 					</div>
-				)}
+				) : null}
 
 				<div className="flex flex-col sm:flex-row">
-					{/* Image */}
-					{option.image_url && (
-						<div className="relative w-full sm:w-36 h-36 sm:h-auto bg-muted shrink-0">
+					{option.image_url ? (
+						<div className="relative h-36 w-full shrink-0 bg-slate-100 sm:h-auto sm:w-36">
 							<Image
 								src={option.image_url}
 								alt={option.title}
@@ -110,140 +109,147 @@ export function VoteOptionCard({
 								unoptimized
 							/>
 						</div>
-					)}
+					) : null}
 
-					<CardContent className="flex-1 p-5 space-y-4">
-						{/* Header */}
+					<div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
 						<div className="flex items-start justify-between gap-3">
 							<div className="min-w-0 space-y-1">
-								<h3 className="font-semibold text-base leading-tight">
+								<h3 className="text-base font-semibold leading-tight text-slate-900">
 									{option.title}
 								</h3>
-								{option.description && (
-									<p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+								{option.description ? (
+									<p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
 										{option.description}
 									</p>
-								)}
+								) : null}
 							</div>
-							{option.project_slug && (
+							{option.project_slug ? (
 								<Link
 									href={`/projects/${option.project_slug}`}
-									className="inline-flex items-center gap-1 text-xs text-primary hover:underline shrink-0 font-medium"
+									className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-emerald-700 hover:underline"
 								>
-									<ExternalLink className="h-3 w-3" />
-									View project
+									<ExternalLink className="h-3 w-3" aria-hidden="true" />
+									{t('governancePage.viewProject')}
 								</Link>
-							)}
+							) : null}
 						</div>
 
-						{/* Progress bar */}
 						{(roundStatus === 'active' || roundStatus === 'ended') &&
-							totalRoundWeight > 0 && (
-								<div className="space-y-1.5">
-									<div className="flex items-center justify-between text-xs">
-										<span className="text-muted-foreground">
-											{upWeight} weighted upvote{upWeight !== 1 ? 's' : ''}
-										</span>
-										<span className="font-semibold tabular-nums">
-											{allocationPercent}% allocation
-										</span>
-									</div>
-									<div className="h-2.5 rounded-full bg-muted overflow-hidden">
-										<motion.div
-											className={cn(
-												'h-full rounded-full',
-												isWinner
-													? 'bg-gradient-to-r from-amber-400 to-yellow-500'
-													: 'bg-gradient-to-r from-primary/80 to-primary',
-											)}
-											initial={{ width: 0 }}
-											animate={{ width: `${allocationPercent}%` }}
-											transition={{ duration: 0.7, ease: 'easeOut' }}
-										/>
-									</div>
+						totalRoundWeight > 0 ? (
+							<div className="space-y-1.5">
+								<div className="flex items-center justify-between text-xs">
+									<span className="text-muted-foreground">
+										{upWeight}{' '}
+										{t('governancePage.weightedUpvotes')}
+									</span>
+									<span className="font-semibold tabular-nums text-slate-900">
+										{allocationPercent}% {t('governancePage.allocation')}
+									</span>
 								</div>
-							)}
+								<div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+									<motion.div
+										className={cn(
+											'h-full rounded-full',
+											isWinner
+												? 'bg-gradient-to-r from-amber-400 to-amber-500'
+												: 'bg-gradient-to-r from-emerald-500 to-emerald-600',
+										)}
+										initial={{ width: 0 }}
+										animate={{ width: `${allocationPercent}%` }}
+										transition={{ duration: 0.7, ease: 'easeOut' }}
+									/>
+								</div>
+							</div>
+						) : null}
 
-						{/* Stats + vote buttons row */}
-						<div className="flex items-center justify-between gap-3 flex-wrap">
-							<div className="flex items-center gap-3">
+						<div className="flex flex-wrap items-center justify-between gap-3">
+							<div className="flex flex-wrap items-center gap-3">
 								<div className="flex items-center gap-1.5 text-sm">
-									<ThumbsUp className="h-3.5 w-3.5 text-green-500" />
-									<span className="font-semibold tabular-nums">{upWeight}</span>
+									<Heart
+										className="h-3.5 w-3.5 text-emerald-600"
+										aria-hidden="true"
+									/>
+									<span className="font-semibold tabular-nums text-slate-900">
+										{upWeight}
+									</span>
 								</div>
 								<div className="flex items-center gap-1.5 text-sm">
-									<ThumbsDown className="h-3.5 w-3.5 text-red-400" />
-									<span className="font-semibold tabular-nums">
+									<MinusCircle
+										className="h-3.5 w-3.5 text-slate-400"
+										aria-hidden="true"
+									/>
+									<span className="font-semibold tabular-nums text-slate-600">
 										{downWeight}
 									</span>
 								</div>
-								{netWeight !== 0 && (
+								{netWeight !== 0 ? (
 									<Badge
 										variant="outline"
 										className={cn(
 											'text-xs tabular-nums',
 											netWeight > 0
-												? 'border-green-300 text-green-700 dark:text-green-400'
-												: 'border-red-300 text-red-600 dark:text-red-400',
+												? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+												: 'border-slate-200 bg-slate-50 text-slate-600',
 										)}
 									>
 										{netWeight > 0 ? '+' : ''}
-										{netWeight} net
+										{netWeight}
 									</Badge>
-								)}
-								{option.user_voted && (
+								) : null}
+								{option.user_voted ? (
 									<Badge
 										variant="outline"
-										className="text-xs gap-1 border-primary/30 text-primary"
+										className="gap-1 border-emerald-200 bg-emerald-50 text-xs text-emerald-800"
 									>
-										<CheckCircle2 className="h-3 w-3" />
-										{option.user_vote_type === 'up' ? 'Upvoted' : 'Downvoted'}
+										<CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+										{option.user_vote_type === 'up'
+											? t('governancePage.votedUp')
+											: t('governancePage.votedDown')}
 									</Badge>
-								)}
+								) : null}
 							</div>
 
-							{/* Vote buttons */}
-							{roundStatus === 'active' && !hasVotedInRound && (
+							{roundStatus === 'active' && !hasVotedInRound ? (
 								<div className="flex items-center gap-2">
-									{!isEligible && (
-										<p className="text-xs text-muted-foreground mr-1">
-											NFT required
+									{!isEligible ? (
+										<p className="mr-1 text-xs text-muted-foreground">
+											{t('governancePage.nftRequired')}
 										</p>
-									)}
+									) : null}
 									<Button
 										size="sm"
 										variant="outline"
 										onClick={() => castVote('up')}
 										disabled={!canVote}
-										className="gap-1.5 h-8 px-3 hover:border-green-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
+										className="h-9 gap-1.5 rounded-full border-emerald-200 bg-white px-4 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800"
 									>
 										{isPending ? (
 											<Loader2 className="h-3.5 w-3.5 animate-spin" />
 										) : (
-											<ThumbsUp className="h-3.5 w-3.5" />
+											<Heart className="h-3.5 w-3.5" />
 										)}
-										Upvote
+										{t('governancePage.upvote')}
 									</Button>
 									<Button
 										size="sm"
 										variant="outline"
 										onClick={() => castVote('down')}
 										disabled={!canVote}
-										className="gap-1.5 h-8 px-3 hover:border-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+										className="h-9 gap-1.5 rounded-full border-slate-200 bg-white px-4 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
 									>
 										{isPending ? (
 											<Loader2 className="h-3.5 w-3.5 animate-spin" />
 										) : (
-											<ThumbsDown className="h-3.5 w-3.5" />
+											<MinusCircle className="h-3.5 w-3.5" />
 										)}
-										Downvote
+										{t('governancePage.downvote')}
 									</Button>
 								</div>
-							)}
+							) : null}
 						</div>
-					</CardContent>
+					</div>
 				</div>
-			</Card>
+			</div>
 		</motion.div>
 	)
 }

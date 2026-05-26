@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import { Button } from '~/components/base/button'
 import {
@@ -20,7 +21,12 @@ interface SortDropdownProps {
 
 export function SortDropdown({ value, onChange }: SortDropdownProps) {
 	const { t } = useI18n()
+	const [isMounted, setIsMounted] = useState(false)
 	const selectedOption = sortOptions.find((option) => option.value === value)
+
+	useEffect(() => {
+		setIsMounted(true)
+	}, [])
 
 	// Translate sort option labels
 	const getSortLabel = (option: SortOption) => {
@@ -38,29 +44,35 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
 		}
 	}
 
+	const triggerButton = (
+		<Button
+			variant="outline"
+			className="flex items-center gap-2 rounded-full border-slate-200 bg-white px-4"
+			aria-label={t('projects.sort')}
+			aria-haspopup="listbox"
+		>
+			{selectedOption?.icon}
+			{selectedOption && getSortLabel(selectedOption.value)}
+			<ChevronDown className="h-4 w-4 ml-2" aria-hidden="true" />
+		</Button>
+	)
+
+	if (!isMounted) {
+		return triggerButton
+	}
+
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button
-					variant="outline"
-					className="flex items-center gap-2 gradient-border-btn"
-					aria-label="Sort projects"
-					aria-haspopup="listbox"
-				>
-					{selectedOption?.icon}
-					{selectedOption && getSortLabel(selectedOption.value)}
-					<ChevronDown className="h-4 w-4 ml-2" aria-hidden="true" />
-				</Button>
-			</DropdownMenuTrigger>
+			<DropdownMenuTrigger asChild>{triggerButton}</DropdownMenuTrigger>
 			<DropdownMenuContent
 				align="end"
-				className="w-[--radix-dropdown-menu-trigger-width] gradient-border-btn"
+				className="w-[--radix-dropdown-menu-trigger-width] rounded-xl border-slate-200"
 			>
 				{sortOptions.map((option) => (
 					<DropdownMenuItem
 						key={option.value}
 						onClick={() => onChange(option.value)}
-						className="flex items-center cursor-pointer focus:bg-green-100 focus:text-primary"
+						className="flex cursor-pointer items-center focus:bg-emerald-50 focus:text-emerald-900"
 						aria-selected={option.value === value}
 					>
 						{option.icon}

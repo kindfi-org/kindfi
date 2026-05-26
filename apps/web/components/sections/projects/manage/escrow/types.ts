@@ -27,6 +27,5 @@ export interface EscrowAdminPanelProps {
 	projectSlug: string
 	projectTitle?: string
 	projectDescription?: string
-	escrowContractAddress?: string
 	escrowType?: EscrowType
 }

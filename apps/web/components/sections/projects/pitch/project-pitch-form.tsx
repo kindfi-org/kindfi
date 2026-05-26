@@ -69,7 +69,7 @@ export function ProjectPitchForm({
 			animate={{ opacity: 1, x: 0 }}
 			transition={{ duration: 0.5, delay: 0.1 }}
 		>
-			<Card className="bg-white max-w-5xl w-full">
+			<Card className=" max-w-5xl w-full">
 				<CardContent>
 					<Form {...form}>
 						<form
@@ -91,7 +91,7 @@ export function ProjectPitchForm({
 												<Input
 													placeholder="Enter your pitch title"
 													maxLength={100}
-													className="bg-white border-green-600 pr-16"
+													className=" pr-16"
 													{...field}
 												/>
 												<div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
@@ -174,7 +174,7 @@ export function ProjectPitchForm({
 												<Video className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
 												<Input
 													placeholder="Enter YouTube or Vimeo URL"
-													className="pl-10 bg-white border-green-600"
+													className="pl-10"
 													value={field.value ?? ''}
 													onChange={field.onChange}
 													onBlur={field.onBlur}

@@ -1,15 +1,18 @@
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { error, requireSession, respond } from '~/lib/api-helpers'
 import { AppError } from '~/lib/error'
+import { escrowInitializeSchema } from '~/lib/schemas/escrow.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
-import { escrowInitializeSchema } from '~/lib/schemas/escrow.schemas'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: NextRequest) {
+	const { user, error: authError } = await requireSession()
+	if (authError) return authError
+
 	const auditLogger = new AuditLogger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
@@ -22,6 +25,7 @@ export async function POST(req: NextRequest) {
 				correlationId,
 				operation: 'escrow.initialize',
 				resourceType: 'escrow',
+				actorId: user.id,
 				status: 'validation_error',
 				durationMs: Date.now() - startTime,
 			})
@@ -49,90 +53,112 @@ export async function POST(req: NextRequest) {
 		// 4. Send the signed transaction to the Stellar network through the send transaction - Trustless Work API
 		const response = await sendTransaction(signedTxXdr || '')
 
-		if (response) {
-			const { data: dbResult, error: dbError } = await supabase
-				.from('escrow_contracts')
-				.insert({
-					engagement_id: response.escrow.engagementId,
-					contract_id: response.contract_id,
-					amount: response.escrow.amount,
-					platform_fee: response.escrow.platformFee,
-					current_state: 'PENDING',
-				})
-				.select('id')
-				.single()
-
-			if (dbError) {
-				return NextResponse.json(
-					{
-						error: 'Failed to track escrow contract',
-						details: dbError,
-					},
-					{ status: 500 },
-				)
-			}
-
-			// If successful, update the state to INITIALIZED
-			await supabase
-				.from('escrow_contracts')
-				.update({ current_state: 'INITIALIZED' })
-				.eq('id', dbResult.id)
-
+		if (!response) {
 			await auditLogger.log({
 				correlationId,
 				operation: 'escrow.initialize',
 				resourceType: 'escrow',
-				resourceId: dbResult.id,
-				status: 'success',
-				durationMs: Date.now() - startTime,
-				metadata: { contractAddress: response.contract_id },
-			})
-
-			return NextResponse.json(
-				{
-					escrowId: dbResult.id,
-					contractAddress: response.contract_id,
-					status: 'INITIALIZED',
-				},
-				{ status: 201 },
-			)
-		}
-	} catch (error) {
-		if (error instanceof AppError) {
-			console.error('Escrow initialization error:', error)
-			await auditLogger.log({
-				correlationId,
-				operation: 'escrow.initialize',
-				resourceType: 'escrow',
+				actorId: user.id,
 				status: 'failure',
-				errorCode: String(error.statusCode),
+				errorCode: 'TX_SEND_FAILED',
 				durationMs: Date.now() - startTime,
-				metadata: { error: error.message },
 			})
-			return NextResponse.json(
-				{
-					error: (error as AppError).message,
-					details: (error as AppError).details,
-				},
-				{ status: (error as AppError).statusCode },
-			)
+			return error('Failed to send escrow transaction', {
+				status: 502,
+				code: 'TX_SEND_FAILED',
+			})
 		}
 
-		console.error('Internal server error during escrow initialization:', error)
+		const { data: dbResult, error: dbError } = await supabase
+			.from('escrow_contracts')
+			.insert({
+				engagement_id: response.escrow.engagementId,
+				contract_id: response.contract_id,
+				amount: response.escrow.amount,
+				platform_fee: response.escrow.platformFee,
+				current_state: 'PENDING',
+			})
+			.select('id')
+			.single()
+
+		if (dbError) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.initialize',
+				resourceType: 'escrow',
+				actorId: user.id,
+				status: 'failure',
+				errorCode: 'DB_INSERT_FAILED',
+				durationMs: Date.now() - startTime,
+				metadata: { error: dbError.message },
+			})
+			return error('Failed to track escrow contract', {
+				status: 500,
+				code: 'DB_INSERT_FAILED',
+				details: dbError,
+				log: dbError,
+			})
+		}
+
+		// If successful, update the state to INITIALIZED
+		await supabase
+			.from('escrow_contracts')
+			.update({ current_state: 'INITIALIZED' })
+			.eq('id', dbResult.id)
+
 		await auditLogger.log({
 			correlationId,
 			operation: 'escrow.initialize',
 			resourceType: 'escrow',
-			status: 'failure',
-			errorCode: '500',
+			resourceId: dbResult.id,
+			actorId: user.id,
+			status: 'success',
 			durationMs: Date.now() - startTime,
-			metadata: { error: error instanceof Error ? error.message : String(error) },
+			metadata: { contractAddress: response.contract_id },
 		})
-		return NextResponse.json(
+
+		return respond(
 			{
-				error: 'Internal server error during escrow initialization',
+				escrowId: dbResult.id,
+				contractAddress: response.contract_id,
+				status: 'INITIALIZED',
 			},
-			{ status: 500 },
+			{ status: 201 },
 		)
+	} catch (err) {
+		if (err instanceof AppError) {
+			await auditLogger.log({
+				correlationId,
+				operation: 'escrow.initialize',
+				resourceType: 'escrow',
+				actorId: user.id,
+				status: 'failure',
+				errorCode: 'ESCROW_INIT_ERROR',
+				durationMs: Date.now() - startTime,
+				metadata: { error: err.message },
+			})
+			return error(err.message, {
+				status: err.statusCode,
+				code: 'ESCROW_INIT_ERROR',
+				details: err.details,
+				log: err,
+			})
+		}
+
+		await auditLogger.log({
+			correlationId,
+			operation: 'escrow.initialize',
+			resourceType: 'escrow',
+			actorId: user.id,
+			status: 'failure',
+			errorCode: 'INTERNAL_ERROR',
+			durationMs: Date.now() - startTime,
+			metadata: { error: err instanceof Error ? err.message : String(err) },
+		})
+		return error('Internal server error during escrow initialization', {
+			status: 500,
+			code: 'INTERNAL_ERROR',
+			log: err instanceof Error ? err : true,
+		})
 	}
 }

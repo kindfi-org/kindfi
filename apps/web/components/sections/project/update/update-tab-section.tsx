@@ -167,7 +167,7 @@ export function ProjectUpdatesTabSection() {
 			fetchUpdates()
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates is stable; adding it causes unnecessary refetches
-	}, [page, projectId, isCreatingUpdate])
+	}, [isCreatingUpdate, fetchUpdates])
 
 	// Setup real-time subscription
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates intentionally omitted to avoid resubscribing on every fetch
@@ -198,7 +198,10 @@ export function ProjectUpdatesTabSection() {
 			supabase.removeChannel(channel)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates intentionally omitted to avoid resubscribing on every fetch
-	}, [projectId, isCreatingUpdate])
+	}, [
+		isCreatingUpdate, // Refetch data when any change occurs
+		fetchUpdates,
+	])
 
 	return (
 		<section

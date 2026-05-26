@@ -15,6 +15,7 @@ interface CategoryFiltersProps {
 	selectedCategories: string[]
 	onCategoryToggle: (categorySlug: string) => void
 	onResetCategories: () => void
+	variant?: 'default' | 'embedded'
 }
 
 export function CategoryFilters({
@@ -22,12 +23,14 @@ export function CategoryFilters({
 	selectedCategories,
 	onCategoryToggle,
 	onResetCategories,
+	variant = 'default',
 }: CategoryFiltersProps) {
 	const { t } = useI18n()
 	const reducedMotion = useReducedMotion()
 	const scrollRef = useRef<HTMLDivElement | null>(null)
 	const [showLeftFade, setShowLeftFade] = useState(false)
 	const [showRightFade, setShowRightFade] = useState(false)
+	const isEmbedded = variant === 'embedded'
 
 	useEffect(() => {
 		const element = scrollRef.current
@@ -54,42 +57,60 @@ export function CategoryFilters({
 			element.removeEventListener('scroll', onScroll)
 			if (resizeObserver) resizeObserver.disconnect()
 		}
-	}, [])
+	}, [categories.length])
+
 	return (
 		<motion.div
-			className="flex flex-col space-y-3 mb-6 relative"
+			className={cn('relative flex flex-col', !isEmbedded && 'mb-6 space-y-3')}
 			initial={reducedMotion ? false : { opacity: 0, y: 8 }}
 			animate={reducedMotion ? false : { opacity: 1, y: 0 }}
-			transition={reducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
+			transition={
+				reducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }
+			}
 		>
-			<div className="flex justify-between items-center">
-				<h3 className="font-medium">{t('projects.filterByCategory')}</h3>
-				{selectedCategories.length > 0 && (
+			{!isEmbedded ? (
+				<div className="flex items-center justify-between">
+					<h3 className="text-sm font-semibold text-slate-900">
+						{t('projects.filterByCategory')}
+					</h3>
+					{selectedCategories.length > 0 ? (
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={onResetCategories}
+							className="rounded-full text-muted-foreground hover:text-slate-900"
+							aria-label={t('projects.clearCategories')}
+						>
+							<X className="mr-1 h-4 w-4" aria-hidden="true" />
+							{t('projects.clearCategories')}
+						</Button>
+					) : null}
+				</div>
+			) : selectedCategories.length > 0 ? (
+				<div className="mb-3 flex justify-end">
 					<Button
 						variant="ghost"
 						size="sm"
 						onClick={onResetCategories}
-						className="text-gray-500 hover:text-gray-700 flex items-center gap-1"
+						className="rounded-full text-muted-foreground hover:text-slate-900"
 						aria-label={t('projects.clearCategories')}
 					>
-						<X className="h-4 w-4" aria-hidden="true" />
+						<X className="mr-1 h-4 w-4" aria-hidden="true" />
 						{t('projects.clearCategories')}
 					</Button>
-				)}
-			</div>
-			{/* Edge fades */}
-			{showLeftFade && (
-				<div className="pointer-events-none absolute inset-y-10 -left-1 w-6 bg-gradient-to-r from-background to-transparent" />
-			)}
-			{showRightFade && (
-				<div className="pointer-events-none absolute inset-y-10 -right-1 w-6 bg-gradient-to-l from-background to-transparent" />
-			)}
+				</div>
+			) : null}
+
+			{showLeftFade ? (
+				<div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-white to-transparent" />
+			) : null}
+			{showRightFade ? (
+				<div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-white to-transparent" />
+			) : null}
 
 			<motion.div
 				ref={scrollRef}
-				className={cn(
-					'flex overflow-x-auto overflow-y-hidden no-scrollbar gap-2 py-1',
-				)}
+				className="flex gap-2 overflow-x-auto overflow-y-hidden py-1 no-scrollbar"
 				variants={reducedMotion ? undefined : staggerContainer}
 				initial={reducedMotion ? false : 'initial'}
 				animate={reducedMotion ? false : 'animate'}

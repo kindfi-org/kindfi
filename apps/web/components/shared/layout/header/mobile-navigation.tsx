@@ -1,7 +1,7 @@
 'use client'
 
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import { ExternalLink, LogOut, User as UserIcon, Wallet } from 'lucide-react'
+import { ExternalLink, LogOut, User as UserIcon, Vote, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import type { User } from 'next-auth'
@@ -72,6 +72,9 @@ export const MobileNavigation = () => {
 		if (path === '/news') {
 			return pathname?.startsWith('/news')
 		}
+		if (path === '/governance') {
+			return pathname === '/governance' || pathname?.startsWith('/governance/')
+		}
 		return false
 	}
 
@@ -98,6 +101,17 @@ export const MobileNavigation = () => {
 				)}
 			>
 				{t('nav.foundations')}
+			</Link>
+			<Link
+				href="/governance"
+				className={cn(
+					'text-sm font-medium transition-colors px-3 py-2 rounded-md',
+					isActive('/governance')
+						? 'bg-green-900/10 text-green-900 font-semibold'
+						: 'hover:bg-green-900/10 hover:text-green-900',
+				)}
+			>
+				{t('nav.governance')}
 			</Link>
 			<Link
 				href="/about"
@@ -193,6 +207,12 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 					<Button variant="ghost" className="w-full justify-start font-medium">
 						<UserIcon className="mr-2 h-4 w-4" />
 						{t('nav.dashboard')}
+					</Button>
+				</Link>
+				<Link href="/governance">
+					<Button variant="ghost" className="w-full justify-start font-medium">
+						<Vote className="mr-2 h-4 w-4 text-emerald-600" />
+						{t('nav.governance')}
 					</Button>
 				</Link>
 				<Button

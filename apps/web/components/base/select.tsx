@@ -5,6 +5,7 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+import { inputClasses } from '~/lib/form/form-styles'
 
 /**
  * Select component for creating a dropdown menu.
@@ -40,7 +41,7 @@ const SelectTrigger = React.forwardRef<
 	<SelectPrimitive.Trigger
 		ref={ref}
 		className={cn(
-			'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 duration-200',
+			'flex h-11 w-full items-center justify-between whitespace-nowrap rounded-xl border-2 border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm transition-[color,box-shadow,border-color] duration-200 placeholder:text-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:ring-offset-0 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:opacity-100 [&>span]:line-clamp-1',
 			className,
 		)}
 		{...props}

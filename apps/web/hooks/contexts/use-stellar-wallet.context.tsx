@@ -2,6 +2,10 @@
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { getStellarWalletTheme } from '~/lib/config/stellar-wallet-theme'
+import {
+	getTrustlessSignerError,
+	isExternalStellarWalletAddress,
+} from '~/lib/utils/escrow/trustless-signer'
 
 /** Loaded only in the browser so kit state does not touch Node's broken `localStorage` polyfill. */
 type StellarWalletsKitModules = {
@@ -39,7 +43,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 	// Initialize state from localStorage if available (client-side only)
 	const [address, setAddress] = useState<string | null>(() => {
 		if (typeof window === 'undefined') return null
-		return localStorage.getItem('stellar_wallet_address')
+		const stored = localStorage.getItem('stellar_wallet_address')
+		if (stored && !isExternalStellarWalletAddress(stored)) {
+			localStorage.removeItem('stellar_wallet_address')
+			localStorage.removeItem('stellar_wallet_name')
+		}
+		return isExternalStellarWalletAddress(stored) ? stored : null
 	})
 	const [walletName, setWalletName] = useState<string | null>(() => {
 		if (typeof window === 'undefined') return null
@@ -89,6 +98,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				if (storedAddress) {
 					StellarWalletsKit.getAddress()
 						.then(({ address: fetchedAddress }: { address: string }) => {
+							if (
+								fetchedAddress &&
+								!isExternalStellarWalletAddress(fetchedAddress)
+							) {
+								setAddress(null)
+								setWalletName(null)
+								localStorage.removeItem('stellar_wallet_address')
+								localStorage.removeItem('stellar_wallet_name')
+								return
+							}
 							if (fetchedAddress && fetchedAddress !== storedAddress) {
 								setAddress(fetchedAddress)
 							}
@@ -111,6 +130,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 						payload: { address?: string; networkPassphrase: string }
 					}) => {
 						if (event.payload.address) {
+							if (!isExternalStellarWalletAddress(event.payload.address)) {
+								setAddress(null)
+								localStorage.removeItem('stellar_wallet_address')
+								return
+							}
 							setAddress(event.payload.address)
 							localStorage.setItem(
 								'stellar_wallet_address',
@@ -191,6 +215,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
 			const { address: newAddress } = await StellarWalletsKit.authModal()
 			if (newAddress) {
+				if (!isExternalStellarWalletAddress(newAddress)) {
+					throw new Error(
+						'Trustless Work requires an external Stellar wallet (G-address). Smart accounts are not supported yet.',
+					)
+				}
 				setAddress(newAddress)
 				localStorage.setItem('stellar_wallet_address', newAddress)
 				// Try to get wallet name from the selected wallet
@@ -227,6 +256,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		}
 		if (!address) {
 			throw new Error('Wallet not connected')
+		}
+
+		const signerError = getTrustlessSignerError(address)
+		if (signerError) {
+			throw new Error(signerError)
 		}
 
 		try {

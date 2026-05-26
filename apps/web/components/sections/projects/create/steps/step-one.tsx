@@ -51,7 +51,7 @@ export function StepOne({ onNext }: StepOneProps) {
 			exit={{ opacity: 0, x: -50 }}
 			transition={{ duration: 0.3 }}
 		>
-			<Card className="bg-white">
+			<Card >
 				<CardContent className="pt-6">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -68,7 +68,7 @@ export function StepOne({ onNext }: StepOneProps) {
 										<FormControl>
 											<Input
 												placeholder="Enter your project title"
-												className="border-green-600 bg-white"
+												
 												{...field}
 											/>
 										</FormControl>
@@ -89,7 +89,7 @@ export function StepOne({ onNext }: StepOneProps) {
 										<FormControl>
 											<Textarea
 												placeholder="Describe your project in a few sentences"
-												className="min-h-[100px] border-green-600 bg-white"
+												className="min-h-[100px]"
 												{...field}
 											/>
 										</FormControl>
@@ -119,7 +119,7 @@ export function StepOne({ onNext }: StepOneProps) {
 												<Input
 													type="number"
 													placeholder="50000"
-													className="pl-7 border-green-600 bg-white"
+													className="pl-7"
 													value={field.value ?? ''}
 													onChange={(e) =>
 														field.onChange(
@@ -153,7 +153,7 @@ export function StepOne({ onNext }: StepOneProps) {
 												<Input
 													type="number"
 													placeholder="100"
-													className="pl-7 border-green-600 bg-white"
+													className="pl-7"
 													value={field.value ?? ''}
 													onChange={(e) =>
 														field.onChange(
@@ -175,7 +175,7 @@ export function StepOne({ onNext }: StepOneProps) {
 									type="button"
 									variant="outline"
 									disabled
-									className="flex items-center gap-2 gradient-border-btn bg-white"
+									className="flex items-center gap-2 gradient-border-btn"
 									aria-label="Previous step (disabled on first step)"
 								>
 									<ChevronLeft className="h-4 w-4" />

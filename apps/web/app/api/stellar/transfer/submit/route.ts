@@ -35,10 +35,11 @@ export async function POST(req: NextRequest) {
 		const body = await req.json()
 		const validation = validateRequest(transferSubmitSchema, body)
 		if (!validation.success) return validation.response
-		const { transactionData, authResponse, userDevice, verificationJSON } = validation.data
+		const { transactionData, authResponse, userDevice, verificationJSON } =
+			validation.data
 		const { transactionXDR, hash: _hash } = transactionData
-		const smartWalletAddress = userDevice.address
-		const verificationJSONTyped = verificationJSON as Awaited<
+		const _smartWalletAddress = userDevice.address
+		const _verificationJSONTyped = verificationJSON as Awaited<
 			ReturnType<typeof verifyAuthentication>
 		>
 
@@ -69,7 +70,6 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-
 		// Parse the prepared transaction
 		// CRITICAL: The transaction from prepare is ALREADY assembled after simulation
 		// DO NOT re-simulate or re-assemble, as that would change the auth entry structure
@@ -92,11 +92,9 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-
 		const authEntries =
 			(transaction.operations[0] as unknown as Api.SimulateHostFunctionResult)
 				.auth || []
-
 
 		if (authEntries.length) {
 			const publicKeyArray =
@@ -198,7 +196,6 @@ export async function POST(req: NextRequest) {
 
 		// Re-sign with funding account (as it is the source/fee payer)
 		transaction.sign(fundingKeypair)
-
 
 		// Submit to network
 		const submitResult = await server.sendTransaction(transaction)
