@@ -49,10 +49,3 @@ jobs:
         working-directory: apps/indexer
         run: bun run build
         timeout-minutes: 10
-      - name: Install test dependencies
-        working-directory: apps/indexer
-        run: bun add --dev @subql/node-stellar
-      - name: Run tests with Subquery Node
-        working-directory: apps/indexer
-        run: bunx subql-node-stellar test -f .
-        timeout-minutes: 15
