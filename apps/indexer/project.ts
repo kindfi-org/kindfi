@@ -42,7 +42,8 @@ const project: StellarProject = {
       'Test SDF Network ; September 2015' for testnet
       'Public Global Stellar Network ; September 2015' for mainnet
       'Test SDF Future Network ; October 2022' for Future Network */
-		chainId: process.env.CHAIN_ID || '',
+		chainId:
+			process.env.CHAIN_ID || 'Test SDF Network ; September 2015',
 		/**
 		 * These endpoint(s) should be public non-pruned archive node
 		 * We recommend providing more than one endpoint for improved reliability, performance, and uptime
@@ -51,7 +52,9 @@ const project: StellarProject = {
 		 * If you use a rate limited endpoint, adjust the --batch-size and --workers parameters
 		 * These settings can be found in your docker-compose.yaml, they will slow indexing but prevent your project being rate limited
 		 */
-		endpoint: (process.env.ENDPOINT || '').split(',') as string[] | string,
+		endpoint: (
+			process.env.ENDPOINT || 'https://horizon-testnet.stellar.org'
+		).split(',') as string[] | string,
 		/* This is a specific Soroban endpoint
       It is only required when you are using a soroban/EventHandler */
 		sorobanEndpoint: 'https://soroban-testnet.stellar.org',
