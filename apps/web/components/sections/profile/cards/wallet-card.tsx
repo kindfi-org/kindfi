@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckCircle2, Copy, Link2, LogOut, Wallet } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -27,8 +27,16 @@ export function WalletCard({
 	onDisconnectExternal,
 }: WalletCardProps) {
 	const { t } = useI18n()
+	const [isMounted, setIsMounted] = useState(false)
 	const [copiedSmartAccount, setCopiedSmartAccount] = useState(false)
 	const [copiedExternal, setCopiedExternal] = useState(false)
+
+	useEffect(() => {
+		setIsMounted(true)
+	}, [])
+
+	const showExternalConnected =
+		isMounted && isExternalConnected && Boolean(externalWalletAddress)
 
 	const handleCopy = async (address: string, type: 'smart' | 'external') => {
 		try {
@@ -98,7 +106,7 @@ export function WalletCard({
 						</p>
 					</div>
 
-					{isExternalConnected && externalWalletAddress ? (
+					{showExternalConnected ? (
 						<div className="space-y-3">
 							<AddressRow
 								address={externalWalletAddress}

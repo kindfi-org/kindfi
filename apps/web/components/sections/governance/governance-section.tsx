@@ -6,7 +6,6 @@ import { Heart, History, ShieldCheck, Vote } from 'lucide-react'
 import { useState } from 'react'
 import {
 	Tabs,
-	TabsContent,
 	TabsList,
 	TabsTrigger,
 } from '~/components/base/tabs'
@@ -195,16 +194,19 @@ export function GovernanceSection() {
 								</TabsList>
 							</div>
 
-							<AnimatePresence mode="wait">
-								<TabsContent value="active" className="mt-6">
-									<motion.div
-										key="active"
-										initial={reducedMotion ? false : { opacity: 0, y: 10 }}
-										animate={reducedMotion ? false : { opacity: 1, y: 0 }}
-										exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
-										transition={reducedMotion ? { duration: 0 } : { duration: 0.2 }}
-									>
-										{isLoading ? (
+							<AnimatePresence mode="wait" initial={false}>
+								<motion.div
+									key={activeTab}
+									initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+									animate={reducedMotion ? false : { opacity: 1, y: 0 }}
+									exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
+									transition={
+										reducedMotion ? { duration: 0 } : { duration: 0.2 }
+									}
+									className="mt-6"
+								>
+									{activeTab === 'active' ? (
+										isLoading ? (
 											<LoadingSkeleton />
 										) : activeRounds.length === 0 ? (
 											<EmptyState
@@ -222,39 +224,27 @@ export function GovernanceSection() {
 													/>
 												))}
 											</div>
-										)}
-									</motion.div>
-								</TabsContent>
-
-								<TabsContent value="past" className="mt-6">
-									<motion.div
-										key="past"
-										initial={reducedMotion ? false : { opacity: 0, y: 10 }}
-										animate={reducedMotion ? false : { opacity: 1, y: 0 }}
-										exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
-										transition={reducedMotion ? { duration: 0 } : { duration: 0.2 }}
-									>
-										{isLoading ? (
-											<LoadingSkeleton />
-										) : pastRounds.length === 0 ? (
-											<EmptyState
-												icon={History}
-												title={t('governancePage.emptyPastTitle')}
-												description={t('governancePage.emptyPastDescription')}
-											/>
-										) : (
-											<div className="space-y-8">
-												{pastRounds.map((round) => (
-													<GovernanceRoundCard
-														key={round.id}
-														roundId={round.id}
-														fundBalance={fundBalance}
-													/>
-												))}
-											</div>
-										)}
-									</motion.div>
-								</TabsContent>
+										)
+									) : isLoading ? (
+										<LoadingSkeleton />
+									) : pastRounds.length === 0 ? (
+										<EmptyState
+											icon={History}
+											title={t('governancePage.emptyPastTitle')}
+											description={t('governancePage.emptyPastDescription')}
+										/>
+									) : (
+										<div className="space-y-8">
+											{pastRounds.map((round) => (
+												<GovernanceRoundCard
+													key={round.id}
+													roundId={round.id}
+													fundBalance={fundBalance}
+												/>
+											))}
+										</div>
+									)}
+								</motion.div>
 							</AnimatePresence>
 						</Tabs>
 					</div>
