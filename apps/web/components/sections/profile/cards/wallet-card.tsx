@@ -35,8 +35,10 @@ export function WalletCard({
 		setIsMounted(true)
 	}, [])
 
-	const showExternalConnected =
-		isMounted && isExternalConnected && Boolean(externalWalletAddress)
+	const connectedExternalAddress =
+		isMounted && isExternalConnected && externalWalletAddress
+			? externalWalletAddress
+			: null
 
 	const handleCopy = async (address: string, type: 'smart' | 'external') => {
 		try {
@@ -106,19 +108,21 @@ export function WalletCard({
 						</p>
 					</div>
 
-					{showExternalConnected ? (
+					{connectedExternalAddress ? (
 						<div className="space-y-3">
 							<AddressRow
-								address={externalWalletAddress}
+								address={connectedExternalAddress}
 								isCopied={copiedExternal}
-								onCopy={() => handleCopy(externalWalletAddress, 'external')}
+								onCopy={() => handleCopy(connectedExternalAddress, 'external')}
 							/>
 							<div className="flex gap-2">
 								<Button
 									variant="outline"
 									size="sm"
 									className="flex-1 rounded-full"
-									onClick={() => handleCopy(externalWalletAddress, 'external')}
+									onClick={() =>
+										handleCopy(connectedExternalAddress, 'external')
+									}
 								>
 									<Copy className="mr-2 h-3.5 w-3.5" />
 									{t('profile.copyAddress')}
