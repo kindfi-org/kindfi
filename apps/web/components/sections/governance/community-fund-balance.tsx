@@ -1,10 +1,11 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { ExternalLink, RefreshCw, TrendingUp, Vault } from 'lucide-react'
-import { Badge } from '~/components/base/badge'
-import { Card, CardContent } from '~/components/base/card'
+import { ExternalLink, RefreshCw, Vault } from 'lucide-react'
+import { Button } from '~/components/base/button'
+import { useI18n } from '~/lib/i18n'
 import type { CommunityFundBalance as CommunityFundBalanceData } from '~/lib/governance/types'
+import { cn } from '~/lib/utils'
 import { getStellarExplorerAddressUrl } from '~/lib/utils/escrow/stellar-explorer'
 
 interface BalanceApiResponse {
@@ -14,6 +15,7 @@ interface BalanceApiResponse {
 }
 
 export function CommunityFundBalance() {
+	const { t } = useI18n()
 	const { data, isLoading, isError, refetch, isFetching } =
 		useQuery<BalanceApiResponse>({
 			queryKey: ['community-fund-balance'],
@@ -30,81 +32,82 @@ export function CommunityFundBalance() {
 	const currency = process.env.NEXT_PUBLIC_COMMUNITY_FUND_CURRENCY ?? 'USDC'
 
 	return (
-		<Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5 h-full">
-			<CardContent className="p-6">
-				<div className="flex items-start gap-4">
-					<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-						<Vault className="h-6 w-6 text-primary" />
-					</div>
-
-					<div className="flex-1 min-w-0">
-						<div className="flex items-center gap-2 mb-2">
-							<p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-								Community Fund
-							</p>
-							<Badge
-								variant="outline"
-								className="text-[10px] px-1.5 py-0 h-4 font-normal border-primary/30 text-primary"
-							>
-								Live
-							</Badge>
-							<button
-								type="button"
-								onClick={() => refetch()}
-								disabled={isFetching}
-								className="ml-auto p-1 rounded-md hover:bg-muted transition-colors disabled:opacity-50"
-								aria-label="Refresh balance"
-							>
-								<RefreshCw
-									className={`h-3.5 w-3.5 text-muted-foreground ${isFetching ? 'animate-spin' : ''}`}
-								/>
-							</button>
-						</div>
-
-						{isLoading ? (
-							<div className="h-8 w-40 animate-pulse rounded-md bg-muted" />
-						) : isError ? (
-							<p className="text-sm text-destructive">Failed to load balance</p>
-						) : (
-							<>
-								<div className="flex items-baseline gap-2 flex-wrap">
-									<span className="text-2xl font-bold tracking-tight tabular-nums">
-										{Number(balance?.balance ?? 0).toLocaleString('en-US', {
-											minimumFractionDigits: 2,
-											maximumFractionDigits: 2,
-										})}
-									</span>
-									<span className="text-base font-semibold text-muted-foreground">
-										{currency}
-									</span>
-									<span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
-										<TrendingUp className="h-3 w-3" />
-										Escrow
-									</span>
-								</div>
-
-								{balance?.address && (
-									<div className="flex items-center gap-2 mt-2">
-										<code className="text-[11px] text-muted-foreground font-mono">
-											{balance.address.slice(0, 6)}…
-											{balance.address.slice(-4)}
-										</code>
-										<a
-											href={getStellarExplorerAddressUrl(balance.address)}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
-										>
-											<ExternalLink className="h-2.5 w-2.5" />
-											Verify
-										</a>
-									</div>
-								)}
-							</>
-						)}
-					</div>
+		<div className="h-full rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm shadow-slate-200/50">
+			<div className="flex items-start gap-4">
+				<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+					<Vault className="h-6 w-6" aria-hidden="true" />
 				</div>
-			</CardContent>
-		</Card>
+
+				<div className="min-w-0 flex-1">
+					<div className="mb-3 flex items-start justify-between gap-3">
+						<div>
+							<p className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500">
+								{t('governancePage.fundLabel')}
+							</p>
+							<p className="mt-1 text-sm text-muted-foreground">
+								{t('governancePage.fundSubtitle')}
+							</p>
+						</div>
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							onClick={() => refetch()}
+							disabled={isFetching}
+							className="h-8 rounded-full px-3 text-slate-600 hover:bg-emerald-50 hover:text-emerald-800"
+							aria-label={t('governancePage.fundRefresh')}
+						>
+							<RefreshCw
+								className={cn(
+									'h-4 w-4',
+									isFetching && 'animate-spin',
+								)}
+								aria-hidden="true"
+							/>
+						</Button>
+					</div>
+
+					{isLoading ? (
+						<div className="h-10 w-44 animate-pulse rounded-xl bg-emerald-50" />
+					) : isError ? (
+						<p className="text-sm text-destructive">
+							{t('governancePage.fundLoadError')}
+						</p>
+					) : (
+						<>
+							<div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+								<span className="text-3xl font-bold tabular-nums tracking-tight text-slate-900 sm:text-4xl">
+									{Number(balance?.balance ?? 0).toLocaleString('en-US', {
+										minimumFractionDigits: 2,
+										maximumFractionDigits: 2,
+									})}
+								</span>
+								<span className="text-base font-semibold text-slate-500">
+									{currency}
+								</span>
+							</div>
+
+							{balance?.address ? (
+								<div className="mt-4 flex flex-wrap items-center gap-2">
+									<code className="rounded-full bg-slate-50 px-3 py-1 text-[11px] font-mono text-slate-500">
+										{balance.address.slice(0, 6)}…
+										{balance.address.slice(-4)}
+									</code>
+									<a
+										href={getStellarExplorerAddressUrl(balance.address)}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:underline"
+									>
+										<ExternalLink className="h-3 w-3" aria-hidden="true" />
+										{t('governancePage.fundVerify')}
+									</a>
+								</div>
+							) : null}
+						</>
+					)}
+				</div>
+			</div>
+		</div>
 	)
 }

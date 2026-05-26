@@ -16,6 +16,7 @@ import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 import { AccountInfoCard } from './cards/account-info-card'
+import { GovernanceCard } from './cards/governance-card'
 import { KYCCard } from './cards/kyc-card'
 import { PersonalInfoCard } from './cards/personal-info-card'
 import { WalletCard } from './cards/wallet-card'
@@ -200,6 +201,10 @@ export function ProfileDashboard({
 						<div className="lg:col-span-2">
 							<KYCCard userId={user.id} shouldRefresh={kycCompleted} />
 						</div>
+					</motion.div>
+
+					<motion.div {...profileFadeUp(0.1)}>
+						<GovernanceCard />
 					</motion.div>
 
 					<motion.div {...profileFadeUp(0.12)}>
