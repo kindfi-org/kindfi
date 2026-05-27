@@ -108,10 +108,9 @@ export function validateInput<T>(
 
 /**
  * Apply a rate limit keyed by `identifier` for `action`. Throws RATE_LIMITED
- * when the caller has exceeded the configured budget. Outside development the
- * helper fails closed when the rate limiter itself errors, so abuse protection
- * is preserved even during a Redis outage; in dev/test it falls back to
- * allowing the request to keep local flows usable.
+ * when the caller has exceeded the configured budget. When Redis is unavailable,
+ * logs a warning and allows the request so auth and other server actions keep
+ * working in production until Upstash is configured.
  */
 export async function enforceRateLimit(
 	identifier: string,
@@ -132,10 +131,6 @@ export async function enforceRateLimit(
 			)
 		}
 
-		// `RateLimiter.increment` catches Redis errors internally and returns
-		// `{ isBlocked: false, error }` so it fails open. Detect that case here
-		// and fail closed in production so abuse protection is preserved during
-		// a Redis outage.
 		if (result.error) {
 			logger.warn({
 				eventType: 'SERVER_ACTION_RATE_LIMIT_UNAVAILABLE',
@@ -143,32 +138,15 @@ export async function enforceRateLimit(
 				identifier,
 				error: result.error,
 			})
-
-			if (process.env.NODE_ENV === 'production') {
-				throw new ServerActionError(
-					'Service temporarily unavailable. Please try again later.',
-					'RATE_LIMITED',
-				)
-			}
 		}
 	} catch (error) {
 		if (error instanceof ServerActionError) throw error
 
-		// Defensive fallback — `rateLimiter.increment` is not expected to throw,
-		// but if a future change makes it throw we still want the fail-closed
-		// behavior in production.
 		logger.warn({
 			eventType: 'SERVER_ACTION_RATE_LIMIT_UNAVAILABLE',
 			action,
 			error: error instanceof Error ? error.message : 'Unknown error',
 		})
-
-		if (process.env.NODE_ENV === 'production') {
-			throw new ServerActionError(
-				'Service temporarily unavailable. Please try again later.',
-				'RATE_LIMITED',
-			)
-		}
 	}
 }
 
