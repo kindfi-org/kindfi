@@ -131,7 +131,7 @@ function CommentItem({
 				</div>
 
 				<div className="flex items-center gap-3 flex-wrap">
-					<LikeButton initialCount={comment.like || 0} />
+					<LikeButton initialCount={comment.like || 0} commentId={comment.id} />
 
 					{canReply && (
 						<Button

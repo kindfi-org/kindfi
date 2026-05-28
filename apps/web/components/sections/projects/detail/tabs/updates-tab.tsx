@@ -13,9 +13,10 @@ import type { Comment, Update } from '~/lib/types/project/project-detail.types'
 
 interface UpdatesTabProps {
 	updates: Update[]
+	projectId?: string
 }
 
-export function UpdatesTab({ updates }: UpdatesTabProps) {
+export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 	const sortedUpdates = [...updates].sort(
 		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
 	)
@@ -49,9 +50,43 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 			like: 0,
 		}
 
-		// TODO: Persist comment to backend
+		    // Persist comment to backend
+		    ;(async () => {
+			    try {
+				    if (projectId) {
+					    const res = await fetch('/api/comments', {
+						    method: 'POST',
+						    headers: { 'Content-Type': 'application/json' },
+						    body: JSON.stringify({
+							    content,
+							    project_update_id: updateId,
+							    type: 'comment',
+						    }),
+					    })
+					    if (res.ok) {
+						    const json = await res.json()
+						    // replace temp comment with server comment
+						    const serverComment = json.data
+						    setUpdatesState((prevUpdates) =>
+							    prevUpdates.map((update) => {
+								    if (update.id === updateId) {
+									    return {
+										    ...update,
+										    comments: [serverComment, ...update.comments.filter(c => !String(c.id).startsWith('temp-'))],
+									    }
+								    }
+								    return update
+							    }),
+						    )
+						    return
+					    }
+				    }
+			    } catch (e) {
+				    console.error('Failed to persist comment', e)
+			    }
+		    })()
 
-		setUpdatesState((prevUpdates) =>
+		    setUpdatesState((prevUpdates) =>
 			prevUpdates.map((update) => {
 				if (update.id === updateId) {
 					return {
@@ -85,9 +120,37 @@ export function UpdatesTab({ updates }: UpdatesTabProps) {
 			like: 0,
 		}
 
-		// TODO: Persist comment to backend
+		    // Persist reply to backend
+		    ;(async () => {
+			    try {
+				    if (projectId) {
+					    const res = await fetch('/api/comments', {
+						    method: 'POST',
+						    headers: { 'Content-Type': 'application/json' },
+						    body: JSON.stringify({
+							    content,
+							    parent_comment_id: parentId,
+							    project_update_id: updateId,
+							    type: 'comment',
+						    }),
+					    })
+					    if (res.ok) {
+						    const json = await res.json()
+						    const serverComment = json.data
+						    setUpdatesState((prev) =>
+							    prev.map((u) =>
+								    u.id === updateId ? { ...u, comments: [...u.comments.filter(c => !String(c.id).startsWith('temp-')), serverComment] } : u,
+							    ),
+						    )
+						    return
+					    }
+				    }
+			    } catch (e) {
+				    console.error('Failed to persist reply', e)
+			    }
+		    })()
 
-		setUpdatesState((prev) =>
+		    setUpdatesState((prev) =>
 			prev.map((u) =>
 				u.id === updateId ? { ...u, comments: [...u.comments, reply] } : u,
 			),

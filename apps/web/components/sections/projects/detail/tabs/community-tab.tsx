@@ -10,9 +10,10 @@ import type { Comment } from '~/lib/types/project/project-detail.types'
 
 interface CommunityTabProps {
 	comments: Comment[]
+	projectId?: string
 }
 
-export function CommunityTab({ comments }: CommunityTabProps) {
+export function CommunityTab({ comments, projectId }: CommunityTabProps) {
 	const [showQuestionForm, setShowQuestionForm] = useState(false)
 	const [commentsState, setCommentsState] = useState<Comment[]>(comments)
 
@@ -30,10 +31,33 @@ export function CommunityTab({ comments }: CommunityTabProps) {
 			like: 0,
 		}
 
-		// TODO: Persist question to backend
+		    // Persist question to backend
+		    ;(async () => {
+			    try {
+				    if (projectId) {
+					    const res = await fetch('/api/comments', {
+						    method: 'POST',
+						    headers: { 'Content-Type': 'application/json' },
+						    body: JSON.stringify({
+							    content,
+							    project_id: projectId,
+							    type: 'question',
+						    }),
+					    })
+					    if (res.ok) {
+						    const json = await res.json()
+						    setCommentsState((prev) => [json.data, ...prev.filter(c => !String(c.id).startsWith('temp-'))])
+						    setShowQuestionForm(false)
+						    return
+					    }
+				    }
+			    } catch (e) {
+				    console.error('Failed to persist question', e)
+			    }
+		    })()
 
-		setCommentsState((prev) => [newQuestion, ...prev])
-		setShowQuestionForm(false)
+		    setCommentsState((prev) => [newQuestion, ...prev])
+		    setShowQuestionForm(false)
 	}
 
 	const handleAddReply = (parentId: string, content: string) => {
@@ -51,9 +75,32 @@ export function CommunityTab({ comments }: CommunityTabProps) {
 			like: 0,
 		}
 
-		// TODO: Persist answer to backend
+		    // Persist answer to backend
+		    ;(async () => {
+			    try {
+				    if (projectId) {
+					    const res = await fetch('/api/comments', {
+						    method: 'POST',
+						    headers: { 'Content-Type': 'application/json' },
+						    body: JSON.stringify({
+							    content,
+							    parent_comment_id: parentId,
+							    project_id: projectId,
+							    type: 'answer',
+						    }),
+					    })
+					    if (res.ok) {
+						    const json = await res.json()
+						    setCommentsState((prev) => [...prev.filter(c => !String(c.id).startsWith('temp-')), json.data])
+						    return
+					    }
+				    }
+			    } catch (e) {
+				    console.error('Failed to persist answer', e)
+			    }
+		    })()
 
-		setCommentsState((prev) => [...prev, reply])
+		    setCommentsState((prev) => [...prev, reply])
 	}
 
 	// Get all top-level comments from the current state
