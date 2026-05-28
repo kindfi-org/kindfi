@@ -65,10 +65,10 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
 				/>
 			</TabsContent>
 			<TabsContent value="updates">
-				<UpdatesTab updates={project.updates} />
+				<UpdatesTab updates={project.updates} projectId={project.id} />
 			</TabsContent>
 			<TabsContent value="community">
-				<CommunityTab comments={project.comments} />
+				<CommunityTab comments={project.comments} projectId={project.id} />
 			</TabsContent>
 		</Tabs>
 	)

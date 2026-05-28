@@ -110,9 +110,18 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 	const handleToggleFollow = async () => {
 		try {
-			// TODO: Send follow/unfollow request to backend
-			setIsFollowing(!isFollowing)
-		} catch (error) {
+                    // Send follow/unfollow request to backend (follow the project creator when available)
+                    if (!project.kindlerId) {
+                            toast.error('Unable to follow: project creator unknown')
+                            return
+                    }
+                    const action = isFollowing ? 'unfollow' : 'follow'
+                    const res = await fetch('/api/profile/follow', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ targetUserId: project.kindlerId, action }),
+                    })
+                    if (!res.ok) throw new Error('Follow request failed')
 			console.error(error)
 			toast.error('Unable to update follow status', {
 				icon: <CircleAlert className="text-destructive" />,

@@ -10,6 +10,7 @@ export async function getBasicProjectInfoBySlug(
 		.select(
 			`
 			id,
+						kindler_id,
 			title,
 			slug,
 			description,
@@ -84,6 +85,7 @@ export async function getBasicProjectInfoBySlug(
 
 	return {
 		id: project.id,
+		kindlerId: (project as any).kindler_id,
 		title: project.title,
 		slug: project.slug,
 		description: project.description,
