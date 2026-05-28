@@ -20,10 +20,6 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			return null
 		}
 
-		// TODO: Add on-chain verification of the user device.
-		// ? We are only checking if the device exists in the database and the signature match but
-		// ? we don't check if is actually registered in the auth_controller contract.
-
 		try {
 			// First, check if user profile exists using Drizzle
 			const profileData = await db
@@ -60,7 +56,6 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 						eq(devices.credentialId, credentials.credentialId),
 						// !BUG FOUND: pubkey is not the same while sign up and login hence, in sign up fails...
 						// ! This happens because the pre address is parsed in one way and the sing in the other (when data saves) hence, the values are unmatched
-						// TODO: Fix pre and actual user address to parse match.
 						// ? Fallback created to be /sign-in
 						eq(devices.publicKey, credentials.pubKey),
 						eq(devices.userId, userData.id),

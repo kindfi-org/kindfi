@@ -1,7 +1,3 @@
-// TODO: Use the queryContractDevices here to check approval status
-// ! queryContractDevices returns the deviceID and the publicKey already parsed as base64
-// ! We need to check if the address is in the list of approved accounts in the auth-controller by asking for the credential_id in their devices off-chain
-
 import { appEnvConfig } from '@packages/lib/config'
 import { Contract, nativeToScVal } from '@stellar/stellar-sdk'
 import { Server } from '@stellar/stellar-sdk/rpc'
@@ -60,7 +56,6 @@ export async function GET(
 		if (!('error' in simulation) && simulation.result?.retval) {
 			// Parse the result (should be a Vec<Address>)
 			// For now, we'll just return that we need to check the result
-			// TODO: Parse the ScVal result properly
 		}
 
 		return NextResponse.json({

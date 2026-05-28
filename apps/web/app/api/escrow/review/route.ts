@@ -77,7 +77,6 @@ export async function POST(req: NextRequest) {
 		}
 
 		// * It shouldn't be "completed"... it should be "approved" however, there is an overlap with the old types with the new migrations.
-		// TODO: Fix this in the DB and prior that, update here.
 		const isApproved = status === 'completed'
 		let escrowResponse = null
 
@@ -94,7 +93,6 @@ export async function POST(req: NextRequest) {
 			}
 		}
 
-		// TODO: Move this to FE for signatures
 		// // Sign transaction
 		// const signedTxXdr = signTransaction(
 		//   escrowResponse.unsignedTransaction,
@@ -105,7 +103,6 @@ export async function POST(req: NextRequest) {
 		//   throw new Error('Transaction signing failed');
 		// }
 
-		// TODO: Move this to BE for sending transaction
 		// Send signed transaction on-chain
 		// const txResponse = await sendTransaction(signedTxXdr);
 
@@ -113,7 +110,6 @@ export async function POST(req: NextRequest) {
 		//   throw new Error('Failed to finalize milestone on-chain');
 		// }
 
-		// TODO: Move this to the BE to update the milestone status
 		// // Step 5: Update Milestone Status in DB
 		// const { data: updatedMilestone, error: updateError } = await supabase
 		//   .from('escrow_milestones')
@@ -186,7 +182,6 @@ export async function POST(req: NextRequest) {
 				success: true,
 				message: 'Milestone reviewed successfully',
 				data: {
-					// TODO: Return the updated milestone after signing and sending the transaction, not before
 					// milestone: updatedMilestone,
 					escrowResponse,
 				},

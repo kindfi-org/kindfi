@@ -103,7 +103,7 @@ export async function getBasicProjectInfoBySlug(
 				: {},
 		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
 		escrowContractAddress,
-		escrowType: undefined, // TODO: Determine escrow type from contract data or metadata
+		escrowType: undefined,
 		foundation,
 	}
 }

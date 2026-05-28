@@ -65,7 +65,7 @@ export const usePasskeyAuthentication = (
 				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, opts.error)
 			}
 
-			const authenticationOptions = await resp.json() // TODO: type this
+			const authenticationOptions = await resp.json()
 
 			const authenticationResponse = await startAuthentication({
 				optionsJSON: authenticationOptions,

@@ -147,7 +147,6 @@ export async function POST(req: NextRequest) {
 			// console.log('   Challenge (utf8):', challenge)
 			// console.log('   Challenge Bytes (hex):', challengeBytes?.toString('hex'))
 
-			// TODO: If the attestation can be verified here, then it should go through the stellar blockchain
 			// ! Strategy still not the same... simplify. A verification already happening, but is not "preparing" the signature to on-chain verification
 			// const verificationResults = await stellarService.verifyPasskeySignature(
 			// 	verificationJSON.device.address,

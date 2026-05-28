@@ -310,8 +310,6 @@ async function getUserStats(
 	const streakDays = streaksResult.data?.[0]?.current_streak ?? 0
 	const referralCount = referralsResult.data?.length ?? 0
 
-	// TODO: Refactor this local function to use the centralized getUserStats service from ~/lib/services/user-stats
-	// This local implementation is kept temporarily to avoid breaking changes while API stabilization is in progress.
 	const impactScore =
 		donationCount * IMPACT_SCORE_WEIGHTS.DONATIONS +
 		questsCompleted * IMPACT_SCORE_WEIGHTS.QUESTS +

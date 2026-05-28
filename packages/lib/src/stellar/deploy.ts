@@ -55,10 +55,6 @@ export async function handleDeploy(params: {
 		// Pre-calculate the contract address
 		const contractAddress = generateStellarAddress(contractSalt)
 
-		// TODO: Implement actual deployment logic using Passkey Kit
-		// This should use the official Passkey Kit library instead of our custom implementation
-		// For now, return the pre-calculated address
-
 		return {
 			address: contractAddress,
 			transactionHash: undefined, // Will be set when actual deployment is implemented

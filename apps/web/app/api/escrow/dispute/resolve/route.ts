@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
 
 		const validatedData = validationResult.data as DisputeResolutionPayload
 
-		// TODO: Improve this validation. Some fields are mixed with current logic.
 		const {
 			// Dispute ID is the ID of the AI conversation between the Kindler and the admin where the AI is the mediator
 			disputeId,

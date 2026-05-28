@@ -141,7 +141,6 @@ export class StellarPasskeyService {
 				// 	'ℹ️ LedgerEntries for webauthn account',
 				// 	JSON.stringify(ledgerEntries.entries, null, 2),
 				// )
-				// TODO: Substract contract balances... to get smart wallet user balances
 				return {
 					address: contractAddress,
 					balance: '0', // Contracts don't have balances directly
@@ -432,7 +431,6 @@ export class StellarPasskeyService {
 			}
 
 			// Verify origin (optional but recommended)
-			// TODO: Add proper origin verification based on your environment config
 
 			// Get the public key for this address
 			const publicKey = await this.getPublicKeyForContract(address)

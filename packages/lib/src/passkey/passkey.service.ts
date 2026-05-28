@@ -261,7 +261,6 @@ export const getAuthenticationOptions = async ({
 	const opts: GenerateAuthenticationOptionsOpts = {
 		userVerification: 'preferred',
 		rpID: rpId,
-		// TODO: Check this, we should always have a mapped challenge that both Stellar and Devices supports
 		challenge: challenge
 			? new Uint8Array(base64url.toBuffer(challenge))
 			: undefined,

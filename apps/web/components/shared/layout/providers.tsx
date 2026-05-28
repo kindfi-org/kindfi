@@ -46,7 +46,6 @@ export function Providers({ children, initSession }: ProvidersProps) {
 					try {
 						const reg = registration as ServiceWorkerRegistrationWithSync
 						if (reg.periodicSync) {
-							// TODO: Fix registration, crashing on some MacOs due lack of permissions on browsers by default...
 							// reg.periodicSync
 							// 	.register('notification-sync', {
 							// 		minInterval: 24 * 60 * 60 * 1000, // 24 hours
