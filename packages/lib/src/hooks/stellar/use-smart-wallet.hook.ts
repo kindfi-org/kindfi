@@ -4,6 +4,7 @@ import { debounce } from 'lodash'
 import type { Session, User } from 'next-auth'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '../../logger'
 import { useStellarSignature } from './use-stellar-signature.hook'
 
 export interface ContractOperation {
@@ -39,7 +40,7 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 			}
 		},
 		onError: (error) => {
-			console.error('❌ Transaction failed:', error)
+			logger.error('Transaction failed', error)
 		},
 		// Pass session directly to avoid useSession call inside useStellarSignature
 		// This prevents the SessionProvider requirement error
@@ -112,7 +113,7 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 
 			return accountData
 		} catch (error) {
-			console.error('❌ Error initializing account:', error)
+			logger.error('Error initializing account', error instanceof Error ? error : new Error(String(error)))
 			setRequestId(null)
 			throw error
 		}
@@ -140,7 +141,7 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 					: null,
 			)
 		} catch (error) {
-			console.error('❌ Error refreshing account info:', error)
+			logger.error('Error refreshing account info', error instanceof Error ? error : new Error(String(error)))
 		}
 	}, [account?.contractId, stellarSignature])
 
@@ -177,7 +178,7 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 			!stellarSignature.isLoading &&
 			!requestId
 		) {
-			debounce(() => initializeAccount().catch(console.error), 6000)()
+			debounce(() => initializeAccount().catch((err) => logger.error('initializeAccount failed', err instanceof Error ? err : new Error(String(err)))), 6000)()
 		}
 	}, [
 		session,

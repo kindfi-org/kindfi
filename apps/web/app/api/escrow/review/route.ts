@@ -7,6 +7,7 @@ import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { milestoneReviewSchema } from '~/lib/schemas/escrow.schemas'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -161,7 +162,7 @@ export async function POST(req: NextRequest) {
 						}),
 					)
 					.catch((err) =>
-						console.error('[Escrow review] Notification error:', err),
+						logger.error('[Escrow review] Notification error:', err),
 					)
 			}
 		}
@@ -189,7 +190,7 @@ export async function POST(req: NextRequest) {
 			{ status: 200 },
 		)
 	} catch (error) {
-		console.error('Milestone Review Error:', error)
+		logger.error('Milestone Review Error:', error)
 
 		if (error instanceof AppError) {
 			await auditLogger.log({

@@ -30,6 +30,7 @@ import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
 import { getAvatarFallback } from '~/lib/utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
+import { logger } from '@/lib/logger'
 
 const WalletAddressSection = ({
 	address,
@@ -51,7 +52,7 @@ const WalletAddressSection = ({
 			toast.success('Wallet address copied to clipboard')
 			setTimeout(() => setCopied(false), 2000)
 		} catch (error) {
-			console.error('Failed to copy address:', error)
+			logger.error('Failed to copy address:', error)
 			toast.error('Failed to copy address')
 		}
 	}
@@ -112,21 +113,21 @@ export const UserMenu = ({ user }: { user: User }) => {
 			try {
 				disconnect()
 			} catch (error) {
-				console.error('Error disconnecting wallet:', error)
+				logger.error('Error disconnecting wallet:', error)
 			}
 
 			try {
 				const supabase = createSupabaseBrowserClient()
 				await supabase.auth.signOut()
 			} catch (error) {
-				console.error('Error signing out from Supabase:', error)
+				logger.error('Error signing out from Supabase:', error)
 			}
 
 			await signOut({
 				callbackUrl: '/sign-in?success=Successfully signed out',
 			})
 		} catch (error) {
-			console.error('Error signing out:', error)
+			logger.error('Error signing out:', error)
 			toast.error(t('auth.signOutError'))
 			router.push('/')
 			setIsSigningOut(false)

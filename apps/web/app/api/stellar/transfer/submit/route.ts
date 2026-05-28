@@ -17,6 +17,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { transferSubmitSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 // Don't initialize services at module level - do it inside the route handler
 // This prevents build-time errors when environment variables are not available
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
 		try {
 			fundingKeypair = Keypair.fromSecret(appConfig.stellar.fundingAccount)
 		} catch (error) {
-			console.error('❌ Invalid funding account secret:', error)
+			logger.error('❌ Invalid funding account secret:', error)
 			return NextResponse.json(
 				{
 					error: 'Invalid funding account configuration',
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
 				appConfig.stellar.networkPassphrase,
 			) as Transaction
 		} catch (error) {
-			console.error('❌ Invalid transactionXDR:', error)
+			logger.error('❌ Invalid transactionXDR:', error)
 			return NextResponse.json(
 				{
 					error: 'Invalid transactionXDR format',
@@ -129,23 +130,23 @@ export async function POST(req: NextRequest) {
 
 			// ! Keeping logs commented out for now. Deactivating signature verification on-chain, verifying device existence on contract only
 			// Logging WebAuthn Signature Details
-			// console.log('🔏 WebAuthn Signature Details:')
-			// console.log('   Signature (base64):', signature.toString('base64'))
-			// console.log(
+
+
+
 			// 	'   Authenticator Data (base64):',
 			// 	authenticatorData.toString('base64'),
 			// )
-			// console.log('   Client Data (object):', clientData)
-			// console.log(
+
+
 			// 	'   WebAuthn Payload (base64):',
 			// 	webauthnPayload.toString('base64'),
 			// )
-			// console.log(
+
 			// 	'   WebAuthn Payload Hash (hex):',
 			// 	webauthnPayloadHash.toString('hex'),
 			// )
-			// console.log('   Challenge (utf8):', challenge)
-			// console.log('   Challenge Bytes (hex):', challengeBytes?.toString('hex'))
+
+
 
 			// ! Strategy still not the same... simplify. A verification already happening, but is not "preparing" the signature to on-chain verification
 			// const verificationResults = await stellarService.verifyPasskeySignature(
@@ -154,7 +155,6 @@ export async function POST(req: NextRequest) {
 			// 	hash,
 			// )
 
-			// console.log('🔐 Contract will verify signature', { verificationResults })
 
 			// Find and update the auth entry for the smart wallet
 			const signatureScVal = xdr.ScVal.fromXDR(signatureScValRaw.toXDR())
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
 		const submitResult = await server.sendTransaction(transaction)
 
 		if (submitResult.status === 'ERROR') {
-			console.error('❌ Submit error:', submitResult)
+			logger.error('❌ Submit error:', submitResult)
 			throw new Error(
 				`Transaction submission failed: ${JSON.stringify(submitResult.errorResult, null, 2) || 'Unknown error'}`,
 			)
@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
 		const txHash = submitResult.hash
 
 		if (submitResult?.errorResult) {
-			console.error('❌ Submit error (false positive):', submitResult)
+			logger.error('❌ Submit error (false positive):', submitResult)
 			throw new Error(
 				`Transaction submission failed: ${submitResult.errorResult || 'Unknown error'}`,
 			)
@@ -223,7 +223,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 	} catch (error) {
-		console.error('❌ Error submitting transfer:', error)
+		logger.error('❌ Error submitting transfer:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to submit transfer',

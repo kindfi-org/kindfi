@@ -1,5 +1,6 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { TeamMember } from '~/lib/types/project/project-detail.types'
+import { logger } from '@/lib/logger'
 
 export async function getProjectTeam(
 	client: TypedSupabaseClient,
@@ -19,7 +20,7 @@ export async function getProjectTeam(
 			error.message?.includes('relation') ||
 			error.code === '42P01'
 		) {
-			console.warn('project_team table not found')
+			logger.warn('project_team table not found')
 			return []
 		}
 		throw error

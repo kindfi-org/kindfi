@@ -25,6 +25,7 @@ import {
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
 import type { CreateTeamMemberData } from '~/lib/types/project/project-team.types'
+import { logger } from '@/lib/logger'
 
 interface AddTeamMemberFormProps {
 	onAdd: (data: CreateTeamMemberData) => Promise<void>
@@ -91,7 +92,7 @@ export function AddTeamMemberForm({
 			})
 			form.reset()
 		} catch (error) {
-			console.error('Failed to add team member:', error)
+			logger.error('Failed to add team member:', error)
 		} finally {
 			setIsSubmitting(false)
 		}

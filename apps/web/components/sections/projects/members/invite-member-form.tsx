@@ -26,6 +26,7 @@ import {
 import { Input } from '~/components/base/input'
 import type { InviteMemberData } from '~/lib/types/project/team-members.types'
 import { RoleSelect } from './role-select'
+import { logger } from '@/lib/logger'
 
 interface InviteMemberFormProps {
 	onInvite: (data: InviteMemberData) => Promise<void>
@@ -57,7 +58,7 @@ export function InviteMemberForm({
 			})
 			form.reset()
 		} catch (error) {
-			console.error('Failed to invite member:', error)
+			logger.error('Failed to invite member:', error)
 		} finally {
 			setIsSubmitting(false)
 		}

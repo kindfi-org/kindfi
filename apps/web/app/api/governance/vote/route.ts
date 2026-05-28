@@ -6,6 +6,7 @@ import type { NftTier } from '~/lib/governance/types'
 import { castVoteSchema } from '~/lib/schemas/governance.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 import { getVoteWeight } from '~/lib/governance/vote-weight'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/governance/vote
@@ -125,7 +126,7 @@ export async function POST(req: NextRequest) {
 					{ status: 409 },
 				)
 			}
-			console.error('Error inserting vote:', insertError)
+			logger.error('Error inserting vote:', insertError)
 			return NextResponse.json(
 				{ error: 'Failed to record vote' },
 				{ status: 500 },
@@ -182,11 +183,11 @@ export async function POST(req: NextRequest) {
 					})
 					onChain = result.success
 					if (!result.success) {
-						console.warn('[governance/vote] on-chain record_vote failed:', result.error)
+						logger.warn('[governance/vote] on-chain record_vote failed:', result.error)
 					}
 				}
 			} catch (err) {
-				console.warn('[governance/vote] on-chain record error:', err)
+				logger.warn('[governance/vote] on-chain record error:', err)
 			}
 		}
 
@@ -201,7 +202,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 	} catch (error) {
-		console.error('Error in POST /api/governance/vote:', error)
+		logger.error('Error in POST /api/governance/vote:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

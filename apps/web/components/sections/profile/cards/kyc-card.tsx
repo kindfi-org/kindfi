@@ -18,6 +18,7 @@ import { cn } from '~/lib/utils'
 import { profileFadeUp } from '../profile-motion'
 import { ProfileSurfaceCard } from '../profile-surface-card'
 import { KYCRedirectModal } from '../modals/kyc-redirect-modal'
+import { logger } from '@/lib/logger'
 
 interface KYCCardProps {
 	userId: string
@@ -63,7 +64,7 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 				toast.error(result.error || t('profile.kycStartFailed'))
 			}
 		} catch (error) {
-			console.error('Failed to start KYC:', error)
+			logger.error('Failed to start KYC:', error)
 			toast.error(t('profile.kycStartFailed'))
 		} finally {
 			setIsCreating(false)

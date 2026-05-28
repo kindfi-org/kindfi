@@ -19,6 +19,7 @@ import { IMPACT_SCORE_WEIGHTS } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/nfts/evolve
@@ -139,7 +140,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			imageUri = uploadResult.ipfsUrl
 			imageIpfsHash = uploadResult.ipfsHash
 		} catch (err) {
-			console.warn(
+			logger.warn(
 				'[NFT Evolve] Failed to upload image, using placeholder:',
 				err,
 			)
@@ -163,7 +164,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			)
 			metadataIpfsHash = metaResult.ipfsHash
 		} catch (err) {
-			console.warn('[NFT Evolve] Failed to upload metadata to Pinata:', err)
+			logger.warn('[NFT Evolve] Failed to upload metadata to Pinata:', err)
 		}
 
 		// Update on-chain metadata
@@ -183,7 +184,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 		)
 
 		if (!updateResult.success) {
-			console.error('[NFT Evolve] On-chain update failed:', updateResult.error)
+			logger.error('[NFT Evolve] On-chain update failed:', updateResult.error)
 			return NextResponse.json(
 				{ error: `Failed to update NFT on-chain: ${updateResult.error}` },
 				{ status: 500 },
@@ -205,7 +206,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			.single()
 
 		if (dbError) {
-			console.error('[NFT Evolve] Database update failed:', dbError)
+			logger.error('[NFT Evolve] Database update failed:', dbError)
 		}
 
 		await auditLogger.log({
@@ -234,7 +235,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			nft: updatedNFT || existingNFT,
 		})
 	} catch (error) {
-		console.error('Error in POST /api/nfts/evolve:', error)
+		logger.error('Error in POST /api/nfts/evolve:', error)
 		await auditLogger.log({
 			correlationId,
 			operation: 'nft.evolve',

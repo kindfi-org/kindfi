@@ -1,4 +1,5 @@
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
+import { logger } from '@/lib/logger'
 
 // audit_logs table is not in generated Supabase types
 const AUDIT_LOGS_TABLE = 'audit_logs' as const
@@ -100,7 +101,7 @@ export class AuditLogger {
 			if (error) throw error
 		} catch (dbError) {
 			// eslint-disable-next-line no-console -- last-resort fallback: AuditLogger itself failed, no other logging mechanism available
-			console.error('[AuditLogger] Failed to persist audit log:', dbError)
+			logger.error('[AuditLogger] Failed to persist audit log:', dbError)
 			// Don't throw to avoid disrupting the main flow
 		}
 	}

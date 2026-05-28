@@ -5,6 +5,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { referralOnboardSchema } from '~/lib/schemas/referral.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 const ONBOARDING_REWARD_POINTS = 50
 
@@ -74,14 +75,14 @@ export async function POST(req: NextRequest) {
 		const { data: stats, error: statsError } = statsResult
 
 		if (statsError && statsError.code !== 'PGRST116') {
-			console.error(
+			logger.error(
 				'[Referral Onboard API] Error fetching referrer statistics:',
 				statsError,
 			)
 		}
 
 		if (updateError) {
-			console.error('Error updating referral:', updateError)
+			logger.error('Error updating referral:', updateError)
 			return NextResponse.json(
 				{ error: 'Failed to update referral' },
 				{ status: 500 },
@@ -129,20 +130,20 @@ export async function POST(req: NextRequest) {
 					)
 
 					if (!contractResult.success) {
-						console.error(
+						logger.error(
 							'[Referral Onboard API] On-chain mark_onboarded failed:',
 							contractResult.error,
 						)
 					} else {
 					}
 				} catch (err) {
-					console.error(
+					logger.error(
 						'[Referral Onboard API] Error calling mark_onboarded on-chain:',
 						err,
 					)
 				}
 			} else {
-				console.warn(
+				logger.warn(
 					'[Referral Onboard API] Skipping on-chain mark_onboarded — no Stellar address for referred user',
 				)
 			}
@@ -154,7 +155,7 @@ export async function POST(req: NextRequest) {
 			onChain: contractResult?.success ?? false,
 		})
 	} catch (error) {
-		console.error('Error in POST /api/referrals/onboard:', error)
+		logger.error('Error in POST /api/referrals/onboard:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

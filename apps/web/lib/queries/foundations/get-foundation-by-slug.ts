@@ -1,4 +1,5 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
+import { logger } from '@/lib/logger'
 
 export async function getFoundationBySlug(
 	client: TypedSupabaseClient,
@@ -40,7 +41,7 @@ export async function getFoundationBySlug(
 		.maybeSingle()
 
 	if (error) {
-		console.error('Error fetching foundation by slug:', error)
+		logger.error('Error fetching foundation by slug:', error)
 		throw error
 	}
 

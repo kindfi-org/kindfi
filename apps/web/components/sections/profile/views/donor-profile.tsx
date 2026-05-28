@@ -23,6 +23,7 @@ import { getUserSupportedProjects } from '~/lib/queries/projects/get-user-projec
 import { ProfileSectionHeader } from '../profile-section-header'
 import { ProfileStatCard } from '../profile-stat-card'
 import { ProfileSurfaceCard } from '../profile-surface-card'
+import { logger } from '@/lib/logger'
 
 interface DonorProfileProps {
 	userId: string
@@ -77,7 +78,7 @@ export function DonorProfile({
 				})
 				setEscrowBalances(balanceMap)
 			} catch (error) {
-				console.error('Failed to fetch escrow balances', error)
+				logger.error('Failed to fetch escrow balances', error)
 			}
 		}
 

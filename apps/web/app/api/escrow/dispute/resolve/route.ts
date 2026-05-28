@@ -7,6 +7,7 @@ import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import type { DisputeResolutionPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateDisputeResolution } from '~/lib/validators/dispute'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -129,7 +130,7 @@ export async function POST(req: NextRequest) {
 		// Note: Notifications will be handled by the /escrow/dispute/sign endpoint
 		// after the transaction is signed and submitted
 	} catch (error) {
-		console.error('Dispute Resolution Error:', error)
+		logger.error('Dispute Resolution Error:', error)
 
 		if (error instanceof AppError) {
 			await auditLogger.log({

@@ -5,6 +5,7 @@ import {
 	useQueryClient,
 } from '@tanstack/react-query'
 import { useEffect, useMemo } from 'react'
+import { logger } from '../logger'
 import { createSupabaseBrowserClient } from '../supabase/client/browser-client'
 import type { TypedSupabaseClient } from '../types/supabase-client.types'
 
@@ -57,7 +58,7 @@ export function useSupabaseQuery<TData>(
 			try {
 				return await queryFn(supabase)
 			} catch (error) {
-				console.error(`Error in query ${queryName}:`, error)
+				logger.error(`Error in query: ${queryName}`, error instanceof Error ? error : new Error(String(error)))
 				throw error instanceof Error ? error : new Error(String(error))
 			}
 		},

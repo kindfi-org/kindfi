@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import {
+import { logger } from '@/lib/logger'
 	mapDiditStatusToKYC,
 	verifyDiditWebhookSignatureSimple,
 	verifyDiditWebhookSignatureV2,
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
 		const webhookSecret = process.env.DIDIT_WEBHOOK_SECRET_KEY
 
 		if (!webhookSecret) {
-			console.error('DIDIT_WEBHOOK_SECRET_KEY is not configured')
+			logger.error('DIDIT_WEBHOOK_SECRET_KEY is not configured')
 			return NextResponse.json(
 				{ error: 'Webhook secret not configured' },
 				{ status: 500 },
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
 			.like('notes', `%${jsonBody.session_id}%`)
 
 		if (findError || !kycRecords || kycRecords.length === 0) {
-			console.error('KYC record not found for session:', jsonBody.session_id)
+			logger.error('KYC record not found for session:', jsonBody.session_id)
 			// Return 200 to prevent retries for sessions we don't have
 			return NextResponse.json({ received: true })
 		}
@@ -127,7 +128,7 @@ export async function POST(req: NextRequest) {
 			.eq('user_id', kycRecord.user_id)
 
 		if (updateError) {
-			console.error('Failed to update KYC record:', updateError)
+			logger.error('Failed to update KYC record:', updateError)
 			// Return 500 to trigger retry
 			return NextResponse.json(
 				{ error: 'Failed to update KYC record' },
@@ -137,7 +138,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json({ received: true })
 	} catch (error) {
-		console.error('Error processing Didit webhook:', error)
+		logger.error('Error processing Didit webhook:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to process webhook',

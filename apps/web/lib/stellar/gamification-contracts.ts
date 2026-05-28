@@ -18,6 +18,7 @@ import {
 } from '@stellar/stellar-sdk'
 import * as SorobanRpc from '@stellar/stellar-sdk/rpc'
 import { Api, assembleTransaction } from '@stellar/stellar-sdk/rpc'
+import { logger } from '@/lib/logger'
 
 interface RecordStreakDonationParams {
 	userAddress: string // User's Stellar address (G... or C...)
@@ -193,7 +194,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					console.error(
+					logger.error(
 						'[GamificationContractService] Simulation failed:',
 						simulation,
 					)
@@ -212,7 +213,7 @@ export class GamificationContractService {
 				const result = await this.server.sendTransaction(assembledTx)
 
 				if (result.status === 'ERROR') {
-					console.error(
+					logger.error(
 						'[GamificationContractService] Transaction failed:',
 						result,
 					)
@@ -230,7 +231,7 @@ export class GamificationContractService {
 					streak: 1,
 				}
 			} catch (error) {
-				console.error(
+				logger.error(
 					'[GamificationContractService] Error recording streak donation:',
 					error,
 				)
@@ -294,7 +295,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					console.error(
+					logger.error(
 						'[GamificationContractService] Simulation failed:',
 						simulation,
 					)
@@ -312,7 +313,7 @@ export class GamificationContractService {
 						rewardPoints =
 							(scValToNative(simulation.result.retval) as number) ?? 0
 					} catch {
-						console.warn(
+						logger.warn(
 							'[GamificationContractService] Could not parse reward points from record_donation',
 						)
 					}
@@ -327,7 +328,7 @@ export class GamificationContractService {
 				const result = await this.server.sendTransaction(assembledTx)
 
 				if (result.status === 'ERROR') {
-					console.error(
+					logger.error(
 						'[GamificationContractService] Transaction failed:',
 						result,
 					)
@@ -343,7 +344,7 @@ export class GamificationContractService {
 					rewardPoints,
 				}
 			} catch (error) {
-				console.error(
+				logger.error(
 					'[GamificationContractService] Error recording referral donation:',
 					error,
 				)
@@ -401,7 +402,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					console.error(
+					logger.error(
 						'[GamificationContractService] createReferral simulation failed:',
 						simulation,
 					)
@@ -425,7 +426,7 @@ export class GamificationContractService {
 
 				return { success: true }
 			} catch (error) {
-				console.error(
+				logger.error(
 					'[GamificationContractService] Error creating referral:',
 					error,
 				)
@@ -480,7 +481,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					console.error(
+					logger.error(
 						'[GamificationContractService] markOnboarded simulation failed:',
 						simulation,
 					)
@@ -498,7 +499,7 @@ export class GamificationContractService {
 						rewardPoints =
 							(scValToNative(simulation.result.retval) as number) ?? 0
 					} catch {
-						console.warn(
+						logger.warn(
 							'[GamificationContractService] Could not parse reward points from markOnboarded',
 						)
 					}
@@ -518,7 +519,7 @@ export class GamificationContractService {
 
 				return { success: true, rewardPoints }
 			} catch (error) {
-				console.error(
+				logger.error(
 					'[GamificationContractService] Error marking onboarded:',
 					error,
 				)
@@ -584,7 +585,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					console.error(
+					logger.error(
 						'[GamificationContractService] Simulation failed:',
 						simulation,
 					)
@@ -603,7 +604,7 @@ export class GamificationContractService {
 				const result = await this.server.sendTransaction(assembledTx)
 
 				if (result.status === 'ERROR') {
-					console.error(
+					logger.error(
 						'[GamificationContractService] Transaction failed:',
 						result,
 					)
@@ -619,7 +620,7 @@ export class GamificationContractService {
 					completed: false,
 				}
 			} catch (error) {
-				console.error(
+				logger.error(
 					'[GamificationContractService] Error updating quest progress:',
 					error,
 				)
@@ -660,7 +661,7 @@ export class GamificationContractService {
 						return account
 					})
 					.catch((error) => {
-						console.error(
+						logger.error(
 							'[GamificationContractService] Error fetching admin account:',
 							error,
 						)
@@ -701,7 +702,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					console.error(
+					logger.error(
 						'[GamificationContractService] Simulation failed:',
 						simulation,
 					)
@@ -720,7 +721,7 @@ export class GamificationContractService {
 				const result = await this.server.sendTransaction(assembledTx)
 
 				if (result.status === 'ERROR') {
-					console.error(
+					logger.error(
 						'[GamificationContractService] Transaction failed:',
 						result,
 					)
@@ -739,7 +740,7 @@ export class GamificationContractService {
 						const { scValToNative } = await import('@stellar/stellar-sdk')
 						questId = scValToNative(simulation.result.retval) as number
 					} catch (e) {
-						console.warn(
+						logger.warn(
 							'[GamificationContractService] Could not parse quest ID from simulation result',
 							e,
 						)
@@ -751,7 +752,7 @@ export class GamificationContractService {
 					questId,
 				}
 			} catch (error) {
-				console.error(
+				logger.error(
 					'[GamificationContractService] Error creating quest:',
 					error,
 				)
@@ -897,7 +898,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					console.error(
+					logger.error(
 						'[GamificationContractService] mintNFT simulation failed:',
 						simulation,
 					)
@@ -914,7 +915,7 @@ export class GamificationContractService {
 						const { scValToNative } = await import('@stellar/stellar-sdk')
 						tokenId = scValToNative(simulation.result.retval) as number
 					} catch {
-						console.warn(
+						logger.warn(
 							'[GamificationContractService] Could not parse token ID from simulation',
 						)
 					}
@@ -934,7 +935,7 @@ export class GamificationContractService {
 
 				return { success: true, tokenId }
 			} catch (error) {
-				console.error('[GamificationContractService] Error minting NFT:', error)
+				logger.error('[GamificationContractService] Error minting NFT:', error)
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error',
@@ -989,7 +990,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					console.error(
+					logger.error(
 						'[GamificationContractService] updateNFTMetadata simulation failed:',
 						simulation,
 					)
@@ -1013,7 +1014,7 @@ export class GamificationContractService {
 
 				return { success: true }
 			} catch (error) {
-				console.error(
+				logger.error(
 					'[GamificationContractService] Error updating NFT metadata:',
 					error,
 				)
@@ -1069,7 +1070,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					console.error(
+					logger.error(
 						'[GamificationContractService] grant_role simulation failed:',
 						simulation.error,
 					)
@@ -1111,7 +1112,7 @@ export class GamificationContractService {
 
 				return { success: true }
 			} catch (error) {
-				console.error(
+				logger.error(
 					'[GamificationContractService] Error granting role:',
 					error,
 				)

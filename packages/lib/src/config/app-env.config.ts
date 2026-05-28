@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { logger } from '../logger'
 import type { AppEnvInterface, AppName, ValidatedEnvInput } from '../types'
 
 // Transform function with explicit type annotation
@@ -318,13 +319,13 @@ export function appEnvConfig<T extends keyof typeof appRequirements>(
 
 			if (!result.success) {
 				const issues = result.error.issues
-				console.error('❌ Config validation failed:', {
+				logger.error('Config validation failed', undefined, {
 					errorCount: issues.length,
 					errors: issues.map((err) => ({
 						path: err.path.join('.'),
 						message: err.message,
 						code: err.code,
-					})),
+					})) as unknown as Record<string, unknown>[],
 				})
 
 				const missingVars = issues
@@ -334,18 +335,11 @@ export function appEnvConfig<T extends keyof typeof appRequirements>(
 					`❌ Environment validation failed for ${String(appName)}:\n${missingVars}\n\nPlease check your .env file and ensure all required variables are set.`,
 				)
 			}
-			// console.log(
-			// 	`✅ Environment variables for ${String(appName)} validated successfully.`,
-			// )
 		}
 
 		return transformedConfig
 	} catch (error) {
-		console.error('💥 Error in getEnv function:', {
-			errorType: error?.constructor?.name,
-			message: error instanceof Error ? error.message : 'Unknown error',
-			appName,
-		})
+		logger.error('Error in appEnvConfig', error instanceof Error ? error : new Error(String(error)), { appName: String(appName ?? 'unknown') })
 		throw error
 	}
 }

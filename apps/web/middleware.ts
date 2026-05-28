@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { type NextRequestWithAuth, withAuth } from 'next-auth/middleware'
 import { ensureCsrfTokenCookie } from '~/app/actions/csrf'
+import { logger } from '@/lib/logger'
 
 // * Infer the type of the first parameter of updateSession
 type ExpectedRequestType = Parameters<typeof updateSession>[0]
@@ -39,7 +40,6 @@ export default withAuth(
 						: 'next-auth.session-token',
 			})
 
-			// console.log('🔑 Middleware token check:', {
 			// 	hasToken: !!token,
 			// 	tokenSub: token?.sub,
 			// 	pathname,
@@ -48,7 +48,7 @@ export default withAuth(
 
 			// Redirect unauthenticated access to protected paths only
 			if (isProtectedPath(pathname) && !token?.sub) {
-				console.warn('⚠️ Unauthorized access attempt to:', pathname)
+				logger.warn('⚠️ Unauthorized access attempt to:', pathname)
 				const url = req.nextUrl.clone()
 				url.pathname = '/sign-in'
 				url.searchParams.set('callbackUrl', pathname)
@@ -58,7 +58,7 @@ export default withAuth(
 			// Pass through Supabase session refresh logic
 			return await updateSession(req as unknown as ExpectedRequestType, null)
 		} catch (error) {
-			console.error('Middleware error:', error)
+			logger.error('Middleware error:', error)
 			return NextResponse.next({
 				request: { headers: req.headers },
 			})

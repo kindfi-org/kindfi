@@ -9,6 +9,7 @@ import {
 	teamMemberDeleteQuerySchema,
 } from '~/lib/schemas/project.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function POST(
 	req: Request,
@@ -96,7 +97,7 @@ export async function POST(
 			.single()
 
 		if (insertError) {
-			console.error(insertError)
+			logger.error(insertError)
 			return NextResponse.json({ error: insertError.message }, { status: 500 })
 		}
 
@@ -116,7 +117,7 @@ export async function POST(
 			},
 		})
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },
@@ -174,7 +175,7 @@ export async function PATCH(
 		}
 
 		if (memberError && memberError.code !== 'PGRST116') {
-			console.error('Error checking user permissions:', memberError)
+			logger.error('Error checking user permissions:', memberError)
 		}
 
 		const isOwner = project.kindler_id === userId
@@ -210,7 +211,7 @@ export async function PATCH(
 				.single()
 
 		if (updateError) {
-			console.error(updateError)
+			logger.error(updateError)
 			return NextResponse.json({ error: updateError.message }, { status: 500 })
 		}
 
@@ -230,7 +231,7 @@ export async function PATCH(
 			},
 		})
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },
@@ -283,7 +284,7 @@ export async function DELETE(
 		}
 
 		if (memberError && memberError.code !== 'PGRST116') {
-			console.error('Error checking user permissions:', memberError)
+			logger.error('Error checking user permissions:', memberError)
 		}
 
 		const isOwner = project.kindler_id === userId
@@ -306,7 +307,7 @@ export async function DELETE(
 			.eq('project_id', projectId)
 
 		if (deleteError) {
-			console.error(deleteError)
+			logger.error(deleteError)
 			return NextResponse.json({ error: deleteError.message }, { status: 500 })
 		}
 
@@ -314,7 +315,7 @@ export async function DELETE(
 			message: 'Team member removed successfully',
 		})
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

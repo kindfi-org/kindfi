@@ -7,6 +7,7 @@ import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import type { DisputeSignPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateDisputeSign } from '~/lib/validators/dispute'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -123,10 +124,10 @@ export async function POST(req: NextRequest) {
 			const { data: milestone, error: milestoneError } = milestoneResult
 
 			if (escrowError) {
-				console.error('Error fetching escrow contract:', escrowError)
+				logger.error('Error fetching escrow contract:', escrowError)
 			}
 			if (milestoneError) {
-				console.error('Error fetching milestone:', milestoneError)
+				logger.error('Error fetching milestone:', milestoneError)
 			}
 
 			// Create notifications for all parties involved
@@ -149,7 +150,7 @@ export async function POST(req: NextRequest) {
 					])
 
 				if (notificationError) {
-					console.error(
+					logger.error(
 						'Error creating dispute filed notifications:',
 						notificationError,
 					)
@@ -234,7 +235,7 @@ export async function POST(req: NextRequest) {
 					.eq('id', dispute.escrow_milestones.id)
 
 				if (milestoneUpdateError) {
-					console.error(
+					logger.error(
 						'Error updating milestone status:',
 						milestoneUpdateError,
 					)
@@ -251,7 +252,7 @@ export async function POST(req: NextRequest) {
 					.single()
 
 				if (escrowError) {
-					console.error('Error fetching escrow contract:', escrowError)
+					logger.error('Error fetching escrow contract:', escrowError)
 					throw new Error(
 						`Failed to fetch escrow contract: ${escrowError.message}`,
 					)
@@ -277,7 +278,7 @@ export async function POST(req: NextRequest) {
 						])
 
 					if (notificationError) {
-						console.error('Error creating notifications:', notificationError)
+						logger.error('Error creating notifications:', notificationError)
 						throw new Error(
 							`Failed to create notifications: ${notificationError.message}`,
 						)
@@ -321,7 +322,7 @@ export async function POST(req: NextRequest) {
 			{ status: 400 },
 		)
 	} catch (error) {
-		console.error('Dispute Sign Error:', error)
+		logger.error('Dispute Sign Error:', error)
 
 		await auditLogger.log({
 			correlationId,

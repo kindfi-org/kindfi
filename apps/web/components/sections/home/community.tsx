@@ -8,6 +8,7 @@ import { SectionContainer } from '~/components/shared/section-container'
 import { Testimonial } from '~/components/shared/testimonial-card'
 import { benefits, testimonialData } from '~/lib/constants/community-data'
 import { useI18n } from '~/lib/i18n'
+import { logger } from '@/lib/logger'
 
 export function Community() {
 	const prefersReducedMotion = useReducedMotion()
@@ -40,7 +41,7 @@ export function Community() {
 				message: 'Form submitted successfully!',
 			})
 		} catch (error) {
-			console.error(error) // Logs the error for debugging
+			logger.error(error) // Logs the error for debugging
 			setFormStatus({
 				type: 'error',
 				message: 'Failed to submit the form. Please try again.',

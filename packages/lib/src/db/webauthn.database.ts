@@ -4,6 +4,7 @@ import type {
 	WebAuthnCredential as BaseWebAuthnCredential,
 } from '@simplewebauthn/server'
 import { and, desc, eq, gt, lt } from 'drizzle-orm'
+import { logger } from '../logger'
 
 // Extended WebAuthnCredential with Stellar address support (matches passkey-service.ts)
 export interface WebAuthnCredential extends BaseWebAuthnCredential {
@@ -151,7 +152,7 @@ export const getUser = async ({
 			credentials,
 		}
 	} catch (error) {
-		console.error('Error getting user by identifier', error)
+		logger.error('Error getting user by identifier', error instanceof Error ? error : new Error(String(error)), { identifier })
 		return null
 	}
 }

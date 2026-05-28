@@ -7,6 +7,7 @@ import { Button } from '~/components/base/button'
 import { CommentForm } from '~/components/sections/projects/detail/comment-form'
 import { CommentThread } from '~/components/sections/projects/detail/comment-thread'
 import type { Comment } from '~/lib/types/project/project-detail.types'
+import { logger } from '@/lib/logger'
 
 interface CommunityTabProps {
 	comments: Comment[]
@@ -52,7 +53,7 @@ export function CommunityTab({ comments, projectId }: CommunityTabProps) {
 					    }
 				    }
 			    } catch (e) {
-				    console.error('Failed to persist question', e)
+				    logger.error('Failed to persist question', e)
 			    }
 		    })()
 
@@ -96,7 +97,7 @@ export function CommunityTab({ comments, projectId }: CommunityTabProps) {
 					    }
 				    }
 			    } catch (e) {
-				    console.error('Failed to persist answer', e)
+				    logger.error('Failed to persist answer', e)
 			    }
 		    })()
 

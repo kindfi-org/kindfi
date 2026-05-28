@@ -9,6 +9,7 @@ import { listDisputesQuerySchema } from '~/lib/schemas/escrow-dispute.schemas'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateDispute } from '~/lib/validators/dispute'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -141,7 +142,7 @@ export async function POST(req: NextRequest) {
 		// Note: The database updates and notifications will be handled by the /escrow/dispute/sign endpoint
 		// after the transaction is signed and submitted
 	} catch (error) {
-		console.error('Dispute Filing Error:', error)
+		logger.error('Dispute Filing Error:', error)
 
 		if (error instanceof AppError) {
 			await auditLogger.log({
@@ -221,7 +222,7 @@ export async function GET(req: NextRequest) {
 			{ status: 200 },
 		)
 	} catch (error) {
-		console.error('Fetch Disputes Error:', error)
+		logger.error('Fetch Disputes Error:', error)
 
 		if (error instanceof AppError) {
 			return NextResponse.json(

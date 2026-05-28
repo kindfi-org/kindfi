@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
+import { logger } from '@/lib/logger'
 
 export type AnalysisStatus = 'idle' | 'loading' | 'streaming' | 'done' | 'error'
 
@@ -60,7 +61,7 @@ export const usePitchAnalysis = (): UsePitchAnalysisReturn => {
 			setStatus('done')
 		} catch (err) {
 			if ((err as Error).name === 'AbortError') return
-			console.error('[usePitchAnalysis]', err)
+			logger.error('[usePitchAnalysis]', err)
 			setStatus('error')
 		}
 	}, [])

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 const TW_API_KEY = process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY ?? ''
 const APP_ENV = process.env.NEXT_PUBLIC_APP_ENV ?? 'development'
@@ -48,7 +49,7 @@ export async function GET() {
 
 		if (!res.ok) {
 			const body = await res.text()
-			console.error('TW balance API error:', res.status, body)
+			logger.error('TW balance API error:', res.status, body)
 			throw new Error(`Trustless Work API returned ${res.status}`)
 		}
 
@@ -64,7 +65,7 @@ export async function GET() {
 			},
 		})
 	} catch (error) {
-		console.error('Error fetching community fund balance:', error)
+		logger.error('Error fetching community fund balance:', error)
 		return NextResponse.json(
 			{ error: 'Failed to fetch balance' },
 			{ status: 500 },

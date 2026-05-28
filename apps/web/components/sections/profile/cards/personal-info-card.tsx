@@ -11,6 +11,7 @@ import { Label } from '~/components/base/label'
 import { Textarea } from '~/components/base/textarea'
 import { useI18n } from '~/lib/i18n'
 import { ProfileSurfaceCard } from '../profile-surface-card'
+import { logger } from '@/lib/logger'
 
 interface PersonalInfoCardProps {
 	userId: string
@@ -51,7 +52,7 @@ export function PersonalInfoCard({
 			setIsEditing(false)
 			window.location.reload()
 		} catch (error) {
-			console.error(error)
+			logger.error(error)
 			toast.error(t('profile.profileUpdateFailed'))
 		} finally {
 			setIsSaving(false)

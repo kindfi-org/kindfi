@@ -6,6 +6,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { createQuestSchema } from '~/lib/schemas/quest.schemas'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/quests
@@ -46,7 +47,7 @@ export async function GET(_req: NextRequest) {
 		const hasContributions = (contributionsCountResult.count ?? 0) > 0
 
 		if (error) {
-			console.error('Error fetching quests:', error)
+			logger.error('Error fetching quests:', error)
 			return NextResponse.json(
 				{ error: 'Failed to fetch quests' },
 				{ status: 500 },
@@ -54,7 +55,7 @@ export async function GET(_req: NextRequest) {
 		}
 
 		if (progressError) {
-			console.error('Error fetching quest progress:', progressError)
+			logger.error('Error fetching quest progress:', progressError)
 		}
 
 		// Build a Map for O(1) lookup instead of O(n) Array.find
@@ -82,7 +83,7 @@ export async function GET(_req: NextRequest) {
 					progressMap,
 				)
 			} catch (syncErr) {
-				console.error('[Quests] Error syncing quest progress:', syncErr)
+				logger.error('[Quests] Error syncing quest progress:', syncErr)
 			}
 		}
 
@@ -108,7 +109,7 @@ export async function GET(_req: NextRequest) {
 
 		return NextResponse.json({ quests: questsWithProgress || [] })
 	} catch (error) {
-		console.error('Error in GET /api/quests:', error)
+		logger.error('Error in GET /api/quests:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },
@@ -183,7 +184,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (error) {
-			console.error('Error creating quest:', error)
+			logger.error('Error creating quest:', error)
 			return NextResponse.json(
 				{ error: 'Failed to create quest' },
 				{ status: 500 },
@@ -225,7 +226,7 @@ export async function POST(req: NextRequest) {
 					process.env.ADMIN_PRIVATE_KEY || process.env.SOROBAN_PRIVATE_KEY
 
 				if (!adminPrivateKey) {
-					console.warn(
+					logger.warn(
 						'[Quest API] No admin private key found. Quest created in database but not synced to chain.',
 					)
 				} else {
@@ -247,18 +248,18 @@ export async function POST(req: NextRequest) {
 
 					if (onChainResult.success) {
 					} else {
-						console.error(
+						logger.error(
 							'[Quest API] Failed to sync quest to on-chain:',
 							onChainResult.error,
 						)
 					}
 				}
 			} catch (error) {
-				console.error('[Quest API] Error syncing quest to on-chain:', error)
+				logger.error('[Quest API] Error syncing quest to on-chain:', error)
 				// Don't fail the request if on-chain sync fails - quest is still in database
 			}
 		} else {
-			console.warn(
+			logger.warn(
 				'[Quest API] No quest contract address configured. Quest created in database only.',
 			)
 		}
@@ -277,7 +278,7 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Error in POST /api/quests:', error)
+		logger.error('Error in POST /api/quests:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },
@@ -358,7 +359,7 @@ async function syncQuestProgress(
 			.single()
 
 		if (error) {
-			console.error(
+			logger.error(
 				`[Quests] Failed to backfill progress for quest ${quest.quest_id}:`,
 				error,
 			)

@@ -8,6 +8,7 @@ import { signAndSubmitSchema } from '~/lib/schemas/escrow-sign.schemas'
 import { isSmartAccountAddress } from '~/lib/utils/escrow/trustless-signer'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/escrow/sign-and-submit
@@ -143,7 +144,7 @@ export async function POST(req: NextRequest) {
 			authEntry: authEntry.toXDR('base64'),
 		})
 	} catch (error) {
-		console.error('Error in sign-and-submit:', error)
+		logger.error('Error in sign-and-submit:', error)
 		await auditLogger.log({
 			correlationId,
 			operation: 'escrow.sign_and_submit',

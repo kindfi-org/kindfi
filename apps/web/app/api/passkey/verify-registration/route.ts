@@ -15,6 +15,7 @@ import { NextResponse } from 'next/server'
 import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 import { verifyRegistrationSchema } from '~/lib/schemas/passkey.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/passkey/verify-registration
@@ -85,14 +86,14 @@ export async function POST(req: NextRequest) {
 					) {
 						const errorMsg =
 							'Funding account not configured. Set STELLAR_FUNDING_SECRET_KEY environment variable.'
-						console.error('❌', errorMsg)
+						logger.error('❌', errorMsg)
 						throw new Error(errorMsg)
 					}
 
 					if (!config.stellar.factoryContractId) {
 						const errorMsg =
 							'Factory contract not configured. Set FACTORY_CONTRACT_ID environment variable.'
-						console.error('❌', errorMsg)
+						logger.error('❌', errorMsg)
 						throw new Error(errorMsg)
 					}
 
@@ -122,17 +123,17 @@ export async function POST(req: NextRequest) {
 							? deploymentError.message
 							: String(deploymentError)
 
-					console.error('❌ Smart Account deployment failed:', { error: errorMessage })
+					logger.error('❌ Smart Account deployment failed:', { error: errorMessage })
 
 					// Log detailed error for debugging
-					console.error('Smart Account deployment error details:', {
+					logger.error('Smart Account deployment error details:', {
 						fundingAccount: config.stellar.fundingAccount ? 'set' : 'missing',
 						factoryContractId: config.stellar.factoryContractId ? 'set' : 'missing',
 					})
 
 					// For now, we'll continue without Smart Account creation
 					// In production, you may want to fail the registration
-					console.warn(
+					logger.warn(
 						'⚠️ Continuing registration without Smart Account creation. ' +
 							'Check server logs for deployment errors. ' +
 							'The passkey can still be used for authentication.',
@@ -185,8 +186,8 @@ export async function POST(req: NextRequest) {
 				'Passkey registered successfully, but Smart Account creation failed. ' +
 				'Check server logs for details. The passkey can still be used for authentication.'
 			response.warning = warningMessage
-			console.warn('⚠️', warningMessage)
-			console.warn('⚠️ Configuration check:', {
+			logger.warn('⚠️', warningMessage)
+			logger.warn('⚠️ Configuration check:', {
 				hasAccountWasmHash: !!process.env.NEXT_PUBLIC_ACCOUNT_WASM_HASH,
 				hasWebAuthnVerifier:
 					!!process.env.NEXT_PUBLIC_WEBAUTHN_VERIFIER_ADDRESS,
@@ -199,7 +200,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(response)
 	} catch (error) {
-		console.error('❌ Error verifying registration:', error instanceof Error ? error.message : String(error))
+		logger.error('❌ Error verifying registration:', error instanceof Error ? error.message : String(error))
 		return NextResponse.json(
 			{
 				error: 'Failed to verify registration',

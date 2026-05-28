@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { mapDiditStatusToKYC } from '~/lib/services/didit'
+import { logger } from '@/lib/logger'
 
 interface DiditCallbackBody {
 	verificationSessionId: string
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
 			.limit(1)
 
 		if (findError) {
-			console.error('Error finding KYC record:', findError)
+			logger.error('Error finding KYC record:', findError)
 			return NextResponse.json(
 				{ error: 'Failed to find KYC record', details: findError.message },
 				{ status: 500 },
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
 				})
 
 			if (insertError) {
-				console.error('Failed to create KYC record:', insertError)
+				logger.error('Failed to create KYC record:', insertError)
 				return NextResponse.json(
 					{ error: 'Failed to create KYC record' },
 					{ status: 500 },
@@ -133,7 +134,7 @@ export async function POST(req: NextRequest) {
 			.eq('id', kycRecord.id)
 
 		if (updateError) {
-			console.error('Failed to update KYC record:', updateError)
+			logger.error('Failed to update KYC record:', updateError)
 			return NextResponse.json(
 				{ error: 'Failed to update KYC record' },
 				{ status: 500 },
@@ -146,7 +147,7 @@ export async function POST(req: NextRequest) {
 			diditStatus: status,
 		})
 	} catch (error) {
-		console.error('Error processing Didit callback:', error)
+		logger.error('Error processing Didit callback:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to process callback',

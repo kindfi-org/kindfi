@@ -9,6 +9,7 @@ import { FundsReleasedEmail } from './templates/funds-released-email'
 import { MilestoneApprovedEmail } from './templates/milestone-approved-email'
 import { NewProjectEmail } from './templates/new-project-email'
 import { WelcomeNewUserEmail } from './templates/welcome-new-user-email'
+import { logger } from '@/lib/logger'
 
 const appConfig = appEnvConfig('web')
 
@@ -52,12 +53,12 @@ async function sendEmail({
 		})
 
 		if (error) {
-			console.error('[EmailNotificationService] Resend error:', error)
+			logger.error('[EmailNotificationService] Resend error:', error)
 			return { success: false, error: error.message }
 		}
 		return { success: true }
 	} catch (err) {
-		console.error('[EmailNotificationService] Send failed:', err)
+		logger.error('[EmailNotificationService] Send failed:', err)
 		return {
 			success: false,
 			error: err instanceof Error ? err.message : 'Unknown error',
@@ -84,10 +85,10 @@ async function createInAppNotification({
 			type,
 		})
 		if (error) {
-			console.error('[EmailNotificationService] In-app notification failed:', error)
+			logger.error('[EmailNotificationService] In-app notification failed:', error)
 		}
 	} catch (err) {
-		console.error('[EmailNotificationService] In-app notification error:', err)
+		logger.error('[EmailNotificationService] In-app notification error:', err)
 	}
 }
 

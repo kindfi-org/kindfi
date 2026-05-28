@@ -7,6 +7,7 @@ import {
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import { logger } from '@/lib/logger'
 
 export const usePasskeyRegistration = (
 	identifier: string,
@@ -143,7 +144,7 @@ export const usePasskeyRegistration = (
 						// Call the onRegister callback for any additional processing (without blockchain deployment)
 						await onRegister(registrationResponse, userId as string)
 					} catch (stellarError) {
-						console.warn('Failed to extract stellar data:', stellarError)
+						logger.warn('Failed to extract stellar data:', stellarError)
 					}
 				}
 				const message = 'Authenticator registered!'

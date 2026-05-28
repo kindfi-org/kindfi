@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
+import { logger } from '@/lib/logger'
 	getDiditSessionStatus,
 	mapDiditStatusToKYC,
 } from '~/lib/services/didit'
@@ -33,7 +34,7 @@ export async function POST(_req: NextRequest) {
 			.maybeSingle()
 
 		if (findError) {
-			console.error('Error finding KYC record:', findError)
+			logger.error('Error finding KYC record:', findError)
 			return NextResponse.json(
 				{ error: 'Failed to find KYC record', details: findError.message },
 				{ status: 500 },
@@ -88,7 +89,7 @@ export async function POST(_req: NextRequest) {
 			.eq('user_id', session.user.id)
 
 		if (updateError) {
-			console.error('Failed to update KYC record:', updateError)
+			logger.error('Failed to update KYC record:', updateError)
 			// Still return the status even if update fails
 		}
 
@@ -98,7 +99,7 @@ export async function POST(_req: NextRequest) {
 			diditStatus: diditStatus.status,
 		})
 	} catch (error) {
-		console.error('Error checking KYC status:', error)
+		logger.error('Error checking KYC status:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to check KYC status',

@@ -17,6 +17,7 @@ import {
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 import { eq } from 'drizzle-orm'
 import { appEnvConfig } from '../config'
+import { logger } from '../logger'
 import {
 	computeDeviceIdFromCoseKey,
 	convertCoseToUncompressedPublicKey,
@@ -118,7 +119,7 @@ export class StellarPasskeyService {
 				isExisting: false,
 			}
 		} catch (error) {
-			console.error('❌ Error deploying smart wallet:', error)
+			logger.error('Error deploying smart wallet', error instanceof Error ? error : new Error(String(error)))
 			throw new Error(`Failed to deploy smart wallet: ${error}`)
 		}
 	}
@@ -137,10 +138,6 @@ export class StellarPasskeyService {
 
 			try {
 				const ledgerEntries = await this.server.getLedgerEntries(ledgerKey)
-				// console.log(
-				// 	'ℹ️ LedgerEntries for webauthn account',
-				// 	JSON.stringify(ledgerEntries.entries, null, 2),
-				// )
 				return {
 					address: contractAddress,
 					balance: '0', // Contracts don't have balances directly
@@ -187,9 +184,7 @@ export class StellarPasskeyService {
 					'Account Factory',
 				)
 			} catch {
-				console.warn(
-					'⚠️ Factory contract verification failed. Continuing with deployment attempt.'
-				)
+				logger.warn('Factory contract verification failed – continuing with deployment attempt')
 			}
 
 			// Verify controller contract exists (non-blocking)
@@ -199,9 +194,7 @@ export class StellarPasskeyService {
 					'Auth Controller',
 				)
 			} catch {
-				console.warn(
-					'⚠️ Controller contract verification failed. Continuing with deployment attempt.'
-				)
+				logger.warn('Controller contract verification failed – continuing with deployment attempt')
 			}
 
 			const fundingAccount = await this.server.getAccount(
@@ -321,7 +314,7 @@ export class StellarPasskeyService {
 			}
 
 		} catch (error) {
-			console.error(`❌ Failed to verify ${contractName}:`, error)
+			logger.error(`Failed to verify ${contractName}`, error instanceof Error ? error : new Error(String(error)), { contractId })
 			throw new Error(
 				`${contractName} (${contractId}) verification failed: ${error}. ` +
 					'Please ensure the contract is deployed on this network.',
@@ -453,7 +446,7 @@ export class StellarPasskeyService {
 
 			return isValid
 		} catch (error) {
-			console.error('❌ Error verifying signature:', error)
+			logger.error('Error verifying signature', error instanceof Error ? error : new Error(String(error)))
 			return false
 		}
 	}
@@ -495,7 +488,7 @@ export class StellarPasskeyService {
 
 			return isValid
 		} catch (error) {
-			console.error('❌ SECP256R1 verification failed:', error)
+			logger.error('SECP256R1 verification failed', error instanceof Error ? error : new Error(String(error)))
 			return false
 		}
 	}
@@ -587,7 +580,7 @@ export class StellarPasskeyService {
 
 			return publicKeyBuffer
 		} catch (error) {
-			console.error('❌ Error retrieving public key from database:', error)
+			logger.error('Error retrieving public key from database', error instanceof Error ? error : new Error(String(error)), { contractId })
 			return null
 		}
 	}
@@ -637,7 +630,7 @@ export class StellarPasskeyService {
 					throw new Error('Unsupported operation type')
 			}
 		} catch (error) {
-			console.error('❌ Error executing transaction:', error)
+			logger.error('Error executing transaction', error instanceof Error ? error : new Error(String(error)), { address })
 			throw new Error(`Transaction execution failed: ${error}`)
 		}
 	}
@@ -828,7 +821,6 @@ export class StellarPasskeyService {
 
 
 					if (txResult.status === Api.GetTransactionStatus.SUCCESS) {
-						// console.log('📋 Transaction result:', JSON.stringify(txResult.resultMetaXdr, null, 2))
 						return sendResult.hash
 					}
 
@@ -914,10 +906,10 @@ export async function queryContractDevices(
 			}
 		}
 
-		console.warn('⚠️ Failed to query contract devices')
+		logger.warn('Failed to query contract devices')
 		return []
 	} catch (error) {
-		console.error('❌ Error querying contract devices:', error)
+		logger.error('Error querying contract devices', error instanceof Error ? error : new Error(String(error)), { contractAddress })
 		return []
 	}
 }

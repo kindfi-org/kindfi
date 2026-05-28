@@ -28,6 +28,7 @@ import type {
 	QAClientProps,
 } from '~/lib/types/project/project-qa.types'
 import {
+import { logger } from '@/lib/logger'
 	buildQuestionThreads,
 	getGuestRemainingComments as utilGetGuestRemainingComments,
 	getGuestUserId as utilGetGuestUserId,
@@ -110,14 +111,14 @@ export default function QAClient({
 				if (error) throw error
 
 				if (!data || !data.length) {
-					console.warn('No questions found for this project')
+					logger.warn('No questions found for this project')
 					return []
 				}
 
 				const mapped = await fetchQuestions(supabase, projectId)
 				return mapped
 			} catch (err) {
-				console.error('Error fetching questions:', err)
+				logger.error('Error fetching questions:', err)
 				return []
 			}
 		},
@@ -134,12 +135,12 @@ export default function QAClient({
 			try {
 				const data = await fetchChildComments(supabase, projectId)
 				if (!data || data.length === 0) {
-					console.warn('No comments found for this project')
+					logger.warn('No comments found for this project')
 					return []
 				}
 				return data
 			} catch (err) {
-				console.error('Error fetching comments:', err)
+				logger.error('Error fetching comments:', err)
 				return []
 			}
 		},
@@ -156,7 +157,7 @@ export default function QAClient({
 			const threads = buildQuestionThreads(questions, commentsData)
 			setProcessedQuestions(threads)
 		} catch (err) {
-			console.error('Error processing comments:', err)
+			logger.error('Error processing comments:', err)
 		}
 	}, [questions, commentsData])
 
@@ -356,7 +357,7 @@ export default function QAClient({
 			setTimeout(() => setRealtimeStatus(null), 3000)
 		},
 		onError: (error) => {
-			console.error('Error submitting question:', error)
+			logger.error('Error submitting question:', error)
 			setRealtimeStatus(
 				`Error: ${error instanceof Error ? error.message : String(error)}`,
 			)
@@ -409,7 +410,7 @@ export default function QAClient({
 			setTimeout(() => setRealtimeStatus(null), 3000)
 		},
 		onError: (error) => {
-			console.error('Error submitting answer:', error)
+			logger.error('Error submitting answer:', error)
 			setRealtimeStatus(
 				`Error: ${error instanceof Error ? error.message : String(error)}`,
 			)
@@ -456,7 +457,7 @@ export default function QAClient({
 			setTimeout(() => setRealtimeStatus(null), 3000)
 		},
 		onError: (error) => {
-			console.error('Error submitting reply:', error)
+			logger.error('Error submitting reply:', error)
 			setRealtimeStatus(
 				`Error: ${error instanceof Error ? error.message : String(error)}`,
 			)
@@ -507,7 +508,7 @@ export default function QAClient({
 			setTimeout(() => setRealtimeStatus(null), 3000)
 		},
 		onError: (error) => {
-			console.error('Error marking as resolved:', error)
+			logger.error('Error marking as resolved:', error)
 			setRealtimeStatus(
 				`Error: ${error instanceof Error ? error.message : String(error)}`,
 			)

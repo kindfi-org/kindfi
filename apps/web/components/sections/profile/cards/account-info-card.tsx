@@ -9,6 +9,7 @@ import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { useI18n } from '~/lib/i18n'
 import { ProfileSurfaceCard } from '../profile-surface-card'
+import { logger } from '@/lib/logger'
 
 interface AccountInfoCardProps {
 	userEmail: string
@@ -49,7 +50,7 @@ export function AccountInfoCard({
 			setIsEditing(false)
 			window.location.reload()
 		} catch (error) {
-			console.error('Failed to update slug:', error)
+			logger.error('Failed to update slug:', error)
 			toast.error(
 				error instanceof Error ? error.message : t('profile.handleUpdateFailed'),
 			)

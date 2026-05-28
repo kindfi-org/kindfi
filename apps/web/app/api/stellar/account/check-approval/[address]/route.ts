@@ -5,6 +5,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { addressParamSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/stellar/account/check-approval/[address]
@@ -67,7 +68,7 @@ export async function GET(
 			},
 		})
 	} catch (error) {
-		console.error('❌ Error checking account approval:', error)
+		logger.error('❌ Error checking account approval:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to check account approval',

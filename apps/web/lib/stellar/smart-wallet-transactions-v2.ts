@@ -161,7 +161,7 @@ export class SmartWalletTransactionServiceV2 {
 		webAuthnSignature: WebAuthnSignatureData
 		publicKey: Uint8Array
 	}): Promise<{ transactionHash: string; status: string }> {
-		console.warn(
+		logger.warn(
 			'⚠️ submitTransactionWithWebAuthn requires Smart Account Kit SDK. ' +
 				'Use SmartAccountKitService.signAndSubmit() instead.',
 		)
@@ -219,7 +219,7 @@ export class SmartWalletTransactionServiceV2 {
 				tokens: [],
 			}
 		} catch (error) {
-			console.error('❌ Error fetching balances:', error)
+			logger.error('❌ Error fetching balances:', error)
 			return {
 				xlm: '0',
 				tokens: [],
@@ -252,7 +252,7 @@ export class SmartWalletTransactionServiceV2 {
 		})
 
 		if (Api.isSimulationError(simulation)) {
-			console.error('❌ Simulation error:', simulation.error)
+			logger.error('❌ Simulation error:', simulation.error)
 			throw new Error(
 				`Transaction simulation failed: ${simulation.error || 'Unknown error'}`,
 			)
@@ -358,4 +358,5 @@ interface BuildTransactionParamsV2 {
 
 // Import Account and TransactionBuilder for balance queries
 import { Account, TransactionBuilder } from '@stellar/stellar-sdk'
+import { logger } from '@/lib/logger'
 // Api is already imported at the top of the file

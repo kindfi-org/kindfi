@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { getUserStats } from '~/lib/services/user-stats'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/nfts/user
@@ -30,7 +31,7 @@ export async function GET() {
 		const { data: nft, error } = nftResult
 
 		if (error && error.code !== 'PGRST116') {
-			console.error('Error fetching user NFT:', error)
+			logger.error('Error fetching user NFT:', error)
 		}
 
 		return NextResponse.json({
@@ -38,7 +39,7 @@ export async function GET() {
 			stats,
 		})
 	} catch (error) {
-		console.error('Error in GET /api/nfts/user:', error)
+		logger.error('Error in GET /api/nfts/user:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

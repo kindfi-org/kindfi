@@ -11,6 +11,7 @@ import {
 	TransactionBuilder,
 } from '@stellar/stellar-sdk'
 import type { AppEnvInterface } from '../types'
+import { logger } from '../logger'
 import { ChannelsClientService } from './channels-client.service'
 
 /**
@@ -78,7 +79,7 @@ export class SmartAccountService {
 				}
 			}
 		} catch (error) {
-			console.warn('⚠️ Smart Account Kit not available, using fallback:', error)
+			logger.warn('Smart Account Kit not available, using fallback', error instanceof Error ? error : undefined)
 		}
 
 		// Fallback: throw error if Smart Account Kit is not available
@@ -197,7 +198,7 @@ export class SmartAccountService {
 				status: result.status,
 			}
 		} catch (error) {
-			console.error('❌ Transaction signing/submission failed:', error)
+			logger.error('Transaction signing/submission failed', error instanceof Error ? error : new Error(String(error)))
 			throw error
 		}
 	}

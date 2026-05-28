@@ -10,6 +10,7 @@ import { CommentForm } from '~/components/sections/projects/detail/comment-form'
 import { CommentThread } from '~/components/sections/projects/detail/comment-thread'
 import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { Comment, Update } from '~/lib/types/project/project-detail.types'
+import { logger } from '@/lib/logger'
 
 interface UpdatesTabProps {
 	updates: Update[]
@@ -82,7 +83,7 @@ export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 					    }
 				    }
 			    } catch (e) {
-				    console.error('Failed to persist comment', e)
+				    logger.error('Failed to persist comment', e)
 			    }
 		    })()
 
@@ -146,7 +147,7 @@ export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 					    }
 				    }
 			    } catch (e) {
-				    console.error('Failed to persist reply', e)
+				    logger.error('Failed to persist reply', e)
 			    }
 		    })()
 

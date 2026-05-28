@@ -10,6 +10,7 @@ import type {
 } from '../types/notification'
 import { notificationTypeToCategory } from '../types/notification'
 import { NotificationLogger } from './notification-logger'
+import { logger } from '@/lib/logger'
 
 type DbNotificationRow = {
 	id: string
@@ -309,7 +310,7 @@ export class NotificationService {
 			if (error) throw error
 			return true
 		} catch (error) {
-			console.error('Failed to mark notification as read:', error)
+			logger.error('Failed to mark notification as read:', error)
 			return false
 		}
 	}
@@ -330,7 +331,7 @@ export class NotificationService {
 			if (error) throw error
 			return true
 		} catch (error) {
-			console.error('Failed to mark all notifications as read:', error)
+			logger.error('Failed to mark all notifications as read:', error)
 			return false
 		}
 	}
@@ -354,7 +355,7 @@ export class NotificationService {
 				mapDbRowToBaseNotification(row as DbNotificationRow),
 			)
 		} catch (error) {
-			console.error('Failed to get unread notifications:', error)
+			logger.error('Failed to get unread notifications:', error)
 			return []
 		}
 	}

@@ -14,6 +14,7 @@ import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
 import { cn, getAvatarFallback } from '~/lib/utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
+import { logger } from '@/lib/logger'
 
 const WalletCopyButton = ({
 	address,
@@ -154,21 +155,21 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 			try {
 				disconnect()
 			} catch (error) {
-				console.error('Error disconnecting wallet:', error)
+				logger.error('Error disconnecting wallet:', error)
 			}
 
 			try {
 				const supabase = createSupabaseBrowserClient()
 				await supabase.auth.signOut()
 			} catch (error) {
-				console.error('Error signing out from Supabase:', error)
+				logger.error('Error signing out from Supabase:', error)
 			}
 
 			await signOut({
 				callbackUrl: '/sign-in?success=Successfully signed out',
 			})
 		} catch (error) {
-			console.error('Error signing out:', error)
+			logger.error('Error signing out:', error)
 			toast.error(t('auth.signOutError'))
 			router.push('/')
 			setIsSigningOut(false)

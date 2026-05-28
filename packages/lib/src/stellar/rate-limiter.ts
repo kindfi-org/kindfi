@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis'
+import { logger } from '../logger'
 
 export interface RateLimitConfig {
 	maxAttempts: number
@@ -34,10 +35,7 @@ export class SignatureRateLimiter {
 					token: config.redisToken,
 				})
 			} catch (error) {
-				console.warn(
-					'⚠️ Failed to initialize Upstash Redis, using in-memory store:',
-					error,
-				)
+				logger.warn('Failed to initialize Upstash Redis, using in-memory store', error instanceof Error ? error : undefined)
 			}
 		} else {
 		}
@@ -55,7 +53,7 @@ export class SignatureRateLimiter {
 				return await this.checkRedisLimit(key)
 			}
 		} catch (error) {
-			console.warn('⚠️ Redis rate limit check failed, using in-memory:', error)
+			logger.warn('Redis rate limit check failed, using in-memory fallback', error instanceof Error ? error : undefined)
 		}
 
 		// Fallback to in-memory
@@ -71,7 +69,7 @@ export class SignatureRateLimiter {
 				await this.redis.del(this.getRedisKey(key))
 			}
 		} catch (error) {
-			console.warn('⚠️ Redis reset failed:', error)
+			logger.warn('Redis reset failed', error instanceof Error ? error : undefined)
 		}
 
 		// Always reset in-memory as well

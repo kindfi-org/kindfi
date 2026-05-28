@@ -1,5 +1,6 @@
 import { Address, hash, Keypair, StrKey, xdr } from '@stellar/stellar-sdk'
 import { appEnvConfig } from '../config'
+import { logger } from '../logger'
 import type { AppEnvInterface } from '../types'
 
 /**
@@ -60,7 +61,7 @@ export async function handleDeploy(params: {
 			transactionHash: undefined, // Will be set when actual deployment is implemented
 		}
 	} catch (error) {
-		console.error('❌ Error during deployment:', error)
+		logger.error('Error during deployment', error instanceof Error ? error : new Error(String(error)))
 		throw new Error(`Deployment failed: ${error}`)
 	}
 }

@@ -3,6 +3,7 @@ import { SupabaseAdapter } from '@auth/supabase-adapter'
 import { appEnvConfig } from '@packages/lib/config'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Adapter, AdapterSession, AdapterUser } from 'next-auth/adapters'
+import { logger } from '@/lib/logger'
 
 interface DeviceData {
 	credential_id: string
@@ -91,7 +92,7 @@ export function KindfiSupabaseAdapter(): Adapter {
 					}),
 				)
 				.catch((err) => {
-					console.error('[Auth] Welcome email error:', err)
+					logger.error('[Auth] Welcome email error:', err)
 				})
 
 			return createdUser

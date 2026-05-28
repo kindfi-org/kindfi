@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { devicesSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/stellar/devices
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
 			transactionHash: data.transactionHash,
 		})
 	} catch (error) {
-		console.error('Error executing device operation:', error)
+		logger.error('Error executing device operation:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to execute device operation',

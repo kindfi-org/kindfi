@@ -5,6 +5,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { referralDonationSchema } from '~/lib/schemas/referral.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/referrals/donation
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
 
 
 					if (!contractResult.success) {
-						console.error(
+						logger.error(
 							'[Referral API] Failed to record referral donation on-chain:',
 							contractResult.error,
 						)
@@ -102,12 +103,12 @@ export async function POST(req: NextRequest) {
 					} else {
 					}
 				} else {
-					console.warn(
+					logger.warn(
 						'[Referral API] Referral contract address not configured',
 					)
 				}
 			} catch (error) {
-				console.error('[Referral API] Error calling referral contract:', error)
+				logger.error('[Referral API] Error calling referral contract:', error)
 				// Continue with database update even if contract call fails
 			}
 		} else {
@@ -148,7 +149,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (updateError) {
-			console.error('Error updating referral:', updateError)
+			logger.error('Error updating referral:', updateError)
 			return NextResponse.json(
 				{ error: 'Failed to update referral' },
 				{ status: 500 },
@@ -186,7 +187,7 @@ export async function POST(req: NextRequest) {
 			status_changed: new_status !== old_status,
 		})
 	} catch (error) {
-		console.error('Error in POST /api/referrals/donation:', error)
+		logger.error('Error in POST /api/referrals/donation:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

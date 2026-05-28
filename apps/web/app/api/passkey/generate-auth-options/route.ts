@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 import { generateAuthOptionsSchema } from '~/lib/schemas/passkey.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/passkey/generate-auth-options
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(options)
 	} catch (error) {
-		console.error('❌ Error generating authentication options:', error)
+		logger.error('❌ Error generating authentication options:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to generate authentication options',

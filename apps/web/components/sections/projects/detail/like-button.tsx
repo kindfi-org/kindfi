@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ThumbsUp } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '~/components/base/button'
+import { logger } from '@/lib/logger'
 
 interface LikeButtonProps {
     initialCount: number
@@ -31,7 +32,7 @@ export function LikeButton({ initialCount = 0, commentId, onLike }: LikeButtonPr
                 const likes = json.data?.metadata?.likes ?? count
                 setCount(likes)
             } catch (e) {
-                console.error('Failed to persist like', e)
+                logger.error('Failed to persist like', e)
             }
         }
 

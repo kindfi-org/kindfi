@@ -7,6 +7,10 @@
 			"import": "./src/index.ts",
 			"require": "./src/index.ts"
 		},
+		"./logger": {
+			"import": "./src/logger/index.ts",
+			"require": "./src/logger/index.ts"
+		},
 		"./config": {
 			"import": "./src/config/index.ts",
 			"require": "./src/config/index.ts"

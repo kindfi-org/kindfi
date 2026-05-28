@@ -25,6 +25,7 @@ import { WritingTips } from '~/components/sections/project/highlights/writing-ti
 import { useHighlightsMutation } from '~/hooks/projects/use-highlights-mutation'
 import { getProjectHighlights } from '~/lib/queries/projects/get-project-highlights'
 import { generateUniqueId } from '~/lib/utils/id'
+import { logger } from '@/lib/logger'
 
 interface Highlight {
 	id: string
@@ -113,7 +114,7 @@ export default function ProjectHighlights() {
 			})
 		} catch (error) {
 			// Error is handled by the mutation hook (toast notification)
-			console.error('Failed to save highlights:', error)
+			logger.error('Failed to save highlights:', error)
 		}
 	}
 

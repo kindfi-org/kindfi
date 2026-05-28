@@ -14,6 +14,7 @@ export function errorHandler(
 	res: Response,
 	_next?: Function,
 ): void {
+	// biome-ignore lint/suspicious/noConsole: Express error boundary — console.error is intentional here
 	console.error('Error details:', {
 		message: err.message,
 		name: err.name,

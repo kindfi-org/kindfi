@@ -15,6 +15,7 @@ import {
 } from '@simplewebauthn/server'
 import base64url from 'base64url'
 import { appEnvConfig } from '../config'
+import { logger } from '../logger'
 import {
 	deleteChallenge,
 	getChallenge,
@@ -199,7 +200,7 @@ export const verifyRegistration = async ({
 				contractAddress = deploymentResult.address
 
 			} catch (error) {
-				console.error('❌ Failed to deploy smart wallet:', error)
+				logger.error('Failed to deploy smart wallet', error instanceof Error ? error : new Error(String(error)))
 				throw new InAppError(
 					ErrorCode.UNEXPECTED_ERROR,
 					`Smart wallet deployment failed: ${error}`,

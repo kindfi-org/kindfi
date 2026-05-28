@@ -19,6 +19,7 @@ import { LogoSection } from '../create/components/logo-section'
 import { MissionVisionSection } from '../create/components/mission-vision-section'
 import { SocialLinksSection } from '../create/components/social-links-section'
 import {
+import { logger } from '@/lib/logger'
 	type CreateFoundationFormData,
 	createFoundationSchema,
 } from '../create/types'
@@ -98,7 +99,7 @@ export function EditFoundationForm({
 				router.refresh()
 				router.push(`/foundations/${slug}/manage`)
 			} catch (error) {
-				console.error('Edit foundation error:', error)
+				logger.error('Edit foundation error:', error)
 				toast.error(
 					error instanceof Error
 						? error.message

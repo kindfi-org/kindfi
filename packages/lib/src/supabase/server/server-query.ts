@@ -1,4 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query'
+import { logger } from '../../logger'
 import type { TypedSupabaseClient } from '../../types/supabase-client.types'
 import { createSupabaseServerClient } from './server-client'
 
@@ -28,7 +29,7 @@ export async function fetchSupabaseServer<TData>(
 	try {
 		return await queryFn(supabase)
 	} catch (error) {
-		console.error(`Error in server query ${queryName}:`, error)
+		logger.error(`Error in server query: ${queryName}`, error instanceof Error ? error : new Error(String(error)))
 		throw error instanceof Error ? error : new Error(String(error))
 	}
 }

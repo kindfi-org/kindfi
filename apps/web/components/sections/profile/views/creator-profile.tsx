@@ -23,6 +23,7 @@ import { ProfileSectionHeader } from '../profile-section-header'
 import { ProfileStatCard } from '../profile-stat-card'
 import { ProfileSurfaceCard } from '../profile-surface-card'
 import { FoundationsSection } from './foundations-section'
+import { logger } from '@/lib/logger'
 
 interface CreatorProfileProps {
 	userId: string
@@ -74,7 +75,7 @@ export function CreatorProfile({
 				})
 				setEscrowBalances(balanceMap)
 			} catch (error) {
-				console.error('Failed to fetch escrow balances', error)
+				logger.error('Failed to fetch escrow balances', error)
 			}
 		}
 

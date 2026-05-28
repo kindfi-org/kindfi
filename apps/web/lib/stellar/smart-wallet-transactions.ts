@@ -18,6 +18,7 @@ import {
 	xdr,
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
+import { logger } from '@/lib/logger'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
@@ -209,7 +210,7 @@ export class SmartWalletTransactionService {
 				const nativeValue = scValToNative(retval)
 				xlmBalance = nativeValue.toString()
 			} else if (Api.isSimulationError(simulation)) {
-				console.warn('⚠️ Simulation error:', simulation.error)
+				logger.warn('⚠️ Simulation error:', simulation.error)
 				// Return 0 balance if simulation fails (contract not funded yet)
 			}
 
@@ -218,7 +219,7 @@ export class SmartWalletTransactionService {
 				tokens: [],
 			}
 		} catch (error) {
-			console.error('❌ Error fetching balances:', error)
+			logger.error('❌ Error fetching balances:', error)
 			// Return zero balance instead of throwing for better UX
 			return {
 				xlm: '0',
@@ -257,7 +258,7 @@ export class SmartWalletTransactionService {
 		webAuthnSignature: WebAuthnSignatureData
 		publicKey: Uint8Array
 	}): Promise<{ transactionHash: string; status: string }> {
-		console.warn(
+		logger.warn(
 			'⚠️ submitTransactionWithWebAuthn requires Smart Account Kit SDK. ' +
 				'Use SmartAccountKitService.signAndSubmit() instead, or use legacy submitTransaction() method.',
 		)
@@ -348,7 +349,7 @@ export class SmartWalletTransactionService {
 		})
 
 		if (Api.isSimulationError(simulation)) {
-			console.error('❌ Simulation error:', simulation.error)
+			logger.error('❌ Simulation error:', simulation.error)
 			throw new Error(
 				`Transaction simulation failed: ${simulation.error || 'Unknown error'}`,
 			)
@@ -417,7 +418,7 @@ export class SmartWalletTransactionService {
 
 		if (!signaturePayloadResult) {
 			// Fallback to transaction hash if we can't extract signature_payload
-			console.warn(
+			logger.warn(
 				'⚠️  Could not extract signature_payload, falling back to tx hash',
 			)
 			throw new Error('⚠️  Could not extract signature_payload')
@@ -452,14 +453,14 @@ export class SmartWalletTransactionService {
 						checkCredentials.signatureExpirationLedger().toString() !==
 						signatureExpirationLedger.toString()
 					) {
-						console.error(
+						logger.error(
 							'❌ CRITICAL: XDR bytes do NOT contain correct expiration!',
 						)
 					}
 				}
 			}
 		} catch (error) {
-			console.error('❌ Error verifying XDR:', error)
+			logger.error('❌ Error verifying XDR:', error)
 		}
 
 		return {

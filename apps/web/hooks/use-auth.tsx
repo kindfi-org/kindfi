@@ -9,6 +9,7 @@ import type {
 import type { Session, User } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { createContext, useContext, useEffect, useState } from 'react'
+import { logger } from '@/lib/logger'
 
 interface AuthContextType {
 	isSupabaseUserLoading: boolean
@@ -57,7 +58,7 @@ export function AuthProvider({
 				} = await supabase.auth.getSession()
 				setSupabaseUser(supabaseSession?.user)
 			} catch (error) {
-				console.error('Auth check failed:', error)
+				logger.error('Auth check failed:', error)
 				setSupabaseUser(undefined)
 			} finally {
 				setIsSupabaseUserLoading(false)

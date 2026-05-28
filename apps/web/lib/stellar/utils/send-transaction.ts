@@ -1,5 +1,6 @@
 import { httpEscrow } from '~/lib/axios/http'
 import type { SendTransactionResponse } from '~/lib/types/escrow/escrow-response.types'
+import { logger } from '@/lib/logger'
 
 export async function sendTransaction(
 	signedXdr: string,
@@ -14,7 +15,7 @@ export async function sendTransaction(
 		)
 		return response.data
 	} catch (error) {
-		console.error('Error sending transaction:', error)
+		logger.error('Error sending transaction:', error)
 		throw error
 	}
 }

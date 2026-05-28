@@ -5,6 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '~/lib/utils'
+import { logger } from '@/lib/logger'
 
 /**
  * ShadCN/UI Reference: https://ui.shadcn.com/docs/components/button
@@ -135,7 +136,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 		// Warning for icon-only buttons without aria-label in development
 		// if (appConfig.env.nodeEnv !== 'production' && isIconOnly && !ariaLabel) {
-		// 	console.error(
+
 		// 		`Accessibility error: Icon-only Button must have an aria-label to describe its purpose. Component: ${Button.displayName}`,
 		// 	)
 		// }
@@ -151,7 +152,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 				isLink &&
 				!('href' in props) && {
 					onClick: (e) => {
-						console.warn(
+						logger.warn(
 							'Accessibility warning: Buttons with role="link" should have an href attribute.',
 						)
 						props.onClick?.(e)

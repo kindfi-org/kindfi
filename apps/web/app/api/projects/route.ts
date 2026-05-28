@@ -1,5 +1,6 @@
 import { supabase } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/projects
@@ -20,7 +21,7 @@ export async function GET() {
 
 		return NextResponse.json({ success: true, data: data ?? [] })
 	} catch (error) {
-		console.error('Error fetching projects list:', error)
+		logger.error('Error fetching projects list:', error)
 		return NextResponse.json(
 			{ error: 'Failed to fetch projects' },
 			{ status: 500 },

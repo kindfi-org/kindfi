@@ -9,6 +9,7 @@ import {
 } from '@/lib/passkey/rp-id-helper'
 import { generateRegistrationOptionsSchema } from '~/lib/schemas/passkey.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/passkey/generate-registration-options
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(options)
 	} catch (error) {
-		console.error('❌ Error generating registration options:', error)
+		logger.error('❌ Error generating registration options:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to generate registration options',

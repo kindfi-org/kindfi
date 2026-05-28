@@ -15,6 +15,7 @@ import { getCsrfTokenFromCookie } from '~/app/actions/csrf'
 import { Label } from '~/components/base/label'
 import { cn } from '~/lib/utils'
 import { formFieldClasses } from '~/lib/form/form-styles'
+import { logger } from '@/lib/logger'
 
 /**
  * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/form
@@ -224,7 +225,7 @@ export function CSRFTokenField(): React.ReactElement {
 		getCsrfTokenFromCookie().then((fetchedToken) => {
 			if (!active) return
 			if (!fetchedToken) {
-				console.warn(
+				logger.warn(
 					'CSRF token not found in cookies. Ensure you have set it correctly.',
 				)
 				return

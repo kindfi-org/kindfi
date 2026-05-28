@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
 	try {
@@ -119,7 +120,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (contributionError) {
-			console.error('Error creating contribution:', contributionError)
+			logger.error('Error creating contribution:', contributionError)
 			return NextResponse.json(
 				{
 					error: 'Failed to create contribution',
@@ -196,12 +197,12 @@ export async function POST(req: NextRequest) {
 					})
 				}
 			} catch (err) {
-				console.error('[Contributions] Notification error:', err)
+				logger.error('[Contributions] Notification error:', err)
 			}
 		}
 
 		notifyContribution().catch((err) => {
-			console.error('[Contributions] Unhandled notification error:', err)
+			logger.error('[Contributions] Unhandled notification error:', err)
 		})
 
 		// Trigger gamification updates (fire and forget - don't block response)
@@ -281,7 +282,7 @@ export async function POST(req: NextRequest) {
 							return response
 						})
 						.catch((error) => {
-							console.error(
+							logger.error(
 								'[Gamification] Error updating weekly streak:',
 								error,
 							)
@@ -299,7 +300,7 @@ export async function POST(req: NextRequest) {
 							return response
 						})
 						.catch((error) => {
-							console.error(
+							logger.error(
 								'[Gamification] Error updating monthly streak:',
 								error,
 							)
@@ -335,7 +336,7 @@ export async function POST(req: NextRequest) {
 						])
 
 				if (questsError) {
-					console.error('[Gamification] Error fetching quests:', questsError)
+					logger.error('[Gamification] Error fetching quests:', questsError)
 				}
 
 				if (donationQuests && donationQuests.length > 0) {
@@ -405,7 +406,7 @@ export async function POST(req: NextRequest) {
 								return response
 							})
 							.catch((error) => {
-								console.error(
+								logger.error(
 									`[Gamification] Error updating quest ${quest.quest_id}:`,
 									error,
 								)
@@ -445,11 +446,11 @@ export async function POST(req: NextRequest) {
 						)
 					}
 				} catch (nftError) {
-					console.error('[Gamification] NFT mint/evolve error:', nftError)
+					logger.error('[Gamification] NFT mint/evolve error:', nftError)
 				}
 			} catch (error) {
 				// Log but don't throw - gamification updates shouldn't block donations
-				console.error(
+				logger.error(
 					'[Gamification] Fatal error in gamification updates:',
 					error,
 				)
@@ -459,7 +460,7 @@ export async function POST(req: NextRequest) {
 
 		// Trigger gamification updates asynchronously
 		gamificationUpdates().catch((error) => {
-			console.error(
+			logger.error(
 				'[Gamification] Unhandled error in gamification updates:',
 				error,
 			)
@@ -473,7 +474,7 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Create contribution error:', error)
+		logger.error('Create contribution error:', error)
 		return NextResponse.json(
 			{
 				error: error instanceof Error ? error.message : 'Internal server error',

@@ -6,6 +6,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
 import { foundationCampaignsSchema } from '~/lib/schemas/foundation.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * PATCH /api/foundations/[slug]/campaigns
@@ -70,7 +71,7 @@ export async function PATCH(
 			.eq('id', projectId)
 
 		if (updateError) {
-			console.error('Error updating project:', updateError)
+			logger.error('Error updating project:', updateError)
 			return NextResponse.json(
 				{ error: 'Failed to update campaign' },
 				{ status: 500 },
@@ -79,7 +80,7 @@ export async function PATCH(
 
 		return NextResponse.json({ success: true })
 	} catch (error) {
-		console.error('Error in PATCH /api/foundations/[slug]/campaigns:', error)
+		logger.error('Error in PATCH /api/foundations/[slug]/campaigns:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

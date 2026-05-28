@@ -5,6 +5,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { recordStreakSchema } from '~/lib/schemas/streak.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/streaks
@@ -31,7 +32,7 @@ export async function GET(_req: NextRequest) {
 			.order('period', { ascending: true })
 
 		if (error) {
-			console.error('Error fetching streaks:', error)
+			logger.error('Error fetching streaks:', error)
 			return NextResponse.json(
 				{ error: 'Failed to fetch streaks' },
 				{ status: 500 },
@@ -40,7 +41,7 @@ export async function GET(_req: NextRequest) {
 
 		return NextResponse.json({ streaks: streaks || [] })
 	} catch (error) {
-		console.error('Error in GET /api/streaks:', error)
+		logger.error('Error in GET /api/streaks:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },
@@ -126,7 +127,7 @@ export async function POST(req: NextRequest) {
 
 
 					if (!contractResult.success) {
-						console.error(
+						logger.error(
 							'[Streak API] Failed to record streak on-chain:',
 							contractResult.error,
 						)
@@ -134,10 +135,10 @@ export async function POST(req: NextRequest) {
 					} else {
 					}
 				} else {
-					console.warn('[Streak API] Streak contract address not configured')
+					logger.warn('[Streak API] Streak contract address not configured')
 				}
 			} catch (error) {
-				console.error('[Streak API] Error calling streak contract:', error)
+				logger.error('[Streak API] Error calling streak contract:', error)
 				// Continue with database update even if contract call fails
 			}
 		} else {
@@ -153,7 +154,7 @@ export async function POST(req: NextRequest) {
 
 		// If there's an error other than "not found", return it
 		if (fetchError && fetchError.code !== 'PGRST116') {
-			console.error('Error fetching streak:', fetchError)
+			logger.error('Error fetching streak:', fetchError)
 			return NextResponse.json(
 				{ error: 'Failed to fetch streak' },
 				{ status: 500 },
@@ -204,7 +205,7 @@ export async function POST(req: NextRequest) {
 				.single()
 
 			if (error) {
-				console.error('Error updating streak:', error)
+				logger.error('Error updating streak:', error)
 				return NextResponse.json(
 					{ error: 'Failed to update streak' },
 					{ status: 500 },
@@ -224,7 +225,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (error) {
-			console.error('Error creating streak:', error)
+			logger.error('Error creating streak:', error)
 			return NextResponse.json(
 				{ error: 'Failed to create streak' },
 				{ status: 500 },
@@ -236,7 +237,7 @@ export async function POST(req: NextRequest) {
 			bonus_points: 0,
 		})
 	} catch (error) {
-		console.error('Error in POST /api/streaks:', error)
+		logger.error('Error in POST /api/streaks:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

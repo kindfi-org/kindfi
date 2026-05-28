@@ -5,6 +5,7 @@ import { CreateProjectForm } from '~/components/sections/projects/create/create-
 import { UnauthorizedAccess } from '~/components/shared/unauthorized-access'
 import { CreateProjectProvider } from '~/hooks/contexts/use-create-project.context'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { logger } from '@/lib/logger'
 
 export default async function CreateProjectPage() {
 	const session = await getServerSession(nextAuthOption)
@@ -22,7 +23,7 @@ export default async function CreateProjectPage() {
 		.single()
 
 	if (error || !profileData) {
-		console.error('Error fetching user profile:', error)
+		logger.error('Error fetching user profile:', error)
 		redirect('/sign-in')
 	}
 

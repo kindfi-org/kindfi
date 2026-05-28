@@ -7,6 +7,7 @@ import { Heart, Lightbulb } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import {
+import { logger } from '@/lib/logger'
 	Dialog,
 	DialogContent,
 	DialogDescription,
@@ -54,7 +55,7 @@ export function RoleSelectionModal({
 			// Reload page to reflect changes
 			window.location.reload()
 		} catch (error) {
-			console.error('Failed to update role:', error)
+			logger.error('Failed to update role:', error)
 			toast.error('Failed to update role. Please try again.')
 		} finally {
 			setIsSaving(false)

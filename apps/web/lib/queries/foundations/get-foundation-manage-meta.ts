@@ -1,4 +1,5 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
+import { logger } from '@/lib/logger'
 
 export interface FoundationManageMeta {
 	id: string
@@ -21,7 +22,7 @@ export async function getFoundationManageMeta(
 		.maybeSingle()
 
 	if (error) {
-		console.error('Error fetching foundation meta:', error)
+		logger.error('Error fetching foundation meta:', error)
 		throw error
 	}
 
