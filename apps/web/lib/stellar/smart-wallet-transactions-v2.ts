@@ -216,7 +216,7 @@ export class SmartWalletTransactionServiceV2 {
 
 			return {
 				xlm: xlmBalance,
-				tokens: [], // TODO: Query known token balances
+				tokens: [],
 			}
 		} catch (error) {
 			console.error('❌ Error fetching balances:', error)

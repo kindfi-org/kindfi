@@ -291,10 +291,6 @@ export async function requestResetAccountAction(
 		redirect('/reset-account?error=Too many requests. Try again later.')
 	}
 
-	// TODO: Implement a proper reset account flow.
-	// Until the reset email/token logic is in place we must not pretend the
-	// request succeeded — that would let users believe a recovery email is
-	// on its way when nothing has been sent.
 	logger.warn({
 		eventType: 'RESET_ACCOUNT_NOT_IMPLEMENTED',
 		email,

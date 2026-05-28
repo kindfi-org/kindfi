@@ -51,7 +51,6 @@ export const updateSession = async (
 		// https://supabase.com/docs/guides/auth/server-side/nextjs
 		// const user = await supabase.auth.getUser(cookieSessionToken) // it wont work 😏
 		// console.log('🗝️ User fetched from Supabase:', user)
-		// // TODO: Validate the user session
 		// if (
 		// 	!user &&
 		// 	!request.nextUrl.pathname.startsWith('/sign-in') &&

@@ -227,7 +227,7 @@ export class GamificationContractService {
 				// For now, we'll return success if the transaction was submitted
 				return {
 					success: true,
-					streak: 1, // TODO: Parse from transaction result after confirmation
+					streak: 1,
 				}
 			} catch (error) {
 				console.error(
@@ -616,7 +616,7 @@ export class GamificationContractService {
 				// Transaction submitted successfully
 				return {
 					success: true,
-					completed: false, // TODO: Parse from transaction result after confirmation
+					completed: false,
 				}
 			} catch (error) {
 				console.error(

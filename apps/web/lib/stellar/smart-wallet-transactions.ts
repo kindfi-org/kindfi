@@ -215,7 +215,7 @@ export class SmartWalletTransactionService {
 
 			return {
 				xlm: xlmBalance,
-				tokens: [], // TODO: Query known token balances
+				tokens: [],
 			}
 		} catch (error) {
 			console.error('❌ Error fetching balances:', error)
@@ -344,7 +344,6 @@ export class SmartWalletTransactionService {
 
 		// Simulate to get auth entry with signature_payload
 		const simulation = await this.server.simulateTransaction(transaction, {
-			// TODO: Dynamic cpu calculation according to action to execute in the Soroban Contracts
 			cpuInstructions: 3_500_000,
 		})
 

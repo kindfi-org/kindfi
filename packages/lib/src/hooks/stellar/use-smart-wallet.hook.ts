@@ -1,4 +1,3 @@
-// TODO: REFACTOR THIS TO DO HOOK FOR SMART WALLET MANAGEMENT (transferXML/USDC, transaction invoke, balances, verification)
 'use client'
 
 import { debounce } from 'lodash'
@@ -103,7 +102,6 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 					setIsInitialized(true)
 					setRequestId(null)
 
-					// TODO: Update device record with new Stellar address
 					toast.success(
 						`🧪 SIMULATION: Stellar account created: ${newAccount.address}`,
 					)

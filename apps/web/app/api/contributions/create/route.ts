@@ -360,7 +360,6 @@ export async function POST(req: NextRequest) {
 								: Number(amount)
 						} else if (quest.quest_type === 'multi_region_donation') {
 							// Count unique regions (simplified - using project categories as regions)
-							// TODO: Add proper region tracking
 							const { data: uniqueProjects } = await supabaseClient
 								.from('contributions')
 								.select('project_id, projects!inner(category_id)')
