@@ -5,6 +5,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { createDiditSession } from '~/lib/services/didit'
 import { createDiditSessionSchema } from '~/lib/schemas/kyc.schemas'
 import { validateRequest } from '~/lib/utils/validation'
@@ -15,7 +16,7 @@ import { logger } from '@/lib/logger'
  *
  * Creates a Didit verification session for the authenticated user
  */
-export async function POST(req: NextRequest) {
+async function createSessionHandler(req: NextRequest) {
 	try {
 		// Get user session from NextAuth
 		const session = await getServerSession(nextAuthOption)
@@ -78,3 +79,15 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? ip ?? 'anonymous'
+		},
+	},
+	createSessionHandler,
+)

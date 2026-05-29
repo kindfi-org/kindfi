@@ -2,6 +2,7 @@ import { supabase } from '@packages/lib/supabase'
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { milestoneReviewSchema } from '~/lib/schemas/escrow.schemas'
@@ -9,7 +10,7 @@ import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 import { logger } from '@/lib/logger'
 
-export async function POST(req: NextRequest) {
+async function reviewHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
@@ -242,3 +243,11 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	reviewHandler,
+)

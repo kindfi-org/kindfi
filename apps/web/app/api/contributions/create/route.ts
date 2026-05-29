@@ -4,11 +4,12 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 import { logger } from '@/lib/logger'
 
-export async function POST(req: NextRequest) {
+async function createContributionHandler(req: NextRequest) {
 	try {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
@@ -483,3 +484,15 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? ip ?? 'anonymous'
+		},
+	},
+	createContributionHandler,
+)

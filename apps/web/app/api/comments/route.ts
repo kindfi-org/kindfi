@@ -6,6 +6,7 @@ import {
 	createCommentSchema,
 	validateParentComment,
 } from './validation'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { validateRequest } from '~/lib/utils/validation'
 import { logger } from '@/lib/logger'
 
@@ -81,7 +82,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 	}
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+async function createCommentHandler(req: NextRequest): Promise<NextResponse> {
 	try {
 		const supabase = await createSupabaseServerClient()
 
@@ -238,3 +239,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'moderate',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	createCommentHandler,
+)

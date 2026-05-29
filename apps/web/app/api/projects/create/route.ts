@@ -1,8 +1,10 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesInsert } from '@services/supabase'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { projectCreateFormSchema } from '~/lib/schemas/project.schemas'
 import {
 	buildSocialLinks,
@@ -13,7 +15,7 @@ import {
 import { validateRequest } from '~/lib/utils/validation'
 import { logger } from '@/lib/logger'
 
-export async function POST(req: Request) {
+async function createProjectHandler(req: NextRequest) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -147,3 +149,15 @@ export async function POST(req: Request) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'moderate',
+		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? ip ?? 'anonymous'
+		},
+	},
+	createProjectHandler,
+)
