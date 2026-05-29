@@ -7,6 +7,7 @@ import {
 	foundationSlugParamSchema,
 } from '~/lib/schemas/foundation.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function POST(
 	req: Request,
@@ -64,7 +65,7 @@ export async function POST(
 			})
 
 		if (insertError) {
-			console.error('Insert milestone error:', insertError)
+			logger.error('Insert milestone error:', insertError)
 			return NextResponse.json(
 				{ error: insertError.message ?? 'Failed to add milestone' },
 				{ status: 500 },
@@ -73,7 +74,7 @@ export async function POST(
 
 		return NextResponse.json({ success: true }, { status: 201 })
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { syncContributionSchema } from '~/lib/schemas/contribution.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * Sync an existing on-chain donation to the contributions table
@@ -92,7 +93,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (contributionError) {
-			console.error('Error creating contribution:', contributionError)
+			logger.error('Error creating contribution:', contributionError)
 			return NextResponse.json(
 				{
 					error: 'Failed to create contribution',
@@ -138,7 +139,7 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Sync contribution error:', error)
+		logger.error('Sync contribution error:', error)
 		return NextResponse.json(
 			{
 				error: error instanceof Error ? error.message : 'Internal server error',

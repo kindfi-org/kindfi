@@ -16,6 +16,7 @@ import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
+import { logger } from '@/lib/logger'
 
 interface FundEscrowTabProps {
 	escrowContractAddress: string
@@ -92,7 +93,7 @@ export function FundEscrowTab({
 			setFundAmount('')
 			onSuccess()
 		} catch (error) {
-			console.error('Fund escrow error:', error)
+			logger.error('Fund escrow error:', error)
 
 			// Extract error message from various error formats
 			let errorMessage = ''

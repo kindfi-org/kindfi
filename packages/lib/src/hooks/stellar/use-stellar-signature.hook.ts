@@ -5,6 +5,7 @@ import type { Session } from 'next-auth'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { appEnvConfig } from '../../config'
+import { logger } from '../../logger'
 import type { AppEnvInterface } from '../../types'
 
 export interface StellarOperation {
@@ -146,7 +147,7 @@ export const useStellarSignature = (
 			} catch (err) {
 				const error =
 					err instanceof Error ? err : new Error('Unknown error occurred')
-				console.error('❌ Error signing Stellar transaction:', error)
+				logger.error('Error signing Stellar transaction', error)
 
 				setError(error.message)
 				options.onError?.(error)
@@ -218,11 +219,10 @@ export const useStellarSignature = (
 			} catch (err) {
 				const error =
 					err instanceof Error ? err : new Error('Unknown error occurred')
-				console.error('❌ Error creating Stellar account:', error)
+				logger.error('Error creating Stellar account', error)
 
 				setError(error.message)
 				options.onError?.(error)
-				// toast.error(`Account creation failed: ${error.message}`)
 
 				throw error
 			} finally {
@@ -259,7 +259,7 @@ export const useStellarSignature = (
 			} catch (err) {
 				const error =
 					err instanceof Error ? err : new Error('Unknown error occurred')
-				console.error('❌ Error getting account info:', error)
+				logger.error('Error getting account info', error)
 
 				setError(error.message)
 				options.onError?.(error)
@@ -301,7 +301,7 @@ export const useStellarSignature = (
 				const result = await response.json()
 				return result.valid
 			} catch (err) {
-				console.error('❌ Error verifying signature:', err)
+				logger.error('Error verifying signature', err instanceof Error ? err : new Error(String(err)))
 				return false
 			}
 		},

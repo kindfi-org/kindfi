@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { getStellarWalletTheme } from '~/lib/config/stellar-wallet-theme'
 import {
+import { logger } from '@/lib/logger'
 	getTrustlessSignerError,
 	isExternalStellarWalletAddress,
 } from '~/lib/utils/escrow/trustless-signer'
@@ -72,7 +73,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
 				const storage = globalThis.localStorage
 				if (typeof storage?.getItem !== 'function') {
-					console.error(
+					logger.error(
 						'StellarWalletsKit requires browser localStorage. Check NODE_OPTIONS for a broken --localstorage-file flag.',
 					)
 					return
@@ -186,7 +187,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 					unsubscribeWalletSelected,
 				]
 			} catch (error) {
-				console.error('❌ Failed to initialize StellarWalletsKit:', error)
+				logger.error('❌ Failed to initialize StellarWalletsKit:', error)
 				setIsInitialized(false)
 			}
 		})()
@@ -226,7 +227,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				// This might need adjustment based on actual API behavior
 			}
 		} catch (error) {
-			console.error('❌ Failed to connect wallet:', error)
+			logger.error('❌ Failed to connect wallet:', error)
 			// Re-throw with more context
 			if (error && typeof error === 'object' && 'message' in error) {
 				throw new Error(`Wallet connection failed: ${error.message}`)
@@ -245,7 +246,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 			localStorage.removeItem('stellar_wallet_address')
 			localStorage.removeItem('stellar_wallet_name')
 		} catch (error) {
-			console.error('Failed to disconnect wallet:', error)
+			logger.error('Failed to disconnect wallet:', error)
 		}
 	}
 
@@ -273,7 +274,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 			)
 			return signedTxXdr
 		} catch (error) {
-			console.error('Failed to sign transaction:', error)
+			logger.error('Failed to sign transaction:', error)
 			throw error
 		}
 	}

@@ -1,4 +1,5 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
+import { logger } from '@/lib/logger'
 
 /**
  * Get the count of existing escrows for a project.
@@ -14,7 +15,7 @@ export async function getEscrowCountByProject(
 		.eq('project_id', projectId)
 
 	if (error) {
-		console.error('Error counting escrows:', error)
+		logger.error('Error counting escrows:', error)
 		// Return 0 on error to default to 1 for the first escrow
 		return 0
 	}

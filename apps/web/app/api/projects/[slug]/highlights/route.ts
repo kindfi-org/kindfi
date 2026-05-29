@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { highlightsUpdateSchema } from '~/lib/schemas/project.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function POST(
 	req: Request,
@@ -87,7 +88,7 @@ export async function POST(
 			.eq('id', projectId)
 
 		if (updateError) {
-			console.error(updateError)
+			logger.error(updateError)
 			return NextResponse.json({ error: updateError.message }, { status: 500 })
 		}
 
@@ -95,7 +96,7 @@ export async function POST(
 			message: 'Highlights saved successfully',
 		})
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

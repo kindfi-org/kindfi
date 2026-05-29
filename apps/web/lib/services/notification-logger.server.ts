@@ -1,4 +1,5 @@
 import { supabase } from '@packages/lib/supabase'
+import { logger } from '@/lib/logger'
 
 const NOTIFICATION_LOGS_TABLE = 'notification_logs' as const
 
@@ -81,7 +82,7 @@ export class NotificationLogger {
 
 			if (dbError) throw dbError
 		} catch (logError) {
-			console.error(
+			logger.error(
 				'[NotificationLogger] Failed to log error:',
 				serializeLogError(logError),
 			)
@@ -103,7 +104,7 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			console.error(
+			logger.error(
 				'[NotificationLogger] Failed to log info:',
 				serializeLogError(logError),
 			)
@@ -125,7 +126,7 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			console.error(
+			logger.error(
 				'[NotificationLogger] Failed to log warning:',
 				serializeLogError(logError),
 			)
@@ -145,7 +146,7 @@ export class NotificationLogger {
 			if (error) throw error
 			return data || []
 		} catch (error) {
-			console.error('[NotificationLogger] Failed to get notification logs:', error)
+			logger.error('[NotificationLogger] Failed to get notification logs:', error)
 			return []
 		}
 	}
@@ -162,7 +163,7 @@ export class NotificationLogger {
 			if (error) throw error
 			return data || []
 		} catch (error) {
-			console.error('[NotificationLogger] Failed to get error logs:', error)
+			logger.error('[NotificationLogger] Failed to get error logs:', error)
 			return []
 		}
 	}

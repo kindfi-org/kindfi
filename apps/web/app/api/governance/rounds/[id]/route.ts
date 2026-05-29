@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { governanceRoundIdParamSchema } from '~/lib/schemas/governance.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/governance/rounds/[id]
@@ -91,7 +92,7 @@ export async function GET(
 			},
 		})
 	} catch (error) {
-		console.error('Error in GET /api/governance/rounds/[id]:', error)
+		logger.error('Error in GET /api/governance/rounds/[id]:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

@@ -13,6 +13,7 @@ import { NextResponse } from 'next/server'
 import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 import { verifyAuthSchema } from '~/lib/schemas/passkey.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/passkey/verify-auth
@@ -107,7 +108,7 @@ export async function POST(req: NextRequest) {
 			publicKey: publicKeyBase64, // Base64 encoded public key for session creation
 		})
 	} catch (error) {
-		console.error('❌ Error verifying authentication:', error)
+		logger.error('❌ Error verifying authentication:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to verify authentication',

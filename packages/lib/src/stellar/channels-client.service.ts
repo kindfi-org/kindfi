@@ -1,3 +1,4 @@
+import { logger } from '../logger'
 import type { AppEnvInterface } from '../types'
 
 // Dynamic import for Channels client to handle missing package gracefully
@@ -13,9 +14,7 @@ try {
 	ChannelsFuncAuthRequestType = channelsModule.ChannelsFuncAuthRequest
 	ChannelsTransactionResponseType = channelsModule.ChannelsTransactionResponse
 } catch (error) {
-	console.warn(
-		'⚠️ @openzeppelin/relayer-plugin-channels not installed. Install it with: bun add "@openzeppelin/relayer-plugin-channels"',
-	)
+	logger.warn('Package @openzeppelin/relayer-plugin-channels not installed. Install it with: bun add "@openzeppelin/relayer-plugin-channels"', error instanceof Error ? error : undefined)
 }
 
 export type ChannelsFuncAuthRequest = {
@@ -60,11 +59,7 @@ export class ChannelsClientService {
 		this.apiKey = process.env.CHANNELS_API_KEY || ''
 
 		if (!this.apiKey) {
-			console.warn(
-				'⚠️ CHANNELS_API_KEY not set. Get your API key from:',
-				this.baseUrl + '/gen',
-				'\n   Channels service provides fee-sponsored transactions with automatic parallel processing.',
-			)
+			logger.warn('CHANNELS_API_KEY not set', { setupUrl: this.baseUrl + '/gen' })
 		}
 
 		// Initialize Channels client if package is available
@@ -74,9 +69,7 @@ export class ChannelsClientService {
 				apiKey: this.apiKey,
 			})
 		} else {
-			console.warn(
-				'⚠️ Channels client not initialized. Install @openzeppelin/relayer-plugin-channels package.',
-			)
+			logger.warn('Channels client not initialized – install @openzeppelin/relayer-plugin-channels')
 		}
 	}
 
@@ -105,7 +98,7 @@ export class ChannelsClientService {
 			const response = await this.client.submitSorobanTransaction(request)
 			return response
 		} catch (error) {
-			console.error('❌ Channels transaction submission failed:', error)
+			logger.error('Channels transaction submission failed', error instanceof Error ? error : new Error(String(error)))
 			throw error
 		}
 	}

@@ -26,6 +26,7 @@ import {
 } from '~/components/base/select'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
+import { logger } from '@/lib/logger'
 
 interface ReleaseTabProps {
 	escrowContractAddress: string
@@ -84,7 +85,7 @@ export function ReleaseTab({
 			toast.success('Funds released successfully!')
 			onSuccess()
 		} catch (error) {
-			console.error(error)
+			logger.error(error)
 			const errorMessage =
 				error instanceof Error ? error.message : 'Failed to release funds'
 			toast.error(errorMessage)

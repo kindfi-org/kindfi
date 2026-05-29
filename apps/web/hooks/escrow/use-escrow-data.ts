@@ -7,6 +7,7 @@ import type {
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { logger } from '@/lib/logger'
 
 interface UseEscrowDataParams {
 	escrowContractAddress: string
@@ -91,7 +92,7 @@ export function useEscrowData({
 
 			setEscrowData(processedEscrowData)
 		} catch (err) {
-			console.error('Failed to fetch escrow data:', err)
+			logger.error('Failed to fetch escrow data:', err)
 			const errorMessage =
 				err instanceof Error ? err.message : 'Failed to load escrow data'
 			setError(errorMessage)

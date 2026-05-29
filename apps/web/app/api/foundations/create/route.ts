@@ -6,6 +6,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { createFoundationFormSchema } from '~/lib/schemas/foundation-create.schemas'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: Request) {
 	try {
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (profileError || !profileData) {
-			console.error('Profile lookup error:', {
+			logger.error('Profile lookup error:', {
 				error: profileError,
 				userId,
 			})
@@ -122,7 +123,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (insertError || !foundation) {
-			console.error(insertError)
+			logger.error(insertError)
 			return NextResponse.json(
 				{ error: insertError?.message || 'Failed to create foundation' },
 				{ status: 500 },
@@ -147,7 +148,7 @@ export async function POST(req: Request) {
 					.eq('id', foundation.id)
 
 				if (updateLogoError) {
-					console.error(updateLogoError)
+					logger.error(updateLogoError)
 					return NextResponse.json(
 						{ error: updateLogoError.message },
 						{ status: 500 },
@@ -158,7 +159,7 @@ export async function POST(req: Request) {
 
 		return NextResponse.json({ slug: foundation.slug }, { status: 201 })
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

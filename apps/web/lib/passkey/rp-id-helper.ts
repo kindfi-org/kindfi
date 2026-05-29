@@ -1,5 +1,6 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
+import { logger } from '@/lib/logger'
 
 /**
  * Get the appropriate RP ID based on the origin
@@ -29,7 +30,7 @@ export function getRpIdFromOrigin(origin: string): string {
 		return rpId
 	} catch {
 		// Invalid URL, fall back to first configured RP ID
-		console.warn(
+		logger.warn(
 			`⚠️ Invalid origin format: ${origin}. Using first configured RP ID.`,
 		)
 		return rpIds[0] || 'localhost'

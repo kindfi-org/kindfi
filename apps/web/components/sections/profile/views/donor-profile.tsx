@@ -11,29 +11,20 @@ import { useEffect, useMemo, useState } from "react";
 import { Badge } from "~/components/base/badge";
 import { Button } from "~/components/base/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "~/components/base/card";
-import { GamificationSection } from "~/components/sections/gamification/gamification-section";
-import { useEscrow } from "~/hooks/contexts/use-escrow.context";
-import { useI18n } from "~/lib/i18n";
-import { getUserSupportedProjects } from "~/lib/queries/projects/get-user-projects";
-import { ProfileSectionHeader } from "../profile-section-header";
-import { ProfileStatCard } from "../profile-stat-card";
-import { ProfileSurfaceCard } from "../profile-surface-card";
-
-const NFTCollection = dynamic(
-  () =>
-    import("~/components/sections/gamification/nft-collection").then((mod) => ({
-      default: mod.NFTCollection,
-    })),
-  {
-    loading: () => null,
-    ssr: false,
-  },
-);
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from '~/components/base/card'
+import { GamificationSection } from '~/components/sections/gamification/gamification-section'
+import { NFTCollection } from '~/components/sections/gamification/nft-collection'
+import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { useI18n } from '~/lib/i18n'
+import { getUserSupportedProjects } from '~/lib/queries/projects/get-user-projects'
+import { ProfileSectionHeader } from '../profile-section-header'
+import { ProfileStatCard } from '../profile-stat-card'
+import { ProfileSurfaceCard } from '../profile-surface-card'
+import { logger } from '@/lib/logger'
 
 interface DonorProfileProps {
   userId: string;
@@ -79,18 +70,18 @@ export function DonorProfile({
           "multi-release",
         );
 
-        const balanceMap: Record<string, number> = {};
-        addresses.forEach((address, index) => {
-          const balanceResponse = balances[index];
-          if (balanceResponse?.balance !== undefined) {
-            balanceMap[address] = balanceResponse.balance;
-          }
-        });
-        setEscrowBalances(balanceMap);
-      } catch (error) {
-        console.error("Failed to fetch escrow balances", error);
-      }
-    };
+				const balanceMap: Record<string, number> = {}
+				addresses.forEach((address, index) => {
+					const balanceResponse = balances[index]
+					if (balanceResponse?.balance !== undefined) {
+						balanceMap[address] = balanceResponse.balance
+					}
+				})
+				setEscrowBalances(balanceMap)
+			} catch (error) {
+				logger.error('Failed to fetch escrow balances', error)
+			}
+		}
 
     if (supportedProjects.length > 0) {
       fetchBalances();

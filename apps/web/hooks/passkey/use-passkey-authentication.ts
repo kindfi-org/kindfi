@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { createSessionAction } from '~/app/actions/auth'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import type { PresignResponse, SignParams } from '~/lib/types'
+import { logger } from '@/lib/logger'
 
 export const usePasskeyAuthentication = (
 	identifier: string,
@@ -141,7 +142,7 @@ export const usePasskeyAuthentication = (
 				credentialId: verificationJSON.device.id,
 				address: verificationJSON.device.address,
 			}).catch((error) => {
-				console.error('Error during signIn:', error)
+				logger.error('Error during signIn:', error)
 				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, error.message)
 			})
 
@@ -151,7 +152,7 @@ export const usePasskeyAuthentication = (
 			toast.success(message)
 			success = Boolean(loginResult?.ok)
 		} catch (_error) {
-			console.error('🔴 Error during passkey authentication:', _error)
+			logger.error('🔴 Error during passkey authentication:', _error)
 			const error = _error as Error
 			let message = error.toString()
 			if (

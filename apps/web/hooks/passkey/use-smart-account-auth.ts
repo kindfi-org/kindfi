@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { createSessionAction } from '~/app/actions/auth'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import { logger } from '@/lib/logger'
 
 const mapPasskeyApiError = (errorMessage: string): InAppError => {
 	if (errorMessage === 'User not found') {
@@ -185,7 +186,7 @@ export const useSmartAccountAuth = (identifier: string) => {
 				return { verified: false }
 			}
 
-			console.error('Error during Smart Account authentication:', err)
+			logger.error('Error during Smart Account authentication:', err)
 
 			const message =
 				err.code === ErrorCode.AUTHENTICATOR_NOT_REGISTERED

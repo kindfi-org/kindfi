@@ -12,6 +12,7 @@ import {
 	upsertTags,
 } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function PATCH(req: Request) {
 	try {
@@ -112,7 +113,7 @@ export async function PATCH(req: Request) {
 					// Delete all files in the project's thumbnail folder
 					await deleteFolderFromBucket(supabase, 'project_thumbnails', slug)
 				} catch (e) {
-					console.warn('Failed to cleanup thumbnails:', (e as Error).message)
+					logger.warn('Failed to cleanup thumbnails:', (e as Error).message)
 				}
 			}
 		}
@@ -124,7 +125,7 @@ export async function PATCH(req: Request) {
 			.eq('id', projectId)
 
 		if (updateError) {
-			console.error(updateError)
+			logger.error(updateError)
 			return NextResponse.json({ error: updateError.message }, { status: 500 })
 		}
 
@@ -142,7 +143,7 @@ export async function PATCH(req: Request) {
 			{ status: 200 },
 		)
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

@@ -70,26 +70,26 @@ export function CreatorProfile({
       );
       if (projectsWithEscrow.length === 0) return;
 
-      try {
-        const addresses = projectsWithEscrow.map(
-          (p) => p.escrowContractAddress as string,
-        );
-        const balances = await getMultipleBalances(
-          { addresses },
-          "multi-release",
-        );
-        const balanceMap: Record<string, number> = {};
-        addresses.forEach((address, index) => {
-          const balanceResponse = balances[index];
-          if (balanceResponse?.balance !== undefined) {
-            balanceMap[address] = balanceResponse.balance;
-          }
-        });
-        setEscrowBalances(balanceMap);
-      } catch (error) {
-        console.error("Failed to fetch escrow balances", error);
-      }
-    };
+			try {
+				const addresses = projectsWithEscrow.map(
+					(p) => p.escrowContractAddress as string,
+				)
+				const balances = await getMultipleBalances(
+					{ addresses },
+					'multi-release',
+				)
+				const balanceMap: Record<string, number> = {}
+				addresses.forEach((address, index) => {
+					const balanceResponse = balances[index]
+					if (balanceResponse?.balance !== undefined) {
+						balanceMap[address] = balanceResponse.balance
+					}
+				})
+				setEscrowBalances(balanceMap)
+			} catch (error) {
+				logger.error('Failed to fetch escrow balances', error)
+			}
+		}
 
     if (projects.length > 0) {
       fetchBalances();

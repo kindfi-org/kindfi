@@ -25,6 +25,7 @@ import {
 	InputOTPSlot,
 } from '~/components/base/input-otp'
 import { OTPTips } from '~/components/shared/otp-tips'
+import { logger } from '@/lib/logger'
 
 export function VerifyOTPComponent() {
 	const router = useRouter()
@@ -107,10 +108,10 @@ export function VerifyOTPComponent() {
 						})
 					// Ignore conflict or RLS (duplicate) errors silently
 					if (profileInsertError) {
-						console.warn('Profile insert warning:', profileInsertError.message)
+						logger.warn('Profile insert warning:', profileInsertError.message)
 					}
 				} catch (profileErr) {
-					console.warn('Profile insert (non-fatal) error:', profileErr)
+					logger.warn('Profile insert (non-fatal) error:', profileErr)
 				}
 
 				setIsVerified(true)
@@ -120,7 +121,7 @@ export function VerifyOTPComponent() {
 				}, 1200)
 			}
 		} catch (err) {
-			console.error('OTP verification error:', err)
+			logger.error('OTP verification error:', err)
 			if (err instanceof Error) {
 				setError(err.message)
 			} else {
@@ -153,7 +154,7 @@ export function VerifyOTPComponent() {
 			setTimeLeft(120)
 			setSuccess('Verification code resent! Please check your inbox.')
 		} catch (err) {
-			console.error('Resend OTP error:', err)
+			logger.error('Resend OTP error:', err)
 			if (err instanceof Error) {
 				setError(err.message)
 			} else {

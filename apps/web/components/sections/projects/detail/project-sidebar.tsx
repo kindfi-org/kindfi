@@ -37,6 +37,7 @@ import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
+import { logger } from '@/lib/logger'
 
 interface ProjectSidebarProps {
 	project: ProjectDetail
@@ -122,7 +123,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
                             body: JSON.stringify({ targetUserId: project.kindlerId, action }),
                     })
                     if (!res.ok) throw new Error('Follow request failed')
-			console.error(error)
+			logger.error(error)
 			toast.error('Unable to update follow status', {
 				icon: <CircleAlert className="text-destructive" />,
 			})
@@ -140,7 +141,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			const first = balances?.[0]
 			if (first) setOnChainRaised(first.balance)
 		} catch (error) {
-			console.error('Failed to fetch escrow balance', error)
+			logger.error('Failed to fetch escrow balance', error)
 		} finally {
 			setIsFetchingBalance(false)
 		}
@@ -215,11 +216,11 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 
 					if (!response.ok) {
 						const errorData = await response.json()
-						console.error('Failed to create contribution:', errorData)
+						logger.error('Failed to create contribution:', errorData)
 						// Don't throw - donation succeeded on-chain, just log the error
 					}
 				} catch (error) {
-					console.error('Error creating contribution record:', error)
+					logger.error('Error creating contribution record:', error)
 					// Don't throw - donation succeeded on-chain
 				}
 			}
@@ -232,7 +233,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			// 6) Refresh balance
 			fetchEscrowBalance()
 		} catch (error) {
-			console.error('Fund escrow error:', error)
+			logger.error('Fund escrow error:', error)
 
 			// Extract error message from various error formats
 			let errorMessage = ''

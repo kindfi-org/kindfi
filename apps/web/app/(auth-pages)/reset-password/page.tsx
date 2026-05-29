@@ -10,6 +10,7 @@ import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { FormFieldGroup } from '~/components/shared/form/form-field-group'
 import { FormShell } from '~/components/shared/form/form-shell'
 import { formLayoutClasses } from '~/lib/form/form-styles'
+import { logger } from '@/lib/logger'
 
 export default function ResetPassword(props: {
 	searchParams: Promise<Message>
@@ -22,7 +23,7 @@ export default function ResetPassword(props: {
 				const result = await props.searchParams
 				setMessage(result)
 			} catch (error) {
-				console.error('Error fetching message:', error)
+				logger.error('Error fetching message:', error)
 			}
 		}
 

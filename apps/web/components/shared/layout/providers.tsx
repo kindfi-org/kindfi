@@ -13,6 +13,7 @@ import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { AuthProvider } from '~/hooks/use-auth'
 import { I18nProvider } from '~/lib/i18n/context'
 import { translations } from '~/lib/i18n/translations'
+import { logger } from '@/lib/logger'
 
 interface ProvidersProps {
 	children: React.ReactNode
@@ -51,15 +52,15 @@ export function Providers({ children, initSession }: ProvidersProps) {
 							// 		minInterval: 24 * 60 * 60 * 1000, // 24 hours
 							// 	})
 							// 	.catch((error) => {
-							// 		console.error('Periodic sync registration failed:', error)
+
 							// 	})
 						}
 					} catch (error) {
-						console.error('Periodic sync not supported:', error)
+						logger.error('Periodic sync not supported:', error)
 					}
 				})
 				.catch((error) => {
-					console.error('Service worker registration failed:', error)
+					logger.error('Service worker registration failed:', error)
 				})
 		}
 	}, [])

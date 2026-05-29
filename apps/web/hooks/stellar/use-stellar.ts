@@ -56,7 +56,7 @@ export const useStellar = () => {
 			}
 		},
 		onError: (error) => {
-			console.error('❌ Transaction failed:', error)
+			logger.error('❌ Transaction failed:', error)
 		},
 	})
 
@@ -91,7 +91,7 @@ export const useStellar = () => {
 
 			return deployee
 		} catch (error) {
-			console.error('❌ useStellar::onRegister::>', error)
+			logger.error('❌ useStellar::onRegister::>', error)
 		} finally {
 			setLoadingRegister(false)
 			setCreatingDeployee(false)
@@ -114,7 +114,7 @@ export const useStellar = () => {
 			// if (!deployee) throw new Error('Deployee not found')
 			setContractData({})
 		} catch (error) {
-			console.error(error)
+			logger.error(error)
 		} finally {
 			setLoadingSign(false)
 		}
@@ -144,7 +144,7 @@ export const useStellar = () => {
 					setDeployee(storedDeployee)
 				}
 			} catch (error) {
-				console.error(error)
+				logger.error(error)
 			} finally {
 				setLoadingDeployee(false)
 			}

@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 // POST /api/comments/[id]/like
 export async function POST(
@@ -51,13 +52,13 @@ export async function POST(
                         .single()
 
                 if (error) {
-                        console.error('Failed to update likes:', error)
+                        logger.error('Failed to update likes:', error)
                         return NextResponse.json({ error: 'Failed to update like' }, { status: 500 })
                 }
 
                 return NextResponse.json({ success: true, data })
         } catch (error) {
-                console.error('Error in like route:', error)
+                logger.error('Error in like route:', error)
                 return NextResponse.json({ error: 'Internal error' }, { status: 500 })
         }
 }

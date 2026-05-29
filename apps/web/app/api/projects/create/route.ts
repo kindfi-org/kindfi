@@ -11,6 +11,7 @@ import {
 	upsertTags,
 } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: Request) {
 	try {
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (profileError || !profileData) {
-			console.error('Profile lookup error:', {
+			logger.error('Profile lookup error:', {
 				error: profileError,
 				userId,
 			})
@@ -97,7 +98,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (insertError || !project) {
-			console.error(insertError)
+			logger.error(insertError)
 			return NextResponse.json({ error: insertError?.message }, { status: 500 })
 		}
 
@@ -114,7 +115,7 @@ export async function POST(req: Request) {
 					.eq('id', project.id)
 
 				if (updateImageError) {
-					console.error(updateImageError)
+					logger.error(updateImageError)
 					return NextResponse.json(
 						{ error: updateImageError.message },
 						{ status: 500 },
@@ -135,11 +136,11 @@ export async function POST(req: Request) {
 					creatorId: userId,
 				}),
 			)
-			.catch((err) => console.error('[Project create] Notification error:', err))
+			.catch((err) => logger.error('[Project create] Notification error:', err))
 
 		return NextResponse.json({ slug: project.slug }, { status: 201 })
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { checkSlugQuerySchema } from '~/lib/schemas/foundation.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 import { validateSlug } from '~/lib/validation/foundation-api'
+import { logger } from '@/lib/logger'
 
 export async function GET(req: Request) {
 	try {
@@ -31,7 +32,7 @@ export async function GET(req: Request) {
 			.maybeSingle()
 
 		if (error) {
-			console.error('Error checking slug:', error)
+			logger.error('Error checking slug:', error)
 			return NextResponse.json(
 				{ error: 'Failed to check slug' },
 				{ status: 500 },
@@ -40,7 +41,7 @@ export async function GET(req: Request) {
 
 		return NextResponse.json({ data: data || null })
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

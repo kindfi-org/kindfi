@@ -8,6 +8,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { createDiditSession } from '~/lib/services/didit'
 import { createDiditSessionSchema } from '~/lib/schemas/kyc.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/kyc/didit/create-session
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
 			})
 
 		if (dbError) {
-			console.error('Failed to store KYC session:', dbError)
+			logger.error('Failed to store KYC session:', dbError)
 			// Don't fail the request if DB write fails, session is still created
 		}
 
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
 			verificationUrl: diditSession.url,
 		})
 	} catch (error) {
-		console.error('Error creating Didit session:', error)
+		logger.error('Error creating Didit session:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to create verification session',

@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { addressParamSchema } from '~/lib/schemas/stellar.schemas'
 import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transactions'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/stellar/balances/[address]
@@ -47,7 +48,7 @@ export async function GET(
 			},
 		})
 	} catch (error) {
-		console.error('Error fetching balances:', error)
+		logger.error('Error fetching balances:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to fetch balances',

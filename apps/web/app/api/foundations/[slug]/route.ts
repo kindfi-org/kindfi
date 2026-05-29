@@ -5,6 +5,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { foundationSlugParamSchema, foundationUpdateFormSchema } from '~/lib/schemas/foundation.schemas'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function PATCH(
 	req: Request,
@@ -32,7 +33,7 @@ export async function PATCH(
 			.maybeSingle()
 
 		if (fetchError) {
-			console.error('Foundation fetch error:', fetchError)
+			logger.error('Foundation fetch error:', fetchError)
 			return NextResponse.json(
 				{ error: fetchError.message ?? 'Failed to load foundation' },
 				{ status: 500 },
@@ -93,7 +94,7 @@ export async function PATCH(
 			.eq('id', foundation.id)
 
 		if (updateError) {
-			console.error('Foundation update error:', updateError)
+			logger.error('Foundation update error:', updateError)
 			return NextResponse.json(
 				{ error: updateError.message ?? 'Failed to update foundation' },
 				{ status: 500 },
@@ -112,7 +113,7 @@ export async function PATCH(
 					.eq('id', foundation.id)
 
 				if (logoUpdateError) {
-					console.error('Logo update error:', logoUpdateError)
+					logger.error('Logo update error:', logoUpdateError)
 					// Do not fail the whole request; main update succeeded
 				}
 			}
@@ -120,7 +121,7 @@ export async function PATCH(
 
 		return NextResponse.json({ slug: validatedSlug }, { status: 200 })
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

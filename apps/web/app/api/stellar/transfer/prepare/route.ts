@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { transferPrepareSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 import {
+import { logger } from '@/lib/logger'
 	SmartWalletTransactionService,
 	type TransactionChallenge,
 } from '~/lib/stellar/smart-wallet-transactions'
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 	} catch (error) {
-		console.error('Error preparing transfer:', error)
+		logger.error('Error preparing transfer:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to prepare transfer',

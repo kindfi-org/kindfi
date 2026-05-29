@@ -10,6 +10,7 @@ import {
 	uploadPitchDeck,
 } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function POST(
 	req: Request,
@@ -102,7 +103,7 @@ export async function POST(
 					validatedSlug,
 				)
 			} catch (e) {
-				console.warn(
+				logger.warn(
 					'Failed to cleanup pitch deck folder:',
 					(e as Error).message,
 				)
@@ -114,7 +115,7 @@ export async function POST(
 			.upsert(projectPitchData, { onConflict: 'project_id' })
 
 		if (error) {
-			console.error(error)
+			logger.error(error)
 			return NextResponse.json({ error: error.message }, { status: 500 })
 		}
 
@@ -122,7 +123,7 @@ export async function POST(
 			message: 'Project pitch upserted successfully',
 		})
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

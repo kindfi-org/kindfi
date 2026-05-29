@@ -35,10 +35,7 @@
 			"suspicious": {
 				"recommended": true,
 				"noExplicitAny": "error",
-				"noConsole": {
-					"level": "error",
-					"options": { "allow": ["warn", "error"] }
-				}
+				"noConsole": "error"
 			}
 		}
 	},
@@ -48,6 +45,45 @@
 	"overrides": [
 		{
 			"includes": ["**/scripts/**"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noConsole": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"**/lib/logger.ts",
+				"**/logger/index.ts"
+			],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noConsole": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"**/lib/logger.ts",
+				"**/logger/index.ts"
+			],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noConsole": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"apps/indexer/src/mappings/**",
+				"packages/drizzle/src/**"
+			],
 			"linter": {
 				"rules": {
 					"suspicious": {

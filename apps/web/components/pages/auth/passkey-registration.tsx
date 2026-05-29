@@ -22,6 +22,7 @@ import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { useSmartAccountRegistration } from '~/hooks/passkey/use-smart-account-registration'
 import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
+import { logger } from '@/lib/logger'
 
 export function PasskeyRegistrationComponent() {
 	const router = useRouter()
@@ -57,7 +58,7 @@ export function PasskeyRegistrationComponent() {
 		try {
 			await signOutAction()
 		} catch (error) {
-			console.error('Error signing out:', error)
+			logger.error('Error signing out:', error)
 			// Even if sign out fails, redirect to home
 			router.push('/')
 		}
@@ -87,7 +88,7 @@ export function PasskeyRegistrationComponent() {
 			sessionStorage.setItem('kindfi_new_session', 'true')
 			router.push('/profile')
 		} catch (e) {
-			console.error('Finalize passkey registration error', e)
+			logger.error('Finalize passkey registration error', e)
 			router.push('/sign-in')
 		}
 	}, [regSuccess, userEmail, userId, smartAccountAddress, router])
@@ -97,7 +98,7 @@ export function PasskeyRegistrationComponent() {
 		// If registration succeeded but no Smart Account address, redirect to sign-in
 		// The passkey is still registered and can be used for authentication
 		if (regSuccess && !smartAccountAddress) {
-			console.warn(
+			logger.warn(
 				'⚠️ Passkey registered but Smart Account creation failed. Redirecting to sign-in.',
 			)
 			toast.warning(

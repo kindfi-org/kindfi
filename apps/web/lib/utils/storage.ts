@@ -1,4 +1,5 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
+import { logger } from '@/lib/logger'
 
 export interface StorageAdapter {
 	list(
@@ -46,7 +47,7 @@ export async function uploadFile({
 		try {
 			await deleteFolder(client, folder)
 		} catch (e) {
-			console.warn(
+			logger.warn(
 				`Failed to delete existing files in ${folder}:`,
 				(e as Error).message,
 			)

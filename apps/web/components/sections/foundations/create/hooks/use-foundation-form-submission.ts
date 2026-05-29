@@ -2,6 +2,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { CreateFoundationFormData } from '../types'
+import { logger } from '@/lib/logger'
 
 export function useFoundationFormSubmission() {
 	const router = useRouter()
@@ -47,7 +48,7 @@ export function useFoundationFormSubmission() {
 			toast.success('Foundation created successfully!')
 			router.push(`/foundations/${result.slug}`)
 		} catch (error) {
-			console.error('Error creating foundation:', error)
+			logger.error('Error creating foundation:', error)
 			toast.error(
 				error instanceof Error
 					? error.message

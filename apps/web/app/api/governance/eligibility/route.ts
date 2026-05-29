@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import type { NftTier } from '~/lib/governance/types'
 import { getVoteWeight } from '~/lib/governance/vote-weight'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/governance/eligibility
@@ -32,7 +33,7 @@ export async function GET() {
 			.single()
 
 		if (error && error.code !== 'PGRST116') {
-			console.error('Error fetching user NFT for eligibility:', error)
+			logger.error('Error fetching user NFT for eligibility:', error)
 		}
 
 		if (!nft) {
@@ -52,7 +53,7 @@ export async function GET() {
 			voteWeight: getVoteWeight(tier),
 		})
 	} catch (error) {
-		console.error('Error in GET /api/governance/eligibility:', error)
+		logger.error('Error in GET /api/governance/eligibility:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

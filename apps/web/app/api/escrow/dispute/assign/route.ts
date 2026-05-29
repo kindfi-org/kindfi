@@ -9,6 +9,7 @@ import { AuditLogger } from '~/lib/services/audit-logger'
 import type { MediatorAssignmentPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateMediatorAssignment } from '~/lib/validators/dispute'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -106,7 +107,7 @@ export async function POST(req: NextRequest) {
 				})
 
 			if (notificationError) {
-				console.error('Failed to send notification:', notificationError)
+				logger.error('Failed to send notification:', notificationError)
 			}
 		})
 
@@ -134,7 +135,7 @@ export async function POST(req: NextRequest) {
 			{ status: 200 },
 		)
 	} catch (error) {
-		console.error('Mediator Assignment Error:', error)
+		logger.error('Mediator Assignment Error:', error)
 
 		await auditLogger.log({
 			correlationId,

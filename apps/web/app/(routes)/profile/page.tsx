@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { mapDiditStatusToKYC } from '~/lib/services/didit'
+import { logger } from '@/lib/logger'
 
 interface ProfilePageProps {
 	searchParams: Promise<{
@@ -79,7 +80,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 				.select()
 
 			if (updateResult.error) {
-				console.error(' Failed to update KYC record:', updateResult.error)
+				logger.error(' Failed to update KYC record:', updateResult.error)
 			} else {
 			}
 		} else {
@@ -106,7 +107,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 		.single()
 
 	if (error || !profileData) {
-		console.error('⚠️ ProfilePage profile fetch error:', error)
+		logger.error('⚠️ ProfilePage profile fetch error:', error)
 		redirect('/sign-in')
 	}
 

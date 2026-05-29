@@ -16,6 +16,7 @@ import {
 } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import { logger } from '@/lib/logger'
 
 interface TransferFormData {
 	to: string
@@ -82,7 +83,7 @@ export function SmartWalletTransferDemo() {
 				duration: 5000,
 			})
 		} catch (error) {
-			console.error('Error approving account:', error)
+			logger.error('Error approving account:', error)
 			toast.error(
 				error instanceof Error ? error.message : 'Failed to approve account',
 			)
@@ -126,7 +127,7 @@ export function SmartWalletTransferDemo() {
 			// Refresh balance after funding
 			await fetchBalance()
 		} catch (error) {
-			console.error('Error funding wallet:', error)
+			logger.error('Error funding wallet:', error)
 			toast.error(
 				error instanceof Error ? error.message : 'Failed to fund wallet',
 			)
@@ -153,7 +154,7 @@ export function SmartWalletTransferDemo() {
 			setBalance(data.data.xlm.balance)
 			toast.success(`Balance: ${data.data.xlm.balance} XLM`)
 		} catch (error) {
-			console.error('Error fetching balance:', error)
+			logger.error('Error fetching balance:', error)
 			toast.error('Failed to fetch balance')
 		} finally {
 			setIsLoading(false)
@@ -301,7 +302,7 @@ export function SmartWalletTransferDemo() {
 			// Refresh balance
 			await fetchBalance()
 		} catch (error) {
-			console.error('Error preparing transfer:', error)
+			logger.error('Error preparing transfer:', error)
 
 			if (error instanceof Error) {
 				if (error.message.includes('NotAllowedError')) {

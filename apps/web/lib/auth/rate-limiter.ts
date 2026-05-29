@@ -1,5 +1,6 @@
 import { Redis } from '@upstash/redis'
 import { AuthErrorType } from '../types/auth'
+import { logger } from '@/lib/logger'
 
 const RATE_LIMIT_ATTEMPTS = 5
 const RATE_LIMIT_WINDOW = 60 * 15 // 15 minutes in seconds
@@ -13,7 +14,7 @@ function getRedis(): Redis | null {
 		redis = Redis.fromEnv()
 		return redis
 	} catch (err) {
-		console.warn(
+		logger.warn(
 			'[RateLimiter] Failed to initialize Redis — rate limiting disabled:',
 			err,
 		)
@@ -56,7 +57,7 @@ export class RateLimiter {
 			const isBlocked = await client.exists(blockKey)
 			return isBlocked === 1
 		} catch (err) {
-			console.warn(
+			logger.warn(
 				'[RateLimiter] Redis error in isBlocked — failing open:',
 				err,
 			)
@@ -115,7 +116,7 @@ export class RateLimiter {
 				attemptsRemaining: this.maxAttempts - attempts,
 			}
 		} catch (err) {
-			console.warn(
+			logger.warn(
 				'[RateLimiter] Redis error in increment — failing open:',
 				err,
 			)
@@ -136,7 +137,7 @@ export class RateLimiter {
 			const blockKey = this.getBlockKey(identifier, action)
 			await Promise.all([client.del(key), client.del(blockKey)])
 		} catch (err) {
-			console.warn('[RateLimiter] Redis error in reset — failing open:', err)
+			logger.warn('[RateLimiter] Redis error in reset — failing open:', err)
 		}
 	}
 }

@@ -10,6 +10,7 @@ import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
 import { escrowFundSchema } from '~/lib/schemas/escrow.schemas'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Escrow Fund Error:', error)
+		logger.error('Escrow Fund Error:', error)
 
 		if (error instanceof AppError) {
 			await auditLogger.log({
@@ -120,7 +121,7 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		console.error('Internal server error during escrow initialization:', error)
+		logger.error('Internal server error during escrow initialization:', error)
 
 		await auditLogger.log({
 			correlationId,

@@ -6,6 +6,7 @@ import { startRegistration } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import { logger } from '@/lib/logger'
 
 /**
  * Hook for Smart Account registration using WebAuthn passkeys
@@ -114,7 +115,7 @@ export const useSmartAccountRegistration = (
 					// Passkey registered but Smart Account creation failed
 					const warning =
 						verificationJSON.warning || 'Smart Account creation failed'
-					console.warn('⚠️ Smart Account creation failed:', warning)
+					logger.warn('⚠️ Smart Account creation failed:', warning)
 					setRegSuccess('Passkey registered successfully')
 					setSmartAccountAddress(null)
 					toast.warning(warning)

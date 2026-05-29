@@ -19,6 +19,7 @@ import { promisify } from 'node:util'
 import { Keypair } from '@stellar/stellar-sdk'
 import { Server } from '@stellar/stellar-sdk/rpc'
 import type { NftTier } from '~/lib/governance/types'
+import { logger } from '@/lib/logger'
 
 const execFile = promisify(execFileCb)
 
@@ -151,7 +152,7 @@ export class GovernanceContractService {
 		)
 
 		if (!result.success) {
-			console.warn('[GovernanceContract] create_round failed:', result.error)
+			logger.warn('[GovernanceContract] create_round failed:', result.error)
 			return { success: false, error: result.error }
 		}
 
@@ -183,7 +184,7 @@ export class GovernanceContractService {
 		)
 
 		if (!result.success) {
-			console.warn('[GovernanceContract] add_option failed:', result.error)
+			logger.warn('[GovernanceContract] add_option failed:', result.error)
 			return { success: false, error: result.error }
 		}
 
@@ -228,7 +229,7 @@ export class GovernanceContractService {
 		)
 
 		if (!result.success) {
-			console.warn('[GovernanceContract] record_vote failed:', result.error)
+			logger.warn('[GovernanceContract] record_vote failed:', result.error)
 			return { success: false, error: result.error }
 		}
 

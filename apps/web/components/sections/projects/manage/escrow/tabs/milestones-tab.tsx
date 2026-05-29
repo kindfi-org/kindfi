@@ -28,6 +28,7 @@ import {
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import {
+import { logger } from '@/lib/logger'
 	getMilestoneStatus,
 	isSingleReleaseMilestone,
 } from '~/lib/utils/escrow/milestone-utils'
@@ -87,7 +88,7 @@ export function MilestonesTab({
 			toast.success('Milestone approved successfully!')
 			onSuccess()
 		} catch (error) {
-			console.error(error)
+			logger.error(error)
 			const errorMessage =
 				error instanceof Error ? error.message : 'Failed to approve milestone'
 			toast.error(errorMessage)
@@ -131,7 +132,7 @@ export function MilestonesTab({
 			setMilestoneEvidence('')
 			onSuccess()
 		} catch (error) {
-			console.error(error)
+			logger.error(error)
 			const errorMessage =
 				error instanceof Error
 					? error.message

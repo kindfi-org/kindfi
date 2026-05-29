@@ -12,6 +12,7 @@ import {
 	CardTitle,
 } from '~/components/base/card'
 import {
+import { logger } from '@/lib/logger'
 	Select,
 	SelectContent,
 	SelectItem,
@@ -48,7 +49,7 @@ export function RoleCard({ userId, currentRole }: RoleCardProps) {
 			// Reload page to reflect changes
 			window.location.reload()
 		} catch (error) {
-			console.error('Failed to update role:', error)
+			logger.error('Failed to update role:', error)
 			toast.error('Failed to update role')
 		} finally {
 			setIsChanging(false)

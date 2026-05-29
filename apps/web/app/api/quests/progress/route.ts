@@ -6,6 +6,7 @@ import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { questProgressSchema } from '~/lib/schemas/quest.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 const rateLimiter = new RateLimiter()
 
@@ -108,7 +109,7 @@ export async function POST(req: NextRequest) {
 
 
 					if (!contractResult.success) {
-						console.error(
+						logger.error(
 							'[Quest API] Failed to update quest progress on-chain:',
 							contractResult.error,
 						)
@@ -116,10 +117,10 @@ export async function POST(req: NextRequest) {
 					} else {
 					}
 				} else {
-					console.warn('[Quest API] Quest contract address not configured')
+					logger.warn('[Quest API] Quest contract address not configured')
 				}
 			} catch (error) {
-				console.error('[Quest API] Error calling quest contract:', error)
+				logger.error('[Quest API] Error calling quest contract:', error)
 				// Continue with database update even if contract call fails
 			}
 		} else {
@@ -147,7 +148,7 @@ export async function POST(req: NextRequest) {
 
 		// If there's an error other than "not found", return it
 		if (fetchError && fetchError.code !== 'PGRST116') {
-			console.error('Error fetching quest progress:', fetchError)
+			logger.error('Error fetching quest progress:', fetchError)
 			return NextResponse.json(
 				{ error: 'Failed to fetch quest progress' },
 				{ status: 500 },
@@ -173,7 +174,7 @@ export async function POST(req: NextRequest) {
 				.single()
 
 			if (error) {
-				console.error('Error updating quest progress:', error)
+				logger.error('Error updating quest progress:', error)
 				return NextResponse.json(
 					{ error: 'Failed to update quest progress' },
 					{ status: 500 },
@@ -201,7 +202,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (error) {
-			console.error('Error creating quest progress:', error)
+			logger.error('Error creating quest progress:', error)
 			return NextResponse.json(
 				{ error: 'Failed to create quest progress' },
 				{ status: 500 },
@@ -214,7 +215,7 @@ export async function POST(req: NextRequest) {
 			reward_points: is_completed ? quest.reward_points : 0,
 		})
 	} catch (error) {
-		console.error('Error in POST /api/quests/progress:', error)
+		logger.error('Error in POST /api/quests/progress:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

@@ -13,6 +13,7 @@ import {
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/stellar/faucet
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 	} catch (error) {
-		console.error('❌ Error funding smart wallet:', error)
+		logger.error('❌ Error funding smart wallet:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to fund smart wallet',
@@ -158,7 +159,7 @@ async function fundContractViaSAC(
 
 
 	if (Api.isSimulationError(simulation)) {
-		console.error('❌ Simulation error:', JSON.stringify(simulation, null, 2))
+		logger.error('❌ Simulation error:', JSON.stringify(simulation, null, 2))
 		throw new Error(
 			`SAC transfer simulation failed: ${JSON.stringify(simulation)}`,
 		)
@@ -174,7 +175,7 @@ async function fundContractViaSAC(
 
 
 	if (submitResult.status === 'ERROR') {
-		console.error('❌ Submit error:', submitResult)
+		logger.error('❌ Submit error:', submitResult)
 		throw new Error(`SAC transfer submission failed: ${submitResult.status}`)
 	}
 
@@ -235,7 +236,7 @@ async function fundAccountViaHorizon(
 
 	if (!submitResponse.ok) {
 		const errorData = await submitResponse.json()
-		console.error('❌ Horizon submission error:', errorData)
+		logger.error('❌ Horizon submission error:', errorData)
 		throw new Error(
 			errorData.extras?.result_codes?.operations?.[0] ||
 				errorData.title ||

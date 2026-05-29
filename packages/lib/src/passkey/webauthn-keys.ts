@@ -5,6 +5,7 @@
 import { Buffer } from 'buffer'
 import * as CBOR from 'cbor-x/decode'
 import { createHash } from 'crypto'
+import { logger } from '../logger'
 
 /**
  * WebAuthn/COSE Public Key Utilities for Stellar Smart Contracts
@@ -73,7 +74,7 @@ export function convertCoseToUncompressedPublicKey(
 
 		// Validate algorithm (optional check)
 		if (alg && alg !== -7) {
-			console.warn(`⚠️ Unexpected algorithm: ${alg} (expected -7 for ES256)`)
+			logger.warn(`Unexpected algorithm: ${alg} (expected -7 for ES256)`)
 		}
 
 		// Validate curve

@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { accountApproveSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/stellar/account/approve
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
 
 		if (!response.ok) {
 			const errorData = await response.json()
-			console.error('❌ KYC server error:', errorData)
+			logger.error('❌ KYC server error:', errorData)
 			throw new Error(errorData.error || 'Failed to register account')
 		}
 
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 	} catch (error) {
-		console.error('❌ Error approving account:', error)
+		logger.error('❌ Error approving account:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to approve account',

@@ -8,6 +8,7 @@ import {
 } from '~/lib/schemas/governance.schemas'
 import { GovernanceContractService } from '~/lib/stellar/governance-contract'
 import { validateRequest } from '~/lib/utils/validation'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/governance/rounds
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
 		const { data: rounds, error } = await query
 
 		if (error) {
-			console.error('Error fetching governance rounds:', error)
+			logger.error('Error fetching governance rounds:', error)
 			return NextResponse.json(
 				{ error: 'Failed to fetch rounds' },
 				{ status: 500 },
@@ -88,7 +89,7 @@ export async function GET(req: NextRequest) {
 
 		return NextResponse.json({ success: true, data: enrichedRounds })
 	} catch (error) {
-		console.error('Error in GET /api/governance/rounds:', error)
+		logger.error('Error in GET /api/governance/rounds:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },
@@ -151,7 +152,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (roundError || !round) {
-			console.error('Error creating governance round:', roundError)
+			logger.error('Error creating governance round:', roundError)
 			return NextResponse.json(
 				{ error: 'Failed to create round' },
 				{ status: 500 },
@@ -174,7 +175,7 @@ export async function POST(req: NextRequest) {
 				)
 				.select('id, title')
 			if (optError) {
-				console.error('Error inserting options:', optError)
+				logger.error('Error inserting options:', optError)
 			} else {
 				insertedOptions.push(...(opts ?? []))
 			}
@@ -195,7 +196,7 @@ export async function POST(req: NextRequest) {
 			})
 
 			if (!roundResult.success || roundResult.roundId === undefined) {
-				console.warn('[Governance] create_round failed:', roundResult.error)
+				logger.warn('[Governance] create_round failed:', roundResult.error)
 			} else {
 				contractRoundId = roundResult.roundId
 
@@ -215,12 +216,12 @@ export async function POST(req: NextRequest) {
 							.update({ contract_option_id: optResult.optionId })
 							.eq('id', opt.id)
 					} else {
-						console.warn('[Governance] add_option failed:', optResult.error)
+						logger.warn('[Governance] add_option failed:', optResult.error)
 					}
 				}
 			}
 		} catch (err) {
-			console.error('[Governance] on-chain recording error:', err)
+			logger.error('[Governance] on-chain recording error:', err)
 		}
 
 		return NextResponse.json(
@@ -232,7 +233,7 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Error in POST /api/governance/rounds:', error)
+		logger.error('Error in POST /api/governance/rounds:', error)
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },
