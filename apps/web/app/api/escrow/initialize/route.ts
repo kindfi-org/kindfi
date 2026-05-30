@@ -2,6 +2,7 @@ import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { error, requireSession, respond } from '~/lib/api-helpers'
 import { AppError } from '~/lib/error'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { escrowInitializeSchema } from '~/lib/schemas/escrow.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
@@ -9,7 +10,7 @@ import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
-export async function POST(req: NextRequest) {
+async function initializeHandler(req: NextRequest) {
 	const { user, error: authError } = await requireSession()
 	if (authError) return authError
 
@@ -162,3 +163,11 @@ export async function POST(req: NextRequest) {
 		})
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	initializeHandler,
+)

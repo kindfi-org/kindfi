@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import type { NftTier } from '~/lib/governance/types'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { castVoteSchema } from '~/lib/schemas/governance.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 import { getVoteWeight } from '~/lib/governance/vote-weight'
@@ -15,7 +16,7 @@ import { logger } from '@/lib/logger'
  * Eligibility is determined by the user's Kinders NFT tier.
  * Each user may cast exactly one vote per round.
  */
-export async function POST(req: NextRequest) {
+async function voteHandler(req: NextRequest) {
 	try {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
@@ -209,3 +210,15 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? ip ?? 'anonymous'
+		},
+	},
+	voteHandler,
+)

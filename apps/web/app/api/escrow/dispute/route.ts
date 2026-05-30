@@ -2,6 +2,7 @@ import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { AppError } from '~/lib/error'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import type { DisputePayload } from '~/lib/types/escrow/escrow-payload.types'
@@ -11,7 +12,7 @@ import { validateDispute } from '~/lib/validators/dispute'
 import { validateRequest } from '~/lib/utils/validation'
 import { logger } from '@/lib/logger'
 
-export async function POST(req: NextRequest) {
+async function createDisputeHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
@@ -177,6 +178,14 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	createDisputeHandler,
+)
 
 export async function GET(req: NextRequest) {
 	try {

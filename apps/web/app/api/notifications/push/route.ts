@@ -1,7 +1,9 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
+import type { NextRequest } from 'next/server'
 import { after, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { NotificationLogger } from '~/lib/services/notification-logger.server'
 import { NotificationService } from '~/lib/services/notification-service'
 
@@ -29,7 +31,7 @@ const requestSchema = z.object({
 	notification: notificationSchema,
 })
 
-export async function POST(request: Request) {
+async function pushHandler(request: NextRequest) {
 	const logger = new NotificationLogger()
 	const _notificationService = new NotificationService()
 
@@ -97,3 +99,11 @@ export async function POST(request: Request) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'moderate',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	pushHandler,
+)
