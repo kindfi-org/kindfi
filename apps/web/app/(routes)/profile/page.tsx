@@ -1,11 +1,22 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { mapDiditStatusToKYC } from '~/lib/services/didit'
-import { logger } from '@/lib/logger'
+
+export const metadata: Metadata = {
+	title: 'My Profile | KindFi',
+	description:
+		'Manage your KindFi profile, view your donation history, and track your social impact contributions.',
+	robots: {
+		index: false,
+		follow: false,
+	},
+}
 
 interface ProfilePageProps {
 	searchParams: Promise<{
