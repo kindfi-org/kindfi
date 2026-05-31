@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { readAllPosts } from '~/lib/mdx'
+import { SITE_URL } from '~/lib/seo/structured-data'
 
 type ChangeFreq =
 	| 'always'
@@ -27,11 +28,9 @@ const STATIC_ROUTES: {
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
-	const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-
 	const routes: MetadataRoute.Sitemap = STATIC_ROUTES.map(
 		({ path, priority, changeFrequency }) => ({
-			url: `${base}${path}`,
+			url: `${SITE_URL}${path}`,
 			lastModified: new Date(),
 			changeFrequency,
 			priority,
@@ -39,7 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 	)
 
 	const posts: MetadataRoute.Sitemap = readAllPosts().map((post) => ({
-		url: `${base}/news/${post.slug}`,
+		url: `${SITE_URL}/news/${post.slug}`,
 		lastModified: new Date(post.updated || post.date),
 		changeFrequency: 'weekly' as const,
 		priority: 0.7,

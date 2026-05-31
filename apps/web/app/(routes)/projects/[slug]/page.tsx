@@ -1,7 +1,4 @@
-import {
-	createSupabaseServerClient,
-	prefetchSupabaseQuery,
-} from '@packages/lib/supabase-server'
+import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import {
 	dehydrate,
 	HydrationBoundary,
@@ -12,10 +9,8 @@ import { notFound } from 'next/navigation'
 import { ProjectClientWrapper } from '~/components/sections/projects/detail/project-client-wrapper'
 import { JsonLd } from '~/components/shared/json-ld'
 import { getProjectBySlug } from '~/lib/queries/projects'
-import { getBreadcrumbSchema } from '~/lib/seo/structured-data'
+import { getBreadcrumbSchema, SITE_URL } from '~/lib/seo/structured-data'
 import { validateProjectSlug } from '~/lib/validation/project-slug'
-
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.kindfi.org'
 
 export async function generateMetadata({
 	params,
@@ -61,34 +56,29 @@ export default async function ProjectDetailPage({
 	const { slug } = await params
 	if (!validateProjectSlug(slug)) notFound()
 
-	const queryClient = new QueryClient()
 	const client = await createSupabaseServerClient()
 	const project = await getProjectBySlug(client, slug)
 
-	await prefetchSupabaseQuery(
-		queryClient,
-		'project',
-		(c) => getProjectBySlug(c, slug),
-		[slug],
-	)
+	if (!project) notFound()
+
+	const queryClient = new QueryClient()
+	queryClient.setQueryData(['supabase', 'project', slug], project)
 
 	const dehydratedState = dehydrate(queryClient)
 
-	const projectSchema = project
-		? {
-				'@context': 'https://schema.org',
-				'@type': 'Event',
-				name: project.title,
-				description: project.description ?? undefined,
-				url: `${BASE_URL}/projects/${slug}`,
-				image: project.image ?? undefined,
-				organizer: {
-					'@type': 'Organization',
-					name: 'KindFi',
-					url: BASE_URL,
-				},
-			}
-		: null
+	const projectSchema = {
+		'@context': 'https://schema.org',
+		'@type': 'Event',
+		name: project.title,
+		description: project.description ?? undefined,
+		url: `${SITE_URL}/projects/${slug}`,
+		image: project.image ?? undefined,
+		organizer: {
+			'@type': 'Organization',
+			name: 'KindFi',
+			url: SITE_URL,
+		},
+	}
 
 	return (
 		<>
@@ -99,7 +89,7 @@ export default async function ProjectDetailPage({
 					{ name: project?.title ?? slug, url: `/projects/${slug}` },
 				])}
 			/>
-			{projectSchema && <JsonLd data={projectSchema} />}
+			<JsonLd data={projectSchema} />
 			<main
 				className="container mx-auto p-4 md:p-12"
 				aria-label="Project details"

@@ -8,15 +8,13 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	getOrganizationSchema,
 	getWebSiteSchema,
+	SITE_URL,
 } from '~/lib/seo/structured-data'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
-const defaultUrl = appConfig.deployment.vercelUrl
-	? `https://${appConfig.deployment.vercelUrl}`
-	: 'http://localhost:3000'
 export const metadata = {
-	metadataBase: new URL(defaultUrl),
+	metadataBase: new URL(SITE_URL),
 	title: {
 		default: 'KindFi — Web3 Crowdfunding for Social Impact',
 		template: '%s | KindFi',
@@ -32,22 +30,14 @@ export const metadata = {
 		'NGO funding',
 		'decentralized fundraising',
 	],
-	authors: [{ name: 'KindFi', url: defaultUrl }],
+	authors: [{ name: 'KindFi', url: SITE_URL }],
 	creator: 'KindFi',
 	publisher: 'KindFi',
 	openGraph: {
 		siteName: 'KindFi',
 		type: 'website',
 		locale: 'en_US',
-		url: defaultUrl,
-		images: [
-			{
-				url: '/images/og-home.png',
-				width: 1200,
-				height: 630,
-				alt: 'KindFi — Web3 Crowdfunding for Social Impact',
-			},
-		],
+		url: SITE_URL,
 	},
 	twitter: {
 		card: 'summary_large_image',
