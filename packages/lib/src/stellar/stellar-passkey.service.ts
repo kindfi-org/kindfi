@@ -1,4 +1,3 @@
-// ! Some of these fns are already in other apps... update these to have the latest. Apps version are the newest. Check git history to confirm
 
 import { Buffer } from 'node:buffer'
 import { createHash, createPublicKey, createVerify } from 'node:crypto'
