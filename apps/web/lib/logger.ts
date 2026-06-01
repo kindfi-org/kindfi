@@ -93,19 +93,29 @@ function fmt(level: string, message: string): string {
 	return `[${level.toUpperCase()}] ${new Date().toISOString()} | ${message}`
 }
 
+function sanitiseData(data?: unknown): unknown {
+	if (!data || typeof data !== 'object' || Array.isArray(data)) {
+		return data
+	}
+
+	return sanitise(data as Record<string, unknown>)
+}
+
 export interface KindFiLogger {
 	debug(message: string, data?: Record<string, unknown>): void
 	info(message: string, data?: Record<string, unknown>): void
 	warn(
 		message: string,
 		errorOrData?: unknown,
-		data?: Record<string, unknown>,
+		data?: unknown,
 	): void
+	warn(errorOrData: unknown): void
 	error(
 		message: string,
 		errorOrData?: unknown,
-		data?: Record<string, unknown>,
+		data?: unknown,
 	): void
+	error(errorOrData: unknown): void
 }
 
 function buildLogger(): KindFiLogger {
@@ -122,38 +132,68 @@ function buildLogger(): KindFiLogger {
 			console.info(fmt('info', message), sanitise(data))
 		},
 
-		warn(message, errorOrData, data) {
-			const formatted = fmt('warn', message)
+		warn(messageOrError: string | unknown, errorOrData?: unknown, data?: unknown) {
+			if (typeof messageOrError !== 'string') {
+				this.warn('Warning', messageOrError)
+				return
+			}
+
+			const formatted = fmt('warn', messageOrError)
 			if (errorOrData instanceof Error) {
 				const errInfo = isDev
 					? { message: errorOrData.message, stack: errorOrData.stack }
 					: { message: errorOrData.message }
 				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
-				console.warn(formatted, errInfo, sanitise(data))
-			} else {
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
-				console.warn(
-					formatted,
-					sanitise(errorOrData as Record<string, unknown>),
-				)
+				console.warn(formatted, errInfo, sanitiseData(data))
+				return
 			}
+
+			if (data !== undefined) {
+				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
+				console.warn(formatted, errorOrData, sanitiseData(data))
+				return
+			}
+
+			if (errorOrData !== undefined) {
+				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
+				console.warn(formatted, sanitiseData(errorOrData))
+				return
+			}
+
+			// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
+			console.warn(formatted)
 		},
 
-		error(message, errorOrData, data) {
-			const formatted = fmt('error', message)
+		error(messageOrError: string | unknown, errorOrData?: unknown, data?: unknown) {
+			if (typeof messageOrError !== 'string') {
+				this.error('Error', messageOrError)
+				return
+			}
+
+			const formatted = fmt('error', messageOrError)
 			if (errorOrData instanceof Error) {
 				const errInfo = isDev
 					? { message: errorOrData.message, stack: errorOrData.stack }
 					: { message: errorOrData.message }
 				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
-				console.error(formatted, errInfo, sanitise(data))
-			} else {
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
-				console.error(
-					formatted,
-					sanitise(errorOrData as Record<string, unknown>),
-				)
+				console.error(formatted, errInfo, sanitiseData(data))
+				return
 			}
+
+			if (data !== undefined) {
+				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
+				console.error(formatted, errorOrData, sanitiseData(data))
+				return
+			}
+
+			if (errorOrData !== undefined) {
+				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
+				console.error(formatted, sanitiseData(errorOrData))
+				return
+			}
+
+			// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
+			console.error(formatted)
 		},
 	}
 }

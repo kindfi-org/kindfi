@@ -5,11 +5,9 @@ import type { RegistrationResponseJSON } from '@simplewebauthn/browser'
 import { Horizon, Keypair } from '@stellar/stellar-sdk'
 import { useEffect, useRef, useState } from 'react'
 import { updateDeviceWithDeployee } from '~/app/actions/auth'
-import { Logger } from '~/lib/logger'
+import { logger } from '~/lib/logger'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
-
-const _logger = new Logger()
 
 const getStoredDeployee = () => {
 	return localStorage.getItem('sp:deployee')

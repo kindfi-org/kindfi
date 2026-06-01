@@ -18,8 +18,8 @@ import { FormFooter } from '../create/components/form-footer'
 import { LogoSection } from '../create/components/logo-section'
 import { MissionVisionSection } from '../create/components/mission-vision-section'
 import { SocialLinksSection } from '../create/components/social-links-section'
-import {
 import { logger } from '@/lib/logger'
+import {
 	type CreateFoundationFormData,
 	createFoundationSchema,
 } from '../create/types'

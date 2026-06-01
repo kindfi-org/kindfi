@@ -3,8 +3,8 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import {
 import { logger } from '@/lib/logger'
+import {
 	mapDiditStatusToKYC,
 	verifyDiditWebhookSignatureSimple,
 	verifyDiditWebhookSignatureV2,

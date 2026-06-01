@@ -15,7 +15,6 @@ const AdminGamificationManager = dynamic(
     ),
   {
     loading: () => <AdminGamificationSkeleton />,
-    ssr: false,
   },
 );
 

@@ -3,8 +3,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { transferPrepareSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import {
 import { logger } from '@/lib/logger'
+import {
 	SmartWalletTransactionService,
 	type TransactionChallenge,
 } from '~/lib/stellar/smart-wallet-transactions'

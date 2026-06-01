@@ -27,8 +27,8 @@ import {
 } from '~/components/base/select'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
-import {
 import { logger } from '@/lib/logger'
+import {
 	getMilestoneStatus,
 	isSingleReleaseMilestone,
 } from '~/lib/utils/escrow/milestone-utils'

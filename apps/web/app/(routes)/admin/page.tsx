@@ -16,7 +16,6 @@ const AdminOverview = dynamic(
     })),
   {
     loading: () => <AdminOverviewSkeleton />,
-    ssr: false,
   },
 );
 

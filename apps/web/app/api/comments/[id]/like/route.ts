@@ -4,19 +4,19 @@ import { logger } from '@/lib/logger'
 
 // POST /api/comments/[id]/like
 export async function POST(
-        req: Request,
-        { params }: { params: { id: string } },
+	req: Request,
+	{ params }: { params: Promise<{ id: string }> },
 ) {
-        try {
-                const supabase = await createSupabaseServerClient()
+	try {
+		const { id } = await params
+		const supabase = await createSupabaseServerClient()
 
-                const { data: authData } = await supabase.auth.getUser()
-                if (!authData?.user) {
-                        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-                }
+		const { data: authData } = await supabase.auth.getUser()
+		if (!authData?.user) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
 
-                const id = params.id
-                if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+		if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
 
                 const { data: existing, error: fetchError } = await supabase
                         .from('comments')

@@ -1,5 +1,5 @@
 interface JsonLdProps {
-	data: Record<string, unknown> | Record<string, unknown>[]
+	data: object | object[]
 }
 
 export function JsonLd({ data }: JsonLdProps) {

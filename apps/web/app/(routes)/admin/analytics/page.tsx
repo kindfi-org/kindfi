@@ -16,7 +16,6 @@ const AdminAnalytics = dynamic(
     })),
   {
     loading: () => <AdminAnalyticsSkeleton />,
-    ssr: false,
   },
 );
 

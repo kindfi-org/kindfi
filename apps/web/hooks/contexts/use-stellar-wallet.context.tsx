@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { getStellarWalletTheme } from '~/lib/config/stellar-wallet-theme'
-import {
 import { logger } from '@/lib/logger'
+import {
 	getTrustlessSignerError,
 	isExternalStellarWalletAddress,
 } from '~/lib/utils/escrow/trustless-signer'
