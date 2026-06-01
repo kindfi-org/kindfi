@@ -163,3 +163,5 @@ export async function getAdminStats(client: TypedSupabaseClient) {
 		},
 	}
 }
+
+export type AdminStats = Awaited<ReturnType<typeof getAdminStats>>

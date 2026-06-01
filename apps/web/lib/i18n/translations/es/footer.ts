@@ -1,0 +1,32 @@
+export const footer = {
+			description:
+				'La primera plataforma Web3 que conecta partidarios con causas impactantes impulsando la adopción de blockchain para el cambio social y ambiental.',
+			quickLinks: 'Enlaces Rápidos',
+			projects: 'Proyectos',
+			socialProjects: 'Proyectos Sociales',
+			startCampaign: 'Iniciar una Campaña',
+			featuredProjects: 'Proyectos Destacados',
+			recentInvestments: 'Inversiones Recientes',
+			resources: 'Recursos',
+			trustlessWork: 'Trustless Work',
+			documentation: 'Documentación',
+			news: 'Noticias',
+			communityGovernance: 'Gobernanza Comunitaria',
+			tutorials: 'Tutoriales',
+			faqs: 'Preguntas Frecuentes',
+			legal: 'Legal',
+			termsOfUse: 'Términos de Uso',
+			privacyPolicy: 'Política de Privacidad',
+			cookiePolicy: 'Política de Cookies',
+			licenses: 'Licencias',
+			contact: 'Contacto',
+			followUs: 'Síguenos',
+			allRightsReserved: 'Todos los derechos reservados',
+			keepInTouch: 'Mantente en contacto',
+			emailPlaceholder: 'tu@email.com',
+			subscribe: 'Suscribirse',
+			enterEmail:
+				'Ingresa tu dirección de correo electrónico para recibir nuestras actualizaciones y boletines',
+			invalidEmail:
+				'Por favor ingresa una dirección de correo electrónico válida',
+}
