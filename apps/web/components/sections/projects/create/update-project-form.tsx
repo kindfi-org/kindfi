@@ -3,45 +3,23 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion } from 'framer-motion'
-import { Loader2, Save } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
-import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
-import {
-	CSRFTokenField,
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '~/components/base/form'
-import { Input } from '~/components/base/input'
-import { Textarea } from '~/components/base/textarea'
-import { ImageUpload } from '~/components/sections/projects/create/image-upload'
-import { LocationSelect } from '~/components/sections/projects/create/location-select'
-import { SocialLinks } from '~/components/sections/projects/create/social-links'
-import { TagInput } from '~/components/sections/projects/create/tag-input'
-import { CategoryBadge } from '~/components/sections/projects/shared'
+import { CSRFTokenField, Form } from '~/components/base/form'
 import { useProjectMutation } from '~/hooks/projects/use-project-mutation'
 import { getAllCategories } from '~/lib/queries/projects'
-import {
-	stepOneSchema,
-	stepThreeSchema,
-	stepTwoSchema,
-} from '~/lib/schemas/create-project.schemas'
 import type {
 	BasicProjectInfo,
 	CreateProjectFormData,
 } from '~/lib/types/project/create-project.types'
 import { normalizeProjectToFormDefaults } from '~/lib/utils/project-utils'
-import { CategoryBadgeSkeleton } from '../skeletons'
-
-// Combine all schemas for the complete form
-const updateProjectSchema = stepOneSchema
-	.and(stepTwoSchema)
-	.and(stepThreeSchema)
+import { BasicInfoFields } from './update-project-form/basic-info-fields'
+import { FundingFields } from './update-project-form/funding-fields'
+import { LinksAndMediaFields } from './update-project-form/links-and-media-fields'
+import { LocationCategoryTagsFields } from './update-project-form/location-category-tags-fields'
+import { SaveFooter } from './update-project-form/save-footer'
+import { updateProjectSchema } from './update-project-form/schema'
 
 interface UpdateProjectFormProps {
 	project: BasicProjectInfo
@@ -57,8 +35,8 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 		isLoading,
 		error: categoryError,
 	} = useSupabaseQuery('categories', getAllCategories, {
-		staleTime: 1000 * 60 * 60, // 1 hour
-		gcTime: 1000 * 60 * 60, // 1 hour
+		staleTime: 1000 * 60 * 60,
+		gcTime: 1000 * 60 * 60,
 	})
 
 	const form = useForm<CreateProjectFormData>({
@@ -95,298 +73,15 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 								className="max-w-2xl mx-auto space-y-6"
 							>
 								<CSRFTokenField />
-								{/* Title */}
-								<FormField
-									control={form.control}
-									name="title"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>
-												Title <span className="text-destructive">*</span>
-											</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Enter your project title"
-													className="bg-white border-green-600"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
+								<BasicInfoFields />
+								<FundingFields />
+								<LinksAndMediaFields />
+								<LocationCategoryTagsFields
+									categories={categories}
+									isLoading={isLoading}
+									categoryError={categoryError}
 								/>
-
-								{/* Description */}
-								<FormField
-									control={form.control}
-									name="description"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>
-												Description <span className="text-destructive">*</span>
-											</FormLabel>
-											<FormControl>
-												<Textarea
-													placeholder="Describe your project in a few sentences"
-													className="min-h-[120px] border-green-600 bg-white"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								{/* Target Amount */}
-								<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-									<FormField
-										control={form.control}
-										name="targetAmount"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>
-													Target Amount{' '}
-													<span className="text-destructive">*</span>
-												</FormLabel>
-												<FormControl>
-													<div className="relative">
-														<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-															<span className="text-gray-500 sm:text-sm">
-																$
-															</span>
-														</div>
-														<Input
-															type="number"
-															placeholder="50000"
-															className="bg-white border-green-600 pl-7"
-															value={field.value ?? ''}
-															onChange={(e) =>
-																field.onChange(
-																	e.target.value === ''
-																		? undefined
-																		: Number(e.target.value),
-																)
-															}
-														/>
-													</div>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-
-									{/* Minimum Investment */}
-									<FormField
-										control={form.control}
-										name="minimumInvestment"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>
-													Minimum Investment{' '}
-													<span className="text-destructive">*</span>
-												</FormLabel>
-												<FormControl>
-													<div className="relative">
-														<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-															<span className="text-gray-500 sm:text-sm">
-																$
-															</span>
-														</div>
-														<Input
-															type="number"
-															placeholder="100"
-															className="bg-white border-green-600 pl-7"
-															value={field.value ?? ''}
-															onChange={(e) =>
-																field.onChange(
-																	e.target.value === ''
-																		? undefined
-																		: Number(e.target.value),
-																)
-															}
-														/>
-													</div>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-
-								{/* Website */}
-								<FormField
-									control={form.control}
-									name="website"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Website (optional)</FormLabel>
-											<FormControl>
-												<Input
-													type="url"
-													placeholder="https://yourproject.com"
-													className="bg-white border-green-600"
-													value={field.value ?? ''}
-													onChange={(e) => field.onChange(e.target.value)}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								{/* Social Links */}
-								<FormField
-									control={form.control}
-									name="socialLinks"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Social Links (optional)</FormLabel>
-											<FormControl>
-												<SocialLinks
-													value={field.value ?? []}
-													onChange={field.onChange}
-													error={form.formState.errors.socialLinks?.message}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								{/* Project Image */}
-								<FormField
-									control={form.control}
-									name="image"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Project Image (optional)</FormLabel>
-											<FormControl>
-												<ImageUpload
-													value={field.value}
-													onChange={field.onChange}
-													error={form.formState.errors.image?.message}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								{/* Location */}
-								<FormField
-									control={form.control}
-									name="location"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>
-												Location <span className="text-destructive">*</span>
-											</FormLabel>
-											<FormControl>
-												<LocationSelect
-													value={field.value}
-													onChange={field.onChange}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								{/* Category */}
-								<FormField
-									control={form.control}
-									name="category"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>
-												Category <span className="text-destructive">*</span>
-											</FormLabel>
-											<FormControl>
-												<div className="mt-8 flex flex-wrap gap-2">
-													{isLoading ? (
-														<div className="flex flex-wrap gap-2">
-															{Array.from({ length: 12 }).map((_, i) => (
-																// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
-																<CategoryBadgeSkeleton key={i} />
-															))}
-														</div>
-													) : categoryError ? (
-														<p className="text-sm text-destructive text-center w-full">
-															Failed to load categories. Please try again later.
-														</p>
-													) : (
-														categories.map((category) => (
-															<CategoryBadge
-																key={category.id}
-																category={category}
-																selected={field.value === category.id}
-																onClick={() => field.onChange(category.id)}
-															/>
-														))
-													)}
-												</div>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								{/* Tags */}
-								<FormField
-									control={form.control}
-									name="tags"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Tags (optional)</FormLabel>
-											<FormControl>
-												<TagInput
-													tags={field.value || []}
-													onChange={field.onChange}
-													error={form.formState.errors.tags?.message}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								{/* Save Button Section */}
-								<div className="pt-6 border-t border-gray-200">
-									<div className="space-y-4 text-center">
-										<div className="text-sm text-muted-foreground">
-											{isDirty ? (
-												<span className="font-medium text-amber-600">
-													You have unsaved changes
-												</span>
-											) : (
-												<span>All changes saved</span>
-											)}
-										</div>
-
-										<Button
-											type="submit"
-											disabled={!isDirty || isPending}
-											className="flex items-center w-full gap-2 px-8 text-white gradient-btn"
-											size="lg"
-											aria-describedby={
-												isDirty ? 'unsaved-changes' : 'all-saved'
-											}
-											aria-label="Save changes"
-										>
-											{isPending ? (
-												<>
-													<Loader2 className="w-4 h-4 animate-spin" />
-													Saving...
-												</>
-											) : (
-												<>
-													<Save className="w-4 h-4" />
-													Save Changes
-												</>
-											)}
-										</Button>
-									</div>
-								</div>
+								<SaveFooter isDirty={isDirty} isPending={isPending} />
 							</form>
 						</Form>
 					</CardContent>
