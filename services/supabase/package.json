@@ -24,8 +24,9 @@
 		"start": "supabase start",
 		"status": "supabase status",
 		"stop": "supabase stop",
-		"types": "supabase gen types typescript --local > src/database.types.ts",
-		"types:remote": "supabase gen types typescript --project-id ${PROJECT_ID:-${SUPABASE_PROJECT_ID}} > src/database.types.ts"
+		"types": "./scripts/gen-types.sh local",
+		"types:remote": "./scripts/gen-types.sh remote",
+		"verify:generated": "./scripts/verify-generated-types.sh"
 	},
 	"type": "module",
 	"types": "./src/index.ts",

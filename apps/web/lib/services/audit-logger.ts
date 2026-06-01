@@ -77,9 +77,9 @@ export class AuditLogger {
 		try {
 			const supabase = createSupabaseBrowserClient()
 			const { error } = await (
-				supabase as {
-					from: (table: string) => {
-						insert: (values: Record<string, unknown>) => Promise<{ error: Error | null }>
+				supabase as unknown as {
+					from: (table: typeof AUDIT_LOGS_TABLE) => {
+						insert: (values: Record<string, unknown>) => PromiseLike<{ error: Error | null }>
 					}
 				}
 			)

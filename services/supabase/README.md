@@ -56,8 +56,8 @@ Generate the necessary types and schemas for the Supabase service:
 # Option 2: Using npm script with PROJECT_ID env variable
 PROJECT_ID=<YOUR_PROJECT_ID> bun run gen:remote
 
-# Option 3: Direct command
-supabase gen types typescript --project-id <YOUR_PROJECT_ID> > src/database.types.ts
+# Option 3: Direct command (prefer bun run types / gen-types.sh — they write atomically)
+PROJECT_ID=<YOUR_PROJECT_ID> bun run types:remote
 bun run schemas
 ```
 
@@ -75,6 +75,8 @@ bun gen # generates what it is in local database
 ```
 
 **Important:** After generating types from remote, commit the `src/database.types.ts` file to your repository so Vercel builds have access to the types.
+
+`database.types.ts` and `database.schemas.ts` are force-ignored by Biome (`!!` in root `biome.json`) and must never be formatted by `biome check --write`. Regenerate via `bun run gen` (local) or `bun run gen:remote` (remote); scripts write to a temp file first so a failed CLI run cannot truncate the committed file.
 
 3. **Environment Variables**
 

@@ -8,13 +8,18 @@ if [ -z "$STAGED_FILES" ]; then
   exit 0
 fi
 
-# Optional: Supabase TypeScript generation (warn only, don't block)
-if echo "$STAGED_FILES" | grep -q '^services/supabase/'; then
-  echo "🔵 Running Supabase TypeScript generation (optional)..."
-  if (cd services/supabase && bun gen 2>/dev/null); then
-    echo "✅ Supabase types generated successfully"
-  else
-    echo "⚠️  Supabase TypeScript generation skipped (not blocking commit)"
+# Guard generated Supabase artifacts from ever being committed empty
+if echo "$STAGED_FILES" | grep -q '^services/supabase/src/database\.types\.ts$'; then
+  if [ ! -s services/supabase/src/database.types.ts ]; then
+    echo "❌ services/supabase/src/database.types.ts is empty. Regenerate with: cd services/supabase && bun run gen"
+    exit 1
+  fi
+fi
+
+if echo "$STAGED_FILES" | grep -q '^services/supabase/src/database\.schemas\.ts$'; then
+  if [ ! -s services/supabase/src/database.schemas.ts ]; then
+    echo "❌ services/supabase/src/database.schemas.ts is empty. Regenerate with: cd services/supabase && bun run gen"
+    exit 1
   fi
 fi
 
@@ -26,3 +31,11 @@ bunx biome check --write --staged --no-errors-on-unmatched || {
 
 # Re-stage files that were auto-formatted
 git update-index --again 2>/dev/null || true
+
+# Re-check Supabase generated files after Biome (Biome must ignore them via biome.json)
+if echo "$STAGED_FILES" | grep -q '^services/supabase/src/database\.types\.ts$'; then
+  if [ ! -s services/supabase/src/database.types.ts ]; then
+    echo "❌ Biome wiped services/supabase/src/database.types.ts. Check biome.json force-ignore settings."
+    exit 1
+  fi
+fi

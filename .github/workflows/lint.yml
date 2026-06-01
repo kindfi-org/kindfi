@@ -34,5 +34,7 @@ jobs:
             ${{ runner.os }}-bun-
       - name: Install dependencies
         run: bun install
+      - name: Verify Supabase generated types
+        run: bun --filter @services/supabase verify:generated
       - name: Run Biome
         run: bun run lint

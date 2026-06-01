@@ -1,5 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config'
-import { ChannelsClientService, type WebAuthnSignatureData } from '@packages/lib/stellar'
+import type { WebAuthnSignatureData } from '@packages/lib/stellar'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Address,
@@ -32,9 +32,6 @@ export class SmartWalletTransactionServiceV2 {
 	constructor(networkPassphrase?: string, rpcUrl?: string) {
 		this.networkPassphrase = networkPassphrase || appConfig.stellar.networkPassphrase
 		this.server = new Server(rpcUrl || appConfig.stellar.rpcUrl)
-
-		// Initialize Channels client
-		this.channelsClient = new ChannelsClientService(appConfig)
 	}
 
 	/**

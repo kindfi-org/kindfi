@@ -11,7 +11,9 @@
 			"**",
 			"!apps/indexer/src/types/models",
 			"!apps/kyc-server/public",
-			"!services/supabase/templates"
+			"!services/supabase/templates",
+			"!!services/supabase/src/database.types.ts",
+			"!!services/supabase/src/database.schemas.ts"
 		]
 	},
 	"formatter": {

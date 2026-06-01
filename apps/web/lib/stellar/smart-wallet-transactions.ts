@@ -2,7 +2,6 @@ import { Buffer } from 'node:buffer'
 import { appEnvConfig } from '@packages/lib/config'
 import { deriveSignaturePayload } from '@packages/lib/passkey'
 import type { WebAuthnSignatureData } from '@packages/lib/stellar'
-import { ChannelsClientService } from '@packages/lib/stellar'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,
@@ -47,9 +46,6 @@ export class SmartWalletTransactionService {
 		if (fundingSecretKey) {
 			this.fundingKeypair = Keypair.fromSecret(fundingSecretKey)
 		}
-
-		// Initialize Channels client
-		this.channelsClient = new ChannelsClientService(appConfig)
 	}
 
 	/**

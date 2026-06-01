@@ -41,10 +41,14 @@ fi
 
 # Generate types
 echo "🔵 Generating types..."
-supabase gen types typescript --project-id "$PROJECT_ID" > src/database.types.ts
+TMP="$(mktemp)"
+trap 'rm -f "$TMP"' EXIT
+supabase gen types typescript --project-id "$PROJECT_ID" >"$TMP"
 
 # Check if generation was successful
-if [ $? -eq 0 ] && [ -s src/database.types.ts ]; then
+if [ $? -eq 0 ] && [ -s "$TMP" ]; then
+	mv "$TMP" src/database.types.ts
+	trap - EXIT
   echo "✅ Types generated successfully!"
   
   # Generate schemas
@@ -62,6 +66,7 @@ if [ $? -eq 0 ] && [ -s src/database.types.ts ]; then
     echo "⚠️  Types generated but schemas generation failed"
   fi
 else
-  echo "❌ Failed to generate types"
-  exit 1
+	echo "❌ Failed to generate types"
+	rm -f "$TMP"
+	exit 1
 fi
