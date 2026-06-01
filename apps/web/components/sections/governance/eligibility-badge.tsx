@@ -6,13 +6,9 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import { useI18n } from '~/lib/i18n'
 import type { EligibilityResult, NftTier } from '~/lib/governance/types'
-import {
-	TIER_COLORS,
-	TIER_LABELS,
-	TIER_VOTE_WEIGHTS,
-} from '~/lib/governance/vote-weight'
+import { TIER_COLORS, TIER_LABELS, TIER_VOTE_WEIGHTS } from '~/lib/governance/vote-weight'
+import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 
 interface EligibilityResponse extends EligibilityResult {
@@ -136,9 +132,7 @@ export function EligibilityBadge() {
 					<div className="rounded-2xl border border-emerald-100 bg-white/80 px-4 py-3 text-center">
 						<div className="flex items-center justify-center gap-1.5 text-emerald-700">
 							<Vote className="h-4 w-4" aria-hidden="true" />
-							<p className="text-2xl font-bold tabular-nums leading-none">
-								{voteWeight}
-							</p>
+							<p className="text-2xl font-bold tabular-nums leading-none">{voteWeight}</p>
 						</div>
 						<p className="mt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500">
 							{t('governancePage.eligibilityWeight')}

@@ -1,24 +1,18 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import {
-	CheckCircle2,
-	Clock,
-	Shield,
-	Sparkles,
-	XCircle,
-} from 'lucide-react'
+import { CheckCircle2, Clock, Shield, Sparkles, XCircle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { useDiditKYC } from '~/hooks/use-didit-kyc'
 import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
+import { KYCRedirectModal } from '../modals/kyc-redirect-modal'
 import { profileFadeUp } from '../profile-motion'
 import { ProfileSurfaceCard } from '../profile-surface-card'
-import { KYCRedirectModal } from '../modals/kyc-redirect-modal'
-import { logger } from '@/lib/logger'
 
 interface KYCCardProps {
 	userId: string
@@ -74,9 +68,7 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 	const statusConfig = getStatusConfig(kycStatus.status, kycStatus.isLoading, kycStatus.error, t)
 
 	const shouldShowButton =
-		!kycStatus.status ||
-		kycStatus.status === 'rejected' ||
-		kycStatus.error !== null
+		!kycStatus.status || kycStatus.status === 'rejected' || kycStatus.error !== null
 
 	if (!userId) {
 		return (
@@ -101,12 +93,8 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 								<statusConfig.Icon className="h-5 w-5" />
 							</div>
 							<div>
-								<h3 className="text-base font-semibold text-gray-900">
-									{t('profile.kycTitle')}
-								</h3>
-								<p className="text-sm text-muted-foreground">
-									{statusConfig.message}
-								</p>
+								<h3 className="text-base font-semibold text-gray-900">{t('profile.kycTitle')}</h3>
+								<p className="text-sm text-muted-foreground">{statusConfig.message}</p>
 							</div>
 						</div>
 						<Badge className={cn('rounded-full', statusConfig.badgeClass)}>

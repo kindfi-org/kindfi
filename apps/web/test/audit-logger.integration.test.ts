@@ -24,8 +24,19 @@ mock.module('@packages/lib/supabase-client', () => ({
 function createChain(result: any) {
 	const chain: any = {}
 	for (const m of [
-		'select', 'insert', 'update', 'delete', 'eq', 'neq',
-		'in', 'not', 'order', 'limit', 'range', 'is', 'maybeSingle',
+		'select',
+		'insert',
+		'update',
+		'delete',
+		'eq',
+		'neq',
+		'in',
+		'not',
+		'order',
+		'limit',
+		'range',
+		'is',
+		'maybeSingle',
 	]) {
 		chain[m] = () => createChain(result)
 	}
@@ -37,8 +48,7 @@ function createChain(result: any) {
 
 mock.module('@packages/lib/supabase', () => ({
 	supabase: {
-		from: (table: string) =>
-			createChain(mockDbResults[table] ?? { data: null, error: null }),
+		from: (table: string) => createChain(mockDbResults[table] ?? { data: null, error: null }),
 		auth: {
 			getUser: () =>
 				Promise.resolve({
@@ -68,9 +78,7 @@ mock.module('next-auth', () => ({
 mock.module('~/lib/auth/auth-options', () => ({ nextAuthOption: {} }))
 
 // Stellar utils
-const mockCreateEscrow = mock(() =>
-	Promise.resolve({ unsignedTransaction: 'mock-xdr' }),
-)
+const mockCreateEscrow = mock(() => Promise.resolve({ unsignedTransaction: 'mock-xdr' }))
 const mockSendTx = mock(() =>
 	Promise.resolve({
 		txHash: 'mock-tx-hash',
@@ -289,9 +297,7 @@ describe('Audit logging integration — POST /api/escrow/dispute/assign', () => 
 			error: { format: () => ({ _errors: ['Invalid disputeId'] }) },
 		})
 
-		const { POST } = await import(
-			'../app/api/escrow/dispute/assign/route'
-		)
+		const { POST } = await import('../app/api/escrow/dispute/assign/route')
 		const res = await POST(createRequest({}) as any)
 
 		expect(res.status).toBe(400)
@@ -305,12 +311,8 @@ describe('Audit logging integration — POST /api/escrow/dispute/assign', () => 
 	})
 
 	test('emits success audit log with actorId, resourceId and metadata', async () => {
-		const { POST } = await import(
-			'../app/api/escrow/dispute/assign/route'
-		)
-		const res = await POST(
-			createRequest({ disputeId: 'disp-1', mediatorId: 'med-1' }) as any,
-		)
+		const { POST } = await import('../app/api/escrow/dispute/assign/route')
+		const res = await POST(createRequest({ disputeId: 'disp-1', mediatorId: 'med-1' }) as any)
 
 		expect(res.status).toBe(200)
 
@@ -359,9 +361,7 @@ describe('Audit logging integration — POST /api/escrow/fund/[transactionHash]'
 	})
 
 	test('emits success audit log with transactionHash as resourceId', async () => {
-		const { POST } = await import(
-			'../app/api/escrow/fund/[transactionHash]/route'
-		)
+		const { POST } = await import('../app/api/escrow/fund/[transactionHash]/route')
 		const res = await POST(createRequest({ escrowId: 'esc-1', status: 'PENDING' }) as any, {
 			params: Promise.resolve({ transactionHash: 'tx-abc123' }),
 		})

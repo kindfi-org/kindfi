@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
@@ -19,7 +20,6 @@ import { IMPACT_SCORE_WEIGHTS } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * POST /api/nfts/evolve
@@ -93,8 +93,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 		}
 
 		const nftContractAddress =
-			process.env.NFT_CONTRACT_ADDRESS ||
-			process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS
+			process.env.NFT_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS
 
 		if (!nftContractAddress || !process.env.SOROBAN_PRIVATE_KEY) {
 			return NextResponse.json(
@@ -140,20 +139,12 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			imageUri = uploadResult.ipfsUrl
 			imageIpfsHash = uploadResult.ipfsHash
 		} catch (err) {
-			logger.warn(
-				'[NFT Evolve] Failed to upload image, using placeholder:',
-				err,
-			)
+			logger.warn('[NFT Evolve] Failed to upload image, using placeholder:', err)
 			imageUri = `https://kindfi.org/images/nft-${newTier}.svg`
 		}
 
 		// Build new metadata
-		const nftMetadataJSON = buildNFTMetadata(
-			newTier,
-			existingNFT.token_id,
-			stats,
-			imageUri,
-		)
+		const nftMetadataJSON = buildNFTMetadata(newTier, existingNFT.token_id, stats, imageUri)
 
 		// Upload metadata JSON to IPFS as backup
 		let metadataIpfsHash = ''
@@ -169,19 +160,16 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 
 		// Update on-chain metadata
 		const contractService = new GamificationContractService()
-		const updateResult = await contractService.updateNFTMetadata(
-			nftContractAddress,
-			{
-				tokenId: existingNFT.token_id,
-				metadata: {
-					name: nftMetadataJSON.name,
-					description: nftMetadataJSON.description,
-					imageUri,
-					externalUrl: nftMetadataJSON.external_url,
-					attributes: nftMetadataJSON.attributes,
-				},
+		const updateResult = await contractService.updateNFTMetadata(nftContractAddress, {
+			tokenId: existingNFT.token_id,
+			metadata: {
+				name: nftMetadataJSON.name,
+				description: nftMetadataJSON.description,
+				imageUri,
+				externalUrl: nftMetadataJSON.external_url,
+				attributes: nftMetadataJSON.attributes,
 			},
-		)
+		})
 
 		if (!updateResult.success) {
 			logger.error('[NFT Evolve] On-chain update failed:', updateResult.error)
@@ -247,10 +235,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 				error: error instanceof Error ? error.message : String(error),
 			},
 		})
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 
@@ -262,25 +247,21 @@ async function getUserStats(
 	userId: string,
 ) {
 	// Execute all independent queries in parallel for better performance
-	const [contributionsResult, questsResult, streaksResult, referralsResult] =
-		await Promise.all([
-			supabase
-				.from('contributions')
-				.select('amount')
-				.eq('contributor_id', userId),
-			supabase
-				.from('user_quest_progress')
-				.select('id')
-				.eq('user_id', userId)
-				.eq('is_completed', true),
-			supabase
-				.from('user_streaks')
-				.select('current_streak')
-				.eq('user_id', userId)
-				.order('current_streak', { ascending: false })
-				.limit(1),
-			supabase.from('referral_records').select('id').eq('referrer_id', userId),
-		])
+	const [contributionsResult, questsResult, streaksResult, referralsResult] = await Promise.all([
+		supabase.from('contributions').select('amount').eq('contributor_id', userId),
+		supabase
+			.from('user_quest_progress')
+			.select('id')
+			.eq('user_id', userId)
+			.eq('is_completed', true),
+		supabase
+			.from('user_streaks')
+			.select('current_streak')
+			.eq('user_id', userId)
+			.order('current_streak', { ascending: false })
+			.limit(1),
+		supabase.from('referral_records').select('id').eq('referrer_id', userId),
+	])
 
 	if (contributionsResult.error) {
 		throw new Error(

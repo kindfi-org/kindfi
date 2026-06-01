@@ -16,9 +16,7 @@ export const CreateRoundSuccess = ({ result }: CreateRoundSuccessProps) => {
 				<CheckCircle2 className="h-12 w-12 text-emerald-500" />
 				<div>
 					<p className="font-semibold text-base">Round created!</p>
-					<p className="text-sm text-muted-foreground mt-1">
-						{result.data.title}
-					</p>
+					<p className="text-sm text-muted-foreground mt-1">{result.data.title}</p>
 				</div>
 			</div>
 
@@ -51,8 +49,7 @@ export const CreateRoundSuccess = ({ result }: CreateRoundSuccessProps) => {
 					<div className="flex items-center gap-2 text-amber-700">
 						<span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
 						<span className="text-xs">
-							Saved to database — on-chain recording is pending (will retry
-							automatically).
+							Saved to database — on-chain recording is pending (will retry automatically).
 						</span>
 					</div>
 				)}

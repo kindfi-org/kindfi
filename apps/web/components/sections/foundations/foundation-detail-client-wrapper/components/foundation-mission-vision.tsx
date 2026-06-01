@@ -24,9 +24,7 @@ export function FoundationMissionVision({
 		<div className="grid gap-6 md:grid-cols-2">
 			{foundation.mission && (
 				<motion.div
-					initial={
-						shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }
-					}
+					initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: shouldReduceMotion ? 0 : 0.1 }}
 				>
@@ -34,25 +32,18 @@ export function FoundationMissionVision({
 						<CardContent className="p-6 md:p-8">
 							<div className="mb-4 flex items-center gap-3">
 								<div className="rounded-lg bg-primary/10 p-2">
-									<Target
-										className="h-5 w-5 text-primary"
-										aria-hidden="true"
-									/>
+									<Target className="h-5 w-5 text-primary" aria-hidden="true" />
 								</div>
 								<h2 className="text-2xl font-bold tracking-tight">Mission</h2>
 							</div>
-							<p className="leading-relaxed text-muted-foreground">
-								{foundation.mission}
-							</p>
+							<p className="leading-relaxed text-muted-foreground">{foundation.mission}</p>
 						</CardContent>
 					</Card>
 				</motion.div>
 			)}
 			{foundation.vision && (
 				<motion.div
-					initial={
-						shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }
-					}
+					initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: shouldReduceMotion ? 0 : 0.2 }}
 				>
@@ -64,9 +55,7 @@ export function FoundationMissionVision({
 								</div>
 								<h2 className="text-2xl font-bold tracking-tight">Vision</h2>
 							</div>
-							<p className="leading-relaxed text-muted-foreground">
-								{foundation.vision}
-							</p>
+							<p className="leading-relaxed text-muted-foreground">{foundation.vision}</p>
 						</CardContent>
 					</Card>
 				</motion.div>

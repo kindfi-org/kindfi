@@ -27,9 +27,7 @@ mock.module('~/lib/auth/rate-limiter', () => ({
 }))
 
 // Dynamic import ensures mocks are registered before module loads
-const { withRateLimit, RATE_LIMIT_PRESETS } = await import(
-	'../lib/middleware/rate-limit'
-)
+const { withRateLimit, RATE_LIMIT_PRESETS } = await import('../lib/middleware/rate-limit')
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -66,12 +64,8 @@ describe('withRateLimit', () => {
 		})
 
 		test('strict preset has smallest attempt count', () => {
-			expect(RATE_LIMIT_PRESETS.strict.attempts).toBeLessThan(
-				RATE_LIMIT_PRESETS.moderate.attempts,
-			)
-			expect(RATE_LIMIT_PRESETS.moderate.attempts).toBeLessThan(
-				RATE_LIMIT_PRESETS.lenient.attempts,
-			)
+			expect(RATE_LIMIT_PRESETS.strict.attempts).toBeLessThan(RATE_LIMIT_PRESETS.moderate.attempts)
+			expect(RATE_LIMIT_PRESETS.moderate.attempts).toBeLessThan(RATE_LIMIT_PRESETS.lenient.attempts)
 		})
 	})
 
@@ -104,10 +98,7 @@ describe('withRateLimit', () => {
 
 		test('uses moderate preset when none specified', async () => {
 			const handler = makeHandler()
-			const wrapped = withRateLimit(
-				{ identifier: async () => 'user-1' },
-				handler,
-			)
+			const wrapped = withRateLimit({ identifier: async () => 'user-1' }, handler)
 
 			const res = await wrapped(makeRequest())
 			expect(res.status).toBe(200)
@@ -125,10 +116,7 @@ describe('withRateLimit', () => {
 
 		test('returns HTTP 429 when isBlocked is true', async () => {
 			const handler = makeHandler()
-			const wrapped = withRateLimit(
-				{ preset: 'strict', identifier: async () => 'user-1' },
-				handler,
-			)
+			const wrapped = withRateLimit({ preset: 'strict', identifier: async () => 'user-1' }, handler)
 
 			const res = await wrapped(makeRequest())
 
@@ -138,10 +126,7 @@ describe('withRateLimit', () => {
 
 		test('response body contains error message', async () => {
 			const handler = makeHandler()
-			const wrapped = withRateLimit(
-				{ preset: 'strict', identifier: async () => 'user-1' },
-				handler,
-			)
+			const wrapped = withRateLimit({ preset: 'strict', identifier: async () => 'user-1' }, handler)
 
 			const res = await wrapped(makeRequest())
 			const body = await res.json()
@@ -194,10 +179,7 @@ describe('withRateLimit', () => {
 			})
 
 			const handler = makeHandler()
-			const wrapped = withRateLimit(
-				{ preset: 'strict', identifier: async () => 'user-1' },
-				handler,
-			)
+			const wrapped = withRateLimit({ preset: 'strict', identifier: async () => 'user-1' }, handler)
 
 			// First 3 requests should pass
 			for (let i = 0; i < 3; i++) {

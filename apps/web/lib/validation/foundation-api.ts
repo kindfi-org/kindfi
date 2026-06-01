@@ -14,25 +14,14 @@ const MAX_SOCIAL_LINK_VALUE_LENGTH = 2048
 const FOUNDED_YEAR_MIN = 1900
 
 export function validateSlug(slug: unknown): slug is string {
-	return (
-		typeof slug === 'string' &&
-		slug.length >= 3 &&
-		slug.length <= 30 &&
-		SLUG_REGEX.test(slug)
-	)
+	return typeof slug === 'string' && slug.length >= 3 && slug.length <= 30 && SLUG_REGEX.test(slug)
 }
 
-export function validateRequiredString(
-	value: unknown,
-	maxLength: number,
-): value is string {
+export function validateRequiredString(value: unknown, maxLength: number): value is string {
 	return typeof value === 'string' && value.trim().length > 0 && value.length <= maxLength
 }
 
-export function validateOptionalString(
-	value: unknown,
-	maxLength: number,
-): value is string {
+export function validateOptionalString(value: unknown, maxLength: number): value is string {
 	if (value == null || value === '') return true
 	return typeof value === 'string' && value.length <= maxLength
 }

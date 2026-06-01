@@ -13,11 +13,7 @@ interface NewsCardProps {
 	showCategory?: boolean
 }
 
-export function NewsCard({
-	update,
-	className,
-	showCategory = false,
-}: NewsCardProps) {
+export function NewsCard({ update, className, showCategory = false }: NewsCardProps) {
 	const href = `/news/${update.slug}`
 	const hasTags = Array.isArray(update.tags) && update.tags.length > 0
 	const showImage = Boolean(update.image)

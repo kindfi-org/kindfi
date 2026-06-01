@@ -22,15 +22,9 @@ export const extractDate = (text: string): string | null => {
 
 	if (formattedMatch) {
 		const [_, month, day, year] = formattedMatch
-		const monthIndex = monthNames.findIndex(
-			(m) => m.toLowerCase() === month.toLowerCase(),
-		)
+		const monthIndex = monthNames.findIndex((m) => m.toLowerCase() === month.toLowerCase())
 		if (monthIndex !== -1) {
-			const date = new Date(
-				Number.parseInt(year, 10),
-				monthIndex,
-				Number.parseInt(day, 10),
-			)
+			const date = new Date(Number.parseInt(year, 10), monthIndex, Number.parseInt(day, 10))
 			return date.toISOString()
 		}
 	}

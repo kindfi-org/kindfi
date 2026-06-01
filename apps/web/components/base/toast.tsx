@@ -1,8 +1,7 @@
 import * as ToastPrimitives from '@radix-ui/react-toast'
 import * as React from 'react'
 
-interface ToastProps
-	extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> {
+interface ToastProps extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> {
 	className?: string
 }
 
@@ -23,19 +22,16 @@ interface ToastProps
  *   action: <ToastAction altText="View">View</ToastAction>
  * })
  */
-const Toast = React.forwardRef<HTMLLIElement, ToastProps>(
-	({ className, ...props }, ref) => (
-		<ToastPrimitives.Root
-			ref={ref}
-			className={`group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full ${className}`}
-			{...props}
-		/>
-	),
-)
+const Toast = React.forwardRef<HTMLLIElement, ToastProps>(({ className, ...props }, ref) => (
+	<ToastPrimitives.Root
+		ref={ref}
+		className={`group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full ${className}`}
+		{...props}
+	/>
+))
 Toast.displayName = 'Toast'
 
-interface ToastActionProps
-	extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action> {
+interface ToastActionProps extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action> {
 	className?: string
 }
 
@@ -68,20 +64,14 @@ interface UseToastReturn {
 const useToast = (): UseToastReturn => {
 	const [toasts, setToasts] = React.useState<Toast[]>([])
 
-	const toast = React.useCallback(
-		({ title, description, action }: Omit<Toast, 'id'>) => {
-			const id = Math.random().toString(36).slice(2, 9)
-			setToasts((prevToasts) => [
-				...prevToasts,
-				{ id, title, description, action },
-			])
+	const toast = React.useCallback(({ title, description, action }: Omit<Toast, 'id'>) => {
+		const id = Math.random().toString(36).slice(2, 9)
+		setToasts((prevToasts) => [...prevToasts, { id, title, description, action }])
 
-			return () => {
-				setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id))
-			}
-		},
-		[],
-	)
+		return () => {
+			setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id))
+		}
+	}, [])
 
 	return { toast, toasts, setToasts }
 }

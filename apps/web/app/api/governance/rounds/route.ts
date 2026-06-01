@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	createGovernanceRoundSchema,
@@ -8,7 +9,6 @@ import {
 } from '~/lib/schemas/governance.schemas'
 import { GovernanceContractService } from '~/lib/stellar/governance-contract'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * GET /api/governance/rounds
@@ -49,10 +49,7 @@ export async function GET(req: NextRequest) {
 
 		if (error) {
 			logger.error('Error fetching governance rounds:', error)
-			return NextResponse.json(
-				{ error: 'Failed to fetch rounds' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to fetch rounds' }, { status: 500 })
 		}
 
 		// For each round, fetch aggregated vote weights per option
@@ -75,13 +72,11 @@ export async function GET(req: NextRequest) {
 					}
 				}
 
-				const enrichedOptions = (round.options ?? []).map(
-					(opt: { id: string }) => ({
-						...opt,
-						weighted_upvotes: weightMap[opt.id]?.up ?? 0,
-						weighted_downvotes: weightMap[opt.id]?.down ?? 0,
-					}),
-				)
+				const enrichedOptions = (round.options ?? []).map((opt: { id: string }) => ({
+					...opt,
+					weighted_upvotes: weightMap[opt.id]?.up ?? 0,
+					weighted_downvotes: weightMap[opt.id]?.down ?? 0,
+				}))
 
 				return { ...round, options: enrichedOptions }
 			}),
@@ -90,10 +85,7 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json({ success: true, data: enrichedRounds })
 	} catch (error) {
 		logger.error('Error in GET /api/governance/rounds:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 
@@ -133,8 +125,7 @@ export async function POST(req: NextRequest) {
 		const endsAt = new Date(roundPayload.endsAt)
 		const now = new Date()
 
-		const status =
-			endsAt < now ? 'ended' : startsAt <= now ? 'active' : 'upcoming'
+		const status = endsAt < now ? 'ended' : startsAt <= now ? 'active' : 'upcoming'
 
 		const { data: round, error: roundError } = await supabase
 			.from('governance_rounds')
@@ -153,10 +144,7 @@ export async function POST(req: NextRequest) {
 
 		if (roundError || !round) {
 			logger.error('Error creating governance round:', roundError)
-			return NextResponse.json(
-				{ error: 'Failed to create round' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to create round' }, { status: 500 })
 		}
 
 		// Insert options if provided
@@ -234,9 +222,6 @@ export async function POST(req: NextRequest) {
 		)
 	} catch (error) {
 		logger.error('Error in POST /api/governance/rounds:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

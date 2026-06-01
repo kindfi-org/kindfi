@@ -4,19 +4,13 @@ import type { EscrowType } from '@trustless-work/escrow'
 import { DollarSign, Info, Loader2, Send } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
-import { logger } from '@/lib/logger'
 
 interface FundEscrowTabProps {
 	escrowContractAddress: string
@@ -70,10 +64,7 @@ export function FundEscrowTab({
 				escrowType,
 			)
 
-			if (
-				fundResponse.status !== 'SUCCESS' ||
-				!fundResponse.unsignedTransaction
-			) {
+			if (fundResponse.status !== 'SUCCESS' || !fundResponse.unsignedTransaction) {
 				throw new Error('Failed to prepare funding transaction')
 			}
 
@@ -127,8 +118,7 @@ export function FundEscrowTab({
 			if (
 				combinedMessage.includes('storage, missingvalue') ||
 				combinedMessage.includes('missingvalue') ||
-				(combinedMessage.includes('balance') &&
-					combinedMessage.includes('non-existing'))
+				(combinedMessage.includes('balance') && combinedMessage.includes('non-existing'))
 			) {
 				userFriendlyMessage =
 					'Your wallet needs to establish a trustline for the token before funding. Please ensure your wallet has approved the token contract.'
@@ -162,8 +152,8 @@ export function FundEscrowTab({
 					<div>
 						<CardTitle>Fund Escrow</CardTitle>
 						<CardDescription>
-							Add funds to your escrow contract. You&apos;ll need to approve the
-							transaction in your wallet.
+							Add funds to your escrow contract. You&apos;ll need to approve the transaction in your
+							wallet.
 						</CardDescription>
 					</div>
 				</div>
@@ -177,9 +167,7 @@ export function FundEscrowTab({
 						id="fund-amount"
 						type="number"
 						value={fundAmount}
-						onChange={(e) =>
-							setFundAmount(e.target.value === '' ? '' : Number(e.target.value))
-						}
+						onChange={(e) => setFundAmount(e.target.value === '' ? '' : Number(e.target.value))}
 						placeholder="0.00"
 						min="0"
 						step="0.01"

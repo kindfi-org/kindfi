@@ -7,8 +7,8 @@ import { Slot } from '@radix-ui/react-slot'
 import * as React from 'react'
 
 import { Button } from '~/components/base/button'
-import { cn } from '~/lib/utils'
 import { inputClasses } from '~/lib/form/form-styles'
+import { cn } from '~/lib/utils'
 
 /**
  * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/input
@@ -31,21 +31,11 @@ export const Input = React.forwardRef<
 	HTMLInputElement,
 	React.InputHTMLAttributes<HTMLInputElement>
 >(({ className, type, ...props }, ref) => {
-	return (
-		<input
-			type={type}
-			className={cn(inputClasses.base, className)}
-			ref={ref}
-			{...props}
-		/>
-	)
+	return <input type={type} className={cn(inputClasses.base, className)} ref={ref} {...props} />
 })
 Input.displayName = 'Input'
 
-export type InputBaseContextProps = Pick<
-	InputBaseProps,
-	'autoFocus' | 'disabled'
-> & {
+export type InputBaseContextProps = Pick<InputBaseProps, 'autoFocus' | 'disabled'> & {
 	controlRef: React.RefObject<HTMLElement | null>
 	onFocusedChange: (focused: boolean) => void
 }
@@ -59,75 +49,66 @@ const InputBaseContext = React.createContext<InputBaseContextProps>({
 
 const useInputBaseContext = () => React.useContext(InputBaseContext)
 
-export interface InputBaseProps
-	extends React.ComponentPropsWithoutRef<typeof Primitive.div> {
+export interface InputBaseProps extends React.ComponentPropsWithoutRef<typeof Primitive.div> {
 	autoFocus?: boolean
 	disabled?: boolean
 }
 
-export const InputBase = React.forwardRef<
-	React.ElementRef<typeof Primitive.div>,
-	InputBaseProps
->(({ autoFocus, disabled, className, onClick, ...props }, ref) => {
-	const [focused, setFocused] = React.useState(false)
+export const InputBase = React.forwardRef<React.ElementRef<typeof Primitive.div>, InputBaseProps>(
+	({ autoFocus, disabled, className, onClick, ...props }, ref) => {
+		const [focused, setFocused] = React.useState(false)
 
-	const controlRef = React.useRef<HTMLElement>(null)
+		const controlRef = React.useRef<HTMLElement>(null)
 
-	// Memoize the click handler to avoid React Compiler warning about ref access
-	const handleClick = React.useCallback(
-		(event: React.MouseEvent<HTMLDivElement>) => {
+		// Memoize the click handler to avoid React Compiler warning about ref access
+		const handleClick = React.useCallback((event: React.MouseEvent<HTMLDivElement>) => {
 			// Access ref in event handler, not during render
 			const control = controlRef.current
 			if (control && event.currentTarget === event.target) {
 				control.focus()
 			}
-		},
-		[],
-	)
+		}, [])
 
-	// Combine onClick handlers manually to avoid React Compiler ref access warning
-	const combinedOnClick = React.useCallback(
-		(event: React.MouseEvent<HTMLDivElement>) => {
-			onClick?.(event)
-			handleClick(event)
-		},
-		[onClick, handleClick],
-	)
+		// Combine onClick handlers manually to avoid React Compiler ref access warning
+		const combinedOnClick = React.useCallback(
+			(event: React.MouseEvent<HTMLDivElement>) => {
+				onClick?.(event)
+				handleClick(event)
+			},
+			[onClick, handleClick],
+		)
 
-	return (
-		<InputBaseContext.Provider
-			value={{
-				autoFocus,
-				controlRef,
-				disabled,
-				onFocusedChange: setFocused,
-			}}
-		>
-			<Primitive.div
-				ref={ref}
-				onClick={combinedOnClick}
-				className={cn(
-					'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 duration-200',
-					disabled && 'cursor-not-allowed opacity-50',
-					focused && 'ring-2 ring-ring ring-offset-2',
-					className,
-				)}
-				{...props}
-			/>
-		</InputBaseContext.Provider>
-	)
-})
+		return (
+			<InputBaseContext.Provider
+				value={{
+					autoFocus,
+					controlRef,
+					disabled,
+					onFocusedChange: setFocused,
+				}}
+			>
+				<Primitive.div
+					ref={ref}
+					onClick={combinedOnClick}
+					className={cn(
+						'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 duration-200',
+						disabled && 'cursor-not-allowed opacity-50',
+						focused && 'ring-2 ring-ring ring-offset-2',
+						className,
+					)}
+					{...props}
+				/>
+			</InputBaseContext.Provider>
+		)
+	},
+)
 InputBase.displayName = 'InputBase'
 
 export const InputBaseFlexWrapper = React.forwardRef<
 	React.ElementRef<typeof Primitive.div>,
 	React.ComponentPropsWithoutRef<typeof Primitive.div>
 >(({ className, ...props }, ref) => (
-	<Primitive.div
-		ref={ref}
-		className={cn('flex flex-1 flex-wrap', className)}
-		{...props}
-	/>
+	<Primitive.div ref={ref} className={cn('flex flex-1 flex-wrap', className)} {...props} />
 ))
 InputBaseFlexWrapper.displayName = 'InputBaseFlexWrapper'
 
@@ -135,8 +116,7 @@ export const InputBaseControl = React.forwardRef<
 	React.ElementRef<typeof Slot>,
 	React.ComponentPropsWithoutRef<typeof Slot>
 >(({ onFocus, onBlur, ...props }, ref) => {
-	const { controlRef, autoFocus, disabled, onFocusedChange } =
-		useInputBaseContext()
+	const { controlRef, autoFocus, disabled, onFocusedChange } = useInputBaseContext()
 
 	return (
 		<Slot
@@ -151,8 +131,7 @@ export const InputBaseControl = React.forwardRef<
 })
 InputBaseControl.displayName = 'InputBaseControl'
 
-export interface InputBaseAdornmentProps
-	extends React.ComponentPropsWithoutRef<'div'> {
+export interface InputBaseAdornmentProps extends React.ComponentPropsWithoutRef<'div'> {
 	asChild?: boolean
 	disablePointerEvents?: boolean
 }
@@ -163,8 +142,7 @@ export const InputBaseAdornment = React.forwardRef<
 >(({ className, disablePointerEvents, asChild, children, ...props }, ref) => {
 	const Comp = asChild ? Slot : typeof children === 'string' ? 'p' : 'div'
 
-	const isAction =
-		React.isValidElement(children) && children.type === InputBaseAdornmentButton
+	const isAction = React.isValidElement(children) && children.type === InputBaseAdornmentButton
 
 	return (
 		<Comp

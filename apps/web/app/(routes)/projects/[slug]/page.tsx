@@ -1,9 +1,5 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
-import {
-	dehydrate,
-	HydrationBoundary,
-	QueryClient,
-} from '@tanstack/react-query'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ProjectClientWrapper } from '~/components/sections/projects/detail/project-client-wrapper'
@@ -30,9 +26,7 @@ export async function generateMetadata({
 			description: project.description ?? undefined,
 			type: 'website',
 			url: `/projects/${slug}`,
-			images: project.image
-				? [{ url: project.image, alt: project.title }]
-				: undefined,
+			images: project.image ? [{ url: project.image, alt: project.title }] : undefined,
 		},
 		twitter: {
 			card: 'summary_large_image',
@@ -90,10 +84,7 @@ export default async function ProjectDetailPage({
 				])}
 			/>
 			<JsonLd data={projectSchema} />
-			<main
-				className="container mx-auto p-4 md:p-12"
-				aria-label="Project details"
-			>
+			<main className="container mx-auto p-4 md:p-12" aria-label="Project details">
 				<HydrationBoundary state={dehydratedState}>
 					<ProjectClientWrapper projectSlug={slug} />
 				</HydrationBoundary>

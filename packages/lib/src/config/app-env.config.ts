@@ -16,16 +16,14 @@ export function transformEnv(): AppEnvInterface {
 		},
 		database: {
 			url: data.NEXT_PUBLIC_SUPABASE_URL || data.SUPABASE_URL || '',
-			anonKey:
-				data.NEXT_PUBLIC_SUPABASE_ANON_KEY || data.SUPABASE_ANON_KEY || '',
+			anonKey: data.NEXT_PUBLIC_SUPABASE_ANON_KEY || data.SUPABASE_ANON_KEY || '',
 			serviceRoleKey: data.SUPABASE_SERVICE_ROLE_KEY || '',
 			connectionString: data.SUPABASE_DB_URL || '',
 			port: data.SUPABASE_PORT || '54321',
 		},
 		features: {
 			enableEscrowFeature:
-				data.NODE_ENV === 'development' ||
-				data.NEXT_PUBLIC_ENABLE_ESCROW_FEATURE === 'true',
+				data.NODE_ENV === 'development' || data.NEXT_PUBLIC_ENABLE_ESCROW_FEATURE === 'true',
 		},
 		vapid: {
 			email: data.VAPID_EMAIL || '',
@@ -42,16 +40,12 @@ export function transformEnv(): AppEnvInterface {
 			appEnv: data.NEXT_PUBLIC_APP_ENV || 'development',
 		},
 		stellar: {
-			networkUrl:
-				data.STELLAR_NETWORK_URL || 'https://horizon-futurenet.stellar.org',
-			networkPassphrase:
-				data.NETWORK_PASSPHRASE || 'Test SDF Future Network ; October 2022',
+			networkUrl: data.STELLAR_NETWORK_URL || 'https://horizon-futurenet.stellar.org',
+			networkPassphrase: data.NETWORK_PASSPHRASE || 'Test SDF Future Network ; October 2022',
 			factoryContractId:
-				data.FACTORY_CONTRACT_ID ||
-				'CCZWIOWKT4WGJQHWZFF7ARCQJFVWRXPOKG4WGY6DOZ72OHZEMKXAEGRO',
+				data.FACTORY_CONTRACT_ID || 'CCZWIOWKT4WGJQHWZFF7ARCQJFVWRXPOKG4WGY6DOZ72OHZEMKXAEGRO',
 			controllerContractId:
-				data.CONTROLLER_CONTRACT_ID ||
-				'CCZWIOWKT4WGJQHWZFF7ARCQJFVWRXPOKG4WGY6DOZ72OHZEMKXAEGRO',
+				data.CONTROLLER_CONTRACT_ID || 'CCZWIOWKT4WGJQHWZFF7ARCQJFVWRXPOKG4WGY6DOZ72OHZEMKXAEGRO',
 			accountSecp256r1ContractWasm:
 				data.ACCOUNT_SECP256R1_CONTRACT_WASM ||
 				'23d8e1fbdb0bb903815feb7d07b675db98b5376feedab056aab61910d41e80c1',
@@ -77,8 +71,7 @@ export function transformEnv(): AppEnvInterface {
 		},
 		deployment: {
 			vercelUrl: data.VERCEL_URL || '',
-			appUrl:
-				data.NEXT_PUBLIC_APP_URL || data.APP_URL || 'http://localhost:3000',
+			appUrl: data.NEXT_PUBLIC_APP_URL || data.APP_URL || 'http://localhost:3000',
 			port: Number(data.PORT) || 3000,
 		},
 		kycServer: {
@@ -94,9 +87,7 @@ export function transformEnv(): AppEnvInterface {
 			},
 			rpId: JSON.parse(`${data.RP_ID || '["localhost"]'}`),
 			rpName: JSON.parse(`${data.RP_NAME || '["App"]'}`),
-			expectedOrigin: JSON.parse(
-				`${data.EXPECTED_ORIGIN || '["http://localhost:3000"]'}`,
-			),
+			expectedOrigin: JSON.parse(`${data.EXPECTED_ORIGIN || '["http://localhost:3000"]'}`),
 			challengeTtlSeconds: data.CHALLENGE_TTL_SECONDS || 60,
 			challengeTtlMs: (data.CHALLENGE_TTL_SECONDS || 60) * 1000,
 		},
@@ -108,9 +99,7 @@ export function transformEnv(): AppEnvInterface {
 }
 
 // Create app-specific schema that validates the transformed config
-function createAppConfigSchema<T extends keyof typeof appRequirements>(
-	appName: T,
-) {
+function createAppConfigSchema<T extends keyof typeof appRequirements>(appName: T) {
 	const requirements = appRequirements[appName]
 
 	const baseSchema = z.object({
@@ -267,10 +256,7 @@ function validateRequiredFields(
 }
 
 // Helper to get nested value from object
-function getNestedValue<T = unknown>(
-	obj: AppEnvInterface,
-	path: string[],
-): T | undefined {
+function getNestedValue<T = unknown>(obj: AppEnvInterface, path: string[]): T | undefined {
 	return path.reduce((current: unknown, key: string) => {
 		if (current && typeof current === 'object' && key in current) {
 			return (current as Record<string, unknown>)[key]
@@ -304,9 +290,7 @@ function detectApp(): AppName | undefined {
 }
 
 // Generic appEnvConfig function that validates transformed config
-export function appEnvConfig<T extends keyof typeof appRequirements>(
-	appName?: T,
-): AppEnvInterface {
+export function appEnvConfig<T extends keyof typeof appRequirements>(appName?: T): AppEnvInterface {
 	try {
 		const _app = appName || detectApp()
 		// Transform the environment first
@@ -339,7 +323,11 @@ export function appEnvConfig<T extends keyof typeof appRequirements>(
 
 		return transformedConfig
 	} catch (error) {
-		logger.error('Error in appEnvConfig', error instanceof Error ? error : new Error(String(error)), { appName: String(appName ?? 'unknown') })
+		logger.error(
+			'Error in appEnvConfig',
+			error instanceof Error ? error : new Error(String(error)),
+			{ appName: String(appName ?? 'unknown') },
+		)
 		throw error
 	}
 }
@@ -358,11 +346,7 @@ export const baseEnvSchema = z.object({
 
 	// Auth Configuration
 	NEXTAUTH_SECRET: z.string().optional(),
-	NEXTAUTH_URL: z
-		.string()
-		.url('Invalid NextAuth URL format')
-		.optional()
-		.or(z.literal('')),
+	NEXTAUTH_URL: z.string().url('Invalid NextAuth URL format').optional().or(z.literal('')),
 	JWT_TOKEN_EXPIRATION: z
 		.string()
 		.regex(/^\d+$/, 'JWT token expiration must be a valid number')
@@ -375,10 +359,7 @@ export const baseEnvSchema = z.object({
 		.optional(),
 
 	// Database Configuration (both variants)
-	NEXT_PUBLIC_SUPABASE_URL: z
-		.string()
-		.url('Invalid Supabase URL format')
-		.optional(),
+	NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid Supabase URL format').optional(),
 	SUPABASE_URL: z.string().url('Invalid Supabase URL format').optional(),
 	SUPABASE_PORT: z.string().optional(),
 	SUPABASE_DB_URL: z.string().url('Invalid Supabase DB URL format').optional(),
@@ -392,10 +373,7 @@ export const baseEnvSchema = z.object({
 	NEXT_PUBLIC_ENABLE_ESCROW_FEATURE: z.enum(['true', 'false']).optional(),
 
 	// Stellar Configuration
-	STELLAR_NETWORK_URL: z
-		.string()
-		.url('Invalid Stellar Network URL format')
-		.optional(),
+	STELLAR_NETWORK_URL: z.string().url('Invalid Stellar Network URL format').optional(),
 	NETWORK_PASSPHRASE: z.string().optional(),
 	FACTORY_CONTRACT_ID: z.string().optional(),
 	CONTROLLER_CONTRACT_ID: z.string().optional(),
@@ -405,15 +383,9 @@ export const baseEnvSchema = z.object({
 	HORIZON_URL: z.string().url('Invalid Horizon URL format').optional(),
 
 	// External APIs
-	TRUSTLESS_WORK_API_URL: z
-		.string()
-		.url('Invalid Trustless Work API URL format')
-		.optional(),
+	TRUSTLESS_WORK_API_URL: z.string().url('Invalid Trustless Work API URL format').optional(),
 	TRUSTLESS_WORK_API_KEY: z.string().optional(),
-	NEXT_PUBLIC_KYC_API_BASE_URL: z
-		.string()
-		.url('Invalid KYC API base URL format')
-		.optional(),
+	NEXT_PUBLIC_KYC_API_BASE_URL: z.string().url('Invalid KYC API base URL format').optional(),
 
 	// Analytics
 	NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
@@ -422,11 +394,7 @@ export const baseEnvSchema = z.object({
 	VERCEL_URL: z.string().optional(),
 	NEXT_PUBLIC_APP_URL: z.string().optional(),
 	APP_URL: z.string().optional(),
-	PORT: z
-		.string()
-		.regex(/^\d+$/, 'Port must be a valid number')
-		.transform(Number)
-		.optional(),
+	PORT: z.string().regex(/^\d+$/, 'Port must be a valid number').transform(Number).optional(),
 
 	// KYC Server
 	ALLOWED_ORIGINS: z.string().optional(),
@@ -466,19 +434,14 @@ export const baseEnvSchema = z.object({
 			try {
 				return JSON.parse(val) as string[]
 			} catch {
-				throw new Error(
-					'Invalid EXPECTED_ORIGIN format. Expected a JSON array string.',
-				)
+				throw new Error('Invalid EXPECTED_ORIGIN format. Expected a JSON array string.')
 			}
 		})
 		.optional(),
 	CHALLENGE_TTL_SECONDS: z.coerce.number().optional(),
 
 	// Redis Configuration (Upstash)
-	UPSTASH_REDIS_REST_URL: z
-		.string()
-		.url('Invalid Redis REST URL format')
-		.optional(),
+	UPSTASH_REDIS_REST_URL: z.string().url('Invalid Redis REST URL format').optional(),
 	UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 
 	// Stellar Signature Verification Rate Limiting
@@ -518,12 +481,7 @@ export const appRequirements = {
 		] as const,
 	},
 	'kyc-server': {
-		required: [
-			'SUPABASE_URL',
-			'SUPABASE_ANON_KEY',
-			'SUPABASE_DB_URL',
-			'APP_URL',
-		] as const,
+		required: ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_DB_URL', 'APP_URL'] as const,
 		optional: [
 			'RP_ID',
 			'RP_NAME',

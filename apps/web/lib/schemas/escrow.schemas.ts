@@ -9,9 +9,7 @@ const milestoneSchema = z.object({
 export const escrowInitializeSchema = z.object({
 	approver: z.string().min(1, 'Approver address is required'),
 	serviceProvider: z.string().min(1, 'Service provider address is required'),
-	milestones: z
-		.array(milestoneSchema)
-		.min(1, 'At least one milestone is required'),
+	milestones: z.array(milestoneSchema).min(1, 'At least one milestone is required'),
 	platformFee: z
 		.number()
 		.min(0, 'Platform fee must be at least 0')
@@ -19,13 +17,7 @@ export const escrowInitializeSchema = z.object({
 	engagementId: z.string().min(1, 'Engagement type is required'),
 })
 
-const transactionTypeSchema = z.enum([
-	'DEPOSIT',
-	'RELEASE',
-	'REFUND',
-	'DISPUTE',
-	'FEE',
-])
+const transactionTypeSchema = z.enum(['DEPOSIT', 'RELEASE', 'REFUND', 'DISPUTE', 'FEE'])
 
 const escrowTransactionMetadataSchema = z.object({
 	escrowId: z.string().min(1, 'Escrow ID is required'),
@@ -94,9 +86,7 @@ export const milestoneReviewSchema = z.object({
 	status: z.enum(['pending', 'approved', 'rejected', 'completed', 'disputed']),
 	comments: z.string().optional(),
 	signer: z.string().min(1, 'Signer is required'),
-	escrowContractAddress: z
-		.string()
-		.min(1, 'Escrow contract address is required'),
+	escrowContractAddress: z.string().min(1, 'Escrow contract address is required'),
 })
 
 export const escrowFundUpdateSchema = z.object({

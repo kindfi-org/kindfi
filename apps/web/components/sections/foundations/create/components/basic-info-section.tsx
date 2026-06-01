@@ -1,13 +1,6 @@
 'use client'
 
-import {
-	Calendar,
-	CheckCircle2,
-	Globe,
-	Loader2,
-	Sparkles,
-	XCircle,
-} from 'lucide-react'
+import { Calendar, CheckCircle2, Globe, Loader2, Sparkles, XCircle } from 'lucide-react'
 import { useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import {
@@ -30,16 +23,10 @@ type BasicInfoSectionProps = {
 	slugReadOnly?: boolean
 }
 
-export function BasicInfoSection({
-	slugReadOnly = false,
-}: BasicInfoSectionProps) {
+export function BasicInfoSection({ slugReadOnly = false }: BasicInfoSectionProps) {
 	const form = useFormContext<CreateFoundationFormData>()
 	const slug = form.watch('slug')
-	const {
-		isChecking,
-		isAvailable,
-		error: slugError,
-	} = useSlugValidation(slugReadOnly ? '' : slug)
+	const { isChecking, isAvailable, error: slugError } = useSlugValidation(slugReadOnly ? '' : slug)
 
 	// Optimize: use getValues instead of watch for display-only values
 	const description = form.getValues('description') || ''
@@ -65,9 +52,7 @@ export function BasicInfoSection({
 								autoComplete="organization"
 							/>
 						</FormControl>
-						<FormDescription>
-							The official name of your foundation
-						</FormDescription>
+						<FormDescription>The official name of your foundation</FormDescription>
 						<FormMessage />
 					</FormItem>
 				)}
@@ -116,10 +101,7 @@ export function BasicInfoSection({
 												aria-label="Slug available"
 											/>
 										) : isAvailable === false ? (
-											<XCircle
-												className="h-4 w-4 text-destructive"
-												aria-label="Slug taken"
-											/>
+											<XCircle className="h-4 w-4 text-destructive" aria-label="Slug taken" />
 										) : null}
 									</div>
 								) : null}
@@ -147,10 +129,7 @@ export function BasicInfoSection({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel className="text-base font-medium flex items-center gap-2">
-								<Calendar
-									className="h-4 w-4 text-purple-600"
-									aria-hidden="true"
-								/>
+								<Calendar className="h-4 w-4 text-purple-600" aria-hidden="true" />
 								Year Founded <span className="text-destructive">*</span>
 							</FormLabel>
 							<FormControl>
@@ -165,9 +144,7 @@ export function BasicInfoSection({
 									inputMode="numeric"
 								/>
 							</FormControl>
-							<FormDescription>
-								The year your foundation was established
-							</FormDescription>
+							<FormDescription>The year your foundation was established</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -191,9 +168,7 @@ export function BasicInfoSection({
 									autoComplete="url"
 								/>
 							</FormControl>
-							<FormDescription>
-								Your foundation&apos;s official website
-							</FormDescription>
+							<FormDescription>Your foundation&apos;s official website</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}

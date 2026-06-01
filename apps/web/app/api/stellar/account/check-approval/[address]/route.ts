@@ -3,19 +3,16 @@ import { Contract, nativeToScVal } from '@stellar/stellar-sdk'
 import { Server } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { addressParamSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * GET /api/stellar/account/check-approval/[address]
  *
  * Check if a smart wallet account is registered in the auth-controller
  */
-export async function GET(
-	_req: NextRequest,
-	{ params }: { params: Promise<{ address: string }> },
-) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ address: string }> }) {
 	try {
 		const { address } = await params
 		const validation = validateRequest(addressParamSchema, { address })
@@ -24,7 +21,6 @@ export async function GET(
 
 		const config = appEnvConfig('web')
 		const server = new Server(config.stellar.rpcUrl)
-
 
 		// Build get_accounts invocation with empty context
 		const authController = new Contract(config.stellar.controllerContractId)

@@ -1,8 +1,6 @@
 import type { ExtractedData } from './types'
 
-export const validateDocument = (
-	data: ExtractedData,
-): { isValid: boolean; errors: string[] } => {
+export const validateDocument = (data: ExtractedData): { isValid: boolean; errors: string[] } => {
 	const errors: string[] = []
 
 	if (!data.date) {
@@ -27,9 +25,7 @@ export const validateDocument = (
 		}
 
 		if (documentDate < threeMonthsAgo) {
-			errors.push(
-				`Document is too old. Must be dated after ${formatDate(threeMonthsAgo)}`,
-			)
+			errors.push(`Document is too old. Must be dated after ${formatDate(threeMonthsAgo)}`)
 		}
 
 		if (documentDate > today) {

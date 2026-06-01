@@ -3,10 +3,10 @@ import { getUser, saveChallenge } from '@packages/lib/db'
 import { generateAuthenticationOptions } from '@simplewebauthn/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 import { generateAuthOptionsSchema } from '~/lib/schemas/passkey.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * POST /api/passkey/generate-auth-options
@@ -40,10 +40,7 @@ export async function POST(req: NextRequest) {
 		const { credentials } = userResponse
 
 		if (credentials.length === 0) {
-			return NextResponse.json(
-				{ error: 'No passkeys registered for this user' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'No passkeys registered for this user' }, { status: 404 })
 		}
 
 		// Generate authentication options

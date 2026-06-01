@@ -76,18 +76,10 @@ export const CreateRoundDialog = ({ onCreated }: CreateRoundDialogProps) => {
 
 	const validOptionCount = optionRows.filter((r) => r.title.trim()).length
 	const canSubmit =
-		!isPending &&
-		!result &&
-		form.title &&
-		form.startsAt &&
-		form.endsAt &&
-		validOptionCount > 0
+		!isPending && !result && form.title && form.startsAt && form.endsAt && validOptionCount > 0
 
 	return (
-		<Dialog
-			open={open}
-			onOpenChange={(v) => (v ? setOpen(true) : handleClose())}
-		>
+		<Dialog open={open} onOpenChange={(v) => (v ? setOpen(true) : handleClose())}>
 			<DialogTrigger asChild>
 				<Button size="sm" className="gap-1.5">
 					<Plus className="h-4 w-4" />
@@ -123,17 +115,10 @@ export const CreateRoundDialog = ({ onCreated }: CreateRoundDialogProps) => {
 						</Button>
 					) : (
 						<>
-							<Button
-								variant="outline"
-								onClick={handleClose}
-								disabled={isPending}
-							>
+							<Button variant="outline" onClick={handleClose} disabled={isPending}>
 								Cancel
 							</Button>
-							<Button
-								onClick={() => createRound({ form, optionRows })}
-								disabled={!canSubmit}
-							>
+							<Button onClick={() => createRound({ form, optionRows })} disabled={!canSubmit}>
 								{isPending ? (
 									<>
 										<Loader2 className="h-4 w-4 mr-2 animate-spin" />

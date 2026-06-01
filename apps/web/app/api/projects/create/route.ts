@@ -3,6 +3,7 @@ import type { TablesInsert } from '@services/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { projectCreateFormSchema } from '~/lib/schemas/project.schemas'
@@ -13,7 +14,6 @@ import {
 	upsertTags,
 } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 async function createProjectHandler(req: NextRequest) {
 	try {
@@ -118,10 +118,7 @@ async function createProjectHandler(req: NextRequest) {
 
 				if (updateImageError) {
 					logger.error(updateImageError)
-					return NextResponse.json(
-						{ error: updateImageError.message },
-						{ status: 500 },
-					)
+					return NextResponse.json({ error: updateImageError.message }, { status: 500 })
 				}
 			}
 		}

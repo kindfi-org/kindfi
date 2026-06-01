@@ -2,16 +2,11 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import type {
-	NFTCollectionResponse,
-	UserNFTRecord,
-	UserStats,
-} from '../types'
+import type { NFTCollectionResponse, UserNFTRecord, UserStats } from '../types'
 
 export function useNftCollection() {
 	const { data: session } = useSession()
-	const smartAccountAddress =
-		session?.device?.address || session?.user?.device?.address
+	const smartAccountAddress = session?.device?.address || session?.user?.device?.address
 
 	const { data: userData, isLoading: dbLoading } = useQuery<{
 		nft: UserNFTRecord | null
@@ -36,17 +31,16 @@ export function useNftCollection() {
 		enabled: !!session?.user?.id,
 	})
 
-	const { data: onChainData, isLoading: chainLoading } =
-		useQuery<NFTCollectionResponse>({
-			queryKey: ['nfts', smartAccountAddress],
-			queryFn: async () => {
-				if (!smartAccountAddress) throw new Error('No wallet')
-				const res = await fetch(`/api/nfts/${smartAccountAddress}`)
-				if (!res.ok) throw new Error('Failed to fetch NFTs')
-				return res.json()
-			},
-			enabled: !!smartAccountAddress,
-		})
+	const { data: onChainData, isLoading: chainLoading } = useQuery<NFTCollectionResponse>({
+		queryKey: ['nfts', smartAccountAddress],
+		queryFn: async () => {
+			if (!smartAccountAddress) throw new Error('No wallet')
+			const res = await fetch(`/api/nfts/${smartAccountAddress}`)
+			if (!res.ok) throw new Error('Failed to fetch NFTs')
+			return res.json()
+		},
+		enabled: !!smartAccountAddress,
+	})
 
 	return {
 		session,

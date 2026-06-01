@@ -3,11 +3,11 @@
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { Loader2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
 import { LoadMoreButton } from './load-more-button'
 import { UpdateCard } from './update-card'
 import { UpdateForm } from './update-form'
-import { logger } from '@/lib/logger'
 
 // Define types for project updates based on actual DB structure
 type ProjectUpdate = {
@@ -53,14 +53,10 @@ export function ProjectUpdatesTabSection() {
 				throw error
 			}
 
-			setUpdates((prevUpdates) =>
-				page === 1 ? data : [...prevUpdates, ...data],
-			)
+			setUpdates((prevUpdates) => (page === 1 ? data : [...prevUpdates, ...data]))
 		} catch (err) {
 			logger.error('Failed to fetch updates:', err)
-			setError(
-				err instanceof Error ? err : new Error('Failed to fetch updates'),
-			)
+			setError(err instanceof Error ? err : new Error('Failed to fetch updates'))
 		} finally {
 			setIsLoading(false)
 		}
@@ -82,10 +78,7 @@ export function ProjectUpdatesTabSection() {
 				author_id: authorId,
 			}
 
-			const { error } = await supabase
-				.from('project_updates')
-				.insert([updateData])
-				.select()
+			const { error } = await supabase.from('project_updates').insert([updateData]).select()
 
 			if (error) {
 				logger.error('Error creating update:', error)
@@ -98,9 +91,7 @@ export function ProjectUpdatesTabSection() {
 			setIsCreatingUpdate(false)
 		} catch (err) {
 			logger.error('Error creating update:', err)
-			alert(
-				`Failed to create update: ${err instanceof Error ? err.message : 'Unknown error'}`,
-			)
+			alert(`Failed to create update: ${err instanceof Error ? err.message : 'Unknown error'}`)
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -112,10 +103,7 @@ export function ProjectUpdatesTabSection() {
 			setIsSubmitting(true)
 			const supabase = createSupabaseBrowserClient()
 
-			const { error } = await supabase
-				.from('project_updates')
-				.update(data)
-				.eq('id', id)
+			const { error } = await supabase.from('project_updates').update(data).eq('id', id)
 
 			if (error) {
 				logger.error('Error updating update:', error)
@@ -137,10 +125,7 @@ export function ProjectUpdatesTabSection() {
 		try {
 			const supabase = createSupabaseBrowserClient()
 
-			const { error } = await supabase
-				.from('project_updates')
-				.delete()
-				.eq('id', id)
+			const { error } = await supabase.from('project_updates').delete().eq('id', id)
 
 			if (error) {
 				logger.error('Error deleting update:', error)
@@ -222,10 +207,7 @@ export function ProjectUpdatesTabSection() {
 							Project Updates
 						</h1>
 						{isKindler && (
-							<Button
-								onClick={() => setIsCreatingUpdate(true)}
-								className="flex items-center gap-2"
-							>
+							<Button onClick={() => setIsCreatingUpdate(true)} className="flex items-center gap-2">
 								<Plus size={16} />
 								Add Update
 							</Button>
@@ -244,9 +226,7 @@ export function ProjectUpdatesTabSection() {
 							</Button>
 						</div>
 					) : updates.length === 0 ? (
-						<div className="text-center py-10 text-gray-500">
-							No updates available yet.
-						</div>
+						<div className="text-center py-10 text-gray-500">No updates available yet.</div>
 					) : (
 						<>
 							<UpdateCard
@@ -256,9 +236,7 @@ export function ProjectUpdatesTabSection() {
 								onEdit={handleEditUpdate}
 								onDelete={handleDeleteUpdate}
 							/>
-							{updates.length >= pageSize && (
-								<LoadMoreButton onLoadMore={handleLoadMore} />
-							)}
+							{updates.length >= pageSize && <LoadMoreButton onLoadMore={handleLoadMore} />}
 						</>
 					)}
 				</>

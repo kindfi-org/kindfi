@@ -6,34 +6,32 @@ import * as React from 'react'
 import { Separator } from '~/components/base/separator'
 import { cn } from '~/lib/utils'
 
-export const SidebarHeader = React.forwardRef<
-	HTMLDivElement,
-	React.ComponentProps<'div'>
->(({ className, ...props }, ref) => {
-	return (
-		<div
-			ref={ref}
-			data-sidebar="header"
-			className={cn('flex flex-col gap-2 p-2', className)}
-			{...props}
-		/>
-	)
-})
+export const SidebarHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+	({ className, ...props }, ref) => {
+		return (
+			<div
+				ref={ref}
+				data-sidebar="header"
+				className={cn('flex flex-col gap-2 p-2', className)}
+				{...props}
+			/>
+		)
+	},
+)
 SidebarHeader.displayName = 'SidebarHeader'
 
-export const SidebarFooter = React.forwardRef<
-	HTMLDivElement,
-	React.ComponentProps<'div'>
->(({ className, ...props }, ref) => {
-	return (
-		<div
-			ref={ref}
-			data-sidebar="footer"
-			className={cn('flex flex-col gap-2 p-2', className)}
-			{...props}
-		/>
-	)
-})
+export const SidebarFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+	({ className, ...props }, ref) => {
+		return (
+			<div
+				ref={ref}
+				data-sidebar="footer"
+				className={cn('flex flex-col gap-2 p-2', className)}
+				{...props}
+			/>
+		)
+	},
+)
 SidebarFooter.displayName = 'SidebarFooter'
 
 export const SidebarSeparator = React.forwardRef<
@@ -51,37 +49,35 @@ export const SidebarSeparator = React.forwardRef<
 })
 SidebarSeparator.displayName = 'SidebarSeparator'
 
-export const SidebarContent = React.forwardRef<
-	HTMLDivElement,
-	React.ComponentProps<'div'>
->(({ className, ...props }, ref) => {
-	return (
-		<div
-			ref={ref}
-			data-sidebar="content"
-			className={cn(
-				'flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden',
-				className,
-			)}
-			{...props}
-		/>
-	)
-})
+export const SidebarContent = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+	({ className, ...props }, ref) => {
+		return (
+			<div
+				ref={ref}
+				data-sidebar="content"
+				className={cn(
+					'flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden',
+					className,
+				)}
+				{...props}
+			/>
+		)
+	},
+)
 SidebarContent.displayName = 'SidebarContent'
 
-export const SidebarGroup = React.forwardRef<
-	HTMLDivElement,
-	React.ComponentProps<'div'>
->(({ className, ...props }, ref) => {
-	return (
-		<div
-			ref={ref}
-			data-sidebar="group"
-			className={cn('relative flex w-full min-w-0 flex-col p-2', className)}
-			{...props}
-		/>
-	)
-})
+export const SidebarGroup = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+	({ className, ...props }, ref) => {
+		return (
+			<div
+				ref={ref}
+				data-sidebar="group"
+				className={cn('relative flex w-full min-w-0 flex-col p-2', className)}
+				{...props}
+			/>
+		)
+	},
+)
 SidebarGroup.displayName = 'SidebarGroup'
 
 export const SidebarGroupLabel = React.forwardRef<
@@ -128,15 +124,14 @@ export const SidebarGroupAction = React.forwardRef<
 })
 SidebarGroupAction.displayName = 'SidebarGroupAction'
 
-export const SidebarGroupContent = React.forwardRef<
-	HTMLDivElement,
-	React.ComponentProps<'div'>
->(({ className, ...props }, ref) => (
-	<div
-		ref={ref}
-		data-sidebar="group-content"
-		className={cn('w-full text-sm', className)}
-		{...props}
-	/>
-))
+export const SidebarGroupContent = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+	({ className, ...props }, ref) => (
+		<div
+			ref={ref}
+			data-sidebar="group-content"
+			className={cn('w-full text-sm', className)}
+			{...props}
+		/>
+	),
+)
 SidebarGroupContent.displayName = 'SidebarGroupContent'

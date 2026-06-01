@@ -1,12 +1,4 @@
-import {
-	Building2,
-	Calendar,
-	CheckCircle2,
-	Heart,
-	Settings2,
-	Share2,
-	Users,
-} from 'lucide-react'
+import { Building2, Calendar, CheckCircle2, Heart, Settings2, Share2, Users } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
@@ -82,13 +74,8 @@ export function FoundationHeader({
 
 				<div className="mb-6">
 					<div className="mb-3 flex items-center gap-3">
-						<Share2
-							className="h-5 w-5 text-muted-foreground"
-							aria-hidden="true"
-						/>
-						<span className="text-sm font-medium text-muted-foreground">
-							Share
-						</span>
+						<Share2 className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+						<span className="text-sm font-medium text-muted-foreground">Share</span>
 					</div>
 					<SocialShareButtons
 						url={shareUrl}
@@ -100,15 +87,10 @@ export function FoundationHeader({
 				<div className="flex flex-wrap justify-center gap-4 md:justify-start md:gap-6">
 					{yearFounded != null ? (
 						<div className="flex items-center gap-2 text-muted-foreground">
-							<Calendar
-								className="h-5 w-5 shrink-0 text-primary"
-								aria-hidden="true"
-							/>
+							<Calendar className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
 							<span className="text-sm md:text-base">
 								Founded{' '}
-								<strong className="font-bold tabular-nums text-foreground">
-									{yearFounded}
-								</strong>
+								<strong className="font-bold tabular-nums text-foreground">{yearFounded}</strong>
 							</span>
 						</div>
 					) : null}
@@ -126,10 +108,7 @@ export function FoundationHeader({
 					</div>
 					{foundation.totalCampaignsOpen > 0 ? (
 						<div className="flex items-center gap-2 text-muted-foreground">
-							<Users
-								className="h-5 w-5 shrink-0 text-primary"
-								aria-hidden="true"
-							/>
+							<Users className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
 							<span className="text-sm md:text-base">
 								<strong className="font-bold tabular-nums text-foreground">
 									{foundation.totalCampaignsOpen}
@@ -139,10 +118,7 @@ export function FoundationHeader({
 						</div>
 					) : null}
 					<div className="flex items-center gap-2 text-muted-foreground">
-						<Heart
-							className="h-5 w-5 shrink-0 text-primary"
-							aria-hidden="true"
-						/>
+						<Heart className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
 						<span className="text-sm md:text-base">
 							<strong className="font-bold tabular-nums text-foreground">
 								{formattedDonations}

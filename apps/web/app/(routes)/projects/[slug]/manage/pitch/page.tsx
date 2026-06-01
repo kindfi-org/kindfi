@@ -1,17 +1,9 @@
 import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
-import {
-	dehydrate,
-	HydrationBoundary,
-	QueryClient,
-} from '@tanstack/react-query'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { ProjectPitchWrapper } from '~/components/sections/projects/pitch/project-pitch-wrapper'
 import { getProjectPitchDataBySlug } from '~/lib/queries/projects/get-project-pitch-data-by-slug'
 
-export default async function ProjectPitchPage({
-	params,
-}: {
-	params: Promise<{ slug: string }>
-}) {
+export default async function ProjectPitchPage({ params }: { params: Promise<{ slug: string }> }) {
 	const { slug } = await params
 
 	const queryClient = new QueryClient()

@@ -20,9 +20,7 @@ function RoleField({ id, label, field, placeholder, disabled, hint }: RoleFieldP
 		<div className="grid gap-2">
 			<label htmlFor={id} className="text-sm font-medium">
 				{label} <span className="text-destructive">*</span>
-				{hint && (
-					<span className="text-xs text-muted-foreground ml-2">{hint}</span>
-				)}
+				{hint && <span className="text-xs text-muted-foreground ml-2">{hint}</span>}
 			</label>
 			<Input
 				id={id}

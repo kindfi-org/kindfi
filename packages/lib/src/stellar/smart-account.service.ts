@@ -1,17 +1,11 @@
 import {
-	type Address,
-	Contract,
-	Keypair,
-	Networks,
 	type Operation,
-	type ScVal,
 	type SorobanAuthorizationEntry,
 	SorobanRpc,
-	type Transaction,
 	TransactionBuilder,
 } from '@stellar/stellar-sdk'
-import type { AppEnvInterface } from '../types'
 import { logger } from '../logger'
+import type { AppEnvInterface } from '../types'
 import { ChannelsClientService } from './channels-client.service'
 
 /**
@@ -79,7 +73,10 @@ export class SmartAccountService {
 				}
 			}
 		} catch (error) {
-			logger.warn('Smart Account Kit not available, using fallback', error instanceof Error ? error : undefined)
+			logger.warn(
+				'Smart Account Kit not available, using fallback',
+				error instanceof Error ? error : undefined,
+			)
 		}
 
 		// Fallback: throw error if Smart Account Kit is not available
@@ -94,12 +91,9 @@ export class SmartAccountService {
 	 * Add a context rule to a Smart Account
 	 * Context rules define authorization scopes and policies
 	 */
-	async addContextRule(params: {
+	async addContextRule(_params: {
 		accountAddress: string
-		contextType:
-			| 'Default'
-			| { CallContract: string }
-			| { CreateContract: string }
+		contextType: 'Default' | { CallContract: string } | { CreateContract: string }
 		name: string
 		signers: Array<{ External: [string, Uint8Array] } | { Delegated: string }>
 		policies?: Array<{ address: string; params: unknown }>
@@ -137,10 +131,7 @@ export class SmartAccountService {
 				throw new Error(`Simulation failed: ${simulation.error}`)
 			}
 
-			const assembled = SorobanRpc.assembleTransaction(
-				transaction,
-				simulation,
-			).build()
+			const assembled = SorobanRpc.assembleTransaction(transaction, simulation).build()
 
 			// 3. Construct authorization entries with WebAuthn signature
 			const authEntries: SorobanAuthorizationEntry[] = []
@@ -198,7 +189,10 @@ export class SmartAccountService {
 				status: result.status,
 			}
 		} catch (error) {
-			logger.error('Transaction signing/submission failed', error instanceof Error ? error : new Error(String(error)))
+			logger.error(
+				'Transaction signing/submission failed',
+				error instanceof Error ? error : new Error(String(error)),
+			)
 			throw error
 		}
 	}

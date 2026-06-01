@@ -18,18 +18,12 @@ export function WaitlistReviewSummary() {
 			<dl className="space-y-3 text-sm">
 				<div className="flex items-start justify-between gap-4">
 					<dt className="text-muted-foreground">{t('waitlist.fields.name')}</dt>
-					<dd className="text-right font-medium text-slate-900">
-						{formData.name}
-					</dd>
+					<dd className="text-right font-medium text-slate-900">{formData.name}</dd>
 				</div>
 				{formData.email ? (
 					<div className="flex items-start justify-between gap-4">
-						<dt className="text-muted-foreground">
-							{t('waitlist.fields.email')}
-						</dt>
-						<dd className="text-right font-medium text-slate-900">
-							{formData.email}
-						</dd>
+						<dt className="text-muted-foreground">{t('waitlist.fields.email')}</dt>
+						<dd className="text-right font-medium text-slate-900">{formData.email}</dd>
 					</div>
 				) : null}
 				<div className="flex items-start justify-between gap-4">
@@ -40,22 +34,14 @@ export function WaitlistReviewSummary() {
 				</div>
 				{formData.projectName ? (
 					<div className="flex items-start justify-between gap-4">
-						<dt className="text-muted-foreground">
-							{t('waitlist.fields.projectName')}
-						</dt>
-						<dd className="text-right font-medium text-slate-900">
-							{formData.projectName}
-						</dd>
+						<dt className="text-muted-foreground">{t('waitlist.fields.projectName')}</dt>
+						<dd className="text-right font-medium text-slate-900">{formData.projectName}</dd>
 					</div>
 				) : null}
 				{formData.location ? (
 					<div className="flex items-start justify-between gap-4">
-						<dt className="text-muted-foreground">
-							{t('waitlist.fields.location')}
-						</dt>
-						<dd className="text-right font-medium text-slate-900">
-							{formData.location}
-						</dd>
+						<dt className="text-muted-foreground">{t('waitlist.fields.location')}</dt>
+						<dd className="text-right font-medium text-slate-900">{formData.location}</dd>
 					</div>
 				) : null}
 			</dl>

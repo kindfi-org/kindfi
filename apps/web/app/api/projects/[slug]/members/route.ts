@@ -2,18 +2,15 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { Enums, TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
-	projectMemberUpdateFormSchema,
 	projectMemberDeleteFormSchema,
+	projectMemberUpdateFormSchema,
 } from '~/lib/schemas/project.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
-export async function PATCH(
-	req: Request,
-	{ params }: { params: Promise<{ slug: string }> },
-) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ slug: string }> }) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -37,28 +34,22 @@ export async function PATCH(
 
 		// Verify user has permission to update project members
 		// Check project, user role, and target member in parallel
-		const [projectResult, memberResult, targetMemberResult] = await Promise.all(
-			[
-				supabaseServiceRole
-					.from('projects')
-					.select('id, kindler_id')
-					.eq('id', projectId)
-					.single(),
-				supabaseServiceRole
-					.from('project_members')
-					.select('role')
-					.eq('project_id', projectId)
-					.eq('user_id', userId)
-					.in('role', ['core', 'admin'])
-					.single(),
-				supabaseServiceRole
-					.from('project_members')
-					.select('user_id, role')
-					.eq('id', memberId)
-					.eq('project_id', projectId)
-					.single(),
-			],
-		)
+		const [projectResult, memberResult, targetMemberResult] = await Promise.all([
+			supabaseServiceRole.from('projects').select('id, kindler_id').eq('id', projectId).single(),
+			supabaseServiceRole
+				.from('project_members')
+				.select('role')
+				.eq('project_id', projectId)
+				.eq('user_id', userId)
+				.in('role', ['core', 'admin'])
+				.single(),
+			supabaseServiceRole
+				.from('project_members')
+				.select('user_id, role')
+				.eq('id', memberId)
+				.eq('project_id', projectId)
+				.single(),
+		])
 
 		const { data: project, error: projectError } = projectResult
 		const { data: memberData } = memberResult
@@ -131,10 +122,7 @@ export async function PATCH(
 	}
 }
 
-export async function DELETE(
-	req: Request,
-	{ params }: { params: Promise<{ slug: string }> },
-) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ slug: string }> }) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -156,28 +144,22 @@ export async function DELETE(
 
 		// Verify user has permission to delete project members
 		// Check project, user role, and target member in parallel
-		const [projectResult, memberResult, targetMemberResult] = await Promise.all(
-			[
-				supabaseServiceRole
-					.from('projects')
-					.select('id, kindler_id')
-					.eq('id', projectId)
-					.single(),
-				supabaseServiceRole
-					.from('project_members')
-					.select('role')
-					.eq('project_id', projectId)
-					.eq('user_id', userId)
-					.in('role', ['core', 'admin'])
-					.single(),
-				supabaseServiceRole
-					.from('project_members')
-					.select('user_id')
-					.eq('id', memberId)
-					.eq('project_id', projectId)
-					.single(),
-			],
-		)
+		const [projectResult, memberResult, targetMemberResult] = await Promise.all([
+			supabaseServiceRole.from('projects').select('id, kindler_id').eq('id', projectId).single(),
+			supabaseServiceRole
+				.from('project_members')
+				.select('role')
+				.eq('project_id', projectId)
+				.eq('user_id', userId)
+				.in('role', ['core', 'admin'])
+				.single(),
+			supabaseServiceRole
+				.from('project_members')
+				.select('user_id')
+				.eq('id', memberId)
+				.eq('project_id', projectId)
+				.single(),
+		])
 
 		const { data: project, error: projectError } = projectResult
 		const { data: memberData } = memberResult

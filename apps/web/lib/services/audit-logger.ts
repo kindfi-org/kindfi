@@ -17,18 +17,9 @@ export type AuditOperation =
 	| 'nft.mint'
 	| 'nft.evolve'
 
-export type AuditResourceType =
-	| 'escrow'
-	| 'transaction'
-	| 'milestone'
-	| 'dispute'
-	| 'nft'
+export type AuditResourceType = 'escrow' | 'transaction' | 'milestone' | 'dispute' | 'nft'
 
-export type AuditStatus =
-	| 'initiated'
-	| 'success'
-	| 'failure'
-	| 'validation_error'
+export type AuditStatus = 'initiated' | 'success' | 'failure' | 'validation_error'
 
 export interface AuditLogEntry {
 	timestamp: string
@@ -85,18 +76,25 @@ export class AuditLogger {
 
 		try {
 			const supabase = createSupabaseBrowserClient()
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- audit_logs not in generated types
-			const { error } = await (supabase as any).from(AUDIT_LOGS_TABLE).insert({
-				correlation_id: params.correlationId,
-				operation: params.operation,
-				resource_type: params.resourceType,
-				resource_id: params.resourceId,
-				actor_id: params.actorId,
-				status: params.status,
-				metadata: params.metadata ?? {},
-				error_code: params.errorCode,
-				duration_ms: params.durationMs,
-			})
+			const { error } = await (
+				supabase as {
+					from: (table: string) => {
+						insert: (values: Record<string, unknown>) => Promise<{ error: Error | null }>
+					}
+				}
+			)
+				.from(AUDIT_LOGS_TABLE)
+				.insert({
+					correlation_id: params.correlationId,
+					operation: params.operation,
+					resource_type: params.resourceType,
+					resource_id: params.resourceId,
+					actor_id: params.actorId,
+					status: params.status,
+					metadata: params.metadata ?? {},
+					error_code: params.errorCode,
+					duration_ms: params.durationMs,
+				})
 
 			if (error) throw error
 		} catch (dbError) {

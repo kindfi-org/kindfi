@@ -29,10 +29,7 @@ export const categories = pgTable(
 		slug: text(),
 	},
 	(table) => [
-		index('categories_slug_idx').using(
-			'btree',
-			table.slug.asc().nullsLast().op('text_ops'),
-		),
+		index('categories_slug_idx').using('btree', table.slug.asc().nullsLast().op('text_ops')),
 		unique('categories_name_key').on(table.name),
 		unique('categories_color_key').on(table.color),
 		pgPolicy('Public can read categories', {
@@ -50,16 +47,13 @@ export const categories = pgTable(
 	],
 )
 
-
 export const projects = pgTable(
 	'projects',
 	{
 		id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
 		title: text().notNull(),
 		description: text().notNull(),
-		currentAmount: numeric('current_amount', { precision: 12, scale: 2 })
-			.default('0')
-			.notNull(),
+		currentAmount: numeric('current_amount', { precision: 12, scale: 2 }).default('0').notNull(),
 		targetAmount: numeric('target_amount', {
 			precision: 12,
 			scale: 2,
@@ -102,14 +96,8 @@ export const projects = pgTable(
 			'btree',
 			table.projectLocation.asc().nullsLast().op('bpchar_ops'),
 		),
-		uniqueIndex('projects_slug_key').using(
-			'btree',
-			table.slug.asc().nullsLast().op('text_ops'),
-		),
-		index('projects_status_idx').using(
-			'btree',
-			table.status.asc().nullsLast().op('enum_ops'),
-		),
+		uniqueIndex('projects_slug_key').using('btree', table.slug.asc().nullsLast().op('text_ops')),
+		index('projects_status_idx').using('btree', table.status.asc().nullsLast().op('enum_ops')),
 		foreignKey({
 			columns: [table.kindlerId],
 			foreignColumns: [usersInAuth.id],
@@ -145,18 +133,11 @@ export const projects = pgTable(
 			for: 'delete',
 			to: ['authenticated'],
 		}),
-		check(
-			'check_min_investment_less_than_target',
-			sql`min_investment <= target_amount`,
-		),
+		check('check_min_investment_less_than_target', sql`min_investment <= target_amount`),
 		check('check_positive_target_amount', sql`target_amount > (0)::numeric`),
-		check(
-			'chk_project_location_alpha3',
-			sql`project_location ~ '^[A-Z]{3}$'::text`,
-		),
+		check('chk_project_location_alpha3', sql`project_location ~ '^[A-Z]{3}$'::text`),
 	],
 )
-
 
 export const projectUpdates = pgTable(
 	'project_updates',
@@ -272,9 +253,7 @@ export const projectMembers = pgTable(
 		projectId: uuid('project_id').notNull(),
 		userId: uuid('user_id').notNull(),
 		role: projectMemberRole().default('editor').notNull(),
-		joinedAt: timestamp('joined_at', { withTimezone: true, mode: 'string' })
-			.defaultNow()
-			.notNull(),
+		joinedAt: timestamp('joined_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
 			.defaultNow()
 			.notNull(),
@@ -299,10 +278,7 @@ export const projectMembers = pgTable(
 			foreignColumns: [usersInAuth.id],
 			name: 'project_members_user_id_fkey',
 		}).onDelete('cascade'),
-		unique('project_members_project_id_user_id_key').on(
-			table.projectId,
-			table.userId,
-		),
+		unique('project_members_project_id_user_id_key').on(table.projectId, table.userId),
 		pgPolicy('Public read access to project members', {
 			as: 'permissive',
 			for: 'select',
@@ -391,13 +367,9 @@ export const projectTags = pgTable(
 	},
 	(table) => [
 		unique('project_tags_name_color_key').on(table.name, table.color),
-		check(
-			'project_tags_color_check',
-			sql`(color)::text ~ '^#[0-9A-Fa-f]{6}$'::text`,
-		),
+		check('project_tags_color_check', sql`(color)::text ~ '^#[0-9A-Fa-f]{6}$'::text`),
 	],
 )
-
 
 export const projectTagRelationships = pgTable(
 	'project_tag_relationships',
@@ -428,9 +400,7 @@ export const kindlerProjects = pgTable(
 	{
 		kindlerId: uuid('kindler_id').notNull(),
 		projectId: uuid('project_id').notNull(),
-		joinedAt: timestamp('joined_at', { withTimezone: true, mode: 'string' })
-			.defaultNow()
-			.notNull(),
+		joinedAt: timestamp('joined_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	},
 	(table) => [
 		index('idx_kindler_projects_project_id').using(
@@ -520,4 +490,3 @@ export const userFollows = pgTable(
 		}),
 	],
 )
-

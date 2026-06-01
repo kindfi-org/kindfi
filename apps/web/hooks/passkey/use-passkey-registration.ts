@@ -1,13 +1,10 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
-import {
-	type RegistrationResponseJSON,
-	startRegistration,
-} from '@simplewebauthn/browser'
+import { type RegistrationResponseJSON, startRegistration } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import { logger } from '@/lib/logger'
+import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 
 export const usePasskeyRegistration = (
 	identifier: string,
@@ -115,21 +112,18 @@ export const usePasskeyRegistration = (
 				optionsJSON: registrationOptions,
 			})
 
-			const verificationResp = await fetch(
-				`${baseUrl}/api/passkey/verify-registration`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						registrationResponse,
-						identifier,
-						origin: window.location.origin,
-						userId,
-					}),
+			const verificationResp = await fetch(`${baseUrl}/api/passkey/verify-registration`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			)
+				body: JSON.stringify({
+					registrationResponse,
+					identifier,
+					origin: window.location.origin,
+					userId,
+				}),
+			})
 
 			if (!verificationResp.ok) {
 				const verificationJSON = await verificationResp.json()
@@ -158,18 +152,13 @@ export const usePasskeyRegistration = (
 		} catch (_error) {
 			const error = _error as Error
 			if (error.name === 'InvalidStateError') {
-				const message =
-					'Error: Authenticator was probably already registered by user'
+				const message = 'Error: Authenticator was probably already registered by user'
 				setRegError(message)
 				setIsAlreadyRegistered(true)
 				toast.error(message)
 			} else {
 				let message = error.toString()
-				if (
-					error.message.includes(
-						'The operation either timed out or was not allowed.',
-					)
-				) {
+				if (error.message.includes('The operation either timed out or was not allowed.')) {
 					message = 'Operation cancelled or not allowed'
 				}
 				setRegError(message)

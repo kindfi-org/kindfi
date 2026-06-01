@@ -1,6 +1,4 @@
 import { appEnvConfig } from '@packages/lib/config'
-import { faucetSchema } from '~/lib/schemas/stellar.schemas'
-import { validateRequest } from '~/lib/utils/validation'
 import {
 	Address,
 	Asset,
@@ -14,6 +12,8 @@ import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
+import { faucetSchema } from '~/lib/schemas/stellar.schemas'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/stellar/faucet
@@ -26,10 +26,7 @@ export async function POST(req: NextRequest) {
 		const config = appEnvConfig('web')
 
 		// Security check: Only allow on testnet
-		if (
-			!config.stellar.networkPassphrase.includes('Test') &&
-			config.env.appEnv !== 'development'
-		) {
+		if (!config.stellar.networkPassphrase.includes('Test') && config.env.appEnv !== 'development') {
 			return NextResponse.json(
 				{
 					error: 'Faucet only available on testnet',
@@ -45,15 +42,12 @@ export async function POST(req: NextRequest) {
 		}
 		const { address, amount: fundAmount } = validation.data
 
-
 		// Initialize funding account
 		const fundingKeypair = Keypair.fromSecret(config.stellar.fundingAccount)
 
 		// Get funding account details from Horizon
 		const horizonUrl = config.stellar.horizonUrl
-		const horizonResponse = await fetch(
-			`${horizonUrl}/accounts/${fundingKeypair.publicKey()}`,
-		)
+		const horizonResponse = await fetch(`${horizonUrl}/accounts/${fundingKeypair.publicKey()}`)
 
 		if (!horizonResponse.ok) {
 			throw new Error('Failed to fetch funding account from Horizon')
@@ -84,7 +78,6 @@ export async function POST(req: NextRequest) {
 				config.stellar.networkPassphrase,
 			)
 		}
-
 
 		return NextResponse.json({
 			success: true,
@@ -124,7 +117,6 @@ async function fundContractViaSAC(
 	const xlmSacAddress = nativeAsset.contractId(config.stellar.networkPassphrase)
 	const xlmSacContract = new Contract(xlmSacAddress)
 
-
 	// Build SAC transfer transaction
 	const transaction = new TransactionBuilder(
 		{
@@ -157,14 +149,10 @@ async function fundContractViaSAC(
 	// Simulate transaction
 	const simulation = await server.simulateTransaction(transaction)
 
-
 	if (Api.isSimulationError(simulation)) {
 		logger.error('❌ Simulation error:', JSON.stringify(simulation, null, 2))
-		throw new Error(
-			`SAC transfer simulation failed: ${JSON.stringify(simulation)}`,
-		)
+		throw new Error(`SAC transfer simulation failed: ${JSON.stringify(simulation)}`)
 	}
-
 
 	// Assemble with simulation results
 	const assembledTx = assembleTransaction(transaction, simulation).build()
@@ -172,7 +160,6 @@ async function fundContractViaSAC(
 
 	// Submit to network
 	const submitResult = await server.sendTransaction(assembledTx)
-
 
 	if (submitResult.status === 'ERROR') {
 		logger.error('❌ Submit error:', submitResult)
@@ -238,9 +225,7 @@ async function fundAccountViaHorizon(
 		const errorData = await submitResponse.json()
 		logger.error('❌ Horizon submission error:', errorData)
 		throw new Error(
-			errorData.extras?.result_codes?.operations?.[0] ||
-				errorData.title ||
-				'Transaction failed',
+			errorData.extras?.result_codes?.operations?.[0] || errorData.title || 'Transaction failed',
 		)
 	}
 

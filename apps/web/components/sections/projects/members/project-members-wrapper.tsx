@@ -14,9 +14,7 @@ interface ProjectMembersWrapperProps {
 	projectSlug: string
 }
 
-export function ProjectMembersWrapper({
-	projectSlug,
-}: ProjectMembersWrapperProps) {
+export function ProjectMembersWrapper({ projectSlug }: ProjectMembersWrapperProps) {
 	const { data: teamData, isLoading } = useSupabaseQuery(
 		'project-team',
 		(client) => getProjectTeamBySlug(client, projectSlug),
@@ -111,10 +109,7 @@ export function ProjectMembersWrapper({
 							<div className="h-64 bg-muted rounded-lg" />
 						</div>
 					) : (
-						<TeamMemberList
-							members={teamMembers}
-							onDelete={handleDeleteMember}
-						/>
+						<TeamMemberList members={teamMembers} onDelete={handleDeleteMember} />
 					)}
 				</motion.div>
 			</motion.div>

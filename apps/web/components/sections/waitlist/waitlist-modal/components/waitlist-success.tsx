@@ -2,10 +2,7 @@
 
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '~/components/base/button'
-import {
-	DialogDescription,
-	DialogTitle,
-} from '~/components/base/dialog'
+import { DialogDescription, DialogTitle } from '~/components/base/dialog'
 import { useI18n } from '~/lib/i18n'
 
 interface WaitlistSuccessProps {
@@ -26,10 +23,7 @@ export function WaitlistSuccess({ onClose }: WaitlistSuccessProps) {
 			<DialogDescription className="mt-3 max-w-sm text-base leading-relaxed">
 				{t('waitlist.successDescription')}
 			</DialogDescription>
-			<Button
-				className="gradient-btn mt-8 min-w-40 text-white"
-				onClick={onClose}
-			>
+			<Button className="gradient-btn mt-8 min-w-40 text-white" onClick={onClose}>
 				{t('waitlist.actions.close')}
 			</Button>
 		</div>

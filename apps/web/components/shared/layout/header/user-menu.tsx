@@ -17,6 +17,7 @@ import type { User } from 'next-auth'
 import { signOut } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { Avatar, AvatarFallback } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import {
@@ -30,15 +31,8 @@ import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
 import { getAvatarFallback } from '~/lib/utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
-import { logger } from '@/lib/logger'
 
-const WalletAddressSection = ({
-	address,
-	className,
-}: {
-	address: string
-	className?: string
-}) => {
+const WalletAddressSection = ({ address, className }: { address: string; className?: string }) => {
 	const [copied, setCopied] = useState(false)
 	const explorerUrl = getStellarExplorerUrl(address)
 
@@ -60,9 +54,7 @@ const WalletAddressSection = ({
 	return (
 		<div className={['space-y-2', className].filter(Boolean).join(' ')}>
 			<div className="px-2">
-				<p className="text-xs font-medium text-muted-foreground mb-1.5">
-					Wallet Address
-				</p>
+				<p className="text-xs font-medium text-muted-foreground mb-1.5">Wallet Address</p>
 				<div className="flex items-center gap-1.5 p-2.5 rounded-lg border bg-muted/30">
 					<Wallet className="size-4 text-muted-foreground shrink-0" />
 					<span className="text-xs font-mono text-foreground flex-1 min-w-0 truncate">
@@ -184,9 +176,7 @@ export const UserMenu = ({ user }: { user: User }) => {
 							</span>
 						)}
 					</div>
-					{user.device?.address && (
-						<WalletAddressSection address={user.device.address} />
-					)}
+					{user.device?.address && <WalletAddressSection address={user.device.address} />}
 				</div>
 
 				<DropdownMenuSeparator />

@@ -3,9 +3,9 @@ import {
 	Globe,
 	Instagram,
 	LinkedinIcon,
+	type LucideIcon,
 	Twitter,
 	Youtube,
-	type LucideIcon,
 } from 'lucide-react'
 
 export function getSocialIcon(platform: string): LucideIcon {

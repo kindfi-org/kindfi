@@ -4,12 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Calendar, Flame, TrendingUp, Zap } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { staggerContainer } from '~/lib/constants/animations'
 
 interface Streak {
@@ -112,9 +107,7 @@ export function StreakTracker() {
 					<CardContent className="py-12 text-center text-muted-foreground">
 						<Flame className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
 						<p className="font-medium">No streak yet</p>
-						<p className="text-sm mt-2">
-							Start donating to begin your streak journey!
-						</p>
+						<p className="text-sm mt-2">Start donating to begin your streak journey!</p>
 					</CardContent>
 				</Card>
 			)}
@@ -179,8 +172,7 @@ function StreakCard({
 		: null
 
 	const periodDays = streak.period === 'weekly' ? 7 : 30
-	const isActive =
-		daysSinceLastDonation !== null && daysSinceLastDonation <= periodDays
+	const isActive = daysSinceLastDonation !== null && daysSinceLastDonation <= periodDays
 	const daysRemaining = isActive ? periodDays - (daysSinceLastDonation || 0) : 0
 
 	return (
@@ -205,9 +197,7 @@ function StreakCard({
 							</div>
 							<div>
 								<CardTitle className="text-lg">{title}</CardTitle>
-								<p className="text-sm text-muted-foreground mt-1">
-									{description}
-								</p>
+								<p className="text-sm text-muted-foreground mt-1">{description}</p>
 							</div>
 						</div>
 					</div>
@@ -225,9 +215,7 @@ function StreakCard({
 								className="flex items-center gap-2 mt-1"
 							>
 								<Flame className="h-6 w-6 text-orange-500" />
-								<span className="text-3xl font-bold text-orange-600">
-									{streak.current_streak}
-								</span>
+								<span className="text-3xl font-bold text-orange-600">{streak.current_streak}</span>
 								<span className="text-sm text-muted-foreground">
 									{streak.period === 'weekly' ? 'weeks' : 'months'}
 								</span>
@@ -248,12 +236,9 @@ function StreakCard({
 						>
 							<Zap className="h-4 w-4 text-orange-600" />
 							<div className="flex-1">
-								<p className="text-sm font-medium text-orange-900">
-									Streak Active!
-								</p>
+								<p className="text-sm font-medium text-orange-900">Streak Active!</p>
 								<p className="text-xs text-orange-700">
-									{daysRemaining} day{daysRemaining !== 1 ? 's' : ''} until next
-									donation
+									{daysRemaining} day{daysRemaining !== 1 ? 's' : ''} until next donation
 								</p>
 							</div>
 							<Badge className="bg-orange-600">+{bonusPoints} pts</Badge>
@@ -264,16 +249,12 @@ function StreakCard({
 						<div className="flex items-center gap-2 p-3 rounded-lg bg-gray-100">
 							<Calendar className="h-4 w-4 text-gray-600" />
 							<div className="flex-1">
-								<p className="text-sm font-medium text-gray-900">
-									Streak Paused
-								</p>
+								<p className="text-sm font-medium text-gray-900">Streak Paused</p>
 								<p className="text-xs text-gray-700">
 									Last donation{' '}
 									{daysSinceLastDonation === 0
 										? 'today'
-										: `${daysSinceLastDonation} day${
-												daysSinceLastDonation !== 1 ? 's' : ''
-											} ago`}
+										: `${daysSinceLastDonation} day${daysSinceLastDonation !== 1 ? 's' : ''} ago`}
 								</p>
 							</div>
 						</div>
@@ -281,9 +262,7 @@ function StreakCard({
 
 					{!lastDonation && (
 						<div className="text-center py-4 text-muted-foreground">
-							<p className="text-sm">
-								Start your streak with your first donation
-							</p>
+							<p className="text-sm">Start your streak with your first donation</p>
 						</div>
 					)}
 				</CardContent>

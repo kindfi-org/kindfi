@@ -2,14 +2,7 @@ import type { MetadataRoute } from 'next'
 import { readAllPosts } from '~/lib/mdx'
 import { SITE_URL } from '~/lib/seo/structured-data'
 
-type ChangeFreq =
-	| 'always'
-	| 'hourly'
-	| 'daily'
-	| 'weekly'
-	| 'monthly'
-	| 'yearly'
-	| 'never'
+type ChangeFreq = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
 
 const STATIC_ROUTES: {
 	path: string

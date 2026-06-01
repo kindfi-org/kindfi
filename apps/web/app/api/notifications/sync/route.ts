@@ -17,9 +17,7 @@ const syncPayloadSchema = z.object({
  * @param error - The error object to check
  * @returns True if the error has a notificationId property of type string
  */
-function hasNotificationId(
-	error: unknown,
-): error is { notificationId: string } {
+function hasNotificationId(error: unknown): error is { notificationId: string } {
 	return (
 		typeof error === 'object' &&
 		error !== null &&
@@ -44,8 +42,7 @@ export async function POST(request: Request) {
 			.from('notifications')
 			.update({
 				status: payload.status,
-				delivered_at:
-					payload.status === 'delivered' ? new Date(payload.timestamp) : null,
+				delivered_at: payload.status === 'delivered' ? new Date(payload.timestamp) : null,
 				error: payload.error,
 			})
 			.eq('id', payload.notificationId)
@@ -59,10 +56,7 @@ export async function POST(request: Request) {
 					context: payload,
 				})
 			})
-			return NextResponse.json(
-				{ error: 'Failed to update notification status' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to update notification status' }, { status: 500 })
 		}
 
 		return NextResponse.json({ success: true })
@@ -81,15 +75,9 @@ export async function POST(request: Request) {
 		})
 
 		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Invalid sync payload' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Invalid sync payload' }, { status: 400 })
 		}
 
-		return NextResponse.json(
-			{ error: 'Failed to process sync' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Failed to process sync' }, { status: 500 })
 	}
 }

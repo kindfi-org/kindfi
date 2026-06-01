@@ -1,5 +1,5 @@
 export const language = {
-			select: 'Select Language',
-			english: 'English',
-			spanish: 'Spanish',
+	select: 'Select Language',
+	english: 'English',
+	spanish: 'Spanish',
 }

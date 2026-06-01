@@ -11,11 +11,11 @@ import {
 	FormProvider,
 	useFormContext,
 } from 'react-hook-form'
+import { logger } from '@/lib/logger'
 import { getCsrfTokenFromCookie } from '~/app/actions/csrf'
 import { Label } from '~/components/base/label'
-import { cn } from '~/lib/utils'
 import { formFieldClasses } from '~/lib/form/form-styles'
-import { logger } from '@/lib/logger'
+import { cn } from '~/lib/utils'
 
 /**
  * ShadCN/UI Reference:https://ui.shadcn.com/docs/components/form
@@ -35,9 +35,7 @@ type FormFieldContextValue<
 	name: TName
 }
 
-const FormFieldContext = React.createContext<FormFieldContextValue>(
-	{} as FormFieldContextValue,
-)
+const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue)
 
 /**
  * Wrapper for form fields with react-hook-form support.
@@ -94,27 +92,24 @@ type FormItemContextValue = {
 	id: string
 }
 
-const FormItemContext = React.createContext<FormItemContextValue>(
-	{} as FormItemContextValue,
-)
+const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue)
 
 /**
  * Wrapper for form item elements.
  * @component
  * @param {React.HTMLAttributes<HTMLDivElement>} props - Component properties
  */
-const FormItem = React.forwardRef<
-	HTMLDivElement,
-	React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-	const id = React.useId()
+const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+	({ className, ...props }, ref) => {
+		const id = React.useId()
 
-	return (
-		<FormItemContext.Provider value={{ id }}>
-			<div ref={ref} className={cn(formFieldClasses.item, className)} {...props} />
-		</FormItemContext.Provider>
-	)
-})
+		return (
+			<FormItemContext.Provider value={{ id }}>
+				<div ref={ref} className={cn(formFieldClasses.item, className)} {...props} />
+			</FormItemContext.Provider>
+		)
+	},
+)
 FormItem.displayName = 'FormItem'
 
 /**
@@ -154,11 +149,7 @@ const FormControl = React.forwardRef<
 		<Slot
 			ref={ref}
 			id={formItemId}
-			aria-describedby={
-				!error
-					? `${formDescriptionId}`
-					: `${formDescriptionId} ${formMessageId}`
-			}
+			aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
 			aria-invalid={!!error}
 			{...props}
 		/>
@@ -225,9 +216,7 @@ export function CSRFTokenField(): React.ReactElement {
 		getCsrfTokenFromCookie().then((fetchedToken) => {
 			if (!active) return
 			if (!fetchedToken) {
-				logger.warn(
-					'CSRF token not found in cookies. Ensure you have set it correctly.',
-				)
+				logger.warn('CSRF token not found in cookies. Ensure you have set it correctly.')
 				return
 			}
 			setToken(fetchedToken)

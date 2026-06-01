@@ -2,10 +2,7 @@
 
 import { useStellarSorobanAccount } from '@packages/lib/hooks'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import type {
-	Session as SupabaseSession,
-	User as SupabaseUser,
-} from '@supabase/supabase-js'
+import type { Session as SupabaseSession, User as SupabaseUser } from '@supabase/supabase-js'
 import type { Session, User } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { createContext, useContext, useEffect, useState } from 'react'
@@ -38,9 +35,7 @@ export function AuthProvider({
 	// Use null as initial state to prevent hydration mismatch
 	const { data: session } = useSession()
 	const userSession = (session ?? initSession) as Session | null
-	const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | undefined>(
-		undefined,
-	)
+	const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | undefined>(undefined)
 	const [isSupabaseUserLoading, setIsSupabaseUserLoading] = useState(true)
 	const supabase = createSupabaseBrowserClient()
 	// Pass the full session object to useStellarSorobanAccount so it can pass it to useStellarSignature
@@ -69,12 +64,10 @@ export function AuthProvider({
 
 		const {
 			data: { subscription },
-		} = supabase.auth.onAuthStateChange(
-			(_event: string, session: SupabaseSession | null) => {
-				setSupabaseUser(session?.user)
-				setIsSupabaseUserLoading(false)
-			},
-		)
+		} = supabase.auth.onAuthStateChange((_event: string, session: SupabaseSession | null) => {
+			setSupabaseUser(session?.user)
+			setIsSupabaseUserLoading(false)
+		})
 
 		return () => {
 			subscription.unsubscribe()

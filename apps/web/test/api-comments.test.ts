@@ -163,9 +163,7 @@ describe('/api/comments', () => {
 
 			expect(response.status).toBe(400)
 			expect(result.success).toBe(false)
-			expect(result.error.message).toBe(
-				'Parent comment belongs to a different project',
-			)
+			expect(result.error.message).toBe('Parent comment belongs to a different project')
 		})
 
 		test('should return 400 when trying to add answer to non-question comment', async () => {
@@ -195,9 +193,7 @@ describe('/api/comments', () => {
 
 			expect(response.status).toBe(400)
 			expect(result.success).toBe(false)
-			expect(result.error.message).toBe(
-				'Answers can only be added to questions',
-			)
+			expect(result.error.message).toBe('Answers can only be added to questions')
 		})
 
 		test('should return 400 when comment has both project_id and project_update_id', async () => {
@@ -339,9 +335,7 @@ describe('/api/comments', () => {
 			const json = await res.json()
 			expect(res.status).toBe(400)
 			expect(json.success).toBe(false)
-			expect(json.error.message).toBe(
-				'Parent comment belongs to a different project update',
-			)
+			expect(json.error.message).toBe('Parent comment belongs to a different project update')
 		})
 
 		test('should return 401 when user is not authenticated', async () => {
@@ -432,9 +426,7 @@ describe('/api/comments', () => {
 				count: 1,
 			})
 
-			const req = new NextRequest(
-				'http://localhost/api/comments?project_id=123',
-			)
+			const req = new NextRequest('http://localhost/api/comments?project_id=123')
 			const response = await GET(req)
 			const result = await response.json()
 
@@ -444,9 +436,7 @@ describe('/api/comments', () => {
 		})
 
 		test('should filter comments by type', async () => {
-			const mockQuestions = [
-				{ id: 'question-1', content: 'Test question', type: 'question' },
-			]
+			const mockQuestions = [{ id: 'question-1', content: 'Test question', type: 'question' }]
 
 			mockSupabase.range.mockResolvedValue({
 				data: mockQuestions,
@@ -500,9 +490,7 @@ describe('/api/comments', () => {
 				count: 1,
 			})
 
-			const req = new NextRequest(
-				'http://localhost/api/comments?limit=10&offset=20',
-			)
+			const req = new NextRequest('http://localhost/api/comments?limit=10&offset=20')
 			const response = await GET(req)
 			const result = await response.json()
 

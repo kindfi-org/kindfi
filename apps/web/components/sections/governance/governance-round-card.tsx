@@ -2,19 +2,12 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import {
-	Calendar,
-	Clock,
-	ExternalLink,
-	Loader2,
-	Users,
-	Vote,
-} from 'lucide-react'
+import { Calendar, Clock, ExternalLink, Loader2, Users, Vote } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { Badge } from '~/components/base/badge'
-import { useI18n } from '~/lib/i18n'
 import type { EligibilityResult, GovernanceRound } from '~/lib/governance/types'
 import { calcAllocationPercents } from '~/lib/governance/vote-weight'
+import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { ResultsVisualization } from './results-visualization'
@@ -57,10 +50,7 @@ function formatTimeRemaining(target: Date, now: Date): string {
 	return isPast ? `${label} ago` : `${label} left`
 }
 
-export function GovernanceRoundCard({
-	roundId,
-	fundBalance,
-}: GovernanceRoundCardProps) {
+export function GovernanceRoundCard({ roundId, fundBalance }: GovernanceRoundCardProps) {
 	const { t } = useI18n()
 	const { data: session } = useSession()
 
@@ -117,23 +107,15 @@ export function GovernanceRoundCard({
 	const endsAt = new Date(round.ends_at)
 	const startsAt = new Date(round.starts_at)
 	const now = new Date()
-	const contractAddress =
-		process.env.NEXT_PUBLIC_GOVERNANCE_CONTRACT_ADDRESS ?? ''
+	const contractAddress = process.env.NEXT_PUBLIC_GOVERNANCE_CONTRACT_ADDRESS ?? ''
 
 	const allocationPercents = calcAllocationPercents(
 		options.map((o) => ({ id: o.id, weighted_upvotes: o.weighted_upvotes })),
 	)
 
-	const totalWeight = options.reduce(
-		(sum, o) => sum + (o.weighted_upvotes ?? 0),
-		0,
-	)
+	const totalWeight = options.reduce((sum, o) => sum + (o.weighted_upvotes ?? 0), 0)
 
-	const totalVoters =
-		options.reduce(
-			(sum, o) => sum + (o.upvotes ?? 0) + (o.downvotes ?? 0),
-			0,
-		)
+	const totalVoters = options.reduce((sum, o) => sum + (o.upvotes ?? 0) + (o.downvotes ?? 0), 0)
 
 	return (
 		<motion.div
@@ -152,14 +134,9 @@ export function GovernanceRoundCard({
 								</h3>
 								<Badge
 									variant="outline"
-									className={cn(
-										'shrink-0 gap-1.5 font-medium',
-										statusStyles.className,
-									)}
+									className={cn('shrink-0 gap-1.5 font-medium', statusStyles.className)}
 								>
-									<span
-										className={cn('h-1.5 w-1.5 rounded-full', statusStyles.dot)}
-									/>
+									<span className={cn('h-1.5 w-1.5 rounded-full', statusStyles.dot)} />
 									{statusLabel}
 								</Badge>
 							</div>
@@ -188,17 +165,11 @@ export function GovernanceRoundCard({
 						</span>
 						<span className="flex items-center gap-1.5">
 							<Vote className="h-3.5 w-3.5" aria-hidden="true" />
-							{t('governancePage.optionsCount').replace(
-								'{count}',
-								String(options.length),
-							)}
+							{t('governancePage.optionsCount').replace('{count}', String(options.length))}
 						</span>
 						<span className="flex items-center gap-1.5">
 							<Users className="h-3.5 w-3.5" aria-hidden="true" />
-							{t('governancePage.votesCount').replace(
-								'{count}',
-								String(totalVoters),
-							)}
+							{t('governancePage.votesCount').replace('{count}', String(totalVoters))}
 						</span>
 						{round.total_fund_amount > 0 ? (
 							<span className="font-semibold text-slate-900">
@@ -248,11 +219,7 @@ export function GovernanceRoundCard({
 
 			{/* Results */}
 			{(isActive || isEnded) && options.length > 0 && (
-				<ResultsVisualization
-					round={round}
-					totalVoters={totalVoters}
-					fundBalance={fundBalance}
-				/>
+				<ResultsVisualization round={round} totalVoters={totalVoters} fundBalance={fundBalance} />
 			)}
 		</motion.div>
 	)

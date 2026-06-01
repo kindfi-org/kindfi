@@ -38,9 +38,7 @@ export const foundations = pgTable(
 		})
 			.default('0')
 			.notNull(),
-		totalCampaignsCompleted: integer('total_campaigns_completed')
-			.default(0)
-			.notNull(),
+		totalCampaignsCompleted: integer('total_campaigns_completed').default(0).notNull(),
 		totalCampaignsOpen: integer('total_campaigns_open').default(0).notNull(),
 		metadata: jsonb().default({}).notNull(),
 		createdAt: timestamp('created_at', {
@@ -57,27 +55,18 @@ export const foundations = pgTable(
 			.notNull(),
 	},
 	(table) => [
-		uniqueIndex('foundations_slug_key').using(
-			'btree',
-			table.slug.asc().nullsLast().op('text_ops'),
-		),
+		uniqueIndex('foundations_slug_key').using('btree', table.slug.asc().nullsLast().op('text_ops')),
 		index('idx_foundations_founder_id').using(
 			'btree',
 			table.founderId.asc().nullsLast().op('uuid_ops'),
 		),
-		index('idx_foundations_slug').using(
-			'btree',
-			table.slug.asc().nullsLast().op('text_ops'),
-		),
+		index('idx_foundations_slug').using('btree', table.slug.asc().nullsLast().op('text_ops')),
 		foreignKey({
 			columns: [table.founderId],
 			foreignColumns: [usersInNextAuth.id],
 			name: 'foundations_founder_id_fkey',
 		}).onDelete('cascade'),
-		check(
-			'valid_slug_format',
-			sql`slug ~ '^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])?$'::text`,
-		),
+		check('valid_slug_format', sql`slug ~ '^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])?$'::text`),
 		check(
 			'valid_founded_year',
 			sql`founded_year >= 1900 AND founded_year <= EXTRACT(YEAR FROM CURRENT_DATE)`,

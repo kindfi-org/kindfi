@@ -1,7 +1,4 @@
-export const formatCurrency = (
-	value: number,
-	options?: { maxFractionDigits?: number },
-) =>
+export const formatCurrency = (value: number, options?: { maxFractionDigits?: number }) =>
 	new Intl.NumberFormat(undefined, {
 		style: 'currency',
 		currency: 'USD',

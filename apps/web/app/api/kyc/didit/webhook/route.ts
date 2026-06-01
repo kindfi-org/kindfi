@@ -12,13 +12,7 @@ import {
 
 interface DiditWebhookEvent extends Record<string, unknown> {
 	session_id: string
-	status:
-		| 'Not Started'
-		| 'In Progress'
-		| 'Approved'
-		| 'Declined'
-		| 'In Review'
-		| 'Abandoned'
+	status: 'Not Started' | 'In Progress' | 'Approved' | 'Declined' | 'In Review' | 'Abandoned'
 	webhook_type: 'status.updated' | 'data.updated'
 	created_at?: number
 	timestamp: number
@@ -39,10 +33,7 @@ export async function POST(req: NextRequest) {
 
 		if (!webhookSecret) {
 			logger.error('DIDIT_WEBHOOK_SECRET_KEY is not configured')
-			return NextResponse.json(
-				{ error: 'Webhook secret not configured' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
 		}
 
 		// Get raw body and parse JSON
@@ -55,21 +46,13 @@ export async function POST(req: NextRequest) {
 		const timestamp = req.headers.get('x-timestamp')
 
 		if (!timestamp) {
-			return NextResponse.json(
-				{ error: 'Missing timestamp header' },
-				{ status: 401 },
-			)
+			return NextResponse.json({ error: 'Missing timestamp header' }, { status: 401 })
 		}
 
 		// Verify signature - try V2 first (recommended), then Simple (fallback)
 		let isValid = false
 		if (signatureV2) {
-			isValid = verifyDiditWebhookSignatureV2(
-				jsonBody,
-				signatureV2,
-				timestamp,
-				webhookSecret,
-			)
+			isValid = verifyDiditWebhookSignatureV2(jsonBody, signatureV2, timestamp, webhookSecret)
 			if (isValid) {
 			}
 		}
@@ -105,9 +88,7 @@ export async function POST(req: NextRequest) {
 
 		const kycRecord = kycRecords[0]
 		const notes =
-			typeof kycRecord.notes === 'string'
-				? JSON.parse(kycRecord.notes)
-				: kycRecord.notes
+			typeof kycRecord.notes === 'string' ? JSON.parse(kycRecord.notes) : kycRecord.notes
 
 		const kycStatus = mapDiditStatusToKYC(jsonBody.status)
 		// Update KYC record
@@ -130,10 +111,7 @@ export async function POST(req: NextRequest) {
 		if (updateError) {
 			logger.error('Failed to update KYC record:', updateError)
 			// Return 500 to trigger retry
-			return NextResponse.json(
-				{ error: 'Failed to update KYC record' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to update KYC record' }, { status: 500 })
 		}
 
 		return NextResponse.json({ received: true })

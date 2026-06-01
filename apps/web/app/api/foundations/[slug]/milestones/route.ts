@@ -1,24 +1,18 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	foundationMilestoneCreateSchema,
 	foundationSlugParamSchema,
 } from '~/lib/schemas/foundation.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
-export async function POST(
-	req: Request,
-	{ params }: { params: Promise<{ slug: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
 	try {
 		// Get session and params in parallel
-		const [session, { slug }] = await Promise.all([
-			getServerSession(nextAuthOption),
-			params,
-		])
+		const [session, { slug }] = await Promise.all([getServerSession(nextAuthOption), params])
 
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -43,26 +37,21 @@ export async function POST(
 			.maybeSingle()
 
 		if (fetchError || !foundation) {
-			return NextResponse.json(
-				{ error: 'Foundation not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Foundation not found' }, { status: 404 })
 		}
 
 		if (foundation.founder_id !== session.user.id) {
 			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 		}
 
-		const { error: insertError } = await supabase
-			.from('foundation_milestones')
-			.insert({
-				foundation_id: foundation.id,
-				title,
-				description: description ?? null,
-				achieved_date: achievedDate,
-				impact_metric: impactMetric ?? null,
-				metadata: {},
-			})
+		const { error: insertError } = await supabase.from('foundation_milestones').insert({
+			foundation_id: foundation.id,
+			title,
+			description: description ?? null,
+			achieved_date: achievedDate,
+			impact_metric: impactMetric ?? null,
+			metadata: {},
+		})
 
 		if (insertError) {
 			logger.error('Insert milestone error:', insertError)

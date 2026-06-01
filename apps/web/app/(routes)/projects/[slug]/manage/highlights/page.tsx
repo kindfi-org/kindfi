@@ -10,22 +10,16 @@ import {
 	IoInformationCircleOutline,
 	IoStarOutline,
 } from 'react-icons/io5'
+import { logger } from '@/lib/logger'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { ExampleHighlights } from '~/components/sections/project/highlights/example-highlights'
 import { ProjectHighlightCard } from '~/components/sections/project/highlights/project-highlight-card'
 import { WritingTips } from '~/components/sections/project/highlights/writing-tips'
 import { useHighlightsMutation } from '~/hooks/projects/use-highlights-mutation'
 import { getProjectHighlights } from '~/lib/queries/projects/get-project-highlights'
 import { generateUniqueId } from '~/lib/utils/id'
-import { logger } from '@/lib/logger'
 
 interface Highlight {
 	id: string
@@ -56,11 +50,7 @@ export default function ProjectHighlights() {
 	const [isInitialized, setIsInitialized] = useState(false)
 
 	useEffect(() => {
-		if (
-			!isInitialized &&
-			highlightsData?.highlights &&
-			highlightsData.highlights.length > 0
-		) {
+		if (!isInitialized && highlightsData?.highlights && highlightsData.highlights.length > 0) {
 			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setHighlights(highlightsData.highlights)
 			setIsInitialized(true)
@@ -69,14 +59,8 @@ export default function ProjectHighlights() {
 
 	const { mutateAsync: saveHighlights, isPending } = useHighlightsMutation()
 
-	const handleHighlightChange = (
-		id: string,
-		field: keyof Omit<Highlight, 'id'>,
-		value: string,
-	) => {
-		setHighlights(
-			highlights.map((h) => (h.id === id ? { ...h, [field]: value } : h)),
-		)
+	const handleHighlightChange = (id: string, field: keyof Omit<Highlight, 'id'>, value: string) => {
+		setHighlights(highlights.map((h) => (h.id === id ? { ...h, [field]: value } : h)))
 	}
 
 	const addHighlight = () => {
@@ -95,12 +79,9 @@ export default function ProjectHighlights() {
 	}
 
 	const isValid =
-		highlights.length >= 2 &&
-		highlights.every((h) => h.title.trim() && h.description.trim())
+		highlights.length >= 2 && highlights.every((h) => h.title.trim() && h.description.trim())
 
-	const completedCount = highlights.filter(
-		(h) => h.title.trim() && h.description.trim(),
-	).length
+	const completedCount = highlights.filter((h) => h.title.trim() && h.description.trim()).length
 	const minRequired = 2
 
 	const handleSave = async () => {
@@ -148,8 +129,7 @@ export default function ProjectHighlights() {
 										Project Highlights
 									</h1>
 									<p className="text-lg md:text-xl text-muted-foreground mt-2">
-										Showcase your key achievements and metrics that make your
-										project stand out
+										Showcase your key achievements and metrics that make your project stand out
 									</p>
 								</div>
 							</div>
@@ -182,12 +162,10 @@ export default function ProjectHighlights() {
 						>
 							<Card className="border border-border bg-card shadow-sm">
 								<CardHeader className="pb-6">
-									<CardTitle className="text-2xl font-semibold">
-										Your Highlights
-									</CardTitle>
+									<CardTitle className="text-2xl font-semibold">Your Highlights</CardTitle>
 									<CardDescription>
-										Add at least {minRequired} highlights to showcase your
-										project&apos;s achievements
+										Add at least {minRequired} highlights to showcase your project&apos;s
+										achievements
 									</CardDescription>
 								</CardHeader>
 								<CardContent className="space-y-6">
@@ -248,13 +226,10 @@ export default function ProjectHighlights() {
 											size={20}
 										/>
 										<div className="flex-1 space-y-1">
-											<h4 className="font-medium text-sm">
-												Tips for great highlights
-											</h4>
+											<h4 className="font-medium text-sm">Tips for great highlights</h4>
 											<p className="text-sm text-muted-foreground">
-												Focus on concrete achievements, metrics, or milestones.
-												Be specific and use numbers when possible. Make each
-												highlight unique and compelling.
+												Focus on concrete achievements, metrics, or milestones. Be specific and use
+												numbers when possible. Make each highlight unique and compelling.
 											</p>
 										</div>
 									</motion.div>

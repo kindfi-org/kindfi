@@ -62,8 +62,8 @@
 
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { logger } from '@/lib/logger'
+import { RateLimiter } from '~/lib/auth/rate-limiter'
 
 export const RATE_LIMIT_PRESETS = {
 	strict: { attempts: 3, window: 60, block: 3600 }, // Financial operations
@@ -106,10 +106,7 @@ export function withRateLimit(
 			}
 
 			const response = await handler(req)
-			response.headers.set(
-				'X-RateLimit-Remaining',
-				String(result.attemptsRemaining ?? 0),
-			)
+			response.headers.set('X-RateLimit-Remaining', String(result.attemptsRemaining ?? 0))
 			return response
 		} catch (err) {
 			logger.warn('[RateLimit] Redis unavailable, failing open:', err)

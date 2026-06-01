@@ -1,8 +1,8 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
-import { nextAuthOption } from '~/lib/auth/auth-options'
 import { logger } from '@/lib/logger'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 
 export async function requireAdmin() {
 	const session = await getServerSession(nextAuthOption)

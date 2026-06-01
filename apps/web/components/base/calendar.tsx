@@ -3,7 +3,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import * as React from 'react'
 import { cn } from '~/lib/utils'
-import { logger } from '@/lib/logger'
 
 interface CalendarProps {
 	selected?: Date
@@ -30,25 +29,14 @@ interface CalendarProps {
  *  disabled={(date) => date.getDay() === 0}
  * />
  */
-export function Calendar({
-	selected,
-	onSelect,
-	className,
-	disabled,
-}: CalendarProps) {
+export function Calendar({ selected, onSelect, className, disabled }: CalendarProps) {
 	// Calculate 18 years ago from today
 	const today = new Date()
-	const eighteenYearsAgo = new Date(
-		today.getFullYear() - 18,
-		today.getMonth(),
-		today.getDate(),
-	)
+	const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
 
 	// Start the calendar view at selected date or 18 years ago
 	// eslint-disable-next-line react-hooks/rules-of-hooks
-	const [currentDate, setCurrentDate] = React.useState(
-		selected || eighteenYearsAgo,
-	)
+	const [currentDate, setCurrentDate] = React.useState(selected || eighteenYearsAgo)
 
 	// Sync currentDate with selected date when it changes
 	React.useEffect(() => {
@@ -57,16 +45,8 @@ export function Calendar({
 		}
 	}, [selected])
 
-	const daysInMonth = new Date(
-		currentDate.getFullYear(),
-		currentDate.getMonth() + 1,
-		0,
-	).getDate()
-	const firstDayOfMonth = new Date(
-		currentDate.getFullYear(),
-		currentDate.getMonth(),
-		1,
-	).getDay()
+	const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
+	const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay()
 	const lastDayOfPrevMonth = new Date(
 		currentDate.getFullYear(),
 		currentDate.getMonth(),
@@ -149,11 +129,7 @@ export function Calendar({
 
 	const handleDateClick = (day: number, isCurrentMonth: boolean) => {
 		if (!isCurrentMonth) return
-		const newDate = new Date(
-			currentDate.getFullYear(),
-			currentDate.getMonth(),
-			day,
-		)
+		const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
 
 		// Check if the date is not after 18 years ago
 		if (newDate > eighteenYearsAgo) return
@@ -196,13 +172,7 @@ export function Calendar({
 				<div className="relative flex items-center justify-center pt-1">
 					<button
 						onClick={() =>
-							setCurrentDate(
-								new Date(
-									currentDate.getFullYear(),
-									currentDate.getMonth() - 1,
-									1,
-								),
-							)
+							setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
 						}
 						className="absolute left-1 h-7 w-7 bg-transparent p-0 opacity-75 hover:opacity-100 transition-opacity"
 						type="button"
@@ -214,23 +184,13 @@ export function Calendar({
 					</div>
 					<button
 						onClick={() =>
-							setCurrentDate(
-								new Date(
-									currentDate.getFullYear(),
-									currentDate.getMonth() + 1,
-									1,
-								),
-							)
+							setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
 						}
 						className="absolute right-1 h-7 w-7 bg-transparent p-0 opacity-75 hover:opacity-100 transition-opacity"
 						type="button"
 						// Disable next button if next month would be after 18 years ago
 						disabled={
-							new Date(
-								currentDate.getFullYear(),
-								currentDate.getMonth() + 1,
-								1,
-							) > eighteenYearsAgo
+							new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1) > eighteenYearsAgo
 						}
 					>
 						<ChevronRight className="h-4 w-4" />
@@ -251,8 +211,7 @@ export function Calendar({
 						<div key={week.id} className="flex mt-2">
 							{week.days.map((dayObj, _dayIndex) => {
 								const day = dayObj.value
-								const isCurrentMonth =
-									!dayObj.isPrevMonth && !dayObj.isNextMonth
+								const isCurrentMonth = !dayObj.isPrevMonth && !dayObj.isNextMonth
 								const date = new Date(
 									currentDate.getFullYear(),
 									dayObj.isPrevMonth
@@ -278,8 +237,7 @@ export function Calendar({
 												'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
 											!isSelected && 'hover:bg-accent',
 											!isCurrentMonth && 'text-muted-foreground opacity-50',
-											isDisabled &&
-												'text-muted-foreground opacity-50 cursor-not-allowed',
+											isDisabled && 'text-muted-foreground opacity-50 cursor-not-allowed',
 										)}
 									>
 										{day}

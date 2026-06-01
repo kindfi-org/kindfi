@@ -1,11 +1,8 @@
 import { sql } from 'drizzle-orm'
 import {
-	boolean,
-	check,
 	foreignKey,
 	index,
 	integer,
-	jsonb,
 	pgPolicy,
 	pgTable,
 	text,
@@ -45,10 +42,7 @@ export const profiles = pgTable(
 		slug: text('slug'),
 	},
 	(table) => [
-		uniqueIndex('profiles_slug_key').using(
-			'btree',
-			table.slug.asc().nullsLast().op('text_ops'),
-		),
+		uniqueIndex('profiles_slug_key').using('btree', table.slug.asc().nullsLast().op('text_ops')),
 		index('idx_profiles_next_auth_user_id').using(
 			'btree',
 			table.nextAuthUserId.asc().nullsLast().op('uuid_ops'),
@@ -125,10 +119,7 @@ export const kycReviews = pgTable(
 			'btree',
 			table.reviewerId.asc().nullsLast().op('uuid_ops'),
 		),
-		index('idx_kyc_reviews_user_id').using(
-			'btree',
-			table.userId.asc().nullsLast().op('uuid_ops'),
-		),
+		index('idx_kyc_reviews_user_id').using('btree', table.userId.asc().nullsLast().op('uuid_ops')),
 		foreignKey({
 			columns: [table.userId],
 			foreignColumns: [usersInAuth.id],
@@ -214,17 +205,13 @@ export const devices = pgTable(
 		identifier: text().notNull(),
 		rpId: text('rp_id').notNull(),
 		deviceName: text('device_name'),
-		credentialType: credentialType('credential_type')
-			.default('public-key')
-			.notNull(),
+		credentialType: credentialType('credential_type').default('public-key').notNull(),
 		credentialId: text('credential_id').notNull(),
 		aaguid: text().default('00000000-0000-0000-0000-000000000000').notNull(),
 		address: text().default('0x').notNull(),
 		signCount: integer('sign_count').default(0).notNull(),
 		transports: text().array().default(['']).notNull(),
-		profileVerificationStatus: profileVerificationStatus(
-			'profile_verification_status',
-		)
+		profileVerificationStatus: profileVerificationStatus('profile_verification_status')
 			.default('unverified')
 			.notNull(),
 		deviceType: deviceType('device_type').default('single_device').notNull(),
@@ -256,10 +243,7 @@ export const devices = pgTable(
 			'btree',
 			table.nextAuthUserId.asc().nullsLast().op('uuid_ops'),
 		),
-		index('idx_devices_user_id').using(
-			'btree',
-			table.userId.asc().nullsLast().op('uuid_ops'),
-		),
+		index('idx_devices_user_id').using('btree', table.userId.asc().nullsLast().op('uuid_ops')),
 		foreignKey({
 			columns: [table.nextAuthUserId],
 			foreignColumns: [usersInNextAuth.id],

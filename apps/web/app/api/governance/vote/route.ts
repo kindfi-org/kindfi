@@ -1,13 +1,13 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import type { NftTier } from '~/lib/governance/types'
+import { getVoteWeight } from '~/lib/governance/vote-weight'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { castVoteSchema } from '~/lib/schemas/governance.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { getVoteWeight } from '~/lib/governance/vote-weight'
-import { logger } from '@/lib/logger'
 
 /**
  * POST /api/governance/vote
@@ -44,17 +44,11 @@ async function voteHandler(req: NextRequest) {
 		}
 
 		if (round.status !== 'active') {
-			return NextResponse.json(
-				{ error: 'Voting is not open for this round' },
-				{ status: 422 },
-			)
+			return NextResponse.json({ error: 'Voting is not open for this round' }, { status: 422 })
 		}
 
 		if (new Date(round.ends_at) < new Date()) {
-			return NextResponse.json(
-				{ error: 'This voting round has ended' },
-				{ status: 422 },
-			)
+			return NextResponse.json({ error: 'This voting round has ended' }, { status: 422 })
 		}
 
 		// 2. Verify option belongs to this round
@@ -66,10 +60,7 @@ async function voteHandler(req: NextRequest) {
 			.single()
 
 		if (optionError || !option) {
-			return NextResponse.json(
-				{ error: 'Option not found in this round' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Option not found in this round' }, { status: 404 })
 		}
 
 		// 3. Check for double voting
@@ -81,10 +72,7 @@ async function voteHandler(req: NextRequest) {
 			.maybeSingle()
 
 		if (existingVote) {
-			return NextResponse.json(
-				{ error: 'You have already voted in this round' },
-				{ status: 409 },
-			)
+			return NextResponse.json({ error: 'You have already voted in this round' }, { status: 409 })
 		}
 
 		// 4. Check NFT eligibility + get tier
@@ -97,8 +85,7 @@ async function voteHandler(req: NextRequest) {
 		if (nftError || !nft) {
 			return NextResponse.json(
 				{
-					error:
-						'You must hold a Kinders NFT to vote. Make your first donation to receive one!',
+					error: 'You must hold a Kinders NFT to vote. Make your first donation to receive one!',
 				},
 				{ status: 403 },
 			)
@@ -108,30 +95,22 @@ async function voteHandler(req: NextRequest) {
 		const voteWeight = getVoteWeight(tier)
 
 		// 5. Record the vote
-		const { error: insertError } = await supabase
-			.from('governance_votes')
-			.insert({
-				round_id: roundId,
-				option_id: optionId,
-				user_id: session.user.id,
-				vote_type: voteType,
-				vote_weight: voteWeight,
-				nft_tier: tier,
-				stellar_address: nft.stellar_address ?? null,
-			})
+		const { error: insertError } = await supabase.from('governance_votes').insert({
+			round_id: roundId,
+			option_id: optionId,
+			user_id: session.user.id,
+			vote_type: voteType,
+			vote_weight: voteWeight,
+			nft_tier: tier,
+			stellar_address: nft.stellar_address ?? null,
+		})
 
 		if (insertError) {
 			if (insertError.code === '23505') {
-				return NextResponse.json(
-					{ error: 'You have already voted in this round' },
-					{ status: 409 },
-				)
+				return NextResponse.json({ error: 'You have already voted in this round' }, { status: 409 })
 			}
 			logger.error('Error inserting vote:', insertError)
-			return NextResponse.json(
-				{ error: 'Failed to record vote' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to record vote' }, { status: 500 })
 		}
 
 		// 6. Update denormalized counts on the option
@@ -149,32 +128,22 @@ async function voteHandler(req: NextRequest) {
 
 		if (contractAddress && stellarAddress) {
 			try {
-				const { GovernanceContractService } = await import(
-					'~/lib/stellar/governance-contract'
-				)
+				const { GovernanceContractService } = await import('~/lib/stellar/governance-contract')
 				const govService = new GovernanceContractService()
 
-				const [{ data: roundRecord }, { data: optionRecord }] =
-					await Promise.all([
-						supabase
-							.from('governance_rounds')
-							.select('contract_round_id')
-							.eq('id', roundId)
-							.single(),
-						supabase
-							.from('governance_options')
-							.select('contract_option_id')
-							.eq('id', optionId)
-							.single(),
-					])
+				const [{ data: roundRecord }, { data: optionRecord }] = await Promise.all([
+					supabase.from('governance_rounds').select('contract_round_id').eq('id', roundId).single(),
+					supabase
+						.from('governance_options')
+						.select('contract_option_id')
+						.eq('id', optionId)
+						.single(),
+				])
 
 				const contractRoundId = roundRecord?.contract_round_id
 				const contractOptionId = optionRecord?.contract_option_id
 
-				if (
-					contractRoundId != null &&
-					contractOptionId != null
-				) {
+				if (contractRoundId != null && contractOptionId != null) {
 					const result = await govService.recordVote({
 						voterAddress: stellarAddress,
 						roundId: contractRoundId,
@@ -204,10 +173,7 @@ async function voteHandler(req: NextRequest) {
 		})
 	} catch (error) {
 		logger.error('Error in POST /api/governance/vote:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 

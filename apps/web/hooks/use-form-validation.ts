@@ -53,9 +53,7 @@ export function useFormValidation(rules: ValidationRules = {}) {
 		}
 	}
 
-	const handleValidation = (
-		e: React.ChangeEvent<HTMLInputElement & { name: ValidFieldName }>,
-	) => {
+	const handleValidation = (e: React.ChangeEvent<HTMLInputElement & { name: ValidFieldName }>) => {
 		const { name, value } = e.target
 		validateField(name, value)
 	}

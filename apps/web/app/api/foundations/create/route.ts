@@ -3,12 +3,12 @@ import type { Json, TablesInsert } from '@services/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { createFoundationFormSchema } from '~/lib/schemas/foundation-create.schemas'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 async function createFoundationHandler(req: NextRequest) {
 	try {
@@ -78,16 +78,8 @@ async function createFoundationHandler(req: NextRequest) {
 		if (!validation.success) {
 			return validation.response
 		}
-		const {
-			name,
-			description,
-			slug,
-			foundedYear,
-			mission,
-			vision,
-			websiteUrl,
-			socialLinks,
-		} = validation.data
+		const { name, description, slug, foundedYear, mission, vision, websiteUrl, socialLinks } =
+			validation.data
 		const logo = formData.get('logo') as File | null
 
 		// Check if slug already exists
@@ -98,10 +90,7 @@ async function createFoundationHandler(req: NextRequest) {
 			.single()
 
 		if (existing) {
-			return NextResponse.json(
-				{ error: 'Slug already exists' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Slug already exists' }, { status: 400 })
 		}
 
 		// Prepare foundation data to insert
@@ -137,11 +126,7 @@ async function createFoundationHandler(req: NextRequest) {
 		if (logo instanceof File) {
 			if (!foundation.slug) throw new Error('Foundation slug is missing')
 
-			const logoUrl = await uploadFoundationLogo(
-				foundation.slug,
-				logo,
-				supabase,
-			)
+			const logoUrl = await uploadFoundationLogo(foundation.slug, logo, supabase)
 
 			if (logoUrl) {
 				const { error: updateLogoError } = await supabase
@@ -151,10 +136,7 @@ async function createFoundationHandler(req: NextRequest) {
 
 				if (updateLogoError) {
 					logger.error(updateLogoError)
-					return NextResponse.json(
-						{ error: updateLogoError.message },
-						{ status: 500 },
-					)
+					return NextResponse.json({ error: updateLogoError.message }, { status: 500 })
 				}
 			}
 		}

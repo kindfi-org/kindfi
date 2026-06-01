@@ -65,111 +65,106 @@ export function getTagColors(tag: Tag | string): {
  * Maps category names to appropriate colors and Lucide icons
  */
 export const getCategoryStyles = (category: string) => {
-	const categoryMap: Record<string, { color: string; icon: React.ReactNode }> =
-		{
-			'Animal Welfare': {
-				color:
-					'bg-rose-50/80 text-rose-700 hover:bg-rose-100/80 active:bg-rose-100/80 border-rose-200/50',
-				icon: <Heart className="w-4 h-4" />,
-			},
-			'Child Welfare': {
-				color:
-					'bg-purple-50/80 border-purple-200/50 text-purple-700 hover:bg-purple-200/80 active:bg-purple-200/80',
-				icon: <Baby className="w-4 h-4" />,
-			},
-			'Environmental Protection': {
-				color:
-					'bg-green-50/80 text-green-700 hover:bg-green-100/80 active:bg-green-100/80 border-green-200/50',
-				icon: <Leaf className="w-4 h-4" />,
-			},
-			'Disaster Relief': {
-				color:
-					'bg-red-50/80 text-red-700 hover:bg-red-100/80 active:bg-red-100/80 border-red-200/50',
-				icon: <ShieldAlert className="w-4 h-4" />,
-			},
-			'Culture and Arts': {
-				color:
-					'bg-blue-50/80 text-blue-700 hover:bg-blue-100/80 active:bg-blue-100/80 border-blue-200/50',
-				icon: <MessageSquare className="w-4 h-4" />,
-			},
-			'Access to Clean Water': {
-				color:
-					'bg-cyan-50/80 border-cyan-200/50 text-cyan-700 hover:bg-cyan-200/80 active:bg-cyan-200/80',
-				icon: <Droplets className="w-4 h-4" />,
-			},
-			Education: {
-				color:
-					'bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100/80 active:bg-indigo-100/80 border-indigo-200/50',
-				icon: <GraduationCap className="w-4 h-4" />,
-			},
-			Healthcare: {
-				color:
-					'bg-cyan-50/80 border-cyan-200/50 text-cyan-700 hover:bg-cyan-200/80 active:bg-cyan-200/80',
-				icon: <Stethoscope className="w-4 h-4" />,
-			},
-			'Environmental Projects': {
-				color:
-					'bg-green-50/80 text-green-700 hover:bg-green-100/80 active:bg-green-100/80 border-green-200/50',
-				icon: <Leaf className="w-4 h-4" />,
-			},
-			'Empowering Communities': {
-				color:
-					'bg-teal-50/80 text-teal-700 hover:bg-teal-100/80 active:bg-teal-100/80 border-teal-200/50',
-				icon: <Rocket className="w-4 h-4" />,
-			},
-			'Animal Shelters': {
-				color:
-					'bg-rose-50/80 text-rose-700 hover:bg-rose-100/80 active:bg-rose-100/80 border-rose-200/50',
-				icon: <Heart className="w-4 h-4" />,
-			},
-			'Community News Initiatives': {
-				color:
-					'bg-slate-50/80 text-slate-700 hover:bg-slate-100/80 active:bg-slate-100/80 border-slate-200/50',
-				icon: <Newspaper className="w-4 h-4" />,
-			},
-			'Healthcare Support': {
-				color:
-					'bg-cyan-50/80 border-cyan-200/50 text-cyan-700 hover:bg-cyan-200/80 active:bg-cyan-200/80',
-				icon: <Stethoscope className="w-4 h-4" />,
-			},
-			'Food Campaigns': {
-				color:
-					'bg-orange-50/80 border-orange-200/50 text-orange-700 hover:bg-orange-200/80 active:bg-orange-200/80',
-				icon: <UtensilsCrossed className="w-4 h-4" />,
-			},
-			'Child Welfare Programs': {
-				color:
-					'bg-purple-50/80 border-purple-200/50 text-purple-700 hover:bg-purple-200/80 active:bg-purple-200/80',
-				icon: <Baby className="w-4 h-4" />,
-			},
-			'Sustainable Agriculture': {
-				color:
-					'bg-sky-50/80 border-emerald-200/50 text-emerald-700 hover:bg-emerald-200/80 active:bg-emerald-200/80',
-				icon: <Sprout className="w-4 h-4" />,
-			},
-			'Social Finance & Innovation': {
-				color:
-					'bg-sky-50/80 text-sky-700 hover:bg-sky-100/80 active:bg-sky-100/80 border-sky-200/50',
-				icon: <Coins className="w-4 h-4" />,
-			},
-			'Education for All': {
-				color:
-					'bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100/80 active:bg-indigo-100/80 border-indigo-200/50',
-				icon: <GraduationCap className="w-4 h-4" />,
-			},
-			'Disaster Relief Efforts': {
-				color:
-					'bg-red-50/80 text-red-700 hover:bg-red-100/80 active:bg-red-100/80 border-red-200/50',
-				icon: <HandHelping className="w-4 h-4" />,
-			},
-			// Add more mappings as needed
-		}
+	const categoryMap: Record<string, { color: string; icon: React.ReactNode }> = {
+		'Animal Welfare': {
+			color:
+				'bg-rose-50/80 text-rose-700 hover:bg-rose-100/80 active:bg-rose-100/80 border-rose-200/50',
+			icon: <Heart className="w-4 h-4" />,
+		},
+		'Child Welfare': {
+			color:
+				'bg-purple-50/80 border-purple-200/50 text-purple-700 hover:bg-purple-200/80 active:bg-purple-200/80',
+			icon: <Baby className="w-4 h-4" />,
+		},
+		'Environmental Protection': {
+			color:
+				'bg-green-50/80 text-green-700 hover:bg-green-100/80 active:bg-green-100/80 border-green-200/50',
+			icon: <Leaf className="w-4 h-4" />,
+		},
+		'Disaster Relief': {
+			color: 'bg-red-50/80 text-red-700 hover:bg-red-100/80 active:bg-red-100/80 border-red-200/50',
+			icon: <ShieldAlert className="w-4 h-4" />,
+		},
+		'Culture and Arts': {
+			color:
+				'bg-blue-50/80 text-blue-700 hover:bg-blue-100/80 active:bg-blue-100/80 border-blue-200/50',
+			icon: <MessageSquare className="w-4 h-4" />,
+		},
+		'Access to Clean Water': {
+			color:
+				'bg-cyan-50/80 border-cyan-200/50 text-cyan-700 hover:bg-cyan-200/80 active:bg-cyan-200/80',
+			icon: <Droplets className="w-4 h-4" />,
+		},
+		Education: {
+			color:
+				'bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100/80 active:bg-indigo-100/80 border-indigo-200/50',
+			icon: <GraduationCap className="w-4 h-4" />,
+		},
+		Healthcare: {
+			color:
+				'bg-cyan-50/80 border-cyan-200/50 text-cyan-700 hover:bg-cyan-200/80 active:bg-cyan-200/80',
+			icon: <Stethoscope className="w-4 h-4" />,
+		},
+		'Environmental Projects': {
+			color:
+				'bg-green-50/80 text-green-700 hover:bg-green-100/80 active:bg-green-100/80 border-green-200/50',
+			icon: <Leaf className="w-4 h-4" />,
+		},
+		'Empowering Communities': {
+			color:
+				'bg-teal-50/80 text-teal-700 hover:bg-teal-100/80 active:bg-teal-100/80 border-teal-200/50',
+			icon: <Rocket className="w-4 h-4" />,
+		},
+		'Animal Shelters': {
+			color:
+				'bg-rose-50/80 text-rose-700 hover:bg-rose-100/80 active:bg-rose-100/80 border-rose-200/50',
+			icon: <Heart className="w-4 h-4" />,
+		},
+		'Community News Initiatives': {
+			color:
+				'bg-slate-50/80 text-slate-700 hover:bg-slate-100/80 active:bg-slate-100/80 border-slate-200/50',
+			icon: <Newspaper className="w-4 h-4" />,
+		},
+		'Healthcare Support': {
+			color:
+				'bg-cyan-50/80 border-cyan-200/50 text-cyan-700 hover:bg-cyan-200/80 active:bg-cyan-200/80',
+			icon: <Stethoscope className="w-4 h-4" />,
+		},
+		'Food Campaigns': {
+			color:
+				'bg-orange-50/80 border-orange-200/50 text-orange-700 hover:bg-orange-200/80 active:bg-orange-200/80',
+			icon: <UtensilsCrossed className="w-4 h-4" />,
+		},
+		'Child Welfare Programs': {
+			color:
+				'bg-purple-50/80 border-purple-200/50 text-purple-700 hover:bg-purple-200/80 active:bg-purple-200/80',
+			icon: <Baby className="w-4 h-4" />,
+		},
+		'Sustainable Agriculture': {
+			color:
+				'bg-sky-50/80 border-emerald-200/50 text-emerald-700 hover:bg-emerald-200/80 active:bg-emerald-200/80',
+			icon: <Sprout className="w-4 h-4" />,
+		},
+		'Social Finance & Innovation': {
+			color: 'bg-sky-50/80 text-sky-700 hover:bg-sky-100/80 active:bg-sky-100/80 border-sky-200/50',
+			icon: <Coins className="w-4 h-4" />,
+		},
+		'Education for All': {
+			color:
+				'bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100/80 active:bg-indigo-100/80 border-indigo-200/50',
+			icon: <GraduationCap className="w-4 h-4" />,
+		},
+		'Disaster Relief Efforts': {
+			color: 'bg-red-50/80 text-red-700 hover:bg-red-100/80 active:bg-red-100/80 border-red-200/50',
+			icon: <HandHelping className="w-4 h-4" />,
+		},
+		// Add more mappings as needed
+	}
 
 	// Default fallback
 	return (
 		categoryMap[category] || {
-			color:
-				'bg-gray-50/80 text-gray-700 hover:bg-gray-100/80 border-gray-200/50',
+			color: 'bg-gray-50/80 text-gray-700 hover:bg-gray-100/80 border-gray-200/50',
 			icon: <LineChart className="w-4 h-4" />,
 		}
 	)

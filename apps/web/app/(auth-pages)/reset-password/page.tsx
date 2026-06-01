@@ -2,19 +2,17 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { logger } from '@/lib/logger'
 import { resetPasswordAction } from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { FormMessage, type Message } from '~/components/form-message'
-import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { FormFieldGroup } from '~/components/shared/form/form-field-group'
 import { FormShell } from '~/components/shared/form/form-shell'
+import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { formLayoutClasses } from '~/lib/form/form-styles'
-import { logger } from '@/lib/logger'
 
-export default function ResetPassword(props: {
-	searchParams: Promise<Message>
-}) {
+export default function ResetPassword(props: { searchParams: Promise<Message> }) {
 	const [message, setMessage] = useState<Message | null>(null)
 
 	useEffect(() => {
@@ -66,10 +64,7 @@ export default function ResetPassword(props: {
 						/>
 					</FormFieldGroup>
 
-					<Button
-						className="gradient-btn w-full text-white"
-						formAction={resetPasswordAction}
-					>
+					<Button className="gradient-btn w-full text-white" formAction={resetPasswordAction}>
 						Update Password
 					</Button>
 

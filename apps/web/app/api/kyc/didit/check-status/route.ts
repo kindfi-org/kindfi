@@ -2,12 +2,9 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { nextAuthOption } from '~/lib/auth/auth-options'
 import { logger } from '@/lib/logger'
-import {
-	getDiditSessionStatus,
-	mapDiditStatusToKYC,
-} from '~/lib/services/didit'
+import { nextAuthOption } from '~/lib/auth/auth-options'
+import { getDiditSessionStatus, mapDiditStatusToKYC } from '~/lib/services/didit'
 
 /**
  * POST /api/kyc/didit/check-status
@@ -52,9 +49,7 @@ export async function POST(_req: NextRequest) {
 
 		// Parse notes to get session ID
 		const notes =
-			typeof kycRecord.notes === 'string'
-				? JSON.parse(kycRecord.notes)
-				: kycRecord.notes
+			typeof kycRecord.notes === 'string' ? JSON.parse(kycRecord.notes) : kycRecord.notes
 
 		const sessionId = notes.diditSessionId
 

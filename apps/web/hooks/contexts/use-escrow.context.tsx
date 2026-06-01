@@ -46,9 +46,7 @@ import { createContext, useContext, useMemo } from 'react'
 interface EscrowActionsContext {
 	// initialize
 	deployEscrow: (
-		payload:
-			| InitializeSingleReleaseEscrowPayload
-			| InitializeMultiReleaseEscrowPayload,
+		payload: InitializeSingleReleaseEscrowPayload | InitializeMultiReleaseEscrowPayload,
 		type: EscrowType,
 	) => Promise<EscrowRequestResponse>
 
@@ -78,9 +76,7 @@ interface EscrowActionsContext {
 		type: EscrowType,
 	) => Promise<EscrowRequestResponse>
 	resolveDispute: (
-		payload:
-			| SingleReleaseResolveDisputePayload
-			| MultiReleaseResolveDisputePayload,
+		payload: SingleReleaseResolveDisputePayload | MultiReleaseResolveDisputePayload,
 		type: EscrowType,
 	) => Promise<EscrowRequestResponse>
 
@@ -95,10 +91,7 @@ interface EscrowActionsContext {
 		payload: SingleReleaseReleaseFundsPayload | MultiReleaseReleaseFundsPayload,
 		type: EscrowType,
 	) => Promise<EscrowRequestResponse>
-	fundEscrow: (
-		payload: FundEscrowPayload,
-		type: EscrowType,
-	) => Promise<EscrowRequestResponse>
+	fundEscrow: (payload: FundEscrowPayload, type: EscrowType) => Promise<EscrowRequestResponse>
 
 	// milestones
 	changeMilestoneStatus: (
@@ -169,9 +162,7 @@ export function EscrowProvider({ children }: { children: React.ReactNode }) {
 		],
 	)
 
-	return (
-		<EscrowContext.Provider value={value}>{children}</EscrowContext.Provider>
-	)
+	return <EscrowContext.Provider value={value}>{children}</EscrowContext.Provider>
 }
 
 export function useEscrow() {

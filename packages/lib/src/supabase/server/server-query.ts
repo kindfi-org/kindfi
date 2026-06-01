@@ -29,7 +29,10 @@ export async function fetchSupabaseServer<TData>(
 	try {
 		return await queryFn(supabase)
 	} catch (error) {
-		logger.error(`Error in server query: ${queryName}`, error instanceof Error ? error : new Error(String(error)))
+		logger.error(
+			`Error in server query: ${queryName}`,
+			error instanceof Error ? error : new Error(String(error)),
+		)
 		throw error instanceof Error ? error : new Error(String(error))
 	}
 }
@@ -57,9 +60,7 @@ export async function prefetchSupabaseQuery<TData>(
 	additionalKeyValues?: unknown[],
 ) {
 	const baseKey = ['supabase', queryName]
-	const queryKey = additionalKeyValues?.length
-		? [...baseKey, ...additionalKeyValues]
-		: baseKey
+	const queryKey = additionalKeyValues?.length ? [...baseKey, ...additionalKeyValues] : baseKey
 
 	const supabase = await createSupabaseServerClient()
 

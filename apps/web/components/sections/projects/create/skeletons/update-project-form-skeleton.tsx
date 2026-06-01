@@ -66,7 +66,6 @@ export function UpdateProjectFormSkeleton() {
 					<Skeleton className="h-4 w-16" />
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 						{Array.from({ length: 12 }).map((_, i) => (
-							// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
 							<Skeleton key={i} className="h-10 w-full rounded-full" />
 						))}
 					</div>

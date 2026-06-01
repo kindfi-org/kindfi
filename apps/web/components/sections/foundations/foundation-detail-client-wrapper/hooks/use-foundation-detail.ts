@@ -10,19 +10,14 @@ export function useFoundationDetail(slug: string) {
 		data: foundation,
 		isLoading,
 		error,
-	} = useSupabaseQuery(
-		'foundation',
-		(client) => getFoundationBySlug(client, slug),
-		{
-			additionalKeyValues: [slug],
-		},
-	)
+	} = useSupabaseQuery('foundation', (client) => getFoundationBySlug(client, slug), {
+		additionalKeyValues: [slug],
+	})
 
 	const { data: session } = useSession()
 
 	const yearFounded = useMemo(
-		() =>
-			foundation && foundation.foundedYear > 0 ? foundation.foundedYear : null,
+		() => (foundation && foundation.foundedYear > 0 ? foundation.foundedYear : null),
 		[foundation],
 	)
 
@@ -49,14 +44,11 @@ export function useFoundationDetail(slug: string) {
 
 	const campaignsWithSlug = useMemo(
 		() =>
-			foundation?.campaigns?.filter((c): c is typeof c & { slug: string } =>
-				Boolean(c.slug),
-			) ?? [],
+			foundation?.campaigns?.filter((c): c is typeof c & { slug: string } => Boolean(c.slug)) ?? [],
 		[foundation?.campaigns],
 	)
 
-	const isFounder =
-		Boolean(session?.user?.id) && session?.user?.id === foundation?.founderId
+	const isFounder = Boolean(session?.user?.id) && session?.user?.id === foundation?.founderId
 
 	return {
 		foundation,

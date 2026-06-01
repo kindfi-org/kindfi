@@ -3,13 +3,13 @@ import type { Enums } from '@services/supabase'
 import type { NextRequest } from 'next/server'
 import { after, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { AppError } from '~/lib/error'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import type { MediatorAssignmentPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateMediatorAssignment } from '~/lib/validators/dispute'
-import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -61,21 +61,14 @@ export async function POST(req: NextRequest) {
 				.eq('status', 'PENDING')
 				.eq('type', 'dispute')
 				.single(),
-			supabase
-				.from('users')
-				.select('id, user_roles!inner(role)')
-				.eq('id', assignedById)
-				.single(),
+			supabase.from('users').select('id, user_roles!inner(role)').eq('id', assignedById).single(),
 		])
 
 		const { data: dispute, error: disputeError } = disputeResult
 		const { data: assigner, error: assignerError } = assignerResult
 
 		if (disputeError || !dispute) {
-			return NextResponse.json(
-				{ error: 'Dispute not found or already resolved' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Dispute not found or already resolved' }, { status: 404 })
 		}
 
 		if (assignerError || !assigner) {
@@ -83,28 +76,22 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if the assigner has the required role (admin or dispute_manager)
-		const hasRequiredRole = assigner.user_roles.some(
-			(userRole: { role: Enums<'user_role'> }) =>
-				['admin', 'dispute_manager'].includes(userRole.role),
+		const hasRequiredRole = assigner.user_roles.some((userRole: { role: Enums<'user_role'> }) =>
+			['admin', 'dispute_manager'].includes(userRole.role),
 		)
 
 		if (!hasRequiredRole) {
-			return NextResponse.json(
-				{ error: 'Not authorized to assign mediators' },
-				{ status: 403 },
-			)
+			return NextResponse.json({ error: 'Not authorized to assign mediators' }, { status: 403 })
 		}
 
 		// 7. Send notification to the mediator (non-blocking)
 		after(async () => {
-			const { error: notificationError } = await supabase
-				.from('notifications')
-				.insert({
-					user_id: mediatorId,
-					review_id: disputeId, // Use review_id instead of dispute_id
-					message: 'You have been assigned as a mediator for a dispute',
-					type: 'MEDIATOR_ASSIGNED',
-				})
+			const { error: notificationError } = await supabase.from('notifications').insert({
+				user_id: mediatorId,
+				review_id: disputeId, // Use review_id instead of dispute_id
+				message: 'You have been assigned as a mediator for a dispute',
+				type: 'MEDIATOR_ASSIGNED',
+			})
 
 			if (notificationError) {
 				logger.error('Failed to send notification:', notificationError)

@@ -2,10 +2,10 @@ import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { syncContributionSchema } from '~/lib/schemas/contribution.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * Sync an existing on-chain donation to the contributions table
@@ -55,10 +55,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		if (!projectId) {
-			return NextResponse.json(
-				{ error: 'Project ID is required' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
 		}
 
 		// Check if contribution already exists
@@ -104,13 +101,10 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Update project's current_amount (raised amount)
-		const { error: updateError } = await supabase.rpc(
-			'increment_project_amount',
-			{
-				project_id_param: projectId,
-				amount_param: Number(amount),
-			},
-		)
+		const { error: updateError } = await supabase.rpc('increment_project_amount', {
+			project_id_param: projectId,
+			amount_param: Number(amount),
+		})
 
 		// If RPC doesn't exist, fallback to manual update
 		if (updateError) {

@@ -6,8 +6,8 @@
 		"react-webcam": "^7.2.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.1.2",
-		"@biomejs/cli-darwin-x64": "^2.1.2",
+		"@biomejs/biome": "2.4.5",
+		"@biomejs/cli-darwin-x64": "2.4.5",
 		"@commitlint/cli": "^19.6.1",
 		"@commitlint/config-conventional": "^19.6.0",
 		"@types/bun": "1.3.14",
@@ -42,8 +42,10 @@
 	"scripts": {
 		"clean": "git clean -xdf node_modules",
 		"clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-		"format-and-lint": "biome check .",
+		"format-and-lint": "biome ci .",
 		"format-and-lint:fix": "biome check . --write",
+		"lint": "biome ci .",
+		"lint:fix": "biome check . --write",
 		"husky:prepare": "husky",
 		"init": "bun install && bun husky:prepare",
 		"prepare": "husky"

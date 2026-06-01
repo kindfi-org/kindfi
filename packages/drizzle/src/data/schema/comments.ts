@@ -45,10 +45,7 @@ export const comments = pgTable(
 			'btree',
 			table.parentCommentId.asc().nullsLast().op('uuid_ops'),
 		),
-		index('idx_comments_type').using(
-			'btree',
-			table.type.asc().nullsLast().op('enum_ops'),
-		),
+		index('idx_comments_type').using('btree', table.type.asc().nullsLast().op('enum_ops')),
 		index('idx_comments_type_parent').using(
 			'btree',
 			table.type.asc().nullsLast().op('uuid_ops'),

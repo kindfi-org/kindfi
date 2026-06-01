@@ -48,8 +48,7 @@ export function useDiditKYC(userId: string) {
 			setKycStatus({
 				status: null,
 				isLoading: false,
-				error:
-					error instanceof Error ? error.message : 'Failed to load KYC status',
+				error: error instanceof Error ? error.message : 'Failed to load KYC status',
 			})
 		}
 	}, [])
@@ -114,9 +113,7 @@ export function useDiditKYC(userId: string) {
 		}
 	}, [loadKYCStatus])
 
-	const createSession = async (
-		redirectUrl?: string,
-	): Promise<CreateSessionResponse> => {
+	const createSession = async (redirectUrl?: string): Promise<CreateSessionResponse> => {
 		try {
 			const response = await fetch('/api/kyc/didit/create-session', {
 				method: 'POST',

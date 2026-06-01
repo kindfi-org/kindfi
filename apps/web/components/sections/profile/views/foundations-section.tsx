@@ -2,26 +2,13 @@
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
-import {
-	ArrowRight,
-	Building2,
-	CheckCircle2,
-	Heart,
-	Plus,
-	Settings,
-	Users,
-} from 'lucide-react'
+import { ArrowRight, Building2, CheckCircle2, Heart, Plus, Settings, Users } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { staggerContainer } from '~/lib/constants/animations'
 import { getUserFoundations } from '~/lib/queries/foundations/get-user-foundations'
 
@@ -47,13 +34,9 @@ export function FoundationsSection({ userId }: FoundationsSectionProps) {
 		data: foundations = [],
 		isLoading,
 		error,
-	} = useSupabaseQuery(
-		'user-foundations',
-		(client) => getUserFoundations(client, userId),
-		{
-			additionalKeyValues: [userId],
-		},
-	)
+	} = useSupabaseQuery('user-foundations', (client) => getUserFoundations(client, userId), {
+		additionalKeyValues: [userId],
+	})
 
 	const shouldReduceMotion = useReducedMotion()
 
@@ -103,14 +86,10 @@ export function FoundationsSection({ userId }: FoundationsSectionProps) {
 		return (
 			<Card className="border-0 bg-muted/50">
 				<CardContent className="py-16 text-center">
-					<Building2
-						className="h-16 w-16 text-muted-foreground mx-auto mb-4"
-						aria-hidden="true"
-					/>
+					<Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
 					<h3 className="text-xl font-semibold mb-2">No Foundations Yet</h3>
 					<p className="text-muted-foreground mb-6">
-						Create a foundation to build trust and organize your campaigns under
-						one umbrella.
+						Create a foundation to build trust and organize your campaigns under one umbrella.
 					</p>
 					<Button asChild>
 						<Link href="/create-foundation">
@@ -254,27 +233,21 @@ function FoundationCard({
 						<div className="flex items-center justify-center gap-1 text-purple-600 mb-1">
 							<Heart className="h-4 w-4" aria-hidden="true" />
 						</div>
-						<p className="text-xs font-bold tabular-nums">
-							{foundation.formattedDonations}
-						</p>
+						<p className="text-xs font-bold tabular-nums">{foundation.formattedDonations}</p>
 						<p className="text-xs text-muted-foreground">Raised</p>
 					</div>
 					<div className="text-center">
 						<div className="flex items-center justify-center gap-1 text-green-600 mb-1">
 							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
 						</div>
-						<p className="text-xs font-bold tabular-nums">
-							{foundation.totalCampaignsCompleted}
-						</p>
+						<p className="text-xs font-bold tabular-nums">{foundation.totalCampaignsCompleted}</p>
 						<p className="text-xs text-muted-foreground">Completed</p>
 					</div>
 					<div className="text-center">
 						<div className="flex items-center justify-center gap-1 text-blue-600 mb-1">
 							<Users className="h-4 w-4" aria-hidden="true" />
 						</div>
-						<p className="text-xs font-bold tabular-nums">
-							{foundation.totalCampaignsOpen}
-						</p>
+						<p className="text-xs font-bold tabular-nums">{foundation.totalCampaignsOpen}</p>
 						<p className="text-xs text-muted-foreground">Active</p>
 					</div>
 				</div>

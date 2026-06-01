@@ -26,10 +26,7 @@ export function ShareButtons({ url, title, description }: ShareButtonsProps) {
 		<div className="flex items-center gap-2">
 			<a href={twitterHref} target="_blank" rel="noopener noreferrer">
 				<Button variant="outline" size="sm" className="gap-2">
-					<span
-						className="h-4 w-4 inline-block align-middle"
-						aria-hidden="true"
-					>
+					<span className="h-4 w-4 inline-block align-middle" aria-hidden="true">
 						<svg
 							role="img"
 							viewBox="0 0 24 24"
@@ -53,12 +50,7 @@ export function ShareButtons({ url, title, description }: ShareButtonsProps) {
 					Facebook
 				</Button>
 			</a>
-			<Button
-				variant="ghost"
-				size="sm"
-				className="gap-2"
-				onClick={copyToClipboard}
-			>
+			<Button variant="ghost" size="sm" className="gap-2" onClick={copyToClipboard}>
 				<LinkIcon className="h-4 w-4" /> Copy link
 			</Button>
 		</div>

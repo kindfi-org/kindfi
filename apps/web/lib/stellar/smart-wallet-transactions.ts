@@ -36,18 +36,12 @@ export class SmartWalletTransactionService {
 	private server: Server
 	private networkPassphrase: string
 	private fundingKeypair?: Keypair
-	private channelsClient: ChannelsClientService
 
 	// ? WebAuthn Signatures requires a lot of GAS
 	private readonly STANDARD_FEE = '5000000' // 0.41 XLM
 
-	constructor(
-		networkPassphrase?: string,
-		rpcUrl?: string,
-		fundingSecretKey?: string,
-	) {
-		this.networkPassphrase =
-			networkPassphrase || appConfig.stellar.networkPassphrase
+	constructor(networkPassphrase?: string, rpcUrl?: string, fundingSecretKey?: string) {
+		this.networkPassphrase = networkPassphrase || appConfig.stellar.networkPassphrase
 		this.server = new Server(rpcUrl || appConfig.stellar.rpcUrl)
 
 		if (fundingSecretKey) {
@@ -89,9 +83,7 @@ export class SmartWalletTransactionService {
 	 * @param params Transfer parameters
 	 * @returns Transaction hash and WebAuthn challenge for signing
 	 */
-	async transferToken(
-		params: TransferTokenParams,
-	): Promise<TransactionChallenge> {
+	async transferToken(params: TransferTokenParams): Promise<TransactionChallenge> {
 		const { from, to, tokenAddress, amount, sponsorFees = false } = params
 
 		// Build contract invocation for transfer_token
@@ -117,16 +109,8 @@ export class SmartWalletTransactionService {
 	 * @param params Invocation parameters
 	 * @returns Transaction hash and WebAuthn challenge for signing
 	 */
-	async invokeContract(
-		params: InvokeContractParams,
-	): Promise<TransactionChallenge> {
-		const {
-			from,
-			contractAddress,
-			functionName,
-			args = [],
-			sponsorFees = false,
-		} = params
+	async invokeContract(params: InvokeContractParams): Promise<TransactionChallenge> {
+		const { from, contractAddress, functionName, args = [], sponsorFees = false } = params
 
 		// Convert arguments to ScVal format
 		const scArgs = args.map((arg) => {
@@ -316,9 +300,7 @@ export class SmartWalletTransactionService {
 	 * Builds a transaction for WebAuthn signing
 	 * @returns the transaction envelope and challenge hash
 	 */
-	private async buildTransaction(
-		params: BuildTransactionParams,
-	): Promise<TransactionChallenge> {
+	private async buildTransaction(params: BuildTransactionParams): Promise<TransactionChallenge> {
 		const { smartWalletAddress, operations, sponsorFees } = params
 
 		// Determine source account (funding account if sponsoring fees, otherwise smart wallet)
@@ -350,9 +332,7 @@ export class SmartWalletTransactionService {
 
 		if (Api.isSimulationError(simulation)) {
 			logger.error('❌ Simulation error:', simulation.error)
-			throw new Error(
-				`Transaction simulation failed: ${simulation.error || 'Unknown error'}`,
-			)
+			throw new Error(`Transaction simulation failed: ${simulation.error || 'Unknown error'}`)
 		}
 		// Get current ledger to set valid signature expiration
 		const latestLedger = await this.server.getLatestLedger()
@@ -387,8 +367,7 @@ export class SmartWalletTransactionService {
 
 				// Create new auth entry with updated credentials
 				const newAuthEntry = new xdr.SorobanAuthorizationEntry({
-					credentials:
-						xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
+					credentials: xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
 					rootInvocation: simAuthEntry.rootInvocation(),
 				})
 
@@ -396,9 +375,7 @@ export class SmartWalletTransactionService {
 				simulation.result.auth[0] = newAuthEntry
 
 				// VERIFY: Check that modification worked
-				const _verifyCredentials = simulation.result.auth[0]
-					.credentials()
-					.address()
+				const _verifyCredentials = simulation.result.auth[0].credentials().address()
 			}
 		}
 
@@ -418,17 +395,12 @@ export class SmartWalletTransactionService {
 
 		if (!signaturePayloadResult) {
 			// Fallback to transaction hash if we can't extract signature_payload
-			logger.warn(
-				'⚠️  Could not extract signature_payload, falling back to tx hash',
-			)
+			logger.warn('⚠️  Could not extract signature_payload, falling back to tx hash')
 			throw new Error('⚠️  Could not extract signature_payload')
 		}
 
 		// Use signature_payload as the WebAuthn challenge
-		const challenge = Buffer.from(
-			signaturePayloadResult.payloadHex,
-			'hex',
-		).toString('base64url')
+		const challenge = Buffer.from(signaturePayloadResult.payloadHex, 'hex').toString('base64url')
 		const txHash = assembledTx.hash()
 
 		// DIAGNOSTIC: Verify XDR encoding contains correct values
@@ -438,8 +410,7 @@ export class SmartWalletTransactionService {
 				transactionXDR,
 				this.networkPassphrase,
 			) as Transaction
-			const checkOp = xdrCheck
-				.operations[0] as unknown as Api.SimulateHostFunctionResult
+			const checkOp = xdrCheck.operations[0] as unknown as Api.SimulateHostFunctionResult
 			const checkAuthEntries = checkOp?.auth || []
 			if (checkAuthEntries.length > 0) {
 				const checkAuthEntry = checkAuthEntries[0]
@@ -453,9 +424,7 @@ export class SmartWalletTransactionService {
 						checkCredentials.signatureExpirationLedger().toString() !==
 						signatureExpirationLedger.toString()
 					) {
-						logger.error(
-							'❌ CRITICAL: XDR bytes do NOT contain correct expiration!',
-						)
+						logger.error('❌ CRITICAL: XDR bytes do NOT contain correct expiration!')
 					}
 				}
 			}
@@ -478,14 +447,9 @@ export class SmartWalletTransactionService {
 			throw new Error('Funding keypair required for fee sponsorship')
 		}
 
-		const accountResponse = await this.server.getAccount(
-			this.fundingKeypair.publicKey(),
-		)
+		const accountResponse = await this.server.getAccount(this.fundingKeypair.publicKey())
 
-		return new Account(
-			accountResponse.accountId(),
-			accountResponse.sequenceNumber(),
-		)
+		return new Account(accountResponse.accountId(), accountResponse.sequenceNumber())
 	}
 
 	/**

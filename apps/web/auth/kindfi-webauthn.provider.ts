@@ -1,8 +1,6 @@
 import { and, db, devices, eq, profiles } from '@packages/drizzle'
 import type { User } from 'next-auth'
-import CredentialsProvider, {
-	type CredentialInput,
-} from 'next-auth/providers/credentials'
+import CredentialsProvider, { type CredentialInput } from 'next-auth/providers/credentials'
 
 export const kindfiWebAuthnProvider = CredentialsProvider({
 	name: 'Credentials',
@@ -68,7 +66,6 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			if (!deviceInfo) {
 				throw new Error('Device not found or credentials mismatch')
 			}
-
 
 			return {
 				id: credentials.userId,

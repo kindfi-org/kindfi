@@ -2,11 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { Card, CardContent } from '~/components/base/card'
-import {
-	cardVariants,
-	fadeInUp,
-	staggerChildren,
-} from '~/lib/constants/animations'
+import { cardVariants, fadeInUp, staggerChildren } from '~/lib/constants/animations'
 import { statsData } from '~/lib/constants/impact-data/hero-data'
 import type { StatCard } from '~/lib/types/impact/impact-hero.types'
 
@@ -14,11 +10,7 @@ export function Hero() {
 	const shouldReduceMotion = useReducedMotion()
 
 	const renderStatCard = ({ id, value, label }: StatCard) => (
-		<motion.div
-			key={id}
-			variants={shouldReduceMotion ? {} : cardVariants}
-			whileHover="hover"
-		>
+		<motion.div key={id} variants={shouldReduceMotion ? {} : cardVariants} whileHover="hover">
 			<Card className="overflow-hidden shadow-xl border-none bg-white rounded-xl">
 				<CardContent className="p-7 sm:p-3">
 					<div className="space-y-3">
@@ -64,8 +56,8 @@ export function Hero() {
 						initial="initial"
 						animate="animate"
 					>
-						See the social impact of KindFi campaigns, fully tracked and
-						verifiable on the Stellar blockchain.
+						See the social impact of KindFi campaigns, fully tracked and verifiable on the Stellar
+						blockchain.
 					</motion.p>
 				</div>
 

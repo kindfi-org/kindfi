@@ -2,6 +2,7 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { projectUpdateFormSchema } from '~/lib/schemas/project.schemas'
 import {
@@ -12,7 +13,6 @@ import {
 	upsertTags,
 } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 export async function PATCH(req: Request) {
 	try {
@@ -49,11 +49,7 @@ export async function PATCH(req: Request) {
 		// Verify user has permission to update this project
 		// Check if user is the project owner or has editor role in parallel
 		const [projectResult, memberResult] = await Promise.all([
-			supabaseServiceRole
-				.from('projects')
-				.select('id, kindler_id')
-				.eq('id', projectId)
-				.single(),
+			supabaseServiceRole.from('projects').select('id, kindler_id').eq('id', projectId).single(),
 			supabaseServiceRole
 				.from('project_members')
 				.select('role')
@@ -130,18 +126,12 @@ export async function PATCH(req: Request) {
 		}
 
 		// Remove old tag relationships before inserting updated ones
-		await supabase
-			.from('project_tag_relationships')
-			.delete()
-			.eq('project_id', projectId)
+		await supabase.from('project_tag_relationships').delete().eq('project_id', projectId)
 
 		// Upsert new tag relationships
 		await upsertTags(projectId, tags ?? [], supabase)
 
-		return NextResponse.json(
-			{ message: 'Project updated successfully' },
-			{ status: 200 },
-		)
+		return NextResponse.json({ message: 'Project updated successfully' }, { status: 200 })
 	} catch (err) {
 		logger.error(err)
 		return NextResponse.json(

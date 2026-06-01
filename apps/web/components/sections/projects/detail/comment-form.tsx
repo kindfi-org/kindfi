@@ -1,20 +1,14 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import clsx from 'clsx'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { Button } from '~/components/base/button'
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormMessage,
-} from '~/components/base/form'
+import { Form, FormControl, FormField, FormItem, FormMessage } from '~/components/base/form'
 import { Textarea } from '~/components/base/textarea'
 import { UserAvatar } from '~/components/base/user-avatar'
+import { zodResolver } from '~/lib/form/zod-resolver'
 
 interface CommentFormProps {
 	userAvatar?: string
@@ -72,11 +66,7 @@ export function CommentForm({
 			})}
 		>
 			<div className="flex gap-3">
-				<UserAvatar
-					src={userAvatar || '/images/placeholder.png'}
-					alt={userName}
-					name={userName}
-				/>
+				<UserAvatar src={userAvatar || '/images/placeholder.png'} alt={userName} name={userName} />
 				<div className="flex-1">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(handleFormSubmit)}>
@@ -89,13 +79,9 @@ export function CommentForm({
 											<Textarea
 												{...field}
 												placeholder={placeholder}
-												className={clsx(
-													'resize-none min-h-[80px]',
-													{
-														'border-red-500 focus-visible:ring-red-500':
-															isOverLimit,
-													},
-												)}
+												className={clsx('resize-none min-h-[80px]', {
+													'border-red-500 focus-visible:ring-red-500': isOverLimit,
+												})}
 												onFocus={() => setIsFocused(true)}
 												aria-label={placeholder}
 												aria-invalid={isOverLimit}

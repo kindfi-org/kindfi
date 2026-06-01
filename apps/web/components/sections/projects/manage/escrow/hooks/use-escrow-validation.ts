@@ -2,13 +2,9 @@ import { useMemo } from 'react'
 import { isExternalStellarWalletAddress } from '~/lib/utils/escrow/trustless-signer'
 import type { EscrowFormData } from '../types'
 
-const isValidTrustlessRoleAddress = (value: string) =>
-	isExternalStellarWalletAddress(value.trim())
+const isValidTrustlessRoleAddress = (value: string) => isExternalStellarWalletAddress(value.trim())
 
-export function useEscrowValidation(
-	formData: EscrowFormData,
-	projectId: string,
-): boolean {
+export function useEscrowValidation(formData: EscrowFormData, projectId: string): boolean {
 	return useMemo(() => {
 		const {
 			title,

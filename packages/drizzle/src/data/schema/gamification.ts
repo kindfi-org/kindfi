@@ -12,8 +12,8 @@ import {
 	uuid,
 } from 'drizzle-orm/pg-core'
 import { usersInAuth } from './auth'
-import { categories } from './projects'
 import { usersInNextAuth } from './next-auth'
+import { categories } from './projects'
 
 export const waitlistInterests = pgTable(
 	'waitlist_interests',

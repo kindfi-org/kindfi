@@ -49,10 +49,7 @@ export function NftHeroCard({
 					)}
 					{(nft || dbNft) && (
 						<div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-							#
-							{(nft?.tokenId ?? dbNft?.token_id ?? 0)
-								.toString()
-								.padStart(4, '0')}
+							#{(nft?.tokenId ?? dbNft?.token_id ?? 0).toString().padStart(4, '0')}
 						</div>
 					)}
 				</div>
@@ -96,9 +93,7 @@ export function NftHeroCard({
 
 					<p className="text-xs text-muted-foreground">
 						Governance votes:{' '}
-						<span className="font-semibold text-foreground">
-							{govVotes || tierConfig.votes}
-						</span>
+						<span className="font-semibold text-foreground">{govVotes || tierConfig.votes}</span>
 					</p>
 
 					{smartAccountAddress && (

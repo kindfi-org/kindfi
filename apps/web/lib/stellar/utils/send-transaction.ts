@@ -1,18 +1,13 @@
+import { logger } from '@/lib/logger'
 import { httpEscrow } from '~/lib/axios/http'
 import type { SendTransactionResponse } from '~/lib/types/escrow/escrow-response.types'
-import { logger } from '@/lib/logger'
 
-export async function sendTransaction(
-	signedXdr: string,
-): Promise<SendTransactionResponse> {
+export async function sendTransaction(signedXdr: string): Promise<SendTransactionResponse> {
 	try {
-		const response = await httpEscrow.post<SendTransactionResponse>(
-			'/helper/send-transaction',
-			{
-				signedXdr,
-				returnValueIsRequired: true,
-			},
-		)
+		const response = await httpEscrow.post<SendTransactionResponse>('/helper/send-transaction', {
+			signedXdr,
+			returnValueIsRequired: true,
+		})
 		return response.data
 	} catch (error) {
 		logger.error('Error sending transaction:', error)

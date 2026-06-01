@@ -55,11 +55,7 @@ export function useSlugValidation(slug: string): UseSlugValidationResult {
 
 				const available = !data
 				setIsAvailable(available)
-				setError(
-					available
-						? null
-						: 'This slug is already taken. Please choose another.',
-				)
+				setError(available ? null : 'This slug is already taken. Please choose another.')
 			})
 			.catch((err) => {
 				logger.error('Error checking slug:', err)

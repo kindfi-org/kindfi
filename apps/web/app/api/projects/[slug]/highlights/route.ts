@@ -2,15 +2,12 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { highlightsUpdateSchema } from '~/lib/schemas/project.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
-export async function POST(
-	req: Request,
-	_params: { params: Promise<{ slug: string }> },
-) {
+export async function POST(req: Request, _params: { params: Promise<{ slug: string }> }) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)

@@ -28,15 +28,11 @@ export function useProjectDefaults({
 	}, [projectTitle, projectId, consecutiveNumber])
 
 	const suggestedEngagementId = useMemo(() => {
-		if (projectTitle)
-			return generateEngagementId(projectTitle, consecutiveNumber)
+		if (projectTitle) return generateEngagementId(projectTitle, consecutiveNumber)
 		return `Kindfi - project-${projectId} - ${consecutiveNumber}`
 	}, [projectTitle, projectId, consecutiveNumber])
 
-	const suggestedDescription = useMemo(
-		() => projectDescription ?? '',
-		[projectDescription],
-	)
+	const suggestedDescription = useMemo(() => projectDescription ?? '', [projectDescription])
 
 	return { suggestedTitle, suggestedEngagementId, suggestedDescription }
 }

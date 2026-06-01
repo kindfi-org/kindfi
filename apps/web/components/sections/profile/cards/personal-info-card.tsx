@@ -5,13 +5,13 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { Textarea } from '~/components/base/textarea'
 import { useI18n } from '~/lib/i18n'
 import { ProfileSurfaceCard } from '../profile-surface-card'
-import { logger } from '@/lib/logger'
 
 interface PersonalInfoCardProps {
 	userId: string
@@ -41,10 +41,7 @@ export function PersonalInfoCard({
 				bio: (formData.get('bio') as string) ?? '',
 				image_url: (formData.get('image_url') as string) ?? '',
 			}
-			const { error } = await supabase
-				.from('profiles')
-				.update(payload)
-				.eq('id', userId)
+			const { error } = await supabase.from('profiles').update(payload).eq('id', userId)
 
 			if (error) throw error
 
@@ -63,9 +60,7 @@ export function PersonalInfoCard({
 		<ProfileSurfaceCard className="h-full">
 			<div className="mb-6 flex items-start justify-between gap-4 border-b border-slate-100 pb-5">
 				<div>
-					<h3 className="text-lg font-semibold text-gray-900">
-						{t('profile.personalInfoTitle')}
-					</h3>
+					<h3 className="text-lg font-semibold text-gray-900">{t('profile.personalInfoTitle')}</h3>
 					<p className="mt-1 text-sm text-muted-foreground">
 						{t('profile.personalInfoDescription')}
 					</p>

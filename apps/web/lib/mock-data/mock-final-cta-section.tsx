@@ -1,13 +1,4 @@
-import {
-	Apple,
-	Facebook,
-	Globe,
-	Mail,
-	Settings,
-	Shield,
-	Target,
-	Zap,
-} from 'lucide-react'
+import { Apple, Facebook, Globe, Mail, Settings, Shield, Target, Zap } from 'lucide-react'
 import type { Feature, SocialButtonProps } from '~/lib/types'
 
 export const features: Feature[] = [

@@ -5,10 +5,7 @@ import Image from 'next/image'
 import { useMemo } from 'react'
 import { AnimatedCounter } from '~/components/sections/projects/detail/animated-counter'
 import { SocialLinksDisplay } from '~/components/sections/projects/detail/social-links-display'
-import {
-	CategoryBadge,
-	CountryFlag,
-} from '~/components/sections/projects/shared'
+import { CategoryBadge, CountryFlag } from '~/components/sections/projects/shared'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { useProjectSupportersCount } from '~/hooks/projects/use-project-supporters-count'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
@@ -64,10 +61,7 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 			</div>
 
 			<div className="p-6">
-				<h1
-					id="project-hero-title"
-					className="mb-3 text-3xl font-bold md:text-4xl text-balance"
-				>
+				<h1 id="project-hero-title" className="mb-3 text-3xl font-bold md:text-4xl text-balance">
 					{project.title}
 				</h1>
 
@@ -80,9 +74,7 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 							<div className="flex gap-2 items-center text-sm font-medium text-muted-foreground">
 								<span>Location:</span>
 								<CountryFlag countryCode={project.location} />
-								<span className="text-gray-700">
-									{getCountryNameFromAlpha3(project.location)}
-								</span>
+								<span className="text-gray-700">{getCountryNameFromAlpha3(project.location)}</span>
 							</div>
 						)}
 
@@ -117,9 +109,7 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 						</p>
 					</div>
 					<div className="p-4 text-center bg-gray-50 rounded-lg">
-						<p className="mb-1 text-sm text-muted-foreground">
-							Minimum Donation
-						</p>
+						<p className="mb-1 text-sm text-muted-foreground">Minimum Donation</p>
 						<p className="text-xl font-bold tabular-nums">
 							$<AnimatedCounter value={project.minInvestment} />
 						</p>

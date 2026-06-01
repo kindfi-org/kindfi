@@ -8,11 +8,7 @@ interface FormActionsProps {
 	align?: 'between' | 'end'
 }
 
-export function FormActions({
-	children,
-	className,
-	align = 'between',
-}: FormActionsProps) {
+export function FormActions({ children, className, align = 'between' }: FormActionsProps) {
 	return (
 		<div
 			className={cn(

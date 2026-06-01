@@ -16,10 +16,7 @@ interface FoundationCampaignsProps {
 	shouldReduceMotion: boolean | null
 }
 
-export function FoundationCampaigns({
-	campaigns,
-	shouldReduceMotion,
-}: FoundationCampaignsProps) {
+export function FoundationCampaigns({ campaigns, shouldReduceMotion }: FoundationCampaignsProps) {
 	if (!campaigns.length) {
 		return null
 	}
@@ -32,17 +29,13 @@ export function FoundationCampaigns({
 		>
 			<div className="mb-6 flex items-center gap-3">
 				<Megaphone className="h-6 w-6 text-primary" aria-hidden="true" />
-				<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-					Campaigns
-				</h2>
+				<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Campaigns</h2>
 			</div>
 			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 				{campaigns.map((campaign, index) => (
 					<motion.div
 						key={campaign.id}
-						initial={
-							shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }
-						}
+						initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: shouldReduceMotion ? 0 : 0.05 * index }}
 					>
@@ -90,9 +83,7 @@ export function FoundationCampaigns({
 									</div>
 									<div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
 										<Users className="h-4 w-4 shrink-0" aria-hidden="true" />
-										<span className="tabular-nums">
-											{campaign.investors} supporters
-										</span>
+										<span className="tabular-nums">{campaign.investors} supporters</span>
 										<span className="ml-auto inline-flex items-center gap-1">
 											View
 											<ArrowRight

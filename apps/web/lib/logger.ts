@@ -35,10 +35,7 @@ export class Logger implements ILogger {
 		if (!this.shouldLog(level)) return
 
 		const timestamp = new Date().toISOString()
-		const logMethod = console[level] as (
-			message: string,
-			...optionalParams: unknown[]
-		) => void
+		const logMethod = console[level] as (message: string, ...optionalParams: unknown[]) => void
 		const prefix = `[${level.toUpperCase()}] ${timestamp}:`
 
 		try {
@@ -50,7 +47,7 @@ export class Logger implements ILogger {
 			}
 			const jsonData = JSON.stringify(logData, null, 2)
 			logMethod(prefix, eventType, '\n', jsonData)
-		} catch (error) {
+		} catch (_error) {
 			logMethod(prefix, data.eventType, '\n', 'Error: Unable to stringify log data')
 		}
 	}
@@ -71,21 +68,14 @@ export class Logger implements ILogger {
 // ---------------------------------------------------------------------------
 // Lightweight `logger` singleton — used by api routes, hooks, services
 // ---------------------------------------------------------------------------
-const isDev =
-	typeof process !== 'undefined'
-		? process.env.NODE_ENV !== 'production'
-		: false
+const isDev = typeof process !== 'undefined' ? process.env.NODE_ENV !== 'production' : false
 
-const SENSITIVE_KEY_PATTERN =
-	/secret|token|key|password|auth|credential|passphrase|seed/i
+const SENSITIVE_KEY_PATTERN = /secret|token|key|password|auth|credential|passphrase|seed/i
 
 function sanitise(data?: Record<string, unknown>): Record<string, unknown> {
 	if (!data) return {}
 	return Object.fromEntries(
-		Object.entries(data).map(([k, v]) => [
-			k,
-			SENSITIVE_KEY_PATTERN.test(k) ? '[REDACTED]' : v,
-		]),
+		Object.entries(data).map(([k, v]) => [k, SENSITIVE_KEY_PATTERN.test(k) ? '[REDACTED]' : v]),
 	)
 }
 
@@ -104,17 +94,9 @@ function sanitiseData(data?: unknown): unknown {
 export interface KindFiLogger {
 	debug(message: string, data?: Record<string, unknown>): void
 	info(message: string, data?: Record<string, unknown>): void
-	warn(
-		message: string,
-		errorOrData?: unknown,
-		data?: unknown,
-	): void
+	warn(message: string, errorOrData?: unknown, data?: unknown): void
 	warn(errorOrData: unknown): void
-	error(
-		message: string,
-		errorOrData?: unknown,
-		data?: unknown,
-	): void
+	error(message: string, errorOrData?: unknown, data?: unknown): void
 	error(errorOrData: unknown): void
 }
 
@@ -122,13 +104,11 @@ function buildLogger(): KindFiLogger {
 	return {
 		debug(message, data) {
 			if (!isDev) return
-			// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 			console.debug(fmt('debug', message), sanitise(data))
 		},
 
 		info(message, data) {
 			if (!isDev) return
-			// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 			console.info(fmt('info', message), sanitise(data))
 		},
 
@@ -143,24 +123,20 @@ function buildLogger(): KindFiLogger {
 				const errInfo = isDev
 					? { message: errorOrData.message, stack: errorOrData.stack }
 					: { message: errorOrData.message }
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 				console.warn(formatted, errInfo, sanitiseData(data))
 				return
 			}
 
 			if (data !== undefined) {
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 				console.warn(formatted, errorOrData, sanitiseData(data))
 				return
 			}
 
 			if (errorOrData !== undefined) {
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 				console.warn(formatted, sanitiseData(errorOrData))
 				return
 			}
 
-			// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 			console.warn(formatted)
 		},
 
@@ -175,28 +151,23 @@ function buildLogger(): KindFiLogger {
 				const errInfo = isDev
 					? { message: errorOrData.message, stack: errorOrData.stack }
 					: { message: errorOrData.message }
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 				console.error(formatted, errInfo, sanitiseData(data))
 				return
 			}
 
 			if (data !== undefined) {
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 				console.error(formatted, errorOrData, sanitiseData(data))
 				return
 			}
 
 			if (errorOrData !== undefined) {
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 				console.error(formatted, sanitiseData(errorOrData))
 				return
 			}
 
-			// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 			console.error(formatted)
 		},
 	}
 }
 
 export const logger: KindFiLogger = buildLogger()
-

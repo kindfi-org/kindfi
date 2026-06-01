@@ -4,13 +4,13 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { useSetState } from 'react-use'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
 import { UserAvatar } from '~/components/base/user-avatar'
 import { CommentForm } from '~/components/sections/projects/detail/comment-form'
 import { CommentThread } from '~/components/sections/projects/detail/comment-thread'
 import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { Comment, Update } from '~/lib/types/project/project-detail.types'
-import { logger } from '@/lib/logger'
 
 interface UpdatesTabProps {
 	updates: Update[]
@@ -21,12 +21,8 @@ export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 	const sortedUpdates = [...updates].sort(
 		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
 	)
-	const [expandedUpdates, setExpandedUpdates] = useSetState<
-		Record<string, boolean>
-	>({})
-	const [showCommentForms, setShowCommentForms] = useSetState<
-		Record<string, boolean>
-	>({})
+	const [expandedUpdates, setExpandedUpdates] = useSetState<Record<string, boolean>>({})
+	const [showCommentForms, setShowCommentForms] = useSetState<Record<string, boolean>>({})
 	const [updatesState, setUpdatesState] = useState(sortedUpdates)
 
 	const toggleComments = (updateId: string) => {
@@ -51,43 +47,46 @@ export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 			like: 0,
 		}
 
-		    // Persist comment to backend
-		    ;(async () => {
-			    try {
-				    if (projectId) {
-					    const res = await fetch('/api/comments', {
-						    method: 'POST',
-						    headers: { 'Content-Type': 'application/json' },
-						    body: JSON.stringify({
-							    content,
-							    project_update_id: updateId,
-							    type: 'comment',
-						    }),
-					    })
-					    if (res.ok) {
-						    const json = await res.json()
-						    // replace temp comment with server comment
-						    const serverComment = json.data
-						    setUpdatesState((prevUpdates) =>
-							    prevUpdates.map((update) => {
-								    if (update.id === updateId) {
-									    return {
-										    ...update,
-										    comments: [serverComment, ...update.comments.filter(c => !String(c.id).startsWith('temp-'))],
-									    }
-								    }
-								    return update
-							    }),
-						    )
-						    return
-					    }
-				    }
-			    } catch (e) {
-				    logger.error('Failed to persist comment', e)
-			    }
-		    })()
+		// Persist comment to backend
+		;(async () => {
+			try {
+				if (projectId) {
+					const res = await fetch('/api/comments', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							content,
+							project_update_id: updateId,
+							type: 'comment',
+						}),
+					})
+					if (res.ok) {
+						const json = await res.json()
+						// replace temp comment with server comment
+						const serverComment = json.data
+						setUpdatesState((prevUpdates) =>
+							prevUpdates.map((update) => {
+								if (update.id === updateId) {
+									return {
+										...update,
+										comments: [
+											serverComment,
+											...update.comments.filter((c) => !String(c.id).startsWith('temp-')),
+										],
+									}
+								}
+								return update
+							}),
+						)
+						return
+					}
+				}
+			} catch (e) {
+				logger.error('Failed to persist comment', e)
+			}
+		})()
 
-		    setUpdatesState((prevUpdates) =>
+		setUpdatesState((prevUpdates) =>
 			prevUpdates.map((update) => {
 				if (update.id === updateId) {
 					return {
@@ -121,40 +120,46 @@ export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 			like: 0,
 		}
 
-		    // Persist reply to backend
-		    ;(async () => {
-			    try {
-				    if (projectId) {
-					    const res = await fetch('/api/comments', {
-						    method: 'POST',
-						    headers: { 'Content-Type': 'application/json' },
-						    body: JSON.stringify({
-							    content,
-							    parent_comment_id: parentId,
-							    project_update_id: updateId,
-							    type: 'comment',
-						    }),
-					    })
-					    if (res.ok) {
-						    const json = await res.json()
-						    const serverComment = json.data
-						    setUpdatesState((prev) =>
-							    prev.map((u) =>
-								    u.id === updateId ? { ...u, comments: [...u.comments.filter(c => !String(c.id).startsWith('temp-')), serverComment] } : u,
-							    ),
-						    )
-						    return
-					    }
-				    }
-			    } catch (e) {
-				    logger.error('Failed to persist reply', e)
-			    }
-		    })()
+		// Persist reply to backend
+		;(async () => {
+			try {
+				if (projectId) {
+					const res = await fetch('/api/comments', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							content,
+							parent_comment_id: parentId,
+							project_update_id: updateId,
+							type: 'comment',
+						}),
+					})
+					if (res.ok) {
+						const json = await res.json()
+						const serverComment = json.data
+						setUpdatesState((prev) =>
+							prev.map((u) =>
+								u.id === updateId
+									? {
+											...u,
+											comments: [
+												...u.comments.filter((c) => !String(c.id).startsWith('temp-')),
+												serverComment,
+											],
+										}
+									: u,
+							),
+						)
+						return
+					}
+				}
+			} catch (e) {
+				logger.error('Failed to persist reply', e)
+			}
+		})()
 
-		    setUpdatesState((prev) =>
-			prev.map((u) =>
-				u.id === updateId ? { ...u, comments: [...u.comments, reply] } : u,
-			),
+		setUpdatesState((prev) =>
+			prev.map((u) => (u.id === updateId ? { ...u, comments: [...u.comments, reply] } : u)),
 		)
 	}
 
@@ -180,9 +185,7 @@ export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 							transition={{ duration: 0.3, delay: index * 0.1 }}
 						>
 							<div className="p-6">
-								<h3 className="text-xl font-bold mb-4 break-words">
-									{update.title}
-								</h3>
+								<h3 className="text-xl font-bold mb-4 break-words">{update.title}</h3>
 
 								<div className="flex items-center gap-3 mb-4 min-w-0">
 									<UserAvatar
@@ -191,9 +194,7 @@ export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 										name={update.author.name}
 									/>
 									<div>
-										<p className="font-medium text-sm break-words">
-											{update.author.name}
-										</p>
+										<p className="font-medium text-sm break-words">{update.author.name}</p>
 										<p className="text-xs text-gray-500">
 											{new Date(update.date).toLocaleDateString('en-US', {
 												year: 'numeric',
@@ -214,11 +215,7 @@ export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 										size="sm"
 										className="text-gray-500 hover:text-gray-700 flex items-center gap-1"
 										onClick={() => toggleCommentForm(update.id)}
-										aria-label={
-											showCommentForms[update.id]
-												? 'Cancel comment'
-												: 'Add comment'
-										}
+										aria-label={showCommentForms[update.id] ? 'Cancel comment' : 'Add comment'}
 									>
 										<MessageCircle className="h-4 w-4" />
 										{showCommentForms[update.id] ? 'Cancel' : 'Comment'}
@@ -283,15 +280,11 @@ export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 										transition={{ duration: 0.2 }}
 										className="bg-gray-50 p-6 border-t border-gray-200"
 									>
-										<h4 className="font-medium mb-4">
-											Comments ({update.comments.length})
-										</h4>
+										<h4 className="font-medium mb-4">Comments ({update.comments.length})</h4>
 										<CommentThread
 											comments={update.comments}
 											allowReplies={true}
-											onAddReply={(parentId, content) =>
-												addReply(update.id, parentId, content)
-											}
+											onAddReply={(parentId, content) => addReply(update.id, parentId, content)}
 										/>
 									</motion.div>
 								)}

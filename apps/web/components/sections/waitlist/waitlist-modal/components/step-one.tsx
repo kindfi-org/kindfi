@@ -1,9 +1,7 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
-import { Button } from '~/components/base/button'
 import {
 	Form,
 	FormControl,
@@ -16,6 +14,7 @@ import {
 import { Input } from '~/components/base/input'
 import { RadioGroup, RadioGroupItem } from '~/components/base/radio-group'
 import { useWaitlist } from '~/hooks/contexts/use-waitlist.context'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { useI18n } from '~/lib/i18n'
 import { waitlistStepOneSchema } from '~/lib/schemas/waitlist.schemas'
 import type { WaitlistStepOneData } from '~/lib/types/waitlist.types'
@@ -86,9 +85,7 @@ export function StepOne({ onNext }: StepOneProps) {
 											{...field}
 										/>
 									</FormControl>
-									<FormDescription>
-										{t('waitlist.fields.emailHint')}
-									</FormDescription>
+									<FormDescription>{t('waitlist.fields.emailHint')}</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -114,6 +111,7 @@ export function StepOne({ onNext }: StepOneProps) {
 											return (
 												<FormItem key={role.value}>
 													<FormControl>
+														{/* biome-ignore lint/a11y/noLabelWithoutControl: RadioGroupItem is nested inside the label */}
 														<label
 															className={cn(
 																'flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all',
@@ -122,10 +120,7 @@ export function StepOne({ onNext }: StepOneProps) {
 																	: 'border-slate-200 bg-white hover:border-emerald-200',
 															)}
 														>
-															<RadioGroupItem
-																value={role.value}
-																className="sr-only"
-															/>
+															<RadioGroupItem value={role.value} className="sr-only" />
 															<div
 																className={cn(
 																	'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
@@ -156,10 +151,7 @@ export function StepOne({ onNext }: StepOneProps) {
 						)}
 					/>
 
-					<WaitlistStepActions
-						showBack={false}
-						primaryLabel={t('waitlist.actions.continue')}
-					/>
+					<WaitlistStepActions showBack={false} primaryLabel={t('waitlist.actions.continue')} />
 				</form>
 			</Form>
 		</motion.div>

@@ -1,11 +1,6 @@
 'use client'
 
-import {
-	Calendar,
-	ChevronDown,
-	ChevronUp,
-	ExternalLink,
-} from 'lucide-react'
+import { Calendar, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from '~/components/base/badge'
 import type { GovernanceOption, GovernanceRound } from '~/lib/governance/types'
@@ -21,10 +16,7 @@ export const RoundRow = ({ round }: RoundRowProps) => {
 	const [expanded, setExpanded] = useState(false)
 	const statusConfig = STATUS_CONFIG[round.status]
 	const options = round.options ?? []
-	const totalVotes = options.reduce(
-		(sum, o) => sum + (o.upvotes ?? 0) + (o.downvotes ?? 0),
-		0,
-	)
+	const totalVotes = options.reduce((sum, o) => sum + (o.upvotes ?? 0) + (o.downvotes ?? 0), 0)
 
 	return (
 		<div className="border rounded-lg overflow-hidden">
@@ -36,10 +28,7 @@ export const RoundRow = ({ round }: RoundRowProps) => {
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center gap-2 flex-wrap">
 						<span className="font-medium text-sm">{round.title}</span>
-						<Badge
-							variant="outline"
-							className={cn('text-xs', statusConfig.className)}
-						>
+						<Badge variant="outline" className={cn('text-xs', statusConfig.className)}>
 							{statusConfig.label}
 						</Badge>
 						{round.contract_round_id != null ? (
@@ -111,18 +100,14 @@ export const RoundRow = ({ round }: RoundRowProps) => {
 							<div className="min-w-0">
 								<span className="font-medium">{opt.title}</span>
 								{opt.project_slug && (
-									<span className="text-xs text-muted-foreground ml-2">
-										/{opt.project_slug}
-									</span>
+									<span className="text-xs text-muted-foreground ml-2">/{opt.project_slug}</span>
 								)}
 							</div>
 							<div className="flex items-center gap-3 shrink-0 text-xs text-muted-foreground">
 								<span>👍 {opt.upvotes}</span>
 								<span>👎 {opt.downvotes}</span>
 								{round.winner_option_id === opt.id && (
-									<span className="text-yellow-600 font-semibold">
-										🏆 Winner
-									</span>
+									<span className="text-yellow-600 font-semibold">🏆 Winner</span>
 								)}
 							</div>
 						</div>

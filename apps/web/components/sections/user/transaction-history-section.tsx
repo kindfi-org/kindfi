@@ -1,10 +1,4 @@
-import {
-	ArrowDownRight,
-	ArrowUpRight,
-	Clock,
-	Filter,
-	RefreshCw,
-} from 'lucide-react'
+import { ArrowDownRight, ArrowUpRight, Clock, Filter, RefreshCw } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card } from '~/components/base/card'
 
@@ -77,9 +71,7 @@ export function TransactionHistory() {
 					{transactions.map((transaction) => (
 						<div
 							key={transaction.id}
-							className={
-								'flex items-center justify-between py-3 px-4 rounded-lg bg-gray-100'
-							}
+							className={'flex items-center justify-between py-3 px-4 rounded-lg bg-gray-100'}
 						>
 							<div className="flex items-center gap-3">
 								<div
@@ -105,8 +97,7 @@ export function TransactionHistory() {
 							<span
 								className={`font-medium ${transaction.type === 'sent' ? 'text-red-500' : 'text-green-500'}`}
 							>
-								{transaction.type === 'sent' ? '-' : '+'}$
-								{transaction.amount.toFixed(2)}
+								{transaction.type === 'sent' ? '-' : '+'}${transaction.amount.toFixed(2)}
 							</span>
 						</div>
 					))}

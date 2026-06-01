@@ -12,10 +12,9 @@ import { useI18n } from '~/lib/i18n'
 
 const Footer = () => {
 	const { t } = useI18n()
-	const { isEmailInvalid, handleValidation, resetValidation } =
-		useFormValidation({
-			email: true,
-		})
+	const { isEmailInvalid, handleValidation, resetValidation } = useFormValidation({
+		email: true,
+	})
 	const mainLinks = [
 		{
 			title: t('footer.projects'),
@@ -102,10 +101,7 @@ const Footer = () => {
 										aria-invalid={isEmailInvalid}
 										onChange={handleValidation}
 									/>
-						<Button
-							size="sm"
-							className="gradient-btn rounded-full text-white"
-						>
+									<Button size="sm" className="gradient-btn rounded-full text-white">
 										{t('footer.subscribe')}
 									</Button>
 								</div>
@@ -122,9 +118,7 @@ const Footer = () => {
 					{/* Links Columns */}
 					{mainLinks.map((column) => (
 						<div key={column.title}>
-							<h3 className="mb-3 text-sm font-semibold text-black">
-								{column.title}
-							</h3>
+							<h3 className="mb-3 text-sm font-semibold text-black">{column.title}</h3>
 							<ul className="space-y-2">
 								{column.links.map((link) => (
 									<li key={link.href}>
@@ -159,8 +153,7 @@ const Footer = () => {
 							))}
 						</div>
 						<p className="text-sm text-gray-600">
-							© {new Date().getFullYear()} KindFi.{' '}
-							{t('footer.allRightsReserved')}.
+							© {new Date().getFullYear()} KindFi. {t('footer.allRightsReserved')}.
 						</p>
 						<div className="flex items-center gap-2">
 							<Button variant="outline" size="sm">

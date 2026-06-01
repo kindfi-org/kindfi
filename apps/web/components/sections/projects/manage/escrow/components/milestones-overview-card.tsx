@@ -1,18 +1,9 @@
 'use client'
 
-import type {
-	MultiReleaseMilestone,
-	SingleReleaseMilestone,
-} from '@trustless-work/escrow'
+import type { MultiReleaseMilestone, SingleReleaseMilestone } from '@trustless-work/escrow'
 import { AlertCircle, CheckCircle2, Clock, FileText, Send } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Progress } from '~/components/base/progress'
 import {
 	calculateMilestoneProgress,
@@ -25,9 +16,7 @@ interface MilestonesOverviewCardProps {
 	milestones: (SingleReleaseMilestone | MultiReleaseMilestone)[]
 }
 
-export function MilestonesOverviewCard({
-	milestones,
-}: MilestonesOverviewCardProps) {
+export function MilestonesOverviewCard({ milestones }: MilestonesOverviewCardProps) {
 	if (milestones.length === 0) return null
 
 	const progress = calculateMilestoneProgress(milestones)
@@ -38,9 +27,7 @@ export function MilestonesOverviewCard({
 				<div className="flex items-center justify-between">
 					<div>
 						<CardTitle>Milestones Overview</CardTitle>
-						<CardDescription>
-							Quick view of all milestones and their status
-						</CardDescription>
+						<CardDescription>Quick view of all milestones and their status</CardDescription>
 					</div>
 					<div className="text-right">
 						<div className="text-2xl font-bold">{progress}%</div>
@@ -91,9 +78,7 @@ export function MilestonesOverviewCard({
 											</Badge>
 										)}
 									</div>
-									<p className="text-sm text-muted-foreground ml-11">
-										{milestone.description}
-									</p>
+									<p className="text-sm text-muted-foreground ml-11">{milestone.description}</p>
 									{!isSingle && (
 										<div className="ml-11 space-y-1">
 											<div className="flex gap-4 text-sm flex-wrap">

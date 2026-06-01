@@ -4,10 +4,9 @@ import { ImageIcon, Upload, X } from 'lucide-react'
 import Image from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
 import { cn } from '~/lib/utils'
-import { logger } from '@/lib/logger'
 
 interface ImageUploadProps {
 	value: File | string | null
@@ -99,16 +98,11 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 						aria-label="Upload project image. Accepts JPEG, PNG, WebP files up to 5MB"
 						aria-describedby="upload-instructions"
 					/>
-					<Upload
-						className="mx-auto h-12 w-12 text-gray-400 mb-4"
-						aria-hidden="true"
-					/>
+					<Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" aria-hidden="true" />
 					<p className="text-lg font-medium text-gray-900 mb-2">
 						{isDragActive ? 'Drop your image here' : 'Upload project image'}
 					</p>
-					<p className="text-sm text-gray-500">
-						Drag and drop or click to select
-					</p>
+					<p className="text-sm text-gray-500">Drag and drop or click to select</p>
 					<p id="upload-instructions" className="text-xs text-gray-400 mt-2">
 						JPEG, PNG, WebP up to 5MB
 					</p>
@@ -123,9 +117,7 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 								width={400}
 								height={192}
 								className="w-full h-64 object-cover bg-gray-50 rounded-md"
-								unoptimized={
-									preview.startsWith('data:') || preview.startsWith('http')
-								}
+								unoptimized={preview.startsWith('data:') || preview.startsWith('http')}
 							/>
 						) : (
 							<div className="w-full h-64 bg-gray-100 flex items-center justify-center">

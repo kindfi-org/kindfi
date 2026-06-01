@@ -23,12 +23,7 @@ interface DonationFormProps {
 	onSubmit: (data: FormValues) => Promise<void>
 }
 
-export function DonationForm({
-	project,
-	hasEscrow,
-	form,
-	onSubmit,
-}: DonationFormProps) {
+export function DonationForm({ project, hasEscrow, form, onSubmit }: DonationFormProps) {
 	return (
 		<>
 			{hasEscrow && (
@@ -54,9 +49,7 @@ export function DonationForm({
 											type="text"
 											inputMode="decimal"
 											placeholder={
-												hasEscrow
-													? `Min. $${project.minInvestment}…`
-													: 'Donations coming soon'
+												hasEscrow ? `Min. $${project.minInvestment}…` : 'Donations coming soon'
 											}
 											className="pl-6 disabled:opacity-60 disabled:cursor-not-allowed"
 											aria-label="Donation amount in USD"
@@ -75,11 +68,7 @@ export function DonationForm({
 						type="submit"
 						className="mt-4 w-full text-white gradient-btn"
 						size="lg"
-						disabled={
-							!hasEscrow ||
-							!form.formState.isValid ||
-							form.formState.isSubmitting
-						}
+						disabled={!hasEscrow || !form.formState.isValid || form.formState.isSubmitting}
 						aria-busy={form.formState.isSubmitting}
 					>
 						{form.formState.isSubmitting ? (
@@ -106,9 +95,8 @@ export function DonationNotices({ hasEscrow }: DonationNoticesProps) {
 		<>
 			{hasEscrow && (
 				<div className="p-3 my-4 text-sm text-amber-900 bg-amber-50 rounded-md border border-amber-300">
-					Donating without logging in means you will miss out on features like
-					reputation, contributor NFTs, and future perks. If that&apos;s fine,
-					you can still donate anonymously.
+					Donating without logging in means you will miss out on features like reputation,
+					contributor NFTs, and future perks. If that&apos;s fine, you can still donate anonymously.
 				</div>
 			)}
 
@@ -116,8 +104,8 @@ export function DonationNotices({ hasEscrow }: DonationNoticesProps) {
 				<div className="p-3 my-4 text-sm text-amber-900 bg-amber-50 rounded-md border border-amber-300">
 					<p className="font-medium mb-1">Donations not yet available</p>
 					<p className="text-amber-800">
-						This project is still setting up its secure escrow contract. Check
-						back soon to support this cause.
+						This project is still setting up its secure escrow contract. Check back soon to support
+						this cause.
 					</p>
 				</div>
 			)}

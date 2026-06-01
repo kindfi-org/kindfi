@@ -1,7 +1,4 @@
-import type {
-	AuthenticationResponseJSON,
-	RegistrationResponseJSON,
-} from '@simplewebauthn/browser'
+import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simplewebauthn/browser'
 import { hash } from '@stellar/stellar-sdk'
 import base64url from 'base64url'
 import { bigintToBuf, bufToBigint } from 'bigint-conversion'
@@ -14,11 +11,7 @@ export const truncateAccount = (account: string) => {
 const getPublicKeyObject = (attestationObject: string) => {
 	const { authData } = CBOR.decode(base64url.toBuffer(attestationObject))
 	const authDataUint8Array = new Uint8Array(authData)
-	const authDataView = new DataView(
-		authDataUint8Array.buffer,
-		0,
-		authDataUint8Array.length,
-	)
+	const authDataView = new DataView(authDataUint8Array.buffer, 0, authDataUint8Array.length)
 
 	let offset = 0
 
@@ -84,9 +77,7 @@ export const getPublicKeys = async (
 
 	if ('attestationObject' in registration.response) {
 		// Handle RegistrationResponseJSON
-		const { publicKeyObject, aaguid } = getPublicKeyObject(
-			registration.response.attestationObject,
-		)
+		const { publicKeyObject, aaguid } = getPublicKeyObject(registration.response.attestationObject)
 		const publicKey = Buffer.from([
 			4, // (0x04 prefix) https://en.bitcoin.it/wiki/Elliptic_Curve_Digital_Signature_Algorithm
 			...(publicKeyObject.get('-2') as Buffer),
@@ -107,10 +98,7 @@ export const getPublicKeys = async (
 export const convertEcdsaSignatureAsnToCompact = (sig: Buffer) => {
 	// Define the order of the curve secp256k1
 	// https://github.com/RustCrypto/elliptic-curves/blob/master/p256/src/lib.rs#L72
-	const q = Buffer.from(
-		'ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551',
-		'hex',
-	)
+	const q = Buffer.from('ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551', 'hex')
 
 	// ASN Sequence
 	let offset = 0
@@ -172,9 +160,7 @@ export const convertEcdsaSignatureAsnToCompact = (sig: Buffer) => {
 	if (bufToBigint(s) > (bufToBigint(q) - BigInt(1)) / BigInt(2)) {
 		signature64 = Buffer.from([
 			...r,
-			...Buffer.from(
-				new Uint8Array(bigintToBuf(bufToBigint(q) - bufToBigint(s))),
-			),
+			...Buffer.from(new Uint8Array(bigintToBuf(bufToBigint(q) - bufToBigint(s)))),
 		])
 	} else {
 		signature64 = Buffer.from([...r, ...s])
@@ -190,10 +176,7 @@ export const convertEcdsaSignatureAsnToCompact = (sig: Buffer) => {
 export const convertP256SignatureAsnToCompact = (sig: Buffer): Buffer => {
 	// Define the order of the curve secp256r1 (P-256)
 	// https://github.com/RustCrypto/elliptic-curves/blob/master/p256/src/lib.rs#L72
-	const q = Buffer.from(
-		'ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551',
-		'hex',
-	)
+	const q = Buffer.from('ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551', 'hex')
 
 	// ASN Sequence
 	let offset = 0

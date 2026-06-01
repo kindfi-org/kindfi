@@ -39,10 +39,7 @@ export const useQAMutations = ({
 
 	const showError = (error: unknown) => {
 		logger.error('Q&A mutation error:', error)
-		showStatus(
-			`Error: ${error instanceof Error ? error.message : String(error)}`,
-			5000,
-		)
+		showStatus(`Error: ${error instanceof Error ? error.message : String(error)}`, 5000)
 	}
 
 	const submitQuestionMutation = useMutation({

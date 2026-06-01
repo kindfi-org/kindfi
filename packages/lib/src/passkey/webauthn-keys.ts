@@ -2,9 +2,9 @@
 // import { Buffer } from 'node:buffer'
 // import { createHash } from 'node:crypto'
 
-import { Buffer } from 'buffer'
+import { Buffer } from 'node:buffer'
+import { createHash } from 'node:crypto'
 import * as CBOR from 'cbor-x/decode'
-import { createHash } from 'crypto'
 import { logger } from '../logger'
 
 /**
@@ -108,9 +108,7 @@ export function convertCoseToUncompressedPublicKey(
 		])
 
 		if (uncompressedKey.length !== 65) {
-			throw new Error(
-				`Invalid uncompressed key length: ${uncompressedKey.length} (expected 65)`,
-			)
+			throw new Error(`Invalid uncompressed key length: ${uncompressedKey.length} (expected 65)`)
 		}
 
 		return uncompressedKey
@@ -194,12 +192,7 @@ export function detectPublicKeyFormat(
 		// Try to decode as CBOR
 		try {
 			const decoded = CBOR.decode(keyBuffer)
-			if (
-				decoded &&
-				typeof decoded === 'object' &&
-				decoded[-2] &&
-				decoded[-3]
-			) {
+			if (decoded && typeof decoded === 'object' && decoded[-2] && decoded[-3]) {
 				return 'cose'
 			}
 		} catch {
@@ -222,9 +215,7 @@ export function detectPublicKeyFormat(
  * @param cosePublicKeyBase64 - Base64-encoded COSE public key from database
  * @returns 32-byte device_id as hex string
  */
-export function computeDeviceIdFromCoseKey(
-	cosePublicKeyBase64: string,
-): string {
+export function computeDeviceIdFromCoseKey(cosePublicKeyBase64: string): string {
 	// Convert COSE to uncompressed format
 	const uncompressedKey = convertCoseToUncompressedPublicKey(
 		Buffer.from(cosePublicKeyBase64, 'base64'),

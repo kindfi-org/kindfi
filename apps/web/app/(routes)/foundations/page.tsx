@@ -1,9 +1,5 @@
 import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
-import {
-	dehydrate,
-	HydrationBoundary,
-	QueryClient,
-} from '@tanstack/react-query'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
 import { FoundationsClientWrapper } from '~/components/sections/foundations/foundations-client-wrapper'
 import { FoundationsHeader } from '~/components/sections/foundations/foundations-header'
@@ -39,10 +35,7 @@ export default async function FoundationsPage({
 
 	return (
 		<main className="min-h-screen bg-muted/30" aria-label="Foundations directory">
-			<SectionContainer
-				maxWidth="6xl"
-				className="py-10 sm:py-14 lg:py-16"
-			>
+			<SectionContainer maxWidth="6xl" className="py-10 sm:py-14 lg:py-16">
 				<FoundationsHeader activeSort={sortSlug} />
 				<HydrationBoundary state={dehydratedState}>
 					<FoundationsClientWrapper />

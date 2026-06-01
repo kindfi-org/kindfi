@@ -2,12 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { IoPeopleOutline } from 'react-icons/io5'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import type { AdminStats } from '~/lib/queries/admin/get-admin-stats'
 import { buildUserStats } from './build-stat-configs'
 import { formatPercent } from './formatters'
@@ -37,30 +32,22 @@ export function AdminUserStats({ stats, reducedMotion }: AdminUserStatsProps) {
 						key={stat.label}
 						{...motionProps}
 						transition={
-							reducedMotion
-								? { duration: 0 }
-								: { duration: 0.3, delay: 0.7 + index * 0.05 }
+							reducedMotion ? { duration: 0 } : { duration: 0.3, delay: 0.7 + index * 0.05 }
 						}
 					>
 						<Card className="hover:shadow-md transition-shadow">
 							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-								<CardTitle className="text-sm font-medium">
-									{stat.label}
-								</CardTitle>
+								<CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
 								<div className={`${stat.bgColor} p-2 rounded-lg`} aria-hidden>
 									<IoPeopleOutline className={`h-5 w-5 ${stat.color}`} />
 								</div>
 							</CardHeader>
 							<CardContent>
-								<div className="text-3xl font-bold tabular-nums">
-									{stat.value}
-								</div>
+								<div className="text-3xl font-bold tabular-nums">{stat.value}</div>
 								{stat.value > 0 ? (
 									<p className="text-xs text-muted-foreground mt-1">
 										{formatPercent(
-											stats.totalUsers > 0
-												? (stat.value / stats.totalUsers) * 100
-												: 0,
+											stats.totalUsers > 0 ? (stat.value / stats.totalUsers) * 100 : 0,
 										)}{' '}
 										of total
 									</p>

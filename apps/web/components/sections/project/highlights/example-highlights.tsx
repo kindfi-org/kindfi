@@ -1,8 +1,4 @@
-import {
-	IoSparklesOutline,
-	IoStarOutline,
-	IoTrendingUpOutline,
-} from 'react-icons/io5'
+import { IoSparklesOutline, IoStarOutline, IoTrendingUpOutline } from 'react-icons/io5'
 import { Card } from '~/components/base/card'
 import { ExampleHighlightCard } from './example-highlight-card'
 

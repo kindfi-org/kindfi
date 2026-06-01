@@ -12,9 +12,7 @@ interface CreateProjectContextType {
 	setCurrentStep: (step: number) => void
 }
 
-const CreateProjectContext = createContext<
-	CreateProjectContextType | undefined
->(undefined)
+const CreateProjectContext = createContext<CreateProjectContextType | undefined>(undefined)
 
 const initialFormData: CreateProjectFormData = {
 	title: '',
@@ -30,8 +28,7 @@ const initialFormData: CreateProjectFormData = {
 }
 
 export function CreateProjectProvider({ children }: { children: ReactNode }) {
-	const [formData, setFormData] =
-		useSetState<CreateProjectFormData>(initialFormData)
+	const [formData, setFormData] = useSetState<CreateProjectFormData>(initialFormData)
 	const [currentStep, setCurrentStep] = useState(1)
 
 	const updateFormData = (data: Partial<CreateProjectFormData>) => {
@@ -55,9 +52,7 @@ export function CreateProjectProvider({ children }: { children: ReactNode }) {
 export function useCreateProject() {
 	const context = useContext(CreateProjectContext)
 	if (context === undefined) {
-		throw new Error(
-			'useCreateProject must be used within a CreateProjectProvider',
-		)
+		throw new Error('useCreateProject must be used within a CreateProjectProvider')
 	}
 	return context
 }

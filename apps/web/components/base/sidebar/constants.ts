@@ -16,8 +16,6 @@ export const getSidebarStyles = (reducedMotion: boolean) => ({
 })
 
 export const getSidebarStylesTwo = (reducedMotion: boolean) => ({
-	transition: reducedMotion
-		? 'none'
-		: `transform ${TRANSITION_DURATION} ease-in-out`,
+	transition: reducedMotion ? 'none' : `transform ${TRANSITION_DURATION} ease-in-out`,
 	willChange: reducedMotion ? 'auto' : 'transform',
 })

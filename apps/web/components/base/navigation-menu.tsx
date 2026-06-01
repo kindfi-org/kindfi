@@ -46,10 +46,7 @@ const NavigationMenu = React.forwardRef<
 
 	return (
 		<nav
-			className={cn(
-				'relative z-10 flex max-w-max flex-1 items-center justify-center',
-				className,
-			)}
+			className={cn('relative z-10 flex max-w-max flex-1 items-center justify-center', className)}
 		>
 			<NavigationMenuPrimitive.Root
 				ref={ref}
@@ -72,10 +69,7 @@ const NavigationMenuList = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<NavigationMenuPrimitive.List
 		ref={ref}
-		className={cn(
-			'group flex flex-1 list-none items-center justify-center space-x-1',
-			className,
-		)}
+		className={cn('group flex flex-1 list-none items-center justify-center space-x-1', className)}
 		aria-label="Navigation menu items"
 		{...props}
 	/>
@@ -84,9 +78,7 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName
 
 const NavigationMenuItem = NavigationMenuPrimitive.Item
 
-type TriggerProps = React.ComponentPropsWithoutRef<
-	typeof NavigationMenuPrimitive.Trigger
-> & {
+type TriggerProps = React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Trigger> & {
 	'data-state'?: 'open' | 'closed'
 }
 
@@ -145,8 +137,7 @@ const NavigationMenuViewport = React.forwardRef<
 		/>
 	</div>
 ))
-NavigationMenuViewport.displayName =
-	NavigationMenuPrimitive.Viewport.displayName
+NavigationMenuViewport.displayName = NavigationMenuPrimitive.Viewport.displayName
 
 const NavigationMenuIndicator = React.forwardRef<
 	React.ElementRef<typeof NavigationMenuPrimitive.Indicator>,
@@ -163,12 +154,9 @@ const NavigationMenuIndicator = React.forwardRef<
 		<div className="relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-border shadow-md" />
 	</NavigationMenuPrimitive.Indicator>
 ))
-NavigationMenuIndicator.displayName =
-	NavigationMenuPrimitive.Indicator.displayName
+NavigationMenuIndicator.displayName = NavigationMenuPrimitive.Indicator.displayName
 
-const SkeletonItem = () => (
-	<div className="h-10 w-full animate-pulse rounded bg-gray-200" />
-)
+const SkeletonItem = () => <div className="h-10 w-full animate-pulse rounded bg-gray-200" />
 
 export {
 	NavigationMenu,

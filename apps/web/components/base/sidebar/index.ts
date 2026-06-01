@@ -1,22 +1,11 @@
 export { useSidebar } from './context'
-export { SidebarProvider } from './sidebar-provider'
 export {
 	Sidebar,
-	SidebarInset,
 	SidebarInput,
+	SidebarInset,
 	SidebarRail,
 	SidebarTrigger,
 } from './sidebar-layout'
-export {
-	SidebarContent,
-	SidebarFooter,
-	SidebarGroup,
-	SidebarGroupAction,
-	SidebarGroupContent,
-	SidebarGroupLabel,
-	SidebarHeader,
-	SidebarSeparator,
-} from './sidebar-structure'
 export {
 	SidebarMenu,
 	SidebarMenuAction,
@@ -28,3 +17,14 @@ export {
 	SidebarMenuSubButton,
 	SidebarMenuSubItem,
 } from './sidebar-menu'
+export { SidebarProvider } from './sidebar-provider'
+export {
+	SidebarContent,
+	SidebarFooter,
+	SidebarGroup,
+	SidebarGroupAction,
+	SidebarGroupContent,
+	SidebarGroupLabel,
+	SidebarHeader,
+	SidebarSeparator,
+} from './sidebar-structure'

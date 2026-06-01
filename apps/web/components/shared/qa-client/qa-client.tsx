@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import type { QAClientProps } from '~/lib/types/project/project-qa.types'
 import { GuestAlerts } from './guest-alerts'
 import { useAutoExpandQuestions } from './hooks/use-auto-expand-questions'
 import { useGuestUser } from './hooks/use-guest-user'
@@ -10,14 +11,8 @@ import { useQARealtime } from './hooks/use-qa-realtime'
 import { QAHeader } from './qa-header'
 import { QARealtimeStatus } from './qa-realtime-status'
 import { QuestionsSection } from './questions-section'
-import type { QAClientProps } from '~/lib/types/project/project-qa.types'
 
-const QAClient = ({
-	projectId,
-	currentUser,
-	initialQuestions,
-	initialComments,
-}: QAClientProps) => {
+const QAClient = ({ projectId, currentUser, initialQuestions, initialComments }: QAClientProps) => {
 	const router = useRouter()
 
 	const {
@@ -27,21 +22,14 @@ const QAClient = ({
 		handleGuestCommentSuccess,
 	} = useGuestUser(currentUser)
 
-	const {
-		processedQuestions,
-		setProcessedQuestions,
-		refetchQuestions,
-	} = useQAQueries({
+	const { processedQuestions, setProcessedQuestions, refetchQuestions } = useQAQueries({
 		projectId,
 		initialQuestions,
 		initialComments,
 	})
 
-	const {
-		expandedQuestionIds,
-		toggleQuestion,
-		expandQuestion,
-	} = useAutoExpandQuestions(processedQuestions)
+	const { expandedQuestionIds, toggleQuestion, expandQuestion } =
+		useAutoExpandQuestions(processedQuestions)
 
 	const {
 		isRealtimeEnabled,
@@ -97,21 +85,14 @@ const QAClient = ({
 			/>
 
 			<p className="mb-1 text-gray-500">
-				Ask questions about this project and get answers from the community and
-				project team members.
+				Ask questions about this project and get answers from the community and project team
+				members.
 				{isRealtimeEnabled && (
-					<span className="ml-1 text-blue-600">
-						Real-time updates are enabled.
-					</span>
+					<span className="ml-1 text-blue-600">Real-time updates are enabled.</span>
 				)}
 			</p>
 
-			{realtimeStatus && (
-				<QARealtimeStatus
-					status={realtimeStatus}
-					isActive={realtimeActivity}
-				/>
-			)}
+			{realtimeStatus && <QARealtimeStatus status={realtimeStatus} isActive={realtimeActivity} />}
 
 			{!currentUser && (
 				<GuestAlerts

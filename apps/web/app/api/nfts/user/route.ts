@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { getUserStats } from '~/lib/services/user-stats'
-import { logger } from '@/lib/logger'
 
 /**
  * GET /api/nfts/user
@@ -20,11 +20,7 @@ export async function GET() {
 		const { supabase } = await import('@packages/lib/supabase')
 
 		const [nftResult, stats] = await Promise.all([
-			supabase
-				.from('user_nfts')
-				.select('*')
-				.eq('user_id', session.user.id)
-				.single(),
+			supabase.from('user_nfts').select('*').eq('user_id', session.user.id).single(),
 			getUserStats({ supabase, userId: session.user.id }),
 		])
 
@@ -40,9 +36,6 @@ export async function GET() {
 		})
 	} catch (error) {
 		logger.error('Error in GET /api/nfts/user:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

@@ -14,13 +14,7 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Label } from '~/components/base/label'
 import { Separator } from '~/components/base/separator'
 import { formatEscrowAmount } from '~/lib/utils/escrow/milestone-utils'
@@ -31,17 +25,12 @@ interface EscrowDetailsCardProps {
 	escrowContractAddress: string
 }
 
-export function EscrowDetailsCard({
-	escrowData,
-	escrowContractAddress,
-}: EscrowDetailsCardProps) {
+export function EscrowDetailsCard({ escrowData, escrowContractAddress }: EscrowDetailsCardProps) {
 	return (
 		<Card>
 			<CardHeader>
 				<CardTitle>Escrow Details</CardTitle>
-				<CardDescription>
-					Complete information about your escrow contract
-				</CardDescription>
+				<CardDescription>Complete information about your escrow contract</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-6">
 				<div className="grid gap-6 sm:grid-cols-2">
@@ -52,10 +41,7 @@ export function EscrowDetailsCard({
 					<div className="space-y-1">
 						<Label className="text-xs text-muted-foreground">Status</Label>
 						<div className="flex items-center gap-2 flex-wrap">
-							<Badge
-								variant={escrowData.isActive ? 'default' : 'secondary'}
-								className="gap-1"
-							>
+							<Badge variant={escrowData.isActive ? 'default' : 'secondary'} className="gap-1">
 								{escrowData.isActive ? (
 									<>
 										<CheckCircle2 className="w-3 h-3" />
@@ -100,9 +86,7 @@ export function EscrowDetailsCard({
 									size="sm"
 									className="h-6 w-6 p-0"
 									onClick={() => {
-										navigator.clipboard.writeText(
-											escrowData.contractId || escrowContractAddress,
-										)
+										navigator.clipboard.writeText(escrowData.contractId || escrowContractAddress)
 										toast.success('Contract ID copied to clipboard')
 									}}
 									title="Copy Contract ID"
@@ -117,9 +101,7 @@ export function EscrowDetailsCard({
 									title="View on Stellar Explorer"
 								>
 									<Link
-										href={getStellarExplorerUrl(
-											escrowData.contractId || escrowContractAddress,
-										)}
+										href={getStellarExplorerUrl(escrowData.contractId || escrowContractAddress)}
 										target="_blank"
 										rel="noopener noreferrer"
 									>
@@ -130,17 +112,11 @@ export function EscrowDetailsCard({
 						</div>
 					</div>
 					<div className="space-y-1">
-						<Label className="text-xs text-muted-foreground">
-							Engagement ID
-						</Label>
-						<p className="font-mono text-sm break-all">
-							{escrowData.engagementId}
-						</p>
+						<Label className="text-xs text-muted-foreground">Engagement ID</Label>
+						<p className="font-mono text-sm break-all">{escrowData.engagementId}</p>
 					</div>
 					<div className="space-y-1">
-						<Label className="text-xs text-muted-foreground">
-							Total Amount
-						</Label>
+						<Label className="text-xs text-muted-foreground">Total Amount</Label>
 						<p className="font-semibold text-lg">
 							{escrowData.amount !== undefined &&
 							escrowData.amount !== null &&
@@ -157,9 +133,7 @@ export function EscrowDetailsCard({
 							)}
 					</div>
 					<div className="space-y-1">
-						<Label className="text-xs text-muted-foreground">
-							Platform Fee
-						</Label>
+						<Label className="text-xs text-muted-foreground">Platform Fee</Label>
 						<p className="font-semibold">
 							{escrowData.platformFee !== undefined &&
 							escrowData.platformFee !== null &&
@@ -184,9 +158,7 @@ export function EscrowDetailsCard({
 				<Separator />
 				<div className="space-y-1">
 					<Label className="text-xs text-muted-foreground">Description</Label>
-					<p className="text-sm leading-relaxed whitespace-pre-wrap">
-						{escrowData.description}
-					</p>
+					<p className="text-sm leading-relaxed whitespace-pre-wrap">{escrowData.description}</p>
 				</div>
 				{(escrowData.createdAt || escrowData.updatedAt) && (
 					<>

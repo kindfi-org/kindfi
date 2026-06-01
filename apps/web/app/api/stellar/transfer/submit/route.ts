@@ -5,19 +5,14 @@ import {
 	type verifyAuthentication,
 	type WebAuthnAssertionResponse,
 } from '@packages/lib/passkey'
-import {
-	Keypair,
-	type Transaction,
-	TransactionBuilder,
-	xdr,
-} from '@stellar/stellar-sdk'
+import { Keypair, type Transaction, TransactionBuilder, xdr } from '@stellar/stellar-sdk'
 import { type Api, Server } from '@stellar/stellar-sdk/rpc'
 import isEqual from 'lodash/isEqual'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { transferSubmitSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 // Don't initialize services at module level - do it inside the route handler
 // This prevents build-time errors when environment variables are not available
@@ -36,8 +31,7 @@ export async function POST(req: NextRequest) {
 		const body = await req.json()
 		const validation = validateRequest(transferSubmitSchema, body)
 		if (!validation.success) return validation.response
-		const { transactionData, authResponse, userDevice, verificationJSON } =
-			validation.data
+		const { transactionData, authResponse, userDevice, verificationJSON } = validation.data
 		const { transactionXDR, hash: _hash } = transactionData
 		const _smartWalletAddress = userDevice.address
 		const _verificationJSONTyped = verificationJSON as Awaited<
@@ -94,18 +88,13 @@ export async function POST(req: NextRequest) {
 		}
 
 		const authEntries =
-			(transaction.operations[0] as unknown as Api.SimulateHostFunctionResult)
-				.auth || []
+			(transaction.operations[0] as unknown as Api.SimulateHostFunctionResult).auth || []
 
 		if (authEntries.length) {
 			const publicKeyArray =
 				verificationJSON.device.pubKey instanceof Uint8Array
 					? verificationJSON.device.pubKey
-					: new Uint8Array(
-							Object.values(
-								verificationJSON.device.pubKey as Record<string, number>,
-							),
-						)
+					: new Uint8Array(Object.values(verificationJSON.device.pubKey as Record<string, number>))
 			const publicKey = Buffer.from(publicKeyArray).toString('base64')
 			const credentialId = verificationJSON.device.id
 			const deviceIdHex = computeDeviceIdFromCoseKey(publicKey)
@@ -131,12 +120,9 @@ export async function POST(req: NextRequest) {
 			// ! Keeping logs commented out for now. Deactivating signature verification on-chain, verifying device existence on contract only
 			// Logging WebAuthn Signature Details
 
-
-
 			// 	'   Authenticator Data (base64):',
 			// 	authenticatorData.toString('base64'),
 			// )
-
 
 			// 	'   WebAuthn Payload (base64):',
 			// 	webauthnPayload.toString('base64'),
@@ -146,15 +132,12 @@ export async function POST(req: NextRequest) {
 			// 	webauthnPayloadHash.toString('hex'),
 			// )
 
-
-
 			// ! Strategy still not the same... simplify. A verification already happening, but is not "preparing" the signature to on-chain verification
 			// const verificationResults = await stellarService.verifyPasskeySignature(
 			// 	verificationJSON.device.address,
 			// 	JSON.stringify(authResponse.response),
 			// 	hash,
 			// )
-
 
 			// Find and update the auth entry for the smart wallet
 			const signatureScVal = xdr.ScVal.fromXDR(signatureScValRaw.toXDR())
@@ -172,15 +155,12 @@ export async function POST(req: NextRequest) {
 					const newCredentials = new xdr.SorobanAddressCredentials({
 						address: addressCredentials.address(),
 						nonce: addressCredentials.nonce(),
-						signatureExpirationLedger:
-							addressCredentials.signatureExpirationLedger(),
+						signatureExpirationLedger: addressCredentials.signatureExpirationLedger(),
 						signature: signatureScVal,
 					})
 
 					// Update the auth entry with the new credentials containing our signature
-					authEntry.credentials(
-						xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
-					)
+					authEntry.credentials(xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials))
 
 					break
 				}

@@ -30,10 +30,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 		[onChainRaised, project.raised],
 	)
 
-	const progressPercentage = Math.min(
-		Math.round((displayRaised / project.goal) * 100),
-		100,
-	)
+	const progressPercentage = Math.min(Math.round((displayRaised / project.goal) * 100), 100)
 
 	return (
 		<Link
@@ -66,10 +63,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 						</h3>
 						<div className="flex shrink-0 flex-wrap gap-1.5">
 							{project.category && (
-								<CategoryBadge
-									category={project.category}
-									className="text-xs sm:text-sm"
-								/>
+								<CategoryBadge category={project.category} className="text-xs sm:text-sm" />
 							)}
 							{project.escrowContractAddress && (
 								<Badge
@@ -128,12 +122,8 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 								<p className="text-[10px] text-gray-500 sm:text-xs">{t('projects.goal')}</p>
 							</div>
 							<div className="text-center">
-								<p className="text-xs font-bold sm:text-sm">
-									{project.investors}
-								</p>
-								<p className="text-[10px] text-gray-500 sm:text-xs">
-									{t('projects.supporters')}
-								</p>
+								<p className="text-xs font-bold sm:text-sm">{project.investors}</p>
+								<p className="text-[10px] text-gray-500 sm:text-xs">{t('projects.supporters')}</p>
 							</div>
 							<div className="text-center">
 								<p className="text-xs font-bold sm:text-sm">
@@ -143,9 +133,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 										maximumFractionDigits: 0,
 									}).format(project.minInvestment)}
 								</p>
-								<p className="text-[10px] text-gray-500 sm:text-xs">
-									{t('projects.minDonation')}
-								</p>
+								<p className="text-[10px] text-gray-500 sm:text-xs">{t('projects.minDonation')}</p>
 							</div>
 						</div>
 						<div className="flex flex-wrap gap-1" aria-label="Project tags">

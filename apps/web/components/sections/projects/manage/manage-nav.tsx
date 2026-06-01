@@ -75,9 +75,7 @@ export function ManageNav({ slug }: { slug: string }) {
 								<Icon
 									className={cn(
 										'shrink-0',
-										isActive
-											? 'opacity-100'
-											: 'opacity-80 group-hover:opacity-100',
+										isActive ? 'opacity-100' : 'opacity-80 group-hover:opacity-100',
 									)}
 									size={16}
 								/>

@@ -19,8 +19,7 @@ export interface RateLimitResult {
  */
 export class SignatureRateLimiter {
 	private redis: Redis | null = null
-	private inMemoryStore: Map<string, { count: number; resetAt: number }> =
-		new Map()
+	private inMemoryStore: Map<string, { count: number; resetAt: number }> = new Map()
 	private config: RateLimitConfig
 	private cleanupInterval: NodeJS.Timeout | null = null
 
@@ -35,7 +34,10 @@ export class SignatureRateLimiter {
 					token: config.redisToken,
 				})
 			} catch (error) {
-				logger.warn('Failed to initialize Upstash Redis, using in-memory store', error instanceof Error ? error : undefined)
+				logger.warn(
+					'Failed to initialize Upstash Redis, using in-memory store',
+					error instanceof Error ? error : undefined,
+				)
 			}
 		} else {
 		}
@@ -53,7 +55,10 @@ export class SignatureRateLimiter {
 				return await this.checkRedisLimit(key)
 			}
 		} catch (error) {
-			logger.warn('Redis rate limit check failed, using in-memory fallback', error instanceof Error ? error : undefined)
+			logger.warn(
+				'Redis rate limit check failed, using in-memory fallback',
+				error instanceof Error ? error : undefined,
+			)
 		}
 
 		// Fallback to in-memory

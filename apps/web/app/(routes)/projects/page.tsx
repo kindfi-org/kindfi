@@ -1,9 +1,5 @@
 import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
-import {
-	dehydrate,
-	HydrationBoundary,
-	QueryClient,
-} from '@tanstack/react-query'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
 import { ProjectsClientWrapper } from '~/components/sections/projects/projects-client-wrapper'
 import { ProjectsHero } from '~/components/sections/projects/projects-hero'
@@ -25,8 +21,7 @@ export const metadata: Metadata = {
 	twitter: {
 		card: 'summary_large_image',
 		title: 'Projects | KindFi',
-		description:
-			'Explore and support transparent crowdfunding projects on KindFi.',
+		description: 'Explore and support transparent crowdfunding projects on KindFi.',
 	},
 	alternates: {
 		canonical: '/projects',
@@ -42,11 +37,7 @@ export default async function ProjectsPage({
 
 	const { sort, category } = await searchParams
 	const sortSlug = sort ?? 'most-popular'
-	const categorySlugs = Array.isArray(category)
-		? category
-		: category
-			? [category]
-			: []
+	const categorySlugs = Array.isArray(category) ? category : category ? [category] : []
 
 	await Promise.all([
 		prefetchSupabaseQuery(

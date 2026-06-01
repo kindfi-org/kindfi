@@ -62,11 +62,7 @@ const Problems = () => {
 					viewport={{ once: true, amount: 0.12 }}
 				>
 					{mockAboutUs.problems.map((problem, index) => (
-						<motion.div
-							key={problem.id}
-							variants={itemVariants}
-							className="h-full"
-						>
+						<motion.div key={problem.id} variants={itemVariants} className="h-full">
 							<Card className="flex h-full flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
 								<div
 									className={

@@ -1,11 +1,9 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion } from 'framer-motion'
 import { Loader2, Save } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import {
@@ -25,12 +23,9 @@ import { SocialLinks } from '~/components/sections/projects/create/social-links'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/shared'
 import { useProjectMutation } from '~/hooks/projects/use-project-mutation'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { getAllCategories } from '~/lib/queries/projects'
-import {
-	stepOneSchema,
-	stepThreeSchema,
-	stepTwoSchema,
-} from '~/lib/schemas/create-project.schemas'
+import { stepOneSchema, stepThreeSchema, stepTwoSchema } from '~/lib/schemas/create-project.schemas'
 import type {
 	BasicProjectInfo,
 	CreateProjectFormData,
@@ -39,9 +34,7 @@ import { normalizeProjectToFormDefaults } from '~/lib/utils/project-utils'
 import { CategoryBadgeSkeleton } from '../skeletons'
 
 // Combine all schemas for the complete form
-const updateProjectSchema = stepOneSchema
-	.and(stepTwoSchema)
-	.and(stepThreeSchema)
+const updateProjectSchema = stepOneSchema.and(stepTwoSchema).and(stepThreeSchema)
 
 interface UpdateProjectFormProps {
 	project: BasicProjectInfo
@@ -86,13 +79,10 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 			transition={{ duration: 0.5 }}
 		>
 			<div className="max-w-2xl mx-auto">
-				<Card >
+				<Card>
 					<CardContent>
 						<Form {...form}>
-							<form
-								onSubmit={form.handleSubmit(onSubmit)}
-								className="max-w-2xl mx-auto space-y-6"
-							>
+							<form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl mx-auto space-y-6">
 								<CSRFTokenField />
 								{/* Title */}
 								<FormField
@@ -104,11 +94,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 												Title <span className="text-destructive">*</span>
 											</FormLabel>
 											<FormControl>
-												<Input
-													placeholder="Enter your project title"
-													
-													{...field}
-												/>
+												<Input placeholder="Enter your project title" {...field} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -144,15 +130,12 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>
-													Target Amount{' '}
-													<span className="text-destructive">*</span>
+													Target Amount <span className="text-destructive">*</span>
 												</FormLabel>
 												<FormControl>
 													<div className="relative">
 														<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-															<span className="text-gray-500 sm:text-sm">
-																$
-															</span>
+															<span className="text-gray-500 sm:text-sm">$</span>
 														</div>
 														<Input
 															type="number"
@@ -161,9 +144,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 															value={field.value ?? ''}
 															onChange={(e) =>
 																field.onChange(
-																	e.target.value === ''
-																		? undefined
-																		: Number(e.target.value),
+																	e.target.value === '' ? undefined : Number(e.target.value),
 																)
 															}
 														/>
@@ -181,15 +162,12 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>
-													Minimum Investment{' '}
-													<span className="text-destructive">*</span>
+													Minimum Investment <span className="text-destructive">*</span>
 												</FormLabel>
 												<FormControl>
 													<div className="relative">
 														<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-															<span className="text-gray-500 sm:text-sm">
-																$
-															</span>
+															<span className="text-gray-500 sm:text-sm">$</span>
 														</div>
 														<Input
 															type="number"
@@ -198,9 +176,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 															value={field.value ?? ''}
 															onChange={(e) =>
 																field.onChange(
-																	e.target.value === ''
-																		? undefined
-																		: Number(e.target.value),
+																	e.target.value === '' ? undefined : Number(e.target.value),
 																)
 															}
 														/>
@@ -223,7 +199,6 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 												<Input
 													type="url"
 													placeholder="https://yourproject.com"
-													
 													value={field.value ?? ''}
 													onChange={(e) => field.onChange(e.target.value)}
 												/>
@@ -281,10 +256,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 												Location <span className="text-destructive">*</span>
 											</FormLabel>
 											<FormControl>
-												<LocationSelect
-													value={field.value}
-													onChange={field.onChange}
-												/>
+												<LocationSelect value={field.value} onChange={field.onChange} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -354,9 +326,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 									<div className="space-y-4 text-center">
 										<div className="text-sm text-muted-foreground">
 											{isDirty ? (
-												<span className="font-medium text-amber-600">
-													You have unsaved changes
-												</span>
+												<span className="font-medium text-amber-600">You have unsaved changes</span>
 											) : (
 												<span>All changes saved</span>
 											)}
@@ -367,9 +337,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 											disabled={!isDirty || isPending}
 											className="flex items-center w-full gap-2 px-8 text-white gradient-btn"
 											size="lg"
-											aria-describedby={
-												isDirty ? 'unsaved-changes' : 'all-saved'
-											}
+											aria-describedby={isDirty ? 'unsaved-changes' : 'all-saved'}
 											aria-label="Save changes"
 										>
 											{isPending ? (

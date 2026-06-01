@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '~/components/base/button'
 import {
 	FOUNDATION_LIST_SORT_NAV,
@@ -23,9 +23,8 @@ export function FoundationsHeader({ activeSort }: FoundationsHeaderProps) {
 						Foundations
 					</h1>
 					<p className="mt-3 text-base leading-relaxed text-muted-foreground sm:text-lg">
-						Verified organizations running campaigns on KindFi. Explore their
-						work, follow live initiatives, and support causes that match your
-						values.
+						Verified organizations running campaigns on KindFi. Explore their work, follow live
+						initiatives, and support causes that match your values.
 					</p>
 				</div>
 				<Button asChild className="shrink-0 self-start lg:self-auto">
@@ -36,14 +35,10 @@ export function FoundationsHeader({ activeSort }: FoundationsHeaderProps) {
 				</Button>
 			</div>
 
-			<nav
-				className="mt-8 flex flex-wrap gap-2"
-				aria-label="Sort foundations"
-			>
+			<nav className="mt-8 flex flex-wrap gap-2" aria-label="Sort foundations">
 				{FOUNDATION_LIST_SORT_NAV.map(({ slug, label }) => {
 					const active = activeSort === slug
-					const href =
-						slug === 'most-recent' ? '/foundations' : `/foundations?sort=${slug}`
+					const href = slug === 'most-recent' ? '/foundations' : `/foundations?sort=${slug}`
 					return (
 						<Link
 							key={slug}

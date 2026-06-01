@@ -13,10 +13,7 @@ import {
 } from 'react-icons/io5'
 import { Button } from '~/components/base/button'
 import { cn } from '~/lib/utils'
-import {
-	FOUNDATION_MANAGE_SECTIONS,
-	type FoundationManageSectionKey,
-} from './constants'
+import { FOUNDATION_MANAGE_SECTIONS, type FoundationManageSectionKey } from './constants'
 
 const SECTION_ICONS: Record<
 	FoundationManageSectionKey,
@@ -78,10 +75,7 @@ export function FoundationManageCommandCenter({
 			</div>
 
 			{/* Horizontal tabs */}
-			<nav
-				className="mt-4 flex gap-0 border-b border-border"
-				aria-label="Manage sections"
-			>
+			<nav className="mt-4 flex gap-0 border-b border-border" aria-label="Manage sections">
 				{FOUNDATION_MANAGE_SECTIONS.map((section) => {
 					const url = section.href(slug)
 					const isActive =

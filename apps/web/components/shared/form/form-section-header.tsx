@@ -25,9 +25,7 @@ export function FormSectionHeader({
 					<Icon className="h-4 w-4" aria-hidden="true" />
 				</div>
 				<div className="min-w-0 flex-1">
-					<h3 className="text-base font-semibold tracking-tight text-slate-900">
-						{title}
-					</h3>
+					<h3 className="text-base font-semibold tracking-tight text-slate-900">{title}</h3>
 					{description ? (
 						<p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
 					) : null}

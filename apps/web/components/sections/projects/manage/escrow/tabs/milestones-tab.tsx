@@ -8,14 +8,9 @@ import type {
 import { CheckCircle2, FileText, Loader2, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import {
@@ -27,11 +22,7 @@ import {
 } from '~/components/base/select'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
-import { logger } from '@/lib/logger'
-import {
-	getMilestoneStatus,
-	isSingleReleaseMilestone,
-} from '~/lib/utils/escrow/milestone-utils'
+import { getMilestoneStatus, isSingleReleaseMilestone } from '~/lib/utils/escrow/milestone-utils'
 
 interface MilestonesTabProps {
 	escrowContractAddress: string
@@ -48,8 +39,7 @@ export function MilestonesTab({
 	isLoading,
 	onSuccess,
 }: MilestonesTabProps) {
-	const { approveMilestone, changeMilestoneStatus, sendTransaction } =
-		useEscrow()
+	const { approveMilestone, changeMilestoneStatus, sendTransaction } = useEscrow()
 	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState('0')
 	const [milestoneStatus, setMilestoneStatus] = useState('approved')
@@ -70,16 +60,11 @@ export function MilestonesTab({
 				escrowType,
 			)
 
-			if (
-				approveResponse.status !== 'SUCCESS' ||
-				!approveResponse.unsignedTransaction
-			) {
+			if (approveResponse.status !== 'SUCCESS' || !approveResponse.unsignedTransaction) {
 				throw new Error('Failed to prepare approval transaction')
 			}
 
-			const signedXdr = await signTrustlessTransaction(
-				approveResponse.unsignedTransaction,
-			)
+			const signedXdr = await signTrustlessTransaction(approveResponse.unsignedTransaction)
 			const sendResult = await sendTransaction(signedXdr)
 			if (sendResult?.status !== 'SUCCESS') {
 				throw new Error('Transaction failed')
@@ -89,8 +74,7 @@ export function MilestonesTab({
 			onSuccess()
 		} catch (error) {
 			logger.error(error)
-			const errorMessage =
-				error instanceof Error ? error.message : 'Failed to approve milestone'
+			const errorMessage = error instanceof Error ? error.message : 'Failed to approve milestone'
 			toast.error(errorMessage)
 		} finally {
 			setIsProcessing(false)
@@ -113,16 +97,11 @@ export function MilestonesTab({
 				escrowType,
 			)
 
-			if (
-				changeResponse.status !== 'SUCCESS' ||
-				!changeResponse.unsignedTransaction
-			) {
+			if (changeResponse.status !== 'SUCCESS' || !changeResponse.unsignedTransaction) {
 				throw new Error('Failed to prepare status change transaction')
 			}
 
-			const signedXdr = await signTrustlessTransaction(
-				changeResponse.unsignedTransaction,
-			)
+			const signedXdr = await signTrustlessTransaction(changeResponse.unsignedTransaction)
 			const sendResult = await sendTransaction(signedXdr)
 			if (sendResult?.status !== 'SUCCESS') {
 				throw new Error('Transaction failed')
@@ -134,9 +113,7 @@ export function MilestonesTab({
 		} catch (error) {
 			logger.error(error)
 			const errorMessage =
-				error instanceof Error
-					? error.message
-					: 'Failed to update milestone status'
+				error instanceof Error ? error.message : 'Failed to update milestone status'
 			toast.error(errorMessage)
 		} finally {
 			setIsProcessing(false)
@@ -149,9 +126,7 @@ export function MilestonesTab({
 				<CardContent className="py-12">
 					<div className="flex flex-col items-center justify-center space-y-4">
 						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">
-							Loading milestones...
-						</p>
+						<p className="text-sm text-muted-foreground">Loading milestones...</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -165,8 +140,7 @@ export function MilestonesTab({
 					<div className="flex flex-col items-center justify-center space-y-4">
 						<FileText className="h-8 w-8 text-muted-foreground" />
 						<p className="text-sm text-muted-foreground">
-							No milestones found. Milestones are defined when creating the
-							escrow.
+							No milestones found. Milestones are defined when creating the escrow.
 						</p>
 					</div>
 				</CardContent>
@@ -179,9 +153,7 @@ export function MilestonesTab({
 			<Card>
 				<CardHeader>
 					<CardTitle>Milestones</CardTitle>
-					<CardDescription>
-						View and manage all escrow milestones
-					</CardDescription>
+					<CardDescription>View and manage all escrow milestones</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-4">
@@ -212,18 +184,13 @@ export function MilestonesTab({
 												</span>
 											)}
 										</div>
-										<p className="text-sm text-muted-foreground">
-											{milestone.description}
-										</p>
+										<p className="text-sm text-muted-foreground">{milestone.description}</p>
 										{!isSingle && (
 											<div className="flex items-center gap-4 text-sm">
 												<span>
 													Amount:{' '}
 													<span className="font-semibold">
-														$
-														{(
-															milestone as MultiReleaseMilestone
-														).amount?.toLocaleString()}
+														${(milestone as MultiReleaseMilestone).amount?.toLocaleString()}
 													</span>
 												</span>
 												{milestone.evidence && (
@@ -307,16 +274,13 @@ export function MilestonesTab({
 							Update Status
 						</CardTitle>
 						<CardDescription>
-							Update milestone status and add evidence (Service Provider role
-							required)
+							Update milestone status and add evidence (Service Provider role required)
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-4">
 							<div className="space-y-2">
-								<Label htmlFor="status-milestone-select">
-									Select Milestone
-								</Label>
+								<Label htmlFor="status-milestone-select">Select Milestone</Label>
 								<Select
 									value={selectedMilestoneIndex}
 									onValueChange={setSelectedMilestoneIndex}

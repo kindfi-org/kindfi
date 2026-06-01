@@ -7,13 +7,9 @@ import { ViewDonated } from './view-donated'
 import { type FormValue, ViewInitial } from './view-initial'
 
 export function ProjectRightPanel() {
-	const [amountOfSupport, setAmountOfSupport] = useState(
-		projectData.raisedAmount,
-	)
+	const [amountOfSupport, setAmountOfSupport] = useState(projectData.raisedAmount)
 	const [viewMode, setViewMode] = useState<ViewModeProps>('initial')
-	const percentage = Math.round(
-		Math.min((amountOfSupport / projectData.goalAmount) * 100, 100),
-	)
+	const percentage = Math.round(Math.min((amountOfSupport / projectData.goalAmount) * 100, 100))
 
 	const onSubmit = (data: FormValue) => {
 		setViewMode('donated')

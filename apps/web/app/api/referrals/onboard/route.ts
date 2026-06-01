@@ -1,11 +1,11 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { nextAuthOption } from '~/lib/auth/auth-options'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
-import { referralOnboardSchema } from '~/lib/schemas/referral.schemas'
-import { validateRequest } from '~/lib/utils/validation'
 import { logger } from '@/lib/logger'
+import { nextAuthOption } from '~/lib/auth/auth-options'
+import { referralOnboardSchema } from '~/lib/schemas/referral.schemas'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { validateRequest } from '~/lib/utils/validation'
 
 const ONBOARDING_REWARD_POINTS = 50
 
@@ -75,18 +75,12 @@ export async function POST(req: NextRequest) {
 		const { data: stats, error: statsError } = statsResult
 
 		if (statsError && statsError.code !== 'PGRST116') {
-			logger.error(
-				'[Referral Onboard API] Error fetching referrer statistics:',
-				statsError,
-			)
+			logger.error('[Referral Onboard API] Error fetching referrer statistics:', statsError)
 		}
 
 		if (updateError) {
 			logger.error('Error updating referral:', updateError)
-			return NextResponse.json(
-				{ error: 'Failed to update referral' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to update referral' }, { status: 500 })
 		}
 
 		if (stats) {
@@ -106,8 +100,7 @@ export async function POST(req: NextRequest) {
 			error?: string
 		} | null = null
 		const referralContractAddress =
-			process.env.REFERRAL_CONTRACT_ADDRESS ||
-			process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
+			process.env.REFERRAL_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
 
 		if (referralContractAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			// Resolve referred user's Stellar address
@@ -124,10 +117,9 @@ export async function POST(req: NextRequest) {
 			if (referredAddress) {
 				try {
 					const contractService = new GamificationContractService()
-					contractResult = await contractService.markOnboarded(
-						referralContractAddress,
-						{ referredAddress },
-					)
+					contractResult = await contractService.markOnboarded(referralContractAddress, {
+						referredAddress,
+					})
 
 					if (!contractResult.success) {
 						logger.error(
@@ -137,10 +129,7 @@ export async function POST(req: NextRequest) {
 					} else {
 					}
 				} catch (err) {
-					logger.error(
-						'[Referral Onboard API] Error calling mark_onboarded on-chain:',
-						err,
-					)
+					logger.error('[Referral Onboard API] Error calling mark_onboarded on-chain:', err)
 				}
 			} else {
 				logger.warn(
@@ -156,9 +145,6 @@ export async function POST(req: NextRequest) {
 		})
 	} catch (error) {
 		logger.error('Error in POST /api/referrals/onboard:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

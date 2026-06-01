@@ -15,9 +15,7 @@ export async function getAdminStats(client: TypedSupabaseClient) {
 		client.from('projects').select('id', { count: 'exact', head: true }),
 		client.from('foundations').select('id', { count: 'exact', head: true }),
 		client.from('profiles').select('id', { count: 'exact', head: true }),
-		client
-			.from('escrow_contracts')
-			.select('id', { count: 'exact', head: true }),
+		client.from('escrow_contracts').select('id', { count: 'exact', head: true }),
 		client.from('projects').select('status, id'),
 		client.from('profiles').select('role, id'),
 		client.from('projects').select('current_amount, target_amount, status'),
@@ -40,28 +38,17 @@ export async function getAdminStats(client: TypedSupabaseClient) {
 
 	// Calculate total donations and funding stats
 	const totalDonations =
-		donationsData?.data?.reduce(
-			(sum, p) => sum + Number(p.current_amount || 0),
-			0,
-		) || 0
+		donationsData?.data?.reduce((sum, p) => sum + Number(p.current_amount || 0), 0) || 0
 
 	const totalTarget =
-		donationsData?.data?.reduce(
-			(sum, p) => sum + Number(p.target_amount || 0),
-			0,
-		) || 0
+		donationsData?.data?.reduce((sum, p) => sum + Number(p.target_amount || 0), 0) || 0
 
 	const totalContributions =
-		contributionsData?.data?.reduce(
-			(sum, c) => sum + Number(c.amount || 0),
-			0,
-		) || 0
+		contributionsData?.data?.reduce((sum, c) => sum + Number(c.amount || 0), 0) || 0
 
 	// Calculate active projects funding stats
 	const activeProjectsData =
-		donationsData?.data?.filter(
-			(p) => (p as { status?: string }).status === 'active',
-		) || []
+		donationsData?.data?.filter((p) => (p as { status?: string }).status === 'active') || []
 	const activeProjectsRaised = activeProjectsData.reduce(
 		(sum, p) => sum + Number(p.current_amount || 0),
 		0,
@@ -75,25 +62,24 @@ export async function getAdminStats(client: TypedSupabaseClient) {
 	const sevenDaysAgo = new Date()
 	sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-	const [recentProjects, recentFoundations, recentUsers, recentContributions] =
-		await Promise.all([
-			client
-				.from('projects')
-				.select('id, created_at, status')
-				.gte('created_at', sevenDaysAgo.toISOString()),
-			client
-				.from('foundations')
-				.select('id, created_at')
-				.gte('created_at', sevenDaysAgo.toISOString()),
-			client
-				.from('profiles')
-				.select('id, created_at, role')
-				.gte('created_at', sevenDaysAgo.toISOString()),
-			client
-				.from('contributions')
-				.select('id, created_at, amount')
-				.gte('created_at', sevenDaysAgo.toISOString()),
-		])
+	const [recentProjects, recentFoundations, recentUsers, recentContributions] = await Promise.all([
+		client
+			.from('projects')
+			.select('id, created_at, status')
+			.gte('created_at', sevenDaysAgo.toISOString()),
+		client
+			.from('foundations')
+			.select('id, created_at')
+			.gte('created_at', sevenDaysAgo.toISOString()),
+		client
+			.from('profiles')
+			.select('id, created_at, role')
+			.gte('created_at', sevenDaysAgo.toISOString()),
+		client
+			.from('contributions')
+			.select('id, created_at, amount')
+			.gte('created_at', sevenDaysAgo.toISOString()),
+	])
 
 	// Calculate recent activity breakdowns
 	const recentProjectsByStatus: Record<string, number> = {}
@@ -109,10 +95,7 @@ export async function getAdminStats(client: TypedSupabaseClient) {
 	})
 
 	const recentContributionsTotal =
-		recentContributions.data?.reduce(
-			(sum, c) => sum + Number(c.amount || 0),
-			0,
-		) || 0
+		recentContributions.data?.reduce((sum, c) => sum + Number(c.amount || 0), 0) || 0
 
 	return {
 		// Totals
@@ -147,9 +130,7 @@ export async function getAdminStats(client: TypedSupabaseClient) {
 		activeProjectsRaised,
 		activeProjectsTarget,
 		activeProjectsProgress:
-			activeProjectsTarget > 0
-				? (activeProjectsRaised / activeProjectsTarget) * 100
-				: 0,
+			activeProjectsTarget > 0 ? (activeProjectsRaised / activeProjectsTarget) * 100 : 0,
 
 		// Recent activity (last 7 days)
 		recentActivity: {

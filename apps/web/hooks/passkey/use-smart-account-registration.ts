@@ -5,25 +5,20 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import { startRegistration } from '@simplewebauthn/browser'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import { logger } from '@/lib/logger'
+import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 
 /**
  * Hook for Smart Account registration using WebAuthn passkeys
  * Replaces the KYC server-based registration flow
  */
-export const useSmartAccountRegistration = (
-	identifier: string,
-	userId?: string,
-) => {
+export const useSmartAccountRegistration = (identifier: string, userId?: string) => {
 	const _appConfig: AppEnvInterface = appEnvConfig('web')
 	const [isCreatingPasskey, setIsCreatingPasskey] = useState<boolean>(false)
 	const [regSuccess, setRegSuccess] = useState<string>('')
 	const [regError, setRegError] = useState<string>('')
 	const [isAlreadyRegistered, setIsAlreadyRegistered] = useState<boolean>(false)
-	const [smartAccountAddress, setSmartAccountAddress] = useState<string | null>(
-		null,
-	)
+	const [smartAccountAddress, setSmartAccountAddress] = useState<string | null>(null)
 
 	const reset = () => {
 		setIsCreatingPasskey(false)
@@ -45,20 +40,17 @@ export const useSmartAccountRegistration = (
 		try {
 			// Step 1: Generate registration options
 			// This should be done server-side
-			const registrationOptionsResp = await fetch(
-				'/api/passkey/generate-registration-options',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						identifier,
-						origin: window.location.origin,
-						userId,
-					}),
+			const registrationOptionsResp = await fetch('/api/passkey/generate-registration-options', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			)
+				body: JSON.stringify({
+					identifier,
+					origin: window.location.origin,
+					userId,
+				}),
+			})
 
 			if (!registrationOptionsResp.ok) {
 				const opts = await registrationOptionsResp.json()
@@ -113,8 +105,7 @@ export const useSmartAccountRegistration = (
 					toast.success(message)
 				} else {
 					// Passkey registered but Smart Account creation failed
-					const warning =
-						verificationJSON.warning || 'Smart Account creation failed'
+					const warning = verificationJSON.warning || 'Smart Account creation failed'
 					logger.warn('⚠️ Smart Account creation failed:', warning)
 					setRegSuccess('Passkey registered successfully')
 					setSmartAccountAddress(null)
@@ -129,18 +120,13 @@ export const useSmartAccountRegistration = (
 		} catch (error) {
 			const err = error as Error
 			if (err.name === 'InvalidStateError') {
-				const message =
-					'Error: Authenticator was probably already registered by user'
+				const message = 'Error: Authenticator was probably already registered by user'
 				setRegError(message)
 				setIsAlreadyRegistered(true)
 				toast.error(message)
 			} else {
 				let message = err.toString()
-				if (
-					err.message.includes(
-						'The operation either timed out or was not allowed.',
-					)
-				) {
+				if (err.message.includes('The operation either timed out or was not allowed.')) {
 					message = 'Operation cancelled or not allowed'
 				}
 				setRegError(message)

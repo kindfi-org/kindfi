@@ -24,17 +24,9 @@ export interface Project {
 	escrowContractAddress?: string
 }
 
-export type SortOption =
-	| 'Most Popular'
-	| 'Most Funded'
-	| 'Most Recent'
-	| 'Most Supporters'
+export type SortOption = 'Most Popular' | 'Most Funded' | 'Most Recent' | 'Most Supporters'
 
-export type SortSlug =
-	| 'most-popular'
-	| 'most-funded'
-	| 'most-recent'
-	| 'most-supporters'
+export type SortSlug = 'most-popular' | 'most-funded' | 'most-recent' | 'most-supporters'
 
 export interface SortOptionItem {
 	value: SortOption

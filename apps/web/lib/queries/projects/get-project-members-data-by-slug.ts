@@ -1,15 +1,9 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import { getProjectIdTitleAndCategoryBySlug } from './get-project-id-title-and-category-by-slug'
 
-export async function getProjectMembersDataBySlug(
-	client: TypedSupabaseClient,
-	slug: string,
-) {
+export async function getProjectMembersDataBySlug(client: TypedSupabaseClient, slug: string) {
 	// Get project ID and category
-	const { id, title, category } = await getProjectIdTitleAndCategoryBySlug(
-		client,
-		slug,
-	)
+	const { id, title, category } = await getProjectIdTitleAndCategoryBySlug(client, slug)
 
 	// Members for this project
 	const { data: members, error: membersError } = await client

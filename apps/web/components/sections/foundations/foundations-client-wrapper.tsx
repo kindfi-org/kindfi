@@ -22,13 +22,9 @@ export function FoundationsClientWrapper() {
 		data: foundations = [],
 		isLoading,
 		error,
-	} = useSupabaseQuery(
-		'foundations',
-		(client) => getAllFoundations(client, sortSlug),
-		{
-			additionalKeyValues: [sortSlug],
-		},
-	)
+	} = useSupabaseQuery('foundations', (client) => getAllFoundations(client, sortSlug), {
+		additionalKeyValues: [sortSlug],
+	})
 
 	const loadingSkeletons = useMemo(
 		() =>
@@ -43,31 +39,21 @@ export function FoundationsClientWrapper() {
 
 	if (isLoading) {
 		return (
-			<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-				{loadingSkeletons}
-			</div>
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">{loadingSkeletons}</div>
 		)
 	}
 
 	if (error) {
 		return (
 			<div className="rounded-2xl border border-border bg-card px-6 py-16 text-center">
-				<Building2
-					className="mx-auto mb-4 h-14 w-14 text-muted-foreground"
-					aria-hidden="true"
-				/>
+				<Building2 className="mx-auto mb-4 h-14 w-14 text-muted-foreground" aria-hidden="true" />
 				<h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
 					We couldn&apos;t load foundations
 				</h2>
 				<p className="mx-auto mt-2 max-w-md text-muted-foreground">
-					Check your connection and try again. If the problem continues, try back
-					later.
+					Check your connection and try again. If the problem continues, try back later.
 				</p>
-				<Button
-					className="mt-6"
-					onClick={() => window.location.reload()}
-					type="button"
-				>
+				<Button className="mt-6" onClick={() => window.location.reload()} type="button">
 					Retry
 				</Button>
 			</div>
@@ -78,17 +64,12 @@ export function FoundationsClientWrapper() {
 		return (
 			<div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
 				<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-					<Building2
-						className="h-8 w-8 text-muted-foreground"
-						aria-hidden="true"
-					/>
+					<Building2 className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
 				</div>
-				<h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-					No foundations yet
-				</h2>
+				<h2 className="text-xl font-semibold tracking-tight sm:text-2xl">No foundations yet</h2>
 				<p className="mx-auto mt-2 max-w-md text-muted-foreground">
-					When organizations join KindFi, they will appear here. You can register
-					your foundation to get started.
+					When organizations join KindFi, they will appear here. You can register your foundation to
+					get started.
 				</p>
 				<Button asChild className="mt-6">
 					<Link href="/create-foundation">Create a foundation</Link>

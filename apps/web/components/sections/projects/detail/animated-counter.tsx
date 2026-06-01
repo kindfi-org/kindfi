@@ -8,10 +8,7 @@ interface AnimatedCounterProps {
 	duration?: number
 }
 
-export function AnimatedCounter({
-	value,
-	duration = 1000,
-}: AnimatedCounterProps) {
+export function AnimatedCounter({ value, duration = 1000 }: AnimatedCounterProps) {
 	const [count, setCount] = useState(0)
 	const ref = useRef(null)
 	const isInView = useInView(ref, { once: true })

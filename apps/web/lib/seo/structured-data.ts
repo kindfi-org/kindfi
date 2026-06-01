@@ -1,5 +1,4 @@
-export const SITE_URL =
-	process.env.NEXT_PUBLIC_SITE_URL || 'https://www.kindfi.org'
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.kindfi.org'
 
 export interface OrganizationSchema {
 	'@context': string
@@ -89,9 +88,7 @@ export function getWebSiteSchema(): WebSiteSchema {
 	}
 }
 
-export function getBreadcrumbSchema(
-	items: { name: string; url: string }[],
-): BreadcrumbListSchema {
+export function getBreadcrumbSchema(items: { name: string; url: string }[]): BreadcrumbListSchema {
 	return {
 		'@context': 'https://schema.org',
 		'@type': 'BreadcrumbList',
@@ -104,9 +101,7 @@ export function getBreadcrumbSchema(
 	}
 }
 
-export function getFaqPageSchema(
-	faqs: { question: string; answer: string }[],
-): FAQPageSchema {
+export function getFaqPageSchema(faqs: { question: string; answer: string }[]): FAQPageSchema {
 	return {
 		'@context': 'https://schema.org',
 		'@type': 'FAQPage',

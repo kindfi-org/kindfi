@@ -110,8 +110,7 @@ export const comments = [
 		id: 'comment-1',
 		name: 'Sarah M.',
 		badge: 'Early Supporter',
-		comment:
-			'Amazing to see the project reach its goal! The community really came together. 🎉',
+		comment: 'Amazing to see the project reach its goal! The community really came together. 🎉',
 		likes: 24,
 	},
 	{

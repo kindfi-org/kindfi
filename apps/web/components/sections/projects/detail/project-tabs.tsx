@@ -1,20 +1,9 @@
 'use client'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from '~/components/base/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
-import {
-	CommunityTab,
-	MilestonesTab,
-	OverviewTab,
-	TeamTab,
-	UpdatesTab,
-} from './tabs'
+import { CommunityTab, MilestonesTab, OverviewTab, TeamTab, UpdatesTab } from './tabs'
 
 const TAB_VALUES = ['overview', 'team', 'milestones', 'updates', 'community'] as const
 type TabValue = (typeof TAB_VALUES)[number]
@@ -39,12 +28,15 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
 		if (value === 'overview') params.delete('tab')
 		else params.set('tab', value)
 		const q = params.toString()
-		router.replace(q ? `${pathname}?${q}` : pathname ?? '/', { scroll: false })
+		router.replace(q ? `${pathname}?${q}` : (pathname ?? '/'), { scroll: false })
 	}
 
 	return (
 		<Tabs value={tab} onValueChange={setTab} className="w-full">
-			<TabsList className="grid grid-cols-2 md:grid-cols-5 bg-muted mb-20 md:mb-8" aria-label="Project sections">
+			<TabsList
+				className="grid grid-cols-2 md:grid-cols-5 bg-muted mb-20 md:mb-8"
+				aria-label="Project sections"
+			>
 				<TabsTrigger value="overview">Overview</TabsTrigger>
 				<TabsTrigger value="team">Team</TabsTrigger>
 				<TabsTrigger value="milestones">Milestones</TabsTrigger>

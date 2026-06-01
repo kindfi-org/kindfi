@@ -20,7 +20,6 @@ export type FundEscrowResponse = {
 	status: Status
 }
 
-export type SendTransactionResponse = InitializeEscrowResponse &
-	FundEscrowResponse
+export type SendTransactionResponse = InitializeEscrowResponse & FundEscrowResponse
 
 export type SignTransactionResponse = string

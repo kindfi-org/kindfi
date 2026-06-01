@@ -30,9 +30,7 @@ export function getRpIdFromOrigin(origin: string): string {
 		return rpId
 	} catch {
 		// Invalid URL, fall back to first configured RP ID
-		logger.warn(
-			`⚠️ Invalid origin format: ${origin}. Using first configured RP ID.`,
-		)
+		logger.warn(`⚠️ Invalid origin format: ${origin}. Using first configured RP ID.`)
 		return rpIds[0] || 'localhost'
 	}
 }

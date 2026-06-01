@@ -3,21 +3,11 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import {
-	IoAddOutline,
-	IoCheckmarkCircleOutline,
-	IoCloseCircleOutline,
-} from 'react-icons/io5'
+import { IoAddOutline, IoCheckmarkCircleOutline, IoCloseCircleOutline } from 'react-icons/io5'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import {
 	Dialog,
 	DialogContent,
@@ -66,18 +56,15 @@ export function AdminQuestManager() {
 		expires_at: '',
 	})
 
-	const { data: questsData, isLoading } = useSupabaseQuery(
-		'quests',
-		async (supabase) => {
-			const { data, error } = await supabase
-				.from('quest_definitions')
-				.select('*')
-				.order('quest_id', { ascending: true })
+	const { data: questsData, isLoading } = useSupabaseQuery('quests', async (supabase) => {
+		const { data, error } = await supabase
+			.from('quest_definitions')
+			.select('*')
+			.order('quest_id', { ascending: true })
 
-			if (error) throw error
-			return { quests: data || [] }
-		},
-	)
+		if (error) throw error
+		return { quests: data || [] }
+	})
 
 	const createQuestMutation = useMutation({
 		mutationFn: async (quest: {
@@ -193,9 +180,7 @@ export function AdminQuestManager() {
 								<Input
 									id="name"
 									value={formData.name}
-									onChange={(e) =>
-										setFormData({ ...formData, name: e.target.value })
-									}
+									onChange={(e) => setFormData({ ...formData, name: e.target.value })}
 									placeholder="e.g., First Donation"
 								/>
 							</div>
@@ -205,9 +190,7 @@ export function AdminQuestManager() {
 								<Textarea
 									id="description"
 									value={formData.description}
-									onChange={(e) =>
-										setFormData({ ...formData, description: e.target.value })
-									}
+									onChange={(e) => setFormData({ ...formData, description: e.target.value })}
 									placeholder="e.g., Make your first donation to any project"
 									rows={3}
 								/>
@@ -221,9 +204,7 @@ export function AdminQuestManager() {
 										type="number"
 										min="1"
 										value={formData.target_value}
-										onChange={(e) =>
-											setFormData({ ...formData, target_value: e.target.value })
-										}
+										onChange={(e) => setFormData({ ...formData, target_value: e.target.value })}
 										placeholder="e.g., 1"
 									/>
 								</div>
@@ -252,23 +233,15 @@ export function AdminQuestManager() {
 									id="expires_at"
 									type="datetime-local"
 									value={formData.expires_at}
-									onChange={(e) =>
-										setFormData({ ...formData, expires_at: e.target.value })
-									}
+									onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
 								/>
 							</div>
 						</div>
 						<div className="flex justify-end gap-2">
-							<Button
-								variant="outline"
-								onClick={() => setIsCreateDialogOpen(false)}
-							>
+							<Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
 								Cancel
 							</Button>
-							<Button
-								onClick={handleCreateQuest}
-								disabled={createQuestMutation.isPending}
-							>
+							<Button onClick={handleCreateQuest} disabled={createQuestMutation.isPending}>
 								{createQuestMutation.isPending ? 'Creating...' : 'Create Quest'}
 							</Button>
 						</div>
@@ -277,9 +250,7 @@ export function AdminQuestManager() {
 			</div>
 
 			{isLoading ? (
-				<div className="text-center py-8 text-muted-foreground">
-					Loading quests...
-				</div>
+				<div className="text-center py-8 text-muted-foreground">Loading quests...</div>
 			) : quests.length === 0 ? (
 				<Card>
 					<CardContent className="py-8 text-center">
@@ -310,9 +281,7 @@ export function AdminQuestManager() {
 												</Badge>
 											)}
 										</CardTitle>
-										<CardDescription className="mt-1">
-											{quest.description}
-										</CardDescription>
+										<CardDescription className="mt-1">{quest.description}</CardDescription>
 									</div>
 								</div>
 							</CardHeader>
@@ -320,20 +289,16 @@ export function AdminQuestManager() {
 								<div className="grid grid-cols-2 gap-4 text-sm">
 									<div>
 										<span className="font-medium">Type:</span>{' '}
-										{QUEST_TYPE_LABELS[quest.quest_type as QuestType] ||
-											quest.quest_type}
+										{QUEST_TYPE_LABELS[quest.quest_type as QuestType] || quest.quest_type}
 									</div>
 									<div>
-										<span className="font-medium">Target:</span>{' '}
-										{quest.target_value}
+										<span className="font-medium">Target:</span> {quest.target_value}
 									</div>
 									<div>
-										<span className="font-medium">Reward:</span>{' '}
-										{quest.reward_points} points
+										<span className="font-medium">Reward:</span> {quest.reward_points} points
 									</div>
 									<div>
-										<span className="font-medium">Quest ID:</span>{' '}
-										{quest.quest_id}
+										<span className="font-medium">Quest ID:</span> {quest.quest_id}
 									</div>
 								</div>
 								{quest.expires_at && (

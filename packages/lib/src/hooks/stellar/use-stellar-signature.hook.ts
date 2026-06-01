@@ -46,9 +46,7 @@ export interface UseStellarSignatureOptions {
  * </SessionProvider>
  * ```
  */
-export const useStellarSignature = (
-	options: UseStellarSignatureOptions = {},
-) => {
+export const useStellarSignature = (options: UseStellarSignatureOptions = {}) => {
 	// Check if session was explicitly provided (either a Session object or null)
 	// If session is explicitly provided, we'll use that exclusively
 	const hasExplicitSession = 'session' in options
@@ -72,10 +70,7 @@ export const useStellarSignature = (
 	 * Signs a Stellar transaction using WebAuthn/Passkey
 	 */
 	const signTransaction = useCallback(
-		async (
-			operation: StellarOperation,
-			contractId: string,
-		): Promise<SignatureResult> => {
+		async (operation: StellarOperation, contractId: string): Promise<SignatureResult> => {
 			if (!session?.user) {
 				throw new Error('User not authenticated')
 			}
@@ -115,17 +110,14 @@ export const useStellarSignature = (
 				const authResult = await startAuthentication(authOptions)
 
 				// Step 3: Verify authentication and execute Stellar transaction
-				const stellarResponse = await fetch(
-					`${kycBaseUrl}/api/stellar/execute-transaction`,
-					{
-						method: 'POST',
-						body: JSON.stringify({
-							contractId,
-							operation,
-							signature: JSON.stringify(authResult),
-						}),
-					},
-				)
+				const stellarResponse = await fetch(`${kycBaseUrl}/api/stellar/execute-transaction`, {
+					method: 'POST',
+					body: JSON.stringify({
+						contractId,
+						operation,
+						signature: JSON.stringify(authResult),
+					}),
+				})
 
 				if (!stellarResponse.ok) {
 					throw new Error('Failed to execute Stellar transaction')
@@ -145,8 +137,7 @@ export const useStellarSignature = (
 
 				return result
 			} catch (err) {
-				const error =
-					err instanceof Error ? err : new Error('Unknown error occurred')
+				const error = err instanceof Error ? err : new Error('Unknown error occurred')
 				logger.error('Error signing Stellar transaction', error)
 
 				setError(error.message)
@@ -166,7 +157,7 @@ export const useStellarSignature = (
 	 */
 	const approveKYCAccount = useCallback(
 		async (
-			deployOnly = false,
+			_deployOnly = false,
 		): Promise<{
 			address: string
 			contractId: string
@@ -192,17 +183,14 @@ export const useStellarSignature = (
 					throw new Error('User session not found. Please login first.')
 				}
 
-				const response = await fetch(
-					`${kycBaseUrl}/api/stellar/create-passkey-account`,
-					{
-						method: 'POST',
-						body: JSON.stringify({
-							credentialId: userData.device?.credential_id,
-							publicKey: userData.device?.public_key,
-							userId: userData.id,
-						}),
-					},
-				)
+				const response = await fetch(`${kycBaseUrl}/api/stellar/create-passkey-account`, {
+					method: 'POST',
+					body: JSON.stringify({
+						credentialId: userData.device?.credential_id,
+						publicKey: userData.device?.public_key,
+						userId: userData.id,
+					}),
+				})
 
 				if (!response.ok) {
 					throw new Error('Failed to create Stellar account')
@@ -217,8 +205,7 @@ export const useStellarSignature = (
 					contractId: result.data.contractId,
 				}
 			} catch (err) {
-				const error =
-					err instanceof Error ? err : new Error('Unknown error occurred')
+				const error = err instanceof Error ? err : new Error('Unknown error occurred')
 				logger.error('Error creating Stellar account', error)
 
 				setError(error.message)
@@ -249,16 +236,13 @@ export const useStellarSignature = (
 
 				if (!response.ok) {
 					const errorData = await response.json().catch(() => ({}))
-					throw new Error(
-						errorData.error || 'Failed to get account information',
-					)
+					throw new Error(errorData.error || 'Failed to get account information')
 				}
 
 				const result = await response.json()
 				return result.data
 			} catch (err) {
-				const error =
-					err instanceof Error ? err : new Error('Unknown error occurred')
+				const error = err instanceof Error ? err : new Error('Unknown error occurred')
 				logger.error('Error getting account info', error)
 
 				setError(error.message)
@@ -276,23 +260,16 @@ export const useStellarSignature = (
 	 * Verifies a signature for a given transaction
 	 */
 	const verifySignature = useCallback(
-		async (
-			contractId: string,
-			signature: string,
-			transactionHash: string,
-		): Promise<boolean> => {
+		async (contractId: string, signature: string, transactionHash: string): Promise<boolean> => {
 			try {
-				const response = await fetch(
-					`${kycBaseUrl}/api/stellar/verify-signature`,
-					{
-						method: 'POST',
-						body: JSON.stringify({
-							contractId,
-							signature,
-							transactionHash,
-						}),
-					},
-				)
+				const response = await fetch(`${kycBaseUrl}/api/stellar/verify-signature`, {
+					method: 'POST',
+					body: JSON.stringify({
+						contractId,
+						signature,
+						transactionHash,
+					}),
+				})
 
 				if (!response.ok) {
 					throw new Error('Failed to verify signature')
@@ -301,7 +278,10 @@ export const useStellarSignature = (
 				const result = await response.json()
 				return result.valid
 			} catch (err) {
-				logger.error('Error verifying signature', err instanceof Error ? err : new Error(String(err)))
+				logger.error(
+					'Error verifying signature',
+					err instanceof Error ? err : new Error(String(err)),
+				)
 				return false
 			}
 		},

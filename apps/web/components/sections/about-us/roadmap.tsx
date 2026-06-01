@@ -1,12 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useI18n } from '~/lib/i18n'
 

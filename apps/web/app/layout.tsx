@@ -5,11 +5,7 @@ import { LayoutContainer } from '~/components/layout-container'
 import { GoogleAnalytics } from '~/components/shared/google-analytics'
 import { JsonLd } from '~/components/shared/json-ld'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import {
-	getOrganizationSchema,
-	getWebSiteSchema,
-	SITE_URL,
-} from '~/lib/seo/structured-data'
+import { getOrganizationSchema, getWebSiteSchema, SITE_URL } from '~/lib/seo/structured-data'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
@@ -56,11 +52,7 @@ export const metadata = {
 	},
 }
 
-export default async function RootLayout({
-	children,
-}: {
-	children: React.ReactNode
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
 	const session = await getServerSession(nextAuthOption)
 	return (
 		<html lang="en" suppressHydrationWarning>

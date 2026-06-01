@@ -21,12 +21,7 @@ export function ImpactMakerCard({ maker, index }: ImpactMakerCardProps) {
 			className="rounded-3xl bg-white p-8 shadow-lg"
 		>
 			<div className="flex items-center gap-4">
-				<UserAvatar
-					src={maker.image}
-					alt={maker.name}
-					name={maker.name}
-					className="h-16 w-16"
-				/>
+				<UserAvatar src={maker.image} alt={maker.name} name={maker.name} className="h-16 w-16" />
 
 				<div>
 					<h3 className="text-xl font-bold">{maker.name}</h3>
@@ -40,15 +35,11 @@ export function ImpactMakerCard({ maker, index }: ImpactMakerCardProps) {
 			<div className="mt-8 space-y-3">
 				<div className="flex items-center justify-between text-gray-600">
 					<span>Total Impact</span>
-					<span className="font-bold text-black">
-						${maker.totalImpact.toLocaleString()}
-					</span>
+					<span className="font-bold text-black">${maker.totalImpact.toLocaleString()}</span>
 				</div>
 				<div className="flex items-center justify-between text-gray-600">
 					<span>Projects Supported</span>
-					<span className="font-bold text-black">
-						{maker.projectsSupported}
-					</span>
+					<span className="font-bold text-black">{maker.projectsSupported}</span>
 				</div>
 			</div>
 

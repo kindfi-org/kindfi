@@ -19,10 +19,7 @@
 
 type Level = 'debug' | 'info' | 'warn' | 'error'
 
-const isDev =
-	typeof process !== 'undefined'
-		? process.env.NODE_ENV !== 'production'
-		: false
+const isDev = typeof process !== 'undefined' ? process.env.NODE_ENV !== 'production' : false
 
 const LEVELS: Record<Level, number> = {
 	debug: 0,
@@ -49,13 +46,9 @@ function formatMessage(level: Level, message: string): string {
 function sanitise(data?: Record<string, unknown>): Record<string, unknown> {
 	if (!data) return {}
 	const REDACTED = '[REDACTED]'
-	const sensitiveKeys =
-		/secret|token|key|password|auth|credential|passphrase|seed/i
+	const sensitiveKeys = /secret|token|key|password|auth|credential|passphrase|seed/i
 	return Object.fromEntries(
-		Object.entries(data).map(([k, v]) => [
-			k,
-			sensitiveKeys.test(k) ? REDACTED : v,
-		]),
+		Object.entries(data).map(([k, v]) => [k, sensitiveKeys.test(k) ? REDACTED : v]),
 	)
 }
 
@@ -70,13 +63,11 @@ function buildLogger(): KindFiLogger {
 	return {
 		debug(message, data) {
 			if (!shouldLog('debug')) return
-			// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 			console.debug(formatMessage('debug', message), sanitise(data))
 		},
 
 		info(message, data) {
 			if (!shouldLog('info')) return
-			// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 			console.info(formatMessage('info', message), sanitise(data))
 		},
 
@@ -88,10 +79,8 @@ function buildLogger(): KindFiLogger {
 				const errInfo = isDev
 					? { message: errorOrData.message, stack: errorOrData.stack }
 					: { message: errorOrData.message }
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 				console.warn(formatted, errInfo, sanitise(data))
 			} else {
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 				console.warn(formatted, sanitise(errorOrData as Record<string, unknown>))
 			}
 		},
@@ -103,10 +92,8 @@ function buildLogger(): KindFiLogger {
 				const errInfo = isDev
 					? { message: errorOrData.message, stack: errorOrData.stack }
 					: { message: errorOrData.message }
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 				console.error(formatted, errInfo, sanitise(data))
 			} else {
-				// biome-ignore lint/suspicious/noConsole: logger internals intentionally use console
 				console.error(formatted, sanitise(errorOrData as Record<string, unknown>))
 			}
 		},

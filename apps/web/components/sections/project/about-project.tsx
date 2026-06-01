@@ -30,18 +30,14 @@ const AboutProject: React.FC<AboutProjectProps> = ({
 	return (
 		<div className="about-project mt-6 bg-white rounded-lg p-6 shadow-md font-inter">
 			<div className="mb-6">
-				<h3 className="text-xl font-bold text-black mb-2">
-					About this project
-				</h3>
+				<h3 className="text-xl font-bold text-black mb-2">About this project</h3>
 				<p className="text-gray-600">{description}</p>
 			</div>
 
 			<div className="border-t border-gray-200 my-4" />
 
 			<div className="project-highlights mb-6">
-				<h3 className="text-xl font-bold text-black mb-2">
-					Project Highlights
-				</h3>
+				<h3 className="text-xl font-bold text-black mb-2">Project Highlights</h3>
 				<ul className="grid grid-cols-2 gap-4">
 					{highlights.map((highlight) => (
 						<li key={highlight.id} className="flex items-start pl-4">
@@ -53,16 +49,12 @@ const AboutProject: React.FC<AboutProjectProps> = ({
 							<div>
 								{titleAboveHighlights ? (
 									<>
-										<span className="text-black font-bold mb-1 block">
-											{highlight.label}
-										</span>
+										<span className="text-black font-bold mb-1 block">{highlight.label}</span>
 										<span className="text-gray-600">{highlight.value}</span>
 									</>
 								) : (
 									<>
-										<span className="text-black font-bold mr-2">
-											{highlight.label}:
-										</span>
+										<span className="text-black font-bold mr-2">{highlight.label}:</span>
 										{highlight.value}
 									</>
 								)}
@@ -78,13 +70,8 @@ const AboutProject: React.FC<AboutProjectProps> = ({
 				<h3 className="text-xl font-bold text-black mb-2">Latest Updates</h3>
 				<ul>
 					{updates.map((update) => (
-						<li
-							key={update.id}
-							className="bg-gray-100 rounded-lg p-4 mb-4 relative"
-						>
-							<span className="absolute top-2 right-4 text-sm text-gray-400">
-								{update.date}
-							</span>
+						<li key={update.id} className="bg-gray-100 rounded-lg p-4 mb-4 relative">
+							<span className="absolute top-2 right-4 text-sm text-gray-400">{update.date}</span>
 							<h4 className="text-black font-bold mb-1">{update.title}</h4>
 							<p className="text-gray-600">{update.description}</p>
 						</li>

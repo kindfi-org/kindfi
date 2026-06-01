@@ -30,8 +30,7 @@ export const TIER_ACCENT: Record<NftTier, string> = {
 
 export const TIER_ORDER: NftTier[] = ['bronze', 'silver', 'gold', 'diamond']
 
-export const getVoteWeight = (tier: NftTier): number =>
-	TIER_VOTE_WEIGHTS[tier] ?? 1
+export const getVoteWeight = (tier: NftTier): number => TIER_VOTE_WEIGHTS[tier] ?? 1
 
 export const getTierLabel = (tier: NftTier): string => TIER_LABELS[tier] ?? tier
 
@@ -45,9 +44,6 @@ export const calcAllocationPercents = (
 	const totalUp = options.reduce((sum, o) => sum + (o.weighted_upvotes ?? 0), 0)
 	if (totalUp === 0) return Object.fromEntries(options.map((o) => [o.id, 0]))
 	return Object.fromEntries(
-		options.map((o) => [
-			o.id,
-			Math.round(((o.weighted_upvotes ?? 0) / totalUp) * 100),
-		]),
+		options.map((o) => [o.id, Math.round(((o.weighted_upvotes ?? 0) / totalUp) * 100)]),
 	)
 }

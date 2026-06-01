@@ -1,8 +1,8 @@
 import { gateway, streamText } from 'ai'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { nextAuthOption } from '~/lib/auth/auth-options'
 import { logger } from '@/lib/logger'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 
 export const maxDuration = 30
 

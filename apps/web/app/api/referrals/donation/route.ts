@@ -1,11 +1,11 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { nextAuthOption } from '~/lib/auth/auth-options'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
-import { referralDonationSchema } from '~/lib/schemas/referral.schemas'
-import { validateRequest } from '~/lib/utils/validation'
 import { logger } from '@/lib/logger'
+import { nextAuthOption } from '~/lib/auth/auth-options'
+import { referralDonationSchema } from '~/lib/schemas/referral.schemas'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/referrals/donation
@@ -45,11 +45,7 @@ export async function POST(req: NextRequest) {
 						.not('address', 'is', null)
 						.limit(1),
 			// Get referral record
-			supabase
-				.from('referral_records')
-				.select('*')
-				.eq('referred_id', referred_id)
-				.single(),
+			supabase.from('referral_records').select('*').eq('referred_id', referred_id).single(),
 		])
 
 		let stellarAddress = referred_address
@@ -76,23 +72,16 @@ export async function POST(req: NextRequest) {
 			error?: string
 		} | null = null
 
-
 		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			try {
 				const contractService = new GamificationContractService()
 				const referralContractAddress =
-					process.env.REFERRAL_CONTRACT_ADDRESS ||
-					process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
-
+					process.env.REFERRAL_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
 
 				if (referralContractAddress) {
-					contractResult = await contractService.recordReferralDonation(
-						referralContractAddress,
-						{
-							referredAddress: stellarAddress,
-						},
-					)
-
+					contractResult = await contractService.recordReferralDonation(referralContractAddress, {
+						referredAddress: stellarAddress,
+					})
 
 					if (!contractResult.success) {
 						logger.error(
@@ -103,9 +92,7 @@ export async function POST(req: NextRequest) {
 					} else {
 					}
 				} else {
-					logger.warn(
-						'[Referral API] Referral contract address not configured',
-					)
+					logger.warn('[Referral API] Referral contract address not configured')
 				}
 			} catch (error) {
 				logger.error('[Referral API] Error calling referral contract:', error)
@@ -150,10 +137,7 @@ export async function POST(req: NextRequest) {
 
 		if (updateError) {
 			logger.error('Error updating referral:', updateError)
-			return NextResponse.json(
-				{ error: 'Failed to update referral' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to update referral' }, { status: 500 })
 		}
 
 		// Award reward points if first donation
@@ -188,9 +172,6 @@ export async function POST(req: NextRequest) {
 		})
 	} catch (error) {
 		logger.error('Error in POST /api/referrals/donation:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

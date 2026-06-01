@@ -77,19 +77,12 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					isFetchingBalance={isFetchingBalance}
 				/>
 
-				<DonationForm
-					project={project}
-					hasEscrow={hasEscrow}
-					form={form}
-					onSubmit={onSubmit}
-				/>
+				<DonationForm project={project} hasEscrow={hasEscrow} form={form} onSubmit={onSubmit} />
 
 				<DonationNotices hasEscrow={hasEscrow} />
 
 				{project.escrowContractAddress && (
-					<EscrowContractInfo
-						escrowContractAddress={project.escrowContractAddress}
-					/>
+					<EscrowContractInfo escrowContractAddress={project.escrowContractAddress} />
 				)}
 
 				<SidebarActions
@@ -108,9 +101,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				/>
 			</div>
 
-			{project.foundation && (
-				<FoundationLink foundation={project.foundation} />
-			)}
+			{project.foundation && <FoundationLink foundation={project.foundation} />}
 
 			<ProjectTagsPanel tags={project.tags} />
 		</motion.div>

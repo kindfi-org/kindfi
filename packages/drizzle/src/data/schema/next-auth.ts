@@ -114,10 +114,7 @@ export const accountsInNextAuth = nextAuth.table(
 			name: 'accounts_user_id_fkey',
 		}).onDelete('cascade'),
 		unique('provider_unique').on(table.provider, table.providerAccountId),
-		unique('accounts_provider_provider_account_id_key').on(
-			table.provider,
-			table.providerAccountId,
-		),
+		unique('accounts_provider_provider_account_id_key').on(table.provider, table.providerAccountId),
 		pgPolicy('Users can view own accounts', {
 			as: 'permissive',
 			for: 'select',
@@ -140,10 +137,7 @@ export const verificationTokensInNextAuth = nextAuth.table(
 		expires: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	},
 	(table) => [
-		unique('verification_tokens_identifier_token_key').on(
-			table.identifier,
-			table.token,
-		),
+		unique('verification_tokens_identifier_token_key').on(table.identifier, table.token),
 		pgPolicy('Service role can manage all verification tokens', {
 			as: 'permissive',
 			for: 'all',
@@ -152,4 +146,3 @@ export const verificationTokensInNextAuth = nextAuth.table(
 		}),
 	],
 )
-

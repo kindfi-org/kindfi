@@ -18,8 +18,8 @@ import { promisify } from 'node:util'
 
 import { Keypair } from '@stellar/stellar-sdk'
 import { Server } from '@stellar/stellar-sdk/rpc'
-import type { NftTier } from '~/lib/governance/types'
 import { logger } from '@/lib/logger'
+import type { NftTier } from '~/lib/governance/types'
 
 const execFile = promisify(execFileCb)
 
@@ -91,8 +91,7 @@ export class GovernanceContractService {
 		const contractAddr = process.env.GOVERNANCE_CONTRACT_ADDRESS
 
 		if (!secretKey) throw new Error('SOROBAN_PRIVATE_KEY is not configured')
-		if (!contractAddr)
-			throw new Error('GOVERNANCE_CONTRACT_ADDRESS is not configured')
+		if (!contractAddr) throw new Error('GOVERNANCE_CONTRACT_ADDRESS is not configured')
 
 		this.server = new Server(rpcUrl)
 		this.secretKey = secretKey
@@ -133,23 +132,18 @@ export class GovernanceContractService {
 
 		const fundAmountI128 = BigInt(Math.round(fundAmount * 10_000_000))
 
-		const result = await stellarInvoke(
-			this.secretKey,
-			this.contractAddress,
-			'create_round',
-			[
-				'--caller',
-				this.publicKey,
-				'--title',
-				title,
-				'--start_ledger',
-				String(startLedger),
-				'--end_ledger',
-				String(endLedger),
-				'--fund_amount',
-				String(fundAmountI128),
-			],
-		)
+		const result = await stellarInvoke(this.secretKey, this.contractAddress, 'create_round', [
+			'--caller',
+			this.publicKey,
+			'--title',
+			title,
+			'--start_ledger',
+			String(startLedger),
+			'--end_ledger',
+			String(endLedger),
+			'--fund_amount',
+			String(fundAmountI128),
+		])
 
 		if (!result.success) {
 			logger.warn('[GovernanceContract] create_round failed:', result.error)
@@ -169,19 +163,14 @@ export class GovernanceContractService {
 	}): Promise<{ success: boolean; optionId?: number; error?: string }> {
 		const { roundId, title } = params
 
-		const result = await stellarInvoke(
-			this.secretKey,
-			this.contractAddress,
-			'add_option',
-			[
-				'--caller',
-				this.publicKey,
-				'--round_id',
-				String(roundId),
-				'--title',
-				title,
-			],
-		)
+		const result = await stellarInvoke(this.secretKey, this.contractAddress, 'add_option', [
+			'--caller',
+			this.publicKey,
+			'--round_id',
+			String(roundId),
+			'--title',
+			title,
+		])
 
 		if (!result.success) {
 			logger.warn('[GovernanceContract] add_option failed:', result.error)
@@ -208,25 +197,20 @@ export class GovernanceContractService {
 	}): Promise<{ success: boolean; weight?: number; error?: string }> {
 		const { voterAddress, roundId, optionId, voteType, tier } = params
 
-		const result = await stellarInvoke(
-			this.secretKey,
-			this.contractAddress,
-			'record_vote',
-			[
-				'--caller',
-				this.publicKey,
-				'--voter',
-				voterAddress,
-				'--round_id',
-				String(roundId),
-				'--option_id',
-				String(optionId),
-				'--vote_type',
-				String(VOTE_TYPE_TO_U32[voteType]),
-				'--tier',
-				String(TIER_TO_U32[tier]),
-			],
-		)
+		const result = await stellarInvoke(this.secretKey, this.contractAddress, 'record_vote', [
+			'--caller',
+			this.publicKey,
+			'--voter',
+			voterAddress,
+			'--round_id',
+			String(roundId),
+			'--option_id',
+			String(optionId),
+			'--vote_type',
+			String(VOTE_TYPE_TO_U32[voteType]),
+			'--tier',
+			String(TIER_TO_U32[tier]),
+		])
 
 		if (!result.success) {
 			logger.warn('[GovernanceContract] record_vote failed:', result.error)

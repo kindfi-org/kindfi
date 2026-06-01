@@ -25,10 +25,7 @@ export function GovernanceCard() {
 						</p>
 					</div>
 				</div>
-				<Button
-					asChild
-					className="gradient-btn shrink-0 rounded-full text-white sm:min-w-[180px]"
-				>
+				<Button asChild className="gradient-btn shrink-0 rounded-full text-white sm:min-w-[180px]">
 					<Link href="/governance">
 						{t('profile.governanceCta')}
 						<ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />

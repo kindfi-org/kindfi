@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import type { NftTier } from '~/lib/governance/types'
 import { getVoteWeight } from '~/lib/governance/vote-weight'
-import { logger } from '@/lib/logger'
 
 /**
  * GET /api/governance/eligibility
@@ -54,9 +54,6 @@ export async function GET() {
 		})
 	} catch (error) {
 		logger.error('Error in GET /api/governance/eligibility:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

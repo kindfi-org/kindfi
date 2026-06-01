@@ -18,15 +18,10 @@ export function FoundationLink({ foundation }: FoundationLinkProps) {
 					<Building2 className="h-5 w-5 text-purple-600" aria-hidden="true" />
 				</div>
 				<div className="min-w-0 flex-1">
-					<p className="font-semibold text-purple-900 truncate">
-						{foundation.name}
-					</p>
+					<p className="font-semibold text-purple-900 truncate">{foundation.name}</p>
 					<p className="text-xs text-muted-foreground">View foundation</p>
 				</div>
-				<ExternalLink
-					className="h-4 w-4 text-purple-600 shrink-0"
-					aria-hidden="true"
-				/>
+				<ExternalLink className="h-4 w-4 text-purple-600 shrink-0" aria-hidden="true" />
 			</Link>
 		</div>
 	)

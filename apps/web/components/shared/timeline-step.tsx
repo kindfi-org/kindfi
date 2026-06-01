@@ -68,9 +68,7 @@ const TimelineStep = ({ step, index, isLast }: TimelineStepProps) => {
 					{/* Card */}
 					<div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
 						{/* Top colored border */}
-						<div
-							className={`h-1 w-full bg-gradient-to-r ${colorScheme.line}`}
-						/>
+						<div className={`h-1 w-full bg-gradient-to-r ${colorScheme.line}`} />
 
 						{/* Icon centered on top edge */}
 						<div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
@@ -81,18 +79,13 @@ const TimelineStep = ({ step, index, isLast }: TimelineStepProps) => {
 								viewport={{ once: true, amount: 0.2 }}
 								className={`w-10 h-10 rounded-full ${colorScheme.bg} border-4 border-white shadow-md flex items-center justify-center`}
 							>
-								<Icon
-									name={step.icon}
-									className={`w-5 h-5 ${colorScheme.icon}`}
-								/>
+								<Icon name={step.icon} className={`w-5 h-5 ${colorScheme.icon}`} />
 							</motion.div>
 						</div>
 
 						{/* Card content with extra top padding for icon */}
 						<div className="p-6 pt-8">
-							<h3 className="text-xl font-bold text-gray-900 mb-3 text-center">
-								{step.title}
-							</h3>
+							<h3 className="text-xl font-bold text-gray-900 mb-3 text-center">{step.title}</h3>
 							<p className="text-gray-700 text-center">{step.description}</p>
 						</div>
 					</div>

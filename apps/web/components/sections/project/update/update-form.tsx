@@ -1,6 +1,5 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -16,6 +15,7 @@ import {
 	FormMessage,
 } from '~/components/base/form'
 import { Textarea } from '~/components/base/textarea'
+import { zodResolver } from '~/lib/form/zod-resolver'
 
 // Define the form schema with Zod based on actual DB structure
 const updateFormSchema = z.object({
@@ -36,12 +36,7 @@ interface UpdateFormProps {
 	isSubmitting: boolean
 }
 
-export function UpdateForm({
-	update,
-	onSubmit,
-	onCancel,
-	isSubmitting,
-}: UpdateFormProps) {
+export function UpdateForm({ update, onSubmit, onCancel, isSubmitting }: UpdateFormProps) {
 	const form = useForm<UpdateFormValues>({
 		resolver: zodResolver(updateFormSchema),
 		defaultValues: {
@@ -66,20 +61,14 @@ export function UpdateForm({
 					{update?.id ? 'Edit Update' : 'Create New Update'}
 				</h3>
 				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit(handleSubmit)}
-						className="space-y-4"
-					>
+					<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
 						<CSRFTokenField />
 						<FormField
 							control={form.control}
 							name="content"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel
-										htmlFor="update-content"
-										className="block font-medium mb-1"
-									>
+									<FormLabel htmlFor="update-content" className="block font-medium mb-1">
 										Content
 									</FormLabel>
 									<FormControl>
@@ -96,12 +85,7 @@ export function UpdateForm({
 						/>
 
 						<div className="flex justify-end gap-3 pt-2">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={onCancel}
-								disabled={isSubmitting}
-							>
+							<Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
 								Cancel
 							</Button>
 							<Button type="submit" disabled={isSubmitting}>

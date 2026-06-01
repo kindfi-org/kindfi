@@ -2,12 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { EyeIcon, Target } from 'lucide-react'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useI18n } from '~/lib/i18n'
 

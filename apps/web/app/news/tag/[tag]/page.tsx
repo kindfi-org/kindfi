@@ -18,9 +18,7 @@ export function generateStaticParams() {
 	return tags.map((tag) => ({ tag }))
 }
 
-export async function generateMetadata({
-	params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
 	const { tag } = await params
 	const decoded = decodeURIComponent(tag)
 	return {
@@ -38,10 +36,7 @@ export default async function TagPage({ params }: PageProps) {
 	const headingId = 'news-tag-heading'
 
 	return (
-		<main
-			className="min-h-screen bg-muted/30"
-			aria-label={`News tagged with ${decoded}`}
-		>
+		<main className="min-h-screen bg-muted/30" aria-label={`News tagged with ${decoded}`}>
 			<SectionContainer maxWidth="6xl" className="py-10 sm:py-14 lg:py-16">
 				<Link
 					href="/news"
@@ -60,8 +55,7 @@ export default async function TagPage({ params }: PageProps) {
 						<span className="gradient-text">{decoded}</span>
 					</h1>
 					<p className="mt-2 max-w-2xl text-muted-foreground">
-						{posts.length} {posts.length === 1 ? 'article' : 'articles'} with
-						this tag.
+						{posts.length} {posts.length === 1 ? 'article' : 'articles'} with this tag.
 					</p>
 				</header>
 
@@ -70,11 +64,7 @@ export default async function TagPage({ params }: PageProps) {
 					className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8"
 				>
 					{posts.map((post, index) => (
-						<NewsCard
-							key={post.slug}
-							update={mapPostToNewsUpdate(post, index)}
-							showCategory
-						/>
+						<NewsCard key={post.slug} update={mapPostToNewsUpdate(post, index)} showCategory />
 					))}
 				</section>
 			</SectionContainer>

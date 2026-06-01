@@ -20,19 +20,9 @@ import {
 
 export const auth = pgSchema('auth')
 export const aalLevelInAuth = auth.enum('aal_level', ['aal1', 'aal2', 'aal3'])
-export const codeChallengeMethodInAuth = auth.enum('code_challenge_method', [
-	's256',
-	'plain',
-])
-export const factorStatusInAuth = auth.enum('factor_status', [
-	'unverified',
-	'verified',
-])
-export const factorTypeInAuth = auth.enum('factor_type', [
-	'totp',
-	'webauthn',
-	'phone',
-])
+export const codeChallengeMethodInAuth = auth.enum('code_challenge_method', ['s256', 'plain'])
+export const factorStatusInAuth = auth.enum('factor_status', ['unverified', 'verified'])
+export const factorTypeInAuth = auth.enum('factor_type', ['totp', 'webauthn', 'phone'])
 export const oneTimeTokenTypeInAuth = auth.enum('one_time_token_type', [
 	'confirmation_token',
 	'reauthentication_token',
@@ -99,9 +89,7 @@ export const usersInAuth = auth.table(
 			mode: 'string',
 		}),
 		phoneChange: text('phone_change').default(''),
-		phoneChangeToken: varchar('phone_change_token', { length: 255 }).default(
-			'',
-		),
+		phoneChangeToken: varchar('phone_change_token', { length: 255 }).default(''),
 		phoneChangeSentAt: timestamp('phone_change_sent_at', {
 			withTimezone: true,
 			mode: 'string',
@@ -113,9 +101,7 @@ export const usersInAuth = auth.table(
 		emailChangeTokenCurrent: varchar('email_change_token_current', {
 			length: 255,
 		}).default(''),
-		emailChangeConfirmStatus: smallint('email_change_confirm_status').default(
-			0,
-		),
+		emailChangeConfirmStatus: smallint('email_change_confirm_status').default(0),
 		bannedUntil: timestamp('banned_until', {
 			withTimezone: true,
 			mode: 'string',
@@ -136,22 +122,13 @@ export const usersInAuth = auth.table(
 			.using('btree', table.confirmationToken.asc().nullsLast().op('text_ops'))
 			.where(sql`((confirmation_token)::text !~ '^[0-9 ]*$'::text)`),
 		uniqueIndex('email_change_token_current_idx')
-			.using(
-				'btree',
-				table.emailChangeTokenCurrent.asc().nullsLast().op('text_ops'),
-			)
+			.using('btree', table.emailChangeTokenCurrent.asc().nullsLast().op('text_ops'))
 			.where(sql`((email_change_token_current)::text !~ '^[0-9 ]*$'::text)`),
 		uniqueIndex('email_change_token_new_idx')
-			.using(
-				'btree',
-				table.emailChangeTokenNew.asc().nullsLast().op('text_ops'),
-			)
+			.using('btree', table.emailChangeTokenNew.asc().nullsLast().op('text_ops'))
 			.where(sql`((email_change_token_new)::text !~ '^[0-9 ]*$'::text)`),
 		uniqueIndex('reauthentication_token_idx')
-			.using(
-				'btree',
-				table.reauthenticationToken.asc().nullsLast().op('text_ops'),
-			)
+			.using('btree', table.reauthenticationToken.asc().nullsLast().op('text_ops'))
 			.where(sql`((reauthentication_token)::text !~ '^[0-9 ]*$'::text)`),
 		uniqueIndex('recovery_token_idx')
 			.using('btree', table.recoveryToken.asc().nullsLast().op('text_ops'))
@@ -262,10 +239,7 @@ export const sessionsInAuth = auth.table(
 			'btree',
 			table.notAfter.desc().nullsFirst().op('timestamptz_ops'),
 		),
-		index('sessions_user_id_idx').using(
-			'btree',
-			table.userId.asc().nullsLast().op('uuid_ops'),
-		),
+		index('sessions_user_id_idx').using('btree', table.userId.asc().nullsLast().op('uuid_ops')),
 		index('user_id_created_at_idx').using(
 			'btree',
 			table.userId.asc().nullsLast().op('uuid_ops'),
@@ -292,9 +266,7 @@ export const identitiesInAuth = auth.table(
 		}),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
-		email: text().generatedAlwaysAs(
-			sql`lower((identity_data ->> 'email'::text))`,
-		),
+		email: text().generatedAlwaysAs(sql`lower((identity_data ->> 'email'::text))`),
 		id: uuid().defaultRandom().primaryKey().notNull(),
 	},
 	(table) => [
@@ -302,19 +274,13 @@ export const identitiesInAuth = auth.table(
 			'btree',
 			table.email.asc().nullsLast().op('text_pattern_ops'),
 		),
-		index('identities_user_id_idx').using(
-			'btree',
-			table.userId.asc().nullsLast().op('uuid_ops'),
-		),
+		index('identities_user_id_idx').using('btree', table.userId.asc().nullsLast().op('uuid_ops')),
 		foreignKey({
 			columns: [table.userId],
 			foreignColumns: [usersInAuth.id],
 			name: 'identities_user_id_fkey',
 		}).onDelete('cascade'),
-		unique('identities_provider_id_provider_unique').on(
-			table.providerId,
-			table.provider,
-		),
+		unique('identities_provider_id_provider_unique').on(table.providerId, table.provider),
 	],
 )
 
@@ -356,10 +322,7 @@ export const mfaFactorsInAuth = auth.table(
 				table.userId.asc().nullsLast().op('uuid_ops'),
 			)
 			.where(sql`(TRIM(BOTH FROM friendly_name) <> ''::text)`),
-		index('mfa_factors_user_id_idx').using(
-			'btree',
-			table.userId.asc().nullsLast().op('uuid_ops'),
-		),
+		index('mfa_factors_user_id_idx').using('btree', table.userId.asc().nullsLast().op('uuid_ops')),
 		uniqueIndex('unique_phone_factor_per_user').using(
 			'btree',
 			table.userId.asc().nullsLast().op('text_ops'),
@@ -414,10 +377,7 @@ export const ssoProvidersInAuth = auth.table(
 		disabled: boolean(),
 	},
 	(table) => [
-		uniqueIndex('sso_providers_resource_id_idx').using(
-			'btree',
-			sql`lower(resource_id)`,
-		),
+		uniqueIndex('sso_providers_resource_id_idx').using('btree', sql`lower(resource_id)`),
 		index('sso_providers_resource_id_pattern_idx').using(
 			'btree',
 			table.resourceId.asc().nullsLast().op('text_pattern_ops'),
@@ -559,9 +519,7 @@ export const flowStateInAuth = auth.table(
 		id: uuid().primaryKey().notNull(),
 		userId: uuid('user_id'),
 		authCode: text('auth_code').notNull(),
-		codeChallengeMethod: codeChallengeMethodInAuth(
-			'code_challenge_method',
-		).notNull(),
+		codeChallengeMethod: codeChallengeMethodInAuth('code_challenge_method').notNull(),
 		codeChallenge: text('code_challenge').notNull(),
 		providerType: text('provider_type').notNull(),
 		providerAccessToken: text('provider_access_token'),
@@ -579,10 +537,7 @@ export const flowStateInAuth = auth.table(
 			'btree',
 			table.createdAt.desc().nullsFirst().op('timestamptz_ops'),
 		),
-		index('idx_auth_code').using(
-			'btree',
-			table.authCode.asc().nullsLast().op('text_ops'),
-		),
+		index('idx_auth_code').using('btree', table.authCode.asc().nullsLast().op('text_ops')),
 		index('idx_user_id_auth_method').using(
 			'btree',
 			table.userId.asc().nullsLast().op('uuid_ops'),
@@ -599,12 +554,8 @@ export const oneTimeTokensInAuth = auth.table(
 		tokenType: oneTimeTokenTypeInAuth('token_type').notNull(),
 		tokenHash: text('token_hash').notNull(),
 		relatesTo: text('relates_to').notNull(),
-		createdAt: timestamp('created_at', { mode: 'string' })
-			.defaultNow()
-			.notNull(),
-		updatedAt: timestamp('updated_at', { mode: 'string' })
-			.defaultNow()
-			.notNull(),
+		createdAt: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { mode: 'string' }).defaultNow().notNull(),
 	},
 	(table) => [
 		index('one_time_tokens_relates_to_hash_idx').using(

@@ -1,8 +1,8 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { nextAuthOption } from '~/lib/auth/auth-options'
 import { logger } from '@/lib/logger'
+import { nextAuthOption } from '~/lib/auth/auth-options'
 
 /**
  * GET /api/kyc/status

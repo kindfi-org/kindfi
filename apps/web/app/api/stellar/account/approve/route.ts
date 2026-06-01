@@ -1,9 +1,9 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { accountApproveSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * POST /api/stellar/account/approve
@@ -24,22 +24,18 @@ export async function POST(req: NextRequest) {
 		// KYC server URL - use environment variable or default to localhost
 		const kycServerUrl = config.externalApis.kyc.baseUrl
 
-
 		// Call KYC server's create-passkey-account endpoint
 		// which handles the auth-controller registration
-		const response = await fetch(
-			`${kycServerUrl}/api/stellar/create-passkey-account`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					contractAddress: accountAddress,
-					contexts: [accountAddress], // Register with self as context
-				}),
+		const response = await fetch(`${kycServerUrl}/api/stellar/create-passkey-account`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
 			},
-		)
+			body: JSON.stringify({
+				contractAddress: accountAddress,
+				contexts: [accountAddress], // Register with self as context
+			}),
+		})
 
 		if (!response.ok) {
 			const errorData = await response.json()
@@ -48,7 +44,6 @@ export async function POST(req: NextRequest) {
 		}
 
 		const result = await response.json()
-
 
 		return NextResponse.json({
 			success: true,

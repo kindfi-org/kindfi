@@ -1,9 +1,4 @@
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import type { AdminStats } from '~/lib/queries/admin/get-admin-stats'
 import { formatCurrency } from './formatters'
 
@@ -18,9 +13,7 @@ export function AdminAverageMetrics({ stats }: AdminAverageMetricsProps) {
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 				<Card>
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium">
-							Avg Project Goal
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Avg Project Goal</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold tabular-nums">
@@ -28,17 +21,13 @@ export function AdminAverageMetrics({ stats }: AdminAverageMetricsProps) {
 								? formatCurrency(stats.totalTarget / stats.totalProjects)
 								: formatCurrency(0)}
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							Per project target
-						</p>
+						<p className="text-xs text-muted-foreground mt-1">Per project target</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium">
-							Avg Project Raised
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Avg Project Raised</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold tabular-nums">
@@ -46,39 +35,30 @@ export function AdminAverageMetrics({ stats }: AdminAverageMetricsProps) {
 								? formatCurrency(stats.totalDonations / stats.totalProjects)
 								: formatCurrency(0)}
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							Per project average
-						</p>
+						<p className="text-xs text-muted-foreground mt-1">Per project average</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium">
-							Avg Contribution
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Avg Contribution</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold tabular-nums">
 							{stats.recentActivity.contributions > 0
 								? formatCurrency(
-										stats.recentActivity.contributionsAmount /
-											stats.recentActivity.contributions,
+										stats.recentActivity.contributionsAmount / stats.recentActivity.contributions,
 										{ maxFractionDigits: 2 },
 									)
 								: formatCurrency(0, { maxFractionDigits: 2 })}
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							Last 7 days average
-						</p>
+						<p className="text-xs text-muted-foreground mt-1">Last 7 days average</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium">
-							Projects per Foundation
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Projects per Foundation</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold tabular-nums">
@@ -86,9 +66,7 @@ export function AdminAverageMetrics({ stats }: AdminAverageMetricsProps) {
 								? (stats.totalProjects / stats.totalFoundations).toFixed(1)
 								: '0'}
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							Average campaigns
-						</p>
+						<p className="text-xs text-muted-foreground mt-1">Average campaigns</p>
 					</CardContent>
 				</Card>
 			</div>

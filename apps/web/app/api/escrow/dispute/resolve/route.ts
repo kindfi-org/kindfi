@@ -1,13 +1,13 @@
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import type { DisputeResolutionPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateDisputeResolution } from '~/lib/validators/dispute'
-import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -61,10 +61,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (disputeError || !dispute) {
-			return NextResponse.json(
-				{ error: 'Dispute not found or already resolved' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Dispute not found or already resolved' }, { status: 404 })
 		}
 
 		// 4. Resolve the dispute on-chain through the Trustless Work API

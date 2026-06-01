@@ -4,16 +4,11 @@ import { Plus, Trash2 } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from '~/components/base/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/base/tooltip'
 import { useEscrowForm } from '../context/escrow-form-context'
 
 export function EscrowMilestones() {
-	const { formData, addMilestone, removeMilestone, updateMilestone } =
-		useEscrowForm()
+	const { formData, addMilestone, removeMilestone, updateMilestone } = useEscrowForm()
 	const { milestones, selectedEscrowType } = formData
 
 	return (
@@ -24,9 +19,7 @@ export function EscrowMilestones() {
 						Milestones <span className="text-destructive">*</span>
 					</h3>
 					<Tooltip>
-						<TooltipTrigger className="text-xs underline">
-							More information
-						</TooltipTrigger>
+						<TooltipTrigger className="text-xs underline">More information</TooltipTrigger>
 						<TooltipContent>
 							{selectedEscrowType === 'multi-release'
 								? 'For multi-release escrows, each milestone must have an amount and receiver address.'
@@ -41,13 +34,8 @@ export function EscrowMilestones() {
 
 			<div className="space-y-3">
 				{milestones.map((m, i) =>
-					selectedEscrowType === 'multi-release' &&
-					'amount' in m &&
-					'receiver' in m ? (
-						<div
-							key={m.id}
-							className="p-4 rounded-lg border bg-card space-y-3"
-						>
+					selectedEscrowType === 'multi-release' && 'amount' in m && 'receiver' in m ? (
+						<div key={m.id} className="p-4 rounded-lg border bg-card space-y-3">
 							<div className="flex items-center justify-between">
 								<span className="text-sm font-medium">Milestone {i + 1}</span>
 								<Button
@@ -62,14 +50,10 @@ export function EscrowMilestones() {
 							</div>
 							<div className="grid gap-3 sm:grid-cols-3">
 								<div className="sm:col-span-3">
-									<Label className="text-xs text-muted-foreground">
-										Description
-									</Label>
+									<Label className="text-xs text-muted-foreground">Description</Label>
 									<Input
 										value={m.description}
-										onChange={(e) =>
-											updateMilestone(i, { description: e.target.value })
-										}
+										onChange={(e) => updateMilestone(i, { description: e.target.value })}
 										placeholder="Milestone description"
 									/>
 								</div>
@@ -92,19 +76,15 @@ export function EscrowMilestones() {
 								</div>
 								<div className="sm:col-span-2">
 									<Label className="text-xs text-muted-foreground">
-										Receiver Address{' '}
-										<span className="text-destructive">*</span>
+										Receiver Address <span className="text-destructive">*</span>
 									</Label>
 									<Input
 										value={m.receiver}
-										onChange={(e) =>
-											updateMilestone(i, { receiver: e.target.value })
-										}
+										onChange={(e) => updateMilestone(i, { receiver: e.target.value })}
 										placeholder="Enter Stellar address (must have USDC trustline)"
 									/>
 									<p className="text-xs text-muted-foreground mt-1">
-										⚠️ The receiver address must have a USDC trustline
-										established.
+										⚠️ The receiver address must have a USDC trustline established.
 									</p>
 								</div>
 							</div>
@@ -113,9 +93,7 @@ export function EscrowMilestones() {
 						<div key={m.id} className="flex gap-2 items-center">
 							<Input
 								value={m.description}
-								onChange={(e) =>
-									updateMilestone(i, { description: e.target.value })
-								}
+								onChange={(e) => updateMilestone(i, { description: e.target.value })}
 								placeholder="Milestone Description"
 							/>
 							<Button

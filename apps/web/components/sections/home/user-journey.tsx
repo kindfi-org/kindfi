@@ -1,243 +1,229 @@
-"use client";
+'use client'
 
-import { AnimatePresence, motion } from "framer-motion";
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import React from "react";
-import { Button } from "~/components/base/button";
-import { SectionContainer } from "~/components/shared/section-container";
-import { useI18n } from "~/lib/i18n";
-import { cn } from "~/lib/utils";
+import { AnimatePresence, motion } from 'framer-motion'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import React from 'react'
+import { Button } from '~/components/base/button'
+import { SectionContainer } from '~/components/shared/section-container'
+import { useI18n } from '~/lib/i18n'
+import { cn } from '~/lib/utils'
 
 const WaitlistModal = dynamic(
-  () =>
-    import("~/components/sections/waitlist/waitlist-modal").then((mod) => ({
-      default: mod.WaitlistModal,
-    })),
-  {
-    loading: () => null,
-    ssr: false,
-  },
-);
+	() =>
+		import('~/components/sections/waitlist/waitlist-modal').then((mod) => ({
+			default: mod.WaitlistModal,
+		})),
+	{
+		loading: () => null,
+		ssr: false,
+	},
+)
 
-type ViewType = "project" | "investor";
+type ViewType = 'project' | 'investor'
 
 export function UserJourney() {
-  const [activeView, setActiveView] = React.useState<ViewType>("project");
-  const [waitlistOpen, setWaitlistOpen] = React.useState(false);
-  const { t } = useI18n();
+	const [activeView, setActiveView] = React.useState<ViewType>('project')
+	const [waitlistOpen, setWaitlistOpen] = React.useState(false)
+	const { t } = useI18n()
 
-  // Translated steps
-  const projectSteps = [
-    {
-      number: 1,
-      title: t("home.kindlerStep1Title"),
-      description: t("home.kindlerStep1Desc"),
-    },
-    {
-      number: 2,
-      title: t("home.kindlerStep2Title"),
-      description: t("home.kindlerStep2Desc"),
-    },
-    {
-      number: 3,
-      title: t("home.kindlerStep3Title"),
-      description: t("home.kindlerStep3Desc"),
-    },
-    {
-      number: 4,
-      title: t("home.kindlerStep4Title"),
-      description: t("home.kindlerStep4Desc"),
-    },
-    {
-      number: 5,
-      title: t("home.kindlerStep5Title"),
-      description: t("home.kindlerStep5Desc"),
-    },
-  ];
+	// Translated steps
+	const projectSteps = [
+		{
+			number: 1,
+			title: t('home.kindlerStep1Title'),
+			description: t('home.kindlerStep1Desc'),
+		},
+		{
+			number: 2,
+			title: t('home.kindlerStep2Title'),
+			description: t('home.kindlerStep2Desc'),
+		},
+		{
+			number: 3,
+			title: t('home.kindlerStep3Title'),
+			description: t('home.kindlerStep3Desc'),
+		},
+		{
+			number: 4,
+			title: t('home.kindlerStep4Title'),
+			description: t('home.kindlerStep4Desc'),
+		},
+		{
+			number: 5,
+			title: t('home.kindlerStep5Title'),
+			description: t('home.kindlerStep5Desc'),
+		},
+	]
 
-  const investorSteps = [
-    {
-      number: 1,
-      title: t("home.kinderStep1Title"),
-      description: t("home.kinderStep1Desc"),
-    },
-    {
-      number: 2,
-      title: t("home.kinderStep2Title"),
-      description: t("home.kinderStep2Desc"),
-    },
-    {
-      number: 3,
-      title: t("home.kinderStep3Title"),
-      description: t("home.kinderStep3Desc"),
-    },
-    {
-      number: 4,
-      title: t("home.kinderStep4Title"),
-      description: t("home.kinderStep4Desc"),
-    },
-    {
-      number: 5,
-      title: t("home.kinderStep5Title"),
-      description: t("home.kinderStep5Desc"),
-    },
-  ];
+	const investorSteps = [
+		{
+			number: 1,
+			title: t('home.kinderStep1Title'),
+			description: t('home.kinderStep1Desc'),
+		},
+		{
+			number: 2,
+			title: t('home.kinderStep2Title'),
+			description: t('home.kinderStep2Desc'),
+		},
+		{
+			number: 3,
+			title: t('home.kinderStep3Title'),
+			description: t('home.kinderStep3Desc'),
+		},
+		{
+			number: 4,
+			title: t('home.kinderStep4Title'),
+			description: t('home.kinderStep4Desc'),
+		},
+		{
+			number: 5,
+			title: t('home.kinderStep5Title'),
+			description: t('home.kinderStep5Desc'),
+		},
+	]
 
-  const steps = activeView === "project" ? projectSteps : investorSteps;
+	const steps = activeView === 'project' ? projectSteps : investorSteps
 
-  const [shouldReduceMotion, setShouldReduceMotion] = React.useState(false);
+	const [shouldReduceMotion, setShouldReduceMotion] = React.useState(false)
 
-  const fadeInUpAnimation = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: (delay = 0) => ({
-      duration: shouldReduceMotion ? 0 : 0.5,
-      delay,
-      y: { duration: shouldReduceMotion ? 0 : 0.5 },
-    }),
-  };
+	const fadeInUpAnimation = {
+		initial: { opacity: 0, y: 20 },
+		animate: { opacity: 1, y: 0 },
+		transition: (delay = 0) => ({
+			duration: shouldReduceMotion ? 0 : 0.5,
+			delay,
+			y: { duration: shouldReduceMotion ? 0 : 0.5 },
+		}),
+	}
 
-  React.useEffect(() => {
-    setShouldReduceMotion(
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    );
-  }, []);
+	React.useEffect(() => {
+		setShouldReduceMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+	}, [])
 
-  return (
-    <section className="relative overflow-hidden py-16 bg-white sm:py-20 lg:py-24">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
-      <SectionContainer className="relative">
-        {/* Header */}
-        <div className="text-center mb-12 max-w-3xl mx-auto sm:mb-16">
-          <motion.div {...fadeInUpAnimation}>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 sm:text-4xl">
-              {t("home.journeyTitle")} <br />
-              <span className="gradient-text">
-                {t("home.journeyTitleHighlight")}
-              </span>
-            </h2>
-            <p className="text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto sm:text-lg">
-              {t("home.journeyDescription")}
-            </p>
-          </motion.div>
+	return (
+		<section className="relative overflow-hidden py-16 bg-white sm:py-20 lg:py-24">
+			{/* Background Pattern */}
+			<div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+			<SectionContainer className="relative">
+				{/* Header */}
+				<div className="text-center mb-12 max-w-3xl mx-auto sm:mb-16">
+					<motion.div {...fadeInUpAnimation}>
+						<h2 className="text-3xl font-bold text-gray-900 mb-4 sm:text-4xl">
+							{t('home.journeyTitle')} <br />
+							<span className="gradient-text">{t('home.journeyTitleHighlight')}</span>
+						</h2>
+						<p className="text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto sm:text-lg">
+							{t('home.journeyDescription')}
+						</p>
+					</motion.div>
 
-          {/* Toggle Buttons */}
-          <motion.div
-            className="mt-12 mb-16 flex justify-center"
-            {...fadeInUpAnimation}
-          >
-            <div className="inline-flex rounded-full p-1 bg-white shadow-sm border border-gray-100">
-              <Button
-                variant={activeView === "project" ? "default" : "ghost"}
-                className={cn(
-                  "rounded-full px-6 py-2 text-sm font-medium transition-all duration-200",
-                  activeView === "project"
-                    ? "gradient-btn text-white"
-                    : "text-gray-600 hover:text-emerald-600",
-                )}
-                onClick={() => setActiveView("project")}
-                aria-pressed={activeView === "project"}
-                aria-label="Show project creator journey"
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowRight") {
-                    e.preventDefault();
-                    setActiveView("investor");
-                  }
-                }}
-              >
-                {t("home.forKindlers")}
-              </Button>
-              <Button
-                variant={activeView === "investor" ? "default" : "ghost"}
-                className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
-                  activeView === "investor"
-                    ? "gradient-btn text-white"
-                    : "text-gray-600 hover:text-emerald-600"
-                }`}
-                onClick={() => setActiveView("investor")}
-                aria-pressed={activeView === "investor"}
-                aria-label="Show investor journey"
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowLeft") {
-                    e.preventDefault();
-                    setActiveView("project");
-                  }
-                }}
-              >
-                {t("home.forKinders")}
-              </Button>
-            </div>
-          </motion.div>
-        </div>
+					{/* Toggle Buttons */}
+					<motion.div className="mt-12 mb-16 flex justify-center" {...fadeInUpAnimation}>
+						<div className="inline-flex rounded-full p-1 bg-white shadow-sm border border-gray-100">
+							<Button
+								variant={activeView === 'project' ? 'default' : 'ghost'}
+								className={cn(
+									'rounded-full px-6 py-2 text-sm font-medium transition-all duration-200',
+									activeView === 'project'
+										? 'gradient-btn text-white'
+										: 'text-gray-600 hover:text-emerald-600',
+								)}
+								onClick={() => setActiveView('project')}
+								aria-pressed={activeView === 'project'}
+								aria-label="Show project creator journey"
+								onKeyDown={(e) => {
+									if (e.key === 'ArrowRight') {
+										e.preventDefault()
+										setActiveView('investor')
+									}
+								}}
+							>
+								{t('home.forKindlers')}
+							</Button>
+							<Button
+								variant={activeView === 'investor' ? 'default' : 'ghost'}
+								className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
+									activeView === 'investor'
+										? 'gradient-btn text-white'
+										: 'text-gray-600 hover:text-emerald-600'
+								}`}
+								onClick={() => setActiveView('investor')}
+								aria-pressed={activeView === 'investor'}
+								aria-label="Show investor journey"
+								onKeyDown={(e) => {
+									if (e.key === 'ArrowLeft') {
+										e.preventDefault()
+										setActiveView('project')
+									}
+								}}
+							>
+								{t('home.forKinders')}
+							</Button>
+						</div>
+					</motion.div>
+				</div>
 
-        {/* Steps */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeView}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5 }}
-            className="grid gap-8 sm:gap-6 md:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
-          >
-            {steps.map((step) => (
-              <motion.div key={`step-${step.number}`} {...fadeInUpAnimation}>
-                <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 h-full border border-gray-100">
-                  <div className="flex items-center mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-purple-600 font-semibold text-sm">
-                      {step.number}
-                    </div>
-                    <div className="ml-3 font-semibold text-gray-900">
-                      {step.title}
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </AnimatePresence>
+				{/* Steps */}
+				<AnimatePresence mode="wait">
+					<motion.div
+						key={activeView}
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -20 }}
+						transition={{ duration: 0.5 }}
+						className="grid gap-8 sm:gap-6 md:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
+					>
+						{steps.map((step) => (
+							<motion.div key={`step-${step.number}`} {...fadeInUpAnimation}>
+								<div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 h-full border border-gray-100">
+									<div className="flex items-center mb-4">
+										<div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-purple-600 font-semibold text-sm">
+											{step.number}
+										</div>
+										<div className="ml-3 font-semibold text-gray-900">{step.title}</div>
+									</div>
+									<p className="text-gray-600 text-sm leading-relaxed">{step.description}</p>
+								</div>
+							</motion.div>
+						))}
+					</motion.div>
+				</AnimatePresence>
 
-        {/* Action Button */}
-        <motion.div
-          className="mt-12 text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-        >
-          {activeView === "project" ? (
-            <>
-              <Button
-                size="lg"
-                className="gradient-border-btn text-white px-8"
-                onClick={() => setWaitlistOpen(true)}
-                aria-label={t("home.waitlistYourProject")}
-                variant="outline"
-              >
-                {t("home.waitlistYourProject")}
-              </Button>
-              <WaitlistModal
-                open={waitlistOpen}
-                onOpenChange={setWaitlistOpen}
-              />
-            </>
-          ) : (
-            <Button
-              size="lg"
-              className="gradient-border-btn text-white px-8"
-              asChild
-              aria-label={t("home.exploreCauses")}
-              variant="outline"
-            >
-              <Link href="/projects">{t("home.exploreCauses")}</Link>
-            </Button>
-          )}
-        </motion.div>
-      </SectionContainer>
-    </section>
-  );
+				{/* Action Button */}
+				<motion.div
+					className="mt-12 text-center"
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ duration: 0.5, delay: 0.8 }}
+				>
+					{activeView === 'project' ? (
+						<>
+							<Button
+								size="lg"
+								className="gradient-border-btn text-white px-8"
+								onClick={() => setWaitlistOpen(true)}
+								aria-label={t('home.waitlistYourProject')}
+								variant="outline"
+							>
+								{t('home.waitlistYourProject')}
+							</Button>
+							<WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
+						</>
+					) : (
+						<Button
+							size="lg"
+							className="gradient-border-btn text-white px-8"
+							asChild
+							aria-label={t('home.exploreCauses')}
+							variant="outline"
+						>
+							<Link href="/projects">{t('home.exploreCauses')}</Link>
+						</Button>
+					)}
+				</motion.div>
+			</SectionContainer>
+		</section>
+	)
 }

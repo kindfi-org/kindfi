@@ -15,9 +15,7 @@ interface WaitlistContextType {
 	setIsOpen: (open: boolean) => void
 }
 
-const WaitlistContext = createContext<WaitlistContextType | undefined>(
-	undefined,
-)
+const WaitlistContext = createContext<WaitlistContextType | undefined>(undefined)
 
 const initialFormData: WaitlistFormData = {
 	name: '',

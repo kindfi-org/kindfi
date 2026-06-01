@@ -62,11 +62,7 @@ export function Hero() {
 							</Button>
 						</a>
 						<Link href="/projects">
-							<Button
-								size="lg"
-								variant="outline"
-								className="gradient-border-btn"
-							>
+							<Button size="lg" variant="outline" className="gradient-border-btn">
 								{t('about.discoverCauses')}
 							</Button>
 						</Link>

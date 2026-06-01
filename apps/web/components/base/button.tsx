@@ -3,9 +3,8 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
-
-import { cn } from '~/lib/utils'
 import { logger } from '@/lib/logger'
+import { cn } from '~/lib/utils'
 
 /**
  * ShadCN/UI Reference: https://ui.shadcn.com/docs/components/button
@@ -26,12 +25,9 @@ const buttonVariants = cva(
 			/** Defines different button visual styles */
 			variant: {
 				default: 'text-blue-700',
-				destructive:
-					'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-				outline:
-					'border border-input bg-background text-black hover:text-blue-700',
-				secondary:
-					'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+				destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+				outline: 'border border-input bg-background text-black hover:text-blue-700',
+				secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
 				ghost: 'hover:gradient-border-btn',
 				link: 'text-primary underline-offset-4 hover:underline',
 				'primary-gradient': 'gradient-btn text-white',
@@ -131,8 +127,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 		)
 
 		// Use the iconOnly prop or determine it based on the presence of text content
-		const isIconOnly =
-			iconOnly || (!hasTextContent && (startIcon || endIcon || children))
+		const isIconOnly = iconOnly || (!hasTextContent && (startIcon || endIcon || children))
 
 		// Warning for icon-only buttons without aria-label in development
 		// if (appConfig.env.nodeEnv !== 'production' && isIconOnly && !ariaLabel) {
@@ -162,18 +157,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 		}
 
 		return asChild ? (
-			<Slot
-				className={cn(buttonVariants({ variant, size, className }))}
-				ref={ref}
-			>
+			<Slot className={cn(buttonVariants({ variant, size, className }))} ref={ref}>
 				{React.cloneElement(children as React.ReactElement, buttonProps)}
 			</Slot>
 		) : (
-			<Comp
-				className={cn(buttonVariants({ variant, size, className }))}
-				ref={ref}
-				{...buttonProps}
-			>
+			<Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...buttonProps}>
 				{startIcon}
 				{children}
 				{endIcon}

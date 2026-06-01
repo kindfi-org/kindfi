@@ -2,16 +2,16 @@ import { supabase } from '@packages/lib/supabase'
 import { Networks } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { escrowFundSchema } from '~/lib/schemas/escrow.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
-import { escrowFundSchema } from '~/lib/schemas/escrow.schemas'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 async function fundHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -44,11 +44,7 @@ async function fundHandler(req: NextRequest) {
 			throw new Error('Failed to retrieve unsigned transaction XDR')
 		}
 
-		const signedTxXdr = signTransaction(
-			unsignedTransaction,
-			Networks.TESTNET,
-			signer,
-		)
+		const signedTxXdr = signTransaction(unsignedTransaction, Networks.TESTNET, signer)
 		if (!signedTxXdr) {
 			throw new Error('Transaction signing failed')
 		}

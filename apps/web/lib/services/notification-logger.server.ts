@@ -60,12 +60,7 @@ function getSupabase(): UntypedSupabase {
 }
 
 export class NotificationLogger {
-	async logError({
-		message,
-		error,
-		context,
-		notificationId,
-	}: LogErrorParams): Promise<void> {
+	async logError({ message, error, context, notificationId }: LogErrorParams): Promise<void> {
 		try {
 			const { error: dbError } = await getSupabase()
 				.from(NOTIFICATION_LOGS_TABLE)
@@ -82,18 +77,11 @@ export class NotificationLogger {
 
 			if (dbError) throw dbError
 		} catch (logError) {
-			logger.error(
-				'[NotificationLogger] Failed to log error:',
-				serializeLogError(logError),
-			)
+			logger.error('[NotificationLogger] Failed to log error:', serializeLogError(logError))
 		}
 	}
 
-	async logInfo({
-		notificationId,
-		message,
-		context,
-	}: LogInfoParams): Promise<void> {
+	async logInfo({ notificationId, message, context }: LogInfoParams): Promise<void> {
 		try {
 			const { error } = await getSupabase().from(NOTIFICATION_LOGS_TABLE).insert({
 				level: 'info',
@@ -104,18 +92,11 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			logger.error(
-				'[NotificationLogger] Failed to log info:',
-				serializeLogError(logError),
-			)
+			logger.error('[NotificationLogger] Failed to log info:', serializeLogError(logError))
 		}
 	}
 
-	async logWarning({
-		notificationId,
-		message,
-		context,
-	}: LogWarningParams): Promise<void> {
+	async logWarning({ notificationId, message, context }: LogWarningParams): Promise<void> {
 		try {
 			const { error } = await getSupabase().from(NOTIFICATION_LOGS_TABLE).insert({
 				level: 'warning',
@@ -126,16 +107,11 @@ export class NotificationLogger {
 
 			if (error) throw error
 		} catch (logError) {
-			logger.error(
-				'[NotificationLogger] Failed to log warning:',
-				serializeLogError(logError),
-			)
+			logger.error('[NotificationLogger] Failed to log warning:', serializeLogError(logError))
 		}
 	}
 
-	async getNotificationLogs(
-		notificationId: string,
-	): Promise<NotificationLog[]> {
+	async getNotificationLogs(notificationId: string): Promise<NotificationLog[]> {
 		try {
 			const { data, error } = await getSupabase()
 				.from(NOTIFICATION_LOGS_TABLE)

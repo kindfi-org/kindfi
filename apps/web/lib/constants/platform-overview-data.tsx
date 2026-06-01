@@ -10,8 +10,7 @@ export const features: Feature[] = [
 		icon: <Wallet className="w-6 h-6 text-purple-600" />,
 		stats: {
 			value: '$1.7B',
-			label:
-				'in regional funding now ready to be unlocked with blockchain transparency',
+			label: 'in regional funding now ready to be unlocked with blockchain transparency',
 		},
 	},
 	{

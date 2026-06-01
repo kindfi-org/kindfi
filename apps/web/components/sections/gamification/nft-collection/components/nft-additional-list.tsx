@@ -19,10 +19,7 @@ export function NftAdditionalList({ nfts }: NftAdditionalListProps) {
 			</h4>
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 				{nfts.slice(1).map((extra) => (
-					<Card
-						key={extra.tokenId}
-						className="overflow-hidden hover:shadow-md transition-shadow"
-					>
+					<Card key={extra.tokenId} className="overflow-hidden hover:shadow-md transition-shadow">
 						<div className="relative h-40 bg-muted">
 							{extra.metadata.image_uri ? (
 								<Image
@@ -42,9 +39,7 @@ export function NftAdditionalList({ nfts }: NftAdditionalListProps) {
 							</div>
 						</div>
 						<CardContent className="p-3">
-							<h4 className="font-medium text-sm line-clamp-1">
-								{extra.metadata.name}
-							</h4>
+							<h4 className="font-medium text-sm line-clamp-1">{extra.metadata.name}</h4>
 						</CardContent>
 					</Card>
 				))}

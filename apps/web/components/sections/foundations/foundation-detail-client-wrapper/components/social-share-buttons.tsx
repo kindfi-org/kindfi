@@ -11,11 +11,7 @@ interface SocialShareButtonsProps {
 	description?: string
 }
 
-export function SocialShareButtons({
-	url,
-	title,
-	description,
-}: SocialShareButtonsProps) {
+export function SocialShareButtons({ url, title, description }: SocialShareButtonsProps) {
 	const shareData = useMemo(() => {
 		const encodedUrl = encodeURIComponent(url)
 		const encodedTitle = encodeURIComponent(title)

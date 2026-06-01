@@ -184,9 +184,7 @@ export function KindfiSupabaseAdapter(): Adapter {
 				// Get the NextAuth user via base adapter (already scoped to next_auth schema)
 				let nextAuthUser: AdapterUser | null = null
 				if (baseAdapter.getUser) {
-					nextAuthUser = await baseAdapter.getUser(
-						deviceData.next_auth_user_id || '',
-					)
+					nextAuthUser = await baseAdapter.getUser(deviceData.next_auth_user_id || '')
 				}
 
 				if (!nextAuthUser) {
@@ -227,9 +225,7 @@ export function KindfiSupabaseAdapter(): Adapter {
 			})
 		},
 
-		async linkAccount(
-			account: AdapterAccount,
-		): Promise<AdapterAccount | null | undefined> {
+		async linkAccount(account: AdapterAccount): Promise<AdapterAccount | null | undefined> {
 			// For WebAuthn provider, we handle the account linking differently
 			if (account.provider === 'webauthn') {
 				// WebAuthn account linking is handled through device registration
@@ -287,9 +283,7 @@ export function KindfiSupabaseAdapter(): Adapter {
 			return result
 		},
 
-		async updateSession(
-			session: Partial<AdapterSession> & Pick<AdapterSession, 'sessionToken'>,
-		) {
+		async updateSession(session: Partial<AdapterSession> & Pick<AdapterSession, 'sessionToken'>) {
 			if (!baseAdapter.updateSession) {
 				return null
 			}

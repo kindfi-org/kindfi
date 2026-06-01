@@ -2,10 +2,7 @@ import type { Metadata } from 'next'
 import { FaqContainer } from '~/components/sections/faqs/faq-container'
 import { JsonLd } from '~/components/shared/json-ld'
 import { faqData } from '~/lib/mock-data/project/project-card-variants.mock'
-import {
-	getBreadcrumbSchema,
-	getFaqPageSchema,
-} from '~/lib/seo/structured-data'
+import { getBreadcrumbSchema, getFaqPageSchema } from '~/lib/seo/structured-data'
 
 export const metadata: Metadata = {
 	title: 'FAQs | KindFi',
@@ -35,9 +32,7 @@ export default function FaqsPage() {
 	return (
 		<>
 			<JsonLd
-				data={getFaqPageSchema(
-					allFaqs.map(({ question, answer }) => ({ question, answer })),
-				)}
+				data={getFaqPageSchema(allFaqs.map(({ question, answer }) => ({ question, answer })))}
 			/>
 			<JsonLd
 				data={getBreadcrumbSchema([

@@ -62,9 +62,7 @@ export function readRawPostBySlug(
 export function readAllPosts(): MdxPost[] {
 	return listPostSlugs()
 		.map((slug) => readRawPostBySlug(slug))
-		.filter(
-			(p): p is { frontmatter: MdxFrontmatter; body: string } => p !== null,
-		)
+		.filter((p): p is { frontmatter: MdxFrontmatter; body: string } => p !== null)
 		.map(({ frontmatter, body }) => {
 			const words = body.trim().split(/\s+/).length
 			const tpm = 200
@@ -81,10 +79,7 @@ export async function compileMdx(source: string) {
 	return serialize(source, {
 		mdxOptions: {
 			remarkPlugins: [remarkGfm],
-			rehypePlugins: [
-				rehypeSlug,
-				[rehypeAutolinkHeadings, { behavior: 'append' }],
-			],
+			rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: 'append' }]],
 		},
 	})
 }

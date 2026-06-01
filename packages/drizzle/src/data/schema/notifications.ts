@@ -12,11 +12,7 @@ import {
 	uuid,
 } from 'drizzle-orm/pg-core'
 import { usersInAuth } from './auth'
-import {
-	notificationDeliveryStatus,
-	notificationPriority,
-	notificationType,
-} from './enums'
+import { notificationDeliveryStatus, notificationPriority, notificationType } from './enums'
 
 export const notificationPreferences = pgTable(
 	'notification_preferences',
@@ -64,8 +60,7 @@ export const notifications = pgTable(
 		type: notificationType().default('info').notNull(),
 		priority: notificationPriority().default('medium').notNull(),
 		isRead: boolean('is_read').default(false),
-		deliveryStatus:
-			notificationDeliveryStatus('delivery_status').default('pending'),
+		deliveryStatus: notificationDeliveryStatus('delivery_status').default('pending'),
 		deliveryAttempts: integer('delivery_attempts').default(0),
 		nextRetryAt: timestamp('next_retry_at', {
 			withTimezone: true,

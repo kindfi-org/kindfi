@@ -1,16 +1,16 @@
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { listDisputesQuerySchema } from '~/lib/schemas/escrow-dispute.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import type { DisputePayload } from '~/lib/types/escrow/escrow-payload.types'
-import { listDisputesQuerySchema } from '~/lib/schemas/escrow-dispute.schemas'
 import { generateUniqueId } from '~/lib/utils/id'
-import { validateDispute } from '~/lib/validators/dispute'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
+import { validateDispute } from '~/lib/validators/dispute'
 
 async function createDisputeHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -59,10 +59,7 @@ async function createDisputeHandler(req: NextRequest) {
 			.single()
 
 		if (escrowError || !escrow) {
-			return NextResponse.json(
-				{ error: 'Escrow contract not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Escrow contract not found' }, { status: 404 })
 		}
 
 		const { data: milestone, error: milestoneError } = await supabase
@@ -72,10 +69,7 @@ async function createDisputeHandler(req: NextRequest) {
 			.single()
 
 		if (milestoneError || !milestone) {
-			return NextResponse.json(
-				{ error: 'Milestone not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Milestone not found' }, { status: 404 })
 		}
 
 		// 4. Check if a dispute already exists for this milestone

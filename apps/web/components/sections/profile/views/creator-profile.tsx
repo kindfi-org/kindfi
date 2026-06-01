@@ -1,1 +1,1 @@
-export { CreatorProfile } from "./creator-profile/creator-profile";
+export { CreatorProfile } from './creator-profile/creator-profile'

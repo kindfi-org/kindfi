@@ -4,16 +4,9 @@ import { useSupabaseQuery } from '@packages/lib/hooks'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import {
-	ProjectCardGrid,
-	ProjectCardList,
-} from '~/components/sections/projects/cards'
-import {
-	CategoryTicker,
-	SortDropdown,
-	ViewToggle,
-} from '~/components/sections/projects/filters'
+import { ProjectCardGrid, ProjectCardList } from '~/components/sections/projects/cards'
 import { EmptyProject } from '~/components/sections/projects/empty-project'
+import { CategoryTicker, SortDropdown, ViewToggle } from '~/components/sections/projects/filters'
 import {
 	ProjectCardGridSkeleton,
 	ProjectCardListSkeleton,
@@ -53,13 +46,9 @@ export function ProjectsClientWrapper() {
 		data: projects = [],
 		isLoading: isLoadingProjects,
 		error: projectError,
-	} = useSupabaseQuery(
-		'projects',
-		(client) => getAllProjects(client, categoryParams, sortParam),
-		{
-			additionalKeyValues: [categoryFilterKey, sortParam],
-		},
-	)
+	} = useSupabaseQuery('projects', (client) => getAllProjects(client, categoryParams, sortParam), {
+		additionalKeyValues: [categoryFilterKey, sortParam],
+	})
 
 	const {
 		data: categories = [],
@@ -124,9 +113,7 @@ export function ProjectsClientWrapper() {
 							{t('nav.exploreProjects')}
 						</p>
 						<p className="mt-1 text-lg font-semibold text-slate-900">
-							{isLoadingProjects
-								? t('projects.loading')
-								: formatResultsCount(projects.length, t)}
+							{isLoadingProjects ? t('projects.loading') : formatResultsCount(projects.length, t)}
 						</p>
 					</div>
 					<div className="flex flex-wrap items-center gap-3">
@@ -176,11 +163,7 @@ export function ProjectsClientWrapper() {
 								aria-label="Projects grid view"
 							>
 								{projects.map((project, index) => (
-									<ProjectCardGrid
-										key={project.id}
-										project={project}
-										index={index}
-									/>
+									<ProjectCardGrid key={project.id} project={project} index={index} />
 								))}
 							</motion.div>
 						) : (

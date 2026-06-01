@@ -1,3 +1,4 @@
+import type { IconType } from 'react-icons'
 import {
 	IoBusinessOutline,
 	IoCheckmarkCircleOutline,
@@ -10,7 +11,6 @@ import {
 	IoPlayCircleOutline,
 	IoShieldCheckmarkOutline,
 } from 'react-icons/io5'
-import type { IconType } from 'react-icons'
 import type { AdminStats } from '~/lib/queries/admin/get-admin-stats'
 
 export type MainStatConfig = {

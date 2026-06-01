@@ -43,13 +43,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 			case 2:
 				return <StepTwo onNext={handleNext} onBack={handleBack} />
 			case 3:
-				return (
-					<StepThree
-						onBack={handleBack}
-						onSubmit={handleSubmit}
-						isPending={isSubmitting}
-					/>
-				)
+				return <StepThree onBack={handleBack} onSubmit={handleSubmit} isPending={isSubmitting} />
 			default:
 				return <StepOne onNext={handleNext} />
 		}

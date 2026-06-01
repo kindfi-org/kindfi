@@ -35,9 +35,8 @@ export function LogoSection() {
 							/>
 						</FormControl>
 						<FormDescription>
-							Upload your foundation logo. Recommended: Square image, at least
-							400×400px. This will be displayed prominently on your foundation
-							profile.
+							Upload your foundation logo. Recommended: Square image, at least 400×400px. This will
+							be displayed prominently on your foundation profile.
 						</FormDescription>
 						<FormMessage />
 					</FormItem>

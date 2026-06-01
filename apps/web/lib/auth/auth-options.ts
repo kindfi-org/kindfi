@@ -3,9 +3,9 @@ import type { AppEnvInterface } from '@packages/lib/types'
 import type { Enums } from '@services/supabase'
 import jwt from 'jsonwebtoken'
 import type { NextAuthOptions, User } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { KindfiSupabaseAdapter } from '~/auth/kindfi-supabase-adapter'
 import { kindfiWebAuthnProvider } from '~/auth/kindfi-webauthn.provider'
-import { logger } from '@/lib/logger'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
@@ -20,7 +20,6 @@ export const nextAuthOption: NextAuthOptions = {
 		async jwt({ token, user, account, trigger: _trigger }) {
 			// On sign in, populate the token with user data
 			if (user) {
-
 				const userData = user as User
 
 				// Set core NextAuth token properties
@@ -40,8 +39,7 @@ export const nextAuthOption: NextAuthOptions = {
 				if (signingSecret) {
 					const supabasePayload = {
 						aud: 'authenticated',
-						exp:
-							Math.floor(Date.now() / 1000) + appConfig.auth.token.expiration,
+						exp: Math.floor(Date.now() / 1000) + appConfig.auth.token.expiration,
 						sub: user.id,
 						email: user.email,
 						role: 'authenticated',
@@ -64,7 +62,6 @@ export const nextAuthOption: NextAuthOptions = {
 				logger.error('❌ No token found in session callback')
 				return session
 			}
-
 
 			// Build session from token
 			session.user = {
@@ -92,14 +89,13 @@ export const nextAuthOption: NextAuthOptions = {
 				session.supabaseAccessToken = token.supabaseAccessToken as string
 			}
 
-
 			return session
 		},
 		// @ts-expect-error auth param is OK on this scenario as we only return it.
 		async authorized({ auth }) {
 			return !!auth?.user
 		},
-		async signIn({ user, account }) {
+		async signIn({ user: _user, account: _account }) {
 			return true
 		},
 	},

@@ -3,10 +3,7 @@ import type { TypedSupabaseClient } from '@packages/lib/types'
 import { useEffect, useState } from 'react'
 import { logger } from '@/lib/logger'
 import { fetchChildComments, fetchQuestions } from '~/lib/services/comments'
-import type {
-	CommentData,
-	CommentWithAnswers,
-} from '~/lib/types/project/project-qa.types'
+import type { CommentData, CommentWithAnswers } from '~/lib/types/project/project-qa.types'
 import { buildQuestionThreads } from '~/lib/utils/qa'
 
 interface UseQAQueriesOptions {
@@ -20,13 +17,9 @@ export const useQAQueries = ({
 	initialQuestions,
 	initialComments,
 }: UseQAQueriesOptions) => {
-	const [processedQuestions, setProcessedQuestions] = useState<
-		CommentWithAnswers[]
-	>([])
+	const [processedQuestions, setProcessedQuestions] = useState<CommentWithAnswers[]>([])
 
-	const { data: questions, refresh: refetchQuestions } = useSupabaseQuery<
-		CommentData[]
-	>(
+	const { data: questions, refresh: refetchQuestions } = useSupabaseQuery<CommentData[]>(
 		'projectQuestions',
 		async (supabase: TypedSupabaseClient) => {
 			try {

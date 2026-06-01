@@ -64,7 +64,11 @@ mock.module('~/lib/utils/id', () => ({ generateUniqueId: () => 'mock-id' }))
 mock.module('~/lib/utils/validation', () => ({
 	validateRequest: () => ({
 		success: false,
-		response: { status: 400, headers: { set: () => {}, get: () => null }, json: async () => ({ error: 'validation' }) },
+		response: {
+			status: 400,
+			headers: { set: () => {}, get: () => null },
+			json: async () => ({ error: 'validation' }),
+		},
 	}),
 }))
 
@@ -103,7 +107,12 @@ mock.module('~/lib/api-helpers', () => ({
 mock.module('@packages/lib/supabase', () => ({
 	supabase: {
 		from: () => ({
-			select: () => ({ eq: () => ({ single: () => ({ data: null, error: null }), maybeSingle: () => ({ data: null, error: null }) } ) }),
+			select: () => ({
+				eq: () => ({
+					single: () => ({ data: null, error: null }),
+					maybeSingle: () => ({ data: null, error: null }),
+				}),
+			}),
 			insert: () => ({ select: () => ({ single: () => ({ data: { id: '1' }, error: null }) }) }),
 			update: () => ({ eq: () => ({ data: null, error: null }) }),
 		}),
@@ -255,38 +264,18 @@ mock.module('../app/api/comments/validation', () => ({
 
 // ─── Dynamic route imports (after all mocks are registered) ───────────────────
 
-const { POST: escrowFundPOST } = await import(
-	'../app/api/escrow/fund/route'
-)
-const { POST: escrowInitializePOST } = await import(
-	'../app/api/escrow/initialize/route'
-)
-const { POST: escrowDisputePOST } = await import(
-	'../app/api/escrow/dispute/route'
-)
-const { POST: escrowReviewPOST } = await import(
-	'../app/api/escrow/review/route'
-)
-const { POST: escrowSignPOST } = await import(
-	'../app/api/escrow/sign-and-submit/route'
-)
-const { POST: contributionsPOST } = await import(
-	'../app/api/contributions/create/route'
-)
+const { POST: escrowFundPOST } = await import('../app/api/escrow/fund/route')
+const { POST: escrowInitializePOST } = await import('../app/api/escrow/initialize/route')
+const { POST: escrowDisputePOST } = await import('../app/api/escrow/dispute/route')
+const { POST: escrowReviewPOST } = await import('../app/api/escrow/review/route')
+const { POST: escrowSignPOST } = await import('../app/api/escrow/sign-and-submit/route')
+const { POST: contributionsPOST } = await import('../app/api/contributions/create/route')
 const { POST: votePOST } = await import('../app/api/governance/vote/route')
-const { POST: kycSessionPOST } = await import(
-	'../app/api/kyc/didit/create-session/route'
-)
+const { POST: kycSessionPOST } = await import('../app/api/kyc/didit/create-session/route')
 const { POST: commentsPOST } = await import('../app/api/comments/route')
-const { POST: foundationsPOST } = await import(
-	'../app/api/foundations/create/route'
-)
-const { POST: projectsPOST } = await import(
-	'../app/api/projects/create/route'
-)
-const { POST: notificationsPOST } = await import(
-	'../app/api/notifications/push/route'
-)
+const { POST: foundationsPOST } = await import('../app/api/foundations/create/route')
+const { POST: projectsPOST } = await import('../app/api/projects/create/route')
+const { POST: notificationsPOST } = await import('../app/api/notifications/push/route')
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -294,8 +283,7 @@ function makeRequest(path = '/api/test'): NextRequest {
 	return {
 		nextUrl: { pathname: path },
 		headers: {
-			get: (key: string) =>
-				key === 'x-forwarded-for' ? '127.0.0.1' : null,
+			get: (key: string) => (key === 'x-forwarded-for' ? '127.0.0.1' : null),
 		},
 	} as unknown as NextRequest
 }
@@ -450,18 +438,12 @@ describe('Rate-limited routes — increment is called for each request', () => {
 
 	test('increment is called with the route pathname', async () => {
 		await votePOST(makeRequest('/api/governance/vote'))
-		expect(mockIncrement).toHaveBeenCalledWith(
-			expect.any(String),
-			'/api/governance/vote',
-		)
+		expect(mockIncrement).toHaveBeenCalledWith(expect.any(String), '/api/governance/vote')
 	})
 
 	test('increment is called with the route pathname for medium-priority routes', async () => {
 		await commentsPOST(makeRequest('/api/comments'))
-		expect(mockIncrement).toHaveBeenCalledWith(
-			expect.any(String),
-			'/api/comments',
-		)
+		expect(mockIncrement).toHaveBeenCalledWith(expect.any(String), '/api/comments')
 	})
 })
 
@@ -479,9 +461,7 @@ describe('Rate-limited routes — Redis failure falls open', () => {
 	})
 
 	test('/api/contributions/create passes through when Redis is unavailable', async () => {
-		const res = await contributionsPOST(
-			makeRequest('/api/contributions/create'),
-		)
+		const res = await contributionsPOST(makeRequest('/api/contributions/create'))
 		expect(res.status).not.toBe(429)
 	})
 })

@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
@@ -13,7 +14,6 @@ import {
 	triggerGamificationUpdates,
 } from '~/lib/services/contribution-service'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 const MAX_CONTRIBUTION_AMOUNT = 1_000_000
 
@@ -33,11 +33,7 @@ async function createContributionHandler(req: NextRequest) {
 
 		const numericAmount = Number(amount)
 
-		if (
-			typeof numericAmount !== 'number' ||
-			Number.isNaN(numericAmount) ||
-			numericAmount <= 0
-		) {
+		if (typeof numericAmount !== 'number' || Number.isNaN(numericAmount) || numericAmount <= 0) {
 			return NextResponse.json(
 				{ error: 'Invalid request. amount must be a positive number.' },
 				{ status: 400 },
@@ -110,10 +106,7 @@ async function createContributionHandler(req: NextRequest) {
 			amount,
 			req,
 		}).catch((error) => {
-			logger.error(
-				'[Gamification] Unhandled error in gamification updates:',
-				error,
-			)
+			logger.error('[Gamification] Unhandled error in gamification updates:', error)
 		})
 
 		return NextResponse.json(

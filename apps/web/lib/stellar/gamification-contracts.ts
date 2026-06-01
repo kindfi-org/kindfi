@@ -109,11 +109,7 @@ export class GamificationContractService {
 	private networkPassphrase: string
 	private recorderKeypair: Keypair
 
-	constructor(
-		rpcUrl?: string,
-		networkPassphrase?: string,
-		recorderSecretKey?: string,
-	) {
+	constructor(rpcUrl?: string, networkPassphrase?: string, recorderSecretKey?: string) {
 		const rpc = rpcUrl || process.env.STELLAR_RPC_URL || process.env.RPC_URL
 		const passphrase =
 			networkPassphrase ||
@@ -148,7 +144,6 @@ export class GamificationContractService {
 			try {
 				const { userAddress, period, donationTimestamp } = params
 
-
 				// Convert period to enum (0 = Weekly, 1 = Monthly)
 				const periodValue = period === 'weekly' ? 0 : 1
 
@@ -174,7 +169,6 @@ export class GamificationContractService {
 					nativeToScVal(BigInt(donationTimestamp), { type: 'u64' }), // donation_timestamp
 				]
 
-
 				const operation = Operation.invokeContractFunction({
 					contract: streakContractAddress,
 					function: 'record_donation',
@@ -194,10 +188,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					logger.error(
-						'[GamificationContractService] Simulation failed:',
-						simulation,
-					)
+					logger.error('[GamificationContractService] Simulation failed:', simulation)
 					return {
 						success: false,
 						error: `Simulation failed: ${JSON.stringify(simulation)}`,
@@ -213,10 +204,7 @@ export class GamificationContractService {
 				const result = await this.server.sendTransaction(assembledTx)
 
 				if (result.status === 'ERROR') {
-					logger.error(
-						'[GamificationContractService] Transaction failed:',
-						result,
-					)
+					logger.error('[GamificationContractService] Transaction failed:', result)
 					return {
 						success: false,
 						error: `Transaction failed: ${JSON.stringify(result)}`,
@@ -231,10 +219,7 @@ export class GamificationContractService {
 					streak: 1,
 				}
 			} catch (error) {
-				logger.error(
-					'[GamificationContractService] Error recording streak donation:',
-					error,
-				)
+				logger.error('[GamificationContractService] Error recording streak donation:', error)
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error',
@@ -253,7 +238,6 @@ export class GamificationContractService {
 		return enqueue(async () => {
 			try {
 				const { referredAddress } = params
-
 
 				// Get recorder account
 				const recorderAccount = await this.server
@@ -275,7 +259,6 @@ export class GamificationContractService {
 					nativeToScVal(referredAddr, { type: 'address' }), // referred
 				]
 
-
 				const operation = Operation.invokeContractFunction({
 					contract: referralContractAddress,
 					function: 'record_donation',
@@ -295,10 +278,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					logger.error(
-						'[GamificationContractService] Simulation failed:',
-						simulation,
-					)
+					logger.error('[GamificationContractService] Simulation failed:', simulation)
 					return {
 						success: false,
 						error: `Simulation failed: ${JSON.stringify(simulation)}`,
@@ -310,8 +290,7 @@ export class GamificationContractService {
 				if (simulation.result?.retval) {
 					try {
 						const { scValToNative } = await import('@stellar/stellar-sdk')
-						rewardPoints =
-							(scValToNative(simulation.result.retval) as number) ?? 0
+						rewardPoints = (scValToNative(simulation.result.retval) as number) ?? 0
 					} catch {
 						logger.warn(
 							'[GamificationContractService] Could not parse reward points from record_donation',
@@ -328,10 +307,7 @@ export class GamificationContractService {
 				const result = await this.server.sendTransaction(assembledTx)
 
 				if (result.status === 'ERROR') {
-					logger.error(
-						'[GamificationContractService] Transaction failed:',
-						result,
-					)
+					logger.error('[GamificationContractService] Transaction failed:', result)
 					return {
 						success: false,
 						error: `Transaction failed: ${JSON.stringify(result)}`,
@@ -344,10 +320,7 @@ export class GamificationContractService {
 					rewardPoints,
 				}
 			} catch (error) {
-				logger.error(
-					'[GamificationContractService] Error recording referral donation:',
-					error,
-				)
+				logger.error('[GamificationContractService] Error recording referral donation:', error)
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error',
@@ -367,7 +340,6 @@ export class GamificationContractService {
 		return enqueue(async () => {
 			try {
 				const { referrerAddress, referredAddress } = params
-
 
 				const recorderAccount = await this.server
 					.getAccount(this.recorderKeypair.publicKey())
@@ -426,10 +398,7 @@ export class GamificationContractService {
 
 				return { success: true }
 			} catch (error) {
-				logger.error(
-					'[GamificationContractService] Error creating referral:',
-					error,
-				)
+				logger.error('[GamificationContractService] Error creating referral:', error)
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error',
@@ -449,7 +418,6 @@ export class GamificationContractService {
 		return enqueue(async () => {
 			try {
 				const { referredAddress } = params
-
 
 				const recorderAccount = await this.server
 					.getAccount(this.recorderKeypair.publicKey())
@@ -481,10 +449,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					logger.error(
-						'[GamificationContractService] markOnboarded simulation failed:',
-						simulation,
-					)
+					logger.error('[GamificationContractService] markOnboarded simulation failed:', simulation)
 					return {
 						success: false,
 						error: `Simulation failed: ${JSON.stringify(simulation)}`,
@@ -496,8 +461,7 @@ export class GamificationContractService {
 				if (simulation.result?.retval) {
 					try {
 						const { scValToNative } = await import('@stellar/stellar-sdk')
-						rewardPoints =
-							(scValToNative(simulation.result.retval) as number) ?? 0
+						rewardPoints = (scValToNative(simulation.result.retval) as number) ?? 0
 					} catch {
 						logger.warn(
 							'[GamificationContractService] Could not parse reward points from markOnboarded',
@@ -519,10 +483,7 @@ export class GamificationContractService {
 
 				return { success: true, rewardPoints }
 			} catch (error) {
-				logger.error(
-					'[GamificationContractService] Error marking onboarded:',
-					error,
-				)
+				logger.error('[GamificationContractService] Error marking onboarded:', error)
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error',
@@ -541,7 +502,6 @@ export class GamificationContractService {
 		return enqueue(async () => {
 			try {
 				const { userAddress, questId, progressValue } = params
-
 
 				// Get recorder account
 				const recorderAccount = await this.server
@@ -565,7 +525,6 @@ export class GamificationContractService {
 					nativeToScVal(progressValue, { type: 'u32' }), // progress_value
 				]
 
-
 				const operation = Operation.invokeContractFunction({
 					contract: questContractAddress,
 					function: 'update_progress',
@@ -585,10 +544,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					logger.error(
-						'[GamificationContractService] Simulation failed:',
-						simulation,
-					)
+					logger.error('[GamificationContractService] Simulation failed:', simulation)
 					return {
 						success: false,
 						error: `Simulation failed: ${JSON.stringify(simulation)}`,
@@ -604,10 +560,7 @@ export class GamificationContractService {
 				const result = await this.server.sendTransaction(assembledTx)
 
 				if (result.status === 'ERROR') {
-					logger.error(
-						'[GamificationContractService] Transaction failed:',
-						result,
-					)
+					logger.error('[GamificationContractService] Transaction failed:', result)
 					return {
 						success: false,
 						error: `Transaction failed: ${JSON.stringify(result)}`,
@@ -620,10 +573,7 @@ export class GamificationContractService {
 					completed: false,
 				}
 			} catch (error) {
-				logger.error(
-					'[GamificationContractService] Error updating quest progress:',
-					error,
-				)
+				logger.error('[GamificationContractService] Error updating quest progress:', error)
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error',
@@ -643,15 +593,7 @@ export class GamificationContractService {
 	): Promise<{ success: boolean; questId?: number; error?: string }> {
 		return enqueue(async () => {
 			try {
-				const {
-					questType,
-					name,
-					description,
-					targetValue,
-					rewardPoints,
-					expiresAt,
-				} = params
-
+				const { questType, name, description, targetValue, rewardPoints, expiresAt } = params
 
 				// Get admin account
 				const adminAccount = await this.server
@@ -661,10 +603,7 @@ export class GamificationContractService {
 						return account
 					})
 					.catch((error) => {
-						logger.error(
-							'[GamificationContractService] Error fetching admin account:',
-							error,
-						)
+						logger.error('[GamificationContractService] Error fetching admin account:', error)
 						throw error
 					})
 
@@ -681,7 +620,6 @@ export class GamificationContractService {
 					nativeToScVal(rewardPoints, { type: 'u32' }), // reward_points
 					nativeToScVal(BigInt(expiresAt), { type: 'u64' }), // expires_at
 				]
-
 
 				const operation = Operation.invokeContractFunction({
 					contract: questContractAddress,
@@ -702,10 +640,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					logger.error(
-						'[GamificationContractService] Simulation failed:',
-						simulation,
-					)
+					logger.error('[GamificationContractService] Simulation failed:', simulation)
 					return {
 						success: false,
 						error: `Simulation failed: ${JSON.stringify(simulation)}`,
@@ -721,10 +656,7 @@ export class GamificationContractService {
 				const result = await this.server.sendTransaction(assembledTx)
 
 				if (result.status === 'ERROR') {
-					logger.error(
-						'[GamificationContractService] Transaction failed:',
-						result,
-					)
+					logger.error('[GamificationContractService] Transaction failed:', result)
 					return {
 						success: false,
 						error: `Transaction failed: ${JSON.stringify(result)}`,
@@ -752,10 +684,7 @@ export class GamificationContractService {
 					questId,
 				}
 			} catch (error) {
-				logger.error(
-					'[GamificationContractService] Error creating quest:',
-					error,
-				)
+				logger.error('[GamificationContractService] Error creating quest:', error)
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error',
@@ -785,18 +714,14 @@ export class GamificationContractService {
 				key: nativeToScVal('display_type', { type: 'symbol' }),
 				val:
 					attr.display_type != null
-						? xdr.ScVal.scvVec([
-								nativeToScVal(attr.display_type, { type: 'string' }),
-							])
+						? xdr.ScVal.scvVec([nativeToScVal(attr.display_type, { type: 'string' })])
 						: xdr.ScVal.scvVoid(),
 			}),
 			new xdr.ScMapEntry({
 				key: nativeToScVal('max_value', { type: 'symbol' }),
 				val:
 					attr.max_value != null
-						? xdr.ScVal.scvVec([
-								nativeToScVal(attr.max_value, { type: 'string' }),
-							])
+						? xdr.ScVal.scvVec([nativeToScVal(attr.max_value, { type: 'string' })])
 						: xdr.ScVal.scvVoid(),
 			}),
 			new xdr.ScMapEntry({
@@ -822,9 +747,7 @@ export class GamificationContractService {
 	 * Fields must be in alphabetical order for contracttype map encoding.
 	 */
 	private buildMetadataArg(metadata: MintNFTParams['metadata']) {
-		const attrVec = metadata.attributes.map((a) =>
-			this.buildNFTAttributeScVal(a),
-		)
+		const attrVec = metadata.attributes.map((a) => this.buildNFTAttributeScVal(a))
 
 		const fields = [
 			new xdr.ScMapEntry({
@@ -866,7 +789,6 @@ export class GamificationContractService {
 			try {
 				const { toAddress, metadata } = params
 
-
 				const recorderAccount = await this.server
 					.getAccount(this.recorderKeypair.publicKey())
 					.then((res) => new Account(res.accountId(), res.sequenceNumber()))
@@ -898,10 +820,7 @@ export class GamificationContractService {
 				const simulation = await this.server.simulateTransaction(transaction)
 
 				if (Api.isSimulationError(simulation)) {
-					logger.error(
-						'[GamificationContractService] mintNFT simulation failed:',
-						simulation,
-					)
+					logger.error('[GamificationContractService] mintNFT simulation failed:', simulation)
 					return {
 						success: false,
 						error: `Simulation failed: ${JSON.stringify(simulation)}`,
@@ -915,9 +834,7 @@ export class GamificationContractService {
 						const { scValToNative } = await import('@stellar/stellar-sdk')
 						tokenId = scValToNative(simulation.result.retval) as number
 					} catch {
-						logger.warn(
-							'[GamificationContractService] Could not parse token ID from simulation',
-						)
+						logger.warn('[GamificationContractService] Could not parse token ID from simulation')
 					}
 				}
 
@@ -957,7 +874,6 @@ export class GamificationContractService {
 		return enqueue(async () => {
 			try {
 				const { tokenId, metadata } = params
-
 
 				const recorderAccount = await this.server
 					.getAccount(this.recorderKeypair.publicKey())
@@ -1014,10 +930,7 @@ export class GamificationContractService {
 
 				return { success: true }
 			} catch (error) {
-				logger.error(
-					'[GamificationContractService] Error updating NFT metadata:',
-					error,
-				)
+				logger.error('[GamificationContractService] Error updating NFT metadata:', error)
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error',
@@ -1038,7 +951,6 @@ export class GamificationContractService {
 	): Promise<{ success: boolean; error?: string }> {
 		return enqueue(async () => {
 			try {
-
 				const adminAccount = await this.server
 					.getAccount(adminKeypair.publicKey())
 					.then((res) => new Account(res.accountId(), res.sequenceNumber()))
@@ -1112,10 +1024,7 @@ export class GamificationContractService {
 
 				return { success: true }
 			} catch (error) {
-				logger.error(
-					'[GamificationContractService] Error granting role:',
-					error,
-				)
+				logger.error('[GamificationContractService] Error granting role:', error)
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error',

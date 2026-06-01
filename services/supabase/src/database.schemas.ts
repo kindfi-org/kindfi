@@ -151,15 +151,9 @@ export const contributionsUpdateSchema = z.object({
 	updated_at: z.string().optional().nullable(),
 })
 
-export const backupStateSchema = z.union([
-	z.literal('not_backed_up'),
-	z.literal('backed_up'),
-])
+export const backupStateSchema = z.union([z.literal('not_backed_up'), z.literal('backed_up')])
 
-export const deviceTypeSchema = z.union([
-	z.literal('single_device'),
-	z.literal('multi_device'),
-])
+export const deviceTypeSchema = z.union([z.literal('single_device'), z.literal('multi_device')])
 
 export const profileVerificationStatusSchema = z.union([
 	z.literal('unverified'),
@@ -342,10 +336,7 @@ export const kycStatusEnumSchema = z.union([
 	z.literal('verified'),
 ])
 
-export const kycVerificationEnumSchema = z.union([
-	z.literal('basic'),
-	z.literal('enhanced'),
-])
+export const kycVerificationEnumSchema = z.union([z.literal('basic'), z.literal('enhanced')])
 
 export const kycReviewsInsertSchema = z.object({
 	created_at: z.string().optional(),

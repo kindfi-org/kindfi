@@ -2,20 +2,17 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
 import { foundationCampaignsSchema } from '~/lib/schemas/foundation.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * PATCH /api/foundations/[slug]/campaigns
  * Assign or unassign campaigns to/from a foundation
  */
-export async function PATCH(
-	req: Request,
-	{ params }: { params: Promise<{ slug: string }> },
-) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ slug: string }> }) {
 	try {
 		// Get params, session and supabase client in parallel
 		const [{ slug }, session, supabase] = await Promise.all([
@@ -30,10 +27,7 @@ export async function PATCH(
 		const foundation = await getFoundationBySlug(supabase, slug)
 
 		if (!foundation) {
-			return NextResponse.json(
-				{ error: 'Foundation not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Foundation not found' }, { status: 404 })
 		}
 
 		// Verify user is the founder
@@ -58,10 +52,7 @@ export async function PATCH(
 		}
 
 		if (project.kindler_id !== session.user.id) {
-			return NextResponse.json(
-				{ error: 'You can only assign your own campaigns' },
-				{ status: 403 },
-			)
+			return NextResponse.json({ error: 'You can only assign your own campaigns' }, { status: 403 })
 		}
 
 		// Update the project's foundation_id
@@ -72,18 +63,12 @@ export async function PATCH(
 
 		if (updateError) {
 			logger.error('Error updating project:', updateError)
-			return NextResponse.json(
-				{ error: 'Failed to update campaign' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to update campaign' }, { status: 500 })
 		}
 
 		return NextResponse.json({ success: true })
 	} catch (error) {
 		logger.error('Error in PATCH /api/foundations/[slug]/campaigns:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

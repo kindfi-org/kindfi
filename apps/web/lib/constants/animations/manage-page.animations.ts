@@ -3,9 +3,7 @@
  * These variants respect user's motion preferences.
  */
 
-export const createManageContainerVariants = (
-	prefersReducedMotion: boolean,
-) => ({
+export const createManageContainerVariants = (prefersReducedMotion: boolean) => ({
 	hidden: { opacity: 0 },
 	show: {
 		opacity: 1,

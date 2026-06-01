@@ -14,14 +14,8 @@ import { findAttr } from './utils/helpers'
 
 export function NFTCollection() {
 	const [showMetadata, setShowMetadata] = useState(false)
-	const {
-		session,
-		smartAccountAddress,
-		dbNft,
-		userStats,
-		onChainData,
-		isLoading,
-	} = useNftCollection()
+	const { session, smartAccountAddress, dbNft, userStats, onChainData, isLoading } =
+		useNftCollection()
 
 	if (!smartAccountAddress && !session?.user?.id) {
 		return <NftNotConnected />
@@ -58,11 +52,7 @@ export function NFTCollection() {
 	const progressPct = nextTierPts
 		? Math.min(
 				100,
-				Math.round(
-					((currentPts - tierConfig.minPts) /
-						(nextTierPts - tierConfig.minPts)) *
-						100,
-				),
+				Math.round(((currentPts - tierConfig.minPts) / (nextTierPts - tierConfig.minPts)) * 100),
 			)
 		: 100
 

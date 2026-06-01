@@ -1,13 +1,6 @@
 import { z } from 'zod'
 
-const escrowStatusEnum = z.enum([
-	'NEW',
-	'FUNDED',
-	'ACTIVE',
-	'COMPLETED',
-	'DISPUTED',
-	'CANCELLED',
-])
+const escrowStatusEnum = z.enum(['NEW', 'FUNDED', 'ACTIVE', 'COMPLETED', 'DISPUTED', 'CANCELLED'])
 
 export type EscrowStatusInput = z.infer<typeof escrowStatusEnum>
 
@@ -97,8 +90,7 @@ const escrowDataSchema = z
 			(data.milestones && data.milestones.length > 0) ||
 			(data.amount !== undefined && data.receiver !== undefined),
 		{
-			message:
-				'Either milestones or single-release amount/receiver must be provided',
+			message: 'Either milestones or single-release amount/receiver must be provided',
 		},
 	)
 	.refine(
@@ -116,10 +108,7 @@ const escrowDataSchema = z
 
 export const saveEscrowContractInputSchema = z.object({
 	projectId: z.string().uuid('Invalid projectId'),
-	contractId: z
-		.string()
-		.min(1, 'contractId is required')
-		.max(120, 'contractId is too long'),
+	contractId: z.string().min(1, 'contractId is required').max(120, 'contractId is too long'),
 	engagementId: z.string().min(1).optional(),
 	escrowData: escrowDataSchema,
 })
@@ -139,11 +128,7 @@ export const createFoundationInputSchema = z.object({
 		.max(new Date().getFullYear() + 1),
 	mission: z.string().max(2000).optional(),
 	vision: z.string().max(2000).optional(),
-	websiteUrl: z
-		.string()
-		.url('Invalid website URL')
-		.optional()
-		.or(z.literal('')),
+	websiteUrl: z.string().url('Invalid website URL').optional().or(z.literal('')),
 	socialLinks: z.record(z.string(), z.string().url('Invalid URL')).optional(),
 })
 

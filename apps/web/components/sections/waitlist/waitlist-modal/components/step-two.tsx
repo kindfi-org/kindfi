@@ -1,6 +1,5 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { Button } from '~/components/base/button'
@@ -15,6 +14,7 @@ import {
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
 import { useWaitlist } from '~/hooks/contexts/use-waitlist.context'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { useI18n } from '~/lib/i18n'
 import { waitlistStepTwoSchema } from '~/lib/schemas/waitlist.schemas'
 import type { WaitlistStepTwoData } from '~/lib/types/waitlist.types'
@@ -68,10 +68,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 							<FormItem>
 								<FormLabel>{t('waitlist.fields.projectName')}</FormLabel>
 								<FormControl>
-									<Input
-										placeholder={t('waitlist.fields.projectNamePlaceholder')}
-										{...field}
-									/>
+									<Input placeholder={t('waitlist.fields.projectNamePlaceholder')} {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -86,9 +83,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 								<FormControl>
 									<Textarea
 										rows={4}
-										placeholder={t(
-											'waitlist.fields.projectDescriptionPlaceholder',
-										)}
+										placeholder={t('waitlist.fields.projectDescriptionPlaceholder')}
 										className="resize-none"
 										{...field}
 									/>
@@ -104,10 +99,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 							<FormItem>
 								<FormLabel>{t('waitlist.fields.location')}</FormLabel>
 								<FormControl>
-									<Input
-										placeholder={t('waitlist.fields.locationPlaceholder')}
-										{...field}
-									/>
+									<Input placeholder={t('waitlist.fields.locationPlaceholder')} {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>

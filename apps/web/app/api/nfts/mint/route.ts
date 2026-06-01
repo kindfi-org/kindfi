@@ -3,9 +3,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
-import { RateLimiter } from '~/lib/auth/rate-limiter'
-import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { Logger } from '~/lib/logger'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { mintNftSchema } from '~/lib/schemas/nft.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import {
@@ -20,8 +19,6 @@ import { getUserStats } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
-
-
 
 /**
  * POST /api/nfts/mint
@@ -133,21 +130,14 @@ async function mintHandler(req: NextRequest) {
 		}
 
 		const nftContractAddress =
-			process.env.NFT_CONTRACT_ADDRESS ||
-			process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS
+			process.env.NFT_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS
 
 		if (!nftContractAddress) {
-			return NextResponse.json(
-				{ error: 'NFT contract address not configured' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'NFT contract address not configured' }, { status: 500 })
 		}
 
 		if (!process.env.SOROBAN_PRIVATE_KEY) {
-			return NextResponse.json(
-				{ error: 'SOROBAN_PRIVATE_KEY not configured' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'SOROBAN_PRIVATE_KEY not configured' }, { status: 500 })
 		}
 
 		// Gather user stats for the NFT metadata
@@ -287,10 +277,7 @@ async function mintHandler(req: NextRequest) {
 				error: error instanceof Error ? error.message : String(error),
 			},
 		})
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 

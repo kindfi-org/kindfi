@@ -3,11 +3,7 @@ import type { ReactNode } from 'react'
 import { AdminNavigation } from '~/components/sections/admin/admin-navigation'
 import { requireAdmin } from '~/lib/utils/admin'
 
-export default async function AdminLayout({
-	children,
-}: {
-	children: ReactNode
-}) {
+export default async function AdminLayout({ children }: { children: ReactNode }) {
 	await requireAdmin()
 
 	return (

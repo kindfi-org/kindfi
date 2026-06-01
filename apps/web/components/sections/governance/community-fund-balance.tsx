@@ -3,8 +3,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { ExternalLink, RefreshCw, Vault } from 'lucide-react'
 import { Button } from '~/components/base/button'
-import { useI18n } from '~/lib/i18n'
 import type { CommunityFundBalance as CommunityFundBalanceData } from '~/lib/governance/types'
+import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 import { getStellarExplorerAddressUrl } from '~/lib/utils/escrow/stellar-explorer'
 
@@ -16,17 +16,16 @@ interface BalanceApiResponse {
 
 export function CommunityFundBalance() {
 	const { t } = useI18n()
-	const { data, isLoading, isError, refetch, isFetching } =
-		useQuery<BalanceApiResponse>({
-			queryKey: ['community-fund-balance'],
-			queryFn: async () => {
-				const res = await fetch('/api/governance/balance')
-				if (!res.ok) throw new Error('Failed to fetch balance')
-				return res.json()
-			},
-			refetchInterval: 60_000,
-			staleTime: 30_000,
-		})
+	const { data, isLoading, isError, refetch, isFetching } = useQuery<BalanceApiResponse>({
+		queryKey: ['community-fund-balance'],
+		queryFn: async () => {
+			const res = await fetch('/api/governance/balance')
+			if (!res.ok) throw new Error('Failed to fetch balance')
+			return res.json()
+		},
+		refetchInterval: 60_000,
+		staleTime: 30_000,
+	})
 
 	const balance = data?.data
 	const currency = process.env.NEXT_PUBLIC_COMMUNITY_FUND_CURRENCY ?? 'USDC'
@@ -58,10 +57,7 @@ export function CommunityFundBalance() {
 							aria-label={t('governancePage.fundRefresh')}
 						>
 							<RefreshCw
-								className={cn(
-									'h-4 w-4',
-									isFetching && 'animate-spin',
-								)}
+								className={cn('h-4 w-4', isFetching && 'animate-spin')}
 								aria-hidden="true"
 							/>
 						</Button>
@@ -70,9 +66,7 @@ export function CommunityFundBalance() {
 					{isLoading ? (
 						<div className="h-10 w-44 animate-pulse rounded-xl bg-emerald-50" />
 					) : isError ? (
-						<p className="text-sm text-destructive">
-							{t('governancePage.fundLoadError')}
-						</p>
+						<p className="text-sm text-destructive">{t('governancePage.fundLoadError')}</p>
 					) : (
 						<>
 							<div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -82,16 +76,13 @@ export function CommunityFundBalance() {
 										maximumFractionDigits: 2,
 									})}
 								</span>
-								<span className="text-base font-semibold text-slate-500">
-									{currency}
-								</span>
+								<span className="text-base font-semibold text-slate-500">{currency}</span>
 							</div>
 
 							{balance?.address ? (
 								<div className="mt-4 flex flex-wrap items-center gap-2">
 									<code className="rounded-full bg-slate-50 px-3 py-1 text-[11px] font-mono text-slate-500">
-										{balance.address.slice(0, 6)}…
-										{balance.address.slice(-4)}
+										{balance.address.slice(0, 6)}…{balance.address.slice(-4)}
 									</code>
 									<a
 										href={getStellarExplorerAddressUrl(balance.address)}

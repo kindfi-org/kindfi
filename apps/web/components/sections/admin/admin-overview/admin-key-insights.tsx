@@ -1,9 +1,4 @@
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import type { AdminStats } from '~/lib/queries/admin/get-admin-stats'
 import { formatPercent } from './formatters'
 
@@ -24,22 +19,17 @@ export function AdminKeyInsights({ stats }: AdminKeyInsightsProps) {
 						<div className="text-2xl font-bold tabular-nums">
 							{formatPercent(
 								stats.recentActivity.projects > 0 && stats.totalProjects > 0
-									? (stats.recentActivity.projects / stats.totalProjects) *
-											100
+									? (stats.recentActivity.projects / stats.totalProjects) * 100
 									: 0,
 							)}
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							New projects this week
-						</p>
+						<p className="text-xs text-muted-foreground mt-1">New projects this week</p>
 					</CardContent>
 				</Card>
 
 				<Card className="border-l-4 border-l-blue-500">
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium">
-							User Growth Rate
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">User Growth Rate</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold tabular-nums">
@@ -49,17 +39,13 @@ export function AdminKeyInsights({ stats }: AdminKeyInsightsProps) {
 									: 0,
 							)}
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							New users this week
-						</p>
+						<p className="text-xs text-muted-foreground mt-1">New users this week</p>
 					</CardContent>
 				</Card>
 
 				<Card className="border-l-4 border-l-purple-500">
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium">
-							Engagement Rate
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold tabular-nums">
@@ -67,9 +53,7 @@ export function AdminKeyInsights({ stats }: AdminKeyInsightsProps) {
 								? (stats.totalProjects / stats.totalUsers).toFixed(2)
 								: '0'}
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							Projects per user
-						</p>
+						<p className="text-xs text-muted-foreground mt-1">Projects per user</p>
 					</CardContent>
 				</Card>
 
@@ -80,34 +64,24 @@ export function AdminKeyInsights({ stats }: AdminKeyInsightsProps) {
 					<CardContent>
 						<div className="text-2xl font-bold tabular-nums">
 							{formatPercent(
-								stats.totalProjects > 0
-									? (stats.activeProjects / stats.totalProjects) * 100
-									: 0,
+								stats.totalProjects > 0 ? (stats.activeProjects / stats.totalProjects) * 100 : 0,
 							)}
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							Projects currently active
-						</p>
+						<p className="text-xs text-muted-foreground mt-1">Projects currently active</p>
 					</CardContent>
 				</Card>
 
 				<Card className="border-l-4 border-l-indigo-500">
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium">
-							Creator Ratio
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Creator Ratio</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold tabular-nums">
 							{formatPercent(
-								stats.totalUsers > 0
-									? (stats.creatorUsers / stats.totalUsers) * 100
-									: 0,
+								stats.totalUsers > 0 ? (stats.creatorUsers / stats.totalUsers) * 100 : 0,
 							)}
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							Users who are creators
-						</p>
+						<p className="text-xs text-muted-foreground mt-1">Users who are creators</p>
 					</CardContent>
 				</Card>
 
@@ -118,14 +92,10 @@ export function AdminKeyInsights({ stats }: AdminKeyInsightsProps) {
 					<CardContent>
 						<div className="text-2xl font-bold tabular-nums">
 							{formatPercent(
-								stats.totalUsers > 0
-									? (stats.donorUsers / stats.totalUsers) * 100
-									: 0,
+								stats.totalUsers > 0 ? (stats.donorUsers / stats.totalUsers) * 100 : 0,
 							)}
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							Users who are donors
-						</p>
+						<p className="text-xs text-muted-foreground mt-1">Users who are donors</p>
 					</CardContent>
 				</Card>
 			</div>

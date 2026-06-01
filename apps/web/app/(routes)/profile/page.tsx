@@ -71,9 +71,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
 		if (kycRecord) {
 			const notes =
-				typeof kycRecord.notes === 'string'
-					? JSON.parse(kycRecord.notes)
-					: kycRecord.notes || {}
+				typeof kycRecord.notes === 'string' ? JSON.parse(kycRecord.notes) : kycRecord.notes || {}
 
 			const updateResult = await supabaseServiceRole
 				.from('kyc_reviews')
@@ -130,9 +128,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 				created_at: profileData.created_at,
 				profile: profileData,
 			}}
-			smartAccountAddress={
-				session.device?.address || session.user.device?.address || null
-			}
+			smartAccountAddress={session.device?.address || session.user.device?.address || null}
 			kycCompleted={kycCompleted}
 		/>
 	)

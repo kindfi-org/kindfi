@@ -3,10 +3,7 @@
 import { useState } from 'react'
 import { useWaitlist } from '~/hooks/contexts/use-waitlist.context'
 import { useI18n } from '~/lib/i18n'
-import type {
-	WaitlistFormData,
-	WaitlistStepThreeData,
-} from '~/lib/types/waitlist.types'
+import type { WaitlistFormData, WaitlistStepThreeData } from '~/lib/types/waitlist.types'
 import { TOTAL_STEPS } from '../constants'
 
 export function useWaitlistModal(onOpenChange: (open: boolean) => void) {
@@ -67,10 +64,7 @@ export function useWaitlistModal(onOpenChange: (open: boolean) => void) {
 			if (!res.ok) {
 				const err = await res.json().catch(() => ({}) as unknown)
 				const message =
-					typeof err === 'object' &&
-					err !== null &&
-					'error' in err &&
-					typeof err.error === 'string'
+					typeof err === 'object' && err !== null && 'error' in err && typeof err.error === 'string'
 						? err.error
 						: t('waitlist.errors.submitFailed')
 				throw new Error(message)
@@ -78,11 +72,7 @@ export function useWaitlistModal(onOpenChange: (open: boolean) => void) {
 
 			setIsSuccess(true)
 		} catch (error) {
-			setSubmitError(
-				error instanceof Error
-					? error.message
-					: t('waitlist.errors.submitFailed'),
-			)
+			setSubmitError(error instanceof Error ? error.message : t('waitlist.errors.submitFailed'))
 		} finally {
 			setIsSubmitting(false)
 		}

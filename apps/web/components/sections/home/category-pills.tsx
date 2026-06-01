@@ -97,13 +97,7 @@ export function CategoryPills({
 		return () => {
 			if (rafId) cancelAnimationFrame(rafId)
 		}
-	}, [
-		enableAutoScroll,
-		prefersReducedMotion,
-		isHovered,
-		isInteracting,
-		autoScrollSpeed,
-	])
+	}, [enableAutoScroll, prefersReducedMotion, isHovered, isInteracting, autoScrollSpeed])
 
 	const scrollByAmount = (amount: number) => {
 		const element = scrollRef.current
@@ -208,11 +202,7 @@ export function CategoryPills({
 							<CategoryBadge
 								key={category.id}
 								category={category}
-								onClick={
-									handleCategoryClick
-										? () => handleCategoryClick(category)
-										: undefined
-								}
+								onClick={handleCategoryClick ? () => handleCategoryClick(category) : undefined}
 							/>
 						))}
 					</div>

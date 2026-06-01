@@ -2,12 +2,7 @@
 
 import { Bell, BellOff, RefreshCw } from 'lucide-react'
 import { Button } from '~/components/base/button'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from '~/components/base/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/base/tooltip'
 
 interface QAHeaderProps {
 	realtimeActivity: boolean
@@ -57,27 +52,18 @@ export const QAHeader = ({
 								className={`rounded-full w-9 h-9 p-0 ${isRealtimeEnabled ? 'bg-blue-50' : ''}`}
 								onClick={onToggleRealtime}
 								aria-label={
-									isRealtimeEnabled
-										? 'Disable real-time updates'
-										: 'Enable real-time updates'
+									isRealtimeEnabled ? 'Disable real-time updates' : 'Enable real-time updates'
 								}
 							>
 								{isRealtimeEnabled ? (
-									<Bell
-										className="w-4 h-4 text-blue-600"
-										aria-hidden="true"
-									/>
+									<Bell className="w-4 h-4 text-blue-600" aria-hidden="true" />
 								) : (
 									<BellOff className="w-4 h-4" aria-hidden="true" />
 								)}
 							</Button>
 						</TooltipTrigger>
 						<TooltipContent>
-							<p>
-								{isRealtimeEnabled
-									? 'Disable real-time updates'
-									: 'Enable real-time updates'}
-							</p>
+							<p>{isRealtimeEnabled ? 'Disable real-time updates' : 'Enable real-time updates'}</p>
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>

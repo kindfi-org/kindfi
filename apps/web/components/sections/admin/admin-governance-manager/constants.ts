@@ -13,5 +13,4 @@ export const STATUS_CONFIG = {
 	ended: { label: 'Ended', className: 'border-gray-300 text-gray-500' },
 } as const
 
-export const GOVERNANCE_CONTRACT_ADDRESS =
-	process.env.NEXT_PUBLIC_GOVERNANCE_CONTRACT_ADDRESS ?? ''
+export const GOVERNANCE_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_GOVERNANCE_CONTRACT_ADDRESS ?? ''

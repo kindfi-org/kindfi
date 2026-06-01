@@ -1,7 +1,7 @@
 // todo: sign transaction function
 import { Keypair, Transaction } from '@stellar/stellar-sdk'
-import type { SignTransactionResponse } from '~/lib/types/escrow/escrow-response.types'
 import { logger } from '@/lib/logger'
+import type { SignTransactionResponse } from '~/lib/types/escrow/escrow-response.types'
 
 export function signTransaction(
 	unsignedXDR: string,

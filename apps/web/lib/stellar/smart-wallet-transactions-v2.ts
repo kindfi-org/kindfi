@@ -1,8 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config'
-import {
-	ChannelsClientService,
-	type WebAuthnSignatureData,
-} from '@packages/lib/stellar'
+import { ChannelsClientService, type WebAuthnSignatureData } from '@packages/lib/stellar'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Address,
@@ -31,11 +28,9 @@ const appConfig: AppEnvInterface = appEnvConfig('web')
 export class SmartWalletTransactionServiceV2 {
 	private server: Server
 	private networkPassphrase: string
-	private channelsClient: ChannelsClientService
 
 	constructor(networkPassphrase?: string, rpcUrl?: string) {
-		this.networkPassphrase =
-			networkPassphrase || appConfig.stellar.networkPassphrase
+		this.networkPassphrase = networkPassphrase || appConfig.stellar.networkPassphrase
 		this.server = new Server(rpcUrl || appConfig.stellar.rpcUrl)
 
 		// Initialize Channels client
@@ -49,11 +44,8 @@ export class SmartWalletTransactionServiceV2 {
 	 * @param params Transfer parameters
 	 * @returns Transaction challenge for WebAuthn signing
 	 */
-	async transferXLM(
-		params: TransferXLMParamsV2,
-	): Promise<TransactionChallengeV2> {
+	async transferXLM(params: TransferXLMParamsV2): Promise<TransactionChallengeV2> {
 		const { from, to, amount } = params
-
 
 		// Build contract invocation for transfer_xlm
 		const contract = new Contract(from)
@@ -76,11 +68,8 @@ export class SmartWalletTransactionServiceV2 {
 	 * @param params Transfer parameters
 	 * @returns Transaction challenge for WebAuthn signing
 	 */
-	async transferToken(
-		params: TransferTokenParamsV2,
-	): Promise<TransactionChallengeV2> {
+	async transferToken(params: TransferTokenParamsV2): Promise<TransactionChallengeV2> {
 		const { from, to, tokenAddress, amount } = params
-
 
 		// Build contract invocation for transfer_token
 		const contract = new Contract(from)
@@ -105,18 +94,12 @@ export class SmartWalletTransactionServiceV2 {
 	 * @param params Invocation parameters
 	 * @returns Transaction challenge for WebAuthn signing
 	 */
-	async invokeContract(
-		params: InvokeContractParamsV2,
-	): Promise<TransactionChallengeV2> {
+	async invokeContract(params: InvokeContractParamsV2): Promise<TransactionChallengeV2> {
 		const { from, contractAddress, functionName, args = [] } = params
-
 
 		// Convert arguments to ScVal format
 		const scArgs = args.map((arg) => {
-			if (
-				typeof arg === 'string' &&
-				(arg.startsWith('G') || arg.startsWith('C'))
-			) {
+			if (typeof arg === 'string' && (arg.startsWith('G') || arg.startsWith('C'))) {
 				return nativeToScVal(Address.fromString(arg), { type: 'address' })
 			}
 			if (typeof arg === 'number' || typeof arg === 'bigint') {
@@ -180,7 +163,6 @@ export class SmartWalletTransactionServiceV2 {
 	 * @returns Balances for XLM and tokens
 	 */
 	async getBalances(smartWalletAddress: string): Promise<SmartWalletBalances> {
-
 		try {
 			// Get Native XLM SAC contract address
 			const nativeAsset = Asset.native()
@@ -236,7 +218,6 @@ export class SmartWalletTransactionServiceV2 {
 	): Promise<TransactionChallengeV2> {
 		const { smartWalletAddress, operation } = params
 
-
 		// Simulate transaction to get auth requirements
 		const dummyAccount = new Account(smartWalletAddress, '0')
 		const transaction = new TransactionBuilder(dummyAccount, {
@@ -253,9 +234,7 @@ export class SmartWalletTransactionServiceV2 {
 
 		if (Api.isSimulationError(simulation)) {
 			logger.error('❌ Simulation error:', simulation.error)
-			throw new Error(
-				`Transaction simulation failed: ${simulation.error || 'Unknown error'}`,
-			)
+			throw new Error(`Transaction simulation failed: ${simulation.error || 'Unknown error'}`)
 		}
 
 		// Get current ledger for signature expiration
@@ -277,10 +256,7 @@ export class SmartWalletTransactionServiceV2 {
 
 		// Construct signature payload hash (this becomes the WebAuthn challenge)
 		// Format: SHA256(network_id || nonce || signature_expiration_ledger || invocation)
-		const _networkId = Buffer.from(this.networkPassphrase, 'utf-8').toString(
-			'hex',
-		)
-
+		const _networkId = Buffer.from(this.networkPassphrase, 'utf-8').toString('hex')
 
 		return {
 			operation,

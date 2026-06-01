@@ -1,9 +1,4 @@
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import type { AdminStats } from '~/lib/queries/admin/get-admin-stats'
 import { formatPercent } from './formatters'
 
@@ -23,16 +18,11 @@ export function AdminDistributionCards({ stats }: AdminDistributionCardsProps) {
 						{Object.entries(stats.projectsByStatus || {})
 							.toSorted(([, a], [, b]) => b - a)
 							.map(([status, count]) => {
-								const percentage =
-									stats.totalProjects > 0
-										? (count / stats.totalProjects) * 100
-										: 0
+								const percentage = stats.totalProjects > 0 ? (count / stats.totalProjects) * 100 : 0
 								return (
 									<div key={status} className="space-y-1 min-w-0">
 										<div className="flex items-center justify-between text-sm gap-2">
-											<span className="capitalize font-medium truncate">
-												{status}
-											</span>
+											<span className="capitalize font-medium truncate">{status}</span>
 											<span className="text-muted-foreground tabular-nums shrink-0">
 												{count} ({formatPercent(percentage)})
 											</span>
@@ -59,14 +49,11 @@ export function AdminDistributionCards({ stats }: AdminDistributionCardsProps) {
 						{Object.entries(stats.usersByRole || {})
 							.toSorted(([, a], [, b]) => b - a)
 							.map(([role, count]) => {
-								const percentage =
-									stats.totalUsers > 0 ? (count / stats.totalUsers) * 100 : 0
+								const percentage = stats.totalUsers > 0 ? (count / stats.totalUsers) * 100 : 0
 								return (
 									<div key={role} className="space-y-1 min-w-0">
 										<div className="flex items-center justify-between text-sm gap-2">
-											<span className="capitalize font-medium truncate">
-												{role}
-											</span>
+											<span className="capitalize font-medium truncate">{role}</span>
 											<span className="text-muted-foreground tabular-nums shrink-0">
 												{count} ({formatPercent(percentage)})
 											</span>

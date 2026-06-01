@@ -32,10 +32,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 		[onChainRaised, project.raised],
 	)
 
-	const progressPercentage = Math.min(
-		Math.round((displayRaised / project.goal) * 100),
-		100,
-	)
+	const progressPercentage = Math.min(Math.round((displayRaised / project.goal) * 100), 100)
 
 	const imageSrc = project.image || '/images/placeholder.png'
 
@@ -63,9 +60,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 					<div className="absolute top-3 left-3 flex flex-col gap-2 drop-shadow">
-						{project.category && (
-							<CategoryBadge category={project.category} />
-						)}
+						{project.category && <CategoryBadge category={project.category} />}
 						{project.escrowContractAddress && (
 							<Badge
 								className="rounded-full border-0 bg-emerald-600/90 px-1.5 py-0.5 text-[9px] font-medium text-white"
@@ -78,12 +73,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 					<div className="absolute inset-0 flex items-end justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
 						<span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 shadow-sm backdrop-blur">
 							{t('projects.explore')}
-							<svg
-								viewBox="0 0 20 20"
-								fill="currentColor"
-								aria-hidden="true"
-								className="h-4 w-4"
-							>
+							<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="h-4 w-4">
 								<path
 									fillRule="evenodd"
 									d="M10.293 3.293a1 1 0 0 1 1.414 0l5 5a1 1 0 0 1-1.414 1.414L11 6.414V16a1 1 0 1 1-2 0V6.414l-4.293 4.293A1 1 0 0 1 3.293 8.293l5-5Z"
@@ -95,12 +85,8 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 				</div>
 
 				<div className="p-5 flex flex-col flex-grow">
-					<h3 className="text-xl font-bold mb-2 line-clamp-1">
-						{project.title}
-					</h3>
-					<p className="text-muted-foreground mb-4 text-sm line-clamp-2">
-						{project.description}
-					</p>
+					<h3 className="text-xl font-bold mb-2 line-clamp-1">{project.title}</h3>
+					<p className="text-muted-foreground mb-4 text-sm line-clamp-2">{project.description}</p>
 
 					<div
 						className="w-full bg-gray-100 rounded-full h-1.5 sm:h-2 shadow-inner"

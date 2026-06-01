@@ -20,11 +20,7 @@ export default async function NewsIndexPage() {
 	const [hero, ...rest] = posts
 
 	const categoryLinks = Array.from(
-		new Set(
-			posts
-				.map((p) => p.category)
-				.filter((c): c is string => Boolean(c?.trim())),
-		),
+		new Set(posts.map((p) => p.category).filter((c): c is string => Boolean(c?.trim()))),
 	).sort((a, b) => a.localeCompare(b))
 
 	return (
@@ -42,8 +38,8 @@ export default async function NewsIndexPage() {
 							News
 						</h1>
 						<p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-							Product updates, field notes, and milestones from the KindFi
-							team—same transparency standards we bring to crowdfunding.
+							Product updates, field notes, and milestones from the KindFi team—same transparency
+							standards we bring to crowdfunding.
 						</p>
 					</div>
 					<Link
@@ -56,10 +52,7 @@ export default async function NewsIndexPage() {
 				</header>
 
 				{categoryLinks.length > 0 ? (
-					<nav
-						className="mb-10 flex flex-wrap gap-2 sm:mb-12"
-						aria-label="Browse by category"
-					>
+					<nav className="mb-10 flex flex-wrap gap-2 sm:mb-12" aria-label="Browse by category">
 						{categoryLinks.map((cat) => (
 							<Link
 								key={cat}
@@ -131,16 +124,13 @@ export default async function NewsIndexPage() {
 							All articles
 						</h2>
 						<p className="mt-1 text-sm text-muted-foreground sm:text-base">
-							{rest.length} more {rest.length === 1 ? 'story' : 'stories'} on
-							KindFi and our ecosystem.
+							{rest.length} more {rest.length === 1 ? 'story' : 'stories'} on KindFi and our
+							ecosystem.
 						</p>
 						<ul className="mt-8 grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
 							{rest.map((post, index) => (
 								<li key={post.slug} className="min-w-0">
-									<NewsCard
-										update={mapPostToNewsUpdate(post, index)}
-										showCategory
-									/>
+									<NewsCard update={mapPostToNewsUpdate(post, index)} showCategory />
 								</li>
 							))}
 						</ul>
@@ -149,9 +139,7 @@ export default async function NewsIndexPage() {
 
 				{!hero && rest.length === 0 ? (
 					<div className="rounded-2xl border border-dashed border-border bg-muted/40 px-6 py-16 text-center">
-						<p className="text-lg font-medium text-foreground">
-							No articles published yet.
-						</p>
+						<p className="text-lg font-medium text-foreground">No articles published yet.</p>
 						<p className="mt-2 text-sm text-muted-foreground">
 							Check back soon or explore active campaigns.
 						</p>

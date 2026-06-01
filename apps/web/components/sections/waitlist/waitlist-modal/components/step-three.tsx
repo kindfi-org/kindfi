@@ -1,6 +1,5 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { Checkbox } from '~/components/base/checkbox'
@@ -14,6 +13,7 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { useWaitlist } from '~/hooks/contexts/use-waitlist.context'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { useI18n } from '~/lib/i18n'
 import { waitlistStepThreeSchema } from '~/lib/schemas/waitlist.schemas'
 import type { WaitlistStepThreeData } from '~/lib/types/waitlist.types'
@@ -26,11 +26,7 @@ interface StepThreeProps {
 	isPending?: boolean
 }
 
-export function StepThree({
-	onBack,
-	onSubmit,
-	isPending = false,
-}: StepThreeProps) {
+export function StepThree({ onBack, onSubmit, isPending = false }: StepThreeProps) {
 	const { t } = useI18n()
 	const { formData, updateFormData } = useWaitlist()
 	const form = useForm<WaitlistStepThreeData>({
@@ -58,10 +54,7 @@ export function StepThree({
 				<WaitlistReviewSummary />
 
 				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit(handleSubmit)}
-						className="space-y-5"
-					>
+					<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
 						<FormField
 							control={form.control}
 							name="source"
@@ -69,10 +62,7 @@ export function StepThree({
 								<FormItem>
 									<FormLabel>{t('waitlist.fields.source')}</FormLabel>
 									<FormControl>
-										<Input
-											placeholder={t('waitlist.fields.sourcePlaceholder')}
-											{...field}
-										/>
+										<Input placeholder={t('waitlist.fields.sourcePlaceholder')} {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>

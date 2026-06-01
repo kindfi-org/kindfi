@@ -7,11 +7,11 @@ import type {
 } from '@trustless-work/escrow'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Logger } from '~/lib/logger'
 import { toast } from 'sonner'
 import { saveEscrowContractAction } from '~/app/actions/escrow/save-escrow-contract'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
+import { Logger } from '~/lib/logger'
 import type { EscrowFormData } from '../types'
 
 const logger = new Logger()
@@ -21,25 +21,17 @@ interface UseEscrowTransactionParams {
 	projectSlug: string
 }
 
-export function useEscrowTransaction({
-	projectId,
-	projectSlug,
-}: UseEscrowTransactionParams) {
+export function useEscrowTransaction({ projectId, projectSlug }: UseEscrowTransactionParams) {
 	const router = useRouter()
 	const { deployEscrow, sendTransaction } = useEscrow()
-	const {
-		ensureTrustlessSigner,
-		signTrustlessTransaction,
-	} = useTrustlessSigner()
+	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const handleCreateEscrow = async (formData: EscrowFormData) => {
 		setIsSubmitting(true)
 		try {
 			const signer = await ensureTrustlessSigner()
-			const effectiveEngagementId = (
-				formData.engagementId || `project-${projectId}`
-			).trim()
+			const effectiveEngagementId = (formData.engagementId || `project-${projectId}`).trim()
 			const composedDescription =
 				formData.receiverMemo.trim().length > 0
 					? `${formData.description.trim()}\nReceiver Memo: ${formData.receiverMemo.trim()}`
@@ -73,7 +65,10 @@ export function useEscrowTransaction({
 				})
 			}
 		} catch (e) {
-			logger.error({ eventType: 'escrow.create.error', error: e instanceof Error ? e.message : String(e) })
+			logger.error({
+				eventType: 'escrow.create.error',
+				error: e instanceof Error ? e.message : String(e),
+			})
 			toast.error(e instanceof Error ? e.message : 'Failed to create escrow')
 		} finally {
 			setIsSubmitting(false)
@@ -93,9 +88,7 @@ interface TransactionHelperParams {
 	projectId: string
 	projectSlug: string
 	deployEscrow: (
-		payload:
-			| InitializeSingleReleaseEscrowPayload
-			| InitializeMultiReleaseEscrowPayload,
+		payload: InitializeSingleReleaseEscrowPayload | InitializeMultiReleaseEscrowPayload,
 		type: 'single-release' | 'multi-release',
 	) => Promise<EscrowRequestResponse>
 	signTransaction: (xdr: string) => Promise<string>
@@ -116,9 +109,7 @@ async function _deployAndSign({
 	signTransaction,
 	sendTransaction,
 }: {
-	payload:
-		| InitializeSingleReleaseEscrowPayload
-		| InitializeMultiReleaseEscrowPayload
+	payload: InitializeSingleReleaseEscrowPayload | InitializeMultiReleaseEscrowPayload
 	type: 'single-release' | 'multi-release'
 	deployEscrow: TransactionHelperParams['deployEscrow']
 	signTransaction: TransactionHelperParams['signTransaction']
@@ -155,7 +146,10 @@ async function _deployAndSign({
 		throw new Error(msg)
 	}
 
-	let sendResult: InitializeSingleReleaseEscrowResponse | InitializeMultiReleaseEscrowResponse | { status: string }
+	let sendResult:
+		| InitializeSingleReleaseEscrowResponse
+		| InitializeMultiReleaseEscrowResponse
+		| { status: string }
 	try {
 		sendResult = await sendTransaction(signedXdr)
 	} catch (error) {
@@ -166,7 +160,8 @@ async function _deployAndSign({
 
 	if (!sendResult || (sendResult as { status?: string }).status !== 'SUCCESS') {
 		const status = (sendResult as { status?: string })?.status
-		const msg = status === 'ERROR' ? 'Transaction submission failed' : 'Transaction failed: Invalid response'
+		const msg =
+			status === 'ERROR' ? 'Transaction submission failed' : 'Transaction failed: Invalid response'
 		toast.error('Transaction failed', { description: msg })
 		throw new Error(msg)
 	}
@@ -246,7 +241,12 @@ async function _saveAndRedirect({
 		roles,
 		platformFee: escrowData?.platformFee ?? (formData.platformFee as number),
 		...(escrowData?.milestones && escrowData.milestones.length > 0
-			? { milestones: escrowData.milestones.map((m) => ({ amount: m.amount, receiver: m.receiver })) }
+			? {
+					milestones: escrowData.milestones.map((m) => ({
+						amount: m.amount,
+						receiver: m.receiver,
+					})),
+				}
 			: formData.selectedEscrowType === 'multi-release'
 				? {
 						milestones: formData.milestones

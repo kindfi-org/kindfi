@@ -9,11 +9,7 @@ import {
 	AccordionTrigger,
 } from '~/components/base/accordion'
 import { Button } from '~/components/base/button'
-import {
-	fadeInUp,
-	fadeSlideDown,
-	fadeSlideLeft,
-} from '~/lib/constants/animations'
+import { fadeInUp, fadeSlideDown, fadeSlideLeft } from '~/lib/constants/animations'
 import { steps } from '~/lib/mock-data/project/project-pitch.mock'
 
 export function UpcomingSteps() {
@@ -22,11 +18,7 @@ export function UpcomingSteps() {
 			<h2 className="text-2xl font-bold">Upcoming Steps</h2>
 
 			{/* Accordion for Steps */}
-			<Accordion
-				type="single"
-				collapsible
-				className="mt-8 rounded-lg shadow-md p-6"
-			>
+			<Accordion type="single" collapsible className="mt-8 rounded-lg shadow-md p-6">
 				{steps.map((step, index) => (
 					<motion.div key={step.id} {...fadeSlideLeft(0.7 + index * 0.1)}>
 						<AccordionItem value={step.id} className="border-b">
@@ -45,14 +37,9 @@ export function UpcomingSteps() {
 							<AccordionContent className="px-12 pb-4">
 								<motion.div {...fadeSlideDown}>
 									<p className="text-gray-600">
-										Additional details and instructions for completing this step
-										will appear here.
+										Additional details and instructions for completing this step will appear here.
 									</p>
-									<Button
-										variant="outline"
-										size="sm"
-										className="mt-3 flex items-center gap-2"
-									>
+									<Button variant="outline" size="sm" className="mt-3 flex items-center gap-2">
 										<FileCheck className="w-4 h-4" /> Start This Step
 									</Button>
 								</motion.div>

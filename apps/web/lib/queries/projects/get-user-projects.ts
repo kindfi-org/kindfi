@@ -3,10 +3,7 @@ import type { TypedSupabaseClient } from '@packages/lib/types'
 /**
  * Get all projects created by a specific user (for creators)
  */
-export async function getUserCreatedProjects(
-	client: TypedSupabaseClient,
-	userId: string,
-) {
+export async function getUserCreatedProjects(client: TypedSupabaseClient, userId: string) {
 	const { data, error } = await client
 		.from('projects')
 		.select(
@@ -41,15 +38,11 @@ export async function getUserCreatedProjects(
 		data?.map((project) => {
 			const escrowRel = (
 				project as unknown as {
-					project_escrows?:
-						| { escrow_id?: string }
-						| Array<{ escrow_id?: string }>
+					project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
 				}
 			).project_escrows
 
-			const escrowId = Array.isArray(escrowRel)
-				? escrowRel[0]?.escrow_id
-				: escrowRel?.escrow_id
+			const escrowId = Array.isArray(escrowRel) ? escrowRel[0]?.escrow_id : escrowRel?.escrow_id
 
 			return {
 				id: project.id,
@@ -75,10 +68,7 @@ export async function getUserCreatedProjects(
 /**
  * Get all projects a user has contributed to (for donors)
  */
-export async function getUserSupportedProjects(
-	client: TypedSupabaseClient,
-	userId: string,
-) {
+export async function getUserSupportedProjects(client: TypedSupabaseClient, userId: string) {
 	const { data: contributions, error: contributionsError } = await client
 		.from('contributions')
 		.select(
@@ -187,32 +177,28 @@ export async function getUserSupportedProjects(
 		}
 	}
 
-	return Array.from(projectMap.values()).map(
-		({ project, totalAmount, latestDate }) => {
-			const escrowRel = project.project_escrows
-			const escrowId = Array.isArray(escrowRel)
-				? escrowRel[0]?.escrow_id
-				: escrowRel?.escrow_id
+	return Array.from(projectMap.values()).map(({ project, totalAmount, latestDate }) => {
+		const escrowRel = project.project_escrows
+		const escrowId = Array.isArray(escrowRel) ? escrowRel[0]?.escrow_id : escrowRel?.escrow_id
 
-			return {
-				id: project.id,
-				title: project.title,
-				slug: project.slug,
-				description: project.description,
-				image: project.image_url,
-				goal: project.target_amount,
-				raised: project.current_amount,
-				investors: project.kinder_count,
-				minInvestment: project.min_investment,
-				createdAt: project.created_at,
-				status: project.status,
-				percentageComplete: project.percentage_complete,
-				category: project.category,
-				tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
-				escrowContractAddress: escrowId,
-				contributionAmount: totalAmount,
-				contributionDate: latestDate,
-			}
-		},
-	)
+		return {
+			id: project.id,
+			title: project.title,
+			slug: project.slug,
+			description: project.description,
+			image: project.image_url,
+			goal: project.target_amount,
+			raised: project.current_amount,
+			investors: project.kinder_count,
+			minInvestment: project.min_investment,
+			createdAt: project.created_at,
+			status: project.status,
+			percentageComplete: project.percentage_complete,
+			category: project.category,
+			tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
+			escrowContractAddress: escrowId,
+			contributionAmount: totalAmount,
+			contributionDate: latestDate,
+		}
+	})
 }

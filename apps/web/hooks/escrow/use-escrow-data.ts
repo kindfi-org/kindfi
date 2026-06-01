@@ -1,13 +1,10 @@
 'use client'
 
-import type {
-	EscrowType,
-	GetEscrowsFromIndexerResponse,
-} from '@trustless-work/escrow'
+import type { EscrowType, GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { logger } from '@/lib/logger'
+import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 
 interface UseEscrowDataParams {
 	escrowContractAddress: string
@@ -16,11 +13,10 @@ interface UseEscrowDataParams {
 
 export function useEscrowData({
 	escrowContractAddress,
-	escrowType,
+	escrowType: _escrowType,
 }: UseEscrowDataParams) {
 	const { getEscrowByContractIds } = useEscrow()
-	const [escrowData, setEscrowData] =
-		useState<GetEscrowsFromIndexerResponse | null>(null)
+	const [escrowData, setEscrowData] = useState<GetEscrowsFromIndexerResponse | null>(null)
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
@@ -93,8 +89,7 @@ export function useEscrowData({
 			setEscrowData(processedEscrowData)
 		} catch (err) {
 			logger.error('Failed to fetch escrow data:', err)
-			const errorMessage =
-				err instanceof Error ? err.message : 'Failed to load escrow data'
+			const errorMessage = err instanceof Error ? err.message : 'Failed to load escrow data'
 			setError(errorMessage)
 			toast.error(errorMessage)
 			setEscrowData(null)

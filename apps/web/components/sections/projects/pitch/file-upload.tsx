@@ -24,8 +24,7 @@ export function FileUpload({
 	accept = {
 		'application/pdf': ['.pdf'],
 		'application/vnd.ms-powerpoint': ['.ppt'],
-		'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-			['.pptx'],
+		'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
 	},
 	maxSize = 10 * 1024 * 1024, // 10MB
 	label = 'Upload your pitch deck',
@@ -43,9 +42,7 @@ export function FileUpload({
 						`File is too large. Maximum size is ${(maxSize / 1024 / 1024).toFixed(0)}MB`,
 					)
 				} else if (rejection.errors[0]?.code === 'file-invalid-type') {
-					setUploadError(
-						'Invalid file type. Please upload PDF, PPT, or PPTX files only.',
-					)
+					setUploadError('Invalid file type. Please upload PDF, PPT, or PPTX files only.')
 				} else {
 					setUploadError('File upload failed. Please try again.')
 				}
@@ -99,23 +96,17 @@ export function FileUpload({
 								'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
 								{
 									'border-blue-400 bg-blue-50': isDragActive,
-									'border-gray-300 hover:border-gray-400':
-										!isDragActive && !displayError,
+									'border-gray-300 hover:border-gray-400': !isDragActive && !displayError,
 									'border-red-300 bg-red-50': displayError,
 								},
 							)}
 						>
 							<input {...getInputProps()} aria-label={label} />
-							<Upload
-								className="mx-auto h-12 w-12 text-gray-400 mb-4"
-								aria-hidden="true"
-							/>
+							<Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" aria-hidden="true" />
 							<p className="text-lg font-medium text-gray-900 mb-2">
 								{isDragActive ? 'Drop your file here' : label}
 							</p>
-							<p className="text-sm text-gray-500 mb-2">
-								Drag and drop or click to select
-							</p>
+							<p className="text-sm text-gray-500 mb-2">Drag and drop or click to select</p>
 							<p className="text-xs text-gray-400">
 								PDF, PPT, PPTX up to {(maxSize / 1024 / 1024).toFixed(0)}MB
 							</p>
@@ -133,10 +124,7 @@ export function FileUpload({
 							<div className="flex items-center gap-4">
 								{typeof value === 'string' ? (
 									<>
-										<FileIcon
-											fileType={value.split('.').pop() || ''}
-											className="h-8 w-8"
-										/>
+										<FileIcon fileType={value.split('.').pop() || ''} className="h-8 w-8" />
 										<div className="flex-1 min-w-0">
 											<h4 className="font-medium truncate">
 												{decodeURIComponent(value.split('/').pop() || 'File')}
@@ -146,15 +134,10 @@ export function FileUpload({
 									</>
 								) : (
 									<>
-										<FileIcon
-											fileType={value.name.split('.').pop() || ''}
-											className="h-8 w-8"
-										/>
+										<FileIcon fileType={value.name.split('.').pop() || ''} className="h-8 w-8" />
 										<div className="flex-1 min-w-0">
 											<h4 className="font-medium truncate">{value.name}</h4>
-											<p className="text-sm text-gray-500">
-												{formatFileSize(value.size)}
-											</p>
+											<p className="text-sm text-gray-500">{formatFileSize(value.size)}</p>
 										</div>
 									</>
 								)}

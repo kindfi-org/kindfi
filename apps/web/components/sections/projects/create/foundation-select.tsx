@@ -55,7 +55,7 @@ export function FoundationSelect({ value, onChange }: FoundationSelectProps) {
 
 	return (
 		<Select value={value || ''} onValueChange={onChange}>
-			<SelectTrigger >
+			<SelectTrigger>
 				<SelectValue placeholder="Select a foundation (optional)" />
 			</SelectTrigger>
 			<SelectContent>

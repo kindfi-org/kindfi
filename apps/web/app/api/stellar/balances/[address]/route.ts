@@ -1,20 +1,17 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { addressParamSchema } from '~/lib/schemas/stellar.schemas'
 import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transactions'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * GET /api/stellar/balances/[address]
  *
  * Get balances for a smart wallet
  */
-export async function GET(
-	_req: NextRequest,
-	{ params }: { params: Promise<{ address: string }> },
-) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ address: string }> }) {
 	try {
 		const { address } = await params
 		const validation = validateRequest(addressParamSchema, { address })

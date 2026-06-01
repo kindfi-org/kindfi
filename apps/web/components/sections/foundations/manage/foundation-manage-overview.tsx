@@ -16,19 +16,10 @@ import {
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { staggerContainer } from '~/lib/constants/animations'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
-import {
-	FOUNDATION_MANAGE_SECTIONS,
-	type FoundationManageSectionKey,
-} from './constants'
+import { FOUNDATION_MANAGE_SECTIONS, type FoundationManageSectionKey } from './constants'
 import { ManagePageShell } from './shared'
 
 interface FoundationManageOverviewProps {
@@ -58,25 +49,18 @@ const OVERVIEW_CARD_ICONS: Record<
 	campaigns: Megaphone,
 }
 
-export function FoundationManageOverview({
-	slug,
-}: FoundationManageOverviewProps) {
+export function FoundationManageOverview({ slug }: FoundationManageOverviewProps) {
 	const {
 		data: foundation,
 		isLoading,
 		error,
-	} = useSupabaseQuery(
-		'foundation',
-		(client) => getFoundationBySlug(client, slug),
-		{
-			additionalKeyValues: [slug],
-		},
-	)
+	} = useSupabaseQuery('foundation', (client) => getFoundationBySlug(client, slug), {
+		additionalKeyValues: [slug],
+	})
 
 	const shouldReduceMotion = useReducedMotion()
 
-	const yearFounded =
-		foundation && foundation.foundedYear > 0 ? foundation.foundedYear : null
+	const yearFounded = foundation && foundation.foundedYear > 0 ? foundation.foundedYear : null
 	const formattedDonations = foundation
 		? new Intl.NumberFormat('en-US', {
 				style: 'currency',
@@ -96,10 +80,7 @@ export function FoundationManageOverview({
 					</p>
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 						{['years', 'donations', 'completed', 'active'].map((id) => (
-							<div
-								key={id}
-								className="h-32 bg-muted animate-pulse rounded-lg"
-							/>
+							<div key={id} className="h-32 bg-muted animate-pulse rounded-lg" />
 						))}
 					</div>
 				</div>
@@ -111,14 +92,10 @@ export function FoundationManageOverview({
 		return (
 			<ManagePageShell>
 				<div className="text-center py-12">
-					<Building2
-						className="h-16 w-16 text-muted-foreground mx-auto mb-4"
-						aria-hidden="true"
-					/>
+					<Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
 					<h2 className="text-2xl font-bold mb-2">Foundation Not Found</h2>
 					<p className="text-muted-foreground mb-6">
-						The foundation you&apos;re looking for doesn&apos;t exist or has
-						been removed.
+						The foundation you&apos;re looking for doesn&apos;t exist or has been removed.
 					</p>
 					<Button asChild>
 						<Link href="/foundations">Browse All Foundations</Link>
@@ -175,12 +152,9 @@ export function FoundationManageOverview({
 				animate="animate"
 				className="space-y-8 lg:space-y-12"
 			>
-				<motion.p
-					variants={cardVariants}
-					className="text-muted-foreground text-lg"
-				>
-					Overview and quick actions for your foundation. Edit details,
-					milestones, team, and settings.
+				<motion.p variants={cardVariants} className="text-muted-foreground text-lg">
+					Overview and quick actions for your foundation. Edit details, milestones, team, and
+					settings.
 				</motion.p>
 
 				<motion.div
@@ -203,10 +177,7 @@ export function FoundationManageOverview({
 										{stat.label}
 									</CardTitle>
 									<div className={`${stat.bgColor} p-2 rounded-lg`}>
-										<stat.icon
-											className={`h-4 w-4 ${stat.color}`}
-											aria-hidden="true"
-										/>
+										<stat.icon className={`h-4 w-4 ${stat.color}`} aria-hidden="true" />
 									</div>
 								</CardHeader>
 								<CardContent className="relative z-10">
@@ -258,14 +229,9 @@ export function FoundationManageOverview({
 								<CardHeader className="relative z-10">
 									<div className="flex items-center gap-3 mb-2">
 										<div className="p-2 rounded-lg bg-purple-100 group-hover:bg-purple-200 transition-colors">
-											<Pencil
-												className="h-5 w-5 text-purple-600"
-												aria-hidden="true"
-											/>
+											<Pencil className="h-5 w-5 text-purple-600" aria-hidden="true" />
 										</div>
-										<CardTitle className="text-lg font-bold">
-											Edit foundation
-										</CardTitle>
+										<CardTitle className="text-lg font-bold">Edit foundation</CardTitle>
 									</div>
 									<CardDescription className="text-sm">
 										Update name, description, mission, vision, logo, and links.
@@ -286,10 +252,7 @@ export function FoundationManageOverview({
 							</Card>
 						</motion.div>
 						{managementSections.map((section, index) => {
-							const Icon =
-								OVERVIEW_CARD_ICONS[
-									section.key as keyof typeof OVERVIEW_CARD_ICONS
-								]
+							const Icon = OVERVIEW_CARD_ICONS[section.key as keyof typeof OVERVIEW_CARD_ICONS]
 							return (
 								<motion.div
 									key={section.key}
@@ -306,18 +269,11 @@ export function FoundationManageOverview({
 										<CardHeader className="relative z-10">
 											<div className="flex items-center gap-3 mb-2">
 												<div className="p-2 rounded-lg bg-purple-100 group-hover:bg-purple-200 transition-colors">
-													<Icon
-														className="h-5 w-5 text-purple-600"
-														aria-hidden="true"
-													/>
+													<Icon className="h-5 w-5 text-purple-600" aria-hidden="true" />
 												</div>
-												<CardTitle className="text-lg font-bold">
-													{section.title}
-												</CardTitle>
+												<CardTitle className="text-lg font-bold">{section.title}</CardTitle>
 											</div>
-											<CardDescription className="text-sm">
-												{section.description}
-											</CardDescription>
+											<CardDescription className="text-sm">{section.description}</CardDescription>
 										</CardHeader>
 										<CardContent className="relative z-10 mt-auto">
 											<Button
@@ -327,10 +283,7 @@ export function FoundationManageOverview({
 											>
 												<Link href={section.href(slug)}>
 													{section.cta}
-													<ArrowRight
-														className="h-4 w-4 ml-2"
-														aria-hidden="true"
-													/>
+													<ArrowRight className="h-4 w-4 ml-2" aria-hidden="true" />
 												</Link>
 											</Button>
 										</CardContent>

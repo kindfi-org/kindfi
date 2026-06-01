@@ -1,21 +1,9 @@
 'use client'
 
-import {
-	CheckCircle,
-	ChevronDown,
-	ChevronUp,
-	Loader2,
-	MessageCircle,
-	Reply,
-} from 'lucide-react'
+import { CheckCircle, ChevronDown, ChevronUp, Loader2, MessageCircle, Reply } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-} from '~/components/base/card'
+import { Card, CardContent, CardFooter, CardHeader } from '~/components/base/card'
 import { Textarea } from '~/components/base/textarea'
 import type {
 	CommentWithAnswers,
@@ -71,8 +59,7 @@ export function QuestionCard({
 						size="sm"
 					/>
 					<div className="flex items-center gap-2">
-						{(question.metadata as QuestionMetadata | undefined)?.status ===
-							'resolved' && (
+						{(question.metadata as QuestionMetadata | undefined)?.status === 'resolved' && (
 							<Badge variant="secondary" className="bg-green-50 text-green-700">
 								<CheckCircle className="mr-1 h-3 w-3" aria-hidden="true" />
 								Resolved
@@ -94,8 +81,7 @@ export function QuestionCard({
 						aria-label={expanded ? 'Collapse answers' : 'Expand answers'}
 					>
 						<MessageCircle className="h-4 w-4" aria-hidden="true" />
-						{question.answers?.length || 0}{' '}
-						{question.answers?.length === 1 ? 'Answer' : 'Answers'}
+						{question.answers?.length || 0} {question.answers?.length === 1 ? 'Answer' : 'Answers'}
 						{expanded ? (
 							<ChevronUp className="h-4 w-4 ml-1" aria-hidden="true" />
 						) : (
@@ -103,8 +89,7 @@ export function QuestionCard({
 						)}
 					</Button>
 
-					{(question.metadata as QuestionMetadata | undefined)?.status ===
-						'resolved' &&
+					{(question.metadata as QuestionMetadata | undefined)?.status === 'resolved' &&
 						effectiveUser && (
 							<Button
 								variant="outline"
@@ -116,10 +101,7 @@ export function QuestionCard({
 							>
 								{markResolvedPending ? (
 									<>
-										<Loader2
-											className="h-3 w-3 animate-spin mr-1"
-											aria-hidden="true"
-										/>
+										<Loader2 className="h-3 w-3 animate-spin mr-1" aria-hidden="true" />
 										Mark Resolved
 									</>
 								) : (
@@ -148,9 +130,7 @@ export function QuestionCard({
 														createdAt={answer.created_at as string}
 														size="sm"
 													/>
-													<p className="mt-2 whitespace-pre-line">
-														{answer.content}
-													</p>
+													<p className="mt-2 whitespace-pre-line">{answer.content}</p>
 													{replyingTo !== answer.id && effectiveUser && (
 														<Button
 															variant="outline"
@@ -181,9 +161,7 @@ export function QuestionCard({
 																createdAt={reply.created_at as string}
 																size="sm"
 															/>
-															<p className="mt-2 whitespace-pre-line text-sm">
-																{reply.content}
-															</p>
+															<p className="mt-2 whitespace-pre-line text-sm">{reply.content}</p>
 														</div>
 													</div>
 												))}
@@ -195,9 +173,7 @@ export function QuestionCard({
 												<div className="pl-4 border-l-2 border-gray-100 py-2">
 													<Textarea
 														value={replyContent[answer.id] || ''}
-														onChange={(e) =>
-															onReplyChange(answer.id, e.target.value)
-														}
+														onChange={(e) => onReplyChange(answer.id, e.target.value)}
 														placeholder="Write a reply..."
 														className="min-h-16 w-full text-sm"
 													/>
@@ -215,10 +191,7 @@ export function QuestionCard({
 															size="sm"
 															className="gradient-btn rounded-full text-xs text-white"
 															onClick={() => onSubmitReply(answer.id)}
-															disabled={
-																!replyContent[answer.id]?.trim() ||
-																!!submitReplyPending
-															}
+															disabled={!replyContent[answer.id]?.trim() || !!submitReplyPending}
 															aria-label="Post your reply"
 														>
 															{submitReplyPending ? (
@@ -248,9 +221,7 @@ export function QuestionCard({
 
 						{effectiveUser && (
 							<div className="answer-form w-full rounded-xl border border-slate-200 bg-[#fafbfc] p-4">
-								<h4 className="mb-2 text-base font-medium text-slate-900">
-									Add Your Answer
-								</h4>
+								<h4 className="mb-2 text-base font-medium text-slate-900">Add Your Answer</h4>
 								<Textarea
 									value={replyContent[question.id] || ''}
 									onChange={(e) => onReplyChange(question.id, e.target.value)}
@@ -271,10 +242,7 @@ export function QuestionCard({
 									>
 										{submitAnswerPending ? (
 											<>
-												<Loader2
-													className="mr-1 h-3 w-3 animate-spin"
-													aria-hidden="true"
-												/>
+												<Loader2 className="mr-1 h-3 w-3 animate-spin" aria-hidden="true" />
 												Submitting...
 											</>
 										) : (

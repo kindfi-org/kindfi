@@ -1,9 +1,6 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 
-export async function getProjectPitch(
-	client: TypedSupabaseClient,
-	projectId: string,
-) {
+export async function getProjectPitch(client: TypedSupabaseClient, projectId: string) {
 	const { data, error } = await client
 		.from('project_pitch')
 		.select('title, story, pitch_deck, video_url')

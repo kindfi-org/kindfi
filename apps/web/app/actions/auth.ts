@@ -89,10 +89,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 	try {
 		await enforceRateLimit(email.toLowerCase(), 'sign_up')
 	} catch (error) {
-		const failure = toServerActionFailure(
-			error,
-			'Too many requests. Please try again later.',
-		)
+		const failure = toServerActionFailure(error, 'Too many requests. Please try again later.')
 		return {
 			success: false,
 			message: failure.error,
@@ -132,8 +129,7 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
 		revalidatePath('/sign-up', 'layout')
 		return {
 			success: true,
-			message:
-				'Verification code sent! Please check your email to confirm your account.',
+			message: 'Verification code sent! Please check your email to confirm your account.',
 			redirect: `/otp-validation?email=${encodeURIComponent(signInWithOptOpt.email)}`,
 			data,
 		}
@@ -148,11 +144,7 @@ export async function createSessionAction(input: {
 }): Promise<AuthResponse> {
 	let validated: { userId: string; email: string }
 	try {
-		validated = validateInput(
-			createSessionInputSchema,
-			input,
-			'createSessionAction',
-		)
+		validated = validateInput(createSessionInputSchema, input, 'createSessionAction')
 	} catch (error) {
 		const failure = toServerActionFailure(error, 'Invalid input')
 		return {
@@ -165,10 +157,7 @@ export async function createSessionAction(input: {
 	try {
 		await enforceRateLimit(validated.userId, 'create_session')
 	} catch (error) {
-		const failure = toServerActionFailure(
-			error,
-			'Too many requests. Please try again later.',
-		)
+		const failure = toServerActionFailure(error, 'Too many requests. Please try again later.')
 		return {
 			success: false,
 			message: failure.error,
@@ -189,8 +178,7 @@ export async function createSessionAction(input: {
 		if (userError || !userData) {
 			return {
 				success: false,
-				message:
-					'User verification failed. Email does not match registered user.',
+				message: 'User verification failed. Email does not match registered user.',
 				error: 'User verification failed',
 			}
 		}
@@ -258,17 +246,12 @@ export async function signOutAction(): Promise<void> {
 			throw error
 		}
 
-		const response = errorHandler.handleAuthError(
-			error as AuthError,
-			'sign_out',
-		)
+		const response = errorHandler.handleAuthError(error as AuthError, 'sign_out')
 		redirect(`/?error=${encodeURIComponent(response.message)}`)
 	}
 }
 
-export async function requestResetAccountAction(
-	formData: FormData,
-): Promise<void> {
+export async function requestResetAccountAction(formData: FormData): Promise<void> {
 	if (!(await validateCsrfToken(formData.get('csrfToken')?.toString()))) {
 		redirect('/reset-account?error=Invalid CSRF token')
 	}
@@ -355,10 +338,7 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
 		) {
 			throw error
 		}
-		const response = errorHandler.handleAuthError(
-			error as AuthError,
-			'reset_password',
-		)
+		const response = errorHandler.handleAuthError(error as AuthError, 'reset_password')
 		redirect(`/reset-password?error=${encodeURIComponent(response.message)}`)
 	}
 }
@@ -400,10 +380,7 @@ export async function updateEscrowStatusAction(
 	try {
 		await requireAdminSession('updateEscrowStatusAction')
 	} catch (error) {
-		return escrowFailureFromAction(
-			toServerActionFailure(error, 'Forbidden'),
-			'Forbidden',
-		)
+		return escrowFailureFromAction(toServerActionFailure(error, 'Forbidden'), 'Forbidden')
 	}
 
 	let validated: { id: string; newStatus: EscrowRecord['status'] }
@@ -414,10 +391,7 @@ export async function updateEscrowStatusAction(
 			'updateEscrowStatusAction',
 		) as { id: string; newStatus: EscrowRecord['status'] }
 	} catch (error) {
-		return escrowFailureFromAction(
-			toServerActionFailure(error, 'Invalid input'),
-			'Invalid input',
-		)
+		return escrowFailureFromAction(toServerActionFailure(error, 'Invalid input'), 'Invalid input')
 	}
 
 	const supabase = await createSupabaseServerClient()
@@ -464,10 +438,7 @@ export async function updateEscrowMilestoneAction(
 	try {
 		await requireAdminSession('updateEscrowMilestoneAction')
 	} catch (error) {
-		return escrowFailureFromAction(
-			toServerActionFailure(error, 'Forbidden'),
-			'Forbidden',
-		)
+		return escrowFailureFromAction(toServerActionFailure(error, 'Forbidden'), 'Forbidden')
 	}
 
 	let validated: { id: string; current: number; completed: number }
@@ -478,10 +449,7 @@ export async function updateEscrowMilestoneAction(
 			'updateEscrowMilestoneAction',
 		)
 	} catch (error) {
-		return escrowFailureFromAction(
-			toServerActionFailure(error, 'Invalid input'),
-			'Invalid input',
-		)
+		return escrowFailureFromAction(toServerActionFailure(error, 'Invalid input'), 'Invalid input')
 	}
 
 	const supabase = await createSupabaseServerClient()
@@ -535,10 +503,7 @@ export async function updateEscrowFinancialsAction(
 	try {
 		await requireAdminSession('updateEscrowFinancialsAction')
 	} catch (error) {
-		return escrowFailureFromAction(
-			toServerActionFailure(error, 'Forbidden'),
-			'Forbidden',
-		)
+		return escrowFailureFromAction(toServerActionFailure(error, 'Forbidden'), 'Forbidden')
 	}
 
 	let validated: { id: string; funded: number; released: number }
@@ -549,10 +514,7 @@ export async function updateEscrowFinancialsAction(
 			'updateEscrowFinancialsAction',
 		)
 	} catch (error) {
-		return escrowFailureFromAction(
-			toServerActionFailure(error, 'Invalid input'),
-			'Invalid input',
-		)
+		return escrowFailureFromAction(toServerActionFailure(error, 'Invalid input'), 'Invalid input')
 	}
 
 	const supabase = await createSupabaseServerClient()
@@ -597,10 +559,7 @@ export async function getEscrowRecordsAction(): Promise<EscrowResponse> {
 	try {
 		await requireAdminSession('getEscrowRecordsAction')
 	} catch (error) {
-		return escrowFailureFromAction(
-			toServerActionFailure(error, 'Forbidden'),
-			'Forbidden',
-		)
+		return escrowFailureFromAction(toServerActionFailure(error, 'Forbidden'), 'Forbidden')
 	}
 
 	const supabase = await createSupabaseServerClient()
@@ -643,10 +602,7 @@ export async function insertTestEscrowRecordAction(): Promise<EscrowResponse> {
 	try {
 		await requireAdminSession('insertTestEscrowRecordAction')
 	} catch (error) {
-		return escrowFailureFromAction(
-			toServerActionFailure(error, 'Forbidden'),
-			'Forbidden',
-		)
+		return escrowFailureFromAction(toServerActionFailure(error, 'Forbidden'), 'Forbidden')
 	}
 
 	const supabase = await createSupabaseServerClient()
@@ -739,10 +695,7 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 	try {
 		await enforceRateLimit(userId, 'update_device_with_deployee')
 	} catch (error) {
-		const failure = toServerActionFailure(
-			error,
-			'Too many requests. Please try again later.',
-		)
+		const failure = toServerActionFailure(error, 'Too many requests. Please try again later.')
 		return {
 			success: false,
 			message: failure.error,
@@ -759,9 +712,7 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 				credentialId: devices.credentialId,
 			})
 			.from(devices)
-			.where(
-				and(eq(devices.userId, userId), eq(devices.credentialId, credentialId)),
-			)
+			.where(and(eq(devices.userId, userId), eq(devices.credentialId, credentialId)))
 			.limit(1)
 
 		if (!existingDevice.length) {

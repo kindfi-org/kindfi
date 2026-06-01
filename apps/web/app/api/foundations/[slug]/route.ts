@@ -1,16 +1,16 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { foundationSlugParamSchema, foundationUpdateFormSchema } from '~/lib/schemas/foundation.schemas'
+import {
+	foundationSlugParamSchema,
+	foundationUpdateFormSchema,
+} from '~/lib/schemas/foundation.schemas'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
-export async function PATCH(
-	req: Request,
-	{ params }: { params: Promise<{ slug: string }> },
-) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ slug: string }> }) {
 	try {
 		const session = await getServerSession(nextAuthOption)
 		const userId = session?.user?.id
@@ -41,10 +41,7 @@ export async function PATCH(
 		}
 
 		if (!foundation) {
-			return NextResponse.json(
-				{ error: 'Foundation not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Foundation not found' }, { status: 404 })
 		}
 
 		if (foundation.founder_id !== userId) {
@@ -75,7 +72,8 @@ export async function PATCH(
 		}
 		const validation = validateRequest(foundationUpdateFormSchema, formPayload)
 		if (!validation.success) return validation.response
-		const { name, description, foundedYear, mission, vision, websiteUrl, socialLinks, logo } = validation.data
+		const { name, description, foundedYear, mission, vision, websiteUrl, socialLinks, logo } =
+			validation.data
 
 		const updatePayload: Record<string, unknown> = {
 			name,

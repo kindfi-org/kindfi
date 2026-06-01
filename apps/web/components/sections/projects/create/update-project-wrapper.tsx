@@ -12,9 +12,7 @@ interface UpdateProjectWrapperProps {
 	projectSlug: string
 }
 
-export function UpdateProjectWrapper({
-	projectSlug,
-}: UpdateProjectWrapperProps) {
+export function UpdateProjectWrapper({ projectSlug }: UpdateProjectWrapperProps) {
 	const prefersReducedMotion = useReducedMotion()
 	const {
 		data: project,
@@ -58,8 +56,7 @@ export function UpdateProjectWrapper({
 								Edit Project Basics
 							</h1>
 							<p className="text-lg md:text-xl text-muted-foreground mt-2 text-center">
-								Update your project&apos;s core information and social media
-								presence
+								Update your project&apos;s core information and social media presence
 							</p>
 						</div>
 					</div>
@@ -74,11 +71,7 @@ export function UpdateProjectWrapper({
 						duration: prefersReducedMotion ? 0 : 0.3,
 					}}
 				>
-					{isLoading ? (
-						<UpdateProjectFormSkeleton />
-					) : (
-						<UpdateProjectForm project={project} />
-					)}
+					{isLoading ? <UpdateProjectFormSkeleton /> : <UpdateProjectForm project={project} />}
 				</motion.div>
 			</motion.div>
 		</div>

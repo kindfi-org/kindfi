@@ -1,12 +1,7 @@
 'use client'
 
 import { CircleDashed, Loader2, Vote } from 'lucide-react'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import type { GovernanceRound } from '~/lib/governance/types'
 import { RoundRow } from './round-row'
 
@@ -15,10 +10,7 @@ interface GovernanceRoundsListProps {
 	isLoading: boolean
 }
 
-export const GovernanceRoundsList = ({
-	rounds,
-	isLoading,
-}: GovernanceRoundsListProps) => {
+export const GovernanceRoundsList = ({ rounds, isLoading }: GovernanceRoundsListProps) => {
 	return (
 		<Card>
 			<CardHeader className="pb-3">

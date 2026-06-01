@@ -1,16 +1,16 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { CircleAlert, CircleCheck } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
-import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
-import { useAuth } from '~/hooks/use-auth'
-import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { logger } from '@/lib/logger'
+import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
+import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
+import { useAuth } from '~/hooks/use-auth'
+import { zodResolver } from '~/lib/form/zod-resolver'
+import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { buildFormSchema, type FormValues } from '../types'
 
 export function useProjectSidebar(project: ProjectDetail) {
@@ -38,8 +38,7 @@ export function useProjectSidebar(project: ProjectDetail) {
 		escrowType: project.escrowType,
 	})
 
-	const effectiveEscrowType =
-		escrowData?.type || project.escrowType || 'multi-release'
+	const effectiveEscrowType = escrowData?.type || project.escrowType || 'multi-release'
 
 	const hasEscrow = Boolean(project.escrowContractAddress)
 
@@ -48,10 +47,7 @@ export function useProjectSidebar(project: ProjectDetail) {
 		return Math.min(Math.round((raised / project.goal) * 100), 100)
 	}, [onChainRaised, project.goal, project.raised])
 
-	const formSchema = useMemo(
-		() => buildFormSchema(project.minInvestment),
-		[project.minInvestment],
-	)
+	const formSchema = useMemo(() => buildFormSchema(project.minInvestment), [project.minInvestment])
 
 	const initialInvestmentAmount = hasEscrow ? project.minInvestment : ''
 
@@ -137,9 +133,7 @@ export function useProjectSidebar(project: ProjectDetail) {
 				throw new Error('No unsigned transaction returned')
 			}
 
-			const signedXdr = await signTrustlessTransaction(
-				fundResponse.unsignedTransaction,
-			)
+			const signedXdr = await signTrustlessTransaction(fundResponse.unsignedTransaction)
 
 			const sendResult = await sendTransaction(signedXdr)
 			if (sendResult?.status !== 'SUCCESS') {
@@ -203,14 +197,12 @@ export function useProjectSidebar(project: ProjectDetail) {
 
 			const combinedMessage = `${errorMessage} ${apiErrorMessage}`.toLowerCase()
 
-			let userFriendlyMessage =
-				"We couldn't process your donation. Please try again."
+			let userFriendlyMessage = "We couldn't process your donation. Please try again."
 
 			if (
 				combinedMessage.includes('storage, missingvalue') ||
 				combinedMessage.includes('missingvalue') ||
-				(combinedMessage.includes('balance') &&
-					combinedMessage.includes('non-existing'))
+				(combinedMessage.includes('balance') && combinedMessage.includes('non-existing'))
 			) {
 				const tokenAddress = escrowData?.trustline?.address
 				if (tokenAddress) {

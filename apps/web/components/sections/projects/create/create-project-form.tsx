@@ -4,18 +4,13 @@ import { AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 
 import { StepperIndicator } from '~/components/sections/projects/create/stepper-indicator'
-import {
-	StepOne,
-	StepThree,
-	StepTwo,
-} from '~/components/sections/projects/create/steps'
+import { StepOne, StepThree, StepTwo } from '~/components/sections/projects/create/steps'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { useProjectMutation } from '~/hooks/projects/use-project-mutation'
 import type { StepThreeData } from '~/lib/types/project/create-project.types'
 
 export function CreateProjectForm() {
-	const { currentStep, setCurrentStep, formData, updateFormData } =
-		useCreateProject()
+	const { currentStep, setCurrentStep, formData, updateFormData } = useCreateProject()
 	const { mutateAsync: createProject, isPending } = useProjectMutation({})
 	const router = useRouter()
 
@@ -54,13 +49,7 @@ export function CreateProjectForm() {
 			case 2:
 				return <StepTwo onNext={handleNext} onBack={handleBack} />
 			case 3:
-				return (
-					<StepThree
-						onBack={handleBack}
-						onSubmit={handleSubmit}
-						isPending={isPending}
-					/>
-				)
+				return <StepThree onBack={handleBack} onSubmit={handleSubmit} isPending={isPending} />
 			default:
 				return <StepOne onNext={handleNext} />
 		}

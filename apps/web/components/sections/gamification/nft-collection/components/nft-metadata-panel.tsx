@@ -55,10 +55,7 @@ export function NftMetadataPanel({
 						<div className="flex justify-between">
 							<span className="text-muted-foreground">Token ID</span>
 							<span className="font-mono">
-								#
-								{(nft?.tokenId ?? dbNft?.token_id ?? 0)
-									.toString()
-									.padStart(4, '0')}
+								#{(nft?.tokenId ?? dbNft?.token_id ?? 0).toString().padStart(4, '0')}
 							</span>
 						</div>
 						{nft?.metadata?.name && (
@@ -69,9 +66,7 @@ export function NftMetadataPanel({
 						)}
 						{nft?.metadata?.description && (
 							<div className="flex justify-between gap-4">
-								<span className="text-muted-foreground shrink-0">
-									Description
-								</span>
+								<span className="text-muted-foreground shrink-0">Description</span>
 								<span className="text-right">{nft.metadata.description}</span>
 							</div>
 						)}
@@ -90,9 +85,7 @@ export function NftMetadataPanel({
 						)}
 						{nft?.metadata?.external_url && (
 							<div className="flex justify-between gap-2">
-								<span className="text-muted-foreground shrink-0">
-									External URL
-								</span>
+								<span className="text-muted-foreground shrink-0">External URL</span>
 								<a
 									href={nft.metadata.external_url}
 									target="_blank"
@@ -106,28 +99,18 @@ export function NftMetadataPanel({
 					</div>
 					{(attrs.length > 0 || userStats) && (
 						<div>
-							<p className="text-xs font-medium text-muted-foreground mb-2">
-								Attributes
-							</p>
+							<p className="text-xs font-medium text-muted-foreground mb-2">Attributes</p>
 							<div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
 								{attrs.length > 0
 									? attrs.map((a) => (
-											<div
-												key={a.trait_type}
-												className="bg-muted/60 rounded px-2 py-1.5 text-xs"
-											>
-												<span className="text-muted-foreground">
-													{a.trait_type}:
-												</span>{' '}
+											<div key={a.trait_type} className="bg-muted/60 rounded px-2 py-1.5 text-xs">
+												<span className="text-muted-foreground">{a.trait_type}:</span>{' '}
 												<span className="font-medium">{a.value}</span>
 											</div>
 										))
 									: userStats && (
 											<>
-												<AttrChip
-													label="Impact Score"
-													value={String(userStats.impactScore)}
-												/>
+												<AttrChip label="Impact Score" value={String(userStats.impactScore)} />
 												<AttrChip
 													label="Total Donations"
 													value={String(userStats.totalDonations)}
@@ -136,14 +119,8 @@ export function NftMetadataPanel({
 													label="Quests Completed"
 													value={String(userStats.questsCompleted)}
 												/>
-												<AttrChip
-													label="Streak Days"
-													value={String(userStats.streakDays)}
-												/>
-												<AttrChip
-													label="Referrals"
-													value={String(userStats.referralCount)}
-												/>
+												<AttrChip label="Streak Days" value={String(userStats.streakDays)} />
+												<AttrChip label="Referrals" value={String(userStats.referralCount)} />
 												<AttrChip label="Tier" value={tierConfig.label} />
 											</>
 										)}

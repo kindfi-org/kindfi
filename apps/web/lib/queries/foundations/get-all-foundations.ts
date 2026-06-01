@@ -9,13 +9,9 @@ export const FOUNDATION_LIST_SORT_NAV = [
 	{ slug: 'oldest', label: 'Oldest (year)' },
 ] as const
 
-export type FoundationListSortSlug =
-	(typeof FOUNDATION_LIST_SORT_NAV)[number]['slug']
+export type FoundationListSortSlug = (typeof FOUNDATION_LIST_SORT_NAV)[number]['slug']
 
-const sortMap: Record<
-	FoundationListSortSlug,
-	{ column: string; ascending: boolean }
-> = {
+const sortMap: Record<FoundationListSortSlug, { column: string; ascending: boolean }> = {
 	'most-recent': { column: 'created_at', ascending: false },
 	'most-donations': { column: 'total_donations_received', ascending: false },
 	'most-campaigns': { column: 'total_campaigns_completed', ascending: false },

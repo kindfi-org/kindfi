@@ -4,12 +4,9 @@ import { logger } from '@/lib/logger'
 const TW_API_KEY = process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY ?? ''
 const APP_ENV = process.env.NEXT_PUBLIC_APP_ENV ?? 'development'
 const TW_BASE_URL =
-	APP_ENV === 'production'
-		? 'https://api.trustlesswork.com'
-		: 'https://dev.api.trustlesswork.com'
+	APP_ENV === 'production' ? 'https://api.trustlesswork.com' : 'https://dev.api.trustlesswork.com'
 
-const COMMUNITY_FUND_ADDRESS =
-	process.env.NEXT_PUBLIC_COMMUNITY_FUND_ADDRESS ?? ''
+const COMMUNITY_FUND_ADDRESS = process.env.NEXT_PUBLIC_COMMUNITY_FUND_ADDRESS ?? ''
 
 /** Shape returned by GET /helper/get-multiple-escrow-balance */
 interface EscrowBalanceItem {
@@ -26,17 +23,11 @@ interface EscrowBalanceItem {
 export async function GET() {
 	try {
 		if (!COMMUNITY_FUND_ADDRESS) {
-			return NextResponse.json(
-				{ error: 'Community fund address not configured' },
-				{ status: 503 },
-			)
+			return NextResponse.json({ error: 'Community fund address not configured' }, { status: 503 })
 		}
 
 		if (!TW_API_KEY) {
-			return NextResponse.json(
-				{ error: 'Trustless Work API key not configured' },
-				{ status: 503 },
-			)
+			return NextResponse.json({ error: 'Trustless Work API key not configured' }, { status: 503 })
 		}
 
 		const url = new URL(`${TW_BASE_URL}/helper/get-multiple-escrow-balance`)
@@ -54,8 +45,7 @@ export async function GET() {
 		}
 
 		const items: EscrowBalanceItem[] = await res.json()
-		const balance =
-			items.find((i) => i.address === COMMUNITY_FUND_ADDRESS)?.balance ?? 0
+		const balance = items.find((i) => i.address === COMMUNITY_FUND_ADDRESS)?.balance ?? 0
 
 		return NextResponse.json({
 			success: true,
@@ -66,9 +56,6 @@ export async function GET() {
 		})
 	} catch (error) {
 		logger.error('Error fetching community fund balance:', error)
-		return NextResponse.json(
-			{ error: 'Failed to fetch balance' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Failed to fetch balance' }, { status: 500 })
 	}
 }

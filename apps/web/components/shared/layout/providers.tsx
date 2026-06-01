@@ -6,6 +6,7 @@ import type { Session } from 'next-auth'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
+import { logger } from '@/lib/logger'
 import { StellarProvider } from '~/hooks/contexts/stellar-context'
 import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
 import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
@@ -13,7 +14,6 @@ import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { AuthProvider } from '~/hooks/use-auth'
 import { I18nProvider } from '~/lib/i18n/context'
 import { translations } from '~/lib/i18n/translations'
-import { logger } from '@/lib/logger'
 
 interface ProvidersProps {
 	children: React.ReactNode
@@ -34,7 +34,6 @@ export function Providers({ children, initSession }: ProvidersProps) {
 					scope: '/',
 				})
 				.then((registration) => {
-
 					// Request notification permission
 					if ('Notification' in window) {
 						Notification.requestPermission().then((permission) => {
@@ -52,7 +51,6 @@ export function Providers({ children, initSession }: ProvidersProps) {
 							// 		minInterval: 24 * 60 * 60 * 1000, // 24 hours
 							// 	})
 							// 	.catch((error) => {
-
 							// 	})
 						}
 					} catch (error) {

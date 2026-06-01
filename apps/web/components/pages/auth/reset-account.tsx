@@ -3,16 +3,12 @@ import { requestResetAccountAction } from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { FormMessage, type Message } from '~/components/form-message'
-import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { FormFieldGroup } from '~/components/shared/form/form-field-group'
 import { FormShell } from '~/components/shared/form/form-shell'
+import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { formLayoutClasses } from '~/lib/form/form-styles'
 
-export async function ResetAccountComponent({
-	searchParams,
-}: {
-	searchParams: Message
-}) {
+export async function ResetAccountComponent({ searchParams }: { searchParams: Message }) {
 	return (
 		<AuthLayout>
 			<FormShell
@@ -21,10 +17,7 @@ export async function ResetAccountComponent({
 				footer={
 					<div className="w-full text-center text-sm text-muted-foreground">
 						Remembered your password?{' '}
-						<Link
-							href="/sign-in"
-							className="font-medium text-primary hover:underline"
-						>
+						<Link href="/sign-in" className="font-medium text-primary hover:underline">
 							Go back to login
 						</Link>
 					</div>
@@ -42,10 +35,7 @@ export async function ResetAccountComponent({
 						/>
 					</FormFieldGroup>
 
-					<Button
-						className="gradient-btn w-full text-white"
-						formAction={requestResetAccountAction}
-					>
+					<Button className="gradient-btn w-full text-white" formAction={requestResetAccountAction}>
 						Send Recovery Link
 					</Button>
 

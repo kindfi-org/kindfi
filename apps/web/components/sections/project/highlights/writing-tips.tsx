@@ -16,11 +16,7 @@ export function WritingTips() {
 			<div className="space-y-3">
 				{WRITING_TIPS.map((tip) => (
 					<div key={tip.id} className="flex gap-2 items-center">
-						<IoArrowForward
-							className="text-gray-500 flex-shrink-0"
-							size={16}
-							color="black"
-						/>
+						<IoArrowForward className="text-gray-500 flex-shrink-0" size={16} color="black" />
 						<p className="text-gray-600">{tip.label}</p>
 					</div>
 				))}

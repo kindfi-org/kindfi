@@ -40,9 +40,7 @@ export const CreateRoundForm = ({
 	validOptionCount,
 }: CreateRoundFormProps) => {
 	const updateRow = (i: number, patch: Partial<OptionRow>) => {
-		onOptionRowsChange(
-			optionRows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)),
-		)
+		onOptionRowsChange(optionRows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)))
 	}
 
 	return (
@@ -101,9 +99,7 @@ export const CreateRoundForm = ({
 						type="number"
 						placeholder="10000"
 						value={form.totalFundAmount}
-						onChange={(e) =>
-							onFormChange({ totalFundAmount: e.target.value })
-						}
+						onChange={(e) => onFormChange({ totalFundAmount: e.target.value })}
 						disabled={isPending}
 					/>
 				</div>
@@ -122,9 +118,7 @@ export const CreateRoundForm = ({
 			<div>
 				<div className="flex items-center justify-between mb-2">
 					<p className="text-sm font-semibold">Redistribution Options</p>
-					<span className="text-xs text-muted-foreground">
-						{validOptionCount} selected
-					</span>
+					<span className="text-xs text-muted-foreground">{validOptionCount} selected</span>
 				</div>
 
 				{loadingProjects && (
@@ -144,18 +138,12 @@ export const CreateRoundForm = ({
 							className="border rounded-lg p-3 space-y-2.5"
 						>
 							<div className="flex items-center justify-between">
-								<p className="text-xs font-medium text-muted-foreground">
-									Option {i + 1}
-								</p>
+								<p className="text-xs font-medium text-muted-foreground">Option {i + 1}</p>
 								{optionRows.length > 1 && (
 									<button
 										type="button"
 										disabled={isPending}
-										onClick={() =>
-											onOptionRowsChange(
-												optionRows.filter((_, idx) => idx !== i),
-											)
-										}
+										onClick={() => onOptionRowsChange(optionRows.filter((_, idx) => idx !== i))}
 										className="text-destructive hover:opacity-70 disabled:opacity-30"
 									>
 										<Trash2 className="h-3.5 w-3.5" />
@@ -186,27 +174,21 @@ export const CreateRoundForm = ({
 											placeholder="Campaign or project name"
 											value={row.title}
 											disabled={isPending}
-											onChange={(e) =>
-												updateRow(i, { title: e.target.value })
-											}
+											onChange={(e) => updateRow(i, { title: e.target.value })}
 										/>
 									</div>
 
 									<div className="space-y-1">
 										<Label className="text-xs">
 											Notes for voters
-											<span className="text-muted-foreground ml-1 font-normal">
-												(optional)
-											</span>
+											<span className="text-muted-foreground ml-1 font-normal">(optional)</span>
 										</Label>
 										<Textarea
 											placeholder="Why should the community fund this project?"
 											value={row.description}
 											rows={2}
 											disabled={isPending}
-											onChange={(e) =>
-												updateRow(i, { description: e.target.value })
-											}
+											onChange={(e) => updateRow(i, { description: e.target.value })}
 										/>
 									</div>
 								</>
@@ -220,9 +202,7 @@ export const CreateRoundForm = ({
 						size="sm"
 						disabled={isPending}
 						className="w-full gap-1.5"
-						onClick={() =>
-							onOptionRowsChange([...optionRows, { ...EMPTY_ROW }])
-						}
+						onClick={() => onOptionRowsChange([...optionRows, { ...EMPTY_ROW }])}
 					>
 						<Plus className="h-3.5 w-3.5" />
 						Add Option

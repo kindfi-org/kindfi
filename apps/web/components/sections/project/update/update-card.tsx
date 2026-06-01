@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { ChevronDown, Edit, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
+import { logger } from '@/lib/logger'
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -19,7 +20,6 @@ import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import { UpdateForm } from './update-form'
-import { logger } from '@/lib/logger'
 
 // Define the Update type based on actual DB structure
 type Update = {
@@ -122,18 +122,13 @@ export function UpdateCard({
 								<div className="flex items-center justify-between mb-4 relative">
 									<div className="flex items-center gap-3 my-4">
 										<Avatar>
-											<AvatarImage
-												src={`${PLACEHOLDER_IMG}?height=40&width=40`}
-												alt="User"
-											/>
+											<AvatarImage src={`${PLACEHOLDER_IMG}?height=40&width=40`} alt="User" />
 										</Avatar>
 										<div>
 											<p className="font-medium">
 												Author ID: {update.author_id?.substring(0, 8)}...
 											</p>
-											<p className="text-sm text-gray-500">
-												{formatDate(update.created_at)}
-											</p>
+											<p className="text-sm text-gray-500">{formatDate(update.created_at)}</p>
 										</div>
 									</div>
 									{canManageUpdates && (
@@ -170,9 +165,7 @@ export function UpdateCard({
 									</div>
 								)}
 
-								<h3 className="text-xl font-bold mb-4">
-									{extractTitle(update.content)}
-								</h3>
+								<h3 className="text-xl font-bold mb-4">{extractTitle(update.content)}</h3>
 
 								<p className="text-gray-700 leading-relaxed mb-6">
 									{update.content.length > 150
@@ -201,8 +194,7 @@ export function UpdateCard({
 					<AlertDialogHeader>
 						<AlertDialogTitle>Are you sure?</AlertDialogTitle>
 						<AlertDialogDescription>
-							This action cannot be undone. This will permanently delete the
-							update.
+							This action cannot be undone. This will permanently delete the update.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>

@@ -31,12 +31,7 @@ export const CreatorCard: React.FC<CreatorCardProps> = ({ creator }) => {
 				<CardContent className="p-8">
 					<div className="flex items-center gap-4 mb-6">
 						<div className="relative h-16 w-16 rounded-full overflow-hidden">
-							<Image
-								src={image || PLACEHOLDER_IMG}
-								alt={name}
-								fill
-								className="object-cover"
-							/>
+							<Image src={image || PLACEHOLDER_IMG} alt={name} fill className="object-cover" />
 						</div>
 						<div>
 							<div className="flex items-center gap-2">
@@ -50,9 +45,7 @@ export const CreatorCard: React.FC<CreatorCardProps> = ({ creator }) => {
 					<div className="space-y-4">
 						<div className="flex items-center justify-between text-sm">
 							<span className="text-muted-foreground">Total Raised</span>
-							<span className="font-bold">
-								${total_raised?.toLocaleString()}
-							</span>
+							<span className="font-bold">${total_raised?.toLocaleString()}</span>
 						</div>
 						<div className="flex items-center justify-between text-sm">
 							<span className="text-muted-foreground">Completed Projects</span>
@@ -64,10 +57,7 @@ export const CreatorCard: React.FC<CreatorCardProps> = ({ creator }) => {
 						</div>
 						<div className="pt-2">
 							<div className="text-sm font-medium mb-2">Recent Project</div>
-							<Badge
-								variant="secondary"
-								className="bg-primary/10 text-primary hover:bg-primary/20"
-							>
+							<Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
 								{recent_project}
 							</Badge>
 						</div>

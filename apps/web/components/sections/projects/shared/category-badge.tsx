@@ -48,17 +48,13 @@ export function CategoryBadge({
 			aria-pressed={isInteractive ? selected : undefined}
 			role={isInteractive ? 'button' : 'badge'}
 			tabIndex={isInteractive ? 0 : -1}
-			aria-label={
-				isInteractive ? `Select category ${category.name}` : undefined
-			}
+			aria-label={isInteractive ? `Select category ${category.name}` : undefined}
 		>
 			{showIcon && Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
 			<span
 				className={cn(
 					'overflow-hidden text-ellipsis',
-					isInteractive
-						? 'max-w-[160px] sm:max-w-full'
-						: 'max-w-[90px] sm:max-w-full',
+					isInteractive ? 'max-w-[160px] sm:max-w-full' : 'max-w-[90px] sm:max-w-full',
 					'whitespace-nowrap',
 				)}
 				title={category.name}

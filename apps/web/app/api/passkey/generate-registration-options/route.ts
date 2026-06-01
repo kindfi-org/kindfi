@@ -3,13 +3,10 @@ import { getUser, saveChallenge } from '@packages/lib/db'
 import { generateRegistrationOptions } from '@simplewebauthn/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import {
-	getRpIdFromOrigin,
-	getRpNameFromOrigin,
-} from '@/lib/passkey/rp-id-helper'
+import { logger } from '@/lib/logger'
+import { getRpIdFromOrigin, getRpNameFromOrigin } from '@/lib/passkey/rp-id-helper'
 import { generateRegistrationOptionsSchema } from '~/lib/schemas/passkey.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * POST /api/passkey/generate-registration-options
@@ -29,7 +26,6 @@ export async function POST(req: NextRequest) {
 		const config = appEnvConfig('web')
 		const rpId = getRpIdFromOrigin(origin)
 		const rpName = getRpNameFromOrigin(origin)
-
 
 		// Get user from database (or create empty credentials array if new user)
 		const userResponse = await getUser({

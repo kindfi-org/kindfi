@@ -36,12 +36,7 @@ export function WalletStatusPanel({
 					<div className="text-gray-700 break-all">
 						<p className="mb-1">{walletName || 'Wallet'}</p>
 						<p className="text-xs">{address}</p>
-						<Button
-							variant="outline"
-							size="sm"
-							className="mt-3"
-							onClick={onDisconnect}
-						>
+						<Button variant="outline" size="sm" className="mt-3" onClick={onDisconnect}>
 							Disconnect wallet
 						</Button>
 					</div>

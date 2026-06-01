@@ -7,10 +7,7 @@ export function AdminOverviewSkeleton() {
 			<div className="h-8 bg-muted animate-pulse rounded w-1/3" />
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 				{SKELETON_KEYS.map((key) => (
-					<div
-						key={key}
-						className="h-32 bg-muted animate-pulse rounded-lg"
-					/>
+					<div key={key} className="h-32 bg-muted animate-pulse rounded-lg" />
 				))}
 			</div>
 		</div>

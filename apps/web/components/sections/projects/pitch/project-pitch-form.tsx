@@ -1,6 +1,5 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { Loader2, Save, Video } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -18,6 +17,7 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { useProjectPitchMutation } from '~/hooks/projects/use-pitch-mutation'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { projectPitchSchema } from '~/lib/schemas/create-project.schemas'
 import type { ProjectPitchData } from '~/lib/types/project/create-project.types'
 import { FileUpload } from './file-upload'
@@ -29,11 +29,7 @@ interface ProjectPitchFormProps {
 	pitch?: ProjectPitchData | null
 }
 
-export function ProjectPitchForm({
-	projectId,
-	projectSlug,
-	pitch,
-}: ProjectPitchFormProps) {
+export function ProjectPitchForm({ projectId, projectSlug, pitch }: ProjectPitchFormProps) {
 	const { mutateAsync: savePitch, isPending } = useProjectPitchMutation()
 
 	const form = useForm<ProjectPitchData>({
@@ -53,7 +49,6 @@ export function ProjectPitchForm({
 			projectSlug,
 		}
 
-
 		await savePitch(payload, {
 			onSuccess: () => {
 				form.reset(data)
@@ -72,10 +67,7 @@ export function ProjectPitchForm({
 			<Card className=" max-w-5xl w-full">
 				<CardContent>
 					<Form {...form}>
-						<form
-							onSubmit={form.handleSubmit(handleSubmit)}
-							className="w-full space-y-6"
-						>
+						<form onSubmit={form.handleSubmit(handleSubmit)} className="w-full space-y-6">
 							<CSRFTokenField />
 							{/* Title */}
 							<FormField
@@ -100,8 +92,7 @@ export function ProjectPitchForm({
 											</div>
 										</FormControl>
 										<FormDescription>
-											A clear, compelling title that captures your
-											project&apos;s essence
+											A clear, compelling title that captures your project&apos;s essence
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -125,9 +116,8 @@ export function ProjectPitchForm({
 											/>
 										</FormControl>
 										<FormDescription>
-											Write your project story using the editor. Describe the
-											problem, your proposed solution, and the positive impact
-											you aim to achieve.
+											Write your project story using the editor. Describe the problem, your proposed
+											solution, and the positive impact you aim to achieve.
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -146,8 +136,7 @@ export function ProjectPitchForm({
 												value={field.value}
 												onChange={field.onChange}
 												error={
-													typeof form.formState.errors.pitchDeck?.message ===
-													'string'
+													typeof form.formState.errors.pitchDeck?.message === 'string'
 														? form.formState.errors.pitchDeck?.message
 														: undefined
 												}
@@ -184,49 +173,45 @@ export function ProjectPitchForm({
 											</div>
 										</FormControl>
 										<FormDescription>
-											Add a YouTube or Vimeo video to make your pitch more
-											engaging
+											Add a YouTube or Vimeo video to make your pitch more engaging
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
 
-						{/* Actions */}
-						<div className="pt-6 border-t border-gray-200 space-y-4">
-							<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-								<div className="text-sm text-muted-foreground">
-									{isDirty ? (
-										<span className="text-amber-600 font-medium">
-											You have unsaved changes
-										</span>
-									) : (
-										<span>All changes saved</span>
-									)}
+							{/* Actions */}
+							<div className="pt-6 border-t border-gray-200 space-y-4">
+								<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+									<div className="text-sm text-muted-foreground">
+										{isDirty ? (
+											<span className="text-amber-600 font-medium">You have unsaved changes</span>
+										) : (
+											<span>All changes saved</span>
+										)}
+									</div>
+
+									<Button
+										type="submit"
+										disabled={!isDirty || isPending}
+										className="flex items-center gap-2 px-8 text-white gradient-btn"
+										size="lg"
+										aria-label="Save changes"
+									>
+										{isPending ? (
+											<>
+												<Loader2 className="w-4 h-4 animate-spin" />
+												Saving...
+											</>
+										) : (
+											<>
+												<Save className="h-4 w-4" />
+												Save Changes
+											</>
+										)}
+									</Button>
 								</div>
-
-								<Button
-									type="submit"
-									disabled={!isDirty || isPending}
-									className="flex items-center gap-2 px-8 text-white gradient-btn"
-									size="lg"
-									aria-label="Save changes"
-								>
-									{isPending ? (
-										<>
-											<Loader2 className="w-4 h-4 animate-spin" />
-											Saving...
-										</>
-									) : (
-										<>
-											<Save className="h-4 w-4" />
-											Save Changes
-										</>
-									)}
-								</Button>
 							</div>
-
-						</div>
 						</form>
 					</Form>
 				</CardContent>

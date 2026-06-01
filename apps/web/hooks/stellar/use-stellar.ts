@@ -58,18 +58,14 @@ export const useStellar = () => {
 		},
 	})
 
-	const onRegister = async (
-		registerRes: RegistrationResponseJSON,
-		userId: string,
-	) => {
+	const onRegister = async (registerRes: RegistrationResponseJSON, userId: string) => {
 		// Handles registration by preparing Stellar data WITHOUT deploying the contract
 		// Contract deployment should only happen after KYC approval
 		if (deployee) return deployee
 		try {
 			setLoadingRegister(true)
 			setStoredCredentialId(registerRes.id)
-			const { contractSalt, publicKey, aaguid } =
-				await getPublicKeys(registerRes)
+			const { contractSalt, publicKey, aaguid } = await getPublicKeys(registerRes)
 			if (!bundlerKey.current) throw new Error('Bundler key not found')
 			if (!contractSalt || !publicKey) throw new Error('Invalid public keys')
 
@@ -104,7 +100,11 @@ export const useStellar = () => {
 		return {} as PresignResponse
 	}
 
-	const onSign = async ({ signRes, authTxn, lastLedger }: SignParams) => {
+	const onSign = async ({
+		signRes: _signRes,
+		authTxn: _authTxn,
+		lastLedger: _lastLedger,
+	}: SignParams) => {
 		// Handles the signing of a transaction and sends it to the Stellar network
 		try {
 			setLoadingSign(true)

@@ -4,12 +4,12 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
-import { createDiditSession } from '~/lib/services/didit'
 import { createDiditSessionSchema } from '~/lib/schemas/kyc.schemas'
+import { createDiditSession } from '~/lib/services/didit'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * POST /api/kyc/didit/create-session
@@ -33,30 +33,24 @@ async function createSessionHandler(req: NextRequest) {
 		const { redirectUrl, metadata } = validation.data
 
 		// Create Didit session
-		const diditSession = await createDiditSession(
-			session.user.email,
-			redirectUrl,
-			{
-				userId: session.user.id,
-				...(metadata || {}),
-			},
-		)
+		const diditSession = await createDiditSession(session.user.email, redirectUrl, {
+			userId: session.user.id,
+			...(metadata || {}),
+		})
 
 		// Store session in database using Supabase
 		// Use service role client since we've already validated the user via NextAuth
 		// and we're explicitly setting the user_id
-		const { error: dbError } = await supabaseServiceRole
-			.from('kyc_reviews')
-			.upsert({
-				user_id: session.user.id,
-				status: 'pending',
-				verification_level: 'enhanced',
-				notes: JSON.stringify({
-					diditSessionId: diditSession.session_id,
-					diditSessionToken: diditSession.session_token,
-					createdAt: new Date().toISOString(),
-				}),
-			})
+		const { error: dbError } = await supabaseServiceRole.from('kyc_reviews').upsert({
+			user_id: session.user.id,
+			status: 'pending',
+			verification_level: 'enhanced',
+			notes: JSON.stringify({
+				diditSessionId: diditSession.session_id,
+				diditSessionToken: diditSession.session_token,
+				createdAt: new Date().toISOString(),
+			}),
+		})
 
 		if (dbError) {
 			logger.error('Failed to store KYC session:', dbError)

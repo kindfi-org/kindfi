@@ -16,19 +16,15 @@ interface FoundationMembersWrapperProps {
 	foundationSlug: string
 }
 
-export function FoundationMembersWrapper({
-	foundationSlug,
-}: FoundationMembersWrapperProps) {
+export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWrapperProps) {
 	const prefersReducedMotion = useReducedMotion()
 	const {
 		data: foundation,
 		error,
 		isLoading,
-	} = useSupabaseQuery(
-		'foundation',
-		(client) => getFoundationBySlug(client, foundationSlug),
-		{ additionalKeyValues: [foundationSlug] },
-	)
+	} = useSupabaseQuery('foundation', (client) => getFoundationBySlug(client, foundationSlug), {
+		additionalKeyValues: [foundationSlug],
+	})
 
 	if (error ?? !foundation) {
 		notFound()
@@ -51,13 +47,7 @@ export function FoundationMembersWrapper({
 	return (
 		<ManagePageShell>
 			<ManageSectionHeader
-				icon={
-					<IoPeopleOutline
-						size={24}
-						className="relative z-10"
-						aria-hidden="true"
-					/>
-				}
+				icon={<IoPeopleOutline size={24} className="relative z-10" aria-hidden="true" />}
 				title="Foundation Team"
 				description={`View the people behind ${foundation.name}`}
 			/>
@@ -83,11 +73,7 @@ export function FoundationMembersWrapper({
 								<div className="flex items-start gap-6">
 									{foundation.founder.imageUrl ? (
 										<Link
-											href={
-												foundation.founder.slug
-													? `/u/${foundation.founder.slug}`
-													: '#'
-											}
+											href={foundation.founder.slug ? `/u/${foundation.founder.slug}` : '#'}
 											className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-full ring-4 ring-purple-100 hover:ring-purple-200 transition-[box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
 										>
 											<Image
@@ -116,9 +102,7 @@ export function FoundationMembersWrapper({
 														{foundation.founder.displayName ?? 'Anonymous'}
 													</p>
 												)}
-												<Badge className="bg-purple-600 text-white border-0 mt-2">
-													Founder
-												</Badge>
+												<Badge className="bg-purple-600 text-white border-0 mt-2">Founder</Badge>
 											</div>
 										</div>
 										{foundation.founder.bio ? (
@@ -137,9 +121,7 @@ export function FoundationMembersWrapper({
 									className="h-16 w-16 text-muted-foreground mx-auto mb-4"
 									aria-hidden="true"
 								/>
-								<p className="text-muted-foreground">
-									Founder information not available
-								</p>
+								<p className="text-muted-foreground">Founder information not available</p>
 							</CardContent>
 						</Card>
 					)}
@@ -154,8 +136,8 @@ export function FoundationMembersWrapper({
 							/>
 							<h3 className="text-lg font-semibold mb-2">Team Members</h3>
 							<p className="text-muted-foreground text-sm">
-								Foundation team member management coming soon. For now, only the
-								founder is displayed.
+								Foundation team member management coming soon. For now, only the founder is
+								displayed.
 							</p>
 						</CardContent>
 					</Card>

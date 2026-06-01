@@ -11,12 +11,7 @@ import {
 	IoShieldCheckmarkOutline,
 } from 'react-icons/io5'
 import { Badge } from '~/components/base/badge'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 
 const upcomingFeatures = [
@@ -40,30 +35,19 @@ export function AdminSettings() {
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2 text-lg">
-						<IoGlobeOutline
-							className="h-5 w-5 text-muted-foreground"
-							aria-hidden
-						/>
+						<IoGlobeOutline className="h-5 w-5 text-muted-foreground" aria-hidden />
 						General
 					</CardTitle>
-					<p className="text-sm text-muted-foreground">
-						Basic platform identity and contact
-					</p>
+					<p className="text-sm text-muted-foreground">Basic platform identity and contact</p>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="grid gap-4 sm:grid-cols-2">
 						<div className="space-y-2">
-							<p className="text-sm font-medium text-muted-foreground">
-								Platform name
-							</p>
-							<p className="rounded-md border bg-muted/30 px-3 py-2 text-sm">
-								Kindfi
-							</p>
+							<p className="text-sm font-medium text-muted-foreground">Platform name</p>
+							<p className="rounded-md border bg-muted/30 px-3 py-2 text-sm">Kindfi</p>
 						</div>
 						<div className="space-y-2">
-							<p className="text-sm font-medium text-muted-foreground">
-								Support email
-							</p>
+							<p className="text-sm font-medium text-muted-foreground">Support email</p>
 							<p className="rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
 								Configure in environment
 							</p>
@@ -79,10 +63,7 @@ export function AdminSettings() {
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2 text-lg">
-						<IoMailOutline
-							className="h-5 w-5 text-muted-foreground"
-							aria-hidden
-						/>
+						<IoMailOutline className="h-5 w-5 text-muted-foreground" aria-hidden />
 						Notifications & email
 					</CardTitle>
 					<p className="text-sm text-muted-foreground">
@@ -105,10 +86,7 @@ export function AdminSettings() {
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2 text-lg">
-						<IoShieldCheckmarkOutline
-							className="h-5 w-5 text-muted-foreground"
-							aria-hidden
-						/>
+						<IoShieldCheckmarkOutline className="h-5 w-5 text-muted-foreground" aria-hidden />
 						Safety & operations
 					</CardTitle>
 					<p className="text-sm text-muted-foreground">
@@ -131,10 +109,7 @@ export function AdminSettings() {
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2 text-lg">
-						<IoFlagOutline
-							className="h-5 w-5 text-muted-foreground"
-							aria-hidden
-						/>
+						<IoFlagOutline className="h-5 w-5 text-muted-foreground" aria-hidden />
 						Planned settings
 					</CardTitle>
 					<p className="text-sm text-muted-foreground">
@@ -165,15 +140,10 @@ export function AdminSettings() {
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2 text-lg">
-						<IoHeartCircleOutline
-							className="h-5 w-5 text-muted-foreground"
-							aria-hidden
-						/>
+						<IoHeartCircleOutline className="h-5 w-5 text-muted-foreground" aria-hidden />
 						System health
 					</CardTitle>
-					<p className="text-sm text-muted-foreground">
-						Database, storage, and external services
-					</p>
+					<p className="text-sm text-muted-foreground">Database, storage, and external services</p>
 				</CardHeader>
 				<CardContent>
 					<p className="text-sm text-muted-foreground">

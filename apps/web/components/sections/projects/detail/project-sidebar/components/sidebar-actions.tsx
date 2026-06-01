@@ -9,11 +9,7 @@ interface SidebarActionsProps {
 	onShare: () => void
 }
 
-export function SidebarActions({
-	isFollowing,
-	onToggleFollow,
-	onShare,
-}: SidebarActionsProps) {
+export function SidebarActions({ isFollowing, onToggleFollow, onShare }: SidebarActionsProps) {
 	return (
 		<div className="flex gap-4">
 			<Button

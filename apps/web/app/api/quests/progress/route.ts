@@ -1,12 +1,12 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { questProgressSchema } from '~/lib/schemas/quest.schemas'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 const rateLimiter = new RateLimiter()
 
@@ -22,10 +22,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const rateLimitResult = await rateLimiter.increment(
-			session.user.id,
-			'quest_progress',
-		)
+		const rateLimitResult = await rateLimiter.increment(session.user.id, 'quest_progress')
 		if (rateLimitResult.isBlocked) {
 			return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 		}
@@ -42,9 +39,7 @@ export async function POST(req: NextRequest) {
 
 		// Use service role client to bypass RLS, but ensure user_id matches session
 		// This is necessary because these operations are triggered server-side after donations
-		const { supabase: supabaseServiceRole } = await import(
-			'@packages/lib/supabase'
-		)
+		const { supabase: supabaseServiceRole } = await import('@packages/lib/supabase')
 		const supabase = supabaseServiceRole
 
 		// Run independent queries in parallel
@@ -60,11 +55,7 @@ export async function POST(req: NextRequest) {
 						.not('address', 'is', null)
 						.limit(1),
 			// Get quest definition
-			supabase
-				.from('quest_definitions')
-				.select('*')
-				.eq('quest_id', quest_id)
-				.single(),
+			supabase.from('quest_definitions').select('*').eq('quest_id', quest_id).single(),
 		])
 
 		let stellarAddress = user_address
@@ -87,7 +78,6 @@ export async function POST(req: NextRequest) {
 			error?: string
 		} | null = null
 
-
 		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			try {
 				const contractService = new GamificationContractService()
@@ -96,17 +86,12 @@ export async function POST(req: NextRequest) {
 					process.env.QUEST_CONTRACT_ADDRESS ||
 					process.env.NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS
 
-
 				if (questContractAddress) {
-					contractResult = await contractService.updateQuestProgress(
-						questContractAddress,
-						{
-							userAddress: stellarAddress,
-							questId: quest_id,
-							progressValue: progress_value,
-						},
-					)
-
+					contractResult = await contractService.updateQuestProgress(questContractAddress, {
+						userAddress: stellarAddress,
+						questId: quest_id,
+						progressValue: progress_value,
+					})
 
 					if (!contractResult.success) {
 						logger.error(
@@ -127,10 +112,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		if (!quest.is_active) {
-			return NextResponse.json(
-				{ error: 'Quest is not active' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Quest is not active' }, { status: 400 })
 		}
 
 		// Check expiration
@@ -149,10 +131,7 @@ export async function POST(req: NextRequest) {
 		// If there's an error other than "not found", return it
 		if (fetchError && fetchError.code !== 'PGRST116') {
 			logger.error('Error fetching quest progress:', fetchError)
-			return NextResponse.json(
-				{ error: 'Failed to fetch quest progress' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to fetch quest progress' }, { status: 500 })
 		}
 
 		const is_completed = progress_value >= quest.target_value
@@ -175,10 +154,7 @@ export async function POST(req: NextRequest) {
 
 			if (error) {
 				logger.error('Error updating quest progress:', error)
-				return NextResponse.json(
-					{ error: 'Failed to update quest progress' },
-					{ status: 500 },
-				)
+				return NextResponse.json({ error: 'Failed to update quest progress' }, { status: 500 })
 			}
 
 			return NextResponse.json({
@@ -203,10 +179,7 @@ export async function POST(req: NextRequest) {
 
 		if (error) {
 			logger.error('Error creating quest progress:', error)
-			return NextResponse.json(
-				{ error: 'Failed to create quest progress' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to create quest progress' }, { status: 500 })
 		}
 
 		return NextResponse.json({
@@ -216,9 +189,6 @@ export async function POST(req: NextRequest) {
 		})
 	} catch (error) {
 		logger.error('Error in POST /api/quests/progress:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

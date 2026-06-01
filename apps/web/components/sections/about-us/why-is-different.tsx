@@ -1,12 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { Icon } from '~/components/base/icon'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useI18n } from '~/lib/i18n'
@@ -69,11 +64,7 @@ export function WhyKindFiIsDifferent() {
 					viewport={{ once: true, amount: 0.12 }}
 				>
 					{ITEMS.map((item, index) => (
-						<motion.div
-							key={item.id}
-							variants={cardVariants}
-							className="h-full"
-						>
+						<motion.div key={item.id} variants={cardVariants} className="h-full">
 							<Card className="h-full overflow-hidden rounded-2xl border bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
 								<div
 									className={

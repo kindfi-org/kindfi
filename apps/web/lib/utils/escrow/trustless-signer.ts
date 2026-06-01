@@ -7,15 +7,11 @@ export function isExternalStellarWalletAddress(
 	return Boolean(address && STELLAR_G_ADDRESS_REGEX.test(address))
 }
 
-export function isSmartAccountAddress(
-	address: string | null | undefined,
-): boolean {
+export function isSmartAccountAddress(address: string | null | undefined): boolean {
 	return Boolean(address && STELLAR_C_ADDRESS_REGEX.test(address))
 }
 
-export function getTrustlessSignerError(
-	address: string | null | undefined,
-): string | null {
+export function getTrustlessSignerError(address: string | null | undefined): string | null {
 	if (!address) {
 		return 'Connect an external Stellar wallet (Freighter, xBull, etc.) to sign Trustless Work transactions.'
 	}

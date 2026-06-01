@@ -26,17 +26,11 @@ export async function GET() {
 
 		if (profileError) {
 			logger.error('Error fetching user profile:', profileError)
-			return NextResponse.json(
-				{ error: 'Error fetching user profile' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Error fetching user profile' }, { status: 500 })
 		}
 
 		if (!userProfile) {
-			return NextResponse.json(
-				{ error: 'User profile not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'User profile not found' }, { status: 404 })
 		}
 
 		// Return basic user info
@@ -51,9 +45,6 @@ export async function GET() {
 		})
 	} catch (error) {
 		logger.error('Error getting user:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

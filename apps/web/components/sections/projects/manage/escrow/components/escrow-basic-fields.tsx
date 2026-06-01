@@ -3,11 +3,7 @@
 import { useId } from 'react'
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from '~/components/base/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/base/tooltip'
 import { useEscrowForm } from '../context/escrow-form-context'
 
 interface EscrowBasicFieldsProps {
@@ -56,12 +52,9 @@ export function EscrowBasicFields({ projectId }: EscrowBasicFieldsProps) {
 						Trustline Address <span className="text-destructive">*</span>
 					</label>
 					<Tooltip>
-						<TooltipTrigger className="text-xs underline">
-							More information
-						</TooltipTrigger>
+						<TooltipTrigger className="text-xs underline">More information</TooltipTrigger>
 						<TooltipContent>
-							The asset contract address for the trustline. For USDC testnet
-							(Soroban-wrapped), use:
+							The asset contract address for the trustline. For USDC testnet (Soroban-wrapped), use:
 							GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5
 						</TooltipContent>
 					</Tooltip>

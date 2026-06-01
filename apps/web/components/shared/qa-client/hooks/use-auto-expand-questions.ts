@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { CommentWithAnswers } from '~/lib/types/project/project-qa.types'
 
-export const useAutoExpandQuestions = (
-	processedQuestions: CommentWithAnswers[],
-) => {
-	const [expandedQuestionIds, setExpandedQuestionIds] = useState<
-		Record<string, boolean>
-	>({})
+export const useAutoExpandQuestions = (processedQuestions: CommentWithAnswers[]) => {
+	const [expandedQuestionIds, setExpandedQuestionIds] = useState<Record<string, boolean>>({})
 
 	useEffect(() => {
 		if (!processedQuestions || processedQuestions.length === 0) return
@@ -15,16 +11,11 @@ export const useAutoExpandQuestions = (
 		let hasChanges = false
 
 		for (const question of processedQuestions) {
-			if (
-				question.answers &&
-				question.answers.length > 0 &&
-				!expandedQuestionIds[question.id]
-			) {
+			if (question.answers && question.answers.length > 0 && !expandedQuestionIds[question.id]) {
 				const hasRecentActivity = question.answers.some((answer) => {
 					const answerDate = new Date(answer.created_at || '1970-01-01')
 					const now = new Date()
-					const hoursDiff =
-						(now.getTime() - answerDate.getTime()) / (1000 * 60 * 60)
+					const hoursDiff = (now.getTime() - answerDate.getTime()) / (1000 * 60 * 60)
 					return hoursDiff < 24
 				})
 

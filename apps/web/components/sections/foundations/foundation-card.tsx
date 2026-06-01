@@ -67,8 +67,7 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 	const hasActiveCampaigns = foundation.totalCampaignsOpen > 0
 	const hasSocialLinks =
 		foundation.websiteUrl != null ||
-		(foundation.socialLinks != null &&
-			Object.keys(foundation.socialLinks).length > 0)
+		(foundation.socialLinks != null && Object.keys(foundation.socialLinks).length > 0)
 	const shouldReduceMotion = useReducedMotion()
 
 	return (
@@ -139,10 +138,7 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 					) : (
 						<div className="relative z-10 -mt-12 mb-4 flex justify-center">
 							<div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border-4 border-card bg-gradient-to-br from-primary to-primary/70 shadow-lg ring-2 ring-border">
-								<Building2
-									className="h-12 w-12 text-primary-foreground"
-									aria-hidden="true"
-								/>
+								<Building2 className="h-12 w-12 text-primary-foreground" aria-hidden="true" />
 							</div>
 						</div>
 					)}
@@ -174,9 +170,7 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 							<div className="mb-1 flex items-center justify-center gap-1 text-emerald-600 dark:text-emerald-400">
 								<Building2 className="h-4 w-4" aria-hidden="true" />
 							</div>
-							<p className="text-lg font-bold tabular-nums">
-								{foundation.totalCampaignsCompleted}
-							</p>
+							<p className="text-lg font-bold tabular-nums">{foundation.totalCampaignsCompleted}</p>
 							<p className="text-xs text-muted-foreground">Completed</p>
 						</div>
 						<div className="text-center">
@@ -210,27 +204,22 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 								</a>
 							) : null}
 							{foundation.socialLinks != null
-								? Object.entries(foundation.socialLinks).map(
-										([platform, url]) => {
-											const Icon = getSocialIcon(platform)
-											return (
-												<a
-													key={platform}
-													href={url}
-													target="_blank"
-													rel="noopener noreferrer"
-													onClick={(e) => e.stopPropagation()}
-													className="rounded-lg border border-border p-2 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-													aria-label={`Visit ${platform}`}
-												>
-													<Icon
-														className="h-4 w-4 text-primary"
-														aria-hidden="true"
-													/>
-												</a>
-											)
-										},
-									)
+								? Object.entries(foundation.socialLinks).map(([platform, url]) => {
+										const Icon = getSocialIcon(platform)
+										return (
+											<a
+												key={platform}
+												href={url}
+												target="_blank"
+												rel="noopener noreferrer"
+												onClick={(e) => e.stopPropagation()}
+												className="rounded-lg border border-border p-2 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+												aria-label={`Visit ${platform}`}
+											>
+												<Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+											</a>
+										)
+									})
 								: null}
 						</div>
 					) : null}

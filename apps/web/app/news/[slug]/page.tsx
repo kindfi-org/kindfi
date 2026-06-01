@@ -6,13 +6,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypePrettyCode from 'rehype-pretty-code'
 import rehypeSlug from 'rehype-slug'
 import remarkGfm from 'remark-gfm'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { mdxComponents } from '~/components/mdx-components'
 import { SectionContainer } from '~/components/shared/section-container'
 import { ShareButtons } from '~/components/shared/share-buttons'
@@ -82,9 +76,7 @@ export default async function NewsPostPage({ params }: PageProps) {
 							/>
 						</div>
 					) : null}
-					<h1 className="text-3xl font-bold tracking-tight mb-2 sm:text-4xl">
-						{fm.title}
-					</h1>
+					<h1 className="text-3xl font-bold tracking-tight mb-2 sm:text-4xl">{fm.title}</h1>
 					<p className="text-muted-foreground text-lg mb-6">{fm.description}</p>
 					<div className="mb-8">
 						<Link
@@ -97,11 +89,7 @@ export default async function NewsPostPage({ params }: PageProps) {
 					</div>
 
 					<div className="mb-8">
-						<ShareButtons
-							url={articleUrl}
-							title={fm.title}
-							description={fm.description}
-						/>
+						<ShareButtons url={articleUrl} title={fm.title} description={fm.description} />
 					</div>
 					<div className="prose prose-neutral dark:prose-invert max-w-none">
 						<MDXRemote

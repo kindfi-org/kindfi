@@ -1,9 +1,5 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
-import {
-	dehydrate,
-	HydrationBoundary,
-	QueryClient,
-} from '@tanstack/react-query'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
@@ -23,9 +19,7 @@ const getFoundationCached = cache(async (slug: string) => {
 	return getFoundationBySlug(supabase, slug)
 })
 
-export async function generateMetadata({
-	params,
-}: FoundationDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: FoundationDetailPageProps): Promise<Metadata> {
 	const { slug } = await params
 	const foundation = await getFoundationCached(slug)
 
@@ -88,9 +82,7 @@ export async function generateMetadata({
 	}
 }
 
-export default async function FoundationDetailPage({
-	params,
-}: FoundationDetailPageProps) {
+export default async function FoundationDetailPage({ params }: FoundationDetailPageProps) {
 	const { slug } = await params
 	const foundation = await getFoundationCached(slug)
 
@@ -103,10 +95,7 @@ export default async function FoundationDetailPage({
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<main
-			className="min-h-screen bg-muted/30"
-			aria-label={`${foundation.name} foundation profile`}
-		>
+		<main className="min-h-screen bg-muted/30" aria-label={`${foundation.name} foundation profile`}>
 			<SectionContainer maxWidth="6xl" className="py-10 sm:py-14 lg:py-16">
 				<HydrationBoundary state={dehydratedState}>
 					<FoundationDetailClientWrapper slug={slug} />

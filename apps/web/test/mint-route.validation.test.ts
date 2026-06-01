@@ -19,9 +19,7 @@ describe('NFT mint route validation helpers', () => {
 	})
 
 	test('validateStellarAddress accepts valid addresses and rejects invalid', async () => {
-		const { validateStellarAddress } = await import(
-			'../app/api/nfts/mint/route'
-		)
+		const { validateStellarAddress } = await import('../app/api/nfts/mint/route')
 
 		const good = `G${'A'.repeat(55)}`
 		expect(validateStellarAddress(good)).toBe(true)

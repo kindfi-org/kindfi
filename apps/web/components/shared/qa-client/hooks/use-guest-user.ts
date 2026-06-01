@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
+import type { UserData } from '~/lib/types/project/project-qa.types'
 import {
 	getGuestRemainingComments as utilGetGuestRemainingComments,
 	getGuestUserId as utilGetGuestUserId,
 	incrementGuestCommentCount as utilIncrementGuestCommentCount,
 	resetGuestCommentCount as utilResetGuestCommentCount,
 } from '~/lib/utils/qa'
-import type { UserData } from '~/lib/types/project/project-qa.types'
 
 export const useGuestUser = (currentUser?: UserData | null) => {
 	const [guestUserId, setGuestUserId] = useState<string | null>(null)

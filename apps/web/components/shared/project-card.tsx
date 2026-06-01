@@ -48,9 +48,7 @@ function ProjectDetails({
 		>
 			<div
 				className={cn(
-					viewMode === 'list'
-						? ' h-auto w-[200px] min-h-[180px]'
-						: ' w-full h-48',
+					viewMode === 'list' ? ' h-auto w-[200px] min-h-[180px]' : ' w-full h-48',
 					'relative',
 				)}
 			>
@@ -65,17 +63,14 @@ function ProjectDetails({
 
 			<div className={'p-5 flex-1'}>
 				<h3 className="text-lg font-semibold mb-2">{project.title}</h3>
-				<p className="text-gray-600 mb-4 line-clamp-2 text-sm">
-					{project.description}
-				</p>
+				<p className="text-gray-600 mb-4 line-clamp-2 text-sm">{project.description}</p>
 				<div className="mb-4">
 					<div className="flex justify-between text-sm mb-1">
 						<span className="font-semibold">
 							${project.current_amount?.toLocaleString() ?? '0'}
 						</span>
 						<span className="text-gray-500">
-							{percentageComplete.toFixed(0)}% of $
-							{project.target_amount?.toLocaleString()}
+							{percentageComplete.toFixed(0)}% of ${project.target_amount?.toLocaleString()}
 						</span>
 					</div>
 					<Progress value={percentageComplete} className="h-2 bg-gray-100" />
@@ -83,9 +78,7 @@ function ProjectDetails({
 
 				<div className="flex justify-between mb-4 text-center">
 					<div>
-						<p className="font-semibold">
-							${project.target_amount?.toLocaleString()}
-						</p>
+						<p className="font-semibold">${project.target_amount?.toLocaleString()}</p>
 						<p className="text-xs text-gray-500">Goal</p>
 					</div>
 					<div>

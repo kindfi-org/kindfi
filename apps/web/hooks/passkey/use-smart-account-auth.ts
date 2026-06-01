@@ -7,9 +7,9 @@ import { useRouter } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { createSessionAction } from '~/app/actions/auth'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
-import { logger } from '@/lib/logger'
 
 const mapPasskeyApiError = (errorMessage: string): InAppError => {
 	if (errorMessage === 'User not found') {
@@ -57,19 +57,16 @@ export const useSmartAccountAuth = (identifier: string) => {
 		try {
 			// Step 1: Generate authentication options
 			// This should be done server-side to maintain security
-			const authOptionsResponse = await fetch(
-				'/api/passkey/generate-auth-options',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						identifier,
-						origin: window.location.origin,
-					}),
+			const authOptionsResponse = await fetch('/api/passkey/generate-auth-options', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			)
+				body: JSON.stringify({
+					identifier,
+					origin: window.location.origin,
+				}),
+			})
 
 			if (!authOptionsResponse.ok) {
 				const errorData = await authOptionsResponse.json()
@@ -120,10 +117,7 @@ export const useSmartAccountAuth = (identifier: string) => {
 				})
 
 				if (!sessionResult.success) {
-					throw new InAppError(
-						ErrorCode.UNEXPECTED_ERROR,
-						sessionResult.message,
-					)
+					throw new InAppError(ErrorCode.UNEXPECTED_ERROR, sessionResult.message)
 				}
 
 				// Then sign in with NextAuth to create the client-side session

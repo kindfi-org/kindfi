@@ -4,10 +4,7 @@ import { Card } from '~/components/base/card'
 import { Separator } from '~/components/base/separator'
 import { AskQuestionForm } from '~/components/shared/qa/ask-question-form'
 import { QuestionCard } from '~/components/shared/qa/question-card'
-import type {
-	CommentWithAnswers,
-	UserData,
-} from '~/lib/types/project/project-qa.types'
+import type { CommentWithAnswers, UserData } from '~/lib/types/project/project-qa.types'
 
 interface QuestionsSectionProps {
 	newQuestion: string

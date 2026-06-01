@@ -64,12 +64,7 @@ export interface TeamMember {
 	title: string
 }
 
-export type MilestoneStatus =
-	| 'pending'
-	| 'completed'
-	| 'approved'
-	| 'rejected'
-	| 'disputed'
+export type MilestoneStatus = 'pending' | 'completed' | 'approved' | 'rejected' | 'disputed'
 
 export interface Milestone {
 	id: string

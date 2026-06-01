@@ -1,4 +1,3 @@
-
 import { Buffer } from 'node:buffer'
 import { createHash, createPublicKey, createVerify } from 'node:crypto'
 import { db, devices } from '@packages/drizzle'
@@ -38,15 +37,10 @@ export class StellarPasskeyService {
 
 	private readonly STANDARD_FEE = '100000' // Higher fee for contract deployment
 
-	constructor(
-		networkPassphrase?: string,
-		rpcUrl?: string,
-		fundingSecretKey?: string,
-	) {
+	constructor(networkPassphrase?: string, rpcUrl?: string, fundingSecretKey?: string) {
 		const config: AppEnvInterface = appEnvConfig('kyc-server')
 
-		this.networkPassphrase =
-			networkPassphrase || config.stellar.networkPassphrase
+		this.networkPassphrase = networkPassphrase || config.stellar.networkPassphrase
 		this.server = new Server(rpcUrl || config.stellar.rpcUrl)
 		this.factoryContractId = config.stellar.factoryContractId
 		this.controllerContractId = config.stellar.controllerContractId
@@ -80,7 +74,6 @@ export class StellarPasskeyService {
 		}
 
 		try {
-
 			// Use provided salt or generate from credential
 			const salt = params.salt
 				? Buffer.from(params.salt, 'hex')
@@ -104,21 +97,18 @@ export class StellarPasskeyService {
 				deviceId = Buffer.from(deviceIdHex, 'hex')
 			}
 
-
 			// Deploy via account-factory
-			const contractAddress = await this.deployViaFactory(
-				salt,
-				deviceId,
-				publicKeyBuffer,
-			)
-
+			const contractAddress = await this.deployViaFactory(salt, deviceId, publicKeyBuffer)
 
 			return {
 				address: contractAddress,
 				isExisting: false,
 			}
 		} catch (error) {
-			logger.error('Error deploying smart wallet', error instanceof Error ? error : new Error(String(error)))
+			logger.error(
+				'Error deploying smart wallet',
+				error instanceof Error ? error : new Error(String(error)),
+			)
 			throw new Error(`Failed to deploy smart wallet: ${error}`)
 		}
 	}
@@ -136,7 +126,7 @@ export class StellarPasskeyService {
 			const ledgerKey = contract.getFootprint()
 
 			try {
-				const ledgerEntries = await this.server.getLedgerEntries(ledgerKey)
+				const _ledgerEntries = await this.server.getLedgerEntries(ledgerKey)
 				return {
 					address: contractAddress,
 					balance: '0', // Contracts don't have balances directly
@@ -175,30 +165,21 @@ export class StellarPasskeyService {
 		}
 
 		try {
-
 			// Verify factory contract exists (non-blocking - will fail during deployment if missing)
 			try {
-				await this.verifyContractExists(
-					this.factoryContractId,
-					'Account Factory',
-				)
+				await this.verifyContractExists(this.factoryContractId, 'Account Factory')
 			} catch {
 				logger.warn('Factory contract verification failed – continuing with deployment attempt')
 			}
 
 			// Verify controller contract exists (non-blocking)
 			try {
-				await this.verifyContractExists(
-					this.controllerContractId,
-					'Auth Controller',
-				)
+				await this.verifyContractExists(this.controllerContractId, 'Auth Controller')
 			} catch {
 				logger.warn('Controller contract verification failed – continuing with deployment attempt')
 			}
 
-			const fundingAccount = await this.server.getAccount(
-				this.fundingKeypair.publicKey(),
-			)
+			const fundingAccount = await this.server.getAccount(this.fundingKeypair.publicKey())
 
 			// Build factory.deploy() call
 			const factory = new Contract(this.factoryContractId)
@@ -220,9 +201,7 @@ export class StellarPasskeyService {
 			const simulation = await this.server.simulateTransaction(transaction)
 
 			if (Api.isSimulationError(simulation)) {
-				throw new Error(
-					`Simulation failed: ${simulation.error || 'unknown error'}`,
-				)
+				throw new Error(`Simulation failed: ${simulation.error || 'unknown error'}`)
 			}
 
 			const assembledTx = assembleTransaction(transaction, simulation).build()
@@ -245,7 +224,6 @@ export class StellarPasskeyService {
 					const txResult = await this.server.getTransaction(result.hash)
 
 					if (txResult.status === Api.GetTransactionStatus.SUCCESS) {
-
 						// Extract contract address from result
 						// The factory.deploy() returns Address type
 						const returnValue = txResult.returnValue
@@ -297,10 +275,7 @@ export class StellarPasskeyService {
 	/**
 	 * Verifies that a contract exists on-chain
 	 */
-	private async verifyContractExists(
-		contractId: string,
-		contractName: string,
-	): Promise<void> {
+	private async verifyContractExists(contractId: string, contractName: string): Promise<void> {
 		try {
 			const contract = new Contract(contractId)
 			const ledgerKey = contract.getFootprint()
@@ -311,68 +286,16 @@ export class StellarPasskeyService {
 					`${contractName} (${contractId}) not found on network. Please deploy the contract first.`,
 				)
 			}
-
 		} catch (error) {
-			logger.error(`Failed to verify ${contractName}`, error instanceof Error ? error : new Error(String(error)), { contractId })
+			logger.error(
+				`Failed to verify ${contractName}`,
+				error instanceof Error ? error : new Error(String(error)),
+				{ contractId },
+			)
 			throw new Error(
 				`${contractName} (${contractId}) verification failed: ${error}. ` +
 					'Please ensure the contract is deployed on this network.',
 			)
-		}
-	}
-
-	/**
-	 * Decodes diagnostic events from XDR for debugging
-	 */
-	// biome-ignore lint/suspicious/noExplicitAny: XDR event types are complex and not fully typed
-	private decodeDiagnosticEvent(eventXdr: any): string {
-		try {
-			// Extract event data for logging
-			const event = eventXdr._attributes?.event || eventXdr
-			const topics = event._attributes?.body?._value?._attributes?.topics || []
-			const data = event._attributes?.body?._value?._attributes?.data
-
-			const topicStrings = topics
-				// biome-ignore lint/suspicious/noExplicitAny: XDR topic types vary
-				.map((topic: any) => {
-					try {
-						if (topic._arm === 'sym') {
-							return topic._value?.toString('utf-8') || ''
-						}
-						if (topic._arm === 'str') {
-							return topic._value?.toString('utf-8') || ''
-						}
-						return ''
-					} catch {
-						return ''
-					}
-				})
-				.filter(Boolean)
-
-			let dataString = ''
-			if (data?._arm === 'str') {
-				dataString = data._value?.toString('utf-8') || ''
-			} else if (data?._arm === 'vec') {
-				const vecItems = data._value || []
-				dataString = vecItems
-					// biome-ignore lint/suspicious/noExplicitAny: XDR data types vary
-					.map((item: any) => {
-						if (item._arm === 'str') {
-							return item._value?.toString('utf-8')
-						}
-						return ''
-					})
-					.filter(Boolean)
-					.join(' ')
-			}
-
-			if (topicStrings.length > 0 || dataString) {
-				return `[${topicStrings.join(', ')}] ${dataString}`.trim()
-			}
-
-			return 'Unable to decode event'
-		} catch {
-			return 'Unable to decode event'
 		}
 	}
 
@@ -391,32 +314,23 @@ export class StellarPasskeyService {
 			const rateLimitResult = await this.rateLimiter.checkLimit(address)
 
 			if (!rateLimitResult.allowed) {
-
 				// Log potential brute-force attempt
 
 				return false
 			}
 
-
-
 			// Parse the signature data (should be WebAuthn assertion response)
 			const signatureData = JSON.parse(signature)
 
 			// Extract signature components
-			const {
-				authenticatorData,
-				clientDataJSON,
-				signature: rawSignature,
-			} = signatureData
+			const { authenticatorData, clientDataJSON, signature: rawSignature } = signatureData
 
 			if (!authenticatorData || !clientDataJSON || !rawSignature) {
 				throw new Error('Missing required signature components')
 			}
 
 			// Verify client data challenge matches transaction hash
-			const clientData = JSON.parse(
-				Buffer.from(clientDataJSON, 'base64').toString('utf-8'),
-			)
+			const clientData = JSON.parse(Buffer.from(clientDataJSON, 'base64').toString('utf-8'))
 
 			if (clientData.challenge !== transactionHash) {
 				return false
@@ -445,7 +359,10 @@ export class StellarPasskeyService {
 
 			return isValid
 		} catch (error) {
-			logger.error('Error verifying signature', error instanceof Error ? error : new Error(String(error)))
+			logger.error(
+				'Error verifying signature',
+				error instanceof Error ? error : new Error(String(error)),
+			)
 			return false
 		}
 	}
@@ -463,9 +380,7 @@ export class StellarPasskeyService {
 			// Create the signed data (authenticator data + client data hash)
 			const authDataBuffer = Buffer.from(authenticatorData, 'base64')
 			const clientDataBuffer = Buffer.from(clientDataJSON, 'base64')
-			const clientDataHash = createHash('sha256')
-				.update(clientDataBuffer)
-				.digest()
+			const clientDataHash = createHash('sha256').update(clientDataBuffer).digest()
 
 			const signedData = Buffer.concat([authDataBuffer, clientDataHash])
 			const signatureBuffer = Buffer.from(signature, 'base64')
@@ -487,7 +402,10 @@ export class StellarPasskeyService {
 
 			return isValid
 		} catch (error) {
-			logger.error('SECP256R1 verification failed', error instanceof Error ? error : new Error(String(error)))
+			logger.error(
+				'SECP256R1 verification failed',
+				error instanceof Error ? error : new Error(String(error)),
+			)
 			return false
 		}
 	}
@@ -533,11 +451,8 @@ export class StellarPasskeyService {
 	/**
 	 * Gets the public key for a contract
 	 */
-	private async getPublicKeyForContract(
-		contractId: string,
-	): Promise<Buffer | null> {
+	private async getPublicKeyForContract(contractId: string): Promise<Buffer | null> {
 		try {
-
 			// Query database for device record with this contract address
 			const deviceRecord = await db
 				.select({
@@ -576,10 +491,13 @@ export class StellarPasskeyService {
 				}
 			}
 
-
 			return publicKeyBuffer
 		} catch (error) {
-			logger.error('Error retrieving public key from database', error instanceof Error ? error : new Error(String(error)), { contractId })
+			logger.error(
+				'Error retrieving public key from database',
+				error instanceof Error ? error : new Error(String(error)),
+				{ contractId },
+			)
 			return null
 		}
 	}
@@ -598,7 +516,6 @@ export class StellarPasskeyService {
 		}
 
 		try {
-
 			// Parse operation details
 			const operationData: PasskeyOperation = JSON.parse(operation)
 
@@ -620,16 +537,16 @@ export class StellarPasskeyService {
 				case 'remove_device':
 					return await this.executeRemoveDevice(address, operationData)
 				case 'invoke_contract':
-					return await this.executeContractInvocation(
-						address,
-						address,
-						operationData,
-					)
+					return await this.executeContractInvocation(address, address, operationData)
 				default:
 					throw new Error('Unsupported operation type')
 			}
 		} catch (error) {
-			logger.error('Error executing transaction', error instanceof Error ? error : new Error(String(error)), { address })
+			logger.error(
+				'Error executing transaction',
+				error instanceof Error ? error : new Error(String(error)),
+				{ address },
+			)
 			throw new Error(`Transaction execution failed: ${error}`)
 		}
 	}
@@ -765,13 +682,10 @@ export class StellarPasskeyService {
 	/**
 	 * Helper to submit transactions with proper error handling and authorization
 	 */
-	private async submitTransaction(
-		builtTransaction: Transaction,
-	): Promise<string> {
+	private async submitTransaction(builtTransaction: Transaction): Promise<string> {
 		if (!this.fundingKeypair) {
 			throw new Error('Funding keypair required for transaction submission')
 		}
-
 
 		// Simulate transaction to get authorization requirements
 		const simulation = await this.server.simulateTransaction(builtTransaction)
@@ -784,17 +698,12 @@ export class StellarPasskeyService {
 			throw new Error('Transaction requires restore operation')
 		}
 
-
 		// Assemble transaction with authorization entries from simulation
-		const assembledTransaction = assembleTransaction(
-			builtTransaction,
-			simulation,
-		).build()
+		const assembledTransaction = assembleTransaction(builtTransaction, simulation).build()
 
 		// Sign the transaction with our funding account
 		// The assembleTransaction function handles authorization entries automatically
 		assembledTransaction.sign(this.fundingKeypair)
-
 
 		// Submit transaction to Soroban RPC (NOT Horizon - this was the bug!)
 		// Soroban transactions with authorization entries must use sendTransaction
@@ -805,11 +714,9 @@ export class StellarPasskeyService {
 		}
 
 		if (sendResult.status === 'PENDING') {
-
 			// Wait for transaction to be included in a ledger
 			let attempts = 0
 			const maxAttempts = 120 // 2 minutes for complex auth transactions
-
 
 			while (attempts < maxAttempts) {
 				await new Promise((resolve) => setTimeout(resolve, 10000)) // Wait 1 second
@@ -817,7 +724,6 @@ export class StellarPasskeyService {
 
 				try {
 					const txResult = await this.server.getTransaction(sendResult.hash)
-
 
 					if (txResult.status === Api.GetTransactionStatus.SUCCESS) {
 						return sendResult.hash
@@ -831,8 +737,7 @@ export class StellarPasskeyService {
 					}
 
 					// Still pending, continue waiting
-				} catch (_error) {
-				}
+				} catch (_error) {}
 			}
 
 			throw new Error('Transaction timed out waiting for confirmation')
@@ -908,7 +813,11 @@ export async function queryContractDevices(
 		logger.warn('Failed to query contract devices')
 		return []
 	} catch (error) {
-		logger.error('Error querying contract devices', error instanceof Error ? error : new Error(String(error)), { contractAddress })
+		logger.error(
+			'Error querying contract devices',
+			error instanceof Error ? error : new Error(String(error)),
+			{ contractAddress },
+		)
 		return []
 	}
 }

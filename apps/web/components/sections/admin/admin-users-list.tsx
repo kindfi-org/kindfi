@@ -9,13 +9,7 @@ import { AdminSectionHeader } from '~/components/sections/admin/admin-section-he
 import { getAllUsers } from '~/lib/queries/admin/get-all-users'
 import { formatDistanceToNow } from '~/lib/utils/date-utils'
 
-const SKELETON_KEYS = [
-	'user-sk-1',
-	'user-sk-2',
-	'user-sk-3',
-	'user-sk-4',
-	'user-sk-5',
-] as const
+const SKELETON_KEYS = ['user-sk-1', 'user-sk-2', 'user-sk-3', 'user-sk-4', 'user-sk-5'] as const
 
 export function AdminUsersList() {
 	const {
@@ -33,10 +27,7 @@ export function AdminUsersList() {
 				</div>
 				<div className="space-y-2">
 					{SKELETON_KEYS.map((key) => (
-						<div
-							key={key}
-							className="h-20 rounded-lg bg-muted/60 animate-pulse"
-						/>
+						<div key={key} className="h-20 rounded-lg bg-muted/60 animate-pulse" />
 					))}
 				</div>
 			</div>
@@ -46,10 +37,7 @@ export function AdminUsersList() {
 	if (error) {
 		return (
 			<div className="space-y-6">
-				<AdminSectionHeader
-					title="Users"
-					description="View and manage all users on the platform"
-				/>
+				<AdminSectionHeader title="Users" description="View and manage all users on the platform" />
 				<Card className="border-destructive/50">
 					<CardContent className="py-12 text-center">
 						<p className="font-medium text-destructive">Error loading users.</p>
@@ -73,10 +61,7 @@ export function AdminUsersList() {
 
 	return (
 		<div className="space-y-6">
-			<AdminSectionHeader
-				title="Users"
-				description="View and manage all users on the platform"
-			/>
+			<AdminSectionHeader title="Users" description="View and manage all users on the platform" />
 
 			<div className="space-y-2">
 				{users?.map((user) => (
@@ -98,21 +83,15 @@ export function AdminUsersList() {
 									)}
 									<div className="flex-1">
 										<div className="flex items-center gap-3 mb-1">
-											<span className="font-semibold">
-												{user.displayName || 'Anonymous'}
-											</span>
-											<Badge className={roleColors[user.role] || 'bg-gray-100'}>
-												{user.role}
-											</Badge>
+											<span className="font-semibold">{user.displayName || 'Anonymous'}</span>
+											<Badge className={roleColors[user.role] || 'bg-gray-100'}>{user.role}</Badge>
 										</div>
 										<div className="flex items-center gap-4 text-sm text-muted-foreground">
 											<span>{user.email}</span>
 											<span>•</span>
 											<span>
 												Joined{' '}
-												{user.createdAt
-													? formatDistanceToNow(new Date(user.createdAt))
-													: 'Unknown'}
+												{user.createdAt ? formatDistanceToNow(new Date(user.createdAt)) : 'Unknown'}
 											</span>
 										</div>
 									</div>

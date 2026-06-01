@@ -15,9 +15,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 
 	const { data: initialQuestions, error: questionsError } = await supabase
 		.from('comments')
-		.select(
-			'id, content, created_at, project_id, author_id, type, parent_comment_id, metadata',
-		)
+		.select('id, content, created_at, project_id, author_id, type, parent_comment_id, metadata')
 		.eq('project_id', projectId)
 		.eq('type', 'question')
 		.is('parent_comment_id', null)
@@ -26,21 +24,13 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 	let questionsWithAuthors: QuestionData[] = []
 
 	if (initialQuestions && initialQuestions.length > 0) {
-		const authorIds = [
-			...new Set(initialQuestions.map((item) => item.author_id)),
-		]
+		const authorIds = [...new Set(initialQuestions.map((item) => item.author_id))]
 
-		const { data: authors } = await supabase
-			.from('profiles')
-			.select('*')
-			.in('id', authorIds)
+		const { data: authors } = await supabase.from('profiles').select('*').in('id', authorIds)
 
 		const authorsMap = authors
 			? authors.reduce(
-					(
-						acc: Record<string, Tables<'profiles'>>,
-						author: Tables<'profiles'>,
-					) => {
+					(acc: Record<string, Tables<'profiles'>>, author: Tables<'profiles'>) => {
 						acc[author.id] = author
 						return acc
 					},
@@ -74,10 +64,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 	if (commentsData && commentsData.length > 0) {
 		const authorIds = [...new Set(commentsData.map((item) => item.author_id))]
 
-		const { data: authors } = await supabase
-			.from('profiles')
-			.select('*')
-			.in('id', authorIds)
+		const { data: authors } = await supabase.from('profiles').select('*').in('id', authorIds)
 
 		const authorsMap = authors
 			? authors.reduce(
@@ -110,9 +97,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 				<p className="text-red-600 text-sm">
 					Failed to load questions. Please try again later.
 					{questionsError instanceof Error && (
-						<span className="block mt-1 text-xs">
-							Error details: {questionsError.message}
-						</span>
+						<span className="block mt-1 text-xs">Error details: {questionsError.message}</span>
 					)}
 				</p>
 			</div>
@@ -123,10 +108,7 @@ export default async function QA({ projectId, currentUser }: QAProps) {
 		<Suspense
 			fallback={
 				<div className="flex justify-center items-center h-64">
-					<Loader2
-						className="h-8 w-8 animate-spin text-primary"
-						aria-hidden="true"
-					/>
+					<Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
 					<span className="ml-2">Loading questions...</span>
 				</div>
 			}

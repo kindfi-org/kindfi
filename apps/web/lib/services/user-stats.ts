@@ -27,25 +27,21 @@ export const getUserStats = async ({
 	supabase,
 	userId,
 }: GetUserStatsParams): Promise<UserStats> => {
-	const [contributionsResult, questsResult, streaksResult, referralsResult] =
-		await Promise.all([
-			supabase
-				.from('contributions')
-				.select('amount')
-				.eq('contributor_id', userId),
-			supabase
-				.from('user_quest_progress')
-				.select('id')
-				.eq('user_id', userId)
-				.eq('is_completed', true),
-			supabase
-				.from('user_streaks')
-				.select('current_streak')
-				.eq('user_id', userId)
-				.order('current_streak', { ascending: false })
-				.limit(1),
-			supabase.from('referral_records').select('id').eq('referrer_id', userId),
-		])
+	const [contributionsResult, questsResult, streaksResult, referralsResult] = await Promise.all([
+		supabase.from('contributions').select('amount').eq('contributor_id', userId),
+		supabase
+			.from('user_quest_progress')
+			.select('id')
+			.eq('user_id', userId)
+			.eq('is_completed', true),
+		supabase
+			.from('user_streaks')
+			.select('current_streak')
+			.eq('user_id', userId)
+			.order('current_streak', { ascending: false })
+			.limit(1),
+		supabase.from('referral_records').select('id').eq('referrer_id', userId),
+	])
 
 	if (contributionsResult.error) {
 		throw new Error(

@@ -57,9 +57,7 @@ async function pushHandler(request: NextRequest) {
 		})
 
 		if (!response.ok) {
-			throw new Error(
-				`Failed to send push notification: ${response.statusText}`,
-			)
+			throw new Error(`Failed to send push notification: ${response.statusText}`)
 		}
 
 		// Log successful push notification (non-blocking)
@@ -93,10 +91,7 @@ async function pushHandler(request: NextRequest) {
 			)
 		}
 
-		return NextResponse.json(
-			{ error: 'Failed to send push notification' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Failed to send push notification' }, { status: 500 })
 	}
 }
 

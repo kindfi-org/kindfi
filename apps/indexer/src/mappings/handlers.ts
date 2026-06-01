@@ -1,9 +1,5 @@
 import { Address, type Horizon, type xdr } from '@stellar/stellar-sdk'
-import type {
-	SorobanEvent,
-	StellarEffect,
-	StellarOperation,
-} from '@subql/types-stellar'
+import type { SorobanEvent, StellarEffect, StellarOperation } from '@subql/types-stellar'
 import { Account, Credit, Debit, Payment, Transfer } from '../types'
 
 type AccountCredited = any
@@ -31,15 +27,10 @@ export async function handleOperation(
 	await Promise.all([fromAccount.save(), toAccount.save(), payment.save()])
 }
 
-export async function handleCredit(
-	effect: StellarEffect<AccountCredited>,
-): Promise<void> {
+export async function handleCredit(effect: StellarEffect<AccountCredited>): Promise<void> {
 	console.info(`Indexing effect ${effect.id}, type: ${effect.type}`)
 
-	const account = await checkAndGetAccount(
-		effect.account,
-		effect.ledger?.sequence ?? 0,
-	)
+	const account = await checkAndGetAccount(effect.account, effect.ledger?.sequence ?? 0)
 
 	const credit = Credit.create({
 		id: effect.id,
@@ -51,15 +42,10 @@ export async function handleCredit(
 	await Promise.all([account.save(), credit.save()])
 }
 
-export async function handleDebit(
-	effect: StellarEffect<AccountDebited>,
-): Promise<void> {
+export async function handleDebit(effect: StellarEffect<AccountDebited>): Promise<void> {
 	console.info(`Indexing effect ${effect.id}, type: ${effect.type}`)
 
-	const account = await checkAndGetAccount(
-		effect.account,
-		effect.ledger?.sequence ?? 0,
-	)
+	const account = await checkAndGetAccount(effect.account, effect.ledger?.sequence ?? 0)
 
 	const debit = Debit.create({
 		id: effect.id,
@@ -72,9 +58,7 @@ export async function handleDebit(
 }
 
 export async function handleEvent(event: SorobanEvent): Promise<void> {
-	console.info(
-		`New transfer event found at block ${event.ledger?.sequence.toString() ?? ''}`,
-	)
+	console.info(`New transfer event found at block ${event.ledger?.sequence.toString() ?? ''}`)
 
 	// Get data from the event
 	// The transfer event has the following payload \[env, from, to\]
@@ -90,14 +74,8 @@ export async function handleEvent(event: SorobanEvent): Promise<void> {
 		console.info('decode address failed')
 	}
 
-	const fromAccount = await checkAndGetAccount(
-		decodeAddress(from),
-		event.ledger?.sequence ?? 0,
-	)
-	const toAccount = await checkAndGetAccount(
-		decodeAddress(to),
-		event.ledger?.sequence ?? 0,
-	)
+	const fromAccount = await checkAndGetAccount(decodeAddress(from), event.ledger?.sequence ?? 0)
+	const toAccount = await checkAndGetAccount(decodeAddress(to), event.ledger?.sequence ?? 0)
 
 	// Create the new transfer entity
 	const transfer = Transfer.create({
@@ -118,10 +96,7 @@ export async function handleEvent(event: SorobanEvent): Promise<void> {
 	await Promise.all([fromAccount.save(), toAccount.save(), transfer.save()])
 }
 
-async function checkAndGetAccount(
-	id: string,
-	ledgerSequence: number,
-): Promise<Account> {
+async function checkAndGetAccount(id: string, ledgerSequence: number): Promise<Account> {
 	let account = await Account.get(id.toLowerCase())
 	if (!account) {
 		// We couldn't find the account
@@ -136,12 +111,8 @@ async function checkAndGetAccount(
 // scValToNative not works, temp solution
 function decodeAddress(scVal: xdr.ScVal): string {
 	try {
-		return Address.account(
-			Buffer.from(scVal.address().accountId().ed25519() as any),
-		).toString()
+		return Address.account(Buffer.from(scVal.address().accountId().ed25519() as any)).toString()
 	} catch (_e) {
-		return Address.contract(
-			Buffer.from(scVal.address().contractId() as any),
-		).toString()
+		return Address.contract(Buffer.from(scVal.address().contractId() as any)).toString()
 	}
 }

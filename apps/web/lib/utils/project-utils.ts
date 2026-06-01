@@ -136,8 +136,7 @@ export function getSocialTypeFromUrl(url: string): string | null {
 	try {
 		const domain = new URL(url).hostname.toLowerCase()
 
-		if (domain.includes('x.com') || domain.includes('twitter.com'))
-			return 'twitter'
+		if (domain.includes('x.com') || domain.includes('twitter.com')) return 'twitter'
 		if (domain.includes('facebook.com')) return 'facebook'
 		if (domain.includes('instagram.com')) return 'instagram'
 		if (domain.includes('linkedin.com')) return 'linkedin'
@@ -164,9 +163,7 @@ export function getSocialTypeFromUrl(url: string): string | null {
  * @param project - A raw project object from the database
  * @returns A structured object suitable for pre-filling a project form
  */
-export function normalizeProjectToFormDefaults(
-	project: BasicProjectInfo,
-): CreateProjectFormData {
+export function normalizeProjectToFormDefaults(project: BasicProjectInfo): CreateProjectFormData {
 	return {
 		title: project.title ?? '',
 		description: project.description ?? '',
@@ -225,10 +222,7 @@ export function parseFormData(formData: FormData) {
  * @param socialLinks - Array of social media URLs
  * @returns A record of platform keys mapped to their respective URLs
  */
-export function buildSocialLinks(
-	website?: string,
-	socialLinks?: string[],
-): Record<string, string> {
+export function buildSocialLinks(website?: string, socialLinks?: string[]): Record<string, string> {
 	const links = Object.fromEntries(
 		(socialLinks || [])
 			.map((url: string) => {
@@ -319,9 +313,7 @@ export async function upsertTags(
 	supabase: TypedSupabaseClient,
 ): Promise<void> {
 	const tagNames = tags.map((t) => t.name.toLowerCase().trim())
-	const tagColors = Object.fromEntries(
-		tags.map((t) => [t.name.toLowerCase(), t.color]),
-	)
+	const tagColors = Object.fromEntries(tags.map((t) => [t.name.toLowerCase(), t.color]))
 
 	const { data: insertedTags, error: tagError } = await supabase
 		.from('project_tags')
@@ -336,14 +328,12 @@ export async function upsertTags(
 
 	if (tagError) throw new Error(tagError.message)
 
-	const { error: relError } = await supabase
-		.from('project_tag_relationships')
-		.insert(
-			insertedTags.map((tag) => ({
-				project_id: projectId,
-				tag_id: tag.id,
-			})),
-		)
+	const { error: relError } = await supabase.from('project_tag_relationships').insert(
+		insertedTags.map((tag) => ({
+			project_id: projectId,
+			tag_id: tag.id,
+		})),
+	)
 
 	if (relError) throw new Error(relError.message)
 }

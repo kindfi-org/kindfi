@@ -1,13 +1,4 @@
-import {
-	Apple,
-	Facebook,
-	Globe,
-	Mail,
-	Settings,
-	Shield,
-	Target,
-	Zap,
-} from 'lucide-react'
+import { Apple, Facebook, Globe, Mail, Settings, Shield, Target, Zap } from 'lucide-react'
 import type { Feature, SocialButtonProps, Statistics } from '~/lib/types'
 
 export const features: Feature[] = [
@@ -79,7 +70,6 @@ export const statistics: Statistics = {
 	},
 	capitalRaised: {
 		value: '$1.7B',
-		label:
-			'In regional funding can now be unlocked with blockchain transparency',
+		label: 'In regional funding can now be unlocked with blockchain transparency',
 	},
 }

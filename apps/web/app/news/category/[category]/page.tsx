@@ -24,9 +24,7 @@ export function generateStaticParams() {
 	return categories.map((category) => ({ category }))
 }
 
-export async function generateMetadata({
-	params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
 	const { category } = await params
 	const label = formatNewsCategoryLabel(decodeURIComponent(category))
 	return {
@@ -38,19 +36,14 @@ export async function generateMetadata({
 export default async function CategoryPage({ params }: PageProps) {
 	const { category } = await params
 	const decoded = decodeURIComponent(category)
-	const posts = readAllPosts().filter(
-		(p) => (p.category ?? 'general') === decoded,
-	)
+	const posts = readAllPosts().filter((p) => (p.category ?? 'general') === decoded)
 	if (posts.length === 0) return notFound()
 
 	const headingId = 'news-category-heading'
 	const label = formatNewsCategoryLabel(decoded)
 
 	return (
-		<main
-			className="min-h-screen bg-muted/30"
-			aria-label={`News in category: ${label}`}
-		>
+		<main className="min-h-screen bg-muted/30" aria-label={`News in category: ${label}`}>
 			<SectionContainer maxWidth="6xl" className="py-10 sm:py-14 lg:py-16">
 				<Link
 					href="/news"
@@ -68,8 +61,7 @@ export default async function CategoryPage({ params }: PageProps) {
 						<span className="gradient-text">{label}</span>
 					</h1>
 					<p className="mt-2 max-w-2xl text-muted-foreground">
-						{posts.length} {posts.length === 1 ? 'article' : 'articles'} in this
-						category.
+						{posts.length} {posts.length === 1 ? 'article' : 'articles'} in this category.
 					</p>
 				</header>
 

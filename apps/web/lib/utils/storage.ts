@@ -2,10 +2,7 @@ import type { TypedSupabaseClient } from '@packages/lib/types'
 import { logger } from '@/lib/logger'
 
 export interface StorageAdapter {
-	list(
-		folder: string,
-		opts?: { limit?: number },
-	): Promise<{ files: { name: string }[] }>
+	list(folder: string, opts?: { limit?: number }): Promise<{ files: { name: string }[] }>
 	remove(paths: string[]): Promise<void>
 	upload(
 		path: string,
@@ -47,10 +44,7 @@ export async function uploadFile({
 		try {
 			await deleteFolder(client, folder)
 		} catch (e) {
-			logger.warn(
-				`Failed to delete existing files in ${folder}:`,
-				(e as Error).message,
-			)
+			logger.warn(`Failed to delete existing files in ${folder}:`, (e as Error).message)
 		}
 	}
 
@@ -75,10 +69,7 @@ export async function uploadFile({
  * @returns The number of files removed
  * @throws If listing or deleting files fails
  */
-export async function deleteFolder(
-	client: StorageAdapter,
-	folder: string,
-): Promise<number> {
+export async function deleteFolder(client: StorageAdapter, folder: string): Promise<number> {
 	const { files } = await client.list(folder, { limit: 100 })
 	if (!files?.length) return 0
 
@@ -108,16 +99,12 @@ export function makeSupabaseAdapter(
 	return {
 		async list(prefix, options) {
 			const { data, error } = await bucketRef.list(prefix, options)
-			if (error)
-				throw new Error(`Failed to list files in ${bucket}: ${error.message}`)
+			if (error) throw new Error(`Failed to list files in ${bucket}: ${error.message}`)
 			return { files: data ?? [] }
 		},
 		async remove(paths) {
 			const { error } = await bucketRef.remove(paths)
-			if (error)
-				throw new Error(
-					`Failed to delete old files in ${bucket}: ${error.message}`,
-				)
+			if (error) throw new Error(`Failed to delete old files in ${bucket}: ${error.message}`)
 		},
 		async upload(path, data, options) {
 			const { error } = await bucketRef.upload(path, data, options)

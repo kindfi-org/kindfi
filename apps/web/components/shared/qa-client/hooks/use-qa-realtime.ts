@@ -11,17 +11,12 @@ interface UseQARealtimeOptions {
 	effectiveUserId?: string
 }
 
-export const useQARealtime = ({
-	projectId,
-	effectiveUserId,
-}: UseQARealtimeOptions) => {
+export const useQARealtime = ({ projectId, effectiveUserId }: UseQARealtimeOptions) => {
 	const queryClient = useQueryClient()
 	const [isRealtimeEnabled, setIsRealtimeEnabled] = useState(true)
 	const [realtimeActivity, setRealtimeActivity] = useState(false)
 	const [realtimeStatus, setRealtimeStatus] = useState<string | null>(null)
-	const subscriptionRef = useRef<ReturnType<
-		TypedSupabaseClient['channel']
-	> | null>(null)
+	const subscriptionRef = useRef<ReturnType<TypedSupabaseClient['channel']> | null>(null)
 
 	const showStatus = (message: string, duration = 3000) => {
 		setRealtimeStatus(message)
@@ -50,9 +45,7 @@ export const useQARealtime = ({
 						table: 'comments',
 						filter: `project_id=eq.${projectId}`,
 					},
-					(
-						payload: RealtimePostgresChangesPayload<TablesUpdate<'comments'>>,
-					) => {
+					(payload: RealtimePostgresChangesPayload<TablesUpdate<'comments'>>) => {
 						flashActivity()
 
 						queryClient.invalidateQueries({
@@ -70,15 +63,9 @@ export const useQARealtime = ({
 							const commentType = record?.type || 'comment'
 
 							if (record?.author_id !== effectiveUserId) {
-								showStatus(
-									`New ${commentType} added to the discussion`,
-									5000,
-								)
+								showStatus(`New ${commentType} added to the discussion`, 5000)
 							}
-						} else if (
-							eventType === 'UPDATE' &&
-							metadata.status === 'resolved'
-						) {
+						} else if (eventType === 'UPDATE' && metadata.status === 'resolved') {
 							showStatus('A question has been marked as resolved', 5000)
 						}
 					},
@@ -102,7 +89,7 @@ export const useQARealtime = ({
 
 		supabase.removeChannel(subscriptionRef.current)
 		subscriptionRef.current = null
-	}, [isRealtimeEnabled, projectId, queryClient, effectiveUserId])
+	}, [isRealtimeEnabled, projectId, queryClient, effectiveUserId, flashActivity, showStatus])
 
 	const handleManualRefresh = (refetchQuestions: () => void) => {
 		refetchQuestions()
@@ -112,11 +99,7 @@ export const useQARealtime = ({
 
 	const toggleRealtime = () => {
 		setIsRealtimeEnabled(!isRealtimeEnabled)
-		showStatus(
-			isRealtimeEnabled
-				? 'Real-time updates disabled'
-				: 'Real-time updates enabled',
-		)
+		showStatus(isRealtimeEnabled ? 'Real-time updates disabled' : 'Real-time updates enabled')
 	}
 
 	return {

@@ -22,5 +22,4 @@ export const mockStep5KycData = {
 }
 export const handleBack = () => {}
 export const handleSubmit = () => {}
-export const handleStepChange = (step: number) =>
-	alert(`Navigate to step: ${step}`)
+export const handleStepChange = (step: number) => alert(`Navigate to step: ${step}`)

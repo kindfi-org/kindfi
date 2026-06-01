@@ -1,19 +1,13 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { Building2 } from 'lucide-react'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { CSRFTokenField, Form } from '~/components/base/form'
 import { useCreateFoundation } from '~/hooks/contexts/use-create-foundation.context'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { BasicInfoSection } from './components/basic-info-section'
 import { FormFooter } from './components/form-footer'
 import { LogoSection } from './components/logo-section'
@@ -61,10 +55,7 @@ export function CreateFoundationForm() {
 		} catch (error) {
 			// Error is already handled in the hook with toast
 			// If it's a slug error, set it on the form field
-			if (
-				error instanceof Error &&
-				error.message.includes('foundation URL is already taken')
-			) {
+			if (error instanceof Error && error.message.includes('foundation URL is already taken')) {
 				form.setError('slug', {
 					type: 'manual',
 					message: error.message,
@@ -86,17 +77,12 @@ export function CreateFoundationForm() {
 						Foundation Information
 					</CardTitle>
 					<CardDescription>
-						Fill in the details about your foundation. All fields marked with *
-						are required.
+						Fill in the details about your foundation. All fields marked with * are required.
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="pt-6">
 					<Form {...form}>
-						<form
-							onSubmit={form.handleSubmit(onSubmit)}
-							className="space-y-8"
-							noValidate
-						>
+						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" noValidate>
 							<CSRFTokenField />
 
 							<BasicInfoSection />

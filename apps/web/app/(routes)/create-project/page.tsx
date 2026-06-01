@@ -1,11 +1,11 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { CreateProjectForm } from '~/components/sections/projects/create/create-project-form'
 import { UnauthorizedAccess } from '~/components/shared/unauthorized-access'
 import { CreateProjectProvider } from '~/hooks/contexts/use-create-project.context'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { logger } from '@/lib/logger'
 
 export default async function CreateProjectPage() {
 	const session = await getServerSession(nextAuthOption)
@@ -45,8 +45,7 @@ export default async function CreateProjectPage() {
 						Let&apos;s get your KindFi project started
 					</h1>
 					<p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-						Create a crowdfunding campaign and make an impact with the power of
-						Web3 transparency.
+						Create a crowdfunding campaign and make an impact with the power of Web3 transparency.
 					</p>
 				</div>
 

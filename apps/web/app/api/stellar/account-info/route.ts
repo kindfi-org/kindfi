@@ -2,9 +2,9 @@ import { appEnvConfig } from '@packages/lib/config'
 import { StellarPasskeyService } from '@packages/lib/stellar'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { accountInfoQuerySchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * GET /api/stellar/account-info

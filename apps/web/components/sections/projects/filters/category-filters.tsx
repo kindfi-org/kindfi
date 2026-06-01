@@ -57,22 +57,18 @@ export function CategoryFilters({
 			element.removeEventListener('scroll', onScroll)
 			if (resizeObserver) resizeObserver.disconnect()
 		}
-	}, [categories.length])
+	}, [])
 
 	return (
 		<motion.div
 			className={cn('relative flex flex-col', !isEmbedded && 'mb-6 space-y-3')}
 			initial={reducedMotion ? false : { opacity: 0, y: 8 }}
 			animate={reducedMotion ? false : { opacity: 1, y: 0 }}
-			transition={
-				reducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }
-			}
+			transition={reducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
 		>
 			{!isEmbedded ? (
 				<div className="flex items-center justify-between">
-					<h3 className="text-sm font-semibold text-slate-900">
-						{t('projects.filterByCategory')}
-					</h3>
+					<h3 className="text-sm font-semibold text-slate-900">{t('projects.filterByCategory')}</h3>
 					{selectedCategories.length > 0 ? (
 						<Button
 							variant="ghost"

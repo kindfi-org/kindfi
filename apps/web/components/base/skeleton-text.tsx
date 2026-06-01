@@ -15,11 +15,7 @@ export const SkeletonText: FC<SkeletonTextProps> = ({ width, className }) => {
 	return (
 		<div className="space-y-2">
 			{width.map((w) => (
-				<Skeleton
-					key={w}
-					className={cn('h-4', className)}
-					style={{ width: `${w}%` }}
-				/>
+				<Skeleton key={w} className={cn('h-4', className)} style={{ width: `${w}%` }} />
 			))}
 		</div>
 	)

@@ -19,9 +19,7 @@ interface FoundationDetailClientWrapperProps {
 	slug: string
 }
 
-export function FoundationDetailClientWrapper({
-	slug,
-}: FoundationDetailClientWrapperProps) {
+export function FoundationDetailClientWrapper({ slug }: FoundationDetailClientWrapperProps) {
 	const shouldReduceMotion = useReducedMotion()
 	const {
 		foundation,
@@ -59,10 +57,7 @@ export function FoundationDetailClientWrapper({
 				isFounder={isFounder}
 			/>
 
-			<FoundationMissionVision
-				foundation={foundation}
-				shouldReduceMotion={shouldReduceMotion}
-			/>
+			<FoundationMissionVision foundation={foundation} shouldReduceMotion={shouldReduceMotion} />
 
 			{foundation.milestones && foundation.milestones.length > 0 ? (
 				<FoundationMilestones
@@ -71,10 +66,7 @@ export function FoundationDetailClientWrapper({
 				/>
 			) : null}
 
-			<FoundationCampaigns
-				campaigns={campaignsWithSlug}
-				shouldReduceMotion={shouldReduceMotion}
-			/>
+			<FoundationCampaigns campaigns={campaignsWithSlug} shouldReduceMotion={shouldReduceMotion} />
 
 			<div className="grid gap-6 md:grid-cols-2">
 				{foundation.founder ? (

@@ -1,6 +1,6 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
-import type { TeamMember } from '~/lib/types/project/project-detail.types'
 import { logger } from '@/lib/logger'
+import type { TeamMember } from '~/lib/types/project/project-detail.types'
 
 export async function getProjectTeam(
 	client: TypedSupabaseClient,

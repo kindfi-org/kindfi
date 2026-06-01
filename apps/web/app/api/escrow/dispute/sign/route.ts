@@ -1,13 +1,13 @@
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import type { DisputeSignPayload } from '~/lib/types/escrow/escrow-payload.types'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateDisputeSign } from '~/lib/validators/dispute'
-import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -101,9 +101,7 @@ export async function POST(req: NextRequest) {
 				.eq('id', milestoneId)
 
 			if (milestoneUpdateError) {
-				throw new Error(
-					`Failed to mark milestone as disputed: ${milestoneUpdateError.message}`,
-				)
+				throw new Error(`Failed to mark milestone as disputed: ${milestoneUpdateError.message}`)
 			}
 
 			// Get escrow contract and milestone details for notifications in parallel
@@ -113,11 +111,7 @@ export async function POST(req: NextRequest) {
 					.select('service_provider_id, approver_id')
 					.eq('id', escrowId)
 					.single(),
-				supabase
-					.from('escrow_milestones')
-					.select('title')
-					.eq('id', milestoneId)
-					.single(),
+				supabase.from('escrow_milestones').select('title').eq('id', milestoneId).single(),
 			])
 
 			const { data: escrow, error: escrowError } = escrowResult
@@ -132,28 +126,23 @@ export async function POST(req: NextRequest) {
 
 			// Create notifications for all parties involved
 			if (escrow && milestone) {
-				const { error: notificationError } = await supabase
-					.from('notifications')
-					.insert([
-						{
-							user_id: escrow.service_provider_id,
-							milestone_id: milestoneId,
-							message: `A dispute has been filed for milestone: ${milestone.title}`,
-							type: 'DISPUTE_FILED',
-						},
-						{
-							user_id: escrow.approver_id,
-							milestone_id: milestoneId,
-							message: `A dispute has been filed for milestone: ${milestone.title}`,
-							type: 'DISPUTE_FILED',
-						},
-					])
+				const { error: notificationError } = await supabase.from('notifications').insert([
+					{
+						user_id: escrow.service_provider_id,
+						milestone_id: milestoneId,
+						message: `A dispute has been filed for milestone: ${milestone.title}`,
+						type: 'DISPUTE_FILED',
+					},
+					{
+						user_id: escrow.approver_id,
+						milestone_id: milestoneId,
+						message: `A dispute has been filed for milestone: ${milestone.title}`,
+						type: 'DISPUTE_FILED',
+					},
+				])
 
 				if (notificationError) {
-					logger.error(
-						'Error creating dispute filed notifications:',
-						notificationError,
-					)
+					logger.error('Error creating dispute filed notifications:', notificationError)
 					throw new Error(
 						`Failed to create dispute filed notifications: ${notificationError.message}`,
 					)
@@ -211,9 +200,7 @@ export async function POST(req: NextRequest) {
 				.eq('id', disputeId)
 
 			if (updateError) {
-				throw new Error(
-					`Failed to update dispute status: ${updateError.message}`,
-				)
+				throw new Error(`Failed to update dispute status: ${updateError.message}`)
 			}
 
 			// Get the dispute details
@@ -225,8 +212,7 @@ export async function POST(req: NextRequest) {
 
 			if (dispute) {
 				// Update the milestone status based on the resolution
-				const milestoneStatus =
-					resolution === 'APPROVED' ? 'completed' : 'rejected'
+				const milestoneStatus = resolution === 'APPROVED' ? 'completed' : 'rejected'
 
 				// Update milestone status with error handling
 				const { error: milestoneUpdateError } = await supabase
@@ -235,13 +221,8 @@ export async function POST(req: NextRequest) {
 					.eq('id', dispute.escrow_milestones.id)
 
 				if (milestoneUpdateError) {
-					logger.error(
-						'Error updating milestone status:',
-						milestoneUpdateError,
-					)
-					throw new Error(
-						`Failed to update milestone status: ${milestoneUpdateError.message}`,
-					)
+					logger.error('Error updating milestone status:', milestoneUpdateError)
+					throw new Error(`Failed to update milestone status: ${milestoneUpdateError.message}`)
 				}
 
 				// Get escrow contract details for notifications
@@ -253,35 +234,29 @@ export async function POST(req: NextRequest) {
 
 				if (escrowError) {
 					logger.error('Error fetching escrow contract:', escrowError)
-					throw new Error(
-						`Failed to fetch escrow contract: ${escrowError.message}`,
-					)
+					throw new Error(`Failed to fetch escrow contract: ${escrowError.message}`)
 				}
 
 				// Create notifications for all parties involved
 				if (escrow) {
-					const { error: notificationError } = await supabase
-						.from('notifications')
-						.insert([
-							{
-								user_id: escrow.service_provider_id,
-								review_id: disputeId,
-								message: `Dispute resolution: ${resolution}. ${resolutionNotes}`,
-								type: 'DISPUTE_RESOLVED',
-							},
-							{
-								user_id: escrow.approver_id,
-								review_id: disputeId,
-								message: `Dispute resolution: ${resolution}. ${resolutionNotes}`,
-								type: 'DISPUTE_RESOLVED',
-							},
-						])
+					const { error: notificationError } = await supabase.from('notifications').insert([
+						{
+							user_id: escrow.service_provider_id,
+							review_id: disputeId,
+							message: `Dispute resolution: ${resolution}. ${resolutionNotes}`,
+							type: 'DISPUTE_RESOLVED',
+						},
+						{
+							user_id: escrow.approver_id,
+							review_id: disputeId,
+							message: `Dispute resolution: ${resolution}. ${resolutionNotes}`,
+							type: 'DISPUTE_RESOLVED',
+						},
+					])
 
 					if (notificationError) {
 						logger.error('Error creating notifications:', notificationError)
-						throw new Error(
-							`Failed to create notifications: ${notificationError.message}`,
-						)
+						throw new Error(`Failed to create notifications: ${notificationError.message}`)
 					}
 				}
 			}
@@ -317,10 +292,7 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		return NextResponse.json(
-			{ error: 'Invalid transaction type' },
-			{ status: 400 },
-		)
+		return NextResponse.json({ error: 'Invalid transaction type' }, { status: 400 })
 	} catch (error) {
 		logger.error('Dispute Sign Error:', error)
 

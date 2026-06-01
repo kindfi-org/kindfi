@@ -60,8 +60,7 @@ export async function resolveProjectId(
 		if (finalProjectId && projectId !== finalProjectId) {
 			return {
 				success: false,
-				error:
-					'Project does not match escrow contract. Use the contractId from the project page.',
+				error: 'Project does not match escrow contract. Use the contractId from the project page.',
 				status: 400,
 			}
 		}
@@ -172,8 +171,9 @@ export async function sendContributionNotifications(
 
 		if (!project) return
 
-		const { sendContributionNotifications, sendCampaignGoalReachedNotifications } =
-			await import('~/lib/email/email-notification-service')
+		const { sendContributionNotifications, sendCampaignGoalReachedNotifications } = await import(
+			'~/lib/email/email-notification-service'
+		)
 
 		const formattedAmount = `$${input.amount.toLocaleString()}`
 
@@ -214,15 +214,9 @@ export async function triggerGamificationUpdates(
 
 		let userStellarAddress: string | null = null
 
-		if (
-			input.session?.device?.address &&
-			input.session.device.address !== '0x'
-		) {
+		if (input.session?.device?.address && input.session.device.address !== '0x') {
 			userStellarAddress = input.session.device.address
-		} else if (
-			input.session?.user?.device?.address &&
-			input.session.user.device.address !== '0x'
-		) {
+		} else if (input.session?.user?.device?.address && input.session.user.device.address !== '0x') {
 			userStellarAddress = input.session.user.device.address
 		}
 
@@ -246,12 +240,8 @@ export async function triggerGamificationUpdates(
 		}
 
 		const { POST: streaksPOST } = await import('~/app/api/streaks/route')
-		const { POST: referralsDonationPOST } = await import(
-			'~/app/api/referrals/donation/route'
-		)
-		const { POST: questsProgressPOST } = await import(
-			'~/app/api/quests/progress/route'
-		)
+		const { POST: referralsDonationPOST } = await import('~/app/api/referrals/donation/route')
+		const { POST: questsProgressPOST } = await import('~/app/api/quests/progress/route')
 
 		const createMockRequest = (body: Record<string, unknown>) => {
 			return new Request('http://localhost/api', {
@@ -335,12 +325,7 @@ export async function triggerGamificationUpdates(
 						.eq('contributor_id', userId)
 
 					progressValue = allContributions
-						? Math.floor(
-								allContributions.reduce(
-									(sum, c) => sum + Number(c.amount || 0),
-									0,
-								),
-							)
+						? Math.floor(allContributions.reduce((sum, c) => sum + Number(c.amount || 0), 0))
 						: Number(input.amount)
 				} else if (quest.quest_type === 'multi_region_donation') {
 					const { data: uniqueProjects } = await supabaseClient
@@ -352,9 +337,7 @@ export async function triggerGamificationUpdates(
 						uniqueProjects?.filter(
 							(p, index, self) =>
 								index ===
-								self.findIndex(
-									(pr) => pr.projects?.category_id === p.projects?.category_id,
-								),
+								self.findIndex((pr) => pr.projects?.category_id === p.projects?.category_id),
 						).length || 1
 				} else if (quest.quest_type === 'multi_category_donation') {
 					const { data: uniqueCategories } = await supabaseClient
@@ -366,9 +349,7 @@ export async function triggerGamificationUpdates(
 						uniqueCategories?.filter(
 							(p, index, self) =>
 								index ===
-								self.findIndex(
-									(pr) => pr.projects?.category_id === p.projects?.category_id,
-								),
+								self.findIndex((pr) => pr.projects?.category_id === p.projects?.category_id),
 						).length || 1
 				}
 
@@ -384,10 +365,7 @@ export async function triggerGamificationUpdates(
 						return response
 					})
 					.catch((error) => {
-						logger.error(
-							`[Gamification] Error updating quest ${quest.quest_id}:`,
-							error,
-						)
+						logger.error(`[Gamification] Error updating quest ${quest.quest_id}:`, error)
 					})
 			}
 		}
@@ -412,9 +390,7 @@ export async function triggerGamificationUpdates(
 					}),
 				)
 			} else {
-				const _evolveResponse = await nftEvolvePOST(
-					createMockRequest({ user_id: userId }),
-				)
+				const _evolveResponse = await nftEvolvePOST(createMockRequest({ user_id: userId }))
 			}
 		} catch (nftError) {
 			logger.error('[Gamification] NFT mint/evolve error:', nftError)

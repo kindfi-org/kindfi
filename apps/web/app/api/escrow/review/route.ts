@@ -1,14 +1,13 @@
-import { supabase } from '@packages/lib/supabase'
-import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import { supabase, supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { milestoneReviewSchema } from '~/lib/schemas/escrow.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
-import { milestoneReviewSchema } from '~/lib/schemas/escrow.schemas'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 async function reviewHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
@@ -28,14 +27,8 @@ async function reviewHandler(req: NextRequest) {
 			})
 			return validation.response
 		}
-		const {
-			milestoneId,
-			reviewerId,
-			status,
-			comments,
-			signer,
-			escrowContractAddress,
-		} = validation.data
+		const { milestoneId, reviewerId, status, comments, signer, escrowContractAddress } =
+			validation.data
 
 		// Verify authenticated user matches reviewerId
 		const {
@@ -65,17 +58,11 @@ async function reviewHandler(req: NextRequest) {
 		const { data: reviewer, error: reviewerError } = reviewerResult
 
 		if (milestoneError || !milestone) {
-			return NextResponse.json(
-				{ error: 'Milestone not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Milestone not found' }, { status: 404 })
 		}
 
 		if (reviewerError || !reviewer) {
-			return NextResponse.json(
-				{ error: 'Reviewer not authorized' },
-				{ status: 403 },
-			)
+			return NextResponse.json({ error: 'Reviewer not authorized' }, { status: 403 })
 		}
 
 		// * It shouldn't be "completed"... it should be "approved" however, there is an overlap with the old types with the new migrations.
@@ -127,13 +114,11 @@ async function reviewHandler(req: NextRequest) {
 		// }
 
 		// Step 6: Save Review Comments
-		const { error: commentError } = await supabase
-			.from('review_comments')
-			.insert({
-				milestone_id: milestoneId,
-				reviewer_id: reviewerId,
-				comments,
-			})
+		const { error: commentError } = await supabase.from('review_comments').insert({
+			milestone_id: milestoneId,
+			reviewer_id: reviewerId,
+			comments,
+		})
 
 		if (commentError) {
 			throw new AppError(
@@ -162,9 +147,7 @@ async function reviewHandler(req: NextRequest) {
 							milestoneIndex: milestone.order_index ?? 0,
 						}),
 					)
-					.catch((err) =>
-						logger.error('[Escrow review] Notification error:', err),
-					)
+					.catch((err) => logger.error('[Escrow review] Notification error:', err))
 			}
 		}
 
@@ -219,10 +202,7 @@ async function reviewHandler(req: NextRequest) {
 				durationMs: Date.now() - startTime,
 				metadata: { error: 'Invalid JSON format' },
 			})
-			return NextResponse.json(
-				{ error: 'Invalid JSON format in request body' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Invalid JSON format in request body' }, { status: 400 })
 		}
 
 		await auditLogger.log({

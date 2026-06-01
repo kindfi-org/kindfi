@@ -9,23 +9,16 @@ interface GuestAlertsProps {
 	onGoToLogin: () => void
 }
 
-export const GuestAlerts = ({
-	guestRemainingComments,
-	onGoToLogin,
-}: GuestAlertsProps) => {
+export const GuestAlerts = ({ guestRemainingComments, onGoToLogin }: GuestAlertsProps) => {
 	if (guestRemainingComments > 0) {
 		return (
-			<Alert
-				variant="default"
-				className="mb-6 text-blue-700 bg-blue-50 border-blue-200"
-			>
+			<Alert variant="default" className="mb-6 text-blue-700 bg-blue-50 border-blue-200">
 				<AlertTitle className="flex gap-2 items-center">
 					<UserIcon className="w-4 h-4" />
 					Guest Mode
 				</AlertTitle>
 				<AlertDescription>
-					You&apos;re currently browsing as a guest. You have{' '}
-					{guestRemainingComments} comment
+					You&apos;re currently browsing as a guest. You have {guestRemainingComments} comment
 					{guestRemainingComments !== 1 ? 's' : ''} remaining.
 					<Button
 						variant="link"
@@ -41,10 +34,7 @@ export const GuestAlerts = ({
 	}
 
 	return (
-		<Alert
-			variant="default"
-			className="mb-6 text-yellow-700 bg-yellow-50 border-yellow-200"
-		>
+		<Alert variant="default" className="mb-6 text-yellow-700 bg-yellow-50 border-yellow-200">
 			<AlertTitle className="flex gap-2 items-center">
 				<LogIn className="w-4 h-4" />
 				Comment Limit Reached

@@ -41,111 +41,103 @@ export function CategoryTicker({
 	)
 
 	const hasSelection = selectedCategories.length > 0
-	const shouldMarquee =
-		isMounted &&
-		!prefersReducedMotion &&
-		tickerCategories.length > 4
+	const shouldMarquee = isMounted && !prefersReducedMotion && tickerCategories.length > 4
 
 	return (
-		<div
-			className={cn(
-				'relative z-10 -mt-6 mb-8 sm:-mt-8 sm:mb-10',
-				className,
-			)}
-		>
+		<div className={cn('relative z-10 -mt-6 mb-8 sm:-mt-8 sm:mb-10', className)}>
 			<div className="relative overflow-hidden">
-					<div className="px-4 pt-5 sm:px-6 sm:pt-6">
-						<div className="mx-auto flex max-w-2xl flex-col items-center gap-2 text-center">
-							<p className="text-balance text-base font-medium leading-relaxed text-slate-800 sm:text-lg">
-								{hasSelection
-									? t('projects.categoryTickerFiltering')
-									: t('projects.categoryTickerMessage')}
-							</p>
-							<p className="text-sm leading-relaxed text-muted-foreground">
-								{hasSelection
-									? t('projects.categoryTickerFilteringHint')
-									: t('projects.categoryTickerSubline')}
-							</p>
-							{hasSelection ? (
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={onResetCategories}
-									className="mt-2 h-8 rounded-full px-4 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
-									aria-label={t('projects.clearCategories')}
-								>
-									<X className="mr-1.5 h-4 w-4" aria-hidden="true" />
-									{t('projects.clearCategories')}
-								</Button>
-							) : null}
+				<div className="px-4 pt-5 sm:px-6 sm:pt-6">
+					<div className="mx-auto flex max-w-2xl flex-col items-center gap-2 text-center">
+						<p className="text-balance text-base font-medium leading-relaxed text-slate-800 sm:text-lg">
+							{hasSelection
+								? t('projects.categoryTickerFiltering')
+								: t('projects.categoryTickerMessage')}
+						</p>
+						<p className="text-sm leading-relaxed text-muted-foreground">
+							{hasSelection
+								? t('projects.categoryTickerFilteringHint')
+								: t('projects.categoryTickerSubline')}
+						</p>
+						{hasSelection ? (
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={onResetCategories}
+								className="mt-2 h-8 rounded-full px-4 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900"
+								aria-label={t('projects.clearCategories')}
+							>
+								<X className="mr-1.5 h-4 w-4" aria-hidden="true" />
+								{t('projects.clearCategories')}
+							</Button>
+						) : null}
+					</div>
+				</div>
+
+				{/* biome-ignore lint/a11y/noStaticElementInteractions: pause marquee on hover and focus */}
+				<section
+					className="relative pb-4 pt-3 sm:pb-5 sm:pt-4"
+					onMouseEnter={() => setIsPaused(true)}
+					onMouseLeave={() => setIsPaused(false)}
+					onFocusCapture={() => setIsPaused(true)}
+					onBlurCapture={(event) => {
+						if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+							setIsPaused(false)
+						}
+					}}
+				>
+					<div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent sm:w-14" />
+					<div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent sm:w-14" />
+
+					{isLoading ? (
+						<div className="flex items-center gap-3 overflow-hidden px-4 sm:px-6">
+							{Array.from({ length: 8 }).map((_, index) => (
+								<div
+									key={index}
+									className="h-9 w-32 shrink-0 animate-pulse rounded-full bg-emerald-50"
+								/>
+							))}
 						</div>
-					</div>
-
-					<div
-						className="relative pb-4 pt-3 sm:pb-5 sm:pt-4"
-						onMouseEnter={() => setIsPaused(true)}
-						onMouseLeave={() => setIsPaused(false)}
-						onFocusCapture={() => setIsPaused(true)}
-						onBlurCapture={(event) => {
-							if (
-								!event.currentTarget.contains(event.relatedTarget as Node | null)
-							) {
-								setIsPaused(false)
-							}
-						}}
-					>
-						<div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent sm:w-14" />
-						<div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent sm:w-14" />
-
-						{isLoading ? (
-							<div className="flex items-center gap-3 overflow-hidden px-4 sm:px-6">
-								{Array.from({ length: 8 }).map((_, index) => (
-									// biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders
-									<div
-										key={index}
-										className="h-9 w-32 shrink-0 animate-pulse rounded-full bg-emerald-50"
-									/>
-								))}
-							</div>
-						) : tickerCategories.length === 0 ? (
-							<p className="px-4 py-2 text-center text-sm text-muted-foreground sm:px-6">
-								{t('projects.noCategories')}
-							</p>
-						) : shouldMarquee ? (
-							<div
-								className={cn(
-									'flex w-max items-center animate-category-ticker',
-									isPaused && '[animation-play-state:paused]',
-								)}
-								role="group"
-								aria-label={t('projects.filterByCategory')}
-							>
-								<TickerTrack
-									categories={tickerCategories}
-									selectedCategories={selectedCategories}
-									onCategoryToggle={onCategoryToggle}
-								/>
-								<TickerTrack
-									categories={tickerCategories}
-									selectedCategories={selectedCategories}
-									onCategoryToggle={onCategoryToggle}
-									ariaHidden
-								/>
-							</div>
-						) : (
-							<div
-								className="flex justify-center gap-2 overflow-x-auto px-4 py-1 no-scrollbar sm:gap-3 sm:px-6"
-								role="group"
-								aria-label={t('projects.filterByCategory')}
-							>
-								<TickerTrack
-									categories={tickerCategories}
-									selectedCategories={selectedCategories}
-									onCategoryToggle={onCategoryToggle}
-								/>
-							</div>
-						)}
-					</div>
+					) : tickerCategories.length === 0 ? (
+						<p className="px-4 py-2 text-center text-sm text-muted-foreground sm:px-6">
+							{t('projects.noCategories')}
+						</p>
+					) : shouldMarquee ? (
+						// biome-ignore lint/a11y/useSemanticElements: marquee track uses role="group" for screen readers
+						<div
+							className={cn(
+								'flex w-max items-center animate-category-ticker',
+								isPaused && '[animation-play-state:paused]',
+							)}
+							role="group"
+							aria-label={t('projects.filterByCategory')}
+						>
+							<TickerTrack
+								categories={tickerCategories}
+								selectedCategories={selectedCategories}
+								onCategoryToggle={onCategoryToggle}
+							/>
+							<TickerTrack
+								categories={tickerCategories}
+								selectedCategories={selectedCategories}
+								onCategoryToggle={onCategoryToggle}
+								ariaHidden
+							/>
+						</div>
+					) : (
+						// biome-ignore lint/a11y/useSemanticElements: category filter group uses role="group" for screen readers
+						<div
+							className="flex justify-center gap-2 overflow-x-auto px-4 py-1 no-scrollbar sm:gap-3 sm:px-6"
+							role="group"
+							aria-label={t('projects.filterByCategory')}
+						>
+							<TickerTrack
+								categories={tickerCategories}
+								selectedCategories={selectedCategories}
+								onCategoryToggle={onCategoryToggle}
+							/>
+						</div>
+					)}
+				</section>
 			</div>
 		</div>
 	)
@@ -185,9 +177,7 @@ function TickerTrack({
 						<CategoryBadge
 							category={category}
 							selected={selected}
-							onClick={
-								ariaHidden ? undefined : () => onCategoryToggle(slug)
-							}
+							onClick={ariaHidden ? undefined : () => onCategoryToggle(slug)}
 							className="shadow-sm"
 						/>
 					</div>

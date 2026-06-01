@@ -3,18 +3,21 @@ import type { AppEnvInterface } from '../types'
 
 // Dynamic import for Channels client to handle missing package gracefully
 let ChannelsClientImpl: any
-let ChannelsClientType: any
-let ChannelsFuncAuthRequestType: any
-let ChannelsTransactionResponseType: any
+let _ChannelsClientType: any
+let _ChannelsFuncAuthRequestType: any
+let _ChannelsTransactionResponseType: any
 
 try {
 	const channelsModule = require('@openzeppelin/relayer-plugin-channels')
 	ChannelsClientImpl = channelsModule.ChannelsClient
-	ChannelsClientType = channelsModule.ChannelsClient
-	ChannelsFuncAuthRequestType = channelsModule.ChannelsFuncAuthRequest
-	ChannelsTransactionResponseType = channelsModule.ChannelsTransactionResponse
+	_ChannelsClientType = channelsModule.ChannelsClient
+	_ChannelsFuncAuthRequestType = channelsModule.ChannelsFuncAuthRequest
+	_ChannelsTransactionResponseType = channelsModule.ChannelsTransactionResponse
 } catch (error) {
-	logger.warn('Package @openzeppelin/relayer-plugin-channels not installed. Install it with: bun add "@openzeppelin/relayer-plugin-channels"', error instanceof Error ? error : undefined)
+	logger.warn(
+		'Package @openzeppelin/relayer-plugin-channels not installed. Install it with: bun add "@openzeppelin/relayer-plugin-channels"',
+		error instanceof Error ? error : undefined,
+	)
 }
 
 export type ChannelsFuncAuthRequest = {
@@ -59,7 +62,7 @@ export class ChannelsClientService {
 		this.apiKey = process.env.CHANNELS_API_KEY || ''
 
 		if (!this.apiKey) {
-			logger.warn('CHANNELS_API_KEY not set', { setupUrl: this.baseUrl + '/gen' })
+			logger.warn('CHANNELS_API_KEY not set', { setupUrl: `${this.baseUrl}/gen` })
 		}
 
 		// Initialize Channels client if package is available
@@ -87,18 +90,17 @@ export class ChannelsClientService {
 		}
 
 		if (!this.apiKey) {
-			throw new Error(
-				'CHANNELS_API_KEY not set. Get your API key from: ' +
-					this.baseUrl +
-					'/gen',
-			)
+			throw new Error(`CHANNELS_API_KEY not set. Get your API key from: ${this.baseUrl}/gen`)
 		}
 
 		try {
 			const response = await this.client.submitSorobanTransaction(request)
 			return response
 		} catch (error) {
-			logger.error('Channels transaction submission failed', error instanceof Error ? error : new Error(String(error)))
+			logger.error(
+				'Channels transaction submission failed',
+				error instanceof Error ? error : new Error(String(error)),
+			)
 			throw error
 		}
 	}

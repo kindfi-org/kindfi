@@ -11,11 +11,7 @@ import {
 	CommandItem,
 	CommandList,
 } from '~/components/base/command'
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '~/components/base/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/base/popover'
 import { cn } from '~/lib/utils'
 import type { ProjectSummary } from './types'
 
@@ -26,12 +22,7 @@ interface ProjectPickerProps {
 	disabled?: boolean
 }
 
-export const ProjectPicker = ({
-	projects,
-	selectedId,
-	onSelect,
-	disabled,
-}: ProjectPickerProps) => {
+export const ProjectPicker = ({ projects, selectedId, onSelect, disabled }: ProjectPickerProps) => {
 	const [open, setOpen] = useState(false)
 	const selected = projects.find((p) => p.id === selectedId)
 
@@ -48,16 +39,11 @@ export const ProjectPicker = ({
 						!selected && 'text-muted-foreground',
 					)}
 				>
-					<span className="truncate">
-						{selected ? selected.title : 'Select a project…'}
-					</span>
+					<span className="truncate">{selected ? selected.title : 'Select a project…'}</span>
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</button>
 			</PopoverTrigger>
-			<PopoverContent
-				className="w-[--radix-popover-trigger-width] p-0"
-				align="start"
-			>
+			<PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
 				<Command>
 					<CommandInput placeholder="Search projects…" className="h-9" />
 					<CommandList>
@@ -85,18 +71,14 @@ export const ProjectPicker = ({
 										<div className="h-6 w-6 rounded bg-muted shrink-0" />
 									)}
 									<div className="flex-1 min-w-0">
-										<span className="block truncate font-medium">
-											{project.title}
-										</span>
+										<span className="block truncate font-medium">{project.title}</span>
 										{project.category && (
 											<span className="block text-xs text-muted-foreground truncate">
 												{project.category.name} · /{project.slug}
 											</span>
 										)}
 									</div>
-									{selectedId === project.id && (
-										<Check className="h-4 w-4 shrink-0 text-primary" />
-									)}
+									{selectedId === project.id && <Check className="h-4 w-4 shrink-0 text-primary" />}
 								</CommandItem>
 							))}
 						</CommandGroup>

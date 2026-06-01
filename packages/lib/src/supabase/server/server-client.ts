@@ -34,59 +34,53 @@ export async function createSupabaseServerClient(supabaseServerClientProps?: {
 	// Otherwise, if jwt is provided, inject it as a cookie instead to avoid the error
 	const resolvedAccessToken = accessToken ? accessToken : undefined
 
-	return createServerClient<Database>(
-		appConfig.database.url,
-		appConfig.database.anonKey,
-		{
-			...(resolvedAccessToken
-				? {
-						accessToken: resolvedAccessToken,
-					}
-				: {}),
-			cookies: {
-				getAll() {
-					const allCookies = cookieStore.getAll()
+	return createServerClient<Database>(appConfig.database.url, appConfig.database.anonKey, {
+		...(resolvedAccessToken
+			? {
+					accessToken: resolvedAccessToken,
+				}
+			: {}),
+		cookies: {
+			getAll() {
+				const allCookies = cookieStore.getAll()
 
-					// If a custom JWT is provided and no accessToken function exists,
-					// inject it as a Supabase auth cookie to avoid the onAuthStateChange error
-					// This allows RLS policies to identify the user via current_auth_user_id()
-					if (jwt && !accessToken) {
-						const existingAuthCookie = allCookies.find(
-							(cookie) => cookie.name === authCookieName,
-						)
+				// If a custom JWT is provided and no accessToken function exists,
+				// inject it as a Supabase auth cookie to avoid the onAuthStateChange error
+				// This allows RLS policies to identify the user via current_auth_user_id()
+				if (jwt && !accessToken) {
+					const existingAuthCookie = allCookies.find((cookie) => cookie.name === authCookieName)
 
-						// Only inject if not already present
-						if (!existingAuthCookie) {
-							return [
-								...allCookies,
-								{
-									name: authCookieName,
-									value: JSON.stringify({
-										access_token: jwt,
-										refresh_token: '',
-										expires_at: Math.floor(Date.now() / 1000) + 3600,
-										token_type: 'bearer',
-										user: {},
-									}),
-								},
-							]
-						}
+					// Only inject if not already present
+					if (!existingAuthCookie) {
+						return [
+							...allCookies,
+							{
+								name: authCookieName,
+								value: JSON.stringify({
+									access_token: jwt,
+									refresh_token: '',
+									expires_at: Math.floor(Date.now() / 1000) + 3600,
+									token_type: 'bearer',
+									user: {},
+								}),
+							},
+						]
 					}
+				}
 
-					return allCookies
-				},
-				setAll(cookiesToSet) {
-					try {
-						cookiesToSet.forEach(({ name, value, options }) => {
-							cookieStore.set(name, value, options)
-						})
-					} catch (_error) {
-						// The `set` method was called from a Server Component.
-						// This can be ignored if you have middleware refreshing
-						// user sessions.
-					}
-				},
+				return allCookies
+			},
+			setAll(cookiesToSet) {
+				try {
+					cookiesToSet.forEach(({ name, value, options }) => {
+						cookieStore.set(name, value, options)
+					})
+				} catch (_error) {
+					// The `set` method was called from a Server Component.
+					// This can be ignored if you have middleware refreshing
+					// user sessions.
+				}
 			},
 		},
-	)
+	})
 }

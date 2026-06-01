@@ -15,10 +15,7 @@ interface FoundationFounderCardProps {
 	shouldReduceMotion: boolean | null
 }
 
-export function FoundationFounderCard({
-	founder,
-	shouldReduceMotion,
-}: FoundationFounderCardProps) {
+export function FoundationFounderCard({ founder, shouldReduceMotion }: FoundationFounderCardProps) {
 	return (
 		<motion.div
 			initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
@@ -35,23 +32,11 @@ export function FoundationFounderCard({
 									href={`/u/${founder.slug}`}
 									className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-border transition-shadow hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 								>
-									<Image
-										src={founder.imageUrl}
-										alt=""
-										fill
-										className="object-cover"
-										sizes="80px"
-									/>
+									<Image src={founder.imageUrl} alt="" fill className="object-cover" sizes="80px" />
 								</Link>
 							) : (
 								<div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-border">
-									<Image
-										src={founder.imageUrl}
-										alt=""
-										fill
-										className="object-cover"
-										sizes="80px"
-									/>
+									<Image src={founder.imageUrl} alt="" fill className="object-cover" sizes="80px" />
 								</div>
 							)
 						) : (
@@ -66,14 +51,10 @@ export function FoundationFounderCard({
 									{founder.displayName || 'Anonymous'}
 								</Link>
 							) : (
-								<p className="mb-2 text-xl font-bold">
-									{founder.displayName || 'Anonymous'}
-								</p>
+								<p className="mb-2 text-xl font-bold">{founder.displayName || 'Anonymous'}</p>
 							)}
 							{founder.bio && (
-								<p className="text-sm leading-relaxed text-muted-foreground">
-									{founder.bio}
-								</p>
+								<p className="text-sm leading-relaxed text-muted-foreground">{founder.bio}</p>
 							)}
 						</div>
 					</div>

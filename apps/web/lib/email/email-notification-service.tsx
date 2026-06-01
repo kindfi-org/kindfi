@@ -1,6 +1,7 @@
-import type { ReactElement } from 'react'
 import { appEnvConfig } from '@packages/lib/config'
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import type { ReactElement } from 'react'
+import { logger } from '@/lib/logger'
 import { getResendClient } from './resend-client'
 import { CampaignGoalReachedEmail } from './templates/campaign-goal-reached-email'
 import { ContributionConfirmedEmail } from './templates/contribution-confirmed-email'
@@ -9,7 +10,6 @@ import { FundsReleasedEmail } from './templates/funds-released-email'
 import { MilestoneApprovedEmail } from './templates/milestone-approved-email'
 import { NewProjectEmail } from './templates/new-project-email'
 import { WelcomeNewUserEmail } from './templates/welcome-new-user-email'
-import { logger } from '@/lib/logger'
 
 const appConfig = appEnvConfig('web')
 
@@ -284,12 +284,7 @@ export async function sendWelcomeEmail({
 	await sendEmail({
 		to: user.email,
 		subject: `Welcome to KindFi, ${displayName}!`,
-		react: (
-			<WelcomeNewUserEmail
-				displayName={displayName}
-				hasKyc={hasKyc}
-			/>
-		),
+		react: <WelcomeNewUserEmail displayName={displayName} hasKyc={hasKyc} />,
 	})
 
 	await createInAppNotification({
@@ -442,9 +437,7 @@ export async function sendCampaignGoalReachedNotifications({
 
 	if (!contributors?.length) return
 
-	const uniqueContributorIds = [
-		...new Set(contributors.map((c) => c.contributor_id)),
-	]
+	const uniqueContributorIds = [...new Set(contributors.map((c) => c.contributor_id))]
 
 	for (const contributorId of uniqueContributorIds) {
 		const contributor = await getUserEmailAndName(contributorId)

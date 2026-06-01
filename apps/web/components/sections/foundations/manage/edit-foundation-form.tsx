@@ -1,28 +1,19 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { logger } from '@/lib/logger'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { CSRFTokenField, Form } from '~/components/base/form'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { BasicInfoSection } from '../create/components/basic-info-section'
 import { FormFooter } from '../create/components/form-footer'
 import { LogoSection } from '../create/components/logo-section'
 import { MissionVisionSection } from '../create/components/mission-vision-section'
 import { SocialLinksSection } from '../create/components/social-links-section'
-import { logger } from '@/lib/logger'
-import {
-	type CreateFoundationFormData,
-	createFoundationSchema,
-} from '../create/types'
+import { type CreateFoundationFormData, createFoundationSchema } from '../create/types'
 
 export type EditFoundationFormFoundation = {
 	name: string
@@ -41,10 +32,7 @@ type EditFoundationFormProps = {
 	foundation: EditFoundationFormFoundation
 }
 
-export function EditFoundationForm({
-	slug,
-	foundation,
-}: EditFoundationFormProps) {
+export function EditFoundationForm({ slug, foundation }: EditFoundationFormProps) {
 	const router = useRouter()
 	const [isPending, startTransition] = useTransition()
 
@@ -72,13 +60,9 @@ export function EditFoundationForm({
 				formDataToSubmit.append('foundedYear', String(data.foundedYear))
 				if (data.mission) formDataToSubmit.append('mission', data.mission)
 				if (data.vision) formDataToSubmit.append('vision', data.vision)
-				if (data.websiteUrl)
-					formDataToSubmit.append('websiteUrl', data.websiteUrl)
+				if (data.websiteUrl) formDataToSubmit.append('websiteUrl', data.websiteUrl)
 				if (data.socialLinks && Object.keys(data.socialLinks).length > 0) {
-					formDataToSubmit.append(
-						'socialLinks',
-						JSON.stringify(data.socialLinks),
-					)
+					formDataToSubmit.append('socialLinks', JSON.stringify(data.socialLinks))
 				}
 				if (data.logo instanceof File) {
 					formDataToSubmit.append('logo', data.logo)
@@ -101,9 +85,7 @@ export function EditFoundationForm({
 			} catch (error) {
 				logger.error('Edit foundation error:', error)
 				toast.error(
-					error instanceof Error
-						? error.message
-						: 'Failed to update foundation. Please try again.',
+					error instanceof Error ? error.message : 'Failed to update foundation. Please try again.',
 				)
 			}
 		})
@@ -114,17 +96,12 @@ export function EditFoundationForm({
 			<CardHeader className="border-b">
 				<CardTitle className="text-2xl font-bold">Edit foundation</CardTitle>
 				<CardDescription>
-					Update name, description, mission, vision, and logo. The foundation
-					URL cannot be changed.
+					Update name, description, mission, vision, and logo. The foundation URL cannot be changed.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="pt-6">
 				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit(onSubmit)}
-						className="space-y-8"
-						noValidate
-					>
+					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" noValidate>
 						<CSRFTokenField />
 						<BasicInfoSection slugReadOnly />
 						<MissionVisionSection />

@@ -27,9 +27,7 @@ export function CommentThread({
 }: CommentThreadProps) {
 	// Filter comments to only include those that are direct replies to the parentId
 	// If parentId is undefined, get top-level comments (those without a parentId)
-	const filteredComments = comments.filter(
-		(comment) => comment.parentId === parentId,
-	)
+	const filteredComments = comments.filter((comment) => comment.parentId === parentId)
 
 	// Sort by date (newest first)
 	const sortedComments = [...filteredComments].sort(
@@ -66,13 +64,7 @@ interface CommentItemProps {
 	onAddReply?: (parentId: string, content: string) => void
 }
 
-function CommentItem({
-	comment,
-	allComments,
-	level,
-	canReply,
-	onAddReply,
-}: CommentItemProps) {
+function CommentItem({ comment, allComments, level, canReply, onAddReply }: CommentItemProps) {
 	const [isExpanded, setIsExpanded] = useState(false)
 	const [showReplyForm, setShowReplyForm] = useState(false)
 
@@ -126,9 +118,7 @@ function CommentItem({
 					</div>
 				</div>
 
-				<div className="text-sm mb-3 break-words max-w-full">
-					{comment.content}
-				</div>
+				<div className="text-sm mb-3 break-words max-w-full">{comment.content}</div>
 
 				<div className="flex items-center gap-3 flex-wrap">
 					<LikeButton initialCount={comment.like || 0} commentId={comment.id} />
@@ -154,11 +144,7 @@ function CommentItem({
 							onClick={() => setIsExpanded(!isExpanded)}
 							aria-expanded={isExpanded}
 							aria-controls={`replies-${comment.id}`}
-							aria-label={
-								isExpanded
-									? `Hide ${replyCount} replies`
-									: `View ${replyCount} replies`
-							}
+							aria-label={isExpanded ? `Hide ${replyCount} replies` : `View ${replyCount} replies`}
 						>
 							{isExpanded ? (
 								<>

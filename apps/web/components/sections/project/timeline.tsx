@@ -47,9 +47,7 @@ const Timeline: React.FC<TimelineProps> = ({ events }) => {
 								<FaClock className="w-6 h-6 text-gray-400 mr-4" />
 							)}
 							<div>
-								<p className="text-sm font-medium text-gray-900">
-									{event.title}
-								</p>
+								<p className="text-sm font-medium text-gray-900">{event.title}</p>
 								<p className="text-sm text-gray-500">{event.date}</p>
 							</div>
 						</div>

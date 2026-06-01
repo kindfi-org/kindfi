@@ -28,7 +28,10 @@ export const processFile = async (file: File): Promise<ProcessFileResult> => {
 
 		extractedText = result.data.text
 	} catch (error) {
-		logger.error('Error processing document', error instanceof Error ? error : new Error(String(error)))
+		logger.error(
+			'Error processing document',
+			error instanceof Error ? error : new Error(String(error)),
+		)
 		errorMessage = 'Error processing document'
 	}
 

@@ -17,9 +17,8 @@ export function NFTAchievement() {
 				<span className="gradient-text !bg-gradient-to-r"> Badges</span>
 			</h2>
 			<p className="text-center text-lg text-gray-700 max-w-xl mx-auto">
-				Earn these NFT badges as you complete modules. These badges are stored
-				on the Stellar blockchain and serve as proof of your blockchain
-				proficiency.
+				Earn these NFT badges as you complete modules. These badges are stored on the Stellar
+				blockchain and serve as proof of your blockchain proficiency.
 			</p>
 
 			<div className="flex flex-col sm:flex-row justify-center gap-4 pt-2 w-full sm:w-auto">

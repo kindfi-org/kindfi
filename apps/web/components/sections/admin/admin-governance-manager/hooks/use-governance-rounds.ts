@@ -12,9 +12,7 @@ export const useGovernanceRounds = () => {
 	})
 
 	const rounds = query.data?.data ?? []
-	const activeCount = rounds.filter(
-		(r) => r.status === 'active' || r.status === 'upcoming',
-	).length
+	const activeCount = rounds.filter((r) => r.status === 'active' || r.status === 'upcoming').length
 	const endedCount = rounds.filter((r) => r.status === 'ended').length
 
 	return {

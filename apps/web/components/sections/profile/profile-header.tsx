@@ -24,7 +24,10 @@ interface ProfileHeaderProps {
 	onOpenSettings?: () => void
 }
 
-const ROLE_LABEL_KEYS: Record<string, 'profile.roleCreator' | 'profile.roleDonor' | 'profile.roleAdmin'> = {
+const ROLE_LABEL_KEYS: Record<
+	string,
+	'profile.roleCreator' | 'profile.roleDonor' | 'profile.roleAdmin'
+> = {
 	creator: 'profile.roleCreator',
 	donor: 'profile.roleDonor',
 	admin: 'profile.roleAdmin',

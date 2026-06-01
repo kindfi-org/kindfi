@@ -13,10 +13,7 @@ import type {
  * Check if a user can mark an answer as official
  * Must be a project team member (admin/editor) or project owner
  */
-export function canMarkAnswerOfficial(
-	userRole: UserRole | null,
-	_projectId: string,
-): boolean {
+export function canMarkAnswerOfficial(userRole: UserRole | null, _projectId: string): boolean {
 	if (!userRole) return false
 
 	return (
@@ -62,10 +59,7 @@ export function canCreateQAContent(currentUserId: string | null): boolean {
 /**
  * Check if a user can edit their own content
  */
-export function canEditOwnContent(
-	authorId: string,
-	currentUserId: string | null,
-): boolean {
+export function canEditOwnContent(authorId: string, currentUserId: string | null): boolean {
 	return currentUserId !== null && authorId === currentUserId
 }
 
@@ -120,9 +114,7 @@ export function getUserRole(
  * Helper to determine if an answer is marked as official
  */
 
-export function isOfficialAnswer(
-	metadata: AnswerMetadata | undefined,
-): boolean {
+export function isOfficialAnswer(metadata: AnswerMetadata | undefined): boolean {
 	return metadata?.is_official === true
 }
 
@@ -139,30 +131,29 @@ export function getQuestionStatus(
 /**
  * Helper to check if a question is resolved
  */
-export function isQuestionResolved(
-	metadata: QuestionMetadata | undefined,
-): boolean {
+export function isQuestionResolved(metadata: QuestionMetadata | undefined): boolean {
 	return getQuestionStatus(metadata) === 'resolved'
 }
 
 /**
  * Helper to validate metadata structure for different comment types
  */
-export function validateMetadata(
-	type: Enums<'comment_type'>,
-	metadata: any,
-): boolean {
+export function validateMetadata(type: Enums<'comment_type'>, metadata: unknown): boolean {
+	if (!metadata) {
+		return type === 'question' || type === 'answer' || type === 'comment'
+	}
+
+	if (typeof metadata !== 'object') {
+		return false
+	}
+
+	const record = metadata as Record<string, unknown>
+
 	switch (type) {
 		case 'question':
-			return (
-				!metadata || ['new', 'answered', 'resolved'].includes(metadata.status)
-			)
+			return ['new', 'answered', 'resolved'].includes(String(record.status ?? ''))
 		case 'answer':
-			return (
-				!metadata ||
-				typeof metadata.is_official === 'boolean' ||
-				metadata.is_official === undefined
-			)
+			return record.is_official === undefined || typeof record.is_official === 'boolean'
 		case 'comment':
 			return true
 		default:

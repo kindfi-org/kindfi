@@ -1,16 +1,14 @@
 import type { AuthError } from '@supabase/supabase-js'
+import { logger } from '@/lib/logger'
 import { ERROR_MESSAGES } from '../constants/error'
 import type { AuthResponse } from '../types/auth'
-import { logger } from '@/lib/logger'
 
 export function handleClientAuthError(error: AuthError): AuthResponse {
-	const errorKey = Object.keys(ERROR_MESSAGES).find((key) =>
-		error.message.includes(key),
-	) as keyof typeof ERROR_MESSAGES | undefined
+	const errorKey = Object.keys(ERROR_MESSAGES).find((key) => error.message.includes(key)) as
+		| keyof typeof ERROR_MESSAGES
+		| undefined
 
-	const message = errorKey
-		? ERROR_MESSAGES[errorKey]
-		: error.message || 'An unknown error occurred'
+	const message = errorKey ? ERROR_MESSAGES[errorKey] : error.message || 'An unknown error occurred'
 
 	logger.error('[Auth Error]', {
 		eventType: 'AUTH_ERROR',

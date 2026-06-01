@@ -2,15 +2,13 @@ import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardFooter } from '~/components/base/card'
 import { useI18n } from '~/lib/i18n'
-import { cn } from '~/lib/utils'
 import { ModelVariant } from '~/lib/types'
+import { cn } from '~/lib/utils'
 
 const variantStyles = {
-	[ModelVariant.SECURE]:
-		'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
+	[ModelVariant.SECURE]: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
 	[ModelVariant.SOCIAL]: 'bg-blue-50 hover:bg-blue-100 border-blue-200',
-	[ModelVariant.BLOCKCHAIN]:
-		'bg-purple-50 hover:bg-purple-100 border-purple-200',
+	[ModelVariant.BLOCKCHAIN]: 'bg-purple-50 hover:bg-purple-100 border-purple-200',
 }
 
 interface InvestmentModelCardProps {
@@ -47,10 +45,7 @@ export const InvestmentModelCard = ({
 
 				<div className="space-y-3">
 					{capabilities?.map((capability) => (
-						<div
-							key={capability.id}
-							className="flex items-center text-sm text-gray-600"
-						>
+						<div key={capability.id} className="flex items-center text-sm text-gray-600">
 							<Check className="w-4 h-4 mr-2 text-green-600" />
 							{capability.text}
 						</div>

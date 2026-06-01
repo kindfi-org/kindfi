@@ -1,8 +1,8 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { devicesSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * POST /api/stellar/devices
@@ -19,16 +19,13 @@ export async function POST(req: NextRequest) {
 
 		// Call kyc-server API (recommended for now)
 		const kycServerUrl = process.env.KYC_SERVER_URL || 'http://localhost:3001'
-		const response = await fetch(
-			`${kycServerUrl}/api/stellar/execute-transaction`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ address, operation, signature }),
+		const response = await fetch(`${kycServerUrl}/api/stellar/execute-transaction`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
 			},
-		)
+			body: JSON.stringify({ address, operation, signature }),
+		})
 
 		if (!response.ok) {
 			const errorData = await response.json()

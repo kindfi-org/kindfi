@@ -29,26 +29,20 @@ export function FoundationMilestones({
 		>
 			<div className="mb-6 flex items-center gap-3">
 				<TrendingUp className="h-6 w-6 text-primary" aria-hidden="true" />
-				<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-					Key milestones
-				</h2>
+				<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Key milestones</h2>
 			</div>
 			<div className="grid gap-4 md:grid-cols-2">
 				{milestones.map((milestone, index) => (
 					<motion.div
 						key={milestone.id}
-						initial={
-							shouldReduceMotion ? { opacity: 1 } : { opacity: 0, x: -20 }
-						}
+						initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, x: -20 }}
 						animate={{ opacity: 1, x: 0 }}
 						transition={{ delay: shouldReduceMotion ? 0 : 0.1 * index }}
 					>
 						<Card className="h-full border-l-4 border-l-primary transition-shadow hover:shadow-md">
 							<CardContent className="p-6">
 								<div className="mb-3 flex items-start justify-between gap-4">
-									<h3 className="flex-1 text-lg font-semibold">
-										{milestone.title}
-									</h3>
+									<h3 className="flex-1 text-lg font-semibold">{milestone.title}</h3>
 									<Badge variant="outline" className="shrink-0">
 										{new Intl.DateTimeFormat('en-US', {
 											year: 'numeric',
@@ -58,9 +52,7 @@ export function FoundationMilestones({
 									</Badge>
 								</div>
 								{milestone.description && (
-									<p className="mb-3 text-sm text-muted-foreground">
-										{milestone.description}
-									</p>
+									<p className="mb-3 text-sm text-muted-foreground">{milestone.description}</p>
 								)}
 								{milestone.impactMetric && (
 									<div className="flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">

@@ -116,10 +116,7 @@ export function TagInput({
 		onChange(tags.filter((_, i) => i !== indexToRemove))
 
 		// Reset color error if removed tag had the conflicting color
-		if (
-			colorError &&
-			removed.color.toLowerCase() === selectedColor.toLowerCase()
-		) {
+		if (colorError && removed.color.toLowerCase() === selectedColor.toLowerCase()) {
 			setColorError('')
 		}
 	}
@@ -149,9 +146,7 @@ export function TagInput({
 
 	const handleSelectTag = (tag: Tag) => {
 		const normalizedName = tag.name.trim().toUpperCase()
-		const isDuplicate = tags.some(
-			(t) => t.name.trim().toUpperCase() === normalizedName,
-		)
+		const isDuplicate = tags.some((t) => t.name.trim().toUpperCase() === normalizedName)
 
 		if (isDuplicate) {
 			setTagError(`The tag "${normalizedName}" is already selected`)
@@ -232,11 +227,7 @@ export function TagInput({
 				</Button>
 			</div>
 
-			{colorError && (
-				<p className="text-[0.8rem] font-medium text-destructive">
-					{colorError}
-				</p>
-			)}
+			{colorError && <p className="text-[0.8rem] font-medium text-destructive">{colorError}</p>}
 
 			{showPreview && newTag.trim() && (
 				<motion.div
@@ -247,9 +238,7 @@ export function TagInput({
 					className="flex items-center gap-2"
 				>
 					<span className="text-sm text-muted-foreground">Preview:</span>
-					<TagBadge
-						tag={{ name: newTag.trim().toUpperCase(), color: selectedColor }}
-					/>
+					<TagBadge tag={{ name: newTag.trim().toUpperCase(), color: selectedColor }} />
 				</motion.div>
 			)}
 
@@ -274,9 +263,7 @@ export function TagInput({
 				</div>
 			)}
 
-			{tagError && (
-				<p className="text-[0.8rem] font-medium text-destructive">{tagError}</p>
-			)}
+			{tagError && <p className="text-[0.8rem] font-medium text-destructive">{tagError}</p>}
 
 			{tags.length > 0 && (
 				<div className="flex flex-col gap-2">
@@ -294,14 +281,10 @@ export function TagInput({
 			)}
 
 			{tags.length >= maxTags && (
-				<p className="text-sm text-amber-600">
-					Maximum of {maxTags} tags reached
-				</p>
+				<p className="text-sm text-amber-600">Maximum of {maxTags} tags reached</p>
 			)}
 
-			{error && (
-				<p className="text-[0.8rem] font-medium text-destructive">{error}</p>
-			)}
+			{error && <p className="text-[0.8rem] font-medium text-destructive">{error}</p>}
 
 			<div className="flex justify-between items-center">
 				<p className="text-xs text-gray-500">

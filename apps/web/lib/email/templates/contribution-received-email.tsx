@@ -42,33 +42,28 @@ export function ContributionReceivedEmail({
 				<Body className="bg-gray-50 text-gray-900">
 					<Container className="mx-auto my-8 w-full max-w-[560px]">
 						<Section className="bg-white rounded-2xl p-8 shadow">
-							<Text className="text-2xl font-semibold mb-1">
-								🎉 New contribution received
-							</Text>
+							<Text className="text-2xl font-semibold mb-1">🎉 New contribution received</Text>
 							<Text className="text-sm text-gray-500 mb-4">KindFi</Text>
 
-							<Text className="text-base leading-6 mb-3">
-								Hi {recipientName},
-							</Text>
+							<Text className="text-base leading-6 mb-3">Hi {recipientName},</Text>
 
 							<Text className="text-base leading-6 mb-3">
 								{contributorName ? (
 									<>
-										<strong>{contributorName}</strong> just contributed{' '}
-										<strong>{amount}</strong> to your project{' '}
-										<strong>{projectTitle}</strong>.
+										<strong>{contributorName}</strong> just contributed <strong>{amount}</strong> to
+										your project <strong>{projectTitle}</strong>.
 									</>
 								) : (
 									<>
-										Your project <strong>{projectTitle}</strong> received a new
-										contribution of <strong>{amount}</strong>.
+										Your project <strong>{projectTitle}</strong> received a new contribution of{' '}
+										<strong>{amount}</strong>.
 									</>
 								)}
 							</Text>
 
 							<Text className="text-base leading-6 mb-4">
-								Keep up the great work — every contribution brings you closer to
-								your goal. Visit your project dashboard to see your progress.
+								Keep up the great work — every contribution brings you closer to your goal. Visit
+								your project dashboard to see your progress.
 							</Text>
 
 							<Button

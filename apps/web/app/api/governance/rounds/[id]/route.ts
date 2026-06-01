@@ -1,10 +1,10 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { governanceRoundIdParamSchema } from '~/lib/schemas/governance.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
 
 /**
  * GET /api/governance/rounds/[id]
@@ -12,10 +12,7 @@ import { logger } from '@/lib/logger'
  * Returns a single governance round with options, aggregated vote weights,
  * and the current user's vote (if authenticated).
  */
-export async function GET(
-	_req: NextRequest,
-	{ params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const { id } = await params
 		const validation = validateRequest(governanceRoundIdParamSchema, { id })
@@ -30,9 +27,7 @@ export async function GET(
 
 		const { data: round, error } = await supabase
 			.from('governance_rounds')
-			.select(
-				`*, options:governance_options!governance_options_round_id_fkey(*)`,
-			)
+			.select(`*, options:governance_options!governance_options_round_id_fkey(*)`)
 			.eq('id', validatedId)
 			.single()
 
@@ -61,24 +56,18 @@ export async function GET(
 			}
 		}
 
-		const enrichedOptions = (round.options ?? []).map(
-			(opt: { id: string }) => ({
-				...opt,
-				weighted_upvotes: weightMap[opt.id]?.up ?? 0,
-				weighted_downvotes: weightMap[opt.id]?.down ?? 0,
-				user_voted: userVote?.option_id === opt.id,
-				user_vote_type:
-					userVote?.option_id === opt.id ? userVote.vote_type : undefined,
-			}),
-		)
+		const enrichedOptions = (round.options ?? []).map((opt: { id: string }) => ({
+			...opt,
+			weighted_upvotes: weightMap[opt.id]?.up ?? 0,
+			weighted_downvotes: weightMap[opt.id]?.down ?? 0,
+			user_voted: userVote?.option_id === opt.id,
+			user_vote_type: userVote?.option_id === opt.id ? userVote.vote_type : undefined,
+		}))
 
 		// Attach winner option if round ended
 		let winner = null
 		if (round.winner_option_id) {
-			winner =
-				enrichedOptions.find(
-					(o: { id: string }) => o.id === round.winner_option_id,
-				) ?? null
+			winner = enrichedOptions.find((o: { id: string }) => o.id === round.winner_option_id) ?? null
 		}
 
 		return NextResponse.json({
@@ -93,9 +82,6 @@ export async function GET(
 		})
 	} catch (error) {
 		logger.error('Error in GET /api/governance/rounds/[id]:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

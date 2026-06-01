@@ -70,9 +70,8 @@ export default function Custom404() {
 					transition={{ delay: 0.5, duration: 0.8 }}
 					className="text-gray-600 text-lg mb-8"
 				>
-					This page seems to have wandered off, but there are still countless
-					ways to make an impact. Explore other meaningful projects or return
-					home to start your journey of change.
+					This page seems to have wandered off, but there are still countless ways to make an
+					impact. Explore other meaningful projects or return home to start your journey of change.
 				</motion.p>
 
 				{/* Animated icons */}

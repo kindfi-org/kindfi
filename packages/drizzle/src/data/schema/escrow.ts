@@ -68,7 +68,6 @@ export const escrowContracts = pgTable(
 	],
 )
 
-
 export const contributions = pgTable(
 	'contributions',
 	{
@@ -93,7 +92,6 @@ export const contributions = pgTable(
 		}),
 	],
 )
-
 
 export const escrowStatus = pgTable(
 	'escrow_status',
@@ -123,14 +121,10 @@ export const escrowStatus = pgTable(
 			'gin',
 			table.metadata.asc().nullsLast().op('jsonb_ops'),
 		),
-		index('idx_escrow_status_status').using(
-			'btree',
-			table.status.asc().nullsLast().op('enum_ops'),
-		),
+		index('idx_escrow_status_status').using('btree', table.status.asc().nullsLast().op('enum_ops')),
 		check('valid_amounts', sql`total_funded >= total_released`),
 	],
 )
-
 
 export const escrowReviews = pgTable(
 	'escrow_reviews',
@@ -164,10 +158,7 @@ export const escrowReviews = pgTable(
 			'btree',
 			table.milestoneId.asc().nullsLast().op('uuid_ops'),
 		),
-		index('escrow_reviews_type_idx').using(
-			'btree',
-			table.type.asc().nullsLast().op('text_ops'),
-		),
+		index('escrow_reviews_type_idx').using('btree', table.type.asc().nullsLast().op('text_ops')),
 		foreignKey({
 			columns: [table.escrowId],
 			foreignColumns: [escrowContracts.id],
@@ -178,10 +169,7 @@ export const escrowReviews = pgTable(
 			foreignColumns: [milestones.id],
 			name: 'escrow_reviews_milestone_id_fkey',
 		}),
-		check(
-			'escrow_reviews_type_check',
-			sql`type = ANY (ARRAY['dispute'::text, 'milestone'::text])`,
-		),
+		check('escrow_reviews_type_check', sql`type = ANY (ARRAY['dispute'::text, 'milestone'::text])`),
 	],
 )
 

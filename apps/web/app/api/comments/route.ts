@@ -1,14 +1,10 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
-import {
-	commentsQuerySchema,
-	createCommentSchema,
-	validateParentComment,
-} from './validation'
+import { logger } from '@/lib/logger'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { validateRequest } from '~/lib/utils/validation'
-import { logger } from '@/lib/logger'
+import { commentsQuerySchema, createCommentSchema, validateParentComment } from './validation'
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
 	try {
@@ -36,8 +32,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 		if (!validation.success) {
 			return validation.response
 		}
-		const { project_id: projectId, project_update_id: projectUpdateId, type } =
-			validation.data
+		const { project_id: projectId, project_update_id: projectUpdateId, type } = validation.data
 		const limit = validation.data.limit ?? 50
 		const offset = validation.data.offset ?? 0
 
@@ -131,14 +126,8 @@ async function createCommentHandler(req: NextRequest): Promise<NextResponse> {
 			)
 		}
 
-		const {
-			content,
-			parent_comment_id,
-			project_id,
-			project_update_id,
-			type,
-			metadata,
-		} = parsed.data
+		const { content, parent_comment_id, project_id, project_update_id, type, metadata } =
+			parsed.data
 
 		// Validate parent comment relationships if parent_comment_id is provided
 		if (parent_comment_id) {

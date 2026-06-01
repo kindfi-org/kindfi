@@ -6,10 +6,7 @@ import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import ProjectCard from '~/components/shared/project-card'
 // import { ProjectCard } from '~/components/shared/project-card'
-import {
-	mockImpactMetrics,
-	mockProjects,
-} from '~/lib/mock-data/mock-user-dashboard'
+import { mockImpactMetrics, mockProjects } from '~/lib/mock-data/mock-user-dashboard'
 import type { ImpactMetric, Project } from '~/lib/types'
 
 export function UserDashboard() {
@@ -23,11 +20,7 @@ export function UserDashboard() {
 								<Heart className="h-6 w-6 text-primary" />
 								<h2 className="text-2xl font-semibold">Featured Impact</h2>
 							</div>
-							<Button
-								variant="outline"
-								className="group"
-								aria-label="View all featured impacts"
-							>
+							<Button variant="outline" className="group" aria-label="View all featured impacts">
 								View All
 								<ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
 							</Button>
@@ -48,8 +41,8 @@ export function UserDashboard() {
                    transition-all duration-500 ease-in-out flex flex-col items-center justify-center space-y-4"
 								>
 									<p className="text-white text-center px-6 translate-y-8 group-hover:translate-y-0 transition-transform delay-150 duration-300">
-										Discover how our featured projects are making a real
-										difference in communities worldwide
+										Discover how our featured projects are making a real difference in communities
+										worldwide
 									</p>
 									<Link
 										href="/all-featured"
@@ -63,10 +56,7 @@ export function UserDashboard() {
 
 						<ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
 							{mockImpactMetrics.map((metric: ImpactMetric) => (
-								<li
-									key={metric.label}
-									className="bg-muted rounded-lg p-6 text-center"
-								>
+								<li key={metric.label} className="bg-muted rounded-lg p-6 text-center">
 									<h3 className="font-medium mb-2">{metric.label}</h3>
 									<div className="text-2xl font-bold">{metric.value}</div>
 								</li>
@@ -78,9 +68,7 @@ export function UserDashboard() {
 				<Card className="h-full">
 					<CardContent className="p-6 h-full flex flex-col items-center justify-center">
 						<h2 className="text-2xl font-semibold mb-6">Join KindFi</h2>
-						<Button className="w-[300px] mb-3 gradient-btn text-white">
-							Sign Up
-						</Button>
+						<Button className="w-[300px] mb-3 gradient-btn text-white">Sign Up</Button>
 						<Button variant="outline" className="w-[300px] mb-4">
 							Login
 						</Button>
@@ -97,11 +85,7 @@ export function UserDashboard() {
 						<div className="flex justify-between items-center mb-6">
 							<h2 className="text-2xl font-semibold">Active Projects</h2>
 							<div className="flex gap-2">
-								<Button
-									variant="outline"
-									size="icon"
-									aria-label="Filter projects"
-								>
+								<Button variant="outline" size="icon" aria-label="Filter projects">
 									<Filter className="h-4 w-4" />
 								</Button>
 								<Button variant="outline" className="group">
@@ -140,12 +124,8 @@ export function UserDashboard() {
 										key={project.id}
 										className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
 									>
-										<h3 className="font-medium text-sm mb-1">
-											{project.title}
-										</h3>
-										<p className="text-sm text-gray-600">
-											{project.description}
-										</p>
+										<h3 className="font-medium text-sm mb-1">{project.title}</h3>
+										<p className="text-sm text-gray-600">{project.description}</p>
 										<time
 											dateTime={new Date().toISOString()}
 											className="text-xs text-gray-500 mt-2 block"

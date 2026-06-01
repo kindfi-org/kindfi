@@ -43,15 +43,9 @@ export const CTAButtons = ({
 			)}
 			disabled={disabled}
 			asChild={!!primaryHref && !disabled}
-			aria-label={
-				typeof primaryText === 'string' ? primaryText : 'Primary action'
-			}
+			aria-label={typeof primaryText === 'string' ? primaryText : 'Primary action'}
 		>
-			{primaryHref && !disabled ? (
-				<Link href={primaryHref}>{primaryText}</Link>
-			) : (
-				primaryText
-			)}
+			{primaryHref && !disabled ? <Link href={primaryHref}>{primaryText}</Link> : primaryText}
 		</Button>
 	)
 
@@ -67,9 +61,7 @@ export const CTAButtons = ({
 			)}
 			disabled={disabled}
 			asChild={!!secondaryHref && !disabled}
-			aria-label={
-				typeof secondaryText === 'string' ? secondaryText : 'Secondary action'
-			}
+			aria-label={typeof secondaryText === 'string' ? secondaryText : 'Secondary action'}
 		>
 			{secondaryHref && !disabled ? (
 				<Link href={secondaryHref}>{secondaryText}</Link>
@@ -81,10 +73,7 @@ export const CTAButtons = ({
 
 	return (
 		<motion.div
-			className={cn(
-				'flex flex-col sm:flex-row justify-center gap-4',
-				className,
-			)}
+			className={cn('flex flex-col sm:flex-row justify-center gap-4', className)}
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.5, delay: animationDelay }}
