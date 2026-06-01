@@ -11,8 +11,6 @@ export const updateSession = async (
 	request: NextRequest,
 	_userSession: Session | null,
 ) => {
-	// This `try/catch` block is only here for the interactive tutorial.
-	// Feel free to remove once you have Supabase connected.
 	// Create an unmodified response
 	let response = NextResponse.next({
 		request: {
@@ -47,26 +45,11 @@ export const updateSession = async (
 			},
 		)
 
-		// This will refresh session if expired - required for Server Components
-		// https://supabase.com/docs/guides/auth/server-side/nextjs
-		// const user = await supabase.auth.getUser(cookieSessionToken) // it wont work 😏
-		// console.log('🗝️ User fetched from Supabase:', user)
-		// if (
-		// 	!user &&
-		// 	!request.nextUrl.pathname.startsWith('/sign-in') &&
-		// 	!request.nextUrl.pathname.startsWith('/auth')
-		// ) {
-		// 	// no user, potentially respond by redirecting the user to the login page
-		// 	const url = request.nextUrl.clone()
-		// 	url.pathname = '/sign-in'
-		// 	return NextResponse.redirect(url)
-		// }
-
+		// Session validation is handled via NextAuth (_userSession parameter).
+		// Supabase cookies are refreshed here to keep the SSR client in sync.
 		return response
 	} catch (_e) {
-		// If you are here, a Supabase client could not be created!
-		// This is likely because you have not set up environment variables.
-		// Check out http://localhost:3000 for Next Steps.
+		// Supabase client creation failed — check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.
 		return response
 	}
 }
