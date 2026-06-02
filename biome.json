@@ -11,6 +11,8 @@
 			"**",
 			"!.agents",
 			"!.claude/skills",
+			"!.codex/skills",
+			"!.cursor/skills",
 			"!apps/indexer/src/types/models",
 			"!apps/kyc-server/public",
 			"!services/supabase/templates",
