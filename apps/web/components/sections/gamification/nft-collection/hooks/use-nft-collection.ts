@@ -21,7 +21,8 @@ export function useNftCollection() {
 				nft: json.nft ?? null,
 				stats: json.stats ?? {
 					impactScore: 0,
-					totalDonations: 0,
+					donationCount: 0,
+					totalAmount: 0,
 					questsCompleted: 0,
 					streakDays: 0,
 					referralCount: 0,

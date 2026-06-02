@@ -1,7 +1,39 @@
-import type { NFTAttribute } from '../types'
+import type { NFTAttribute, UserStats } from '../types'
 
 export function findAttr(attrs: NFTAttribute[], traitType: string): string | undefined {
 	return attrs.find((a) => a.trait_type === traitType)?.value
+}
+
+const DONATION_COUNT_TRAIT_TYPES = ['Donation Count', 'Total Donations'] as const
+
+/** Read donation count from on-chain NFT metadata (supports legacy trait names). */
+export function findDonationCountAttr(attrs: NFTAttribute[]): string | undefined {
+	for (const traitType of DONATION_COUNT_TRAIT_TYPES) {
+		const value = findAttr(attrs, traitType)
+		if (value !== undefined && value !== '') return value
+	}
+	return undefined
+}
+
+/**
+ * Prefer live DB stats when chain metadata is missing or zero (NFT may be stale until evolve).
+ */
+export function resolveDonationCount(
+	attrs: NFTAttribute[],
+	userStats: UserStats | null | undefined,
+): string {
+	const fromDb = userStats?.donationCount
+	if (fromDb !== undefined && fromDb > 0) {
+		return String(fromDb)
+	}
+
+	const fromChain = findDonationCountAttr(attrs)
+	if (fromChain !== undefined && fromChain !== '' && fromChain !== '0') {
+		return fromChain
+	}
+
+	if (fromDb !== undefined) return String(fromDb)
+	return fromChain ?? '0'
 }
 
 export function AttrChip({ label, value }: { label: string; value: string }) {

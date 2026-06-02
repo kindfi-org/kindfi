@@ -38,7 +38,10 @@ export interface UserNFTRecord {
 
 export interface UserStats {
 	impactScore: number
-	totalDonations: number
+	/** Number of contribution records (from `contributions` table). */
+	donationCount: number
+	/** Sum of contribution amounts in USD (same source as profile total contributed). */
+	totalAmount: number
 	questsCompleted: number
 	streakDays: number
 	referralCount: number

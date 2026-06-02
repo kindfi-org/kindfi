@@ -111,10 +111,7 @@ export function NftMetadataPanel({
 									: userStats && (
 											<>
 												<AttrChip label="Impact Score" value={String(userStats.impactScore)} />
-												<AttrChip
-													label="Total Donations"
-													value={String(userStats.totalDonations)}
-												/>
+												<AttrChip label="Donations" value={String(userStats.donationCount)} />
 												<AttrChip
 													label="Quests Completed"
 													value={String(userStats.questsCompleted)}

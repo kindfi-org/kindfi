@@ -10,7 +10,7 @@ import { TierRoadmap } from './components/tier-roadmap'
 import type { Tier } from './constants'
 import { TIERS } from './constants'
 import { useNftCollection } from './hooks/use-nft-collection'
-import { findAttr } from './utils/helpers'
+import { findAttr, resolveDonationCount } from './utils/helpers'
 
 export function NFTCollection() {
 	const [showMetadata, setShowMetadata] = useState(false)
@@ -36,14 +36,13 @@ export function NFTCollection() {
 	const nft = nfts[0]
 	const attrs = nft?.metadata?.attributes ?? []
 	const impactScoreOnChain = findAttr(attrs, 'Impact Score')
-	const donationsOnChain = findAttr(attrs, 'Total Donations')
 	const questsOnChain = findAttr(attrs, 'Quests Completed')
 	const streaksOnChain = findAttr(attrs, 'Streak Days')
 	const referralsOnChain = findAttr(attrs, 'Referrals')
 	const govVotes = findAttr(attrs, 'Governance Votes')
 
 	const impactScore = impactScoreOnChain ?? String(userStats?.impactScore ?? 0)
-	const donations = donationsOnChain ?? String(userStats?.totalDonations ?? 0)
+	const donations = resolveDonationCount(attrs, userStats)
 	const quests = questsOnChain ?? String(userStats?.questsCompleted ?? 0)
 	const streaks = streaksOnChain ?? String(userStats?.streakDays ?? 0)
 	const referrals = referralsOnChain ?? String(userStats?.referralCount ?? 0)

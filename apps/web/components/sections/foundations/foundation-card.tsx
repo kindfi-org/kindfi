@@ -52,7 +52,7 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 				className="absolute inset-0 z-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 				aria-label={`${t('foundations.exploreFoundation')}: ${foundation.name}`}
 			/>
-			<div className="relative h-40 overflow-hidden bg-gradient-to-br from-emerald-50 via-slate-50 to-indigo-50">
+			<div className="pointer-events-none relative h-40 overflow-hidden bg-gradient-to-br from-emerald-50 via-slate-50 to-indigo-50">
 				{foundation.coverImageUrl ? (
 					<>
 						<Image
@@ -92,7 +92,7 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 				</div>
 			</div>
 
-			<div className="relative z-10 flex flex-grow flex-col p-6">
+			<div className="pointer-events-none relative flex flex-grow flex-col p-6">
 				{foundation.logoUrl ? (
 					<div className="relative z-10 -mt-12 mb-4 flex justify-center">
 						<div className="relative h-28 w-28 overflow-hidden rounded-2xl border-4 border-white bg-white shadow-lg ring-2 ring-slate-200/80 transition-all duration-300 group-hover:ring-emerald-200/80">
@@ -168,7 +168,7 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 								href={foundation.websiteUrl}
 								target="_blank"
 								rel="noopener noreferrer"
-								className="relative z-10 rounded-lg border border-slate-200 bg-white p-2 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+								className="pointer-events-auto relative z-10 rounded-lg border border-slate-200 bg-white p-2 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 								aria-label={t('foundations.visitWebsite')}
 							>
 								<Globe className="h-4 w-4 text-emerald-700" aria-hidden="true" />
@@ -183,7 +183,7 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 											href={url}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="relative z-10 rounded-lg border border-slate-200 bg-white p-2 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+											className="pointer-events-auto relative z-10 rounded-lg border border-slate-200 bg-white p-2 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 											aria-label={t('foundations.visitPlatform').replace('{platform}', platform)}
 										>
 											<Icon className="h-4 w-4 text-emerald-700" aria-hidden="true" />
@@ -214,7 +214,7 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 							{foundation.founder.slug ? (
 								<Link
 									href={`/u/${foundation.founder.slug}`}
-									className="relative z-10 line-clamp-1 rounded text-sm font-semibold text-slate-900 transition-colors hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+									className="pointer-events-auto relative z-10 line-clamp-1 rounded text-sm font-semibold text-slate-900 transition-colors hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 								>
 									{foundation.founder.displayName ?? 'Anonymous'}
 								</Link>
