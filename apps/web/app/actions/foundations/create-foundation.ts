@@ -37,11 +37,7 @@ export async function createFoundation(
 
 	let validated: ReturnType<typeof createFoundationInputSchema.parse>
 	try {
-		validated = validateInput(
-			createFoundationInputSchema,
-			input,
-			'createFoundation',
-		)
+		validated = validateInput(createFoundationInputSchema, input, 'createFoundation')
 	} catch (error) {
 		const failure = toServerActionFailure(error, 'Invalid input')
 		return { success: false, error: failure.error }
@@ -50,10 +46,7 @@ export async function createFoundation(
 	try {
 		await enforceRateLimit(session.user.id, 'create_foundation')
 	} catch (error) {
-		const failure = toServerActionFailure(
-			error,
-			'Too many requests. Please try again later.',
-		)
+		const failure = toServerActionFailure(error, 'Too many requests. Please try again later.')
 		return { success: false, error: failure.error }
 	}
 

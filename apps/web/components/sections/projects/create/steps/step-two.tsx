@@ -1,10 +1,8 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import {
@@ -19,6 +17,7 @@ import { Input } from '~/components/base/input'
 import { ImageUpload } from '~/components/sections/projects/create/image-upload'
 import { SocialLinks } from '~/components/sections/projects/create/social-links'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { stepTwoSchema } from '~/lib/schemas/create-project.schemas'
 import type { StepTwoData } from '~/lib/types/project/create-project.types'
 
@@ -63,7 +62,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 			exit={{ opacity: 0, x: -50 }}
 			transition={{ duration: 0.3 }}
 		>
-			<Card >
+			<Card>
 				<CardContent className="pt-6">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -77,11 +76,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 											<ImageUpload
 												value={field.value}
 												onChange={field.onChange}
-												error={
-													form.formState.errors.image?.message as
-														| string
-														| undefined
-												}
+												error={form.formState.errors.image?.message as string | undefined}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -94,13 +89,10 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 								name="website"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>
-											What&apos;s your project&apos;s website? (optional)
-										</FormLabel>
+										<FormLabel>What&apos;s your project&apos;s website? (optional)</FormLabel>
 										<FormControl>
 											<Input
 												type="url"
-												
 												placeholder="https://yourproject.com"
 												value={field.value ?? ''}
 												onChange={(e) => field.onChange(e.target.value)}
@@ -116,9 +108,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 								name="socialLinks"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>
-											Add any additional social links (optional)
-										</FormLabel>
+										<FormLabel>Add any additional social links (optional)</FormLabel>
 										<FormControl>
 											<SocialLinks
 												value={field.value ?? []}
@@ -141,10 +131,7 @@ export function StepTwo({ onNext, onBack }: StepTwoProps) {
 									<ChevronLeft className="h-4 w-4" />
 									Previous
 								</Button>
-								<Button
-									type="submit"
-									className="flex items-center gap-2 gradient-btn text-white"
-								>
+								<Button type="submit" className="flex items-center gap-2 gradient-btn text-white">
 									Next
 									<ChevronRight className="h-4 w-4" />
 								</Button>

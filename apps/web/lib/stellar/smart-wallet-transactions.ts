@@ -2,7 +2,6 @@ import { Buffer } from 'node:buffer'
 import { appEnvConfig } from '@packages/lib/config'
 import { deriveSignaturePayload } from '@packages/lib/passkey'
 import type { WebAuthnSignatureData } from '@packages/lib/stellar'
-import { ChannelsClientService } from '@packages/lib/stellar'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
 	Account,
@@ -18,6 +17,7 @@ import {
 	xdr,
 } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
+import { logger } from '@/lib/logger'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
@@ -35,26 +35,17 @@ export class SmartWalletTransactionService {
 	private server: Server
 	private networkPassphrase: string
 	private fundingKeypair?: Keypair
-	private channelsClient: ChannelsClientService
 
 	// ? WebAuthn Signatures requires a lot of GAS
 	private readonly STANDARD_FEE = '5000000' // 0.41 XLM
 
-	constructor(
-		networkPassphrase?: string,
-		rpcUrl?: string,
-		fundingSecretKey?: string,
-	) {
-		this.networkPassphrase =
-			networkPassphrase || appConfig.stellar.networkPassphrase
+	constructor(networkPassphrase?: string, rpcUrl?: string, fundingSecretKey?: string) {
+		this.networkPassphrase = networkPassphrase || appConfig.stellar.networkPassphrase
 		this.server = new Server(rpcUrl || appConfig.stellar.rpcUrl)
 
 		if (fundingSecretKey) {
 			this.fundingKeypair = Keypair.fromSecret(fundingSecretKey)
 		}
-
-		// Initialize Channels client
-		this.channelsClient = new ChannelsClientService(appConfig)
 	}
 
 	/**
@@ -88,9 +79,7 @@ export class SmartWalletTransactionService {
 	 * @param params Transfer parameters
 	 * @returns Transaction hash and WebAuthn challenge for signing
 	 */
-	async transferToken(
-		params: TransferTokenParams,
-	): Promise<TransactionChallenge> {
+	async transferToken(params: TransferTokenParams): Promise<TransactionChallenge> {
 		const { from, to, tokenAddress, amount, sponsorFees = false } = params
 
 		// Build contract invocation for transfer_token
@@ -116,16 +105,8 @@ export class SmartWalletTransactionService {
 	 * @param params Invocation parameters
 	 * @returns Transaction hash and WebAuthn challenge for signing
 	 */
-	async invokeContract(
-		params: InvokeContractParams,
-	): Promise<TransactionChallenge> {
-		const {
-			from,
-			contractAddress,
-			functionName,
-			args = [],
-			sponsorFees = false,
-		} = params
+	async invokeContract(params: InvokeContractParams): Promise<TransactionChallenge> {
+		const { from, contractAddress, functionName, args = [], sponsorFees = false } = params
 
 		// Convert arguments to ScVal format
 		const scArgs = args.map((arg) => {
@@ -209,16 +190,16 @@ export class SmartWalletTransactionService {
 				const nativeValue = scValToNative(retval)
 				xlmBalance = nativeValue.toString()
 			} else if (Api.isSimulationError(simulation)) {
-				console.warn('⚠️ Simulation error:', simulation.error)
+				logger.warn('⚠️ Simulation error:', simulation.error)
 				// Return 0 balance if simulation fails (contract not funded yet)
 			}
 
 			return {
 				xlm: xlmBalance,
-				tokens: [], // TODO: Query known token balances
+				tokens: [],
 			}
 		} catch (error) {
-			console.error('❌ Error fetching balances:', error)
+			logger.error('❌ Error fetching balances:', error)
 			// Return zero balance instead of throwing for better UX
 			return {
 				xlm: '0',
@@ -257,7 +238,7 @@ export class SmartWalletTransactionService {
 		webAuthnSignature: WebAuthnSignatureData
 		publicKey: Uint8Array
 	}): Promise<{ transactionHash: string; status: string }> {
-		console.warn(
+		logger.warn(
 			'⚠️ submitTransactionWithWebAuthn requires Smart Account Kit SDK. ' +
 				'Use SmartAccountKitService.signAndSubmit() instead, or use legacy submitTransaction() method.',
 		)
@@ -315,9 +296,7 @@ export class SmartWalletTransactionService {
 	 * Builds a transaction for WebAuthn signing
 	 * @returns the transaction envelope and challenge hash
 	 */
-	private async buildTransaction(
-		params: BuildTransactionParams,
-	): Promise<TransactionChallenge> {
+	private async buildTransaction(params: BuildTransactionParams): Promise<TransactionChallenge> {
 		const { smartWalletAddress, operations, sponsorFees } = params
 
 		// Determine source account (funding account if sponsoring fees, otherwise smart wallet)
@@ -344,15 +323,12 @@ export class SmartWalletTransactionService {
 
 		// Simulate to get auth entry with signature_payload
 		const simulation = await this.server.simulateTransaction(transaction, {
-			// TODO: Dynamic cpu calculation according to action to execute in the Soroban Contracts
 			cpuInstructions: 3_500_000,
 		})
 
 		if (Api.isSimulationError(simulation)) {
-			console.error('❌ Simulation error:', simulation.error)
-			throw new Error(
-				`Transaction simulation failed: ${simulation.error || 'Unknown error'}`,
-			)
+			logger.error('❌ Simulation error:', simulation.error)
+			throw new Error(`Transaction simulation failed: ${simulation.error || 'Unknown error'}`)
 		}
 		// Get current ledger to set valid signature expiration
 		const latestLedger = await this.server.getLatestLedger()
@@ -387,8 +363,7 @@ export class SmartWalletTransactionService {
 
 				// Create new auth entry with updated credentials
 				const newAuthEntry = new xdr.SorobanAuthorizationEntry({
-					credentials:
-						xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
+					credentials: xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
 					rootInvocation: simAuthEntry.rootInvocation(),
 				})
 
@@ -396,9 +371,7 @@ export class SmartWalletTransactionService {
 				simulation.result.auth[0] = newAuthEntry
 
 				// VERIFY: Check that modification worked
-				const _verifyCredentials = simulation.result.auth[0]
-					.credentials()
-					.address()
+				const _verifyCredentials = simulation.result.auth[0].credentials().address()
 			}
 		}
 
@@ -418,17 +391,12 @@ export class SmartWalletTransactionService {
 
 		if (!signaturePayloadResult) {
 			// Fallback to transaction hash if we can't extract signature_payload
-			console.warn(
-				'⚠️  Could not extract signature_payload, falling back to tx hash',
-			)
+			logger.warn('⚠️  Could not extract signature_payload, falling back to tx hash')
 			throw new Error('⚠️  Could not extract signature_payload')
 		}
 
 		// Use signature_payload as the WebAuthn challenge
-		const challenge = Buffer.from(
-			signaturePayloadResult.payloadHex,
-			'hex',
-		).toString('base64url')
+		const challenge = Buffer.from(signaturePayloadResult.payloadHex, 'hex').toString('base64url')
 		const txHash = assembledTx.hash()
 
 		// DIAGNOSTIC: Verify XDR encoding contains correct values
@@ -438,8 +406,7 @@ export class SmartWalletTransactionService {
 				transactionXDR,
 				this.networkPassphrase,
 			) as Transaction
-			const checkOp = xdrCheck
-				.operations[0] as unknown as Api.SimulateHostFunctionResult
+			const checkOp = xdrCheck.operations[0] as unknown as Api.SimulateHostFunctionResult
 			const checkAuthEntries = checkOp?.auth || []
 			if (checkAuthEntries.length > 0) {
 				const checkAuthEntry = checkAuthEntries[0]
@@ -453,14 +420,12 @@ export class SmartWalletTransactionService {
 						checkCredentials.signatureExpirationLedger().toString() !==
 						signatureExpirationLedger.toString()
 					) {
-						console.error(
-							'❌ CRITICAL: XDR bytes do NOT contain correct expiration!',
-						)
+						logger.error('❌ CRITICAL: XDR bytes do NOT contain correct expiration!')
 					}
 				}
 			}
 		} catch (error) {
-			console.error('❌ Error verifying XDR:', error)
+			logger.error('❌ Error verifying XDR:', error)
 		}
 
 		return {
@@ -478,14 +443,9 @@ export class SmartWalletTransactionService {
 			throw new Error('Funding keypair required for fee sponsorship')
 		}
 
-		const accountResponse = await this.server.getAccount(
-			this.fundingKeypair.publicKey(),
-		)
+		const accountResponse = await this.server.getAccount(this.fundingKeypair.publicKey())
 
-		return new Account(
-			accountResponse.accountId(),
-			accountResponse.sequenceNumber(),
-		)
+		return new Account(accountResponse.accountId(), accountResponse.sequenceNumber())
 	}
 
 	/**

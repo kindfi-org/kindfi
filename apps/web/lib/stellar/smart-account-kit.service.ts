@@ -1,5 +1,6 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
+import { logger } from '@/lib/logger'
 
 /**
  * Smart Account Kit Service
@@ -101,10 +102,7 @@ function getRpId(appConfig: AppEnvInterface, providedRpId?: string): string {
 /**
  * Get the appropriate RP Name based on the current environment
  */
-function getRpName(
-	appConfig: AppEnvInterface,
-	providedRpName?: string,
-): string {
+function getRpName(appConfig: AppEnvInterface, providedRpName?: string): string {
 	// If explicitly provided, use it
 	if (providedRpName) {
 		return providedRpName
@@ -143,8 +141,7 @@ export class SmartAccountKitService {
 
 		this.config = {
 			rpcUrl: config?.rpcUrl || appConfig.stellar.rpcUrl,
-			networkPassphrase:
-				config?.networkPassphrase || appConfig.stellar.networkPassphrase,
+			networkPassphrase: config?.networkPassphrase || appConfig.stellar.networkPassphrase,
 			accountWasmHash:
 				config?.accountWasmHash ||
 				process.env.NEXT_PUBLIC_ACCOUNT_WASM_HASH ||
@@ -166,9 +163,7 @@ export class SmartAccountKitService {
 			// Note: Channels service uses CHANNELS_API_KEY env var separately
 			// relayerUrl is for custom relayer proxies, not Channels
 			relayerUrl:
-				config?.relayerUrl ||
-				process.env.NEXT_PUBLIC_RELAYER_URL ||
-				process.env.RELAYER_URL,
+				config?.relayerUrl || process.env.NEXT_PUBLIC_RELAYER_URL || process.env.RELAYER_URL,
 			rpId: getRpId(appConfig, config?.rpId),
 			rpName: getRpName(appConfig, config?.rpName),
 			timeoutInSeconds: config?.timeoutInSeconds || 30,
@@ -192,17 +187,12 @@ export class SmartAccountKitService {
 			// Try to load the package
 			const kitModule = await loadSmartAccountKit()
 			if (!kitModule) {
-				console.warn(
-					'⚠️ smart-account-kit not installed. Install it with: bun add smart-account-kit',
-				)
+				logger.warn('⚠️ smart-account-kit not installed. Install it with: bun add smart-account-kit')
 				return
 			}
 
-			if (
-				!this.config.accountWasmHash ||
-				!this.config.webauthnVerifierAddress
-			) {
-				console.error(
+			if (!this.config.accountWasmHash || !this.config.webauthnVerifierAddress) {
+				logger.error(
 					'❌ Missing required configuration: accountWasmHash or webauthnVerifierAddress',
 				)
 				return
@@ -273,7 +263,7 @@ export class SmartAccountKitService {
 				this.kit = new kitModule.SmartAccountKit(kitConfig)
 				this.isInitialized = true
 			} catch (error) {
-				console.error('❌ Failed to initialize Smart Account Kit:', error)
+				logger.error('❌ Failed to initialize Smart Account Kit:', error)
 				throw error
 			}
 		})()
@@ -315,8 +305,7 @@ export class SmartAccountKitService {
 			const result = await this.kit.createWallet(appName, userName, {
 				autoSubmit: options?.autoSubmit ?? true,
 				autoFund: options?.autoFund ?? false,
-				nativeTokenContract:
-					options?.nativeTokenContract || this.config.nativeTokenContract,
+				nativeTokenContract: options?.nativeTokenContract || this.config.nativeTokenContract,
 			})
 
 			return {
@@ -324,11 +313,10 @@ export class SmartAccountKitService {
 				credentialId: result.credentialId,
 			}
 		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : String(error)
+			const errorMessage = error instanceof Error ? error.message : String(error)
 			const errorStack = error instanceof Error ? error.stack : undefined
 
-			console.error('❌ Failed to create wallet:', {
+			logger.error('❌ Failed to create wallet:', {
 				error: errorMessage,
 				stack: errorStack,
 				config: {
@@ -364,7 +352,7 @@ export class SmartAccountKitService {
 				credentialId: result.credentialId || '',
 			}
 		} catch (error) {
-			console.error('❌ Failed to connect wallet:', error)
+			logger.error('❌ Failed to connect wallet:', error)
 			throw error
 		}
 	}
@@ -380,7 +368,7 @@ export class SmartAccountKitService {
 		try {
 			await this.kit.disconnect()
 		} catch (error) {
-			console.error('❌ Failed to disconnect:', error)
+			logger.error('❌ Failed to disconnect:', error)
 		}
 	}
 
@@ -394,7 +382,7 @@ export class SmartAccountKitService {
 		try {
 			return await this.kit.signAndSubmit(transaction, options)
 		} catch (error) {
-			console.error('❌ Failed to sign and submit transaction:', error)
+			logger.error('❌ Failed to sign and submit transaction:', error)
 			throw error
 		}
 	}
@@ -413,7 +401,7 @@ export class SmartAccountKitService {
 		try {
 			return await this.kit.transfer(tokenContract, recipient, amount, options)
 		} catch (error) {
-			console.error('❌ Failed to transfer tokens:', error)
+			logger.error('❌ Failed to transfer tokens:', error)
 			throw error
 		}
 	}

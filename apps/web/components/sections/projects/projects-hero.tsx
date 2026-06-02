@@ -14,10 +14,7 @@ interface ProjectsHeroProps {
 	sortSlug?: string
 }
 
-export function ProjectsHero({
-	categorySlugs = [],
-	sortSlug = 'most-popular',
-}: ProjectsHeroProps) {
+export function ProjectsHero({ categorySlugs = [], sortSlug = 'most-popular' }: ProjectsHeroProps) {
 	const { t } = useI18n()
 	const reducedMotion = useReducedMotion()
 
@@ -29,11 +26,14 @@ export function ProjectsHero({
 		},
 	)
 
-	const { data: categories = [], isLoading: isLoadingCategories } =
-		useSupabaseQuery('categories', getAllCategories, {
+	const { data: categories = [], isLoading: isLoadingCategories } = useSupabaseQuery(
+		'categories',
+		getAllCategories,
+		{
 			staleTime: 1000 * 60 * 60,
 			gcTime: 1000 * 60 * 60,
-		})
+		},
+	)
 
 	const acceptingDonationsCount = useMemo(
 		() => projects.filter((project) => Boolean(project.escrowContractAddress)).length,
@@ -59,9 +59,7 @@ export function ProjectsHero({
 					initial={reducedMotion ? false : { opacity: 0, y: 16 }}
 					animate={reducedMotion ? false : { opacity: 1, y: 0 }}
 					transition={
-						reducedMotion
-							? { duration: 0 }
-							: { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
+						reducedMotion ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
 					}
 				>
 					<p className="mb-4 text-[11px] font-medium uppercase tracking-[0.2em] text-emerald-700/80">
@@ -83,7 +81,7 @@ export function ProjectsHero({
 					</p>
 				</motion.div>
 
-				<div
+				<section
 					className={cn(
 						'relative mx-auto mt-12 flex max-w-3xl flex-col items-stretch gap-8 border-t border-slate-200/50 pt-10 sm:flex-row sm:items-center sm:justify-center sm:gap-0 md:mt-14',
 						isLoadingStats && 'animate-pulse',
@@ -104,7 +102,7 @@ export function ProjectsHero({
 						label={t('projects.statCategories')}
 						value={isLoadingStats ? null : categories.length}
 					/>
-				</div>
+				</section>
 			</SectionContainer>
 
 			<div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-white" />
@@ -126,10 +124,5 @@ function HeroStat({ label, value }: { label: string; value: number | null }) {
 }
 
 function HeroStatDivider() {
-	return (
-		<div
-			className="hidden h-12 w-px shrink-0 bg-slate-200/70 sm:block"
-			aria-hidden="true"
-		/>
-	)
+	return <div className="hidden h-12 w-px shrink-0 bg-slate-200/70 sm:block" aria-hidden="true" />
 }

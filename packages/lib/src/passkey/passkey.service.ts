@@ -22,6 +22,7 @@ import {
 	saveChallenge,
 	saveUser,
 } from '../db/webauthn.database'
+import { logger } from '../logger'
 import { ErrorCode, InAppError } from '../stellar/errors'
 import { StellarPasskeyService } from '../stellar/stellar-passkey.service'
 import type { AppEnvInterface } from '../types'
@@ -51,16 +52,12 @@ const getStellarService = (): StellarPasskeyService => {
 /**
  * Retrieves the RP ID corresponding to the provided host.
  */
-const getRpInfo = (
-	origin: string,
-): { rpName: string; rpId: string; expectedOrigin: string } => {
+const getRpInfo = (origin: string): { rpName: string; rpId: string; expectedOrigin: string } => {
 	const expectedOrigins = appConfig.passkey.expectedOrigin
 	const rpIds = appConfig.passkey.rpId
 	const rpNames = appConfig.passkey.rpName
 
-	const index = expectedOrigins.findIndex(
-		(expectedOrigin: string) => origin === expectedOrigin,
-	)
+	const index = expectedOrigins.findIndex((expectedOrigin: string) => origin === expectedOrigin)
 
 	if (index === -1) {
 		throw new Error(`Origin ${origin} not found in expected origins`)
@@ -173,9 +170,7 @@ export const verifyRegistration = async ({
 	if (verified && registrationInfo) {
 		const { credential } = registrationInfo
 
-		const existingCredential = credentials.find(
-			(cred) => cred.id === credential.id,
-		)
+		const existingCredential = credentials.find((cred) => cred.id === credential.id)
 
 		if (!existingCredential) {
 			/**
@@ -183,7 +178,6 @@ export const verifyRegistration = async ({
 			 * This creates the user's Stellar account as a smart contract
 			 */
 			try {
-
 				// Extract public key from attestation response
 				const publicKeyBase64 = credential.publicKey.toBase64()
 
@@ -197,13 +191,12 @@ export const verifyRegistration = async ({
 				})
 
 				contractAddress = deploymentResult.address
-
 			} catch (error) {
-				console.error('❌ Failed to deploy smart wallet:', error)
-				throw new InAppError(
-					ErrorCode.UNEXPECTED_ERROR,
-					`Smart wallet deployment failed: ${error}`,
+				logger.error(
+					'Failed to deploy smart wallet',
+					error instanceof Error ? error : new Error(String(error)),
 				)
+				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, `Smart wallet deployment failed: ${error}`)
 			}
 
 			/**
@@ -214,8 +207,7 @@ export const verifyRegistration = async ({
 				id: credential.id,
 				address: contractAddress, // Store contract address (C... format)
 				publicKey: credential.publicKey,
-				aaguid: (credential as BaseWebAuthnCredential & { aaguid?: string })
-					.aaguid,
+				aaguid: (credential as BaseWebAuthnCredential & { aaguid?: string }).aaguid,
 				counter: credential.counter,
 				transports: registrationResponse.response.transports,
 			}
@@ -261,10 +253,7 @@ export const getAuthenticationOptions = async ({
 	const opts: GenerateAuthenticationOptionsOpts = {
 		userVerification: 'preferred',
 		rpID: rpId,
-		// TODO: Check this, we should always have a mapped challenge that both Stellar and Devices supports
-		challenge: challenge
-			? new Uint8Array(base64url.toBuffer(challenge))
-			: undefined,
+		challenge: challenge ? new Uint8Array(base64url.toBuffer(challenge)) : undefined,
 		timeout: appConfig.passkey.challengeTtlMs,
 		allowCredentials: credentials.map((cred) => ({
 			id: cred.id,
@@ -312,11 +301,8 @@ export const verifyAuthentication = async ({
 	const { credentials } = userResponse
 
 	// Find the credential in the user's list of credentials
-	const dbCredentialIndex = credentials.findIndex(
-		(cred) => cred.id === authenticationResponse.id,
-	)
-	if (dbCredentialIndex === -1)
-		throw new InAppError(ErrorCode.AUTHENTICATOR_NOT_REGISTERED)
+	const dbCredentialIndex = credentials.findIndex((cred) => cred.id === authenticationResponse.id)
+	if (dbCredentialIndex === -1) throw new InAppError(ErrorCode.AUTHENTICATOR_NOT_REGISTERED)
 	const dbCredential = credentials[dbCredentialIndex]
 
 	const opts: VerifyAuthenticationResponseOpts = {
@@ -327,8 +313,7 @@ export const verifyAuthentication = async ({
 		credential: dbCredential,
 		requireUserVerification: false,
 	}
-	const { verified, authenticationInfo } =
-		await verifyAuthenticationResponse(opts)
+	const { verified, authenticationInfo } = await verifyAuthenticationResponse(opts)
 
 	if (verified) {
 		// Update the credential's counter in the DB to the newest count in the authentication

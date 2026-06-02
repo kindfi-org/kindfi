@@ -1,13 +1,7 @@
 import { AlertCircle, ArrowLeft, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 
 interface UnauthorizedAccessProps {
 	userRole?: string | null
@@ -33,13 +27,11 @@ export function UnauthorizedAccess({ userRole }: UnauthorizedAccessProps) {
 								<AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
 								<div className="space-y-2">
 									<p className="text-sm font-medium">
-										This page is only available to project creators and
-										administrators.
+										This page is only available to project creators and administrators.
 									</p>
 									{userRole && (
 										<p className="text-xs text-muted-foreground">
-											Your current role:{' '}
-											<span className="font-medium capitalize">{userRole}</span>
+											Your current role: <span className="font-medium capitalize">{userRole}</span>
 										</p>
 									)}
 								</div>

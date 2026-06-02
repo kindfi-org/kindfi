@@ -2,11 +2,9 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import {
-	getDiditSessionStatus,
-	mapDiditStatusToKYC,
-} from '~/lib/services/didit'
+import { getDiditSessionStatus, mapDiditStatusToKYC } from '~/lib/services/didit'
 
 /**
  * POST /api/kyc/didit/check-status
@@ -33,7 +31,7 @@ export async function POST(_req: NextRequest) {
 			.maybeSingle()
 
 		if (findError) {
-			console.error('Error finding KYC record:', findError)
+			logger.error('Error finding KYC record:', findError)
 			return NextResponse.json(
 				{ error: 'Failed to find KYC record', details: findError.message },
 				{ status: 500 },
@@ -51,9 +49,7 @@ export async function POST(_req: NextRequest) {
 
 		// Parse notes to get session ID
 		const notes =
-			typeof kycRecord.notes === 'string'
-				? JSON.parse(kycRecord.notes)
-				: kycRecord.notes
+			typeof kycRecord.notes === 'string' ? JSON.parse(kycRecord.notes) : kycRecord.notes
 
 		const sessionId = notes.diditSessionId
 
@@ -88,7 +84,7 @@ export async function POST(_req: NextRequest) {
 			.eq('user_id', session.user.id)
 
 		if (updateError) {
-			console.error('Failed to update KYC record:', updateError)
+			logger.error('Failed to update KYC record:', updateError)
 			// Still return the status even if update fails
 		}
 
@@ -98,7 +94,7 @@ export async function POST(_req: NextRequest) {
 			diditStatus: diditStatus.status,
 		})
 	} catch (error) {
-		console.error('Error checking KYC status:', error)
+		logger.error('Error checking KYC status:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to check KYC status',

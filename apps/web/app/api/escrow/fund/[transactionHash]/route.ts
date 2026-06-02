@@ -1,9 +1,9 @@
-import { supabase } from '@packages/lib/supabase'
-import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import { supabase, supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
-import { AuditLogger } from '~/lib/services/audit-logger'
 import { escrowFundUpdateSchema } from '~/lib/schemas/escrow.schemas'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -73,9 +73,7 @@ export async function POST(
 							amount,
 						}),
 					)
-					.catch((err) =>
-						console.error('[Escrow fund] Notification error:', err),
-					)
+					.catch((err) => logger.error('[Escrow fund] Notification error:', err))
 			}
 		}
 
@@ -89,13 +87,10 @@ export async function POST(
 			metadata: { escrowId, newStatus: status },
 		})
 
-		return NextResponse.json(
-			{ message: 'Transaction updated', data },
-			{ status: 200 },
-		)
+		return NextResponse.json({ message: 'Transaction updated', data }, { status: 200 })
 	} catch (error) {
 		if (error instanceof AppError) {
-			console.error('Escrow Fund error:', error)
+			logger.error('Escrow Fund error:', error)
 			await auditLogger.log({
 				correlationId,
 				operation: 'escrow.fund.update',
@@ -114,7 +109,7 @@ export async function POST(
 			)
 		}
 
-		console.error('Internal server error during escrow fund:', error)
+		logger.error('Internal server error during escrow fund:', error)
 		await auditLogger.log({
 			correlationId,
 			operation: 'escrow.fund.update',
@@ -126,10 +121,7 @@ export async function POST(
 		})
 		return NextResponse.json(
 			{
-				error:
-					error instanceof Error
-						? error.message
-						: 'Internal server error during escrow fund',
+				error: error instanceof Error ? error.message : 'Internal server error during escrow fund',
 			},
 			{ status: 500 },
 		)

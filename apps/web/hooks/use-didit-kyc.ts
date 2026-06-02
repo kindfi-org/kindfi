@@ -1,6 +1,7 @@
 // hooks/use-didit-kyc.ts
 
 import { useCallback, useEffect, useState } from 'react'
+import { logger } from '@/lib/logger'
 
 interface KYCStatus {
 	status: 'pending' | 'approved' | 'rejected' | 'verified' | null
@@ -43,12 +44,11 @@ export function useDiditKYC(userId: string) {
 				error: null,
 			})
 		} catch (error) {
-			console.error('❌ Failed to load KYC status:', error)
+			logger.error('❌ Failed to load KYC status:', error)
 			setKycStatus({
 				status: null,
 				isLoading: false,
-				error:
-					error instanceof Error ? error.message : 'Failed to load KYC status',
+				error: error instanceof Error ? error.message : 'Failed to load KYC status',
 			})
 		}
 	}, [])
@@ -103,7 +103,7 @@ export function useDiditKYC(userId: string) {
 
 			return result
 		} catch (error) {
-			console.error('Failed to check status from Didit:', error)
+			logger.error('Failed to check status from Didit:', error)
 			// Fallback to loading from database
 			await loadKYCStatus()
 			return {
@@ -113,9 +113,7 @@ export function useDiditKYC(userId: string) {
 		}
 	}, [loadKYCStatus])
 
-	const createSession = async (
-		redirectUrl?: string,
-	): Promise<CreateSessionResponse> => {
+	const createSession = async (redirectUrl?: string): Promise<CreateSessionResponse> => {
 		try {
 			const response = await fetch('/api/kyc/didit/create-session', {
 				method: 'POST',

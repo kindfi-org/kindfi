@@ -43,5 +43,4 @@ app.post('/verify-biometrics', async (req, res) => {
 
 app.use(errorHandler)
 
-app.listen(PORT, () => {
-})
+app.listen(PORT, () => {})

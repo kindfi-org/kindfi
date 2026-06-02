@@ -5,13 +5,9 @@ import { isAllowedSocialUrl, isFile } from '~/lib/utils/project-utils'
 export const stepOneSchema = z
 	.object({
 		title: z.string().min(3, 'Title must be at least 3 characters'),
-		description: z
-			.string()
-			.min(10, 'Description must be at least 10 characters'),
+		description: z.string().min(10, 'Description must be at least 10 characters'),
 		targetAmount: z.number().min(1, 'Target amount must be at least $1'),
-		minimumInvestment: z
-			.number()
-			.min(1, 'Minimum investment must be at least $1'),
+		minimumInvestment: z.number().min(1, 'Minimum investment must be at least $1'),
 	})
 	.refine((data) => data.minimumInvestment <= data.targetAmount, {
 		message: 'Minimum investment cannot exceed target amount',
@@ -22,10 +18,7 @@ export const stepTwoSchema = z.object({
 	image: z
 		.union([
 			z.string().url('Project Image must be a valid URL'),
-			z.custom<File>(
-				(v) => isFile(v),
-				'Project Image must be a File upload or URL',
-			),
+			z.custom<File>((v) => isFile(v), 'Project Image must be a File upload or URL'),
 		])
 		.nullable(),
 	website: z
@@ -38,12 +31,9 @@ export const stepTwoSchema = z.object({
 		.or(z.literal('')),
 	socialLinks: z
 		.array(
-			z
-				.string()
-				.url('Please enter a valid social media URL')
-				.refine(isAllowedSocialUrl, {
-					message: 'Please enter a valid social media URL',
-				}),
+			z.string().url('Please enter a valid social media URL').refine(isAllowedSocialUrl, {
+				message: 'Please enter a valid social media URL',
+			}),
 		)
 		.optional(),
 })
@@ -70,10 +60,7 @@ const youtubeRegex =
 const vimeoRegex = /^(https:\/\/)(www\.)?(vimeo\.com\/)[0-9]+(\?.*)?$/
 
 export const projectPitchSchema = z.object({
-	title: z
-		.string()
-		.min(1, 'Title is required')
-		.max(100, 'Title must be less than 100 characters'),
+	title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
 	story: z
 		.string()
 		.trim()
@@ -87,10 +74,7 @@ export const projectPitchSchema = z.object({
 	pitchDeck: z
 		.union([
 			z.string().url('Pitch deck must be a valid URL'),
-			z.custom<File>(
-				(v) => isFile(v),
-				'Pitch deck must be a File upload or URL',
-			),
+			z.custom<File>((v) => isFile(v), 'Pitch deck must be a File upload or URL'),
 		])
 		.nullable(),
 	videoUrl: z

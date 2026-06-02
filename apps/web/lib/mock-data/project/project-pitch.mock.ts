@@ -12,8 +12,7 @@ export const tips: Tip[] = [
 	{
 		id: 'feedback',
 		title: 'Get Pitch Feedback',
-		description:
-			'Share your pitch with our community experts for valuable insights.',
+		description: 'Share your pitch with our community experts for valuable insights.',
 		action: 'Request Feedback',
 		icon: MessageSquareText,
 	},

@@ -1,15 +1,11 @@
-import {
-	deleteChallenge,
-	getChallenge,
-	getUser,
-	saveUser,
-} from '@packages/lib/db'
+import { deleteChallenge, getChallenge, getUser, saveUser } from '@packages/lib/db'
 import {
 	type AuthenticationResponseJSON,
 	verifyAuthenticationResponse,
 } from '@simplewebauthn/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 import { verifyAuthSchema } from '~/lib/schemas/passkey.schemas'
 import { validateRequest } from '~/lib/utils/validation'
@@ -40,10 +36,7 @@ export async function POST(req: NextRequest) {
 		])
 
 		if (!expectedChallenge) {
-			return NextResponse.json(
-				{ error: 'Challenge not found' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Challenge not found' }, { status: 400 })
 		}
 
 		if (!userResponse) {
@@ -53,15 +46,10 @@ export async function POST(req: NextRequest) {
 		const { credentials } = userResponse
 
 		// Find credential
-		const credentialIndex = credentials.findIndex(
-			(cred) => cred.id === authenticationResponse.id,
-		)
+		const credentialIndex = credentials.findIndex((cred) => cred.id === authenticationResponse.id)
 
 		if (credentialIndex === -1) {
-			return NextResponse.json(
-				{ error: 'Credential not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Credential not found' }, { status: 404 })
 		}
 
 		const credential = credentials[credentialIndex]
@@ -78,8 +66,7 @@ export async function POST(req: NextRequest) {
 
 		if (verification.verified && verification.authenticationInfo) {
 			// Update credential counter
-			credentials[credentialIndex].counter =
-				verification.authenticationInfo.newCounter
+			credentials[credentialIndex].counter = verification.authenticationInfo.newCounter
 
 			await saveUser({
 				rpId,
@@ -107,7 +94,7 @@ export async function POST(req: NextRequest) {
 			publicKey: publicKeyBase64, // Base64 encoded public key for session creation
 		})
 	} catch (error) {
-		console.error('❌ Error verifying authentication:', error)
+		logger.error('❌ Error verifying authentication:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to verify authentication',

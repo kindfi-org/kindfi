@@ -16,13 +16,7 @@ const formatCurrency = (value: number) =>
 		maximumFractionDigits: 2,
 	}).format(value)
 
-const SKELETON_KEYS = [
-	'esc-sk-1',
-	'esc-sk-2',
-	'esc-sk-3',
-	'esc-sk-4',
-	'esc-sk-5',
-] as const
+const SKELETON_KEYS = ['esc-sk-1', 'esc-sk-2', 'esc-sk-3', 'esc-sk-4', 'esc-sk-5'] as const
 
 export function AdminEscrowsList() {
 	const {
@@ -40,10 +34,7 @@ export function AdminEscrowsList() {
 				</div>
 				<div className="space-y-2">
 					{SKELETON_KEYS.map((key) => (
-						<div
-							key={key}
-							className="h-20 rounded-lg bg-muted/60 animate-pulse"
-						/>
+						<div key={key} className="h-20 rounded-lg bg-muted/60 animate-pulse" />
 					))}
 				</div>
 			</div>
@@ -59,9 +50,7 @@ export function AdminEscrowsList() {
 				/>
 				<Card className="border-destructive/50">
 					<CardContent className="py-12 text-center">
-						<p className="font-medium text-destructive">
-							Error loading escrows.
-						</p>
+						<p className="font-medium text-destructive">Error loading escrows.</p>
 						<p className="mt-1 text-sm text-muted-foreground">
 							Refresh the page or try again later.
 						</p>
@@ -98,10 +87,7 @@ export function AdminEscrowsList() {
 											{escrow.contractId.slice(0, 20)}...
 										</span>
 										<Badge
-											className={
-												stateColors[escrow.currentState] ||
-												'bg-gray-100 text-gray-800'
-											}
+											className={stateColors[escrow.currentState] || 'bg-gray-100 text-gray-800'}
 										>
 											{escrow.currentState}
 										</Badge>

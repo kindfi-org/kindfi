@@ -1,125 +1,117 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
-import { AnimatePresence, motion } from 'framer-motion'
-import { Building2 } from 'lucide-react'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { useMemo } from 'react'
-import { Button } from '~/components/base/button'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { EmptyFoundations } from '~/components/sections/foundations/empty-foundations'
+import { FoundationsSortDropdown } from '~/components/sections/foundations/filters/foundations-sort-dropdown'
 import { FoundationCard } from '~/components/sections/foundations/foundation-card'
+import { FoundationCardGridSkeleton } from '~/components/sections/foundations/skeletons/foundation-card-grid-skeleton'
+import { SectionContainer } from '~/components/shared/section-container'
 import { staggerContainer } from '~/lib/constants/animations'
+import { useI18n } from '~/lib/i18n'
 import {
+	type FoundationListSortSlug,
 	getAllFoundations,
 	normalizeFoundationListSort,
 } from '~/lib/queries/foundations/get-all-foundations'
 
+const formatResultsCount = (count: number, t: (key: string) => string) => {
+	if (count === 1) {
+		return t('foundations.resultsCountOne').replace('{count}', String(count))
+	}
+	return t('foundations.resultsCountMany').replace('{count}', String(count))
+}
+
 export function FoundationsClientWrapper() {
+	const router = useRouter()
 	const searchParams = useSearchParams()
+	const { t } = useI18n()
+	const reducedMotion = useReducedMotion()
 	const sortSlug = normalizeFoundationListSort(searchParams.get('sort'))
 
 	const {
 		data: foundations = [],
 		isLoading,
 		error,
-	} = useSupabaseQuery(
-		'foundations',
-		(client) => getAllFoundations(client, sortSlug),
-		{
-			additionalKeyValues: [sortSlug],
-		},
-	)
+	} = useSupabaseQuery('foundations', (client) => getAllFoundations(client, sortSlug), {
+		additionalKeyValues: [sortSlug],
+	})
 
-	const loadingSkeletons = useMemo(
-		() =>
-			['a', 'b', 'c', 'd', 'e', 'f'].map((id) => (
-				<div
-					key={`skeleton-${id}`}
-					className="min-h-[22rem] animate-pulse rounded-2xl border border-border bg-card"
-				/>
-			)),
-		[],
-	)
-
-	if (isLoading) {
-		return (
-			<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-				{loadingSkeletons}
-			</div>
-		)
+	const handleSortChange = (newSort: FoundationListSortSlug) => {
+		const params = new URLSearchParams(searchParams.toString())
+		if (newSort === 'most-recent') {
+			params.delete('sort')
+		} else {
+			params.set('sort', newSort)
+		}
+		const query = params.toString()
+		router.push(query ? `/foundations?${query}` : '/foundations', { scroll: false })
 	}
 
 	if (error) {
 		return (
-			<div className="rounded-2xl border border-border bg-card px-6 py-16 text-center">
-				<Building2
-					className="mx-auto mb-4 h-14 w-14 text-muted-foreground"
-					aria-hidden="true"
-				/>
-				<h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-					We couldn&apos;t load foundations
-				</h2>
-				<p className="mx-auto mt-2 max-w-md text-muted-foreground">
-					Check your connection and try again. If the problem continues, try back
-					later.
-				</p>
-				<Button
-					className="mt-6"
-					onClick={() => window.location.reload()}
-					type="button"
-				>
-					Retry
-				</Button>
-			</div>
-		)
-	}
-
-	if (foundations.length === 0) {
-		return (
-			<div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
-				<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-					<Building2
-						className="h-8 w-8 text-muted-foreground"
-						aria-hidden="true"
-					/>
+			<SectionContainer withPadding={false} className="px-4 py-16 sm:px-6 lg:px-8">
+				<div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-6 py-8 text-center text-destructive">
+					<p className="font-semibold">{t('foundations.errorTitle')}</p>
+					<p className="mt-2 text-sm opacity-90">{t('foundations.errorDescription')}</p>
+					<p className="mt-2 text-xs">
+						{t('common.error')}: {error.message}
+					</p>
 				</div>
-				<h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-					No foundations yet
-				</h2>
-				<p className="mx-auto mt-2 max-w-md text-muted-foreground">
-					When organizations join KindFi, they will appear here. You can register
-					your foundation to get started.
-				</p>
-				<Button asChild className="mt-6">
-					<Link href="/create-foundation">Create a foundation</Link>
-				</Button>
-			</div>
+			</SectionContainer>
 		)
 	}
 
 	return (
-		<AnimatePresence mode="wait">
-			<motion.div
-				key={sortSlug}
-				variants={staggerContainer}
-				initial="initial"
-				animate="animate"
-				exit="exit"
-				className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-			>
-				{foundations.map((foundation, index) => (
+		<section id="foundations-results" className="bg-white pb-10 pt-2 sm:pb-12 md:pb-14">
+			<SectionContainer withPadding={false} className="px-4 sm:px-6 lg:px-8">
+				<div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+					<div>
+						<p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700/80">
+							{t('foundations.resultsEyebrow')}
+						</p>
+						<p className="mt-1 text-lg font-semibold text-slate-900">
+							{isLoading ? t('foundations.loading') : formatResultsCount(foundations.length, t)}
+						</p>
+					</div>
+					<FoundationsSortDropdown value={sortSlug} onChange={handleSortChange} />
+				</div>
+
+				<AnimatePresence mode="wait">
 					<motion.div
-						key={foundation.id}
-						variants={{
-							initial: { opacity: 0, y: 20 },
-							animate: { opacity: 1, y: 0 },
-						}}
-						custom={index}
+						key={sortSlug}
+						initial={reducedMotion ? false : { opacity: 0 }}
+						animate={reducedMotion ? false : { opacity: 1 }}
+						exit={reducedMotion ? undefined : { opacity: 0 }}
+						transition={reducedMotion ? { duration: 0 } : { duration: 0.2 }}
 					>
-						<FoundationCard foundation={foundation} />
+						{isLoading ? (
+							<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+								{Array.from({ length: 6 }).map((_, i) => (
+									// biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders
+									<FoundationCardGridSkeleton key={i} />
+								))}
+							</div>
+						) : foundations.length === 0 ? (
+							<EmptyFoundations />
+						) : (
+							<motion.div
+								className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+								variants={reducedMotion ? undefined : staggerContainer}
+								initial={reducedMotion ? false : 'initial'}
+								animate={reducedMotion ? false : 'animate'}
+								role="feed"
+								aria-label={t('foundations.resultsEyebrow')}
+							>
+								{foundations.map((foundation) => (
+									<FoundationCard key={foundation.id} foundation={foundation} />
+								))}
+							</motion.div>
+						)}
 					</motion.div>
-				))}
-			</motion.div>
-		</AnimatePresence>
+				</AnimatePresence>
+			</SectionContainer>
+		</section>
 	)
 }

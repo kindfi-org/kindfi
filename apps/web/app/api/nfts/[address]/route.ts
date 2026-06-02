@@ -10,6 +10,7 @@ import {
 import { Api } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { addressParamSchema } from '~/lib/schemas/stellar.schemas'
 import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transactions'
 import { validateRequest } from '~/lib/utils/validation'
@@ -20,10 +21,7 @@ import { validateRequest } from '~/lib/utils/validation'
  * Get NFTs owned by a smart wallet address
  * Note: This is a simplified implementation. For production, use an indexer.
  */
-export async function GET(
-	_req: NextRequest,
-	{ params }: { params: Promise<{ address: string }> },
-) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ address: string }> }) {
 	try {
 		const { address } = await params
 		const validation = validateRequest(addressParamSchema, { address })
@@ -31,8 +29,7 @@ export async function GET(
 		const { address: validatedAddress } = validation.data
 
 		const nftContractAddress =
-			process.env.NFT_CONTRACT_ADDRESS ||
-			process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS
+			process.env.NFT_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS
 
 		if (!nftContractAddress) {
 			return NextResponse.json(
@@ -102,16 +99,10 @@ export async function GET(
 			.setTimeout(30)
 			.build()
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const totalSupplySim = await (txService as any).server.simulateTransaction(
-			totalSupplyTx,
-		)
+		const totalSupplySim = await txService.simulateTransaction(totalSupplyTx)
 
 		let totalSupply = 0
-		if (
-			!Api.isSimulationError(totalSupplySim) &&
-			totalSupplySim.result?.retval
-		) {
+		if (!Api.isSimulationError(totalSupplySim) && totalSupplySim.result?.retval) {
 			totalSupply = Number(scValToNative(totalSupplySim.result.retval))
 		}
 
@@ -123,10 +114,7 @@ export async function GET(
 		for (let tokenId = 0; tokenId < maxTokensToCheck; tokenId++) {
 			try {
 				// Check owner
-				const ownerOp = nftContract.call(
-					'owner_of',
-					nativeToScVal(tokenId, { type: 'u32' }),
-				)
+				const ownerOp = nftContract.call('owner_of', nativeToScVal(tokenId, { type: 'u32' }))
 				const ownerTx = new TransactionBuilder(sourceAccount, {
 					fee: '100',
 					networkPassphrase: config.stellar.networkPassphrase,
@@ -135,10 +123,7 @@ export async function GET(
 					.setTimeout(30)
 					.build()
 
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const ownerSim = await (txService as any).server.simulateTransaction(
-					ownerTx,
-				)
+				const ownerSim = await txService.simulateTransaction(ownerTx)
 
 				if (!Api.isSimulationError(ownerSim) && ownerSim.result?.retval) {
 					const ownerAddress = scValToNative(ownerSim.result.retval)
@@ -146,8 +131,7 @@ export async function GET(
 					// If this address owns the token, get metadata
 					if (
 						ownerAddress &&
-						String(ownerAddress).toLowerCase() ===
-							validatedAddress.toLowerCase()
+						String(ownerAddress).toLowerCase() === validatedAddress.toLowerCase()
 					) {
 						const metadataOp = nftContract.call(
 							'get_metadata',
@@ -163,10 +147,7 @@ export async function GET(
 
 						const metadataSim = await txService.simulateTransaction(metadataTx)
 
-						if (
-							!Api.isSimulationError(metadataSim) &&
-							metadataSim.result?.retval
-						) {
+						if (!Api.isSimulationError(metadataSim) && metadataSim.result?.retval) {
 							const metadata = scValToNative(metadataSim.result.retval) as {
 								name?: string
 								description?: string
@@ -205,7 +186,7 @@ export async function GET(
 			},
 		})
 	} catch (error) {
-		console.error('Error fetching NFTs:', error)
+		logger.error('Error fetching NFTs:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to fetch NFTs',

@@ -1,9 +1,6 @@
 import { supabase } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
-import {
-	createTagSchema,
-	paginationQuerySchema,
-} from '~/lib/schemas/tag.schemas'
+import { createTagSchema, paginationQuerySchema } from '~/lib/schemas/tag.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
 function generateColor(name: string): string {

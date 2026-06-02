@@ -10,18 +10,12 @@ import {
 } from '~/components/sections/home/skeletons'
 
 export const DynamicComponents = {
-	Hero: dynamic(
-		() => import('~/components/sections/home/hero').then((mod) => mod.Hero),
-		{
-			ssr: true,
-			loading: SkeletonHero,
-		},
-	),
+	Hero: dynamic(() => import('~/components/sections/home/hero').then((mod) => mod.Hero), {
+		ssr: true,
+		loading: SkeletonHero,
+	}),
 	UserJourney: dynamic(
-		() =>
-			import('~/components/sections/home/user-journey').then(
-				(mod) => mod.UserJourney,
-			),
+		() => import('~/components/sections/home/user-journey').then((mod) => mod.UserJourney),
 		{
 			loading: SkeletonUserJourney,
 		},
@@ -36,36 +30,24 @@ export const DynamicComponents = {
 			loading: SkeletonHighlightedProjects,
 		},
 	),
-	JoinUs: dynamic(
-		() =>
-			import('~/components/sections/home/join-us').then((mod) => mod.JoinUs),
-		{
-			loading: SkeletonJoinUs,
-		},
-	),
+	JoinUs: dynamic(() => import('~/components/sections/home/join-us').then((mod) => mod.JoinUs), {
+		loading: SkeletonJoinUs,
+	}),
 	HowItWorks: dynamic(
-		() =>
-			import('~/components/sections/home/how-it-works').then(
-				(mod) => mod.HowItWorks,
-			),
+		() => import('~/components/sections/home/how-it-works').then((mod) => mod.HowItWorks),
 		{
 			loading: SkeletonHowItWorks,
 		},
 	),
 	NewUserGuide: dynamic(
-		() =>
-			import('~/components/sections/home/new-user-guide').then(
-				(mod) => mod.NewUserGuide,
-			),
+		() => import('~/components/sections/home/new-user-guide').then((mod) => mod.NewUserGuide),
 		{
 			loading: SkeletonNewUserGuide,
 		},
 	),
 	PlatformOverview: dynamic(
 		() =>
-			import('~/components/sections/home/platform-overview').then(
-				(mod) => mod.PlatformOverview,
-			),
+			import('~/components/sections/home/platform-overview').then((mod) => mod.PlatformOverview),
 		{
 			loading: SkeletonPlatformOverview,
 		},

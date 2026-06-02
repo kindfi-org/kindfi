@@ -240,9 +240,7 @@ describe('error', () => {
 
 	test('logs when log: true', async () => {
 		const { Logger } = await import('../lib/logger')
-		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(
-			() => {},
-		)
+		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(() => {})
 
 		error('DB failed', { status: 500, code: 'DB_ERROR', log: true })
 
@@ -256,9 +254,7 @@ describe('error', () => {
 
 	test('logs Error instance with message and stack', async () => {
 		const { Logger } = await import('../lib/logger')
-		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(
-			() => {},
-		)
+		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(() => {})
 
 		const err = new Error('Connection refused')
 		error('DB failed', { status: 500, code: 'DB_ERROR', log: err })
@@ -273,9 +269,7 @@ describe('error', () => {
 
 	test('logs arbitrary objects (e.g. Supabase errors)', async () => {
 		const { Logger } = await import('../lib/logger')
-		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(
-			() => {},
-		)
+		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(() => {})
 
 		const supabaseError = { message: 'duplicate key', code: '23505' }
 		error('Insert failed', {
@@ -293,9 +287,7 @@ describe('error', () => {
 
 	test('does not log when log is not set', async () => {
 		const { Logger } = await import('../lib/logger')
-		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(
-			() => {},
-		)
+		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(() => {})
 
 		error('Silent error', { status: 400 })
 
@@ -305,9 +297,7 @@ describe('error', () => {
 
 	test('does not log when log: false', async () => {
 		const { Logger } = await import('../lib/logger')
-		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(
-			() => {},
-		)
+		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(() => {})
 
 		error('Silent error', { status: 400, log: false })
 
@@ -317,9 +307,7 @@ describe('error', () => {
 
 	test('uses code as log eventType', async () => {
 		const { Logger } = await import('../lib/logger')
-		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(
-			() => {},
-		)
+		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(() => {})
 
 		error('Not found', { status: 404, code: 'NOT_FOUND', log: true })
 
@@ -331,9 +319,7 @@ describe('error', () => {
 
 	test('falls back to API_ERROR eventType when no code given', async () => {
 		const { Logger } = await import('../lib/logger')
-		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(
-			() => {},
-		)
+		const errorSpy = spyOn(Logger.prototype, 'error').mockImplementation(() => {})
 
 		error('Unknown', { log: true })
 

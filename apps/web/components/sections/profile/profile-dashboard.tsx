@@ -2,15 +2,11 @@
 
 import type { Database } from '@services/supabase'
 import { motion } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { startTransition, useEffect, useMemo, useState } from 'react'
+import { Suspense, startTransition, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from '~/components/base/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n'
@@ -21,11 +17,32 @@ import { KYCCard } from './cards/kyc-card'
 import { PersonalInfoCard } from './cards/personal-info-card'
 import { WalletCard } from './cards/wallet-card'
 import { RoleSelectionModal } from './modals/role-selection-modal'
-import { profileFadeUp } from './profile-motion'
 import { ProfileHeader } from './profile-header'
+import { profileFadeUp } from './profile-motion'
 import { ProfileShell } from './profile-shell'
-import { CreatorProfile } from './views/creator-profile'
-import { DonorProfile } from './views/donor-profile'
+import { ProfileViewSkeleton } from './skeletons'
+
+const CreatorProfile = dynamic(
+	() =>
+		import('./views/creator-profile').then((mod) => ({
+			default: mod.CreatorProfile,
+		})),
+	{
+		loading: () => <ProfileViewSkeleton />,
+		ssr: false,
+	},
+)
+
+const DonorProfile = dynamic(
+	() =>
+		import('./views/donor-profile').then((mod) => ({
+			default: mod.DonorProfile,
+		})),
+	{
+		loading: () => <ProfileViewSkeleton />,
+		ssr: false,
+	},
+)
 
 type Role = Database['public']['Enums']['user_role']
 
@@ -66,12 +83,7 @@ export function ProfileDashboard({
 		() => user.profile?.display_name || user.email?.split('@')[0] || 'You',
 		[user.profile?.display_name, user.email],
 	)
-	const {
-		address: externalWalletAddress,
-		connect,
-		disconnect,
-		isConnected,
-	} = useWallet()
+	const { address: externalWalletAddress, connect, disconnect, isConnected } = useWallet()
 	const imageUrl = user.profile?.image_url ?? null
 	const bio = user.profile?.bio ?? null
 	const [showRoleModal, setShowRoleModal] = useState(false)
@@ -106,10 +118,7 @@ export function ProfileDashboard({
 			toast.success(t('profile.kycCallbackApproved'))
 		} else if (normalizedStatus === 'Declined') {
 			toast.error(t('profile.kycCallbackDeclined'))
-		} else if (
-			normalizedStatus === 'In Review' ||
-			normalizedStatus === 'In Progress'
-		) {
+		} else if (normalizedStatus === 'In Review' || normalizedStatus === 'In Progress') {
 			toast.info(t('profile.kycCallbackReview'))
 		} else {
 			toast.info(t('profile.kycCallbackChecking'))
@@ -155,19 +164,21 @@ export function ProfileDashboard({
 	const renderSection = (section: string) => {
 		const ProfileView = role === 'creator' ? CreatorProfile : DonorProfile
 		return (
-			<ProfileView
-				userId={user.id}
-				displayName={displayName}
-				showSection={
-					section as
-						| 'overview'
-						| 'gamification'
-						| 'donations'
-						| 'nfts'
-						| 'campaigns'
-						| 'foundations'
-				}
-			/>
+			<Suspense fallback={<ProfileViewSkeleton />}>
+				<ProfileView
+					userId={user.id}
+					displayName={displayName}
+					showSection={
+						section as
+							| 'overview'
+							| 'gamification'
+							| 'donations'
+							| 'nfts'
+							| 'campaigns'
+							| 'foundations'
+					}
+				/>
+			</Suspense>
 		)
 	}
 
@@ -185,10 +196,7 @@ export function ProfileDashboard({
 						onOpenSettings={openSettings}
 					/>
 
-					<motion.div
-						{...profileFadeUp(0.08)}
-						className="grid gap-5 lg:grid-cols-5"
-					>
+					<motion.div {...profileFadeUp(0.08)} className="grid gap-5 lg:grid-cols-5">
 						<div className="lg:col-span-3">
 							<WalletCard
 								smartAccountAddress={smartAccountAddress ?? null}
@@ -208,20 +216,13 @@ export function ProfileDashboard({
 					</motion.div>
 
 					<motion.div {...profileFadeUp(0.12)}>
-						<Tabs
-							value={activeSection}
-							onValueChange={handleTabChange}
-							className="space-y-6"
-						>
+						<Tabs value={activeSection} onValueChange={handleTabChange} className="space-y-6">
 							<div className="overflow-x-auto pb-1">
 								<TabsList className="inline-flex h-auto w-max min-w-full gap-1 rounded-full border border-white/70 bg-white/60 p-1.5 shadow-sm backdrop-blur-sm sm:min-w-0">
 									<TabsTrigger value="overview" className={TAB_TRIGGER_CLASS}>
 										{t('profile.tabOverview')}
 									</TabsTrigger>
-									<TabsTrigger
-										value="gamification"
-										className={TAB_TRIGGER_CLASS}
-									>
+									<TabsTrigger value="gamification" className={TAB_TRIGGER_CLASS}>
 										{t('profile.tabGamification')}
 									</TabsTrigger>
 									{role === 'donor' ? (
@@ -234,10 +235,7 @@ export function ProfileDashboard({
 											<TabsTrigger value="campaigns" className={TAB_TRIGGER_CLASS}>
 												{t('profile.tabCampaigns')}
 											</TabsTrigger>
-											<TabsTrigger
-												value="foundations"
-												className={TAB_TRIGGER_CLASS}
-											>
+											<TabsTrigger value="foundations" className={TAB_TRIGGER_CLASS}>
 												{t('profile.tabFoundations')}
 											</TabsTrigger>
 										</>

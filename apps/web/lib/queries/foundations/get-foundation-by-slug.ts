@@ -1,9 +1,7 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
+import { logger } from '@/lib/logger'
 
-export async function getFoundationBySlug(
-	client: TypedSupabaseClient,
-	slug: string,
-) {
+export async function getFoundationBySlug(client: TypedSupabaseClient, slug: string) {
 	const { data, error } = await client
 		.from('foundations')
 		.select(
@@ -40,7 +38,7 @@ export async function getFoundationBySlug(
 		.maybeSingle()
 
 	if (error) {
-		console.error('Error fetching foundation by slug:', error)
+		logger.error('Error fetching foundation by slug:', error)
 		throw error
 	}
 
@@ -119,7 +117,7 @@ export async function getFoundationBySlug(
 	])
 
 	const profileData = profileResult.data
-	const foundationEscrows = ((escrowsResult.data || []) as unknown) as Array<{
+	const foundationEscrows = (escrowsResult.data || []) as unknown as Array<{
 		escrow_id: string
 		escrow_contracts: {
 			id: string

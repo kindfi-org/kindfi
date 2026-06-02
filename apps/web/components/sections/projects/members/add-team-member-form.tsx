@@ -1,19 +1,13 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { Loader2, UserPlus } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import {
 	Form,
 	FormControl,
@@ -24,6 +18,7 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import type { CreateTeamMemberData } from '~/lib/types/project/project-team.types'
 
 interface AddTeamMemberFormProps {
@@ -32,26 +27,10 @@ interface AddTeamMemberFormProps {
 }
 
 const teamMemberSchema = z.object({
-	fullName: z
-		.string()
-		.trim()
-		.min(1, 'Full name is required')
-		.max(100, 'Full name is too long'),
-	roleTitle: z
-		.string()
-		.trim()
-		.min(1, 'Role/title is required')
-		.max(100, 'Role/title is too long'),
-	bio: z
-		.string()
-		.trim()
-		.max(300, 'Bio must be 2-3 lines (max 300 characters)')
-		.optional(),
-	photoUrl: z
-		.string()
-		.url('Please enter a valid URL')
-		.optional()
-		.or(z.literal('')),
+	fullName: z.string().trim().min(1, 'Full name is required').max(100, 'Full name is too long'),
+	roleTitle: z.string().trim().min(1, 'Role/title is required').max(100, 'Role/title is too long'),
+	bio: z.string().trim().max(300, 'Bio must be 2-3 lines (max 300 characters)').optional(),
+	photoUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
 	yearsInvolved: z
 		.number()
 		.int('Years must be a whole number')
@@ -62,10 +41,7 @@ const teamMemberSchema = z.object({
 
 type TeamMemberFormData = z.infer<typeof teamMemberSchema>
 
-export function AddTeamMemberForm({
-	onAdd,
-	className,
-}: AddTeamMemberFormProps) {
+export function AddTeamMemberForm({ onAdd, className }: AddTeamMemberFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const form = useForm<TeamMemberFormData>({
@@ -91,7 +67,7 @@ export function AddTeamMemberForm({
 			})
 			form.reset()
 		} catch (error) {
-			console.error('Failed to add team member:', error)
+			logger.error('Failed to add team member:', error)
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -116,10 +92,7 @@ export function AddTeamMemberForm({
 				</CardHeader>
 				<CardContent>
 					<Form {...form}>
-						<form
-							onSubmit={form.handleSubmit(handleSubmit)}
-							className="space-y-4"
-						>
+						<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<FormField
 									control={form.control}
@@ -130,11 +103,7 @@ export function AddTeamMemberForm({
 												Full Name <span className="text-destructive">*</span>
 											</FormLabel>
 											<FormControl>
-												<Input
-													placeholder="John Doe"
-													disabled={isSubmitting}
-													{...field}
-												/>
+												<Input placeholder="John Doe" disabled={isSubmitting} {...field} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -169,9 +138,7 @@ export function AddTeamMemberForm({
 									<FormItem>
 										<FormLabel>
 											Short Bio{' '}
-											<span className="text-muted-foreground text-xs">
-												(optional, 2-3 lines)
-											</span>
+											<span className="text-muted-foreground text-xs">(optional, 2-3 lines)</span>
 										</FormLabel>
 										<FormControl>
 											<Textarea
@@ -193,10 +160,7 @@ export function AddTeamMemberForm({
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>
-												Photo URL{' '}
-												<span className="text-muted-foreground text-xs">
-													(optional)
-												</span>
+												Photo URL <span className="text-muted-foreground text-xs">(optional)</span>
 											</FormLabel>
 											<FormControl>
 												<Input
@@ -218,9 +182,7 @@ export function AddTeamMemberForm({
 										<FormItem>
 											<FormLabel>
 												Years Involved{' '}
-												<span className="text-muted-foreground text-xs">
-													(optional)
-												</span>
+												<span className="text-muted-foreground text-xs">(optional)</span>
 											</FormLabel>
 											<FormControl>
 												<Input
@@ -232,9 +194,7 @@ export function AddTeamMemberForm({
 													{...field}
 													onChange={(e) =>
 														field.onChange(
-															e.target.value
-																? parseInt(e.target.value, 10)
-																: undefined,
+															e.target.value ? parseInt(e.target.value, 10) : undefined,
 														)
 													}
 												/>

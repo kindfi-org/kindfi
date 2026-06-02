@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import {
 	mapDiditStatusToKYC,
 	verifyDiditWebhookSignatureSimple,
@@ -11,13 +12,7 @@ import {
 
 interface DiditWebhookEvent extends Record<string, unknown> {
 	session_id: string
-	status:
-		| 'Not Started'
-		| 'In Progress'
-		| 'Approved'
-		| 'Declined'
-		| 'In Review'
-		| 'Abandoned'
+	status: 'Not Started' | 'In Progress' | 'Approved' | 'Declined' | 'In Review' | 'Abandoned'
 	webhook_type: 'status.updated' | 'data.updated'
 	created_at?: number
 	timestamp: number
@@ -37,11 +32,8 @@ export async function POST(req: NextRequest) {
 		const webhookSecret = process.env.DIDIT_WEBHOOK_SECRET_KEY
 
 		if (!webhookSecret) {
-			console.error('DIDIT_WEBHOOK_SECRET_KEY is not configured')
-			return NextResponse.json(
-				{ error: 'Webhook secret not configured' },
-				{ status: 500 },
-			)
+			logger.error('DIDIT_WEBHOOK_SECRET_KEY is not configured')
+			return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
 		}
 
 		// Get raw body and parse JSON
@@ -54,21 +46,13 @@ export async function POST(req: NextRequest) {
 		const timestamp = req.headers.get('x-timestamp')
 
 		if (!timestamp) {
-			return NextResponse.json(
-				{ error: 'Missing timestamp header' },
-				{ status: 401 },
-			)
+			return NextResponse.json({ error: 'Missing timestamp header' }, { status: 401 })
 		}
 
 		// Verify signature - try V2 first (recommended), then Simple (fallback)
 		let isValid = false
 		if (signatureV2) {
-			isValid = verifyDiditWebhookSignatureV2(
-				jsonBody,
-				signatureV2,
-				timestamp,
-				webhookSecret,
-			)
+			isValid = verifyDiditWebhookSignatureV2(jsonBody, signatureV2, timestamp, webhookSecret)
 			if (isValid) {
 			}
 		}
@@ -97,16 +81,14 @@ export async function POST(req: NextRequest) {
 			.like('notes', `%${jsonBody.session_id}%`)
 
 		if (findError || !kycRecords || kycRecords.length === 0) {
-			console.error('KYC record not found for session:', jsonBody.session_id)
+			logger.error('KYC record not found for session:', jsonBody.session_id)
 			// Return 200 to prevent retries for sessions we don't have
 			return NextResponse.json({ received: true })
 		}
 
 		const kycRecord = kycRecords[0]
 		const notes =
-			typeof kycRecord.notes === 'string'
-				? JSON.parse(kycRecord.notes)
-				: kycRecord.notes
+			typeof kycRecord.notes === 'string' ? JSON.parse(kycRecord.notes) : kycRecord.notes
 
 		const kycStatus = mapDiditStatusToKYC(jsonBody.status)
 		// Update KYC record
@@ -127,17 +109,14 @@ export async function POST(req: NextRequest) {
 			.eq('user_id', kycRecord.user_id)
 
 		if (updateError) {
-			console.error('Failed to update KYC record:', updateError)
+			logger.error('Failed to update KYC record:', updateError)
 			// Return 500 to trigger retry
-			return NextResponse.json(
-				{ error: 'Failed to update KYC record' },
-				{ status: 500 },
-			)
+			return NextResponse.json({ error: 'Failed to update KYC record' }, { status: 500 })
 		}
 
 		return NextResponse.json({ received: true })
 	} catch (error) {
-		console.error('Error processing Didit webhook:', error)
+		logger.error('Error processing Didit webhook:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to process webhook',

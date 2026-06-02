@@ -1,8 +1,11 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesInsert } from '@services/supabase'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { projectCreateFormSchema } from '~/lib/schemas/project.schemas'
 import {
 	buildSocialLinks,
@@ -12,7 +15,7 @@ import {
 } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
 
-export async function POST(req: Request) {
+async function createProjectHandler(req: NextRequest) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -30,7 +33,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (profileError || !profileData) {
-			console.error('Profile lookup error:', {
+			logger.error('Profile lookup error:', {
 				error: profileError,
 				userId,
 			})
@@ -97,7 +100,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (insertError || !project) {
-			console.error(insertError)
+			logger.error(insertError)
 			return NextResponse.json({ error: insertError?.message }, { status: 500 })
 		}
 
@@ -114,11 +117,8 @@ export async function POST(req: Request) {
 					.eq('id', project.id)
 
 				if (updateImageError) {
-					console.error(updateImageError)
-					return NextResponse.json(
-						{ error: updateImageError.message },
-						{ status: 500 },
-					)
+					logger.error(updateImageError)
+					return NextResponse.json({ error: updateImageError.message }, { status: 500 })
 				}
 			}
 		}
@@ -135,14 +135,26 @@ export async function POST(req: Request) {
 					creatorId: userId,
 				}),
 			)
-			.catch((err) => console.error('[Project create] Notification error:', err))
+			.catch((err) => logger.error('[Project create] Notification error:', err))
 
 		return NextResponse.json({ slug: project.slug }, { status: 201 })
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'moderate',
+		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? ip ?? 'anonymous'
+		},
+	},
+	createProjectHandler,
+)

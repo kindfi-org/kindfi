@@ -4,17 +4,10 @@ import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Heart, History, ShieldCheck, Vote } from 'lucide-react'
 import { useState } from 'react'
-import {
-	Tabs,
-	TabsList,
-	TabsTrigger,
-} from '~/components/base/tabs'
+import { Tabs, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { SectionContainer } from '~/components/shared/section-container'
+import type { CommunityFundBalance, GovernanceRound } from '~/lib/governance/types'
 import { useI18n } from '~/lib/i18n'
-import type {
-	CommunityFundBalance,
-	GovernanceRound,
-} from '~/lib/governance/types'
 import { cn } from '~/lib/utils'
 import { CommunityFundBalance as FundBalanceWidget } from './community-fund-balance'
 import { EligibilityBadge } from './eligibility-badge'
@@ -62,9 +55,7 @@ export function GovernanceSection() {
 	})
 
 	const allRounds = allRoundsData?.data ?? []
-	const activeRounds = allRounds.filter(
-		(r) => r.status === 'active' || r.status === 'upcoming',
-	)
+	const activeRounds = allRounds.filter((r) => r.status === 'active' || r.status === 'upcoming')
 	const pastRounds = allRounds.filter((r) => r.status === 'ended')
 	const fundBalance = balanceData?.data?.balance
 
@@ -101,9 +92,7 @@ export function GovernanceSection() {
 						initial={reducedMotion ? false : { opacity: 0, y: 16 }}
 						animate={reducedMotion ? false : { opacity: 1, y: 0 }}
 						transition={
-							reducedMotion
-								? { duration: 0 }
-								: { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
+							reducedMotion ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
 						}
 					>
 						<p className="mb-4 text-[11px] font-medium uppercase tracking-[0.2em] text-emerald-700/80">
@@ -114,9 +103,7 @@ export function GovernanceSection() {
 							className="text-balance text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl"
 						>
 							{t('governancePage.title')}{' '}
-							<span className="gradient-text">
-								{t('governancePage.titleHighlight')}
-							</span>
+							<span className="gradient-text">{t('governancePage.titleHighlight')}</span>
 						</h1>
 						<p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
 							{t('governancePage.subtitle')}
@@ -136,9 +123,7 @@ export function GovernanceSection() {
 								<p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700/80">
 									{String(index + 1).padStart(2, '0')}
 								</p>
-								<p className="mt-2 text-sm font-semibold text-slate-900">
-									{step.title}
-								</p>
+								<p className="mt-2 text-sm font-semibold text-slate-900">{step.title}</p>
 								<p className="mt-2 text-sm leading-relaxed text-muted-foreground">
 									{step.description}
 								</p>
@@ -186,9 +171,7 @@ export function GovernanceSection() {
 										<History className="mr-2 h-4 w-4" aria-hidden="true" />
 										{t('governancePage.tabPast')}
 										{pastRounds.length > 0 ? (
-											<span className="ml-2 text-xs text-slate-500">
-												({pastRounds.length})
-											</span>
+											<span className="ml-2 text-xs text-slate-500">({pastRounds.length})</span>
 										) : null}
 									</TabsTrigger>
 								</TabsList>
@@ -200,9 +183,7 @@ export function GovernanceSection() {
 									initial={reducedMotion ? false : { opacity: 0, y: 10 }}
 									animate={reducedMotion ? false : { opacity: 1, y: 0 }}
 									exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
-									transition={
-										reducedMotion ? { duration: 0 } : { duration: 0.2 }
-									}
+									transition={reducedMotion ? { duration: 0 } : { duration: 0.2 }}
 									className="mt-6"
 								>
 									{activeTab === 'active' ? (

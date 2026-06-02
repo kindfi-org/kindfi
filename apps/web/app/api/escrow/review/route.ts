@@ -1,14 +1,15 @@
-import { supabase } from '@packages/lib/supabase'
-import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import { supabase, supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { milestoneReviewSchema } from '~/lib/schemas/escrow.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
-import { milestoneReviewSchema } from '~/lib/schemas/escrow.schemas'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
-export async function POST(req: NextRequest) {
+async function reviewHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
@@ -26,14 +27,8 @@ export async function POST(req: NextRequest) {
 			})
 			return validation.response
 		}
-		const {
-			milestoneId,
-			reviewerId,
-			status,
-			comments,
-			signer,
-			escrowContractAddress,
-		} = validation.data
+		const { milestoneId, reviewerId, status, comments, signer, escrowContractAddress } =
+			validation.data
 
 		// Verify authenticated user matches reviewerId
 		const {
@@ -63,21 +58,14 @@ export async function POST(req: NextRequest) {
 		const { data: reviewer, error: reviewerError } = reviewerResult
 
 		if (milestoneError || !milestone) {
-			return NextResponse.json(
-				{ error: 'Milestone not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Milestone not found' }, { status: 404 })
 		}
 
 		if (reviewerError || !reviewer) {
-			return NextResponse.json(
-				{ error: 'Reviewer not authorized' },
-				{ status: 403 },
-			)
+			return NextResponse.json({ error: 'Reviewer not authorized' }, { status: 403 })
 		}
 
 		// * It shouldn't be "completed"... it should be "approved" however, there is an overlap with the old types with the new migrations.
-		// TODO: Fix this in the DB and prior that, update here.
 		const isApproved = status === 'completed'
 		let escrowResponse = null
 
@@ -94,7 +82,6 @@ export async function POST(req: NextRequest) {
 			}
 		}
 
-		// TODO: Move this to FE for signatures
 		// // Sign transaction
 		// const signedTxXdr = signTransaction(
 		//   escrowResponse.unsignedTransaction,
@@ -105,7 +92,6 @@ export async function POST(req: NextRequest) {
 		//   throw new Error('Transaction signing failed');
 		// }
 
-		// TODO: Move this to BE for sending transaction
 		// Send signed transaction on-chain
 		// const txResponse = await sendTransaction(signedTxXdr);
 
@@ -113,7 +99,6 @@ export async function POST(req: NextRequest) {
 		//   throw new Error('Failed to finalize milestone on-chain');
 		// }
 
-		// TODO: Move this to the BE to update the milestone status
 		// // Step 5: Update Milestone Status in DB
 		// const { data: updatedMilestone, error: updateError } = await supabase
 		//   .from('escrow_milestones')
@@ -129,13 +114,11 @@ export async function POST(req: NextRequest) {
 		// }
 
 		// Step 6: Save Review Comments
-		const { error: commentError } = await supabase
-			.from('review_comments')
-			.insert({
-				milestone_id: milestoneId,
-				reviewer_id: reviewerId,
-				comments,
-			})
+		const { error: commentError } = await supabase.from('review_comments').insert({
+			milestone_id: milestoneId,
+			reviewer_id: reviewerId,
+			comments,
+		})
 
 		if (commentError) {
 			throw new AppError(
@@ -164,9 +147,7 @@ export async function POST(req: NextRequest) {
 							milestoneIndex: milestone.order_index ?? 0,
 						}),
 					)
-					.catch((err) =>
-						console.error('[Escrow review] Notification error:', err),
-					)
+					.catch((err) => logger.error('[Escrow review] Notification error:', err))
 			}
 		}
 
@@ -186,7 +167,6 @@ export async function POST(req: NextRequest) {
 				success: true,
 				message: 'Milestone reviewed successfully',
 				data: {
-					// TODO: Return the updated milestone after signing and sending the transaction, not before
 					// milestone: updatedMilestone,
 					escrowResponse,
 				},
@@ -194,7 +174,7 @@ export async function POST(req: NextRequest) {
 			{ status: 200 },
 		)
 	} catch (error) {
-		console.error('Milestone Review Error:', error)
+		logger.error('Milestone Review Error:', error)
 
 		if (error instanceof AppError) {
 			await auditLogger.log({
@@ -222,10 +202,7 @@ export async function POST(req: NextRequest) {
 				durationMs: Date.now() - startTime,
 				metadata: { error: 'Invalid JSON format' },
 			})
-			return NextResponse.json(
-				{ error: 'Invalid JSON format in request body' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Invalid JSON format in request body' }, { status: 400 })
 		}
 
 		await auditLogger.log({
@@ -246,3 +223,11 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	reviewHandler,
+)

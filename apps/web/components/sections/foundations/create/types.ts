@@ -25,10 +25,7 @@ export const createFoundationSchema = z.object({
 			/^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])?$/,
 			'Slug must be lowercase alphanumeric with hyphens',
 		),
-	foundedYear: z
-		.number()
-		.min(1900)
-		.max(new Date().getFullYear(), 'Year cannot be in the future'),
+	foundedYear: z.number().min(1900).max(new Date().getFullYear(), 'Year cannot be in the future'),
 	mission: z.string().max(MAX_MISSION_LENGTH).optional(),
 	vision: z.string().max(MAX_VISION_LENGTH).optional(),
 	websiteUrl: z.string().url().optional().or(z.literal('')),

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
@@ -16,11 +17,7 @@ interface AccountInfoCardProps {
 	slug: string
 }
 
-export function AccountInfoCard({
-	userEmail,
-	createdAt,
-	slug,
-}: AccountInfoCardProps) {
+export function AccountInfoCard({ userEmail, createdAt, slug }: AccountInfoCardProps) {
 	const { t } = useI18n()
 	const [isEditing, setIsEditing] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
@@ -49,10 +46,8 @@ export function AccountInfoCard({
 			setIsEditing(false)
 			window.location.reload()
 		} catch (error) {
-			console.error('Failed to update slug:', error)
-			toast.error(
-				error instanceof Error ? error.message : t('profile.handleUpdateFailed'),
-			)
+			logger.error('Failed to update slug:', error)
+			toast.error(error instanceof Error ? error.message : t('profile.handleUpdateFailed'))
 		} finally {
 			setIsSaving(false)
 		}
@@ -62,9 +57,7 @@ export function AccountInfoCard({
 		<ProfileSurfaceCard className="h-full">
 			<div className="mb-6 flex items-start justify-between gap-4 border-b border-slate-100 pb-5">
 				<div>
-					<h3 className="text-lg font-semibold text-gray-900">
-						{t('profile.accountInfoTitle')}
-					</h3>
+					<h3 className="text-lg font-semibold text-gray-900">{t('profile.accountInfoTitle')}</h3>
 					<p className="mt-1 text-sm text-muted-foreground">
 						{t('profile.accountInfoDescription')}
 					</p>
@@ -89,11 +82,7 @@ export function AccountInfoCard({
 			<div className="space-y-5">
 				<div className="space-y-2">
 					<Label>{t('profile.email')}</Label>
-					<Input
-						value={userEmail}
-						readOnly
-						className="cursor-not-allowed rounded-xl bg-slate-50"
-					/>
+					<Input value={userEmail} readOnly className="cursor-not-allowed rounded-xl bg-slate-50" />
 					<p className="text-xs text-muted-foreground">{t('profile.emailReadonly')}</p>
 				</div>
 

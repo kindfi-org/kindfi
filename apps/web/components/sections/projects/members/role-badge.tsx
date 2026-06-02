@@ -9,10 +9,7 @@ export function RoleBadge({ role }: { role: Enums<'project_member_role'> }) {
 	return (
 		<Badge
 			variant="secondary"
-			className={cn(
-				'inline-flex items-center gap-1.5 px-2.5 py-1 leading-none',
-				meta.badgeClass,
-			)}
+			className={cn('inline-flex items-center gap-1.5 px-2.5 py-1 leading-none', meta.badgeClass)}
 		>
 			<Icon aria-hidden className={cn('h-3.5 w-3.5', meta.iconClass)} />
 			{meta.label}

@@ -2,12 +2,7 @@
 
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-} from '~/components/base/card'
+import { Card, CardContent, CardFooter, CardHeader } from '~/components/base/card'
 import { cn } from '~/lib/utils'
 
 interface FormShellProps {
@@ -47,13 +42,9 @@ export function FormShell({
 			<CardHeader className="space-y-2 border-b bg-[#fafbfc] px-6 pb-5 pt-6">
 				<div className="flex items-start justify-between gap-4">
 					<div className="space-y-1 text-left">
-						<h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-							{title}
-						</h1>
+						<h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">{title}</h1>
 						{subtitle ? (
-							<div className="text-sm leading-relaxed text-muted-foreground">
-								{subtitle}
-							</div>
+							<div className="text-sm leading-relaxed text-muted-foreground">{subtitle}</div>
 						) : null}
 					</div>
 					{Icon ? (
@@ -64,9 +55,7 @@ export function FormShell({
 				</div>
 			</CardHeader>
 			<CardContent className="px-6 py-6">{children}</CardContent>
-			{footer ? (
-				<CardFooter className="border-t bg-white px-6 py-5">{footer}</CardFooter>
-			) : null}
+			{footer ? <CardFooter className="border-t bg-white px-6 py-5">{footer}</CardFooter> : null}
 		</Card>
 	)
 }

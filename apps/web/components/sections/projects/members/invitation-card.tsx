@@ -24,12 +24,7 @@ interface InvitationCardProps {
 	onCancel?: (id: string) => void
 }
 
-export function InvitationCard({
-	invitation,
-	index,
-	onResend,
-	onCancel,
-}: InvitationCardProps) {
+export function InvitationCard({ invitation, index, onResend, onCancel }: InvitationCardProps) {
 	const isExpired = isAfter(new Date(), new Date(invitation.expiresAt))
 	const menuAria = `Open actions menu for ${invitation.email}`
 	const resendAria = `Resend invitation to ${invitation.email}`
@@ -57,10 +52,7 @@ export function InvitationCard({
 										{invitation.title}
 									</Badge>
 								)}
-								<Badge
-									variant={isExpired ? 'destructive' : 'secondary'}
-									className="capitalize"
-								>
+								<Badge variant={isExpired ? 'destructive' : 'secondary'} className="capitalize">
 									{isExpired ? 'Expired' : invitation.status}
 								</Badge>
 							</div>

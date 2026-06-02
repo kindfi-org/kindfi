@@ -2,23 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import {
-	CheckCircle2,
-	Clock,
-	ExternalLink,
-	Flag,
-	Sparkles,
-	Target,
-	Trophy,
-} from 'lucide-react'
+import { CheckCircle2, Clock, ExternalLink, Flag, Sparkles, Target, Trophy } from 'lucide-react'
 import { useMemo } from 'react'
 import { Badge } from '~/components/base/badge'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { Progress } from '~/components/base/progress'
 import { staggerContainer } from '~/lib/constants/animations'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
@@ -76,20 +63,11 @@ export function QuestEngine() {
 	const quests = useMemo(() => data?.quests || [], [data?.quests])
 	// Track completed quest IDs (for future use in animations/effects)
 	const _completedQuests = useMemo(
-		() =>
-			new Set(
-				quests.filter((q) => q.progress?.is_completed).map((q) => q.quest_id),
-			),
+		() => new Set(quests.filter((q) => q.progress?.is_completed).map((q) => q.quest_id)),
 		[quests],
 	)
-	const activeQuests = useMemo(
-		() => quests.filter((q) => !q.progress?.is_completed),
-		[quests],
-	)
-	const completed = useMemo(
-		() => quests.filter((q) => q.progress?.is_completed),
-		[quests],
-	)
+	const activeQuests = useMemo(() => quests.filter((q) => !q.progress?.is_completed), [quests])
+	const completed = useMemo(() => quests.filter((q) => q.progress?.is_completed), [quests])
 
 	if (isLoading) {
 		return (
@@ -140,11 +118,7 @@ export function QuestEngine() {
 
 			{/* Active Quests */}
 			{activeQuests.length > 0 && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					className="space-y-4"
-				>
+				<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
 					<h3 className="text-lg font-semibold">Active Quests</h3>
 					<div className="grid gap-4 md:grid-cols-2">
 						{activeQuests.map((quest, index) => (
@@ -156,11 +130,7 @@ export function QuestEngine() {
 
 			{/* Completed Quests */}
 			{completed.length > 0 && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					className="space-y-4"
-				>
+				<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
 					<h3 className="text-lg font-semibold flex items-center gap-2">
 						<CheckCircle2 className="h-5 w-5 text-green-600" />
 						Completed Quests
@@ -187,13 +157,9 @@ export function QuestEngine() {
 
 function QuestCard({ quest, index }: { quest: Quest; index: number }) {
 	const Icon = questTypeIcons[quest.quest_type] || Target
-	const typeColor =
-		questTypeColors[quest.quest_type] || 'bg-gray-100 text-gray-600'
+	const typeColor = questTypeColors[quest.quest_type] || 'bg-gray-100 text-gray-600'
 	const progress = quest.progress || { current_value: 0, is_completed: false }
-	const progressPercentage = Math.min(
-		(progress.current_value / quest.target_value) * 100,
-		100,
-	)
+	const progressPercentage = Math.min((progress.current_value / quest.target_value) * 100, 100)
 	const isCompleted = progress.is_completed
 	const isExpired = quest.expires_at && new Date(quest.expires_at) < new Date()
 
@@ -227,9 +193,7 @@ function QuestCard({ quest, index }: { quest: Quest; index: number }) {
 								<Icon className="h-5 w-5" />
 							</div>
 							<div className="flex-1 min-w-0">
-								<CardTitle className="text-lg line-clamp-2">
-									{quest.name}
-								</CardTitle>
+								<CardTitle className="text-lg line-clamp-2">{quest.name}</CardTitle>
 								<Badge variant="outline" className="mt-1 text-xs">
 									{quest.reward_points} points
 								</Badge>
@@ -248,9 +212,7 @@ function QuestCard({ quest, index }: { quest: Quest; index: number }) {
 				</CardHeader>
 
 				<CardContent className="relative z-10 space-y-4">
-					<p className="text-sm text-muted-foreground line-clamp-2">
-						{quest.description}
-					</p>
+					<p className="text-sm text-muted-foreground line-clamp-2">{quest.description}</p>
 
 					{!isCompleted && (
 						<div className="space-y-2">
@@ -270,18 +232,14 @@ function QuestCard({ quest, index }: { quest: Quest; index: number }) {
 					{isCompleted && progress.completed_at && (
 						<div className="flex items-center gap-2 text-sm text-green-600">
 							<CheckCircle2 className="h-4 w-4" />
-							<span>
-								Completed {new Date(progress.completed_at).toLocaleDateString()}
-							</span>
+							<span>Completed {new Date(progress.completed_at).toLocaleDateString()}</span>
 						</div>
 					)}
 
 					{quest.expires_at && !isCompleted && (
 						<div className="flex items-center gap-2 text-xs text-muted-foreground">
 							<Clock className="h-3 w-3" />
-							<span>
-								Expires {new Date(quest.expires_at).toLocaleDateString()}
-							</span>
+							<span>Expires {new Date(quest.expires_at).toLocaleDateString()}</span>
 						</div>
 					)}
 

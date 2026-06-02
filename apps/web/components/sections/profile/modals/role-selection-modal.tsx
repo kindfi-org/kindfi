@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { Heart, Lightbulb } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import {
 	Dialog,
 	DialogContent,
@@ -40,10 +41,7 @@ export function RoleSelectionModal({
 		setIsSaving(true)
 		try {
 			const supabase = createSupabaseBrowserClient()
-			const { error } = await supabase
-				.from('profiles')
-				.update({ role })
-				.eq('id', userId)
+			const { error } = await supabase.from('profiles').update({ role }).eq('id', userId)
 
 			if (error) throw error
 
@@ -54,7 +52,7 @@ export function RoleSelectionModal({
 			// Reload page to reflect changes
 			window.location.reload()
 		} catch (error) {
-			console.error('Failed to update role:', error)
+			logger.error('Failed to update role:', error)
 			toast.error('Failed to update role. Please try again.')
 		} finally {
 			setIsSaving(false)
@@ -65,12 +63,10 @@ export function RoleSelectionModal({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[600px]">
 				<DialogHeader>
-					<DialogTitle className="text-center text-2xl font-bold">
-						Welcome to KindFi
-					</DialogTitle>
+					<DialogTitle className="text-center text-2xl font-bold">Welcome to KindFi</DialogTitle>
 					<DialogDescription className="text-center text-base">
-						Select how you&apos;d like to use KindFi. You can&apos;t change this
-						later in your settings.
+						Select how you&apos;d like to use KindFi. You can&apos;t change this later in your
+						settings.
 					</DialogDescription>
 				</DialogHeader>
 

@@ -20,18 +20,12 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '~/components/base/button'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from '~/components/base/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/base/tooltip'
 import { cn } from '~/lib/utils'
 import { LinkDialog } from './link-dialog'
 
 // Returns the count of visible characters by collapsing whitespace and trimming the text
-const visibleCharCount = (text: string) =>
-	Array.from(text.replace(/\s+/g, ' ').trim()).length
+const visibleCharCount = (text: string) => Array.from(text.replace(/\s+/g, ' ').trim()).length
 
 interface RichTextEditorProps {
 	value: string
@@ -158,9 +152,7 @@ export function RichTextEditor({
 				const { state } = editor
 				const { from, to } = state.selection
 				const selectedText = state.doc.textBetween(from, to, ' ')
-				const initialUrl = editor?.isActive('link')
-					? editor?.getAttributes('link').href
-					: ''
+				const initialUrl = editor?.isActive('link') ? editor?.getAttributes('link').href : ''
 				setLinkDialogData({ initialUrl, selectedText })
 				setLinkDialogOpen(true)
 			},
@@ -184,36 +176,27 @@ export function RichTextEditor({
 	return (
 		<TooltipProvider>
 			<div
-				className={cn(
-					'border rounded-lg overflow-hidden',
-					error && 'border-red-500',
-					className,
-				)}
+				className={cn('border rounded-lg overflow-hidden', error && 'border-red-500', className)}
 			>
 				<div className="flex items-center flex-wrap gap-1 p-2 bg-gray-50 border-b">
-					{formatButtons.map(
-						({ icon: Icon, action, label, active, disabled }) => (
-							<Tooltip key={label}>
-								<TooltipTrigger asChild>
-									<Button
-										type="button"
-										variant="ghost"
-										size="sm"
-										className={cn(
-											'h-8 w-8 p-0',
-											active && 'bg-accent text-accent-foreground',
-										)}
-										onClick={action}
-										aria-label={label}
-										disabled={disabled}
-									>
-										<Icon className="h-4 w-4" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>{label}</TooltipContent>
-							</Tooltip>
-						),
-					)}
+					{formatButtons.map(({ icon: Icon, action, label, active, disabled }) => (
+						<Tooltip key={label}>
+							<TooltipTrigger asChild>
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									className={cn('h-8 w-8 p-0', active && 'bg-accent text-accent-foreground')}
+									onClick={action}
+									aria-label={label}
+									disabled={disabled}
+								>
+									<Icon className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>{label}</TooltipContent>
+						</Tooltip>
+					))}
 				</div>
 
 				<div className="min-h-[200px]">
@@ -225,10 +208,7 @@ export function RichTextEditor({
 				</div>
 
 				<div className="px-4 py-2 bg-gray-50 border-t text-xs text-gray-500 text-end">
-					{editor
-						? visibleCharCount(editor.getText())
-						: visibleCharCount(value)}{' '}
-					characters
+					{editor ? visibleCharCount(editor.getText()) : visibleCharCount(value)} characters
 				</div>
 			</div>
 

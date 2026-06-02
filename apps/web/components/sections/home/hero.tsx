@@ -2,14 +2,25 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import { useMemo, useState, type ReactNode } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 import { Button } from '~/components/base/button'
-import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useTypewriter } from '~/hooks/use-typewriter'
 import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
+
+const WaitlistModal = dynamic(
+	() =>
+		import('~/components/sections/waitlist/waitlist-modal').then((mod) => ({
+			default: mod.WaitlistModal,
+		})),
+	{
+		loading: () => null,
+		ssr: false,
+	},
+)
 
 const fadeUp = (delay = 0) => ({
 	initial: { opacity: 0, y: 24 },
@@ -75,10 +86,7 @@ export function Hero() {
 
 			<SectionContainer className="relative">
 				<div className="mx-auto flex max-w-5xl flex-col items-center text-center">
-					<motion.div
-						{...fadeUp(0)}
-						className="mb-5 max-w-xl space-y-3"
-					>
+					<motion.div {...fadeUp(0)} className="mb-5 max-w-xl space-y-3">
 						<p className="text-[11px] font-medium uppercase tracking-[0.2em] text-emerald-700/80">
 							{t('home.heroEyebrow')}
 						</p>
@@ -128,15 +136,9 @@ interface EcosystemPartnersProps {
 	builtUsingLabel: string
 }
 
-function EcosystemPartners({
-	supportedByLabel,
-	builtUsingLabel,
-}: EcosystemPartnersProps) {
+function EcosystemPartners({ supportedByLabel, builtUsingLabel }: EcosystemPartnersProps) {
 	return (
-		<motion.div
-			{...fadeUp(0.4)}
-			className="w-full max-w-4xl pt-8"
-		>
+		<motion.div {...fadeUp(0.4)} className="w-full max-w-4xl pt-8">
 			<div className="flex flex-col items-center gap-8 sm:gap-6">
 				<PartnerRow label={supportedByLabel}>
 					<a
@@ -166,17 +168,14 @@ function EcosystemPartners({
 								target="_blank"
 								rel="noopener noreferrer"
 								aria-label={`Visit ${partner.name}`}
-							className="group inline-flex items-center justify-center rounded-md px-3 py-2 transition-opacity hover:opacity-100 opacity-85"
+								className="group inline-flex items-center justify-center rounded-md px-3 py-2 transition-opacity hover:opacity-100 opacity-85"
 							>
 								<Image
 									src={partner.src}
 									alt={partner.name}
 									width={partner.width}
 									height={partner.height}
-									className={cn(
-										partner.className,
-										'object-contain',
-									)}
+									className={cn(partner.className, 'object-contain')}
 								/>
 							</a>
 						))}
@@ -187,13 +186,7 @@ function EcosystemPartners({
 	)
 }
 
-function PartnerRow({
-	label,
-	children,
-}: {
-	label: string
-	children: ReactNode
-}) {
+function PartnerRow({ label, children }: { label: string; children: ReactNode }) {
 	return (
 		<div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-5">
 			<span className="shrink-0 text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">

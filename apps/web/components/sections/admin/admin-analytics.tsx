@@ -9,12 +9,7 @@ import {
 	IoTrendingUpOutline,
 	IoWalletOutline,
 } from 'react-icons/io5'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 import { getAdminStats } from '~/lib/queries/admin/get-admin-stats'
 
@@ -51,10 +46,7 @@ export function AdminAnalytics() {
 				</div>
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 					{SKELETON_KEYS.map((key) => (
-						<div
-							key={key}
-							className="h-28 rounded-lg border bg-muted/50 animate-pulse"
-						/>
+						<div key={key} className="h-28 rounded-lg border bg-muted/50 animate-pulse" />
 					))}
 				</div>
 				<div className="grid gap-6 lg:grid-cols-2">
@@ -68,15 +60,10 @@ export function AdminAnalytics() {
 	if (error || !stats) {
 		return (
 			<div className="space-y-6">
-				<AdminSectionHeader
-					title="Analytics"
-					description="Platform insights and metrics"
-				/>
+				<AdminSectionHeader title="Analytics" description="Platform insights and metrics" />
 				<Card className="border-destructive/50">
 					<CardContent className="py-12 text-center">
-						<p className="font-medium text-destructive">
-							Error loading analytics.
-						</p>
+						<p className="font-medium text-destructive">Error loading analytics.</p>
 						<p className="mt-1 text-sm text-muted-foreground">
 							Refresh the page or try again later.
 						</p>
@@ -89,9 +76,7 @@ export function AdminAnalytics() {
 	const projectEntries = Object.entries(stats.projectsByStatus || {}).toSorted(
 		([, a], [, b]) => b - a,
 	)
-	const userEntries = Object.entries(stats.usersByRole || {}).toSorted(
-		([, a], [, b]) => b - a,
-	)
+	const userEntries = Object.entries(stats.usersByRole || {}).toSorted(([, a], [, b]) => b - a)
 	const totalProjects = stats.totalProjects || 1
 	const totalUsers = stats.totalUsers || 1
 
@@ -106,17 +91,13 @@ export function AdminAnalytics() {
 			<section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">
-							Total community
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Total community</CardTitle>
 						<span className="rounded-md bg-muted p-2" aria-hidden>
 							<IoPeopleOutline className="h-4 w-4 text-muted-foreground" />
 						</span>
 					</CardHeader>
 					<CardContent>
-						<p className="text-2xl font-bold tabular-nums">
-							{stats.totalUsers}
-						</p>
+						<p className="text-2xl font-bold tabular-nums">{stats.totalUsers}</p>
 						<p className="text-xs text-muted-foreground">
 							+{stats.recentActivity.users} in last 7 days
 						</p>
@@ -124,20 +105,14 @@ export function AdminAnalytics() {
 				</Card>
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">
-							Active campaigns
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Active campaigns</CardTitle>
 						<span className="rounded-md bg-muted p-2" aria-hidden>
 							<IoFolderOutline className="h-4 w-4 text-muted-foreground" />
 						</span>
 					</CardHeader>
 					<CardContent>
-						<p className="text-2xl font-bold tabular-nums">
-							{stats.activeProjects}
-						</p>
-						<p className="text-xs text-muted-foreground">
-							{stats.totalProjects} total projects
-						</p>
+						<p className="text-2xl font-bold tabular-nums">{stats.activeProjects}</p>
+						<p className="text-xs text-muted-foreground">{stats.totalProjects} total projects</p>
 					</CardContent>
 				</Card>
 				<Card>
@@ -166,14 +141,10 @@ export function AdminAnalytics() {
 					<CardContent>
 						<p className="text-2xl font-bold tabular-nums">
 							{stats.totalProjects > 0
-								? formatPercent(
-										(stats.fundedProjects / stats.totalProjects) * 100,
-									)
+								? formatPercent((stats.fundedProjects / stats.totalProjects) * 100)
 								: formatPercent(0)}
 						</p>
-						<p className="text-xs text-muted-foreground">
-							{stats.fundedProjects} funded
-						</p>
+						<p className="text-xs text-muted-foreground">{stats.fundedProjects} funded</p>
 					</CardContent>
 				</Card>
 			</section>
@@ -186,9 +157,7 @@ export function AdminAnalytics() {
 							<IoStatsChartOutline className="h-4 w-4" aria-hidden />
 							Projects by status
 						</CardTitle>
-						<p className="text-sm text-muted-foreground">
-							Distribution of campaign statuses
-						</p>
+						<p className="text-sm text-muted-foreground">Distribution of campaign statuses</p>
 					</CardHeader>
 					<CardContent>
 						{projectEntries.length > 0 ? (
@@ -214,9 +183,7 @@ export function AdminAnalytics() {
 								})}
 							</div>
 						) : (
-							<p className="text-sm text-muted-foreground">
-								No project data yet
-							</p>
+							<p className="text-sm text-muted-foreground">No project data yet</p>
 						)}
 					</CardContent>
 				</Card>
@@ -227,9 +194,7 @@ export function AdminAnalytics() {
 							<IoPeopleOutline className="h-4 w-4" aria-hidden />
 							Users by role
 						</CardTitle>
-						<p className="text-sm text-muted-foreground">
-							Distribution of user roles
-						</p>
+						<p className="text-sm text-muted-foreground">Distribution of user roles</p>
 					</CardHeader>
 					<CardContent>
 						{userEntries.length > 0 ? (
@@ -276,41 +241,32 @@ export function AdminAnalytics() {
 					<CardContent>
 						<dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
 							<div>
-								<dt className="text-xs font-medium text-muted-foreground">
-									Projects
-								</dt>
+								<dt className="text-xs font-medium text-muted-foreground">Projects</dt>
 								<dd className="mt-1 text-xl font-semibold tabular-nums">
 									{stats.recentActivity.projects}
 								</dd>
 							</div>
 							<div>
-								<dt className="text-xs font-medium text-muted-foreground">
-									Users
-								</dt>
+								<dt className="text-xs font-medium text-muted-foreground">Users</dt>
 								<dd className="mt-1 text-xl font-semibold tabular-nums">
 									{stats.recentActivity.users}
 								</dd>
 							</div>
 							<div>
-								<dt className="text-xs font-medium text-muted-foreground">
-									Foundations
-								</dt>
+								<dt className="text-xs font-medium text-muted-foreground">Foundations</dt>
 								<dd className="mt-1 text-xl font-semibold tabular-nums">
 									{stats.recentActivity.foundations}
 								</dd>
 							</div>
 							<div>
-								<dt className="text-xs font-medium text-muted-foreground">
-									Contributions
-								</dt>
+								<dt className="text-xs font-medium text-muted-foreground">Contributions</dt>
 								<dd className="mt-1 text-xl font-semibold tabular-nums">
 									{stats.recentActivity.contributions}
 								</dd>
 							</div>
 						</dl>
 						<p className="mt-4 text-sm text-muted-foreground">
-							Contribution total:{' '}
-							{formatCurrency(stats.recentActivity.contributionsAmount, 2)}
+							Contribution total: {formatCurrency(stats.recentActivity.contributionsAmount, 2)}
 						</p>
 					</CardContent>
 				</Card>
@@ -321,39 +277,25 @@ export function AdminAnalytics() {
 							<IoBusinessOutline className="h-4 w-4" aria-hidden />
 							Platform summary
 						</CardTitle>
-						<p className="text-sm text-muted-foreground">
-							Foundations and funding progress
-						</p>
+						<p className="text-sm text-muted-foreground">Foundations and funding progress</p>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="flex items-center justify-between">
-							<span className="text-sm text-muted-foreground">
-								Total foundations
-							</span>
-							<span className="text-lg font-semibold tabular-nums">
-								{stats.totalFoundations}
-							</span>
+							<span className="text-sm text-muted-foreground">Total foundations</span>
+							<span className="text-lg font-semibold tabular-nums">{stats.totalFoundations}</span>
 						</div>
 						<div className="flex items-center justify-between">
-							<span className="text-sm text-muted-foreground">
-								Total escrows
-							</span>
-							<span className="text-lg font-semibold tabular-nums">
-								{stats.totalEscrows}
-							</span>
+							<span className="text-sm text-muted-foreground">Total escrows</span>
+							<span className="text-lg font-semibold tabular-nums">{stats.totalEscrows}</span>
 						</div>
 						<div className="flex items-center justify-between">
-							<span className="text-sm text-muted-foreground">
-								Target (all projects)
-							</span>
+							<span className="text-sm text-muted-foreground">Target (all projects)</span>
 							<span className="text-lg font-semibold tabular-nums">
 								{formatCurrency(stats.totalTarget)}
 							</span>
 						</div>
 						<div className="flex items-center justify-between">
-							<span className="text-sm text-muted-foreground">
-								Active projects progress
-							</span>
+							<span className="text-sm text-muted-foreground">Active projects progress</span>
 							<span className="text-lg font-semibold tabular-nums">
 								{formatPercent(stats.activeProjectsProgress)}
 							</span>

@@ -1,4 +1,5 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
+import { logger } from '@/lib/logger'
 import type { ProjectTeamMember } from '~/lib/types/project/project-team.types'
 
 export async function getProjectTeamBySlug(
@@ -30,9 +31,7 @@ export async function getProjectTeamBySlug(
 			teamError.message?.includes('relation') ||
 			teamError.code === '42P01'
 		) {
-			console.warn(
-				'project_team table does not exist yet. Please run the migration.',
-			)
+			logger.warn('project_team table does not exist yet. Please run the migration.')
 			return {
 				projectId: project.id,
 				team: [],

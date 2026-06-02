@@ -7,9 +7,7 @@ interface UseProjectSupportersCountParams {
 	projectId?: string
 }
 
-export function useProjectSupportersCount({
-	projectId,
-}: UseProjectSupportersCountParams) {
+export function useProjectSupportersCount({ projectId }: UseProjectSupportersCountParams) {
 	const [supportersCount, setSupportersCount] = useState<number | null>(null)
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState<unknown>(null)

@@ -44,39 +44,31 @@ export function CampaignGoalReachedEmail({
 				<Body className="bg-gray-50 text-gray-900">
 					<Container className="mx-auto my-8 w-full max-w-[560px]">
 						<Section className="bg-white rounded-2xl p-8 shadow">
-							<Text className="text-2xl font-semibold mb-1">
-								🎯 Funding goal reached!
-							</Text>
+							<Text className="text-2xl font-semibold mb-1">🎯 Funding goal reached!</Text>
 							<Text className="text-sm text-gray-500 mb-4">KindFi</Text>
 
-							<Text className="text-base leading-6 mb-3">
-								Hi {recipientName},
-							</Text>
+							<Text className="text-base leading-6 mb-3">Hi {recipientName},</Text>
 
 							{isCreator ? (
 								<>
 									<Text className="text-base leading-6 mb-3">
-										Incredible news — your project{' '}
-										<strong>{projectTitle}</strong> has reached its funding goal
-										of <strong>{targetAmount}</strong>!
+										Incredible news — your project <strong>{projectTitle}</strong> has reached its
+										funding goal of <strong>{targetAmount}</strong>!
 									</Text>
 									<Text className="text-base leading-6 mb-4">
-										Your campaign is now fully funded. Head to your project
-										dashboard to review the next steps, manage your milestones,
-										and keep your supporters updated.
+										Your campaign is now fully funded. Head to your project dashboard to review the
+										next steps, manage your milestones, and keep your supporters updated.
 									</Text>
 								</>
 							) : (
 								<>
 									<Text className="text-base leading-6 mb-3">
-										A project you support — <strong>{projectTitle}</strong> —
-										has reached its funding goal of{' '}
-										<strong>{targetAmount}</strong>!
+										A project you support — <strong>{projectTitle}</strong> — has reached its
+										funding goal of <strong>{targetAmount}</strong>!
 									</Text>
 									<Text className="text-base leading-6 mb-4">
-										Your contribution helped make this happen. The project team
-										will now begin executing their milestones. Stay tuned for
-										updates.
+										Your contribution helped make this happen. The project team will now begin
+										executing their milestones. Stay tuned for updates.
 									</Text>
 								</>
 							)}

@@ -43,11 +43,7 @@ type TeamMemberResponse = {
 export function useTeamMutation() {
 	const queryClient = useQueryClient()
 
-	const createMember = useMutation<
-		TeamMemberResponse,
-		Error,
-		CreateTeamMemberRequest
-	>({
+	const createMember = useMutation<TeamMemberResponse, Error, CreateTeamMemberRequest>({
 		mutationFn: async (data) => {
 			const res = await fetch(`/api/projects/${data.projectSlug}/team`, {
 				method: 'POST',
@@ -99,11 +95,7 @@ export function useTeamMutation() {
 		},
 	})
 
-	const updateMember = useMutation<
-		TeamMemberResponse,
-		Error,
-		UpdateTeamMemberRequest
-	>({
+	const updateMember = useMutation<TeamMemberResponse, Error, UpdateTeamMemberRequest>({
 		mutationFn: async (data) => {
 			const res = await fetch(`/api/projects/${data.projectSlug}/team`, {
 				method: 'PATCH',
@@ -157,11 +149,7 @@ export function useTeamMutation() {
 		},
 	})
 
-	const deleteMember = useMutation<
-		{ message: string },
-		Error,
-		DeleteTeamMemberRequest
-	>({
+	const deleteMember = useMutation<{ message: string }, Error, DeleteTeamMemberRequest>({
 		mutationFn: async (data) => {
 			const res = await fetch(
 				`/api/projects/${data.projectSlug}/team?projectId=${data.projectId}&memberId=${data.memberId}`,

@@ -26,7 +26,6 @@ export function ProjectPitchFormSkeleton() {
 								{/* Toolbar */}
 								<div className="flex items-center gap-1 p-2 bg-gray-50 border-b">
 									{Array.from({ length: 8 }).map((_, i) => (
-										// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
 										<Skeleton key={i} className="h-8 w-8" />
 									))}
 								</div>

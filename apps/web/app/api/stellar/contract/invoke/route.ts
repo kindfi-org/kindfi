@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { contractInvokeSchema } from '~/lib/schemas/stellar.schemas'
 import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transactions'
 import { validateRequest } from '~/lib/utils/validation'
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 	} catch (error) {
-		console.error('Error preparing contract invocation:', error)
+		logger.error('Error preparing contract invocation:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to prepare contract invocation',

@@ -2,6 +2,7 @@ import { appEnvConfig } from '@packages/lib/config'
 import { StellarPasskeyService } from '@packages/lib/stellar'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { accountInfoQuerySchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -35,7 +36,7 @@ export async function GET(req: NextRequest) {
 			data: accountInfo,
 		})
 	} catch (error) {
-		console.error('❌ Error getting account info:', error)
+		logger.error('❌ Error getting account info:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to get account information',

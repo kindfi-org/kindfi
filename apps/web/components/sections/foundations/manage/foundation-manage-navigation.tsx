@@ -11,10 +11,7 @@ import {
 	IoSpeedometerOutline,
 } from 'react-icons/io5'
 import { cn } from '~/lib/utils'
-import {
-	FOUNDATION_MANAGE_SECTIONS,
-	type FoundationManageSectionKey,
-} from './constants'
+import { FOUNDATION_MANAGE_SECTIONS, type FoundationManageSectionKey } from './constants'
 
 const SECTION_ICONS: Record<
 	FoundationManageSectionKey,
@@ -60,9 +57,7 @@ export function FoundationManageNavigation({ slug }: { slug: string }) {
 								<Icon
 									className={cn(
 										'shrink-0 transition-opacity',
-										isActive
-											? 'opacity-100'
-											: 'opacity-70 group-hover:opacity-100',
+										isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100',
 									)}
 									size={18}
 									aria-hidden="true"

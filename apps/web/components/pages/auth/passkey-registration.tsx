@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { signOutAction } from '~/app/actions/auth'
-
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -57,7 +57,7 @@ export function PasskeyRegistrationComponent() {
 		try {
 			await signOutAction()
 		} catch (error) {
-			console.error('Error signing out:', error)
+			logger.error('Error signing out:', error)
 			// Even if sign out fails, redirect to home
 			router.push('/')
 		}
@@ -87,19 +87,16 @@ export function PasskeyRegistrationComponent() {
 			sessionStorage.setItem('kindfi_new_session', 'true')
 			router.push('/profile')
 		} catch (e) {
-			console.error('Finalize passkey registration error', e)
+			logger.error('Finalize passkey registration error', e)
 			router.push('/sign-in')
 		}
 	}, [regSuccess, userEmail, userId, smartAccountAddress, router])
 
 	useEffect(() => {
-
 		// If registration succeeded but no Smart Account address, redirect to sign-in
 		// The passkey is still registered and can be used for authentication
 		if (regSuccess && !smartAccountAddress) {
-			console.warn(
-				'⚠️ Passkey registered but Smart Account creation failed. Redirecting to sign-in.',
-			)
+			logger.warn('⚠️ Passkey registered but Smart Account creation failed. Redirecting to sign-in.')
 			toast.warning(
 				'Passkey registered, but Smart Account creation failed. You can still sign in with your passkey.',
 			)
@@ -113,14 +110,7 @@ export function PasskeyRegistrationComponent() {
 		}
 
 		handleFinalize()
-	}, [
-		regSuccess,
-		userEmail,
-		userId,
-		smartAccountAddress,
-		router,
-		handleFinalize,
-	])
+	}, [regSuccess, userEmail, userId, smartAccountAddress, router, handleFinalize])
 
 	// Removed automatic redirection - user will manually choose to continue
 	// Note: We keep the user on this page even if registration succeeds
@@ -134,12 +124,10 @@ export function PasskeyRegistrationComponent() {
 						<div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
 							<Shield className="h-6 w-6 text-destructive" />
 						</div>
-						<CardTitle className="text-2xl font-bold">
-							WebAuthn Not Supported
-						</CardTitle>
+						<CardTitle className="text-2xl font-bold">WebAuthn Not Supported</CardTitle>
 						<CardDescription>
-							Your browser doesn&apos;t support passkeys. To be able to interact
-							with the website, please use a browser that supports WebAuthn.
+							Your browser doesn&apos;t support passkeys. To be able to interact with the website,
+							please use a browser that supports WebAuthn.
 						</CardDescription>
 					</CardHeader>
 					<CardFooter>
@@ -160,32 +148,21 @@ export function PasskeyRegistrationComponent() {
 						<div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
 							<CheckCircle className="h-6 w-6 text-green-600" />
 						</div>
-						<CardTitle className="text-2xl font-bold text-green-600">
-							Passkey Registered!
-						</CardTitle>
+						<CardTitle className="text-2xl font-bold text-green-600">Passkey Registered!</CardTitle>
 						<CardDescription>
-							Your passkey has been successfully registered. You can now use it
-							to sign in securely.
+							Your passkey has been successfully registered. You can now use it to sign in securely.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="text-center">
 						<p className="text-sm text-muted-foreground">
-							You can now sign in using your passkey or continue to your
-							profile.
+							You can now sign in using your passkey or continue to your profile.
 						</p>
 					</CardContent>
 					<CardFooter className="flex flex-col space-y-2">
-						<Button
-							onClick={handleFinalize}
-							className="w-full gradient-btn text-white"
-						>
+						<Button onClick={handleFinalize} className="w-full gradient-btn text-white">
 							Continue to Profile
 						</Button>
-						<Button
-							variant="outline"
-							onClick={() => router.push('/sign-in')}
-							className="w-full"
-						>
+						<Button variant="outline" onClick={() => router.push('/sign-in')} className="w-full">
 							Go to Login
 						</Button>
 					</CardFooter>
@@ -201,17 +178,11 @@ export function PasskeyRegistrationComponent() {
 					<div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
 						<Shield className="h-6 w-6 text-primary" />
 					</div>
-					<CardTitle className="text-2xl font-bold">
-						Set Up Your Passkey
-					</CardTitle>
+					<CardTitle className="text-2xl font-bold">Set Up Your Passkey</CardTitle>
 					<CardDescription>
-						Complete your account setup by registering a passkey for secure,
-						passwordless authentication.
-						{userEmail && (
-							<span className="block mt-2 font-medium text-primary">
-								{userEmail}
-							</span>
-						)}
+						Complete your account setup by registering a passkey for secure, passwordless
+						authentication.
+						{userEmail && <span className="block mt-2 font-medium text-primary">{userEmail}</span>}
 					</CardDescription>
 				</CardHeader>
 
@@ -222,9 +193,8 @@ export function PasskeyRegistrationComponent() {
 								<strong>What is a passkey?</strong>
 							</p>
 							<p>
-								A passkey is a secure, passwordless way to sign in using your
-								device&apos;s biometrics (like Face ID or fingerprint) or
-								security key.
+								A passkey is a secure, passwordless way to sign in using your device&apos;s
+								biometrics (like Face ID or fingerprint) or security key.
 							</p>
 						</div>
 
@@ -247,17 +217,9 @@ export function PasskeyRegistrationComponent() {
 						<PasskeyInfoDialog />
 
 						{regError && !isAlreadyRegistered && (
-							<div
-								className="text-red-600 text-sm text-center"
-								role="alert"
-								aria-live="assertive"
-							>
+							<div className="text-red-600 text-sm text-center" role="alert" aria-live="assertive">
 								{regError}
-								<Button
-									variant="link"
-									onClick={reset}
-									className="ml-2 text-red-600 underline"
-								>
+								<Button variant="link" onClick={reset} className="ml-2 text-red-600 underline">
 									Try Again
 								</Button>
 							</div>
@@ -283,11 +245,7 @@ export function PasskeyRegistrationComponent() {
 				</CardContent>
 
 				<CardFooter className="flex flex-col space-y-2">
-					<Button
-						variant="outline"
-						onClick={handleSkipForNow}
-						className="w-full"
-					>
+					<Button variant="outline" onClick={handleSkipForNow} className="w-full">
 						Skip for now
 					</Button>
 					<p className="text-xs text-muted-foreground text-center">
@@ -295,10 +253,7 @@ export function PasskeyRegistrationComponent() {
 					</p>
 					<div className="text-center text-sm text-muted-foreground">
 						Need help?{' '}
-						<Link
-							href="/support"
-							className="text-primary underline hover:text-primary/80"
-						>
+						<Link href="/support" className="text-primary underline hover:text-primary/80">
 							Contact Support
 						</Link>
 					</div>

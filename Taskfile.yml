@@ -87,27 +87,6 @@ tasks:
     cmds:
       - cd apps/indexer && bun start:docker
 
-  # ? Academy Web App tasks
-  academy:dev:
-    desc: "Run the development server for the Academy web app"
-    cmds:
-      - cd apps/academy-wep && bun dev
-
-  academy:build:
-    desc: "Build the Academy web app"
-    cmds:
-      - cd apps/academy-wep && bun run build
-
-  academy:start:
-    desc: "Start the production server for the Academy web app"
-    cmds:
-      - cd apps/academy-wep && bun run start
-
-  academy:test:
-    desc: "Run tests for the Academy web app"
-    cmds:
-      - cd apps/academy-wep && bun test
-
   # ? AI Service tasks
   ai:dev:
     desc: "Run the AI service in development mode"

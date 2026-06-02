@@ -8,12 +8,7 @@ import { useState } from 'react'
 import { IoCalendarOutline } from 'react-icons/io5'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
 import { AddMilestoneDialog } from './add-milestone-dialog'
 import { FOUNDATION_MANAGE_SECTIONS } from './constants'
@@ -23,24 +18,18 @@ interface FoundationMilestonesWrapperProps {
 	foundationSlug: string
 }
 
-const milestonesSection = FOUNDATION_MANAGE_SECTIONS.find(
-	(s) => s.key === 'milestones',
-)
+const milestonesSection = FOUNDATION_MANAGE_SECTIONS.find((s) => s.key === 'milestones')
 
-export function FoundationMilestonesWrapper({
-	foundationSlug,
-}: FoundationMilestonesWrapperProps) {
+export function FoundationMilestonesWrapper({ foundationSlug }: FoundationMilestonesWrapperProps) {
 	const prefersReducedMotion = useReducedMotion()
 	const [addDialogOpen, setAddDialogOpen] = useState(false)
 	const {
 		data: foundation,
 		error,
 		isLoading,
-	} = useSupabaseQuery(
-		'foundation',
-		(client) => getFoundationBySlug(client, foundationSlug),
-		{ additionalKeyValues: [foundationSlug] },
-	)
+	} = useSupabaseQuery('foundation', (client) => getFoundationBySlug(client, foundationSlug), {
+		additionalKeyValues: [foundationSlug],
+	})
 
 	if (error ?? !foundation) {
 		notFound()
@@ -72,13 +61,7 @@ export function FoundationMilestonesWrapper({
 			/>
 			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
 				<ManageSectionHeader
-					icon={
-						<IoCalendarOutline
-							size={24}
-							className="relative z-10"
-							aria-hidden="true"
-						/>
-					}
+					icon={<IoCalendarOutline size={24} className="relative z-10" aria-hidden="true" />}
 					title="Foundation Milestones"
 					description={
 						milestonesSection?.description ??
@@ -100,7 +83,6 @@ export function FoundationMilestonesWrapper({
 				transition={{
 					delay: prefersReducedMotion ? 0 : 0.2,
 					duration: prefersReducedMotion ? 0 : 0.3,
-					transitionProperty: 'opacity',
 				}}
 				className="space-y-6"
 			>
@@ -109,9 +91,7 @@ export function FoundationMilestonesWrapper({
 						{milestones.map((milestone, index) => (
 							<motion.div
 								key={milestone.id}
-								initial={
-									prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }
-								}
+								initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{
 									delay: prefersReducedMotion ? 0 : 0.1 * index,
@@ -141,9 +121,7 @@ export function FoundationMilestonesWrapper({
 										{milestone.impactMetric ? (
 											<div className="flex items-center gap-2 text-green-600 font-semibold">
 												<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-												<span className="text-sm">
-													{milestone.impactMetric}
-												</span>
+												<span className="text-sm">{milestone.impactMetric}</span>
 											</div>
 										) : null}
 									</CardContent>
@@ -160,8 +138,7 @@ export function FoundationMilestonesWrapper({
 							/>
 							<h3 className="text-xl font-semibold mb-2">No Milestones Yet</h3>
 							<p className="text-muted-foreground mb-6">
-								Start tracking your foundation&apos;s achievements by adding
-								your first milestone.
+								Start tracking your foundation&apos;s achievements by adding your first milestone.
 							</p>
 							<Button
 								onClick={() => setAddDialogOpen(true)}

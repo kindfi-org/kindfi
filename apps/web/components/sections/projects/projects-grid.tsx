@@ -30,10 +30,7 @@ export function ProjectsGrid({
 					exit={{ opacity: 0 }}
 					transition={{ duration: 0.3 }}
 				>
-					<EmptyProject
-						selectedCategories={selectedCategories}
-						onClearFilters={onClearFilters}
-					/>
+					<EmptyProject selectedCategories={selectedCategories} onClearFilters={onClearFilters} />
 				</motion.div>
 			) : (
 				<div
@@ -54,11 +51,7 @@ export function ProjectsGrid({
 							transition={{ duration: 0.3 }}
 							className="w-full"
 						>
-							<ProjectCard
-								key={project.id}
-								project={project}
-								viewMode={viewMode}
-							/>
+							<ProjectCard key={project.id} project={project} viewMode={viewMode} />
 						</motion.div>
 					))}
 				</div>

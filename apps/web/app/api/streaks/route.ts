@@ -1,9 +1,10 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { recordStreakSchema } from '~/lib/schemas/streak.schemas'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -31,20 +32,14 @@ export async function GET(_req: NextRequest) {
 			.order('period', { ascending: true })
 
 		if (error) {
-			console.error('Error fetching streaks:', error)
-			return NextResponse.json(
-				{ error: 'Failed to fetch streaks' },
-				{ status: 500 },
-			)
+			logger.error('Error fetching streaks:', error)
+			return NextResponse.json({ error: 'Failed to fetch streaks' }, { status: 500 })
 		}
 
 		return NextResponse.json({ streaks: streaks || [] })
 	} catch (error) {
-		console.error('Error in GET /api/streaks:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in GET /api/streaks:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 
@@ -71,15 +66,11 @@ export async function POST(req: NextRequest) {
 
 		// Use service role client to bypass RLS, but ensure user_id matches session
 		// This is necessary because these operations are triggered server-side after donations
-		const { supabase: supabaseServiceRole } = await import(
-			'@packages/lib/supabase'
-		)
+		const { supabase: supabaseServiceRole } = await import('@packages/lib/supabase')
 		const supabase = supabaseServiceRole
 
 		const timestamp = donation_timestamp || new Date().toISOString()
-		const donationTimestampUnix = Math.floor(
-			new Date(timestamp).getTime() / 1000,
-		)
+		const donationTimestampUnix = Math.floor(new Date(timestamp).getTime() / 1000)
 
 		// Get user's Stellar address if not provided
 		let stellarAddress = user_address
@@ -105,39 +96,29 @@ export async function POST(req: NextRequest) {
 			error?: string
 		} | null = null
 
-
 		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			try {
 				const contractService = new GamificationContractService()
 				const streakContractAddress =
-					process.env.STREAK_CONTRACT_ADDRESS ||
-					process.env.NEXT_PUBLIC_STREAK_CONTRACT_ADDRESS
-
+					process.env.STREAK_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_STREAK_CONTRACT_ADDRESS
 
 				if (streakContractAddress) {
-					contractResult = await contractService.recordStreakDonation(
-						streakContractAddress,
-						{
-							userAddress: stellarAddress,
-							period: period as 'weekly' | 'monthly',
-							donationTimestamp: donationTimestampUnix,
-						},
-					)
-
+					contractResult = await contractService.recordStreakDonation(streakContractAddress, {
+						userAddress: stellarAddress,
+						period: period as 'weekly' | 'monthly',
+						donationTimestamp: donationTimestampUnix,
+					})
 
 					if (!contractResult.success) {
-						console.error(
-							'[Streak API] Failed to record streak on-chain:',
-							contractResult.error,
-						)
+						logger.error('[Streak API] Failed to record streak on-chain:', contractResult.error)
 						// Continue with database update even if contract call fails
 					} else {
 					}
 				} else {
-					console.warn('[Streak API] Streak contract address not configured')
+					logger.warn('[Streak API] Streak contract address not configured')
 				}
 			} catch (error) {
-				console.error('[Streak API] Error calling streak contract:', error)
+				logger.error('[Streak API] Error calling streak contract:', error)
 				// Continue with database update even if contract call fails
 			}
 		} else {
@@ -153,11 +134,8 @@ export async function POST(req: NextRequest) {
 
 		// If there's an error other than "not found", return it
 		if (fetchError && fetchError.code !== 'PGRST116') {
-			console.error('Error fetching streak:', fetchError)
-			return NextResponse.json(
-				{ error: 'Failed to fetch streak' },
-				{ status: 500 },
-			)
+			logger.error('Error fetching streak:', fetchError)
+			return NextResponse.json({ error: 'Failed to fetch streak' }, { status: 500 })
 		}
 
 		// Calculate streak logic (simplified - should match contract logic)
@@ -204,11 +182,8 @@ export async function POST(req: NextRequest) {
 				.single()
 
 			if (error) {
-				console.error('Error updating streak:', error)
-				return NextResponse.json(
-					{ error: 'Failed to update streak' },
-					{ status: 500 },
-				)
+				logger.error('Error updating streak:', error)
+				return NextResponse.json({ error: 'Failed to update streak' }, { status: 500 })
 			}
 
 			return NextResponse.json({
@@ -224,11 +199,8 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (error) {
-			console.error('Error creating streak:', error)
-			return NextResponse.json(
-				{ error: 'Failed to create streak' },
-				{ status: 500 },
-			)
+			logger.error('Error creating streak:', error)
+			return NextResponse.json({ error: 'Failed to create streak' }, { status: 500 })
 		}
 
 		return NextResponse.json({
@@ -236,10 +208,7 @@ export async function POST(req: NextRequest) {
 			bonus_points: 0,
 		})
 	} catch (error) {
-		console.error('Error in POST /api/streaks:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in POST /api/streaks:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

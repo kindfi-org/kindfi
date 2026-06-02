@@ -42,17 +42,13 @@ export function NftItem({
 	}
 
 	return (
-		<div
-			className={cn('p-4 bg-gray-50 rounded-lg', isBgPurple && 'bg-purple-50')}
-		>
+		<div className={cn('p-4 bg-gray-50 rounded-lg', isBgPurple && 'bg-purple-50')}>
 			<div className="flex justify-between">
 				<h4 className="font-semibold text-gray-700">{title}</h4>
 				{renderRightSite()}
 			</div>
 
-			<span className={cn('text-gray-600', isClaimed && 'text-purple-600')}>
-				{description}
-			</span>
+			<span className={cn('text-gray-600', isClaimed && 'text-purple-600')}>{description}</span>
 		</div>
 	)
 }

@@ -8,10 +8,7 @@ import type {
 } from './escrow-reviews.types'
 
 // Escrow's Payload
-export type EscrowPayload = Omit<
-	Escrow,
-	'user' | 'createdAt' | 'updatedAt' | 'id'
->
+export type EscrowPayload = Omit<Escrow, 'user' | 'createdAt' | 'updatedAt' | 'id'>
 
 // Re-export the types from Supabase service for backward compatibility
 export type {
@@ -72,12 +69,7 @@ export type GetBalanceParams = {
 
 export type TransactionStatus = 'PENDING' | 'SUCCESSFUL' | 'FAILED'
 
-export type TransactionType =
-	| 'DEPOSIT'
-	| 'RELEASE'
-	| 'REFUND'
-	| 'DISPUTE'
-	| 'FEE'
+export type TransactionType = 'DEPOSIT' | 'RELEASE' | 'REFUND' | 'DISPUTE' | 'FEE'
 
 export interface EscrowFundParams {
 	userId: string

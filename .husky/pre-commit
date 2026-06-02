@@ -1,35 +1,41 @@
 #!/bin/sh
 
 # Get list of staged files
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|json|css|md)$' || true)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|json|jsonc|css|md)$' || true)
 
 # If no relevant files staged, skip hooks
 if [ -z "$STAGED_FILES" ]; then
   exit 0
 fi
 
-# Optional: Supabase TypeScript generation (warn only, don't block)
-if echo "$STAGED_FILES" | grep -q '^services/supabase/'; then
-  echo "🔵 Running Supabase TypeScript generation (optional)..."
-  if (cd services/supabase && bun gen 2>/dev/null); then
-    echo "✅ Supabase types generated successfully"
-  else
-    echo "⚠️  Supabase TypeScript generation skipped (not blocking commit)"
+# Guard generated Supabase artifacts from ever being committed empty
+if echo "$STAGED_FILES" | grep -q '^services/supabase/src/database\.types\.ts$'; then
+  if [ ! -s services/supabase/src/database.types.ts ]; then
+    echo "❌ services/supabase/src/database.types.ts is empty. Regenerate with: cd services/supabase && bun run gen"
+    exit 1
   fi
 fi
 
-# Format staged files only with Prettier (non-blocking)
-if [ -n "$STAGED_FILES" ]; then
-  echo "$STAGED_FILES" | tr '\n' '\0' | xargs -0 prettier --write --ignore-unknown 2>/dev/null || true
+if echo "$STAGED_FILES" | grep -q '^services/supabase/src/database\.schemas\.ts$'; then
+  if [ ! -s services/supabase/src/database.schemas.ts ]; then
+    echo "❌ services/supabase/src/database.schemas.ts is empty. Regenerate with: cd services/supabase && bun run gen"
+    exit 1
+  fi
 fi
 
-# Lint and format only staged files with Biome (non-blocking)
-if [ -n "$STAGED_FILES" ]; then
-  echo "🔵 Running Biome on staged files..."
-  echo "$STAGED_FILES" | tr '\n' '\0' | xargs -0 bunx biome check --write --no-errors-on-unmatched 2>/dev/null || {
-    echo "⚠️  Biome found issues. Review and fix if needed (not blocking commit)"
-  }
-fi
+echo "🔵 Running Biome on staged files..."
+bunx biome check --write --staged --no-errors-on-unmatched || {
+  echo "❌ Biome found issues. Fix them before committing."
+  exit 1
+}
 
 # Re-stage files that were auto-formatted
 git update-index --again 2>/dev/null || true
+
+# Re-check Supabase generated files after Biome (Biome must ignore them via biome.json)
+if echo "$STAGED_FILES" | grep -q '^services/supabase/src/database\.types\.ts$'; then
+  if [ ! -s services/supabase/src/database.types.ts ]; then
+    echo "❌ Biome wiped services/supabase/src/database.types.ts. Check biome.json force-ignore settings."
+    exit 1
+  fi
+fi

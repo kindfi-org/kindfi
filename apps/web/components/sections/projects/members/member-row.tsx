@@ -3,13 +3,7 @@
 import type { Enums } from '@services/supabase'
 import { formatDistanceToNow } from 'date-fns'
 import { motion } from 'framer-motion'
-import {
-	Check,
-	MoreHorizontal,
-	Pencil,
-	UserMinus,
-	X as XIcon,
-} from 'lucide-react'
+import { Check, MoreHorizontal, Pencil, UserMinus, X as XIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
@@ -54,8 +48,7 @@ export function MemberRow({
 	const isOwner = member.userId === currentUserId
 
 	const saveDisabled =
-		tempTitle.trim().length === 0 ||
-		tempTitle.trim() === (member.title?.trim() ?? '')
+		tempTitle.trim().length === 0 || tempTitle.trim() === (member.title?.trim() ?? '')
 
 	const handleCommit = () => {
 		const next = tempTitle.trim()
@@ -86,15 +79,11 @@ export function MemberRow({
 							src={member.avatar || PLACEHOLDER_IMG}
 							alt={member.displayName || 'User Avatar'}
 						/>
-						<AvatarFallback>
-							{getAvatarFallback(member.displayName || '')}
-						</AvatarFallback>
+						<AvatarFallback>{getAvatarFallback(member.displayName || '')}</AvatarFallback>
 					</Avatar>
 					<div className="flex flex-col">
 						<span className="font-medium">{member.displayName}</span>
-						<span className="text-sm text-muted-foreground">
-							{member.email}
-						</span>
+						<span className="text-sm text-muted-foreground">{member.email}</span>
 					</div>
 				</div>
 			</TableCell>
@@ -184,25 +173,15 @@ export function MemberRow({
 								</Button>
 							</DropdownMenuTrigger>
 
-							<DropdownMenuContent
-								className="bg-white min-w-[220px]"
-								align="end"
-							>
-								<div className="px-2 py-1.5 text-xs text-muted-foreground">
-									Change role
-								</div>
-								{(
-									Object.keys(memberRole) as Array<Enums<'project_member_role'>>
-								).map((rk) => {
+							<DropdownMenuContent className="bg-white min-w-[220px]" align="end">
+								<div className="px-2 py-1.5 text-xs text-muted-foreground">Change role</div>
+								{(Object.keys(memberRole) as Array<Enums<'project_member_role'>>).map((rk) => {
 									const meta = memberRole[rk]
 									const isCurrent = rk === member.role
 									return (
 										<DropdownMenuItem
 											key={rk}
-											className={cn(
-												'cursor-pointer',
-												isCurrent && 'opacity-60 cursor-not-allowed',
-											)}
+											className={cn('cursor-pointer', isCurrent && 'opacity-60 cursor-not-allowed')}
 											disabled={isCurrent}
 											aria-disabled={isCurrent}
 											onClick={() => {

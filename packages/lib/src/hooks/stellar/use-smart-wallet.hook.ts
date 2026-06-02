@@ -1,10 +1,10 @@
-// TODO: REFACTOR THIS TO DO HOOK FOR SMART WALLET MANAGEMENT (transferXML/USDC, transaction invoke, balances, verification)
 'use client'
 
 import { debounce } from 'lodash'
-import type { Session, User } from 'next-auth'
+import type { Session } from 'next-auth'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '../../logger'
 import { useStellarSignature } from './use-stellar-signature.hook'
 
 export interface ContractOperation {
@@ -33,14 +33,14 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 	const [requestId, setRequestId] = useState<string | null>(null)
 
 	const stellarSignature = useStellarSignature({
-		onSuccess: (result) => {
+		onSuccess: (_result) => {
 			// Refresh account info after successful transaction
 			if (account?.contractId) {
 				refreshAccountInfo()
 			}
 		},
 		onError: (error) => {
-			console.error('❌ Transaction failed:', error)
+			logger.error('Transaction failed', error)
 		},
 		// Pass session directly to avoid useSession call inside useStellarSignature
 		// This prevents the SessionProvider requirement error
@@ -83,7 +83,6 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 			}
 
 			if (accountData.status === 'not_found') {
-
 				// SIMULATION: In production, this should only happen after KYC approval
 				// For testing purposes, we'll simulate the account creation
 
@@ -103,10 +102,7 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 					setIsInitialized(true)
 					setRequestId(null)
 
-					// TODO: Update device record with new Stellar address
-					toast.success(
-						`🧪 SIMULATION: Stellar account created: ${newAccount.address}`,
-					)
+					toast.success(`🧪 SIMULATION: Stellar account created: ${newAccount.address}`)
 				}
 
 				return accountData
@@ -114,7 +110,10 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 
 			return accountData
 		} catch (error) {
-			console.error('❌ Error initializing account:', error)
+			logger.error(
+				'Error initializing account',
+				error instanceof Error ? error : new Error(String(error)),
+			)
 			setRequestId(null)
 			throw error
 		}
@@ -127,9 +126,7 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 		if (!account?.contractId) return
 
 		try {
-			const accountInfo = await stellarSignature.getAccountInfo(
-				account.contractId,
-			)
+			const accountInfo = await stellarSignature.getAccountInfo(account.contractId)
 
 			setAccount((prev) =>
 				prev
@@ -142,7 +139,10 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 					: null,
 			)
 		} catch (error) {
-			console.error('❌ Error refreshing account info:', error)
+			logger.error(
+				'Error refreshing account info',
+				error instanceof Error ? error : new Error(String(error)),
+			)
 		}
 	}, [account?.contractId, stellarSignature])
 
@@ -163,31 +163,26 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 				auth: operation.auth,
 			}
 
-			return await stellarSignature.signTransaction(
-				stellarOperation,
-				account.contractId,
-			)
+			return await stellarSignature.signTransaction(stellarOperation, account.contractId)
 		},
 		[account?.contractId, stellarSignature],
 	)
 
 	// Auto-initialize account when session is available
 	useEffect(() => {
-		if (
-			session?.user?.device &&
-			!isInitialized &&
-			!stellarSignature.isLoading &&
-			!requestId
-		) {
-			debounce(() => initializeAccount().catch(console.error), 6000)()
+		if (session?.user?.device && !isInitialized && !stellarSignature.isLoading && !requestId) {
+			debounce(
+				() =>
+					initializeAccount().catch((err) =>
+						logger.error(
+							'initializeAccount failed',
+							err instanceof Error ? err : new Error(String(err)),
+						),
+					),
+				6000,
+			)()
 		}
-	}, [
-		session,
-		isInitialized,
-		stellarSignature.isLoading,
-		requestId,
-		initializeAccount,
-	])
+	}, [session, isInitialized, stellarSignature.isLoading, requestId, initializeAccount])
 
 	return {
 		// Account state

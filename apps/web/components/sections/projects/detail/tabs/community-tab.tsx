@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { HelpCircle } from 'lucide-react'
 import { useState } from 'react'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
 import { CommentForm } from '~/components/sections/projects/detail/comment-form'
 import { CommentThread } from '~/components/sections/projects/detail/comment-thread'
@@ -10,9 +11,10 @@ import type { Comment } from '~/lib/types/project/project-detail.types'
 
 interface CommunityTabProps {
 	comments: Comment[]
+	projectId?: string
 }
 
-export function CommunityTab({ comments }: CommunityTabProps) {
+export function CommunityTab({ comments, projectId }: CommunityTabProps) {
 	const [showQuestionForm, setShowQuestionForm] = useState(false)
 	const [commentsState, setCommentsState] = useState<Comment[]>(comments)
 
@@ -30,7 +32,33 @@ export function CommunityTab({ comments }: CommunityTabProps) {
 			like: 0,
 		}
 
-		// TODO: Persist question to backend
+		// Persist question to backend
+		;(async () => {
+			try {
+				if (projectId) {
+					const res = await fetch('/api/comments', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							content,
+							project_id: projectId,
+							type: 'question',
+						}),
+					})
+					if (res.ok) {
+						const json = await res.json()
+						setCommentsState((prev) => [
+							json.data,
+							...prev.filter((c) => !String(c.id).startsWith('temp-')),
+						])
+						setShowQuestionForm(false)
+						return
+					}
+				}
+			} catch (e) {
+				logger.error('Failed to persist question', e)
+			}
+		})()
 
 		setCommentsState((prev) => [newQuestion, ...prev])
 		setShowQuestionForm(false)
@@ -51,15 +79,39 @@ export function CommunityTab({ comments }: CommunityTabProps) {
 			like: 0,
 		}
 
-		// TODO: Persist answer to backend
+		// Persist answer to backend
+		;(async () => {
+			try {
+				if (projectId) {
+					const res = await fetch('/api/comments', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							content,
+							parent_comment_id: parentId,
+							project_id: projectId,
+							type: 'answer',
+						}),
+					})
+					if (res.ok) {
+						const json = await res.json()
+						setCommentsState((prev) => [
+							...prev.filter((c) => !String(c.id).startsWith('temp-')),
+							json.data,
+						])
+						return
+					}
+				}
+			} catch (e) {
+				logger.error('Failed to persist answer', e)
+			}
+		})()
 
 		setCommentsState((prev) => [...prev, reply])
 	}
 
 	// Get all top-level comments from the current state
-	const currentTopLevelComments = commentsState.filter(
-		(comment) => !comment.parentId,
-	)
+	const currentTopLevelComments = commentsState.filter((comment) => !comment.parentId)
 	const sortedCurrentComments = [...currentTopLevelComments].sort(
 		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
 	)
@@ -105,11 +157,7 @@ export function CommunityTab({ comments }: CommunityTabProps) {
 					No comments yet. Be the first to ask a question!
 				</div>
 			) : (
-				<CommentThread
-					comments={commentsState}
-					allowReplies={true}
-					onAddReply={handleAddReply}
-				/>
+				<CommentThread comments={commentsState} allowReplies={true} onAddReply={handleAddReply} />
 			)}
 		</motion.div>
 	)

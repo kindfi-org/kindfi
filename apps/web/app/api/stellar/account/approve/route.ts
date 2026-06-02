@@ -1,6 +1,7 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { accountApproveSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -23,31 +24,26 @@ export async function POST(req: NextRequest) {
 		// KYC server URL - use environment variable or default to localhost
 		const kycServerUrl = config.externalApis.kyc.baseUrl
 
-
 		// Call KYC server's create-passkey-account endpoint
 		// which handles the auth-controller registration
-		const response = await fetch(
-			`${kycServerUrl}/api/stellar/create-passkey-account`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					contractAddress: accountAddress,
-					contexts: [accountAddress], // Register with self as context
-				}),
+		const response = await fetch(`${kycServerUrl}/api/stellar/create-passkey-account`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
 			},
-		)
+			body: JSON.stringify({
+				contractAddress: accountAddress,
+				contexts: [accountAddress], // Register with self as context
+			}),
+		})
 
 		if (!response.ok) {
 			const errorData = await response.json()
-			console.error('❌ KYC server error:', errorData)
+			logger.error('❌ KYC server error:', errorData)
 			throw new Error(errorData.error || 'Failed to register account')
 		}
 
 		const result = await response.json()
-
 
 		return NextResponse.json({
 			success: true,
@@ -58,7 +54,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 	} catch (error) {
-		console.error('❌ Error approving account:', error)
+		logger.error('❌ Error approving account:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to approve account',

@@ -20,9 +20,7 @@ export const PageSection: React.FC<PageSectionProps> = ({
 	}
 
 	return (
-		<section
-			className={`py-24 lg:py-32 px-6 lg:px-8 ${bgClasses[background]} ${className}`}
-		>
+		<section className={`py-24 lg:py-32 px-6 lg:px-8 ${bgClasses[background]} ${className}`}>
 			<div className={containerWidth}>{children}</div>
 		</section>
 	)

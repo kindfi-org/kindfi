@@ -11,11 +11,7 @@ export interface UserInfoProps {
 	size?: 'sm' | 'md'
 }
 
-export function UserInfo({
-	authorData,
-	createdAt,
-	size = 'md',
-}: UserInfoProps) {
+export function UserInfo({ authorData, createdAt, size = 'md' }: UserInfoProps) {
 	if (!authorData) {
 		return null
 	}
@@ -36,15 +32,12 @@ export function UserInfo({
 		role = profile.role
 	} else {
 		// guest shape
-		displayName =
-			authorData.full_name || `User ${authorData.id.substring(0, 6)}`
+		displayName = authorData.full_name || `User ${authorData.id.substring(0, 6)}`
 	}
 
 	// Accessible alt text: prefer real names; fall back to a generic label if none provided
 	const directName =
-		'display_name' in authorData
-			? (authorData as ProfileRow).display_name
-			: authorData.full_name
+		'display_name' in authorData ? (authorData as ProfileRow).display_name : authorData.full_name
 	const nameForAlt = directName?.trim()
 	const avatarAltText = nameForAlt ? `Avatar of ${nameForAlt}` : 'User avatar'
 

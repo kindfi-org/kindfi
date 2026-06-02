@@ -91,8 +91,8 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 								Project Pitch
 							</h1>
 							<p className="text-lg md:text-xl text-muted-foreground mt-2 text-center">
-								Create a compelling pitch that showcases your project&apos;s
-								impact and inspires supporters to join your mission
+								Create a compelling pitch that showcases your project&apos;s impact and inspires
+								supporters to join your mission
 							</p>
 						</div>
 					</div>
@@ -123,9 +123,7 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 					<aside className="lg:col-span-1 space-y-6">
 						{aiEnabled ? (
 							<motion.div
-								initial={
-									prefersReducedMotion ? false : { opacity: 0, y: -8 }
-								}
+								initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.3 }}
 							>
@@ -135,16 +133,12 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 									onAnalyze={handleReanalyze}
 									onReset={handleDismiss}
 									isLoading={isLoading}
-									hasContent={
-										!!(pitchSnapshot?.title && pitchSnapshot?.story)
-									}
+									hasContent={!!(pitchSnapshot?.title && pitchSnapshot?.story)}
 								/>
 							</motion.div>
 						) : (
 							<motion.div
-								initial={
-									prefersReducedMotion ? false : { opacity: 0, y: 8 }
-								}
+								initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.3, delay: 0.2 }}
 								className="rounded-xl border border-dashed border-purple-200 bg-purple-50/50 p-5 text-center space-y-3"
@@ -155,23 +149,17 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 									</div>
 								</div>
 								<div>
-									<p className="text-sm font-medium text-foreground">
-										AI Pitch Advisor
-									</p>
+									<p className="text-sm font-medium text-foreground">AI Pitch Advisor</p>
 									<p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-										Get personalized feedback on your pitch once you&apos;ve
-										filled in the title and story.
+										Get personalized feedback on your pitch once you&apos;ve filled in the title and
+										story.
 									</p>
 								</div>
 								<Button
 									type="button"
 									size="sm"
 									variant="outline"
-									disabled={
-										isProjectLoading ||
-										!project?.pitch?.title ||
-										!project?.pitch?.story
-									}
+									disabled={isProjectLoading || !project?.pitch?.title || !project?.pitch?.story}
 									onClick={() => {
 										const title = project?.pitch?.title ?? ''
 										const story = project?.pitch?.story ?? ''

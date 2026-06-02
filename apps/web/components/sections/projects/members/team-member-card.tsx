@@ -24,12 +24,7 @@ interface TeamMemberCardProps {
 	onDelete?: (memberId: string) => void
 }
 
-export function TeamMemberCard({
-	member,
-	index,
-	onEdit,
-	onDelete,
-}: TeamMemberCardProps) {
+export function TeamMemberCard({ member, index, onEdit, onDelete }: TeamMemberCardProps) {
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 	const initials = getInitials(member.fullName)
 
@@ -44,21 +39,14 @@ export function TeamMemberCard({
 					<div className="flex items-start justify-between">
 						<div className="flex items-center gap-3 flex-1 min-w-0">
 							<Avatar className="h-12 w-12 flex-shrink-0">
-								<AvatarImage
-									src={member.photoUrl || undefined}
-									alt={member.fullName}
-								/>
+								<AvatarImage src={member.photoUrl || undefined} alt={member.fullName} />
 								<AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-600 text-white">
 									{initials}
 								</AvatarFallback>
 							</Avatar>
 							<div className="flex-1 min-w-0">
-								<h3 className="font-semibold text-lg truncate">
-									{member.fullName}
-								</h3>
-								<p className="text-sm text-muted-foreground truncate">
-									{member.roleTitle}
-								</p>
+								<h3 className="font-semibold text-lg truncate">{member.fullName}</h3>
+								<p className="text-sm text-muted-foreground truncate">{member.roleTitle}</p>
 							</div>
 						</div>
 						{(onEdit || onDelete) && (
@@ -74,10 +62,7 @@ export function TeamMemberCard({
 									</Button>
 								)}
 								{onDelete && (
-									<Dialog
-										open={showDeleteDialog}
-										onOpenChange={setShowDeleteDialog}
-									>
+									<Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
 										<DialogTrigger asChild>
 											<Button variant="ghost" size="icon" className="h-8 w-8">
 												<Trash2 className="h-4 w-4 text-destructive" />
@@ -87,15 +72,12 @@ export function TeamMemberCard({
 											<DialogHeader>
 												<DialogTitle>Remove Team Member</DialogTitle>
 												<DialogDescription>
-													Are you sure you want to remove {member.fullName} from
-													the project team? This action cannot be undone.
+													Are you sure you want to remove {member.fullName} from the project team?
+													This action cannot be undone.
 												</DialogDescription>
 											</DialogHeader>
 											<div className="flex justify-end gap-2 mt-4">
-												<Button
-													variant="outline"
-													onClick={() => setShowDeleteDialog(false)}
-												>
+												<Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
 													Cancel
 												</Button>
 												<Button
@@ -116,18 +98,12 @@ export function TeamMemberCard({
 					</div>
 				</CardHeader>
 				<CardContent className="space-y-2">
-					{member.bio && (
-						<p className="text-sm text-muted-foreground line-clamp-3">
-							{member.bio}
+					{member.bio && <p className="text-sm text-muted-foreground line-clamp-3">{member.bio}</p>}
+					{member.yearsInvolved !== null && member.yearsInvolved !== undefined && (
+						<p className="text-xs text-muted-foreground">
+							{member.yearsInvolved} {member.yearsInvolved === 1 ? 'year' : 'years'} involved
 						</p>
 					)}
-					{member.yearsInvolved !== null &&
-						member.yearsInvolved !== undefined && (
-							<p className="text-xs text-muted-foreground">
-								{member.yearsInvolved}{' '}
-								{member.yearsInvolved === 1 ? 'year' : 'years'} involved
-							</p>
-						)}
 				</CardContent>
 			</Card>
 		</motion.div>

@@ -1,0 +1,30 @@
+export const auth = {
+	// Sign In
+	welcomeBack: 'Welcome Back',
+	signInSubtitle: 'Sign in with your passkey to continue',
+	email: 'Email',
+	emailPlaceholder: 'you@example.com',
+	signInWithPasskey: 'Sign in with passkey',
+	authenticating: 'Authenticating...',
+	signingOut: 'Signing out...',
+	signOutError: 'Error signing out',
+	dontHaveAccount: "Don't have an account yet?",
+	createNewOne: 'Create new one',
+	deviceNotFound: 'Device account not found. Please',
+	signUp: 'sign up',
+	first: 'first',
+	authError: 'There was an error during authentication. Please try again.',
+	authSuccess: 'Authentication successful! Redirecting...',
+	invalidEmail: 'Please enter a valid email address.',
+	accountNotRegistered: 'Account is not registered. Please',
+	signIn: 'sign in',
+	instead: 'instead',
+
+	// Sign Up
+	createAccount: 'Create an account',
+	signUpSubtitle: 'Enter your details below to create your account',
+	createAccountBtn: 'Create account',
+	creatingAccount: 'Creating account...',
+	alreadyHaveAccount: 'Already have an account?',
+	accountExists: 'Account is already registered. Please',
+}

@@ -18,9 +18,7 @@ export function EscrowTypeSelector() {
 			<RadioGroup
 				aria-labelledby={labelId}
 				value={formData.selectedEscrowType}
-				onValueChange={(val) =>
-					convertMilestones(val as 'single-release' | 'multi-release')
-				}
+				onValueChange={(val) => convertMilestones(val as 'single-release' | 'multi-release')}
 				className="grid grid-cols-1 gap-3 sm:grid-cols-2"
 			>
 				<div className="flex gap-2 items-center p-3 rounded-md border">
@@ -37,9 +35,8 @@ export function EscrowTypeSelector() {
 				</div>
 			</RadioGroup>
 			<p className="text-xs text-muted-foreground">
-				A{' '}
-				{formData.selectedEscrowType === 'single-release' ? 'single' : 'multi'}{' '}
-				payment will be released upon completion of milestones.
+				A {formData.selectedEscrowType === 'single-release' ? 'single' : 'multi'} payment will be
+				released upon completion of milestones.
 			</p>
 		</div>
 	)

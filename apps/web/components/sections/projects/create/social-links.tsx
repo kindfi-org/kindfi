@@ -26,8 +26,7 @@ export function SocialLinks({ value, onChange, error }: SocialLinksProps) {
 		if (!isAllowedSocialUrl(trimmed)) {
 			return setLinkError('URL must be from a valid social network')
 		}
-		if (value.includes(trimmed))
-			return setLinkError('This URL has already been added')
+		if (value.includes(trimmed)) return setLinkError('This URL has already been added')
 
 		onChange([...value, trimmed])
 		setNewLink('')
@@ -66,9 +65,7 @@ export function SocialLinks({ value, onChange, error }: SocialLinksProps) {
 						)}
 						aria-label="Add social link"
 					/>
-					{linkError && (
-						<p className="mt-1 text-sm text-destructive">{linkError}</p>
-					)}
+					{linkError && <p className="mt-1 text-sm text-destructive">{linkError}</p>}
 				</div>
 
 				<Button
@@ -86,10 +83,7 @@ export function SocialLinks({ value, onChange, error }: SocialLinksProps) {
 			{value.length > 0 && (
 				<div className="space-y-2">
 					{value.map((link) => (
-						<div
-							key={link}
-							className="flex items-center gap-2 rounded-md bg-gray-50 p-2"
-						>
+						<div key={link} className="flex items-center gap-2 rounded-md bg-gray-50 p-2">
 							<span className="flex-1 truncate text-sm">{link}</span>
 							<Button
 								type="button"

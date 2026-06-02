@@ -19,9 +19,7 @@ self.addEventListener('push', (event) => {
 		}
 
 		event.waitUntil(self.registration.showNotification(data.title, options))
-	} catch (error) {
-		console.error('Error handling push event:', error)
-	}
+	} catch (_error) {}
 })
 
 self.addEventListener('notificationclick', (event) => {
@@ -69,9 +67,7 @@ async function syncNotifications() {
 		}
 
 		const _data = await response.json()
-	} catch (error) {
-		console.error('Error syncing notifications:', error)
-	}
+	} catch (_error) {}
 }
 
 // Handle background sync
@@ -128,8 +124,7 @@ self.addEventListener('fetch', (event) => {
 	// Only handle requests to our API endpoints
 	if (event.request.url.includes('/api/notifications/')) {
 		event.respondWith(
-			fetch(event.request).catch((error) => {
-				console.error('Fetch failed:', error)
+			fetch(event.request).catch((_error) => {
 				// Return a fallback response or error
 				return new Response('Network error occurred', {
 					status: 503,

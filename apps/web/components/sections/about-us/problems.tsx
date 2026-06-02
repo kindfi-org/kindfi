@@ -1,16 +1,21 @@
 'use client'
 
+import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '~/components/base/card'
 import { Icon } from '~/components/base/icon'
+import { AboutSectionHeader } from '~/components/sections/about-us/about-section-header'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useI18n } from '~/lib/i18n'
 import { mockAboutUs } from '~/lib/mock-data/mock-about-us'
 
+const cardClassName =
+	'flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200/60 hover:shadow-md'
+
 const Problems = () => {
 	const { t } = useI18n()
 
-	const containerVariants = {
+	const containerVariants: Variants = {
 		hidden: { opacity: 0 },
 		visible: {
 			opacity: 1,
@@ -21,38 +26,26 @@ const Problems = () => {
 		},
 	}
 
-	const itemVariants = {
+	const itemVariants: Variants = {
 		hidden: { opacity: 0, y: 24 },
 		visible: {
 			opacity: 1,
 			y: 0,
-			transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+			transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
 		},
 	}
 
 	return (
 		<section
-			className="relative overflow-hidden bg-background py-16 sm:py-20 lg:py-24"
+			className="relative overflow-hidden bg-[#fafbfc] py-16 sm:py-20 lg:py-24"
 			aria-labelledby="about-problems-heading"
 		>
 			<SectionContainer maxWidth="6xl">
-				<motion.div
-					className="mx-auto mb-10 max-w-3xl text-center sm:mb-14"
-					initial={{ opacity: 0, y: 16 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-					viewport={{ once: true, amount: 0.2 }}
-				>
-					<h2
-						id="about-problems-heading"
-						className="mb-3 text-3xl font-bold tracking-tight gradient-text sm:text-4xl"
-					>
-						{t('about.problems.title')}
-					</h2>
-					<p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
-						{t('about.problems.subtitle')}
-					</p>
-				</motion.div>
+				<AboutSectionHeader
+					id="about-problems-heading"
+					title={t('about.problems.title')}
+					subtitle={t('about.problems.subtitle')}
+				/>
 
 				<motion.div
 					className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4"
@@ -61,36 +54,15 @@ const Problems = () => {
 					whileInView="visible"
 					viewport={{ once: true, amount: 0.12 }}
 				>
-					{mockAboutUs.problems.map((problem, index) => (
-						<motion.div
-							key={problem.id}
-							variants={itemVariants}
-							className="h-full"
-						>
-							<Card className="flex h-full flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
-								<div
-									className={
-										index % 3 === 0
-											? 'h-1 bg-gradient-to-r from-emerald-500 to-teal-500'
-											: index % 3 === 1
-												? 'h-1 bg-gradient-to-r from-blue-500 to-indigo-500'
-												: 'h-1 bg-gradient-to-r from-violet-500 to-purple-500'
-									}
-								/>
+					{mockAboutUs.problems.map((problem) => (
+						<motion.div key={problem.id} variants={itemVariants} className="h-full">
+							<Card className={cardClassName}>
 								<div className="flex flex-1 flex-col p-6 sm:p-7">
-									<div
-										className={
-											index % 3 === 0
-												? 'mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600'
-												: index % 3 === 1
-													? 'mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600'
-													: 'mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600'
-										}
-									>
+									<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
 										<Icon name={problem.icon} className="text-2xl" />
 									</div>
 									<CardContent className="flex flex-1 flex-col p-0 text-left">
-										<h3 className="mb-2 text-lg font-semibold text-foreground">
+										<h3 className="mb-2 text-lg font-semibold text-slate-900">
 											{t(`about.problems.items.${problem.id}.title`)}
 										</h3>
 										<p className="text-sm leading-relaxed text-muted-foreground">

@@ -31,10 +31,7 @@ export function ResultsVisualization({
 		})),
 	)
 
-	const totalWeight = options.reduce(
-		(sum, o) => sum + (o.weighted_upvotes ?? 0),
-		0,
-	)
+	const totalWeight = options.reduce((sum, o) => sum + (o.weighted_upvotes ?? 0), 0)
 
 	const sortedOptions = [...options].sort(
 		(a, b) => (b.weighted_upvotes ?? 0) - (a.weighted_upvotes ?? 0),
@@ -49,21 +46,13 @@ export function ResultsVisualization({
 			<div className="border-b border-slate-100 px-6 py-5 sm:px-7">
 				<div className="flex flex-wrap items-center justify-between gap-3">
 					<h4 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-						<BarChart3
-							className="h-4 w-4 text-emerald-600"
-							aria-hidden="true"
-						/>
-						{isEnded
-							? t('governancePage.finalResults')
-							: t('governancePage.liveStandings')}
+						<BarChart3 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+						{isEnded ? t('governancePage.finalResults') : t('governancePage.liveStandings')}
 					</h4>
 					<div className="flex items-center gap-3 text-xs text-muted-foreground">
 						<span className="flex items-center gap-1">
 							<Users className="h-3.5 w-3.5" aria-hidden="true" />
-							{t('governancePage.votesCount').replace(
-								'{count}',
-								String(totalVoters),
-							)}
+							{t('governancePage.votesCount').replace('{count}', String(totalVoters))}
 						</span>
 						{fundAmount > 0 ? (
 							<Badge
@@ -90,9 +79,7 @@ export function ResultsVisualization({
 							<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700">
 								{t('governancePage.winnerLabel')}
 							</p>
-							<p className="truncate text-sm font-semibold text-slate-900">
-								{winner.title}
-							</p>
+							<p className="truncate text-sm font-semibold text-slate-900">{winner.title}</p>
 							{fundAmount > 0 ? (
 								<p className="mt-0.5 text-xs text-muted-foreground">
 									{t('governancePage.allocatedLabel')}{' '}
@@ -110,9 +97,7 @@ export function ResultsVisualization({
 
 				{!hasVotes ? (
 					<p className="py-6 text-center text-sm text-muted-foreground">
-						{isActive
-							? t('governancePage.noVotesActive')
-							: t('governancePage.noVotesEnded')}
+						{isActive ? t('governancePage.noVotesActive') : t('governancePage.noVotesEnded')}
 					</p>
 				) : null}
 
@@ -123,8 +108,7 @@ export function ResultsVisualization({
 							const upW = opt.weighted_upvotes ?? 0
 							const downW = opt.weighted_downvotes ?? 0
 							const isTop = i === 0
-							const allocatedFund =
-								fundAmount > 0 ? (pct / 100) * fundAmount : null
+							const allocatedFund = fundAmount > 0 ? (pct / 100) * fundAmount : null
 
 							return (
 								<div key={opt.id} className="space-y-1.5">
@@ -133,23 +117,16 @@ export function ResultsVisualization({
 											<span
 												className={cn(
 													'w-5 text-center text-xs font-semibold tabular-nums',
-													isTop
-														? 'text-amber-600'
-														: 'text-muted-foreground',
+													isTop ? 'text-amber-600' : 'text-muted-foreground',
 												)}
 											>
 												{isTop && hasVotes ? (
-													<Trophy
-														className="inline h-3.5 w-3.5"
-														aria-hidden="true"
-													/>
+													<Trophy className="inline h-3.5 w-3.5" aria-hidden="true" />
 												) : (
 													`#${i + 1}`
 												)}
 											</span>
-											<span className="truncate font-medium text-slate-900">
-												{opt.title}
-											</span>
+											<span className="truncate font-medium text-slate-900">{opt.title}</span>
 											{opt.user_voted ? (
 												<Badge
 													variant="outline"
@@ -194,17 +171,11 @@ export function ResultsVisualization({
 
 									<div className="flex items-center gap-3 text-xs text-muted-foreground">
 										<span className="inline-flex items-center gap-1 tabular-nums">
-											<Heart
-												className="h-3 w-3 text-emerald-600"
-												aria-hidden="true"
-											/>
+											<Heart className="h-3 w-3 text-emerald-600" aria-hidden="true" />
 											{upW}
 										</span>
 										<span className="inline-flex items-center gap-1 tabular-nums">
-											<MinusCircle
-												className="h-3 w-3 text-slate-400"
-												aria-hidden="true"
-											/>
+											<MinusCircle className="h-3 w-3 text-slate-400" aria-hidden="true" />
 											{downW}
 										</span>
 									</div>

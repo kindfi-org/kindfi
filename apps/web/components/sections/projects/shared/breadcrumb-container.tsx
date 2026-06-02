@@ -79,9 +79,7 @@ export function BreadcrumbContainer({
 							<BreadcrumbSeparator />
 							<BreadcrumbItem>
 								<BreadcrumbLink asChild>
-									<Link
-										href={`/projects?category=${encodeURIComponent(category.slug)}`}
-									>
+									<Link href={`/projects?category=${encodeURIComponent(category.slug)}`}>
 										{category.name}
 									</Link>
 								</BreadcrumbLink>
@@ -106,9 +104,7 @@ export function BreadcrumbContainer({
 							<BreadcrumbItem>
 								{subSection && projectSlug ? (
 									<BreadcrumbLink asChild>
-										<Link href={`/projects/${projectSlug}/manage`}>
-											{manageSection}
-										</Link>
+										<Link href={`/projects/${projectSlug}/manage`}>{manageSection}</Link>
 									</BreadcrumbLink>
 								) : (
 									<BreadcrumbPage>{manageSection}</BreadcrumbPage>

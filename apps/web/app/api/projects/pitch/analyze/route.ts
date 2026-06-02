@@ -1,6 +1,7 @@
 import { gateway, streamText } from 'ai'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 
 export const maxDuration = 30
@@ -72,7 +73,7 @@ Provide specific, actionable recommendations to help improve this pitch for pote
 
 		return result.toTextStreamResponse()
 	} catch (err) {
-		console.error('[pitch/analyze] Error:', err)
+		logger.error('[pitch/analyze] Error:', err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

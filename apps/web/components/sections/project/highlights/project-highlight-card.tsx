@@ -49,9 +49,7 @@ export function ProjectHighlightCard({
 						<div
 							className={cn(
 								'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors',
-								isComplete
-									? 'bg-green-500 text-white'
-									: 'bg-muted text-muted-foreground',
+								isComplete ? 'bg-green-500 text-white' : 'bg-muted text-muted-foreground',
 							)}
 						>
 							{isComplete ? <IoCheckmarkCircleOutline size={14} /> : index}
@@ -82,10 +80,7 @@ export function ProjectHighlightCard({
 
 			<div className="space-y-4 p-4 pt-4">
 				<div className="space-y-2">
-					<Label
-						htmlFor={`title-${id}`}
-						className="text-sm font-medium text-foreground"
-					>
+					<Label htmlFor={`title-${id}`} className="text-sm font-medium text-foreground">
 						Title
 						<span className="text-destructive ml-1">*</span>
 					</Label>
@@ -103,19 +98,14 @@ export function ProjectHighlightCard({
 
 				<div className="space-y-2">
 					<div className="flex items-center justify-between">
-						<Label
-							htmlFor={`description-${id}`}
-							className="text-sm font-medium text-foreground"
-						>
+						<Label htmlFor={`description-${id}`} className="text-sm font-medium text-foreground">
 							Description
 							<span className="text-destructive ml-1">*</span>
 						</Label>
 						<span
 							className={cn(
 								'text-xs transition-colors',
-								isNearLimit
-									? 'text-destructive font-medium'
-									: 'text-muted-foreground',
+								isNearLimit ? 'text-destructive font-medium' : 'text-muted-foreground',
 							)}
 						>
 							{charCount}/{maxChars}

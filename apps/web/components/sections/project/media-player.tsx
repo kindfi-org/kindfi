@@ -4,15 +4,7 @@ import { useState } from 'react'
 import { Button } from '~/components/base/button'
 
 type MediaType = 'image' | 'video'
-type MediaFileExtension =
-	| '.mp4'
-	| '.mov'
-	| '.webm'
-	| '.jpg'
-	| '.jpeg'
-	| '.png'
-	| '.webp'
-	| '.avif'
+type MediaFileExtension = '.mp4' | '.mov' | '.webm' | '.jpg' | '.jpeg' | '.png' | '.webp' | '.avif'
 
 type MediaItem = {
 	id: string
@@ -42,11 +34,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 				aria-live="polite"
 			>
 				{activeItem.type === 'image' ? (
-					<Image
-						src={activeItem.src}
-						alt={activeItem.alt}
-						className="h-full object-contain"
-					/>
+					<Image src={activeItem.src} alt={activeItem.alt} className="h-full object-contain" />
 				) : (
 					<video
 						src={activeItem.src}
@@ -74,11 +62,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 				)}
 			</div>
 
-			<div
-				className="thumbnails flex space-x-2"
-				role="tablist"
-				aria-label="Media thumbnails"
-			>
+			<div className="thumbnails flex space-x-2" role="tablist" aria-label="Media thumbnails">
 				{items.map((item, index) => (
 					<Button
 						key={item.id}
@@ -94,9 +78,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ items }) => {
 						role="tab"
 						aria-label={`View ${item.alt}`}
 						className={`thumbnail w-16 h-16 border-2 rounded-md overflow-hidden flex items-center justify-center ${
-							activeIndex === index
-								? 'border-blue-500'
-								: 'border-gray-300 hover:border-gray-400'
+							activeIndex === index ? 'border-blue-500' : 'border-gray-300 hover:border-gray-400'
 						}`}
 					>
 						{item.type === 'image' ? (

@@ -16,10 +16,7 @@ export async function generateCsrfToken(): Promise<string> {
 			? performance.now().toString(36).replace('.', '')
 			: Math.random().toString(36).substring(2)
 
-	return (timestamp + randomPart + performanceEntropy).substring(
-		0,
-		CSRF_TOKEN_LENGTH * 2,
-	)
+	return (timestamp + randomPart + performanceEntropy).substring(0, CSRF_TOKEN_LENGTH * 2)
 }
 
 // Set CSRF token in a secure, HTTP-only cookie if not already set
@@ -31,8 +28,7 @@ export async function ensureCsrfTokenCookie(): Promise<string> {
 		cookieStore.set(CSRF_COOKIE_NAME, token, {
 			httpOnly: true,
 			sameSite: 'lax',
-			secure:
-				typeof process !== 'undefined' && process.env.NODE_ENV === 'production',
+			secure: typeof process !== 'undefined' && process.env.NODE_ENV === 'production',
 			path: '/',
 			maxAge: 60 * 60 * 24, // 1 day
 		})
@@ -47,9 +43,7 @@ export async function getCsrfTokenFromCookie(): Promise<string | undefined> {
 }
 
 // Validate CSRF token from form against cookie
-export async function validateCsrfToken(
-	formToken: string | null | undefined,
-): Promise<boolean> {
+export async function validateCsrfToken(formToken: string | null | undefined): Promise<boolean> {
 	if (!formToken) return false
 	const cookieToken = await getCsrfTokenFromCookie()
 	return !!cookieToken && formToken === cookieToken

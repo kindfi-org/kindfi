@@ -2,13 +2,7 @@
 
 import type { GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
 import { DollarSign, Wallet } from 'lucide-react'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Label } from '~/components/base/label'
 import { formatEscrowAmount } from '~/lib/utils/escrow/milestone-utils'
 
@@ -16,12 +10,8 @@ interface TrustlineAndFundsCardProps {
 	escrowData: GetEscrowsFromIndexerResponse
 }
 
-export function TrustlineAndFundsCard({
-	escrowData,
-}: TrustlineAndFundsCardProps) {
-	const trustline = escrowData.trustline as
-		| { address: string; name?: string }
-		| undefined
+export function TrustlineAndFundsCard({ escrowData }: TrustlineAndFundsCardProps) {
+	const trustline = escrowData.trustline as { address: string; name?: string } | undefined
 
 	return (
 		<div className="grid gap-6 md:grid-cols-2">
@@ -37,18 +27,12 @@ export function TrustlineAndFundsCard({
 					{trustline && (
 						<>
 							<div className="space-y-1">
-								<Label className="text-xs text-muted-foreground">
-									Token Address
-								</Label>
-								<p className="font-mono text-sm break-all">
-									{trustline.address}
-								</p>
+								<Label className="text-xs text-muted-foreground">Token Address</Label>
+								<p className="font-mono text-sm break-all">{trustline.address}</p>
 							</div>
 							{trustline.name && (
 								<div className="space-y-1">
-									<Label className="text-xs text-muted-foreground">
-										Token Name
-									</Label>
+									<Label className="text-xs text-muted-foreground">Token Name</Label>
 									<p className="font-semibold">{trustline.name}</p>
 								</div>
 							)}
@@ -66,27 +50,18 @@ export function TrustlineAndFundsCard({
 							<DollarSign className="w-5 h-5" />
 							Funds Breakdown
 						</CardTitle>
-						<CardDescription>
-							Current balance and fund allocations
-						</CardDescription>
+						<CardDescription>Current balance and fund allocations</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{escrowData.balance !== undefined &&
-							escrowData.balance !== null && (
-								<div className="space-y-1">
-									<Label className="text-xs text-muted-foreground">
-										Current Balance
-									</Label>
-									<p className="font-semibold text-lg">
-										{formatEscrowAmount(escrowData.balance)}
-									</p>
-								</div>
-							)}
+						{escrowData.balance !== undefined && escrowData.balance !== null && (
+							<div className="space-y-1">
+								<Label className="text-xs text-muted-foreground">Current Balance</Label>
+								<p className="font-semibold text-lg">{formatEscrowAmount(escrowData.balance)}</p>
+							</div>
+						)}
 						{escrowData.approverFunds && (
 							<div className="space-y-1">
-								<Label className="text-xs text-muted-foreground">
-									Approver Funds
-								</Label>
+								<Label className="text-xs text-muted-foreground">Approver Funds</Label>
 								<p className="font-semibold">
 									{formatEscrowAmount(Number(escrowData.approverFunds))}
 								</p>
@@ -94,9 +69,7 @@ export function TrustlineAndFundsCard({
 						)}
 						{escrowData.receiverFunds && (
 							<div className="space-y-1">
-								<Label className="text-xs text-muted-foreground">
-									Receiver Funds
-								</Label>
+								<Label className="text-xs text-muted-foreground">Receiver Funds</Label>
 								<p className="font-semibold">
 									{formatEscrowAmount(Number(escrowData.receiverFunds))}
 								</p>

@@ -14,8 +14,7 @@ export function useWalletSync() {
 
 	// Sync suggested values when they arrive (only if field is still empty)
 	useEffect(() => {
-		if (!formData.title.trim() && suggestedTitle)
-			setField('title', suggestedTitle)
+		if (!formData.title.trim() && suggestedTitle) setField('title', suggestedTitle)
 	}, [suggestedTitle, formData.title, setField])
 
 	useEffect(() => {
@@ -49,19 +48,19 @@ export function useWalletSync() {
 	])
 
 	// Sync wallet address into empty multi-release milestone receivers
-	const milestoneReceiversKey = formData.milestones
+	const _milestoneReceiversKey = formData.milestones
 		.map((m) => ('receiver' in m ? m.receiver : ''))
 		.join('|')
 
 	useEffect(() => {
-		if (!isExternalStellarWalletAddress(address) || formData.selectedEscrowType !== 'multi-release') return
+		if (!isExternalStellarWalletAddress(address) || formData.selectedEscrowType !== 'multi-release')
+			return
 		const updated = formData.milestones.map((m) => {
-			if ('receiver' in m && !m.receiver.trim())
-				return { ...m, receiver: address }
+			if ('receiver' in m && !m.receiver.trim()) return { ...m, receiver: address }
 			return m
 		})
 		// Only update if something changed
 		const changed = updated.some((m, i) => m !== formData.milestones[i])
 		if (changed) setField('milestones', updated)
-	}, [address, formData.selectedEscrowType, milestoneReceiversKey, setField])
+	}, [address, formData.selectedEscrowType, setField, formData.milestones])
 }

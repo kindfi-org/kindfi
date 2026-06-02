@@ -11,8 +11,7 @@ export async function POST(request: Request) {
 		const {
 			data: { user },
 		} = await supabase.auth.getUser()
-		if (!user)
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
 		const body = await request.json()
 		const validation = validateRequest(updateSlugSchema, body)
@@ -29,19 +28,12 @@ export async function POST(request: Request) {
 			.maybeSingle()
 
 		if (existing && existing.id !== user.id) {
-			return NextResponse.json(
-				{ error: 'Handle already taken' },
-				{ status: 409 },
-			)
+			return NextResponse.json({ error: 'Handle already taken' }, { status: 409 })
 		}
 
-		const { error } = await supabase
-			.from('profiles')
-			.update({ slug })
-			.eq('id', user.id)
+		const { error } = await supabase.from('profiles').update({ slug }).eq('id', user.id)
 
-		if (error)
-			return NextResponse.json({ error: error.message }, { status: 500 })
+		if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
 		return NextResponse.json({ success: true, slug })
 	} catch (_e) {

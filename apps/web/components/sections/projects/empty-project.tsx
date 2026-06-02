@@ -10,10 +10,7 @@ interface EmptyStateProps {
 	onClearFilters: () => void
 }
 
-export function EmptyProject({
-	selectedCategories,
-	onClearFilters,
-}: EmptyStateProps) {
+export function EmptyProject({ selectedCategories, onClearFilters }: EmptyStateProps) {
 	const { t } = useI18n()
 	const hasFilters = selectedCategories.length > 0
 
@@ -34,9 +31,7 @@ export function EmptyProject({
 			</h2>
 
 			<p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-				{hasFilters
-					? t('projects.emptyFilteredDescription')
-					: t('projects.emptyDescription')}
+				{hasFilters ? t('projects.emptyFilteredDescription') : t('projects.emptyDescription')}
 			</p>
 
 			<div className="mt-8 flex flex-col gap-3 sm:flex-row">

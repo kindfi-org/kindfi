@@ -1,4 +1,5 @@
 import Tesseract from 'tesseract.js'
+import { logger } from '../logger'
 import type { ExtractedData } from './types'
 
 interface ProcessFileResult {
@@ -26,10 +27,11 @@ export const processFile = async (file: File): Promise<ProcessFileResult> => {
 		})
 
 		extractedText = result.data.text
-		// TODO: Add logic to populate extractedData and validationErrors if needed.
-		// This could include document-specific field extraction based on the document type.
 	} catch (error) {
-		console.error('Error processing document:', error)
+		logger.error(
+			'Error processing document',
+			error instanceof Error ? error : new Error(String(error)),
+		)
 		errorMessage = 'Error processing document'
 	}
 

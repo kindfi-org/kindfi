@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 
 export async function requireAdmin() {
@@ -18,7 +19,7 @@ export async function requireAdmin() {
 		.single()
 
 	if (error || !profileData) {
-		console.error('Error fetching user profile:', error)
+		logger.error('Error fetching user profile:', error)
 		redirect('/sign-in')
 	}
 

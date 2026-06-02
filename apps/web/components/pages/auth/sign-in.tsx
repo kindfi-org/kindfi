@@ -5,15 +5,15 @@ import Link from 'next/link'
 import { type ChangeEvent, useState } from 'react'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
-import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { FormAlert } from '~/components/shared/form/form-alert'
 import { FormFieldGroup } from '~/components/shared/form/form-field-group'
 import { FormShell } from '~/components/shared/form/form-shell'
+import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { useSmartAccountAuth } from '~/hooks/passkey/use-smart-account-auth'
 import { useFormValidation } from '~/hooks/use-form-validation'
-import { useI18n } from '~/lib/i18n'
 import { formLayoutClasses } from '~/lib/form/form-styles'
+import { useI18n } from '~/lib/i18n'
 
 export function LoginComponent() {
 	const [email, setEmail] = useState('')
@@ -23,14 +23,8 @@ export function LoginComponent() {
 		email: true,
 	})
 
-	const {
-		isAuthenticating,
-		authSuccess,
-		authError,
-		handleAuth,
-		isNotRegistered,
-		reset,
-	} = useSmartAccountAuth(email)
+	const { isAuthenticating, authSuccess, authError, handleAuth, isNotRegistered, reset } =
+		useSmartAccountAuth(email)
 
 	const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
 		handleValidation(e as ChangeEvent<HTMLInputElement & { name: 'email' }>)
@@ -55,10 +49,7 @@ export function LoginComponent() {
 				footer={
 					<div className="w-full text-center text-sm text-muted-foreground">
 						{t('auth.dontHaveAccount')}{' '}
-						<Link
-							className="font-medium text-primary hover:underline"
-							href="/sign-up"
-						>
+						<Link className="font-medium text-primary hover:underline" href="/sign-up">
 							{t('auth.createNewOne')}
 						</Link>
 					</div>
@@ -68,10 +59,7 @@ export function LoginComponent() {
 					{isNotRegistered ? (
 						<FormAlert variant="warning">
 							{t('auth.deviceNotFound')}{' '}
-							<Link
-								className="font-medium text-primary hover:underline"
-								href="/sign-up"
-							>
+							<Link className="font-medium text-primary hover:underline" href="/sign-up">
 								{t('auth.signUp')}
 							</Link>{' '}
 							{t('auth.first')}.
@@ -82,9 +70,7 @@ export function LoginComponent() {
 						<FormAlert variant="error">{t('auth.authError')}</FormAlert>
 					) : null}
 
-					{authSuccess ? (
-						<FormAlert variant="success">{t('auth.authSuccess')}</FormAlert>
-					) : null}
+					{authSuccess ? <FormAlert variant="success">{t('auth.authSuccess')}</FormAlert> : null}
 
 					<FormFieldGroup
 						id="email"

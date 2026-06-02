@@ -10,13 +10,9 @@ export function TipsSidebar() {
 	return (
 		<motion.div
 			className="sticky top-16 space-y-6 transform-gpu will-change-transform"
-			initial={
-				shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
-			}
+			initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
-			transition={
-				shouldReduceMotion ? undefined : { duration: 0.5, delay: 0.2 }
-			}
+			transition={shouldReduceMotion ? undefined : { duration: 0.5, delay: 0.2 }}
 		>
 			<Card className="p-6 shadow-md hover:shadow-lg transition-shadow bg-white">
 				<div className="flex items-center gap-2 mb-4">
@@ -33,10 +29,7 @@ export function TipsSidebar() {
 						'End with a clear call to action',
 					].map((tip) => (
 						<li key={tip} className="flex items-start gap-2">
-							<ChevronRight
-								className="w-4 h-4 mt-1 text-blue-500 shrink-0"
-								aria-hidden="true"
-							/>
+							<ChevronRight className="w-4 h-4 mt-1 text-blue-500 shrink-0" aria-hidden="true" />
 							<span>{tip}</span>
 						</li>
 					))}
@@ -49,8 +42,8 @@ export function TipsSidebar() {
 					<h3 className="text-lg font-semibold">Pro Tip</h3>
 				</div>
 				<p className="text-gray-600">
-					Keep your pitch concise and focused. Use data and stories to
-					demonstrate your impactful potential.
+					Keep your pitch concise and focused. Use data and stories to demonstrate your impactful
+					potential.
 				</p>
 			</Card>
 		</motion.div>

@@ -1,13 +1,5 @@
 'use client'
-import {
-	Bookmark,
-	Gift,
-	Globe,
-	Heart,
-	Share2,
-	Star,
-	Trophy,
-} from 'lucide-react'
+import { Bookmark, Gift, Globe, Heart, Share2, Star, Trophy } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useState } from 'react'
 import {
@@ -107,9 +99,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ onShowImpact }) => (
 				<div className="w-5 h-5 text-green-500">✓</div>
 				<div>
 					<div className="font-semibold">Verified Project</div>
-					<div className="text-gray-500">
-						This project has been verified by KindFi
-					</div>
+					<div className="text-gray-500">This project has been verified by KindFi</div>
 				</div>
 			</div>
 		</div>
@@ -172,9 +162,7 @@ const ImpactView = () => (
 			</div>
 
 			<div>
-				<h3 className="font-semibold text-gray-700 mb-4">
-					Your Impact Journey
-				</h3>
+				<h3 className="font-semibold text-gray-700 mb-4">Your Impact Journey</h3>
 				<div className="space-y-3">
 					<div className="flex justify-between text-gray-600">
 						<span>Current Impact</span>
@@ -269,10 +257,7 @@ const SuccessView: React.FC<SuccessViewProps> = ({ renderAvatars }) => (
 						</div>
 					</div>
 				))}
-				<button
-					type="button"
-					className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg"
-				>
+				<button type="button" className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg">
 					Join Success Celebration
 				</button>
 				<button
@@ -327,11 +312,7 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 	return (
 		<div className="space-y-4">
 			<div className="max-w-md p-6 bg-white rounded-lg shadow">
-				{showImpact ? (
-					<ImpactView />
-				) : (
-					<ProjectView onShowImpact={() => setShowImpact(true)} />
-				)}
+				{showImpact ? <ImpactView /> : <ProjectView onShowImpact={() => setShowImpact(true)} />}
 			</div>
 
 			{!showImpact && (
@@ -356,17 +337,12 @@ const ProjectCard: React.FC<ProjectCardProps> = () => {
 			)}
 			{showImpact && (
 				<div className="max-w-md p-6 bg-white rounded-lg shadow">
-					<h3 className="font-semibold text-gray-700 mb-4">
-						Fellow Supporters
-					</h3>
+					<h3 className="font-semibold text-gray-700 mb-4">Fellow Supporters</h3>
 					<div className="flex items-center">
 						{renderAvatars(5, 'supporter-avatar')}
 						<span className="text-gray-500 ml-2">+42</span>
 					</div>
-					<button
-						type="button"
-						className="w-full p-4 text-gray-600 bg-gray-50 rounded-lg mt-4"
-					>
+					<button type="button" className="w-full p-4 text-gray-600 bg-gray-50 rounded-lg mt-4">
 						Join Community Chat
 					</button>
 				</div>

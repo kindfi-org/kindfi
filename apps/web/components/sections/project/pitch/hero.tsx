@@ -5,12 +5,7 @@ import { ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 import { Checkbox } from '~/components/base/checkbox'
 import { Progress } from '~/components/base/progress'
-import {
-	fadeInUp,
-	fadeInWithDelay,
-	fadeSlideLeft,
-	scaleFadeIn,
-} from '~/lib/constants/animations'
+import { fadeInUp, fadeInWithDelay, fadeSlideLeft, scaleFadeIn } from '~/lib/constants/animations'
 import { requiredItems } from '~/lib/mock-data/project/project-pitch.mock'
 import type { RequiredItem } from '~/lib/types/project/pitch.types'
 import { cn } from '~/lib/utils'
@@ -23,9 +18,7 @@ export function Hero() {
 
 	const toggleItem = (id: string) => {
 		setItems((prevItems) =>
-			prevItems.map((item) =>
-				item.id === id ? { ...item, completed: !item.completed } : item,
-			),
+			prevItems.map((item) => (item.id === id ? { ...item, completed: !item.completed } : item)),
 		)
 	}
 
@@ -35,14 +28,11 @@ export function Hero() {
 				Complete Your Pitch
 			</motion.h1>
 			<motion.p className="text-gray-600" {...fadeInWithDelay(0.4)}>
-				Before you can start collecting reservations, fill out at least 2
-				Highlights, your Pitch, and your Contract.
+				Before you can start collecting reservations, fill out at least 2 Highlights, your Pitch,
+				and your Contract.
 			</motion.p>
 
-			<motion.section
-				className="rounded-lg shadow-md p-6 mt-5"
-				{...scaleFadeIn}
-			>
+			<motion.section className="rounded-lg shadow-md p-6 mt-5" {...scaleFadeIn}>
 				<div className="mt-4 flex justify-between items-center">
 					<h2 className="text-lg font-semibold">Required Items</h2>
 					<span className="text-gray-500 text-sm">

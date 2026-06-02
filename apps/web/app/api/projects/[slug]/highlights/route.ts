@@ -2,14 +2,12 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { highlightsUpdateSchema } from '~/lib/schemas/project.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
-export async function POST(
-	req: Request,
-	_params: { params: Promise<{ slug: string }> },
-) {
+export async function POST(req: Request, _params: { params: Promise<{ slug: string }> }) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -87,7 +85,7 @@ export async function POST(
 			.eq('id', projectId)
 
 		if (updateError) {
-			console.error(updateError)
+			logger.error(updateError)
 			return NextResponse.json({ error: updateError.message }, { status: 500 })
 		}
 
@@ -95,7 +93,7 @@ export async function POST(
 			message: 'Highlights saved successfully',
 		})
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

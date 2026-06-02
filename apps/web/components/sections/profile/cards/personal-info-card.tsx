@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
@@ -40,10 +41,7 @@ export function PersonalInfoCard({
 				bio: (formData.get('bio') as string) ?? '',
 				image_url: (formData.get('image_url') as string) ?? '',
 			}
-			const { error } = await supabase
-				.from('profiles')
-				.update(payload)
-				.eq('id', userId)
+			const { error } = await supabase.from('profiles').update(payload).eq('id', userId)
 
 			if (error) throw error
 
@@ -51,7 +49,7 @@ export function PersonalInfoCard({
 			setIsEditing(false)
 			window.location.reload()
 		} catch (error) {
-			console.error(error)
+			logger.error(error)
 			toast.error(t('profile.profileUpdateFailed'))
 		} finally {
 			setIsSaving(false)
@@ -62,9 +60,7 @@ export function PersonalInfoCard({
 		<ProfileSurfaceCard className="h-full">
 			<div className="mb-6 flex items-start justify-between gap-4 border-b border-slate-100 pb-5">
 				<div>
-					<h3 className="text-lg font-semibold text-gray-900">
-						{t('profile.personalInfoTitle')}
-					</h3>
+					<h3 className="text-lg font-semibold text-gray-900">{t('profile.personalInfoTitle')}</h3>
 					<p className="mt-1 text-sm text-muted-foreground">
 						{t('profile.personalInfoDescription')}
 					</p>

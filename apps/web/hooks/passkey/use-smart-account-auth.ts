@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { createSessionAction } from '~/app/actions/auth'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 
@@ -56,19 +57,16 @@ export const useSmartAccountAuth = (identifier: string) => {
 		try {
 			// Step 1: Generate authentication options
 			// This should be done server-side to maintain security
-			const authOptionsResponse = await fetch(
-				'/api/passkey/generate-auth-options',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						identifier,
-						origin: window.location.origin,
-					}),
+			const authOptionsResponse = await fetch('/api/passkey/generate-auth-options', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			)
+				body: JSON.stringify({
+					identifier,
+					origin: window.location.origin,
+				}),
+			})
 
 			if (!authOptionsResponse.ok) {
 				const errorData = await authOptionsResponse.json()
@@ -119,10 +117,7 @@ export const useSmartAccountAuth = (identifier: string) => {
 				})
 
 				if (!sessionResult.success) {
-					throw new InAppError(
-						ErrorCode.UNEXPECTED_ERROR,
-						sessionResult.message,
-					)
+					throw new InAppError(ErrorCode.UNEXPECTED_ERROR, sessionResult.message)
 				}
 
 				// Then sign in with NextAuth to create the client-side session
@@ -185,7 +180,7 @@ export const useSmartAccountAuth = (identifier: string) => {
 				return { verified: false }
 			}
 
-			console.error('Error during Smart Account authentication:', err)
+			logger.error('Error during Smart Account authentication:', err)
 
 			const message =
 				err.code === ErrorCode.AUTHENTICATOR_NOT_REGISTERED

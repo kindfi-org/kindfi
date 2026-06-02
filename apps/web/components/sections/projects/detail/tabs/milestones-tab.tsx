@@ -10,14 +10,8 @@ import { motion, useInView } from 'framer-motion'
 import { AlertCircle, CheckCircle, Clock } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import type {
-	Milestone,
-	MilestoneStatus,
-} from '~/lib/types/project/project-detail.types'
-import {
-	getMilestoneStatus,
-	isSingleReleaseMilestone,
-} from '~/lib/utils/escrow/milestone-utils'
+import type { Milestone, MilestoneStatus } from '~/lib/types/project/project-detail.types'
+import { getMilestoneStatus, isSingleReleaseMilestone } from '~/lib/utils/escrow/milestone-utils'
 
 interface MilestonesTabProps {
 	milestones: Milestone[]
@@ -31,9 +25,7 @@ export function MilestonesTab({
 	escrowType: _escrowType,
 }: MilestonesTabProps) {
 	const { getEscrowByContractIds } = useEscrow()
-	const [onChainMilestones, setOnChainMilestones] = useState<
-		Milestone[] | null
-	>(null)
+	const [onChainMilestones, setOnChainMilestones] = useState<Milestone[] | null>(null)
 	const [isLoadingOnChain, setIsLoadingOnChain] = useState(false)
 
 	useEffect(() => {
@@ -48,32 +40,31 @@ export function MilestonesTab({
 				// Handle both object and array responses from the indexer
 				const escrow = Array.isArray(resp) ? resp[0] : resp
 				const ms =
-					(escrow?.milestones as
-						| (SingleReleaseMilestone | MultiReleaseMilestone)[]
-						| undefined) || []
-			const mapped: Milestone[] = ms.map((m, idx) => {
-				const isApproved = getMilestoneStatus(m)
-				const isSingle = isSingleReleaseMilestone(m)
-				let status: MilestoneStatus
+					(escrow?.milestones as (SingleReleaseMilestone | MultiReleaseMilestone)[] | undefined) ||
+					[]
+				const mapped: Milestone[] = ms.map((m, idx) => {
+					const isApproved = getMilestoneStatus(m)
+					const isSingle = isSingleReleaseMilestone(m)
+					let status: MilestoneStatus
 
-				if (isApproved) {
-					status = 'approved'
-				} else if (!isSingle && m.status) {
-					status = (m.status as MilestoneStatus) ?? 'pending'
-				} else {
-					status = 'pending'
-				}
+					if (isApproved) {
+						status = 'approved'
+					} else if (!isSingle && m.status) {
+						status = (m.status as MilestoneStatus) ?? 'pending'
+					} else {
+						status = 'pending'
+					}
 
-				return {
-					id: String(idx),
-					title: m.description || `Milestone ${idx + 1}`,
-					description: m.description || '',
-					amount: (m as MultiReleaseMilestone).amount ?? 0,
-					deadline: new Date().toISOString(),
-					status,
-					orderIndex: idx,
-				}
-			})
+					return {
+						id: String(idx),
+						title: m.description || `Milestone ${idx + 1}`,
+						description: m.description || '',
+						amount: (m as MultiReleaseMilestone).amount ?? 0,
+						deadline: new Date().toISOString(),
+						status,
+						orderIndex: idx,
+					}
+				})
 				setOnChainMilestones(mapped)
 			} finally {
 				setIsLoadingOnChain(false)
@@ -87,9 +78,7 @@ export function MilestonesTab({
 		if (escrowContractAddress) return onChainMilestones ?? []
 		return milestones
 	}, [escrowContractAddress, onChainMilestones, milestones])
-	const sortedMilestones = [...effectiveMilestones].sort(
-		(a, b) => a.orderIndex - b.orderIndex,
-	)
+	const sortedMilestones = [...effectiveMilestones].sort((a, b) => a.orderIndex - b.orderIndex)
 
 	if (sortedMilestones.length === 0) {
 		if (escrowContractAddress && isLoadingOnChain) {
@@ -124,11 +113,7 @@ export function MilestonesTab({
 
 				<div className="space-y-12">
 					{sortedMilestones.map((milestone, index) => (
-						<MilestoneCard
-							key={milestone.id}
-							milestone={milestone}
-							index={index}
-						/>
+						<MilestoneCard key={milestone.id} milestone={milestone} index={index} />
 					))}
 				</div>
 			</div>
@@ -205,14 +190,11 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 		}
 	}
 
-	const formattedDate = new Date(milestone.deadline).toLocaleDateString(
-		'en-US',
-		{
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-		},
-	)
+	const formattedDate = new Date(milestone.deadline).toLocaleDateString('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+	})
 
 	return (
 		<div ref={cardRef} className="relative">
@@ -239,9 +221,7 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 						className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(milestone.status)}`}
 						aria-label={`Status: ${milestone.status}`}
 					>
-						{milestone.status
-							.replace('-', ' ')
-							.replace(/\b\w/g, (l) => l.toUpperCase())}
+						{milestone.status.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
 					</span>
 				</div>
 

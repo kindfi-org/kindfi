@@ -13,9 +13,7 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ pitch }: OverviewTabProps) {
-	const [DOMPurify, setDOMPurify] = useState<
-		typeof import('dompurify').default | null
-	>(null)
+	const [DOMPurify, setDOMPurify] = useState<typeof import('dompurify').default | null>(null)
 
 	// Load DOMPurify only in the browser
 	useEffect(() => {
@@ -50,9 +48,7 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 			<h1 className="text-4xl font-bold mb-6">{pitch.title}</h1>
 
 			{/* Project story section */}
-			{pitch.story && (
-				<div className="mb-8 prose max-w-none">{parse(safeStory)}</div>
-			)}
+			{pitch.story && <div className="mb-8 prose max-w-none">{parse(safeStory)}</div>}
 
 			{/* Video section */}
 			{pitch.videoUrl && (
@@ -82,20 +78,14 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 							url.split('/').pop()?.split('?')[0] ?? 'Project File',
 						)
 						const extension = fileName.split('.').pop()?.toLowerCase()
-						const fileType =
-							extension === 'ppt' || extension === 'pptx' ? 'ppt' : 'pdf' // fallback
+						const fileType = extension === 'ppt' || extension === 'pptx' ? 'ppt' : 'pdf' // fallback
 
 						return (
 							<div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-								<FileIcon
-									fileType={fileType}
-									className="h-10 w-10 flex-shrink-0"
-								/>
+								<FileIcon fileType={fileType} className="h-10 w-10 flex-shrink-0" />
 								<div className="flex-1 min-w-0 w-full">
 									<h3 className="font-medium truncate">{fileName}</h3>
-									<p className="text-sm text-muted-foreground uppercase">
-										Pitch Deck
-									</p>
+									<p className="text-sm text-muted-foreground uppercase">Pitch Deck</p>
 								</div>
 								<Button
 									asChild
@@ -104,12 +94,7 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 									className="gradient-border-btn bg-white"
 									aria-label={`Download ${fileName}`}
 								>
-									<a
-										href={url}
-										download
-										target="_blank"
-										rel="noopener noreferrer"
-									>
+									<a href={url} download target="_blank" rel="noopener noreferrer">
 										<Download className="h-4 w-4 mr-2" />
 										Download
 									</a>

@@ -1,13 +1,7 @@
 'use client'
 
 import type { EscrowType } from '@trustless-work/escrow'
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useMemo,
-	useState,
-} from 'react'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { DEFAULT_USDC_CONTRACT_ADDRESS } from '~/lib/constants/escrow'
 import type { EscrowFormData, MilestoneItem } from '../types'
 
@@ -26,19 +20,14 @@ interface EscrowSuggestions {
 interface EscrowFormContextValue {
 	formData: EscrowFormData
 	suggestions: EscrowSuggestions
-	setField: <K extends keyof EscrowFormData>(
-		field: K,
-		value: EscrowFormData[K],
-	) => void
+	setField: <K extends keyof EscrowFormData>(field: K, value: EscrowFormData[K]) => void
 	addMilestone: () => void
 	removeMilestone: (id: string) => void
 	updateMilestone: (index: number, patch: Partial<MilestoneItem>) => void
 	convertMilestones: (type: EscrowType) => void
 }
 
-const EscrowFormContext = createContext<EscrowFormContextValue | undefined>(
-	undefined,
-)
+const EscrowFormContext = createContext<EscrowFormContextValue | undefined>(undefined)
 
 interface EscrowFormProviderProps {
 	children: React.ReactNode
@@ -53,10 +42,7 @@ interface EscrowFormProviderProps {
 	}
 }
 
-export function EscrowFormProvider({
-	children,
-	initialData,
-}: EscrowFormProviderProps) {
+export function EscrowFormProvider({ children, initialData }: EscrowFormProviderProps) {
 	const {
 		walletAddress,
 		selectedEscrowType,
@@ -130,17 +116,12 @@ export function EscrowFormProvider({
 		}))
 	}, [])
 
-	const updateMilestone = useCallback(
-		(index: number, patch: Partial<MilestoneItem>) => {
-			setFormData((prev) => ({
-				...prev,
-				milestones: prev.milestones.map((m, i) =>
-					i === index ? { ...m, ...patch } : m,
-				),
-			}))
-		},
-		[],
-	)
+	const updateMilestone = useCallback((index: number, patch: Partial<MilestoneItem>) => {
+		setFormData((prev) => ({
+			...prev,
+			milestones: prev.milestones.map((m, i) => (i === index ? { ...m, ...patch } : m)),
+		}))
+	}, [])
 
 	const convertMilestones = useCallback((type: EscrowType) => {
 		setFormData((prev) => ({
@@ -183,16 +164,11 @@ export function EscrowFormProvider({
 		],
 	)
 
-	return (
-		<EscrowFormContext.Provider value={value}>
-			{children}
-		</EscrowFormContext.Provider>
-	)
+	return <EscrowFormContext.Provider value={value}>{children}</EscrowFormContext.Provider>
 }
 
 export function useEscrowForm(): EscrowFormContextValue {
 	const ctx = useContext(EscrowFormContext)
-	if (!ctx)
-		throw new Error('useEscrowForm must be used within EscrowFormProvider')
+	if (!ctx) throw new Error('useEscrowForm must be used within EscrowFormProvider')
 	return ctx
 }

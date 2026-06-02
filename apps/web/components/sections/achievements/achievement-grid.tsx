@@ -21,12 +21,7 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/base/dropdown-menu'
 import { Progress } from '~/components/base/progress'
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from '~/components/base/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { ErrorFallback } from '~/components/fallbacks/error-fallback'
 import { LoadingFallback } from '~/components/fallbacks/loading-fallback'
 import { Paginations } from '~/components/shared/pagination'
@@ -84,9 +79,7 @@ export function AchievementsGrid() {
 
 	const totalNFTPages = Math.ceil(filteredNFTs.length / itemsPerPage)
 
-	const completedCount = achievements.filter(
-		(a) => a.status === 'completed',
-	).length
+	const completedCount = achievements.filter((a) => a.status === 'completed').length
 	const progress = (completedCount / achievements.length) * 100
 
 	return (
@@ -161,15 +154,10 @@ export function AchievementsGrid() {
 												</div>
 												<div>
 													<h2 className="">Impact Champion</h2>
-													<p className="text-sm font-light">
-														5/10 projects supported
-													</p>
+													<p className="text-sm font-light">5/10 projects supported</p>
 												</div>
 											</div>
-											<Progress
-												value={progress}
-												className="h-2 w-full sm:w-1/4 bg-blue-200"
-											/>
+											<Progress value={progress} className="h-2 w-full sm:w-1/4 bg-blue-200" />
 										</CardContent>
 									</Card>
 								)}
@@ -221,25 +209,16 @@ export function AchievementsGrid() {
 										/>
 									</div>
 								)}
-								<StatsSection
-									totalNFTs={filteredNFTs.length}
-									rareItems={5}
-									collections={3}
-								/>
+								<StatsSection totalNFTs={filteredNFTs.length} rareItems={5} collections={3} />
 							</CardContent>
 						</TabsContent>
 					</Tabs>
 					{selectedNFT && (
-						<Dialog
-							open={!!selectedNFT}
-							onOpenChange={() => setSelectedNFT(null)}
-						>
+						<Dialog open={!!selectedNFT} onOpenChange={() => setSelectedNFT(null)}>
 							<DialogContent>
 								<DialogHeader>
 									<DialogTitle>{selectedNFT.title}</DialogTitle>
-									<DialogDescription>
-										{selectedNFT.description}
-									</DialogDescription>
+									<DialogDescription>{selectedNFT.description}</DialogDescription>
 								</DialogHeader>
 								<Image
 									src={selectedNFT.imageUrl || PLACEHOLDER_IMG}

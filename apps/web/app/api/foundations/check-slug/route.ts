@@ -1,5 +1,6 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { checkSlugQuerySchema } from '~/lib/schemas/foundation.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 import { validateSlug } from '~/lib/validation/foundation-api'
@@ -17,8 +18,7 @@ export async function GET(req: Request) {
 		if (!validateSlug(slug)) {
 			return NextResponse.json(
 				{
-					error:
-						'Slug must be 3-30 characters, lowercase alphanumeric with hyphens',
+					error: 'Slug must be 3-30 characters, lowercase alphanumeric with hyphens',
 				},
 				{ status: 400 },
 			)
@@ -31,16 +31,13 @@ export async function GET(req: Request) {
 			.maybeSingle()
 
 		if (error) {
-			console.error('Error checking slug:', error)
-			return NextResponse.json(
-				{ error: 'Failed to check slug' },
-				{ status: 500 },
-			)
+			logger.error('Error checking slug:', error)
+			return NextResponse.json({ error: 'Failed to check slug' }, { status: 500 })
 		}
 
 		return NextResponse.json({ data: data || null })
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

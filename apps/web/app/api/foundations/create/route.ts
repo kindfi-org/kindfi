@@ -1,13 +1,16 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { Json, TablesInsert } from '@services/supabase'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { createFoundationFormSchema } from '~/lib/schemas/foundation-create.schemas'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
 
-export async function POST(req: Request) {
+async function createFoundationHandler(req: NextRequest) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -24,7 +27,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (profileError || !profileData) {
-			console.error('Profile lookup error:', {
+			logger.error('Profile lookup error:', {
 				error: profileError,
 				userId,
 			})
@@ -75,16 +78,8 @@ export async function POST(req: Request) {
 		if (!validation.success) {
 			return validation.response
 		}
-		const {
-			name,
-			description,
-			slug,
-			foundedYear,
-			mission,
-			vision,
-			websiteUrl,
-			socialLinks,
-		} = validation.data
+		const { name, description, slug, foundedYear, mission, vision, websiteUrl, socialLinks } =
+			validation.data
 		const logo = formData.get('logo') as File | null
 
 		// Check if slug already exists
@@ -95,10 +90,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (existing) {
-			return NextResponse.json(
-				{ error: 'Slug already exists' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Slug already exists' }, { status: 400 })
 		}
 
 		// Prepare foundation data to insert
@@ -122,7 +114,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (insertError || !foundation) {
-			console.error(insertError)
+			logger.error(insertError)
 			return NextResponse.json(
 				{ error: insertError?.message || 'Failed to create foundation' },
 				{ status: 500 },
@@ -134,11 +126,7 @@ export async function POST(req: Request) {
 		if (logo instanceof File) {
 			if (!foundation.slug) throw new Error('Foundation slug is missing')
 
-			const logoUrl = await uploadFoundationLogo(
-				foundation.slug,
-				logo,
-				supabase,
-			)
+			const logoUrl = await uploadFoundationLogo(foundation.slug, logo, supabase)
 
 			if (logoUrl) {
 				const { error: updateLogoError } = await supabase
@@ -147,21 +135,30 @@ export async function POST(req: Request) {
 					.eq('id', foundation.id)
 
 				if (updateLogoError) {
-					console.error(updateLogoError)
-					return NextResponse.json(
-						{ error: updateLogoError.message },
-						{ status: 500 },
-					)
+					logger.error(updateLogoError)
+					return NextResponse.json({ error: updateLogoError.message }, { status: 500 })
 				}
 			}
 		}
 
 		return NextResponse.json({ slug: foundation.slug }, { status: 201 })
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'moderate',
+		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? ip ?? 'anonymous'
+		},
+	},
+	createFoundationHandler,
+)

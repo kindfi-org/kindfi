@@ -2,16 +2,18 @@ import { supabase } from '@packages/lib/supabase'
 import { Networks } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { escrowFundSchema } from '~/lib/schemas/escrow.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import { sendTransaction } from '~/lib/stellar/utils/send-transaction'
 import { signTransaction } from '~/lib/stellar/utils/sign-transaction'
-import { escrowFundSchema } from '~/lib/schemas/escrow.schemas'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
-export async function POST(req: NextRequest) {
+async function fundHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
@@ -42,11 +44,7 @@ export async function POST(req: NextRequest) {
 			throw new Error('Failed to retrieve unsigned transaction XDR')
 		}
 
-		const signedTxXdr = signTransaction(
-			unsignedTransaction,
-			Networks.TESTNET,
-			signer,
-		)
+		const signedTxXdr = signTransaction(unsignedTransaction, Networks.TESTNET, signer)
 		if (!signedTxXdr) {
 			throw new Error('Transaction signing failed')
 		}
@@ -102,7 +100,7 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Escrow Fund Error:', error)
+		logger.error('Escrow Fund Error:', error)
 
 		if (error instanceof AppError) {
 			await auditLogger.log({
@@ -120,7 +118,7 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		console.error('Internal server error during escrow initialization:', error)
+		logger.error('Internal server error during escrow initialization:', error)
 
 		await auditLogger.log({
 			correlationId,
@@ -140,3 +138,11 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	fundHandler,
+)

@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
-import { getServerSession } from 'next-auth'
 import { notFound, redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
 import type { ReactNode } from 'react'
 import { FoundationManageCommandCenter } from '~/components/sections/foundations/manage/foundation-manage-command-center'
 import { nextAuthOption } from '~/lib/auth/auth-options'
@@ -34,10 +34,7 @@ export default async function FoundationManageLayout({
 			className="container mx-auto px-4 py-6 md:py-8 max-w-5xl"
 			aria-label="Foundation management"
 		>
-			<FoundationManageCommandCenter
-				slug={slug}
-				foundationName={foundationMeta.name}
-			/>
+			<FoundationManageCommandCenter slug={slug} foundationName={foundationMeta.name} />
 			<main className="min-w-0 pt-6">{children}</main>
 		</section>
 	)

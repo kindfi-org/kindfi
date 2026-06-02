@@ -1,15 +1,6 @@
-import {
-	ChevronDown,
-	LayoutDashboard,
-	Megaphone,
-	Shield,
-	Users,
-} from 'lucide-react'
+import { ChevronDown, LayoutDashboard, Megaphone, Shield, Users } from 'lucide-react'
 import { useTranslation } from '~/hooks/use-translation'
-import {
-	categoryTitles,
-	faqData,
-} from '~/lib/mock-data/project/project-card-variants.mock'
+import { categoryTitles, faqData } from '~/lib/mock-data/project/project-card-variants.mock'
 
 interface Props {
 	activeTab: string
@@ -32,58 +23,52 @@ export function FaqTabs({
 		>
 			<div className="w-full md:w-[40rem] lg:w-[55rem] xl:w-[65rem]">
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-					{(['platform', 'campaigns', 'donors', 'security'] as const).map(
-						(key) => {
-							const isActive = activeTab === key
-							const Icon =
-								key === 'platform'
-									? LayoutDashboard
-									: key === 'campaigns'
-										? Megaphone
-										: key === 'donors'
-											? Users
-											: Shield
-							return (
-								<button
-									key={key}
-									type="button"
-									onClick={() => handleActiveFaq(key)}
-									className={`group flex items-start gap-3 rounded-2xl border ${isActive ? 'border-black bg-black text-white' : 'border-[#E6E6E6] bg-white text-black'} p-4 shadow-sm transition hover:shadow`}
-									aria-pressed={isActive}
+					{(['platform', 'campaigns', 'donors', 'security'] as const).map((key) => {
+						const isActive = activeTab === key
+						const Icon =
+							key === 'platform'
+								? LayoutDashboard
+								: key === 'campaigns'
+									? Megaphone
+									: key === 'donors'
+										? Users
+										: Shield
+						return (
+							<button
+								key={key}
+								type="button"
+								onClick={() => handleActiveFaq(key)}
+								className={`group flex items-start gap-3 rounded-2xl border ${isActive ? 'border-black bg-black text-white' : 'border-[#E6E6E6] bg-white text-black'} p-4 shadow-sm transition hover:shadow`}
+								aria-pressed={isActive}
+							>
+								<span
+									className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${isActive ? 'bg-white/10' : 'bg-gray-100'} transition`}
 								>
+									<Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-gray-700'}`} />
+								</span>
+								<span className="flex-1 text-left">
+									<span className="block text-sm font-semibold">
+										{t(`faqs.tabs.${key}`)} ({faqData[key].length})
+									</span>
 									<span
-										className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${isActive ? 'bg-white/10' : 'bg-gray-100'} transition`}
+										className={`mt-1 block text-xs ${isActive ? 'text-white/80' : 'text-[#727276]'}`}
 									>
-										<Icon
-											className={`h-5 w-5 ${isActive ? 'text-white' : 'text-gray-700'}`}
-										/>
+										{categoryTitles[key].subtitle}
 									</span>
-									<span className="flex-1 text-left">
-										<span className="block text-sm font-semibold">
-											{t(`faqs.tabs.${key}`)} ({faqData[key].length})
-										</span>
-										<span
-											className={`mt-1 block text-xs ${isActive ? 'text-white/80' : 'text-[#727276]'}`}
-										>
-											{categoryTitles[key].subtitle}
-										</span>
-									</span>
-								</button>
-							)
-						},
-					)}
+								</span>
+							</button>
+						)
+					})}
 				</div>
 
 				<div className="mt-8">
 					<h2 className="text-black font-semibold text-xl md:text-2xl">
-						{t(`faqs.categories.${activeTab}.title`) ===
-						`faqs.categories.${activeTab}.title`
+						{t(`faqs.categories.${activeTab}.title`) === `faqs.categories.${activeTab}.title`
 							? categoryTitles[activeTab].title
 							: t(`faqs.categories.${activeTab}.title`)}
 					</h2>
 					<p className="text-[#727276] text-sm md:text-base">
-						{t(`faqs.categories.${activeTab}.subtitle`) ===
-						`faqs.categories.${activeTab}.subtitle`
+						{t(`faqs.categories.${activeTab}.subtitle`) === `faqs.categories.${activeTab}.subtitle`
 							? categoryTitles[activeTab].subtitle
 							: t(`faqs.categories.${activeTab}.subtitle`)}
 					</p>
@@ -92,8 +77,7 @@ export function FaqTabs({
 							const isOpen = selectedQuestion === id
 							const tq = t(`faqs.items.${id}.q`)
 							const ta = t(`faqs.items.${id}.a`)
-							const translatedQuestion =
-								tq === `faqs.items.${id}.q` ? question : tq
+							const translatedQuestion = tq === `faqs.items.${id}.q` ? question : tq
 							const translatedAnswer = ta === `faqs.items.${id}.a` ? answer : ta
 							return (
 								<div

@@ -1,17 +1,10 @@
 import { appEnvConfig } from '@packages/lib/config'
-import {
-	deleteChallenge,
-	getChallenge,
-	getUser,
-	saveUser,
-} from '@packages/lib/db'
+import { deleteChallenge, getChallenge, getUser, saveUser } from '@packages/lib/db'
 import { StellarPasskeyService } from '@packages/lib/stellar'
-import {
-	type RegistrationResponseJSON,
-	verifyRegistrationResponse,
-} from '@simplewebauthn/server'
+import { type RegistrationResponseJSON, verifyRegistrationResponse } from '@simplewebauthn/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { getRpIdFromOrigin } from '@/lib/passkey/rp-id-helper'
 import { verifyRegistrationSchema } from '~/lib/schemas/passkey.schemas'
 import { validateRequest } from '~/lib/utils/validation'
@@ -29,14 +22,12 @@ export async function POST(req: NextRequest) {
 		if (!validation.success) {
 			return validation.response
 		}
-		const { registrationResponse, identifier, origin, userId } =
-			validation.data
+		const { registrationResponse, identifier, origin, userId } = validation.data
 
 		const config = appEnvConfig('web')
 		const rpId = getRpIdFromOrigin(origin)
 		// Use the origin as expectedOrigin (it's already validated by getRpIdFromOrigin)
 		const expectedOrigin = origin
-
 
 		// Get challenge and user in parallel
 		const [expectedChallenge, userResponse] = await Promise.all([
@@ -45,10 +36,7 @@ export async function POST(req: NextRequest) {
 		])
 
 		if (!expectedChallenge) {
-			return NextResponse.json(
-				{ error: 'Challenge not found' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Challenge not found' }, { status: 400 })
 		}
 
 		// Use existing credentials or create empty array if new user
@@ -69,9 +57,7 @@ export async function POST(req: NextRequest) {
 			const { credential } = verification.registrationInfo
 
 			// Check if credential already exists
-			const existingCredential = credentials.find(
-				(cred) => cred.id === credential.id,
-			)
+			const existingCredential = credentials.find((cred) => cred.id === credential.id)
 
 			if (!existingCredential) {
 				// Create Smart Account
@@ -79,23 +65,19 @@ export async function POST(req: NextRequest) {
 				// We use custom contracts (StellarPasskeyService) for server-side deployment
 				// Smart Account Kit SDK should be used client-side for wallet management after deployment
 				try {
-					if (
-						!config.stellar.fundingAccount ||
-						config.stellar.fundingAccount === 'SB...4756'
-					) {
+					if (!config.stellar.fundingAccount || config.stellar.fundingAccount === 'SB...4756') {
 						const errorMsg =
 							'Funding account not configured. Set STELLAR_FUNDING_SECRET_KEY environment variable.'
-						console.error('❌', errorMsg)
+						logger.error('❌', errorMsg)
 						throw new Error(errorMsg)
 					}
 
 					if (!config.stellar.factoryContractId) {
 						const errorMsg =
 							'Factory contract not configured. Set FACTORY_CONTRACT_ID environment variable.'
-						console.error('❌', errorMsg)
+						logger.error('❌', errorMsg)
 						throw new Error(errorMsg)
 					}
-
 
 					const stellarService = new StellarPasskeyService(
 						config.stellar.networkPassphrase,
@@ -104,9 +86,7 @@ export async function POST(req: NextRequest) {
 					)
 
 					// Convert Uint8Array publicKey to base64 (same as verify-auth route)
-					const publicKeyBase64 = Buffer.from(credential.publicKey).toString(
-						'base64',
-					)
+					const publicKeyBase64 = Buffer.from(credential.publicKey).toString('base64')
 
 					const deploymentResult = await stellarService.deployPasskeyAccount({
 						credentialId: credential.id,
@@ -118,21 +98,19 @@ export async function POST(req: NextRequest) {
 				} catch (deploymentError) {
 					// Smart Account deployment failed
 					const errorMessage =
-						deploymentError instanceof Error
-							? deploymentError.message
-							: String(deploymentError)
+						deploymentError instanceof Error ? deploymentError.message : String(deploymentError)
 
-					console.error('❌ Smart Account deployment failed:', { error: errorMessage })
+					logger.error('❌ Smart Account deployment failed:', { error: errorMessage })
 
 					// Log detailed error for debugging
-					console.error('Smart Account deployment error details:', {
+					logger.error('Smart Account deployment error details:', {
 						fundingAccount: config.stellar.fundingAccount ? 'set' : 'missing',
 						factoryContractId: config.stellar.factoryContractId ? 'set' : 'missing',
 					})
 
 					// For now, we'll continue without Smart Account creation
 					// In production, you may want to fail the registration
-					console.warn(
+					logger.warn(
 						'⚠️ Continuing registration without Smart Account creation. ' +
 							'Check server logs for deployment errors. ' +
 							'The passkey can still be used for authentication.',
@@ -155,10 +133,7 @@ export async function POST(req: NextRequest) {
 					rpId,
 					identifier,
 					user: {
-						credentials: [
-							...credentials,
-							newCredential as (typeof credentials)[number],
-						],
+						credentials: [...credentials, newCredential as (typeof credentials)[number]],
 					},
 					userId,
 				})
@@ -185,21 +160,22 @@ export async function POST(req: NextRequest) {
 				'Passkey registered successfully, but Smart Account creation failed. ' +
 				'Check server logs for details. The passkey can still be used for authentication.'
 			response.warning = warningMessage
-			console.warn('⚠️', warningMessage)
-			console.warn('⚠️ Configuration check:', {
+			logger.warn('⚠️', warningMessage)
+			logger.warn('⚠️ Configuration check:', {
 				hasAccountWasmHash: !!process.env.NEXT_PUBLIC_ACCOUNT_WASM_HASH,
-				hasWebAuthnVerifier:
-					!!process.env.NEXT_PUBLIC_WEBAUTHN_VERIFIER_ADDRESS,
+				hasWebAuthnVerifier: !!process.env.NEXT_PUBLIC_WEBAUTHN_VERIFIER_ADDRESS,
 				hasFundingAccount:
-					!!config.stellar.fundingAccount &&
-					config.stellar.fundingAccount !== 'SB...4756',
+					!!config.stellar.fundingAccount && config.stellar.fundingAccount !== 'SB...4756',
 				hasFactoryContract: !!config.stellar.factoryContractId,
 			})
 		}
 
 		return NextResponse.json(response)
 	} catch (error) {
-		console.error('❌ Error verifying registration:', error instanceof Error ? error.message : String(error))
+		logger.error(
+			'❌ Error verifying registration:',
+			error instanceof Error ? error.message : String(error),
+		)
 		return NextResponse.json(
 			{
 				error: 'Failed to verify registration',

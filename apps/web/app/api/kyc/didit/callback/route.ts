@@ -2,6 +2,7 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { mapDiditStatusToKYC } from '~/lib/services/didit'
 
@@ -33,10 +34,7 @@ export async function POST(req: NextRequest) {
 	try {
 		body = await req.json()
 	} catch {
-		return NextResponse.json(
-			{ error: 'Invalid JSON in request body' },
-			{ status: 400 },
-		)
+		return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
 	}
 
 	if (!isValidCallbackBody(body)) {
@@ -74,7 +72,7 @@ export async function POST(req: NextRequest) {
 			.limit(1)
 
 		if (findError) {
-			console.error('Error finding KYC record:', findError)
+			logger.error('Error finding KYC record:', findError)
 			return NextResponse.json(
 				{ error: 'Failed to find KYC record', details: findError.message },
 				{ status: 500 },
@@ -83,25 +81,20 @@ export async function POST(req: NextRequest) {
 
 		if (!kycRecords || kycRecords.length === 0) {
 			// No record found - might be a new session, create one
-			const { error: insertError } = await supabaseServiceRole
-				.from('kyc_reviews')
-				.insert({
-					user_id: session.user.id,
-					status: kycStatus,
-					verification_level: 'enhanced',
-					notes: JSON.stringify({
-						diditSessionId: verificationSessionId,
-						diditStatus: status,
-						callbackReceived: new Date().toISOString(),
-					}),
-				})
+			const { error: insertError } = await supabaseServiceRole.from('kyc_reviews').insert({
+				user_id: session.user.id,
+				status: kycStatus,
+				verification_level: 'enhanced',
+				notes: JSON.stringify({
+					diditSessionId: verificationSessionId,
+					diditStatus: status,
+					callbackReceived: new Date().toISOString(),
+				}),
+			})
 
 			if (insertError) {
-				console.error('Failed to create KYC record:', insertError)
-				return NextResponse.json(
-					{ error: 'Failed to create KYC record' },
-					{ status: 500 },
-				)
+				logger.error('Failed to create KYC record:', insertError)
+				return NextResponse.json({ error: 'Failed to create KYC record' }, { status: 500 })
 			}
 
 			return NextResponse.json({
@@ -114,9 +107,7 @@ export async function POST(req: NextRequest) {
 		// Update existing record
 		const kycRecord = kycRecords[0]
 		const notes =
-			typeof kycRecord.notes === 'string'
-				? JSON.parse(kycRecord.notes)
-				: kycRecord.notes
+			typeof kycRecord.notes === 'string' ? JSON.parse(kycRecord.notes) : kycRecord.notes
 
 		const { error: updateError } = await supabaseServiceRole
 			.from('kyc_reviews')
@@ -133,11 +124,8 @@ export async function POST(req: NextRequest) {
 			.eq('id', kycRecord.id)
 
 		if (updateError) {
-			console.error('Failed to update KYC record:', updateError)
-			return NextResponse.json(
-				{ error: 'Failed to update KYC record' },
-				{ status: 500 },
-			)
+			logger.error('Failed to update KYC record:', updateError)
+			return NextResponse.json({ error: 'Failed to update KYC record' }, { status: 500 })
 		}
 
 		return NextResponse.json({
@@ -146,7 +134,7 @@ export async function POST(req: NextRequest) {
 			diditStatus: status,
 		})
 	} catch (error) {
-		console.error('Error processing Didit callback:', error)
+		logger.error('Error processing Didit callback:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to process callback',

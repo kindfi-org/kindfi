@@ -2,20 +2,8 @@
 
 import { AnimatePresence } from 'framer-motion'
 import { Clock } from 'lucide-react'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
-import {
-	Table,
-	TableBody,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '~/components/base/table'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '~/components/base/table'
 import type { PendingInvitation } from '~/lib/types/project/team-members.types'
 import { cn } from '~/lib/utils'
 import { InvitationCard } from './invitation-card'
@@ -42,9 +30,7 @@ export function PendingInvitations({
 						<Clock className="h-5 w-5" aria-hidden="true" />
 						Pending Invitations
 					</CardTitle>
-					<CardDescription>
-						No pending invitations at the moment.
-					</CardDescription>
+					<CardDescription>No pending invitations at the moment.</CardDescription>
 				</CardHeader>
 			</Card>
 		)
@@ -59,9 +45,7 @@ export function PendingInvitations({
 						<Clock className="h-5 w-5" aria-hidden="true" />
 						Pending Invitations ({invitations.length})
 					</CardTitle>
-					<CardDescription>
-						Manage invitations that haven&apos;t been accepted yet.
-					</CardDescription>
+					<CardDescription>Manage invitations that haven&apos;t been accepted yet.</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<Table>
@@ -96,9 +80,7 @@ export function PendingInvitations({
 			<div className="md:hidden space-y-4">
 				<div className="flex items-center gap-2">
 					<Clock className="h-5 w-5" aria-hidden="true" />
-					<h3 className="text-2xl font-semibold">
-						Pending Invitations ({invitations.length})
-					</h3>
+					<h3 className="text-2xl font-semibold">Pending Invitations ({invitations.length})</h3>
 				</div>
 				<p className="text-sm text-muted-foreground !mt-1.5">
 					Manage invitations that haven&apos;t been accepted yet.

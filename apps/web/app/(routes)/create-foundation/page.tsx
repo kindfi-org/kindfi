@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { CreateFoundationForm } from '~/components/sections/foundations/create/create-foundation-form'
 import { UnauthorizedAccess } from '~/components/shared/unauthorized-access'
 import { CreateFoundationProvider } from '~/hooks/contexts/use-create-foundation.context'
@@ -22,7 +23,7 @@ export default async function CreateFoundationPage() {
 		.single()
 
 	if (error || !profileData) {
-		console.error('Error fetching user profile:', error)
+		logger.error('Error fetching user profile:', error)
 		redirect('/sign-in')
 	}
 
@@ -44,8 +45,8 @@ export default async function CreateFoundationPage() {
 						Let&apos;s get your Foundation started
 					</h1>
 					<p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-						Create a foundation profile to build trust and receive donations
-						directly, or organize your campaigns under one umbrella.
+						Create a foundation profile to build trust and receive donations directly, or organize
+						your campaigns under one umbrella.
 					</p>
 				</div>
 

@@ -5,10 +5,7 @@ import { z } from 'zod'
 const uuidValidator = z.string().uuid('Must be a valid UUID')
 const addressValidator = z
 	.string()
-	.regex(
-		/^G[A-Z2-7]{55}$|^0x[a-fA-F0-9]{40}$/,
-		'Must be a valid Stellar or EVM address',
-	)
+	.regex(/^G[A-Z2-7]{55}$|^0x[a-fA-F0-9]{40}$/, 'Must be a valid Stellar or EVM address')
 const nonEmptyString = z.string().min(1, 'This field is required')
 const signerValidator = z.string().min(1, 'Signer is required')
 
@@ -23,14 +20,8 @@ const nonNegativeNumericString = z
 const optionalNonNegativeNumericString = z
 	.string()
 	.optional()
-	.refine(
-		(val) => val === undefined || !Number.isNaN(Number(val)),
-		'Must be a valid number',
-	)
-	.refine(
-		(val) => val === undefined || Number(val) >= 0,
-		'Amount must be a non-negative number',
-	)
+	.refine((val) => val === undefined || !Number.isNaN(Number(val)), 'Must be a valid number')
+	.refine((val) => val === undefined || Number(val) >= 0, 'Amount must be a non-negative number')
 
 // Dispute filing schema
 export const disputeSchema = z.object({
@@ -53,15 +44,11 @@ export const disputeResolutionSchema = z.object({
 	resolution: z
 		.enum(['APPROVED', 'REJECTED', 'RESOLVED'] as const, {
 			error: (issue) =>
-				issue.input === undefined
-					? 'Resolution status is required'
-					: 'Invalid resolution status',
+				issue.input === undefined ? 'Resolution status is required' : 'Invalid resolution status',
 		})
 		.describe('Resolution decision'),
 	resolutionNotes: nonEmptyString.describe('Notes explaining the resolution'),
-	approverAmount: nonNegativeNumericString.describe(
-		'Amount allocated to the approver',
-	),
+	approverAmount: nonNegativeNumericString.describe('Amount allocated to the approver'),
 	serviceProviderAmount: nonNegativeNumericString.describe(
 		'Amount allocated to the service provider',
 	),
@@ -79,22 +66,12 @@ export const mediatorAssignmentSchema = z.object({
 // Evidence submission schema
 export const evidenceSubmissionSchema = z.object({
 	disputeId: uuidValidator.describe('Dispute ID'),
-	submitterAddress: addressValidator.describe(
-		'Address of the evidence submitter',
-	),
-	evidenceType: z.enum(
-		['DOCUMENT', 'IMAGE', 'VIDEO', 'LINK', 'TEXT'] as const,
-		{
-			error: (issue) =>
-				issue.input === undefined
-					? 'Evidence type is required'
-					: 'Invalid evidence type',
-		},
-	),
-	evidenceUrl: z
-		.string()
-		.url('Must be a valid URL')
-		.describe('URL to the evidence'),
+	submitterAddress: addressValidator.describe('Address of the evidence submitter'),
+	evidenceType: z.enum(['DOCUMENT', 'IMAGE', 'VIDEO', 'LINK', 'TEXT'] as const, {
+		error: (issue) =>
+			issue.input === undefined ? 'Evidence type is required' : 'Invalid evidence type',
+	}),
+	evidenceUrl: z.string().url('Must be a valid URL').describe('URL to the evidence'),
 	description: nonEmptyString.describe('Description of the evidence'),
 })
 
@@ -125,45 +102,29 @@ export const disputeSignSchema = z
 		// For filing a dispute - required if type is 'file'
 		escrowId: uuidValidator.optional().describe('Escrow contract ID'),
 		milestoneId: uuidValidator.optional().describe('Milestone ID'),
-		filerAddress: addressValidator
-			.optional()
-			.describe('Address of the dispute filer'),
-		disputeReason: z
-			.string()
-			.optional()
-			.describe('Reason for filing the dispute'),
+		filerAddress: addressValidator.optional().describe('Address of the dispute filer'),
+		disputeReason: z.string().optional().describe('Reason for filing the dispute'),
 		evidenceUrls: z
 			.array(z.string().url('Must be a valid URL'))
 			.optional()
 			.describe('URLs to evidence supporting the dispute'),
-		escrowParticipantId: uuidValidator
-			.optional()
-			.describe('Escrow participant ID'),
+		escrowParticipantId: uuidValidator.optional().describe('Escrow participant ID'),
 		// For resolving a dispute - required if type is 'resolve'
 		disputeId: uuidValidator.optional().describe('Dispute ID'),
 		mediatorId: uuidValidator.optional().describe('Mediator ID'),
 		resolution: z
 			.enum(['APPROVED', 'REJECTED', 'RESOLVED'] as const, {
 				error: (issue) =>
-					issue.input === undefined
-						? 'Resolution status is required'
-						: 'Invalid resolution status',
+					issue.input === undefined ? 'Resolution status is required' : 'Invalid resolution status',
 			})
 			.optional()
 			.describe('Resolution decision'),
-		resolutionNotes: z
-			.string()
-			.optional()
-			.describe('Notes explaining the resolution'),
-		approverAmount: optionalNonNegativeNumericString.describe(
-			'Amount allocated to the approver',
-		),
+		resolutionNotes: z.string().optional().describe('Notes explaining the resolution'),
+		approverAmount: optionalNonNegativeNumericString.describe('Amount allocated to the approver'),
 		serviceProviderAmount: optionalNonNegativeNumericString.describe(
 			'Amount allocated to the service provider',
 		),
-		escrowContractAddress: addressValidator
-			.optional()
-			.describe('Escrow contract address'),
+		escrowContractAddress: addressValidator.optional().describe('Escrow contract address'),
 	})
 	.superRefine((data, ctx) => {
 		const getMissingFileTypeFields = (data: DisputeSignData): string[] => {
@@ -183,8 +144,7 @@ export const disputeSignSchema = z
 			if (!data.resolution) missingFields.push('resolution')
 			if (!data.resolutionNotes) missingFields.push('resolutionNotes')
 			if (!data.approverAmount) missingFields.push('approverAmount')
-			if (!data.serviceProviderAmount)
-				missingFields.push('serviceProviderAmount')
+			if (!data.serviceProviderAmount) missingFields.push('serviceProviderAmount')
 			return missingFields
 		}
 
@@ -228,15 +188,9 @@ export const disputeSignSchema = z
 
 // Type definitions for inferred types
 export type DisputeSchemaType = z.infer<typeof disputeSchema>
-export type DisputeResolutionSchemaType = z.infer<
-	typeof disputeResolutionSchema
->
-export type MediatorAssignmentSchemaType = z.infer<
-	typeof mediatorAssignmentSchema
->
-export type EvidenceSubmissionSchemaType = z.infer<
-	typeof evidenceSubmissionSchema
->
+export type DisputeResolutionSchemaType = z.infer<typeof disputeResolutionSchema>
+export type MediatorAssignmentSchemaType = z.infer<typeof mediatorAssignmentSchema>
+export type EvidenceSubmissionSchemaType = z.infer<typeof evidenceSubmissionSchema>
 export type DisputeSignSchemaType = z.infer<typeof disputeSignSchema>
 
 // Validation functions

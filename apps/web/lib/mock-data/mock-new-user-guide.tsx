@@ -1,8 +1,4 @@
-import {
-	Contribute,
-	ExploreDetails,
-	ExploreProject,
-} from '~/components/icons/illustrations'
+import { Contribute, ExploreDetails, ExploreProject } from '~/components/icons/illustrations'
 import { type GuideStep, StepNumber } from '~/lib/types'
 
 export const steps: GuideStep[] = [

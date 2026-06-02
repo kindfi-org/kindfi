@@ -1,6 +1,7 @@
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
@@ -37,7 +38,6 @@ export async function POST(req: NextRequest) {
 
 		const validatedData = validationResult.data as DisputeResolutionPayload
 
-		// TODO: Improve this validation. Some fields are mixed with current logic.
 		const {
 			// Dispute ID is the ID of the AI conversation between the Kindler and the admin where the AI is the mediator
 			disputeId,
@@ -61,10 +61,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (disputeError || !dispute) {
-			return NextResponse.json(
-				{ error: 'Dispute not found or already resolved' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Dispute not found or already resolved' }, { status: 404 })
 		}
 
 		// 4. Resolve the dispute on-chain through the Trustless Work API
@@ -130,7 +127,7 @@ export async function POST(req: NextRequest) {
 		// Note: Notifications will be handled by the /escrow/dispute/sign endpoint
 		// after the transaction is signed and submitted
 	} catch (error) {
-		console.error('Dispute Resolution Error:', error)
+		logger.error('Dispute Resolution Error:', error)
 
 		if (error instanceof AppError) {
 			await auditLogger.log({

@@ -15,10 +15,7 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { cn } from '~/lib/utils'
-import {
-	getSocialTypeFromUrl,
-	isAllowedSocialUrl,
-} from '~/lib/utils/project-utils'
+import { getSocialTypeFromUrl, isAllowedSocialUrl } from '~/lib/utils/project-utils'
 import type { CreateFoundationFormData } from '../types'
 import { FormSectionHeader } from './form-section-header'
 
@@ -92,9 +89,7 @@ export function SocialLinksSection() {
 				name="socialLinks"
 				render={() => (
 					<FormItem>
-						<FormLabel className="text-base font-medium">
-							Social Media Profiles
-						</FormLabel>
+						<FormLabel className="text-base font-medium">Social Media Profiles</FormLabel>
 						<FormControl>
 							<div className="space-y-4">
 								<div className="flex gap-2">
@@ -138,9 +133,7 @@ export function SocialLinksSection() {
 												className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3"
 											>
 												<div className="flex-1 min-w-0">
-													<div className="text-sm font-medium capitalize">
-														{platform}
-													</div>
+													<div className="text-sm font-medium capitalize">{platform}</div>
 													<div className="text-xs text-muted-foreground truncate">
 														{String(url)}
 													</div>
@@ -162,8 +155,8 @@ export function SocialLinksSection() {
 							</div>
 						</FormControl>
 						<FormDescription>
-							Add links to your foundation&apos;s social media profiles.
-							We&apos;ll automatically detect the platform from the URL.
+							Add links to your foundation&apos;s social media profiles. We&apos;ll automatically
+							detect the platform from the URL.
 						</FormDescription>
 						<FormMessage />
 					</FormItem>

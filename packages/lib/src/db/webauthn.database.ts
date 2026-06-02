@@ -4,6 +4,7 @@ import type {
 	WebAuthnCredential as BaseWebAuthnCredential,
 } from '@simplewebauthn/server'
 import { and, desc, eq, gt, lt } from 'drizzle-orm'
+import { logger } from '../logger'
 
 // Extended WebAuthnCredential with Stellar address support (matches passkey-service.ts)
 export interface WebAuthnCredential extends BaseWebAuthnCredential {
@@ -37,9 +38,7 @@ export const saveChallenge = async ({
 	// First, clean up any existing challenges for this identifier/rpId combination
 	await db
 		.delete(challenges)
-		.where(
-			and(eq(challenges.identifier, identifier), eq(challenges.rpId, rpId)),
-		)
+		.where(and(eq(challenges.identifier, identifier), eq(challenges.rpId, rpId)))
 
 	// Insert the new challenge with 5-minute expiration
 	await db.insert(challenges).values({
@@ -57,7 +56,7 @@ export const saveChallenge = async ({
 export const getChallenge = async ({
 	identifier,
 	rpId,
-	userId,
+	userId: _userId,
 }: {
 	identifier: string
 	rpId: string
@@ -151,7 +150,11 @@ export const getUser = async ({
 			credentials,
 		}
 	} catch (error) {
-		console.error('Error getting user by identifier', error)
+		logger.error(
+			'Error getting user by identifier',
+			error instanceof Error ? error : new Error(String(error)),
+			{ identifier },
+		)
 		return null
 	}
 }
@@ -228,9 +231,7 @@ export const saveUser = async ({
  * Clean up expired challenges (can be called periodically)
  */
 export const cleanupExpiredChallenges = async (): Promise<void> => {
-	await db
-		.delete(challenges)
-		.where(lt(challenges.expiresAt, new Date().toISOString()))
+	await db.delete(challenges).where(lt(challenges.expiresAt, new Date().toISOString()))
 }
 
 /**
@@ -247,9 +248,7 @@ export const getUserDevices = async (userId: string) => {
 /**
  * Update device last used timestamp
  */
-export const updateDeviceLastUsed = async (
-	credentialId: string,
-): Promise<void> => {
+export const updateDeviceLastUsed = async (credentialId: string): Promise<void> => {
 	await db
 		.update(devices)
 		.set({
@@ -262,13 +261,8 @@ export const updateDeviceLastUsed = async (
 /**
  * Remove a device by credential ID
  */
-export const removeDevice = async (
-	userId: string,
-	credentialId: string,
-): Promise<void> => {
+export const removeDevice = async (userId: string, credentialId: string): Promise<void> => {
 	await db
 		.delete(devices)
-		.where(
-			and(eq(devices.userId, userId), eq(devices.credentialId, credentialId)),
-		)
+		.where(and(eq(devices.userId, userId), eq(devices.credentialId, credentialId)))
 }

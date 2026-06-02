@@ -1,3 +1,4 @@
+import type { Variants } from 'framer-motion'
 import type { ComponentType } from 'react'
 
 export type ManageSectionCategory = 'content' | 'team' | 'escrow'
@@ -22,18 +23,5 @@ export interface CategoryConfig {
 export interface SectionCardProps extends ManageSection {
 	slug: string
 	categoryConfig: CategoryConfig
-	cardVariants: {
-		hidden: { opacity: number; y: number }
-		show: {
-			opacity: number
-			y: number
-			transition:
-				| { duration: number }
-				| {
-						type: string
-						stiffness: number
-						damping: number
-				  }
-		}
-	}
+	cardVariants: Variants
 }

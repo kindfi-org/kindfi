@@ -14,10 +14,7 @@ export const createQuestSchema = z.object({
 })
 
 export const questProgressSchema = z.object({
-	quest_id: z.coerce
-		.number()
-		.int('Quest ID must be an integer')
-		.positive('Quest ID is required'),
+	quest_id: z.coerce.number().int('Quest ID must be an integer').positive('Quest ID is required'),
 	progress_value: z.coerce
 		.number()
 		.int('Progress value must be an integer')

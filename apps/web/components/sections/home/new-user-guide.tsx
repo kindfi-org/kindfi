@@ -43,9 +43,7 @@ export function NewUserGuide() {
 				>
 					<h2 className="text-3xl font-bold text-gray-900 mb-4 sm:text-4xl sm:mb-6">
 						<span className="block">{t('home.newUserTitle1')}</span>
-						<span className="block gradient-text">
-							{t('home.newUserTitle2')}
-						</span>
+						<span className="block gradient-text">{t('home.newUserTitle2')}</span>
 					</h2>
 					<p className="text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto sm:text-lg">
 						{t('home.newUserSubtitle')}
@@ -55,11 +53,7 @@ export function NewUserGuide() {
 				{/* Steps */}
 				<div className="max-w-4xl mx-auto space-y-20">
 					{translatedSteps.map((step, index) => (
-						<StepCard
-							key={`step-${step.stepNumber}`}
-							{...step}
-							isReversed={index % 2 !== 0}
-						/>
+						<StepCard key={`step-${step.stepNumber}`} {...step} isReversed={index % 2 !== 0} />
 					))}
 				</div>
 			</SectionContainer>

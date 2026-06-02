@@ -20,8 +20,9 @@ import { ScrollArea } from '../base/scroll-area'
 export function NotificationBell() {
 	const [isOpen, setIsOpen] = useState(false)
 	const { user } = useAuth()
-	const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } =
-		useNotifications({ user_id: user?.id })
+	const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } = useNotifications({
+		user_id: user?.id,
+	})
 
 	const truncateMessage = useCallback((message: string, maxLength = 100) => {
 		if (message.length <= maxLength) return message
@@ -78,9 +79,7 @@ export function NotificationBell() {
 							<div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
 						</div>
 					) : notifications.length === 0 ? (
-						<div className="p-4 text-center text-sm text-muted-foreground">
-							No notifications
-						</div>
+						<div className="p-4 text-center text-sm text-muted-foreground">No notifications</div>
 					) : (
 						notifications.map((notification: BaseNotification) => (
 							<DropdownMenuItem
@@ -92,9 +91,7 @@ export function NotificationBell() {
 								onClick={() => handleNotificationClick(notification.id)}
 							>
 								<div className="flex w-full items-start justify-between gap-2">
-									<span className="text-sm font-medium">
-										{notification.title}
-									</span>
+									<span className="text-sm font-medium">{notification.title}</span>
 									<span className="text-xs text-muted-foreground">
 										{formatDistanceToNow(new Date(notification.created_at), {
 											addSuffix: true,

@@ -1,15 +1,10 @@
 'use client'
 
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import {
-	AlertCircle,
-	ArrowRight,
-	CheckCircle,
-	CheckCircle2,
-	Shield,
-} from 'lucide-react'
+import { AlertCircle, ArrowRight, CheckCircle, CheckCircle2, Shield } from 'lucide-react'
 import { redirect, useRouter, useSearchParams } from 'next/navigation'
 import { type SetStateAction, useEffect, useId, useState } from 'react'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -19,11 +14,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/base/card'
-import {
-	InputOTP,
-	InputOTPGroup,
-	InputOTPSlot,
-} from '~/components/base/input-otp'
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '~/components/base/input-otp'
 import { OTPTips } from '~/components/shared/otp-tips'
 
 export function VerifyOTPComponent() {
@@ -95,22 +86,20 @@ export function VerifyOTPComponent() {
 				// Ensure profile skeleton exists immediately after successful verification.
 				// The trigger migration should already have inserted next_auth.users row.
 				try {
-					const { error: profileInsertError } = await supabase
-						.from('profiles')
-						.insert({
-							id: data.user.id,
-							next_auth_user_id: data.user.id,
-							display_name: (data.user.email || '').split('@')[0] || null,
-							role: 'pending',
-							bio: null,
-							image_url: null,
-						})
+					const { error: profileInsertError } = await supabase.from('profiles').insert({
+						id: data.user.id,
+						next_auth_user_id: data.user.id,
+						display_name: (data.user.email || '').split('@')[0] || null,
+						role: 'pending',
+						bio: null,
+						image_url: null,
+					})
 					// Ignore conflict or RLS (duplicate) errors silently
 					if (profileInsertError) {
-						console.warn('Profile insert warning:', profileInsertError.message)
+						logger.warn('Profile insert warning:', profileInsertError.message)
 					}
 				} catch (profileErr) {
-					console.warn('Profile insert (non-fatal) error:', profileErr)
+					logger.warn('Profile insert (non-fatal) error:', profileErr)
 				}
 
 				setIsVerified(true)
@@ -120,7 +109,7 @@ export function VerifyOTPComponent() {
 				}, 1200)
 			}
 		} catch (err) {
-			console.error('OTP verification error:', err)
+			logger.error('OTP verification error:', err)
 			if (err instanceof Error) {
 				setError(err.message)
 			} else {
@@ -153,7 +142,7 @@ export function VerifyOTPComponent() {
 			setTimeLeft(120)
 			setSuccess('Verification code resent! Please check your inbox.')
 		} catch (err) {
-			console.error('Resend OTP error:', err)
+			logger.error('Resend OTP error:', err)
 			if (err instanceof Error) {
 				setError(err.message)
 			} else {
@@ -167,25 +156,19 @@ export function VerifyOTPComponent() {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
 			<div className="w-full max-w-5xl">
-				<form
-					className="grid gap-6 lg:grid-cols-[1fr_320px]"
-					onSubmit={handleVerify}
-				>
+				<form className="grid gap-6 lg:grid-cols-[1fr_320px]" onSubmit={handleVerify}>
 					<Card className="w-full border-none">
 						<CardHeader className="space-y-1">
 							<div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
 								<Shield className="h-6 w-6 text-primary" />
 							</div>
-							<CardTitle
-								className="text-center text-2xl font-bold"
-								id={labelId}
-							>
+							<CardTitle className="text-center text-2xl font-bold" id={labelId}>
 								Check Your Email
 							</CardTitle>
 							<CardDescription className="text-center">
 								We&apos;ve sent a verification code to{' '}
-								{email && <span className="font-medium">{email}</span>}. Enter
-								the 6-digit code below to complete your account setup.
+								{email && <span className="font-medium">{email}</span>}. Enter the 6-digit code
+								below to complete your account setup.
 								<span className="mt-2 block font-medium text-primary">
 									Please check your inbox and spam folder
 								</span>
@@ -207,10 +190,7 @@ export function VerifyOTPComponent() {
 							) : (
 								<>
 									<fieldset className="space-y-4">
-										<legend
-											className="text-base text-center font-medium"
-											id={legendId}
-										>
+										<legend className="text-base text-center font-medium" id={legendId}>
 											Verification Code
 										</legend>
 										<div className="flex justify-center">
@@ -226,8 +206,8 @@ export function VerifyOTPComponent() {
 												className="gap-3"
 											>
 												<p id={instructionsId} className="sr-only">
-													Enter the 6-digit code sent to your email or phone.
-													Use the arrow keys to navigate.
+													Enter the 6-digit code sent to your email or phone. Use the arrow keys to
+													navigate.
 												</p>
 												<InputOTPGroup className="gap-3">
 													<InputOTPSlot
@@ -266,10 +246,7 @@ export function VerifyOTPComponent() {
 
 										{/* Status indicator */}
 										{isVerifying && (
-											<div
-												className="text-center text-sm text-muted-foreground"
-												aria-live="polite"
-											>
+											<div className="text-center text-sm text-muted-foreground" aria-live="polite">
 												Verifying code...
 											</div>
 										)}
@@ -308,9 +285,7 @@ export function VerifyOTPComponent() {
 										{timeLeft > 0 ? (
 											<p>
 												Code expires in{' '}
-												<span className="font-medium text-primary">
-													{formatTime(timeLeft)}
-												</span>
+												<span className="font-medium text-primary">{formatTime(timeLeft)}</span>
 											</p>
 										) : (
 											<p className="text-destructive">Code expired</p>

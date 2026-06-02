@@ -7,13 +7,7 @@ import { useMemo } from 'react'
 import { IoChevronForwardOutline } from 'react-icons/io5'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { staggerContainer } from '~/lib/constants/animations'
 import {
 	createManageCardVariants,
@@ -29,18 +23,9 @@ export default function ProjectManagementDashboardPage() {
 	const prefersReducedMotion = useReducedMotion()
 
 	// Memoize filtered sections to avoid recalculation on re-renders
-	const contentSections = useMemo(
-		() => manageSections.filter((s) => s.category === 'content'),
-		[],
-	)
-	const teamSections = useMemo(
-		() => manageSections.filter((s) => s.category === 'team'),
-		[],
-	)
-	const escrowSections = useMemo(
-		() => manageSections.filter((s) => s.category === 'escrow'),
-		[],
-	)
+	const contentSections = useMemo(() => manageSections.filter((s) => s.category === 'content'), [])
+	const teamSections = useMemo(() => manageSections.filter((s) => s.category === 'team'), [])
+	const escrowSections = useMemo(() => manageSections.filter((s) => s.category === 'escrow'), [])
 
 	// Memoize animation variants based on motion preference
 	const containerVariants = useMemo(
@@ -72,16 +57,13 @@ export default function ProjectManagementDashboardPage() {
 				className="relative z-10 space-y-12 lg:space-y-16"
 			>
 				{/* Enhanced Header */}
-				<motion.header
-					variants={sectionVariants}
-					className="space-y-4 relative"
-				>
+				<motion.header variants={sectionVariants} className="space-y-4 relative">
 					<h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text py-2">
 						Project Management
 					</h1>
 					<p className="text-lg md:text-xl text-muted-foreground max-w-3xl leading-relaxed">
-						Manage your project content, team, and escrow settings. Keep
-						everything up to date and running smoothly.
+						Manage your project content, team, and escrow settings. Keep everything up to date and
+						running smoothly.
 					</p>
 				</motion.header>
 
@@ -204,9 +186,7 @@ function SectionCard({
 							<Icon size={20} className="relative z-10" aria-hidden="true" />
 						</div>
 						<div className="min-w-0 flex-1 space-y-2">
-							<CardTitle className="text-xl font-semibold text-foreground">
-								{title}
-							</CardTitle>
+							<CardTitle className="text-xl font-semibold text-foreground">{title}</CardTitle>
 							<CardDescription className="text-sm leading-relaxed text-muted-foreground">
 								{description}
 							</CardDescription>

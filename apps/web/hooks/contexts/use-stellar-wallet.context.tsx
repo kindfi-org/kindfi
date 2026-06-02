@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { logger } from '@/lib/logger'
 import { getStellarWalletTheme } from '~/lib/config/stellar-wallet-theme'
 import {
 	getTrustlessSignerError,
@@ -72,15 +73,14 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
 				const storage = globalThis.localStorage
 				if (typeof storage?.getItem !== 'function') {
-					console.error(
+					logger.error(
 						'StellarWalletsKit requires browser localStorage. Check NODE_OPTIONS for a broken --localstorage-file flag.',
 					)
 					return
 				}
 
 				swkRef.current = swk
-				const { defaultModules, StellarWalletsKit, KitEventType, Networks } =
-					swk
+				const { defaultModules, StellarWalletsKit, KitEventType, Networks } = swk
 
 				const modules = defaultModules()
 
@@ -98,10 +98,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				if (storedAddress) {
 					StellarWalletsKit.getAddress()
 						.then(({ address: fetchedAddress }: { address: string }) => {
-							if (
-								fetchedAddress &&
-								!isExternalStellarWalletAddress(fetchedAddress)
-							) {
+							if (fetchedAddress && !isExternalStellarWalletAddress(fetchedAddress)) {
 								setAddress(null)
 								setWalletName(null)
 								localStorage.removeItem('stellar_wallet_address')
@@ -126,9 +123,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				// Listen to state updates
 				const unsubscribeState = StellarWalletsKit.on(
 					KitEventType.STATE_UPDATED,
-					(event: {
-						payload: { address?: string; networkPassphrase: string }
-					}) => {
+					(event: { payload: { address?: string; networkPassphrase: string } }) => {
 						if (event.payload.address) {
 							if (!isExternalStellarWalletAddress(event.payload.address)) {
 								setAddress(null)
@@ -136,10 +131,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 								return
 							}
 							setAddress(event.payload.address)
-							localStorage.setItem(
-								'stellar_wallet_address',
-								event.payload.address,
-							)
+							localStorage.setItem('stellar_wallet_address', event.payload.address)
 						} else {
 							setAddress(null)
 							localStorage.removeItem('stellar_wallet_address')
@@ -148,15 +140,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				)
 
 				// Listen to disconnect events
-				const unsubscribeDisconnect = StellarWalletsKit.on(
-					KitEventType.DISCONNECT,
-					() => {
-						setAddress(null)
-						setWalletName(null)
-						localStorage.removeItem('stellar_wallet_address')
-						localStorage.removeItem('stellar_wallet_name')
-					},
-				)
+				const unsubscribeDisconnect = StellarWalletsKit.on(KitEventType.DISCONNECT, () => {
+					setAddress(null)
+					setWalletName(null)
+					localStorage.removeItem('stellar_wallet_address')
+					localStorage.removeItem('stellar_wallet_name')
+				})
 
 				// Listen to wallet selection
 				const unsubscribeWalletSelected = StellarWalletsKit.on(
@@ -186,7 +175,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 					unsubscribeWalletSelected,
 				]
 			} catch (error) {
-				console.error('❌ Failed to initialize StellarWalletsKit:', error)
+				logger.error('❌ Failed to initialize StellarWalletsKit:', error)
 				setIsInitialized(false)
 			}
 		})()
@@ -226,7 +215,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				// This might need adjustment based on actual API behavior
 			}
 		} catch (error) {
-			console.error('❌ Failed to connect wallet:', error)
+			logger.error('❌ Failed to connect wallet:', error)
 			// Re-throw with more context
 			if (error && typeof error === 'object' && 'message' in error) {
 				throw new Error(`Wallet connection failed: ${error.message}`)
@@ -245,7 +234,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 			localStorage.removeItem('stellar_wallet_address')
 			localStorage.removeItem('stellar_wallet_name')
 		} catch (error) {
-			console.error('Failed to disconnect wallet:', error)
+			logger.error('Failed to disconnect wallet:', error)
 		}
 	}
 
@@ -264,16 +253,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		try {
-			const { signedTxXdr } = await StellarWalletsKit.signTransaction(
-				unsignedXdr,
-				{
-					address,
-					networkPassphrase: Networks.TESTNET,
-				},
-			)
+			const { signedTxXdr } = await StellarWalletsKit.signTransaction(unsignedXdr, {
+				address,
+				networkPassphrase: Networks.TESTNET,
+			})
 			return signedTxXdr
 		} catch (error) {
-			console.error('Failed to sign transaction:', error)
+			logger.error('Failed to sign transaction:', error)
 			throw error
 		}
 	}
@@ -288,9 +274,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		signTransaction,
 	}
 
-	return (
-		<WalletContext.Provider value={value}>{children}</WalletContext.Provider>
-	)
+	return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
 }
 
 export function useWallet() {

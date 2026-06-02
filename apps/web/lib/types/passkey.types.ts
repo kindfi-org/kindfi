@@ -1,10 +1,5 @@
 import type { AuthenticationResponseJSON } from '@simplewebauthn/browser'
-import type {
-	Memo,
-	MemoType,
-	Operation,
-	Transaction,
-} from '@stellar/stellar-sdk'
+import type { Memo, MemoType, Operation, Transaction } from '@stellar/stellar-sdk'
 
 export type SignParams = {
 	signRes: AuthenticationResponseJSON

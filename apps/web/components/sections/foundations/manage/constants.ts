@@ -22,8 +22,7 @@ export const FOUNDATION_MANAGE_SECTIONS: ReadonlyArray<{
 	{
 		key: 'overview',
 		title: 'Dashboard',
-		description:
-			'Stats, mission, vision, and quick links to manage your foundation.',
+		description: 'Stats, mission, vision, and quick links to manage your foundation.',
 		href: (slug: string) => `/foundations/${slug}/manage`,
 		path: '',
 		cta: 'View Dashboard',

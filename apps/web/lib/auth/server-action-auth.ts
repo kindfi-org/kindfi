@@ -46,9 +46,7 @@ export async function getAuthenticatedSession(): Promise<Session | null> {
  * Require an authenticated session inside a server action. Throws
  * ServerActionError('UNAUTHORIZED') if the caller is not signed in.
  */
-export async function requireAuthenticatedSession(
-	action: string,
-): Promise<Session> {
+export async function requireAuthenticatedSession(action: string): Promise<Session> {
 	const session = await getAuthenticatedSession()
 	if (!session) {
 		logger.warn({ eventType: 'SERVER_ACTION_UNAUTHORIZED', action })
@@ -88,11 +86,7 @@ export async function requireAdminSession(action: string): Promise<Session> {
  * Parse `input` against a Zod schema. Throws VALIDATION_ERROR on failure with
  * structured details so callers can return them to the client.
  */
-export function validateInput<T>(
-	schema: ZodSchema<T>,
-	input: unknown,
-	action: string,
-): T {
+export function validateInput<T>(schema: ZodSchema<T>, input: unknown, action: string): T {
 	const result = schema.safeParse(input)
 	if (!result.success) {
 		const details = treeifyError(result.error)
@@ -112,10 +106,7 @@ export function validateInput<T>(
  * logs a warning and allows the request so auth and other server actions keep
  * working in production until Upstash is configured.
  */
-export async function enforceRateLimit(
-	identifier: string,
-	action: string,
-): Promise<void> {
+export async function enforceRateLimit(identifier: string, action: string): Promise<void> {
 	try {
 		const result = await rateLimiter.increment(identifier, action)
 
@@ -125,10 +116,7 @@ export async function enforceRateLimit(
 				action,
 				identifier,
 			})
-			throw new ServerActionError(
-				'Too many requests. Please try again later.',
-				'RATE_LIMITED',
-			)
+			throw new ServerActionError('Too many requests. Please try again later.', 'RATE_LIMITED')
 		}
 
 		if (result.error) {

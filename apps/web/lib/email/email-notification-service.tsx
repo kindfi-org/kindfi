@@ -1,6 +1,7 @@
-import type { ReactElement } from 'react'
 import { appEnvConfig } from '@packages/lib/config'
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import type { ReactElement } from 'react'
+import { logger } from '@/lib/logger'
 import { getResendClient } from './resend-client'
 import { CampaignGoalReachedEmail } from './templates/campaign-goal-reached-email'
 import { ContributionConfirmedEmail } from './templates/contribution-confirmed-email'
@@ -52,12 +53,12 @@ async function sendEmail({
 		})
 
 		if (error) {
-			console.error('[EmailNotificationService] Resend error:', error)
+			logger.error('[EmailNotificationService] Resend error:', error)
 			return { success: false, error: error.message }
 		}
 		return { success: true }
 	} catch (err) {
-		console.error('[EmailNotificationService] Send failed:', err)
+		logger.error('[EmailNotificationService] Send failed:', err)
 		return {
 			success: false,
 			error: err instanceof Error ? err.message : 'Unknown error',
@@ -84,10 +85,10 @@ async function createInAppNotification({
 			type,
 		})
 		if (error) {
-			console.error('[EmailNotificationService] In-app notification failed:', error)
+			logger.error('[EmailNotificationService] In-app notification failed:', error)
 		}
 	} catch (err) {
-		console.error('[EmailNotificationService] In-app notification error:', err)
+		logger.error('[EmailNotificationService] In-app notification error:', err)
 	}
 }
 
@@ -283,12 +284,7 @@ export async function sendWelcomeEmail({
 	await sendEmail({
 		to: user.email,
 		subject: `Welcome to KindFi, ${displayName}!`,
-		react: (
-			<WelcomeNewUserEmail
-				displayName={displayName}
-				hasKyc={hasKyc}
-			/>
-		),
+		react: <WelcomeNewUserEmail displayName={displayName} hasKyc={hasKyc} />,
 	})
 
 	await createInAppNotification({
@@ -441,9 +437,7 @@ export async function sendCampaignGoalReachedNotifications({
 
 	if (!contributors?.length) return
 
-	const uniqueContributorIds = [
-		...new Set(contributors.map((c) => c.contributor_id)),
-	]
+	const uniqueContributorIds = [...new Set(contributors.map((c) => c.contributor_id))]
 
 	for (const contributorId of uniqueContributorIds) {
 		const contributor = await getUserEmailAndName(contributorId)

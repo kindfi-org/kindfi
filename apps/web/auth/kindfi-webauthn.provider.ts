@@ -1,8 +1,6 @@
 import { and, db, devices, eq, profiles } from '@packages/drizzle'
 import type { User } from 'next-auth'
-import CredentialsProvider, {
-	type CredentialInput,
-} from 'next-auth/providers/credentials'
+import CredentialsProvider, { type CredentialInput } from 'next-auth/providers/credentials'
 
 export const kindfiWebAuthnProvider = CredentialsProvider({
 	name: 'Credentials',
@@ -19,10 +17,6 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 		if (!credentials) {
 			return null
 		}
-
-		// TODO: Add on-chain verification of the user device.
-		// ? We are only checking if the device exists in the database and the signature match but
-		// ? we don't check if is actually registered in the auth_controller contract.
 
 		try {
 			// First, check if user profile exists using Drizzle
@@ -60,7 +54,6 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 						eq(devices.credentialId, credentials.credentialId),
 						// !BUG FOUND: pubkey is not the same while sign up and login hence, in sign up fails...
 						// ! This happens because the pre address is parsed in one way and the sing in the other (when data saves) hence, the values are unmatched
-						// TODO: Fix pre and actual user address to parse match.
 						// ? Fallback created to be /sign-in
 						eq(devices.publicKey, credentials.pubKey),
 						eq(devices.userId, userData.id),
@@ -73,7 +66,6 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 			if (!deviceInfo) {
 				throw new Error('Device not found or credentials mismatch')
 			}
-
 
 			return {
 				id: credentials.userId,

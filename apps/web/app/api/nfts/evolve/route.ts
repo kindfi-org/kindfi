@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
@@ -92,8 +93,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 		}
 
 		const nftContractAddress =
-			process.env.NFT_CONTRACT_ADDRESS ||
-			process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS
+			process.env.NFT_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS
 
 		if (!nftContractAddress || !process.env.SOROBAN_PRIVATE_KEY) {
 			return NextResponse.json(
@@ -139,20 +139,12 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			imageUri = uploadResult.ipfsUrl
 			imageIpfsHash = uploadResult.ipfsHash
 		} catch (err) {
-			console.warn(
-				'[NFT Evolve] Failed to upload image, using placeholder:',
-				err,
-			)
+			logger.warn('[NFT Evolve] Failed to upload image, using placeholder:', err)
 			imageUri = `https://kindfi.org/images/nft-${newTier}.svg`
 		}
 
 		// Build new metadata
-		const nftMetadataJSON = buildNFTMetadata(
-			newTier,
-			existingNFT.token_id,
-			stats,
-			imageUri,
-		)
+		const nftMetadataJSON = buildNFTMetadata(newTier, existingNFT.token_id, stats, imageUri)
 
 		// Upload metadata JSON to IPFS as backup
 		let metadataIpfsHash = ''
@@ -163,27 +155,24 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			)
 			metadataIpfsHash = metaResult.ipfsHash
 		} catch (err) {
-			console.warn('[NFT Evolve] Failed to upload metadata to Pinata:', err)
+			logger.warn('[NFT Evolve] Failed to upload metadata to Pinata:', err)
 		}
 
 		// Update on-chain metadata
 		const contractService = new GamificationContractService()
-		const updateResult = await contractService.updateNFTMetadata(
-			nftContractAddress,
-			{
-				tokenId: existingNFT.token_id,
-				metadata: {
-					name: nftMetadataJSON.name,
-					description: nftMetadataJSON.description,
-					imageUri,
-					externalUrl: nftMetadataJSON.external_url,
-					attributes: nftMetadataJSON.attributes,
-				},
+		const updateResult = await contractService.updateNFTMetadata(nftContractAddress, {
+			tokenId: existingNFT.token_id,
+			metadata: {
+				name: nftMetadataJSON.name,
+				description: nftMetadataJSON.description,
+				imageUri,
+				externalUrl: nftMetadataJSON.external_url,
+				attributes: nftMetadataJSON.attributes,
 			},
-		)
+		})
 
 		if (!updateResult.success) {
-			console.error('[NFT Evolve] On-chain update failed:', updateResult.error)
+			logger.error('[NFT Evolve] On-chain update failed:', updateResult.error)
 			return NextResponse.json(
 				{ error: `Failed to update NFT on-chain: ${updateResult.error}` },
 				{ status: 500 },
@@ -205,7 +194,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			.single()
 
 		if (dbError) {
-			console.error('[NFT Evolve] Database update failed:', dbError)
+			logger.error('[NFT Evolve] Database update failed:', dbError)
 		}
 
 		await auditLogger.log({
@@ -234,7 +223,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 			nft: updatedNFT || existingNFT,
 		})
 	} catch (error) {
-		console.error('Error in POST /api/nfts/evolve:', error)
+		logger.error('Error in POST /api/nfts/evolve:', error)
 		await auditLogger.log({
 			correlationId,
 			operation: 'nft.evolve',
@@ -246,10 +235,7 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 				error: error instanceof Error ? error.message : String(error),
 			},
 		})
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 
@@ -261,25 +247,21 @@ async function getUserStats(
 	userId: string,
 ) {
 	// Execute all independent queries in parallel for better performance
-	const [contributionsResult, questsResult, streaksResult, referralsResult] =
-		await Promise.all([
-			supabase
-				.from('contributions')
-				.select('amount')
-				.eq('contributor_id', userId),
-			supabase
-				.from('user_quest_progress')
-				.select('id')
-				.eq('user_id', userId)
-				.eq('is_completed', true),
-			supabase
-				.from('user_streaks')
-				.select('current_streak')
-				.eq('user_id', userId)
-				.order('current_streak', { ascending: false })
-				.limit(1),
-			supabase.from('referral_records').select('id').eq('referrer_id', userId),
-		])
+	const [contributionsResult, questsResult, streaksResult, referralsResult] = await Promise.all([
+		supabase.from('contributions').select('amount').eq('contributor_id', userId),
+		supabase
+			.from('user_quest_progress')
+			.select('id')
+			.eq('user_id', userId)
+			.eq('is_completed', true),
+		supabase
+			.from('user_streaks')
+			.select('current_streak')
+			.eq('user_id', userId)
+			.order('current_streak', { ascending: false })
+			.limit(1),
+		supabase.from('referral_records').select('id').eq('referrer_id', userId),
+	])
 
 	if (contributionsResult.error) {
 		throw new Error(
@@ -310,8 +292,6 @@ async function getUserStats(
 	const streakDays = streaksResult.data?.[0]?.current_streak ?? 0
 	const referralCount = referralsResult.data?.length ?? 0
 
-	// TODO: Refactor this local function to use the centralized getUserStats service from ~/lib/services/user-stats
-	// This local implementation is kept temporarily to avoid breaking changes while API stabilization is in progress.
 	const impactScore =
 		donationCount * IMPACT_SCORE_WEIGHTS.DONATIONS +
 		questsCompleted * IMPACT_SCORE_WEIGHTS.QUESTS +

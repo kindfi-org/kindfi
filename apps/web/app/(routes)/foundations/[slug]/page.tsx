@@ -1,15 +1,12 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
-import {
-	dehydrate,
-	HydrationBoundary,
-	QueryClient,
-} from '@tanstack/react-query'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 import { FoundationDetailClientWrapper } from '~/components/sections/foundations/foundation-detail-client-wrapper'
-import { SectionContainer } from '~/components/shared/section-container'
+import { JsonLd } from '~/components/shared/json-ld'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
+import { getBreadcrumbSchema } from '~/lib/seo/structured-data'
 
 interface FoundationDetailPageProps {
 	params: Promise<{ slug: string }>
@@ -23,9 +20,7 @@ const getFoundationCached = cache(async (slug: string) => {
 	return getFoundationBySlug(supabase, slug)
 })
 
-export async function generateMetadata({
-	params,
-}: FoundationDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: FoundationDetailPageProps): Promise<Metadata> {
 	const { slug } = await params
 	const foundation = await getFoundationCached(slug)
 
@@ -88,9 +83,7 @@ export async function generateMetadata({
 	}
 }
 
-export default async function FoundationDetailPage({
-	params,
-}: FoundationDetailPageProps) {
+export default async function FoundationDetailPage({ params }: FoundationDetailPageProps) {
 	const { slug } = await params
 	const foundation = await getFoundationCached(slug)
 
@@ -103,15 +96,24 @@ export default async function FoundationDetailPage({
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<main
-			className="min-h-screen bg-muted/30"
-			aria-label={`${foundation.name} foundation profile`}
-		>
-			<SectionContainer maxWidth="6xl" className="py-10 sm:py-14 lg:py-16">
-				<HydrationBoundary state={dehydratedState}>
-					<FoundationDetailClientWrapper slug={slug} />
-				</HydrationBoundary>
-			</SectionContainer>
-		</main>
+		<>
+			<JsonLd
+				data={getBreadcrumbSchema([
+					{ name: 'Home', url: '/' },
+					{ name: 'Foundations', url: '/foundations' },
+					{ name: foundation.name, url: `/foundations/${slug}` },
+				])}
+			/>
+			<main
+				className="min-h-screen bg-[#fafbfc]"
+				aria-label={`${foundation.name} foundation profile`}
+			>
+				<div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
+					<HydrationBoundary state={dehydratedState}>
+						<FoundationDetailClientWrapper slug={slug} />
+					</HydrationBoundary>
+				</div>
+			</main>
+		</>
 	)
 }

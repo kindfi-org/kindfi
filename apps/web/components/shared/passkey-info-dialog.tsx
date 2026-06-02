@@ -14,11 +14,7 @@ export function PasskeyInfoDialog() {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button
-					size="lg"
-					variant="outline"
-					className="gradient-border-btn w-full"
-				>
+				<Button size="lg" variant="outline" className="gradient-border-btn w-full">
 					<BadgeAlert className="mr-2" />
 					What is a passkey?
 				</Button>
@@ -43,8 +39,8 @@ export function PasskeyInfoDialog() {
 					<section>
 						<Card className="w-full max-w-md text-lg p-4">
 							<p>
-								Passkeys are replacements for passwords that provide strong
-								security and better user experience.
+								Passkeys are replacements for passwords that provide strong security and better user
+								experience.
 							</p>
 						</Card>
 					</section>
@@ -55,9 +51,8 @@ export function PasskeyInfoDialog() {
 						<div className="ml-4">
 							<h2 className="font-semibold text-black mb-2">More Secure</h2>
 							<p className="text-zinc-800">
-								Passkeys uses strong cryptography and biometric(like your finger
-								print or face) to protect your account from phishing and data
-								breaches.
+								Passkeys uses strong cryptography and biometric(like your finger print or face) to
+								protect your account from phishing and data breaches.
 							</p>
 						</div>
 					</section>
@@ -68,9 +63,8 @@ export function PasskeyInfoDialog() {
 						<div className="ml-4">
 							<h2 className="font-semibold text-black mb-2">Easier to Use</h2>
 							<p className="text-zinc-800">
-								No more remembering complex passwords. Just use your
-								device&apos;s biometric authentication or pin to sign in
-								instantly.
+								No more remembering complex passwords. Just use your device&apos;s biometric
+								authentication or pin to sign in instantly.
 							</p>
 						</div>
 					</section>
@@ -79,12 +73,9 @@ export function PasskeyInfoDialog() {
 							<Lock className="text-purple-500 text-3xl" />
 						</div>
 						<div className="ml-4">
-							<h2 className="font-semibold text-black mb-2">
-								Works Across Devices
-							</h2>
+							<h2 className="font-semibold text-black mb-2">Works Across Devices</h2>
 							<p className="text-zinc-800">
-								Your passkey sync securely across your devices, so you can sign
-								in from anywhere.
+								Your passkey sync securely across your devices, so you can sign in from anywhere.
 							</p>
 						</div>
 					</section>
@@ -94,8 +85,7 @@ export function PasskeyInfoDialog() {
 							<ol className="list-decimal space-y-1 list-inside text-sm text-muted-foreground">
 								<li>Enter your email.</li>
 								<li>
-									Your device will prompt you to authenticate with your
-									fingerprint, face, or pin.
+									Your device will prompt you to authenticate with your fingerprint, face, or pin.
 								</li>
 								<li>You are securely signed in! No password needed.</li>
 							</ol>

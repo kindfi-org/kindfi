@@ -1,15 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import {
-	AlertCircle,
-	Bot,
-	CheckCircle2,
-	Loader2,
-	RefreshCw,
-	Sparkles,
-	X,
-} from 'lucide-react'
+import { AlertCircle, Bot, CheckCircle2, Loader2, RefreshCw, Sparkles, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Button } from '~/components/base/button'
@@ -86,9 +78,7 @@ export const PitchAIAnalysis = ({
 						<Bot className="h-4 w-4" aria-hidden="true" />
 					</div>
 					<div>
-						<h3 className="text-base font-semibold leading-tight">
-							AI Pitch Advisor
-						</h3>
+						<h3 className="text-base font-semibold leading-tight">AI Pitch Advisor</h3>
 						<StatusIndicator status={status} />
 					</div>
 				</div>
@@ -116,8 +106,8 @@ export const PitchAIAnalysis = ({
 					className="space-y-3"
 				>
 					<p className="text-sm text-muted-foreground leading-relaxed">
-						Get personalized feedback and recommendations from our AI advisor
-						to strengthen your pitch before publishing.
+						Get personalized feedback and recommendations from our AI advisor to strengthen your
+						pitch before publishing.
 					</p>
 					<ul className="space-y-1.5 text-sm text-muted-foreground">
 						{[
@@ -153,13 +143,15 @@ export const PitchAIAnalysis = ({
 			{/* Loading skeleton */}
 			{status === 'loading' && (
 				<div className="space-y-2" aria-live="polite" aria-busy="true">
-					{([
-						{ w: 80, id: 'sk-a' },
-						{ w: 60, id: 'sk-b' },
-						{ w: 90, id: 'sk-c' },
-						{ w: 50, id: 'sk-d' },
-						{ w: 70, id: 'sk-e' },
-					] as const).map(({ w, id }) => (
+					{(
+						[
+							{ w: 80, id: 'sk-a' },
+							{ w: 60, id: 'sk-b' },
+							{ w: 90, id: 'sk-c' },
+							{ w: 50, id: 'sk-d' },
+							{ w: 70, id: 'sk-e' },
+						] as const
+					).map(({ w, id }) => (
 						<div
 							key={id}
 							className="h-3 rounded-full bg-gradient-to-r from-muted to-muted/40 animate-pulse"
@@ -186,9 +178,7 @@ export const PitchAIAnalysis = ({
 								prose-p:text-muted-foreground prose-p:leading-relaxed"
 							aria-live="polite"
 						>
-							<ReactMarkdown remarkPlugins={[remarkGfm]}>
-								{analysis}
-							</ReactMarkdown>
+							<ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis}</ReactMarkdown>
 						</div>
 					</ScrollArea>
 

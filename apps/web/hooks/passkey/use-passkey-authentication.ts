@@ -5,6 +5,7 @@ import { RedirectType, redirect } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { createSessionAction } from '~/app/actions/auth'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 import type { PresignResponse, SignParams } from '~/lib/types'
@@ -45,47 +46,41 @@ export const usePasskeyAuthentication = (
 
 		try {
 			const PresignResponse = await prepareSign?.()
-			const resp = await fetch(
-				`${baseUrl}/api/passkey/generate-authentication-options`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						identifier,
-						origin: window.location.origin,
-						challenge: PresignResponse?.base64urlAuthHash,
-					}),
+			const resp = await fetch(`${baseUrl}/api/passkey/generate-authentication-options`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			)
+				body: JSON.stringify({
+					identifier,
+					origin: window.location.origin,
+					challenge: PresignResponse?.base64urlAuthHash,
+				}),
+			})
 
 			if (!resp.ok) {
 				const opts = await resp.json()
 				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, opts.error)
 			}
 
-			const authenticationOptions = await resp.json() // TODO: type this
+			const authenticationOptions = await resp.json()
 
 			const authenticationResponse = await startAuthentication({
 				optionsJSON: authenticationOptions,
 			})
 
-			const verificationResp = await fetch(
-				`${baseUrl}/api/passkey/verify-authentication`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						identifier,
-						authenticationResponse,
-						origin: window.location.origin,
-						userId,
-					}),
+			const verificationResp = await fetch(`${baseUrl}/api/passkey/verify-authentication`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			)
+				body: JSON.stringify({
+					identifier,
+					authenticationResponse,
+					origin: window.location.origin,
+					userId,
+				}),
+			})
 
 			if (!verificationResp.ok) {
 				const verificationJSON = await verificationResp.json()
@@ -121,16 +116,11 @@ export const usePasskeyAuthentication = (
 				})
 			}
 
-
 			// Convert pubKey object to Uint8Array, then to base64 string
 			const pubKeyArray =
 				verificationJSON.device.pubKey instanceof Uint8Array
 					? verificationJSON.device.pubKey
-					: new Uint8Array(
-							Object.values(
-								verificationJSON.device.pubKey as Record<string, number>,
-							),
-						)
+					: new Uint8Array(Object.values(verificationJSON.device.pubKey as Record<string, number>))
 			const pubKeyString = Buffer.from(pubKeyArray).toString('base64')
 
 			const loginResult = await signIn('credentials', {
@@ -141,24 +131,19 @@ export const usePasskeyAuthentication = (
 				credentialId: verificationJSON.device.id,
 				address: verificationJSON.device.address,
 			}).catch((error) => {
-				console.error('Error during signIn:', error)
+				logger.error('Error during signIn:', error)
 				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, error.message)
 			})
-
 
 			setAuthSuccess(message)
 			setIsNotRegistered(false)
 			toast.success(message)
 			success = Boolean(loginResult?.ok)
 		} catch (_error) {
-			console.error('🔴 Error during passkey authentication:', _error)
+			logger.error('🔴 Error during passkey authentication:', _error)
 			const error = _error as Error
 			let message = error.toString()
-			if (
-				error.message.includes(
-					'The operation either timed out or was not allowed.',
-				)
-			) {
+			if (error.message.includes('The operation either timed out or was not allowed.')) {
 				message = 'Operation cancelled or not allowed'
 			} else if (error.message.includes('User not found.')) {
 				message = 'User not registered. Please register first.'

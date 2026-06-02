@@ -4,21 +4,11 @@ import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { notFound } from 'next/navigation'
 import { IoLockClosedOutline } from 'react-icons/io5'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import { EscrowManagementPanel } from './escrow-management-panel'
 
-export function EscrowManagementClientWrapper({
-	projectSlug,
-}: {
-	projectSlug: string
-}) {
+export function EscrowManagementClientWrapper({ projectSlug }: { projectSlug: string }) {
 	const prefersReducedMotion = useReducedMotion()
 	const {
 		data: project,
@@ -66,8 +56,7 @@ export function EscrowManagementClientWrapper({
 									Escrow Management
 								</h1>
 								<p className="text-lg md:text-xl text-muted-foreground mt-2 text-center">
-									Fund escrow, approve milestones, release funds, and track
-									balance
+									Fund escrow, approve milestones, release funds, and track balance
 								</p>
 							</div>
 						</div>
@@ -138,8 +127,7 @@ export function EscrowManagementClientWrapper({
 								Escrow Management
 							</h1>
 							<p className="text-lg md:text-xl text-muted-foreground mt-2">
-								Fund escrow, approve milestones, release funds, and track
-								balance
+								Fund escrow, approve milestones, release funds, and track balance
 							</p>
 						</div>
 					</div>

@@ -36,22 +36,11 @@ type ItemProjectProps = {
 	image: string
 }
 
-function ItemProject({
-	title,
-	description,
-	progress,
-	raised,
-	image,
-}: ItemProjectProps) {
+function ItemProject({ title, description, progress, raised, image }: ItemProjectProps) {
 	return (
 		<div className="flex gap-4">
 			<div className="w-20 h-20 relative">
-				<Image
-					src={image}
-					alt={title}
-					className="rounded-lg object-cover"
-					fill
-				/>
+				<Image src={image} alt={title} className="rounded-lg object-cover" fill />
 			</div>
 			<div>
 				<span className="font-semibold block">{title}</span>

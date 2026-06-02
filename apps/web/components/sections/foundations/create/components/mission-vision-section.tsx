@@ -34,9 +34,7 @@ export function MissionVisionSection() {
 					name="mission"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel className="text-base font-medium">
-								Mission Statement
-							</FormLabel>
+							<FormLabel className="text-base font-medium">Mission Statement</FormLabel>
 							<FormControl>
 								<Textarea
 									placeholder="What is your foundation's mission?"

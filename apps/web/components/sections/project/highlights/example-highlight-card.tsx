@@ -6,11 +6,7 @@ interface ExampleHighlightProps {
 	description: string
 }
 
-export function ExampleHighlightCard({
-	icon,
-	title,
-	description,
-}: ExampleHighlightProps) {
+export function ExampleHighlightCard({ icon, title, description }: ExampleHighlightProps) {
 	return (
 		<div className="flex gap-3">
 			<div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 border border-none">

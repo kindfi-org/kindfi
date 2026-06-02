@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
+import { logger } from '@/lib/logger'
 import { BenefitItem } from '~/components/shared/benefits-items'
 import { CTAForm } from '~/components/shared/cta-form'
 import { SectionContainer } from '~/components/shared/section-container'
@@ -40,7 +41,7 @@ export function Community() {
 				message: 'Form submitted successfully!',
 			})
 		} catch (error) {
-			console.error(error) // Logs the error for debugging
+			logger.error(error) // Logs the error for debugging
 			setFormStatus({
 				type: 'error',
 				message: 'Failed to submit the form. Please try again.',
@@ -63,9 +64,7 @@ export function Community() {
 				>
 					<h2 className="text-4xl font-bold text-gray-900 mb-6">
 						<span className="block">{t('home.communityTitle')}</span>
-						<span className="block gradient-text">
-							{t('home.communitySubtitle')}
-						</span>
+						<span className="block gradient-text">{t('home.communitySubtitle')}</span>
 					</h2>
 					<p className="text-lg font-medium text-gray-600 leading-relaxed text-justify">
 						{t('home.communityDescription')}
@@ -77,11 +76,7 @@ export function Community() {
 					{/* Benefits List */}
 					<div className="container space-y-2">
 						{translatedBenefits.map((benefit, index) => (
-							<BenefitItem
-								key={benefit.id}
-								{...benefit}
-								isActive={index === 0}
-							/>
+							<BenefitItem key={benefit.id} {...benefit} isActive={index === 0} />
 						))}
 					</div>
 

@@ -1,15 +1,13 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { SocialLinks } from '~/lib/types/project/project-detail.types'
 
-export async function getBasicProjectInfoBySlug(
-	client: TypedSupabaseClient,
-	projectSlug: string,
-) {
+export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, projectSlug: string) {
 	const { data: project, error } = await client
 		.from('projects')
 		.select(
 			`
 			id,
+						kindler_id,
 			title,
 			slug,
 			description,
@@ -44,9 +42,7 @@ export async function getBasicProjectInfoBySlug(
 			project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
 		}
 	).project_escrows
-	const escrowId = Array.isArray(escrowRel)
-		? escrowRel[0]?.escrow_id
-		: escrowRel?.escrow_id
+	const escrowId = Array.isArray(escrowRel) ? escrowRel[0]?.escrow_id : escrowRel?.escrow_id
 
 	// Fetch the actual contract_id from escrow_contracts table
 	let escrowContractAddress: string | undefined
@@ -62,8 +58,7 @@ export async function getBasicProjectInfoBySlug(
 	}
 
 	// Fetch foundation when project is assigned to one
-	const foundationId = (project as { foundation_id?: string | null })
-		.foundation_id
+	const foundationId = (project as { foundation_id?: string | null }).foundation_id
 	let foundation: { id: string; name: string; slug: string } | undefined
 
 	if (foundationId) {
@@ -84,6 +79,7 @@ export async function getBasicProjectInfoBySlug(
 
 	return {
 		id: project.id,
+		kindlerId: (project as { kindler_id?: string | null }).kindler_id ?? undefined,
 		title: project.title,
 		slug: project.slug,
 		description: project.description,
@@ -101,7 +97,7 @@ export async function getBasicProjectInfoBySlug(
 				: {},
 		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
 		escrowContractAddress,
-		escrowType: undefined, // TODO: Determine escrow type from contract data or metadata
+		escrowType: undefined,
 		foundation,
 	}
 }

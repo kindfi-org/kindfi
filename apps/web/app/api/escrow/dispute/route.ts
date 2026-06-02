@@ -1,16 +1,18 @@
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { listDisputesQuerySchema } from '~/lib/schemas/escrow-dispute.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { createEscrowRequest } from '~/lib/stellar/utils/create-escrow'
 import type { DisputePayload } from '~/lib/types/escrow/escrow-payload.types'
-import { listDisputesQuerySchema } from '~/lib/schemas/escrow-dispute.schemas'
 import { generateUniqueId } from '~/lib/utils/id'
-import { validateDispute } from '~/lib/validators/dispute'
 import { validateRequest } from '~/lib/utils/validation'
+import { validateDispute } from '~/lib/validators/dispute'
 
-export async function POST(req: NextRequest) {
+async function createDisputeHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
@@ -57,10 +59,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (escrowError || !escrow) {
-			return NextResponse.json(
-				{ error: 'Escrow contract not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Escrow contract not found' }, { status: 404 })
 		}
 
 		const { data: milestone, error: milestoneError } = await supabase
@@ -70,10 +69,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (milestoneError || !milestone) {
-			return NextResponse.json(
-				{ error: 'Milestone not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'Milestone not found' }, { status: 404 })
 		}
 
 		// 4. Check if a dispute already exists for this milestone
@@ -141,7 +137,7 @@ export async function POST(req: NextRequest) {
 		// Note: The database updates and notifications will be handled by the /escrow/dispute/sign endpoint
 		// after the transaction is signed and submitted
 	} catch (error) {
-		console.error('Dispute Filing Error:', error)
+		logger.error('Dispute Filing Error:', error)
 
 		if (error instanceof AppError) {
 			await auditLogger.log({
@@ -176,6 +172,14 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	createDisputeHandler,
+)
 
 export async function GET(req: NextRequest) {
 	try {
@@ -221,7 +225,7 @@ export async function GET(req: NextRequest) {
 			{ status: 200 },
 		)
 	} catch (error) {
-		console.error('Fetch Disputes Error:', error)
+		logger.error('Fetch Disputes Error:', error)
 
 		if (error instanceof AppError) {
 			return NextResponse.json(

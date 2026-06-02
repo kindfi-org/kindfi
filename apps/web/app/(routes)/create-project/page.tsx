@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { CreateProjectForm } from '~/components/sections/projects/create/create-project-form'
 import { UnauthorizedAccess } from '~/components/shared/unauthorized-access'
 import { CreateProjectProvider } from '~/hooks/contexts/use-create-project.context'
@@ -22,7 +23,7 @@ export default async function CreateProjectPage() {
 		.single()
 
 	if (error || !profileData) {
-		console.error('Error fetching user profile:', error)
+		logger.error('Error fetching user profile:', error)
 		redirect('/sign-in')
 	}
 
@@ -44,8 +45,7 @@ export default async function CreateProjectPage() {
 						Let&apos;s get your KindFi project started
 					</h1>
 					<p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-						Create a crowdfunding campaign and make an impact with the power of
-						Web3 transparency.
+						Create a crowdfunding campaign and make an impact with the power of Web3 transparency.
 					</p>
 				</div>
 

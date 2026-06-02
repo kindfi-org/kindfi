@@ -4,6 +4,8 @@ import type { Project } from './'
 
 export interface ProjectDetail extends Project {
 	location: string
+	/** Optional project creator user id (kindler) */
+	kindlerId?: string
 	socialLinks?: SocialLinks
 	pitch: ProjectPitch
 	team: TeamMember[]
@@ -62,12 +64,7 @@ export interface TeamMember {
 	title: string
 }
 
-export type MilestoneStatus =
-	| 'pending'
-	| 'completed'
-	| 'approved'
-	| 'rejected'
-	| 'disputed'
+export type MilestoneStatus = 'pending' | 'completed' | 'approved' | 'rejected' | 'disputed'
 
 export interface Milestone {
 	id: string

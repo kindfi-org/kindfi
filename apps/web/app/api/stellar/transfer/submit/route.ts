@@ -5,16 +5,12 @@ import {
 	type verifyAuthentication,
 	type WebAuthnAssertionResponse,
 } from '@packages/lib/passkey'
-import {
-	Keypair,
-	type Transaction,
-	TransactionBuilder,
-	xdr,
-} from '@stellar/stellar-sdk'
+import { Keypair, type Transaction, TransactionBuilder, xdr } from '@stellar/stellar-sdk'
 import { type Api, Server } from '@stellar/stellar-sdk/rpc'
 import isEqual from 'lodash/isEqual'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { transferSubmitSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -35,8 +31,7 @@ export async function POST(req: NextRequest) {
 		const body = await req.json()
 		const validation = validateRequest(transferSubmitSchema, body)
 		if (!validation.success) return validation.response
-		const { transactionData, authResponse, userDevice, verificationJSON } =
-			validation.data
+		const { transactionData, authResponse, userDevice, verificationJSON } = validation.data
 		const { transactionXDR, hash: _hash } = transactionData
 		const _smartWalletAddress = userDevice.address
 		const _verificationJSONTyped = verificationJSON as Awaited<
@@ -60,7 +55,7 @@ export async function POST(req: NextRequest) {
 		try {
 			fundingKeypair = Keypair.fromSecret(appConfig.stellar.fundingAccount)
 		} catch (error) {
-			console.error('❌ Invalid funding account secret:', error)
+			logger.error('❌ Invalid funding account secret:', error)
 			return NextResponse.json(
 				{
 					error: 'Invalid funding account configuration',
@@ -82,7 +77,7 @@ export async function POST(req: NextRequest) {
 				appConfig.stellar.networkPassphrase,
 			) as Transaction
 		} catch (error) {
-			console.error('❌ Invalid transactionXDR:', error)
+			logger.error('❌ Invalid transactionXDR:', error)
 			return NextResponse.json(
 				{
 					error: 'Invalid transactionXDR format',
@@ -93,18 +88,13 @@ export async function POST(req: NextRequest) {
 		}
 
 		const authEntries =
-			(transaction.operations[0] as unknown as Api.SimulateHostFunctionResult)
-				.auth || []
+			(transaction.operations[0] as unknown as Api.SimulateHostFunctionResult).auth || []
 
 		if (authEntries.length) {
 			const publicKeyArray =
 				verificationJSON.device.pubKey instanceof Uint8Array
 					? verificationJSON.device.pubKey
-					: new Uint8Array(
-							Object.values(
-								verificationJSON.device.pubKey as Record<string, number>,
-							),
-						)
+					: new Uint8Array(Object.values(verificationJSON.device.pubKey as Record<string, number>))
 			const publicKey = Buffer.from(publicKeyArray).toString('base64')
 			const credentialId = verificationJSON.device.id
 			const deviceIdHex = computeDeviceIdFromCoseKey(publicKey)
@@ -129,33 +119,25 @@ export async function POST(req: NextRequest) {
 
 			// ! Keeping logs commented out for now. Deactivating signature verification on-chain, verifying device existence on contract only
 			// Logging WebAuthn Signature Details
-			// console.log('🔏 WebAuthn Signature Details:')
-			// console.log('   Signature (base64):', signature.toString('base64'))
-			// console.log(
+
 			// 	'   Authenticator Data (base64):',
 			// 	authenticatorData.toString('base64'),
 			// )
-			// console.log('   Client Data (object):', clientData)
-			// console.log(
+
 			// 	'   WebAuthn Payload (base64):',
 			// 	webauthnPayload.toString('base64'),
 			// )
-			// console.log(
+
 			// 	'   WebAuthn Payload Hash (hex):',
 			// 	webauthnPayloadHash.toString('hex'),
 			// )
-			// console.log('   Challenge (utf8):', challenge)
-			// console.log('   Challenge Bytes (hex):', challengeBytes?.toString('hex'))
 
-			// TODO: If the attestation can be verified here, then it should go through the stellar blockchain
 			// ! Strategy still not the same... simplify. A verification already happening, but is not "preparing" the signature to on-chain verification
 			// const verificationResults = await stellarService.verifyPasskeySignature(
 			// 	verificationJSON.device.address,
 			// 	JSON.stringify(authResponse.response),
 			// 	hash,
 			// )
-
-			// console.log('🔐 Contract will verify signature', { verificationResults })
 
 			// Find and update the auth entry for the smart wallet
 			const signatureScVal = xdr.ScVal.fromXDR(signatureScValRaw.toXDR())
@@ -173,15 +155,12 @@ export async function POST(req: NextRequest) {
 					const newCredentials = new xdr.SorobanAddressCredentials({
 						address: addressCredentials.address(),
 						nonce: addressCredentials.nonce(),
-						signatureExpirationLedger:
-							addressCredentials.signatureExpirationLedger(),
+						signatureExpirationLedger: addressCredentials.signatureExpirationLedger(),
 						signature: signatureScVal,
 					})
 
 					// Update the auth entry with the new credentials containing our signature
-					authEntry.credentials(
-						xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
-					)
+					authEntry.credentials(xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials))
 
 					break
 				}
@@ -201,7 +180,7 @@ export async function POST(req: NextRequest) {
 		const submitResult = await server.sendTransaction(transaction)
 
 		if (submitResult.status === 'ERROR') {
-			console.error('❌ Submit error:', submitResult)
+			logger.error('❌ Submit error:', submitResult)
 			throw new Error(
 				`Transaction submission failed: ${JSON.stringify(submitResult.errorResult, null, 2) || 'Unknown error'}`,
 			)
@@ -210,7 +189,7 @@ export async function POST(req: NextRequest) {
 		const txHash = submitResult.hash
 
 		if (submitResult?.errorResult) {
-			console.error('❌ Submit error (false positive):', submitResult)
+			logger.error('❌ Submit error (false positive):', submitResult)
 			throw new Error(
 				`Transaction submission failed: ${submitResult.errorResult || 'Unknown error'}`,
 			)
@@ -224,7 +203,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 	} catch (error) {
-		console.error('❌ Error submitting transfer:', error)
+		logger.error('❌ Error submitting transfer:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to submit transfer',

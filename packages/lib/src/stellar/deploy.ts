@@ -1,5 +1,6 @@
 import { Address, hash, Keypair, StrKey, xdr } from '@stellar/stellar-sdk'
 import { appEnvConfig } from '../config'
+import { logger } from '../logger'
 import type { AppEnvInterface } from '../types'
 
 /**
@@ -9,9 +10,7 @@ import type { AppEnvInterface } from '../types'
 export function generateStellarAddress(contractSalt: Buffer): string {
 	// Validate salt length
 	if (contractSalt.length !== 32) {
-		throw new Error(
-			`Contract salt must be exactly 32 bytes, got ${contractSalt.length}`,
-		)
+		throw new Error(`Contract salt must be exactly 32 bytes, got ${contractSalt.length}`)
 	}
 
 	const config: AppEnvInterface = appEnvConfig('web')
@@ -19,18 +18,13 @@ export function generateStellarAddress(contractSalt: Buffer): string {
 		hash(
 			xdr.HashIdPreimage.envelopeTypeContractId(
 				new xdr.HashIdPreimageContractId({
-					networkId: hash(
-						Buffer.from(config.stellar.networkPassphrase, 'utf-8'),
+					networkId: hash(Buffer.from(config.stellar.networkPassphrase, 'utf-8')),
+					contractIdPreimage: xdr.ContractIdPreimage.contractIdPreimageFromAddress(
+						new xdr.ContractIdPreimageFromAddress({
+							address: Address.fromString(config.stellar.factoryContractId).toScAddress(),
+							salt: contractSalt,
+						}),
 					),
-					contractIdPreimage:
-						xdr.ContractIdPreimage.contractIdPreimageFromAddress(
-							new xdr.ContractIdPreimageFromAddress({
-								address: Address.fromString(
-									config.stellar.factoryContractId,
-								).toScAddress(),
-								salt: contractSalt,
-							}),
-						),
 				}),
 			).toXDR(),
 		),
@@ -48,23 +42,26 @@ export async function handleDeploy(params: {
 	contractSalt: Buffer
 	accountId: Buffer
 }): Promise<{ address: string; transactionHash?: string }> {
-	const { credentialId, contractSalt } = params
+	const {
+		credentialId: _credentialId,
+		contractSalt,
+		publicKey: _publicKey,
+		accountId: _accountId,
+	} = params
 
 	try {
-
 		// Pre-calculate the contract address
 		const contractAddress = generateStellarAddress(contractSalt)
-
-		// TODO: Implement actual deployment logic using Passkey Kit
-		// This should use the official Passkey Kit library instead of our custom implementation
-		// For now, return the pre-calculated address
 
 		return {
 			address: contractAddress,
 			transactionHash: undefined, // Will be set when actual deployment is implemented
 		}
 	} catch (error) {
-		console.error('❌ Error during deployment:', error)
+		logger.error(
+			'Error during deployment',
+			error instanceof Error ? error : new Error(String(error)),
+		)
 		throw new Error(`Deployment failed: ${error}`)
 	}
 }

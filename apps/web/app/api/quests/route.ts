@@ -2,6 +2,7 @@ import { Keypair } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { createQuestSchema } from '~/lib/schemas/quest.schemas'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
@@ -27,34 +28,30 @@ export async function GET(_req: NextRequest) {
 		const userId = session.user.id
 
 		// Get all active quests, user's progress, and contribution count in parallel
-		const [questsResult, progressResult, contributionsCountResult] =
-			await Promise.all([
-				supabase
-					.from('quest_definitions')
-					.select('*')
-					.eq('is_active', true)
-					.order('created_at', { ascending: false }),
-				supabase.from('user_quest_progress').select('*').eq('user_id', userId),
-				supabase
-					.from('contributions')
-					.select('id', { count: 'exact', head: true })
-					.eq('contributor_id', userId),
-			])
+		const [questsResult, progressResult, contributionsCountResult] = await Promise.all([
+			supabase
+				.from('quest_definitions')
+				.select('*')
+				.eq('is_active', true)
+				.order('created_at', { ascending: false }),
+			supabase.from('user_quest_progress').select('*').eq('user_id', userId),
+			supabase
+				.from('contributions')
+				.select('id', { count: 'exact', head: true })
+				.eq('contributor_id', userId),
+		])
 
 		const { data: quests, error } = questsResult
 		const { data: progress, error: progressError } = progressResult
 		const hasContributions = (contributionsCountResult.count ?? 0) > 0
 
 		if (error) {
-			console.error('Error fetching quests:', error)
-			return NextResponse.json(
-				{ error: 'Failed to fetch quests' },
-				{ status: 500 },
-			)
+			logger.error('Error fetching quests:', error)
+			return NextResponse.json({ error: 'Failed to fetch quests' }, { status: 500 })
 		}
 
 		if (progressError) {
-			console.error('Error fetching quest progress:', progressError)
+			logger.error('Error fetching quest progress:', progressError)
 		}
 
 		// Build a Map for O(1) lookup instead of O(n) Array.find
@@ -68,29 +65,20 @@ export async function GET(_req: NextRequest) {
 			'multi_category_donation',
 		]
 		const questsMissingProgress = (quests ?? []).filter(
-			(q) =>
-				donationQuestTypes.includes(q.quest_type) &&
-				!progressMap.has(q.quest_id),
+			(q) => donationQuestTypes.includes(q.quest_type) && !progressMap.has(q.quest_id),
 		)
 
 		if (hasContributions && questsMissingProgress.length > 0) {
 			try {
-				await syncQuestProgress(
-					supabase,
-					userId,
-					questsMissingProgress,
-					progressMap,
-				)
+				await syncQuestProgress(supabase, userId, questsMissingProgress, progressMap)
 			} catch (syncErr) {
-				console.error('[Quests] Error syncing quest progress:', syncErr)
+				logger.error('[Quests] Error syncing quest progress:', syncErr)
 			}
 		}
 
 		// Resolve quest contract address (DB field or env fallback)
 		const fallbackQuestContract =
-			process.env.QUEST_CONTRACT_ADDRESS ||
-			process.env.NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS ||
-			null
+			process.env.QUEST_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS || null
 
 		// Merge quests with user progress and resolved contract address
 		const questsWithProgress = quests?.map((quest) => {
@@ -108,11 +96,8 @@ export async function GET(_req: NextRequest) {
 
 		return NextResponse.json({ quests: questsWithProgress || [] })
 	} catch (error) {
-		console.error('Error in GET /api/quests:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in GET /api/quests:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 
@@ -183,11 +168,8 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (error) {
-			console.error('Error creating quest:', error)
-			return NextResponse.json(
-				{ error: 'Failed to create quest' },
-				{ status: 500 },
-			)
+			logger.error('Error creating quest:', error)
+			return NextResponse.json({ error: 'Failed to create quest' }, { status: 500 })
 		}
 
 		// Map quest_type from database enum to contract enum value
@@ -204,9 +186,7 @@ export async function POST(req: NextRequest) {
 
 		// Convert expires_at to Unix timestamp (0 for no expiration)
 		const expiresAtUnix =
-			expires_at && expires_at !== ''
-				? Math.floor(new Date(expires_at).getTime() / 1000)
-				: 0
+			expires_at && expires_at !== '' ? Math.floor(new Date(expires_at).getTime() / 1000) : 0
 
 		// Sync quest to on-chain contract
 		let onChainResult: {
@@ -214,18 +194,16 @@ export async function POST(req: NextRequest) {
 			questId?: number
 			error?: string
 		} | null = null
-		const questContractAddress =
-			contract_address || process.env.QUEST_CONTRACT_ADDRESS
+		const questContractAddress = contract_address || process.env.QUEST_CONTRACT_ADDRESS
 
 		if (questContractAddress) {
 			try {
 				// Use admin private key if available, otherwise use recorder keypair
 				// (assuming recorder has admin role granted)
-				const adminPrivateKey =
-					process.env.ADMIN_PRIVATE_KEY || process.env.SOROBAN_PRIVATE_KEY
+				const adminPrivateKey = process.env.ADMIN_PRIVATE_KEY || process.env.SOROBAN_PRIVATE_KEY
 
 				if (!adminPrivateKey) {
-					console.warn(
+					logger.warn(
 						'[Quest API] No admin private key found. Quest created in database but not synced to chain.',
 					)
 				} else {
@@ -247,18 +225,15 @@ export async function POST(req: NextRequest) {
 
 					if (onChainResult.success) {
 					} else {
-						console.error(
-							'[Quest API] Failed to sync quest to on-chain:',
-							onChainResult.error,
-						)
+						logger.error('[Quest API] Failed to sync quest to on-chain:', onChainResult.error)
 					}
 				}
 			} catch (error) {
-				console.error('[Quest API] Error syncing quest to on-chain:', error)
+				logger.error('[Quest API] Error syncing quest to on-chain:', error)
 				// Don't fail the request if on-chain sync fails - quest is still in database
 			}
 		} else {
-			console.warn(
+			logger.warn(
 				'[Quest API] No quest contract address configured. Quest created in database only.',
 			)
 		}
@@ -277,11 +252,8 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Error in POST /api/quests:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in POST /api/quests:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 
@@ -304,13 +276,9 @@ async function syncQuestProgress(
 	// Fetch contribution data needed for each quest type in parallel
 	const [amountResult, categoryResult] = await Promise.all([
 		questTypes.has('total_donation_amount')
-			? supabase
-					.from('contributions')
-					.select('amount')
-					.eq('contributor_id', userId)
+			? supabase.from('contributions').select('amount').eq('contributor_id', userId)
 			: Promise.resolve({ data: null }),
-		questTypes.has('multi_category_donation') ||
-		questTypes.has('multi_region_donation')
+		questTypes.has('multi_category_donation') || questTypes.has('multi_region_donation')
 			? supabase
 					.from('contributions')
 					.select('project_id, projects!inner(category_id)')
@@ -334,9 +302,7 @@ async function syncQuestProgress(
 				categoryResult.data.filter(
 					(p, index, self) =>
 						index ===
-						self.findIndex(
-							(pr) => pr.projects[0].category_id === p.projects[0].category_id,
-						),
+						self.findIndex((pr) => pr.projects[0].category_id === p.projects[0].category_id),
 				).length || 0
 		}
 
@@ -358,10 +324,7 @@ async function syncQuestProgress(
 			.single()
 
 		if (error) {
-			console.error(
-				`[Quests] Failed to backfill progress for quest ${quest.quest_id}:`,
-				error,
-			)
+			logger.error(`[Quests] Failed to backfill progress for quest ${quest.quest_id}:`, error)
 			continue
 		}
 

@@ -2,20 +2,9 @@
 
 import type { GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
 import { Send, Shield, Users, Wallet } from 'lucide-react'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Label } from '~/components/base/label'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from '~/components/base/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/base/tooltip'
 
 interface RolesCardProps {
 	escrowData: GetEscrowsFromIndexerResponse
@@ -31,9 +20,7 @@ export function RolesCard({ escrowData }: RolesCardProps) {
 					<Users className="w-5 h-5" />
 					Roles & Permissions
 				</CardTitle>
-				<CardDescription>
-					Addresses assigned to different roles in this escrow
-				</CardDescription>
+				<CardDescription>Addresses assigned to different roles in this escrow</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<TooltipProvider>
@@ -47,15 +34,10 @@ export function RolesCard({ escrowData }: RolesCardProps) {
 									</Label>
 								</TooltipTrigger>
 								<TooltipContent className="max-w-xs">
-									<p>
-										Address of the entity requiring the service. Can approve
-										milestones.
-									</p>
+									<p>Address of the entity requiring the service. Can approve milestones.</p>
 								</TooltipContent>
 							</Tooltip>
-							<p className="font-mono text-sm break-all">
-								{escrowData.roles.approver}
-							</p>
+							<p className="font-mono text-sm break-all">{escrowData.roles.approver}</p>
 						</div>
 						<div className="space-y-2">
 							<Tooltip>
@@ -66,15 +48,10 @@ export function RolesCard({ escrowData }: RolesCardProps) {
 									</Label>
 								</TooltipTrigger>
 								<TooltipContent className="max-w-xs">
-									<p>
-										Address of the entity providing the service. Can update
-										milestone status.
-									</p>
+									<p>Address of the entity providing the service. Can update milestone status.</p>
 								</TooltipContent>
 							</Tooltip>
-							<p className="font-mono text-sm break-all">
-								{escrowData.roles.serviceProvider}
-							</p>
+							<p className="font-mono text-sm break-all">{escrowData.roles.serviceProvider}</p>
 						</div>
 						<div className="space-y-2">
 							<Tooltip>
@@ -88,9 +65,7 @@ export function RolesCard({ escrowData }: RolesCardProps) {
 									<p>Address of the entity that owns the escrow platform.</p>
 								</TooltipContent>
 							</Tooltip>
-							<p className="font-mono text-sm break-all">
-								{escrowData.roles.platformAddress}
-							</p>
+							<p className="font-mono text-sm break-all">{escrowData.roles.platformAddress}</p>
 						</div>
 						<div className="space-y-2">
 							<Tooltip>
@@ -101,15 +76,10 @@ export function RolesCard({ escrowData }: RolesCardProps) {
 									</Label>
 								</TooltipTrigger>
 								<TooltipContent className="max-w-xs">
-									<p>
-										Address in charge of releasing escrow funds to the service
-										provider.
-									</p>
+									<p>Address in charge of releasing escrow funds to the service provider.</p>
 								</TooltipContent>
 							</Tooltip>
-							<p className="font-mono text-sm break-all">
-								{escrowData.roles.releaseSigner}
-							</p>
+							<p className="font-mono text-sm break-all">{escrowData.roles.releaseSigner}</p>
 						</div>
 						<div className="space-y-2">
 							<Tooltip>
@@ -120,14 +90,10 @@ export function RolesCard({ escrowData }: RolesCardProps) {
 									</Label>
 								</TooltipTrigger>
 								<TooltipContent className="max-w-xs">
-									<p>
-										Address in charge of resolving disputes within the escrow.
-									</p>
+									<p>Address in charge of resolving disputes within the escrow.</p>
 								</TooltipContent>
 							</Tooltip>
-							<p className="font-mono text-sm break-all">
-								{escrowData.roles.disputeResolver}
-							</p>
+							<p className="font-mono text-sm break-all">{escrowData.roles.disputeResolver}</p>
 						</div>
 						{'receiver' in escrowData.roles && (
 							<div className="space-y-2">
@@ -139,15 +105,10 @@ export function RolesCard({ escrowData }: RolesCardProps) {
 										</Label>
 									</TooltipTrigger>
 									<TooltipContent className="max-w-xs">
-										<p>
-											Address where escrow funds will be sent (for
-											single-release escrows).
-										</p>
+										<p>Address where escrow funds will be sent (for single-release escrows).</p>
 									</TooltipContent>
 								</Tooltip>
-								<p className="font-mono text-sm break-all">
-									{escrowData.roles.receiver}
-								</p>
+								<p className="font-mono text-sm break-all">{escrowData.roles.receiver}</p>
 							</div>
 						)}
 					</div>

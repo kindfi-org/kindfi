@@ -45,13 +45,19 @@ export const transferSubmitSchema = z.object({
 		hash: z.string().optional(),
 	}),
 	authResponse: z.any(),
-	userDevice: z.object({
-		address: z.string().min(1, 'Smart wallet address is required'),
-		credential_id: z.string().optional(),
-	}).passthrough(),
-	verificationJSON: z.object({
-		device: z.object({
-			pubKey: z.unknown().refine((v) => v != null, 'Public key is required'),
-		}).passthrough(),
-	}).passthrough(),
+	userDevice: z
+		.object({
+			address: z.string().min(1, 'Smart wallet address is required'),
+			credential_id: z.string().optional(),
+		})
+		.passthrough(),
+	verificationJSON: z
+		.object({
+			device: z
+				.object({
+					pubKey: z.unknown().refine((v) => v != null, 'Public key is required'),
+				})
+				.passthrough(),
+		})
+		.passthrough(),
 })

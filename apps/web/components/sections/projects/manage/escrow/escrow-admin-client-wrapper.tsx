@@ -7,11 +7,7 @@ import { IoSettingsOutline } from 'react-icons/io5'
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import { EscrowAdminPanel } from './escrow-admin-panel'
 
-export function EscrowAdminClientWrapper({
-	projectSlug,
-}: {
-	projectSlug: string
-}) {
+export function EscrowAdminClientWrapper({ projectSlug }: { projectSlug: string }) {
 	const prefersReducedMotion = useReducedMotion()
 	const {
 		data: project,
@@ -59,8 +55,7 @@ export function EscrowAdminClientWrapper({
 								Escrow Creation
 							</h1>
 							<p className="text-lg md:text-xl text-muted-foreground mt-2 text-center">
-								Initialize and configure your escrow contract, roles, and
-								milestones
+								Initialize and configure your escrow contract, roles, and milestones
 							</p>
 						</div>
 					</div>

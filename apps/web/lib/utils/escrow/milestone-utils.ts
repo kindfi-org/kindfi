@@ -1,7 +1,4 @@
-import type {
-	MultiReleaseMilestone,
-	SingleReleaseMilestone,
-} from '@trustless-work/escrow'
+import type { MultiReleaseMilestone, SingleReleaseMilestone } from '@trustless-work/escrow'
 
 /**
  * Type guard to check if a milestone is a SingleReleaseMilestone

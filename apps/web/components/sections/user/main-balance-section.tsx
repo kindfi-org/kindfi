@@ -20,17 +20,14 @@ export function MainBalanceCard() {
 				</div>
 
 				<div className="grid grid-cols-2 gap-4">
-					<Button
-						className="w-full gradient-btn text-white z-10"
-						aria-label="Send Money"
-					>
+					<Button className="w-full gradient-btn text-white z-10" aria-label="Send Money">
 						<Send className="mr-2 h-4 w-4" />
 						Send
 					</Button>
 					<Button
 						variant="outline"
 						aria-label="Receive Money"
-						className="w-full gradient-border-btn z-10"
+						className="gradient-border-btn z-10 w-full bg-white"
 					>
 						<span className="w-full flex items-center justify-center">
 							<Download className="mr-2 h-4 w-4" />

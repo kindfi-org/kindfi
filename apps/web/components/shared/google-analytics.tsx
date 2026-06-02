@@ -2,11 +2,7 @@
 
 import Script from 'next/script'
 
-export function GoogleAnalytics({
-	GA_MEASUREMENT_ID,
-}: {
-	GA_MEASUREMENT_ID: string
-}) {
+export function GoogleAnalytics({ GA_MEASUREMENT_ID }: { GA_MEASUREMENT_ID: string }) {
 	return (
 		<>
 			<Script

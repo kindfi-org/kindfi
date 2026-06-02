@@ -2,14 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import {
-	CheckCircle2,
-	ExternalLink,
-	Heart,
-	Loader2,
-	MinusCircle,
-	Trophy,
-} from 'lucide-react'
+import { CheckCircle2, ExternalLink, Heart, Loader2, MinusCircle, Trophy } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
@@ -67,8 +60,7 @@ export function VoteOptionCard({
 		},
 	})
 
-	const canVote =
-		roundStatus === 'active' && isEligible && !hasVotedInRound && !isPending
+	const canVote = roundStatus === 'active' && isEligible && !hasVotedInRound && !isPending
 
 	const upWeight = option.weighted_upvotes ?? 0
 	const downWeight = option.weighted_downvotes ?? 0
@@ -83,10 +75,8 @@ export function VoteOptionCard({
 			<div
 				className={cn(
 					'overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 shadow-sm shadow-slate-200/40 transition-all duration-200',
-					option.user_voted &&
-						'border-emerald-200/80 ring-2 ring-emerald-100',
-					isWinner &&
-						'border-amber-200/80 ring-2 ring-amber-100 shadow-md shadow-amber-100/40',
+					option.user_voted && 'border-emerald-200/80 ring-2 ring-emerald-100',
+					isWinner && 'border-amber-200/80 ring-2 ring-amber-100 shadow-md shadow-amber-100/40',
 				)}
 			>
 				{isWinner ? (
@@ -134,13 +124,11 @@ export function VoteOptionCard({
 							) : null}
 						</div>
 
-						{(roundStatus === 'active' || roundStatus === 'ended') &&
-						totalRoundWeight > 0 ? (
+						{(roundStatus === 'active' || roundStatus === 'ended') && totalRoundWeight > 0 ? (
 							<div className="space-y-1.5">
 								<div className="flex items-center justify-between text-xs">
 									<span className="text-muted-foreground">
-										{upWeight}{' '}
-										{t('governancePage.weightedUpvotes')}
+										{upWeight} {t('governancePage.weightedUpvotes')}
 									</span>
 									<span className="font-semibold tabular-nums text-slate-900">
 										{allocationPercent}% {t('governancePage.allocation')}
@@ -165,22 +153,12 @@ export function VoteOptionCard({
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div className="flex flex-wrap items-center gap-3">
 								<div className="flex items-center gap-1.5 text-sm">
-									<Heart
-										className="h-3.5 w-3.5 text-emerald-600"
-										aria-hidden="true"
-									/>
-									<span className="font-semibold tabular-nums text-slate-900">
-										{upWeight}
-									</span>
+									<Heart className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+									<span className="font-semibold tabular-nums text-slate-900">{upWeight}</span>
 								</div>
 								<div className="flex items-center gap-1.5 text-sm">
-									<MinusCircle
-										className="h-3.5 w-3.5 text-slate-400"
-										aria-hidden="true"
-									/>
-									<span className="font-semibold tabular-nums text-slate-600">
-										{downWeight}
-									</span>
+									<MinusCircle className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+									<span className="font-semibold tabular-nums text-slate-600">{downWeight}</span>
 								</div>
 								{netWeight !== 0 ? (
 									<Badge

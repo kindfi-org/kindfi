@@ -1,7 +1,8 @@
 'use client'
 
-import { LinkedinIcon, Link as LinkIcon } from 'lucide-react'
+import { Link as LinkIcon } from 'lucide-react'
 import { Button } from '~/components/base/button'
+import { FacebookIcon, LinkedinIcon, XIcon } from '~/lib/icons/social-icons'
 
 interface ShareButtonsProps {
 	url: string
@@ -25,40 +26,23 @@ export function ShareButtons({ url, title, description }: ShareButtonsProps) {
 	return (
 		<div className="flex items-center gap-2">
 			<a href={twitterHref} target="_blank" rel="noopener noreferrer">
-				<Button variant="outline" size="sm" className="gap-2">
-					<span
-						className="h-4 w-4 inline-block align-middle"
-						aria-hidden="true"
-					>
-						<svg
-							role="img"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-							className="h-4 w-4"
-						>
-							<title>X</title>
-							<path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
-						</svg>
-					</span>
+				<Button variant="outline" size="sm" className="gradient-border-btn gap-2 bg-white">
+					<XIcon className="h-4 w-4" aria-hidden="true" />
 					Share
 				</Button>
 			</a>
 			<a href={linkedinHref} target="_blank" rel="noopener noreferrer">
-				<Button variant="outline" size="sm" className="gap-2">
+				<Button variant="outline" size="sm" className="gradient-border-btn gap-2 bg-white">
 					<LinkedinIcon className="h-4 w-4" /> Share
 				</Button>
 			</a>
 			<a href={facebookHref} target="_blank" rel="noopener noreferrer">
-				<Button variant="outline" size="sm">
+				<Button variant="outline" size="sm" className="gradient-border-btn gap-2 bg-white">
+					<FacebookIcon className="h-4 w-4" aria-hidden="true" />
 					Facebook
 				</Button>
 			</a>
-			<Button
-				variant="ghost"
-				size="sm"
-				className="gap-2"
-				onClick={copyToClipboard}
-			>
+			<Button variant="ghost" size="sm" className="gap-2" onClick={copyToClipboard}>
 				<LinkIcon className="h-4 w-4" /> Copy link
 			</Button>
 		</div>

@@ -16,10 +16,7 @@ export const updateTagSchema = z.object({
 		.string()
 		.min(1, 'Tag name is required')
 		.max(50, 'Tag name must be 50 characters or less')
-		.regex(
-			/^[a-zA-Z0-9\s-_]+$/,
-			'Tag name contains invalid characters',
-		)
+		.regex(/^[a-zA-Z0-9\s-_]+$/, 'Tag name contains invalid characters')
 		.transform((s) => s.trim()),
 })
 

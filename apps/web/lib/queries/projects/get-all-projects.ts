@@ -62,14 +62,10 @@ export async function getAllProjects(
 		data?.map((project) => {
 			const escrowRel = (
 				project as unknown as {
-					project_escrows?:
-						| { escrow_id?: string }
-						| Array<{ escrow_id?: string }>
+					project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
 				}
 			).project_escrows
-			const escrowId = Array.isArray(escrowRel)
-				? escrowRel[0]?.escrow_id
-				: escrowRel?.escrow_id
+			const escrowId = Array.isArray(escrowRel) ? escrowRel[0]?.escrow_id : escrowRel?.escrow_id
 
 			return {
 				id: project.id,

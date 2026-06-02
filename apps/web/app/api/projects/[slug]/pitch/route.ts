@@ -2,6 +2,7 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { projectPitchFormSchema } from '~/lib/schemas/project.schemas'
 import {
@@ -11,10 +12,7 @@ import {
 } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
 
-export async function POST(
-	req: Request,
-	{ params }: { params: Promise<{ slug: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -36,16 +34,20 @@ export async function POST(
 		}
 		const validation = validateRequest(projectPitchFormSchema, formPayload)
 		if (!validation.success) return validation.response
-		const { projectId, projectSlug: validatedSlug, title, story, videoUrl: rawVideoUrl, pitchDeck, removePitchDeck } = validation.data
+		const {
+			projectId,
+			projectSlug: validatedSlug,
+			title,
+			story,
+			videoUrl: rawVideoUrl,
+			pitchDeck,
+			removePitchDeck,
+		} = validation.data
 
 		// Verify user has permission to update this project
 		// Check if user is the project owner or has editor role in parallel
 		const [projectResult, memberResult] = await Promise.all([
-			supabaseServiceRole
-				.from('projects')
-				.select('id, kindler_id')
-				.eq('id', projectId)
-				.single(),
+			supabaseServiceRole.from('projects').select('id, kindler_id').eq('id', projectId).single(),
 			supabaseServiceRole
 				.from('project_members')
 				.select('role')
@@ -96,16 +98,9 @@ export async function POST(
 
 			try {
 				// Delete all files in the project's pitch deck folder
-				await deleteFolderFromBucket(
-					supabase,
-					'project_pitch_decks',
-					validatedSlug,
-				)
+				await deleteFolderFromBucket(supabase, 'project_pitch_decks', validatedSlug)
 			} catch (e) {
-				console.warn(
-					'Failed to cleanup pitch deck folder:',
-					(e as Error).message,
-				)
+				logger.warn('Failed to cleanup pitch deck folder:', (e as Error).message)
 			}
 		}
 
@@ -114,7 +109,7 @@ export async function POST(
 			.upsert(projectPitchData, { onConflict: 'project_id' })
 
 		if (error) {
-			console.error(error)
+			logger.error(error)
 			return NextResponse.json({ error: error.message }, { status: 500 })
 		}
 
@@ -122,7 +117,7 @@ export async function POST(
 			message: 'Project pitch upserted successfully',
 		})
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

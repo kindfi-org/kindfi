@@ -21,15 +21,11 @@ export function ProfileStatCard({
 		<ProfileSurfaceCard padding="sm" className={cn('h-full', className)}>
 			<div className="flex items-start justify-between gap-3">
 				<div className="min-w-0 space-y-2">
-					<p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
-						{label}
-					</p>
+					<p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">{label}</p>
 					<p className="text-2xl font-bold tabular-nums tracking-tight text-gray-900 sm:text-3xl">
 						{value}
 					</p>
-					{trend ? (
-						<p className="text-xs text-muted-foreground">{trend}</p>
-					) : null}
+					{trend ? <p className="text-xs text-muted-foreground">{trend}</p> : null}
 				</div>
 				{Icon ? (
 					<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">

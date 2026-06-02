@@ -1,9 +1,10 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { createReferralSchema } from '~/lib/schemas/referral.schemas'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -50,16 +51,8 @@ export async function GET(_req: NextRequest) {
 				.select('*')
 				.eq('referrer_id', session.user.id)
 				.order('created_at', { ascending: false }),
-			supabase
-				.from('referrer_statistics')
-				.select('*')
-				.eq('referrer_id', session.user.id)
-				.single(),
-			supabase
-				.from('referral_records')
-				.select('*')
-				.eq('referred_id', session.user.id)
-				.single(),
+			supabase.from('referrer_statistics').select('*').eq('referrer_id', session.user.id).single(),
+			supabase.from('referral_records').select('*').eq('referred_id', session.user.id).single(),
 		])
 
 		const { data: referrals, error: referralsError } = referralsResult
@@ -67,11 +60,11 @@ export async function GET(_req: NextRequest) {
 		const { data: referredRecord } = referredResult
 
 		if (referralsError) {
-			console.error('Error fetching referrals:', referralsError)
+			logger.error('Error fetching referrals:', referralsError)
 		}
 
 		if (statsError && statsError.code !== 'PGRST116') {
-			console.error('Error fetching referrer stats:', statsError)
+			logger.error('Error fetching referrer stats:', statsError)
 		}
 
 		return NextResponse.json({
@@ -84,11 +77,8 @@ export async function GET(_req: NextRequest) {
 			referred_by: referredRecord?.referrer_id || null,
 		})
 	} catch (error) {
-		console.error('Error in GET /api/referrals:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in GET /api/referrals:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 
@@ -124,10 +114,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (existing) {
-			return NextResponse.json(
-				{ error: 'Referral already exists' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Referral already exists' }, { status: 400 })
 		}
 
 		// Create referral record in DB
@@ -142,11 +129,8 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (error) {
-			console.error('Error creating referral:', error)
-			return NextResponse.json(
-				{ error: 'Failed to create referral' },
-				{ status: 500 },
-			)
+			logger.error('Error creating referral:', error)
+			return NextResponse.json({ error: 'Failed to create referral' }, { status: 500 })
 		}
 
 		// Update or create referrer statistics
@@ -176,8 +160,7 @@ export async function POST(req: NextRequest) {
 		// ---- On-chain: create_referral ----
 		let contractResult: { success: boolean; error?: string } | null = null
 		const referralContractAddress =
-			process.env.REFERRAL_CONTRACT_ADDRESS ||
-			process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
+			process.env.REFERRAL_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
 
 		if (referralContractAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			// Resolve both addresses in parallel
@@ -186,32 +169,23 @@ export async function POST(req: NextRequest) {
 				resolveUserStellarAddress(supabase, referred_id),
 			])
 
-
 			if (referrerAddress && referredAddress) {
 				try {
 					const contractService = new GamificationContractService()
-					contractResult = await contractService.createReferral(
-						referralContractAddress,
-						{ referrerAddress, referredAddress },
-					)
+					contractResult = await contractService.createReferral(referralContractAddress, {
+						referrerAddress,
+						referredAddress,
+					})
 
 					if (!contractResult.success) {
-						console.error(
-							'[Referral API] On-chain create_referral failed:',
-							contractResult.error,
-						)
+						logger.error('[Referral API] On-chain create_referral failed:', contractResult.error)
 					} else {
 					}
 				} catch (err) {
-					console.error(
-						'[Referral API] Error calling create_referral on-chain:',
-						err,
-					)
+					logger.error('[Referral API] Error calling create_referral on-chain:', err)
 				}
 			} else {
-				console.warn(
-					'[Referral API] Skipping on-chain create_referral — missing Stellar addresses',
-				)
+				logger.warn('[Referral API] Skipping on-chain create_referral — missing Stellar addresses')
 			}
 		}
 
@@ -220,10 +194,7 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Error in POST /api/referrals:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in POST /api/referrals:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

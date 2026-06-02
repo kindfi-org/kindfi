@@ -3,20 +3,27 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import Autoplay from 'embla-carousel-autoplay'
 import { motion } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
-import {
-	Carousel,
-	CarouselContent,
-	CarouselItem,
-} from '~/components/base/carousel'
+import { Carousel, CarouselContent, CarouselItem } from '~/components/base/carousel'
 import { CategoryPills } from '~/components/sections/home/category-pills'
 import { ProjectCardGrid } from '~/components/sections/projects/cards'
 import { ProjectCardGridSkeleton } from '~/components/sections/projects/skeletons'
-import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 import { CTAButtons } from '~/components/shared/cta-buttons'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useI18n } from '~/lib/i18n'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
+
+const WaitlistModal = dynamic(
+	() =>
+		import('~/components/sections/waitlist/waitlist-modal').then((mod) => ({
+			default: mod.WaitlistModal,
+		})),
+	{
+		loading: () => null,
+		ssr: false,
+	},
+)
 
 const fadeUp = (delay = 0) => ({
 	initial: { opacity: 0, y: 20 },
@@ -54,18 +61,13 @@ export function HighlightedProjects() {
 			</div>
 
 			<SectionContainer className="relative">
-				<motion.header
-					{...fadeUp(0)}
-					className="mx-auto mb-10 max-w-3xl text-center sm:mb-12"
-				>
+				<motion.header {...fadeUp(0)} className="mx-auto mb-10 max-w-3xl text-center sm:mb-12">
 					<p className="mb-4 text-[11px] font-medium uppercase tracking-[0.2em] text-emerald-700/80">
 						{t('home.highlightedProjectsEyebrow')}
 					</p>
 					<h2 className="text-balance text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
 						{t('home.highlightedProjectsTitle')}{' '}
-						<span className="gradient-text">
-							{t('home.highlightedProjectsTitleHighlight')}
-						</span>
+						<span className="gradient-text">{t('home.highlightedProjectsTitleHighlight')}</span>
 					</h2>
 					<p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
 						{t('home.highlightedProjectsSubtitle')}

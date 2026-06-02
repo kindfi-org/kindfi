@@ -97,10 +97,7 @@ describe('Redis rate limiting infrastructure', () => {
 		await Promise.all([redis.del(client1Key), redis.del(client2Key)])
 
 		// Set different values for each client
-		await Promise.all([
-			redis.setex(client1Key, 900, 3),
-			redis.setex(client2Key, 900, 1),
-		])
+		await Promise.all([redis.setex(client1Key, 900, 3), redis.setex(client2Key, 900, 1)])
 
 		// Verify values are independent
 		const [client1Count, client2Count] = await Promise.all([

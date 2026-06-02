@@ -1,9 +1,5 @@
 import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
-import {
-	dehydrate,
-	HydrationBoundary,
-	QueryClient,
-} from '@tanstack/react-query'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { AdminFoundationsList } from '~/components/sections/admin/admin-foundations-list'
 import { getAllFoundations } from '~/lib/queries/foundations/get-all-foundations'
 

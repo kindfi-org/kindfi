@@ -2,17 +2,13 @@ import { Globe, Heart } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { PrimaryCard } from '~/components/cards/primary-card'
-import {
-	comments,
-	dataSupporters,
-} from '~/lib/mock-data/project/mock-project-side-panel'
+import { comments, dataSupporters } from '~/lib/mock-data/project/mock-project-side-panel'
 import { Supporter } from '../supporter'
 import { TitleCardDetail } from '../title-card-detail'
 
 export function Community() {
 	const dataSupportersMaxToShow = dataSupporters.slice(0, 5)
-	const supportersOverflow =
-		dataSupporters.length - dataSupportersMaxToShow.length
+	const supportersOverflow = dataSupporters.length - dataSupportersMaxToShow.length
 
 	return (
 		<PrimaryCard className="space-y-4">
@@ -21,10 +17,7 @@ export function Community() {
 			<div className="flex items-center gap-2 mt-1 mb-3">
 				<div>
 					{dataSupportersMaxToShow.map((item, index) => (
-						<Supporter
-							key={`${item + index}`}
-							offSet={index > 0 ? '-ml-3' : '0'}
-						/>
+						<Supporter key={`${item + index}`} offSet={index > 0 ? '-ml-3' : '0'} />
 					))}
 				</div>
 				{supportersOverflow > 1 ? (

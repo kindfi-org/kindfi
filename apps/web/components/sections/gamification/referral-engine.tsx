@@ -8,12 +8,7 @@ import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import {
 	Dialog,
 	DialogContent,
@@ -164,11 +159,7 @@ export function ReferralEngine() {
 						<code className="flex-1 px-4 py-3 bg-white rounded-lg border-2 border-primary/20 font-mono text-lg font-bold">
 							{referralCode}
 						</code>
-						<Button
-							onClick={handleCopyReferralCode}
-							variant="outline"
-							size="sm"
-						>
+						<Button onClick={handleCopyReferralCode} variant="outline" size="sm">
 							<Copy className="h-4 w-4 mr-2" />
 							Copy
 						</Button>
@@ -259,11 +250,7 @@ export function ReferralEngine() {
 					<CardContent>
 						<div className="space-y-3">
 							{referrals.map((referral, index) => (
-								<ReferralItem
-									key={referral.id}
-									referral={referral}
-									index={index}
-								/>
+								<ReferralItem key={referral.id} referral={referral} index={index} />
 							))}
 						</div>
 					</CardContent>
@@ -275,9 +262,7 @@ export function ReferralEngine() {
 					<CardContent className="py-12 text-center text-muted-foreground">
 						<Share2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
 						<p className="font-medium">No referrals yet</p>
-						<p className="text-sm mt-2">
-							Share your referral code to start earning rewards!
-						</p>
+						<p className="text-sm mt-2">Share your referral code to start earning rewards!</p>
 					</CardContent>
 				</Card>
 			)}
@@ -326,13 +311,7 @@ function StatCard({
 	)
 }
 
-function ReferralItem({
-	referral,
-	index,
-}: {
-	referral: Referral
-	index: number
-}) {
+function ReferralItem({ referral, index }: { referral: Referral; index: number }) {
 	const statusColors: Record<string, string> = {
 		pending: 'bg-gray-100 text-gray-600',
 		onboarded: 'bg-blue-100 text-blue-600',
@@ -359,18 +338,14 @@ function ReferralItem({
 					<Users className="h-4 w-4 text-primary" />
 				</div>
 				<div className="flex-1">
-					<p className="font-medium text-sm">
-						Referral #{referral.id.slice(0, 8)}
-					</p>
+					<p className="font-medium text-sm">Referral #{referral.id.slice(0, 8)}</p>
 					<p className="text-xs text-muted-foreground">
 						Joined {new Date(referral.created_at).toLocaleDateString()}
 					</p>
 				</div>
 			</div>
 			<div className="flex items-center gap-3">
-				<Badge className={statusColors[referral.status]}>
-					{statusLabels[referral.status]}
-				</Badge>
+				<Badge className={statusColors[referral.status]}>{statusLabels[referral.status]}</Badge>
 				{referral.total_donations > 0 && (
 					<span className="text-sm font-medium">
 						{referral.total_donations} donation

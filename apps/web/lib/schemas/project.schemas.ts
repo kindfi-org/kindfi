@@ -61,10 +61,22 @@ export const projectSlugParamSchema = z.object({
 
 export const teamMemberCreateSchema = z.object({
 	projectId: z.string().uuid('Project ID is required'),
-	fullName: z.string().min(1, 'Full name is required').transform((s) => s.trim()),
-	roleTitle: z.string().min(1, 'Role title is required').transform((s) => s.trim()),
-	bio: z.string().optional().transform((s) => s?.trim() || undefined),
-	photoUrl: z.string().optional().transform((s) => s?.trim() || undefined),
+	fullName: z
+		.string()
+		.min(1, 'Full name is required')
+		.transform((s) => s.trim()),
+	roleTitle: z
+		.string()
+		.min(1, 'Role title is required')
+		.transform((s) => s.trim()),
+	bio: z
+		.string()
+		.optional()
+		.transform((s) => s?.trim() || undefined),
+	photoUrl: z
+		.string()
+		.optional()
+		.transform((s) => s?.trim() || undefined),
 	yearsInvolved: z.number().optional(),
 })
 
@@ -85,15 +97,19 @@ export const teamMemberDeleteQuerySchema = z.object({
 })
 
 const highlightItemSchema = z.object({
-	title: z.string().min(1, 'Title is required').transform((s) => s.trim()),
-	description: z.string().min(1, 'Description is required').transform((s) => s.trim()),
+	title: z
+		.string()
+		.min(1, 'Title is required')
+		.transform((s) => s.trim()),
+	description: z
+		.string()
+		.min(1, 'Description is required')
+		.transform((s) => s.trim()),
 })
 
 export const highlightsUpdateSchema = z.object({
 	projectId: z.string().uuid('Project ID is required'),
-	highlights: z
-		.array(highlightItemSchema)
-		.min(2, 'At least 2 highlights are required'),
+	highlights: z.array(highlightItemSchema).min(2, 'At least 2 highlights are required'),
 })
 
 export const projectMemberUpdateFormSchema = z
@@ -101,10 +117,7 @@ export const projectMemberUpdateFormSchema = z
 		projectId: z.string().uuid('Project ID is required'),
 		memberId: z.string().uuid('Member ID is required'),
 		role: z
-			.union([
-				z.enum(['admin', 'editor', 'advisor', 'community', 'core', 'others']),
-				z.literal(''),
-			])
+			.union([z.enum(['admin', 'editor', 'advisor', 'community', 'core', 'others']), z.literal('')])
 			.optional()
 			.transform((v) => (v === '' ? undefined : v)),
 		title: z.string().nullable().optional(),

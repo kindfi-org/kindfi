@@ -1,9 +1,6 @@
 import type { AxiosRequestConfig, Method } from 'axios'
 import { httpEscrow } from '~/lib/axios/http'
-import type {
-	EscrowEndpoint,
-	TCreateEscrowRequest,
-} from '~/lib/types/escrow/escrow-endpoint.types'
+import type { EscrowEndpoint, TCreateEscrowRequest } from '~/lib/types/escrow/escrow-endpoint.types'
 import type { EscrowRequestResponse } from '~/lib/types/escrow/escrow-response.types'
 import { getEndpoint } from './get-endpoint'
 
@@ -23,8 +20,7 @@ export async function createEscrowRequest<T extends EscrowEndpoint>(
 	}
 
 	try {
-		const axiosResponse =
-			await httpEscrow.request<EscrowRequestResponse>(config)
+		const axiosResponse = await httpEscrow.request<EscrowRequestResponse>(config)
 		response = axiosResponse.data
 	} catch (err) {
 		error = (err as Error).message

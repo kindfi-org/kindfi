@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	createGovernanceRoundSchema,
@@ -47,11 +48,8 @@ export async function GET(req: NextRequest) {
 		const { data: rounds, error } = await query
 
 		if (error) {
-			console.error('Error fetching governance rounds:', error)
-			return NextResponse.json(
-				{ error: 'Failed to fetch rounds' },
-				{ status: 500 },
-			)
+			logger.error('Error fetching governance rounds:', error)
+			return NextResponse.json({ error: 'Failed to fetch rounds' }, { status: 500 })
 		}
 
 		// For each round, fetch aggregated vote weights per option
@@ -74,13 +72,11 @@ export async function GET(req: NextRequest) {
 					}
 				}
 
-				const enrichedOptions = (round.options ?? []).map(
-					(opt: { id: string }) => ({
-						...opt,
-						weighted_upvotes: weightMap[opt.id]?.up ?? 0,
-						weighted_downvotes: weightMap[opt.id]?.down ?? 0,
-					}),
-				)
+				const enrichedOptions = (round.options ?? []).map((opt: { id: string }) => ({
+					...opt,
+					weighted_upvotes: weightMap[opt.id]?.up ?? 0,
+					weighted_downvotes: weightMap[opt.id]?.down ?? 0,
+				}))
 
 				return { ...round, options: enrichedOptions }
 			}),
@@ -88,11 +84,8 @@ export async function GET(req: NextRequest) {
 
 		return NextResponse.json({ success: true, data: enrichedRounds })
 	} catch (error) {
-		console.error('Error in GET /api/governance/rounds:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in GET /api/governance/rounds:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 
@@ -132,8 +125,7 @@ export async function POST(req: NextRequest) {
 		const endsAt = new Date(roundPayload.endsAt)
 		const now = new Date()
 
-		const status =
-			endsAt < now ? 'ended' : startsAt <= now ? 'active' : 'upcoming'
+		const status = endsAt < now ? 'ended' : startsAt <= now ? 'active' : 'upcoming'
 
 		const { data: round, error: roundError } = await supabase
 			.from('governance_rounds')
@@ -151,11 +143,8 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (roundError || !round) {
-			console.error('Error creating governance round:', roundError)
-			return NextResponse.json(
-				{ error: 'Failed to create round' },
-				{ status: 500 },
-			)
+			logger.error('Error creating governance round:', roundError)
+			return NextResponse.json({ error: 'Failed to create round' }, { status: 500 })
 		}
 
 		// Insert options if provided
@@ -174,7 +163,7 @@ export async function POST(req: NextRequest) {
 				)
 				.select('id, title')
 			if (optError) {
-				console.error('Error inserting options:', optError)
+				logger.error('Error inserting options:', optError)
 			} else {
 				insertedOptions.push(...(opts ?? []))
 			}
@@ -195,7 +184,7 @@ export async function POST(req: NextRequest) {
 			})
 
 			if (!roundResult.success || roundResult.roundId === undefined) {
-				console.warn('[Governance] create_round failed:', roundResult.error)
+				logger.warn('[Governance] create_round failed:', roundResult.error)
 			} else {
 				contractRoundId = roundResult.roundId
 
@@ -215,12 +204,12 @@ export async function POST(req: NextRequest) {
 							.update({ contract_option_id: optResult.optionId })
 							.eq('id', opt.id)
 					} else {
-						console.warn('[Governance] add_option failed:', optResult.error)
+						logger.warn('[Governance] add_option failed:', optResult.error)
 					}
 				}
 			}
 		} catch (err) {
-			console.error('[Governance] on-chain recording error:', err)
+			logger.error('[Governance] on-chain recording error:', err)
 		}
 
 		return NextResponse.json(
@@ -232,10 +221,7 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Error in POST /api/governance/rounds:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in POST /api/governance/rounds:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

@@ -18,8 +18,7 @@ export default async function FoundationCampaignsPage({
 				<div className="text-center py-12">
 					<h2 className="text-2xl font-bold mb-2">Foundation Not Found</h2>
 					<p className="text-muted-foreground">
-						The foundation you&apos;re looking for doesn&apos;t exist or has
-						been removed.
+						The foundation you&apos;re looking for doesn&apos;t exist or has been removed.
 					</p>
 				</div>
 			</ManagePageShell>
@@ -28,10 +27,7 @@ export default async function FoundationCampaignsPage({
 
 	return (
 		<ManagePageShell>
-			<FoundationCampaignsWrapper
-				foundationSlug={slug}
-				foundationId={foundation.id}
-			/>
+			<FoundationCampaignsWrapper foundationSlug={slug} foundationId={foundation.id} />
 		</ManagePageShell>
 	)
 }

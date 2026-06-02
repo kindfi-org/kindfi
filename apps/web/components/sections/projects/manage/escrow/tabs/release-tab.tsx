@@ -8,14 +8,9 @@ import type {
 import { AlertCircle, Loader2, Send } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Label } from '~/components/base/label'
 import {
 	Select,
@@ -66,16 +61,11 @@ export function ReleaseTab({
 				escrowType,
 			)
 
-			if (
-				releaseResponse.status !== 'SUCCESS' ||
-				!releaseResponse.unsignedTransaction
-			) {
+			if (releaseResponse.status !== 'SUCCESS' || !releaseResponse.unsignedTransaction) {
 				throw new Error('Failed to prepare release transaction')
 			}
 
-			const signedXdr = await signTrustlessTransaction(
-				releaseResponse.unsignedTransaction,
-			)
+			const signedXdr = await signTrustlessTransaction(releaseResponse.unsignedTransaction)
 			const sendResult = await sendTransaction(signedXdr)
 			if (sendResult?.status !== 'SUCCESS') {
 				throw new Error('Transaction failed')
@@ -84,9 +74,8 @@ export function ReleaseTab({
 			toast.success('Funds released successfully!')
 			onSuccess()
 		} catch (error) {
-			console.error(error)
-			const errorMessage =
-				error instanceof Error ? error.message : 'Failed to release funds'
+			logger.error(error)
+			const errorMessage = error instanceof Error ? error.message : 'Failed to release funds'
 			toast.error(errorMessage)
 		} finally {
 			setIsProcessing(false)
@@ -137,9 +126,7 @@ export function ReleaseTab({
 					<div className="flex items-start gap-3">
 						<AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
 						<div className="space-y-1">
-							<p className="font-medium text-amber-900 dark:text-amber-100">
-								Important
-							</p>
+							<p className="font-medium text-amber-900 dark:text-amber-100">Important</p>
 							<p className="text-sm text-amber-800 dark:text-amber-200">
 								{isSingleRelease
 									? 'This will release all funds from the escrow. Make sure all milestones are approved before proceeding.'
@@ -149,12 +136,7 @@ export function ReleaseTab({
 					</div>
 				</div>
 
-				<Button
-					onClick={handleReleaseFunds}
-					disabled={isProcessing}
-					className="w-full"
-					size="lg"
-				>
+				<Button onClick={handleReleaseFunds} disabled={isProcessing} className="w-full" size="lg">
 					{isProcessing ? (
 						<>
 							<Loader2 className="w-4 h-4 mr-2 animate-spin" />

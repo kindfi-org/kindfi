@@ -8,6 +8,7 @@ import type { User } from 'next-auth'
 import { signOut } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { Avatar, AvatarFallback } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
@@ -15,13 +16,7 @@ import { useI18n } from '~/lib/i18n/context'
 import { cn, getAvatarFallback } from '~/lib/utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 
-const WalletCopyButton = ({
-	address,
-	className,
-}: {
-	address: string
-	className?: string
-}) => {
+const WalletCopyButton = ({ address, className }: { address: string; className?: string }) => {
 	const explorerUrl = getStellarExplorerUrl(address)
 
 	const start = address.substring(0, 6)
@@ -31,9 +26,7 @@ const WalletCopyButton = ({
 		<Button
 			asChild
 			variant="outline"
-			className={['flex w-full justify-between', className]
-				.filter(Boolean)
-				.join(' ')}
+			className={['flex w-full justify-between', className].filter(Boolean).join(' ')}
 		>
 			<a
 				href={explorerUrl}
@@ -62,9 +55,7 @@ export const MobileNavigation = () => {
 			return pathname === '/projects' || pathname?.startsWith('/projects/')
 		}
 		if (path === '/foundations') {
-			return (
-				pathname === '/foundations' || pathname?.startsWith('/foundations/')
-			)
+			return pathname === '/foundations' || pathname?.startsWith('/foundations/')
 		}
 		if (path === '/about') {
 			return pathname === '/about'
@@ -154,21 +145,21 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 			try {
 				disconnect()
 			} catch (error) {
-				console.error('Error disconnecting wallet:', error)
+				logger.error('Error disconnecting wallet:', error)
 			}
 
 			try {
 				const supabase = createSupabaseBrowserClient()
 				await supabase.auth.signOut()
 			} catch (error) {
-				console.error('Error signing out from Supabase:', error)
+				logger.error('Error signing out from Supabase:', error)
 			}
 
 			await signOut({
 				callbackUrl: '/sign-in?success=Successfully signed out',
 			})
 		} catch (error) {
-			console.error('Error signing out:', error)
+			logger.error('Error signing out:', error)
 			toast.error(t('auth.signOutError'))
 			router.push('/')
 			setIsSigningOut(false)
@@ -184,12 +175,8 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 					</AvatarFallback>
 				</Avatar>
 				<div className="flex flex-col space-y-0.5 min-w-0 flex-1">
-					<p className="text-sm font-semibold leading-none truncate">
-						{user.name || user.email}
-					</p>
-					<p className="text-xs text-muted-foreground leading-none truncate">
-						{user.email}
-					</p>
+					<p className="text-sm font-semibold leading-none truncate">{user.name || user.email}</p>
+					<p className="text-xs text-muted-foreground leading-none truncate">{user.email}</p>
 				</div>
 				{user.email?.split('@')[0] && (
 					<span className="h-2.5 w-2.5 rounded-full bg-green-500 shrink-0">

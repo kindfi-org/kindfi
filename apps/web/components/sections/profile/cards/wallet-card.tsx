@@ -16,8 +16,7 @@ interface WalletCardProps {
 	onDisconnectExternal?: () => void
 }
 
-const truncateAddress = (address: string) =>
-	`${address.slice(0, 6)}...${address.slice(-6)}`
+const truncateAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-6)}`
 
 export function WalletCard({
 	smartAccountAddress,
@@ -36,9 +35,7 @@ export function WalletCard({
 	}, [])
 
 	const connectedExternalAddress =
-		isMounted && isExternalConnected && externalWalletAddress
-			? externalWalletAddress
-			: null
+		isMounted && isExternalConnected && externalWalletAddress ? externalWalletAddress : null
 
 	const handleCopy = async (address: string, type: 'smart' | 'external') => {
 		try {
@@ -64,12 +61,8 @@ export function WalletCard({
 						<Wallet className="h-5 w-5" />
 					</div>
 					<div>
-						<h3 className="text-base font-semibold text-gray-900">
-							{t('profile.walletsTitle')}
-						</h3>
-						<p className="text-sm text-muted-foreground">
-							{t('profile.walletsSubtitle')}
-						</p>
+						<h3 className="text-base font-semibold text-gray-900">{t('profile.walletsTitle')}</h3>
+						<p className="text-sm text-muted-foreground">{t('profile.walletsSubtitle')}</p>
 					</div>
 				</div>
 				<Badge className="rounded-full bg-emerald-50 text-emerald-800 hover:bg-emerald-50">
@@ -120,9 +113,7 @@ export function WalletCard({
 									variant="outline"
 									size="sm"
 									className="flex-1 rounded-full"
-									onClick={() =>
-										handleCopy(connectedExternalAddress, 'external')
-									}
+									onClick={() => handleCopy(connectedExternalAddress, 'external')}
 								>
 									<Copy className="mr-2 h-3.5 w-3.5" />
 									{t('profile.copyAddress')}

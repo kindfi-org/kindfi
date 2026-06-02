@@ -12,8 +12,11 @@ export function EscrowAdminPanel({
 	projectDescription,
 	escrowType,
 }: EscrowAdminPanelProps) {
-	const { suggestedTitle, suggestedEngagementId, suggestedDescription } =
-		useProjectDefaults({ projectId, projectTitle, projectDescription })
+	const { suggestedTitle, suggestedEngagementId, suggestedDescription } = useProjectDefaults({
+		projectId,
+		projectTitle,
+		projectDescription,
+	})
 
 	return (
 		<EscrowFormProvider
@@ -27,10 +30,7 @@ export function EscrowAdminPanel({
 				suggestedDescription,
 			}}
 		>
-			<EscrowAdminPanelContent
-				projectId={projectId}
-				projectSlug={projectSlug}
-			/>
+			<EscrowAdminPanelContent projectId={projectId} projectSlug={projectSlug} />
 		</EscrowFormProvider>
 	)
 }

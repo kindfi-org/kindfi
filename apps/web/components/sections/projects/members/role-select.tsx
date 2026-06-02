@@ -12,11 +12,7 @@ import {
 	CommandItem,
 	CommandList,
 } from '~/components/base/command'
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '~/components/base/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/base/popover'
 import { cn } from '~/lib/utils'
 import { memberRole } from '~/lib/utils/member-role'
 import { RoleBadge } from './role-badge'
@@ -66,17 +62,12 @@ export function RoleSelect({
 				</Button>
 			</PopoverTrigger>
 
-			<PopoverContent
-				className="w-[--radix-popover-trigger-width] p-0"
-				align="start"
-			>
-				<Command id={listboxId}  role="listbox">
+			<PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+				<Command id={listboxId} role="listbox">
 					<CommandEmpty>No role found.</CommandEmpty>
 					<CommandList>
 						<CommandGroup>
-							{(
-								Object.keys(memberRole) as Array<Enums<'project_member_role'>>
-							).map((roleKey) => (
+							{(Object.keys(memberRole) as Array<Enums<'project_member_role'>>).map((roleKey) => (
 								<CommandItem
 									key={roleKey}
 									value={roleKey}
@@ -92,23 +83,14 @@ export function RoleSelect({
 										<div className="flex items-center gap-2">
 											<RoleBadge role={roleKey} />
 
-											{role === roleKey && (
-												<Check aria-hidden className="h-4 w-4 text-primary" />
-											)}
+											{role === roleKey && <Check aria-hidden className="h-4 w-4 text-primary" />}
 										</div>
 
-										{showDescription &&
-											descriptions?.[
-												roleKey as Enums<'project_member_role'>
-											] && (
-												<p className="text-sm text-muted-foreground">
-													{
-														descriptions[
-															roleKey as Enums<'project_member_role'>
-														]
-													}
-												</p>
-											)}
+										{showDescription && descriptions?.[roleKey as Enums<'project_member_role'>] && (
+											<p className="text-sm text-muted-foreground">
+												{descriptions[roleKey as Enums<'project_member_role'>]}
+											</p>
+										)}
 									</div>
 								</CommandItem>
 							))}

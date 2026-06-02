@@ -1,5 +1,6 @@
 import { supabase } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { waitlistSchema } from '~/lib/schemas/waitlist.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -20,16 +21,8 @@ export async function POST(req: Request) {
 			return validation.response
 		}
 
-		const {
-			name,
-			email,
-			role,
-			projectName,
-			projectDescription,
-			location,
-			source,
-			consent,
-		} = validation.data
+		const { name, email, role, projectName, projectDescription, location, source, consent } =
+			validation.data
 
 		const insertData = {
 			name,
@@ -49,7 +42,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (error) {
-			console.error('Waitlist insert failed:', error)
+			logger.error('Waitlist insert failed:', error)
 			return NextResponse.json(
 				{
 					error: error.message || 'Insert failed',
@@ -63,7 +56,7 @@ export async function POST(req: Request) {
 
 		return NextResponse.json({ success: true, id: data.id }, { status: 201 })
 	} catch (err) {
-		console.error('Waitlist submit error:', err)
+		logger.error('Waitlist submit error:', err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

@@ -67,10 +67,7 @@ export async function saveEscrowContractAction(
 	try {
 		await enforceRateLimit(userId, 'save_escrow_contract')
 	} catch (error) {
-		const failure = toServerActionFailure(
-			error,
-			'Too many requests. Please try again later.',
-		)
+		const failure = toServerActionFailure(error, 'Too many requests. Please try again later.')
 		return { success: false, error: failure.error }
 	}
 
@@ -114,8 +111,7 @@ export async function saveEscrowContractAction(
 				})
 				return {
 					success: false,
-					error:
-						'Forbidden: You do not have permission to update escrow for this project',
+					error: 'Forbidden: You do not have permission to update escrow for this project',
 				}
 			}
 		}
@@ -138,10 +134,7 @@ export async function saveEscrowContractAction(
 			// Schema guarantees every milestone shares the same receiver, so
 			// reading the first is safe and represents the single receiver.
 			receiverAddress = milestones[0].receiver
-		} else if (
-			escrowData.amount !== undefined &&
-			escrowData.receiver !== undefined
-		) {
+		} else if (escrowData.amount !== undefined && escrowData.receiver !== undefined) {
 			totalAmount = escrowData.amount
 			receiverAddress = escrowData.receiver
 		} else {
@@ -152,8 +145,7 @@ export async function saveEscrowContractAction(
 			})
 			return {
 				success: false,
-				error:
-					'Escrow data must include either milestones or single-release amount and receiver',
+				error: 'Escrow data must include either milestones or single-release amount and receiver',
 			}
 		}
 
@@ -234,17 +226,15 @@ export async function saveEscrowContractAction(
 
 		const escrowContractUuid = upsertedEscrow.id
 
-		const { error: upsertError } = await supabase
-			.from('project_escrows')
-			.upsert(
-				{
-					project_id: validated.projectId,
-					escrow_id: escrowContractUuid,
-				},
-				{
-					onConflict: 'project_id',
-				},
-			)
+		const { error: upsertError } = await supabase.from('project_escrows').upsert(
+			{
+				project_id: validated.projectId,
+				escrow_id: escrowContractUuid,
+			},
+			{
+				onConflict: 'project_id',
+			},
+		)
 
 		if (upsertError) {
 			throw new Error(`Failed to save escrow contract: ${upsertError.message}`)
@@ -271,10 +261,7 @@ export async function saveEscrowContractAction(
 		})
 		return {
 			success: false,
-			error:
-				error instanceof Error
-					? error.message
-					: 'Failed to save escrow contract',
+			error: error instanceof Error ? error.message : 'Failed to save escrow contract',
 		}
 	}
 }

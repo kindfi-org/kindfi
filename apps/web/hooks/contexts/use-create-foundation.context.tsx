@@ -21,9 +21,7 @@ interface CreateFoundationContextType {
 	updateFormData: (data: Partial<CreateFoundationFormData>) => void
 }
 
-const CreateFoundationContext = createContext<
-	CreateFoundationContextType | undefined
->(undefined)
+const CreateFoundationContext = createContext<CreateFoundationContextType | undefined>(undefined)
 
 const initialFormData: CreateFoundationFormData = {
 	name: '',
@@ -38,13 +36,8 @@ const initialFormData: CreateFoundationFormData = {
 	coverImageUrl: '',
 }
 
-export function CreateFoundationProvider({
-	children,
-}: {
-	children: ReactNode
-}) {
-	const [formData, setFormData] =
-		useSetState<CreateFoundationFormData>(initialFormData)
+export function CreateFoundationProvider({ children }: { children: ReactNode }) {
+	const [formData, setFormData] = useSetState<CreateFoundationFormData>(initialFormData)
 
 	const updateFormData = (data: Partial<CreateFoundationFormData>) => {
 		setFormData((prev) => ({ ...prev, ...data }))
@@ -65,9 +58,7 @@ export function CreateFoundationProvider({
 export function useCreateFoundation() {
 	const context = useContext(CreateFoundationContext)
 	if (context === undefined) {
-		throw new Error(
-			'useCreateFoundation must be used within a CreateFoundationProvider',
-		)
+		throw new Error('useCreateFoundation must be used within a CreateFoundationProvider')
 	}
 	return context
 }

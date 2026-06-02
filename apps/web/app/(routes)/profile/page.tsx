@@ -1,10 +1,22 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { mapDiditStatusToKYC } from '~/lib/services/didit'
+
+export const metadata: Metadata = {
+	title: 'My Profile | KindFi',
+	description:
+		'Manage your KindFi profile, view your donation history, and track your social impact contributions.',
+	robots: {
+		index: false,
+		follow: false,
+	},
+}
 
 interface ProfilePageProps {
 	searchParams: Promise<{
@@ -59,9 +71,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
 		if (kycRecord) {
 			const notes =
-				typeof kycRecord.notes === 'string'
-					? JSON.parse(kycRecord.notes)
-					: kycRecord.notes || {}
+				typeof kycRecord.notes === 'string' ? JSON.parse(kycRecord.notes) : kycRecord.notes || {}
 
 			const updateResult = await supabaseServiceRole
 				.from('kyc_reviews')
@@ -79,7 +89,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 				.select()
 
 			if (updateResult.error) {
-				console.error(' Failed to update KYC record:', updateResult.error)
+				logger.error(' Failed to update KYC record:', updateResult.error)
 			} else {
 			}
 		} else {
@@ -106,7 +116,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 		.single()
 
 	if (error || !profileData) {
-		console.error('⚠️ ProfilePage profile fetch error:', error)
+		logger.error('⚠️ ProfilePage profile fetch error:', error)
 		redirect('/sign-in')
 	}
 
@@ -118,9 +128,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 				created_at: profileData.created_at,
 				profile: profileData,
 			}}
-			smartAccountAddress={
-				session.device?.address || session.user.device?.address || null
-			}
+			smartAccountAddress={session.device?.address || session.user.device?.address || null}
 			kycCompleted={kycCompleted}
 		/>
 	)

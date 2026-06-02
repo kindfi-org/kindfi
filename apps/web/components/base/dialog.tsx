@@ -72,9 +72,7 @@ const DialogOverlay = React.forwardRef<
 			ref={ref}
 			className={cn(
 				'fixed inset-0 z-50 backdrop-blur-[1px]',
-				reducedMotion
-					? 'bg-black/80'
-					: animations.fadeAndAnimateAndOverlay.inOut,
+				reducedMotion ? 'bg-black/80' : animations.fadeAndAnimateAndOverlay.inOut,
 				className,
 			)}
 			{...props}
@@ -145,29 +143,17 @@ const DialogContent = React.forwardRef<
 })
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
-const DialogHeader = ({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
 	<div
-		className={cn(
-			'flex flex-col space-y-1.5 text-center sm:text-left mt-10',
-			className,
-		)}
+		className={cn('flex flex-col space-y-1.5 text-center sm:text-left mt-10', className)}
 		{...props}
 	/>
 )
 DialogHeader.displayName = 'DialogHeader'
 
-const DialogFooter = ({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
 	<div
-		className={cn(
-			'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2',
-			className,
-		)}
+		className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
 		{...props}
 	/>
 )
@@ -191,10 +177,7 @@ const DialogTitle = React.forwardRef<
 			data-dialog-title=""
 			id={id ?? generatedId}
 			ref={ref}
-			className={cn(
-				'text-lg font-semibold leading-none tracking-tight',
-				className,
-			)}
+			className={cn('text-lg font-semibold leading-none tracking-tight', className)}
 			{...props}
 		/>
 	)

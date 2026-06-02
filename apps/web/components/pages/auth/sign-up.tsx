@@ -9,32 +9,29 @@ import { signUpAction } from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import { CSRFTokenField } from '~/components/base/form'
 import { Input } from '~/components/base/input'
-import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { FormAlert } from '~/components/shared/form/form-alert'
 import { FormFieldGroup } from '~/components/shared/form/form-field-group'
 import { FormShell } from '~/components/shared/form/form-shell'
+import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { useFormValidation } from '~/hooks/use-form-validation'
-import { useI18n } from '~/lib/i18n'
 import { formLayoutClasses } from '~/lib/form/form-styles'
+import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 
 export function SignupComponent() {
 	const router = useRouter()
 	const { t } = useI18n()
-	const [{ email, isSubmitting, error, success }, setSignUpState] = useSetState(
-		{
-			email: '',
-			isSubmitting: false,
-			error: '',
-			success: '',
-		},
-	)
+	const [{ email, isSubmitting, error, success }, setSignUpState] = useSetState({
+		email: '',
+		isSubmitting: false,
+		error: '',
+		success: '',
+	})
 
-	const { isEmailInvalid, doesEmailExist, handleValidation, resetValidation } =
-		useFormValidation({
-			email: true,
-		})
+	const { isEmailInvalid, doesEmailExist, handleValidation, resetValidation } = useFormValidation({
+		email: true,
+	})
 
 	const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
 		handleValidation(e as ChangeEvent<HTMLInputElement & { name: 'email' }>)
@@ -91,10 +88,7 @@ export function SignupComponent() {
 				footer={
 					<div className="w-full text-center text-sm text-muted-foreground">
 						{t('auth.alreadyHaveAccount')}{' '}
-						<Link
-							href="/sign-in"
-							className="font-medium text-primary hover:underline"
-						>
+						<Link href="/sign-in" className="font-medium text-primary hover:underline">
 							{t('nav.signIn')}
 						</Link>
 					</div>
@@ -109,11 +103,7 @@ export function SignupComponent() {
 					<FormFieldGroup
 						id="email"
 						label={t('auth.email')}
-						error={
-							isEmailInvalid
-								? t('auth.invalidEmail')
-								: emailExistsError
-						}
+						error={isEmailInvalid ? t('auth.invalidEmail') : emailExistsError}
 						required
 					>
 						<div className="relative">
@@ -147,8 +137,7 @@ export function SignupComponent() {
 							t('auth.creatingAccount')
 						) : (
 							<>
-								{t('auth.createAccountBtn')}{' '}
-								<UserPlus className="ml-2 h-4 w-4" />
+								{t('auth.createAccountBtn')} <UserPlus className="ml-2 h-4 w-4" />
 							</>
 						)}
 					</Button>

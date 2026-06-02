@@ -6,10 +6,7 @@ import { getProjectQuestions } from './get-project-questions'
 import { getProjectTeam } from './get-project-team'
 import { getProjectUpdates } from './get-project-updates'
 
-export async function getProjectBySlug(
-	client: TypedSupabaseClient,
-	projectSlug: string,
-) {
+export async function getProjectBySlug(client: TypedSupabaseClient, projectSlug: string) {
 	const basicInfo = await getBasicProjectInfoBySlug(client, projectSlug)
 	if (!basicInfo) return null
 

@@ -73,8 +73,7 @@ export function ResourceCard({ resource, className = '' }: ResourceCardProps) {
 						<div className="flex items-center text-gray-600">
 							<Clock className="w-4 h-4 mr-2" />
 							<span className="text-sm">
-								{resource.duration}{' '}
-								{resource.type === 'video' ? 'watch' : 'read'}
+								{resource.duration} {resource.type === 'video' ? 'watch' : 'read'}
 							</span>
 						</div>
 

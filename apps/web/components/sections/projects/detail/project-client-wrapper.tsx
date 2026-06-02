@@ -18,20 +18,14 @@ interface ProjectClientWrapperProps {
 	projectSlug: string
 }
 
-export function ProjectClientWrapper({
-	projectSlug,
-}: ProjectClientWrapperProps) {
+export function ProjectClientWrapper({ projectSlug }: ProjectClientWrapperProps) {
 	const {
 		data: project,
 		isLoading,
 		error,
-	} = useSupabaseQuery(
-		'project',
-		(client) => getProjectBySlug(client, projectSlug),
-		{
-			additionalKeyValues: [projectSlug],
-		},
-	)
+	} = useSupabaseQuery('project', (client) => getProjectBySlug(client, projectSlug), {
+		additionalKeyValues: [projectSlug],
+	})
 
 	if (isLoading) {
 		return (

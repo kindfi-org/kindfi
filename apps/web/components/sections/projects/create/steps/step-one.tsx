@@ -1,10 +1,8 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import {
@@ -19,6 +17,7 @@ import {
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { stepOneSchema } from '~/lib/schemas/create-project.schemas'
 import type { StepOneData } from '~/lib/types/project/create-project.types'
 
@@ -51,7 +50,7 @@ export function StepOne({ onNext }: StepOneProps) {
 			exit={{ opacity: 0, x: -50 }}
 			transition={{ duration: 0.3 }}
 		>
-			<Card >
+			<Card>
 				<CardContent className="pt-6">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -62,15 +61,10 @@ export function StepOne({ onNext }: StepOneProps) {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											What is your project&apos;s title?{' '}
-											<span className="text-destructive">*</span>
+											What is your project&apos;s title? <span className="text-destructive">*</span>
 										</FormLabel>
 										<FormControl>
-											<Input
-												placeholder="Enter your project title"
-												
-												{...field}
-											/>
+											<Input placeholder="Enter your project title" {...field} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -94,8 +88,7 @@ export function StepOne({ onNext }: StepOneProps) {
 											/>
 										</FormControl>
 										<p className="text-sm text-muted-foreground mt-2">
-											Just a quick summary is fine for now. You will be able to
-											edit it later.
+											Just a quick summary is fine for now. You will be able to edit it later.
 										</p>
 										<FormMessage />
 									</FormItem>
@@ -123,9 +116,7 @@ export function StepOne({ onNext }: StepOneProps) {
 													value={field.value ?? ''}
 													onChange={(e) =>
 														field.onChange(
-															e.target.value === ''
-																? undefined
-																: Number(e.target.value),
+															e.target.value === '' ? undefined : Number(e.target.value),
 														)
 													}
 												/>
@@ -157,9 +148,7 @@ export function StepOne({ onNext }: StepOneProps) {
 													value={field.value ?? ''}
 													onChange={(e) =>
 														field.onChange(
-															e.target.value === ''
-																? undefined
-																: Number(e.target.value),
+															e.target.value === '' ? undefined : Number(e.target.value),
 														)
 													}
 												/>
@@ -181,10 +170,7 @@ export function StepOne({ onNext }: StepOneProps) {
 									<ChevronLeft className="h-4 w-4" />
 									Previous
 								</Button>
-								<Button
-									type="submit"
-									className="flex items-center gap-2 gradient-btn text-white"
-								>
+								<Button type="submit" className="flex items-center gap-2 gradient-btn text-white">
 									Next
 									<ChevronRight className="h-4 w-4" />
 								</Button>

@@ -2,17 +2,20 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { Trophy } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from '~/components/base/tabs'
-import { NFTCollection } from './nft-collection'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { QuestEngine } from './quest-engine'
 import { ReferralEngine } from './referral-engine'
 import { StreakTracker } from './streak-tracker'
+
+const NFTCollection = dynamic(
+	() => import('./nft-collection').then((mod) => ({ default: mod.NFTCollection })),
+	{
+		loading: () => null,
+		ssr: false,
+	},
+)
 
 export function GamificationSection() {
 	const [activeTab, setActiveTab] = useState('quests')

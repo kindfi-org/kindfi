@@ -49,12 +49,7 @@ const configItems: NavItem[] = [
 	{ href: '/admin/settings', label: 'Settings', Icon: IoSettingsOutline },
 ]
 
-function NavLink({
-	href,
-	label,
-	Icon,
-	isActive,
-}: NavItem & { isActive: boolean }) {
+function NavLink({ href, label, Icon, isActive }: NavItem & { isActive: boolean }) {
 	return (
 		<Link
 			href={href}
@@ -107,8 +102,7 @@ function NavGroup({
 			<ul className="space-y-0.5">
 				{items.map((item) => {
 					const isActive =
-						pathname === item.href ||
-						(item.href !== '/admin' && pathname?.startsWith(item.href))
+						pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))
 					return (
 						<li key={item.href}>
 							<NavLink {...item} isActive={!!isActive} />

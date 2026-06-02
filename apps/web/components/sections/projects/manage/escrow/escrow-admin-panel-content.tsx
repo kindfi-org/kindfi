@@ -3,14 +3,14 @@
 import { Plus } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { TooltipProvider } from '~/components/base/tooltip'
-import { TrustlessExternalWalletBanner } from './components/trustless-external-wallet-banner'
 import { EscrowBasicFields } from './components/escrow-basic-fields'
 import { EscrowMilestones } from './components/escrow-milestones'
 import { EscrowRoleFields } from './components/escrow-role-fields'
 import { EscrowTypeSelector } from './components/escrow-type-selector'
+import { TrustlessExternalWalletBanner } from './components/trustless-external-wallet-banner'
 import { useEscrowForm } from './context/escrow-form-context'
-import { useEscrowValidation } from './hooks/use-escrow-validation'
 import { useEscrowTransaction } from './hooks/use-escrow-transaction'
+import { useEscrowValidation } from './hooks/use-escrow-validation'
 import { useWalletSync } from './hooks/use-wallet-sync'
 
 interface EscrowAdminPanelContentProps {
@@ -18,10 +18,7 @@ interface EscrowAdminPanelContentProps {
 	projectSlug: string
 }
 
-export function EscrowAdminPanelContent({
-	projectId,
-	projectSlug,
-}: EscrowAdminPanelContentProps) {
+export function EscrowAdminPanelContent({ projectId, projectSlug }: EscrowAdminPanelContentProps) {
 	const { formData } = useEscrowForm()
 
 	useWalletSync()
@@ -40,13 +37,10 @@ export function EscrowAdminPanelContent({
 				<div className="space-y-6">
 					<div className="space-y-2">
 						<div className="flex gap-2 items-center">
-							<h2 className="text-lg font-semibold">
-								Fill in the details of the Escrow
-							</h2>
+							<h2 className="text-lg font-semibold">Fill in the details of the Escrow</h2>
 						</div>
 						<p className="text-sm text-muted-foreground">
-							Fill in the details below to set up a secure and reliable escrow
-							agreement.
+							Fill in the details below to set up a secure and reliable escrow agreement.
 						</p>
 					</div>
 

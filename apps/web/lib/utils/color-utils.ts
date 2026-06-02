@@ -18,10 +18,7 @@ export function getA11yColorMatch(color: string): [string, string] {
 	const MAX_ATTEMPTS = 100
 	let contrastColor = randomHexColor()
 
-	while (
-		!getContrast.isAccessible(newColor, contrastColor) &&
-		attempts < MAX_ATTEMPTS
-	) {
+	while (!getContrast.isAccessible(newColor, contrastColor) && attempts < MAX_ATTEMPTS) {
 		contrastColor = randomHexColor()
 		attempts++
 	}
@@ -55,8 +52,7 @@ export function getContrastRatio(color1: string, color2: string): number {
 		const toLinear = (v: number) =>
 			v <= WCAG_LUMINANCE_THRESHOLD
 				? v / WCAG_LUMINANCE_DIVISOR
-				: ((v + WCAG_LUMINANCE_OFFSET) / WCAG_LUMINANCE_MULTIPLIER) **
-					WCAG_LUMINANCE_POWER
+				: ((v + WCAG_LUMINANCE_OFFSET) / WCAG_LUMINANCE_MULTIPLIER) ** WCAG_LUMINANCE_POWER
 
 		return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
 	}
@@ -80,11 +76,7 @@ export function getContrastTextColor(
 	const contrastWithBlack = getContrastRatio(backgroundColor, '#000000')
 	const contrastWithGray = getContrastRatio(backgroundColor, '#61646B') // text-muted-foreground
 
-	const maxContrast = Math.max(
-		contrastWithWhite,
-		contrastWithBlack,
-		contrastWithGray,
-	)
+	const maxContrast = Math.max(contrastWithWhite, contrastWithBlack, contrastWithGray)
 
 	if (maxContrast === contrastWithWhite) return 'text-white'
 	if (maxContrast === contrastWithBlack) return 'text-black'
@@ -94,9 +86,7 @@ export function getContrastTextColor(
 /**
  * Generate a visually distinct random color using HSL for better distribution
  */
-export function generateDistinctRandomColor(
-	existingColors: string[] = [],
-): string {
+export function generateDistinctRandomColor(existingColors: string[] = []): string {
 	// Use HSL for better color distribution
 	const hue = Math.floor(Math.random() * 360)
 	const saturation = 60 + Math.floor(Math.random() * 30) // 60-90% for vibrant colors

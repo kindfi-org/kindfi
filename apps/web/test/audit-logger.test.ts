@@ -18,9 +18,7 @@ describe('AuditLogger', () => {
 
 	describe('maskAddress', () => {
 		test('masks a standard Stellar address', async () => {
-			const { AuditLogger } = await import(
-				'../lib/services/audit-logger'
-			)
+			const { AuditLogger } = await import('../lib/services/audit-logger')
 			const result = AuditLogger.maskAddress(
 				'GABCDEFGHIJKLMNOPQRSTUVWXYZ234567ABCDEFGHIJKLMNOPQRSTUV',
 			)
@@ -28,29 +26,21 @@ describe('AuditLogger', () => {
 		})
 
 		test('returns short strings unchanged', async () => {
-			const { AuditLogger } = await import(
-				'../lib/services/audit-logger'
-			)
+			const { AuditLogger } = await import('../lib/services/audit-logger')
 			expect(AuditLogger.maskAddress('GABCWXYZ')).toBe('GABCWXYZ')
 			expect(AuditLogger.maskAddress('SHORT')).toBe('SHORT')
 		})
 
 		test('returns empty string unchanged', async () => {
-			const { AuditLogger } = await import(
-				'../lib/services/audit-logger'
-			)
+			const { AuditLogger } = await import('../lib/services/audit-logger')
 			expect(AuditLogger.maskAddress('')).toBe('')
 		})
 	})
 
 	describe('log', () => {
 		test('emits structured JSON to console.info', async () => {
-			const { AuditLogger } = await import(
-				'../lib/services/audit-logger'
-			)
-			const consoleSpy = spyOn(console, 'info').mockImplementation(
-				() => {},
-			)
+			const { AuditLogger } = await import('../lib/services/audit-logger')
+			const consoleSpy = spyOn(console, 'info').mockImplementation(() => {})
 
 			const logger = new AuditLogger()
 			await logger.log({
@@ -74,9 +64,7 @@ describe('AuditLogger', () => {
 		})
 
 		test('calls Supabase insert with correct fields', async () => {
-			const { AuditLogger } = await import(
-				'../lib/services/audit-logger'
-			)
+			const { AuditLogger } = await import('../lib/services/audit-logger')
 			spyOn(console, 'info').mockImplementation(() => {})
 
 			const logger = new AuditLogger()
@@ -108,17 +96,11 @@ describe('AuditLogger', () => {
 		})
 
 		test('does not throw when Supabase insert fails', async () => {
-			const { AuditLogger } = await import(
-				'../lib/services/audit-logger'
-			)
+			const { AuditLogger } = await import('../lib/services/audit-logger')
 			spyOn(console, 'info').mockImplementation(() => {})
-			const errorSpy = spyOn(console, 'error').mockImplementation(
-				() => {},
-			)
+			const errorSpy = spyOn(console, 'error').mockImplementation(() => {})
 
-			mockInsert.mockImplementationOnce(() =>
-				Promise.resolve({ error: new Error('DB down') }),
-			)
+			mockInsert.mockImplementationOnce(() => Promise.resolve({ error: new Error('DB down') }))
 
 			const logger = new AuditLogger()
 			// Should not throw
@@ -138,12 +120,8 @@ describe('AuditLogger', () => {
 		})
 
 		test('includes all fields in the log entry', async () => {
-			const { AuditLogger } = await import(
-				'../lib/services/audit-logger'
-			)
-			const consoleSpy = spyOn(console, 'info').mockImplementation(
-				() => {},
-			)
+			const { AuditLogger } = await import('../lib/services/audit-logger')
+			const consoleSpy = spyOn(console, 'info').mockImplementation(() => {})
 
 			const logger = new AuditLogger()
 			await logger.log({

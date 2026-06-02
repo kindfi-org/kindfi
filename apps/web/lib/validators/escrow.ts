@@ -35,9 +35,7 @@ const validateMilestone = (milestone: Milestone, index: number): string[] => {
 	return errors
 }
 
-export function validateEscrowInitialization(
-	data: EscrowPayload,
-): ValidationResult {
+export function validateEscrowInitialization(data: EscrowPayload): ValidationResult {
 	const errors: string[] = []
 
 	// Validate parties
@@ -64,11 +62,7 @@ export function validateEscrowInitialization(
 	}
 
 	// Validate platform fee
-	if (
-		typeof data.platformFee !== 'number' ||
-		data.platformFee < 0 ||
-		data.platformFee > 100
-	) {
+	if (typeof data.platformFee !== 'number' || data.platformFee < 0 || data.platformFee > 100) {
 		errors.push('Platform fee must be a percentage between 0 and 100')
 	}
 
@@ -117,9 +111,7 @@ export function validateEscrowFunding(data: EscrowFundData): ValidationResult {
 		if (!data.fundParams.transactionType) {
 			errors.push('Transaction type is required.')
 		} else if (
-			!['DEPOSIT', 'RELEASE', 'REFUND', 'DISPUTE', 'FEE'].includes(
-				data.fundParams.transactionType,
-			)
+			!['DEPOSIT', 'RELEASE', 'REFUND', 'DISPUTE', 'FEE'].includes(data.fundParams.transactionType)
 		) {
 			errors.push('Invalid transaction type.')
 		}
@@ -141,19 +133,14 @@ export function validateEscrowFunding(data: EscrowFundData): ValidationResult {
 		}
 
 		// Ensure required fields based on transaction type
-		if (
-			data.fundParams.transactionType === 'RELEASE' &&
-			!data.metadata.recipientAddress?.trim()
-		) {
+		if (data.fundParams.transactionType === 'RELEASE' && !data.metadata.recipientAddress?.trim()) {
 			errors.push('Recipient address is required for RELEASE transactions.')
 		}
 		if (
 			['DISPUTE', 'REFUND'].includes(data.fundParams.transactionType) &&
 			!data.metadata.reason?.trim()
 		) {
-			errors.push(
-				`Reason is required for ${data.fundParams.transactionType} transactions.`,
-			)
+			errors.push(`Reason is required for ${data.fundParams.transactionType} transactions.`)
 		}
 		if (
 			data.fundParams.transactionType === 'FEE' &&
@@ -171,9 +158,7 @@ export function validateEscrowFunding(data: EscrowFundData): ValidationResult {
 	}
 }
 
-export function validateEscrowFundUpdate(
-	data: EscrowFundUpdateData,
-): ValidationResult {
+export function validateEscrowFundUpdate(data: EscrowFundUpdateData): ValidationResult {
 	const errors: string[] = []
 
 	// Validate escrowId
@@ -199,9 +184,7 @@ export function validateEscrowFundUpdate(
 	}
 }
 
-export function validateMilestoneReview(
-	data: MilestoneReviewPayload,
-): ValidationResult {
+export function validateMilestoneReview(data: MilestoneReviewPayload): ValidationResult {
 	const errors: string[] = []
 
 	// Validate milestoneId
@@ -217,11 +200,7 @@ export function validateMilestoneReview(
 	// Validate status
 	if (!data.status) {
 		errors.push('Milestone status is required.')
-	} else if (
-		!['pending', 'approved', 'rejected', 'completed', 'disputed'].includes(
-			data.status,
-		)
-	) {
+	} else if (!['pending', 'approved', 'rejected', 'completed', 'disputed'].includes(data.status)) {
 		errors.push('Invalid milestone status.')
 	}
 
@@ -284,9 +263,7 @@ export function validateDispute(data: DisputePayload): ValidationResult {
 	}
 }
 
-export function validateDisputeResolution(
-	data: DisputeResolutionPayload,
-): ValidationResult {
+export function validateDisputeResolution(data: DisputeResolutionPayload): ValidationResult {
 	const errors: string[] = []
 
 	// Validate disputeId
@@ -317,10 +294,7 @@ export function validateDisputeResolution(
 	}
 
 	// Validate serviceProviderAmount
-	if (
-		!data.serviceProviderAmount ||
-		Number.isNaN(Number(data.serviceProviderAmount))
-	) {
+	if (!data.serviceProviderAmount || Number.isNaN(Number(data.serviceProviderAmount))) {
 		errors.push('Valid service provider amount is required.')
 	}
 
@@ -340,9 +314,7 @@ export function validateDisputeResolution(
 	}
 }
 
-export function validateMediatorAssignment(
-	data: MediatorAssignmentPayload,
-): ValidationResult {
+export function validateMediatorAssignment(data: MediatorAssignmentPayload): ValidationResult {
 	const errors: string[] = []
 
 	// Validate disputeId
@@ -366,9 +338,7 @@ export function validateMediatorAssignment(
 	}
 }
 
-export function validateEvidenceSubmission(
-	data: EvidenceSubmissionPayload,
-): ValidationResult {
+export function validateEvidenceSubmission(data: EvidenceSubmissionPayload): ValidationResult {
 	const errors: string[] = []
 
 	// Validate disputeId
@@ -384,9 +354,7 @@ export function validateEvidenceSubmission(
 	// Validate evidenceType
 	if (!data.evidenceType) {
 		errors.push('Evidence type is required.')
-	} else if (
-		!['DOCUMENT', 'IMAGE', 'VIDEO', 'LINK', 'TEXT'].includes(data.evidenceType)
-	) {
+	} else if (!['DOCUMENT', 'IMAGE', 'VIDEO', 'LINK', 'TEXT'].includes(data.evidenceType)) {
 		errors.push('Invalid evidence type.')
 	}
 

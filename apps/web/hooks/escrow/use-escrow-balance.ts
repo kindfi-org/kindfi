@@ -9,10 +9,7 @@ interface UseEscrowBalanceParams {
 	escrowType?: EscrowType
 }
 
-export function useEscrowBalance({
-	escrowContractAddress,
-	escrowType,
-}: UseEscrowBalanceParams) {
+export function useEscrowBalance({ escrowContractAddress, escrowType }: UseEscrowBalanceParams) {
 	const { getMultipleBalances } = useEscrow()
 	const [balance, setBalance] = useState<number | null>(null)
 	const [isLoading, setIsLoading] = useState(false)

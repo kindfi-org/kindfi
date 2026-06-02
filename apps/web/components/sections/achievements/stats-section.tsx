@@ -1,10 +1,6 @@
 import type { StatsProps } from '~/lib/types'
 
-export function StatsSection({
-	totalNFTs,
-	rareItems,
-	collections,
-}: StatsProps) {
+export function StatsSection({ totalNFTs, rareItems, collections }: StatsProps) {
 	return (
 		<div className="grid grid-cols-3 gap-4 border-t border-border pt-8 mt-8">
 			<div className="text-center">

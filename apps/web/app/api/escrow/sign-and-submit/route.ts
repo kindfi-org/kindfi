@@ -3,8 +3,10 @@ import { TransactionBuilder } from '@stellar/stellar-sdk'
 import { Api, Server } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { AuditLogger } from '~/lib/services/audit-logger'
+import { logger } from '@/lib/logger'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { signAndSubmitSchema } from '~/lib/schemas/escrow-sign.schemas'
+import { AuditLogger } from '~/lib/services/audit-logger'
 import { isSmartAccountAddress } from '~/lib/utils/escrow/trustless-signer'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
@@ -15,7 +17,7 @@ import { validateRequest } from '~/lib/utils/validation'
  * Signs an unsigned transaction XDR from Trustless Work SDK using WebAuthn
  * and submits it to the network
  */
-export async function POST(req: NextRequest) {
+async function signAndSubmitHandler(req: NextRequest) {
 	const auditLogger = new AuditLogger()
 	const correlationId = generateUniqueId('audit-')
 	const startTime = Date.now()
@@ -143,7 +145,7 @@ export async function POST(req: NextRequest) {
 			authEntry: authEntry.toXDR('base64'),
 		})
 	} catch (error) {
-		console.error('Error in sign-and-submit:', error)
+		logger.error('Error in sign-and-submit:', error)
 		await auditLogger.log({
 			correlationId,
 			operation: 'escrow.sign_and_submit',
@@ -162,3 +164,11 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	signAndSubmitHandler,
+)

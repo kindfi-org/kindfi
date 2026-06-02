@@ -3,6 +3,7 @@ import { SupabaseAdapter } from '@auth/supabase-adapter'
 import { appEnvConfig } from '@packages/lib/config'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Adapter, AdapterSession, AdapterUser } from 'next-auth/adapters'
+import { logger } from '@/lib/logger'
 
 interface DeviceData {
 	credential_id: string
@@ -91,7 +92,7 @@ export function KindfiSupabaseAdapter(): Adapter {
 					}),
 				)
 				.catch((err) => {
-					console.error('[Auth] Welcome email error:', err)
+					logger.error('[Auth] Welcome email error:', err)
 				})
 
 			return createdUser
@@ -183,9 +184,7 @@ export function KindfiSupabaseAdapter(): Adapter {
 				// Get the NextAuth user via base adapter (already scoped to next_auth schema)
 				let nextAuthUser: AdapterUser | null = null
 				if (baseAdapter.getUser) {
-					nextAuthUser = await baseAdapter.getUser(
-						deviceData.next_auth_user_id || '',
-					)
+					nextAuthUser = await baseAdapter.getUser(deviceData.next_auth_user_id || '')
 				}
 
 				if (!nextAuthUser) {
@@ -226,9 +225,7 @@ export function KindfiSupabaseAdapter(): Adapter {
 			})
 		},
 
-		async linkAccount(
-			account: AdapterAccount,
-		): Promise<AdapterAccount | null | undefined> {
+		async linkAccount(account: AdapterAccount): Promise<AdapterAccount | null | undefined> {
 			// For WebAuthn provider, we handle the account linking differently
 			if (account.provider === 'webauthn') {
 				// WebAuthn account linking is handled through device registration
@@ -286,9 +283,7 @@ export function KindfiSupabaseAdapter(): Adapter {
 			return result
 		},
 
-		async updateSession(
-			session: Partial<AdapterSession> & Pick<AdapterSession, 'sessionToken'>,
-		) {
+		async updateSession(session: Partial<AdapterSession> & Pick<AdapterSession, 'sessionToken'>) {
 			if (!baseAdapter.updateSession) {
 				return null
 			}
