@@ -3,7 +3,7 @@ import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { Tables, TablesUpdate } from '@services/supabase'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { UserData } from '~/lib/types/project/project-qa.types'
 
 interface UseQARealtimeOptions {
@@ -18,15 +18,15 @@ export const useQARealtime = ({ projectId, effectiveUserId }: UseQARealtimeOptio
 	const [realtimeStatus, setRealtimeStatus] = useState<string | null>(null)
 	const subscriptionRef = useRef<ReturnType<TypedSupabaseClient['channel']> | null>(null)
 
-	const showStatus = (message: string, duration = 3000) => {
+	const showStatus = useCallback((message: string, duration = 3000) => {
 		setRealtimeStatus(message)
 		setTimeout(() => setRealtimeStatus(null), duration)
-	}
+	}, [])
 
-	const flashActivity = (duration = 3000) => {
+	const flashActivity = useCallback((duration = 3000) => {
 		setRealtimeActivity(true)
 		setTimeout(() => setRealtimeActivity(false), duration)
-	}
+	}, [])
 
 	useEffect(() => {
 		const supabase = createSupabaseBrowserClient()
