@@ -5,10 +5,12 @@ import { common } from './common'
 import { community } from './community'
 import { faqs } from './faqs'
 import { footer } from './footer'
+import { foundations } from './foundations'
 import { governancePage } from './governancePage'
 import { home } from './home'
 import { language } from './language'
 import { nav } from './nav'
+import { news } from './news'
 import { profile } from './profile'
 import { projects } from './projects'
 import { user } from './user'
@@ -22,12 +24,14 @@ export const es = {
 	aria,
 	home,
 	projects,
+	foundations,
 	community,
 	faqs,
 	auth,
 	governancePage,
 	profile,
 	about,
+	news,
 	waitlist,
 	footer,
 }

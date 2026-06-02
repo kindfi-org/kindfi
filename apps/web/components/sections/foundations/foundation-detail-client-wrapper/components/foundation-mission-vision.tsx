@@ -28,13 +28,13 @@ export function FoundationMissionVision({
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: shouldReduceMotion ? 0 : 0.1 }}
 				>
-					<Card className="h-full border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+					<Card className="h-full border-slate-200/80 bg-white shadow-sm transition-shadow hover:border-emerald-200/80 hover:shadow-md">
 						<CardContent className="p-6 md:p-8">
 							<div className="mb-4 flex items-center gap-3">
-								<div className="rounded-lg bg-primary/10 p-2">
-									<Target className="h-5 w-5 text-primary" aria-hidden="true" />
+								<div className="rounded-lg bg-emerald-50 p-2">
+									<Target className="h-5 w-5 text-emerald-700" aria-hidden="true" />
 								</div>
-								<h2 className="text-2xl font-bold tracking-tight">Mission</h2>
+								<h2 className="text-2xl font-bold tracking-tight text-slate-900">Mission</h2>
 							</div>
 							<p className="leading-relaxed text-muted-foreground">{foundation.mission}</p>
 						</CardContent>
@@ -47,13 +47,13 @@ export function FoundationMissionVision({
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: shouldReduceMotion ? 0 : 0.2 }}
 				>
-					<Card className="h-full border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+					<Card className="h-full border-slate-200/80 bg-white shadow-sm transition-shadow hover:border-emerald-200/80 hover:shadow-md">
 						<CardContent className="p-6 md:p-8">
 							<div className="mb-4 flex items-center gap-3">
-								<div className="rounded-lg bg-primary/10 p-2">
-									<Eye className="h-5 w-5 text-primary" aria-hidden="true" />
+								<div className="rounded-lg bg-emerald-50 p-2">
+									<Eye className="h-5 w-5 text-emerald-700" aria-hidden="true" />
 								</div>
-								<h2 className="text-2xl font-bold tracking-tight">Vision</h2>
+								<h2 className="text-2xl font-bold tracking-tight text-slate-900">Vision</h2>
 							</div>
 							<p className="leading-relaxed text-muted-foreground">{foundation.vision}</p>
 						</CardContent>

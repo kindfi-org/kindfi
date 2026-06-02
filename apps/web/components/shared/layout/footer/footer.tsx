@@ -1,14 +1,12 @@
 // components/layout/footer.tsx
 'use client'
 
-import { GithubIcon, LinkedinIcon, TwitterIcon } from 'lucide-react'
-// https://github.com/simple-icons/simple-icons?tab=readme-ov-file#node-usage-
-// import { siGithub as GithubIcon, siLinkerd as LinkedinIcon, siX as Twitter } from 'simple-icons';
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { useFormValidation } from '~/hooks/use-form-validation'
 import { useI18n } from '~/lib/i18n'
+import { GithubIcon, LinkedinIcon, TwitterIcon } from '~/lib/icons/social-icons'
 
 const Footer = () => {
 	const { t } = useI18n()
@@ -68,7 +66,7 @@ const Footer = () => {
 		{
 			icon: <GithubIcon className="h-5 w-5" />,
 			href: 'https://github.com/kindfi-org',
-			label: 'Facebook',
+			label: 'GitHub',
 		},
 	]
 

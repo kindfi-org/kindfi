@@ -56,8 +56,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 	const session = await getServerSession(nextAuthOption)
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body suppressHydrationWarning>
+			<head>
 				<JsonLd data={[getOrganizationSchema(), getWebSiteSchema()]} />
+			</head>
+			<body suppressHydrationWarning>
 				<LayoutContainer session={session}>{children}</LayoutContainer>
 				<GoogleAnalytics GA_MEASUREMENT_ID={appConfig.analytics.gaId} />
 			</body>

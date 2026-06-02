@@ -10,6 +10,8 @@ export function JsonLd({ data }: JsonLdProps) {
 
 	return (
 		<script
+			// React 19 SSR can emit type={null} on <script>; suppress avoids hydration noise.
+			suppressHydrationWarning
 			type="application/ld+json"
 			// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is safe and required for SEO
 			dangerouslySetInnerHTML={{ __html: safeJson }}

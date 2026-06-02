@@ -3,7 +3,9 @@
  * These variants respect user's motion preferences.
  */
 
-export const createManageContainerVariants = (prefersReducedMotion: boolean) => ({
+import type { Variants } from 'framer-motion'
+
+export const createManageContainerVariants = (prefersReducedMotion: boolean): Variants => ({
 	hidden: { opacity: 0 },
 	show: {
 		opacity: 1,
@@ -16,7 +18,7 @@ export const createManageContainerVariants = (prefersReducedMotion: boolean) => 
 	},
 })
 
-export const createManageSectionVariants = (prefersReducedMotion: boolean) => ({
+export const createManageSectionVariants = (prefersReducedMotion: boolean): Variants => ({
 	hidden: {
 		opacity: prefersReducedMotion ? 1 : 0,
 		y: prefersReducedMotion ? 0 : 20,
@@ -27,14 +29,14 @@ export const createManageSectionVariants = (prefersReducedMotion: boolean) => ({
 		transition: prefersReducedMotion
 			? { duration: 0 }
 			: {
-					type: 'spring',
+					type: 'spring' as const,
 					stiffness: 100,
 					damping: 15,
 				},
 	},
 })
 
-export const createManageCardVariants = (prefersReducedMotion: boolean) => ({
+export const createManageCardVariants = (prefersReducedMotion: boolean): Variants => ({
 	hidden: {
 		opacity: prefersReducedMotion ? 1 : 0,
 		y: prefersReducedMotion ? 0 : 20,
@@ -45,7 +47,7 @@ export const createManageCardVariants = (prefersReducedMotion: boolean) => ({
 		transition: prefersReducedMotion
 			? { duration: 0 }
 			: {
-					type: 'spring',
+					type: 'spring' as const,
 					stiffness: 100,
 					damping: 15,
 				},

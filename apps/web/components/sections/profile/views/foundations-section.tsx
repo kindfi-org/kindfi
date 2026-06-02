@@ -1,6 +1,7 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
+import type { Variants } from 'framer-motion'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, Building2, CheckCircle2, Heart, Plus, Settings, Users } from 'lucide-react'
 import Image from 'next/image'
@@ -16,13 +17,13 @@ interface FoundationsSectionProps {
 	userId: string
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
 	hidden: { opacity: 0, y: 20 },
 	show: {
 		opacity: 1,
 		y: 0,
 		transition: {
-			type: 'spring',
+			type: 'spring' as const,
 			stiffness: 100,
 			damping: 12,
 		},

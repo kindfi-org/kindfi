@@ -28,8 +28,8 @@ export function FoundationCampaigns({ campaigns, shouldReduceMotion }: Foundatio
 			transition={{ delay: shouldReduceMotion ? 0 : 0.35 }}
 		>
 			<div className="mb-6 flex items-center gap-3">
-				<Megaphone className="h-6 w-6 text-primary" aria-hidden="true" />
-				<h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Campaigns</h2>
+				<Megaphone className="h-6 w-6 text-emerald-700" aria-hidden="true" />
+				<h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Campaigns</h2>
 			</div>
 			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 				{campaigns.map((campaign, index) => (
@@ -43,9 +43,9 @@ export function FoundationCampaigns({ campaigns, shouldReduceMotion }: Foundatio
 							href={`/projects/${campaign.slug}`}
 							className="block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 						>
-							<Card className="group h-full overflow-hidden border-border transition-[box-shadow,border-color] hover:border-primary/25 hover:shadow-md">
+							<Card className="group h-full overflow-hidden border-slate-200/80 bg-white transition-[box-shadow,border-color] hover:border-emerald-200/80 hover:shadow-md">
 								<CardContent className="p-6">
-									<h3 className="mb-2 line-clamp-2 text-lg font-semibold transition-colors group-hover:text-primary">
+									<h3 className="mb-2 line-clamp-2 text-lg font-semibold text-slate-900 transition-colors group-hover:text-emerald-800">
 										{campaign.title}
 									</h3>
 									{campaign.description ? (
@@ -72,9 +72,9 @@ export function FoundationCampaigns({ campaigns, shouldReduceMotion }: Foundatio
 												}).format(campaign.goal)}
 											</span>
 										</div>
-										<div className="h-2 overflow-hidden rounded-full bg-muted">
+										<div className="h-2 overflow-hidden rounded-full bg-slate-100">
 											<div
-												className="h-full rounded-full bg-primary transition-all duration-300"
+												className="gradient-progress h-full rounded-full transition-all duration-300"
 												style={{
 													width: `${Math.min(100, campaign.percentageComplete)}%`,
 												}}

@@ -256,7 +256,6 @@ export function FoundationCampaignsWrapper({
 								transition={{
 									duration: shouldReduceMotion ? 0 : 0.3,
 									delay: index * 0.05,
-									transitionProperty: 'opacity, transform',
 								}}
 								className="border rounded-lg p-4 bg-card hover:shadow-md transition-[box-shadow]"
 							>

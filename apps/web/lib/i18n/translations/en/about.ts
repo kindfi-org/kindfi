@@ -3,7 +3,9 @@ export const about = {
 
 	// Hero Section
 	heroSubtitle: 'Reimagining Social Impact',
-	heroTitle: 'Redefining Crowdfunding with Blockchain Transparency',
+	heroTitleLead: 'Redefining Crowdfunding',
+	heroTitleHighlight: 'with Blockchain Transparency',
+	heroTrustLine: 'Stellar · Smart escrow · Milestone verification',
 	heroDescription:
 		'KindFi is the first Web3 platform built to fund verified social impact using Stellar blockchain, smart contract escrows, and AI-powered verification. We make it possible to support or launch trusted causes—securely, transparently, and on-chain',
 	seeHowItWorks: 'See how it works in minutes',

@@ -64,10 +64,10 @@ export const CreatorCard: React.FC<CreatorCardProps> = ({ creator }) => {
 					</div>
 
 					<div className="flex gap-2 mt-6">
-						<Button className="w-full" variant="outline">
+						<Button className="gradient-border-btn w-full bg-white" variant="outline">
 							Follow
 						</Button>
-						<Button className="w-full">View Projects</Button>
+						<Button className="gradient-btn w-full text-white">View Projects</Button>
 					</div>
 				</CardContent>
 			</Card>

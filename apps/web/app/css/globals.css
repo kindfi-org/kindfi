@@ -1,8 +1,6 @@
+@import "tailwindcss";
 @import "./categories.css";
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config "../../tailwind.config.ts";
 
 @layer base {
 	:root {
@@ -182,38 +180,38 @@
 	}
 }
 
-/* Custom Gradients - darker green for better visibility */
+/* Custom Gradients - brand CTAs (Tailwind v4 requires complete from/to gradient stops) */
 .gradient-text {
 	@apply bg-clip-text text-transparent bg-gradient-to-l from-[#000124] to-[#15803d];
 }
 
+/* Primary filled CTA */
 .gradient-btn {
-	@apply bg-gradient-to-r from-green-700 to-indigo-950;
-	@apply transition duration-300;
+	@apply border-0 bg-gradient-to-r from-green-700 to-emerald-950 text-white shadow-sm;
+	@apply transition-all duration-300;
 }
 
 .gradient-btn:hover {
-	@apply from-green-800 to-indigo-950;
+	@apply from-green-800 to-green-950 text-white;
 }
 
 .gradient-btn-purple {
-	@apply bg-gradient-to-r from-green-700 to-blue-900;
-	@apply transition duration-300;
+	@apply border-0 bg-gradient-to-r from-green-700 to-blue-900 text-white shadow-sm;
+	@apply transition-all duration-300;
 }
 
 .gradient-btn-purple:hover {
-	@apply from-green-800 to-green-700;
+	@apply from-green-800 to-green-700 text-white;
 }
 
+/* Secondary / outline-style CTA — flat surface, no gradient */
 .gradient-border-btn {
-	@apply bg-gradient-to-r border-green-700 to-green-800;
-	@apply text-green-700;
-	@apply transition duration-300;
+	@apply border-2 border-green-700 bg-white text-green-800 shadow-sm;
+	@apply transition-colors duration-300;
 }
 
 .gradient-border-btn:hover {
-	@apply border-green-800 to-green-700;
-	@apply text-green-700 !important;
+	@apply border-green-800 bg-green-50 text-green-900;
 }
 
 .gradient-bg {

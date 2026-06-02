@@ -83,7 +83,6 @@ export function FoundationMilestonesWrapper({ foundationSlug }: FoundationMilest
 				transition={{
 					delay: prefersReducedMotion ? 0 : 0.2,
 					duration: prefersReducedMotion ? 0 : 0.3,
-					transitionProperty: 'opacity',
 				}}
 				className="space-y-6"
 			>

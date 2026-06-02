@@ -2,17 +2,33 @@ import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
 import { FoundationsClientWrapper } from '~/components/sections/foundations/foundations-client-wrapper'
-import { FoundationsHeader } from '~/components/sections/foundations/foundations-header'
-import { SectionContainer } from '~/components/shared/section-container'
+import { FoundationsHero } from '~/components/sections/foundations/foundations-hero'
+import { JsonLd } from '~/components/shared/json-ld'
 import {
 	getAllFoundations,
 	normalizeFoundationListSort,
 } from '~/lib/queries/foundations/get-all-foundations'
+import { getBreadcrumbSchema } from '~/lib/seo/structured-data'
 
 export const metadata: Metadata = {
 	title: 'Foundations | KindFi',
 	description:
-		'Discover nonprofit and community foundations on KindFi—missions, campaigns, and transparent impact.',
+		'Discover nonprofit and community foundations on KindFi—missions, campaigns, and transparent impact on the Stellar blockchain.',
+	openGraph: {
+		title: 'Foundations | KindFi',
+		description:
+			'Explore verified organizations running campaigns on KindFi. Follow their work and support causes that match your values.',
+		type: 'website',
+		url: '/foundations',
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: 'Foundations | KindFi',
+		description: 'Discover verified foundations and their impact campaigns on KindFi.',
+	},
+	alternates: {
+		canonical: '/foundations',
+	},
 }
 
 export default async function FoundationsPage({
@@ -34,13 +50,17 @@ export default async function FoundationsPage({
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<main className="min-h-screen bg-muted/30" aria-label="Foundations directory">
-			<SectionContainer maxWidth="6xl" className="py-10 sm:py-14 lg:py-16">
-				<FoundationsHeader activeSort={sortSlug} />
-				<HydrationBoundary state={dehydratedState}>
-					<FoundationsClientWrapper />
-				</HydrationBoundary>
-			</SectionContainer>
-		</main>
+		<>
+			<JsonLd
+				data={getBreadcrumbSchema([
+					{ name: 'Home', url: '/' },
+					{ name: 'Foundations', url: '/foundations' },
+				])}
+			/>
+			<HydrationBoundary state={dehydratedState}>
+				<FoundationsHero sortSlug={sortSlug} />
+				<FoundationsClientWrapper />
+			</HydrationBoundary>
+		</>
 	)
 }

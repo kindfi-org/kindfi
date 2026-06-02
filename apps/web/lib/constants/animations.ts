@@ -206,7 +206,7 @@ export const itemVariants = {
 		y: 0,
 		opacity: 1,
 		transition: {
-			type: 'spring',
+			type: 'spring' as const,
 			stiffness: 100,
 			damping: 12,
 		},
@@ -219,7 +219,7 @@ export const noResultsVariants = {
 		opacity: 1,
 		y: 0,
 		transition: {
-			type: 'spring',
+			type: 'spring' as const,
 			stiffness: 100,
 			damping: 12,
 		},
@@ -252,6 +252,6 @@ export const progressBarAnimation = {
 	initial: { width: 0 },
 	animate: (width: number) => ({
 		width: `${width}%`,
-		transition: { duration: 1, ease: 'easeOut' },
+		transition: { duration: 1, ease: 'easeOut' as const },
 	}),
 }

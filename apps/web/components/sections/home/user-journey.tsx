@@ -88,15 +88,15 @@ export function UserJourney() {
 
 	const [shouldReduceMotion, setShouldReduceMotion] = React.useState(false)
 
-	const fadeInUpAnimation = {
+	const fadeInUpAnimation = (delay = 0) => ({
 		initial: { opacity: 0, y: 20 },
 		animate: { opacity: 1, y: 0 },
-		transition: (delay = 0) => ({
+		transition: {
 			duration: shouldReduceMotion ? 0 : 0.5,
 			delay,
-			y: { duration: shouldReduceMotion ? 0 : 0.5 },
-		}),
-	}
+			ease: [0.22, 1, 0.36, 1] as const,
+		},
+	})
 
 	React.useEffect(() => {
 		setShouldReduceMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -109,7 +109,7 @@ export function UserJourney() {
 			<SectionContainer className="relative">
 				{/* Header */}
 				<div className="text-center mb-12 max-w-3xl mx-auto sm:mb-16">
-					<motion.div {...fadeInUpAnimation}>
+					<motion.div {...fadeInUpAnimation()}>
 						<h2 className="text-3xl font-bold text-gray-900 mb-4 sm:text-4xl">
 							{t('home.journeyTitle')} <br />
 							<span className="gradient-text">{t('home.journeyTitleHighlight')}</span>
@@ -120,7 +120,7 @@ export function UserJourney() {
 					</motion.div>
 
 					{/* Toggle Buttons */}
-					<motion.div className="mt-12 mb-16 flex justify-center" {...fadeInUpAnimation}>
+					<motion.div className="mt-12 mb-16 flex justify-center" {...fadeInUpAnimation(0.1)}>
 						<div className="inline-flex rounded-full p-1 bg-white shadow-sm border border-gray-100">
 							<Button
 								variant={activeView === 'project' ? 'default' : 'ghost'}
@@ -176,7 +176,7 @@ export function UserJourney() {
 						className="grid gap-8 sm:gap-6 md:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
 					>
 						{steps.map((step) => (
-							<motion.div key={`step-${step.number}`} {...fadeInUpAnimation}>
+							<motion.div key={`step-${step.number}`} {...fadeInUpAnimation(step.number * 0.08)}>
 								<div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 h-full border border-gray-100">
 									<div className="flex items-center mb-4">
 										<div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-purple-600 font-semibold text-sm">
@@ -202,10 +202,9 @@ export function UserJourney() {
 						<>
 							<Button
 								size="lg"
-								className="gradient-border-btn text-white px-8"
+								className="gradient-btn px-8 text-white"
 								onClick={() => setWaitlistOpen(true)}
 								aria-label={t('home.waitlistYourProject')}
-								variant="outline"
 							>
 								{t('home.waitlistYourProject')}
 							</Button>
@@ -214,10 +213,9 @@ export function UserJourney() {
 					) : (
 						<Button
 							size="lg"
-							className="gradient-border-btn text-white px-8"
+							className="gradient-btn px-8 text-white"
 							asChild
 							aria-label={t('home.exploreCauses')}
-							variant="outline"
 						>
 							<Link href="/projects">{t('home.exploreCauses')}</Link>
 						</Button>

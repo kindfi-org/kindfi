@@ -14,7 +14,7 @@ export function SidebarActions({ isFollowing, onToggleFollow, onShare }: Sidebar
 		<div className="flex gap-4">
 			<Button
 				variant="outline"
-				className="flex gap-2 justify-center items-center w-full gradient-border-btn"
+				className="gradient-border-btn flex w-full items-center justify-center gap-2 bg-white"
 				onClick={onToggleFollow}
 				aria-label={isFollowing ? 'Unfollow project' : 'Follow project'}
 			>
@@ -27,7 +27,7 @@ export function SidebarActions({ isFollowing, onToggleFollow, onShare }: Sidebar
 
 			<Button
 				variant="outline"
-				className="flex gap-2 justify-center items-center w-full gradient-border-btn"
+				className="gradient-border-btn flex w-full items-center justify-center gap-2 bg-white"
 				onClick={onShare}
 				aria-label="Share project"
 			>

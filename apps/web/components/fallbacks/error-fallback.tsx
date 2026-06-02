@@ -35,7 +35,7 @@ export function ErrorFallback({
 			</div>
 			<h2 className="text-xl font-semibold mb-2 text-gray-800">{title}</h2>
 			<p className="mb-4 text-gray-600">{message}</p>
-			<p className="mb-4 text-gray-600">{error.message}</p>
+			{error instanceof Error ? <p className="mb-4 text-gray-600">{error.message}</p> : null}
 			<Button
 				onClick={handleReset}
 				disabled={isLoading}

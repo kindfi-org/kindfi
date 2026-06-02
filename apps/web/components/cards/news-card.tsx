@@ -26,8 +26,8 @@ export function NewsCard({ update, className, showCategory = false }: NewsCardPr
 		>
 			<article
 				className={cn(
-					'flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-300',
-					'hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md',
+					'flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white text-card-foreground shadow-sm transition-all duration-300',
+					'hover:-translate-y-0.5 hover:border-emerald-200/60 hover:shadow-md',
 				)}
 			>
 				{showImage ? (
@@ -42,10 +42,7 @@ export function NewsCard({ update, className, showCategory = false }: NewsCardPr
 						<div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 					</div>
 				) : (
-					<div
-						className="h-2 shrink-0 bg-gradient-to-r from-primary/80 to-primary/40"
-						aria-hidden
-					/>
+					<div className="h-1 shrink-0 bg-emerald-500/80" aria-hidden />
 				)}
 
 				<div className="flex flex-1 flex-col p-5">
@@ -59,14 +56,14 @@ export function NewsCard({ update, className, showCategory = false }: NewsCardPr
 								<span className="text-border" aria-hidden>
 									·
 								</span>
-								<span className="font-medium normal-case text-primary">
+								<span className="font-medium normal-case text-emerald-700">
 									{formatNewsCategoryLabel(update.category)}
 								</span>
 							</>
 						) : null}
 					</div>
 
-					<h3 className="mb-2 text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+					<h3 className="mb-2 text-lg font-semibold text-slate-900 transition-colors group-hover:text-emerald-800">
 						{update.title}
 					</h3>
 
@@ -79,7 +76,7 @@ export function NewsCard({ update, className, showCategory = false }: NewsCardPr
 							{update.tags.slice(0, 4).map((tag: string) => (
 								<li
 									key={tag}
-									className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+									className="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
 								>
 									{tag}
 								</li>

@@ -22,9 +22,9 @@ export function FoundationFounderCard({ founder, shouldReduceMotion }: Foundatio
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ delay: shouldReduceMotion ? 0 : 0.4 }}
 		>
-			<Card className="h-full border-border shadow-sm">
+			<Card className="h-full border-slate-200/80 bg-white shadow-sm">
 				<CardContent className="p-6 md:p-8">
-					<h2 className="mb-6 text-2xl font-bold tracking-tight">Founder</h2>
+					<h2 className="mb-6 text-2xl font-bold tracking-tight text-slate-900">Founder</h2>
 					<div className="flex items-start gap-4">
 						{founder.imageUrl ? (
 							founder.slug ? (
@@ -85,19 +85,19 @@ export function FoundationConnectCard({
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ delay: shouldReduceMotion ? 0 : 0.5 }}
 		>
-			<Card className="h-full border-border shadow-sm">
+			<Card className="h-full border-slate-200/80 bg-white shadow-sm">
 				<CardContent className="p-6 md:p-8">
-					<h2 className="mb-6 text-2xl font-bold tracking-tight">Connect</h2>
+					<h2 className="mb-6 text-2xl font-bold tracking-tight text-slate-900">Connect</h2>
 					<div className="flex flex-col gap-3">
 						{websiteUrl && (
 							<a
 								href={websiteUrl}
 								target="_blank"
 								rel="noopener noreferrer"
-								className="group flex items-center gap-3 rounded-xl border border-border p-3 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+								className="group flex items-center gap-3 rounded-xl border border-slate-200 p-3 transition-colors hover:border-emerald-200 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 							>
-								<div className="rounded-lg bg-primary/10 p-2 transition-colors group-hover:bg-primary/15">
-									<Globe className="h-5 w-5 text-primary" aria-hidden="true" />
+								<div className="rounded-lg bg-emerald-50 p-2 transition-colors group-hover:bg-emerald-100">
+									<Globe className="h-5 w-5 text-emerald-700" aria-hidden="true" />
 								</div>
 								<span className="flex-1 font-medium">Website</span>
 								<ArrowRight
@@ -114,10 +114,10 @@ export function FoundationConnectCard({
 									href={url}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="group flex items-center gap-3 rounded-xl border border-border p-3 capitalize transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+									className="group flex items-center gap-3 rounded-xl border border-slate-200 p-3 capitalize transition-colors hover:border-emerald-200 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 								>
-									<div className="rounded-lg bg-primary/10 p-2 transition-colors group-hover:bg-primary/15">
-										<Icon className="h-5 w-5 text-primary" aria-hidden="true" />
+									<div className="rounded-lg bg-emerald-50 p-2 transition-colors group-hover:bg-emerald-100">
+										<Icon className="h-5 w-5 text-emerald-700" aria-hidden="true" />
 									</div>
 									<span className="flex-1 font-medium">{platform}</span>
 									<ArrowRight

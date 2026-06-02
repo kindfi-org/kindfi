@@ -27,7 +27,7 @@ export function MainBalanceCard() {
 					<Button
 						variant="outline"
 						aria-label="Receive Money"
-						className="w-full gradient-border-btn z-10"
+						className="gradient-border-btn z-10 w-full bg-white"
 					>
 						<span className="w-full flex items-center justify-center">
 							<Download className="mr-2 h-4 w-4" />

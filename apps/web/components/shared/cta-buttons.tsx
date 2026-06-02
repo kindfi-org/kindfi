@@ -55,7 +55,7 @@ export const CTAButtons = ({
 			variant="outline"
 			onClick={onSecondaryClick}
 			className={cn(
-				'gradient-border-btn transition-all duration-300 hover:bg-gray-50',
+				'gradient-border-btn bg-white transition-all duration-300',
 				disabled && 'opacity-70 cursor-not-allowed',
 				secondaryClassName,
 			)}
