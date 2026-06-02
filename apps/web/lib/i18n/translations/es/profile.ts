@@ -24,8 +24,10 @@ export const profile = {
 	copyAddress: 'Copiar dirección',
 	disconnect: 'Desconectar',
 	connectExternalWallet: 'Conectar billetera externa',
-	trustlessWalletRequired: 'Billetera externa requerida para escrow',
+	trustlessWalletRequired: 'Recuerda conectar tu billetera',
 	trustlessWalletRequiredDescription:
+		'Conecta una billetera Stellar externa para donar y firmar acciones de escrow.',
+	trustlessWalletRequiredDetail:
 		'Las acciones de escrow en Trustless Work (crear, fondear, liberar, hitos) deben firmarse con una billetera Stellar externa (dirección G). Las cuentas inteligentes aún no están soportadas.',
 	externalWalletTrustlessNote:
 		'Requerida para Trustless Work: donaciones, fondeo de escrow, hitos y liberaciones.',
