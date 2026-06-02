@@ -10,6 +10,7 @@
 		"includes": [
 			"**",
 			"!.agents",
+			"!.claude/skills",
 			"!apps/indexer/src/types/models",
 			"!apps/kyc-server/public",
 			"!services/supabase/templates",
