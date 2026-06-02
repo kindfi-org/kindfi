@@ -28,7 +28,7 @@ export function DonationForm({ project, hasEscrow, form, onSubmit }: DonationFor
 		<>
 			{hasEscrow && (
 				<div className="mb-4">
-					<TrustlessExternalWalletBanner />
+					<TrustlessExternalWalletBanner compact />
 				</div>
 			)}
 

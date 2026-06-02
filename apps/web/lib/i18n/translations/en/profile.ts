@@ -24,9 +24,11 @@ export const profile = {
 	copyAddress: 'Copy address',
 	disconnect: 'Disconnect',
 	connectExternalWallet: 'Connect external wallet',
-	trustlessWalletRequired: 'External wallet required for escrow',
+	trustlessWalletRequired: 'Remember to connect your wallet',
 	trustlessWalletRequiredDescription:
-		'Trustless Work escrow actions (create, fund, release, milestones) must be signed with an external Stellar wallet (G-address). Smart accounts are not supported yet.',
+		'Link an external Stellar wallet to donate and sign escrow actions.',
+	trustlessWalletRequiredDetail:
+		'Trustless Work escrow (create, fund, release, milestones) must be signed with an external Stellar wallet (G-address). Smart accounts are not supported yet.',
 	externalWalletTrustlessNote:
 		'Required for Trustless Work: donations, escrow funding, milestones, and releases.',
 	addressCopied: 'Address copied',
