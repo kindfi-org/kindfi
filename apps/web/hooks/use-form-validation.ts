@@ -1,5 +1,5 @@
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import { throttle } from 'lodash'
+import throttle from 'lodash/throttle'
 import { useState } from 'react'
 
 /**
