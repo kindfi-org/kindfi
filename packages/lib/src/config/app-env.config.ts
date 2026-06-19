@@ -65,6 +65,11 @@ export function transformEnv(): AppEnvInterface {
 			kyc: {
 				baseUrl: data.NEXT_PUBLIC_KYC_API_BASE_URL || 'http://localhost:3001',
 			},
+			etherfuse: {
+				apiKey: data.ETHERFUSE_API_KEY || '',
+				baseUrl: data.ETHERFUSE_BASE_URL || 'https://api.sand.etherfuse.com',
+				customerId: data.ETHERFUSE_CUSTOMER_ID || '',
+			},
 		},
 		analytics: {
 			gaId: data.NEXT_PUBLIC_GA_MEASUREMENT_ID || '',
@@ -158,6 +163,11 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(appName: 
 			}),
 			kyc: z.object({
 				baseUrl: z.string(),
+			}),
+			etherfuse: z.object({
+				apiKey: z.string(),
+				baseUrl: z.string(),
+				customerId: z.string(),
 			}),
 		}),
 		analytics: z.object({
@@ -386,6 +396,9 @@ export const baseEnvSchema = z.object({
 	TRUSTLESS_WORK_API_URL: z.string().url('Invalid Trustless Work API URL format').optional(),
 	TRUSTLESS_WORK_API_KEY: z.string().optional(),
 	NEXT_PUBLIC_KYC_API_BASE_URL: z.string().url('Invalid KYC API base URL format').optional(),
+	ETHERFUSE_API_KEY: z.string().optional(),
+	ETHERFUSE_BASE_URL: z.string().url('Invalid Etherfuse base URL format').optional(),
+	ETHERFUSE_CUSTOMER_ID: z.string().optional(),
 
 	// Analytics
 	NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),

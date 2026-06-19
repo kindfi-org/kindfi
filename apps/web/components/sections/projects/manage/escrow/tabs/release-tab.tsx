@@ -19,8 +19,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
+import { EtherfuseOffRampCard } from '../components/etherfuse-off-ramp-card'
 
 interface ReleaseTabProps {
 	escrowContractAddress: string
@@ -93,62 +95,82 @@ export function ReleaseTab({
 						<CardTitle>Release Funds</CardTitle>
 						<CardDescription>
 							{isSingleRelease
-								? 'Release all funds from the escrow contract'
-								: 'Release funds for a specific milestone'}
+								? 'Release all funds from the escrow contract or withdraw to fiat'
+								: 'Release funds for a specific milestone or withdraw to fiat'}
 						</CardDescription>
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-6">
-				{!isSingleRelease && (
-					<div className="space-y-2">
-						<Label htmlFor="release-milestone">Select Milestone</Label>
-						<Select
-							value={selectedMilestoneIndex}
-							onValueChange={setSelectedMilestoneIndex}
-							disabled={isProcessing}
-						>
-							<SelectTrigger id="release-milestone">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{milestones.map((_, index) => (
-									<SelectItem key={index} value={String(index)}>
-										Milestone {index + 1}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-				)}
+			<CardContent>
+				<Tabs defaultValue="crypto" className="w-full">
+					<TabsList className="grid w-full grid-cols-2">
+						<TabsTrigger value="crypto">Crypto Release</TabsTrigger>
+						<TabsTrigger value="fiat">Fiat Off-Ramp</TabsTrigger>
+					</TabsList>
+					<TabsContent value="crypto" className="space-y-6 mt-6">
+						{!isSingleRelease && (
+							<div className="space-y-2">
+								<Label htmlFor="release-milestone">Select Milestone</Label>
+								<Select
+									value={selectedMilestoneIndex}
+									onValueChange={setSelectedMilestoneIndex}
+									disabled={isProcessing}
+								>
+									<SelectTrigger id="release-milestone">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{milestones.map((_, index) => (
+											<SelectItem key={index} value={String(index)}>
+												Milestone {index + 1}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+						)}
 
-				<div className="rounded-lg border p-4 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
-					<div className="flex items-start gap-3">
-						<AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-						<div className="space-y-1">
-							<p className="font-medium text-amber-900 dark:text-amber-100">Important</p>
-							<p className="text-sm text-amber-800 dark:text-amber-200">
-								{isSingleRelease
-									? 'This will release all funds from the escrow. Make sure all milestones are approved before proceeding.'
-									: 'This will release funds for the selected milestone. The milestone must be approved first.'}
-							</p>
+						<div className="rounded-lg border p-4 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
+							<div className="flex items-start gap-3">
+								<AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+								<div className="space-y-1">
+									<p className="font-medium text-amber-900 dark:text-amber-100">Important</p>
+									<p className="text-sm text-amber-800 dark:text-amber-200">
+										{isSingleRelease
+											? 'This will release all funds from the escrow. Make sure all milestones are approved before proceeding.'
+											: 'This will release funds for the selected milestone. The milestone must be approved first.'}
+									</p>
+								</div>
+							</div>
 						</div>
-					</div>
-				</div>
 
-				<Button onClick={handleReleaseFunds} disabled={isProcessing} className="w-full" size="lg">
-					{isProcessing ? (
-						<>
-							<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-							Processing...
-						</>
-					) : (
-						<>
-							<Send className="w-4 h-4 mr-2" />
-							Release Funds
-						</>
-					)}
-				</Button>
+						<Button
+							onClick={handleReleaseFunds}
+							disabled={isProcessing}
+							className="w-full"
+							size="lg"
+						>
+							{isProcessing ? (
+								<>
+									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+									Processing...
+								</>
+							) : (
+								<>
+									<Send className="w-4 h-4 mr-2" />
+									Release Funds
+								</>
+							)}
+						</Button>
+					</TabsContent>
+					<TabsContent value="fiat" className="mt-6">
+						<EtherfuseOffRampCard
+							walletAddress={escrowContractAddress}
+							escrowId={escrowContractAddress}
+							onSuccess={onSuccess}
+						/>
+					</TabsContent>
+				</Tabs>
 			</CardContent>
 		</Card>
 	)

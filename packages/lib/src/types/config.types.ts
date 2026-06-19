@@ -67,6 +67,11 @@ export interface AppEnvInterface {
 		kyc: {
 			baseUrl: string
 		}
+		etherfuse: {
+			apiKey: string
+			baseUrl: string
+			customerId: string
+		}
 	}
 	analytics: {
 		gaId: string
