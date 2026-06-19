@@ -9,8 +9,10 @@ import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
+import { EtherfuseOnRampCard } from '../components/etherfuse-on-ramp-card'
 
 interface FundEscrowTabProps {
 	escrowContractAddress: string
@@ -152,72 +154,86 @@ export function FundEscrowTab({
 					<div>
 						<CardTitle>Fund Escrow</CardTitle>
 						<CardDescription>
-							Add funds to your escrow contract. You&apos;ll need to approve the transaction in your
-							wallet.
+							Add funds to your escrow contract using crypto or fiat on-ramp.
 						</CardDescription>
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-6">
-				<div className="space-y-2">
-					<Label htmlFor="fund-amount" className="text-base font-medium">
-						Amount (USDC)
-					</Label>
-					<Input
-						id="fund-amount"
-						type="number"
-						value={fundAmount}
-						onChange={(e) => setFundAmount(e.target.value === '' ? '' : Number(e.target.value))}
-						placeholder="0.00"
-						min="0"
-						step="0.01"
-						className="text-lg"
-						disabled={isProcessing}
-					/>
-					<p className="text-xs text-muted-foreground">
-						Enter the amount you want to add to the escrow
-					</p>
-				</div>
-
-				<div className="rounded-lg border p-4 bg-muted/50">
-					<div className="flex items-start gap-3">
-						<Info className="w-5 h-5 text-primary mt-0.5" />
-						<div className="space-y-1">
-							<p className="text-sm font-medium">Current Balance</p>
-							<p className="text-2xl font-bold">
-								{isLoadingBalance ? (
-									<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-								) : balance !== null ? (
-									`$${balance.toLocaleString(undefined, {
-										minimumFractionDigits: 2,
-										maximumFractionDigits: 7,
-									})}`
-								) : (
-									'N/A'
-								)}
+			<CardContent>
+				<Tabs defaultValue="crypto" className="w-full">
+					<TabsList className="grid w-full grid-cols-2">
+						<TabsTrigger value="crypto">Crypto Funding</TabsTrigger>
+						<TabsTrigger value="fiat">Fiat On-Ramp</TabsTrigger>
+					</TabsList>
+					<TabsContent value="crypto" className="space-y-6 mt-6">
+						<div className="space-y-2">
+							<Label htmlFor="fund-amount" className="text-base font-medium">
+								Amount (USDC)
+							</Label>
+							<Input
+								id="fund-amount"
+								type="number"
+								value={fundAmount}
+								onChange={(e) => setFundAmount(e.target.value === '' ? '' : Number(e.target.value))}
+								placeholder="0.00"
+								min="0"
+								step="0.01"
+								className="text-lg"
+								disabled={isProcessing}
+							/>
+							<p className="text-xs text-muted-foreground">
+								Enter the amount you want to add to the escrow
 							</p>
 						</div>
-					</div>
-				</div>
 
-				<Button
-					onClick={handleFundEscrow}
-					disabled={!fundAmount || Number(fundAmount) <= 0 || isProcessing}
-					className="w-full"
-					size="lg"
-				>
-					{isProcessing ? (
-						<>
-							<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-							Processing...
-						</>
-					) : (
-						<>
-							<Send className="w-4 h-4 mr-2" />
-							Fund Escrow
-						</>
-					)}
-				</Button>
+						<div className="rounded-lg border p-4 bg-muted/50">
+							<div className="flex items-start gap-3">
+								<Info className="w-5 h-5 text-primary mt-0.5" />
+								<div className="space-y-1">
+									<p className="text-sm font-medium">Current Balance</p>
+									<p className="text-2xl font-bold">
+										{isLoadingBalance ? (
+											<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+										) : balance !== null ? (
+											`$${balance.toLocaleString(undefined, {
+												minimumFractionDigits: 2,
+												maximumFractionDigits: 7,
+											})}`
+										) : (
+											'N/A'
+										)}
+									</p>
+								</div>
+							</div>
+						</div>
+
+						<Button
+							onClick={handleFundEscrow}
+							disabled={!fundAmount || Number(fundAmount) <= 0 || isProcessing}
+							className="w-full"
+							size="lg"
+						>
+							{isProcessing ? (
+								<>
+									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+									Processing...
+								</>
+							) : (
+								<>
+									<Send className="w-4 h-4 mr-2" />
+									Fund Escrow
+								</>
+							)}
+						</Button>
+					</TabsContent>
+					<TabsContent value="fiat" className="mt-6">
+						<EtherfuseOnRampCard
+							walletAddress={escrowContractAddress}
+							escrowId={escrowContractAddress}
+							onSuccess={onSuccess}
+						/>
+					</TabsContent>
+				</Tabs>
 			</CardContent>
 		</Card>
 	)
