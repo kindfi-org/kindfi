@@ -19,13 +19,17 @@ import { validateRequest } from '~/lib/utils/validation'
 export async function GET(req: NextRequest) {
 	try {
 		const { supabase } = await import('@packages/lib/supabase')
-		const { searchParams } = new URL(req.url)
-		const queryData = { status: searchParams.get('status') ?? undefined }
+		const { searchParams } = req.nextUrl
+		const queryData = {
+			status: searchParams.get('status') ?? undefined,
+			limit: searchParams.get('limit'),
+			offset: searchParams.get('offset'),
+		}
 		const validation = validateRequest(governanceRoundsQuerySchema, queryData)
 		if (!validation.success) {
 			return validation.response
 		}
-		const { status } = validation.data
+		const { status, limit, offset } = validation.data
 
 		// Auto-activate and close rounds based on current time
 		await supabase.rpc('activate_governance_rounds')
@@ -38,6 +42,7 @@ export async function GET(req: NextRequest) {
 				*,
 				options:governance_options!governance_options_round_id_fkey(*)
 			`,
+				{ count: 'exact' },
 			)
 			.order('starts_at', { ascending: false })
 
@@ -45,7 +50,7 @@ export async function GET(req: NextRequest) {
 			query = query.eq('status', status)
 		}
 
-		const { data: rounds, error } = await query
+		const { data: rounds, error, count } = await query.range(offset, offset + limit - 1)
 
 		if (error) {
 			logger.error('Error fetching governance rounds:', error)
@@ -82,7 +87,11 @@ export async function GET(req: NextRequest) {
 			}),
 		)
 
-		return NextResponse.json({ success: true, data: enrichedRounds })
+		return NextResponse.json({
+			success: true,
+			data: enrichedRounds,
+			pagination: { limit, offset, total: count ?? 0 },
+		})
 	} catch (error) {
 		logger.error('Error in GET /api/governance/rounds:', error)
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
