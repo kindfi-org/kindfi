@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowRight, CreditCard, ExternalLink, Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
@@ -15,25 +15,41 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
+import { useEtherfuseRampAssets } from '~/hooks/use-etherfuse-ramp-assets'
 
 interface EtherfuseOnRampCardProps {
 	walletAddress: string
+	userId?: string
 	escrowId?: string
 	onSuccess?: () => void
 }
 
 export function EtherfuseOnRampCard({
 	walletAddress,
+	userId,
 	escrowId,
 	onSuccess,
 }: EtherfuseOnRampCardProps) {
 	const [amount, setAmount] = useState<number | ''>('')
 	const [currency, setCurrency] = useState('MXN')
-	const [targetAsset, setTargetAsset] = useState(
-		'USDC:GA5ZSEJYB37JRC5AVCY5MV7R3ZR3WUYCBK6R3A3D3Q3D3Q3D3Q3D3Q3D',
-	) // Example USDC on Stellar
+	const [targetAsset, setTargetAsset] = useState('')
+	const { data: assets = [], isLoading: isLoadingAssets } = useEtherfuseRampAssets(
+		currency,
+		walletAddress,
+	)
 	const [isProcessing, setIsProcessing] = useState(false)
 	const [statusPage, setStatusPage] = useState<string | null>(null)
+
+	useEffect(() => {
+		if (assets.length === 0) {
+			return
+		}
+
+		const hasSelectedAsset = assets.some((asset) => asset.identifier === targetAsset)
+		if (!hasSelectedAsset) {
+			setTargetAsset(assets[0].identifier)
+		}
+	}, [assets, targetAsset])
 
 	const handleOnRamp = async () => {
 		if (!amount || Number(amount) <= 0) {
@@ -41,8 +57,16 @@ export function EtherfuseOnRampCard({
 			return
 		}
 
+		if (!targetAsset) {
+			toast.error('Please select a target asset')
+			return
+		}
+
 		try {
 			setIsProcessing(true)
+
+			const resolvedUserId =
+				userId ?? (await fetch('/api/auth/user').then((res) => res.json())).user.id
 
 			const response = await fetch('/api/etherfuse/on-ramp', {
 				method: 'POST',
@@ -50,7 +74,7 @@ export function EtherfuseOnRampCard({
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					userId: (await fetch('/api/auth/user').then((res) => res.json())).user.id,
+					userId: resolvedUserId,
 					amount: String(amount),
 					currency,
 					targetAsset,
@@ -130,10 +154,7 @@ export function EtherfuseOnRampCard({
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="MXN">Mexican Peso (MXN)</SelectItem>
-									<SelectItem value="USD">US Dollar (USD)</SelectItem>
-									<SelectItem value="EUR">Euro (EUR)</SelectItem>
 									<SelectItem value="BRL">Brazilian Real (BRL)</SelectItem>
-									<SelectItem value="COP">Colombian Peso (COP)</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -156,16 +177,20 @@ export function EtherfuseOnRampCard({
 
 						<div className="space-y-2">
 							<Label htmlFor="target-asset">Target Asset</Label>
-							<Select value={targetAsset} onValueChange={setTargetAsset} disabled={isProcessing}>
+							<Select
+								value={targetAsset}
+								onValueChange={setTargetAsset}
+								disabled={isProcessing || isLoadingAssets || assets.length === 0}
+							>
 								<SelectTrigger id="target-asset">
-									<SelectValue />
+									<SelectValue placeholder={isLoadingAssets ? 'Loading assets…' : 'Select asset'} />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="USDC:GA5ZSEJYB37JRC5AVCY5MV7R3ZR3WUYCBK6R3A3D3Q3D3Q3D3Q3D3Q3D">
-										USDC (Stellar)
-									</SelectItem>
-									<SelectItem value="CETES:GC3CW7...">CETES (Stellar)</SelectItem>
-									<SelectItem value="USDx:G...">USDx (Stellar)</SelectItem>
+									{assets.map((asset) => (
+										<SelectItem key={asset.identifier} value={asset.identifier}>
+											{asset.symbol} · {asset.name}
+										</SelectItem>
+									))}
 								</SelectContent>
 							</Select>
 						</div>
@@ -188,7 +213,7 @@ export function EtherfuseOnRampCard({
 
 						<Button
 							onClick={handleOnRamp}
-							disabled={!amount || Number(amount) <= 0 || isProcessing}
+							disabled={!amount || Number(amount) <= 0 || !targetAsset || isProcessing}
 							className="w-full"
 							size="lg"
 						>

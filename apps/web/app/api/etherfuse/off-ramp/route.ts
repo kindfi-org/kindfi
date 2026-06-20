@@ -1,9 +1,11 @@
-import { appEnvConfig } from '@packages/lib/config'
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
+import { getAuthenticatedSession } from '~/lib/auth/server-action-auth'
 import { AppError } from '~/lib/error'
+import { getEtherfuseConfig } from '~/lib/etherfuse/get-etherfuse-config'
+import { resolveEtherfuseOrderContext } from '~/lib/etherfuse/resolve-order-context'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import {
 	etherfuseWithdrawalRequestSchema,
@@ -32,14 +34,19 @@ async function offRampHandler(req: NextRequest) {
 			return validation.response
 		}
 
-		const { userId, amount, sourceAsset, currency, bankAccountId, escrowId } = validation.data
-
-		// Verify authenticated user
 		const {
-			data: { user },
-			error: authError,
-		} = await supabase.auth.getUser()
-		if (authError || !user || user.id !== userId) {
+			userId,
+			amount,
+			sourceAsset,
+			currency,
+			bankAccountId,
+			walletAddress,
+			etherfuseCustomerId,
+			escrowId,
+		} = validation.data
+
+		const session = await getAuthenticatedSession()
+		if (!session?.user?.id || session.user.id !== userId) {
 			await auditLogger.log({
 				correlationId,
 				operation: 'etherfuse.off_ramp',
@@ -52,12 +59,28 @@ async function offRampHandler(req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 		}
 
-		const config = appEnvConfig('web')
-		const { apiKey, baseUrl, customerId } = config.externalApis.etherfuse
-
-		if (!apiKey || !customerId) {
-			throw new AppError('Etherfuse API configuration is missing', 500)
+		if (!etherfuseCustomerId) {
+			return NextResponse.json(
+				{
+					error:
+						'Complete Etherfuse verification for this wallet before creating a withdrawal order.',
+				},
+				{ status: 400 },
+			)
 		}
+
+		const config = await getEtherfuseConfig()
+		const orderContext = await resolveEtherfuseOrderContext(config, walletAddress, {
+			customerId: etherfuseCustomerId,
+			bankAccountId,
+		})
+		const { apiKey, baseUrl } = config
+		const {
+			customerId: quoteCustomerId,
+			bankAccountId: resolvedBankAccountId,
+			cryptoWalletId,
+			publicKey,
+		} = orderContext
 
 		// Step 1: Create a quote
 		const quoteId = crypto.randomUUID()
@@ -69,7 +92,7 @@ async function offRampHandler(req: NextRequest) {
 			},
 			body: JSON.stringify({
 				quoteId,
-				customerId,
+				customerId: quoteCustomerId,
 				blockchain: 'stellar',
 				quoteAssets: {
 					type: 'offramp',
@@ -98,8 +121,9 @@ async function offRampHandler(req: NextRequest) {
 			},
 			body: JSON.stringify({
 				orderId,
-				bankAccountId,
-				cryptoWalletId: process.env.ETHERFUSE_CRYPTO_WALLET_ID || 'placeholder-crypto-wallet-id',
+				bankAccountId: resolvedBankAccountId,
+				cryptoWalletId,
+				publicKey,
 				quoteId: quoteData.quoteId,
 			}),
 		})

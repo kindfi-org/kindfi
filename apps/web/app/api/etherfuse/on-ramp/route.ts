@@ -1,9 +1,11 @@
-import { appEnvConfig } from '@packages/lib/config'
 import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
+import { getAuthenticatedSession } from '~/lib/auth/server-action-auth'
 import { AppError } from '~/lib/error'
+import { getEtherfuseConfig } from '~/lib/etherfuse/get-etherfuse-config'
+import { resolveEtherfuseOrderContext } from '~/lib/etherfuse/resolve-order-context'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import {
 	etherfuseDepositRequestSchema,
@@ -32,14 +34,19 @@ async function onRampHandler(req: NextRequest) {
 			return validation.response
 		}
 
-		const { userId, amount, currency, targetAsset, walletAddress, escrowId } = validation.data
-
-		// Verify authenticated user
 		const {
-			data: { user },
-			error: authError,
-		} = await supabase.auth.getUser()
-		if (authError || !user || user.id !== userId) {
+			userId,
+			amount,
+			currency,
+			targetAsset,
+			walletAddress,
+			etherfuseCustomerId,
+			etherfuseBankAccountId,
+			escrowId,
+		} = validation.data
+
+		const session = await getAuthenticatedSession()
+		if (!session?.user?.id || session.user.id !== userId) {
 			await auditLogger.log({
 				correlationId,
 				operation: 'etherfuse.on_ramp',
@@ -52,12 +59,22 @@ async function onRampHandler(req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 		}
 
-		const config = appEnvConfig('web')
-		const { apiKey, baseUrl, customerId } = config.externalApis.etherfuse
-
-		if (!apiKey || !customerId) {
-			throw new AppError('Etherfuse API configuration is missing', 500)
+		if (!etherfuseCustomerId || !etherfuseBankAccountId) {
+			return NextResponse.json(
+				{
+					error: 'Complete Etherfuse verification for this wallet before creating a deposit order.',
+				},
+				{ status: 400 },
+			)
 		}
+
+		const config = await getEtherfuseConfig()
+		const orderContext = await resolveEtherfuseOrderContext(config, walletAddress, {
+			customerId: etherfuseCustomerId,
+			bankAccountId: etherfuseBankAccountId,
+		})
+		const { apiKey, baseUrl } = config
+		const { customerId: quoteCustomerId, bankAccountId, cryptoWalletId, publicKey } = orderContext
 
 		// Step 1: Create a quote
 		const quoteId = crypto.randomUUID()
@@ -69,7 +86,7 @@ async function onRampHandler(req: NextRequest) {
 			},
 			body: JSON.stringify({
 				quoteId,
-				customerId,
+				customerId: quoteCustomerId,
 				blockchain: 'stellar',
 				quoteAssets: {
 					type: 'onramp',
@@ -90,8 +107,6 @@ async function onRampHandler(req: NextRequest) {
 		const quoteData = await quoteResponse.json()
 
 		// Step 2: Create an order
-		// Note: In production, you would need to have bankAccountId and cryptoWalletId from onboarding
-		// For now, we'll use placeholder values that should be replaced with actual onboarding data
 		const orderId = crypto.randomUUID()
 		const orderResponse = await fetch(`${baseUrl}/ramp/order`, {
 			method: 'POST',
@@ -101,8 +116,9 @@ async function onRampHandler(req: NextRequest) {
 			},
 			body: JSON.stringify({
 				orderId,
-				bankAccountId: process.env.ETHERFUSE_BANK_ACCOUNT_ID || 'placeholder-bank-account-id',
-				cryptoWalletId: process.env.ETHERFUSE_CRYPTO_WALLET_ID || 'placeholder-crypto-wallet-id',
+				bankAccountId,
+				cryptoWalletId,
+				publicKey,
 				quoteId: quoteData.quoteId,
 			}),
 		})

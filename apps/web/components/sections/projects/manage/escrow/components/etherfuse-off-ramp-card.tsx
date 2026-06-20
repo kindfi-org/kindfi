@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowRight, ExternalLink, Landmark, Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
@@ -15,31 +15,54 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
+import { useEtherfuseRampAssets } from '~/hooks/use-etherfuse-ramp-assets'
 
 interface EtherfuseOffRampCardProps {
 	walletAddress: string
+	userId?: string
+	defaultBankAccountId?: string
 	escrowId?: string
 	onSuccess?: () => void
 }
 
 export function EtherfuseOffRampCard({
 	walletAddress,
+	userId,
+	defaultBankAccountId,
 	escrowId,
 	onSuccess,
 }: EtherfuseOffRampCardProps) {
 	const [amount, setAmount] = useState<number | ''>('')
-	const [sourceAsset, setSourceAsset] = useState(
-		'USDC:GA5ZSEJYB37JRC5AVCY5MV7R3ZR3WUYCBK6R3A3D3Q3D3Q3D3Q3D3Q3D',
-	) // Example USDC on Stellar
 	const [currency, setCurrency] = useState('MXN')
-	const [bankAccountId, setBankAccountId] = useState('')
+	const [sourceAsset, setSourceAsset] = useState('')
+	const { data: assets = [], isLoading: isLoadingAssets } = useEtherfuseRampAssets(
+		currency,
+		walletAddress,
+	)
+	const [bankAccountId, setBankAccountId] = useState(defaultBankAccountId ?? '')
 	const [isProcessing, setIsProcessing] = useState(false)
 	const [statusPage, setStatusPage] = useState<string | null>(null)
 	const [burnTransaction, setBurnTransaction] = useState<string | null>(null)
 
+	useEffect(() => {
+		if (assets.length === 0) {
+			return
+		}
+
+		const hasSelectedAsset = assets.some((asset) => asset.identifier === sourceAsset)
+		if (!hasSelectedAsset) {
+			setSourceAsset(assets[0].identifier)
+		}
+	}, [assets, sourceAsset])
+
 	const handleOffRamp = async () => {
 		if (!amount || Number(amount) <= 0) {
 			toast.error('Please enter a valid amount')
+			return
+		}
+
+		if (!sourceAsset) {
+			toast.error('Please select a source asset')
 			return
 		}
 
@@ -51,17 +74,21 @@ export function EtherfuseOffRampCard({
 		try {
 			setIsProcessing(true)
 
+			const resolvedUserId =
+				userId ?? (await fetch('/api/auth/user').then((res) => res.json())).user.id
+
 			const response = await fetch('/api/etherfuse/off-ramp', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					userId: (await fetch('/api/auth/user').then((res) => res.json())).user.id,
+					userId: resolvedUserId,
 					amount: String(amount),
 					sourceAsset,
 					currency,
 					bankAccountId,
+					walletAddress,
 					escrowId,
 				}),
 			})
@@ -140,16 +167,20 @@ export function EtherfuseOffRampCard({
 					<>
 						<div className="space-y-2">
 							<Label htmlFor="source-asset">Source Asset</Label>
-							<Select value={sourceAsset} onValueChange={setSourceAsset} disabled={isProcessing}>
+							<Select
+								value={sourceAsset}
+								onValueChange={setSourceAsset}
+								disabled={isProcessing || isLoadingAssets || assets.length === 0}
+							>
 								<SelectTrigger id="source-asset">
-									<SelectValue />
+									<SelectValue placeholder={isLoadingAssets ? 'Loading assets…' : 'Select asset'} />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="USDC:GA5ZSEJYB37JRC5AVCY5MV7R3ZR3WUYCBK6R3A3D3Q3D3Q3D3Q3D3Q3D">
-										USDC (Stellar)
-									</SelectItem>
-									<SelectItem value="CETES:GC3CW7...">CETES (Stellar)</SelectItem>
-									<SelectItem value="USDx:G...">USDx (Stellar)</SelectItem>
+									{assets.map((asset) => (
+										<SelectItem key={asset.identifier} value={asset.identifier}>
+											{asset.symbol} · {asset.name}
+										</SelectItem>
+									))}
 								</SelectContent>
 							</Select>
 						</div>
@@ -178,33 +209,39 @@ export function EtherfuseOffRampCard({
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="MXN">Mexican Peso (MXN)</SelectItem>
-									<SelectItem value="USD">US Dollar (USD)</SelectItem>
-									<SelectItem value="EUR">Euro (EUR)</SelectItem>
 									<SelectItem value="BRL">Brazilian Real (BRL)</SelectItem>
-									<SelectItem value="COP">Colombian Peso (COP)</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
 
-						<div className="space-y-2">
-							<Label htmlFor="bank-account">Bank Account</Label>
-							<Select
-								value={bankAccountId}
-								onValueChange={setBankAccountId}
-								disabled={isProcessing}
-							>
-								<SelectTrigger id="bank-account">
-									<SelectValue placeholder="Select bank account" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="bank-1">Bank Account 1 (****1234)</SelectItem>
-									<SelectItem value="bank-2">Bank Account 2 (****5678)</SelectItem>
-								</SelectContent>
-							</Select>
-							<p className="text-xs text-muted-foreground">
-								Select the bank account to receive funds
-							</p>
-						</div>
+						{defaultBankAccountId ? (
+							<div className="rounded-lg border p-4 bg-muted/50">
+								<p className="text-sm font-medium">Bank Account</p>
+								<p className="text-xs text-muted-foreground mt-1">
+									Withdrawals will be sent to your linked Etherfuse bank account.
+								</p>
+							</div>
+						) : (
+							<div className="space-y-2">
+								<Label htmlFor="bank-account">Bank Account</Label>
+								<Select
+									value={bankAccountId}
+									onValueChange={setBankAccountId}
+									disabled={isProcessing}
+								>
+									<SelectTrigger id="bank-account">
+										<SelectValue placeholder="Select bank account" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="bank-1">Bank Account 1 (****1234)</SelectItem>
+										<SelectItem value="bank-2">Bank Account 2 (****5678)</SelectItem>
+									</SelectContent>
+								</Select>
+								<p className="text-xs text-muted-foreground">
+									Select the bank account to receive funds
+								</p>
+							</div>
+						)}
 
 						<div className="rounded-lg border p-4 bg-muted/50">
 							<div className="flex items-start gap-3">
@@ -224,7 +261,9 @@ export function EtherfuseOffRampCard({
 
 						<Button
 							onClick={handleOffRamp}
-							disabled={!amount || Number(amount) <= 0 || !bankAccountId || isProcessing}
+							disabled={
+								!amount || Number(amount) <= 0 || !sourceAsset || !bankAccountId || isProcessing
+							}
 							className="w-full"
 							size="lg"
 						>

@@ -1,4 +1,9 @@
 import { z } from 'zod'
+import { etherfuseFiatCurrencySchema } from '~/lib/etherfuse/constants'
+import { externalStellarWalletSchema } from '~/lib/etherfuse/wallet'
+
+const etherfuseCustomerIdSchema = z.string().uuid('Invalid Etherfuse customer ID')
+const etherfuseBankAccountIdSchema = z.string().uuid('Invalid Etherfuse bank account ID')
 
 // Supported blockchains
 export const etherfuseBlockchainSchema = z.enum(['stellar', 'solana', 'base', 'polygon', 'monad'])
@@ -129,9 +134,11 @@ export const etherfuseDepositRequestSchema = z.object({
 		.refine((v) => !Number.isNaN(Number(v)) && Number(v) > 0, {
 			message: 'Amount must be a positive number',
 		}),
-	currency: z.string().default('MXN'),
+	currency: etherfuseFiatCurrencySchema.default('MXN'),
 	targetAsset: z.string().min(1, 'Target asset is required'),
-	walletAddress: z.string().min(1, 'Wallet address is required'),
+	walletAddress: externalStellarWalletSchema,
+	etherfuseCustomerId: etherfuseCustomerIdSchema.optional(),
+	etherfuseBankAccountId: etherfuseBankAccountIdSchema.optional(),
 	escrowId: z.string().optional(),
 })
 
@@ -145,8 +152,10 @@ export const etherfuseWithdrawalRequestSchema = z.object({
 			message: 'Amount must be a positive number',
 		}),
 	sourceAsset: z.string().min(1, 'Source asset is required'),
-	currency: z.string().default('MXN'),
-	bankAccountId: z.string().min(1, 'Bank account ID is required'),
+	currency: etherfuseFiatCurrencySchema.default('MXN'),
+	bankAccountId: etherfuseBankAccountIdSchema,
+	walletAddress: externalStellarWalletSchema,
+	etherfuseCustomerId: etherfuseCustomerIdSchema.optional(),
 	escrowId: z.string().optional(),
 })
 
