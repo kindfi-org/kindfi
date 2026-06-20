@@ -8,12 +8,20 @@ process.env.NEXTAUTH_SECRET = 'test-secret'
 process.env.ETHERFUSE_API_KEY = 'test-api-key'
 process.env.ETHERFUSE_BASE_URL = 'https://api.sand.etherfuse.com'
 process.env.ETHERFUSE_CUSTOMER_ID = 'test-customer-id'
+process.env.ETHERFUSE_BANK_ACCOUNT_ID = 'test-bank-account-id'
+process.env.ETHERFUSE_CRYPTO_WALLET_ID = 'test-crypto-wallet-id'
+
+const VALID_G_ADDRESS = 'GDUKMGUGD3V6VXTU2RLAUM7A2FABLMHCPWTMDHKP7HHJ6FCZKEY4PVWL'
+const VALID_BANK_ACCOUNT_ID = 'd86c8445-359c-421d-a66d-4e08f916fcc9'
+const VALID_CUSTOMER_ID = '935c6992-90f1-4ec3-99d2-e049de3b4ed5'
+const VALID_WALLET_ID = '5915dfc1-8995-4465-9c04-76470298b8b3'
 
 // ===== Mutable mock state (configured per test in beforeEach) =====
 let mockDbResults: Record<string, any> = {}
 let mockEtherfuseQuoteResponse: any = null
 let mockEtherfuseOrderResponse: any = null
 let mockFetchCalls: Array<{ url: string; options: RequestInit }> = []
+let mockSession: { user: { id: string } } | null = { user: { id: 'test-user' } }
 
 // ===== Module mocks =====
 
@@ -46,13 +54,6 @@ function createChain(result: any) {
 mock.module('@packages/lib/supabase', () => ({
 	supabase: {
 		from: (table: string) => createChain(mockDbResults[table] ?? { data: null, error: null }),
-		auth: {
-			getUser: () =>
-				Promise.resolve({
-					data: { user: { id: 'test-user' } },
-					error: null,
-				}),
-		},
 	},
 }))
 
@@ -70,7 +71,7 @@ mock.module('next/server', () => ({
 
 // next-auth
 mock.module('next-auth', () => ({
-	getServerSession: () => Promise.resolve(null),
+	getServerSession: () => Promise.resolve(mockSession),
 }))
 mock.module('~/lib/auth/auth-options', () => ({ nextAuthOption: {} }))
 
@@ -103,6 +104,104 @@ mock.module('~/lib/schemas/etherfuse.schemas', () => ({
 // Global fetch mock
 const mockFetch = mock((url: string, options?: RequestInit) => {
 	mockFetchCalls.push({ url, options: options || {} })
+
+	if (url.includes('/ramp/bank-accounts')) {
+		return Promise.resolve(
+			new Response(
+				JSON.stringify({
+					items: [{ bankAccountId: VALID_BANK_ACCOUNT_ID, status: 'active', compliant: true }],
+				}),
+				{ status: 200, headers: { 'Content-Type': 'application/json' } },
+			),
+		)
+	}
+
+	if (url.includes('/ramp/customer/') && url.includes('/bank-accounts')) {
+		return Promise.resolve(
+			new Response(
+				JSON.stringify({
+					items: [
+						{
+							bankAccountId: VALID_BANK_ACCOUNT_ID,
+							status: 'active',
+							compliant: true,
+							customerId: VALID_CUSTOMER_ID,
+						},
+					],
+				}),
+				{ status: 200, headers: { 'Content-Type': 'application/json' } },
+			),
+		)
+	}
+
+	if (url.includes('/ramp/customer/') && url.includes('/kyc')) {
+		return Promise.resolve(
+			new Response(JSON.stringify({ status: 'approved' }), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' },
+			}),
+		)
+	}
+
+	if (url.includes('/ramp/customer/') && url.includes('/wallets')) {
+		return Promise.resolve(
+			new Response(
+				JSON.stringify({
+					items: [
+						{
+							walletId: VALID_WALLET_ID,
+							publicKey: VALID_G_ADDRESS,
+							customerId: VALID_CUSTOMER_ID,
+							blockchain: 'stellar',
+						},
+					],
+				}),
+				{ status: 200, headers: { 'Content-Type': 'application/json' } },
+			),
+		)
+	}
+
+	if (url.includes('/ramp/wallets')) {
+		return Promise.resolve(
+			new Response(
+				JSON.stringify({
+					items: [
+						{
+							walletId: VALID_WALLET_ID,
+							publicKey: VALID_G_ADDRESS,
+							customerId: VALID_CUSTOMER_ID,
+							blockchain: 'stellar',
+						},
+					],
+				}),
+				{ status: 200, headers: { 'Content-Type': 'application/json' } },
+			),
+		)
+	}
+
+	if (url.includes('/ramp/wallet/')) {
+		return Promise.resolve(
+			new Response(
+				JSON.stringify({
+					walletId: VALID_WALLET_ID,
+					publicKey: VALID_G_ADDRESS,
+					customerId: VALID_CUSTOMER_ID,
+					kycStatus: 'approved',
+					blockchain: 'stellar',
+				}),
+				{ status: 200, headers: { 'Content-Type': 'application/json' } },
+			),
+		)
+	}
+
+	if (url.includes('/ramp/wallet')) {
+		return Promise.resolve(
+			new Response(JSON.stringify({ walletId: VALID_WALLET_ID }), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' },
+			}),
+		)
+	}
 
 	if (url.includes('/ramp/quote')) {
 		if (mockEtherfuseQuoteResponse) {
@@ -161,6 +260,7 @@ describe('Etherfuse on-ramp integration', () => {
 	let errorSpy: ReturnType<typeof spyOn>
 
 	beforeEach(() => {
+		mockSession = { user: { id: 'test-user' } }
 		infoSpy = spyOn(console, 'info').mockImplementation(() => {})
 		errorSpy = spyOn(console, 'error').mockImplementation(() => {})
 		mockAuditLog.mockClear()
@@ -171,8 +271,10 @@ describe('Etherfuse on-ramp integration', () => {
 				userId: 'test-user',
 				amount: '100',
 				currency: 'MXN',
-				targetAsset: 'USDC:GA5ZSEJYB37JRC5AVCY5MV7R3ZR3WUYCBK6R3A3D3Q3D3Q3D3Q3D3Q3D',
-				walletAddress: 'GABCD1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890',
+				targetAsset: 'USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
+				walletAddress: VALID_G_ADDRESS,
+				etherfuseCustomerId: VALID_CUSTOMER_ID,
+				etherfuseBankAccountId: VALID_BANK_ACCOUNT_ID,
 			},
 		}))
 		mockEtherfuseQuoteResponse = {
@@ -180,7 +282,7 @@ describe('Etherfuse on-ramp integration', () => {
 			sourceAmount: '100',
 			targetAmount: '95.50',
 			sourceAsset: 'MXN',
-			targetAsset: 'USDC:GA5ZSEJYB37JRC5AVCY5MV7R3ZR3WUYCBK6R3A3D3Q3D3Q3D3Q3D3Q3D',
+			targetAsset: 'USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
 		}
 		mockEtherfuseOrderResponse = {
 			orderId: '223e4567-e89b-12d3-a456-426614174001',
@@ -252,18 +354,7 @@ describe('Etherfuse on-ramp integration', () => {
 	})
 
 	test('handles unauthorized user', async () => {
-		mock.module('@packages/lib/supabase', () => ({
-			supabase: {
-				from: () => createChain({ data: null, error: null }),
-				auth: {
-					getUser: () =>
-						Promise.resolve({
-							data: { user: null },
-							error: { message: 'Unauthorized' },
-						}),
-				},
-			},
-		}))
+		mockSession = null
 
 		const { POST } = await import('../app/api/etherfuse/on-ramp/route')
 		const res = await POST(createRequest({}) as any)
@@ -281,6 +372,7 @@ describe('Etherfuse off-ramp integration', () => {
 	let errorSpy: ReturnType<typeof spyOn>
 
 	beforeEach(() => {
+		mockSession = { user: { id: 'test-user' } }
 		infoSpy = spyOn(console, 'info').mockImplementation(() => {})
 		errorSpy = spyOn(console, 'error').mockImplementation(() => {})
 		mockAuditLog.mockClear()
@@ -290,16 +382,18 @@ describe('Etherfuse off-ramp integration', () => {
 			data: {
 				userId: 'test-user',
 				amount: '50',
-				sourceAsset: 'USDC:GA5ZSEJYB37JRC5AVCY5MV7R3ZR3WUYCBK6R3A3D3Q3D3Q3D3Q3D3Q3D',
+				sourceAsset: 'USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
 				currency: 'MXN',
-				bankAccountId: 'bank-acc-123',
+				bankAccountId: VALID_BANK_ACCOUNT_ID,
+				walletAddress: VALID_G_ADDRESS,
+				etherfuseCustomerId: VALID_CUSTOMER_ID,
 			},
 		}))
 		mockEtherfuseQuoteResponse = {
 			quoteId: '323e4567-e89b-12d3-a456-426614174002',
 			sourceAmount: '50',
 			targetAmount: '47.75',
-			sourceAsset: 'USDC:GA5ZSEJYB37JRC5AVCY5MV7R3ZR3WUYCBK6R3A3D3Q3D3Q3D3Q3D3Q3D',
+			sourceAsset: 'USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
 			targetAsset: 'MXN',
 		}
 		mockEtherfuseOrderResponse = {
@@ -312,19 +406,6 @@ describe('Etherfuse off-ramp integration', () => {
 		mockDbResults = {
 			transactions: { data: { id: 'tx-456' }, error: null },
 		}
-		// Reset auth mock for off-ramp tests
-		mock.module('@packages/lib/supabase', () => ({
-			supabase: {
-				from: (table: string) => createChain(mockDbResults[table] ?? { data: null, error: null }),
-				auth: {
-					getUser: () =>
-						Promise.resolve({
-							data: { user: { id: 'test-user' } },
-							error: null,
-						}),
-				},
-			},
-		}))
 	})
 
 	afterEach(() => {
