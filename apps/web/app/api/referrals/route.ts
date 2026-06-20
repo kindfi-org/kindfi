@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { limitOffsetQuerySchema } from '~/lib/schemas/common.schemas'
 import { createReferralSchema } from '~/lib/schemas/referral.schemas'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
@@ -34,12 +35,22 @@ async function resolveUserStellarAddress(
  * but this app authenticates via NextAuth. The session check above ensures
  * only authenticated users can access this endpoint.
  */
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
 	try {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
+
+		const { searchParams } = req.nextUrl
+		const paginationValidation = validateRequest(limitOffsetQuerySchema, {
+			limit: searchParams.get('limit'),
+			offset: searchParams.get('offset'),
+		})
+		if (!paginationValidation.success) {
+			return paginationValidation.response
+		}
+		const { limit, offset } = paginationValidation.data
 
 		// Use service role client to bypass RLS — auth is handled by NextAuth session above
 		const { supabase } = await import('@packages/lib/supabase')
@@ -48,14 +59,15 @@ export async function GET(_req: NextRequest) {
 		const [referralsResult, statsResult, referredResult] = await Promise.all([
 			supabase
 				.from('referral_records')
-				.select('*')
+				.select('*', { count: 'exact' })
 				.eq('referrer_id', session.user.id)
-				.order('created_at', { ascending: false }),
+				.order('created_at', { ascending: false })
+				.range(offset, offset + limit - 1),
 			supabase.from('referrer_statistics').select('*').eq('referrer_id', session.user.id).single(),
 			supabase.from('referral_records').select('*').eq('referred_id', session.user.id).single(),
 		])
 
-		const { data: referrals, error: referralsError } = referralsResult
+		const { data: referrals, error: referralsError, count: referralsCount } = referralsResult
 		const { data: stats, error: statsError } = statsResult
 		const { data: referredRecord } = referredResult
 
@@ -75,6 +87,7 @@ export async function GET(_req: NextRequest) {
 				total_reward_points: 0,
 			},
 			referred_by: referredRecord?.referrer_id || null,
+			pagination: { limit, offset, total: referralsCount ?? 0 },
 		})
 	} catch (error) {
 		logger.error('Error in GET /api/referrals:', error)

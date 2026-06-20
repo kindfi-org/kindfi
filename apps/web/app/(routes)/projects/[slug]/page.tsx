@@ -2,11 +2,17 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { cache } from 'react'
 import { ProjectClientWrapper } from '~/components/sections/projects/detail/project-client-wrapper'
 import { JsonLd } from '~/components/shared/json-ld'
 import { getProjectBySlug } from '~/lib/queries/projects'
 import { getBreadcrumbSchema, SITE_URL } from '~/lib/seo/structured-data'
 import { validateProjectSlug } from '~/lib/validation/project-slug'
+
+const getProjectBySlugCached = cache(async (slug: string) => {
+	const client = await createSupabaseServerClient()
+	return getProjectBySlug(client, slug)
+})
 
 export async function generateMetadata({
 	params,
@@ -15,8 +21,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
 	const { slug } = await params
 	if (!validateProjectSlug(slug)) return { title: 'Project | KindFi' }
-	const client = await createSupabaseServerClient()
-	const project = await getProjectBySlug(client, slug)
+	const project = await getProjectBySlugCached(slug)
 	if (!project) return { title: 'Project | KindFi' }
 	return {
 		title: `${project.title} | KindFi`,
@@ -50,8 +55,7 @@ export default async function ProjectDetailPage({
 	const { slug } = await params
 	if (!validateProjectSlug(slug)) notFound()
 
-	const client = await createSupabaseServerClient()
-	const project = await getProjectBySlug(client, slug)
+	const project = await getProjectBySlugCached(slug)
 
 	if (!project) notFound()
 
