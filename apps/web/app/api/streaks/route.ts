@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { limitOffsetQuerySchema } from '~/lib/schemas/common.schemas'
 import { recordStreakSchema } from '~/lib/schemas/streak.schemas'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
@@ -15,28 +16,46 @@ import { validateRequest } from '~/lib/utils/validation'
  * but this app authenticates via NextAuth. The session check above ensures
  * only authenticated users can access this endpoint.
  */
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
 	try {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
+		const { searchParams } = req.nextUrl
+		const paginationValidation = validateRequest(limitOffsetQuerySchema, {
+			limit: searchParams.get('limit'),
+			offset: searchParams.get('offset'),
+		})
+		if (!paginationValidation.success) {
+			return paginationValidation.response
+		}
+		const { limit, offset } = paginationValidation.data
+
 		// Use service role client to bypass RLS — auth is handled by NextAuth session above
 		const { supabase } = await import('@packages/lib/supabase')
 
-		const { data: streaks, error } = await supabase
+		const {
+			data: streaks,
+			error,
+			count,
+		} = await supabase
 			.from('user_streaks')
-			.select('*')
+			.select('*', { count: 'exact' })
 			.eq('user_id', session.user.id)
 			.order('period', { ascending: true })
+			.range(offset, offset + limit - 1)
 
 		if (error) {
 			logger.error('Error fetching streaks:', error)
 			return NextResponse.json({ error: 'Failed to fetch streaks' }, { status: 500 })
 		}
 
-		return NextResponse.json({ streaks: streaks || [] })
+		return NextResponse.json({
+			streaks: streaks || [],
+			pagination: { limit, offset, total: count ?? 0 },
+		})
 	} catch (error) {
 		logger.error('Error in GET /api/streaks:', error)
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
