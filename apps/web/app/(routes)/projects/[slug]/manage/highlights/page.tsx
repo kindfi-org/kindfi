@@ -100,15 +100,12 @@ export default function ProjectHighlights() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
-			{/* Subtle background pattern */}
-			<div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,1,36,0.03)_1px,transparent_0)] bg-[size:32px_32px] opacity-40" />
-
+		<div className="relative">
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.4 }}
-				className="relative z-10 max-w-7xl mx-auto px-4 py-8 md:py-12"
+				className="relative z-10"
 			>
 				<div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
 					{/* Main Content */}

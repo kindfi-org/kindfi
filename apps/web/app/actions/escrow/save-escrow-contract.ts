@@ -167,7 +167,8 @@ export async function saveEscrowContractAction(
 				.insert({
 					project_id: validated.projectId,
 					contributor_id: userId,
-					amount: totalAmount,
+					// Placeholder row for escrow_contracts FK only — not funded capital.
+					amount: 0,
 				})
 				.select('id')
 				.single()

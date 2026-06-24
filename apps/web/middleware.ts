@@ -13,11 +13,20 @@ const AUTH_PROTECTED_PATHS = ['/create-project', '/profile']
 // const AUTH_PROTECTED_PATHS: string[] = []
 
 function isProtectedPath(pathname: string) {
-	return (
-		AUTH_PROTECTED_PATHS.includes(pathname) ||
-		// /projects/[slug]/manage pattern
-		(pathname.startsWith('/projects/') && pathname.endsWith('/manage'))
-	)
+	if (AUTH_PROTECTED_PATHS.includes(pathname)) {
+		return true
+	}
+
+	// Project and foundation manage areas (including sub-routes)
+	if (pathname.startsWith('/projects/') && pathname.includes('/manage')) {
+		return true
+	}
+
+	if (pathname.startsWith('/foundations/') && pathname.includes('/manage')) {
+		return true
+	}
+
+	return false
 }
 
 const AUTH_PAGES = ['/sign-in', '/sign-up', '/reset-password', '/reset-account']
