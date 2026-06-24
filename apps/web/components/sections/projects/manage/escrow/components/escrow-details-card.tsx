@@ -89,7 +89,7 @@ export function EscrowDetailsCard({ escrowData, escrowContractAddress }: EscrowD
 										navigator.clipboard.writeText(escrowData.contractId || escrowContractAddress)
 										toast.success('Contract ID copied to clipboard')
 									}}
-									title="Copy Contract ID"
+									aria-label="Copy contract ID"
 								>
 									<Copy className="w-3 h-3" />
 								</Button>
@@ -98,7 +98,7 @@ export function EscrowDetailsCard({ escrowData, escrowContractAddress }: EscrowD
 									size="sm"
 									className="h-6 w-6 p-0"
 									asChild
-									title="View on Stellar Explorer"
+									aria-label="View contract on Stellar explorer"
 								>
 									<Link
 										href={getStellarExplorerUrl(escrowData.contractId || escrowContractAddress)}

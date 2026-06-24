@@ -5,10 +5,12 @@ import type {
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import { CheckCircle2, FileText, Loader2, TrendingUp } from 'lucide-react'
+import { ArrowRight, CheckCircle2, FileText, Loader2, Send, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
+import { Alert, AlertDescription } from '~/components/base/alert'
+import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Input } from '~/components/base/input'
@@ -22,7 +24,12 @@ import {
 } from '~/components/base/select'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
-import { getMilestoneStatus, isSingleReleaseMilestone } from '~/lib/utils/escrow/milestone-utils'
+import { cn } from '~/lib/utils'
+import {
+	getMilestoneStatus,
+	isSingleReleaseMilestone,
+	truncateAddress,
+} from '~/lib/utils/escrow/milestone-utils'
 
 interface MilestonesTabProps {
 	escrowContractAddress: string
@@ -30,6 +37,7 @@ interface MilestonesTabProps {
 	milestones: (SingleReleaseMilestone | MultiReleaseMilestone)[]
 	isLoading: boolean
 	onSuccess: () => void
+	onGoToRelease?: () => void
 }
 
 export function MilestonesTab({
@@ -38,13 +46,17 @@ export function MilestonesTab({
 	milestones,
 	isLoading,
 	onSuccess,
+	onGoToRelease,
 }: MilestonesTabProps) {
 	const { approveMilestone, changeMilestoneStatus, sendTransaction } = useEscrow()
 	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState('0')
-	const [milestoneStatus, setMilestoneStatus] = useState('approved')
+	const [milestoneStatus, setMilestoneStatus] = useState('in_progress')
 	const [milestoneEvidence, setMilestoneEvidence] = useState('')
 	const [isProcessing, setIsProcessing] = useState(false)
+
+	const selectedIndex = Number(selectedMilestoneIndex)
+	const selectedMilestone = milestones[selectedIndex]
 
 	const handleApproveMilestone = async () => {
 		try {
@@ -70,7 +82,7 @@ export function MilestonesTab({
 				throw new Error('Transaction failed')
 			}
 
-			toast.success('Milestone approved successfully!')
+			toast.success('Milestone approved successfully')
 			onSuccess()
 		} catch (error) {
 			logger.error(error)
@@ -107,7 +119,7 @@ export function MilestonesTab({
 				throw new Error('Transaction failed')
 			}
 
-			toast.success('Milestone status updated successfully!')
+			toast.success('Milestone status updated successfully')
 			setMilestoneEvidence('')
 			onSuccess()
 		} catch (error) {
@@ -123,11 +135,11 @@ export function MilestonesTab({
 	if (isLoading) {
 		return (
 			<Card>
-				<CardContent className="py-12">
-					<div className="flex flex-col items-center justify-center space-y-4">
-						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Loading milestones...</p>
-					</div>
+				<CardContent className="flex flex-col items-center justify-center gap-4 py-12">
+					<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
+					<p className="text-sm text-muted-foreground" aria-live="polite">
+						Loading milestones…
+					</p>
 				</CardContent>
 			</Card>
 		)
@@ -136,131 +148,150 @@ export function MilestonesTab({
 	if (milestones.length === 0) {
 		return (
 			<Card>
-				<CardContent className="py-12">
-					<div className="flex flex-col items-center justify-center space-y-4">
-						<FileText className="h-8 w-8 text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">
-							No milestones found. Milestones are defined when creating the escrow.
-						</p>
-					</div>
+				<CardContent className="flex flex-col items-center justify-center gap-4 py-12">
+					<FileText className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+					<p className="text-sm text-muted-foreground">
+						No milestones found. They are defined when the escrow is created.
+					</p>
 				</CardContent>
 			</Card>
 		)
 	}
 
+	const isSelectedApproved = selectedMilestone ? getMilestoneStatus(selectedMilestone) : false
+
 	return (
-		<>
+		<div className="space-y-6">
 			<Card>
 				<CardHeader>
-					<CardTitle>Milestones</CardTitle>
-					<CardDescription>View and manage all escrow milestones</CardDescription>
+					<CardTitle>Select a Milestone</CardTitle>
+					<CardDescription>
+						Choose a milestone to update its status or approve it. Approver and Service Provider
+						roles sign with their connected wallet.
+					</CardDescription>
 				</CardHeader>
-				<CardContent>
-					<div className="space-y-4">
-						{milestones.map((milestone, index) => {
-							const isApproved = getMilestoneStatus(milestone)
-							const isSingle = isSingleReleaseMilestone(milestone)
+				<CardContent className="space-y-3">
+					{milestones.map((milestone, index) => {
+						const isApproved = getMilestoneStatus(milestone)
+						const isSingle = isSingleReleaseMilestone(milestone)
+						const isSelected = selectedMilestoneIndex === String(index)
+						const multiMilestone = milestone as MultiReleaseMilestone
 
-							return (
-								<div
-									key={index}
-									className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
-								>
-									<div className="flex-shrink-0">
-										<div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-semibold">
-											{index + 1}
-										</div>
+						return (
+							<button
+								key={index}
+								type="button"
+								onClick={() => setSelectedMilestoneIndex(String(index))}
+								className={cn(
+									'w-full rounded-xl border p-4 text-left transition-[border-color,background-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+									isSelected
+										? 'border-primary bg-primary/5 shadow-sm'
+										: 'bg-card hover:border-primary/30 hover:bg-muted/30',
+								)}
+								aria-pressed={isSelected}
+							>
+								<div className="flex items-start gap-3">
+									<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+										{index + 1}
 									</div>
-									<div className="flex-1 space-y-2">
-										<div className="flex items-center gap-2">
-											<h4 className="font-semibold">Milestone {index + 1}</h4>
+									<div className="min-w-0 flex-1 space-y-2">
+										<div className="flex flex-wrap items-center gap-2">
+											<span className="font-semibold">Milestone {index + 1}</span>
 											{isApproved ? (
-												<span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+												<Badge className="gap-1">
+													<CheckCircle2 className="h-3 w-3" aria-hidden="true" />
 													Approved
-												</span>
+												</Badge>
 											) : (
-												<span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-													Pending
-												</span>
+												<Badge variant="secondary">Pending approval</Badge>
 											)}
+											{!isSingle && multiMilestone.flags?.released ? (
+												<Badge variant="outline" className="gap-1">
+													<Send className="h-3 w-3" aria-hidden="true" />
+													Released
+												</Badge>
+											) : null}
 										</div>
 										<p className="text-sm text-muted-foreground">{milestone.description}</p>
-										{!isSingle && (
-											<div className="flex items-center gap-4 text-sm">
-												<span>
-													Amount:{' '}
-													<span className="font-semibold">
-														${(milestone as MultiReleaseMilestone).amount?.toLocaleString()}
+										{!isSingle ? (
+											<div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+												{typeof multiMilestone.amount === 'number' ? (
+													<span className="tabular-nums">
+														Amount: ${multiMilestone.amount.toLocaleString()}
 													</span>
-												</span>
-												{milestone.evidence && (
-													<span className="text-muted-foreground flex items-center gap-1">
-														<FileText className="w-3 h-3" />
-														Evidence provided
+												) : null}
+												{multiMilestone.receiver ? (
+													<span className="font-mono">
+														Receiver: {truncateAddress(multiMilestone.receiver, 6)}
 													</span>
-												)}
+												) : null}
 											</div>
-										)}
-										{milestone.status && (
-											<span className="text-xs text-muted-foreground">
-												Status: {milestone.status}
-											</span>
-										)}
+										) : null}
 									</div>
 								</div>
-							)
-						})}
-					</div>
+							</button>
+						)
+					})}
 				</CardContent>
 			</Card>
 
-			{/* Milestone Actions */}
-			<div className="grid gap-6 md:grid-cols-2">
+			<div className="grid gap-6 lg:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<CheckCircle2 className="w-5 h-5" />
-							Approve Milestone
+						<CardTitle className="flex items-center gap-2 text-lg">
+							<TrendingUp className="h-5 w-5" aria-hidden="true" />
+							Update Progress
 						</CardTitle>
 						<CardDescription>
-							Approve a milestone as completed (Approver role required)
+							Service Provider role: mark work in progress and attach evidence.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="approve-milestone-select">Select Milestone</Label>
+							<Label htmlFor="milestone-status">Status</Label>
 							<Select
-								value={selectedMilestoneIndex}
-								onValueChange={setSelectedMilestoneIndex}
+								value={milestoneStatus}
+								onValueChange={setMilestoneStatus}
 								disabled={isProcessing}
 							>
-								<SelectTrigger id="approve-milestone-select">
+								<SelectTrigger id="milestone-status">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									{milestones.map((_, index) => (
-										<SelectItem key={index} value={String(index)}>
-											Milestone {index + 1}
-										</SelectItem>
-									))}
+									<SelectItem value="in_progress">In Progress</SelectItem>
+									<SelectItem value="pending">Pending</SelectItem>
+									<SelectItem value="approved">Approved</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
+						<div className="space-y-2">
+							<Label htmlFor="milestone-evidence">Evidence or Notes</Label>
+							<Input
+								id="milestone-evidence"
+								name="milestone-evidence"
+								autoComplete="off"
+								value={milestoneEvidence}
+								onChange={(e) => setMilestoneEvidence(e.target.value)}
+								placeholder="Link, summary, or delivery note…"
+								disabled={isProcessing}
+							/>
+						</div>
 						<Button
-							onClick={handleApproveMilestone}
+							type="button"
+							variant="outline"
+							onClick={handleChangeMilestoneStatus}
 							disabled={isProcessing}
 							className="w-full"
-							size="lg"
 						>
 							{isProcessing ? (
 								<>
-									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-									Processing...
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+									Updating…
 								</>
 							) : (
 								<>
-									<CheckCircle2 className="w-4 h-4 mr-2" />
-									Approve Milestone
+									<TrendingUp className="mr-2 h-4 w-4" aria-hidden="true" />
+									Update Milestone {selectedIndex + 1}
 								</>
 							)}
 						</Button>
@@ -269,85 +300,61 @@ export function MilestonesTab({
 
 				<Card>
 					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<TrendingUp className="w-5 h-5" />
-							Update Status
+						<CardTitle className="flex items-center gap-2 text-lg">
+							<CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+							Approve Milestone
 						</CardTitle>
 						<CardDescription>
-							Update milestone status and add evidence (Service Provider role required)
+							Approver role: confirm deliverables are complete before funds can release.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						<div className="space-y-4">
-							<div className="space-y-2">
-								<Label htmlFor="status-milestone-select">Select Milestone</Label>
-								<Select
-									value={selectedMilestoneIndex}
-									onValueChange={setSelectedMilestoneIndex}
-									disabled={isProcessing}
-								>
-									<SelectTrigger id="status-milestone-select">
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										{milestones.map((_, index) => (
-											<SelectItem key={index} value={String(index)}>
-												Milestone {index + 1}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="space-y-2">
-								<Label htmlFor="milestone-status">Status</Label>
-								<Select
-									value={milestoneStatus}
-									onValueChange={setMilestoneStatus}
-									disabled={isProcessing}
-								>
-									<SelectTrigger id="milestone-status">
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="approved">Approved</SelectItem>
-										<SelectItem value="in_progress">In Progress</SelectItem>
-										<SelectItem value="pending">Pending</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="space-y-2">
-								<Label htmlFor="milestone-evidence">Evidence (Optional)</Label>
-								<Input
-									id="milestone-evidence"
-									value={milestoneEvidence}
-									onChange={(e) => setMilestoneEvidence(e.target.value)}
-									placeholder="Add evidence or notes"
-									disabled={isProcessing}
-								/>
-							</div>
-						</div>
+						{isSelectedApproved ? (
+							<Alert>
+								<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+								<AlertDescription>
+									Milestone {selectedIndex + 1} is already approved. Go to Release to send funds.
+								</AlertDescription>
+							</Alert>
+						) : (
+							<p className="text-sm text-muted-foreground">
+								Approving milestone {selectedIndex + 1} allows the Release Signer to disburse
+								{escrowType === 'multi-release'
+									? ' this milestone’s amount'
+									: ' the escrow balance'}
+								.
+							</p>
+						)}
+
 						<Button
-							onClick={handleChangeMilestoneStatus}
-							variant="outline"
-							disabled={isProcessing}
+							type="button"
+							onClick={handleApproveMilestone}
+							disabled={isProcessing || isSelectedApproved}
 							className="w-full"
 							size="lg"
 						>
 							{isProcessing ? (
 								<>
-									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-									Processing...
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+									Approving…
 								</>
 							) : (
 								<>
-									<TrendingUp className="w-4 h-4 mr-2" />
-									Update Status
+									<CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
+									Approve Milestone {selectedIndex + 1}
 								</>
 							)}
 						</Button>
+
+						{isSelectedApproved && onGoToRelease ? (
+							<Button type="button" variant="secondary" onClick={onGoToRelease} className="w-full">
+								Go to Release
+								<ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+							</Button>
+						) : null}
 					</CardContent>
 				</Card>
 			</div>
-		</>
+		</div>
 	)
 }
