@@ -19,11 +19,19 @@ import type { FormValues } from '../types'
 interface DonationFormProps {
 	project: ProjectDetail
 	hasEscrow: boolean
+	isGoalReached: boolean
 	form: UseFormReturn<FormValues>
 	onSubmit: (data: FormValues) => Promise<void>
 }
 
-export function DonationForm({ project, hasEscrow, form, onSubmit }: DonationFormProps) {
+export function DonationForm({
+	project,
+	hasEscrow,
+	isGoalReached,
+	form,
+	onSubmit,
+}: DonationFormProps) {
+	const canDonate = hasEscrow && !isGoalReached
 	return (
 		<>
 			{hasEscrow && (
@@ -49,13 +57,17 @@ export function DonationForm({ project, hasEscrow, form, onSubmit }: DonationFor
 											type="text"
 											inputMode="decimal"
 											placeholder={
-												hasEscrow ? `Min. $${project.minInvestment}…` : 'Donations coming soon'
+												!hasEscrow
+													? 'Donations coming soon'
+													: isGoalReached
+														? 'Funding goal reached'
+														: `Min. $${project.minInvestment}…`
 											}
 											className="pl-6 disabled:opacity-60 disabled:cursor-not-allowed"
 											aria-label="Donation amount in USD"
 											autoComplete="off"
 											{...field}
-											disabled={!hasEscrow}
+											disabled={!canDonate}
 										/>
 									</FormControl>
 								</div>
@@ -68,7 +80,7 @@ export function DonationForm({ project, hasEscrow, form, onSubmit }: DonationFor
 						type="submit"
 						className="mt-4 w-full text-white gradient-btn"
 						size="lg"
-						disabled={!hasEscrow || !form.formState.isValid || form.formState.isSubmitting}
+						disabled={!canDonate || !form.formState.isValid || form.formState.isSubmitting}
 						aria-busy={form.formState.isSubmitting}
 					>
 						{form.formState.isSubmitting ? (
@@ -88,12 +100,22 @@ export function DonationForm({ project, hasEscrow, form, onSubmit }: DonationFor
 
 interface DonationNoticesProps {
 	hasEscrow: boolean
+	isGoalReached: boolean
 }
 
-export function DonationNotices({ hasEscrow }: DonationNoticesProps) {
+export function DonationNotices({ hasEscrow, isGoalReached }: DonationNoticesProps) {
 	return (
 		<>
-			{hasEscrow && (
+			{hasEscrow && isGoalReached && (
+				<div className="p-3 my-4 text-sm text-green-900 bg-green-50 rounded-md border border-green-300">
+					<p className="font-medium mb-1">Funding goal reached</p>
+					<p className="text-green-800">
+						This project has met its fundraising target. Thank you to everyone who contributed!
+					</p>
+				</div>
+			)}
+
+			{hasEscrow && !isGoalReached && (
 				<div className="p-3 my-4 text-sm text-amber-900 bg-amber-50 rounded-md border border-amber-300">
 					Donating without logging in means you will miss out on features like reputation,
 					contributor NFTs, and future perks. If that&apos;s fine, you can still donate anonymously.

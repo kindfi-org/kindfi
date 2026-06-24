@@ -7,6 +7,7 @@ import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
 import {
 	checkDuplicateContribution,
+	checkFundraisingGoalNotReached,
 	createContributionWithProjectUpdate,
 	resolveProjectId,
 	sendContributionNotifications,
@@ -58,6 +59,11 @@ async function createContributionHandler(req: NextRequest) {
 
 		if (!finalProjectId) {
 			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
+		}
+
+		const goalCheck = await checkFundraisingGoalNotReached(finalProjectId, contractId)
+		if (!goalCheck.allowed) {
+			return NextResponse.json({ error: goalCheck.error }, { status: 403 })
 		}
 
 		const duplicateCheck = await checkDuplicateContribution({

@@ -42,10 +42,16 @@ export function useProjectSidebar(project: ProjectDetail) {
 
 	const hasEscrow = Boolean(project.escrowContractAddress)
 
+	const effectiveRaised = onChainRaised ?? project.raised
+
 	const progressPercentage = useMemo(() => {
-		const raised = onChainRaised ?? project.raised
-		return Math.min(Math.round((raised / project.goal) * 100), 100)
-	}, [onChainRaised, project.goal, project.raised])
+		return Math.min(Math.round((effectiveRaised / project.goal) * 100), 100)
+	}, [effectiveRaised, project.goal])
+
+	const isGoalReached = useMemo(
+		() => hasEscrow && project.goal > 0 && effectiveRaised >= project.goal,
+		[hasEscrow, project.goal, effectiveRaised],
+	)
 
 	const formSchema = useMemo(() => buildFormSchema(project.minInvestment), [project.minInvestment])
 
@@ -105,6 +111,15 @@ export function useProjectSidebar(project: ProjectDetail) {
 	const onSubmit = async (data: FormValues) => {
 		if (!project.escrowContractAddress) {
 			toast.error('Escrow is not configured for this project', {
+				icon: <CircleAlert className="text-destructive" />,
+			})
+			return
+		}
+
+		if (isGoalReached) {
+			toast.error('Funding goal reached', {
+				description:
+					'This project has met its fundraising goal and is no longer accepting donations.',
 				icon: <CircleAlert className="text-destructive" />,
 			})
 			return
@@ -272,6 +287,7 @@ export function useProjectSidebar(project: ProjectDetail) {
 	return {
 		form,
 		hasEscrow,
+		isGoalReached,
 		progressPercentage,
 		onChainRaised,
 		isFetchingBalance,

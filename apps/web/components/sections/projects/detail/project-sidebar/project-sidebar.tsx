@@ -21,6 +21,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 	const {
 		form,
 		hasEscrow,
+		isGoalReached,
 		progressPercentage,
 		onChainRaised,
 		isFetchingBalance,
@@ -46,7 +47,15 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			<div className="p-6">
 				<div className="flex items-center gap-2 mb-2">
 					<h2 className="text-xl font-bold">Support This Project</h2>
-					{hasEscrow ? (
+					{hasEscrow && isGoalReached ? (
+						<Badge
+							variant="secondary"
+							className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-0"
+							aria-label="This project has reached its funding goal"
+						>
+							Goal reached
+						</Badge>
+					) : hasEscrow ? (
 						<Badge
 							variant="secondary"
 							className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-0"
@@ -65,9 +74,11 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					)}
 				</div>
 				<p className="mb-4 text-muted-foreground">
-					{hasEscrow
-						? 'Your contribution matters. Join the change.'
-						: 'This project is still setting up secure escrow. Donations will be available soon.'}
+					{!hasEscrow
+						? 'This project is still setting up secure escrow. Donations will be available soon.'
+						: isGoalReached
+							? 'This project has reached its fundraising goal. Thank you for your support!'
+							: 'Your contribution matters. Join the change.'}
 				</p>
 
 				<ProjectProgressBar
@@ -77,9 +88,15 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					isFetchingBalance={isFetchingBalance}
 				/>
 
-				<DonationForm project={project} hasEscrow={hasEscrow} form={form} onSubmit={onSubmit} />
+				<DonationForm
+					project={project}
+					hasEscrow={hasEscrow}
+					isGoalReached={isGoalReached}
+					form={form}
+					onSubmit={onSubmit}
+				/>
 
-				<DonationNotices hasEscrow={hasEscrow} />
+				<DonationNotices hasEscrow={hasEscrow} isGoalReached={isGoalReached} />
 
 				{project.escrowContractAddress && (
 					<EscrowContractInfo escrowContractAddress={project.escrowContractAddress} />

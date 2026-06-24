@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { NextRequest } from 'next/server'
 import type { Session } from 'next-auth'
 import { logger } from '@/lib/logger'
+import { getEscrowBalance } from '~/lib/services/escrow-balance.service'
 
 export type ResolveProjectIdInput = {
 	contractId?: string
@@ -33,6 +34,57 @@ export type TriggerGamificationUpdatesInput = {
 	session: Session
 	amount: string | number
 	req: NextRequest
+}
+
+export type FundraisingGoalCheckResult = { allowed: true } | { allowed: false; error: string }
+
+export async function checkFundraisingGoalNotReached(
+	projectId: string,
+	contractId?: string,
+): Promise<FundraisingGoalCheckResult> {
+	const { data: project, error: projectError } = await supabase
+		.from('projects')
+		.select('target_amount, current_amount')
+		.eq('id', projectId)
+		.single()
+
+	if (projectError || !project) {
+		logger.error('Failed to load project for fundraising goal check:', projectError)
+		return {
+			allowed: false,
+			error: 'Failed to verify project fundraising status',
+		}
+	}
+
+	const targetAmount = Number(project.target_amount ?? 0)
+	if (targetAmount <= 0) {
+		return { allowed: true }
+	}
+
+	let escrowContractAddress = contractId
+
+	if (!escrowContractAddress) {
+		const { data: escrowContract } = await supabase
+			.from('escrow_contracts')
+			.select('contract_id')
+			.eq('project_id', projectId)
+			.maybeSingle()
+
+		escrowContractAddress = escrowContract?.contract_id ?? undefined
+	}
+
+	const dbRaised = Number(project.current_amount ?? 0)
+	const onChainRaised = escrowContractAddress ? await getEscrowBalance(escrowContractAddress) : null
+	const effectiveRaised = onChainRaised ?? dbRaised
+
+	if (effectiveRaised >= targetAmount) {
+		return {
+			allowed: false,
+			error: 'This project has reached its fundraising goal and is no longer accepting donations.',
+		}
+	}
+
+	return { allowed: true }
 }
 
 export async function resolveProjectId(

@@ -5,7 +5,10 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { syncContributionSchema } from '~/lib/schemas/contribution.schemas'
-import { createContributionWithProjectUpdate } from '~/lib/services/contribution-service'
+import {
+	checkFundraisingGoalNotReached,
+	createContributionWithProjectUpdate,
+} from '~/lib/services/contribution-service'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -57,6 +60,11 @@ export async function POST(req: NextRequest) {
 
 		if (!projectId) {
 			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
+		}
+
+		const goalCheck = await checkFundraisingGoalNotReached(projectId, contractId)
+		if (!goalCheck.allowed) {
+			return NextResponse.json({ error: goalCheck.error }, { status: 403 })
 		}
 
 		// Check if contribution already exists
