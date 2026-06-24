@@ -73,7 +73,7 @@ export async function getProjectManageMeta(
 	return {
 		id: data.id,
 		title: data.title,
-		slug: data.slug,
+		slug: data.slug ?? slug,
 		imageUrl: data.image_url,
 		kindlerId: (data as { kindler_id?: string | null }).kindler_id ?? null,
 		categoryName: category?.name ?? null,

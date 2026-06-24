@@ -86,7 +86,12 @@ export function EscrowCreationWizard({ projectId, projectSlug }: EscrowCreationW
 		[currentIndex],
 	)
 
-	const stepMeta = isReviewStep ? ESCROW_WIZARD_STEPS[currentIndex] : STEP_CONTENT[currentStep]
+	const stepTitle = isReviewStep
+		? ESCROW_WIZARD_STEPS[currentIndex].label
+		: STEP_CONTENT[currentStep].title
+	const stepDescription = isReviewStep
+		? ESCROW_WIZARD_STEPS[currentIndex].description
+		: STEP_CONTENT[currentStep].description
 
 	return (
 		<TooltipProvider>
@@ -101,8 +106,8 @@ export function EscrowCreationWizard({ projectId, projectSlug }: EscrowCreationW
 
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-xl text-wrap-balance">{stepMeta.title}</CardTitle>
-						<CardDescription>{stepMeta.description}</CardDescription>
+						<CardTitle className="text-xl text-wrap-balance">{stepTitle}</CardTitle>
+						<CardDescription>{stepDescription}</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{currentStep === 'type' ? <EscrowTypeSelector /> : null}
