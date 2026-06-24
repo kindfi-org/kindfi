@@ -140,9 +140,17 @@ export function useProjectSidebar(project: ProjectDetail) {
 				throw new Error('Transaction failed')
 			}
 
+			const txHash = 'txHash' in sendResult ? sendResult.txHash : undefined
+			const formattedAmount = new Intl.NumberFormat(undefined, {
+				style: 'currency',
+				currency: 'USD',
+				maximumFractionDigits: 0,
+			}).format(data.investmentAmount)
+
+			let contributionSynced = !user?.id
+
 			if (user?.id) {
 				try {
-					const txHash = 'txHash' in sendResult ? sendResult.txHash : undefined
 					const response = await fetch('/api/contributions/create', {
 						method: 'POST',
 						headers: {
@@ -156,8 +164,10 @@ export function useProjectSidebar(project: ProjectDetail) {
 						}),
 					})
 
-					if (!response.ok) {
-						const errorData = await response.json()
+					if (response.ok) {
+						contributionSynced = true
+					} else {
+						const errorData = await response.json().catch(() => null)
 						logger.error('Failed to create contribution:', errorData)
 					}
 				} catch (error) {
@@ -165,10 +175,18 @@ export function useProjectSidebar(project: ProjectDetail) {
 				}
 			}
 
-			toast.success('Thank you for your support!', {
-				description: `You've donated ${new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(data.investmentAmount)}`,
-				icon: <CircleCheck className="text-primary" />,
-			})
+			if (contributionSynced) {
+				toast.success('Thank you for your support!', {
+					description: `You've donated ${formattedAmount}`,
+					icon: <CircleCheck className="text-primary" />,
+				})
+			} else {
+				const txHint = txHash ? `Transaction: ${txHash.slice(0, 8)}…${txHash.slice(-8)}. ` : ''
+				toast.warning('Payment sent — sync pending', {
+					description: `${txHint}Your on-chain donation succeeded, but project totals may not update yet. Refresh this page in a few minutes or contact support with your transaction hash if it is still missing.`,
+					duration: 15_000,
+				})
+			}
 
 			fetchEscrowBalance()
 		} catch (error) {

@@ -20,6 +20,101 @@ import { GamificationContractService } from '~/lib/stellar/gamification-contract
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
 
+/** Placeholder token_id while an on-chain mint is in progress. */
+const PENDING_TOKEN_ID = -1
+
+/** Rows with PENDING_TOKEN_ID older than this are treated as stale and reclaimed. */
+const PENDING_STALE_MS = 10 * 60 * 1000
+
+type UserNftRow = {
+	id: string
+	user_id: string
+	token_id: number
+	tier: string
+	contract_address: string
+	stellar_address: string
+	image_ipfs_hash: string | null
+	metadata_ipfs_hash: string | null
+	created_at: string
+}
+
+function isMintComplete(nft: Pick<UserNftRow, 'token_id'>): boolean {
+	return nft.token_id >= 0
+}
+
+function isPendingStale(createdAt: string): boolean {
+	return Date.now() - new Date(createdAt).getTime() > PENDING_STALE_MS
+}
+
+/**
+ * Claim a DB row before on-chain mint to serialize concurrent mint requests.
+ * Returns `claimed: true` when this request owns the mint, or existing row details otherwise.
+ */
+async function claimMintSlot(
+	supabase: Awaited<typeof import('@packages/lib/supabase')>['supabase'],
+	params: {
+		userId: string
+		contractAddress: string
+		stellarAddress: string
+	},
+): Promise<
+	| { claimed: true; rowId: string }
+	| { claimed: false; existing: UserNftRow; alreadyExists: true }
+	| { claimed: false; mintInProgress: true }
+> {
+	const { data: existing } = await supabase
+		.from('user_nfts')
+		.select('*')
+		.eq('user_id', params.userId)
+		.eq('contract_address', params.contractAddress)
+		.maybeSingle()
+
+	if (existing) {
+		if (isMintComplete(existing)) {
+			return { claimed: false, existing, alreadyExists: true }
+		}
+
+		if (!isPendingStale(existing.created_at)) {
+			return { claimed: false, mintInProgress: true }
+		}
+
+		await supabase.from('user_nfts').delete().eq('id', existing.id)
+	}
+
+	const { data: claimRow, error: claimError } = await supabase
+		.from('user_nfts')
+		.insert({
+			user_id: params.userId,
+			token_id: PENDING_TOKEN_ID,
+			tier: 'bronze',
+			contract_address: params.contractAddress,
+			stellar_address: params.stellarAddress,
+		})
+		.select()
+		.single()
+
+	if (claimError) {
+		if (claimError.code === '23505') {
+			const { data: racedRow } = await supabase
+				.from('user_nfts')
+				.select('*')
+				.eq('user_id', params.userId)
+				.eq('contract_address', params.contractAddress)
+				.single()
+
+			if (racedRow && isMintComplete(racedRow)) {
+				return { claimed: false, existing: racedRow, alreadyExists: true }
+			}
+
+			return { claimed: false, mintInProgress: true }
+		}
+
+		throw new Error(`Failed to claim NFT mint slot: ${claimError.message}`)
+	}
+
+	return { claimed: true, rowId: claimRow.id }
+}
+
 /**
  * POST /api/nfts/mint
  *
@@ -79,35 +174,10 @@ async function mintHandler(req: NextRequest) {
 		}
 		const { userId } = authorization
 
-		let stellarAddress: string | null = validation.data.stellar_address || null
-
 		// Use service role client to bypass RLS
 		const { supabase } = await import('@packages/lib/supabase')
 
-		// Check if user already has an NFT
-		const { data: existingNFT } = await supabase
-			.from('user_nfts')
-			.select('*')
-			.eq('user_id', userId)
-			.single()
-
-		if (existingNFT) {
-			await auditLogger.log({
-				correlationId,
-				operation: 'nft.mint',
-				resourceType: 'nft',
-				resourceId: existingNFT.id,
-				actorId: session.user.id,
-				status: 'success',
-				durationMs: Date.now() - startTime,
-				metadata: { alreadyExists: true, tier: existingNFT.tier },
-			})
-			return NextResponse.json({
-				success: true,
-				message: 'User already has an NFT',
-				nft: existingNFT,
-			})
-		}
+		let stellarAddress: string | null = validation.data.stellar_address || null
 
 		// Resolve Stellar address if not provided
 		if (!stellarAddress) {
@@ -139,6 +209,42 @@ async function mintHandler(req: NextRequest) {
 		if (!process.env.SOROBAN_PRIVATE_KEY) {
 			return NextResponse.json({ error: 'SOROBAN_PRIVATE_KEY not configured' }, { status: 500 })
 		}
+
+		const claim = await claimMintSlot(supabase, {
+			userId,
+			contractAddress: nftContractAddress,
+			stellarAddress,
+		})
+
+		if (!claim.claimed) {
+			if ('alreadyExists' in claim && claim.alreadyExists) {
+				await auditLogger.log({
+					correlationId,
+					operation: 'nft.mint',
+					resourceType: 'nft',
+					resourceId: claim.existing.id,
+					actorId: session.user.id,
+					status: 'success',
+					durationMs: Date.now() - startTime,
+					metadata: { alreadyExists: true, tier: claim.existing.tier },
+				})
+				return NextResponse.json({
+					success: true,
+					message: 'User already has an NFT',
+					nft: claim.existing,
+				})
+			}
+
+			return NextResponse.json(
+				{
+					success: false,
+					error: 'An NFT mint is already in progress for this user. Try again shortly.',
+				},
+				{ status: 409 },
+			)
+		}
+
+		const claimRowId = claim.rowId
 
 		// Gather user stats for the NFT metadata
 		const stats = await getUserStats({ supabase, userId })
@@ -199,6 +305,7 @@ async function mintHandler(req: NextRequest) {
 				eventType: 'nft.mint.onchain_failed',
 				error: mintResult.error,
 			})
+			await supabase.from('user_nfts').delete().eq('id', claimRowId)
 			return NextResponse.json(
 				{ error: `Failed to mint NFT on-chain: ${mintResult.error}` },
 				{ status: 500 },
@@ -207,35 +314,58 @@ async function mintHandler(req: NextRequest) {
 
 		const tokenId = mintResult.tokenId ?? 0
 
-		// Save to database
+		// Finalize the claimed row with on-chain details
 		const { data: nftRecord, error: dbError } = await supabase
 			.from('user_nfts')
-			.insert({
-				user_id: userId,
+			.update({
 				token_id: tokenId,
 				tier,
-				contract_address: nftContractAddress,
-				stellar_address: stellarAddress,
 				image_ipfs_hash: imageIpfsHash || null,
 				metadata_ipfs_hash: metadataIpfsHash || null,
+				updated_at: new Date().toISOString(),
 			})
+			.eq('id', claimRowId)
 			.select()
 			.single()
 
 		if (dbError) {
 			logger.error({
-				eventType: 'nft.mint.db_insert_failed',
+				eventType: 'nft.mint.db_update_failed',
 				error: dbError.message,
-			})
-			// The on-chain mint succeeded, so we still return success
-			return NextResponse.json({
-				success: true,
 				tokenId,
-				tier,
-				onChain: true,
-				dbSaved: false,
-				error: dbError.message,
+				userId,
 			})
+			await auditLogger.log({
+				correlationId,
+				operation: 'nft.mint',
+				resourceType: 'nft',
+				resourceId: claimRowId,
+				actorId: session.user.id,
+				status: 'failure',
+				errorCode: '500',
+				durationMs: Date.now() - startTime,
+				metadata: {
+					tokenId,
+					tier,
+					onChainMinted: true,
+					dbError: dbError.message,
+				},
+			})
+			return NextResponse.json(
+				{
+					success: false,
+					partialFailure: true,
+					onChain: true,
+					dbSaved: false,
+					tokenId,
+					tier,
+					reconciliationId: correlationId,
+					error: dbError.message,
+					message:
+						'NFT minted on-chain but failed to save to your profile. We will sync automatically, or you can retry later.',
+				},
+				{ status: 500 },
+			)
 		}
 
 		await auditLogger.log({

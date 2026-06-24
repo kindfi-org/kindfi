@@ -195,6 +195,40 @@ async function evolveHandler(req: NextRequest): Promise<NextResponse> {
 
 		if (dbError) {
 			logger.error('[NFT Evolve] Database update failed:', dbError)
+			await auditLogger.log({
+				correlationId,
+				operation: 'nft.evolve',
+				resourceType: 'nft',
+				resourceId: existingNFT.id,
+				actorId: session.user.id,
+				status: 'failure',
+				errorCode: '500',
+				durationMs: Date.now() - startTime,
+				metadata: {
+					tokenId: existingNFT.token_id,
+					previousTier: currentTier,
+					newTier,
+					onChainUpdated: true,
+					dbError: dbError.message,
+				},
+			})
+			return NextResponse.json(
+				{
+					success: false,
+					partialFailure: true,
+					onChain: true,
+					dbSaved: false,
+					evolved: false,
+					previousTier: currentTier,
+					newTier,
+					tokenId: existingNFT.token_id,
+					reconciliationId: correlationId,
+					error: dbError.message,
+					message:
+						'NFT tier updated on-chain but failed to save to your profile. We will sync automatically, or you can retry later.',
+				},
+				{ status: 500 },
+			)
 		}
 
 		await auditLogger.log({

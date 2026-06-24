@@ -373,19 +373,29 @@ export async function triggerGamificationUpdates(
 			// biome-ignore lint/suspicious/noExplicitAny: user_nfts table types pending regeneration
 			const { data: existingNFT } = await (svcClient as any) // eslint-disable-line @typescript-eslint/no-explicit-any
 				.from('user_nfts')
-				.select('id, tier')
+				.select('id, tier, token_id')
 				.eq('user_id', userId)
 				.single()
 
-			if (!existingNFT) {
-				const _mintResponse = await nftMintPOST(
+			const hasCompletedNft = existingNFT && existingNFT.token_id >= 0
+
+			if (!hasCompletedNft) {
+				const mintResponse = await nftMintPOST(
 					createMockRequest({
 						user_id: userId,
 						stellar_address: userStellarAddress,
 					}),
 				)
+				if (!mintResponse.ok) {
+					const mintError = await mintResponse.json().catch(() => null)
+					logger.error('[Gamification] NFT mint failed:', mintError)
+				}
 			} else {
-				const _evolveResponse = await nftEvolvePOST(createMockRequest({ user_id: userId }))
+				const evolveResponse = await nftEvolvePOST(createMockRequest({ user_id: userId }))
+				if (!evolveResponse.ok) {
+					const evolveError = await evolveResponse.json().catch(() => null)
+					logger.error('[Gamification] NFT evolve failed:', evolveError)
+				}
 			}
 		} catch (nftError) {
 			logger.error('[Gamification] NFT mint/evolve error:', nftError)
