@@ -7,1602 +7,1812 @@ export type Json =
   | Json[]
 
 export type Database = {
-	// Allows to automatically instantiate createClient with right options
-	// instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-	__InternalSupabase: {
-		PostgrestVersion: '14.1'
-	}
-	public: {
-		Tables: {
-			categories: {
-				Row: {
-					color: string
-					id: string
-					name: string
-					slug: string | null
-				}
-				Insert: {
-					color: string
-					id?: string
-					name: string
-					slug?: string | null
-				}
-				Update: {
-					color?: string
-					id?: string
-					name?: string
-					slug?: string | null
-				}
-				Relationships: []
-			}
-			challenges: {
-				Row: {
-					challenge: string
-					created_at: string
-					expires_at: string
-					id: string
-					identifier: string
-					next_auth_user_id: string | null
-					rp_id: string
-					user_id: string | null
-				}
-				Insert: {
-					challenge: string
-					created_at?: string
-					expires_at?: string
-					id?: string
-					identifier: string
-					next_auth_user_id?: string | null
-					rp_id: string
-					user_id?: string | null
-				}
-				Update: {
-					challenge?: string
-					created_at?: string
-					expires_at?: string
-					id?: string
-					identifier?: string
-					next_auth_user_id?: string | null
-					rp_id?: string
-					user_id?: string | null
-				}
-				Relationships: []
-			}
-			comments: {
-				Row: {
-					author_id: string
-					content: string
-					created_at: string | null
-					id: string
-					metadata: Json
-					parent_comment_id: string | null
-					project_id: string | null
-					project_update_id: string | null
-					type: Database['public']['Enums']['comment_type']
-					updated_at: string | null
-				}
-				Insert: {
-					author_id: string
-					content: string
-					created_at?: string | null
-					id?: string
-					metadata?: Json
-					parent_comment_id?: string | null
-					project_id?: string | null
-					project_update_id?: string | null
-					type?: Database['public']['Enums']['comment_type']
-					updated_at?: string | null
-				}
-				Update: {
-					author_id?: string
-					content?: string
-					created_at?: string | null
-					id?: string
-					metadata?: Json
-					parent_comment_id?: string | null
-					project_id?: string | null
-					project_update_id?: string | null
-					type?: Database['public']['Enums']['comment_type']
-					updated_at?: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'comments_parent_comment_id_fkey'
-						columns: ['parent_comment_id']
-						isOneToOne: false
-						referencedRelation: 'comments'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'comments_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'comments_project_update_id_fkey'
-						columns: ['project_update_id']
-						isOneToOne: false
-						referencedRelation: 'project_updates'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			community: {
-				Row: {
-					comment_id: string
-					created_at: string | null
-					id: string
-					project_id: string
-					update_id: string
-				}
-				Insert: {
-					comment_id: string
-					created_at?: string | null
-					id?: string
-					project_id: string
-					update_id: string
-				}
-				Update: {
-					comment_id?: string
-					created_at?: string | null
-					id?: string
-					project_id?: string
-					update_id?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'comment_id_fkey'
-						columns: ['comment_id']
-						isOneToOne: false
-						referencedRelation: 'comments'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'community_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'community_update_id_fkey'
-						columns: ['update_id']
-						isOneToOne: false
-						referencedRelation: 'project_updates'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			contributions: {
-				Row: {
-					amount: number
-					contributor_id: string
-					created_at: string | null
-					id: string
-					project_id: string
-					updated_at: string | null
-				}
-				Insert: {
-					amount: number
-					contributor_id: string
-					created_at?: string | null
-					id?: string
-					project_id: string
-					updated_at?: string | null
-				}
-				Update: {
-					amount?: number
-					contributor_id?: string
-					created_at?: string | null
-					id?: string
-					project_id?: string
-					updated_at?: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'contributions_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			devices: {
-				Row: {
-					aaguid: string
-					address: string
-					backup_state: Database['public']['Enums']['backup_state']
-					created_at: string
-					credential_id: string
-					credential_type: Database['public']['Enums']['credential_type']
-					device_name: string | null
-					device_type: Database['public']['Enums']['device_type']
-					id: string
-					identifier: string
-					last_used_at: string | null
-					next_auth_user_id: string | null
-					profile_verification_status: Database['public']['Enums']['profile_verification_status']
-					public_key: string
-					rp_id: string
-					sign_count: number
-					transports: string[]
-					updated_at: string
-					user_id: string | null
-				}
-				Insert: {
-					aaguid?: string
-					address?: string
-					backup_state?: Database['public']['Enums']['backup_state']
-					created_at?: string
-					credential_id: string
-					credential_type?: Database['public']['Enums']['credential_type']
-					device_name?: string | null
-					device_type?: Database['public']['Enums']['device_type']
-					id?: string
-					identifier: string
-					last_used_at?: string | null
-					next_auth_user_id?: string | null
-					profile_verification_status?: Database['public']['Enums']['profile_verification_status']
-					public_key: string
-					rp_id: string
-					sign_count?: number
-					transports?: string[]
-					updated_at?: string
-					user_id?: string | null
-				}
-				Update: {
-					aaguid?: string
-					address?: string
-					backup_state?: Database['public']['Enums']['backup_state']
-					created_at?: string
-					credential_id?: string
-					credential_type?: Database['public']['Enums']['credential_type']
-					device_name?: string | null
-					device_type?: Database['public']['Enums']['device_type']
-					id?: string
-					identifier?: string
-					last_used_at?: string | null
-					next_auth_user_id?: string | null
-					profile_verification_status?: Database['public']['Enums']['profile_verification_status']
-					public_key?: string
-					rp_id?: string
-					sign_count?: number
-					transports?: string[]
-					updated_at?: string
-					user_id?: string | null
-				}
-				Relationships: []
-			}
-			escrow_contracts: {
-				Row: {
-					amount: number
-					completed_at: string | null
-					contract_id: string
-					contribution_id: string
-					created_at: string | null
-					current_state: Database['public']['Enums']['escrow_status_type']
-					engagement_id: string
-					id: string
-					metadata: Json | null
-					payer_address: string
-					platform_fee: number
-					project_id: string
-					receiver_address: string
-					updated_at: string | null
-				}
-				Insert: {
-					amount: number
-					completed_at?: string | null
-					contract_id: string
-					contribution_id: string
-					created_at?: string | null
-					current_state?: Database['public']['Enums']['escrow_status_type']
-					engagement_id: string
-					id?: string
-					metadata?: Json | null
-					payer_address: string
-					platform_fee: number
-					project_id: string
-					receiver_address: string
-					updated_at?: string | null
-				}
-				Update: {
-					amount?: number
-					completed_at?: string | null
-					contract_id?: string
-					contribution_id?: string
-					created_at?: string | null
-					current_state?: Database['public']['Enums']['escrow_status_type']
-					engagement_id?: string
-					id?: string
-					metadata?: Json | null
-					payer_address?: string
-					platform_fee?: number
-					project_id?: string
-					receiver_address?: string
-					updated_at?: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'escrow_contracts_contribution_id_fkey'
-						columns: ['contribution_id']
-						isOneToOne: false
-						referencedRelation: 'contributions'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'escrow_contracts_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			escrow_milestones: {
-				Row: {
-					created_at: string
-					escrow_id: string
-					milestone_id: string
-					updated_at: string
-				}
-				Insert: {
-					created_at?: string
-					escrow_id: string
-					milestone_id: string
-					updated_at?: string
-				}
-				Update: {
-					created_at?: string
-					escrow_id?: string
-					milestone_id?: string
-					updated_at?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'escrow_milestones_escrow_id_fkey'
-						columns: ['escrow_id']
-						isOneToOne: false
-						referencedRelation: 'escrow_contracts'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'escrow_milestones_milestone_id_fkey'
-						columns: ['milestone_id']
-						isOneToOne: false
-						referencedRelation: 'milestones'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			escrow_reviews: {
-				Row: {
-					created_at: string | null
-					disputer_id: string | null
-					escrow_id: string
-					evidence_urls: string[] | null
-					id: string
-					milestone_id: string | null
-					resolution_text: string | null
-					review_notes: string | null
-					reviewed_at: string | null
-					reviewer_address: string
-					status: string
-					transaction_hash: string | null
-					type: string
-				}
-				Insert: {
-					created_at?: string | null
-					disputer_id?: string | null
-					escrow_id: string
-					evidence_urls?: string[] | null
-					id?: string
-					milestone_id?: string | null
-					resolution_text?: string | null
-					review_notes?: string | null
-					reviewed_at?: string | null
-					reviewer_address: string
-					status?: string
-					transaction_hash?: string | null
-					type: string
-				}
-				Update: {
-					created_at?: string | null
-					disputer_id?: string | null
-					escrow_id?: string
-					evidence_urls?: string[] | null
-					id?: string
-					milestone_id?: string | null
-					resolution_text?: string | null
-					review_notes?: string | null
-					reviewed_at?: string | null
-					reviewer_address?: string
-					status?: string
-					transaction_hash?: string | null
-					type?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'escrow_reviews_escrow_id_fkey'
-						columns: ['escrow_id']
-						isOneToOne: false
-						referencedRelation: 'escrow_contracts'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'escrow_reviews_milestone_id_fkey'
-						columns: ['milestone_id']
-						isOneToOne: false
-						referencedRelation: 'milestones'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			escrow_status: {
-				Row: {
-					current_milestone: number | null
-					escrow_id: string
-					id: string
-					last_updated: string | null
-					metadata: Json | null
-					status: Database['public']['Enums']['escrow_status_type']
-					total_funded: number | null
-					total_released: number | null
-				}
-				Insert: {
-					current_milestone?: number | null
-					escrow_id: string
-					id?: string
-					last_updated?: string | null
-					metadata?: Json | null
-					status: Database['public']['Enums']['escrow_status_type']
-					total_funded?: number | null
-					total_released?: number | null
-				}
-				Update: {
-					current_milestone?: number | null
-					escrow_id?: string
-					id?: string
-					last_updated?: string | null
-					metadata?: Json | null
-					status?: Database['public']['Enums']['escrow_status_type']
-					total_funded?: number | null
-					total_released?: number | null
-				}
-				Relationships: []
-			}
-			foundation_escrows: {
-				Row: {
-					created_at: string
-					escrow_id: string
-					foundation_id: string
-					updated_at: string
-				}
-				Insert: {
-					created_at?: string
-					escrow_id: string
-					foundation_id: string
-					updated_at?: string
-				}
-				Update: {
-					created_at?: string
-					escrow_id?: string
-					foundation_id?: string
-					updated_at?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'foundation_escrows_escrow_id_fkey'
-						columns: ['escrow_id']
-						isOneToOne: false
-						referencedRelation: 'escrow_contracts'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'foundation_escrows_foundation_id_fkey'
-						columns: ['foundation_id']
-						isOneToOne: false
-						referencedRelation: 'foundations'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			foundation_milestones: {
-				Row: {
-					achieved_date: string
-					created_at: string
-					description: string | null
-					foundation_id: string
-					id: string
-					impact_metric: string | null
-					metadata: Json | null
-					title: string
-					updated_at: string
-				}
-				Insert: {
-					achieved_date: string
-					created_at?: string
-					description?: string | null
-					foundation_id: string
-					id?: string
-					impact_metric?: string | null
-					metadata?: Json | null
-					title: string
-					updated_at?: string
-				}
-				Update: {
-					achieved_date?: string
-					created_at?: string
-					description?: string | null
-					foundation_id?: string
-					id?: string
-					impact_metric?: string | null
-					metadata?: Json | null
-					title?: string
-					updated_at?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'foundation_milestones_foundation_id_fkey'
-						columns: ['foundation_id']
-						isOneToOne: false
-						referencedRelation: 'foundations'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			foundations: {
-				Row: {
-					cover_image_url: string | null
-					created_at: string
-					description: string
-					founded_year: number
-					founder_id: string
-					id: string
-					logo_url: string | null
-					metadata: Json
-					mission: string | null
-					name: string
-					slug: string
-					social_links: Json
-					total_campaigns_completed: number
-					total_campaigns_open: number
-					total_donations_received: number
-					updated_at: string
-					vision: string | null
-					website_url: string | null
-				}
-				Insert: {
-					cover_image_url?: string | null
-					created_at?: string
-					description: string
-					founded_year: number
-					founder_id: string
-					id?: string
-					logo_url?: string | null
-					metadata?: Json
-					mission?: string | null
-					name: string
-					slug: string
-					social_links?: Json
-					total_campaigns_completed?: number
-					total_campaigns_open?: number
-					total_donations_received?: number
-					updated_at?: string
-					vision?: string | null
-					website_url?: string | null
-				}
-				Update: {
-					cover_image_url?: string | null
-					created_at?: string
-					description?: string
-					founded_year?: number
-					founder_id?: string
-					id?: string
-					logo_url?: string | null
-					metadata?: Json
-					mission?: string | null
-					name?: string
-					slug?: string
-					social_links?: Json
-					total_campaigns_completed?: number
-					total_campaigns_open?: number
-					total_donations_received?: number
-					updated_at?: string
-					vision?: string | null
-					website_url?: string | null
-				}
-				Relationships: []
-			}
-			kyc_admin_whitelist: {
-				Row: {
-					created_at: string
-					created_by: string | null
-					id: string
-					notes: string | null
-					user_id: string
-				}
-				Insert: {
-					created_at?: string
-					created_by?: string | null
-					id?: string
-					notes?: string | null
-					user_id: string
-				}
-				Update: {
-					created_at?: string
-					created_by?: string | null
-					id?: string
-					notes?: string | null
-					user_id?: string
-				}
-				Relationships: []
-			}
-			kyc_reviews: {
-				Row: {
-					created_at: string
-					id: string
-					notes: string | null
-					reviewer_id: string | null
-					status: Database['public']['Enums']['kyc_status_enum']
-					updated_at: string
-					user_id: string
-					verification_level: Database['public']['Enums']['kyc_verification_enum']
-				}
-				Insert: {
-					created_at?: string
-					id?: string
-					notes?: string | null
-					reviewer_id?: string | null
-					status: Database['public']['Enums']['kyc_status_enum']
-					updated_at?: string
-					user_id: string
-					verification_level: Database['public']['Enums']['kyc_verification_enum']
-				}
-				Update: {
-					created_at?: string
-					id?: string
-					notes?: string | null
-					reviewer_id?: string | null
-					status?: Database['public']['Enums']['kyc_status_enum']
-					updated_at?: string
-					user_id?: string
-					verification_level?: Database['public']['Enums']['kyc_verification_enum']
-				}
-				Relationships: []
-			}
-			milestones: {
-				Row: {
-					amount: number
-					completed_at: string | null
-					created_at: string | null
-					deadline: string
-					description: string | null
-					id: string
-					order_index: number
-					project_id: string
-					status: Database['public']['Enums']['milestone_status']
-					title: string
-				}
-				Insert: {
-					amount: number
-					completed_at?: string | null
-					created_at?: string | null
-					deadline: string
-					description?: string | null
-					id?: string
-					order_index: number
-					project_id: string
-					status?: Database['public']['Enums']['milestone_status']
-					title: string
-				}
-				Update: {
-					amount?: number
-					completed_at?: string | null
-					created_at?: string | null
-					deadline?: string
-					description?: string | null
-					id?: string
-					order_index?: number
-					project_id?: string
-					status?: Database['public']['Enums']['milestone_status']
-					title?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'milestones_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			notification_preferences: {
-				Row: {
-					created_at: string | null
-					email: boolean | null
-					in_app: boolean | null
-					push: boolean | null
-					updated_at: string | null
-					user_id: string
-				}
-				Insert: {
-					created_at?: string | null
-					email?: boolean | null
-					in_app?: boolean | null
-					push?: boolean | null
-					updated_at?: string | null
-					user_id: string
-				}
-				Update: {
-					created_at?: string | null
-					email?: boolean | null
-					in_app?: boolean | null
-					push?: boolean | null
-					updated_at?: string | null
-					user_id?: string
-				}
-				Relationships: []
-			}
-			notifications: {
-				Row: {
-					body: string
-					created_at: string | null
-					data: Json | null
-					delivery_attempts: number | null
-					delivery_status:
-						| Database['public']['Enums']['notification_delivery_status']
-						| null
-					expires_at: string | null
-					id: string
-					is_read: boolean | null
-					metadata: Json | null
-					next_retry_at: string | null
-					priority: Database['public']['Enums']['notification_priority']
-					title: string
-					type: Database['public']['Enums']['notification_type']
-					updated_at: string | null
-					user_id: string
-				}
-				Insert: {
-					body: string
-					created_at?: string | null
-					data?: Json | null
-					delivery_attempts?: number | null
-					delivery_status?:
-						| Database['public']['Enums']['notification_delivery_status']
-						| null
-					expires_at?: string | null
-					id?: string
-					is_read?: boolean | null
-					metadata?: Json | null
-					next_retry_at?: string | null
-					priority?: Database['public']['Enums']['notification_priority']
-					title: string
-					type?: Database['public']['Enums']['notification_type']
-					updated_at?: string | null
-					user_id: string
-				}
-				Update: {
-					body?: string
-					created_at?: string | null
-					data?: Json | null
-					delivery_attempts?: number | null
-					delivery_status?:
-						| Database['public']['Enums']['notification_delivery_status']
-						| null
-					expires_at?: string | null
-					id?: string
-					is_read?: boolean | null
-					metadata?: Json | null
-					next_retry_at?: string | null
-					priority?: Database['public']['Enums']['notification_priority']
-					title?: string
-					type?: Database['public']['Enums']['notification_type']
-					updated_at?: string | null
-					user_id?: string
-				}
-				Relationships: []
-			}
-			profiles: {
-				Row: {
-					bio: string | null
-					created_at: string
-					display_name: string | null
-					email: string | null
-					id: string
-					image_url: string | null
-					next_auth_user_id: string | null
-					role: Database['public']['Enums']['user_role']
-					slug: string | null
-					updated_at: string
-				}
-				Insert: {
-					bio?: string | null
-					created_at?: string
-					display_name?: string | null
-					email?: string | null
-					id: string
-					image_url?: string | null
-					next_auth_user_id?: string | null
-					role?: Database['public']['Enums']['user_role']
-					slug?: string | null
-					updated_at?: string
-				}
-				Update: {
-					bio?: string | null
-					created_at?: string
-					display_name?: string | null
-					email?: string | null
-					id?: string
-					image_url?: string | null
-					next_auth_user_id?: string | null
-					role?: Database['public']['Enums']['user_role']
-					slug?: string | null
-					updated_at?: string
-				}
-				Relationships: []
-			}
-			project_escrows: {
-				Row: {
-					created_at: string
-					escrow_id: string
-					project_id: string
-					updated_at: string
-				}
-				Insert: {
-					created_at?: string
-					escrow_id: string
-					project_id: string
-					updated_at?: string
-				}
-				Update: {
-					created_at?: string
-					escrow_id?: string
-					project_id?: string
-					updated_at?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'project_escrows_escrow_id_fkey'
-						columns: ['escrow_id']
-						isOneToOne: true
-						referencedRelation: 'escrow_contracts'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'project_escrows_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: true
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			project_members: {
-				Row: {
-					id: string
-					joined_at: string
-					project_id: string
-					role: Database['public']['Enums']['project_member_role']
-					title: string
-					updated_at: string
-					user_id: string
-				}
-				Insert: {
-					id?: string
-					joined_at?: string
-					project_id: string
-					role?: Database['public']['Enums']['project_member_role']
-					title?: string
-					updated_at?: string
-					user_id: string
-				}
-				Update: {
-					id?: string
-					joined_at?: string
-					project_id?: string
-					role?: Database['public']['Enums']['project_member_role']
-					title?: string
-					updated_at?: string
-					user_id?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'project_members_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			project_pitch: {
-				Row: {
-					created_at: string | null
-					id: string
-					pitch_deck: string | null
-					project_id: string
-					story: string
-					title: string
-					updated_at: string | null
-					video_url: string | null
-				}
-				Insert: {
-					created_at?: string | null
-					id?: string
-					pitch_deck?: string | null
-					project_id: string
-					story: string
-					title: string
-					updated_at?: string | null
-					video_url?: string | null
-				}
-				Update: {
-					created_at?: string | null
-					id?: string
-					pitch_deck?: string | null
-					project_id?: string
-					story?: string
-					title?: string
-					updated_at?: string | null
-					video_url?: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'project_pitch_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: true
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			project_tag_relationships: {
-				Row: {
-					project_id: string
-					tag_id: string
-				}
-				Insert: {
-					project_id: string
-					tag_id: string
-				}
-				Update: {
-					project_id?: string
-					tag_id?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'project_tag_relationships_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'project_tag_relationships_tag_id_fkey'
-						columns: ['tag_id']
-						isOneToOne: false
-						referencedRelation: 'project_tags'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			project_tags: {
-				Row: {
-					color: string
-					created_at: string | null
-					id: string
-					name: string
-					updated_at: string | null
-				}
-				Insert: {
-					color: string
-					created_at?: string | null
-					id?: string
-					name: string
-					updated_at?: string | null
-				}
-				Update: {
-					color?: string
-					created_at?: string | null
-					id?: string
-					name?: string
-					updated_at?: string | null
-				}
-				Relationships: []
-			}
-			project_team: {
-				Row: {
-					bio: string | null
-					created_at: string
-					full_name: string
-					id: string
-					order_index: number
-					photo_url: string | null
-					project_id: string
-					role_title: string
-					updated_at: string
-					years_involved: number | null
-				}
-				Insert: {
-					bio?: string | null
-					created_at?: string
-					full_name: string
-					id?: string
-					order_index?: number
-					photo_url?: string | null
-					project_id: string
-					role_title: string
-					updated_at?: string
-					years_involved?: number | null
-				}
-				Update: {
-					bio?: string | null
-					created_at?: string
-					full_name?: string
-					id?: string
-					order_index?: number
-					photo_url?: string | null
-					project_id?: string
-					role_title?: string
-					updated_at?: string
-					years_involved?: number | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'project_team_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			project_updates: {
-				Row: {
-					author_id: string
-					content: string
-					created_at: string
-					id: string
-					project_id: string
-					title: string
-					updated_at: string
-				}
-				Insert: {
-					author_id: string
-					content: string
-					created_at?: string
-					id?: string
-					project_id: string
-					title: string
-					updated_at?: string
-				}
-				Update: {
-					author_id?: string
-					content?: string
-					created_at?: string
-					id?: string
-					project_id?: string
-					title?: string
-					updated_at?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'project_updates_project_id_fkey'
-						columns: ['project_id']
-						isOneToOne: false
-						referencedRelation: 'projects'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			projects: {
-				Row: {
-					category_id: string
-					created_at: string | null
-					current_amount: number
-					description: string
-					foundation_id: string | null
-					id: string
-					image_url: string | null
-					kinder_count: number
-					kindler_id: string
-					metadata: Json
-					min_investment: number
-					percentage_complete: number
-					project_location: string
-					slug: string | null
-					social_links: Json
-					status: Database['public']['Enums']['project_status']
-					target_amount: number
-					title: string
-					updated_at: string | null
-				}
-				Insert: {
-					category_id: string
-					created_at?: string | null
-					current_amount?: number
-					description: string
-					foundation_id?: string | null
-					id?: string
-					image_url?: string | null
-					kinder_count?: number
-					kindler_id: string
-					metadata?: Json
-					min_investment: number
-					percentage_complete?: number
-					project_location: string
-					slug?: string | null
-					social_links?: Json
-					status?: Database['public']['Enums']['project_status']
-					target_amount: number
-					title: string
-					updated_at?: string | null
-				}
-				Update: {
-					category_id?: string
-					created_at?: string | null
-					current_amount?: number
-					description?: string
-					foundation_id?: string | null
-					id?: string
-					image_url?: string | null
-					kinder_count?: number
-					kindler_id?: string
-					metadata?: Json
-					min_investment?: number
-					percentage_complete?: number
-					project_location?: string
-					slug?: string | null
-					social_links?: Json
-					status?: Database['public']['Enums']['project_status']
-					target_amount?: number
-					title?: string
-					updated_at?: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'projects_category_id_fkey'
-						columns: ['category_id']
-						isOneToOne: false
-						referencedRelation: 'categories'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'projects_foundation_id_fkey'
-						columns: ['foundation_id']
-						isOneToOne: false
-						referencedRelation: 'foundations'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			quest_definitions: {
-				Row: {
-					contract_address: string | null
-					created_at: string
-					description: string
-					expires_at: string | null
-					id: string
-					is_active: boolean
-					name: string
-					quest_id: number
-					quest_type: Database['public']['Enums']['quest_type']
-					reward_points: number
-					target_value: number
-					updated_at: string
-				}
-				Insert: {
-					contract_address?: string | null
-					created_at?: string
-					description: string
-					expires_at?: string | null
-					id?: string
-					is_active?: boolean
-					name: string
-					quest_id: number
-					quest_type: Database['public']['Enums']['quest_type']
-					reward_points?: number
-					target_value: number
-					updated_at?: string
-				}
-				Update: {
-					contract_address?: string | null
-					created_at?: string
-					description?: string
-					expires_at?: string | null
-					id?: string
-					is_active?: boolean
-					name?: string
-					quest_id?: number
-					quest_type?: Database['public']['Enums']['quest_type']
-					reward_points?: number
-					target_value?: number
-					updated_at?: string
-				}
-				Relationships: []
-			}
-			referral_records: {
-				Row: {
-					contract_address: string | null
-					created_at: string
-					first_donation_at: string | null
-					id: string
-					onboarded_at: string | null
-					referred_id: string
-					referrer_id: string
-					status: Database['public']['Enums']['referral_status']
-					total_donations: number
-				}
-				Insert: {
-					contract_address?: string | null
-					created_at?: string
-					first_donation_at?: string | null
-					id?: string
-					onboarded_at?: string | null
-					referred_id: string
-					referrer_id: string
-					status?: Database['public']['Enums']['referral_status']
-					total_donations?: number
-				}
-				Update: {
-					contract_address?: string | null
-					created_at?: string
-					first_donation_at?: string | null
-					id?: string
-					onboarded_at?: string | null
-					referred_id?: string
-					referrer_id?: string
-					status?: Database['public']['Enums']['referral_status']
-					total_donations?: number
-				}
-				Relationships: []
-			}
-			referrer_statistics: {
-				Row: {
-					active_referrals: number
-					created_at: string
-					id: string
-					referrer_id: string
-					total_referrals: number
-					total_reward_points: number
-					updated_at: string
-				}
-				Insert: {
-					active_referrals?: number
-					created_at?: string
-					id?: string
-					referrer_id: string
-					total_referrals?: number
-					total_reward_points?: number
-					updated_at?: string
-				}
-				Update: {
-					active_referrals?: number
-					created_at?: string
-					id?: string
-					referrer_id?: string
-					total_referrals?: number
-					total_reward_points?: number
-					updated_at?: string
-				}
-				Relationships: []
-			}
-			user_follows: {
-				Row: {
-					created_at: string
-					follower_id: string
-					following_id: string
-				}
-				Insert: {
-					created_at?: string
-					follower_id: string
-					following_id: string
-				}
-				Update: {
-					created_at?: string
-					follower_id?: string
-					following_id?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'user_follows_follower_id_fkey'
-						columns: ['follower_id']
-						isOneToOne: false
-						referencedRelation: 'profiles'
-						referencedColumns: ['id']
-					},
-					{
-						foreignKeyName: 'user_follows_following_id_fkey'
-						columns: ['following_id']
-						isOneToOne: false
-						referencedRelation: 'profiles'
-						referencedColumns: ['id']
-					},
-				]
-			}
-			user_nfts: {
-				Row: {
-					contract_address: string
-					created_at: string
-					evolved_at: string | null
-					id: string
-					image_ipfs_hash: string | null
-					metadata_ipfs_hash: string | null
-					minted_at: string
-					stellar_address: string
-					tier: string
-					token_id: number
-					updated_at: string
-					user_id: string
-				}
-				Insert: {
-					contract_address: string
-					created_at?: string
-					evolved_at?: string | null
-					id?: string
-					image_ipfs_hash?: string | null
-					metadata_ipfs_hash?: string | null
-					minted_at?: string
-					stellar_address: string
-					tier?: string
-					token_id: number
-					updated_at?: string
-					user_id: string
-				}
-				Update: {
-					contract_address?: string
-					created_at?: string
-					evolved_at?: string | null
-					id?: string
-					image_ipfs_hash?: string | null
-					metadata_ipfs_hash?: string | null
-					minted_at?: string
-					stellar_address?: string
-					tier?: string
-					token_id?: number
-					updated_at?: string
-					user_id?: string
-				}
-				Relationships: []
-			}
-			user_quest_progress: {
-				Row: {
-					completed_at: string | null
-					created_at: string
-					current_value: number
-					id: string
-					is_completed: boolean
-					quest_id: number
-					updated_at: string
-					user_id: string
-				}
-				Insert: {
-					completed_at?: string | null
-					created_at?: string
-					current_value?: number
-					id?: string
-					is_completed?: boolean
-					quest_id: number
-					updated_at?: string
-					user_id: string
-				}
-				Update: {
-					completed_at?: string | null
-					created_at?: string
-					current_value?: number
-					id?: string
-					is_completed?: boolean
-					quest_id?: number
-					updated_at?: string
-					user_id?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'user_quest_progress_quest_id_fkey'
-						columns: ['quest_id']
-						isOneToOne: false
-						referencedRelation: 'quest_definitions'
-						referencedColumns: ['quest_id']
-					},
-				]
-			}
-			user_streaks: {
-				Row: {
-					contract_address: string | null
-					created_at: string
-					current_streak: number
-					id: string
-					last_donation_timestamp: string | null
-					longest_streak: number
-					period: Database['public']['Enums']['streak_period']
-					updated_at: string
-					user_id: string
-				}
-				Insert: {
-					contract_address?: string | null
-					created_at?: string
-					current_streak?: number
-					id?: string
-					last_donation_timestamp?: string | null
-					longest_streak?: number
-					period: Database['public']['Enums']['streak_period']
-					updated_at?: string
-					user_id: string
-				}
-				Update: {
-					contract_address?: string | null
-					created_at?: string
-					current_streak?: number
-					id?: string
-					last_donation_timestamp?: string | null
-					longest_streak?: number
-					period?: Database['public']['Enums']['streak_period']
-					updated_at?: string
-					user_id?: string
-				}
-				Relationships: []
-			}
-			waitlist_interests: {
-				Row: {
-					category_id: string | null
-					consent: boolean
-					created_at: string
-					email: string | null
-					id: string
-					location: string | null
-					name: string
-					project_description: string | null
-					project_name: string | null
-					role: string
-					source: string | null
-				}
-				Insert: {
-					category_id?: string | null
-					consent?: boolean
-					created_at?: string
-					email?: string | null
-					id?: string
-					location?: string | null
-					name: string
-					project_description?: string | null
-					project_name?: string | null
-					role: string
-					source?: string | null
-				}
-				Update: {
-					category_id?: string | null
-					consent?: boolean
-					created_at?: string
-					email?: string | null
-					id?: string
-					location?: string | null
-					name?: string
-					project_description?: string | null
-					project_name?: string | null
-					role?: string
-					source?: string | null
-				}
-				Relationships: [
-					{
-						foreignKeyName: 'waitlist_interests_category_id_fkey'
-						columns: ['category_id']
-						isOneToOne: false
-						referencedRelation: 'categories'
-						referencedColumns: ['id']
-					},
-				]
-			}
-		}
-		Views: {
-			[_ in never]: never
-		}
-		Functions: {
-			add_kyc_admin: {
-				Args: { admin_notes?: string; target_user_id: string }
-				Returns: undefined
-			}
-			cleanup_expired_challenges: { Args: never; Returns: undefined }
-			current_auth_user_id: { Args: never; Returns: string }
-			get_current_user_profile: {
-				Args: never
-				Returns: {
-					profile_id: string
-					role: Database['public']['Enums']['user_role']
-					user_id: string
-				}[]
-			}
-			is_project_owner: {
-				Args: { project_uuid: string; user_uuid: string }
-				Returns: boolean
-			}
-			is_project_team_member: {
-				Args: { project_uuid: string; user_uuid: string }
-				Returns: boolean
-			}
-			remove_kyc_admin: { Args: { target_user_id: string }; Returns: undefined }
-			unaccent: { Args: { '': string }; Returns: string }
-			upsert_escrow_contract: {
-				Args: {
-					p_amount: number
-					p_contract_id: string
-					p_contribution_id: string
-					p_current_state?: Database['public']['Enums']['escrow_status_type']
-					p_engagement_id: string
-					p_metadata?: Json
-					p_payer_address: string
-					p_platform_fee: number
-					p_project_id: string
-					p_receiver_address: string
-				}
-				Returns: string
-			}
-		}
-		Enums: {
-			backup_state: 'not_backed_up' | 'backed_up'
-			comment_type: 'comment' | 'question' | 'answer'
-			credential_type: 'public-key'
-			device_type: 'single_device' | 'multi_device'
-			escrow_status_type:
-				| 'NEW'
-				| 'FUNDED'
-				| 'ACTIVE'
-				| 'COMPLETED'
-				| 'DISPUTED'
-				| 'CANCELLED'
-			kyc_status_enum: 'pending' | 'approved' | 'rejected' | 'verified'
-			kyc_verification_enum: 'basic' | 'enhanced'
-			milestone_status:
-				| 'pending'
-				| 'completed'
-				| 'approved'
-				| 'rejected'
-				| 'disputed'
-			notification_delivery_status: 'pending' | 'delivered' | 'failed'
-			notification_priority: 'low' | 'medium' | 'high' | 'urgent'
-			notification_type: 'info' | 'success' | 'warning' | 'error'
-			profile_verification_status: 'unverified' | 'verified'
-			project_member_role:
-				| 'admin'
-				| 'editor'
-				| 'advisor'
-				| 'community'
-				| 'core'
-				| 'others'
-			project_status:
-				| 'draft'
-				| 'review'
-				| 'active'
-				| 'paused'
-				| 'funded'
-				| 'rejected'
-			quest_status: 'active' | 'completed' | 'expired'
-			quest_type:
-				| 'multi_region_donation'
-				| 'weekly_streak'
-				| 'multi_category_donation'
-				| 'referral_quest'
-				| 'total_donation_amount'
-				| 'quest_master'
-			referral_status: 'pending' | 'onboarded' | 'first_donation' | 'active'
-			streak_period: 'weekly' | 'monthly'
-			user_role:
-				| 'donor'
-				| 'creator'
-				| 'pending'
-				| 'admin'
-				| 'kinder'
-				| 'kindler'
-		}
-		CompositeTypes: {
-			[_ in never]: never
-		}
-	}
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1"
+  }
+  public: {
+    Tables: {
+      categories: {
+        Row: {
+          color: string
+          id: string
+          name: string
+          slug: string | null
+        }
+        Insert: {
+          color: string
+          id?: string
+          name: string
+          slug?: string | null
+        }
+        Update: {
+          color?: string
+          id?: string
+          name?: string
+          slug?: string | null
+        }
+        Relationships: []
+      }
+      challenges: {
+        Row: {
+          challenge: string
+          created_at: string
+          expires_at: string
+          id: string
+          identifier: string
+          next_auth_user_id: string | null
+          rp_id: string
+          user_id: string | null
+        }
+        Insert: {
+          challenge: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          identifier: string
+          next_auth_user_id?: string | null
+          rp_id: string
+          user_id?: string | null
+        }
+        Update: {
+          challenge?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          identifier?: string
+          next_auth_user_id?: string | null
+          rp_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          id: string
+          metadata: Json
+          parent_comment_id: string | null
+          project_id: string | null
+          project_update_id: string | null
+          type: Database["public"]["Enums"]["comment_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json
+          parent_comment_id?: string | null
+          project_id?: string | null
+          project_update_id?: string | null
+          type?: Database["public"]["Enums"]["comment_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json
+          parent_comment_id?: string | null
+          project_id?: string | null
+          project_update_id?: string | null
+          type?: Database["public"]["Enums"]["comment_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_project_update_id_fkey"
+            columns: ["project_update_id"]
+            isOneToOne: false
+            referencedRelation: "project_updates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community: {
+        Row: {
+          comment_id: string
+          created_at: string | null
+          id: string
+          project_id: string
+          update_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string | null
+          id?: string
+          project_id: string
+          update_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string | null
+          id?: string
+          project_id?: string
+          update_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_update_id_fkey"
+            columns: ["update_id"]
+            isOneToOne: false
+            referencedRelation: "project_updates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contributions: {
+        Row: {
+          amount: number
+          contributor_id: string
+          created_at: string | null
+          id: string
+          project_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          contributor_id: string
+          created_at?: string | null
+          id?: string
+          project_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          contributor_id?: string
+          created_at?: string | null
+          id?: string
+          project_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contributions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devices: {
+        Row: {
+          aaguid: string
+          address: string
+          backup_state: Database["public"]["Enums"]["backup_state"]
+          created_at: string
+          credential_id: string
+          credential_type: Database["public"]["Enums"]["credential_type"]
+          device_name: string | null
+          device_type: Database["public"]["Enums"]["device_type"]
+          id: string
+          identifier: string
+          last_used_at: string | null
+          next_auth_user_id: string | null
+          profile_verification_status: Database["public"]["Enums"]["profile_verification_status"]
+          public_key: string
+          rp_id: string
+          sign_count: number
+          transports: string[]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          aaguid?: string
+          address?: string
+          backup_state?: Database["public"]["Enums"]["backup_state"]
+          created_at?: string
+          credential_id: string
+          credential_type?: Database["public"]["Enums"]["credential_type"]
+          device_name?: string | null
+          device_type?: Database["public"]["Enums"]["device_type"]
+          id?: string
+          identifier: string
+          last_used_at?: string | null
+          next_auth_user_id?: string | null
+          profile_verification_status?: Database["public"]["Enums"]["profile_verification_status"]
+          public_key: string
+          rp_id: string
+          sign_count?: number
+          transports?: string[]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          aaguid?: string
+          address?: string
+          backup_state?: Database["public"]["Enums"]["backup_state"]
+          created_at?: string
+          credential_id?: string
+          credential_type?: Database["public"]["Enums"]["credential_type"]
+          device_name?: string | null
+          device_type?: Database["public"]["Enums"]["device_type"]
+          id?: string
+          identifier?: string
+          last_used_at?: string | null
+          next_auth_user_id?: string | null
+          profile_verification_status?: Database["public"]["Enums"]["profile_verification_status"]
+          public_key?: string
+          rp_id?: string
+          sign_count?: number
+          transports?: string[]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      escrow_contracts: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          contract_id: string
+          contribution_id: string
+          created_at: string | null
+          current_state: Database["public"]["Enums"]["escrow_status_type"]
+          engagement_id: string
+          id: string
+          metadata: Json | null
+          payer_address: string
+          platform_fee: number
+          project_id: string
+          receiver_address: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          contract_id: string
+          contribution_id: string
+          created_at?: string | null
+          current_state?: Database["public"]["Enums"]["escrow_status_type"]
+          engagement_id: string
+          id?: string
+          metadata?: Json | null
+          payer_address: string
+          platform_fee: number
+          project_id: string
+          receiver_address: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          contract_id?: string
+          contribution_id?: string
+          created_at?: string | null
+          current_state?: Database["public"]["Enums"]["escrow_status_type"]
+          engagement_id?: string
+          id?: string
+          metadata?: Json | null
+          payer_address?: string
+          platform_fee?: number
+          project_id?: string
+          receiver_address?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escrow_contracts_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "contributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "escrow_contracts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escrow_milestones: {
+        Row: {
+          created_at: string
+          escrow_id: string
+          milestone_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          escrow_id: string
+          milestone_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          escrow_id?: string
+          milestone_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escrow_milestones_escrow_id_fkey"
+            columns: ["escrow_id"]
+            isOneToOne: false
+            referencedRelation: "escrow_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "escrow_milestones_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escrow_reviews: {
+        Row: {
+          created_at: string | null
+          disputer_id: string | null
+          escrow_id: string
+          evidence_urls: string[] | null
+          id: string
+          milestone_id: string | null
+          resolution_text: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewer_address: string
+          status: string
+          transaction_hash: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          disputer_id?: string | null
+          escrow_id: string
+          evidence_urls?: string[] | null
+          id?: string
+          milestone_id?: string | null
+          resolution_text?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewer_address: string
+          status?: string
+          transaction_hash?: string | null
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          disputer_id?: string | null
+          escrow_id?: string
+          evidence_urls?: string[] | null
+          id?: string
+          milestone_id?: string | null
+          resolution_text?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewer_address?: string
+          status?: string
+          transaction_hash?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escrow_reviews_escrow_id_fkey"
+            columns: ["escrow_id"]
+            isOneToOne: false
+            referencedRelation: "escrow_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "escrow_reviews_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escrow_status: {
+        Row: {
+          current_milestone: number | null
+          escrow_id: string
+          id: string
+          last_updated: string | null
+          metadata: Json | null
+          status: Database["public"]["Enums"]["escrow_status_type"]
+          total_funded: number | null
+          total_released: number | null
+        }
+        Insert: {
+          current_milestone?: number | null
+          escrow_id: string
+          id?: string
+          last_updated?: string | null
+          metadata?: Json | null
+          status: Database["public"]["Enums"]["escrow_status_type"]
+          total_funded?: number | null
+          total_released?: number | null
+        }
+        Update: {
+          current_milestone?: number | null
+          escrow_id?: string
+          id?: string
+          last_updated?: string | null
+          metadata?: Json | null
+          status?: Database["public"]["Enums"]["escrow_status_type"]
+          total_funded?: number | null
+          total_released?: number | null
+        }
+        Relationships: []
+      }
+      foundation_escrows: {
+        Row: {
+          created_at: string
+          escrow_id: string
+          foundation_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          escrow_id: string
+          foundation_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          escrow_id?: string
+          foundation_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "foundation_escrows_escrow_id_fkey"
+            columns: ["escrow_id"]
+            isOneToOne: false
+            referencedRelation: "escrow_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "foundation_escrows_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      foundation_milestones: {
+        Row: {
+          achieved_date: string
+          created_at: string
+          description: string | null
+          foundation_id: string
+          id: string
+          impact_metric: string | null
+          metadata: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          achieved_date: string
+          created_at?: string
+          description?: string | null
+          foundation_id: string
+          id?: string
+          impact_metric?: string | null
+          metadata?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          achieved_date?: string
+          created_at?: string
+          description?: string | null
+          foundation_id?: string
+          id?: string
+          impact_metric?: string | null
+          metadata?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "foundation_milestones_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      foundations: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          description: string
+          founded_year: number
+          founder_id: string
+          id: string
+          logo_url: string | null
+          metadata: Json
+          mission: string | null
+          name: string
+          slug: string
+          social_links: Json
+          total_campaigns_completed: number
+          total_campaigns_open: number
+          total_donations_received: number
+          updated_at: string
+          vision: string | null
+          website_url: string | null
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          description: string
+          founded_year: number
+          founder_id: string
+          id?: string
+          logo_url?: string | null
+          metadata?: Json
+          mission?: string | null
+          name: string
+          slug: string
+          social_links?: Json
+          total_campaigns_completed?: number
+          total_campaigns_open?: number
+          total_donations_received?: number
+          updated_at?: string
+          vision?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string
+          founded_year?: number
+          founder_id?: string
+          id?: string
+          logo_url?: string | null
+          metadata?: Json
+          mission?: string | null
+          name?: string
+          slug?: string
+          social_links?: Json
+          total_campaigns_completed?: number
+          total_campaigns_open?: number
+          total_donations_received?: number
+          updated_at?: string
+          vision?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      governance_options: {
+        Row: {
+          contract_option_id: number | null
+          created_at: string
+          description: string | null
+          downvotes: number
+          id: string
+          image_url: string | null
+          project_slug: string | null
+          round_id: string
+          title: string
+          total_weight: number
+          updated_at: string
+          upvotes: number
+        }
+        Insert: {
+          contract_option_id?: number | null
+          created_at?: string
+          description?: string | null
+          downvotes?: number
+          id?: string
+          image_url?: string | null
+          project_slug?: string | null
+          round_id: string
+          title: string
+          total_weight?: number
+          updated_at?: string
+          upvotes?: number
+        }
+        Update: {
+          contract_option_id?: number | null
+          created_at?: string
+          description?: string | null
+          downvotes?: number
+          id?: string
+          image_url?: string | null
+          project_slug?: string | null
+          round_id?: string
+          title?: string
+          total_weight?: number
+          updated_at?: string
+          upvotes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_options_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "governance_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_rounds: {
+        Row: {
+          contract_round_id: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          fund_currency: string
+          id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["governance_round_status"]
+          title: string
+          total_fund_amount: number
+          updated_at: string
+          winner_option_id: string | null
+        }
+        Insert: {
+          contract_round_id?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at: string
+          fund_currency?: string
+          id?: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["governance_round_status"]
+          title: string
+          total_fund_amount?: number
+          updated_at?: string
+          winner_option_id?: string | null
+        }
+        Update: {
+          contract_round_id?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string
+          fund_currency?: string
+          id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["governance_round_status"]
+          title?: string
+          total_fund_amount?: number
+          updated_at?: string
+          winner_option_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_winner_option"
+            columns: ["winner_option_id"]
+            isOneToOne: false
+            referencedRelation: "governance_options"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_votes: {
+        Row: {
+          created_at: string
+          id: string
+          nft_tier: string
+          option_id: string
+          round_id: string
+          stellar_address: string | null
+          user_id: string
+          vote_type: string
+          vote_weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nft_tier?: string
+          option_id: string
+          round_id: string
+          stellar_address?: string | null
+          user_id: string
+          vote_type: string
+          vote_weight?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nft_tier?: string
+          option_id?: string
+          round_id?: string
+          stellar_address?: string | null
+          user_id?: string
+          vote_type?: string
+          vote_weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "governance_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_votes_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "governance_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kyc_admin_whitelist: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kyc_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          reviewer_id: string | null
+          status: Database["public"]["Enums"]["kyc_status_enum"]
+          updated_at: string
+          user_id: string
+          verification_level: Database["public"]["Enums"]["kyc_verification_enum"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reviewer_id?: string | null
+          status: Database["public"]["Enums"]["kyc_status_enum"]
+          updated_at?: string
+          user_id: string
+          verification_level: Database["public"]["Enums"]["kyc_verification_enum"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reviewer_id?: string | null
+          status?: Database["public"]["Enums"]["kyc_status_enum"]
+          updated_at?: string
+          user_id?: string
+          verification_level?: Database["public"]["Enums"]["kyc_verification_enum"]
+        }
+        Relationships: []
+      }
+      milestones: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string | null
+          deadline: string
+          description: string | null
+          id: string
+          order_index: number
+          project_id: string
+          status: Database["public"]["Enums"]["milestone_status"]
+          title: string
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string | null
+          deadline: string
+          description?: string | null
+          id?: string
+          order_index: number
+          project_id: string
+          status?: Database["public"]["Enums"]["milestone_status"]
+          title: string
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string | null
+          deadline?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          project_id?: string
+          status?: Database["public"]["Enums"]["milestone_status"]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_logs: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: string
+          message: string
+          metadata: Json | null
+          notification_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: string
+          message: string
+          metadata?: Json | null
+          notification_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: string
+          message?: string
+          metadata?: Json | null
+          notification_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string | null
+          email: boolean | null
+          in_app: boolean | null
+          push: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: boolean | null
+          in_app?: boolean | null
+          push?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: boolean | null
+          in_app?: boolean | null
+          push?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string | null
+          data: Json | null
+          delivery_attempts: number | null
+          delivery_status:
+            | Database["public"]["Enums"]["notification_delivery_status"]
+            | null
+          expires_at: string | null
+          id: string
+          is_read: boolean | null
+          metadata: Json | null
+          next_retry_at: string | null
+          priority: Database["public"]["Enums"]["notification_priority"]
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          data?: Json | null
+          delivery_attempts?: number | null
+          delivery_status?:
+            | Database["public"]["Enums"]["notification_delivery_status"]
+            | null
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          next_retry_at?: string | null
+          priority?: Database["public"]["Enums"]["notification_priority"]
+          title: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          data?: Json | null
+          delivery_attempts?: number | null
+          delivery_status?:
+            | Database["public"]["Enums"]["notification_delivery_status"]
+            | null
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          next_retry_at?: string | null
+          priority?: Database["public"]["Enums"]["notification_priority"]
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          image_url: string | null
+          next_auth_user_id: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          image_url?: string | null
+          next_auth_user_id?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          next_auth_user_id?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          slug?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project_escrows: {
+        Row: {
+          created_at: string
+          escrow_id: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          escrow_id: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          escrow_id?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_escrows_escrow_id_fkey"
+            columns: ["escrow_id"]
+            isOneToOne: true
+            referencedRelation: "escrow_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_escrows_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_members: {
+        Row: {
+          id: string
+          joined_at: string
+          project_id: string
+          role: Database["public"]["Enums"]["project_member_role"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          project_id: string
+          role?: Database["public"]["Enums"]["project_member_role"]
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          project_id?: string
+          role?: Database["public"]["Enums"]["project_member_role"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_pitch: {
+        Row: {
+          created_at: string | null
+          id: string
+          pitch_deck: string | null
+          project_id: string
+          story: string
+          title: string
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          pitch_deck?: string | null
+          project_id: string
+          story: string
+          title: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          pitch_deck?: string | null
+          project_id?: string
+          story?: string
+          title?: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_pitch_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_tag_relationships: {
+        Row: {
+          project_id: string
+          tag_id: string
+        }
+        Insert: {
+          project_id: string
+          tag_id: string
+        }
+        Update: {
+          project_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_tag_relationships_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_tag_relationships_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "project_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_tags: {
+        Row: {
+          color: string
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          color: string
+          created_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      project_team: {
+        Row: {
+          bio: string | null
+          created_at: string
+          full_name: string
+          id: string
+          order_index: number
+          photo_url: string | null
+          project_id: string
+          role_title: string
+          updated_at: string
+          years_involved: number | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          order_index?: number
+          photo_url?: string | null
+          project_id: string
+          role_title: string
+          updated_at?: string
+          years_involved?: number | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          order_index?: number
+          photo_url?: string | null
+          project_id?: string
+          role_title?: string
+          updated_at?: string
+          years_involved?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_team_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_updates: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          project_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          project_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_updates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          category_id: string
+          created_at: string | null
+          current_amount: number
+          description: string
+          foundation_id: string | null
+          id: string
+          image_url: string | null
+          kinder_count: number
+          kindler_id: string
+          metadata: Json
+          min_investment: number
+          percentage_complete: number
+          project_location: string
+          slug: string | null
+          social_links: Json
+          status: Database["public"]["Enums"]["project_status"]
+          target_amount: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_id: string
+          created_at?: string | null
+          current_amount?: number
+          description: string
+          foundation_id?: string | null
+          id?: string
+          image_url?: string | null
+          kinder_count?: number
+          kindler_id: string
+          metadata?: Json
+          min_investment: number
+          percentage_complete?: number
+          project_location: string
+          slug?: string | null
+          social_links?: Json
+          status?: Database["public"]["Enums"]["project_status"]
+          target_amount: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string
+          created_at?: string | null
+          current_amount?: number
+          description?: string
+          foundation_id?: string | null
+          id?: string
+          image_url?: string | null
+          kinder_count?: number
+          kindler_id?: string
+          metadata?: Json
+          min_investment?: number
+          percentage_complete?: number
+          project_location?: string
+          slug?: string | null
+          social_links?: Json
+          status?: Database["public"]["Enums"]["project_status"]
+          target_amount?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_definitions: {
+        Row: {
+          contract_address: string | null
+          created_at: string
+          description: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          name: string
+          quest_id: number
+          quest_type: Database["public"]["Enums"]["quest_type"]
+          reward_points: number
+          target_value: number
+          updated_at: string
+        }
+        Insert: {
+          contract_address?: string | null
+          created_at?: string
+          description: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          quest_id: number
+          quest_type: Database["public"]["Enums"]["quest_type"]
+          reward_points?: number
+          target_value: number
+          updated_at?: string
+        }
+        Update: {
+          contract_address?: string | null
+          created_at?: string
+          description?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          quest_id?: number
+          quest_type?: Database["public"]["Enums"]["quest_type"]
+          reward_points?: number
+          target_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      referral_records: {
+        Row: {
+          contract_address: string | null
+          created_at: string
+          first_donation_at: string | null
+          id: string
+          onboarded_at: string | null
+          referred_id: string
+          referrer_id: string
+          status: Database["public"]["Enums"]["referral_status"]
+          total_donations: number
+        }
+        Insert: {
+          contract_address?: string | null
+          created_at?: string
+          first_donation_at?: string | null
+          id?: string
+          onboarded_at?: string | null
+          referred_id: string
+          referrer_id: string
+          status?: Database["public"]["Enums"]["referral_status"]
+          total_donations?: number
+        }
+        Update: {
+          contract_address?: string | null
+          created_at?: string
+          first_donation_at?: string | null
+          id?: string
+          onboarded_at?: string | null
+          referred_id?: string
+          referrer_id?: string
+          status?: Database["public"]["Enums"]["referral_status"]
+          total_donations?: number
+        }
+        Relationships: []
+      }
+      referrer_statistics: {
+        Row: {
+          active_referrals: number
+          created_at: string
+          id: string
+          referrer_id: string
+          total_referrals: number
+          total_reward_points: number
+          updated_at: string
+        }
+        Insert: {
+          active_referrals?: number
+          created_at?: string
+          id?: string
+          referrer_id: string
+          total_referrals?: number
+          total_reward_points?: number
+          updated_at?: string
+        }
+        Update: {
+          active_referrals?: number
+          created_at?: string
+          id?: string
+          referrer_id?: string
+          total_referrals?: number
+          total_reward_points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_nfts: {
+        Row: {
+          contract_address: string
+          created_at: string
+          evolved_at: string | null
+          id: string
+          image_ipfs_hash: string | null
+          metadata_ipfs_hash: string | null
+          minted_at: string
+          stellar_address: string
+          tier: string
+          token_id: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contract_address: string
+          created_at?: string
+          evolved_at?: string | null
+          id?: string
+          image_ipfs_hash?: string | null
+          metadata_ipfs_hash?: string | null
+          minted_at?: string
+          stellar_address: string
+          tier?: string
+          token_id: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contract_address?: string
+          created_at?: string
+          evolved_at?: string | null
+          id?: string
+          image_ipfs_hash?: string | null
+          metadata_ipfs_hash?: string | null
+          minted_at?: string
+          stellar_address?: string
+          tier?: string
+          token_id?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_quest_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          id: string
+          is_completed: boolean
+          quest_id: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          is_completed?: boolean
+          quest_id: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          is_completed?: boolean
+          quest_id?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_quest_progress_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quest_definitions"
+            referencedColumns: ["quest_id"]
+          },
+        ]
+      }
+      user_streaks: {
+        Row: {
+          contract_address: string | null
+          created_at: string
+          current_streak: number
+          id: string
+          last_donation_timestamp: string | null
+          longest_streak: number
+          period: Database["public"]["Enums"]["streak_period"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contract_address?: string | null
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_donation_timestamp?: string | null
+          longest_streak?: number
+          period: Database["public"]["Enums"]["streak_period"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contract_address?: string | null
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_donation_timestamp?: string | null
+          longest_streak?: number
+          period?: Database["public"]["Enums"]["streak_period"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      waitlist_interests: {
+        Row: {
+          category_id: string | null
+          consent: boolean
+          created_at: string
+          email: string | null
+          id: string
+          location: string | null
+          name: string
+          project_description: string | null
+          project_name: string | null
+          role: string
+          source: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          consent?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          project_description?: string | null
+          project_name?: string | null
+          role: string
+          source?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          consent?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          project_description?: string | null
+          project_name?: string | null
+          role?: string
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waitlist_interests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      activate_governance_rounds: { Args: never; Returns: undefined }
+      add_kyc_admin: {
+        Args: { admin_notes?: string; target_user_id: string }
+        Returns: undefined
+      }
+      cleanup_expired_challenges: { Args: never; Returns: undefined }
+      close_expired_governance_rounds: { Args: never; Returns: undefined }
+      create_contribution_and_update_project: {
+        Args: {
+          p_amount: number
+          p_contributor_id: string
+          p_project_id: string
+        }
+        Returns: string
+      }
+      current_auth_user_id: { Args: never; Returns: string }
+      get_current_user_profile: {
+        Args: never
+        Returns: {
+          profile_id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }[]
+      }
+      increment_governance_option_count: {
+        Args: { p_field: string; p_option_id: string; p_weight: number }
+        Returns: undefined
+      }
+      is_project_owner: {
+        Args: { project_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
+      is_project_team_member: {
+        Args: { project_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
+      remove_kyc_admin: { Args: { target_user_id: string }; Returns: undefined }
+      unaccent: { Args: { "": string }; Returns: string }
+      upsert_escrow_contract: {
+        Args: {
+          p_amount: number
+          p_contract_id: string
+          p_contribution_id: string
+          p_current_state?: Database["public"]["Enums"]["escrow_status_type"]
+          p_engagement_id: string
+          p_metadata?: Json
+          p_payer_address: string
+          p_platform_fee: number
+          p_project_id: string
+          p_receiver_address: string
+        }
+        Returns: string
+      }
+    }
+    Enums: {
+      backup_state: "not_backed_up" | "backed_up"
+      comment_type: "comment" | "question" | "answer"
+      credential_type: "public-key"
+      device_type: "single_device" | "multi_device"
+      escrow_status_type:
+        | "NEW"
+        | "FUNDED"
+        | "ACTIVE"
+        | "COMPLETED"
+        | "DISPUTED"
+        | "CANCELLED"
+      governance_round_status: "upcoming" | "active" | "ended"
+      kyc_status_enum: "pending" | "approved" | "rejected" | "verified"
+      kyc_verification_enum: "basic" | "enhanced"
+      milestone_status:
+        | "pending"
+        | "completed"
+        | "approved"
+        | "rejected"
+        | "disputed"
+      notification_delivery_status: "pending" | "delivered" | "failed"
+      notification_priority: "low" | "medium" | "high" | "urgent"
+      notification_type: "info" | "success" | "warning" | "error"
+      profile_verification_status: "unverified" | "verified"
+      project_member_role:
+        | "admin"
+        | "editor"
+        | "advisor"
+        | "community"
+        | "core"
+        | "others"
+      project_status:
+        | "draft"
+        | "review"
+        | "active"
+        | "paused"
+        | "funded"
+        | "rejected"
+      quest_status: "active" | "completed" | "expired"
+      quest_type:
+        | "multi_region_donation"
+        | "weekly_streak"
+        | "multi_category_donation"
+        | "referral_quest"
+        | "total_donation_amount"
+        | "quest_master"
+      referral_status: "pending" | "onboarded" | "first_donation" | "active"
+      streak_period: "weekly" | "monthly"
+      user_role:
+        | "donor"
+        | "creator"
+        | "pending"
+        | "admin"
+        | "kinder"
+        | "kindler"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
@@ -1723,61 +1933,62 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-	public: {
-		Enums: {
-			backup_state: ['not_backed_up', 'backed_up'],
-			comment_type: ['comment', 'question', 'answer'],
-			credential_type: ['public-key'],
-			device_type: ['single_device', 'multi_device'],
-			escrow_status_type: [
-				'NEW',
-				'FUNDED',
-				'ACTIVE',
-				'COMPLETED',
-				'DISPUTED',
-				'CANCELLED',
-			],
-			kyc_status_enum: ['pending', 'approved', 'rejected', 'verified'],
-			kyc_verification_enum: ['basic', 'enhanced'],
-			milestone_status: [
-				'pending',
-				'completed',
-				'approved',
-				'rejected',
-				'disputed',
-			],
-			notification_delivery_status: ['pending', 'delivered', 'failed'],
-			notification_priority: ['low', 'medium', 'high', 'urgent'],
-			notification_type: ['info', 'success', 'warning', 'error'],
-			profile_verification_status: ['unverified', 'verified'],
-			project_member_role: [
-				'admin',
-				'editor',
-				'advisor',
-				'community',
-				'core',
-				'others',
-			],
-			project_status: [
-				'draft',
-				'review',
-				'active',
-				'paused',
-				'funded',
-				'rejected',
-			],
-			quest_status: ['active', 'completed', 'expired'],
-			quest_type: [
-				'multi_region_donation',
-				'weekly_streak',
-				'multi_category_donation',
-				'referral_quest',
-				'total_donation_amount',
-				'quest_master',
-			],
-			referral_status: ['pending', 'onboarded', 'first_donation', 'active'],
-			streak_period: ['weekly', 'monthly'],
-			user_role: ['donor', 'creator', 'pending', 'admin', 'kinder', 'kindler'],
-		},
-	},
+  public: {
+    Enums: {
+      backup_state: ["not_backed_up", "backed_up"],
+      comment_type: ["comment", "question", "answer"],
+      credential_type: ["public-key"],
+      device_type: ["single_device", "multi_device"],
+      escrow_status_type: [
+        "NEW",
+        "FUNDED",
+        "ACTIVE",
+        "COMPLETED",
+        "DISPUTED",
+        "CANCELLED",
+      ],
+      governance_round_status: ["upcoming", "active", "ended"],
+      kyc_status_enum: ["pending", "approved", "rejected", "verified"],
+      kyc_verification_enum: ["basic", "enhanced"],
+      milestone_status: [
+        "pending",
+        "completed",
+        "approved",
+        "rejected",
+        "disputed",
+      ],
+      notification_delivery_status: ["pending", "delivered", "failed"],
+      notification_priority: ["low", "medium", "high", "urgent"],
+      notification_type: ["info", "success", "warning", "error"],
+      profile_verification_status: ["unverified", "verified"],
+      project_member_role: [
+        "admin",
+        "editor",
+        "advisor",
+        "community",
+        "core",
+        "others",
+      ],
+      project_status: [
+        "draft",
+        "review",
+        "active",
+        "paused",
+        "funded",
+        "rejected",
+      ],
+      quest_status: ["active", "completed", "expired"],
+      quest_type: [
+        "multi_region_donation",
+        "weekly_streak",
+        "multi_category_donation",
+        "referral_quest",
+        "total_donation_amount",
+        "quest_master",
+      ],
+      referral_status: ["pending", "onboarded", "first_donation", "active"],
+      streak_period: ["weekly", "monthly"],
+      user_role: ["donor", "creator", "pending", "admin", "kinder", "kindler"],
+    },
+  },
 } as const

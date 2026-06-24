@@ -7,8 +7,7 @@ import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
 import {
 	checkDuplicateContribution,
-	createContributionRecord,
-	incrementProjectAmount,
+	createContributionWithProjectUpdate,
 	resolveProjectId,
 	sendContributionNotifications,
 	triggerGamificationUpdates,
@@ -57,6 +56,10 @@ async function createContributionHandler(req: NextRequest) {
 		}
 		const finalProjectId = projectResolution.projectId
 
+		if (!finalProjectId) {
+			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
+		}
+
 		const duplicateCheck = await checkDuplicateContribution({
 			transactionHash,
 			projectId: finalProjectId,
@@ -73,7 +76,7 @@ async function createContributionHandler(req: NextRequest) {
 			)
 		}
 
-		const contributionResult = await createContributionRecord({
+		const contributionResult = await createContributionWithProjectUpdate({
 			projectId: finalProjectId,
 			contributorId: session.user.id,
 			amount: numericAmount,
@@ -87,11 +90,6 @@ async function createContributionHandler(req: NextRequest) {
 				{ status: 500 },
 			)
 		}
-
-		await incrementProjectAmount({
-			projectId: finalProjectId,
-			amount: numericAmount,
-		})
 
 		sendContributionNotifications({
 			projectId: finalProjectId,

@@ -21,6 +21,8 @@ export type CreateContributionRecordResult =
 	| { success: true; contributionId: string }
 	| { success: false; error: string; details?: string }
 
+export type CreateContributionWithProjectUpdateResult = CreateContributionRecordResult
+
 export type SendContributionNotificationsInput = {
 	projectId: string | null
 	contributorId: string
@@ -105,58 +107,51 @@ export async function checkDuplicateContribution(params: {
 	return { duplicate: false }
 }
 
+export async function createContributionWithProjectUpdate(params: {
+	projectId: string
+	contributorId: string
+	amount: number
+}): Promise<CreateContributionWithProjectUpdateResult> {
+	const { data: contributionId, error } = await supabase.rpc(
+		'create_contribution_and_update_project',
+		{
+			p_project_id: params.projectId,
+			p_contributor_id: params.contributorId,
+			p_amount: params.amount,
+		},
+	)
+
+	if (error || !contributionId) {
+		logger.error('Error creating contribution with project update:', error)
+		return {
+			success: false,
+			error: 'Failed to create contribution',
+			details: error?.message ?? 'No contribution id returned',
+		}
+	}
+
+	return { success: true, contributionId }
+}
+
+/** @deprecated Use createContributionWithProjectUpdate for atomic insert + project totals update. */
 export async function createContributionRecord(params: {
 	projectId: string | null
 	contributorId: string
 	amount: number
 }): Promise<CreateContributionRecordResult> {
-	const { data: contribution, error: contributionError } = await supabase
-		.from('contributions')
-		.insert({
-			project_id: params.projectId,
-			contributor_id: params.contributorId,
-			amount: params.amount,
-		})
-		.select('id')
-		.single()
-
-	if (contributionError) {
-		logger.error('Error creating contribution:', contributionError)
+	if (!params.projectId) {
 		return {
 			success: false,
 			error: 'Failed to create contribution',
-			details: contributionError.message,
+			details: 'project_id is required',
 		}
 	}
 
-	return { success: true, contributionId: contribution.id }
-}
-
-export async function incrementProjectAmount(params: {
-	projectId: string | null
-	amount: number
-}): Promise<void> {
-	const { error: updateError } = await supabase.rpc('increment_project_amount', {
-		project_id_param: params.projectId,
-		amount_param: params.amount,
+	return createContributionWithProjectUpdate({
+		projectId: params.projectId,
+		contributorId: params.contributorId,
+		amount: params.amount,
 	})
-
-	if (updateError) {
-		const { data: project } = await supabase
-			.from('projects')
-			.select('current_amount')
-			.eq('id', params.projectId)
-			.single()
-
-		if (project) {
-			await supabase
-				.from('projects')
-				.update({
-					current_amount: (project.current_amount || 0) + params.amount,
-				})
-				.eq('id', params.projectId)
-		}
-	}
 }
 
 export async function sendContributionNotifications(
