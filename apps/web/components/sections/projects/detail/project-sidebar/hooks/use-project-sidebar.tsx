@@ -140,7 +140,10 @@ export function useProjectSidebar(project: ProjectDetail) {
 				throw new Error('Transaction failed')
 			}
 
-			const txHash = 'txHash' in sendResult ? sendResult.txHash : undefined
+			const txHash =
+				sendResult && 'txHash' in sendResult && typeof sendResult.txHash === 'string'
+					? sendResult.txHash
+					: undefined
 			const formattedAmount = new Intl.NumberFormat(undefined, {
 				style: 'currency',
 				currency: 'USD',
