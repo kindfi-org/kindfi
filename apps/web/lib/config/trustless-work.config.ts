@@ -5,6 +5,8 @@ export const TRUSTLESS_WORK_API_URLS = {
 
 export type TrustlessWorkNetwork = keyof typeof TRUSTLESS_WORK_API_URLS
 
+type TrustlessWorkApiBaseUrl = (typeof TRUSTLESS_WORK_API_URLS)[TrustlessWorkNetwork]
+
 /**
  * Trustless Work network selection is controlled only by env vars — never by
  * NODE_ENV, NEXT_PUBLIC_APP_ENV, or Vercel deployment environment.
@@ -26,7 +28,7 @@ const resolveTrustlessWorkNetwork = (network: string): TrustlessWorkNetwork => {
 }
 
 /** Trustless Work API base URL — shared by client SDK and server-side escrow services. */
-export const getTrustlessWorkApiBaseUrl = (): string => {
+export const getTrustlessWorkApiBaseUrl = (): TrustlessWorkApiBaseUrl => {
 	const networkEnv = readTrustlessWorkNetworkEnv()
 
 	if (networkEnv) {
@@ -36,8 +38,12 @@ export const getTrustlessWorkApiBaseUrl = (): string => {
 	const explicitUrl =
 		process.env.TRUSTLESS_WORK_API_URL ?? process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_URL
 
-	if (explicitUrl) {
-		return explicitUrl
+	if (explicitUrl === TRUSTLESS_WORK_API_URLS.mainnet) {
+		return TRUSTLESS_WORK_API_URLS.mainnet
+	}
+
+	if (explicitUrl === TRUSTLESS_WORK_API_URLS.development) {
+		return TRUSTLESS_WORK_API_URLS.development
 	}
 
 	return TRUSTLESS_WORK_API_URLS.development

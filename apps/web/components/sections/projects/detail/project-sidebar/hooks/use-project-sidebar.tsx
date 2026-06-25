@@ -59,7 +59,7 @@ export function useProjectSidebar(project: ProjectDetail) {
 		resolver: zodResolver(formSchema),
 		mode: 'onBlur',
 		defaultValues: {
-			investmentAmount: hasEscrow && project.minInvestment > 0 ? String(project.minInvestment) : '',
+			investmentAmount: hasEscrow && project.minInvestment > 0 ? project.minInvestment : 0,
 		},
 	})
 

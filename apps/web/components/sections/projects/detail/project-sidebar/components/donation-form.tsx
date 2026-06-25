@@ -66,8 +66,18 @@ export function DonationForm({
 											className="pl-6 disabled:opacity-60 disabled:cursor-not-allowed"
 											aria-label="Donation amount in USD"
 											autoComplete="off"
-											value={field.value ?? ''}
-											onChange={field.onChange}
+											value={field.value > 0 ? String(field.value) : ''}
+											onChange={(event) => {
+												const raw = event.target.value
+												if (raw === '' || raw === '.') {
+													field.onChange(0)
+													return
+												}
+												const parsed = Number(raw)
+												if (!Number.isNaN(parsed)) {
+													field.onChange(parsed)
+												}
+											}}
 											onBlur={field.onBlur}
 											name={field.name}
 											ref={field.ref}
