@@ -66,7 +66,11 @@ export function DonationForm({
 											className="pl-6 disabled:opacity-60 disabled:cursor-not-allowed"
 											aria-label="Donation amount in USD"
 											autoComplete="off"
-											{...field}
+											value={field.value ?? ''}
+											onChange={field.onChange}
+											onBlur={field.onBlur}
+											name={field.name}
+											ref={field.ref}
 											disabled={!canDonate}
 										/>
 									</FormControl>

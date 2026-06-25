@@ -55,13 +55,11 @@ export function useProjectSidebar(project: ProjectDetail) {
 
 	const formSchema = useMemo(() => buildFormSchema(project.minInvestment), [project.minInvestment])
 
-	const initialInvestmentAmount = hasEscrow ? project.minInvestment : ''
-
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		mode: 'onBlur',
 		defaultValues: {
-			investmentAmount: initialInvestmentAmount as FormValues['investmentAmount'],
+			investmentAmount: hasEscrow && project.minInvestment > 0 ? String(project.minInvestment) : '',
 		},
 	})
 

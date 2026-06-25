@@ -8,6 +8,7 @@ export type AnalysisStatus = 'idle' | 'loading' | 'streaming' | 'done' | 'error'
 interface UsePitchAnalysisReturn {
 	analysis: string
 	status: AnalysisStatus
+	errorMessage: string | null
 	analyze: (title: string, story: string) => Promise<void>
 	reset: () => void
 	isLoading: boolean
@@ -16,12 +17,14 @@ interface UsePitchAnalysisReturn {
 export const usePitchAnalysis = (): UsePitchAnalysisReturn => {
 	const [analysis, setAnalysis] = useState('')
 	const [status, setStatus] = useState<AnalysisStatus>('idle')
+	const [errorMessage, setErrorMessage] = useState<string | null>(null)
 	const abortControllerRef = useRef<AbortController | null>(null)
 
 	const reset = useCallback(() => {
 		abortControllerRef.current?.abort()
 		setAnalysis('')
 		setStatus('idle')
+		setErrorMessage(null)
 	}, [])
 
 	const analyze = useCallback(async (title: string, story: string) => {
@@ -30,6 +33,7 @@ export const usePitchAnalysis = (): UsePitchAnalysisReturn => {
 		abortControllerRef.current = controller
 
 		setAnalysis('')
+		setErrorMessage(null)
 		setStatus('loading')
 
 		try {
@@ -42,7 +46,9 @@ export const usePitchAnalysis = (): UsePitchAnalysisReturn => {
 
 			if (!response.ok) {
 				const error = await response.json().catch(() => ({}))
-				throw new Error(error.error ?? `Request failed: ${response.status}`)
+				throw new Error(
+					typeof error.error === 'string' ? error.error : `Request failed: ${response.status}`,
+				)
 			}
 
 			if (!response.body) throw new Error('No response body')
@@ -51,17 +57,29 @@ export const usePitchAnalysis = (): UsePitchAnalysisReturn => {
 
 			const reader = response.body.getReader()
 			const decoder = new TextDecoder()
+			let accumulated = ''
 
 			while (true) {
 				const { done, value } = await reader.read()
 				if (done) break
-				setAnalysis((prev) => prev + decoder.decode(value, { stream: true }))
+				accumulated += decoder.decode(value, { stream: true })
+				setAnalysis(accumulated)
+			}
+
+			accumulated += decoder.decode()
+			setAnalysis(accumulated)
+
+			if (!accumulated.trim()) {
+				setErrorMessage('The analysis returned no content. Please try again.')
+				setStatus('error')
+				return
 			}
 
 			setStatus('done')
 		} catch (err) {
 			if ((err as Error).name === 'AbortError') return
 			logger.error('[usePitchAnalysis]', err)
+			setErrorMessage(err instanceof Error ? err.message : 'The analysis could not be completed.')
 			setStatus('error')
 		}
 	}, [])
@@ -69,6 +87,7 @@ export const usePitchAnalysis = (): UsePitchAnalysisReturn => {
 	return {
 		analysis,
 		status,
+		errorMessage,
 		analyze,
 		reset,
 		isLoading: status === 'loading' || status === 'streaming',
