@@ -100,8 +100,8 @@ async function onRampHandler(req: NextRequest) {
 
 		if (!quoteResponse.ok) {
 			const errorText = await quoteResponse.text()
-			logger.error('Etherfuse quote creation failed:', errorText)
-			throw new AppError(`Failed to create quote: ${errorText}`, quoteResponse.status)
+			logger.error('Etherfuse quote creation failed', { status: quoteResponse.status, body: errorText })
+			throw new AppError('Failed to create on-ramp quote', quoteResponse.status)
 		}
 
 		const quoteData = await quoteResponse.json()
@@ -125,8 +125,8 @@ async function onRampHandler(req: NextRequest) {
 
 		if (!orderResponse.ok) {
 			const errorText = await orderResponse.text()
-			logger.error('Etherfuse order creation failed:', errorText)
-			throw new AppError(`Failed to create order: ${errorText}`, orderResponse.status)
+			logger.error('Etherfuse order creation failed', { status: orderResponse.status, body: errorText })
+			throw new AppError('Failed to create on-ramp order', orderResponse.status)
 		}
 
 		const orderData = await orderResponse.json()
