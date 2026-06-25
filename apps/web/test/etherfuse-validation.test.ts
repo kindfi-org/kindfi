@@ -123,7 +123,9 @@ describe('Etherfuse onboarding status', () => {
 		}) as typeof fetch
 
 		try {
-			const { resolveEtherfuseOrderContext } = await import('../lib/etherfuse/resolve-order-context')
+			const { resolveEtherfuseOrderContext } = await import(
+				'../lib/etherfuse/resolve-order-context'
+			)
 			const config = {
 				apiKey: 'test-api-key',
 				baseUrl: 'https://api.sand.etherfuse.com',

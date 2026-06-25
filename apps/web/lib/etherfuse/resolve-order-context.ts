@@ -1,3 +1,4 @@
+import { AppError } from '~/lib/error'
 import {
 	type EtherfuseApiAuth,
 	getEtherfuseCustomerKycStatus,
@@ -5,7 +6,6 @@ import {
 	resolveCustomerWalletReference,
 	resolveEtherfuseBankAccountId,
 } from '~/lib/etherfuse/etherfuse-api'
-import { AppError } from '~/lib/error'
 import type { EtherfuseConfig } from '~/lib/etherfuse/get-etherfuse-config'
 import {
 	findEtherfuseWalletByPublicKey,
