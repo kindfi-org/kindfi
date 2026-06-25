@@ -4,7 +4,10 @@ import { logger } from '@/lib/logger'
 import { getAuthenticatedSession } from '~/lib/auth/server-action-auth'
 import { AppError } from '~/lib/error'
 import { getEtherfuseConfig } from '~/lib/etherfuse/get-etherfuse-config'
-import { getEtherfuseOnboardingStatus } from '~/lib/etherfuse/resolve-order-context'
+import {
+	getEtherfuseOnboardingStatus,
+	resolveEtherfuseOrderContext,
+} from '~/lib/etherfuse/resolve-order-context'
 import { isExternalStellarWallet } from '~/lib/etherfuse/wallet'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 
@@ -15,29 +18,27 @@ async function onboardingStatusHandler(req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 		}
 
-		const customerId = req.nextUrl.searchParams.get('customerId')
-		const bankAccountId = req.nextUrl.searchParams.get('bankAccountId')
 		const walletAddress = req.nextUrl.searchParams.get('walletAddress')
 
-		if (
-			!customerId ||
-			!bankAccountId ||
-			!walletAddress ||
-			!isExternalStellarWallet(walletAddress)
-		) {
+		if (!walletAddress || !isExternalStellarWallet(walletAddress)) {
 			return NextResponse.json(
-				{
-					error: 'customerId, bankAccountId, and a valid external wallet address are required',
-				},
+				{ error: 'A valid external wallet address is required' },
 				{ status: 400 },
 			)
 		}
 
 		const config = await getEtherfuseConfig()
-		const status = await getEtherfuseOnboardingStatus(
-			{ apiKey: config.apiKey, baseUrl: config.baseUrl },
-			{ customerId, bankAccountId, walletAddress },
+		const auth = { apiKey: config.apiKey, baseUrl: config.baseUrl }
+		const { customerId, bankAccountId } = await resolveEtherfuseOrderContext(
+			config,
+			walletAddress,
+			{},
 		)
+		const status = await getEtherfuseOnboardingStatus(auth, {
+			customerId,
+			bankAccountId,
+			walletAddress,
+		})
 
 		return NextResponse.json(status)
 	} catch (error) {
