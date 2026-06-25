@@ -131,7 +131,7 @@ describe('Etherfuse onboarding status', () => {
 				baseUrl: 'https://api.sand.etherfuse.com',
 				customerId: 'test-customer-id',
 				bankAccountId: VALID_BANK_ACCOUNT_ID,
-				cryptoWalletId: VALID_WALLET_ID,
+				cryptoWalletId: '',
 			}
 
 			const context = await resolveEtherfuseOrderContext(config, VALID_G_ADDRESS, {})

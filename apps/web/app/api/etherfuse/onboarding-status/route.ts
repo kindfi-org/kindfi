@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
 import { getAuthenticatedSession } from '~/lib/auth/server-action-auth'
 import { AppError } from '~/lib/error'
+import { resolveAuthorizedEtherfuseWallet } from '~/lib/etherfuse/etherfuse-wallet-binding'
 import { getEtherfuseConfig } from '~/lib/etherfuse/get-etherfuse-config'
 import {
 	getEtherfuseOnboardingStatus,
@@ -18,9 +19,13 @@ async function onboardingStatusHandler(req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 		}
 
-		const walletAddress = req.nextUrl.searchParams.get('walletAddress')
+		const requestedWalletAddress = req.nextUrl.searchParams.get('walletAddress')
+		const walletAddress = await resolveAuthorizedEtherfuseWallet(
+			session.user.id,
+			requestedWalletAddress,
+		)
 
-		if (!walletAddress || !isExternalStellarWallet(walletAddress)) {
+		if (!isExternalStellarWallet(walletAddress)) {
 			return NextResponse.json(
 				{ error: 'A valid external wallet address is required' },
 				{ status: 400 },

@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger'
 import { getAuthenticatedSession } from '~/lib/auth/server-action-auth'
 import { AppError } from '~/lib/error'
 import type { EtherfuseApiAuth } from '~/lib/etherfuse/etherfuse-api'
+import { persistEtherfuseWalletBinding } from '~/lib/etherfuse/etherfuse-wallet-binding'
 import { getEtherfuseConfig } from '~/lib/etherfuse/get-etherfuse-config'
 import {
 	requestEtherfuseOnboardingUrl,
@@ -49,6 +50,12 @@ async function onboardingUrlHandler(req: NextRequest) {
 				email: session.user.email ?? undefined,
 				displayName: session.user.name ?? undefined,
 			},
+		})
+
+		await persistEtherfuseWalletBinding(session.user.id, {
+			walletAddress,
+			customerId: result.customerId,
+			bankAccountId: result.bankAccountId,
 		})
 
 		return NextResponse.json(result)
