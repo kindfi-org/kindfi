@@ -1,30 +1,30 @@
 import { logger } from '@/lib/logger'
+import {
+	getTrustlessWorkApiBaseUrl,
+	getTrustlessWorkApiKey,
+} from '~/lib/config/trustless-work.config'
 
 interface EscrowBalanceItem {
 	address: string
 	balance: number
 }
 
-const TW_API_KEY =
-	process.env.TRUSTLESS_WORK_API_KEY ?? process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY ?? ''
-
-const APP_ENV = process.env.NEXT_PUBLIC_APP_ENV ?? 'development'
-
-const TW_BASE_URL =
-	process.env.TRUSTLESS_WORK_API_URL ??
-	(APP_ENV === 'production' ? 'https://api.trustlesswork.com' : 'https://dev.api.trustlesswork.com')
-
 export async function getEscrowBalance(contractAddress: string): Promise<number | null> {
-	if (!contractAddress || !TW_API_KEY) {
+	if (!contractAddress) {
+		return null
+	}
+
+	const apiKey = getTrustlessWorkApiKey()
+	if (!apiKey) {
 		return null
 	}
 
 	try {
-		const url = new URL(`${TW_BASE_URL}/helper/get-multiple-escrow-balance`)
+		const url = new URL(`${getTrustlessWorkApiBaseUrl()}/helper/get-multiple-escrow-balance`)
 		url.searchParams.append('addresses[]', contractAddress)
 
 		const res = await fetch(url.toString(), {
-			headers: { 'x-api-key': TW_API_KEY },
+			headers: { 'x-api-key': apiKey },
 			cache: 'no-store',
 		})
 

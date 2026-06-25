@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
-
-const TW_API_KEY = process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY ?? ''
-const APP_ENV = process.env.NEXT_PUBLIC_APP_ENV ?? 'development'
-const TW_BASE_URL =
-	APP_ENV === 'production' ? 'https://api.trustlesswork.com' : 'https://dev.api.trustlesswork.com'
+import {
+	getTrustlessWorkApiBaseUrl,
+	getTrustlessWorkApiKey,
+} from '~/lib/config/trustless-work.config'
 
 const COMMUNITY_FUND_ADDRESS = process.env.NEXT_PUBLIC_COMMUNITY_FUND_ADDRESS ?? ''
 
@@ -26,15 +25,15 @@ export async function GET() {
 			return NextResponse.json({ error: 'Community fund address not configured' }, { status: 503 })
 		}
 
-		if (!TW_API_KEY) {
+		if (!getTrustlessWorkApiKey()) {
 			return NextResponse.json({ error: 'Trustless Work API key not configured' }, { status: 503 })
 		}
 
-		const url = new URL(`${TW_BASE_URL}/helper/get-multiple-escrow-balance`)
+		const url = new URL(`${getTrustlessWorkApiBaseUrl()}/helper/get-multiple-escrow-balance`)
 		url.searchParams.append('addresses[]', COMMUNITY_FUND_ADDRESS)
 
 		const res = await fetch(url.toString(), {
-			headers: { 'x-api-key': TW_API_KEY },
+			headers: { 'x-api-key': getTrustlessWorkApiKey() },
 			next: { revalidate: 60 },
 		})
 

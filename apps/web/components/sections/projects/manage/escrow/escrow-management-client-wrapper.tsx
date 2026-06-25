@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
+import { SyncEscrowCard } from './components/sync-escrow-card'
 import { EscrowManagementPanel } from './escrow-management-panel'
 
 export function EscrowManagementClientWrapper({ projectSlug }: { projectSlug: string }) {
@@ -41,6 +42,7 @@ export function EscrowManagementClientWrapper({ projectSlug }: { projectSlug: st
 						</Button>
 					</CardContent>
 				</Card>
+				<SyncEscrowCard projectId={project.id} projectSlug={projectSlug} />
 			</div>
 		)
 	}

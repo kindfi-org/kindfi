@@ -20,6 +20,7 @@ import { EscrowReviewStep } from './escrow-review-step'
 import { EscrowRoleFields } from './escrow-role-fields'
 import { EscrowStepIndicator } from './escrow-step-indicator'
 import { EscrowTypeSelector } from './escrow-type-selector'
+import { SyncEscrowCard } from './sync-escrow-card'
 import { TrustlessExternalWalletBanner } from './trustless-external-wallet-banner'
 
 interface EscrowCreationWizardProps {
@@ -180,6 +181,8 @@ export function EscrowCreationWizard({ projectId, projectSlug }: EscrowCreationW
 					)}
 				</div>
 			</div>
+
+			<SyncEscrowCard projectId={projectId} projectSlug={projectSlug} variant="compact" />
 		</TooltipProvider>
 	)
 }

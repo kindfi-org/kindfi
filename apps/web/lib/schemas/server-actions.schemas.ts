@@ -113,6 +113,17 @@ export const saveEscrowContractInputSchema = z.object({
 	escrowData: escrowDataSchema,
 })
 
+const stellarContractIdSchema = z
+	.string()
+	.min(1, 'Contract ID is required')
+	.regex(/^C[A-Z2-7]{55}$/, 'Invalid Stellar contract ID')
+
+export const syncEscrowToDatabaseInputSchema = z.object({
+	projectId: z.string().uuid('Invalid projectId'),
+	contractId: stellarContractIdSchema,
+	escrowSnapshot: escrowDataSchema.optional(),
+})
+
 export const createFoundationInputSchema = z.object({
 	name: z.string().min(1, 'Name is required').max(120),
 	description: z.string().min(1, 'Description is required').max(2000),
