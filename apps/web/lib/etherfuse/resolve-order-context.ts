@@ -1,3 +1,4 @@
+import { AppError } from '~/lib/error'
 import {
 	type EtherfuseApiAuth,
 	getEtherfuseCustomerKycStatus,
@@ -6,7 +7,11 @@ import {
 	resolveEtherfuseBankAccountId,
 } from '~/lib/etherfuse/etherfuse-api'
 import type { EtherfuseConfig } from '~/lib/etherfuse/get-etherfuse-config'
-import { listEtherfuseCustomerBankAccounts } from '~/lib/etherfuse/resolve-etherfuse-onboarding'
+import {
+	findEtherfuseWalletByPublicKey,
+	listEtherfuseCustomerBankAccounts,
+	resolveEtherfuseOnboardingIds,
+} from '~/lib/etherfuse/resolve-etherfuse-onboarding'
 
 export type EtherfuseOrderContext = {
 	customerId: string
@@ -16,7 +21,7 @@ export type EtherfuseOrderContext = {
 }
 
 type EtherfuseOrderOverrides = {
-	customerId: string
+	customerId?: string
 	bankAccountId?: string
 	cryptoWalletId?: string
 }
@@ -38,21 +43,34 @@ const isWalletKycReady = (
 export const resolveEtherfuseOrderContext = async (
 	config: EtherfuseConfig,
 	walletAddress: string,
-	overrides: EtherfuseOrderOverrides,
+	overrides: EtherfuseOrderOverrides = {},
 ): Promise<EtherfuseOrderContext> => {
 	const auth = { apiKey: config.apiKey, baseUrl: config.baseUrl }
 
-	const [bankAccountId, walletReference] = await Promise.all([
-		overrides.bankAccountId
-			? Promise.resolve(overrides.bankAccountId)
-			: resolveEtherfuseBankAccountId(auth, config.bankAccountId || undefined),
-		resolveCustomerWalletReference(
-			auth,
-			overrides.customerId,
-			walletAddress,
-			overrides.cryptoWalletId ?? (config.cryptoWalletId || undefined),
-		),
-	])
+	let customerId = overrides.customerId
+	if (!customerId) {
+		const existingWallet = await findEtherfuseWalletByPublicKey(auth, walletAddress)
+		if (!existingWallet?.customerId) {
+			throw new AppError(
+				'No Etherfuse profile found for this wallet. Complete Etherfuse verification first.',
+				404,
+			)
+		}
+		customerId = existingWallet.customerId
+	}
+
+	const bankAccountId = overrides.bankAccountId
+		? overrides.bankAccountId
+		: overrides.customerId
+			? await resolveEtherfuseBankAccountId(auth, config.bankAccountId || undefined)
+			: (await resolveEtherfuseOnboardingIds(auth, walletAddress, { customerId })).bankAccountId
+
+	const walletReference = await resolveCustomerWalletReference(
+		auth,
+		customerId,
+		walletAddress,
+		overrides.cryptoWalletId ?? (config.cryptoWalletId || undefined),
+	)
 
 	return {
 		customerId: walletReference.customerId,

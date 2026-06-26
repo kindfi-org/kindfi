@@ -65,7 +65,7 @@ export const useEtherfuseUserOnboarding = (userId: string, walletAddress: string
 	}, [userId])
 
 	const refreshStatus = useCallback(async () => {
-		if (!onboarding?.customerId || !onboarding.bankAccountId || !walletAddress) {
+		if (!walletAddress) {
 			setStatus(null)
 			return null
 		}
@@ -73,11 +73,7 @@ export const useEtherfuseUserOnboarding = (userId: string, walletAddress: string
 		setIsCheckingStatus(true)
 
 		try {
-			const params = new URLSearchParams({
-				customerId: onboarding.customerId,
-				bankAccountId: onboarding.bankAccountId,
-				walletAddress,
-			})
+			const params = new URLSearchParams({ walletAddress })
 			const response = await fetch(`/api/etherfuse/onboarding-status?${params.toString()}`)
 			const data = await response.json()
 
@@ -92,7 +88,7 @@ export const useEtherfuseUserOnboarding = (userId: string, walletAddress: string
 		} finally {
 			setIsCheckingStatus(false)
 		}
-	}, [onboarding?.bankAccountId, onboarding?.customerId, walletAddress])
+	}, [walletAddress])
 
 	useEffect(() => {
 		void refreshStatus()
