@@ -166,6 +166,8 @@ export const requestEtherfuseOnboardingUrl = async (
 				throw error
 			}
 
+			let handledError: AppError = error
+
 			if (hasUserInfo && isEtherfuseClientNotLinkedError(error.message)) {
 				try {
 					return await createUrl(ids, false)
@@ -180,13 +182,14 @@ export const requestEtherfuseOnboardingUrl = async (
 						)
 					}
 
-					throw retryError
+					if (!(retryError instanceof AppError)) throw retryError
+					handledError = retryError
 				}
 			}
 
-			const existingOrgId = parseExistingEtherfuseOrgId(error.message)
+			const existingOrgId = parseExistingEtherfuseOrgId(handledError.message)
 			if (!existingOrgId || !allowOrgRecovery) {
-				throw error
+				throw handledError
 			}
 
 			const recoveredIds = await resolveEtherfuseOnboardingIds(auth, params.walletAddress, {
