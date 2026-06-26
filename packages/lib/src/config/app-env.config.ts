@@ -24,6 +24,7 @@ export function transformEnv(): AppEnvInterface {
 		features: {
 			enableEscrowFeature:
 				data.NODE_ENV === 'development' || data.NEXT_PUBLIC_ENABLE_ESCROW_FEATURE === 'true',
+			enableSmartAccountCreation: data.NEXT_PUBLIC_ENABLE_SMART_ACCOUNT_CREATION === 'true',
 		},
 		vapid: {
 			email: data.VAPID_EMAIL || '',
@@ -125,6 +126,7 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(appName: 
 		}),
 		features: z.object({
 			enableEscrowFeature: z.boolean(),
+			enableSmartAccountCreation: z.boolean(),
 		}),
 		vapid: z.object({
 			email: z.string(),
@@ -381,6 +383,7 @@ export const baseEnvSchema = z.object({
 	NODE_ENV: z.enum(['development', 'production', 'test']).optional(),
 	NEXT_PUBLIC_APP_ENV: z.enum(['development', 'production', 'test']).optional(),
 	NEXT_PUBLIC_ENABLE_ESCROW_FEATURE: z.enum(['true', 'false']).optional(),
+	NEXT_PUBLIC_ENABLE_SMART_ACCOUNT_CREATION: z.enum(['true', 'false']).optional(),
 
 	// Stellar Configuration
 	STELLAR_NETWORK_URL: z.string().url('Invalid Stellar Network URL format').optional(),

@@ -60,67 +60,66 @@ export async function POST(req: NextRequest) {
 			const existingCredential = credentials.find((cred) => cred.id === credential.id)
 
 			if (!existingCredential) {
-				// Create Smart Account
-				// NOTE: Smart Account Kit SDK requires browser WebAuthn APIs and cannot be used server-side
-				// We use custom contracts (StellarPasskeyService) for server-side deployment
-				// Smart Account Kit SDK should be used client-side for wallet management after deployment
-				try {
-					if (!config.stellar.fundingAccount || config.stellar.fundingAccount === 'SB...4756') {
-						const errorMsg =
-							'Funding account not configured. Set STELLAR_FUNDING_SECRET_KEY environment variable.'
-						logger.error('❌', errorMsg)
-						throw new Error(errorMsg)
+				if (config.features.enableSmartAccountCreation) {
+					// Create Smart Account
+					// NOTE: Smart Account Kit SDK requires browser WebAuthn APIs and cannot be used server-side
+					// We use custom contracts (StellarPasskeyService) for server-side deployment
+					// Smart Account Kit SDK should be used client-side for wallet management after deployment
+					try {
+						if (!config.stellar.fundingAccount || config.stellar.fundingAccount === 'SB...4756') {
+							const errorMsg =
+								'Funding account not configured. Set STELLAR_FUNDING_SECRET_KEY environment variable.'
+							logger.error('❌', errorMsg)
+							throw new Error(errorMsg)
+						}
+
+						if (!config.stellar.factoryContractId) {
+							const errorMsg =
+								'Factory contract not configured. Set FACTORY_CONTRACT_ID environment variable.'
+							logger.error('❌', errorMsg)
+							throw new Error(errorMsg)
+						}
+
+						const stellarService = new StellarPasskeyService(
+							config.stellar.networkPassphrase,
+							config.stellar.rpcUrl,
+							config.stellar.fundingAccount,
+						)
+
+						// Convert Uint8Array publicKey to base64 (same as verify-auth route)
+						const publicKeyBase64 = Buffer.from(credential.publicKey).toString('base64')
+
+						const deploymentResult = await stellarService.deployPasskeyAccount({
+							credentialId: credential.id,
+							publicKey: publicKeyBase64,
+							userId,
+						})
+
+						smartAccountAddress = deploymentResult.address
+					} catch (deploymentError) {
+						// Smart Account deployment failed
+						const errorMessage =
+							deploymentError instanceof Error ? deploymentError.message : String(deploymentError)
+
+						logger.error('❌ Smart Account deployment failed:', { error: errorMessage })
+
+						// Log detailed error for debugging
+						logger.error('Smart Account deployment error details:', {
+							fundingAccount: config.stellar.fundingAccount ? 'set' : 'missing',
+							factoryContractId: config.stellar.factoryContractId ? 'set' : 'missing',
+						})
+
+						logger.warn(
+							'⚠️ Continuing registration without Smart Account creation. ' +
+								'Check server logs for deployment errors. ' +
+								'The passkey can still be used for authentication.',
+						)
 					}
-
-					if (!config.stellar.factoryContractId) {
-						const errorMsg =
-							'Factory contract not configured. Set FACTORY_CONTRACT_ID environment variable.'
-						logger.error('❌', errorMsg)
-						throw new Error(errorMsg)
-					}
-
-					const stellarService = new StellarPasskeyService(
-						config.stellar.networkPassphrase,
-						config.stellar.rpcUrl,
-						config.stellar.fundingAccount,
-					)
-
-					// Convert Uint8Array publicKey to base64 (same as verify-auth route)
-					const publicKeyBase64 = Buffer.from(credential.publicKey).toString('base64')
-
-					const deploymentResult = await stellarService.deployPasskeyAccount({
-						credentialId: credential.id,
-						publicKey: publicKeyBase64,
-						userId,
-					})
-
-					smartAccountAddress = deploymentResult.address
-				} catch (deploymentError) {
-					// Smart Account deployment failed
-					const errorMessage =
-						deploymentError instanceof Error ? deploymentError.message : String(deploymentError)
-
-					logger.error('❌ Smart Account deployment failed:', { error: errorMessage })
-
-					// Log detailed error for debugging
-					logger.error('Smart Account deployment error details:', {
-						fundingAccount: config.stellar.fundingAccount ? 'set' : 'missing',
-						factoryContractId: config.stellar.factoryContractId ? 'set' : 'missing',
-					})
-
-					// For now, we'll continue without Smart Account creation
-					// In production, you may want to fail the registration
-					logger.warn(
-						'⚠️ Continuing registration without Smart Account creation. ' +
-							'Check server logs for deployment errors. ' +
-							'The passkey can still be used for authentication.',
-					)
-
-					// Don't throw - allow registration to continue
-					// The credential will be saved without address
+				} else {
+					logger.info('Smart Account creation is disabled. Saving passkey credential only.')
 				}
 
-				// Save credential with Smart Account address
+				// Save credential with optional Smart Account address
 				const newCredential = {
 					id: credential.id,
 					address: smartAccountAddress, // Store Smart Account address
@@ -142,19 +141,27 @@ export async function POST(req: NextRequest) {
 
 		await deleteChallenge({ identifier, rpId, userId })
 
-		// Return response with verification status and Smart Account address
+		// Return response with verification status and credential info
 		const response: {
 			verified: boolean
 			smartAccountAddress?: string
+			credentialId?: string
+			publicKey?: string
 			warning?: string
 			error?: string
 		} = {
 			verified: verification.verified,
 		}
 
+		if (verification.verified && verification.registrationInfo) {
+			const { credential } = verification.registrationInfo
+			response.credentialId = credential.id
+			response.publicKey = Buffer.from(credential.publicKey).toString('base64')
+		}
+
 		if (smartAccountAddress) {
 			response.smartAccountAddress = smartAccountAddress
-		} else if (verification.verified) {
+		} else if (verification.verified && config.features.enableSmartAccountCreation) {
 			// Registration verified but Smart Account creation failed
 			const warningMessage =
 				'Passkey registered successfully, but Smart Account creation failed. ' +

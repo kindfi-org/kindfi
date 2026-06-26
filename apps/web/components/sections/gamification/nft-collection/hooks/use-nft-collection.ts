@@ -2,11 +2,14 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
+import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
 import type { NFTCollectionResponse, UserNFTRecord, UserStats } from '../types'
 
 export function useNftCollection() {
 	const { data: session } = useSession()
-	const smartAccountAddress = session?.device?.address || session?.user?.device?.address
+	const smartAccountAddress = resolveSmartAccountAddress(
+		session?.device?.address || session?.user?.device?.address,
+	)
 
 	const { data: userData, isLoading: dbLoading } = useQuery<{
 		nft: UserNFTRecord | null

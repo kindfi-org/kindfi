@@ -8,7 +8,7 @@ import { signIn } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
-import { signOutAction } from '~/app/actions/auth'
+import { createSessionAction, signOutAction } from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -35,6 +35,8 @@ export function PasskeyRegistrationComponent() {
 		regError,
 		isAlreadyRegistered,
 		smartAccountAddress,
+		credentialId,
+		publicKey,
 		handleRegister,
 		reset,
 	} = useSmartAccountRegistration(userEmail, userId)
@@ -65,7 +67,7 @@ export function PasskeyRegistrationComponent() {
 
 	// Finalize after successful passkey registration: update profile and sign in via NextAuth
 	const handleFinalize = useCallback(async () => {
-		if (!regSuccess || !userEmail || !userId || !smartAccountAddress) return
+		if (!regSuccess || !userEmail || !userId || !credentialId || !publicKey) return
 
 		try {
 			const supabase = createSupabaseBrowserClient()
@@ -76,13 +78,30 @@ export function PasskeyRegistrationComponent() {
 					display_name: userEmail.split('@')[0],
 				})
 				.eq('next_auth_user_id', userId)
+
+			const sessionResult = await createSessionAction({
+				userId,
+				email: userEmail,
+			})
+
+			if (!sessionResult.success) {
+				throw new Error(sessionResult.message)
+			}
+
 			// Sign in through credentials provider once device/passkey ready
-			await signIn('credentials', {
+			const loginResult = await signIn('credentials', {
 				redirect: false,
 				userId,
 				email: userEmail,
-				address: smartAccountAddress || '',
+				credentialId,
+				pubKey: publicKey,
+				address: smartAccountAddress || '0x',
 			})
+
+			if (!loginResult?.ok) {
+				throw new Error('Failed to create authentication session')
+			}
+
 			// Mark this as a new session so role selection modal can be shown
 			sessionStorage.setItem('kindfi_new_session', 'true')
 			router.push('/profile')
@@ -90,27 +109,15 @@ export function PasskeyRegistrationComponent() {
 			logger.error('Finalize passkey registration error', e)
 			router.push('/sign-in')
 		}
-	}, [regSuccess, userEmail, userId, smartAccountAddress, router])
+	}, [regSuccess, userEmail, userId, credentialId, publicKey, smartAccountAddress, router])
 
 	useEffect(() => {
-		// If registration succeeded but no Smart Account address, redirect to sign-in
-		// The passkey is still registered and can be used for authentication
-		if (regSuccess && !smartAccountAddress) {
-			logger.warn('⚠️ Passkey registered but Smart Account creation failed. Redirecting to sign-in.')
-			toast.warning(
-				'Passkey registered, but Smart Account creation failed. You can still sign in with your passkey.',
-			)
-			router.push('/sign-in')
-			return
-		}
-
-		// Only finalize if we have all required data including Smart Account address
-		if (!regSuccess || !userEmail || !userId || !smartAccountAddress) {
+		if (!regSuccess || !userEmail || !userId || !credentialId || !publicKey) {
 			return
 		}
 
 		handleFinalize()
-	}, [regSuccess, userEmail, userId, smartAccountAddress, router, handleFinalize])
+	}, [regSuccess, userEmail, userId, credentialId, publicKey, handleFinalize])
 
 	// Removed automatic redirection - user will manually choose to continue
 	// Note: We keep the user on this page even if registration succeeds
