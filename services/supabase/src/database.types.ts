@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          actor_id: string | null
+          correlation_id: string
+          created_at: string | null
+          duration_ms: number | null
+          error_code: string | null
+          id: string
+          metadata: Json | null
+          operation: string
+          resource_id: string | null
+          resource_type: string
+          status: string
+        }
+        Insert: {
+          actor_id?: string | null
+          correlation_id: string
+          created_at?: string | null
+          duration_ms?: number | null
+          error_code?: string | null
+          id?: string
+          metadata?: Json | null
+          operation: string
+          resource_id?: string | null
+          resource_type: string
+          status: string
+        }
+        Update: {
+          actor_id?: string | null
+          correlation_id?: string
+          created_at?: string | null
+          duration_ms?: number | null
+          error_code?: string | null
+          id?: string
+          metadata?: Json | null
+          operation?: string
+          resource_id?: string | null
+          resource_type?: string
+          status?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           color: string
@@ -559,6 +601,7 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           description: string
+          entity_type: Database["public"]["Enums"]["creator_entity_type"]
           founded_year: number
           founder_id: string
           id: string
@@ -579,6 +622,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           description: string
+          entity_type?: Database["public"]["Enums"]["creator_entity_type"]
           founded_year: number
           founder_id: string
           id?: string
@@ -599,6 +643,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           description?: string
+          entity_type?: Database["public"]["Enums"]["creator_entity_type"]
           founded_year?: number
           founder_id?: string
           id?: string
@@ -1006,39 +1051,60 @@ export type Database = {
       profiles: {
         Row: {
           bio: string | null
+          country: string | null
           created_at: string
+          creator_entity_type:
+            | Database["public"]["Enums"]["creator_entity_type"]
+            | null
           display_name: string | null
           email: string | null
+          headline: string | null
           id: string
           image_url: string | null
           next_auth_user_id: string | null
           role: Database["public"]["Enums"]["user_role"]
           slug: string | null
+          social_links: Json
           updated_at: string
+          website_url: string | null
         }
         Insert: {
           bio?: string | null
+          country?: string | null
           created_at?: string
+          creator_entity_type?:
+            | Database["public"]["Enums"]["creator_entity_type"]
+            | null
           display_name?: string | null
           email?: string | null
+          headline?: string | null
           id: string
           image_url?: string | null
           next_auth_user_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           slug?: string | null
+          social_links?: Json
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
           bio?: string | null
+          country?: string | null
           created_at?: string
+          creator_entity_type?:
+            | Database["public"]["Enums"]["creator_entity_type"]
+            | null
           display_name?: string | null
           email?: string | null
+          headline?: string | null
           id?: string
           image_url?: string | null
           next_auth_user_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           slug?: string | null
+          social_links?: Json
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -1755,6 +1821,7 @@ export type Database = {
     Enums: {
       backup_state: "not_backed_up" | "backed_up"
       comment_type: "comment" | "question" | "answer"
+      creator_entity_type: "individual" | "ngo" | "foundation"
       credential_type: "public-key"
       device_type: "single_device" | "multi_device"
       escrow_status_type:
@@ -1937,6 +2004,7 @@ export const Constants = {
     Enums: {
       backup_state: ["not_backed_up", "backed_up"],
       comment_type: ["comment", "question", "answer"],
+      creator_entity_type: ["individual", "ngo", "foundation"],
       credential_type: ["public-key"],
       device_type: ["single_device", "multi_device"],
       escrow_status_type: [

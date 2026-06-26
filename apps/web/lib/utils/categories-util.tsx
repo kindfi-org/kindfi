@@ -85,6 +85,10 @@ export const getCategoryStyles = (category: string) => {
 			color: 'bg-red-50/80 text-red-700 hover:bg-red-100/80 active:bg-red-100/80 border-red-200/50',
 			icon: <ShieldAlert className="w-4 h-4" />,
 		},
+		'Humanitarian Aid': {
+			color: 'bg-red-50/80 text-red-700 hover:bg-red-100/80 active:bg-red-100/80 border-red-200/50',
+			icon: <HandHelping className="w-4 h-4" />,
+		},
 		'Culture and Arts': {
 			color:
 				'bg-blue-50/80 text-blue-700 hover:bg-blue-100/80 active:bg-blue-100/80 border-blue-200/50',
