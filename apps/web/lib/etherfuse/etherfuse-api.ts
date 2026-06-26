@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { AppError } from '~/lib/error'
 import type { EtherfuseRampAsset } from '~/lib/etherfuse/types'
 
@@ -40,7 +41,8 @@ export const etherfuseRequest = async <T>(
 
 	if (!response.ok) {
 		const errorText = await response.text()
-		throw new AppError(`Etherfuse API error (${path}): ${errorText}`, response.status)
+		logger.error('Etherfuse API error', { path, status: response.status, body: errorText })
+		throw new AppError(`Etherfuse API error (${path})`, response.status)
 	}
 
 	if (response.status === 204) {
