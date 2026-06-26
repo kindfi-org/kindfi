@@ -42,8 +42,9 @@ export const getEtherfuseConfig = async (): Promise<EtherfuseConfig> => {
 
 	const missing: string[] = []
 	if (!apiKey) missing.push('ETHERFUSE_API_KEY')
+	if (!baseUrl) missing.push('ETHERFUSE_BASE_URL')
 
-	if (!customerId) {
+	if (!customerId && apiKey && baseUrl) {
 		customerId = (await resolveOrganizationId(apiKey, baseUrl)) ?? ''
 	}
 	if (!customerId) {
