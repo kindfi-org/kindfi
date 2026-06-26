@@ -1,5 +1,5 @@
-import { AppError } from '~/lib/error'
 import { logger } from '@/lib/logger'
+import { AppError } from '~/lib/error'
 import type { EtherfuseRampAsset } from '~/lib/etherfuse/types'
 
 export type EtherfuseApiAuth = {
