@@ -1,5 +1,7 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
+import type { EscrowType } from '@trustless-work/escrow'
 import type { SocialLinks } from '~/lib/types/project/project-detail.types'
+import { readEscrowTypeFromMetadata } from '~/lib/utils/escrow/resolve-escrow-type'
 
 export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, projectSlug: string) {
 	const { data: project, error } = await client
@@ -46,15 +48,17 @@ export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, pro
 
 	// Fetch the actual contract_id from escrow_contracts table
 	let escrowContractAddress: string | undefined
+	let escrowType: EscrowType | undefined
 
 	if (escrowId) {
 		const { data: escrowContract } = await client
 			.from('escrow_contracts')
-			.select('contract_id')
+			.select('contract_id, metadata')
 			.eq('id', escrowId)
 			.maybeSingle()
 
 		escrowContractAddress = escrowContract?.contract_id
+		escrowType = readEscrowTypeFromMetadata(escrowContract?.metadata)
 	}
 
 	// Fetch foundation when project is assigned to one
@@ -97,7 +101,7 @@ export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, pro
 				: {},
 		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
 		escrowContractAddress,
-		escrowType: undefined,
+		escrowType,
 		foundation,
 	}
 }

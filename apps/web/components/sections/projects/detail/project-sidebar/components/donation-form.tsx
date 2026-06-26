@@ -20,6 +20,8 @@ interface DonationFormProps {
 	project: ProjectDetail
 	hasEscrow: boolean
 	isGoalReached: boolean
+	isDonationReady: boolean
+	isEscrowDataLoading: boolean
 	form: UseFormReturn<FormValues>
 	onSubmit: (data: FormValues) => Promise<void>
 }
@@ -28,10 +30,12 @@ export function DonationForm({
 	project,
 	hasEscrow,
 	isGoalReached,
+	isDonationReady,
+	isEscrowDataLoading,
 	form,
 	onSubmit,
 }: DonationFormProps) {
-	const canDonate = hasEscrow && !isGoalReached
+	const canDonate = isDonationReady && !isGoalReached
 	return (
 		<>
 			{hasEscrow && (
@@ -59,9 +63,13 @@ export function DonationForm({
 											placeholder={
 												!hasEscrow
 													? 'Donations coming soon'
-													: isGoalReached
-														? 'Funding goal reached'
-														: `Min. $${project.minInvestment}…`
+													: isEscrowDataLoading
+														? 'Loading escrow…'
+														: isGoalReached
+															? 'Funding goal reached'
+															: !isDonationReady
+																? 'Preparing donations…'
+																: `Min. $${project.minInvestment}…`
 											}
 											className="pl-6 disabled:opacity-60 disabled:cursor-not-allowed"
 											aria-label="Donation amount in USD"

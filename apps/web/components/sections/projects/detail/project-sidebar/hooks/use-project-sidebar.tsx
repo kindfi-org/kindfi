@@ -1,5 +1,6 @@
 'use client'
 
+import type { EscrowType } from '@trustless-work/escrow'
 import { CircleAlert, CircleCheck } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -11,11 +12,12 @@ import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { useAuth } from '~/hooks/use-auth'
 import { zodResolver } from '~/lib/form/zod-resolver'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
+import { resolveEscrowType } from '~/lib/utils/escrow/resolve-escrow-type'
 import { buildFormSchema, type FormValues } from '../types'
 
 export function useProjectSidebar(project: ProjectDetail) {
 	const [isFollowing, setIsFollowing] = useState(false)
-	const { getMultipleBalances, fundEscrow, sendTransaction } = useEscrow()
+	const { getMultipleBalances, fundEscrow, sendTransaction, getEscrowByContractIds } = useEscrow()
 	const {
 		address,
 		walletName,
@@ -33,14 +35,19 @@ export function useProjectSidebar(project: ProjectDetail) {
 
 	useEffect(() => setIsMounted(true), [])
 
-	const { escrowData } = useEscrowData({
+	const { escrowData, isLoading: isEscrowDataLoading } = useEscrowData({
 		escrowContractAddress: project.escrowContractAddress || '',
 		escrowType: project.escrowType,
 	})
 
-	const effectiveEscrowType = escrowData?.type || project.escrowType || 'multi-release'
-
 	const hasEscrow = Boolean(project.escrowContractAddress)
+
+	const effectiveEscrowType = resolveEscrowType({
+		indexerEscrow: escrowData,
+		projectEscrowType: project.escrowType,
+	})
+
+	const isDonationReady = Boolean(hasEscrow && effectiveEscrowType && !isEscrowDataLoading)
 
 	const effectiveRaised = onChainRaised ?? project.raised
 
@@ -86,7 +93,7 @@ export function useProjectSidebar(project: ProjectDetail) {
 	}
 
 	const fetchEscrowBalance = useCallback(async () => {
-		if (!project.escrowContractAddress) return
+		if (!project.escrowContractAddress || !effectiveEscrowType) return
 		try {
 			setIsFetchingBalance(true)
 			const balances = await getMultipleBalances(
@@ -101,6 +108,27 @@ export function useProjectSidebar(project: ProjectDetail) {
 			setIsFetchingBalance(false)
 		}
 	}, [getMultipleBalances, project.escrowContractAddress, effectiveEscrowType])
+
+	const resolveEscrowTypeForFunding = useCallback(async (): Promise<EscrowType> => {
+		const knownType = resolveEscrowType({
+			indexerEscrow: escrowData,
+			projectEscrowType: project.escrowType,
+		})
+		if (knownType) return knownType
+
+		if (!project.escrowContractAddress) {
+			throw new Error('Escrow is not configured for this project')
+		}
+
+		const response = await getEscrowByContractIds({
+			contractIds: [project.escrowContractAddress],
+			validateOnChain: false,
+		})
+		const indexerEscrow = Array.isArray(response) ? response[0] : response
+		if (indexerEscrow?.type) return indexerEscrow.type
+
+		throw new Error('Unable to determine escrow configuration')
+	}, [escrowData, getEscrowByContractIds, project.escrowContractAddress, project.escrowType])
 
 	useEffect(() => {
 		fetchEscrowBalance()
@@ -133,13 +161,24 @@ export function useProjectSidebar(project: ProjectDetail) {
 				return
 			}
 
+			const escrowType = await resolveEscrowTypeForFunding()
+
+			if (escrowType === 'multi-release') {
+				toast.error('Donations unavailable for this escrow', {
+					description:
+						'This project uses a multi-release escrow, which cannot accept partial donations. The project owner should recreate the escrow as single-release for crowdfunding.',
+					icon: <CircleAlert className="text-destructive" />,
+				})
+				return
+			}
+
 			const fundResponse = await fundEscrow(
 				{
 					amount: data.investmentAmount,
 					contractId: project.escrowContractAddress,
 					signer,
 				},
-				effectiveEscrowType,
+				escrowType,
 			)
 
 			if (!fundResponse.unsignedTransaction) {
@@ -254,6 +293,9 @@ export function useProjectSidebar(project: ProjectDetail) {
 			} else if (combinedMessage.includes('trustline')) {
 				userFriendlyMessage =
 					'Trustline required. Your wallet needs to establish a trustline for the token before donating.'
+			} else if (combinedMessage.includes("reading 'approved'")) {
+				userFriendlyMessage =
+					'Escrow configuration mismatch. This project may be using the wrong escrow type for donations. Please contact the project owner or try again after refreshing the page.'
 			} else if (apiErrorMessage) {
 				userFriendlyMessage = apiErrorMessage
 			}
@@ -286,6 +328,8 @@ export function useProjectSidebar(project: ProjectDetail) {
 		form,
 		hasEscrow,
 		isGoalReached,
+		isDonationReady,
+		isEscrowDataLoading,
 		progressPercentage,
 		onChainRaised,
 		isFetchingBalance,

@@ -1,6 +1,7 @@
 'use server'
 
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import type { EscrowType } from '@trustless-work/escrow'
 import {
 	enforceRateLimit,
 	requireAuthenticatedSession,
@@ -11,6 +12,7 @@ import { Logger } from '~/lib/logger'
 import { syncEscrowToDatabaseInputSchema } from '~/lib/schemas/server-actions.schemas'
 import { getEscrowByContractIdFromIndexer } from '~/lib/services/escrow-indexer.service'
 import { mapIndexerEscrowToSaveData } from '~/lib/utils/escrow/map-indexer-escrow-to-save-data'
+import { inferEscrowTypeFromSaveData } from '~/lib/utils/escrow/resolve-escrow-type'
 import { assertCanManageProjectEscrow, persistEscrowContract } from './persist-escrow-contract'
 import type { SaveEscrowContractParams } from './save-escrow-contract.types'
 
@@ -99,9 +101,11 @@ export async function syncEscrowToDatabaseAction(
 		}
 
 		let escrowData: SaveEscrowContractParams['escrowData']
+		let escrowType: EscrowType | undefined
 
 		if (validated.escrowSnapshot) {
 			escrowData = validated.escrowSnapshot
+			escrowType = inferEscrowTypeFromSaveData(escrowData)
 		} else {
 			const indexerResult = await getEscrowByContractIdFromIndexer(validated.contractId, {
 				validateOnChain: true,
@@ -116,6 +120,7 @@ export async function syncEscrowToDatabaseAction(
 
 			try {
 				escrowData = mapIndexerEscrowToSaveData(indexerResult.escrow)
+				escrowType = indexerResult.escrow.type
 			} catch (error) {
 				return {
 					success: false,
@@ -129,6 +134,7 @@ export async function syncEscrowToDatabaseAction(
 			projectId: validated.projectId,
 			contractId: validated.contractId,
 			escrowData,
+			escrowType,
 		})
 
 		if (!saveResult.success) {

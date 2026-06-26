@@ -22,6 +22,8 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		form,
 		hasEscrow,
 		isGoalReached,
+		isDonationReady,
+		isEscrowDataLoading,
 		progressPercentage,
 		onChainRaised,
 		isFetchingBalance,
@@ -92,6 +94,8 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					project={project}
 					hasEscrow={hasEscrow}
 					isGoalReached={isGoalReached}
+					isDonationReady={isDonationReady}
+					isEscrowDataLoading={isEscrowDataLoading}
 					form={form}
 					onSubmit={onSubmit}
 				/>

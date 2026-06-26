@@ -1,6 +1,8 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import type { EscrowType } from '@trustless-work/escrow'
 import { revalidatePath } from 'next/cache'
 import { Logger } from '~/lib/logger'
+import { inferEscrowTypeFromSaveData } from '~/lib/utils/escrow/resolve-escrow-type'
 import type { SaveEscrowContractParams } from './save-escrow-contract.types'
 
 const logger = new Logger()
@@ -62,17 +64,20 @@ export async function persistEscrowContract({
 	projectId,
 	contractId,
 	escrowData,
+	escrowType,
 }: {
 	userId: string
 	projectId: string
 	contractId: string
 	escrowData: SaveEscrowContractParams['escrowData']
+	escrowType?: EscrowType
 }): Promise<{ success: boolean; error?: string }> {
 	const supabase = supabaseServiceRole
 	const engagementId = escrowData.engagementId
 	const payerAddress = escrowData.roles.approver
 	const platformFee = escrowData.platformFee
 
+	const resolvedEscrowType = escrowType ?? inferEscrowTypeFromSaveData(escrowData)
 	const milestones = escrowData.milestones
 	let totalAmount: number
 	let receiverAddress: string
@@ -147,6 +152,7 @@ export async function persistEscrowContract({
 				amount: totalAmount,
 				platform_fee: platformFee,
 				current_state: 'NEW',
+				metadata: { escrow_type: resolvedEscrowType },
 				updated_at: new Date().toISOString(),
 			},
 			{
