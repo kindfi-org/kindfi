@@ -84,10 +84,14 @@ export function ProjectPitchForm({ projectId, projectSlug, pitch }: ProjectPitch
 													placeholder="Enter your pitch title"
 													maxLength={100}
 													className=" pr-16"
-													{...field}
+													value={field.value ?? ''}
+													onChange={field.onChange}
+													onBlur={field.onBlur}
+													name={field.name}
+													ref={field.ref}
 												/>
 												<div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-													{field.value.length}/100
+													{(field.value ?? '').length}/100
 												</div>
 											</div>
 										</FormControl>

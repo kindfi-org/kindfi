@@ -20,13 +20,17 @@ export function useProjectSupportersCount({ projectId }: UseProjectSupportersCou
 				setError(null)
 				const supabase = createSupabaseBrowserClient()
 				const { data, error: fetchError } = await supabase
-					.from('projects')
-					.select('kinder_count')
-					.eq('id', projectId)
-					.single()
+					.from('contributions')
+					.select('contributor_id')
+					.eq('project_id', projectId)
+					.gt('amount', 0)
 
 				if (fetchError) throw fetchError
-				if (data) setSupportersCount(data.kinder_count)
+
+				const uniqueContributors = new Set(
+					(data ?? []).map((row) => row.contributor_id).filter(Boolean),
+				)
+				setSupportersCount(uniqueContributors.size)
 			} catch (e) {
 				setError(e)
 			} finally {
@@ -39,13 +43,11 @@ export function useProjectSupportersCount({ projectId }: UseProjectSupportersCou
 	useEffect(() => {
 		if (!projectId) return
 
-		// Initial fetch with loading state
 		fetchSupportersCount(true)
 
-		// Set up polling to refresh count every 10 seconds (without loading state)
 		const intervalId = setInterval(() => {
 			fetchSupportersCount(false)
-		}, 10000) // Poll every 10 seconds
+		}, 10000)
 
 		return () => {
 			clearInterval(intervalId)

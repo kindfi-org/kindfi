@@ -9,16 +9,18 @@ import { logger } from '@/lib/logger'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
 
 /**
- * Hook for Smart Account registration using WebAuthn passkeys
- * Replaces the KYC server-based registration flow
+ * Hook for passkey registration using WebAuthn
  */
 export const useSmartAccountRegistration = (identifier: string, userId?: string) => {
-	const _appConfig: AppEnvInterface = appEnvConfig('web')
+	const appConfig: AppEnvInterface = appEnvConfig('web')
+	const smartAccountEnabled = appConfig.features.enableSmartAccountCreation
 	const [isCreatingPasskey, setIsCreatingPasskey] = useState<boolean>(false)
 	const [regSuccess, setRegSuccess] = useState<string>('')
 	const [regError, setRegError] = useState<string>('')
 	const [isAlreadyRegistered, setIsAlreadyRegistered] = useState<boolean>(false)
 	const [smartAccountAddress, setSmartAccountAddress] = useState<string | null>(null)
+	const [credentialId, setCredentialId] = useState<string | null>(null)
+	const [publicKey, setPublicKey] = useState<string | null>(null)
 
 	const reset = () => {
 		setIsCreatingPasskey(false)
@@ -26,6 +28,8 @@ export const useSmartAccountRegistration = (identifier: string, userId?: string)
 		setRegError('')
 		setIsAlreadyRegistered(false)
 		setSmartAccountAddress(null)
+		setCredentialId(null)
+		setPublicKey(null)
 	}
 
 	const handleRegister = async () => {
@@ -35,7 +39,9 @@ export const useSmartAccountRegistration = (identifier: string, userId?: string)
 		setRegSuccess('')
 		setRegError('')
 		setIsAlreadyRegistered(false)
-		toast.info('Creating passkey and Smart Account...')
+		toast.info(
+			smartAccountEnabled ? 'Creating passkey and Smart Account...' : 'Creating passkey...',
+		)
 
 		try {
 			// Step 1: Generate registration options
@@ -98,19 +104,29 @@ export const useSmartAccountRegistration = (identifier: string, userId?: string)
 			const verificationJSON = await verificationResp.json()
 
 			if (verificationJSON?.verified) {
+				if (verificationJSON.credentialId) {
+					setCredentialId(verificationJSON.credentialId)
+				}
+				if (verificationJSON.publicKey) {
+					setPublicKey(verificationJSON.publicKey)
+				}
+
 				if (verificationJSON.smartAccountAddress) {
 					const message = 'Passkey registered and Smart Account created!'
 					setRegSuccess(message)
 					setSmartAccountAddress(verificationJSON.smartAccountAddress)
 					toast.success(message)
-				} else {
-					// Passkey registered but Smart Account creation failed
+				} else if (smartAccountEnabled) {
 					const warning = verificationJSON.warning || 'Smart Account creation failed'
 					logger.warn('⚠️ Smart Account creation failed:', warning)
 					setRegSuccess('Passkey registered successfully')
 					setSmartAccountAddress(null)
 					toast.warning(warning)
-					// Still show success for passkey registration, but log the warning
+				} else {
+					const message = 'Passkey registered successfully!'
+					setRegSuccess(message)
+					setSmartAccountAddress(null)
+					toast.success(message)
 				}
 			} else {
 				const message = `Registration failed: ${JSON.stringify(verificationJSON)}`
@@ -144,6 +160,8 @@ export const useSmartAccountRegistration = (identifier: string, userId?: string)
 		isRegistered: Boolean(regSuccess),
 		isAlreadyRegistered,
 		smartAccountAddress,
+		credentialId,
+		publicKey,
 		handleRegister,
 		reset,
 	}

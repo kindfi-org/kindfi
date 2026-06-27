@@ -5,6 +5,10 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { syncContributionSchema } from '~/lib/schemas/contribution.schemas'
+import {
+	checkFundraisingGoalNotReached,
+	createContributionWithProjectUpdate,
+} from '~/lib/services/contribution-service'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -58,6 +62,11 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
 		}
 
+		const goalCheck = await checkFundraisingGoalNotReached(projectId, contractId)
+		if (!goalCheck.allowed) {
+			return NextResponse.json({ error: goalCheck.error }, { status: 403 })
+		}
+
 		// Check if contribution already exists
 		const { data: existingContribution } = await supabase
 			.from('contributions')
@@ -78,56 +87,27 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Create contribution record
-		const { data: contribution, error: contributionError } = await supabase
-			.from('contributions')
-			.insert({
-				project_id: projectId,
-				contributor_id: session.user.id,
-				amount: Number(amount),
-			})
-			.select('id')
-			.single()
+		// Create contribution record and update project totals atomically
+		const contributionResult = await createContributionWithProjectUpdate({
+			projectId,
+			contributorId: session.user.id,
+			amount: Number(amount),
+		})
 
-		if (contributionError) {
-			logger.error('Error creating contribution:', contributionError)
+		if (!contributionResult.success) {
 			return NextResponse.json(
 				{
-					error: 'Failed to create contribution',
-					details: contributionError.message,
+					error: contributionResult.error,
+					details: contributionResult.details,
 				},
 				{ status: 500 },
 			)
 		}
 
-		// Update project's current_amount (raised amount)
-		const { error: updateError } = await supabase.rpc('increment_project_amount', {
-			project_id_param: projectId,
-			amount_param: Number(amount),
-		})
-
-		// If RPC doesn't exist, fallback to manual update
-		if (updateError) {
-			const { data: project } = await supabase
-				.from('projects')
-				.select('current_amount')
-				.eq('id', projectId)
-				.single()
-
-			if (project) {
-				await supabase
-					.from('projects')
-					.update({
-						current_amount: (project.current_amount || 0) + Number(amount),
-					})
-					.eq('id', projectId)
-			}
-		}
-
 		return NextResponse.json(
 			{
 				success: true,
-				contributionId: contribution.id,
+				contributionId: contributionResult.contributionId,
 				message: 'Contribution synced successfully',
 			},
 			{ status: 201 },

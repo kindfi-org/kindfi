@@ -24,6 +24,7 @@ export function transformEnv(): AppEnvInterface {
 		features: {
 			enableEscrowFeature:
 				data.NODE_ENV === 'development' || data.NEXT_PUBLIC_ENABLE_ESCROW_FEATURE === 'true',
+			enableSmartAccountCreation: data.NEXT_PUBLIC_ENABLE_SMART_ACCOUNT_CREATION === 'true',
 		},
 		vapid: {
 			email: data.VAPID_EMAIL || '',
@@ -97,8 +98,10 @@ export function transformEnv(): AppEnvInterface {
 			challengeTtlMs: (data.CHALLENGE_TTL_SECONDS || 60) * 1000,
 		},
 		redis: {
-			url: data.UPSTASH_REDIS_REST_URL || data.REDIS_URL || '',
-			token: data.UPSTASH_REDIS_REST_TOKEN || '',
+			// REST API credentials (@upstash/redis). Prefer UPSTASH_*; fall back to Vercel KV names.
+			// Do not use REDIS_URL/KV_URL here — those are rediss:// TCP URLs, not REST endpoints.
+			url: data.UPSTASH_REDIS_REST_URL || data.KV_REST_API_URL || '',
+			token: data.UPSTASH_REDIS_REST_TOKEN || data.KV_REST_API_TOKEN || '',
 		},
 	} as const
 }
@@ -125,6 +128,7 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(appName: 
 		}),
 		features: z.object({
 			enableEscrowFeature: z.boolean(),
+			enableSmartAccountCreation: z.boolean(),
 		}),
 		vapid: z.object({
 			email: z.string(),
@@ -232,6 +236,8 @@ function createValidationRules<T extends keyof typeof appRequirements>(
 		RESEND_SMTP_API_KEY: ['resend', 'apiKey'],
 		UPSTASH_REDIS_REST_URL: ['redis', 'url'],
 		UPSTASH_REDIS_REST_TOKEN: ['redis', 'token'],
+		KV_REST_API_URL: ['redis', 'url'],
+		KV_REST_API_TOKEN: ['redis', 'token'],
 	}
 
 	// Mark required fields
@@ -381,6 +387,7 @@ export const baseEnvSchema = z.object({
 	NODE_ENV: z.enum(['development', 'production', 'test']).optional(),
 	NEXT_PUBLIC_APP_ENV: z.enum(['development', 'production', 'test']).optional(),
 	NEXT_PUBLIC_ENABLE_ESCROW_FEATURE: z.enum(['true', 'false']).optional(),
+	NEXT_PUBLIC_ENABLE_SMART_ACCOUNT_CREATION: z.enum(['true', 'false']).optional(),
 
 	// Stellar Configuration
 	STELLAR_NETWORK_URL: z.string().url('Invalid Stellar Network URL format').optional(),
@@ -453,9 +460,11 @@ export const baseEnvSchema = z.object({
 		.optional(),
 	CHALLENGE_TTL_SECONDS: z.coerce.number().optional(),
 
-	// Redis Configuration (Upstash)
+	// Redis Configuration (Upstash / Vercel KV)
 	UPSTASH_REDIS_REST_URL: z.string().url('Invalid Redis REST URL format').optional(),
 	UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+	KV_REST_API_URL: z.string().url('Invalid KV REST URL format').optional(),
+	KV_REST_API_TOKEN: z.string().optional(),
 
 	// Stellar Signature Verification Rate Limiting
 	STELLAR_SIGNATURE_MAX_ATTEMPTS: z.coerce.number().optional(),
@@ -489,6 +498,8 @@ export const appRequirements = {
 			'SUPABASE_DB_URL',
 			'UPSTASH_REDIS_REST_URL',
 			'UPSTASH_REDIS_REST_TOKEN',
+			'KV_REST_API_URL',
+			'KV_REST_API_TOKEN',
 			'STELLAR_SIGNATURE_MAX_ATTEMPTS',
 			'STELLAR_SIGNATURE_WINDOW_MS',
 		] as const,
@@ -505,6 +516,8 @@ export const appRequirements = {
 			'PORT',
 			'UPSTASH_REDIS_REST_URL',
 			'UPSTASH_REDIS_REST_TOKEN',
+			'KV_REST_API_URL',
+			'KV_REST_API_TOKEN',
 			'STELLAR_SIGNATURE_MAX_ATTEMPTS',
 			'STELLAR_SIGNATURE_WINDOW_MS',
 		] as const,

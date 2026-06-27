@@ -12,8 +12,12 @@ insert into public.categories (name, color) values
   ('Animal Welfare', '#FF7043'),
   ('Public Infrastructure & Transportation', '#607D8B'),
   ('Community & Civic Engagement', '#FFCA28'),
-  ('Mental Health & Well-being', '#8BC34A')
+  ('Mental Health & Well-being', '#8BC34A'),
+  ('Humanitarian Aid', '#C62828')
 on conflict (name) do nothing;
+
+-- Ensure Humanitarian Aid uses slug "aid" for campaign filters
+update public.categories set slug = 'aid' where name = 'Humanitarian Aid';
 commit;
 
 -- Create sample user

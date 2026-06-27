@@ -1,5 +1,6 @@
 'use client'
 
+import type { EscrowType } from '@trustless-work/escrow'
 import { CircleAlert, CircleCheck } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -11,11 +12,12 @@ import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { useAuth } from '~/hooks/use-auth'
 import { zodResolver } from '~/lib/form/zod-resolver'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
+import { resolveEscrowType } from '~/lib/utils/escrow/resolve-escrow-type'
 import { buildFormSchema, type FormValues } from '../types'
 
 export function useProjectSidebar(project: ProjectDetail) {
 	const [isFollowing, setIsFollowing] = useState(false)
-	const { getMultipleBalances, fundEscrow, sendTransaction } = useEscrow()
+	const { getMultipleBalances, fundEscrow, sendTransaction, getEscrowByContractIds } = useEscrow()
 	const {
 		address,
 		walletName,
@@ -33,29 +35,38 @@ export function useProjectSidebar(project: ProjectDetail) {
 
 	useEffect(() => setIsMounted(true), [])
 
-	const { escrowData } = useEscrowData({
+	const { escrowData, isLoading: isEscrowDataLoading } = useEscrowData({
 		escrowContractAddress: project.escrowContractAddress || '',
 		escrowType: project.escrowType,
 	})
 
-	const effectiveEscrowType = escrowData?.type || project.escrowType || 'multi-release'
-
 	const hasEscrow = Boolean(project.escrowContractAddress)
 
+	const effectiveEscrowType = resolveEscrowType({
+		indexerEscrow: escrowData,
+		projectEscrowType: project.escrowType,
+	})
+
+	const isDonationReady = Boolean(hasEscrow && effectiveEscrowType && !isEscrowDataLoading)
+
+	const effectiveRaised = onChainRaised ?? project.raised
+
 	const progressPercentage = useMemo(() => {
-		const raised = onChainRaised ?? project.raised
-		return Math.min(Math.round((raised / project.goal) * 100), 100)
-	}, [onChainRaised, project.goal, project.raised])
+		return Math.min(Math.round((effectiveRaised / project.goal) * 100), 100)
+	}, [effectiveRaised, project.goal])
+
+	const isGoalReached = useMemo(
+		() => hasEscrow && project.goal > 0 && effectiveRaised >= project.goal,
+		[hasEscrow, project.goal, effectiveRaised],
+	)
 
 	const formSchema = useMemo(() => buildFormSchema(project.minInvestment), [project.minInvestment])
-
-	const initialInvestmentAmount = hasEscrow ? project.minInvestment : ''
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		mode: 'onBlur',
 		defaultValues: {
-			investmentAmount: initialInvestmentAmount as FormValues['investmentAmount'],
+			investmentAmount: hasEscrow && project.minInvestment > 0 ? project.minInvestment : 0,
 		},
 	})
 
@@ -82,7 +93,7 @@ export function useProjectSidebar(project: ProjectDetail) {
 	}
 
 	const fetchEscrowBalance = useCallback(async () => {
-		if (!project.escrowContractAddress) return
+		if (!project.escrowContractAddress || !effectiveEscrowType) return
 		try {
 			setIsFetchingBalance(true)
 			const balances = await getMultipleBalances(
@@ -98,6 +109,27 @@ export function useProjectSidebar(project: ProjectDetail) {
 		}
 	}, [getMultipleBalances, project.escrowContractAddress, effectiveEscrowType])
 
+	const resolveEscrowTypeForFunding = useCallback(async (): Promise<EscrowType> => {
+		const knownType = resolveEscrowType({
+			indexerEscrow: escrowData,
+			projectEscrowType: project.escrowType,
+		})
+		if (knownType) return knownType
+
+		if (!project.escrowContractAddress) {
+			throw new Error('Escrow is not configured for this project')
+		}
+
+		const response = await getEscrowByContractIds({
+			contractIds: [project.escrowContractAddress],
+			validateOnChain: false,
+		})
+		const indexerEscrow = Array.isArray(response) ? response[0] : response
+		if (indexerEscrow?.type) return indexerEscrow.type
+
+		throw new Error('Unable to determine escrow configuration')
+	}, [escrowData, getEscrowByContractIds, project.escrowContractAddress, project.escrowType])
+
 	useEffect(() => {
 		fetchEscrowBalance()
 	}, [fetchEscrowBalance])
@@ -105,6 +137,15 @@ export function useProjectSidebar(project: ProjectDetail) {
 	const onSubmit = async (data: FormValues) => {
 		if (!project.escrowContractAddress) {
 			toast.error('Escrow is not configured for this project', {
+				icon: <CircleAlert className="text-destructive" />,
+			})
+			return
+		}
+
+		if (isGoalReached) {
+			toast.error('Funding goal reached', {
+				description:
+					'This project has met its fundraising goal and is no longer accepting donations.',
 				icon: <CircleAlert className="text-destructive" />,
 			})
 			return
@@ -120,13 +161,24 @@ export function useProjectSidebar(project: ProjectDetail) {
 				return
 			}
 
+			const escrowType = await resolveEscrowTypeForFunding()
+
+			if (escrowType === 'multi-release') {
+				toast.error('Donations unavailable for this escrow', {
+					description:
+						'This project uses a multi-release escrow, which cannot accept partial donations. The project owner should recreate the escrow as single-release for crowdfunding.',
+					icon: <CircleAlert className="text-destructive" />,
+				})
+				return
+			}
+
 			const fundResponse = await fundEscrow(
 				{
 					amount: data.investmentAmount,
 					contractId: project.escrowContractAddress,
 					signer,
 				},
-				effectiveEscrowType,
+				escrowType,
 			)
 
 			if (!fundResponse.unsignedTransaction) {
@@ -140,9 +192,20 @@ export function useProjectSidebar(project: ProjectDetail) {
 				throw new Error('Transaction failed')
 			}
 
+			const txHash =
+				sendResult && 'txHash' in sendResult && typeof sendResult.txHash === 'string'
+					? sendResult.txHash
+					: undefined
+			const formattedAmount = new Intl.NumberFormat(undefined, {
+				style: 'currency',
+				currency: 'USD',
+				maximumFractionDigits: 0,
+			}).format(data.investmentAmount)
+
+			let contributionSynced = !user?.id
+
 			if (user?.id) {
 				try {
-					const txHash = 'txHash' in sendResult ? sendResult.txHash : undefined
 					const response = await fetch('/api/contributions/create', {
 						method: 'POST',
 						headers: {
@@ -156,8 +219,10 @@ export function useProjectSidebar(project: ProjectDetail) {
 						}),
 					})
 
-					if (!response.ok) {
-						const errorData = await response.json()
+					if (response.ok) {
+						contributionSynced = true
+					} else {
+						const errorData = await response.json().catch(() => null)
 						logger.error('Failed to create contribution:', errorData)
 					}
 				} catch (error) {
@@ -165,10 +230,18 @@ export function useProjectSidebar(project: ProjectDetail) {
 				}
 			}
 
-			toast.success('Thank you for your support!', {
-				description: `You've donated ${new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(data.investmentAmount)}`,
-				icon: <CircleCheck className="text-primary" />,
-			})
+			if (contributionSynced) {
+				toast.success('Thank you for your support!', {
+					description: `You've donated ${formattedAmount}`,
+					icon: <CircleCheck className="text-primary" />,
+				})
+			} else {
+				const txHint = txHash ? `Transaction: ${txHash.slice(0, 8)}…${txHash.slice(-8)}. ` : ''
+				toast.warning('Payment sent — sync pending', {
+					description: `${txHint}Your on-chain donation succeeded, but project totals may not update yet. Refresh this page in a few minutes or contact support with your transaction hash if it is still missing.`,
+					duration: 15_000,
+				})
+			}
 
 			fetchEscrowBalance()
 		} catch (error) {
@@ -220,6 +293,9 @@ export function useProjectSidebar(project: ProjectDetail) {
 			} else if (combinedMessage.includes('trustline')) {
 				userFriendlyMessage =
 					'Trustline required. Your wallet needs to establish a trustline for the token before donating.'
+			} else if (combinedMessage.includes("reading 'approved'")) {
+				userFriendlyMessage =
+					'Escrow configuration mismatch. This project may be using the wrong escrow type for donations. Please contact the project owner or try again after refreshing the page.'
 			} else if (apiErrorMessage) {
 				userFriendlyMessage = apiErrorMessage
 			}
@@ -251,6 +327,9 @@ export function useProjectSidebar(project: ProjectDetail) {
 	return {
 		form,
 		hasEscrow,
+		isGoalReached,
+		isDonationReady,
+		isEscrowDataLoading,
 		progressPercentage,
 		onChainRaised,
 		isFetchingBalance,

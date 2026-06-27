@@ -31,8 +31,8 @@ export function StepOne({ onNext }: StepOneProps) {
 	const form = useForm<StepOneData>({
 		resolver: zodResolver(stepOneSchema),
 		defaultValues: {
-			title: formData.title,
-			description: formData.description,
+			title: formData.title ?? '',
+			description: formData.description ?? '',
 			targetAmount: formData.targetAmount || undefined,
 			minimumInvestment: formData.minimumInvestment || undefined,
 		},
@@ -64,7 +64,14 @@ export function StepOne({ onNext }: StepOneProps) {
 											What is your project&apos;s title? <span className="text-destructive">*</span>
 										</FormLabel>
 										<FormControl>
-											<Input placeholder="Enter your project title" {...field} />
+											<Input
+												placeholder="Enter your project title"
+												value={field.value ?? ''}
+												onChange={field.onChange}
+												onBlur={field.onBlur}
+												name={field.name}
+												ref={field.ref}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -84,7 +91,11 @@ export function StepOne({ onNext }: StepOneProps) {
 											<Textarea
 												placeholder="Describe your project in a few sentences"
 												className="min-h-[100px]"
-												{...field}
+												value={field.value ?? ''}
+												onChange={field.onChange}
+												onBlur={field.onBlur}
+												name={field.name}
+												ref={field.ref}
 											/>
 										</FormControl>
 										<p className="text-sm text-muted-foreground mt-2">

@@ -31,6 +31,7 @@ import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
 import { getAvatarFallback } from '~/lib/utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
+import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
 
 const WalletAddressSection = ({ address, className }: { address: string; className?: string }) => {
 	const [copied, setCopied] = useState(false)
@@ -176,7 +177,9 @@ export const UserMenu = ({ user }: { user: User }) => {
 							</span>
 						)}
 					</div>
-					{user.device?.address && <WalletAddressSection address={user.device.address} />}
+					{resolveSmartAccountAddress(user.device?.address) && (
+						<WalletAddressSection address={resolveSmartAccountAddress(user.device?.address)!} />
+					)}
 				</div>
 
 				<DropdownMenuSeparator />

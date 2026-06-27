@@ -14,6 +14,7 @@ import {
 	uniqueIndex,
 	uuid,
 } from 'drizzle-orm/pg-core'
+import { creatorEntityType } from './enums'
 import { escrowContracts } from './escrow'
 import { usersInNextAuth } from './next-auth'
 
@@ -41,6 +42,7 @@ export const foundations = pgTable(
 		totalCampaignsCompleted: integer('total_campaigns_completed').default(0).notNull(),
 		totalCampaignsOpen: integer('total_campaigns_open').default(0).notNull(),
 		metadata: jsonb().default({}).notNull(),
+		entityType: creatorEntityType('entity_type').default('foundation').notNull(),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
 			mode: 'string',
@@ -70,6 +72,14 @@ export const foundations = pgTable(
 		check(
 			'valid_founded_year',
 			sql`founded_year >= 1900 AND founded_year <= EXTRACT(YEAR FROM CURRENT_DATE)`,
+		),
+		check(
+			'foundations_entity_type_check',
+			sql`entity_type = ANY (ARRAY['ngo'::creator_entity_type, 'foundation'::creator_entity_type])`,
+		),
+		index('idx_foundations_entity_type').using(
+			'btree',
+			table.entityType.asc().nullsLast().op('enum_ops'),
 		),
 		pgPolicy('Public read access to foundations', {
 			as: 'permissive',

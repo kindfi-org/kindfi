@@ -1,8 +1,10 @@
 import { sql } from 'drizzle-orm'
 import {
+	char,
 	foreignKey,
 	index,
 	integer,
+	jsonb,
 	pgPolicy,
 	pgTable,
 	text,
@@ -14,6 +16,7 @@ import {
 import { usersInAuth } from './auth'
 import {
 	backupState,
+	creatorEntityType,
 	credentialType,
 	deviceType,
 	kycStatusEnum,
@@ -40,8 +43,17 @@ export const profiles = pgTable(
 		email: text(),
 		nextAuthUserId: uuid('next_auth_user_id'),
 		slug: text('slug'),
+		creatorEntityType: creatorEntityType('creator_entity_type'),
+		headline: text(),
+		country: char({ length: 3 }),
+		websiteUrl: text('website_url'),
+		socialLinks: jsonb('social_links').default({}).notNull(),
 	},
 	(table) => [
+		index('idx_profiles_creator_entity_type').using(
+			'btree',
+			table.creatorEntityType.asc().nullsLast().op('enum_ops'),
+		),
 		uniqueIndex('profiles_slug_key').using('btree', table.slug.asc().nullsLast().op('text_ops')),
 		index('idx_profiles_next_auth_user_id').using(
 			'btree',

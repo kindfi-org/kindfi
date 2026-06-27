@@ -23,10 +23,8 @@ export default async function ProjectMembersPage({
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<section className="container mx-auto px-4 py-8 md:py-12">
-			<HydrationBoundary state={dehydratedState}>
-				<ProjectMembersWrapper projectSlug={slug} />
-			</HydrationBoundary>
-		</section>
+		<HydrationBoundary state={dehydratedState}>
+			<ProjectMembersWrapper projectSlug={slug} />
+		</HydrationBoundary>
 	)
 }

@@ -130,7 +130,7 @@ export const useSmartAccountAuth = (identifier: string) => {
 					email: identifier,
 					pubKey: pubKeyString,
 					credentialId: verificationJSON.credentialId,
-					address: verificationJSON.smartAccountAddress,
+					address: verificationJSON.smartAccountAddress || '0x',
 				})
 
 				if (!loginResult?.ok) {
