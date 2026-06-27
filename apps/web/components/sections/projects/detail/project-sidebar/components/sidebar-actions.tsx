@@ -1,17 +1,26 @@
 'use client'
 
-import { Heart, Share } from 'lucide-react'
+import { Heart } from 'lucide-react'
 import { Button } from '~/components/base/button'
+import { ShareButtons } from '~/components/shared/share-buttons'
 
 interface SidebarActionsProps {
 	isFollowing: boolean
 	onToggleFollow: () => void
-	onShare: () => void
+	shareUrl: string
+	shareTitle: string
+	shareDescription?: string
 }
 
-export function SidebarActions({ isFollowing, onToggleFollow, onShare }: SidebarActionsProps) {
+export function SidebarActions({
+	isFollowing,
+	onToggleFollow,
+	shareUrl,
+	shareTitle,
+	shareDescription,
+}: SidebarActionsProps) {
 	return (
-		<div className="flex gap-4">
+		<div className="space-y-4">
 			<Button
 				variant="outline"
 				className="gradient-border-btn flex w-full items-center justify-center gap-2 bg-white"
@@ -25,15 +34,15 @@ export function SidebarActions({ isFollowing, onToggleFollow, onShare }: Sidebar
 				{isFollowing ? 'Following' : 'Follow'}
 			</Button>
 
-			<Button
-				variant="outline"
-				className="gradient-border-btn flex w-full items-center justify-center gap-2 bg-white"
-				onClick={onShare}
-				aria-label="Share project"
-			>
-				<Share className="w-4 h-4" aria-hidden />
-				Share
-			</Button>
+			<div>
+				<p className="mb-2 text-sm font-medium text-slate-700">Share</p>
+				<ShareButtons
+					url={shareUrl}
+					title={shareTitle}
+					description={shareDescription}
+					variant="pill"
+				/>
+			</div>
 		</div>
 	)
 }
