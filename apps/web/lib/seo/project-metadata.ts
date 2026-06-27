@@ -21,7 +21,8 @@ export function truncateMetaDescription(
 	return `${normalized.slice(0, maxLength - 3).trimEnd()}...`
 }
 
-export function getProjectPageUrl(slug: string): string {
+export function getProjectPageUrl(slug: string | null | undefined): string {
+	if (!slug) return SITE_URL
 	return `${SITE_URL}/projects/${slug}`
 }
 
