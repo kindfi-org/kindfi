@@ -11,9 +11,20 @@ export function DonorDonationsSection({ projectsWithBalances }: DonorDonationsSe
 	const { t } = useI18n()
 
 	return (
-		<ProfileSurfaceCard>
-			<h3 className="mb-4 text-lg font-semibold">{t('profile.donationHistory')}</h3>
-			<DonationHistory donations={projectsWithBalances} t={t} />
-		</ProfileSurfaceCard>
+		<div className="space-y-6">
+			{projectsWithBalances.length > 0 ? (
+				<ProfileSurfaceCard className="border-emerald-100 bg-emerald-50/40">
+					<h3 className="text-lg font-semibold text-foreground">{t('profile.shareImpactTitle')}</h3>
+					<p className="mt-2 text-sm text-muted-foreground">
+						{t('profile.shareImpactDescription')}
+					</p>
+				</ProfileSurfaceCard>
+			) : null}
+
+			<ProfileSurfaceCard>
+				<h3 className="mb-4 text-lg font-semibold">{t('profile.donationHistory')}</h3>
+				<DonationHistory donations={projectsWithBalances} t={t} />
+			</ProfileSurfaceCard>
+		</div>
 	)
 }
