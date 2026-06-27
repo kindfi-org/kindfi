@@ -1,3 +1,5 @@
+import type { baseURL as TrustlessWorkSdkBaseUrl } from '@trustless-work/escrow'
+
 export const TRUSTLESS_WORK_API_URLS = {
 	development: 'https://dev.api.trustlesswork.com',
 	mainnet: 'https://api.trustlesswork.com',
@@ -66,6 +68,13 @@ export const getTrustlessWorkClientBaseUrl = (): string => {
 
 	return `${origin}${TRUSTLESS_WORK_CLIENT_PROXY_PATH}`
 }
+
+/**
+ * Same as getTrustlessWorkClientBaseUrl, typed for TrustlessWorkConfig.
+ * The SDK only declares upstream API hosts; our proxy URL is valid at runtime.
+ */
+export const getTrustlessWorkSdkBaseUrl = (): TrustlessWorkSdkBaseUrl =>
+	getTrustlessWorkClientBaseUrl() as TrustlessWorkSdkBaseUrl
 
 export const getTrustlessWorkNetwork = (): TrustlessWorkNetwork => {
 	const networkEnv = readTrustlessWorkNetworkEnv()
