@@ -53,3 +53,56 @@ describe('Trustless Work config', () => {
 		expect(getTrustlessWorkClientBaseUrl()).toBe('http://localhost:3000/api/trustless-work')
 	})
 })
+
+describe('Legacy escrow API routes', () => {
+	test('retired /api/escrow paths return 410 Gone', async () => {
+		const { POST } = await import('../app/api/escrow/[[...path]]/route')
+		const response = await POST()
+		const body = await response.json()
+
+		expect(response.status).toBe(410)
+		expect(body.error).toBe('Gone')
+		expect(body.message).toContain('/api/trustless-work')
+	})
+})
+
+describe('Escrow USDC defaults', () => {
+	test('uses testnet USDC when Trustless Work network is development', async () => {
+		process.env.NEXT_PUBLIC_TRUSTLESS_WORK_NETWORK = 'development'
+		delete process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS
+		delete process.env.USDC_CONTRACT_ADDRESS
+
+		const { getDefaultUsdcContractAddress, TESTNET_USDC_TRUSTLINE_ADDRESS } = await import(
+			'../lib/constants/escrow'
+		)
+
+		expect(getDefaultUsdcContractAddress()).toBe(TESTNET_USDC_TRUSTLINE_ADDRESS)
+	})
+
+	test('uses mainnet USDC when Trustless Work network is mainnet', async () => {
+		process.env.NEXT_PUBLIC_TRUSTLESS_WORK_NETWORK = 'mainnet'
+		delete process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS
+		delete process.env.USDC_CONTRACT_ADDRESS
+		delete process.env.MAINNET_PUBLIC_USDC_ISSUER
+
+		const { getDefaultUsdcContractAddress, MAINNET_USDC_TRUSTLINE_ADDRESS } = await import(
+			'../lib/constants/escrow'
+		)
+
+		expect(getDefaultUsdcContractAddress()).toBe(MAINNET_USDC_TRUSTLINE_ADDRESS)
+	})
+
+	test('explicit USDC env override wins over network default', async () => {
+		process.env.NEXT_PUBLIC_TRUSTLESS_WORK_NETWORK = 'mainnet'
+		process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS =
+			'CCUSTOMUSDCADDRESS12345678901234567890123456789012'
+
+		const { getDefaultUsdcContractAddress } = await import('../lib/constants/escrow')
+
+		expect(getDefaultUsdcContractAddress()).toBe(
+			'CCUSTOMUSDCADDRESS12345678901234567890123456789012',
+		)
+
+		delete process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS
+	})
+})

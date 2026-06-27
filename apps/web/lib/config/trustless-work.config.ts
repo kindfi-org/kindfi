@@ -26,6 +26,10 @@ const resolveTrustlessWorkNetwork = (network: string): TrustlessWorkNetwork => {
 		return 'mainnet'
 	}
 
+	if (normalized === 'development' || normalized === 'testnet' || normalized === 'dev') {
+		return 'development'
+	}
+
 	return 'development'
 }
 
