@@ -330,6 +330,12 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 			} else if (combinedMessage.includes('trustline')) {
 				userFriendlyMessage =
 					'Trustline required. Your wallet needs to establish a trustline for the token before donating.'
+			} else if (
+				(combinedMessage.includes('main net') && combinedMessage.includes('test net')) ||
+				combinedMessage.includes('network mismatch')
+			) {
+				userFriendlyMessage =
+					'Your wallet and KindFi are on different Stellar networks. In Freighter, open Settings → Network, select Main Net, disconnect and reconnect your wallet here, then try again.'
 			} else if (combinedMessage.includes("reading 'approved'")) {
 				userFriendlyMessage =
 					'Escrow configuration mismatch. This project may be using the wrong escrow type for donations. Please contact the project owner or try again after refreshing the page.'
