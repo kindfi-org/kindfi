@@ -1,8 +1,8 @@
-export const SITE_URL = (
-	process.env.NEXT_PUBLIC_SITE_URL ||
-	process.env.NEXT_PUBLIC_APP_URL ||
-	'https://www.kindfi.org'
-).replace(/\/+$/, '')
+/** Canonical public site URL for SEO metadata, share links, and sitemaps. */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.kindfi.org').replace(
+	/\/+$/,
+	'',
+)
 
 export interface OrganizationSchema {
 	'@context': string

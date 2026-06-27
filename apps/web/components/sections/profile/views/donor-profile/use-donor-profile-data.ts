@@ -64,30 +64,13 @@ export function useDonorProfileData(userId: string) {
 
 	const stats = useMemo(() => {
 		let totalContributed = 0
-		let activeProjects = 0
-		let completedProjects = 0
-		let totalImpact = 0
 
 		for (const p of projectsWithBalances) {
 			totalContributed += Number(p.contributionAmount || 0)
-			const isActive = p.status === 'active' || p.status === 'funding'
-			const isCompleted = p.status === 'completed' || p.status === 'funded'
-			if (isActive) activeProjects++
-			if (isCompleted) completedProjects++
-			if (isActive || isCompleted) {
-				totalImpact += Number(p.contributionAmount || 0)
-			}
 		}
-
-		const avgContribution =
-			projectsWithBalances.length > 0 ? totalContributed / projectsWithBalances.length : 0
 
 		return {
 			totalContributed,
-			activeProjects,
-			completedProjects,
-			totalImpact,
-			avgContribution,
 			impactScore: projectsWithBalances.length * 10,
 		}
 	}, [projectsWithBalances])
