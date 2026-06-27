@@ -27,7 +27,7 @@ mock.module('@packages/lib/config', () => ({
 
 const mockFetchCalls: string[] = []
 
-const mockFetch = mock((url: string) => {
+const defaultFetchImpl = (url: string, _init?: RequestInit) => {
 	mockFetchCalls.push(url)
 	if (url.includes('/ramp/me')) {
 		return Promise.resolve(
@@ -37,10 +37,10 @@ const mockFetch = mock((url: string) => {
 			}),
 		)
 	}
-	return Promise.resolve(
-		new Response(JSON.stringify({ error: 'not found' }), { status: 404 }),
-	)
-})
+	return Promise.resolve(new Response(JSON.stringify({ error: 'not found' }), { status: 404 }))
+}
+
+const mockFetch = mock(defaultFetchImpl)
 
 // @ts-expect-error - mock doesn't need all fetch properties
 global.fetch = mockFetch
@@ -53,6 +53,7 @@ describe('getEtherfuseConfig', () => {
 			baseUrl: 'https://api.sand.etherfuse.com',
 			customerId: 'test-customer-id',
 		}
+		mockFetch.mockImplementation(defaultFetchImpl)
 	})
 
 	test('returns full config when all values present', async () => {
@@ -126,9 +127,43 @@ describe('getEtherfuseConfig', () => {
 		expect(mockFetchCalls.length).toBe(0)
 	})
 
+	test('throws AppError when fetch times out (AbortError)', async () => {
+		mockEtherfuseEnv = {
+			apiKey: 'test-key',
+			baseUrl: 'https://api.sand.etherfuse.com',
+			customerId: '',
+		}
+		mockFetch.mockImplementation((url: string, _init?: RequestInit) => {
+			mockFetchCalls.push(url)
+			if (url.includes('/ramp/me')) {
+				const error = new DOMException('The operation was aborted.', 'AbortError')
+				return Promise.reject(error)
+			}
+			return Promise.resolve(new Response(JSON.stringify({ error: 'not found' }), { status: 404 }))
+		})
+
+		const { getEtherfuseConfig } = await import('../lib/etherfuse/get-etherfuse-config')
+
+		let caught: any
+		try {
+			await getEtherfuseConfig()
+		} catch (err) {
+			caught = err
+		}
+
+		expect(caught?.name).toBe('AppError')
+		expect(caught?.statusCode).toBe(504)
+		expect(caught?.message).toContain('timed out')
+		expect(mockFetchCalls.length).toBe(1)
+	})
+
 	test('resolves customerId via GET /ramp/me when not in config', async () => {
 		// cachedOrganizationId is null at this point (error tests above never called resolveOrganizationId)
-		mockEtherfuseEnv = { apiKey: 'test-key', baseUrl: 'https://api.sand.etherfuse.com', customerId: '' }
+		mockEtherfuseEnv = {
+			apiKey: 'test-key',
+			baseUrl: 'https://api.sand.etherfuse.com',
+			customerId: '',
+		}
 		const { getEtherfuseConfig } = await import('../lib/etherfuse/get-etherfuse-config')
 
 		const config = await getEtherfuseConfig()
