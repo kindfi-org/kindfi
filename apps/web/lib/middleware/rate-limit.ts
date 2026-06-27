@@ -38,11 +38,6 @@
  * ## Protected routes
  *
  * ### High priority — `strict` (3 req/min, 1 h block)
- * - `POST /api/escrow/fund`
- * - `POST /api/escrow/initialize`
- * - `POST /api/escrow/dispute`
- * - `POST /api/escrow/review`
- * - `POST /api/escrow/sign-and-submit`
  * - `POST /api/contributions/create`
  * - `POST /api/governance/vote`
  * - `POST /api/kyc/didit/create-session`

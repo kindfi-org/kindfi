@@ -21,12 +21,8 @@ interface ProjectPitchWrapperProps {
 export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 	const prefersReducedMotion = useReducedMotion()
 	const [aiEnabled, setAiEnabled] = useState(false)
-	const [pitchSnapshot, setPitchSnapshot] = useState<{
-		title: string
-		story: string
-	} | null>(null)
 
-	const { analysis, status, analyze, reset, isLoading } = usePitchAnalysis()
+	const { analysis, status, errorMessage, analyze, reset } = usePitchAnalysis()
 
 	const {
 		data: project,
@@ -42,23 +38,15 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 
 	const handleActivateAI = useCallback(
 		(title: string, story: string) => {
-			setPitchSnapshot({ title, story })
 			setAiEnabled(true)
 			analyze(title, story)
 		},
 		[analyze],
 	)
 
-	const handleReanalyze = useCallback(() => {
-		if (pitchSnapshot) {
-			analyze(pitchSnapshot.title, pitchSnapshot.story)
-		}
-	}, [pitchSnapshot, analyze])
-
 	const handleDismiss = useCallback(() => {
 		reset()
 		setAiEnabled(false)
-		setPitchSnapshot(null)
 	}, [reset])
 
 	return (
@@ -130,10 +118,8 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 								<PitchAIAnalysis
 									analysis={analysis}
 									status={status}
-									onAnalyze={handleReanalyze}
+									errorMessage={errorMessage}
 									onReset={handleDismiss}
-									isLoading={isLoading}
-									hasContent={!!(pitchSnapshot?.title && pitchSnapshot?.story)}
 								/>
 							</motion.div>
 						) : (

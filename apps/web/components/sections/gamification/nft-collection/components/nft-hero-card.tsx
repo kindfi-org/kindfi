@@ -15,7 +15,7 @@ interface NftHeroCardProps {
 	currentPts: number
 	progressPct: number
 	govVotes: string | undefined
-	smartAccountAddress: string | undefined
+	smartAccountAddress: string | null
 }
 
 export function NftHeroCard({

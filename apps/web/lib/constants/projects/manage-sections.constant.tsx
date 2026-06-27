@@ -43,7 +43,8 @@ export const manageSections: ManageSection[] = [
 	},
 	{
 		title: 'Escrow Creation',
-		description: 'Initialize and configure your escrow contract, roles, and milestones.',
+		description:
+			'Step-by-step setup for your Trustless Work escrow contract, roles, and milestones.',
 		href: 'settings',
 		cta: 'Create escrow',
 		Icon: IoSettingsOutline,
@@ -51,7 +52,7 @@ export const manageSections: ManageSection[] = [
 	},
 	{
 		title: 'Escrow Management',
-		description: 'Fund escrow, approve milestones, release funds, and track balance.',
+		description: 'Fund the contract, approve milestones, and release payments step by step.',
 		href: 'settings/manage',
 		cta: 'Manage escrow',
 		Icon: IoLockClosedOutline,

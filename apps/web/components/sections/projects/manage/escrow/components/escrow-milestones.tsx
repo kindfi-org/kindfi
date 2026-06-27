@@ -1,113 +1,185 @@
 'use client'
 
-import { Plus, Trash2 } from 'lucide-react'
+import { AlertTriangle, Plus, Trash2 } from 'lucide-react'
+import { Alert, AlertDescription } from '~/components/base/alert'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
-import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/base/tooltip'
 import { useEscrowForm } from '../context/escrow-form-context'
 
 export function EscrowMilestones() {
 	const { formData, addMilestone, removeMilestone, updateMilestone } = useEscrowForm()
 	const { milestones, selectedEscrowType } = formData
+	const isMulti = selectedEscrowType === 'multi-release'
+
+	const milestoneTotal = milestones.reduce((sum, milestone) => {
+		if ('amount' in milestone && typeof milestone.amount === 'number') {
+			return sum + milestone.amount
+		}
+		return sum
+	}, 0)
 
 	return (
-		<div className="space-y-2">
-			<div className="flex justify-between items-center">
-				<div className="flex gap-2 items-center">
+		<div className="space-y-4">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<div>
 					<h3 className="text-sm font-medium">
 						Milestones <span className="text-destructive">*</span>
 					</h3>
-					<Tooltip>
-						<TooltipTrigger className="text-xs underline">More information</TooltipTrigger>
-						<TooltipContent>
-							{selectedEscrowType === 'multi-release'
-								? 'For multi-release escrows, each milestone must have an amount and receiver address.'
-								: 'Provide one or more milestone descriptions.'}
-						</TooltipContent>
-					</Tooltip>
+					<p className="mt-1 text-xs text-muted-foreground">
+						{isMulti
+							? 'Each milestone needs a description, amount, and receiver address.'
+							: 'Describe each deliverable. Funds release together once all are approved.'}
+					</p>
 				</div>
-				<Button onClick={addMilestone} variant="outline" className="px-2 h-8">
-					<Plus className="w-4 h-4" /> Add Item
+				<Button
+					type="button"
+					onClick={addMilestone}
+					variant="outline"
+					size="sm"
+					className="shrink-0"
+				>
+					<Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+					Add Milestone
 				</Button>
 			</div>
 
+			{isMulti && milestoneTotal > 0 ? (
+				<p className="text-sm text-muted-foreground">
+					Combined milestone total:{' '}
+					<span className="font-semibold tabular-nums text-foreground">{milestoneTotal}</span>
+				</p>
+			) : null}
+
 			<div className="space-y-3">
-				{milestones.map((m, i) =>
-					selectedEscrowType === 'multi-release' && 'amount' in m && 'receiver' in m ? (
-						<div key={m.id} className="p-4 rounded-lg border bg-card space-y-3">
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">Milestone {i + 1}</span>
+				{milestones.length === 0 ? (
+					<div className="rounded-lg border border-dashed p-6 text-center">
+						<p className="text-sm text-muted-foreground">
+							No milestones yet. Add at least one to continue.
+						</p>
+					</div>
+				) : null}
+
+				{milestones.map((milestone, index) =>
+					isMulti && 'amount' in milestone && 'receiver' in milestone ? (
+						<div key={milestone.id} className="space-y-3 rounded-xl border bg-card p-4">
+							<div className="flex items-center justify-between gap-3">
+								<span className="text-sm font-semibold">Milestone {index + 1}</span>
 								<Button
+									type="button"
 									variant="ghost"
 									size="sm"
-									onClick={() => removeMilestone(m.id)}
+									onClick={() => removeMilestone(milestone.id)}
 									className="h-8 w-8 p-0"
-									aria-label={`Remove milestone ${i + 1}`}
+									disabled={milestones.length <= 1}
+									aria-label={`Remove milestone ${index + 1}`}
 								>
-									<Trash2 className="w-4 h-4" />
+									<Trash2 className="h-4 w-4" aria-hidden="true" />
 								</Button>
 							</div>
 							<div className="grid gap-3 sm:grid-cols-3">
 								<div className="sm:col-span-3">
-									<Label className="text-xs text-muted-foreground">Description</Label>
+									<Label
+										htmlFor={`milestone-desc-${milestone.id}`}
+										className="text-xs text-muted-foreground"
+									>
+										Description
+									</Label>
 									<Input
-										value={m.description}
-										onChange={(e) => updateMilestone(i, { description: e.target.value })}
-										placeholder="Milestone description"
+										id={`milestone-desc-${milestone.id}`}
+										name={`milestone-desc-${index}`}
+										autoComplete="off"
+										value={milestone.description}
+										onChange={(e) => updateMilestone(index, { description: e.target.value })}
+										placeholder="Deliverable or phase description…"
 									/>
 								</div>
 								<div>
-									<Label className="text-xs text-muted-foreground">
+									<Label
+										htmlFor={`milestone-amount-${milestone.id}`}
+										className="text-xs text-muted-foreground"
+									>
 										Amount <span className="text-destructive">*</span>
 									</Label>
 									<Input
+										id={`milestone-amount-${milestone.id}`}
+										name={`milestone-amount-${index}`}
 										type="number"
-										value={m.amount}
+										inputMode="decimal"
+										autoComplete="off"
+										value={milestone.amount}
 										onChange={(e) =>
-											updateMilestone(i, {
+											updateMilestone(index, {
 												amount: e.target.value === '' ? '' : Number(e.target.value),
 											})
 										}
-										placeholder="0.00"
+										placeholder="0.00…"
 										min="0"
 										step="0.01"
 									/>
 								</div>
 								<div className="sm:col-span-2">
-									<Label className="text-xs text-muted-foreground">
+									<Label
+										htmlFor={`milestone-receiver-${milestone.id}`}
+										className="text-xs text-muted-foreground"
+									>
 										Receiver Address <span className="text-destructive">*</span>
 									</Label>
 									<Input
-										value={m.receiver}
-										onChange={(e) => updateMilestone(i, { receiver: e.target.value })}
-										placeholder="Enter Stellar address (must have USDC trustline)"
+										id={`milestone-receiver-${milestone.id}`}
+										name={`milestone-receiver-${index}`}
+										autoComplete="off"
+										spellCheck={false}
+										value={milestone.receiver}
+										onChange={(e) => updateMilestone(index, { receiver: e.target.value })}
+										placeholder="G… receiver with USDC trustline…"
+										className="font-mono text-xs"
 									/>
-									<p className="text-xs text-muted-foreground mt-1">
-										⚠️ The receiver address must have a USDC trustline established.
-									</p>
 								</div>
 							</div>
 						</div>
 					) : (
-						<div key={m.id} className="flex gap-2 items-center">
-							<Input
-								value={m.description}
-								onChange={(e) => updateMilestone(i, { description: e.target.value })}
-								placeholder="Milestone Description"
-							/>
+						<div key={milestone.id} className="flex items-start gap-2">
+							<div className="grid flex-1 gap-1">
+								<Label
+									htmlFor={`milestone-desc-${milestone.id}`}
+									className="text-xs text-muted-foreground"
+								>
+									Milestone {index + 1}
+								</Label>
+								<Input
+									id={`milestone-desc-${milestone.id}`}
+									name={`milestone-desc-${index}`}
+									autoComplete="off"
+									value={milestone.description}
+									onChange={(e) => updateMilestone(index, { description: e.target.value })}
+									placeholder="Deliverable or phase description…"
+								/>
+							</div>
 							<Button
+								type="button"
 								variant="ghost"
-								onClick={() => removeMilestone(m.id)}
-								className="p-0 w-8 h-8"
-								aria-label={`Remove milestone ${i + 1}`}
+								onClick={() => removeMilestone(milestone.id)}
+								className="mt-6 h-8 w-8 p-0"
+								disabled={milestones.length <= 1}
+								aria-label={`Remove milestone ${index + 1}`}
 							>
-								<Trash2 className="w-4 h-4" />
+								<Trash2 className="h-4 w-4" aria-hidden="true" />
 							</Button>
 						</div>
 					),
 				)}
 			</div>
+
+			{isMulti ? (
+				<Alert>
+					<AlertTriangle className="h-4 w-4" aria-hidden="true" />
+					<AlertDescription>
+						Each receiver must have a USDC trustline on Stellar before funds can be released to
+						them.
+					</AlertDescription>
+				</Alert>
+			) : null}
 		</div>
 	)
 }

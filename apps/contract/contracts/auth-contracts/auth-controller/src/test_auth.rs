@@ -176,10 +176,12 @@ fn create_factory_client(env: &Env, auth_client: &AuthControllerClient) -> Accou
         .deployer()
         .upload_contract_wasm(account_contract_mod::WASM);
 
+    let native_token = Address::generate(env);
+
     // Register and initialize the factory contract with the auth controller address
     let contract_address = env.register(
         AccountFactory,
-        (&auth_client.address, &wasm_hash),
+        (&auth_client.address, &wasm_hash, &native_token),
     );
 
     AccountFactoryClient::new(env, &contract_address)
@@ -190,11 +192,12 @@ fn create_account_client(env: &Env, auth_client: &AuthControllerClient) -> Accou
     let secure_key = SecureKeyStorage::new(42);
     let device_id = secure_key.get_device_id(env);
     let public_key = secure_key.get_secp_public_key(env);
+    let native_token = Address::generate(env);
 
     // Register and initialize the account contract with the auth controller address
     let contract_address = env.register(
         AccountContract, 
-        (&device_id, &public_key, &auth_client.address)
+        (&device_id, &public_key, &auth_client.address, &native_token)
     );
     AccountContractClient::new(env, &contract_address)
 }

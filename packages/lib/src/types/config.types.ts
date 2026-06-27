@@ -29,6 +29,7 @@ export interface AppEnvInterface {
 	}
 	features: {
 		enableEscrowFeature: boolean
+		enableSmartAccountCreation: boolean
 	}
 	vapid: {
 		email: string
@@ -66,6 +67,11 @@ export interface AppEnvInterface {
 		}
 		kyc: {
 			baseUrl: string
+		}
+		etherfuse: {
+			apiKey: string
+			baseUrl: string
+			customerId: string
 		}
 	}
 	analytics: {

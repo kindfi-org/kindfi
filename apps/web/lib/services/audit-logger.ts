@@ -16,6 +16,8 @@ export type AuditOperation =
 	| 'escrow.dispute.assign_mediator'
 	| 'nft.mint'
 	| 'nft.evolve'
+	| 'etherfuse.on_ramp'
+	| 'etherfuse.off_ramp'
 
 export type AuditResourceType = 'escrow' | 'transaction' | 'milestone' | 'dispute' | 'nft'
 

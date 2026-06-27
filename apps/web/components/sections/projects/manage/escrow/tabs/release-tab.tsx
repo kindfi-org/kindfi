@@ -5,10 +5,12 @@ import type {
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import { AlertCircle, Loader2, Send } from 'lucide-react'
-import { useState } from 'react'
+import { AlertCircle, CheckCircle2, Loader2, Send } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
+import { Alert, AlertDescription, AlertTitle } from '~/components/base/alert'
+import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Label } from '~/components/base/label'
@@ -19,8 +21,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
+import { getMilestoneStatus, isSingleReleaseMilestone } from '~/lib/utils/escrow/milestone-utils'
+import { EtherfuseOffRampCard } from '../components/etherfuse-off-ramp-card'
 
 interface ReleaseTabProps {
 	escrowContractAddress: string
@@ -41,6 +46,39 @@ export function ReleaseTab({
 	const [isProcessing, setIsProcessing] = useState(false)
 
 	const isSingleRelease = escrowType === 'single-release'
+	const selectedIndex = Number(selectedMilestoneIndex)
+	const selectedMilestone = milestones[selectedIndex]
+
+	const releaseReadiness = useMemo(() => {
+		if (isSingleRelease) {
+			const allApproved = milestones.length > 0 && milestones.every((m) => getMilestoneStatus(m))
+			return {
+				canRelease: allApproved,
+				message: allApproved
+					? 'All milestones are approved. You can release the full escrow balance.'
+					: 'Approve all milestones before releasing funds.',
+			}
+		}
+
+		if (!selectedMilestone) {
+			return { canRelease: false, message: 'Select a milestone to release.' }
+		}
+
+		const isApproved = getMilestoneStatus(selectedMilestone)
+		const isReleased =
+			!isSingleReleaseMilestone(selectedMilestone) && selectedMilestone.flags?.released
+
+		if (isReleased) {
+			return { canRelease: false, message: 'This milestone has already been released.' }
+		}
+
+		return {
+			canRelease: isApproved,
+			message: isApproved
+				? 'This milestone is approved and ready for release.'
+				: 'Approve this milestone before releasing its funds.',
+		}
+	}, [isSingleRelease, milestones, selectedMilestone])
 
 	const handleReleaseFunds = async () => {
 		try {
@@ -71,7 +109,7 @@ export function ReleaseTab({
 				throw new Error('Transaction failed')
 			}
 
-			toast.success('Funds released successfully!')
+			toast.success('Funds released successfully')
 			onSuccess()
 		} catch (error) {
 			logger.error(error)
@@ -86,69 +124,117 @@ export function ReleaseTab({
 		<Card>
 			<CardHeader>
 				<div className="flex items-center gap-3">
-					<div className="p-2 rounded-lg bg-primary/10">
-						<Send className="w-5 h-5 text-primary" />
+					<div className="rounded-lg bg-primary/10 p-2">
+						<Send className="h-5 w-5 text-primary" aria-hidden="true" />
 					</div>
 					<div>
 						<CardTitle>Release Funds</CardTitle>
 						<CardDescription>
-							{isSingleRelease
-								? 'Release all funds from the escrow contract'
-								: 'Release funds for a specific milestone'}
+							Release Signer role: disburse approved funds to receivers on-chain.
 						</CardDescription>
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-6">
-				{!isSingleRelease && (
-					<div className="space-y-2">
-						<Label htmlFor="release-milestone">Select Milestone</Label>
-						<Select
-							value={selectedMilestoneIndex}
-							onValueChange={setSelectedMilestoneIndex}
-							disabled={isProcessing}
+			<CardContent>
+				<Tabs defaultValue="crypto" className="w-full">
+					<TabsList className="grid w-full grid-cols-2">
+						<TabsTrigger value="crypto">Crypto Release</TabsTrigger>
+						<TabsTrigger value="fiat">Fiat Off-Ramp</TabsTrigger>
+					</TabsList>
+					<TabsContent value="crypto" className="mt-6 space-y-6">
+						{!isSingleRelease ? (
+							<div className="space-y-2">
+								<Label htmlFor="release-milestone">Milestone to Release</Label>
+								<Select
+									value={selectedMilestoneIndex}
+									onValueChange={setSelectedMilestoneIndex}
+									disabled={isProcessing}
+								>
+									<SelectTrigger id="release-milestone">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{milestones.map((milestone, index) => {
+											const approved = getMilestoneStatus(milestone)
+											const released =
+												!isSingleReleaseMilestone(milestone) && milestone.flags?.released
+											return (
+												<SelectItem key={index} value={String(index)}>
+													Milestone {index + 1}
+													{approved ? ' · Approved' : ''}
+													{released ? ' · Released' : ''}
+												</SelectItem>
+											)
+										})}
+									</SelectContent>
+								</Select>
+							</div>
+						) : null}
+
+						<Alert
+							variant={releaseReadiness.canRelease ? 'default' : 'destructive'}
+							className={
+								releaseReadiness.canRelease
+									? 'border-emerald-200 bg-emerald-50/80 dark:border-emerald-900 dark:bg-emerald-950/20'
+									: undefined
+							}
 						>
-							<SelectTrigger id="release-milestone">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{milestones.map((_, index) => (
-									<SelectItem key={index} value={String(index)}>
-										Milestone {index + 1}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-				)}
+							{releaseReadiness.canRelease ? (
+								<CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+							) : (
+								<AlertCircle className="h-4 w-4" aria-hidden="true" />
+							)}
+							<AlertTitle>
+								{releaseReadiness.canRelease ? 'Ready to release' : 'Not ready yet'}
+							</AlertTitle>
+							<AlertDescription>{releaseReadiness.message}</AlertDescription>
+						</Alert>
 
-				<div className="rounded-lg border p-4 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
-					<div className="flex items-start gap-3">
-						<AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-						<div className="space-y-1">
-							<p className="font-medium text-amber-900 dark:text-amber-100">Important</p>
-							<p className="text-sm text-amber-800 dark:text-amber-200">
-								{isSingleRelease
-									? 'This will release all funds from the escrow. Make sure all milestones are approved before proceeding.'
-									: 'This will release funds for the selected milestone. The milestone must be approved first.'}
-							</p>
-						</div>
-					</div>
-				</div>
+						{!isSingleRelease && selectedMilestone ? (
+							<div className="flex flex-wrap gap-2">
+								{getMilestoneStatus(selectedMilestone) ? (
+									<Badge className="gap-1">
+										<CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+										Approved
+									</Badge>
+								) : (
+									<Badge variant="secondary">Not approved</Badge>
+								)}
+								{!isSingleReleaseMilestone(selectedMilestone) &&
+								selectedMilestone.flags?.released ? (
+									<Badge variant="outline">Already released</Badge>
+								) : null}
+							</div>
+						) : null}
 
-				<Button onClick={handleReleaseFunds} disabled={isProcessing} className="w-full" size="lg">
-					{isProcessing ? (
-						<>
-							<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-							Processing...
-						</>
-					) : (
-						<>
-							<Send className="w-4 h-4 mr-2" />
-							Release Funds
-						</>
-					)}
-				</Button>
+						<Button
+							type="button"
+							onClick={handleReleaseFunds}
+							disabled={isProcessing || !releaseReadiness.canRelease}
+							className="w-full"
+							size="lg"
+						>
+							{isProcessing ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+									Releasing…
+								</>
+							) : (
+								<>
+									<Send className="mr-2 h-4 w-4" aria-hidden="true" />
+									{isSingleRelease ? 'Release All Funds' : `Release Milestone ${selectedIndex + 1}`}
+								</>
+							)}
+						</Button>
+					</TabsContent>
+					<TabsContent value="fiat" className="mt-6">
+						<EtherfuseOffRampCard
+							walletAddress={escrowContractAddress}
+							escrowId={escrowContractAddress}
+							onSuccess={onSuccess}
+						/>
+					</TabsContent>
+				</Tabs>
 			</CardContent>
 		</Card>
 	)

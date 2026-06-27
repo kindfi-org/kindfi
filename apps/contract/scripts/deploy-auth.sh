@@ -79,6 +79,36 @@ case $NETWORK in
         ;;
 esac
 
+# Native XLM Stellar Asset Contract (SAC) per network
+case $NETWORK in
+    testnet)
+        NATIVE_XLM_SAC="CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
+        ;;
+    futurenet)
+        NATIVE_XLM_SAC="CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
+        ;;
+    mainnet)
+        NATIVE_XLM_SAC="CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA"
+        ;;
+esac
+
+echo "Native XLM SAC: $NATIVE_XLM_SAC"
+
+# Mainnet warning
+if [[ "$NETWORK" == "mainnet" ]]; then
+    echo ""
+    echo "=============================================="
+    echo "  WARNING: DEPLOYING TO MAINNET!"
+    echo "  This action will use real XLM."
+    echo "=============================================="
+    echo ""
+    read -p "Are you sure you want to continue? (yes/no): " confirm
+    if [[ "$confirm" != "yes" ]]; then
+        echo "Deployment cancelled."
+        exit 0
+    fi
+fi
+
 echo "🛠️  Building auth contracts with Stellar CLI..."
 
 # Build each contract individually using stellar contract build
@@ -119,18 +149,22 @@ ACCOUNT_WASM_HASH=$(stellar contract upload \
     --wasm target/wasm32-unknown-unknown/release/account_contract.wasm)
 
 # Convert credential ID to 32-byte hex hash (SHA-256 of the credential ID)
-CREDENTIAL_ID="8b5k8pR3N5o7JEvD4Aw70_738E8wBEQp6DT_vLf4Tp1mLnKkVonWTpKcmRTS1f_ndhKYLooSz2XFMXXaauZCqQ"
+# Override with ADMIN_CREDENTIAL_ID env var for production passkeys.
+CREDENTIAL_ID="${ADMIN_CREDENTIAL_ID:-8b5k8pR3N5o7JEvD4Aw70_738E8wBEQp6DT_vLf4Tp1mLnKkVonWTpKcmRTS1f_ndhKYLooSz2XFMXXaauZCqQ}"
 DEVICE_ID_HASH=$(echo -n "$CREDENTIAL_ID" | shasum -a 256 | cut -d' ' -f1)
 
-# Convert base64 public key to hex format
-# Your WebAuthn public key in base64
-PUBLIC_KEY_BASE64="pQECAyYgASFYIIpRuCBPaYjG1Mf1RskFAkxONKCEzWRuWvjxsdvS4CoWIlggQdx5K9DQTVyp+rk2BZf8FVhifph0TltmV0sHmT9ugBs="
+# Convert base64 public key to hex format (65-byte uncompressed secp256r1).
+# Override with ADMIN_PUBLIC_KEY_BASE64 or ADMIN_PUBLIC_KEY_HEX for production passkeys.
+PUBLIC_KEY_BASE64="${ADMIN_PUBLIC_KEY_BASE64:-pQECAyYgASFYIIpRuCBPaYjG1Mf1RskFAkxONKCEzWRuWvjxsdvS4CoWIlggQdx5K9DQTVyp+rk2BZf8FVhifph0TltmV0sHmT9ugBs=}"
 
-# Decode base64 to hex
-PUBLIC_KEY_HEX=$(echo -n "$PUBLIC_KEY_BASE64" | base64 -d | xxd -p | tr -d '\n')
+if [[ -n "${ADMIN_PUBLIC_KEY_HEX:-}" ]]; then
+    PUBLIC_KEY_HEX="$ADMIN_PUBLIC_KEY_HEX"
+else
+    PUBLIC_KEY_HEX=$(echo -n "$PUBLIC_KEY_BASE64" | base64 -d | xxd -p | tr -d '\n')
+fi
 
-# Ensure it's exactly 65 bytes (130 hex characters) for uncompressed secp256r1
-# If it's shorter, pad with zeros; if longer, truncate or handle appropriately
+if [[ -z "${ADMIN_PUBLIC_KEY_HEX:-}" ]]; then
+    # Ensure it's exactly 65 bytes (130 hex characters) for uncompressed secp256r1
 if [ ${#PUBLIC_KEY_HEX} -lt 130 ]; then
     # Pad with leading zeros to make it 130 characters (65 bytes)
     PUBLIC_KEY_HEX=$(printf "%0130s" "$PUBLIC_KEY_HEX" | tr ' ' '0')
@@ -145,6 +179,7 @@ if [[ ! "$PUBLIC_KEY_HEX" =~ ^04 ]]; then
     PUBLIC_KEY_HEX="04$PUBLIC_KEY_HEX"
     # Trim to exactly 130 characters if needed
     PUBLIC_KEY_HEX="${PUBLIC_KEY_HEX:0:130}"
+fi
 fi
 
 echo "Using device_id hash: $DEVICE_ID_HASH"
@@ -161,7 +196,8 @@ ACCOUNT_CONTRACT_ID=$(stellar contract deploy \
     -- \
     --device_id "$DEVICE_ID_HASH" \
     --public_key "$PUBLIC_KEY_HEX" \
-    --auth_contract "$AUTH_CONTROLLER_CONTRACT_ID")
+    --auth_contract "$AUTH_CONTROLLER_CONTRACT_ID" \
+    --native_token "$NATIVE_XLM_SAC")
 
 echo "✅ Account Contract deployed: $ACCOUNT_CONTRACT_ID"
 
@@ -178,7 +214,8 @@ ACCOUNT_FACTORY_CONTRACT_ID=$(stellar contract deploy \
     --wasm-hash "$ACCOUNT_FACTORY_WASM_HASH" \
     -- \
     --auth_contract "$AUTH_CONTROLLER_CONTRACT_ID" \
-    --wasm_hash "$ACCOUNT_WASM_HASH")
+    --wasm_hash "$ACCOUNT_WASM_HASH" \
+    --native_token "$NATIVE_XLM_SAC")
 
 echo "✅ Account Factory Contract deployed: $ACCOUNT_FACTORY_CONTRACT_ID"
 
@@ -243,6 +280,7 @@ Account Factory Contract:
   Status: Registered with auth-controller
 
 Configuration:
+  Native XLM SAC: $NATIVE_XLM_SAC
   Admin Public Key (hex): $PUBLIC_KEY_HEX
   Admin Credential ID: $CREDENTIAL_ID
 

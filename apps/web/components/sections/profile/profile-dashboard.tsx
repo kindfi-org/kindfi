@@ -44,6 +44,17 @@ const DonorProfile = dynamic(
 	},
 )
 
+const FiatRampsSection = dynamic(
+	() =>
+		import('./cards/fiat-ramps-section').then((mod) => ({
+			default: mod.FiatRampsSection,
+		})),
+	{
+		loading: () => <ProfileViewSkeleton />,
+		ssr: false,
+	},
+)
+
 type Role = Database['public']['Enums']['user_role']
 
 interface ProfileDashboardProps {
@@ -222,6 +233,9 @@ export function ProfileDashboard({
 									<TabsTrigger value="overview" className={TAB_TRIGGER_CLASS}>
 										{t('profile.tabOverview')}
 									</TabsTrigger>
+									<TabsTrigger value="ramps" className={TAB_TRIGGER_CLASS}>
+										{t('profile.tabRamps')}
+									</TabsTrigger>
 									<TabsTrigger value="gamification" className={TAB_TRIGGER_CLASS}>
 										{t('profile.tabGamification')}
 									</TabsTrigger>
@@ -248,6 +262,14 @@ export function ProfileDashboard({
 
 							<TabsContent value="overview" className="mt-0">
 								{renderSection('overview')}
+							</TabsContent>
+							<TabsContent value="ramps" className="mt-0">
+								<FiatRampsSection
+									userId={user.id}
+									externalWalletAddress={externalWalletAddress}
+									isExternalConnected={isConnected}
+									onConnectExternal={connect}
+								/>
 							</TabsContent>
 							<TabsContent value="gamification" className="mt-0">
 								{renderSection('gamification')}

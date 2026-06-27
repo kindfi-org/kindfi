@@ -15,6 +15,7 @@ import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
 import { cn, getAvatarFallback } from '~/lib/utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
+import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
 
 const WalletCopyButton = ({ address, className }: { address: string; className?: string }) => {
 	const explorerUrl = getStellarExplorerUrl(address)
@@ -184,9 +185,12 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 					</span>
 				)}
 			</div>
-			{user.device?.address && (
+			{resolveSmartAccountAddress(user.device?.address) && (
 				<div className="px-2">
-					<WalletCopyButton address={user.device.address} className="w-full" />
+					<WalletCopyButton
+						address={resolveSmartAccountAddress(user.device?.address)!}
+						className="w-full"
+					/>
 				</div>
 			)}
 			<div className="flex flex-col space-y-1">

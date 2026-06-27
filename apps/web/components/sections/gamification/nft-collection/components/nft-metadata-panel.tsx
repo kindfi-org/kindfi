@@ -15,7 +15,7 @@ interface NftMetadataPanelProps {
 	tier: Tier
 	showMetadata: boolean
 	onToggle: () => void
-	smartAccountAddress: string | undefined
+	smartAccountAddress: string | null
 	nftContractAddress: string | undefined
 }
 

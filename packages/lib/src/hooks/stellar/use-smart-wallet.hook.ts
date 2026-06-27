@@ -1,6 +1,6 @@
 'use client'
 
-import { debounce } from 'lodash'
+import debounce from 'lodash/debounce'
 import type { Session } from 'next-auth'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'

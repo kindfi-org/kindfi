@@ -6,6 +6,15 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 
 export const maxDuration = 30
 
+/** Free-tier-friendly default; override with AI_PITCH_ADVISOR_MODEL */
+const DEFAULT_PITCH_ADVISOR_MODEL = 'google/gemini-2.5-flash-lite'
+
+const stripHtml = (html: string): string =>
+	html
+		.replace(/<[^>]*>/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim()
+
 const SYSTEM_PROMPT = `You are an expert project pitch consultant specializing in impact-driven and crowdfunding projects. 
 Your role is to analyze project pitches and provide actionable, constructive feedback to help creators improve their pitches.
 
@@ -56,22 +65,46 @@ export async function POST(req: Request) {
 			)
 		}
 
+		const plainStory = stripHtml(story)
+		if (!plainStory) {
+			return NextResponse.json({ error: 'Story content is required for analysis' }, { status: 400 })
+		}
+
 		const userMessage = `Please analyze this project pitch and provide detailed feedback:
 
-**Title:** ${title}
+**Title:** ${title.trim()}
 
 **Story/Description:**
-${story}
+${plainStory}
 
 Provide specific, actionable recommendations to help improve this pitch for potential supporters and investors.`
 
+		const modelId = process.env.AI_PITCH_ADVISOR_MODEL ?? DEFAULT_PITCH_ADVISOR_MODEL
+
 		const result = streamText({
-			model: gateway('anthropic/claude-sonnet-4-5'),
+			model: gateway(modelId),
 			system: SYSTEM_PROMPT,
 			messages: [{ role: 'user', content: userMessage }],
+			onError: ({ error }) => {
+				logger.error('[pitch/analyze] Stream error:', error)
+			},
 		})
 
-		return result.toTextStreamResponse()
+		const text = await result.text
+		if (!text.trim()) {
+			logger.error('[pitch/analyze] Empty analysis response for model:', modelId)
+			return NextResponse.json(
+				{
+					error:
+						'AI analysis could not be generated. The model may be unavailable — try again later or contact support.',
+				},
+				{ status: 503 },
+			)
+		}
+
+		return new Response(text, {
+			headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+		})
 	} catch (err) {
 		logger.error('[pitch/analyze] Error:', err)
 		return NextResponse.json(
