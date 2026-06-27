@@ -17,9 +17,6 @@ const errorHandler = new AuthErrorHandler(logger)
 
 const OTP_REQUEST_TIMEOUT_MS = 25_000
 
-/** OTP email dispatch can exceed Vercel's default 10s serverless limit. */
-export const maxDuration = 30
-
 async function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
 	let timeoutId: ReturnType<typeof setTimeout> | undefined
 	const timeout = new Promise<never>((_, reject) => {
