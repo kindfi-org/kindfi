@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { KINDFI_PLATFORM_FEE_PERCENT } from '~/lib/utils/escrow/platform-fee'
 
 const escrowStatusEnum = z.enum(['NEW', 'FUNDED', 'ACTIVE', 'COMPLETED', 'DISPUTED', 'CANCELLED'])
 
@@ -79,7 +80,7 @@ const escrowDataSchema = z
 			platformAddress: stellarAddressSchema,
 			releaseSigner: stellarAddressSchema,
 		}),
-		platformFee: z.number().min(0).max(100),
+		platformFee: z.literal(KINDFI_PLATFORM_FEE_PERCENT),
 		milestones: z.array(escrowMilestoneSchema).optional(),
 		amount: z.number().positive().optional(),
 		receiver: stellarAddressSchema.optional(),

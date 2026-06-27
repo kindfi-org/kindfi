@@ -2,6 +2,10 @@
 
 import { Badge } from '~/components/base/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
+import {
+	formatHumanPlatformFee,
+	KINDFI_PLATFORM_FEE_PERCENT,
+} from '~/lib/utils/escrow/platform-fee'
 import { useEscrowForm } from '../context/escrow-form-context'
 
 const truncateAddress = (value: string) =>
@@ -28,9 +32,9 @@ export function EscrowReviewStep() {
 				<CardContent className="space-y-4">
 					<div className="flex flex-wrap items-center gap-2">
 						<Badge variant="secondary">{isMulti ? 'Multi-Release' : 'Single-Release'}</Badge>
-						{typeof formData.platformFee === 'number' ? (
-							<Badge variant="outline">Platform fee: {formData.platformFee}%</Badge>
-						) : null}
+						<Badge variant="outline">
+							Platform fee: {formatHumanPlatformFee(KINDFI_PLATFORM_FEE_PERCENT)}
+						</Badge>
 					</div>
 
 					<dl className="grid gap-3 sm:grid-cols-2">

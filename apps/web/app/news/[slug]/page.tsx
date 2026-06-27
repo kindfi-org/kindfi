@@ -13,6 +13,7 @@ import { JsonLd } from '~/components/shared/json-ld'
 import { SectionContainer } from '~/components/shared/section-container'
 import { ShareButtons } from '~/components/shared/share-buttons'
 import { type MdxFrontmatter, readAllPosts, readRawPostBySlug } from '~/lib/mdx'
+import { getNewsArticleUrl } from '~/lib/seo/news-metadata'
 import { getBreadcrumbSchema } from '~/lib/seo/structured-data'
 import { formatNewsCategoryLabel } from '~/lib/utils/news'
 
@@ -64,8 +65,7 @@ export default async function NewsPostPage({ params }: PageProps) {
 		)
 		.slice(0, 3)
 
-	const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-	const articleUrl = `${baseUrl}/news/${slug}`
+	const articleUrl = getNewsArticleUrl(slug)
 
 	return (
 		<>

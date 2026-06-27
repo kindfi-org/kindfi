@@ -18,6 +18,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Label } from '~/components/base/label'
 import { Separator } from '~/components/base/separator'
 import { formatEscrowAmount } from '~/lib/utils/escrow/milestone-utils'
+import {
+	formatHumanPlatformFee,
+	fromTrustlessWorkPlatformFee,
+} from '~/lib/utils/escrow/platform-fee'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 
 interface EscrowDetailsCardProps {
@@ -138,7 +142,7 @@ export function EscrowDetailsCard({ escrowData, escrowContractAddress }: EscrowD
 							{escrowData.platformFee !== undefined &&
 							escrowData.platformFee !== null &&
 							typeof escrowData.platformFee === 'number'
-								? `${escrowData.platformFee}%`
+								? formatHumanPlatformFee(fromTrustlessWorkPlatformFee(escrowData.platformFee))
 								: 'N/A'}
 						</p>
 					</div>

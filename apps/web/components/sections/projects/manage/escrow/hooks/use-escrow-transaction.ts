@@ -13,6 +13,10 @@ import { syncEscrowToDatabaseAction } from '~/app/actions/escrow/sync-escrow-to-
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { Logger } from '~/lib/logger'
+import {
+	getKindfiTrustlessWorkPlatformFee,
+	KINDFI_PLATFORM_FEE_PERCENT,
+} from '~/lib/utils/escrow/platform-fee'
 import type { EscrowFormData } from '../types'
 
 const logger = new Logger()
@@ -243,7 +247,7 @@ async function _saveAndRedirect({
 		title: escrowData?.title || formData.title.trim() || 'Untitled Escrow',
 		description: escrowData?.description || formData.description.trim() || '',
 		roles,
-		platformFee: escrowData?.platformFee ?? (formData.platformFee as number),
+		platformFee: KINDFI_PLATFORM_FEE_PERCENT,
 		...(formData.selectedEscrowType === 'multi-release'
 			? {
 					milestones:
@@ -347,7 +351,7 @@ async function _handleSingleRelease({
 		},
 		description: composedDescription,
 		amount: formData.amount as number,
-		platformFee: formData.platformFee as number,
+		platformFee: getKindfiTrustlessWorkPlatformFee(),
 		trustline: { address: formData.trustlineAddress.trim(), symbol: 'USDC' },
 		milestones: sanitizedMilestones,
 	}
@@ -419,7 +423,7 @@ async function _handleMultiRelease({
 			disputeResolver: formData.disputeResolver.trim(),
 		},
 		description: composedDescription,
-		platformFee: formData.platformFee as number,
+		platformFee: getKindfiTrustlessWorkPlatformFee(),
 		trustline: { address: formData.trustlineAddress.trim(), symbol: 'USDC' },
 		milestones: sanitizedMilestones,
 	}

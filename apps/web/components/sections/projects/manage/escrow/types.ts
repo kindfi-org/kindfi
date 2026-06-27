@@ -15,7 +15,6 @@ export interface EscrowFormData {
 	disputeResolver: string
 	platformAddress: string
 	receiver: string
-	platformFee: number | ''
 	amount: number | ''
 	receiverMemo: string
 	description: string

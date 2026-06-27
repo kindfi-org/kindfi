@@ -20,7 +20,7 @@ export const ESCROW_WIZARD_STEPS: {
 		id: 'details',
 		label: 'Project Details',
 		shortLabel: 'Details',
-		description: 'Name your escrow and set the asset, fee, and funding amount.',
+		description: 'Name your escrow and set the asset and funding amount.',
 	},
 	{
 		id: 'roles',
@@ -56,8 +56,6 @@ function validateDetails(formData: EscrowFormData, projectId: string): string[] 
 	if (!(formData.engagementId || `project-${projectId}`).trim())
 		issues.push('Add an engagement identifier.')
 	if (!formData.trustlineAddress.trim()) issues.push('Add a trustline (asset) address.')
-	if (typeof formData.platformFee !== 'number' || !Number.isFinite(formData.platformFee))
-		issues.push('Set a valid platform fee.')
 	if (!formData.description.trim()) issues.push('Add an escrow description.')
 
 	if (formData.selectedEscrowType === 'single-release') {

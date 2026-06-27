@@ -14,9 +14,10 @@ import { useProjectSidebar } from './hooks/use-project-sidebar'
 
 interface ProjectSidebarProps {
 	project: ProjectDetail
+	projectSlug: string
 }
 
-export function ProjectSidebar({ project }: ProjectSidebarProps) {
+export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 	const reducedMotion = useReducedMotion()
 	const {
 		form,
@@ -37,7 +38,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		onSubmit,
 		handleToggleFollow,
 		shareUrl,
-	} = useProjectSidebar(project)
+	} = useProjectSidebar(project, projectSlug)
 
 	return (
 		<motion.div
