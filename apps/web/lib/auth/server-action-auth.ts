@@ -2,11 +2,12 @@ import type { Session } from 'next-auth'
 import { getServerSession } from 'next-auth'
 import { treeifyError, type ZodSchema } from 'zod'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { RateLimiter } from '~/lib/auth/rate-limiter'
+import { enforceRateLimit, RateLimitExceededError } from '~/lib/auth/rate-limit'
 import { Logger } from '~/lib/logger'
 
 const logger = new Logger()
-const rateLimiter = new RateLimiter()
+
+export { enforceRateLimit, RateLimitExceededError }
 
 export type ServerActionErrorCode =
 	| 'UNAUTHORIZED'
@@ -101,44 +102,6 @@ export function validateInput<T>(schema: ZodSchema<T>, input: unknown, action: s
 }
 
 /**
- * Apply a rate limit keyed by `identifier` for `action`. Throws RATE_LIMITED
- * when the caller has exceeded the configured budget. When Redis is unavailable,
- * logs a warning and allows the request so auth and other server actions keep
- * working in production until Upstash is configured.
- */
-export async function enforceRateLimit(identifier: string, action: string): Promise<void> {
-	try {
-		const result = await rateLimiter.increment(identifier, action)
-
-		if (result.isBlocked) {
-			logger.warn({
-				eventType: 'SERVER_ACTION_RATE_LIMITED',
-				action,
-				identifier,
-			})
-			throw new ServerActionError('Too many requests. Please try again later.', 'RATE_LIMITED')
-		}
-
-		if (result.error) {
-			logger.warn({
-				eventType: 'SERVER_ACTION_RATE_LIMIT_UNAVAILABLE',
-				action,
-				identifier,
-				error: result.error,
-			})
-		}
-	} catch (error) {
-		if (error instanceof ServerActionError) throw error
-
-		logger.warn({
-			eventType: 'SERVER_ACTION_RATE_LIMIT_UNAVAILABLE',
-			action,
-			error: error instanceof Error ? error.message : 'Unknown error',
-		})
-	}
-}
-
-/**
  * Convert any thrown value (typically inside a server action `catch` block)
  * into a structured failure response that is safe to return to the client.
  */
@@ -152,6 +115,14 @@ export function toServerActionFailure(
 			error: error.message,
 			code: error.code,
 			details: error.details,
+		}
+	}
+
+	if (error instanceof RateLimitExceededError) {
+		return {
+			success: false,
+			error: error.message,
+			code: 'RATE_LIMITED',
 		}
 	}
 
