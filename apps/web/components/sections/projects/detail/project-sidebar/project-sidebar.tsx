@@ -36,7 +36,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		disconnect,
 		onSubmit,
 		handleToggleFollow,
-		handleShare,
+		shareUrl,
 	} = useProjectSidebar(project)
 
 	return (
@@ -109,7 +109,9 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				<SidebarActions
 					isFollowing={isFollowing}
 					onToggleFollow={handleToggleFollow}
-					onShare={handleShare}
+					shareUrl={shareUrl}
+					shareTitle={project.title}
+					shareDescription={project.description ?? undefined}
 				/>
 
 				<WalletStatusPanel

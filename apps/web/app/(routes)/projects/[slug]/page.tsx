@@ -6,6 +6,7 @@ import { cache } from 'react'
 import { ProjectClientWrapper } from '~/components/sections/projects/detail/project-client-wrapper'
 import { JsonLd } from '~/components/shared/json-ld'
 import { getProjectBySlug } from '~/lib/queries/projects'
+import { buildProjectMetadata, getProjectPageUrl } from '~/lib/seo/project-metadata'
 import { getBreadcrumbSchema, SITE_URL } from '~/lib/seo/structured-data'
 import { validateProjectSlug } from '~/lib/validation/project-slug'
 
@@ -23,26 +24,15 @@ export async function generateMetadata({
 	if (!validateProjectSlug(slug)) return { title: 'Project | KindFi' }
 	const project = await getProjectBySlugCached(slug)
 	if (!project) return { title: 'Project | KindFi' }
-	return {
-		title: `${project.title} | KindFi`,
-		description: project.description ?? undefined,
-		openGraph: {
-			title: project.title,
-			description: project.description ?? undefined,
-			type: 'website',
-			url: `/projects/${slug}`,
-			images: project.image ? [{ url: project.image, alt: project.title }] : undefined,
-		},
-		twitter: {
-			card: 'summary_large_image',
-			title: project.title,
-			description: project.description ?? undefined,
-			images: project.image ? [project.image] : undefined,
-		},
-		alternates: {
-			canonical: `/projects/${slug}`,
-		},
-	}
+
+	return buildProjectMetadata({
+		slug,
+		title: project.title,
+		description: project.description,
+		image: project.image,
+		categoryName: project.category?.name ?? null,
+		tagNames: project.tags?.map((tag) => tag.name) ?? [],
+	})
 }
 
 export default async function ProjectDetailPage({
@@ -64,17 +54,29 @@ export default async function ProjectDetailPage({
 
 	const dehydratedState = dehydrate(queryClient)
 
+	const projectPageUrl = getProjectPageUrl(slug)
 	const projectSchema = {
 		'@context': 'https://schema.org',
-		'@type': 'Event',
+		'@type': 'WebPage',
 		name: project.title,
 		description: project.description ?? undefined,
-		url: `${SITE_URL}/projects/${slug}`,
-		image: project.image ?? undefined,
-		organizer: {
-			'@type': 'Organization',
+		url: projectPageUrl,
+		primaryImageOfPage: project.image
+			? {
+					'@type': 'ImageObject',
+					url: project.image,
+				}
+			: undefined,
+		isPartOf: {
+			'@type': 'WebSite',
 			name: 'KindFi',
 			url: SITE_URL,
+		},
+		about: {
+			'@type': 'CreativeWork',
+			name: project.title,
+			description: project.description ?? undefined,
+			url: projectPageUrl,
 		},
 	}
 

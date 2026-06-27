@@ -116,7 +116,7 @@ export const profile = {
 	passkeySecured: 'Passkey secured',
 	smartAccount: 'Smart account',
 	primaryWallet: 'Primary',
-	smartAccountPending: 'Your smart account will appear here after registration.',
+	smartAccountPending: 'Smart accounts are coming soon.',
 	externalWallet: 'External wallet',
 	copyAddress: 'Copy address',
 	disconnect: 'Disconnect',

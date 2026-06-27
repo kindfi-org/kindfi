@@ -11,6 +11,7 @@ import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { useAuth } from '~/hooks/use-auth'
 import { zodResolver } from '~/lib/form/zod-resolver'
+import { getProjectPageUrl } from '~/lib/seo/project-metadata'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { resolveEscrowType } from '~/lib/utils/escrow/resolve-escrow-type'
 import { buildFormSchema, type FormValues } from '../types'
@@ -307,22 +308,10 @@ export function useProjectSidebar(project: ProjectDetail) {
 		}
 	}
 
-	const handleShare = () => {
-		if (navigator.share) {
-			navigator
-				.share({
-					title: project.title,
-					text: project.description ?? '',
-					url: window.location.href,
-				})
-				.catch(() => {})
-		} else {
-			navigator.clipboard.writeText(window.location.href)
-			toast('Link copied to clipboard ✅', {
-				description: 'You can now share it with others',
-			})
-		}
-	}
+	const shareUrl = useMemo(() => {
+		if (typeof window !== 'undefined') return window.location.href
+		return getProjectPageUrl(project.slug)
+	}, [project.slug])
 
 	return {
 		form,
@@ -342,6 +331,6 @@ export function useProjectSidebar(project: ProjectDetail) {
 		disconnect,
 		onSubmit,
 		handleToggleFollow,
-		handleShare,
+		shareUrl,
 	}
 }
