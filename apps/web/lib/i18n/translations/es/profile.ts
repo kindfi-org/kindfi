@@ -117,7 +117,7 @@ export const profile = {
 	passkeySecured: 'Protegido con passkey',
 	smartAccount: 'Cuenta inteligente',
 	primaryWallet: 'Principal',
-	smartAccountPending: 'Tu cuenta inteligente aparecerá aquí después del registro.',
+	smartAccountPending: 'Las cuentas inteligentes llegarán pronto.',
 	externalWallet: 'Billetera externa',
 	copyAddress: 'Copiar dirección',
 	disconnect: 'Desconectar',
