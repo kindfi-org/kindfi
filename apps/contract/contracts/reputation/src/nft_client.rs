@@ -133,8 +133,8 @@ pub fn update_attributes_with_level_and_points(
 
     new_attrs
 }
+
 /// Create updated attributes vector with new level.
-=======
 /// Removes any existing level attribute and adds the new one.
 pub fn update_attributes_with_level(
     e: &Env,

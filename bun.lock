@@ -151,6 +151,7 @@
         "simple-icons": "^16.22.0",
         "smart-account-kit": "^0.2.9",
         "sonner": "^2.0.7",
+        "stellar-dev-skill": "https://github.com/stellar/stellar-dev-skill",
         "stellar-sdk": "^13.3.0",
         "tailwind-merge": "^3.0.1",
         "tailwindcss-animate": "^1.0.7",
@@ -3946,6 +3947,8 @@
     "standardwebhooks": ["standardwebhooks@1.0.0", "", { "dependencies": { "@stablelib/base64": "^1.0.0", "fast-sha256": "^1.3.0" } }, "sha512-BbHGOQK9olHPMvQNHWul6MYlrRTAOKn03rOe4A8O3CLWhNf4YHBqq2HJKKC+sfqpxiBY52pNeesD6jIiLDz8jg=="],
 
     "statuses": ["statuses@2.0.2", "", {}, "sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw=="],
+
+    "stellar-dev-skill": ["stellar-dev-skill@github:stellar/stellar-dev-skill#6956c5f", {}, "stellar-stellar-dev-skill-6956c5f", "sha512-pqhD230H4JGysxWd1J6apsB03YUEj8bnXK31Zt1GKeBHEQNn7prAF+DfXPYT+ei24xNWmtoPf4X9fbr7Bo2w6g=="],
 
     "stellar-sdk": ["stellar-sdk@13.3.0", "", { "dependencies": { "@stellar/stellar-base": "^13.1.0", "axios": "^1.8.4", "bignumber.js": "^9.3.0", "eventsource": "^2.0.2", "feaxios": "^0.0.23", "randombytes": "^2.1.0", "toml": "^3.0.0", "urijs": "^1.19.1" } }, "sha512-jAA3+U7oAUueldoS4kuEhcym+DigElWq9isPxt7tjMrE7kTJ2vvY29waavUb2FSfQIWwGbuwAJTYddy2BeyJsw=="],
 
