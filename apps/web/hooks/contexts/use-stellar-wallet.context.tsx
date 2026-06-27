@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { logger } from '@/lib/logger'
+import { getClientStellarNetworkPassphrase } from '~/lib/config/stellar-network.config'
 import { getStellarWalletTheme } from '~/lib/config/stellar-wallet-theme'
 import {
 	getTrustlessSignerError,
@@ -83,10 +84,17 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				const { defaultModules, StellarWalletsKit, KitEventType, Networks } = swk
 
 				const modules = defaultModules()
+				const networkPassphrase = getClientStellarNetworkPassphrase()
+				const kitNetwork =
+					networkPassphrase === Networks.PUBLIC
+						? Networks.PUBLIC
+						: networkPassphrase === Networks.FUTURENET
+							? Networks.FUTURENET
+							: Networks.TESTNET
 
 				StellarWalletsKit.init({
 					modules,
-					network: Networks.TESTNET,
+					network: kitNetwork,
 					theme: getStellarWalletTheme(),
 					authModal: {
 						showInstallLabel: true,
@@ -253,9 +261,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		try {
+			const networkPassphrase = getClientStellarNetworkPassphrase()
 			const { signedTxXdr } = await StellarWalletsKit.signTransaction(unsignedXdr, {
 				address,
-				networkPassphrase: Networks.TESTNET,
+				networkPassphrase,
 			})
 			return signedTxXdr
 		} catch (error) {
