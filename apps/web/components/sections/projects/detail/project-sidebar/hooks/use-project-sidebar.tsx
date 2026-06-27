@@ -71,23 +71,68 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		},
 	})
 
+	useEffect(() => {
+		if (!user?.id || !project.kindlerId) {
+			setIsFollowing(false)
+			return
+		}
+
+		let cancelled = false
+
+		const loadFollowStatus = async () => {
+			try {
+				const res = await fetch(
+					`/api/profile/follow?targetUserId=${encodeURIComponent(project.kindlerId as string)}`,
+				)
+				if (!res.ok) return
+
+				const data = (await res.json()) as { isFollowing?: boolean }
+				if (!cancelled) {
+					setIsFollowing(Boolean(data.isFollowing))
+				}
+			} catch (error) {
+				logger.error('Failed to load follow status', error)
+			}
+		}
+
+		void loadFollowStatus()
+
+		return () => {
+			cancelled = true
+		}
+	}, [user?.id, project.kindlerId])
+
 	const handleToggleFollow = async () => {
 		try {
+			if (!user?.id) {
+				toast.error('Sign in to follow this project', {
+					icon: <CircleAlert className="text-destructive" />,
+				})
+				return
+			}
+
 			if (!project.kindlerId) {
 				toast.error('Unable to follow: project creator unknown')
 				return
 			}
+
 			const action = isFollowing ? 'unfollow' : 'follow'
 			const res = await fetch('/api/profile/follow', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ targetUserId: project.kindlerId, action }),
 			})
-			if (!res.ok) throw new Error('Follow request failed')
-			setIsFollowing(!isFollowing)
+
+			if (!res.ok) {
+				const payload = (await res.json().catch(() => null)) as { error?: string } | null
+				throw new Error(payload?.error || 'Follow request failed')
+			}
+
+			const payload = (await res.json()) as { isFollowing?: boolean }
+			setIsFollowing(typeof payload.isFollowing === 'boolean' ? payload.isFollowing : !isFollowing)
 		} catch (error) {
 			logger.error(error)
-			toast.error('Unable to update follow status', {
+			toast.error(error instanceof Error ? error.message : 'Unable to update follow status', {
 				icon: <CircleAlert className="text-destructive" />,
 			})
 		}
