@@ -200,6 +200,10 @@ export const profile = {
 	viewCampaign: 'View campaign',
 	manageCampaign: 'Manage',
 	viewProject: 'View project',
+	shareDonation: 'Share donation',
+	shareImpactTitle: 'Spread the word',
+	shareImpactDescription:
+		'Share a project you supported on social media. Your post links directly to the campaign and helps bring more donors to KindFi.',
 	noDonations: 'No donation history yet',
 	personalInfoTitle: 'Personal information',
 	personalInfoDescription: 'Update how you appear across KindFi',

@@ -209,15 +209,6 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 
 			const escrowType = await resolveEscrowTypeForFunding()
 
-			if (escrowType === 'multi-release') {
-				toast.error('Donations unavailable for this escrow', {
-					description:
-						'This project uses a multi-release escrow, which cannot accept partial donations. The project owner should recreate the escrow as single-release for crowdfunding.',
-					icon: <CircleAlert className="text-destructive" />,
-				})
-				return
-			}
-
 			const fundResponse = await fundEscrow(
 				{
 					amount: data.investmentAmount,

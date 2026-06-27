@@ -200,6 +200,10 @@ export const profile = {
 	viewCampaign: 'Ver campaña',
 	manageCampaign: 'Gestionar',
 	viewProject: 'Ver proyecto',
+	shareDonation: 'Compartir donación',
+	shareImpactTitle: 'Difunde la causa',
+	shareImpactDescription:
+		'Comparte en redes un proyecto que apoyaste. Tu publicación enlaza directamente a la campaña y ayuda a traer más donantes a KindFi.',
 	noDonations: 'Aún no hay historial de donaciones',
 	personalInfoTitle: 'Información personal',
 	personalInfoDescription: 'Actualiza cómo apareces en KindFi',
