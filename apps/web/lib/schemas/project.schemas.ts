@@ -112,6 +112,37 @@ export const highlightsUpdateSchema = z.object({
 	highlights: z.array(highlightItemSchema).min(2, 'At least 2 highlights are required'),
 })
 
+export const projectUpdateCreateSchema = z.object({
+	projectId: z.string().uuid('Project ID is required'),
+	title: z
+		.string()
+		.max(100, 'Title must be 100 characters or less')
+		.optional()
+		.transform((value) => value?.trim() || undefined),
+	content: z
+		.string()
+		.min(1, 'Content is required')
+		.transform((value) => value.trim()),
+})
+
+export const projectUpdatePatchSchema = z.object({
+	projectId: z.string().uuid('Project ID is required'),
+	title: z
+		.string()
+		.max(100, 'Title must be 100 characters or less')
+		.optional()
+		.transform((value) => value?.trim() || undefined),
+	content: z
+		.string()
+		.min(1, 'Content is required')
+		.optional()
+		.transform((value) => value?.trim()),
+})
+
+export const projectUpdateDeleteSchema = z.object({
+	projectId: z.string().uuid('Project ID is required'),
+})
+
 export const projectMemberUpdateFormSchema = z
 	.object({
 		projectId: z.string().uuid('Project ID is required'),

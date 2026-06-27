@@ -8,6 +8,7 @@ export type ProjectManageSectionKey =
 	| 'basics'
 	| 'pitch'
 	| 'highlights'
+	| 'updates'
 	| 'members'
 	| 'escrow-setup'
 	| 'escrow-manage'
@@ -59,6 +60,15 @@ export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection>
 		path: '/highlights',
 		match: 'prefix',
 		cta: 'Add highlights',
+	},
+	{
+		key: 'updates',
+		title: 'Updates',
+		description: 'Post progress and news for supporters on your public project page.',
+		href: (slug) => `/projects/${slug}/manage/updates`,
+		path: '/updates',
+		match: 'prefix',
+		cta: 'Post update',
 	},
 	{
 		key: 'members',
