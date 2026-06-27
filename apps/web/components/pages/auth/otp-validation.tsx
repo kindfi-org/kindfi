@@ -5,6 +5,7 @@ import { AlertCircle, ArrowRight, CheckCircle, CheckCircle2, Shield } from 'luci
 import { redirect, useRouter, useSearchParams } from 'next/navigation'
 import { type SetStateAction, useEffect, useId, useState } from 'react'
 import { logger } from '@/lib/logger'
+import { resendSignUpOtpAction } from '~/app/actions/sign-up'
 import { Button } from '~/components/base/button'
 import {
 	Card,
@@ -130,17 +131,14 @@ export function VerifyOTPComponent() {
 		setError('')
 
 		try {
-			const { error: resendError } = await supabase.auth.resend({
-				type: 'signup',
-				email,
-			})
+			const result = await resendSignUpOtpAction(email)
 
-			if (resendError) {
-				throw resendError
+			if (!result.success) {
+				throw new Error(result.message)
 			}
 
 			setTimeLeft(120)
-			setSuccess('Verification code resent! Please check your inbox.')
+			setSuccess(result.message)
 		} catch (err) {
 			logger.error('Resend OTP error:', err)
 			if (err instanceof Error) {
