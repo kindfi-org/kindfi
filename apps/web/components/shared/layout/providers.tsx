@@ -12,10 +12,7 @@ import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
 import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { AuthProvider } from '~/hooks/use-auth'
-import {
-	getTrustlessWorkApiBaseUrl,
-	getTrustlessWorkApiKey,
-} from '~/lib/config/trustless-work.config'
+import { getTrustlessWorkClientBaseUrl } from '~/lib/config/trustless-work.config'
 import { I18nProvider } from '~/lib/i18n/context'
 import { translations } from '~/lib/i18n/translations'
 
@@ -79,10 +76,7 @@ export function Providers({ children, initSession }: ProvidersProps) {
 					<SessionProvider session={initSession}>
 						<AuthProvider initSession={initSession}>
 							<WaitlistProvider>
-								<TrustlessWorkConfig
-									baseURL={getTrustlessWorkApiBaseUrl()}
-									apiKey={getTrustlessWorkApiKey()}
-								>
+								<TrustlessWorkConfig baseURL={getTrustlessWorkClientBaseUrl()} apiKey="">
 									<WalletProvider>
 										<EscrowProvider>
 											<StellarProvider>{children}</StellarProvider>

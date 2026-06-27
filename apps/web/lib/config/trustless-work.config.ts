@@ -7,6 +7,8 @@ export type TrustlessWorkNetwork = keyof typeof TRUSTLESS_WORK_API_URLS
 
 type TrustlessWorkApiBaseUrl = (typeof TRUSTLESS_WORK_API_URLS)[TrustlessWorkNetwork]
 
+const TRUSTLESS_WORK_CLIENT_PROXY_PATH = '/api/trustless-work'
+
 /**
  * Trustless Work network selection is controlled only by env vars — never by
  * NODE_ENV, NEXT_PUBLIC_APP_ENV, or Vercel deployment environment.
@@ -27,7 +29,7 @@ const resolveTrustlessWorkNetwork = (network: string): TrustlessWorkNetwork => {
 	return 'development'
 }
 
-/** Trustless Work API base URL — shared by client SDK and server-side escrow services. */
+/** Upstream Trustless Work API base URL — server-side only. */
 export const getTrustlessWorkApiBaseUrl = (): TrustlessWorkApiBaseUrl => {
 	const networkEnv = readTrustlessWorkNetworkEnv()
 
@@ -35,8 +37,7 @@ export const getTrustlessWorkApiBaseUrl = (): TrustlessWorkApiBaseUrl => {
 		return TRUSTLESS_WORK_API_URLS[resolveTrustlessWorkNetwork(networkEnv)]
 	}
 
-	const explicitUrl =
-		process.env.TRUSTLESS_WORK_API_URL ?? process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_URL
+	const explicitUrl = process.env.TRUSTLESS_WORK_API_URL
 
 	if (explicitUrl === TRUSTLESS_WORK_API_URLS.mainnet) {
 		return TRUSTLESS_WORK_API_URLS.mainnet
@@ -49,6 +50,19 @@ export const getTrustlessWorkApiBaseUrl = (): TrustlessWorkApiBaseUrl => {
 	return TRUSTLESS_WORK_API_URLS.development
 }
 
+/**
+ * Base URL for the browser Trustless Work SDK.
+ * Routes through our API proxy so the API key never ships to the client.
+ */
+export const getTrustlessWorkClientBaseUrl = (): string => {
+	const origin =
+		typeof window !== 'undefined'
+			? window.location.origin
+			: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+	return `${origin}${TRUSTLESS_WORK_CLIENT_PROXY_PATH}`
+}
+
 export const getTrustlessWorkNetwork = (): TrustlessWorkNetwork => {
 	const networkEnv = readTrustlessWorkNetworkEnv()
 
@@ -56,8 +70,7 @@ export const getTrustlessWorkNetwork = (): TrustlessWorkNetwork => {
 		return resolveTrustlessWorkNetwork(networkEnv)
 	}
 
-	const explicitUrl =
-		process.env.TRUSTLESS_WORK_API_URL ?? process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_URL
+	const explicitUrl = process.env.TRUSTLESS_WORK_API_URL
 
 	if (explicitUrl === TRUSTLESS_WORK_API_URLS.mainnet) {
 		return 'mainnet'
@@ -70,5 +83,5 @@ export const getTrustlessWorkNetwork = (): TrustlessWorkNetwork => {
 	return 'development'
 }
 
-export const getTrustlessWorkApiKey = (): string =>
-	process.env.TRUSTLESS_WORK_API_KEY ?? process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY ?? ''
+/** Server-only Trustless Work API key — never expose via NEXT_PUBLIC_. */
+export const getTrustlessWorkApiKey = (): string => process.env.TRUSTLESS_WORK_API_KEY ?? ''
