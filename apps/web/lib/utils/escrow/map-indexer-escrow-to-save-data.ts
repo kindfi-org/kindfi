@@ -1,5 +1,6 @@
 import type { GetEscrowsFromIndexerResponse, MultiReleaseMilestone } from '@trustless-work/escrow'
 import type { SaveEscrowContractParams } from '~/app/actions/escrow/save-escrow-contract.types'
+import { KINDFI_PLATFORM_FEE_PERCENT } from '~/lib/utils/escrow/platform-fee'
 
 type EscrowSaveData = SaveEscrowContractParams['escrowData']
 
@@ -32,7 +33,7 @@ export const mapIndexerEscrowToSaveData = (
 		title: escrow.title,
 		description: escrow.description,
 		roles,
-		platformFee: escrow.platformFee,
+		platformFee: KINDFI_PLATFORM_FEE_PERCENT,
 	}
 
 	if (escrow.type === 'single-release') {

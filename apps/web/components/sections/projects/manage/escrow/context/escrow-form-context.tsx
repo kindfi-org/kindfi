@@ -71,7 +71,6 @@ export function EscrowFormProvider({ children, initialData }: EscrowFormProvider
 		disputeResolver: walletAddress ?? '',
 		platformAddress: walletAddress ?? '',
 		receiver: walletAddress ?? '',
-		platformFee: '',
 		amount: '',
 		receiverMemo: '',
 		description,

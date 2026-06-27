@@ -7,6 +7,10 @@ import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/base/tooltip'
 import { DEFAULT_USDC_CONTRACT_ADDRESS } from '~/lib/constants/escrow'
+import {
+	formatHumanPlatformFee,
+	KINDFI_PLATFORM_FEE_PERCENT,
+} from '~/lib/utils/escrow/platform-fee'
 import { useEscrowForm } from '../context/escrow-form-context'
 
 interface EscrowBasicFieldsProps {
@@ -18,7 +22,6 @@ export function EscrowBasicFields({ projectId }: EscrowBasicFieldsProps) {
 	const titleId = useId()
 	const engagementIdId = useId()
 	const trustlineId = useId()
-	const platformFeeId = useId()
 	const amountId = useId()
 	const receiverMemoId = useId()
 	const descriptionId = useId()
@@ -87,23 +90,10 @@ export function EscrowBasicFields({ projectId }: EscrowBasicFieldsProps) {
 				</div>
 
 				<div className="grid gap-2">
-					<label htmlFor={platformFeeId} className="text-sm font-medium">
-						Platform Fee (%) <span className="text-destructive">*</span>
-					</label>
-					<Input
-						id={platformFeeId}
-						name="escrow-platform-fee"
-						type="number"
-						inputMode="decimal"
-						autoComplete="off"
-						value={formData.platformFee}
-						onChange={(e) =>
-							setField('platformFee', e.target.value === '' ? '' : Number(e.target.value))
-						}
-						placeholder="2.5…"
-						min="0"
-						step="0.01"
-					/>
+					<p className="text-sm font-medium">Platform Fee</p>
+					<p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+						{formatHumanPlatformFee(KINDFI_PLATFORM_FEE_PERCENT)} (fixed for all KindFi escrows)
+					</p>
 				</div>
 
 				<div className="grid gap-2 sm:col-span-2">
