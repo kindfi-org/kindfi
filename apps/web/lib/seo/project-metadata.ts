@@ -21,9 +21,11 @@ export function truncateMetaDescription(
 	return `${normalized.slice(0, maxLength - 3).trimEnd()}...`
 }
 
-export function getProjectPageUrl(slug: string | null | undefined): string {
-	if (!slug) return SITE_URL
-	return `${SITE_URL}/projects/${slug}`
+export function getProjectPageUrl(slug: string | null | undefined, fallbackSlug?: string): string {
+	const resolvedSlug = slug ?? fallbackSlug
+	if (!resolvedSlug) return `${SITE_URL}/projects`
+
+	return `${SITE_URL}/projects/${resolvedSlug}`
 }
 
 export function getProjectShareDescription(title: string, description: string | null): string {

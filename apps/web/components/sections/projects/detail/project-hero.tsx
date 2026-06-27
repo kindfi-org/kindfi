@@ -16,9 +16,10 @@ import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
 
 interface ProjectHeroProps {
 	project: ProjectDetail
+	projectSlug: string
 }
 
-export function ProjectHero({ project }: ProjectHeroProps) {
+export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 	const reducedMotion = useReducedMotion()
 	const { balance: onChainRaised } = useEscrowBalance({
 		escrowContractAddress: project.escrowContractAddress,
@@ -39,10 +40,10 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 		[supportersCount, project.investors],
 	)
 
-	const shareUrl = useMemo(() => {
-		if (typeof window !== 'undefined') return window.location.href
-		return getProjectPageUrl(project.slug)
-	}, [project.slug])
+	const shareUrl = useMemo(
+		() => getProjectPageUrl(project.slug, projectSlug),
+		[project.slug, projectSlug],
+	)
 
 	return (
 		<motion.section

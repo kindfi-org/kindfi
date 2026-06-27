@@ -16,7 +16,7 @@ import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { resolveEscrowType } from '~/lib/utils/escrow/resolve-escrow-type'
 import { buildFormSchema, type FormValues } from '../types'
 
-export function useProjectSidebar(project: ProjectDetail) {
+export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 	const [isFollowing, setIsFollowing] = useState(false)
 	const { getMultipleBalances, fundEscrow, sendTransaction, getEscrowByContractIds } = useEscrow()
 	const {
@@ -308,10 +308,10 @@ export function useProjectSidebar(project: ProjectDetail) {
 		}
 	}
 
-	const shareUrl = useMemo(() => {
-		if (typeof window !== 'undefined') return window.location.href
-		return getProjectPageUrl(project.slug)
-	}, [project.slug])
+	const shareUrl = useMemo(
+		() => getProjectPageUrl(project.slug, projectSlug),
+		[project.slug, projectSlug],
+	)
 
 	return {
 		form,
