@@ -18,9 +18,10 @@ function parseTab(param: string | null, hasTeam: boolean): TabValue {
 
 interface ProjectTabsProps {
 	project: ProjectDetail
+	projectSlug: string
 }
 
-export function ProjectTabs({ project }: ProjectTabsProps) {
+export function ProjectTabs({ project, projectSlug }: ProjectTabsProps) {
 	const router = useRouter()
 	const pathname = usePathname()
 	const searchParams = useSearchParams()
@@ -76,7 +77,7 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
 				/>
 			</TabsContent>
 			<TabsContent value="updates">
-				<UpdatesTab updates={project.updates} projectId={project.id} />
+				<UpdatesTab updates={project.updates} projectId={project.id} projectSlug={projectSlug} />
 			</TabsContent>
 			<TabsContent value="community">
 				<CommunityTab comments={project.comments} projectId={project.id} />

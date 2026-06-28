@@ -9,15 +9,17 @@ import { Button } from '~/components/base/button'
 import { UserAvatar } from '~/components/base/user-avatar'
 import { CommentForm } from '~/components/sections/projects/detail/comment-form'
 import { CommentThread } from '~/components/sections/projects/detail/comment-thread'
+import { DonationStream } from '~/components/sections/projects/detail/tabs/donation-stream'
 import { PLACEHOLDER_IMG } from '~/lib/constants/paths'
 import type { Comment, Update } from '~/lib/types/project/project-detail.types'
 
 interface UpdatesTabProps {
 	updates: Update[]
 	projectId?: string
+	projectSlug: string
 }
 
-export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
+export function UpdatesTab({ updates, projectId, projectSlug }: UpdatesTabProps) {
 	const sortedUpdates = [...updates].sort(
 		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
 	)
@@ -170,6 +172,8 @@ export function UpdatesTab({ updates, projectId }: UpdatesTabProps) {
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3 }}
 		>
+			<DonationStream projectSlug={projectSlug} />
+
 			<h2 className="text-2xl font-bold mb-6">Project Updates</h2>
 
 			{updatesState.length === 0 ? (
