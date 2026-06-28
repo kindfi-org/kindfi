@@ -190,12 +190,6 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 		}
 	}
 
-	const formattedDate = new Date(milestone.deadline).toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric',
-	})
-
 	return (
 		<div ref={cardRef} className="relative">
 			{/* Timeline dot */}
@@ -227,15 +221,9 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 
 				<p className="mb-6 text-muted-foreground">{milestone.description}</p>
 
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<div className="p-3 bg-gray-50 rounded-lg">
-						<p className="mb-1 text-sm text-gray-500">Funding Required</p>
-						<p className="font-bold">${milestone.amount.toLocaleString()}</p>
-					</div>
-					<div className="p-3 bg-gray-50 rounded-lg">
-						<p className="mb-1 text-sm text-gray-500">Deadline</p>
-						<p className="font-bold">{formattedDate}</p>
-					</div>
+				<div className="p-3 bg-gray-50 rounded-lg">
+					<p className="mb-1 text-sm text-gray-500">Funding Required</p>
+					<p className="font-bold">${milestone.amount.toLocaleString()}</p>
 				</div>
 			</motion.div>
 		</div>
