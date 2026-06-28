@@ -4,7 +4,15 @@ export const SMART_ACCOUNT_PLACEHOLDER_ADDRESS = '0x'
 export const STELLAR_G_ADDRESS_REGEX = /^G[A-Z2-7]{55}$/
 export const STELLAR_C_ADDRESS_REGEX = /^C[A-Z2-7]{55}$/
 
-export const isSmartAccountPlaceholder = (address: string | null | undefined): boolean =>
+type SmartAccountPlaceholderAddress =
+	| null
+	| undefined
+	| ''
+	| typeof SMART_ACCOUNT_PLACEHOLDER_ADDRESS
+
+export const isSmartAccountPlaceholder = (
+	address: string | null | undefined,
+): address is SmartAccountPlaceholderAddress =>
 	!address || address === SMART_ACCOUNT_PLACEHOLDER_ADDRESS
 
 export const resolveSmartAccountAddress = (address: string | null | undefined): string | null => {
