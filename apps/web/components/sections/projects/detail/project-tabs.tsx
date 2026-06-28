@@ -5,13 +5,14 @@ import { useEffect, useMemo } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
-import { CommunityTab, MilestonesTab, OverviewTab, TeamTab, UpdatesTab } from './tabs'
+import { DonationsTab, MilestonesTab, OverviewTab, TeamTab, UpdatesTab } from './tabs'
 
-const TAB_VALUES = ['overview', 'team', 'milestones', 'updates', 'community'] as const
+const TAB_VALUES = ['overview', 'team', 'milestones', 'updates', 'donations'] as const
 type TabValue = (typeof TAB_VALUES)[number]
 
 function parseTab(param: string | null, hasTeam: boolean): TabValue {
 	if (param === 'team' && !hasTeam) return 'overview'
+	if (param === 'community') return 'donations'
 	if (param && TAB_VALUES.includes(param as TabValue)) return param as TabValue
 	return 'overview'
 }
@@ -35,6 +36,13 @@ export function ProjectTabs({ project, projectSlug }: ProjectTabsProps) {
 			params.delete('tab')
 			const q = params.toString()
 			router.replace(q ? `${pathname}?${q}` : (pathname ?? '/'), { scroll: false })
+			return
+		}
+
+		if (tabParam === 'community') {
+			const params = new URLSearchParams(searchParams.toString())
+			params.set('tab', 'donations')
+			router.replace(`${pathname}?${params.toString()}`, { scroll: false })
 		}
 	}, [tabParam, hasTeam, pathname, router, searchParams])
 
@@ -59,7 +67,7 @@ export function ProjectTabs({ project, projectSlug }: ProjectTabsProps) {
 				{hasTeam ? <TabsTrigger value="team">Team</TabsTrigger> : null}
 				<TabsTrigger value="milestones">Milestones</TabsTrigger>
 				<TabsTrigger value="updates">Updates</TabsTrigger>
-				<TabsTrigger value="community">Community</TabsTrigger>
+				<TabsTrigger value="donations">Latest Donations</TabsTrigger>
 			</TabsList>
 			<TabsContent value="overview">
 				<OverviewTab pitch={project.pitch} />
@@ -77,10 +85,10 @@ export function ProjectTabs({ project, projectSlug }: ProjectTabsProps) {
 				/>
 			</TabsContent>
 			<TabsContent value="updates">
-				<UpdatesTab updates={project.updates} projectId={project.id} projectSlug={projectSlug} />
+				<UpdatesTab updates={project.updates} projectId={project.id} />
 			</TabsContent>
-			<TabsContent value="community">
-				<CommunityTab comments={project.comments} projectId={project.id} />
+			<TabsContent value="donations">
+				<DonationsTab projectSlug={projectSlug} />
 			</TabsContent>
 		</Tabs>
 	)

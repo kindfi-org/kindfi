@@ -1,4 +1,4 @@
-export * from './community-tab'
+export * from './donations-tab'
 export * from './milestones-tab'
 export * from './overview-tab'
 export * from './team-tab'
