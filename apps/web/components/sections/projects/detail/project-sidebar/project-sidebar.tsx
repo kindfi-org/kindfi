@@ -38,6 +38,8 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 		onSubmit,
 		handleToggleFollow,
 		shareUrl,
+		isAuthenticated,
+		signInHref,
 	} = useProjectSidebar(project, projectSlug)
 
 	return (
@@ -97,11 +99,18 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 					isGoalReached={isGoalReached}
 					isDonationReady={isDonationReady}
 					isEscrowDataLoading={isEscrowDataLoading}
+					isAuthenticated={isAuthenticated}
+					signInHref={signInHref}
 					form={form}
 					onSubmit={onSubmit}
 				/>
 
-				<DonationNotices hasEscrow={hasEscrow} isGoalReached={isGoalReached} />
+				<DonationNotices
+					hasEscrow={hasEscrow}
+					isGoalReached={isGoalReached}
+					isAuthenticated={isAuthenticated}
+					signInHref={signInHref}
+				/>
 
 				{project.escrowContractAddress && (
 					<EscrowContractInfo escrowContractAddress={project.escrowContractAddress} />
@@ -115,14 +124,16 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 					shareDescription={project.description ?? undefined}
 				/>
 
-				<WalletStatusPanel
-					isMounted={isMounted}
-					isConnected={isConnected}
-					walletName={walletName}
-					address={address}
-					onConnect={connect}
-					onDisconnect={disconnect}
-				/>
+				{isAuthenticated ? (
+					<WalletStatusPanel
+						isMounted={isMounted}
+						isConnected={isConnected}
+						walletName={walletName}
+						address={address}
+						onConnect={connect}
+						onDisconnect={disconnect}
+					/>
+				) : null}
 			</div>
 
 			{project.foundation && <FoundationLink foundation={project.foundation} />}

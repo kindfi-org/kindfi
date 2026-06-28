@@ -181,6 +181,14 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 	}, [fetchEscrowBalance])
 
 	const onSubmit = async (data: FormValues) => {
+		if (!user?.id) {
+			toast.error('Sign in to donate', {
+				description: 'Create an account or sign in to support this project.',
+				icon: <CircleAlert className="text-destructive" />,
+			})
+			return
+		}
+
 		if (!project.escrowContractAddress) {
 			toast.error('Escrow is not configured for this project', {
 				icon: <CircleAlert className="text-destructive" />,
@@ -355,6 +363,14 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		[project.slug, projectSlug],
 	)
 
+	const isAuthenticated = Boolean(user?.id)
+
+	const signInHref = useMemo(() => {
+		const slug = project.slug ?? projectSlug
+		const callbackPath = slug ? `/projects/${slug}` : '/projects'
+		return `/sign-in?callbackUrl=${encodeURIComponent(callbackPath)}`
+	}, [project.slug, projectSlug])
+
 	return {
 		form,
 		hasEscrow,
@@ -366,6 +382,8 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		isFetchingBalance,
 		isMounted,
 		isFollowing,
+		isAuthenticated,
+		signInHref,
 		address,
 		walletName,
 		isConnected,

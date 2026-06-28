@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
+import Link from 'next/link'
 import type { UseFormReturn } from 'react-hook-form'
 import { Button } from '~/components/base/button'
 import {
@@ -22,6 +23,8 @@ interface DonationFormProps {
 	isGoalReached: boolean
 	isDonationReady: boolean
 	isEscrowDataLoading: boolean
+	isAuthenticated: boolean
+	signInHref: string
 	form: UseFormReturn<FormValues>
 	onSubmit: (data: FormValues) => Promise<void>
 }
@@ -32,13 +35,15 @@ export function DonationForm({
 	isGoalReached,
 	isDonationReady,
 	isEscrowDataLoading,
+	isAuthenticated,
+	signInHref,
 	form,
 	onSubmit,
 }: DonationFormProps) {
-	const canDonate = isDonationReady && !isGoalReached
+	const canDonate = isDonationReady && !isGoalReached && isAuthenticated
 	return (
 		<>
-			{hasEscrow && (
+			{hasEscrow && isAuthenticated && (
 				<div className="mb-4">
 					<TrustlessExternalWalletBanner compact />
 				</div>
@@ -63,13 +68,15 @@ export function DonationForm({
 											placeholder={
 												!hasEscrow
 													? 'Donations coming soon'
-													: isEscrowDataLoading
-														? 'Loading escrow…'
-														: isGoalReached
-															? 'Funding goal reached'
-															: !isDonationReady
-																? 'Preparing donations…'
-																: `Min. $${project.minInvestment}…`
+													: !isAuthenticated
+														? 'Sign in to donate'
+														: isEscrowDataLoading
+															? 'Loading escrow…'
+															: isGoalReached
+																? 'Funding goal reached'
+																: !isDonationReady
+																	? 'Preparing donations…'
+																	: `Min. $${project.minInvestment}…`
 											}
 											className="pl-6 disabled:opacity-60 disabled:cursor-not-allowed"
 											aria-label="Donation amount in USD"
@@ -98,22 +105,34 @@ export function DonationForm({
 						)}
 					/>
 
-					<Button
-						type="submit"
-						className="mt-4 w-full text-white gradient-btn"
-						size="lg"
-						disabled={!canDonate || !form.formState.isValid || form.formState.isSubmitting}
-						aria-busy={form.formState.isSubmitting}
-					>
-						{form.formState.isSubmitting ? (
-							<>
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-								Supporting…
-							</>
-						) : (
-							'Support Now'
-						)}
-					</Button>
+					{isAuthenticated ? (
+						<Button
+							type="submit"
+							className="mt-4 w-full text-white gradient-btn"
+							size="lg"
+							disabled={!canDonate || !form.formState.isValid || form.formState.isSubmitting}
+							aria-busy={form.formState.isSubmitting}
+						>
+							{form.formState.isSubmitting ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+									Supporting…
+								</>
+							) : (
+								'Support Now'
+							)}
+						</Button>
+					) : (
+						<Button
+							type="button"
+							className="mt-4 w-full text-white gradient-btn"
+							size="lg"
+							asChild
+							disabled={!hasEscrow || isGoalReached}
+						>
+							<Link href={signInHref}>Sign in to donate</Link>
+						</Button>
+					)}
 				</form>
 			</Form>
 		</>
@@ -123,9 +142,16 @@ export function DonationForm({
 interface DonationNoticesProps {
 	hasEscrow: boolean
 	isGoalReached: boolean
+	isAuthenticated: boolean
+	signInHref: string
 }
 
-export function DonationNotices({ hasEscrow, isGoalReached }: DonationNoticesProps) {
+export function DonationNotices({
+	hasEscrow,
+	isGoalReached,
+	isAuthenticated,
+	signInHref,
+}: DonationNoticesProps) {
 	return (
 		<>
 			{hasEscrow && isGoalReached && (
@@ -137,10 +163,16 @@ export function DonationNotices({ hasEscrow, isGoalReached }: DonationNoticesPro
 				</div>
 			)}
 
-			{hasEscrow && !isGoalReached && (
-				<div className="p-3 my-4 text-sm text-amber-900 bg-amber-50 rounded-md border border-amber-300">
-					Donating without logging in means you will miss out on features like reputation,
-					contributor NFTs, and future perks. If that&apos;s fine, you can still donate anonymously.
+			{hasEscrow && !isGoalReached && !isAuthenticated && (
+				<div className="p-3 my-4 text-sm text-blue-900 bg-blue-50 rounded-md border border-blue-200">
+					<p className="font-medium mb-1">Sign in to donate</p>
+					<p className="text-blue-800">
+						Create an account or{' '}
+						<Link href={signInHref} className="font-medium underline underline-offset-2">
+							sign in
+						</Link>{' '}
+						to support this project and unlock reputation, contributor NFTs, and perks.
+					</p>
 				</div>
 			)}
 
