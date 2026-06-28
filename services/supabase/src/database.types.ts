@@ -1058,6 +1058,7 @@ export type Database = {
             | null
           display_name: string | null
           email: string | null
+          external_wallet_address: string | null
           headline: string | null
           id: string
           image_url: string | null
@@ -1077,6 +1078,7 @@ export type Database = {
             | null
           display_name?: string | null
           email?: string | null
+          external_wallet_address?: string | null
           headline?: string | null
           id: string
           image_url?: string | null
@@ -1096,6 +1098,7 @@ export type Database = {
             | null
           display_name?: string | null
           email?: string | null
+          external_wallet_address?: string | null
           headline?: string | null
           id?: string
           image_url?: string | null

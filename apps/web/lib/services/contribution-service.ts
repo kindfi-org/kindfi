@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server'
 import type { Session } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { getEscrowBalance } from '~/lib/services/escrow-balance.service'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
 
 export type ResolveProjectIdInput = {
 	contractId?: string
@@ -34,6 +35,7 @@ export type TriggerGamificationUpdatesInput = {
 	session: Session
 	amount: string | number
 	req: NextRequest
+	walletAddress?: string | null
 }
 
 export type FundraisingGoalCheckResult = { allowed: true } | { allowed: false; error: string }
@@ -258,33 +260,15 @@ export async function triggerGamificationUpdates(
 		const donationTimestamp = new Date().toISOString()
 		const userId = input.session.user.id
 		const supabaseClient = await createSupabaseServerClient()
+		const { supabase: serviceRoleClient } = await import('@packages/lib/supabase')
 
-		let userStellarAddress: string | null = null
+		const sessionDeviceAddress =
+			input.session?.device?.address ?? input.session?.user?.device?.address ?? null
 
-		if (input.session?.device?.address && input.session.device.address !== '0x') {
-			userStellarAddress = input.session.device.address
-		} else if (input.session?.user?.device?.address && input.session.user.device.address !== '0x') {
-			userStellarAddress = input.session.user.device.address
-		}
-
-		if (!userStellarAddress) {
-			try {
-				const { data: devices, error: deviceError } = await supabaseClient
-					.from('devices')
-					.select('address')
-					.eq('user_id', userId)
-					.not('address', 'eq', '0x')
-					.not('address', 'is', null)
-					.limit(1)
-
-				if (deviceError) {
-				} else if (devices && devices.length > 0 && devices[0]?.address) {
-					userStellarAddress = devices[0].address
-				}
-			} catch {
-				// ignore device address fetch errors
-			}
-		}
+		const userStellarAddress = await resolveUserStellarAddress(serviceRoleClient, userId, {
+			overrideAddress: input.walletAddress,
+			sessionAddress: sessionDeviceAddress,
+		})
 
 		const { POST: streaksPOST } = await import('~/app/api/streaks/route')
 		const { POST: referralsDonationPOST } = await import('~/app/api/referrals/donation/route')

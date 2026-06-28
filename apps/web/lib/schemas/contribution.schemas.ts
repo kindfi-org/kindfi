@@ -1,3 +1,4 @@
+import { STELLAR_G_ADDRESS_REGEX } from '@packages/lib/utils/wallet-address'
 import { z } from 'zod'
 
 export const createContributionSchema = z
@@ -6,6 +7,10 @@ export const createContributionSchema = z
 		contractId: z.string().optional(),
 		amount: z.coerce.number().positive('Amount must be positive'),
 		transactionHash: z.string().optional(),
+		walletAddress: z
+			.string()
+			.regex(STELLAR_G_ADDRESS_REGEX, 'Must be a valid external Stellar wallet address (G-address)')
+			.optional(),
 	})
 	.refine((data) => data.projectId || data.contractId, {
 		message: 'Either projectId or contractId is required',

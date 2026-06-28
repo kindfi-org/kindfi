@@ -15,6 +15,7 @@ import {
 	uploadFileToIPFS,
 	uploadMetadataToIPFS,
 } from '~/lib/services/pinata'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
 import { getUserStats } from '~/lib/services/user-stats'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { generateUniqueId } from '~/lib/utils/id'
@@ -179,17 +180,8 @@ async function mintHandler(req: NextRequest) {
 
 		let stellarAddress: string | null = validation.data.stellar_address || null
 
-		// Resolve Stellar address if not provided
 		if (!stellarAddress) {
-			const { data: devices } = await supabase
-				.from('devices')
-				.select('address')
-				.eq('user_id', userId)
-				.not('address', 'eq', '0x')
-				.not('address', 'is', null)
-				.limit(1)
-
-			stellarAddress = devices?.[0]?.address ?? null
+			stellarAddress = await resolveUserStellarAddress(supabase, userId)
 		}
 
 		if (!stellarAddress) {

@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { referralOnboardSchema } from '~/lib/schemas/referral.schemas'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -103,16 +104,7 @@ export async function POST(req: NextRequest) {
 			process.env.REFERRAL_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
 
 		if (referralContractAddress && process.env.SOROBAN_PRIVATE_KEY) {
-			// Resolve referred user's Stellar address
-			const { data: devices } = await supabase
-				.from('devices')
-				.select('address')
-				.eq('user_id', referred_id)
-				.not('address', 'eq', '0x')
-				.not('address', 'is', null)
-				.limit(1)
-
-			const referredAddress = devices?.[0]?.address ?? null
+			const referredAddress = await resolveUserStellarAddress(supabase, referred_id)
 
 			if (referredAddress) {
 				try {

@@ -1,10 +1,23 @@
-/** Placeholder stored in devices.address when no smart account has been deployed yet. */
-export const SMART_ACCOUNT_PLACEHOLDER_ADDRESS = '0x'
+export {
+	isExternalStellarWalletAddress,
+	isSmartAccountContractAddress,
+	isSmartAccountPlaceholder,
+	isValidStellarWalletAddress,
+	resolveSmartAccountAddress,
+	SMART_ACCOUNT_PLACEHOLDER_ADDRESS,
+	STELLAR_C_ADDRESS_REGEX,
+	STELLAR_G_ADDRESS_REGEX,
+} from '@packages/lib/utils/wallet-address'
 
-export const resolveSmartAccountAddress = (address: string | null | undefined): string | null => {
-	if (!address || address === SMART_ACCOUNT_PLACEHOLDER_ADDRESS) {
-		return null
-	}
+import {
+	isExternalStellarWalletAddress,
+	resolveSmartAccountAddress,
+} from '@packages/lib/utils/wallet-address'
 
-	return address
-}
+/** Prefer smart account (C-address); fall back to external Stellar Wallet Kit G-address. */
+export const resolveGamificationWalletAddress = (
+	smartAccountAddress: string | null | undefined,
+	externalWalletAddress: string | null | undefined,
+): string | null =>
+	resolveSmartAccountAddress(smartAccountAddress) ??
+	(isExternalStellarWalletAddress(externalWalletAddress) ? externalWalletAddress : null)

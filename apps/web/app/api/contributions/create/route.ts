@@ -29,7 +29,7 @@ async function createContributionHandler(req: NextRequest) {
 		if (!validation.success) {
 			return validation.response
 		}
-		const { projectId, contractId, amount, transactionHash } = validation.data
+		const { projectId, contractId, amount, transactionHash, walletAddress } = validation.data
 
 		const numericAmount = Number(amount)
 
@@ -109,6 +109,7 @@ async function createContributionHandler(req: NextRequest) {
 			session,
 			amount,
 			req,
+			walletAddress,
 		}).catch((error) => {
 			logger.error('[Gamification] Unhandled error in gamification updates:', error)
 		})
