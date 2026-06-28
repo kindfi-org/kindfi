@@ -261,6 +261,7 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 							contractId: project.escrowContractAddress,
 							amount: data.investmentAmount,
 							transactionHash: txHash,
+							walletAddress: address ?? undefined,
 						}),
 					})
 

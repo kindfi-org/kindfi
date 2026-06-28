@@ -5,27 +5,9 @@ import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { limitOffsetQuerySchema } from '~/lib/schemas/common.schemas'
 import { createReferralSchema } from '~/lib/schemas/referral.schemas'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
-
-/**
- * Resolve a user ID to a Stellar address (G... or C...) via devices table.
- * Returns null if no address is found.
- */
-async function resolveUserStellarAddress(
-	supabase: import('@packages/lib/types').TypedSupabaseClient,
-	userId: string,
-): Promise<string | null> {
-	const { data: devices } = await supabase
-		.from('devices')
-		.select('address')
-		.eq('user_id', userId)
-		.not('address', 'eq', '0x')
-		.not('address', 'is', null)
-		.limit(1)
-
-	return devices?.[0]?.address ?? null
-}
 
 /**
  * GET /api/referrals

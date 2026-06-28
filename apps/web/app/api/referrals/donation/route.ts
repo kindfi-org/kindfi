@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { referralDonationSchema } from '~/lib/schemas/referral.schemas'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -33,28 +34,13 @@ export async function POST(req: NextRequest) {
 		const { supabase } = await import('@packages/lib/supabase')
 
 		// Run independent queries in parallel
-		const [devicesResult, referralResult] = await Promise.all([
-			// Get user's Stellar address if not provided
-			referred_address
-				? Promise.resolve({ data: null })
-				: supabase
-						.from('devices')
-						.select('address')
-						.eq('user_id', referred_id)
-						.not('address', 'eq', '0x')
-						.not('address', 'is', null)
-						.limit(1),
+		const [stellarAddress, referralResult] = await Promise.all([
+			resolveUserStellarAddress(supabase, referred_id, {
+				overrideAddress: referred_address,
+			}),
 			// Get referral record
 			supabase.from('referral_records').select('*').eq('referred_id', referred_id).single(),
 		])
-
-		let stellarAddress = referred_address
-		if (!stellarAddress) {
-			const devices = devicesResult.data
-			if (devices && devices.length > 0 && devices[0]?.address) {
-				stellarAddress = devices[0].address
-			}
-		}
 
 		const { data: referral, error: refError } = referralResult
 		if (refError || !referral) {
