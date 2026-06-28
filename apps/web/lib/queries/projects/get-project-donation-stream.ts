@@ -2,6 +2,7 @@ import type { TypedSupabaseClient } from '@packages/lib/types'
 
 export interface DonationStreamItem {
 	id: string
+	amount: number
 	donatedAt: string
 }
 
@@ -17,7 +18,7 @@ export async function getProjectDonationStream(
 
 	const { data, error } = await client
 		.from('contributions')
-		.select('id, created_at')
+		.select('id, amount, created_at')
 		.eq('project_id', projectId)
 		.gt('amount', 0)
 		.order('created_at', { ascending: false })
@@ -27,6 +28,7 @@ export async function getProjectDonationStream(
 
 	return (data ?? []).map((row) => ({
 		id: row.id,
+		amount: Number(row.amount ?? 0),
 		donatedAt: row.created_at ?? new Date().toISOString(),
 	}))
 }
