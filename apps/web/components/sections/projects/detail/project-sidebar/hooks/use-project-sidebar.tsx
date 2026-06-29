@@ -181,6 +181,14 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 	}, [fetchEscrowBalance])
 
 	const onSubmit = async (data: FormValues) => {
+		if (!user?.id) {
+			toast.error('Sign in to donate', {
+				description: 'Create an account or sign in to support this project.',
+				icon: <CircleAlert className="text-destructive" />,
+			})
+			return
+		}
+
 		if (!project.escrowContractAddress) {
 			toast.error('Escrow is not configured for this project', {
 				icon: <CircleAlert className="text-destructive" />,
@@ -253,6 +261,7 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 							contractId: project.escrowContractAddress,
 							amount: data.investmentAmount,
 							transactionHash: txHash,
+							walletAddress: address ?? undefined,
 						}),
 					})
 
@@ -330,6 +339,12 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 			} else if (combinedMessage.includes('trustline')) {
 				userFriendlyMessage =
 					'Trustline required. Your wallet needs to establish a trustline for the token before donating.'
+			} else if (
+				(combinedMessage.includes('main net') && combinedMessage.includes('test net')) ||
+				combinedMessage.includes('network mismatch')
+			) {
+				userFriendlyMessage =
+					'Your wallet and KindFi are on different Stellar networks. In Freighter, open Settings → Network, select Main Net, disconnect and reconnect your wallet here, then try again.'
 			} else if (combinedMessage.includes("reading 'approved'")) {
 				userFriendlyMessage =
 					'Escrow configuration mismatch. This project may be using the wrong escrow type for donations. Please contact the project owner or try again after refreshing the page.'
@@ -349,6 +364,14 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		[project.slug, projectSlug],
 	)
 
+	const isAuthenticated = Boolean(user?.id)
+
+	const signInHref = useMemo(() => {
+		const slug = project.slug ?? projectSlug
+		const callbackPath = slug ? `/projects/${slug}` : '/projects'
+		return `/sign-in?callbackUrl=${encodeURIComponent(callbackPath)}`
+	}, [project.slug, projectSlug])
+
 	return {
 		form,
 		hasEscrow,
@@ -360,6 +383,8 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		isFetchingBalance,
 		isMounted,
 		isFollowing,
+		isAuthenticated,
+		signInHref,
 		address,
 		walletName,
 		isConnected,

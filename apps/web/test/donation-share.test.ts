@@ -4,6 +4,7 @@ import {
 	getDonationShareDescription,
 	getDonationShareTitle,
 } from '../lib/seo/donation-share'
+import { SITE_URL } from '../lib/seo/structured-data'
 
 describe('donation share helpers', () => {
 	it('builds a donor-first share title', () => {
@@ -23,14 +24,15 @@ describe('donation share helpers', () => {
 		expect(description).toContain('Venezuela Earthquake Relief')
 	})
 
-	it('links to the project page', () => {
+	it('links to the canonical project page URL', () => {
 		const content = getDonationShareContent({
 			projectTitle: 'Venezuela Earthquake Relief',
 			projectSlug: 'venezuela-earthquake-emergency-relief',
 			contributionAmount: 25,
 		})
 
-		expect(content.url).toContain('/projects/venezuela-earthquake-emergency-relief')
+		expect(content.url).toBe(`${SITE_URL}/projects/venezuela-earthquake-emergency-relief`)
+		expect(content.url).not.toContain('dev.kindfi.org')
 		expect(content.title).toContain('join me')
 	})
 })

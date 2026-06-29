@@ -1,3 +1,4 @@
+import { STELLAR_G_ADDRESS_REGEX } from '@packages/lib/utils/wallet-address'
 import { z } from 'zod'
 
 export const updateSlugSchema = z.object({
@@ -15,4 +16,11 @@ export const updateSlugSchema = z.object({
 export const followActionSchema = z.object({
 	targetUserId: z.string().uuid('Invalid target user ID'),
 	action: z.enum(['follow', 'unfollow']),
+})
+
+export const linkExternalWalletSchema = z.object({
+	address: z
+		.string()
+		.regex(STELLAR_G_ADDRESS_REGEX, 'Must be a valid external Stellar wallet address (G-address)')
+		.nullable(),
 })

@@ -48,6 +48,7 @@ export const profiles = pgTable(
 		country: char({ length: 3 }),
 		websiteUrl: text('website_url'),
 		socialLinks: jsonb('social_links').default({}).notNull(),
+		externalWalletAddress: text('external_wallet_address'),
 	},
 	(table) => [
 		index('idx_profiles_creator_entity_type').using(

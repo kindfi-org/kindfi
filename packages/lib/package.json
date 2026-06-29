@@ -54,6 +54,10 @@
 		"./types": {
 			"import": "./src/types/index.ts",
 			"require": "./src/types/index.ts"
+		},
+		"./utils/wallet-address": {
+			"import": "./src/utils/wallet-address.ts",
+			"require": "./src/utils/wallet-address.ts"
 		}
 	},
 	"main": "./src/index.ts",

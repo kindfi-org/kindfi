@@ -2,9 +2,14 @@
 
 import debounce from 'lodash/debounce'
 import type { Session } from 'next-auth'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { appEnvConfig } from '../../config'
 import { logger } from '../../logger'
+import {
+	isSmartAccountContractAddress,
+	isSmartAccountPlaceholder,
+} from '../../utils/wallet-address'
 import { useStellarSignature } from './use-stellar-signature.hook'
 
 export interface ContractOperation {
@@ -32,6 +37,16 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 	const [isInitialized, setIsInitialized] = useState(false)
 	const [requestId, setRequestId] = useState<string | null>(null)
 
+	const smartAccountEnabled = appEnvConfig('web').features.enableSmartAccountCreation
+	const deviceAddress = session?.user?.device?.address ?? null
+	const shouldManageSmartAccount = useMemo(
+		() =>
+			smartAccountEnabled &&
+			!isSmartAccountPlaceholder(deviceAddress) &&
+			isSmartAccountContractAddress(deviceAddress),
+		[smartAccountEnabled, deviceAddress],
+	)
+
 	const stellarSignature = useStellarSignature({
 		onSuccess: (_result) => {
 			// Refresh account info after successful transaction
@@ -52,6 +67,17 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 	 * This simulates the approval process - in production, this should only happen after KYC approval
 	 */
 	const initializeAccount = useCallback(async (): Promise<StellarAccount> => {
+		if (!shouldManageSmartAccount) {
+			setIsInitialized(true)
+			return {
+				address: '',
+				contractId: '',
+				balance: '0',
+				sequence: '0',
+				status: 'disabled',
+			}
+		}
+
 		if (!session?.user || !session?.user?.device) {
 			throw new Error('User not authenticated or no device available')
 		}
@@ -63,6 +89,21 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 		try {
 			// Check if user already has a Stellar account
 			const existingAddress = session.user.device.address
+
+			if (
+				isSmartAccountPlaceholder(existingAddress) ||
+				!isSmartAccountContractAddress(existingAddress)
+			) {
+				setIsInitialized(true)
+				setRequestId(null)
+				return {
+					address: existingAddress,
+					contractId: existingAddress,
+					balance: '0',
+					sequence: '0',
+					status: 'not_found',
+				}
+			}
 
 			// User has an existing address, get account info
 			const accountInfo = await stellarSignature.getAccountInfo(existingAddress)
@@ -117,7 +158,7 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 			setRequestId(null)
 			throw error
 		}
-	}, [session, stellarSignature, requestId])
+	}, [session, stellarSignature, requestId, shouldManageSmartAccount])
 
 	/**
 	 * Refresh account information from the blockchain
@@ -168,10 +209,17 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 		[account?.contractId, stellarSignature],
 	)
 
-	// Auto-initialize account when session is available
+	// Auto-initialize only when a deployed smart account (C-address) should be managed
 	useEffect(() => {
+		if (!shouldManageSmartAccount) {
+			if (!isInitialized) {
+				setIsInitialized(true)
+			}
+			return
+		}
+
 		if (session?.user?.device && !isInitialized && !stellarSignature.isLoading && !requestId) {
-			debounce(
+			const debouncedInit = debounce(
 				() =>
 					initializeAccount().catch((err) =>
 						logger.error(
@@ -180,9 +228,22 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 						),
 					),
 				6000,
-			)()
+			)
+
+			debouncedInit()
+
+			return () => {
+				debouncedInit.cancel()
+			}
 		}
-	}, [session, isInitialized, stellarSignature.isLoading, requestId, initializeAccount])
+	}, [
+		session,
+		isInitialized,
+		stellarSignature.isLoading,
+		requestId,
+		initializeAccount,
+		shouldManageSmartAccount,
+	])
 
 	return {
 		// Account state
@@ -203,7 +264,8 @@ export const useStellarSorobanAccount = (session?: Session | null) => {
 		verifySignature: stellarSignature.verifySignature,
 
 		// Computed properties
-		isReady: stellarSignature.isReady && isInitialized,
+		isReady: shouldManageSmartAccount ? stellarSignature.isReady && isInitialized : false,
+		smartAccountEnabled: shouldManageSmartAccount,
 		address: account?.address,
 		balance: account?.balance,
 		contractId: account?.contractId,

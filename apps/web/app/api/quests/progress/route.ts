@@ -5,6 +5,7 @@ import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { questProgressSchema } from '~/lib/schemas/quest.schemas'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -43,28 +44,13 @@ export async function POST(req: NextRequest) {
 		const supabase = supabaseServiceRole
 
 		// Run independent queries in parallel
-		const [devicesResult, questResult] = await Promise.all([
-			// Get user's Stellar address if not provided
-			user_address
-				? Promise.resolve({ data: null })
-				: supabase
-						.from('devices')
-						.select('address')
-						.eq('user_id', user_id)
-						.not('address', 'eq', '0x')
-						.not('address', 'is', null)
-						.limit(1),
+		const [stellarAddress, questResult] = await Promise.all([
+			resolveUserStellarAddress(supabase, user_id, {
+				overrideAddress: user_address,
+			}),
 			// Get quest definition
 			supabase.from('quest_definitions').select('*').eq('quest_id', quest_id).single(),
 		])
-
-		let stellarAddress = user_address
-		if (!stellarAddress) {
-			const devices = devicesResult.data
-			if (devices && devices.length > 0 && devices[0]?.address) {
-				stellarAddress = devices[0].address
-			}
-		}
 
 		const { data: quest, error: questError } = questResult
 		if (questError || !quest) {
