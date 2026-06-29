@@ -10,19 +10,21 @@ import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
 	try {
-		const session = await getServerSession(nextAuthOption)
+		const [session, { slug }, body] = await Promise.all([
+			getServerSession(nextAuthOption),
+			params,
+			req.json(),
+		])
 		const userId = session?.user?.id
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const { slug } = await params
 		const projectIdFromSlug = await getProjectIdBySlug(slug)
 		if (!projectIdFromSlug) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
 
-		const body = await req.json()
 		const validation = validateRequest(projectUpdateCreateSchema, body)
 		if (!validation.success) return validation.response
 

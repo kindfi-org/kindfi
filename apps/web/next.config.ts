@@ -12,7 +12,13 @@ const nextConfig: NextConfig = {
 	},
 	experimental: {
 		mdxRs: true,
-		optimizePackageImports: ['react-icons'],
+		optimizePackageImports: [
+			'react-icons',
+			'lucide-react',
+			'framer-motion',
+			'lodash',
+			'@radix-ui/react-icons',
+		],
 	},
 	serverExternalPackages: [
 		'@packages/lib/stellar',
