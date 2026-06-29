@@ -1,5 +1,5 @@
-import dynamic from 'next/dynamic'
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import { GovernanceSkeleton } from '~/components/sections/governance/skeletons'
 import { JsonLd } from '~/components/shared/json-ld'
 import { getBreadcrumbSchema } from '~/lib/seo/structured-data'

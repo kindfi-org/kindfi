@@ -1,5 +1,5 @@
-import { Suspense } from 'react'
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { HomeDashboard } from '~/components/pages/home'
 import { HighlightedProjectsHydration } from '~/components/sections/home/highlighted-projects-hydration'
 import { SkeletonHighlightedProjects } from '~/components/sections/home/skeletons'

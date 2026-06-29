@@ -6,14 +6,12 @@ import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 
-const QuestEngine = dynamic(
-	() => import('./quest-engine').then((mod) => mod.QuestEngine),
-	{ loading: () => null },
-)
-const StreakTracker = dynamic(
-	() => import('./streak-tracker').then((mod) => mod.StreakTracker),
-	{ loading: () => null },
-)
+const QuestEngine = dynamic(() => import('./quest-engine').then((mod) => mod.QuestEngine), {
+	loading: () => null,
+})
+const StreakTracker = dynamic(() => import('./streak-tracker').then((mod) => mod.StreakTracker), {
+	loading: () => null,
+})
 const ReferralEngine = dynamic(
 	() => import('./referral-engine').then((mod) => mod.ReferralEngine),
 	{ loading: () => null },
