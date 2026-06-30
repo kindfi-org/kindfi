@@ -9,7 +9,6 @@ import { logger } from '@/lib/logger'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { AuthProvider } from '~/hooks/use-auth'
 import { I18nProvider } from '~/lib/i18n/context'
-import { translations } from '~/lib/i18n/translations'
 
 interface ProvidersProps {
 	children: React.ReactNode
@@ -61,7 +60,7 @@ export function Providers({ children, initSession }: ProvidersProps) {
 
 	return (
 		<ReactQueryClientProvider>
-			<I18nProvider translations={translations}>
+			<I18nProvider>
 				<NextThemesProvider
 					attribute="class"
 					defaultTheme="light"

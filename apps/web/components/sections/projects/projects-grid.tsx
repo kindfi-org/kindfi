@@ -49,7 +49,7 @@ export function ProjectsGrid({
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -20 }}
 							transition={{ duration: 0.3 }}
-							className="w-full"
+							className="long-list-item w-full"
 						>
 							<ProjectCard key={project.id} project={project} viewMode={viewMode} />
 						</motion.div>

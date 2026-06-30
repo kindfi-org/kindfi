@@ -17,12 +17,11 @@ import { validateRequest } from '~/lib/utils/validation'
  */
 export async function POST(req: NextRequest) {
 	try {
-		const session = await getServerSession(nextAuthOption)
+		const [session, body] = await Promise.all([getServerSession(nextAuthOption), req.json()])
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const body = await req.json()
 		const validation = validateRequest(syncContributionSchema, body)
 		if (!validation.success) {
 			return validation.response
@@ -62,19 +61,19 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
 		}
 
-		const goalCheck = await checkFundraisingGoalNotReached(projectId, contractId)
+		const [goalCheck, { data: existingContribution }] = await Promise.all([
+			checkFundraisingGoalNotReached(projectId, contractId),
+			supabase
+				.from('contributions')
+				.select('id')
+				.eq('project_id', projectId)
+				.eq('contributor_id', session.user.id)
+				.eq('amount', Number(amount))
+				.single(),
+		])
 		if (!goalCheck.allowed) {
 			return NextResponse.json({ error: goalCheck.error }, { status: 403 })
 		}
-
-		// Check if contribution already exists
-		const { data: existingContribution } = await supabase
-			.from('contributions')
-			.select('id')
-			.eq('project_id', projectId)
-			.eq('contributor_id', session.user.id)
-			.eq('amount', Number(amount))
-			.single()
 
 		if (existingContribution) {
 			return NextResponse.json(
