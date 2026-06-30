@@ -48,27 +48,27 @@ export function useEscrowWorkflowStatus({
 
 		let recommendedTab: EscrowManagementTab = 'overview'
 		let headline = 'Review your escrow'
-		let detail = 'Check contract details, roles, and milestone progress.'
+		let detail = 'Check contract details, roles, and release progress.'
 
 		if (!hasBalance) {
 			recommendedTab = 'fund'
 			headline = 'Fund the escrow'
-			detail = 'Add USDC to the contract before milestones can be approved and released.'
+			detail = 'Add USDC to the contract before releases can be approved and released.'
 		} else if (milestones.length === 0) {
 			recommendedTab = 'overview'
-			headline = 'No milestones found'
-			detail = 'This contract has no milestones indexed yet. Refresh or check the explorer.'
+			headline = 'No releases found'
+			detail = 'This contract has no releases indexed yet. Add a release or refresh the page.'
 		} else if (approvedCount < milestones.length) {
 			recommendedTab = 'milestones'
-			headline = 'Approve milestones'
-			detail = `${milestones.length - approvedCount} of ${milestones.length} milestone(s) still need approval.`
+			headline = 'Approve releases'
+			detail = `${milestones.length - approvedCount} of ${milestones.length} release(s) still need approval.`
 		} else if (!isReleased) {
 			recommendedTab = 'release'
 			headline = 'Release funds'
 			detail =
 				escrowType === 'single-release'
-					? 'All milestones are approved. Release the escrow balance to the receiver.'
-					: 'Approved milestones are ready. Release funds per milestone.'
+					? 'All releases are approved. Release the escrow balance to the receiver.'
+					: 'Approved releases are ready. Release funds per release.'
 		} else {
 			recommendedTab = 'overview'
 			headline = 'Escrow is complete'
@@ -84,7 +84,7 @@ export function useEscrowWorkflowStatus({
 			},
 			{
 				id: 'milestones',
-				label: 'Milestones',
+				label: 'Releases',
 				description: 'Mark progress and approve deliverables.',
 				status: !hasBalance
 					? 'upcoming'
