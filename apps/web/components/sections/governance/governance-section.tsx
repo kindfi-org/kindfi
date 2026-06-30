@@ -198,11 +198,9 @@ export function GovernanceSection() {
 										) : (
 											<div className="space-y-8">
 												{activeRounds.map((round) => (
-													<GovernanceRoundCard
-														key={round.id}
-														roundId={round.id}
-														fundBalance={fundBalance}
-													/>
+													<div key={round.id} className="governance-round-item">
+														<GovernanceRoundCard roundId={round.id} fundBalance={fundBalance} />
+													</div>
 												))}
 											</div>
 										)
@@ -217,11 +215,9 @@ export function GovernanceSection() {
 									) : (
 										<div className="space-y-8">
 											{pastRounds.map((round) => (
-												<GovernanceRoundCard
-													key={round.id}
-													roundId={round.id}
-													fundBalance={fundBalance}
-												/>
+												<div key={round.id} className="governance-round-item">
+													<GovernanceRoundCard roundId={round.id} fundBalance={fundBalance} />
+												</div>
 											))}
 										</div>
 									)}

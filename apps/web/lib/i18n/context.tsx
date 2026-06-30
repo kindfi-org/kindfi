@@ -2,6 +2,8 @@
 
 import type React from 'react'
 import { createContext, useContext, useEffect, useState } from 'react'
+import { loadLocaleBundle } from './load-locale'
+import { en } from './translations/en'
 
 export type Language = 'en' | 'es'
 
@@ -24,18 +26,16 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined)
 
 interface I18nProviderProps {
 	children: React.ReactNode
-	translations: Record<Language, TranslationDict>
 }
 
-export function I18nProvider({ children, translations }: I18nProviderProps) {
+export function I18nProvider({ children }: I18nProviderProps) {
 	const [language, setLanguageState] = useState<Language>('en')
+	const [bundles, setBundles] = useState<Partial<Record<Language, TranslationDict>>>({ en })
 
 	// Load language from localStorage on mount
-	// Use setTimeout to avoid React Compiler warning about setState in effect
 	useEffect(() => {
 		const savedLanguage = localStorage.getItem('language') as Language
 		if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'es')) {
-			// Schedule state update in next tick to avoid synchronous setState in effect
 			const timer = setTimeout(() => {
 				setLanguageState(savedLanguage)
 			}, 0)
@@ -43,22 +43,37 @@ export function I18nProvider({ children, translations }: I18nProviderProps) {
 		}
 	}, [])
 
+	// Lazy-load inactive locale bundles when the active language changes
+	useEffect(() => {
+		if (bundles[language]) return
+
+		let cancelled = false
+		void loadLocaleBundle(language).then((bundle) => {
+			if (!cancelled) {
+				setBundles((prev) => ({ ...prev, [language]: bundle }))
+			}
+		})
+
+		return () => {
+			cancelled = true
+		}
+	}, [language, bundles])
+
 	const setLanguage = (lang: Language) => {
 		setLanguageState(lang)
 		localStorage.setItem('language', lang)
-		// Update HTML lang attribute for accessibility
 		document.documentElement.lang = lang
 	}
 
 	const t = (key: string): string => {
 		const keys = key.split('.')
-		let value: unknown = translations[language]
+		let value: unknown = bundles[language] ?? bundles.en ?? en
 
 		for (const k of keys) {
 			if (isRecord(value)) {
 				value = (value as Record<string, unknown>)[k]
 			} else {
-				return key // Return key if translation not found
+				return key
 			}
 		}
 

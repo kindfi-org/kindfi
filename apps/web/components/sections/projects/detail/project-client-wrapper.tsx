@@ -25,6 +25,7 @@ export function ProjectClientWrapper({ projectSlug }: ProjectClientWrapperProps)
 		error,
 	} = useSupabaseQuery('project', (client) => getProjectBySlug(client, projectSlug), {
 		additionalKeyValues: [projectSlug],
+		staleTime: 60_000,
 	})
 
 	if (isLoading) {

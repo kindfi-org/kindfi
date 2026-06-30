@@ -1,7 +1,18 @@
 import type { Metadata } from 'next'
-import { GovernanceSection } from '~/components/sections/governance'
+import dynamic from 'next/dynamic'
+import { GovernanceSkeleton } from '~/components/sections/governance/skeletons'
 import { JsonLd } from '~/components/shared/json-ld'
 import { getBreadcrumbSchema } from '~/lib/seo/structured-data'
+
+const GovernanceSection = dynamic(
+	() =>
+		import('~/components/sections/governance/governance-section').then(
+			(mod) => mod.GovernanceSection,
+		),
+	{
+		loading: () => <GovernanceSkeleton />,
+	},
+)
 
 export const metadata: Metadata = {
 	title: 'Community Governance | KindFi',

@@ -5,10 +5,17 @@ import { Trophy } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
-import { QuestEngine } from './quest-engine'
-import { ReferralEngine } from './referral-engine'
-import { StreakTracker } from './streak-tracker'
 
+const QuestEngine = dynamic(() => import('./quest-engine').then((mod) => mod.QuestEngine), {
+	loading: () => null,
+})
+const StreakTracker = dynamic(() => import('./streak-tracker').then((mod) => mod.StreakTracker), {
+	loading: () => null,
+})
+const ReferralEngine = dynamic(
+	() => import('./referral-engine').then((mod) => mod.ReferralEngine),
+	{ loading: () => null },
+)
 const NFTCollection = dynamic(
 	() => import('./nft-collection').then((mod) => ({ default: mod.NFTCollection })),
 	{

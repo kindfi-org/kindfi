@@ -35,7 +35,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 	return (
 		<Link
 			href={`/projects/${project.slug}`}
-			className="h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+			className="long-list-item-compact h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
 		>
 			<motion.article
 				className="flex h-full flex-row overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200/80 hover:shadow-md"

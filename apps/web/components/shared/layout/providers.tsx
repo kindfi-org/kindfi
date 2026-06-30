@@ -1,20 +1,14 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
-import { TrustlessWorkConfig } from '@trustless-work/escrow'
 import type { Session } from 'next-auth'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
 import { logger } from '@/lib/logger'
-import { StellarProvider } from '~/hooks/contexts/stellar-context'
-import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
-import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { AuthProvider } from '~/hooks/use-auth'
-import { getTrustlessWorkSdkBaseUrl } from '~/lib/config/trustless-work.config'
 import { I18nProvider } from '~/lib/i18n/context'
-import { translations } from '~/lib/i18n/translations'
 
 interface ProvidersProps {
 	children: React.ReactNode
@@ -66,7 +60,7 @@ export function Providers({ children, initSession }: ProvidersProps) {
 
 	return (
 		<ReactQueryClientProvider>
-			<I18nProvider translations={translations}>
+			<I18nProvider>
 				<NextThemesProvider
 					attribute="class"
 					defaultTheme="light"
@@ -75,15 +69,7 @@ export function Providers({ children, initSession }: ProvidersProps) {
 				>
 					<SessionProvider session={initSession}>
 						<AuthProvider initSession={initSession}>
-							<WaitlistProvider>
-								<TrustlessWorkConfig baseURL={getTrustlessWorkSdkBaseUrl()} apiKey="">
-									<WalletProvider>
-										<EscrowProvider>
-											<StellarProvider>{children}</StellarProvider>
-										</EscrowProvider>
-									</WalletProvider>
-								</TrustlessWorkConfig>
-							</WaitlistProvider>
+							<WaitlistProvider>{children}</WaitlistProvider>
 						</AuthProvider>
 					</SessionProvider>
 				</NextThemesProvider>

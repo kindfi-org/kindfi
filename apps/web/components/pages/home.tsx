@@ -4,7 +4,6 @@ export function HomeDashboard() {
 	return (
 		<>
 			<DynamicComponents.Hero />
-			<DynamicComponents.HighlightedProjects />
 			<DynamicComponents.NewUserGuide />
 			<DynamicComponents.UserJourney />
 			<DynamicComponents.JoinUs />

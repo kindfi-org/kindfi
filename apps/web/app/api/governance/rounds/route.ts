@@ -32,8 +32,10 @@ export async function GET(req: NextRequest) {
 		const { status, limit, offset } = validation.data
 
 		// Auto-activate and close rounds based on current time
-		await supabase.rpc('activate_governance_rounds')
-		await supabase.rpc('close_expired_governance_rounds')
+		await Promise.all([
+			supabase.rpc('activate_governance_rounds'),
+			supabase.rpc('close_expired_governance_rounds'),
+		])
 
 		let query = supabase
 			.from('governance_rounds')
@@ -110,9 +112,13 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const { supabase } = await import('@packages/lib/supabase')
+		const [body, { supabase }] = await Promise.all([req.json(), import('@packages/lib/supabase')])
+		const validation = validateRequest(createGovernanceRoundSchema, body)
+		if (!validation.success) {
+			return validation.response
+		}
+		const { round: roundPayload, options: optionPayloads } = validation.data
 
-		// Verify admin role
 		const { data: profile } = await supabase
 			.from('profiles')
 			.select('role')
@@ -122,13 +128,6 @@ export async function POST(req: NextRequest) {
 		if (profile?.role !== 'admin') {
 			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 		}
-
-		const body = await req.json()
-		const validation = validateRequest(createGovernanceRoundSchema, body)
-		if (!validation.success) {
-			return validation.response
-		}
-		const { round: roundPayload, options: optionPayloads } = validation.data
 
 		const startsAt = new Date(roundPayload.startsAt)
 		const endsAt = new Date(roundPayload.endsAt)

@@ -14,32 +14,35 @@ import { validateRequest } from '~/lib/utils/validation'
  */
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
-		const { id } = await params
+		const [{ id }, session, { supabase }] = await Promise.all([
+			params,
+			getServerSession(nextAuthOption),
+			import('@packages/lib/supabase'),
+		])
 		const validation = validateRequest(governanceRoundIdParamSchema, { id })
 		if (!validation.success) return validation.response
 		const { id: validatedId } = validation.data
-		const session = await getServerSession(nextAuthOption)
-		const { supabase } = await import('@packages/lib/supabase')
 
-		// Auto-activate / close based on current time
-		await supabase.rpc('activate_governance_rounds')
-		await supabase.rpc('close_expired_governance_rounds')
+		await Promise.all([
+			supabase.rpc('activate_governance_rounds'),
+			supabase.rpc('close_expired_governance_rounds'),
+		])
 
-		const { data: round, error } = await supabase
-			.from('governance_rounds')
-			.select(`*, options:governance_options!governance_options_round_id_fkey(*)`)
-			.eq('id', validatedId)
-			.single()
+		const [{ data: round, error }, { data: votes }] = await Promise.all([
+			supabase
+				.from('governance_rounds')
+				.select(`*, options:governance_options!governance_options_round_id_fkey(*)`)
+				.eq('id', validatedId)
+				.single(),
+			supabase
+				.from('governance_votes')
+				.select('option_id, vote_type, vote_weight, user_id')
+				.eq('round_id', validatedId),
+		])
 
 		if (error || !round) {
 			return NextResponse.json({ error: 'Round not found' }, { status: 404 })
 		}
-
-		// Fetch votes for this round
-		const { data: votes } = await supabase
-			.from('governance_votes')
-			.select('option_id, vote_type, vote_weight, user_id')
-			.eq('round_id', validatedId)
 
 		const weightMap: Record<string, { up: number; down: number }> = {}
 		let userVote: { option_id: string; vote_type: string } | null = null
