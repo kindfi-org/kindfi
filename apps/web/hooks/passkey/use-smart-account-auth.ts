@@ -141,7 +141,10 @@ export const useSmartAccountAuth = (identifier: string) => {
 				try {
 					await updateSession()
 				} catch (updateError) {
-					logger.warn('Session update after sign-in failed, falling back to getSession:', updateError)
+					logger.warn(
+						'Session update after sign-in failed, falling back to getSession:',
+						updateError,
+					)
 				}
 
 				await getSession()
