@@ -100,6 +100,39 @@ Obtaining the Service Role Key
 4. Select Data API from the settings menu.
 5. Locate the Service Role Key and reveal and copy it:
 
+## Auth Email (Custom SMTP)
+
+Signup and OTP emails are sent by **Supabase Auth**, not the Next.js app. Until custom SMTP is configured on your hosted Supabase project, messages come from `Supabase Auth <noreply@mail.app.supabase.io>` with the default "Confirm Your Signup" template.
+
+### Production (required)
+
+1. Open [Supabase Dashboard](https://supabase.com/dashboard) → your project → **Authentication** → **SMTP Settings**.
+2. Enable custom SMTP and enter Resend credentials:
+
+| Field | Value |
+|-------|-------|
+| Host | `smtp.resend.com` |
+| Port | `587` |
+| Username | `resend` |
+| Password | Your Resend API key (`RESEND_SMTP_API_KEY`) |
+| Sender email | `noreply@kindfi.org` |
+| Sender name | `KindFi Notifications` |
+
+3. Ensure `kindfi.org` is verified in [Resend](https://resend.com/domains) and `noreply@kindfi.org` is allowed as a sender.
+4. Under **Authentication** → **Email Templates**, paste the HTML from `services/supabase/templates/`:
+   - **Confirm signup** → `confirmation.html`
+   - **Magic link** → `magic_link.html`
+   - **Change email address** → `email_change.html`
+5. After saving SMTP, review **Authentication** → **Rate Limits** (default is 30 emails/hour until adjusted).
+
+### Local development
+
+`services/supabase/config.toml` enables Resend SMTP when `RESEND_SMTP_API_KEY` is set in `services/supabase/.env`. Restart local Supabase after changing SMTP settings:
+
+```sh
+bun stop && bun start
+```
+
 ## Useful Commands
 
 - **Apply (new) migrations to the local database**

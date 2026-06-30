@@ -17,10 +17,8 @@ export default async function EscrowManagePage({ params }: { params: Promise<{ s
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<section className="container mx-auto px-4 py-8 md:py-12">
-			<HydrationBoundary state={dehydratedState}>
-				<EscrowManagementClientWrapper projectSlug={slug} />
-			</HydrationBoundary>
-		</section>
+		<HydrationBoundary state={dehydratedState}>
+			<EscrowManagementClientWrapper projectSlug={slug} />
+		</HydrationBoundary>
 	)
 }

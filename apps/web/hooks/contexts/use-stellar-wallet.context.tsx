@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { logger } from '@/lib/logger'
+import { getClientStellarNetworkPassphrase } from '~/lib/config/stellar-network.config'
 import { getStellarWalletTheme } from '~/lib/config/stellar-wallet-theme'
 import {
 	getTrustlessSignerError,
@@ -39,6 +40,18 @@ interface WalletContextValue {
 }
 
 const WalletContext = createContext<WalletContextValue | undefined>(undefined)
+
+const syncLinkedWallet = async (address: string | null) => {
+	try {
+		await fetch('/api/profile/wallet', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ address }),
+		})
+	} catch (error) {
+		logger.error('Failed to sync linked external wallet:', error)
+	}
+}
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
 	// Initialize state from localStorage if available (client-side only)
@@ -83,10 +96,17 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				const { defaultModules, StellarWalletsKit, KitEventType, Networks } = swk
 
 				const modules = defaultModules()
+				const networkPassphrase = getClientStellarNetworkPassphrase()
+				const kitNetwork =
+					networkPassphrase === Networks.PUBLIC
+						? Networks.PUBLIC
+						: networkPassphrase === Networks.FUTURENET
+							? Networks.FUTURENET
+							: Networks.TESTNET
 
 				StellarWalletsKit.init({
 					modules,
-					network: Networks.TESTNET,
+					network: kitNetwork,
 					theme: getStellarWalletTheme(),
 					authModal: {
 						showInstallLabel: true,
@@ -107,6 +127,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 							}
 							if (fetchedAddress && fetchedAddress !== storedAddress) {
 								setAddress(fetchedAddress)
+								void syncLinkedWallet(fetchedAddress)
 							}
 						})
 						.catch(() => {
@@ -132,9 +153,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 							}
 							setAddress(event.payload.address)
 							localStorage.setItem('stellar_wallet_address', event.payload.address)
+							void syncLinkedWallet(event.payload.address)
 						} else {
 							setAddress(null)
 							localStorage.removeItem('stellar_wallet_address')
+							void syncLinkedWallet(null)
 						}
 					},
 				)
@@ -145,6 +168,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 					setWalletName(null)
 					localStorage.removeItem('stellar_wallet_address')
 					localStorage.removeItem('stellar_wallet_name')
+					void syncLinkedWallet(null)
 				})
 
 				// Listen to wallet selection
@@ -192,6 +216,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, [])
 
+	useEffect(() => {
+		if (!isInitialized) return
+		if (!address) return
+		void syncLinkedWallet(address)
+	}, [isInitialized, address])
+
 	const connect = async () => {
 		const { StellarWalletsKit } = swkRef.current ?? {}
 		if (!isInitialized || !StellarWalletsKit) {
@@ -211,6 +241,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				}
 				setAddress(newAddress)
 				localStorage.setItem('stellar_wallet_address', newAddress)
+				void syncLinkedWallet(newAddress)
 				// Try to get wallet name from the selected wallet
 				// This might need adjustment based on actual API behavior
 			}
@@ -233,6 +264,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 			setWalletName(null)
 			localStorage.removeItem('stellar_wallet_address')
 			localStorage.removeItem('stellar_wallet_name')
+			void syncLinkedWallet(null)
 		} catch (error) {
 			logger.error('Failed to disconnect wallet:', error)
 		}
@@ -253,9 +285,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		try {
+			const networkPassphrase = getClientStellarNetworkPassphrase()
 			const { signedTxXdr } = await StellarWalletsKit.signTransaction(unsignedXdr, {
 				address,
-				networkPassphrase: Networks.TESTNET,
+				networkPassphrase,
 			})
 			return signedTxXdr
 		} catch (error) {

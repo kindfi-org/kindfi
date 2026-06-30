@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from 'date-fns'
 import { Calendar, Heart } from 'lucide-react'
+import { DonationSharePopover } from './donation-share-popover'
 import type { DonorDonationHistoryItem } from './types'
 
 interface DonationHistoryProps {
@@ -26,7 +27,7 @@ export function DonationHistory({ donations, t }: DonationHistoryProps) {
 				return (
 					<div
 						key={donation.id}
-						className="flex items-center justify-between py-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+						className="flex items-center justify-between gap-3 py-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
 					>
 						<div className="flex items-center gap-3 flex-1 min-w-0">
 							<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50">
@@ -40,13 +41,24 @@ export function DonationHistory({ donations, t }: DonationHistoryProps) {
 								</p>
 							</div>
 						</div>
-						<span className="font-bold text-foreground ml-4 flex-shrink-0 tabular-nums">
-							$
-							{amount.toLocaleString(undefined, {
-								minimumFractionDigits: 2,
-								maximumFractionDigits: 2,
-							})}
-						</span>
+						<div className="flex items-center gap-2 flex-shrink-0">
+							<span className="font-bold text-foreground tabular-nums">
+								$
+								{amount.toLocaleString(undefined, {
+									minimumFractionDigits: 2,
+									maximumFractionDigits: 2,
+								})}
+							</span>
+							<DonationSharePopover
+								projectTitle={donation.title}
+								projectSlug={donation.slug}
+								projectDescription={donation.description}
+								contributionAmount={amount}
+								shareLabel={t('profile.shareDonation')}
+								variant="ghost"
+								size="icon"
+							/>
+						</div>
 					</div>
 				)
 			})}

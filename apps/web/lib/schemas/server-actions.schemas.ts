@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { KINDFI_PLATFORM_FEE_PERCENT } from '~/lib/utils/escrow/platform-fee'
 
 const escrowStatusEnum = z.enum(['NEW', 'FUNDED', 'ACTIVE', 'COMPLETED', 'DISPUTED', 'CANCELLED'])
 
@@ -79,7 +80,7 @@ const escrowDataSchema = z
 			platformAddress: stellarAddressSchema,
 			releaseSigner: stellarAddressSchema,
 		}),
-		platformFee: z.number().min(0).max(100),
+		platformFee: z.literal(KINDFI_PLATFORM_FEE_PERCENT),
 		milestones: z.array(escrowMilestoneSchema).optional(),
 		amount: z.number().positive().optional(),
 		receiver: stellarAddressSchema.optional(),
@@ -111,6 +112,17 @@ export const saveEscrowContractInputSchema = z.object({
 	contractId: z.string().min(1, 'contractId is required').max(120, 'contractId is too long'),
 	engagementId: z.string().min(1).optional(),
 	escrowData: escrowDataSchema,
+})
+
+const stellarContractIdSchema = z
+	.string()
+	.min(1, 'Contract ID is required')
+	.regex(/^C[A-Z2-7]{55}$/, 'Invalid Stellar contract ID')
+
+export const syncEscrowToDatabaseInputSchema = z.object({
+	projectId: z.string().uuid('Invalid projectId'),
+	contractId: stellarContractIdSchema,
+	escrowSnapshot: escrowDataSchema.optional(),
 })
 
 export const createFoundationInputSchema = z.object({

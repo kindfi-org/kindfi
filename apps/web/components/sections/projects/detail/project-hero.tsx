@@ -1,21 +1,25 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
+import { Share2 } from 'lucide-react'
 import Image from 'next/image'
 import { useMemo } from 'react'
 import { AnimatedCounter } from '~/components/sections/projects/detail/animated-counter'
 import { SocialLinksDisplay } from '~/components/sections/projects/detail/social-links-display'
 import { CategoryBadge, CountryFlag } from '~/components/sections/projects/shared'
+import { ShareButtons } from '~/components/shared/share-buttons'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { useProjectSupportersCount } from '~/hooks/projects/use-project-supporters-count'
+import { getProjectPageUrl } from '~/lib/seo/project-metadata'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
 
 interface ProjectHeroProps {
 	project: ProjectDetail
+	projectSlug: string
 }
 
-export function ProjectHero({ project }: ProjectHeroProps) {
+export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 	const reducedMotion = useReducedMotion()
 	const { balance: onChainRaised } = useEscrowBalance({
 		escrowContractAddress: project.escrowContractAddress,
@@ -34,6 +38,11 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 	const displaySupporters = useMemo(
 		() => supportersCount ?? project.investors,
 		[supportersCount, project.investors],
+	)
+
+	const shareUrl = useMemo(
+		() => getProjectPageUrl(project.slug, projectSlug),
+		[project.slug, projectSlug],
 	)
 
 	return (
@@ -114,6 +123,22 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 							$<AnimatedCounter value={project.minInvestment} />
 						</p>
 					</div>
+				</section>
+
+				<section className="border-t border-slate-100 pt-6" aria-label="Share this project">
+					<div className="mb-3 flex items-center gap-2">
+						<Share2 className="h-5 w-5 text-emerald-700" aria-hidden="true" />
+						<span className="text-sm font-medium text-slate-700">Share this project</span>
+					</div>
+					<ShareButtons
+						url={shareUrl}
+						title={project.title}
+						description={project.description ?? undefined}
+						variant="pill"
+					/>
+					<p className="mt-2 text-xs text-muted-foreground">
+						Share on social media or copy the link for Instagram, messaging apps, and more.
+					</p>
 				</section>
 			</div>
 		</motion.section>

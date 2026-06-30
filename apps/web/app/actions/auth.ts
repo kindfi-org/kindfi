@@ -1,11 +1,6 @@
 'use server'
 
-import { and, db, eq } from '@packages/drizzle'
-import { devices } from '@packages/drizzle/src/data/schema'
-import { appEnvConfig } from '@packages/lib/config'
-import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
-import type { AppEnvInterface } from '@packages/lib/types'
 import type { Database } from '@services/supabase'
 import type { AuthError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
@@ -27,7 +22,6 @@ import {
 	createSessionInputSchema,
 	requestResetAccountInputSchema,
 	resetPasswordInputSchema,
-	signUpInputSchema,
 	updateDeviceWithDeployeeInputSchema,
 	updateEscrowFinancialsInputSchema,
 	updateEscrowMilestoneInputSchema,
@@ -56,85 +50,6 @@ function escrowFailureFromAction(
 		success: false,
 		message: failure.error || fallbackMessage,
 		error: failure.error,
-	}
-}
-
-export async function signUpAction(formData: FormData): Promise<AuthResponse> {
-	const appConfig: AppEnvInterface = appEnvConfig('web')
-	if (!(await validateCsrfToken(formData.get('csrfToken')?.toString()))) {
-		return {
-			success: false,
-			message: 'Invalid CSRF token',
-			error: 'Invalid CSRF token',
-		}
-	}
-
-	let email: string
-	try {
-		const validated = validateInput(
-			signUpInputSchema,
-			{ email: formData.get('email')?.toString() },
-			'signUpAction',
-		)
-		email = validated.email
-	} catch (error) {
-		const failure = toServerActionFailure(error, 'Invalid input')
-		return {
-			success: false,
-			message: failure.error,
-			error: failure.error,
-		}
-	}
-
-	try {
-		await enforceRateLimit(email.toLowerCase(), 'sign_up')
-	} catch (error) {
-		const failure = toServerActionFailure(error, 'Too many requests. Please try again later.')
-		return {
-			success: false,
-			message: failure.error,
-			error: failure.error,
-		}
-	}
-
-	const supabase = supabaseServiceRole
-
-	const { data: existingUser } = await supabase
-		.from('profiles')
-		.select('id, email')
-		.eq('email', email)
-		.single()
-
-	if (existingUser) {
-		return {
-			success: false,
-			message: 'This account is already registered. Sign in instead!',
-			error: 'User already exists',
-		}
-	}
-
-	const signInWithOptOpt = {
-		email,
-		options: {
-			emailRedirectTo: `${appConfig.deployment.appUrl}/auth/callback?redirect_to=/otp-validation?email=${email}`,
-		},
-	}
-
-	try {
-		const { data, error } = await supabase.auth.signInWithOtp(signInWithOptOpt)
-		if (error) {
-			return errorHandler.handleAuthError(error, 'sign_up')
-		}
-
-		revalidatePath('/sign-up', 'layout')
-		return {
-			success: true,
-			message: 'Verification code sent! Please check your email to confirm your account.',
-			redirect: `/otp-validation?email=${encodeURIComponent(signInWithOptOpt.email)}`,
-			data,
-		}
-	} catch (error) {
-		return errorHandler.handleAuthError(error as AuthError, 'sign_up')
 	}
 }
 
@@ -704,6 +619,9 @@ export async function updateDeviceWithDeployee(deployeeUpdateData: string) {
 	}
 
 	try {
+		const { and, db, eq } = await import('@packages/drizzle')
+		const { devices } = await import('@packages/drizzle/src/data/schema')
+
 		const existingDevice = await db
 			.select({
 				id: devices.id,

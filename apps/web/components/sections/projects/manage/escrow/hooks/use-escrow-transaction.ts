@@ -9,9 +9,14 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { saveEscrowContractAction } from '~/app/actions/escrow/save-escrow-contract'
+import { syncEscrowToDatabaseAction } from '~/app/actions/escrow/sync-escrow-to-database'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { Logger } from '~/lib/logger'
+import {
+	getKindfiTrustlessWorkPlatformFee,
+	KINDFI_PLATFORM_FEE_PERCENT,
+} from '~/lib/utils/escrow/platform-fee'
 import type { EscrowFormData } from '../types'
 
 const logger = new Logger()
@@ -187,6 +192,7 @@ function _extractContractData(responseAny: Record<string, unknown>) {
 							disputeResolver?: string
 							platformAddress?: string
 							releaseSigner?: string
+							receiver?: string
 					  }
 					| undefined,
 				platformFee: escrowDataRaw.platformFee as number | undefined,
@@ -194,7 +200,9 @@ function _extractContractData(responseAny: Record<string, unknown>) {
 					| Array<{ amount: number; receiver: string; description?: string }>
 					| undefined,
 				amount: escrowDataRaw.amount as number | undefined,
-				receiver: escrowDataRaw.receiver as string | undefined,
+				receiver:
+					(escrowDataRaw.receiver as string | undefined) ||
+					(escrowDataRaw.roles as { receiver?: string } | undefined)?.receiver,
 				receiverMemo: escrowDataRaw.receiverMemo as number | undefined,
 			}
 		: undefined
@@ -239,30 +247,31 @@ async function _saveAndRedirect({
 		title: escrowData?.title || formData.title.trim() || 'Untitled Escrow',
 		description: escrowData?.description || formData.description.trim() || '',
 		roles,
-		platformFee: escrowData?.platformFee ?? (formData.platformFee as number),
-		...(escrowData?.milestones && escrowData.milestones.length > 0
+		platformFee: KINDFI_PLATFORM_FEE_PERCENT,
+		...(formData.selectedEscrowType === 'multi-release'
 			? {
-					milestones: escrowData.milestones.map((m) => ({
-						amount: m.amount,
-						receiver: m.receiver,
-					})),
+					milestones:
+						escrowData?.milestones &&
+						escrowData.milestones.length > 0 &&
+						escrowData.milestones.every((m) => m.amount != null && m.receiver != null)
+							? escrowData.milestones.map((m) => ({
+									amount: m.amount,
+									receiver: m.receiver,
+								}))
+							: formData.milestones
+									.filter((m) => m.description.trim().length > 0)
+									.flatMap((m) => {
+										if ('amount' in m && 'receiver' in m) {
+											return [{ amount: m.amount as number, receiver: m.receiver.trim() }]
+										}
+										return []
+									}),
 				}
-			: formData.selectedEscrowType === 'multi-release'
-				? {
-						milestones: formData.milestones
-							.filter((m) => m.description.trim().length > 0)
-							.flatMap((m) => {
-								if ('amount' in m && 'receiver' in m) {
-									return [{ amount: m.amount as number, receiver: m.receiver.trim() }]
-								}
-								return []
-							}),
-					}
-				: {}),
+			: {}),
 		...(formData.selectedEscrowType === 'single-release'
 			? {
 					amount: escrowData?.amount ?? (formData.amount as number),
-					receiver: escrowData?.receiver || formData.receiver.trim(),
+					receiver: escrowData?.receiver || escrowData?.roles?.receiver || formData.receiver.trim(),
 					...(escrowData?.receiverMemo !== undefined
 						? { receiverMemo: escrowData.receiverMemo }
 						: {}),
@@ -278,8 +287,21 @@ async function _saveAndRedirect({
 	})
 
 	if (!saveResult.success) {
+		const syncResult = await syncEscrowToDatabaseAction({ projectId, contractId })
+		if (syncResult.success) {
+			toast.success('Escrow linked to project', {
+				description: syncResult.alreadySynced
+					? 'The contract was already saved — continuing to manage escrow.'
+					: 'Recovered from Trustless Work indexer after the initial save failed.',
+			})
+			setTimeout(() => {
+				router.push(`/projects/${projectSlug}/manage`)
+			}, 1500)
+			return
+		}
+
 		toast.error('Escrow created but failed to save to database', {
-			description: saveResult.error,
+			description: syncResult.error ?? saveResult.error,
 		})
 		return
 	}
@@ -329,7 +351,7 @@ async function _handleSingleRelease({
 		},
 		description: composedDescription,
 		amount: formData.amount as number,
-		platformFee: formData.platformFee as number,
+		platformFee: getKindfiTrustlessWorkPlatformFee(),
 		trustline: { address: formData.trustlineAddress.trim(), symbol: 'USDC' },
 		milestones: sanitizedMilestones,
 	}
@@ -401,7 +423,7 @@ async function _handleMultiRelease({
 			disputeResolver: formData.disputeResolver.trim(),
 		},
 		description: composedDescription,
-		platformFee: formData.platformFee as number,
+		platformFee: getKindfiTrustlessWorkPlatformFee(),
 		trustline: { address: formData.trustlineAddress.trim(), symbol: 'USDC' },
 		milestones: sanitizedMilestones,
 	}

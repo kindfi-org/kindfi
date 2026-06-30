@@ -23,6 +23,8 @@ export type DonorProjectWithBalance = {
 export type DonorDonationHistoryItem = {
 	id: string
 	title: string
+	slug: string
+	description?: string | null
 	contributionAmount: string | number
 	contributionDate: string | null
 }

@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { mapDiditStatusToKYC } from '~/lib/services/didit'
+import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
 
 export const metadata: Metadata = {
 	title: 'My Profile | KindFi',
@@ -128,7 +129,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 				created_at: profileData.created_at,
 				profile: profileData,
 			}}
-			smartAccountAddress={session.device?.address || session.user.device?.address || null}
+			smartAccountAddress={resolveSmartAccountAddress(
+				session.device?.address || session.user.device?.address,
+			)}
 			kycCompleted={kycCompleted}
 		/>
 	)

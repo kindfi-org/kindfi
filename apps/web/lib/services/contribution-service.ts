@@ -3,6 +3,8 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { NextRequest } from 'next/server'
 import type { Session } from 'next-auth'
 import { logger } from '@/lib/logger'
+import { getEscrowBalance } from '~/lib/services/escrow-balance.service'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
 
 export type ResolveProjectIdInput = {
 	contractId?: string
@@ -21,6 +23,8 @@ export type CreateContributionRecordResult =
 	| { success: true; contributionId: string }
 	| { success: false; error: string; details?: string }
 
+export type CreateContributionWithProjectUpdateResult = CreateContributionRecordResult
+
 export type SendContributionNotificationsInput = {
 	projectId: string | null
 	contributorId: string
@@ -31,6 +35,58 @@ export type TriggerGamificationUpdatesInput = {
 	session: Session
 	amount: string | number
 	req: NextRequest
+	walletAddress?: string | null
+}
+
+export type FundraisingGoalCheckResult = { allowed: true } | { allowed: false; error: string }
+
+export async function checkFundraisingGoalNotReached(
+	projectId: string,
+	contractId?: string,
+): Promise<FundraisingGoalCheckResult> {
+	const { data: project, error: projectError } = await supabase
+		.from('projects')
+		.select('target_amount, current_amount')
+		.eq('id', projectId)
+		.single()
+
+	if (projectError || !project) {
+		logger.error('Failed to load project for fundraising goal check:', projectError)
+		return {
+			allowed: false,
+			error: 'Failed to verify project fundraising status',
+		}
+	}
+
+	const targetAmount = Number(project.target_amount ?? 0)
+	if (targetAmount <= 0) {
+		return { allowed: true }
+	}
+
+	let escrowContractAddress = contractId
+
+	if (!escrowContractAddress) {
+		const { data: escrowContract } = await supabase
+			.from('escrow_contracts')
+			.select('contract_id')
+			.eq('project_id', projectId)
+			.maybeSingle()
+
+		escrowContractAddress = escrowContract?.contract_id ?? undefined
+	}
+
+	const dbRaised = Number(project.current_amount ?? 0)
+	const onChainRaised = escrowContractAddress ? await getEscrowBalance(escrowContractAddress) : null
+	const effectiveRaised = onChainRaised ?? dbRaised
+
+	if (effectiveRaised >= targetAmount) {
+		return {
+			allowed: false,
+			error: 'This project has reached its fundraising goal and is no longer accepting donations.',
+		}
+	}
+
+	return { allowed: true }
 }
 
 export async function resolveProjectId(
@@ -105,58 +161,51 @@ export async function checkDuplicateContribution(params: {
 	return { duplicate: false }
 }
 
+export async function createContributionWithProjectUpdate(params: {
+	projectId: string
+	contributorId: string
+	amount: number
+}): Promise<CreateContributionWithProjectUpdateResult> {
+	const { data: contributionId, error } = await supabase.rpc(
+		'create_contribution_and_update_project',
+		{
+			p_project_id: params.projectId,
+			p_contributor_id: params.contributorId,
+			p_amount: params.amount,
+		},
+	)
+
+	if (error || !contributionId) {
+		logger.error('Error creating contribution with project update:', error)
+		return {
+			success: false,
+			error: 'Failed to create contribution',
+			details: error?.message ?? 'No contribution id returned',
+		}
+	}
+
+	return { success: true, contributionId }
+}
+
+/** @deprecated Use createContributionWithProjectUpdate for atomic insert + project totals update. */
 export async function createContributionRecord(params: {
 	projectId: string | null
 	contributorId: string
 	amount: number
 }): Promise<CreateContributionRecordResult> {
-	const { data: contribution, error: contributionError } = await supabase
-		.from('contributions')
-		.insert({
-			project_id: params.projectId,
-			contributor_id: params.contributorId,
-			amount: params.amount,
-		})
-		.select('id')
-		.single()
-
-	if (contributionError) {
-		logger.error('Error creating contribution:', contributionError)
+	if (!params.projectId) {
 		return {
 			success: false,
 			error: 'Failed to create contribution',
-			details: contributionError.message,
+			details: 'project_id is required',
 		}
 	}
 
-	return { success: true, contributionId: contribution.id }
-}
-
-export async function incrementProjectAmount(params: {
-	projectId: string | null
-	amount: number
-}): Promise<void> {
-	const { error: updateError } = await supabase.rpc('increment_project_amount', {
-		project_id_param: params.projectId,
-		amount_param: params.amount,
+	return createContributionWithProjectUpdate({
+		projectId: params.projectId,
+		contributorId: params.contributorId,
+		amount: params.amount,
 	})
-
-	if (updateError) {
-		const { data: project } = await supabase
-			.from('projects')
-			.select('current_amount')
-			.eq('id', params.projectId)
-			.single()
-
-		if (project) {
-			await supabase
-				.from('projects')
-				.update({
-					current_amount: (project.current_amount || 0) + params.amount,
-				})
-				.eq('id', params.projectId)
-		}
-	}
 }
 
 export async function sendContributionNotifications(
@@ -211,33 +260,15 @@ export async function triggerGamificationUpdates(
 		const donationTimestamp = new Date().toISOString()
 		const userId = input.session.user.id
 		const supabaseClient = await createSupabaseServerClient()
+		const { supabase: serviceRoleClient } = await import('@packages/lib/supabase')
 
-		let userStellarAddress: string | null = null
+		const sessionDeviceAddress =
+			input.session?.device?.address ?? input.session?.user?.device?.address ?? null
 
-		if (input.session?.device?.address && input.session.device.address !== '0x') {
-			userStellarAddress = input.session.device.address
-		} else if (input.session?.user?.device?.address && input.session.user.device.address !== '0x') {
-			userStellarAddress = input.session.user.device.address
-		}
-
-		if (!userStellarAddress) {
-			try {
-				const { data: devices, error: deviceError } = await supabaseClient
-					.from('devices')
-					.select('address')
-					.eq('user_id', userId)
-					.not('address', 'eq', '0x')
-					.not('address', 'is', null)
-					.limit(1)
-
-				if (deviceError) {
-				} else if (devices && devices.length > 0 && devices[0]?.address) {
-					userStellarAddress = devices[0].address
-				}
-			} catch {
-				// ignore device address fetch errors
-			}
-		}
+		const userStellarAddress = await resolveUserStellarAddress(serviceRoleClient, userId, {
+			overrideAddress: input.walletAddress,
+			sessionAddress: sessionDeviceAddress,
+		})
 
 		const { POST: streaksPOST } = await import('~/app/api/streaks/route')
 		const { POST: referralsDonationPOST } = await import('~/app/api/referrals/donation/route')
@@ -378,19 +409,29 @@ export async function triggerGamificationUpdates(
 			// biome-ignore lint/suspicious/noExplicitAny: user_nfts table types pending regeneration
 			const { data: existingNFT } = await (svcClient as any) // eslint-disable-line @typescript-eslint/no-explicit-any
 				.from('user_nfts')
-				.select('id, tier')
+				.select('id, tier, token_id')
 				.eq('user_id', userId)
 				.single()
 
-			if (!existingNFT) {
-				const _mintResponse = await nftMintPOST(
+			const hasCompletedNft = existingNFT && existingNFT.token_id >= 0
+
+			if (!hasCompletedNft) {
+				const mintResponse = await nftMintPOST(
 					createMockRequest({
 						user_id: userId,
 						stellar_address: userStellarAddress,
 					}),
 				)
+				if (!mintResponse.ok) {
+					const mintError = await mintResponse.json().catch(() => null)
+					logger.error('[Gamification] NFT mint failed:', mintError)
+				}
 			} else {
-				const _evolveResponse = await nftEvolvePOST(createMockRequest({ user_id: userId }))
+				const evolveResponse = await nftEvolvePOST(createMockRequest({ user_id: userId }))
+				if (!evolveResponse.ok) {
+					const evolveError = await evolveResponse.json().catch(() => null)
+					logger.error('[Gamification] NFT evolve failed:', evolveError)
+				}
 			}
 		} catch (nftError) {
 			logger.error('[Gamification] NFT mint/evolve error:', nftError)

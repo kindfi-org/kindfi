@@ -29,6 +29,7 @@ export interface AppEnvInterface {
 	}
 	features: {
 		enableEscrowFeature: boolean
+		enableSmartAccountCreation: boolean
 	}
 	vapid: {
 		email: string

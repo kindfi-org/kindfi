@@ -2,11 +2,17 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
+import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { resolveGamificationWalletAddress } from '~/lib/utils/wallet-address'
 import type { NFTCollectionResponse, UserNFTRecord, UserStats } from '../types'
 
 export function useNftCollection() {
 	const { data: session } = useSession()
-	const smartAccountAddress = session?.device?.address || session?.user?.device?.address
+	const { address: externalWalletAddress } = useWallet()
+	const smartAccountAddress = resolveGamificationWalletAddress(
+		session?.device?.address || session?.user?.device?.address,
+		externalWalletAddress,
+	)
 
 	const { data: userData, isLoading: dbLoading } = useQuery<{
 		nft: UserNFTRecord | null

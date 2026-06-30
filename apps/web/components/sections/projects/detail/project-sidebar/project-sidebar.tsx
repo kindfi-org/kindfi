@@ -14,13 +14,17 @@ import { useProjectSidebar } from './hooks/use-project-sidebar'
 
 interface ProjectSidebarProps {
 	project: ProjectDetail
+	projectSlug: string
 }
 
-export function ProjectSidebar({ project }: ProjectSidebarProps) {
+export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 	const reducedMotion = useReducedMotion()
 	const {
 		form,
 		hasEscrow,
+		isGoalReached,
+		isDonationReady,
+		isEscrowDataLoading,
 		progressPercentage,
 		onChainRaised,
 		isFetchingBalance,
@@ -33,8 +37,10 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 		disconnect,
 		onSubmit,
 		handleToggleFollow,
-		handleShare,
-	} = useProjectSidebar(project)
+		shareUrl,
+		isAuthenticated,
+		signInHref,
+	} = useProjectSidebar(project, projectSlug)
 
 	return (
 		<motion.div
@@ -46,7 +52,15 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 			<div className="p-6">
 				<div className="flex items-center gap-2 mb-2">
 					<h2 className="text-xl font-bold">Support This Project</h2>
-					{hasEscrow ? (
+					{hasEscrow && isGoalReached ? (
+						<Badge
+							variant="secondary"
+							className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-0"
+							aria-label="This project has reached its funding goal"
+						>
+							Goal reached
+						</Badge>
+					) : hasEscrow ? (
 						<Badge
 							variant="secondary"
 							className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-0"
@@ -65,9 +79,11 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					)}
 				</div>
 				<p className="mb-4 text-muted-foreground">
-					{hasEscrow
-						? 'Your contribution matters. Join the change.'
-						: 'This project is still setting up secure escrow. Donations will be available soon.'}
+					{!hasEscrow
+						? 'This project is still setting up secure escrow. Donations will be available soon.'
+						: isGoalReached
+							? 'This project has reached its fundraising goal. Thank you for your support!'
+							: 'Your contribution matters. Join the change.'}
 				</p>
 
 				<ProjectProgressBar
@@ -77,9 +93,24 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 					isFetchingBalance={isFetchingBalance}
 				/>
 
-				<DonationForm project={project} hasEscrow={hasEscrow} form={form} onSubmit={onSubmit} />
+				<DonationForm
+					project={project}
+					hasEscrow={hasEscrow}
+					isGoalReached={isGoalReached}
+					isDonationReady={isDonationReady}
+					isEscrowDataLoading={isEscrowDataLoading}
+					isAuthenticated={isAuthenticated}
+					signInHref={signInHref}
+					form={form}
+					onSubmit={onSubmit}
+				/>
 
-				<DonationNotices hasEscrow={hasEscrow} />
+				<DonationNotices
+					hasEscrow={hasEscrow}
+					isGoalReached={isGoalReached}
+					isAuthenticated={isAuthenticated}
+					signInHref={signInHref}
+				/>
 
 				{project.escrowContractAddress && (
 					<EscrowContractInfo escrowContractAddress={project.escrowContractAddress} />
@@ -88,17 +119,21 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
 				<SidebarActions
 					isFollowing={isFollowing}
 					onToggleFollow={handleToggleFollow}
-					onShare={handleShare}
+					shareUrl={shareUrl}
+					shareTitle={project.title}
+					shareDescription={project.description ?? undefined}
 				/>
 
-				<WalletStatusPanel
-					isMounted={isMounted}
-					isConnected={isConnected}
-					walletName={walletName}
-					address={address}
-					onConnect={connect}
-					onDisconnect={disconnect}
-				/>
+				{isAuthenticated ? (
+					<WalletStatusPanel
+						isMounted={isMounted}
+						isConnected={isConnected}
+						walletName={walletName}
+						address={address}
+						onConnect={connect}
+						onDisconnect={disconnect}
+					/>
+				) : null}
 			</div>
 
 			{project.foundation && <FoundationLink foundation={project.foundation} />}

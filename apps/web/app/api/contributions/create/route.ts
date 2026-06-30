@@ -7,8 +7,8 @@ import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
 import {
 	checkDuplicateContribution,
-	createContributionRecord,
-	incrementProjectAmount,
+	checkFundraisingGoalNotReached,
+	createContributionWithProjectUpdate,
 	resolveProjectId,
 	sendContributionNotifications,
 	triggerGamificationUpdates,
@@ -29,7 +29,7 @@ async function createContributionHandler(req: NextRequest) {
 		if (!validation.success) {
 			return validation.response
 		}
-		const { projectId, contractId, amount, transactionHash } = validation.data
+		const { projectId, contractId, amount, transactionHash, walletAddress } = validation.data
 
 		const numericAmount = Number(amount)
 
@@ -57,6 +57,15 @@ async function createContributionHandler(req: NextRequest) {
 		}
 		const finalProjectId = projectResolution.projectId
 
+		if (!finalProjectId) {
+			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
+		}
+
+		const goalCheck = await checkFundraisingGoalNotReached(finalProjectId, contractId)
+		if (!goalCheck.allowed) {
+			return NextResponse.json({ error: goalCheck.error }, { status: 403 })
+		}
+
 		const duplicateCheck = await checkDuplicateContribution({
 			transactionHash,
 			projectId: finalProjectId,
@@ -73,7 +82,7 @@ async function createContributionHandler(req: NextRequest) {
 			)
 		}
 
-		const contributionResult = await createContributionRecord({
+		const contributionResult = await createContributionWithProjectUpdate({
 			projectId: finalProjectId,
 			contributorId: session.user.id,
 			amount: numericAmount,
@@ -88,11 +97,6 @@ async function createContributionHandler(req: NextRequest) {
 			)
 		}
 
-		await incrementProjectAmount({
-			projectId: finalProjectId,
-			amount: numericAmount,
-		})
-
 		sendContributionNotifications({
 			projectId: finalProjectId,
 			contributorId: session.user.id,
@@ -105,6 +109,7 @@ async function createContributionHandler(req: NextRequest) {
 			session,
 			amount,
 			req,
+			walletAddress,
 		}).catch((error) => {
 			logger.error('[Gamification] Unhandled error in gamification updates:', error)
 		})

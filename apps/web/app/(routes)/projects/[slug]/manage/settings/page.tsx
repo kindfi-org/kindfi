@@ -17,10 +17,8 @@ export default async function SettingPage({ params }: { params: Promise<{ slug: 
 	const dehydratedState = dehydrate(queryClient)
 
 	return (
-		<section className="container mx-auto px-4 py-8 md:py-12">
-			<HydrationBoundary state={dehydratedState}>
-				<EscrowAdminClientWrapper projectSlug={slug} />
-			</HydrationBoundary>
-		</section>
+		<HydrationBoundary state={dehydratedState}>
+			<EscrowAdminClientWrapper projectSlug={slug} />
+		</HydrationBoundary>
 	)
 }

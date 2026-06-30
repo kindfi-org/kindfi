@@ -25,6 +25,7 @@ export function ProjectClientWrapper({ projectSlug }: ProjectClientWrapperProps)
 		error,
 	} = useSupabaseQuery('project', (client) => getProjectBySlug(client, projectSlug), {
 		additionalKeyValues: [projectSlug],
+		staleTime: 60_000,
 	})
 
 	if (isLoading) {
@@ -59,11 +60,11 @@ export function ProjectClientWrapper({ projectSlug }: ProjectClientWrapperProps)
 			</div>
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<div className="lg:col-span-2">
-					<ProjectHero project={project} />
-					<ProjectTabs project={project} />
+					<ProjectHero project={project} projectSlug={projectSlug} />
+					<ProjectTabs project={project} projectSlug={projectSlug} />
 				</div>
 				<div className="lg:col-span-1">
-					<ProjectSidebar project={project} />
+					<ProjectSidebar project={project} projectSlug={projectSlug} />
 				</div>
 			</div>
 		</>

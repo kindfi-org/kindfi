@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Loader2, Save, Video } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useForm } from 'react-hook-form'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
@@ -21,7 +22,14 @@ import { zodResolver } from '~/lib/form/zod-resolver'
 import { projectPitchSchema } from '~/lib/schemas/create-project.schemas'
 import type { ProjectPitchData } from '~/lib/types/project/create-project.types'
 import { FileUpload } from './file-upload'
-import { RichTextEditor } from './rich-text-editor'
+
+const RichTextEditor = dynamic(
+	() => import('./rich-text-editor').then((mod) => mod.RichTextEditor),
+	{
+		ssr: false,
+		loading: () => <div className="h-48 animate-pulse rounded-md bg-muted" />,
+	},
+)
 
 interface ProjectPitchFormProps {
 	projectId: string
@@ -84,10 +92,14 @@ export function ProjectPitchForm({ projectId, projectSlug, pitch }: ProjectPitch
 													placeholder="Enter your pitch title"
 													maxLength={100}
 													className=" pr-16"
-													{...field}
+													value={field.value ?? ''}
+													onChange={field.onChange}
+													onBlur={field.onBlur}
+													name={field.name}
+													ref={field.ref}
 												/>
 												<div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-													{field.value.length}/100
+													{(field.value ?? '').length}/100
 												</div>
 											</div>
 										</FormControl>

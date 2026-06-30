@@ -59,3 +59,4 @@ export const projectStatus = pgEnum('project_status', [
 	'rejected',
 ])
 export const userRole = pgEnum('user_role', ['kinder', 'kindler'])
+export const creatorEntityType = pgEnum('creator_entity_type', ['individual', 'ngo', 'foundation'])

@@ -1,15 +1,11 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
-import { development, TrustlessWorkConfig } from '@trustless-work/escrow'
 import type { Session } from 'next-auth'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
 import { logger } from '@/lib/logger'
-import { StellarProvider } from '~/hooks/contexts/stellar-context'
-import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
-import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { AuthProvider } from '~/hooks/use-auth'
 import { I18nProvider } from '~/lib/i18n/context'
@@ -63,11 +59,6 @@ export function Providers({ children, initSession }: ProvidersProps) {
 		}
 	}, [])
 
-	// Use development API until mainnet release (post-Stellar audit).
-	// When ready for mainnet: import mainNet, then use:
-	// trustlessBaseUrl = process.env.NEXT_PUBLIC_STELLAR_NETWORK === 'mainnet' ? mainNet : development
-	const trustlessBaseUrl = development
-
 	return (
 		<ReactQueryClientProvider>
 			<I18nProvider translations={translations}>
@@ -79,18 +70,7 @@ export function Providers({ children, initSession }: ProvidersProps) {
 				>
 					<SessionProvider session={initSession}>
 						<AuthProvider initSession={initSession}>
-							<WaitlistProvider>
-								<TrustlessWorkConfig
-									baseURL={trustlessBaseUrl}
-									apiKey={process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY || ''}
-								>
-									<WalletProvider>
-										<EscrowProvider>
-											<StellarProvider>{children}</StellarProvider>
-										</EscrowProvider>
-									</WalletProvider>
-								</TrustlessWorkConfig>
-							</WaitlistProvider>
+							<WaitlistProvider>{children}</WaitlistProvider>
 						</AuthProvider>
 					</SessionProvider>
 				</NextThemesProvider>

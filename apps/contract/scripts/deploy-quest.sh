@@ -4,6 +4,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export CARGO_TARGET_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/target"
+
 echo "========================================"
 echo "  KindFi Quest Contract Deployment"
 echo "========================================"
@@ -133,10 +136,12 @@ fi
 # Step 1: Build Quest contract
 echo ""
 echo "=== Step 1: Building Quest Contract ==="
-cargo build --target wasm32-unknown-unknown --release --manifest-path ./contracts/quest/Cargo.toml || {
+cd contracts/quest
+stellar contract build || {
     echo "🔴 Failed to build Quest Contract"
     exit 1
 }
+cd ../..
 echo "✅ Quest Contract built successfully!"
 
 # Step 2: Upload WASM
@@ -145,7 +150,7 @@ echo "=== Step 2: Uploading WASM ==="
 QUEST_WASM_HASH=$(stellar contract upload \
     --network "$NETWORK" \
     --source "$SOURCE" \
-    --wasm target/wasm32-unknown-unknown/release/quest.wasm)
+    --wasm target/wasm32v1-none/release/quest.wasm)
 
 echo "WASM Hash: $QUEST_WASM_HASH"
 

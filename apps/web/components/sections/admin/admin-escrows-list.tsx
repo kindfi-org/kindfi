@@ -7,6 +7,7 @@ import { Card, CardContent } from '~/components/base/card'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 import { getAllEscrows } from '~/lib/queries/admin/get-all-escrows'
 import { formatDistanceToNow } from '~/lib/utils/date-utils'
+import { formatHumanPlatformFee } from '~/lib/utils/escrow/platform-fee'
 
 const formatCurrency = (value: number) =>
 	new Intl.NumberFormat(undefined, {
@@ -95,7 +96,7 @@ export function AdminEscrowsList() {
 									<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
 										<span>Amount: {formatCurrency(escrow.amount)}</span>
 										<span>•</span>
-										<span>Fee: {escrow.platformFee}%</span>
+										<span>Fee: {formatHumanPlatformFee(escrow.platformFee)}</span>
 										<span>•</span>
 										{escrow.project && (
 											<>

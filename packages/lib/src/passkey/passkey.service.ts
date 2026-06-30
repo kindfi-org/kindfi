@@ -173,35 +173,40 @@ export const verifyRegistration = async ({
 		const existingCredential = credentials.find((cred) => cred.id === credential.id)
 
 		if (!existingCredential) {
-			/**
-			 * Deploy smart wallet contract on-chain during registration
-			 * This creates the user's Stellar account as a smart contract
-			 */
-			try {
-				// Extract public key from attestation response
-				const publicKeyBase64 = credential.publicKey.toBase64()
+			if (appEnvConfig('web').features.enableSmartAccountCreation) {
+				/**
+				 * Deploy smart wallet contract on-chain during registration
+				 * This creates the user's Stellar account as a smart contract
+				 */
+				try {
+					// Extract public key from attestation response
+					const publicKeyBase64 = credential.publicKey.toBase64()
 
-				// Deploy smart wallet via account-factory
-				// Note: This uses the old StellarPasskeyService - consider migrating to Smart Account Kit
-				const stellarService = getStellarService()
-				const deploymentResult = await stellarService.deployPasskeyAccount({
-					credentialId: credential.id,
-					publicKey: publicKeyBase64,
-					userId,
-				})
+					// Deploy smart wallet via account-factory
+					// Note: This uses the old StellarPasskeyService - consider migrating to Smart Account Kit
+					const stellarService = getStellarService()
+					const deploymentResult = await stellarService.deployPasskeyAccount({
+						credentialId: credential.id,
+						publicKey: publicKeyBase64,
+						userId,
+					})
 
-				contractAddress = deploymentResult.address
-			} catch (error) {
-				logger.error(
-					'Failed to deploy smart wallet',
-					error instanceof Error ? error : new Error(String(error)),
-				)
-				throw new InAppError(ErrorCode.UNEXPECTED_ERROR, `Smart wallet deployment failed: ${error}`)
+					contractAddress = deploymentResult.address
+				} catch (error) {
+					logger.error(
+						'Failed to deploy smart wallet',
+						error instanceof Error ? error : new Error(String(error)),
+					)
+					throw new InAppError(
+						ErrorCode.UNEXPECTED_ERROR,
+						`Smart wallet deployment failed: ${error}`,
+					)
+				}
 			}
 
 			/**
 			 * Add the returned credential to the user's list of credentials
-			 * Store the smart wallet contract address with the credential
+			 * Store the smart wallet contract address with the credential when available
 			 */
 			const newCredential: WebAuthnCredential = {
 				id: credential.id,

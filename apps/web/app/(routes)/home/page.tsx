@@ -1,8 +1,8 @@
-import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
-import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { HomeDashboard } from '~/components/pages/home'
-import { getAllProjects } from '~/lib/queries/projects'
+import { HighlightedProjectsHydration } from '~/components/sections/home/highlighted-projects-hydration'
+import { SkeletonHighlightedProjects } from '~/components/sections/home/skeletons'
 
 export const metadata: Metadata = {
 	title: 'KindFi — Web3 Crowdfunding for Social Impact',
@@ -45,20 +45,13 @@ export const metadata: Metadata = {
 	},
 }
 
-export default async function HomePage() {
-	const queryClient = new QueryClient()
-
-	// Prefetch project data from Supabase with limit
-	await prefetchSupabaseQuery(queryClient, 'highlighted-projects', (client) =>
-		getAllProjects(client, [], 'most-recent', 6),
-	)
-
-	// Hydrate React Query cache on the client
-	const dehydratedState = dehydrate(queryClient)
-
+export default function HomePage() {
 	return (
-		<HydrationBoundary state={dehydratedState}>
+		<>
 			<HomeDashboard />
-		</HydrationBoundary>
+			<Suspense fallback={<SkeletonHighlightedProjects />}>
+				<HighlightedProjectsHydration />
+			</Suspense>
+		</>
 	)
 }

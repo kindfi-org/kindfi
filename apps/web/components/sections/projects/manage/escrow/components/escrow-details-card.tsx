@@ -18,6 +18,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Label } from '~/components/base/label'
 import { Separator } from '~/components/base/separator'
 import { formatEscrowAmount } from '~/lib/utils/escrow/milestone-utils'
+import {
+	formatHumanPlatformFee,
+	fromTrustlessWorkPlatformFee,
+} from '~/lib/utils/escrow/platform-fee'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 
 interface EscrowDetailsCardProps {
@@ -89,7 +93,7 @@ export function EscrowDetailsCard({ escrowData, escrowContractAddress }: EscrowD
 										navigator.clipboard.writeText(escrowData.contractId || escrowContractAddress)
 										toast.success('Contract ID copied to clipboard')
 									}}
-									title="Copy Contract ID"
+									aria-label="Copy contract ID"
 								>
 									<Copy className="w-3 h-3" />
 								</Button>
@@ -98,7 +102,7 @@ export function EscrowDetailsCard({ escrowData, escrowContractAddress }: EscrowD
 									size="sm"
 									className="h-6 w-6 p-0"
 									asChild
-									title="View on Stellar Explorer"
+									aria-label="View contract on Stellar explorer"
 								>
 									<Link
 										href={getStellarExplorerUrl(escrowData.contractId || escrowContractAddress)}
@@ -138,7 +142,7 @@ export function EscrowDetailsCard({ escrowData, escrowContractAddress }: EscrowD
 							{escrowData.platformFee !== undefined &&
 							escrowData.platformFee !== null &&
 							typeof escrowData.platformFee === 'number'
-								? `${escrowData.platformFee}%`
+								? formatHumanPlatformFee(fromTrustlessWorkPlatformFee(escrowData.platformFee))
 								: 'N/A'}
 						</p>
 					</div>

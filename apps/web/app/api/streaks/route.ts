@@ -5,6 +5,7 @@ import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { limitOffsetQuerySchema } from '~/lib/schemas/common.schemas'
 import { recordStreakSchema } from '~/lib/schemas/streak.schemas'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -91,22 +92,9 @@ export async function POST(req: NextRequest) {
 		const timestamp = donation_timestamp || new Date().toISOString()
 		const donationTimestampUnix = Math.floor(new Date(timestamp).getTime() / 1000)
 
-		// Get user's Stellar address if not provided
-		let stellarAddress = user_address
-		if (!stellarAddress) {
-			// Try to get from user's device/smart account (handle multiple devices)
-			const { data: devices } = await supabase
-				.from('devices')
-				.select('address')
-				.eq('user_id', user_id)
-				.not('address', 'eq', '0x')
-				.not('address', 'is', null)
-				.limit(1)
-
-			if (devices && devices.length > 0 && devices[0]?.address) {
-				stellarAddress = devices[0].address
-			}
-		}
+		const stellarAddress = await resolveUserStellarAddress(supabase, user_id, {
+			overrideAddress: user_address,
+		})
 
 		// Call smart contract if address is available and SOROBAN_PRIVATE_KEY is set
 		let contractResult: {

@@ -1,12 +1,5 @@
 import type { Metadata } from 'next'
-import { CallToAction } from '~/components/sections/about-us/call-to-action'
-import { Hero } from '~/components/sections/about-us/hero'
-import { HowItWorks } from '~/components/sections/about-us/how-it-works'
-import { KindFiStellar } from '~/components/sections/about-us/kindfi-stellar'
-import { MissionVision } from '~/components/sections/about-us/mission-vision'
-import { Problems } from '~/components/sections/about-us/problems'
-import { Roadmap } from '~/components/sections/about-us/roadmap'
-import { WhyKindFiIsDifferent } from '~/components/sections/about-us/why-is-different'
+import { DynamicAboutSections } from '~/components/sections/about-us/dynamic-sections'
 import { JsonLd } from '~/components/shared/json-ld'
 import { getBreadcrumbSchema } from '~/lib/seo/structured-data'
 
@@ -42,14 +35,14 @@ export default function AboutPage() {
 				])}
 			/>
 			<main className="flex w-full flex-col bg-white" aria-label="About KindFi">
-				<Hero />
-				<MissionVision />
-				<Problems />
-				<KindFiStellar />
-				<HowItWorks />
-				<WhyKindFiIsDifferent />
-				<Roadmap />
-				<CallToAction />
+				<DynamicAboutSections.Hero />
+				<DynamicAboutSections.MissionVision />
+				<DynamicAboutSections.Problems />
+				<DynamicAboutSections.KindFiStellar />
+				<DynamicAboutSections.HowItWorks />
+				<DynamicAboutSections.WhyKindFiIsDifferent />
+				<DynamicAboutSections.Roadmap />
+				<DynamicAboutSections.CallToAction />
 			</main>
 		</>
 	)

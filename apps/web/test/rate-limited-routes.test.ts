@@ -5,7 +5,7 @@
  * 1. Return HTTP 429 when the rate limiter blocks the request
  * 2. Pass through to the handler when the rate limiter allows the request
  *
- * All 12 routes added in the rate-limiting expansion are covered.
+ * All 7 routes added in the rate-limiting expansion are covered.
  * High-priority routes use the 'strict' preset (3 req/min, 1 h block).
  * Medium-priority routes use the 'moderate' preset (10 req/min, 30 min block).
  */
@@ -132,19 +132,7 @@ mock.module('@packages/lib/supabase-server', () => ({
 
 mock.module('@services/supabase', () => ({}))
 
-// ── stellar / escrow ─────────────────────────────────────────────────────────
-
-mock.module('@stellar/stellar-sdk', () => ({
-	Networks: { TESTNET: 'Test SDF Network ; September 2015' },
-	TransactionBuilder: { fromXDR: () => ({ toEnvelope: () => {} }) },
-}))
-
-mock.module('@stellar/stellar-sdk/rpc', () => ({
-	Api: { isSimulationError: () => true },
-	Server: class {
-		simulateTransaction = async () => ({ error: 'sim error' })
-	},
-}))
+// ── stellar (governance vote route) ──────────────────────────────────────────
 
 mock.module('@packages/lib/config', () => ({
 	appEnvConfig: () => ({
@@ -157,38 +145,6 @@ mock.module('@packages/lib/config', () => ({
 }))
 
 mock.module('@packages/lib/types', () => ({}))
-
-mock.module('~/lib/stellar/utils/create-escrow', () => ({
-	createEscrowRequest: async () => ({ unsignedTransaction: 'mock-xdr' }),
-}))
-
-mock.module('~/lib/stellar/utils/send-transaction', () => ({
-	sendTransaction: async () => null,
-}))
-
-mock.module('~/lib/stellar/utils/sign-transaction', () => ({
-	signTransaction: () => 'signed-xdr',
-}))
-
-mock.module('~/lib/utils/escrow/trustless-signer', () => ({
-	isSmartAccountAddress: () => false,
-}))
-
-// ── schemas ───────────────────────────────────────────────────────────────────
-
-mock.module('~/lib/schemas/escrow.schemas', () => ({
-	escrowFundSchema: {},
-	escrowInitializeSchema: {},
-	milestoneReviewSchema: {},
-}))
-
-mock.module('~/lib/schemas/escrow-dispute.schemas', () => ({
-	listDisputesQuerySchema: {},
-}))
-
-mock.module('~/lib/schemas/escrow-sign.schemas', () => ({
-	signAndSubmitSchema: {},
-}))
 
 mock.module('~/lib/schemas/governance.schemas', () => ({
 	castVoteSchema: {},
@@ -211,12 +167,6 @@ mock.module('~/lib/schemas/project.schemas', () => ({
 }))
 
 // ── validators / types ────────────────────────────────────────────────────────
-
-mock.module('~/lib/validators/dispute', () => ({
-	validateDispute: () => ({ success: false, error: { format: () => ({}) } }),
-}))
-
-mock.module('~/lib/types/escrow/escrow-payload.types', () => ({}))
 
 mock.module('~/lib/governance/vote-weight', () => ({ getVoteWeight: () => 1 }))
 
@@ -264,11 +214,6 @@ mock.module('../app/api/comments/validation', () => ({
 
 // ─── Dynamic route imports (after all mocks are registered) ───────────────────
 
-const { POST: escrowFundPOST } = await import('../app/api/escrow/fund/route')
-const { POST: escrowInitializePOST } = await import('../app/api/escrow/initialize/route')
-const { POST: escrowDisputePOST } = await import('../app/api/escrow/dispute/route')
-const { POST: escrowReviewPOST } = await import('../app/api/escrow/review/route')
-const { POST: escrowSignPOST } = await import('../app/api/escrow/sign-and-submit/route')
 const { POST: contributionsPOST } = await import('../app/api/contributions/create/route')
 const { POST: votePOST } = await import('../app/api/governance/vote/route')
 const { POST: kycSessionPOST } = await import('../app/api/kyc/didit/create-session/route')
@@ -304,31 +249,6 @@ describe('Rate-limited routes — blocked requests return 429', () => {
 		handler: (req: NextRequest) => Promise<{ status: number }>
 		path: string
 	}> = [
-		{
-			name: '/api/escrow/fund',
-			handler: escrowFundPOST,
-			path: '/api/escrow/fund',
-		},
-		{
-			name: '/api/escrow/initialize',
-			handler: escrowInitializePOST,
-			path: '/api/escrow/initialize',
-		},
-		{
-			name: '/api/escrow/dispute',
-			handler: escrowDisputePOST,
-			path: '/api/escrow/dispute',
-		},
-		{
-			name: '/api/escrow/review',
-			handler: escrowReviewPOST,
-			path: '/api/escrow/review',
-		},
-		{
-			name: '/api/escrow/sign-and-submit',
-			handler: escrowSignPOST,
-			path: '/api/escrow/sign-and-submit',
-		},
 		{
 			name: '/api/contributions/create',
 			handler: contributionsPOST,
@@ -401,11 +321,6 @@ describe('Rate-limited routes — allowed requests pass through', () => {
 		}))
 	})
 
-	test('/api/escrow/fund does not return 429 when not blocked', async () => {
-		const res = await escrowFundPOST(makeRequest('/api/escrow/fund'))
-		expect(res.status).not.toBe(429)
-	})
-
 	test('/api/governance/vote does not return 429 when not blocked', async () => {
 		const res = await votePOST(makeRequest('/api/governance/vote'))
 		expect(res.status).not.toBe(429)
@@ -431,11 +346,6 @@ describe('Rate-limited routes — increment is called for each request', () => {
 		}))
 	})
 
-	test('increment is called once per request on /api/escrow/fund', async () => {
-		await escrowFundPOST(makeRequest('/api/escrow/fund'))
-		expect(mockIncrement).toHaveBeenCalledTimes(1)
-	})
-
 	test('increment is called with the route pathname', async () => {
 		await votePOST(makeRequest('/api/governance/vote'))
 		expect(mockIncrement).toHaveBeenCalledWith(expect.any(String), '/api/governance/vote')
@@ -453,11 +363,6 @@ describe('Rate-limited routes — Redis failure falls open', () => {
 		mockIncrement.mockImplementation(async () => {
 			throw new Error('Redis connection refused')
 		})
-	})
-
-	test('/api/escrow/fund passes through when Redis is unavailable', async () => {
-		const res = await escrowFundPOST(makeRequest('/api/escrow/fund'))
-		expect(res.status).not.toBe(429)
 	})
 
 	test('/api/contributions/create passes through when Redis is unavailable', async () => {

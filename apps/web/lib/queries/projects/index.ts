@@ -1,6 +1,7 @@
 export * from './get-all-categories'
 export * from './get-all-projects'
 export * from './get-project-by-slug'
+export * from './get-project-donation-stream'
 export * from './get-project-milestones'
 export * from './get-project-pitch'
 export * from './get-project-questions'

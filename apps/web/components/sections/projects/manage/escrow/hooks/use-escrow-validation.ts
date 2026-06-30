@@ -15,7 +15,6 @@ export function useEscrowValidation(formData: EscrowFormData, projectId: string)
 			releaseSigner,
 			disputeResolver,
 			platformAddress,
-			platformFee,
 			description,
 			milestones,
 			selectedEscrowType,
@@ -32,8 +31,6 @@ export function useEscrowValidation(formData: EscrowFormData, projectId: string)
 			isValidTrustlessRoleAddress(releaseSigner) &&
 			isValidTrustlessRoleAddress(disputeResolver) &&
 			isValidTrustlessRoleAddress(platformAddress) &&
-			typeof platformFee === 'number' &&
-			Number.isFinite(platformFee) &&
 			description.trim().length > 0 &&
 			milestones.filter((m) => m.description.trim().length > 0).length > 0
 
