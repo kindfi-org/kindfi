@@ -19,12 +19,11 @@ const MAX_CONTRIBUTION_AMOUNT = 1_000_000
 
 async function createContributionHandler(req: NextRequest) {
 	try {
-		const session = await getServerSession(nextAuthOption)
+		const [session, body] = await Promise.all([getServerSession(nextAuthOption), req.json()])
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const body = await req.json()
 		const validation = validateRequest(createContributionSchema, body)
 		if (!validation.success) {
 			return validation.response
@@ -61,16 +60,18 @@ async function createContributionHandler(req: NextRequest) {
 			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
 		}
 
-		const goalCheck = await checkFundraisingGoalNotReached(finalProjectId, contractId)
+		const [goalCheck, duplicateCheck] = await Promise.all([
+			checkFundraisingGoalNotReached(finalProjectId, contractId),
+			checkDuplicateContribution({
+				transactionHash,
+				projectId: finalProjectId,
+				contributorId: session.user.id,
+			}),
+		])
 		if (!goalCheck.allowed) {
 			return NextResponse.json({ error: goalCheck.error }, { status: 403 })
 		}
 
-		const duplicateCheck = await checkDuplicateContribution({
-			transactionHash,
-			projectId: finalProjectId,
-			contributorId: session.user.id,
-		})
 		if (duplicateCheck.duplicate) {
 			return NextResponse.json(
 				{
