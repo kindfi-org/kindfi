@@ -4,7 +4,7 @@ import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { useRouter } from 'next/navigation'
-import { signIn, useSession } from 'next-auth/react'
+import { getSession, signIn, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
@@ -110,7 +110,6 @@ export const useSmartAccountAuth = (identifier: string) => {
 
 			// Step 4: Create NextAuth session after successful passkey verification
 			if (verificationJSON.userId) {
-				// First create the session action (for Supabase/backend)
 				const sessionResult = await createSessionAction({
 					userId: verificationJSON.userId,
 					email: identifier,
@@ -120,8 +119,6 @@ export const useSmartAccountAuth = (identifier: string) => {
 					throw new InAppError(ErrorCode.UNEXPECTED_ERROR, sessionResult.message)
 				}
 
-				// Then sign in with NextAuth to create the client-side session
-				// Public key is already base64 encoded from the API
 				const pubKeyString = verificationJSON.publicKey || ''
 
 				const loginResult = await signIn('credentials', {
@@ -136,26 +133,31 @@ export const useSmartAccountAuth = (identifier: string) => {
 				if (!loginResult?.ok) {
 					throw new InAppError(
 						ErrorCode.UNEXPECTED_ERROR,
-						'Failed to create authentication session',
+						loginResult?.error ?? 'Failed to create authentication session',
 					)
 				}
 
-				// Refresh the session to get updated data
-				await updateSession()
+				// Ensure client session state updates before navigation
+				try {
+					await updateSession()
+				} catch (updateError) {
+					logger.warn(
+						'Session update after sign-in failed, falling back to getSession:',
+						updateError,
+					)
+				}
+
+				await getSession()
 			}
 
 			const message = 'User authenticated successfully!'
 			setAuthSuccess(message)
 			toast.success(message)
 
-			// Mark this as a new session so role selection modal can be shown
 			sessionStorage.setItem('kindfi_new_session', 'true')
 
-			// Redirect to profile page after a short delay to allow session to update
-			setTimeout(() => {
-				router.push('/profile')
-				router.refresh() // Refresh to update navigation state
-			}, 500)
+			router.refresh()
+			router.push('/profile')
 
 			return {
 				verified: true,

@@ -85,12 +85,22 @@ export async function createSessionAction(input: {
 	try {
 		const { data: userData, error: userError } = await supabase
 			.from('profiles')
-			.select()
+			.select('id, email')
 			.eq('id', validated.userId)
-			.eq('email', validated.email)
 			.single()
 
 		if (userError || !userData) {
+			return {
+				success: false,
+				message: 'User verification failed. User profile not found.',
+				error: 'User verification failed',
+			}
+		}
+
+		const normalizedInputEmail = validated.email.trim().toLowerCase()
+		const normalizedProfileEmail = userData.email?.trim().toLowerCase()
+
+		if (normalizedProfileEmail && normalizedProfileEmail !== normalizedInputEmail) {
 			return {
 				success: false,
 				message: 'User verification failed. Email does not match registered user.',

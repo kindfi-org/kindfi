@@ -50,14 +50,7 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 				})
 				.from(devices)
 				.where(
-					and(
-						eq(devices.credentialId, credentials.credentialId),
-						// !BUG FOUND: pubkey is not the same while sign up and login hence, in sign up fails...
-						// ! This happens because the pre address is parsed in one way and the sing in the other (when data saves) hence, the values are unmatched
-						// ? Fallback created to be /sign-in
-						eq(devices.publicKey, credentials.pubKey),
-						eq(devices.userId, userData.id),
-					),
+					and(eq(devices.credentialId, credentials.credentialId), eq(devices.userId, userData.id)),
 				)
 				.limit(1)
 
