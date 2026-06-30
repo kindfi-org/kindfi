@@ -67,7 +67,7 @@ export function Providers({ children, initSession }: ProvidersProps) {
 					forcedTheme="light"
 					disableTransitionOnChange
 				>
-					<SessionProvider session={initSession}>
+					<SessionProvider session={initSession} refetchOnWindowFocus>
 						<AuthProvider initSession={initSession}>
 							<WaitlistProvider>{children}</WaitlistProvider>
 						</AuthProvider>

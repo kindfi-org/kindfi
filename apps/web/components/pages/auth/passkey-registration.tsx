@@ -4,9 +4,8 @@ import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { CheckCircle, Shield, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
+import { getSession, signIn } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { createSessionAction, signOutAction } from '~/app/actions/auth'
 import { Button } from '~/components/base/button'
@@ -102,8 +101,11 @@ export function PasskeyRegistrationComponent() {
 				throw new Error('Failed to create authentication session')
 			}
 
+			await getSession()
+
 			// Mark this as a new session so role selection modal can be shown
 			sessionStorage.setItem('kindfi_new_session', 'true')
+			router.refresh()
 			router.push('/profile')
 		} catch (e) {
 			logger.error('Finalize passkey registration error', e)
