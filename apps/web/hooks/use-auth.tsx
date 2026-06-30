@@ -32,9 +32,11 @@ export function AuthProvider({
 	children: React.ReactNode
 	initSession: Session | null
 }) {
-	// Use null as initial state to prevent hydration mismatch
-	const { data: session } = useSession()
-	const userSession = (session ?? initSession) as Session | null
+	const { data: session, status } = useSession()
+	// Prefer authenticated client session; fall back to server session during load or after refresh
+	const userSession = (
+		status === 'authenticated' ? session : (session ?? initSession)
+	) as Session | null
 	const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | undefined>(undefined)
 	const [isSupabaseUserLoading, setIsSupabaseUserLoading] = useState(true)
 	const supabase = createSupabaseBrowserClient()

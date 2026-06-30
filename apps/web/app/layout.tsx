@@ -1,7 +1,6 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import { Suspense } from 'react'
-import { LayoutContainer } from '~/components/layout-container'
 import { SessionShell } from '~/components/session-shell'
 import { DeferredGoogleAnalytics } from '~/components/shared/deferred-google-analytics'
 import { JsonLd } from '~/components/shared/json-ld'
@@ -59,7 +58,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<JsonLd data={[getOrganizationSchema(), getWebSiteSchema()]} />
 			</head>
 			<body suppressHydrationWarning>
-				<Suspense fallback={<LayoutContainer session={null}>{children}</LayoutContainer>}>
+				<Suspense
+					fallback={
+						<div className="flex min-h-screen items-center justify-center bg-background">
+							<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+						</div>
+					}
+				>
 					<SessionShell>{children}</SessionShell>
 				</Suspense>
 				<DeferredGoogleAnalytics gaMeasurementId={appConfig.analytics.gaId} />

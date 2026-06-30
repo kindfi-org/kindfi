@@ -156,7 +156,7 @@ export const useSmartAccountAuth = (identifier: string) => {
 
 			sessionStorage.setItem('kindfi_new_session', 'true')
 
-			router.refresh()
+			await router.refresh()
 			router.push('/profile')
 
 			return {
