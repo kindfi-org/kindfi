@@ -25,19 +25,21 @@ export async function PATCH(
 	{ params }: { params: Promise<{ slug: string; updateId: string }> },
 ) {
 	try {
-		const session = await getServerSession(nextAuthOption)
+		const [session, { slug, updateId }, body] = await Promise.all([
+			getServerSession(nextAuthOption),
+			params,
+			req.json(),
+		])
 		const userId = session?.user?.id
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const { slug, updateId } = await params
 		const projectIdFromSlug = await getProjectIdBySlug(slug)
 		if (!projectIdFromSlug) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
 
-		const body = await req.json()
 		const validation = validateRequest(projectUpdatePatchSchema, body)
 		if (!validation.success) return validation.response
 
@@ -50,7 +52,10 @@ export async function PATCH(
 			return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
 		}
 
-		const auth = await authorizeProjectManage(userId, projectId)
+		const [auth, existing] = await Promise.all([
+			authorizeProjectManage(userId, projectId),
+			getUpdateForProject(updateId, projectId),
+		])
 		if (!auth.ok) {
 			return NextResponse.json(
 				{ error: auth.status === 404 ? 'Project not found' : 'Forbidden' },
@@ -58,7 +63,6 @@ export async function PATCH(
 			)
 		}
 
-		const existing = await getUpdateForProject(updateId, projectId)
 		if (!existing) {
 			return NextResponse.json({ error: 'Update not found' }, { status: 404 })
 		}
@@ -104,19 +108,21 @@ export async function DELETE(
 	{ params }: { params: Promise<{ slug: string; updateId: string }> },
 ) {
 	try {
-		const session = await getServerSession(nextAuthOption)
+		const [session, { slug, updateId }, body] = await Promise.all([
+			getServerSession(nextAuthOption),
+			params,
+			req.json(),
+		])
 		const userId = session?.user?.id
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const { slug, updateId } = await params
 		const projectIdFromSlug = await getProjectIdBySlug(slug)
 		if (!projectIdFromSlug) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
 
-		const body = await req.json()
 		const validation = validateRequest(projectUpdateDeleteSchema, body)
 		if (!validation.success) return validation.response
 
@@ -125,7 +131,10 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Project mismatch' }, { status: 400 })
 		}
 
-		const auth = await authorizeProjectManage(userId, projectId)
+		const [auth, existing] = await Promise.all([
+			authorizeProjectManage(userId, projectId),
+			getUpdateForProject(updateId, projectId),
+		])
 		if (!auth.ok) {
 			return NextResponse.json(
 				{ error: auth.status === 404 ? 'Project not found' : 'Forbidden' },
@@ -133,7 +142,6 @@ export async function DELETE(
 			)
 		}
 
-		const existing = await getUpdateForProject(updateId, projectId)
 		if (!existing) {
 			return NextResponse.json({ error: 'Update not found' }, { status: 404 })
 		}

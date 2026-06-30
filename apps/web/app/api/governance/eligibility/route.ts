@@ -13,7 +13,10 @@ import { getVoteWeight } from '~/lib/governance/vote-weight'
  */
 export async function GET() {
 	try {
-		const session = await getServerSession(nextAuthOption)
+		const [session, { supabase }] = await Promise.all([
+			getServerSession(nextAuthOption),
+			import('@packages/lib/supabase'),
+		])
 
 		if (!session?.user?.id) {
 			return NextResponse.json({
@@ -23,8 +26,6 @@ export async function GET() {
 				reason: 'not_authenticated',
 			})
 		}
-
-		const { supabase } = await import('@packages/lib/supabase')
 
 		const { data: nft, error } = await supabase
 			.from('user_nfts')

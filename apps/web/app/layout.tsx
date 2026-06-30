@@ -1,9 +1,17 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
+import dynamic from 'next/dynamic'
 import { LayoutContainer } from '~/components/layout-container'
-import { GoogleAnalytics } from '~/components/shared/google-analytics'
 import { JsonLd } from '~/components/shared/json-ld'
 import { getOrganizationSchema, getWebSiteSchema, SITE_URL } from '~/lib/seo/structured-data'
+
+const GoogleAnalytics = dynamic(
+	() =>
+		import('~/components/shared/google-analytics').then((mod) => ({
+			default: mod.GoogleAnalytics,
+		})),
+	{ ssr: false },
+)
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
@@ -58,7 +66,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			</head>
 			<body suppressHydrationWarning>
 				<LayoutContainer session={null}>{children}</LayoutContainer>
-				<GoogleAnalytics GA_MEASUREMENT_ID={appConfig.analytics.gaId} />
+				{appConfig.analytics.gaId ? (
+					<GoogleAnalytics GA_MEASUREMENT_ID={appConfig.analytics.gaId} />
+				) : null}
 			</body>
 		</html>
 	)

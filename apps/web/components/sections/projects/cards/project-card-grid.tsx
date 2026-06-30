@@ -39,7 +39,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 	return (
 		<Link
 			href={`/projects/${project.slug}`}
-			className="h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl"
+			className="long-list-item h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl"
 		>
 			<motion.article
 				className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200/80 hover:shadow-lg"

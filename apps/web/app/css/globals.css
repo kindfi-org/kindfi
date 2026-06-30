@@ -178,6 +178,21 @@
 	.no-scrollbar::-webkit-scrollbar {
 		display: none; /* Chrome, Safari, Opera */
 	}
+
+	.long-list-item {
+		content-visibility: auto;
+		contain-intrinsic-size: auto 320px;
+	}
+
+	.long-list-item-compact {
+		content-visibility: auto;
+		contain-intrinsic-size: auto 180px;
+	}
+
+	.governance-round-item {
+		content-visibility: auto;
+		contain-intrinsic-size: auto 400px;
+	}
 }
 
 /* Custom Gradients - brand CTAs (Tailwind v4 requires complete from/to gradient stops) */

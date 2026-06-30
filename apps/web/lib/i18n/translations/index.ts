@@ -1,7 +1,6 @@
 import { en } from './en'
-import { es } from './es'
 
+/** Default locale bundle (eager). Non-default locales are loaded via `loadLocaleBundle`. */
 export const translations = {
 	en,
-	es,
-}
+} as const
