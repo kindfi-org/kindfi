@@ -1,4 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import type { AppError } from '../lib/error'
+
+const isAppError = (value: unknown): value is AppError =>
+	value instanceof Error && value.name === 'AppError' && 'statusCode' in value
 
 // Must be set before any imports that touch env
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost'
@@ -27,7 +31,7 @@ mock.module('@packages/lib/config', () => ({
 
 const mockFetchCalls: string[] = []
 
-const mockFetch = mock((url: string) => {
+const defaultFetchImpl = (url: string, _init?: RequestInit) => {
 	mockFetchCalls.push(url)
 	if (url.includes('/ramp/me')) {
 		return Promise.resolve(
@@ -51,6 +55,7 @@ describe('getEtherfuseConfig', () => {
 			baseUrl: 'https://api.sand.etherfuse.com',
 			customerId: 'test-customer-id',
 		}
+		mockFetch.mockImplementation(defaultFetchImpl)
 	})
 
 	test('returns full config when all values present', async () => {
@@ -70,16 +75,18 @@ describe('getEtherfuseConfig', () => {
 		mockEtherfuseEnv = { apiKey: '', baseUrl: 'https://api.sand.etherfuse.com', customerId: '' }
 		const { getEtherfuseConfig } = await import('../lib/etherfuse/get-etherfuse-config')
 
-		let caught: any
+		let caught: unknown
 		try {
 			await getEtherfuseConfig()
 		} catch (err) {
 			caught = err
 		}
 
-		expect(caught?.name).toBe('AppError')
-		expect(caught?.statusCode).toBe(500)
-		expect(caught?.message).toContain('ETHERFUSE_API_KEY')
+		expect(isAppError(caught)).toBe(true)
+		if (!isAppError(caught)) return
+		expect(caught.name).toBe('AppError')
+		expect(caught.statusCode).toBe(500)
+		expect(caught.message).toContain('ETHERFUSE_API_KEY')
 		// Guard prevents fetch call — no TypeError from bad URL construction
 		expect(mockFetchCalls.length).toBe(0)
 	})
@@ -88,18 +95,20 @@ describe('getEtherfuseConfig', () => {
 		mockEtherfuseEnv = { apiKey: 'test-key', baseUrl: '', customerId: '' }
 		const { getEtherfuseConfig } = await import('../lib/etherfuse/get-etherfuse-config')
 
-		let caught: any
+		let caught: unknown
 		try {
 			await getEtherfuseConfig()
 		} catch (err) {
 			caught = err
 		}
 
-		expect(caught?.name).toBe('AppError')
-		expect(caught?.statusCode).toBe(500)
-		expect(caught?.message).toContain('ETHERFUSE_BASE_URL')
+		expect(isAppError(caught)).toBe(true)
+		if (!isAppError(caught)) return
+		expect(caught.name).toBe('AppError')
+		expect(caught.statusCode).toBe(500)
+		expect(caught.message).toContain('ETHERFUSE_BASE_URL')
 		// Verify we get a structured AppError, not a TypeError from URL construction
-		expect(caught?.name).not.toBe('TypeError')
+		expect(caught.name).not.toBe('TypeError')
 		// Guard prevents fetch call entirely
 		expect(mockFetchCalls.length).toBe(0)
 	})
@@ -108,20 +117,54 @@ describe('getEtherfuseConfig', () => {
 		mockEtherfuseEnv = { apiKey: '', baseUrl: '', customerId: '' }
 		const { getEtherfuseConfig } = await import('../lib/etherfuse/get-etherfuse-config')
 
-		let caught: any
+		let caught: unknown
 		try {
 			await getEtherfuseConfig()
 		} catch (err) {
 			caught = err
 		}
 
-		expect(caught?.name).toBe('AppError')
-		expect(caught?.statusCode).toBe(500)
-		expect(caught?.message).toContain('ETHERFUSE_API_KEY')
-		expect(caught?.message).toContain('ETHERFUSE_BASE_URL')
-		expect(caught?.message).toContain('ETHERFUSE_CUSTOMER_ID')
+		expect(isAppError(caught)).toBe(true)
+		if (!isAppError(caught)) return
+		expect(caught.name).toBe('AppError')
+		expect(caught.statusCode).toBe(500)
+		expect(caught.message).toContain('ETHERFUSE_API_KEY')
+		expect(caught.message).toContain('ETHERFUSE_BASE_URL')
+		expect(caught.message).toContain('ETHERFUSE_CUSTOMER_ID')
 		// resolveOrganizationId never called — both guards failed
 		expect(mockFetchCalls.length).toBe(0)
+	})
+
+	test('throws AppError when fetch times out (AbortError)', async () => {
+		mockEtherfuseEnv = {
+			apiKey: 'test-key',
+			baseUrl: 'https://api.sand.etherfuse.com',
+			customerId: '',
+		}
+		mockFetch.mockImplementation((url: string, _init?: RequestInit) => {
+			mockFetchCalls.push(url)
+			if (url.includes('/ramp/me')) {
+				const error = new DOMException('The operation was aborted.', 'AbortError')
+				return Promise.reject(error)
+			}
+			return Promise.resolve(new Response(JSON.stringify({ error: 'not found' }), { status: 404 }))
+		})
+
+		const { getEtherfuseConfig } = await import('../lib/etherfuse/get-etherfuse-config')
+
+		let caught: unknown
+		try {
+			await getEtherfuseConfig()
+		} catch (err) {
+			caught = err
+		}
+
+		expect(isAppError(caught)).toBe(true)
+		if (!isAppError(caught)) return
+		expect(caught.name).toBe('AppError')
+		expect(caught.statusCode).toBe(504)
+		expect(caught.message).toContain('timed out')
+		expect(mockFetchCalls.length).toBe(1)
 	})
 
 	test('resolves customerId via GET /ramp/me when not in config', async () => {
