@@ -42,9 +42,7 @@ const defaultFetchImpl = (url: string, _init?: RequestInit) => {
 		)
 	}
 	return Promise.resolve(new Response(JSON.stringify({ error: 'not found' }), { status: 404 }))
-}
-
-const mockFetch = mock(defaultFetchImpl)
+})
 
 // @ts-expect-error - mock doesn't need all fetch properties
 global.fetch = mockFetch
