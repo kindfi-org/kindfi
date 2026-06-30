@@ -6,6 +6,7 @@ import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
 import { logger } from '@/lib/logger'
+import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { AuthProvider } from '~/hooks/use-auth'
 import { I18nProvider } from '~/lib/i18n/context'
@@ -67,9 +68,15 @@ export function Providers({ children, initSession }: ProvidersProps) {
 					forcedTheme="light"
 					disableTransitionOnChange
 				>
-					<SessionProvider session={initSession} refetchOnWindowFocus>
+					<SessionProvider
+						key={initSession?.user?.id ?? 'guest'}
+						session={initSession ?? undefined}
+						refetchOnWindowFocus
+					>
 						<AuthProvider initSession={initSession}>
-							<WaitlistProvider>{children}</WaitlistProvider>
+							<WalletProvider>
+								<WaitlistProvider>{children}</WaitlistProvider>
+							</WalletProvider>
 						</AuthProvider>
 					</SessionProvider>
 				</NextThemesProvider>

@@ -105,7 +105,7 @@ export function PasskeyRegistrationComponent() {
 
 			// Mark this as a new session so role selection modal can be shown
 			sessionStorage.setItem('kindfi_new_session', 'true')
-			router.refresh()
+			await router.refresh()
 			router.push('/profile')
 		} catch (e) {
 			logger.error('Finalize passkey registration error', e)
