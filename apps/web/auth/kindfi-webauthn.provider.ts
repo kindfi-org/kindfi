@@ -50,10 +50,7 @@ export const kindfiWebAuthnProvider = CredentialsProvider({
 				})
 				.from(devices)
 				.where(
-					and(
-						eq(devices.credentialId, credentials.credentialId),
-						eq(devices.userId, userData.id),
-					),
+					and(eq(devices.credentialId, credentials.credentialId), eq(devices.userId, userData.id)),
 				)
 				.limit(1)
 
