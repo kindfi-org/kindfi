@@ -37,9 +37,7 @@ const mockFetch = mock((url: string) => {
 			}),
 		)
 	}
-	return Promise.resolve(
-		new Response(JSON.stringify({ error: 'not found' }), { status: 404 }),
-	)
+	return Promise.resolve(new Response(JSON.stringify({ error: 'not found' }), { status: 404 }))
 })
 
 // @ts-expect-error - mock doesn't need all fetch properties
@@ -128,7 +126,11 @@ describe('getEtherfuseConfig', () => {
 
 	test('resolves customerId via GET /ramp/me when not in config', async () => {
 		// cachedOrganizationId is null at this point (error tests above never called resolveOrganizationId)
-		mockEtherfuseEnv = { apiKey: 'test-key', baseUrl: 'https://api.sand.etherfuse.com', customerId: '' }
+		mockEtherfuseEnv = {
+			apiKey: 'test-key',
+			baseUrl: 'https://api.sand.etherfuse.com',
+			customerId: '',
+		}
 		const { getEtherfuseConfig } = await import('../lib/etherfuse/get-etherfuse-config')
 
 		const config = await getEtherfuseConfig()
