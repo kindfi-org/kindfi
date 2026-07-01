@@ -27,7 +27,7 @@ const baseEscrowData: GetEscrowsFromIndexerResponse = {
 		},
 	],
 	flags: { disputed: false, released: false, resolved: false },
-	trustline: { address: 'CTRUSTLINE1234567890123456789012345678', name: 'USDC' },
+	trustline: { address: 'CTRUSTLINE1234567890123456789012345678', symbol: 'USDC' },
 	isActive: true,
 	user: 'GUser123456789012345678901234567890123',
 	createdAt: new Date(),

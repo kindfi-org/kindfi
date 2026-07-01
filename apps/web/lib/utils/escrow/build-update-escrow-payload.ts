@@ -74,7 +74,11 @@ export function buildUpdateEscrowPayload(
 	}
 
 	const trustline = {
-		symbol: escrowData.trustline.name || 'USDC',
+		symbol:
+			'symbol' in escrowData.trustline &&
+			typeof escrowData.trustline.symbol === 'string'
+				? escrowData.trustline.symbol
+				: 'USDC',
 		address: escrowData.trustline.address,
 	}
 
