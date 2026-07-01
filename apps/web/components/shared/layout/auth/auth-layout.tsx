@@ -1,30 +1,47 @@
+import type { ReactNode } from 'react'
+import { cn } from '~/lib/utils'
+
 interface AuthLayoutProps {
 	children: React.ReactNode
 	backgroundImage?: string
+	/** Optional content over the branding image on large screens */
+	aside?: ReactNode
+	contentMaxWidth?: 'md' | 'lg'
 }
 
-export const AuthLayout = ({ children, backgroundImage }: AuthLayoutProps) => {
+export const AuthLayout = ({
+	children,
+	backgroundImage,
+	aside,
+	contentMaxWidth = 'md',
+}: AuthLayoutProps) => {
+	const imageUrl = backgroundImage || '/auth-background.jpg'
+
 	return (
-		<div className="min-h-screen flex">
-			{/* Left side - Form */}
-			<div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-				<div className="w-full max-w-md">{children}</div>
+		<div className="flex min-h-screen">
+			<div className="flex w-full items-center justify-center p-6 sm:p-8 lg:w-1/2">
+				<div className={cn('w-full', contentMaxWidth === 'lg' ? 'max-w-lg' : 'max-w-md')}>
+					{children}
+				</div>
 			</div>
 
-			{/* Right side - Image/Branding */}
-			<div className="hidden lg:block lg:w-1/2 relative">
+			<div className="relative hidden lg:block lg:w-1/2">
 				<div
 					className="absolute inset-0 bg-cover bg-center"
-					style={{
-						backgroundImage: `url(${backgroundImage || '/auth-background.jpg'})`,
-					}}
+					style={{ backgroundImage: `url(${imageUrl})` }}
 				>
 					<div className="absolute inset-0 bg-blue-900/40 backdrop-blur-sm">
-						<div className="flex flex-col justify-center items-center h-full text-white p-8">
-							<h2 className="text-3xl font-bold mb-4">Make an Impact with Web3</h2>
-							<p className="text-lg text-center max-w-md">
-								Join the first blockchain-powered social impact platform in Latin America
-							</p>
+						<div className="flex h-full items-center justify-center p-8 text-white">
+							{aside ? (
+								<div className="w-full max-w-md">{aside}</div>
+							) : (
+								<div className="flex flex-col items-center justify-center">
+									<h2 className="mb-4 text-3xl font-bold">Make an Impact with Web3</h2>
+									<p className="max-w-md text-center text-lg">
+										Join the first blockchain-powered social impact platform in Latin America
+									</p>
+								</div>
+							)}
 						</div>
 					</div>
 				</div>

@@ -38,7 +38,7 @@ export function EscrowWorkflowGuide({
 					<div>
 						<p className="font-semibold">{headline}</p>
 						<p className="mt-1 text-sm text-muted-foreground">
-							Work through Fund → Milestones → Release in order.
+							Work through Fund → Releases → Release in order.
 						</p>
 					</div>
 					<Button type="button" onClick={() => onGoToTab(recommendedTab)} className="shrink-0">

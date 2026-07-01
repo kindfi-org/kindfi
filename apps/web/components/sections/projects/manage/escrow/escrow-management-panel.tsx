@@ -26,7 +26,7 @@ import { ReleaseTab } from './tabs/release-tab'
 const TAB_ITEMS: { value: EscrowManagementTab; label: string; icon: typeof LayoutDashboard }[] = [
 	{ value: 'overview', label: 'Overview', icon: LayoutDashboard },
 	{ value: 'fund', label: 'Fund', icon: DollarSign },
-	{ value: 'milestones', label: 'Milestones', icon: CheckCircle2 },
+	{ value: 'milestones', label: 'Releases', icon: CheckCircle2 },
 	{ value: 'release', label: 'Release', icon: Send },
 ]
 
@@ -159,6 +159,7 @@ export function EscrowManagementPanel({
 					<MilestonesTab
 						escrowContractAddress={escrowContractAddress}
 						escrowType={effectiveEscrowType}
+						escrowData={escrowData}
 						milestones={milestones}
 						isLoading={isLoadingEscrow}
 						onSuccess={handleRefetch}
