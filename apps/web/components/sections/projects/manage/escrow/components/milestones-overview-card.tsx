@@ -26,8 +26,8 @@ export function MilestonesOverviewCard({ milestones }: MilestonesOverviewCardPro
 			<CardHeader>
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle>Milestones Overview</CardTitle>
-						<CardDescription>Quick view of all milestones and their status</CardDescription>
+						<CardTitle>Releases Overview</CardTitle>
+						<CardDescription>Quick view of all releases and their status</CardDescription>
 					</div>
 					<div className="text-right">
 						<div className="text-2xl font-bold">{progress}%</div>
@@ -53,7 +53,7 @@ export function MilestonesOverviewCard({ milestones }: MilestonesOverviewCardPro
 										<div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold text-sm">
 											{index + 1}
 										</div>
-										<span className="font-semibold">Milestone {index + 1}</span>
+										<span className="font-semibold">Release {index + 1}</span>
 										{isApproved ? (
 											<Badge variant="default" className="gap-1">
 												<CheckCircle2 className="w-3 h-3" />

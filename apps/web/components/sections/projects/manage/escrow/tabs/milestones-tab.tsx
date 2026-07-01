@@ -2,10 +2,19 @@
 
 import type {
 	EscrowType,
+	GetEscrowsFromIndexerResponse,
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import { ArrowRight, CheckCircle2, FileText, Loader2, Send, TrendingUp } from 'lucide-react'
+import {
+	ArrowRight,
+	CheckCircle2,
+	FileText,
+	Loader2,
+	Plus,
+	Send,
+	TrendingUp,
+} from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
@@ -26,14 +35,21 @@ import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { cn } from '~/lib/utils'
 import {
+	buildUpdateEscrowPayload,
+	MAX_ESCROW_RELEASES,
+	type NewRelease,
+} from '~/lib/utils/escrow/build-update-escrow-payload'
+import {
 	getMilestoneStatus,
 	isSingleReleaseMilestone,
 	truncateAddress,
 } from '~/lib/utils/escrow/milestone-utils'
+import { AddReleaseDialog } from '../components/add-release-dialog'
 
 interface MilestonesTabProps {
 	escrowContractAddress: string
 	escrowType: EscrowType
+	escrowData: GetEscrowsFromIndexerResponse | null
 	milestones: (SingleReleaseMilestone | MultiReleaseMilestone)[]
 	isLoading: boolean
 	onSuccess: () => void
@@ -43,20 +59,23 @@ interface MilestonesTabProps {
 export function MilestonesTab({
 	escrowContractAddress,
 	escrowType,
+	escrowData,
 	milestones,
 	isLoading,
 	onSuccess,
 	onGoToRelease,
 }: MilestonesTabProps) {
-	const { approveMilestone, changeMilestoneStatus, sendTransaction } = useEscrow()
+	const { approveMilestone, changeMilestoneStatus, sendTransaction, updateEscrow } = useEscrow()
 	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState('0')
 	const [milestoneStatus, setMilestoneStatus] = useState('in_progress')
 	const [milestoneEvidence, setMilestoneEvidence] = useState('')
 	const [isProcessing, setIsProcessing] = useState(false)
+	const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
 	const selectedIndex = Number(selectedMilestoneIndex)
 	const selectedMilestone = milestones[selectedIndex]
+	const canAddRelease = milestones.length < MAX_ESCROW_RELEASES && !escrowData?.flags?.disputed
 
 	const handleApproveMilestone = async () => {
 		try {
@@ -82,11 +101,11 @@ export function MilestonesTab({
 				throw new Error('Transaction failed')
 			}
 
-			toast.success('Milestone approved successfully')
+			toast.success('Release approved successfully')
 			onSuccess()
 		} catch (error) {
 			logger.error(error)
-			const errorMessage = error instanceof Error ? error.message : 'Failed to approve milestone'
+			const errorMessage = error instanceof Error ? error.message : 'Failed to approve release'
 			toast.error(errorMessage)
 		} finally {
 			setIsProcessing(false)
@@ -119,13 +138,47 @@ export function MilestonesTab({
 				throw new Error('Transaction failed')
 			}
 
-			toast.success('Milestone status updated successfully')
+			toast.success('Release status updated successfully')
 			setMilestoneEvidence('')
 			onSuccess()
 		} catch (error) {
 			logger.error(error)
 			const errorMessage =
-				error instanceof Error ? error.message : 'Failed to update milestone status'
+				error instanceof Error ? error.message : 'Failed to update release status'
+			toast.error(errorMessage)
+		} finally {
+			setIsProcessing(false)
+		}
+	}
+
+	const handleAddRelease = async (newRelease: NewRelease) => {
+		if (!escrowData) {
+			toast.error('Escrow data is not loaded yet. Try refreshing.')
+			return
+		}
+
+		try {
+			setIsProcessing(true)
+			const signer = await ensureTrustlessSigner()
+			const payload = buildUpdateEscrowPayload(escrowData, escrowType, signer, newRelease)
+
+			const updateResponse = await updateEscrow(payload, escrowType)
+			if (updateResponse.status !== 'SUCCESS' || !updateResponse.unsignedTransaction) {
+				throw new Error('Failed to prepare add-release transaction')
+			}
+
+			const signedXdr = await signTrustlessTransaction(updateResponse.unsignedTransaction)
+			const sendResult = await sendTransaction(signedXdr)
+			if (sendResult?.status !== 'SUCCESS') {
+				throw new Error('Transaction failed')
+			}
+
+			toast.success('Release added successfully')
+			setIsAddDialogOpen(false)
+			onSuccess()
+		} catch (error) {
+			logger.error(error)
+			const errorMessage = error instanceof Error ? error.message : 'Failed to add release'
 			toast.error(errorMessage)
 		} finally {
 			setIsProcessing(false)
@@ -138,7 +191,7 @@ export function MilestonesTab({
 				<CardContent className="flex flex-col items-center justify-center gap-4 py-12">
 					<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
 					<p className="text-sm text-muted-foreground" aria-live="polite">
-						Loading milestones…
+						Loading releases…
 					</p>
 				</CardContent>
 			</Card>
@@ -147,14 +200,33 @@ export function MilestonesTab({
 
 	if (milestones.length === 0) {
 		return (
-			<Card>
-				<CardContent className="flex flex-col items-center justify-center gap-4 py-12">
-					<FileText className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
-					<p className="text-sm text-muted-foreground">
-						No milestones found. They are defined when the escrow is created.
-					</p>
-				</CardContent>
-			</Card>
+			<div className="space-y-4">
+				<Card>
+					<CardContent className="flex flex-col items-center justify-center gap-4 py-12">
+						<FileText className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+						<p className="text-sm text-muted-foreground">
+							No releases found yet. Add one to get started.
+						</p>
+						{escrowData ? (
+							<Button
+								type="button"
+								onClick={() => setIsAddDialogOpen(true)}
+								disabled={isProcessing || !canAddRelease}
+							>
+								<Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+								Add release
+							</Button>
+						) : null}
+					</CardContent>
+				</Card>
+				<AddReleaseDialog
+					open={isAddDialogOpen}
+					onOpenChange={setIsAddDialogOpen}
+					escrowType={escrowType}
+					isSubmitting={isProcessing}
+					onSubmit={handleAddRelease}
+				/>
+			</div>
 		)
 	}
 
@@ -164,11 +236,26 @@ export function MilestonesTab({
 		<div className="space-y-6">
 			<Card>
 				<CardHeader>
-					<CardTitle>Select a Milestone</CardTitle>
-					<CardDescription>
-						Choose a milestone to update its status or approve it. Approver and Service Provider
-						roles sign with their connected wallet.
-					</CardDescription>
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+						<div>
+							<CardTitle>Select a Release</CardTitle>
+							<CardDescription>
+								Choose a release to update its status or approve it. Approver and Service Provider
+								roles sign with their connected wallet.
+							</CardDescription>
+						</div>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => setIsAddDialogOpen(true)}
+							disabled={isProcessing || !canAddRelease || !escrowData}
+							className="shrink-0"
+						>
+							<Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+							Add release
+						</Button>
+					</div>
 				</CardHeader>
 				<CardContent className="space-y-3">
 					{milestones.map((milestone, index) => {
@@ -196,7 +283,7 @@ export function MilestonesTab({
 									</div>
 									<div className="min-w-0 flex-1 space-y-2">
 										<div className="flex flex-wrap items-center gap-2">
-											<span className="font-semibold">Milestone {index + 1}</span>
+											<span className="font-semibold">Release {index + 1}</span>
 											{isApproved ? (
 												<Badge className="gap-1">
 													<CheckCircle2 className="h-3 w-3" aria-hidden="true" />
@@ -234,6 +321,14 @@ export function MilestonesTab({
 					})}
 				</CardContent>
 			</Card>
+
+			{!canAddRelease && milestones.length >= MAX_ESCROW_RELEASES ? (
+				<Alert>
+					<AlertDescription>
+						This escrow has reached the maximum of {MAX_ESCROW_RELEASES} releases.
+					</AlertDescription>
+				</Alert>
+			) : null}
 
 			<div className="grid gap-6 lg:grid-cols-2">
 				<Card>
@@ -291,7 +386,7 @@ export function MilestonesTab({
 							) : (
 								<>
 									<TrendingUp className="mr-2 h-4 w-4" aria-hidden="true" />
-									Update Milestone {selectedIndex + 1}
+									Update Release {selectedIndex + 1}
 								</>
 							)}
 						</Button>
@@ -302,7 +397,7 @@ export function MilestonesTab({
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2 text-lg">
 							<CheckCircle2 className="h-5 w-5" aria-hidden="true" />
-							Approve Milestone
+							Approve Release
 						</CardTitle>
 						<CardDescription>
 							Approver role: confirm deliverables are complete before funds can release.
@@ -313,14 +408,14 @@ export function MilestonesTab({
 							<Alert>
 								<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
 								<AlertDescription>
-									Milestone {selectedIndex + 1} is already approved. Go to Release to send funds.
+									Release {selectedIndex + 1} is already approved. Go to Release to send funds.
 								</AlertDescription>
 							</Alert>
 						) : (
 							<p className="text-sm text-muted-foreground">
-								Approving milestone {selectedIndex + 1} allows the Release Signer to disburse
+								Approving release {selectedIndex + 1} allows the Release Signer to disburse
 								{escrowType === 'multi-release'
-									? ' this milestone’s amount'
+									? ' this release’s amount'
 									: ' the escrow balance'}
 								.
 							</p>
@@ -341,7 +436,7 @@ export function MilestonesTab({
 							) : (
 								<>
 									<CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
-									Approve Milestone {selectedIndex + 1}
+									Approve Release {selectedIndex + 1}
 								</>
 							)}
 						</Button>
@@ -355,6 +450,14 @@ export function MilestonesTab({
 					</CardContent>
 				</Card>
 			</div>
+
+			<AddReleaseDialog
+				open={isAddDialogOpen}
+				onOpenChange={setIsAddDialogOpen}
+				escrowType={escrowType}
+				isSubmitting={isProcessing}
+				onSubmit={handleAddRelease}
+			/>
 		</div>
 	)
 }

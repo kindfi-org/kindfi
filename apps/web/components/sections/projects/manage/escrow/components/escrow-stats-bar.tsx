@@ -114,7 +114,7 @@ export function EscrowStatsBar({
 
 				<Card>
 					<CardContent className="pt-6">
-						<p className="text-sm font-medium text-muted-foreground">Milestone Progress</p>
+						<p className="text-sm font-medium text-muted-foreground">Release Progress</p>
 						<p className="mt-1 text-2xl font-bold tabular-nums">{milestoneProgress}%</p>
 						<p className="mt-1 text-xs text-muted-foreground">
 							{approvedCount} of {totalMilestones} approved
@@ -130,8 +130,8 @@ export function EscrowStatsBar({
 							<p className="mt-1 text-lg font-semibold">{typeLabel}</p>
 							<p className="mt-1 text-xs text-muted-foreground">
 								{escrowType === 'single-release'
-									? 'One payout when all milestones are approved'
-									: 'Separate payout per milestone'}
+									? 'One payout when all releases are approved'
+									: 'Separate payout per release'}
 							</p>
 						</div>
 						<Layers className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
