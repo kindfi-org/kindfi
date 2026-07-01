@@ -16,6 +16,21 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === 'object'
 }
 
+function resolveInBundle(dict: unknown, key: string): string | undefined {
+	const keys = key.split('.')
+	let value: unknown = dict
+
+	for (const k of keys) {
+		if (isRecord(value)) {
+			value = value[k]
+		} else {
+			return undefined
+		}
+	}
+
+	return typeof value === 'string' ? value : undefined
+}
+
 interface I18nContextType {
 	language: Language
 	setLanguage: (lang: Language) => void
@@ -66,18 +81,13 @@ export function I18nProvider({ children }: I18nProviderProps) {
 	}
 
 	const t = (key: string): string => {
-		const keys = key.split('.')
-		let value: unknown = bundles[language] ?? bundles.en ?? en
+		const activeBundle = bundles[language]
+		const resolved =
+			(activeBundle ? resolveInBundle(activeBundle, key) : undefined) ??
+			resolveInBundle(en, key) ??
+			(bundles.en ? resolveInBundle(bundles.en, key) : undefined)
 
-		for (const k of keys) {
-			if (isRecord(value)) {
-				value = (value as Record<string, unknown>)[k]
-			} else {
-				return key
-			}
-		}
-
-		return typeof value === 'string' ? value : key
+		return resolved ?? key
 	}
 
 	return (

@@ -1,78 +1,97 @@
 'use client'
 
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import { AlertCircle, ArrowRight, CheckCircle, CheckCircle2, Shield } from 'lucide-react'
-import { redirect, useRouter, useSearchParams } from 'next/navigation'
-import { type SetStateAction, useEffect, useId, useState } from 'react'
+import { ArrowRight, CheckCircle2, Mail, Shield } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { type FormEvent, useEffect, useId, useRef, useState } from 'react'
 import { logger } from '@/lib/logger'
 import { resendSignUpOtpAction } from '~/app/actions/sign-up'
 import { Button } from '~/components/base/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '~/components/base/input-otp'
+import { FormAlert } from '~/components/shared/form/form-alert'
+import { FormShell } from '~/components/shared/form/form-shell'
+import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { OTPTips } from '~/components/shared/otp-tips'
+import { formLayoutClasses } from '~/lib/form/form-styles'
+import { useI18n } from '~/lib/i18n'
+import { cn } from '~/lib/utils'
+
+const CODE_EXPIRY_SECONDS = 120
+const RESEND_COOLDOWN_SECONDS = 60
+const OTP_LENGTH = 6
+const OTP_SLOT_KEYS = ['otp-0', 'otp-1', 'otp-2', 'otp-3', 'otp-4', 'otp-5'] as const
+
+const formatTime = (seconds: number) => {
+	const mins = Math.floor(seconds / 60)
+	const secs = seconds % 60
+	return `${mins}:${secs.toString().padStart(2, '0')}`
+}
 
 export function VerifyOTPComponent() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
+	const { t } = useI18n()
+	const formRef = useRef<HTMLFormElement>(null)
+	const errorRef = useRef<HTMLDivElement>(null)
+
 	const [otp, setOtp] = useState('')
-	const [timeLeft, setTimeLeft] = useState(120) // 2 minutes
+	const [timeLeft, setTimeLeft] = useState(CODE_EXPIRY_SECONDS)
+	const [resendCooldown, setResendCooldown] = useState(RESEND_COOLDOWN_SECONDS)
 	const [isVerifying, setIsVerifying] = useState(false)
 	const [isVerified, setIsVerified] = useState(false)
 	const [isResending, setIsResending] = useState(false)
 	const [error, setError] = useState('')
 	const [success, setSuccess] = useState('')
 
-	const supabase = createSupabaseBrowserClient()
-	const email = searchParams.get('email') || ''
+	const email = searchParams.get('email') ?? ''
+
+	const legendId = useId()
+	const instructionsId = useId()
 
 	useEffect(() => {
 		if (!email) {
-			redirect('/sign-up')
+			router.replace('/sign-up')
 		}
-	}, [email])
+	}, [email, router])
 
 	useEffect(() => {
-		if (timeLeft > 0 && !isVerified) {
-			const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
-			return () => clearTimeout(timer)
-		}
-	}, [timeLeft, isVerified])
+		if (isVerified) return
 
-	const formatTime = (seconds: number) => {
-		const mins = Math.floor(seconds / 60)
-		const secs = seconds % 60
-		return `${mins}:${secs < 10 ? '0' : ''}${secs}`
-	}
+		const interval = window.setInterval(() => {
+			setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0))
+			setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0))
+		}, 1000)
 
-	const handleOtpChange = (value: SetStateAction<string>) => {
+		return () => window.clearInterval(interval)
+	}, [isVerified])
+
+	useEffect(() => {
+		if (!error) return
+		errorRef.current?.focus()
+	}, [error])
+
+	useEffect(() => {
+		if (otp.length !== OTP_LENGTH || isVerifying || isVerified || timeLeft <= 0) return
+		formRef.current?.requestSubmit()
+	}, [otp, isVerifying, isVerified, timeLeft])
+
+	const handleOtpChange = (value: string) => {
 		setOtp(value)
-
-		// Clear any existing errors when user starts typing again
 		if (error) setError('')
+		if (success) setSuccess('')
 	}
 
-	// dynamic ids for a11y (avoid static lint warnings)
-	const labelId = useId()
-	const legendId = useId()
-	const instructionsId = useId()
-	const errorId = useId()
-	const successId = useId()
-
-	const handleVerify = async (event: React.FormEvent<HTMLFormElement>) => {
+	const handleVerify = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
-		if (otp.length !== 6) return
+		if (otp.length !== OTP_LENGTH || isVerifying || timeLeft <= 0) return
 
 		setIsVerifying(true)
 		setError('')
+		setSuccess('')
 
 		try {
+			const supabase = createSupabaseBrowserClient()
 			const { data, error: verifyError } = await supabase.auth.verifyOtp({
 				email,
 				token: otp,
@@ -84,8 +103,6 @@ export function VerifyOTPComponent() {
 			}
 
 			if (data.user) {
-				// Ensure profile skeleton exists immediately after successful verification.
-				// The trigger migration should already have inserted next_auth.users row.
 				try {
 					const { error: profileInsertError } = await supabase.from('profiles').insert({
 						id: data.user.id,
@@ -95,7 +112,6 @@ export function VerifyOTPComponent() {
 						bio: null,
 						image_url: null,
 					})
-					// Ignore conflict or RLS (duplicate) errors silently
 					if (profileInsertError) {
 						logger.warn('Profile insert warning:', profileInsertError.message)
 					}
@@ -104,18 +120,14 @@ export function VerifyOTPComponent() {
 				}
 
 				setIsVerified(true)
-				setSuccess('Verification successful! Redirecting to passkey setup...')
-				setTimeout(() => {
+				setSuccess(t('auth.otpRedirecting'))
+				window.setTimeout(() => {
 					router.push('/passkey-registration')
 				}, 1200)
 			}
 		} catch (err) {
 			logger.error('OTP verification error:', err)
-			if (err instanceof Error) {
-				setError(err.message)
-			} else {
-				setError('Verification failed. Please try again.')
-			}
+			setError(err instanceof Error ? err.message : t('auth.otpVerificationFailed'))
 		} finally {
 			setIsVerifying(false)
 		}
@@ -123,12 +135,13 @@ export function VerifyOTPComponent() {
 
 	const handleResend = async () => {
 		if (!email) {
-			setError('Email address not found. Please go back to sign up.')
+			setError(t('auth.otpEmailNotFound'))
 			return
 		}
 
 		setIsResending(true)
 		setError('')
+		setSuccess('')
 
 		try {
 			const result = await resendSignUpOtpAction(email)
@@ -137,198 +150,197 @@ export function VerifyOTPComponent() {
 				throw new Error(result.message)
 			}
 
-			setTimeLeft(120)
+			setTimeLeft(CODE_EXPIRY_SECONDS)
+			setResendCooldown(RESEND_COOLDOWN_SECONDS)
+			setOtp('')
 			setSuccess(result.message)
 		} catch (err) {
 			logger.error('Resend OTP error:', err)
-			if (err instanceof Error) {
-				setError(err.message)
-			} else {
-				setError('Failed to resend verification code. Please try again.')
-			}
+			setError(err instanceof Error ? err.message : t('auth.otpResendFailed'))
 		} finally {
 			setIsResending(false)
 		}
 	}
 
+	const slotClassName = cn(
+		'h-11 w-10 rounded-xl border-2 border-slate-200 bg-white text-center text-lg font-semibold tabular-nums shadow-sm sm:h-12 sm:w-11 sm:text-xl md:h-14 md:w-12',
+		'focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20',
+		error &&
+			'border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20',
+	)
+
+	if (!email) {
+		return null
+	}
+
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-			<div className="w-full max-w-5xl">
-				<form className="grid gap-6 lg:grid-cols-[1fr_320px]" onSubmit={handleVerify}>
-					<Card className="w-full border-none">
-						<CardHeader className="space-y-1">
-							<div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-								<Shield className="h-6 w-6 text-primary" />
-							</div>
-							<CardTitle className="text-center text-2xl font-bold" id={labelId}>
-								Check Your Email
-							</CardTitle>
-							<CardDescription className="text-center">
-								We&apos;ve sent a verification code to{' '}
-								{email && <span className="font-medium">{email}</span>}. Enter the 6-digit code
-								below to complete your account setup.
-								<span className="mt-2 block font-medium text-primary">
-									Please check your inbox and spam folder
-								</span>
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							{isVerified ? (
-								<div className="flex flex-col items-center justify-center space-y-2 py-4">
-									<div className="rounded-full bg-green-100 p-2">
-										<CheckCircle2 className="h-8 w-8 text-green-600" />
-									</div>
-									<p className="text-center text-lg font-medium text-green-600">
-										Verification Successful!
-									</p>
-									<p className="text-center text-sm text-muted-foreground">
-										Redirecting you to your profile...
-									</p>
-								</div>
-							) : (
-								<>
-									<fieldset className="space-y-4">
-										<legend className="text-base text-center font-medium" id={legendId}>
-											Verification Code
-										</legend>
-										<div className="flex justify-center">
-											<InputOTP
-												maxLength={6}
-												value={otp}
-												onChange={handleOtpChange}
-												disabled={isVerifying || isVerified}
-												aria-labelledby={labelId}
-												aria-describedby={instructionsId}
-												aria-invalid={!!error}
-												aria-errormessage={error ? errorId : undefined}
-												className="gap-3"
-											>
-												<p id={instructionsId} className="sr-only">
-													Enter the 6-digit code sent to your email or phone. Use the arrow keys to
-													navigate.
-												</p>
-												<InputOTPGroup className="gap-3">
-													<InputOTPSlot
-														index={0}
-														className={`h-14 w-14 rounded-md border-2 text-xl shadow-sm ${error ? 'border-red-500' : ''} ${isVerified ? 'border-green-500' : ''}`}
-														aria-label="Digit 1"
-													/>
-													<InputOTPSlot
-														index={1}
-														className={`h-14 w-14 rounded-md border-2 text-xl shadow-sm ${error ? 'border-red-500' : ''} ${isVerified ? 'border-green-500' : ''}`}
-														aria-label="Digit 2"
-													/>
-													<InputOTPSlot
-														index={2}
-														className={`h-14 w-14 rounded-md border-2 text-xl shadow-sm ${error ? 'border-red-500' : ''} ${isVerified ? 'border-green-500' : ''}`}
-														aria-label="Digit 3"
-													/>
-													<InputOTPSlot
-														index={3}
-														className={`h-14 w-14 rounded-md border-2 text-xl shadow-sm ${error ? 'border-red-500' : ''} ${isVerified ? 'border-green-500' : ''}`}
-														aria-label="Digit 4"
-													/>
-													<InputOTPSlot
-														index={4}
-														className={`h-14 w-14 rounded-md border-2 text-xl shadow-sm ${error ? 'border-red-500' : ''} ${isVerified ? 'border-green-500' : ''}`}
-														aria-label="Digit 5"
-													/>
-													<InputOTPSlot
-														index={5}
-														className={`h-14 w-14 rounded-md border-2 text-xl shadow-sm ${error ? 'border-red-500' : ''} ${isVerified ? 'border-green-500' : ''}`}
-														aria-label="Digit 6"
-													/>
-												</InputOTPGroup>
-											</InputOTP>
-										</div>
-
-										{/* Status indicator */}
-										{isVerifying && (
-											<div className="text-center text-sm text-muted-foreground" aria-live="polite">
-												Verifying code...
-											</div>
-										)}
-
-										{/* Error message */}
-										{error && (
-											<div
-												id={errorId}
-												className="flex items-center justify-center gap-2 text-sm text-red-500"
-												aria-live="assertive"
-											>
-												<AlertCircle className="h-4 w-4" aria-hidden="true" />
-												{error}
-											</div>
-										)}
-
-										{/* Success message */}
-										{success && (
-											<div
-												id={successId}
-												className="flex items-center justify-center gap-2 text-sm text-green-500"
-												aria-live="assertive"
-											>
-												<CheckCircle className="h-4 w-4" aria-hidden="true" />
-												{success}
-											</div>
-										)}
-
-										{/* Current input announcement for screen readers */}
-										<div className="sr-only" aria-live="polite">
-											{otp ? `Current input: ${otp.split('').join(' ')}` : ''}
-										</div>
-									</fieldset>
-
-									<div className="text-center text-sm">
-										{timeLeft > 0 ? (
-											<p>
-												Code expires in{' '}
-												<span className="font-medium text-primary">{formatTime(timeLeft)}</span>
-											</p>
-										) : (
-											<p className="text-destructive">Code expired</p>
-										)}
-									</div>
-								</>
-							)}
-						</CardContent>
-						<CardFooter className="flex flex-col space-y-2">
-							{!isVerified && (
-								<>
-									<Button
-										className="w-full gap-2"
-										type="submit"
-										disabled={otp.length !== 6 || isVerifying || timeLeft <= 0}
-									>
-										{isVerifying ? 'Verifying...' : 'Verify Code'}
-										{!isVerifying && <ArrowRight className="h-4 w-4" />}
-									</Button>
-
-									<div className="flex items-center justify-center space-x-1 pt-2">
-										<span className="text-sm text-muted-foreground">
-											Didn&apos;t receive the code?
-										</span>
-										<Button
-											variant="link"
-											type="button"
-											className="h-auto p-0 text-sm"
-											onClick={handleResend}
-											disabled={isResending || timeLeft > 0 || !email}
-										>
-											{isResending ? 'Sending...' : 'Resend'}
-										</Button>
-									</div>
-								</>
-							)}
-						</CardFooter>
-					</Card>
-
-					{/* Tips section - automatically responsive with grid */}
-					<div className="self-start lg:self-center">
-						<OTPTips />
+		<AuthLayout contentMaxWidth="lg" aside={<OTPTips variant="panel" />}>
+			<FormShell
+				className="w-full max-w-none"
+				maxWidth="lg"
+				title={t('auth.otpTitle')}
+				subtitle={t('auth.otpSpamHint')}
+				icon={Shield}
+				footer={
+					<div className="w-full text-center text-sm text-muted-foreground">
+						{t('auth.otpWrongEmail')}{' '}
+						<Link href="/sign-up" className="font-medium text-primary hover:underline">
+							{t('auth.otpStartOver')}
+						</Link>
 					</div>
-				</form>
-			</div>
-		</div>
+				}
+			>
+				{isVerified ? (
+					<div className="flex flex-col items-center justify-center space-y-3 py-6">
+						<div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+							<CheckCircle2 className="h-8 w-8 text-primary" aria-hidden="true" />
+						</div>
+						<p className="text-balance text-center text-lg font-semibold text-slate-900">
+							{t('auth.otpVerifyingSuccess')}
+						</p>
+						<p className="text-center text-sm text-muted-foreground">{t('auth.otpRedirecting')}</p>
+					</div>
+				) : (
+					<form
+						ref={formRef}
+						className={formLayoutClasses.stack}
+						aria-label={t('auth.otpFormLabel')}
+						onSubmit={handleVerify}
+					>
+						<div className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200/80 bg-[#fafbfc] px-4 py-3">
+							<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
+								<Mail className="h-4 w-4" aria-hidden="true" />
+							</div>
+							<div className="min-w-0">
+								<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+									{t('auth.otpSubtitle')}
+								</p>
+								<p className="truncate text-sm font-semibold text-slate-900" translate="no">
+									{email}
+								</p>
+							</div>
+						</div>
+
+						{success ? <FormAlert variant="success">{success}</FormAlert> : null}
+						{error ? (
+							<FormAlert variant="error">
+								<div ref={errorRef} tabIndex={-1} className="outline-none">
+									{error}
+								</div>
+							</FormAlert>
+						) : null}
+
+						<fieldset className="space-y-5">
+							<legend id={legendId} className="sr-only">
+								{t('auth.otpCodeLabel')}
+							</legend>
+
+							<div className="space-y-2 text-center">
+								<p className="text-sm font-medium text-slate-800">{t('auth.otpCodeLabel')}</p>
+								<p className="text-xs text-muted-foreground">{t('auth.otpInstructions')}</p>
+							</div>
+
+							<div className="flex justify-center overflow-x-auto px-1 pb-1">
+								<InputOTP
+									maxLength={OTP_LENGTH}
+									value={otp}
+									onChange={handleOtpChange}
+									disabled={isVerifying}
+									inputMode="numeric"
+									autoComplete="one-time-code"
+									spellCheck={false}
+									aria-labelledby={legendId}
+									aria-describedby={instructionsId}
+									aria-invalid={Boolean(error)}
+									className="gap-1.5 sm:gap-2 md:gap-3"
+								>
+									<p id={instructionsId} className="sr-only">
+										{t('auth.otpInstructions')}
+									</p>
+									<InputOTPGroup className="gap-1.5 sm:gap-2 md:gap-3">
+										{OTP_SLOT_KEYS.map((slotKey, index) => (
+											<InputOTPSlot
+												key={slotKey}
+												index={index}
+												className={slotClassName}
+												aria-label={`Digit ${index + 1}`}
+											/>
+										))}
+									</InputOTPGroup>
+								</InputOTP>
+							</div>
+
+							{isVerifying ? (
+								<p className="text-center text-sm text-muted-foreground" aria-live="polite">
+									{t('auth.otpVerifying')}
+								</p>
+							) : null}
+
+							<div className="sr-only" aria-live="polite">
+								{otp ? `Current input: ${otp.split('').join(' ')}` : ''}
+							</div>
+						</fieldset>
+
+						<div className="flex justify-center">
+							<div
+								className={cn(
+									'inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm',
+									timeLeft > 0
+										? 'border-slate-200 bg-[#fafbfc] text-slate-700'
+										: 'border-destructive/20 bg-destructive/5 text-destructive',
+								)}
+							>
+								{timeLeft > 0 ? (
+									<>
+										<span>{t('auth.otpCodeExpires')}</span>
+										<span className="font-semibold tabular-nums text-primary">
+											{formatTime(timeLeft)}
+										</span>
+									</>
+								) : (
+									<span>{t('auth.otpCodeExpired')}</span>
+								)}
+							</div>
+						</div>
+
+						<Button
+							className="gradient-btn w-full gap-2 text-white"
+							type="submit"
+							disabled={otp.length !== OTP_LENGTH || isVerifying || timeLeft <= 0}
+							aria-busy={isVerifying}
+						>
+							{isVerifying ? t('auth.otpVerifying') : t('auth.otpVerifyBtn')}
+							{!isVerifying ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : null}
+						</Button>
+
+						<div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 text-center text-sm">
+							<span className="text-muted-foreground">{t('auth.otpDidntReceive')}</span>
+							{resendCooldown > 0 ? (
+								<span className="text-muted-foreground">
+									{t('auth.otpResendIn')}{' '}
+									<span className="font-medium tabular-nums text-primary">
+										{formatTime(resendCooldown)}
+									</span>
+								</span>
+							) : (
+								<Button
+									variant="link"
+									type="button"
+									className="h-auto p-0 text-sm font-medium"
+									onClick={handleResend}
+									disabled={isResending}
+								>
+									{isResending ? t('auth.otpResending') : t('auth.otpResend')}
+								</Button>
+							)}
+						</div>
+
+						<div className="lg:hidden">
+							<OTPTips variant="inline" />
+						</div>
+					</form>
+				)}
+			</FormShell>
+		</AuthLayout>
 	)
 }

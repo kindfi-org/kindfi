@@ -1,73 +1,100 @@
-/** biome-ignore-all lint/a11y/useAriaPropsSupportedByRole: any */
+'use client'
+
 import { AlertTriangle, CheckCircle, Clock, Info, Mail } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
+import { useI18n } from '~/lib/i18n'
+import { cn } from '~/lib/utils'
 
-export function OTPTips() {
+type OTPTipsVariant = 'card' | 'panel' | 'inline'
+
+interface OTPTipsProps {
+	variant?: OTPTipsVariant
+	className?: string
+}
+
+const tipItems = [
+	{ icon: Clock, titleKey: 'otpTipWhatTitle', bodyKey: 'otpTipWhatBody' },
+	{ icon: Mail, titleKey: 'otpTipInboxTitle', bodyKey: 'otpTipInboxBody' },
+	{ icon: AlertTriangle, titleKey: 'otpTipSecurityTitle', bodyKey: 'otpTipSecurityBody' },
+	{ icon: CheckCircle, titleKey: 'otpTipDigitsTitle', bodyKey: 'otpTipDigitsBody' },
+] as const
+
+export function OTPTips({ variant = 'card', className }: OTPTipsProps) {
+	const { t } = useI18n()
+
+	const isPanel = variant === 'panel'
+	const isInline = variant === 'inline'
+
+	const list = (
+		<ul className={cn('list-none space-y-4', isInline && 'space-y-3')}>
+			{tipItems.map(({ icon: Icon, titleKey, bodyKey }) => (
+				<li key={titleKey} className="flex gap-3">
+					<Icon
+						className={cn(
+							'mt-0.5 h-4 w-4 shrink-0',
+							isPanel ? 'text-white/70' : 'text-muted-foreground',
+						)}
+						aria-hidden="true"
+					/>
+					<p
+						className={cn(
+							'text-sm leading-relaxed',
+							isPanel ? 'text-white/90' : 'text-muted-foreground',
+						)}
+					>
+						<span className={cn('font-medium', isPanel ? 'text-white' : 'text-slate-800')}>
+							{t(`auth.${titleKey}`)}
+						</span>
+						<span className={isPanel ? 'text-white/75' : ''}> — {t(`auth.${bodyKey}`)}</span>
+					</p>
+				</li>
+			))}
+		</ul>
+	)
+
+	if (isPanel) {
+		return (
+			<section aria-labelledby="otp-tips-title" className={className}>
+				<div className="mb-6 flex items-center gap-3">
+					<div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15">
+						<Info className="h-5 w-5 text-white" aria-hidden="true" />
+					</div>
+					<h2 id="otp-tips-title" className="text-xl font-semibold text-white">
+						{t('auth.otpTipsTitle')}
+					</h2>
+				</div>
+				{list}
+			</section>
+		)
+	}
+
+	if (isInline) {
+		return (
+			<section
+				aria-labelledby="otp-tips-title"
+				className={cn('rounded-xl border border-slate-200/80 bg-[#fafbfc] px-4 py-4', className)}
+			>
+				<h2
+					id="otp-tips-title"
+					className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900"
+				>
+					<Info className="h-4 w-4 text-primary" aria-hidden="true" />
+					{t('auth.otpTipsTitle')}
+				</h2>
+				{list}
+			</section>
+		)
+	}
+
 	return (
-		<Card aria-labelledby="otp-tips-title">
+		<Card aria-labelledby="otp-tips-title" className={className}>
 			<CardHeader className="pb-2">
 				<CardTitle id="otp-tips-title" className="flex items-center gap-2 text-base font-medium">
-					<Info className="h-4 w-4 text-blue-500" aria-hidden="true" />
-					Quick Tips
+					<Info className="h-4 w-4 text-primary" aria-hidden="true" />
+					{t('auth.otpTipsTitle')}
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="pb-4 pt-0 text-sm">
-				<ul className="space-y-3 list-none">
-					<li className="flex gap-2">
-						<Clock
-							className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground"
-							aria-hidden="true"
-						/>
-						<p>
-							<span className="font-medium text-blue-500" aria-label="What is an OTP?">
-								What is an OTP?
-							</span>
-							<span> A one-time password is a 6-digit code sent to verify your identity.</span>
-						</p>
-					</li>
-
-					<li className="flex gap-2">
-						<Mail
-							className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground"
-							aria-hidden="true"
-						/>
-						<p>
-							<span className="font-medium text-green-500" aria-label="Check your inbox:">
-								Check your inbox
-							</span>
-							<span>
-								{' '}
-								- The code should arrive within 1 minute. Check your spam folder if you don&apos;t
-								see it.
-							</span>
-						</p>
-					</li>
-
-					<li className="flex gap-2">
-						<AlertTriangle
-							className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground"
-							aria-hidden="true"
-						/>
-						<p>
-							<span className="font-medium text-red-500" aria-label="Important security warning:">
-								Never share your OTP
-							</span>
-							<span> - Our team will never ask for your OTP via phone or email.</span>
-						</p>
-					</li>
-
-					<li className="flex gap-2">
-						<CheckCircle
-							className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground"
-							aria-hidden="true"
-						/>
-						<p>
-							<span className="font-medium">Enter all digits</span>
-							<span> - Make sure to enter all 6 digits to proceed with verification.</span>
-						</p>
-					</li>
-				</ul>
-			</CardContent>
+			<CardContent className="pb-4 pt-0">{list}</CardContent>
 		</Card>
 	)
 }

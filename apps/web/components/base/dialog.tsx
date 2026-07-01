@@ -81,41 +81,39 @@ const DialogOverlay = React.forwardRef<
 })
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
+const containsDialogTitle = (children: React.ReactNode): boolean => {
+	return React.Children.toArray(children).some((child) => {
+		if (!React.isValidElement(child)) return false
+
+		const type = child.type as { displayName?: string }
+		if (
+			type.displayName === DialogPrimitive.Title.displayName ||
+			type.displayName === 'DialogTitle'
+		) {
+			return true
+		}
+
+		const props = child.props as { children?: React.ReactNode }
+		if (props.children) {
+			return containsDialogTitle(props.children)
+		}
+
+		return false
+	})
+}
+
 const DialogContent = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Content>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
 	const reducedMotion = useReducedMotion()
-	const contentRef = React.useRef<HTMLDivElement | null>(null)
-	const [needsSrOnlyTitle, setNeedsSrOnlyTitle] = React.useState(true)
-	const fallbackTitleId = React.useId()
-
-	const setRefs = React.useCallback(
-		(node: HTMLDivElement | null) => {
-			contentRef.current = node
-			if (typeof ref === 'function') {
-				ref(node)
-			} else if (ref) {
-				;(ref as React.MutableRefObject<HTMLDivElement | null>).current = node
-			}
-		},
-		[ref],
-	)
-
-	// Re-scan when body changes so we drop the sr-only fallback once a real DialogTitle mounts.
-	// biome-ignore lint/correctness/useExhaustiveDependencies: children drives dialog body updates
-	React.useLayoutEffect(() => {
-		const root = contentRef.current
-		if (!root) return
-		const hasTitle = root.querySelector('[data-dialog-title]')
-		setNeedsSrOnlyTitle(!hasTitle)
-	}, [children])
+	const hasTitle = containsDialogTitle(children)
 
 	return (
 		<DialogPortal>
 			<DialogOverlay />
 			<DialogPrimitive.Content
-				ref={setRefs}
+				ref={ref}
 				className={cn(
 					'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-default',
 					reducedMotion ? '' : animations.fadeAndAnimate.inOut,
@@ -124,12 +122,12 @@ const DialogContent = React.forwardRef<
 				)}
 				{...props}
 			>
-				{children}
-				{needsSrOnlyTitle ? (
-					<DialogPrimitive.Title id={fallbackTitleId} className="sr-only">
+				{!hasTitle ? (
+					<DialogPrimitive.Title data-dialog-title="" className="sr-only">
 						Dialog
 					</DialogPrimitive.Title>
 				) : null}
+				{children}
 				<DialogPrimitive.Close
 					className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
 					aria-label="Close dialog button. Click to close the dialog"
