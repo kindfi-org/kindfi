@@ -1,5 +1,3 @@
-import { appEnvConfig } from '@packages/lib/config'
-import type { AppEnvInterface } from '@packages/lib/types'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
@@ -75,8 +73,6 @@ export interface ButtonProps
 	'aria-label'?: boolean extends true ? string : string | undefined
 }
 
-const appConfig: AppEnvInterface = appEnvConfig('web')
-
 /**
  * `Button` component used for triggering actions within the UI. It supports various variants and sizes,
  * and it can optionally render as a child component to integrate with other UI elements.
@@ -144,7 +140,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			role: isLink ? 'link' : undefined,
 			'aria-label': ariaLabel || (isIconOnly ? String(children) : 'Button'),
 			title: ariaLabel || (typeof children === 'string' ? children : 'Button'),
-			...(appConfig.env.nodeEnv !== 'production' &&
+			...(process.env.NODE_ENV !== 'production' &&
 				isLink &&
 				!('href' in props) && {
 					onClick: (e) => {

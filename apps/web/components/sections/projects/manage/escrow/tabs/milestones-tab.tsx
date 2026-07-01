@@ -6,15 +6,7 @@ import type {
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import {
-	ArrowRight,
-	CheckCircle2,
-	FileText,
-	Loader2,
-	Plus,
-	Send,
-	TrendingUp,
-} from 'lucide-react'
+import { ArrowRight, CheckCircle2, FileText, Loader2, Plus, Send, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
@@ -414,10 +406,7 @@ export function MilestonesTab({
 						) : (
 							<p className="text-sm text-muted-foreground">
 								Approving release {selectedIndex + 1} allows the Release Signer to disburse
-								{escrowType === 'multi-release'
-									? ' this release’s amount'
-									: ' the escrow balance'}
-								.
+								{escrowType === 'multi-release' ? ' this release’s amount' : ' the escrow balance'}.
 							</p>
 						)}
 

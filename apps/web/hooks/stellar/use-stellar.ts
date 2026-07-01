@@ -8,33 +8,34 @@ import { updateDeviceWithDeployee } from '~/app/actions/auth'
 import { logger } from '~/lib/logger'
 import { getPublicKeys } from '~/lib/passkey/stellar'
 import type { PresignResponse, SignParams } from '~/lib/types'
+import {
+	safeLocalStorageGet,
+	safeLocalStorageRemove,
+	safeLocalStorageSet,
+} from '~/lib/utils/safe-storage'
 
-const getStoredDeployee = () => {
-	return localStorage.getItem('sp:deployee')
-}
+const getStoredDeployee = () => safeLocalStorageGet('sp:deployee')
 
 const removeStoredDeployee = () => {
-	localStorage.removeItem('sp:deployee')
+	safeLocalStorageRemove('sp:deployee')
 }
 
-const getStoredBundler = () => {
-	return localStorage.getItem('sp:bundler')
-}
+const getStoredBundler = () => safeLocalStorageGet('sp:bundler')
 
 const setStoredBundler = (bundler: string) => {
-	localStorage.setItem('sp:bundler', bundler)
+	safeLocalStorageSet('sp:bundler', bundler)
 }
 
 const removeStoredBundler = () => {
-	localStorage.removeItem('sp:bundler')
+	safeLocalStorageRemove('sp:bundler')
 }
 
 const setStoredCredentialId = (credentials: string) => {
-	localStorage.setItem('sp:id', credentials)
+	safeLocalStorageSet('sp:id', credentials)
 }
 
 const removeStoredCredentialId = () => {
-	localStorage.removeItem('sp:id')
+	safeLocalStorageRemove('sp:id')
 }
 
 export const useStellar = () => {

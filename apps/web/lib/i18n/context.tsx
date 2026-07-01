@@ -2,6 +2,7 @@
 
 import type React from 'react'
 import { createContext, useContext, useEffect, useState } from 'react'
+import { safeLocalStorageGet, safeLocalStorageSet } from '~/lib/utils/safe-storage'
 import { loadLocaleBundle } from './load-locale'
 import { en } from './translations/en'
 
@@ -49,7 +50,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
 
 	// Load language from localStorage on mount
 	useEffect(() => {
-		const savedLanguage = localStorage.getItem('language') as Language
+		const savedLanguage = safeLocalStorageGet('language') as Language
 		if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'es')) {
 			const timer = setTimeout(() => {
 				setLanguageState(savedLanguage)
@@ -76,7 +77,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
 
 	const setLanguage = (lang: Language) => {
 		setLanguageState(lang)
-		localStorage.setItem('language', lang)
+		safeLocalStorageSet('language', lang)
 		document.documentElement.lang = lang
 	}
 

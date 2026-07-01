@@ -3,6 +3,20 @@ import { logger } from '../logger'
 import type { AppEnvInterface, AppName, ValidatedEnvInput } from '../types'
 
 // Transform function with explicit type annotation
+function parseJsonStringArray(value: string | string[] | undefined, fallback: string): string[] {
+	if (Array.isArray(value)) {
+		return value.map(String)
+	}
+
+	const source = value || fallback
+	try {
+		const parsed: unknown = JSON.parse(source)
+		return Array.isArray(parsed) ? parsed.map(String) : JSON.parse(fallback)
+	} catch {
+		return JSON.parse(fallback)
+	}
+}
+
 export function transformEnv(): AppEnvInterface {
 	const data = process.env as ValidatedEnvInput
 	return {
@@ -91,11 +105,11 @@ export function transformEnv(): AppEnvInterface {
 			redis: {
 				url: data.REDIS_URL || '',
 			},
-			rpId: JSON.parse(`${data.RP_ID || '["localhost"]'}`),
-			rpName: JSON.parse(`${data.RP_NAME || '["App"]'}`),
-			expectedOrigin: JSON.parse(`${data.EXPECTED_ORIGIN || '["http://localhost:3000"]'}`),
-			challengeTtlSeconds: data.CHALLENGE_TTL_SECONDS || 60,
-			challengeTtlMs: (data.CHALLENGE_TTL_SECONDS || 60) * 1000,
+			rpId: parseJsonStringArray(data.RP_ID, '["localhost"]'),
+			rpName: parseJsonStringArray(data.RP_NAME, '["App"]'),
+			expectedOrigin: parseJsonStringArray(data.EXPECTED_ORIGIN, '["http://localhost:3000"]'),
+			challengeTtlSeconds: Number(data.CHALLENGE_TTL_SECONDS) || 60,
+			challengeTtlMs: (Number(data.CHALLENGE_TTL_SECONDS) || 60) * 1000,
 		},
 		redis: {
 			// REST API credentials (@upstash/redis). Prefer UPSTASH_*; fall back to Vercel KV names.
