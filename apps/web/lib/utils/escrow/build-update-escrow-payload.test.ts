@@ -37,12 +37,9 @@ const baseEscrowData: GetEscrowsFromIndexerResponse = {
 
 describe('buildUpdateEscrowPayload', () => {
 	test('appends a new single-release milestone', () => {
-		const payload = buildUpdateEscrowPayload(
-			baseEscrowData,
-			'single-release',
-			platformAddress,
-			{ description: 'Phase 2' },
-		)
+		const payload = buildUpdateEscrowPayload(baseEscrowData, 'single-release', platformAddress, {
+			description: 'Phase 2',
+		})
 
 		expect(payload.signer).toBe(platformAddress)
 		expect(payload.escrow.milestones).toHaveLength(2)
@@ -63,16 +60,11 @@ describe('buildUpdateEscrowPayload', () => {
 			],
 		}
 
-		const payload = buildUpdateEscrowPayload(
-			multiEscrow,
-			'multi-release',
-			platformAddress,
-			{
-				description: 'Build',
-				amount: 1500,
-				receiver: 'GReceiver1234567890123456789012345678901',
-			},
-		)
+		const payload = buildUpdateEscrowPayload(multiEscrow, 'multi-release', platformAddress, {
+			description: 'Build',
+			amount: 1500,
+			receiver: 'GReceiver1234567890123456789012345678901',
+		})
 
 		if ('amount' in payload.escrow.milestones[1]) {
 			expect(payload.escrow.milestones[1].amount).toBe(1500)
@@ -83,9 +75,14 @@ describe('buildUpdateEscrowPayload', () => {
 
 	test('rejects non-platform signer', () => {
 		expect(() =>
-			buildUpdateEscrowPayload(baseEscrowData, 'single-release', 'GOther123456789012345678901234567890123', {
-				description: 'Phase 2',
-			}),
+			buildUpdateEscrowPayload(
+				baseEscrowData,
+				'single-release',
+				'GOther123456789012345678901234567890123',
+				{
+					description: 'Phase 2',
+				},
+			),
 		).toThrow('Only the platform address can add releases')
 	})
 })

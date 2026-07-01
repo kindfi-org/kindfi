@@ -1,7 +1,6 @@
 import {
 	isSmartAccountPlaceholder,
 	isValidStellarWalletAddress,
-	STELLAR_G_ADDRESS_REGEX,
 } from '@packages/lib/utils/wallet-address'
 import { z } from 'zod'
 

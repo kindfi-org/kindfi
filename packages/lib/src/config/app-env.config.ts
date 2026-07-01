@@ -3,7 +3,11 @@ import { logger } from '../logger'
 import type { AppEnvInterface, AppName, ValidatedEnvInput } from '../types'
 
 // Transform function with explicit type annotation
-function parseJsonStringArray(value: string | undefined, fallback: string): string[] {
+function parseJsonStringArray(value: string | string[] | undefined, fallback: string): string[] {
+	if (Array.isArray(value)) {
+		return value.map(String)
+	}
+
 	const source = value || fallback
 	try {
 		const parsed: unknown = JSON.parse(source)
@@ -104,8 +108,8 @@ export function transformEnv(): AppEnvInterface {
 			rpId: parseJsonStringArray(data.RP_ID, '["localhost"]'),
 			rpName: parseJsonStringArray(data.RP_NAME, '["App"]'),
 			expectedOrigin: parseJsonStringArray(data.EXPECTED_ORIGIN, '["http://localhost:3000"]'),
-			challengeTtlSeconds: data.CHALLENGE_TTL_SECONDS || 60,
-			challengeTtlMs: (data.CHALLENGE_TTL_SECONDS || 60) * 1000,
+			challengeTtlSeconds: Number(data.CHALLENGE_TTL_SECONDS) || 60,
+			challengeTtlMs: (Number(data.CHALLENGE_TTL_SECONDS) || 60) * 1000,
 		},
 		redis: {
 			// REST API credentials (@upstash/redis). Prefer UPSTASH_*; fall back to Vercel KV names.
