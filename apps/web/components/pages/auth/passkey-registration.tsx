@@ -94,6 +94,8 @@ export function PasskeyRegistrationComponent() {
 			}
 
 			await getSession()
+
+			// Mark this as a new session so role selection modal can be shown
 			sessionStorage.setItem('kindfi_new_session', 'true')
 			await router.refresh()
 			router.push('/profile')
