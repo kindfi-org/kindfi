@@ -18,6 +18,7 @@ import { useSmartAccountRegistration } from '~/hooks/passkey/use-smart-account-r
 import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
 import { formLayoutClasses } from '~/lib/form/form-styles'
 import { useI18n } from '~/lib/i18n'
+import { safeSessionStorageSet } from '~/lib/utils/safe-storage'
 
 export function PasskeyRegistrationComponent() {
 	const router = useRouter()
@@ -95,8 +96,8 @@ export function PasskeyRegistrationComponent() {
 
 			await getSession()
 
-			// Mark this as a new session so role selection modal can be shown
-			sessionStorage.setItem('kindfi_new_session', 'true')
+			// Best-effort only — blocked sessionStorage must not fail registration on iOS Safari.
+			safeSessionStorageSet('kindfi_new_session', 'true')
 			await router.refresh()
 			router.push('/profile')
 		} catch (e) {

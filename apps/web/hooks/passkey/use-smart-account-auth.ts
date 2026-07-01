@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { createSessionAction } from '~/app/actions/auth'
 import { ErrorCode, InAppError } from '~/lib/passkey/errors'
+import { safeSessionStorageSet } from '~/lib/utils/safe-storage'
 
 const mapPasskeyApiError = (errorMessage: string): InAppError => {
 	if (errorMessage === 'User not found') {
@@ -154,7 +155,8 @@ export const useSmartAccountAuth = (identifier: string) => {
 			setAuthSuccess(message)
 			toast.success(message)
 
-			sessionStorage.setItem('kindfi_new_session', 'true')
+			// Best-effort only — blocked sessionStorage must not fail login (common on iOS Safari).
+			safeSessionStorageSet('kindfi_new_session', 'true')
 
 			await router.refresh()
 			router.push('/profile')

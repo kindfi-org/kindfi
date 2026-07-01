@@ -20,7 +20,7 @@ export const resolveSmartAccountAddress = (address: string | null | undefined): 
 		return null
 	}
 
-	return address
+	return isSmartAccountContractAddress(address) ? address : null
 }
 
 export const isExternalStellarWalletAddress = (
