@@ -102,7 +102,14 @@ export function ProjectMembersWrapper({ projectSlug }: ProjectMembersWrapperProp
 					className="space-y-8 max-w-4xl mx-auto"
 				>
 					{/* Add Team Member Form */}
-					{!isLoading ? <AddTeamMemberForm onAdd={handleAddMember} /> : null}
+					{!isLoading ? (
+						<AddTeamMemberForm
+							onAdd={handleAddMember}
+							excludeUserIds={teamMembers
+								.filter((member) => member.userId)
+								.map((member) => member.userId as string)}
+						/>
+					) : null}
 
 					{/* Team Members List */}
 					<TeamMemberList members={teamMembers} onDelete={handleDeleteMember} />

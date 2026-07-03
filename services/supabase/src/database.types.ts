@@ -596,6 +596,94 @@ export type Database = {
           },
         ]
       }
+      foundation_members: {
+        Row: {
+          foundation_id: string
+          id: string
+          joined_at: string
+          role: Database["public"]["Enums"]["project_member_role"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          foundation_id: string
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["project_member_role"]
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          foundation_id?: string
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["project_member_role"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "foundation_members_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      foundation_team: {
+        Row: {
+          bio: string | null
+          created_at: string
+          foundation_id: string
+          full_name: string
+          id: string
+          order_index: number
+          photo_url: string | null
+          role_title: string
+          updated_at: string
+          user_id: string | null
+          years_involved: number | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          foundation_id: string
+          full_name: string
+          id?: string
+          order_index?: number
+          photo_url?: string | null
+          role_title: string
+          updated_at?: string
+          user_id?: string | null
+          years_involved?: number | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          foundation_id?: string
+          full_name?: string
+          id?: string
+          order_index?: number
+          photo_url?: string | null
+          role_title?: string
+          updated_at?: string
+          user_id?: string | null
+          years_involved?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "foundation_team_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       foundations: {
         Row: {
           cover_image_url: string | null
@@ -1291,6 +1379,7 @@ export type Database = {
           project_id: string
           role_title: string
           updated_at: string
+          user_id: string | null
           years_involved: number | null
         }
         Insert: {
@@ -1303,6 +1392,7 @@ export type Database = {
           project_id: string
           role_title: string
           updated_at?: string
+          user_id?: string | null
           years_involved?: number | null
         }
         Update: {
@@ -1315,6 +1405,7 @@ export type Database = {
           project_id?: string
           role_title?: string
           updated_at?: string
+          user_id?: string | null
           years_involved?: number | null
         }
         Relationships: [

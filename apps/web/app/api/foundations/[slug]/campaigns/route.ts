@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
+import { authorizeFoundationManage } from '~/lib/api/authorize-foundation-manage'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
 import { foundationCampaignsSchema } from '~/lib/schemas/foundation.schemas'
@@ -30,9 +31,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 			return NextResponse.json({ error: 'Foundation not found' }, { status: 404 })
 		}
 
-		// Verify user is the founder
-		if (foundation.founderId !== session.user.id) {
-			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+		const auth = await authorizeFoundationManage(session.user.id, foundation.id)
+		if (!auth.ok) {
+			return NextResponse.json({ error: 'Forbidden' }, { status: auth.status })
 		}
 
 		const body = await req.json()

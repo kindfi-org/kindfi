@@ -2,38 +2,35 @@ import type { TypedSupabaseClient } from '@packages/lib/types'
 import { logger } from '@/lib/logger'
 import type { ProjectTeamMember } from '~/lib/types/project/project-team.types'
 
-export async function getProjectTeamBySlug(
+export async function getFoundationTeamBySlug(
 	client: TypedSupabaseClient,
-	projectSlug: string,
-): Promise<{ projectId: string; team: ProjectTeamMember[] } | null> {
-	const { data: project, error: projectError } = await client
-		.from('projects')
+	foundationSlug: string,
+): Promise<{ foundationId: string; team: ProjectTeamMember[] } | null> {
+	const { data: foundation, error: foundationError } = await client
+		.from('foundations')
 		.select('id')
-		.eq('slug', projectSlug)
+		.eq('slug', foundationSlug)
 		.single()
 
-	if (projectError) throw projectError
-	if (!project) return null
+	if (foundationError) throw foundationError
+	if (!foundation) return null
 
 	const { data: team, error: teamError } = await client
-		.from('project_team')
+		.from('foundation_team')
 		.select('*')
-		.eq('project_id', project.id)
+		.eq('foundation_id', foundation.id)
 		.order('order_index', { ascending: true })
 		.order('created_at', { ascending: true })
 
-	// If table doesn't exist yet (migration not run), return empty team
-	// This prevents 404 errors before the migration is applied
 	if (teamError) {
-		// Check if it's a "relation does not exist" error
 		if (
 			teamError.message?.includes('does not exist') ||
 			teamError.message?.includes('relation') ||
 			teamError.code === '42P01'
 		) {
-			logger.warn('project_team table does not exist yet. Please run the migration.')
+			logger.warn('foundation_team table does not exist yet. Please run the migration.')
 			return {
-				projectId: project.id,
+				foundationId: foundation.id,
 				team: [],
 			}
 		}
@@ -41,11 +38,11 @@ export async function getProjectTeamBySlug(
 	}
 
 	return {
-		projectId: project.id,
+		foundationId: foundation.id,
 		team:
 			team?.map((member) => ({
 				id: member.id,
-				projectId: member.project_id,
+				projectId: member.foundation_id,
 				userId: member.user_id ?? null,
 				fullName: member.full_name,
 				roleTitle: member.role_title,

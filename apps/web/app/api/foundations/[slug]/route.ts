@@ -2,6 +2,7 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
+import { authorizeFoundationManage } from '~/lib/api/authorize-foundation-manage'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	foundationSlugParamSchema,
@@ -44,8 +45,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 			return NextResponse.json({ error: 'Foundation not found' }, { status: 404 })
 		}
 
-		if (foundation.founder_id !== userId) {
-			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+		const auth = await authorizeFoundationManage(userId, foundation.id)
+		if (!auth.ok) {
+			return NextResponse.json({ error: 'Forbidden' }, { status: auth.status })
 		}
 
 		const formData = await req.formData()

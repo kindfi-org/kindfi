@@ -60,26 +60,40 @@ export const projectSlugParamSchema = z.object({
 	slug: z.string().min(1, 'Slug is required'),
 })
 
-export const teamMemberCreateSchema = z.object({
-	projectId: z.string().uuid('Project ID is required'),
-	fullName: z
-		.string()
-		.min(1, 'Full name is required')
-		.transform((s) => s.trim()),
-	roleTitle: z
-		.string()
-		.min(1, 'Role title is required')
-		.transform((s) => s.trim()),
-	bio: z
-		.string()
-		.optional()
-		.transform((s) => s?.trim() || undefined),
-	photoUrl: z
-		.string()
-		.optional()
-		.transform((s) => s?.trim() || undefined),
-	yearsInvolved: z.number().optional(),
-})
+const teamMemberRoleTitleSchema = z
+	.string()
+	.min(1, 'Role title is required')
+	.transform((s) => s.trim())
+
+const teamMemberBioSchema = z
+	.string()
+	.optional()
+	.transform((s) => s?.trim() || undefined)
+
+export const teamMemberCreateSchema = z.discriminatedUnion('type', [
+	z.object({
+		type: z.literal('manual'),
+		projectId: z.string().uuid('Project ID is required'),
+		fullName: z
+			.string()
+			.min(1, 'Full name is required')
+			.transform((s) => s.trim()),
+		roleTitle: teamMemberRoleTitleSchema,
+		bio: teamMemberBioSchema,
+		photoUrl: z
+			.string()
+			.optional()
+			.transform((s) => s?.trim() || undefined),
+		yearsInvolved: z.number().optional(),
+	}),
+	z.object({
+		type: z.literal('registered'),
+		projectId: z.string().uuid('Project ID is required'),
+		userId: z.string().uuid('User ID is required'),
+		roleTitle: teamMemberRoleTitleSchema,
+		bio: teamMemberBioSchema,
+	}),
+])
 
 export const teamMemberUpdateSchema = z.object({
 	projectId: z.string().uuid('Project ID is required'),
