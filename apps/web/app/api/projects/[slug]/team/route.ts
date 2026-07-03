@@ -1,8 +1,9 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
-import type { TablesInsert, TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
+import { authorizeProjectManage } from '~/lib/api/authorize-project-manage'
+import { createTeamMemberRecord, deleteTeamMemberRecord } from '~/lib/api/team-member-service'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	teamMemberCreateSchema,
@@ -23,86 +24,61 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 		const body = await req.json()
 		const validation = validateRequest(teamMemberCreateSchema, body)
 		if (!validation.success) return validation.response
-		const { projectId, fullName, roleTitle, bio, photoUrl, yearsInvolved } = validation.data
 
-		// Verify user has permission and get max order_index in parallel
-		const [projectResult, memberResult, existingTeamResult] = await Promise.all([
-			supabaseServiceRole.from('projects').select('id, kindler_id').eq('id', projectId).single(),
-			supabaseServiceRole
-				.from('project_members')
-				.select('role')
-				.eq('project_id', projectId)
-				.eq('user_id', userId)
-				.in('role', ['core', 'admin', 'editor'])
-				.single(),
-			supabaseServiceRole
-				.from('project_team')
-				.select('order_index')
-				.eq('project_id', projectId)
-				.order('order_index', { ascending: false })
-				.limit(1)
-				.single(),
-		])
+		const auth = await authorizeProjectManage(userId, validation.data.projectId)
+		if (!auth.ok) {
+			return NextResponse.json({ error: 'Forbidden' }, { status: auth.status })
+		}
 
-		const { data: project, error: projectError } = projectResult
-		const { data: memberData } = memberResult
-		const { data: existingTeam } = existingTeamResult
+		const { data: project, error: projectError } = await supabaseServiceRole
+			.from('projects')
+			.select('kindler_id')
+			.eq('id', validation.data.projectId)
+			.single()
 
 		if (projectError || !project) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
 
-		const isOwner = project.kindler_id === userId
-		const hasEditorRole = !!memberData
-
-		if (!isOwner && !hasEditorRole) {
-			return NextResponse.json(
-				{
-					error: 'Forbidden: You do not have permission to manage this project team',
-				},
-				{ status: 403 },
-			)
-		}
-
-		const nextOrderIndex = existingTeam?.order_index ? existingTeam.order_index + 1 : 0
-
-		// Insert new team member
-		const insertData: TablesInsert<'project_team'> = {
-			project_id: projectId,
-			full_name: fullName,
-			role_title: roleTitle,
-			bio: bio?.trim() || null,
-			photo_url: photoUrl?.trim() || null,
-			years_involved: yearsInvolved || null,
-			order_index: nextOrderIndex,
-		}
-
-		const { data: newMember, error: insertError } = await supabaseServiceRole
-			.from('project_team')
-			.insert(insertData)
-			.select()
-			.single()
-
-		if (insertError) {
-			logger.error(insertError)
-			return NextResponse.json({ error: insertError.message }, { status: 500 })
-		}
-
-		return NextResponse.json({
-			message: 'Team member added successfully',
-			member: {
-				id: newMember.id,
-				projectId: newMember.project_id,
-				fullName: newMember.full_name,
-				roleTitle: newMember.role_title,
-				bio: newMember.bio,
-				photoUrl: newMember.photo_url,
-				yearsInvolved: newMember.years_involved,
-				orderIndex: newMember.order_index,
-				createdAt: newMember.created_at,
-				updatedAt: newMember.updated_at,
-			},
+		const result = await createTeamMemberRecord({
+			entityId: validation.data.projectId,
+			entityColumn: 'project_id',
+			teamTable: 'project_team',
+			membersTable: 'project_members',
+			ownerUserId: project.kindler_id,
+			type: validation.data.type,
+			fullName: validation.data.type === 'manual' ? validation.data.fullName : undefined,
+			roleTitle: validation.data.roleTitle,
+			bio: validation.data.bio,
+			photoUrl: validation.data.type === 'manual' ? validation.data.photoUrl : undefined,
+			yearsInvolved: validation.data.type === 'manual' ? validation.data.yearsInvolved : undefined,
+			userId: validation.data.type === 'registered' ? validation.data.userId : undefined,
 		})
+
+		if ('error' in result) {
+			return NextResponse.json({ error: result.error }, { status: result.status })
+		}
+
+		return NextResponse.json(
+			{
+				message: 'Team member added successfully',
+				member: {
+					id: result.member.id,
+					projectId: result.member.entityId,
+					userId: result.member.userId,
+					fullName: result.member.fullName,
+					roleTitle: result.member.roleTitle,
+					bio: result.member.bio,
+					photoUrl: result.member.photoUrl,
+					yearsInvolved: result.member.yearsInvolved,
+					orderIndex: result.member.orderIndex,
+					isManager: result.member.isManager,
+					createdAt: result.member.createdAt,
+					updatedAt: result.member.updatedAt,
+				},
+			},
+			{ status: result.status },
+		)
 	} catch (err) {
 		logger.error(err)
 		return NextResponse.json(
@@ -127,43 +103,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 		const { projectId, memberId, fullName, roleTitle, bio, photoUrl, yearsInvolved, orderIndex } =
 			validation.data
 
-		// Verify user has permission in parallel
-		const [projectResult, memberResult] = await Promise.all([
-			supabaseServiceRole.from('projects').select('id, kindler_id').eq('id', projectId).single(),
-			supabaseServiceRole
-				.from('project_members')
-				.select('role')
-				.eq('project_id', projectId)
-				.eq('user_id', userId)
-				.in('role', ['core', 'admin', 'editor'])
-				.single(),
-		])
-
-		const { data: project, error: projectError } = projectResult
-		const { data: memberData, error: memberError } = memberResult
-
-		if (projectError || !project) {
-			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+		const auth = await authorizeProjectManage(userId, projectId)
+		if (!auth.ok) {
+			return NextResponse.json({ error: 'Forbidden' }, { status: auth.status })
 		}
 
-		if (memberError && memberError.code !== 'PGRST116') {
-			logger.error('Error checking user permissions:', memberError)
-		}
-
-		const isOwner = project.kindler_id === userId
-		const hasEditorRole = !!memberData
-
-		if (!isOwner && !hasEditorRole) {
-			return NextResponse.json(
-				{
-					error: 'Forbidden: You do not have permission to manage this project team',
-				},
-				{ status: 403 },
-			)
-		}
-
-		// Build update data
-		const updateData: TablesUpdate<'project_team'> = {}
+		const updateData: Record<string, unknown> = {}
 		if (fullName !== undefined) updateData.full_name = fullName?.trim() ?? null
 		if (roleTitle !== undefined) updateData.role_title = roleTitle?.trim() ?? null
 		if (bio !== undefined) updateData.bio = bio?.trim() || null
@@ -189,12 +134,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 			member: {
 				id: updatedMember.id,
 				projectId: updatedMember.project_id,
+				userId: updatedMember.user_id,
 				fullName: updatedMember.full_name,
 				roleTitle: updatedMember.role_title,
 				bio: updatedMember.bio,
 				photoUrl: updatedMember.photo_url,
 				yearsInvolved: updatedMember.years_involved,
 				orderIndex: updatedMember.order_index,
+				isManager: Boolean(updatedMember.user_id),
 				createdAt: updatedMember.created_at,
 				updatedAt: updatedMember.updated_at,
 			},
@@ -218,63 +165,31 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ slug:
 
 		const { slug: _projectSlug } = await params
 		const { searchParams } = new URL(req.url)
-		const queryData = {
+		const validation = validateRequest(teamMemberDeleteQuerySchema, {
 			projectId: searchParams.get('projectId'),
 			memberId: searchParams.get('memberId'),
-		}
-		const validation = validateRequest(teamMemberDeleteQuerySchema, queryData)
+		})
 		if (!validation.success) return validation.response
 		const { projectId, memberId } = validation.data
 
-		// Verify user has permission in parallel
-		const [projectResult, memberResult] = await Promise.all([
-			supabaseServiceRole.from('projects').select('id, kindler_id').eq('id', projectId).single(),
-			supabaseServiceRole
-				.from('project_members')
-				.select('role')
-				.eq('project_id', projectId)
-				.eq('user_id', userId)
-				.in('role', ['core', 'admin', 'editor'])
-				.single(),
-		])
-
-		const { data: project, error: projectError } = projectResult
-		const { data: memberData, error: memberError } = memberResult
-
-		if (projectError || !project) {
-			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+		const auth = await authorizeProjectManage(userId, projectId)
+		if (!auth.ok) {
+			return NextResponse.json({ error: 'Forbidden' }, { status: auth.status })
 		}
 
-		if (memberError && memberError.code !== 'PGRST116') {
-			logger.error('Error checking user permissions:', memberError)
-		}
-
-		const isOwner = project.kindler_id === userId
-		const hasEditorRole = !!memberData
-
-		if (!isOwner && !hasEditorRole) {
-			return NextResponse.json(
-				{
-					error: 'Forbidden: You do not have permission to manage this project team',
-				},
-				{ status: 403 },
-			)
-		}
-
-		const { error: deleteError } = await supabaseServiceRole
-			.from('project_team')
-			.delete()
-			.eq('id', memberId)
-			.eq('project_id', projectId)
-
-		if (deleteError) {
-			logger.error(deleteError)
-			return NextResponse.json({ error: deleteError.message }, { status: 500 })
-		}
-
-		return NextResponse.json({
-			message: 'Team member removed successfully',
+		const result = await deleteTeamMemberRecord({
+			entityId: projectId,
+			entityColumn: 'project_id',
+			teamTable: 'project_team',
+			membersTable: 'project_members',
+			memberId,
 		})
+
+		if ('error' in result) {
+			return NextResponse.json({ error: result.error }, { status: result.status })
+		}
+
+		return NextResponse.json({ message: 'Team member removed successfully' })
 	} catch (err) {
 		logger.error(err)
 		return NextResponse.json(

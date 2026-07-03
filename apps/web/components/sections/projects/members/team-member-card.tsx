@@ -1,9 +1,10 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Edit2, Trash2 } from 'lucide-react'
+import { Edit2, Shield, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
+import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardHeader } from '~/components/base/card'
 import {
@@ -45,7 +46,15 @@ export function TeamMemberCard({ member, index, onEdit, onDelete }: TeamMemberCa
 								</AvatarFallback>
 							</Avatar>
 							<div className="flex-1 min-w-0">
-								<h3 className="font-semibold text-lg truncate">{member.fullName}</h3>
+								<div className="flex items-center gap-2">
+									<h3 className="font-semibold text-lg truncate">{member.fullName}</h3>
+									{member.isManager ? (
+										<Badge variant="secondary" className="shrink-0 gap-1 text-xs">
+											<Shield className="h-3 w-3" aria-hidden="true" />
+											Manager
+										</Badge>
+									) : null}
+								</div>
 								<p className="text-sm text-muted-foreground truncate">{member.roleTitle}</p>
 							</div>
 						</div>

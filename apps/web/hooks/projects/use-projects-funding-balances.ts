@@ -1,7 +1,7 @@
 'use client'
 
 import type { EscrowType } from '@trustless-work/escrow'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { logger } from '@/lib/logger'
 import { useOptionalEscrow } from '~/hooks/contexts/use-escrow.context'
 import {
@@ -12,20 +12,32 @@ import {
 	resolveEscrowBalanceFromMap,
 } from '~/lib/utils/projects/project-funding'
 
-export function useProjectsFundingBalances(projects: ProjectFundingSource[]) {
+const EMPTY_PROJECTS: ProjectFundingSource[] = []
+
+const buildProjectsEscrowKey = (projects: ProjectFundingSource[]): string =>
+	projects
+		.filter((project) => Boolean(project.escrowContractAddress))
+		.map((project) => `${project.escrowContractAddress as string}|${getProjectEscrowType(project)}`)
+		.sort()
+		.join(',')
+
+export function useProjectsFundingBalances(projects: ProjectFundingSource[] = EMPTY_PROJECTS) {
 	const escrow = useOptionalEscrow()
 	const getMultipleBalances = escrow?.getMultipleBalances
 	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>({})
 	const [isLoadingBalances, setIsLoadingBalances] = useState(false)
+	const projectsRef = useRef(projects)
+	projectsRef.current = projects
 
-	const projectsWithEscrow = useMemo(
-		() => projects.filter((project) => Boolean(project.escrowContractAddress)),
-		[projects],
-	)
+	const projectsEscrowKey = useMemo(() => buildProjectsEscrowKey(projects), [projects])
 
 	const fetchBalances = useCallback(async () => {
+		const projectsWithEscrow = projectsRef.current.filter((project) =>
+			Boolean(project.escrowContractAddress),
+		)
+
 		if (projectsWithEscrow.length === 0 || !getMultipleBalances) {
-			setEscrowBalances({})
+			setEscrowBalances((prev) => (Object.keys(prev).length === 0 ? prev : {}))
 			return
 		}
 
@@ -62,7 +74,7 @@ export function useProjectsFundingBalances(projects: ProjectFundingSource[]) {
 		} finally {
 			setIsLoadingBalances(false)
 		}
-	}, [getMultipleBalances, projectsWithEscrow])
+	}, [getMultipleBalances, projectsEscrowKey])
 
 	useEffect(() => {
 		void fetchBalances()

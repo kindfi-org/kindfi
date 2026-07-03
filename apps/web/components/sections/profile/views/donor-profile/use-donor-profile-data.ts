@@ -15,7 +15,7 @@ export function useDonorProfileData(userId: string) {
 	const queryEnabled = status === 'authenticated' && Boolean(userId) && !isSupabaseUserLoading
 
 	const {
-		data: supportedProjects = [],
+		data: supportedProjects,
 		isLoading,
 		error,
 	} = useSupabaseQuery(
@@ -27,7 +27,7 @@ export function useDonorProfileData(userId: string) {
 	const { getDisplayRaised, isLoadingBalances } = useProjectsFundingBalances(supportedProjects)
 
 	const projectsWithBalances = useMemo((): DonorProjectWithBalance[] => {
-		return supportedProjects.map((project) => {
+		return (supportedProjects ?? []).map((project) => {
 			const raised = getDisplayRaised(project)
 			const percentageComplete =
 				calculateFundingProgressPercent(raised, project.goal) ?? project.percentageComplete
@@ -50,7 +50,7 @@ export function useDonorProfileData(userId: string) {
 	}, [projectsWithBalances])
 
 	return {
-		supportedProjects,
+		supportedProjects: supportedProjects ?? [],
 		projectsWithBalances,
 		stats,
 		isLoading: isLoading || isLoadingBalances,

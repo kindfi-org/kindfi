@@ -23,6 +23,46 @@ export const foundationMilestoneCreateSchema = z.object({
 	impactMetric: z.string().nullable().optional(),
 })
 
+const foundationTeamRoleTitleSchema = z
+	.string()
+	.min(1, 'Role title is required')
+	.transform((s) => s.trim())
+
+const foundationTeamBioSchema = z
+	.string()
+	.optional()
+	.transform((s) => s?.trim() || undefined)
+
+export const foundationTeamMemberCreateSchema = z.discriminatedUnion('type', [
+	z.object({
+		type: z.literal('manual'),
+		foundationId: z.string().uuid('Foundation ID is required'),
+		fullName: z
+			.string()
+			.min(1, 'Full name is required')
+			.transform((s) => s.trim()),
+		roleTitle: foundationTeamRoleTitleSchema,
+		bio: foundationTeamBioSchema,
+		photoUrl: z
+			.string()
+			.optional()
+			.transform((s) => s?.trim() || undefined),
+		yearsInvolved: z.number().optional(),
+	}),
+	z.object({
+		type: z.literal('registered'),
+		foundationId: z.string().uuid('Foundation ID is required'),
+		userId: z.string().uuid('User ID is required'),
+		roleTitle: foundationTeamRoleTitleSchema,
+		bio: foundationTeamBioSchema,
+	}),
+])
+
+export const foundationTeamMemberDeleteQuerySchema = z.object({
+	foundationId: z.string().uuid('Foundation ID is required'),
+	memberId: z.string().uuid('Member ID is required'),
+})
+
 export const foundationUpdateFormSchema = z.object({
 	name: z.string().min(1, 'Name is required'),
 	description: z.string().min(1, 'Description is required'),

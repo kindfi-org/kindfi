@@ -2,6 +2,7 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
+import { authorizeFoundationManage } from '~/lib/api/authorize-foundation-manage'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
 	foundationMilestoneCreateSchema,
@@ -40,8 +41,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 			return NextResponse.json({ error: 'Foundation not found' }, { status: 404 })
 		}
 
-		if (foundation.founder_id !== session.user.id) {
-			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+		const auth = await authorizeFoundationManage(session.user.id, foundation.id)
+		if (!auth.ok) {
+			return NextResponse.json({ error: 'Forbidden' }, { status: auth.status })
 		}
 
 		const { error: insertError } = await supabase.from('foundation_milestones').insert({

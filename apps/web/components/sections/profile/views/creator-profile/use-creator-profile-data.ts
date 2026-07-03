@@ -18,7 +18,7 @@ async function fetchProfileProjects(): Promise<CreatorProjectWithBalance[]> {
 export function useCreatorProfileData(userId: string) {
 	const { status } = useSession()
 	const {
-		data: projects = [],
+		data: projects,
 		isLoading,
 		error,
 	} = useQuery({
@@ -30,7 +30,7 @@ export function useCreatorProfileData(userId: string) {
 	const { getDisplayRaised, isLoadingBalances } = useProjectsFundingBalances(projects)
 
 	const projectsWithBalances = useMemo((): CreatorProjectWithBalance[] => {
-		return projects.map((project) => {
+		return (projects ?? []).map((project) => {
 			const raised = getDisplayRaised(project)
 			const percentageComplete =
 				calculateFundingProgressPercent(raised, project.goal) ?? project.percentageComplete
@@ -61,7 +61,7 @@ export function useCreatorProfileData(userId: string) {
 		}).format(amount)
 
 	return {
-		projects,
+		projects: projects ?? [],
 		projectsWithBalances,
 		activeProjects,
 		totalRaised,
