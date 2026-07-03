@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
 	formatHumanPlatformFee,
 	fromTrustlessWorkPlatformFee,
+	getKindfiDeployPlatformFee,
 	getKindfiTrustlessWorkPlatformFee,
 	KINDFI_PLATFORM_FEE_PERCENT,
 	KINDFI_TRUSTLESS_WORK_PLATFORM_FEE,
@@ -13,6 +14,10 @@ describe('platform-fee', () => {
 		expect(KINDFI_PLATFORM_FEE_PERCENT).toBe(1)
 		expect(KINDFI_TRUSTLESS_WORK_PLATFORM_FEE).toBe(100)
 		expect(getKindfiTrustlessWorkPlatformFee()).toBe(100)
+	})
+
+	test('deploy API uses human percent', () => {
+		expect(getKindfiDeployPlatformFee()).toBe(1)
 	})
 
 	test('converts human percent to Trustless Work centi-percent', () => {
