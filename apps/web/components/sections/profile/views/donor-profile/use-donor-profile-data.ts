@@ -1,13 +1,19 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
+import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { logger } from '@/lib/logger'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { useAuth } from '~/hooks/use-auth'
 import { getUserSupportedProjects } from '~/lib/queries/projects/get-user-projects'
 import type { DonorProjectWithBalance } from './types'
 
 export function useDonorProfileData(userId: string) {
+	const { status } = useSession()
+	const { isSupabaseUserLoading } = useAuth()
+	const queryEnabled = status === 'authenticated' && Boolean(userId) && !isSupabaseUserLoading
+
 	const {
 		data: supportedProjects = [],
 		isLoading,
@@ -15,7 +21,7 @@ export function useDonorProfileData(userId: string) {
 	} = useSupabaseQuery(
 		'user-supported-projects',
 		(client) => getUserSupportedProjects(client, userId),
-		{ additionalKeyValues: [userId] },
+		{ additionalKeyValues: [userId], enabled: queryEnabled },
 	)
 
 	const { getMultipleBalances } = useEscrow()

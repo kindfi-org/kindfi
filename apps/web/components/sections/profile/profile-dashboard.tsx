@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs
 import { SectionContainer } from '~/components/shared/section-container'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n'
+import { isCreatorProfileRole } from '~/lib/profile/is-creator-profile-role'
 import { cn } from '~/lib/utils'
 import { safeLocalStorageSet } from '~/lib/utils/safe-storage'
 import { AccountInfoCard } from './cards/account-info-card'
@@ -91,6 +92,7 @@ export function ProfileDashboard({
 	const { t } = useI18n()
 	const router = useRouter()
 	const role: Role | null = user.profile?.role ?? null
+	const showCreatorProfile = isCreatorProfileRole(role)
 	const displayName = useMemo(
 		() => user.profile?.display_name || user.email?.split('@')[0] || 'You',
 		[user.profile?.display_name, user.email],
@@ -174,7 +176,7 @@ export function ProfileDashboard({
 	const openSettings = () => handleTabChange('settings')
 
 	const renderSection = (section: string) => {
-		const ProfileView = role === 'creator' ? CreatorProfile : DonorProfile
+		const ProfileView = showCreatorProfile ? CreatorProfile : DonorProfile
 		return (
 			<Suspense fallback={<ProfileViewSkeleton />}>
 				<ProfileView
@@ -245,7 +247,7 @@ export function ProfileDashboard({
 											{t('profile.tabDonations')}
 										</TabsTrigger>
 									) : null}
-									{role === 'creator' ? (
+									{showCreatorProfile ? (
 										<>
 											<TabsTrigger value="campaigns" className={TAB_TRIGGER_CLASS}>
 												{t('profile.tabCampaigns')}
@@ -280,7 +282,7 @@ export function ProfileDashboard({
 									{renderSection('donations')}
 								</TabsContent>
 							) : null}
-							{role === 'creator' ? (
+							{showCreatorProfile ? (
 								<>
 									<TabsContent value="campaigns" className="mt-0">
 										{renderSection('campaigns')}

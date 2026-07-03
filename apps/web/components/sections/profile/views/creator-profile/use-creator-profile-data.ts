@@ -1,19 +1,30 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
+import { useQuery } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { logger } from '@/lib/logger'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import { getUserCreatedProjects } from '~/lib/queries/projects/get-user-projects'
 import type { CreatorProjectWithBalance } from './types'
 
+async function fetchProfileProjects(): Promise<CreatorProjectWithBalance[]> {
+	const response = await fetch('/api/profile/projects')
+	if (!response.ok) {
+		throw new Error('Failed to load projects')
+	}
+	return response.json()
+}
+
 export function useCreatorProfileData(userId: string) {
+	const { status } = useSession()
 	const {
 		data: projects = [],
 		isLoading,
 		error,
-	} = useSupabaseQuery('user-projects', (client) => getUserCreatedProjects(client, userId), {
-		additionalKeyValues: [userId],
+	} = useQuery({
+		queryKey: ['profile', 'user-projects', userId],
+		queryFn: fetchProfileProjects,
+		enabled: status === 'authenticated' && Boolean(userId),
 	})
 
 	const { getMultipleBalances } = useEscrow()

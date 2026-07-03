@@ -154,6 +154,10 @@ export async function getUserSupportedProjects(client: TypedSupabaseClient, user
 				tag: { id: string; name: string; color: string }
 			}>
 			project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+		} | null
+
+		if (!project?.id) {
+			continue
 		}
 
 		const existing = projectMap.get(project.id)
