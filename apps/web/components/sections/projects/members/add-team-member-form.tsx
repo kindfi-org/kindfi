@@ -17,6 +17,7 @@ import {
 	FormMessage,
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
+import { Label } from '~/components/base/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { Textarea } from '~/components/base/textarea'
 import { UserSearchPicker } from '~/components/shared/user-search-picker'
@@ -161,22 +162,20 @@ export function AddTeamMemberForm({
 									onSubmit={registeredForm.handleSubmit(handleRegisteredSubmit)}
 									className="space-y-4"
 								>
-									<FormItem>
-										<FormLabel>
+									<div className="space-y-2">
+										<Label>
 											Platform User <span className="text-destructive">*</span>
-										</FormLabel>
-										<FormControl>
-											<UserSearchPicker
-												selectedUser={selectedUser}
-												onSelect={setSelectedUser}
-												disabled={isSubmitting}
-												excludeUserIds={excludeUserIds}
-											/>
-										</FormControl>
-										<p className="text-xs text-muted-foreground mt-1">
+										</Label>
+										<UserSearchPicker
+											selectedUser={selectedUser}
+											onSelect={setSelectedUser}
+											disabled={isSubmitting}
+											excludeUserIds={excludeUserIds}
+										/>
+										<p className="text-xs text-muted-foreground">
 											Registered users are granted permission to manage this {entityLabel}.
 										</p>
-									</FormItem>
+									</div>
 
 									<FormField
 										control={registeredForm.control}

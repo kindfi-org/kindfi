@@ -1,8 +1,7 @@
 'use client'
 
 import { Check, ChevronsUpDown, Loader2, User } from 'lucide-react'
-import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import {
 	Command,
@@ -27,25 +26,47 @@ export function UserSearchPicker({
 	const [query, setQuery] = useState('')
 	const [users, setUsers] = useState<SearchableUser[]>([])
 	const [isSearching, setIsSearching] = useState(false)
+	const [searchError, setSearchError] = useState<string | null>(null)
+	const excludedIdsKey = useMemo(() => excludeUserIds.join(','), [excludeUserIds])
 
 	useEffect(() => {
 		if (query.trim().length < 2) {
 			setUsers([])
+			setSearchError(null)
 			return
 		}
 
 		const controller = new AbortController()
 		const timeoutId = setTimeout(async () => {
 			setIsSearching(true)
+			setSearchError(null)
 			try {
 				const res = await fetch(`/api/users/search?q=${encodeURIComponent(query.trim())}`, {
 					signal: controller.signal,
 				})
-				if (!res.ok) return
+
+				if (!res.ok) {
+					let message = 'Failed to search users'
+					try {
+						const body = (await res.json()) as { error?: string }
+						message = body.error ?? message
+					} catch {
+						// ignore parse errors
+					}
+					setUsers([])
+					setSearchError(message)
+					return
+				}
+
 				const data = (await res.json()) as { users: SearchableUser[] }
-				setUsers(data.users.filter((user) => !excludeUserIds.includes(user.id)))
-			} catch {
-				// Ignore aborted requests
+				const excluded = new Set(excludedIdsKey.split(',').filter(Boolean))
+				setUsers(data.users.filter((user) => !excluded.has(user.id)))
+			} catch (error) {
+				if (error instanceof DOMException && error.name === 'AbortError') {
+					return
+				}
+				setUsers([])
+				setSearchError('Failed to search users')
 			} finally {
 				setIsSearching(false)
 			}
@@ -55,7 +76,7 @@ export function UserSearchPicker({
 			clearTimeout(timeoutId)
 			controller.abort()
 		}
-	}, [query, excludeUserIds])
+	}, [query, excludedIdsKey])
 
 	const displayLabel = selectedUser
 		? selectedUser.displayName || selectedUser.email || 'Selected user'
@@ -104,6 +125,8 @@ export function UserSearchPicker({
 								<Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
 								Searching…
 							</div>
+						) : searchError ? (
+							<CommandEmpty>{searchError}</CommandEmpty>
 						) : query.trim().length < 2 ? (
 							<CommandEmpty>Type at least 2 characters to search.</CommandEmpty>
 						) : users.length === 0 ? (
@@ -122,19 +145,12 @@ export function UserSearchPicker({
 											}}
 											className="gap-2"
 										>
-											{user.imageUrl ? (
-												<Image
-													src={user.imageUrl}
-													alt=""
-													width={24}
-													height={24}
-													className="h-6 w-6 rounded-full object-cover shrink-0"
-												/>
-											) : (
-												<div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium shrink-0">
+											<Avatar className="h-6 w-6 shrink-0">
+												<AvatarImage src={user.imageUrl ?? undefined} alt="" />
+												<AvatarFallback className="text-xs">
 													{getAvatarFallback(label)}
-												</div>
-											)}
+												</AvatarFallback>
+											</Avatar>
 											<div className="flex-1 min-w-0">
 												<span className="block truncate font-medium">{label}</span>
 												{user.email ? (

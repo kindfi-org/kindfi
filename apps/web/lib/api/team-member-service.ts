@@ -123,8 +123,7 @@ export async function createTeamMemberRecord(input: TeamInsertInput) {
 			? profile?.display_name?.trim() || profile?.email || 'Team Member'
 			: (fullName?.trim() ?? '')
 
-	const insertData: TablesInsert<'project_team'> | TablesInsert<'foundation_team'> = {
-		[entityColumn]: entityId,
+	const sharedInsert = {
 		full_name: resolvedFullName,
 		role_title: roleTitle,
 		bio: bio?.trim() || (type === 'registered' ? profile?.bio?.trim() || null : null),
@@ -134,6 +133,17 @@ export async function createTeamMemberRecord(input: TeamInsertInput) {
 		order_index: nextOrderIndex,
 		user_id: type === 'registered' ? (userId ?? null) : null,
 	}
+
+	const insertData =
+		entityColumn === 'project_id'
+			? ({
+					...sharedInsert,
+					project_id: entityId,
+				} satisfies TablesInsert<'project_team'>)
+			: ({
+					...sharedInsert,
+					foundation_id: entityId,
+				} satisfies TablesInsert<'foundation_team'>)
 
 	const { data: newMember, error: insertError } = await supabaseServiceRole
 		.from(teamTable)
@@ -146,12 +156,20 @@ export async function createTeamMemberRecord(input: TeamInsertInput) {
 	}
 
 	if (type === 'registered' && userId) {
-		const memberInsert: TablesInsert<'project_members'> | TablesInsert<'foundation_members'> = {
-			[entityColumn]: entityId,
-			user_id: userId,
-			role: 'admin',
-			title: roleTitle,
-		}
+		const memberInsert =
+			entityColumn === 'project_id'
+				? ({
+						project_id: entityId,
+						user_id: userId,
+						role: 'admin',
+						title: roleTitle,
+					} satisfies TablesInsert<'project_members'>)
+				: ({
+						foundation_id: entityId,
+						user_id: userId,
+						role: 'admin',
+						title: roleTitle,
+					} satisfies TablesInsert<'foundation_members'>)
 
 		const { error: memberError } = await supabaseServiceRole
 			.from(membersTable)

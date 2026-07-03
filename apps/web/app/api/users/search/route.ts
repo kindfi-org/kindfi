@@ -6,6 +6,9 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { userSearchQuerySchema } from '~/lib/schemas/user.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
+const escapeFilterValue = (value: string): string =>
+	value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+
 export async function GET(req: Request) {
 	try {
 		const session = await getServerSession(nextAuthOption)
@@ -20,13 +23,13 @@ export async function GET(req: Request) {
 		if (!validation.success) return validation.response
 
 		const { q } = validation.data
-		const pattern = `%${q}%`
+		const pattern = `%${escapeFilterValue(q)}%`
 
 		const { data: users, error } = await supabaseServiceRole
 			.from('profiles')
 			.select('id, display_name, email, image_url, slug')
-			.or(`display_name.ilike.${pattern},email.ilike.${pattern},slug.ilike.${pattern}`)
-			.order('display_name', { ascending: true })
+			.or(`display_name.ilike."${pattern}",email.ilike."${pattern}",slug.ilike."${pattern}"`)
+			.order('display_name', { ascending: true, nullsFirst: false })
 			.limit(10)
 
 		if (error) {

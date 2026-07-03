@@ -38,7 +38,7 @@ export function AdminProjectsList() {
 		queryFn: fetchAdminProjects,
 	})
 
-	const { getDisplayRaised } = useProjectsFundingBalances(projects ?? [])
+	const { getDisplayRaised } = useProjectsFundingBalances(projects)
 
 	if (isLoading) {
 		return (
