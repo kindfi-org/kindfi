@@ -8,7 +8,7 @@ import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { Progress } from '~/components/base/progress'
-import { truncateAddress } from '~/lib/utils/escrow/milestone-utils'
+import { formatEscrowAmount, truncateAddress } from '~/lib/utils/escrow/milestone-utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 
 interface EscrowStatsBarProps {
@@ -99,10 +99,7 @@ export function EscrowStatsBar({
 								{isLoadingBalance ? (
 									<span className="text-muted-foreground">Loading…</span>
 								) : balance !== null ? (
-									`$${balance.toLocaleString(undefined, {
-										minimumFractionDigits: 2,
-										maximumFractionDigits: 7,
-									})}`
+									formatEscrowAmount(balance)
 								) : (
 									<span className="text-muted-foreground">N/A</span>
 								)}

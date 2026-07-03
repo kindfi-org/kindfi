@@ -13,6 +13,7 @@ import { Label } from '~/components/base/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
+import { formatEscrowAmount } from '~/lib/utils/escrow/milestone-utils'
 import { EtherfuseOnRampCard } from '../components/etherfuse-on-ramp-card'
 
 const QUICK_AMOUNTS = [100, 500, 1000, 5000]
@@ -162,10 +163,7 @@ export function FundEscrowTab({
 								{isLoadingBalance ? (
 									<span className="text-base text-muted-foreground">Loading…</span>
 								) : balance !== null ? (
-									`$${balance.toLocaleString(undefined, {
-										minimumFractionDigits: 2,
-										maximumFractionDigits: 7,
-									})}`
+									formatEscrowAmount(balance)
 								) : (
 									'N/A'
 								)}

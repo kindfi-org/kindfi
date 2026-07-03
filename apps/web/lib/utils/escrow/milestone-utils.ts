@@ -1,4 +1,5 @@
 import type { MultiReleaseMilestone, SingleReleaseMilestone } from '@trustless-work/escrow'
+import { formatCurrencyAmount } from '~/lib/utils/format-currency'
 
 export type MilestoneReleasePhase =
 	| 'released'
@@ -216,10 +217,11 @@ export function calculateMilestoneProgress(
  */
 export function formatEscrowAmount(amount: number | undefined | null): string {
 	if (amount === undefined || amount === null) return 'N/A'
-	return `$${amount.toLocaleString(undefined, {
+
+	return formatCurrencyAmount(amount, {
 		minimumFractionDigits: 2,
 		maximumFractionDigits: 7,
-	})}`
+	})
 }
 
 /**
