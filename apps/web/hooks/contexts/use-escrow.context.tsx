@@ -171,4 +171,9 @@ export function useEscrow() {
 	return ctx
 }
 
+/** Returns escrow actions when available; null when EscrowProvider is not mounted. */
+export function useOptionalEscrow(): EscrowActionsContext | null {
+	return useContext(EscrowContext) ?? null
+}
+
 export type { EscrowActionsContext }

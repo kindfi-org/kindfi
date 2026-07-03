@@ -8,6 +8,29 @@ export type FormatCurrencyOptions = {
 	maximumFractionDigits?: number
 }
 
+/** Coerce API / DB values to a finite number without throwing. */
+export const coerceNumericAmount = (amount: unknown): number | null => {
+	if (amount === null || amount === undefined) {
+		return null
+	}
+
+	if (typeof amount === 'number') {
+		return Number.isFinite(amount) ? amount : null
+	}
+
+	if (typeof amount === 'bigint') {
+		const numeric = Number(amount)
+		return Number.isFinite(numeric) ? numeric : null
+	}
+
+	if (typeof amount === 'string' && amount.trim() !== '') {
+		const numeric = Number(amount)
+		return Number.isFinite(numeric) ? numeric : null
+	}
+
+	return null
+}
+
 const clampFractionDigits = (value: number | undefined, fallback: number): number => {
 	if (value === undefined || !Number.isFinite(value)) {
 		return fallback
@@ -38,12 +61,10 @@ export const formatCurrencyAmount = (
 	amount: number | null | undefined,
 	options?: FormatCurrencyOptions,
 ): string => {
-	if (amount === null || amount === undefined) {
-		return options?.loadingPlaceholder ?? '…'
-	}
+	const numericAmount = coerceNumericAmount(amount)
 
-	if (!Number.isFinite(amount)) {
-		return options?.loadingPlaceholder ?? '—'
+	if (numericAmount === null) {
+		return options?.loadingPlaceholder ?? (amount === null || amount === undefined ? '…' : '—')
 	}
 
 	const { minimumFractionDigits, maximumFractionDigits } = normalizeFractionDigits(
@@ -57,9 +78,9 @@ export const formatCurrencyAmount = (
 			currency: options?.currency ?? 'USD',
 			minimumFractionDigits,
 			maximumFractionDigits,
-		}).format(amount)
+		}).format(numericAmount)
 	} catch {
 		const fallbackDigits = Math.min(maximumFractionDigits, 2)
-		return `$${amount.toFixed(fallbackDigits)}`
+		return `$${numericAmount.toFixed(fallbackDigits)}`
 	}
 }

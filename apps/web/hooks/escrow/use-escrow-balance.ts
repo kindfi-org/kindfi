@@ -2,7 +2,7 @@
 
 import type { EscrowType } from '@trustless-work/escrow'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { useOptionalEscrow } from '~/hooks/contexts/use-escrow.context'
 
 interface UseEscrowBalanceParams {
 	escrowContractAddress?: string
@@ -10,14 +10,15 @@ interface UseEscrowBalanceParams {
 }
 
 export function useEscrowBalance({ escrowContractAddress, escrowType }: UseEscrowBalanceParams) {
-	const { getMultipleBalances } = useEscrow()
+	const escrow = useOptionalEscrow()
+	const getMultipleBalances = escrow?.getMultipleBalances
 	const [balance, setBalance] = useState<number | null>(null)
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState<unknown>(null)
 
 	const fetchBalance = useCallback(
 		async (showLoading = true) => {
-			if (!escrowContractAddress) return
+			if (!escrowContractAddress || !getMultipleBalances) return
 			try {
 				if (showLoading) setIsLoading(true)
 				setError(null)
@@ -26,7 +27,10 @@ export function useEscrowBalance({ escrowContractAddress, escrowType }: UseEscro
 					escrowType || 'multi-release',
 				)
 				const first = balances?.[0]
-				if (first) setBalance(first.balance)
+				if (first?.balance !== undefined && first.balance !== null) {
+					const numericBalance = Number(first.balance)
+					setBalance(Number.isFinite(numericBalance) ? numericBalance : null)
+				}
 			} catch (e) {
 				setError(e)
 			} finally {
@@ -37,7 +41,11 @@ export function useEscrowBalance({ escrowContractAddress, escrowType }: UseEscro
 	)
 
 	useEffect(() => {
-		if (!escrowContractAddress) return
+		if (!escrowContractAddress || !getMultipleBalances) {
+			setBalance(null)
+			setIsLoading(false)
+			return
+		}
 
 		// Initial fetch with loading state
 		fetchBalance(true)
@@ -50,7 +58,7 @@ export function useEscrowBalance({ escrowContractAddress, escrowType }: UseEscro
 		return () => {
 			clearInterval(intervalId)
 		}
-	}, [escrowContractAddress, fetchBalance])
+	}, [escrowContractAddress, fetchBalance, getMultipleBalances])
 
 	const refetch = useCallback(() => {
 		return fetchBalance(true)

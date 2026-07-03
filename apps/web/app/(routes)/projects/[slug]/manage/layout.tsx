@@ -6,18 +6,6 @@ import { ProjectManageCommandCenter } from '~/components/sections/projects/manag
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { canUserManageProject } from '~/lib/queries/projects/can-user-manage-project'
 import { getProjectManageMeta } from '~/lib/queries/projects/get-project-manage-meta'
-import { getAuthenticatedSupabaseServerClient } from '~/lib/supabase/authenticated-server-client'
-
-async function resolveProjectManageMeta(slug: string) {
-	const authenticatedClient = await getAuthenticatedSupabaseServerClient()
-	const authenticatedMeta = await getProjectManageMeta(authenticatedClient, slug)
-	if (authenticatedMeta) {
-		return authenticatedMeta
-	}
-
-	// Fallback for development-only projects when Supabase JWT is unavailable.
-	return getProjectManageMeta(supabaseServiceRole, slug)
-}
 
 export default async function ManageLayout({
 	children,
@@ -29,7 +17,8 @@ export default async function ManageLayout({
 	const { slug } = await params
 	const session = await getServerSession(nextAuthOption)
 
-	const projectMeta = await resolveProjectManageMeta(slug)
+	// Use service role for layout metadata; access is enforced below via NextAuth + canUserManageProject.
+	const projectMeta = await getProjectManageMeta(supabaseServiceRole, slug)
 	if (!projectMeta) {
 		notFound()
 	}

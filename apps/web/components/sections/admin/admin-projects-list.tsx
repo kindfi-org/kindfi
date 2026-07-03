@@ -9,15 +9,14 @@ import { AdminSectionHeader } from '~/components/sections/admin/admin-section-he
 import { useProjectsFundingBalances } from '~/hooks/projects/use-projects-funding-balances'
 import type { ProjectListItem } from '~/lib/queries/projects/get-all-projects'
 import { formatDistanceToNow } from '~/lib/utils/date-utils'
+import { coerceNumericAmount } from '~/lib/utils/format-currency'
 import { formatProjectFundingAmount, projectHasEscrow } from '~/lib/utils/projects/project-funding'
 
-const formatCurrency = (value: number) =>
-	new Intl.NumberFormat(undefined, {
-		style: 'currency',
-		currency: 'USD',
-		minimumFractionDigits: 0,
+const formatGoal = (value: number | null | undefined) =>
+	formatProjectFundingAmount(coerceNumericAmount(value) ?? 0, {
 		maximumFractionDigits: 0,
-	}).format(value)
+		minimumFractionDigits: 0,
+	})
 
 const SKELETON_KEYS = ['proj-sk-1', 'proj-sk-2', 'proj-sk-3', 'proj-sk-4', 'proj-sk-5'] as const
 
@@ -127,7 +126,7 @@ export function AdminProjectsList() {
 											{formatProjectFundingAmount(getDisplayRaised(project), {
 												hasEscrow: projectHasEscrow(project),
 											})}{' '}
-											/ {formatCurrency(project.goal)}
+											/ {formatGoal(project.goal)}
 										</span>
 										<span>•</span>
 										<span>{project.investors} supporters</span>

@@ -3,7 +3,7 @@
 import type { EscrowType } from '@trustless-work/escrow'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { logger } from '@/lib/logger'
-import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { useOptionalEscrow } from '~/hooks/contexts/use-escrow.context'
 import {
 	getProjectDbRaised,
 	getProjectEscrowType,
@@ -13,7 +13,8 @@ import {
 } from '~/lib/utils/projects/project-funding'
 
 export function useProjectsFundingBalances(projects: ProjectFundingSource[]) {
-	const { getMultipleBalances } = useEscrow()
+	const escrow = useOptionalEscrow()
+	const getMultipleBalances = escrow?.getMultipleBalances
 	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>({})
 	const [isLoadingBalances, setIsLoadingBalances] = useState(false)
 
@@ -23,7 +24,7 @@ export function useProjectsFundingBalances(projects: ProjectFundingSource[]) {
 	)
 
 	const fetchBalances = useCallback(async () => {
-		if (projectsWithEscrow.length === 0) {
+		if (projectsWithEscrow.length === 0 || !getMultipleBalances) {
 			setEscrowBalances({})
 			return
 		}
@@ -46,8 +47,11 @@ export function useProjectsFundingBalances(projects: ProjectFundingSource[]) {
 				const balances = await getMultipleBalances({ addresses }, type)
 				addresses.forEach((address, index) => {
 					const balanceResponse = balances[index]
-					if (balanceResponse?.balance !== undefined) {
-						balanceMap[address] = balanceResponse.balance
+					if (balanceResponse?.balance !== undefined && balanceResponse.balance !== null) {
+						const numericBalance = Number(balanceResponse.balance)
+						if (Number.isFinite(numericBalance)) {
+							balanceMap[address] = numericBalance
+						}
 					}
 				})
 			}
