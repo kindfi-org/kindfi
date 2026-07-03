@@ -1,5 +1,6 @@
 'use client'
 
+import { useSession } from 'next-auth/react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { logger } from '@/lib/logger'
 import { getClientStellarNetworkPassphrase } from '~/lib/config/stellar-network.config'
@@ -60,6 +61,17 @@ const syncLinkedWallet = async (address: string | null) => {
 }
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
+	const { status: sessionStatus } = useSession()
+	const isAuthenticated = sessionStatus === 'authenticated'
+	const isAuthenticatedRef = useRef(isAuthenticated)
+	isAuthenticatedRef.current = isAuthenticated
+
+	const syncLinkedWalletIfAuthenticatedRef = useRef<(address: string | null) => void>(() => {})
+	syncLinkedWalletIfAuthenticatedRef.current = (address: string | null) => {
+		if (!isAuthenticatedRef.current) return
+		void syncLinkedWallet(address)
+	}
+
 	// Initialize state from localStorage if available (client-side only)
 	const [address, setAddress] = useState<string | null>(() => {
 		if (typeof window === 'undefined') return null
@@ -132,7 +144,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 							}
 							if (fetchedAddress && fetchedAddress !== storedAddress) {
 								setAddress(fetchedAddress)
-								void syncLinkedWallet(fetchedAddress)
+								syncLinkedWalletIfAuthenticatedRef.current(fetchedAddress)
 							}
 						})
 						.catch(() => {
@@ -158,11 +170,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 							}
 							setAddress(event.payload.address)
 							safeLocalStorageSet('stellar_wallet_address', event.payload.address)
-							void syncLinkedWallet(event.payload.address)
+							syncLinkedWalletIfAuthenticatedRef.current(event.payload.address)
 						} else {
 							setAddress(null)
 							safeLocalStorageRemove('stellar_wallet_address')
-							void syncLinkedWallet(null)
+							syncLinkedWalletIfAuthenticatedRef.current(null)
 						}
 					},
 				)
@@ -173,7 +185,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 					setWalletName(null)
 					safeLocalStorageRemove('stellar_wallet_address')
 					safeLocalStorageRemove('stellar_wallet_name')
-					void syncLinkedWallet(null)
+					syncLinkedWalletIfAuthenticatedRef.current(null)
 				})
 
 				// Listen to wallet selection
@@ -224,8 +236,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		if (!isInitialized) return
 		if (!address) return
+		if (!isAuthenticated) return
 		void syncLinkedWallet(address)
-	}, [isInitialized, address])
+	}, [isInitialized, address, isAuthenticated])
 
 	const connect = async () => {
 		const { StellarWalletsKit } = swkRef.current ?? {}
@@ -246,7 +259,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				}
 				setAddress(newAddress)
 				safeLocalStorageSet('stellar_wallet_address', newAddress)
-				void syncLinkedWallet(newAddress)
+				syncLinkedWalletIfAuthenticatedRef.current(newAddress)
 				// Try to get wallet name from the selected wallet
 				// This might need adjustment based on actual API behavior
 			}
@@ -269,7 +282,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 			setWalletName(null)
 			safeLocalStorageRemove('stellar_wallet_address')
 			safeLocalStorageRemove('stellar_wallet_name')
-			void syncLinkedWallet(null)
+			syncLinkedWalletIfAuthenticatedRef.current(null)
 		} catch (error) {
 			logger.error('Failed to disconnect wallet:', error)
 		}
