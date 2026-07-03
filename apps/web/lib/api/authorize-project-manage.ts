@@ -1,6 +1,8 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { canAccessDevelopmentOnlyProject } from '~/lib/queries/projects/development-only-access'
 
+const MANAGE_MEMBER_ROLES = ['core', 'admin', 'editor'] as const
+
 export type ProjectManageAccess = {
 	userId: string
 	projectId: string

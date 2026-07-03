@@ -1,22 +1,24 @@
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { useMemo } from 'react'
-import { getEscrowCountByProject } from '~/lib/queries/escrow/get-escrow-count-by-project'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
 import { generateEngagementId, generateEscrowTitle } from '~/lib/utils/escrow'
 
 interface ProjectDefaultsParams {
 	projectId: string
+	projectSlug: string
 	projectTitle?: string
 	projectDescription?: string
 }
 
 export function useProjectDefaults({
 	projectId,
+	projectSlug,
 	projectTitle,
 	projectDescription,
 }: ProjectDefaultsParams) {
-	const { data: escrowCount = 0 } = useSupabaseQuery(
+	const { data: escrowCount = 0 } = useManagedProjectQuery<number>(
 		'escrow-count',
-		(client) => getEscrowCountByProject(client, projectId),
+		projectSlug,
+		'escrow-count',
 		{ additionalKeyValues: [projectId] },
 	)
 

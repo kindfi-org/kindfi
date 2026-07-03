@@ -1,14 +1,14 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { IoMegaphoneOutline } from 'react-icons/io5'
 import { Button } from '~/components/base/button'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
 import { usePitchAnalysis } from '~/hooks/projects/use-pitch-analysis'
-import { getProjectPitchDataBySlug } from '~/lib/queries/projects/get-project-pitch-data-by-slug'
+import type { getProjectPitchDataBySlug } from '~/lib/queries/projects/get-project-pitch-data-by-slug'
 import { PitchAIAnalysis } from './ai/pitch-ai-analysis'
 import { ProjectPitchForm } from './project-pitch-form'
 import { ProjectPitchFormSkeleton } from './skeleton'
@@ -28,13 +28,12 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 		data: project,
 		isLoading: isProjectLoading,
 		error,
-	} = useSupabaseQuery(
+	} = useManagedProjectQuery<Awaited<ReturnType<typeof getProjectPitchDataBySlug>>>(
 		'project-pitch',
-		(client) => getProjectPitchDataBySlug(client, projectSlug),
+		projectSlug,
+		'pitch',
 		{ additionalKeyValues: [projectSlug] },
 	)
-
-	if (error || !project) notFound()
 
 	const handleActivateAI = useCallback(
 		(title: string, story: string) => {
@@ -48,6 +47,12 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 		reset()
 		setAiEnabled(false)
 	}, [reset])
+
+	if (isProjectLoading) {
+		return <ProjectPitchFormSkeleton />
+	}
+
+	if (error || !project) notFound()
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">

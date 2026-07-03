@@ -1,19 +1,28 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Lock } from 'lucide-react'
 import { notFound } from 'next/navigation'
-import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
+import type { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import { EscrowAdminPanel } from './escrow-admin-panel'
 
 export function EscrowAdminClientWrapper({ projectSlug }: { projectSlug: string }) {
 	const prefersReducedMotion = useReducedMotion()
-	const { data: project, error } = useSupabaseQuery(
+	const {
+		data: project,
+		isLoading,
+		error,
+	} = useManagedProjectQuery<Awaited<ReturnType<typeof getBasicProjectInfoBySlug>>>(
 		'basic-project-info',
-		(client) => getBasicProjectInfoBySlug(client, projectSlug),
+		projectSlug,
+		'basic-info',
 		{ additionalKeyValues: [projectSlug] },
 	)
+
+	if (isLoading) {
+		return null
+	}
 
 	if (error || !project) notFound()
 

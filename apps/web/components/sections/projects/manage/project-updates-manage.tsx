@@ -1,6 +1,5 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { formatDistanceToNow } from 'date-fns'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
@@ -22,8 +21,9 @@ import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { UserAvatar } from '~/components/base/user-avatar'
 import { UpdateForm } from '~/components/sections/project/update/update-form'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
 import { useProjectUpdatesMutation } from '~/hooks/projects/use-project-updates-mutation'
-import { getProjectUpdatesForManage } from '~/lib/queries/projects/get-project-updates-for-manage'
+import type { getProjectUpdatesForManage } from '~/lib/queries/projects/get-project-updates-for-manage'
 
 type UpdateFormData = {
 	id?: string
@@ -38,11 +38,9 @@ export function ProjectUpdatesManage() {
 	const [editingUpdateId, setEditingUpdateId] = useState<string | null>(null)
 	const [deletingUpdateId, setDeletingUpdateId] = useState<string | null>(null)
 
-	const { data, isLoading } = useSupabaseQuery(
-		'project-updates-manage',
-		(client) => getProjectUpdatesForManage(client, projectSlug),
-		{ additionalKeyValues: [projectSlug] },
-	)
+	const { data, isLoading } = useManagedProjectQuery<
+		Awaited<ReturnType<typeof getProjectUpdatesForManage>>
+	>('project-updates-manage', projectSlug, 'updates', { additionalKeyValues: [projectSlug] })
 
 	const { createUpdate, editUpdate, deleteUpdate, isPending } = useProjectUpdatesMutation()
 

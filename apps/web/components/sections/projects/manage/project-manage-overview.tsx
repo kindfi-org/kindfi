@@ -1,6 +1,5 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { useMemo } from 'react'
@@ -17,6 +16,7 @@ import {
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
 import { useProjectFundingDisplay } from '~/hooks/projects/use-project-funding-display'
 import { staggerContainer } from '~/lib/constants/animations'
 import {
@@ -25,7 +25,7 @@ import {
 	createManageSectionVariants,
 } from '~/lib/constants/animations/manage-page.animations'
 import { manageCategoryConfig } from '~/lib/constants/projects'
-import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
+import type { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import {
 	PROJECT_MANAGE_NAV_SECTIONS,
 	type ProjectManageNavSection,
@@ -71,11 +71,9 @@ type ProjectManageOverviewProps = {
 
 export function ProjectManageOverview({ slug }: ProjectManageOverviewProps) {
 	const prefersReducedMotion = useReducedMotion()
-	const { data: project, isLoading } = useSupabaseQuery(
-		'basic-project-info',
-		(client) => getBasicProjectInfoBySlug(client, slug),
-		{ additionalKeyValues: [slug] },
-	)
+	const { data: project, isLoading } = useManagedProjectQuery<
+		Awaited<ReturnType<typeof getBasicProjectInfoBySlug>>
+	>('basic-project-info', slug, 'basic-info', { additionalKeyValues: [slug] })
 
 	const {
 		displayRaised,
