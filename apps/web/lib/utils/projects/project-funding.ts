@@ -78,12 +78,18 @@ export function formatProjectFundingAmount(
 	}
 
 	const hasEscrow = options?.hasEscrow ?? false
+	const defaultFractionDigits = hasEscrow ? 2 : 0
+	const maximumFractionDigits = options?.maximumFractionDigits ?? defaultFractionDigits
+	const minimumFractionDigits = Math.min(
+		options?.minimumFractionDigits ?? defaultFractionDigits,
+		maximumFractionDigits,
+	)
 
 	return new Intl.NumberFormat('en-US', {
 		style: 'currency',
 		currency: 'USD',
-		maximumFractionDigits: options?.maximumFractionDigits ?? (hasEscrow ? 2 : 0),
-		minimumFractionDigits: options?.minimumFractionDigits ?? (hasEscrow ? 2 : 0),
+		maximumFractionDigits,
+		minimumFractionDigits,
 	}).format(amount)
 }
 
