@@ -1,18 +1,19 @@
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { getServerSession } from 'next-auth'
 import { cache } from 'react'
 import { ProjectClientWrapper } from '~/components/sections/projects/detail/project-client-wrapper'
 import { JsonLd } from '~/components/shared/json-ld'
-import { getProjectBySlug } from '~/lib/queries/projects'
+import { nextAuthOption } from '~/lib/auth/auth-options'
+import { resolveProjectBySlug } from '~/lib/queries/projects/resolve-project-by-slug'
 import { buildProjectMetadata, getProjectPageUrl } from '~/lib/seo/project-metadata'
 import { getBreadcrumbSchema, SITE_URL } from '~/lib/seo/structured-data'
 import { validateProjectSlug } from '~/lib/validation/project-slug'
 
 const getProjectBySlugCached = cache(async (slug: string) => {
-	const client = await createSupabaseServerClient()
-	return getProjectBySlug(client, slug)
+	const session = await getServerSession(nextAuthOption)
+	return resolveProjectBySlug(slug, session?.user?.id)
 })
 
 export async function generateMetadata({
@@ -50,7 +51,7 @@ export default async function ProjectDetailPage({
 	if (!project) notFound()
 
 	const queryClient = new QueryClient()
-	queryClient.setQueryData(['supabase', 'project', slug], project)
+	queryClient.setQueryData(['project', slug], project)
 
 	const dehydratedState = dehydrate(queryClient)
 

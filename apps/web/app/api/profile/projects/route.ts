@@ -1,7 +1,9 @@
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { isPlatformAdmin } from '~/lib/queries/projects/development-only-access'
 import { getUserCreatedProjects } from '~/lib/queries/projects/get-user-projects'
 import { getAuthenticatedSupabaseServerClient } from '~/lib/supabase/authenticated-server-client'
 
@@ -16,8 +18,11 @@ export async function GET() {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const client = await getAuthenticatedSupabaseServerClient()
-		const projects = await getUserCreatedProjects(client, session.user.id)
+		const userId = session.user.id
+		const client = (await isPlatformAdmin(userId))
+			? supabaseServiceRole
+			: await getAuthenticatedSupabaseServerClient()
+		const projects = await getUserCreatedProjects(client, userId)
 
 		return NextResponse.json(projects)
 	} catch (error) {

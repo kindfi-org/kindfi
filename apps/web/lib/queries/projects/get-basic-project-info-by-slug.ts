@@ -33,7 +33,7 @@ export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, pro
 		`,
 		)
 		.eq('slug', projectSlug)
-		.single()
+		.maybeSingle()
 
 	if (error) throw error
 	if (!project) return null
