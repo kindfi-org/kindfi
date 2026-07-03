@@ -1371,6 +1371,7 @@ export type Database = {
           created_at: string | null
           current_amount: number
           description: string
+          development_only: boolean
           foundation_id: string | null
           id: string
           image_url: string | null
@@ -1392,6 +1393,7 @@ export type Database = {
           created_at?: string | null
           current_amount?: number
           description: string
+          development_only?: boolean
           foundation_id?: string | null
           id?: string
           image_url?: string | null
@@ -1413,6 +1415,7 @@ export type Database = {
           created_at?: string | null
           current_amount?: number
           description?: string
+          development_only?: boolean
           foundation_id?: string | null
           id?: string
           image_url?: string | null

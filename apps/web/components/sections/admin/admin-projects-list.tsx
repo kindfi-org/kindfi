@@ -3,6 +3,7 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
+import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 import { getAllProjects } from '~/lib/queries/projects/get-all-projects'
@@ -78,7 +79,11 @@ export function AdminProjectsList() {
 			<AdminSectionHeader
 				title="Projects"
 				description="View and manage all projects on the platform"
-			/>
+			>
+				<Button asChild>
+					<Link href="/admin/projects/create">Create dev project</Link>
+				</Button>
+			</AdminSectionHeader>
 
 			<div className="space-y-2">
 				{projects?.map((project) => (
@@ -96,6 +101,14 @@ export function AdminProjectsList() {
 										<Badge className={statusColors[project.status || 'draft']}>
 											{project.status || 'draft'}
 										</Badge>
+										{project.developmentOnly ? (
+											<Badge
+												variant="secondary"
+												className="bg-amber-100 text-amber-900 hover:bg-amber-100"
+											>
+												Development only
+											</Badge>
+										) : null}
 									</div>
 									<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
 										<span>

@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { canAccessDevelopmentOnlyProject } from '~/lib/queries/projects/development-only-access'
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
 import {
 	checkDuplicateContribution,
@@ -58,6 +59,11 @@ async function createContributionHandler(req: NextRequest) {
 
 		if (!finalProjectId) {
 			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
+		}
+
+		const devAccessAllowed = await canAccessDevelopmentOnlyProject(finalProjectId, session.user.id)
+		if (!devAccessAllowed) {
+			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
 
 		const [goalCheck, duplicateCheck] = await Promise.all([

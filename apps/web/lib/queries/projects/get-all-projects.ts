@@ -25,6 +25,7 @@ export async function getAllProjects(
       percentage_complete,
       kinder_count,
       status,
+      development_only,
       category:category_id ( * ),
       project_tag_relationships (
         tag:tag_id ( id, name, color )
@@ -79,6 +80,7 @@ export async function getAllProjects(
 				minInvestment: project.min_investment,
 				createdAt: project.created_at,
 				status: (project as { status?: string }).status,
+				developmentOnly: Boolean((project as { development_only?: boolean }).development_only),
 				category: project.category,
 				tags: project.project_tag_relationships.map((r) => r.tag),
 				escrowContractAddress: escrowId,

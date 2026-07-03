@@ -14,9 +14,13 @@ type UpdateProjectResponse = {
 
 type UseProjectMutationOptions = {
 	projectId?: string // If present, triggers update; otherwise, create
+	developmentOnly?: boolean
 }
 
-export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
+export function useProjectMutation({
+	projectId,
+	developmentOnly = false,
+}: UseProjectMutationOptions) {
 	const queryClient = useQueryClient()
 	const isUpdate = Boolean(projectId)
 
@@ -54,6 +58,10 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 
 			if ((formData as { foundationId?: string }).foundationId) {
 				fd.append('foundationId', (formData as { foundationId: string }).foundationId)
+			}
+
+			if (developmentOnly) {
+				fd.append('developmentOnly', 'true')
 			}
 
 			const res = await fetch(isUpdate ? '/api/projects/update' : '/api/projects/create', {

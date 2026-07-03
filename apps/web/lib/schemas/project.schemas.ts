@@ -18,6 +18,7 @@ export const projectCreateFormSchema = z
 		socialLinks: z.array(z.string()).optional().default([]),
 		image: z.instanceof(File).nullable().optional(),
 		foundationId: z.string().uuid().optional().or(z.literal('')),
+		developmentOnly: z.boolean().optional().default(false),
 	})
 	.refine((data) => data.minimumInvestment <= data.targetAmount, {
 		message: 'Minimum investment cannot exceed target amount',
