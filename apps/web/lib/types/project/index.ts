@@ -4,17 +4,17 @@ import type { ReactNode } from 'react'
 export interface Tag {
 	id: string
 	name: string
-	color: string
+	color: string | null
 }
 
 export interface Project {
 	id: string
 	title: string
 	slug: string | null
-	description: string
+	description: string | null
 	image: string | null
 	createdAt: string | null
-	category: Tables<'categories'>
+	category: Tables<'categories'> | null
 	goal: number
 	raised: number
 	investors: number

@@ -88,7 +88,7 @@ export function ProjectManageOverview({ slug }: ProjectManageOverviewProps) {
 		escrowContractAddress: project?.escrowContractAddress,
 		escrowType: project?.escrowType,
 		goal: project?.goal,
-		dbRaised: project?.raised,
+		raised: project?.raised,
 		dbInvestors: project?.investors,
 	})
 

@@ -1,28 +1,14 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
-import type { EscrowType } from '@trustless-work/escrow'
 import { sortMap } from '~/lib/constants/projects'
 import {
 	getProjectEscrowRowId,
 	resolveProjectEscrowContracts,
 } from '~/lib/queries/projects/resolve-project-escrow-contracts'
+import type { Project } from '~/lib/types/project'
 
-export type ProjectListItem = {
-	id: string
-	title: string
-	slug: string | null
-	description: string | null
-	image: string | null
-	goal: number
-	raised: number
-	investors: number
-	minInvestment: number
-	createdAt: string | null
+export type ProjectListItem = Project & {
 	status?: string
 	developmentOnly: boolean
-	category: unknown
-	tags: Array<{ id: string; name: string; color: string | null }>
-	escrowContractAddress?: string
-	escrowType?: EscrowType
 }
 
 export async function getAllProjects(
@@ -84,15 +70,17 @@ export async function getAllProjects(
 	if (error) throw error
 
 	const escrowRowIds =
-		data?.map((project) =>
-			getProjectEscrowRowId(
-				(
-					project as unknown as {
-						project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
-					}
-				).project_escrows,
-			),
-		) ?? []
+		data
+			?.map((project) =>
+				getProjectEscrowRowId(
+					(
+						project as unknown as {
+							project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+						}
+					).project_escrows,
+				),
+			)
+			.filter((id): id is string => Boolean(id)) ?? []
 
 	const escrowContracts = await resolveProjectEscrowContracts(client, escrowRowIds)
 
@@ -124,7 +112,7 @@ export async function getAllProjects(
 				tags: project.project_tag_relationships.map((r) => r.tag),
 				escrowContractAddress: escrow?.escrowContractAddress,
 				escrowType: escrow?.escrowType,
-			}
+			} satisfies ProjectListItem
 		}) ?? []
 	)
 }

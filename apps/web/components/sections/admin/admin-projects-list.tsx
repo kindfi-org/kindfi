@@ -7,7 +7,7 @@ import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 import { useProjectsFundingBalances } from '~/hooks/projects/use-projects-funding-balances'
-import type { getAllProjects } from '~/lib/queries/projects/get-all-projects'
+import type { ProjectListItem } from '~/lib/queries/projects/get-all-projects'
 import { formatDistanceToNow } from '~/lib/utils/date-utils'
 import { formatProjectFundingAmount, projectHasEscrow } from '~/lib/utils/projects/project-funding'
 
@@ -26,7 +26,7 @@ const fetchAdminProjects = async () => {
 	if (!response.ok) {
 		throw new Error('Failed to load projects')
 	}
-	return response.json() as Awaited<ReturnType<typeof getAllProjects>>
+	return (await response.json()) as ProjectListItem[]
 }
 
 export function AdminProjectsList() {

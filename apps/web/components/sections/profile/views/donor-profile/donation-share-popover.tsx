@@ -10,7 +10,7 @@ import { cn } from '~/lib/utils'
 
 interface DonationSharePopoverProps {
 	projectTitle: string
-	projectSlug: string
+	projectSlug: string | null
 	projectDescription?: string | null
 	contributionAmount?: number
 	shareLabel: string
@@ -33,14 +33,20 @@ export const DonationSharePopover = ({
 }: DonationSharePopoverProps) => {
 	const shareContent = useMemo(
 		() =>
-			getDonationShareContent({
-				projectTitle,
-				projectSlug,
-				projectDescription,
-				contributionAmount,
-			}),
+			projectSlug
+				? getDonationShareContent({
+						projectTitle,
+						projectSlug,
+						projectDescription,
+						contributionAmount,
+					})
+				: null,
 		[projectTitle, projectSlug, projectDescription, contributionAmount],
 	)
+
+	if (!shareContent) {
+		return null
+	}
 
 	return (
 		<Popover>

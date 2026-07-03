@@ -404,21 +404,21 @@ async function _handleMultiRelease({
 			throw new Error('Invalid milestone data for multi-release')
 		})
 
-	const invalidMilestones = milestoneRows.filter(
-		(m) =>
-			typeof m.amount !== 'number' ||
-			!Number.isFinite(m.amount) ||
-			m.amount <= 0 ||
-			!m.receiver?.trim(),
+	const validMilestones = milestoneRows.filter(
+		(m): m is { description: string; amount: number; receiver: string } =>
+			typeof m.amount === 'number' &&
+			Number.isFinite(m.amount) &&
+			m.amount > 0 &&
+			Boolean(m.receiver?.trim()),
 	)
-	if (invalidMilestones.length > 0) {
+	if (validMilestones.length === 0 || validMilestones.length !== milestoneRows.length) {
 		toast.error('Invalid milestone data', {
 			description: 'All milestones must have amount > 0 and receiver address',
 		})
 		throw new Error('Invalid milestone data')
 	}
 
-	const sanitizedMilestones = milestoneRows.map((m) => ({
+	const sanitizedMilestones = validMilestones.map((m) => ({
 		description: m.description,
 		amount: m.amount,
 		receiver: m.receiver,

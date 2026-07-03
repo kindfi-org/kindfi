@@ -15,7 +15,7 @@ export type UserProjectSummary = {
 	raised: number
 	investors: number
 	minInvestment: number
-	createdAt: string
+	createdAt: string | null
 	status: string
 	percentageComplete: number | null
 	category: unknown
@@ -62,15 +62,17 @@ export async function getUserCreatedProjects(
 	if (error) throw error
 
 	const escrowRowIds =
-		data?.map((project) =>
-			getProjectEscrowRowId(
-				(
-					project as unknown as {
-						project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
-					}
-				).project_escrows,
-			),
-		) ?? []
+		data
+			?.map((project) =>
+				getProjectEscrowRowId(
+					(
+						project as unknown as {
+							project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+						}
+					).project_escrows,
+				),
+			)
+			.filter((id): id is string => Boolean(id)) ?? []
 
 	const escrowContracts = await resolveProjectEscrowContracts(client, escrowRowIds)
 
