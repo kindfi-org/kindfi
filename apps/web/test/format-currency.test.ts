@@ -42,6 +42,10 @@ describe('formatCurrencyAmount', () => {
 		expect(formatCurrencyAmount(Number.NaN)).toBe('—')
 	})
 
+	test('coerces numeric strings', () => {
+		expect(formatCurrencyAmount('1234.5', { maximumFractionDigits: 0 })).toBe('$1,235')
+	})
+
 	test('never throws for invalid fraction-digit combinations', () => {
 		expect(() =>
 			formatCurrencyAmount(100, {

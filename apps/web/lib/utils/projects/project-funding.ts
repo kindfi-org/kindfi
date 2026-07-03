@@ -1,5 +1,5 @@
 import type { EscrowType } from '@trustless-work/escrow'
-import { formatCurrencyAmount } from '~/lib/utils/format-currency'
+import { coerceNumericAmount, formatCurrencyAmount } from '~/lib/utils/format-currency'
 
 /** Shared input for resolving how much a project has raised. */
 export type ProjectFundingSource = {
@@ -20,7 +20,7 @@ export type ResolveDisplayRaisedParams = {
 const DEFAULT_ESCROW_TYPE: EscrowType = 'multi-release'
 
 export const getProjectDbRaised = (project: ProjectFundingSource): number =>
-	Number(project.raised ?? 0)
+	coerceNumericAmount(project.raised) ?? 0
 
 export const projectHasEscrow = (project: ProjectFundingSource): boolean =>
 	Boolean(project.escrowContractAddress)
@@ -43,7 +43,7 @@ export function resolveDisplayRaisedAmount({
 	}
 
 	if (escrowBalance !== undefined && escrowBalance !== null) {
-		return escrowBalance
+		return coerceNumericAmount(escrowBalance) ?? normalizedDbRaised
 	}
 
 	if (isLoadingEscrowBalance) {
@@ -57,7 +57,7 @@ export function calculateFundingProgressPercent(
 	raised: number | null,
 	goal?: number | null,
 ): number | null {
-	const goalAmount = Number(goal ?? 0)
+	const goalAmount = coerceNumericAmount(goal) ?? 0
 	if (!goalAmount || goalAmount <= 0 || raised === null) {
 		return null
 	}
@@ -81,7 +81,7 @@ export function formatProjectFundingAmount(
 	const hasEscrow = options?.hasEscrow ?? false
 	const defaultFractionDigits = hasEscrow ? 2 : 0
 
-	return formatCurrencyAmount(amount, {
+	return formatCurrencyAmount(coerceNumericAmount(amount), {
 		loadingPlaceholder: options?.loadingPlaceholder,
 		minimumFractionDigits: options?.minimumFractionDigits ?? defaultFractionDigits,
 		maximumFractionDigits: options?.maximumFractionDigits ?? defaultFractionDigits,
