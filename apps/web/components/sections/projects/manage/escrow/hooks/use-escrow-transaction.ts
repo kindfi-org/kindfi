@@ -420,11 +420,11 @@ async function _handleMultiRelease({
 
 	const sanitizedMilestones = milestoneRows.map((m) => ({
 		description: m.description,
-		amount: String(m.amount),
+		amount: m.amount,
 		receiver: m.receiver,
 	}))
 
-	const payload = {
+	const payload: InitializeMultiReleaseEscrowPayload = {
 		signer,
 		engagementId: effectiveEngagementId,
 		title: formData.title.trim(),
@@ -439,7 +439,7 @@ async function _handleMultiRelease({
 		platformFee: getKindfiDeployPlatformFee(),
 		trustline: { address: formData.trustlineAddress.trim(), symbol: 'USDC' },
 		milestones: sanitizedMilestones,
-	} satisfies InitializeMultiReleaseEscrowPayload
+	}
 
 	const responseAny = await _deployAndSign({
 		payload,
