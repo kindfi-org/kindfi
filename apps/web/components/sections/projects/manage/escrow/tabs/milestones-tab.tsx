@@ -11,6 +11,7 @@ import {
 	CheckCircle2,
 	FileText,
 	Loader2,
+	Pencil,
 	Plus,
 	Send,
 	TrendingUp,
@@ -35,7 +36,9 @@ import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { cn } from '~/lib/utils'
 import {
+	buildEditReleasePayload,
 	buildUpdateEscrowPayload,
+	isMilestoneEditable,
 	MAX_ESCROW_RELEASES,
 	type NewRelease,
 } from '~/lib/utils/escrow/build-update-escrow-payload'
@@ -44,7 +47,7 @@ import {
 	isSingleReleaseMilestone,
 	truncateAddress,
 } from '~/lib/utils/escrow/milestone-utils'
-import { AddReleaseDialog } from '../components/add-release-dialog'
+import { AddReleaseDialog, type ReleaseFormValues } from '../components/add-release-dialog'
 
 interface MilestonesTabProps {
 	escrowContractAddress: string
@@ -52,6 +55,7 @@ interface MilestonesTabProps {
 	escrowData: GetEscrowsFromIndexerResponse | null
 	milestones: (SingleReleaseMilestone | MultiReleaseMilestone)[]
 	isLoading: boolean
+	escrowBalance?: number | null
 	onSuccess: () => void
 	onGoToRelease?: () => void
 }
@@ -62,6 +66,7 @@ export function MilestonesTab({
 	escrowData,
 	milestones,
 	isLoading,
+	escrowBalance = null,
 	onSuccess,
 	onGoToRelease,
 }: MilestonesTabProps) {
@@ -72,10 +77,34 @@ export function MilestonesTab({
 	const [milestoneEvidence, setMilestoneEvidence] = useState('')
 	const [isProcessing, setIsProcessing] = useState(false)
 	const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+	const [editingMilestoneIndex, setEditingMilestoneIndex] = useState<number | null>(null)
 
 	const selectedIndex = Number(selectedMilestoneIndex)
 	const selectedMilestone = milestones[selectedIndex]
+	const hasFunds = escrowBalance !== null && escrowBalance > 0
 	const canAddRelease = milestones.length < MAX_ESCROW_RELEASES && !escrowData?.flags?.disputed
+	const editingMilestone = editingMilestoneIndex !== null ? milestones[editingMilestoneIndex] : null
+
+	const submitEscrowUpdate = async (
+		payload: ReturnType<typeof buildUpdateEscrowPayload>,
+		successMessage: string,
+		onComplete?: () => void,
+	) => {
+		const updateResponse = await updateEscrow(payload, escrowType)
+		if (updateResponse.status !== 'SUCCESS' || !updateResponse.unsignedTransaction) {
+			throw new Error('Failed to prepare escrow update transaction')
+		}
+
+		const signedXdr = await signTrustlessTransaction(updateResponse.unsignedTransaction)
+		const sendResult = await sendTransaction(signedXdr)
+		if (sendResult?.status !== 'SUCCESS') {
+			throw new Error('Transaction failed')
+		}
+
+		toast.success(successMessage)
+		onComplete?.()
+		onSuccess()
+	}
 
 	const handleApproveMilestone = async () => {
 		try {
@@ -161,27 +190,58 @@ export function MilestonesTab({
 			setIsProcessing(true)
 			const signer = await ensureTrustlessSigner()
 			const payload = buildUpdateEscrowPayload(escrowData, escrowType, signer, newRelease)
-
-			const updateResponse = await updateEscrow(payload, escrowType)
-			if (updateResponse.status !== 'SUCCESS' || !updateResponse.unsignedTransaction) {
-				throw new Error('Failed to prepare add-release transaction')
-			}
-
-			const signedXdr = await signTrustlessTransaction(updateResponse.unsignedTransaction)
-			const sendResult = await sendTransaction(signedXdr)
-			if (sendResult?.status !== 'SUCCESS') {
-				throw new Error('Transaction failed')
-			}
-
-			toast.success('Release added successfully')
-			setIsAddDialogOpen(false)
-			onSuccess()
+			await submitEscrowUpdate(payload, 'Release added successfully', () =>
+				setIsAddDialogOpen(false),
+			)
 		} catch (error) {
 			logger.error(error)
 			const errorMessage = error instanceof Error ? error.message : 'Failed to add release'
 			toast.error(errorMessage)
 		} finally {
 			setIsProcessing(false)
+		}
+	}
+
+	const handleEditRelease = async (editedRelease: ReleaseFormValues) => {
+		if (!escrowData || editingMilestoneIndex === null) {
+			toast.error('Escrow data is not loaded yet. Try refreshing.')
+			return
+		}
+
+		try {
+			setIsProcessing(true)
+			const signer = await ensureTrustlessSigner()
+			const payload = buildEditReleasePayload(
+				escrowData,
+				escrowType,
+				signer,
+				editingMilestoneIndex,
+				editedRelease,
+				hasFunds,
+			)
+			await submitEscrowUpdate(payload, 'Release updated successfully', () =>
+				setEditingMilestoneIndex(null),
+			)
+		} catch (error) {
+			logger.error(error)
+			const errorMessage = error instanceof Error ? error.message : 'Failed to update release'
+			toast.error(errorMessage)
+		} finally {
+			setIsProcessing(false)
+		}
+	}
+
+	const getReleaseFormValues = (
+		milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+	): ReleaseFormValues => {
+		if (isSingleReleaseMilestone(milestone)) {
+			return { description: milestone.description }
+		}
+
+		return {
+			description: milestone.description,
+			amount: milestone.amount,
+			receiver: milestone.receiver,
 		}
 	}
 
@@ -263,64 +323,93 @@ export function MilestonesTab({
 						const isSingle = isSingleReleaseMilestone(milestone)
 						const isSelected = selectedMilestoneIndex === String(index)
 						const multiMilestone = milestone as MultiReleaseMilestone
+						const canEdit = isMilestoneEditable(milestone, hasFunds)
 
 						return (
-							<button
+							<div
 								key={index}
-								type="button"
-								onClick={() => setSelectedMilestoneIndex(String(index))}
 								className={cn(
-									'w-full rounded-xl border p-4 text-left transition-[border-color,background-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+									'w-full rounded-xl border p-4 transition-[border-color,background-color,box-shadow] duration-200',
 									isSelected
 										? 'border-primary bg-primary/5 shadow-sm'
 										: 'bg-card hover:border-primary/30 hover:bg-muted/30',
 								)}
-								aria-pressed={isSelected}
 							>
 								<div className="flex items-start gap-3">
-									<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-										{index + 1}
-									</div>
-									<div className="min-w-0 flex-1 space-y-2">
-										<div className="flex flex-wrap items-center gap-2">
-											<span className="font-semibold">Release {index + 1}</span>
-											{isApproved ? (
-												<Badge className="gap-1">
-													<CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-													Approved
-												</Badge>
-											) : (
-												<Badge variant="secondary">Pending approval</Badge>
-											)}
-											{!isSingle && multiMilestone.flags?.released ? (
-												<Badge variant="outline" className="gap-1">
-													<Send className="h-3 w-3" aria-hidden="true" />
-													Released
-												</Badge>
-											) : null}
-										</div>
-										<p className="text-sm text-muted-foreground">{milestone.description}</p>
-										{!isSingle ? (
-											<div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-												{typeof multiMilestone.amount === 'number' ? (
-													<span className="tabular-nums">
-														Amount: ${multiMilestone.amount.toLocaleString()}
-													</span>
-												) : null}
-												{multiMilestone.receiver ? (
-													<span className="font-mono">
-														Receiver: {truncateAddress(multiMilestone.receiver, 6)}
-													</span>
+									<button
+										type="button"
+										onClick={() => setSelectedMilestoneIndex(String(index))}
+										className="min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+										aria-pressed={isSelected}
+									>
+										<div className="flex items-start gap-3">
+											<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+												{index + 1}
+											</div>
+											<div className="min-w-0 flex-1 space-y-2">
+												<div className="flex flex-wrap items-center gap-2">
+													<span className="font-semibold">Release {index + 1}</span>
+													{isApproved ? (
+														<Badge className="gap-1">
+															<CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+															Approved
+														</Badge>
+													) : (
+														<Badge variant="secondary">Pending approval</Badge>
+													)}
+													{!isSingle && multiMilestone.flags?.released ? (
+														<Badge variant="outline" className="gap-1">
+															<Send className="h-3 w-3" aria-hidden="true" />
+															Released
+														</Badge>
+													) : null}
+												</div>
+												<p className="text-sm text-muted-foreground">{milestone.description}</p>
+												{!isSingle ? (
+													<div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+														{typeof multiMilestone.amount === 'number' ? (
+															<span className="tabular-nums">
+																Amount: ${multiMilestone.amount.toLocaleString()}
+															</span>
+														) : null}
+														{multiMilestone.receiver ? (
+															<span className="font-mono">
+																Receiver: {truncateAddress(multiMilestone.receiver, 6)}
+															</span>
+														) : null}
+													</div>
 												) : null}
 											</div>
-										) : null}
-									</div>
+										</div>
+									</button>
+									{canEdit ? (
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon"
+											className="shrink-0"
+											onClick={() => setEditingMilestoneIndex(index)}
+											disabled={isProcessing || !escrowData}
+											aria-label={`Edit release ${index + 1}`}
+										>
+											<Pencil className="h-4 w-4" aria-hidden="true" />
+										</Button>
+									) : null}
 								</div>
-							</button>
+							</div>
 						)
 					})}
 				</CardContent>
 			</Card>
+
+			{hasFunds ? (
+				<Alert>
+					<AlertDescription>
+						This escrow is funded. You can add new releases, but existing releases cannot be edited
+						after funding.
+					</AlertDescription>
+				</Alert>
+			) : null}
 
 			{!canAddRelease && milestones.length >= MAX_ESCROW_RELEASES ? (
 				<Alert>
@@ -414,10 +503,7 @@ export function MilestonesTab({
 						) : (
 							<p className="text-sm text-muted-foreground">
 								Approving release {selectedIndex + 1} allows the Release Signer to disburse
-								{escrowType === 'multi-release'
-									? ' this release’s amount'
-									: ' the escrow balance'}
-								.
+								{escrowType === 'multi-release' ? ' this release’s amount' : ' the escrow balance'}.
 							</p>
 						)}
 
@@ -458,6 +544,23 @@ export function MilestonesTab({
 				isSubmitting={isProcessing}
 				onSubmit={handleAddRelease}
 			/>
+
+			{editingMilestone ? (
+				<AddReleaseDialog
+					open={editingMilestoneIndex !== null}
+					onOpenChange={(open) => {
+						if (!open) {
+							setEditingMilestoneIndex(null)
+						}
+					}}
+					escrowType={escrowType}
+					isSubmitting={isProcessing}
+					mode="edit"
+					releaseLabel={`Release ${(editingMilestoneIndex ?? 0) + 1}`}
+					initialValues={getReleaseFormValues(editingMilestone)}
+					onSubmit={handleEditRelease}
+				/>
+			) : null}
 		</div>
 	)
 }

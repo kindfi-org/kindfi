@@ -8,6 +8,12 @@ import {
 	getTrustlessSignerError,
 	isExternalStellarWalletAddress,
 } from '~/lib/utils/escrow/trustless-signer'
+import {
+	isLocalStorageAvailable,
+	safeLocalStorageGet,
+	safeLocalStorageRemove,
+	safeLocalStorageSet,
+} from '~/lib/utils/safe-storage'
 
 /** Loaded only in the browser so kit state does not touch Node's broken `localStorage` polyfill. */
 type StellarWalletsKitModules = {
@@ -57,16 +63,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 	// Initialize state from localStorage if available (client-side only)
 	const [address, setAddress] = useState<string | null>(() => {
 		if (typeof window === 'undefined') return null
-		const stored = localStorage.getItem('stellar_wallet_address')
+		const stored = safeLocalStorageGet('stellar_wallet_address')
 		if (stored && !isExternalStellarWalletAddress(stored)) {
-			localStorage.removeItem('stellar_wallet_address')
-			localStorage.removeItem('stellar_wallet_name')
+			safeLocalStorageRemove('stellar_wallet_address')
+			safeLocalStorageRemove('stellar_wallet_name')
 		}
 		return isExternalStellarWalletAddress(stored) ? stored : null
 	})
 	const [walletName, setWalletName] = useState<string | null>(() => {
 		if (typeof window === 'undefined') return null
-		return localStorage.getItem('stellar_wallet_name')
+		return safeLocalStorageGet('stellar_wallet_name')
 	})
 	const [isInitialized, setIsInitialized] = useState(false)
 	const subscriptionsRef = useRef<Array<() => void>>([])
@@ -84,10 +90,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				const swk = await loadStellarWalletsKit()
 				if (cancelled) return
 
-				const storage = globalThis.localStorage
-				if (typeof storage?.getItem !== 'function') {
+				if (!isLocalStorageAvailable()) {
 					logger.error(
-						'StellarWalletsKit requires browser localStorage. Check NODE_OPTIONS for a broken --localstorage-file flag.',
+						'StellarWalletsKit requires browser localStorage. Storage may be blocked by privacy settings.',
 					)
 					return
 				}
@@ -114,15 +119,15 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 					},
 				})
 				// Try to get address if already connected (read from localStorage directly to avoid dependency)
-				const storedAddress = localStorage.getItem('stellar_wallet_address')
+				const storedAddress = safeLocalStorageGet('stellar_wallet_address')
 				if (storedAddress) {
 					StellarWalletsKit.getAddress()
 						.then(({ address: fetchedAddress }: { address: string }) => {
 							if (fetchedAddress && !isExternalStellarWalletAddress(fetchedAddress)) {
 								setAddress(null)
 								setWalletName(null)
-								localStorage.removeItem('stellar_wallet_address')
-								localStorage.removeItem('stellar_wallet_name')
+								safeLocalStorageRemove('stellar_wallet_address')
+								safeLocalStorageRemove('stellar_wallet_name')
 								return
 							}
 							if (fetchedAddress && fetchedAddress !== storedAddress) {
@@ -134,8 +139,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 							// If getAddress fails, clear stored data
 							setAddress(null)
 							setWalletName(null)
-							localStorage.removeItem('stellar_wallet_address')
-							localStorage.removeItem('stellar_wallet_name')
+							safeLocalStorageRemove('stellar_wallet_address')
+							safeLocalStorageRemove('stellar_wallet_name')
 						})
 				}
 
@@ -148,15 +153,15 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 						if (event.payload.address) {
 							if (!isExternalStellarWalletAddress(event.payload.address)) {
 								setAddress(null)
-								localStorage.removeItem('stellar_wallet_address')
+								safeLocalStorageRemove('stellar_wallet_address')
 								return
 							}
 							setAddress(event.payload.address)
-							localStorage.setItem('stellar_wallet_address', event.payload.address)
+							safeLocalStorageSet('stellar_wallet_address', event.payload.address)
 							void syncLinkedWallet(event.payload.address)
 						} else {
 							setAddress(null)
-							localStorage.removeItem('stellar_wallet_address')
+							safeLocalStorageRemove('stellar_wallet_address')
 							void syncLinkedWallet(null)
 						}
 					},
@@ -166,8 +171,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				const unsubscribeDisconnect = StellarWalletsKit.on(KitEventType.DISCONNECT, () => {
 					setAddress(null)
 					setWalletName(null)
-					localStorage.removeItem('stellar_wallet_address')
-					localStorage.removeItem('stellar_wallet_name')
+					safeLocalStorageRemove('stellar_wallet_address')
+					safeLocalStorageRemove('stellar_wallet_name')
 					void syncLinkedWallet(null)
 				})
 
@@ -188,7 +193,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 							}
 							const name = walletIdToName[event.payload.id] || event.payload.id
 							setWalletName(name)
-							localStorage.setItem('stellar_wallet_name', name)
+							safeLocalStorageSet('stellar_wallet_name', name)
 						}
 					},
 				)
@@ -240,7 +245,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 					)
 				}
 				setAddress(newAddress)
-				localStorage.setItem('stellar_wallet_address', newAddress)
+				safeLocalStorageSet('stellar_wallet_address', newAddress)
 				void syncLinkedWallet(newAddress)
 				// Try to get wallet name from the selected wallet
 				// This might need adjustment based on actual API behavior
@@ -262,8 +267,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 			StellarWalletsKit.disconnect()
 			setAddress(null)
 			setWalletName(null)
-			localStorage.removeItem('stellar_wallet_address')
-			localStorage.removeItem('stellar_wallet_name')
+			safeLocalStorageRemove('stellar_wallet_address')
+			safeLocalStorageRemove('stellar_wallet_name')
 			void syncLinkedWallet(null)
 		} catch (error) {
 			logger.error('Failed to disconnect wallet:', error)

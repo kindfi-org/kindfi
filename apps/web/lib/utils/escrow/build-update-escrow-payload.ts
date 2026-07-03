@@ -6,7 +6,7 @@ import type {
 	UpdateMultiReleaseEscrowPayload,
 	UpdateSingleReleaseEscrowPayload,
 } from '@trustless-work/escrow'
-import { isSingleReleaseMilestone } from './milestone-utils'
+import { getMilestoneStatus, isSingleReleaseMilestone } from './milestone-utils'
 
 export const MAX_ESCROW_RELEASES = 50
 
@@ -22,11 +22,19 @@ export type NewMultiRelease = {
 
 export type NewRelease = NewSingleRelease | NewMultiRelease
 
+export type EditRelease = NewRelease
+
+type EscrowPayloadContext = {
+	escrowData: GetEscrowsFromIndexerResponse
+	escrowType: EscrowType
+	platformSigner: string
+}
+
 function mapExistingSingleReleaseMilestone(milestone: SingleReleaseMilestone) {
 	return {
 		description: milestone.description,
 		...(milestone.status ? { status: milestone.status } : {}),
-		...(milestone.evidence ? { evidence: milestone.evidence } : {}),
+		evidence: milestone.evidence ?? '',
 		...(milestone.approved !== undefined ? { approved: milestone.approved } : {}),
 	}
 }
@@ -37,7 +45,7 @@ function mapExistingMultiReleaseMilestone(milestone: MultiReleaseMilestone) {
 		amount: milestone.amount,
 		receiver: milestone.receiver,
 		...(milestone.status ? { status: milestone.status } : {}),
-		...(milestone.evidence ? { evidence: milestone.evidence } : {}),
+		evidence: milestone.evidence ?? '',
 		...(milestone.flags ? { flags: milestone.flags } : {}),
 	}
 }
@@ -49,54 +57,85 @@ function getReceiverFromRoles(roles: GetEscrowsFromIndexerResponse['roles']): st
 	throw new Error('Escrow is missing receiver address')
 }
 
-export function buildUpdateEscrowPayload(
+function assertPlatformCanUpdateEscrow(
 	escrowData: GetEscrowsFromIndexerResponse,
-	escrowType: EscrowType,
 	platformSigner: string,
-	newRelease: NewRelease,
+) {
+	if (platformSigner !== escrowData.roles.platformAddress) {
+		throw new Error('Only the platform address can update releases on this escrow')
+	}
+
+	if (escrowData.flags?.disputed) {
+		throw new Error('Cannot update releases while the escrow is in dispute')
+	}
+}
+
+function assertMilestoneNotApproved(
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+	milestoneIndex: number,
+) {
+	if (getMilestoneStatus(milestone)) {
+		throw new Error(`Release ${milestoneIndex + 1} is already approved and cannot be edited`)
+	}
+}
+
+export function isMilestoneEditable(
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+	hasFunds: boolean,
+): boolean {
+	if (getMilestoneStatus(milestone)) {
+		return false
+	}
+
+	if (hasFunds) {
+		return false
+	}
+
+	if (!isSingleReleaseMilestone(milestone)) {
+		if (milestone.flags?.disputed || milestone.flags?.released) {
+			return false
+		}
+	}
+
+	return true
+}
+
+function buildEscrowPayloadBase(
+	context: EscrowPayloadContext,
+	milestones:
+		| UpdateSingleReleaseEscrowPayload['escrow']['milestones']
+		| UpdateMultiReleaseEscrowPayload['escrow']['milestones'],
 ): UpdateSingleReleaseEscrowPayload | UpdateMultiReleaseEscrowPayload {
+	const { escrowData, escrowType, platformSigner } = context
 	const contractId = escrowData.contractId
 	if (!contractId) {
 		throw new Error('Escrow contract ID is missing')
 	}
 
-	if (platformSigner !== escrowData.roles.platformAddress) {
-		throw new Error('Only the platform address can add releases to this escrow')
-	}
-
-	if (escrowData.flags?.disputed) {
-		throw new Error('Cannot add releases while the escrow is in dispute')
-	}
-
-	const existingCount = escrowData.milestones.length
-	if (existingCount >= MAX_ESCROW_RELEASES) {
-		throw new Error(`Cannot add more than ${MAX_ESCROW_RELEASES} releases per escrow`)
-	}
-
 	const trustline = {
 		symbol:
-			'symbol' in escrowData.trustline &&
-			typeof escrowData.trustline.symbol === 'string'
+			'symbol' in escrowData.trustline && typeof escrowData.trustline.symbol === 'string'
 				? escrowData.trustline.symbol
 				: 'USDC',
 		address: escrowData.trustline.address,
 	}
 
+	const sharedEscrowFields = {
+		engagementId: escrowData.engagementId,
+		title: escrowData.title,
+		description: escrowData.description,
+		platformFee: escrowData.platformFee,
+		...(escrowData.flags ? { flags: escrowData.flags } : {}),
+		...(escrowData.isActive !== undefined ? { isActive: escrowData.isActive } : {}),
+		trustline,
+	}
+
 	if (escrowType === 'single-release') {
-		const newSingle = newRelease as NewSingleRelease
-		if (!newSingle.description.trim()) {
-			throw new Error('Release description is required')
-		}
-
-		const existingMilestones = escrowData.milestones.filter(isSingleReleaseMilestone)
-
 		return {
 			contractId,
 			signer: platformSigner,
 			escrow: {
-				engagementId: escrowData.engagementId,
-				title: escrowData.title,
-				description: escrowData.description,
+				...sharedEscrowFields,
 				roles: {
 					approver: escrowData.roles.approver,
 					serviceProvider: escrowData.roles.serviceProvider,
@@ -106,19 +145,29 @@ export function buildUpdateEscrowPayload(
 					receiver: getReceiverFromRoles(escrowData.roles),
 				},
 				amount: escrowData.amount,
-				platformFee: escrowData.platformFee,
-				milestones: [
-					...existingMilestones.map(mapExistingSingleReleaseMilestone),
-					{ description: newSingle.description.trim() },
-				],
-				...(escrowData.flags ? { flags: escrowData.flags } : {}),
-				...(escrowData.isActive !== undefined ? { isActive: escrowData.isActive } : {}),
-				trustline,
+				milestones: milestones as UpdateSingleReleaseEscrowPayload['escrow']['milestones'],
 			},
 		}
 	}
 
-	const newMulti = newRelease as NewMultiRelease
+	return {
+		contractId,
+		signer: platformSigner,
+		escrow: {
+			...sharedEscrowFields,
+			roles: {
+				approver: escrowData.roles.approver,
+				serviceProvider: escrowData.roles.serviceProvider,
+				platformAddress: escrowData.roles.platformAddress,
+				releaseSigner: escrowData.roles.releaseSigner,
+				disputeResolver: escrowData.roles.disputeResolver,
+			},
+			milestones: milestones as UpdateMultiReleaseEscrowPayload['escrow']['milestones'],
+		},
+	}
+}
+
+function validateNewMultiRelease(newMulti: NewMultiRelease) {
 	if (!newMulti.description.trim()) {
 		throw new Error('Release description is required')
 	}
@@ -128,37 +177,128 @@ export function buildUpdateEscrowPayload(
 	if (!Number.isFinite(newMulti.amount) || newMulti.amount <= 0) {
 		throw new Error('Release amount must be greater than zero')
 	}
+}
+
+function validateNewSingleRelease(newSingle: NewSingleRelease) {
+	if (!newSingle.description.trim()) {
+		throw new Error('Release description is required')
+	}
+}
+
+export function buildUpdateEscrowPayload(
+	escrowData: GetEscrowsFromIndexerResponse,
+	escrowType: EscrowType,
+	platformSigner: string,
+	newRelease: NewRelease,
+): UpdateSingleReleaseEscrowPayload | UpdateMultiReleaseEscrowPayload {
+	assertPlatformCanUpdateEscrow(escrowData, platformSigner)
+
+	const existingCount = escrowData.milestones.length
+	if (existingCount >= MAX_ESCROW_RELEASES) {
+		throw new Error(`Cannot add more than ${MAX_ESCROW_RELEASES} releases per escrow`)
+	}
+
+	const context: EscrowPayloadContext = { escrowData, escrowType, platformSigner }
+
+	if (escrowType === 'single-release') {
+		const newSingle = newRelease as NewSingleRelease
+		validateNewSingleRelease(newSingle)
+
+		const existingMilestones = escrowData.milestones.filter(isSingleReleaseMilestone)
+
+		return buildEscrowPayloadBase(context, [
+			...existingMilestones.map(mapExistingSingleReleaseMilestone),
+			{ description: newSingle.description.trim() },
+		])
+	}
+
+	const newMulti = newRelease as NewMultiRelease
+	validateNewMultiRelease(newMulti)
 
 	const existingMilestones = escrowData.milestones.filter(
 		(m): m is MultiReleaseMilestone => !isSingleReleaseMilestone(m),
 	)
 
-	return {
-		contractId,
-		signer: platformSigner,
-		escrow: {
-			engagementId: escrowData.engagementId,
-			title: escrowData.title,
-			description: escrowData.description,
-			roles: {
-				approver: escrowData.roles.approver,
-				serviceProvider: escrowData.roles.serviceProvider,
-				platformAddress: escrowData.roles.platformAddress,
-				releaseSigner: escrowData.roles.releaseSigner,
-				disputeResolver: escrowData.roles.disputeResolver,
-			},
-			platformFee: escrowData.platformFee,
-			milestones: [
-				...existingMilestones.map(mapExistingMultiReleaseMilestone),
-				{
-					description: newMulti.description.trim(),
-					amount: newMulti.amount,
-					receiver: newMulti.receiver.trim(),
-				},
-			],
-			...(escrowData.flags ? { flags: escrowData.flags } : {}),
-			...(escrowData.isActive !== undefined ? { isActive: escrowData.isActive } : {}),
-			trustline,
+	return buildEscrowPayloadBase(context, [
+		...existingMilestones.map(mapExistingMultiReleaseMilestone),
+		{
+			description: newMulti.description.trim(),
+			amount: newMulti.amount,
+			receiver: newMulti.receiver.trim(),
 		},
+	])
+}
+
+export function buildEditReleasePayload(
+	escrowData: GetEscrowsFromIndexerResponse,
+	escrowType: EscrowType,
+	platformSigner: string,
+	milestoneIndex: number,
+	editedRelease: EditRelease,
+	hasFunds = false,
+): UpdateSingleReleaseEscrowPayload | UpdateMultiReleaseEscrowPayload {
+	assertPlatformCanUpdateEscrow(escrowData, platformSigner)
+
+	if (hasFunds) {
+		throw new Error(
+			'Cannot edit existing releases after the escrow has been funded. You can still add new releases.',
+		)
 	}
+
+	if (milestoneIndex < 0 || milestoneIndex >= escrowData.milestones.length) {
+		throw new Error('Invalid release index')
+	}
+
+	const milestone = escrowData.milestones[milestoneIndex]
+	assertMilestoneNotApproved(milestone, milestoneIndex)
+
+	const context: EscrowPayloadContext = { escrowData, escrowType, platformSigner }
+
+	if (escrowType === 'single-release') {
+		if (!isSingleReleaseMilestone(milestone)) {
+			throw new Error('Release type mismatch for single-release escrow')
+		}
+
+		const editedSingle = editedRelease as NewSingleRelease
+		validateNewSingleRelease(editedSingle)
+
+		const existingMilestones = escrowData.milestones.filter(isSingleReleaseMilestone)
+
+		return buildEscrowPayloadBase(
+			context,
+			existingMilestones.map((existing, index) =>
+				index === milestoneIndex
+					? {
+							...mapExistingSingleReleaseMilestone(existing),
+							description: editedSingle.description.trim(),
+						}
+					: mapExistingSingleReleaseMilestone(existing),
+			),
+		)
+	}
+
+	if (isSingleReleaseMilestone(milestone)) {
+		throw new Error('Release type mismatch for multi-release escrow')
+	}
+
+	const editedMulti = editedRelease as NewMultiRelease
+	validateNewMultiRelease(editedMulti)
+
+	const existingMilestones = escrowData.milestones.filter(
+		(m): m is MultiReleaseMilestone => !isSingleReleaseMilestone(m),
+	)
+
+	return buildEscrowPayloadBase(
+		context,
+		existingMilestones.map((existing, index) =>
+			index === milestoneIndex
+				? {
+						...mapExistingMultiReleaseMilestone(existing),
+						description: editedMulti.description.trim(),
+						amount: editedMulti.amount,
+						receiver: editedMulti.receiver.trim(),
+					}
+				: mapExistingMultiReleaseMilestone(existing),
+		),
+	)
 }
