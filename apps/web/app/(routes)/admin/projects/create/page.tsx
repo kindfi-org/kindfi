@@ -17,10 +17,7 @@ export default function AdminCreateDevelopmentProjectPage() {
 				</AdminSectionHeader>
 
 				<section className="mx-auto max-w-2xl">
-					<CreateProjectForm
-						developmentOnly
-						successRedirectPath={(slug) => `/projects/${slug}/manage`}
-					/>
+					<CreateProjectForm developmentOnly />
 				</section>
 			</div>
 		</CreateProjectProvider>

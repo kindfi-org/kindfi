@@ -11,13 +11,9 @@ import type { StepThreeData } from '~/lib/types/project/create-project.types'
 
 type CreateProjectFormProps = {
 	developmentOnly?: boolean
-	successRedirectPath?: (slug: string) => string
 }
 
-export function CreateProjectForm({
-	developmentOnly = false,
-	successRedirectPath = (slug) => `/projects/${slug}/manage`,
-}: CreateProjectFormProps) {
+export function CreateProjectForm({ developmentOnly = false }: CreateProjectFormProps) {
 	const { currentStep, setCurrentStep, formData, updateFormData } = useCreateProject()
 	const { mutateAsync: createProject, isPending } = useProjectMutation({ developmentOnly })
 	const router = useRouter()
@@ -44,7 +40,7 @@ export function CreateProjectForm({
 		updateFormData(fullData)
 		const result = await createProject(fullData)
 		if ('slug' in result && result.slug) {
-			router.push(successRedirectPath(result.slug))
+			router.push(`/projects/${result.slug}/manage`)
 		} else {
 			router.push(developmentOnly ? '/admin/projects' : '/projects')
 		}
