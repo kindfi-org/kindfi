@@ -1,12 +1,12 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
+import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
-import { getAllProjects } from '~/lib/queries/projects/get-all-projects'
+import type { getAllProjects } from '~/lib/queries/projects/get-all-projects'
 import { formatDistanceToNow } from '~/lib/utils/date-utils'
 
 const formatCurrency = (value: number) =>
@@ -19,16 +19,23 @@ const formatCurrency = (value: number) =>
 
 const SKELETON_KEYS = ['proj-sk-1', 'proj-sk-2', 'proj-sk-3', 'proj-sk-4', 'proj-sk-5'] as const
 
+const fetchAdminProjects = async () => {
+	const response = await fetch('/api/admin/projects')
+	if (!response.ok) {
+		throw new Error('Failed to load projects')
+	}
+	return response.json() as Awaited<ReturnType<typeof getAllProjects>>
+}
+
 export function AdminProjectsList() {
 	const {
 		data: projects,
 		isLoading,
 		error,
-	} = useSupabaseQuery(
-		'admin-projects',
-		(client) => getAllProjects(client, [], 'most-recent', 1000),
-		{},
-	)
+	} = useQuery({
+		queryKey: ['supabase', 'admin-projects'],
+		queryFn: fetchAdminProjects,
+	})
 
 	if (isLoading) {
 		return (

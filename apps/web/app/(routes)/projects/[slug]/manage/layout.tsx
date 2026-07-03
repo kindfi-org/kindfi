@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import type { ReactNode } from 'react'
@@ -6,6 +6,18 @@ import { ProjectManageCommandCenter } from '~/components/sections/projects/manag
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { canUserManageProject } from '~/lib/queries/projects/can-user-manage-project'
 import { getProjectManageMeta } from '~/lib/queries/projects/get-project-manage-meta'
+import { getAuthenticatedSupabaseServerClient } from '~/lib/supabase/authenticated-server-client'
+
+async function resolveProjectManageMeta(slug: string) {
+	const authenticatedClient = await getAuthenticatedSupabaseServerClient()
+	const authenticatedMeta = await getProjectManageMeta(authenticatedClient, slug)
+	if (authenticatedMeta) {
+		return authenticatedMeta
+	}
+
+	// Fallback for development-only projects when Supabase JWT is unavailable.
+	return getProjectManageMeta(supabaseServiceRole, slug)
+}
 
 export default async function ManageLayout({
 	children,
@@ -15,12 +27,9 @@ export default async function ManageLayout({
 	params: Promise<{ slug: string }>
 }) {
 	const { slug } = await params
-	const [session, supabase] = await Promise.all([
-		getServerSession(nextAuthOption),
-		createSupabaseServerClient(),
-	])
+	const session = await getServerSession(nextAuthOption)
 
-	const projectMeta = await getProjectManageMeta(supabase, slug)
+	const projectMeta = await resolveProjectManageMeta(slug)
 	if (!projectMeta) {
 		notFound()
 	}

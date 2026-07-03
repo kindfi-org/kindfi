@@ -1,7 +1,7 @@
-import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { ProjectManageOverview } from '~/components/sections/projects/manage/project-manage-overview'
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
+import { prefetchManagedProjectQuery } from '~/lib/supabase/prefetch-managed-project-query'
 
 export default async function ProjectManagementDashboardPage({
 	params,
@@ -11,7 +11,7 @@ export default async function ProjectManagementDashboardPage({
 	const { slug } = await params
 	const queryClient = new QueryClient()
 
-	await prefetchSupabaseQuery(
+	await prefetchManagedProjectQuery(
 		queryClient,
 		'basic-project-info',
 		(client) => getBasicProjectInfoBySlug(client, slug),

@@ -1,10 +1,10 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
 import { Card, CardContent } from '~/components/base/card'
+import { UserAvatar } from '~/components/base/user-avatar'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 import { getAllUsers } from '~/lib/queries/admin/get-all-users'
 import { formatDistanceToNow } from '~/lib/utils/date-utils'
@@ -69,18 +69,12 @@ export function AdminUsersList() {
 						<CardContent className="p-4">
 							<div className="flex items-center justify-between">
 								<div className="flex items-center gap-4 flex-1">
-									{user.imageUrl ? (
-										<div className="relative h-12 w-12 overflow-hidden rounded-full">
-											<Image
-												src={user.imageUrl}
-												alt={user.displayName || 'User'}
-												fill
-												className="object-cover"
-											/>
-										</div>
-									) : (
-										<div className="h-12 w-12 rounded-full bg-muted" />
-									)}
+									<UserAvatar
+										src={user.imageUrl ?? undefined}
+										alt={user.displayName || 'User'}
+										name={user.displayName || user.email || 'User'}
+										className="h-12 w-12"
+									/>
 									<div className="flex-1">
 										<div className="flex items-center gap-3 mb-1">
 											<span className="font-semibold">{user.displayName || 'Anonymous'}</span>

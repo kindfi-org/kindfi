@@ -1,7 +1,7 @@
-import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { ProjectMembersWrapper } from '~/components/sections/projects/members/project-members-wrapper'
 import { getProjectTeamBySlug } from '~/lib/queries/projects/get-project-team-by-slug'
+import { prefetchManagedProjectQuery } from '~/lib/supabase/prefetch-managed-project-query'
 
 export default async function ProjectMembersPage({
 	params,
@@ -11,8 +11,7 @@ export default async function ProjectMembersPage({
 	const { slug } = await params
 	const queryClient = new QueryClient()
 
-	// Prefetch project team data
-	await prefetchSupabaseQuery(
+	await prefetchManagedProjectQuery(
 		queryClient,
 		'project-team',
 		(client) => getProjectTeamBySlug(client, slug),
