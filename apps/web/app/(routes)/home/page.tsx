@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { HomeDashboard } from '~/components/pages/home'
 import { HighlightedProjectsHydration } from '~/components/sections/home/highlighted-projects-hydration'
 import { SkeletonHighlightedProjects } from '~/components/sections/home/skeletons'
+import { DynamicComponents } from '~/lib/constants/home-page-data'
 
 export const metadata: Metadata = {
 	title: 'KindFi — Web3 Crowdfunding for Social Impact',
@@ -48,10 +49,11 @@ export const metadata: Metadata = {
 export default function HomePage() {
 	return (
 		<>
-			<HomeDashboard />
+			<DynamicComponents.Hero />
 			<Suspense fallback={<SkeletonHighlightedProjects />}>
 				<HighlightedProjectsHydration />
 			</Suspense>
+			<HomeDashboard />
 		</>
 	)
 }
