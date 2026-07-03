@@ -10,10 +10,11 @@ export type CreatorProjectWithBalance = {
 	slug: string | null
 	description: string | null
 	image: string | null
-	raised: number
+	raised: number | null
 	goal: number
 	percentageComplete: number | null
 	status: string
 	tags: Array<{ name: string; color: string | null }>
 	escrowContractAddress?: string | null
+	escrowType?: 'single-release' | 'multi-release'
 }

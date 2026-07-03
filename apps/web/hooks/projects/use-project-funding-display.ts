@@ -4,13 +4,18 @@ import type { EscrowType } from '@trustless-work/escrow'
 import { useMemo } from 'react'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { useProjectSupportersCount } from '~/hooks/projects/use-project-supporters-count'
+import {
+	calculateFundingProgressPercent,
+	formatProjectFundingAmount,
+	getProjectDbRaised,
+	type ProjectFundingSource,
+	projectHasEscrow,
+	resolveDisplayRaisedAmount,
+} from '~/lib/utils/projects/project-funding'
 
-interface UseProjectFundingDisplayParams {
+interface UseProjectFundingDisplayParams extends ProjectFundingSource {
 	projectId?: string
-	escrowContractAddress?: string
 	escrowType?: EscrowType
-	goal?: number
-	dbRaised?: number
 	dbInvestors?: number
 }
 
@@ -19,13 +24,14 @@ export function useProjectFundingDisplay({
 	escrowContractAddress,
 	escrowType,
 	goal = 0,
-	dbRaised = 0,
+	raised,
 	dbInvestors = 0,
 }: UseProjectFundingDisplayParams) {
-	const hasEscrow = Boolean(escrowContractAddress)
+	const hasEscrow = projectHasEscrow({ escrowContractAddress })
+	const dbRaised = getProjectDbRaised({ raised })
 
 	const { balance: onChainBalance, isLoading: isLoadingBalance } = useEscrowBalance({
-		escrowContractAddress,
+		escrowContractAddress: escrowContractAddress ?? undefined,
 		escrowType,
 	})
 
@@ -33,24 +39,26 @@ export function useProjectFundingDisplay({
 		projectId,
 	})
 
-	const displayRaised = useMemo(() => {
-		if (hasEscrow) {
-			if (onChainBalance !== null) return onChainBalance
-			if (!isLoadingBalance) return 0
-			return null
-		}
-		return dbRaised
-	}, [hasEscrow, onChainBalance, isLoadingBalance, dbRaised])
+	const displayRaised = useMemo(
+		() =>
+			resolveDisplayRaisedAmount({
+				dbRaised,
+				escrowContractAddress,
+				escrowBalance: onChainBalance,
+				isLoadingEscrowBalance: hasEscrow && isLoadingBalance && onChainBalance === null,
+			}),
+		[dbRaised, escrowContractAddress, hasEscrow, isLoadingBalance, onChainBalance],
+	)
 
 	const displaySupporters = useMemo(
 		() => supportersCount ?? dbInvestors,
 		[supportersCount, dbInvestors],
 	)
 
-	const progressPercent = useMemo(() => {
-		if (!goal || goal <= 0 || displayRaised === null) return null
-		return Math.min(100, Math.round((displayRaised / goal) * 100))
-	}, [displayRaised, goal])
+	const progressPercent = useMemo(
+		() => calculateFundingProgressPercent(displayRaised, goal),
+		[displayRaised, goal],
+	)
 
 	const raisedLabel = hasEscrow ? 'Escrow balance' : 'Raised'
 
@@ -60,12 +68,11 @@ export function useProjectFundingDisplay({
 		amount: number,
 		options?: { maximumFractionDigits?: number; minimumFractionDigits?: number },
 	) =>
-		new Intl.NumberFormat('en-US', {
-			style: 'currency',
-			currency: 'USD',
-			maximumFractionDigits: options?.maximumFractionDigits ?? (hasEscrow ? 2 : 0),
-			minimumFractionDigits: options?.minimumFractionDigits ?? (hasEscrow ? 2 : 0),
-		}).format(amount)
+		formatProjectFundingAmount(amount, {
+			hasEscrow,
+			maximumFractionDigits: options?.maximumFractionDigits,
+			minimumFractionDigits: options?.minimumFractionDigits,
+		})
 
 	return {
 		displayRaised,

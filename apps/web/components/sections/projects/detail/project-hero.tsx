@@ -8,8 +8,7 @@ import { AnimatedCounter } from '~/components/sections/projects/detail/animated-
 import { SocialLinksDisplay } from '~/components/sections/projects/detail/social-links-display'
 import { CategoryBadge, CountryFlag } from '~/components/sections/projects/shared'
 import { ShareButtons } from '~/components/shared/share-buttons'
-import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
-import { useProjectSupportersCount } from '~/hooks/projects/use-project-supporters-count'
+import { useProjectFundingDisplay } from '~/hooks/projects/use-project-funding-display'
 import { getProjectPageUrl } from '~/lib/seo/project-metadata'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
@@ -21,24 +20,15 @@ interface ProjectHeroProps {
 
 export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 	const reducedMotion = useReducedMotion()
-	const { balance: onChainRaised } = useEscrowBalance({
+
+	const { displayRaised, displaySupporters } = useProjectFundingDisplay({
+		projectId: project.id,
 		escrowContractAddress: project.escrowContractAddress,
 		escrowType: project.escrowType,
+		goal: project.goal,
+		raised: project.raised,
+		dbInvestors: project.investors,
 	})
-
-	const { supportersCount } = useProjectSupportersCount({
-		projectId: project.id,
-	})
-
-	const displayRaised = useMemo(
-		() => onChainRaised ?? project.raised,
-		[onChainRaised, project.raised],
-	)
-
-	const displaySupporters = useMemo(
-		() => supportersCount ?? project.investors,
-		[supportersCount, project.investors],
-	)
 
 	const shareUrl = useMemo(
 		() => getProjectPageUrl(project.slug, projectSlug),
@@ -76,7 +66,6 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 
 				<p className="mb-6 text-muted-foreground">{project.description}</p>
 
-				{/* Location + Social Links */}
 				{(project.location || project.socialLinks) && (
 					<div className="flex flex-wrap gap-2 justify-between items-center mb-6">
 						{project.location && (
@@ -102,7 +91,13 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 					<div className="p-4 text-center bg-gray-50 rounded-lg">
 						<p className="mb-1 text-sm text-muted-foreground">Raised</p>
 						<p className="text-xl font-bold tabular-nums">
-							$<AnimatedCounter value={displayRaised} />
+							{displayRaised === null ? (
+								'…'
+							) : (
+								<>
+									$<AnimatedCounter value={displayRaised} />
+								</>
+							)}
 						</p>
 					</div>
 					<div className="p-4 text-center bg-gray-50 rounded-lg">

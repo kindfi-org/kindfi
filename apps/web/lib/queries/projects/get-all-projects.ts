@@ -1,12 +1,36 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
+import type { EscrowType } from '@trustless-work/escrow'
 import { sortMap } from '~/lib/constants/projects'
+import {
+	getProjectEscrowRowId,
+	resolveProjectEscrowContracts,
+} from '~/lib/queries/projects/resolve-project-escrow-contracts'
+
+export type ProjectListItem = {
+	id: string
+	title: string
+	slug: string | null
+	description: string | null
+	image: string | null
+	goal: number
+	raised: number
+	investors: number
+	minInvestment: number
+	createdAt: string | null
+	status?: string
+	developmentOnly: boolean
+	category: unknown
+	tags: Array<{ id: string; name: string; color: string | null }>
+	escrowContractAddress?: string
+	escrowType?: EscrowType
+}
 
 export async function getAllProjects(
 	client: TypedSupabaseClient,
 	categorySlugs: string[] = [],
 	sortSlug = 'most-popular',
 	limit?: number,
-) {
+): Promise<ProjectListItem[]> {
 	const { column, ascending } = sortMap[sortSlug] ?? sortMap['most-popular']
 
 	let query = client
@@ -59,14 +83,29 @@ export async function getAllProjects(
 
 	if (error) throw error
 
+	const escrowRowIds =
+		data?.map((project) =>
+			getProjectEscrowRowId(
+				(
+					project as unknown as {
+						project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+					}
+				).project_escrows,
+			),
+		) ?? []
+
+	const escrowContracts = await resolveProjectEscrowContracts(client, escrowRowIds)
+
 	return (
 		data?.map((project) => {
-			const escrowRel = (
-				project as unknown as {
-					project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
-				}
-			).project_escrows
-			const escrowId = Array.isArray(escrowRel) ? escrowRel[0]?.escrow_id : escrowRel?.escrow_id
+			const escrowRowId = getProjectEscrowRowId(
+				(
+					project as unknown as {
+						project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+					}
+				).project_escrows,
+			)
+			const escrow = escrowRowId ? escrowContracts.get(escrowRowId) : undefined
 
 			return {
 				id: project.id,
@@ -83,7 +122,8 @@ export async function getAllProjects(
 				developmentOnly: Boolean((project as { development_only?: boolean }).development_only),
 				category: project.category,
 				tags: project.project_tag_relationships.map((r) => r.tag),
-				escrowContractAddress: escrowId,
+				escrowContractAddress: escrow?.escrowContractAddress,
+				escrowType: escrow?.escrowType,
 			}
 		}) ?? []
 	)

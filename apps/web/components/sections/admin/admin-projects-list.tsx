@@ -6,8 +6,10 @@ import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
+import { useProjectsFundingBalances } from '~/hooks/projects/use-projects-funding-balances'
 import type { getAllProjects } from '~/lib/queries/projects/get-all-projects'
 import { formatDistanceToNow } from '~/lib/utils/date-utils'
+import { formatProjectFundingAmount, projectHasEscrow } from '~/lib/utils/projects/project-funding'
 
 const formatCurrency = (value: number) =>
 	new Intl.NumberFormat(undefined, {
@@ -36,6 +38,8 @@ export function AdminProjectsList() {
 		queryKey: ['supabase', 'admin-projects'],
 		queryFn: fetchAdminProjects,
 	})
+
+	const { getDisplayRaised } = useProjectsFundingBalances(projects ?? [])
 
 	if (isLoading) {
 		return (
@@ -119,7 +123,11 @@ export function AdminProjectsList() {
 									</div>
 									<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
 										<span>
-											Raised: {formatCurrency(project.raised)} / {formatCurrency(project.goal)}
+											Raised:{' '}
+											{formatProjectFundingAmount(getDisplayRaised(project), {
+												hasEscrow: projectHasEscrow(project),
+											})}{' '}
+											/ {formatCurrency(project.goal)}
 										</span>
 										<span>•</span>
 										<span>{project.investors} supporters</span>
