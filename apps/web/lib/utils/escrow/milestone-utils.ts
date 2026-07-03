@@ -1,5 +1,16 @@
 import type { MultiReleaseMilestone, SingleReleaseMilestone } from '@trustless-work/escrow'
 
+export type MilestoneReleasePhase =
+	| 'released'
+	| 'approved'
+	| 'ready_for_approval'
+	| 'in_progress'
+	| 'not_started'
+	| 'unknown'
+
+const WORK_STATUS_FORM_VALUES = ['pending', 'in_progress', 'completed'] as const
+export type MilestoneWorkStatusFormValue = (typeof WORK_STATUS_FORM_VALUES)[number]
+
 /**
  * Type guard to check if a milestone is a SingleReleaseMilestone
  */
@@ -27,7 +38,129 @@ export function getMilestoneWorkStatus(
 	return milestone.status?.trim() || undefined
 }
 
+/** Legacy UI/API used "approved" as work status; TW convention is "completed". */
+export function normalizeWorkStatus(status: string | undefined): string | undefined {
+	if (!status) return undefined
+	if (status.toLowerCase() === 'approved') return 'completed'
+	return status
+}
+
+export function isWorkComplete(status: string | undefined): boolean {
+	const normalized = normalizeWorkStatus(status)?.toLowerCase()
+	return normalized === 'completed'
+}
+
+export function normalizeWorkStatusForForm(
+	status: string | undefined,
+): MilestoneWorkStatusFormValue {
+	const normalized = normalizeWorkStatus(status)?.toLowerCase()
+	if (normalized === 'pending') return 'pending'
+	if (normalized === 'completed') return 'completed'
+	return 'in_progress'
+}
+
 export function formatMilestoneWorkStatus(status: string): string {
+	const normalized = normalizeWorkStatus(status) ?? status
+	return normalized.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+export function getMilestoneReleasePhase(
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+	options?: { escrowReleased?: boolean },
+): MilestoneReleasePhase {
+	if (isMilestoneReleased(milestone, options?.escrowReleased)) {
+		return 'released'
+	}
+
+	if (getMilestoneStatus(milestone)) {
+		return 'approved'
+	}
+
+	if (isWorkComplete(getMilestoneWorkStatus(milestone))) {
+		return 'ready_for_approval'
+	}
+
+	const work = getMilestoneWorkStatus(milestone)?.toLowerCase()
+	if (work === 'in_progress') return 'in_progress'
+	if (work === 'pending' || !work) return 'not_started'
+
+	return 'unknown'
+}
+
+export function formatMilestoneReleasePhase(phase: MilestoneReleasePhase): string {
+	switch (phase) {
+		case 'released':
+			return 'Released'
+		case 'approved':
+			return 'Approved'
+		case 'ready_for_approval':
+			return 'Ready for approval'
+		case 'in_progress':
+			return 'Work in progress'
+		case 'not_started':
+			return 'Not started'
+		default:
+			return 'In progress'
+	}
+}
+
+export function getMilestoneReleasePhaseBadgeVariant(
+	phase: MilestoneReleasePhase,
+): 'default' | 'secondary' | 'outline' | 'destructive' {
+	switch (phase) {
+		case 'released':
+		case 'approved':
+			return 'default'
+		case 'ready_for_approval':
+			return 'secondary'
+		case 'in_progress':
+		case 'unknown':
+			return 'outline'
+		case 'not_started':
+			return 'secondary'
+	}
+}
+
+export function isMilestoneReleased(
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+	escrowReleased = false,
+): boolean {
+	if (!isSingleReleaseMilestone(milestone)) {
+		return milestone.flags?.released ?? false
+	}
+
+	return escrowReleased
+}
+
+/** Maps on-chain escrow milestone state to the public project page status. */
+export function mapEscrowMilestoneToPublicStatus(
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+	options?: { escrowReleased?: boolean },
+): 'pending' | 'completed' | 'approved' | 'released' | 'rejected' | 'disputed' {
+	if (isMilestoneReleased(milestone, options?.escrowReleased)) {
+		return 'released'
+	}
+
+	if (!isSingleReleaseMilestone(milestone) && milestone.flags?.disputed) {
+		return 'disputed'
+	}
+
+	if (getMilestoneStatus(milestone)) {
+		return 'approved'
+	}
+
+	if (isWorkComplete(getMilestoneWorkStatus(milestone))) {
+		return 'completed'
+	}
+
+	const work = getMilestoneWorkStatus(milestone)?.toLowerCase()
+	if (work === 'rejected') return 'rejected'
+	if (work === 'disputed') return 'disputed'
+
+	return 'pending'
+}
+
+export function formatPublicMilestoneStatus(status: string): string {
 	return status.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
@@ -69,9 +202,12 @@ export function patchMilestoneAtIndex(
  */
 export function calculateMilestoneProgress(
 	milestones: (SingleReleaseMilestone | MultiReleaseMilestone)[],
+	options?: { escrowReleased?: boolean },
 ): number {
 	if (!milestones.length) return 0
-	const completed = milestones.filter((m) => getMilestoneStatus(m)).length
+	const completed = milestones.filter(
+		(m) => getMilestoneStatus(m) || isMilestoneReleased(m, options?.escrowReleased),
+	).length
 	return Math.round((completed / milestones.length) * 100)
 }
 

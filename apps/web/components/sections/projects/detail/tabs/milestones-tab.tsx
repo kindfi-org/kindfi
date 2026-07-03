@@ -7,11 +7,11 @@ import type {
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
 import { motion, useInView } from 'framer-motion'
-import { AlertCircle, CheckCircle, Clock } from 'lucide-react'
+import { AlertCircle, CheckCircle, Clock, Send } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import type { Milestone, MilestoneStatus } from '~/lib/types/project/project-detail.types'
-import { getMilestoneStatus, isSingleReleaseMilestone } from '~/lib/utils/escrow/milestone-utils'
+import type { Milestone } from '~/lib/types/project/project-detail.types'
+import { mapEscrowMilestoneToPublicStatus } from '~/lib/utils/escrow/milestone-utils'
 
 interface MilestonesTabProps {
 	milestones: Milestone[]
@@ -35,36 +35,23 @@ export function MilestonesTab({
 				setIsLoadingOnChain(true)
 				const resp = await getEscrowByContractIds({
 					contractIds: [escrowContractAddress],
-					validateOnChain: false,
+					validateOnChain: true,
 				})
 				// Handle both object and array responses from the indexer
 				const escrow = Array.isArray(resp) ? resp[0] : resp
+				const escrowReleased = escrow?.flags?.released ?? false
 				const ms =
 					(escrow?.milestones as (SingleReleaseMilestone | MultiReleaseMilestone)[] | undefined) ||
 					[]
-				const mapped: Milestone[] = ms.map((m, idx) => {
-					const isApproved = getMilestoneStatus(m)
-					const isSingle = isSingleReleaseMilestone(m)
-					let status: MilestoneStatus
-
-					if (isApproved) {
-						status = 'approved'
-					} else if (!isSingle && m.status) {
-						status = (m.status as MilestoneStatus) ?? 'pending'
-					} else {
-						status = 'pending'
-					}
-
-					return {
-						id: String(idx),
-						title: m.description || `Milestone ${idx + 1}`,
-						description: m.description || '',
-						amount: (m as MultiReleaseMilestone).amount ?? 0,
-						deadline: new Date().toISOString(),
-						status,
-						orderIndex: idx,
-					}
-				})
+				const mapped: Milestone[] = ms.map((m, idx) => ({
+					id: String(idx),
+					title: m.description || `Milestone ${idx + 1}`,
+					description: m.description || '',
+					amount: (m as MultiReleaseMilestone).amount ?? 0,
+					deadline: new Date().toISOString(),
+					status: mapEscrowMilestoneToPublicStatus(m, { escrowReleased }),
+					orderIndex: idx,
+				}))
 				setOnChainMilestones(mapped)
 			} finally {
 				setIsLoadingOnChain(false)
@@ -79,6 +66,7 @@ export function MilestonesTab({
 		return milestones
 	}, [escrowContractAddress, onChainMilestones, milestones])
 	const sortedMilestones = [...effectiveMilestones].sort((a, b) => a.orderIndex - b.orderIndex)
+	const releasedCount = sortedMilestones.filter((m) => m.status === 'released').length
 
 	if (sortedMilestones.length === 0) {
 		if (escrowContractAddress && isLoadingOnChain) {
@@ -102,7 +90,15 @@ export function MilestonesTab({
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3 }}
 		>
-			<h2 className="mb-8 text-2xl font-bold">Project Milestones</h2>
+			<h2 className="mb-2 text-2xl font-bold">Project Milestones</h2>
+			{escrowContractAddress && releasedCount > 0 ? (
+				<p className="mb-8 text-sm text-muted-foreground">
+					{releasedCount} of {sortedMilestones.length} milestone
+					{sortedMilestones.length === 1 ? '' : 's'} have had funds released on-chain.
+				</p>
+			) : (
+				<div className="mb-8" />
+			)}
 
 			<div className="relative">
 				{/* Vertical timeline line */}
@@ -154,6 +150,13 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 						<span className="sr-only">Milestone approved</span>
 					</>
 				)
+			case 'released':
+				return (
+					<>
+						<Send {...iconProps} className="text-emerald-600" />
+						<span className="sr-only">Milestone released — funds disbursed on-chain</span>
+					</>
+				)
 			case 'rejected':
 				return (
 					<>
@@ -181,6 +184,8 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 				return 'bg-amber-100 text-amber-800'
 			case 'approved':
 				return 'bg-blue-100 text-blue-800'
+			case 'released':
+				return 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200'
 			case 'rejected':
 				return 'bg-red-100 text-red-800'
 			case 'disputed':

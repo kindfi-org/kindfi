@@ -24,7 +24,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
-import { getMilestoneStatus, isSingleReleaseMilestone } from '~/lib/utils/escrow/milestone-utils'
+import {
+	getMilestoneReleasePhase,
+	getMilestoneStatus,
+	isSingleReleaseMilestone,
+} from '~/lib/utils/escrow/milestone-utils'
 import { EtherfuseOffRampCard } from '../components/etherfuse-off-ramp-card'
 
 interface ReleaseTabProps {
@@ -32,6 +36,21 @@ interface ReleaseTabProps {
 	escrowType: EscrowType
 	milestones: (SingleReleaseMilestone | MultiReleaseMilestone)[]
 	onSuccess: () => void
+}
+
+type ReleaseReadinessTone = 'success' | 'info' | 'warning'
+
+interface ReleaseReadiness {
+	canRelease: boolean
+	tone: ReleaseReadinessTone
+	title: string
+	message: string
+}
+
+const RELEASE_READINESS_ALERT_CLASS: Record<ReleaseReadinessTone, string | undefined> = {
+	success: 'border-emerald-200 bg-emerald-50/80 dark:border-emerald-900 dark:bg-emerald-950/20',
+	info: 'border-sky-200 bg-sky-50/80 dark:border-sky-900 dark:bg-sky-950/20',
+	warning: undefined,
 }
 
 export function ReleaseTab({
@@ -49,36 +68,82 @@ export function ReleaseTab({
 	const selectedIndex = Number(selectedMilestoneIndex)
 	const selectedMilestone = milestones[selectedIndex]
 
-	const releaseReadiness = useMemo(() => {
+	const releaseReadiness = useMemo((): ReleaseReadiness => {
 		if (isSingleRelease) {
 			const allApproved = milestones.length > 0 && milestones.every((m) => getMilestoneStatus(m))
+			if (allApproved) {
+				return {
+					canRelease: true,
+					tone: 'success',
+					title: 'Ready to release',
+					message: 'All milestones are approved. You can release the full escrow balance.',
+				}
+			}
+
+			const pendingCount = milestones.filter((m) => !getMilestoneStatus(m)).length
 			return {
-				canRelease: allApproved,
-				message: allApproved
-					? 'All milestones are approved. You can release the full escrow balance.'
-					: 'Approve all milestones before releasing funds.',
+				canRelease: false,
+				tone: 'warning',
+				title: 'Approval required',
+				message: `${pendingCount} release${pendingCount === 1 ? '' : 's'} still need approver sign-off before the escrow balance can be released.`,
 			}
 		}
 
 		if (!selectedMilestone) {
-			return { canRelease: false, message: 'Select a milestone to release.' }
+			return {
+				canRelease: false,
+				tone: 'warning',
+				title: 'Select a milestone',
+				message: 'Choose which milestone you want to release funds for.',
+			}
 		}
 
-		const isApproved = getMilestoneStatus(selectedMilestone)
-		const isReleased =
-			!isSingleReleaseMilestone(selectedMilestone) && selectedMilestone.flags?.released
+		const phase = getMilestoneReleasePhase(selectedMilestone)
+		const milestoneLabel = `Milestone ${selectedIndex + 1}`
 
-		if (isReleased) {
-			return { canRelease: false, message: 'This milestone has already been released.' }
+		if (phase === 'released') {
+			return {
+				canRelease: false,
+				tone: 'info',
+				title: 'Already released',
+				message: `${milestoneLabel} funds were already sent to the receiver. No further release action is needed for this milestone.`,
+			}
+		}
+
+		if (phase === 'ready_for_approval') {
+			return {
+				canRelease: false,
+				tone: 'warning',
+				title: 'Awaiting approver',
+				message: `Work is complete for ${milestoneLabel}, but the approver has not signed off yet. Approve the release on the Releases tab before releasing funds.`,
+			}
+		}
+
+		if (phase === 'in_progress' || phase === 'not_started' || phase === 'unknown') {
+			return {
+				canRelease: false,
+				tone: 'warning',
+				title: 'Work not complete',
+				message: `${milestoneLabel} is still in progress. The service provider should finish work and the approver must sign off before funds can be released.`,
+			}
+		}
+
+		if (getMilestoneStatus(selectedMilestone)) {
+			return {
+				canRelease: true,
+				tone: 'success',
+				title: 'Ready to release',
+				message: `${milestoneLabel} is approved. Connect the Release Signer wallet and submit the on-chain release.`,
+			}
 		}
 
 		return {
-			canRelease: isApproved,
-			message: isApproved
-				? 'This milestone is approved and ready for release.'
-				: 'Approve this milestone before releasing its funds.',
+			canRelease: false,
+			tone: 'warning',
+			title: 'Approval required',
+			message: `Approve ${milestoneLabel} on the Releases tab before releasing its funds.`,
 		}
-	}, [isSingleRelease, milestones, selectedMilestone])
+	}, [isSingleRelease, milestones, selectedIndex, selectedMilestone])
 
 	const handleReleaseFunds = async () => {
 		try {
@@ -172,21 +237,17 @@ export function ReleaseTab({
 						) : null}
 
 						<Alert
-							variant={releaseReadiness.canRelease ? 'default' : 'destructive'}
-							className={
-								releaseReadiness.canRelease
-									? 'border-emerald-200 bg-emerald-50/80 dark:border-emerald-900 dark:bg-emerald-950/20'
-									: undefined
-							}
+							variant={releaseReadiness.tone === 'warning' ? 'destructive' : 'default'}
+							className={RELEASE_READINESS_ALERT_CLASS[releaseReadiness.tone]}
 						>
-							{releaseReadiness.canRelease ? (
+							{releaseReadiness.tone === 'success' ? (
 								<CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+							) : releaseReadiness.tone === 'info' ? (
+								<CheckCircle2 className="h-4 w-4 text-sky-600" aria-hidden="true" />
 							) : (
 								<AlertCircle className="h-4 w-4" aria-hidden="true" />
 							)}
-							<AlertTitle>
-								{releaseReadiness.canRelease ? 'Ready to release' : 'Not ready yet'}
-							</AlertTitle>
+							<AlertTitle>{releaseReadiness.title}</AlertTitle>
 							<AlertDescription>{releaseReadiness.message}</AlertDescription>
 						</Alert>
 
@@ -218,6 +279,13 @@ export function ReleaseTab({
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
 									Releasing…
+								</>
+							) : releaseReadiness.tone === 'info' ? (
+								<>
+									<CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
+									{isSingleRelease
+										? 'Already released'
+										: `Milestone ${selectedIndex + 1} already released`}
 								</>
 							) : (
 								<>

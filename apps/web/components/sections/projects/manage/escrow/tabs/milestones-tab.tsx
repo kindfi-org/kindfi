@@ -6,17 +6,8 @@ import type {
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import {
-	ArrowRight,
-	CheckCircle2,
-	FileText,
-	Loader2,
-	Pencil,
-	Plus,
-	Send,
-	TrendingUp,
-} from 'lucide-react'
-import { useState } from 'react'
+import { ArrowRight, CheckCircle2, FileText, Loader2, Pencil, Plus, TrendingUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { Alert, AlertDescription } from '~/components/base/alert'
@@ -43,10 +34,13 @@ import {
 	type NewRelease,
 } from '~/lib/utils/escrow/build-update-escrow-payload'
 import {
-	formatMilestoneWorkStatus,
+	formatMilestoneReleasePhase,
+	getMilestoneReleasePhase,
+	getMilestoneReleasePhaseBadgeVariant,
 	getMilestoneStatus,
 	getMilestoneWorkStatus,
 	isSingleReleaseMilestone,
+	normalizeWorkStatusForForm,
 	truncateAddress,
 } from '~/lib/utils/escrow/milestone-utils'
 import { AddReleaseDialog, type ReleaseFormValues } from '../components/add-release-dialog'
@@ -88,9 +82,18 @@ export function MilestonesTab({
 
 	const selectedIndex = Number(selectedMilestoneIndex)
 	const selectedMilestone = milestones[selectedIndex]
+	const selectedPhase = selectedMilestone ? getMilestoneReleasePhase(selectedMilestone) : null
 	const hasFunds = escrowBalance !== null && escrowBalance > 0
 	const canAddRelease = milestones.length < MAX_ESCROW_RELEASES && !escrowData?.flags?.disputed
 	const editingMilestone = editingMilestoneIndex !== null ? milestones[editingMilestoneIndex] : null
+
+	useEffect(() => {
+		const milestone = milestones[selectedIndex]
+		if (!milestone) return
+
+		setMilestoneStatus(normalizeWorkStatusForForm(getMilestoneWorkStatus(milestone)))
+		setMilestoneEvidence(milestone.evidence ?? '')
+	}, [milestones, selectedIndex])
 
 	const submitEscrowUpdate = async (
 		payload: ReturnType<typeof buildUpdateEscrowPayload>,
@@ -333,8 +336,7 @@ export function MilestonesTab({
 				</CardHeader>
 				<CardContent className="space-y-3">
 					{milestones.map((milestone, index) => {
-						const isApproved = getMilestoneStatus(milestone)
-						const workStatus = getMilestoneWorkStatus(milestone)
+						const phase = getMilestoneReleasePhase(milestone)
 						const isSingle = isSingleReleaseMilestone(milestone)
 						const isSelected = selectedMilestoneIndex === String(index)
 						const multiMilestone = milestone as MultiReleaseMilestone
@@ -364,25 +366,15 @@ export function MilestonesTab({
 											<div className="min-w-0 flex-1 space-y-2">
 												<div className="flex flex-wrap items-center gap-2">
 													<span className="font-semibold">Release {index + 1}</span>
-													{isApproved ? (
-														<Badge className="gap-1">
+													<Badge
+														variant={getMilestoneReleasePhaseBadgeVariant(phase)}
+														className="gap-1"
+													>
+														{phase === 'approved' || phase === 'released' ? (
 															<CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-															Approved
-														</Badge>
-													) : (
-														<Badge variant="secondary">Pending approval</Badge>
-													)}
-													{workStatus ? (
-														<Badge variant="outline">
-															Work: {formatMilestoneWorkStatus(workStatus)}
-														</Badge>
-													) : null}
-													{!isSingle && multiMilestone.flags?.released ? (
-														<Badge variant="outline" className="gap-1">
-															<Send className="h-3 w-3" aria-hidden="true" />
-															Released
-														</Badge>
-													) : null}
+														) : null}
+														{formatMilestoneReleasePhase(phase)}
+													</Badge>
 												</div>
 												<p className="text-sm text-muted-foreground">{milestone.description}</p>
 												{!isSingle ? (
@@ -521,6 +513,11 @@ export function MilestonesTab({
 									Release {selectedIndex + 1} is already approved. Go to Release to send funds.
 								</AlertDescription>
 							</Alert>
+						) : selectedPhase === 'ready_for_approval' ? (
+							<p className="text-sm text-muted-foreground">
+								Work is marked complete for release {selectedIndex + 1}. Connect the approver wallet
+								and sign below to authorize fund release.
+							</p>
 						) : (
 							<p className="text-sm text-muted-foreground">
 								Approving release {selectedIndex + 1} allows the Release Signer to disburse
