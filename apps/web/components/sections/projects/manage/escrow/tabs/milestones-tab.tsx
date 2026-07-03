@@ -43,7 +43,9 @@ import {
 	type NewRelease,
 } from '~/lib/utils/escrow/build-update-escrow-payload'
 import {
+	formatMilestoneWorkStatus,
 	getMilestoneStatus,
+	getMilestoneWorkStatus,
 	isSingleReleaseMilestone,
 	truncateAddress,
 } from '~/lib/utils/escrow/milestone-utils'
@@ -57,6 +59,10 @@ interface MilestonesTabProps {
 	isLoading: boolean
 	escrowBalance?: number | null
 	onSuccess: () => void
+	onPatchMilestone?: (
+		index: number,
+		patch: { kind: 'approve' } | { kind: 'status'; status: string; evidence?: string },
+	) => void
 	onGoToRelease?: () => void
 }
 
@@ -68,6 +74,7 @@ export function MilestonesTab({
 	isLoading,
 	escrowBalance = null,
 	onSuccess,
+	onPatchMilestone,
 	onGoToRelease,
 }: MilestonesTabProps) {
 	const { approveMilestone, changeMilestoneStatus, sendTransaction, updateEscrow } = useEscrow()
@@ -131,6 +138,7 @@ export function MilestonesTab({
 			}
 
 			toast.success('Release approved successfully')
+			onPatchMilestone?.(selectedIndex, { kind: 'approve' })
 			onSuccess()
 		} catch (error) {
 			logger.error(error)
@@ -168,7 +176,13 @@ export function MilestonesTab({
 			}
 
 			toast.success('Release status updated successfully')
+			const evidence = milestoneEvidence || undefined
 			setMilestoneEvidence('')
+			onPatchMilestone?.(selectedIndex, {
+				kind: 'status',
+				status: milestoneStatus,
+				evidence,
+			})
 			onSuccess()
 		} catch (error) {
 			logger.error(error)
@@ -320,6 +334,7 @@ export function MilestonesTab({
 				<CardContent className="space-y-3">
 					{milestones.map((milestone, index) => {
 						const isApproved = getMilestoneStatus(milestone)
+						const workStatus = getMilestoneWorkStatus(milestone)
 						const isSingle = isSingleReleaseMilestone(milestone)
 						const isSelected = selectedMilestoneIndex === String(index)
 						const multiMilestone = milestone as MultiReleaseMilestone
@@ -357,6 +372,11 @@ export function MilestonesTab({
 													) : (
 														<Badge variant="secondary">Pending approval</Badge>
 													)}
+													{workStatus ? (
+														<Badge variant="outline">
+															Work: {formatMilestoneWorkStatus(workStatus)}
+														</Badge>
+													) : null}
 													{!isSingle && multiMilestone.flags?.released ? (
 														<Badge variant="outline" className="gap-1">
 															<Send className="h-3 w-3" aria-hidden="true" />
@@ -427,7 +447,8 @@ export function MilestonesTab({
 							Update Progress
 						</CardTitle>
 						<CardDescription>
-							Service Provider role: mark work in progress and attach evidence.
+							Service Provider role: report work progress and attach evidence. This does not approve
+							the release — use Approve Release with the approver wallet.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -442,9 +463,9 @@ export function MilestonesTab({
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="in_progress">In Progress</SelectItem>
 									<SelectItem value="pending">Pending</SelectItem>
-									<SelectItem value="approved">Approved</SelectItem>
+									<SelectItem value="in_progress">In Progress</SelectItem>
+									<SelectItem value="completed">Completed</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>

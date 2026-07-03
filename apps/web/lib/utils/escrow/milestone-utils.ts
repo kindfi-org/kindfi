@@ -10,7 +10,8 @@ export function isSingleReleaseMilestone(
 }
 
 /**
- * Get the approval status of a milestone
+ * Whether the approver has signed off (required before release).
+ * This is separate from milestone.status, which tracks service-provider work progress.
  */
 export function getMilestoneStatus(
 	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
@@ -18,6 +19,49 @@ export function getMilestoneStatus(
 	return isSingleReleaseMilestone(milestone)
 		? (milestone.approved ?? false)
 		: (milestone.flags?.approved ?? false)
+}
+
+export function getMilestoneWorkStatus(
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+): string | undefined {
+	return milestone.status?.trim() || undefined
+}
+
+export function formatMilestoneWorkStatus(status: string): string {
+	return status.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+/** Apply a local milestone patch after a successful on-chain mutation. */
+export function patchMilestoneAtIndex(
+	milestones: (SingleReleaseMilestone | MultiReleaseMilestone)[],
+	index: number,
+	patch: { kind: 'approve' } | { kind: 'status'; status: string; evidence?: string },
+): (SingleReleaseMilestone | MultiReleaseMilestone)[] {
+	return milestones.map((milestone, milestoneIndex) => {
+		if (milestoneIndex !== index) {
+			return milestone
+		}
+
+		if (patch.kind === 'approve') {
+			if (isSingleReleaseMilestone(milestone)) {
+				return { ...milestone, approved: true }
+			}
+
+			return {
+				...milestone,
+				flags: {
+					...(milestone.flags ?? {}),
+					approved: true,
+				},
+			}
+		}
+
+		return {
+			...milestone,
+			status: patch.status,
+			...(patch.evidence !== undefined ? { evidence: patch.evidence } : {}),
+		}
+	})
 }
 
 /**

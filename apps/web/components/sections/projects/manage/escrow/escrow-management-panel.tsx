@@ -43,7 +43,8 @@ export function EscrowManagementPanel({
 		escrowData,
 		isLoading: isLoadingEscrow,
 		error,
-		refetch,
+		refetchAfterTransaction,
+		patchMilestone,
 	} = useEscrowData({
 		escrowContractAddress,
 		escrowType,
@@ -73,11 +74,11 @@ export function EscrowManagementPanel({
 	const handleRefetch = useCallback(async () => {
 		setIsRefreshing(true)
 		try {
-			await Promise.all([refetch(), refetchBalance()])
+			await Promise.all([refetchAfterTransaction(), refetchBalance()])
 		} finally {
 			setIsRefreshing(false)
 		}
-	}, [refetch, refetchBalance])
+	}, [refetchAfterTransaction, refetchBalance])
 
 	const handleGoToTab = useCallback((tab: EscrowManagementTab) => {
 		setActiveTab(tab)
@@ -164,6 +165,7 @@ export function EscrowManagementPanel({
 						isLoading={isLoadingEscrow}
 						escrowBalance={balance}
 						onSuccess={handleRefetch}
+						onPatchMilestone={patchMilestone}
 						onGoToRelease={() => setActiveTab('release')}
 					/>
 				</TabsContent>
