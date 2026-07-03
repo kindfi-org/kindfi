@@ -9,9 +9,13 @@ import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { useProjectMutation } from '~/hooks/projects/use-project-mutation'
 import type { StepThreeData } from '~/lib/types/project/create-project.types'
 
-export function CreateProjectForm() {
+type CreateProjectFormProps = {
+	developmentOnly?: boolean
+}
+
+export function CreateProjectForm({ developmentOnly = false }: CreateProjectFormProps) {
 	const { currentStep, setCurrentStep, formData, updateFormData } = useCreateProject()
-	const { mutateAsync: createProject, isPending } = useProjectMutation({})
+	const { mutateAsync: createProject, isPending } = useProjectMutation({ developmentOnly })
 	const router = useRouter()
 
 	const handleNext = () => {
@@ -38,7 +42,7 @@ export function CreateProjectForm() {
 		if ('slug' in result && result.slug) {
 			router.push(`/projects/${result.slug}/manage`)
 		} else {
-			router.push('/projects')
+			router.push(developmentOnly ? '/admin/projects' : '/projects')
 		}
 	}
 

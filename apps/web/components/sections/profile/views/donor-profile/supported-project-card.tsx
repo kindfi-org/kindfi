@@ -16,6 +16,7 @@ interface SupportedProjectCardProps {
 export function SupportedProjectCard({ project, t }: SupportedProjectCardProps) {
 	const percentage = project.percentageComplete ?? 0
 	const contributionAmount = Number(project.contributionAmount)
+	const raisedLabel = project.raised === null ? '…' : `$${Number(project.raised).toLocaleString()}`
 
 	return (
 		<ProfileSurfaceCard
@@ -47,7 +48,7 @@ export function SupportedProjectCard({ project, t }: SupportedProjectCardProps) 
 					<div className="flex justify-between text-sm">
 						<span className="text-muted-foreground">Total Raised</span>
 						<span className="font-semibold">
-							${Number(project.raised).toLocaleString()} / ${Number(project.goal).toLocaleString()}
+							{raisedLabel} / ${Number(project.goal).toLocaleString()}
 						</span>
 					</div>
 					<div className="relative h-2 bg-muted rounded-full overflow-hidden">

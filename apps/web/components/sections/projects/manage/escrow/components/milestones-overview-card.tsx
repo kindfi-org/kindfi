@@ -1,13 +1,15 @@
 'use client'
 
 import type { MultiReleaseMilestone, SingleReleaseMilestone } from '@trustless-work/escrow'
-import { AlertCircle, CheckCircle2, Clock, FileText, Send } from 'lucide-react'
+import { AlertCircle, CheckCircle2, FileText } from 'lucide-react'
 import { Badge } from '~/components/base/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { Progress } from '~/components/base/progress'
 import {
 	calculateMilestoneProgress,
-	getMilestoneStatus,
+	formatMilestoneReleasePhase,
+	getMilestoneReleasePhase,
+	getMilestoneReleasePhaseBadgeVariant,
 	isSingleReleaseMilestone,
 	truncateAddress,
 } from '~/lib/utils/escrow/milestone-utils'
@@ -39,7 +41,7 @@ export function MilestonesOverviewCard({ milestones }: MilestonesOverviewCardPro
 				<Progress value={progress} className="h-3" />
 				<div className="space-y-3">
 					{milestones.map((milestone, index) => {
-						const isApproved = getMilestoneStatus(milestone)
+						const phase = getMilestoneReleasePhase(milestone)
 						const isSingle = isSingleReleaseMilestone(milestone)
 						const multiMilestone = milestone as MultiReleaseMilestone
 
@@ -54,27 +56,16 @@ export function MilestonesOverviewCard({ milestones }: MilestonesOverviewCardPro
 											{index + 1}
 										</div>
 										<span className="font-semibold">Release {index + 1}</span>
-										{isApproved ? (
-											<Badge variant="default" className="gap-1">
+										<Badge variant={getMilestoneReleasePhaseBadgeVariant(phase)} className="gap-1">
+											{phase === 'approved' || phase === 'released' ? (
 												<CheckCircle2 className="w-3 h-3" />
-												Approved
-											</Badge>
-										) : (
-											<Badge variant="secondary" className="gap-1">
-												<Clock className="w-3 h-3" />
-												Pending
-											</Badge>
-										)}
+											) : null}
+											{formatMilestoneReleasePhase(phase)}
+										</Badge>
 										{!isSingle && multiMilestone.flags?.disputed && (
 											<Badge variant="destructive" className="gap-1">
 												<AlertCircle className="w-3 h-3" />
 												Disputed
-											</Badge>
-										)}
-										{!isSingle && multiMilestone.flags?.released && (
-											<Badge variant="outline" className="gap-1">
-												<Send className="w-3 h-3" />
-												Released
 											</Badge>
 										)}
 									</div>

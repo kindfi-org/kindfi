@@ -1,12 +1,15 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
+import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
+import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
-import { getAllProjects } from '~/lib/queries/projects/get-all-projects'
+import { useProjectsFundingBalances } from '~/hooks/projects/use-projects-funding-balances'
+import type { ProjectListItem } from '~/lib/queries/projects/get-all-projects'
 import { formatDistanceToNow } from '~/lib/utils/date-utils'
+import { formatProjectFundingAmount, projectHasEscrow } from '~/lib/utils/projects/project-funding'
 
 const formatCurrency = (value: number) =>
 	new Intl.NumberFormat(undefined, {
@@ -18,16 +21,25 @@ const formatCurrency = (value: number) =>
 
 const SKELETON_KEYS = ['proj-sk-1', 'proj-sk-2', 'proj-sk-3', 'proj-sk-4', 'proj-sk-5'] as const
 
+const fetchAdminProjects = async () => {
+	const response = await fetch('/api/admin/projects')
+	if (!response.ok) {
+		throw new Error('Failed to load projects')
+	}
+	return (await response.json()) as ProjectListItem[]
+}
+
 export function AdminProjectsList() {
 	const {
 		data: projects,
 		isLoading,
 		error,
-	} = useSupabaseQuery(
-		'admin-projects',
-		(client) => getAllProjects(client, [], 'most-recent', 1000),
-		{},
-	)
+	} = useQuery({
+		queryKey: ['supabase', 'admin-projects'],
+		queryFn: fetchAdminProjects,
+	})
+
+	const { getDisplayRaised } = useProjectsFundingBalances(projects ?? [])
 
 	if (isLoading) {
 		return (
@@ -78,7 +90,11 @@ export function AdminProjectsList() {
 			<AdminSectionHeader
 				title="Projects"
 				description="View and manage all projects on the platform"
-			/>
+			>
+				<Button asChild>
+					<Link href="/admin/projects/create">Create dev project</Link>
+				</Button>
+			</AdminSectionHeader>
 
 			<div className="space-y-2">
 				{projects?.map((project) => (
@@ -96,10 +112,22 @@ export function AdminProjectsList() {
 										<Badge className={statusColors[project.status || 'draft']}>
 											{project.status || 'draft'}
 										</Badge>
+										{project.developmentOnly ? (
+											<Badge
+												variant="secondary"
+												className="bg-amber-100 text-amber-900 hover:bg-amber-100"
+											>
+												Development only
+											</Badge>
+										) : null}
 									</div>
 									<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
 										<span>
-											Raised: {formatCurrency(project.raised)} / {formatCurrency(project.goal)}
+											Raised:{' '}
+											{formatProjectFundingAmount(getDisplayRaised(project), {
+												hasEscrow: projectHasEscrow(project),
+											})}{' '}
+											/ {formatCurrency(project.goal)}
 										</span>
 										<span>•</span>
 										<span>{project.investors} supporters</span>

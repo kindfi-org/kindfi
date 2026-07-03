@@ -14,6 +14,7 @@ export function EscrowAdminPanel({
 }: EscrowAdminPanelProps) {
 	const { suggestedTitle, suggestedEngagementId, suggestedDescription } = useProjectDefaults({
 		projectId,
+		projectSlug,
 		projectTitle,
 		projectDescription,
 	})

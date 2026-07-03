@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+	boolean,
 	char,
 	check,
 	foreignKey,
@@ -86,6 +87,7 @@ export const projects = pgTable(
 		status: projectStatus().default('draft').notNull(),
 		metadata: jsonb().default({}).notNull(),
 		foundationId: uuid('foundation_id'),
+		developmentOnly: boolean('development_only').default(false).notNull(),
 	},
 	(table) => [
 		index('idx_projects_kindler_id').using(

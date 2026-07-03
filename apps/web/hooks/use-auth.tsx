@@ -47,9 +47,16 @@ export function AuthProvider({
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: any
 	useEffect(() => {
-		// Move session check to useEffect to avoid hydration mismatch
-		const checkSession = async () => {
+		const syncSupabaseAuth = async () => {
 			try {
+				const accessToken = userSession?.supabaseAccessToken
+				if (accessToken) {
+					await supabase.auth.setSession({
+						access_token: accessToken,
+						refresh_token: accessToken,
+					})
+				}
+
 				const {
 					data: { session: supabaseSession },
 				} = await supabase.auth.getSession()
@@ -62,7 +69,7 @@ export function AuthProvider({
 			}
 		}
 
-		checkSession()
+		syncSupabaseAuth()
 
 		const {
 			data: { subscription },
@@ -74,7 +81,7 @@ export function AuthProvider({
 		return () => {
 			subscription.unsubscribe()
 		}
-	}, [session])
+	}, [session, userSession?.supabaseAccessToken, supabase])
 
 	// Always render children, but show loading state
 	return (

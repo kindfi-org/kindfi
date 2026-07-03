@@ -77,7 +77,18 @@ async function createProjectHandler(req: NextRequest) {
 			socialLinks,
 			image,
 			foundationId,
+			developmentOnly,
 		} = validation.data
+
+		if (developmentOnly && userRole !== 'admin') {
+			return NextResponse.json(
+				{
+					error: 'Forbidden',
+					message: 'Only administrators can create development-only projects',
+				},
+				{ status: 403 },
+			)
+		}
 
 		// Prepare project data to insert
 		const insertData: TablesInsert<'projects'> = {
@@ -90,6 +101,7 @@ async function createProjectHandler(req: NextRequest) {
 			kindler_id: userId,
 			social_links: buildSocialLinks(website, socialLinks),
 			...(foundationId && { foundation_id: foundationId }),
+			...(developmentOnly && { development_only: true }),
 		}
 
 		// Insert new project and retrieve its ID and slug
@@ -126,16 +138,18 @@ async function createProjectHandler(req: NextRequest) {
 		// Create tag relationships for the new project
 		await upsertTags(project.id, tags ?? [], supabase)
 
-		// Send email + in-app notifications (non-blocking)
-		import('~/lib/email/email-notification-service')
-			.then(({ sendNewProjectEmails }) =>
-				sendNewProjectEmails({
-					projectTitle: title,
-					projectSlug: project.slug ?? '',
-					creatorId: userId,
-				}),
-			)
-			.catch((err) => logger.error('[Project create] Notification error:', err))
+		if (!developmentOnly) {
+			// Send email + in-app notifications (non-blocking)
+			import('~/lib/email/email-notification-service')
+				.then(({ sendNewProjectEmails }) =>
+					sendNewProjectEmails({
+						projectTitle: title,
+						projectSlug: project.slug ?? '',
+						creatorId: userId,
+					}),
+				)
+				.catch((err) => logger.error('[Project create] Notification error:', err))
+		}
 
 		return NextResponse.json({ slug: project.slug }, { status: 201 })
 	} catch (err) {

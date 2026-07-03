@@ -1,23 +1,32 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
-import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
+import type { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import { SyncEscrowCard } from './components/sync-escrow-card'
 import { EscrowManagementPanel } from './escrow-management-panel'
 
 export function EscrowManagementClientWrapper({ projectSlug }: { projectSlug: string }) {
 	const prefersReducedMotion = useReducedMotion()
-	const { data: project, error } = useSupabaseQuery(
+	const {
+		data: project,
+		isLoading,
+		error,
+	} = useManagedProjectQuery<Awaited<ReturnType<typeof getBasicProjectInfoBySlug>>>(
 		'basic-project-info',
-		(client) => getBasicProjectInfoBySlug(client, projectSlug),
+		projectSlug,
+		'basic-info',
 		{ additionalKeyValues: [projectSlug] },
 	)
+
+	if (isLoading) {
+		return null
+	}
 
 	if (error || !project) notFound()
 

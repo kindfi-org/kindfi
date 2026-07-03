@@ -7,10 +7,10 @@ export interface DonorProfileProps {
 export type DonorProjectWithBalance = {
 	id: string
 	title: string
-	slug: string
+	slug: string | null
 	description: string | null
 	image: string | null
-	raised: number
+	raised: number | null
 	goal: number
 	percentageComplete: number | null
 	status: string
@@ -18,12 +18,13 @@ export type DonorProjectWithBalance = {
 	contributionAmount: string | number
 	contributionDate: string | null
 	escrowContractAddress?: string | null
+	escrowType?: 'single-release' | 'multi-release'
 }
 
 export type DonorDonationHistoryItem = {
 	id: string
 	title: string
-	slug: string
+	slug: string | null
 	description?: string | null
 	contributionAmount: string | number
 	contributionDate: string | null

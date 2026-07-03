@@ -1,4 +1,5 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import { canAccessDevelopmentOnlyProject } from '~/lib/queries/projects/development-only-access'
 
 const MANAGE_MEMBER_ROLES = ['core', 'admin', 'editor'] as const
 
@@ -44,6 +45,11 @@ export async function authorizeProjectManage(
 	const isOwner = project.kindler_id === userId
 	const isPlatformAdmin = profileResult.data?.role === 'admin'
 	const hasEditorRole = !!memberResult.data
+
+	const devAccessAllowed = await canAccessDevelopmentOnlyProject(projectId, userId)
+	if (!devAccessAllowed) {
+		return { ok: false, status: 403 }
+	}
 
 	if (!isOwner && !hasEditorRole && !isPlatformAdmin) {
 		return { ok: false, status: 403 }

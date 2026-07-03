@@ -1,6 +1,5 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -18,7 +17,8 @@ import { ExampleHighlights } from '~/components/sections/project/highlights/exam
 import { ProjectHighlightCard } from '~/components/sections/project/highlights/project-highlight-card'
 import { WritingTips } from '~/components/sections/project/highlights/writing-tips'
 import { useHighlightsMutation } from '~/hooks/projects/use-highlights-mutation'
-import { getProjectHighlights } from '~/lib/queries/projects/get-project-highlights'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
+import type { getProjectHighlights } from '~/lib/queries/projects/get-project-highlights'
 import { generateUniqueId } from '~/lib/utils/id'
 
 interface Highlight {
@@ -33,11 +33,9 @@ export default function ProjectHighlights() {
 	const prefersReducedMotion = useReducedMotion()
 
 	// Fetch existing highlights
-	const { data: highlightsData, isLoading } = useSupabaseQuery(
-		'project-highlights',
-		(client) => getProjectHighlights(client, projectSlug),
-		{ additionalKeyValues: [projectSlug] },
-	)
+	const { data: highlightsData, isLoading } = useManagedProjectQuery<
+		Awaited<ReturnType<typeof getProjectHighlights>>
+	>('project-highlights', projectSlug, 'highlights', { additionalKeyValues: [projectSlug] })
 
 	// Initialize highlights with defaults
 	const [highlights, setHighlights] = useState<Highlight[]>(() => [

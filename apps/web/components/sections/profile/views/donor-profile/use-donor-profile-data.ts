@@ -1,13 +1,19 @@
 'use client'
 
 import { useSupabaseQuery } from '@packages/lib/hooks'
-import { useEffect, useMemo, useState } from 'react'
-import { logger } from '@/lib/logger'
-import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { useSession } from 'next-auth/react'
+import { useMemo } from 'react'
+import { useProjectsFundingBalances } from '~/hooks/projects/use-projects-funding-balances'
+import { useAuth } from '~/hooks/use-auth'
 import { getUserSupportedProjects } from '~/lib/queries/projects/get-user-projects'
+import { calculateFundingProgressPercent } from '~/lib/utils/projects/project-funding'
 import type { DonorProjectWithBalance } from './types'
 
 export function useDonorProfileData(userId: string) {
+	const { status } = useSession()
+	const { isSupabaseUserLoading } = useAuth()
+	const queryEnabled = status === 'authenticated' && Boolean(userId) && !isSupabaseUserLoading
+
 	const {
 		data: supportedProjects = [],
 		isLoading,
@@ -15,58 +21,26 @@ export function useDonorProfileData(userId: string) {
 	} = useSupabaseQuery(
 		'user-supported-projects',
 		(client) => getUserSupportedProjects(client, userId),
-		{ additionalKeyValues: [userId] },
+		{ additionalKeyValues: [userId], enabled: queryEnabled },
 	)
 
-	const { getMultipleBalances } = useEscrow()
-	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>({})
-
-	useEffect(() => {
-		const fetchBalances = async () => {
-			const projectsWithEscrow = supportedProjects.filter((p) => p.escrowContractAddress)
-			if (projectsWithEscrow.length === 0) return
-
-			try {
-				const addresses = projectsWithEscrow.map((p) => p.escrowContractAddress as string)
-				const balances = await getMultipleBalances({ addresses }, 'multi-release')
-
-				const balanceMap: Record<string, number> = {}
-				addresses.forEach((address, index) => {
-					const balanceResponse = balances[index]
-					if (balanceResponse?.balance !== undefined) {
-						balanceMap[address] = balanceResponse.balance
-					}
-				})
-				setEscrowBalances(balanceMap)
-			} catch (error) {
-				logger.error('Failed to fetch escrow balances', error)
-			}
-		}
-
-		if (supportedProjects.length > 0) {
-			fetchBalances()
-			const intervalId = setInterval(() => fetchBalances(), 10000)
-			return () => clearInterval(intervalId)
-		}
-	}, [supportedProjects, getMultipleBalances])
+	const { getDisplayRaised, isLoadingBalances } = useProjectsFundingBalances(supportedProjects)
 
 	const projectsWithBalances = useMemo((): DonorProjectWithBalance[] => {
 		return supportedProjects.map((project) => {
-			const escrowBalance =
-				project.escrowContractAddress && escrowBalances[project.escrowContractAddress]
-			const raised = Number(escrowBalance ?? project.raised ?? 0)
-			const goal = Number(project.goal ?? 0)
-			const percentageComplete = goal > 0 ? Math.min((raised / goal) * 100, 100) : 0
+			const raised = getDisplayRaised(project)
+			const percentageComplete =
+				calculateFundingProgressPercent(raised, project.goal) ?? project.percentageComplete
 
 			return { ...project, raised, percentageComplete }
 		})
-	}, [supportedProjects, escrowBalances])
+	}, [supportedProjects, getDisplayRaised])
 
 	const stats = useMemo(() => {
 		let totalContributed = 0
 
-		for (const p of projectsWithBalances) {
-			totalContributed += Number(p.contributionAmount || 0)
+		for (const project of projectsWithBalances) {
+			totalContributed += Number(project.contributionAmount || 0)
 		}
 
 		return {
@@ -79,7 +53,7 @@ export function useDonorProfileData(userId: string) {
 		supportedProjects,
 		projectsWithBalances,
 		stats,
-		isLoading,
+		isLoading: isLoading || isLoadingBalances,
 		error,
 	}
 }

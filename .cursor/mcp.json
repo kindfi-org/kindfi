@@ -1,0 +1,20 @@
+{
+	"mcpServers": {
+		"supabase": {
+			"url": "https://mcp.supabase.com/mcp?project_ref=gcqrhpprpqyfqabrhmla",
+			"headers": {}
+		},
+		"trustless-work": {
+			"url": "https://docs.trustlesswork.com/trustless-work/~gitbook/mcp",
+			"headers": {}
+		},
+		"etherfuse": {
+			"url": "https://docs.etherfuse.com/mcp",
+			"headers": {}
+		},
+		"vercel": {
+			"url": "https://mcp.vercel.com",
+			"headers": {}
+		}
+	}
+}

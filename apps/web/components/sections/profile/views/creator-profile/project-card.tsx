@@ -32,6 +32,8 @@ export function ProjectCard({ project, compact = false, t }: ProjectCardProps) {
 			maximumFractionDigits: 0,
 		}).format(amount)
 
+	const raisedLabel = project.raised === null ? '…' : formatCurrency(project.raised)
+
 	return (
 		<ProfileSurfaceCard
 			padding="sm"
@@ -68,7 +70,7 @@ export function ProjectCard({ project, compact = false, t }: ProjectCardProps) {
 					<div className="flex justify-between text-sm">
 						<span className="text-muted-foreground">Raised</span>
 						<span className="font-semibold tabular-nums">
-							{formatCurrency(project.raised)} / {formatCurrency(project.goal)}
+							{raisedLabel} / {formatCurrency(project.goal)}
 						</span>
 					</div>
 					<div

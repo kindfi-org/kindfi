@@ -4,17 +4,17 @@ import type { ReactNode } from 'react'
 export interface Tag {
 	id: string
 	name: string
-	color: string
+	color: string | null
 }
 
 export interface Project {
 	id: string
 	title: string
 	slug: string | null
-	description: string
+	description: string | null
 	image: string | null
 	createdAt: string | null
-	category: Tables<'categories'>
+	category: Tables<'categories'> | null
 	goal: number
 	raised: number
 	investors: number
@@ -22,6 +22,7 @@ export interface Project {
 	tags: Tag[]
 	/** Optional on-chain escrow contract address for this project */
 	escrowContractAddress?: string
+	escrowType?: 'single-release' | 'multi-release'
 }
 
 export type SortOption = 'Most Popular' | 'Most Funded' | 'Most Recent' | 'Most Supporters'

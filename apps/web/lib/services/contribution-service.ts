@@ -5,6 +5,7 @@ import type { Session } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { getEscrowBalance } from '~/lib/services/escrow-balance.service'
 import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
+import { resolveDisplayRaisedAmount } from '~/lib/utils/projects/project-funding'
 
 export type ResolveProjectIdInput = {
 	contractId?: string
@@ -77,7 +78,13 @@ export async function checkFundraisingGoalNotReached(
 
 	const dbRaised = Number(project.current_amount ?? 0)
 	const onChainRaised = escrowContractAddress ? await getEscrowBalance(escrowContractAddress) : null
-	const effectiveRaised = onChainRaised ?? dbRaised
+	const effectiveRaised =
+		resolveDisplayRaisedAmount({
+			dbRaised,
+			escrowContractAddress,
+			escrowBalance: onChainRaised,
+			isLoadingEscrowBalance: false,
+		}) ?? dbRaised
 
 	if (effectiveRaised >= targetAmount) {
 		return {

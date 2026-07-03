@@ -1,12 +1,22 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import { sortMap } from '~/lib/constants/projects'
+import {
+	getProjectEscrowRowId,
+	resolveProjectEscrowContracts,
+} from '~/lib/queries/projects/resolve-project-escrow-contracts'
+import type { Project } from '~/lib/types/project'
+
+export type ProjectListItem = Project & {
+	status?: string
+	developmentOnly: boolean
+}
 
 export async function getAllProjects(
 	client: TypedSupabaseClient,
 	categorySlugs: string[] = [],
 	sortSlug = 'most-popular',
 	limit?: number,
-) {
+): Promise<ProjectListItem[]> {
 	const { column, ascending } = sortMap[sortSlug] ?? sortMap['most-popular']
 
 	let query = client
@@ -25,6 +35,7 @@ export async function getAllProjects(
       percentage_complete,
       kinder_count,
       status,
+      development_only,
       category:category_id ( * ),
       project_tag_relationships (
         tag:tag_id ( id, name, color )
@@ -58,14 +69,31 @@ export async function getAllProjects(
 
 	if (error) throw error
 
+	const escrowRowIds =
+		data
+			?.map((project) =>
+				getProjectEscrowRowId(
+					(
+						project as unknown as {
+							project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+						}
+					).project_escrows,
+				),
+			)
+			.filter((id): id is string => Boolean(id)) ?? []
+
+	const escrowContracts = await resolveProjectEscrowContracts(client, escrowRowIds)
+
 	return (
 		data?.map((project) => {
-			const escrowRel = (
-				project as unknown as {
-					project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
-				}
-			).project_escrows
-			const escrowId = Array.isArray(escrowRel) ? escrowRel[0]?.escrow_id : escrowRel?.escrow_id
+			const escrowRowId = getProjectEscrowRowId(
+				(
+					project as unknown as {
+						project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+					}
+				).project_escrows,
+			)
+			const escrow = escrowRowId ? escrowContracts.get(escrowRowId) : undefined
 
 			return {
 				id: project.id,
@@ -79,10 +107,12 @@ export async function getAllProjects(
 				minInvestment: project.min_investment,
 				createdAt: project.created_at,
 				status: (project as { status?: string }).status,
+				developmentOnly: Boolean((project as { development_only?: boolean }).development_only),
 				category: project.category,
 				tags: project.project_tag_relationships.map((r) => r.tag),
-				escrowContractAddress: escrowId,
-			}
+				escrowContractAddress: escrow?.escrowContractAddress,
+				escrowType: escrow?.escrowType,
+			} satisfies ProjectListItem
 		}) ?? []
 	)
 }

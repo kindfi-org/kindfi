@@ -1,10 +1,10 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { notFound } from 'next/navigation'
 import { IoCreateOutline } from 'react-icons/io5'
-import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
+import type { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import { UpdateProjectFormSkeleton } from './skeletons'
 import { UpdateProjectForm } from './update-project-form'
 
@@ -18,11 +18,16 @@ export function UpdateProjectWrapper({ projectSlug }: UpdateProjectWrapperProps)
 		data: project,
 		isLoading,
 		error,
-	} = useSupabaseQuery(
+	} = useManagedProjectQuery<Awaited<ReturnType<typeof getBasicProjectInfoBySlug>>>(
 		'basic-project-info',
-		(client) => getBasicProjectInfoBySlug(client, projectSlug),
+		projectSlug,
+		'basic-info',
 		{ additionalKeyValues: [projectSlug] },
 	)
+
+	if (isLoading) {
+		return <UpdateProjectFormSkeleton />
+	}
 
 	if (error || !project) notFound()
 
@@ -67,7 +72,7 @@ export function UpdateProjectWrapper({ projectSlug }: UpdateProjectWrapperProps)
 						duration: prefersReducedMotion ? 0 : 0.3,
 					}}
 				>
-					{isLoading ? <UpdateProjectFormSkeleton /> : <UpdateProjectForm project={project} />}
+					<UpdateProjectForm project={project} />
 				</motion.div>
 			</motion.div>
 		</div>

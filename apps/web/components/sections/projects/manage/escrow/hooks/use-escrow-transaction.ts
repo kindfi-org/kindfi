@@ -14,9 +14,10 @@ import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { Logger } from '~/lib/logger'
 import {
-	getKindfiTrustlessWorkPlatformFee,
+	getKindfiDeployPlatformFee,
 	KINDFI_PLATFORM_FEE_PERCENT,
 } from '~/lib/utils/escrow/platform-fee'
+import { getTrustlessWorkApiErrorMessage } from '~/lib/utils/escrow/trustless-work-api-error'
 import type { EscrowFormData } from '../types'
 
 const logger = new Logger()
@@ -124,8 +125,10 @@ async function _deployAndSign({
 	try {
 		deployResponse = await deployEscrow(payload, type)
 	} catch (error) {
-		const msg =
-			error instanceof Error ? error.message : 'Failed to create escrow: API request failed'
+		const msg = getTrustlessWorkApiErrorMessage(
+			error,
+			'Failed to create escrow: API request failed',
+		)
 		toast.error('Failed to deploy escrow', { description: msg })
 		throw new Error(msg)
 	}
@@ -351,7 +354,7 @@ async function _handleSingleRelease({
 		},
 		description: composedDescription,
 		amount: formData.amount as number,
-		platformFee: getKindfiTrustlessWorkPlatformFee(),
+		platformFee: getKindfiDeployPlatformFee(),
 		trustline: { address: formData.trustlineAddress.trim(), symbol: 'USDC' },
 		milestones: sanitizedMilestones,
 	}
@@ -388,28 +391,38 @@ async function _handleMultiRelease({
 	sendTransaction,
 	router,
 }: TransactionHelperParams) {
-	const sanitizedMilestones = formData.milestones
+	const milestoneRows = formData.milestones
 		.filter((m) => m.description.trim().length > 0)
 		.map((m) => {
 			if ('amount' in m && 'receiver' in m) {
 				return {
 					description: m.description.trim(),
-					amount: m.amount as number,
+					amount: m.amount,
 					receiver: m.receiver.trim(),
 				}
 			}
 			throw new Error('Invalid milestone data for multi-release')
 		})
 
-	const invalidMilestones = sanitizedMilestones.filter(
-		(m) => !m.amount || m.amount <= 0 || !m.receiver?.trim(),
+	const validMilestones = milestoneRows.filter(
+		(m): m is { description: string; amount: number; receiver: string } =>
+			typeof m.amount === 'number' &&
+			Number.isFinite(m.amount) &&
+			m.amount > 0 &&
+			Boolean(m.receiver?.trim()),
 	)
-	if (invalidMilestones.length > 0) {
+	if (validMilestones.length === 0 || validMilestones.length !== milestoneRows.length) {
 		toast.error('Invalid milestone data', {
 			description: 'All milestones must have amount > 0 and receiver address',
 		})
 		throw new Error('Invalid milestone data')
 	}
+
+	const sanitizedMilestones = validMilestones.map((m) => ({
+		description: m.description,
+		amount: m.amount,
+		receiver: m.receiver,
+	}))
 
 	const payload: InitializeMultiReleaseEscrowPayload = {
 		signer,
@@ -423,7 +436,7 @@ async function _handleMultiRelease({
 			disputeResolver: formData.disputeResolver.trim(),
 		},
 		description: composedDescription,
-		platformFee: getKindfiTrustlessWorkPlatformFee(),
+		platformFee: getKindfiDeployPlatformFee(),
 		trustline: { address: formData.trustlineAddress.trim(), symbol: 'USDC' },
 		milestones: sanitizedMilestones,
 	}

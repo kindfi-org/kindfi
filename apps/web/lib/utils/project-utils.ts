@@ -211,6 +211,7 @@ export function parseFormData(formData: FormData) {
 		socialLinks: safeJsonParse(formData.get('socialLinks') as string, [] as string[]),
 		image: formData.get('image') as File | null,
 		foundationId: (formData.get('foundationId') as string) || undefined,
+		developmentOnly: formData.get('developmentOnly') === 'true',
 	}
 }
 

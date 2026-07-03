@@ -4,10 +4,9 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useMemo } from 'react'
 import { Badge } from '~/components/base/badge'
 import { CategoryBadge } from '~/components/sections/projects/shared'
-import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
+import { useProjectFundingDisplay } from '~/hooks/projects/use-project-funding-display'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import { useI18n } from '~/lib/i18n'
 import type { Project } from '~/lib/types/project'
@@ -22,17 +21,14 @@ interface ProjectCardGridProps {
 
 export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 	const { t } = useI18n()
-	const { balance: onChainRaised } = useEscrowBalance({
+	const { displayRaised, progressPercent, formatCurrency } = useProjectFundingDisplay({
 		escrowContractAddress: project.escrowContractAddress,
-		escrowType: 'multi-release',
+		escrowType: project.escrowType,
+		goal: project.goal,
+		raised: project.raised,
 	})
 
-	const displayRaised = useMemo(
-		() => onChainRaised ?? project.raised,
-		[onChainRaised, project.raised],
-	)
-
-	const progressPercentage = Math.min(Math.round((displayRaised / project.goal) * 100), 100)
+	const progressPercentage = progressPercent ?? 0
 
 	const imageSrc = project.image || '/images/placeholder.png'
 
@@ -107,11 +103,9 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 
 					<div className="flex justify-between text-sm text-gray-500 mb-3 tabular-nums">
 						<span>
-							{new Intl.NumberFormat(undefined, {
-								style: 'currency',
-								currency: 'USD',
-								maximumFractionDigits: 0,
-							}).format(displayRaised)}{' '}
+							{displayRaised === null
+								? '…'
+								: formatCurrency(displayRaised, { maximumFractionDigits: 0 })}{' '}
 							{t('projects.raised').toLowerCase()}
 						</span>
 						<span>{progressPercentage}%</span>
