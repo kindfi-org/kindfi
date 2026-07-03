@@ -258,7 +258,10 @@ export function AdminAnalytics() {
 							</div>
 						</dl>
 						<p className="mt-4 text-sm text-muted-foreground">
-							Contribution total: {formatCurrency(stats.recentActivity.contributionsAmount, 2)}
+							Contribution total:{' '}
+							{formatCurrency(stats.recentActivity.contributionsAmount, {
+								maxFractionDigits: 2,
+							})}
 						</p>
 					</CardContent>
 				</Card>
