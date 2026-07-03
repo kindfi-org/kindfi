@@ -1,14 +1,21 @@
+import { formatCurrencyAmount, normalizeFractionDigits } from '~/lib/utils/format-currency'
+
 export const formatCurrency = (value: number, options?: { maxFractionDigits?: number }) =>
-	new Intl.NumberFormat(undefined, {
-		style: 'currency',
-		currency: 'USD',
+	formatCurrencyAmount(value, {
 		minimumFractionDigits: 0,
 		maximumFractionDigits: options?.maxFractionDigits ?? 0,
-	}).format(value)
+	})
 
-export const formatPercent = (value: number, fractionDigits = 1) =>
-	new Intl.NumberFormat(undefined, {
+export const formatPercent = (value: number, fractionDigits = 1) => {
+	const { minimumFractionDigits, maximumFractionDigits } = normalizeFractionDigits(
+		fractionDigits,
+		fractionDigits,
+		1,
+	)
+
+	return new Intl.NumberFormat(undefined, {
 		style: 'percent',
-		minimumFractionDigits: fractionDigits,
-		maximumFractionDigits: fractionDigits,
+		minimumFractionDigits,
+		maximumFractionDigits,
 	}).format(value / 100)
+}

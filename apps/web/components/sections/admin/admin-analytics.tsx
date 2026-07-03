@@ -10,23 +10,15 @@ import {
 	IoWalletOutline,
 } from 'react-icons/io5'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
+import {
+	formatCurrency as formatAdminCurrency,
+	formatPercent as formatAdminPercent,
+} from '~/components/sections/admin/admin-overview/formatters'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 import { getAdminStats } from '~/lib/queries/admin/get-admin-stats'
 
-const formatCurrency = (value: number, maxFractionDigits = 0) =>
-	new Intl.NumberFormat(undefined, {
-		style: 'currency',
-		currency: 'USD',
-		minimumFractionDigits: 0,
-		maximumFractionDigits: maxFractionDigits,
-	}).format(value)
-
-const formatPercent = (value: number, fractionDigits = 1) =>
-	new Intl.NumberFormat(undefined, {
-		style: 'percent',
-		minimumFractionDigits: fractionDigits,
-		maximumFractionDigits: fractionDigits,
-	}).format(value / 100)
+const formatCurrency = formatAdminCurrency
+const formatPercent = formatAdminPercent
 
 const SKELETON_KEYS = ['ana-1', 'ana-2', 'ana-3', 'ana-4'] as const
 

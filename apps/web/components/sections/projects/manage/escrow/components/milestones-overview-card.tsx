@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Progress } from '~/components/base/progress'
 import {
 	calculateMilestoneProgress,
+	formatEscrowAmount,
 	formatMilestoneReleasePhase,
 	getMilestoneReleasePhase,
 	getMilestoneReleasePhaseBadgeVariant,
@@ -76,11 +77,7 @@ export function MilestonesOverviewCard({ milestones }: MilestonesOverviewCardPro
 												<span>
 													Amount:{' '}
 													<span className="font-semibold">
-														$
-														{multiMilestone.amount?.toLocaleString(undefined, {
-															minimumFractionDigits: 2,
-															maximumFractionDigits: 7,
-														}) || '0.00'}
+														{formatEscrowAmount(multiMilestone.amount ?? 0)}
 													</span>
 												</span>
 												{multiMilestone.receiver && (

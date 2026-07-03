@@ -1,4 +1,5 @@
 import type { EscrowType } from '@trustless-work/escrow'
+import { formatCurrencyAmount } from '~/lib/utils/format-currency'
 
 /** Shared input for resolving how much a project has raised. */
 export type ProjectFundingSource = {
@@ -79,18 +80,12 @@ export function formatProjectFundingAmount(
 
 	const hasEscrow = options?.hasEscrow ?? false
 	const defaultFractionDigits = hasEscrow ? 2 : 0
-	const maximumFractionDigits = options?.maximumFractionDigits ?? defaultFractionDigits
-	const minimumFractionDigits = Math.min(
-		options?.minimumFractionDigits ?? defaultFractionDigits,
-		maximumFractionDigits,
-	)
 
-	return new Intl.NumberFormat('en-US', {
-		style: 'currency',
-		currency: 'USD',
-		maximumFractionDigits,
-		minimumFractionDigits,
-	}).format(amount)
+	return formatCurrencyAmount(amount, {
+		loadingPlaceholder: options?.loadingPlaceholder,
+		minimumFractionDigits: options?.minimumFractionDigits ?? defaultFractionDigits,
+		maximumFractionDigits: options?.maximumFractionDigits ?? defaultFractionDigits,
+	})
 }
 
 export function resolveEscrowBalanceFromMap(
