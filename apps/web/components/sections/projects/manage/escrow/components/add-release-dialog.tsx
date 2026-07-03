@@ -2,7 +2,7 @@
 
 import type { EscrowType } from '@trustless-work/escrow'
 import { AlertTriangle, Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Alert, AlertDescription } from '~/components/base/alert'
 import { Button } from '~/components/base/button'
 import {
@@ -16,14 +16,19 @@ import {
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { Textarea } from '~/components/base/textarea'
-import type { NewRelease } from '~/lib/utils/escrow/build-update-escrow-payload'
+import type { EditRelease, NewRelease } from '~/lib/utils/escrow/build-update-escrow-payload'
+
+export type ReleaseFormValues = NewRelease | EditRelease
 
 interface AddReleaseDialogProps {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 	escrowType: EscrowType
 	isSubmitting: boolean
-	onSubmit: (release: NewRelease) => void
+	onSubmit: (release: ReleaseFormValues) => void
+	mode?: 'add' | 'edit'
+	initialValues?: ReleaseFormValues
+	releaseLabel?: string
 }
 
 export function AddReleaseDialog({
@@ -32,11 +37,37 @@ export function AddReleaseDialog({
 	escrowType,
 	isSubmitting,
 	onSubmit,
+	mode = 'add',
+	initialValues,
+	releaseLabel,
 }: AddReleaseDialogProps) {
 	const isMulti = escrowType === 'multi-release'
+	const isEdit = mode === 'edit'
 	const [description, setDescription] = useState('')
 	const [amount, setAmount] = useState('')
 	const [receiver, setReceiver] = useState('')
+
+	useEffect(() => {
+		if (!open) {
+			return
+		}
+
+		if (isEdit && initialValues) {
+			setDescription(initialValues.description)
+			if (isMulti && 'amount' in initialValues) {
+				setAmount(String(initialValues.amount))
+				setReceiver(initialValues.receiver)
+			} else {
+				setAmount('')
+				setReceiver('')
+			}
+			return
+		}
+
+		setDescription('')
+		setAmount('')
+		setReceiver('')
+	}, [open, isEdit, initialValues, isMulti])
 
 	const resetForm = () => {
 		setDescription('')
@@ -67,15 +98,23 @@ export function AddReleaseDialog({
 		onSubmit({ description })
 	}
 
+	const title = isEdit ? `Edit ${releaseLabel ?? 'release'}` : 'Add release'
+	const submitLabel = isEdit ? 'Save changes' : 'Add release'
+	const submittingLabel = isEdit ? 'Saving…' : 'Adding…'
+
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<DialogTitle>Add release</DialogTitle>
+					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>
-						{isMulti
-							? 'Add a new payment release with its own amount and receiver. The platform wallet must sign this update.'
-							: 'Add a new deliverable release to the escrow. Funds still release together once all releases are approved.'}
+						{isEdit
+							? isMulti
+								? 'Update this release’s description, amount, or receiver. Approved releases cannot be edited.'
+								: 'Update this release’s description. Approved releases cannot be edited.'
+							: isMulti
+								? 'Add a new payment release with its own amount and receiver. The platform wallet must sign this update.'
+								: 'Add a new deliverable release to the escrow. Funds still release together once all releases are approved.'}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -123,13 +162,15 @@ export function AddReleaseDialog({
 									required
 								/>
 							</div>
-							<Alert>
-								<AlertTriangle className="h-4 w-4" aria-hidden="true" />
-								<AlertDescription>
-									After adding a release, fund the escrow with enough USDC to cover the new amount
-									plus platform fees before approving and releasing.
-								</AlertDescription>
-							</Alert>
+							{!isEdit ? (
+								<Alert>
+									<AlertTriangle className="h-4 w-4" aria-hidden="true" />
+									<AlertDescription>
+										After adding a release, fund the escrow with enough USDC to cover the new amount
+										plus platform fees before approving and releasing.
+									</AlertDescription>
+								</Alert>
+							) : null}
 						</>
 					) : null}
 
@@ -146,10 +187,10 @@ export function AddReleaseDialog({
 							{isSubmitting ? (
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-									Adding…
+									{submittingLabel}
 								</>
 							) : (
-								'Add release'
+								submitLabel
 							)}
 						</Button>
 					</DialogFooter>
