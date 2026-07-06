@@ -11,25 +11,42 @@ export type EtherfuseConfig = {
 
 let cachedOrganizationId: string | null = null
 
-const resolveOrganizationId = async (apiKey: string, baseUrl: string): Promise<string | null> => {
+const resolveOrganizationId = async (
+	apiKey: string,
+	baseUrl: string,
+	timeoutMs = 5000,
+): Promise<string | null> => {
 	if (cachedOrganizationId) {
 		return cachedOrganizationId
 	}
 
-	const response = await fetch(`${baseUrl}/ramp/me`, {
-		headers: { Authorization: apiKey },
-	})
+	const controller = new AbortController()
+	const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
-	if (!response.ok) {
-		return null
+	try {
+		const response = await fetch(`${baseUrl}/ramp/me`, {
+			headers: { Authorization: apiKey },
+			signal: controller.signal,
+		})
+
+		if (!response.ok) {
+			return null
+		}
+
+		const data = (await response.json()) as { id?: string }
+		if (data.id) {
+			cachedOrganizationId = data.id
+		}
+
+		return data.id ?? null
+	} catch (error: unknown) {
+		if (error instanceof Error && error.name === 'AbortError') {
+			throw new AppError('Etherfuse API request timed out while resolving organization ID.', 504)
+		}
+		throw error
+	} finally {
+		clearTimeout(timeoutId)
 	}
-
-	const data = (await response.json()) as { id?: string }
-	if (data.id) {
-		cachedOrganizationId = data.id
-	}
-
-	return data.id ?? null
 }
 
 export const getEtherfuseConfig = async (): Promise<EtherfuseConfig> => {
