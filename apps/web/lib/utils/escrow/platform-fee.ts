@@ -23,14 +23,28 @@ export const getKindfiTrustlessWorkPlatformFee = (): number =>
 export const getKindfiDeployPlatformFee = (): number => KINDFI_PLATFORM_FEE_PERCENT
 
 /**
- * Indexer returns centi-percent (100 = 1%) while update/deploy APIs expect human percent (1 = 1%).
+ * Indexer cache uses centi-percent (100 = 1%). On-chain validated responses already
+ * use deploy/update API human percent (1 = 1%, 0.6 = 0.6%).
  */
+export const toHumanPlatformFeeFromIndexer = (indexerFee: number): number => {
+	if (!Number.isFinite(indexerFee)) {
+		return KINDFI_PLATFORM_FEE_PERCENT
+	}
+
+	if (indexerFee >= 10) {
+		return fromTrustlessWorkPlatformFee(indexerFee)
+	}
+
+	return indexerFee
+}
+
+/** Human percent for Trustless Work deploy/update API bodies (1 = 1%). */
 export const normalizePlatformFeeForUpdateApi = (indexerFee: number): number => {
 	if (!Number.isFinite(indexerFee)) {
 		return getKindfiDeployPlatformFee()
 	}
 
-	return fromTrustlessWorkPlatformFee(indexerFee)
+	return toHumanPlatformFeeFromIndexer(indexerFee)
 }
 
 export const formatHumanPlatformFee = (humanPercent: number): string => {

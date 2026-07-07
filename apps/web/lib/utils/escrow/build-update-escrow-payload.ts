@@ -45,25 +45,47 @@ function normalizeFlags(flags?: Flags): Flags | undefined {
 }
 
 function mapExistingSingleReleaseMilestone(milestone: SingleReleaseMilestone) {
-	return {
+	const mapped: UpdateSingleReleaseEscrowPayload['escrow']['milestones'][number] = {
 		description: milestone.description,
-		...(milestone.status ? { status: milestone.status } : {}),
-		evidence: milestone.evidence ?? '',
-		...(milestone.approved ? { approved: true } : {}),
 	}
+
+	if (milestone.status) {
+		mapped.status = milestone.status
+	}
+
+	const evidence = milestone.evidence?.trim()
+	if (evidence) {
+		mapped.evidence = evidence
+	}
+
+	if (milestone.approved) {
+		mapped.approved = true
+	}
+
+	return mapped
 }
 
 function mapExistingMultiReleaseMilestone(milestone: MultiReleaseMilestone) {
-	const mapped = {
+	const mapped: UpdateMultiReleaseEscrowPayload['escrow']['milestones'][number] = {
 		description: milestone.description,
 		amount: milestone.amount,
 		receiver: milestone.receiver,
-		...(milestone.status ? { status: milestone.status } : {}),
-		evidence: milestone.evidence ?? '',
 	}
 
-	const flags = normalizeFlags(milestone.flags)
-	return flags ? { ...mapped, flags } : mapped
+	if (milestone.status) {
+		mapped.status = milestone.status
+	}
+
+	const evidence = milestone.evidence?.trim()
+	if (evidence) {
+		mapped.evidence = evidence
+	}
+
+	if (milestone.flags) {
+		mapped.flags = milestone.flags
+	}
+
+	return mapped
 }
 
 function getReceiverFromRoles(roles: GetEscrowsFromIndexerResponse['roles']): string {
