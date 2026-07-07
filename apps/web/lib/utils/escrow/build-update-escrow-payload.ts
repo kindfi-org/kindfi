@@ -79,25 +79,29 @@ function assertMilestoneNotApproved(
 	}
 }
 
-export function isMilestoneEditable(
+export function getMilestoneEditBlockReason(
 	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
-	hasFunds: boolean,
-): boolean {
+): string | null {
 	if (getMilestoneStatus(milestone)) {
-		return false
-	}
-
-	if (hasFunds) {
-		return false
+		return 'This release is already approved and cannot be edited.'
 	}
 
 	if (!isSingleReleaseMilestone(milestone)) {
-		if (milestone.flags?.disputed || milestone.flags?.released) {
-			return false
+		if (milestone.flags?.disputed) {
+			return 'This release is in dispute and cannot be edited.'
+		}
+		if (milestone.flags?.released) {
+			return 'This release has already been disbursed and cannot be edited.'
 		}
 	}
 
-	return true
+	return null
+}
+
+export function isMilestoneEditable(
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+): boolean {
+	return getMilestoneEditBlockReason(milestone) === null
 }
 
 function buildEscrowPayloadBase(
@@ -235,15 +239,8 @@ export function buildEditReleasePayload(
 	platformSigner: string,
 	milestoneIndex: number,
 	editedRelease: EditRelease,
-	hasFunds = false,
 ): UpdateSingleReleaseEscrowPayload | UpdateMultiReleaseEscrowPayload {
 	assertPlatformCanUpdateEscrow(escrowData, platformSigner)
-
-	if (hasFunds) {
-		throw new Error(
-			'Cannot edit existing releases after the escrow has been funded. You can still add new releases.',
-		)
-	}
 
 	if (milestoneIndex < 0 || milestoneIndex >= escrowData.milestones.length) {
 		throw new Error('Invalid release index')

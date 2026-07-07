@@ -163,7 +163,6 @@ export function EscrowManagementPanel({
 						escrowData={escrowData}
 						milestones={milestones}
 						isLoading={isLoadingEscrow}
-						escrowBalance={balance}
 						onSuccess={handleRefetch}
 						onPatchMilestone={patchMilestone}
 						onGoToRelease={() => setActiveTab('release')}

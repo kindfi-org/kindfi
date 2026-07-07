@@ -202,11 +202,11 @@ export async function fetchMatchingCandidates(
 			description: project.description,
 			projectLocation: project.project_location,
 			category: normalizeCategory(project.category),
-			tags:
-				project.project_tag_relationships
-					?.map((rel) => rel.tag)
-					.filter((tag): tag is { name: string; color: string | null } => Boolean(tag?.name))
-					.map((tag) => ({ name: tag.name, color: tag.color })) ?? [],
+			tags: (project.project_tag_relationships ?? []).flatMap((rel) => {
+				const tag = rel.tag
+				if (!tag?.name) return []
+				return [{ name: tag.name, color: tag.color ?? null }]
+			}),
 			goal: project.target_amount,
 			raised: project.current_amount,
 			investors: project.kinder_count,
