@@ -120,13 +120,61 @@ export function isMilestoneEditable(
 	return getMilestoneEditBlockReason(milestone) === null
 }
 
-function buildEscrowPayloadBase(
+function buildSingleReleaseEscrowPayload(
 	context: EscrowPayloadContext,
-	milestones:
-		| UpdateSingleReleaseEscrowPayload['escrow']['milestones']
-		| UpdateMultiReleaseEscrowPayload['escrow']['milestones'],
-): UpdateSingleReleaseEscrowPayload | UpdateMultiReleaseEscrowPayload {
-	const { escrowData, escrowType, platformSigner } = context
+	milestones: UpdateSingleReleaseEscrowPayload['escrow']['milestones'],
+): UpdateSingleReleaseEscrowPayload {
+	const { escrowData, platformSigner } = context
+	const contractId = escrowData.contractId
+	if (!contractId) {
+		throw new Error('Escrow contract ID is missing')
+	}
+
+	const trustline = {
+		symbol:
+			'symbol' in escrowData.trustline && typeof escrowData.trustline.symbol === 'string'
+				? escrowData.trustline.symbol
+				: 'USDC',
+		address: escrowData.trustline.address,
+	}
+
+	const escrowFlags = normalizeFlags(escrowData.flags)
+	const receiverMemo =
+		'receiverMemo' in escrowData && typeof escrowData.receiverMemo === 'number'
+			? escrowData.receiverMemo
+			: 0
+
+	return {
+		contractId,
+		signer: platformSigner,
+		escrow: {
+			engagementId: escrowData.engagementId,
+			title: escrowData.title,
+			description: escrowData.description,
+			platformFee: normalizePlatformFeeForUpdateApi(escrowData.platformFee),
+			...(escrowFlags ? { flags: escrowFlags } : {}),
+			trustline,
+			isActive: escrowData.isActive ?? true,
+			roles: {
+				approver: escrowData.roles.approver,
+				serviceProvider: escrowData.roles.serviceProvider,
+				platformAddress: escrowData.roles.platformAddress,
+				releaseSigner: escrowData.roles.releaseSigner,
+				disputeResolver: escrowData.roles.disputeResolver,
+				receiver: getReceiverFromRoles(escrowData.roles),
+			},
+			amount: escrowData.amount,
+			milestones,
+			...(receiverMemo !== 0 ? { receiverMemo } : {}),
+		} as UpdateSingleReleaseEscrowPayload['escrow'],
+	}
+}
+
+function buildMultiReleaseEscrowPayload(
+	context: EscrowPayloadContext,
+	milestones: UpdateMultiReleaseEscrowPayload['escrow']['milestones'],
+): UpdateMultiReleaseEscrowPayload {
+	const { escrowData, platformSigner } = context
 	const contractId = escrowData.contractId
 	if (!contractId) {
 		throw new Error('Escrow contract ID is missing')
@@ -142,47 +190,16 @@ function buildEscrowPayloadBase(
 
 	const escrowFlags = normalizeFlags(escrowData.flags)
 
-	const sharedEscrowFields = {
-		engagementId: escrowData.engagementId,
-		title: escrowData.title,
-		description: escrowData.description,
-		platformFee: normalizePlatformFeeForUpdateApi(escrowData.platformFee),
-		...(escrowFlags ? { flags: escrowFlags } : {}),
-		trustline,
-	}
-
-	if (escrowType === 'single-release') {
-		const receiverMemo =
-			'receiverMemo' in escrowData && typeof escrowData.receiverMemo === 'number'
-				? escrowData.receiverMemo
-				: 0
-
-		return {
-			contractId,
-			signer: platformSigner,
-			escrow: {
-				...sharedEscrowFields,
-				isActive: escrowData.isActive ?? true,
-				receiverMemo,
-				roles: {
-					approver: escrowData.roles.approver,
-					serviceProvider: escrowData.roles.serviceProvider,
-					platformAddress: escrowData.roles.platformAddress,
-					releaseSigner: escrowData.roles.releaseSigner,
-					disputeResolver: escrowData.roles.disputeResolver,
-					receiver: getReceiverFromRoles(escrowData.roles),
-				},
-				amount: escrowData.amount,
-				milestones: milestones as UpdateSingleReleaseEscrowPayload['escrow']['milestones'],
-			},
-		}
-	}
-
 	return {
 		contractId,
 		signer: platformSigner,
 		escrow: {
-			...sharedEscrowFields,
+			engagementId: escrowData.engagementId,
+			title: escrowData.title,
+			description: escrowData.description,
+			platformFee: normalizePlatformFeeForUpdateApi(escrowData.platformFee),
+			...(escrowFlags ? { flags: escrowFlags } : {}),
+			trustline,
 			...(escrowData.isActive !== undefined ? { isActive: escrowData.isActive } : {}),
 			roles: {
 				approver: escrowData.roles.approver,
@@ -191,7 +208,7 @@ function buildEscrowPayloadBase(
 				releaseSigner: escrowData.roles.releaseSigner,
 				disputeResolver: escrowData.roles.disputeResolver,
 			},
-			milestones: milestones as UpdateMultiReleaseEscrowPayload['escrow']['milestones'],
+			milestones,
 		},
 	}
 }
@@ -235,7 +252,7 @@ export function buildUpdateEscrowPayload(
 
 		const existingMilestones = escrowData.milestones.filter(isSingleReleaseMilestone)
 
-		return buildEscrowPayloadBase(context, [
+		return buildSingleReleaseEscrowPayload(context, [
 			...existingMilestones.map(mapExistingSingleReleaseMilestone),
 			{ description: newSingle.description.trim() },
 		])
@@ -248,7 +265,7 @@ export function buildUpdateEscrowPayload(
 		(m): m is MultiReleaseMilestone => !isSingleReleaseMilestone(m),
 	)
 
-	return buildEscrowPayloadBase(context, [
+	return buildMultiReleaseEscrowPayload(context, [
 		...existingMilestones.map(mapExistingMultiReleaseMilestone),
 		{
 			description: newMulti.description.trim(),
@@ -286,7 +303,7 @@ export function buildEditReleasePayload(
 
 		const existingMilestones = escrowData.milestones.filter(isSingleReleaseMilestone)
 
-		return buildEscrowPayloadBase(
+		return buildSingleReleaseEscrowPayload(
 			context,
 			existingMilestones.map((existing, index) =>
 				index === milestoneIndex
@@ -310,7 +327,7 @@ export function buildEditReleasePayload(
 		(m): m is MultiReleaseMilestone => !isSingleReleaseMilestone(m),
 	)
 
-	return buildEscrowPayloadBase(
+	return buildMultiReleaseEscrowPayload(
 		context,
 		existingMilestones.map((existing, index) =>
 			index === milestoneIndex
