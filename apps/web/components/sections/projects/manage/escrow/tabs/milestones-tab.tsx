@@ -45,7 +45,21 @@ import {
 	normalizeWorkStatusForForm,
 	truncateAddress,
 } from '~/lib/utils/escrow/milestone-utils'
+import { getTrustlessWorkApiErrorMessage } from '~/lib/utils/escrow/trustless-work-api-error'
 import { AddReleaseDialog, type ReleaseFormValues } from '../components/add-release-dialog'
+
+const resolveValidatedEscrowData = (
+	response: GetEscrowsFromIndexerResponse | GetEscrowsFromIndexerResponse[],
+): GetEscrowsFromIndexerResponse => {
+	if (Array.isArray(response)) {
+		if (response.length === 0) {
+			throw new Error('No escrow found for this contract ID')
+		}
+		return response[0]
+	}
+
+	return response
+}
 
 interface MilestonesTabProps {
 	escrowContractAddress: string
@@ -71,7 +85,13 @@ export function MilestonesTab({
 	onPatchMilestone,
 	onGoToRelease,
 }: MilestonesTabProps) {
-	const { approveMilestone, changeMilestoneStatus, sendTransaction, updateEscrow } = useEscrow()
+	const {
+		approveMilestone,
+		changeMilestoneStatus,
+		sendTransaction,
+		updateEscrow,
+		getEscrowByContractIds,
+	} = useEscrow()
 	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState('0')
 	const [milestoneStatus, setMilestoneStatus] = useState('in_progress')
@@ -93,6 +113,14 @@ export function MilestonesTab({
 		setMilestoneStatus(normalizeWorkStatusForForm(getMilestoneWorkStatus(milestone)))
 		setMilestoneEvidence(milestone.evidence ?? '')
 	}, [milestones, selectedIndex])
+
+	const fetchValidatedEscrowData = async (): Promise<GetEscrowsFromIndexerResponse> => {
+		const response = await getEscrowByContractIds({
+			contractIds: [escrowContractAddress],
+			validateOnChain: true,
+		})
+		return resolveValidatedEscrowData(response)
+	}
 
 	const submitEscrowUpdate = async (
 		payload: ReturnType<typeof buildUpdateEscrowPayload>,
@@ -197,21 +225,19 @@ export function MilestonesTab({
 	}
 
 	const handleAddRelease = async (newRelease: NewRelease) => {
-		if (!escrowData) {
-			toast.error('Escrow data is not loaded yet. Try refreshing.')
-			return
-		}
-
 		try {
 			setIsProcessing(true)
-			const signer = await ensureTrustlessSigner()
-			const payload = buildUpdateEscrowPayload(escrowData, escrowType, signer, newRelease)
+			const [signer, validatedEscrowData] = await Promise.all([
+				ensureTrustlessSigner(),
+				fetchValidatedEscrowData(),
+			])
+			const payload = buildUpdateEscrowPayload(validatedEscrowData, escrowType, signer, newRelease)
 			await submitEscrowUpdate(payload, 'Release added successfully', () =>
 				setIsAddDialogOpen(false),
 			)
 		} catch (error) {
 			logger.error(error)
-			const errorMessage = error instanceof Error ? error.message : 'Failed to add release'
+			const errorMessage = getTrustlessWorkApiErrorMessage(error, 'Failed to add release')
 			toast.error(errorMessage)
 		} finally {
 			setIsProcessing(false)
@@ -219,16 +245,19 @@ export function MilestonesTab({
 	}
 
 	const handleEditRelease = async (editedRelease: ReleaseFormValues) => {
-		if (!escrowData || editingMilestoneIndex === null) {
-			toast.error('Escrow data is not loaded yet. Try refreshing.')
+		if (editingMilestoneIndex === null) {
+			toast.error('Select a release to edit.')
 			return
 		}
 
 		try {
 			setIsProcessing(true)
-			const signer = await ensureTrustlessSigner()
+			const [signer, validatedEscrowData] = await Promise.all([
+				ensureTrustlessSigner(),
+				fetchValidatedEscrowData(),
+			])
 			const payload = buildEditReleasePayload(
-				escrowData,
+				validatedEscrowData,
 				escrowType,
 				signer,
 				editingMilestoneIndex,
@@ -239,7 +268,7 @@ export function MilestonesTab({
 			)
 		} catch (error) {
 			logger.error(error)
-			const errorMessage = error instanceof Error ? error.message : 'Failed to update release'
+			const errorMessage = getTrustlessWorkApiErrorMessage(error, 'Failed to update release')
 			toast.error(errorMessage)
 		} finally {
 			setIsProcessing(false)
