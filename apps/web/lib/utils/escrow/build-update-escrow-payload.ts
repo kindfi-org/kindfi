@@ -1,5 +1,6 @@
 import type {
 	EscrowType,
+	Flags,
 	GetEscrowsFromIndexerResponse,
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
@@ -7,6 +8,7 @@ import type {
 	UpdateSingleReleaseEscrowPayload,
 } from '@trustless-work/escrow'
 import { getMilestoneStatus, isSingleReleaseMilestone } from './milestone-utils'
+import { normalizePlatformFeeForUpdateApi } from './platform-fee'
 
 export const MAX_ESCROW_RELEASES = 50
 
@@ -30,24 +32,38 @@ type EscrowPayloadContext = {
 	platformSigner: string
 }
 
+function normalizeFlags(flags?: Flags): Flags | undefined {
+	if (!flags) return undefined
+
+	const normalized: Flags = {}
+	if (flags.disputed) normalized.disputed = true
+	if (flags.released) normalized.released = true
+	if (flags.resolved) normalized.resolved = true
+	if (flags.approved) normalized.approved = true
+
+	return Object.keys(normalized).length > 0 ? normalized : undefined
+}
+
 function mapExistingSingleReleaseMilestone(milestone: SingleReleaseMilestone) {
 	return {
 		description: milestone.description,
 		...(milestone.status ? { status: milestone.status } : {}),
 		evidence: milestone.evidence ?? '',
-		...(milestone.approved !== undefined ? { approved: milestone.approved } : {}),
+		...(milestone.approved ? { approved: true } : {}),
 	}
 }
 
 function mapExistingMultiReleaseMilestone(milestone: MultiReleaseMilestone) {
-	return {
+	const mapped = {
 		description: milestone.description,
 		amount: milestone.amount,
 		receiver: milestone.receiver,
 		...(milestone.status ? { status: milestone.status } : {}),
 		evidence: milestone.evidence ?? '',
-		...(milestone.flags ? { flags: milestone.flags } : {}),
 	}
+
+	const flags = normalizeFlags(milestone.flags)
+	return flags ? { ...mapped, flags } : mapped
 }
 
 function getReceiverFromRoles(roles: GetEscrowsFromIndexerResponse['roles']): string {
@@ -124,13 +140,14 @@ function buildEscrowPayloadBase(
 		address: escrowData.trustline.address,
 	}
 
+	const escrowFlags = normalizeFlags(escrowData.flags)
+
 	const sharedEscrowFields = {
 		engagementId: escrowData.engagementId,
 		title: escrowData.title,
 		description: escrowData.description,
-		platformFee: escrowData.platformFee,
-		...(escrowData.flags ? { flags: escrowData.flags } : {}),
-		...(escrowData.isActive !== undefined ? { isActive: escrowData.isActive } : {}),
+		platformFee: normalizePlatformFeeForUpdateApi(escrowData.platformFee),
+		...(escrowFlags ? { flags: escrowFlags } : {}),
 		trustline,
 	}
 
