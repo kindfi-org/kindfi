@@ -1,3 +1,5 @@
+import { TX_BAD_AUTH_MESSAGE } from './trustless-transaction-signing'
+
 type TrustlessWorkErrorBody = {
 	message?: string
 	detail?: string
@@ -57,7 +59,12 @@ export const getTrustlessWorkApiErrorMessage = (error: unknown, fallback: string
 	const axiosData = axiosResponse
 		? formatTrustlessWorkErrorBody(readTrustlessWorkErrorBody(axiosResponse.data))
 		: undefined
-	if (axiosData) return axiosData
+	if (axiosData) {
+		if (axiosData.includes('tx_bad_auth')) {
+			return TX_BAD_AUTH_MESSAGE
+		}
+		return axiosData
+	}
 
 	const directData = formatTrustlessWorkErrorBody(readTrustlessWorkErrorBody(error.data))
 	if (directData) return directData

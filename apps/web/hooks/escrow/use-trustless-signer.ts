@@ -7,6 +7,10 @@ import {
 	getTrustlessSignerError,
 	isExternalStellarWalletAddress,
 } from '~/lib/utils/escrow/trustless-signer'
+import {
+	assertSignedTrustlessTransaction,
+	assertTrustlessSignerMatches,
+} from '~/lib/utils/escrow/trustless-transaction-signing'
 
 export function useTrustlessSigner() {
 	const wallet = useWallet()
@@ -28,9 +32,17 @@ export function useTrustlessSigner() {
 		return wallet.address as string
 	}
 
-	const signTrustlessTransaction = async (unsignedXdr: string): Promise<string> => {
-		await ensureTrustlessSigner()
-		return wallet.signTransaction(unsignedXdr)
+	const signTrustlessTransaction = async (
+		unsignedXdr: string,
+		requiredSigner?: string,
+	): Promise<string> => {
+		const signer = await ensureTrustlessSigner()
+		if (requiredSigner) {
+			assertTrustlessSignerMatches(signer, requiredSigner, 'platform')
+		}
+		const signedXdr = await wallet.signTransaction(unsignedXdr, requiredSigner ?? signer)
+		assertSignedTrustlessTransaction(signedXdr, requiredSigner ?? signer)
+		return signedXdr
 	}
 
 	return {
