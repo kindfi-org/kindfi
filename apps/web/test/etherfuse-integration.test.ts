@@ -350,7 +350,7 @@ describe('Etherfuse on-ramp integration', () => {
 		// The API returns 400 when Etherfuse quote fails
 		expect(res.status).toBe(400)
 		const body = await res.json()
-		expect(body.error).toContain('Failed to create quote')
+		expect(body.error).toContain('Failed to create on-ramp quote')
 	})
 
 	test('handles unauthorized user', async () => {
@@ -464,7 +464,7 @@ describe('Etherfuse off-ramp integration', () => {
 		// The API returns 400 when Etherfuse order fails
 		expect(res.status).toBe(400)
 		const body = await res.json()
-		expect(body.error).toContain('Failed to create order')
+		expect(body.error).toContain('Failed to create off-ramp order')
 	})
 
 	test('includes burn transaction in response', async () => {

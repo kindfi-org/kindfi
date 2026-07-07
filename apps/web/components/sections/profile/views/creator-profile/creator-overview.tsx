@@ -8,6 +8,7 @@ import { useI18n } from '~/lib/i18n'
 import { ProfileSectionHeader } from '../../profile-section-header'
 import { ProfileStatCard } from '../../profile-stat-card'
 import { ProfileSurfaceCard } from '../../profile-surface-card'
+import { ProjectMatchingSection } from '../../project-matching/project-matching-section'
 import { ProjectCard } from './project-card'
 import type { CreatorProjectWithBalance } from './types'
 
@@ -63,6 +64,8 @@ export function CreatorOverview({
 					</Link>
 				</Button>
 			</div>
+
+			<ProjectMatchingSection />
 
 			{activeProjects.length > 0 && (
 				<div className="space-y-4">

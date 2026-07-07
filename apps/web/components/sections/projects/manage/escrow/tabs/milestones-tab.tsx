@@ -23,12 +23,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/base/tooltip'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { cn } from '~/lib/utils'
 import {
 	buildEditReleasePayload,
 	buildUpdateEscrowPayload,
+	getMilestoneEditBlockReason,
 	isMilestoneEditable,
 	MAX_ESCROW_RELEASES,
 	type NewRelease,
@@ -51,7 +53,6 @@ interface MilestonesTabProps {
 	escrowData: GetEscrowsFromIndexerResponse | null
 	milestones: (SingleReleaseMilestone | MultiReleaseMilestone)[]
 	isLoading: boolean
-	escrowBalance?: number | null
 	onSuccess: () => void
 	onPatchMilestone?: (
 		index: number,
@@ -66,7 +67,6 @@ export function MilestonesTab({
 	escrowData,
 	milestones,
 	isLoading,
-	escrowBalance = null,
 	onSuccess,
 	onPatchMilestone,
 	onGoToRelease,
@@ -83,7 +83,6 @@ export function MilestonesTab({
 	const selectedIndex = Number(selectedMilestoneIndex)
 	const selectedMilestone = milestones[selectedIndex]
 	const selectedPhase = selectedMilestone ? getMilestoneReleasePhase(selectedMilestone) : null
-	const hasFunds = escrowBalance !== null && escrowBalance > 0
 	const canAddRelease = milestones.length < MAX_ESCROW_RELEASES && !escrowData?.flags?.disputed
 	const editingMilestone = editingMilestoneIndex !== null ? milestones[editingMilestoneIndex] : null
 
@@ -234,7 +233,6 @@ export function MilestonesTab({
 				signer,
 				editingMilestoneIndex,
 				editedRelease,
-				hasFunds,
 			)
 			await submitEscrowUpdate(payload, 'Release updated successfully', () =>
 				setEditingMilestoneIndex(null),
@@ -335,93 +333,97 @@ export function MilestonesTab({
 					</div>
 				</CardHeader>
 				<CardContent className="space-y-3">
-					{milestones.map((milestone, index) => {
-						const phase = getMilestoneReleasePhase(milestone)
-						const isSingle = isSingleReleaseMilestone(milestone)
-						const isSelected = selectedMilestoneIndex === String(index)
-						const multiMilestone = milestone as MultiReleaseMilestone
-						const canEdit = isMilestoneEditable(milestone, hasFunds)
+					<TooltipProvider delayDuration={200}>
+						{milestones.map((milestone, index) => {
+							const phase = getMilestoneReleasePhase(milestone)
+							const isSingle = isSingleReleaseMilestone(milestone)
+							const isSelected = selectedMilestoneIndex === String(index)
+							const multiMilestone = milestone as MultiReleaseMilestone
+							const canEdit = isMilestoneEditable(milestone)
+							const editBlockReason = getMilestoneEditBlockReason(milestone)
 
-						return (
-							<div
-								key={index}
-								className={cn(
-									'w-full rounded-xl border p-4 transition-[border-color,background-color,box-shadow] duration-200',
-									isSelected
-										? 'border-primary bg-primary/5 shadow-sm'
-										: 'bg-card hover:border-primary/30 hover:bg-muted/30',
-								)}
-							>
-								<div className="flex items-start gap-3">
-									<button
-										type="button"
-										onClick={() => setSelectedMilestoneIndex(String(index))}
-										className="min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
-										aria-pressed={isSelected}
-									>
-										<div className="flex items-start gap-3">
-											<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-												{index + 1}
-											</div>
-											<div className="min-w-0 flex-1 space-y-2">
-												<div className="flex flex-wrap items-center gap-2">
-													<span className="font-semibold">Release {index + 1}</span>
-													<Badge
-														variant={getMilestoneReleasePhaseBadgeVariant(phase)}
-														className="gap-1"
-													>
-														{phase === 'approved' || phase === 'released' ? (
-															<CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-														) : null}
-														{formatMilestoneReleasePhase(phase)}
-													</Badge>
-												</div>
-												<p className="text-sm text-muted-foreground">{milestone.description}</p>
-												{!isSingle ? (
-													<div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-														{typeof multiMilestone.amount === 'number' ? (
-															<span className="tabular-nums">
-																Amount: ${multiMilestone.amount.toLocaleString()}
-															</span>
-														) : null}
-														{multiMilestone.receiver ? (
-															<span className="font-mono">
-																Receiver: {truncateAddress(multiMilestone.receiver, 6)}
-															</span>
-														) : null}
-													</div>
-												) : null}
-											</div>
-										</div>
-									</button>
-									{canEdit ? (
-										<Button
+							return (
+								<div
+									key={index}
+									className={cn(
+										'w-full rounded-xl border p-4 transition-[border-color,background-color,box-shadow] duration-200',
+										isSelected
+											? 'border-primary bg-primary/5 shadow-sm'
+											: 'bg-card hover:border-primary/30 hover:bg-muted/30',
+									)}
+								>
+									<div className="flex items-start gap-3">
+										<button
 											type="button"
-											variant="ghost"
-											size="icon"
-											className="shrink-0"
-											onClick={() => setEditingMilestoneIndex(index)}
-											disabled={isProcessing || !escrowData}
-											aria-label={`Edit release ${index + 1}`}
+											onClick={() => setSelectedMilestoneIndex(String(index))}
+											className="min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+											aria-pressed={isSelected}
 										>
-											<Pencil className="h-4 w-4" aria-hidden="true" />
-										</Button>
-									) : null}
+											<div className="flex items-start gap-3">
+												<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+													{index + 1}
+												</div>
+												<div className="min-w-0 flex-1 space-y-2">
+													<div className="flex flex-wrap items-center gap-2">
+														<span className="font-semibold">Release {index + 1}</span>
+														<Badge
+															variant={getMilestoneReleasePhaseBadgeVariant(phase)}
+															className="gap-1"
+														>
+															{phase === 'approved' || phase === 'released' ? (
+																<CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+															) : null}
+															{formatMilestoneReleasePhase(phase)}
+														</Badge>
+													</div>
+													<p className="text-sm text-muted-foreground">{milestone.description}</p>
+													{!isSingle ? (
+														<div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+															{typeof multiMilestone.amount === 'number' ? (
+																<span className="tabular-nums">
+																	Amount: ${multiMilestone.amount.toLocaleString()}
+																</span>
+															) : null}
+															{multiMilestone.receiver ? (
+																<span className="font-mono">
+																	Receiver: {truncateAddress(multiMilestone.receiver, 6)}
+																</span>
+															) : null}
+														</div>
+													) : null}
+												</div>
+											</div>
+										</button>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<span className="inline-flex shrink-0">
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon"
+														onClick={() => setEditingMilestoneIndex(index)}
+														disabled={isProcessing || !escrowData || !canEdit}
+														aria-label={`Edit release ${index + 1}`}
+													>
+														<Pencil className="h-4 w-4" aria-hidden="true" />
+													</Button>
+												</span>
+											</TooltipTrigger>
+											{editBlockReason ? (
+												<TooltipContent side="left" className="max-w-xs text-left">
+													{editBlockReason}
+												</TooltipContent>
+											) : (
+												<TooltipContent side="left">Edit release details</TooltipContent>
+											)}
+										</Tooltip>
+									</div>
 								</div>
-							</div>
-						)
-					})}
+							)
+						})}
+					</TooltipProvider>
 				</CardContent>
 			</Card>
-
-			{hasFunds ? (
-				<Alert>
-					<AlertDescription>
-						This escrow is funded. You can add new releases, but existing releases cannot be edited
-						after funding.
-					</AlertDescription>
-				</Alert>
-			) : null}
 
 			{!canAddRelease && milestones.length >= MAX_ESCROW_RELEASES ? (
 				<Alert>
