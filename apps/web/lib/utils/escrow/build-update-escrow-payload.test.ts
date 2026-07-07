@@ -68,9 +68,9 @@ describe('buildUpdateEscrowPayload', () => {
 		expect(payload.escrow.milestones[0]).toMatchObject({
 			description: 'Design',
 			amount: 500,
+			evidence: '',
 			flags: { approved: false },
 		})
-		expect('evidence' in payload.escrow.milestones[0]).toBe(false)
 	})
 
 	test('preserves sub-one-percent platform fees from indexer centi values', () => {
@@ -201,7 +201,7 @@ describe('buildUpdateEscrowPayload', () => {
 		expect('receiverMemo' in payload.escrow).toBe(false)
 	})
 
-	test('omits empty evidence on existing multi-release milestones', () => {
+	test('includes empty evidence for existing multi-release milestones', () => {
 		const multiEscrow: GetEscrowsFromIndexerResponse = {
 			...baseEscrowData,
 			type: 'multi-release',
@@ -227,8 +227,8 @@ describe('buildUpdateEscrowPayload', () => {
 			description: 'First Relief Transfer',
 			amount: 500,
 			status: 'pending',
+			evidence: '',
 		})
-		expect('evidence' in payload.escrow.milestones[0]).toBe(false)
 		expect(payload.escrow.milestones[1]).toEqual({
 			description: 'Initital Release',
 			amount: 50,
@@ -279,11 +279,13 @@ describe('buildEditReleasePayload', () => {
 		expect(payload.escrow.milestones[0]).toMatchObject({
 			description: 'Updated design',
 			amount: 750,
+			evidence: '',
 			flags: { approved: false },
 		})
 		expect(payload.escrow.milestones[1]).toMatchObject({
 			description: 'Build',
 			amount: 1500,
+			evidence: '',
 			flags: { approved: false },
 		})
 	})

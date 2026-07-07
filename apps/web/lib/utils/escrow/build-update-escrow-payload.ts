@@ -44,18 +44,21 @@ function normalizeFlags(flags?: Flags): Flags | undefined {
 	return Object.keys(normalized).length > 0 ? normalized : undefined
 }
 
+/** TW update-escrow requires evidence on existing milestones; empty string is valid. */
+function getExistingMilestoneEvidence(
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+): string {
+	return milestone.evidence ?? ''
+}
+
 function mapExistingSingleReleaseMilestone(milestone: SingleReleaseMilestone) {
 	const mapped: UpdateSingleReleaseEscrowPayload['escrow']['milestones'][number] = {
 		description: milestone.description,
+		evidence: getExistingMilestoneEvidence(milestone),
 	}
 
 	if (milestone.status) {
 		mapped.status = milestone.status
-	}
-
-	const evidence = milestone.evidence?.trim()
-	if (evidence) {
-		mapped.evidence = evidence
 	}
 
 	if (milestone.approved) {
@@ -70,15 +73,11 @@ function mapExistingMultiReleaseMilestone(milestone: MultiReleaseMilestone) {
 		description: milestone.description,
 		amount: milestone.amount,
 		receiver: milestone.receiver,
+		evidence: getExistingMilestoneEvidence(milestone),
 	}
 
 	if (milestone.status) {
 		mapped.status = milestone.status
-	}
-
-	const evidence = milestone.evidence?.trim()
-	if (evidence) {
-		mapped.evidence = evidence
 	}
 
 	if (milestone.flags) {
