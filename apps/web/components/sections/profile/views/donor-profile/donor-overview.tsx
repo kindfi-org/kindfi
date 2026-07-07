@@ -6,6 +6,7 @@ import { useI18n } from '~/lib/i18n'
 import { ProfileSectionHeader } from '../../profile-section-header'
 import { ProfileStatCard } from '../../profile-stat-card'
 import { ProfileSurfaceCard } from '../../profile-surface-card'
+import { ProjectMatchingSection } from '../../project-matching/project-matching-section'
 import { SupportedProjectCard } from './supported-project-card'
 import type { DonorProjectWithBalance } from './types'
 
@@ -52,6 +53,8 @@ export function DonorOverview({
 					icon={Trophy}
 				/>
 			</div>
+
+			<ProjectMatchingSection />
 
 			<AnimatePresence mode="wait">
 				{isLoading ? (
