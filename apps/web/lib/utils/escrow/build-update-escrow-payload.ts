@@ -141,6 +141,10 @@ function buildEscrowPayloadBase(
 	}
 
 	const escrowFlags = normalizeFlags(escrowData.flags)
+	const receiverMemo =
+		'receiverMemo' in escrowData && typeof escrowData.receiverMemo === 'number'
+			? escrowData.receiverMemo
+			: 0
 
 	const sharedEscrowFields = {
 		engagementId: escrowData.engagementId,
@@ -148,6 +152,8 @@ function buildEscrowPayloadBase(
 		description: escrowData.description,
 		platformFee: normalizePlatformFeeForUpdateApi(escrowData.platformFee),
 		...(escrowFlags ? { flags: escrowFlags } : {}),
+		isActive: escrowData.isActive ?? true,
+		receiverMemo,
 		trustline,
 	}
 

@@ -43,7 +43,7 @@ interface WalletContextValue {
 	isInitialized: boolean
 	connect: () => Promise<void>
 	disconnect: () => void
-	signTransaction: (unsignedXdr: string) => Promise<string>
+	signTransaction: (unsignedXdr: string, signerAddress?: string) => Promise<string>
 }
 
 const WalletContext = createContext<WalletContextValue | undefined>(undefined)
@@ -288,16 +288,17 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		}
 	}
 
-	const signTransaction = async (unsignedXdr: string) => {
+	const signTransaction = async (unsignedXdr: string, signerAddress?: string) => {
 		const { StellarWalletsKit, Networks } = swkRef.current ?? {}
 		if (!isInitialized || !StellarWalletsKit || !Networks) {
 			throw new Error('Wallet kit not initialized')
 		}
-		if (!address) {
+		const signingAddress = signerAddress ?? address
+		if (!signingAddress) {
 			throw new Error('Wallet not connected')
 		}
 
-		const signerError = getTrustlessSignerError(address)
+		const signerError = getTrustlessSignerError(signingAddress)
 		if (signerError) {
 			throw new Error(signerError)
 		}
@@ -305,7 +306,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		try {
 			const networkPassphrase = getClientStellarNetworkPassphrase()
 			const { signedTxXdr } = await StellarWalletsKit.signTransaction(unsignedXdr, {
-				address,
+				address: signingAddress,
 				networkPassphrase,
 			})
 			return signedTxXdr

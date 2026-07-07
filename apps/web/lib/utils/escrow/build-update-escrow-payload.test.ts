@@ -40,7 +40,7 @@ const baseEscrowData: GetEscrowsFromIndexerResponse = {
 }
 
 describe('buildUpdateEscrowPayload', () => {
-	test('normalizes indexer platform fee for update API', () => {
+	test('normalizes indexer centi-percent platform fee for update API', () => {
 		const multiEscrow: GetEscrowsFromIndexerResponse = {
 			...baseEscrowData,
 			type: 'multi-release',
@@ -63,12 +63,83 @@ describe('buildUpdateEscrowPayload', () => {
 
 		expect(payload.escrow.platformFee).toBe(1)
 		expect(payload.escrow.flags).toBeUndefined()
+		expect(payload.escrow.isActive).toBe(true)
+		expect(payload.escrow.receiverMemo).toBe(0)
 		expect(payload.escrow.milestones[0]).toMatchObject({
 			description: 'Design',
 			amount: 500,
 			evidence: '',
 		})
 		expect('flags' in payload.escrow.milestones[0]).toBe(false)
+	})
+
+	test('preserves sub-one-percent platform fees from indexer centi values', () => {
+		const multiEscrow: GetEscrowsFromIndexerResponse = {
+			...baseEscrowData,
+			type: 'multi-release',
+			platformFee: 60,
+			milestones: [
+				{
+					description: 'Design',
+					amount: 500,
+					receiver: 'GReceiver1234567890123456789012345678901',
+				},
+			],
+		}
+
+		const payload = buildUpdateEscrowPayload(multiEscrow, 'multi-release', platformAddress, {
+			description: 'Build',
+			amount: 1500,
+			receiver: 'GReceiver1234567890123456789012345678901',
+		})
+
+		expect(payload.escrow.platformFee).toBe(0.6)
+	})
+
+	test('normalizes higher indexer centi-percent platform fees', () => {
+		const multiEscrow: GetEscrowsFromIndexerResponse = {
+			...baseEscrowData,
+			type: 'multi-release',
+			platformFee: 300,
+			milestones: [
+				{
+					description: 'Design',
+					amount: 500,
+					receiver: 'GReceiver1234567890123456789012345678901',
+				},
+			],
+		}
+
+		const payload = buildUpdateEscrowPayload(multiEscrow, 'multi-release', platformAddress, {
+			description: 'Build',
+			amount: 1500,
+			receiver: 'GReceiver1234567890123456789012345678901',
+		})
+
+		expect(payload.escrow.platformFee).toBe(3)
+	})
+
+	test('includes receiver memo from validated escrow data', () => {
+		const multiEscrow = {
+			...baseEscrowData,
+			type: 'multi-release' as const,
+			receiverMemo: 3,
+			milestones: [
+				{
+					description: 'Design',
+					amount: 500,
+					receiver: 'GReceiver1234567890123456789012345678901',
+				},
+			],
+		}
+
+		const payload = buildUpdateEscrowPayload(multiEscrow, 'multi-release', platformAddress, {
+			description: 'Build',
+			amount: 1500,
+			receiver: 'GReceiver1234567890123456789012345678901',
+		})
+
+		expect(payload.escrow.receiverMemo).toBe(3)
 	})
 
 	test('appends a new single-release milestone', () => {

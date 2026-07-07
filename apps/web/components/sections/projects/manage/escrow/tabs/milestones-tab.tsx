@@ -132,7 +132,10 @@ export function MilestonesTab({
 			throw new Error('Failed to prepare escrow update transaction')
 		}
 
-		const signedXdr = await signTrustlessTransaction(updateResponse.unsignedTransaction)
+		const signedXdr = await signTrustlessTransaction(
+			updateResponse.unsignedTransaction,
+			payload.signer,
+		)
 		const sendResult = await sendTransaction(signedXdr)
 		if (sendResult?.status !== 'SUCCESS') {
 			throw new Error('Transaction failed')
@@ -336,8 +339,19 @@ export function MilestonesTab({
 
 	const isSelectedApproved = selectedMilestone ? getMilestoneStatus(selectedMilestone) : false
 
+	const platformAddress = escrowData?.roles.platformAddress
+
 	return (
 		<div className="space-y-6">
+			{platformAddress ? (
+				<Alert>
+					<AlertDescription>
+						Adding or editing releases requires the escrow platform wallet{' '}
+						<span className="font-mono">{truncateAddress(platformAddress)}</span> connected in
+						Freighter or another external Stellar wallet on the same network as this escrow.
+					</AlertDescription>
+				</Alert>
+			) : null}
 			<Card>
 				<CardHeader>
 					<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
