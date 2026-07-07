@@ -64,7 +64,7 @@ describe('buildUpdateEscrowPayload', () => {
 		expect(payload.escrow.platformFee).toBe(1)
 		expect(payload.escrow.flags).toBeUndefined()
 		expect(payload.escrow.isActive).toBe(true)
-		expect(payload.escrow.receiverMemo).toBe(0)
+		expect('receiverMemo' in payload.escrow).toBe(false)
 		expect(payload.escrow.milestones[0]).toMatchObject({
 			description: 'Design',
 			amount: 500,
@@ -119,7 +119,20 @@ describe('buildUpdateEscrowPayload', () => {
 		expect(payload.escrow.platformFee).toBe(3)
 	})
 
-	test('includes receiver memo from validated escrow data', () => {
+	test('includes receiver memo for single-release escrows only', () => {
+		const singleEscrow = {
+			...baseEscrowData,
+			receiverMemo: 3,
+		}
+
+		const payload = buildUpdateEscrowPayload(singleEscrow, 'single-release', platformAddress, {
+			description: 'Phase 2',
+		})
+
+		expect(payload.escrow.receiverMemo).toBe(3)
+	})
+
+	test('omits receiver memo for multi-release escrows', () => {
 		const multiEscrow = {
 			...baseEscrowData,
 			type: 'multi-release' as const,
@@ -139,7 +152,7 @@ describe('buildUpdateEscrowPayload', () => {
 			receiver: 'GReceiver1234567890123456789012345678901',
 		})
 
-		expect(payload.escrow.receiverMemo).toBe(3)
+		expect('receiverMemo' in payload.escrow).toBe(false)
 	})
 
 	test('appends a new single-release milestone', () => {
