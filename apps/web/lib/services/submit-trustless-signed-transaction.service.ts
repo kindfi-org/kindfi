@@ -1,13 +1,19 @@
 import { TransactionBuilder, type xdr } from '@stellar/stellar-sdk'
 import { type Api, Server } from '@stellar/stellar-sdk/rpc'
-import { getClientStellarNetworkPassphrase } from '~/lib/config/stellar-network.config'
-import { getTrustlessWorkStellarRpcUrl } from '~/lib/config/trustless-work.config'
+import type { ClientStellarNetworkId } from '~/lib/config/stellar-network.config'
+import type { TrustlessWorkNetwork } from '~/lib/config/trustless-work.config'
+import { getTrustlessWorkStellarRpcUrlForNetwork } from '~/lib/config/trustless-work.config'
+import { resolveSignedTransactionNetwork } from '~/lib/utils/escrow/resolve-signed-transaction-network'
+import { TX_BAD_AUTH_MESSAGE } from '~/lib/utils/escrow/trustless-transaction-signing'
 
 export type TrustlessSubmitSuccess = {
 	status: 'SUCCESS'
 	message: string
 	hash: string
 }
+
+const toTrustlessWorkNetwork = (networkId: ClientStellarNetworkId): TrustlessWorkNetwork =>
+	networkId === 'mainnet' ? 'mainnet' : 'development'
 
 const getTransactionResultCode = (errorResult: xdr.TransactionResult): string => {
 	const result = errorResult.result()
@@ -51,13 +57,23 @@ export class TrustlessStellarSubmitError extends Error {
 	}
 }
 
-/** Submit a wallet-signed Trustless Work XDR directly to Soroban RPC on the configured network. */
+/** Submit a wallet-signed Trustless Work XDR directly to Soroban RPC on the signed network. */
 export const submitTrustlessSignedTransaction = async (
 	signedXdr: string,
 ): Promise<TrustlessSubmitSuccess> => {
-	const networkPassphrase = getClientStellarNetworkPassphrase()
-	const transaction = TransactionBuilder.fromXDR(signedXdr, networkPassphrase)
-	const server = new Server(getTrustlessWorkStellarRpcUrl())
+	const resolvedNetwork = resolveSignedTransactionNetwork(signedXdr)
+	if (!resolvedNetwork) {
+		throw new TrustlessStellarSubmitError(
+			'Signed transaction signature could not be verified for mainnet or testnet.',
+			'invalid_signature',
+		)
+	}
+
+	const transaction = TransactionBuilder.fromXDR(signedXdr, resolvedNetwork.networkPassphrase)
+	const rpcUrl = getTrustlessWorkStellarRpcUrlForNetwork(
+		toTrustlessWorkNetwork(resolvedNetwork.networkId),
+	)
+	const server = new Server(rpcUrl)
 	const result = await server.sendTransaction(transaction)
 
 	if (result.status === 'PENDING' || result.status === 'DUPLICATE') {
@@ -69,8 +85,10 @@ export const submitTrustlessSignedTransaction = async (
 	}
 
 	const stellarCode = formatSubmitError(result)
-	throw new TrustlessStellarSubmitError(
-		`Transaction rejected by Stellar: ${stellarCode}`,
-		stellarCode,
-	)
+	const message =
+		stellarCode === 'tx_bad_auth'
+			? TX_BAD_AUTH_MESSAGE
+			: `Transaction rejected by Stellar: ${stellarCode}`
+
+	throw new TrustlessStellarSubmitError(message, stellarCode)
 }
