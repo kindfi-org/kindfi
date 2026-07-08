@@ -1,8 +1,7 @@
 import { Keypair, type Transaction, TransactionBuilder } from '@stellar/stellar-sdk'
-import { getClientStellarNetworkPassphrase } from '~/lib/config/stellar-network.config'
 
 export const TX_BAD_AUTH_MESSAGE =
-	'Transaction authorization failed. Connect the escrow platform wallet (G-address) on the correct Stellar network, approve the wallet signature prompt, and try again.'
+	'Transaction authorization failed. Connect the escrow platform wallet (G-address) on the correct Stellar network (Public/Mainnet), approve the wallet signature prompt, and try again.'
 
 type SignableTransactionEnvelope = {
 	source: string
@@ -10,8 +9,10 @@ type SignableTransactionEnvelope = {
 	signatures: Transaction['signatures']
 }
 
-const resolveSignableTransactionEnvelope = (signedXdr: string): SignableTransactionEnvelope => {
-	const networkPassphrase = getClientStellarNetworkPassphrase()
+const resolveSignableTransactionEnvelope = (
+	signedXdr: string,
+	networkPassphrase: string,
+): SignableTransactionEnvelope => {
 	const envelope = TransactionBuilder.fromXDR(signedXdr, networkPassphrase)
 
 	if ('innerTransaction' in envelope) {
@@ -44,8 +45,9 @@ export const assertTrustlessSignerMatches = (
 export const assertSignedTrustlessTransaction = (
 	signedXdr: string,
 	expectedSource: string,
+	networkPassphrase: string,
 ): void => {
-	const transaction = resolveSignableTransactionEnvelope(signedXdr)
+	const transaction = resolveSignableTransactionEnvelope(signedXdr, networkPassphrase)
 
 	if (transaction.source !== expectedSource) {
 		throw new Error(

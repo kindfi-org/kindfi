@@ -1,6 +1,7 @@
 'use client'
 
 import { toast } from 'sonner'
+import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n'
 import {
@@ -14,6 +15,7 @@ import {
 
 export function useTrustlessSigner() {
 	const wallet = useWallet()
+	const { networkPassphrase } = useStellarNetworkConfig()
 	const { t } = useI18n()
 
 	const ensureTrustlessSigner = async (): Promise<string> => {
@@ -41,7 +43,7 @@ export function useTrustlessSigner() {
 			assertTrustlessSignerMatches(signer, requiredSigner, 'platform')
 		}
 		const signedXdr = await wallet.signTransaction(unsignedXdr, requiredSigner ?? signer)
-		assertSignedTrustlessTransaction(signedXdr, requiredSigner ?? signer)
+		assertSignedTrustlessTransaction(signedXdr, requiredSigner ?? signer, networkPassphrase)
 		return signedXdr
 	}
 

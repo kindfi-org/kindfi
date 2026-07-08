@@ -111,3 +111,11 @@ export const getTrustlessWorkStellarRpcUrl = (): string => {
 
 	return TRUSTLESS_WORK_STELLAR_RPC_URLS[getTrustlessWorkNetwork()]
 }
+
+/** Soroban RPC URL for a specific Trustless Work / Stellar network id. */
+export const getTrustlessWorkStellarRpcUrlForNetwork = (network: TrustlessWorkNetwork): string => {
+	const explicit = process.env.RPC_URL?.trim()
+	if (explicit) return explicit
+
+	return TRUSTLESS_WORK_STELLAR_RPC_URLS[network]
+}
