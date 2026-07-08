@@ -1,4 +1,4 @@
-import { TransactionBuilder, xdr } from '@stellar/stellar-sdk'
+import { TransactionBuilder, type xdr } from '@stellar/stellar-sdk'
 import { type Api, Server } from '@stellar/stellar-sdk/rpc'
 import { getClientStellarNetworkPassphrase } from '~/lib/config/stellar-network.config'
 import { getTrustlessWorkStellarRpcUrl } from '~/lib/config/trustless-work.config'
@@ -11,23 +11,21 @@ export type TrustlessSubmitSuccess = {
 
 const getTransactionResultCode = (errorResult: xdr.TransactionResult): string => {
 	const result = errorResult.result()
+	const resultType = result.switch().name
 
-	switch (result.switch()) {
-		case xdr.TransactionResultResultType.txBadAuth():
+	switch (resultType) {
+		case 'txBadAuth':
 			return 'tx_bad_auth'
-		case xdr.TransactionResultResultType.txBadSeq():
+		case 'txBadSeq':
 			return 'tx_bad_seq'
-		case xdr.TransactionResultResultType.txTooEarly():
+		case 'txTooEarly':
 			return 'tx_too_early'
-		case xdr.TransactionResultResultType.txTooLate():
+		case 'txTooLate':
 			return 'tx_too_late'
-		case xdr.TransactionResultResultType.txFailed(): {
-			const operationResults = result.txFailed()
-			const codes = operationResults.map((operationResult) => operationResult.value().switch().name)
-			return codes.length > 0 ? codes.join(', ') : 'tx_failed'
-		}
+		case 'txFailed':
+			return 'tx_failed'
 		default:
-			return result.switch().name
+			return resultType
 	}
 }
 
@@ -62,7 +60,7 @@ export const submitTrustlessSignedTransaction = async (
 	const server = new Server(getTrustlessWorkStellarRpcUrl())
 	const result = await server.sendTransaction(transaction)
 
-	if (result.status === 'PENDING' || result.status === 'DUPLICATE' || result.status === 'SUCCESS') {
+	if (result.status === 'PENDING' || result.status === 'DUPLICATE') {
 		return {
 			status: 'SUCCESS',
 			message: 'Transaction submitted to Stellar',
