@@ -1,14 +1,14 @@
 import type { AuthenticationResponseJSON } from '@simplewebauthn/browser'
-import type { Memo, MemoType, Operation, Transaction } from '@stellar/stellar-sdk'
+import type { Transaction } from '@stellar/stellar-sdk'
 
 export type SignParams = {
 	signRes: AuthenticationResponseJSON
-	authTxn: Transaction<Memo<MemoType>, Operation[]>
+	authTxn: Transaction
 	lastLedger: number
 }
 
 export type PresignResponse = {
-	authTxn: Transaction<Memo<MemoType>, Operation[]>
+	authTxn: Transaction
 	base64urlAuthHash: string
 	lastLedger: number
 }

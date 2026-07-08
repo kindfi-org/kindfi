@@ -26,7 +26,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ add
 		const authController = new Contract(config.stellar.controllerContractId)
 		const getAccountsOp = authController.call(
 			'get_accounts',
-			nativeToScVal([], { type: 'Vec' }), // Empty context array
+			nativeToScVal([]), // Empty context array
 		)
 
 		// Create a dummy source account for simulation
