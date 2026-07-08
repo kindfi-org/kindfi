@@ -38,7 +38,7 @@
 		"@services/supabase": "workspace:*",
 		"@simplewebauthn/browser": "^13.2.2",
 		"@simplewebauthn/server": "^13.2.2",
-		"@stellar/stellar-sdk": "^15.1.0",
+		"@stellar/stellar-sdk": "^16.0.1",
 		"@supabase/realtime-js": "^2.79.0",
 		"@supabase/ssr": "^0.10.3",
 		"@supabase/supabase-js": "^2.56.0",
