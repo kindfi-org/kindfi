@@ -63,6 +63,12 @@ export const getTrustlessWorkApiErrorMessage = (error: unknown, fallback: string
 		if (axiosData.includes('tx_bad_auth')) {
 			return TX_BAD_AUTH_MESSAGE
 		}
+		if (axiosData.includes('do not match the stored escrow')) {
+			return 'Escrow data is out of sync with the blockchain. Refresh the page and try again. If it persists, contact support.'
+		}
+		if (axiosData.toLowerCase().includes('connection key is missing')) {
+			return 'Wallet session expired. Disconnect and reconnect your Stellar wallet (Freighter), then try again.'
+		}
 		return axiosData
 	}
 

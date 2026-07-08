@@ -44,6 +44,18 @@ function normalizeFlags(flags?: Flags): Flags | undefined {
 	return Object.keys(normalized).length > 0 ? normalized : undefined
 }
 
+/** On-chain escrows omit default pending status; indexer cache often adds it. */
+function getMilestoneStatusForUpdate(status?: string): string | undefined {
+	const trimmed = status?.trim()
+	if (!trimmed || trimmed === 'pending') return undefined
+	return trimmed
+}
+
+/** Only forward milestone flags that are true on-chain. */
+function getMilestoneFlagsForUpdate(flags?: Flags): Flags | undefined {
+	return normalizeFlags(flags)
+}
+
 /** TW update-escrow requires evidence on existing milestones; empty string is valid. */
 function getExistingMilestoneEvidence(
 	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
@@ -58,7 +70,8 @@ function mapExistingSingleReleaseMilestone(milestone: SingleReleaseMilestone) {
 	}
 
 	if (milestone.status) {
-		mapped.status = milestone.status
+		const status = getMilestoneStatusForUpdate(milestone.status)
+		if (status) mapped.status = status
 	}
 
 	if (milestone.approved) {
@@ -77,11 +90,13 @@ function mapExistingMultiReleaseMilestone(milestone: MultiReleaseMilestone) {
 	}
 
 	if (milestone.status) {
-		mapped.status = milestone.status
+		const status = getMilestoneStatusForUpdate(milestone.status)
+		if (status) mapped.status = status
 	}
 
-	if (milestone.flags) {
-		mapped.flags = milestone.flags
+	const flags = getMilestoneFlagsForUpdate(milestone.flags)
+	if (flags) {
+		mapped.flags = flags
 	}
 
 	return mapped
@@ -209,8 +224,6 @@ function buildMultiReleaseEscrowPayload(
 		address: escrowData.trustline.address,
 	}
 
-	const escrowFlags = normalizeFlags(escrowData.flags)
-
 	return {
 		contractId,
 		signer: platformSigner,
@@ -219,9 +232,7 @@ function buildMultiReleaseEscrowPayload(
 			title: escrowData.title,
 			description: escrowData.description,
 			platformFee: normalizePlatformFeeForUpdateApi(escrowData.platformFee),
-			...(escrowFlags ? { flags: escrowFlags } : {}),
 			trustline,
-			...(escrowData.isActive !== undefined ? { isActive: escrowData.isActive } : {}),
 			roles: {
 				approver: escrowData.roles.approver,
 				serviceProvider: escrowData.roles.serviceProvider,
