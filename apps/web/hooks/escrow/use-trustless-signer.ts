@@ -11,11 +11,12 @@ import {
 import {
 	assertSignedTrustlessTransaction,
 	assertTrustlessSignerMatches,
+	getTxBadAuthMessage,
 } from '~/lib/utils/escrow/trustless-transaction-signing'
 
 export function useTrustlessSigner() {
 	const wallet = useWallet()
-	const { networkPassphrase } = useStellarNetworkConfig()
+	const { networkId, networkPassphrase } = useStellarNetworkConfig()
 	const { t } = useI18n()
 
 	const ensureTrustlessSigner = async (): Promise<string> => {
@@ -43,7 +44,14 @@ export function useTrustlessSigner() {
 			assertTrustlessSignerMatches(signer, requiredSigner, 'platform')
 		}
 		const signedXdr = await wallet.signTransaction(unsignedXdr, requiredSigner ?? signer)
-		assertSignedTrustlessTransaction(signedXdr, requiredSigner ?? signer, networkPassphrase)
+		try {
+			assertSignedTrustlessTransaction(signedXdr, requiredSigner ?? signer, networkPassphrase)
+		} catch (error) {
+			if (error instanceof Error && error.message.includes('authorization failed')) {
+				throw new Error(getTxBadAuthMessage(networkId))
+			}
+			throw error
+		}
 		return signedXdr
 	}
 

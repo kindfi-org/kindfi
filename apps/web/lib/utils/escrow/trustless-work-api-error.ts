@@ -1,4 +1,4 @@
-import { TX_BAD_AUTH_MESSAGE } from './trustless-transaction-signing'
+import { getTxBadAuthMessage } from './trustless-transaction-signing'
 
 type TrustlessWorkErrorBody = {
 	message?: string
@@ -61,7 +61,7 @@ export const getTrustlessWorkApiErrorMessage = (error: unknown, fallback: string
 		: undefined
 	if (axiosData) {
 		if (axiosData.includes('tx_bad_auth')) {
-			return TX_BAD_AUTH_MESSAGE
+			return getTxBadAuthMessage()
 		}
 		if (axiosData.includes('do not match the stored escrow')) {
 			return 'Escrow data is out of sync with the blockchain. Refresh the page and try again. If it persists, contact support.'

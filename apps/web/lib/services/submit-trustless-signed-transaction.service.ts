@@ -1,10 +1,11 @@
 import { TransactionBuilder, type xdr } from '@stellar/stellar-sdk'
 import { type Api, Server } from '@stellar/stellar-sdk/rpc'
+import { logger } from '@/lib/logger'
 import type { ClientStellarNetworkId } from '~/lib/config/stellar-network.config'
 import type { TrustlessWorkNetwork } from '~/lib/config/trustless-work.config'
 import { getTrustlessWorkStellarRpcUrlForNetwork } from '~/lib/config/trustless-work.config'
 import { resolveSignedTransactionNetwork } from '~/lib/utils/escrow/resolve-signed-transaction-network'
-import { TX_BAD_AUTH_MESSAGE } from '~/lib/utils/escrow/trustless-transaction-signing'
+import { getTxBadAuthMessage } from '~/lib/utils/escrow/trustless-transaction-signing'
 
 export type TrustlessSubmitSuccess = {
 	status: 'SUCCESS'
@@ -70,9 +71,8 @@ export const submitTrustlessSignedTransaction = async (
 	}
 
 	const transaction = TransactionBuilder.fromXDR(signedXdr, resolvedNetwork.networkPassphrase)
-	const rpcUrl = getTrustlessWorkStellarRpcUrlForNetwork(
-		toTrustlessWorkNetwork(resolvedNetwork.networkId),
-	)
+	const trustlessNetwork = toTrustlessWorkNetwork(resolvedNetwork.networkId)
+	const rpcUrl = getTrustlessWorkStellarRpcUrlForNetwork(trustlessNetwork)
 	const server = new Server(rpcUrl)
 	const result = await server.sendTransaction(transaction)
 
@@ -85,9 +85,17 @@ export const submitTrustlessSignedTransaction = async (
 	}
 
 	const stellarCode = formatSubmitError(result)
+	logger.error('Trustless Work signed tx rejected by Soroban RPC', {
+		stellarCode,
+		networkId: resolvedNetwork.networkId,
+		rpcUrl,
+		txHash: result.hash,
+		source: transaction.source,
+	})
+
 	const message =
 		stellarCode === 'tx_bad_auth'
-			? TX_BAD_AUTH_MESSAGE
+			? getTxBadAuthMessage(resolvedNetwork.networkId)
 			: `Transaction rejected by Stellar: ${stellarCode}`
 
 	throw new TrustlessStellarSubmitError(message, stellarCode)
