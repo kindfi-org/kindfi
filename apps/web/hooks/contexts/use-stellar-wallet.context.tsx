@@ -195,12 +195,15 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 						// Wallet name will be available from the module, but we can try to get it
 						// For now, we'll just store the wallet ID
 						if (event.payload.id) {
-							// You might want to map wallet IDs to names
 							const walletIdToName: Record<string, string> = {
 								freighter: 'Freighter',
+								lobstr: 'LOBSTR',
 								albedo: 'Albedo',
 								rabet: 'Rabet',
 								xbull: 'xBull',
+								hana: 'Hana',
+								klever: 'Klever',
+								onekey: 'OneKey',
 								walletconnect: 'WalletConnect',
 							}
 							const name = walletIdToName[event.payload.id] || event.payload.id

@@ -1,7 +1,20 @@
 import { Keypair, type Transaction, TransactionBuilder } from '@stellar/stellar-sdk'
 
 export const TX_BAD_AUTH_MESSAGE =
-	'Transaction authorization failed. Connect the escrow platform wallet (G-address) on the correct Stellar network (Public/Mainnet), approve the wallet signature prompt, and try again.'
+	'Transaction authorization failed. Connect the escrow platform wallet (G-address) on the same Stellar network the app is using, approve the wallet signature prompt, and try again.'
+
+/** Build a network-aware auth failure message for local submit / signing checks. */
+export const getTxBadAuthMessage = (networkId?: 'mainnet' | 'testnet'): string => {
+	if (networkId === 'mainnet') {
+		return 'Transaction authorization failed. Connect the escrow platform wallet (G-address) on Public/Mainnet in Freighter, approve the signature prompt, and try again.'
+	}
+
+	if (networkId === 'testnet') {
+		return 'Transaction authorization failed. This app is on Testnet, but the signature was rejected. Switch Freighter to Test Network (not Public/Mainnet), reconnect the platform G-address, and try again.'
+	}
+
+	return TX_BAD_AUTH_MESSAGE
+}
 
 type SignableTransactionEnvelope = {
 	source: string
