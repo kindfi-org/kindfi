@@ -51,14 +51,18 @@ function getExistingMilestoneEvidence(
 	return milestone.evidence ?? ''
 }
 
+/** TW update-escrow requires status on existing milestones; empty string is valid. */
+function getExistingMilestoneStatus(
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+): string {
+	return milestone.status ?? ''
+}
+
 function mapExistingSingleReleaseMilestone(milestone: SingleReleaseMilestone) {
 	const mapped: UpdateSingleReleaseEscrowPayload['escrow']['milestones'][number] = {
 		description: milestone.description,
+		status: getExistingMilestoneStatus(milestone),
 		evidence: getExistingMilestoneEvidence(milestone),
-	}
-
-	if (milestone.status) {
-		mapped.status = milestone.status
 	}
 
 	if (milestone.approved) {
@@ -73,11 +77,8 @@ function mapExistingMultiReleaseMilestone(milestone: MultiReleaseMilestone) {
 		description: milestone.description,
 		amount: milestone.amount,
 		receiver: milestone.receiver,
+		status: getExistingMilestoneStatus(milestone),
 		evidence: getExistingMilestoneEvidence(milestone),
-	}
-
-	if (milestone.status) {
-		mapped.status = milestone.status
 	}
 
 	if (milestone.flags) {

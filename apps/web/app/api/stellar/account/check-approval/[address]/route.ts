@@ -1,5 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config'
-import { Contract, nativeToScVal } from '@stellar/stellar-sdk'
+import { Contract, xdr } from '@stellar/stellar-sdk'
 import { Server } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -26,7 +26,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ add
 		const authController = new Contract(config.stellar.controllerContractId)
 		const getAccountsOp = authController.call(
 			'get_accounts',
-			nativeToScVal([], { type: 'Vec' }), // Empty context array
+			xdr.ScVal.scvVec([]), // Empty context array
 		)
 
 		// Create a dummy source account for simulation
