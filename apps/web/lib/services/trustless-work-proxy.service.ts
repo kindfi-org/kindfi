@@ -59,10 +59,54 @@ const notifyTrustlessWorkIndexer = async (txHash: string): Promise<void> => {
 	}
 }
 
-const handleSendTransaction = async (body: string | undefined): Promise<Response> => {
+const isTxBadAuthUpstreamBody = (body: string): boolean => {
+	const normalized = body.toLowerCase()
+	return normalized.includes('tx_bad_auth') || normalized.includes('txbadauth')
+}
+
+/**
+ * Prefer Trustless Work's helper/send-transaction so factory deploys return
+ * contractId + escrow. Fall back to direct Soroban submit only when TW rejects
+ * with tx_bad_auth (network mismatch), then notify the indexer.
+ */
+const handleSendTransaction = async (
+	headers: Record<string, string>,
+	body: string | undefined,
+): Promise<Response> => {
 	const signedXdr = readSignedXdrFromBody(body)
 	if (!signedXdr) {
 		return NextResponse.json({ statusCode: 400, message: 'signedXdr is required' }, { status: 400 })
+	}
+
+	const upstreamUrl = `${getTrustlessWorkApiBaseUrl()}/helper/send-transaction`
+
+	try {
+		const upstreamResponse = await fetch(upstreamUrl, {
+			method: 'POST',
+			headers,
+			body: body || undefined,
+			cache: 'no-store',
+		})
+
+		const responseBody = await upstreamResponse.text()
+
+		if (upstreamResponse.ok || !isTxBadAuthUpstreamBody(responseBody)) {
+			return new Response(responseBody, {
+				status: upstreamResponse.status,
+				headers: {
+					'Content-Type': upstreamResponse.headers.get('Content-Type') || 'application/json',
+				},
+			})
+		}
+
+		logger.error(
+			'Trustless Work helper/send-transaction returned tx_bad_auth; retrying via Soroban RPC',
+			{
+				status: upstreamResponse.status,
+			},
+		)
+	} catch (error) {
+		logger.error('Trustless Work helper/send-transaction failed; retrying via Soroban RPC:', error)
 	}
 
 	try {
@@ -149,7 +193,7 @@ export async function proxyTrustlessWorkRequest(
 	const body = method !== 'GET' && method !== 'HEAD' ? await request.text() : undefined
 
 	if (path === 'helper/send-transaction' && method === 'POST') {
-		return handleSendTransaction(body)
+		return handleSendTransaction(headers, body)
 	}
 
 	try {
