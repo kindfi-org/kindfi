@@ -85,12 +85,14 @@ export const submitTrustlessSignedTransaction = async (
 	}
 
 	const stellarCode = formatSubmitError(result)
+	const transactionSource =
+		'innerTransaction' in transaction ? transaction.innerTransaction.source : transaction.source
 	logger.error('Trustless Work signed tx rejected by Soroban RPC', {
 		stellarCode,
 		networkId: resolvedNetwork.networkId,
 		rpcUrl,
 		txHash: result.hash,
-		source: transaction.source,
+		source: transactionSource,
 	})
 
 	const message =
