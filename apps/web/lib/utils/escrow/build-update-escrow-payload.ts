@@ -32,19 +32,26 @@ type EscrowPayloadContext = {
 	platformSigner: string
 }
 
-function normalizeFlags(flags?: Flags): Flags | undefined {
-	if (!flags) return undefined
-
-	const normalized: Flags = {}
-	if (flags.disputed) normalized.disputed = true
-	if (flags.released) normalized.released = true
-	if (flags.resolved) normalized.resolved = true
-	if (flags.approved) normalized.approved = true
-
-	return Object.keys(normalized).length > 0 ? normalized : undefined
+function hasAnyTrueFlag(flags: Flags): boolean {
+	return Boolean(flags.disputed || flags.released || flags.resolved || flags.approved)
 }
 
-/** Only forward milestone flags that are true on-chain. */
+/**
+ * TW update-escrow validates each flag as a boolean when `flags` is present.
+ * Omitting false keys (e.g. disputed/resolved) fails with "must be a boolean value".
+ */
+function normalizeFlags(flags?: Flags): Flags | undefined {
+	if (!flags || !hasAnyTrueFlag(flags)) return undefined
+
+	return {
+		disputed: Boolean(flags.disputed),
+		released: Boolean(flags.released),
+		resolved: Boolean(flags.resolved),
+		approved: Boolean(flags.approved),
+	}
+}
+
+/** Forward on-chain milestone flags with every boolean field set. */
 function getMilestoneFlagsForUpdate(flags?: Flags): Flags | undefined {
 	return normalizeFlags(flags)
 }

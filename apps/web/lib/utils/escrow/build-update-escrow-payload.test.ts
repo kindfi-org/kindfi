@@ -273,7 +273,7 @@ describe('buildUpdateEscrowPayload', () => {
 		})
 	})
 
-	test('preserves true milestone flags for multi-release updates', () => {
+	test('preserves milestone flags with all boolean fields for multi-release updates', () => {
 		const multiEscrow: GetEscrowsFromIndexerResponse = {
 			...baseEscrowData,
 			type: 'multi-release',
@@ -293,7 +293,48 @@ describe('buildUpdateEscrowPayload', () => {
 			receiver: 'GReceiver1234567890123456789012345678901',
 		})
 
-		expect(payload.escrow.milestones[0].flags).toEqual({ approved: true })
+		expect(payload.escrow.milestones[0].flags).toEqual({
+			disputed: false,
+			released: false,
+			resolved: false,
+			approved: true,
+		})
+	})
+
+	test('sends complete flags when a sibling milestone is released', () => {
+		const multiEscrow: GetEscrowsFromIndexerResponse = {
+			...baseEscrowData,
+			type: 'multi-release',
+			milestones: [
+				{
+					description: 'First Relief Transfer',
+					amount: 500,
+					receiver: 'GReceiver1234567890123456789012345678901',
+					status: 'pending',
+				},
+				{
+					description: 'Release',
+					amount: 10,
+					receiver: 'GReceiver1234567890123456789012345678901',
+					status: 'pending',
+					flags: { released: true, approved: true },
+				},
+			],
+		}
+
+		const payload = buildUpdateEscrowPayload(multiEscrow, 'multi-release', platformAddress, {
+			description: 'New Release',
+			amount: 15,
+			receiver: 'GReceiver1234567890123456789012345678901',
+		})
+
+		expect(payload.escrow.milestones[1].flags).toEqual({
+			disputed: false,
+			released: true,
+			resolved: false,
+			approved: true,
+		})
+		expect(payload.escrow.milestones[0].flags).toBeUndefined()
 	})
 
 	test('appends a new single-release milestone', () => {
