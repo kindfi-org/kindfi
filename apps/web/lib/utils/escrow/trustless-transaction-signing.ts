@@ -1,4 +1,8 @@
 import { Keypair, type Transaction, TransactionBuilder } from '@stellar/stellar-sdk'
+import {
+	STELLAR_MAINNET_PASSPHRASE,
+	STELLAR_TESTNET_PASSPHRASE,
+} from '~/lib/config/stellar-network.config'
 
 export const TX_BAD_AUTH_MESSAGE =
 	'Transaction authorization failed. Connect the escrow platform wallet (G-address) on the same Stellar network the app is using, approve the wallet signature prompt, and try again.'
@@ -22,17 +26,24 @@ type SignableTransactionEnvelope = {
 	signatures: Transaction['signatures']
 }
 
-const resolveSignableTransactionEnvelope = (
+/**
+ * Resolve the envelope the escrow signer must authorize.
+ * Fee-bump wrappers are signed on the outer fee-source account; the escrow
+ * signer authorizes the inner transaction, so verification must use the inner
+ * hash + signatures.
+ */
+export const resolveSignableTransactionEnvelope = (
 	signedXdr: string,
 	networkPassphrase: string,
 ): SignableTransactionEnvelope => {
 	const envelope = TransactionBuilder.fromXDR(signedXdr, networkPassphrase)
 
 	if ('innerTransaction' in envelope) {
+		const inner = envelope.innerTransaction
 		return {
-			source: envelope.innerTransaction.source,
-			hash: () => envelope.hash(),
-			signatures: envelope.signatures,
+			source: inner.source,
+			hash: () => inner.hash(),
+			signatures: inner.signatures,
 		}
 	}
 
@@ -41,6 +52,24 @@ const resolveSignableTransactionEnvelope = (
 		hash: () => envelope.hash(),
 		signatures: envelope.signatures,
 	}
+}
+
+const signatureMatchesSource = (
+	envelope: SignableTransactionEnvelope,
+	expectedSource: string,
+): boolean => {
+	if (envelope.signatures.length === 0) return false
+
+	const keypair = Keypair.fromPublicKey(expectedSource)
+	return envelope.signatures.some((signature) =>
+		keypair.verify(envelope.hash(), signature.signature()),
+	)
+}
+
+const alternateNetworkPassphrase = (networkPassphrase: string): string | null => {
+	if (networkPassphrase === STELLAR_TESTNET_PASSPHRASE) return STELLAR_MAINNET_PASSPHRASE
+	if (networkPassphrase === STELLAR_MAINNET_PASSPHRASE) return STELLAR_TESTNET_PASSPHRASE
+	return null
 }
 
 export const assertTrustlessSignerMatches = (
@@ -72,10 +101,24 @@ export const assertSignedTrustlessTransaction = (
 		throw new Error('Wallet did not attach a signature to the transaction.')
 	}
 
-	for (const signature of transaction.signatures) {
-		const keypair = Keypair.fromPublicKey(expectedSource)
-		if (keypair.verify(transaction.hash(), signature.signature())) {
-			return
+	if (signatureMatchesSource(transaction, expectedSource)) {
+		return
+	}
+
+	const otherPassphrase = alternateNetworkPassphrase(networkPassphrase)
+	if (otherPassphrase) {
+		try {
+			const otherNetworkTx = resolveSignableTransactionEnvelope(signedXdr, otherPassphrase)
+			if (
+				otherNetworkTx.source === expectedSource &&
+				signatureMatchesSource(otherNetworkTx, expectedSource)
+			) {
+				throw new Error(TX_BAD_AUTH_MESSAGE)
+			}
+		} catch (error) {
+			if (error instanceof Error && error.message === TX_BAD_AUTH_MESSAGE) {
+				throw error
+			}
 		}
 	}
 

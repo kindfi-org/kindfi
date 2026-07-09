@@ -27,6 +27,36 @@ const buildSignedTransaction = (networkPassphrase: string): string => {
 	return transaction.toXDR()
 }
 
+const buildSignedFeeBump = (networkPassphrase: string): string => {
+	const source = Keypair.random()
+	const feeSource = Keypair.random()
+	const account = new Account(source.publicKey(), '1')
+	const inner = new TransactionBuilder(account, {
+		fee: '100',
+		networkPassphrase,
+	})
+		.addOperation(
+			Operation.payment({
+				destination: Keypair.random().publicKey(),
+				asset: Asset.native(),
+				amount: '1',
+			}),
+		)
+		.setTimeout(30)
+		.build()
+
+	inner.sign(source)
+
+	const feeBump = TransactionBuilder.buildFeeBumpTransaction(
+		feeSource,
+		'200',
+		inner,
+		networkPassphrase,
+	)
+	feeBump.sign(feeSource)
+	return feeBump.toXDR()
+}
+
 describe('resolveSignedTransactionNetwork', () => {
 	test('detects mainnet signatures', () => {
 		const signedXdr = buildSignedTransaction(STELLAR_MAINNET_PASSPHRASE)
@@ -38,6 +68,14 @@ describe('resolveSignedTransactionNetwork', () => {
 
 	test('detects testnet signatures', () => {
 		const signedXdr = buildSignedTransaction(STELLAR_TESTNET_PASSPHRASE)
+		const resolved = resolveSignedTransactionNetwork(signedXdr)
+
+		expect(resolved?.networkId).toBe('testnet')
+		expect(resolved?.networkPassphrase).toBe(STELLAR_TESTNET_PASSPHRASE)
+	})
+
+	test('detects fee-bump envelopes from the inner signature network', () => {
+		const signedXdr = buildSignedFeeBump(STELLAR_TESTNET_PASSPHRASE)
 		const resolved = resolveSignedTransactionNetwork(signedXdr)
 
 		expect(resolved?.networkId).toBe('testnet')
