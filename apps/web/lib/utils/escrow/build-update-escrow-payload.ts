@@ -44,13 +44,6 @@ function normalizeFlags(flags?: Flags): Flags | undefined {
 	return Object.keys(normalized).length > 0 ? normalized : undefined
 }
 
-/** On-chain escrows omit default pending status; indexer cache often adds it. */
-function getMilestoneStatusForUpdate(status?: string): string | undefined {
-	const trimmed = status?.trim()
-	if (!trimmed || trimmed === 'pending') return undefined
-	return trimmed
-}
-
 /** Only forward milestone flags that are true on-chain. */
 function getMilestoneFlagsForUpdate(flags?: Flags): Flags | undefined {
 	return normalizeFlags(flags)
@@ -63,15 +56,21 @@ function getExistingMilestoneEvidence(
 	return milestone.evidence ?? ''
 }
 
+/**
+ * TW update-escrow requires status on existing milestones; empty string is valid.
+ * Indexer may omit status or cache "pending" — always send a string field.
+ */
+function getExistingMilestoneStatus(
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+): string {
+	return milestone.status ?? ''
+}
+
 function mapExistingSingleReleaseMilestone(milestone: SingleReleaseMilestone) {
 	const mapped: UpdateSingleReleaseEscrowPayload['escrow']['milestones'][number] = {
 		description: milestone.description,
+		status: getExistingMilestoneStatus(milestone),
 		evidence: getExistingMilestoneEvidence(milestone),
-	}
-
-	if (milestone.status) {
-		const status = getMilestoneStatusForUpdate(milestone.status)
-		if (status) mapped.status = status
 	}
 
 	if (milestone.approved) {
@@ -86,12 +85,8 @@ function mapExistingMultiReleaseMilestone(milestone: MultiReleaseMilestone) {
 		description: milestone.description,
 		amount: milestone.amount,
 		receiver: milestone.receiver,
+		status: getExistingMilestoneStatus(milestone),
 		evidence: getExistingMilestoneEvidence(milestone),
-	}
-
-	if (milestone.status) {
-		const status = getMilestoneStatusForUpdate(milestone.status)
-		if (status) mapped.status = status
 	}
 
 	const flags = getMilestoneFlagsForUpdate(milestone.flags)
