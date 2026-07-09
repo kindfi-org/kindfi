@@ -5,6 +5,11 @@ export const TRUSTLESS_WORK_API_URLS = {
 	mainnet: 'https://api.trustlesswork.com',
 } as const
 
+export const TRUSTLESS_WORK_STELLAR_RPC_URLS = {
+	development: 'https://soroban-testnet.stellar.org',
+	mainnet: 'https://mainnet.sorobanrpc.com',
+} as const
+
 export type TrustlessWorkNetwork = keyof typeof TRUSTLESS_WORK_API_URLS
 
 type TrustlessWorkApiBaseUrl = (typeof TRUSTLESS_WORK_API_URLS)[TrustlessWorkNetwork]
@@ -98,3 +103,19 @@ export const getTrustlessWorkNetwork = (): TrustlessWorkNetwork => {
 
 /** Server-only Trustless Work API key — never expose via NEXT_PUBLIC_. */
 export const getTrustlessWorkApiKey = (): string => process.env.TRUSTLESS_WORK_API_KEY ?? ''
+
+/** Soroban RPC URL aligned with the active Trustless Work network. */
+export const getTrustlessWorkStellarRpcUrl = (): string => {
+	const explicit = process.env.RPC_URL?.trim()
+	if (explicit) return explicit
+
+	return TRUSTLESS_WORK_STELLAR_RPC_URLS[getTrustlessWorkNetwork()]
+}
+
+/** Soroban RPC URL for a specific Trustless Work / Stellar network id. */
+export const getTrustlessWorkStellarRpcUrlForNetwork = (network: TrustlessWorkNetwork): string => {
+	const explicit = process.env.RPC_URL?.trim()
+	if (explicit) return explicit
+
+	return TRUSTLESS_WORK_STELLAR_RPC_URLS[network]
+}

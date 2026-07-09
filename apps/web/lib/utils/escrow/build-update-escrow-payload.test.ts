@@ -62,16 +62,16 @@ describe('buildUpdateEscrowPayload', () => {
 		})
 
 		expect(payload.escrow.platformFee).toBe(1)
-		expect(payload.escrow.flags).toBeUndefined()
-		expect(payload.escrow.isActive).toBe(true)
+		expect('flags' in payload.escrow).toBe(false)
+		expect('isActive' in payload.escrow).toBe(false)
 		expect('receiverMemo' in payload.escrow).toBe(false)
 		expect(payload.escrow.milestones[0]).toMatchObject({
 			description: 'Design',
 			amount: 500,
 			status: '',
 			evidence: '',
-			flags: { approved: false },
 		})
+		expect(payload.escrow.milestones[0].flags).toBeUndefined()
 	})
 
 	test('includes empty status for existing multi-release milestones without status', () => {
@@ -101,7 +101,6 @@ describe('buildUpdateEscrowPayload', () => {
 			receiver: 'GReceiver1234567890123456789012345678901',
 			status: '',
 			evidence: '',
-			flags: { approved: false },
 		})
 		expect(payload.escrow.milestones[1]).toEqual({
 			description: 'Build',
@@ -236,6 +235,7 @@ describe('buildUpdateEscrowPayload', () => {
 		})
 
 		expect('receiverMemo' in payload.escrow).toBe(false)
+		expect('isActive' in payload.escrow).toBe(false)
 	})
 
 	test('includes empty evidence for existing multi-release milestones', () => {
@@ -271,6 +271,29 @@ describe('buildUpdateEscrowPayload', () => {
 			amount: 50,
 			receiver: 'GReceiver1234567890123456789012345678901',
 		})
+	})
+
+	test('preserves true milestone flags for multi-release updates', () => {
+		const multiEscrow: GetEscrowsFromIndexerResponse = {
+			...baseEscrowData,
+			type: 'multi-release',
+			milestones: [
+				{
+					description: 'Design',
+					amount: 500,
+					receiver: 'GReceiver1234567890123456789012345678901',
+					flags: { approved: true, disputed: false },
+				},
+			],
+		}
+
+		const payload = buildUpdateEscrowPayload(multiEscrow, 'multi-release', platformAddress, {
+			description: 'Build',
+			amount: 1500,
+			receiver: 'GReceiver1234567890123456789012345678901',
+		})
+
+		expect(payload.escrow.milestones[0].flags).toEqual({ approved: true })
 	})
 
 	test('appends a new single-release milestone', () => {
@@ -345,15 +368,15 @@ describe('buildEditReleasePayload', () => {
 			amount: 750,
 			status: '',
 			evidence: '',
-			flags: { approved: false },
 		})
+		expect(payload.escrow.milestones[0].flags).toBeUndefined()
 		expect(payload.escrow.milestones[1]).toMatchObject({
 			description: 'Build',
 			amount: 1500,
 			status: '',
 			evidence: '',
-			flags: { approved: false },
 		})
+		expect(payload.escrow.milestones[1].flags).toBeUndefined()
 	})
 
 	test('rejects editing an approved milestone', () => {

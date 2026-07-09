@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { logger } from '@/lib/logger'
-import { getClientStellarNetworkPassphrase } from '~/lib/config/stellar-network.config'
+import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.context'
 import { getStellarWalletTheme } from '~/lib/config/stellar-wallet-theme'
 import {
 	getTrustlessSignerError,
@@ -61,6 +61,7 @@ const syncLinkedWallet = async (address: string | null) => {
 }
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
+	const { networkPassphrase } = useStellarNetworkConfig()
 	const { status: sessionStatus } = useSession()
 	const isAuthenticated = sessionStatus === 'authenticated'
 	const isAuthenticatedRef = useRef(isAuthenticated)
@@ -113,7 +114,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				const { defaultModules, StellarWalletsKit, KitEventType, Networks } = swk
 
 				const modules = defaultModules()
-				const networkPassphrase = getClientStellarNetworkPassphrase()
 				const kitNetwork =
 					networkPassphrase === Networks.PUBLIC
 						? Networks.PUBLIC
@@ -231,7 +231,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 			})
 			subscriptionsRef.current = []
 		}
-	}, [])
+	}, [networkPassphrase])
 
 	useEffect(() => {
 		if (!isInitialized) return
@@ -304,7 +304,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		try {
-			const networkPassphrase = getClientStellarNetworkPassphrase()
 			const { signedTxXdr } = await StellarWalletsKit.signTransaction(unsignedXdr, {
 				address: signingAddress,
 				networkPassphrase,

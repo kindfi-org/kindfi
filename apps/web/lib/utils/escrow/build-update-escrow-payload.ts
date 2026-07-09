@@ -44,6 +44,11 @@ function normalizeFlags(flags?: Flags): Flags | undefined {
 	return Object.keys(normalized).length > 0 ? normalized : undefined
 }
 
+/** Only forward milestone flags that are true on-chain. */
+function getMilestoneFlagsForUpdate(flags?: Flags): Flags | undefined {
+	return normalizeFlags(flags)
+}
+
 /** TW update-escrow requires evidence on existing milestones; empty string is valid. */
 function getExistingMilestoneEvidence(
 	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
@@ -51,7 +56,10 @@ function getExistingMilestoneEvidence(
 	return milestone.evidence ?? ''
 }
 
-/** TW update-escrow requires status on existing milestones; empty string is valid. */
+/**
+ * TW update-escrow requires status on existing milestones; empty string is valid.
+ * Indexer may omit status or cache "pending" — always send a string field.
+ */
 function getExistingMilestoneStatus(
 	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
 ): string {
@@ -81,8 +89,9 @@ function mapExistingMultiReleaseMilestone(milestone: MultiReleaseMilestone) {
 		evidence: getExistingMilestoneEvidence(milestone),
 	}
 
-	if (milestone.flags) {
-		mapped.flags = milestone.flags
+	const flags = getMilestoneFlagsForUpdate(milestone.flags)
+	if (flags) {
+		mapped.flags = flags
 	}
 
 	return mapped
@@ -210,8 +219,6 @@ function buildMultiReleaseEscrowPayload(
 		address: escrowData.trustline.address,
 	}
 
-	const escrowFlags = normalizeFlags(escrowData.flags)
-
 	return {
 		contractId,
 		signer: platformSigner,
@@ -220,9 +227,7 @@ function buildMultiReleaseEscrowPayload(
 			title: escrowData.title,
 			description: escrowData.description,
 			platformFee: normalizePlatformFeeForUpdateApi(escrowData.platformFee),
-			...(escrowFlags ? { flags: escrowFlags } : {}),
 			trustline,
-			...(escrowData.isActive !== undefined ? { isActive: escrowData.isActive } : {}),
 			roles: {
 				approver: escrowData.roles.approver,
 				serviceProvider: escrowData.roles.serviceProvider,
